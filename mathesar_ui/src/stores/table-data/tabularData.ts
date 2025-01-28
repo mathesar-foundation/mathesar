@@ -1,36 +1,66 @@
 import { getContext, setContext } from 'svelte';
-import {
-  derived,
-  writable,
-  get,
-  type Readable,
-  type Writable,
-} from 'svelte/store';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { States } from '@mathesar/api/utils/requestUtils';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import { SheetSelection } from '@mathesar/components/sheet';
-import { getColumnOrder } from '@mathesar/utils/tables';
-import type { ShareConsumer } from '@mathesar/utils/shares';
-import { Meta } from './meta';
-import { ColumnsDataStore } from './columns';
-import type { RecordRow, TableRecordsData } from './records';
-import { RecordsData } from './records';
-import { Display } from './display';
-import type { ConstraintsData } from './constraints';
-import { ConstraintsDataStore } from './constraints';
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
+
+import { States } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rpc/columns';
+import { parseCellId } from '@mathesar/components/sheet/cellIds';
+import type { SelectedCellData } from '@mathesar/components/sheet/selection';
+import Plane from '@mathesar/components/sheet/selection/Plane';
+import Series from '@mathesar/components/sheet/selection/Series';
+import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
+import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
 import type {
-  ProcessedColumn,
-  ProcessedColumnsStore,
-} from './processedColumns';
-import { processColumn } from './processedColumns';
+  ProcessedColumns,
+  RecordRow,
+  RecordSummariesForSheet,
+} from '@mathesar/stores/table-data';
+import type { ShareConsumer } from '@mathesar/utils/shares';
+import { orderProcessedColumns } from '@mathesar/utils/tables';
+import { defined } from '@mathesar-component-library';
+
+import { ColumnsDataStore } from './columns';
+import { type ConstraintsData, ConstraintsDataStore } from './constraints';
+import { Display } from './display';
+import { Meta } from './meta';
+import { type ProcessedColumnsStore, processColumn } from './processedColumns';
+import { RecordsData, type TableRecordsData } from './records';
+
+function getSelectedCellData(
+  selection: SheetSelection,
+  selectableRowsMap: Map<string, RecordRow>,
+  processedColumns: ProcessedColumns,
+  linkedRecordSummaries: RecordSummariesForSheet,
+): SelectedCellData {
+  const { activeCellId } = selection;
+  const selectionData = {
+    cellCount: selection.cellIds.size,
+  };
+  if (activeCellId === undefined) {
+    return { selectionData };
+  }
+  const { rowId, columnId } = parseCellId(activeCellId);
+  const row = selectableRowsMap.get(rowId);
+  const value = row?.record[columnId];
+  const column = processedColumns.get(Number(columnId));
+  const recordSummary = defined(
+    value,
+    (v) => linkedRecordSummaries.get(columnId)?.get(String(v)),
+  );
+  return {
+    activeCellData: column && {
+      column,
+      value,
+      recordSummary,
+    },
+    selectionData,
+  };
+}
 
 export interface TabularDataProps {
-  id: DBObjectEntry['id'];
-  abstractTypesMap: AbstractTypesMap;
-  table: TableEntry;
+  database: Pick<Database, 'id'>;
+  table: Table;
   meta?: Meta;
   shareConsumer?: ShareConsumer;
   /**
@@ -44,12 +74,20 @@ export interface TabularDataProps {
   hasEnhancedPrimaryKeyCell?: Parameters<
     typeof processColumn
   >[0]['hasEnhancedPrimaryKeyCell'];
+  /**
+   * When true, load the record summaries associated directly with each record
+   * in the table. These are *not* the record summaries associated with linked
+   * records. Instead they are the summaries of the records themselves. By
+   * default, we don't load these summaries because it's a performance hit. But
+   * we need them for the records within the record selector.
+   */
+  loadIntrinsicRecordSummaries?: boolean;
 }
 
-export type TabularDataSelection = SheetSelection<RecordRow, ProcessedColumn>;
-
 export class TabularData {
-  id: DBObjectEntry['id'];
+  database: Pick<Database, 'id'>;
+
+  table: Table;
 
   meta: Meta;
 
@@ -65,33 +103,38 @@ export class TabularData {
 
   isLoading: Readable<boolean>;
 
-  selection: TabularDataSelection;
+  selection: SheetSelectionStore;
 
-  table: TableEntry;
+  selectedCellData: Readable<SelectedCellData>;
 
   shareConsumer?: ShareConsumer;
 
   constructor(props: TabularDataProps) {
+    this.database = props.database;
     const contextualFilters =
       props.contextualFilters ?? new Map<number, string | number>();
-    this.id = props.id;
+    this.table = props.table;
     this.meta = props.meta ?? new Meta();
     this.shareConsumer = props.shareConsumer;
     this.columnsDataStore = new ColumnsDataStore({
-      tableId: this.id,
+      database: props.database,
+      table: this.table,
       hiddenColumns: contextualFilters.keys(),
       shareConsumer: this.shareConsumer,
     });
     this.constraintsDataStore = new ConstraintsDataStore({
-      tableId: this.id,
+      database: props.database,
+      table: props.table,
       shareConsumer: this.shareConsumer,
     });
     this.recordsData = new RecordsData({
-      tableId: this.id,
+      database: props.database,
+      table: props.table,
       meta: this.meta,
       columnsDataStore: this.columnsDataStore,
       contextualFilters,
       shareConsumer: this.shareConsumer,
+      loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
     this.display = new Display(
       this.meta,
@@ -99,48 +142,42 @@ export class TabularData {
       this.recordsData,
     );
 
+    this.table = props.table;
+
     this.processedColumns = derived(
       [this.columnsDataStore.columns, this.constraintsDataStore],
       ([columns, constraintsData]) =>
-        new Map(
-          columns.map((column, columnIndex) => [
-            column.id,
-            processColumn({
-              tableId: this.id,
-              column,
-              columnIndex,
-              constraints: constraintsData.constraints,
-              abstractTypeMap: props.abstractTypesMap,
-              hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
-            }),
-          ]),
+        orderProcessedColumns(
+          new Map(
+            columns.map((column, columnIndex) => [
+              column.id,
+              processColumn({
+                tableId: this.table.oid,
+                column,
+                columnIndex,
+                constraints: constraintsData.constraints,
+                hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
+              }),
+            ]),
+          ),
+          this.table,
         ),
     );
 
-    this.table = props.table;
-
-    this.selection = new SheetSelection({
-      getColumns: () => [...get(this.processedColumns).values()],
-      getColumnOrder: () =>
-        getColumnOrder([...get(this.processedColumns).values()], this.table),
-      getRows: () => this.recordsData.getRecordRows(),
-      getMaxSelectionRowIndex: () => {
-        const totalCount = get(this.recordsData.totalCount) ?? 0;
-        const savedRecords = get(this.recordsData.savedRecords);
-        const newRecords = get(this.recordsData.newRecords);
-        const pagination = get(this.meta.pagination);
-        const { offset } = pagination;
-        const pageSize = pagination.size;
-        /**
-         * We are not subtracting 1 from the below maxRowIndex calculation
-         * inorder to account for the add-new-record placeholder row
-         */
-        return (
-          Math.min(pageSize, totalCount - offset, savedRecords.length) +
-          newRecords.length
-        );
+    const plane = derived(
+      [
+        this.recordsData.selectableRowsMap,
+        this.processedColumns,
+        this.display.placeholderRowId,
+      ],
+      ([selectableRowsMap, processedColumns, placeholderRowId]) => {
+        const rowIds = new Series([...selectableRowsMap.keys()]);
+        const columns = [...processedColumns.values()];
+        const columnIds = new Series(columns.map((c) => String(c.id)));
+        return new Plane(rowIds, columnIds, placeholderRowId);
       },
-    });
+    );
+    this.selection = new SheetSelectionStore(plane);
 
     this.isLoading = derived(
       [
@@ -152,6 +189,16 @@ export class TabularData {
         columnsStatus?.state === 'processing' ||
         constraintsData.state === States.Loading ||
         recordsDataState === States.Loading,
+    );
+
+    this.selectedCellData = derived(
+      [
+        this.selection,
+        this.recordsData.selectableRowsMap,
+        this.processedColumns,
+        this.recordsData.linkedRecordSummaries,
+      ],
+      (args) => getSelectedCellData(...args),
     );
 
     this.columnsDataStore.on('columnRenamed', async () => {
@@ -222,6 +269,11 @@ export class TabularData {
       return g.withoutColumns(extractedColumnIds);
     });
     return this.refresh();
+  }
+
+  addEmptyRecord() {
+    void this.recordsData.addEmptyRecord();
+    this.selection.update((s) => s.ofNewRecordDataEntryCell());
   }
 
   destroy(): void {

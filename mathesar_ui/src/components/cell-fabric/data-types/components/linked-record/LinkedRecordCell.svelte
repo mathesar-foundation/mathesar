@@ -1,16 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import {
-    Icon,
-    iconExpandDown,
-    compareWholeValues,
-  } from '@mathesar-component-library';
+
   import Default from '@mathesar/components/Default.svelte';
-  import Null from '@mathesar/components/Null.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  import Null from '@mathesar/components/Null.svelte';
   // eslint-disable-next-line import/no-cycle
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import {
+    Icon,
+    compareWholeValues,
+    iconExpandDown,
+  } from '@mathesar-component-library';
+
   import CellWrapper from '../CellWrapper.svelte';
   import type { LinkedRecordCellProps } from '../typeDefinitions';
 
@@ -21,7 +23,6 @@
 
   export let isActive: $$Props['isActive'];
   export let columnFabric: $$Props['columnFabric'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let searchValue: $$Props['searchValue'] = undefined;
   export let recordSummary: $$Props['recordSummary'] = undefined;
@@ -94,7 +95,6 @@
 
 <CellWrapper
   {isActive}
-  {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
   on:mouseenter

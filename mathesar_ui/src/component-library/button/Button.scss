@@ -13,9 +13,9 @@
     #000 0 0 0 0,
     #000 0 0 0 0,
     rgba(0, 0, 0, 0.05) 0 1px 2px 0;
-  font-weight: inherit;
   position: relative;
   padding: var(--input-padding);
+  box-sizing: border-box;
 
   > * + * {
     margin-left: 0.25em;
@@ -30,11 +30,11 @@
   /* Appearances */
   &.btn-default {
     background: var(--color-white);
-    border-color: var(--slate-200);
+    border-color: var(--slate-300);
 
     &:not(:disabled) {
       &:focus {
-        border-color: var(--slate-300);
+        border-color: var(--slate-400);
       }
     }
   }
@@ -67,20 +67,20 @@
 
   &.btn-secondary {
     background: var(--slate-100);
-    border-color: var(--slate-200);
+    border-color: var(--slate-300);
     color: var(--slate-800);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        outline: 2px solid var(--slate-300);
+        outline: 2px solid var(--slate-400);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
         background: var(--slate-200);
-        border-color: var(--slate-300);
+        border-color: var(--slate-400);
       }
 
       &:active,
@@ -189,6 +189,53 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  &.btn-action {
+    background: var(--color-white);
+    border-color: var(--sand-300);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        border-color: var(--sand-600);
+      }
+
+      &:active,
+      &.active {
+        background: var(--sand-300);
+        border-color: var(--sand-600);
+      }
+
+      &:focus,
+      &.focus {
+        outline: 2px solid var(--sand-500);
+        outline-offset: 1px;
+      }
+    }
+  }
+
+  &.btn-outcome {
+    background-color: var(--purple-100);
+    border: 1px solid var(--purple-200);
+
+    &:hover {
+      border: 1px solid var(--purple-300);
+    }
+  }
+
+  &.btn-inspector {
+    background-color: var(--sand-200);
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+
+    &:hover {
+      background-color: var(--sand-300);
+    }
+
+    &:active {
+      background-color: var(--sand-400);
+    }
   }
 }
 a.btn {

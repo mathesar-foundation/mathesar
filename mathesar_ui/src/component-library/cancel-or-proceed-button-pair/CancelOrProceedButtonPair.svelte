@@ -1,18 +1,21 @@
 <script lang="ts">
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
-  import SpinnerButton from '@mathesar-component-library-dir/spinner-button/SpinnerButton.svelte';
-  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { iconProceed } from '@mathesar-component-library-dir/common/icons';
   import type { Size } from '@mathesar-component-library-dir/commonTypes';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import SpinnerButton from '@mathesar-component-library-dir/spinner-button/SpinnerButton.svelte';
+
   import type { ButtonDetails } from './CancelOrProceedButtonPairTypes';
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',
+    appearance: 'secondary',
   };
 
   const proceedButtonDefaults: ButtonDetails = {
     label: 'Proceed',
     icon: iconProceed,
+    appearance: 'primary',
   };
 
   export let cancelButton: Partial<ButtonDetails> = {};
@@ -47,7 +50,7 @@
 >
   {#if hasCancelButton}
     <Button
-      appearance="secondary"
+      appearance={fullCancelButton.appearance}
       on:click={onCancel}
       disabled={isProcessing || !canCancel}
       {size}
@@ -60,6 +63,7 @@
     bind:isProcessing
     bind:proceed={spinnerButtonProceed}
     onClick={onProceed}
+    appearance={fullProceedButton.appearance}
     icon={fullProceedButton.icon}
     label={fullProceedButton.label}
     disabled={isProcessing || !canProceed}

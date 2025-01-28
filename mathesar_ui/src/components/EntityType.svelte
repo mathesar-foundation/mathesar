@@ -1,3 +1,5 @@
+<script lang="ts"></script>
+
 <span class="entity-type"><slot /></span>
 
 <style>

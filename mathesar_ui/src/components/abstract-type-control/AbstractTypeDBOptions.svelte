@@ -1,22 +1,23 @@
 <script lang="ts">
-  import {
-    FormBuilder,
-    getValidationContext,
-  } from '@mathesar-component-library';
-  import type { FormValues } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/AppTypes';
   import type {
     AbstractType,
     AbstractTypeDbConfig,
   } from '@mathesar/stores/abstract-types/types';
+  import {
+    FormBuilder,
+    getValidationContext,
+  } from '@mathesar-component-library';
+  import type { FormValues } from '@mathesar-component-library/types';
+
   import DbTypeIndicator from './DbTypeIndicator.svelte';
-  import { constructDbForm } from './utils';
-  import type { ColumnWithAbstractType } from './utils';
+  import { type ColumnWithAbstractType, constructDbForm } from './utils';
 
   export let selectedAbstractType: AbstractType;
   export let selectedDbType: DbType;
   export let typeOptions: ColumnWithAbstractType['type_options'];
   export let column: ColumnWithAbstractType;
+  export let disabled = false;
 
   $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
@@ -58,7 +59,7 @@
     {#if dbForm}
       <div class="option-form db-opts">
         <div class="content">
-          <FormBuilder form={dbForm} />
+          <FormBuilder form={dbForm} {disabled} />
         </div>
       </div>
     {/if}

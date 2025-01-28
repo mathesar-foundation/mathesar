@@ -2,19 +2,22 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
-  import { currentTableId, tables } from '@mathesar/stores/tables';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { currentTableId, currentTablesData } from '@mathesar/stores/tables';
+
   import RecordPageRoute from './RecordPageRoute.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let tableId: number;
 
   $: $currentTableId = tableId;
-  $: table = $tables.data.get(tableId);
+  $: table = $currentTablesData.tablesMap.get(tableId);
 
   function handleUnmount() {
     $currentTableId = undefined;

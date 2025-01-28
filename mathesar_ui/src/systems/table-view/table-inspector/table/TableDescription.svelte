@@ -1,26 +1,33 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
-  import EditTableHOC from '@mathesar/components/EditTableHOC.svelte';
-  import { tables } from '@mathesar/stores/tables';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { updateTable } from '@mathesar/stores/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let disabled = false;
+
+  $: ({ table } = $tabularData);
+
+  async function handleSave(description: string) {
+    await updateTable({
+      schema: table.schema,
+      table: { oid: table.oid, description },
+    });
+  }
 </script>
 
-<EditTableHOC let:onUpdate tableId={$tabularData.id}>
-  <div class="update-table-description-property-container">
-    <span class="label">{$_('description')}</span>
-    <EditableTextWithActions
-      initialValue={$tables.data.get($tabularData.id)?.description ?? ''}
-      onSubmit={(description) => onUpdate({ description })}
-      isLongText
-      {disabled}
-    />
-  </div>
-</EditTableHOC>
+<div class="update-table-description-property-container">
+  <span class="label">{$_('table_description')}</span>
+  <EditableTextWithActions
+    initialValue={table.description ?? ''}
+    onSubmit={handleSave}
+    isLongText
+    {disabled}
+  />
+</div>
 
 <style lang="scss">
   .update-table-description-property-container {
@@ -28,7 +35,7 @@
     flex-direction: column;
 
     > :global(* + *) {
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
     }
   }
 </style>

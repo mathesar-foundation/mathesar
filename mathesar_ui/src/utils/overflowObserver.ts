@@ -1,5 +1,5 @@
-import { writable, type Writable } from 'svelte/store';
 import type { ActionReturn } from 'svelte/action';
+import { type Writable, writable } from 'svelte/store';
 
 export interface OverflowDetails {
   hasOverflowTop: Writable<boolean>;

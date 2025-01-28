@@ -1,18 +1,24 @@
 <script lang="ts">
-  import { popper, portal } from '@mathesar-component-library';
   import { onMount } from 'svelte';
+
+  import { popper, portal } from '@mathesar-component-library';
 
   export let errors: string[];
   export let forceShowErrors = false;
 
   let errorIndicatorElement: SVGSVGElement | undefined;
   let cellElementIsHovered = false;
+  let hiderTimeoutId: number;
 
   function setHover() {
+    window.clearTimeout(hiderTimeoutId);
     cellElementIsHovered = true;
   }
+
   function unsetHover() {
-    cellElementIsHovered = false;
+    hiderTimeoutId = window.setTimeout(() => {
+      cellElementIsHovered = false;
+    }, 1);
   }
   onMount(() => {
     const cell = errorIndicatorElement?.parentElement;
@@ -46,6 +52,8 @@
       reference: cellElement,
       options: { placement: 'top-start' },
     }}
+    on:mouseenter={() => setHover()}
+    on:mouseleave={() => unsetHover()}
   >
     {errors.join(' ')}
   </div>

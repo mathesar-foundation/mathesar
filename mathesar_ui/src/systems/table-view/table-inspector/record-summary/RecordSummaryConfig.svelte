@@ -1,77 +1,63 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { RadioGroup, Spinner } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+
+  import type { ResultValue } from '@mathesar/api/rpc/records';
   import {
     FormSubmit,
     makeForm,
     optionalField,
-    requiredField,
+    validIf,
   } from '@mathesar/components/form';
-  import Field from '@mathesar/components/form/Field.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
-  import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
-  import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import { saveRecordSummaryTemplate } from '@mathesar/stores/tables';
+  import { iconUndo } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Table } from '@mathesar/models/Table';
+  import type { ProcessedColumns } from '@mathesar/stores/table-data';
+  import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import {
-    columnIsConformant,
-    getColumnsInTemplate,
-    hasColumnReferences,
-  } from './recordSummaryTemplateUtils';
-  import TemplateInput from './TemplateInput.svelte';
+  import { Help, Spinner, defined } from '@mathesar-component-library';
 
-  export let table: TableEntry;
-  export let tabularData: TabularData;
+  import Preview from './Preview.svelte';
+  import Template from './Template.svelte';
+  import { TemplateConfig } from './TemplateConfig';
 
-  const userProfile = getUserProfileStoreFromContext();
+  export let database: Pick<Database, 'id'>;
+  export let table: Table;
+  export let processedColumns: ProcessedColumns;
+  export let isLoading: boolean;
+  export let previewRecordId: ResultValue | undefined;
+  export let onSave: (() => void) | undefined = undefined;
 
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: ({ recordsData, columnsDataStore, isLoading } = tabularData);
-  $: ({ columns } = columnsDataStore);
-  $: ({ savedRecords, recordSummaries } = recordsData);
-  $: firstRow = $savedRecords[0] as RecordRow | undefined;
-  $: initialCustomized = table.settings.preview_settings.customized ?? false;
-  $: initialTemplate = table.settings.preview_settings.template ?? '';
-  $: customized = requiredField(initialCustomized);
-  $: customizedDisabled = customized.disabled;
-  $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);
-  $: form = makeForm({ customized, template });
-  $: columnsInTemplate = getColumnsInTemplate($columns, $template);
-  $: nonconformantColumns = columnsInTemplate.filter(
-    (column) => !columnIsConformant(column),
+  $: template = table?.metadata?.record_summary_template ?? undefined;
+  $: templateConfig = optionalField(
+    defined(template, (t) => TemplateConfig.fromTemplate(t)),
+    [
+      validIf(
+        (t) => !!t?.hasAnyColumnParts,
+        $_('static_record_summary_template_error'),
+      ),
+    ],
   );
-  $: previewRecordSummary = (() => {
-    if (!firstRow) {
-      return undefined;
-    }
-    const { record } = firstRow;
-    return renderRecordSummaryForRow({
-      template: $template,
-      record,
-      transitiveData: $recordSummaries,
-    });
-  })();
-  $: canEditMetadata = $userProfile?.hasPermission(
-    {
-      database,
-      schema,
-    },
-    'canEditMetadata',
-  );
-  $: showNullState = !canEditMetadata && !previewRecordSummary;
+  $: form = makeForm({ templateConfig });
+  $: templateErrors = templateConfig.fieldErrors;
+  $: hasPk = [...processedColumns].some(([, c]) => c.column.primary_key);
 
   async function save() {
     try {
-      await saveRecordSummaryTemplate(table, $form.values);
+      await updateTable({
+        schema: table.schema,
+        table: {
+          oid: table.oid,
+          metadata: {
+            record_summary_template: $templateConfig?.template ?? null,
+          },
+        },
+      });
+      onSave?.();
     } catch (e) {
       toast.error(`${$_('unable_to_save_changes')} ${getErrorMessage(e)}`);
     }
@@ -79,109 +65,70 @@
 </script>
 
 <div class="record-summary-config">
-  {#if $isLoading}
+  {#if isLoading}
     <Spinner />
-  {:else}
-    {#if previewRecordSummary}
-      <div class="heading">{$_('preview')}</div>
-      <div class="content">
-        <div class="help">
-          <RichText text={$_('record_summary_help')} let:slotName>
-            {#if slotName === 'tableName'}
-              <Identifier>{table.name}</Identifier>
-            {/if}
-          </RichText>
-        </div>
-        <LinkedRecord recordSummary={previewRecordSummary} />
-      </div>
-    {/if}
-
-    {#if canEditMetadata}
-      <div class="heading">{$_('template')}</div>
-      <div class="content">
-        <RadioGroup
-          options={[false, true]}
-          getRadioLabel={(v) => (v ? $_('custom') : $_('default'))}
-          ariaLabel={$_('template_type')}
-          isInline
-          bind:value={$customized}
-          disabled={$customizedDisabled}
-        />
-
-        {#if $customized}
-          <Field
-            field={template}
-            input={{ component: TemplateInput, props: { columns: $columns } }}
-          />
-
-          {#if nonconformantColumns.length}
-            <InfoBox>
-              <div class="nonconformant-columns">
-                <p>
-                  {$_('record_summary_non_conformant_columns_help')}:
-                </p>
-                <ul>
-                  {#each nonconformantColumns as column}
-                    <li>
-                      <RichText
-                        text={$_('column_id_references_column_name')}
-                        let:slotName
-                      >
-                        {#if slotName === 'columnId'}
-                          <Identifier>{column.id}</Identifier>
-                        {:else if slotName === 'columnName'}
-                          <Identifier>{column.name}</Identifier>
-                        {/if}
-                      </RichText>
-                    </li>
-                  {/each}
-                </ul>
-              </div>
-            </InfoBox>
-          {/if}
+  {:else if !hasPk}
+    <ErrorBox>
+      <RichText text={$_('record_summary_no_pk_error')} let:slotName>
+        {#if slotName === 'tableName'}
+          <Identifier>{table.name}</Identifier>
         {/if}
+      </RichText>
+    </ErrorBox>
+  {:else}
+    <div class="help">
+      <InfoBox>
+        <RichText text={$_('record_summary_config_help')} let:slotName>
+          {#if slotName === 'tableName'}
+            <Identifier>{table.name}</Identifier>
+          {/if}
+        </RichText>
+        <Help>
+          <p>{$_('record_summary_detail_help_1')}</p>
+          <p>
+            <RichText text={$_('record_summary_detail_help_2')} let:slotName>
+              {#if slotName === 'tableName'}
+                <Identifier>{table.name}</Identifier>
+              {/if}
+            </RichText>
+          </p>
+        </Help>
+      </InfoBox>
+    </div>
 
-        <FormSubmit
-          {form}
-          onProceed={save}
-          onCancel={form.reset}
-          proceedButton={{ label: $_('save') }}
-          initiallyHidden
-          size="small"
-        />
-      </div>
+    <Template
+      bind:templateConfig={$templateConfig}
+      columns={processedColumns}
+      {database}
+      errorsDisplayed={$form.hasChanges ? $templateErrors : []}
+    />
+
+    {#if previewRecordId !== undefined}
+      <Preview
+        {database}
+        {table}
+        recordId={previewRecordId}
+        template={$templateConfig?.template ?? null}
+      />
     {/if}
 
-    {#if showNullState}
-      <span class="null-text">{$_('no_record_summary_available')}</span>
-    {/if}
+    <FormSubmit
+      {form}
+      onProceed={save}
+      onCancel={form.reset}
+      proceedButton={{ label: $_('save') }}
+      cancelButton={{ label: $_('reset'), icon: iconUndo }}
+      initiallyHidden
+      size="small"
+    />
   {/if}
 </div>
 
 <style>
-  .heading {
-    margin-block: 0.75rem 0.5rem;
-  }
-  .content > :global(* + *) {
-    margin-top: 0.5rem;
-  }
-  .content {
-    margin-left: 0.5rem;
-  }
   .help {
     font-size: var(--text-size-small);
-    color: var(--color-text-muted);
   }
-  .nonconformant-columns > :global(:first-child) {
-    margin-top: 0;
-  }
-  .nonconformant-columns > :global(:last-child) {
-    margin-bottom: 0;
-  }
-  .nonconformant-columns ul {
-    padding-left: 1.5rem;
-  }
-  .null-text {
-    color: var(--color-text-muted);
+  .record-summary-config > :global(* + *) {
+    margin-top: 1rem;
   }
 </style>

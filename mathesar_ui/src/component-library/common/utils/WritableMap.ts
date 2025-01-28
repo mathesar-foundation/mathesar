@@ -1,10 +1,13 @@
-import type {
-  Subscriber,
-  Unsubscriber,
-  Writable,
-  Readable,
+import {
+  type Readable,
+  type Subscriber,
+  type Unsubscriber,
+  type Writable,
+  derived,
+  get,
+  writable,
 } from 'svelte/store';
-import { writable, get, derived } from 'svelte/store';
+
 import ImmutableMap from './ImmutableMap';
 
 export default class WritableMap<Key, Value>

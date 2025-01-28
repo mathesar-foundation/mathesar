@@ -5,67 +5,97 @@ repo_name: mathesar-foundation/mathesar
 edit_uri: edit/develop/docs/docs/
 
 nav:
-  - Introduction:
-      - Welcome: index.md
-  - Installation:
-      - Install using Docker Compose: installation/docker-compose/index.md
-      - Install from scratch: installation/build-from-source/index.md
-  - Configuration:
-      - Environment variables: configuration/env-variables.md
-  - Administration:
-      - Upgrade:
-        - To 0.1.7: administration/upgrade/0.1.7.md
-        - To 0.1.6: administration/upgrade/0.1.6.md
-        - To 0.1.5: administration/upgrade/0.1.5.md
-        - To 0.1.4: administration/upgrade/0.1.4.md
-        - To older versions: administration/upgrade/older.md
+  - Introduction: index.md
+  - Administrator Guide:
+      - Install using Docker Compose: administration/install-via-docker-compose.md
+      - Install from scratch: administration/install-from-scratch.md
+      - Environment Variables: administration/environment-variables.md
+      - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
-      - Debug Mathesar: administration/debug.md
-  - Using Mathesar:
+      - Debugging Mathesar: administration/debug.md
+      - Postgres & Python Versions: administration/version-support.md
+      
+  - User Guide:
       - Introduction: user-guide/index.md
-      - Importing data: user-guide/importing-data.md
-      - Syncing database changes: user-guide/syncing-db.md
-      - Users & access levels: user-guide/users.md
-      - Glossary: user-guide/glossary.md
+      - Your data in PostgreSQL:
+          - Databases: user-guide/databases.md
+          - Schemas: user-guide/schemas.md
+          - Tables: user-guide/tables.md
+          - Data types: user-guide/data-types.md
+          - Relationships: user-guide/relationships.md
+      - Access Control:
+          - Overview: user-guide/access-control.md
+          - Mathesar Users: user-guide/users.md
+          - PostgreSQL Roles: user-guide/roles.md
+          - Stored Role Passwords: user-guide/stored-role-passwords.md
+          - Collaborators: user-guide/collaborators.md
+      - Mathesar constructs:
+          - Metadata: user-guide/metadata.md
+          - Data Explorer: user-guide/data-explorer.md
+      - Data management:
+          - Importing data: user-guide/importing-data.md
+          - Exporting data: user-guide/exporting-data.md
+      - Settings:
+          - Usage Data Collection: user-guide/usage-data-collection.md
   - API:
-      - REST: api/rest.md
-      - RPC: api/rpc.md
+      - Overview: api/index.md
+      - Methods: api/methods.md
   - Releases:
-      - '0.1.7': releases/0.1.7.md
-      - '0.1.6': releases/0.1.6.md
-      - '0.1.5': releases/0.1.5.md
-      - '0.1.4': releases/0.1.4.md
-      - '0.1.3': releases/0.1.3.md
-      - '0.1.2': releases/0.1.2.md
-      - '0.1.1': releases/0.1.1.md
-      - '0.1.0': releases/0.1.0.md
+      - '0.2.0': releases/0.2.0.md
+      - Previous Releases:
+          - '0.1.7': releases/0.1.7.md
+          - '0.1.6': releases/0.1.6.md
+          - '0.1.5': releases/0.1.5.md
+          - '0.1.4': releases/0.1.4.md
+          - '0.1.3': releases/0.1.3.md
+          - '0.1.2': releases/0.1.2.md
+          - '0.1.1': releases/0.1.1.md
+          - '0.1.0': releases/0.1.0.md
 
 plugins:
   - search:
       lang: en
   - redirects:
       redirect_maps:
-        "installation-dc/ansible-setup.md": "installation/docker-compose/index.md"
+        "installation-dc/ansible-setup.md": "administration/install-via-docker-compose.md"
         "product/intro.md": "user-guide/index.md"
-        "product/syncing-db.md": "user-guide/syncing-db.md"
         "product/users.md": "user-guide/users.md"
         "install/index.md": "index.md"
-        "install/docker-compose/index.md": "installation/docker-compose/index.md"
-        "install/build-from-source/index.md": "installation/build-from-source/index.md"
+        "install/docker-compose/index.md": "administration/install-via-docker-compose.md"
+        "install/build-from-source/index.md": "administration/install-from-scratch.md"
+        "api/rpc.md": "api/index.md"
+        "api/rest.md": "api/index.md"
+        "user-guide/glossary.md": "user-guide/index.md"
+        "user-guide/permissions.md": "user-guide/access-control.md"
+        "configuration/env-variables.md": "administration/environment-variables.md"
+        "administration/configuration.md": "administration/environment-variables.md"
+        "installation/docker-compose/index.md": "administration/install-via-docker-compose.md"
+        "installation/build-from-source/index.md": "administration/install-from-scratch.md"
   - macros
   - placeholder
   - mkdocstrings:
       handlers:
         python:
-          paths: [..]
+          paths: [../mathesar/rpc/]
           options:
+            heading_level: 3
             docstring_style: google
             separate_signature: true
-            show_root_heading: true
-            show_root_full_path: false
+            show_root_toc_entry: false
+            show_root_members_full_path: true
             show_source: false
-            show_symbol_type_heading: true
             group_by_category: false
+  - spellcheck:
+      backends:
+      - codespell:
+          dictionaries: [clear]
+      known_words:
+      - Mathesar
+      ignore_code: yes
+      min_length: 2
+      max_capital: 1
+      allow_unicode: yes
+      strict_only: yes
 
 theme:
   name: material
@@ -118,7 +148,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.1.7
+  mathesar_version: 0.2.0
   version:
     provider: mike
     alias: true

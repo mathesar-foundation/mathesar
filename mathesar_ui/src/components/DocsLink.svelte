@@ -5,14 +5,11 @@
   https://docs.mathesar.org
 -->
 <script lang="ts">
-  import { getDocsLink } from '@mathesar/routes/urls';
+  import { type DocsPage, getDocsLink } from '@mathesar/routes/urls';
 
-  /** Should begin with a forward slash */
-  export let path: string;
-
-  $: href = getDocsLink(path);
+  export let page: DocsPage;
 </script>
 
-<a {href} target="_blank">
+<a href={getDocsLink(page)} target="_blank">
   <slot />
 </a>

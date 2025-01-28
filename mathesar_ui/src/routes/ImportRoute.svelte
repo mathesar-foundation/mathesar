@@ -1,21 +1,24 @@
 <script lang="ts">
-  import { Route } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { Route } from 'tinro';
+
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconImportData } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import ImportPreviewPage from '@mathesar/pages/import/preview/ImportPreviewPage.svelte';
   import ImportUploadPage from '@mathesar/pages/import/upload/ImportUploadPage.svelte';
+
   import { getImportPageUrl, getImportPreviewPageQueryParams } from './urls';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 </script>
 
 <AppendBreadcrumb
   item={{
     type: 'simple',
-    href: getImportPageUrl(database.id, schema.id),
+    href: getImportPageUrl(database.id, schema.oid),
     label: $_('import'),
     icon: iconImportData,
   }}

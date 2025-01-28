@@ -1,10 +1,10 @@
 #=========== STAGE: BASE =====================================================#
-ARG PYTHON_VERSION=3.9-bookworm
+ARG PYTHON_VERSION=3.13-bookworm
 FROM python:$PYTHON_VERSION AS base
 
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
-ARG BUILD_PG_MAJOR=15
+ARG BUILD_PG_MAJOR=17
 ENV PG_MAJOR=$BUILD_PG_MAJOR
 
 RUN set -eux;
@@ -42,19 +42,28 @@ ENV PGDATA /var/lib/postgresql/mathesar
 VOLUME /etc/postgresql/
 VOLUME /var/lib/postgresql/
 
-# We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL
-# calls "Fast Shutdown mode" wherein new connections are disallowed and any
-# in-progress transactions are aborted, allowing PostgreSQL to stop cleanly and
-# flush tables to disk, which is the best compromise available to avoid data
-# corruption.
-
-STOPSIGNAL SIGINT
-
 EXPOSE 5432
 
 # Mathesar source
 WORKDIR /code/
 COPY . .
+
+
+#=========== STAGE: TESTING ==================================================#
+
+ARG PYTHON_VERSION=3.13-bookworm
+FROM python:$PYTHON_VERSION AS testing
+
+# Mathesar source
+WORKDIR /code/
+COPY . .
+
+# Install dev requirements
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+EXPOSE 8000
+
+ENTRYPOINT ["./dev-run.sh"]
 
 
 #=========== STAGE: DEVELOPMENT ==============================================#
@@ -87,12 +96,12 @@ EXPOSE 8000 3000 6006
 ENTRYPOINT ["./dev-run.sh"]
 
 
-#=========== STAGE: COMMON ===================================================#
+#=========== STAGE: PRODUCTION ===============================================#
 
-from base as common
+from base as production
 
 # Install prod requirements
-RUN pip install --no-cache-dir -r requirements-prod.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Compile translation files
 RUN python manage.py compilemessages
@@ -104,23 +113,6 @@ COPY --from=development /code/mathesar/static/mathesar ./mathesar/static/mathesa
 RUN rm -rf ./mathesar_ui
 RUN rm -rf ./mathesar/tests ./db/tests
 RUN rm -rf ./docs
-
-
-#=========== STAGE: DEMO =====================================================#
-
-FROM common AS demo
-
-# Install prod requirements
-RUN pip install --no-cache-dir -r requirements-demo.txt
-
-EXPOSE 8000
-
-ENTRYPOINT ["./run.sh"]
-
-
-#=========== STAGE: PRODUCTION ===============================================#
-
-FROM common AS production
 
 EXPOSE 8000
 

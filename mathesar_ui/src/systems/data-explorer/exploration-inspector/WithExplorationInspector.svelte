@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { WithPanel } from '@mathesar-component-library';
   import { dataExplorerRightSidebarWidth } from '@mathesar/stores/localStorage';
   import type QueryManager from '@mathesar/systems/data-explorer/QueryManager';
-  import type QueryRunner from '@mathesar/systems/data-explorer/QueryRunner';
+  import type { QueryRunner } from '@mathesar/systems/data-explorer/QueryRunner';
+  import { WithPanel } from '@mathesar-component-library';
+
   import ExplorationInspector from './ExplorationInspector.svelte';
 
   export let isInspectorOpen: boolean;
   export let queryHandler: QueryRunner | QueryManager;
-  export let canEditMetadata: boolean;
 </script>
 
 <WithPanel
@@ -17,10 +17,5 @@
   maxSizePx={600}
 >
   <slot />
-  <ExplorationInspector
-    slot="panel"
-    {queryHandler}
-    {canEditMetadata}
-    on:delete
-  />
+  <ExplorationInspector slot="panel" {queryHandler} on:delete />
 </WithPanel>

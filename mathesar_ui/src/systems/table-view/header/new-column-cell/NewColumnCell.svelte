@@ -1,15 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Dropdown, Icon, Spinner } from '@mathesar-component-library';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+
   import {
-    requiredField,
-    makeForm,
     Field,
     FormSubmit,
+    makeForm,
+    requiredField,
   } from '@mathesar/components/form';
-  import { columnNameIsAvailable } from '@mathesar/utils/columnUtils';
   import { iconAddNew } from '@mathesar/icons';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { columnNameIsAvailable } from '@mathesar/utils/columnUtils';
+  import { Dropdown, Icon, Spinner } from '@mathesar-component-library';
+
   import ColumnTypeSelector from './ColumnTypeSelector.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -22,13 +24,10 @@
   $: ({ isSubmitting } = form);
 
   async function addColumn(closeDropdown: () => void) {
-    const newColumn = {
+    await columnsDataStore.add({
       name: $columnName,
       type: $columnType,
-      nullable: true,
-      primary_key: false,
-    };
-    await columnsDataStore.add(newColumn);
+    });
     closeDropdown();
   }
 </script>

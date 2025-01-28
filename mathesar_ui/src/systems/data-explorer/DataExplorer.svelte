@@ -1,21 +1,23 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Tutorial } from '@mathesar-component-library';
+
   import { queries } from '@mathesar/stores/queries';
+  import { Tutorial } from '@mathesar-component-library';
+
   import ActionsPane from './ActionsPane.svelte';
-  import type QueryManager from './QueryManager';
   import { WithExplorationInspector } from './exploration-inspector';
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
-  import ResultPane from './result-pane/ResultPane.svelte';
+  import type QueryManager from './QueryManager';
+  import ExplorationResults from './result-pane/ExplorationResults.svelte';
+  import StatusBar from './StatusBar.svelte';
   import type { ColumnWithLink } from './utils';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
-  export let canEditMetadata: boolean;
 
   $: ({ query } = queryManager);
-  $: hasNoColumns = $query.initial_columns.length === 0;
+  $: hasColumns = !!$query.initial_columns.length;
 
   let isInspectorOpen = true;
 </script>
@@ -23,12 +25,11 @@
 <div class="data-explorer">
   <ActionsPane
     {queryManager}
-    {canEditMetadata}
     bind:linkCollapsibleOpenState
     bind:isInspectorOpen
     on:close
   />
-  {#if !$query.base_table}
+  {#if !$query.base_table_oid}
     <div class="initial-content">
       {#if $queries.requestStatus.state === 'success' && $queries.data.size === 0}
         <div class="tutorial-holder">
@@ -49,7 +50,7 @@
   {:else}
     <div class="content-pane">
       <WithInputSidebar {queryManager} {linkCollapsibleOpenState}>
-        {#if hasNoColumns}
+        {#if !hasColumns}
           <div class="help-text">
             {$_('get_started_by_adding_columns_from_left')}
           </div>
@@ -57,13 +58,15 @@
           <WithExplorationInspector
             {isInspectorOpen}
             queryHandler={queryManager}
-            {canEditMetadata}
             on:delete
           >
-            <ResultPane queryHandler={queryManager} />
+            <ExplorationResults queryHandler={queryManager} />
           </WithExplorationInspector>
         {/if}
       </WithInputSidebar>
+      {#if hasColumns}
+        <StatusBar queryHandler={queryManager} />
+      {/if}
     </div>
   {/if}
 </div>
@@ -101,7 +104,8 @@
     }
 
     .content-pane {
-      display: flex;
+      display: grid;
+      grid-template: 1fr auto / 1fr;
       overflow: hidden;
       overflow-x: auto;
       .help-text {

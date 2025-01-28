@@ -16,10 +16,6 @@ def verify_data_file_data(data_file, data_file_dict):
     assert data_file_dict['id'] == data_file.id
     assert data_file_dict['file'] == f'http://testserver/media/{data_file.file.name}'
     assert data_file_dict['created_from'] == data_file.created_from
-    if data_file.table_imported_to:
-        assert data_file_dict['table_imported_to'] == data_file.table_imported_to.id
-    else:
-        assert data_file_dict['table_imported_to'] is None
     if data_file.user:
         assert data_file_dict['user'] == data_file.user.id
     else:
@@ -31,9 +27,9 @@ def verify_data_file_data(data_file, data_file_dict):
 
 
 @pytest.fixture
-def data_file(patents_csv_filepath):
+def data_file(patents_csv_filepath, user_alice):
     with open(patents_csv_filepath, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file), type='csv')
+        data_file = DataFile.objects.create(file=File(csv_file), type='csv', user=user_alice)
     return data_file
 
 
@@ -124,18 +120,6 @@ def test_data_file_create_json(client, patents_json_filepath, header):
     )
 
 
-@pytest.mark.parametrize('has_header', [True, False])
-def test_data_file_create_excel(client, patents_excel_filepath, has_header):
-    num_data_files = DataFile.objects.count()
-
-    with open(patents_excel_filepath, 'rb') as excel_file:
-        data = {'file': excel_file, 'header': has_header}
-        response = client.post('/api/db/v0/data_files/', data, format='multipart')
-    check_create_data_file_response(
-        response, num_data_files, 'file', 'patents', ',', '"', '', has_header
-    )
-
-
 def test_data_file_create_csv_long_name(client, patents_csv_filepath):
     with open(patents_csv_filepath, 'rb') as csv_file:
         with patch.object(os.path, 'basename', lambda _: '0' * 101):
@@ -210,7 +194,7 @@ def test_data_file_404(client, data_file):
     data_file_id = data_file.id
     data_file.delete()
     response = client.get(f'/api/db/v0/data_files/{data_file_id}/')
-    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['message'] == 'No DataFile matches the given query.'
     assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 

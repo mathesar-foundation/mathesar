@@ -1,25 +1,26 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import type { Table } from '@mathesar/models/Table';
   import { Select } from '@mathesar-component-library';
   import type { SelectProps } from '@mathesar-component-library/types';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+
   import TableName from './TableName.svelte';
 
-  type $$Events = Select<TableEntry | undefined>['$$events_def'];
+  type $$Events = Select<Table | undefined>['$$events_def'];
 
-  export let tables: TableEntry[];
-  export let value: TableEntry | undefined = undefined;
+  export let tables: Table[];
+  export let value: Table | undefined = undefined;
   /** TODO: Discuss, do we need prependBlank? */
   export let prependBlank = false;
-  export let autoSelect: SelectProps<TableEntry | undefined>['autoSelect'] =
-    'first';
+  export let autoSelect: SelectProps<Table | undefined>['autoSelect'] = 'first';
 
   $: tableList = prependBlank ? [undefined, ...tables] : tables;
 </script>
 
 <Select
   options={tableList}
-  valuesAreEqual={(a, b) => a?.id === b?.id}
+  valuesAreEqual={(a, b) => a?.oid === b?.oid}
   {autoSelect}
   bind:value
   on:change

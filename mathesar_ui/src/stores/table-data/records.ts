@@ -1,49 +1,45 @@
 import {
-  derived,
-  get,
-  writable,
   type Readable,
   type Unsubscriber,
   type Writable,
+  derived,
+  get,
+  writable,
 } from 'svelte/store';
 
-import {
-  getGloballyUniqueId,
-  isDefinedNonNullable,
-  type CancellablePromise,
-} from '@mathesar-component-library';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import { States } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type {
-  GetRequestParams as ApiGetRequestParams,
   Group as ApiGroup,
-  Grouping as ApiGrouping,
+  GroupingResponse as ApiGroupingResponse,
   Result as ApiRecord,
-  Response as ApiRecordsResponse,
-  GroupingMode,
-} from '@mathesar/api/types/tables/records';
-import {
-  States,
-  deleteAPI,
-  getAPI,
-  patchAPI,
-  postAPI,
-  getQueryStringFromParams,
-} from '@mathesar/api/utils/requestUtils';
-import type Pagination from '@mathesar/utils/Pagination';
+  RecordsListParams,
+  RecordsResponse,
+  RecordsSearchParams,
+} from '@mathesar/api/rpc/records';
+import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
+import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
+import {
+  type CancellablePromise,
+  WritableMap,
+  getGloballyUniqueId,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
+
 import type { ColumnsDataStore } from './columns';
-import type { Filtering } from './filtering';
+import type { FilterEntry, Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Meta } from './meta';
 import RecordSummaryStore from './record-summaries/RecordSummaryStore';
 import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 import type { SearchFuzzy } from './searchFuzzy';
 import type { Sorting } from './sorting';
-import type { RowKey } from './utils';
-import { getCellKey, validateRow } from './utils';
+import { type RowKey, getCellKey, validateRow } from './utils';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
@@ -53,55 +49,30 @@ export interface RecordsRequestParamsData {
   searchFuzzy: SearchFuzzy;
 }
 
-interface RecordsFetchQueryParamsData extends RecordsRequestParamsData {
-  shareConsumer?: ShareConsumer;
-}
-
-function buildFetchQueryString(data: RecordsFetchQueryParamsData): string {
-  const params: ApiGetRequestParams = {
-    ...data.pagination.recordsRequestParams(),
-    ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
-    ...data.grouping.recordsRequestParams(),
-    ...data.filtering.recordsRequestParams(),
-    ...data.searchFuzzy.recordsRequestParams(),
-  };
-  const paramsWithShareConsumer = {
-    ...params,
-    ...data.shareConsumer?.getQueryParams(),
-  };
-  return getQueryStringFromParams(paramsWithShareConsumer);
-}
-
 export interface RecordGroup {
   count: number;
-  eqValue: ApiGroup['eq_value'];
-  firstValue: ApiGroup['first_value'];
-  lastValue: ApiGroup['last_value'];
+  eqValue: ApiGroup['results_eq'];
   resultIndices: number[];
 }
 
 export interface RecordGrouping {
   columnIds: number[];
   preprocIds: (string | null)[];
-  mode: GroupingMode;
   groups: RecordGroup[];
 }
 
 function buildGroup(apiGroup: ApiGroup): RecordGroup {
   return {
     count: apiGroup.count,
-    eqValue: apiGroup.eq_value,
-    firstValue: apiGroup.first_value,
-    lastValue: apiGroup.last_value,
+    eqValue: apiGroup.results_eq,
     resultIndices: apiGroup.result_indices,
   };
 }
 
-function buildGrouping(apiGrouping: ApiGrouping): RecordGrouping {
+function buildGrouping(apiGrouping: ApiGroupingResponse): RecordGrouping {
   return {
     columnIds: apiGrouping.columns,
     preprocIds: apiGrouping.preproc ?? [],
-    mode: apiGrouping.mode,
     groups: (apiGrouping.groups ?? []).map(buildGroup),
   };
 }
@@ -121,7 +92,7 @@ export interface NewRecordRow extends RecordRow {
 
 export interface GroupHeaderRow extends BaseRow {
   group: RecordGroup;
-  groupValues: ApiGroup['first_value'];
+  groupValues: ApiGroup['results_eq'];
 }
 
 export interface HelpTextRow extends BaseRow {
@@ -174,13 +145,16 @@ export function filterRecordRows(rows: Row[]): RecordRow[] {
 export function rowHasSavedRecord(row: Row): row is RecordRow {
   return rowHasRecord(row) && Object.entries(row.record).length > 0;
 }
-
 export interface TableRecordsData {
   state: States;
   error?: string;
   savedRecordRowsWithGroupHeaders: Row[];
   totalCount: number;
   grouping?: RecordGrouping;
+}
+
+export function getRowSelectionId(row: Row): string {
+  return row.identifier;
 }
 
 export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
@@ -250,7 +224,7 @@ function preprocessRecords({
         if (group.eqValue[columnId] !== undefined) {
           groupValues[columnId] = group.eqValue[columnId];
         } else {
-          groupValues[columnId] = group.firstValue[columnId];
+          groupValues[columnId] = group.eqValue[columnId];
         }
       });
       combinedRecords.push({
@@ -275,9 +249,10 @@ function preprocessRecords({
 }
 
 export class RecordsData {
-  private tableId: TableEntry['id'];
-
-  private url: string;
+  private apiContext: {
+    database_id: number;
+    table_oid: Table['oid'];
+  };
 
   private meta: Meta;
 
@@ -291,7 +266,9 @@ export class RecordsData {
 
   newRecords: Writable<NewRecordRow[]>;
 
-  recordSummaries = new RecordSummaryStore();
+  recordSummaries = new WritableMap<string, string>();
+
+  linkedRecordSummaries = new RecordSummaryStore();
 
   grouping: Writable<RecordGrouping | undefined>;
 
@@ -299,7 +276,10 @@ export class RecordsData {
 
   error: Writable<string | undefined>;
 
-  private promise: CancellablePromise<ApiRecordsResponse> | undefined;
+  /** Keys are row selection ids */
+  selectableRowsMap: Readable<Map<string, RecordRow>>;
+
+  private promise: CancellablePromise<RecordsResponse> | undefined;
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private createPromises: Map<unknown, CancellablePromise<unknown>>;
@@ -319,20 +299,26 @@ export class RecordsData {
 
   readonly shareConsumer?: ShareConsumer;
 
+  private loadIntrinsicRecordSummaries?: boolean;
+
   constructor({
-    tableId,
+    database,
+    table,
     meta,
     columnsDataStore,
     contextualFilters,
     shareConsumer,
+    loadIntrinsicRecordSummaries,
   }: {
-    tableId: TableEntry['id'];
+    database: Pick<Database, 'id'>;
+    table: Pick<Table, 'oid'>;
     meta: Meta;
     columnsDataStore: ColumnsDataStore;
     contextualFilters: Map<number, number | string>;
     shareConsumer?: ShareConsumer;
+    loadIntrinsicRecordSummaries?: boolean;
   }) {
-    this.tableId = tableId;
+    this.apiContext = { database_id: database.id, table_oid: table.oid };
     this.shareConsumer = shareConsumer;
     this.state = writable(States.Loading);
     this.savedRecordRowsWithGroupHeaders = writable([]);
@@ -351,8 +337,16 @@ export class RecordsData {
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.contextualFilters = contextualFilters;
-    this.url = `/api/db/v0/tables/${this.tableId}/records/`;
+    this.loadIntrinsicRecordSummaries = loadIntrinsicRecordSummaries;
     void this.fetch();
+
+    this.selectableRowsMap = derived(
+      [this.savedRecords, this.newRecords],
+      ([savedRecords, newRecords]) => {
+        const records = [...savedRecords, ...newRecords];
+        return new Map(records.map((r) => [getRowSelectionId(r), r]));
+      },
+    );
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
     this.requestParamsUnsubscriber =
@@ -362,57 +356,76 @@ export class RecordsData {
   }
 
   async fetch(
-    retainExistingRows = false,
+    opts: {
+      clearNewRecords?: boolean;
+      setLoadingState?: boolean;
+      clearMetaStatuses?: boolean;
+    } = {},
   ): Promise<TableRecordsData | undefined> {
+    const options = {
+      clearNewRecords: true,
+      setLoadingState: true,
+      clearMetaStatuses: true,
+      ...opts,
+    };
+
     this.promise?.cancel();
     const { offset } = get(this.meta.pagination);
 
-    this.savedRecordRowsWithGroupHeaders.update((existingData) => {
-      let data = [...existingData];
-      data.length = Math.min(data.length, get(this.meta.pagination).size);
-
-      let index = -1;
-      data = data.map((entry) => {
-        index += 1;
-        if (!retainExistingRows || !entry) {
-          return {
-            state: 'loading',
-            identifier: generateRowIdentifier('dummy', offset, index),
-            rowIndex: index,
-            record: {},
-          };
-        }
-        return entry;
-      });
-
-      return data;
-    });
     this.error.set(undefined);
-    if (!retainExistingRows) {
-      this.state.set(States.Loading);
+
+    if (options.clearNewRecords) {
       this.newRecords.set([]);
+    }
+    if (options.setLoadingState) {
+      this.state.set(States.Loading);
+    }
+    if (options.clearMetaStatuses) {
       this.meta.clearAllStatusesAndErrors();
     }
 
     try {
       const params = get(this.meta.recordsRequestParamsData);
-      const contextualFilterEntries = [...this.contextualFilters].map(
-        ([columnId, value]) => ({ columnId, conditionId: 'equal', value }),
-      );
-      const queryString = buildFetchQueryString({
-        ...params,
-        filtering: params.filtering.withEntries(contextualFilterEntries),
-        shareConsumer: this.shareConsumer,
-      });
-      this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${queryString}`);
+      const contextualFilterEntries: FilterEntry[] = [
+        ...this.contextualFilters,
+      ].map(([columnId, value]) => ({ columnId, conditionId: 'equal', value }));
+
+      const recordsListParams: RecordsListParams = {
+        ...this.apiContext,
+        ...params.pagination.recordsRequestParams(),
+        ...params.sorting.recordsRequestParamsIncludingGrouping(
+          params.grouping,
+        ),
+        ...params.grouping.recordsRequestParams(),
+        ...params.filtering
+          .withEntries(contextualFilterEntries)
+          .recordsRequestParams(),
+        return_record_summaries: this.loadIntrinsicRecordSummaries,
+      };
+
+      const fuzzySearchParams = params.searchFuzzy.getSearchParams();
+      const recordSearchParams: RecordsSearchParams = {
+        ...this.apiContext,
+        search_params: fuzzySearchParams,
+      };
+
+      this.promise = fuzzySearchParams.length
+        ? api.records.search(recordSearchParams).run()
+        : api.records.list(recordsListParams).run();
+
       const response = await this.promise;
       const totalCount = response.count || 0;
       const grouping = response.grouping
         ? buildGrouping(response.grouping)
         : undefined;
-      if (response.preview_data) {
-        this.recordSummaries.setFetchedSummaries(
-          buildRecordSummariesForSheet(response.preview_data),
+      if (response.linked_record_summaries) {
+        this.linkedRecordSummaries.setFetchedSummaries(
+          buildRecordSummariesForSheet(response.linked_record_summaries),
+        );
+      }
+      if (response.record_summaries) {
+        this.recordSummaries.reconstruct(
+          Object.entries(response.record_summaries),
         );
       }
       const records = preprocessRecords({
@@ -443,26 +456,28 @@ export class RecordsData {
     return undefined;
   }
 
-  async deleteSelected(selectedRowIndices: number[]): Promise<void> {
-    const recordRows = this.getRecordRows();
+  /** @returns the number of selected rows deleted */
+  async deleteSelected(rowSelectionIds: Iterable<string>): Promise<number> {
+    const ids =
+      typeof rowSelectionIds === 'string' ? [rowSelectionIds] : rowSelectionIds;
     const pkColumn = get(this.columnsDataStore.pkColumn);
     const primaryKeysOfSavedRows: string[] = [];
     const identifiersOfUnsavedRows: string[] = [];
-    selectedRowIndices.forEach((index) => {
-      const row = recordRows[index];
-      if (row) {
-        const rowKey = getRowKey(row, pkColumn?.id);
-        if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
-          primaryKeysOfSavedRows.push(rowKey);
-        } else {
-          identifiersOfUnsavedRows.push(rowKey);
-        }
+    const selectableRows = get(this.selectableRowsMap);
+    for (const rowId of ids) {
+      const row = selectableRows.get(rowId);
+      if (!row) continue;
+      const rowKey = getRowKey(row, pkColumn?.id);
+      if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
+        primaryKeysOfSavedRows.push(rowKey);
+      } else {
+        identifiersOfUnsavedRows.push(rowKey);
       }
-    });
+    }
     const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
     if (rowKeys.length === 0) {
-      return;
+      return 0;
     }
 
     this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
@@ -482,9 +497,14 @@ export class RecordsData {
     let shouldReFetchRecords = successRowKeys.size > 0;
     if (keysToDelete.length > 0) {
       const recordIds = [...keysToDelete];
-      const bulkDeleteURL = `/api/ui/v0/tables/${this.tableId}/records/delete/`;
       try {
-        await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
+        await api.records
+          .delete({
+            database_id: this.apiContext.database_id,
+            table_oid: this.apiContext.table_oid,
+            record_ids: recordIds,
+          })
+          .run();
         keysToDelete.forEach((key) => successRowKeys.add(key));
       } catch (error) {
         failures.set(keysToDelete.join(','), getErrorMessage(error));
@@ -518,7 +538,11 @@ export class RecordsData {
     // flag instead of just re-fetching the records immediately after deleting
     // the saved records.
     if (shouldReFetchRecords) {
-      await this.fetch(true);
+      await this.fetch({
+        clearMetaStatuses: false,
+        clearNewRecords: false,
+        setLoadingState: false,
+      });
     }
 
     this.meta.rowCreationStatus.delete(Array.from(savedRecordKeys, String));
@@ -536,6 +560,8 @@ export class RecordsData {
       const apiMsg = [...failures.values()].join('\n');
       throw new Error(`${uiMsg} ${apiMsg}`);
     }
+
+    return primaryKeysOfSavedRows.length + identifiersOfUnsavedRows.length;
   }
 
   // TODO: It would be better to throw errors instead of silently failing
@@ -564,10 +590,17 @@ export class RecordsData {
     const cellKey = getCellKey(rowKey, column.id);
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
-    const promise = patchAPI<ApiRecordsResponse>(
-      `${this.url}${String(primaryKeyValue)}/`,
-      { [column.id]: record[column.id] },
-    );
+
+    const promise = api.records
+      .patch({
+        ...this.apiContext,
+        record_id: primaryKeyValue,
+        record_def: {
+          [String(column.id)]: record[column.id],
+        },
+      })
+      .run();
+
     if (!this.updatePromises) {
       this.updatePromises = new Map();
     }
@@ -634,11 +667,17 @@ export class RecordsData {
     const rowKeyOfBlankRow = getRowKey(row, pkColumn?.id);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
-    const requestRecord = {
-      ...Object.fromEntries(this.contextualFilters),
-      ...row.record,
-    };
-    const promise = postAPI<ApiRecordsResponse>(this.url, requestRecord);
+
+    const promise = api.records
+      .add({
+        ...this.apiContext,
+        record_def: {
+          ...Object.fromEntries(this.contextualFilters),
+          ...row.record,
+        },
+      })
+      .run();
+
     if (!this.createPromises) {
       this.createPromises = new Map();
     }

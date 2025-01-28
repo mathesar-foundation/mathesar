@@ -1,26 +1,28 @@
-import { makeForm } from '@mathesar-component-library';
+import { readable } from 'svelte/store';
+
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
-import type { FormBuildConfiguration } from '@mathesar-component-library/types';
 import type {
   AbstractType,
   AbstractTypeDbConfig,
   AbstractTypeDisplayConfig,
 } from '@mathesar/stores/abstract-types/types';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import { readable } from 'svelte/store';
+import { makeForm } from '@mathesar-component-library';
+import type { FormBuildConfiguration } from '@mathesar-component-library/types';
+
 import DurationConfiguration from './config-components/DurationConfiguration.svelte';
 
 export interface ColumnWithAbstractType
   extends Pick<
     Column,
-    'id' | 'type' | 'type_options' | 'display_options' | 'valid_target_types'
+    'id' | 'type' | 'type_options' | 'metadata' | 'valid_target_types'
   > {
   abstractType: AbstractType;
 }
 
 export type ColumnTypeOptionsSaveArgs = Pick<
   ColumnWithAbstractType,
-  'type' | 'type_options' | 'display_options'
+  'type' | 'type_options' | 'metadata'
 >;
 
 export function getFormValueStore(
@@ -77,7 +79,7 @@ export function constructDisplayForm(
     const displayFormValues =
       column.type === selectedDbType
         ? displayOptionsConfig.constructDisplayFormValuesFromDisplayOptions(
-            column.display_options,
+            column.metadata,
           )
         : {};
     displayForm = makeForm(displayOptionsConfig.form, displayFormValues, {
@@ -90,18 +92,4 @@ export function constructDisplayForm(
     displayForm,
     displayFormValues,
   };
-}
-
-export function hasTypeOptionsChanged(
-  previousTypeOptions: NonNullable<ColumnWithAbstractType['type_options']>,
-  currentTypeOptions: NonNullable<ColumnWithAbstractType['type_options']>,
-): boolean {
-  for (const key in currentTypeOptions) {
-    if (Object.hasOwn(currentTypeOptions, key)) {
-      if (currentTypeOptions[key] !== previousTypeOptions[key]) {
-        return true;
-      }
-    }
-  }
-  return false;
 }

@@ -1,10 +1,11 @@
-import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
-import { ImmutableMap } from '@mathesar-component-library';
+import { _ } from 'svelte-i18n';
+
 import type {
   QueryInstanceSummarizationTransformation,
   QuerySummarizationFunctionId,
-} from '@mathesar/api/types/queries';
+} from '@mathesar/api/rpc/explorations';
+import { ImmutableMap } from '@mathesar-component-library';
 
 export interface QuerySummarizationAggregationEntry {
   inputAlias: string;
@@ -25,7 +26,7 @@ export interface QuerySummarizationTransformationEntry {
   aggregations: ImmutableMap<string, QuerySummarizationAggregationEntry>;
 }
 
-export default class QuerySummarizationTransformationModel
+export class QuerySummarizationTransformationModel
   implements QuerySummarizationTransformationEntry
 {
   type = 'summarize' as const;

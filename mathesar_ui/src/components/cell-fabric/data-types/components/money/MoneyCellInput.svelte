@@ -1,6 +1,7 @@
 <script lang="ts">
   import { StringifiedNumberInput } from '@mathesar-component-library';
   import type { StringifiedNumberInputProps } from '@mathesar-component-library/types';
+
   import type { NumberCellProps } from '../typeDefinitions';
 
   interface $$Props extends Omit<StringifiedNumberInputProps, 'value'> {
@@ -25,16 +26,11 @@
     childValue = getNewChildValue(newParentValue);
   }
   $: handleParentValueChange(parentValue);
-  $: cssVariables = {
-    '--input-element-text-align': 'right',
-    ...($$restProps.cssVariables || {}),
-  };
 </script>
 
 <StringifiedNumberInput
   {...$$restProps}
   value={childValue}
-  {cssVariables}
   on:blur
   on:focus
   on:keydown

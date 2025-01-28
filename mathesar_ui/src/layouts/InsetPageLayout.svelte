@@ -27,7 +27,7 @@
     }
   }
   .restrict-width {
-    max-width: var(--max-layout-width);
+    max-width: var(--max-layout-width-data-pages);
     margin-left: auto;
     margin-right: auto;
     width: 100%;

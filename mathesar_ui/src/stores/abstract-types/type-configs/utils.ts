@@ -1,9 +1,6 @@
-import { dayjs } from '@mathesar-component-library';
-import type {
-  DateFormat,
-  TimeFormat,
-} from '@mathesar/api/types/tables/columns';
+import type { DateFormat, TimeFormat } from '@mathesar/api/rpc/columns';
 import { DateTimeSpecification } from '@mathesar/utils/date-time';
+import { dayjs } from '@mathesar-component-library';
 
 export function getDateFormatOptions(): Record<DateFormat, { label: string }> {
   const day = dayjs('2001-12-31');

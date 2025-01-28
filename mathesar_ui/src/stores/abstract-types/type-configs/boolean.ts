@@ -1,9 +1,11 @@
-import type { FormValues } from '@mathesar-component-library/types';
-import type {
-  BooleanDisplayOptions,
-  Column,
-} from '@mathesar/api/types/tables/columns';
+import {
+  type BooleanInputType,
+  type Column,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeBoolean } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -82,40 +84,30 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(
-  dispFormValues: FormValues,
-): Column['display_options'] {
-  const displayOptions: Column['display_options'] = {
-    input: dispFormValues.displayAs,
+function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
+  const displayOptions: Column['metadata'] = {
+    bool_input: formValues.displayAs as BooleanInputType,
   };
-  if (
-    dispFormValues.displayAs === 'dropdown' &&
-    dispFormValues.useCustomLabels
-  ) {
-    displayOptions.custom_labels = {
-      TRUE: dispFormValues.trueLabel,
-      FALSE: dispFormValues.falseLabel,
-    };
+  if (formValues.displayAs === 'dropdown' && formValues.useCustomLabels) {
+    displayOptions.bool_true = formValues.trueLabel as string;
+    displayOptions.bool_false = formValues.falseLabel as string;
   }
   return displayOptions;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as BooleanDisplayOptions | null;
-  const dispFormValues: FormValues = {
-    displayAs: displayOptions?.input ?? 'checkbox',
+  const column = { metadata };
+  const formValues: FormValues = {
+    displayAs: getColumnMetadataValue(column, 'bool_input'),
   };
-  if (
-    typeof displayOptions?.custom_labels === 'object' &&
-    displayOptions.custom_labels !== null
-  ) {
-    dispFormValues.useCustomLabels = true;
-    dispFormValues.trueLabel = displayOptions.custom_labels.TRUE;
-    dispFormValues.falseLabel = displayOptions.custom_labels.FALSE;
+  if (metadata?.bool_true || metadata?.bool_false) {
+    formValues.useCustomLabels = true;
+    formValues.trueLabel = getColumnMetadataValue(column, 'bool_true');
+    formValues.falseLabel = getColumnMetadataValue(column, 'bool_false');
   }
-  return dispFormValues;
+  return formValues;
 }
 
 const booleanType: AbstractTypeConfiguration = {

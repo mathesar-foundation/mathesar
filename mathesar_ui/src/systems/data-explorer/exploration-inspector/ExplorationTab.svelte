@@ -1,32 +1,37 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import {
-    Collapsible,
-    LabeledInput,
-    TextInput,
-    TextArea,
-    CancelOrProceedButtonPair,
-    Button,
-    Icon,
-  } from '@mathesar-component-library';
-  import { iconDeleteMajor } from '@mathesar/icons';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
-  import { queries, putQuery, deleteQuery } from '@mathesar/stores/queries';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { getAvailableName } from '@mathesar/utils/db';
+
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import {
+    deleteExploration,
+    queries,
+    replaceExploration,
+  } from '@mathesar/stores/queries';
   import { toast } from '@mathesar/stores/toast';
-  import type QueryRunner from '../QueryRunner';
+  import { getAvailableName } from '@mathesar/utils/db';
+  import {
+    Button,
+    CancelOrProceedButtonPair,
+    Collapsible,
+    Icon,
+    LabeledInput,
+    TextArea,
+    TextInput,
+  } from '@mathesar-component-library';
+
   import QueryManager from '../QueryManager';
+  import type { QueryRunner } from '../QueryRunner';
 
   const dispatch = createEventDispatcher();
 
   export let queryHandler: QueryRunner | QueryManager;
   export let name: string | undefined;
   export let description: string | undefined;
-  export let canEditMetadata: boolean;
 
   $: ({ query } = queryHandler);
   $: hasManager = queryHandler instanceof QueryManager;
@@ -73,7 +78,9 @@
         .withName(name)
         .model.withDescription(description).model;
       // TODO: Write better utility methods to identify saved instances
-      await putQuery(updatedQuery.toJson() as QueryInstance);
+      await replaceExploration(
+        updatedQuery.toMaybeSavedExploration() as SavedExploration,
+      );
       query.set(updatedQuery);
     } catch (err) {
       const message =
@@ -88,7 +95,7 @@
       void confirmDelete({
         identifierType: 'Exploration',
         onProceed: async () => {
-          await deleteQuery(queryId);
+          await deleteExploration(queryId);
           dispatch('delete');
         },
       });
@@ -107,7 +114,6 @@
             aria-label={$_('name')}
             on:change={handleNameChange}
             on:input={setHasChangesToTrue}
-            disabled={!canEditMetadata}
           />
         </LabeledInput>
       </FormField>
@@ -118,12 +124,11 @@
             aria-label={$_('description')}
             on:change={handleDescriptionChange}
             on:input={setHasChangesToTrue}
-            disabled={!canEditMetadata}
           />
         </LabeledInput>
       </FormField>
 
-      {#if !hasManager && hasChanges && canEditMetadata}
+      {#if !hasManager && hasChanges}
         <FormField>
           <CancelOrProceedButtonPair
             cancelButton={{ icon: undefined }}
@@ -137,18 +142,16 @@
   </div>
 </Collapsible>
 
-{#if canEditMetadata}
-  <Collapsible isOpen triggerAppearance="plain">
-    <span slot="header">{$_('actions')}</span>
-    <div slot="content" class="section-content actions">
-      <Button
-        class="delete-button"
-        appearance="outline-primary"
-        on:click={handleDeleteExploration}
-      >
-        <Icon {...iconDeleteMajor} />
-        <span>{$_('delete_exploration')}</span>
-      </Button>
-    </div>
-  </Collapsible>
-{/if}
+<Collapsible isOpen triggerAppearance="plain">
+  <span slot="header">{$_('actions')}</span>
+  <div slot="content" class="section-content actions">
+    <Button
+      class="delete-button"
+      appearance="outline-primary"
+      on:click={handleDeleteExploration}
+    >
+      <Icon {...iconDeleteMajor} />
+      <span>{$_('delete_exploration')}</span>
+    </Button>
+  </div>
+</Collapsible>

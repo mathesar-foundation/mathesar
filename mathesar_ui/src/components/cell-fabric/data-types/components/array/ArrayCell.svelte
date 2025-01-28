@@ -1,9 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { isDefinedNonNullable, Chip } from '@mathesar-component-library';
+
   import CellValue from '@mathesar/components/CellValue.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { Chip, isDefinedNonNullable } from '@mathesar-component-library';
+
   import CellWrapper from '../CellWrapper.svelte';
   import type { ArrayCellProps } from '../typeDefinitions';
 
@@ -12,7 +14,6 @@
   const dispatch = createEventDispatcher();
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
@@ -34,22 +35,14 @@
         break;
     }
   }
-
-  function handleMouseDown() {
-    if (!isActive) {
-      dispatch('activate');
-    }
-  }
 </script>
 
 <CellWrapper
   {isActive}
-  {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
-  on:mousedown={handleMouseDown}
 >
   <CellValue {value}>
     {#if isDefinedNonNullable(value)}

@@ -1,10 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import { iconDeleteMinor } from '@mathesar/icons';
   import { Icon } from '@mathesar-component-library';
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
-  import { iconDeleteMinor } from '@mathesar/icons';
-  import RecordSummary from './RecordSummary.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -20,13 +20,13 @@
   let isHoveringRecordPageLink = false;
 
   $: label = (() => {
-    if (recordSummary) {
+    if (recordSummary && recordSummary.trim() !== '') {
       return recordSummary;
     }
     if (recordId !== undefined) {
       return String(recordId);
     }
-    return '(Unknown)';
+    return '?';
   })();
 
   function handleDeleteButtonClick() {
@@ -57,12 +57,10 @@
       }}
       on:click={(e) => e.stopPropagation()}
     >
-      <RecordSummary recordSummary={label} />
+      {label}
     </a>
   {:else}
-    <span class="record-summary">
-      <RecordSummary recordSummary={label} />
-    </span>
+    <span class="record-summary">{label}</span>
   {/if}
   {#if hasDeleteButton}
     <!--

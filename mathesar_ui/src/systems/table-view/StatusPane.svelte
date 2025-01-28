@@ -1,39 +1,30 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    getPaginationPageCount,
-    Button,
-    Icon,
-  } from '@mathesar-component-library';
-  import { States } from '@mathesar/api/utils/requestUtils';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import RefreshButton from '@mathesar/components/RefreshButton.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    Button,
+    Icon,
+    getPaginationPageCount,
+  } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
-
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: canEditTableRecords = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canEditTableRecords',
-  );
 
   export let context: 'page' | 'widget' | 'shared-consumer-page' = 'page';
 
   $: ({
+    table,
     recordsData,
     meta,
     isLoading,
     columnsDataStore,
     constraintsDataStore,
-    selection,
   } = $tabularData);
+  $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
@@ -45,7 +36,8 @@
     $columnsFetchStatus?.state === 'failure' ||
     recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
-  $: hasNewRecordButton = context !== 'widget' && canEditTableRecords;
+  $: hasNewRecordButton =
+    context !== 'widget' && $currentRolePrivileges.has('INSERT');
   $: refreshButtonState = (() => {
     let buttonState: 'loading' | 'error' | undefined = undefined;
     if ($isLoading) {
@@ -74,10 +66,7 @@
         disabled={$isLoading}
         size="medium"
         appearance="primary"
-        on:click={() => {
-          void recordsData.addEmptyRecord();
-          selection.selectAndActivateFirstDataEntryCellInLastRow();
-        }}
+        on:click={() => $tabularData.addEmptyRecord()}
       >
         <Icon {...iconAddNew} />
         <span>{$_('new_record')}</span>
@@ -118,7 +107,7 @@
 
 <style lang="scss">
   .status-pane {
-    padding: 0.5rem;
+    padding: var(--status-bar-padding);
     display: flex;
     align-items: center;
     justify-content: space-between;

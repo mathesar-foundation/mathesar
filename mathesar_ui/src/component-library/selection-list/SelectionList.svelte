@@ -1,13 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+  import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
+  import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import {
     ListBox,
     ListBoxOptions,
   } from '@mathesar-component-library-dir/list-box';
-  import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
-  import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
+
   import type { SelectionListProps } from './SelectionListTypes';
 
   type Option = $$Generic;

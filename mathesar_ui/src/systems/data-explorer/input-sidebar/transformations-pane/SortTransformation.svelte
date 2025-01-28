@@ -1,5 +1,6 @@
 <script lang="ts">
   import SortEntryComponent from '@mathesar/components/sort-entry/SortEntry.svelte';
+
   import type QuerySortTransformationModel from '../../QuerySortTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../utils';
 

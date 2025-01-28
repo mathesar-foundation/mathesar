@@ -1,8 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { Button, Badge, Tooltip } from '@mathesar-component-library';
+
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { Badge, Button, Tooltip } from '@mathesar-component-library';
+
   import type { ColumnWithLink } from '../../utils';
 
   const dispatch = createEventDispatcher();
@@ -21,7 +23,6 @@
           type_options: column.producesMultipleResults
             ? { item_type: column.type }
             : null,
-          display_options: null,
         }}
       />
     </div>

@@ -2,6 +2,18 @@
   import { createEventDispatcher, onDestroy } from 'svelte';
   import { readable } from 'svelte/store';
 
+  import type { ConstraintType } from '@mathesar/api/rpc/constraints';
+  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
+  import { getDbTypeBasedFilterCap } from '@mathesar/components/cell-fabric/utils';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import type {
+    AbstractTypeFilterDefinition,
+    FilterId,
+  } from '@mathesar/stores/abstract-types/types';
+  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
+  import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import type { ReadableMapLike } from '@mathesar/typeUtils';
   import {
     Button,
     Icon,
@@ -9,18 +21,10 @@
     Select,
   } from '@mathesar-component-library';
   import {
-    ImmutableMap,
     type ComponentAndProps,
+    ImmutableMap,
   } from '@mathesar-component-library/types';
-  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { iconDeleteMajor } from '@mathesar/icons';
-  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
-  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
-  import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+
   import type { FilterEntryColumnLike } from './types';
   import { FILTER_INPUT_CLASS, validateFilterEntry } from './utils';
 
@@ -36,7 +40,7 @@
   ) => ConstraintType[] | undefined = () => undefined;
 
   export let columnIdentifier: ColumnLikeType['id'] | undefined;
-  export let conditionIdentifier: string | undefined;
+  export let conditionIdentifier: FilterId | undefined;
   export let value: unknown | undefined;
 
   export let layout: 'horizontal' | 'vertical' = 'horizontal';
@@ -65,7 +69,7 @@
   $: selectedCondition = conditionIdentifier
     ? selectedColumnFiltersMap.get(conditionIdentifier)
     : undefined;
-  $: selectedColumnInputCap = selectedColumn?.inputComponentAndProps;
+  $: selectedColumnInputCap = selectedColumn?.filterComponentAndProps;
 
   const initialNoOfFilters = numberOfFilters;
   let showError = false;
@@ -105,7 +109,7 @@
     return undefined;
   }
 
-  function getConditionName(_conditionId?: string) {
+  function getConditionName(_conditionId?: FilterId) {
     if (_conditionId) {
       return selectedColumnFiltersMap.get(_conditionId)?.name ?? '';
     }
@@ -150,10 +154,10 @@
     if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
       return selectedColumnInputCap;
     }
-    return getDbTypeBasedInputCap({
+    return getDbTypeBasedFilterCap({
       type: parameterTypeId,
       type_options: {},
-      display_options: {},
+      metadata: {},
     });
   }
 
@@ -165,7 +169,7 @@
     dispatch('update');
   }
 
-  function onConditionChange(_conditionId?: string) {
+  function onConditionChange(_conditionId?: FilterId) {
     if (!_conditionId) {
       return;
     }
@@ -218,7 +222,6 @@
           name: getColumnName(option),
           type: columnInfo?.column.type ?? 'unknown',
           type_options: columnInfo?.column.type_options ?? null,
-          display_options: columnInfo?.column.display_options ?? null,
           constraintsType: getColumnConstraintTypeFromColumnId(option),
         }}
       />

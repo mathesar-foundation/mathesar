@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import type { TinroRouteMeta } from 'tinro';
+
   import EventfulRoute from './EventfulRoute.svelte';
   import type { RoutePath } from './utils';
 
@@ -36,8 +37,8 @@
 {#each paths as rp (rp.name)}
   <EventfulRoute
     path={rp.path}
-    on:load={(e) => setPath(rp, e.detail)}
-    on:unload={() => clearPath(rp)}
+    onLoad={(meta) => setPath(rp, meta)}
+    onUnload={() => clearPath(rp)}
     firstmatch
   />
 {/each}

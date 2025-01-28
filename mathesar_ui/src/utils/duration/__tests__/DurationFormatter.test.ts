@@ -1,6 +1,7 @@
 import DurationFormatter from '../DurationFormatter';
-import DurationSpecification from '../DurationSpecification';
-import type { DurationConfig } from '../DurationSpecification';
+import DurationSpecification, {
+  type DurationConfig,
+} from '../DurationSpecification';
 
 describe('parse', () => {
   // prettier-ignore

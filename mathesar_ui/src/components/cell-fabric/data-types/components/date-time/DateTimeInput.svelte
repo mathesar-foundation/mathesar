@@ -1,17 +1,20 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+
   import {
-    dayjs,
-    isDefinedNonNullable,
+    AttachableDropdown,
     FormattedInput,
     InlineDateTimePicker,
-    AttachableDropdown,
+    dayjs,
+    isDefinedNonNullable,
   } from '@mathesar-component-library';
-  import { createEventDispatcher } from 'svelte';
   import type { FormattedInputProps } from '@mathesar-component-library/types';
+
   import type {
     DateTimeCellExternalProps,
     DateTimeCellProps,
   } from '../typeDefinitions';
+
   import Presets from './Presets.svelte';
 
   const dispatch = createEventDispatcher();

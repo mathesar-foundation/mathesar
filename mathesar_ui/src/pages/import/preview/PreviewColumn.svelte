@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Dropdown, TextInput, Checkbox } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
-  import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import { Checkbox, Dropdown, TextInput } from '@mathesar-component-library';
 
   export let isLoading = false;
 

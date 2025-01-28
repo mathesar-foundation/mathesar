@@ -1,19 +1,19 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { Icon } from '@mathesar-component-library';
+
   import CellWrapper from '@mathesar/components/cell-fabric/data-types/components/CellWrapper.svelte';
   import type { PrimaryKeyCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import Default from '@mathesar/components/Default.svelte';
   import { iconLinkToRecordPage } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { Icon } from '@mathesar-component-library';
 
   type $$Props = PrimaryKeyCellProps;
 
   const dispatch = createEventDispatcher();
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
@@ -26,10 +26,6 @@
     // This is so users can right-click on the link without triggering the
     // Mathesar context menu or cell selection.
     e.stopPropagation();
-  }
-
-  function handleValueMouseDown() {
-    dispatch('activate');
   }
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -52,7 +48,6 @@
 
 <CellWrapper
   {isActive}
-  {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
   on:mouseenter
@@ -63,7 +58,7 @@
     class="primary-key-cell"
     class:is-independent-of-sheet={isIndependentOfSheet}
   >
-    <span class="value" on:mousedown={handleValueMouseDown}>
+    <span class="value">
       {#if value === undefined}
         <Default />
       {:else}

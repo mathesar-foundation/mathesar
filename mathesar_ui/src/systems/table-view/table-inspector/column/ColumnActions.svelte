@@ -1,17 +1,19 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Button, Icon, iconSettings } from '@mathesar-component-library';
+
   import {
     iconDeleteMajor,
-    iconMoveColumnsToNewLinkedTable,
     iconMoveColumnsToExistingLinkedTable,
+    iconMoveColumnsToNewLinkedTable,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import {
-    getTabularDataStoreFromContext,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
+  import { Button, Icon, iconSettings } from '@mathesar-component-library';
+
   import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
   import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 
@@ -22,9 +24,10 @@
 
   export let columns: ProcessedColumn[];
 
-  $: ({ processedColumns, columnsDataStore } = $tabularData);
+  $: ({ table, processedColumns, columnsDataStore } = $tabularData);
   $: column = columns.length === 1 ? columns[0] : undefined;
   $: canMoveToLinkedTable = [...$processedColumns].some(([, c]) => c.linkFk);
+  $: ({ currentRoleOwns } = table.currentAccess);
 
   function handleDeleteColumn(c: ProcessedColumn) {
     void confirmDelete({
@@ -53,7 +56,11 @@
 </script>
 
 <div class="actions-container">
-  <Button on:click={handleMoveColumnsToNewLinkedTable}>
+  <Button
+    on:click={handleMoveColumnsToNewLinkedTable}
+    disabled={!$currentRoleOwns}
+    appearance="action"
+  >
     <div class="action-item">
       <div>
         <Icon {...iconMoveColumnsToNewLinkedTable} />
@@ -67,7 +74,11 @@
     </div>
   </Button>
   {#if canMoveToLinkedTable}
-    <Button on:click={handleMoveColumnsToExistingLinkedTable}>
+    <Button
+      on:click={handleMoveColumnsToExistingLinkedTable}
+      disabled={!$currentRoleOwns}
+      appearance="action"
+    >
       <div class="action-item">
         <div>
           <Icon {...iconMoveColumnsToExistingLinkedTable} />
@@ -85,6 +96,7 @@
     <Button
       appearance="outline-primary"
       on:click={() => column && handleDeleteColumn(column)}
+      disabled={!$currentRoleOwns}
     >
       <Icon {...iconDeleteMajor} />
       <span>

@@ -1,54 +1,41 @@
-import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
+import type { JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 
-export type TableLinkType = 'in_this_table' | 'from_other_tables';
 export type TableLink = {
-  table: { id: number; name: string };
-  column: { id: number; name: string };
+  table: { oid: number; name: string };
+  column: { name: string };
 };
 
-export function getTableLinks(
-  type: TableLinkType,
+export function* getLinksInThisTable(
   joinableTablesResult: JoinableTablesResult,
   currentTableColumns: Map<number, ProcessedColumn>,
-): TableLink[] {
-  switch (type) {
-    case 'in_this_table': {
-      const linkedTables = joinableTablesResult.joinable_tables.filter(
-        (table) => !table.fk_path[0][1],
-      );
-      const links: TableLink[] = linkedTables.map((table) => ({
-        table: {
-          id: table.target,
-          name: joinableTablesResult.tables[table.target].name,
-        },
-        column: {
-          id: table.jp_path[0][0],
-          // The joinable_tables API will not contain the columns from the current table
-          name:
-            currentTableColumns.get(table.jp_path[0][0])?.column.name || '--',
-        },
-      }));
-      return links;
+): Generator<TableLink> {
+  const joinableTables = joinableTablesResult.joinable_tables;
+  const linkedTables = joinableTables.filter((t) => !t.fkey_path[0][1]);
+  for (const joinableTable of linkedTables) {
+    const table = joinableTablesResult.target_table_info[joinableTable.target];
+    const columnId = joinableTable.join_path[0][0][1];
+    const column = currentTableColumns.get(columnId);
+    if (column) {
+      yield {
+        table: { oid: joinableTable.target, name: table.name },
+        column: { name: column.column.name },
+      };
     }
-    case 'from_other_tables': {
-      const linkedTables = joinableTablesResult.joinable_tables.filter(
-        (table) => table.fk_path[0][1],
-      );
-      const links: TableLink[] = linkedTables.map((table) => ({
-        table: {
-          id: table.target,
-          name: joinableTablesResult.tables[table.target].name,
-        },
-        column: {
-          id: table.jp_path[0][1],
-          name: joinableTablesResult.columns[table.jp_path[0][1]].name,
-        },
-      }));
-      return links;
-    }
-    default:
-      throw new MissingExhaustiveConditionError(type);
+  }
+}
+
+export function* getLinksToThisTable(
+  joinableTablesResult: JoinableTablesResult,
+): Generator<TableLink> {
+  const joinableTables = joinableTablesResult.joinable_tables;
+  const linkedTables = joinableTables.filter((t) => t.fkey_path[0][1]);
+  for (const joinableTable of linkedTables) {
+    const table = joinableTablesResult.target_table_info[joinableTable.target];
+    const columnId = joinableTable.join_path[0][1][1];
+    yield {
+      table: { oid: joinableTable.target, name: table.name },
+      column: table.columns[columnId],
+    };
   }
 }

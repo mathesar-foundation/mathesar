@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { render, fireEvent } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+
 import Select from '../Select.svelte';
 
 test('renders select button in default appearance', () => {

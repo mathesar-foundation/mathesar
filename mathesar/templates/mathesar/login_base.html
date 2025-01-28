@@ -53,6 +53,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: var(--size-xx-large);
     }
     .tutorial, .login-card,
     .login-card form, .login-card .footer {
@@ -111,41 +112,6 @@
   <div class="logo">
     <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
   </div>
-
-  {% if live_demo_mode %}
-    <div class="unsupported-device">
-      <div class="warning-icon">⚠️</div>
-      <p class="title">{% translate "Unsupported Screen Size" %}</p>
-      <p>
-      {% translate "Mathesar is a spreadsheet-like application with a rich UI that does not yet function well on screens this small. Improved support for mobile devices is on our" %}
-        
-        <a href="https://mathesar.org/roadmap.html" target="_blank">
-          {% translate "roadmap" %}
-        </a>.
-      </p>
-      <p>
-      {% translate "You can still use this demo site, but some features may not work correctly. We encourage you to try Mathesar on a device with a larger screen." %}
-    </p>
-    </div>
-    <div class="tutorial align-center">
-      <div class="header">
-        <strong>{% translate "Live Demo Mode" %}</strong>
-      </div>
-      <div class="body">
-      {% translate "Mathesar's live demo is available to anyone to try out." %}
-        
-        {% if live_demo_username and live_demo_password %}
-          {% translate "Use the following credentials to login" %}:
-          <ul>
-            <li>{% translate "Username" %}: <strong>{{live_demo_username}}</strong></li>
-            <li>{% translate "Password" %}: <strong>{{live_demo_password}}</strong></li>
-          </ul>
-        {% endif %}
-
-        {% translate "Keep in mind that the data in the live demo is reset regularly." %}
-      </div>
-    </div>
-  {% endif %}
 
   <div class="login-card align-center">
     <h1>{% block h1 %} {% endblock %}</h1>

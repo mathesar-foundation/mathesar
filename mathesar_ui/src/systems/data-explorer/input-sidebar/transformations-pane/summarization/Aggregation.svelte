@@ -1,9 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { Button, Icon, Select, iconClose } from '@mathesar-component-library';
+
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import { Button, Icon, Select, iconClose } from '@mathesar-component-library';
+
   import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
   import type { ProcessedQueryResultColumn } from '../../../utils';
 

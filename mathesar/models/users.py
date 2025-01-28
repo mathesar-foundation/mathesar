@@ -1,8 +1,5 @@
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-from mathesar.models.base import BaseModel, Database, Schema
 
 
 class User(AbstractUser):
@@ -17,32 +14,5 @@ class User(AbstractUser):
     password_change_needed = models.BooleanField(default=False)
     display_language = models.CharField(max_length=30, blank=True, default='en')
 
-
-class Role(models.TextChoices):
-    MANAGER = 'manager', 'Manager'
-    EDITOR = 'editor', 'Editor'
-    VIEWER = 'viewer', 'Viewer'
-
-
-class DatabaseRole(BaseModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='database_roles')
-    database = models.ForeignKey(Database, on_delete=models.CASCADE)
-    role = models.CharField(max_length=10, choices=Role.choices)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'database'], name='unique_database_role')
-        ]
-        default_related_name = 'database_role'
-
-
-class SchemaRole(BaseModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='schema_roles')
-    schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
-    role = models.CharField(max_length=10, choices=Role.choices)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'schema'], name='unique_schema_role')
-        ]
-        default_related_name = 'schema_role'
+    def metadata_privileges(self, database_id):
+        return 'read write'

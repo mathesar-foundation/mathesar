@@ -1,9 +1,10 @@
 <script lang="ts">
-  import Menu from '@mathesar-component-library-dir/menu/Menu.svelte';
+  import { onMount } from 'svelte';
+
+  import clickOffBounds from '@mathesar-component-library-dir/common/actions/clickOffBounds';
   import popper from '@mathesar-component-library-dir/common/actions/popper';
   import portal from '@mathesar-component-library-dir/common/actions/portal';
-  import clickOffBounds from '@mathesar-component-library-dir/common/actions/clickOffBounds';
-  import { onMount } from 'svelte';
+  import Menu from '@mathesar-component-library-dir/menu/Menu.svelte';
 
   /**
    * A reference to the DOM node where we'll attach the contextmenu event

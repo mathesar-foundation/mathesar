@@ -1,7 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Button, Icon, iconError } from '@mathesar-component-library';
+
   import { iconRefresh } from '@mathesar/icons';
+  import { Button, Icon, iconError } from '@mathesar-component-library';
 
   export let state: 'loading' | 'error' | undefined = undefined;
 

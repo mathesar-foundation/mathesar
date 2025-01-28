@@ -1,38 +1,37 @@
 <script lang="ts">
-  import { meta } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import {
-    currentTableId,
-    tables as tablesStore,
-  } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { getExplorationPageUrl } from '@mathesar/routes/urls';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { meta } from 'tinro';
+
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import { iconTable } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+  import type { Table } from '@mathesar/models/Table';
+  import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { queries as queriesStore } from '@mathesar/stores/queries';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
+  import { currentTableId, currentTables } from '@mathesar/stores/tables';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
+
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
-    BreadcrumbSelectorEntry,
-    SimpleBreadcrumbSelectorEntry,
     BreadcrumbSelectorEntryForTable,
+    SimpleBreadcrumbSelectorEntry,
   } from './breadcrumbTypes';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   function makeTableBreadcrumbSelectorItem(
-    table: TableEntry,
+    table: Table,
   ): BreadcrumbSelectorEntryForTable {
     return {
       type: 'table',
       table,
       label: table.name,
-      href: getLinkForTableItem(database.id, schema.id, table),
+      href: getLinkForTableItem(database.id, schema.oid, table),
       icon: iconTable,
       isActive() {
-        return table.id === $currentTableId;
+        return table.oid === $currentTableId;
       },
     };
   }
@@ -40,18 +39,18 @@
   const currentRoute = meta();
 
   function makeQueryBreadcrumbSelectorItem(
-    queryInstance: QueryInstance,
+    queryInstance: SavedExploration,
   ): SimpleBreadcrumbSelectorEntry {
     return {
       type: 'simple',
       label: queryInstance.name,
-      href: getExplorationPageUrl(database.id, schema.id, queryInstance.id),
+      href: getExplorationPageUrl(database.id, schema.oid, queryInstance.id),
       icon: iconTable,
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
         const entryhref = getExplorationPageUrl(
           database.id,
-          schema.id,
+          schema.oid,
           queryInstance.id,
         );
         const currentHref = $currentRoute.url;
@@ -60,16 +59,21 @@
     };
   }
 
-  $: tables = [...$tablesStore.data.values()];
   $: queries = [...$queriesStore.data.values()];
-
-  $: selectorData = new Map<string, BreadcrumbSelectorEntry[]>([
-    [$_('tables'), tables.map(makeTableBreadcrumbSelectorItem)],
-    [$_('explorations'), queries.map(makeQueryBreadcrumbSelectorItem)],
-  ]);
 </script>
 
 <BreadcrumbSelector
-  data={selectorData}
+  sections={[
+    {
+      label: $_('tables'),
+      entries: $currentTables.map(makeTableBreadcrumbSelectorItem),
+      emptyMessage: $_('no_tables'),
+    },
+    {
+      label: $_('explorations'),
+      entries: queries.map(makeQueryBreadcrumbSelectorItem),
+      emptyMessage: $_('no_explorations'),
+    },
+  ]}
   triggerLabel={$_('choose_table_or_exploration')}
 />

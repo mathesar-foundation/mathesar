@@ -1,28 +1,26 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { ColumnMetadata } from '@mathesar/api/rpc/columns';
   import { createValidationContext } from '@mathesar/component-library';
   import CancelOrProceedButtonPair from '@mathesar/component-library/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
   import AbstractTypeDisplayOptions from '@mathesar/components/abstract-type-control/AbstractTypeDisplayOptions.svelte';
-  import type { ColumnWithAbstractType } from '@mathesar/components/abstract-type-control/types';
   import { constructDisplayForm } from '@mathesar/components/abstract-type-control/utils';
   import {
-    getTabularDataStoreFromContext,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
 
   export let column: ProcessedColumn;
-  export let canEditMetadata: boolean;
 
   let actionButtonsVisible = false;
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);
 
-  let displayOptions: ColumnWithAbstractType['display_options'] = {
-    ...(column.column.display_options ?? {}),
-  };
+  let displayOptions: ColumnMetadata = column.column.metadata ?? {};
   let typeChangeState: RequestStatus;
 
   const validationContext = createValidationContext();
@@ -37,9 +35,7 @@
   async function save() {
     typeChangeState = { state: 'processing' };
     try {
-      await columnsDataStore.patch(column.id, {
-        display_options: displayOptions,
-      });
+      await columnsDataStore.setDisplayOptions(column, displayOptions);
       actionButtonsVisible = false;
       typeChangeState = { state: 'success' };
     } catch (err) {
@@ -54,8 +50,13 @@
 
   function cancel() {
     typeChangeState = { state: 'success' };
-    displayOptions = {};
+    displayOptions = column.column.metadata ?? {};
     actionButtonsVisible = false;
+    ({ displayOptionsConfig, displayForm, displayFormValues } =
+      constructDisplayForm(column.abstractType, column.column.type, {
+        ...column.column,
+        abstractType: column.abstractType,
+      }));
   }
 
   $: isSaveDisabled =
@@ -66,8 +67,7 @@
   }
 
   $: isFkOrPk = column.column.primary_key || !!column.linkFk;
-  $: isFormDisabled =
-    typeChangeState?.state === 'processing' || !canEditMetadata;
+  $: isFormDisabled = typeChangeState?.state === 'processing';
 </script>
 
 {#if displayOptionsConfig && displayForm && !isFkOrPk}

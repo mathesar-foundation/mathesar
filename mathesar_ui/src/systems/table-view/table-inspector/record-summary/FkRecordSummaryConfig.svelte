@@ -1,19 +1,23 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { Meta, TabularData } from '@mathesar/stores/table-data';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import type { ResultValue } from '@mathesar/api/rpc/records';
+  import type { Table } from '@mathesar/models/Table';
+  import { TableStructure } from '@mathesar/stores/table-data';
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
-  import Pagination from '@mathesar/utils/Pagination';
 
-  export let table: TableEntry;
+  export let linkedTable: Table;
+  export let previewRecordId: ResultValue | undefined;
+  export let onSave: (() => void) | undefined = undefined;
 
-  $: abstractTypesMap = $currentDbAbstractTypes.data;
-  $: tabularData = new TabularData({
-    id: table.id,
-    abstractTypesMap,
-    meta: new Meta({ pagination: new Pagination({ size: 1 }) }),
-    table,
-  });
+  $: ({ database } = linkedTable.schema);
+  $: structure = new TableStructure({ database, table: linkedTable });
+  $: ({ processedColumns, isLoading } = structure);
 </script>
 
-<RecordSummaryConfig {table} {tabularData} />
+<RecordSummaryConfig
+  {database}
+  table={linkedTable}
+  processedColumns={$processedColumns}
+  isLoading={$isLoading}
+  {previewRecordId}
+  {onSave}
+/>

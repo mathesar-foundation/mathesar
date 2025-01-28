@@ -1,36 +1,31 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
 
-  import { ImmutableSet } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
+    type RecordRow,
+    type TabularData,
     constraintIsFk,
     setTabularDataStoreInContext,
-    TabularData,
-    type RecordRow,
   } from '@mathesar/stores/table-data';
-  import {
-    buildInputData,
-    renderTransitiveRecordSummary,
-  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import { tables } from '@mathesar/stores/tables';
-  import { States } from '@mathesar/api/utils/requestUtils';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
+  import { ImmutableSet } from '@mathesar-component-library';
+
   import Cell from './RecordSelectorCellWrapper.svelte';
-  import type {
-    RecordSelectorController,
-    RecordSelectorResult,
-  } from './RecordSelectorController';
-  import { setRecordSelectorControllerInContext } from './RecordSelectorController';
-  import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
   import RecordSelectorColumnHeaderCell from './RecordSelectorColumnHeaderCell.svelte';
-  import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
-  import { getColumnIdToFocusInitially } from './recordSelectorUtils';
+  import {
+    type RecordSelectorController,
+    type RecordSelectorResult,
+    setRecordSelectorControllerInContext,
+  } from './RecordSelectorController';
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
+  import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
+  import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -43,6 +38,7 @@
   let columnWithFocus: Column | undefined = undefined;
   /** It will be undefined if we're loading data, for example. */
   let selectionIndex: number | undefined = undefined;
+  let tableElement: HTMLElement;
 
   $: setRecordSelectorControllerInContext(nestedController);
   $: ({ columnWithNestedSelectorOpen, purpose } = controller);
@@ -51,12 +47,15 @@
     constraintsDataStore,
     meta,
     columnsDataStore,
-    id: tableId,
+    table,
     recordsData,
     processedColumns,
   } = tabularData);
-  $: table = $tables.data.get(tableId);
-  $: ({ recordSummaries, state: recordsDataState } = recordsData);
+  $: ({
+    recordSummaries,
+    linkedRecordSummaries,
+    state: recordsDataState,
+  } = recordsData);
   $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
@@ -122,7 +121,7 @@
     if (!recordId) {
       return undefined;
     }
-    return $storeToGetRecordPageUrl({ tableId, recordId });
+    return $storeToGetRecordPageUrl({ tableId: table.oid, recordId });
   }
 
   function submitIndex(index: number) {
@@ -136,13 +135,9 @@
     if (!record || recordId === undefined) {
       return;
     }
-    const tableEntry = $tables.data.get(tableId);
-    const template = tableEntry?.settings?.preview_settings?.template ?? '';
-    const recordSummary = renderTransitiveRecordSummary({
-      template,
-      inputData: buildInputData(record),
-      transitiveData: $recordSummaries,
-    });
+
+    const recordSummary = $recordSummaries.get(String(recordId)) ?? '';
+
     submitResult({ recordId, recordSummary, record });
   }
 
@@ -187,6 +182,21 @@
     }
   }
 
+  function findBestColumnIdToFocus(): number {
+    const firstNonPkColumn = $columns.find((c) => c.primary_key === false);
+    return firstNonPkColumn?.id ?? $columns[0].id;
+  }
+
+  async function focusBestInput() {
+    const columnId = findBestColumnIdToFocus();
+    await tick();
+    const selector = `.record-selector-input.column-${columnId}`;
+    const input = tableElement.querySelector<HTMLElement>(selector);
+    if (input) {
+      input.focus();
+    }
+  }
+
   onMount(() => {
     window.addEventListener('keydown', handleKeydown, { capture: true });
     return () => {
@@ -194,18 +204,7 @@
     };
   });
 
-  onMount(async () => {
-    const columnId = getColumnIdToFocusInitially({ table, columns: $columns });
-    if (columnId === undefined) {
-      return;
-    }
-    await tick();
-    const selector = `.record-selector-input.column-${columnId}`;
-    const input = document.querySelector<HTMLElement>(selector);
-    if (input) {
-      input.focus();
-    }
-  });
+  onMount(focusBestInput);
 
   const overflowDetails = makeOverflowDetails();
   const {
@@ -222,6 +221,7 @@
   class:has-overflow-right={$hasOverflowRight}
   class:has-overflow-bottom={$hasOverflowBottom}
   class:has-overflow-left={$hasOverflowLeft}
+  bind:this={tableElement}
 >
   <div class="scroll-container" use:overflowObserver={overflowDetails}>
     <div class="table">
@@ -239,7 +239,7 @@
               {overflowDetails}
               {processedColumn}
               {searchFuzzy}
-              recordSummaryStore={recordSummaries}
+              recordSummaryStore={linkedRecordSummaries}
               on:focus={() => handleInputFocus(column)}
               on:blur={() => handleInputBlur()}
               on:recordSelectorOpen={() => {
@@ -287,8 +287,9 @@
               <RecordSelectorDataCell
                 {row}
                 {processedColumn}
-                {recordSummaries}
+                {linkedRecordSummaries}
                 {searchFuzzy}
+                isLoading={recordsDataIsLoading}
               />
             {/each}
           </RecordSelectorDataRow>

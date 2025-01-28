@@ -1,8 +1,9 @@
-import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import type { Column } from '@mathesar/api/rpc/columns';
+import type { Table } from '@mathesar/models/Table';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import DataTypes from './data-types';
 import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
 import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';
@@ -23,12 +24,12 @@ export function getCellCap({
    * When the cell falls within an FK column, this value will give the id of the
    * table to which the FK points.
    */
-  fkTargetTableId?: TableEntry['id'];
+  fkTargetTableId?: Table['oid'];
   /**
    * When the cell falls within a PK column, this value will give the id of the
    * table.
    */
-  pkTargetTableId?: TableEntry['id'];
+  pkTargetTableId?: Table['oid'];
 }): ComponentAndProps {
   if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
@@ -51,7 +52,7 @@ export function getCellCap({
 
 export function getDbTypeBasedInputCap(
   column: CellColumnLike,
-  fkTargetTableId?: TableEntry['id'],
+  fkTargetTableId?: Table['oid'],
   optionalCellInfo?: CellInfo,
 ): ComponentAndProps {
   if (fkTargetTableId) {
@@ -68,9 +69,23 @@ export function getDbTypeBasedInputCap(
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
 
+export function getDbTypeBasedFilterCap(
+  column: CellColumnLike,
+  fkTargetTableId?: Table['oid'],
+  optionalCellInfo?: CellInfo,
+): ComponentAndProps {
+  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  const factory = DataTypes[cellInfo?.type ?? 'string'];
+  if (factory.getFilterInput) {
+    const config = getCellConfiguration(column.type, cellInfo);
+    return factory.getFilterInput(column, config);
+  }
+  return getDbTypeBasedInputCap(column, fkTargetTableId, cellInfo);
+}
+
 export function getInitialInputValue(
   column: CellColumnLike,
-  fkTargetTableId?: TableEntry['id'],
+  fkTargetTableId?: Table['oid'],
   optionalCellInfo?: CellInfo,
 ): unknown {
   if (fkTargetTableId) {

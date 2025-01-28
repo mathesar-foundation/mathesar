@@ -42,18 +42,13 @@ export {
   getTabularDataStoreFromContext,
   TabularData,
   type TabularDataProps,
-  type TabularDataSelection,
 } from './tabularData';
 export {
   type ProcessedColumn,
   type ProcessedColumns,
   type ProcessedColumnsStore,
 } from './processedColumns';
-export {
-  type Constraint,
-  type ConstraintsData,
-  type ConstraintsDataStore,
-} from './constraints';
+export { type ConstraintsData, type ConstraintsDataStore } from './constraints';
 export { TableStructure } from './TableStructure';
 export { SearchFuzzy } from './searchFuzzy';
 export { constraintIsFk, findFkConstraintsForColumn } from './constraintsUtils';

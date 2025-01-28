@@ -1,10 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import SelectableColumnTree from './SelectableColumnTree.svelte';
-  import SelectableColumn from './SelectableColumn.svelte';
+
   import type QueryManager from '../../QueryManager';
-  import TableGroupCollapsible from './TableGroupCollapsible.svelte';
   import type { ColumnWithLink } from '../../utils';
+
+  import SelectableColumn from './SelectableColumn.svelte';
+  import SelectableColumnTree from './SelectableColumnTree.svelte';
+  import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
@@ -27,7 +29,7 @@
       {#each [...baseTableColumns] as [columnId, column] (columnId)}
         <SelectableColumn
           {column}
-          usageCount={$query.getColumnCount(columnId)}
+          usageCount={$query.getColumnCount(column)}
           on:add
         />
       {/each}
@@ -35,7 +37,7 @@
   </section>
   {#if !hasInitialColumns && (hasLinksFromBaseTable || hasLinksToBaseTable)}
     <section>
-      <header>{$_('from_linked_tables')}</header>
+      <header>{$_('from_related_tables')}</header>
       <div class="content">
         <div class="help-text">
           {$_('one_column_from_base_is_required')}
@@ -45,7 +47,7 @@
   {:else}
     {#if hasLinksFromBaseTable}
       <section>
-        <header>{$_('linked_from_base_table')}</header>
+        <header>{$_('references_from_base_table')}</header>
         <div class="content">
           <SelectableColumnTree
             columnsWithLinks={baseTableColumnsWithLinks}
@@ -58,7 +60,7 @@
     {/if}
     {#if hasLinksToBaseTable}
       <section>
-        <header>{$_('linked_to_base_table')}</header>
+        <header>{$_('references_to_base_table')}</header>
         <div class="content" data-identifier="referenced-by-tables">
           {#if hasInitialColumns}
             <!--table.id is not unique here. Same table can be present multiple times-->

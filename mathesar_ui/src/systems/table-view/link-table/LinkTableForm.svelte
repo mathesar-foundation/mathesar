@@ -1,35 +1,30 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    ensureReadable,
-    portalToWindowFooter,
-  } from '@mathesar-component-library';
-  import type { LinksPostRequest } from '@mathesar/api/types/links';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { postAPI } from '@mathesar/api/utils/requestUtils';
-  import SelectTable from '@mathesar/components/SelectTable.svelte';
+
+  import { api } from '@mathesar/api/rpc';
   import {
     Field,
     FieldLayout,
+    type FilledFormValues,
     FormSubmit,
     comboInvalidIf,
     makeForm,
     requiredField,
-    type FilledFormValues,
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import type { Table } from '@mathesar/models/Table';
   import {
     ColumnsDataStore,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import {
+    currentTables,
+    fetchTablesForCurrentSchema,
     importVerifiedTables as importVerifiedTablesStore,
-    refetchTablesForSchema,
-    tables as tablesDataStore,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -38,20 +33,27 @@
     getSuggestedFkColumnName,
   } from '@mathesar/utils/columnUtils';
   import { getAvailableName } from '@mathesar/utils/db';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import { makeSingular } from '@mathesar/utils/languageUtils';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import Pill from './LinkTablePill.svelte';
-  import NewColumn from './NewColumn.svelte';
-  import SelectLinkType from './SelectLinkType.svelte';
   import {
+    assertExhaustive,
+    ensureReadable,
+    portalToWindowFooter,
+  } from '@mathesar-component-library';
+  import Collapsible from '@mathesar-component-library-dir/collapsible/Collapsible.svelte';
+
+  import Pill from './LinkTablePill.svelte';
+  import {
+    type LinkType,
     columnNameIsNotId,
     suggestMappingTableName,
-    type LinkType,
   } from './linkTableUtils';
+  import NewColumn from './NewColumn.svelte';
+  import SelectLinkType from './SelectLinkType.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let base: TableEntry;
+  export let base: Table;
   export let close: () => void;
 
   // ===========================================================================
@@ -59,16 +61,15 @@
   // ===========================================================================
   $: singularBaseTableName = makeSingular(base.name);
   $: importVerifiedTables = [...$importVerifiedTablesStore.values()];
-  $: allTables = [...$tablesDataStore.data.values()];
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
 
   // ===========================================================================
   // Fields
   // ===========================================================================
-  $: targetTable = requiredField<TableEntry | undefined>(undefined);
+  $: targetTable = requiredField<Table | undefined>(undefined);
   $: target = $targetTable;
-  $: isSelfReferential = base.id === target?.id;
+  $: isSelfReferential = base.oid === target?.oid;
   $: linkTypes = ((): LinkType[] =>
     isSelfReferential
       ? ['manyToOne', 'manyToMany']
@@ -76,7 +77,7 @@
   $: linkType = requiredField<LinkType>('manyToOne');
   $: $targetTable, linkType.reset();
   $: targetColumnsStore = target
-    ? new ColumnsDataStore({ tableId: target.id })
+    ? new ColumnsDataStore({ database: target.schema.database, table: target })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
@@ -91,7 +92,7 @@
     [columnNameIsAvailable($targetColumns)],
   );
   $: mappingTableName = requiredField(
-    suggestMappingTableName(base, target, allTables),
+    suggestMappingTableName(base, target, $currentTables),
     [$validateNewTableName],
   );
   $: columnNameMappingToBase = (() => {
@@ -158,70 +159,85 @@
   // Saving
   // ===========================================================================
 
-  function getRequestBody(
-    values: FilledFormValues<typeof form>,
-  ): LinksPostRequest {
-    if ($linkType === 'oneToMany') {
-      return {
-        link_type: 'one-to-many',
-        reference_table: values.targetTable.id,
-        reference_column_name: $columnNameInTarget,
-        referent_table: base.id,
-      };
-    }
-    if ($linkType === 'manyToOne') {
-      return {
-        link_type: 'one-to-many',
-        reference_table: base.id,
-        reference_column_name: $columnNameInBase,
-        referent_table: values.targetTable.id,
-      };
-    }
-    if ($linkType === 'manyToMany') {
-      return {
-        link_type: 'many-to-many',
-        mapping_table_name: $mappingTableName,
-        referents: [
-          {
-            referent_table: base.id,
-            column_name: $columnNameMappingToBase,
-          },
-          {
-            referent_table: values.targetTable.id,
-            column_name: $columnNameMappingToTarget,
-          },
-        ],
-      };
-    }
-    return assertExhaustive($linkType);
-  }
-
   async function reFetchOtherThingsThatChanged() {
-    if ($linkType === 'manyToMany' && $currentSchemaId !== undefined) {
-      await refetchTablesForSchema($currentSchemaId);
+    if ($linkType === 'manyToMany') {
+      await fetchTablesForCurrentSchema();
       return;
     }
     const tableWithNewColumn = $linkType === 'oneToMany' ? target : base;
     if (!tableWithNewColumn) {
       return;
     }
-    if (tableWithNewColumn.id === $tabularData.id) {
+    if (tableWithNewColumn.oid === $tabularData.table.oid) {
       await $tabularData.refresh();
     }
   }
 
   async function handleSave(values: FilledFormValues<typeof form>) {
-    await postAPI('/api/db/v0/links/', getRequestBody(values));
-    toast.success('The link has been created successfully');
-    await reFetchOtherThingsThatChanged();
-    close();
+    try {
+      if ($linkType === 'oneToMany') {
+        await api.data_modeling
+          .add_foreign_key_column({
+            database_id: base.schema.database.id,
+            referrer_table_oid: values.targetTable.oid,
+            referent_table_oid: base.oid,
+            column_name: $columnNameInTarget,
+          })
+          .run();
+      } else if ($linkType === 'manyToOne') {
+        await api.data_modeling
+          .add_foreign_key_column({
+            database_id: base.schema.database.id,
+            referrer_table_oid: base.oid,
+            referent_table_oid: values.targetTable.oid,
+            column_name: $columnNameInBase,
+          })
+          .run();
+      } else if ($linkType === 'manyToMany') {
+        await api.data_modeling
+          .add_mapping_table({
+            database_id: base.schema.database.id,
+            schema_oid: base.schema.oid,
+            table_name: $mappingTableName,
+            mapping_columns: [
+              {
+                referent_table_oid: base.oid,
+                column_name: $columnNameMappingToBase,
+              },
+              {
+                referent_table_oid: values.targetTable.oid,
+                column_name: $columnNameMappingToTarget,
+              },
+            ],
+          })
+          .run();
+      } else {
+        assertExhaustive($linkType);
+      }
+      toast.success('The link has been created successfully');
+      await reFetchOtherThingsThatChanged();
+      close();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
   }
+
+  let isNewTableOpen = false;
+  let isNewColumnsOpen = false;
 </script>
 
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
-      {$_('links_info')}
+      <RichText
+        text={$_('create_reference_help_info_2')}
+        let:slotName
+        let:translatedArg
+      >
+        {#if slotName === 'italic'}
+          <em>{translatedArg}</em>
+        {/if}
+      </RichText>
     </InfoBox>
   </FieldLayout>
 
@@ -233,7 +249,7 @@
     }}
   >
     <span slot="label">
-      <RichText text={$_('link_table_to')} let:slotName>
+      <RichText text={$_('create_relationship_between')} let:slotName>
         {#if slotName === 'tablePill'}
           <Pill table={base} which="base" />
         {/if}
@@ -252,63 +268,125 @@
 
     <FieldLayout>
       <OutcomeBox>
-        {#if $linkType === 'oneToMany'}
-          <NewColumn
-            base={target}
-            target={base}
-            field={columnNameInTarget}
-            {targetColumnsAreLoading}
-          />
-        {:else if $linkType === 'manyToOne'}
-          <NewColumn {base} {target} field={columnNameInBase} />
-        {:else if $linkType === 'manyToMany'}
-          {#if isSelfReferential}
-            <p>{$_('we_will_create_a_new_table')}</p>
-            <Field field={mappingTableName} label={$_('table_name')} />
-            {#if $mappingTableName}
-              <p>
-                <RichText
-                  text={$_('we_will_add_two_columns_in_x_to_y')}
-                  let:slotName
+        <div class="collapsible-sections">
+          {#if $linkType === 'oneToMany'}
+            <NewColumn
+              base={target}
+              target={base}
+              field={columnNameInTarget}
+              {targetColumnsAreLoading}
+            />
+          {:else if $linkType === 'manyToOne'}
+            <NewColumn {base} {target} field={columnNameInBase} />
+          {:else if $linkType === 'manyToMany'}
+            {#if isSelfReferential}
+              <Collapsible
+                bind:isOpen={isNewTableOpen}
+                triggerAppearance="outcome"
+              >
+                <svelte:fragment slot="header">
+                  <RichText
+                    text={$_('we_will_create_a_new_table')}
+                    let:slotName
+                  >
+                    {#if slotName === 'mappingTable'}
+                      <Pill
+                        table={{ name: $mappingTableName }}
+                        which="mapping"
+                      />
+                    {/if}
+                  </RichText>
+                </svelte:fragment>
+                <svelte:fragment slot="content">
+                  <div class="collapsible-detail">
+                    <Field field={mappingTableName} label={$_('table_name')} />
+                  </div>
+                </svelte:fragment>
+              </Collapsible>
+              {#if $mappingTableName}
+                <Collapsible
+                  bind:isOpen={isNewColumnsOpen}
+                  triggerAppearance="outcome"
                 >
-                  {#if slotName === 'mappingTable'}
-                    <Pill table={{ name: $mappingTableName }} which="mapping" />
-                  {:else if slotName === 'targetTable'}
-                    <Pill table={target} which="target" />
-                  {/if}
-                </RichText>
-              </p>
-              <Field
-                field={columnNameMappingToBase}
-                label={$_('column_number_name', { values: { number: 1 } })}
-              />
-              <Field
-                field={columnNameMappingToTarget}
-                label={$_('column_number_name', { values: { number: 2 } })}
-              />
+                  <svelte:fragment slot="header">
+                    <RichText
+                      text={$_('we_will_add_two_columns_in_x_to_y')}
+                      let:slotName
+                    >
+                      {#if slotName === 'mappingTable'}
+                        <Pill
+                          table={{ name: $mappingTableName }}
+                          which="mapping"
+                        />
+                      {:else if slotName === 'targetTable'}
+                        <Pill table={target} which="target" />
+                      {/if}
+                    </RichText>
+                  </svelte:fragment>
+
+                  <svelte:fragment slot="content">
+                    <div class="collapsible-detail">
+                      <Field
+                        field={columnNameMappingToBase}
+                        label={$_('column_number_name', {
+                          values: { number: 1 },
+                        })}
+                      />
+                      <Field
+                        field={columnNameMappingToTarget}
+                        label={$_('column_number_name', {
+                          values: { number: 2 },
+                        })}
+                      />
+                    </div>
+                  </svelte:fragment>
+                </Collapsible>
+              {/if}
+            {:else}
+              <Collapsible
+                bind:isOpen={isNewTableOpen}
+                triggerAppearance="outcome"
+              >
+                <svelte:fragment slot="header">
+                  <RichText
+                    text={$_('we_will_create_a_new_table')}
+                    let:slotName
+                  >
+                    {#if slotName === 'mappingTable'}
+                      <Pill
+                        table={{ name: $mappingTableName }}
+                        which="mapping"
+                      />
+                    {/if}
+                  </RichText>
+                </svelte:fragment>
+
+                <svelte:fragment slot="content">
+                  <div class="collapsible-detail">
+                    <Field field={mappingTableName} label={$_('table_name')} />
+                  </div>
+                </svelte:fragment>
+              </Collapsible>
+              {#if $mappingTableName}
+                <NewColumn
+                  base={{ name: $mappingTableName }}
+                  baseWhich="mapping"
+                  target={base}
+                  targetWhich="base"
+                  field={columnNameMappingToBase}
+                />
+                <NewColumn
+                  base={{ name: $mappingTableName }}
+                  baseWhich="mapping"
+                  {target}
+                  field={columnNameMappingToTarget}
+                />
+              {/if}
             {/if}
           {:else}
-            <p>{$_('we_will_create_a_new_table')}</p>
-            <Field field={mappingTableName} label={$_('table_name')} />
-            {#if $mappingTableName}
-              <NewColumn
-                base={{ name: $mappingTableName }}
-                baseWhich="mapping"
-                target={base}
-                targetWhich="base"
-                field={columnNameMappingToBase}
-              />
-              <NewColumn
-                base={{ name: $mappingTableName }}
-                baseWhich="mapping"
-                {target}
-                field={columnNameMappingToTarget}
-              />
-            {/if}
+            {assertExhaustive($linkType)}
           {/if}
-        {:else}
-          {assertExhaustive($linkType)}
-        {/if}
+        </div>
       </OutcomeBox>
     </FieldLayout>
   {/if}
@@ -320,7 +398,7 @@
     catchErrors
     {canProceed}
     onCancel={close}
-    proceedButton={{ label: $_('create_link'), icon: iconTableLink }}
+    proceedButton={{ label: $_('create_relationship'), icon: iconTableLink }}
     onProceed={handleSave}
   />
 </div>
@@ -338,5 +416,12 @@
   .form.self-referential {
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);
+  }
+  .collapsible-detail {
+    padding: var(--size-xx-small);
+    margin-top: 0.25em;
+  }
+  .collapsible-sections > :global(* + *) {
+    margin-top: var(--size-xx-small);
   }
 </style>

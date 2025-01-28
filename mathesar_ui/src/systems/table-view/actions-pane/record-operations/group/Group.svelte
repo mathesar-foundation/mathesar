@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import { DropdownMenu, ButtonMenuItem } from '@mathesar-component-library';
   import type { Writable } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
+
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
+  import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
+  import { iconAddNew } from '@mathesar/icons';
   import {
-    getTabularDataStoreFromContext,
     type Grouping,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -69,27 +71,14 @@
   </div>
   <footer>
     <DropdownMenu
+      icon={iconAddNew}
       label={$_('add_new_grouping')}
       disabled={availableColumns.length === 0}
       triggerAppearance="secondary"
     >
       {#each availableColumns as column (column.id)}
         <ButtonMenuItem on:click={() => addGroupColumn(column)}>
-          <ColumnName
-            column={{
-              name: $processedColumns.get(column.id)?.column.name ?? '',
-              type: $processedColumns.get(column.id)?.column.type ?? '',
-              type_options:
-                $processedColumns.get(column.id)?.column.type_options ?? null,
-              display_options:
-                $processedColumns.get(column.id)?.column.display_options ??
-                null,
-              constraintsType: getColumnConstraintTypeByColumnId(
-                column.id,
-                $processedColumns,
-              ),
-            }}
-          />
+          <ProcessedColumnName processedColumn={column} />
         </ButtonMenuItem>
       {/each}
     </DropdownMenu>

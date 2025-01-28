@@ -1,13 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { Select, LabeledInput } from '@mathesar-component-library';
-  import {
-    currentDbAbstractTypes,
-    getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
-  } from '@mathesar/stores/abstract-types';
-  import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { getAllowedAbstractTypesForDbTypeAndItsTargetTypes } from '@mathesar/stores/abstract-types';
+  import { typeCastMap } from '@mathesar/stores/abstract-types/typeCastMap';
+  import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+  import { LabeledInput, Select } from '@mathesar-component-library';
+
   import type { ColumnWithAbstractType } from './utils';
 
   const dispatch = createEventDispatcher<{
@@ -24,8 +24,7 @@
 
   $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     column.type,
-    column.valid_target_types ?? [],
-    $currentDbAbstractTypes.data,
+    typeCastMap[column.type] ?? [],
   ).filter((item) => !['jsonlist', 'map'].includes(item.identifier));
 
   function selectAbstractType(

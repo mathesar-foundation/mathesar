@@ -1,0 +1,22 @@
+.fieldset {
+  padding: 0;
+  margin: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: 0.5rem;
+  }
+  legend:empty {
+    display: none;
+  }
+
+  &:not(.boxed) {
+    border: 0;
+  }
+  &.boxed {
+    border: 1px solid var(--slate-300);
+    border-radius: var(--border-radius-m);
+    padding: 1em;
+    padding-top: 0;
+  }
+}

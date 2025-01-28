@@ -21,7 +21,7 @@
   For example:
 
   ```
-  The documenation can be found [anchorComponent](here).
+  The documentation can be found [anchorComponent](here).
   ```
 
   The argument 'here' would be translated, and passed to the 'anchorComponent' slot.
@@ -32,7 +32,7 @@
   example:
 
   ```svelte
-  <RichText text={$_(sometext)} let:slotName let:translatedArg>
+  <RichText text={$_('sometext')} let:slotName let:translatedArg>
     {#if slotName === 'tableName'}
       <TableName {table} />
     {:else if slotName === 'schemaName'}
@@ -44,7 +44,8 @@
   ```
 -->
 <script lang="ts">
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import { assertExhaustive } from '@mathesar-component-library';
+
   import { parse } from './richTextUtils';
 
   export let text: string;

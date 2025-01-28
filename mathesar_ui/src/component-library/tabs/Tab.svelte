@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
   import type { Tab } from './TabContainerTypes';
 
   const dispatch = createEventDispatcher();

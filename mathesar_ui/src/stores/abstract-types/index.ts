@@ -3,9 +3,8 @@ export {
   getAllowedAbstractTypesForNewColumn,
   defaultDbType,
   getDefaultDbTypeOfAbstractType,
+  getAbstractTypeForDbType,
 } from './abstractTypeCategories';
-export { getAbstractTypeForDbType } from './utils';
-export { currentDbAbstractTypes, refetchTypesForDb } from './store';
 export {
   filterDefinitionMap,
   getEqualityFiltersForAbstractType,

@@ -1,11 +1,9 @@
-version: "3.9"
-
+---
 services:
   # Mathesar App built with the same configurations as the production image
   # but with additional testing dependencies.
   # It is used to run automated test cases to verify if the app works as intended
-  dev-db:
-    container_name: mathesar_dev_db
+  dev-db-base:
     command: ["postgres", "-c", "shared_preload_libraries=plugin_debugger"]
     build:
       context: .
@@ -17,17 +15,21 @@ services:
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
-    ports:
-      - "5432:5432"
-    volumes:
-      - dev_postgres_data:/var/lib/postgresql/data
-      - ./db/sql:/sql/
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
       interval: 5s
       timeout: 1s
       retries: 30
       start_period: 5s
+  dev-db:
+    container_name: mathesar_dev_db
+    extends:
+      service: dev-db-base
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+      - ./db/sql:/sql/
   # A Django development webserver + Svelte development server used when developing Mathesar.
   #  The code changes are hot reloaded and debug flags are enabled to aid developers working on Mathesar.
   #  It is not recommended to use this service in production environment.
@@ -39,13 +41,16 @@ services:
       target: development
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
+        PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       - SECRET_KEY=${SECRET_KEY}
+      - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
+      - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
+      - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL-https://example.com/feedback}
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
       - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
@@ -76,10 +81,10 @@ services:
       - POSTGRES_PORT=5432
     build:
       context: .
-      target: development
+      target: ${TARGET-testing}
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
+        PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     depends_on:
       - dev-db
     ports:

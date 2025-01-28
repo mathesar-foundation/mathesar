@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Placement } from '@popperjs/core/lib/enums';
   import {
     createEventDispatcher,
     getContext,
@@ -7,12 +8,13 @@
     tick,
   } from 'svelte';
   import { derived } from 'svelte/store';
-  import type { Placement } from '@popperjs/core/lib/enums';
-  import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
-  import portal from '@mathesar-component-library-dir/common/actions/portal';
-  import popper from '@mathesar-component-library-dir/common/actions/popper';
+
   import clickOffBounds from '@mathesar-component-library-dir/common/actions/clickOffBounds';
+  import popper from '@mathesar-component-library-dir/common/actions/popper';
+  import portal from '@mathesar-component-library-dir/common/actions/portal';
   import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
+  import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
+
   import { AccompanyingElements } from './AccompanyingElements';
 
   const dispatch = createEventDispatcher();

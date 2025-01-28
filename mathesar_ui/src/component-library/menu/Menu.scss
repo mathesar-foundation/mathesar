@@ -1,9 +1,9 @@
 .menu {
-  $spacing-x-default: 0.5em;
-  $spacing-y-default: 0.5em;
+  $padding-x-default: 0.5em;
+  $padding-y-default: 0.5em;
   display: inline-flex;
   flex-direction: column;
-  min-width: var(--min-width, 0);
+  min-width: var(--Menu__min-width, 0);
 
   .menu-heading {
     color: var(--slate-500);
@@ -22,7 +22,7 @@
     flex-grow: 1;
     align-items: center;
     background-color: var(--Menu__item-background, transparent);
-    padding: 0 var(--spacing-x, $spacing-x-default);
+    padding: 0 var(--Menu__padding-x, $padding-x-default);
     border-radius: var(--Menu__item-border-radius, 0);
 
     &.menu-item-link {
@@ -52,8 +52,8 @@
       flex-grow: 1;
     }
     > .cell:not(:empty) {
-      padding: var(--spacing-y, $spacing-y-default)
-        calc(var(--spacing-x, $spacing-x-default) / 2);
+      padding: var(--Menu__padding-y, $padding-y-default)
+        calc(var(--Menu__padding-x, $padding-x-default) / 2);
     }
     > .control,
     > .icon {
@@ -81,14 +81,14 @@
   &.has-icon {
     .menu-item > .icon {
       width: calc(
-        var(--Menu__icon-width) + var(--spacing-x, $spacing-x-default)
+        var(--Menu__icon-width) + var(--Menu__padding-x, $padding-x-default)
       );
     }
   }
   &.has-control {
     .menu-item > .control {
       width: calc(
-        var(--Menu__control-width) + var(--spacing-x, $spacing-x-default)
+        var(--Menu__control-width) + var(--Menu__padding-x, $padding-x-default)
       );
     }
   }

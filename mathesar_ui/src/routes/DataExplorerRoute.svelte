@@ -1,47 +1,49 @@
 <script lang="ts">
+  import { type Readable, readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import {
-    QueryManager,
-    QueryModel,
-    constructQueryModelFromHash,
-  } from '@mathesar/systems/data-explorer';
-  import { getQuery } from '@mathesar/stores/queries';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+
+  import type {
+    MaybeSavedExploration,
+    SavedExploration,
+  } from '@mathesar/api/rpc/explorations';
   import type { CancellablePromise } from '@mathesar/component-library';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
-  import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { iconEdit, iconExploration } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import {
     getDataExplorerPageUrl,
     getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconEdit, iconExploration } from '@mathesar/icons';
-  import { readable, type Readable } from 'svelte/store';
+  import { getExploration } from '@mathesar/stores/queries';
+  import {
+    QueryManager,
+    QueryModel,
+    constructQueryModelFromHash,
+  } from '@mathesar/systems/data-explorer';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let queryId: number | undefined;
 
   let is404 = false;
 
   let queryManager: QueryManager | undefined;
-  let queryLoadPromise: CancellablePromise<QueryInstance>;
+  let queryLoadPromise: CancellablePromise<SavedExploration>;
   let query: Readable<QueryModel | undefined> = readable(undefined);
 
-  function createQueryManager(queryInstance: UnsavedQueryInstance) {
+  function createQueryManager(queryInstance: MaybeSavedExploration) {
     queryManager?.destroy();
     queryManager = new QueryManager({
       query: new QueryModel(queryInstance),
-      abstractTypeMap: $currentDbAbstractTypes.data,
       onSave: async (instance) => {
         try {
           const url = getExplorationEditorPageUrl(
             database.id,
-            schema.id,
+            schema.oid,
             instance.id,
           );
           router.goto(url, true);
@@ -74,14 +76,18 @@
       try {
         const newQueryModel = constructQueryModelFromHash(hash);
         router.location.hash.clear();
-        createQueryManager(newQueryModel ?? {});
+        createQueryManager({
+          database_id: database.id,
+          schema_oid: schema.oid,
+          ...(newQueryModel ?? {}),
+        });
         return;
       } catch {
         // fail silently
         console.error('Unable to create query model from hash', hash);
       }
     }
-    createQueryManager({});
+    createQueryManager({ database_id: database.id, schema_oid: schema.oid });
   }
 
   async function loadSavedQuery(_queryId: number) {
@@ -96,7 +102,7 @@
     }
 
     queryLoadPromise?.cancel();
-    queryLoadPromise = getQuery(_queryId);
+    queryLoadPromise = getExploration(_queryId);
     try {
       const queryInstance = await queryLoadPromise;
       createQueryManager(queryInstance);
@@ -133,16 +139,17 @@
     <AppendBreadcrumb
       item={{
         type: 'simple',
-        href: getExplorationEditorPageUrl(database.id, schema.id, $query.id),
+        href: getExplorationEditorPageUrl(database.id, schema.oid, $query.id),
         label: $_('edit'),
         icon: iconEdit,
+        prependSeparator: true,
       }}
     />
   {:else}
     <AppendBreadcrumb
       item={{
         type: 'simple',
-        href: getExplorationEditorPageUrl(database.id, schema.id, $query.id),
+        href: getExplorationEditorPageUrl(database.id, schema.oid, $query.id),
         label: $_('data_explorer'),
         icon: iconExploration,
       }}
@@ -152,7 +159,7 @@
   <AppendBreadcrumb
     item={{
       type: 'simple',
-      href: getDataExplorerPageUrl(database.id, schema.id),
+      href: getDataExplorerPageUrl(database.id, schema.oid),
       label: $_('data_explorer'),
       icon: iconExploration,
     }}

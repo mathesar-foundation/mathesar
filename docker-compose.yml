@@ -1,5 +1,4 @@
-version: "3.9"
-
+---
 # This file defines a viable production setup for Mathesar.
 #
 # It can be used in production directly, or used as an example to help define
@@ -55,8 +54,8 @@ x-config: &config
 
   # (Optional) Replace 'mathesar' with any custom password for the
   # aforementioned database
-
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+
   # (Optional) Replace 'mathesar_db' with the name of the host running postgres
   POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}
 
@@ -80,7 +79,7 @@ x-config: &config
 #           or https(port 443), also automatically creating SSL certificates 
 #           for the same. If you want to host an instance of Mathesar over the
 #           internet or over your local network, add those domains here.
-#     Example: yourdomain.com, *.subdomain.com, 127.0.0.1
+#     Example: yourdomain.com,*.subdomain.com,127.0.0.1
 #
 # POSTGRES_DB:
 #     Default: mathesar_django
@@ -144,7 +143,7 @@ services:
   #
   service:
     container_name: mathesar_service
-    image: mathesar/mathesar-prod:latest
+    image: mathesar/mathesar:latest
     environment: 
       # First we load the variables configured above.
       <<: *config

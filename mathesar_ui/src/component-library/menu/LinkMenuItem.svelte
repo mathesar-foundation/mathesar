@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
-  import MenuItemWrapper from './MenuItemWrapper.svelte';
+
   import MenuItemContents from './MenuItemContents.svelte';
+  import MenuItemWrapper from './MenuItemWrapper.svelte';
 
   export let icon: IconProps | undefined = undefined;
   export let href: string;
@@ -13,7 +14,7 @@
 </script>
 
 <MenuItemWrapper
-  tag="a"
+  tag={disabled ? 'span' : 'a'}
   class="menu-item-link {classes}"
   {href}
   {disabled}

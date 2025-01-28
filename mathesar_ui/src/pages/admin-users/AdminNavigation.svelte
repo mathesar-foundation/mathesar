@@ -1,13 +1,19 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { active } from 'tinro';
-  import { Menu, MenuItemContents } from '@mathesar-component-library';
-  import { iconSettingsMajor, iconMultipleUsers } from '@mathesar/icons';
+
   import {
+    iconMultipleUsers,
+    iconSettingsMajor,
+    iconSettingsMinor,
+  } from '@mathesar/icons';
+  import {
+    ADMIN_SETTINGS_PAGE_URL,
     ADMIN_UPDATE_PAGE_URL,
     ADMIN_USERS_PAGE_URL,
   } from '@mathesar/routes/urls';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
+  import { Menu, MenuItemContents } from '@mathesar-component-library';
 
   const releaseDataStore = getReleaseDataStoreFromContext();
 
@@ -39,13 +45,23 @@
         {$_('users')}
       </MenuItemContents>
     </a>
+    <a
+      role="menuitem"
+      href={ADMIN_SETTINGS_PAGE_URL}
+      class="menu-item menu-item-link"
+      use:active
+    >
+      <MenuItemContents icon={iconSettingsMinor}>
+        {$_('settings')}
+      </MenuItemContents>
+    </a>
   </Menu>
 </div>
 
 <style lang="scss">
   .admin-navigation {
     font-size: var(--text-size-base);
-    --min-width: 100%;
+    --Menu__min-width: 100%;
     --Menu__item-border-radius: var(--border-radius-m);
     --Menu__item-hover-background: var(--sand-100);
     --Menu__item-active-background: var(--sand-200);

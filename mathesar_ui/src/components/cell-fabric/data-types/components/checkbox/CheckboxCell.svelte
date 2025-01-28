@@ -1,7 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Checkbox, compareWholeValues } from '@mathesar-component-library';
+
   import Default from '@mathesar/components/Default.svelte';
+  import { Checkbox, compareWholeValues } from '@mathesar-component-library';
+
   import CellWrapper from '../CellWrapper.svelte';
   import type { CheckBoxCellProps } from '../typeDefinitions';
 
@@ -10,7 +12,6 @@
   const dispatch = createEventDispatcher();
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -18,7 +19,7 @@
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   let cellRef: HTMLElement;
-  let isFirstActivated = false;
+  let shouldToggleOnMouseUp = false;
 
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
@@ -49,19 +50,18 @@
     }
   }
 
-  function checkAndToggle(e: Event) {
-    if (!disabled && isActive && e.target === cellRef && !isFirstActivated) {
-      value = !value;
-      dispatchUpdate();
-    }
-    isFirstActivated = false;
-    cellRef?.focus();
+  function handleMouseDown() {
+    shouldToggleOnMouseUp = isActive;
   }
 
-  function handleMouseDown() {
-    if (!isActive) {
-      isFirstActivated = true;
-      dispatch('activate');
+  function handleMouseLeave() {
+    shouldToggleOnMouseUp = false;
+  }
+
+  function handleMouseUp() {
+    if (!disabled && isActive && shouldToggleOnMouseUp) {
+      value = !value;
+      dispatchUpdate();
     }
   }
 </script>
@@ -69,14 +69,14 @@
 <CellWrapper
   bind:element={cellRef}
   {isActive}
-  {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
   {valueComparisonOutcome}
   on:mouseenter
+  on:mouseleave={handleMouseLeave}
   on:keydown={handleWrapperKeyDown}
-  on:click={checkAndToggle}
   on:mousedown={handleMouseDown}
+  on:mouseup={handleMouseUp}
 >
   {#if value === undefined}
     <Default />

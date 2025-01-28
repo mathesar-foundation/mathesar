@@ -8,8 +8,8 @@ during Sheet component creation.
 -->
 <script lang="ts">
   import type {
-    ComponentAndProps,
     BaseInputProps,
+    ComponentAndProps,
     SimplifiedInputProps,
   } from '@mathesar-component-library/types';
 

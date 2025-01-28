@@ -14,6 +14,7 @@
   --green-100: #e5fde6;
 
   --purple-100: #ebe5fd;
+  --purple-200: #d7cbfb;
   --purple-300: #a586ff;
   --purple-400: #6b45dd;
   --purple-500: #4b2c9d;
@@ -25,35 +26,43 @@
   --red-800: #c63826;
 
   --slate-50: #f6f9f9;
-  --slate-100: #eff1f1;
-  --slate-200: #d5d8dc;
-  --slate-300: #b8bdc4;
-  --slate-400: #5e646e;
-  --slate-500: #4a4f58;
-  --slate-600: #3a3f48;
-  --slate-700: #424952;
-  --slate-800: #25292e;
+  --slate-100: #eef0f0;
+  --slate-200: #d3d6da;
+  --slate-300: #b6bbc2;
+  --slate-400: #6c727e;
+  --slate-500: #4c515a;
+  --slate-600: #3c414a;
+  --slate-700: #393f46;
+  --slate-800: #272b30;
 
-  --sand-100: #f9f8f6;
-  --sand-200: #efece7;
-  --sand-300: #e2dcd4;
-  --sand-400: #cec5b6;
-  --sand-800: #776850;
+  --slate-800-rgb: 39, 43, 48;
 
-  --sky-200: #e8f1fd;
-  --sky-300: #b0ccf0;
-  --sky-500: #bcd9f9;
-  --sky-600: #1269cf;
-  --sky-700: #145bbe;
-  --sky-800: #36537a;
+  --sand-50: #fdfdfc;
+  --sand-100: #f9f8f5;
+  --sand-200: #f0e9db;
+  --sand-300: #e6dcbf;
+  --sand-400: #d1c3b0;
+  --sand-500: #b8a895;
+  --sand-600: #9f8d7a;
+  --sand-700: #87725f;
+  --sand-800: #6f5744;
+
+  --sky-200: #daeefb;
+  --sky-300: #99d4f9;
+  --sky-500: #84caf5;
+  --sky-600: #127ed6;
+  --sky-700: #0f69c1;
+  --sky-800: #3e5a80;
 
   // TODO: Get this incorporated in figma
   --slate-50-tentative: #f6f9f9;
   --sky-600-tentative: #87bcf6;
 
-  --yellow-100: #fdf7ed;
-  --yellow-200: #ffedaf;
-  --yellow-300: #f8ceb0;
+  --yellow-100: #fff6e0;
+  --yellow-200: #fff0c0;
+  --yellow-300: #f5cd8c;
+  --yellow-400: #eeb159;
+  --yellow-800: #944f01;
 
   --white: white;
 
@@ -71,17 +80,17 @@
   --brand-box-shadow: var(--red-box-shadow);
 
   --size-extreme-small: 0.1429rem; // 2px
-  --size-super-ultra-small: 0.2858rem; // 4px
+  --size-super-ultra-small: 0.2857rem; // 4px
   --size-ultra-small: 0.4286rem; // 6px
-  --size-xx-small: 0.5715rem; // 8px
+  --size-xx-small: 0.5714rem; // 8px
   --size-x-small: 0.7143rem; // 10px
-  --size-small: 0.8572rem; // 12px
+  --size-small: 0.8571rem; // 12px
   --size-base: 1rem; // 14px
-  --size-large: 1.2rem; // 16.8px
-  --size-x-large: 1.44rem; // 20.2px
-  --size-xx-large: 1.728rem; // 24.2px
-  --size-ultra-large: 2.074rem; // 29px
-  --size-super-ultra-large: 2.488rem; // 34.8px
+  --size-large: 1.1429rem; // 16px
+  --size-x-large: 1.2857rem; // 18px
+  --size-xx-large: 1.4286rem; // 20px
+  --size-ultra-large: 1.7143rem; // 24px
+  --size-super-ultra-large: 2rem; // 28px
 
   --border-radius-xs: 0.071rem; //1px
   --border-radius-s: 0.142rem; //2px
@@ -89,5 +98,40 @@
   --border-radius-l: 0.571rem; //8px
   --border-radius-xl: 1.142rem; //16px
 
-  --input-padding: 0.5em;
+  --input-padding: var(--size-ultra-small);
+
+  /*
+   A lot of the variables below are redundant and we might require
+   a refactor to reduce them.
+   */
+  --color-white: #ffffff;
+  --color-blue-light: #e6f0ff;
+  --color-blue-medium: #3b82f6;
+  --color-blue-dark: #1d4ed8;
+  --color-orange-dark: #7c2d12;
+  --color-green-medium: #10b981;
+  --color-gray-lighter: #fafafa;
+  --color-gray-light: #f4f4f5;
+  --color-gray-medium: #d4d4d8;
+  --color-gray-dark: #a1a1aa;
+  --color-gray-darker: #27272a;
+  --color-contrast: var(--color-blue-medium);
+  --color-contrast-light: var(--color-blue-light);
+  --color-link: var(--color-blue-dark);
+  --color-text: #171717;
+  --color-text-muted: #515662;
+  --text-size-xx-small: var(--size-xx-small);
+  --text-size-x-small: var(--size-x-small);
+  --text-size-small: var(--size-small);
+  --text-size-base: var(--size-base);
+  --text-size-large: var(--size-large);
+  --text-size-x-large: var(--size-x-large);
+  --text-size-xx-large: var(--size-xx-large);
+  --text-size-ultra-large: var(--size-ultra-large);
+  --text-size-super-ultra-large: var(--size-super-ultra-large);
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  --modal-z-index: 50;
 }

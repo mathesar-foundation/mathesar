@@ -1,26 +1,19 @@
-import type {
-  NumberDisplayOptions,
-  NumberFormat,
-  Column,
-} from '@mathesar/api/types/tables/columns';
-import type { FormValues } from '@mathesar-component-library/types';
+import {
+  type Column,
+  type NumberFormat,
+  type NumberGrouping,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeNumber } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
+import { DB_TYPES } from '../dbTypes';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
   AbstractTypeDbConfig,
 } from '../types';
-
-const DB_TYPES = {
-  DECIMAL: 'decimal',
-  NUMERIC: 'numeric',
-  INTEGER: 'integer',
-  SMALLINT: 'smallint',
-  BIGINT: 'bigint',
-  REAL: 'real',
-  DOUBLE_PRECISION: 'double precision',
-};
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {
@@ -147,10 +140,10 @@ function determineDbTypeAndOptions(
 
   if (dbType === DB_TYPES.DECIMAL || dbType === DB_TYPES.NUMERIC) {
     if (dbFormValues.maxDigits !== null) {
-      typeOptions.precision = dbFormValues.maxDigits;
+      typeOptions.precision = Number(dbFormValues.maxDigits);
     }
     if (dbFormValues.decimalPlaces !== null) {
-      typeOptions.scale = dbFormValues.decimalPlaces;
+      typeOptions.scale = Number(dbFormValues.decimalPlaces);
     }
   }
 
@@ -209,8 +202,8 @@ const displayForm: AbstractTypeConfigForm = {
     },
     useGrouping: {
       type: 'string',
-      enum: ['true', 'false'],
-      default: 'false',
+      enum: ['auto', 'always', 'never'],
+      default: 'auto',
     },
     numberFormat: {
       type: 'string',
@@ -231,8 +224,9 @@ const displayForm: AbstractTypeConfigForm = {
         variable: 'useGrouping',
         label: 'Digit Grouping',
         options: {
-          true: { label: 'On' },
-          false: { label: 'Off' },
+          auto: { label: 'Auto' },
+          always: { label: 'Always' },
+          never: { label: 'Never' },
         },
       },
       {
@@ -252,21 +246,17 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(
-  formValues: FormValues,
-): Column['display_options'] {
+function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
   const decimalPlaces = formValues.decimalPlaces as number | null;
-  const opts: Partial<NumberDisplayOptions> = {
-    number_format:
+  const opts: Partial<Column['metadata']> = {
+    num_format:
       formValues.numberFormat === 'none'
         ? undefined
         : (formValues.numberFormat as NumberFormat),
-    use_grouping:
-      (formValues.useGrouping as
-        | NumberDisplayOptions['use_grouping']
-        | undefined) ?? 'false',
-    minimum_fraction_digits: decimalPlaces ?? undefined,
-    maximum_fraction_digits: decimalPlaces ?? undefined,
+    num_grouping:
+      (formValues.useGrouping as NumberGrouping | undefined) ?? 'auto',
+    num_min_frac_digits: decimalPlaces ?? undefined,
+    num_max_frac_digits: decimalPlaces ?? undefined,
   };
   return opts;
 }
@@ -288,16 +278,16 @@ export function getDecimalPlaces(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
+  const column = { metadata };
   const decimalPlaces = getDecimalPlaces(
-    displayOptions?.minimum_fraction_digits ?? null,
-    displayOptions?.maximum_fraction_digits ?? null,
+    metadata?.num_min_frac_digits ?? null,
+    metadata?.num_max_frac_digits ?? null,
   );
   const formValues: FormValues = {
-    numberFormat: displayOptions?.number_format ?? 'none',
-    useGrouping: displayOptions?.use_grouping ?? 'false',
+    numberFormat: getColumnMetadataValue(column, 'num_format'),
+    useGrouping: getColumnMetadataValue(column, 'num_grouping'),
     decimalPlaces,
   };
   return formValues;

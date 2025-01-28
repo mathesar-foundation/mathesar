@@ -1,59 +1,46 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { StringOrComponent } from '@mathesar/component-library';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { iconExploration, iconRecord } from '@mathesar/icons';
   import {
     getDatabasePageUrl,
     getExplorationPageUrl,
     getRecordPageUrl,
     getSchemaPageUrl,
-    CONNECTIONS_URL,
   } from '@mathesar/routes/urls';
-  import { StringOrComponent } from '@mathesar/component-library';
-  import { iconExploration, iconRecord, iconConnection } from '@mathesar/icons';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
+
   import BreadcrumbLink from './BreadcrumbLink.svelte';
+  import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
+  import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
-  import DatabaseSelector from './DatabaseSelector.svelte';
   import EntitySelector from './EntitySelector.svelte';
   import SchemaSelector from './SchemaSelector.svelte';
-  import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
-  import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
-  import RecordSummary from '../RecordSummary.svelte';
 
   export let item: BreadcrumbItem;
 </script>
 
-{#if item.type === 'connectionList'}
-  <DatabaseSelector />
-  <div class="breadcrumb-item truncate">
-    <BreadcrumbLink href={CONNECTIONS_URL}>
-      <NameWithIcon icon={iconConnection}>
-        {$_('connections')}
-      </NameWithIcon>
-    </BreadcrumbLink>
-  </div>
-{:else if item.type === 'database'}
-  <DatabaseSelector />
+{#if item.type === 'database'}
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={getDatabasePageUrl(item.database.id)}>
       <DatabaseName database={item.database} />
     </BreadcrumbLink>
   </div>
-{:else if item.type === 'schema'}
   <SchemaSelector database={item.database} />
+{:else if item.type === 'schema'}
   <div class="breadcrumb-item truncate">
-    <BreadcrumbLink href={getSchemaPageUrl(item.database.id, item.schema.id)}>
+    <BreadcrumbLink href={getSchemaPageUrl(item.database.id, item.schema.oid)}>
       <SchemaName schema={item.schema} />
     </BreadcrumbLink>
   </div>
-{:else if item.type === 'table'}
   <EntitySelector database={item.database} schema={item.schema} />
+{:else if item.type === 'table'}
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
-      href={getLinkForTableItem(item.database.id, item.schema.id, item.table)}
+      href={getLinkForTableItem(item.database.id, item.schema.oid, item.table)}
     >
       <TableName table={item.table} />
     </BreadcrumbLink>
@@ -64,23 +51,20 @@
     <BreadcrumbLink
       href={getRecordPageUrl(
         item.database.id,
-        item.schema.id,
-        item.table.id,
+        item.schema.oid,
+        item.table.oid,
         item.record.pk,
       )}
     >
-      <NameWithIcon icon={iconRecord}>
-        <RecordSummary recordSummary={item.record.summary} />
-      </NameWithIcon>
+      <NameWithIcon icon={iconRecord}>{item.record.summary}</NameWithIcon>
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'exploration'}
-  <EntitySelector database={item.database} schema={item.schema} />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
       href={getExplorationPageUrl(
         item.database.id,
-        item.schema.id,
+        item.schema.oid,
         item.query.id,
       )}
     >
@@ -88,7 +72,9 @@
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'simple'}
-  <BreadcrumbPageSeparator />
+  {#if item.prependSeparator}
+    <BreadcrumbPageSeparator />
+  {/if}
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={item.href}>
       {#if item.icon}

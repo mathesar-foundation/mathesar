@@ -1,29 +1,39 @@
-import { get, writable } from 'svelte/store';
-import type { Writable } from 'svelte/store';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-import { ApiMultiError } from '@mathesar/api/utils/errors';
-import { ImmutableMap, CancellablePromise } from '@mathesar-component-library';
-import Pagination from '@mathesar/utils/Pagination';
-import type {
-  QueryResultRecord,
-  QueryRunResponse,
-  QueryResultsResponse,
-  QueryColumnMetaData,
-} from '@mathesar/api/types/queries';
-import { runQuery, fetchQueryResults } from '@mathesar/stores/queries';
-import { SheetSelection } from '@mathesar/components/sheet';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import type { ShareConsumer } from '@mathesar/utils/shares';
-import type QueryModel from './QueryModel';
-import QueryInspector from './QueryInspector';
 import {
-  processColumnMetaData,
-  getProcessedOutputColumns,
-  speculateColumnMetaData,
-  type ProcessedQueryOutputColumn,
-  type ProcessedQueryResultColumnMap,
-  type ProcessedQueryOutputColumnMap,
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  writable,
+} from 'svelte/store';
+
+import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type {
+  ExplorationResult,
+  QueryColumnMetaData,
+  QueryResultRecord,
+} from '@mathesar/api/rpc/explorations';
+import Plane from '@mathesar/components/sheet/selection/Plane';
+import Series from '@mathesar/components/sheet/selection/Series';
+import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
+import { runSavedExploration } from '@mathesar/stores/queries';
+import Pagination from '@mathesar/utils/Pagination';
+import type { ShareConsumer } from '@mathesar/utils/shares';
+import {
+  type CancellablePromise,
+  ImmutableMap,
+} from '@mathesar-component-library';
+
+import QueryInspector from './QueryInspector';
+import type QueryModel from './QueryModel';
+import {
   type InputColumnsStoreSubstance,
+  type ProcessedQueryOutputColumnMap,
+  type ProcessedQueryResultColumnMap,
+  getProcessedOutputColumns,
+  processColumnMetaData,
+  speculateColumnMetaData,
 } from './utils';
 
 export interface QueryRow {
@@ -31,22 +41,19 @@ export interface QueryRow {
   rowIndex: number;
 }
 
+export function getRowSelectionId(row: QueryRow): string {
+  return String(row.rowIndex);
+}
+
 export interface QueryRowsData {
   totalCount: number;
   rows: QueryRow[];
 }
 
-export type QuerySheetSelection = SheetSelection<
-  QueryRow,
-  ProcessedQueryOutputColumn
->;
-
 type QueryRunMode = 'queryId' | 'queryObject';
 
-export default class QueryRunner {
+export class QueryRunner {
   query: Writable<QueryModel>;
-
-  abstractTypeMap: AbstractTypesMap;
 
   runState: Writable<RequestStatus<string[] | ApiMultiError> | undefined> =
     writable();
@@ -63,36 +70,36 @@ export default class QueryRunner {
     new ImmutableMap(),
   );
 
-  selection: QuerySheetSelection;
+  /** Keys are row selection ids */
+  selectableRowsMap: Readable<Map<string, QueryRow>>;
+
+  selection: SheetSelectionStore;
 
   inspector: QueryInspector;
 
-  private runPromise: CancellablePromise<QueryResultsResponse> | undefined;
+  private runPromise: CancellablePromise<ExplorationResult> | undefined;
 
   private runMode: QueryRunMode;
 
-  private onRunWithObjectCallback?: (results: QueryRunResponse) => unknown;
+  private onRunWithObjectCallback?: (results: ExplorationResult) => unknown;
 
-  private onRunWithIdCallback?: (results: QueryResultsResponse) => unknown;
+  private onRunWithIdCallback?: (results: ExplorationResult) => unknown;
 
   private shareConsumer?: ShareConsumer;
 
   constructor({
     query,
-    abstractTypeMap,
     runMode,
     onRunWithObject,
     onRunWithId,
     shareConsumer,
   }: {
     query: QueryModel;
-    abstractTypeMap: AbstractTypesMap;
     runMode?: QueryRunMode;
-    onRunWithObject?: (instance: QueryRunResponse) => unknown;
-    onRunWithId?: (instance: QueryResultsResponse) => unknown;
+    onRunWithObject?: (instance: ExplorationResult) => unknown;
+    onRunWithId?: (instance: ExplorationResult) => unknown;
     shareConsumer?: ShareConsumer;
   }) {
-    this.abstractTypeMap = abstractTypeMap;
     this.runMode = runMode ?? 'queryObject';
     this.query = writable(query);
     this.onRunWithObjectCallback = onRunWithObject;
@@ -100,20 +107,22 @@ export default class QueryRunner {
     this.shareConsumer = shareConsumer;
     this.speculateProcessedColumns();
     void this.run();
-    this.selection = new SheetSelection({
-      getColumns: () => [...get(this.processedColumns).values()],
-      getColumnOrder: () =>
-        [...get(this.processedColumns).values()].map((column) => column.id),
-      getRows: () => get(this.rowsData).rows,
-      getMaxSelectionRowIndex: () => {
-        const rowLength = get(this.rowsData).rows.length;
-        const totalCount = get(this.rowsData).totalCount ?? 0;
-        const pagination = get(this.pagination);
-        const { offset } = pagination;
-        const pageSize = pagination.size;
-        return Math.min(pageSize, totalCount - offset, rowLength) - 1;
+    this.selectableRowsMap = derived(
+      this.rowsData,
+      ({ rows }) => new Map(rows.map((r) => [getRowSelectionId(r), r])),
+    );
+
+    const plane = derived(
+      [this.rowsData, this.processedColumns],
+      ([{ rows }, columnsMap]) => {
+        const rowIds = new Series(rows.map(getRowSelectionId));
+        const columns = [...columnsMap.values()];
+        const columnIds = new Series(columns.map((c) => String(c.id)));
+        return new Plane(rowIds, columnIds);
       },
-    });
+    );
+    this.selection = new SheetSelectionStore(plane);
+
     this.inspector = new QueryInspector(this.query);
   }
 
@@ -131,7 +140,6 @@ export default class QueryRunner {
         inputColumnInformationMap ??
         (new Map() as InputColumnsStoreSubstance['inputColumnInformationMap']),
       queryModel: this.getQueryModel(),
-      abstractTypeMap: this.abstractTypeMap,
     });
     this.columnsMetaData.set(speculatedMetaData);
     this.processedColumns.set(
@@ -142,11 +150,11 @@ export default class QueryRunner {
     );
   }
 
-  async run(): Promise<QueryResultsResponse | undefined> {
+  async run(): Promise<ExplorationResult | undefined> {
     this.runPromise?.cancel();
     const queryModel = this.getQueryModel();
 
-    if (queryModel.base_table === undefined) {
+    if (queryModel.base_table_oid === undefined) {
       const rowsData = { totalCount: 0, rows: [] };
       this.columnsMetaData.set(new ImmutableMap());
       this.processedColumns.set(new ImmutableMap());
@@ -155,18 +163,18 @@ export default class QueryRunner {
       return undefined;
     }
 
-    let response: QueryResultsResponse;
+    let response: ExplorationResult;
     let triggerCallback: () => unknown;
     try {
       const paginationParams = get(this.pagination).recordsRequestParams();
       this.runState.set({ state: 'processing' });
       if (this.runMode === 'queryObject') {
-        const internalRunPromise = runQuery({
-          ...queryModel.toRunRequestJson(),
-          parameters: {
+        const internalRunPromise = api.explorations
+          .run({
+            exploration_def: queryModel.toAnonymousExploration(),
             ...paginationParams,
-          },
-        });
+          })
+          .run();
         this.runPromise = internalRunPromise;
         const internalResponse = await internalRunPromise;
         response = internalResponse;
@@ -181,7 +189,7 @@ export default class QueryRunner {
           });
           return undefined;
         }
-        this.runPromise = fetchQueryResults(queryModel.id, {
+        this.runPromise = runSavedExploration(queryModel.id, {
           ...paginationParams,
           ...this.shareConsumer?.getQueryParams(),
         });
@@ -189,10 +197,7 @@ export default class QueryRunner {
         triggerCallback = () => this.onRunWithIdCallback?.(response);
       }
 
-      const columnsMetaData = processColumnMetaData(
-        response.column_metadata,
-        this.abstractTypeMap,
-      );
+      const columnsMetaData = processColumnMetaData(response.column_metadata);
       this.columnsMetaData.set(columnsMetaData);
       this.processedColumns.set(
         new ImmutableMap(
@@ -226,7 +231,6 @@ export default class QueryRunner {
   async setPagination(pagination: Pagination): Promise<void> {
     this.pagination.set(pagination);
     await this.run();
-    this.selection.activateFirstCellInSelectedColumn();
   }
 
   protected resetPagination(): void {
@@ -240,7 +244,6 @@ export default class QueryRunner {
   }
 
   protected resetResults(): void {
-    this.clearSelection();
     this.runPromise?.cancel();
     this.resetPagination();
     this.rowsData.set({ totalCount: 0, rows: [] });
@@ -251,34 +254,15 @@ export default class QueryRunner {
   protected async resetPaginationAndRun(): Promise<void> {
     this.resetPagination();
     await this.run();
-    this.selection.activateFirstCellInSelectedColumn();
   }
 
   selectColumn(alias: QueryColumnMetaData['alias']): void {
     const processedColumn = get(this.processedColumns).get(alias);
     if (!processedColumn) {
-      this.selection.resetSelection();
-      this.selection.selectAndActivateFirstCellIfExists();
-      this.inspector.selectCellTab();
       return;
     }
-
-    const isSelected = this.selection.toggleColumnSelection(processedColumn);
-    if (isSelected) {
-      this.inspector.selectColumnTab();
-      return;
-    }
-
-    this.selection.activateFirstCellInSelectedColumn();
-    this.inspector.selectCellTab();
-  }
-
-  clearSelection(): void {
-    this.selection.resetSelection();
-  }
-
-  getRows(): QueryRow[] {
-    return get(this.rowsData).rows;
+    this.selection.update((s) => s.ofOneColumn(processedColumn.id));
+    this.inspector.activate('column');
   }
 
   getQueryModel(): QueryModel {
@@ -286,7 +270,7 @@ export default class QueryRunner {
   }
 
   destroy(): void {
-    this.selection.destroy();
     this.runPromise?.cancel();
+    this.selection.destroy();
   }
 }

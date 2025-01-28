@@ -1,8 +1,12 @@
-MATHESAR_PREFIX = "mathesar_"
-ID = "id"
-ID_ORIGINAL = "id_original"
-INFERENCE_SCHEMA = f"{MATHESAR_PREFIX}inference_schema"
 COLUMN_NAME_TEMPLATE = 'Column '  # auto generated column name 'Column 1' (no undescore)
-MSAR_PUBLIC = 'msar'
-MSAR_PRIVAT = f"__{MSAR_PUBLIC}"
-MSAR_VIEWS = f"{MSAR_PUBLIC}_views"
+
+MATHESAR_PREFIX = "mathesar_"
+MSAR_PUBLIC_SCHEMA = 'msar'
+MSAR_PRIVATE_SCHEMA = f"__{MSAR_PUBLIC_SCHEMA}"
+TYPES_SCHEMA = f"{MATHESAR_PREFIX}types"
+
+INTERNAL_SCHEMAS = {
+    TYPES_SCHEMA,
+    MSAR_PUBLIC_SCHEMA,
+    MSAR_PRIVATE_SCHEMA,
+}

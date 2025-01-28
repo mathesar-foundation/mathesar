@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
   import TableName from '@mathesar/components/TableName.svelte';
+  import type { Table } from '@mathesar/models/Table';
 
-  export let table: Pick<TableEntry, 'name'>;
+  export let table: Pick<Table, 'name'>;
   export let which: 'base' | 'target' | 'mapping';
 </script>
 
@@ -19,10 +19,11 @@
   .table-pill {
     border-radius: 500px;
     padding: 0 0.5em;
+    margin: 0 0.1em;
     max-width: 100%;
     display: inline-block;
-    vertical-align: -17%;
-    line-height: 1.3em;
+    vertical-align: -20%;
+    line-height: 1.2em;
   }
   .base {
     background: var(--base-fill);

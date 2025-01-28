@@ -1,30 +1,40 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
-  import EditTableHOC from '@mathesar/components/EditTableHOC.svelte';
-  import { tables } from '@mathesar/stores/tables';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    factoryToGetTableNameValidationErrors,
+    updateTable,
+  } from '@mathesar/stores/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let disabled = false;
+
+  $: ({ table } = $tabularData);
+  $: getNameValidationErrors = factoryToGetTableNameValidationErrors(table);
+
+  async function handleSubmit(name: string) {
+    await updateTable({
+      schema: table.schema,
+      table: {
+        oid: table.oid,
+        name,
+      },
+    });
+  }
 </script>
 
-<EditTableHOC
-  let:getNameValidationErrors
-  let:onUpdate
-  tableId={$tabularData.id}
->
-  <div class="rename-table-property-container">
-    <span class="label">{$_('name')}</span>
-    <EditableTextWithActions
-      initialValue={$tables.data.get($tabularData.id)?.name ?? ''}
-      onSubmit={(name) => onUpdate({ name })}
-      getValidationErrors={getNameValidationErrors}
-      {disabled}
-    />
-  </div>
-</EditTableHOC>
+<div class="rename-table-property-container">
+  <span class="label">{$_('table_name')}</span>
+  <EditableTextWithActions
+    initialValue={table.name}
+    onSubmit={handleSubmit}
+    getValidationErrors={$getNameValidationErrors}
+    {disabled}
+  />
+</div>
 
 <style lang="scss">
   .rename-table-property-container {
@@ -32,7 +42,7 @@
     flex-direction: column;
 
     > :global(* + *) {
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
     }
   }
 </style>

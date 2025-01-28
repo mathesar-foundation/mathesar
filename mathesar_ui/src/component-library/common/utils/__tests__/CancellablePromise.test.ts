@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+
 import CancellablePromise from '../CancellablePromise';
 
 const dummyOnCancel = vi.fn().mockReturnValueOnce('cancelled');

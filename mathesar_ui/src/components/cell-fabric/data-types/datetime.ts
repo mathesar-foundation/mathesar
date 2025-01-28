@@ -1,26 +1,22 @@
-import { isDefinedNonNullable } from '@mathesar-component-library';
-import type { TimeStampDisplayOptions } from '@mathesar/api/types/tables/columns';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import {
   DateTimeFormatter,
   DateTimeSpecification,
 } from '@mathesar/utils/date-time';
-import type { DateTimeCellExternalProps } from './components/typeDefinitions';
-import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
+import { isDefinedNonNullable } from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import DateTimeCell from './components/date-time/DateTimeCell.svelte';
 import DateTimeInput from './components/date-time/DateTimeInput.svelte';
-
-export interface DateLikeColumn extends CellColumnLike {
-  display_options: Partial<TimeStampDisplayOptions> | null;
-}
+import type { DateTimeCellExternalProps } from './components/typeDefinitions';
+import type { CellComponentFactory } from './typeDefinitions';
 
 function getProps(
-  column: DateLikeColumn,
+  column: Column,
   supportTimeZone: boolean,
 ): DateTimeCellExternalProps {
-  const displayOptions = column.display_options ?? {};
-  const dateFormat = displayOptions.date_format ?? 'none';
-  const timeFormat = displayOptions.time_format ?? '24hr';
+  const dateFormat = getColumnMetadataValue(column, 'date_format');
+  const timeFormat = getColumnMetadataValue(column, 'time_format');
   const specification = new DateTimeSpecification({
     type: supportTimeZone ? 'timestampWithTZ' : 'timestamp',
     dateFormat,
@@ -46,14 +42,14 @@ function getProps(
 
 const datetimeType: CellComponentFactory = {
   get: (
-    column: DateLikeColumn,
+    column: Column,
     config?: { supportTimeZone?: boolean },
   ): ComponentAndProps<DateTimeCellExternalProps> => ({
     component: DateTimeCell,
     props: getProps(column, config?.supportTimeZone ?? false),
   }),
   getInput: (
-    column: DateLikeColumn,
+    column: Column,
     config?: { supportTimeZone?: boolean },
   ): ComponentAndProps<
     Omit<DateTimeCellExternalProps, 'formatForDisplay'>
@@ -64,10 +60,7 @@ const datetimeType: CellComponentFactory = {
       allowRelativePresets: true,
     },
   }),
-  getDisplayFormatter(
-    column: DateLikeColumn,
-    config?: { supportTimeZone?: boolean },
-  ) {
+  getDisplayFormatter(column: Column, config?: { supportTimeZone?: boolean }) {
     return (v) =>
       getProps(column, config?.supportTimeZone ?? false).formatForDisplay(
         String(v),

@@ -1,10 +1,9 @@
 .labeled-input {
-  --spacing-y-default: 0.4em;
+  --spacing-y-default: 0.25em;
   --spacing-x-default: 0.4em;
 
   .label {
     display: inline-block;
-    color: var(--slate-800);
   }
   .input {
     display: block;
@@ -16,11 +15,22 @@
     }
   }
 
-  .help {
+  .label-content > .help {
     display: block;
     font-size: var(--text-size-small);
     color: var(--color-text-muted);
     margin-top: var(--spacing-y, var(--spacing-y-default));
+    &:empty {
+      display: none;
+    }
+  }
+
+  .description {
+    display: block;
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
+    margin-top: var(--spacing-y, var(--spacing-y-default));
+    margin-left: 1.5rem;
     &:empty {
       display: none;
     }
@@ -32,31 +42,32 @@
     }
   }
 
-  // TODO: add support for help text with an inline layout.
   &.layout-inline .label-content {
-    display: inline-flex;
+    display: flex;
     flex-direction: row;
-    align-items: center; // To support a text input that's taller than the label
-    .label {
-      flex: 1 1 auto;
-    }
-    .input {
+    align-items: center;
+    > .label {
       flex: 0 0 auto;
-      margin-left: var(--spacing-x, var(--spacing-x-default));
+      margin-right: 0.5rem;
+      padding-top: calc(var(--input-padding-y, 0.5em));
+      padding-bottom: calc(var(--input-padding-y, 0.5em));
+    }
+    .field-help {
+      margin-top: 0.25em;
     }
   }
 
   &.layout-inline-input-first .label-content {
     display: grid;
     grid-template: auto auto / auto 1fr;
-    .input {
+    > .input {
       grid-area: 1 / 1 / 1 / 1;
       margin-right: var(--spacing-x, var(--spacing-x-default));
     }
-    .label {
+    > .label {
       grid-area: 1 / 2 / 1 / 2;
     }
-    .help {
+    > .help {
       grid-area: 2 / 2 / 2 / 2;
       margin-top: var(--spacing-y, var(--spacing-y-default));
     }

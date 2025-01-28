@@ -1,26 +1,28 @@
-import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import type { Constraint } from '@mathesar/api/types/tables/constraints';
+import type { Readable } from 'svelte/store';
+
+import type { Column, ColumnPrivilege } from '@mathesar/api/rpc/columns';
+import type { Constraint } from '@mathesar/api/rpc/constraints';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
+  getDbTypeBasedFilterCap,
   getDbTypeBasedInputCap,
   getDisplayFormatter,
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
 import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
+import type { Table } from '@mathesar/models/Table';
 import {
   getAbstractTypeForDbType,
-  getFiltersForAbstractType,
+  type getFiltersForAbstractType,
   getPreprocFunctionsForAbstractType,
 } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,
   AbstractTypePreprocFunctionDefinition,
-  AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
-import type { Readable } from 'svelte/store';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import { findFkConstraintsForColumn } from './constraintsUtils';
 import type { RecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 
@@ -39,12 +41,14 @@ export interface ProcessedColumn extends CellColumnFabric {
   abstractType: AbstractType;
   initialInputValue: unknown;
   inputComponentAndProps: ComponentAndProps;
+  filterComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
   formatCellValue: (
     cellValue: unknown,
     recordSummaries?: RecordSummariesForSheet,
   ) => string | null | undefined;
+  currentRolePrivileges: Set<ColumnPrivilege>;
 }
 
 /** Maps column ids to processed columns */
@@ -56,14 +60,12 @@ export function processColumn({
   column,
   columnIndex,
   constraints,
-  abstractTypeMap,
   hasEnhancedPrimaryKeyCell,
 }: {
-  tableId: TableEntry['id'];
+  tableId: Table['oid'];
   column: Column;
   columnIndex: number;
   constraints: Constraint[];
-  abstractTypeMap: AbstractTypesMap;
   /**
    * - When true, the primary key cells will be rendered via the PrimaryKeyCell
    *   component, which provides additional functionality (e.g. hyperlink to
@@ -73,7 +75,7 @@ export function processColumn({
    */
   hasEnhancedPrimaryKeyCell?: boolean;
 }): ProcessedColumn {
-  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  const abstractType = getAbstractTypeForDbType(column.type);
   const relevantConstraints = constraints.filter((c) =>
     c.columns.includes(column.id),
   );
@@ -85,7 +87,7 @@ export function processColumn({
   );
   const linkFk = findFkConstraintsForColumn(exclusiveConstraints, column.id)[0];
   const isPk = (hasEnhancedPrimaryKeyCell ?? true) && column.primary_key;
-  const fkTargetTableId = linkFk ? linkFk.referent_table : undefined;
+  const fkTargetTableId = linkFk ? linkFk.referent_table_oid : undefined;
   return {
     id: column.id,
     column,
@@ -110,10 +112,16 @@ export function processColumn({
       fkTargetTableId,
       abstractType.cellInfo,
     ),
+    filterComponentAndProps: getDbTypeBasedFilterCap(
+      column,
+      fkTargetTableId,
+      abstractType.cellInfo,
+    ),
     allowedFiltersMap: retrieveFilters(abstractType.identifier, linkFk),
     preprocFunctions: getPreprocFunctionsForAbstractType(
       abstractType.identifier,
     ),
     formatCellValue: getDisplayFormatter(column, column.id),
+    currentRolePrivileges: new Set(column.current_role_priv),
   };
 }

@@ -1,75 +1,68 @@
-import { writable, derived, get } from 'svelte/store';
-import type { Writable, Readable, Unsubscriber } from 'svelte/store';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  writable,
+} from 'svelte/store';
 
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type { RawSchema } from '@mathesar/api/rpc/schemas';
+import type { Database } from '@mathesar/models/Database';
+import { Schema } from '@mathesar/models/Schema';
+import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import type {
-  PaginatedResponse,
-  RequestStatus,
-} from '@mathesar/api/utils/requestUtils';
-import schemasApi from '@mathesar/api/schemas';
-import type { Connection } from '@mathesar/api/connections';
+import {
+  type CancellablePromise,
+  collapse,
+  unite,
+} from '@mathesar-component-library';
 
-import type { SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
-import type { CancellablePromise } from '@mathesar-component-library';
-
-import { connectionsStore } from './databases';
+import { databasesStore } from './databases';
 
 const commonData = preloadCommonData();
 
-export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
-  writable(commonData.current_schema ?? undefined);
+export const currentSchemaId: Writable<Schema['oid'] | undefined> = writable(
+  commonData.current_schema ?? undefined,
+);
 
-export interface DBSchemaStoreData {
-  requestStatus: RequestStatus;
-  data: Map<SchemaEntry['id'], SchemaEntry>;
+export interface SchemaStoreData {
+  databaseId?: Database['id'];
+  requestStatus: RequestStatus<RpcError[]>;
+  data: Map<Schema['oid'], Schema>;
 }
 
-const dbSchemaStoreMap: Map<
-  Connection['id'],
-  Writable<DBSchemaStoreData>
-> = new Map();
-const dbSchemasRequestMap: Map<
-  Connection['id'],
-  CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
-> = new Map();
-
-function findStoreBySchemaId(id: SchemaEntry['id']) {
-  return [...dbSchemaStoreMap.values()].find((entry) =>
-    get(entry).data.has(id),
-  );
-}
-
-function setDBSchemaStore(
-  connectionId: Connection['id'],
-  schemas: SchemaResponse[],
-): Writable<DBSchemaStoreData> {
-  const schemaMap: DBSchemaStoreData['data'] = new Map();
-  schemas.forEach((schema) => {
-    schemaMap.set(schema.id, schema);
-  });
-  const storeValue: DBSchemaStoreData = {
+function makeEmptySchemasData(): SchemaStoreData {
+  return {
     requestStatus: { state: 'success' },
-    data: schemaMap,
+    data: new Map(),
   };
-
-  let store = dbSchemaStoreMap.get(connectionId);
-  if (!store) {
-    store = writable(storeValue);
-    dbSchemaStoreMap.set(connectionId, store);
-  } else {
-    store.set(storeValue);
-  }
-  return store;
 }
 
-function updateSchemaInDBSchemaStore(
-  connectionId: Connection['id'],
-  schema: SchemaResponse,
-) {
-  const store = dbSchemaStoreMap.get(connectionId);
-  if (store) {
-    store.update((value) => {
-      value.data?.set(schema.id, schema);
+const schemasStore: Writable<SchemaStoreData> = writable(
+  makeEmptySchemasData(),
+);
+
+let request: CancellablePromise<RawSchema[]>;
+
+function setSchemasInStore(database: Database, rawSchemas: RawSchema[]) {
+  const schemasMap = new Map<Schema['oid'], Schema>();
+  rawSchemas.forEach((rawSchema) => {
+    schemasMap.set(rawSchema.oid, new Schema({ database, rawSchema }));
+  });
+  schemasStore.set({
+    databaseId: database.id,
+    requestStatus: { state: 'success' },
+    data: schemasMap,
+  });
+}
+
+function updateSchemaInStore(database: Database, schema: Schema) {
+  const $schemasStore = get(schemasStore);
+  if ($schemasStore.databaseId === database.id) {
+    schemasStore.update((value) => {
+      value.data?.set(schema.oid, schema);
       return {
         ...value,
         data: new Map(value.data),
@@ -78,14 +71,11 @@ function updateSchemaInDBSchemaStore(
   }
 }
 
-function removeSchemaInDBSchemaStore(
-  connectionId: Connection['id'],
-  schemaId: SchemaEntry['id'],
-) {
-  const store = dbSchemaStoreMap.get(connectionId);
-  if (store) {
-    store.update((value) => {
-      value.data?.delete(schemaId);
+function removeSchemaInStore(database: Database, schema: Schema) {
+  const $schemasStore = get(schemasStore);
+  if ($schemasStore.databaseId === database.id) {
+    schemasStore.update((value) => {
+      value.data?.delete(schema.oid);
       return {
         ...value,
         data: new Map(value.data),
@@ -94,201 +84,128 @@ function removeSchemaInDBSchemaStore(
   }
 }
 
-export function addCountToSchemaNumTables(
-  connection: Connection,
-  schema: SchemaEntry,
-  count: number,
-) {
-  const store = dbSchemaStoreMap.get(connection.id);
-  if (store) {
-    store.update((value) => {
-      const schemaToModify = value.data.get(schema.id);
-      if (schemaToModify) {
-        schemaToModify.num_tables += count;
-        value.data.set(schema.id, schemaToModify);
-      }
+export async function fetchSchemasForCurrentDatabase() {
+  request?.cancel();
+  const $currentDatabase = get(databasesStore.currentDatabase);
+  if (!$currentDatabase) {
+    schemasStore.set(makeEmptySchemasData());
+    return;
+  }
+
+  schemasStore.update(($schemasStore) => {
+    if ($schemasStore.databaseId === $currentDatabase.id) {
       return {
-        ...value,
-        data: new Map(value.data),
+        ...$schemasStore,
+        requestStatus: { state: 'processing' },
       };
-    });
-  }
-}
-
-export function addCountToSchemaNumExplorations(
-  schemaId: SchemaEntry['id'],
-  count: number,
-) {
-  const store = findStoreBySchemaId(schemaId);
-  if (store) {
-    store.update((value) => {
-      const schemaToModify = value.data.get(schemaId);
-      if (schemaToModify) {
-        schemaToModify.num_queries += count;
-        value.data.set(schemaId, schemaToModify);
-      }
-      return {
-        ...value,
-        data: new Map(value.data),
-      };
-    });
-  }
-}
-
-async function refetchSchemasForDB(
-  connectionId: Connection['id'],
-): Promise<DBSchemaStoreData | undefined> {
-  const store = dbSchemaStoreMap.get(connectionId);
-  if (!store) {
-    console.error(
-      `DB Schemas store for connection: ${connectionId} not found.`,
-    );
-    return undefined;
-  }
-
-  try {
-    store.update((currentData) => ({
-      ...currentData,
-      requestStatus: { state: 'processing' },
-    }));
-
-    dbSchemasRequestMap.get(connectionId)?.cancel();
-
-    const schemaRequest = schemasApi.list(connectionId);
-    dbSchemasRequestMap.set(connectionId, schemaRequest);
-    const response = await schemaRequest;
-    const schemas = response?.results || [];
-
-    const dbSchemasStore = setDBSchemaStore(connectionId, schemas);
-
-    return get(dbSchemasStore);
-  } catch (err) {
-    store.update((currentData) => ({
-      ...currentData,
-      requestStatus: {
-        state: 'failure',
-        errors: [
-          err instanceof Error ? err.message : 'Error in fetching schemas',
-        ],
-      },
-    }));
-    return undefined;
-  }
-}
-
-export async function refetchSchema(
-  connectionId: Connection['id'],
-  schemaId: SchemaEntry['id'],
-): Promise<SchemaResponse | undefined> {
-  const store = dbSchemaStoreMap.get(connectionId);
-  if (!store) {
-    console.error(`DB Schemas store for db: ${connectionId} not found.`);
-    return undefined;
-  }
-
-  try {
-    const schemaRequest = schemasApi.get(schemaId);
-    const response = await schemaRequest;
-    if (!response) {
-      return undefined;
     }
-    updateSchemaInDBSchemaStore(connectionId, response);
-    return response;
+    return {
+      databaseId: $currentDatabase.id,
+      requestStatus: { state: 'processing' },
+      data: new Map(),
+    };
+  });
+
+  try {
+    request = api.schemas.list({ database_id: $currentDatabase.id }).run();
+    const rawSchemas = await request;
+    setSchemasInStore($currentDatabase, rawSchemas);
   } catch (err) {
-    return undefined;
+    schemasStore.update(($schemasStore) => {
+      if ($schemasStore.databaseId === $currentDatabase.id) {
+        return {
+          ...$schemasStore,
+          requestStatus: {
+            state: 'failure',
+            errors: [RpcError.fromAnything(err)],
+          },
+        };
+      }
+      return {
+        databaseId: $currentDatabase.id,
+        requestStatus: {
+          state: 'failure',
+          errors: [RpcError.fromAnything(err)],
+        },
+        data: new Map(),
+      };
+    });
   }
+}
+
+export async function createSchema(
+  database: Database,
+  props: {
+    name: string;
+    description: string | null;
+  },
+): Promise<void> {
+  const rawSchema = await api.schemas
+    .add({
+      database_id: database.id,
+      name: props.name,
+      description: props.description,
+    })
+    .run();
+  updateSchemaInStore(database, new Schema({ database, rawSchema }));
+}
+
+export async function deleteSchema(schema: Schema): Promise<void> {
+  await schema.delete();
+  removeSchemaInStore(schema.database, schema);
 }
 
 let preload = true;
 
-function getSchemasStoreForDB(
-  connectionId: Connection['id'],
-): Writable<DBSchemaStoreData> {
-  let store = dbSchemaStoreMap.get(connectionId);
-  if (!store) {
-    store = writable({
-      requestStatus: { state: 'processing' },
-      data: new Map(),
-    });
-    dbSchemaStoreMap.set(connectionId, store);
-    if (preload && commonData.current_connection === connectionId) {
-      store = setDBSchemaStore(connectionId, commonData.schemas ?? []);
-    } else {
-      void refetchSchemasForDB(connectionId);
+export const schemas = collapse(
+  derived(databasesStore.currentDatabase, ($currentDatabase) => {
+    const $schemasStore = get(schemasStore);
+    if ($schemasStore.databaseId !== $currentDatabase?.id) {
+      if (preload && commonData.current_database === $currentDatabase?.id) {
+        if (commonData.schemas.state === 'success') {
+          setSchemasInStore($currentDatabase, commonData.schemas.data);
+        } else {
+          schemasStore.set({
+            databaseId: $currentDatabase.id,
+            requestStatus: {
+              state: 'failure',
+              errors: [RpcError.fromAnything(commonData.schemas.error)],
+            },
+            data: new Map(),
+          });
+        }
+      } else {
+        void fetchSchemasForCurrentDatabase();
+      }
+      preload = false;
+    } else if ($schemasStore.requestStatus.state === 'failure') {
+      void fetchSchemasForCurrentDatabase();
     }
-    preload = false;
-  } else if (get(store).requestStatus.state === 'failure') {
-    void refetchSchemasForDB(connectionId);
-  }
-  return store;
-}
-
-export function getSchemaInfo(
-  connectionId: Connection['id'],
-  schemaId: SchemaEntry['id'],
-): SchemaEntry | undefined {
-  const store = dbSchemaStoreMap.get(connectionId);
-  if (!store) {
-    return undefined;
-  }
-  return get(store).data.get(schemaId);
-}
-
-export async function createSchema(
-  connectionId: Connection['id'],
-  schemaName: SchemaEntry['name'],
-  description: SchemaEntry['description'],
-): Promise<SchemaResponse> {
-  const response = await schemasApi.add({
-    name: schemaName,
-    description,
-    connectionId,
-  });
-  updateSchemaInDBSchemaStore(connectionId, response);
-  return response;
-}
-
-export async function updateSchema(
-  connectionId: Connection['id'],
-  schema: SchemaEntry,
-): Promise<SchemaResponse> {
-  const response = await schemasApi.update(schema);
-  updateSchemaInDBSchemaStore(connectionId, response);
-  return response;
-}
-
-export async function deleteSchema(
-  connectionId: Connection['id'],
-  schemaId: SchemaEntry['id'],
-): Promise<void> {
-  await schemasApi.delete(schemaId);
-  removeSchemaInDBSchemaStore(connectionId, schemaId);
-}
-
-export const schemas: Readable<DBSchemaStoreData> = derived(
-  connectionsStore.currentConnectionId,
-  ($currentConnectionName, set) => {
-    let unsubscribe: Unsubscriber;
-
-    if (!$currentConnectionName) {
-      set({
-        requestStatus: { state: 'success' },
-        data: new Map(),
-      });
-    } else {
-      const store = getSchemasStoreForDB($currentConnectionName);
-      unsubscribe = store.subscribe((dbSchemasData) => {
-        set(dbSchemasData);
-      });
-    }
-
-    return () => {
-      unsubscribe?.();
-    };
-  },
+    return schemasStore;
+  }),
 );
 
-export const currentSchema: Readable<SchemaEntry | undefined> = derived(
+function sortSchemas(_schemas: Iterable<Schema>): Schema[] {
+  return [..._schemas].sort((a, b) => get(a.name).localeCompare(get(b.name)));
+}
+
+export const schemaNames = collapse(
+  derived(schemas, ($schemas) =>
+    unite([...$schemas.data.values()].map((s) => s.name)),
+  ),
+);
+
+export const sortedSchemas = derived([schemas, schemaNames], ([$schemas]) => {
+  const schemasMap = new Map(
+    sortSchemas($schemas.data.values()).map((s) => [s.oid, s]),
+  );
+  return {
+    ...$schemas,
+    data: schemasMap,
+  };
+});
+
+export const currentSchema: Readable<Schema | undefined> = derived(
   [currentSchemaId, schemas],
   ([$currentSchemaId, $schemas]) =>
     $currentSchemaId ? $schemas.data.get($currentSchemaId) : undefined,

@@ -11,8 +11,11 @@
    */
 
   import { onMount } from 'svelte';
-  import { createDetectElementResize } from './detectElementResize';
-  import type { ElementResizeDetector } from './detectElementResize';
+
+  import {
+    type ElementResizeDetector,
+    createDetectElementResize,
+  } from './detectElementResize';
 
   let classes = 'default';
   export { classes as class };

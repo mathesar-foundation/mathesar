@@ -1,25 +1,18 @@
 <script lang="ts">
-  import { SelectionList } from '@mathesar-component-library';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
-    currentDbAbstractTypes,
-    getAllowedAbstractTypesForNewColumn,
-    getAbstractTypeForDbType,
     defaultDbType,
+    getAbstractTypeForDbType,
+    getAllowedAbstractTypesForNewColumn,
     getDefaultDbTypeOfAbstractType,
   } from '@mathesar/stores/abstract-types';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { SelectionList } from '@mathesar-component-library';
 
   export let value = defaultDbType;
   export let disabled = false;
 
-  $: abstractType = getAbstractTypeForDbType(
-    value,
-    $currentDbAbstractTypes.data,
-  );
-
-  $: options = getAllowedAbstractTypesForNewColumn(
-    $currentDbAbstractTypes.data,
-  );
+  $: abstractType = getAbstractTypeForDbType(value);
+  $: options = getAllowedAbstractTypesForNewColumn();
 </script>
 
 <SelectionList

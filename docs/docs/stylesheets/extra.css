@@ -108,6 +108,10 @@
   width: max-content;
 }
 
+.md-nav--primary > .md-nav__title {
+  display: none;
+}
+
 .md-typeset a {
   color: var(--md-link-color);
   text-decoration: underline;
@@ -165,3 +169,18 @@
 .md-version { font-size: 0.7rem; font-weight: normal; }
 [dir="ltr"] .md-version__current { margin-left: 0.6rem; }
 .md-version__list { margin: 1.7rem 0 0 0; }
+
+
+/* Format PR hyperlinks (in release notes) to demand less visual attention */
+a[href^="https://github.com/mathesar-foundation/mathesar/pull/"] {
+  font-size: 0.7rem;
+  color: #777;
+  text-decoration: none;
+}
+a[href^="https://github.com/mathesar-foundation/mathesar/pull/"]:hover {
+  text-decoration: underline;
+}
+p:has(a[href^="https://github.com/mathesar-foundation/mathesar/pull/"]) {
+  line-height: 1.2;
+}
+

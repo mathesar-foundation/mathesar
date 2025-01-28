@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Collapsible, Button, Icon } from '@mathesar-component-library';
+
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import { Button, Collapsible, Icon } from '@mathesar-component-library';
+
   import type QueryManager from '../../QueryManager';
   import type { ProcessedQueryOutputColumn } from '../../utils';
 
@@ -29,7 +31,7 @@
         const source = $columnsMetaData.get(initialColumn.alias)?.source;
         return (
           source?.is_initial_column &&
-          source.input_table_id === $query.base_table
+          source.input_table_id === $query.base_table_oid
         );
       },
     );
@@ -50,7 +52,6 @@
     void queryManager.update((q) =>
       q.withoutInitialColumns(selectedColumnAliases),
     );
-    queryManager.clearSelection();
   }
 </script>
 

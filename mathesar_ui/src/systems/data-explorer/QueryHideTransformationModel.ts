@@ -1,6 +1,7 @@
-import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
-import type { QueryInstanceHideTransformation } from '@mathesar/api/types/queries';
+import { _ } from 'svelte-i18n';
+
+import type { QueryInstanceHideTransformation } from '@mathesar/api/rpc/explorations';
 
 export interface QueryHideTransformationEntry {
   columnAliases: string[];

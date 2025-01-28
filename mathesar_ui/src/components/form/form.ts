@@ -1,21 +1,22 @@
-import { derived, get, writable, type Readable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import {
   unite,
   withSideChannelSubscriptions,
 } from '@mathesar-component-library';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+
 import {
-  comboErrorsKey,
-  disabledKey,
   type FieldStore,
   type RequiredField,
   type ValuedField,
+  comboErrorsKey,
+  disabledKey,
 } from './field';
 import {
-  isValid as outcomeIsValid,
   type ComboValidator,
   type Filled,
+  isValid as outcomeIsValid,
 } from './validators';
 
 type GenericFieldsObj = Record<string, FieldStore>;

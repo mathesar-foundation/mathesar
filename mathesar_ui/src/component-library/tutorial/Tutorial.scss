@@ -3,7 +3,7 @@
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: var(--border-radius-m);
   background-color: var(--yellow-100);
-  padding: 1.5rem;
+  padding: var(--tutorial_padding, 1.5rem);
   display: flex;
   flex-direction: column;
   line-height: 1.5;

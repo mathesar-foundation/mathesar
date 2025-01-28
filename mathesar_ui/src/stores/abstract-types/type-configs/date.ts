@@ -1,14 +1,16 @@
-import type { FormValues } from '@mathesar-component-library/types';
-import type {
-  DateDisplayOptions,
-  DateFormat,
-  Column,
-} from '@mathesar/api/types/tables/columns';
+import {
+  type Column,
+  type DateFormat,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeDate } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
+
 import { getDateFormatOptions } from './utils';
 
 const displayForm: AbstractTypeConfigForm = {
@@ -32,23 +34,20 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(
-  dispFormValues: FormValues,
-): Column['display_options'] {
-  const displayOptions: DateDisplayOptions = {
-    format: dispFormValues.format as DateFormat,
+function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
+  return {
+    date_format: formValues.format as DateFormat,
   };
-  return displayOptions;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as DateDisplayOptions | null;
-  const dispFormValues: FormValues = {
-    format: displayOptions?.format ?? 'none',
+  const column = { metadata };
+  const formValues: FormValues = {
+    format: getColumnMetadataValue(column, 'date_format'),
   };
-  return dispFormValues;
+  return formValues;
 }
 
 const dateType: AbstractTypeConfiguration = {

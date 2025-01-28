@@ -1,17 +1,20 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Icon, iconExternalLink } from '@mathesar-component-library';
+
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconConstraint } from '@mathesar/icons';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
+  import { Icon, iconExternalLink } from '@mathesar-component-library';
 
   export let type: 'primaryKey' | 'foreignKey';
   export let column: ProcessedColumn;
 
-  $: linkedTableId = column.linkFk?.referent_table;
-  $: linkedTable = linkedTableId ? $tables.data.get(linkedTableId) : undefined;
+  $: linkedTableId = column.linkFk?.referent_table_oid;
+  $: linkedTable = linkedTableId
+    ? $currentTablesData.tablesMap.get(linkedTableId)
+    : undefined;
 </script>
 
 <div class="specifier-tag-container">

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { rowHeightPx } from '@mathesar/geometry';
+
   import { getSheetContext } from './utils';
+  import type { Props as VirtualListProps } from './virtual-list/listUtils';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
-  import type { Props as VirtualListProps } from './virtual-list/listUtils';
 
   const { stores, api } = getSheetContext();
   const { rowWidth, horizontalScrollOffset, scrollOffset } = stores;

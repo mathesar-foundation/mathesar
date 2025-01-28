@@ -6,13 +6,15 @@
 -->
 <script lang="ts">
   import type { SvelteComponent } from 'svelte';
+
+  import { Field, type FieldStore } from '@mathesar/components/form';
   import {
     Label,
     LabelController,
     setLabelControllerInContext,
   } from '@mathesar-component-library';
-  import { Field, type FieldStore } from '@mathesar/components/form';
   import type { ComponentWithProps } from '@mathesar-component-library/types';
+
   import GridFormInputRow from './GridFormInputRow.svelte';
 
   const labelController = new LabelController();

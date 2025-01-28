@@ -1,41 +1,44 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton, Button } from '@mathesar-component-library';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
+  import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
-  import { refetchQueriesForSchema } from '@mathesar/stores/queries';
-  import { refetchTablesForSchema } from '@mathesar/stores/tables';
-  import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
-  import OverviewHeader from './OverviewHeader.svelte';
-  import TablesList from './TablesList.svelte';
-  import ExplorationsList from './ExplorationsList.svelte';
-  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+  import type { Table } from '@mathesar/models/Table';
+  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import { fetchExplorationsForCurrentSchema } from '@mathesar/stores/queries';
+  import { fetchTablesForCurrentSchema } from '@mathesar/stores/tables';
+  import { AnchorButton, Button } from '@mathesar-component-library';
+
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
   import CreateNewTableButton from './CreateNewTableButton.svelte';
-  import TableSkeleton from './TableSkeleton.svelte';
+  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
+  import ExplorationsList from './ExplorationsList.svelte';
+  import OverviewHeader from './OverviewHeader.svelte';
+  import TableSkeleton from './TableSkeleton.svelte';
+  import TablesList from './TablesList.svelte';
 
-  export let tablesMap: Map<number, TableEntry>;
-  export let explorationsMap: Map<number, QueryInstance>;
+  export let tablesMap: Map<Table['oid'], Table>;
+  export let explorationsMap: Map<number, SavedExploration>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
-
-  export let canExecuteDDL: boolean;
-  export let canEditMetadata: boolean;
-
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
+  export let onCreateEmptyTable: () => void;
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
-  $: showTableCreationTutorial = !hasTables && canExecuteDDL;
-  $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
+  $: ({ currentRolePrivileges } = schema.currentAccess);
+  $: showTableCreationTutorial =
+    !hasTables && $currentRolePrivileges.has('CREATE');
+  $: showExplorationTutorial = hasTables && !hasExplorations;
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
+  $: ({ tableCount } = schema);
 
   // Viewers can explore, they cannot save explorations
   $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
@@ -45,20 +48,18 @@
   <div class="vertical-container tables">
     <OverviewHeader title={$_('tables')}>
       <svelte:fragment slot="action">
-        {#if canExecuteDDL}
-          <CreateNewTableButton {database} {schema} />
-        {/if}
+        <CreateNewTableButton {database} {schema} {onCreateEmptyTable} />
       </svelte:fragment>
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
-      <TableSkeleton numTables={schema.num_tables} />
+      <TableSkeleton numTables={$tableCount} />
     {:else if tablesRequestStatus.state === 'failure'}
       <ErrorBox>
         <p>{tablesRequestStatus.errors[0]}</p>
         <div>
           <SpinnerButton
             onClick={async () => {
-              await refetchTablesForSchema(schema.id);
+              await fetchTablesForCurrentSchema();
             }}
             label={$_('retry')}
             icon={iconRefresh}
@@ -71,14 +72,9 @@
         </div>
       </ErrorBox>
     {:else if showTableCreationTutorial}
-      <CreateNewTableTutorial {database} {schema} />
+      <CreateNewTableTutorial {database} {schema} {onCreateEmptyTable} />
     {:else}
-      <TablesList
-        {canExecuteDDL}
-        tables={[...tablesMap.values()]}
-        {database}
-        {schema}
-      />
+      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {/if}
   </div>
   <div class="vertical-container explorations">
@@ -92,7 +88,7 @@
           <div>
             <SpinnerButton
               onClick={async () => {
-                await refetchQueriesForSchema(schema.id);
+                await fetchExplorationsForCurrentSchema();
               }}
               label={$_('retry')}
               icon={iconRefresh}
@@ -123,7 +119,7 @@
           {$_('what_is_an_exploration_mini')}
         </span>
         <div>
-          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
+          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.oid)}>
             {$_('open_data_explorer')}
           </AnchorButton>
         </div>

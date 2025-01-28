@@ -1,13 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import TableName from '@mathesar/components/TableName.svelte';
   import {
+    Button,
     Collapsible,
     Icon,
-    Button,
-    iconExpandDown,
     Truncate,
+    iconExpandDown,
   } from '@mathesar-component-library';
-  import TableName from '@mathesar/components/TableName.svelte';
+
   import type { ColumnWithLink } from '../../utils';
 
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =

@@ -1,21 +1,19 @@
-import type { FormValues } from '@mathesar-component-library/types';
-import type {
-  TimeDisplayOptions,
-  TimeFormat,
-  Column,
-} from '@mathesar/api/types/tables/columns';
+import {
+  type Column,
+  type TimeFormat,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeTime } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
+import { DB_TYPES } from '../dbTypes';
 import type {
-  AbstractTypeDbConfig,
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
+  AbstractTypeDbConfig,
 } from '../types';
-import { getTimeFormatOptions } from './utils';
 
-const DB_TYPES = {
-  TIME_WITH_TZ: 'time with time zone',
-  TIME_WITHOUT_TZ: 'time without time zone',
-};
+import { getTimeFormatOptions } from './utils';
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {
@@ -77,23 +75,19 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(
-  dispFormValues: FormValues,
-): Column['display_options'] {
-  const displayOptions: TimeDisplayOptions = {
-    format: dispFormValues.format as TimeFormat,
+function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
+  return {
+    time_format: formValues.format as TimeFormat,
   };
-  return displayOptions;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as TimeDisplayOptions | null;
-  const dispFormValues: FormValues = {
-    format: displayOptions?.format ?? '24hr',
+  const column = { metadata };
+  return {
+    format: getColumnMetadataValue(column, 'time_format'),
   };
-  return dispFormValues;
 }
 
 const timeType: AbstractTypeConfiguration = {

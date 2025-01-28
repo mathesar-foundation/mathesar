@@ -1,39 +1,32 @@
 <script lang="ts">
+  import { SheetVirtualRows } from '@mathesar/components/sheet';
   import {
+    groupHeaderRowHeightPx,
+    helpTextRowHeightPx,
+    rowHeightPx,
+  } from '@mathesar/geometry';
+  import {
+    type Row as RowType,
+    getRowKey,
     getTabularDataStoreFromContext,
     isGroupHeaderRow,
     isHelpTextRow,
-    type Row as RowType,
-    getRowKey,
     isPlaceholderRow,
   } from '@mathesar/stores/table-data';
-  import { SheetVirtualRows } from '@mathesar/components/sheet';
-  import {
-    rowHeightPx,
-    helpTextRowHeightPx,
-    groupHeaderRowHeightPx,
-  } from '@mathesar/geometry';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
-  import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
+
   import Row from './row/Row.svelte';
+  import ScrollAndRowHeightHandler from './ScrollAndRowHeightHandler.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
-
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: canEditTableRecords = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canEditTableRecords',
-  );
 
   export let usesVirtualList = false;
 
-  $: ({ id, display, columnsDataStore } = $tabularData);
+  $: ({ table, display, columnsDataStore } = $tabularData);
+  $: ({ oid } = table);
   $: ({ displayableRecords } = display);
   $: ({ pkColumn } = columnsDataStore);
+  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: canAddRow = $currentRolePrivileges.has('INSERT');
 
   function getItemSizeFromRow(row: RowType) {
     if (isHelpTextRow(row)) {
@@ -59,9 +52,7 @@
   }
 </script>
 
-<svelte:window />
-
-{#key id}
+{#key oid}
   {#if usesVirtualList}
     <SheetVirtualRows
       itemCount={$displayableRecords.length}
@@ -71,9 +62,9 @@
       let:items
       let:api
     >
-      <ScrollAndResetHandler {api} />
+      <ScrollAndRowHeightHandler {api} />
       {#each items as item (item.key)}
-        {#if $displayableRecords[item.index] && !(isPlaceholderRow($displayableRecords[item.index]) && !canEditTableRecords)}
+        {#if $displayableRecords[item.index] && !(isPlaceholderRow($displayableRecords[item.index]) && !canAddRow)}
           <Row style={item.style} bind:row={$displayableRecords[item.index]} />
         {/if}
       {/each}

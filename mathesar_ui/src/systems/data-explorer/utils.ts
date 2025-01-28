@@ -1,12 +1,24 @@
-import { ImmutableMap } from '@mathesar-component-library';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import { api } from '@mathesar/api/rpc';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type {
-  QueryResultColumn,
+  ExplorationResult,
   QueryColumnMetaData,
-  QueryRunResponse,
-  QueryInitialColumnSource,
   QueryGeneratedColumnSource,
-} from '@mathesar/api/types/queries';
+  QueryInitialColumnSource,
+  QueryResultColumn,
+} from '@mathesar/api/rpc/explorations';
+import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
+import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import {
+  getCellCap,
+  getDbTypeBasedFilterCap,
+  getDbTypeBasedInputCap,
+  getDisplayFormatter,
+  getInitialInputValue,
+} from '@mathesar/components/cell-fabric/utils';
+import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
+import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
@@ -15,23 +27,15 @@ import {
 } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,
-  AbstractTypesMap,
   AbstractTypePreprocFunctionDefinition,
   AbstractTypeSummarizationFunction,
 } from '@mathesar/stores/abstract-types/types';
-import {
-  getCellCap,
-  getDbTypeBasedInputCap,
-  getDisplayFormatter,
-  getInitialInputValue,
-} from '@mathesar/components/cell-fabric/utils';
-import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
+import { ImmutableMap } from '@mathesar-component-library';
 import type {
-  JpPath,
-  JoinableTablesResult,
-} from '@mathesar/api/types/tables/joinable_tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+  CancellablePromise,
+  ComponentAndProps,
+} from '@mathesar-component-library/types';
+
 import type QueryModel from './QueryModel';
 
 type ProcessedQueryResultColumnSource =
@@ -44,6 +48,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   column: QueryResultColumn;
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
+  filterComponentAndProps: ComponentAndProps;
   initialInputValue: unknown;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
@@ -69,10 +74,10 @@ export type ProcessedQueryOutputColumnMap = ImmutableMap<
 export interface InputColumn {
   id: Column['id'];
   name: Column['name'];
-  tableName: TableEntry['name'];
-  jpPath?: JpPath;
+  tableName: Table['name'];
+  jpPath?: JoinPath;
   type: Column['type'];
-  tableId: TableEntry['id'];
+  tableId: Table['oid'];
 }
 
 export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
@@ -82,8 +87,8 @@ export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
 }
 
 export interface LinkedTable {
-  id: TableEntry['id'];
-  name: TableEntry['name'];
+  id: Table['oid'];
+  name: Table['name'];
   linkedToColumn: {
     id: Column['id'];
     name: Column['name'];
@@ -128,9 +133,9 @@ export function getLinkFromColumn(
   const allLinksFromColumn = result.joinable_tables.filter(
     (entry) =>
       entry.depth === depth &&
-      entry.fk_path[depth - 1][1] === false &&
-      entry.jp_path[depth - 1][0] === columnId &&
-      entry.jp_path.join(',').indexOf(parentPath) === 0,
+      entry.fkey_path[depth - 1][1] === false &&
+      entry.join_path[depth - 1][0][1] === columnId &&
+      entry.join_path.join(',').indexOf(parentPath) === 0,
   );
   if (allLinksFromColumn.length === 0) {
     return undefined;
@@ -140,19 +145,19 @@ export function getLinkFromColumn(
     throw new Error(`Multiple links present for the same column: ${columnId}`);
   }
   const link = allLinksFromColumn[0];
-  const toTableInfo = result.tables[link.target];
+  const toTableInfo = result.target_table_info[link.target];
   const toTable = {
     id: link.target,
     name: toTableInfo.name,
   };
-  const toColumnId = link.jp_path[depth - 1][1];
+  const toColumnId = link.join_path[depth - 1][1][1];
   const toColumn = {
     id: toColumnId,
-    name: result.columns[toColumnId].name,
+    name: toTableInfo.columns[toColumnId].name,
   };
   const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-    toTableInfo.columns.map((columnIdInLinkedTable) => {
-      const columnInLinkedTable = result.columns[columnIdInLinkedTable];
+    Object.entries(toTableInfo.columns).map(([id, columnInLinkedTable]) => {
+      const columnIdInLinkedTable = parseInt(id, 10);
       return [
         columnIdInLinkedTable,
         {
@@ -164,9 +169,9 @@ export function getLinkFromColumn(
             result,
             columnIdInLinkedTable,
             depth + 1,
-            link.jp_path.join(','),
+            link.join_path.join(','),
           ),
-          jpPath: link.jp_path,
+          jpPath: link.join_path,
           producesMultipleResults: link.multiple_results,
         },
       ];
@@ -178,26 +183,53 @@ export function getLinkFromColumn(
   };
 }
 
-export function getColumnInformationMap(
-  result: JoinableTablesResult,
-  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
-): InputColumnsStoreSubstance['inputColumnInformationMap'] {
+export interface QueryTableStructure {
+  joinableTables: JoinableTablesResult;
+  baseTable: Pick<Table, 'oid' | 'name'>;
+  columns: Pick<Column, 'id' | 'name' | 'type'>[];
+}
+
+export function getQueryTableStructure(p: {
+  database: Pick<Database, 'id'>;
+  baseTableId: Table['oid'];
+}): CancellablePromise<QueryTableStructure> {
+  const args = {
+    database_id: p.database.id,
+    table_oid: p.baseTableId,
+  };
+  return batchRun([
+    api.tables.list_joinable(args),
+    api.tables.get(args),
+    api.columns.list(args),
+  ]).transformResolved(([joinableTables, baseTable, columns]) => ({
+    joinableTables,
+    baseTable,
+    columns,
+  }));
+}
+
+function getColumnInformationMap({
+  joinableTables,
+  baseTable,
+  columns,
+}: QueryTableStructure): InputColumnsStoreSubstance['inputColumnInformationMap'] {
   const map: InputColumnsStoreSubstance['inputColumnInformationMap'] =
     new Map();
-  baseTable.columns.forEach((column) => {
+  columns.forEach((column) => {
     map.set(column.id, {
       id: column.id,
       name: column.name,
       type: column.type,
-      tableId: baseTable.id,
+      tableId: baseTable.oid,
       tableName: baseTable.name,
     });
   });
-  Object.keys(result.tables).forEach((tableIdKey) => {
+  for (const [tableIdKey, table] of Object.entries(
+    joinableTables.target_table_info,
+  )) {
     const tableId = parseInt(tableIdKey, 10);
-    const table = result.tables[tableId];
-    table.columns.forEach((columnId) => {
-      const column = result.columns[columnId];
+    for (const [columnIdKey, column] of Object.entries(table.columns)) {
+      const columnId = parseInt(columnIdKey, 10);
       map.set(columnId, {
         id: columnId,
         name: column.name,
@@ -205,104 +237,115 @@ export function getColumnInformationMap(
         tableId,
         tableName: table.name,
       });
-    });
-  });
+    }
+  }
   return map;
 }
 
-export function getBaseTableColumnsWithLinks(
-  result: JoinableTablesResult,
-  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
-): Map<ColumnWithLink['id'], ColumnWithLink> {
+function getBaseTableColumnsWithLinks({
+  joinableTables,
+  baseTable,
+  columns,
+}: QueryTableStructure): Map<ColumnWithLink['id'], ColumnWithLink> {
   const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-    baseTable.columns.map((column) => [
-      column.id,
+    columns.map(({ id, name, type }) => [
+      id,
       {
-        id: column.id,
-        name: column.name,
-        type: column.type,
+        id,
+        name,
+        type,
         tableName: baseTable.name,
-        linksTo: getLinkFromColumn(result, column.id, 1),
+        linksTo: getLinkFromColumn(joinableTables, id, 1),
         producesMultipleResults: false,
       },
     ]);
   return new Map(columnMapEntries.sort(compareColumnByLinks));
 }
 
-export function getTablesThatReferenceBaseTable(
-  result: JoinableTablesResult,
-  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
-): ReferencedByTable[] {
-  const referenceLinks = result.joinable_tables.filter(
-    (entry) => entry.depth === 1 && entry.fk_path[0][1] === true,
+function getTablesThatReferenceBaseTable({
+  joinableTables,
+  baseTable,
+  columns,
+}: QueryTableStructure): ReferencedByTable[] {
+  const links = joinableTables.joinable_tables.filter(
+    (entry) => entry.depth === 1 && entry.fkey_path[0][1] === true,
   );
   const references: ReferencedByTable[] = [];
 
-  referenceLinks.forEach((reference) => {
-    const tableId = reference.target;
-    const table = result.tables[tableId];
-    const baseTableColumnId = reference.jp_path[0][0];
-    const baseTableColumn = baseTable.columns.find(
-      (column) => column.id === baseTableColumnId,
-    );
-    const referenceTableColumnId = reference.jp_path[0][1];
-    if (!baseTableColumn) {
-      return;
-    }
+  for (const link of links) {
+    const baseTableColumnId = link.join_path[0][0][1];
+    const referenceTableColumnId = link.join_path[0][1][1];
+
+    const baseTableColumn = columns.find((c) => c.id === baseTableColumnId);
+    if (!baseTableColumn) continue;
+    const targetTableId = link.target;
+    const targetTable = joinableTables.target_table_info[targetTableId];
+    const targetTableColumn = targetTable.columns[referenceTableColumnId];
     const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-      result.tables[reference.target].columns
-        .filter((columnId) => columnId !== referenceTableColumnId)
-        .map((columnIdInTable) => {
-          const columnInTable = result.columns[columnIdInTable];
+      Object.entries(targetTable.columns)
+        .filter(([columnId]) => columnId !== String(referenceTableColumnId))
+        .map(([columnIdKey, column]) => {
+          const columnId = parseInt(columnIdKey, 10);
+          const parentPath = link.join_path.join(',');
           return [
-            columnIdInTable,
+            columnId,
             {
-              id: columnIdInTable,
-              name: columnInTable.name,
-              type: columnInTable.type,
-              tableName: table.name,
+              id: columnId,
+              name: column.name,
+              type: column.type,
+              tableName: baseTable.name,
               linksTo: getLinkFromColumn(
-                result,
-                columnIdInTable,
+                joinableTables,
+                columnId,
                 2,
-                reference.jp_path.join(','),
+                parentPath,
               ),
-              jpPath: reference.jp_path,
-              producesMultipleResults: reference.multiple_results,
+              jpPath: link.join_path,
+              producesMultipleResults: link.multiple_results,
             },
           ];
         });
 
     references.push({
-      id: tableId,
-      name: table.name,
+      id: targetTableId,
+      name: targetTable.name,
       referencedViaColumn: {
         id: referenceTableColumnId,
-        ...result.columns[referenceTableColumnId],
+        name: targetTableColumn.name,
+        type: targetTableColumn.type,
       },
       linkedToColumn: baseTableColumn,
       columns: new Map(columnMapEntries.sort(compareColumnByLinks)),
     });
-  });
+  }
 
   return references;
+}
+
+export function getInputColumns(
+  s: QueryTableStructure,
+): InputColumnsStoreSubstance {
+  return {
+    baseTableColumns: getBaseTableColumnsWithLinks(s),
+    tablesThatReferenceBaseTable: getTablesThatReferenceBaseTable(s),
+    inputColumnInformationMap: getColumnInformationMap(s),
+  };
 }
 
 function processColumn(
   columnInfo: Pick<QueryColumnMetaData, 'alias'> &
     ProcessedQueryResultColumnSource &
     Partial<QueryColumnMetaData>,
-  abstractTypeMap: AbstractTypesMap,
 ): ProcessedQueryResultColumn {
-  const column = {
+  const column: QueryResultColumn = {
     alias: columnInfo.alias,
     display_name: columnInfo.display_name ?? columnInfo.alias,
     type: columnInfo.type ?? 'unknown',
     type_options: columnInfo.type_options ?? null,
-    display_options: columnInfo.display_options ?? null,
+    metadata: columnInfo.metadata ?? null,
   };
 
-  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  const abstractType = getAbstractTypeForDbType(column.type);
   const source: ProcessedQueryResultColumnSource = columnInfo.is_initial_column
     ? {
         is_initial_column: true,
@@ -327,6 +370,11 @@ function processColumn(
       undefined,
       abstractType.cellInfo,
     ),
+    filterComponentAndProps: getDbTypeBasedFilterCap(
+      column,
+      undefined,
+      abstractType.cellInfo,
+    ),
     initialInputValue: getInitialInputValue(
       column,
       undefined,
@@ -345,13 +393,12 @@ function processColumn(
 }
 
 export function processColumnMetaData(
-  columnMetaData: QueryRunResponse['column_metadata'],
-  abstractTypeMap: AbstractTypesMap,
+  columnMetaData: ExplorationResult['column_metadata'],
 ): ProcessedQueryResultColumnMap {
   return new ImmutableMap(
     Object.entries(columnMetaData).map(([alias, columnMeta]) => [
       alias,
-      processColumn(columnMeta, abstractTypeMap),
+      processColumn(columnMeta),
     ]),
   );
 }
@@ -360,12 +407,10 @@ export function speculateColumnMetaData({
   currentProcessedColumnsMetaData,
   inputColumnInformationMap,
   queryModel,
-  abstractTypeMap,
 }: {
   currentProcessedColumnsMetaData: ProcessedQueryResultColumnMap;
   inputColumnInformationMap: InputColumnsStoreSubstance['inputColumnInformationMap'];
   queryModel: QueryModel;
-  abstractTypeMap: AbstractTypesMap;
 }): ProcessedQueryResultColumnMap {
   const initialColumns = queryModel.initial_columns;
   const summarizationTransforms = queryModel.getSummarizationTransforms();
@@ -396,21 +441,18 @@ export function speculateColumnMetaData({
   if (initialColumnsWithoutMetaData.length > 0) {
     initialColumnsWithoutMetaData.forEach((initialColumn) => {
       const inputColumnInformation = inputColumnInformationMap.get(
-        initialColumn.id,
+        initialColumn.attnum,
       );
       updatedColumnsMetaData = updatedColumnsMetaData.with(
         initialColumn.alias,
-        processColumn(
-          {
-            alias: initialColumn.alias,
-            type: inputColumnInformation?.type,
-            is_initial_column: true,
-            input_column_name: inputColumnInformation?.name,
-            input_table_name: inputColumnInformation?.tableName,
-            input_table_id: inputColumnInformation?.tableId,
-          },
-          abstractTypeMap,
-        ),
+        processColumn({
+          alias: initialColumn.alias,
+          type: inputColumnInformation?.type,
+          is_initial_column: true,
+          input_column_name: inputColumnInformation?.name,
+          input_table_name: inputColumnInformation?.tableName,
+          input_table_id: inputColumnInformation?.tableId,
+        }),
       );
     });
   }
@@ -422,18 +464,15 @@ export function speculateColumnMetaData({
             ?.column;
           updatedColumnsMetaData = updatedColumnsMetaData.with(
             group.outputAlias,
-            processColumn(
-              {
-                alias: group.outputAlias,
-                display_name: null,
-                type: inputColumn?.type ?? 'unknown',
-                type_options: inputColumn?.type_options ?? null,
-                display_options: inputColumn?.display_options ?? null,
-                is_initial_column: false,
-                input_alias: group.inputAlias,
-              },
-              abstractTypeMap,
-            ),
+            processColumn({
+              alias: group.outputAlias,
+              display_name: null,
+              type: inputColumn?.type ?? 'unknown',
+              type_options: inputColumn?.type_options ?? null,
+              metadata: inputColumn?.metadata ?? null,
+              is_initial_column: false,
+              input_alias: group.inputAlias,
+            }),
           );
         }
       });
@@ -441,27 +480,24 @@ export function speculateColumnMetaData({
         if (!updatedColumnsMetaData.has(aggregation.outputAlias)) {
           updatedColumnsMetaData = updatedColumnsMetaData.with(
             aggregation.outputAlias,
-            processColumn(
-              {
-                alias: aggregation.outputAlias,
-                type:
-                  aggregation.function === 'distinct_aggregate_to_array'
-                    ? '_array'
-                    : 'integer',
-                type_options:
-                  aggregation.function === 'distinct_aggregate_to_array'
-                    ? {
-                        type:
-                          updatedColumnsMetaData.get(aggregation.inputAlias)
-                            ?.column.type ?? 'unknown',
-                      }
-                    : null,
-                display_options: null,
-                is_initial_column: false,
-                input_alias: aggregation.inputAlias,
-              },
-              abstractTypeMap,
-            ),
+            processColumn({
+              alias: aggregation.outputAlias,
+              type:
+                aggregation.function === 'distinct_aggregate_to_array'
+                  ? '_array'
+                  : 'integer',
+              type_options:
+                aggregation.function === 'distinct_aggregate_to_array'
+                  ? {
+                      item_type:
+                        updatedColumnsMetaData.get(aggregation.inputAlias)
+                          ?.column.type ?? 'unknown',
+                    }
+                  : null,
+              metadata: null,
+              is_initial_column: false,
+              input_alias: aggregation.inputAlias,
+            }),
           );
         }
       });
@@ -488,7 +524,7 @@ export function speculateColumnMetaData({
 }
 
 export function getProcessedOutputColumns(
-  outputColumnAliases: QueryRunResponse['output_columns'],
+  outputColumnAliases: ExplorationResult['output_columns'],
   processedColumnMetaData: ProcessedQueryResultColumnMap,
 ): ProcessedQueryOutputColumnMap {
   return new ImmutableMap(
@@ -496,7 +532,7 @@ export function getProcessedOutputColumns(
       alias,
       {
         ...(processedColumnMetaData.get(alias) ??
-          processColumn({ alias, is_initial_column: true }, new Map())),
+          processColumn({ alias, is_initial_column: true })),
         columnIndex: index,
       },
     ]),

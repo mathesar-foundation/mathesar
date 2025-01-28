@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { tick, afterUpdate } from 'svelte';
-  import { getLabelControllerFromContainingLabel } from '@mathesar-component-library-dir/label/LabelController';
+  import { afterUpdate, tick } from 'svelte';
+
   import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
+  import { getLabelControllerFromContainingLabel } from '@mathesar-component-library-dir/label/LabelController';
+
   import type { BaseInputProps } from './BaseInputTypes';
 
   type $$Props = BaseInputProps;

@@ -1,52 +1,37 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Collapsible } from '@mathesar-component-library';
-  import { getSelectedRowIndex } from '@mathesar/components/sheet';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
+
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { Collapsible } from '@mathesar-component-library';
+
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
+
   import RowActions from './RowActions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
 
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: ({ selection, recordsData } = $tabularData);
-  $: ({ selectedCells } = selection);
-  $: selectedRowIndices = $selectedCells
-    .valuesArray()
-    .map((cell) => getSelectedRowIndex(cell));
-  $: uniquelySelectedRowIndices = Array.from(new Set(selectedRowIndices));
-
-  $: canEditTableRecords = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canEditTableRecords',
-  );
+  $: ({ table, selection, recordsData } = $tabularData);
+  $: selectedRowIds = $selection.rowIds;
+  $: selectedRowCount = selectedRowIds.size;
 </script>
 
 <div class="column-mode-container">
-  {#if uniquelySelectedRowIndices.length}
-    {#if uniquelySelectedRowIndices.length > 1}
+  {#if selectedRowCount > 0}
+    {#if selectedRowCount > 1}
       <span class="records-selected-count">
         {$_('multiple_records_selected', {
-          values: {
-            count: uniquelySelectedRowIndices.length,
-          },
+          values: { count: selectedRowCount },
         })}
       </span>
     {/if}
-    <Collapsible isOpen triggerAppearance="plain">
+    <Collapsible isOpen triggerAppearance="inspector">
       <CollapsibleHeader slot="header" title={$_('actions')} />
       <div slot="content" class="content-container">
         <RowActions
-          selectedRowIndices={uniquelySelectedRowIndices}
+          {table}
+          {selectedRowIds}
           {recordsData}
-          {selection}
           columnsDataStore={$tabularData.columnsDataStore}
-          {canEditTableRecords}
         />
       </div>
     </Collapsible>
@@ -59,7 +44,7 @@
 
 <style lang="scss">
   .column-mode-container {
-    padding-bottom: 1rem;
+    padding-bottom: var(--size-small);
     display: flex;
     flex-direction: column;
   }
@@ -69,11 +54,11 @@
   }
 
   .records-selected-count {
-    padding: 1rem;
+    padding: var(--size-large);
   }
 
   .content-container {
-    padding: 1rem;
+    padding: var(--size-small);
     display: flex;
     flex-direction: column;
 

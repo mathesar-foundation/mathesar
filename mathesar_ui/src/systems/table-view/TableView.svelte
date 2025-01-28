@@ -1,22 +1,22 @@
 <script lang="ts">
+  import { map } from 'iter-tools';
+  import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
 
-  import { ImmutableMap } from '@mathesar-component-library';
+  import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
+  import type { Table } from '@mathesar/models/Table';
+  import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import {
-    getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
-    type TabularDataSelection,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { orderProcessedColumns } from '@mathesar/utils/tables';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
+
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
@@ -25,39 +25,34 @@
   type Context = 'page' | 'widget' | 'shared-consumer-page';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
-
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: canExecuteDDL = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canExecuteDDL',
-  );
 
   export let context: Context = 'page';
-  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let table: Table;
+  export let sheetElement: HTMLElement | undefined = undefined;
 
+  let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
+    'table';
+
+  $: ({ currentRoleOwns } = table.currentAccess);
   $: usesVirtualList = context !== 'widget';
-  $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
-    selection,
-    toast,
-    getRows: () => [
-      ...get(recordsData.savedRecords),
-      ...get(recordsData.newRecords),
-    ],
-    getColumnsMap: () => get(processedColumns),
-    getRecordSummaries: () => get(recordsData.recordSummaries),
+    getCopyingContext: () => ({
+      rowsMap: new Map(
+        map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
+      ),
+      columnsMap: stringifyMapKeys(get(processedColumns)),
+      recordSummaries: get(recordsData.linkedRecordSummaries),
+      selectedRowIds: get(selection).rowIds,
+      selectedColumnIds: get(selection).columnIds,
+    }),
+    showToastInfo: toast.info,
   });
-  $: ({ activeCell } = selection);
-  $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
-    display);
-  $: ({ settings } = table);
-  $: ({ column_order: columnOrder } = settings);
-  $: hasNewColumnButton = allowsDdlOperations;
+  $: ({ horizontalScrollOffset, scrollOffset } = display);
+  $: columnOrder = table.metadata?.column_order ?? [];
+  $: hasNewColumnButton = context !== 'widget' && $currentRoleOwns;
   /**
    * These are separate variables for readability and also to keep the door open
    * to more easily displaying the Table Inspector even if DDL operations are
@@ -65,13 +60,9 @@
    */
   $: supportsTableInspector = context === 'page';
   $: sheetColumns = (() => {
-    const orderedProcessedColumns = orderProcessedColumns(
-      $processedColumns,
-      table,
-    );
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...orderedProcessedColumns.values(),
+      ...$processedColumns.values(),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
@@ -83,51 +74,43 @@
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
     [ID_ADD_NEW_COLUMN, 32],
   ]);
-  $: showTableInspector = $isTableInspectorVisible && supportsTableInspector;
-
-  function selectAndActivateFirstCellOnTableLoad(
-    _isLoading: boolean,
-    _selection: TabularDataSelection,
-    _context: Context,
-  ) {
-    // We only activate the first cell on the page, not in the widget. Doing so
-    // on the widget causes the cell to focus and the page to scroll down to
-    // bring that element into view.
-    if (_context !== 'widget' && !_isLoading) {
-      _selection.selectAndActivateFirstCellIfExists();
-    }
-  }
-
-  function checkAndReinstateFocusOnActiveCell(e: Event) {
-    const target = e.target as HTMLElement;
-    if (!target.closest('[data-sheet-element="cell"')) {
-      if ($activeCell) {
-        selection.focusCell(
-          { rowIndex: $activeCell.rowIndex },
-          { id: Number($activeCell.columnId) },
-        );
-      }
-    }
-  }
-
-  $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection, context);
+  $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
 </script>
 
 <div class="table-view">
-  <WithTableInspector {context} {showTableInspector}>
-    <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
+  <WithTableInspector
+    {context}
+    {showTableInspector}
+    bind:activeTabId={tableInspectorTab}
+  >
+    <div class="sheet-area">
+      {#if $isLoading}
+        <div class="loading-sheet">
+          <Spinner />
+        </div>
+      {/if}
       {#if $processedColumns.size}
         <Sheet
-          columns={sheetColumns}
-          getColumnIdentifier={(entry) => entry.column.id}
-          {usesVirtualList}
-          {columnWidths}
           {clipboardHandler}
-          hasBorder={sheetHasBorder}
-          restrictWidthToRowWidth={!usesVirtualList}
+          {columnWidths}
+          {selection}
+          {usesVirtualList}
+          onCellSelectionStart={(cell) => {
+            if (cell.type === 'column-header-cell') {
+              tableInspectorTab = 'column';
+            }
+            if (cell.type === 'row-header-cell') {
+              tableInspectorTab = 'record';
+            }
+          }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
+          columns={sheetColumns}
+          getColumnIdentifier={(entry) => entry.column.id}
+          hasBorder={sheetHasBorder}
           hasPaddingRight
+          restrictWidthToRowWidth={!usesVirtualList}
+          bind:sheetElement
         >
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
@@ -149,5 +132,11 @@
     position: relative;
     height: 100%;
     overflow-x: auto;
+  }
+  .loading-sheet {
+    text-align: center;
+    font-size: 2rem;
+    padding: 2rem;
+    color: var(--slate-500);
   }
 </style>

@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
-  import { Icon, Button } from '@mathesar-component-library';
+
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import SortEntry from '@mathesar/components/sort-entry/SortEntry.svelte';
   import type { SortDirection } from '@mathesar/components/sort-entry/utils';
   import {
@@ -15,6 +16,11 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import {
+    ButtonMenuItem,
+    DropdownMenu,
+    Icon,
+  } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -22,13 +28,13 @@
   $: ({ processedColumns } = $tabularData);
 
   /** Columns which are not already used as a sorting entry */
-  $: availableColumnIds = [...$processedColumns.values()]
-    .filter((column) => !$sorting.has(column.id))
-    .map((entry) => entry.id);
+  $: availableColumns = [...$processedColumns.values()].filter(
+    (c) => !$sorting.has(c.id),
+  );
+  $: availableColumnIds = availableColumns.map((c) => c.id);
 
-  function addSortColumn() {
-    const [newSortColumnId] = availableColumnIds;
-    sorting.update((s) => s.with(newSortColumnId, 'ASCENDING'));
+  function addSortColumn(columnId: number) {
+    sorting.update((s) => s.with(columnId, 'ASCENDING'));
   }
 
   function removeSortColumn(columnId: number) {
@@ -96,10 +102,18 @@
   </div>
   {#if availableColumnIds.length > 0}
     <div class="footer">
-      <Button appearance="secondary" on:click={addSortColumn}>
-        <Icon {...iconAddNew} />
-        <span>{$_('add_new_sort_condition')}</span>
-      </Button>
+      <DropdownMenu
+        icon={iconAddNew}
+        label={$_('add_new_sort_condition')}
+        disabled={availableColumns.length === 0}
+        triggerAppearance="secondary"
+      >
+        {#each availableColumns as column (column.id)}
+          <ButtonMenuItem on:click={() => addSortColumn(column.id)}>
+            <ProcessedColumnName processedColumn={column} />
+          </ButtonMenuItem>
+        {/each}
+      </DropdownMenu>
     </div>
   {/if}
 </div>

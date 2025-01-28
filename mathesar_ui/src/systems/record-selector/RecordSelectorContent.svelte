@@ -1,31 +1,23 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import { Button, Icon, Spinner } from '@mathesar-component-library';
-  import type { Response as ApiRecordsResponse } from '@mathesar/api/types/tables/records';
-  import { postAPI, States } from '@mathesar/api/utils/requestUtils';
+  import { router } from 'tinro';
+
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import { api } from '@mathesar/api/rpc';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
-  import {
-    buildInputData,
-    buildRecordSummariesForSheet,
-    renderTransitiveRecordSummary,
-  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
-  import { tables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { Button, Icon, Spinner } from '@mathesar-component-library';
+
   import type {
     RecordSelectorController,
     RecordSelectorResult,
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
-
-  const userProfile = getUserProfileStoreFromContext();
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -36,19 +28,18 @@
   /** true when the user is hover on the "Create new record" button. */
   let isHoveringCreate = false;
 
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: canEditTableRecords =
-    $userProfile?.hasPermission({ database, schema }, 'canEditTableRecords') ??
-    false;
   $: ({
+    database,
     constraintsDataStore,
     meta,
     isLoading,
     columnsDataStore,
     recordsData,
-    id: tableId,
+    table,
   } = tabularData);
+  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: canViewTable = $currentRolePrivileges.has('SELECT');
+  $: canInsertRecords = $currentRolePrivileges.has('INSERT');
   $: ({ purpose: rowType } = controller);
   $: ({ columns, fetchStatus } = columnsDataStore);
   $: ({ state: constraintsState } = $constraintsDataStore);
@@ -64,7 +55,10 @@
       controller.submit(result);
     } else if ($rowType === 'navigation') {
       const { recordId } = result;
-      const recordPageUrl = $storeToGetRecordPageUrl({ tableId, recordId });
+      const recordPageUrl = $storeToGetRecordPageUrl({
+        tableId: table.oid,
+        recordId,
+      });
       if (recordPageUrl) {
         router.goto(recordPageUrl);
         controller.cancel();
@@ -72,30 +66,27 @@
     }
   }
 
-  function getDataForNewRecord(): Record<number, unknown> {
+  function getDataForNewRecord(): Record<string, unknown> {
     const pkColumnIds = $columns.filter((c) => c.primary_key).map((c) => c.id);
     return Object.fromEntries($searchFuzzy.without(pkColumnIds));
   }
 
   async function submitNewRecord() {
-    const url = `/api/db/v0/tables/${tableId}/records/`;
-    const body = getDataForNewRecord();
     try {
       isSubmittingNewRecord = true;
-      const response = await postAPI<ApiRecordsResponse>(url, body);
+      const response = await api.records
+        .add({
+          database_id: database.id,
+          table_oid: table.oid,
+          record_def: getDataForNewRecord(),
+          return_record_summaries: true,
+        })
+        .run();
       const record = response.results[0];
       const recordId = getPkValueInRecord(record, $columns);
-      const previewData = response.preview_data ?? [];
-      const tableEntry = $tables.data.get(tableId);
-      const template = tableEntry?.settings?.preview_settings?.template;
-      if (!template) {
-        throw new Error('No record summary template found in API response.');
-      }
-      const recordSummary = renderTransitiveRecordSummary({
-        inputData: buildInputData(record),
-        template,
-        transitiveData: buildRecordSummariesForSheet(previewData),
-      });
+
+      const recordSummary = response.record_summaries?.[recordId] ?? '';
+
       submitResult({ recordId, recordSummary, record });
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -118,7 +109,7 @@
     </div>
   {/if}
 
-  {#if isInitialized}
+  {#if isInitialized && canViewTable}
     <RecordSelectorTable
       {tabularData}
       {controller}
@@ -128,7 +119,13 @@
     />
   {/if}
 
-  {#if isInitialized && !records.length}
+  {#if !canViewTable}
+    <WarningBox fullWidth>
+      {$_('no_privileges_view_table')}
+    </WarningBox>
+  {/if}
+
+  {#if isInitialized && !records.length && canViewTable}
     {#if $isLoading}
       <!--
         This only shows when there are no results. When there are results, the
@@ -149,7 +146,7 @@
   {/if}
 
   <div class="footer">
-    {#if hasSearchQueries && canEditTableRecords}
+    {#if hasSearchQueries && canInsertRecords}
       <div class="button">
         <Button
           size="small"

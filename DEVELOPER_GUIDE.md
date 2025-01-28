@@ -49,7 +49,26 @@ Before getting started with your code changes, read our [Contributor guide](./CO
 
 ## Loading sample data
 
-For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`.
+- Using a CSV File (limited visibility of features):
+
+    For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`.
+
+- Using Mathesar Data Playground (recommended):
+
+    1. Clone the `mathesar-data-playground` repo:
+        ```
+        git clone https://github.com/mathesar-foundation/mathesar-data-playground.git
+        ```
+
+    2. Load the data from sql by running:
+        ```
+        sudo docker exec -i mathesar_dev_db bash -c 'psql -U mathesar' < /path/to/your/cloned/repo/mathesar-data-playground/realistic_library_simulation/simulation_runs/simulation_run_20230106_00.sql
+        ```
+        ```
+        sudo docker exec -i mathesar_dev_db bash -c 'psql -U mathesar' < /path/to/your/cloned/repo/mathesar-data-playground/realistic_library_simulation/simulation_runs/simulation_run_20230106_00_checkouts.sql
+        ```
+    3. [Sync]( https://docs.mathesar.org/user-guide/syncing-db/) these changes from the UI.
+
 
 <!-- TODO add more content about sample data -->
 
@@ -168,6 +187,11 @@ Django uses gettext, which require the `.po` files to be compiled into a more ef
 - To handle pluralization and other complexities, the source translation strings may utilize a special syntax called [JSON with ICU Plurals](https://help.transifex.com/en/articles/6220806-json-with-icu-plurals) (a subset of the [ICU format](https://unicode-org.github.io/icu/userguide/icu/i18n.html)).
 - After making changes to your code, ensure that the source `/en/dict.json` file contains new translation strings, if any.
 - Do not update other translation files. They will be pulled from our translation service provider when the translation process is complete.
+- If you encounter merge conflicts in `en/dict.json`, run this script to automatically resolve them:
+
+    ```
+    python3 mathesar_ui/scripts/i18n/resolve_dict_merge_conflicts.py
+    ```
 
 ## Translation process
 
@@ -216,12 +240,6 @@ If you'd like to manually push or pull translations, follow the instructions in 
 
 1. Commit and push the changes to our repo.
 
-## Demo mode
-
-Mathesar can be run in "demo mode" to meet the specific needs of our [live demo site](https://demo.mathesar.org).
-
-See our [Live demo mode](./demo/README.md) guide for more information on enabling live demo mode locally
-
 
 ## Opening a shell in the container
 
@@ -235,37 +253,6 @@ See our [Live demo mode](./demo/README.md) guide for more information on enablin
 
     ```
     docker exec -it mathesar_dev_db psql -U mathesar
-    ```
-
-
-## Building Debian package
-
-- On a Debian machine, install the following dependencies
-    
-    ```
-    sudo apt install debhelper-compat dh-virtualenv libsystemd-dev libpq-dev libicu-dev pkg-config lsb-release python3-dev python3 python3-setuptools python3-pip python3-venv tar
-    ```
-- Setup Mathesar build environment.
-   This step is useful only when testing locally is needed for building static files and for collecting them. We won't have a need for this step while using the build service as it will be using the source code from release assets which will contain these static files
-
-
-- Install Python and Nodejs preferably on a Linux machine
-- Run the following commands to set up the environment
-
-    ```
-    python3 -m venv ./mathesar-venv
-    source ./mathesar-venv/bin/activate
-    pip install -r requirements.txt
-    sudo npm install -g npm-force-resolutions
-    cd mathesar_ui && npm install --unsafe-perm && npm run build
-    cd ..
-    python manage.py collectstatic
-    ```
-  
-- From the mathesar directory, run the build script to generate the debian package
-  
-    ```
-    cd release-scripts && source build-debian.sh
     ```
  
 ## Troubleshooting

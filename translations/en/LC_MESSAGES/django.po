@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-22 07:32+0000\n"
+"POT-Creation-Date: 2025-01-13 21:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -13,65 +13,97 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: config/settings/common_settings.py:264
-msgid "English"
+#: mathesar/templates/installation/complete_installation.html:3
+msgid "Finalizing Installation..."
 msgstr ""
 
-#: config/settings/common_settings.py:265
-msgid "Japanese"
+#: mathesar/templates/installation/complete_installation.html:5
+#: mathesar/templates/installation/complete_installation.html:268
+msgid "Complete Installation"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:129
+msgid "Finish Setting Up Mathesar"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:132
+msgid "Welcome to Mathesar!"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:135
+msgid ""
+"Create an Admin user to start using Mathesar. You can also choose to share "
+"anonymous data to help us improve."
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:142
+msgid "Create Admin User"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:144
+msgid ""
+"Set up an Admin user account. This account will have full control over your "
+"Mathesar installation."
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:153
+#: mathesar/templates/registration/login.html:16
+msgid "Username"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:170
+#: mathesar/templates/registration/login.html:37
+msgid "Password"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:180
+msgid "Confirm Password"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:193
+msgid "Your password must be at least 8 characters long."
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:194
+msgid "We recommend a mix of letters, numbers, and symbols for added security."
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:228
+msgid "Support Mathesar's Growth"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:237
+msgid "Send a one-time confirmation to let us know you've installed Mathesar"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:240
+msgid "Let our open-source team know we have real users out there."
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:241
+msgid ""
+"No personal data is shared, just an acknowledgment of your installation."
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:243
+#: mathesar/templates/installation/complete_installation.html:259
+msgid "See what's shared."
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:253
+msgid "Enable anonymous usage data collection"
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:256
+msgid "Share anonymous usage data periodically to help us improve features."
+msgstr ""
+
+#: mathesar/templates/installation/complete_installation.html:257
+msgid "No personal data is collected, and you can change this setting anytime."
 msgstr ""
 
 #: mathesar/templates/mathesar/login_base.html:4
 msgid "Login"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:118
-msgid "Unsupported Screen Size"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:120
-msgid ""
-"Mathesar is a spreadsheet-like application with a rich UI that does not yet "
-"function well on screens this small. Improved support for mobile devices is "
-"on our"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:123
-msgid "roadmap"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:127
-msgid ""
-"You can still use this demo site, but some features may not work correctly. "
-"We encourage you to try Mathesar on a device with a larger screen."
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:132
-msgid "Live Demo Mode"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:135
-msgid "Mathesar's live demo is available to anyone to try out."
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:138
-msgid "Use the following credentials to login"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:140
-#: mathesar/templates/registration/login.html:16
-#: mathesar/templates/registration/superuser_create.html:119
-msgid "Username"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:141
-#: mathesar/templates/registration/login.html:37
-#: mathesar/templates/registration/superuser_create.html:144
-msgid "Password"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:145
-msgid "Keep in mind that the data in the live demo is reset regularly."
 msgstr ""
 
 #: mathesar/templates/registration/login.html:3
@@ -84,44 +116,6 @@ msgstr ""
 
 #: mathesar/templates/registration/login.html:65
 msgid "Log In"
-msgstr ""
-
-#: mathesar/templates/registration/superuser_create.html:3
-msgid "Creating Admin User..."
-msgstr ""
-
-#: mathesar/templates/registration/superuser_create.html:5
-#: mathesar/templates/registration/superuser_create.html:111
-#: mathesar/templates/registration/superuser_create.html:215
-msgid "Create Admin User"
-msgstr ""
-
-#: mathesar/templates/registration/superuser_create.html:105
-msgid "Welcome"
-msgstr ""
-
-#: mathesar/templates/registration/superuser_create.html:107
-msgid ""
-"To get started with Mathesar, you need to create an Admin user. This user "
-"will have full control over your Mathesar installation."
-msgstr ""
-
-#: mathesar/templates/registration/superuser_create.html:167
-#, python-format
-msgid ""
-"Your password must be at least 8 characters long and include at least one "
-"number and one special character (e.g., !, @, #, $, %%).Please avoid using "
-"spaces or unicode characters."
-msgstr ""
-
-#: mathesar/templates/registration/superuser_create.html:173
-msgid "Confirm Password"
-msgstr ""
-
-#: mathesar/templates/registration/superuser_create.html:210
-msgid ""
-"Important: You will need this password to log in. Please store it in a "
-"secure location."
 msgstr ""
 
 #: mathesar/templates/users/password_reset_confirmation.html:4
@@ -156,6 +150,6 @@ msgid ""
 "used.  Please request a new password reset."
 msgstr ""
 
-#: mathesar/users/password_reset.py:24
+#: mathesar/views/users/password_reset.py:24
 msgid "Change Default Password"
 msgstr ""

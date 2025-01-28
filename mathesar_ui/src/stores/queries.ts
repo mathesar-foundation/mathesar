@@ -32,282 +32,234 @@
  * to having us use the currentSchemaId store directly.
  */
 
-import { derived, writable, get } from 'svelte/store';
-import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import {
-  deleteAPI,
-  getAPI,
-  postAPI,
-  putAPI,
-  addQueryParamsToUrl,
-} from '@mathesar/api/utils/requestUtils';
-import type {
-  RequestStatus,
-  PaginatedResponse,
-} from '@mathesar/api/utils/requestUtils';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import CacheManager from '@mathesar/utils/CacheManager';
-import type { SchemaEntry } from '@mathesar/AppTypes';
-import type {
-  QueryInstance,
-  QueryGetResponse,
-  QueryRunRequest,
-  QueryRunResponse,
-  QueryResultsResponse,
-} from '@mathesar/api/types/queries';
-import { CancellablePromise } from '@mathesar-component-library';
-import { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
+import { derived, get, writable } from 'svelte/store';
 
-import { currentSchemaId, addCountToSchemaNumExplorations } from './schemas';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type {
+  AddableExploration,
+  ExplorationResult,
+  SavedExploration,
+} from '@mathesar/api/rpc/explorations';
+import type { Database } from '@mathesar/models/Database';
+import type { Schema } from '@mathesar/models/Schema';
+import { getErrorMessage } from '@mathesar/utils/errors';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
+import { type CancellablePromise, collapse } from '@mathesar-component-library';
+
+import { currentSchema } from './schemas';
 
 const commonData = preloadCommonData();
 
-export type UnsavedQueryInstance = Partial<QueryInstance>;
-
 export interface QueriesStoreSubstance {
-  schemaId: SchemaEntry['id'];
+  databaseId?: Database['id'];
+  schemaOid?: Schema['oid'];
   requestStatus: RequestStatus;
-  data: Map<QueryInstance['id'], QueryInstance>;
+  data: Map<SavedExploration['id'], SavedExploration>;
 }
 
-// Cache the query list of the last 3 opened schemas
-const schemasCacheManager = new CacheManager<
-  SchemaEntry['id'],
-  Writable<QueriesStoreSubstance>
->(3);
+function makeEmptyQueriesStoreSubstance(): QueriesStoreSubstance {
+  return {
+    data: new Map(),
+    requestStatus: { state: 'success' },
+  };
+}
 
-const requestMap: Map<
-  SchemaEntry['id'],
-  CancellablePromise<PaginatedResponse<QueryInstance>>
-> = new Map();
+const queriesStore = writable(makeEmptyQueriesStoreSubstance());
 
-function sortedQueryEntries(queryEntries: QueryInstance[]): QueryInstance[] {
+function sortedQueryEntries(
+  queryEntries: SavedExploration[],
+): SavedExploration[] {
   return [...queryEntries].sort((a, b) => a.name?.localeCompare(b.name));
 }
 
-function setSchemaQueriesStore(
-  schemaId: SchemaEntry['id'],
-  queryEntries?: QueryInstance[],
-): Writable<QueriesStoreSubstance> {
+function setExplorationsStore(
+  schema: Schema,
+  queryEntries: SavedExploration[],
+) {
   const queries: QueriesStoreSubstance['data'] = new Map();
-  if (queryEntries) {
-    sortedQueryEntries(queryEntries).forEach((entry) => {
-      queries.set(entry.id, entry);
-    });
-  }
+  sortedQueryEntries(queryEntries).forEach((entry) => {
+    queries.set(entry.id, entry);
+  });
 
-  const storeValue: QueriesStoreSubstance = {
-    schemaId,
-    requestStatus: { state: 'success' },
+  queriesStore.set({
+    databaseId: schema.database.id,
+    schemaOid: schema.oid,
     data: queries,
-  };
-
-  let store = schemasCacheManager.get(schemaId);
-  if (!store) {
-    store = writable(storeValue);
-    schemasCacheManager.set(schemaId, store);
-  } else {
-    store.set(storeValue);
-  }
-  return store;
+    requestStatus: { state: 'success' },
+  });
 }
 
-function findSchemaStoreForQuery(id: QueryInstance['id']) {
-  return [...schemasCacheManager.cache.values()].find((entry) =>
-    get(entry).data.has(id),
-  );
-}
+let request: CancellablePromise<SavedExploration[]>;
 
-export async function refetchQueriesForSchema(
-  schemaId: SchemaEntry['id'],
-): Promise<QueriesStoreSubstance | undefined> {
-  const store = schemasCacheManager.get(schemaId);
-  if (!store) {
-    console.error(`Queries store for schema: ${schemaId} not found.`);
-    return undefined;
+export async function fetchExplorationsForCurrentSchema(): Promise<void> {
+  request?.cancel();
+
+  const $currentSchema = get(currentSchema);
+  if (!$currentSchema) {
+    queriesStore.set(makeEmptyQueriesStoreSubstance());
+    return;
   }
 
   try {
-    store.update((currentData) => ({
-      ...currentData,
-      requestStatus: { state: 'processing' },
-    }));
+    queriesStore.update(($queriesStore) => {
+      if (
+        $queriesStore.databaseId === $currentSchema.database.id &&
+        $queriesStore.schemaOid === $currentSchema.oid
+      ) {
+        return {
+          ...$queriesStore,
+          requestStatus: { state: 'processing' },
+        };
+      }
+      return {
+        databaseId: $currentSchema.database.id,
+        schemaOid: $currentSchema.oid,
+        data: new Map(),
+        requestStatus: { state: 'processing' },
+      };
+    });
 
-    requestMap.get(schemaId)?.cancel();
+    request = api.explorations
+      .list({
+        database_id: $currentSchema.database.id,
+        schema_oid: $currentSchema.oid,
+      })
+      .run();
 
-    const queriesRequest = getAPI<PaginatedResponse<QueryInstance>>(
-      `/api/db/v0/queries/?schema=${schemaId}&limit=500`,
-    );
-    requestMap.set(schemaId, queriesRequest);
-
-    const response = await queriesRequest;
-    const queriesResult = response.results || [];
-
-    const schemaQueriesStore = setSchemaQueriesStore(schemaId, queriesResult);
-
-    return get(schemaQueriesStore);
+    const queriesResult = await request;
+    setExplorationsStore($currentSchema, queriesResult);
   } catch (err) {
-    store.update((currentData) => ({
-      ...currentData,
-      requestStatus: {
-        state: 'failure',
-        errors: [
-          err instanceof Error ? err.message : 'Error in fetching schemas',
-        ],
-      },
-    }));
-    return undefined;
+    queriesStore.update(($queriesStore) => {
+      if (
+        $queriesStore.databaseId === $currentSchema.database.id &&
+        $queriesStore.schemaOid === $currentSchema.oid
+      ) {
+        return {
+          ...$queriesStore,
+          requestStatus: {
+            state: 'failure',
+            errors: [getErrorMessage(err)],
+          },
+        };
+      }
+      return {
+        databaseId: $currentSchema.database.id,
+        schemaOid: $currentSchema.oid,
+        data: new Map(),
+        requestStatus: {
+          state: 'failure',
+          errors: [getErrorMessage(err)],
+        },
+      };
+    });
   }
+}
+
+function putExplorationInStore(exploration: SavedExploration) {
+  const $currentSchema = get(currentSchema);
+  if (!$currentSchema) {
+    return;
+  }
+
+  if (
+    exploration.database_id === $currentSchema.database.id &&
+    exploration.schema_oid === $currentSchema.oid
+  ) {
+    const queryData = get(queriesStore).data.set(exploration.id, exploration);
+    setExplorationsStore($currentSchema, [...queryData.values()]);
+  }
+}
+
+export function addExploration(
+  exploration: AddableExploration,
+): CancellablePromise<SavedExploration> {
+  const promise = api.explorations.add({ exploration_def: exploration }).run();
+  void promise.then((savedExploration) => {
+    putExplorationInStore(savedExploration);
+    return savedExploration;
+  });
+  return promise;
+}
+
+export function replaceExploration(
+  exploration: SavedExploration,
+): CancellablePromise<SavedExploration> {
+  const promise = api.explorations
+    .replace({ new_exploration: exploration })
+    .run();
+
+  void promise.then((newlySavedExploration) => {
+    putExplorationInStore(newlySavedExploration);
+    return newlySavedExploration;
+  });
+
+  return promise;
+}
+
+export function getExploration(
+  id: SavedExploration['id'],
+): CancellablePromise<SavedExploration> {
+  return api.explorations.get({ exploration_id: id }).run();
+}
+
+export function runSavedExploration(
+  id: number,
+  params: {
+    limit: number;
+    offset: number;
+  },
+): CancellablePromise<ExplorationResult> {
+  return api.explorations
+    .run_saved({
+      exploration_id: id,
+      limit: params.limit,
+      offset: params.offset,
+    })
+    .run();
+}
+
+export function deleteExploration(id: number): CancellablePromise<void> {
+  const promise = api.explorations.delete({ exploration_id: id }).run();
+
+  const $queriesStore = get(queriesStore);
+  const $currentSchema = get(currentSchema);
+  if (
+    $queriesStore.databaseId === $currentSchema?.database.id &&
+    $queriesStore.schemaOid === $currentSchema?.oid
+  ) {
+    $queriesStore.data.delete(id);
+    queriesStore.update((store) => ({
+      ...store,
+      data: new Map($queriesStore.data),
+    }));
+  }
+
+  return promise;
 }
 
 let preload = true;
 
-export function getQueriesStoreForSchema(
-  schemaId: SchemaEntry['id'],
-): Writable<QueriesStoreSubstance> {
-  let store = schemasCacheManager.get(schemaId);
-  if (!store) {
-    store = writable({
-      schemaId,
-      requestStatus: { state: 'processing' },
-      data: new Map(),
-    });
-    schemasCacheManager.set(schemaId, store);
-    if (preload && commonData.current_schema === schemaId) {
-      store = setSchemaQueriesStore(schemaId, commonData.queries ?? []);
-    } else {
-      void refetchQueriesForSchema(schemaId);
+export const queries = collapse(
+  derived(currentSchema, ($currentSchema) => {
+    const $queriesStore = get(queriesStore);
+    if (
+      $queriesStore.databaseId !== $currentSchema?.database.id ||
+      $queriesStore.schemaOid !== $currentSchema?.oid
+    ) {
+      if (
+        preload &&
+        commonData.current_schema === $currentSchema?.oid &&
+        commonData.current_database === $currentSchema?.database.id
+      ) {
+        setExplorationsStore($currentSchema, commonData.queries);
+      } else {
+        void fetchExplorationsForCurrentSchema();
+      }
+      preload = false;
+    } else if ($queriesStore.requestStatus.state === 'failure') {
+      void fetchExplorationsForCurrentSchema();
     }
-    preload = false;
-  } else if (get(store).requestStatus.state === 'failure') {
-    void refetchQueriesForSchema(schemaId);
-  }
-  return store;
-}
-
-export const queries: Readable<Omit<QueriesStoreSubstance, 'schemaId'>> =
-  derived(currentSchemaId, ($currentSchemaId, set) => {
-    let unsubscribe: Unsubscriber;
-
-    if (!$currentSchemaId) {
-      set({
-        requestStatus: { state: 'success' },
-        data: new Map(),
-      });
-    } else {
-      const store = getQueriesStoreForSchema($currentSchemaId);
-      unsubscribe = store.subscribe((dbSchemasData) => {
-        set(dbSchemasData);
-      });
-    }
-
-    return () => {
-      unsubscribe?.();
-    };
-  });
-
-export function createQuery(
-  newQuery: UnsavedQueryInstance,
-): CancellablePromise<QueryGetResponse> {
-  const promise = postAPI<QueryGetResponse>('/api/db/v0/queries/', newQuery);
-  void promise.then((instance) => {
-    addCountToSchemaNumExplorations(instance.schema, 1);
-    void refetchQueriesForSchema(instance.schema);
-    return instance;
-  });
-  return promise;
-}
-
-export function putQuery(
-  query: QueryInstance,
-): CancellablePromise<QueryInstance> {
-  const promise = putAPI<QueryInstance>(
-    `/api/db/v0/queries/${query.id}/`,
-    query,
-  );
-  void promise.then((result) => {
-    // TODO: Get schemaId as a query property
-    const schemaId = get(currentSchemaId);
-    if (schemaId) {
-      const store = getQueriesStoreForSchema(schemaId);
-      get(store).data.set(query.id, result);
-      setSchemaQueriesStore(schemaId, [...get(store).data.values()]);
-    }
-    return undefined;
-  });
-  return promise;
-}
-
-export function getQuery(
-  queryId: QueryInstance['id'],
-): CancellablePromise<QueryInstance> {
-  // TODO: Get schemaId as a query property
-  const schemaId = get(currentSchemaId);
-  let innerRequest: CancellablePromise<QueryInstance>;
-  if (schemaId) {
-    return new CancellablePromise<QueryInstance>(
-      (resolve, reject) => {
-        const store = getQueriesStoreForSchema(schemaId);
-        const storeSubstance = get(store);
-        const queryResponse = storeSubstance.data.get(queryId);
-        if (queryResponse) {
-          resolve(queryResponse);
-          return;
-        }
-        if (storeSubstance.requestStatus.state !== 'success') {
-          innerRequest = getAPI<QueryInstance>(
-            `/api/db/v0/queries/${queryId}/`,
-          );
-          void innerRequest.then(
-            (result) => resolve(result),
-            (reason) => reject(reason),
-          );
-        } else {
-          reject(new Error('Query not found'));
-        }
-      },
-      () => {
-        innerRequest?.cancel();
-      },
-    );
-  }
-  return new CancellablePromise((resolve) => resolve());
-}
-
-export function runQuery(
-  request: QueryRunRequest,
-): CancellablePromise<QueryRunResponse> {
-  return postAPI('/api/db/v0/queries/run/', request);
-}
-
-export function fetchQueryResults(
-  queryId: number,
-  params?: {
-    limit: number;
-    offset: number;
-    [SHARED_LINK_UUID_QUERY_PARAM]?: string;
-  },
-): CancellablePromise<QueryResultsResponse> {
-  const url = addQueryParamsToUrl(
-    `/api/db/v0/queries/${queryId}/results/`,
-    params,
-  );
-  return getAPI(url);
-}
-
-export function deleteQuery(queryId: number): CancellablePromise<void> {
-  const promise = deleteAPI<void>(`/api/db/v0/queries/${queryId}/`);
-
-  void promise.then(() => {
-    const store = findSchemaStoreForQuery(queryId);
-    if (store) {
-      store.update((storeData) => {
-        storeData.data.delete(queryId);
-        return { ...storeData, data: new Map(storeData.data) };
-      });
-      addCountToSchemaNumExplorations(get(store).schemaId, -1);
-    }
-    return undefined;
-  });
-  return promise;
-}
+    return queriesStore;
+  }),
+);

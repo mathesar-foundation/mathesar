@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import type {
     ColumnsDataStore,
@@ -10,7 +11,7 @@
 
   export let column: ProcessedColumn;
   export let columnsDataStore: ColumnsDataStore;
-  export let canExecuteDDL: boolean;
+  export let currentRoleOwnsTable: boolean;
 
   $: ({ columns } = columnsDataStore);
 
@@ -50,22 +51,22 @@
 </script>
 
 <div class="column-property column-name">
-  <span>{$_('name')}</span>
+  <span class="label">{$_('column_name')}</span>
   <EditableTextWithActions
     initialValue={column.column.name}
     onSubmit={handleColumnNameChange}
     {getValidationErrors}
-    disabled={!canExecuteDDL}
+    disabled={!currentRoleOwnsTable}
   />
 </div>
 
 <div class="column-property column-description">
-  <span>{$_('description')}</span>
+  <span class="label">{$_('column_description')}</span>
   <EditableTextWithActions
     initialValue={column.column.description ?? ''}
     onSubmit={handleColumnDescriptionChange}
     isLongText
-    disabled={!canExecuteDDL}
+    disabled={!currentRoleOwnsTable}
   />
 </div>
 
@@ -75,7 +76,7 @@
     flex-direction: column;
 
     > :global(* + *) {
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
     }
   }
 </style>

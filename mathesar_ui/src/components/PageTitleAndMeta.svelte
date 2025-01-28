@@ -3,8 +3,9 @@
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
   export let icon: IconProps;
-  export let type: string | undefined = undefined;
   export let name: string;
+  export let entityTypeName: string | undefined = undefined;
+  export let subText: string | undefined = undefined;
 </script>
 
 <div class="container">
@@ -12,13 +13,16 @@
     <div class="left">
       <div class="entity-container">
         <div class="entity-icon">
-          <Icon {...icon} size="2em" />
+          <Icon {...icon} size="1.5em" />
         </div>
         <div class="left-meta-container">
-          {#if type}
-            <span class="entity-type">{type}</span>
+          {#if entityTypeName}
+            <span class="entity-type-name">{entityTypeName}</span>
           {/if}
           <span class="entity-name">{name}</span>
+          {#if subText}
+            <span>{subText}</span>
+          {/if}
         </div>
       </div>
     </div>
@@ -56,7 +60,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: var(--border-radius-l);
+    border-radius: 50%;
     color: var(--white);
   }
 
@@ -64,17 +68,20 @@
     display: flex;
     flex-direction: column;
     margin-left: 0.75rem;
+    gap: var(--size-super-ultra-small);
   }
 
-  .entity-type {
-    font-size: var(--text-size-small);
-    font-weight: 600;
+  .entity-type-name {
+    font-size: var(--text-size-x-small);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--sand-700);
     text-transform: uppercase;
   }
 
   .entity-name {
     font-weight: 500;
-    font-size: var(--text-size-ultra-large);
+    font-size: var(--text-size-xx-large);
     line-height: 1;
   }
 </style>

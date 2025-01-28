@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { Constraint } from '@mathesar/api/types/tables/constraints';
+  import type { Constraint } from '@mathesar/api/rpc/constraints';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
   export let constraint: Constraint;
@@ -46,7 +45,7 @@
     font-size: var(--text-size-small);
     background-color: var(--slate-200);
     border-radius: var(--border-radius-xl);
-    padding: 0.285rem 0.428rem;
+    padding: 0.25rem 0.75rem;
     margin-bottom: var(--size-super-ultra-small);
   }
 </style>

@@ -2,10 +2,11 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
-  import { preloadRouteData } from '@mathesar/utils/preloadData';
+
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
-  import { currentTableId, tables } from '@mathesar/stores/tables';
+  import { currentTableId, currentTablesData } from '@mathesar/stores/tables';
+  import { preloadRouteData } from '@mathesar/utils/preloadData';
   import { ShareConsumer } from '@mathesar/utils/shares';
 
   const routeSpecificData = preloadRouteData<{ table_id: number | null }>(
@@ -16,7 +17,7 @@
 
   $: tableId = routeSpecificData?.table_id ?? undefined;
   $: $currentTableId = tableId ?? undefined;
-  $: table = tableId ? $tables.data.get(tableId) : undefined;
+  $: table = tableId ? $currentTablesData.tablesMap.get(tableId) : undefined;
   $: shareConsumer = new ShareConsumer({
     slug,
   });

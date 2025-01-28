@@ -1,14 +1,17 @@
-import type { DurationUnit } from '@mathesar/api/types/tables/columns';
+import {
+  type DurationUnit,
+  allDurationUnits,
+  defaultColumnMetadata,
+} from '@mathesar/api/rpc/columns';
 
 export interface DurationConfig {
   max: DurationUnit;
   min: DurationUnit;
 }
 
-const allUnits: DurationUnit[] = ['d', 'h', 'm', 's', 'ms'];
 const defaults: DurationConfig = {
-  max: 'm',
-  min: 's',
+  max: defaultColumnMetadata.duration_max,
+  min: defaultColumnMetadata.duration_min,
 };
 
 const formattingTokens: Record<DurationUnit, string> = {
@@ -30,18 +33,20 @@ export default class DurationSpecification {
   }
 
   getUnitsInRange(): DurationUnit[] {
-    return allUnits.slice(
-      allUnits.indexOf(this.max),
-      allUnits.indexOf(this.min) + 1,
+    return allDurationUnits.slice(
+      allDurationUnits.indexOf(this.max),
+      allDurationUnits.indexOf(this.min) + 1,
     );
   }
 
   getHigherUnit(unit: DurationUnit): DurationUnit | null {
-    const higherUnit = allUnits[allUnits.indexOf(unit) - 1];
+    const higherUnit = allDurationUnits[allDurationUnits.indexOf(unit) - 1];
     if (!higherUnit) {
       return null;
     }
-    if (allUnits.indexOf(higherUnit) < allUnits.indexOf(this.max)) {
+    if (
+      allDurationUnits.indexOf(higherUnit) < allDurationUnits.indexOf(this.max)
+    ) {
       return null;
     }
     return higherUnit;
@@ -62,7 +67,7 @@ export default class DurationSpecification {
   }
 
   static getAllUnits(): DurationUnit[] {
-    return allUnits;
+    return [...allDurationUnits];
   }
 
   static getDefaults(): DurationConfig {

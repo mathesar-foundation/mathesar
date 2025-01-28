@@ -1,6 +1,6 @@
+import { type Writable, writable } from 'svelte/store';
+
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
-import type { Writable } from 'svelte/store';
-import { writable } from 'svelte/store';
 import type { ModalController } from '@mathesar-component-library-dir/modal';
 import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
 
@@ -9,18 +9,18 @@ interface ButtonDetails {
   icon?: IconProps;
 }
 
-export interface ConfirmationProps {
+export interface ConfirmationProps<T> {
   title?: string | ComponentAndProps;
   /** An array of strings will be transformed into paragraphs. */
   body: string | string[] | ComponentAndProps;
   proceedButton: ButtonDetails;
   cancelButton: ButtonDetails;
-  onProceed: () => Promise<void>;
-  onSuccess: () => void;
+  onProceed: () => Promise<T>;
+  onSuccess: (value: T) => void;
   onError: (error: Error) => void;
 }
 
-const baseConfirmationProps: ConfirmationProps = {
+const baseConfirmationProps: ConfirmationProps<unknown> = {
   body: 'Are you sure?',
   proceedButton: {
     label: 'Yes',
@@ -36,7 +36,7 @@ const baseConfirmationProps: ConfirmationProps = {
 export class ConfirmationController {
   modal: ModalController;
 
-  confirmationProps: Writable<ConfirmationProps>;
+  confirmationProps: Writable<ConfirmationProps<unknown>>;
 
   resolve = writable<(isConfirmed: boolean) => void>(() => {});
 
@@ -44,7 +44,7 @@ export class ConfirmationController {
 
   constructor(
     modalController: ModalController,
-    initialConfirmationProps: ConfirmationProps,
+    initialConfirmationProps: ConfirmationProps<unknown>,
   ) {
     this.modal = modalController;
     this.confirmationProps = writable(initialConfirmationProps);
@@ -52,7 +52,7 @@ export class ConfirmationController {
 }
 
 interface MakeConfirm {
-  confirm: (props: Partial<ConfirmationProps>) => Promise<boolean>;
+  confirm: <T>(props: Partial<ConfirmationProps<T>>) => Promise<boolean>;
   confirmationController: ConfirmationController;
 }
 
@@ -61,7 +61,7 @@ export function makeConfirm({
   defaultConfirmationProps,
 }: {
   confirmationModal: ModalController;
-  defaultConfirmationProps?: ConfirmationProps;
+  defaultConfirmationProps?: ConfirmationProps<unknown>;
 }): MakeConfirm {
   const fullDefaultConfirmationProps = {
     ...baseConfirmationProps,
@@ -71,16 +71,19 @@ export function makeConfirm({
     confirmationModal,
     fullDefaultConfirmationProps,
   );
-  async function confirm(props: Partial<ConfirmationProps>) {
-    return new Promise<boolean>((resolve) => {
-      controller.resolve.set(resolve);
-      controller.canProceed.set(true);
-      controller.confirmationProps.set({
+  return {
+    async confirm(props) {
+      const fullProps = {
         ...fullDefaultConfirmationProps,
         ...props,
+      } as ConfirmationProps<unknown>;
+      return new Promise<boolean>((resolve) => {
+        controller.resolve.set(resolve);
+        controller.canProceed.set(true);
+        controller.confirmationProps.set(fullProps);
+        controller.modal.open();
       });
-      controller.modal.open();
-    });
-  }
-  return { confirm, confirmationController: controller };
+    },
+    confirmationController: controller,
+  };
 }
