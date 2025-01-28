@@ -232,7 +232,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     ```
 
 
-1. Install Mathesar functions on the database:
+1. Run Django migrations and collect static files:
 
     ```
     python -m mathesar.install --skip-confirm | tee /tmp/install.py.log

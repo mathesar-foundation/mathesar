@@ -110,7 +110,7 @@ Restart the docker containers for the configuration to take effect.
 If you'd like to use an external PostgreSQL server for Mathesar's internal database, you'll need to do the following:
 
 
-1. On the external PostgreSQL server, [create a new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) for Mathesar to store its metadata.
+1. On your PostgreSQL server, [create a new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) for Mathesar to store its metadata.
 
     ```bash
     psql -c 'create database mathesar_django;'
