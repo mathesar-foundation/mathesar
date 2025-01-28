@@ -1,8 +1,9 @@
 # Usage Data Collection
 
-You can opt-in to allow Mathesar to gather anonymized usage data. This is very valuable to us to help us improve Mathesar’s features, performance, and stability,  through understanding how Mathesar is being used, enabling us to identify areas to improve the user experience, and allowing us to track adoption and ensure the reliability of the tool.
+You can opt-in to allow Mathesar to gather anonymized usage data. This is very valuable to us to help us improve Mathesar’s features, performance, and stability, through understanding how Mathesar is being used, enabling us to identify areas to improve the user experience, and allowing us to track adoption and ensure the reliability of the tool.
 
 ## Data Sent
+
 When you've opted-in to usage data collection, the following information is sent every 24 hours:
 
 - **created_at**: A timestamp giving the time the report was created.
@@ -19,4 +20,4 @@ When you've opted-in to usage data collection, the following information is sent
 
 ## Viewing Actual Reports
 
-If you'd like to see an actual report from your running Mathesar installation, go to the path `/info/analytics_sample_report/` at the domain where you connect to Mathesar. You can also call the RPC function [`analytics.view_report`](/api/methods#analytics.view_report).
+If you'd like to see an actual report from your running Mathesar installation, go to the path `/info/analytics_sample_report/` at the domain where you connect to Mathesar. You can also call the RPC function [`analytics.view_report`](../../api/methods#analytics.view_report).

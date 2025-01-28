@@ -1,6 +1,6 @@
 # Upgrade Mathesar
 
-!!! warning "Mathesar 0.2.0 cannot be upgraded"
+!!! warning "Mathesar cannot be upgraded to version 0.2.0"
     You'll need to reinstall Mathesar to use Mathesar 0.2.0, our initial beta release. Upgrading from our alpha versions is not supported.
 
 The steps to upgrade Mathesar vary by release.
