@@ -165,7 +165,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
         touch .env
         ```
 
-    1. Edit your `.env` file, adding [environment variables](./configuration.md) to configure Mathesar.
+    1. Edit your `.env` file, adding [environment variables](./environment-variables.md) to configure Mathesar.
 
         !!! example
             Your `.env` file should look something like this
@@ -182,7 +182,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             ```
 
         !!! tip
-            To generate a [`SECRET_KEY`](./configuration.md#secret_key) you can use this [browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
+            To generate a [`SECRET_KEY`](./environment-variables.md#secret_key) you can use this [browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
 
             ```
             echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)

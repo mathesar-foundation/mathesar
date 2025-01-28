@@ -1,4 +1,4 @@
-# Uninstall Mathesar
+# TODO: Uninstall Mathesar
 
 The uninstall instructions vary depending on the [installation method](../index.md#installing-mathesar) you chose. Select your installation method below to proceed.
 
@@ -29,7 +29,7 @@ The uninstall instructions vary depending on the [installation method](../index.
 {% include 'snippets/uninstall-schemas.md' %}
 
 
-## Uninstall a Guided script or Docker compose installation of Mathesar
+## Uninstall a guided script or Docker compose installation of Mathesar
 
 1. Remove all Mathesar Docker images and containers.
 

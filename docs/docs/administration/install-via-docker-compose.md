@@ -116,4 +116,4 @@ If you'd like to use an external PostgreSQL server for Mathesar's internal datab
     psql -c 'create database mathesar_django;'
     ```
 
-1. Configure the [internal database environment variables](./configuration.md#db) to point to the database you just created. Ensure that you change the default values for the user, password, and host.
+1. Configure the [internal database environment variables](./environment-variables.md#db) to point to the database you just created. Ensure that you change the default values for the user, password, and host.
