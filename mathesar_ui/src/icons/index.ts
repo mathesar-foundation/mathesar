@@ -57,6 +57,7 @@ import {
   faShapes,
   faShareFromSquare,
   faSlash,
+  faSliders,
   faSnowflake,
   faSort,
   faSortAmountDown,
@@ -188,6 +189,7 @@ export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSettingsMajor: IconProps = { data: faGear };
+export const iconSettingsMinor: IconProps = { data: faSliders };
 export const iconShortcuts: IconProps = { data: faStar };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: tableIcon };
