@@ -1614,10 +1614,10 @@ Don’t worry—<strong>your databases can still be migrated to <code>0.2.0</cod
 <h2 id="improvements">Improvements<a class="headerlink" href="#improvements" title="Permanent link">&para;</a></h2>
 <h3 id="permissions">New access control system based on PostgreSQL roles and privileges<a class="headerlink" href="#permissions" title="Permanent link">&para;</a></h3>
 <p>We&rsquo;ve completely redesigned Mathesar&rsquo;s <a href="../../user-guide/access-control/">access controls</a> to leverage PostgreSQL&rsquo;s powerful system of roles and privileges. Each Mathesar user will now be assigned to a specific PostgreSQL role so that all their operations on the underlying database will be performed using that role.</p>
-<p><img alt="A screenshot of Mathesar's UI showing the &quot;Add Collaborator&quot; modal for a database." src="/assets/releases/0.2.0/add-collaborator.png" /></p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Add Collaborator&quot; modal for a database." src="../../assets/releases/0.2.0/add-collaborator.png" /></p>
 <p>The new system gives Mathesar several new capabilities. You can use Mathesar to configure roles and privileges in PostgreSQL and to set granular access control at the individual schema and table level. Plus Mathesar will respect all these configurations when performed directly in PostgreSQL by database administrators outside of Mathesar. Mathesar also no longer needs a database superuser for day-to-day operations.</p>
-<p><img alt="A screenshot of Mathesar's UI depicting the &quot;Roles&quot; database settings page, where roles and their dependent child roles can be managed." src="/assets/releases/0.2.0/showcase-roles.png" /></p>
-<p><img alt="A screenshot of Mathesar's UI showing the &quot;Permissions&quot; modal for a table, where privleges can be granted to the different database roles." src="/assets/releases/0.2.0/showcase-table-permissions.png" /></p>
+<p><img alt="A screenshot of Mathesar's UI depicting the &quot;Roles&quot; database settings page, where roles and their dependent child roles can be managed." src="../../assets/releases/0.2.0/showcase-roles.png" /></p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Permissions&quot; modal for a table, where privleges can be granted to the different database roles." src="../../assets/releases/0.2.0/showcase-table-permissions.png" /></p>
 <p><a href="https://github.com/mathesar-foundation/mathesar/pull/3626" title="Initial permissions remodel">#3626</a>
 <a href="https://github.com/mathesar-foundation/mathesar/pull/3663" title="Implement RPC endpoint for listing roles in server">#3663</a>
 <a href="https://github.com/mathesar-foundation/mathesar/pull/3665" title="Initial database_setup RPC functions">#3665</a>
@@ -1802,11 +1802,11 @@ Some pages in the library management schema that would demo perf improvements we
 <a href="https://github.com/mathesar-foundation/mathesar/pull/4105" title="Fix fieldset legend displaying undefined">#4105</a></p>
 <h3 id="table-exports">Table exports<a class="headerlink" href="#table-exports" title="Permanent link">&para;</a></h3>
 <p>You can now use Mathesar to <a href="../../user-guide/exporting-data/">export a table</a> to a CSV file. Any filters and sorting that you&rsquo;ve applied to the table will be reflected in the exported data. And all relevant records will be included in the export, even if they are not shown on the current page within Mathesar.</p>
-<p><img alt="A screenshot of Mathesar's UI showing the &quot;Export&quot; button on a table page." src="/assets/releases/0.2.0/export-button-table-view-arrow.png" /></p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Export&quot; button on a table page." src="../../assets/releases/0.2.0/export-button-table-view-arrow.png" /></p>
 <p><a href="https://github.com/mathesar-foundation/mathesar/pull/4090" title="Add ability to export tables">#4090</a></p>
 <h3 id="more-options-when-disconnecting-a-database">More options when disconnecting a database<a class="headerlink" href="#more-options-when-disconnecting-a-database" title="Permanent link">&para;</a></h3>
 <p>When disconnecting a database from Mathesar, you can now choose to remove the Mathesar schemas from the database.</p>
-<p><img alt="A screenshot of Mathesar's UI showing the &quot;Disconnect Database&quot; modal, with all options selected except &quot;Specify a role&quot;." src="/assets/releases/0.2.0/disconnect-db.png" /></p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Disconnect Database&quot; modal, with all options selected except &quot;Specify a role&quot;." src="../../assets/releases/0.2.0/disconnect-db.png" /></p>
 <p><a href="https://github.com/mathesar-foundation/mathesar/pull/4122" title="Function to remove Mathesar schemas and disconnect DB">#4122</a>
 <a href="https://github.com/mathesar-foundation/mathesar/pull/4136" title="Allow disconnecting server via databases.configured.disconnect">#4136</a>
 <a href="https://github.com/mathesar-foundation/mathesar/pull/4124" title="Implement new UI for disconnecting DBs">#4124</a></p>
@@ -1832,7 +1832,7 @@ Some pages in the library management schema that would demo perf improvements we
 <h3 id="optional-anonymous-usage-reporting">Optional (anonymous) usage reporting<a class="headerlink" href="#optional-anonymous-usage-reporting" title="Permanent link">&para;</a></h3>
 <p>To help us better understand the ways in which people are using Mathesar, we&rsquo;ve added a new feature which periodically reports anonymous usage data about each Mathesar installation to the maintainers team. Upon installing (or upgrading to) Mathesar 0.2.0, Mathesar will give you an opportunity to opt out of usage data collection if you so choose. You can access this setting later by visiting the &ldquo;Administration&rdquo; &gt; &ldquo;Privacy&rdquo; page within Mathesar.</p>
 <p>This usage data will help us make Mathesar better! And it will help us demonstrate Mathesar&rsquo;s traction and impact to potential donors — so we encourage you to enable it.</p>
-<p><img alt="A screenshot of Mathesar's UI showing the &quot;Privacy&quot; page with a checkbox to opt out of data collection." src="/assets/releases/0.2.0/usage-stats.png" /></p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Privacy&quot; page with a checkbox to opt out of data collection." src="../../assets/releases/0.2.0/usage-stats.png" /></p>
 <p>We do not collect any personal or sensitive data!</p>
 <div class="admonition info">
 <p class="admonition-title">Here is a sample of the anonymous usage data we collect:</p>
