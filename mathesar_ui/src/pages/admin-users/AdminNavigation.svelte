@@ -4,11 +4,11 @@
 
   import {
     iconMultipleUsers,
-    iconPrivacy,
     iconSettingsMajor,
+    iconSettingsMinor,
   } from '@mathesar/icons';
   import {
-    ADMIN_PRIVACY_PAGE_URL,
+    ADMIN_SETTINGS_PAGE_URL,
     ADMIN_UPDATE_PAGE_URL,
     ADMIN_USERS_PAGE_URL,
   } from '@mathesar/routes/urls';
@@ -47,12 +47,12 @@
     </a>
     <a
       role="menuitem"
-      href={ADMIN_PRIVACY_PAGE_URL}
+      href={ADMIN_SETTINGS_PAGE_URL}
       class="menu-item menu-item-link"
       use:active
     >
-      <MenuItemContents icon={iconPrivacy}>
-        {$_('privacy')}
+      <MenuItemContents icon={iconSettingsMinor}>
+        {$_('settings')}
       </MenuItemContents>
     </a>
   </Menu>
