@@ -1,7 +1,7 @@
 <p align="center">
     <img src="https://user-images.githubusercontent.com/845767/218793207-a84a8c9e-d147-40a8-839b-f2b5d8b1ccba.png" width=450px alt="Mathesar logo"/>
 </p>
-<p align="center"><b>An intuitive, open source UI to view, edit, and query Postgres data—easy to deploy with robust access control.</b></p>
+<p align="center"><b>An intuitive spreadsheet-like interface that lets users of all technical skill levels view, edit, query, and collaborate on Postgres data directly—100% open source and self hosted, with native Postgres access control.</b></p>
 <p align="center">
     <img alt="License" src="https://img.shields.io/github/license/mathesar-foundation/mathesar">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/mathesar-foundation/mathesar">
@@ -14,10 +14,9 @@
 
 
 # Mathesar
-Mathesar is an open source application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to **view, edit, and query data** with a familiar **spreadsheet-like interface**—no code needed. It **can be deployed in minute**s, and works **directly with PostgreSQL** databases, schemas, and tables without extra abstractions. The project is **100% open source** and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.
+Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface—no code needed. It’s self hosted, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions. The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.
 
-Mathesar is as scalable as Postgres and supports any size or complexity of data, making it **ideal for workflows involving production databases**. It requires minimal setup, and integrates into **your existing infrastructure**. Because Mathesar is self-hosted, your data never leaves your servers, and **access control based on Postgres roles and privileges** keeps your database secure without adding unnecessary risk.
-
+Mathesar is as scalable as Postgres and supports any size or complexity of data, making it ideal for workflows involving production databases. It requires minimal setup, and integrates into your existing infrastructure. Because Mathesar is self-hosted, your data never leaves your servers, and access control based on Postgres roles and privileges keeps your database secure without adding unnecessary risk.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
