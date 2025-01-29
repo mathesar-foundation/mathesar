@@ -60,13 +60,16 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 
 ## Features
 - **Built on Postgres**: Connect to an existing Postgres database or set one up from scratch.
+- **Install in minutes**: Install using Docker in minutes, integrate into any existing infrastructure.
+- **Postgres-based access control**: Use existing Postgres roles within Mathesar's UI, or set up your own.
+- **Interoperable with other tools**: Mathesar works harmoniously alongside your database and thousands of other tools in the Postgres ecosystem.
 - **Set up your data models**: Easily create and update Postgres schemas and tables.
 - **Data entry**: Use our spreadsheet-like interface to view, create, update, and delete table records.
 - **Filter, sort, and group**: Quickly slice your data in different ways.
-- **Postgres-based access control**: Use existing Postgres roles within Mathesar's UI, or set up your own.
 - **Query builder**: Use our Data Explorer to build queries without knowing anything about SQL or joins.
+- **Import and export data**: Import and export data into Mathesar easily to work with your data elsewhere.
 - **Schema migrations**: Transfer columns between tables in two clicks.
-- **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Links" in the UI are foreign keys in the database.
+- **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Relationships" in the UI are foreign keys in the database.
 - **Custom data types**: Custom data types for emails and URLs, validated at the database level.
 
 ## Screeenshots
