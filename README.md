@@ -50,12 +50,13 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
 
 We are currently in the **public beta** stage.
 
-## Installing Mathesar
+## Install Mathesar
 Please see [our documentation](https://docs.mathesar.org/?ref=github-readme-installing) for instructions on installing Mathesar on your own server.
 
-## Community & Contributing
+## Join our community
 The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list.
 
+### Contribute to Mathesar
 We actively encourage contribution! Get started by reading our [Contributor Guide](./CONTRIBUTING.md).
 
 ## Features
