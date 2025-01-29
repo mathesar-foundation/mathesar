@@ -24,8 +24,9 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
 **Table of Contents**
 
 - [Status](#status)
-- [Installing Mathesar](#installing-mathesar)
-- [Community & Contributing](#community--contributing)
+- [Install Mathesar](#install-mathesar)
+- [Join our community](#join-our-community)
+  - [Contribute to Mathesar](#contribute-to-mathesar)
 - [Features](#features)
 - [Screeenshots](#screeenshots)
   - [Connecting a database](#connecting-a-database)
