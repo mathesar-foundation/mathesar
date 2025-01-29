@@ -23,14 +23,21 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Sponsors](#sponsors)
 - [Status](#status)
-- [Join our community!](#join-our-community)
-- [Screenshots](#screenshots)
+- [Installing Mathesar](#installing-mathesar)
+- [Community & Contributing](#community--contributing)
 - [Features](#features)
-- [Self-hosting](#self-hosting)
+- [Screeenshots](#screeenshots)
+  - [Connecting a database](#connecting-a-database)
+  - [Adding collaborators](#adding-collaborators)
+  - [Viewing a Postgres schema](#viewing-a-postgres-schema)
+  - [Working with tables](#working-with-tables)
+  - [Finding a nested record](#finding-a-nested-record)
+  - [Managing table permissions](#managing-table-permissions)
+  - [Viewing a single record with related records](#viewing-a-single-record-with-related-records)
+  - [Disconnecting a database](#disconnecting-a-database)
+- [Mathesar in action](#mathesar-in-action)
 - [Our motivation](#our-motivation)
-- [Contributing](#contributing)
 - [Bugs and troubleshooting](#bugs-and-troubleshooting)
 - [License](#license)
 
