@@ -292,7 +292,7 @@ def import_(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return import_csv(data_file_id, table_name, schema_oid, conn, comment)
+        return import_csv(user, data_file_id, table_name, schema_oid, conn, comment)
 
 
 @mathesar_rpc_method(name="tables.get_import_preview", auth="login")

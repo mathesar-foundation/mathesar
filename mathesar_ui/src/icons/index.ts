@@ -43,6 +43,7 @@ import {
   faLock,
   faMicroscope,
   faPalette,
+  faPaperPlane,
   faPaste,
   faPencilAlt,
   faPlug,
@@ -56,6 +57,7 @@ import {
   faShapes,
   faShareFromSquare,
   faSlash,
+  faSliders,
   faSnowflake,
   faSort,
   faSortAmountDown,
@@ -145,6 +147,7 @@ export const iconSave: IconProps = { data: faSave };
 /** Open the record selector */
 export const iconSelectRecord: IconProps = { data: faSearchPlus };
 export const iconSetToNull: IconProps = { data: faBackspace };
+export const iconSend: IconProps = { data: faPaperPlane };
 export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };
 export const iconUndo: IconProps = { data: faUndo };
@@ -179,12 +182,14 @@ export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
+export const iconMessage: IconProps = { data: faEnvelope };
 export const iconMultipleRecords: IconProps = { data: faCopy };
 export const iconOutcome: IconProps = { data: outcomeIcon };
 export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSettingsMajor: IconProps = { data: faGear };
+export const iconSettingsMinor: IconProps = { data: faSliders };
 export const iconShortcuts: IconProps = { data: faStar };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: tableIcon };

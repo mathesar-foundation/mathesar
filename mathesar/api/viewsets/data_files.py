@@ -50,7 +50,7 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         serializer = DataFileSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         try:
-            datafile = create_datafile(serializer.validated_data)
+            datafile = create_datafile(serializer.validated_data, user=request.user)
         except InvalidTableError as e:
             raise mathesar.api.exceptions.data_import_exceptions.exceptions.InvalidTableAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = DataFileSerializer(datafile, context={'request': request})

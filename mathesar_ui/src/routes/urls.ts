@@ -125,7 +125,7 @@ export const ADMIN_URL = '/administration/';
 export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
 export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
-export const ADMIN_PRIVACY_PAGE_URL = `${ADMIN_URL}privacy/`;
+export const ADMIN_SETTINGS_PAGE_URL = `${ADMIN_URL}settings/`;
 export const LOGOUT_URL = '/auth/logout/';
 
 export function getEditUsersPageUrl(userId: number) {
@@ -141,7 +141,7 @@ export function getSharedExplorationPageUrl(slug: string): string {
 }
 
 const docsPages = {
-  analytics: '/analytics/',
+  usageDataCollection: '/user-guide/usage-data-collection/',
   collaborators: '/user-guide/collaborators/',
   databasePermissions: '/user-guide/databases/#permissions',
   databases: '/user-guide/databases/',
@@ -168,8 +168,9 @@ export function getDocsLink(page: DocsPage): string {
 }
 
 const marketingPages = {
-  community: '/community/',
-  donate: '/donate/',
+  community: '/community',
+  donate: '/donate',
+  privacy: '/privacy',
 };
 
 export type MarketingPage = keyof typeof marketingPages;
