@@ -91,6 +91,8 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 ### Finding a nested record
 ![record-selector](https://github.com/user-attachments/assets/b3d12cb4-e90b-458b-8e19-8371c1332557)
 
+### Linking two tables together
+
 ### Managing table permissions
 ![table-permissions](https://github.com/user-attachments/assets/094d3c98-8c4c-4cfa-aad5-6fd3faa30473)
 
