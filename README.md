@@ -35,6 +35,8 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
   - [Finding a nested record](#finding-a-nested-record)
   - [Managing table permissions](#managing-table-permissions)
   - [Viewing a single record with related records](#viewing-a-single-record-with-related-records)
+  - [Viewing an Exploration (query result)](#viewing-an-exploration-query-result)
+  - [Building an Exploration (query)](#building-an-exploration-query)
   - [Disconnecting a database](#disconnecting-a-database)
 - [Mathesar in action](#mathesar-in-action)
 - [Our motivation](#our-motivation)
