@@ -33,8 +33,11 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
   - [Viewing a Postgres schema](#viewing-a-postgres-schema)
   - [Working with tables](#working-with-tables)
   - [Finding a nested record](#finding-a-nested-record)
+  - [Linking two tables together](#linking-two-tables-together)
   - [Managing table permissions](#managing-table-permissions)
   - [Viewing a single record with related records](#viewing-a-single-record-with-related-records)
+  - [Viewing an Exploration (query result)](#viewing-an-exploration-query-result)
+  - [Building an Exploration (query)](#building-an-exploration-query)
   - [Disconnecting a database](#disconnecting-a-database)
 - [Mathesar in action](#mathesar-in-action)
 - [Our motivation](#our-motivation)
@@ -89,11 +92,20 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 ### Finding a nested record
 ![record-selector](https://github.com/user-attachments/assets/b3d12cb4-e90b-458b-8e19-8371c1332557)
 
+### Linking two tables together
+![relationship-creation](https://github.com/user-attachments/assets/faf8e82c-d165-495a-a9eb-bf76ec9a9283)
+
 ### Managing table permissions
 ![table-permissions](https://github.com/user-attachments/assets/094d3c98-8c4c-4cfa-aad5-6fd3faa30473)
 
 ### Viewing a single record with related records
 ![record-page](https://github.com/user-attachments/assets/00774552-2acb-4a01-87d6-1813f579e757)
+
+### Viewing an Exploration (query result)
+![viewing-exploration](https://github.com/user-attachments/assets/0df680d3-621d-466a-9915-d560001a3931)
+
+### Building an Exploration (query)
+![building-exploration](https://github.com/user-attachments/assets/7ff100fe-cd26-4229-af3b-a5a5bb70b0b7)
 
 ### Disconnecting a database
 ![disconnect-db](https://github.com/user-attachments/assets/48905983-a632-4632-b2c1-b0f25c3b6e75)
