@@ -95,6 +95,12 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 ### Viewing a single record with related records
 ![record-page](https://github.com/user-attachments/assets/00774552-2acb-4a01-87d6-1813f579e757)
 
+### Viewing an Exploration (query result)
+![viewing-exploration](https://github.com/user-attachments/assets/0df680d3-621d-466a-9915-d560001a3931)
+
+### Building an Exploration (query)
+![building-exploration](https://github.com/user-attachments/assets/7ff100fe-cd26-4229-af3b-a5a5bb70b0b7)
+
 ### Disconnecting a database
 ![disconnect-db](https://github.com/user-attachments/assets/48905983-a632-4632-b2c1-b0f25c3b6e75)
 
