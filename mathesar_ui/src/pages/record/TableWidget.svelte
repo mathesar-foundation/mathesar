@@ -48,7 +48,7 @@
 
   <div class="results">
     {#if canViewTable}
-      <TableView context="widget" {table} />
+      <TableView context="widget" showLoadingSpinner={false} {table} />
     {:else}
       <WarningBox fullWidth>
         {$_('no_privileges_view_table')}

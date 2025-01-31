@@ -29,6 +29,7 @@
   export let context: Context = 'page';
   export let table: Table;
   export let sheetElement: HTMLElement | undefined = undefined;
+  export let showLoadingSpinner = true;
 
   let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
     'table';
@@ -84,7 +85,7 @@
     bind:activeTabId={tableInspectorTab}
   >
     <div class="sheet-area">
-      {#if $isLoading}
+      {#if $isLoading && showLoadingSpinner}
         <div class="loading-sheet">
           <Spinner />
         </div>
