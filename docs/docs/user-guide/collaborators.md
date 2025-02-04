@@ -13,10 +13,10 @@ Note that with collaborators, a user's role is set _per-database_. This means th
 !!! info "Prerequisites"
     Before you can add a new collaborator:
 
-    - Your [database](./databases.md) must be connected already.
-    - The [user](./users.md) must already exist in Mathesar.
-    - The [role](./roles.md) must already exist in PostgreSQL. (If needed, uou can use Mathesar to [add new role](./roles.md#managing) before creating a collaborator.)
-    - TODO
+    - Your [database](./databases.md) must be connected already
+    - The [user](./users.md) must already exist in Mathesar
+    - The [role](./roles.md) must already exist in PostgreSQL (you can [use Mathesar](./roles.md#managing))
+    - A password must be [stored](./stored-role-passwords.md) for the role
 
 1. Navigate to the page for your connected database.
 1. Click on the **Database Settings** tab.
