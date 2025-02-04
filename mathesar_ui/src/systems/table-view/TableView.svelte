@@ -84,11 +84,6 @@
     bind:activeTabId={tableInspectorTab}
   >
     <div class="sheet-area">
-      {#if $isLoading}
-        <div class="loading-sheet">
-          <Spinner />
-        </div>
-      {/if}
       {#if $processedColumns.size}
         <Sheet
           {clipboardHandler}
@@ -115,6 +110,10 @@
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
         </Sheet>
+      {:else if $isLoading}
+        <div class="loading-sheet">
+          <Spinner />
+        </div>
       {/if}
     </div>
   </WithTableInspector>
