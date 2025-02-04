@@ -14,7 +14,7 @@ nav:
       - Uninstall Mathesar: administration/uninstall.md
       - Debugging Mathesar: administration/debug.md
       - Postgres & Python Versions: administration/version-support.md
-      
+
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
@@ -41,16 +41,16 @@ nav:
       - Overview: api/index.md
       - Methods: api/methods.md
   - Releases:
-      - '0.2.0': releases/0.2.0.md
+      - "0.2.0": releases/0.2.0.md
       - Previous Releases:
-          - '0.1.7': releases/0.1.7.md
-          - '0.1.6': releases/0.1.6.md
-          - '0.1.5': releases/0.1.5.md
-          - '0.1.4': releases/0.1.4.md
-          - '0.1.3': releases/0.1.3.md
-          - '0.1.2': releases/0.1.2.md
-          - '0.1.1': releases/0.1.1.md
-          - '0.1.0': releases/0.1.0.md
+          - "0.1.7": releases/0.1.7.md
+          - "0.1.6": releases/0.1.6.md
+          - "0.1.5": releases/0.1.5.md
+          - "0.1.4": releases/0.1.4.md
+          - "0.1.3": releases/0.1.3.md
+          - "0.1.2": releases/0.1.2.md
+          - "0.1.1": releases/0.1.1.md
+          - "0.1.0": releases/0.1.0.md
 
 plugins:
   - search:
@@ -87,10 +87,10 @@ plugins:
             group_by_category: false
   - spellcheck:
       backends:
-      - codespell:
-          dictionaries: [clear]
+        - codespell:
+            dictionaries: [clear]
       known_words:
-      - Mathesar
+        - Mathesar
       ignore_code: yes
       min_length: 2
       max_capital: 1
@@ -106,8 +106,8 @@ theme:
     - navigation.sections
     - navigation.expand
   font:
-    text: Nunito Sans
-    code: Fira Code
+    text: Inter
+    code: JetBrains Mono
   icon:
     repo: fontawesome/brands/github
   palette:
