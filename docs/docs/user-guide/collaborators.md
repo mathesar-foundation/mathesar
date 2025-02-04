@@ -17,7 +17,6 @@ Note that with collaborators, a user's role is set _per-database_. This means th
     - The [user](./users.md) must already exist in Mathesar
     - The [role](./roles.md) must already exist in PostgreSQL (you can [use Mathesar](./roles.md#managing))
     - A password must be [stored](./stored-role-passwords.md) for the role
-    - TODO
 
 1. Navigate to the page for your connected database.
 1. Click on the **Database Settings** tab.
