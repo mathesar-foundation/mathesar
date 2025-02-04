@@ -47,7 +47,16 @@
     
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
-      <script async defer src="https://sa.mathesar.org/latest.js"></script>
+      <!--
+ Simple Analytics
+  
+ This script integrates Simple Analytics into the site by overriding analytics.html directly from mkdocs-material.
+ 
+ References:
+ - https://squidfunk.github.io/mkdocs-material/customization/#setup-and-theme-structure
+ - https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-analytics/#custom-site-analytics
+-->
+<script async defer src="https://sa.mathesar.org/latest.js"></script>
 <noscript>
   <img src="https://sa.mathesar.org/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" />
 </noscript>
@@ -1197,7 +1206,7 @@
 
 
 <h1 id="mathesar-documentation">Mathesar Documentation<a class="headerlink" href="#mathesar-documentation" title="Permanent link">&para;</a></h1>
-<p>Mathesar is a self-hostable open source web application that provides a spreadsheet-like interface to PostgreSQL databases. Our web-based interface helps you and your collaborators set up data models, edit data, and build custom reports &mdash; no technical skills needed. You can create a new PostgreSQL database while setting up Mathesar or use our UI to interact with an existing database (or do both).</p>
+<p>Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface—no code needed. It has native database-level access control, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions. The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.</p>
 <h2 id="try-mathesar">Try Mathesar<a class="headerlink" href="#try-mathesar" title="Permanent link">&para;</a></h2>
 <p>This is a quick way to play with Mathesar locally, but is not appropriate for saving data that you care about or setting up a long-term installation.</p>
 <ol>
