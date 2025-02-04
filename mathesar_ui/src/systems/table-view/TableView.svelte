@@ -29,7 +29,6 @@
   export let context: Context = 'page';
   export let table: Table;
   export let sheetElement: HTMLElement | undefined = undefined;
-  export let showLoadingSpinner = true;
 
   let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
     'table';
@@ -85,11 +84,6 @@
     bind:activeTabId={tableInspectorTab}
   >
     <div class="sheet-area">
-      {#if $isLoading && showLoadingSpinner}
-        <div class="loading-sheet">
-          <Spinner />
-        </div>
-      {/if}
       {#if $processedColumns.size}
         <Sheet
           {clipboardHandler}
@@ -116,6 +110,10 @@
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
         </Sheet>
+      {:else if $isLoading}
+        <div class="loading-sheet">
+          <Spinner />
+        </div>
       {/if}
     </div>
   </WithTableInspector>
