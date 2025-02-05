@@ -33,6 +33,7 @@ class Server(BaseModel):
 
 class Database(BaseModel):
     name = models.CharField(max_length=128)
+    nickname = models.CharField(null=True)
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='databases'
     )
