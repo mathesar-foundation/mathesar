@@ -143,7 +143,7 @@
   "data_explorer": "Data Explorer",
   "data_loss_warning_alert": "Data loss can result from changing the data type of a column. This action cannot be undone.",
   "data_source": "Data Source",
-  "data_tabular_format_help": "The data must be in tabular format (CSV, TSV etc) or JSON. See relevant [documentationLink](documentation).",
+  "data_tabular_format_help": "The data must be in tabular format (CSV, TSV etc). See relevant [documentationLink](documentation).",
   "data_type": "Data Type",
   "data_type_linked_column_restricted": "The data type of this column must match the referenced column and cannot be changed.",
   "data_type_pk_column_restricted": "The data type of the primary key column is restricted and cannot be changed.",
