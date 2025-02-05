@@ -14,7 +14,7 @@ nav:
       - Uninstall Mathesar: administration/uninstall.md
       - Debugging Mathesar: administration/debug.md
       - Postgres & Python Versions: administration/version-support.md
-      
+
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
@@ -106,8 +106,8 @@ theme:
     - navigation.sections
     - navigation.expand
   font:
-    text: Nunito Sans
-    code: Fira Code
+    text: Inter
+    code: JetBrains Mono
   icon:
     repo: fontawesome/brands/github
   palette:
