@@ -6,7 +6,7 @@
   import { getMarketingLink } from '@mathesar/routes/urls';
 </script>
 
-<ResourceCard icon={iconCommunityChat} href={getMarketingLink('community')}>
-  <span slot="title">{$_('chat_with_community')}</span>
-  <span slot="description">{$_('connect_with_community_help')}</span>
+<ResourceCard icon={iconCommunityChat} href={getMarketingLink('mailingList')}>
+  <span slot="title">{$_('stay_informed')}</span>
+  <span slot="description">{$_('join_mailing_list_help')}</span>
 </ResourceCard>

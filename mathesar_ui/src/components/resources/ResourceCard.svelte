@@ -7,26 +7,28 @@
   export let icon: IconProps;
 </script>
 
-<div class="resource-card">
-  <div class="title"><Icon {...icon} /> <slot name="title" /></div>
-  <div class="description"><slot name="description" /></div>
-  <div class="button">
-    <AnchorButton appearance="secondary" {href} target="_blank">
-      <slot name="link-text" />
-      <Icon {...iconExternalHyperlink} />
-    </AnchorButton>
+<a class="resource-card" {href} target="_blank">
+  <div class="title">
+    <span>
+      <Icon {...icon} />
+      <slot name="title" />
+    </span>
+    <Icon {...iconExternalHyperlink} />
   </div>
-</div>
+  <div class="description"><slot name="description" /></div>
+</a>
 
 <style>
   .resource-card {
     border-radius: var(--border-radius-l);
     display: flex;
     flex-direction: column;
-    gap: var(--size-x-small);
+    gap: var(--size-ultra-small);
+    text-decoration: none;
   }
   .title {
     font-weight: 500;
+    text-decoration: underline;
   }
   .description {
     color: var(--color-text-muted);

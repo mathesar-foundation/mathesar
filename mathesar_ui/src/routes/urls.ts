@@ -171,6 +171,7 @@ const marketingPages = {
   community: '/community',
   donate: '/donate',
   privacy: '/privacy',
+  mailingList: '/mailing-list',
 };
 
 export type MarketingPage = keyof typeof marketingPages;
