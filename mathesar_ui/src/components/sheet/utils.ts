@@ -1,7 +1,11 @@
 import { getContext, setContext } from 'svelte';
 import type { Readable } from 'svelte/store';
 
-import { defaultColumnWidthPx } from '@mathesar/geometry';
+import {
+  defaultColumnWidthPx,
+  maxColumnWidthPx,
+  minColumnWidthPx,
+} from '@mathesar/geometry';
 import type { ImmutableMap } from '@mathesar-component-library/types';
 
 export interface ColumnPosition {
@@ -35,6 +39,11 @@ export interface SheetContext<SheetColumnIdentifierKey> {
 
 const SHEET_CONTEXT_KEY = {};
 
+export function normalizeColumnWidth(width: number | undefined): number {
+  if (!width) return defaultColumnWidthPx;
+  return Math.max(minColumnWidthPx, Math.min(maxColumnWidthPx, width));
+}
+
 export function calculateColumnStyleMapAndRowWidth<
   SheetColumnType,
   SheetColumnIdentifierKey,
@@ -51,7 +60,7 @@ export function calculateColumnStyleMapAndRowWidth<
   const map = new Map<SheetColumnIdentifierKey, ColumnPosition>();
   columns.forEach((column) => {
     const key = getColumnIdentifier(column);
-    const width = customizedColumnWidths.get(key) ?? defaultColumnWidthPx;
+    const width = normalizeColumnWidth(customizedColumnWidths.get(key));
     map.set(key, {
       left,
       width,

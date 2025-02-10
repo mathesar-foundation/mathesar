@@ -2,7 +2,6 @@
   import { onMount, tick } from 'svelte';
   import { writable } from 'svelte/store';
 
-  import { defaultColumnWidthPx } from '@mathesar/geometry';
   import {
     type ClipboardHandler,
     getClipboardHandlerStoreFromContext,
@@ -19,6 +18,7 @@
   import {
     calculateColumnStyleMapAndRowWidth,
     focusActiveCell,
+    normalizeColumnWidth,
     setSheetContext,
   } from './utils';
 
@@ -77,13 +77,7 @@
   setSheetContext({
     stores,
     api: {
-      getColumnWidth: (id) => {
-        const customWidth = columnWidths.get(id);
-        if (customWidth !== undefined) {
-          return customWidth;
-        }
-        return defaultColumnWidthPx;
-      },
+      getColumnWidth: (id) => normalizeColumnWidth(columnWidths.get(id)),
       setColumnWidth: (key, width) => {
         columnWidths = columnWidths.with(key, width);
       },
