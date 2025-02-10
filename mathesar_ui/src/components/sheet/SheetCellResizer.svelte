@@ -9,6 +9,7 @@
 
   export let minColumnWidth = 50;
   export let columnIdentifierKey: SheetColumnIdentifierKey;
+  export let afterResize: (width: number) => void = () => {};
 
   let isResizing = false;
 
@@ -25,8 +26,9 @@
     onStart: () => {
       isResizing = true;
     },
-    onStop: () => {
+    onStop: (value) => {
       isResizing = false;
+      afterResize(value);
     },
     min: minColumnWidth,
   }}

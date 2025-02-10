@@ -30,7 +30,7 @@
   export let table: Table;
 
   $: columnOrder = columnOrder ?? [];
-  $: ({ selection, processedColumns } = $tabularData);
+  $: ({ selection, processedColumns, columnsDataStore } = $tabularData);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
   let selectedColumnIdsOrdered: number[] = [];
@@ -98,6 +98,10 @@
     selectedColumnIdsOrdered = [];
     newColumnOrder = [];
   }
+
+  function saveColumnWidth(column: ProcessedColumn, width: number) {
+    void columnsDataStore.setDisplayOptions(column, { display_width: width });
+  }
 </script>
 
 <SheetHeader>
@@ -128,7 +132,10 @@
           <HeaderCell {processedColumn} {isSelected} />
         </Droppable>
       </Draggable>
-      <SheetCellResizer columnIdentifierKey={columnId} />
+      <SheetCellResizer
+        columnIdentifierKey={columnId}
+        afterResize={(width) => saveColumnWidth(processedColumn, width)}
+      />
       <ContextMenu>
         <ColumnHeaderContextMenu {processedColumn} />
       </ContextMenu>
