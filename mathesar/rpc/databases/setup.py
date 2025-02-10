@@ -1,7 +1,7 @@
 """
 RPC functions for setting up database connections.
 """
-from typing import TypedDict
+from typing import TypedDict, Optional
 
 from modernrpc.core import REQUEST_KEY
 
@@ -42,6 +42,7 @@ def create_new(
         *,
         database: str,
         sample_data: list[str] = [],
+        nickname: str,
         **kwargs
 ) -> DatabaseConnectionResult:
     """
@@ -62,10 +63,11 @@ def create_new(
             - 'library_makerspace'
             - 'museum_exhibits'
             - 'nonprofit_grants'
+        nickname: An optional nickname for the database.
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_new_database_for_user_on_internal_server(
-        database, user, sample_data=sample_data
+        database, nickname, user, sample_data=sample_data
     )
     return DatabaseConnectionResult.from_model(result)
 
@@ -79,6 +81,7 @@ def connect_existing(
         role: str,
         password: str,
         sample_data: list[str] = [],
+        nickname: Optional[str],
         **kwargs
 ) -> DatabaseConnectionResult:
     """
@@ -103,9 +106,10 @@ def connect_existing(
             - 'library_makerspace'
             - 'museum_exhibits'
             - 'nonprofit_grants'
+        nickname: An optional nickname for the database.
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_preexisting_database_for_user(
-        host, port, database, role, password, user, sample_data=sample_data
+        host, port, database, nickname, role, password, user, sample_data=sample_data
     )
     return DatabaseConnectionResult.from_model(result)

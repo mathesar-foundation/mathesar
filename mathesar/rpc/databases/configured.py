@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, Optional
 
 from modernrpc.core import REQUEST_KEY
 
@@ -18,12 +18,14 @@ class ConfiguredDatabaseInfo(TypedDict):
             were confirmed to have been run on this database.
         needs_upgrade_attention: This is `True` if the SQL version isn't the
             same as the service version.
+        nickname: A optional user-configurable name for the database.
     """
     id: int
     name: str
     server_id: int
     last_confirmed_sql_version: str
     needs_upgrade_attention: bool
+    nickname: Optional[str]
 
     @classmethod
     def from_model(cls, model):
@@ -33,7 +35,18 @@ class ConfiguredDatabaseInfo(TypedDict):
             server_id=model.server.id,
             last_confirmed_sql_version=model.last_confirmed_sql_version,
             needs_upgrade_attention=model.needs_upgrade_attention,
+            nickname=model.nickname,
         )
+
+
+class ConfiguredDatabasePatch(TypedDict):
+    """
+    Information to be changed about a configured database
+
+    Attributes:
+        nickname: A optional user-configurable name for the database.
+    """
+    nickname: Optional[str]
 
 
 @mathesar_rpc_method(name="databases.configured.list", auth='login')
@@ -63,6 +76,25 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
         )
 
     return [ConfiguredDatabaseInfo.from_model(db_model) for db_model in database_qs]
+
+
+@mathesar_rpc_method(name="databases.configured.patch")
+def patch(*, database_id: int, patch: ConfiguredDatabasePatch, **kwargs) -> ConfiguredDatabaseInfo:
+    """
+    Patch a configured database, given its id.
+
+    Args:
+        database_id: The Django id of the database
+        patch: A ConfiguredDatabasePatch object containing the fields to update.
+
+    Returns:
+        The ConfiguredDatabaseInfo describing the database.
+    """
+    database = Database.objects.get(id=database_id)
+    if "nickname" in patch:
+        database.nickname = patch.get("nickname")
+    database.save()
+    return ConfiguredDatabaseInfo.from_model(database)
 
 
 @mathesar_rpc_method(name="databases.configured.disconnect")
