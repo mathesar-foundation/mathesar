@@ -1,10 +1,5 @@
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
-import { defaultColumnWidthPx } from '@mathesar/geometry';
-import { WritableMap } from '@mathesar-component-library';
-
-import type { ColumnsDataStore } from './columns';
-import type { Meta } from './meta';
 import { type RecordsData, type Row, filterRecordRows } from './records';
 
 export interface ColumnPlacement {
@@ -28,73 +23,20 @@ export function getCellStyle(
 }
 
 export class Display {
-  private meta: Meta;
-
-  private columnsDataStore: ColumnsDataStore;
-
   private recordsData: RecordsData;
 
   scrollOffset: Writable<number>;
 
   horizontalScrollOffset: Writable<number>;
 
-  /**
-   * @deprecated
-   * Keys are column ids. Values are column widths in px.
-   *
-   * `customizedColumnWidths` is separate from `columnPlacements` to keep the
-   * column resizing decoupled from the columns data until we determine how the
-   * column widths will be persisted. At some point we will likely read/write
-   * the column widths through the columns API, which will make both
-   * `customizedColumnWidths` and `columnPlacements` irrelevant. Until then,
-   * this decouple design keeps the column resizing logic isolated from other
-   * code.
-   */
-  customizedColumnWidths: WritableMap<number, number>;
-
-  /** @deprecated Keys are column ids. */
-  columnPlacements: Readable<Map<number, ColumnPlacement>>;
-
-  /** @deprecated In px */
-  rowWidth: Readable<number>;
-
   displayableRecords: Readable<Row[]>;
 
   placeholderRowId: Readable<string>;
 
-  constructor(
-    meta: Meta,
-    columnsDataStore: ColumnsDataStore,
-    recordsData: RecordsData,
-  ) {
-    this.meta = meta;
-    this.columnsDataStore = columnsDataStore;
+  constructor(recordsData: RecordsData) {
     this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
     this.scrollOffset = writable(0);
-
-    this.customizedColumnWidths = new WritableMap();
-
-    this.columnPlacements = derived(
-      [this.columnsDataStore.columns, this.customizedColumnWidths],
-      ([columns, customizedColumnWidths]) => {
-        let left = 0;
-        const map = new Map<number, ColumnPlacement>();
-        columns.forEach(({ id }) => {
-          const width = customizedColumnWidths.get(id) ?? defaultColumnWidthPx;
-          map.set(id, { width, left });
-          left += width;
-        });
-        return map;
-      },
-    );
-
-    this.rowWidth = derived(this.columnPlacements, (placements) =>
-      [...placements.values()].reduce(
-        (width, placement) => width + placement.width,
-        0,
-      ),
-    );
 
     const placeholderRowId = writable('');
     this.placeholderRowId = placeholderRowId;
