@@ -57,38 +57,6 @@
     paddingRight,
   ));
 
-  function getColumnWidth(
-    columnIdentifierKey: SheetColumnIdentifierKey,
-  ): number {
-    const customWidth = columnWidths.get(columnIdentifierKey);
-    if (typeof customWidth !== 'undefined') {
-      return customWidth;
-    }
-    const isColumnValid = columns.some(
-      (entry) => getColumnIdentifier(entry) === columnIdentifierKey,
-    );
-    if (isColumnValid) {
-      return defaultColumnWidthPx;
-    }
-    return 0;
-  }
-
-  const api = {
-    getColumnWidth,
-    setColumnWidth: (key: SheetColumnIdentifierKey, width: number) => {
-      columnWidths = columnWidths.with(key, width);
-    },
-    resetColumnWidth: (key: SheetColumnIdentifierKey) => {
-      columnWidths = columnWidths.without(key);
-    },
-    setHorizontalScrollOffset: (offset: number) => {
-      horizontalScrollOffset = offset;
-    },
-    setScrollOffset: (offset: number) => {
-      scrollOffset = offset;
-    },
-  };
-
   const selectionInProgress = writable(false);
   const stores = {
     columnStyleMap: writable(columnStyleMap),
@@ -106,7 +74,30 @@
   $: stores.scrollOffset.set(scrollOffset);
   $: stores.paddingRight.set(paddingRight);
 
-  setSheetContext({ stores, api });
+  setSheetContext({
+    stores,
+    api: {
+      getColumnWidth: (id) => {
+        const customWidth = columnWidths.get(id);
+        if (customWidth !== undefined) {
+          return customWidth;
+        }
+        return defaultColumnWidthPx;
+      },
+      setColumnWidth: (key, width) => {
+        columnWidths = columnWidths.with(key, width);
+      },
+      resetColumnWidth: (key) => {
+        columnWidths = columnWidths.without(key);
+      },
+      setHorizontalScrollOffset: (offset) => {
+        horizontalScrollOffset = offset;
+      },
+      setScrollOffset: (offset) => {
+        scrollOffset = offset;
+      },
+    },
+  });
 
   $: style = restrictWidthToRowWidth ? `width:${rowWidth}px;` : undefined;
 
