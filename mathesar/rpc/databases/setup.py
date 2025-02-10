@@ -42,7 +42,7 @@ def create_new(
         *,
         database: str,
         sample_data: list[str] = [],
-        nickname: str,
+        nickname: Optional[str] = None,
         **kwargs
 ) -> DatabaseConnectionResult:
     """
@@ -81,7 +81,7 @@ def connect_existing(
         role: str,
         password: str,
         sample_data: list[str] = [],
-        nickname: Optional[str],
+        nickname: Optional[str] = None,
         **kwargs
 ) -> DatabaseConnectionResult:
     """
