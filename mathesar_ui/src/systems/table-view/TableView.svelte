@@ -21,6 +21,7 @@
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
+  import { getCustomizedColumnWidths } from './tableViewUtils';
 
   type Context = 'page' | 'widget' | 'shared-consumer-page';
 
@@ -70,9 +71,10 @@
     return columns;
   })();
 
-  const columnWidths = new ImmutableMap([
+  $: columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
     [ID_ADD_NEW_COLUMN, 32],
+    ...getCustomizedColumnWidths($processedColumns.values()),
   ]);
   $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
 </script>
