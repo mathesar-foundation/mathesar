@@ -1,4 +1,4 @@
-import { defaultColumnWidthPx } from '@mathesar/geometry';
+import { DEFAULT_COLUMN_WIDTH_PX } from '@mathesar/geometry';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 export type BooleanInputType = 'checkbox' | 'dropdown';
@@ -129,7 +129,7 @@ export const defaultColumnMetadata: RequiredColumnMetadata = {
   date_format: 'none',
   duration_min: 's',
   duration_max: 'm',
-  display_width: defaultColumnWidthPx,
+  display_width: DEFAULT_COLUMN_WIDTH_PX,
 };
 
 /**

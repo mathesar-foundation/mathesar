@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { maxColumnWidthPx, minColumnWidthPx } from '@mathesar/geometry';
+  import { MAX_COLUMN_WIDTH_PX, MIN_COLUMN_WIDTH_PX } from '@mathesar/geometry';
   import { slider } from '@mathesar-component-library';
 
   import { getSheetContext } from './utils';
@@ -8,8 +8,8 @@
 
   const { api, stores } = getSheetContext<SheetColumnIdentifierKey>();
 
-  export let minColumnWidth = minColumnWidthPx;
-  export let maxColumnWidth = maxColumnWidthPx;
+  export let minColumnWidth = MIN_COLUMN_WIDTH_PX;
+  export let maxColumnWidth = MAX_COLUMN_WIDTH_PX;
   export let columnIdentifierKey: SheetColumnIdentifierKey;
   export let afterResize: (width: number) => void = () => {};
 

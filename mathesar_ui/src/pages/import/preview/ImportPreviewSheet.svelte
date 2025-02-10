@@ -9,7 +9,7 @@
     SheetHeader,
     SheetRow,
   } from '@mathesar/components/sheet';
-  import { minImportColumnWidthPx } from '@mathesar/geometry';
+  import { MIN_IMPORT_COLUMN_WIDTH_PX } from '@mathesar/geometry';
 
   import type {
     ColumnProperties,
@@ -38,7 +38,7 @@
           />
           <SheetCellResizer
             columnIdentifierKey={column.id}
-            minColumnWidth={minImportColumnWidthPx}
+            minColumnWidth={MIN_IMPORT_COLUMN_WIDTH_PX}
           />
         </SheetColumnHeaderCell>
       {/each}

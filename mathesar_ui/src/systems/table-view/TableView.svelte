@@ -6,7 +6,7 @@
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { ROW_HEADER_WIDTH_PX } from '@mathesar/geometry';
   import type { Table } from '@mathesar/models/Table';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import {
@@ -72,7 +72,7 @@
   })();
 
   $: columnWidths = new ImmutableMap([
-    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
+    [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
     [ID_ADD_NEW_COLUMN, 32],
     ...getCustomizedColumnWidths($processedColumns.values()),
   ]);

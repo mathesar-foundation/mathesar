@@ -2,9 +2,9 @@ import { getContext, setContext } from 'svelte';
 import type { Readable } from 'svelte/store';
 
 import {
-  defaultColumnWidthPx,
-  maxColumnWidthPx,
-  minColumnWidthPx,
+  DEFAULT_COLUMN_WIDTH_PX,
+  MAX_COLUMN_WIDTH_PX,
+  MIN_COLUMN_WIDTH_PX,
 } from '@mathesar/geometry';
 import type { ImmutableMap } from '@mathesar-component-library/types';
 
@@ -40,8 +40,8 @@ export interface SheetContext<SheetColumnIdentifierKey> {
 const SHEET_CONTEXT_KEY = {};
 
 export function normalizeColumnWidth(width: number | undefined): number {
-  if (!width) return defaultColumnWidthPx;
-  return Math.max(minColumnWidthPx, Math.min(maxColumnWidthPx, width));
+  if (!width) return DEFAULT_COLUMN_WIDTH_PX;
+  return Math.max(MIN_COLUMN_WIDTH_PX, Math.min(MAX_COLUMN_WIDTH_PX, width));
 }
 
 export function calculateColumnStyleMapAndRowWidth<
