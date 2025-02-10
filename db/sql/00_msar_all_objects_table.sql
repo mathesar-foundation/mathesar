@@ -29,6 +29,9 @@ CREATE TABLE msar.all_mathesar_objects (
 --
 
 INSERT INTO msar.all_mathesar_objects VALUES
+  ('msar', 'msar.get_schema_objects_table(regnamespace[])', 'FUNCTION', NULL),
+  ('msar', 'msar.drop_schemas(regnamespace[],integer)', 'FUNCTION', NULL),
+  ('msar', 'msar.drop_schema_objects(regnamespace[],boolean)', 'FUNCTION', NULL),
   ('mathesar_types', 'mathesar_types.cast_to_uri(tstzrange)', 'FUNCTION', NULL),
   ('msar', 'msar.get_column_names(oid,jsonb)', 'FUNCTION', NULL),
   ('mathesar_types', 'mathesar_types.cast_to_email(bytea)', 'FUNCTION', NULL),

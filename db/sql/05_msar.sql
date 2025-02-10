@@ -699,6 +699,52 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_schema_objects_table(schemas regnamespace[])
+RETURNS TABLE (obj_schema text, obj_name text, obj_kind text) AS $$ /*
+Return a table with information about most objects in the given schemas.
+*/
+WITH obj_cte AS (
+  (
+    SELECT
+      msar.get_schema_name(pronamespace) AS obj_schema,
+      proname AS obj_name,
+      CASE prokind
+        WHEN 'a' THEN 'AGGREGATE'
+        WHEN 'p' THEN 'PROCEDURE'
+        ELSE 'FUNCTION'
+      END AS obj_kind
+    FROM pg_proc
+    WHERE pronamespace=ANY(schemas)
+  ) UNION (
+    SELECT
+      msar.get_schema_name(typnamespace) AS obj_schema,
+      typname AS obj_name,
+      'TYPE' AS obj_kind
+    FROM pg_type
+    WHERE typnamespace=ANY(schemas)
+  ) UNION (
+    SELECT
+      msar.get_schema_name(relnamespace) AS obj_schema,
+      relname AS obj_name,
+      CASE relkind
+        WHEN 'r' THEN 'TABLE'
+        WHEN 'p' THEN 'TABLE'
+        WHEN 'i' THEN 'INDEX'
+        WHEN 'I' THEN 'INDEX'
+        WHEN 'S' THEN 'SEQUENCE'
+        WHEN 'v' THEN 'VIEW'
+        WHEN 'm' THEN 'MATERIALIZED VIEW'
+        WHEN 'c' THEN 'TYPE'
+        WHEN 'f' THEN 'FOREIGN TABLE'
+      END AS obj_kind
+    FROM pg_class
+    WHERE relnamespace=ANY(schemas)
+  )
+) SELECT DISTINCT obj_schema, obj_name, obj_kind FROM obj_cte WHERE obj_kind IS NOT NULL;
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_pk_column(rel_id oid) RETURNS smallint AS $$/*
 Return the first column attnum in the primary key of a given relation (e.g., table).
 
@@ -2004,6 +2050,86 @@ Args:
 */
 BEGIN
   PERFORM msar.drop_schema(msar.get_schema_name(sch_id), cascade_);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schemas(sch_ids regnamespace[], retries integer DEFAULT 20) RETURNS void AS $$/*
+Safely drop all objects in each schema, then the schemas themselves.
+
+Does not work on the msar schema.
+
+If any passed schema doesn't exist, an exception will be raised. If any object exists in a schema
+which isn't passed, but which depends on an object in a passed schema, an exception will be raised.
+
+Args:
+  sch_ids: The OIDs of the schemas to drop.
+*/
+DECLARE
+  i integer;
+  sch regnamespace;
+  sch_name text;
+  failed boolean;
+BEGIN
+  SET client_min_messages = WARNING;
+  FOR i in 1..retries LOOP
+    -- We perform multiple passes to handle dependencies.
+    failed = msar.drop_schema_objects(sch_ids, i >= retries);
+    IF failed IS false THEN
+      EXIT;
+    END IF;
+  END LOOP;
+  RAISE NOTICE E'All objects dropped successfully!\n\nDropping schemas...\n\n';
+  FOREACH sch IN ARRAY sch_ids
+    LOOP
+      sch_name = msar.get_schema_name(sch);
+      RAISE NOTICE 'Dropping Schema %', sch_name;
+      EXECUTE(format('DROP SCHEMA IF EXISTS %I', sch_name));
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schema_objects(sch_ids regnamespace[], strict boolean) RETURNS boolean AS $$/*
+Safely drop all objects in each schema.
+
+If any passed schema doesn't exist, an exception will be raised.
+
+Args:
+  sch_ids: The OIDs of the schemas to drop.
+  strict: Whether we should raise an error if we fail to drop due to dependencies.
+*/
+DECLARE
+  obj RECORD;
+  detail text;
+  message text;
+  failed boolean := false;
+BEGIN
+  SET client_min_messages = WARNING;
+  FOR obj IN SELECT obj_schema, obj_name, obj_kind FROM msar.get_schema_objects_table(sch_ids)
+  LOOP
+    BEGIN
+      EXECUTE format('DROP %s IF EXISTS %I.%I', obj.obj_kind, obj.obj_schema, obj.obj_name);
+    EXCEPTION
+      WHEN dependent_objects_still_exist THEN
+        failed = true;
+        GET STACKED DIAGNOSTICS
+          message = MESSAGE_TEXT,
+          detail = PG_EXCEPTION_DETAIL;
+        IF strict is true THEN
+          RAISE EXCEPTION USING
+            MESSAGE = message,
+            DETAIL = detail,
+            HINT = 'All changes will be reverted.',
+            ERRCODE = 'dependent_objects_still_exist'
+          ;
+        END IF;
+    END;
+  END LOOP;
+  SET client_min_messages = NOTICE;
+  RETURN failed;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
