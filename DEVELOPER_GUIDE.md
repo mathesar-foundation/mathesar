@@ -108,7 +108,7 @@ We use [pytest](https://docs.pytest.org) for our backend tests.
 ### Running scenario tests
 
 ```
-docker compose -f docker-compose.test.yml run --rm test-runner pytest -svv test_happy_db_setups.py
+./run_api_tests.sh
 ```
 
 ## Front end development
