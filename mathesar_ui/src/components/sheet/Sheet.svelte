@@ -2,6 +2,7 @@
   import { onMount, tick } from 'svelte';
   import { writable } from 'svelte/store';
 
+  import { defaultColumnWidthPx } from '@mathesar/geometry';
   import {
     type ClipboardHandler,
     getClipboardHandlerStoreFromContext,
@@ -16,7 +17,6 @@
   } from './selection';
   import type SheetSelectionStore from './selection/SheetSelectionStore';
   import {
-    DEFAULT_COLUMN_WIDTH,
     calculateColumnStyleMapAndRowWidth,
     focusActiveCell,
     setSheetContext,
@@ -68,7 +68,7 @@
       (entry) => getColumnIdentifier(entry) === columnIdentifierKey,
     );
     if (isColumnValid) {
-      return DEFAULT_COLUMN_WIDTH;
+      return defaultColumnWidthPx;
     }
     return 0;
   }

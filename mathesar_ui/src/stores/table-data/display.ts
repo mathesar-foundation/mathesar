@@ -1,13 +1,11 @@
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
+import { defaultColumnWidthPx } from '@mathesar/geometry';
 import { WritableMap } from '@mathesar-component-library';
 
 import type { ColumnsDataStore } from './columns';
 import type { Meta } from './meta';
 import { type RecordsData, type Row, filterRecordRows } from './records';
-
-// @deprecated
-export const DEFAULT_COLUMN_WIDTH = 160;
 
 export interface ColumnPlacement {
   /** CSS value in px */
@@ -83,7 +81,7 @@ export class Display {
         let left = 0;
         const map = new Map<number, ColumnPlacement>();
         columns.forEach(({ id }) => {
-          const width = customizedColumnWidths.get(id) ?? DEFAULT_COLUMN_WIDTH;
+          const width = customizedColumnWidths.get(id) ?? defaultColumnWidthPx;
           map.set(id, { width, left });
           left += width;
         });
