@@ -12,7 +12,7 @@
     SheetRowHeaderCell,
     SheetVirtualRows,
   } from '@mathesar/components/sheet';
-  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
   import { ROW_HEADER_WIDTH_PX, ROW_HEIGHT_PX } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
   import { arrayIndex } from '@mathesar/utils/typeUtils';
@@ -52,6 +52,7 @@
       selectedColumnIds: get(selection).columnIds,
     }),
     showToastInfo: toast.info,
+    showToastError: toast.error,
   });
   $: ({ columnIds } = $selection);
   $: recordRunState = $runState?.state;

@@ -5,7 +5,7 @@
 
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
-  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
   import { ROW_HEADER_WIDTH_PX } from '@mathesar/geometry';
   import type { Table } from '@mathesar/models/Table';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
@@ -50,6 +50,7 @@
       selectedColumnIds: get(selection).columnIds,
     }),
     showToastInfo: toast.info,
+    showToastError: toast.error,
   });
   $: ({ horizontalScrollOffset, scrollOffset } = display);
   $: columnOrder = table.metadata?.column_order ?? [];

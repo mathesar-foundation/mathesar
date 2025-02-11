@@ -4,8 +4,14 @@ import type { AbstractTypeCategoryIdentifier } from '@mathesar/stores/abstract-t
 import type { ClipboardHandler } from '@mathesar/stores/clipboard';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data';
 import type { ReadableMapLike } from '@mathesar/typeUtils';
+import { getErrorMessage } from '@mathesar/utils/errors';
 import { labeledCount } from '@mathesar/utils/languageUtils';
 import type { ImmutableSet } from '@mathesar-component-library';
+
+import {
+  type StructuredCell,
+  validateStructuredCellRows,
+} from './StructuredCell';
 
 const MIME_PLAIN_TEXT = 'text/plain';
 const MIME_MATHESAR_SHEET_CLIPBOARD =
@@ -34,6 +40,11 @@ interface CopyingContext {
   selectedRowIds: ImmutableSet<string>;
   selectedColumnIds: ImmutableSet<string>;
 }
+
+/**
+ * This is the stuff we need to have from the Sheet in order to paste into it
+ */
+// interface PastingContext {}
 
 function getFormattedCellValue(
   rawCellValue: unknown,
@@ -77,19 +88,10 @@ function serializeTsv(data: string[][]): string {
   });
 }
 
-export interface SheetClipboardStats {
-  cellCount: number;
-}
-
-export interface StructuredCell {
-  type: AbstractTypeCategoryIdentifier;
-  raw: unknown;
-  formatted: string;
-}
-
 interface Dependencies {
   getCopyingContext(): CopyingContext;
   showToastInfo(msg: string): void;
+  showToastError(msg: string): void;
 }
 
 export class SheetClipboardHandler implements ClipboardHandler {
@@ -132,6 +134,7 @@ export class SheetClipboardHandler implements ClipboardHandler {
     }
     const cellCount =
       context.selectedRowIds.size * context.selectedColumnIds.size;
+    // TODO translate this text:
     this.deps.showToastInfo(`Copied ${labeledCount(cellCount, 'cells')}.`);
     return {
       structured: JSON.stringify(structuredRows),
@@ -140,9 +143,7 @@ export class SheetClipboardHandler implements ClipboardHandler {
   }
 
   handleCopy(event: ClipboardEvent): void {
-    if (event.clipboardData == null) {
-      return;
-    }
+    if (event.clipboardData == null) return;
     const content = this.getCopyContent();
     event.clipboardData.setData(MIME_PLAIN_TEXT, content.tsv);
     event.clipboardData.setData(
@@ -151,8 +152,27 @@ export class SheetClipboardHandler implements ClipboardHandler {
     );
   }
 
-  handlePaste(event: ClipboardEvent) {
-    // TODO_NEXT
-    console.log(event);
+  handlePaste({ clipboardData }: ClipboardEvent) {
+    if (clipboardData == null) return;
+
+    const mathesarData = clipboardData.getData(MIME_MATHESAR_SHEET_CLIPBOARD);
+    if (mathesarData) {
+      try {
+        const rows = validateStructuredCellRows(JSON.parse(mathesarData));
+        this.pasteMathesarData(rows);
+      } catch (e) {
+        this.deps.showToastError(getErrorMessage(e));
+      }
+      return;
+    }
+
+    const textData = clipboardData.getData(MIME_PLAIN_TEXT);
+    if (textData) {
+      // TODO parse as TSV, hand off to lower-level function
+    }
+  }
+
+  private pasteMathesarData(rows: StructuredCell[][]): void {
+    // TODO
   }
 }
