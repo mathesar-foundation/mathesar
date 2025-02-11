@@ -700,12 +700,13 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.get_schema_objects_table(schemas regnamespace[])
-RETURNS TABLE (obj_schema text, obj_name text, obj_kind text) AS $$ /*
+RETURNS TABLE (obj_id oid, obj_schema text, obj_name text, obj_kind text) AS $$ /*
 Return a table with information about most objects in the given schemas.
 */
 WITH obj_cte AS (
   (
     SELECT
+      oid AS obj_id,
       msar.get_schema_name(pronamespace) AS obj_schema,
       proname AS obj_name,
       CASE prokind
@@ -717,6 +718,7 @@ WITH obj_cte AS (
     WHERE pronamespace=ANY(schemas)
   ) UNION (
     SELECT
+      oid AS obj_id,
       msar.get_schema_name(typnamespace) AS obj_schema,
       typname AS obj_name,
       'TYPE' AS obj_kind
@@ -724,6 +726,7 @@ WITH obj_cte AS (
     WHERE typnamespace=ANY(schemas)
   ) UNION (
     SELECT
+      oid AS obj_id,
       msar.get_schema_name(relnamespace) AS obj_schema,
       relname AS obj_name,
       CASE relkind
@@ -740,7 +743,7 @@ WITH obj_cte AS (
     FROM pg_class
     WHERE relnamespace=ANY(schemas)
   )
-) SELECT DISTINCT obj_schema, obj_name, obj_kind FROM obj_cte WHERE obj_kind IS NOT NULL;
+) SELECT DISTINCT obj_id, obj_schema, obj_name, obj_kind FROM obj_cte WHERE obj_kind IS NOT NULL;
 $$ LANGUAGE SQL;
 
 
@@ -2055,29 +2058,42 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_schemas(sch_ids regnamespace[], retries integer DEFAULT 20) RETURNS void AS $$/*
+msar.drop_schemas(sch_ids regnamespace[], tries integer DEFAULT 20) RETURNS void AS $$/*
 Safely drop all objects in each schema, then the schemas themselves.
 
 Does not work on the msar schema.
 
 If any passed schema doesn't exist, an exception will be raised. If any object exists in a schema
 which isn't passed, but which depends on an object in a passed schema, an exception will be raised.
+If `tries` is too low, so dependent objects remain after `tries` passes have been made over the
+objects, an exception will be raised.
 
 Args:
   sch_ids: The OIDs of the schemas to drop.
+  tries: How many passes over the objects we should make. Allows this function to handle
+  dependencies.
 */
 DECLARE
   i integer;
   sch regnamespace;
   sch_name text;
-  failed boolean;
+  remaining integer;
+  old_remaining integer;
 BEGIN
   SET client_min_messages = WARNING;
-  FOR i in 1..retries LOOP
+  FOR i in 1..tries LOOP
     -- We perform multiple passes to handle dependencies.
-    failed = msar.drop_schema_objects(sch_ids, i >= retries);
-    IF failed IS false THEN
+    old_remaining = remaining;
+    remaining = msar.drop_schema_objects(sch_ids, i >= tries);
+    IF remaining = 0 THEN
       EXIT;
+    ELSIF remaining >= old_remaining THEN
+      RAISE EXCEPTION USING
+        MESSAGE = 'No objects were removed in the last pass.',
+        DETAIL = 'The number of remaining objects should strictly monotonically decrease.',
+        HINT = 'All changes will be reverted.',
+        ERRCODE = 'dependent_objects_still_exist'
+      ;
     END IF;
   END LOOP;
   RAISE NOTICE E'All objects dropped successfully!\n\nDropping schemas...\n\n';
@@ -2092,7 +2108,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_schema_objects(sch_ids regnamespace[], strict boolean) RETURNS boolean AS $$/*
+msar.drop_schema_objects(sch_ids regnamespace[], strict boolean) RETURNS integer AS $$/*
 Safely drop all objects in each schema.
 
 If any passed schema doesn't exist, an exception will be raised.
@@ -2103,25 +2119,25 @@ Args:
 */
 DECLARE
   obj RECORD;
-  detail text;
   message text;
-  failed boolean := false;
+  remaining integer;
 BEGIN
   SET client_min_messages = WARNING;
-  FOR obj IN SELECT obj_schema, obj_name, obj_kind FROM msar.get_schema_objects_table(sch_ids)
+  FOR obj IN
+    SELECT obj_id, obj_schema, obj_name, obj_kind
+    FROM msar.get_schema_objects_table(sch_ids)
+    ORDER BY obj_id DESC
   LOOP
     BEGIN
       EXECUTE format('DROP %s IF EXISTS %I.%I', obj.obj_kind, obj.obj_schema, obj.obj_name);
     EXCEPTION
       WHEN dependent_objects_still_exist THEN
-        failed = true;
         GET STACKED DIAGNOSTICS
-          message = MESSAGE_TEXT,
-          detail = PG_EXCEPTION_DETAIL;
+          message = MESSAGE_TEXT;
         IF strict is true THEN
           RAISE EXCEPTION USING
             MESSAGE = message,
-            DETAIL = detail,
+            DETAIL = 'msar.drop_schema_objects was called with "strict" set to true',
             HINT = 'All changes will be reverted.',
             ERRCODE = 'dependent_objects_still_exist'
           ;
@@ -2129,7 +2145,9 @@ BEGIN
     END;
   END LOOP;
   SET client_min_messages = NOTICE;
-  RETURN failed;
+  SELECT count(1) FROM msar.get_schema_objects_table(sch_ids) INTO remaining;
+  RAISE NOTICE '% objects remaining', remaining;
+  RETURN remaining;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
