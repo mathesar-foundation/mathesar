@@ -2065,13 +2065,9 @@ Does not work on the msar schema.
 
 If any passed schema doesn't exist, an exception will be raised. If any object exists in a schema
 which isn't passed, but which depends on an object in a passed schema, an exception will be raised.
-If `tries` is too low, so dependent objects remain after `tries` passes have been made over the
-objects, an exception will be raised.
 
 Args:
   sch_ids: The OIDs of the schemas to drop.
-  tries: How many passes over the objects we should make. Allows this function to handle
-  dependencies.
 */
 DECLARE
   obj RECORD;
@@ -2079,6 +2075,7 @@ DECLARE
   detail text;
   sch regnamespace;
   sch_name text;
+  undropped_objects text[];
   drop_success boolean := false;
   drop_failed boolean := false;
 BEGIN
@@ -2096,7 +2093,10 @@ BEGIN
         GET STACKED DIAGNOSTICS
           message = MESSAGE_TEXT,
           detail = PG_EXCEPTION_DETAIL;
-        RAISE WARNING E'% \nDETAIL: %', message, detail;
+        undropped_objects = undropped_objects || message;
+        IF detail <> '' THEN
+           undropped_objects = undropped_objects || concat('    ', detail);
+        END IF;
       drop_failed =  true;
     END;
   END LOOP;
@@ -2113,59 +2113,14 @@ BEGIN
   ELSIF drop_success IS false THEN
     -- We failed to drop anything in the schemas (and failed to drop at least one object).
     RAISE EXCEPTION USING
-      MESSAGE = message,
-      DETAIL = detail,
-      HINT = 'Nothing was dropped in this call. All changes will be reverted.',
+      MESSAGE = 'Nothing was dropped in this call due to dependent objects.',
+      DETAIL = array_to_string(array_remove(undropped_objects, ''), E'\n         '),
+      HINT = 'All changes will be reverted.',
       ERRCODE = 'dependent_objects_still_exist';
   ELSE
     -- We did drop some objects, but failed to drop at least one (due to dependencies). Recurse.
     PERFORM msar.drop_schemas(sch_ids);
   END IF;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_schema_objects(sch_ids regnamespace[], strict boolean) RETURNS integer AS $$/*
-Safely drop all objects in each schema.
-
-If any passed schema doesn't exist, an exception will be raised.
-
-Args:
-  sch_ids: The OIDs of the schemas to drop.
-  strict: Whether we should raise an error if we fail to drop due to dependencies.
-*/
-DECLARE
-  obj RECORD;
-  message text;
-  remaining integer;
-BEGIN
-  SET client_min_messages = WARNING;
-  FOR obj IN
-    SELECT obj_id, obj_schema, obj_name, obj_kind
-    FROM msar.get_schema_objects_table(sch_ids)
-    ORDER BY obj_id DESC
-  LOOP
-    BEGIN
-      EXECUTE format('DROP %s IF EXISTS %I.%I', obj.obj_kind, obj.obj_schema, obj.obj_name);
-    EXCEPTION
-      WHEN dependent_objects_still_exist THEN
-        GET STACKED DIAGNOSTICS
-          message = MESSAGE_TEXT;
-        IF strict is true THEN
-          RAISE EXCEPTION USING
-            MESSAGE = message,
-            DETAIL = 'msar.drop_schema_objects was called with "strict" set to true',
-            HINT = 'All changes will be reverted.',
-            ERRCODE = 'dependent_objects_still_exist'
-          ;
-        END IF;
-    END;
-  END LOOP;
-  SET client_min_messages = NOTICE;
-  SELECT count(1) FROM msar.get_schema_objects_table(sch_ids) INTO remaining;
-  RAISE NOTICE '% objects remaining', remaining;
-  RETURN remaining;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
