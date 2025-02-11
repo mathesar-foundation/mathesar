@@ -2058,7 +2058,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_schemas(sch_ids regnamespace[], tries integer DEFAULT 20) RETURNS void AS $$/*
+msar.drop_schemas(sch_ids regnamespace[]) RETURNS void AS $$/*
 Safely drop all objects in each schema, then the schemas themselves.
 
 Does not work on the msar schema.
@@ -2074,35 +2074,53 @@ Args:
   dependencies.
 */
 DECLARE
-  i integer;
+  obj RECORD;
+  message text;
+  detail text;
   sch regnamespace;
   sch_name text;
-  remaining integer;
-  old_remaining integer;
+  drop_success boolean := false;
+  drop_failed boolean := false;
 BEGIN
   SET client_min_messages = WARNING;
-  FOR i in 1..tries LOOP
-    -- We perform multiple passes to handle dependencies.
-    old_remaining = remaining;
-    remaining = msar.drop_schema_objects(sch_ids, i >= tries);
-    IF remaining = 0 THEN
-      EXIT;
-    ELSIF remaining >= old_remaining THEN
-      RAISE EXCEPTION USING
-        MESSAGE = 'No objects were removed in the last pass.',
-        DETAIL = 'The number of remaining objects should strictly monotonically decrease.',
-        HINT = 'All changes will be reverted.',
-        ERRCODE = 'dependent_objects_still_exist'
-      ;
-    END IF;
+  FOR obj IN
+    SELECT obj_id, obj_schema, obj_name, obj_kind
+    FROM msar.get_schema_objects_table(sch_ids)
+    ORDER BY obj_id DESC  -- Objects more often depend on others of lower OID.
+  LOOP
+    BEGIN
+      EXECUTE format('DROP %s IF EXISTS %I.%I', obj.obj_kind, obj.obj_schema, obj.obj_name);
+      drop_success = true;
+    EXCEPTION
+      WHEN dependent_objects_still_exist THEN
+        GET STACKED DIAGNOSTICS
+          message = MESSAGE_TEXT,
+          detail = PG_EXCEPTION_DETAIL;
+        RAISE WARNING E'% \nDETAIL: %', message, detail;
+      drop_failed =  true;
+    END;
   END LOOP;
-  RAISE NOTICE E'All objects dropped successfully!\n\nDropping schemas...\n\n';
-  FOREACH sch IN ARRAY sch_ids
-    LOOP
-      sch_name = msar.get_schema_name(sch);
-      RAISE NOTICE 'Dropping Schema %', sch_name;
-      EXECUTE(format('DROP SCHEMA IF EXISTS %I', sch_name));
-    END LOOP;
+  SET client_min_messages = NOTICE;
+  IF drop_failed IS false THEN
+    -- We dropped every object that existed in the schemas.
+    RAISE NOTICE E'All objects dropped successfully!\n\nDropping schemas...\n\n';
+    FOREACH sch IN ARRAY sch_ids
+      LOOP
+        sch_name = msar.get_schema_name(sch);
+        RAISE NOTICE 'Dropping Schema %', sch_name;
+        EXECUTE(format('DROP SCHEMA IF EXISTS %I', sch_name));
+      END LOOP;
+  ELSIF drop_success IS false THEN
+    -- We failed to drop anything in the schemas (and failed to drop at least one object).
+    RAISE EXCEPTION USING
+      MESSAGE = message,
+      DETAIL = detail,
+      HINT = 'Nothing was dropped in this call. All changes will be reverted.',
+      ERRCODE = 'dependent_objects_still_exist';
+  ELSE
+    -- We did drop some objects, but failed to drop at least one (due to dependencies). Recurse.
+    PERFORM msar.drop_schemas(sch_ids);
+  END IF;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
