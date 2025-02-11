@@ -71,9 +71,16 @@
       e.preventDefault();
     }
   }
+
+  function handlePaste(e: ClipboardEvent) {
+    if (clipboardHandler) {
+      clipboardHandler.handlePaste(e);
+      e.preventDefault();
+    }
+  }
 </script>
 
-<svelte:body on:copy={handleCopy} />
+<svelte:body on:copy={handleCopy} on:paste={handlePaste} />
 
 <ToastPresenter entries={toast.entries} />
 <Confirmation controller={confirmationController} />

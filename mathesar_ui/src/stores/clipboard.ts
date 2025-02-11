@@ -3,6 +3,7 @@ import { type Writable, writable } from 'svelte/store';
 
 export interface ClipboardHandler {
   handleCopy: (event: ClipboardEvent) => void;
+  handlePaste: (event: ClipboardEvent) => void;
 }
 
 const contextKey = Symbol('ClipboardHandlerStore');

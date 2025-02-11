@@ -150,4 +150,9 @@ export class SheetClipboardHandler implements ClipboardHandler {
       content.structured,
     );
   }
+
+  handlePaste(event: ClipboardEvent) {
+    // TODO_NEXT
+    console.log(event);
+  }
 }
