@@ -2,9 +2,9 @@
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
+  import Errors from '@mathesar/components/errors/Errors.svelte';
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { staticText } from '@mathesar/i18n/staticText';
@@ -113,10 +113,8 @@
         {/each}
       </GridTable>
     </div>
-  {:else if $roles.error}
-    <ErrorBox fullWidth>
-      {$roles.error}
-    </ErrorBox>
+  {:else}
+    <Errors fullWidth errors={[$roles.error ?? $_('unknown_error')]} />
   {/if}
 </SettingsContentLayout>
 

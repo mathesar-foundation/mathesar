@@ -110,8 +110,8 @@ grep -Eo 'https://github\.com/mathesar-foundation/mathesar/pull/[0-9]+' \
 PR_LIST=$(echo "
   SELECT
     '- ' || pr.title ||
-    ' _[#' || regexp_extract(pr.url, '(\d+)$', 1) || ']' ||
-    '(' || pr.url || ' \"' || replace(pr.title, '\"', '') || '\")_' AS link
+    ' [#' || regexp_extract(pr.url, '(\d+)$', 1) || ']' ||
+    '(' || pr.url || ' \"' || replace(pr.title, '\"', '') || '\")' AS link
   FROM read_json('$ALL_PRS_FILE', auto_detect=true) AS pr
   JOIN read_csv('$COMMITS_FILE', columns={'hash': 'text'}) AS commit
     ON commit.hash = pr.mergeCommit

@@ -23,15 +23,9 @@ You should have **root access** to the machine you're installing Mathesar on.
 
 You'll need to install the following system packages before you install Mathesar:
 
-- [Python](https://www.python.org/downloads/) 3.9, 3.10, or 3.11 (along with appropriate [`venv`](https://docs.python.org/3/library/venv.html) module)
+- [Python](https://www.python.org/downloads/), along with the appropriate [`venv`](https://docs.python.org/3/library/venv.html) module. See [version support](version-support.md).
 
-    !!! note "Python version"
-
-        Python _older_ than 3.9 will not run Mathesar.
-
-        Python 3.12 will run Mathesar, but you'll have to take extra steps to get some dependencies to build. Installing a package for your OS that provides the `libpq-fe.h` header file should be enough in most cases. On Debian 12, this header is provided by the `libpq-dev` package.
-
-- [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`)
+- [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`). See [version support](version-support.md).
 
 - [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
 
@@ -144,7 +138,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 
     ```
     <path-to-python-binary> -m venv ./mathesar-venv
-    # /usr/bin/python3.9 -m venv ./mathesar-venv
+    # /usr/bin/python3.13 -m venv ./mathesar-venv
     ```
 
 1. Next we will activate our virtual environment:
@@ -162,7 +156,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Install Python dependencies
 
     ```
-    pip install -r requirements-prod.txt
+    pip install -r requirements.txt
     ```
 
 1. Set the environment variables
@@ -173,15 +167,15 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
         touch .env
         ```
 
-    1. Edit your `.env` file, adding [environment variables](./configuration.md) to configure Mathesar.
+    1. Edit your `.env` file, adding [environment variables](./environment-variables.md) to configure Mathesar.
 
         !!! example
             Your `.env` file should look something like this
             
             ```
-            SECRET_KEY='REPLACE_THIS_WITH_YOUR_RANDOMLY_GENERATED_VALUE'
-            DOMAIN_NAME='xDOMAIN_NAMEx'
-            ALLOWED_HOSTS='xDOMAIN_NAMEx'
+            SECRET_KEY=REPLACE_THIS_WITH_YOUR_50_CHAR_RANDOMLY_GENERATED_STRING
+            ALLOWED_HOSTS=xDOMAIN_NAMEx
+            DOMAIN_NAME=xDOMAIN_NAMEx
             POSTGRES_DB=mathesar_django
             POSTGRES_USER=mathesar
             POSTGRES_PASSWORD=REPLACE_THIS_WITH_APPROPRIATE_PASSWORD_FOR_THE_CHOSEN_POSTGRES_USER
@@ -190,7 +184,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             ```
 
         !!! tip
-            To generate a [`SECRET_KEY`](./configuration.md#secret_key) you can use this [browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
+            To generate a [`SECRET_KEY`](./environment-variables.md#secret_key) you can use this [browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
 
             ```
             echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
@@ -200,8 +194,8 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             If you want to host Mathesar on multiple domains/subdomains you can do so by adding multiple comma separated domain names to the following env variables without a whitespace: 
 
             ```
-            DOMAIN_NAME='xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org'
-            ALLOWED_HOSTS='xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org'
+            DOMAIN_NAME=xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org
+            ALLOWED_HOSTS=xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org
             ```
 
     1. Add the environment variables to the shell
@@ -231,18 +225,19 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     ```
 
 
-1. Install Mathesar functions on the database:
-
-    ```
-    python -m mathesar.install --skip-confirm | tee /tmp/install.py.log
-    ```
-
-
 1. Create a media directory for storing user-uploaded media
 
     ```
     mkdir .media
     ```
+
+
+1. Run Django migrations and collect static files:
+
+    ```
+    python -m mathesar.install --skip-confirm | tee /tmp/install.py.log
+    ```
+
 
 ### Set up Gunicorn
 
@@ -317,7 +312,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 2. Add the configuration details to the CaddyFile
 
     ```
-    $DOMAIN_NAME {
+    {$DOMAIN_NAME:xDOMAIN_NAMEx} {
         log {
             output stdout
         }
@@ -377,7 +372,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     LimitNPROC=512
     PrivateTmp=true
     ProtectSystem=full
-    AmbientCapabilities=CAP_NET_BIND_SERVICE
+    AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
     
     [Install]
     WantedBy=multi-user.target

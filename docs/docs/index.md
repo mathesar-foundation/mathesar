@@ -1,6 +1,6 @@
 # Mathesar Documentation
 
-Mathesar is a self-hostable open source web application that provides a spreadsheet-like interface to PostgreSQL databases. Our web-based interface helps you and your collaborators set up data models, edit data, and build custom reports &mdash; no technical skills needed. You can create a new PostgreSQL database while setting up Mathesar or use our UI to interact with an existing database (or do both).
+Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface—no code needed. It has native database-level access control, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions. The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.
 
 ## Try Mathesar
 
@@ -9,7 +9,7 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 1. With [Docker](https://docs.docker.com/get-docker/) installed, run:
 
     ```
-    docker run -it --name mathesar -p 8000:8000 mathesar/mathesar-prod:latest
+    docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
     ```
 
 1. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.

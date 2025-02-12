@@ -6,14 +6,15 @@ edit_uri: edit/develop/docs/docs/
 
 nav:
   - Introduction: index.md
-  - Administration:
+  - Administrator Guide:
       - Install using Docker Compose: administration/install-via-docker-compose.md
       - Install from scratch: administration/install-from-scratch.md
-      - Configuration: administration/configuration.md
-      - Backup & Restore: administration/backup-restore.md
+      - Environment variables: administration/environment-variables.md
       - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
-      - Debug Mathesar: administration/debug.md
+      - Debugging Mathesar: administration/debug.md
+      - Postgres & Python versions: administration/version-support.md
+      
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
@@ -22,11 +23,11 @@ nav:
           - Tables: user-guide/tables.md
           - Data types: user-guide/data-types.md
           - Relationships: user-guide/relationships.md
-      - Access Control:
+      - Access control:
           - Overview: user-guide/access-control.md
-          - Mathesar Users: user-guide/users.md
-          - PostgreSQL Roles: user-guide/roles.md
-          - Stored Role Passwords: user-guide/stored-role-passwords.md
+          - Mathesar users: user-guide/users.md
+          - PostgreSQL roles: user-guide/roles.md
+          - Stored role passwords: user-guide/stored-role-passwords.md
           - Collaborators: user-guide/collaborators.md
       - Mathesar constructs:
           - Metadata: user-guide/metadata.md
@@ -34,12 +35,14 @@ nav:
       - Data management:
           - Importing data: user-guide/importing-data.md
           - Exporting data: user-guide/exporting-data.md
+      - Settings:
+          - Usage data collection: user-guide/usage-data-collection.md
   - API:
       - Overview: api/index.md
       - Methods: api/methods.md
   - Releases:
       - '0.2.0': releases/0.2.0.md
-      - Previous Releases:
+      - Previous releases:
           - '0.1.7': releases/0.1.7.md
           - '0.1.6': releases/0.1.6.md
           - '0.1.5': releases/0.1.5.md
@@ -64,7 +67,8 @@ plugins:
         "api/rest.md": "api/index.md"
         "user-guide/glossary.md": "user-guide/index.md"
         "user-guide/permissions.md": "user-guide/access-control.md"
-        "configuration/env-variables.md": "administration/configuration.md"
+        "configuration/env-variables.md": "administration/environment-variables.md"
+        "administration/configuration.md": "administration/environment-variables.md"
         "installation/docker-compose/index.md": "administration/install-via-docker-compose.md"
         "installation/build-from-source/index.md": "administration/install-from-scratch.md"
   - macros

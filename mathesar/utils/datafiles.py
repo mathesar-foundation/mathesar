@@ -40,7 +40,7 @@ def _get_file_type(raw_file):
         return 'json'
 
 
-def create_datafile(data):
+def create_datafile(data, user=None):
     header = data.get('header', True)
 
     # Validation guarentees only one arg will be present
@@ -81,6 +81,7 @@ def create_datafile(data):
             delimiter=dialect.delimiter,
             escapechar=dialect.escapechar,
             quotechar=dialect.quotechar,
+            user=user,
         )
     else:
         max_level = data.get('max_level', 0)
@@ -92,7 +93,8 @@ def create_datafile(data):
             created_from=created_from,
             header=header,
             max_level=max_level,
-            sheet_index=sheet_index
+            sheet_index=sheet_index,
+            user=user,
         )
     datafile.save()
     raw_file.close()

@@ -47,7 +47,7 @@ def intern_session():
         "new_password1": "myinternpass1234",
         "new_password2": "myinternpass1234"
     }
-    s.post(f'{SERVICE_HOST}/auth/password_reset_confirm', data=reset_payload)
+    s.post(f'{SERVICE_HOST}/auth/password_reset_confirm/', data=reset_payload)
     s.headers['X-CSRFToken'] = s.cookies['csrftoken']
     new_login_payload = {"username": "intern", "password": "myinternpass1234"}
     s.post(f'{SERVICE_HOST}/auth/login/', data=new_login_payload)

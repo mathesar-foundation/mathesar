@@ -9,11 +9,13 @@
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',
+    appearance: 'secondary',
   };
 
   const proceedButtonDefaults: ButtonDetails = {
     label: 'Proceed',
     icon: iconProceed,
+    appearance: 'primary',
   };
 
   export let cancelButton: Partial<ButtonDetails> = {};
@@ -48,7 +50,7 @@
 >
   {#if hasCancelButton}
     <Button
-      appearance="secondary"
+      appearance={fullCancelButton.appearance}
       on:click={onCancel}
       disabled={isProcessing || !canCancel}
       {size}
@@ -61,6 +63,7 @@
     bind:isProcessing
     bind:proceed={spinnerButtonProceed}
     onClick={onProceed}
+    appearance={fullProceedButton.appearance}
     icon={fullProceedButton.icon}
     label={fullProceedButton.label}
     disabled={isProcessing || !canProceed}

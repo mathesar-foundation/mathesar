@@ -1,9 +1,7 @@
 <script lang="ts"></script>
 
 <div class="inset-page-section">
-  {#if $$slots.header}
-    <div class="header"><slot name="header" /></div>
-  {/if}
+  <slot name="header" />
   <div class="section"><slot /></div>
 </div>
 

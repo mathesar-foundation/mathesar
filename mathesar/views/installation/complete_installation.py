@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView
+from django.urls import reverse_lazy
 from django import forms
 from mathesar.analytics import upload_initial_report, initialize_analytics
 import logging
@@ -47,7 +48,7 @@ class CompleteInstallationForm(UserCreationForm):
 class CompleteInstallationFormView(CreateView):
     template_name = "installation/complete_installation.html"
     form_class = CompleteInstallationForm
-    success_url = "/auth/login"
+    success_url = reverse_lazy('login')
 
     def form_valid(self, form):
         success = super().form_valid(form)

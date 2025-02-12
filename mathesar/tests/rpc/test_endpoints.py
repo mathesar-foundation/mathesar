@@ -44,6 +44,11 @@ METHODS = [
         [user_is_superuser]
     ),
     (
+        analytics.upload_feedback,
+        "analytics.upload_feedback",
+        [user_is_authenticated]
+    ),
+    (
         collaborators.add,
         "collaborators.add",
         [user_is_superuser]

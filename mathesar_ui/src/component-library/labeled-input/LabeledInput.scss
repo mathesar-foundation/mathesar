@@ -4,8 +4,6 @@
 
   .label {
     display: inline-block;
-    color: var(--slate-800);
-    font-weight: var(--font-weight-medium);
   }
   .input {
     display: block;
@@ -17,7 +15,7 @@
     }
   }
 
-  .help {
+  .label-content > .help {
     display: block;
     font-size: var(--text-size-small);
     color: var(--color-text-muted);
@@ -62,14 +60,14 @@
   &.layout-inline-input-first .label-content {
     display: grid;
     grid-template: auto auto / auto 1fr;
-    .input {
+    > .input {
       grid-area: 1 / 1 / 1 / 1;
       margin-right: var(--spacing-x, var(--spacing-x-default));
     }
-    .label {
+    > .label {
       grid-area: 1 / 2 / 1 / 2;
     }
-    .help {
+    > .help {
       grid-area: 2 / 2 / 2 / 2;
       margin-top: var(--spacing-y, var(--spacing-y-default));
     }

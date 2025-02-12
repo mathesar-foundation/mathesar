@@ -3065,6 +3065,190 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_wide_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE wide_table (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    col_1 VARCHAR(50),
+    col_2 INT,
+    col_3 DATE,
+    col_4 BOOLEAN,
+    col_5 VARCHAR(50),
+    col_6 INT,
+    col_7 VARCHAR(50),
+    col_8 INT,
+    col_9 DATE,
+    col_10 BOOLEAN,
+    col_11 VARCHAR(50),
+    col_12 INT,
+    col_13 VARCHAR(50),
+    col_14 INT,
+    col_15 DATE,
+    col_16 BOOLEAN,
+    col_17 VARCHAR(50),
+    col_18 INT,
+    col_19 VARCHAR(50),
+    col_20 INT,
+    col_21 DATE,
+    col_22 BOOLEAN,
+    col_23 VARCHAR(50),
+    col_24 INT,
+    col_25 VARCHAR(50),
+    col_26 INT,
+    col_27 DATE,
+    col_28 BOOLEAN,
+    col_29 VARCHAR(50),
+    col_30 INT,
+    col_31 VARCHAR(50),
+    col_32 INT,
+    col_33 DATE,
+    col_34 BOOLEAN,
+    col_35 VARCHAR(50),
+    col_36 INT,
+    col_37 VARCHAR(50),
+    col_38 INT,
+    col_39 DATE,
+    col_40 BOOLEAN,
+    col_41 VARCHAR(50),
+    col_42 INT,
+    col_43 VARCHAR(50),
+    col_44 INT,
+    col_45 DATE,
+    col_46 BOOLEAN,
+    col_47 VARCHAR(50),
+    col_48 INT,
+    col_49 VARCHAR(50),
+    col_50 INT,
+    col_51 DATE,
+    col_52 BOOLEAN,
+    col_53 VARCHAR(50),
+    col_54 INT,
+    col_55 VARCHAR(50),
+    col_56 INT,
+    col_57 DATE,
+    col_58 BOOLEAN,
+    col_59 VARCHAR(50),
+    col_60 INT,
+    col_61 VARCHAR(50),
+    col_62 INT,
+    col_63 DATE,
+    col_64 BOOLEAN,
+    col_65 VARCHAR(50),
+    col_66 INT,
+    col_67 VARCHAR(50),
+    col_68 INT,
+    col_69 DATE,
+    col_70 BOOLEAN,
+    col_71 VARCHAR(50),
+    col_72 INT,
+    col_73 VARCHAR(50),
+    col_74 INT,
+    col_75 DATE,
+    col_76 BOOLEAN,
+    col_77 VARCHAR(50),
+    col_78 INT,
+    col_79 VARCHAR(50),
+    col_80 INT,
+    col_81 DATE,
+    col_82 BOOLEAN,
+    col_83 VARCHAR(50),
+    col_84 INT,
+    col_85 VARCHAR(50),
+    col_86 INT,
+    col_87 DATE,
+    col_88 BOOLEAN,
+    col_89 VARCHAR(50),
+    col_90 INT,
+    col_91 VARCHAR(50),
+    col_92 INT,
+    col_93 DATE,
+    col_94 BOOLEAN,
+    col_95 VARCHAR(50),
+    col_96 INT,
+    col_97 VARCHAR(50),
+    col_98 INT,
+    col_99 DATE,
+    col_100 BOOLEAN,
+    col_101 VARCHAR(50),
+    coltodrop integer
+  );
+  ALTER TABLE wide_table DROP COLUMN coltodrop;
+  INSERT INTO wide_table (
+    col_1, col_2, col_3, col_4, col_5, col_6, col_7, col_8, col_9, col_10,
+    col_11, col_12, col_13, col_14, col_15, col_16, col_17, col_18, col_19, col_20,
+    col_21, col_22, col_23, col_24, col_25, col_26, col_27, col_28, col_29, col_30,
+    col_31, col_32, col_33, col_34, col_35, col_36, col_37, col_38, col_39, col_40,
+    col_41, col_42, col_43, col_44, col_45, col_46, col_47, col_48, col_49, col_50,
+    col_51, col_52, col_53, col_54, col_55, col_56, col_57, col_58, col_59, col_60,
+    col_61, col_62, col_63, col_64, col_65, col_66, col_67, col_68, col_69, col_70,
+    col_71, col_72, col_73, col_74, col_75, col_76, col_77, col_78, col_79, col_80,
+    col_81, col_82, col_83, col_84, col_85, col_86, col_87, col_88, col_89, col_90,
+    col_91, col_92, col_93, col_94, col_95, col_96, col_97, col_98, col_99, col_100,
+    col_101
+  ) VALUES (
+    'John', 42, '1980-05-12', TRUE, 'Developer', 50000, 'New York', 10, '2025-01-01', TRUE,
+    'Alice', 35, 'Bob', 28, '1995-12-14', TRUE, 'Analyst', 40000, 'Chicago', 15,
+    '2025-01-03', TRUE, 'Eve', 31, 'Dave', 29, '1994-06-10', TRUE, 'Engineer', 48000,
+    'Austin', 18, '2025-01-05', TRUE, 'Grace', 33, 'Frank', 40, '1983-03-15', TRUE,
+    'Consultant', 60000, 'Denver', 30, '2025-01-07', TRUE, 'Carol', 27, 'Henry', 36,
+    '1987-09-20', TRUE, 'Technician', 42000, 'Phoenix', 17, '2025-01-09', TRUE, 'Judy', 45,
+    'Zara', 32, '1991-01-25', TRUE, 'Data Scientist', 70000, 'Houston', 35, '2025-01-11', TRUE,
+    'Product Manager', 65000, 'San Diego', 40, '2025-01-12', FALSE, 'Grace', 33, 'Frank', 40,
+    '1983-03-15', TRUE, 'Technician', 42000, 'Phoenix', 17, '2025-01-09', TRUE, 'Engineer', 48000,
+    'Austin', 18, '2025-01-05', TRUE, 'Grace', 33, 'Frank', 40, '1983-03-15', FALSE,
+    'California'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_from_wide_table() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_wide_table();
+  rel_id := 'wide_table'::regclass::oid;
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 1,
+      "results": [
+        {
+          "1": 1, "2": "John", "3": 42, "4": "1980-05-12 AD", "5": true,
+          "6": "Developer", "7": 50000, "8": "New York", "9": 10, "10": "2025-01-01 AD", "11": true,
+          "12": "Alice", "13": 35, "14": "Bob", "15": 28, "16": "1995-12-14 AD", "17": true,
+          "18": "Analyst", "19": 40000, "20": "Chicago", "21": 15, "22": "2025-01-03 AD", "23": true,
+          "24": "Eve", "25": 31, "26": "Dave", "27": 29, "28": "1994-06-10 AD", "29": true,
+          "30": "Engineer", "31": 48000, "32": "Austin", "33": 18, "34": "2025-01-05 AD", "35": true,
+          "36": "Grace", "37": 33, "38": "Frank", "39": 40, "40": "1983-03-15 AD", "41": true,
+          "42": "Consultant", "43": 60000, "44": "Denver", "45": 30, "46": "2025-01-07 AD", "47": true,
+          "48": "Carol", "49": 27, "50": "Henry", "51": 36, "52": "1987-09-20 AD", "53": true,
+          "54": "Technician", "55": 42000, "56": "Phoenix", "57": 17, "58": "2025-01-09 AD", "59": true,
+          "60": "Judy", "61": 45, "62": "Zara", "63": 32, "64": "1991-01-25 AD", "65": true,
+          "66": "Data Scientist", "67": 70000, "68": "Houston", "69": 35, "70": "2025-01-11 AD", "71": true,
+          "72": "Product Manager", "73": 65000, "74": "San Diego", "75": 40, "76": "2025-01-12 AD", "77": false,
+          "78": "Grace", "79": 33, "80": "Frank", "81": 40, "82": "1983-03-15 AD", "83": true,
+          "84": "Technician", "85": 42000, "86": "Phoenix", "87": 17, "88": "2025-01-09 AD", "89": true,
+          "90": "Engineer", "91": 48000, "92": "Austin", "93": 18, "94": "2025-01-05 AD", "95": true,
+          "96": "Grace", "97": 33, "98": "Frank", "99": 40, "100": "1983-03-15 AD", "101": false,
+          "102": "California"
+        }
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -4196,6 +4380,28 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_record_to_table_pkey_quoting() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  ALTER TABLE atable RENAME COLUMN id TO "ID";
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{}'
+    ),
+    $a${
+      "results": [{"1": 4, "2": 200, "3": null, "4": null, "5": null}],
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_record_to_table_stringified_json() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -4345,6 +4551,40 @@ BEGIN
   RETURN NEXT results_eq(
     'SELECT id, col1 FROM atable ORDER BY id',
     'VALUES (1, 5), (2, 10), (3, 2)'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_with_uuid_pk() RETURNS SETOF TEXT AS $$
+DECLARE
+  rec_id uuid := 'c4e8eb88-8b34-459c-9c1f-778699c1f25f'::uuid;
+BEGIN
+  CREATE TABLE things(id uuid PRIMARY KEY, name TEXT);
+  INSERT INTO things VALUES (rec_id, 'chair');
+
+  PERFORM msar.patch_record_in_table('things'::regclass, rec_id, '{"2": "recliner"}');
+
+  RETURN NEXT results_eq(
+    format($q$ SELECT name FROM things WHERE id = %L $q$, rec_id),
+    $v$ VALUES ('recliner') $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_with_string_pk() RETURNS SETOF TEXT AS $$
+DECLARE
+  rec_id TEXT := 'Millennium Falcon';
+BEGIN
+  CREATE TABLE spaceships(name TEXT PRIMARY KEY, max_speed real);
+  INSERT INTO spaceships VALUES (rec_id, 9.0);
+
+  PERFORM msar.patch_record_in_table('spaceships'::regclass, rec_id, '{"2": 10.3}');
+
+  RETURN NEXT results_eq(
+    format($q$ SELECT max_speed FROM spaceships WHERE name = %L $q$, rec_id),
+    'VALUES (10.3::real)'
   );
 END;
 $$ LANGUAGE plpgsql;

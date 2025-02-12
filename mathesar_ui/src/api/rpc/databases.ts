@@ -27,8 +27,13 @@ export interface RawUnderlyingDatabase {
 }
 
 export const sampleDataOptions = [
+  'bike_shop',
+  'hardware_store',
+  'ice_cream_employees',
+  'library_makerspace',
   'library_management',
-  'movie_collection',
+  'museum_exhibits',
+  'nonprofit_grants',
 ] as const;
 
 export type SampleDataSchemaIdentifier = (typeof sampleDataOptions)[number];
@@ -43,6 +48,8 @@ export interface RawDatabasePrivilegesForRole {
   role_oid: RawRole['oid'];
   direct: DatabasePrivilege[];
 }
+
+export type SystemSchema = 'msar' | '__msar' | 'mathesar_types';
 
 export const databases = {
   get: rpcMethodTypeContainer<
@@ -69,6 +76,11 @@ export const databases = {
     disconnect: rpcMethodTypeContainer<
       {
         database_id: RawDatabase['id'];
+        schemas_to_remove?: SystemSchema[];
+        strict?: boolean;
+        role_name?: string;
+        password?: string;
+        disconnect_db_server?: boolean;
       },
       void
     >(),

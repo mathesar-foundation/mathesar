@@ -33,6 +33,7 @@
   }
 
   &.text-area {
-    resize: vertical;
+    resize: var(--text-area-resize, vertical);
+    min-height: var(--text-area-min-height, auto);
   }
 }
