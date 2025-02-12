@@ -119,16 +119,16 @@ def get(*, schema_oid: int, database_id: int, **kwargs) -> SchemaInfo:
 
 
 @mathesar_rpc_method(name="schemas.delete", auth="login")
-def delete(*, schema_oid: int, database_id: int, **kwargs) -> None:
+def delete(*, schema_oids: list[int], database_id: int, **kwargs) -> None:
     """
     Delete a schema, given its OID.
 
     Args:
-        schema_oid: The OID of the schema to delete.
+        schema_oids: The OIDs of the schemas to delete.
         database_id: The Django id of the database containing the schema.
     """
     with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
-        drop_schemas(conn, [schema_oid])
+        drop_schemas(conn, schema_oids)
 
 
 @mathesar_rpc_method(name="schemas.patch", auth="login")
