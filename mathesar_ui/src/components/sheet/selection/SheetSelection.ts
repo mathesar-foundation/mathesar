@@ -67,6 +67,14 @@ export default class SheetSelection {
     return this.basis.columnIds;
   }
 
+  /**
+   * What operation should be performed when pasting data into the selected
+   * cells.
+   */
+  get pasteOperation() {
+    return this.basis.pasteOperation;
+  }
+
   private withBasis(basis: Basis): SheetSelection {
     return new SheetSelection(this.plane, basis);
   }

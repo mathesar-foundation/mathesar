@@ -11,6 +11,7 @@ export function basisFromEmptyColumns(columnIds: Iterable<string>): Basis {
     cellIds: new ImmutableSet(),
     columnIds: new ImmutableSet(columnIds),
     rowIds: new ImmutableSet(),
+    pasteOperation: 'none',
 
     getFullySelectedColumnIds() {
       return this.columnIds;

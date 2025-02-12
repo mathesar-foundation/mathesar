@@ -13,6 +13,7 @@ export function emptyBasis(): Basis {
     cellIds: new ImmutableSet(),
     columnIds: new ImmutableSet(),
     rowIds: new ImmutableSet(),
+    pasteOperation: 'none',
     getFullySelectedColumnIds: () => new ImmutableSet(),
 
     // If the selection is empty, we keep it empty.

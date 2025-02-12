@@ -19,6 +19,7 @@ export function basisFromPlaceholderCell(activeCellId: string): Basis {
     cellIds: new ImmutableSet([activeCellId]),
     columnIds: new ImmutableSet([parseCellId(activeCellId).columnId]),
     rowIds: new ImmutableSet(),
+    pasteOperation: 'insert',
     getFullySelectedColumnIds: () => new ImmutableSet(),
 
     adaptToModifiedPlane({ oldPlane, newPlane }) {

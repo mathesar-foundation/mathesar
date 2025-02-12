@@ -31,6 +31,8 @@ export function basisFromDataCells(
     columnIds: new ImmutableSet(map(({ columnId }) => columnId, parsedCells)),
     rowIds: new ImmutableSet(map(({ rowId }) => rowId, parsedCells)),
 
+    pasteOperation: 'update',
+
     getFullySelectedColumnIds(plane) {
       // This logic is somewhat complex because:
       //

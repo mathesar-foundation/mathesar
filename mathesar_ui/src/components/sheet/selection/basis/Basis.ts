@@ -20,6 +20,12 @@ export default interface Basis {
   readonly rowIds: ImmutableSet<string>;
   readonly columnIds: ImmutableSet<string>;
 
+  /**
+   * What operation should be performed when pasting data into the selected
+   * cells.
+   */
+  readonly pasteOperation: 'update' | 'insert' | 'none';
+
   /** Ids of columns in which _all_ data cells are selected */
   getFullySelectedColumnIds(plane: Plane): ImmutableSet<string>;
 
