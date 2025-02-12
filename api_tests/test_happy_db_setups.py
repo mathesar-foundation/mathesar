@@ -373,7 +373,7 @@ def test_intern_can_now_access_books_table(intern_rpc_call):
 def test_schema_delete(admin_rpc_call):
     admin_rpc_call(
         'schemas.delete',
-        schema_oid=library_management_oid,
+        schema_oids=[library_management_oid],
         database_id=internal_db_id,
     )
     result = admin_rpc_call(
