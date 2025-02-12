@@ -186,6 +186,7 @@ node_modules/
 
 # Client Build files
 mathesar/static/mathesar/
+static/
 
 # Playwright trace files
 test-results/
