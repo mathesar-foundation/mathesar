@@ -4727,6 +4727,40 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_with_uuid_pk() RETURNS SETOF TEXT AS $$
+DECLARE
+  rec_id uuid := 'c4e8eb88-8b34-459c-9c1f-778699c1f25f'::uuid;
+BEGIN
+  CREATE TABLE things(id uuid PRIMARY KEY, name TEXT);
+  INSERT INTO things VALUES (rec_id, 'chair');
+
+  PERFORM msar.patch_record_in_table('things'::regclass, rec_id, '{"2": "recliner"}');
+
+  RETURN NEXT results_eq(
+    format($q$ SELECT name FROM things WHERE id = %L $q$, rec_id),
+    $v$ VALUES ('recliner') $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_with_string_pk() RETURNS SETOF TEXT AS $$
+DECLARE
+  rec_id TEXT := 'Millennium Falcon';
+BEGIN
+  CREATE TABLE spaceships(name TEXT PRIMARY KEY, max_speed real);
+  INSERT INTO spaceships VALUES (rec_id, 9.0);
+
+  PERFORM msar.patch_record_in_table('spaceships'::regclass, rec_id, '{"2": 10.3}');
+
+  RETURN NEXT results_eq(
+    format($q$ SELECT max_speed FROM spaceships WHERE name = %L $q$, rec_id),
+    'VALUES (10.3::real)'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __setup_add_records_table_only_pk() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE atable (

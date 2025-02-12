@@ -5834,14 +5834,10 @@ The `rec_def` object's form is defined by the record being updated.  It should h
 corresponding to the attnums of desired columns and values corresponding to values we should set.
 */
 DECLARE
-  rec_modified_id integer;
   rec_modified jsonb;
 BEGIN
   EXECUTE format(
-    $p$
-    WITH update_cte AS (%1$s %2$s RETURNING %3$I)
-    SELECT * FROM update_cte
-    $p$,
+    $p$ %1$s %2$s $p$,
     msar.build_update_expr(tab_id, rec_def),
     msar.build_where_clause(
       tab_id, jsonb_build_object(
@@ -5850,12 +5846,11 @@ BEGIN
           jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
         )
       )
-    ),
-    msar.get_column_name(tab_id, msar.get_pk_column(tab_id))
-  ) INTO rec_modified_id;
+    )
+  );
   rec_modified := msar.get_record_from_table(
     tab_id,
-    rec_modified_id,
+    rec_id,
     return_record_summaries,
     table_record_summary_templates
   );
