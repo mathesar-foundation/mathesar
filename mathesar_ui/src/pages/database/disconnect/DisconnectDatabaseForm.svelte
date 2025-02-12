@@ -9,6 +9,7 @@
     FieldLayout,
     FormSubmit,
     makeForm,
+    optionalField,
     requiredField,
   } from '@mathesar/components/form';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
@@ -49,7 +50,7 @@
   const removeTypesSchema = requiredField(false);
   const useRole = requiredField(false);
   const roleName = requiredField('');
-  const rolePassword = requiredField('');
+  const rolePassword = optionalField('');
 
   $: ({ databases } = databasesStore);
   /**
