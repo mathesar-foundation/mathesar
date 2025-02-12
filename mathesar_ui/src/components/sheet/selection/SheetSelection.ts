@@ -1,7 +1,10 @@
-import { execPipe, filter, first, map } from 'iter-tools';
+import { first } from 'iter-tools';
 
 import { match } from '@mathesar/utils/patternMatching';
-import { ImmutableSet, assertExhaustive } from '@mathesar-component-library';
+import {
+  type ImmutableSet,
+  assertExhaustive,
+} from '@mathesar-component-library';
 
 import { makeCellId, makeCells, parseCellId } from '../cellIds';
 
@@ -14,76 +17,9 @@ import {
   basisFromZeroEmptyColumns,
   emptyBasis,
 } from './basis';
-import { type Direction, getColumnOffset } from './Direction';
+import type { Direction } from './Direction';
 import Plane from './Plane';
-import {
-  type SheetCellDetails,
-  fitSelectedValuesToSeriesTransformation,
-} from './selectionUtils';
-
-function getFullySelectedColumnIds(
-  plane: Plane,
-  basis: Basis,
-): ImmutableSet<string> {
-  if (basis.type === 'dataCells') {
-    // The logic within this branch is somewhat complex because:
-    // - We might want to support non-rectangular selections someday.
-    // - For performance, we want to avoid iterating over all the selected
-    //   cells.
-
-    const selectedRowCount = basis.rowIds.size;
-    const availableRowCount = plane.rowIds.length;
-    if (selectedRowCount < availableRowCount) {
-      // Performance heuristic. If the number of selected rows is less than the
-      // total number of rows, we can assume that no column exist in which all
-      // rows are selected.
-      return new ImmutableSet();
-    }
-
-    const selectedColumnCount = basis.columnIds.size;
-    const selectedCellCount = basis.cellIds.size;
-    const avgCellsSelectedPerColumn = selectedCellCount / selectedColumnCount;
-    if (avgCellsSelectedPerColumn === availableRowCount) {
-      // Performance heuristic. We know that no column can have more cells
-      // selected than the number of rows. Thus, if the average number of cells
-      // selected per column is equal to the number of rows, then we know that
-      // all selected columns are fully selected.
-      return basis.columnIds;
-    }
-
-    // This is the worst-case scenario, performance-wise, which is why we try to
-    // return early before hitting this branch. This case will only happen when
-    // we have a mix of fully selected columns and partially selected columns.
-    // This case should be rare because most (maybe all?) selections are
-    // rectangular.
-    const countSelectedCellsPerColumn = new Map<string, number>();
-    for (const cellId of basis.cellIds) {
-      const { columnId } = parseCellId(cellId);
-      const count = countSelectedCellsPerColumn.get(columnId) ?? 0;
-      countSelectedCellsPerColumn.set(columnId, count + 1);
-    }
-    const fullySelectedColumnIds = execPipe(
-      countSelectedCellsPerColumn,
-      filter(([, count]) => count === availableRowCount),
-      map(([id]) => id),
-    );
-    return new ImmutableSet(fullySelectedColumnIds);
-  }
-
-  if (basis.type === 'emptyColumns') {
-    return basis.columnIds;
-  }
-
-  if (basis.type === 'placeholderCell') {
-    return new ImmutableSet();
-  }
-
-  if (basis.type === 'empty') {
-    return new ImmutableSet();
-  }
-
-  return assertExhaustive(basis.type);
-}
+import type { SheetCellDetails } from './selectionUtils';
 
 /**
  * This is an immutable data structure which fully represents the state of a
@@ -108,9 +44,8 @@ export default class SheetSelection {
     // TODO validate that basis is valid within plane. For example, remove
     // selected cells from the basis that do not occur within the plane.
 
-    this.fullySelectedColumnIds = getFullySelectedColumnIds(
+    this.fullySelectedColumnIds = this.basis.getFullySelectedColumnIds(
       this.plane,
-      this.basis,
     );
   }
 
@@ -303,79 +238,10 @@ export default class SheetSelection {
    * relevant when paginating or when rows/columns are deleted/reordered/inserted.
    */
   forNewPlane(newPlane: Plane): SheetSelection {
-    if (this.basis.type === 'dataCells') {
-      if (!newPlane.hasResultRows) {
-        return new SheetSelection(newPlane, basisFromZeroEmptyColumns());
-      }
-
-      const [minRowId, maxRowId] = fitSelectedValuesToSeriesTransformation(
-        this.basis.rowIds,
-        this.plane.rowIds,
-        newPlane.rowIds,
-      );
-      const [minColumnId, maxColumnId] =
-        fitSelectedValuesToSeriesTransformation(
-          this.basis.columnIds,
-          this.plane.columnIds,
-          newPlane.columnIds,
-        );
-      if (
-        minRowId === undefined ||
-        maxRowId === undefined ||
-        minColumnId === undefined ||
-        maxColumnId === undefined
-      ) {
-        return new SheetSelection(newPlane);
-      }
-
-      const cellIds = newPlane.dataCellsInFlexibleRowColumnRange(
-        minRowId,
-        maxRowId,
-        minColumnId,
-        maxColumnId,
-      );
-
-      return new SheetSelection(
-        newPlane,
-        basisFromDataCells(cellIds, this.activeCellId),
-      );
-    }
-
-    if (this.basis.type === 'emptyColumns') {
-      if (newPlane.hasResultRows) {
-        return new SheetSelection(newPlane);
-      }
-      const minColumnId = newPlane.columnIds.min(this.basis.columnIds);
-      const maxColumnId = newPlane.columnIds.max(this.basis.columnIds);
-      if (minColumnId === undefined || maxColumnId === undefined) {
-        return new SheetSelection(newPlane, basisFromZeroEmptyColumns());
-      }
-      const columnIds = newPlane.columnIds.range(minColumnId, maxColumnId);
-      return new SheetSelection(newPlane, basisFromEmptyColumns(columnIds));
-    }
-
-    if (this.basis.type === 'placeholderCell') {
-      const columnId = first(this.basis.columnIds);
-      if (columnId === undefined) {
-        return new SheetSelection(newPlane);
-      }
-      const newPlaneHasSelectedCell =
-        newPlane.columnIds.has(columnId) &&
-        newPlane.placeholderRowId === this.plane.placeholderRowId;
-      if (newPlaneHasSelectedCell) {
-        // If we can retain the selected placeholder cell, then do so.
-        return new SheetSelection(newPlane, basisFromPlaceholderCell(columnId));
-      }
-      // Otherwise, return an empty selection
-      return new SheetSelection(newPlane);
-    }
-
-    if (this.basis.type === 'empty') {
-      // If the selection is empty, we keep it empty.
-      return new SheetSelection(newPlane);
-    }
-
-    return assertExhaustive(this.basis.type);
+    return new SheetSelection(
+      newPlane,
+      this.basis.adaptToModifiedPlane({ oldPlane: this.plane, newPlane }),
+    );
   }
 
   /**
@@ -418,18 +284,8 @@ export default class SheetSelection {
    * then a new selection is created with only that one cell selected.
    */
   collapsedAndMoved(direction: Direction): SheetSelection {
-    if (this.basis.type === 'emptyColumns') {
-      const offset = getColumnOffset(direction);
-      const newActiveColumnId = this.plane.columnIds.collapsedOffset(
-        this.basis.columnIds,
-        offset,
-      );
-      if (newActiveColumnId === undefined) {
-        // If we couldn't shift in the direction, then do nothing
-        return this;
-      }
-      return this.withBasis(basisFromEmptyColumns([newActiveColumnId]));
-    }
+    const newBasis = this.basis.collapsedAndMoved?.(direction, this.plane);
+    if (newBasis) return this.withBasis(newBasis);
 
     if (this.activeCellId === undefined) {
       // If no cells are selected, then select the first data cell
