@@ -63,7 +63,9 @@ RUN pip install --no-cache-dir -r requirements-dev.txt
 
 EXPOSE 8000
 
-ENTRYPOINT ["./dev-run.sh"]
+ENTRYPOINT python manage.py migrate \
+    && python manage.py createsuperuser --no-input --username admin --email admin@example.com \
+    && python manage.py runserver 0.0.0.0:8000 && fg
 
 
 #=========== STAGE: DEVELOPMENT ==============================================#
