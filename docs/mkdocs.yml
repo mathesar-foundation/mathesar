@@ -14,7 +14,7 @@ nav:
       - Uninstall Mathesar: administration/uninstall.md
       - Debugging Mathesar: administration/debug.md
       - Postgres & Python versions: administration/version-support.md
-      
+
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
@@ -27,7 +27,7 @@ nav:
           - Overview: user-guide/access-control.md
           - Mathesar users: user-guide/users.md
           - PostgreSQL roles: user-guide/roles.md
-          - Stored role passwords: user-guide/stored-role-passwords.md
+          - Stored roles: user-guide/stored-roles.md
           - Collaborators: user-guide/collaborators.md
       - Mathesar constructs:
           - Metadata: user-guide/metadata.md

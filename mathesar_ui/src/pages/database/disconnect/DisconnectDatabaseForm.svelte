@@ -138,7 +138,7 @@
                     let:translatedArg
                   >
                     {#if slotName === 'docsLink'}
-                      <DocsLink page="storedRolePasswords">
+                      <DocsLink page="storedRoles">
                         {translatedArg}
                       </DocsLink>
                     {/if}
@@ -282,6 +282,7 @@
                 />
                 <Field
                   label={$_('role_password')}
+                  help={$_('password_help')}
                   layout="stacked"
                   field={rolePassword}
                   input={{
