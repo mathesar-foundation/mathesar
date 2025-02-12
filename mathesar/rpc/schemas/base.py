@@ -121,7 +121,13 @@ def get(*, schema_oid: int, database_id: int, **kwargs) -> SchemaInfo:
 @mathesar_rpc_method(name="schemas.delete", auth="login")
 def delete(*, schema_oids: list[int], database_id: int, **kwargs) -> None:
     """
-    Delete a schema, given its OID.
+    Safely drop all objects in each schema, then the schemas themselves.
+
+    Does not work on the internal `msar` schema.
+
+    If any passed schema doesn't exist, an exception will be raised. If
+    any object exists in a schema which isn't passed, but which depends
+    on an object in a passed schema, an exception will be raised.
 
     Args:
         schema_oids: The OIDs of the schemas to delete.
