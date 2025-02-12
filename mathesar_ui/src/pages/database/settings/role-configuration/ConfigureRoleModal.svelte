@@ -5,7 +5,7 @@
     FieldLayout,
     FormSubmit,
     makeForm,
-    requiredField,
+    optionalField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -29,7 +29,7 @@
   export let controller: ModalController;
   export let combinedLoginRole: CombinedLoginRole;
 
-  const password = requiredField('');
+  const password = optionalField('');
   const form = makeForm({ password });
 
   async function configureRole() {
