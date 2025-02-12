@@ -8,7 +8,7 @@ from modernrpc.core import REQUEST_KEY
 from db.constants import INTERNAL_SCHEMAS
 from db.schemas import (
     create_schema,
-    drop_schema_via_oid,
+    drop_schemas,
     get_schema,
     list_schemas,
     patch_schema,
@@ -128,7 +128,7 @@ def delete(*, schema_oid: int, database_id: int, **kwargs) -> None:
         database_id: The Django id of the database containing the schema.
     """
     with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
-        drop_schema_via_oid(conn, schema_oid)
+        drop_schemas(conn, [schema_oid])
 
 
 @mathesar_rpc_method(name="schemas.patch", auth="login")
