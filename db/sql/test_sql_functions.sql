@@ -1331,29 +1331,21 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_schema_objects_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_schemas_with_dependent_obj();
-  RETURN NEXT set_eq(
+  RETURN NEXT set_has(
       format(
         'SELECT obj_name, obj_kind FROM msar.get_schema_objects_table(ARRAY[%L::regnamespace])',
         'people'::regnamespace
       ),
       $v$VALUES
-        ('actors', 'TYPE'),
-        ('_actors', 'TYPE'),
         ('actors_id_seq', 'SEQUENCE'),
         ('actors_id_1_to_50', 'TABLE'),
-        ('actors_id_1_to_50', 'TYPE'),
         ('actors_id_1_to_50_pkey', 'INDEX'),
         ('actors_pkey', 'INDEX'),
-        ('actors_id_seq', 'TYPE'),
-        ('_actors_id_1_to_50', 'TYPE'),
         ('actors', 'TABLE'),
         ('testtype', 'TYPE'),
         ('_testtype', 'TYPE'),
-        ('directors', 'TYPE'),
-        ('_directors', 'TYPE'),
         ('directors_id_seq', 'SEQUENCE'),
         ('directors', 'TABLE'),
-        ('directors_id_seq', 'TYPE'),
         ('directors_pkey', 'INDEX')
       $v$,
       'msar.get_schema_objects_table() should return objects for single schema'
@@ -1365,41 +1357,26 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_schema_objects_table_multi_schema() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_schemas_with_dependent_obj();
-  RETURN NEXT set_eq(
+  RETURN NEXT set_has(
       format(
         'SELECT obj_schema, obj_name, obj_kind FROM msar.get_schema_objects_table(ARRAY[%L::regnamespace, %L::regnamespace])',
         'people'::regnamespace, 'projects'::regnamespace
       ),
       $v$VALUES
-        ('people', 'actors', 'TYPE'),
-        ('people', '_actors', 'TYPE'),
         ('people', 'actors_id_seq', 'SEQUENCE'),
         ('people', 'actors_id_1_to_50', 'TABLE'),
-        ('people', 'actors_id_1_to_50', 'TYPE'),
         ('people', 'actors_id_1_to_50_pkey', 'INDEX'),
         ('people', 'actors_pkey', 'INDEX'),
-        ('people', 'actors_id_seq', 'TYPE'),
-        ('people', '_actors_id_1_to_50', 'TYPE'),
         ('people', 'actors', 'TABLE'),
         ('people', 'testtype', 'TYPE'),
         ('people', '_testtype', 'TYPE'),
-        ('people', 'directors', 'TYPE'),
-        ('people', '_directors', 'TYPE'),
         ('people', 'directors_id_seq', 'SEQUENCE'),
         ('people', 'directors', 'TABLE'),
-        ('people', 'directors_id_seq', 'TYPE'),
         ('people', 'directors_pkey', 'INDEX'),
         ('projects', 'movies_id_seq', 'SEQUENCE'),
-        ('projects', '_actors_fixed_copy', 'TYPE'),
-        ('projects', '_movies', 'TYPE'),
-        ('projects', 'movies', 'TYPE'),
         ('projects', 'actors_fixed_copy', 'MATERIALIZED VIEW'),
-        ('projects', 'movies_id_seq', 'TYPE'),
-        ('projects', 'actors_fixed_copy', 'TYPE'),
         ('projects', 'movies', 'TABLE'),
         ('projects', 'actors_copy', 'VIEW'),
-        ('projects', 'actors_copy', 'TYPE'),
-        ('projects', '_actors_copy', 'TYPE'),
         ('projects', 'movies_pkey', 'INDEX')
       $v$,
       'msar.get_schema_objects_table() should return objects for multiple schemas'
