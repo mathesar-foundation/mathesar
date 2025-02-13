@@ -78,7 +78,8 @@ export const databases = {
       {
         database_id: RawDatabase['id'];
         patch: {
-          nickname?: string;
+          nickname?: string | null;
+          name?: string;
         };
       },
       Array<RawDatabase>
