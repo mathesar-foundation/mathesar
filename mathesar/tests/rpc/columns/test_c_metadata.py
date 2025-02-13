@@ -24,6 +24,7 @@ def test_columns_meta_data_list(monkeypatch):
                 mon_currency_symbol="EUR", mon_currency_location="end-with-space",
                 time_format=None, date_format=None,
                 duration_min=None, duration_max=None, num_format="english",
+                display_width=None,
             ),
             ColumnMetaData(
                 database=db_model, table_oid=_table_oid, attnum=8,
@@ -32,6 +33,7 @@ def test_columns_meta_data_list(monkeypatch):
                 mon_currency_symbol="$", mon_currency_location="after-minus",
                 time_format=None, date_format=None,
                 duration_min=None, duration_max=None, num_format="german",
+                display_width=300,
             )
         ]
 
@@ -45,6 +47,7 @@ def test_columns_meta_data_list(monkeypatch):
             mon_currency_symbol="EUR", mon_currency_location="end-with-space",
             time_format=None, date_format=None,
             duration_min=None, duration_max=None, num_format="english",
+            display_width=None,
         ),
         metadata.ColumnMetaDataRecord(
             database_id=database_id, table_oid=table_oid, attnum=8,
@@ -53,6 +56,7 @@ def test_columns_meta_data_list(monkeypatch):
             mon_currency_symbol="$", mon_currency_location="after-minus",
             time_format=None, date_format=None,
             duration_min=None, duration_max=None, num_format="german",
+            display_width=300,
         ),
     ]
     actual_metadata_list = metadata.list_(table_oid=table_oid, database_id=database_id)
