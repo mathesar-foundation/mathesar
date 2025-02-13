@@ -85,10 +85,10 @@ def patch(*, database_id: int, patch: ConfiguredDatabasePatch, **kwargs) -> Conf
 
     Args:
         database_id: The Django id of the database
-        patch: A ConfiguredDatabasePatch object containing the fields to update.
+        patch: An object containing the fields to update.
 
     Returns:
-        The ConfiguredDatabaseInfo describing the database.
+        An object describing the database.
     """
     database = Database.objects.get(id=database_id)
     if "nickname" in patch:
