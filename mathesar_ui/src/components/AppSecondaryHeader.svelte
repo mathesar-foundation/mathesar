@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import PageTitleAndMeta from './PageTitleAndMeta.svelte';
   import type { IconProps } from '@mathesar/component-library/types';
+
+  import PageTitleAndMeta from './PageTitleAndMeta.svelte';
 
   interface $$Props extends ComponentProps<PageTitleAndMeta> {
     restrictWidth?: boolean;

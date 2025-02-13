@@ -5,6 +5,7 @@
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import { staticText } from '@mathesar/i18n/staticText';
   import {
     iconDatabase,
     iconDeleteMajor,
@@ -78,7 +79,7 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle(database.name)}</title>
+  <title>{makeSimplePageTitle(database.displayName)}</title>
 </svelte:head>
 
 <LayoutWithHeader
@@ -90,12 +91,19 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    name={database.name}
+    name={database.displayName}
     entityTypeName={$_('database')}
     icon={iconDatabase}
   >
-    <div slot="subText">
-      {`${$_('db_server')}: ${database.server.getConnectionString()}`}
+    <div slot="subText" class="details">
+      <div>
+        <span class="label">{$_('db_server')}{staticText.COLON}</span>
+        {database.server.getConnectionString()}
+      </div>
+      <div>
+        <span class="label">{$_('db_name')}{staticText.COLON}</span>
+        {database.name}
+      </div>
     </div>
     <div slot="action">
       <Button appearance="secondary" on:click={() => permissionsModal.open()}>
@@ -183,5 +191,11 @@
 <style>
   .tab-container {
     padding: var(--size-xx-large) 0;
+  }
+  .details {
+    font-size: var(--text-size-small);
+  }
+  .details .label {
+    color: var(--sand-700);
   }
 </style>

@@ -16,7 +16,7 @@
   import RemoveCollaboratorTitle from './RemoveCollaboratorTitle.svelte';
 
   export let collaborator: Collaborator;
-  export let database: Pick<Database, 'name'>;
+  export let database: Pick<Database, 'displayName' | 'name'>;
   export let onClickEditRole: (collaborator: Collaborator) => void;
   export let onDelete: (collaborator: Collaborator) => void;
 
@@ -79,14 +79,14 @@
           component: RemoveCollaboratorTitle,
           props: {
             userName,
-            databaseName: database.name,
+            databaseName: database.displayName,
           },
         },
         body: {
           component: RemoveCollaboratorBody,
           props: {
             userName,
-            databaseName: database.name,
+            databaseName: database.displayName,
             roleName: configuredRole?.name,
           },
         },
