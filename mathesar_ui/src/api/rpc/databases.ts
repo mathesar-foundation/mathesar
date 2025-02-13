@@ -6,6 +6,7 @@ import type { RawServer } from './servers';
 export interface RawDatabase {
   id: number;
   name: string;
+  nickname: string | null;
   server_id: RawServer['id'];
   last_confirmed_sql_version: string;
   needs_upgrade_attention: boolean;
@@ -73,6 +74,15 @@ export const databases = {
       },
       Array<RawDatabase>
     >(),
+    patch: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        patch: {
+          nickname?: string;
+        };
+      },
+      Array<RawDatabase>
+    >(),
     disconnect: rpcMethodTypeContainer<
       {
         database_id: RawDatabase['id'];
@@ -90,6 +100,7 @@ export const databases = {
       {
         database: RawDatabase['name'];
         sample_data?: SampleDataSchemaIdentifier[];
+        nickname: RawDatabase['nickname'];
       },
       DatabaseConnectionResult
     >(),
@@ -101,6 +112,7 @@ export const databases = {
         role: RawConfiguredRole['name'];
         password: string;
         sample_data?: SampleDataSchemaIdentifier[];
+        nickname: RawDatabase['nickname'];
       },
       DatabaseConnectionResult
     >(),

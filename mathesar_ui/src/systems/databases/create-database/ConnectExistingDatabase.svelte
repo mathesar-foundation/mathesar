@@ -20,6 +20,8 @@
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
+  import DatabaseNicknameInput from '../common/DatabaseNicknameInput.svelte';
+
   import {
     type InstallationSchema,
     getSampleSchemasFromInstallationSchemas,
@@ -30,6 +32,7 @@
   export let onSuccess: (db: Database) => void;
 
   const databaseName = requiredField('');
+  const nickname = optionalField<string | undefined>(undefined);
   const host = requiredField('localhost');
   const port = requiredField(5432);
   const role = requiredField('');
@@ -37,6 +40,7 @@
   const installationSchemas = requiredField<InstallationSchema[]>(['internal']);
   const form = makeForm({
     databaseName,
+    nickname,
     host,
     port,
     role,
@@ -51,6 +55,7 @@
       role: $role,
       password: $password,
       database: $databaseName,
+      nickname: $nickname ?? null,
       sample_data:
         getSampleSchemasFromInstallationSchemas($installationSchemas),
     });
@@ -121,6 +126,9 @@
       </RichText>
     </svelte:fragment>
   </Field>
+
+  <Field field={nickname} input={{ component: DatabaseNicknameInput }} />
+
   <FieldLayout>
     <InstallationSchemaSelector {installationSchemas} />
   </FieldLayout>
