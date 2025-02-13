@@ -109,13 +109,14 @@
     }}
   >
     <svelte:fragment slot="help">
+      <RichText text={$_('password_help')} />
       <RichText
         text={$_('connect_db_password_help')}
         let:slotName
         let:translatedArg
       >
         {#if slotName === 'docsLink'}
-          <DocsLink page="storedRolePasswords">{translatedArg}</DocsLink>
+          <DocsLink page="storedRoles">{translatedArg}</DocsLink>
         {/if}
       </RichText>
     </svelte:fragment>

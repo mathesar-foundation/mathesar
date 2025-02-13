@@ -54,6 +54,7 @@
   <div>
     <Field
       label={$_('password')}
+      help={$_('password_help')}
       layout="stacked"
       field={password}
       input={{
@@ -79,7 +80,7 @@
         controller.close();
       }}
       onProceed={configureRole}
-      proceedButton={{ label: $_('save_password') }}
+      proceedButton={{ label: $_('save_role') }}
       cancelButton={{ label: $_('cancel') }}
     />
   </div>
