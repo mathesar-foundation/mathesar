@@ -9,6 +9,7 @@
   import {
     iconDatabase,
     iconDeleteMajor,
+    iconEdit,
     iconMoreActions,
     iconPermissions,
     iconReinstall,
@@ -23,6 +24,7 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
@@ -52,6 +54,7 @@
   const permissionsModal = modal.spawnModalController();
   const disconnectModal = modal.spawnModalController<Database>();
   const reinstallModal = modal.spawnModalController<Database>();
+  const editModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
@@ -106,6 +109,13 @@
       </div>
     </div>
     <div slot="action">
+      {#if isMathesarAdmin}
+        <Button on:click={() => editModal.open()} appearance="secondary">
+          <Icon {...iconEdit} />
+          <span>{$_('edit_database')}</span>
+        </Button>
+      {/if}
+
       <Button appearance="secondary" on:click={() => permissionsModal.open()}>
         <Icon {...iconPermissions} />
         <span>{$_('database_permissions')}</span>
@@ -178,6 +188,7 @@
   </TabContainer>
 </LayoutWithHeader>
 
+<EditDatabaseModal controller={editModal} {database} />
 <DatabasePermissionsModal controller={permissionsModal} />
 <UpgradeDatabaseModal controller={reinstallModal} isReinstall />
 <DisconnectDatabaseModal
