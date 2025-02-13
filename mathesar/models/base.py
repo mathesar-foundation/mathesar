@@ -216,6 +216,7 @@ class ColumnMetaData(BaseModel):
     date_format = models.CharField(null=True)
     duration_min = models.CharField(max_length=255, null=True)
     duration_max = models.CharField(max_length=255, null=True)
+    display_width = models.PositiveIntegerField(null=True)
 
     class Meta:
         constraints = [
