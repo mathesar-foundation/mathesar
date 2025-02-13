@@ -16,15 +16,17 @@ from mathesar.rpc.servers import configured as configured_servers
 def test_create_new(monkeypatch, rf):
     test_sample_data = ["library_management"]
     test_database = "mathesar42"
+    test_nickname = "Saint Nick"
     request = rf.post("/api/rpc/v0/", data={})
     request.user = User(username="alice", password="pass1234")
     server_model = Server(id=2, host="example.com", port=5432)
-    db_model = Database(id=3, name=test_database, server=server_model)
+    db_model = Database(id=3, name=test_database, nickname=test_nickname, server=server_model)
     role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
 
-    def mock_set_up_new_for_user(database, user, sample_data=[]):
+    def mock_set_up_new_for_user(database, nickname, user, sample_data=[]):
         if not (
                 database == test_database
+                and nickname == test_nickname
                 and user == request.user
                 and sample_data == test_sample_data
         ):
@@ -45,7 +47,7 @@ def test_create_new(monkeypatch, rf):
     )
 
     actual_response = database_setup.create_new(
-        database=test_database, sample_data=test_sample_data, request=request
+        database=test_database, nickname=test_nickname, sample_data=test_sample_data, request=request
     )
     assert actual_response == expect_response
 
@@ -53,6 +55,7 @@ def test_create_new(monkeypatch, rf):
 def test_connect_existing(monkeypatch, rf):
     test_sample_data = ["library_management"]
     test_database = "mathesar42"
+    test_nickname = "Saint Nick"
     test_host = "example.com"
     test_port = 6543
     test_role = "ernie"
@@ -64,12 +67,13 @@ def test_connect_existing(monkeypatch, rf):
     role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
 
     def mock_set_up_preexisting_database_for_user(
-            host, port, database_name, role_name, password, user, sample_data=[]
+            host, port, database_name, nickname, role_name, password, user, sample_data=[]
     ):
         if not (
                 host == test_host
                 and port == test_port
                 and database_name == test_database
+                and nickname == test_nickname
                 and role_name == test_role
                 and password == test_password
                 and user == request.user
@@ -92,7 +96,7 @@ def test_connect_existing(monkeypatch, rf):
     )
 
     actual_response = database_setup.connect_existing(
-        host=test_host, port=test_port, database=test_database, role=test_role,
+        host=test_host, port=test_port, database=test_database, nickname=test_nickname, role=test_role,
         password=test_password, sample_data=test_sample_data, request=request
     )
     assert actual_response == expect_response

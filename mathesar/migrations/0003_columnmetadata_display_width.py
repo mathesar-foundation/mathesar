@@ -11,6 +11,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
+            model_name='database',
+            name='nickname',
+            field=models.CharField(null=True),
+        ),
+        migrations.AddField(
             model_name='columnmetadata',
             name='display_width',
             field=models.PositiveIntegerField(null=True),

@@ -57,8 +57,10 @@
     options:
       members:
       - list_
+      - patch
       - disconnect
       - ConfiguredDatabaseInfo
+      - ConfiguredDatabasePatch
 
 ## Constraints
 
