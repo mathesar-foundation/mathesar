@@ -21,7 +21,9 @@
         <slot name="subText" />
       </div>
     </div>
-    <slot name="action" />
+    <div class="action">
+      <slot name="action" />
+    </div>
   </div>
   <slot name="bottom" />
 </div>
@@ -37,6 +39,8 @@
   }
   .top {
     display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -48,10 +52,17 @@
     align-items: center;
   }
 
+  .action {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+
   .entity-icon {
     width: 3.4rem;
     height: 3.4rem;
     background-color: var(--brand-500);
+    flex: 0 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;
