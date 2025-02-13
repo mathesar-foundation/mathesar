@@ -46,9 +46,14 @@
       ),
       columnsMap: stringifyMapKeys(get(processedColumns)),
       recordSummaries: get(recordsData.linkedRecordSummaries),
-      selectedRowIds: get(selection).rowIds,
-      selectedColumnIds: get(selection).columnIds,
     }),
+    getPastingContext: () => ({
+      // TODO
+      getSheetColumns: () => [],
+      // TODO
+      getRecordIdsFromSelectionStart: () => [],
+    }),
+    getSelection: () => get(selection),
     showToastInfo: toast.info,
     showToastError: toast.error,
   });

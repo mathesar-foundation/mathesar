@@ -76,11 +76,11 @@ function* validateRows(input: unknown): Generator<StructuredCell[]> {
 }
 
 /**
- * This function exists to validate data coming into Mathesar from the user's
- * clipboard. Even though this data would be associated with our custom MIME
- * type we still validate it for good measure. For example it could happen that
- * a user copies from an older version of Mathesar and pastes into a newer of
- * Mathesar where the MIME type is still the same but the data structure has
+ * This function exists to validate Mathesar data coming into Mathesar from the
+ * user's clipboard. Even though this data would be associated with our custom
+ * MIME type, we still validate it for good measure. For example it could happen
+ * that a user copies from an older version of Mathesar and pastes into a newer
+ * of Mathesar where the MIME type is still the same but the data structure has
  * changed. We need to perform this validation at runtime in order to rely on
  * the type system throughout the code that handles "paste" operations.
  */
