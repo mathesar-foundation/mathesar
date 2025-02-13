@@ -699,7 +699,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_schema_objects_table(schemas regnamespace[])
+msar.get_schema_objects_table(sch_ids regnamespace[])
 RETURNS TABLE (obj_id oid, obj_schema text, obj_name text, obj_kind text) AS $$ /*
 Return a table with information about most objects in the given schemas.
 */
@@ -715,7 +715,7 @@ WITH obj_cte AS (
         ELSE 'FUNCTION'
       END AS obj_kind
     FROM pg_proc
-    WHERE pronamespace=ANY(schemas)
+    WHERE pronamespace=ANY(sch_ids)
   ) UNION (
     SELECT
       oid AS obj_id,
@@ -723,7 +723,7 @@ WITH obj_cte AS (
       typname AS obj_name,
       'TYPE' AS obj_kind
     FROM pg_type
-    WHERE typnamespace=ANY(schemas)
+    WHERE typnamespace=ANY(sch_ids)
   ) UNION (
     SELECT
       oid AS obj_id,
@@ -741,7 +741,7 @@ WITH obj_cte AS (
         WHEN 'f' THEN 'FOREIGN TABLE'
       END AS obj_kind
     FROM pg_class
-    WHERE relnamespace=ANY(schemas)
+    WHERE relnamespace=ANY(sch_ids)
   )
 ) SELECT DISTINCT obj_id, obj_schema, obj_name, obj_kind FROM obj_cte WHERE obj_kind IS NOT NULL;
 $$ LANGUAGE SQL;
