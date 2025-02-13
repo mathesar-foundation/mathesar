@@ -5,25 +5,20 @@
   export let icon: IconProps;
   export let name: string;
   export let entityTypeName: string | undefined = undefined;
-  export let subText: string | undefined = undefined;
 </script>
 
-<div class="container">
+<div class="page-title-and-meta">
   <div class="top">
-    <div class="left">
-      <div class="entity-container">
-        <div class="entity-icon">
-          <Icon {...icon} size="1.5em" />
-        </div>
-        <div class="left-meta-container">
-          {#if entityTypeName}
-            <span class="entity-type-name">{entityTypeName}</span>
-          {/if}
-          <span class="entity-name">{name}</span>
-          {#if subText}
-            <span>{subText}</span>
-          {/if}
-        </div>
+    <div class="entity-container">
+      <div class="entity-icon">
+        <Icon {...icon} size="1.5em" />
+      </div>
+      <div class="left-meta-container">
+        {#if entityTypeName}
+          <span class="entity-type-name">{entityTypeName}</span>
+        {/if}
+        <span class="entity-name">{name}</span>
+        <slot name="subText" />
       </div>
     </div>
     <slot name="action" />
@@ -32,7 +27,7 @@
 </div>
 
 <style lang="scss">
-  .container {
+  .page-title-and-meta {
     display: flex;
     flex-direction: column;
 

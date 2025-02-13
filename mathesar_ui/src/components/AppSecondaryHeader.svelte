@@ -2,24 +2,29 @@
   import type { ComponentProps } from 'svelte';
 
   import PageTitleAndMeta from './PageTitleAndMeta.svelte';
+  import type { IconProps } from '@mathesar/component-library/types';
 
-  export let pageTitleAndMetaProps: ComponentProps<PageTitleAndMeta>;
+  interface $$Props extends ComponentProps<PageTitleAndMeta> {
+    restrictWidth?: boolean;
+  }
+
+  export let icon: IconProps;
+  export let name: string;
   export let restrictWidth = true;
 </script>
 
-<div class="container">
+<div class="app-secondary-header">
   <div class="content" class:restrict-width={restrictWidth}>
-    <div class="page-title-and-meta-container">
-      <PageTitleAndMeta {...pageTitleAndMetaProps}>
-        <slot slot="action" name="action" />
-        <slot slot="bottom" name="bottom" />
-      </PageTitleAndMeta>
-    </div>
+    <PageTitleAndMeta {icon} {name} {...$$restProps}>
+      <slot slot="action" name="action" />
+      <slot slot="bottom" name="bottom" />
+      <slot slot="subText" name="subText" />
+    </PageTitleAndMeta>
   </div>
 </div>
 
 <style>
-  .container {
+  .app-secondary-header {
     background-color: var(--sand-200);
   }
   .content {

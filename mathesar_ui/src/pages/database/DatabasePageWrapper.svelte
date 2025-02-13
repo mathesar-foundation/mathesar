@@ -90,13 +90,13 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    pageTitleAndMetaProps={{
-      name: database.name,
-      entityTypeName: $_('database'),
-      icon: iconDatabase,
-      subText: `${$_('db_server')}: ${database.server.getConnectionString()}`,
-    }}
+    name={database.name}
+    entityTypeName={$_('database')}
+    icon={iconDatabase}
   >
+    <div slot="subText">
+      {`${$_('db_server')}: ${database.server.getConnectionString()}`}
+    </div>
     <div slot="action">
       <Button appearance="secondary" on:click={() => permissionsModal.open()}>
         <Icon {...iconPermissions} />
