@@ -744,7 +744,7 @@ WITH obj_cte AS (
     WHERE relnamespace=ANY(sch_ids)
   )
 ) SELECT DISTINCT obj_id, obj_schema, obj_name, obj_kind FROM obj_cte WHERE obj_kind IS NOT NULL;
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
