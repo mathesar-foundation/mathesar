@@ -15,6 +15,11 @@ class Migration(migrations.Migration):
             field=encrypted_fields.fields.EncryptedCharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
+            model_name='database',
+            name='nickname',
+            field=models.CharField(null=True),
+        ),
+        migrations.AddField(
             model_name='columnmetadata',
             name='display_width',
             field=models.PositiveIntegerField(null=True),
