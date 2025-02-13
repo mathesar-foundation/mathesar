@@ -1,22 +1,24 @@
 <script lang="ts">
   import type { IconProps } from '@mathesar/component-library/types';
   import { iconExternalHyperlink } from '@mathesar/icons';
-  import { AnchorButton, Icon } from '@mathesar-component-library';
+  import { Icon } from '@mathesar-component-library';
 
   export let href: string;
   export let icon: IconProps;
 </script>
 
-<a class="resource-card" {href} target="_blank">
-  <div class="title">
-    <span>
-      <Icon {...icon} />
+<div class="resource-card">
+  <span>
+    <a class="title" {href} target="_blank">
+      <span class="icon">
+        <Icon {...icon} size="0.8em" />
+      </span>
       <slot name="title" />
-    </span>
-    <Icon {...iconExternalHyperlink} />
-  </div>
+      <Icon {...iconExternalHyperlink} />
+    </a>
+  </span>
   <div class="description"><slot name="description" /></div>
-</a>
+</div>
 
 <style>
   .resource-card {
@@ -24,11 +26,21 @@
     display: flex;
     flex-direction: column;
     gap: var(--size-ultra-small);
-    text-decoration: none;
+  }
+  .icon {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--size-ultra-small);
+    border-radius: 50%;
+    background-color: var(--yellow-400);
+    color: var(--white);
   }
   .title {
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: underline;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--size-super-ultra-small);
   }
   .description {
     color: var(--color-text-muted);
