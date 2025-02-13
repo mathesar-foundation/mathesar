@@ -1385,7 +1385,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_drop_schemas_single() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_drop_single_schema_with_dependent_objs() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_schemas_with_dependent_obj();
   RETURN NEXT throws_ok(
