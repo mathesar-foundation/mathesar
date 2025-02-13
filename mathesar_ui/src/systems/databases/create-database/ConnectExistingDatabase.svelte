@@ -7,6 +7,7 @@
     FieldLayout,
     FormSubmit,
     makeForm,
+    optionalField,
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
@@ -32,7 +33,7 @@
   const host = requiredField('localhost');
   const port = requiredField(5432);
   const role = requiredField('');
-  const password = requiredField('');
+  const password = optionalField('');
   const installationSchemas = requiredField<InstallationSchema[]>(['internal']);
   const form = makeForm({
     databaseName,
@@ -108,13 +109,14 @@
     }}
   >
     <svelte:fragment slot="help">
+      {$_('password_help')}
       <RichText
         text={$_('connect_db_password_help')}
         let:slotName
         let:translatedArg
       >
         {#if slotName === 'docsLink'}
-          <DocsLink page="storedRolePasswords">{translatedArg}</DocsLink>
+          <DocsLink page="storedRoles">{translatedArg}</DocsLink>
         {/if}
       </RichText>
     </svelte:fragment>
