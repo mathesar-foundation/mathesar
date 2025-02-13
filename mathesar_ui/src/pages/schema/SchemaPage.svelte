@@ -11,7 +11,6 @@
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
-  import { logEvent } from '@mathesar/utils/telemetry';
   import { Button, Icon } from '@mathesar-component-library';
 
   import AddTableModal from './AddTableModal.svelte';
@@ -36,12 +35,6 @@
 
   $: ({ name, description, currentAccess } = schema);
   $: ({ currentRoleOwns } = currentAccess);
-
-  logEvent('opened_schema', {
-    database_name: database.name,
-    schema_name: $name,
-    source: 'schema_page',
-  });
 </script>
 
 <svelte:head><title>{makeSimplePageTitle($name)}</title></svelte:head>
