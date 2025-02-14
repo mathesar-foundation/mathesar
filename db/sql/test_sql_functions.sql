@@ -33,26 +33,14 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_columns_ne_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE "12345" (bleh text, bleh2 numeric);
-  PERFORM msar.drop_columns(12345, 1);
+  RETURN NEXT throws_ok(
+    'SELECT msar.drop_columns(12345, 1);',
+    '42P01',
+    'Relation with OID 12345 does not exist',
+    'Column dropper throws when trying to drop from stupidly-named table'
+  );
   RETURN NEXT has_column(
     '12345', 'bleh', 'Doesn''t drop columns of stupidly-named table'
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_columns_names() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_drop_columns();
-  PERFORM msar.drop_columns('public', 'atable', 'dodrop1', 'dodrop2');
-  RETURN NEXT has_column(
-    'atable', 'dontdrop', 'Dropper keeps correct columns'
-  );
-  RETURN NEXT hasnt_column(
-    'atable', 'dodrop1', 'Dropper drops correct columns 1'
-  );
-  RETURN NEXT hasnt_column(
-    'atable', 'dodrop2', 'Dropper drops correct columns 2'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -701,17 +689,6 @@ BEGIN
   created_name := conname FROM pg_constraint
     WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1, 2}';
   RETURN NEXT is(created_name, 'add_pkeytest_pkey');
-END;
-$f$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_add_constraint_pkey_tab_name_singlecol() RETURNS SETOF TEXT AS $f$
-DECLARE
-  con_create_arr jsonb := '[{"type": "p", "columns": [1]}]';
-BEGIN
-  PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('public', 'add_pkeytest', con_create_arr);
-  RETURN NEXT col_is_pk('add_pkeytest', 'col1');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -1455,26 +1432,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_rename_table() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_table();
-  PERFORM msar.rename_table(
-    sch_name =>'public',
-    old_tab_name => 'alter_this_table',
-    new_tab_name => 'renamed_table'
-  );
-  RETURN NEXT hasnt_table('alter_this_table');
-  RETURN NEXT has_table('renamed_table');
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_rename_table_with_same_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
   PERFORM msar.rename_table(
-    sch_name =>'public',
-    old_tab_name => 'alter_this_table',
+    tab_id => 'alter_this_table'::regclass::oid,
     new_tab_name => 'alter_this_table'
   );
   RETURN NEXT has_table('alter_this_table');
@@ -1496,19 +1458,6 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_comment_on_table() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_table();
-  PERFORM msar.comment_on_table(
-    sch_name =>'public',
-    tab_name => 'alter_this_table',
-    comment_ => 'This is a comment!'
-  );
-  RETURN NEXT is(obj_description('alter_this_table'::regclass::oid), 'This is a comment!');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_comment_on_table_using_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
   PERFORM msar.comment_on_table(
