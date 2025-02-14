@@ -21,7 +21,7 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import FeedbackButton from '@mathesar/systems/feedback/FeedbackButton.svelte';
+  import Feedback from '@mathesar/systems/feedback/Feedback.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     DropdownMenu,
@@ -50,7 +50,7 @@
 
   {#if isNormalRoutingContext}
     <div class="right">
-      <FeedbackButton />
+      <Feedback />
 
       {#if $userProfile}
         <DropdownMenu
