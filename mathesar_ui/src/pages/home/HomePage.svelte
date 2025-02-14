@@ -9,17 +9,12 @@
   } from '@mathesar/components/resources';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import { databasesStore } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import Feedback from '@mathesar/systems/feedback/Feedback.svelte';
 
   import DatabasesList from './DatabasesList.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
-
-  $: ({ databases } = databasesStore);
-  $: countDatabases = $databases.size;
-  $: showUseCaseFeedbackPanel = countDatabases === 0;
 </script>
 
 <svelte:head>
@@ -42,11 +37,6 @@
   <div class="content">
     <div class="databases-section">
       <DatabasesList />
-      {#if showUseCaseFeedbackPanel}
-        <div>
-          <Feedback />
-        </div>
-      {/if}
     </div>
     <div class="resources">
       <h2>{$_('resources')}</h2>
