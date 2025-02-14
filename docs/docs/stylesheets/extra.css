@@ -1,20 +1,35 @@
 :root,
 [data-md-color-scheme="default"] {
-  --md-accent-fg-color: #e7754c;
+  --stormy-darkest: #201430;
+  --stormy-darker: #362249;
+  --stormy-dark: #4d3468;
+  --stormy-medium: #644687;
+  --stormy-light: #7a5ca6;
+  --stormy-lighter: #e8e3f0;
+  --stormy-lightest: #fbf7ff;
+
+  --salmon-dark: #d55939;
+  --salmon-medium: #e7754c;
+  --salmon-light: #f4e6e2;
+
+  --white: #ffffff;
+  --white-transparent: rgba(255, 255, 255, 0.1);
+
+  --md-accent-fg-color: var(--salmon-medium);
   --md-admonition-bg-color: var(--md-default-bg-color);
   --md-admonition-fg-color: var(--md-default-fg-color);
-  --md-code-bg-color: #e8e3f0;
-  --md-code-fg-color: #362249;
-  --md-default-bg-color: #fbf7ff;
-  --md-default-fg-color--light: #4d3468;
-  --md-default-fg-color--lighter: #644687;
-  --md-default-fg-color--lightest: #7a5ca6;
-  --md-footer-bg-color: #201430;
+  --md-code-bg-color: var(--stormy-lighter);
+  --md-code-fg-color: var(--stormy-darker);
+  --md-default-bg-color: var(--stormy-lightest);
+  --md-default-fg-color--light: var(--stormy-dark);
+  --md-default-fg-color--lighter: var(--stormy-medium);
+  --md-default-fg-color--lightest: var(--stormy-light);
+  --md-footer-bg-color: var(--stormy-darkest);
   --md-footer-bg-color--dark: #0f081b;
   --md-footer-fg-color: #fdfcf9;
   --md-footer-fg-color--light: #f5ebd1;
   --md-footer-fg-color--lighter: #f0e1ba;
-  --md-link-color: #d55939;
+  --md-link-color: var(--salmon-dark);
   --md-primary-fg-color: #411511;
   --md-secondary-bg-color-default: #fee6df;
   --md-typeset-del-color: #f5503d26;
@@ -27,6 +42,7 @@
   --md-typeset-table-color--light: rgba(0, 0, 0, 0.035);
   --md-warning-bg-color: #ff9;
   --md-warning-fg-color: #000000de;
+  --pumpkin-dark: #411511;
 }
 
 [data-md-color-scheme="slate"] {
@@ -45,17 +61,18 @@
 }
 
 .md-nav--primary > .md-nav__list .md-nav__link--active {
-  background-color: #f4e6e2;
+  background-color: var(--salmon-light);
   border-radius: 8px;
-  color: #d55939;
+  color: var(--salmon-dark);
   font-weight: 700;
   padding: 0.5em 1em;
   transition: all 0.2s ease;
 }
 
 .md-nav--secondary {
-  background-color: transparent;
-  padding: 0;
+  background-color: #f0f8ff;
+  border-left: 2px solid var(--stormy-light);
+  padding: 1em;
 }
 
 .md-nav--secondary > .md-nav__list .md-nav__link {
@@ -80,6 +97,8 @@
 
 [data-md-color-scheme="slate"] .md-nav--secondary {
   background-color: transparent;
+  border-left: 2px solid var(--salmon-medium);
+  padding: 1em;
 }
 
 [data-md-color-scheme="slate"]
@@ -101,7 +120,7 @@
 }
 
 .md-nav__item--section > .md-nav__link {
-  color: #4d3468;
+  color: var(--stormy-dark);
   font-size: 0.85em;
   text-transform: uppercase;
 }
@@ -133,7 +152,7 @@
 }
 
 .md-typeset h1 {
-  color: #362249;
+  color: var(--stormy-darker);
   font-weight: 800;
   letter-spacing: -0.03em;
   font-size: 2.5em;
@@ -148,15 +167,15 @@
 }
 
 .md-typeset h2 {
+  color: var(--stormy-darker);
   font-weight: 700;
-  color: #362249;
 }
 
 .md-typeset h3,
 .md-typeset h4,
 .md-typeset h5,
 .md-typeset h6 {
-  color: #4d3468;
+  color: var(--stormy-dark);
   font-weight: 600;
 }
 
@@ -176,13 +195,8 @@
 }
 
 .md-nav__list .md-nav__link:hover {
-  color: #e7754c;
+  color: var(--salmon-medium);
   transition: all 0.2s ease;
-}
-
-[data-md-color-scheme="slate"] .md-nav--secondary {
-  background-color: transparent;
-  border: none;
 }
 
 .md-nav--secondary > .md-nav__list .md-nav__link--active {
@@ -197,11 +211,11 @@
 }
 
 [data-md-color-scheme="slate"] .md-nav__item--section > .md-nav__link {
-  color: #cdc0e2;
+  color: var(--stormy-lighter);
 }
 
 .md-header {
-  background-color: #201430;
+  background-color: var(--stormy-darkest);
   color: #f3f0f7;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
@@ -222,7 +236,7 @@
 }
 
 .md-header__button {
-  color: #e6dff0;
+  color: var(--stormy-lighter);
   transition: color 0.2s ease;
 }
 
@@ -263,19 +277,19 @@
 }
 
 .md-version__list {
-  background-color: #362249;
-  border: 1px solid #4d3468;
+  background-color: var(--stormy-darker);
+  border: 1px solid var(--stormy-dark);
   border-radius: 8px;
   margin: 1.7rem 0 0 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .md-version__item {
-  color: #e6dff0;
+  color: var(--stormy-lighter);
 }
 
 .md-version__item:hover {
-  background-color: #4d3468;
+  background-color: var(--stormy-dark);
 }
 
 .md-search__input {
@@ -318,8 +332,8 @@ p:has(a[href^="https://github.com/mathesar-foundation/mathesar/pull/"])
   .md-nav--primary
   > .md-nav__list
   .md-nav__link--active {
-  background-color: #411511;
-  color: #f9ac93;
+  background-color: var(--pumpkin-dark);
+  color: var(--salmon-medium);
 }
 
 .md-typeset .admonition,
@@ -331,4 +345,18 @@ p:has(a[href^="https://github.com/mathesar-foundation/mathesar/pull/"])
 [data-md-color-scheme="slate"] .md-typeset .admonition,
 [data-md-color-scheme="slate"] .md-typeset details {
   background-color: transparent;
+}
+
+[data-md-color-scheme="slate"] .md-footer {
+  background-color: var(--stormy-darkest);
+  color: var(--stormy-lighter);
+}
+
+[data-md-color-scheme="slate"] .md-footer a {
+  color: var(--salmon-medium);
+  transition: color 0.2s ease;
+}
+
+[data-md-color-scheme="slate"] .md-footer a:hover {
+  color: var(--white);
 }
