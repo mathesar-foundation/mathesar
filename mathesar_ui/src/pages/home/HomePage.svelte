@@ -10,7 +10,6 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import Feedback from '@mathesar/systems/feedback/Feedback.svelte';
 
   import DatabasesList from './DatabasesList.svelte';
 
