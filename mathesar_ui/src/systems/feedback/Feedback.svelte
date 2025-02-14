@@ -25,7 +25,7 @@
 
   let form = makeForm({ feedback });
   $: formRequestStatus = form.requestStatus;
-  $: isSucessfullySubmitted = $formRequestStatus?.state === 'success';
+  $: isSuccessfullySubmitted = $formRequestStatus?.state === 'success';
 
   async function send() {
     await api.analytics
@@ -72,7 +72,7 @@
       {$_('feedback')}
     </div>
     <div class="feedback-content">
-      {#if !isSucessfullySubmitted}
+      {#if !isSuccessfullySubmitted}
         <div class="feedback-form">
           <div class="help">
             {$_('feedback_form_help')}
