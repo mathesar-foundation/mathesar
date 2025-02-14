@@ -57,3 +57,7 @@ def drop_schema_via_oid(conn, id, cascade=False):
         cascade: Whether to drop the dependent objects.
     """
     db_conn.exec_msar_func(conn, 'drop_schema', id, cascade).fetchone()
+
+
+def drop_schemas(conn, sch_oids):
+    db_conn.exec_msar_func(conn, 'drop_schemas', sch_oids)
