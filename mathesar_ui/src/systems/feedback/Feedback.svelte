@@ -23,6 +23,8 @@
 
   const feedback = requiredField<string>('');
 
+  export let compactLayout = false;
+
   let form = makeForm({ feedback });
   $: formRequestStatus = form.requestStatus;
   $: isSuccessfullySubmitted = $formRequestStatus?.state === 'success';
@@ -69,11 +71,16 @@
   >
     <div class="trigger" slot="trigger">
       <Icon {...iconFeedback} size="0.9em" />
-      {$_('feedback')}
+      {#if !compactLayout}
+        {$_('feedback')}
+      {/if}
     </div>
     <div class="feedback-content">
       {#if !isSuccessfullySubmitted}
         <div class="feedback-form">
+          {#if compactLayout}
+            <div class="title">{$_('feedback')}</div>
+          {/if}
           <div class="help">
             {$_('feedback_form_help')}
           </div>
