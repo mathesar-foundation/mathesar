@@ -368,6 +368,11 @@ METHODS = [
         "servers.configured.list",
         [user_is_authenticated]
     ),
+    (
+        servers.configured.patch,
+        "servers.configured.patch",
+        [user_is_superuser]
+    ),
 
     (
         tables.add,
