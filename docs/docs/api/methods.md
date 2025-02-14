@@ -209,7 +209,9 @@
     options:
       members:
       - list_
+      - patch
       - ConfiguredServerInfo
+      - ConfiguredServerPatch
 
 ## Tables
 
