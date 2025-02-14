@@ -16,6 +16,7 @@ import {
   faClock,
   faClone,
   faCogs,
+  faCommentAlt,
   faComments,
   faCopy,
   faDatabase,
@@ -179,6 +180,7 @@ export const iconDocumentation: IconProps = { data: faBook };
 export const iconDonation: IconProps = { data: faHeart };
 export const iconExploration: IconProps = { data: explorationIcon };
 export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
+export const iconFeedback: IconProps = { data: faCommentAlt };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };

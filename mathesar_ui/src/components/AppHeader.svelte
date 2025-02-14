@@ -21,7 +21,7 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import Feedback from '@mathesar/systems/feedback/Feedback.svelte';
+  import FeedbackButton from '@mathesar/systems/feedback/FeedbackButton.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     DropdownMenu,
@@ -50,20 +50,7 @@
 
   {#if isNormalRoutingContext}
     <div class="right">
-      <DropdownMenu
-        triggerAppearance="secondary"
-        size="small"
-        closeOnInnerClick={false}
-        showArrow={false}
-        menuStyle="--Menu__padding-x: 0.3em;"
-      >
-        <div slot="trigger">
-          {$_('feedback')}
-        </div>
-        <div class="feedback-content">
-          <Feedback />
-        </div>
-      </DropdownMenu>
+      <FeedbackButton />
 
       {#if $userProfile}
         <DropdownMenu
@@ -162,10 +149,6 @@
     align-items: center;
     font-size: var(--text-size-large);
     gap: var(--size-x-small);
-  }
-
-  .feedback-content {
-    padding: var(--size-small);
   }
 
   .user-switcher {
