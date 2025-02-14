@@ -699,6 +699,55 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_schema_objects_table(sch_ids regnamespace[])
+RETURNS TABLE (obj_id oid, obj_schema text, obj_name text, obj_kind text) AS $$ /*
+Return a table with information about most objects in the given schemas.
+*/
+WITH obj_cte AS (
+  (
+    SELECT
+      oid AS obj_id,
+      msar.get_schema_name(pronamespace) AS obj_schema,
+      proname AS obj_name,
+      CASE prokind
+        WHEN 'a' THEN 'AGGREGATE'
+        WHEN 'p' THEN 'PROCEDURE'
+        ELSE 'FUNCTION'
+      END AS obj_kind
+    FROM pg_proc
+    WHERE pronamespace=ANY(sch_ids)
+  ) UNION (
+    SELECT
+      oid AS obj_id,
+      msar.get_schema_name(typnamespace) AS obj_schema,
+      typname AS obj_name,
+      'TYPE' AS obj_kind
+    FROM pg_type
+    WHERE typnamespace=ANY(sch_ids)
+  ) UNION (
+    SELECT
+      oid AS obj_id,
+      msar.get_schema_name(relnamespace) AS obj_schema,
+      relname AS obj_name,
+      CASE relkind
+        WHEN 'r' THEN 'TABLE'
+        WHEN 'p' THEN 'TABLE'
+        WHEN 'i' THEN 'INDEX'
+        WHEN 'I' THEN 'INDEX'
+        WHEN 'S' THEN 'SEQUENCE'
+        WHEN 'v' THEN 'VIEW'
+        WHEN 'm' THEN 'MATERIALIZED VIEW'
+        WHEN 'c' THEN 'TYPE'
+        WHEN 'f' THEN 'FOREIGN TABLE'
+      END AS obj_kind
+    FROM pg_class
+    WHERE relnamespace=ANY(sch_ids)
+  )
+) SELECT DISTINCT obj_id, obj_schema, obj_name, obj_kind FROM obj_cte WHERE obj_kind IS NOT NULL;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_pk_column(rel_id oid) RETURNS smallint AS $$/*
 Return the first column attnum in the primary key of a given relation (e.g., table).
 
@@ -2004,6 +2053,74 @@ Args:
 */
 BEGIN
   PERFORM msar.drop_schema(msar.get_schema_name(sch_id), cascade_);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schemas(sch_ids regnamespace[]) RETURNS void AS $$/*
+Safely drop all objects in each schema, then the schemas themselves.
+
+Does not work on the msar schema.
+
+If any passed schema doesn't exist, an exception will be raised. If any object exists in a schema
+which isn't passed, but which depends on an object in a passed schema, an exception will be raised.
+
+Args:
+  sch_ids: The OIDs of the schemas to drop.
+*/
+DECLARE
+  obj RECORD;
+  message text;
+  detail text;
+  sch regnamespace;
+  sch_name text;
+  undropped_objects text[];
+  drop_success boolean := false;
+  drop_failed boolean := false;
+BEGIN
+  SET client_min_messages = WARNING;
+  FOR obj IN
+    SELECT obj_id, obj_schema, obj_name, obj_kind
+    FROM msar.get_schema_objects_table(sch_ids)
+    ORDER BY obj_id DESC  -- Objects more often depend on others of lower OID.
+  LOOP
+    BEGIN
+      EXECUTE format('DROP %s IF EXISTS %I.%I', obj.obj_kind, obj.obj_schema, obj.obj_name);
+      drop_success = true;
+    EXCEPTION
+      WHEN dependent_objects_still_exist THEN
+        GET STACKED DIAGNOSTICS
+          message = MESSAGE_TEXT,
+          detail = PG_EXCEPTION_DETAIL;
+        undropped_objects = undropped_objects || message;
+        IF detail <> '' THEN
+           undropped_objects = undropped_objects || concat('    ', detail);
+        END IF;
+      drop_failed =  true;
+    END;
+  END LOOP;
+  SET client_min_messages = NOTICE;
+  IF drop_failed IS false THEN
+    -- We dropped every object that existed in the schemas.
+    RAISE NOTICE E'All objects dropped successfully!\n\nDropping schemas...\n\n';
+    FOREACH sch IN ARRAY sch_ids
+      LOOP
+        sch_name = msar.get_schema_name(sch);
+        RAISE NOTICE 'Dropping Schema %', sch_name;
+        EXECUTE(format('DROP SCHEMA IF EXISTS %I', sch_name));
+      END LOOP;
+  ELSIF drop_success IS false THEN
+    -- We failed to drop anything in the schemas (and failed to drop at least one object).
+    RAISE EXCEPTION USING
+      MESSAGE = 'Nothing was dropped in this call due to dependent objects.',
+      DETAIL = array_to_string(array_remove(undropped_objects, ''), E'\n         '),
+      HINT = 'All changes will be reverted.',
+      ERRCODE = 'dependent_objects_still_exist';
+  ELSE
+    -- We did drop some objects, but failed to drop at least one (due to dependencies). Recurse.
+    PERFORM msar.drop_schemas(sch_ids);
+  END IF;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
