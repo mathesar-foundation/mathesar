@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ContextMenu } from '@mathesar/component-library';
   import { SheetRow, SheetRowHeaderCell } from '@mathesar/components/sheet';
-  import { rowHeightPx } from '@mathesar/geometry';
+  import { ROW_HEIGHT_PX } from '@mathesar/geometry';
   import {
     ID_ROW_CONTROL_COLUMN,
     type Row,
@@ -76,7 +76,7 @@
     class:is-group-header={isGroupHeaderRow(row)}
     class:is-add-placeholder={isPlaceholderRow(row)}
     {...htmlAttributes}
-    style="--cell-height:{rowHeightPx - 1}px;{styleString}"
+    style="--cell-height:{ROW_HEIGHT_PX - 1}px;{styleString}"
     on:mousedown={handleMouseDown}
   >
     {#if rowHasRecord(row)}

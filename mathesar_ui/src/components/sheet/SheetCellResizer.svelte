@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { MAX_COLUMN_WIDTH_PX, MIN_COLUMN_WIDTH_PX } from '@mathesar/geometry';
   import { slider } from '@mathesar-component-library';
 
   import { getSheetContext } from './utils';
@@ -7,8 +8,10 @@
 
   const { api, stores } = getSheetContext<SheetColumnIdentifierKey>();
 
-  export let minColumnWidth = 50;
+  export let minColumnWidth = MIN_COLUMN_WIDTH_PX;
+  export let maxColumnWidth = MAX_COLUMN_WIDTH_PX;
   export let columnIdentifierKey: SheetColumnIdentifierKey;
+  export let afterResize: (width: number) => void = () => {};
 
   let isResizing = false;
 
@@ -20,15 +23,17 @@
   class:selection-in-progress={$selectionInProgress}
   class:is-resizing={isResizing}
   use:slider={{
-    getStartingValue: () => api.getColumnWidth(columnIdentifierKey),
+    getStartingValue: () => api.getColumnWidth(columnIdentifierKey) ?? 0,
     onMove: (value) => api.setColumnWidth(columnIdentifierKey, value),
     onStart: () => {
       isResizing = true;
     },
-    onStop: () => {
+    onStop: (value) => {
       isResizing = false;
+      afterResize(value);
     },
     min: minColumnWidth,
+    max: maxColumnWidth,
   }}
   on:dblclick={() => api.resetColumnWidth(columnIdentifierKey)}
 >
