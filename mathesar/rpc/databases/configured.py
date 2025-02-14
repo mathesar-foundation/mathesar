@@ -44,8 +44,10 @@ class ConfiguredDatabasePatch(TypedDict):
     Information to be changed about a configured database
 
     Attributes:
+        name: The name of the database on the server.
         nickname: A optional user-configurable name for the database.
     """
+    name: Optional[str]
     nickname: Optional[str]
 
 
@@ -91,6 +93,8 @@ def patch(*, database_id: int, patch: ConfiguredDatabasePatch, **kwargs) -> Conf
         An object describing the database.
     """
     database = Database.objects.get(id=database_id)
+    if "name" in patch:
+        database.name = patch.get("name")
     if "nickname" in patch:
         database.nickname = patch.get("nickname")
     database.save()
