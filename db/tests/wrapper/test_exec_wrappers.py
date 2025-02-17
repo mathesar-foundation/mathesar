@@ -48,7 +48,7 @@ def find_exec_calls_in_project(directory):
     def find_exec_calls_in_file(filepath):
         exec_calling_functions = []
 
-        with open(filepath, "r") as file:
+        with open(filepath, "rb") as file:
             tree = ast.parse(file.read(), filename=filepath)
 
         class ExecCallVisitor(ast.NodeVisitor):

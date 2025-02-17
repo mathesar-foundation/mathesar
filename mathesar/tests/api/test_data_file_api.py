@@ -35,7 +35,7 @@ def data_file(patents_csv_filepath, user_alice):
 
 @pytest.fixture(scope='session')
 def patents_url_data(patents_url_filename):
-    with open(patents_url_filename, 'r') as f:
+    with open(patents_url_filename, 'rb') as f:
         return f.read()
 
 
@@ -134,7 +134,7 @@ def test_data_file_create_csv_long_name(client, patents_csv_filepath):
 @pytest.mark.parametrize('header', [True, False])
 def test_data_file_create_paste(client, paste_filename, header):
     num_data_files = DataFile.objects.count()
-    with open(paste_filename, 'r') as paste_file:
+    with open(paste_filename, 'rb') as paste_file:
         paste_text = paste_file.read()
 
     data = {'paste': paste_text, 'header': header}
@@ -202,7 +202,7 @@ def test_data_file_create_invalid_file(client):
     file = 'mathesar/tests/data/csv_parsing/patents_invalid.csv'
     with patch.object(csv, "get_sv_dialect") as mock_infer:
         mock_infer.side_effect = InvalidTableError
-        with open(file, 'r') as f:
+        with open(file, 'rb') as f:
             response = client.post('/api/db/v0/data_files/', data={'file': f}, format='multipart')
             response_dict = response.json()
     assert response.status_code == 400

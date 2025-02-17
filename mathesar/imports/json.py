@@ -40,7 +40,7 @@ def get_flattened_keys(json_dict, max_level, prefix=''):
 
 
 def get_column_names_from_json(data_file, max_level):
-    with open(data_file, 'r') as f:
+    with open(data_file, 'rb') as f:
         data = json.load(f)
 
     if isinstance(data, list):

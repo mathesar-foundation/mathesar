@@ -20,7 +20,7 @@ def load_library_dataset(conn):
     set_search_path = sql.SQL("SET search_path={}").format(
         sql.Identifier(LIBRARY_MANAGEMENT)
     )
-    with open(LIBRARY_ONE) as f1, open(LIBRARY_TWO) as f2:
+    with open(LIBRARY_ONE, 'rb') as f1, open(LIBRARY_TWO, 'rb') as f2:
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
         conn.execute(f1.read())

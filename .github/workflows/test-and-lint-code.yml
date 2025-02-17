@@ -165,6 +165,7 @@ jobs:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
         pg-version: [13, 14, 15, 16, 17]
+        init-db-args: ["", "--encoding=SQL_ASCII"]
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
@@ -178,6 +179,7 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
+          POSTGRES_INITDB_ARGS: ${{ matrix.init-db-args }}
 
   python_lint:
     name: Run Python linter
