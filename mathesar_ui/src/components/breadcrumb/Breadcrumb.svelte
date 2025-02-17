@@ -1,23 +1,18 @@
 <script lang="ts">
-  import BreadcrumbItem from './BreadcrumbItem.svelte';
-  import { getBreadcrumbItemsFromContext } from './breadcrumbUtils';
+  import BreadcrumbItemUi from './BreadcrumbItem.svelte';
+  import type { BreadcrumbItem } from './breadcrumbTypes';
   import DatabaseSelector from './DatabaseSelector.svelte';
   import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
 
-  const items = getBreadcrumbItemsFromContext();
-
-  /**
-   * When we have lots of items, tell each one that they can simplify
-   * themselves on narrow viewports.
-   */
-  $: hasResponsiveAbridgement = $items.length > 2;
+  export let items: BreadcrumbItem[];
+  export let compactLayout = false;
 </script>
 
 <div class="breadcrumb">
-  <LogoAndNameWithLink href="/" {hasResponsiveAbridgement} />
+  <LogoAndNameWithLink href="/" {compactLayout} />
   <DatabaseSelector />
-  {#each $items as item}
-    <BreadcrumbItem {item} />
+  {#each items as item}
+    <BreadcrumbItemUi {item} />
   {/each}
 </div>
 
