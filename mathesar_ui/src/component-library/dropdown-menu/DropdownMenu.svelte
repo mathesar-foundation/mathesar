@@ -19,7 +19,13 @@
   export let menuStyle = '';
 </script>
 
-<Dropdown {closeOnInnerClick} ariaLabel={ariaLabel ?? label} {...$$restProps}>
+<Dropdown
+  {closeOnInnerClick}
+  ariaLabel={ariaLabel ?? label}
+  {...$$restProps}
+  on:open
+  on:close
+>
   <slot name="trigger" slot="trigger">
     <span class="dropdown-menu-trigger">
       {#if icon}
