@@ -44,6 +44,7 @@ services:
         PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     environment:
       - MODE=${MODE-DEVELOPMENT}
+      - SKIP_STATIC_COLLECTION=true
       - DEBUG=${DEBUG-True}
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
