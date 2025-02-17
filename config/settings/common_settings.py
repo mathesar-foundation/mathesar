@@ -147,7 +147,7 @@ if TEST:
 SECRET_KEY = os.environ.get('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get('DEBUG', default=False))
+DEBUG = os.environ.get('DEBUG') in ['t', 'true', 'True']
 
 ALLOWED_HOSTS = [i.strip() for i in os.environ.get('ALLOWED_HOSTS', default=".localhost, 127.0.0.1, [::1]").split(',')]
 
