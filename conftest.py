@@ -172,7 +172,9 @@ def create_db_schema(engine_cache):
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
         logger.debug(f'creating {schema_name}')
-        _create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
+        with engine.begin() as conn:
+            conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS {schema_name}'))
+        # _create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
         schema_oid = _get_schema_oid_from_name(schema_name, engine)
         db_name = engine.url.database
         created_schemas_in_this_engine = created_schemas.setdefault(db_name, {})
@@ -187,36 +189,12 @@ def create_db_schema(engine_cache):
                 # Handle schemas being renamed during test
                 schema_name = _get_schema_name_from_oid(schema_oid, engine)
                 if schema_name:
-                    _drop_schema_via_name(engine, schema_name, cascade=True)
+                    with engine.begin() as conn:
+                        conn.execute(text(f'DROP SCHEMA IF EXISTS {schema_name} CASCADE'))
                     logger.debug(f'dropping {schema_name}')
         except OperationalError as e:
             logger.debug(f'ignoring operational error: {e}')
     logger.debug('exit')
-
-
-def _create_schema_if_not_exists_via_sql_alchemy(schema_name, engine):
-    return _execute_msar_func_with_engine(
-        engine, 'create_schema_if_not_exists', schema_name
-    ).fetchone()[0]
-
-
-def _execute_msar_func_with_engine(engine, func_name, *args):
-    """
-    Execute an msar function using an SQLAlchemy engine.
-
-    This is temporary scaffolding.
-
-    Args:
-        engine: an SQLAlchemy engine for connecting to a DB
-        func_name: The unqualified msar function name (danger; not sanitized)
-        *args: The list of parameters to pass
-    """
-    conn_str = str(engine.url)
-    with psycopg.connect(conn_str) as conn:
-        return conn.execute(
-            f"SELECT msar.{func_name}({','.join(['%s'] * len(args))})",
-            args
-        )
 
 
 def _get_schema_name_from_oid(oid, engine, metadata=None):
@@ -247,10 +225,6 @@ def _reflect_schema(engine, name=None, oid=None, metadata=None):
     with engine.begin() as conn:
         schema_info = conn.execute(sel).fetchone()
     return schema_info
-
-
-def _drop_schema_via_name(engine, name, cascade=False):
-    _execute_msar_func_with_engine(engine, 'drop_schema', name, cascade).fetchone()
 
 
 # Seems to be roughly equivalent to mathesar/database/base.py::create_mathesar_engine
