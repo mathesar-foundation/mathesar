@@ -79,7 +79,11 @@ def stream_table_as_csv(
     return response
 
 
-def dump_schema(request, database_id, schema_oid):
+def dump_schema(
+    request,
+    database_id: int,
+    schema_oid: int
+) -> FileResponse:
     user = request.user
     with connect(database_id, user) as conn:
         schema_name = get_schema(schema_oid, conn)['name']
