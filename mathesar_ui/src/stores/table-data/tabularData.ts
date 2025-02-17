@@ -212,6 +212,9 @@ export class TabularData {
     this.columnsDataStore.on('columnPatched', async () => {
       await this.recordsData.fetch();
     });
+    this.constraintsDataStore.subscribe(FKconst => {
+      if (FKconst.state === States.Done) void this.recordsData.fetch();
+    });
   }
 
   refresh(): Promise<
