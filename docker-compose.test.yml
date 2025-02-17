@@ -18,7 +18,7 @@ services:
       - POSTGRES_DB=my_data
       - POSTGRES_USER=data_admin
       - POSTGRES_PASSWORD=data1234
-      - POSTGRES_INITDB_ARGS=${POSTGRES_INITDB_ARGS-"--encoding=SQL_ASCII"}
+      - POSTGRES_INITDB_ARGS=${POSTGRES_INITDB_ARGS-""}
   api-test-service:
     container_name: mathesar-api-test-service
     build:
