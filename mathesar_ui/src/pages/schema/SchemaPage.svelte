@@ -2,7 +2,12 @@
   import { _ } from 'svelte-i18n';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconEdit, iconPermissions, iconSchema } from '@mathesar/icons';
+  import {
+    iconEdit,
+    iconExport,
+    iconPermissions,
+    iconSchema,
+  } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -11,7 +16,13 @@
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { getQueryStringFromParams } from '@mathesar/api/rest/utils/requestUtils';
+  import {
+    AnchorButton,
+    Button,
+    Icon,
+    Tooltip,
+  } from '@mathesar-component-library';
 
   import AddTableModal from './AddTableModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
@@ -35,6 +46,10 @@
 
   $: ({ name, description, currentAccess } = schema);
   $: ({ currentRoleOwns } = currentAccess);
+  $: exportLinkParams = getQueryStringFromParams({
+    database_id: database.id,
+    schema_oid: schema.oid,
+  });
 </script>
 
 <svelte:head><title>{makeSimplePageTitle($name)}</title></svelte:head>
@@ -55,6 +70,25 @@
     }}
   >
     <div slot="action">
+      <Tooltip allowHover>
+        <AnchorButton
+          slot="trigger"
+          href="/api/export/v0/schemas/?{exportLinkParams}"
+          data-tinro-ignore
+          appearance="secondary"
+          size="medium"
+          aria-label={$_('export')}
+          download="{$name}.csv"
+        >
+          <Icon {...iconExport} />
+          <span class="responsive-button-label">{$_('export')}</span>
+        </AnchorButton>
+        <span slot="content">
+          {$_('export_schema_help', {
+            values: { schemaName: $name },
+          })}
+        </span>
+      </Tooltip>
       <Button
         on:click={handleEditSchema}
         appearance="secondary"
