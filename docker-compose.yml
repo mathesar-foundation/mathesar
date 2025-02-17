@@ -159,6 +159,9 @@ services:
 
       # WARNING: MATHESAR_DATABASES is deprecated, and will be removed in a future release.
       MATHESAR_DATABASES: ${MATHESAR_DATABASES:-}
+
+      # SECURITY WARNING: don't run with DEBUG=true in production!
+      DEBUG: ${DEBUG:-false}
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
