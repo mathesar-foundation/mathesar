@@ -33,26 +33,14 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_columns_ne_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE "12345" (bleh text, bleh2 numeric);
-  PERFORM msar.drop_columns(12345, 1);
+  RETURN NEXT throws_ok(
+    'SELECT msar.drop_columns(12345, 1);',
+    '42P01',
+    'Relation with OID 12345 does not exist',
+    'Column dropper throws when trying to drop from stupidly-named table'
+  );
   RETURN NEXT has_column(
     '12345', 'bleh', 'Doesn''t drop columns of stupidly-named table'
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_columns_names() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_drop_columns();
-  PERFORM msar.drop_columns('public', 'atable', 'dodrop1', 'dodrop2');
-  RETURN NEXT has_column(
-    'atable', 'dontdrop', 'Dropper keeps correct columns'
-  );
-  RETURN NEXT hasnt_column(
-    'atable', 'dodrop1', 'Dropper drops correct columns 1'
-  );
-  RETURN NEXT hasnt_column(
-    'atable', 'dodrop2', 'Dropper drops correct columns 2'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -705,17 +693,6 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_add_constraint_pkey_tab_name_singlecol() RETURNS SETOF TEXT AS $f$
-DECLARE
-  con_create_arr jsonb := '[{"type": "p", "columns": [1]}]';
-BEGIN
-  PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('public', 'add_pkeytest', con_create_arr);
-  RETURN NEXT col_is_pk('add_pkeytest', 'col1');
-END;
-$f$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_add_constraint_pkey_col_name_singlecol() RETURNS SETOF TEXT AS $f$
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": ["col1"]}]';
@@ -1273,41 +1250,138 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION __setup_schema_with_dependent_obj() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION __setup_schemas_with_dependent_obj() RETURNS SETOF TEXT AS $$
 BEGIN
-  CREATE SCHEMA schema1;
-  CREATE TABLE schema1.actors (
-    id SERIAL PRIMARY KEY,
+  CREATE SCHEMA people;
+  CREATE SCHEMA projects;
+  CREATE TABLE people.actors (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     actor_name TEXT
+  ) PARTITION BY RANGE (id);
+  CREATE TABLE people.actors_id_1_to_50 PARTITION OF people.actors
+    FOR VALUES FROM (1) TO (50);
+  CREATE DOMAIN people.testtype AS text CHECK (value LIKE '%test');
+  CREATE TABLE people.directors (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text
   );
+  CREATE TABLE projects.movies (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    starring_actor integer REFERENCES people.actors(id),
+    test_col people.testtype
+  );
+  ALTER TABLE people.directors ADD COLUMN best_movie integer REFERENCES projects.movies;
+  CREATE VIEW projects.actors_copy AS SELECT * FROM people.actors;
+  CREATE MATERIALIZED VIEW projects.actors_fixed_copy AS SELECT * FROM people.actors;
 END;
 $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_drop_schema_cascade() RETURNS SETOF TEXT AS $$
 BEGIN
-  PERFORM __setup_schema_with_dependent_obj();
+  PERFORM __setup_schemas_with_dependent_obj();
   PERFORM msar.drop_schema(
-    sch_name => 'schema1',
+    sch_name => 'people',
     cascade_ => true
   );
-  RETURN NEXT hasnt_schema('schema1');
+  RETURN NEXT hasnt_schema('people');
 END;
 $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_drop_schema_restricted() RETURNS SETOF TEXT AS $$
 BEGIN
-  PERFORM __setup_schema_with_dependent_obj();
+  PERFORM __setup_schemas_with_dependent_obj();
   RETURN NEXT throws_ok(
     $d$
       SELECT msar.drop_schema(
-        sch_name => 'schema1',
+        sch_name => 'people',
         cascade_ => false
       )
     $d$,
     '2BP01'
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_schema_objects_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_schemas_with_dependent_obj();
+  RETURN NEXT set_has(
+      format(
+        'SELECT obj_name, obj_kind FROM msar.get_schema_objects_table(ARRAY[%L::regnamespace])',
+        'people'::regnamespace
+      ),
+      $v$VALUES
+        ('actors_id_seq', 'SEQUENCE'),
+        ('actors_id_1_to_50', 'TABLE'),
+        ('actors_id_1_to_50_pkey', 'INDEX'),
+        ('actors_pkey', 'INDEX'),
+        ('actors', 'TABLE'),
+        ('testtype', 'TYPE'),
+        ('_testtype', 'TYPE'),
+        ('directors_id_seq', 'SEQUENCE'),
+        ('directors', 'TABLE'),
+        ('directors_pkey', 'INDEX')
+      $v$,
+      'msar.get_schema_objects_table() should return objects for single schema'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_schema_objects_table_multi_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_schemas_with_dependent_obj();
+  RETURN NEXT set_has(
+      format(
+        'SELECT obj_schema, obj_name, obj_kind FROM msar.get_schema_objects_table(ARRAY[%L::regnamespace, %L::regnamespace])',
+        'people'::regnamespace, 'projects'::regnamespace
+      ),
+      $v$VALUES
+        ('people', 'actors_id_seq', 'SEQUENCE'),
+        ('people', 'actors_id_1_to_50', 'TABLE'),
+        ('people', 'actors_id_1_to_50_pkey', 'INDEX'),
+        ('people', 'actors_pkey', 'INDEX'),
+        ('people', 'actors', 'TABLE'),
+        ('people', 'testtype', 'TYPE'),
+        ('people', '_testtype', 'TYPE'),
+        ('people', 'directors_id_seq', 'SEQUENCE'),
+        ('people', 'directors', 'TABLE'),
+        ('people', 'directors_pkey', 'INDEX'),
+        ('projects', 'movies_id_seq', 'SEQUENCE'),
+        ('projects', 'actors_fixed_copy', 'MATERIALIZED VIEW'),
+        ('projects', 'movies', 'TABLE'),
+        ('projects', 'actors_copy', 'VIEW'),
+        ('projects', 'movies_pkey', 'INDEX')
+      $v$,
+      'msar.get_schema_objects_table() should return objects for multiple schemas'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_single_schema_with_dependent_objs() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_schemas_with_dependent_obj();
+  RETURN NEXT throws_ok(
+    $d$SELECT msar.drop_schemas(ARRAY['people'::regnamespace])$d$,
+    '2BP01'
+  );
+  RETURN NEXT has_table('people'::name, 'actors'::name);
+  RETURN NEXT has_table('projects'::name, 'movies'::name);
+  RETURN NEXT has_table('people'::name, 'actors_id_1_to_50'::name);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schemas_multi_success() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_schemas_with_dependent_obj();
+  PERFORM msar.drop_schemas(ARRAY['people'::regnamespace, 'projects'::regnamespace]);
+  RETURN NEXT hasnt_schema('people'::name);
+  RETURN NEXT hasnt_schema('projects'::name);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1358,26 +1432,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_rename_table() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_table();
-  PERFORM msar.rename_table(
-    sch_name =>'public',
-    old_tab_name => 'alter_this_table',
-    new_tab_name => 'renamed_table'
-  );
-  RETURN NEXT hasnt_table('alter_this_table');
-  RETURN NEXT has_table('renamed_table');
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_rename_table_with_same_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
   PERFORM msar.rename_table(
-    sch_name =>'public',
-    old_tab_name => 'alter_this_table',
+    tab_id => 'alter_this_table'::regclass::oid,
     new_tab_name => 'alter_this_table'
   );
   RETURN NEXT has_table('alter_this_table');
@@ -1399,19 +1458,6 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_comment_on_table() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_table();
-  PERFORM msar.comment_on_table(
-    sch_name =>'public',
-    tab_name => 'alter_this_table',
-    comment_ => 'This is a comment!'
-  );
-  RETURN NEXT is(obj_description('alter_this_table'::regclass::oid), 'This is a comment!');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_comment_on_table_using_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
   PERFORM msar.comment_on_table(

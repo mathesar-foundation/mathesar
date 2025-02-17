@@ -11,11 +11,11 @@ The general strategy of Mathesar is to support whichever versions of Python and 
 - Python 3.9 is supported upstream until October 2025
 - PostgreSQL 13 is supported upstream until November 2025
 
-## Default Python and PostgreSQL versions for Mathesar 0.2.0
+## Default Python and PostgreSQL versions for Mathesar 0.2.1
 
 - Mathesar's Docker image uses PostgreSQL 17.
 - Mathesar's Docker image uses Python 3.13.
-- The default PostgreSQL version provided in our example `docker-compose.yml` is 13.
+- The default PostgreSQL version provided in our example `docker-compose.yml` is 17.
 
 ## Regarding Python Support
 
