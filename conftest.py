@@ -174,7 +174,6 @@ def create_db_schema(engine_cache):
         logger.debug(f'creating {schema_name}')
         with engine.begin() as conn:
             conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS {schema_name}'))
-        # _create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
         schema_oid = _get_schema_oid_from_name(schema_name, engine)
         db_name = engine.url.database
         created_schemas_in_this_engine = created_schemas.setdefault(db_name, {})
