@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { getQueryStringFromParams } from '@mathesar/api/rest/utils/requestUtils';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {
     iconEdit,
@@ -16,7 +17,6 @@
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
-  import { getQueryStringFromParams } from '@mathesar/api/rest/utils/requestUtils';
   import {
     AnchorButton,
     Button,
@@ -78,7 +78,7 @@
           appearance="secondary"
           size="medium"
           aria-label={$_('export')}
-          download="{$name}.csv"
+          download="{$name}.sql"
         >
           <Icon {...iconExport} />
           <span class="responsive-button-label">{$_('export')}</span>
