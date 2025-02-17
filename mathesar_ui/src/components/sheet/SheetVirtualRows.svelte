@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { rowHeightPx } from '@mathesar/geometry';
+  import { ROW_HEIGHT_PX } from '@mathesar/geometry';
 
   import { getSheetContext } from './utils';
   import type { Props as VirtualListProps } from './virtual-list/listUtils';
@@ -25,7 +25,7 @@
       {itemCount}
       {paddingBottom}
       {itemSize}
-      estimatedItemSize={rowHeightPx}
+      estimatedItemSize={ROW_HEIGHT_PX}
       {itemKey}
       let:items
       let:api={virtualListApi}

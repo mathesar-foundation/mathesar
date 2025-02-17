@@ -102,7 +102,7 @@ export class Schema {
     return api.schemas
       .delete({
         database_id: this.database.id,
-        schema_oid: this.oid,
+        schema_oids: [this.oid],
       })
       .run();
   }

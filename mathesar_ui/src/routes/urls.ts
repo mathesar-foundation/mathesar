@@ -155,7 +155,7 @@ const docsPages = {
   rolesLogin: '/user-guide/roles/#login',
   schemaPermissions: '/user-guide/schemas/#permissions',
   schemas: '/user-guide/schemas/',
-  storedRolePasswords: '/user-guide/stored-role-passwords/',
+  storedRoles: '/user-guide/stored-roles/',
   tablePermissions: '/user-guide/tables/#permissions',
   userAdmin: '/user-guide/users/#admin',
   userGuide: '/user-guide/',
@@ -171,6 +171,8 @@ const marketingPages = {
   community: '/community',
   donate: '/donate',
   privacy: '/privacy',
+  mailingList: '/mailing-list',
+  survey: '/survey',
 };
 
 export type MarketingPage = keyof typeof marketingPages;
