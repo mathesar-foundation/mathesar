@@ -2,6 +2,7 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { ClipboardHandler } from '@mathesar/stores/clipboard';
+import { getErrorMessage } from '@mathesar/utils/errors';
 
 import type SheetSelection from '../selection/SheetSelection';
 
@@ -26,16 +27,20 @@ export class SheetClipboardHandler implements ClipboardHandler {
 
   handleCopy(event: ClipboardEvent): void {
     if (event.clipboardData == null) return;
-    const selection = this.deps.getSelection();
-    const content = getCopyContent(selection, this.deps.copyingContext);
-    this.deps.showToastInfo(
-      get(_)('copied_cells', { values: { count: content.cellCount } }),
-    );
-    event.clipboardData.setData(MIME_PLAIN_TEXT, content.tsv);
-    event.clipboardData.setData(
-      MIME_MATHESAR_SHEET_CLIPBOARD,
-      content.structured,
-    );
+    try {
+      const selection = this.deps.getSelection();
+      const content = getCopyContent(selection, this.deps.copyingContext);
+      this.deps.showToastInfo(
+        get(_)('copied_cells', { values: { count: content.cellCount } }),
+      );
+      event.clipboardData.setData(MIME_PLAIN_TEXT, content.tsv);
+      event.clipboardData.setData(
+        MIME_MATHESAR_SHEET_CLIPBOARD,
+        content.structured,
+      );
+    } catch (e) {
+      this.deps.showToastError(getErrorMessage(e));
+    }
   }
 
   handlePaste({ clipboardData }: ClipboardEvent) {
@@ -43,6 +48,10 @@ export class SheetClipboardHandler implements ClipboardHandler {
     if (!context) return;
     const selection = this.deps.getSelection();
     if (!clipboardData) return;
-    paste(clipboardData, selection, context);
+    try {
+      paste(clipboardData, selection, context);
+    } catch (e) {
+      this.deps.showToastError(getErrorMessage(e));
+    }
   }
 }

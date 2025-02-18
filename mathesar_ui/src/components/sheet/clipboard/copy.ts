@@ -66,16 +66,16 @@ export function getCopyContent(
     if (!row) {
       // If this happens, it's a bug. Fail loudly so we don't put incorrect data
       // into the clipboard.
-      throw new Error('RowId not found in rowsMap');
+      throw new Error('Row not found');
     }
     const columns = context.getColumns();
     const recordSummaries = context.getRecordSummaries();
-    for (const columnId of selection.rowIds) {
+    for (const columnId of selection.columnIds) {
       const column = columns.get(columnId);
       if (!column) {
         // If this happens, it's a bug. Fail loudly so we don't put incorrect
         // data into the clipboard.
-        throw new Error('ColumnId not found in columnsMap');
+        throw new Error('Column not found');
       }
       const rawCellValue = row[columnId];
       const formattedCellValue = getFormattedCellValue(
