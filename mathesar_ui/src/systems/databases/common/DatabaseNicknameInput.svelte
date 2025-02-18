@@ -12,7 +12,7 @@
   import DisplayACustomNicknameLabel from '../create-database/DisplayACustomNicknameLabel.svelte';
 
   const strategyOptions = {
-    useName: $_('display_the_database_name'),
+    useName: $_('use_the_database_name'),
     useNickname: { component: DisplayACustomNicknameLabel },
   };
   type Strategy = keyof typeof strategyOptions;
@@ -24,7 +24,7 @@
   export let value: string | undefined = undefined;
 </script>
 
-<Fieldset label={$_('in_mathesar')} boxed>
+<Fieldset label={$_('display_name')} boxed>
   <FieldLayout>
     <RadioGroup
       options={strategyOptionKeys}

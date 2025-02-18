@@ -5,6 +5,6 @@
 </script>
 
 <span>
-  {$_('display_a_custom_nickname_instead')}
+  {$_('use_a_custom_nickname_instead')}
   <Help>{$_('custom_database_nickname_label_help')}</Help>
 </span>

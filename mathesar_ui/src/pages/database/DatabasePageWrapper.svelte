@@ -112,7 +112,7 @@
       {#if isMathesarAdmin}
         <Button on:click={() => editModal.open()} appearance="secondary">
           <Icon {...iconEdit} />
-          <span>{$_('edit_database')}</span>
+          <span>{$_('edit_connection')}</span>
         </Button>
       {/if}
 

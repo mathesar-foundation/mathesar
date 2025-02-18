@@ -17,7 +17,7 @@
 
 <ControlledModal {controller} size="medium">
   <span slot="title">
-    <RichText text={$_('edit_named_database')} let:slotName>
+    <RichText text={$_('edit_named_database_connection')} let:slotName>
       {#if slotName === 'name'}
         <Identifier>{database.displayName}</Identifier>
       {/if}
