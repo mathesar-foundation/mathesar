@@ -3152,7 +3152,7 @@ BEGIN
   RETURN jsonb_build_object(
     'oid', created_table_id::bigint,
     'name', relname,
-    'renamed_columns', renamed_columns
+    'renamed_columns', renamed_columns::jsonb
   ) FROM pg_catalog.pg_class WHERE oid = created_table_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -3228,7 +3228,7 @@ BEGIN
     'copy_sql', copy_sql,
     'table_oid', rel_id::bigint,
     'table_name', relname,
-    'renamed_columns', mathesar_table ->> 'renamed_columns'
+    'renamed_columns', (mathesar_table ->> 'renamed_columns')::jsonb
   ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
