@@ -601,7 +601,7 @@ export class RecordsData {
           // TODO: consider resolving code duplication with cellKey above
           const cellKey = getCellKey(rowKey, cell.columnId);
           this.meta.cellModificationStatus.set(cellKey, {
-            state: 'processing',
+            state: 'success',
           });
         }
       }
