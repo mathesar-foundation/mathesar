@@ -65,6 +65,32 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
+CREATE OR REPLACE FUNCTION msar.get_unique_local_identifier(
+  existing_identifiers text[],
+  base_identifier text
+) RETURNS text AS $$/*
+  This function generates a unique identifier based on a given base identifier and list
+  of existing identifiers.
+
+  If the base identifier already exists in the provided array of existing identifiers,
+  it appends a counter to ensure uniqueness, else it returns the base identifier.
+*/
+DECLARE
+  unique_identifier text;
+  counter integer := 0;
+BEGIN
+  unique_identifier := base_identifier;
+
+  WHILE unique_identifier = ANY(existing_identifiers) LOOP
+    counter := counter + 1;
+    unique_identifier := format('%s %s', base_identifier, counter);
+  END LOOP;
+
+  RETURN unique_identifier;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- GENERAL DDL FUNCTIONS
@@ -3087,7 +3113,7 @@ DECLARE
   column_defs __msar.col_def[];
   constraint_defs __msar.con_def[];
   id_col_name text;
-  id_col_counter integer := 1;
+  existing_col_names text[];
   renamed_columns jsonb := '{}'::jsonb;
 BEGIN
   schema_name := msar.get_schema_name(sch_id);
@@ -3120,15 +3146,8 @@ BEGIN
 
   IF jsonb_path_exists(col_defs, '$[*] ? (@.name == "id")') THEN
     -- rename 'id' 
-    id_col_name := format('id_%s', id_col_counter);
-
-    -- avoid all possible name collisions
-    WHILE EXISTS (
-      SELECT 1 FROM jsonb_array_elements(col_defs) col_def WHERE col_def->>'name' = id_col_name
-    ) LOOP
-      id_col_name := format('id_%s', id_col_counter);
-      id_col_counter := id_col_counter + 1;
-    END LOOP;
+    SELECT array_agg(col_def->>'name') INTO existing_col_names FROM jsonb_array_elements(col_defs) col_def;
+    id_col_name := msar.get_unique_local_identifier(existing_col_names, 'id');
 
     col_defs := (
       SELECT jsonb_agg(

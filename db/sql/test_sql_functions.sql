@@ -196,7 +196,7 @@ BEGIN
     __msar.process_col_def_jsonb(0, '[{}, {"name": "id"}]'::jsonb, false, true),
     ARRAY[
       ('id', 'integer', true, null, true, 'Mathesar default ID column'),
-      ('"id_1"', 'text', null, null, false, null),
+      ('"id 1"', 'text', null, null, false, null),
       ('"Column 1"', 'text', null, null, false, null)
     ]::__msar.col_def[],
     'Should rename incoming "id" column and add default id column when create_id is true'
