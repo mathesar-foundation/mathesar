@@ -1,7 +1,6 @@
 import os
 
 import pytest
-import tempfile
 from mathesar.errors import URLNotReachable
 from unittest.mock import patch
 from django.core.files import File
