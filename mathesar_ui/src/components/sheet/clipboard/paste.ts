@@ -1,4 +1,4 @@
-import { cycle, first, map, take, zip } from 'iter-tools';
+import { arrayFrom, cycle, execPipe, first, map, take, zip } from 'iter-tools';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
@@ -141,40 +141,42 @@ function updateViaPaste(
     throw new Error('Paste TSV is not yet implemented');
   }
 
-  const sheetRows = context.getRecordRows();
-  const payloadRows = payload.rows;
-  const sourceRows = take(selection.rowIds.size, cycle(payloadRows));
+  const sourceRows = [...take(selection.rowIds.size, cycle(payload.rows))];
   const firstSourceRow = first(sourceRows);
   if (!firstSourceRow) throw new Error(get(_)('paste_error_no_rows'));
 
+  const sourceColumnCount = firstSourceRow.length;
   const sheetColumns = context.getSheetColumns();
   const pkColumnId = sheetColumns.find((c) => c.primary_key)?.id;
   if (!pkColumnId) throw new Error(get(_)('paste_error_no_primary_key'));
-  const sourceColumnCount = firstSourceRow.length;
+
+  const destinationRows = execPipe(
+    context.getRecordRows(),
+    (i) => startingFrom(i, (r) => selection.rowIds.has(getRowSelectionId(r))),
+    map((recordRow) => getRowRef(recordRow, pkColumnId)),
+    take(sourceRows.length),
+    arrayFrom,
+  );
+
+  if (destinationRows.length < sourceRows.length) {
+    throw new Error(get(_)('paste_error_too_few_destination_rows'));
+  }
+
   const destinationColumns = getDestinationColumns(
     sourceColumnCount,
     selection.columnIds,
     sheetColumns,
   );
 
-  const rowsFromSelectionStart = startingFrom(sheetRows, (r) =>
-    selection.rowIds.has(getRowSelectionId(r)),
+  const rowBlueprints = execPipe(
+    zip(sourceRows, destinationRows),
+    map(([sourceRow, destinationRow]) => ({
+      recordId: destinationRow.recordId,
+      rowKey: destinationRow.rowKey,
+      cells: [...map(makeCellBlueprint, zip(sourceRow, destinationColumns))],
+    })),
+    arrayFrom,
   );
-  const rowRefs = map((r) => getRowRef(r, pkColumnId), rowsFromSelectionStart);
-
-  function makeRowBlueprint([{ recordId, rowKey }, row]: [
-    RowRef,
-    StructuredCell[],
-  ]) {
-    const cells = [...map(makeCellBlueprint, zip(row, destinationColumns))];
-    return { recordId, rowKey, cells };
-  }
-
-  const rowBlueprints = [...map(makeRowBlueprint, zip(rowRefs, sourceRows))];
-
-  if (rowBlueprints.length < payloadRows.length) {
-    throw new Error(get(_)('paste_error_too_few_destination_rows'));
-  }
 
   void context.updateRecords(rowBlueprints);
 }
