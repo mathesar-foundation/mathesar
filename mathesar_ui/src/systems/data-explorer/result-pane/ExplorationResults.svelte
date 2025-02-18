@@ -44,13 +44,13 @@
   } = queryHandler);
   $: ({ initial_columns } = $query);
   $: clipboardHandler = new SheetClipboardHandler({
-    getCopyingContext: () => ({
-      rowsMap: new Map(map(([k, r]) => [k, r.record], get(selectableRowsMap))),
-      columnsMap: get(processedColumns),
-      recordSummaries: new ImmutableMap(),
-      selectedRowIds: get(selection).rowIds,
-      selectedColumnIds: get(selection).columnIds,
-    }),
+    copyingContext: {
+      getRows: () =>
+        new Map(map(([k, r]) => [k, r.record], get(selectableRowsMap))),
+      getColumns: () => get(processedColumns),
+      getRecordSummaries: () => new ImmutableMap(),
+    },
+    getSelection: () => get(selection),
     showToastInfo: toast.info,
     showToastError: toast.error,
   });

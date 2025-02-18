@@ -24,21 +24,21 @@ interface CopyableColumn {
  */
 export interface CopyingContext {
   /** Keys are row ids, values are records */
-  rowsMap: Map<string, Record<string, unknown>>;
-  columnsMap: ReadableMapLike<string, CopyableColumn>;
-  recordSummaries: RecordSummariesForSheet;
+  getRows: () => Map<string, Record<string, unknown>>;
+  getColumns: () => ReadableMapLike<string, CopyableColumn>;
+  getRecordSummaries: () => RecordSummariesForSheet;
 }
 
 function getFormattedCellValue(
   rawCellValue: unknown,
-  columnsMap: CopyingContext['columnsMap'],
+  columns: ReadableMapLike<string, CopyableColumn>,
   columnId: string,
   recordSummaries: RecordSummariesForSheet,
 ): string {
   if (rawCellValue === undefined || rawCellValue === null) {
     return '';
   }
-  const processedColumn = columnsMap.get(columnId);
+  const processedColumn = columns.get(columnId);
   if (!processedColumn) {
     return String(rawCellValue);
   }
@@ -61,18 +61,28 @@ export function getCopyContent(
   for (const rowId of selection.rowIds) {
     const tsvRow: string[] = [];
     const structuredRow: StructuredCell[] = [];
+    const rows = context.getRows();
+    const row = rows.get(rowId);
+    if (!row) {
+      // If this happens, it's a bug. Fail loudly so we don't put incorrect data
+      // into the clipboard.
+      throw new Error('RowId not found in rowsMap');
+    }
+    const columns = context.getColumns();
+    const recordSummaries = context.getRecordSummaries();
     for (const columnId of selection.rowIds) {
-      const column = context.columnsMap.get(columnId);
+      const column = columns.get(columnId);
       if (!column) {
-        // Ignore cells with no associated column. This should never happen.
-        continue;
+        // If this happens, it's a bug. Fail loudly so we don't put incorrect
+        // data into the clipboard.
+        throw new Error('ColumnId not found in columnsMap');
       }
-      const rawCellValue = context.rowsMap.get(rowId)?.[columnId];
+      const rawCellValue = row[columnId];
       const formattedCellValue = getFormattedCellValue(
         rawCellValue,
-        context.columnsMap,
+        columns,
         columnId,
-        context.recordSummaries,
+        recordSummaries,
       );
       const type = column.abstractType.identifier;
       structuredRow.push({

@@ -12,13 +12,25 @@ export interface StructuredCell {
 }
 
 function validateCell(input: unknown): StructuredCell {
-  if (typeof input !== 'object' || input === null) {
+  // Some of this code is pretty messy because I wrote it for TS 4.8 which lacks
+  // the [unlisted property narrowing][1] feature introduced in TS 4.9.
+  //
+  // [1]:
+  // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#unlisted-property-narrowing-with-the-in-operator
+  //
+  // I also thought about bringing in Zod for this, but was reluctant to add
+  // another dependency.
+
+  if (typeof input !== 'object') {
+    throw new Error('StructuredCell must be an object.');
+  }
+  if (input === null) {
     throw new Error('StructuredCell must be an object.');
   }
   if (!('type' in input)) {
     throw new Error('StructuredCell must have a `type` property.');
   }
-  if (typeof input.type !== 'string') {
+  if (typeof (input as { type: unknown }).type !== 'string') {
     throw new Error('StructuredCell `type` property must be a string.');
   }
   if (!('raw' in input)) {
@@ -27,7 +39,7 @@ function validateCell(input: unknown): StructuredCell {
   if (!('formatted' in input)) {
     throw new Error('StructuredCell must have a `formatted` property.');
   }
-  if (typeof input.formatted !== 'string') {
+  if (typeof (input as { formatted: unknown }).formatted !== 'string') {
     throw new Error('StructuredCell `formatted` property must be a string.');
   }
   return input as StructuredCell;

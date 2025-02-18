@@ -17,9 +17,11 @@ import type {
   RecordsListParams,
   RecordsResponse,
   RecordsSearchParams,
+  ResultValue,
 } from '@mathesar/api/rpc/records';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
+import { batchSend } from '@mathesar/packages/json-rpc-client-builder';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
@@ -562,6 +564,51 @@ export class RecordsData {
     }
 
     return primaryKeysOfSavedRows.length + identifiersOfUnsavedRows.length;
+  }
+
+  async bulkUpdate(
+    rowBlueprints: {
+      recordId: ResultValue;
+      rowKey: string;
+      cells: { columnId: string; value: unknown }[];
+    }[],
+  ): Promise<void> {
+    for (const { rowKey, cells } of rowBlueprints) {
+      this.updatePromises?.get(rowKey)?.cancel();
+      for (const cell of cells) {
+        const cellKey = getCellKey(rowKey, cell.columnId);
+        this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
+        this.updatePromises?.get(cellKey)?.cancel();
+      }
+    }
+
+    // TODO: figure out what we want to set in updatePromises (if anything)
+
+    const requests = rowBlueprints.map((row) =>
+      api.records.patch({
+        ...this.apiContext,
+        record_id: row.recordId,
+        record_def: Object.fromEntries(
+          row.cells.map((cell) => [cell.columnId, cell.value]),
+        ),
+      }),
+    );
+
+    try {
+      const responses = await batchSend(requests);
+      for (const { rowKey, cells } of rowBlueprints) {
+        for (const cell of cells) {
+          // TODO: consider resolving code duplication with cellKey above
+          const cellKey = getCellKey(rowKey, cell.columnId);
+          this.meta.cellModificationStatus.set(cellKey, {
+            state: 'processing',
+          });
+        }
+      }
+      // TODO update records in store
+    } catch (e) {
+      // TODO
+    }
   }
 
   // TODO: It would be better to throw errors instead of silently failing

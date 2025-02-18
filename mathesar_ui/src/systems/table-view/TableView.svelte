@@ -40,19 +40,21 @@
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
-    getCopyingContext: () => ({
-      rowsMap: new Map(
-        map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
-      ),
-      columnsMap: stringifyMapKeys(get(processedColumns)),
-      recordSummaries: get(recordsData.linkedRecordSummaries),
-    }),
-    getPastingContext: () => ({
-      // TODO
-      getSheetColumns: () => [],
-      // TODO
-      getRecordIdsFromSelectionStart: () => [],
-    }),
+    copyingContext: {
+      getRows: () =>
+        new Map(
+          map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
+        ),
+      getColumns: () => stringifyMapKeys(get(processedColumns)),
+      getRecordSummaries: () => get(recordsData.linkedRecordSummaries),
+    },
+    pastingContext: {
+      getRecordRows: () => get(recordsData.savedRecords),
+      getSheetColumns: () => [
+        ...map(({ column }) => column, get(processedColumns).values()),
+      ],
+      updateRecords: (r) => recordsData.bulkUpdate(r),
+    },
     getSelection: () => get(selection),
     showToastInfo: toast.info,
     showToastError: toast.error,

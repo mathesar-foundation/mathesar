@@ -7,12 +7,12 @@ import type SheetSelection from '../selection/SheetSelection';
 
 import { MIME_MATHESAR_SHEET_CLIPBOARD, MIME_PLAIN_TEXT } from './constants';
 import { type CopyingContext, getCopyContent } from './copy';
-import { type PastingContext, getPayload, paste } from './paste';
+import { type PastingContext, paste } from './paste';
 
 interface Dependencies {
   getSelection: () => SheetSelection;
-  getCopyingContext: () => CopyingContext;
-  getPastingContext?: () => PastingContext;
+  copyingContext: CopyingContext;
+  pastingContext?: PastingContext;
   showToastInfo: (msg: string) => void;
   showToastError: (msg: string) => void;
 }
@@ -27,8 +27,7 @@ export class SheetClipboardHandler implements ClipboardHandler {
   handleCopy(event: ClipboardEvent): void {
     if (event.clipboardData == null) return;
     const selection = this.deps.getSelection();
-    const context = this.deps.getCopyingContext();
-    const content = getCopyContent(selection, context);
+    const content = getCopyContent(selection, this.deps.copyingContext);
     this.deps.showToastInfo(
       get(_)('copied_cells', { values: { count: content.cellCount } }),
     );
@@ -40,12 +39,10 @@ export class SheetClipboardHandler implements ClipboardHandler {
   }
 
   handlePaste({ clipboardData }: ClipboardEvent) {
-    if (clipboardData == null) return;
-    const context = this.deps.getPastingContext?.();
+    const context = this.deps.pastingContext;
     if (!context) return;
-    const payload = getPayload(clipboardData);
-    if (!payload) return;
     const selection = this.deps.getSelection();
-    paste(payload, selection, context);
+    if (!clipboardData) return;
+    paste(clipboardData, selection, context);
   }
 }
