@@ -217,16 +217,6 @@ Wraps the `?` jsonb operator for improved readability.
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
-Return true if the schema exists, false otherwise.
-
-Args :
-  sch_name: The name of the schema, UNQUOTED.
-*/
-SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.get_schema_oid(sch_name text) RETURNS oid AS $$/*
 Return the OID of a schema, or NULL if the schema does not exist.
 
@@ -989,13 +979,6 @@ FROM pg_attribute pga
   LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
   LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
 WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
-Return true if the given column exists in the table, false otherwise.
-*/
-SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1850,19 +1833,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.patch_schema(sch_name text, patch jsonb) RETURNS void AS $$/*
-Modify a schema according to the given patch.
-
-Args:
-  sch_name: The name of the schema, UNQUOTED
-  patch: A JSONB object as specified by msar.patch_schema(sch_id oid, patch jsonb)
-*/
-BEGIN
-  PERFORM msar.patch_schema(msar.get_schema_oid(sch_name), patch);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- CREATE SCHEMA FUNCTIONS
@@ -1870,21 +1840,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Create a schema.
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION msar.create_schema_if_not_exists(sch_name text) RETURNS oid AS $$/*
-Ensure that a schema exists in the database.
-
-Args:
-  sch_name: the name of the schema to be created, UNQUOTED.
-
-Returns:
-  The integer OID of the schema
-*/
-BEGIN
-  EXECUTE 'CREATE SCHEMA IF NOT EXISTS ' || quote_ident(sch_name);
-  RETURN msar.get_schema_oid(sch_name);
-END;
-$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION msar.create_schema(
@@ -1947,19 +1902,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.drop_database_query(dat_name text) RETURNS text AS $$/*
-Return the SQL query to drop a database.
-
-Args:
-  dat_id: An unqoted name of the database to be dropped.
-*/
-BEGIN
-  RETURN format('DROP DATABASE %I', dat_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- DROP SCHEMA FUNCTIONS
@@ -1967,40 +1909,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Drop a schema.
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_schema(sch_name text, cascade_ boolean) RETURNS void AS $$/*
-Drop a schema
-
-If no schema exists with the given name, an exception will be raised.
-
-Args:
-  sch_name: An unqoted name of the schema to be dropped
-  cascade_: When true, dependent objects will be dropped automatically
-*/
-DECLARE
-  cascade_sql text = CASE cascade_ WHEN TRUE THEN ' CASCADE' ELSE '' END;
-BEGIN
-  EXECUTE 'DROP SCHEMA ' || quote_ident(sch_name) || cascade_sql;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_schema(sch_id oid, cascade_ boolean) RETURNS void AS $$/*
-Drop a schema
-
-If no schema exists with the given oid, an exception will be raised.
-
-Args:
-  sch_id: The OID of the schema to drop
-  cascade_: When true, dependent objects will be dropped automatically
-*/
-BEGIN
-  PERFORM msar.drop_schema(msar.get_schema_name(sch_id), cascade_);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION

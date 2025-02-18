@@ -1189,7 +1189,6 @@ DECLARE sch_oid oid;
 BEGIN
   SELECT msar.create_schema('foo bar', NULL) ->> 'oid' INTO sch_oid;
   RETURN NEXT throws_ok($$SELECT msar.create_schema('foo bar', NULL)$$, '42P06');
-  RETURN NEXT is(msar.create_schema_if_not_exists('foo bar'), sch_oid);
 END;
 $t$ LANGUAGE plpgsql;
 
@@ -1201,34 +1200,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_drop_schema_using_name() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_drop_schema();
-  PERFORM msar.drop_schema(
-    sch_name => 'drop_test_schema',
-    cascade_ => false
-  );
-  RETURN NEXT hasnt_schema('drop_test_schema');
-  RETURN NEXT throws_ok(
-    $d$
-      SELECT msar.drop_schema(
-        sch_name => 'drop_non_existing_schema',
-        cascade_ => false
-      )
-    $d$,
-    '3F000'
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_drop_schema_using_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_schema();
-  PERFORM msar.drop_schema(
-    sch_id => 'drop_test_schema'::regnamespace::oid,
-    cascade_ => false
-  );
+  PERFORM msar.drop_schemas(ARRAY['drop_test_schema'::regnamespace::oid]);
   RETURN NEXT hasnt_schema('drop_test_schema');
 END;
 $$ LANGUAGE plpgsql;
@@ -1239,10 +1214,7 @@ BEGIN
   PERFORM __setup_drop_schema();
   RETURN NEXT throws_ok(
     $d$
-      SELECT msar.drop_schema(
-        sch_id => 0,
-        cascade_ => false
-      )
+      SELECT msar.drop_schemas(ARRAY[0::oid])
     $d$,
     '3F000'
   );
@@ -1273,34 +1245,6 @@ BEGIN
   ALTER TABLE people.directors ADD COLUMN best_movie integer REFERENCES projects.movies;
   CREATE VIEW projects.actors_copy AS SELECT * FROM people.actors;
   CREATE MATERIALIZED VIEW projects.actors_fixed_copy AS SELECT * FROM people.actors;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_schema_cascade() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_schemas_with_dependent_obj();
-  PERFORM msar.drop_schema(
-    sch_name => 'people',
-    cascade_ => true
-  );
-  RETURN NEXT hasnt_schema('people');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_schema_restricted() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_schemas_with_dependent_obj();
-  RETURN NEXT throws_ok(
-    $d$
-      SELECT msar.drop_schema(
-        sch_name => 'people',
-        cascade_ => false
-      )
-    $d$,
-    '2BP01'
-  );
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1391,12 +1335,6 @@ DECLARE sch_oid oid;
 BEGIN
   CREATE SCHEMA foo;
   SELECT msar.get_schema_oid('foo') INTO sch_oid;
-
-  PERFORM msar.patch_schema('foo', '{"name": "altered"}');
-  RETURN NEXT hasnt_schema('foo');
-  RETURN NEXT has_schema('altered');
-  RETURN NEXT is(obj_description(sch_oid), NULL);
-  RETURN NEXT is(msar.get_schema_name(sch_oid), 'altered');
 
   PERFORM msar.patch_schema(sch_oid, '{"description": "yay"}');
   RETURN NEXT is(obj_description(sch_oid), 'yay');
