@@ -2516,7 +2516,7 @@ WITH attnum_cte AS (
     quote_literal(col_def_obj ->> 'description')
   )::__msar.col_def AS col_defs
   FROM attnum_cte, jsonb_array_elements(col_defs) AS col_def_obj
-  WHERE NOT (create_id AND col_def_obj ->> 'name' = 'id')
+  WHERE (col_def_obj ->> 'name' IS NULL OR NOT create_id OR col_def_obj ->> 'name' <> 'id')
 )
 SELECT array_cat(
   CASE
@@ -3096,7 +3096,6 @@ BEGIN
     )
   THEN
     fq_table_name := format('%I.%I', schema_name, tab_name);
-    uq_table_name = tab_name;
   ELSE
     -- determine what prefix to use for table name generation
     IF NULLIF(tab_name, '') IS NOT NULL THEN
