@@ -167,12 +167,7 @@ BEGIN
       ('"Column 1"', 'text', null, null, false, null),
       ('"Column 2"', 'text', null, null, false, null)
     ]::__msar.col_def[],
-    'Empty columns should result in defaults'
-  );
-  RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false),
-    null,
-    'Column definition processing should ignore "id" column'
+    'Should not add default "id" column when create_id is false'
   );
   RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
@@ -181,7 +176,30 @@ BEGIN
       ('"Column 1"', 'text', null, null, false, null),
       ('"Column 2"', 'text', null, null, false, null)
     ]::__msar.col_def[],
-    'Column definition processing add "id" column'
+    'Should add default "id" column when create_id is true'
+  );
+  RETURN NEXT is(
+    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, false),
+    ARRAY[
+      ('id', 'text', null, null, false, null),
+    ]::__msar.col_def[],
+    'Should add incoming "id" column and not add default "id" column when create_id is false'
+  );
+    RETURN NEXT is(
+    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, false),
+    ARRAY[
+      ('id', 'text', null, null, false, null),
+    ]::__msar.col_def[],
+    'Should ignore incoming "id" column and add default id column when create_id is true'
+  );
+  RETURN NEXT is(
+    __msar.process_col_def_jsonb(0, '[{}, {"name": "id"}]'::jsonb, false, true),
+    ARRAY[
+      ('id', 'integer', true, null, true, 'Mathesar default ID column'),
+      ('"id_1"', 'text', null, null, false, null),
+      ('"Column 1"', 'text', null, null, false, null)
+    ]::__msar.col_def[],
+    'Should rename incoming "id" column and add default id column when create_id is true'
   );
   RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
