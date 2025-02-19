@@ -9,8 +9,8 @@ from django.http import StreamingHttpResponse, JsonResponse, FileResponse
 
 from mathesar.rpc.utils import connect
 from mathesar.rpc.records import Filter, OrderBy
-from mathesar.rpc.schemas import get_schema
 
+from db.schemas import get_schema, schema_has_custom_type_dependency
 from db.tables import fetch_table_in_chunks
 
 
@@ -87,12 +87,17 @@ def dump_schema(
     user = request.user
     with connect(database_id, user) as conn:
         schema_name = get_schema(schema_oid, conn)['name']
+        has_type_deps = schema_has_custom_type_dependency(schema_oid, conn)
         pg_dump_cmd = [
             'pg_dump',
             '-h', conn.info.host,
             '-p', str(conn.info.port),
             '-U', conn.info.user,
-            '-d', conn.info.dbname,
+            '-d', conn.info.dbname
+        ] + (
+            # Include mathesar_types if a schema depend on our custom types
+            ['-n', sql.Identifier('mathesar_types').as_string()] if has_type_deps else []
+        ) + [
             '-n', sql.Identifier(schema_name).as_string(),
             '-O'  # Don't include owner info in the dump
         ]
