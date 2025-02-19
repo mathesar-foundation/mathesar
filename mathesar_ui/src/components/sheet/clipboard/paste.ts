@@ -35,6 +35,7 @@ interface RowRef {
 export interface PastingContext {
   getSheetColumns: () => Column[];
   getRecordRows: () => RecordRow[];
+  setSelection: (selection: SheetSelection) => void;
   updateRecords: (
     rowBlueprints: Parameters<RecordsData['bulkUpdate']>[0],
   ) => Promise<void>;
@@ -177,6 +178,13 @@ function updateViaPaste(
       cells: [...map(makeCellBlueprint, zip(sourceRow, destinationColumns))],
     })),
     arrayFrom,
+  );
+
+  context.setSelection(
+    selection.ofRowColumnIntersection(
+      destinationRows.map((r) => r.rowKey),
+      destinationColumns.map((c) => String(c.id)),
+    ),
   );
 
   void context.updateRecords(rowBlueprints);

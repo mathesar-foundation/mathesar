@@ -54,6 +54,7 @@
         ...map(({ column }) => column, get(processedColumns).values()),
       ],
       updateRecords: (r) => recordsData.bulkUpdate(r),
+      setSelection: (s) => selection.set(s),
     },
     getSelection: () => get(selection),
     showToastInfo: toast.info,
