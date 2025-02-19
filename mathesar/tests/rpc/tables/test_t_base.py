@@ -228,10 +228,11 @@ def test_prepare_table_for_import(rf, monkeypatch, mocked_exec_msar_func):
     expect_dict = {
         'copy_sql': 'COPY public.imported_table FROM patents.csv',
         'table_oid': 1234,
-        'table_name': 'imported_table'
+        'table_name': 'imported_table',
+        'renamed_columns': {}
     }
     mocked_exec_msar_func.fetchone.return_value = [expect_dict]
-    copy_sql, table_oid, table_name = prepare_table_for_import(
+    copy_sql, table_oid, table_name, renamed_columns = prepare_table_for_import(
         table_name="imported_table",
         schema_oid=schema_oid,
         column_names=column_names,
@@ -242,6 +243,7 @@ def test_prepare_table_for_import(rf, monkeypatch, mocked_exec_msar_func):
     assert copy_sql == expect_dict['copy_sql']
     assert table_oid == expect_dict['table_oid']
     assert table_name == expect_dict['table_name']
+    assert renamed_columns == expect_dict['renamed_columns']
     assert call_args[2] == schema_oid
     assert call_args[3] == 'imported_table'
     assert call_args[4] == json.dumps(column_data_list)
