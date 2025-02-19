@@ -5,9 +5,11 @@
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import { staticText } from '@mathesar/i18n/staticText';
   import {
     iconDatabase,
     iconDeleteMajor,
+    iconEdit,
     iconMoreActions,
     iconPermissions,
     iconReinstall,
@@ -22,6 +24,7 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
@@ -51,6 +54,7 @@
   const permissionsModal = modal.spawnModalController();
   const disconnectModal = modal.spawnModalController<Database>();
   const reinstallModal = modal.spawnModalController<Database>();
+  const editModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
@@ -78,7 +82,7 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle(database.name)}</title>
+  <title>{makeSimplePageTitle(database.displayName)}</title>
 </svelte:head>
 
 <LayoutWithHeader
@@ -90,14 +94,28 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    pageTitleAndMetaProps={{
-      name: database.name,
-      entityTypeName: $_('database'),
-      icon: iconDatabase,
-      subText: `${$_('db_server')}: ${database.server.getConnectionString()}`,
-    }}
+    name={database.displayName}
+    entityTypeName={$_('database')}
+    icon={iconDatabase}
   >
+    <div slot="subText" class="details">
+      <div>
+        <span class="label">{$_('db_server')}{staticText.COLON}</span>
+        {database.server.getConnectionString()}
+      </div>
+      <div>
+        <span class="label">{$_('db_name')}{staticText.COLON}</span>
+        {database.name}
+      </div>
+    </div>
     <div slot="action">
+      {#if isMathesarAdmin}
+        <Button on:click={() => editModal.open()} appearance="secondary">
+          <Icon {...iconEdit} />
+          <span>{$_('edit_connection')}</span>
+        </Button>
+      {/if}
+
       <Button appearance="secondary" on:click={() => permissionsModal.open()}>
         <Icon {...iconPermissions} />
         <span>{$_('database_permissions')}</span>
@@ -170,6 +188,7 @@
   </TabContainer>
 </LayoutWithHeader>
 
+<EditDatabaseModal controller={editModal} {database} />
 <DatabasePermissionsModal controller={permissionsModal} />
 <UpgradeDatabaseModal controller={reinstallModal} isReinstall />
 <DisconnectDatabaseModal
@@ -183,5 +202,11 @@
 <style>
   .tab-container {
     padding: var(--size-xx-large) 0;
+  }
+  .details {
+    font-size: var(--text-size-small);
+  }
+  .details .label {
+    color: var(--sand-700);
   }
 </style>

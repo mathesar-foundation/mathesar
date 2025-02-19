@@ -27,6 +27,7 @@ def get_dict_at_commit(commit):
 current_rev = None
 incoming_rev = None
 
+# Needs to be opened in text read mode
 with open(DICT_PATH, "r") as f:
     for line in f:
         if not current_rev:
@@ -94,11 +95,11 @@ for key in keys:
         "incoming": incoming_value,
     }
 
-with open(DICT_PATH, "w") as f:
+with open(DICT_PATH, "wb") as f:
     f.write(json.dumps(merged_dict, indent=2, sort_keys=True) + "\n")
 
 cmd(["git", "add", DICT_PATH])
 
 if conflicts:
-    with open(CONFLICTS_PATH, "w") as f:
+    with open(CONFLICTS_PATH, "wb") as f:
         f.write(json.dumps(conflicts, indent=2, sort_keys=True))

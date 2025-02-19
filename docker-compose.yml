@@ -159,6 +159,9 @@ services:
 
       # WARNING: MATHESAR_DATABASES is deprecated, and will be removed in a future release.
       MATHESAR_DATABASES: ${MATHESAR_DATABASES:-}
+
+      # SECURITY WARNING: don't run with DEBUG=true in production!
+      DEBUG: ${DEBUG:-false}
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
@@ -190,7 +193,7 @@ services:
   # services, allowing the Mathesar web sevice to connect to it.
   #
   db:
-    image: postgres:13
+    image: pgautoupgrade/pgautoupgrade:17-bookworm
     container_name: mathesar_db
     # This service needs the config variables defined above.
     environment: *config
@@ -200,12 +203,6 @@ services:
       - "5432"
     volumes:
       - ./msar/pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
-      interval: 5s
-      timeout: 1s
-      retries: 30
-      start_period: 5s
 
   #-----------------------------------------------------------------------------
   # Caddy

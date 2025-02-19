@@ -57,8 +57,10 @@
     options:
       members:
       - list_
+      - patch
       - disconnect
       - ConfiguredDatabaseInfo
+      - ConfiguredDatabasePatch
 
 ## Constraints
 
@@ -207,7 +209,9 @@
     options:
       members:
       - list_
+      - patch
       - ConfiguredServerInfo
+      - ConfiguredServerPatch
 
 ## Tables
 

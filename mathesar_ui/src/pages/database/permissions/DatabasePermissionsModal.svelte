@@ -112,7 +112,7 @@
   <span slot="title">
     <RichText text={$_('permissions_for_named_database')} let:slotName>
       {#if slotName === 'databaseName'}
-        <Identifier>{database.name}</Identifier>
+        <Identifier>{database.displayName}</Identifier>
       {/if}
     </RichText>
     <Help>
