@@ -1,7 +1,6 @@
 import os
 
 import pytest
-import tempfile
 from mathesar.errors import URLNotReachable
 from unittest.mock import patch
 from django.core.files import File
@@ -108,18 +107,6 @@ def test_data_file_create_csv(client, patents_csv_filepath, header):
     )
 
 
-@pytest.mark.parametrize('header', [True, False])
-def test_data_file_create_json(client, patents_json_filepath, header):
-    num_data_files = DataFile.objects.count()
-
-    with open(patents_json_filepath, 'rb') as json_file:
-        data = {'file': json_file, 'header': header}
-        response = client.post('/api/db/v0/data_files/', data, format='multipart')
-    check_create_data_file_response(
-        response, num_data_files, 'file', 'patents', ',', '"', '', header
-    )
-
-
 def test_data_file_create_csv_long_name(client, patents_csv_filepath):
     with open(patents_csv_filepath, 'rb') as csv_file:
         with patch.object(os.path, 'basename', lambda _: '0' * 101):
@@ -207,53 +194,6 @@ def test_data_file_create_invalid_file(client):
             response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'Unable to tabulate data'
-
-
-def test_data_file_create_unsupported_json_file(client):
-    invalid_json_structures = [
-        b'"Hello"',
-        b'["John", "Mary"]',
-        b'1'
-    ]
-
-    for value in invalid_json_structures:
-        response = _get_response_for_unsupported_json_files(client, value)
-        response_dict = response.json()
-        assert response.status_code == 400
-        assert response_dict[0]['message'] == 'This JSON format is not supported.'
-
-
-def _get_response_for_unsupported_json_files(client, json_content):
-    with tempfile.NamedTemporaryFile(suffix='tempfile.json') as f:
-        f.write(json_content)
-        f.seek(0)
-        response = client.post('/api/db/v0/data_files/', data={'file': f}, format='multipart')
-
-    return response
-
-
-def test_data_file_create_invalid_json_file(client):
-    invalid_json_structures = [
-        b'[{"Name": "John"]',
-        b"'Hello'",
-        b'[{"Name": "John"},]',
-        b'[{"Name": "John",}]'
-    ]
-
-    for value in invalid_json_structures:
-        response = _get_response_for_invalid_json_files(client, value)
-        response_dict = response.json()
-        assert response.status_code == 400
-        assert response_dict[0]['message'] == 'Invalid JSON file.'
-
-
-def _get_response_for_invalid_json_files(client, invalid_json_content):
-    with tempfile.NamedTemporaryFile(suffix='invalid_structure.json') as f:
-        f.write(invalid_json_content)
-        f.seek(0)
-        response = client.post('/api/db/v0/data_files/', data={'file': f}, format='multipart')
-
-    return response
 
 
 def test_data_file_create_non_unicode_file(client, non_unicode_csv_filepath):

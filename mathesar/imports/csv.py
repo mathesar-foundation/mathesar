@@ -34,7 +34,7 @@ def import_csv(user, data_file_id, table_name, schema_oid, conn, comment=None):
     with open(file_path, 'rb') as csv_file:
         csv_reader = _get_sv_reader(csv_file, header, dialect)
         column_names = process_column_names(csv_reader.fieldnames)
-    copy_sql, table_oid, db_table_name = prepare_table_for_import(
+    copy_sql, table_oid, db_table_name, renamed_columns = prepare_table_for_import(
         table_name,
         schema_oid,
         column_names,
@@ -53,7 +53,7 @@ def import_csv(user, data_file_id, table_name, schema_oid, conn, comment=None):
         conversion_encoding,
         conn
     )
-    return {"oid": table_oid, "name": db_table_name}
+    return {"oid": table_oid, "name": db_table_name, "renamed_columns": renamed_columns}
 
 
 def _get_sv_reader(file, header, dialect=None):
@@ -80,7 +80,7 @@ def _insert_csv_records(
     conn
 ):
     cursor = conn.cursor()
-    with open(file_path, 'rb', encoding=encoding) as csv_file:
+    with open(file_path, 'r', encoding=encoding) as csv_file:
         if conversion_encoding == encoding:
             with cursor.copy(copy_sql) as copy:
                 while data := csv_file.read():
