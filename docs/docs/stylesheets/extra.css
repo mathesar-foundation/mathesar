@@ -146,6 +146,10 @@
   display: none;
 }
 
+.md-typeset {
+  font-size: .7rem;
+}
+
 .md-typeset a {
   color: var(--md-link-color);
   text-decoration: underline;
