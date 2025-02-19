@@ -1348,6 +1348,34 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_schemas_with_custom_type_dep() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA type_dep_schema;
+  CREATE SCHEMA no_type_dep_schema;
+  CREATE TABLE type_dep_schema.actors (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    actor_name TEXT,
+    actor_email mathesar_types.email
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_schema_has_custom_type_dependency() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_schemas_with_custom_type_dep();
+  RETURN NEXT is(
+    msar.schema_has_custom_type_dependency('type_dep_schema'::regnamespace),
+    true
+  );
+  RETURN NEXT is(
+    msar.schema_has_custom_type_dependency('no_type_dep_schema'::regnamespace),
+    false
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_patch_schema() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
