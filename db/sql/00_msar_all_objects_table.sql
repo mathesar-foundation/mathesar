@@ -1158,6 +1158,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.role_info_table()', 'FUNCTION', NULL),
   ('msar', 'msar.sanitize_direction(text)', 'FUNCTION', NULL),
   ('msar', 'msar.schema_exists(text)', 'FUNCTION', NULL),
+  ('msar', 'msar.schema_has_custom_type_dependency(regnamespace)', 'FUNCTION', NULL),
   ('msar', 'msar.schema_info_table()', 'FUNCTION', NULL),
   ('msar', 'msar.search_records_from_table(oid,jsonb,integer,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.search_records_from_table(oid,jsonb,integer,boolean,jsonb)', 'FUNCTION', NULL),
