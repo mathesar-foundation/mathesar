@@ -141,7 +141,8 @@ function updateViaPaste(
     throw new Error('Paste TSV is not yet implemented');
   }
 
-  const sourceRows = [...take(selection.rowIds.size, cycle(payload.rows))];
+  const targetRowCount = Math.max(selection.rowIds.size, payload.rows.length);
+  const sourceRows = [...take(targetRowCount, cycle(payload.rows))];
   const firstSourceRow = first(sourceRows);
   if (!firstSourceRow) throw new Error(get(_)('paste_error_no_rows'));
 
