@@ -27,7 +27,8 @@ def get_dict_at_commit(commit):
 current_rev = None
 incoming_rev = None
 
-with open(DICT_PATH, "rb") as f:
+# Needs to be opened in text read mode
+with open(DICT_PATH, "r") as f:
     for line in f:
         if not current_rev:
             match = re.search(r"^<<<<<<< (\w+)", line)
