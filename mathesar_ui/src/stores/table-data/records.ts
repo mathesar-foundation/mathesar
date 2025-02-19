@@ -1,3 +1,4 @@
+import { execPipe, first, map, zip } from 'iter-tools';
 import {
   type Readable,
   type Unsubscriber,
@@ -573,16 +574,23 @@ export class RecordsData {
       cells: { columnId: string; value: unknown }[];
     }[],
   ): Promise<void> {
-    for (const { rowKey, cells } of rowBlueprints) {
-      this.updatePromises?.get(rowKey)?.cancel();
-      for (const cell of cells) {
-        const cellKey = getCellKey(rowKey, cell.columnId);
-        this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
-        this.updatePromises?.get(cellKey)?.cancel();
-      }
+    const cellStatus = this.meta.cellModificationStatus;
+
+    function forEachRow(fn: (b: (typeof rowBlueprints)[number]) => void) {
+      rowBlueprints.forEach(fn);
     }
 
-    // TODO: figure out what we want to set in updatePromises (if anything)
+    function forEachCell(fn: (cellKey: string) => void) {
+      forEachRow((row) =>
+        row.cells.forEach((cell) => fn(getCellKey(row.rowKey, cell.columnId))),
+      );
+    }
+
+    forEachCell((cellKey) => {
+      cellStatus.set(cellKey, { state: 'processing' });
+      this.updatePromises?.get(cellKey)?.cancel();
+    });
+    forEachRow(({ rowKey }) => this.updatePromises?.get(rowKey)?.cancel());
 
     const requests = rowBlueprints.map((row) =>
       api.records.patch({
@@ -594,21 +602,44 @@ export class RecordsData {
       }),
     );
 
-    try {
-      const responses = await batchSend(requests);
-      for (const { rowKey, cells } of rowBlueprints) {
-        for (const cell of cells) {
-          // TODO: consider resolving code duplication with cellKey above
-          const cellKey = getCellKey(rowKey, cell.columnId);
-          this.meta.cellModificationStatus.set(cellKey, {
-            state: 'success',
+    const responses = await batchSend(requests);
+    const responseMap = new Map(
+      execPipe(
+        zip(rowBlueprints, responses),
+        map(([blueprint, response]) => [
+          blueprint.rowKey,
+          { blueprint, response },
+        ]),
+      ),
+    );
+
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    if (!pkColumn) throw new Error('Unable to update without primary key');
+
+    this.savedRecordRowsWithGroupHeaders.update((rows) =>
+      rows.map((row) => {
+        const rowKey = getRowKey(row, pkColumn.id);
+        const responseMapEntry = responseMap.get(rowKey);
+        if (!responseMapEntry) return row;
+        const { blueprint, response } = responseMapEntry;
+        if (response.status === 'error') {
+          console.log(response);
+          // TODO: Set errors in row or cell.
+          blueprint.cells.forEach((cell) => {
+            const cellKey = getCellKey(rowKey, cell.columnId);
+            return cellStatus.set(cellKey, { state: 'success' });
           });
+          return row;
         }
-      }
-      // TODO update records in store
-    } catch (e) {
-      // TODO
-    }
+        const result = first(response.value.results);
+        if (!result) return row;
+        blueprint.cells.forEach((cell) => {
+          const cellKey = getCellKey(rowKey, cell.columnId);
+          return cellStatus.set(cellKey, { state: 'success' });
+        });
+        return { ...row, record: result };
+      }),
+    );
   }
 
   // TODO: It would be better to throw errors instead of silently failing
