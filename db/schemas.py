@@ -45,19 +45,5 @@ def create_schema(schema_name, conn, owner_oid, description=None):
     return db_conn.exec_msar_func(conn, 'create_schema', schema_name, owner_oid, description).fetchone()[0]
 
 
-def drop_schema_via_oid(conn, id, cascade=False):
-    """
-    Drop a schema by its OID.
-
-    If no schema exists with the given oid, an exception will be raised.
-
-    Args:
-        conn: a psycopg connection
-        id: the OID of the schema to drop.
-        cascade: Whether to drop the dependent objects.
-    """
-    db_conn.exec_msar_func(conn, 'drop_schema', id, cascade).fetchone()
-
-
 def drop_schemas(conn, sch_oids):
     db_conn.exec_msar_func(conn, 'drop_schemas', sch_oids)

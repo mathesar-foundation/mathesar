@@ -12,7 +12,7 @@ def _install_sql_file(file_name):
     """
 
     def _install(conn):
-        with open(os.path.join(FILE_DIR, file_name)) as file_handle:
+        with open(os.path.join(FILE_DIR, file_name), 'rb') as file_handle:
             load_file_with_conn(conn, file_handle)
 
     return _install

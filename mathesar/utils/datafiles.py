@@ -6,9 +6,8 @@ import requests
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
-from mathesar.errors import URLDownloadError
+from mathesar.errors import URLDownloadError, UnsupportedFileFormat
 from mathesar.imports.csv import is_valid_csv, get_sv_dialect, get_file_encoding
-from mathesar.imports.json import is_valid_json, validate_json_format
 from mathesar.models.base import DataFile
 
 
@@ -31,13 +30,11 @@ def _download_datafile(url):
 
 def _get_file_type(raw_file):
     file_extension = os.path.splitext(raw_file.name)[1][1:]
-    if file_extension in ['csv', 'tsv', 'json']:
+    if file_extension in ['csv', 'tsv']:
         return file_extension
 
     if is_valid_csv(raw_file):
         return 'csv'
-    elif is_valid_json(raw_file):
-        return 'json'
 
 
 def create_datafile(data, user=None):
@@ -45,11 +42,11 @@ def create_datafile(data, user=None):
 
     # Validation guarentees only one arg will be present
     if 'paste' in data:
-        type = 'json' if is_valid_json(data['paste']) else 'tsv'
-        name = str(int(time())) + '.' + type
+        name = str(int(time()))
         raw_file = ContentFile(str.encode(data['paste']), name=name)
         created_from = 'paste'
         base_name = ''
+        type = _get_file_type(raw_file)
     elif 'url' in data:
         raw_file = _download_datafile(data['url'])
         created_from = 'url'
@@ -68,8 +65,6 @@ def create_datafile(data, user=None):
 
     encoding = get_file_encoding(raw_file.file)
     text_file = TextIOWrapper(raw_file.file, encoding=encoding)
-    if type == 'json':
-        validate_json_format(raw_file)
     if type == 'csv' or type == 'tsv':
         dialect = get_sv_dialect(text_file)
         datafile = DataFile(
@@ -83,20 +78,10 @@ def create_datafile(data, user=None):
             quotechar=dialect.quotechar,
             user=user,
         )
+        datafile.save()
+        raw_file.close()
     else:
-        max_level = data.get('max_level', 0)
-        sheet_index = data.get('sheet_index', 0)
-        datafile = DataFile(
-            file=raw_file,
-            base_name=base_name,
-            type=type,
-            created_from=created_from,
-            header=header,
-            max_level=max_level,
-            sheet_index=sheet_index,
-            user=user,
-        )
-    datafile.save()
-    raw_file.close()
+        raw_file.close()
+        raise UnsupportedFileFormat
 
     return datafile

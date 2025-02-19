@@ -63,11 +63,9 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    pageTitleAndMetaProps={{
-      name: $name,
-      icon: iconSchema,
-      entityTypeName: $_('schema'),
-    }}
+    name={$name}
+    icon={iconSchema}
+    entityTypeName={$_('schema')}
   >
     <div slot="action">
       <Tooltip allowHover>

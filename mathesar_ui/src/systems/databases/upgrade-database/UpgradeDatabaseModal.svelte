@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
   import type { Database } from '@mathesar/models/Database';
   import {
@@ -26,13 +27,13 @@
     {#if isReinstall}
       <RichText text={$_('reinstall_mathesar_schemas_on_db')} let:slotName>
         {#if slotName === 'name'}
-          <b>{database.name}</b>
+          <Identifier>{database.displayName}</Identifier>
         {/if}
       </RichText>
     {:else}
       <RichText text={$_('upgrade_database_with_name')} let:slotName>
         {#if slotName === 'name'}
-          <b>{database.name}</b>
+          <Identifier>{database.displayName}</Identifier>
         {/if}
       </RichText>
     {/if}
