@@ -623,16 +623,19 @@ export class RecordsData {
         if (!responseMapEntry) return row;
         const { blueprint, response } = responseMapEntry;
         if (response.status === 'error') {
-          console.log(response);
-          // TODO: Set errors in row or cell.
           blueprint.cells.forEach((cell) => {
             const cellKey = getCellKey(rowKey, cell.columnId);
-            return cellStatus.set(cellKey, { state: 'success' });
+            return cellStatus.set(cellKey, {
+              state: 'failure',
+              errors: [getErrorMessage(response)],
+            });
           });
           return row;
         }
         const result = first(response.value.results);
         if (!result) return row;
+        // TODO: don't put all messages in all cells for a row. Instead try to
+        // figure out which cells caused which errors.
         blueprint.cells.forEach((cell) => {
           const cellKey = getCellKey(rowKey, cell.columnId);
           return cellStatus.set(cellKey, { state: 'success' });
