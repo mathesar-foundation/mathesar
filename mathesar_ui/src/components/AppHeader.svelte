@@ -88,7 +88,7 @@
               icon={iconDatabase}
               href={getDatabasePageUrl(database.id)}
             >
-              {database.name}
+              {database.displayName}
             </LinkMenuItem>
             <MenuDivider />
           {/if}
