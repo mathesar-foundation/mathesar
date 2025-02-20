@@ -3403,7 +3403,9 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.infer_column_data_type(tab_id regclass, col_id smallint) RETURNS regtype AS $$/*
+msar.infer_column_data_type(
+  tab_id regclass, col_id smallint, test_perc numeric DEFAULT 100
+) RETURNS regtype AS $$/*
 Infer the best type for a given column.
 
 Note that we currently only try for `text` columns, since we only do this at import. I.e.,
@@ -3448,19 +3450,21 @@ BEGIN
       LOOP
         BEGIN
           EXECUTE format(
-            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I',
+            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM (%4$L)',
             msar.build_cast_expr(tab_id, col_id, test_type),
             msar.get_relation_schema_name(tab_id),
-            msar.get_relation_name(tab_id)
+            msar.get_relation_name(tab_id),
+            test_perc
           );
           inferred_type := test_type;
           EXIT;
         EXCEPTION WHEN OTHERS THEN
           RAISE NOTICE 'Test failed: %', format(
-            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I',
+            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM (%4$L)',
             msar.build_cast_expr(tab_id, col_id, test_type),
             msar.get_relation_schema_name(tab_id),
-            msar.get_relation_name(tab_id)
+            msar.get_relation_name(tab_id),
+            test_perc
           );
           -- do nothing, just try the next type.
         END;
@@ -3483,8 +3487,19 @@ Args:
 The response JSON will have attnum keys, and values will be the result of `format_type`
 for the inferred type of each column. Restricted to columns to which the user has access.
 */
-SELECT jsonb_object_agg(
-  attnum, pg_catalog.format_type(msar.infer_column_data_type(attrelid, attnum), null)
+DECLARE
+  test_perc integer;
+BEGIN
+EXECUTE(
+  format(
+    'SELECT GREATEST(LEAST(1000 / COUNT(1), 100), 5) FROM %1$I.%2$I TABLESAMPLE SYSTEM(1)',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id)
+  )
+) INTO test_perc;
+RETURN jsonb_object_agg(
+  attnum,
+  pg_catalog.format_type(msar.infer_column_data_type(attrelid, attnum, test_perc), null)
 )
 FROM pg_catalog.pg_attribute
 WHERE
@@ -3492,7 +3507,8 @@ WHERE
   AND attnum > 0
   AND NOT attisdropped
   AND has_column_privilege(attrelid, attnum, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3717,9 +3733,12 @@ DECLARE
   description_alter RECORD;
 BEGIN
   -- Get the string specifying all non-name-change alterations to perform.
+  RAISE NOTICE 'Getting alter string...';
   col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
+  RAISE NOTICE 'Alter String is\n%', col_alter_str;
 
   -- Perform the non-name-change alterations
+  RAISE NOTICE 'PERFORMING alters...';
   IF col_alter_str IS NOT NULL THEN
     PERFORM __msar.exec_ddl(
       'ALTER TABLE %s %s',
@@ -3728,6 +3747,7 @@ BEGIN
     );
   END IF;
 
+  RAISE NOTICE 'Altering descriptions...';
   -- Here, we perform all description-changing alterations.
   FOR description_alter IN
     SELECT
@@ -3743,6 +3763,7 @@ BEGIN
     );
   END LOOP;
 
+  RAISE NOTICE 'Altering names...';
   -- Here, we perform all name-changing alterations.
   FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
   LOOP

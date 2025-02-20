@@ -1114,6 +1114,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.grant_usage_on_custom_mathesar_types_to_public()', 'FUNCTION', NULL),
   ('msar', 'msar.has_dependents(oid,smallint)', 'FUNCTION', NULL),
   ('msar', 'msar.infer_column_data_type(regclass,smallint)', 'FUNCTION', NULL),
+  ('msar', 'msar.infer_column_data_type(regclass,smallint,numeric)', 'FUNCTION', NULL),
   ('msar', 'msar.infer_table_column_data_types(regclass)', 'FUNCTION', NULL),
   ('msar', 'msar.is_default_possibly_dynamic(oid,integer)', 'FUNCTION', NULL),
   ('msar', 'msar.is_mathesar_id_column(oid,integer)', 'FUNCTION', NULL),
