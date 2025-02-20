@@ -80,6 +80,7 @@ def _insert_csv_records(
     conn
 ):
     cursor = conn.cursor()
+    # Needs to be opened in text read mode
     with open(file_path, 'r', encoding=encoding) as csv_file:
         if conversion_encoding == encoding:
             with cursor.copy(copy_sql) as copy:

@@ -107,8 +107,8 @@ theme:
     - navigation.sections
     - navigation.expand
   font:
-    text: Nunito Sans
-    code: Fira Code
+    text: Inter
+    code: JetBrains Mono
   icon:
     repo: fontawesome/brands/github
   palette:
