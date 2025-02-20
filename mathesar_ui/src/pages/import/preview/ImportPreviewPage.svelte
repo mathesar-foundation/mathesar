@@ -24,6 +24,7 @@
   export let schema: Schema;
   export let tableId: number;
   export let useColumnTypeInference = false;
+  export let renamedIdColumn: string | undefined = undefined;
 
   function redirectToTablePage() {
     router.goto(getTablePageUrl(database.id, schema.oid, tableId));
@@ -58,6 +59,7 @@
     table={$tableFetch.resolvedValue}
     dataFile={$dataFileFetch.resolvedValue}
     {useColumnTypeInference}
+    {renamedIdColumn}
   />
 {:else if $tableFetch.isLoading || $dataFileFetch.isLoading}
   <ImportPreviewLayout><Spinner /></ImportPreviewLayout>

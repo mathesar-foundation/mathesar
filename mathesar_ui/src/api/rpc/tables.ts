@@ -180,6 +180,7 @@ export const tables = {
     {
       oid: number;
       name: string;
+      renamed_columns: Record<string, string>;
     }
   >(),
 

@@ -317,7 +317,10 @@ export async function createTableFromDataFile(props: {
   schema: Schema;
   dataFile: Pick<DataFile, 'id'>;
   name?: string;
-}): Promise<Table> {
+}): Promise<{
+  table: Table;
+  renamedColumns: Record<string, string>;
+}> {
   const { schema } = props;
 
   const created = await api.tables
@@ -340,7 +343,10 @@ export async function createTableFromDataFile(props: {
       },
     },
   });
-  return fullTable;
+  return {
+    table: fullTable,
+    renamedColumns: created.renamed_columns,
+  };
 }
 
 export function getTableFromStoreOrApi({
