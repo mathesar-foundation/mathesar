@@ -171,17 +171,21 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 
         !!! example
             Your `.env` file should look something like this
+
+            ```
+            SECRET_KEY="REPLACE_THIS_WITH_YOUR_50_CHAR_RANDOMLY_GENERATED_STRING"
+            ALLOWED_HOSTS="xDOMAIN_NAMEx"
+            DOMAIN_NAME="xDOMAIN_NAMEx"
+            POSTGRES_DB="mathesar_django"
+            POSTGRES_USER="mathesar"
+            POSTGRES_PASSWORD="REPLACE_THIS_WITH_APPROPRIATE_PASSWORD_FOR_THE_CHOSEN_POSTGRES_USER"
+            POSTGRES_HOST="localhost"
+            POSTGRES_PORT="5432"
+            ```
+
+        !!! info "Note"
+            Each value in the environment file must be enclosed in double quotes(`""`).
             
-            ```
-            SECRET_KEY=REPLACE_THIS_WITH_YOUR_50_CHAR_RANDOMLY_GENERATED_STRING
-            ALLOWED_HOSTS=xDOMAIN_NAMEx
-            DOMAIN_NAME=xDOMAIN_NAMEx
-            POSTGRES_DB=mathesar_django
-            POSTGRES_USER=mathesar
-            POSTGRES_PASSWORD=REPLACE_THIS_WITH_APPROPRIATE_PASSWORD_FOR_THE_CHOSEN_POSTGRES_USER
-            POSTGRES_HOST=localhost
-            POSTGRES_PORT=5432
-            ```
 
         !!! tip
             To generate a [`SECRET_KEY`](./environment-variables.md#secret_key) you can use this [browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
@@ -191,21 +195,21 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             ```
 
         !!! tip
-            If you want to host Mathesar on multiple domains/subdomains you can do so by adding multiple comma separated domain names to the following env variables without a whitespace: 
+            To host Mathesar on multiple domains/subdomains simply list the domain names separated by a comma and a whitespace to the following env variables: 
 
             ```
-            DOMAIN_NAME=xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org
-            ALLOWED_HOSTS=xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org
+            DOMAIN_NAME="xDOMAIN_NAMEx, xDOMAIN_NAMEx.example.org"
+            ALLOWED_HOSTS="xDOMAIN_NAMEx, xDOMAIN_NAMEx.example.org"
             ```
 
     1. Add the environment variables to the shell
-   
+
         You need to `export` the environment variables listed in the `.env` file to your shell. The easiest way would be to run the below command.
-    
+
           ```
-          export $(cat .env)
+          set -a && source .env && set +a
           ```
-       
+
         !!! warning "Important"
             You need to export the environment variables each time you restart the shell as they don't persist across sessions.
 
@@ -312,7 +316,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 2. Add the configuration details to the CaddyFile
 
     ```
-    {$DOMAIN_NAME:xDOMAIN_NAMEx} {
+    {$DOMAIN_NAME} {
         log {
             output stdout
         }
