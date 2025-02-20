@@ -25,6 +25,7 @@ import {
 import { deserializeTsv } from './tsv';
 
 interface RowRef {
+  row: RecordRow;
   recordId: ResultValue;
   rowKey: string;
 }
@@ -109,6 +110,7 @@ function getDestinationColumns(
 
 function getRowRef(row: RecordRow, pkColumnId: number): RowRef {
   return {
+    row,
     recordId: row.record[pkColumnId],
     rowKey: getRowKey(row, pkColumnId),
   };
@@ -182,8 +184,8 @@ function updateViaPaste(
 
   context.setSelection(
     selection.ofRowColumnIntersection(
-      destinationRows.map((r) => r.rowKey),
-      destinationColumns.map((c) => String(c.id)),
+      destinationRows.map(({ row }) => getRowSelectionId(row)),
+      destinationColumns.map((column) => String(column.id)),
     ),
   );
 
