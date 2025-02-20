@@ -369,6 +369,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     Type=notify
     User=caddy
     Group=caddy
+    EnvironmentFile=xMATHESAR_INSTALLATION_DIRx/.env
     ExecStart=/usr/bin/caddy run --config /etc/caddy/Caddyfile
     ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile --force
     TimeoutStopSec=5s
