@@ -126,12 +126,20 @@ function insertViaPaste(
   throw new Error('Insert via paste is not yet implemented.');
 }
 
+function prepareStructuredCellValue(column: Column, cell: StructuredCell) {
+  if (cell.raw === null) return null;
+
+  // If we're pasting into a text column, use the formatted value.
+  if (column.type === 'text') return cell.formatted;
+
+  // Otherwise use the raw value
+  return cell.raw;
+}
+
 function makeCellBlueprint([cell, column]: [StructuredCell, Column]) {
   return {
     columnId: String(column.id),
-    // If we're pasting into a text column, use the formatted value. Otherwise
-    // use the raw value.
-    value: column.type === 'text' ? cell.formatted : cell.raw,
+    value: prepareStructuredCellValue(column, cell),
   };
 }
 
