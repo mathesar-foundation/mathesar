@@ -20,8 +20,8 @@ This page contains all available environment variables supported by Mathesar. Se
 ### `ALLOWED_HOSTS` {: #allowed_hosts}
 
 - **Description**: A set of strings representing the host/domain names that Django is allowed to serve. This is a security measure to prevent HTTP Host header attacks ([see Django docs](https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts)).
-- **Format**: A set of host/domain names separated by a comma
-- **Default value**: `.localhost,127.0.0.1,[::1]`
+- **Format**: A set of host/domain names separated by a comma and a whitespace
+- **Default value**: `.localhost, 127.0.0.1, [::1]`
 
 
 ## Internal Database configuration {: #db}
