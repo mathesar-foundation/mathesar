@@ -87,7 +87,9 @@ function getDestinationColumns(
   selectedColumnIds: ImmutableSet<string>,
   sheetColumns: Column[],
 ): Column[] {
-  if (selectedColumnIds.size > payloadColumnCount) {
+  const selectedColumnCount = selectedColumnIds.size;
+
+  if (selectedColumnCount > payloadColumnCount) {
     throw new Error(get(_)('paste_error_too_many_destination_columns'));
   }
 
@@ -100,7 +102,7 @@ function getDestinationColumns(
   }
 
   /** The index within `sheetColumns` of the final pasted column */
-  const lastIndex = firstIndex + selectedColumnIds.size - 1;
+  const lastIndex = firstIndex + payloadColumnCount - 1;
   if (lastIndex >= sheetColumns.length) {
     throw new Error(get(_)('paste_error_too_few_destination_columns'));
   }
