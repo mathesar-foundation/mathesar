@@ -628,6 +628,14 @@ export class RecordsData {
         if (!responseMapValue) return row;
         const { blueprint, response } = responseMapValue;
         if (response.status === 'error') {
+          // NOTE: this is a bit weird and could potentially be improved. If we
+          // were unable to save the record we need to indicate to the user that
+          // all target cells in the record have failed to update. The code
+          // below is a rather crude way of doing this. If one cells caused the
+          // whole record to fail, then the error message will be repeated for
+          // each cell in the record. We could potentially improve on this by
+          // using our `extractDetailedFieldBasedErrors` utility. But we'd still
+          // need to figure how to show some kind of errors in other cells.
           blueprint.cells.forEach((cell) => {
             const cellKey = getCellKey(rowKey, cell.columnId);
             return cellStatus.set(cellKey, {
@@ -639,8 +647,6 @@ export class RecordsData {
         }
         const result = first(response.value.results);
         if (!result) return row;
-        // TODO: don't put all messages in all cells for a row. Instead try to
-        // figure out which cells caused which errors.
         blueprint.cells.forEach((cell) => {
           const cellKey = getCellKey(rowKey, cell.columnId);
           return cellStatus.set(cellKey, { state: 'success' });
