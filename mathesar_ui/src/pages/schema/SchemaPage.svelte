@@ -3,6 +3,7 @@
 
   import { getQueryStringFromParams } from '@mathesar/api/rest/utils/requestUtils';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import {
     iconEdit,
     iconExport,
@@ -14,6 +15,7 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
@@ -32,6 +34,13 @@
 
   export let database: Database;
   export let schema: Schema;
+
+  const databaseContext = DatabaseRouteContext.get();
+  $: ({ currentRole } = $databaseContext);
+  $: void AsyncRpcApiStore.runBatchConservatively([
+    currentRole.batchRunner({ database_id: database.id }),
+  ]);
+  $: isCurrentRoleSuper = !!$currentRole.resolvedValue?.isSuper;
 
   const editSchemaModal = modal.spawnModalController();
   const addTableModal = modal.spawnModalController();
@@ -82,32 +91,34 @@
         <Icon {...iconPermissions} />
         <span>{$_('schema_permissions')}</span>
       </Button>
-      <DropdownMenu
-        showArrow={false}
-        triggerAppearance="plain"
-        icon={iconMoreActions}
-        preferredPlacement="bottom-end"
-      >
-        <Tooltip allowHover>
-          <LinkMenuItem
-            slot="trigger"
-            icon={iconExport}
-            href="/api/export/v0/schemas/?{exportLinkParams}"
-            data-tinro-ignore
-            appearance="secondary"
-            size="medium"
-            aria-label={$_('export_sql')}
-            download="{$name}.sql"
-          >
-            <span>{$_('export_sql')}</span>
-          </LinkMenuItem>
-          <span slot="content">
-            {$_('export_schema_help', {
-              values: { schemaName: $name },
-            })}
-          </span>
-        </Tooltip>
-      </DropdownMenu>
+      {#if isCurrentRoleSuper}
+        <DropdownMenu
+          showArrow={false}
+          triggerAppearance="plain"
+          icon={iconMoreActions}
+          preferredPlacement="bottom-end"
+        >
+          <Tooltip allowHover>
+            <LinkMenuItem
+              slot="trigger"
+              icon={iconExport}
+              href="/api/export/v0/schemas/?{exportLinkParams}"
+              data-tinro-ignore
+              appearance="secondary"
+              size="medium"
+              aria-label={$_('export_sql')}
+              download="{$name}.sql"
+            >
+              <span>{$_('export_sql')}</span>
+            </LinkMenuItem>
+            <span slot="content">
+              {$_('export_schema_help', {
+                values: { schemaName: $name },
+              })}
+            </span>
+          </Tooltip>
+        </DropdownMenu>
+      {/if}
     </div>
 
     <svelte:fragment slot="bottom">
