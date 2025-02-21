@@ -5,7 +5,7 @@
 
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
-  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
   import { ROW_HEADER_WIDTH_PX } from '@mathesar/geometry';
   import type { Table } from '@mathesar/models/Table';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
@@ -40,16 +40,25 @@
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
-    getCopyingContext: () => ({
-      rowsMap: new Map(
-        map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
-      ),
-      columnsMap: stringifyMapKeys(get(processedColumns)),
-      recordSummaries: get(recordsData.linkedRecordSummaries),
-      selectedRowIds: get(selection).rowIds,
-      selectedColumnIds: get(selection).columnIds,
-    }),
+    copyingContext: {
+      getRows: () =>
+        new Map(
+          map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
+        ),
+      getColumns: () => stringifyMapKeys(get(processedColumns)),
+      getRecordSummaries: () => get(recordsData.linkedRecordSummaries),
+    },
+    pastingContext: {
+      getRecordRows: () => get(recordsData.savedRecords),
+      getSheetColumns: () => [
+        ...map(({ column }) => column, get(processedColumns).values()),
+      ],
+      updateRecords: (r) => recordsData.bulkUpdate(r),
+      setSelection: (s) => selection.set(s),
+    },
+    getSelection: () => get(selection),
     showToastInfo: toast.info,
+    showToastError: toast.error,
   });
   $: ({ horizontalScrollOffset, scrollOffset } = display);
   $: columnOrder = table.metadata?.column_order ?? [];
