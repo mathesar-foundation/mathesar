@@ -6,6 +6,7 @@
   import {
     iconEdit,
     iconExport,
+    iconMoreActions,
     iconPermissions,
     iconSchema,
   } from '@mathesar/icons';
@@ -18,9 +19,10 @@
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import {
-    AnchorButton,
     Button,
+    DropdownMenu,
     Icon,
+    LinkMenuItem,
     Tooltip,
   } from '@mathesar-component-library';
 
@@ -68,25 +70,6 @@
     entityTypeName={$_('schema')}
   >
     <div slot="action">
-      <Tooltip allowHover>
-        <AnchorButton
-          slot="trigger"
-          href="/api/export/v0/schemas/?{exportLinkParams}"
-          data-tinro-ignore
-          appearance="secondary"
-          size="medium"
-          aria-label={$_('export')}
-          download="{$name}.sql"
-        >
-          <Icon {...iconExport} />
-          <span class="responsive-button-label">{$_('export')}</span>
-        </AnchorButton>
-        <span slot="content">
-          {$_('export_schema_help', {
-            values: { schemaName: $name },
-          })}
-        </span>
-      </Tooltip>
       <Button
         on:click={handleEditSchema}
         appearance="secondary"
@@ -99,6 +82,32 @@
         <Icon {...iconPermissions} />
         <span>{$_('schema_permissions')}</span>
       </Button>
+      <DropdownMenu
+        showArrow={false}
+        triggerAppearance="plain"
+        icon={iconMoreActions}
+        preferredPlacement="bottom-end"
+      >
+        <Tooltip allowHover>
+          <LinkMenuItem
+            slot="trigger"
+            icon={iconExport}
+            href="/api/export/v0/schemas/?{exportLinkParams}"
+            data-tinro-ignore
+            appearance="secondary"
+            size="medium"
+            aria-label={$_('export_sql')}
+            download="{$name}.sql"
+          >
+            <span>{$_('export_sql')}</span>
+          </LinkMenuItem>
+          <span slot="content">
+            {$_('export_schema_help', {
+              values: { schemaName: $name },
+            })}
+          </span>
+        </Tooltip>
+      </DropdownMenu>
     </div>
 
     <svelte:fragment slot="bottom">
