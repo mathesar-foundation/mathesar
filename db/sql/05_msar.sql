@@ -2004,6 +2004,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- SCHEMA UTILITY FUNCTIONS
+--
+-- Helper functions for schema.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+msar.schema_has_custom_type_dependency(sch_id regnamespace) RETURNS boolean AS $$/*
+  Determine whether any column within the specified schema uses a custom type 
+  from the 'mathesar_types' namespace.
+
+  Args:
+  sch_ids: The OID of the schema to inspect.
+*/
+SELECT EXISTS (
+  SELECT 1 FROM pg_catalog.pg_attribute pga 
+  LEFT JOIN pg_catalog.pg_class pgc ON pga.attrelid = pgc.oid
+  LEFT JOIN pg_catalog.pg_type pgt ON pga.atttypid = pgt.oid
+  WHERE pgt.typnamespace='mathesar_types'::regnamespace::oid
+  AND pgc.relnamespace = sch_id
+);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
