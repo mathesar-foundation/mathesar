@@ -43,13 +43,13 @@ export class SheetClipboardHandler implements ClipboardHandler {
     }
   }
 
-  handlePaste({ clipboardData }: ClipboardEvent) {
+  async handlePaste({ clipboardData }: ClipboardEvent) {
     const context = this.deps.pastingContext;
     if (!context) return;
     const selection = this.deps.getSelection();
     if (!clipboardData) return;
     try {
-      paste(clipboardData, selection, context);
+      await paste(clipboardData, selection, context);
     } catch (e) {
       this.deps.showToastError(getErrorMessage(e));
     }

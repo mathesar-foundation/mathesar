@@ -74,7 +74,7 @@
 
   function handlePaste(e: ClipboardEvent) {
     if (clipboardHandler) {
-      clipboardHandler.handlePaste(e);
+      void clipboardHandler.handlePaste(e);
       e.preventDefault();
     }
   }

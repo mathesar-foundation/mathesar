@@ -135,7 +135,7 @@ function makeCellBlueprint([cell, column]: [StructuredCell, Column]) {
   };
 }
 
-function updateViaPaste(
+async function updateViaPaste(
   payload: Payload,
   selection: SheetSelection,
   context: PastingContext,
@@ -184,21 +184,21 @@ function updateViaPaste(
     arrayFrom,
   );
 
+  await context.updateRecords(rowBlueprints);
+
   context.setSelection(
     selection.ofRowColumnIntersection(
       destinationRows.map(({ row }) => getRowSelectionId(row)),
       destinationColumns.map((column) => String(column.id)),
     ),
   );
-
-  void context.updateRecords(rowBlueprints);
 }
 
-export function paste(
+export async function paste(
   clipboardData: DataTransfer,
   selection: SheetSelection,
   context: PastingContext,
-): void {
+): Promise<void> {
   const payload = getPayload(clipboardData);
   if (!payload) return;
 
@@ -209,7 +209,7 @@ export function paste(
     return;
   }
   if (operation === 'update') {
-    updateViaPaste(payload, selection, context);
+    await updateViaPaste(payload, selection, context);
     return;
   }
   assertExhaustive(operation);
