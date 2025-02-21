@@ -55,30 +55,22 @@ interface MathesarPayload {
 
 type Payload = TsvPayload | MathesarPayload;
 
-function getPayload(clipboardData: DataTransfer): Payload | undefined {
+function getPayload(clipboardData: DataTransfer): Payload {
   const mathesarData = clipboardData.getData(MIME_MATHESAR_SHEET_CLIPBOARD);
   if (mathesarData) {
-    try {
-      const rows = validateStructuredCellRows(JSON.parse(mathesarData));
-      if (rows.length === 0) return undefined;
-      return { type: 'structured', rows };
-    } catch (e) {
-      // Swallow errors
-    }
+    const rows = validateStructuredCellRows(JSON.parse(mathesarData));
+    if (rows.length === 0) throw new Error(get(_)('paste_error_empty'));
+    return { type: 'structured', rows };
   }
 
   const textData = clipboardData.getData(MIME_PLAIN_TEXT);
   if (textData) {
-    try {
-      const rows = deserializeTsv(textData);
-      if (rows.length === 0) return undefined;
-      return { type: 'tsv', rows };
-    } catch (e) {
-      // Swallow errors
-    }
+    const rows = deserializeTsv(textData);
+    if (rows.length === 0) throw new Error(get(_)('paste_error_empty'));
+    return { type: 'tsv', rows };
   }
 
-  return undefined;
+  throw new Error(get(_)('paste_error_unsupported_mime_type'));
 }
 
 /** Gets the subset of sheet columns that we're actually pasting into */
@@ -208,7 +200,6 @@ export async function paste(
   context: PastingContext,
 ): Promise<void> {
   const payload = getPayload(clipboardData);
-  if (!payload) return;
 
   const operation = selection.pasteOperation;
   if (operation === 'none') return;
