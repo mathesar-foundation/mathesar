@@ -136,11 +136,7 @@ export class TabularData {
       shareConsumer: this.shareConsumer,
       loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
-    this.display = new Display(
-      this.meta,
-      this.columnsDataStore,
-      this.recordsData,
-    );
+    this.display = new Display(this.recordsData);
 
     this.table = props.table;
 

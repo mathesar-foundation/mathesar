@@ -39,10 +39,8 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    pageTitleAndMetaProps={{
-      name: $_('administration'),
-      icon: iconSettingsMajor,
-    }}
+    name={$_('administration')}
+    icon={iconSettingsMajor}
   />
   <PageLayoutWithSidebar>
     <AdminNavigation slot="sidebar" />

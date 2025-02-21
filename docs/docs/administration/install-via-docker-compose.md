@@ -100,7 +100,7 @@ Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](../../configuration/e
 
 !!! example
     ```yaml
-    DOMAIN_NAME: ${DOMAIN_NAME:-yourdomain.org,yoursubdomain.example.org}
+    DOMAIN_NAME: ${DOMAIN_NAME:-yourdomain.org, yoursubdomain.example.org}
     ```
 
 Restart the docker containers for the configuration to take effect.

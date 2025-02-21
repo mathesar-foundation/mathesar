@@ -14,6 +14,7 @@
     uniqueWith,
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
@@ -56,6 +57,7 @@
   export let table: Table;
   export let dataFile: DataFile;
   export let useColumnTypeInference = false;
+  export let renamedIdColumn: string | undefined;
 
   let columns: Column[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([]);
@@ -122,14 +124,14 @@
   $: table, useColumnTypeInference, void init();
 
   function reload(props: {
-    table?: Pick<Table, 'oid'>;
-    useColumnTypeInference?: boolean;
+    tableOid: Table['oid'];
+    useColumnTypeInference: boolean;
+    renamedIdColumn?: string;
   }) {
-    const tableId = props.table?.oid ?? table.oid;
     router.goto(
-      getImportPreviewPageUrl(schema.database.id, schema.oid, tableId, {
-        useColumnTypeInference:
-          props.useColumnTypeInference ?? useColumnTypeInference,
+      getImportPreviewPageUrl(schema.database.id, schema.oid, props.tableOid, {
+        useColumnTypeInference: props.useColumnTypeInference,
+        renamedIdColumn: props.renamedIdColumn,
       }),
       true,
     );
@@ -142,13 +144,21 @@
       customizedTableName: $customizedTableName,
     });
     if (response.resolvedValue) {
-      reload({ table: response.resolvedValue, useColumnTypeInference });
+      reload({
+        tableOid: response.resolvedValue.table.oid,
+        useColumnTypeInference,
+        renamedIdColumn: response.resolvedValue.renamedColumns.id,
+      });
     }
   }
 
   async function toggleInference() {
     previewRequest.reset();
-    reload({ useColumnTypeInference: !useColumnTypeInference });
+    reload({
+      tableOid: table.oid,
+      useColumnTypeInference: !useColumnTypeInference,
+      renamedIdColumn,
+    });
   }
 
   function updateTypeRelatedOptions(updatedColumn: Column) {
@@ -214,6 +224,18 @@
       {$_('customize_names_types_preview')}
     </InfoBox>
   </FieldLayout>
+  {#if renamedIdColumn}
+    <FieldLayout>
+      <WarningBox>
+        {$_('does_not_support_setting_pk')}
+        {$_('id_column_has_been_renamed', {
+          values: {
+            renamedIdColumn,
+          },
+        })}
+      </WarningBox>
+    </FieldLayout>
+  {/if}
 
   <svelte:fragment slot="preview">
     <h2 class="preview-header">{$_('table_preview')}</h2>

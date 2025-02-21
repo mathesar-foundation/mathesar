@@ -174,6 +174,11 @@ METHODS = [
         "databases.configured.disconnect",
         [user_is_superuser]
     ),
+    (
+        databases.configured.patch,
+        "databases.configured.patch",
+        [user_is_superuser]
+    ),
 
     (
         databases.privileges.list_direct,
@@ -362,6 +367,11 @@ METHODS = [
         servers.configured.list_,
         "servers.configured.list",
         [user_is_authenticated]
+    ),
+    (
+        servers.configured.patch,
+        "servers.configured.patch",
+        [user_is_superuser]
     ),
 
     (

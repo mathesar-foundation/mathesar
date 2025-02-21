@@ -65,11 +65,30 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
-CREATE OR REPLACE FUNCTION msar.jsonb_keys_to_array(obj jsonb) RETURNS text[] AS $$/*
-Similar to jsonb_object_keys but returns text[] instead of setof text.
+CREATE OR REPLACE FUNCTION msar.get_unique_local_identifier(
+  existing_identifiers text[],
+  base_identifier text
+) RETURNS text AS $$/*
+  This function generates a unique identifier based on a given base identifier and list
+  of existing identifiers.
+
+  If the base identifier already exists in the provided array of existing identifiers,
+  it appends a counter to ensure uniqueness, else it returns the base identifier.
 */
-SELECT array_agg(x) FROM jsonb_object_keys(obj) as x;
-$$ LANGUAGE SQL STABLE;
+DECLARE
+  unique_identifier text;
+  counter integer := 0;
+BEGIN
+  unique_identifier := base_identifier;
+
+  WHILE unique_identifier = ANY(existing_identifiers) LOOP
+    counter := counter + 1;
+    unique_identifier := format('%s %s', base_identifier, counter);
+  END LOOP;
+
+  RETURN unique_identifier;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -224,16 +243,6 @@ Wraps the `?` jsonb operator for improved readability.
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
-Return true if the schema exists, false otherwise.
-
-Args :
-  sch_name: The name of the schema, UNQUOTED.
-*/
-SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.get_schema_oid(sch_name text) RETURNS oid AS $$/*
 Return the OID of a schema, or NULL if the schema does not exist.
 
@@ -364,22 +373,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
-Return the OID for a given relation (e.g., table).
-
-The relation *must* be in the pg_class table to use this function.
-
-Args:
-  sch_name: The schema of the relation, unquoted.
-  rel_name: The name of the relation, unqualified and unquoted.
-*/
-BEGIN
-  RETURN __msar.build_qualified_name_sql(sch_name, rel_name)::regclass::oid;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.get_relation_namespace_oid(rel_id oid) RETURNS oid AS $$/*
 Get the OID of the namespace containing the given relation.
 
@@ -428,7 +421,7 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.get_column_names(rel_id oid, columns jsonb) RETURNS text[] AS $$/*
+msar.get_column_names(rel_id oid, columns jsonb) RETURNS text[] AS $$/*
 Return the QUOTED names for given columns in a given relation (e.g., table).
 
 - If the rel_id is given as 0, the assumption is that this is a new table, so we just apply normal
@@ -699,6 +692,55 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_schema_objects_table(sch_ids regnamespace[])
+RETURNS TABLE (obj_id oid, obj_schema text, obj_name text, obj_kind text) AS $$ /*
+Return a table with information about most objects in the given schemas.
+*/
+WITH obj_cte AS (
+  (
+    SELECT
+      oid AS obj_id,
+      msar.get_schema_name(pronamespace) AS obj_schema,
+      proname AS obj_name,
+      CASE prokind
+        WHEN 'a' THEN 'AGGREGATE'
+        WHEN 'p' THEN 'PROCEDURE'
+        ELSE 'FUNCTION'
+      END AS obj_kind
+    FROM pg_proc
+    WHERE pronamespace=ANY(sch_ids)
+  ) UNION (
+    SELECT
+      oid AS obj_id,
+      msar.get_schema_name(typnamespace) AS obj_schema,
+      typname AS obj_name,
+      'TYPE' AS obj_kind
+    FROM pg_type
+    WHERE typnamespace=ANY(sch_ids)
+  ) UNION (
+    SELECT
+      oid AS obj_id,
+      msar.get_schema_name(relnamespace) AS obj_schema,
+      relname AS obj_name,
+      CASE relkind
+        WHEN 'r' THEN 'TABLE'
+        WHEN 'p' THEN 'TABLE'
+        WHEN 'i' THEN 'INDEX'
+        WHEN 'I' THEN 'INDEX'
+        WHEN 'S' THEN 'SEQUENCE'
+        WHEN 'v' THEN 'VIEW'
+        WHEN 'm' THEN 'MATERIALIZED VIEW'
+        WHEN 'c' THEN 'TYPE'
+        WHEN 'f' THEN 'FOREIGN TABLE'
+      END AS obj_kind
+    FROM pg_class
+    WHERE relnamespace=ANY(sch_ids)
+  )
+) SELECT DISTINCT obj_id, obj_schema, obj_name, obj_kind FROM obj_cte WHERE obj_kind IS NOT NULL;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_pk_column(rel_id oid) RETURNS smallint AS $$/*
 Return the first column attnum in the primary key of a given relation (e.g., table).
 
@@ -715,21 +757,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_pk_column(sch_name text, rel_name text) RETURNS smallint AS $$/*
-Return the first column attnum in the primary key of a given relation (e.g., table).
-
-Args:
-  sch_name: The schema of the relation, unquoted.
-  rel_name: The name of the relation, unqualified and unquoted.
-*/
-SELECT CASE WHEN array_length(conkey, 1) = 1 THEN conkey[1] END
-FROM pg_constraint
-WHERE contype='p'
-AND conrelid=msar.get_relation_oid(sch_name, rel_name);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.get_column_type(rel_id oid, col_id smallint) RETURNS text AS $$/*
 Return the type of a given column in a relation.
 
@@ -741,22 +768,6 @@ SELECT atttypid::regtype
 FROM pg_attribute
 WHERE attnum = col_id
 AND attrelid = rel_id;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.get_column_type(sch_name text, rel_name text, col_name text) RETURNS text AS $$/*
-Return the type of a given column in a relation.
-
-Args:
-  sch_name: The schema of the relation, unquoted.
-  rel_name: The name of the relation, unqualified and unquoted.
-  col_name: The name of the column in the relation, unquoted.
-*/
-SELECT atttypid::regtype
-FROM pg_attribute
-WHERE attname = quote_ident(col_name)
-AND attrelid = msar.get_relation_oid(sch_name, rel_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -994,13 +1005,6 @@ FROM pg_attribute pga
   LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
   LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
 WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
-Return true if the given column exists in the table, false otherwise.
-*/
-SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1855,19 +1859,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.patch_schema(sch_name text, patch jsonb) RETURNS void AS $$/*
-Modify a schema according to the given patch.
-
-Args:
-  sch_name: The name of the schema, UNQUOTED
-  patch: A JSONB object as specified by msar.patch_schema(sch_id oid, patch jsonb)
-*/
-BEGIN
-  PERFORM msar.patch_schema(msar.get_schema_oid(sch_name), patch);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- CREATE SCHEMA FUNCTIONS
@@ -1875,21 +1866,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Create a schema.
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION msar.create_schema_if_not_exists(sch_name text) RETURNS oid AS $$/*
-Ensure that a schema exists in the database.
-
-Args:
-  sch_name: the name of the schema to be created, UNQUOTED.
-
-Returns:
-  The integer OID of the schema
-*/
-BEGIN
-  EXECUTE 'CREATE SCHEMA IF NOT EXISTS ' || quote_ident(sch_name);
-  RETURN msar.get_schema_oid(sch_name);
-END;
-$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION msar.create_schema(
@@ -1952,19 +1928,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.drop_database_query(dat_name text) RETURNS text AS $$/*
-Return the SQL query to drop a database.
-
-Args:
-  dat_id: An unqoted name of the database to be dropped.
-*/
-BEGIN
-  RETURN format('DROP DATABASE %I', dat_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- DROP SCHEMA FUNCTIONS
@@ -1975,35 +1938,69 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_schema(sch_name text, cascade_ boolean) RETURNS void AS $$/*
-Drop a schema
+msar.drop_schemas(sch_ids regnamespace[]) RETURNS void AS $$/*
+Safely drop all objects in each schema, then the schemas themselves.
 
-If no schema exists with the given name, an exception will be raised.
+Does not work on the msar schema.
+
+If any passed schema doesn't exist, an exception will be raised. If any object exists in a schema
+which isn't passed, but which depends on an object in a passed schema, an exception will be raised.
 
 Args:
-  sch_name: An unqoted name of the schema to be dropped
-  cascade_: When true, dependent objects will be dropped automatically
+  sch_ids: The OIDs of the schemas to drop.
 */
 DECLARE
-  cascade_sql text = CASE cascade_ WHEN TRUE THEN ' CASCADE' ELSE '' END;
+  obj RECORD;
+  message text;
+  detail text;
+  sch regnamespace;
+  sch_name text;
+  undropped_objects text[];
+  drop_success boolean := false;
+  drop_failed boolean := false;
 BEGIN
-  EXECUTE 'DROP SCHEMA ' || quote_ident(sch_name) || cascade_sql;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_schema(sch_id oid, cascade_ boolean) RETURNS void AS $$/*
-Drop a schema
-
-If no schema exists with the given oid, an exception will be raised.
-
-Args:
-  sch_id: The OID of the schema to drop
-  cascade_: When true, dependent objects will be dropped automatically
-*/
-BEGIN
-  PERFORM msar.drop_schema(msar.get_schema_name(sch_id), cascade_);
+  SET client_min_messages = WARNING;
+  FOR obj IN
+    SELECT obj_id, obj_schema, obj_name, obj_kind
+    FROM msar.get_schema_objects_table(sch_ids)
+    ORDER BY obj_id DESC  -- Objects more often depend on others of lower OID.
+  LOOP
+    BEGIN
+      EXECUTE format('DROP %s IF EXISTS %I.%I', obj.obj_kind, obj.obj_schema, obj.obj_name);
+      drop_success = true;
+    EXCEPTION
+      WHEN dependent_objects_still_exist THEN
+        GET STACKED DIAGNOSTICS
+          message = MESSAGE_TEXT,
+          detail = PG_EXCEPTION_DETAIL;
+        undropped_objects = undropped_objects || message;
+        IF detail <> '' THEN
+           undropped_objects = undropped_objects || concat('    ', detail);
+        END IF;
+      drop_failed =  true;
+    END;
+  END LOOP;
+  SET client_min_messages = NOTICE;
+  IF drop_failed IS false THEN
+    -- We dropped every object that existed in the schemas.
+    RAISE NOTICE E'All objects dropped successfully!\n\nDropping schemas...\n\n';
+    FOREACH sch IN ARRAY sch_ids
+      LOOP
+        sch_name = msar.get_schema_name(sch);
+        RAISE NOTICE 'Dropping Schema %', sch_name;
+        EXECUTE(format('DROP SCHEMA IF EXISTS %I', sch_name));
+      END LOOP;
+  ELSIF drop_success IS false THEN
+    -- We failed to drop anything in the schemas (and failed to drop at least one object).
+    RAISE EXCEPTION USING
+      MESSAGE = 'Nothing was dropped in this call due to dependent objects.',
+      DETAIL = array_to_string(array_remove(undropped_objects, ''), E'\n         '),
+      HINT = 'All changes will be reverted.',
+      ERRCODE = 'dependent_objects_still_exist';
+  ELSE
+    -- We did drop some objects, but failed to drop at least one (due to dependencies). Recurse.
+    PERFORM msar.drop_schemas(sch_ids);
+  END IF;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -2019,91 +2016,49 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Rename table ------------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION
-msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS void AS $$/*
-Change a table's name, returning the command executed.
-
-Args:
-  sch_name: unquoted schema name where the table lives
-  old_tab_name: unquoted, unqualified original table name
-  new_tab_name: unquoted, unqualified new table name
-*/
-BEGIN
-  IF old_tab_name = new_tab_name THEN
-    -- Return early if the names are the same. This avoids an error from Postgres.
-    RETURN;
-  END IF;
-  EXECUTE format('ALTER TABLE %I.%I RENAME TO %I', sch_name, old_tab_name, new_tab_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 
 CREATE OR REPLACE FUNCTION
 msar.rename_table(tab_id oid, new_tab_name text) RETURNS void AS $$/*
-Change a table's name, returning the command executed.
+Change a table's name.
 
 Args:
   tab_id: the OID of the table whose name we want to change
   new_tab_name: unquoted, unqualified table name
 */
+DECLARE
+  old_tab_name text := msar.get_relation_name(tab_id);
 BEGIN
-  PERFORM msar.rename_table(
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id),
-    new_tab_name
-  );
+  IF old_tab_name <> new_tab_name THEN
+    EXECUTE format(
+      'ALTER TABLE %I.%I RENAME TO %I',
+      msar.get_relation_schema_name(tab_id),
+      old_tab_name,
+      new_tab_name
+    );
+  END IF;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 
 
 -- Comment on table --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_table(tab_name text, comment_ text) RETURNS text AS $$/*
-Change the description of a table, returning command executed.
-
-Args:
-  tab_name: The qualified, quoted name of the table whose comment we will change.
-  comment_: The new comment. Any quotes or special characters must be escaped.
-*/
-DECLARE
-  comment_or_null text := COALESCE(comment_, 'NULL');
-BEGIN
-RETURN __msar.exec_ddl('COMMENT ON TABLE %s IS %s', tab_name, comment_or_null);
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION
-msar.comment_on_table(tab_id oid, comment_ text) RETURNS text AS $$/*
-Change the description of a table, returning command executed.
+msar.comment_on_table(tab_id oid, comment_ text) RETURNS VOID AS $$/*
+Change the description of a table.
 
 Args:
   tab_id: The OID of the table whose comment we will change.
   comment_: The new comment.
 */
-SELECT __msar.comment_on_table(
-  __msar.get_qualified_relation_name_or_null(tab_id),
-  quote_literal(comment_)
-);
-$$ LANGUAGE SQL;
-
-
-CREATE OR REPLACE FUNCTION
-msar.comment_on_table(sch_name text, tab_name text, comment_ text) RETURNS text AS $$/*
-Change the description of a table, returning command executed.
-
-Args:
-  sch_name: The schema of the table whose comment we will change.
-  tab_name: The name of the table whose comment we will change.
-  comment_: The new comment.
-*/
-SELECT __msar.comment_on_table(
-  __msar.build_qualified_name_sql(sch_name, tab_name),
-  quote_literal(comment_)
-);
-$$ LANGUAGE SQL;
+BEGIN
+  EXECUTE format(
+    'COMMENT ON TABLE %I.%I IS %L',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    comment_
+  );
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- Alter table -------------------------------------------------------------------------------------
@@ -2145,86 +2100,11 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
--- Update table primary key sequence to latest -----------------------------------------------------
-
-CREATE OR REPLACE FUNCTION
-__msar.update_pk_sequence_to_latest(tab_name text, col_name text) RETURNS text AS $$/*
-Update the primary key sequence to the maximum of the primary key column, plus one.
-
-Args:
-  tab_name: Fully-qualified, quoted table name
-  col_name: The column name of the primary key.
-*/
-BEGIN
-  RETURN __msar.exec_ddl(
-    'SELECT '
-      || 'setval('
-      || 'pg_get_serial_sequence(''%1$s'', ''%2$s''), coalesce(max(%2$s) + 1, 1), false'
-      || ') '
-      || 'FROM %1$s',
-    tab_name, col_name
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.update_pk_sequence_to_latest(tab_id oid, col_id integer) RETURNS text AS $$/*
-Update the primary key sequence to the maximum of the primary key column, plus one.
-
-Args:
-  tab_id: The OID of the table whose primary key sequence we'll update.
-  col_id: The attnum of the primary key column.
-*/
-DECLARE tab_name text;
-DECLARE col_name text;
-BEGIN
-  tab_name :=  __msar.get_qualified_relation_name(tab_id);
-  col_name := quote_ident(msar.get_column_name(tab_id, col_id));
-  RETURN __msar.update_pk_sequence_to_latest(tab_name, col_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.update_pk_sequence_to_latest(sch_name text, tab_name text, col_name text) RETURNS text AS $$/*
-Update the primary key sequence to the maximum of the primary key column, plus one.
-
-Args:
-  sch_name: The schema where the table whose primary key sequence we'll update lives.
-  tab_name: The table whose primary key sequence we'll update.
-  col_name: The name of the primary key column.
-*/
-DECLARE qualified_tab_name text;
-BEGIN
-  qualified_tab_name := __msar.build_qualified_name_sql(sch_name, tab_name);
-  RETURN __msar.update_pk_sequence_to_latest(qualified_tab_name, quote_ident(col_name));
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 
 -- Drop columns from table -------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.drop_columns(tab_name text, col_names variadic text[]) RETURNS text AS $$/*
-Drop the given columns from the given table.
-
-Args:
-  tab_name: Fully-qualified, quoted table name.
-  col_names: The column names to be dropped, quoted.
-*/
-DECLARE column_drops text;
-BEGIN
-  SELECT string_agg(format('DROP COLUMN %s', col), ', ')
-  FROM unnest(col_names) AS col
-  INTO column_drops;
-  RETURN __msar.exec_ddl('ALTER TABLE %s %s', tab_name, column_drops);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_columns(tab_id oid, col_ids variadic integer[]) RETURNS text AS $$/*
+msar.drop_columns(tab_id oid, col_ids variadic integer[]) RETURNS void AS $$/*
 Drop the given columns from the given table.
 
 Args:
@@ -2233,34 +2113,14 @@ Args:
 */
 DECLARE col_names text[];
 BEGIN
-  SELECT array_agg(quote_ident(attname))
-  FROM pg_catalog.pg_attribute
-  WHERE attrelid=tab_id AND NOT attisdropped AND ARRAY[attnum::integer] <@ col_ids
-  INTO col_names;
-  PERFORM __msar.drop_columns(
-    __msar.get_qualified_relation_name_or_null(tab_id),
-    variadic col_names
-  );
-  RETURN array_length(col_names, 1);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_columns(sch_name text, tab_name text, col_names variadic text[]) RETURNS text AS $$/*
-Drop the given columns from the given table.
-
-Args:
-  sch_name: The schema where the table whose columns we'll drop lives, unquoted.
-  tab_name: The table whose columns we'll drop, unquoted and unqualified.
-  col_names: The columns to drop, unquoted.
-*/
-DECLARE prepared_col_names text[];
-DECLARE fully_qualified_tab_name text;
-BEGIN
-  SELECT array_agg(quote_ident(col)) FROM unnest(col_names) AS col INTO prepared_col_names;
-  fully_qualified_tab_name := __msar.build_qualified_name_sql(sch_name, tab_name);
-  RETURN __msar.drop_columns(fully_qualified_tab_name, variadic prepared_col_names);
+  EXECUTE format(
+    'ALTER TABLE %I.%I %s',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    string_agg(format('DROP COLUMN %I', attname), ', ')
+  )
+  FROM pg_catalog.pg_attribute AS pga INNER JOIN unnest(col_ids) AS x(col) ON pga.attnum=x.col
+  WHERE attrelid=tab_id AND NOT attisdropped;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -2682,7 +2542,7 @@ WITH attnum_cte AS (
     quote_literal(col_def_obj ->> 'description')
   )::__msar.col_def AS col_defs
   FROM attnum_cte, jsonb_array_elements(col_defs) AS col_def_obj
-  WHERE col_def_obj ->> 'name' IS NULL OR col_def_obj ->> 'name' <> 'id'
+  WHERE (col_def_obj ->> 'name' IS NULL OR NOT create_id OR col_def_obj ->> 'name' <> 'id')
 )
 SELECT array_cat(
   CASE
@@ -2749,21 +2609,6 @@ BEGIN
     ON quote_ident(L.attname) = R.name_;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.add_columns(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
-  RETURNS smallint[] AS $$/*
-Add columns to a table.
-
-Args:
-  sch_name: unquoted schema name of the table to which we'll add columns.
-  tab_name: unquoted, unqualified name of the table to which we'll add columns.
-  col_defs: a JSONB array defining columns to add. See __msar.process_col_def_jsonb for details.
-  raw_default: Whether to treat defaults as raw SQL. DANGER!
-*/
-SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -2885,9 +2730,7 @@ The con_create_arr should have the form:
     "columns": [<int:str>, <int:str>, ...],
     "deferrable": <bool> (optional),
     "fkey_relation_id": <int> (optional),
-    "fkey_relation_schema": <str> (optional),
-    "fkey_relation_name": <str> (optional),
-    "fkey_columns": [<int:str>, <int:str>, ...] (optional),
+    "fkey_columns": [<int>, <int>, ...] (optional),
     "fkey_update_action": <str> (optional),
     "fkey_delete_action": <str> (optional),
     "fkey_match_type": <str> (optional),
@@ -2896,8 +2739,7 @@ The con_create_arr should have the form:
     ...
   }
 ]
-If the constraint type is "f", then we require
-- fkey_relation_id or (fkey_relation_schema and fkey_relation_name).
+If the constraint type is "f", then we require fkey_relation_id.
 
 Numeric IDs are preferred over textual ones where both are accepted.
 */
@@ -2908,26 +2750,14 @@ SELECT array_agg(
     -- set the constraint type as a single char. See __msar.build_con_def_text for details.
     con_create_obj ->> 'type',
     -- Set the column names associated with the constraint.
-    __msar.get_column_names(tab_id, con_create_obj -> 'columns'),
+    msar.get_column_names(tab_id, con_create_obj -> 'columns'),
     -- Set whether the constraint is deferrable or not (boolean).
     con_create_obj ->> 'deferrable',
-    -- Build the relation name where the constraint will be applied. Prefer numeric ID.
-    COALESCE(
-      __msar.get_qualified_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
-      __msar.build_qualified_name_sql(
-        con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
-      )
-    ),
+    __msar.get_qualified_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
     -- Build the array of foreign columns for an fkey constraint.
-    __msar.get_column_names(
-      COALESCE(
-        -- We validate that the given OID (if any) is correct.
-        (con_create_obj -> 'fkey_relation_id')::integer::oid,
-        -- If given a schema, name pair, we get the OID from that (and validate it).
-        msar.get_relation_oid(
-          con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
-        )
-      ),
+    msar.get_column_names(
+      -- We validate that the given OID (if any) is correct.
+      (con_create_obj -> 'fkey_relation_id')::bigint::oid,
       con_create_obj -> 'fkey_columns'
     ),
     -- The below are passed directly. They define some parameters for FOREIGN KEY constraints.
@@ -2976,20 +2806,6 @@ BEGIN
   RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.add_constraints(sch_name text, tab_name text, con_defs jsonb)
-  RETURNS oid[] AS $$/*
-Add constraints to a table.
-
-Args:
-  sch_name: unquoted schema name of the table to which we'll add constraints.
-  tab_name: unquoted, unqualified name of the table to which we'll add constraints.
-  con_defs: a JSONB array defining constraints to add. See __msar.process_con_def_jsonb for details.
-*/
-SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE TYPE __msar.not_null_def AS (
@@ -3282,10 +3098,9 @@ Args:
 
 Note:
   - If tab_name is NULL, the table will be created with a name in the format 'Table <n>'.
-  - If col_defs is NULL, the table will still be created with a default 'id' column. Also,
-    if an 'id' column is given in the input, it will be replaced with our default 'id' column. This is
-    the behavior of the current python functions, so we're keeping it for now. In any case, the created
-    table will always have our default 'id' column as its first column.
+  - If col_defs is NULL, the table will still be created with a default 'id' column.
+  - If an 'id' column is provided, it will be renamed to an auto-generated name.
+  - There would always be an 'id' column which would be created by Mathesar.
   - If own_id is NULL, the current role will be the owner of the new table.
 */
 DECLARE
@@ -3297,6 +3112,9 @@ DECLARE
   created_table_id oid;
   column_defs __msar.col_def[];
   constraint_defs __msar.con_def[];
+  id_col_name text;
+  existing_col_names text[];
+  renamed_columns jsonb := '{}'::jsonb;
 BEGIN
   schema_name := msar.get_schema_name(sch_id);
   IF NULLIF(tab_name, '') IS NOT NULL AND NOT EXISTS(
@@ -3325,6 +3143,21 @@ BEGIN
     END LOOP;
     fq_table_name := format('%I.%I', schema_name, uq_table_name);
   END IF;
+
+  IF jsonb_path_exists(col_defs, '$[*] ? (@.name == "id")') THEN
+    -- rename 'id' 
+    SELECT array_agg(col_def->>'name') INTO existing_col_names FROM jsonb_array_elements(col_defs) col_def;
+    id_col_name := msar.get_unique_local_identifier(existing_col_names, 'id');
+
+    col_defs := (
+      SELECT jsonb_agg(
+        CASE WHEN col_def->>'name' = 'id' THEN jsonb_set(col_def, '{name}', to_jsonb(id_col_name))
+          ELSE col_def END
+    ) FROM jsonb_array_elements(col_defs) col_def);
+
+    renamed_columns := jsonb_build_object('id', id_col_name);
+  END IF;
+
   column_defs := __msar.process_col_def_jsonb(0, col_defs, false, true);
   constraint_defs := __msar.process_con_def_jsonb(0, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
@@ -3333,9 +3166,11 @@ BEGIN
   IF own_id IS NOT NULL THEN
     PERFORM msar.transfer_table_ownership(created_table_id, own_id);
   END IF;
+
   RETURN jsonb_build_object(
     'oid', created_table_id::bigint,
-    'name', relname
+    'name', relname,
+    'renamed_columns', renamed_columns::jsonb
   ) FROM pg_catalog.pg_class WHERE oid = created_table_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -3377,13 +3212,15 @@ Args:
 DECLARE
   sch_name text;
   rel_name text;
+  mathesar_table json;
   rel_id oid;
   col_names_sql text;
   options_sql text;
   copy_sql text;
 BEGIN
   -- Create string table
-  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, NULL, comment_) ->> 'oid';
+  mathesar_table := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, NULL, comment_);
+  rel_id := mathesar_table ->> 'oid';
   -- Get unquoted schema and table name for the created table
   SELECT nspname, relname INTO sch_name, rel_name
   FROM pg_catalog.pg_class AS pgc
@@ -3408,7 +3245,8 @@ BEGIN
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
     'table_oid', rel_id::bigint,
-    'table_name', relname
+    'table_name', relname,
+    'renamed_columns', (mathesar_table ->> 'renamed_columns')::jsonb
   ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -5717,14 +5555,10 @@ The `rec_def` object's form is defined by the record being updated.  It should h
 corresponding to the attnums of desired columns and values corresponding to values we should set.
 */
 DECLARE
-  rec_modified_id integer;
   rec_modified jsonb;
 BEGIN
   EXECUTE format(
-    $p$
-    WITH update_cte AS (%1$s %2$s RETURNING %3$I)
-    SELECT * FROM update_cte
-    $p$,
+    $p$ %1$s %2$s $p$,
     msar.build_update_expr(tab_id, rec_def),
     msar.build_where_clause(
       tab_id, jsonb_build_object(
@@ -5733,12 +5567,11 @@ BEGIN
           jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
         )
       )
-    ),
-    msar.get_column_name(tab_id, msar.get_pk_column(tab_id))
-  ) INTO rec_modified_id;
+    )
+  );
   rec_modified := msar.get_record_from_table(
     tab_id,
-    rec_modified_id,
+    rec_id,
     return_record_summaries,
     table_record_summary_templates
   );

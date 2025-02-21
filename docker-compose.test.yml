@@ -18,6 +18,7 @@ services:
       - POSTGRES_DB=my_data
       - POSTGRES_USER=data_admin
       - POSTGRES_PASSWORD=data1234
+      - POSTGRES_INITDB_ARGS=${POSTGRES_INITDB_ARGS-""}
   api-test-service:
     container_name: mathesar-api-test-service
     build:
@@ -34,6 +35,8 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=mathesar-test-db
       - POSTGRES_PORT=5432
+      - DEBUG=true
+      - SKIP_STATIC_COLLECTION=true
     volumes:
       - .:/code/
     depends_on:

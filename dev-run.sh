@@ -12,6 +12,6 @@ if [ -n "$NODE_MAJOR" ]; then
     cd ..
 fi
 
-python -m mathesar.install --skip-confirm
+python -m mathesar.install
 python manage.py createsuperuser --no-input --username admin --email admin@example.com
 python manage.py runserver 0.0.0.0:8000 && fg

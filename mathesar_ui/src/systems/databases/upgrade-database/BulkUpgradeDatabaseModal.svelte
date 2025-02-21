@@ -42,7 +42,9 @@
   <ul>
     {#each errors as error}
       <li>
-        <p><b>{error.database.name}</b></p>
+        <p>
+          <b>{error.database.displayName}</b>
+        </p>
         <ErrorBox>
           {error.message}
         </ErrorBox>

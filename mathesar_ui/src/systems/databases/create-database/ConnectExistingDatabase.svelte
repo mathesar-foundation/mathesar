@@ -7,6 +7,7 @@
     FieldLayout,
     FormSubmit,
     makeForm,
+    optionalField,
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
@@ -19,6 +20,8 @@
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
+  import DatabaseNicknameInput from '../common/DatabaseNicknameInput.svelte';
+
   import {
     type InstallationSchema,
     getSampleSchemasFromInstallationSchemas,
@@ -29,13 +32,15 @@
   export let onSuccess: (db: Database) => void;
 
   const databaseName = requiredField('');
+  const nickname = optionalField<string | undefined>(undefined);
   const host = requiredField('localhost');
   const port = requiredField(5432);
   const role = requiredField('');
-  const password = requiredField('');
+  const password = optionalField('');
   const installationSchemas = requiredField<InstallationSchema[]>(['internal']);
   const form = makeForm({
     databaseName,
+    nickname,
     host,
     port,
     role,
@@ -50,6 +55,7 @@
       role: $role,
       password: $password,
       database: $databaseName,
+      nickname: $nickname ?? null,
       sample_data:
         getSampleSchemasFromInstallationSchemas($installationSchemas),
     });
@@ -108,17 +114,21 @@
     }}
   >
     <svelte:fragment slot="help">
+      {$_('password_help')}
       <RichText
         text={$_('connect_db_password_help')}
         let:slotName
         let:translatedArg
       >
         {#if slotName === 'docsLink'}
-          <DocsLink page="storedRolePasswords">{translatedArg}</DocsLink>
+          <DocsLink page="storedRoles">{translatedArg}</DocsLink>
         {/if}
       </RichText>
     </svelte:fragment>
   </Field>
+
+  <Field field={nickname} input={{ component: DatabaseNicknameInput }} />
+
   <FieldLayout>
     <InstallationSchemaSelector {installationSchemas} />
   </FieldLayout>

@@ -22,7 +22,7 @@ interface ParseState {
 function parseSlot(text: string): ParseState | undefined {
   let token: Token | undefined;
   const remainder = text.replace(
-    /^\[(\w+)\]\((\w+)\)|^\[(\w+)\]/,
+    /^\[(\w+)\]\(([^)]+)\)|^\[(\w+)\]/,
     (
       _,
       nameOfSlotWithArg: string | undefined,

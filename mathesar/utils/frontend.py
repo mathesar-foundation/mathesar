@@ -15,7 +15,7 @@ def get_manifest_data():
 
     manifest_data = {}
 
-    with open(settings.MATHESAR_MANIFEST_LOCATION, 'r') as manifest_file:
+    with open(settings.MATHESAR_MANIFEST_LOCATION, 'rb') as manifest_file:
         raw_data = json.loads(manifest_file.read())
 
     module_data = raw_data['src/main.ts']

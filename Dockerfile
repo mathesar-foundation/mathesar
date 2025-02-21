@@ -98,7 +98,7 @@ ENTRYPOINT ["./dev-run.sh"]
 
 #=========== STAGE: PRODUCTION ===============================================#
 
-from base as production
+FROM base AS production
 
 # Install prod requirements
 RUN pip install --no-cache-dir -r requirements.txt

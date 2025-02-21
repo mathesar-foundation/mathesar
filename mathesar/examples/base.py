@@ -13,7 +13,7 @@ def load_dataset_sql(conn, schema_name, file_name):
     file_path = os.path.join(RESOURCES, file_name)
     create_schema_query = sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(schema_name))
     set_search_path = sql.SQL("SET search_path={}").format(sql.Identifier(schema_name))
-    with open(file_path) as f:
+    with open(file_path, 'rb') as f:
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
         conn.execute(f.read())

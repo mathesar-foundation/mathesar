@@ -1,9 +1,9 @@
 <script lang="ts">
   import { SheetVirtualRows } from '@mathesar/components/sheet';
   import {
-    groupHeaderRowHeightPx,
-    helpTextRowHeightPx,
-    rowHeightPx,
+    GROUP_HEADER_ROW_HEIGHT_PX,
+    HELP_TEXT_ROW_HEIGHT_PX,
+    ROW_HEIGHT_PX,
   } from '@mathesar/geometry';
   import {
     type Row as RowType,
@@ -30,12 +30,12 @@
 
   function getItemSizeFromRow(row: RowType) {
     if (isHelpTextRow(row)) {
-      return helpTextRowHeightPx;
+      return HELP_TEXT_ROW_HEIGHT_PX;
     }
     if (isGroupHeaderRow(row)) {
-      return groupHeaderRowHeightPx;
+      return GROUP_HEADER_ROW_HEIGHT_PX;
     }
-    return rowHeightPx;
+    return ROW_HEIGHT_PX;
   }
 
   function getIterationKey(index: number, row: RowType | undefined): string {
@@ -48,7 +48,7 @@
   function getItemSizeFromIndex(index: number) {
     const allRecords = $displayableRecords;
     const record = allRecords?.[index];
-    return record ? getItemSizeFromRow(record) : rowHeightPx;
+    return record ? getItemSizeFromRow(record) : ROW_HEIGHT_PX;
   }
 </script>
 

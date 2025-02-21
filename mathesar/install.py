@@ -7,13 +7,12 @@ import django
 from django.core import management
 
 
-def main(skip_static_collection=False):
+def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
     django.setup()
     management.call_command('migrate')
-    debug_mode = bool(os.environ.get('DEBUG', default=False))
-    #
-    if not debug_mode and not skip_static_collection:
+    skip_static_collection = os.environ.get('SKIP_STATIC_COLLECTION') in ['t', 'true', 'True']
+    if not skip_static_collection:
         management.call_command('collectstatic', '--noinput', '--clear')
 
 

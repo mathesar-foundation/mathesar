@@ -16,6 +16,7 @@ import {
   faClock,
   faClone,
   faCogs,
+  faCommentAlt,
   faComments,
   faCopy,
   faDatabase,
@@ -42,6 +43,7 @@ import {
   faListUl,
   faLock,
   faMicroscope,
+  faNewspaper,
   faPalette,
   faPaperPlane,
   faPaste,
@@ -178,10 +180,12 @@ export const iconDocumentation: IconProps = { data: faBook };
 export const iconDonation: IconProps = { data: faHeart };
 export const iconExploration: IconProps = { data: explorationIcon };
 export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
+export const iconFeedback: IconProps = { data: faCommentAlt };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
+export const iconMailingList: IconProps = { data: faNewspaper };
 export const iconMessage: IconProps = { data: faEnvelope };
 export const iconMultipleRecords: IconProps = { data: faCopy };
 export const iconOutcome: IconProps = { data: outcomeIcon };

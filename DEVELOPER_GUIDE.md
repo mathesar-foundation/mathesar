@@ -105,6 +105,12 @@ We use [pytest](https://docs.pytest.org) for our backend tests.
     docker exec mathesar_dev_db /bin/bash sql/run_tests.sh
     ```
 
+### Running scenario tests
+
+```
+./run_api_tests.sh
+```
+
 ## Front end development
 
 - All the front end code is in the `mathesar_ui` directory.

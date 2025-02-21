@@ -11,5 +11,5 @@ def load_library_makerspace_dataset(conn):
     # This function has to let the underlying script handle the schema to
     # make sure the trigger defined by that script works.
     file_path = os.path.join(RESOURCES, LIBRARY_MAKERSPACE_SQL)
-    with open(file_path) as f:
+    with open(file_path, 'rb') as f:
         conn.execute(f.read())

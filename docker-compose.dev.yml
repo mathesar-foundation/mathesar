@@ -9,9 +9,9 @@ services:
       context: .
       dockerfile: Dockerfile.devdb
       args:
-        PG_VERSION: ${PG_VERSION-13}
+        PG_VERSION: ${PG_VERSION-17}
     environment:
-      - PG_VERSION=${PG_VERSION-13}
+      - PG_VERSION=${PG_VERSION-17}
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
@@ -44,6 +44,7 @@ services:
         PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     environment:
       - MODE=${MODE-DEVELOPMENT}
+      - SKIP_STATIC_COLLECTION=true
       - DEBUG=${DEBUG-True}
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}

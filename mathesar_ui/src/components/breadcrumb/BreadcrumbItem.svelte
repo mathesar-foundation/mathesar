@@ -1,6 +1,6 @@
 <script lang="ts">
   import { StringOrComponent } from '@mathesar/component-library';
-  import DatabaseName from '@mathesar/components/DatabaseName.svelte';
+  import DatabaseDisplayNameWithIcon from '@mathesar/components/DatabaseDisplayNameWithIcon.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -26,7 +26,7 @@
 {#if item.type === 'database'}
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={getDatabasePageUrl(item.database.id)}>
-      <DatabaseName database={item.database} />
+      <DatabaseDisplayNameWithIcon database={item.database} />
     </BreadcrumbLink>
   </div>
   <SchemaSelector database={item.database} />

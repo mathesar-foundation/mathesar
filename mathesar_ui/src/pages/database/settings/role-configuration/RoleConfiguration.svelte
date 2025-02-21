@@ -74,7 +74,7 @@
     {$_('stored_role_passwords')}
     <Help>
       {$_('stored_role_passwords_help')}
-      <SeeDocsToLearnMore page="storedRolePasswords" />
+      <SeeDocsToLearnMore page="storedRoles" />
     </Help>
   </svelte:fragment>
   {#if isLoading}

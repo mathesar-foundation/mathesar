@@ -21,6 +21,7 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import Feedback from '@mathesar/systems/feedback/Feedback.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     DropdownMenu,
@@ -31,24 +32,46 @@
   } from '@mathesar-component-library';
 
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
+  import { getBreadcrumbItemsFromContext } from './breadcrumb/breadcrumbUtils';
 
   const commonData = preloadCommonData();
   const userProfile = getUserProfileStoreFromContext();
   const releaseDataStore = getReleaseDataStoreFromContext();
+  const breadcrumbItems = getBreadcrumbItemsFromContext();
   const { currentDatabase } = databasesStore;
+
+  function getCompactLayoutThreshold(breadcrumbItemCount: number): number {
+    switch (breadcrumbItemCount) {
+      case 0:
+        return 350;
+      case 1:
+        return 500;
+      case 2:
+        return 700;
+      case 3:
+        return 800;
+      default:
+        return 900;
+    }
+  }
+
+  let width = 0;
 
   $: database = $currentDatabase;
   $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
   $: isNormalRoutingContext = commonData.routing_context === 'normal';
+  $: compactLayout = width < getCompactLayoutThreshold($breadcrumbItems.length);
 </script>
 
-<header class="app-header">
+<header class="app-header" bind:clientWidth={width}>
   <div class="left">
-    <Breadcrumb />
+    <Breadcrumb items={$breadcrumbItems} {compactLayout} />
   </div>
 
   {#if isNormalRoutingContext}
     <div class="right">
+      <Feedback {compactLayout} />
+
       {#if $userProfile}
         <DropdownMenu
           triggerAppearance="ghost"
@@ -65,7 +88,7 @@
               icon={iconDatabase}
               href={getDatabasePageUrl(database.id)}
             >
-              {database.name}
+              {database.displayName}
             </LinkMenuItem>
             <MenuDivider />
           {/if}
@@ -145,6 +168,7 @@
     display: flex;
     align-items: center;
     font-size: var(--text-size-large);
+    gap: var(--size-x-small);
   }
 
   .user-switcher {

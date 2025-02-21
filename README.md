@@ -1,7 +1,7 @@
 <p align="center">
     <img src="https://user-images.githubusercontent.com/845767/218793207-a84a8c9e-d147-40a8-839b-f2b5d8b1ccba.png" width=450px alt="Mathesar logo"/>
 </p>
-<p align="center"><b>An intuitive UI for managing data, for users of all technical skill levels. Built on Postgres.</b></p>
+<p align="center"><b>Intuitive spreadsheet-like interface that lets users of all technical skill levels view, edit, query, and collaborate on Postgres data directly—self hosted, with native Postgres access control.</b></p>
 <p align="center">
     <img alt="License" src="https://img.shields.io/github/license/mathesar-foundation/mathesar">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/mathesar-foundation/mathesar">
@@ -9,102 +9,114 @@
 </p>
 
 <p align="center">
-  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://demo.mathesar.org?ref=github-readme" target="_blank">Live Demo</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme-top" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Contributor Wiki</a>
 </p>
 
 
 # Mathesar
+Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface—no code needed. It’s self hosted, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions. The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.
 
-Mathesar is a straightforward open source tool that provides a **spreadsheet-like interface** to a PostgreSQL **database**. Our web-based interface helps you and your collaborators work with data more independently and comfortably – **no technical skills needed**.
-
-You can use Mathesar to build **data models**, **enter data**, and even **build reports**. You host your own Mathesar installation, which gives you ownership, privacy, and control of your data.
+Mathesar is as scalable as Postgres and supports any size or complexity of data, making it ideal for workflows involving production databases. It requires minimal setup, and integrates into your existing infrastructure. Because Mathesar is self-hosted, your data never leaves your servers, and access control based on Postgres roles and privileges keeps your database secure without adding unnecessary risk.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Sponsors](#sponsors)
 - [Status](#status)
-- [Join our community!](#join-our-community)
-- [Screenshots](#screenshots)
-- [Live Demo](#live-demo)
+- [Install Mathesar](#install-mathesar)
+- [Join our community](#join-our-community)
+  - [Contribute to Mathesar](#contribute-to-mathesar)
 - [Features](#features)
-- [Self-hosting](#self-hosting)
+- [Screeenshots](#screeenshots)
+  - [Connecting a database](#connecting-a-database)
+  - [Adding collaborators](#adding-collaborators)
+  - [Viewing a Postgres schema](#viewing-a-postgres-schema)
+  - [Working with tables](#working-with-tables)
+  - [Finding a nested record](#finding-a-nested-record)
+  - [Linking two tables together](#linking-two-tables-together)
+  - [Managing table permissions](#managing-table-permissions)
+  - [Viewing a single record with related records](#viewing-a-single-record-with-related-records)
+  - [Viewing an Exploration (query result)](#viewing-an-exploration-query-result)
+  - [Building an Exploration (query)](#building-an-exploration-query)
+  - [Disconnecting a database](#disconnecting-a-database)
+- [Mathesar in action](#mathesar-in-action)
 - [Our motivation](#our-motivation)
-- [Contributing](#contributing)
 - [Bugs and troubleshooting](#bugs-and-troubleshooting)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Sponsors
-Our top sponsors! Become a sponsor on [GitHub](https://github.com/sponsors/mathesar-foundation) or [Open Collective](https://opencollective.com/mathesar).
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%">
-          <a href="https://www.thingylabs.io/">
-              <img src="https://user-images.githubusercontent.com/287034/226116547-cd28e16a-4c89-4a01-bc98-5a19b02ab1b2.png" width="100px;" alt="Thingylabs GmbH"/>
-              <br />
-              <sub><b>Thingylabs GmbH</b></sub>
-          </a>
-          <br />
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 ## Status
 - [x] **Public Alpha**: You can install and deploy Mathesar on your server. Go easy on us!
-- [ ] **Public Beta**: Stable and feature-rich enough to implement in production
-- [ ] **Public**: Production-ready
+- [x] **Public Beta**: Stable and feature-rich enough to implement in production
+- [ ] **Public**: Widely used in production environments
 
-We are currently in the **public alpha** stage.
+We are currently in the **public beta** stage.
 
-## Join our community!
-The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list. 
+## Install Mathesar
+Please see [our documentation](https://docs.mathesar.org/?ref=github-readme-installing) for instructions on installing Mathesar on your own server.
 
-## Screenshots
+## Join our community
+The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list.
 
-![crm-table](https://user-images.githubusercontent.com/287034/220773466-1790a826-923e-47a8-8f7e-1edb67970a16.png)
-
-![authors-filter](https://user-images.githubusercontent.com/287034/220773378-78e05984-5f0f-4ed2-9682-b75ca0f6867c.png)
-
-![talks-with-topics](https://user-images.githubusercontent.com/287034/220773633-0a4ff810-a1e1-476f-b5b0-2667ba97f07a.png)
-
-![author-record](https://user-images.githubusercontent.com/287034/220773738-a3fd0dda-cf16-45ed-a8ef-4e40647bb074.png)
-
-![arxiv-schema](https://user-images.githubusercontent.com/287034/220773323-bd6ffb31-835b-4df5-981e-dae6341d42bb.png)
-
-![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)  
-
-## Live Demo
-Check out a [live demo of Mathesar here](https://demo.mathesar.org)!
+### Contribute to Mathesar
+We actively encourage contribution! Get started by reading our [Contributor Guide](./CONTRIBUTING.md).
 
 ## Features
 - **Built on Postgres**: Connect to an existing Postgres database or set one up from scratch.
+- **Install in minutes**: Install using Docker in minutes, integrate into any existing infrastructure.
+- **Postgres-based access control**: Use existing Postgres roles within Mathesar's UI, or set up your own.
+- **Interoperable with other tools**: Mathesar works harmoniously alongside your database and thousands of other tools in the Postgres ecosystem.
 - **Set up your data models**: Easily create and update Postgres schemas and tables.
 - **Data entry**: Use our spreadsheet-like interface to view, create, update, and delete table records.
 - **Filter, sort, and group**: Quickly slice your data in different ways.
 - **Query builder**: Use our Data Explorer to build queries without knowing anything about SQL or joins.
+- **Import and export data**: Import and export data into Mathesar easily to work with your data elsewhere.
 - **Schema migrations**: Transfer columns between tables in two clicks.
-- **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Links" in the UI are foreign keys in the database.
-- **Custom data types**: Custom data types for emails and URLs (more coming soon), validated at the database level.
-- **Basic access control**: Users can have Viewer (read-only), Editor (can only edit data, but not data structure), or Manager (can edit both data and its structure) roles.
+- **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Relationships" in the UI are foreign keys in the database.
+- **Custom data types**: Custom data types for emails and URLs, validated at the database level.
 
-## Self-hosting
-Please see [our documentation](https://docs.mathesar.org/) for instructions on installing Mathesar on your own server.
+## Screeenshots
+### Connecting a database
+![connect-db](https://github.com/user-attachments/assets/c115ad21-e501-4992-bf84-54758a321f41)
+
+### Adding collaborators
+![add-collaborator](https://github.com/user-attachments/assets/90c65f3f-3edb-4bf3-b00c-586019c78765)
+
+### Viewing a Postgres schema
+![schema-page](https://github.com/user-attachments/assets/305d0d79-fba8-4044-954d-bc511c935321)
+
+### Working with tables
+![table-inspector](https://github.com/user-attachments/assets/bb3bbcd7-ef12-4304-9d5c-8220b188d2f5)
+
+### Finding a nested record
+![record-selector](https://github.com/user-attachments/assets/b3d12cb4-e90b-458b-8e19-8371c1332557)
+
+### Linking two tables together
+![relationship-creation](https://github.com/user-attachments/assets/faf8e82c-d165-495a-a9eb-bf76ec9a9283)
+
+### Managing table permissions
+![table-permissions](https://github.com/user-attachments/assets/094d3c98-8c4c-4cfa-aad5-6fd3faa30473)
+
+### Viewing a single record with related records
+![record-page](https://github.com/user-attachments/assets/00774552-2acb-4a01-87d6-1813f579e757)
+
+### Viewing an Exploration (query result)
+![viewing-exploration](https://github.com/user-attachments/assets/0df680d3-621d-466a-9915-d560001a3931)
+
+### Building an Exploration (query)
+![building-exploration](https://github.com/user-attachments/assets/7ff100fe-cd26-4229-af3b-a5a5bb70b0b7)
+
+### Disconnecting a database
+![disconnect-db](https://github.com/user-attachments/assets/48905983-a632-4632-b2c1-b0f25c3b6e75)
+
+## Mathesar in action
+https://github.com/user-attachments/assets/6bdfb178-17b4-4abf-aac4-9781e1d841ab
 
 ## Our motivation
-Mathesar is a non-profit project. Our goal is to make understanding and working with data easy for everyone.
+Using databases shouldn't require technical expertise or expensive, closed-off tools. Databases are incredibly powerful, but they're often trapped behind complex interfaces that are hard to use or limit how people can access and share their data. We want to change that by building user-friendly tools that unlock the power of existing databases without sacrificing accessibility, portability, or extensibility.
 
-Databases have been around for a long time and solve common data problems really well. But working with databases often requires custom software. Or complex tooling that people struggle to get their heads around.
-
-We want to make existing database functionality more accessible, for users of all technical skill levels.
-
-## Contributing
-We actively encourage contribution! Get started by reading our [Contributor Guide](./CONTRIBUTING.md).
+Mathesar is our answer: an open-source platform designed to unlock the full potential of PostgreSQL, one of the most powerful and trusted open-source databases. Mathesar is easy to use, interoperable, and extensible, while also giving you complete control over your data. As a nonprofit, we're committed to keeping Mathesar 100% open source and available to everyone—because better ways to work with data mean better decisions, and better decisions lead to a better world.
 
 ## Bugs and troubleshooting
 If you run into problems, refer to our [troubleshooting guide](./TROUBLESHOOTING.md).

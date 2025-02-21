@@ -18,6 +18,8 @@ export class Database {
 
   readonly name: string;
 
+  readonly nickname: string | null;
+
   readonly server: Server;
 
   readonly needsUpgradeAttention: boolean;
@@ -25,8 +27,13 @@ export class Database {
   constructor(props: { server: Server; rawDatabase: RawDatabase }) {
     this.id = props.rawDatabase.id;
     this.name = props.rawDatabase.name;
+    this.nickname = props.rawDatabase.nickname;
     this.server = props.server;
     this.needsUpgradeAttention = props.rawDatabase.needs_upgrade_attention;
+  }
+
+  get displayName() {
+    return this.nickname ?? this.name;
   }
 
   constructConfiguredRolesStore() {

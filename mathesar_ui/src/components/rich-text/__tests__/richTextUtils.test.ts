@@ -31,6 +31,19 @@ describe('RichText', () => {
         text('\\(baz_1)foo_2'),
       ],
     ],
+    ['[foo](bar baz)', [slot('foo', 'bar baz')]],
+    [
+      'Read about [link](space travel).',
+      [text('Read about '), slot('link', 'space travel'), text('.')],
+    ],
+    [
+      'foo [button](click here) bar',
+      [text('foo '), slot('button', 'click here'), text(' bar')],
+    ],
+    [
+      'Click [here](this link) to continue.',
+      [text('Click '), slot('here', 'this link'), text(' to continue.')],
+    ],
   ];
   test.each(cases)('parse %# %s', (input, output) => {
     expect(parse(input)).toEqual(output);

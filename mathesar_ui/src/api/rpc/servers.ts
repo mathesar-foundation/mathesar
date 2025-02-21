@@ -9,5 +9,15 @@ export interface RawServer {
 export const servers = {
   configured: {
     list: rpcMethodTypeContainer<void, Array<RawServer>>(),
+    patch: rpcMethodTypeContainer<
+      {
+        server_id: RawServer['id'];
+        patch: {
+          host?: string;
+          port?: number;
+        };
+      },
+      Array<RawServer>
+    >(),
   },
 };

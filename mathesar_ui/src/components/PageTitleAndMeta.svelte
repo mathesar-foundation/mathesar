@@ -5,34 +5,31 @@
   export let icon: IconProps;
   export let name: string;
   export let entityTypeName: string | undefined = undefined;
-  export let subText: string | undefined = undefined;
 </script>
 
-<div class="container">
+<div class="page-title-and-meta">
   <div class="top">
-    <div class="left">
-      <div class="entity-container">
-        <div class="entity-icon">
-          <Icon {...icon} size="1.5em" />
-        </div>
-        <div class="left-meta-container">
-          {#if entityTypeName}
-            <span class="entity-type-name">{entityTypeName}</span>
-          {/if}
-          <span class="entity-name">{name}</span>
-          {#if subText}
-            <span>{subText}</span>
-          {/if}
-        </div>
+    <div class="entity-container">
+      <div class="entity-icon">
+        <Icon {...icon} size="1.5em" />
+      </div>
+      <div class="left-meta-container">
+        {#if entityTypeName}
+          <span class="entity-type-name">{entityTypeName}</span>
+        {/if}
+        <span class="entity-name">{name}</span>
+        <slot name="subText" />
       </div>
     </div>
-    <slot name="action" />
+    <div class="action">
+      <slot name="action" />
+    </div>
   </div>
   <slot name="bottom" />
 </div>
 
 <style lang="scss">
-  .container {
+  .page-title-and-meta {
     display: flex;
     flex-direction: column;
 
@@ -42,6 +39,8 @@
   }
   .top {
     display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -53,10 +52,17 @@
     align-items: center;
   }
 
+  .action {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+
   .entity-icon {
     width: 3.4rem;
     height: 3.4rem;
     background-color: var(--brand-500);
+    flex: 0 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;

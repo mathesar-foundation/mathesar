@@ -151,7 +151,8 @@ def prepare_table_for_import(
     return (
         import_info['copy_sql'],
         import_info['table_oid'],
-        import_info['table_name']
+        import_info['table_name'],
+        import_info['renamed_columns']
     )
 
 
