@@ -19,6 +19,35 @@ export function serializeTsv(data: string[][]): string {
   });
 }
 
+function emptyStrings(count: number) {
+  return Array(count).fill('') as string[];
+}
+
+/**
+ * Ensure that all rows have the same length by padding them with empty strings.
+ */
+function makeRectangular(data: string[][]): string[][] {
+  const width = Math.max(...data.map((row) => row.length));
+  return data.map((r) => [...r, ...emptyStrings(width - r.length)]);
+}
+
 export function deserializeTsv(data: string): string[][] {
-  throw new Error('Not implemented'); // TODO
+  // Trimming is necessary because copied data from spreadsheets can have
+  // trailing newlines.
+  const trimmedData = data.trim();
+
+  const result = Papa.parse(trimmedData, {
+    delimiter: '\t',
+    skipEmptyLines: false,
+  });
+
+  // Note: `result.errors` is an array of error objects but it doesn't seem like
+  // we actually need to handle them. From the [docs][1]:
+  //
+  // > Just because errors are generated does not necessarily mean that parsing
+  // > failed. The worst error you can get is probably MissingQuotes.
+  //
+  // [1]: https://www.papaparse.com/docs#errors
+
+  return makeRectangular(result.data as string[][]);
 }

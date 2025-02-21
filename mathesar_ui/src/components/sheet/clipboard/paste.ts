@@ -42,32 +42,35 @@ export interface PastingContext {
   ) => Promise<void>;
 }
 
-interface TsvPayload {
+interface TsvCell {
   type: 'tsv';
-  rows: string[][];
+  value: string;
 }
 
 /** Data that was copied from Mathesar */
-interface MathesarPayload {
-  type: 'structured';
-  rows: StructuredCell[][];
+interface MathesarCell {
+  type: 'mathesar';
+  value: StructuredCell;
 }
 
-type Payload = TsvPayload | MathesarPayload;
+type PayloadCell = TsvCell | MathesarCell;
+
+type Payload = PayloadCell[][];
 
 function getPayload(clipboardData: DataTransfer): Payload {
   const mathesarData = clipboardData.getData(MIME_MATHESAR_SHEET_CLIPBOARD);
   if (mathesarData) {
     const rows = validateStructuredCellRows(JSON.parse(mathesarData));
     if (rows.length === 0) throw new Error(get(_)('paste_error_empty'));
-    return { type: 'structured', rows };
+    return rows.map((row) => row.map((value) => ({ type: 'mathesar', value })));
   }
 
   const textData = clipboardData.getData(MIME_PLAIN_TEXT);
   if (textData) {
     const rows = deserializeTsv(textData);
     if (rows.length === 0) throw new Error(get(_)('paste_error_empty'));
-    return { type: 'tsv', rows };
+    // return makeTsvPayload(rows);
+    return rows.map((row) => row.map((value) => ({ type: 'tsv', value })));
   }
 
   throw new Error(get(_)('paste_error_unsupported_mime_type'));
@@ -118,17 +121,31 @@ function insertViaPaste(
   throw new Error('Insert via paste is not yet implemented.');
 }
 
-function prepareStructuredCellValue(column: Column, cell: StructuredCell) {
-  if (cell.raw === null) return null;
+function prepareStructuredCellValue(column: Column, cell: PayloadCell) {
+  if (cell.type === 'tsv') {
+    // Since TSV doesn't have a mechanism to faithfully represent NULLs, we
+    // assume that empty strings are NULLs.
+    if (cell.value === '') return null;
 
-  // If we're pasting into a text column, use the formatted value.
-  if (column.type === 'text') return cell.formatted;
+    return cell.value;
+  }
 
-  // Otherwise use the raw value
-  return cell.raw;
+  if (cell.type === 'mathesar') {
+    // We need to check for NULL first because the "formatted" value of a copied
+    // null cell will be an empty string, which we don't want to return.
+    if (cell.value === null) return null;
+
+    // If we're pasting into a text column, use the formatted value.
+    if (column.type === 'text') return cell.value.formatted;
+
+    // Otherwise use the raw value
+    return cell.value.raw;
+  }
+
+  return assertExhaustive(cell);
 }
 
-function makeCellBlueprint([cell, column]: [StructuredCell, Column]) {
+function makeCellBlueprint([cell, column]: [PayloadCell, Column]) {
   return {
     columnId: String(column.id),
     value: prepareStructuredCellValue(column, cell),
@@ -140,14 +157,8 @@ async function updateViaPaste(
   selection: SheetSelection,
   context: PastingContext,
 ) {
-  if (payload.type !== 'structured') {
-    // TODO: implement this branch. We probably want to propagate this branching
-    // logic deeper down this function
-    throw new Error('Paste TSV is not yet implemented');
-  }
-
-  const targetRowCount = Math.max(selection.rowIds.size, payload.rows.length);
-  const sourceRows = [...take(targetRowCount, cycle(payload.rows))];
+  const targetRowCount = Math.max(selection.rowIds.size, payload.length);
+  const sourceRows = [...take(targetRowCount, cycle(payload))];
   const firstSourceRow = first(sourceRows);
   if (!firstSourceRow) throw new Error(get(_)('paste_error_no_rows'));
 
