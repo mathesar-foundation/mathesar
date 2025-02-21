@@ -29,6 +29,7 @@ import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
   type CancellablePromise,
+  ImmutableMap,
   WritableMap,
   getGloballyUniqueId,
   isDefinedNonNullable,
@@ -39,7 +40,11 @@ import type { FilterEntry, Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Meta } from './meta';
 import RecordSummaryStore from './record-summaries/RecordSummaryStore';
-import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
+import {
+  type RecordSummariesForSheet,
+  buildRecordSummariesForSheet,
+  mergeRecordSummariesForSheet,
+} from './record-summaries/recordSummaryUtils';
 import type { SearchFuzzy } from './searchFuzzy';
 import type { Sorting } from './sorting';
 import { type RowKey, getCellKey, validateRow } from './utils';
@@ -619,9 +624,9 @@ export class RecordsData {
     this.savedRecordRowsWithGroupHeaders.update((rows) =>
       rows.map((row) => {
         const rowKey = getRowKey(row, pkColumn.id);
-        const responseMapEntry = responseMap.get(rowKey);
-        if (!responseMapEntry) return row;
-        const { blueprint, response } = responseMapEntry;
+        const responseMapValue = responseMap.get(rowKey);
+        if (!responseMapValue) return row;
+        const { blueprint, response } = responseMapValue;
         if (response.status === 'error') {
           blueprint.cells.forEach((cell) => {
             const cellKey = getCellKey(rowKey, cell.columnId);
@@ -643,6 +648,18 @@ export class RecordsData {
         return { ...row, record: result };
       }),
     );
+
+    let newRecordSummaries: RecordSummariesForSheet = new ImmutableMap();
+    for (const response of responses) {
+      if (response.status === 'error') continue;
+      const linkedRecordSummaries = response.value.linked_record_summaries;
+      if (!linkedRecordSummaries) continue;
+      newRecordSummaries = mergeRecordSummariesForSheet(
+        newRecordSummaries,
+        buildRecordSummariesForSheet(linkedRecordSummaries),
+      );
+    }
+    this.linkedRecordSummaries.addBespokeRecordSummaries(newRecordSummaries);
   }
 
   // TODO: It would be better to throw errors instead of silently failing
