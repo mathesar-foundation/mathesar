@@ -386,6 +386,8 @@
   "password": "Password",
   "password_help": "Can be left blank if your role doesn't use a password.",
   "passwords_do_not_match": "Passwords do not match",
+  "paste": "Paste",
+  "paste_confirmation": "{count, plural, one {Paste {count} cell?} other {Paste {count} cells?}}",
   "paste_data_import": "Paste the data you want to import",
   "paste_error_empty": "No data to paste.",
   "paste_error_no_columns_selected": "You must select cells before pasting data.",

@@ -2,12 +2,15 @@
   import { map } from 'iter-tools';
   import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
   import { ROW_HEADER_WIDTH_PX } from '@mathesar/geometry';
+  import { iconPaste } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
+  import { confirm } from '@mathesar/stores/confirmation';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import {
     ID_ADD_NEW_COLUMN,
@@ -55,6 +58,12 @@
       ],
       updateRecords: (r) => recordsData.bulkUpdate(r),
       setSelection: (s) => selection.set(s),
+      confirm: (title) =>
+        confirm({
+          title,
+          body: [],
+          proceedButton: { label: $_('paste'), icon: iconPaste },
+        }),
     },
     getSelection: () => get(selection),
     showToastInfo: toast.info,

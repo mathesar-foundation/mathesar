@@ -37,6 +37,7 @@ export interface PastingContext {
   getSheetColumns: () => Column[];
   getRecordRows: () => RecordRow[];
   setSelection: (selection: SheetSelection) => void;
+  confirm: (message: string) => Promise<boolean>;
   updateRecords: (
     rowBlueprints: Parameters<RecordsData['bulkUpdate']>[0],
   ) => Promise<void>;
@@ -194,6 +195,12 @@ async function updateViaPaste(
     })),
     arrayFrom,
   );
+
+  const totalCellCount = destinationRows.length * destinationColumns.length;
+  const confirmed = await context.confirm(
+    get(_)('paste_confirmation', { values: { count: totalCellCount } }),
+  );
+  if (!confirmed) return;
 
   await context.updateRecords(rowBlueprints);
 
