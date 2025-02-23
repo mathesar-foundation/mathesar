@@ -575,11 +575,19 @@ export class RecordsData {
   async bulkUpdate(
     rowBlueprints: {
       recordId: ResultValue;
-      rowKey: string;
       cells: { columnId: string; value: unknown }[];
     }[],
   ): Promise<void> {
     const cellStatus = this.meta.cellModificationStatus;
+
+    /**
+     * Get the rowKey from the blueprint's recordId.
+     *
+     * Note: this duplicates some logic within the `getRowKey` function.
+     */
+    function key(blueprint: (typeof rowBlueprints)[number]) {
+      return String(blueprint.recordId);
+    }
 
     function forEachRow(fn: (b: (typeof rowBlueprints)[number]) => void) {
       rowBlueprints.forEach(fn);
@@ -587,7 +595,7 @@ export class RecordsData {
 
     function forEachCell(fn: (cellKey: string) => void) {
       forEachRow((row) =>
-        row.cells.forEach((cell) => fn(getCellKey(row.rowKey, cell.columnId))),
+        row.cells.forEach((cell) => fn(getCellKey(key(row), cell.columnId))),
       );
     }
 
@@ -595,7 +603,7 @@ export class RecordsData {
       cellStatus.set(cellKey, { state: 'processing' });
       this.updatePromises?.get(cellKey)?.cancel();
     });
-    forEachRow(({ rowKey }) => this.updatePromises?.get(rowKey)?.cancel());
+    forEachRow((row) => this.updatePromises?.get(key(row))?.cancel());
 
     const requests = rowBlueprints.map((row) =>
       api.records.patch({
@@ -612,7 +620,7 @@ export class RecordsData {
       execPipe(
         zip(rowBlueprints, responses),
         map(([blueprint, response]) => [
-          blueprint.rowKey,
+          key(blueprint),
           { blueprint, response },
         ]),
       ),
@@ -668,8 +676,8 @@ export class RecordsData {
     this.linkedRecordSummaries.addBespokeRecordSummaries(newRecordSummaries);
   }
 
-  // TODO: It would be better to throw errors instead of silently failing
-  // and returning a value.
+  // TODO: it would be nice to refactor this function to utilize the
+  // `bulkUpdate` function (which actually updates the store values too).
   async updateCell(
     row: RecordRow | NewRecordRow | PlaceholderRow,
     column: Column,
