@@ -394,7 +394,7 @@
   "paste_error_no_primary_key": "Unable to paste into a table without a primary key column.",
   "paste_error_no_rows": "No rows to paste",
   "paste_error_too_few_destination_columns": "The table does not contain enough columns to paste the copied data at your selection.",
-  "paste_error_too_few_destination_rows": "The sheet does not contain enough rows to hold the data you are pasting. If you would like to insert new records while pasting, you can begin your paste operation by using the arrow keys to move the selected cell into the placeholder row at the very bottom of the sheet. This will only insert (not overwrite) records. Mathesar does not support pasting data which updates records and inserts new records simultaneously.",
+  "paste_error_too_few_destination_rows": "The sheet does not contain enough rows to hold the data you are pasting.",
   "paste_error_too_many_destination_columns": "Cannot paste into a selection which has more columns than the copied data.",
   "paste_error_unsupported_mime_type": "Your copied data is in an unsupported format. Mathesar can only paste data when it is formatted as TSV or when from copied directly from Mathesar itself.",
   "permissions_for_named_database": "Permissions for [databaseName] database",
