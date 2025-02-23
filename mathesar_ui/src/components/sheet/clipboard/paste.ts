@@ -134,7 +134,7 @@ function prepareStructuredCellValue(column: Column, cell: PayloadCell) {
   if (cell.type === 'mathesar') {
     // We need to check for NULL first because the "formatted" value of a copied
     // null cell will be an empty string, which we don't want to return.
-    if (cell.value === null) return null;
+    if (cell.value.raw === null) return null;
 
     // If we're pasting into a text column, use the formatted value.
     if (column.type === 'text') return cell.value.formatted;
