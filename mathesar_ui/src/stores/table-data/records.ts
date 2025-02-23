@@ -86,10 +86,12 @@ function buildGrouping(apiGrouping: ApiGroupingResponse): RecordGrouping {
 }
 
 interface BaseRow {
+  /** See `records.ts.README.md` for more info */
   identifier: string;
 }
 
 export interface RecordRow extends BaseRow {
+  /** See `records.ts.README.md` for more info */
   rowIndex: number;
   record: ApiRecord;
 }
@@ -161,10 +163,12 @@ export interface TableRecordsData {
   grouping?: RecordGrouping;
 }
 
+/** See `records.ts.README.md` for more info */
 export function getRowSelectionId(row: Row): string {
   return row.identifier;
 }
 
+/** See `records.ts.README.md` for more info */
 export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
   if (rowHasRecord(row) && primaryKeyColumnId !== undefined) {
     const primaryKeyCellValue = row.record[primaryKeyColumnId];
@@ -175,6 +179,7 @@ export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
   return row.identifier;
 }
 
+/** See `records.ts.README.md` for more info */
 export function getPkValueInRecord(
   record: ApiRecord,
   columns: Column[],
@@ -190,6 +195,7 @@ export function getPkValueInRecord(
   return pkValue;
 }
 
+/** See `records.ts.README.md` for more info */
 function generateRowIdentifier(
   type: 'groupHeader' | 'normal' | 'dummy' | 'new',
   offset: number,

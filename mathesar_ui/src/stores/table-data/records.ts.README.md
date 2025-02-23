@@ -12,7 +12,7 @@ Check git blame to see when this file was last updated. Consider that content he
 
 ## Row ids
 
-The lack of a clear identifying field on our `Row` type seems to have caused a proliferation of _different_ (and incompatible) identifiers used variously in different contexts. Here is a summary:
+Our `Row` type unfortunately doesn't have a defacto field to uniquely identifies rows. Instead, we seem to have a proliferation of _different_ (and incompatible) identifiers used variously in different contexts. Here is a summary:
 
 - `rowIndex`
     - Type: number
