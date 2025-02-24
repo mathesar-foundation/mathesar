@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
+  import { staticText } from '@mathesar/i18n/staticText';
   import { iconDatabase } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import { Icon } from '@mathesar-component-library';
@@ -11,8 +14,15 @@
 
 <div class="db-card-content" class:upgrade-required={upgradeRequired}>
   <div class="circle"><Icon {...iconDatabase} size="1.1rem" /></div>
-  <div class="name">{database.name}</div>
-  <div class="server">{server}</div>
+  <div class="display-name">{database.displayName}</div>
+  <div class="detail">
+    <span class="label">{$_('db_server')}{staticText.COLON}</span>
+    <span>{server}</span>
+  </div>
+  <div class="detail">
+    <span class="label">{$_('db_name')}{staticText.COLON}</span>
+    <span>{database.name}</span>
+  </div>
 </div>
 
 <style lang="scss">
@@ -26,30 +36,32 @@
   }
 
   .circle {
-    grid-row: span 2;
+    --size: 3rem;
+    grid-row: span 3;
     background: var(--brand-500);
     color: var(--white);
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 2.8rem;
-    width: 2.8rem;
+    height: var(--size);
+    width: var(--size);
     border-radius: 3rem;
-    border: 2px solid rgba(226, 211, 177, 0.5);
   }
 
   .upgrade-required .circle {
     background: var(--slate-300);
   }
 
-  .name {
+  .display-name {
     font-size: var(--text-size-xx-large);
     font-weight: var(--font-weight-medium);
   }
 
-  .server {
-    font-size: var(--text-size-base);
+  .detail {
+    font-size: var(--text-size-small);
     margin-top: var(--size-extreme-small);
-    color: var(--slate-500);
+  }
+  .label {
+    color: var(--slate-400);
   }
 </style>

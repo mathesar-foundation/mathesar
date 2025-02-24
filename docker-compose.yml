@@ -79,7 +79,7 @@ x-config: &config
 #           or https(port 443), also automatically creating SSL certificates 
 #           for the same. If you want to host an instance of Mathesar over the
 #           internet or over your local network, add those domains here.
-#     Example: yourdomain.com,*.subdomain.com,127.0.0.1
+#     Example: yourdomain.com, *.subdomain.com, 127.0.0.1
 #
 # POSTGRES_DB:
 #     Default: mathesar_django
@@ -159,6 +159,9 @@ services:
 
       # WARNING: MATHESAR_DATABASES is deprecated, and will be removed in a future release.
       MATHESAR_DATABASES: ${MATHESAR_DATABASES:-}
+
+      # SECURITY WARNING: don't run with DEBUG=true in production!
+      DEBUG: ${DEBUG:-false}
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
