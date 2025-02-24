@@ -3733,12 +3733,8 @@ DECLARE
   description_alter RECORD;
 BEGIN
   -- Get the string specifying all non-name-change alterations to perform.
-  RAISE NOTICE 'Getting alter string...';
   col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
-  RAISE NOTICE 'Alter String is\n%', col_alter_str;
-
   -- Perform the non-name-change alterations
-  RAISE NOTICE 'PERFORMING alters...';
   IF col_alter_str IS NOT NULL THEN
     PERFORM __msar.exec_ddl(
       'ALTER TABLE %s %s',
@@ -3746,8 +3742,6 @@ BEGIN
       msar.process_col_alter_jsonb(tab_id, col_alters)
     );
   END IF;
-
-  RAISE NOTICE 'Altering descriptions...';
   -- Here, we perform all description-changing alterations.
   FOR description_alter IN
     SELECT
@@ -3762,8 +3756,6 @@ BEGIN
       comment_ := description_alter.comment_
     );
   END LOOP;
-
-  RAISE NOTICE 'Altering names...';
   -- Here, we perform all name-changing alterations.
   FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
   LOOP
