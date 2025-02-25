@@ -45,7 +45,7 @@
 <p>{$_('the_following_databases_will_be_upgraded')}</p>
 <ul>
   {#each databases as database}
-    <li>{database.name}</li>
+    <li>{database.displayName}</li>
   {/each}
 </ul>
 
