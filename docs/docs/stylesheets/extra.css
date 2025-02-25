@@ -147,7 +147,7 @@
 }
 
 .md-typeset {
-  font-size: .7rem;
+  font-size: 0.7rem;
 }
 
 .md-typeset a {
@@ -296,20 +296,6 @@
   background-color: var(--stormy-dark);
 }
 
-.md-search__input {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  color: #f3f0f7;
-}
-
-.md-search__input::placeholder {
-  color: #cdc0e2;
-}
-
-.md-search__input:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-}
-
 a[href^="https://github.com/mathesar-foundation/mathesar/pull/"]
 {
   font-size: 0.7rem;
@@ -363,4 +349,50 @@ p:has(a[href^="https://github.com/mathesar-foundation/mathesar/pull/"])
 
 [data-md-color-scheme="slate"] .md-footer a:hover {
   color: var(--white);
+}
+
+.md-search-result {
+  color: var(--stormy-darker);
+}
+
+.md-search-result__meta {
+  background-color: var(--stormy-lighter);
+  color: var(--stormy-dark);
+}
+
+.md-search-result__item {
+  border-bottom: 1px solid var(--stormy-lighter);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.md-search-result__link:hover,
+.md-search-result__link[data-md-state="active"] {
+  background-color: var(--stormy-lighter);
+}
+
+[data-md-color-scheme="slate"] .md-search-result {
+  background-color: var(--stormy-darker);
+  color: var(--stormy-lighter);
+}
+
+[data-md-color-scheme="slate"] .md-search-result__meta {
+  background-color: var(--stormy-darkest);
+  color: var(--stormy-lighter);
+}
+
+[data-md-color-scheme="slate"] .md-search-result__item {
+  border-bottom: 1px solid var(--stormy-dark);
+}
+
+[data-md-color-scheme="slate"] .md-search-result__link:hover,
+[data-md-color-scheme="slate"] .md-search-result__link[data-md-state="active"] {
+  background-color: var(--stormy-darkest);
+}
+
+.md-search-result__more summary ~ * > * {
+  opacity: 0.8;
+}
+
+[data-md-color-scheme="slate"] .md-search-result__more summary ~ * > * {
+  opacity: 0.9;
 }
