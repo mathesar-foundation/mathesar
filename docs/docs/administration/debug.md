@@ -1,5 +1,8 @@
 # Debugging Mathesar
 
+!!! warning "Not for production"
+    Debug mode should **not** be enabled in production environments, where it can cause performance issues and potentially expose sensitive information.
+
 If your Mathesar installation isn't working as expected, you can prefix the docker command with `DEBUG=true` to add additional debugging output to the console and more verbose errors in the browser when something goes wrong. The additional information logged should help you or the Mathesar team diagnose any installation issues.
 
 ### With Docker Compose
