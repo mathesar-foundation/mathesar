@@ -3181,11 +3181,6 @@ msar.prepare_table_for_import(
   sch_id oid,
   tab_name text,
   col_defs jsonb,
-  header boolean,
-  delimiter text,
-  escapechar text,
-  quotechar text,
-  encoding_ text,
   comment_ text
 ) RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning a JSON object containing
@@ -3195,18 +3190,14 @@ Each returned JSON object will have the form:
   {
     "copy_sql": <str>,
     "table_oid": <int>,
-    "table_name": <str>
+    "table_name": <str>,
+    "renamed_columns": <arr>
   }
 
 Args:
   sch_id: The OID of the schema where the table will be created.
   tab_name (optional): The unquoted name for the new table.
   col_defs: The columns for the new table, in order.
-  header: Whether or not the file contains a header line with the names of each column in the file.
-  delimiter: The character that separates columns within each row (line) of the file.
-  escapechar: The character that should appear before a data character that matches the `quotechar` value.
-  quotechar: The quoting character to be used when a data value is quoted.
-  encoding_: The encoding in which the file is encoded.
   comment_ (optional): The comment for the new table.
 */
 DECLARE
@@ -3215,7 +3206,6 @@ DECLARE
   mathesar_table json;
   rel_id oid;
   col_names_sql text;
-  options_sql text;
   copy_sql text;
 BEGIN
   -- Create string table
@@ -3231,17 +3221,8 @@ BEGIN
   SELECT string_agg(quote_ident(attname), ', ') INTO col_names_sql
   FROM pg_catalog.pg_attribute
   WHERE attrelid = rel_id AND atttypid = 'TEXT'::regtype::oid;
-  -- Form a substring for COPY related options
-  options_sql := concat_ws(
-    ' ',
-    CASE WHEN header THEN 'HEADER' END,
-    CASE WHEN NULLIF(delimiter, '') IS NOT NULL THEN 'DELIMITER ' || quote_literal(delimiter) END,
-    CASE WHEN NULLIF(escapechar, '') IS NOT NULL THEN 'ESCAPE ' || quote_literal(escapechar) END,
-    CASE WHEN NULLIF(quotechar, '') IS NOT NULL THEN 'QUOTE ' || quote_literal(quotechar) END,
-    CASE WHEN NULLIF(encoding_, '') IS NOT NULL THEN 'ENCODING '|| quote_literal(encoding_) END
-  );
   -- Create a properly formatted COPY SQL string
-  copy_sql := format('COPY %I.%I (%s) FROM STDIN CSV %s', sch_name, rel_name, col_names_sql, options_sql);
+  copy_sql := format('COPY %I.%I (%s) FROM STDIN', sch_name, rel_name, col_names_sql);
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
     'table_oid', rel_id::bigint,

@@ -14,7 +14,7 @@ from mathesar.imports.utils import process_column_names
 # The user-facing documentation replicates these delimiter characters. If you
 # c, process_column_nameshange this variable, please update the documentation as well.
 ALLOWED_DELIMITERS = ",\t:|;"
-SAMPLE_SIZE = 20000
+SAMPLE_SIZE = 1000000
 CHECK_ROWS = 10
 
 
@@ -24,80 +24,33 @@ def import_csv(user, data_file_id, table_name, schema_oid, conn, comment=None):
     header = data_file.header
     if table_name is None or table_name == '':
         table_name = data_file.base_name
-    dialect = csv.dialect.SimpleDialect(
-        data_file.delimiter,
-        data_file.quotechar,
-        data_file.escapechar
-    )
-    encoding = get_file_encoding(data_file.file)
-    conversion_encoding, sql_encoding = get_sql_compatible_encoding(encoding)
-    with open(file_path, 'rb') as csv_file:
-        csv_reader = _get_sv_reader(csv_file, header, dialect)
-        column_names = process_column_names(csv_reader.fieldnames)
+
+    with open(file_path, "r", newline="") as f:
+        dialect = csv.Sniffer().sniff(f.read(100000))
+        f.seek(0)
+        reader = csv.reader(f, dialect)
+        if header:
+            column_names = process_column_names(next(reader))
+        else:
+            column_names = [
+                f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(next(reader)))
+            ]
     copy_sql, table_oid, db_table_name, renamed_columns = prepare_table_for_import(
         table_name,
         schema_oid,
         column_names,
-        header,
         conn,
-        dialect.delimiter,
-        dialect.escapechar,
-        dialect.quotechar,
-        sql_encoding,
         comment
     )
-    _insert_csv_records(
-        copy_sql,
-        file_path,
-        encoding,
-        conversion_encoding,
-        conn
-    )
-    return {"oid": table_oid, "name": db_table_name, "renamed_columns": renamed_columns}
-
-
-def _get_sv_reader(file, header, dialect=None):
-    encoding = get_file_encoding(file)
-    file = TextIOWrapper(file, encoding=encoding)
-    if dialect:
-        reader = csv.DictReader(file, dialect=dialect)
-    else:
-        reader = csv.DictReader(file)
-    if not header:
-        reader.fieldnames = [
-            f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(reader.fieldnames))
-        ]
-        file.seek(0)
-
-    return reader
-
-
-def _insert_csv_records(
-    copy_sql,
-    file_path,
-    encoding,
-    conversion_encoding,
-    conn
-):
     cursor = conn.cursor()
-    # Needs to be opened in text read mode
-    with open(file_path, 'r', encoding=encoding) as csv_file:
-        if conversion_encoding == encoding:
-            with cursor.copy(copy_sql) as copy:
-                while data := csv_file.read():
-                    copy.write(data)
-        else:
-            # File needs to be converted to compatible database supported encoding
-            with tempfile.SpooledTemporaryFile(mode='wb+', encoding=conversion_encoding) as temp_file:
-                while True:
-                    contents = csv_file.read().encode(conversion_encoding, "replace")
-                    if not contents:
-                        break
-                    temp_file.write(contents)
-                temp_file.seek(0)
-                with cursor.copy(copy_sql) as copy:
-                    while data := temp_file.read():
-                        copy.write(data)
+    with open(file_path, "r", newline="") as f, cursor.copy(copy_sql) as copy:
+        reader = csv.reader(f, dialect)
+        if header:
+            column_names = next(reader)
+        for row in reader:
+            copy.write_row(row)
+
+    return {"oid": table_oid, "name": db_table_name, "renamed_columns": renamed_columns}
 
 
 def is_valid_csv(data):

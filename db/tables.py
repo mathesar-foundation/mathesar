@@ -115,12 +115,7 @@ def prepare_table_for_import(
     table_name,
     schema_oid,
     column_names,
-    header,
     conn,
-    delimiter=None,
-    escapechar=None,
-    quotechar=None,
-    encoding=None,
     comment=None
 ):
     """
@@ -141,11 +136,6 @@ def prepare_table_for_import(
         schema_oid,
         table_name,
         json.dumps(column_data_list),
-        header,
-        delimiter,
-        escapechar,
-        quotechar,
-        encoding,
         comment
     ).fetchone()[0]
     return (
