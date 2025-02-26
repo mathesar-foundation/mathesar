@@ -14,7 +14,7 @@ from db.tables import (
     get_table_info,
     list_joinable_tables,
 )
-from mathesar.imports.csv import import_csv
+from mathesar.imports.csv import copy_datafile_to_table
 from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.decorators import mathesar_rpc_method
@@ -273,8 +273,8 @@ def import_(
     data_file_id: int,
     schema_oid: int,
     database_id: int,
-    table_name: str = None,
-    comment: str = None,
+    table_name: Optional[str] = None,
+    comment: Optional[str] = None,
     **kwargs
 ) -> AddedTableInfo:
     """
@@ -292,7 +292,7 @@ def import_(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return import_csv(user, data_file_id, table_name, schema_oid, conn, comment)
+        return copy_datafile_to_table(user, data_file_id, table_name, schema_oid, conn, comment)
 
 
 @mathesar_rpc_method(name="tables.get_import_preview", auth="login")

@@ -6,8 +6,8 @@ import requests
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
+from mathesar.utils.csv import is_valid_csv, get_file_encoding, get_sv_dialect
 from mathesar.errors import URLDownloadError, UnsupportedFileFormat
-from mathesar.imports.csv import is_valid_csv, get_sv_dialect, get_file_encoding
 from mathesar.models.base import DataFile
 
 
@@ -26,15 +26,6 @@ def _download_datafile(url):
             temp_file.write(chunk)
     temp_file.seek(0)
     return temp_file
-
-
-def _get_file_type(raw_file):
-    file_extension = os.path.splitext(raw_file.name)[1][1:]
-    if file_extension in ['csv', 'tsv']:
-        return file_extension
-
-    if is_valid_csv(raw_file):
-        return 'csv'
 
 
 def create_datafile(data, user=None):
@@ -85,3 +76,12 @@ def create_datafile(data, user=None):
         raise UnsupportedFileFormat
 
     return datafile
+
+
+def _get_file_type(raw_file):
+    file_extension = os.path.splitext(raw_file.name)[1][1:]
+    if file_extension in ['csv', 'tsv']:
+        return file_extension
+
+    if is_valid_csv(raw_file):
+        return 'csv'
