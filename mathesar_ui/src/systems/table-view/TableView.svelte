@@ -6,7 +6,7 @@
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { ROW_HEADER_WIDTH_PX } from '@mathesar/geometry';
   import type { Table } from '@mathesar/models/Table';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import {
@@ -21,6 +21,7 @@
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
+  import { getCustomizedColumnWidths } from './tableViewUtils';
 
   type Context = 'page' | 'widget' | 'shared-consumer-page';
 
@@ -70,9 +71,10 @@
     return columns;
   })();
 
-  const columnWidths = new ImmutableMap([
-    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
+  $: columnWidths = new ImmutableMap([
+    [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
     [ID_ADD_NEW_COLUMN, 32],
+    ...getCustomizedColumnWidths($processedColumns.values()),
   ]);
   $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
 </script>
@@ -84,11 +86,6 @@
     bind:activeTabId={tableInspectorTab}
   >
     <div class="sheet-area">
-      {#if $isLoading}
-        <div class="loading-sheet">
-          <Spinner />
-        </div>
-      {/if}
       {#if $processedColumns.size}
         <Sheet
           {clipboardHandler}
@@ -115,6 +112,10 @@
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
         </Sheet>
+      {:else if $isLoading}
+        <div class="loading-sheet">
+          <Spinner />
+        </div>
       {/if}
     </div>
   </WithTableInspector>

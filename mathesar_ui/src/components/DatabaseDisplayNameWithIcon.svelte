@@ -9,5 +9,5 @@
 </script>
 
 <NameWithIcon icon={iconDatabase} {iconHasBox}>
-  {database.name}
+  {database.displayName}
 </NameWithIcon>

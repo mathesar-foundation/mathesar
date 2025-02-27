@@ -53,7 +53,7 @@ export const schemas = {
   delete: rpcMethodTypeContainer<
     {
       database_id: number;
-      schema_oid: number;
+      schema_oids: number[];
     },
     void
   >(),

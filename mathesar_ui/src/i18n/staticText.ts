@@ -7,4 +7,5 @@
  */
 export const staticText = {
   LOGIN: 'LOGIN',
+  COLON: ':',
 } as const;

@@ -33,6 +33,7 @@ class Server(BaseModel):
 
 class Database(BaseModel):
     name = models.CharField(max_length=128)
+    nickname = models.CharField(null=True)
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='databases'
     )
@@ -64,7 +65,7 @@ class Database(BaseModel):
         return self.last_confirmed_sql_version != __version__
 
     def install_sql(self, username=None, password=None):
-        if username is not None and password is not None:
+        if username is not None:
             with self.connect_manually(username, password) as conn:
                 install(conn)
         else:
@@ -149,7 +150,7 @@ class ConfiguredRole(BaseModel):
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='roles'
     )
-    password = EncryptedCharField(max_length=255)
+    password = EncryptedCharField(max_length=255, blank=True, null=True)
 
     class Meta:
         constraints = [
@@ -215,6 +216,7 @@ class ColumnMetaData(BaseModel):
     date_format = models.CharField(null=True)
     duration_min = models.CharField(max_length=255, null=True)
     duration_max = models.CharField(max_length=255, null=True)
+    display_width = models.PositiveIntegerField(null=True)
 
     class Meta:
         constraints = [

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
   import type { Database } from '@mathesar/models/Database';
   import type { DatabaseDisconnectFn } from '@mathesar/stores/databases';
@@ -19,7 +20,7 @@
   <span slot="title">
     <RichText text={$_('disconnect_named_database')} let:slotName>
       {#if slotName === 'databaseName'}
-        <b>{database.name}</b>
+        <Identifier>{database.displayName}</Identifier>
       {/if}
     </RichText>
   </span>

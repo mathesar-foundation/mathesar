@@ -53,7 +53,7 @@ def grep_i18n_string(string):
         raise
 
 
-with open(EN_DICT_FILE, 'r') as en_dict_file:
+with open(EN_DICT_FILE, 'rb') as en_dict_file:
     en_dict_json = json.load(en_dict_file)
     not_found_count = 0
     for key in en_dict_json:

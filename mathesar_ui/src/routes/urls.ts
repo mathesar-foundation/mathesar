@@ -1,3 +1,5 @@
+import Url64 from '@mathesar/utils/Url64';
+
 export function getDatabasePageUrl(databaseId: number): string {
   return `/db/${databaseId}/`;
 }
@@ -46,23 +48,35 @@ export function getImportPageUrl(databaseId: number, schemaId: number): string {
 
 interface ImportPreviewPageQueryParams {
   useColumnTypeInference: boolean;
+  renamedIdColumn?: string;
 }
 
 const TYPE_INFERENCE_QUERY_PARAM = 'inference';
+const RENAMED_ID_COLUMN_QUERY_PARAM = 'renamed_id_column';
 
 function serializeImportPreviewPageQueryParams(
   p: ImportPreviewPageQueryParams,
 ): string {
-  return new URLSearchParams({
+  const params = new URLSearchParams({
     [TYPE_INFERENCE_QUERY_PARAM]: JSON.stringify(p.useColumnTypeInference),
-  }).toString();
+  });
+  if (p.renamedIdColumn) {
+    params.append(
+      RENAMED_ID_COLUMN_QUERY_PARAM,
+      Url64.encode(p.renamedIdColumn),
+    );
+  }
+  return params.toString();
 }
 
 export function getImportPreviewPageQueryParams(
-  queryParams: Record<string, unknown>,
+  queryParams: Record<string, string>,
 ): ImportPreviewPageQueryParams {
   return {
     useColumnTypeInference: queryParams[TYPE_INFERENCE_QUERY_PARAM] === 'true',
+    renamedIdColumn: queryParams[RENAMED_ID_COLUMN_QUERY_PARAM]
+      ? Url64.decode(queryParams[RENAMED_ID_COLUMN_QUERY_PARAM])
+      : undefined,
   };
 }
 
@@ -155,7 +169,7 @@ const docsPages = {
   rolesLogin: '/user-guide/roles/#login',
   schemaPermissions: '/user-guide/schemas/#permissions',
   schemas: '/user-guide/schemas/',
-  storedRolePasswords: '/user-guide/stored-role-passwords/',
+  storedRoles: '/user-guide/stored-roles/',
   tablePermissions: '/user-guide/tables/#permissions',
   userAdmin: '/user-guide/users/#admin',
   userGuide: '/user-guide/',
@@ -171,6 +185,8 @@ const marketingPages = {
   community: '/community',
   donate: '/donate',
   privacy: '/privacy',
+  mailingList: '/mailing-list',
+  survey: '/survey',
 };
 
 export type MarketingPage = keyof typeof marketingPages;
