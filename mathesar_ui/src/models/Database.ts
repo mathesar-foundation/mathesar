@@ -101,6 +101,7 @@ export class Database {
       postProcess: (currentRole) => ({
         currentRoleOid: currentRole.current_role.oid,
         parentRoleOids: new Set(currentRole.parent_roles.map((pr) => pr.oid)),
+        isSuper: currentRole.current_role.super,
       }),
     });
   }
