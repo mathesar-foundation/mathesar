@@ -267,9 +267,18 @@
   font-size: 0.75rem;
   font-weight: 500;
   background: rgba(255, 255, 255, 0.06);
-  padding: 0.3rem 0.6rem;
+  padding: 0.2rem 0;
   border-radius: 6px;
   transition: all 0.2s ease;
+  height: 1.4rem;
+  align-self: center;
+  line-height: 1;
+  display: inline-flex;
+  margin-left: .5rem;
+}
+
+.md-version__link:is(:focus, :hover) {
+  color: white;
 }
 
 .md-version:hover {
