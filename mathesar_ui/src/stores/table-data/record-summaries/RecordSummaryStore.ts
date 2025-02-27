@@ -77,6 +77,12 @@ export default class RecordSummaryStore
     this.fetched.set(summaries);
   }
 
+  addBespokeRecordSummaries(additional: RecordSummariesForSheet): void {
+    this.bespoke.update((existing) =>
+      mergeRecordSummariesForSheet(existing, additional),
+    );
+  }
+
   addBespokeRecordSummary({
     columnId,
     recordId,
@@ -86,11 +92,10 @@ export default class RecordSummaryStore
     recordId: string;
     recordSummary: string;
   }): void {
-    const additional: RecordSummariesForSheet = new ImmutableMap([
-      [columnId, new ImmutableMap([[recordId, recordSummary]])],
-    ]);
-    this.bespoke.update((existing) =>
-      mergeRecordSummariesForSheet(existing, additional),
+    this.addBespokeRecordSummaries(
+      new ImmutableMap([
+        [columnId, new ImmutableMap([[recordId, recordSummary]])],
+      ]),
     );
   }
 }
