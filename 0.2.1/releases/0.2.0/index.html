@@ -1,0 +1,2253 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mathesar.org/0.2.1/releases/0.2.0/">
+      
+      <link rel="icon" href="../../assets/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>0.2.0 - Mathesar Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../../assets/javascripts/placeholder-plugin.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      <!--
+ Simple Analytics
+  
+ This script integrates Simple Analytics into the site by overriding analytics.html directly from mkdocs-material.
+ 
+ References:
+ - https://squidfunk.github.io/mkdocs-material/customization/#setup-and-theme-structure
+ - https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-analytics/#custom-site-analytics
+-->
+<script async defer src="https://sa.mathesar.org/latest.js"></script>
+<noscript>
+  <img src="https://sa.mathesar.org/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" />
+</noscript>
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mathesar-020-beta" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Mathesar Documentation" class="md-header__button md-logo" aria-label="Mathesar Documentation" data-md-component="logo">
+      
+  <img src="../../assets/images/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Mathesar Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              0.2.0
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+          
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mathesar-foundation/mathesar/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mathesar-foundation/mathesar
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Mathesar Documentation" class="md-nav__button md-logo" aria-label="Mathesar Documentation" data-md-component="logo">
+      
+  <img src="../../assets/images/logo.svg" alt="logo">
+
+    </a>
+    Mathesar Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mathesar-foundation/mathesar/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mathesar-foundation/mathesar
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Administrator Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Administrator Guide" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Administrator Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/install-via-docker-compose/" class="md-nav__link">
+        Install using Docker Compose
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/install-from-scratch/" class="md-nav__link">
+        Install from scratch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/environment-variables/" class="md-nav__link">
+        Environment variables
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/upgrade/" class="md-nav__link">
+        Upgrade Mathesar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/uninstall/" class="md-nav__link">
+        Uninstall Mathesar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/debug/" class="md-nav__link">
+        Debugging Mathesar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/version-support/" class="md-nav__link">
+        Postgres & Python versions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          User Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="User Guide" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          User Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3_2" type="checkbox" id="__nav_3_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2">
+          Your data in PostgreSQL
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Your data in PostgreSQL" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Your data in PostgreSQL
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/databases/" class="md-nav__link">
+        Databases
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/schemas/" class="md-nav__link">
+        Schemas
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/tables/" class="md-nav__link">
+        Tables
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/data-types/" class="md-nav__link">
+        Data types
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/relationships/" class="md-nav__link">
+        Relationships
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_3">
+          Access control
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Access control" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Access control
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/access-control/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/users/" class="md-nav__link">
+        Mathesar users
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/roles/" class="md-nav__link">
+        PostgreSQL roles
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/stored-roles/" class="md-nav__link">
+        Stored roles
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/collaborators/" class="md-nav__link">
+        Collaborators
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_4">
+          Mathesar constructs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Mathesar constructs" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_4">
+          <span class="md-nav__icon md-icon"></span>
+          Mathesar constructs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/metadata/" class="md-nav__link">
+        Metadata
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/data-explorer/" class="md-nav__link">
+        Data Explorer
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3_5" type="checkbox" id="__nav_3_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_5">
+          Data management
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Data management" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_5">
+          <span class="md-nav__icon md-icon"></span>
+          Data management
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/importing-data/" class="md-nav__link">
+        Importing data
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/exporting-data/" class="md-nav__link">
+        Exporting data
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3_6" type="checkbox" id="__nav_3_6" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_6">
+          Settings
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Settings" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_6">
+          <span class="md-nav__icon md-icon"></span>
+          Settings
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/usage-data-collection/" class="md-nav__link">
+        Usage data collection
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/methods/" class="md-nav__link">
+        Methods
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Releases
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Releases" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Releases
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.2.1/" class="md-nav__link">
+        0.2.1
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_2">
+          Previous releases
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Previous releases" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_2">
+          <span class="md-nav__icon md-icon"></span>
+          Previous releases
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          0.2.0
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        0.2.0
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    Summary
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-fixes" class="md-nav__link">
+    Security Fixes
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Fixes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-files" class="md-nav__link">
+    Fix unauthorized access to cached import data
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#improvements" class="md-nav__link">
+    Improvements
+  </a>
+  
+    <nav class="md-nav" aria-label="Improvements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#permissions" class="md-nav__link">
+    New access control system based on PostgreSQL roles and privileges
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    Substantial performance improvements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#table-exports" class="md-nav__link">
+    Table exports
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-options-when-disconnecting-a-database" class="md-nav__link">
+    More options when disconnecting a database
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#small-usability-improvements" class="md-nav__link">
+    Small usability improvements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-sample-data" class="md-nav__link">
+    More sample data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-anonymous-usage-reporting" class="md-nav__link">
+    Optional (anonymous) usage reporting
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    Bug fixes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    Documentation
+  </a>
+  
+    <nav class="md-nav" aria-label="Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-user-guide" class="md-nav__link">
+    New User Guide
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-in-app-help" class="md-nav__link">
+    More in-app help
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-versioned-documentation" class="md-nav__link">
+    Multi-versioned documentation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features-removed" class="md-nav__link">
+    Features removed
+  </a>
+  
+    <nav class="md-nav" aria-label="Features removed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sharable-tables-and-explorations-are-no-longer-available" class="md-nav__link">
+    Sharable tables and explorations are no longer available
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mathesars-internal-database-may-no-longer-be-sqlite" class="md-nav__link">
+    Mathesar's internal database may no longer be SQLite
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mathesars-live-demo-is-no-longer-active" class="md-nav__link">
+    Mathesar's live demo is no longer active
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance" class="md-nav__link">
+    Maintenance
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrate" class="md-nav__link">
+    Migrating to 0.2.0 from previous versions
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating to 0.2.0 from previous versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#migration-overview" class="md-nav__link">
+    Migration Overview
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-installations-using-docker-compose" class="md-nav__link">
+    For installations using Docker Compose
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-installations-done-from-scratch" class="md-nav__link">
+    For installations done from scratch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.7/" class="md-nav__link">
+        0.1.7
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.6/" class="md-nav__link">
+        0.1.6
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.5/" class="md-nav__link">
+        0.1.5
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.4/" class="md-nav__link">
+        0.1.4
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.3/" class="md-nav__link">
+        0.1.3
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.2/" class="md-nav__link">
+        0.1.2
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.1/" class="md-nav__link">
+        0.1.1
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.0/" class="md-nav__link">
+        0.1.0
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    Summary
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-fixes" class="md-nav__link">
+    Security Fixes
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Fixes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-files" class="md-nav__link">
+    Fix unauthorized access to cached import data
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#improvements" class="md-nav__link">
+    Improvements
+  </a>
+  
+    <nav class="md-nav" aria-label="Improvements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#permissions" class="md-nav__link">
+    New access control system based on PostgreSQL roles and privileges
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    Substantial performance improvements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#table-exports" class="md-nav__link">
+    Table exports
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-options-when-disconnecting-a-database" class="md-nav__link">
+    More options when disconnecting a database
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#small-usability-improvements" class="md-nav__link">
+    Small usability improvements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-sample-data" class="md-nav__link">
+    More sample data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-anonymous-usage-reporting" class="md-nav__link">
+    Optional (anonymous) usage reporting
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    Bug fixes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    Documentation
+  </a>
+  
+    <nav class="md-nav" aria-label="Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-user-guide" class="md-nav__link">
+    New User Guide
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-in-app-help" class="md-nav__link">
+    More in-app help
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-versioned-documentation" class="md-nav__link">
+    Multi-versioned documentation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features-removed" class="md-nav__link">
+    Features removed
+  </a>
+  
+    <nav class="md-nav" aria-label="Features removed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sharable-tables-and-explorations-are-no-longer-available" class="md-nav__link">
+    Sharable tables and explorations are no longer available
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mathesars-internal-database-may-no-longer-be-sqlite" class="md-nav__link">
+    Mathesar's internal database may no longer be SQLite
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mathesars-live-demo-is-no-longer-active" class="md-nav__link">
+    Mathesar's live demo is no longer active
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance" class="md-nav__link">
+    Maintenance
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrate" class="md-nav__link">
+    Migrating to 0.2.0 from previous versions
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating to 0.2.0 from previous versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#migration-overview" class="md-nav__link">
+    Migration Overview
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-installations-using-docker-compose" class="md-nav__link">
+    For installations using Docker Compose
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-installations-done-from-scratch" class="md-nav__link">
+    For installations done from scratch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/mathesar-foundation/mathesar/edit/develop/docs/docs/releases/0.2.0.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="mathesar-020-beta">Mathesar 0.2.0 (beta)<a class="headerlink" href="#mathesar-020-beta" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Version 0.2.0 is Mathesar&rsquo;s first <strong>beta</strong> release and features a brand new <a href="#permissions">access control system</a>, massive <a href="#performance">performance improvements</a>, and an important <a href="#data-files">security fix</a>.</p>
+<div class="admonition caution">
+<p>Upgrading directly from previous versions to <code>0.2.0</code> is not supported.
+Don’t worry—<strong>your databases can still be migrated to <code>0.2.0</code> using the instructions provided <a href="#migrate">below</a>.</strong></p>
+</div>
+<p><em>This page provides a comprehensive list of all changes since version 0.1.7.</em></p>
+<h2 id="security-fixes">Security Fixes<a class="headerlink" href="#security-fixes" title="Permanent link">&para;</a></h2>
+<h3 id="data-files">Fix unauthorized access to cached import data<a class="headerlink" href="#data-files" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Risk</strong>: Information disclosure</li>
+<li><strong>Severity</strong>: Low-medium</li>
+<li><strong>Affected versions</strong>: 0.1.0 - 0.1.7</li>
+<li>
+<p><strong>Description</strong>:</p>
+<p>Mathesar has a feature to import data into a new table via uploading a CSV file. During the import process, the uploaded CSV file is cached within Mathesar and never actually deleted.</p>
+<p>Prior to version 0.2.0, all authenticated users were able to use Mathesar&rsquo;s API to read the cached data for all imports which had ever been performed by any user. This could allow one authenticated user to maliciously read another user&rsquo;s uploaded data. (Anonymous users are not affected — they have never been able to read any cached import data.)</p>
+<p>From version 0.2.0 onwards, Mathesar only allows each user to read <em>their own</em> cached import data.</p>
+<p>If any of your users might have imported CSV data through Mathesar which they would like to keep private from <em>other users within the same Mathesar installation</em>, then we recommend moving your Mathesar installation to 0.2.0.</p>
+</li>
+<li>
+<p><strong>Fixed via</strong>: <a href="https://github.com/mathesar-foundation/mathesar/pull/4157">#4157</a></p>
+</li>
+<li>
+<p><strong>Work-around</strong>:</p>
+<p>To mitigate an older version of Mathesar against this vulnerability <em>without</em> upgrading, you can delete all the cached import data files with the following steps.</p>
+<details class="info">
+<summary>How to delete your cached import data files</summary>
+<ol>
+<li>Run <code>docker ps</code> to identify the name of your running Mathesar container. This is commonly named <code>mathesar_service</code> but might vary depending on how you have installed Mathesar</li>
+<li>Run <code>docker exec -it mathesar_service bash</code> to open a shell within your running Mathesar service container. (Replace &ldquo;mathesar_service&rdquo; with the name of your container determined above, if needed.)</li>
+<li>
+<p>From within the shell, run the following command to <em>list</em> your cached import data files.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ls -la /code/.media/*
+</span></code></pre></div>
+</li>
+<li>
+<p>Run the following command to <em>remove all</em> your cached import data files:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>rm -rf /code/.media/*
+</span></code></pre></div>
+</li>
+</ol>
+</details>
+<p>Note that after performing this work-around, subsequent imports will still be vulnerable to this bug until you upgrade to Mathesar 0.2.0.</p>
+</li>
+</ul>
+<h2 id="improvements">Improvements<a class="headerlink" href="#improvements" title="Permanent link">&para;</a></h2>
+<h3 id="permissions">New access control system based on PostgreSQL roles and privileges<a class="headerlink" href="#permissions" title="Permanent link">&para;</a></h3>
+<p>We&rsquo;ve completely redesigned Mathesar&rsquo;s <a href="../../user-guide/access-control/">access controls</a> to leverage PostgreSQL&rsquo;s powerful system of roles and privileges. Each Mathesar user will now be assigned to a specific PostgreSQL role so that all their operations on the underlying database will be performed using that role.</p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Add Collaborator&quot; modal for a database." src="../../assets/releases/0.2.0/add-collaborator.png" /></p>
+<p>The new system gives Mathesar several new capabilities. You can use Mathesar to configure roles and privileges in PostgreSQL and to set granular access control at the individual schema and table level. Plus Mathesar will respect all these configurations when performed directly in PostgreSQL by database administrators outside of Mathesar. Mathesar also no longer needs a database superuser for day-to-day operations.</p>
+<p><img alt="A screenshot of Mathesar's UI depicting the &quot;Roles&quot; database settings page, where roles and their dependent child roles can be managed." src="../../assets/releases/0.2.0/showcase-roles.png" /></p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Permissions&quot; modal for a table, where privleges can be granted to the different database roles." src="../../assets/releases/0.2.0/showcase-table-permissions.png" /></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/3626" title="Initial permissions remodel">#3626</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3663" title="Implement RPC endpoint for listing roles in server">#3663</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3665" title="Initial database_setup RPC functions">#3665</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3667" title="Cast OID values to bigint in msar.get_roles">#3667</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3684" title="Endpoints for servers, collaborators">#3684</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3685" title="Endpoints for configured roles">#3685</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3689" title="Remove existing permissions logic on the frontend">#3689</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3710" title="Homepage changes for database connections">#3710</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3711" title="Homepage UI">#3711</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3750" title="Implement database_privileges.list_direct RPC endpoint.">#3750</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3760" title="Implement database_privileges.get_owner_oid_and_curr_role_db_priv RPC endpoint">#3760</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3762" title="Database page role configuration, collaborators, roles">#3762</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3769" title="Implement roles.add RPC endpoint">#3769</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3781" title="Add database_privileges.replace_for_roles RPC function.">#3781</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3786" title="Add schema_privileges.replace_for_roles RPC function">#3786</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3789" title="Move DB page contexts to the route level">#3789</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3795" title="Add privilege information fields">#3795</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3810" title="Database permissions modal - 'Share' tab">#3810</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3833" title="Implement transfer_ownership for schemas and tables">#3833</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3836" title="Implement Permissions modal -&gt; 'Share' tab for Schemas">#3836</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3838" title="Implement permissions modal for schemas and tables">#3838</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3840" title="Allow setting owner at Creation">#3840</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3858" title="Implement roles.delete, databases.drop &amp; databases.configured.disconnect endpoints">#3858</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3859" title="Implement 'Transfer ownership' tabs">#3859</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3861" title="permission checks in all pages, Disconnect database option">#3861</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3869" title="Bugfix get_current_role when only one role exists">#3869</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3881" title="Grant appropriate permissions for msar, __msar and mathesar_types to PUBLIC">#3881</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3895" title="Filter databases for admin and standard users">#3895</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3922" title="Fix logic in get_current_role">#3922</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3931" title="Fix quoting for role grant/revoke expressions">#3931</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3958" title="Bugfix msar.set_members">#3958</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3966" title="Fix missing links in cell context menu">#3966</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3982" title="Fix some bugs from milestone testing-2">#3982</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4011" title="Return correct permission denied exception from SQL functions">#4011</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4024" title="Allow only superusers to disconnect configured DBs">#4024</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4082" title="Added Table Permission Modal in Table Card Menu">#4082</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4104" title="Fix confusing role field on user edit form">#4104</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4132" title="Handle errors better, Show a clearer error when user is not a collaborator on a database">#4132</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4075" title="Generated Identity for example datasets">#4075</a></p>
+<h3 id="performance">Substantial performance improvements<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h3>
+<p>Mathesar is now much faster! Most pages load about 5x faster, and large imports run about 50x faster.</p>
+<p>Also, you&rsquo;ll no longer need to manually &ldquo;sync database schema changes&rdquo; to Mathesar. Now, any DDL changes will be reflected in Mathesar automatically!</p>
+<p>To achieve these gains, we&rsquo;ve significantly overhauled Mathesar&rsquo;s backend architecture, moving a large chunk of the application code into the database itself, and migrating to a new <a href="../../api/">API</a>.</p>
+<!-- TODO_SCREENSHOT: It could be neat to produce a bar chart here showing page load times across a few pages on 0.1.7 (prod) vs 0.2.0 (prod). This would take some time, but might be worth it.
+
+Some pages in the library management schema that would demo perf improvements well:
+
+- The record page for Author id 225 Robert Jordan
+- The books table
+- Importing something
+ -->
+
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/3543" title="Connections RPC front end">#3543</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3547" title="Exception handler tests">#3547</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3556" title="Add columns.list function">#3556</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3586" title="Col delete func">#3586</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3588" title="Fix SQL syntax highlighting in VS code for SQL tests">#3588</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3589" title="Remove dead front end API client code to GET one schema">#3589</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3597" title="Refactor list of RPC methods to test">#3597</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3598" title="Implement schemas.list RPC method">#3598</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3599" title="Implement tables.list rpc endpoint">#3599</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3608" title="Implement tables.delete RPC endpoint">#3608</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3610" title="Implement schemas.delete RPC method">#3610</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3612" title="Implement tables.get RPC endpoint">#3612</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3614" title="Implement tables.add RPC endpoint">#3614</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3615" title="Add columns.patch RPC function">#3615</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3616" title="Add columns.add RPC function">#3616</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3618" title="Implement tables.patch RPC endpoint">#3618</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3620" title="Implement schemas.add RPC method">#3620</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3623" title="Implement table.import RPC endpoint">#3623</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3628" title="Implement schemas.patch RPC method">#3628</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3632" title="Wire RPC functions to new models">#3632</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3633" title="Quoting refactor">#3633</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3635" title="Implement tables.get_import_preview RPC endpoint">#3635</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3637" title="Auto generate table name">#3637</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3641" title="Add columns.metadata.list RPC function">#3641</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3646" title="Implement tables.metadata list &amp; patch RPC endpoint">#3646</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3648" title="Use schemas RPC APIs in the front end on the database page">#3648</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3649" title="Allow un-setting schema comment using NULL">#3649</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3650" title="Drop old SQL function signature">#3650</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3651" title="Implement tables list and delete RPC APIs">#3651</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3653" title="Columns meta RPC patch">#3653</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3664" title="Constraints RPC transition">#3664</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3666" title="Cast OIDs to bigint before putting in JSON">#3666</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3669" title="RPC implementation for tables.list_joinable">#3669</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3672" title="Improve tables metadata">#3672</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3676" title="RPC implementation for types.list">#3676</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3691" title="Add records.list RPC function">#3691</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3694" title="RPC transition for explorations list and delete">#3694</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3696" title="Implement explorations.run RPC endpoint">#3696</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3698" title="Fix return type error when re-defining get_constraints_for_table SQL function">#3698</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3699" title="Fix Issues with tables.patch RPC method">#3699</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3700" title="RPC records list filtering">#3700</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3702" title="Return empty array when schema has no tables">#3702</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3703" title="RPC endpoint for column info with metadata">#3703</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3704" title="First steps of RPC implementation for table page">#3704</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3708" title="Add records.search RPC function">#3708</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3709" title="Wire up valid_target_type function to column lister">#3709</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3717" title="Alter column metadata fields">#3717</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3718" title="Add target_table_info in tables.list_joinable's response">#3718</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3721" title="Records grouping">#3721</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3723" title="Fix 'no current database' error">#3723</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3725" title="Implement explorations run_saved &amp; get RPC endpoints">#3725</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3728" title="Handle new records filtering on the front end">#3728</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3731" title="Implement explorations add &amp; replace endpoint">#3731</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3740" title="Add records.get RPC function">#3740</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3741" title="Add records.delete RPC function">#3741</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3745" title="Add records.add RPC function">#3745</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3746" title="Adapt front end to new RPC-based joinable tables API">#3746</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3748" title="Fix edge case while getting joinable tables for tables with no links">#3748</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3749" title="Add records.patch RPC function">#3749</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3751" title="Records grouping bugfix">#3751</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3754" title="Records delete bugfix">#3754</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3755" title="Adapt front end to new records grouping API">#3755</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3759" title="Implement RPC records CRUD operations on front end">#3759</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3761" title="Add simplified record summaries">#3761</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3767" title="Add link-adding RPC functions">#3767</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3771" title="Add data_modeling.suggest_types function.">#3771</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3782" title="Add schema_privileges.list_direct RPC function">#3782</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3783" title="Add table_privileges.list_direct RPC function">#3783</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3791" title="Add table_privileges.replace_for_roles RPC function">#3791</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3796" title="Add roles.get_current_role RPC function">#3796</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3799" title="Reorganize namespacing">#3799</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3800" title="Hard-code abstract types response in client">#3800</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3802" title="Change response structure for record summary">#3802</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3803" title="Implement data_modeling.split_table RPC functions">#3803</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3804" title="Modify pkey finder to return False when no pkey exists">#3804</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3807" title="Change response for tables.add and tables.import">#3807</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3808" title="Add summaries to self">#3808</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3809" title="Move columns SQL">#3809</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3811" title="Propagate RPC record summary changes to front end">#3811</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3813" title="Add data_file_id field to TableMetaData">#3813</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3814" title="Implement data_modeling.move_columns RPC endpoint">#3814</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3819" title="Get imports working again">#3819</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3821" title="Implement databases.privileges.transfer_ownership RPC endpoint">#3821</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3823" title="Implement tables.get_with_metadata RPC endpoint">#3823</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3824" title="Use data file name as table name during import">#3824</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3825" title="A couple small front end RPC changes">#3825</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3831" title="Bugfix listing records from a table with self-Referential FK">#3831</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3832" title="Hard-code type cast map on front end">#3832</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3837" title="Alter response for schemas add and patch endpoints &amp; implement schemas.get">#3837</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3843" title="Propagate RPC changes to record selector">#3843</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3845" title="Use RPC API for column metadata">#3845</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3847" title="Propagate RPC changes to link table dialog">#3847</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3850" title="Fix response for split_table">#3850</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3852" title="Alter response for record summaries with NULL records">#3852</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3853" title="Make records.get work with stringified PK values">#3853</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3855" title="Enabling running of very simple explorations">#3855</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3856" title="Get 'extract columns' and 'move columns' functionality working again">#3856</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3857" title="Allow patching records via string PKs">#3857</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3866" title="Implement roles.set_members RPC endpoint">#3866</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3873" title="Deserialize transformations before creating DBQuery object">#3873</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3879" title="Fix updating of table name">#3879</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3884" title="Bugfix summarizations">#3884</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3885" title="Fix insert for table with only ID column">#3885</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3892" title="Add schema_oid to Explorations model">#3892</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3893" title="Get explorations CRUD working again">#3893</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3894" title="Fix broken exploration 'column added' indicators">#3894</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3897" title="Reduces frontend caching, fixes a few bugs">#3897</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3909" title="Fix bug when updating table twice">#3909</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3940" title="Fix response of explorations.run for summarizations">#3940</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3948" title="Fixes server errors when RPC exceptions are thrown while rendering common_data">#3948</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3974" title="Refactor SQL install script">#3974</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3976" title="SQL comments to index positional arguments">#3976</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3978" title="Backend support for configurable record summaries">#3978</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3979" title="Add tests for exec_msar_func python wrappers">#3979</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3983" title="Drop all msar functions at start of install SQL">#3983</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3984" title="Remove types.list RPC endpoint">#3984</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3987" title="Frontend support for configurable record summaries">#3987</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3996" title="Small bug fixes in record summary DB code">#3996</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4015" title="Use mocked exec_msar_func calls for RPC tests">#4015</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4016" title="Handle permissions edge cases within record summaries">#4016</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4021" title="Add RPC functions to install/update SQL on configured databases">#4021</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4026" title="Users RPC transition">#4026</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4035" title="Docs and tests for users.* RPC endpoints">#4035</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4040" title="Add mathesar_rpc_method decorator">#4040</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4116" title="Add support for wide tables">#4116</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4123" title="Implement UI for upgrading databases">#4123</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4046" title="Fix bug on column type options form">#4046</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4065" title="Execute default expr when not dynamic.">#4065</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4073" title="Fix legend missing from installed schemas checkbox group">#4073</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4105" title="Fix fieldset legend displaying undefined">#4105</a></p>
+<h3 id="table-exports">Table exports<a class="headerlink" href="#table-exports" title="Permanent link">&para;</a></h3>
+<p>You can now use Mathesar to <a href="../../user-guide/exporting-data/">export a table</a> to a CSV file. Any filters and sorting that you&rsquo;ve applied to the table will be reflected in the exported data. And all relevant records will be included in the export, even if they are not shown on the current page within Mathesar.</p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Export&quot; button on a table page." src="../../assets/releases/0.2.0/export-button-table-view-arrow.png" /></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4090" title="Add ability to export tables">#4090</a></p>
+<h3 id="more-options-when-disconnecting-a-database">More options when disconnecting a database<a class="headerlink" href="#more-options-when-disconnecting-a-database" title="Permanent link">&para;</a></h3>
+<p>When disconnecting a database from Mathesar, you can now choose to remove the Mathesar schemas from the database.</p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Disconnect Database&quot; modal, with all options selected except &quot;Specify a role&quot;." src="../../assets/releases/0.2.0/disconnect-db.png" /></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4122" title="Function to remove Mathesar schemas and disconnect DB">#4122</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4136" title="Allow disconnecting server via databases.configured.disconnect">#4136</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4124" title="Implement new UI for disconnecting DBs">#4124</a></p>
+<h3 id="small-usability-improvements">Small usability improvements<a class="headerlink" href="#small-usability-improvements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Persist visibility of table inspector sections <a href="https://github.com/mathesar-foundation/mathesar/pull/3997" title="Persist visibility of table inspector sections">#3997</a></li>
+<li>Default to case-insensitive comparison when filtering records <a href="https://github.com/mathesar-foundation/mathesar/pull/4131" title="Fix UX issue with case-sensitive filtering">#4131</a></li>
+<li>Prevent <code>Enter</code> key from mistakenly altering filter value <a href="https://github.com/mathesar-foundation/mathesar/pull/4078" title="Disallow newlines in text filter input">#4078</a></li>
+<li>Make the top navigation header behave more consistently <a href="https://github.com/mathesar-foundation/mathesar/pull/4072" title="Improve nav header behavior">#4072</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4101" title="Added empty state messages in breadcrumb selectors (Header)">#4101</a></li>
+<li>Improve alignment of numeric fields on record page <a href="https://github.com/mathesar-foundation/mathesar/pull/4077" title="Left-align text within number inputs">#4077</a></li>
+<li>Highlight newly-created items <a href="https://github.com/mathesar-foundation/mathesar/pull/4089" title="Improve UX when creating new items">#4089</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4109" title="Don't highlight databases/tables/schemas when filtering">#4109</a></li>
+<li>Add entity type names to database and schema pages <a href="https://github.com/mathesar-foundation/mathesar/pull/4107" title="Add entity type names to database and schema pages">#4107</a></li>
+<li>Simplify the schema page <a href="https://github.com/mathesar-foundation/mathesar/pull/4112" title="Remove tab container from the schema page">#4112</a></li>
+<li>Improve the data explorer layout <a href="https://github.com/mathesar-foundation/mathesar/pull/4115" title="Improve data explorer UI layout">#4115</a></li>
+<li>Show a loading spinner for tale pages <a href="https://github.com/mathesar-foundation/mathesar/pull/3602" title="Show a loading spinner for tale pages">#3602</a></li>
+<li>Improve visual style and aesthetics <a href="https://github.com/mathesar-foundation/mathesar/pull/3860" title="UI consistency improvements">#3860</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/3962" title="Swap Pill declarations to fix wrong colors in the Link Table dialog">#3962</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/3970" title="Fix action buttons looking disabled">#3970</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/3998" title="Minor visual improvements to the Table Inspector">#3998</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4047" title="Improve clarity of table inspector active tab">#4047</a></li>
+</ul>
+<h3 id="more-sample-data">More sample data<a class="headerlink" href="#more-sample-data" title="Permanent link">&para;</a></h3>
+<p>Mathesar now gives you the option to load several new sample data sets when connecting a database.</p>
+<!-- TODO_SCREENSHOT: "Create a New Database" modal with all boxes checked -->
+
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4142" title="Add beta dataset loaders to setup RPC functions">#4142</a></p>
+<h3 id="optional-anonymous-usage-reporting">Optional (anonymous) usage reporting<a class="headerlink" href="#optional-anonymous-usage-reporting" title="Permanent link">&para;</a></h3>
+<p>To help us better understand the ways in which people are using Mathesar, we&rsquo;ve added a new feature which periodically reports anonymous usage data about each Mathesar installation to the maintainers team. Upon installing (or upgrading to) Mathesar 0.2.0, Mathesar will give you an opportunity to opt out of usage data collection if you so choose. You can access this setting later by visiting the &ldquo;Administration&rdquo; &gt; &ldquo;Privacy&rdquo; page within Mathesar.</p>
+<p>This usage data will help us make Mathesar better! And it will help us demonstrate Mathesar&rsquo;s traction and impact to potential donors — so we encourage you to enable it.</p>
+<p><img alt="A screenshot of Mathesar's UI showing the &quot;Privacy&quot; page with a checkbox to opt out of data collection." src="../../assets/releases/0.2.0/usage-stats.png" /></p>
+<p>We do not collect any personal or sensitive data!</p>
+<div class="admonition info">
+<p class="admonition-title">Here is a sample of the anonymous usage data we collect:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nt">&quot;installation_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5f0126e9-02b0-451f-8797-6e2574b69814&quot;</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;mathesar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;user_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">&quot;active_user_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">&quot;configured_role_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">&quot;connected_database_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">&quot;connected_database_schema_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">35</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nt">&quot;connected_database_table_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">169</span><span class="p">,</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nt">&quot;connected_database_record_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1164525</span><span class="p">,</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nt">&quot;exploration_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
+</span></code></pre></div>
+</div>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4049" title="Add analytics wiring">#4049</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4111" title="Add analytics wiring RPC functions">#4111</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4126" title="Analytics opt-in flow UI">#4126</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4140" title="Add feedback uploader rpc function">#4140</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4141" title="Use case feedback collection">#4141</a></p>
+<h2 id="bug-fixes">Bug fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fix error when trying to reset password of other user <a href="https://github.com/mathesar-foundation/mathesar/pull/3536" title="Fix change password error">#3536</a></li>
+<li>Handle negative numbers correctly when copying cells <a href="https://github.com/mathesar-foundation/mathesar/pull/3582" title="Handle negative numbers in TSV serialization for copy">#3582</a></li>
+<li>Fix several subtle bugs related to selecting cells in a sheet <a href="https://github.com/mathesar-foundation/mathesar/pull/3037" title="Refactor CellSelection data structure and store">#3037</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/3968" title="Fix browser console warnings">#3968</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/3973" title="Fix bug when renaming exploration column">#3973</a></li>
+<li>Fix timeout when installing Mathesar on a remote DB <a href="https://github.com/mathesar-foundation/mathesar/pull/3917" title="Fast install">#3917</a></li>
+<li>Sort list of schemas <a href="https://github.com/mathesar-foundation/mathesar/pull/4050" title="Sort schemas in Database page and Breadcrumb selector">#4050</a></li>
+<li>Allow users to hover over record-level error messages <a href="https://github.com/mathesar-foundation/mathesar/pull/4087" title="Added allow users to hover over record-level error messages">#4087</a></li>
+<li>Allow scrolling on &ldquo;Create Superuser&rdquo; page <a href="https://github.com/mathesar-foundation/mathesar/pull/4093" title="fix: Fixed the scroll unscrollable in superuser_create page">#4093</a></li>
+<li>Fix alignment of numbers in cells for some font families <a href="https://github.com/mathesar-foundation/mathesar/pull/4097" title="Fixed the misalignment in number text of money type cell">#4097</a></li>
+<li>Fix 404 error from server side navigation to New User page <a href="https://github.com/mathesar-foundation/mathesar/pull/4106" title="Solved Server side navigation to New User page gives 404 error">#4106</a></li>
+<li>Fix Save &amp; Discard buttons always shown when viewing user <a href="https://github.com/mathesar-foundation/mathesar/pull/3971" title="Fix form state bug in Edit User">#3971</a></li>
+<li>Improve error handling when attempting to import unsupported file types <a href="https://github.com/mathesar-foundation/mathesar/pull/4028" title="Fix error message on invalid file type import">#4028</a></li>
+<li>Keep record selector open when double-clicking on linked record cell <a href="https://github.com/mathesar-foundation/mathesar/pull/4043" title="Allowed the record selector modal to remain open on double-clicking the selected FK cell">#4043</a></li>
+<li>Fix redundant schema name in page titles <a href="https://github.com/mathesar-foundation/mathesar/pull/4074" title="Fix small problem with schema name in page titles">#4074</a></li>
+</ul>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<h3 id="new-user-guide">New User Guide<a class="headerlink" href="#new-user-guide" title="Permanent link">&para;</a></h3>
+<p>We&rsquo;ve overhauled our <a href="../../user-guide/">User Guide</a> to document all new features and more thoroughly explain the inner-workings of Mathesar. You might even learn a thing or two about PostgreSQL by reading it!</p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/3910" title="Permissions Documentation Updates">#3910</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3945" title="Docs improvements for build from scratch">#3945</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4031" title="Comprehensive documentation improvements">#4031</a></p>
+<h3 id="more-in-app-help">More in-app help<a class="headerlink" href="#more-in-app-help" title="Permanent link">&para;</a></h3>
+<p>You&rsquo;ll also find more help within the application itself. Look for small gray help bubbles to explain concepts and provides links to more detailed information within the User Guide.</p>
+<video controls autoplay loop muted playsinline poster="../../assets/releases/0.2.0/export-button-table-view.png">
+  <source src="../../assets/releases/0.2.0/mathesar-beta-vid-tooltips.mp4" type="video/mp4">
+</video>
+
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4108" title="Add more in-app help bubbles">#4108</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4135" title="Resources section and donate in-app">#4135</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4144" title="Fix regression in help bubble placement">#4144</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4121" title="Update public schema notice">#4121</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4098" title="Fix regression: Display the Welcome page when there are no databases">#4098</a></p>
+<h3 id="multi-versioned-documentation">Multi-versioned documentation<a class="headerlink" href="#multi-versioned-documentation" title="Permanent link">&para;</a></h3>
+<p>Our documentation site https://docs.mathesar.org/ now features documentation for multiple Mathesar versions. See the version-switcher within the top navigation bar to read documentation for older versions of Mathesar.</p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/3920" title="Multi-versioned docs — 0.1.7 updates">#3920</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3967" title="Document multi-version docs system">#3967</a></p>
+<h2 id="features-removed">Features removed<a class="headerlink" href="#features-removed" title="Permanent link">&para;</a></h2>
+<h3 id="sharable-tables-and-explorations-are-no-longer-available">Sharable tables and explorations are no longer available<a class="headerlink" href="#sharable-tables-and-explorations-are-no-longer-available" title="Permanent link">&para;</a></h3>
+<p>Back in version 0.1.3, we added support for &ldquo;sharing&rdquo; tables and explorations via a link that would allow anonymous users to view data. In Mathesar 0.2.0, we&rsquo;ve removed this feature in order to speed up the development of our new PostgreSQL-based access control system. If you were relying on this feature, we&rsquo;d like to hear from you! Please <a href="https://github.com/mathesar-foundation/mathesar/issues/new?template=feature_request.md">open an issue</a> to let us know.</p>
+<h3 id="mathesars-internal-database-may-no-longer-be-sqlite">Mathesar&rsquo;s <em>internal</em> database may no longer be SQLite<a class="headerlink" href="#mathesars-internal-database-may-no-longer-be-sqlite" title="Permanent link">&para;</a></h3>
+<p>Version 0.2.0 removes support for SQLite as an <a href="../../user-guide/databases/#internal">internal database</a>. If you were relying on this feature, we&rsquo;d like to hear from you! Please <a href="https://github.com/mathesar-foundation/mathesar/issues/new?template=feature_request.md">open an issue</a> to let us know.</p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4023" title="Remove support for sqlite">#4023</a></p>
+<h3 id="mathesars-live-demo-is-no-longer-active">Mathesar&rsquo;s live demo is no longer active<a class="headerlink" href="#mathesars-live-demo-is-no-longer-active" title="Permanent link">&para;</a></h3>
+<p>We have removed the code and infrastructure which supported Mathesar&rsquo;s live demo.</p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/3538" title="Remove demo code">#3538</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3551" title="Remove E2E infrastructure">#3551</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3577" title="Add GitHub workflow to reset demo">#3577</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3579" title="Updates to GH workflow for resetting demo">#3579</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3580" title="Updates to GH workflow to reset demo">#3580</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3581" title="Remove the demo reset workflow">#3581</a></p>
+<h2 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h2>
+<p>The following PRs represent work done to reduce technical debt, update dependencies, improve developer documentation, and maintain our workflows.</p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/3360" title="Add script to help resolve git merge conflicts in dict.json i18n file">#3360</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3535" title="Update docs to add instructions for loading data from playground">#3535</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3541" title="Remove API documentation infrastructure">#3541</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3544" title="Bump dependencies">#3544</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3546" title="Remove Debian build">#3546</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3552" title="Sort frontend imports">#3552</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3558" title="Merge pull request #3539 from mathesar-foundation/0.1.7">#3558</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3559" title="Resolve merge conflict for #3558">#3559</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3564" title="Remove nonsensical cast_to_email and cast_to_uri functions">#3564</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3567" title="Revert #3559">#3567</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3568" title="Add 0.1.7 release notes to the nav menu">#3568</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3569" title="Merge pull request #3568 from mathesar-foundation/release_notes_nav">#3569</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3587" title="Architectural overhaul">#3587</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3604" title="Bump dependencies">#3604</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3643" title="Add SQL code standard for casting OIDs to bigint">#3643</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3678" title="Fix install script">#3678</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3695" title="Merge breaking changes into develop">#3695</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3763" title="Update MkDocs dependencies">#3763</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3918" title="Add PostgreSQL 17 to the testing matrix">#3918</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3920" title="Multi-versioned docs — 0.1.7 updates">#3920</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3938" title="Use a semver library to parse our version strings on the front end">#3938</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3939" title="Release 0.2.0-testing.1">#3939</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3943" title="Remove GitHub action to auto-publish documentation">#3943</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3947" title="Remove dead code (part 1)">#3947</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3949" title="Release notes for 0.2.0-testing.1">#3949</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3950" title="Merge develop into release branch.">#3950</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3959" title="Merge master into testing.1 branch">#3959</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3961" title="0.2.0">#3961</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3964" title="Updates to 0.2.0-testing.1 release notes">#3964</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3972" title="Improve front end linting">#3972</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3975" title="Remove dead code 2 (the code strikes back)">#3975</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3981" title="Code removal 3: clean up">#3981</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3985" title="Reduce backend dependencies">#3985</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3988" title="Upgrade dependencies">#3988</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3989" title="Add python 13 to testing matrix">#3989</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3990" title="Bump ipython from 7.34.0 to 8.10.0">#3990</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3991" title="Faster CI for running backend tests">#3991</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3994" title="Fix broken GitHub Sponsors link in docs">#3994</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3999" title="Require all Svelte components to have a TS script block">#3999</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4025" title="Add scenario testing framework, initial test">#4025</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4032" title="Remove fixture util">#4032</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4039" title="Added favicon icons for the page templates in base.html and added respective icons in the static folder">#4039</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4045" title="Add spell-checking to MkDocs build process">#4045</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4060" title="Bump django from 4.2.16 to 4.2.17">#4060</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4064" title="Rename references to mathesar/mathesar-ansible to mathesar-infrastructure">#4064</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4076" title="Remove TODO_BETA code comments">#4076</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4125" title="Update codeql-analysis.yml to use latest codeql dependencies">#4125</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4133" title="Update versions and remove unused dependency">#4133</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4145" title="Reset django migrations, document upgrade">#4145</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/3980" title="Fix row height calculation during grouping removal">#3980</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4158" title="Updates for file mathesar_ui/src/i18n/languages/en/dict.json in ja">#4158</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4159" title="Updates for file translations/en/LC_MESSAGES/django.po in ja">#4159</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4165" title="Identify i18n translate function calls made with variables instead of strings">#4165</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4152" title="Release 0.2.0">#4152</a>
+<a href="https://github.com/mathesar-foundation/mathesar/pull/4170" title="Rpc performance">#4170</a></p>
+<h2 id="migrate">Migrating to 0.2.0 from previous versions<a class="headerlink" href="#migrate" title="Permanent link">&para;</a></h2>
+<p>Mathesar 0.2.0 is our first beta release. As such, direct upgrades from our alpha versions are not supported.</p>
+<p>However, you can migrate the databases created in older versions to work with 0.2.0 by following the steps below.</p>
+<h3 id="migration-overview">Migration Overview<a class="headerlink" href="#migration-overview" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>What you can migrate</strong>: the databases you&rsquo;ve created/connected and the data within them.</li>
+<li><strong>What you cannot migrate</strong>: <a href="../../user-guide/users/">user</a> accounts, passwords, <a href="../../user-guide/data-explorer/">explorations</a>, and <a href="../../user-guide/metadata/">metadata</a>.</li>
+<li>Here’s what we’ll do:<ul>
+<li>Take note of the databases you’ve created or connected in your current Mathesar setup.</li>
+<li>Install Mathesar <code>0.2.0</code>.</li>
+<li>Reconnect the databases you had before.</li>
+</ul>
+</li>
+</ul>
+<div class="admonition question">
+<p class="admonition-title">When should I perform these steps?</p>
+<ul>
+<li>If any of your connected databases reside inside Mathesar&rsquo;s internal database server (<em>inside</em> Docker containers), then you will need to perform these steps.</li>
+<li>If all of your connected databases reside in PostgreSQL servers <em>outside</em> the Mathesar&rsquo;s Docker containers, then you could install 0.2.0 and reconnect your databases.</li>
+</ul>
+</div>
+<h3 id="for-installations-using-docker-compose">For installations using Docker Compose<a class="headerlink" href="#for-installations-using-docker-compose" title="Permanent link">&para;</a></h3>
+<p>These instructions are for if you have a Docker compose installation (including one from the guided script).</p>
+<div class="admonition caution">
+<p>These steps assume that you&rsquo;re using our provided <code>docker-compose.yml</code> file, and the installation directory is <code>/etc/mathesar</code>.</p>
+<p>If you have installed Mathesar in a different location or heavily modified the <code>docker-compose.yml</code>, you may need to change some details of the provided commands.</p>
+</div>
+<ol>
+<li>
+<p>With your old version of Mathesar still running, log into your internal database server:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>mathesar_db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>mathesar<span class="w"> </span>-d<span class="w"> </span>mathesar_django
+</span></code></pre></div>
+<p>(This assumes your installation DB role is <code>mathesar</code>. Modify if necessary.)</p>
+</li>
+<li>
+<p>At the <code>psql</code> prompt, run:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">db_name</span><span class="p">,</span><span class="k">host</span><span class="p">,</span><span class="n">port</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">mathesar_database</span><span class="p">;</span>
+</span></code></pre></div>
+<ul>
+<li>The above SQL query will provide the list of connected database names along with their hosts and port.</li>
+<li>Copy and paste them in a text file somewhere. We will need them after installing 0.2.0.</li>
+</ul>
+</li>
+<li>
+<p>Then create a temporary database:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_temp</span><span class="p">;</span>
+</span></code></pre></div>
+</li>
+<li>
+<p>Log out with <kbd>Ctrl</kbd>+<kbd>D</kbd>, and log into the <code>mathesar_temp</code> database:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>mathesar_db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>mathesar<span class="w"> </span>-d<span class="w"> </span>mathesar_temp
+</span></code></pre></div>
+</li>
+<li>
+<p>Then drop the old Mathesar Django database, and create a new one:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">DROP</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_django</span><span class="p">;</span>
+</span></code></pre></div>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_django</span><span class="w"> </span><span class="k">OWNER</span><span class="w"> </span><span class="n">mathesar</span><span class="p">;</span>
+</span></code></pre></div>
+<p>(Modify <code>mathesar</code> above to set the owner to whichever role you use to run Mathesar.)</p>
+</li>
+<li>
+<p>Log out with <kbd>Ctrl</kbd>+<kbd>D</kbd>, and log into your new <code>mathesar_django</code> database:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>mathesar_db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>mathesar<span class="w"> </span>-d<span class="w"> </span>mathesar_django
+</span></code></pre></div>
+</li>
+<li>
+<p>Then drop the temporary database:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">DROP</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_temp</span><span class="p">;</span>
+</span></code></pre></div>
+</li>
+<li>
+<p>Log out with <kbd>Ctrl</kbd>+<kbd>D</kbd>.</p>
+</li>
+<li>
+<p>Stop Mathesar.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker compose -f /etc/mathesar/docker-compose.yml down
+</span></code></pre></div>
+</li>
+<li>
+<p>Rename the old docker-compose file.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>mv /etc/mathesar/docker-compose.yml /etc/mathesar/docker-compose.old.yml
+</span></code></pre></div>
+</li>
+<li>
+<p>Download the 0.2.0 <a href="https://github.com/mathesar-foundation/mathesar/raw/0.2.0/docker-compose.yml">docker-compose.yml</a> file and place it within <code>/etc/mathesar</code>.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>cd /etc/mathesar
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>wget https://github.com/mathesar-foundation/mathesar/raw/0.2.0/docker-compose.yml
+</span></code></pre></div>
+</li>
+<li>
+<p>Modify it as per the <a href="../../administration/install-via-docker-compose/">installation instructions</a>, using values from your old <code>docker-compose.old.yml</code> file.</p>
+</li>
+<li>
+<p>Run the command below:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>docker compose -f /etc/mathesar/docker-compose.yml up --pull always -d
+</span></code></pre></div>
+</li>
+<li>
+<p>After Mathesar starts, connect to the databases using the &ldquo;Connect to an Existing Database&rdquo; option on the UI.</p>
+<ul>
+<li>Use the db_name, host, and port information from the previous database backup list to fill the form.</li>
+<li>For the <code>mathesar_db</code> host, the Role Name and Password can be found from the values of <code>POSTGRES_USER</code> and <code>POSTGRES_PASSWORD</code> environment variables.</li>
+<li>The values for these environment variables can be found in the <code>docker-compose.yml</code> file, or if you&rsquo;ve customized them, in your <code>.env</code> file.</li>
+<li>The default values for them are <code>mathesar</code> and <code>mathesar</code>.</li>
+<li>If you have any external hosts (other than <code>mathesar_db</code>), you should probably have the postgres user and passwords with you.</li>
+</ul>
+</li>
+</ol>
+<h3 id="for-installations-done-from-scratch">For installations done from scratch<a class="headerlink" href="#for-installations-done-from-scratch" title="Permanent link">&para;</a></h3>
+<p>For these instructions, you&rsquo;ll need to be familiar enough with your setup to log into your internal Mathesar Database.</p>
+<div class="admonition caution">
+<p>These steps assume that the installation directory is <code>/etc/mathesar</code>.</p>
+<p>If you have installed Mathesar in a different location, you may need to change some details of the provided commands.</p>
+</div>
+<ol>
+<li>
+<p>Log into your <code>mathesar_django</code> database, and run:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">db_name</span><span class="p">,</span><span class="k">host</span><span class="p">,</span><span class="n">port</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">mathesar_database</span><span class="p">;</span>
+</span></code></pre></div>
+<ul>
+<li>The above SQL query will provide the list of connected database names along with their hosts and port.</li>
+<li>Copy and paste them in a text file somewhere. We will need them after installing 0.2.0.</li>
+</ul>
+</li>
+<li>
+<p>Then create a temporary database:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_temp</span><span class="p">;</span>
+</span></code></pre></div>
+</li>
+<li>
+<p>Log out with <kbd>Ctrl</kbd>+<kbd>D</kbd>, and log into the <code>mathesar_temp</code> database.</p>
+</li>
+<li>
+<p>Then drop the old Mathesar Django database, and create a new one:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">DROP</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_django</span><span class="p">;</span>
+</span></code></pre></div>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_django</span><span class="w"> </span><span class="k">OWNER</span><span class="w"> </span><span class="n">mathesar</span><span class="p">;</span>
+</span></code></pre></div>
+<p>(Modify <code>mathesar</code> above to set the owner to whichever role you use to run Mathesar.)</p>
+</li>
+<li>
+<p>Log out with <kbd>Ctrl</kbd>+<kbd>D</kbd>, and log into your new <code>mathesar_django</code> database.</p>
+</li>
+<li>
+<p>Then drop the temporary database:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">DROP</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_temp</span><span class="p">;</span>
+</span></code></pre></div>
+</li>
+<li>
+<p>Log out with <kbd>Ctrl</kbd>+<kbd>D</kbd>.</p>
+</li>
+<li>
+<p>Stop Mathesar if it&rsquo;s running.</p>
+</li>
+<li>
+<p>Delete your previous Mathesar installation directory</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>rm -rf /etc/mathesar
+</span></code></pre></div>
+</li>
+<li>
+<p>Install Mathesar 0.2.0 using <a href="../../administration/install-from-scratch/">the installation steps</a> in the same location: <code>/etc/mathesar</code>. You would not have to setup a PostgreSQL database since you already have one running.</p>
+</li>
+<li>
+<p>After Mathesar starts, connect to the databases using the &ldquo;Connect to an Existing Database&rdquo; option on the UI.</p>
+<ul>
+<li>Use the db_name from the previous database backup list to fill the Database Name in the form.</li>
+<li>The Host name would be same as the value of <code>POSTGRES_HOST</code> environment variable for the databases created via Mathesar.</li>
+<li>The Role Name and Password can be found from the values of <code>POSTGRES_USER</code> and <code>POSTGRES_PASSWORD</code> environment variables.</li>
+<li>The values for these environment variables can be found in your <code>.env</code> file.</li>
+<li>If you have any external hosts (other than the one in <code>POSTGRES_HOST</code>), you should probably have the postgres user and passwords with you.</li>
+</ul>
+</li>
+</ol>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../0.2.1/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 0.2.1" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              0.2.1
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../0.1.7/" class="md-footer__link md-footer__link--next" aria-label="Next: 0.1.7" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              0.1.7
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy", "navigation.sections", "navigation.expand"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+        <script src="../../assets/javascripts/placeholder-plugin.js"></script>
+      
+        <script src="../../assets/javascripts/placeholder.min.js"></script>
+      
+    
+    
+  </body>
+</html>
