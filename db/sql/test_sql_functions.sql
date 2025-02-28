@@ -181,25 +181,16 @@ BEGIN
   RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, false),
     ARRAY[
-      ('id', 'text', null, null, false, null),
+      ('id', 'text', null, null, false, null)
     ]::__msar.col_def[],
     'Should add incoming "id" column and not add default "id" column when create_id is false'
   );
-    RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, false),
+  RETURN NEXT is(
+    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, true),
     ARRAY[
-      ('id', 'text', null, null, false, null),
+      ('id', 'integer', true, null, true, 'Mathesar default ID column')
     ]::__msar.col_def[],
     'Should ignore incoming "id" column and add default id column when create_id is true'
-  );
-  RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{}, {"name": "id"}]'::jsonb, false, true),
-    ARRAY[
-      ('id', 'integer', true, null, true, 'Mathesar default ID column'),
-      ('"id 1"', 'text', null, null, false, null),
-      ('"Column 1"', 'text', null, null, false, null)
-    ]::__msar.col_def[],
-    'Should rename incoming "id" column and add default id column when create_id is true'
   );
   RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
@@ -1576,6 +1567,33 @@ BEGIN
   );
   RETURN NEXT col_type_is(
     'tab_create_schema'::name, 'cols_table'::name, 'Column 3'::name, 'character varying(128)'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_columns_rename_incoming_id() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_defs jsonb := $j$[
+    {"name": "id", "type": {"name": "numeric"}},
+    {"type": {"name": "varchar", "options": {"length": 128}}}
+  ]$j$;
+BEGIN
+  PERFORM __setup_create_table();
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid,
+    'cols_table',
+    col_defs,
+    null, null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT col_type_is(
+    'tab_create_schema'::name, 'cols_table'::name, 'id 1'::name, 'numeric'
+  );
+  RETURN NEXT col_type_is(
+    'tab_create_schema'::name, 'cols_table'::name, 'Column 2'::name, 'character varying(128)'
   );
 END;
 $f$ LANGUAGE plpgsql;
