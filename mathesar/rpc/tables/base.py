@@ -65,6 +65,15 @@ class AddedTableInfo(TypedDict):
     """
     oid: int
     name: str
+    renamed_columns: Optional[dict]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            oid=d['oid'],
+            name=d['name'],
+            renamed_columns=d.get('renamed_columns')
+        )
 
 
 class SettableTableInfo(TypedDict):
@@ -202,7 +211,7 @@ def add(
     owner_oid: int = None,
     comment: str = None,
     **kwargs
-) -> AddedTableInfo:
+) -> int:
     """
     Add a table with a default id column.
 
@@ -292,7 +301,16 @@ def import_(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return copy_datafile_to_table(user, data_file_id, table_name, schema_oid, conn, comment)
+        return AddedTableInfo.from_dict(
+            copy_datafile_to_table(
+                user,
+                data_file_id,
+                table_name,
+                schema_oid,
+                conn,
+                comment=comment,
+            )
+        )
 
 
 @mathesar_rpc_method(name="tables.get_import_preview", auth="login")

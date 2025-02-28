@@ -7,7 +7,9 @@ from mathesar.models.base import DataFile
 from mathesar.imports.utils import process_column_names
 
 
-def copy_datafile_to_table(user, data_file_id, table_name, schema_oid, conn, comment=None):
+def copy_datafile_to_table(
+        user, data_file_id, table_name, schema_oid, conn, comment=None
+):
     data_file = DataFile.objects.get(id=data_file_id, user=user)
     file_path = data_file.file.path
     header = data_file.header

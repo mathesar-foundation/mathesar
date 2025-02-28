@@ -48,6 +48,8 @@ def create_datafile(data, user=None):
         created_from = 'file'
         base_name = raw_file.name
         type = _get_file_type(raw_file)
+    else:
+        raise Exception("No source submitted!")
 
     if base_name:
         max_length = DataFile._meta.get_field('base_name').max_length
