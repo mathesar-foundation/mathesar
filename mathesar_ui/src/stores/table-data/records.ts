@@ -1,3 +1,4 @@
+import { execPipe, first, map, zip } from 'iter-tools';
 import {
   type Readable,
   type Unsubscriber,
@@ -17,15 +18,18 @@ import type {
   RecordsListParams,
   RecordsResponse,
   RecordsSearchParams,
+  ResultValue,
 } from '@mathesar/api/rpc/records';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
+import { batchSend } from '@mathesar/packages/json-rpc-client-builder';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
   type CancellablePromise,
+  ImmutableMap,
   WritableMap,
   getGloballyUniqueId,
   isDefinedNonNullable,
@@ -36,7 +40,11 @@ import type { FilterEntry, Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Meta } from './meta';
 import RecordSummaryStore from './record-summaries/RecordSummaryStore';
-import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
+import {
+  type RecordSummariesForSheet,
+  buildRecordSummariesForSheet,
+  mergeRecordSummariesForSheet,
+} from './record-summaries/recordSummaryUtils';
 import type { SearchFuzzy } from './searchFuzzy';
 import type { Sorting } from './sorting';
 import { type RowKey, getCellKey, validateRow } from './utils';
@@ -78,10 +86,12 @@ function buildGrouping(apiGrouping: ApiGroupingResponse): RecordGrouping {
 }
 
 interface BaseRow {
+  /** See `records.ts.README.md` for more info */
   identifier: string;
 }
 
 export interface RecordRow extends BaseRow {
+  /** See `records.ts.README.md` for more info */
   rowIndex: number;
   record: ApiRecord;
 }
@@ -153,10 +163,12 @@ export interface TableRecordsData {
   grouping?: RecordGrouping;
 }
 
+/** See `records.ts.README.md` for more info */
 export function getRowSelectionId(row: Row): string {
   return row.identifier;
 }
 
+/** See `records.ts.README.md` for more info */
 export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
   if (rowHasRecord(row) && primaryKeyColumnId !== undefined) {
     const primaryKeyCellValue = row.record[primaryKeyColumnId];
@@ -167,6 +179,7 @@ export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
   return row.identifier;
 }
 
+/** See `records.ts.README.md` for more info */
 export function getPkValueInRecord(
   record: ApiRecord,
   columns: Column[],
@@ -182,6 +195,7 @@ export function getPkValueInRecord(
   return pkValue;
 }
 
+/** See `records.ts.README.md` for more info */
 function generateRowIdentifier(
   type: 'groupHeader' | 'normal' | 'dummy' | 'new',
   offset: number,
@@ -564,8 +578,112 @@ export class RecordsData {
     return primaryKeysOfSavedRows.length + identifiersOfUnsavedRows.length;
   }
 
-  // TODO: It would be better to throw errors instead of silently failing
-  // and returning a value.
+  async bulkUpdate(
+    rowBlueprints: {
+      recordId: ResultValue;
+      cells: { columnId: string; value: unknown }[];
+    }[],
+  ): Promise<void> {
+    const cellStatus = this.meta.cellModificationStatus;
+
+    /**
+     * Get the rowKey from the blueprint's recordId.
+     *
+     * Note: this duplicates some logic within the `getRowKey` function.
+     */
+    function key(blueprint: (typeof rowBlueprints)[number]) {
+      return String(blueprint.recordId);
+    }
+
+    function forEachRow(fn: (b: (typeof rowBlueprints)[number]) => void) {
+      rowBlueprints.forEach(fn);
+    }
+
+    function forEachCell(fn: (cellKey: string) => void) {
+      forEachRow((row) =>
+        row.cells.forEach((cell) => fn(getCellKey(key(row), cell.columnId))),
+      );
+    }
+
+    forEachCell((cellKey) => {
+      cellStatus.set(cellKey, { state: 'processing' });
+      this.updatePromises?.get(cellKey)?.cancel();
+    });
+    forEachRow((row) => this.updatePromises?.get(key(row))?.cancel());
+
+    const requests = rowBlueprints.map((row) =>
+      api.records.patch({
+        ...this.apiContext,
+        record_id: row.recordId,
+        record_def: Object.fromEntries(
+          row.cells.map((cell) => [cell.columnId, cell.value]),
+        ),
+      }),
+    );
+
+    const responses = await batchSend(requests);
+    const responseMap = new Map(
+      execPipe(
+        zip(rowBlueprints, responses),
+        map(([blueprint, response]) => [
+          key(blueprint),
+          { blueprint, response },
+        ]),
+      ),
+    );
+
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    if (!pkColumn) throw new Error('Unable to update without primary key');
+
+    this.savedRecordRowsWithGroupHeaders.update((rows) =>
+      rows.map((row) => {
+        const rowKey = getRowKey(row, pkColumn.id);
+        const responseMapValue = responseMap.get(rowKey);
+        if (!responseMapValue) return row;
+        const { blueprint, response } = responseMapValue;
+        if (response.status === 'error') {
+          // NOTE: this is a bit weird and could potentially be improved. If we
+          // were unable to save the record we need to indicate to the user that
+          // all target cells in the record have failed to update. The code
+          // below is a rather crude way of doing this. If one cells caused the
+          // whole record to fail, then the error message will be repeated for
+          // each cell in the record. We could potentially improve on this by
+          // using our `extractDetailedFieldBasedErrors` utility. But we'd still
+          // need to figure how to show some kind of errors in other cells.
+          blueprint.cells.forEach((cell) => {
+            const cellKey = getCellKey(rowKey, cell.columnId);
+            return cellStatus.set(cellKey, {
+              state: 'failure',
+              errors: [getErrorMessage(response)],
+            });
+          });
+          return row;
+        }
+        const result = first(response.value.results);
+        if (!result) return row;
+        blueprint.cells.forEach((cell) => {
+          const cellKey = getCellKey(rowKey, cell.columnId);
+          return cellStatus.set(cellKey, { state: 'success' });
+        });
+        return { ...row, record: result };
+      }),
+    );
+
+    let newRecordSummaries: RecordSummariesForSheet = new ImmutableMap();
+    for (const response of responses) {
+      if (response.status === 'error') continue;
+      const linkedRecordSummaries = response.value.linked_record_summaries;
+      if (!linkedRecordSummaries) continue;
+      newRecordSummaries = mergeRecordSummariesForSheet(
+        newRecordSummaries,
+        buildRecordSummariesForSheet(linkedRecordSummaries),
+      );
+    }
+    this.linkedRecordSummaries.addBespokeRecordSummaries(newRecordSummaries);
+  }
+
+  // TODO: it would be nice to refactor this function to utilize the
+  // `bulkUpdate` function (which actually updates the store values too).
   async updateCell(
     row: RecordRow | NewRecordRow | PlaceholderRow,
     column: Column,
