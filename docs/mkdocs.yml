@@ -41,8 +41,9 @@ nav:
       - Overview: api/index.md
       - Methods: api/methods.md
   - Releases:
-      - '0.2.0': releases/0.2.0.md
+      - '0.2.1': releases/0.2.1.md
       - Previous releases:
+          - '0.2.0': releases/0.2.0.md
           - '0.1.7': releases/0.1.7.md
           - '0.1.6': releases/0.1.6.md
           - '0.1.5': releases/0.1.5.md
@@ -149,7 +150,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.2.0
+  mathesar_version: 0.2.1
   version:
     provider: mike
     alias: true

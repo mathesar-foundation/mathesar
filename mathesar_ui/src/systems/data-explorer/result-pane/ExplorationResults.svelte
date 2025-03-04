@@ -12,7 +12,7 @@
     SheetRowHeaderCell,
     SheetVirtualRows,
   } from '@mathesar/components/sheet';
-  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
   import { ROW_HEADER_WIDTH_PX, ROW_HEIGHT_PX } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
   import { arrayIndex } from '@mathesar/utils/typeUtils';
@@ -44,14 +44,15 @@
   } = queryHandler);
   $: ({ initial_columns } = $query);
   $: clipboardHandler = new SheetClipboardHandler({
-    getCopyingContext: () => ({
-      rowsMap: new Map(map(([k, r]) => [k, r.record], get(selectableRowsMap))),
-      columnsMap: get(processedColumns),
-      recordSummaries: new ImmutableMap(),
-      selectedRowIds: get(selection).rowIds,
-      selectedColumnIds: get(selection).columnIds,
-    }),
+    copyingContext: {
+      getRows: () =>
+        new Map(map(([k, r]) => [k, r.record], get(selectableRowsMap))),
+      getColumns: () => get(processedColumns),
+      getRecordSummaries: () => new ImmutableMap(),
+    },
+    getSelection: () => get(selection),
     showToastInfo: toast.info,
+    showToastError: toast.error,
   });
   $: ({ columnIds } = $selection);
   $: recordRunState = $runState?.state;
