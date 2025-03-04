@@ -1,3 +1,20 @@
+/**
+ * Returns an iterable that yields the elements of the input iterable, but
+ * starting from the first element that satisfies the given predicate.
+ */
+export function* startingFrom<T>(
+  iter: Iterable<T>,
+  isFirstElement: (i: T) => boolean,
+): Generator<T> {
+  let found = false;
+  for (const i of iter) {
+    if (found || isFirstElement(i)) {
+      found = true;
+      yield i;
+    }
+  }
+}
+
 export function cartesianProduct<T, U>(
   a: Iterable<T>,
   b: Iterable<U>,

@@ -38,6 +38,7 @@
     return ROW_HEIGHT_PX;
   }
 
+  /** See notes in `records.ts.README.md` about different row identifiers */
   function getIterationKey(index: number, row: RowType | undefined): string {
     if (row) {
       return getRowKey(row, $pkColumn?.id);
