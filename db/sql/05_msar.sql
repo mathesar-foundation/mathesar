@@ -3473,7 +3473,7 @@ DECLARE
 BEGIN
 EXECUTE(
   format(
-    'SELECT GREATEST(LEAST(1000 / COUNT(1), 100), 5) FROM %1$I.%2$I TABLESAMPLE SYSTEM(1)',
+    'SELECT GREATEST(LEAST(1000 / (COUNT(1) + 1), 100), 5) FROM %1$I.%2$I TABLESAMPLE SYSTEM(1)',
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id)
   )
