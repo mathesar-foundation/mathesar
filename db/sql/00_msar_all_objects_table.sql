@@ -1144,6 +1144,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.peak_time(time without time zone)', 'AGGREGATE', NULL),
   ('msar', 'msar.point_to_month(point)', 'FUNCTION', NULL),
   ('msar', 'msar.point_to_time(point)', 'FUNCTION', NULL),
+  ('msar', 'msar.prepare_table_for_import(oid,text,jsonb,text)', 'FUNCTION', NULL),
   ('msar', 'msar.prepare_table_for_import(oid,text,jsonb,boolean,text,text,text,text,text)', 'FUNCTION', NULL),
   ('msar', 'msar.process_col_alter_jsonb(oid,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.process_col_def_jsonb(oid,jsonb,boolean,boolean)', 'FUNCTION', NULL),

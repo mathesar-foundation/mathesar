@@ -203,7 +203,7 @@ def test_tables_import(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return {"oid": 1964474, "name": "imported_table"}
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
-    monkeypatch.setattr(tables.base, 'import_csv', mock_table_import)
+    monkeypatch.setattr(tables.base, 'copy_datafile_to_table', mock_table_import)
     imported_table_info = tables.import_(
         data_file_id=10,
         table_name='imported_table',
@@ -211,7 +211,9 @@ def test_tables_import(rf, monkeypatch):
         database_id=11,
         request=request
     )
-    assert imported_table_info == {"oid": 1964474, "name": "imported_table"}
+    assert imported_table_info == {
+        "oid": 1964474, "name": "imported_table", "renamed_columns": None
+    }
 
 
 def test_prepare_table_for_import(rf, monkeypatch, mocked_exec_msar_func):
@@ -236,7 +238,6 @@ def test_prepare_table_for_import(rf, monkeypatch, mocked_exec_msar_func):
         table_name="imported_table",
         schema_oid=schema_oid,
         column_names=column_names,
-        header=True,
         conn=True
     )
     call_args = mocked_exec_msar_func.call_args_list[0][0]
@@ -248,12 +249,7 @@ def test_prepare_table_for_import(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[3] == 'imported_table'
     assert call_args[4] == json.dumps(column_data_list)
     # TODO: Consider parametrizing these params
-    assert call_args[5] is True   # header
-    assert call_args[6] is None   # delimiter
-    assert call_args[7] is None   # escapechar
-    assert call_args[8] is None   # quotechar
-    assert call_args[9] is None   # encoding
-    assert call_args[10] is None  # comment
+    assert call_args[5] is None  # comment
 
 
 def test_tables_preview(rf, monkeypatch, mocked_exec_msar_func):

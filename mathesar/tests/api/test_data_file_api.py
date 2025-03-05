@@ -6,7 +6,7 @@ from unittest.mock import patch
 from django.core.files import File
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.imports import csv
+from mathesar.utils import csv
 from mathesar.models.base import DataFile
 from mathesar.errors import InvalidTableError
 

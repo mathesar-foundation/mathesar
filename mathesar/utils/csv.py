@@ -2,7 +2,7 @@ import clevercsv as csv
 
 from mathesar.errors import InvalidTableError
 # The user-facing documentation replicates these delimiter characters. If you
-# c, process_column_nameshange this variable, please update the documentation as well.
+# change this variable, please update the documentation as well.
 ALLOWED_DELIMITERS = ",\t:|;"
 SAMPLE_SIZE = 1000000
 CHECK_ROWS = 10
