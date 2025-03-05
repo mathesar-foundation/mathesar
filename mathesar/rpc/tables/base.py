@@ -14,7 +14,7 @@ from db.tables import (
     get_table_info,
     list_joinable_tables,
 )
-from mathesar.imports.csv import copy_datafile_to_table
+from mathesar.imports.datafile import copy_datafile_to_table
 from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.decorators import mathesar_rpc_method

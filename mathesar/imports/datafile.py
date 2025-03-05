@@ -1,10 +1,10 @@
 import clevercsv as csv
 
 from db.constants import COLUMN_NAME_TEMPLATE
+from db.identifiers import truncate_if_necessary
 from db.tables import prepare_table_for_import
 
 from mathesar.models.base import DataFile
-from mathesar.imports.utils import process_column_names
 
 
 def copy_datafile_to_table(
@@ -18,13 +18,12 @@ def copy_datafile_to_table(
         data_file.quotechar,
         data_file.escapechar
     )
-    if table_name is None or table_name == '':
-        table_name = data_file.base_name
+    table_name = table_name or data_file.base_name
 
     with open(file_path, "r", newline="") as f:
         reader = csv.reader(f, dialect)
         if header:
-            column_names = process_column_names(next(reader))
+            column_names = _process_column_names(next(reader))
         else:
             column_names = [
                 f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(next(reader)))
@@ -45,3 +44,22 @@ def copy_datafile_to_table(
             copy.write_row(row)
 
     return {"oid": table_oid, "name": db_table_name, "renamed_columns": renamed_columns}
+
+
+def _process_column_names(column_names):
+    column_names = (
+        column_name.strip()
+        for column_name
+        in column_names
+    )
+    column_names = (
+        truncate_if_necessary(column_name)
+        for column_name
+        in column_names
+    )
+    column_names = (
+        f"{COLUMN_NAME_TEMPLATE}{i}" if name == '' else name
+        for i, name
+        in enumerate(column_names)
+    )
+    return list(column_names)
