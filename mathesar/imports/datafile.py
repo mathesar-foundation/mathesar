@@ -2,7 +2,7 @@ import clevercsv as csv
 
 from db.constants import COLUMN_NAME_TEMPLATE
 from db.identifiers import truncate_if_necessary
-from db.tables import prepare_table_for_import
+from db.tables import create_and_import_from_rows
 
 from mathesar.models.base import DataFile
 
@@ -28,20 +28,15 @@ def copy_datafile_to_table(
             column_names = [
                 f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(next(reader)))
             ]
-    copy_sql, table_oid, db_table_name, renamed_columns = prepare_table_for_import(
-        table_name,
-        schema_oid,
-        column_names,
-        conn,
-        comment
-    )
-    cursor = conn.cursor()
-    with open(file_path, "r", newline="") as f, cursor.copy(copy_sql) as copy:
-        reader = csv.reader(f, dialect)
-        if header:
-            column_names = next(reader)
-        for row in reader:
-            copy.write_row(row)
+            reader.seek(0)
+        table_oid, db_table_name, renamed_columns = create_and_import_from_rows(
+            reader,
+            table_name,
+            schema_oid,
+            column_names,
+            conn,
+            comment=comment,
+        )
 
     return {"oid": table_oid, "name": db_table_name, "renamed_columns": renamed_columns}
 

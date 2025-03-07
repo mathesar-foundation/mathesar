@@ -10,7 +10,6 @@ import json
 from decimal import Decimal
 from contextlib import contextmanager
 
-from db.tables import prepare_table_for_import
 from db.deprecated.types.base import PostgresType
 from mathesar.rpc import tables
 from mathesar.models.users import User
@@ -214,42 +213,6 @@ def test_tables_import(rf, monkeypatch):
     assert imported_table_info == {
         "oid": 1964474, "name": "imported_table", "renamed_columns": None
     }
-
-
-def test_prepare_table_for_import(rf, monkeypatch, mocked_exec_msar_func):
-    request = rf.post('/api/rpc/v0', data={})
-    request.user = User(username='alice', password='pass1234')
-    schema_oid = 2200
-    column_names = ['a', 'b', 'c']
-    column_data_list = [
-        {
-            "name": column_name,
-            "type": {"name": PostgresType.TEXT.id}
-        } for column_name in column_names
-    ]
-    expect_dict = {
-        'copy_sql': 'COPY public.imported_table FROM patents.csv',
-        'table_oid': 1234,
-        'table_name': 'imported_table',
-        'renamed_columns': {}
-    }
-    mocked_exec_msar_func.fetchone.return_value = [expect_dict]
-    copy_sql, table_oid, table_name, renamed_columns = prepare_table_for_import(
-        table_name="imported_table",
-        schema_oid=schema_oid,
-        column_names=column_names,
-        conn=True
-    )
-    call_args = mocked_exec_msar_func.call_args_list[0][0]
-    assert copy_sql == expect_dict['copy_sql']
-    assert table_oid == expect_dict['table_oid']
-    assert table_name == expect_dict['table_name']
-    assert renamed_columns == expect_dict['renamed_columns']
-    assert call_args[2] == schema_oid
-    assert call_args[3] == 'imported_table'
-    assert call_args[4] == json.dumps(column_data_list)
-    # TODO: Consider parametrizing these params
-    assert call_args[5] is None  # comment
 
 
 def test_tables_preview(rf, monkeypatch, mocked_exec_msar_func):

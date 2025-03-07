@@ -111,24 +111,26 @@ def create_table_on_database(
     ).fetchone()[0]
 
 
-def prepare_table_for_import(
-    table_name,
-    schema_oid,
-    column_names,
-    conn,
-    comment=None
+def create_and_import_from_rows(
+        rows,
+        table_name,
+        schema_oid,
+        column_names,
+        conn,
+        comment=None
 ):
     """
-    This method creates a Postgres table in the specified schema, with all
-    columns being String type.
+    Create a Mathesar table as specified, with text columns.
 
-    Returns the copy_sql and table_oid for carrying out import into the created table.
+    Args:
+        rows: This must be an iterable of iterables. These correspond to
+              rows in the table, so the inner iterables should all be
+              the same length, and should have the same length as
+              `column_names`
     """
     column_data_list = [
-        {
-            "name": column_name,
-            "type": {"name": PostgresType.TEXT.id}
-        } for column_name in column_names
+        {"name": column_name, "type": {"name": PostgresType.TEXT.id}}
+        for column_name in column_names
     ]
     import_info = db_conn.exec_msar_func(
         conn,
@@ -138,11 +140,15 @@ def prepare_table_for_import(
         json.dumps(column_data_list),
         comment
     ).fetchone()[0]
+
+    cursor = conn.cursor()
+    with cursor.copy(import_info['copy_sql']) as copy:
+        for row in rows:
+            copy.write_row(row)
     return (
-        import_info['copy_sql'],
         import_info['table_oid'],
         import_info['table_name'],
-        import_info['renamed_columns']
+        import_info['renamed_columns'],
     )
 
 
