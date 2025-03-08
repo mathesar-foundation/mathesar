@@ -3084,7 +3084,9 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, own_id regrole, comment_ text)
+msar.add_mathesar_table(
+    sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, own_id regrole, comment_ text
+)
   RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning the OID & name of the created table.
 
@@ -3180,11 +3182,11 @@ CREATE OR REPLACE FUNCTION
 msar.prepare_table_for_import(
   sch_id oid,
   tab_name text,
-  col_defs jsonb,
+  col_names text[],
   comment_ text
 ) RETURNS jsonb AS $$/*
-Add a table, with a default id column, returning a JSON object containing
-a properly formatted SQL statement to carry out `COPY FROM`, table_oid & table_name of the created table.
+Add a table, with a default id column, returning a JSON object containing a properly formatted SQL
+statement to carry out `COPY FROM`, table_oid & table_name of the created table.
 
 Each returned JSON object will have the form:
   {
@@ -3203,11 +3205,14 @@ Args:
 DECLARE
   sch_name text;
   rel_name text;
+  col_defs jsonb;
   mathesar_table json;
   rel_id oid;
   col_names_sql text;
   copy_sql text;
 BEGIN
+  -- Build column definition jsonb
+  col_defs := jsonb_agg(jsonb_build_object('name', n)) FROM unnest(col_names) AS x(n);
   -- Create string table
   mathesar_table := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, NULL, comment_);
   rel_id := mathesar_table ->> 'oid';
@@ -3469,9 +3474,9 @@ The response JSON will have attnum keys, and values will be the result of `forma
 for the inferred type of each column. Restricted to columns to which the user has access.
 
 For tables with at most 9900 rows, we infer based on entire row set. For tables with more rows, we
-decrease the percentage used to maintain an inference row set of ~10,000 rows, down to a minimum of
-5% of the rows. This increases the performance of inference on large tables, at the cost of possibly
-misidentifying the type of a column.
+decrease the percentage used to maintain an inference row set of 9,900-10,000 rows, down to a
+minimum of 5% of the rows. This increases the performance of inference on large tables, at the cost
+of possibly misidentifying the type of a column.
 
 | row count  | perc |
 |------------+------|

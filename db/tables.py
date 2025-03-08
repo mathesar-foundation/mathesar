@@ -1,7 +1,6 @@
 import json
 from db import connection as db_conn
 from db.columns import _transform_column_alter_dict
-from db.deprecated.types.base import PostgresType
 
 
 def _json_or_none(value):
@@ -128,16 +127,12 @@ def create_and_import_from_rows(
               the same length, and should have the same length as
               `column_names`
     """
-    column_data_list = [
-        {"name": column_name, "type": {"name": PostgresType.TEXT.id}}
-        for column_name in column_names
-    ]
     import_info = db_conn.exec_msar_func(
         conn,
         'prepare_table_for_import',
         schema_oid,
         table_name,
-        json.dumps(column_data_list),
+        column_names,
         comment
     ).fetchone()[0]
 

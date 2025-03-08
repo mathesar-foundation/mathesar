@@ -10,7 +10,6 @@ import json
 from decimal import Decimal
 from contextlib import contextmanager
 
-from db.deprecated.types.base import PostgresType
 from mathesar.rpc import tables
 from mathesar.models.users import User
 
