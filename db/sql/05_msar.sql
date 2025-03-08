@@ -3467,13 +3467,26 @@ Args:
 
 The response JSON will have attnum keys, and values will be the result of `format_type`
 for the inferred type of each column. Restricted to columns to which the user has access.
+
+For tables with at most 9900 rows, we infer based on entire row set. For tables with more rows, we
+decrease the percentage used to maintain an inference row set of ~10,000 rows, down to a minimum of
+5% of the rows. This increases the performance of inference on large tables, at the cost of possibly
+misidentifying the type of a column.
+
+| row count  | perc |
+|------------+------|
+|   <= 9,900 | 100% |
+|     19,900 |  50% |
+|     39,900 |  25% |
+|     99,900 |  10% |
+| >= 199,900 |   5% |
 */
 DECLARE
   test_perc integer;
 BEGIN
 EXECUTE(
   format(
-    'SELECT GREATEST(LEAST(1000 / (COUNT(1) + 1), 100), 5) FROM %1$I.%2$I TABLESAMPLE SYSTEM(1)',
+    'SELECT GREATEST(LEAST(10000 / (COUNT(1) + 1), 100), 5) FROM %1$I.%2$I TABLESAMPLE SYSTEM(1)',
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id)
   )
