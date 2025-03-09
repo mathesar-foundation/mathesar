@@ -240,6 +240,20 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_pkey_column_malformed() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  RETURN NEXT throws_like(
+    $s$SELECT msar.add_pkey_column(
+        tab_id => 'add_pkey_col_testable'::regclass,
+        pkey_type => 'ident'
+    );$s$,
+    'invalid input value for enum%'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
 -- msar.add_columns --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_add_columns() RETURNS SETOF TEXT AS $$
