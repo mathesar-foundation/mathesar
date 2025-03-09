@@ -2563,7 +2563,7 @@ CREATE TYPE msar.pkey_kind AS ENUM ('UUIDv4', 'IDENTITY');
 
 CREATE OR REPLACE FUNCTION
 msar.add_pkey_column(
-  tab_id regclass, pkey_type pkey_kind, col_name text DEFAULT 'id'
+  tab_id regclass, pkey_type msar.pkey_kind, col_name text DEFAULT 'id'
 ) RETURNS void AS $$/*
 Add a primary key column with a predefined default to a table.
 */
@@ -2578,7 +2578,7 @@ BEGIN
     'ALTER TABLE %I.%I ADD COLUMN %I %s;',
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
-    col_name,
+    msar.build_unique_column_name(tab_id, col_name),
     pkey_text
   );
 END;

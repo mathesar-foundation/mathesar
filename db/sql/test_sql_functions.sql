@@ -202,6 +202,30 @@ BEGIN
 END;
 $f$ LANGUAGE plpgsql;
 
+-- msar.add_pkey_column -------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_add_pkey_col() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE add_pkey_col_testable (col1 integer, col2 varchar);
+  INSERT INTO add_pkey_col_testable VALUES (324, 'abc'), (567, 'def');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_uuid() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'UUIDv4',
+    col_name => 'User Id'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'User Id');
+  RETURN NEXT col_type_is('add_pkey_col_testable', 'User Id', 'uuid');
+END;
+$f$ LANGUAGE plpgsql;
+
+
 
 -- msar.add_columns --------------------------------------------------------------------------------
 
