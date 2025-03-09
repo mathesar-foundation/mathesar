@@ -226,6 +226,19 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_pkey_column_identity() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'IDENTITY',
+    col_name => 'Identity'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'Identity');
+  RETURN NEXT col_type_is('add_pkey_col_testable', 'Identity', 'integer');
+END;
+$f$ LANGUAGE plpgsql;
+
 
 -- msar.add_columns --------------------------------------------------------------------------------
 
