@@ -64,12 +64,12 @@
     return !processedColumn.column.primary_key;
   }
 
-  function save() {
+  async function save() {
     const formValues = Object.entries($form.values);
     const patch = Object.fromEntries(
       formValues.filter(([c]) => shouldPatchIncludeColumn(c)),
     );
-    record.patch(patch);
+    await record.patch(patch);
   }
 </script>
 
