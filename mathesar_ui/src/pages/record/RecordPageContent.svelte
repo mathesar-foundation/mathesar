@@ -49,6 +49,28 @@
       })
       .run();
   }
+
+  function shouldPatchIncludeColumn(columnId: string) {
+    const processedColumn = $processedColumns.get(parseInt(columnId, 10));
+    if (!processedColumn) return false;
+
+    // Only patch columns that are not primary keys.
+    //
+    // See https://github.com/mathesar-foundation/mathesar/issues/4318
+    //
+    // It would probably be better to check if the column is editable but we
+    // don't have that information here. It would be good to include that in the
+    // columns API response at some point.
+    return !processedColumn.column.primary_key;
+  }
+
+  function save() {
+    const formValues = Object.entries($form.values);
+    const patch = Object.fromEntries(
+      formValues.filter(([c]) => shouldPatchIncludeColumn(c)),
+    );
+    record.patch(patch);
+  }
 </script>
 
 <div class="record-page-content">
@@ -82,7 +104,7 @@
         catchErrors
         proceedButton={{ label: $_('save'), icon: iconSave }}
         cancelButton={{ label: $_('discard_changes'), icon: iconUndo }}
-        onProceed={() => record.patch($form.values)}
+        onProceed={save}
         getErrorMessages={(e) => {
           const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);
           for (const [columnId, errors] of columnErrors) {
