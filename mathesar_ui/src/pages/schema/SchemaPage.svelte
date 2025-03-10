@@ -13,7 +13,7 @@
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import AddTableModal from './AddTableModal.svelte';
+  import CreateTableModal from './CreateTableModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaPermissionsModal from './SchemaPermissionsModal.svelte';
 
@@ -21,7 +21,7 @@
   export let schema: Schema;
 
   const editSchemaModal = modal.spawnModalController();
-  const addTableModal = modal.spawnModalController();
+  const createTableModal = modal.spawnModalController();
   const permissionsModal = modal.spawnModalController();
 
   $: tablesMap = $tablesStore.tablesMap;
@@ -82,10 +82,10 @@
     {database}
     {schema}
     {explorationsRequestStatus}
-    onCreateEmptyTable={() => addTableModal.open()}
+    onCreateEmptyTable={() => createTableModal.open()}
   />
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={editSchemaModal} {database} {schema} />
-<AddTableModal controller={addTableModal} {schema} {tablesMap} />
+<CreateTableModal controller={createTableModal} {schema} {tablesMap} />
 <SchemaPermissionsModal controller={permissionsModal} {schema} />
