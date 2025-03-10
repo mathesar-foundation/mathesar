@@ -119,7 +119,7 @@ function prepareStructuredCellValue(column: Column, cell: PayloadCell) {
   if (cell.type === 'tsv') {
     // Since TSV doesn't have a mechanism to faithfully represent NULLs, we
     // assume that empty strings are NULLs.
-    if (cell.value === '') return null;
+    if (cell.value === '' && column.nullable) return null;
 
     return cell.value;
   }
