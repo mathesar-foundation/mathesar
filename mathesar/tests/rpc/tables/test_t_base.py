@@ -132,10 +132,11 @@ def test_tables_add(rf, monkeypatch, mocked_exec_msar_func):
     assert actual_table_info == {"oid": 1964474, "name": "newtable"}
     assert call_args[2] == schema_oid
     assert call_args[3] == 'newtable'
-    assert call_args[4] == json.dumps([])
+    assert call_args[4] == json.dumps({})
     assert call_args[5] == json.dumps([])
-    assert call_args[6] is None
+    assert call_args[6] == json.dumps([])
     assert call_args[7] is None
+    assert call_args[8] is None
 
 
 def test_tables_patch(rf, monkeypatch, mocked_exec_msar_func):

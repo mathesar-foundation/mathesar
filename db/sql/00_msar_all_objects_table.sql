@@ -76,6 +76,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('__msar', '__msar.prepare_fields_arg(text)', 'FUNCTION', NULL),
   ('__msar', '__msar.process_col_def_jsonb(oid,jsonb,boolean,boolean)', 'FUNCTION', NULL),
   ('__msar', '__msar.process_con_def_jsonb(oid,jsonb)', 'FUNCTION', NULL),
+  ('__msar', '__msar.process_pk_col_def(text,msar.pkey_kind)', 'FUNCTION', NULL),
   ('__msar', '__msar.rename_column(text,text,text)', 'FUNCTION', NULL),
   ('__msar', '__msar.rename_schema(text,text)', 'FUNCTION', NULL),
   ('__msar', '__msar.rename_table(text,text)', 'FUNCTION', NULL),
