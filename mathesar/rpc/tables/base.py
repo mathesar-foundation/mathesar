@@ -211,6 +211,7 @@ def add(
         schema_oid: Identity of the schema in the user's database.
         database_id: The Django id of the database containing the table.
         table_name: Name of the table to be created.
+        pkey_column_info: A dict describing the primary key column to be created for the new table.
         column_data_list: A list describing columns to be created for the new table, in order.
         constraint_data_list: A list describing constraints to be created for the new table.
         owner_oid: The OID of the role who will own the new table.

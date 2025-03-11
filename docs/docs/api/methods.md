@@ -36,6 +36,7 @@
       - list_with_metadata
       - ColumnInfo
       - ColumnListReturn
+      - CreatablePkColumnInfo
       - CreatableColumnInfo
       - PreviewableColumnInfo
       - SettableColumnInfo
