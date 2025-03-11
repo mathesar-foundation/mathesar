@@ -17,7 +17,10 @@ import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { ColumnPatchSpec } from '@mathesar/api/rpc/columns';
-import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
+import type {
+  NewPkColumnType,
+  RawTableWithMetadata,
+} from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import type { Database } from '@mathesar/models/Database';
 import type { Schema } from '@mathesar/models/Schema';
@@ -294,7 +297,7 @@ export async function createTable({
   description?: string;
   pkColumn?: {
     name: string;
-    type: 'identity' | 'uuid';
+    type: NewPkColumnType;
   };
 }): Promise<Table> {
   const created = await api.tables
@@ -303,6 +306,7 @@ export async function createTable({
       schema_oid: schema.oid,
       table_name: name,
       comment: description,
+      pkey_column_info: pkColumn,
     })
     .run();
 

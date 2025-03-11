@@ -2,10 +2,10 @@ import Identity from './Identity.svelte';
 import Uuid from './Uuid.svelte';
 
 export const pkColumnTypeMap = {
-  identity: {
+  IDENTITY: {
     label: { component: Identity },
   },
-  uuid: {
+  UUIDv4: {
     label: { component: Uuid },
   },
 };

@@ -37,7 +37,7 @@
   ]);
   $: description = optionalField('');
   $: pkColumnName = requiredField('id');
-  $: pkColumnType = requiredField<NewPkColumnType>('identity');
+  $: pkColumnType = requiredField<NewPkColumnType>('IDENTITY');
   $: form = makeForm({ name, description, pkColumnName, pkColumnType });
 
   async function save(values: FilledFormValues<typeof form>) {
