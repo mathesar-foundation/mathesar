@@ -78,6 +78,20 @@ class ColumnDefault(TypedDict):
             )
 
 
+class CreatablePkColumnInfo(TypedDict):
+    """
+    Information needed to add a new PK column.
+
+    No keys are required.
+
+    Attributes:
+        name: The name of the column.
+        type: The type of the pk column on the database.
+    """
+    name: Optional[str]
+    type: Optional[Literal["IDENTITY", "UUIDv4"]]
+
+
 class CreatableColumnInfo(TypedDict):
     """
     Information needed to add a new column.

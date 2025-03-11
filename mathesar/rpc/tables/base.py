@@ -15,7 +15,7 @@ from db.tables import (
     list_joinable_tables,
 )
 from mathesar.imports.csv import import_csv
-from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
+from mathesar.rpc.columns import CreatablePkColumnInfo, CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.tables.metadata import TableMetaDataBlob
@@ -197,6 +197,7 @@ def add(
     schema_oid: int,
     database_id: int,
     table_name: str = None,
+    pkey_column_info: CreatablePkColumnInfo = {},
     column_data_list: list[CreatableColumnInfo] = [],
     constraint_data_list: list[CreatableConstraintInfo] = [],
     owner_oid: int = None,
@@ -222,7 +223,7 @@ def add(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         created_table_oid = create_table_on_database(
-            table_name, schema_oid, conn, column_data_list, constraint_data_list, owner_oid, comment
+            table_name, schema_oid, conn, pkey_column_info, column_data_list, constraint_data_list, owner_oid, comment
         )
     return created_table_oid
 
