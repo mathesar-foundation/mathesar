@@ -164,38 +164,15 @@ BEGIN
   RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
     ARRAY[
-      ('"Column 1"', 'text', null, null, false, null),
-      ('"Column 2"', 'text', null, null, false, null)
+      ('"Column 1"', 'text', null, null, null, null),
+      ('"Column 2"', 'text', null, null, null, null)
     ]::__msar.col_def[],
     'Should not add default "id" column when create_id is false'
   );
   RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
-    ARRAY[
-      ('id', 'integer', true, null, true, 'Mathesar default ID column'),
-      ('"Column 1"', 'text', null, null, false, null),
-      ('"Column 2"', 'text', null, null, false, null)
-    ]::__msar.col_def[],
-    'Should add default "id" column when create_id is true'
-  );
-  RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, false),
-    ARRAY[
-      ('id', 'text', null, null, false, null)
-    ]::__msar.col_def[],
-    'Should add incoming "id" column and not add default "id" column when create_id is false'
-  );
-  RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, true),
-    ARRAY[
-      ('id', 'integer', true, null, true, 'Mathesar default ID column')
-    ]::__msar.col_def[],
-    'Should ignore incoming "id" column and add default id column when create_id is true'
-  );
-  RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
     ARRAY[
-      ('"Column 1"', 'text', null, null, false, '''Some comment''')
+      ('"Column 1"', 'text', null, null, null, '''Some comment''')
     ]::__msar.col_def[],
     'Comments should be sanitized'
   );
@@ -1524,7 +1501,7 @@ CREATE OR REPLACE FUNCTION test_add_mathesar_table_minimal_id_col() RETURNS SETO
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null, null
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null, null, null
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
@@ -1546,7 +1523,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, badname, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, badname, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, badname::name);
 END;
@@ -1559,7 +1536,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
 END;
@@ -1573,10 +1550,10 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 1'::name);
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 2'::name);
@@ -1588,7 +1565,7 @@ BEGIN
   );
   RETURN NEXT hasnt_table('tab_create_schema'::name, 'Table 1'::name);
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
 END;
@@ -1607,6 +1584,7 @@ BEGIN
   PERFORM msar.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid,
     'cols_table',
+    null,
     col_defs,
     null, null, null
   );
@@ -1634,6 +1612,7 @@ BEGIN
   PERFORM msar.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid,
     'cols_table',
+    null,
     col_defs,
     null, null, null
   );
@@ -1690,7 +1669,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, null, comment_
+    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, null, null, comment_
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
