@@ -80,6 +80,7 @@ def create_table_on_database(
     table_name,
     schema_oid,
     conn,
+    pk_column_info={},
     column_data_list=[],
     constraint_data_list=[],
     owner_oid=None,
@@ -91,6 +92,7 @@ def create_table_on_database(
     Args:
         table_name: Name of the table to be created.
         schema_oid: The OID of the schema where the table will be created.
+        pk_column: A dict describing the name and type of the primary key. (optional)
         columns: The columns dict for the new table, in order. (optional)
         constraints: The constraints dict for the new table. (optional)
         owner_oid: The OID of the role who will own the new table.(optional)
@@ -104,6 +106,7 @@ def create_table_on_database(
         'add_mathesar_table',
         schema_oid,
         table_name,
+        json.dumps(pk_column_info),
         json.dumps(column_data_list),
         json.dumps(constraint_data_list),
         owner_oid,
