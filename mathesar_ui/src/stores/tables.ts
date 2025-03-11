@@ -287,10 +287,15 @@ export async function createTable({
   schema,
   name,
   description,
+  pkColumn,
 }: {
   schema: Schema;
   name?: string;
   description?: string;
+  pkColumn?: {
+    name: string;
+    type: 'identity' | 'uuid';
+  };
 }): Promise<Table> {
   const created = await api.tables
     .add({

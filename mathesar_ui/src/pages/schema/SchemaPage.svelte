@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { map } from 'iter-tools';
   import { _ } from 'svelte-i18n';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
@@ -87,5 +88,9 @@
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={editSchemaModal} {database} {schema} />
-<CreateTableModal controller={createTableModal} {schema} {tablesMap} />
+<CreateTableModal
+  controller={createTableModal}
+  {schema}
+  existingTableNames={new Set(map((t) => t.name, tablesMap.values()))}
+/>
 <SchemaPermissionsModal controller={permissionsModal} {schema} />
