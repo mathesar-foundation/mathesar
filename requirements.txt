@@ -1,5 +1,5 @@
 clevercsv==0.8.2
-Django==4.2.18
+Django==4.2.20
 dj-database-url==2.3.0
 django-filter==24.3
 django-modern-rpc==1.0.3
