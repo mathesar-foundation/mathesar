@@ -62,6 +62,8 @@ class AddedTableInfo(TypedDict):
     Attributes:
         oid: The `oid` of the table in the schema.
         name: The name of the table.
+        renamed_columns: A dictionary giving the names of colummns which
+            were renamed due to collisions.
     """
     oid: int
     name: str
@@ -226,7 +228,7 @@ def add(
         comment: The comment for the new table.
 
     Returns:
-        The `oid` & `name` of the created table.
+        The `oid` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -297,7 +299,7 @@ def import_(
         comment: The comment for the new table.
 
     Returns:
-        The `oid` and `name` of the created table.
+        The `oid`, `name`, and `renamed_columns` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
