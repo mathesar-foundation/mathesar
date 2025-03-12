@@ -30,6 +30,7 @@ import {
   faFileAlt,
   faFilter,
   faFilterCircleXmark,
+  faFingerprint,
   faGear,
   faGlobe,
   faGrip,
@@ -241,3 +242,4 @@ export const iconUiTypeTime: IconProps = { data: faClock };
 export const iconUiTypeUnknown: IconProps = { data: faQuestion };
 export const iconUiTypeUri: IconProps = { data: faGlobe };
 export const iconUiTypeArray: IconProps = { data: arrayIcon };
+export const iconUiTypeUuid: IconProps = { data: faFingerprint };
