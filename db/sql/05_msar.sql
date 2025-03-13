@@ -2484,12 +2484,18 @@ __msar.process_pk_col_def(
   col_name text DEFAULT 'id',
   pkey_type msar.pkey_kind DEFAULT 'IDENTITY'
 ) RETURNS __msar.col_def[] AS $$
-  -- The below tuple(s) defines a default 'id' column for Mathesar. It can have a given name, type integer or uuid,
-  -- it's not null, it uses the 'identity' or 'gen_random_uuid()' functionality to generate default values, has
-  -- a default comment.
+  -- The below tuple(s) defines a default 'id' column for Mathesar. It can have a given name, type
+  -- integer or uuid, it's not null, it uses the 'identity' or 'gen_random_uuid()' functionality to
+  -- generate default values, has a default comment.
   SELECT CASE pkey_type 
-    WHEN 'IDENTITY' THEN ARRAY[(col_name, 'integer', true, null, pkey_type, 'Mathesar default integer ID column')]::__msar.col_def[]
-    WHEN 'UUIDv4' THEN ARRAY[(col_name, 'uuid', true, null, pkey_type, 'Mathesar default uuid ID column')]::__msar.col_def[]
+    WHEN 'IDENTITY' THEN
+      ARRAY[
+        (col_name, 'integer', true, null, pkey_type, 'Mathesar default integer ID column')
+      ]::__msar.col_def[]
+    WHEN 'UUIDv4' THEN
+      ARRAY[
+        (col_name, 'uuid', true, null, pkey_type, 'Mathesar default uuid ID column')
+      ]::__msar.col_def[]
   END;
 $$ LANGUAGE SQL;
 
