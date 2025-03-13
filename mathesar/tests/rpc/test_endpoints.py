@@ -75,6 +75,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        columns.add_primary_key_column,
+        "columns.add_primary_key_column",
+        [user_is_authenticated]
+    ),
+    (
         columns.delete,
         "columns.delete",
         [user_is_authenticated]
