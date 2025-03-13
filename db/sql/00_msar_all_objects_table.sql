@@ -542,6 +542,8 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('mathesar_types', 'mathesar_types.cast_to_uri(tstzrange)', 'FUNCTION', NULL),
   ('mathesar_types', 'mathesar_types.cast_to_uri(tsvector)', 'FUNCTION', NULL),
   ('mathesar_types', 'mathesar_types.cast_to_uri(uuid)', 'FUNCTION', NULL),
+  ('mathesar_types', 'mathesar_types.cast_to_uuid(text)', 'FUNCTION', NULL),
+  ('mathesar_types', 'mathesar_types.cast_to_uuid(uuid)', 'FUNCTION', NULL),
   ('mathesar_types', 'mathesar_types.email', 'TYPE', true),
   ('mathesar_types', 'mathesar_types.email_domain_name(mathesar_types.email)', 'FUNCTION', NULL),
   ('mathesar_types', 'mathesar_types.email_local_part(mathesar_types.email)', 'FUNCTION', NULL),
