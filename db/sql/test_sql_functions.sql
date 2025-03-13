@@ -164,40 +164,68 @@ BEGIN
   RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
     ARRAY[
-      ('"Column 1"', 'text', null, null, false, null),
-      ('"Column 2"', 'text', null, null, false, null)
+      ('"Column 1"', 'text', null, null, null, null),
+      ('"Column 2"', 'text', null, null, null, null)
     ]::__msar.col_def[],
     'Should not add default "id" column when create_id is false'
   );
   RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
-    ARRAY[
-      ('id', 'integer', true, null, true, 'Mathesar default ID column'),
-      ('"Column 1"', 'text', null, null, false, null),
-      ('"Column 2"', 'text', null, null, false, null)
-    ]::__msar.col_def[],
-    'Should add default "id" column when create_id is true'
-  );
-  RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, false),
-    ARRAY[
-      ('id', 'text', null, null, false, null)
-    ]::__msar.col_def[],
-    'Should add incoming "id" column and not add default "id" column when create_id is false'
-  );
-  RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, true),
-    ARRAY[
-      ('id', 'integer', true, null, true, 'Mathesar default ID column')
-    ]::__msar.col_def[],
-    'Should ignore incoming "id" column and add default id column when create_id is true'
-  );
-  RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
     ARRAY[
-      ('"Column 1"', 'text', null, null, false, '''Some comment''')
+      ('"Column 1"', 'text', null, null, null, '''Some comment''')
     ]::__msar.col_def[],
     'Comments should be sanitized'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+-- msar.add_pkey_column -------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_add_pkey_col() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE add_pkey_col_testable (col1 integer, col2 varchar);
+  INSERT INTO add_pkey_col_testable VALUES (324, 'abc'), (567, 'def');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_uuid() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'UUIDv4',
+    col_name => 'User Id'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'User Id');
+  RETURN NEXT col_type_is('add_pkey_col_testable', 'User Id', 'uuid');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_identity() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'IDENTITY',
+    col_name => 'Identity'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'Identity');
+  RETURN NEXT col_type_is('add_pkey_col_testable', 'Identity', 'integer');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_malformed() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  RETURN NEXT throws_like(
+    $s$SELECT msar.add_pkey_column(
+        tab_id => 'add_pkey_col_testable'::regclass,
+        pkey_type => 'ident'
+    );$s$,
+    'invalid input value for enum%'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -1473,7 +1501,7 @@ CREATE OR REPLACE FUNCTION test_add_mathesar_table_minimal_id_col() RETURNS SETO
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null, null
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null, null, null
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
@@ -1495,7 +1523,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, badname, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, badname, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, badname::name);
 END;
@@ -1508,7 +1536,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
 END;
@@ -1522,10 +1550,10 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 1'::name);
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 2'::name);
@@ -1537,7 +1565,7 @@ BEGIN
   );
   RETURN NEXT hasnt_table('tab_create_schema'::name, 'Table 1'::name);
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
 END;
@@ -1556,6 +1584,7 @@ BEGIN
   PERFORM msar.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid,
     'cols_table',
+    null,
     col_defs,
     null, null, null
   );
@@ -1583,6 +1612,7 @@ BEGIN
   PERFORM msar.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid,
     'cols_table',
+    null,
     col_defs,
     null, null, null
   );
@@ -1639,7 +1669,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, null, comment_
+    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, null, null, comment_
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
@@ -1649,6 +1679,89 @@ BEGIN
     comment_,
     'created table should have specified description (comment)'
   );
+END;
+$f$ LANGUAGE plpgsql;
+
+-- msar.prepare_table_for_import --------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_null_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql', 'COPY tab_create_schema.anewtable () FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_empty_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid, 'anewtable', ARRAY[]::text[], null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql', 'COPY tab_create_schema.anewtable () FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_nonempty_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid,
+    'anewtable',
+    ARRAY['My Col', 'col2'],
+    'my comment here'
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT columns_are('tab_create_schema', 'anewtable', ARRAY['id', 'My Col', 'col2']);
+  RETURN NEXT col_type_is('tab_create_schema'::name, 'anewtable'::name, 'My Col'::name, 'text'::name);
+  RETURN NEXT col_type_is('tab_create_schema'::name, 'anewtable'::name, 'col2'::name, 'text'::name);
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql',
+    'COPY tab_create_schema.anewtable ("My Col", col2) FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
 END;
 $f$ LANGUAGE plpgsql;
 

@@ -160,13 +160,20 @@
     }
   }
 
-  onMount(() =>
+  onMount(() => {
     selection?.on('focus', async () => {
       if (!sheetElement) return;
       await tick();
       focusActiveCell(sheetElement);
-    }),
-  );
+    });
+
+    return () => {
+      // Need to disable clipboard when the sheet is unmounted so that the user
+      // can copy text in the page without the clipboard handler interfering.
+      // https://github.com/mathesar-foundation/mathesar/issues/4289
+      disableClipboard();
+    };
+  });
 </script>
 
 <div

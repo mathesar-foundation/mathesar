@@ -1,7 +1,6 @@
 import json
 from db import connection as db_conn
 from db.columns import _transform_column_alter_dict
-from db.deprecated.types.base import PostgresType
 
 
 def _json_or_none(value):
@@ -80,6 +79,7 @@ def create_table_on_database(
     table_name,
     schema_oid,
     conn,
+    pk_column_info={},
     column_data_list=[],
     constraint_data_list=[],
     owner_oid=None,
@@ -91,6 +91,7 @@ def create_table_on_database(
     Args:
         table_name: Name of the table to be created.
         schema_oid: The OID of the schema where the table will be created.
+        pk_column: A dict describing the name and type of the primary key. (optional)
         columns: The columns dict for the new table, in order. (optional)
         constraints: The constraints dict for the new table. (optional)
         owner_oid: The OID of the role who will own the new table.(optional)
@@ -104,6 +105,7 @@ def create_table_on_database(
         'add_mathesar_table',
         schema_oid,
         table_name,
+        json.dumps(pk_column_info),
         json.dumps(column_data_list),
         json.dumps(constraint_data_list),
         owner_oid,
@@ -111,48 +113,40 @@ def create_table_on_database(
     ).fetchone()[0]
 
 
-def prepare_table_for_import(
-    table_name,
-    schema_oid,
-    column_names,
-    header,
-    conn,
-    delimiter=None,
-    escapechar=None,
-    quotechar=None,
-    encoding=None,
-    comment=None
+def create_and_import_from_rows(
+        rows,
+        table_name,
+        schema_oid,
+        column_names,
+        conn,
+        comment=None
 ):
     """
-    This method creates a Postgres table in the specified schema, with all
-    columns being String type.
+    Create a Mathesar table as specified, with text columns.
 
-    Returns the copy_sql and table_oid for carrying out import into the created table.
+    Args:
+        rows: This must be an iterable of iterables. These correspond to
+              rows in the table, so the inner iterables should all be
+              the same length, and should have the same length as
+              `column_names`
     """
-    column_data_list = [
-        {
-            "name": column_name,
-            "type": {"name": PostgresType.TEXT.id}
-        } for column_name in column_names
-    ]
     import_info = db_conn.exec_msar_func(
         conn,
         'prepare_table_for_import',
         schema_oid,
         table_name,
-        json.dumps(column_data_list),
-        header,
-        delimiter,
-        escapechar,
-        quotechar,
-        encoding,
+        column_names,
         comment
     ).fetchone()[0]
+
+    cursor = conn.cursor()
+    with cursor.copy(import_info['copy_sql']) as copy:
+        for row in rows:
+            copy.write_row(row)
     return (
-        import_info['copy_sql'],
         import_info['table_oid'],
         import_info['table_name'],
-        import_info['renamed_columns']
+        import_info['renamed_columns'],
     )
 
 
