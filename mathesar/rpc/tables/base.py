@@ -14,8 +14,13 @@ from db.tables import (
     get_table_info,
     list_joinable_tables,
 )
-from mathesar.imports.csv import import_csv
-from mathesar.rpc.columns import CreatablePkColumnInfo, CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
+from mathesar.imports.datafile import copy_datafile_to_table
+from mathesar.rpc.columns import (
+    CreatablePkColumnInfo,
+    CreatableColumnInfo,
+    PreviewableColumnInfo,
+    SettableColumnInfo,
+)
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.tables.metadata import TableMetaDataBlob
@@ -62,9 +67,20 @@ class AddedTableInfo(TypedDict):
     Attributes:
         oid: The `oid` of the table in the schema.
         name: The name of the table.
+        renamed_columns: A dictionary giving the names of columns which
+            were renamed due to collisions.
     """
     oid: int
     name: str
+    renamed_columns: Optional[dict]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            oid=d['oid'],
+            name=d['name'],
+            renamed_columns=d.get('renamed_columns')
+        )
 
 
 class SettableTableInfo(TypedDict):
@@ -203,7 +219,7 @@ def add(
     owner_oid: int = None,
     comment: str = None,
     **kwargs
-) -> AddedTableInfo:
+) -> int:
     """
     Add a table with a default id column.
 
@@ -219,7 +235,7 @@ def add(
         comment: The comment for the new table.
 
     Returns:
-        The `oid` & `name` of the created table.
+        The `oid` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -275,8 +291,8 @@ def import_(
     data_file_id: int,
     schema_oid: int,
     database_id: int,
-    table_name: str = None,
-    comment: str = None,
+    table_name: Optional[str] = None,
+    comment: Optional[str] = None,
     **kwargs
 ) -> AddedTableInfo:
     """
@@ -290,11 +306,20 @@ def import_(
         comment: The comment for the new table.
 
     Returns:
-        The `oid` and `name` of the created table.
+        The `oid`, `name`, and `renamed_columns` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return import_csv(user, data_file_id, table_name, schema_oid, conn, comment)
+        return AddedTableInfo.from_dict(
+            copy_datafile_to_table(
+                user,
+                data_file_id,
+                table_name,
+                schema_oid,
+                conn,
+                comment=comment,
+            )
+        )
 
 
 @mathesar_rpc_method(name="tables.get_import_preview", auth="login")

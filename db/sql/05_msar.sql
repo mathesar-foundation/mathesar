@@ -2484,12 +2484,18 @@ __msar.process_pk_col_def(
   col_name text DEFAULT 'id',
   pkey_type msar.pkey_kind DEFAULT 'IDENTITY'
 ) RETURNS __msar.col_def[] AS $$
-  -- The below tuple(s) defines a default 'id' column for Mathesar. It can have a given name, type integer or uuid,
-  -- it's not null, it uses the 'identity' or 'gen_random_uuid()' functionality to generate default values, has
-  -- a default comment.
+  -- The below tuple(s) defines a default 'id' column for Mathesar. It can have a given name, type
+  -- integer or uuid, it's not null, it uses the 'identity' or 'gen_random_uuid()' functionality to
+  -- generate default values, has a default comment.
   SELECT CASE pkey_type 
-    WHEN 'IDENTITY' THEN ARRAY[(col_name, 'integer', true, null, pkey_type, 'Mathesar default integer ID column')]::__msar.col_def[]
-    WHEN 'UUIDv4' THEN ARRAY[(col_name, 'uuid', true, null, pkey_type, 'Mathesar default uuid ID column')]::__msar.col_def[]
+    WHEN 'IDENTITY' THEN
+      ARRAY[
+        (col_name, 'integer', true, null, pkey_type, 'Mathesar default integer ID column')
+      ]::__msar.col_def[]
+    WHEN 'UUIDv4' THEN
+      ARRAY[
+        (col_name, 'uuid', true, null, pkey_type, 'Mathesar default uuid ID column')
+      ]::__msar.col_def[]
   END;
 $$ LANGUAGE SQL;
 
@@ -3128,8 +3134,15 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_mathesar_table(sch_id oid, tab_name text, pk_col_def jsonb, col_defs jsonb, con_defs jsonb, own_id regrole, comment_ text)
-  RETURNS jsonb AS $$/*
+msar.add_mathesar_table(
+  sch_id oid,
+  tab_name text,
+  pk_col_def jsonb,
+  col_defs jsonb,
+  con_defs jsonb,
+  own_id regrole,
+  comment_ text
+) RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning the OID & name of the created table.
 
 Args:
@@ -3229,44 +3242,37 @@ CREATE OR REPLACE FUNCTION
 msar.prepare_table_for_import(
   sch_id oid,
   tab_name text,
-  col_defs jsonb,
-  header boolean,
-  delimiter text,
-  escapechar text,
-  quotechar text,
-  encoding_ text,
+  col_names text[],
   comment_ text
 ) RETURNS jsonb AS $$/*
-Add a table, with a default id column, returning a JSON object containing
-a properly formatted SQL statement to carry out `COPY FROM`, table_oid & table_name of the created table.
+Add a table, with a default id column, returning a JSON object containing a properly formatted SQL
+statement to carry out `COPY FROM`, table_oid & table_name of the created table.
 
 Each returned JSON object will have the form:
   {
     "copy_sql": <str>,
     "table_oid": <int>,
-    "table_name": <str>
+    "table_name": <str>,
+    "renamed_columns": <arr>
   }
 
 Args:
   sch_id: The OID of the schema where the table will be created.
   tab_name (optional): The unquoted name for the new table.
   col_defs: The columns for the new table, in order.
-  header: Whether or not the file contains a header line with the names of each column in the file.
-  delimiter: The character that separates columns within each row (line) of the file.
-  escapechar: The character that should appear before a data character that matches the `quotechar` value.
-  quotechar: The quoting character to be used when a data value is quoted.
-  encoding_: The encoding in which the file is encoded.
   comment_ (optional): The comment for the new table.
 */
 DECLARE
   sch_name text;
   rel_name text;
+  col_defs jsonb;
   mathesar_table json;
   rel_id oid;
   col_names_sql text;
-  options_sql text;
   copy_sql text;
 BEGIN
+  -- Build column definition jsonb
+  col_defs := jsonb_agg(jsonb_build_object('name', n)) FROM unnest(col_names) AS x(n);
   -- Create string table
   mathesar_table := msar.add_mathesar_table(sch_id, tab_name, NULL, col_defs, NULL, NULL, comment_);
   rel_id := mathesar_table ->> 'oid';
@@ -3280,17 +3286,8 @@ BEGIN
   SELECT string_agg(quote_ident(attname), ', ') INTO col_names_sql
   FROM pg_catalog.pg_attribute
   WHERE attrelid = rel_id AND atttypid = 'TEXT'::regtype::oid;
-  -- Form a substring for COPY related options
-  options_sql := concat_ws(
-    ' ',
-    CASE WHEN header THEN 'HEADER' END,
-    CASE WHEN NULLIF(delimiter, '') IS NOT NULL THEN 'DELIMITER ' || quote_literal(delimiter) END,
-    CASE WHEN NULLIF(escapechar, '') IS NOT NULL THEN 'ESCAPE ' || quote_literal(escapechar) END,
-    CASE WHEN NULLIF(quotechar, '') IS NOT NULL THEN 'QUOTE ' || quote_literal(quotechar) END,
-    CASE WHEN NULLIF(encoding_, '') IS NOT NULL THEN 'ENCODING '|| quote_literal(encoding_) END
-  );
   -- Create a properly formatted COPY SQL string
-  copy_sql := format('COPY %I.%I (%s) FROM STDIN CSV %s', sch_name, rel_name, col_names_sql, options_sql);
+  copy_sql := format('COPY %I.%I (%s) FROM STDIN', sch_name, rel_name, col_names_sql);
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
     'table_oid', rel_id::bigint,
@@ -3452,7 +3449,9 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.infer_column_data_type(tab_id regclass, col_id smallint) RETURNS regtype AS $$/*
+msar.infer_column_data_type(
+  tab_id regclass, col_id smallint, test_perc numeric DEFAULT 100
+) RETURNS regtype AS $$/*
 Infer the best type for a given column.
 
 Note that we currently only try for `text` columns, since we only do this at import. I.e.,
@@ -3497,19 +3496,21 @@ BEGIN
       LOOP
         BEGIN
           EXECUTE format(
-            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I',
+            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM (%4$L)',
             msar.build_cast_expr(tab_id, col_id, test_type),
             msar.get_relation_schema_name(tab_id),
-            msar.get_relation_name(tab_id)
+            msar.get_relation_name(tab_id),
+            test_perc
           );
           inferred_type := test_type;
           EXIT;
         EXCEPTION WHEN OTHERS THEN
           RAISE NOTICE 'Test failed: %', format(
-            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I',
+            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM (%4$L)',
             msar.build_cast_expr(tab_id, col_id, test_type),
             msar.get_relation_schema_name(tab_id),
-            msar.get_relation_name(tab_id)
+            msar.get_relation_name(tab_id),
+            test_perc
           );
           -- do nothing, just try the next type.
         END;
@@ -3531,9 +3532,33 @@ Args:
 
 The response JSON will have attnum keys, and values will be the result of `format_type`
 for the inferred type of each column. Restricted to columns to which the user has access.
+
+For tables with at most 9900 rows, we infer based on entire row set. For tables with more rows, we
+decrease the percentage used to maintain an inference row set of 9,900-10,000 rows, down to a
+minimum of 5% of the rows. This increases the performance of inference on large tables, at the cost
+of possibly misidentifying the type of a column.
+
+| row count  | perc |
+|------------+------|
+|   <= 9,900 | 100% |
+|     19,900 |  50% |
+|     39,900 |  25% |
+|     99,900 |  10% |
+| >= 199,900 |   5% |
 */
-SELECT jsonb_object_agg(
-  attnum, pg_catalog.format_type(msar.infer_column_data_type(attrelid, attnum), null)
+DECLARE
+  test_perc integer;
+BEGIN
+EXECUTE(
+  format(
+    'SELECT GREATEST(LEAST(10000 / (COUNT(1) + 1), 100), 5) FROM %1$I.%2$I TABLESAMPLE SYSTEM(1)',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id)
+  )
+) INTO test_perc;
+RETURN jsonb_object_agg(
+  attnum,
+  pg_catalog.format_type(msar.infer_column_data_type(attrelid, attnum, test_perc), null)
 )
 FROM pg_catalog.pg_attribute
 WHERE
@@ -3541,7 +3566,8 @@ WHERE
   AND attnum > 0
   AND NOT attisdropped
   AND has_column_privilege(attrelid, attnum, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3767,7 +3793,6 @@ DECLARE
 BEGIN
   -- Get the string specifying all non-name-change alterations to perform.
   col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
-
   -- Perform the non-name-change alterations
   IF col_alter_str IS NOT NULL THEN
     PERFORM __msar.exec_ddl(
@@ -3776,7 +3801,6 @@ BEGIN
       msar.process_col_alter_jsonb(tab_id, col_alters)
     );
   END IF;
-
   -- Here, we perform all description-changing alterations.
   FOR description_alter IN
     SELECT
@@ -3791,7 +3815,6 @@ BEGIN
       comment_ := description_alter.comment_
     );
   END LOOP;
-
   -- Here, we perform all name-changing alterations.
   FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
   LOOP

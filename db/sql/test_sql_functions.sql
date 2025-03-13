@@ -1682,6 +1682,89 @@ BEGIN
 END;
 $f$ LANGUAGE plpgsql;
 
+-- msar.prepare_table_for_import --------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_null_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql', 'COPY tab_create_schema.anewtable () FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_empty_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid, 'anewtable', ARRAY[]::text[], null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql', 'COPY tab_create_schema.anewtable () FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_nonempty_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid,
+    'anewtable',
+    ARRAY['My Col', 'col2'],
+    'my comment here'
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT columns_are('tab_create_schema', 'anewtable', ARRAY['id', 'My Col', 'col2']);
+  RETURN NEXT col_type_is('tab_create_schema'::name, 'anewtable'::name, 'My Col'::name, 'text'::name);
+  RETURN NEXT col_type_is('tab_create_schema'::name, 'anewtable'::name, 'col2'::name, 'text'::name);
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql',
+    'COPY tab_create_schema.anewtable ("My Col", col2) FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+END;
+$f$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION __setup_column_alter() RETURNS SETOF TEXT AS $$
 BEGIN
