@@ -24,10 +24,7 @@ import { ColumnsDataStore } from './columns';
 import { ConstraintsDataStore } from './constraints';
 import { Display } from './display';
 import { Meta } from './meta';
-import {
-  ProcessedColumn,
-  type ProcessedColumnsStore,
-} from './processedColumns';
+import { type ProcessedColumnsStore, processColumn } from './processedColumns';
 import { RecordsData } from './records';
 
 function getSelectedCellData(
@@ -74,7 +71,9 @@ export interface TabularDataProps {
    * removed from view.
    */
   contextualFilters?: Map<number, number | string>;
-  hasEnhancedPrimaryKeyCell?: boolean;
+  hasEnhancedPrimaryKeyCell?: Parameters<
+    typeof processColumn
+  >[0]['hasEnhancedPrimaryKeyCell'];
   /**
    * When true, load the record summaries associated directly with each record
    * in the table. These are *not* the record summaries associated with linked
@@ -148,8 +147,8 @@ export class TabularData {
           new Map(
             columns.map((column, columnIndex) => [
               column.id,
-              new ProcessedColumn({
-                tableOid: this.table.oid,
+              processColumn({
+                tableId: this.table.oid,
                 column,
                 columnIndex,
                 constraints: constraintsData.constraints,

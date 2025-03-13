@@ -8,10 +8,7 @@ import type { Table } from '@mathesar/models/Table';
 
 import { ColumnsDataStore } from './columns';
 import { type ConstraintsData, ConstraintsDataStore } from './constraints';
-import {
-  ProcessedColumn,
-  type ProcessedColumnsStore,
-} from './processedColumns';
+import { type ProcessedColumnsStore, processColumn } from './processedColumns';
 
 export interface TableStructureProps {
   database: Pick<Database, 'id'>;
@@ -39,8 +36,8 @@ export class TableStructure {
         new Map(
           columns.map((column, columnIndex) => [
             column.id,
-            new ProcessedColumn({
-              tableOid: this.oid,
+            processColumn({
+              tableId: this.oid,
               column,
               columnIndex,
               constraints: constraintsData.constraints,
