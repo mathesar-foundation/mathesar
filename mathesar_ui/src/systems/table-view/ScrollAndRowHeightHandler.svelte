@@ -4,9 +4,9 @@
   import { States } from '@mathesar/api/rest/utils/requestUtils';
   import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
   import {
+    type DisplayRowDescriptor,
     type Filtering,
     type Grouping,
-    type Row,
     type Sorting,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
@@ -17,7 +17,7 @@
   $: ({ recordsData, display, meta } = $tabularData);
   $: ({ newRecords, state } = recordsData);
   $: ({ sorting, filtering, grouping, pagination } = meta);
-  $: ({ allRows } = display);
+  $: ({ displayRowDescriptors } = display);
 
   export let api: SheetVirtualRowsApi;
 
@@ -53,8 +53,10 @@
     api.recalculateHeightsAfterIndex(0);
   }
 
-  async function caculateHeightsForNewRows(_rows: Row[]) {
-    const allRecordCount = _rows.length ?? 0;
+  async function caculateHeightsForNewRows(
+    _rowDescriptors: DisplayRowDescriptor[],
+  ) {
+    const allRecordCount = _rowDescriptors.length ?? 0;
     const newRecordCount = $newRecords.length ?? 0;
     if (previousNewRecordsCount !== newRecordCount) {
       const index = Math.max(
@@ -71,7 +73,10 @@
     }
   }
 
-  async function recalculateRowHeights(_recordState: States, _rows: Row[]) {
+  async function recalculateRowHeights(
+    _recordState: States,
+    _rowDescriptors: DisplayRowDescriptor[],
+  ) {
     /**
      * Only perform full recalculation of heights when,
      * 1. Grouping is applied
@@ -93,8 +98,8 @@
       return;
     }
 
-    await caculateHeightsForNewRows(_rows);
+    await caculateHeightsForNewRows(_rowDescriptors);
   }
 
-  $: void recalculateRowHeights($state, $allRows);
+  $: void recalculateRowHeights($state, $displayRowDescriptors);
 </script>

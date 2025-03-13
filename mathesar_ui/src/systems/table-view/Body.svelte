@@ -6,6 +6,7 @@
     ROW_HEIGHT_PX,
   } from '@mathesar/geometry';
   import {
+    type DisplayRowDescriptor,
     type Row as RowType,
     getTabularDataStoreFromContext,
     isGroupHeaderRow,
@@ -22,7 +23,7 @@
 
   $: ({ table, display } = $tabularData);
   $: ({ oid } = table);
-  $: ({ allRows } = display);
+  $: ({ displayRowDescriptors } = display);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canAddRow = $currentRolePrivileges.has('INSERT');
 
@@ -37,44 +38,56 @@
   }
 
   /** See notes in `records.ts.README.md` about different row identifiers */
-  function getIterationKey(index: number, row: RowType | undefined): string {
-    if (row) {
-      return row.identifier;
+  function getIterationKey(
+    index: number,
+    rowDescriptor: DisplayRowDescriptor | undefined,
+  ): string {
+    if (rowDescriptor) {
+      return rowDescriptor.row.identifier;
     }
     return `__index_${index}`;
   }
 
   function getItemSizeFromIndex(index: number) {
-    const record = $allRows?.[index];
-    return record ? getItemSizeFromRow(record) : ROW_HEIGHT_PX;
+    const row = $displayRowDescriptors?.[index].row;
+    return row ? getItemSizeFromRow(row) : ROW_HEIGHT_PX;
   }
 </script>
 
 {#key oid}
   {#if usesVirtualList}
     <SheetVirtualRows
-      itemCount={$allRows.length}
+      itemCount={$displayRowDescriptors.length}
       paddingBottom={30}
       itemSize={getItemSizeFromIndex}
-      itemKey={(index) => getIterationKey(index, $allRows[index])}
+      itemKey={(index) => getIterationKey(index, $displayRowDescriptors[index])}
       let:items
       let:api
     >
       <ScrollAndRowHeightHandler {api} />
       {#each items as item (item.key)}
-        {#if $allRows[item.index] && !(isPlaceholderRecordRow($allRows[item.index]) && !canAddRow)}
-          <Row style={item.style} bind:row={$allRows[item.index]} />
+        {@const shouldRender = !(
+          isPlaceholderRecordRow($displayRowDescriptors[item.index].row) &&
+          !canAddRow
+        )}
+        {#if $displayRowDescriptors[item.index] && shouldRender}
+          <Row
+            style={item.style}
+            bind:row={$displayRowDescriptors[item.index].row}
+            rowDescriptor={$displayRowDescriptors[item.index]}
+          />
         {/if}
       {/each}
     </SheetVirtualRows>
   {:else}
-    {#each $allRows as row (row)}
+    {#each $displayRowDescriptors as displayRowDescriptor (displayRowDescriptor)}
       <Row
         style={{
           position: 'relative',
-          height: getItemSizeFromRow(row),
+          height: getItemSizeFromRow(displayRowDescriptor.row),
         }}
-        {row}
+        bind:row={displayRowDescriptor.row}
+        rowDescriptor={displayRowDescriptor}
       />
     {/each}
   {/if}

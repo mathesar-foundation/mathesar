@@ -93,6 +93,8 @@ export class RecordsData {
 
   newRecords: Writable<(PersistedRecordRow | DraftRecordRow)[]>;
 
+  persistedNewRecords: Readable<PersistedRecordRow[]>;
+
   recordSummaries = new WritableMap<string, string>();
 
   linkedRecordSummaries = new RecordSummaryStore();
@@ -164,6 +166,12 @@ export class RecordsData {
         const records = [...fetchedRecordRows, ...newRecords];
         return new Map(records.map((r) => [getRowSelectionId(r), r]));
       },
+    );
+
+    this.persistedNewRecords = derived(this.newRecords, (newRecords) =>
+      newRecords.filter((row): row is PersistedRecordRow =>
+        isPersistedRecordRow(row),
+      ),
     );
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
@@ -246,10 +254,9 @@ export class RecordsData {
       }
       this.fetchedRecordRows.set(
         response.results.map(
-          (apiRecord, index) =>
+          (apiRecord) =>
             new PersistedRecordRow({
               record: apiRecord,
-              rowIndex: index,
             }),
         ),
       );
@@ -642,7 +649,6 @@ export class RecordsData {
   async addEmptyRecord(): Promise<void> {
     const row = new DraftRecordRow({
       record: this.getEmptyApiRecord(),
-      rowIndex: get(this.selectableRowsMap).size,
     });
     this.newRecords.update((existing) => existing.concat(row));
     await this.createRecord(row);

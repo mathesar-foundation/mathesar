@@ -21,7 +21,7 @@ import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
 import { ColumnsDataStore } from './columns';
-import { type ConstraintsData, ConstraintsDataStore } from './constraints';
+import { ConstraintsDataStore } from './constraints';
 import { Display } from './display';
 import { Meta } from './meta';
 import {

@@ -24,20 +24,16 @@ abstract class BaseRecordRow<
 > {
   readonly identifier: string;
 
-  readonly rowIndex: number;
-
   readonly record: ApiRecord;
 
   readonly type: T;
 
   protected constructor(props: {
     identifier?: string;
-    rowIndex: number;
     record: ApiRecord;
     type: T;
   }) {
     this.identifier = props.identifier ?? getGloballyUniqueId('record-row');
-    this.rowIndex = props.rowIndex;
     this.record = props.record;
     this.type = props.type;
   }
@@ -49,18 +45,13 @@ abstract class BaseRecordRow<
 }
 
 export class PersistedRecordRow extends BaseRecordRow<RowType.PersistedRecord> {
-  constructor(props: {
-    identifier?: string;
-    rowIndex: number;
-    record: ApiRecord;
-  }) {
+  constructor(props: { identifier?: string; record: ApiRecord }) {
     super({ ...props, type: RowType.PersistedRecord });
   }
 
   withRecord(updatedRecord: ApiRecord): PersistedRecordRow {
     return new PersistedRecordRow({
       identifier: this.identifier,
-      rowIndex: this.rowIndex,
       record: updatedRecord,
     });
   }
@@ -68,25 +59,22 @@ export class PersistedRecordRow extends BaseRecordRow<RowType.PersistedRecord> {
   static fromDraft(draft: DraftRecordRow): PersistedRecordRow {
     return new PersistedRecordRow({
       identifier: draft.identifier,
-      rowIndex: draft.rowIndex,
       record: draft.record,
     });
   }
 }
 
 export class DraftRecordRow extends BaseRecordRow<RowType.DraftRecord> {
-  constructor(props: {
-    identifier?: string;
-    rowIndex: number;
-    record: ApiRecord;
-  }) {
-    super({ ...props, type: RowType.DraftRecord });
+  constructor(props: { identifier?: string; record: ApiRecord }) {
+    super({
+      ...props,
+      type: RowType.DraftRecord,
+    });
   }
 
   withRecord(updatedRecord: ApiRecord): DraftRecordRow {
     return new DraftRecordRow({
       identifier: this.identifier,
-      rowIndex: this.rowIndex,
       record: updatedRecord,
     });
   }
@@ -94,25 +82,22 @@ export class DraftRecordRow extends BaseRecordRow<RowType.DraftRecord> {
   static fromPlaceholder(placeholder: PlaceholderRecordRow): DraftRecordRow {
     return new DraftRecordRow({
       identifier: placeholder.identifier,
-      rowIndex: placeholder.rowIndex,
       record: placeholder.record,
     });
   }
 }
 
 export class PlaceholderRecordRow extends BaseRecordRow<RowType.PlaceholderRecord> {
-  constructor(props: {
-    identifier?: string;
-    rowIndex: number;
-    record: ApiRecord;
-  }) {
-    super({ ...props, type: RowType.PlaceholderRecord });
+  constructor(props: { identifier?: string; record: ApiRecord }) {
+    super({
+      ...props,
+      type: RowType.PlaceholderRecord,
+    });
   }
 
   withRecord(updatedRecord: ApiRecord): PlaceholderRecordRow {
     return new PlaceholderRecordRow({
       identifier: this.identifier,
-      rowIndex: this.rowIndex,
       record: updatedRecord,
     });
   }

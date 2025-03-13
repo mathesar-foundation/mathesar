@@ -3,6 +3,7 @@
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import {
+    type DisplayRowDescriptor,
     type Meta,
     type RecordsData,
     type Row,
@@ -10,18 +11,20 @@
     isPlaceholderRecordRow,
     isRecordRow,
   } from '@mathesar/stores/table-data';
+  import { RowOrigin } from '@mathesar/stores/table-data/display';
   import { Icon, iconLoading } from '@mathesar-component-library';
 
   import CellErrors from './CellErrors.svelte';
 
   export let row: Row;
+  export let rowDescriptor: DisplayRowDescriptor;
   export let meta: Meta;
   export let recordsData: RecordsData;
   export let isSelected = false;
   export let hasErrors = false;
 
   $: ({ pagination, rowStatus } = meta);
-  $: ({ fetchedRecordRows, newRecords, totalCount } = recordsData);
+  $: ({ persistedNewRecords, totalCount } = recordsData);
   $: status = $rowStatus.get(row.identifier);
   $: state = status?.wholeRowState;
   $: errors = status?.errorsFromWholeRowAndCells ?? [];
@@ -34,11 +37,14 @@
     <Icon {...iconAddNew} />
   {:else if isRecordRow(row)}
     <span class="number">
-      {row.rowIndex +
-        (isDraftRecordRow(row)
-          ? ($totalCount ?? 0) - $fetchedRecordRows.length - $newRecords.length
-          : $pagination.offset) +
-        1}
+      {#if rowDescriptor.rowOrigin === RowOrigin.FetchedFromDb}
+        {rowDescriptor.rowNumber + $pagination.offset + 1}
+      {:else if rowDescriptor.rowOrigin === RowOrigin.NewlyCreatedViaUi}
+        {rowDescriptor.rowNumber +
+          ($totalCount ?? 0) -
+          $persistedNewRecords.length +
+          1}
+      {/if}
       {#if isDraftRecordRow(row)}
         *
       {/if}
@@ -63,5 +69,9 @@
     */
     user-select: none;
     -webkit-user-select: none; /* Safari */
+
+    .number {
+      white-space: nowrap;
+    }
   }
 </style>

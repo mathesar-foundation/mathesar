@@ -4,11 +4,11 @@ import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
 
 import type { RecordsData } from './records';
 import {
+  type DraftRecordRow,
   GroupHeaderRow,
   HelpTextRow,
   PersistedRecordRow,
   PlaceholderRecordRow,
-  type Row,
 } from './Row';
 import type { RecordGrouping } from './utils';
 
@@ -32,18 +32,39 @@ export function getCellStyle(
   return cellStyle(placement, leftOffset);
 }
 
+export enum RowOrigin {
+  FetchedFromDb = 'fetchedFromDb',
+  NewlyCreatedViaUi = 'newlyCreatedViaUi',
+  StaticUiElement = 'staticlyPresentInUi',
+}
+
+export interface DisplayRecordRowDescriptor {
+  row: PersistedRecordRow | DraftRecordRow;
+  rowNumber: number;
+  rowOrigin: RowOrigin.FetchedFromDb | RowOrigin.NewlyCreatedViaUi;
+}
+
+export interface DisplayUiRowDescriptor {
+  row: HelpTextRow | GroupHeaderRow | PlaceholderRecordRow;
+  rowOrigin: RowOrigin.StaticUiElement;
+}
+
+export type DisplayRowDescriptor =
+  | DisplayRecordRowDescriptor
+  | DisplayUiRowDescriptor;
+
 export function combineRecordRowsWithGroupHeaders({
   recordRows,
   grouping,
 }: {
   recordRows: PersistedRecordRow[];
   grouping?: RecordGrouping;
-}): (PersistedRecordRow | GroupHeaderRow)[] {
+}): DisplayRowDescriptor[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
 
   if (isResultGrouped && grouping) {
-    const combinedRows: (PersistedRecordRow | GroupHeaderRow)[] = [];
+    const combinedRows: DisplayRowDescriptor[] = [];
     let persistedRecordRowIndex = 0;
 
     grouping.groups.forEach((group) => {
@@ -55,27 +76,33 @@ export function combineRecordRowsWithGroupHeaders({
           groupValues[columnId] = group.eqValue[columnId];
         }
       });
-      combinedRows.push(
-        new GroupHeaderRow({
+      combinedRows.push({
+        row: new GroupHeaderRow({
           group,
           groupValues,
         }),
-      );
+        rowOrigin: RowOrigin.StaticUiElement,
+      });
       group.resultIndices.forEach((resultIndex) => {
         const { record } = recordRows[resultIndex];
-        combinedRows.push(
-          new PersistedRecordRow({
+        combinedRows.push({
+          row: new PersistedRecordRow({
             record,
-            rowIndex: persistedRecordRowIndex,
           }),
-        );
+          rowOrigin: RowOrigin.FetchedFromDb,
+          rowNumber: persistedRecordRowIndex,
+        });
         persistedRecordRowIndex += 1;
       });
     });
     return combinedRows;
   }
 
-  return recordRows;
+  return recordRows.map((row, index) => ({
+    row,
+    rowOrigin: RowOrigin.FetchedFromDb,
+    rowNumber: index,
+  }));
 }
 
 export class Display {
@@ -85,7 +112,7 @@ export class Display {
 
   horizontalScrollOffset: Writable<number>;
 
-  allRows: Readable<Row[]>;
+  displayRowDescriptors: Readable<DisplayRowDescriptor[]>;
 
   placeholderRowId: Readable<string>;
 
@@ -98,19 +125,30 @@ export class Display {
     this.placeholderRowId = placeholderRowId;
 
     const { fetchedRecordRows, newRecords, grouping } = this.recordsData;
-    this.allRows = derived(
+    this.displayRowDescriptors = derived(
       [fetchedRecordRows, newRecords, grouping],
       ([$fetchedRecordRows, $newRecords, $grouping]) => {
-        let rows: Row[] = combineRecordRowsWithGroupHeaders({
-          recordRows: $fetchedRecordRows,
-          grouping: $grouping,
-        });
+        let displayRowDescriptors: DisplayRowDescriptor[] =
+          combineRecordRowsWithGroupHeaders({
+            recordRows: $fetchedRecordRows,
+            grouping: $grouping,
+          });
         if ($newRecords.length > 0) {
-          rows = rows.concat(new HelpTextRow()).concat($newRecords);
+          displayRowDescriptors = displayRowDescriptors
+            .concat({
+              row: new HelpTextRow(),
+              rowOrigin: RowOrigin.StaticUiElement,
+            })
+            .concat(
+              $newRecords.map((row, index) => ({
+                row,
+                rowNumber: index,
+                rowOrigin: RowOrigin.NewlyCreatedViaUi,
+              })),
+            );
         }
         const placeholderRow = new PlaceholderRecordRow({
           record: this.recordsData.getEmptyApiRecord(),
-          rowIndex: $fetchedRecordRows.length + $newRecords.length,
         });
 
         // This is really hacky! We have a side effect (mutating state) within a
@@ -123,8 +161,11 @@ export class Display {
         // didn't want to lump any of that refactoring into an already-large
         // refactor.
         placeholderRowId.set(placeholderRow.identifier);
-        rows = rows.concat(placeholderRow);
-        return rows;
+        displayRowDescriptors = displayRowDescriptors.concat({
+          row: placeholderRow,
+          rowOrigin: RowOrigin.StaticUiElement,
+        });
+        return displayRowDescriptors;
       },
     );
   }

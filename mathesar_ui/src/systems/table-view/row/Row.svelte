@@ -3,6 +3,7 @@
   import { SheetRow, SheetRowHeaderCell } from '@mathesar/components/sheet';
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
   import {
+    type DisplayRowDescriptor,
     ID_ROW_CONTROL_COLUMN,
     type Row,
     getCellKey,
@@ -21,6 +22,7 @@
   import RowControl from './RowControl.svelte';
 
   export let row: Row;
+  export let rowDescriptor: DisplayRowDescriptor;
   export let style: { [key: string]: string | number };
 
   const tabularData = getTabularDataStoreFromContext();
@@ -87,6 +89,7 @@
       >
         <RowControl
           {row}
+          {rowDescriptor}
           {meta}
           {recordsData}
           {isSelected}
