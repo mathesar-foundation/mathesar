@@ -67,7 +67,7 @@ class AddedTableInfo(TypedDict):
     Attributes:
         oid: The `oid` of the table in the schema.
         name: The name of the table.
-        renamed_columns: A dictionary giving the names of colummns which
+        renamed_columns: A dictionary giving the names of columns which
             were renamed due to collisions.
     """
     oid: int
