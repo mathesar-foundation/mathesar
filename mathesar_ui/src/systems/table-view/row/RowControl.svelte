@@ -21,7 +21,7 @@
   export let hasErrors = false;
 
   $: ({ pagination, rowStatus } = meta);
-  $: ({ savedRecords, newRecords, totalCount } = recordsData);
+  $: ({ fetchedRecordRows, newRecords, totalCount } = recordsData);
   $: status = $rowStatus.get(row.identifier);
   $: state = status?.wholeRowState;
   $: errors = status?.errorsFromWholeRowAndCells ?? [];
@@ -36,7 +36,7 @@
     <span class="number">
       {row.rowIndex +
         (isDraftRecordRow(row)
-          ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
+          ? ($totalCount ?? 0) - $fetchedRecordRows.length - $newRecords.length
           : $pagination.offset) +
         1}
       {#if isDraftRecordRow(row)}

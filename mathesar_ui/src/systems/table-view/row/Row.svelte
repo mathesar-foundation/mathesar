@@ -6,13 +6,13 @@
     ID_ROW_CONTROL_COLUMN,
     type Row,
     getCellKey,
+    getRowSelectionId,
     getTabularDataStoreFromContext,
     isGroupHeaderRow,
     isHelpTextRow,
     isPlaceholderRecordRow,
     isRecordRow,
   } from '@mathesar/stores/table-data';
-  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
 
   import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';

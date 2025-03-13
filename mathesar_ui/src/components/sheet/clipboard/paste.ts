@@ -4,8 +4,11 @@ import { _ } from 'svelte-i18n';
 
 import type { Column } from '@mathesar/api/rpc/columns';
 import type { ResultValue } from '@mathesar/api/rpc/records';
-import type { RecordRow, RecordsData } from '@mathesar/stores/table-data';
-import { getRowSelectionId } from '@mathesar/stores/table-data/records';
+import {
+  type RecordRow,
+  type RecordsData,
+  getRowSelectionId,
+} from '@mathesar/stores/table-data';
 import { startingFrom } from '@mathesar/utils/iterUtils';
 import {
   type ImmutableSet,

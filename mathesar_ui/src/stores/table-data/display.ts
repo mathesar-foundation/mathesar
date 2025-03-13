@@ -1,12 +1,16 @@
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
+import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
+
 import type { RecordsData } from './records';
 import {
+  GroupHeaderRow,
   HelpTextRow,
+  PersistedRecordRow,
   PlaceholderRecordRow,
   type Row,
-  filterRecordRows,
 } from './Row';
+import type { RecordGrouping } from './utils';
 
 export interface ColumnPlacement {
   /** CSS value in px */
@@ -28,6 +32,52 @@ export function getCellStyle(
   return cellStyle(placement, leftOffset);
 }
 
+export function combineRecordRowsWithGroupHeaders({
+  recordRows,
+  grouping,
+}: {
+  recordRows: PersistedRecordRow[];
+  grouping?: RecordGrouping;
+}): (PersistedRecordRow | GroupHeaderRow)[] {
+  const groupingColumnIds = grouping?.columnIds ?? [];
+  const isResultGrouped = groupingColumnIds.length > 0;
+
+  if (isResultGrouped && grouping) {
+    const combinedRows: (PersistedRecordRow | GroupHeaderRow)[] = [];
+    let persistedRecordRowIndex = 0;
+
+    grouping.groups.forEach((group) => {
+      const groupValues: ApiRecord = {};
+      grouping.columnIds.forEach((columnId) => {
+        if (group.eqValue[columnId] !== undefined) {
+          groupValues[columnId] = group.eqValue[columnId];
+        } else {
+          groupValues[columnId] = group.eqValue[columnId];
+        }
+      });
+      combinedRows.push(
+        new GroupHeaderRow({
+          group,
+          groupValues,
+        }),
+      );
+      group.resultIndices.forEach((resultIndex) => {
+        const { record } = recordRows[resultIndex];
+        combinedRows.push(
+          new PersistedRecordRow({
+            record,
+            rowIndex: persistedRecordRowIndex,
+          }),
+        );
+        persistedRecordRowIndex += 1;
+      });
+    });
+    return combinedRows;
+  }
+
+  return recordRows;
+}
+
 export class Display {
   private recordsData: RecordsData;
 
@@ -35,7 +85,7 @@ export class Display {
 
   horizontalScrollOffset: Writable<number>;
 
-  displayableRecords: Readable<Row[]>;
+  allRows: Readable<Row[]>;
 
   placeholderRowId: Readable<string>;
 
@@ -47,26 +97,20 @@ export class Display {
     const placeholderRowId = writable('');
     this.placeholderRowId = placeholderRowId;
 
-    const { savedRecordRowsWithGroupHeaders, newRecords } = this.recordsData;
-    this.displayableRecords = derived(
-      [savedRecordRowsWithGroupHeaders, newRecords],
-      ([$savedRecordRowsWithGroupHeaders, $newRecords]) => {
-        let allRecords: Row[] = $savedRecordRowsWithGroupHeaders;
-        /**
-         * Why are we calculating savedRecords here?
-         * 1. We need it to properly calculate the row index of the
-         *    placeholder row.
-         * 2. Adding the savedRecords store as a dependency will
-         *    execute this derived store's callback twice everytime
-         *    records are fetched. So, it's calculated here instead.
-         */
-        const savedRecords = filterRecordRows(allRecords);
+    const { fetchedRecordRows, newRecords, grouping } = this.recordsData;
+    this.allRows = derived(
+      [fetchedRecordRows, newRecords, grouping],
+      ([$fetchedRecordRows, $newRecords, $grouping]) => {
+        let rows: Row[] = combineRecordRowsWithGroupHeaders({
+          recordRows: $fetchedRecordRows,
+          grouping: $grouping,
+        });
         if ($newRecords.length > 0) {
-          allRecords = allRecords.concat(new HelpTextRow()).concat($newRecords);
+          rows = rows.concat(new HelpTextRow()).concat($newRecords);
         }
         const placeholderRow = new PlaceholderRecordRow({
           record: this.recordsData.getEmptyApiRecord(),
-          rowIndex: savedRecords.length + $newRecords.length,
+          rowIndex: $fetchedRecordRows.length + $newRecords.length,
         });
 
         // This is really hacky! We have a side effect (mutating state) within a
@@ -79,9 +123,8 @@ export class Display {
         // didn't want to lump any of that refactoring into an already-large
         // refactor.
         placeholderRowId.set(placeholderRow.identifier);
-
-        allRecords = allRecords.concat(placeholderRow);
-        return allRecords;
+        rows = rows.concat(placeholderRow);
+        return rows;
       },
     );
   }

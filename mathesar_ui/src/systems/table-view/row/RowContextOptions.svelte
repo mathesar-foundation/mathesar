@@ -8,9 +8,9 @@
   import {
     type RecordRow,
     type RecordsData,
+    getRowSelectionId,
     isRecordRow,
   } from '@mathesar/stores/table-data';
-  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
   import {
     ButtonMenuItem,

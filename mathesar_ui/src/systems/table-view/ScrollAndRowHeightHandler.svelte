@@ -17,7 +17,7 @@
   $: ({ recordsData, display, meta } = $tabularData);
   $: ({ newRecords, state } = recordsData);
   $: ({ sorting, filtering, grouping, pagination } = meta);
-  $: ({ displayableRecords } = display);
+  $: ({ allRows } = display);
 
   export let api: SheetVirtualRowsApi;
 
@@ -53,8 +53,8 @@
     api.recalculateHeightsAfterIndex(0);
   }
 
-  async function caculateHeightsForNewRows(_displayableRecords: Row[]) {
-    const allRecordCount = _displayableRecords.length ?? 0;
+  async function caculateHeightsForNewRows(_rows: Row[]) {
+    const allRecordCount = _rows.length ?? 0;
     const newRecordCount = $newRecords.length ?? 0;
     if (previousNewRecordsCount !== newRecordCount) {
       const index = Math.max(
@@ -71,10 +71,7 @@
     }
   }
 
-  async function recalculateRowHeights(
-    _recordState: States,
-    _displayableRecords: Row[],
-  ) {
+  async function recalculateRowHeights(_recordState: States, _rows: Row[]) {
     /**
      * Only perform full recalculation of heights when,
      * 1. Grouping is applied
@@ -96,8 +93,8 @@
       return;
     }
 
-    await caculateHeightsForNewRows(_displayableRecords);
+    await caculateHeightsForNewRows(_rows);
   }
 
-  $: void recalculateRowHeights($state, $displayableRecords);
+  $: void recalculateRowHeights($state, $allRows);
 </script>

@@ -28,7 +28,7 @@ import {
   ProcessedColumn,
   type ProcessedColumnsStore,
 } from './processedColumns';
-import { RecordsData, type TableRecordsData } from './records';
+import { RecordsData } from './records';
 
 function getSelectedCellData(
   selection: SheetSelection,
@@ -215,13 +215,7 @@ export class TabularData {
     });
   }
 
-  refresh(): Promise<
-    [
-      Column[] | undefined,
-      TableRecordsData | undefined,
-      ConstraintsData | undefined,
-    ]
-  > {
+  refresh(): Promise<unknown> {
     return Promise.all([
       this.columnsDataStore.fetch(),
       this.recordsData.fetch(),

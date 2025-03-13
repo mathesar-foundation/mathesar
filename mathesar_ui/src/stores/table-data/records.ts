@@ -12,8 +12,6 @@ import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { Column } from '@mathesar/api/rpc/columns';
 import type {
-  Group as ApiGroup,
-  GroupingResponse as ApiGroupingResponse,
   Result as ApiRecord,
   RecordsListParams,
   RecordsResponse,
@@ -45,19 +43,23 @@ import {
 } from './record-summaries/recordSummaryUtils';
 import {
   DraftRecordRow,
-  GroupHeaderRow,
   PersistedRecordRow,
-  type RecordGroup,
   type RecordRow,
   type Row,
   isDraftRecordRow,
-  isGroupHeaderRow,
   isPersistedRecordRow,
   isPlaceholderRecordRow,
 } from './Row';
 import type { SearchFuzzy } from './searchFuzzy';
 import type { Sorting } from './sorting';
-import { type RowKey, getCellKey, validateRow } from './utils';
+import {
+  type RecordGrouping,
+  type RowKey,
+  buildGrouping,
+  getCellKey,
+  getRowSelectionId,
+  validateRow,
+} from './utils';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
@@ -67,107 +69,12 @@ export interface RecordsRequestParamsData {
   searchFuzzy: SearchFuzzy;
 }
 
-export interface RecordGrouping {
-  columnIds: number[];
-  preprocIds: (string | null)[];
-  groups: RecordGroup[];
-}
-
-function buildGroup(apiGroup: ApiGroup): RecordGroup {
-  return {
-    count: apiGroup.count,
-    eqValue: apiGroup.results_eq,
-    resultIndices: apiGroup.result_indices,
-  };
-}
-
-function buildGrouping(apiGrouping: ApiGroupingResponse): RecordGrouping {
-  return {
-    columnIds: apiGrouping.columns,
-    preprocIds: apiGrouping.preproc ?? [],
-    groups: (apiGrouping.groups ?? []).map(buildGroup),
-  };
-}
-
 export interface TableRecordsData {
   state: States;
   error?: string;
-  savedRecordRowsWithGroupHeaders: Row[];
+  rows: Row[];
   totalCount: number;
   grouping?: RecordGrouping;
-}
-
-/** See `records.ts.README.md` for more info */
-export function getRowSelectionId(row: Row): string {
-  return row.identifier;
-}
-
-/** See `records.ts.README.md` for more info */
-export function getPkValueInRecord(
-  record: ApiRecord,
-  columns: Column[],
-): string | number {
-  const pkColumn = columns.find((c) => c.primary_key);
-  if (!pkColumn) {
-    throw new Error('No primary key column found.');
-  }
-  const pkValue = record[pkColumn.id];
-  if (!(typeof pkValue === 'string' || typeof pkValue === 'number')) {
-    throw new Error('Primary key value is not a string or number.');
-  }
-  return pkValue;
-}
-
-function preprocessRecords({
-  records,
-  grouping,
-}: {
-  records: ApiRecord[];
-  grouping?: RecordGrouping;
-}): (PersistedRecordRow | GroupHeaderRow)[] {
-  const groupingColumnIds = grouping?.columnIds ?? [];
-  const isResultGrouped = groupingColumnIds.length > 0;
-
-  if (isResultGrouped) {
-    const combinedRecords: (PersistedRecordRow | GroupHeaderRow)[] = [];
-    let recordIndex = 0;
-
-    grouping?.groups.forEach((group) => {
-      const groupValues: ApiRecord = {};
-      grouping.columnIds.forEach((columnId) => {
-        if (group.eqValue[columnId] !== undefined) {
-          groupValues[columnId] = group.eqValue[columnId];
-        } else {
-          groupValues[columnId] = group.eqValue[columnId];
-        }
-      });
-      combinedRecords.push(
-        new GroupHeaderRow({
-          group,
-          groupValues,
-        }),
-      );
-      group.resultIndices.forEach((resultIndex) => {
-        const record = records[resultIndex];
-        combinedRecords.push(
-          new PersistedRecordRow({
-            record,
-            rowIndex: recordIndex,
-          }),
-        );
-        recordIndex += 1;
-      });
-    });
-    return combinedRecords;
-  }
-
-  return records.map(
-    (record, rowIndex) =>
-      new PersistedRecordRow({
-        record,
-        rowIndex,
-      }),
-  );
 }
 
 export class RecordsData {
@@ -182,11 +89,7 @@ export class RecordsData {
 
   state: Writable<States>;
 
-  savedRecords: Readable<PersistedRecordRow[]>;
-
-  savedRecordRowsWithGroupHeaders: Writable<
-    (PersistedRecordRow | GroupHeaderRow)[]
-  >;
+  fetchedRecordRows: Writable<PersistedRecordRow[]>;
 
   newRecords: Writable<(PersistedRecordRow | DraftRecordRow)[]>;
 
@@ -210,8 +113,6 @@ export class RecordsData {
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private updatePromises: Map<unknown, CancellablePromise<unknown>>;
-
-  private fetchCallback?: (storeData: TableRecordsData) => void;
 
   private requestParamsUnsubscriber: Unsubscriber;
 
@@ -245,29 +146,22 @@ export class RecordsData {
     this.apiContext = { database_id: database.id, table_oid: table.oid };
     this.shareConsumer = shareConsumer;
     this.state = writable(States.Loading);
-    this.savedRecordRowsWithGroupHeaders = writable([]);
+    this.fetchedRecordRows = writable([]);
     this.newRecords = writable([]);
-    this.savedRecords = derived(
-      this.savedRecordRowsWithGroupHeaders,
-      ($savedRecordRowsWithGroupHeaders) =>
-        $savedRecordRowsWithGroupHeaders.filter(
-          (row): row is PersistedRecordRow => !isGroupHeaderRow(row),
-        ),
-    );
     this.grouping = writable(undefined);
     this.totalCount = writable(undefined);
     this.error = writable(undefined);
-
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.contextualFilters = contextualFilters;
     this.loadIntrinsicRecordSummaries = loadIntrinsicRecordSummaries;
+
     void this.fetch();
 
     this.selectableRowsMap = derived(
-      [this.savedRecords, this.newRecords],
-      ([savedRecords, newRecords]) => {
-        const records = [...savedRecords, ...newRecords];
+      [this.fetchedRecordRows, this.newRecords],
+      ([fetchedRecordRows, newRecords]) => {
+        const records = [...fetchedRecordRows, ...newRecords];
         return new Map(records.map((r) => [getRowSelectionId(r), r]));
       },
     );
@@ -285,7 +179,7 @@ export class RecordsData {
       setLoadingState?: boolean;
       clearMetaStatuses?: boolean;
     } = {},
-  ): Promise<TableRecordsData | undefined> {
+  ): Promise<void> {
     const options = {
       clearNewRecords: true,
       setLoadingState: true,
@@ -294,7 +188,6 @@ export class RecordsData {
     };
 
     this.promise?.cancel();
-
     this.error.set(undefined);
 
     if (options.clearNewRecords) {
@@ -351,24 +244,19 @@ export class RecordsData {
           Object.entries(response.record_summaries),
         );
       }
-      const records = preprocessRecords({
-        records: response.results,
-        grouping,
-      });
-
-      const tableRecordsData: TableRecordsData = {
-        state: States.Done,
-        savedRecordRowsWithGroupHeaders: records,
-        grouping,
-        totalCount,
-      };
-      this.savedRecordRowsWithGroupHeaders.set(records);
+      this.fetchedRecordRows.set(
+        response.results.map(
+          (apiRecord, index) =>
+            new PersistedRecordRow({
+              record: apiRecord,
+              rowIndex: index,
+            }),
+        ),
+      );
       this.state.set(States.Done);
       this.grouping.set(grouping);
       this.totalCount.set(totalCount);
       this.error.set(undefined);
-      this.fetchCallback?.(tableRecordsData);
-      return tableRecordsData;
     } catch (err) {
       this.state.set(States.Error);
       this.error.set(
@@ -383,19 +271,15 @@ export class RecordsData {
     const pkColumn = get(this.columnsDataStore.pkColumn);
     if (!pkColumn) throw new Error('Cannot delete without primary key');
 
-    const ids =
+    const rowIds =
       typeof rowSelectionIds === 'string' ? [rowSelectionIds] : rowSelectionIds;
+    const allSelectableRows = get(this.selectableRowsMap);
 
-    const selectableRows = get(this.selectableRowsMap);
-    const draftRowsToDelete: Map<DraftRecordRow['identifier'], DraftRecordRow> =
-      new Map();
-    const persistedRowsToDelete: Map<
-      PersistedRecordRow['identifier'],
-      PersistedRecordRow
-    > = new Map();
+    const draftRowsToDelete: Map<string, DraftRecordRow> = new Map();
+    const persistedRowsToDelete: Map<string, PersistedRecordRow> = new Map();
 
-    for (const rowId of ids) {
-      const row = selectableRows.get(rowId);
+    for (const rowId of rowIds) {
+      const row = allSelectableRows.get(rowId);
       if (!row) continue;
 
       if (isDraftRecordRow(row)) {
@@ -552,12 +436,9 @@ export class RecordsData {
     const pkColumn = get(this.columnsDataStore.pkColumn);
     if (!pkColumn) throw new Error('Unable to update without primary key');
 
-    this.savedRecordRowsWithGroupHeaders.update((rows) =>
+    // TODO: Fix bug - Update this for new record rows as well
+    this.fetchedRecordRows.update((rows) =>
       rows.map((row) => {
-        if (isGroupHeaderRow(row)) {
-          return row;
-        }
-
         const responseMapValue = responseMap.get(row.identifier);
         if (!responseMapValue) return row;
         const { blueprint, response } = responseMapValue;
@@ -761,14 +642,10 @@ export class RecordsData {
   async addEmptyRecord(): Promise<void> {
     const row = new DraftRecordRow({
       record: this.getEmptyApiRecord(),
-      rowIndex: this.getRecordRows().length,
+      rowIndex: get(this.selectableRowsMap).size,
     });
     this.newRecords.update((existing) => existing.concat(row));
     await this.createRecord(row);
-  }
-
-  getRecordRows(): RecordRow[] {
-    return [...get(this.savedRecords), ...get(this.newRecords)];
   }
 
   destroy(): void {

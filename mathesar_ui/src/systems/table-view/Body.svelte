@@ -22,7 +22,7 @@
 
   $: ({ table, display } = $tabularData);
   $: ({ oid } = table);
-  $: ({ displayableRecords } = display);
+  $: ({ allRows } = display);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canAddRow = $currentRolePrivileges.has('INSERT');
 
@@ -45,8 +45,7 @@
   }
 
   function getItemSizeFromIndex(index: number) {
-    const allRecords = $displayableRecords;
-    const record = allRecords?.[index];
+    const record = $allRows?.[index];
     return record ? getItemSizeFromRow(record) : ROW_HEIGHT_PX;
   }
 </script>
@@ -54,28 +53,28 @@
 {#key oid}
   {#if usesVirtualList}
     <SheetVirtualRows
-      itemCount={$displayableRecords.length}
+      itemCount={$allRows.length}
       paddingBottom={30}
       itemSize={getItemSizeFromIndex}
-      itemKey={(index) => getIterationKey(index, $displayableRecords[index])}
+      itemKey={(index) => getIterationKey(index, $allRows[index])}
       let:items
       let:api
     >
       <ScrollAndRowHeightHandler {api} />
       {#each items as item (item.key)}
-        {#if $displayableRecords[item.index] && !(isPlaceholderRecordRow($displayableRecords[item.index]) && !canAddRow)}
-          <Row style={item.style} bind:row={$displayableRecords[item.index]} />
+        {#if $allRows[item.index] && !(isPlaceholderRecordRow($allRows[item.index]) && !canAddRow)}
+          <Row style={item.style} bind:row={$allRows[item.index]} />
         {/if}
       {/each}
     </SheetVirtualRows>
   {:else}
-    {#each $displayableRecords as displayableRecord (displayableRecord)}
+    {#each $allRows as row (row)}
       <Row
         style={{
           position: 'relative',
-          height: getItemSizeFromRow(displayableRecord),
+          height: getItemSizeFromRow(row),
         }}
-        row={displayableRecord}
+        {row}
       />
     {/each}
   {/if}

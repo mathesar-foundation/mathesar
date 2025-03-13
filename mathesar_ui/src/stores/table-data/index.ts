@@ -10,11 +10,7 @@ export {
 } from './filtering';
 export { Sorting } from './sorting';
 export { Grouping, type GroupEntry, type TerseGrouping } from './grouping';
-export {
-  type RecordGrouping,
-  type TableRecordsData,
-  getRowSelectionId,
-} from './records';
+export { type TableRecordsData } from './records';
 export {
   type GroupHeaderRow,
   type HelpTextRow,
@@ -27,7 +23,6 @@ export {
   isDraftRecordRow,
   isPlaceholderRecordRow,
   filterRecordRows,
-  type RecordGroup,
   type Row,
   type RecordRow,
 } from './Row';
@@ -37,6 +32,10 @@ export {
   ID_ADD_NEW_COLUMN,
   type RowKey,
   type CellKey,
+  getRowSelectionId,
+  type RecordGrouping,
+  type RecordGroup,
+  extractPrimaryKeyValue,
 } from './utils';
 export {
   setTabularDataStoreInContext,

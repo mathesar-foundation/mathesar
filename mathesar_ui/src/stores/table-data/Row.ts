@@ -5,6 +5,8 @@ import type {
 } from '@mathesar/api/rpc/records';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
+import type { RecordGroup } from './utils';
+
 export enum RowType {
   PersistedRecord = 'persistedRecord',
   DraftRecord = 'draftRecord',
@@ -114,12 +116,6 @@ export class PlaceholderRecordRow extends BaseRecordRow<RowType.PlaceholderRecor
       record: updatedRecord,
     });
   }
-}
-
-export interface RecordGroup {
-  count: number;
-  eqValue: ApiGroup['results_eq'];
-  resultIndices: number[];
 }
 
 export class GroupHeaderRow {

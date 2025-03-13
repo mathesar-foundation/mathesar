@@ -5,11 +5,11 @@
   import type { Table } from '@mathesar/models/Table';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import type {
-    ColumnsDataStore,
-    RecordsData,
+  import {
+    type ColumnsDataStore,
+    type RecordsData,
+    extractPrimaryKeyValue,
   } from '@mathesar/stores/table-data';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
   import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
   import {
@@ -35,7 +35,7 @@
     const row = $selectableRowsMap.get(id);
     if (!row) return undefined;
     try {
-      const recordId = getPkValueInRecord(row.record, $columns);
+      const recordId = extractPrimaryKeyValue(row.record, $columns);
       return $storeToGetRecordPageUrl({ recordId });
     } catch (e) {
       return undefined;
