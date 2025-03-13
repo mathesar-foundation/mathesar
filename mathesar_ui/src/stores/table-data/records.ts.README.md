@@ -2,11 +2,18 @@
 
 We have some confusing **mess** in `records.ts` that badly needs refactoring!
 
+## 2025-03-13 from Pavish
+- `Row` is now a discriminated union of different classes. Refer `Row.ts`.
+- `identifier` is used as the defacto field to uniquely identify rows.
+    - It is now generated via `getGloballyUniqueId`.
+- `rowIndex` is moved to `display.ts` as `rowNumber`.
+    - A `DisplayRowDescriptor` is used to wrap Rows and only the record rows that need to display the rowNumber contain this property.
+- `rowKey` is removed and no longer used.
+    - `identifier` replaces `rowKey`.
+    - The type `RowKey` is still present and refers to the `identifier`.
+
+## 2025-02
 This file is Sean's attempt at documenting the mess so that future devs (including me) can either work within the mess or refactor it!
-
-## Relevance
-
-This file was created in 2025-02.
 
 Check git blame to see when this file was last updated. Consider that content here may well be stale if the referenced code has changed!
 

@@ -1,21 +1,15 @@
-import { isDefinedNonNullable } from './typeUtils';
+const ID_PREFIX = '_id';
 
-const contextMap = new Map<string, number>();
+export function getGloballyUniqueId(customPrefix?: string): string {
+  const prefix = customPrefix ?? ID_PREFIX;
 
-export function getGloballyUniqueId(context = 'global'): string {
-  const idPrefix = `_${context}-id`;
-
-  // randomUUID is only present in secure contexts such as https
+  // randomUUID is only present in secure contexts such as https or localhost
   if (crypto && crypto.randomUUID) {
-    return `${idPrefix}-${crypto.randomUUID()}`;
+    return `${prefix}-${crypto.randomUUID()}`;
   }
 
-  let counter = contextMap.get(context);
-  if (!isDefinedNonNullable(counter)) {
-    counter = 0;
-  }
-  counter += 1;
-  contextMap.set(context, counter);
-
-  return `${idPrefix}-${counter}`;
+  // Does not _definitively_ ensure uniqueness but should suffice for our cases
+  return `${prefix}-${Date.now().toString(36)}-${Math.random()
+    .toString(36)
+    .substring(2)}`;
 }
