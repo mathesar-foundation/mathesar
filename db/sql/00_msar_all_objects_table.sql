@@ -1170,6 +1170,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.search_records_from_table(oid,jsonb,integer,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.search_records_from_table(oid,jsonb,integer,boolean,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.set_members_to_role(regrole,oid[])', 'FUNCTION', NULL),
+  ('msar', 'msar.set_pkey_column(regclass,integer,msar.pkey_kind,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.set_schema_description(oid,text)', 'FUNCTION', NULL),
   ('msar', 'msar.time_to_degrees(time without time zone)', 'FUNCTION', NULL),
   ('msar', 'msar.top_level_domains', 'TABLE', NULL),
