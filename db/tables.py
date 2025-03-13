@@ -246,3 +246,20 @@ def fetch_table_in_chunks(
                 if not records:
                     break
                 yield [record[0] for record in records]
+
+
+def set_primary_key_column_on_table(
+        conn,
+        table_oid,
+        column_attnum,
+        default_type=None,
+        drop_old_pkey_column=False,
+):
+    db_conn.exec_msar_func(
+        conn,
+        'set_pkey_column',
+        table_oid,
+        column_attnum,
+        default_type,
+        drop_old_pkey_column
+    )

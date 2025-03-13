@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing data models.
 """
-from typing import TypedDict
+from typing import Literal, Optional, TypedDict
 
 from modernrpc.core import REQUEST_KEY
 
@@ -170,4 +170,25 @@ def move_columns(
             source_table_oid,
             target_table_oid,
             move_column_attnums
+        )
+
+
+@mathesar_rpc_method(name="data_modeling.change_primary_key_column", auth="login")
+def change_primary_key_column(
+        *,
+        column_attnum: int,
+        table_oid: int,
+        database_id: int,
+        default_type: Optional[Literal['IDENTITY', 'UUIDv4']] = None,
+        drop_existing_pk_column: bool = False,
+        **kwargs
+):
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        tables.set_primary_key_column_on_table(
+            conn,
+            table_oid,
+            column_attnum,
+            default_type=default_type,
+            drop_old_pkey_column=drop_existing_pk_column,
         )
