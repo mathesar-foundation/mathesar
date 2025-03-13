@@ -49,6 +49,7 @@
     processColumns,
   } from './importPreviewPageUtils';
   import ImportPreviewSheet from './ImportPreviewSheet.svelte';
+  import PkColumnConfig from './PkColumnConfig.svelte';
 
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
@@ -219,6 +220,11 @@
       disabled={formInputsAreDisabled}
     />
   </FieldLayout>
+
+  <FieldLayout>
+    <PkColumnConfig {columns} />
+  </FieldLayout>
+
   <FieldLayout>
     <InfoBox>
       {$_('customize_names_types_preview')}

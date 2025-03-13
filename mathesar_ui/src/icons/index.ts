@@ -35,6 +35,7 @@ import {
   faGlobe,
   faGrip,
   faHammer,
+  faHandPointer,
   faHashtag,
   faHeart,
   faICursor,
@@ -165,6 +166,8 @@ export const iconDisable: IconProps = { data: faXmark };
 export const iconOpenLinkInNewTab = { data: faExternalLink };
 export const iconGrip = { data: faGrip };
 export const iconReinstall = { data: faRotateBack };
+export const iconAddPrimaryKeyColumn = iconAddNew;
+export const iconPickPrimaryKeyColumn = { data: faHandPointer };
 
 // THINGS
 //

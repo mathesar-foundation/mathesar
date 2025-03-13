@@ -40,3 +40,37 @@ export function match<
     value as Extract<V, Record<P, string>>,
   ) as ReturnType<C[keyof C]>;
 }
+
+/**
+ * Performs branching logic by exhaustively pattern-matching all variants of a
+ * TypeScript union of literal strings.
+ *
+ * @param value The value to match
+ * @param cases An object representing the match arms. It should have one entry
+ * per variant of the union. The key should be the value of the discriminant
+ * property for that variant, and the value should be the result of the match
+ * arm.
+ *
+ * @example
+ *
+ *```ts
+ *type Shape = 'triangle' | 'rectangle' | 'square' | 'pentagon';
+ *
+ *function getNumberOfSides(shape: Shape) {
+ *  return matchLiteral(shape, {
+ *    triangle: 3,
+ *    rectangle: 4,
+ *    square: 4,
+ *    pentagon: 5,
+ *  });
+ *}
+ *```
+ */
+export function matchLiteral<
+  /** The union valued type */
+  V extends string,
+  /** The match arms */
+  C extends { [K in V]: unknown },
+>(value: V, cases: C) {
+  return cases[value];
+}
