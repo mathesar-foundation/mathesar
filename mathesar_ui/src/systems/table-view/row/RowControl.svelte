@@ -6,16 +6,14 @@
     type Meta,
     type RecordsData,
     type Row,
-    getRowKey,
-    isNewRecordRow,
-    isPlaceholderRow,
-    rowHasRecord,
+    isDraftRecordRow,
+    isPlaceholderRecordRow,
+    isRecordRow,
   } from '@mathesar/stores/table-data';
   import { Icon, iconLoading } from '@mathesar-component-library';
 
   import CellErrors from './CellErrors.svelte';
 
-  export let primaryKeyColumnId: number | undefined = undefined;
   export let row: Row;
   export let meta: Meta;
   export let recordsData: RecordsData;
@@ -24,8 +22,7 @@
 
   $: ({ pagination, rowStatus } = meta);
   $: ({ savedRecords, newRecords, totalCount } = recordsData);
-  $: rowKey = getRowKey(row, primaryKeyColumnId);
-  $: status = $rowStatus.get(rowKey);
+  $: status = $rowStatus.get(row.identifier);
   $: state = status?.wholeRowState;
   $: errors = status?.errorsFromWholeRowAndCells ?? [];
 </script>
@@ -33,16 +30,16 @@
 <CellBackground color="var(--cell-bg-color-header)" />
 <RowCellBackgrounds {isSelected} {hasErrors} />
 <div class="control">
-  {#if isPlaceholderRow(row)}
+  {#if isPlaceholderRecordRow(row)}
     <Icon {...iconAddNew} />
-  {:else if rowHasRecord(row)}
+  {:else if isRecordRow(row)}
     <span class="number">
       {row.rowIndex +
-        (isNewRecordRow(row)
+        (isDraftRecordRow(row)
           ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
           : $pagination.offset) +
         1}
-      {#if isNewRecordRow(row)}
+      {#if isDraftRecordRow(row)}
         *
       {/if}
     </span>

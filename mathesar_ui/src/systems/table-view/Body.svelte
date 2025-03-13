@@ -7,11 +7,10 @@
   } from '@mathesar/geometry';
   import {
     type Row as RowType,
-    getRowKey,
     getTabularDataStoreFromContext,
     isGroupHeaderRow,
     isHelpTextRow,
-    isPlaceholderRow,
+    isPlaceholderRecordRow,
   } from '@mathesar/stores/table-data';
 
   import Row from './row/Row.svelte';
@@ -21,10 +20,9 @@
 
   export let usesVirtualList = false;
 
-  $: ({ table, display, columnsDataStore } = $tabularData);
+  $: ({ table, display } = $tabularData);
   $: ({ oid } = table);
   $: ({ displayableRecords } = display);
-  $: ({ pkColumn } = columnsDataStore);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canAddRow = $currentRolePrivileges.has('INSERT');
 
@@ -41,7 +39,7 @@
   /** See notes in `records.ts.README.md` about different row identifiers */
   function getIterationKey(index: number, row: RowType | undefined): string {
     if (row) {
-      return getRowKey(row, $pkColumn?.id);
+      return row.identifier;
     }
     return `__index_${index}`;
   }
@@ -65,7 +63,7 @@
     >
       <ScrollAndRowHeightHandler {api} />
       {#each items as item (item.key)}
-        {#if $displayableRecords[item.index] && !(isPlaceholderRow($displayableRecords[item.index]) && !canAddRow)}
+        {#if $displayableRecords[item.index] && !(isPlaceholderRecordRow($displayableRecords[item.index]) && !canAddRow)}
           <Row style={item.style} bind:row={$displayableRecords[item.index]} />
         {/if}
       {/each}

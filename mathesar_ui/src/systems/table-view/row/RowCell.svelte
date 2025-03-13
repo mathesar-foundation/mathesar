@@ -6,6 +6,7 @@
     type RequestStatus,
     States,
   } from '@mathesar/api/rest/utils/requestUtils';
+  import type { ResultValue } from '@mathesar/api/rpc/records';
   import type { TablePrivilege } from '@mathesar/api/rpc/tables';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
@@ -24,9 +25,9 @@
     type ProcessedColumn,
     type RecordRow,
     type RecordsData,
-    rowHasNewRecord,
+    getRowSelectionId,
+    isProvisionalRecordRow,
   } from '@mathesar/stores/table-data';
-  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
   import {
     ButtonMenuItem,
     ContextMenu,
@@ -44,13 +45,13 @@
   export let recordsData: RecordsData;
   export let selection: Writable<SheetSelection>;
   export let row: RecordRow;
+  export let recordPk: ResultValue | undefined;
   export let rowHasErrors = false;
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-  export let rowKey: string;
   export let currentRoleTablePrivileges: Set<TablePrivilege>;
 
   $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
@@ -92,7 +93,7 @@
       return;
     }
     value = newValue;
-    const updatedRow = rowHasNewRecord(row)
+    const updatedRow = isProvisionalRecordRow(row)
       ? await recordsData.createOrUpdateRecord(row, column)
       : await recordsData.updateCell(row, column);
     value = updatedRow.record?.[column.id] ?? value;
@@ -151,16 +152,14 @@
       {$_('set_to')}
       <Null />
     </ButtonMenuItem>
-    {#if showLinkedRecordHyperLink}
-      {#if showLinkedRecordHyperLink && linkedRecordHref}
-        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-          <RichText text={$_('open_named_record')} let:slotName>
-            {#if slotName === 'recordName'}
-              <Identifier>{recordSummary}</Identifier>
-            {/if}
-          </RichText>
-        </LinkMenuItem>
-      {/if}
+    {#if showLinkedRecordHyperLink && linkedRecordHref}
+      <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
+        <RichText text={$_('open_named_record')} let:slotName>
+          {#if slotName === 'recordName'}
+            <Identifier>{recordSummary}</Identifier>
+          {/if}
+        </RichText>
+      </LinkMenuItem>
     {/if}
     <MenuDivider />
 
@@ -171,12 +170,7 @@
     <!-- Row -->
     <MenuDivider />
     <MenuHeading>{$_('row')}</MenuHeading>
-    <RowContextOptions
-      recordPk={rowKey}
-      {recordsData}
-      {row}
-      {isTableEditable}
-    />
+    <RowContextOptions {recordPk} {recordsData} {row} {isTableEditable} />
   </ContextMenu>
   {#if errors.length}
     <CellErrors {errors} forceShowErrors={isActive} />

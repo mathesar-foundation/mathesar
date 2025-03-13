@@ -12,7 +12,7 @@ import {
 } from '@mathesar-component-library';
 
 import type { RowStatus } from './meta';
-import type { RecordRow } from './records';
+import type { RecordRow } from './Row';
 
 export type CellKey = string;
 export type RowKey = string;
@@ -159,12 +159,10 @@ export function validateCell({
 
 export function validateRow({
   row,
-  rowKey,
   columns,
   cellClientSideErrors,
 }: {
   row: RecordRow;
-  rowKey: RowKey;
   columns: Column[];
   cellClientSideErrors: WritableMap<CellKey, string[]>;
 }): void {
@@ -172,7 +170,7 @@ export function validateRow({
     validateCell({
       cellValue: row.record[String(column.id)],
       column,
-      cellKey: getCellKey(rowKey, column.id),
+      cellKey: getCellKey(row.identifier, column.id),
       cellClientSideErrors,
     });
   });

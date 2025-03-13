@@ -11,25 +11,26 @@ export {
 export { Sorting } from './sorting';
 export { Grouping, type GroupEntry, type TerseGrouping } from './grouping';
 export {
-  getRowKey,
-  rowHasRecord,
-  rowHasNewRecord,
-  isHelpTextRow,
-  isGroupHeaderRow,
-  isPlaceholderRow,
-  isNewRecordRow,
-  filterRecordRows,
-  rowHasSavedRecord,
-  type Row,
-  type RecordRow,
-  type NewRecordRow,
-  type GroupHeaderRow,
-  type HelpTextRow,
-  type PlaceholderRow,
-  type RecordGroup,
   type RecordGrouping,
   type TableRecordsData,
+  getRowSelectionId,
 } from './records';
+export {
+  type GroupHeaderRow,
+  type HelpTextRow,
+  type PlaceholderRecordRow,
+  isRecordRow,
+  isHelpTextRow,
+  isGroupHeaderRow,
+  isPersistedRecordRow,
+  isProvisionalRecordRow,
+  isDraftRecordRow,
+  isPlaceholderRecordRow,
+  filterRecordRows,
+  type RecordGroup,
+  type Row,
+  type RecordRow,
+} from './Row';
 export {
   getCellKey,
   ID_ROW_CONTROL_COLUMN,

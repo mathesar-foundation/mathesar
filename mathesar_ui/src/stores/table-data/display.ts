@@ -1,6 +1,12 @@
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
-import { type RecordsData, type Row, filterRecordRows } from './records';
+import type { RecordsData } from './records';
+import {
+  HelpTextRow,
+  PlaceholderRecordRow,
+  type Row,
+  filterRecordRows,
+} from './Row';
 
 export interface ColumnPlacement {
   /** CSS value in px */
@@ -56,18 +62,12 @@ export class Display {
          */
         const savedRecords = filterRecordRows(allRecords);
         if ($newRecords.length > 0) {
-          allRecords = allRecords
-            .concat({
-              identifier: '__new_help_text',
-              isNewHelpText: true,
-            })
-            .concat($newRecords);
+          allRecords = allRecords.concat(new HelpTextRow()).concat($newRecords);
         }
-        const placeholderRow = {
-          ...this.recordsData.getNewEmptyRecord(),
+        const placeholderRow = new PlaceholderRecordRow({
+          record: this.recordsData.getEmptyApiRecord(),
           rowIndex: savedRecords.length + $newRecords.length,
-          isAddPlaceholder: true,
-        };
+        });
 
         // This is really hacky! We have a side effect (mutating state) within a
         // derived store, which I don't like. I put this here during a large
