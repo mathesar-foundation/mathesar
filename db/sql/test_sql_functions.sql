@@ -195,6 +195,7 @@ BEGIN
   PERFORM msar.add_pkey_column(
     tab_id => 'add_pkey_col_testable'::regclass,
     pkey_type => 'UUIDv4',
+    drop_old_pkey_col => true,
     col_name => 'User Id'
   );
   RETURN NEXT col_is_pk('add_pkey_col_testable', 'User Id');
@@ -209,6 +210,7 @@ BEGIN
   PERFORM msar.add_pkey_column(
     tab_id => 'add_pkey_col_testable'::regclass,
     pkey_type => 'IDENTITY',
+    drop_old_pkey_col => true,
     col_name => 'Identity'
   );
   RETURN NEXT col_is_pk('add_pkey_col_testable', 'Identity');
@@ -223,7 +225,8 @@ BEGIN
   RETURN NEXT throws_like(
     $s$SELECT msar.add_pkey_column(
         tab_id => 'add_pkey_col_testable'::regclass,
-        pkey_type => 'ident'
+        pkey_type => 'ident',
+        drop_old_pkey_col => false
     );$s$,
     'invalid input value for enum%'
   );

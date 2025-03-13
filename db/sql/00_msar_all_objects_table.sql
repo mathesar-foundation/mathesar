@@ -570,6 +570,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.add_mathesar_table(oid,text,jsonb,jsonb,regrole,text)', 'FUNCTION', NULL),
   ('msar', 'msar.add_mathesar_table(oid,text,jsonb,jsonb,text)', 'FUNCTION', NULL),
   ('msar', 'msar.add_month_to_vector(point,date)', 'FUNCTION', NULL),
+  ('msar', 'msar.add_pkey_column(regclass,msar.pkey_kind,boolean,text)', 'FUNCTION', NULL),
   ('msar', 'msar.add_pkey_column(regclass,msar.pkey_kind,text)', 'FUNCTION', NULL),
   ('msar', 'msar.add_record_to_table(oid,jsonb,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.add_record_to_table(oid,jsonb,boolean,jsonb)', 'FUNCTION', NULL),
