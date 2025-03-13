@@ -121,13 +121,18 @@ def _transform_column_alter_dict(data):
     return alter_def
 
 
-def add_pkey_column_to_table(table_oid, pkey_type, conn, name="id"):
+def add_pkey_column_to_table(
+        table_oid, pkey_type, conn, drop_old_pkey_column=False, name="id"
+):
     """
     Add a primary key column to a table.
 
     See the `msar.add_pkey_column` function for info on the arguments.
     """
-    db_conn.exec_msar_func(conn, 'add_pkey_column', table_oid, pkey_type, name)
+    db_conn.exec_msar_func(
+        conn, 'add_pkey_column',
+        table_oid, pkey_type, drop_old_pkey_column, name
+    )
 
 
 def add_columns_to_table(table_oid, column_data_list, conn):

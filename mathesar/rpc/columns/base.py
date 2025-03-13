@@ -233,7 +233,8 @@ def add_primary_key_column(
         pkey_type: Literal["IDENTITY", "UUIDv4"],
         table_oid: int,
         database_id: int,
-        name: Optional[str] = "id",
+        drop_existing_pkey_column: bool = False,
+        name: str = "id",
         **kwargs
 ) -> None:
     """
@@ -259,11 +260,18 @@ def add_primary_key_column(
         pkey_type: Defines the type and default of the primary key.
         table_oid: The OID of the table getting a primary key.
         database_id: The Django id of the database containing the table.
+        drop_existing_pkey_column: Whether to drop the old pkey column.
         name: A custom name for the added primary key column.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        add_pkey_column_to_table(table_oid, pkey_type, conn, name=name)
+        add_pkey_column_to_table(
+            table_oid,
+            pkey_type,
+            conn,
+            drop_old_pkey_column=drop_existing_pkey_column,
+            name=name
+        )
 
 
 @mathesar_rpc_method(name="columns.add", auth="login")
