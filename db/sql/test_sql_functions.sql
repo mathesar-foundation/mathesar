@@ -192,11 +192,13 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_pkey_column_uuid() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_add_pkey_col();
-  PERFORM msar.add_pkey_column(
-    tab_id => 'add_pkey_col_testable'::regclass,
-    pkey_type => 'UUIDv4',
-    drop_old_pkey_col => true,
-    col_name => 'User Id'
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'UUIDv4',
+      drop_old_pkey_col => true,
+      col_name => 'User Id'
+    ), 3
   );
   RETURN NEXT col_is_pk('add_pkey_col_testable', 'User Id');
   RETURN NEXT col_type_is('add_pkey_col_testable', 'User Id', 'uuid');
@@ -207,11 +209,13 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_pkey_column_identity() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_add_pkey_col();
-  PERFORM msar.add_pkey_column(
-    tab_id => 'add_pkey_col_testable'::regclass,
-    pkey_type => 'IDENTITY',
-    drop_old_pkey_col => true,
-    col_name => 'Identity'
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY',
+      drop_old_pkey_col => true,
+      col_name => 'Identity'
+    ), 3
   );
   RETURN NEXT col_is_pk('add_pkey_col_testable', 'Identity');
   RETURN NEXT col_type_is('add_pkey_col_testable', 'Identity', 'integer');
