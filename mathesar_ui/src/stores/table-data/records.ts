@@ -16,7 +16,6 @@ import type {
   RecordsListParams,
   RecordsResponse,
   RecordsSearchParams,
-  ResultValue,
 } from '@mathesar/api/rpc/records';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
@@ -388,43 +387,50 @@ export class RecordsData {
 
   async bulkUpdate(
     rowBlueprints: {
-      recordId: ResultValue;
+      row: RecordRow;
       cells: { columnId: string; value: unknown }[];
     }[],
   ): Promise<void> {
     const cellStatus = this.meta.cellModificationStatus;
-
-    /**
-     * Get the rowKey from the blueprint's recordId.
-     *
-     * Note: this duplicates some logic within the `getRowKey` function.
-     */
-    function key(blueprint: (typeof rowBlueprints)[number]) {
-      return String(blueprint.recordId);
-    }
 
     function forEachRow(fn: (b: (typeof rowBlueprints)[number]) => void) {
       rowBlueprints.forEach(fn);
     }
 
     function forEachCell(fn: (cellKey: string) => void) {
-      forEachRow((row) =>
-        row.cells.forEach((cell) => fn(getCellKey(key(row), cell.columnId))),
+      forEachRow((blueprint) =>
+        blueprint.cells.forEach((cell) =>
+          fn(getCellKey(blueprint.row.identifier, cell.columnId)),
+        ),
       );
     }
+
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    if (!pkColumn) throw new Error('Unable to update without primary key');
+
+    forEachRow((blueprint) => {
+      if (blueprint.row.record[pkColumn.id] === undefined) {
+        throw new Error(
+          'Unable to update record for a row with a missing primary key value',
+        );
+      }
+    });
 
     forEachCell((cellKey) => {
       cellStatus.set(cellKey, { state: 'processing' });
       this.updatePromises?.get(cellKey)?.cancel();
     });
-    forEachRow((row) => this.updatePromises?.get(key(row))?.cancel());
+    forEachRow(
+      (blueprint) =>
+        this.updatePromises?.get(blueprint.row.identifier)?.cancel(),
+    );
 
-    const requests = rowBlueprints.map((row) =>
+    const requests = rowBlueprints.map((blueprint) =>
       api.records.patch({
         ...this.apiContext,
-        record_id: row.recordId,
+        record_id: blueprint.row.record[pkColumn.id],
         record_def: Object.fromEntries(
-          row.cells.map((cell) => [cell.columnId, cell.value]),
+          blueprint.cells.map((cell) => [cell.columnId, cell.value]),
         ),
       }),
     );
@@ -434,14 +440,11 @@ export class RecordsData {
       execPipe(
         zip(rowBlueprints, responses),
         map(([blueprint, response]) => [
-          key(blueprint),
+          blueprint.row.identifier,
           { blueprint, response },
         ]),
       ),
     );
-
-    const pkColumn = get(this.columnsDataStore.pkColumn);
-    if (!pkColumn) throw new Error('Unable to update without primary key');
 
     // TODO: Fix bug - Update this for new record rows as well
     this.fetchedRecordRows.update((rows) =>
