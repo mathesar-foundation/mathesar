@@ -54,7 +54,13 @@
   export let value: unknown = undefined;
   export let currentRoleTablePrivileges: Set<TablePrivilege>;
 
-  $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
+  $: effectiveProcessedColumn = isProvisionalRecordRow(row)
+    ? processedColumn.withoutEnhancedPkCell()
+    : processedColumn;
+  $: cellId = makeCellId(
+    getRowSelectionId(row),
+    String(effectiveProcessedColumn.id),
+  );
 
   // To be used in case of publicly shared links where user should not be able
   // to view linked tables & explorations
@@ -62,7 +68,7 @@
 
   $: recordsDataState = recordsData.state;
   $: ({ linkedRecordSummaries } = recordsData);
-  $: ({ column, linkFk } = processedColumn);
+  $: ({ column, linkFk } = effectiveProcessedColumn);
   $: columnId = column.id;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
@@ -72,12 +78,15 @@
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
+  $: isPKEditable =
+    !effectiveProcessedColumn.hasEnhancedPrimaryKeyCell &&
+    !column.default?.is_dynamic;
   // TODO: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
   $: isEditable =
     isTableEditable &&
-    !column.primary_key &&
-    processedColumn.currentRolePrivileges.has('UPDATE');
+    (!column.primary_key || isPKEditable) &&
+    effectiveProcessedColumn.currentRolePrivileges.has('UPDATE');
   $: canSetNull = isEditable && column.nullable && value !== null;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
@@ -122,7 +131,7 @@
   {/if}
 
   <CellFabric
-    columnFabric={processedColumn}
+    columnFabric={effectiveProcessedColumn}
     {isActive}
     {value}
     {isProcessing}
@@ -165,7 +174,7 @@
 
     <!-- Column Attributes -->
     <MenuHeading>{$_('column')}</MenuHeading>
-    <ColumnHeaderContextMenu {processedColumn} />
+    <ColumnHeaderContextMenu processedColumn={effectiveProcessedColumn} />
 
     <!-- Row -->
     <MenuDivider />
