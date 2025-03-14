@@ -2582,7 +2582,7 @@ msar.add_pkey_column(
   pkey_type msar.pkey_kind,
   drop_old_pkey_col boolean DEFAULT false,
   col_name text DEFAULT 'id'
-) RETURNS void AS $$/*
+) RETURNS integer AS $$/*
 Add a primary key column with a predefined default to a table.
 
 Any name collisions for the column are resolved automatically, with this column's name deferring to
@@ -2611,6 +2611,7 @@ BEGIN
       WHEN 'UUIDv4' THEN 'uuid PRIMARY KEY DEFAULT gen_random_uuid()'
     END
   );
+  RETURN msar.get_pk_column(tab_id);
 END;
 $$ LANGUAGE plpgsql;
 

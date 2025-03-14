@@ -129,10 +129,10 @@ def add_pkey_column_to_table(
 
     See the `msar.add_pkey_column` function for info on the arguments.
     """
-    db_conn.exec_msar_func(
+    return db_conn.exec_msar_func(
         conn, 'add_pkey_column',
         table_oid, pkey_type, drop_old_pkey_column, name
-    )
+    ).fetchone()[0]
 
 
 def add_columns_to_table(table_oid, column_data_list, conn):
