@@ -20,7 +20,8 @@ class TableMetaDataRecord(TypedDict):
         data_file_id: Specifies the DataFile model id used for the import.
         import_verified: Specifies whether a file has been successfully imported into a table.
         column_order: The order in which columns of a table are displayed.
-        record_summary_template: The record summary template
+        record_summary_template: The record summary template.
+        mathesar_added_pkey_attnum: The attnum of the most recently-set pkey column.
     """
     id: int
     database_id: int
@@ -29,6 +30,7 @@ class TableMetaDataRecord(TypedDict):
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
     record_summary_template: Optional[dict[str, Union[str, list[int]]]]
+    mathesar_added_pkey_attnum: Optional[int]
 
     @classmethod
     def from_model(cls, model):
@@ -40,6 +42,7 @@ class TableMetaDataRecord(TypedDict):
             import_verified=model.import_verified,
             column_order=model.column_order,
             record_summary_template=model.record_summary_template,
+            mathesar_added_pkey_attnum=model.mathesar_added_pkey_attnum,
         )
 
 
@@ -52,11 +55,13 @@ class TableMetaDataBlob(TypedDict):
         import_verified: Specifies whether a file has been successfully imported into a table.
         column_order: The order in which columns of a table are displayed.
         record_summary_template: The record summary template
+        mathesar_added_pkey_attnum: The attnum of the most recently-set pkey column.
     """
     data_file_id: Optional[int]
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
     record_summary_template: Optional[dict[str, Union[str, list[int]]]]
+    mathesar_added_pkey_attnum: Optional[int]
 
     @classmethod
     def from_model(cls, model):
@@ -65,6 +70,7 @@ class TableMetaDataBlob(TypedDict):
             import_verified=model.import_verified,
             column_order=model.column_order,
             record_summary_template=model.record_summary_template,
+            mathesar_added_pkey_attnum=model.mathesar_added_pkey_attnum,
         )
 
 
