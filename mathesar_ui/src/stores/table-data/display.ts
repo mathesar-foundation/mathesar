@@ -7,7 +7,7 @@ import {
   type DraftRecordRow,
   GroupHeaderRow,
   HelpTextRow,
-  PersistedRecordRow,
+  type PersistedRecordRow,
   PlaceholderRecordRow,
 } from './Row';
 import type { RecordGrouping } from './utils';
@@ -84,11 +84,14 @@ export function combineRecordRowsWithGroupHeaders({
         rowOrigin: RowOrigin.StaticUiElement,
       });
       group.resultIndices.forEach((resultIndex) => {
-        const { record } = recordRows[resultIndex];
+        const recordRow = recordRows[resultIndex];
+        if (!recordRow) {
+          throw new Error(
+            'Record from group result index is not found. This should never happen',
+          );
+        }
         combinedRows.push({
-          row: new PersistedRecordRow({
-            record,
-          }),
+          row: recordRow,
           rowOrigin: RowOrigin.FetchedFromDb,
           rowNumber: persistedRecordRowIndex,
         });
