@@ -9,6 +9,7 @@
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import SelectColumn from '@mathesar/components/SelectColumn.svelte';
   import { iconUndo } from '@mathesar/icons';
   import { getDbTypesForAbstractType } from '@mathesar/stores/abstract-types/abstractTypeCategories';
@@ -47,7 +48,9 @@
       return assertExhaustive($typeOfColumnToAdd);
     }
     if ($strategy === 'pick') {
-      if (identityCapableDbTypes.has($pickedColumn.type)) return ['identity', 'none'];
+      if (identityCapableDbTypes.has($pickedColumn.type)) {
+        return ['identity', 'none'];
+      }
       if ($pickedColumn.type === 'uuid') return ['uuid4', 'none'];
       return ['none'];
     }
@@ -116,6 +119,19 @@
         {/if}
       </Select>
     </LabeledInput>
+    {#if $defaultValue === 'none'}
+      <div class="error">
+        <WarningBox>
+          <p>{$_('heads_up')}</p>
+          <p>{$_('pk_no_default_warning_0')}</p>
+          <ul>
+            <li>{$_('pk_no_default_warning_1')}</li>
+            <li>{$_('pk_no_default_warning_2')}</li>
+          </ul>
+          <p>{$_('pk_no_default_warning_3')}</p>
+        </WarningBox>
+      </div>
+    {/if}
   </FieldLayout>
 
   {#if $form.hasChanges}
@@ -129,3 +145,9 @@
     </FieldLayout>
   {/if}
 </CollapsibleFieldset>
+
+<style>
+  .error {
+    margin: 0.5rem 0 0 1rem;
+  }
+</style>
