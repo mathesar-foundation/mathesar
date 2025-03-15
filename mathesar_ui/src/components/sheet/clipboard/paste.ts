@@ -4,8 +4,11 @@ import { _ } from 'svelte-i18n';
 
 import type { Column } from '@mathesar/api/rpc/columns';
 import type { ResultValue } from '@mathesar/api/rpc/records';
-import type { RecordRow, RecordsData } from '@mathesar/stores/table-data';
-import { getRowSelectionId } from '@mathesar/stores/table-data/records';
+import {
+  type RecordRow,
+  type RecordsData,
+  getRowSelectionId,
+} from '@mathesar/stores/table-data';
 import { startingFrom } from '@mathesar/utils/iterUtils';
 import {
   type ImmutableSet,
@@ -20,11 +23,6 @@ import {
   validateStructuredCellRows,
 } from './StructuredCell';
 import { deserializeTsv } from './tsv';
-
-interface RowRef {
-  row: RecordRow;
-  recordId: ResultValue;
-}
 
 /**
  * This is the stuff we need to have from the Sheet in order to paste into it
@@ -102,11 +100,6 @@ function getDestinationColumns(
   return sheetColumns.slice(firstIndex, lastIndex + 1);
 }
 
-function getRowRef(row: RecordRow, pkColumnId: number): RowRef {
-  const recordId = row.record[pkColumnId];
-  return { row, recordId };
-}
-
 function insertViaPaste(
   payload: Payload,
   selection: SheetSelection,
@@ -158,13 +151,10 @@ async function updateViaPaste(
 
   const sourceColumnCount = firstSourceRow.length;
   const sheetColumns = context.getSheetColumns();
-  const pkColumnId = sheetColumns.find((c) => c.primary_key)?.id;
-  if (!pkColumnId) throw new Error(get(_)('paste_error_no_primary_key'));
 
   const destinationRows = execPipe(
     context.getRecordRows(),
     (i) => startingFrom(i, (r) => selection.rowIds.has(getRowSelectionId(r))),
-    map((recordRow) => getRowRef(recordRow, pkColumnId)),
     take(sourceRows.length),
     arrayFrom,
   );
@@ -182,7 +172,7 @@ async function updateViaPaste(
   const rowBlueprints = execPipe(
     zip(sourceRows, destinationRows),
     map(([sourceRow, destinationRow]) => ({
-      recordId: destinationRow.recordId,
+      row: destinationRow,
       cells: [...map(makeCellBlueprint, zip(sourceRow, destinationColumns))],
     })),
     arrayFrom,
@@ -198,7 +188,7 @@ async function updateViaPaste(
 
   context.setSelection(
     selection.ofRowColumnIntersection(
-      destinationRows.map(({ row }) => getRowSelectionId(row)),
+      destinationRows.map((row) => getRowSelectionId(row)),
       destinationColumns.map((column) => String(column.id)),
     ),
   );
