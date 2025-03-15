@@ -2,6 +2,8 @@ import { getContext, setContext } from 'svelte';
 import { type Writable, writable } from 'svelte/store';
 
 export interface ClipboardHandler {
+  shouldHandleCopy: (event: ClipboardEvent) => boolean;
+  shouldHandlePaste: (event: ClipboardEvent) => boolean;
   handleCopy: (event: ClipboardEvent) => void;
   handlePaste: (event: ClipboardEvent) => Promise<void>;
 }

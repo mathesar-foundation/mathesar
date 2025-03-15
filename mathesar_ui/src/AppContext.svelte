@@ -66,17 +66,17 @@
   // Data Explorer.
 
   function handleCopy(e: ClipboardEvent) {
-    if (clipboardHandler) {
-      clipboardHandler.handleCopy(e);
-      e.preventDefault();
-    }
+    if (!clipboardHandler) return;
+    if (!clipboardHandler.shouldHandleCopy(e)) return;
+    clipboardHandler.handleCopy(e);
+    e.preventDefault();
   }
 
   function handlePaste(e: ClipboardEvent) {
-    if (clipboardHandler) {
-      void clipboardHandler.handlePaste(e);
-      e.preventDefault();
-    }
+    if (!clipboardHandler) return;
+    if (!clipboardHandler.shouldHandlePaste(e)) return;
+    void clipboardHandler.handlePaste(e);
+    e.preventDefault();
   }
 </script>
 
