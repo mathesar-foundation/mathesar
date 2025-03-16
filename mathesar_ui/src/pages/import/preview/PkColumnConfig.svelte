@@ -12,6 +12,7 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import SelectColumn from '@mathesar/components/SelectColumn.svelte';
   import { iconUndo } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
   import { getDbTypesForAbstractType } from '@mathesar/stores/abstract-types/abstractTypeCategories';
   import { matchLiteral } from '@mathesar/utils/patternMatching';
   import {
@@ -32,13 +33,20 @@
   /** The DB types that can potentially support an identity default. */
   const identityCapableDbTypes = getDbTypesForAbstractType('number');
 
+  export let table: Table;
+  export let columns: Column[];
+
   /** The attnum of thePK column that Mathesar auto-added to the import. */
-  const autoAddedColumnId = 1; // TODO set from metadata
-
-  export let columns: Column[] = [];
-
+  $: autoAddedColumnId =
+    table.metadata?.mathesar_added_pkey_attnum ?? undefined;
+  /**
+   * If the table's primary key was auto-added by Mathesar, the we initialize
+   * the form to indicate an "add" strategy. Otherwise, "pick".
+   */
+  $: initialStrategy = autoAddedColumnId ? ('add' as const) : ('pick' as const);
   $: availableColumns = columns.filter((c) => c.id !== autoAddedColumnId);
-  $: strategy = requiredField<Strategy>('add'); // TODO set from metadata
+
+  $: strategy = requiredField<Strategy>(initialStrategy);
   $: typeOfColumnToAdd = requiredField<ColumnType>('integer');
   $: pickedColumn = requiredField<Column>(availableColumns[0]);
   $: defaultValueOptions = ((): DefaultValue[] => {

@@ -222,7 +222,7 @@
   </FieldLayout>
 
   <FieldLayout>
-    <PkColumnConfig {columns} />
+    <PkColumnConfig {table} {columns} />
   </FieldLayout>
 
   <FieldLayout>
