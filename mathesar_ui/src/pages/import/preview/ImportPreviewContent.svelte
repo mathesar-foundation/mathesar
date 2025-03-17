@@ -221,9 +221,11 @@
     />
   </FieldLayout>
 
-  <FieldLayout>
-    <PkColumnConfig {table} {columns} />
-  </FieldLayout>
+  {#if columns.length}
+    <FieldLayout>
+      <PkColumnConfig {table} {columns} onUpdated={init} />
+    </FieldLayout>
+  {/if}
 
   <FieldLayout>
     <InfoBox>

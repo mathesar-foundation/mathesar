@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { api } from '@mathesar/api/rpc';
   import type { Column } from '@mathesar/api/rpc/columns';
   import CollapsibleFieldset from '@mathesar/components/CollapsibleFieldset.svelte';
   import {
@@ -35,16 +36,18 @@
 
   export let table: Table;
   export let columns: Column[];
+  export let onUpdated: () => void;
 
-  /** The attnum of thePK column that Mathesar auto-added to the import. */
-  $: autoAddedColumnId =
-    table.metadata?.mathesar_added_pkey_attnum ?? undefined;
+  /** The PK column that Mathesar auto-added to the import. */
+  $: autoAddedColumn = columns.find(
+    (c) => c.id === table.metadata?.mathesar_added_pkey_attnum,
+  );
   /**
    * If the table's primary key was auto-added by Mathesar, the we initialize
    * the form to indicate an "add" strategy. Otherwise, "pick".
    */
-  $: initialStrategy = autoAddedColumnId ? ('add' as const) : ('pick' as const);
-  $: availableColumns = columns.filter((c) => c.id !== autoAddedColumnId);
+  $: initialStrategy = autoAddedColumn ? ('add' as const) : ('pick' as const);
+  $: availableColumns = columns.filter((c) => c.id !== autoAddedColumn?.id);
 
   $: strategy = requiredField<Strategy>(initialStrategy);
   $: typeOfColumnToAdd = requiredField<ColumnType>('integer');
@@ -73,9 +76,62 @@
       pick: { pickedColumn },
     }),
   });
+  $: strategyHasChanges = strategy.hasChanges;
+
+  async function addPkColumn(p: { dropExistingPkColumn: boolean }) {
+    await api.columns
+      .add_primary_key_column({
+        database_id: table.schema.database.id,
+        table_oid: table.oid,
+        pkey_type: matchLiteral($typeOfColumnToAdd, {
+          integer: 'IDENTITY',
+          uuid: 'UUIDv4',
+        } as const),
+        drop_existing_pkey_column: p.dropExistingPkColumn,
+      })
+      .run();
+  }
+
+  function changePkColumn(p: { dropExistingPkColumn: boolean }) {
+    return api.data_modeling
+      .change_primary_key_column({
+        database_id: table.schema.database.id,
+        table_oid: table.oid,
+        column_attnum: $pickedColumn.id,
+        default: matchLiteral($defaultValue, {
+          identity: 'IDENTITY',
+          uuid4: 'UUIDv4',
+          none: null,
+        } as const),
+        drop_existing_pk_column: p.dropExistingPkColumn,
+      })
+      .run();
+  }
 
   async function update() {
-    // TODO
+    if ($strategyHasChanges) {
+      if ($strategy === 'pick') {
+        // Strategy changed from "add" to "pick".
+        await changePkColumn({ dropExistingPkColumn: true });
+      } else if ($strategy === 'add') {
+        // Strategy changed from "pick" to "add".
+        await addPkColumn({ dropExistingPkColumn: false });
+      } else {
+        assertExhaustive($strategy);
+      }
+    }
+
+    if ($strategy === 'add') {
+      // $typeOfColumnToAdd must have changed
+      await addPkColumn({ dropExistingPkColumn: true });
+    } else if ($strategy === 'pick') {
+      // $pickedColumn or $defaultValue must have changed
+      await changePkColumn({ dropExistingPkColumn: false });
+    } else {
+      assertExhaustive($strategy);
+    }
+
+    onUpdated();
   }
 </script>
 
@@ -147,6 +203,7 @@
       <FormSubmit
         {form}
         onProceed={update}
+        catchErrors
         proceedButton={{ label: $_('update_primary_key_column') }}
         cancelButton={{ label: $_('discard_changes'), icon: iconUndo }}
       />
