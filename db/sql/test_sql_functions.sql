@@ -247,6 +247,7 @@ BEGIN
   RETURN NEXT col_is_pk(
     'add_pkey_col_testable', 'col1 2', 'rename when collision with previous undropped pkey'
   );
+  RETURN NEXT columns_are('add_pkey_col_testable', ARRAY['col1', 'col2', 'col1 1', 'col1 2']);
 END;
 $f$ LANGUAGE plpgsql;
 
