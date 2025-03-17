@@ -252,6 +252,23 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_pkey_column_defaults_collide() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'IDENTITY'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'id');
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'IDENTITY'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'id 1');
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_pkey_column_malformed() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_add_pkey_col();
