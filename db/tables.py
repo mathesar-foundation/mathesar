@@ -147,6 +147,7 @@ def create_and_import_from_rows(
         import_info['table_oid'],
         import_info['table_name'],
         import_info['renamed_columns'],
+        import_info['pkey_column_attnum'],
     )
 
 

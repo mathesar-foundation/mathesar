@@ -265,14 +265,18 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_pkey_column_defaults_collide() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_add_pkey_col();
-  PERFORM msar.add_pkey_column(
-    tab_id => 'add_pkey_col_testable'::regclass,
-    pkey_type => 'IDENTITY'
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY'
+    ), 3, 'Should return correct attnum'
   );
   RETURN NEXT col_is_pk('add_pkey_col_testable', 'id');
-  PERFORM msar.add_pkey_column(
-    tab_id => 'add_pkey_col_testable'::regclass,
-    pkey_type => 'IDENTITY'
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY'
+    ), 4, 'Should return correct attnum'
   );
   RETURN NEXT col_is_pk('add_pkey_col_testable', 'id 1');
 END;
@@ -1823,6 +1827,7 @@ BEGIN
     response ->> 'copy_sql', 'COPY tab_create_schema.anewtable () FROM STDIN'
   );
   RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+  RETURN NEXT is((response ->> 'pkey_column_attnum')::integer, 1);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -1848,6 +1853,7 @@ BEGIN
     response ->> 'copy_sql', 'COPY tab_create_schema.anewtable () FROM STDIN'
   );
   RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+  RETURN NEXT is((response ->> 'pkey_column_attnum')::integer, 1);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -1880,6 +1886,7 @@ BEGIN
     'COPY tab_create_schema.anewtable ("My Col", col2) FROM STDIN'
   );
   RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+  RETURN NEXT is((response ->> 'pkey_column_attnum')::integer, 1);
 END;
 $f$ LANGUAGE plpgsql;
 

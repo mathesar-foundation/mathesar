@@ -193,6 +193,11 @@ def test_tables_import(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
+    def mock_set_meta_data(table_oid, metadata, _database_id):
+        assert table_oid == 1964474
+        assert metadata == {"mathesar_added_pkey_attnum": 1}
+        assert _database_id == 11
+
     def mock_table_import(_user, _data_file_id, table_name, _schema_oid, conn, comment):
         if (
             _user != request.user
@@ -200,8 +205,9 @@ def test_tables_import(rf, monkeypatch):
             and _data_file_id != data_file_id
         ):
             raise AssertionError('incorrect parameters passed')
-        return {"oid": 1964474, "name": "imported_table"}
+        return {"oid": 1964474, "name": "imported_table", "pkey_column_attnum": 1}
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'set_table_meta_data', mock_set_meta_data)
     monkeypatch.setattr(tables.base, 'copy_datafile_to_table', mock_table_import)
     imported_table_info = tables.import_(
         data_file_id=10,
