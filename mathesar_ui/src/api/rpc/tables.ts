@@ -117,6 +117,8 @@ export interface ColumnPreviewSpec {
   type_options?: ColumnTypeOptions | null;
 }
 
+export type NewPkColumnType = 'IDENTITY' | 'UUIDv4';
+
 export const tables = {
   list: rpcMethodTypeContainer<
     {
@@ -159,6 +161,10 @@ export const tables = {
       comment?: string;
       /** TODO */
       column_data_list?: unknown;
+      pkey_column_info?: {
+        name: string;
+        type: NewPkColumnType;
+      };
       /** TODO */
       constraint_data_list?: unknown;
     },
