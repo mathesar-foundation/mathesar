@@ -1,10 +1,18 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
+  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+  import type { ClientSideCellError } from '@mathesar/stores/table-data';
   import { popper, portal } from '@mathesar-component-library';
 
-  export let errors: string[];
+  export let serverErrors: RpcError[] = [];
+  export let clientErrors: ClientSideCellError[] = [];
   export let forceShowErrors = false;
+
+  $: errors = [
+    ...serverErrors.map((err) => err.message),
+    ...clientErrors.map((err) => err.message),
+  ];
 
   let errorIndicatorElement: SVGSVGElement | undefined;
   let cellElementIsHovered = false;

@@ -19,9 +19,11 @@
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type CellKey,
+    type ClientSideCellError,
     type ProcessedColumn,
     type RecordRow,
     type RecordsData,
@@ -48,9 +50,12 @@
   export let recordPk: ResultValue | undefined;
   export let rowHasErrors = false;
   export let key: CellKey;
-  export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
+  export let modificationStatusMap: WritableMap<
+    CellKey,
+    RequestStatus<RpcError[]>
+  >;
   export let processedColumn: ProcessedColumn;
-  export let clientSideErrorMap: WritableMap<CellKey, string[]>;
+  export let clientSideErrorMap: WritableMap<CellKey, ClientSideCellError[]>;
   export let value: unknown = undefined;
   export let currentRoleTablePrivileges: Set<TablePrivilege>;
 
@@ -176,6 +181,6 @@
     <RowContextOptions {recordPk} {recordsData} {row} {isTableEditable} />
   </ContextMenu>
   {#if errors.length}
-    <CellErrors {errors} forceShowErrors={isActive} />
+    <CellErrors {serverErrors} {clientErrors} forceShowErrors={isActive} />
   {/if}
 </SheetDataCell>

@@ -1,4 +1,6 @@
 import { concat } from 'iter-tools';
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import {
   type RequestStatus,
@@ -10,6 +12,7 @@ import type {
   GroupingResponse as ApiGroupingResponse,
   Result as ApiRecord,
 } from '@mathesar/api/rpc/records';
+import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
 import {
   ImmutableMap,
   ImmutableSet,
@@ -21,6 +24,11 @@ import type { RecordRow, Row } from './Row';
 
 export type CellKey = string;
 export type RowKey = Row['identifier'];
+
+export interface ClientSideCellError {
+  code: number;
+  message: string;
+}
 
 export const ID_ROW_CONTROL_COLUMN = -1;
 export const ID_ADD_NEW_COLUMN = -2;
@@ -43,18 +51,16 @@ export function extractRowKeyFromCellKey(cellKey: CellKey): RowKey {
     .join(CELL_KEY_SEPARATOR);
 }
 
-export const ROW_HAS_CELL_ERROR_MSG = 'This row contains a cell with an error.';
-
 export function getRowStatus({
   cellClientSideErrors,
   cellModificationStatus,
   rowCreationStatus,
   rowDeletionStatus,
 }: {
-  cellClientSideErrors: ImmutableMap<CellKey, string[]>;
-  cellModificationStatus: ImmutableMap<CellKey, RequestStatus>;
-  rowCreationStatus: ImmutableMap<RowKey, RequestStatus>;
-  rowDeletionStatus: ImmutableMap<RowKey, RequestStatus>;
+  cellClientSideErrors: ImmutableMap<CellKey, ClientSideCellError[]>;
+  cellModificationStatus: ImmutableMap<CellKey, RequestStatus<RpcError[]>>;
+  rowCreationStatus: ImmutableMap<RowKey, RequestStatus<RpcError[]>>;
+  rowDeletionStatus: ImmutableMap<RowKey, RequestStatus<RpcError[]>>;
 }): ImmutableMap<RowKey, RowStatus> {
   type PartialResult = ImmutableMap<RowKey, Partial<RowStatus>>;
 
@@ -70,6 +76,10 @@ export function getRowStatus({
         ? rows.with(extractRowKeyFromCellKey(cellKey))
         : rows,
     new ImmutableSet<RowKey>(),
+  );
+
+  const ROW_HAS_CELL_ERROR_MSG = RpcError.fromAnything(
+    get(_)('row_contains_cell_with_error'),
   );
 
   const statusFromCells: PartialResult = new ImmutableMap(
@@ -117,9 +127,9 @@ export function getRowStatus({
 }
 
 export function getSheetState(props: {
-  cellModificationStatus: ImmutableMap<CellKey, RequestStatus>;
-  rowCreationStatus: ImmutableMap<RowKey, RequestStatus>;
-  rowDeletionStatus: ImmutableMap<RowKey, RequestStatus>;
+  cellModificationStatus: ImmutableMap<CellKey, RequestStatus<RpcError[]>>;
+  rowCreationStatus: ImmutableMap<RowKey, RequestStatus<RpcError[]>>;
+  rowDeletionStatus: ImmutableMap<RowKey, RequestStatus<RpcError[]>>;
 }): RequestStatus['state'] | undefined {
   const allStatuses = concat(
     props.cellModificationStatus.values(),
@@ -132,13 +142,19 @@ export function getSheetState(props: {
 export function getClientSideCellErrors(
   cellValue: unknown,
   column: Column,
-): string[] {
+): ClientSideCellError[] {
   const errors = [];
   if (cellValue === null && !column.nullable) {
-    errors.push('Cell value cannot be NULL for this column.');
+    errors.push({
+      code: 101,
+      message: get(_)('cell_cannot_be_null_for_column'),
+    });
   }
   if (cellValue === undefined && !column.default) {
-    errors.push('This column requires an initial value.');
+    errors.push({
+      code: 102,
+      message: get(_)('cell_requires_initial_value_for_column'),
+    });
   }
   return errors;
 }
@@ -152,7 +168,7 @@ export function validateCell({
   cellValue: unknown;
   column: Column;
   cellKey: CellKey;
-  cellClientSideErrors: WritableMap<CellKey, string[]>;
+  cellClientSideErrors: WritableMap<CellKey, ClientSideCellError[]>;
 }): void {
   const errors = getClientSideCellErrors(cellValue, column);
   if (errors.length) {
@@ -169,7 +185,7 @@ export function validateRow({
 }: {
   row: RecordRow;
   columns: Column[];
-  cellClientSideErrors: WritableMap<CellKey, string[]>;
+  cellClientSideErrors: WritableMap<CellKey, ClientSideCellError[]>;
 }): void {
   columns.forEach((column) => {
     validateCell({
