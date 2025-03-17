@@ -4,7 +4,12 @@
   import { getQueryStringFromParams } from '@mathesar/api/rest/utils/requestUtils';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
-  import { iconExport, iconInspector, iconTable } from '@mathesar/icons';
+  import {
+    iconExport,
+    iconInspector,
+    iconRequiresAttention,
+    iconTable,
+  } from '@mathesar/icons';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
@@ -24,7 +29,7 @@
 
   export let context: TableActionsContext = 'page';
 
-  $: ({ table, meta, isLoading } = $tabularData);
+  $: ({ table, meta, isLoading, hasPrimaryKey } = $tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
 
@@ -60,6 +65,19 @@
 
   {#if context === 'page'}
     <ModificationStatus requestState={$sheetState} />
+  {/if}
+
+  {#if !$isLoading && !$hasPrimaryKey}
+    <div class="no-pk-warning">
+      <Tooltip allowHover>
+        <div slot="trigger">
+          <Icon size="1.3em" {...iconRequiresAttention} />
+        </div>
+        <span slot="content">
+          {$_('no_row_op_support_table_without_pk')}
+        </span>
+      </Tooltip>
+    </div>
   {/if}
 
   <div class="aux-actions" slot="actions-right">
@@ -111,6 +129,12 @@
     > :global(* + *) {
       margin-left: 0.5rem;
     }
+  }
+
+  .no-pk-warning {
+    display: flex;
+    align-items: center;
+    color: var(--yellow-400);
   }
 
   .aux-actions {

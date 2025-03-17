@@ -371,6 +371,7 @@
   "no_privileges_view_table": "Your role does not have the privileges to view this table.",
   "no_records_found": "No records found",
   "no_results_found": "No results found",
+  "no_row_op_support_table_without_pk": "This table does not contain a Primary Key. Mathesar currently does not support row level operations for tables without Primary Keys.",
   "no_schemas_found": "No Schemas Found",
   "no_sorting_condition_added": "No sorting condition has been added",
   "no_tables": "No Tables",
