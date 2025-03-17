@@ -3643,13 +3643,6 @@ Args:
 DECLARE
   default_expr text;
   raw_default_expr text;
-  easy_dynamic_defaults jsonb := '[
-    "now()",
-    "current_timestamp",
-    "current_date",
-    "current_time",
-    "gen_random_uuid()"
-  ]'::jsonb;
 BEGIN
   -- In this case, we assume the intent is to clear out the original default.
   IF jsonb_typeof(new_default)='null' THEN
@@ -3657,9 +3650,6 @@ BEGIN
   -- We get the root JSONB value as text if it exists.
   ELSEIF new_default #>> '{}' IS NOT NULL THEN
     default_expr := format('%L', new_default #>> '{}');  -- sanitize since this could be user input.
-    IF new_default <@ easy_dynamic_defaults THEN
-      default_expr := format('%s', new_default #>> '{}');
-    END IF;
   -- At this point, we know we're not setting a new default, or dropping the old one.
   -- So, we check whether the original default is potentially dynamic, and whether we need to cast
   -- it to a new type.
