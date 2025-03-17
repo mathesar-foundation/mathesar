@@ -21,11 +21,11 @@ import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
 import { ColumnsDataStore } from './columns';
-import { type ConstraintsData, ConstraintsDataStore } from './constraints';
+import { ConstraintsDataStore } from './constraints';
 import { Display } from './display';
 import { Meta } from './meta';
 import { type ProcessedColumnsStore, processColumn } from './processedColumns';
-import { RecordsData, type TableRecordsData } from './records';
+import { RecordsData } from './records';
 
 function getSelectedCellData(
   selection: SheetSelection,
@@ -214,13 +214,7 @@ export class TabularData {
     });
   }
 
-  refresh(): Promise<
-    [
-      Column[] | undefined,
-      TableRecordsData | undefined,
-      ConstraintsData | undefined,
-    ]
-  > {
+  refresh(): Promise<unknown> {
     return Promise.all([
       this.columnsDataStore.fetch(),
       this.recordsData.fetch(),

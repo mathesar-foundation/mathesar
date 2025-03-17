@@ -1,6 +1,16 @@
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
-import { type RecordsData, type Row, filterRecordRows } from './records';
+import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
+
+import type { RecordsData } from './records';
+import {
+  type DraftRecordRow,
+  GroupHeaderRow,
+  HelpTextRow,
+  type PersistedRecordRow,
+  PlaceholderRecordRow,
+} from './Row';
+import type { RecordGrouping } from './utils';
 
 export interface ColumnPlacement {
   /** CSS value in px */
@@ -22,6 +32,82 @@ export function getCellStyle(
   return cellStyle(placement, leftOffset);
 }
 
+export enum RowOrigin {
+  FetchedFromDb = 'fetchedFromDb',
+  NewlyCreatedViaUi = 'newlyCreatedViaUi',
+  StaticUiElement = 'staticlyPresentInUi',
+}
+
+export interface DisplayRecordRowDescriptor {
+  row: PersistedRecordRow | DraftRecordRow;
+  rowNumber: number;
+  rowOrigin: RowOrigin.FetchedFromDb | RowOrigin.NewlyCreatedViaUi;
+}
+
+export interface DisplayUiRowDescriptor {
+  row: HelpTextRow | GroupHeaderRow | PlaceholderRecordRow;
+  rowOrigin: RowOrigin.StaticUiElement;
+}
+
+export type DisplayRowDescriptor =
+  | DisplayRecordRowDescriptor
+  | DisplayUiRowDescriptor;
+
+export function combineRecordRowsWithGroupHeaders({
+  recordRows,
+  grouping,
+}: {
+  recordRows: PersistedRecordRow[];
+  grouping?: RecordGrouping;
+}): DisplayRowDescriptor[] {
+  const groupingColumnIds = grouping?.columnIds ?? [];
+  const isResultGrouped = groupingColumnIds.length > 0;
+
+  if (isResultGrouped && grouping) {
+    const combinedRows: DisplayRowDescriptor[] = [];
+    let persistedRecordRowIndex = 0;
+
+    grouping.groups.forEach((group) => {
+      const groupValues: ApiRecord = {};
+      grouping.columnIds.forEach((columnId) => {
+        if (group.eqValue[columnId] !== undefined) {
+          groupValues[columnId] = group.eqValue[columnId];
+        } else {
+          groupValues[columnId] = group.eqValue[columnId];
+        }
+      });
+      combinedRows.push({
+        row: new GroupHeaderRow({
+          group,
+          groupValues,
+        }),
+        rowOrigin: RowOrigin.StaticUiElement,
+      });
+      group.resultIndices.forEach((resultIndex) => {
+        const recordRow = recordRows[resultIndex];
+        if (!recordRow) {
+          throw new Error(
+            'Record from group result index is not found. This should never happen',
+          );
+        }
+        combinedRows.push({
+          row: recordRow,
+          rowOrigin: RowOrigin.FetchedFromDb,
+          rowNumber: persistedRecordRowIndex,
+        });
+        persistedRecordRowIndex += 1;
+      });
+    });
+    return combinedRows;
+  }
+
+  return recordRows.map((row, index) => ({
+    row,
+    rowOrigin: RowOrigin.FetchedFromDb,
+    rowNumber: index,
+  }));
+}
+
 export class Display {
   private recordsData: RecordsData;
 
@@ -29,7 +115,7 @@ export class Display {
 
   horizontalScrollOffset: Writable<number>;
 
-  displayableRecords: Readable<Row[]>;
+  displayRowDescriptors: Readable<DisplayRowDescriptor[]>;
 
   placeholderRowId: Readable<string>;
 
@@ -41,33 +127,32 @@ export class Display {
     const placeholderRowId = writable('');
     this.placeholderRowId = placeholderRowId;
 
-    const { savedRecordRowsWithGroupHeaders, newRecords } = this.recordsData;
-    this.displayableRecords = derived(
-      [savedRecordRowsWithGroupHeaders, newRecords],
-      ([$savedRecordRowsWithGroupHeaders, $newRecords]) => {
-        let allRecords: Row[] = $savedRecordRowsWithGroupHeaders;
-        /**
-         * Why are we calculating savedRecords here?
-         * 1. We need it to properly calculate the row index of the
-         *    placeholder row.
-         * 2. Adding the savedRecords store as a dependency will
-         *    execute this derived store's callback twice everytime
-         *    records are fetched. So, it's calculated here instead.
-         */
-        const savedRecords = filterRecordRows(allRecords);
+    const { fetchedRecordRows, newRecords, grouping } = this.recordsData;
+    this.displayRowDescriptors = derived(
+      [fetchedRecordRows, newRecords, grouping],
+      ([$fetchedRecordRows, $newRecords, $grouping]) => {
+        let displayRowDescriptors: DisplayRowDescriptor[] =
+          combineRecordRowsWithGroupHeaders({
+            recordRows: $fetchedRecordRows,
+            grouping: $grouping,
+          });
         if ($newRecords.length > 0) {
-          allRecords = allRecords
+          displayRowDescriptors = displayRowDescriptors
             .concat({
-              identifier: '__new_help_text',
-              isNewHelpText: true,
+              row: new HelpTextRow(),
+              rowOrigin: RowOrigin.StaticUiElement,
             })
-            .concat($newRecords);
+            .concat(
+              $newRecords.map((row, index) => ({
+                row,
+                rowNumber: index,
+                rowOrigin: RowOrigin.NewlyCreatedViaUi,
+              })),
+            );
         }
-        const placeholderRow = {
-          ...this.recordsData.getNewEmptyRecord(),
-          rowIndex: savedRecords.length + $newRecords.length,
-          isAddPlaceholder: true,
-        };
+        const placeholderRow = new PlaceholderRecordRow({
+          record: this.recordsData.getEmptyApiRecord(),
+        });
 
         // This is really hacky! We have a side effect (mutating state) within a
         // derived store, which I don't like. I put this here during a large
@@ -79,9 +164,11 @@ export class Display {
         // didn't want to lump any of that refactoring into an already-large
         // refactor.
         placeholderRowId.set(placeholderRow.identifier);
-
-        allRecords = allRecords.concat(placeholderRow);
-        return allRecords;
+        displayRowDescriptors = displayRowDescriptors.concat({
+          row: placeholderRow,
+          rowOrigin: RowOrigin.StaticUiElement,
+        });
+        return displayRowDescriptors;
       },
     );
   }

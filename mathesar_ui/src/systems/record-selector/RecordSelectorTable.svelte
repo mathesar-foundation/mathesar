@@ -8,9 +8,9 @@
     type RecordRow,
     type TabularData,
     constraintIsFk,
+    extractPrimaryKeyValue,
     setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
@@ -67,7 +67,7 @@
       .filter((c) => c.columns.length === 1)
       .map((c) => c.columns[0]),
   );
-  $: recordsStore = recordsData.savedRecords;
+  $: recordsStore = recordsData.fetchedRecordRows;
   $: records = $recordsStore;
   $: resultCount = records.length;
   $: fkColumnWithFocus = (() => {
@@ -110,7 +110,7 @@
     if (!record || Object.keys(record).length === 0) {
       return undefined;
     }
-    return getPkValueInRecord(record, $columns);
+    return extractPrimaryKeyValue(record, $columns);
   }
 
   function getRowHref(row: RecordRow): string | undefined {
