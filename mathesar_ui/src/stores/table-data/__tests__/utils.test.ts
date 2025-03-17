@@ -1,4 +1,4 @@
-import { get } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
@@ -13,6 +13,11 @@ import {
   getRowStatus,
 } from '../utils';
 
+vi.mock('svelte-i18n', () => {
+  const translate = (s: string) => s;
+  return { _: readable(translate) };
+});
+
 describe('getRowStatus', () => {
   interface TestCase {
     label: string;
@@ -22,7 +27,8 @@ describe('getRowStatus', () => {
     rowDeletion: [RowKey, RequestStatus<RpcError[]>][];
     result: [RowKey, RowStatus][];
   }
-  const m = RpcError.fromAnything(get(_)('row_contains_cell_with_error'));
+  const c = RpcError.fromAnything('columns_cannot_be_null');
+  const m = RpcError.fromAnything('row_contains_cell_with_error');
   const testCases: TestCase[] = [
     // {
     //   label: 'All empty',
@@ -34,8 +40,31 @@ describe('getRowStatus', () => {
     // },
     {
       label: 'Complex',
-      cellClientErrors: [['300::1', [RpcError.fromAnything('Client error')]]],
-      // cellClientErrors: [],
+      cellClientErrors: [
+        [
+          '300::1',
+          [
+            {
+              code: 101,
+              message: 'Client Error',
+              column: {
+                id: 1,
+                name: 'c',
+                description: null,
+                type: 'text',
+                type_options: null,
+                nullable: false,
+                primary_key: false,
+                default: null,
+                has_dependents: false,
+                valid_target_types: [],
+                current_role_priv: [],
+                metadata: null,
+              },
+            },
+          ],
+        ],
+      ],
       cellModification: [
         ['1::1', { state: 'success' }],
         ['1::2', { state: 'processing' }],
@@ -70,7 +99,7 @@ describe('getRowStatus', () => {
         ],
       ],
       result: [
-        ['300', { errorsFromWholeRowAndCells: [m] }],
+        ['300', { errorsFromWholeRowAndCells: [c] }],
         ['1', { wholeRowState: undefined, errorsFromWholeRowAndCells: [m] }],
         ['2', { wholeRowState: 'success', errorsFromWholeRowAndCells: [m] }],
         ['3', { wholeRowState: 'success', errorsFromWholeRowAndCells: [] }],

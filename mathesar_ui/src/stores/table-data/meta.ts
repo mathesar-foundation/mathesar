@@ -124,7 +124,10 @@ export class Meta {
    * For each cell, the status of the most recent request to update the cell. If
    * no request has been made, then no entry will be present in the map.
    */
-  cellModificationStatus = new WritableMap<CellKey, RequestStatus<RpcError[]>>();
+  cellModificationStatus = new WritableMap<
+    CellKey,
+    RequestStatus<RpcError[]>
+  >();
 
   /**
    * For each row, the status of the most recent request to delete the row. If

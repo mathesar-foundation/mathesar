@@ -80,7 +80,9 @@
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
   $: clientErrors = $clientSideErrorMap.get(key) ?? [];
   $: errors = [...serverErrors, ...clientErrors];
-  $: hasError = !!errors.length;
+  $: hasServerError = !!serverErrors.length;
+  $: hasClientError = !!clientErrors.length;
+  $: hasError = hasClientError || hasServerError;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
   // TODO: Handle case where INSERT is allowed, but UPDATE isn't
@@ -118,7 +120,10 @@
   selection={$selection}
   let:isActive
 >
-  <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
+  <CellBackground
+    when={hasServerError || (!isActive && hasClientError)}
+    color="var(--cell-bg-color-error)"
+  />
   <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
   {#if !(isEditable && isActive)}
     <!--

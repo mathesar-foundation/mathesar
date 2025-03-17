@@ -14,7 +14,7 @@
     ...clientErrors.map((err) => err.message),
   ];
 
-  let errorIndicatorElement: SVGSVGElement | undefined;
+  let errorIndicatorElement: HTMLElement | undefined;
   let cellElementIsHovered = false;
   let hiderTimeoutId: number;
 
@@ -43,16 +43,19 @@
 
   $: cellElement = errorIndicatorElement?.parentElement;
   $: showErrors = cellElementIsHovered || forceShowErrors;
+  $: hasOnlyClientErrors = clientErrors.length && !serverErrors.length;
 </script>
 
-<svg
-  bind:this={errorIndicatorElement}
-  class="error-indicator"
-  viewBox="0 0 10 10"
->
-  <path d="M 0 0 L 10 0 L 10 10 Z" />
-</svg>
-{#if cellElement && showErrors}
+<div class="error-indicator" bind:this={errorIndicatorElement}>
+  {#if hasOnlyClientErrors}
+    <span class="required">*</span>
+  {:else}
+    <svg viewBox="0 0 10 10">
+      <path d="M 0 0 L 10 0 L 10 10 Z" />
+    </svg>
+  {/if}
+</div>
+{#if cellElement && showErrors && !hasOnlyClientErrors}
   <div
     class="errors"
     use:portal
@@ -68,7 +71,7 @@
 {/if}
 
 <style>
-  svg {
+  .error-indicator {
     position: absolute;
     top: 0;
     right: 0;
@@ -79,6 +82,11 @@
   path {
     fill: var(--red-800);
     stroke: none;
+  }
+
+  .required {
+    color: var(--red-800);
+    font-size: var(--text-size-x-large);
   }
 
   .errors {
@@ -93,5 +101,6 @@
     max-width: 20em;
     padding: 0.5em;
     z-index: var(--cell-errors-z-index);
+    font-size: var(--text-size-small);
   }
 </style>

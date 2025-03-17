@@ -28,6 +28,7 @@ export type RowKey = Row['identifier'];
 export interface ClientSideCellError {
   code: number;
   message: string;
+  column: Column;
 }
 
 export const ID_ROW_CONTROL_COLUMN = -1;
@@ -51,6 +52,46 @@ export function extractRowKeyFromCellKey(cellKey: CellKey): RowKey {
     .join(CELL_KEY_SEPARATOR);
 }
 
+export const CLIENT_VALIDATION_CANNOT_BE_NULL = 101;
+
+export function getClientSideCellErrors(
+  cellValue: unknown,
+  column: Column,
+): ClientSideCellError[] {
+  const errors = [];
+  if (cellValue === null && !column.nullable) {
+    errors.push({
+      code: CLIENT_VALIDATION_CANNOT_BE_NULL,
+      column,
+      message: get(_)('cell_cannot_be_null_for_column'),
+    });
+  }
+  return errors;
+}
+
+export function getWholeRowErrorFromClientSideCellErrors(
+  errors: ClientSideCellError[],
+) {
+  const wholeRowErrors = [];
+  const nullValidationErrors = errors.filter(
+    (err) => err.code === CLIENT_VALIDATION_CANNOT_BE_NULL,
+  );
+  if (nullValidationErrors) {
+    wholeRowErrors.push(
+      RpcError.fromAnything(
+        get(_)('columns_cannot_be_null', {
+          values: {
+            columnNames: nullValidationErrors
+              .map((e) => `'${e.column.name}'`)
+              .join(', '),
+          },
+        }),
+      ),
+    );
+  }
+  return wholeRowErrors;
+}
+
 export function getRowStatus({
   cellClientSideErrors,
   cellModificationStatus,
@@ -64,8 +105,30 @@ export function getRowStatus({
 }): ImmutableMap<RowKey, RowStatus> {
   type PartialResult = ImmutableMap<RowKey, Partial<RowStatus>>;
 
-  const keysOfRowsWithClientCellErrors = [...cellClientSideErrors.keys()].map(
-    extractRowKeyFromCellKey,
+  const rowKeysWithClientSideErrors = [
+    ...cellClientSideErrors.entries(),
+  ].reduce(
+    (
+      errorsPerRow: ImmutableMap<RowKey, ClientSideCellError[]>,
+      [cellKey, clientSideCellErrors],
+    ) => {
+      const rowKey = extractRowKeyFromCellKey(cellKey);
+      const errors = errorsPerRow.get(rowKey) ?? [];
+      return errorsPerRow.with(rowKey, errors.concat(clientSideCellErrors));
+    },
+    new ImmutableMap<RowKey, ClientSideCellError[]>(),
+  );
+
+  const statusFromClientSideCellErrors: PartialResult = new ImmutableMap(
+    [...rowKeysWithClientSideErrors.entries()].map(
+      ([rowKey, clientSideCellErrors]) => [
+        rowKey,
+        {
+          errorsFromWholeRowAndCells:
+            getWholeRowErrorFromClientSideCellErrors(clientSideCellErrors),
+        },
+      ],
+    ),
   );
 
   const keysOfRowsWithCellModificationErrors = [
@@ -82,14 +145,15 @@ export function getRowStatus({
     get(_)('row_contains_cell_with_error'),
   );
 
-  const statusFromCells: PartialResult = new ImmutableMap(
-    [
-      ...keysOfRowsWithClientCellErrors,
-      ...keysOfRowsWithCellModificationErrors,
-    ].map((rowKey) => [
+  const statusFromServerSideCellErrors: PartialResult = new ImmutableMap(
+    [...keysOfRowsWithCellModificationErrors].map((rowKey) => [
       rowKey,
       { errorsFromWholeRowAndCells: [ROW_HAS_CELL_ERROR_MSG] },
     ]),
+  );
+
+  const statusFromCells = statusFromClientSideCellErrors.withEntries(
+    statusFromServerSideCellErrors,
   );
 
   const statusFromCreationAndDeletion = rowCreationStatus
@@ -137,26 +201,6 @@ export function getSheetState(props: {
     props.rowDeletionStatus.values(),
   );
   return getMostImportantRequestStatusState(allStatuses);
-}
-
-export function getClientSideCellErrors(
-  cellValue: unknown,
-  column: Column,
-): ClientSideCellError[] {
-  const errors = [];
-  if (cellValue === null && !column.nullable) {
-    errors.push({
-      code: 101,
-      message: get(_)('cell_cannot_be_null_for_column'),
-    });
-  }
-  if (cellValue === undefined && !column.default) {
-    errors.push({
-      code: 102,
-      message: get(_)('cell_requires_initial_value_for_column'),
-    });
-  }
-  return errors;
 }
 
 export function validateCell({
