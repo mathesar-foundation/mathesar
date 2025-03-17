@@ -19,8 +19,10 @@ import type {
 } from '@mathesar/api/rpc/records';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
-import { batchSend } from '@mathesar/packages/json-rpc-client-builder';
-import { getErrorMessage } from '@mathesar/utils/errors';
+import {
+  RpcError,
+  batchSend,
+} from '@mathesar/packages/json-rpc-client-builder';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
@@ -304,7 +306,7 @@ export class RecordsData {
     const rowsSuccessfullyDeleted = new Set<RowKey>(draftRowsToDelete.keys());
 
     /** Values are error messages */
-    const rowsFailedToDelete = new Map<RowKey, string>();
+    const rowsFailedToDelete = new Map<RowKey, RpcError>();
 
     if (persistedRowsToDelete.size) {
       const primaryKeysOfPersistedRows = [
@@ -324,7 +326,10 @@ export class RecordsData {
         );
       } catch (error) {
         persistedRowsToDelete.forEach((row) =>
-          rowsFailedToDelete.set(row.identifier, getErrorMessage(error)),
+          rowsFailedToDelete.set(
+            row.identifier,
+            RpcError.fromAnything(RpcError),
+          ),
         );
       }
     }
@@ -363,9 +368,9 @@ export class RecordsData {
     );
     this.meta.clearAllStatusesAndErrorsForRows([...rowsSuccessfullyDeleted]);
     this.meta.rowDeletionStatus.setEntries(
-      [...rowsFailedToDelete.entries()].map(([rowKey, errorMsg]) => [
+      [...rowsFailedToDelete.entries()].map(([rowKey, error]) => [
         rowKey,
-        { state: 'failure', errors: [errorMsg] },
+        { state: 'failure', errors: [error] },
       ]),
     );
     this.meta.rowDeletionStatus.clear();
@@ -462,7 +467,7 @@ export class RecordsData {
             const cellKey = getCellKey(row.identifier, cell.columnId);
             return cellStatus.set(cellKey, {
               state: 'failure',
-              errors: [getErrorMessage(response)],
+              errors: [response],
             });
           });
           return row;
@@ -538,7 +543,7 @@ export class RecordsData {
     } catch (err) {
       this.meta.cellModificationStatus.set(cellKey, {
         state: 'failure',
-        errors: [`Unable to save cell. ${getErrorMessage(err)}`],
+        errors: [RpcError.fromAnything(err)],
       });
     } finally {
       if (this.updatePromises.get(cellKey) === promise) {
@@ -608,7 +613,7 @@ export class RecordsData {
     } catch (err) {
       this.meta.rowCreationStatus.set(row.identifier, {
         state: 'failure',
-        errors: [getErrorMessage(err)],
+        errors: [RpcError.fromAnything(err)],
       });
     } finally {
       if (this.createPromises.get(row.identifier) === promise) {
