@@ -98,7 +98,8 @@ def create_table_on_database(
         comment: The comment for the new table. (optional)
 
     Returns:
-        Returns the OID and name of the created table.
+        An object with the OID, name, renamed_columns, and primary key
+        column attnum  of the created table.
     """
     return db_conn.exec_msar_func(
         conn,

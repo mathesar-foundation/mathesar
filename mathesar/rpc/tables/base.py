@@ -239,14 +239,21 @@ def add(
         comment: The comment for the new table.
 
     Returns:
-        The `oid` of the created table.
+        The `oid`, `name`, and `renamed_columns` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        created_table_oid = create_table_on_database(
+        created_table_info = create_table_on_database(
             table_name, schema_oid, conn, pkey_column_info, column_data_list, constraint_data_list, owner_oid, comment
         )
-    return created_table_oid
+
+    set_table_meta_data(
+        created_table_info['oid'],
+        {'mathesar_added_pkey_attnum': created_table_info['pkey_column_attnum']},
+        database_id,
+    )
+
+    return AddedTableInfo.from_dict(created_table_info)
 
 
 @mathesar_rpc_method(name="tables.delete", auth="login")
