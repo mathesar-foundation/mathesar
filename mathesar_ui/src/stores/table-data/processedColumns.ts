@@ -26,52 +26,58 @@ import type { ComponentAndProps } from '@mathesar-component-library/types';
 import { findFkConstraintsForColumn } from './constraintsUtils';
 import type { RecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 
+/**
+ * Prefer properties over functions in this class since we use these properties in
+ * each cell and the class is immutable.
+ */
 export class ProcessedColumn implements CellColumnFabric {
   /**
    * This property is also available via `column.id`, but it's duplicated at a
    * higher level for brevity's sake because it's used so frequently.
    */
-  id: Column['id'];
+  readonly id: Column['id'];
 
-  column: Column;
+  readonly column: Column;
 
-  columnIndex: number;
+  readonly columnIndex: number;
 
-  tableOid: Table['oid'];
+  readonly tableOid: Table['oid'];
 
   /** All constriants relevant to this column */
-  relevantConstraints: Constraint[];
+  readonly relevantConstraints: Constraint[];
 
   /** Constraints whose columns include only this column */
-  exclusiveConstraints: Constraint[];
+  readonly exclusiveConstraints: Constraint[];
 
   /** Constraints whose columns include this column and other columns too */
-  sharedConstraints: Constraint[];
+  readonly sharedConstraints: Constraint[];
 
-  abstractType: AbstractType;
+  readonly abstractType: AbstractType;
 
-  initialInputValue: unknown;
+  readonly initialInputValue: unknown;
 
-  linkFk?: FkConstraint;
+  readonly linkFk?: FkConstraint;
 
-  hasEnhancedPrimaryKeyCell: boolean;
+  readonly hasEnhancedPrimaryKeyCell: boolean;
 
-  cellComponentAndProps: ComponentAndProps;
+  readonly cellComponentAndProps: ComponentAndProps;
 
-  inputComponentAndProps: ComponentAndProps;
+  readonly inputComponentAndProps: ComponentAndProps;
 
-  filterComponentAndProps: ComponentAndProps;
+  readonly filterComponentAndProps: ComponentAndProps;
 
-  allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
+  readonly allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
 
-  preprocFunctions: AbstractTypePreprocFunctionDefinition[];
+  readonly preprocFunctions: AbstractTypePreprocFunctionDefinition[];
 
   formatCellValue: (
     cellValue: unknown,
     recordSummaries?: RecordSummariesForSheet,
   ) => string | null | undefined;
 
-  currentRolePrivileges: Set<ColumnPrivilege>;
+  readonly currentRolePrivileges: Set<ColumnPrivilege>;
+
+  readonly isEditable: boolean;
 
   constructor(props: {
     tableOid: Table['oid'];
@@ -146,6 +152,20 @@ export class ProcessedColumn implements CellColumnFabric {
     this.formatCellValue = getDisplayFormatter(this.column, this.column.id);
 
     this.currentRolePrivileges = new Set(this.column.current_role_priv);
+
+    this.isEditable = (() => {
+      const currRoleHasEditPrivileges =
+        this.currentRolePrivileges.has('UPDATE');
+      if (!currRoleHasEditPrivileges) {
+        return false;
+      }
+      const hasDynamicDefault = !!this.column.default?.is_dynamic;
+      const isPk = !!this.column.primary_key;
+      if (isPk) {
+        return !this.hasEnhancedPrimaryKeyCell && !hasDynamicDefault;
+      }
+      return true;
+    })();
   }
 
   withoutEnhancedPkCell() {

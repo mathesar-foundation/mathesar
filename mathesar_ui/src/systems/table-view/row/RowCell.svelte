@@ -78,15 +78,9 @@
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
-  $: isPKEditable =
-    !effectiveProcessedColumn.hasEnhancedPrimaryKeyCell &&
-    !column.default?.is_dynamic;
   // TODO: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
-  $: isEditable =
-    isTableEditable &&
-    (!column.primary_key || isPKEditable) &&
-    effectiveProcessedColumn.currentRolePrivileges.has('UPDATE');
+  $: isEditable = isTableEditable && effectiveProcessedColumn.isEditable;
   $: canSetNull = isEditable && column.nullable && value !== null;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
