@@ -443,6 +443,7 @@
   "record": "Record",
   "record_deleted_successfully": "Record deleted successfully!",
   "record_in_table": "Record in [tableName]",
+  "record_sel_no_support_for_table_without_pk": "The Record selector does not support tables without a Primary key.",
   "record_summary": "Record Summary",
   "record_summary_config_help": "Configure [tableName] record summaries here.",
   "record_summary_detail_help_1": "Mathesar helps you identify records in a table by generating a short piece of text to summarize each record. These record summaries display in various places throughout the app, such as foreign key cells and record page titles.",
