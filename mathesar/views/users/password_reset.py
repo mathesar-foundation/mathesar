@@ -4,6 +4,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse_lazy
 
 
 class MathesarSetPasswordForm(SetPasswordForm):
@@ -22,7 +23,7 @@ class MathesarPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = MathesarSetPasswordForm
     template_name = 'users/password_reset_confirmation.html'
     title = _('Change Default Password')
-    success_url = "/auth/login"
+    success_url = reverse_lazy('login')
 
     @method_decorator(sensitive_post_parameters())
     @method_decorator(never_cache)

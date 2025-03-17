@@ -10,8 +10,8 @@
 !!!note
     Depending on your Docker setup, you may need to run `docker` commands with `sudo`.
 
-???info "Video walkthrough (Click to expand)"
-    <iframe width=100% height=480px src="https://www.youtube.com/embed/0AFfvrUMkas?si=tZkhRHXBqS-sqyto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<!-- ???info "Video walkthrough (Click to expand)"
+    <iframe width=100% height=480px src="https://www.youtube.com/embed/0AFfvrUMkas?si=tZkhRHXBqS-sqyto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
 
 1. Download our [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file.
 
@@ -49,8 +49,8 @@
 
           # (Optional) Replace 'mathesar' with any custom password for the
           # aforementioned database
-
           POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+
           # (Optional) Replace 'mathesar_db' with the name of the host running postgres
           POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}
 
@@ -110,10 +110,10 @@ Restart the docker containers for the configuration to take effect.
 If you'd like to use an external PostgreSQL server for Mathesar's internal database, you'll need to do the following:
 
 
-1. On the existing database server, [create a new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) for Mathesar to store its metadata.
+1. On your PostgreSQL server, [create a new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) for Mathesar to store its metadata.
 
     ```bash
     psql -c 'create database mathesar_django;'
     ```
 
-1. Configure the [internal database environment variables](./configuration.md#db) to point to the database you just created. Ensure that you change the default values for the user, password, and host.
+1. Configure the [internal database environment variables](./environment-variables.md#db) to point to the database you just created. Ensure that you change the default values for the user, password, and host.

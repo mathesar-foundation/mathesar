@@ -2,6 +2,11 @@ import { map } from 'iter-tools';
 
 import { cartesianProduct } from '@mathesar/utils/iterUtils';
 
+/**
+ * ⚠️ Note: we have `cellId` and `cellKey` which are different.
+ *
+ * See notes in `records.ts.README.md`.
+ */
 export function makeCellId(rowId: string, columnId: string): string {
   return JSON.stringify([rowId, columnId]);
 }

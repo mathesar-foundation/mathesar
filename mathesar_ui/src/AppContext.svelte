@@ -66,14 +66,21 @@
   // Data Explorer.
 
   function handleCopy(e: ClipboardEvent) {
-    if (clipboardHandler) {
-      clipboardHandler.handleCopy(e);
-      e.preventDefault();
-    }
+    if (!clipboardHandler) return;
+    if (!clipboardHandler.shouldHandleCopy(e)) return;
+    clipboardHandler.handleCopy(e);
+    e.preventDefault();
+  }
+
+  function handlePaste(e: ClipboardEvent) {
+    if (!clipboardHandler) return;
+    if (!clipboardHandler.shouldHandlePaste(e)) return;
+    void clipboardHandler.handlePaste(e);
+    e.preventDefault();
   }
 </script>
 
-<svelte:body on:copy={handleCopy} />
+<svelte:body on:copy={handleCopy} on:paste={handlePaste} />
 
 <ToastPresenter entries={toast.entries} />
 <Confirmation controller={confirmationController} />

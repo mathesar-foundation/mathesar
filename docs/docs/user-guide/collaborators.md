@@ -13,15 +13,15 @@ Note that with collaborators, a user's role is set _per-database_. This means th
 !!! info "Prerequisites"
     Before you can add a new collaborator:
 
-    - Your [database](./databases.md) must be connected already.
-    - The [user](./users.md) must already exist in Mathesar.
-    - The [role](./roles.md) must already exist in PostgreSQL. (If needed, uou can use Mathesar to [add new role](./roles.md#managing) before creating a collaborator.)
-    - TODO
+    - Your [database](./databases.md) must be connected already
+    - The [user](./users.md) must already exist in Mathesar
+    - The [role](./roles.md) must already exist in PostgreSQL (you can [use Mathesar](./roles.md#managing))
+    - The role must be [stored](./stored-roles.md) in Mathesar
 
 1. Navigate to the page for your connected database.
-1. Click on the **Database Settings** tab.
-1. Click on **Collaborators** in the left-hand menu.
-1. Click **Add Collaborator**.
+2. Click on the **Database Settings** tab.
+3. Click on **Collaborators** in the left-hand menu.
+4. Click **Add Collaborator**.
 
 ## Removing a collaborator
 
@@ -37,5 +37,3 @@ Removing a collaborator revokes that user's access to the database _but_:
 - You can configure separate Mathesar users to share the same PostgreSQL role if you like. This is a good option if you want those users to have the same permissions on the data.
 - Or you can use separate PostgreSQL roles for different users. This is necessary any time you want different users to have different permissions on the data.
 - You cannot configure one Mathesar user with two PostgreSQL role simultaneously — though you can save multiple PostgreSQL roles in Mathesar and manually switch between them if necessary. You won't even need to enter the role's password each time you switch, since it will be saved in Mathesar.
-
-

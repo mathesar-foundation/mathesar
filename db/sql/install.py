@@ -12,13 +12,14 @@ def _install_sql_file(file_name):
     """
 
     def _install(conn):
-        with open(os.path.join(FILE_DIR, file_name)) as file_handle:
+        with open(os.path.join(FILE_DIR, file_name), 'rb') as file_handle:
             load_file_with_conn(conn, file_handle)
 
     return _install
 
 
 INSTALL_STEPS = [
+    _install_sql_file("00_msar_all_objects_table.sql"),
     _install_sql_file("01_msar_types.sql"),
     _install_sql_file("02_msar_remove.sql"),
     _install_sql_file("05_msar.sql"),
@@ -41,6 +42,7 @@ def uninstall(
         strict=True
 ):
     """Remove msar and __msar schemas safely."""
+    _install_sql_file("00_msar_all_objects_table.sql")(conn)
     _install_sql_file("02_msar_remove.sql")(conn)
     exec_msar_func(
         conn,

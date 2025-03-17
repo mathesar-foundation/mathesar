@@ -75,6 +75,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        columns.add_primary_key_column,
+        "columns.add_primary_key_column",
+        [user_is_authenticated]
+    ),
+    (
         columns.delete,
         "columns.delete",
         [user_is_authenticated]
@@ -172,6 +177,11 @@ METHODS = [
     (
         databases.configured.disconnect,
         "databases.configured.disconnect",
+        [user_is_superuser]
+    ),
+    (
+        databases.configured.patch,
+        "databases.configured.patch",
         [user_is_superuser]
     ),
 
@@ -362,6 +372,11 @@ METHODS = [
         servers.configured.list_,
         "servers.configured.list",
         [user_is_authenticated]
+    ),
+    (
+        servers.configured.patch,
+        "servers.configured.patch",
+        [user_is_superuser]
     ),
 
     (

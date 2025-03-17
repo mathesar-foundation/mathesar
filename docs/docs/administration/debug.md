@@ -1,44 +1,28 @@
-# Debug Mathesar
+# Debugging Mathesar
 
-For now, we only support turning on Debugging by using our special docker image. More methods will follow in future releases.
+!!! warning "Not for production"
+    Debug mode should **not** be enabled in production environments, where it can cause performance issues and potentially expose sensitive information.
 
-## Use the debugging Mathesar docker image
+If your Mathesar installation isn't working as expected, you can prefix the docker command with `DEBUG=true` to add additional debugging output to the console and more verbose errors in the browser when something goes wrong. The additional information logged should help you or the Mathesar team diagnose any installation issues.
 
-There is a debugging-enabled Mathesar docker image available at `mathesar/mathesar-debug` that is the same as the `mathesar/mathesar` image, except that it has more debugging output available in the console where it's run, and it also produces more verbose errors in the browser when something goes wrong.
+### With Docker Compose
 
-You can use this image to figure out (or to help the Mathesar team figure out) what's wrong if your Mathesar installation isn't working as expected. The procedure is to
+When debugging Mathesar's recommended [docker compose](../administration/install-via-docker-compose.md) installation method, add `DEBUG=true` to the beginning of the docker compose command:
 
-1. Run Mathesar with the `mathesar/mathesar-debug` image, and then
-1. Observe and report any additional output or clues to the Mathesar team.
-
-### Docker Compose
-
-Just replace the line
-
-```
-    image: mathesar/mathesar:latest
+```diff
+- docker compose -f docker-compose.yml up
++ DEBUG=true docker compose -f docker-compose.yml up
 ```
 
-with
+### With the basic Mathesar docker image
 
-```
-    image: mathesar/mathesar-debug:latest
-```
+If you are just trying the Mathesar Docker image directly as instructed in the [introduction](../index.md#try-locally), you will follow the same approach of setting `DEBUG=true`:
 
-### Basic Mathesar docker image
-
-If you are just trying the Mathesar Docker image directly as instructed in the [introduction](../index.md#try-locally), replace the command
-
-```
-docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
+```diff
+- docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
++ DEBUG=true docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
 ```
 
-with 
+### Before version 0.2.1
 
-```
-docker run -it --name mathesar -p 8000:8000 mathesar/mathesar-debug:latest
-```
-
-### Other setups
-
-The debugging docker image should work anywhere the production image works. This means you can just replace any pull or run of the image `mathesar/mathesar:latest` with `mathesar/mathesar-debug:latest`.
+Previous versions of Mathesar used a dedicated debugging image called `mathesar/mathesar-debug`. These images will not be supported or created for Mathesar versions 0.2.1 or higher.

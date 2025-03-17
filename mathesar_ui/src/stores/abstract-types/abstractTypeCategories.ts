@@ -18,6 +18,7 @@ import Number from './type-configs/number';
 import Text from './type-configs/text';
 import Time from './type-configs/time';
 import Uri from './type-configs/uri';
+import Uuid from './type-configs/uuid';
 import type {
   AbstractType,
   AbstractTypeCategoryIdentifier,
@@ -49,6 +50,7 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.Date]: Date,
   [abstractTypeCategory.Time]: Time,
   [abstractTypeCategory.DateTime]: DateTime,
+  [abstractTypeCategory.Uuid]: Uuid,
 };
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
@@ -221,6 +223,11 @@ const typesResponse: AbstractTypeResponse[] = [
     identifier: 'uri',
     name: 'URI',
     db_types: [DB_TYPES.MSAR__URI],
+  },
+  {
+    identifier: 'uuid',
+    name: 'UUID',
+    db_types: [DB_TYPES.UUID],
   },
   {
     identifier: 'jsonlist',

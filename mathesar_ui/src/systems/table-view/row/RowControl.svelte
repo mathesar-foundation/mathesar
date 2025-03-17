@@ -3,29 +3,29 @@
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import {
+    type DisplayRowDescriptor,
     type Meta,
     type RecordsData,
     type Row,
-    getRowKey,
-    isNewRecordRow,
-    isPlaceholderRow,
-    rowHasRecord,
+    isDraftRecordRow,
+    isPlaceholderRecordRow,
+    isRecordRow,
   } from '@mathesar/stores/table-data';
+  import { RowOrigin } from '@mathesar/stores/table-data/display';
   import { Icon, iconLoading } from '@mathesar-component-library';
 
   import CellErrors from './CellErrors.svelte';
 
-  export let primaryKeyColumnId: number | undefined = undefined;
   export let row: Row;
+  export let rowDescriptor: DisplayRowDescriptor;
   export let meta: Meta;
   export let recordsData: RecordsData;
   export let isSelected = false;
   export let hasErrors = false;
 
   $: ({ pagination, rowStatus } = meta);
-  $: ({ savedRecords, newRecords, totalCount } = recordsData);
-  $: rowKey = getRowKey(row, primaryKeyColumnId);
-  $: status = $rowStatus.get(rowKey);
+  $: ({ persistedNewRecords, totalCount } = recordsData);
+  $: status = $rowStatus.get(row.identifier);
   $: state = status?.wholeRowState;
   $: errors = status?.errorsFromWholeRowAndCells ?? [];
 </script>
@@ -33,16 +33,19 @@
 <CellBackground color="var(--cell-bg-color-header)" />
 <RowCellBackgrounds {isSelected} {hasErrors} />
 <div class="control">
-  {#if isPlaceholderRow(row)}
+  {#if isPlaceholderRecordRow(row)}
     <Icon {...iconAddNew} />
-  {:else if rowHasRecord(row)}
+  {:else if isRecordRow(row)}
     <span class="number">
-      {row.rowIndex +
-        (isNewRecordRow(row)
-          ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
-          : $pagination.offset) +
-        1}
-      {#if isNewRecordRow(row)}
+      {#if rowDescriptor.rowOrigin === RowOrigin.FetchedFromDb}
+        {rowDescriptor.rowNumber + $pagination.offset + 1}
+      {:else if rowDescriptor.rowOrigin === RowOrigin.NewlyCreatedViaUi}
+        {rowDescriptor.rowNumber +
+          ($totalCount ?? 0) -
+          $persistedNewRecords.length +
+          1}
+      {/if}
+      {#if isDraftRecordRow(row)}
         *
       {/if}
     </span>
@@ -66,5 +69,9 @@
     */
     user-select: none;
     -webkit-user-select: none; /* Safari */
+
+    .number {
+      white-space: nowrap;
+    }
   }
 </style>

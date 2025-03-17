@@ -4,15 +4,15 @@
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconPrivacy, iconSettingsMajor } from '@mathesar/icons';
+  import { iconSettingsMajor, iconSettingsMinor } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
-  import PrivacyPage from '@mathesar/pages/admin-privacy/PrivacyPage.svelte';
+  import SettingsPage from '@mathesar/pages/admin-settings/SettingsPage.svelte';
   import SoftwareUpdate from '@mathesar/pages/admin-update/SoftwareUpdatePage.svelte';
   import AdminNavigation from '@mathesar/pages/admin-users/AdminNavigation.svelte';
 
   import {
-    ADMIN_PRIVACY_PAGE_URL,
+    ADMIN_SETTINGS_PAGE_URL,
     ADMIN_UPDATE_PAGE_URL,
     ADMIN_URL,
   } from './urls';
@@ -39,10 +39,8 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    pageTitleAndMetaProps={{
-      name: $_('administration'),
-      icon: iconSettingsMajor,
-    }}
+    name={$_('administration')}
+    icon={iconSettingsMajor}
   />
   <PageLayoutWithSidebar>
     <AdminNavigation slot="sidebar" />
@@ -63,17 +61,17 @@
       <UsersRoute />
     </Route>
 
-    <Route path="/privacy" firstmatch>
+    <Route path="/settings" firstmatch>
       <AppendBreadcrumb
         item={{
           type: 'simple',
-          href: ADMIN_PRIVACY_PAGE_URL,
-          label: $_('privacy'),
-          icon: iconPrivacy,
+          href: ADMIN_SETTINGS_PAGE_URL,
+          label: $_('settings'),
+          icon: iconSettingsMinor,
           prependSeparator: true,
         }}
       />
-      <PrivacyPage />
+      <SettingsPage />
     </Route>
   </PageLayoutWithSidebar>
 </LayoutWithHeader>

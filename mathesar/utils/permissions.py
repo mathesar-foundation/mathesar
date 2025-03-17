@@ -28,7 +28,7 @@ class BadInstallationTarget(Exception):
 
 @transaction.atomic
 def set_up_new_database_for_user_on_internal_server(
-        database_name, user, sample_data=[]
+        database_name, nickname, user, sample_data=[]
 ):
     """
     Create a database on the internal server and install Mathesar.
@@ -44,6 +44,7 @@ def set_up_new_database_for_user_on_internal_server(
         conn_info[HOST],
         conn_info[PORT],
         database_name,
+        nickname,
         conn_info[USER],
         conn_info[PASSWORD],
         user
@@ -66,7 +67,7 @@ def set_up_new_database_for_user_on_internal_server(
 
 @transaction.atomic
 def set_up_preexisting_database_for_user(
-        host, port, database_name, role_name, password, user, sample_data=[]
+        host, port, database_name, nickname, role_name, password, user, sample_data=[]
 ):
     internal_conn_info = settings.DATABASES[INTERNAL_DB_KEY]
     if (
@@ -78,7 +79,7 @@ def set_up_preexisting_database_for_user(
             "Mathesar can't be installed in the internal database."
         )
     user_database_role = _setup_connection_models(
-        host, port, database_name, role_name, password, user
+        host, port, database_name, nickname, role_name, password, user
     )
     user_database_role.database.install_sql(
         username=user_database_role.configured_role.name,
@@ -91,11 +92,11 @@ def set_up_preexisting_database_for_user(
 
 @transaction.atomic
 def _setup_connection_models(
-        host, port, database_name, role_name, password, user
+        host, port, database_name, nickname, role_name, password, user
 ):
     server, _ = Server.objects.get_or_create(host=host, port=port)
     database, _ = Database.objects.get_or_create(
-        name=database_name, server=server
+        name=database_name, nickname=nickname, server=server
     )
     configured_role, _ = ConfiguredRole.objects.get_or_create(
         name=role_name,

@@ -47,7 +47,7 @@ def intern_session():
         "new_password1": "myinternpass1234",
         "new_password2": "myinternpass1234"
     }
-    s.post(f'{SERVICE_HOST}/auth/password_reset_confirm', data=reset_payload)
+    s.post(f'{SERVICE_HOST}/auth/password_reset_confirm/', data=reset_payload)
     s.headers['X-CSRFToken'] = s.cookies['csrftoken']
     new_login_payload = {"username": "intern", "password": "myinternpass1234"}
     s.post(f'{SERVICE_HOST}/auth/login/', data=new_login_payload)
@@ -82,7 +82,7 @@ def test_create_mathesar_db_internal(admin_rpc_call):
     result = admin_rpc_call(
         'databases.setup.create_new',
         database='mathesar',
-        sample_data=['library_management']
+        sample_data=['library_management', 'bike_shop']
     )
     assert set(result.keys()) == set(['configured_role', 'database', 'server'])
     internal_db = result['database']
@@ -267,8 +267,8 @@ def test_schemas_list(admin_rpc_call):
         'schemas.list',
         database_id=1
     )
-    # Should have `public` and `Library Management`
-    assert len(result) == 2
+    # Should have `public`, `Bike Shop`, and `Library Management`
+    assert len(result) == 3
     library_management_oid = [
         s['oid'] for s in result if s['name'] == 'Library Management'
     ][0]
@@ -368,6 +368,21 @@ def test_intern_can_now_access_books_table(intern_rpc_call):
     )
     assert records['count'] == 1410
     assert len(records['results']) == 20
+
+
+def test_schema_delete(admin_rpc_call):
+    admin_rpc_call(
+        'schemas.delete',
+        schema_oids=[library_management_oid],
+        database_id=internal_db_id,
+    )
+    result = admin_rpc_call(
+        'schemas.list',
+        database_id=1
+    )
+    # Should have `public` and `Bike Shop` remaining`
+    assert len(result) == 2
+    assert library_management_oid not in [s['oid'] for s in result]
 
 
 def test_disconnect_fails_when_dependencies(admin_session):

@@ -4699,3 +4699,19 @@ AS $$
     END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_uuid(text)
+RETURNS uuid
+AS $$
+BEGIN
+  RETURN $1::uuid;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_uuid(uuid)
+RETURNS uuid
+AS $$
+BEGIN
+  RETURN $1::uuid;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

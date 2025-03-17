@@ -16,6 +16,7 @@ import {
   faClock,
   faClone,
   faCogs,
+  faCommentAlt,
   faComments,
   faCopy,
   faDatabase,
@@ -29,6 +30,7 @@ import {
   faFileAlt,
   faFilter,
   faFilterCircleXmark,
+  faFingerprint,
   faGear,
   faGlobe,
   faGrip,
@@ -42,6 +44,7 @@ import {
   faListUl,
   faLock,
   faMicroscope,
+  faNewspaper,
   faPalette,
   faPaperPlane,
   faPaste,
@@ -57,6 +60,7 @@ import {
   faShapes,
   faShareFromSquare,
   faSlash,
+  faSliders,
   faSnowflake,
   faSort,
   faSortAmountDown,
@@ -177,10 +181,12 @@ export const iconDocumentation: IconProps = { data: faBook };
 export const iconDonation: IconProps = { data: faHeart };
 export const iconExploration: IconProps = { data: explorationIcon };
 export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
+export const iconFeedback: IconProps = { data: faCommentAlt };
 export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
+export const iconMailingList: IconProps = { data: faNewspaper };
 export const iconMessage: IconProps = { data: faEnvelope };
 export const iconMultipleRecords: IconProps = { data: faCopy };
 export const iconOutcome: IconProps = { data: outcomeIcon };
@@ -188,6 +194,7 @@ export const iconOutwardLink: IconProps = { data: faArrowLeft };
 export const iconRecord: IconProps = { data: faFileAlt };
 export const iconSchema: IconProps = { data: faProjectDiagram };
 export const iconSettingsMajor: IconProps = { data: faGear };
+export const iconSettingsMinor: IconProps = { data: faSliders };
 export const iconShortcuts: IconProps = { data: faStar };
 export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: tableIcon };
@@ -235,3 +242,4 @@ export const iconUiTypeTime: IconProps = { data: faClock };
 export const iconUiTypeUnknown: IconProps = { data: faQuestion };
 export const iconUiTypeUri: IconProps = { data: faGlobe };
 export const iconUiTypeArray: IconProps = { data: arrayIcon };
+export const iconUiTypeUuid: IconProps = { data: faFingerprint };

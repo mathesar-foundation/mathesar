@@ -1,6 +1,8 @@
 1. Remove Mathesar internal schemas.
 
-    **If you'd like to continue using your PostgreSQL database**, you'll need to remove the schemas created for Mathesar's use during installation. You can remove them from the database as follows:
+    **If you'd like to continue using your PostgreSQL databases**, you can remove the schemas created for Mathesar's use during installation. For each database accessible through the Mathesar UI, the safe and easy way to do so is to use Mathesar's new "Disconnect Database" functionality. When disconnecting a database, choose the "Remove Mathesar's internal schemas" option to safely remove any Mathesar schemas.
+
+    If that doesn't work, or doesn't work for all databases, you can perform the following manual steps instead:
 
     1. Connect to the database.
 
@@ -15,7 +17,7 @@
         ```
 
         !!! danger ""
-            Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
+            Deleting this schema will also delete any database objects that depend on it. Specifically, this will delete any data using Mathesar's custom data types.
 
     3. Delete the function schemas.
 

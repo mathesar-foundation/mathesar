@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { map } from 'iter-tools';
   import { _ } from 'svelte-i18n';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
@@ -11,10 +12,9 @@
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
-  import { logEvent } from '@mathesar/utils/telemetry';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import AddTableModal from './AddTableModal.svelte';
+  import CreateTableModal from './CreateTableModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaPermissionsModal from './SchemaPermissionsModal.svelte';
 
@@ -22,7 +22,7 @@
   export let schema: Schema;
 
   const editSchemaModal = modal.spawnModalController();
-  const addTableModal = modal.spawnModalController();
+  const createTableModal = modal.spawnModalController();
   const permissionsModal = modal.spawnModalController();
 
   $: tablesMap = $tablesStore.tablesMap;
@@ -36,12 +36,6 @@
 
   $: ({ name, description, currentAccess } = schema);
   $: ({ currentRoleOwns } = currentAccess);
-
-  logEvent('opened_schema', {
-    database_name: database.name,
-    schema_name: $name,
-    source: 'schema_page',
-  });
 </script>
 
 <svelte:head><title>{makeSimplePageTitle($name)}</title></svelte:head>
@@ -55,11 +49,9 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    pageTitleAndMetaProps={{
-      name: $name,
-      icon: iconSchema,
-      entityTypeName: $_('schema'),
-    }}
+    name={$name}
+    icon={iconSchema}
+    entityTypeName={$_('schema')}
   >
     <div slot="action">
       <Button
@@ -91,10 +83,14 @@
     {database}
     {schema}
     {explorationsRequestStatus}
-    onCreateEmptyTable={() => addTableModal.open()}
+    onCreateEmptyTable={() => createTableModal.open()}
   />
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={editSchemaModal} {database} {schema} />
-<AddTableModal controller={addTableModal} {schema} {tablesMap} />
+<CreateTableModal
+  controller={createTableModal}
+  {schema}
+  existingTableNames={new Set(map((t) => t.name, tablesMap.values()))}
+/>
 <SchemaPermissionsModal controller={permissionsModal} {schema} />

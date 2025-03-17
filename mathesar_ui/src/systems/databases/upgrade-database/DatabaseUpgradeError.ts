@@ -1,9 +1,9 @@
 import type { Database } from '@mathesar/models/Database';
 
 export default class DatabaseUpgradeError extends Error {
-  database: Pick<Database, 'id' | 'name'>;
+  database: Database;
 
-  constructor(database: Pick<Database, 'id' | 'name'>, message: string) {
+  constructor(database: Database, message: string) {
     super(message);
     this.database = database;
   }

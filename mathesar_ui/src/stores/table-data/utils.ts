@@ -5,6 +5,11 @@ import {
   getMostImportantRequestStatusState,
 } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
+import type {
+  Group as ApiGroup,
+  GroupingResponse as ApiGroupingResponse,
+  Result as ApiRecord,
+} from '@mathesar/api/rpc/records';
 import {
   ImmutableMap,
   ImmutableSet,
@@ -12,16 +17,21 @@ import {
 } from '@mathesar-component-library';
 
 import type { RowStatus } from './meta';
-import type { RecordRow } from './records';
+import type { RecordRow, Row } from './Row';
 
 export type CellKey = string;
-export type RowKey = string;
+export type RowKey = Row['identifier'];
 
 export const ID_ROW_CONTROL_COLUMN = -1;
 export const ID_ADD_NEW_COLUMN = -2;
 
 const CELL_KEY_SEPARATOR = '::';
 
+/**
+ * ⚠️ Note: we have `cellId` and `cellKey` which are different.
+ *
+ * See notes in `records.ts.README.md`.
+ */
 export function getCellKey(rowKey: RowKey, columnId: string | number): CellKey {
   return `${String(rowKey)}${CELL_KEY_SEPARATOR}${columnId}`;
 }
@@ -154,12 +164,10 @@ export function validateCell({
 
 export function validateRow({
   row,
-  rowKey,
   columns,
   cellClientSideErrors,
 }: {
   row: RecordRow;
-  rowKey: RowKey;
   columns: Column[];
   cellClientSideErrors: WritableMap<CellKey, string[]>;
 }): void {
@@ -167,8 +175,63 @@ export function validateRow({
     validateCell({
       cellValue: row.record[String(column.id)],
       column,
-      cellKey: getCellKey(rowKey, column.id),
+      cellKey: getCellKey(row.identifier, column.id),
       cellClientSideErrors,
     });
   });
+}
+
+/** See `records.ts.README.md` for more info */
+export function getRowSelectionId(row: Row): string {
+  return row.identifier;
+}
+
+export interface RecordGroup {
+  count: number;
+  eqValue: ApiGroup['results_eq'];
+  resultIndices: number[];
+}
+
+export interface RecordGrouping {
+  columnIds: number[];
+  preprocIds: (string | null)[];
+  groups: RecordGroup[];
+}
+
+function buildGroup(apiGroup: ApiGroup): RecordGroup {
+  return {
+    count: apiGroup.count,
+    eqValue: apiGroup.results_eq,
+    resultIndices: apiGroup.result_indices,
+  };
+}
+
+export function buildGrouping(
+  apiGrouping: ApiGroupingResponse,
+): RecordGrouping {
+  return {
+    columnIds: apiGrouping.columns,
+    preprocIds: apiGrouping.preproc ?? [],
+    groups: (apiGrouping.groups ?? []).map(buildGroup),
+  };
+}
+
+/**
+ * Extracts the primary key value from a record.
+ * @throws Error if no primary key column is found or the value is of an invalid type.
+ * See `records.ts.README.md` for more info
+ */
+export function extractPrimaryKeyValue(
+  record: ApiRecord,
+  columns: Column[],
+): string | number {
+  const pkColumn = columns.find((c) => c.primary_key);
+  if (!pkColumn) {
+    throw new Error('No primary key column found.');
+  }
+  const pkValue = record[pkColumn.id];
+  if (!(typeof pkValue === 'string' || typeof pkValue === 'number')) {
+    throw new Error('Primary key value is not a string or number.');
+  }
+  return pkValue;
 }

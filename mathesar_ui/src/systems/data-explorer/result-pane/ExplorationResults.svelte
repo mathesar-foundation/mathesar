@@ -12,8 +12,8 @@
     SheetRowHeaderCell,
     SheetVirtualRows,
   } from '@mathesar/components/sheet';
-  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
-  import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
+  import { ROW_HEADER_WIDTH_PX, ROW_HEIGHT_PX } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
   import { arrayIndex } from '@mathesar/utils/typeUtils';
   import { ImmutableMap } from '@mathesar-component-library';
@@ -29,7 +29,7 @@
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
   const columnWidths = new ImmutableMap([
-    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
+    [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
   ]);
 
   $: ({
@@ -44,14 +44,15 @@
   } = queryHandler);
   $: ({ initial_columns } = $query);
   $: clipboardHandler = new SheetClipboardHandler({
-    getCopyingContext: () => ({
-      rowsMap: new Map(map(([k, r]) => [k, r.record], get(selectableRowsMap))),
-      columnsMap: get(processedColumns),
-      recordSummaries: new ImmutableMap(),
-      selectedRowIds: get(selection).rowIds,
-      selectedColumnIds: get(selection).columnIds,
-    }),
+    copyingContext: {
+      getRows: () =>
+        new Map(map(([k, r]) => [k, r.record], get(selectableRowsMap))),
+      getColumns: () => get(processedColumns),
+      getRecordSummaries: () => new ImmutableMap(),
+    },
+    getSelection: () => get(selection),
     showToastInfo: toast.info,
+    showToastError: toast.error,
   });
   $: ({ columnIds } = $selection);
   $: recordRunState = $runState?.state;
@@ -105,7 +106,7 @@
       <SheetVirtualRows
         itemCount={sheetItemCount}
         paddingBottom={30}
-        itemSize={() => rowHeightPx}
+        itemSize={() => ROW_HEIGHT_PX}
         let:items
       >
         {#each items as item (item.key)}
@@ -116,7 +117,7 @@
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div
                 {...htmlAttributes}
-                style="--cell-height:{rowHeightPx - 1}px;{styleString}"
+                style="--cell-height:{ROW_HEIGHT_PX - 1}px;{styleString}"
               >
                 <SheetRowHeaderCell
                   {rowSelectionId}

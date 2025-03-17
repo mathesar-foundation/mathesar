@@ -34,6 +34,8 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=mathesar-test-db
       - POSTGRES_PORT=5432
+      - DEBUG=true
+      - SKIP_STATIC_COLLECTION=true
     volumes:
       - .:/code/
     depends_on:

@@ -2,12 +2,15 @@
   import { map } from 'iter-tools';
   import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
-  import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
-  import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
+  import { ROW_HEADER_WIDTH_PX } from '@mathesar/geometry';
+  import { iconPaste } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
+  import { confirm } from '@mathesar/stores/confirmation';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import {
     ID_ADD_NEW_COLUMN,
@@ -21,6 +24,7 @@
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
+  import { getCustomizedColumnWidths } from './tableViewUtils';
 
   type Context = 'page' | 'widget' | 'shared-consumer-page';
 
@@ -39,16 +43,32 @@
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
-    getCopyingContext: () => ({
-      rowsMap: new Map(
-        map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
-      ),
-      columnsMap: stringifyMapKeys(get(processedColumns)),
-      recordSummaries: get(recordsData.linkedRecordSummaries),
-      selectedRowIds: get(selection).rowIds,
-      selectedColumnIds: get(selection).columnIds,
-    }),
+    copyingContext: {
+      getRows: () =>
+        new Map(
+          map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
+        ),
+      getColumns: () => stringifyMapKeys(get(processedColumns)),
+      getRecordSummaries: () => get(recordsData.linkedRecordSummaries),
+    },
+    pastingContext: {
+      // TODO: pasting context should also take new records into account
+      getRecordRows: () => get(recordsData.fetchedRecordRows),
+      getSheetColumns: () => [
+        ...map(({ column }) => column, get(processedColumns).values()),
+      ],
+      updateRecords: (r) => recordsData.bulkUpdate(r),
+      setSelection: (s) => selection.set(s),
+      confirm: (title) =>
+        confirm({
+          title,
+          body: [],
+          proceedButton: { label: $_('paste'), icon: iconPaste },
+        }),
+    },
+    getSelection: () => get(selection),
     showToastInfo: toast.info,
+    showToastError: toast.error,
   });
   $: ({ horizontalScrollOffset, scrollOffset } = display);
   $: columnOrder = table.metadata?.column_order ?? [];
@@ -70,9 +90,10 @@
     return columns;
   })();
 
-  const columnWidths = new ImmutableMap([
-    [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
+  $: columnWidths = new ImmutableMap([
+    [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
     [ID_ADD_NEW_COLUMN, 32],
+    ...getCustomizedColumnWidths($processedColumns.values()),
   ]);
   $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
 </script>
@@ -84,11 +105,6 @@
     bind:activeTabId={tableInspectorTab}
   >
     <div class="sheet-area">
-      {#if $isLoading}
-        <div class="loading-sheet">
-          <Spinner />
-        </div>
-      {/if}
       {#if $processedColumns.size}
         <Sheet
           {clipboardHandler}
@@ -115,6 +131,10 @@
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
         </Sheet>
+      {:else if $isLoading}
+        <div class="loading-sheet">
+          <Spinner />
+        </div>
       {/if}
     </div>
   </WithTableInspector>
