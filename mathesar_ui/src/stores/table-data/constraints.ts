@@ -87,14 +87,11 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
   constructor({
     database,
     table,
-    shareConsumer,
   }: {
     database: Pick<Database, 'id'>;
     table: Pick<Table, 'oid'>;
-    shareConsumer?: ShareConsumer;
   }) {
     this.apiContext = { database_id: database.id, table_oid: table.oid };
-    this.shareConsumer = shareConsumer;
     this.store = writable({
       state: States.Loading,
       constraints: [],

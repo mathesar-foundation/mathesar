@@ -52,7 +52,8 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
-  export let currentRoleTablePrivileges: Set<TablePrivilege>;
+  export let canUpdateRecords: boolean;
+  export let canDeleteRecords: boolean;
 
   $: effectiveProcessedColumn = isProvisionalRecordRow(row)
     ? processedColumn.withoutEnhancedPkCell()
@@ -77,10 +78,9 @@
   $: errors = [...serverErrors, ...clientErrors];
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
-  $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
   // TODO: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
-  $: isEditable = isTableEditable && effectiveProcessedColumn.isEditable;
+  $: isEditable = canUpdateRecords && effectiveProcessedColumn.isEditable;
   $: canSetNull = isEditable && column.nullable && value !== null;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
@@ -173,7 +173,7 @@
     <!-- Row -->
     <MenuDivider />
     <MenuHeading>{$_('row')}</MenuHeading>
-    <RowContextOptions {recordPk} {recordsData} {row} {isTableEditable} />
+    <RowContextOptions {recordPk} {recordsData} {row} {canDeleteRecords} />
   </ContextMenu>
   {#if errors.length}
     <CellErrors {errors} forceShowErrors={isActive} />

@@ -114,7 +114,13 @@ export class TabularData {
 
   selectedCellData: Readable<SelectedCellData>;
 
-  shareConsumer?: ShareConsumer;
+  hasPrimaryKey: Readable<boolean>;
+
+  canInsertRecords: Readable<boolean>;
+
+  canUpdateRecords: Readable<boolean>;
+
+  canDeleteRecords: Readable<boolean>;
 
   constructor(props: TabularDataProps) {
     this.database = props.database;
@@ -122,17 +128,14 @@ export class TabularData {
       props.contextualFilters ?? new Map<number, string | number>();
     this.table = props.table;
     this.meta = props.meta ?? new Meta();
-    this.shareConsumer = props.shareConsumer;
     this.columnsDataStore = new ColumnsDataStore({
       database: props.database,
       table: this.table,
       hiddenColumns: contextualFilters.keys(),
-      shareConsumer: this.shareConsumer,
     });
     this.constraintsDataStore = new ConstraintsDataStore({
       database: props.database,
       table: props.table,
-      shareConsumer: this.shareConsumer,
     });
     this.recordsData = new RecordsData({
       database: props.database,
@@ -140,7 +143,6 @@ export class TabularData {
       meta: this.meta,
       columnsDataStore: this.columnsDataStore,
       contextualFilters,
-      shareConsumer: this.shareConsumer,
       loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
     this.display = new Display(this.recordsData);
@@ -165,6 +167,29 @@ export class TabularData {
           ),
           this.table,
         ),
+    );
+
+    this.hasPrimaryKey = derived(this.processedColumns, (processedColumns) =>
+      [...processedColumns.values()].some((pc) => pc.column.primary_key),
+    );
+
+    // TODO: We should be able to insert without a primary key column
+    this.canInsertRecords = derived(
+      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
+      ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
+        hasPrimaryKey && tableCurrentRolePrivileges.has('INSERT'),
+    );
+
+    this.canUpdateRecords = derived(
+      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
+      ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
+        hasPrimaryKey && tableCurrentRolePrivileges.has('UPDATE'),
+    );
+
+    this.canDeleteRecords = derived(
+      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
+      ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
+        hasPrimaryKey && tableCurrentRolePrivileges.has('DELETE'),
     );
 
     const plane = derived(
