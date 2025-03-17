@@ -219,6 +219,38 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_pkey_column_collision() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'IDENTITY',
+    drop_old_pkey_col => true,
+    col_name => 'col1'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'col1 1', 'rename when collision');
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'IDENTITY',
+    drop_old_pkey_col => true,
+    col_name => 'col1'
+  );
+  RETURN NEXT col_is_pk(
+    'add_pkey_col_testable', 'col1 1', 'do not rename when collision with previous dropped pkey'
+  );
+  PERFORM msar.add_pkey_column(
+    tab_id => 'add_pkey_col_testable'::regclass,
+    pkey_type => 'IDENTITY',
+    drop_old_pkey_col => false,
+    col_name => 'col1'
+  );
+  RETURN NEXT col_is_pk(
+    'add_pkey_col_testable', 'col1 2', 'rename when collision with previous undropped pkey'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_pkey_column_malformed() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_add_pkey_col();
