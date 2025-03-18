@@ -38,9 +38,11 @@
     columnsDataStore,
     recordsData,
     table,
+    hasPrimaryKey,
   } = tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
-  $: canViewTable = $currentRolePrivileges.has('SELECT');
+  $: hasSelect = $currentRolePrivileges.has('SELECT');
+  $: canViewTable = $hasPrimaryKey && hasSelect;
   $: canInsertRecords = $currentRolePrivileges.has('INSERT');
   $: ({ purpose: rowType } = controller);
   $: ({ columns, fetchStatus } = columnsDataStore);
@@ -121,9 +123,13 @@
     />
   {/if}
 
-  {#if !canViewTable}
+  {#if isInitialized && !canViewTable}
     <WarningBox fullWidth>
-      {$_('no_privileges_view_table')}
+      {#if !$hasPrimaryKey}
+        {$_('record_sel_no_support_for_table_without_pk')}
+      {:else if !hasSelect}
+        {$_('no_privileges_view_table')}
+      {/if}
     </WarningBox>
   {/if}
 

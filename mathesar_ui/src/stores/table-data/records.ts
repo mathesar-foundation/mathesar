@@ -135,7 +135,6 @@ export class RecordsData {
     meta,
     columnsDataStore,
     contextualFilters,
-    shareConsumer,
     loadIntrinsicRecordSummaries,
   }: {
     database: Pick<Database, 'id'>;
@@ -143,11 +142,9 @@ export class RecordsData {
     meta: Meta;
     columnsDataStore: ColumnsDataStore;
     contextualFilters: Map<number, number | string>;
-    shareConsumer?: ShareConsumer;
     loadIntrinsicRecordSummaries?: boolean;
   }) {
     this.apiContext = { database_id: database.id, table_oid: table.oid };
-    this.shareConsumer = shareConsumer;
     this.state = writable(States.Loading);
     this.fetchedRecordRows = writable([]);
     this.newRecords = writable([]);

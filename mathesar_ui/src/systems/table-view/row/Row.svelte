@@ -28,14 +28,14 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({
-    table,
     recordsData,
     columnsDataStore,
     meta,
     processedColumns,
     selection,
+    canUpdateRecords,
+    canDeleteRecords,
   } = $tabularData);
-  $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({
     rowStatus,
     rowCreationStatus,
@@ -59,7 +59,6 @@
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
-  $: isTableEditable = $currentRolePrivileges.has('UPDATE');
 
   function handleMouseDown(e: MouseEvent) {
     if (isPlaceholderRecordRow(row)) {
@@ -96,7 +95,12 @@
           hasErrors={hasAnyErrors}
         />
         <ContextMenu>
-          <RowContextOptions {recordPk} {recordsData} {row} {isTableEditable} />
+          <RowContextOptions
+            {recordPk}
+            {recordsData}
+            {row}
+            canDeleteRecords={$canDeleteRecords}
+          />
         </ContextMenu>
       </SheetRowHeaderCell>
     {/if}
@@ -122,7 +126,8 @@
           {processedColumn}
           {recordsData}
           {recordPk}
-          currentRoleTablePrivileges={$currentRolePrivileges}
+          canUpdateRecords={$canUpdateRecords}
+          canDeleteRecords={$canDeleteRecords}
         />
       {/each}
     {:else if isHelpTextRow(row)}
