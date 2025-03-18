@@ -1480,7 +1480,7 @@ BEGIN
       3, 'boolean',
       4, 'date',
       5, 'numeric',
-      6, 'mathesar_types.mathesar_money',
+      6, 'interval',
       7, 'text'
     )
   );
