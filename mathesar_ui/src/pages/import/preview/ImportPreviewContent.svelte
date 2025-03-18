@@ -59,6 +59,7 @@
   export let dataFile: DataFile;
   export let useColumnTypeInference = false;
   export let renamedIdColumn: string | undefined;
+  export let refreshTable: () => Promise<void>;
 
   let columns: Column[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([]);
@@ -169,6 +170,11 @@
     return previewRequest.run(columns);
   }
 
+  async function onPkConfigUpdated() {
+    await refreshTable();
+    await init();
+  }
+
   async function cancel() {
     const response = await cancelationRequest.run();
     if (response.isOk) {
@@ -223,7 +229,7 @@
 
   {#if columns.length}
     <FieldLayout>
-      <PkColumnConfig {table} {columns} onUpdated={init} />
+      <PkColumnConfig {table} {columns} onUpdated={onPkConfigUpdated} />
     </FieldLayout>
   {/if}
 
