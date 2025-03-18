@@ -4386,6 +4386,74 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_uuid_search_records_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE uuid_table (
+  id UUID PRIMARY KEY,
+  column1 TEXT,
+  column2 INTEGER,
+  column3 BOOLEAN
+  );
+  INSERT INTO uuid_table (id, column1, column2, column3) VALUES
+    ('042bb99f-5467-4645-9b9f-843d8b26b087', 'foo', 1, TRUE),
+    ('13c7c1dc-1e35-4fc5-87b0-d9c07c34db4d', 'bar', 2, FALSE),
+    ('2755d6d0-0089-4e22-b9e8-4dc2a7ff2c50', 'baz', 3, TRUE);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_search_uuid_records_from_table() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  search_result jsonb;
+BEGIN
+  PERFORM __setup_uuid_search_records_table();
+  rel_id := 'uuid_table'::regclass::oid;
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 1, 'literal', 4)
+    ),
+    3
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', '042bb99f-5467-4645-9b9f-843d8b26b087', '2', 'foo', '3', 1, '4', TRUE),
+      jsonb_build_object('1', '13c7c1dc-1e35-4fc5-87b0-d9c07c34db4d', '2', 'bar', '3', 2, '4', FALSE),
+      jsonb_build_object('1', '2755d6d0-0089-4e22-b9e8-4dc2a7ff2c50', '2', 'baz', '3', 3, '4', TRUE)
+    )
+  );
+  RETURN NEXT is ((search_result -> 'count')::integer, 3);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 1, 'literal', '1e')
+    ),
+    3
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', '13c7c1dc-1e35-4fc5-87b0-d9c07c34db4d', '2', 'bar', '3', 2, '4', FALSE)
+    )
+  );
+  RETURN NEXT is ((search_result -> 'count')::integer, 1);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 1, 'literal', 'asdf')
+    ),
+    3
+  );
+  RETURN NEXT is(search_result -> 'results', jsonb_build_array());
+  RETURN NEXT is ((search_result -> 'count')::integer, 0);
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_get_record_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
