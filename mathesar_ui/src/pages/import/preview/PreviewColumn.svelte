@@ -1,9 +1,18 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import type { Column } from '@mathesar/api/rpc/columns';
+  import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { iconAutomaticallyAdded, iconPrimaryKey } from '@mathesar/icons';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
-  import { Checkbox, Dropdown, TextInput } from '@mathesar-component-library';
+  import {
+    Checkbox,
+    Dropdown,
+    TextInput,
+    Tooltip,
+  } from '@mathesar-component-library';
 
   export let isLoading = false;
 
@@ -14,18 +23,39 @@
   export let selected: boolean;
   export let displayName: string;
   export let updateTypeRelatedOptions: (options: Column) => Promise<unknown>;
+  /**
+   * True when Mathesar automatically added this column as part of the import
+   * process
+   */
+  export let isAutoAdded = false;
 
-  $: disabled = processedColumn.column.primary_key || isLoading;
+  $: ({ column } = processedColumn);
+  $: isPk = column.primary_key;
+  $: disabled = isPk || isLoading;
 
   // TODO: Also validate with other column names
   function checkAndSetNameIfEmpty() {
     if (displayName.trim() === '') {
-      displayName = processedColumn.column.name;
+      displayName = column.name;
     }
   }
 </script>
 
 <div class="column">
+  <div class="pk-indicator">
+    {#if isPk}
+      <Tooltip allowHover placements={['top', 'bottom']}>
+        <span slot="trigger"><Icon {...iconPrimaryKey} /></span>
+        <p slot="content">{$_('pk_indicator_help_text')}</p>
+      </Tooltip>
+    {/if}
+    {#if isAutoAdded}
+      <Tooltip allowHover placements={['top', 'bottom']}>
+        <span slot="trigger"><Icon {...iconAutomaticallyAdded} /></span>
+        <p slot="content">{$_('auto_added_indicator_help_text')}</p>
+      </Tooltip>
+    {/if}
+  </div>
   <div class="column-name">
     <Checkbox bind:checked={selected} {disabled} />
     <TextInput
@@ -61,6 +91,8 @@
 <style lang="scss">
   .column {
     flex-grow: 1;
+    position: relative;
+    align-self: flex-end;
 
     > :global(.column-type) {
       height: 2.2rem;
@@ -86,5 +118,13 @@
     min-width: 18rem;
     max-width: 22rem;
     padding: var(--size-small);
+  }
+
+  .pk-indicator {
+    color: var(--slate-400);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
   }
 </style>

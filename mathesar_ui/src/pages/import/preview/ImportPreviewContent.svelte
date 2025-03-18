@@ -276,6 +276,8 @@
             {updateTypeRelatedOptions}
             {columnPropertiesMap}
             {records}
+            addedPkAttnum={table.metadata?.mathesar_added_pkey_attnum ??
+              undefined}
           />
         </div>
         {#if records.length === TRUNCATION_LIMIT}

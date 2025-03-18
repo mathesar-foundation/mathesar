@@ -35,7 +35,7 @@
     display: grid;
     grid-template: 1fr auto / 1fr;
     height: 100%;
-    --sheet-header-height: 5.25rem;
+    --sheet-header-height: 6.5rem;
   }
   .page-content {
     overflow: auto;

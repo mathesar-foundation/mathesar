@@ -221,6 +221,8 @@ export const iconField: IconProps = { data: faDatabase };
 export const iconFieldDelimiter: IconProps = { data: faCaretRight };
 export const iconPermissions: IconProps = { data: permissionsIcon };
 export const iconPrivacy: IconProps = { data: faUserSecret };
+export const iconPrimaryKey: IconProps = { data: faKey };
+export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
 
 // STATUSES
 

@@ -22,6 +22,11 @@
   export let updateTypeRelatedOptions: (options: Column) => Promise<unknown>;
   export let columnPropertiesMap: Record<number, ColumnProperties>;
   export let records: Record<string, unknown>[];
+  /**
+   * The column attnum of any PK column which was automatically added by
+   * Mathesar as part of the import process.
+   */
+  export let addedPkAttnum: number | undefined = undefined;
 </script>
 
 <div class="import-preview">
@@ -35,6 +40,7 @@
             {updateTypeRelatedOptions}
             bind:selected={columnPropertiesMap[column.id].selected}
             bind:displayName={columnPropertiesMap[column.id].displayName}
+            isAutoAdded={column.id === addedPkAttnum}
           />
           <SheetCellResizer
             columnIdentifierKey={column.id}
