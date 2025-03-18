@@ -40,7 +40,7 @@
   $: ({ isMathesarAdmin } = $userProfileStore);
   $: ({ databases } = databasesStore);
   $: filteredDatabases = [
-    ...filterViaTextQuery($databases.values(), filterQuery, (d) => d.name),
+    ...filterViaTextQuery($databases.values(), filterQuery, (d) => `${d.name} ${d.nickname}`),
   ];
   $: databasesNeedingUpgrade = [
     ...filter((d) => d.needsUpgradeAttention, $databases.values()),
