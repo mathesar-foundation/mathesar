@@ -3467,7 +3467,7 @@ DECLARE
     'boolean',
     'date',
     'numeric',
-    'mathesar_types.mathesar_money',
+    'uuid',
     'timestamp without time zone',
     'timestamp with time zone',
     'time without time zone',

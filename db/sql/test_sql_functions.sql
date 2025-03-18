@@ -1480,7 +1480,7 @@ BEGIN
       3, 'boolean',
       4, 'date',
       5, 'numeric',
-      6, 'mathesar_types.mathesar_money',
+      6, 'interval',
       7, 'text'
     )
   );
@@ -2687,7 +2687,7 @@ DECLARE
   target_type_strings jsonb;
 BEGIN
   target_type_strings = msar.get_valid_target_type_strings('text');
-  RETURN NEXT is(jsonb_array_length(target_type_strings), 27);
+  RETURN NEXT is(jsonb_array_length(target_type_strings), 28);
   RETURN NEXT ok(
     target_type_strings @> jsonb_build_array(
       'real', 'double precision', 'mathesar_types.email', 'smallint', 'boolean', 'bigint',
@@ -2695,12 +2695,12 @@ BEGIN
       'timestamp with time zone', 'timestamp without time zone', 'date',
       'mathesar_types.mathesar_money', 'money', 'mathesar_types.multicurrency_money',
       'character varying', 'character', '"char"', 'text', 'name', 'mathesar_types.uri', 'numeric',
-      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json'
+      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json', 'uuid'
     ),
     'containment plus length checks order-independent equality'
   );
   target_type_strings = msar.get_valid_target_type_strings('text'::regtype::oid);
-  RETURN NEXT is(jsonb_array_length(target_type_strings), 27);
+  RETURN NEXT is(jsonb_array_length(target_type_strings), 28);
   RETURN NEXT ok(
     target_type_strings @> jsonb_build_array(
       'real', 'double precision', 'mathesar_types.email', 'smallint', 'boolean', 'bigint',
@@ -2708,7 +2708,7 @@ BEGIN
       'timestamp with time zone', 'timestamp without time zone', 'date',
       'mathesar_types.mathesar_money', 'money', 'mathesar_types.multicurrency_money',
       'character varying', 'character', '"char"', 'text', 'name', 'mathesar_types.uri', 'numeric',
-      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json'
+      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json', 'uuid'
     ),
     'containment plus length checks order-independent equality'
   );
