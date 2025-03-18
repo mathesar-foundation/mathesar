@@ -36,7 +36,9 @@
 
   export let table: Table;
   export let columns: Column[];
-  export let onUpdated: () => void;
+  export let onUpdated: () => Promise<void>;
+
+  let isOpen = false;
 
   /** The PK column that Mathesar auto-added to the import. */
   $: autoAddedColumn = columns.find(
@@ -131,11 +133,13 @@
       assertExhaustive($strategy);
     }
 
-    onUpdated();
+    isOpen = false;
+
+    await onUpdated();
   }
 </script>
 
-<CollapsibleFieldset>
+<CollapsibleFieldset bind:isOpen>
   <span slot="label">{$_('primary_key_column')}</span>
   <FieldLayout>
     <LabeledInput label={$_('strategy')}>
