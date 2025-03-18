@@ -19,9 +19,11 @@
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type CellKey,
+    type ClientSideCellError,
     type ProcessedColumn,
     type RecordRow,
     type RecordsData,
@@ -48,13 +50,22 @@
   export let recordPk: ResultValue | undefined;
   export let rowHasErrors = false;
   export let key: CellKey;
-  export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
+  export let modificationStatusMap: WritableMap<
+    CellKey,
+    RequestStatus<RpcError[]>
+  >;
   export let processedColumn: ProcessedColumn;
-  export let clientSideErrorMap: WritableMap<CellKey, string[]>;
+  export let clientSideErrorMap: WritableMap<CellKey, ClientSideCellError[]>;
   export let value: unknown = undefined;
   export let currentRoleTablePrivileges: Set<TablePrivilege>;
 
-  $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
+  $: effectiveProcessedColumn = isProvisionalRecordRow(row)
+    ? processedColumn.withoutEnhancedPkCell()
+    : processedColumn;
+  $: cellId = makeCellId(
+    getRowSelectionId(row),
+    String(effectiveProcessedColumn.id),
+  );
 
   // To be used in case of publicly shared links where user should not be able
   // to view linked tables & explorations
@@ -62,22 +73,21 @@
 
   $: recordsDataState = recordsData.state;
   $: ({ linkedRecordSummaries } = recordsData);
-  $: ({ column, linkFk } = processedColumn);
+  $: ({ column, linkFk } = effectiveProcessedColumn);
   $: columnId = column.id;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
   $: clientErrors = $clientSideErrorMap.get(key) ?? [];
   $: errors = [...serverErrors, ...clientErrors];
-  $: hasError = !!errors.length;
+  $: hasServerError = !!serverErrors.length;
+  $: hasClientError = !!clientErrors.length;
+  $: hasError = hasClientError || hasServerError;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
   // TODO: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
-  $: isEditable =
-    isTableEditable &&
-    !column.primary_key &&
-    processedColumn.currentRolePrivileges.has('UPDATE');
+  $: isEditable = isTableEditable && effectiveProcessedColumn.isEditable;
   $: canSetNull = isEditable && column.nullable && value !== null;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
@@ -110,7 +120,10 @@
   selection={$selection}
   let:isActive
 >
-  <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
+  <CellBackground
+    when={hasServerError || (!isActive && hasClientError)}
+    color="var(--cell-bg-color-error)"
+  />
   <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
   {#if !(isEditable && isActive)}
     <!--
@@ -122,7 +135,7 @@
   {/if}
 
   <CellFabric
-    columnFabric={processedColumn}
+    columnFabric={effectiveProcessedColumn}
     {isActive}
     {value}
     {isProcessing}
@@ -165,7 +178,7 @@
 
     <!-- Column Attributes -->
     <MenuHeading>{$_('column')}</MenuHeading>
-    <ColumnHeaderContextMenu {processedColumn} />
+    <ColumnHeaderContextMenu processedColumn={effectiveProcessedColumn} />
 
     <!-- Row -->
     <MenuDivider />
@@ -173,6 +186,6 @@
     <RowContextOptions {recordPk} {recordsData} {row} {isTableEditable} />
   </ContextMenu>
   {#if errors.length}
-    <CellErrors {errors} forceShowErrors={isActive} />
+    <CellErrors {serverErrors} {clientErrors} forceShowErrors={isActive} />
   {/if}
 </SheetDataCell>

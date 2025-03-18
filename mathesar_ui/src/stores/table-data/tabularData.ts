@@ -1,5 +1,11 @@
 import { getContext, setContext } from 'svelte';
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  writable,
+} from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
@@ -24,7 +30,10 @@ import { ColumnsDataStore } from './columns';
 import { ConstraintsDataStore } from './constraints';
 import { Display } from './display';
 import { Meta } from './meta';
-import { type ProcessedColumnsStore, processColumn } from './processedColumns';
+import {
+  ProcessedColumn,
+  type ProcessedColumnsStore,
+} from './processedColumns';
 import { RecordsData } from './records';
 
 function getSelectedCellData(
@@ -71,9 +80,7 @@ export interface TabularDataProps {
    * removed from view.
    */
   contextualFilters?: Map<number, number | string>;
-  hasEnhancedPrimaryKeyCell?: Parameters<
-    typeof processColumn
-  >[0]['hasEnhancedPrimaryKeyCell'];
+  hasEnhancedPrimaryKeyCell?: boolean;
   /**
    * When true, load the record summaries associated directly with each record
    * in the table. These are *not* the record summaries associated with linked
@@ -147,8 +154,8 @@ export class TabularData {
           new Map(
             columns.map((column, columnIndex) => [
               column.id,
-              processColumn({
-                tableId: this.table.oid,
+              new ProcessedColumn({
+                tableOid: this.table.oid,
                 column,
                 columnIndex,
                 constraints: constraintsData.constraints,
@@ -263,7 +270,15 @@ export class TabularData {
 
   addEmptyRecord() {
     void this.recordsData.addEmptyRecord();
-    this.selection.update((s) => s.ofNewRecordDataEntryCell());
+    const firstEditableColumnInDraftRow = [
+      ...get(this.processedColumns).values(),
+    ]
+      .map((pc) => pc.withoutEnhancedPkCell())
+      .find((pc) => pc.isEditable);
+    const columnId = firstEditableColumnInDraftRow
+      ? String(firstEditableColumnInDraftRow.id)
+      : undefined;
+    this.selection.update((s) => s.ofNewRecordDataEntryCell(columnId));
   }
 
   destroy(): void {

@@ -57,7 +57,7 @@
 {/if}
 
 {#if errors.length}
-  <CellErrors {errors} />
+  <CellErrors serverErrors={errors} />
 {/if}
 
 <style lang="scss">
