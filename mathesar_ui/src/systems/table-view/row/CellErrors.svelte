@@ -102,5 +102,6 @@
     padding: 0.5em;
     z-index: var(--cell-errors-z-index);
     font-size: var(--text-size-small);
+    word-wrap: break-word;
   }
 </style>
