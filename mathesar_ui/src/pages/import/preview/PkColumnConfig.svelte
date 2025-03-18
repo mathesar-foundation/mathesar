@@ -50,9 +50,17 @@
    */
   $: initialStrategy = autoAddedColumn ? ('add' as const) : ('pick' as const);
   $: availableColumns = columns.filter((c) => c.id !== autoAddedColumn?.id);
+  $: initialTypeOfColumnToAdd = ((): ColumnType => {
+    if (initialStrategy === 'pick') return 'integer';
+    if (autoAddedColumn) {
+      if (autoAddedColumn.type === 'integer') return 'integer';
+      if (autoAddedColumn.type === 'uuid') return 'uuid';
+    }
+    return 'integer';
+  })();
 
   $: strategy = requiredField<Strategy>(initialStrategy);
-  $: typeOfColumnToAdd = requiredField<ColumnType>('integer');
+  $: typeOfColumnToAdd = requiredField<ColumnType>(initialTypeOfColumnToAdd);
   $: pickedColumn = requiredField<Column>(availableColumns[0]);
   $: defaultValueOptions = ((): DefaultValue[] => {
     if ($strategy === 'add') {
