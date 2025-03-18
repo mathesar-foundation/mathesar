@@ -18,11 +18,25 @@ interface Dependencies {
   showToastError: (msg: string) => void;
 }
 
+function shouldHandleEvent(): boolean {
+  // Only handle clipboard events when a cell is focused. This prevents pasting
+  // into inputs while editing cells, and other unexpected behavior.
+  return document.activeElement?.hasAttribute('data-active-cell') ?? false;
+}
+
 export class SheetClipboardHandler implements ClipboardHandler {
   private readonly deps: Dependencies;
 
   constructor(deps: Dependencies) {
     this.deps = deps;
+  }
+
+  shouldHandleCopy() {
+    return shouldHandleEvent();
+  }
+
+  shouldHandlePaste() {
+    return shouldHandleEvent();
   }
 
   handleCopy(event: ClipboardEvent): void {
