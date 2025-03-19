@@ -28,7 +28,7 @@ def copy_datafile_to_table(
             column_names = [
                 f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(next(reader)))
             ]
-            reader.seek(0)
+            f.seek(0)
         import_info = create_and_import_from_rows(
             reader,
             table_name,
