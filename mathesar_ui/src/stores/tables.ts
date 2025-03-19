@@ -361,15 +361,19 @@ export async function createTableFromDataFile(props: {
 export function getTableFromStoreOrApi({
   schema,
   tableOid,
+  clearCache = false,
 }: {
   schema: Schema;
   tableOid: Table['oid'];
+  /** When true, the cached table in the store will be cleared */
+  clearCache?: boolean;
 }): CancellablePromise<Table> {
   const $tablesStore = get(tablesStore);
 
   if (
     $tablesStore.databaseId === schema.database.id &&
-    $tablesStore.schemaOid === schema.oid
+    $tablesStore.schemaOid === schema.oid &&
+    !clearCache
   ) {
     const table = $tablesStore.tablesMap.get(tableOid);
     if (table) {

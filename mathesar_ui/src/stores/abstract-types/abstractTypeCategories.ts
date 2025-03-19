@@ -320,3 +320,9 @@ export function getDefaultDbTypeOfAbstractType(
   }
   return defaultDbType;
 }
+
+export function getDbTypesForAbstractType(
+  abstractTypeIdentifier: AbstractType['identifier'],
+): Set<DbType> {
+  return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();
+}

@@ -14,7 +14,6 @@
     uniqueWith,
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
-  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
@@ -49,6 +48,7 @@
     processColumns,
   } from './importPreviewPageUtils';
   import ImportPreviewSheet from './ImportPreviewSheet.svelte';
+  import PkColumnConfig from './PkColumnConfig.svelte';
 
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
@@ -58,6 +58,7 @@
   export let dataFile: DataFile;
   export let useColumnTypeInference = false;
   export let renamedIdColumn: string | undefined;
+  export let refreshTable: () => Promise<void>;
 
   let columns: Column[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([]);
@@ -168,6 +169,12 @@
     return previewRequest.run(columns);
   }
 
+  async function onPkConfigUpdated() {
+    await refreshTable();
+    await init();
+    renamedIdColumn = undefined;
+  }
+
   async function cancel() {
     const response = await cancelationRequest.run();
     if (response.isOk) {
@@ -219,23 +226,18 @@
       disabled={formInputsAreDisabled}
     />
   </FieldLayout>
+
+  {#if columns.length}
+    <FieldLayout>
+      <PkColumnConfig {table} {columns} onUpdated={onPkConfigUpdated} />
+    </FieldLayout>
+  {/if}
+
   <FieldLayout>
     <InfoBox>
       {$_('customize_names_types_preview')}
     </InfoBox>
   </FieldLayout>
-  {#if renamedIdColumn}
-    <FieldLayout>
-      <WarningBox>
-        {$_('does_not_support_setting_pk')}
-        {$_('id_column_has_been_renamed', {
-          values: {
-            renamedIdColumn,
-          },
-        })}
-      </WarningBox>
-    </FieldLayout>
-  {/if}
 
   <svelte:fragment slot="preview">
     <h2 class="preview-header">{$_('table_preview')}</h2>
@@ -268,6 +270,9 @@
             {updateTypeRelatedOptions}
             {columnPropertiesMap}
             {records}
+            addedPkAttnum={table.metadata?.mathesar_added_pkey_attnum ??
+              undefined}
+            {renamedIdColumn}
           />
         </div>
         {#if records.length === TRUNCATION_LIMIT}
