@@ -95,7 +95,11 @@
   $: columnsFetch = new AsyncStore(runner(api.columns.list_with_metadata));
 
   $: records = $previewRequest.resolvedValue ?? getSkeletonRecords();
-  $: formInputsAreDisabled = !$previewRequest.isOk;
+  $: formInputsAreDisabled =
+    $columnsFetch.isLoading ||
+    $headerUpdateRequest.isLoading ||
+    $typeSuggestionsRequest.isLoading ||
+    $previewRequest.isLoading;
   $: canProceed = $previewRequest.isOk && $form.canSubmit;
   $: processedColumns = processColumns(columns);
 
@@ -248,17 +252,17 @@
           on:retry={init}
           on:delete={cancel}
         />
+      {:else if $headerUpdateRequest.error}
+        <ErrorInfo
+          error={$headerUpdateRequest.error}
+          on:retry={init}
+          on:delete={cancel}
+        />
       {:else if !$previewRequest.hasSettled}
         <div class="loading"><Spinner /></div>
       {:else if $previewRequest.error}
         <ErrorInfo
           error={$previewRequest.error}
-          on:retry={init}
-          on:delete={cancel}
-        />
-      {:else if $headerUpdateRequest.error}
-        <ErrorInfo
-          error={$headerUpdateRequest.error}
           on:retry={init}
           on:delete={cancel}
         />
