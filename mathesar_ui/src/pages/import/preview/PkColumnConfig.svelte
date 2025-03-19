@@ -61,7 +61,9 @@
 
   $: strategy = requiredField<Strategy>(initialStrategy);
   $: typeOfColumnToAdd = requiredField<ColumnType>(initialTypeOfColumnToAdd);
-  $: pickedColumn = requiredField<Column>(availableColumns[0]);
+  $: pickedColumn = requiredField<Column>(
+    availableColumns.find((c) => c.primary_key) ?? availableColumns[0],
+  );
   $: defaultValueOptions = ((): DefaultValue[] => {
     if ($strategy === 'add') {
       if ($typeOfColumnToAdd === 'integer') return ['identity'];
