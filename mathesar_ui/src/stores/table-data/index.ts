@@ -36,6 +36,7 @@ export {
   type RecordGrouping,
   type RecordGroup,
   extractPrimaryKeyValue,
+  type ClientSideCellError,
 } from './utils';
 export {
   setTabularDataStoreInContext,
