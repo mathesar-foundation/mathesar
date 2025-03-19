@@ -5389,12 +5389,12 @@ $$ LANGUAGE plpgsql STABLE;
 CREATE OR REPLACE FUNCTION
 msar.get_score_expr(tab_id oid, parameters_ jsonb) RETURNS text AS $$
 SELECT string_agg(
-  CASE WHEN pgt.typcategory = 'S' THEN
+  CASE WHEN pgt.typcategory = 'S' OR pgt.typname = 'uuid' THEN
     format(
       $s$(CASE
-        WHEN %1$I ILIKE %2$L THEN 4
-        WHEN %1$I ILIKE %2$L || '%%' THEN 3
-        WHEN %1$I ILIKE '%%' || %2$L || '%%' THEN 2
+        WHEN %1$I::text ILIKE %2$L THEN 4
+        WHEN %1$I::text ILIKE %2$L || '%%' THEN 3
+        WHEN %1$I::text ILIKE '%%' || %2$L || '%%' THEN 2
         ELSE 0
       END)$s$,
       pga.attname,
