@@ -129,9 +129,7 @@
       } else {
         assertExhaustive($strategy);
       }
-    }
-
-    if ($strategy === 'add') {
+    } else if ($strategy === 'add') {
       // $typeOfColumnToAdd must have changed
       await addPkColumn({ dropExistingPkColumn: true });
     } else if ($strategy === 'pick') {
