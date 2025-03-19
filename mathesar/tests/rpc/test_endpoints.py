@@ -138,6 +138,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        data_modeling.change_primary_key_column,
+        "data_modeling.change_primary_key_column",
+        [user_is_authenticated]
+    ),
+    (
         data_modeling.suggest_types,
         "data_modeling.suggest_types",
         [user_is_authenticated]

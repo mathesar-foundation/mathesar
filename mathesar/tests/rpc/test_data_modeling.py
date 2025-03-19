@@ -183,3 +183,39 @@ def test_move_columns(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[2] == _source_table_oid
     assert call_args[3] == _target_table_oid
     assert call_args[4] == _move_column_attnums
+
+
+def test_change_primary_key_column(rf, monkeypatch, mocked_exec_msar_func):
+    _username = 'alice'
+    _password = 'pass1234'
+    _column_attnum = 3
+    _table_oid = 12345
+    _default = 'UUIDv4'
+    _database_id = 2
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username=_username, password=_password)
+
+    @contextmanager
+    def mock_connect(database_id, user):
+        if database_id == _database_id and user.username == _username:
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    monkeypatch.setattr(data_modeling, 'connect', mock_connect)
+    data_modeling.change_primary_key_column(
+        column_attnum=_column_attnum,
+        table_oid=_table_oid,
+        database_id=_database_id,
+        default=_default,
+        drop_existing_pk_column=True,
+        request=request,
+    )
+    call_args = mocked_exec_msar_func.call_args_list[0][0]
+    assert call_args[2] == _table_oid
+    assert call_args[3] == _column_attnum
+    assert call_args[4] == _default
+    assert call_args[5] is True

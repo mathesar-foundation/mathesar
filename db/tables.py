@@ -98,7 +98,8 @@ def create_table_on_database(
         comment: The comment for the new table. (optional)
 
     Returns:
-        Returns the OID and name of the created table.
+        An object with the OID, name, renamed_columns, and primary key
+        column attnum  of the created table.
     """
     return db_conn.exec_msar_func(
         conn,
@@ -143,11 +144,8 @@ def create_and_import_from_rows(
     with cursor.copy(import_info['copy_sql']) as copy:
         for row in rows:
             copy.write_row(row)
-    return (
-        import_info['table_oid'],
-        import_info['table_name'],
-        import_info['renamed_columns'],
-    )
+
+    return import_info
 
 
 def drop_table_from_database(table_oid, conn, cascade=False):
@@ -246,3 +244,20 @@ def fetch_table_in_chunks(
                 if not records:
                     break
                 yield [record[0] for record in records]
+
+
+def set_primary_key_column_on_table(
+        conn,
+        table_oid,
+        column_attnum,
+        default_type=None,
+        drop_old_pkey_column=False,
+):
+    db_conn.exec_msar_func(
+        conn,
+        'set_pkey_column',
+        table_oid,
+        column_attnum,
+        default_type,
+        drop_old_pkey_column
+    )

@@ -16,6 +16,7 @@ from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_columns_meta_data
+from mathesar.utils.tables import set_table_meta_data
 
 
 class TypeOptions(TypedDict, total=False):
@@ -233,7 +234,8 @@ def add_primary_key_column(
         pkey_type: Literal["IDENTITY", "UUIDv4"],
         table_oid: int,
         database_id: int,
-        name: Optional[str] = "id",
+        drop_existing_pkey_column: bool = False,
+        name: str = "id",
         **kwargs
 ) -> None:
     """
@@ -259,11 +261,21 @@ def add_primary_key_column(
         pkey_type: Defines the type and default of the primary key.
         table_oid: The OID of the table getting a primary key.
         database_id: The Django id of the database containing the table.
+        drop_existing_pkey_column: Whether to drop the old pkey column.
         name: A custom name for the added primary key column.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        add_pkey_column_to_table(table_oid, pkey_type, conn, name=name)
+        pkey_attnum = add_pkey_column_to_table(
+            table_oid,
+            pkey_type,
+            conn,
+            drop_old_pkey_column=drop_existing_pkey_column,
+            name=name
+        )
+    set_table_meta_data(
+        table_oid, {"mathesar_added_pkey_attnum": pkey_attnum}, database_id
+    )
 
 
 @mathesar_rpc_method(name="columns.add", auth="login")
