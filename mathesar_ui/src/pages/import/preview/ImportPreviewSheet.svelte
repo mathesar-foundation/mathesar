@@ -27,6 +27,7 @@
    * Mathesar as part of the import process.
    */
   export let addedPkAttnum: number | undefined = undefined;
+  export let renamedIdColumn: string | undefined;
 </script>
 
 <div class="import-preview">
@@ -41,6 +42,7 @@
             bind:selected={columnPropertiesMap[column.id].selected}
             bind:displayName={columnPropertiesMap[column.id].displayName}
             isAutoAdded={column.id === addedPkAttnum}
+            {renamedIdColumn}
           />
           <SheetCellResizer
             columnIdentifierKey={column.id}

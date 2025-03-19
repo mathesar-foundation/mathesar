@@ -5,7 +5,11 @@
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import { iconAutomaticallyAdded, iconPrimaryKey } from '@mathesar/icons';
+  import {
+    iconAutomaticallyAdded,
+    iconChangeAToB,
+    iconPrimaryKey,
+  } from '@mathesar/icons';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import {
     Checkbox,
@@ -14,7 +18,10 @@
     Tooltip,
   } from '@mathesar-component-library';
 
+  import { RESERVED_ID_COLUMN_NAME } from './importPreviewPageUtils';
+
   export let isLoading = false;
+  export let renamedIdColumn: string | undefined = undefined;
 
   export let processedColumn: {
     column: Column;
@@ -32,6 +39,7 @@
   $: ({ column } = processedColumn);
   $: isPk = column.primary_key;
   $: disabled = isPk || isLoading;
+  $: isColumnRenamed = renamedIdColumn === processedColumn.column.name;
 
   // TODO: Also validate with other column names
   function checkAndSetNameIfEmpty() {
@@ -53,6 +61,22 @@
       <Tooltip allowHover placements={['top', 'bottom']}>
         <span slot="trigger"><Icon {...iconAutomaticallyAdded} /></span>
         <p slot="content">{$_('auto_added_indicator_help_text')}</p>
+      </Tooltip>
+    {/if}
+    {#if isColumnRenamed}
+      <Tooltip allowHover placements={['top', 'bottom']}>
+        <span slot="trigger" class="id-rename">
+          {RESERVED_ID_COLUMN_NAME}
+          <Icon {...iconChangeAToB} />
+          {renamedIdColumn}
+        </span>
+        <p slot="content">
+          {$_('id_column_has_been_renamed', {
+            values: {
+              renamedIdColumn,
+            },
+          })}
+        </p>
       </Tooltip>
     {/if}
   </div>
@@ -112,6 +136,10 @@
         margin-right: 0.5rem;
       }
     }
+  }
+
+  .id-rename {
+    font-size: var(--size-small);
   }
 
   .type-options-content {

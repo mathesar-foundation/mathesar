@@ -119,6 +119,7 @@ import {
 export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
+export const iconChangeAToB = { data: faArrowRight };
 export const iconConfigure: IconProps = { data: faCogs };
 export const iconConnectDatabase = { data: connectDatabaseIcon };
 export const iconCopyMajor: IconProps = { data: faCopy };
