@@ -333,6 +333,33 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_set_pkey_column_identity_reuse() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_set_pkey_col();
+  PERFORM msar.set_pkey_column(
+    tab_id => 'set_pkey_col_testable'::regclass,
+    col_id => 2,
+    default_type => 'IDENTITY',
+    drop_old_pkey_col => false
+  );
+  RETURN NEXT col_is_pk('set_pkey_col_testable', 'col1');
+  RETURN NEXT col_type_is('set_pkey_col_testable', 'col1', 'integer');
+  RETURN NEXT columns_are('set_pkey_col_testable', ARRAY['id', 'col1', 'col2', 'Column 3']);
+  PERFORM msar.set_pkey_column(
+    tab_id => 'set_pkey_col_testable'::regclass,
+    col_id => 1,
+    default_type => 'IDENTITY',
+    drop_old_pkey_col => false
+  );
+  RETURN NEXT col_is_pk('set_pkey_col_testable', 'id');
+  RETURN NEXT columns_are('set_pkey_col_testable', ARRAY['id', 'col1', 'col2', 'Column 3']);
+  INSERT INTO set_pkey_col_testable(col2) VALUES ('ghi');
+  RETURN NEXT results_eq('SELECT max(col1) FROM set_pkey_col_testable', 'VALUES (568)');
+  RETURN NEXT results_eq('SELECT max(id) FROM set_pkey_col_testable', 'VALUES (3)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_set_pkey_column_uuid() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_set_pkey_col();
