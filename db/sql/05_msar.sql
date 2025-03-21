@@ -2637,7 +2637,6 @@ Args:
 */
 DECLARE
   pkey_col_max_val integer;
-  pkey_set_stmt text;
 BEGIN
   IF drop_old_pkey_col THEN
     PERFORM msar.drop_columns(tab_id, msar.get_pk_column(tab_id));
