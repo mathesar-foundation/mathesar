@@ -2635,8 +2635,6 @@ Args:
              do not set any default, or change the column type.
   drop_old_pkey_col: Whether we should drop the current primary key column during this operation.
 */
-DECLARE
-  pkey_col_max_val integer;
 BEGIN
   IF drop_old_pkey_col THEN
     PERFORM msar.drop_columns(tab_id, msar.get_pk_column(tab_id));
