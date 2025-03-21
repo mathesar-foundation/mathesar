@@ -353,6 +353,9 @@ BEGIN
   );
   RETURN NEXT col_is_pk('set_pkey_col_testable', 'id');
   RETURN NEXT columns_are('set_pkey_col_testable', ARRAY['id', 'col1', 'col2', 'Column 3']);
+  INSERT INTO set_pkey_col_testable(col2) VALUES ('ghi');
+  RETURN NEXT results_eq('SELECT max(col1) FROM set_pkey_col_testable', 'VALUES (568)');
+  RETURN NEXT results_eq('SELECT max(id) FROM set_pkey_col_testable', 'VALUES (3)');
 END;
 $f$ LANGUAGE plpgsql;
 
