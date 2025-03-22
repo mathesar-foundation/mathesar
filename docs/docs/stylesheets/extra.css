@@ -405,3 +405,8 @@ p:has(a[href^="https://github.com/mathesar-foundation/mathesar/pull/"])
 [data-md-color-scheme="slate"] .md-search-result__more summary ~ * > * {
   opacity: 0.9;
 }
+
+[dir="ltr"] .md-content__button {
+  position: relative;
+  z-index: 20;
+}
