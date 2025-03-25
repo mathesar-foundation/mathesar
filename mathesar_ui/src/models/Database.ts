@@ -36,6 +36,11 @@ export class Database {
     return this.nickname ?? this.name;
   }
 
+  /** Returns all the names that can be used to identify this database */
+  get allNames(): string[] {
+    return [this.name, ...(this.nickname ? [this.nickname] : [])];
+  }
+
   constructConfiguredRolesStore() {
     return new AsyncRpcApiStore(api.roles.configured.list, {
       postProcess: (rawConfiguredRoles) =>

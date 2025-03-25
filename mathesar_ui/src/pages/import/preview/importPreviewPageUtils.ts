@@ -17,6 +17,8 @@ export function getSkeletonRecords(): Record<string, unknown>[] {
   return [{}, {}];
 }
 
+export const RESERVED_ID_COLUMN_NAME = 'id';
+
 export interface ProcessedPreviewColumn {
   id: number;
   column: Column;

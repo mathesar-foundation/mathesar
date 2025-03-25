@@ -1,24 +1,34 @@
+import { get, readable } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { ImmutableMap } from '@mathesar/component-library';
+import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { RowStatus } from '../meta';
 import {
   type CellKey,
-  ROW_HAS_CELL_ERROR_MSG,
+  type ClientSideCellError,
   type RowKey,
   getRowStatus,
 } from '../utils';
 
+vi.mock('svelte-i18n', () => {
+  const translate = (s: string) => s;
+  return { _: readable(translate) };
+});
+
 describe('getRowStatus', () => {
   interface TestCase {
     label: string;
-    cellClientErrors: [CellKey, string[]][];
-    cellModification: [CellKey, RequestStatus][];
-    rowCreation: [RowKey, RequestStatus][];
-    rowDeletion: [RowKey, RequestStatus][];
+    cellClientErrors: [CellKey, ClientSideCellError[]][];
+    cellModification: [CellKey, RequestStatus<RpcError[]>][];
+    rowCreation: [RowKey, RequestStatus<RpcError[]>][];
+    rowDeletion: [RowKey, RequestStatus<RpcError[]>][];
     result: [RowKey, RowStatus][];
   }
-  const m = ROW_HAS_CELL_ERROR_MSG;
+  const c = RpcError.fromAnything('columns_cannot_be_null');
+  const m = RpcError.fromAnything('row_contains_cell_with_error');
   const testCases: TestCase[] = [
     // {
     //   label: 'All empty',
@@ -30,13 +40,36 @@ describe('getRowStatus', () => {
     // },
     {
       label: 'Complex',
-      cellClientErrors: [['300::1', ['Client error']]],
-      // cellClientErrors: [],
+      cellClientErrors: [
+        [
+          '300::1',
+          [
+            {
+              code: 101,
+              message: 'Client Error',
+              column: {
+                id: 1,
+                name: 'c',
+                description: null,
+                type: 'text',
+                type_options: null,
+                nullable: false,
+                primary_key: false,
+                default: null,
+                has_dependents: false,
+                valid_target_types: [],
+                current_role_priv: [],
+                metadata: null,
+              },
+            },
+          ],
+        ],
+      ],
       cellModification: [
         ['1::1', { state: 'success' }],
         ['1::2', { state: 'processing' }],
-        ['1::3', { state: 'failure', errors: ['foo'] }],
-        ['2::9', { state: 'failure', errors: ['bar'] }],
+        ['1::3', { state: 'failure', errors: [RpcError.fromAnything('foo')] }],
+        ['2::9', { state: 'failure', errors: [RpcError.fromAnything('bar')] }],
         ['3::7', { state: 'processing' }],
         ['4::5', { state: 'processing' }],
         ['5::5', { state: 'success' }],
@@ -49,12 +82,24 @@ describe('getRowStatus', () => {
         ['103', { state: 'processing' }],
       ],
       rowDeletion: [
-        ['102', { state: 'failure', errors: ['Unable to delete row.'] }],
+        [
+          '102',
+          {
+            state: 'failure',
+            errors: [RpcError.fromAnything('Unable to delete row.')],
+          },
+        ],
         ['201', { state: 'processing' }],
-        ['202', { state: 'failure', errors: ['Unable to delete row.'] }],
+        [
+          '202',
+          {
+            state: 'failure',
+            errors: [RpcError.fromAnything('Unable to delete row.')],
+          },
+        ],
       ],
       result: [
-        ['300', { errorsFromWholeRowAndCells: [m] }],
+        ['300', { errorsFromWholeRowAndCells: [c] }],
         ['1', { wholeRowState: undefined, errorsFromWholeRowAndCells: [m] }],
         ['2', { wholeRowState: 'success', errorsFromWholeRowAndCells: [m] }],
         ['3', { wholeRowState: 'success', errorsFromWholeRowAndCells: [] }],
@@ -64,7 +109,9 @@ describe('getRowStatus', () => {
           '102',
           {
             wholeRowState: 'failure',
-            errorsFromWholeRowAndCells: ['Unable to delete row.'],
+            errorsFromWholeRowAndCells: [
+              RpcError.fromAnything('Unable to delete row.'),
+            ],
           },
         ],
         [
@@ -79,7 +126,9 @@ describe('getRowStatus', () => {
           '202',
           {
             wholeRowState: 'failure',
-            errorsFromWholeRowAndCells: ['Unable to delete row.'],
+            errorsFromWholeRowAndCells: [
+              RpcError.fromAnything('Unable to delete row.'),
+            ],
           },
         ],
       ],

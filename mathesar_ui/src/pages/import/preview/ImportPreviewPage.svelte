@@ -60,6 +60,10 @@
     dataFile={$dataFileFetch.resolvedValue}
     {useColumnTypeInference}
     {renamedIdColumn}
+    refreshTable={async () => {
+      // Need to re-fetch the table in order to get the updated metadata
+      await tableFetch.run({ schema, tableOid: tableId, clearCache: true });
+    }}
   />
 {:else if $tableFetch.isLoading || $dataFileFetch.isLoading}
   <ImportPreviewLayout><Spinner /></ImportPreviewLayout>
