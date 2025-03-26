@@ -42,6 +42,15 @@
     }
   }
 
+  &.layout-inline,
+  &.layout-inline-input-first {
+    // This is to avoid having the `<label>` element take up the full width of
+    // its parent. If that happens it can become an annoyingly large click
+    // target. The problem is especially evident when a `Select` component is
+    // used as the input element.
+    max-width: max-content;
+  }
+
   &.layout-inline .label-content {
     display: flex;
     flex-direction: row;
