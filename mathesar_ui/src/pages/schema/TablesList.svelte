@@ -37,7 +37,7 @@
 <div class="tables-list">
   {#if tables.length > 0}
     <div
-      class="container"
+      class="tables-container"
       use:highlightNewItems={{
         scrollHint: $_('table_new_items_scroll_hint'),
       }}
@@ -71,18 +71,19 @@
 {/if}
 
 <style lang="scss">
-  .container {
-    display: grid;
-    grid-gap: 1rem;
-    --minimum-item-width: 18rem;
-    // align all child items to the left
+  .tables-list {
+    border-radius: var(--border-radius-m);
+    border: 1px solid var(--sand-300);
+    overflow: hidden;
+    background-color: var(--color-background);
+    box-shadow: var(--shadow-sm);
   }
-  @supports (width: min(var(--minimum-item-width), 100%)) {
-    .container {
-      grid-template-columns: repeat(
-        auto-fill,
-        minmax(var(--minimum-item-width), 1fr)
-      );
-    }
+
+  .tables-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-height: 70vh;
+    overflow-y: auto;
   }
 </style>

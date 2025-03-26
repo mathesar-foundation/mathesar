@@ -13,7 +13,7 @@
 
 <style>
   .outer {
-    fill: currentcolor;
+    fill: none;
   }
   .inner {
     fill: var(--brand-500);

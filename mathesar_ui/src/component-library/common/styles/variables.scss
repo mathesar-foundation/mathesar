@@ -5,13 +5,131 @@
   // Danger colors
   --danger-color: #d67171;
   --danger-background-color: #fde9e9;
-  --dander-border-color: #f2aaaa;
+  --danger-border-color: #f2aaaa;
 
   // Idea here is to use the same token naming
   // between the Figma designs and the codebase
   // which then makes it easier and faster to create
   // element from design into code.
   --green-100: #e5fde6;
+
+  /* New color palettes */
+  /* Sand palette - more neutral version */
+  --sand-50: #fbfaf8;
+  --sand-100: #f5f4f0;
+  --sand-200: #eae8e2;
+  --sand-300: #dfdcd3;
+  --sand-400: #d4d0c4;
+  --sand-500: #c9c4b5;
+  --sand-600: #a09b8c;
+  --sand-700: #847f71;
+  --sand-800: #696557;
+  --sand-900: #4d4a3f;
+  --sand-950: #2e2c26;
+
+  /* Orange-red palette */
+  --orange-red-50: #fff2ef;
+  --orange-red-100: #ffe2dc;
+  --orange-red-200: #ffc5b8;
+  --orange-red-300: #ffa08b;
+  --orange-red-400: #ff7c5d;
+  --orange-red-500: #ff5030;
+  --orange-red-600: #ea3819;
+  --orange-red-700: #c92812;
+  --orange-red-800: #a31f0e;
+  --orange-red-900: #82180c;
+  --orange-red-950: #470c06;
+
+  /* Stormy palette */
+  --stormy-50: #f3f0f7;
+  --stormy-100: #e6dff0;
+  --stormy-200: #cdc0e2;
+  --stormy-300: #b097d0;
+  --stormy-400: #9475bc;
+  --stormy-500: #7a5ca6;
+  --stormy-600: #644687;
+  --stormy-700: #4d3468;
+  --stormy-800: #362249;
+  --stormy-900: #201430;
+  --stormy-950: #0f081b;
+
+  /* Sapphire palette */
+  --sapphire-50: #f6f2f9;
+  --sapphire-100: #ede5f4;
+  --sapphire-200: #ddcbea;
+  --sapphire-300: #c39fdd;
+  --sapphire-400: #9656bb;
+  --sapphire-500: #6f238f;
+  --sapphire-600: #5f1d7a;
+  --sapphire-700: #4f1865;
+  --sapphire-800: #411450;
+  --sapphire-900: #2a0d32;
+  --sapphire-950: #1d0623;
+
+  /* Plum palette */
+  --plum-50: #faf4f7;
+  --plum-100: #f3e7ee;
+  --plum-200: #e7d0dd;
+  --plum-300: #d3adc3;
+  --plum-400: #b67f9c;
+  --plum-500: #8e5573;
+  --plum-600: #6d3961;
+  --plum-700: #5f3154;
+  --plum-800: #502944;
+  --plum-900: #3d1f33;
+  --plum-950: #251219;
+
+  /* Rosy palette */
+  --rosy-50: #fef3f3;
+  --rosy-100: #fee5e5;
+  --rosy-200: #fccfcf;
+  --rosy-300: #f9aaaa;
+  --rosy-400: #ed7f7f;
+  --rosy-500: #e26464;
+  --rosy-600: #d14848;
+  --rosy-700: #b13535;
+  --rosy-800: #932e2e;
+  --rosy-900: #612323;
+  --rosy-950: #411414;
+
+  /* Salmon palette */
+  --salmon-50: #fef4f1;
+  --salmon-100: #fee6df;
+  --salmon-200: #fdcebf;
+  --salmon-300: #f9ac93;
+  --salmon-400: #ef8b65;
+  --salmon-500: #e7754c;
+  --salmon-600: #d55939;
+  --salmon-700: #b1442b;
+  --salmon-800: #923826;
+  --salmon-900: #60271c;
+  --salmon-950: #411511;
+
+  /* Pumpkin palette */
+  --pumpkin-50: #fefbf3;
+  --pumpkin-100: #fef4de;
+  --pumpkin-200: #fce7bc;
+  --pumpkin-300: #f8d589;
+  --pumpkin-400: #f4b640;
+  --pumpkin-500: #eb9d20;
+  --pumpkin-600: #cc7d16;
+  --pumpkin-700: #a65f14;
+  --pumpkin-800: #874c15;
+  --pumpkin-900: #6f3f15;
+  --pumpkin-950: #422408;
+
+  /* Olivia palette */
+  --olivia-50: #f8f6ef;
+  --olivia-100: #efe9d7;
+  --olivia-200: #dfd0aa;
+  --olivia-300: #c6ad77;
+  --olivia-400: #b08e45;
+  --olivia-500: #9c6b23;
+  --olivia-600: #87571c;
+  --olivia-700: #6d4319;
+  --olivia-800: #5a3619;
+  --olivia-900: #3b2513;
+  --olivia-950: #2c190c;
 
   --purple-100: #ebe5fd;
   --purple-200: #d7cbfb;
@@ -36,16 +154,6 @@
   --slate-800: #272b30;
 
   --slate-800-rgb: 39, 43, 48;
-
-  --sand-50: #fdfdfc;
-  --sand-100: #f9f8f5;
-  --sand-200: #f0e9db;
-  --sand-300: #e6dcbf;
-  --sand-400: #d1c3b0;
-  --sand-500: #b8a895;
-  --sand-600: #9f8d7a;
-  --sand-700: #87725f;
-  --sand-800: #6f5744;
 
   --sky-200: #daeefb;
   --sky-300: #99d4f9;
@@ -78,6 +186,16 @@
   --brand-600: var(--red-600);
   --brand-800: var(--red-800);
   --brand-box-shadow: var(--red-box-shadow);
+  
+  // Accent color
+  --accent-100: var(--salmon-100);
+  --accent-200: var(--salmon-200);
+  --accent-300: var(--salmon-300);
+  --accent-400: var(--salmon-400);
+  --accent-500: var(--salmon-500);
+  --accent-600: var(--salmon-600);
+  --accent-700: var(--salmon-700);
+  --accent-800: var(--salmon-800);
 
   --size-extreme-small: 0.1429rem; // 2px
   --size-super-ultra-small: 0.2857rem; // 4px
@@ -86,11 +204,11 @@
   --size-x-small: 0.7143rem; // 10px
   --size-small: 0.8571rem; // 12px
   --size-base: 1rem; // 14px
-  --size-large: 1.1429rem; // 16px
-  --size-x-large: 1.2857rem; // 18px
-  --size-xx-large: 1.4286rem; // 20px
-  --size-ultra-large: 1.7143rem; // 24px
-  --size-super-ultra-large: 2rem; // 28px
+  --size-large: 1.25rem; // 16px
+  --size-x-large: 1.4286rem; // 20px
+  --size-xx-large: 1.7143rem; // 24px
+  --size-ultra-large: 2.4rem; // 28px
+  --size-super-ultra-large: 3.2rem; // 56px
 
   --border-radius-xs: 0.071rem; //1px
   --border-radius-s: 0.142rem; //2px
@@ -98,7 +216,7 @@
   --border-radius-l: 0.571rem; //8px
   --border-radius-xl: 1.142rem; //16px
 
-  --input-padding: var(--size-ultra-small);
+  --input-padding: var(--size-xx-small);
 
   /*
    A lot of the variables below are redundant and we might require
@@ -133,5 +251,6 @@
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-bold: 600;
+  --font-weight-extra-bold: 700;
   --modal-z-index: 50;
 }

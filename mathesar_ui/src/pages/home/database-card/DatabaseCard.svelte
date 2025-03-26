@@ -21,7 +21,7 @@
 <style lang="scss">
   .db-card {
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--slate-200);
+    border: 1px solid var(--sand-300);
     background-color: var(--white);
     overflow: hidden;
   }
@@ -29,8 +29,7 @@
     cursor: pointer;
   }
   .db-card.hoverable:hover {
-    border-color: var(--slate-500);
-    background-color: var(--slate-50);
+    border-color: var(--stormy-500);
     box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
   }
 </style>

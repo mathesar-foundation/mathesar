@@ -1,8 +1,8 @@
 .input-element {
-  border: 1px solid var(--slate-200);
+  border: 1px solid var(--sand-300);
   align-items: center;
-  border-radius: 0.285rem;
-  background: #fff;
+  border-radius: var(--border-radius-m);
+  background: var(--white);
   margin: 0;
   padding: var(--input-padding);
   line-height: inherit;
@@ -12,6 +12,10 @@
   width: 100%;
   box-sizing: border-box;
   text-align: var(--input-element-text-align, 'left');
+
+  &::placeholder {
+    color: var(--stormy-600);
+  }
 
   &:focus {
     border-color: var(--slate-300);
@@ -28,8 +32,8 @@
   }
 
   &.has-error {
-    border-color: var(--red-500);
-    background: var(--red-100);
+    border-color: var(--rosy-500);
+    background: var(--rosy-50);
   }
 
   &.text-area {

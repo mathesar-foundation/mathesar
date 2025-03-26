@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import { staticText } from '@mathesar/i18n/staticText';
-  import { iconDatabase } from '@mathesar/icons';
+  import { iconDatabase, iconExpandRight } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import { Icon } from '@mathesar-component-library';
 
@@ -10,58 +10,97 @@
   export let upgradeRequired = false;
 
   $: server = `${database.server.host}:${database.server.port}`;
+  $: showDbName = database.name !== database.displayName;
 </script>
 
 <div class="db-card-content" class:upgrade-required={upgradeRequired}>
-  <div class="circle"><Icon {...iconDatabase} size="1.1rem" /></div>
-  <div class="display-name">{database.displayName}</div>
-  <div class="detail">
-    <span class="label">{$_('db_server')}{staticText.COLON}</span>
-    <span>{server}</span>
+  <div class="icon-container">
+    <Icon {...iconDatabase} size="1.25rem" class="database-icon" />
   </div>
-  <div class="detail">
-    <span class="label">{$_('db_name')}{staticText.COLON}</span>
-    <span>{database.name}</span>
+  <div class="content">
+    <div class="display-name">
+      {database.displayName}
+      {#if showDbName}
+        <span class="db-name">({database.name})</span>
+      {/if}
+    </div>
+    <div class="detail">
+      <!-- <span class="label">{$_('db_server')}:</span> -->
+      <span>{server}</span>
+    </div>
+  </div>
+  <div class="caret-container">
+    <Icon {...iconExpandRight} size="1rem" class="caret-icon" />
   </div>
 </div>
 
 <style lang="scss">
   .db-card-content {
-    padding: 0.8rem;
+    padding: 1.5rem;
     font-size: var(--text-size-large);
-    display: grid;
-    grid-template: auto auto / auto 1fr;
+    display: flex;
     align-items: center;
-    gap: 0 0.5rem;
+    gap: 1.5rem;
+    position: relative;
   }
 
-  .circle {
-    --size: 3rem;
-    grid-row: span 3;
-    background: var(--brand-500);
-    color: var(--white);
+  .icon-container {
+    background-color: var(--stormy-100);
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: var(--size);
-    width: var(--size);
-    border-radius: 3rem;
+    flex-shrink: 0;
   }
 
-  .upgrade-required .circle {
-    background: var(--slate-300);
+  .upgrade-required .icon-container {
+    background-color: var(--slate-100);
+  }
+
+  .upgrade-required .database-icon {
+    color: var(--slate-400);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
   }
 
   .display-name {
     font-size: var(--text-size-xx-large);
     font-weight: var(--font-weight-medium);
+    color: var(--stormy-700);
+  }
+
+  .db-name {
+    font-size: var(--text-size-large);
+    font-weight: var(--font-weight-normal);
+    color: var(--stormy-500);
   }
 
   .detail {
-    font-size: var(--text-size-small);
-    margin-top: var(--size-extreme-small);
+    font-size: var(--text-size-base);
+    color: var(--stormy-500);
   }
+
   .label {
-    color: var(--slate-400);
+    color: var(--stormy-300);
+  }
+
+  .caret-container {
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .caret-icon {
+    color: var(--stormy-500);
+    font-size: 1.25rem;
+  }
+
+  .db-card-content:hover .caret-container {
+    opacity: 1;
   }
 </style>

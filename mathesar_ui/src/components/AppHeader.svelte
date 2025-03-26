@@ -153,9 +153,9 @@
     justify-content: space-between;
     padding: 0.25rem 1rem;
     height: var(--header-height, 60px);
-    background-color: var(--slate-800);
+    background-color: var(--white);
     overflow: hidden;
-    color: var(--white);
+    color: var(--stormy-900);
   }
 
   .left {

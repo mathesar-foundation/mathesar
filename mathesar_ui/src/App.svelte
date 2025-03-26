@@ -44,6 +44,15 @@
 
     /** Component theming */
     --Match__highlight-color: var(--color-substring-match);
+
+    /* Typography variables */
+    --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+      'Helvetica Neue', sans-serif;
+    --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', 'Courier New', monospace;
+    --line-height-base: 1.5;
+    --letter-spacing-base: -0.011em;
   }
 
   body {
@@ -86,11 +95,11 @@
     --page-padding: var(--page-padding-x) var(--page-padding-y);
 
     --outer-page-padding-for-inset-page: 0;
-    --inset-page-padding: var(--size-xx-large) var(--page-padding-x);
+    --inset-page-padding: var(--size-super-ultra-large) var(--size-base);
 
     --max-layout-width: 54rem;
     // For database page, schema page, and admin pages
-    --max-layout-width-console-pages: 72rem;
+    --max-layout-width-console-pages: 80rem;
     // For import upload, import preview pages
     --max-layout-width-data-pages: 67.357rem;
 
@@ -103,7 +112,7 @@
     --table-title-header-height: 4.6428rem;
     --status-bar-padding: 0.3rem;
 
-    color: var(--slate-800);
+    color: var(--stormy-800);
 
     --modal-z-index: 1;
     --dropdown-z-index: 1;
@@ -114,35 +123,67 @@
 
     overflow: hidden;
     height: 100vh;
+
+    /* Apply typography base styles */
+    font-family: var(--font-family-base);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   h1 {
     margin: 0 0 1.5rem 0;
     font-size: var(--size-ultra-large);
-    font-weight: 500;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 
   h2 {
+    font-size: var(--size-xx-large);
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+
+  h3 {
     font-size: var(--size-x-large);
     font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
+  }
+
+  h4 {
+    font-size: var(--size-medium);
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.4;
+  }
+
+  p {
     margin: 0 0 1rem 0;
   }
 
   hr {
     margin: 0;
     border: 0;
-    border-top: 1px solid var(--slate-200);
+    border-top: 1px solid var(--stormy-200);
     display: block;
   }
 
   a {
     color: inherit;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.1em;
   }
 
   code {
-    font-family: monospace;
+    font-family: var(--font-family-mono);
     font-size: 85%;
-    background: rgba(127, 127, 127, 0.5);
+    background: rgba(127, 127, 127, 0.2);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
   }

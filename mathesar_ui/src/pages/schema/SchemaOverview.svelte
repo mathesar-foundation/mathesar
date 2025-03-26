@@ -77,8 +77,9 @@
       <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {/if}
   </div>
-  <div class="vertical-container explorations">
-    <div class="vertical-container">
+
+  <div class="vertical-container sidebar">
+    <section class="sidebar-section">
       <OverviewHeader title={$_('saved_explorations')} />
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
@@ -110,27 +111,30 @@
           {schema}
         />
       {/if}
-    </div>
 
-    {#if canExplore}
-      <div class="vertical-container">
-        <OverviewHeader title={$_('explore_your_data')} />
-        <span>
-          {$_('what_is_an_exploration_mini')}
-        </span>
-        <div>
-          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.oid)}>
-            {$_('open_data_explorer')}
-          </AnchorButton>
+      {#if canExplore}
+        <div class="explore-cta">
+          <h3 class="explore-title">{$_('explore_your_data')}</h3>
+          <p class="explore-description">
+            {$_('what_is_an_exploration_mini')}
+          </p>
+          <div>
+            <AnchorButton
+              href={getDataExplorerPageUrl(database.id, schema.oid)}
+              size="small"
+            >
+              {$_('open_data_explorer')}
+            </AnchorButton>
+          </div>
         </div>
-      </div>
-    {/if}
+      {/if}
+    </section>
   </div>
 </div>
 
 <style lang="scss">
   .container {
-    --container-gap: 2rem;
+    --container-gap: 3rem;
     display: flex;
     flex-direction: column;
 
@@ -142,15 +146,42 @@
   .vertical-container {
     display: flex;
     flex-direction: column;
+    gap: 2rem;
+  }
+
+  .sidebar-section {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
     > :global(* + *) {
       margin-top: 1rem;
     }
   }
 
-  .explorations {
-    > :global(* + *) {
-      margin-top: 2rem;
+  .explore-cta {
+    margin: 1.5rem -1.5rem -1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(
+      to bottom right,
+      var(--stormy-100),
+      var(--stormy-50)
+    );
+    border-top: 1px solid var(--stormy-200);
+    border-radius: 0 0 0.5rem 0.5rem;
+
+    .explore-title {
+      font-size: var(--text-size-large);
+      font-weight: var(--font-weight-bold);
+      color: var(--stormy-800);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .explore-description {
+      color: var(--stormy-600);
+      font-size: var(--text-size-base);
+      margin: 0 0 1rem 0;
     }
   }
 
@@ -160,14 +191,18 @@
 
       > :global(* + *) {
         margin-left: var(--container-gap);
-        margin-top: 0rem;
+        margin-top: 0;
       }
     }
+
     .tables {
-      flex-basis: 65%;
+      flex: 1;
+      min-width: 0;
     }
-    .explorations {
-      flex-basis: 35%;
+
+    .sidebar {
+      width: 24rem;
+      flex-shrink: 0;
     }
   }
 </style>

@@ -747,5 +747,6 @@
   "write": "Write",
   "yes": "Yes",
   "yes_summarize_as_list": "Yes, summarize as a list",
-  "yesterday": "Yesterday"
+  "yesterday": "Yesterday",
+  "no_description": "No description"
 }

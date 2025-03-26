@@ -88,6 +88,7 @@
 <LayoutWithHeader
   restrictWidth
   cssVariables={{
+    '--page-padding': '0',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
     '--layout-background-color': 'var(--sand-50)',
   }}
@@ -103,59 +104,66 @@
         <span class="label">{$_('db_server')}{staticText.COLON}</span>
         {database.server.getConnectionString()}
       </div>
-      <div>
-        <span class="label">{$_('db_name')}{staticText.COLON}</span>
-        {database.name}
-      </div>
+      {#if database.name !== database.displayName}
+        <div>
+          <span class="label">{$_('db_name')}{staticText.COLON}</span>
+          {database.name}
+        </div>
+      {/if}
+      {#if isMathesarAdmin}
+        <div class="edit-connection">
+          <Button on:click={() => editModal.open()} appearance="link">
+            <Icon {...iconEdit} />
+            <span>{$_('edit_connection')}</span>
+          </Button>
+        </div>
+      {/if}
     </div>
     <div slot="action">
-      {#if isMathesarAdmin}
-        <Button on:click={() => editModal.open()} appearance="secondary">
-          <Icon {...iconEdit} />
-          <span>{$_('edit_connection')}</span>
+      <div class="actions-container">
+        <Button appearance="secondary" on:click={() => permissionsModal.open()}>
+          <Icon {...iconPermissions} />
+          <span>{$_('database_permissions')}</span>
         </Button>
-      {/if}
 
-      <Button appearance="secondary" on:click={() => permissionsModal.open()}>
-        <Icon {...iconPermissions} />
-        <span>{$_('database_permissions')}</span>
-      </Button>
-
-      {#if isMathesarAdmin}
-        <DropdownMenu
-          showArrow={false}
-          triggerAppearance="plain"
-          closeOnInnerClick={false}
-          icon={iconMoreActions}
-          preferredPlacement="bottom-end"
-        >
-          <ButtonMenuItem
-            icon={iconDeleteMajor}
-            on:click={() => disconnectModal.open(database)}
-          >
-            {$_('disconnect_database')}
-          </ButtonMenuItem>
-          <ButtonMenuItem
-            icon={iconReinstall}
-            on:click={() => reinstallModal.open(database)}
-          >
-            {$_('reinstall_mathesar_schemas')}
-          </ButtonMenuItem>
-          <!--
-            TODO: Allow dropping databases
-            https://github.com/mathesar-foundation/mathesar/issues/3862
-          -->
-          <!-- {#if isDatabaseInInternalServer}
-            <ButtonMenuItem
-              icon={iconDeleteMajor}
-              danger
-              disabled={!$currentRoleOwnsDatabase}
+        {#if isMathesarAdmin}
+          <div class="dropdown-container">
+            <DropdownMenu
+              showArrow={false}
+              triggerAppearance="secondary"
+              closeOnInnerClick={false}
+              icon={iconMoreActions}
+              preferredPlacement="bottom-end"
             >
-              {$_('delete_database')}
-            </ButtonMenuItem>
-          {/if} -->
-        </DropdownMenu>
-      {/if}
+              <ButtonMenuItem
+                icon={iconDeleteMajor}
+                on:click={() => disconnectModal.open(database)}
+              >
+                {$_('disconnect_database')}
+              </ButtonMenuItem>
+              <ButtonMenuItem
+                icon={iconReinstall}
+                on:click={() => reinstallModal.open(database)}
+              >
+                {$_('reinstall_mathesar_schemas')}
+              </ButtonMenuItem>
+              <!--
+                TODO: Allow dropping databases
+                https://github.com/mathesar-foundation/mathesar/issues/3862
+              -->
+              <!-- {#if isDatabaseInInternalServer}
+                <ButtonMenuItem
+                  icon={iconDeleteMajor}
+                  danger
+                  disabled={!$currentRoleOwnsDatabase}
+                >
+                  {$_('delete_database')}
+                </ButtonMenuItem>
+              {/if} -->
+            </DropdownMenu>
+          </div>
+        {/if}
+      </div>
     </div>
   </AppSecondaryHeader>
 
@@ -204,9 +212,23 @@
     padding: var(--size-xx-large) 0;
   }
   .details {
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-base);
+    color: var(--stormy-500);
+    margin-top: var(--size-super-ultra-small);
   }
   .details .label {
-    color: var(--sand-700);
+    color: var(--stormy-600);
+  }
+  .edit-connection {
+    margin-top: var(--size-small);
+    display: inline-flex;
+  }
+  .actions-container {
+    display: flex;
+    align-items: center;
+    gap: var(--size-x-large);
+  }
+  .dropdown-container {
+    margin-left: auto;
   }
 </style>

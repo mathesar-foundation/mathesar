@@ -3,7 +3,7 @@
 
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconExploration } from '@mathesar/icons';
+  import { iconExploration, iconExpandRight } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
@@ -21,63 +21,115 @@
   class="link-container"
   href={getExplorationPageUrl(database.id, schema.oid, exploration.id)}
 >
-  <div class="container">
-    <div class="horizontal-container name-and-icon">
-      <Icon {...iconExploration} />
-      <span>{exploration.name}</span>
+  <div class="content">
+    <div class="title-and-meta">
+      <div class="title-container">
+        <div class="icon-container">
+          <Icon {...iconExploration} size="0.875rem" class="exploration-icon" />
+        </div>
+        <span class="name">{exploration.name}</span>
+      </div>
     </div>
     {#if baseTable}
-      <div class="horizontal-container">
-        <span class="meta">{$_('based_on')}</span>
-        <div class="horizontal-container">
-          <TableName table={baseTable} />
-        </div>
+      <div class="detail">
+        <span>{$_('based_on')}</span>
+        <TableName table={baseTable} />
       </div>
     {/if}
+  </div>
+  <div class="caret-container">
+    <Icon {...iconExpandRight} size="0.875rem" class="caret-icon" />
   </div>
 </a>
 
 <style lang="scss">
   .link-container {
+    position: relative;
     text-decoration: none;
     color: inherit;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0 -0.75rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    border-radius: var(--border-radius-m);
 
     &:hover {
-      background: var(--slate-50);
+      background-color: var(--sand-50);
+
+      .caret-container {
+        opacity: 1;
+      }
     }
+
     &:focus {
-      background: var(--slate-100);
+      outline: none;
+      background-color: var(--sand-100);
     }
   }
 
-  .container {
+  .icon-container {
+    background-color: var(--stormy-100);
+    border-radius: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .exploration-icon {
+    color: var(--brand-500);
+  }
+
+  .content {
     display: flex;
     flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 0.75rem;
-    }
-
-    padding: 1rem 0;
+    gap: 0.125rem;
+    flex-grow: 1;
+    min-width: 0;
   }
 
-  .horizontal-container {
+  .title-and-meta {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-
-    > :global(* + *) {
-      margin-left: 0.5rem;
-    }
+    width: 100%;
   }
 
-  .name-and-icon {
+  .title-container {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .name {
     font-size: var(--text-size-large);
+    font-weight: var(--font-weight-medium);
+    color: var(--stormy-700);
+    line-height: 1.2;
+    transition: color 0.2s ease;
   }
 
-  .meta {
-    font-weight: 300;
+  .detail {
+    font-size: var(--text-size-base);
+    color: var(--stormy-500);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .caret-container {
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .caret-icon {
+    color: var(--stormy-500);
   }
 </style>
