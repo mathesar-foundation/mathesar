@@ -10,10 +10,8 @@
 </script>
 
 <div class="container">
-  <p class="table-count" class:no-tables={actualTableCount === 0}>
-    {actualTableCount === 0
-      ? 'No Tables'
-      : $_('count_tables', { values: { count: actualTableCount } })}
+  <p class="table-count">
+    {actualTableCount}
   </p>
 </div>
 
@@ -23,11 +21,6 @@
     color: var(--text-color-tertiary);
     font-weight: 400;
     margin: 0;
-
-    &.no-tables {
-      color: var(--text-color-tertiary);
-      font-style: italic;
-    }
   }
 
   .container {

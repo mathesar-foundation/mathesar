@@ -12,6 +12,7 @@
     iconMoreActions,
     iconExpandRight,
     iconSchema,
+    iconTable,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -35,48 +36,55 @@
 </script>
 
 <div class="schema-row" class:hover={isHovered} class:focus={isFocused}>
-  <div class="icon-container">
-    <Icon {...iconSchema} size="1.25rem" />
-  </div>
-  <div class="content">
-    <div class="title-and-meta">
-      <div class="name"><SchemaName {schema} /></div>
-
-      <div class="menu-trigger">
-        <DropdownMenu
-          showArrow={false}
-          triggerAppearance="plain"
-          preferredPlacement="bottom-end"
-          icon={iconMoreActions}
-          menuStyle="--Menu__padding-x:0.8em;"
-        >
-          <ButtonMenuItem
-            on:click={() => dispatch('edit')}
-            icon={iconEdit}
-            disabled={!$currentRoleOwns}
-          >
-            {$_('edit_schema')}
-          </ButtonMenuItem>
-          <MenuDivider />
-          <ButtonMenuItem
-            danger
-            on:click={() => dispatch('delete')}
-            icon={iconDeleteMajor}
-            disabled={!$currentRoleOwns}
-          >
-            {$_('delete_schema')}
-          </ButtonMenuItem>
-        </DropdownMenu>
-      </div>
+  <div class="top-row">
+    <div class="icon-container">
+      <Icon {...iconSchema} size="1rem" />
     </div>
+    <div class="menu-trigger">
+      <DropdownMenu
+        showArrow={false}
+        triggerAppearance="plain"
+        preferredPlacement="bottom-end"
+        icon={iconMoreActions}
+        menuStyle="--Menu__padding-x:0.8em;"
+      >
+        <ButtonMenuItem
+          on:click={() => dispatch('edit')}
+          icon={iconEdit}
+          disabled={!$currentRoleOwns}
+        >
+          {$_('edit_schema')}
+        </ButtonMenuItem>
+        <MenuDivider />
+        <ButtonMenuItem
+          danger
+          on:click={() => dispatch('delete')}
+          icon={iconDeleteMajor}
+          disabled={!$currentRoleOwns}
+        >
+          {$_('delete_schema')}
+        </ButtonMenuItem>
+      </DropdownMenu>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="name"><SchemaName {schema} /></div>
 
     {#if $description}
       <p class="description" title={$description}>
         {$description}
       </p>
+    {:else}
+      <div class="description-placeholder"></div>
     {/if}
 
-    <SchemaConstituentCounts {schema} />
+    <div class="bottom-row">
+      <div class="table-count">
+        <Icon {...iconTable} size="1rem" />
+        <SchemaConstituentCounts {schema} />
+      </div>
+    </div>
   </div>
 
   <!--
@@ -114,19 +122,26 @@
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
     border: 1px solid var(--card-border);
-    background-color: var(--card-background);
-    padding: 1.5em;
+    background: linear-gradient(
+      to bottom right,
+      var(--card-gradient-start),
+      var(--card-gradient-end)
+    );
+    padding: 1rem;
     display: flex;
-    align-items: flex-start;
-    gap: 1.5rem;
+    flex-direction: column;
     height: 100%;
     width: 100%;
-    min-height: 130px;
   }
 
   .schema-row.hover {
     border: 1px solid var(--stormy-300);
     box-shadow: var(--shadow-color) 0 2px 4px 0;
+    background: linear-gradient(
+      to bottom right,
+      var(--card-gradient-start),
+      var(--card-gradient-end)
+    );
   }
   .schema-row.focus {
     outline: 2px solid var(--sand-400);
@@ -137,11 +152,19 @@
     box-shadow: var(--shadow-color) 0 1px 2px 0;
   }
 
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 0.125rem;
+  }
+
   .icon-container {
     background-color: var(--icon-background);
     border-radius: 50%;
-    width: 3rem;
-    height: 3rem;
+    width: 2rem;
+    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -153,7 +176,7 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    gap: 0.25rem;
+    gap: 0.125rem;
   }
 
   .hyperlink-overlay {
@@ -176,16 +199,28 @@
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 1.5rem;
   }
 
-  .title-and-meta {
+  .description-placeholder {
+    min-height: 1.5rem;
+  }
+
+  .bottom-row {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
+    justify-content: flex-end;
+    margin-top: 0.25rem;
+  }
+
+  .table-count {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--text-color-tertiary);
+    font-size: var(--text-size-small);
   }
 
   .name {
@@ -193,5 +228,6 @@
     font-weight: var(--font-weight-medium);
     overflow: hidden;
     color: var(--text-color-primary);
+    margin-bottom: 0.125rem;
   }
 </style>

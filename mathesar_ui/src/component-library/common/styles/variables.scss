@@ -17,6 +17,8 @@
   --card-background: #ffffff;
   --card-border: var(--sand-300);
   --card-row-border: var(--sand-200);
+  --card-gradient-start: var(--sand-50);
+  --card-gradient-end: rgba(250, 249, 246, 0.8);
   --sidebar-background: #ffffff;
   --modal-background: #ffffff;
   --modal-overlay: rgba(0, 0, 0, 0.5);
@@ -318,6 +320,8 @@
     --card-background: #171717;
     --card-border: #333333;
     --card-row-border: #262626;
+    --card-gradient-start: #1a1a1a;
+    --card-gradient-end: #171717;
     --sidebar-background: #262626;
     --modal-background: #262626;
     --modal-overlay: rgba(0, 0, 0, 0.7);
