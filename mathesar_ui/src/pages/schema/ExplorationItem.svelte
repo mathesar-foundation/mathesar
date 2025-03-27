@@ -55,7 +55,7 @@
     border-radius: var(--border-radius-m);
 
     &:hover {
-      background-color: var(--sand-50);
+      background-color: var(--hover-background);
 
       .caret-container {
         opacity: 1;
@@ -64,12 +64,12 @@
 
     &:focus {
       outline: none;
-      background-color: var(--sand-100);
+      background-color: var(--active-background);
     }
   }
 
   .icon-container {
-    background-color: var(--stormy-100);
+    background-color: var(--icon-background);
     border-radius: 50%;
     width: 1.25rem;
     height: 1.25rem;
@@ -108,14 +108,14 @@
   .name {
     font-size: var(--text-size-large);
     font-weight: var(--font-weight-medium);
-    color: var(--stormy-700);
+    color: var(--text-color-primary);
     line-height: 1.2;
     transition: color 0.2s ease;
   }
 
   .detail {
     font-size: var(--text-size-base);
-    color: var(--stormy-500);
+    color: var(--text-color-secondary);
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -130,6 +130,6 @@
   }
 
   .caret-icon {
-    color: var(--stormy-500);
+    color: var(--text-color-tertiary);
   }
 </style>

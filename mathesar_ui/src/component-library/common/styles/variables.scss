@@ -2,7 +2,50 @@
  * File to place common css & scss variables for the component library
  */
 :root {
-  // Danger colors
+  --background-color: #ffffff;
+  --text-color: #171717;
+  --text-color-muted: #515662;
+  --border-color: var(--slate-200);
+  --hover-background: var(--slate-100);
+  --active-background: var(--slate-200);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --input-background: #ffffff;
+  --input-border: var(--slate-300);
+  --input-text: var(--text-color);
+  --input-focus-color: var(--stormy-500);
+  --input-focus-shadow: var(--stormy-100);
+  --card-background: #ffffff;
+  --card-border: var(--slate-200);
+  --modal-background: #ffffff;
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --icon-background: var(--stormy-100);
+  --layout-background-color: var(--sand-50);
+  --inspector-background: var(--sand-50);
+  --inspector-border: var(--sand-200);
+  --inspector-hover: var(--sand-300);
+  --inspector-active: var(--sand-400);
+  --collapsible-background: var(--sand-200);
+  --collapsible-hover: var(--sand-300);
+  --collapsible-active: var(--sand-400);
+
+  --gradient-light-start: var(--stormy-100);
+  --gradient-light-end: var(--stormy-200);
+  --gradient-dark-start: var(--stormy-800);
+  --gradient-dark-end: var(--stormy-900);
+  --gradient-direction: to bottom right;
+
+  --button-secondary-text: var(--stormy-600);
+  --button-secondary-border: var(--stormy-200);
+  --button-secondary-hover-bg: var(--stormy-50);
+  --button-secondary-hover-border: var(--stormy-300);
+  --button-secondary-active-bg: var(--stormy-100);
+  --button-secondary-active-border: var(--stormy-400);
+
+  --text-color-primary: var(--stormy-800);
+  --text-color-secondary: var(--stormy-700);
+  --text-color-tertiary: var(--stormy-600);
+  --text-color-muted: var(--stormy-500);
+
   --danger-color: #d67171;
   --danger-background-color: #fde9e9;
   --danger-border-color: #f2aaaa;
@@ -94,16 +137,16 @@
 
   /* Salmon palette */
   --salmon-50: #fef4f1;
-  --salmon-100: #fee6df;
-  --salmon-200: #fdcebf;
-  --salmon-300: #f9ac93;
-  --salmon-400: #ef8b65;
-  --salmon-500: #e7754c;
-  --salmon-600: #d55939;
-  --salmon-700: #b1442b;
-  --salmon-800: #923826;
-  --salmon-900: #60271c;
-  --salmon-950: #411511;
+  --salmon-100: #ffe6df;
+  --salmon-200: #ffd0bf;
+  --salmon-300: #ffa690;
+  --salmon-400: #ff8365;
+  --salmon-500: #f96b45;
+  --salmon-600: #e04e2a;
+  --salmon-700: #c03a1b;
+  --salmon-800: #a02e16;
+  --salmon-900: #832411;
+  --salmon-950: #441209;
 
   /* Pumpkin palette */
   --pumpkin-50: #fefbf3;
@@ -186,7 +229,7 @@
   --brand-600: var(--red-600);
   --brand-800: var(--red-800);
   --brand-box-shadow: var(--red-box-shadow);
-  
+
   // Accent color
   --accent-100: var(--salmon-100);
   --accent-200: var(--salmon-200);
@@ -253,4 +296,59 @@
   --font-weight-bold: 600;
   --font-weight-extra-bold: 700;
   --modal-z-index: 50;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #1a1a1a;
+    --text-color: #e5e5e5;
+    --text-color-muted: #a3a3a3;
+    --border-color: #404040;
+    --hover-background: #262626;
+    --active-background: #333333;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --input-background: #262626;
+    --input-border: #404040;
+    --input-text: var(--text-color);
+    --input-focus-color: var(--stormy-400);
+    --input-focus-shadow: var(--stormy-800);
+    --card-background: transparent;
+    --card-border: #404040;
+    --modal-background: #262626;
+    --modal-overlay: rgba(0, 0, 0, 0.7);
+    --icon-background: var(--stormy-700);
+    --layout-background-color: var(--background-color);
+    --inspector-background: #262626;
+    --inspector-border: #404040;
+    --inspector-hover: #333333;
+    --inspector-active: #404040;
+    --collapsible-background: #333333;
+    --collapsible-hover: #404040;
+    --collapsible-active: #4a4a4a;
+
+    --gradient-light-start: var(--stormy-800);
+    --gradient-light-end: var(--stormy-900);
+    --gradient-dark-start: var(--stormy-900);
+    --gradient-dark-end: var(--stormy-950);
+
+    --button-secondary-text: var(--stormy-200);
+    --button-secondary-border: var(--stormy-300);
+    --button-secondary-hover-bg: var(--stormy-50);
+    --button-secondary-hover-border: var(--stormy-400);
+    --button-secondary-active-bg: var(--stormy-100);
+    --button-secondary-active-border: var(--stormy-500);
+
+    --text-color-primary: #ffffff;
+    --text-color-secondary: var(--stormy-200);
+    --text-color-tertiary: var(--stormy-300);
+    --text-color-muted: var(--stormy-400);
+
+    --danger-color: #ff6b6b;
+    --danger-background-color: rgba(255, 107, 107, 0.1);
+    --danger-border-color: rgba(255, 107, 107, 0.2);
+
+    --color-link: #60a5fa;
+    --color-contrast: #60a5fa;
+    --color-contrast-light: rgba(96, 165, 250, 0.1);
+  }
 }

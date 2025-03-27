@@ -45,7 +45,6 @@
   cssVariables={{
     '--page-padding': '0',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
-    '--layout-background-color': 'var(--sand-50)',
   }}
 >
   <AppSecondaryHeader
@@ -98,7 +97,7 @@
 
 <style>
   .description {
-    color: var(--stormy-500);
+    color: var(--text-color-secondary);
   }
 
   .action-buttons {

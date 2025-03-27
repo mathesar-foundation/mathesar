@@ -36,7 +36,7 @@
 
 <div class="schema-row" class:hover={isHovered} class:focus={isFocused}>
   <div class="icon-container">
-    <Icon {...iconSchema} size="1.25rem" class="schema-icon" />
+    <Icon {...iconSchema} size="1.25rem" />
   </div>
   <div class="content">
     <div class="title-and-meta">
@@ -106,7 +106,7 @@
   />
 </div>
 
-<style>
+<style lang="scss">
   .schema-row {
     position: relative;
     isolation: isolate;
@@ -114,7 +114,7 @@
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
     border: 1px solid var(--sand-300);
-    background-color: var(--white);
+    background-color: var(--background-color);
     padding: 1.5em;
     display: flex;
     align-items: flex-start;
@@ -126,15 +126,19 @@
 
   .schema-row.hover {
     border: 1px solid var(--stormy-300);
-    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-color) 0 2px 4px 0;
   }
   .schema-row.focus {
-    outline: 2px solid var(--slate-300);
+    outline: 2px solid var(--sand-400);
     outline-offset: 1px;
+  }
+  .schema-row.active {
+    border-color: var(--stormy-400);
+    box-shadow: var(--shadow-color) 0 1px 2px 0;
   }
 
   .icon-container {
-    background-color: var(--stormy-100);
+    background-color: var(--icon-background);
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -168,7 +172,7 @@
   .description {
     font-weight: 400;
     font-size: var(--text-size-base);
-    color: var(--slate-500);
+    color: var(--text-color-secondary);
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -188,5 +192,6 @@
     font-size: var(--text-size-xx-large);
     font-weight: var(--font-weight-medium);
     overflow: hidden;
+    color: var(--text-color-primary);
   }
 </style>

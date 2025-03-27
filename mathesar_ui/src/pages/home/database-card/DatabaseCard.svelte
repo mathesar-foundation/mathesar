@@ -22,14 +22,23 @@
   .db-card {
     border-radius: var(--border-radius-l);
     border: 1px solid var(--sand-300);
-    background-color: var(--white);
+    background-color: var(--background-color);
     overflow: hidden;
   }
   .db-card.hoverable {
     cursor: pointer;
   }
   .db-card.hoverable:hover {
-    border-color: var(--stormy-500);
-    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
+    border-color: var(--stormy-300);
+    box-shadow: var(--shadow-color) 0 2px 4px 0;
+  }
+  .db-card.hoverable:focus,
+  .db-card.hoverable:active {
+    outline: 2px solid var(--sand-400);
+    outline-offset: 1px;
+  }
+  .db-card.hoverable:active {
+    border-color: var(--stormy-400);
+    box-shadow: var(--shadow-color) 0 1px 2px 0;
   }
 </style>

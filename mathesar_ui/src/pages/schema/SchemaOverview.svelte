@@ -150,8 +150,9 @@
   }
 
   .sidebar-section {
-    background-color: white;
+    background-color: var(--background-color);
     border-radius: 0.5rem;
+    border: 1px solid var(--sand-300);
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
@@ -164,22 +165,22 @@
     margin: 1.5rem -1.5rem -1.5rem;
     padding: 1.5rem;
     background: linear-gradient(
-      to bottom right,
-      var(--stormy-100),
-      var(--stormy-50)
+      var(--gradient-direction),
+      var(--gradient-light-start),
+      var(--gradient-light-end)
     );
-    border-top: 1px solid var(--stormy-200);
+    border-top: 1px solid var(--sand-300);
     border-radius: 0 0 0.5rem 0.5rem;
 
     .explore-title {
       font-size: var(--text-size-large);
       font-weight: var(--font-weight-bold);
-      color: var(--stormy-800);
+      color: var(--text-color-primary);
       margin: 0 0 0.5rem 0;
     }
 
     .explore-description {
-      color: var(--stormy-600);
+      color: var(--text-color-secondary);
       font-size: var(--text-size-base);
       margin: 0 0 1rem 0;
     }

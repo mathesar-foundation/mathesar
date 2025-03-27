@@ -195,20 +195,29 @@
     position: relative;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--sand-200);
+    border-bottom: 1px solid var(--sand-300);
     padding: 0.75rem 1rem;
-    transition: background-color 0.15s ease;
-    background-color: var(--white);
+    transition: all 0.15s ease;
+    background-color: var(--background-color);
   }
 
   .table-row.focus {
-    outline: 2px solid var(--stormy-300);
+    outline: 2px solid var(--sand-400);
     outline-offset: -2px;
   }
 
+  .table-row:hover {
+    box-shadow: var(--shadow-color) 0 2px 4px 0;
+  }
+
+  .table-row:active {
+    border-color: var(--stormy-400);
+    box-shadow: var(--shadow-color) 0 1px 2px 0;
+  }
+
   .table-row.unconfirmed-import {
-    color: var(--color-text-muted);
-    background-color: var(--slate-50);
+    color: var(--text-color-muted);
+    background-color: var(--hover-background);
   }
 
   .row-content {
@@ -232,11 +241,12 @@
   .table-name {
     font-size: var(--text-size-large);
     font-weight: var(--font-weight-medium);
+    color: var(--text-color-primary);
   }
 
   .description {
     font-size: var(--text-size-base);
-    color: var(--stormy-500);
+    color: var(--text-color-secondary);
     font-weight: var(--font-weight-normal);
     overflow: hidden;
     line-height: 1.2;
@@ -268,14 +278,14 @@
   .menu-container :global(.dropdown-menu-button) {
     width: 2.5rem;
     height: 2.5rem;
-    color: var(--slate-500);
+    color: var(--text-color-tertiary);
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .menu-container :global(.dropdown-menu-button:hover) {
-    color: var(--slate-800);
-    background: var(--slate-100);
+    color: var(--text-color-secondary);
+    background: var(--hover-background);
   }
 </style>

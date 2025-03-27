@@ -31,6 +31,7 @@
     display: inline-flex;
     align-items: center;
     margin-right: var(--size-super-ultra-small);
+    color: var(--text-color-tertiary);
   }
   .title {
     font-weight: var(--font-weight-medium);
@@ -39,9 +40,10 @@
     display: inline-flex;
     align-items: center;
     gap: var(--size-super-ultra-small);
+    color: var(--text-color-primary);
   }
   .description {
-    color: var(--stormy-600);
+    color: var(--text-color-secondary);
     flex: 1 0 auto;
   }
 </style>

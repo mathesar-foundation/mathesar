@@ -29,7 +29,6 @@
   headerTitle={welcomeMessage}
   cssVariables={{
     '--page-padding': '0',
-    '--layout-background-color': 'var(--sand-100)',
     '--layout-margin': '2rem 0',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
@@ -67,10 +66,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background-color: white;
+    background-color: var(--card-background);
     border-radius: 0.5rem;
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-color) 0 2px 8px;
+    border: 1px solid var(--card-border);
   }
   .cards {
     display: flex;

@@ -90,7 +90,6 @@
   cssVariables={{
     '--page-padding': '0',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
-    '--layout-background-color': 'var(--sand-50)',
   }}
 >
   <AppSecondaryHeader
@@ -213,11 +212,12 @@
   }
   .details {
     font-size: var(--text-size-base);
-    color: var(--stormy-500);
+    color: var(--text-color-secondary);
     margin-top: var(--size-super-ultra-small);
   }
   .details .label {
-    color: var(--stormy-600);
+    color: var(--text-color-secondary);
+    font-weight: var(--font-weight-medium);
   }
   .edit-connection {
     margin-top: var(--size-small);

@@ -34,25 +34,22 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: var(--layout-background);
-    background-color: var(--layout-background-color, var(--primary-bg));
-    color: var(--primary-text);
+    background-color: var(--layout-background-color);
+    color: var(--text-color-primary);
 
     .app-layout-header {
       position: sticky;
       top: 0;
       z-index: var(--app-header-z-index, 2);
       flex: 0 0;
-      background-color: var(--white);
-      border-bottom: 1px solid var(--stormy-200);
+      background-color: var(--background-color);
+      border-bottom: 1px solid var(--border-color);
     }
     .app-layout-content {
       position: relative;
       flex-grow: 1;
       margin: var(--layout-margin);
       border-radius: var(--border-radius-l);
-      background-color: var(--app-layout-content-background);
-      border: var(--app-layout-content-border);
 
       &.restrict-width {
         max-width: var(--max-layout-width);
@@ -80,10 +77,11 @@
 
   .header-title {
     padding: var(--size-ultra-large) 0;
-    border-bottom: 1px solid var(--stormy-200);
+    border-bottom: 1px solid var(--border-color);
 
     h1 {
       margin: 0;
+      color: var(--text-color-primary);
     }
 
     .header-title-inner {

@@ -9,8 +9,8 @@
   cursor: pointer;
   border-radius: 6px;
   box-shadow:
-    rgba(0, 0, 0, 0.04) 0 1px 2px 0,
-    rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+    var(--shadow-color) 0 1px 2px 0,
+    var(--shadow-color) 0 1px 3px 0;
   position: relative;
   padding: var(--input-padding) 0.8em;
   box-sizing: border-box;
@@ -33,12 +33,12 @@
 
   /* Appearances */
   &.btn-default {
-    --button-background: var(--color-white);
-    --button-border-color: var(--slate-300);
+    --button-background: var(--background-color);
+    --button-border-color: var(--border-color);
 
     &:not(:disabled) {
       &:focus {
-        --button-border-color: var(--slate-400);
+        --button-border-color: var(--text-color-muted);
       }
     }
   }
@@ -46,7 +46,7 @@
   &.btn-primary {
     --button-background: var(--accent-600);
     --button-border-color: var(--accent-500);
-    --button-color: var(--white);
+    --button-color: #ffffff;
 
     &:not(:disabled) {
       &.focus,
@@ -59,64 +59,60 @@
       &.hover {
         --button-background: var(--accent-700);
         --button-border-color: var(--accent-700);
-        box-shadow: 
-          rgba(0, 0, 0, 0.06) 0 2px 4px 0;
+        box-shadow: var(--shadow-color) 0 2px 4px 0;
       }
 
       &:active,
       &.active {
         --button-background: var(--accent-800);
         --button-border-color: var(--accent-800);
+        box-shadow: var(--shadow-color) 0 1px 2px 0;
       }
     }
   }
 
   &.btn-secondary {
-    --button-background: var(--color-white);
-    --button-border-color: var(--stormy-300);
-    --button-color: var(--stormy-700);
+    --button-background: var(--background-color);
+    --button-border-color: var(--stormy-200);
+    --button-color: var(--text-color-primary);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--stormy-400-rgb), 0.3);
+        --button-outline: 2px solid rgba(var(--stormy-200-rgb), 0.3);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        --button-background: var(--stormy-50);
-        --button-border-color: var(--stormy-400);
+        --button-border-color: var(--stormy-300);
       }
 
       &:active,
       &.active {
-        --button-background: var(--stormy-100);
-        --button-border-color: var(--stormy-500);
-      }
-      &:active:hover,
-      &.active:hover {
-        --button-background: var(--stormy-200);
+        --button-background: var(--hover-background);
+        --button-border-color: var(--stormy-400);
       }
     }
   }
 
   &.btn-outline-primary {
-    --button-background: var(--white);
+    --button-background: var(--background-color);
     --button-border-color: var(--accent-500, var(--brand-500));
     --button-color: var(--accent-500, var(--brand-500));
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--slate-100);
+        --button-background: var(--hover-background);
         --button-border-color: var(--accent-600, var(--brand-600));
       }
 
       &:active,
       &.active {
-        --button-background: var(--slate-200);
+        --button-background: var(--active-background);
         --button-border-color: var(--accent-800, var(--brand-800));
+        --button-color: var(--accent-800, var(--brand-800));
       }
     }
   }
@@ -148,19 +144,18 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--slate-100);
-      }
-
-      &:active,
-      &.active,
-      &:focus,
-      &.focus {
-        box-shadow: 0 0 0 2px var(--slate-100) !important;
+        --button-background: var(--hover-background);
       }
 
       &:active,
       &.active {
-        --button-background: var(--slate-200);
+        --button-background: var(--active-background);
+        box-shadow: 0 0 0 2px var(--active-background) !important;
+      }
+
+      &:focus,
+      &.focus {
+        box-shadow: 0 0 0 2px var(--hover-background) !important;
       }
     }
   }
@@ -190,7 +185,7 @@
   }
 
   &.danger {
-    --button-color: var(--red-500);
+    --button-color: var(--danger-color);
   }
 
   /* State */
@@ -200,24 +195,24 @@
   }
 
   &.btn-action {
-    --button-background: var(--color-white);
-    --button-border-color: var(--sand-300);
+    --button-background: var(--background-color);
+    --button-border-color: var(--border-color);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-border-color: var(--sand-600);
+        --button-border-color: var(--text-color-muted);
       }
 
       &:active,
       &.active {
-        --button-background: var(--sand-300);
-        --button-border-color: var(--sand-600);
+        --button-background: var(--active-background);
+        --button-border-color: var(--text-color-muted);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--sand-500);
+        --button-outline: 2px solid var(--border-color);
         outline-offset: 1px;
       }
     }
@@ -230,26 +225,32 @@
     &:hover {
       border: 1px solid var(--purple-300);
     }
+
+    &:active {
+      --button-background: var(--purple-200);
+      border: 1px solid var(--purple-400);
+    }
   }
 
   &.btn-inspector {
-    --button-background: var(--sand-200);
+    --button-background: var(--hover-background);
     transition: all 0.2s ease;
     border: 2px solid transparent;
 
     &:hover {
-      --button-background: var(--sand-300);
+      --button-background: var(--active-background);
     }
 
     &:active {
-      --button-background: var(--sand-400);
+      --button-background: var(--active-background);
+      border-color: var(--text-color-muted);
     }
   }
 
   &.btn-link {
     --button-background: transparent;
     --button-border-color: transparent;
-    --button-color: var(--accent-400, var(--brand-500));
+    --button-color: var(--accent-600, var(--brand-600));
     box-shadow: none;
     padding: 0;
     height: auto;
@@ -257,22 +258,21 @@
     line-height: 1;
     background-color: transparent;
     border-radius: 4px;
-    
+
     &:not(:disabled) {
       &:hover,
       &.hover {
         background-color: transparent;
-        --button-color: var(--accent-200, var(--brand-700));
+        --button-color: var(--accent-700, var(--brand-700));
       }
 
       &:active,
       &.active {
         background-color: transparent;
-        --button-color: var(--accent-800, var(--brand-900));
+        --button-color: var(--accent-800, var(--brand-800));
       }
     }
   }
-
 }
 a.btn {
   text-decoration: none;

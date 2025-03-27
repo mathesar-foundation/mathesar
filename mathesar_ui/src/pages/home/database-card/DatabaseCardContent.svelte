@@ -45,7 +45,7 @@
   }
 
   .icon-container {
-    background-color: var(--stormy-100);
+    background-color: var(--icon-background);
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -55,12 +55,8 @@
     flex-shrink: 0;
   }
 
-  .upgrade-required .icon-container {
-    background-color: var(--slate-100);
-  }
-
   .upgrade-required .database-icon {
-    color: var(--slate-400);
+    color: var(--stormy-400);
   }
 
   .content {
@@ -71,22 +67,22 @@
   .display-name {
     font-size: var(--text-size-xx-large);
     font-weight: var(--font-weight-medium);
-    color: var(--stormy-700);
+    color: var(--text-color-primary);
   }
 
   .db-name {
     font-size: var(--text-size-large);
     font-weight: var(--font-weight-normal);
-    color: var(--stormy-500);
+    color: var(--text-color-secondary);
   }
 
   .detail {
     font-size: var(--text-size-base);
-    color: var(--stormy-500);
+    color: var(--text-color-secondary);
   }
 
   .label {
-    color: var(--stormy-300);
+    color: var(--text-color-secondary);
   }
 
   .caret-container {
@@ -96,7 +92,7 @@
   }
 
   .caret-icon {
-    color: var(--stormy-500);
+    color: var(--stormy-400);
     font-size: 1.25rem;
   }
 

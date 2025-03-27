@@ -20,12 +20,12 @@
 <style lang="scss">
   .table-count {
     font-size: var(--text-size-base);
-    color: var(--stormy-600);
+    color: var(--text-color-tertiary);
     font-weight: 400;
     margin: 0;
 
     &.no-tables {
-      color: var(--slate-400);
+      color: var(--text-color-tertiary);
       font-style: italic;
     }
   }

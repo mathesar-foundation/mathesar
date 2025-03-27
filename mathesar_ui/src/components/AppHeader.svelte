@@ -153,9 +153,9 @@
     justify-content: space-between;
     padding: 0.25rem 1rem;
     height: var(--header-height, 60px);
-    background-color: var(--white);
+    background-color: var(--background-color);
     overflow: hidden;
-    color: var(--stormy-900);
+    color: var(--text-color);
   }
 
   .left {
@@ -172,8 +172,8 @@
   }
 
   .user-switcher {
-    background-color: var(--slate-200);
-    color: var(--slate-800);
+    background-color: var(--hover-background);
+    color: var(--text-color);
     border-radius: var(--border-radius-m);
     padding: 0.5rem;
     display: flex;

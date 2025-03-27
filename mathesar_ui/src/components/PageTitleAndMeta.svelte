@@ -65,7 +65,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--stormy-600);
+    color: var(--text-color-tertiary);
     margin-right: 0.25rem;
   }
 
@@ -85,13 +85,13 @@
     font-size: var(--text-size-large);
     font-weight: 500;
     line-height: 1;
-    color: var(--stormy-700);
+    color: var(--text-color-secondary);
   }
 
   .entity-name {
     font-weight: var(--font-weight-extra-bold);
     font-size: var(--text-size-super-ultra-large);
     line-height: 1;
-    color: var(--stormy-800);
+    color: var(--text-color-primary);
   }
 </style>

@@ -74,21 +74,21 @@
    * background colors are applied. We need this in case there is a background
    * color applied underneath the cell, e.g. on the table or page.
    */
-    --cell-bg-color-base: white;
-    --cell-bg-color-error: #fef1f1;
-    --cell-bg-color-header: #f9f9f9;
-    --cell-bg-color-processing: #fefef1;
-    --cell-bg-color-disabled: var(--sand-100);
-    --cell-bg-color-row-hover: #f6f7f7;
-    --cell-bg-color-row-selected: #e4f2ff;
+    --cell-bg-color-base: var(--background-color);
+    --cell-bg-color-error: var(--danger-background-color);
+    --cell-bg-color-header: var(--hover-background);
+    --cell-bg-color-processing: var(--yellow-100);
+    --cell-bg-color-disabled: var(--hover-background);
+    --cell-bg-color-row-hover: var(--hover-background);
+    --cell-bg-color-row-selected: var(--sky-200);
 
     --color-fk: var(--yellow-300);
-    --color-error: #f47171;
-    --cell-text-color-processing: #888;
-    --color-array-element: #c1e8e8;
+    --color-error: var(--danger-color);
+    --cell-text-color-processing: var(--text-color-muted);
+    --color-array-element: var(--sky-300);
 
-    --cell-border-horizontal: 1px solid var(--slate-200);
-    --cell-border-vertical: 1px solid var(--slate-200);
+    --cell-border-horizontal: 1px solid var(--border-color);
+    --cell-border-vertical: 1px solid var(--border-color);
 
     --page-padding-x: 1em;
     --page-padding-y: 1em;
@@ -112,7 +112,7 @@
     --table-title-header-height: 4.6428rem;
     --status-bar-padding: 0.3rem;
 
-    color: var(--stormy-800);
+    color: var(--text-color);
 
     --modal-z-index: 1;
     --dropdown-z-index: 1;
@@ -170,12 +170,12 @@
   hr {
     margin: 0;
     border: 0;
-    border-top: 1px solid var(--stormy-200);
+    border-top: 1px solid var(--border-color);
     display: block;
   }
 
   a {
-    color: inherit;
+    color: var(--text-color);
     text-decoration-thickness: 1px;
     text-underline-offset: 0.1em;
   }
@@ -183,9 +183,10 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: rgba(127, 127, 127, 0.2);
+    background: var(--hover-background);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
+    color: var(--text-color);
   }
 
   .block {
@@ -214,9 +215,9 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--hover-background);
     border-radius: 3px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--text-color-muted);
     font-weight: bold;
   }
 
@@ -230,5 +231,6 @@
     align-items: center;
     justify-content: center;
     display: flex;
+    background-color: var(--background-color);
   }
 </style>

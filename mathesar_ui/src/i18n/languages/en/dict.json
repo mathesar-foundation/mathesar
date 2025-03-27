@@ -356,6 +356,7 @@
   "no_continue_without_summarization": "No, continue without summarizing",
   "no_databases_connected": "No Databases Connected",
   "no_default_value": "No Default Value",
+  "no_description": "No description",
   "no_existing_records": "No existing records",
   "no_explorations": "No Explorations",
   "no_fields_added_yet": "No fields added yet",
@@ -747,6 +748,5 @@
   "write": "Write",
   "yes": "Yes",
   "yes_summarize_as_list": "Yes, summarize as a list",
-  "yesterday": "Yesterday",
-  "no_description": "No description"
+  "yesterday": "Yesterday"
 }
