@@ -47,3 +47,15 @@ def create_schema(schema_name, conn, owner_oid, description=None):
 
 def drop_schemas(conn, sch_oids):
     db_conn.exec_msar_func(conn, 'drop_schemas', sch_oids)
+
+
+def schema_has_custom_type_dependency(sch_oid, conn):
+    """
+    Determine whether any column within the specified schema uses a custom type
+    from the 'mathesar_types' namespace.
+    """
+    return db_conn.exec_msar_func(
+        conn,
+        'schema_has_custom_type_dependency',
+        sch_oid
+    ).fetchone()[0]

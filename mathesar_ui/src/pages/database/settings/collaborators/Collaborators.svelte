@@ -72,6 +72,9 @@
           database_id: database.id,
         }),
         databaseRouteContext.roles.batchRunner({ database_id: database.id }),
+        databaseRouteContext.currentRole.batchRunner({
+          database_id: database.id,
+        }),
       ]);
       void fetchSchemasForCurrentDatabase();
     }
