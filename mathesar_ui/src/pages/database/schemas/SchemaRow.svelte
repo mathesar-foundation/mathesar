@@ -113,8 +113,8 @@
     --z-index-hyperlink-overlay: 1;
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--sand-300);
-    background-color: var(--background-color);
+    border: 1px solid var(--card-border);
+    background-color: var(--card-background);
     padding: 1.5em;
     display: flex;
     align-items: flex-start;

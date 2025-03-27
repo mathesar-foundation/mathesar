@@ -150,9 +150,9 @@
   }
 
   .sidebar-section {
-    background-color: var(--background-color);
+    background-color: var(--sidebar-background);
     border-radius: 0.5rem;
-    border: 1px solid var(--sand-300);
+    border: 1px solid var(--card-border);
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 

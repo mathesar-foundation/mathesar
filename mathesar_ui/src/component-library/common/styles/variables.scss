@@ -15,7 +15,9 @@
   --input-focus-color: var(--stormy-500);
   --input-focus-shadow: var(--stormy-100);
   --card-background: #ffffff;
-  --card-border: var(--slate-200);
+  --card-border: var(--sand-300);
+  --card-row-border: var(--sand-200);
+  --sidebar-background: #ffffff;
   --modal-background: #ffffff;
   --modal-overlay: rgba(0, 0, 0, 0.5);
   --icon-background: var(--stormy-100);
@@ -312,8 +314,10 @@
     --input-text: var(--text-color);
     --input-focus-color: var(--stormy-400);
     --input-focus-shadow: var(--stormy-800);
-    --card-background: transparent;
-    --card-border: #404040;
+    --card-background: #171717;
+    --card-border: #333333;
+    --card-row-border: #262626;
+    --sidebar-background: #262626;
     --modal-background: #262626;
     --modal-overlay: rgba(0, 0, 0, 0.7);
     --icon-background: var(--stormy-700);

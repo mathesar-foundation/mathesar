@@ -66,7 +66,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background-color: var(--card-background);
+    background-color: var(--sidebar-background);
     border-radius: 0.5rem;
     padding: 1.5rem;
     box-shadow: var(--shadow-color) 0 2px 8px;

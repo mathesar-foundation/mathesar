@@ -195,10 +195,10 @@
     position: relative;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--sand-300);
+    border-bottom: 1px solid var(--card-row-border);
     padding: 0.75rem 1rem;
     transition: all 0.15s ease;
-    background-color: var(--background-color);
+    background-color: var(--card-background);
   }
 
   .table-row.focus {

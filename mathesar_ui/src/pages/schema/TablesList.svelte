@@ -73,9 +73,9 @@
 <style lang="scss">
   .tables-list {
     border-radius: var(--border-radius-m);
-    border: 1px solid var(--sand-400);
+    border: 1px solid var(--card-border);
     overflow: hidden;
-    background-color: var(--color-background);
+    background-color: var(--card-background);
     box-shadow: var(--shadow-sm);
   }
 
