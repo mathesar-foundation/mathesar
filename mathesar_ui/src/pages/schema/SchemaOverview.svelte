@@ -169,7 +169,7 @@
       var(--gradient-light-start),
       var(--gradient-light-end)
     );
-    border-top: 1px solid var(--sand-300);
+    border-top: 1px solid var(--card-border);
     border-radius: 0 0 0.5rem 0.5rem;
 
     .explore-title {

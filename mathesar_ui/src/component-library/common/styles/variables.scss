@@ -6,8 +6,8 @@
   --text-color: #171717;
   --text-color-muted: #515662;
   --border-color: var(--slate-200);
-  --hover-background: var(--slate-100);
-  --active-background: var(--slate-200);
+  --hover-background: var(--stormy-50);
+  --active-background: var(--stormy-200);
   --shadow-color: rgba(0, 0, 0, 0.1);
   --input-background: #ffffff;
   --input-border: var(--slate-300);
@@ -60,17 +60,18 @@
 
   /* New color palettes */
   /* Sand palette - more neutral version */
-  --sand-50: #fbfaf8;
-  --sand-100: #f5f4f0;
-  --sand-200: #eae8e2;
-  --sand-300: #dfdcd3;
-  --sand-400: #d4d0c4;
-  --sand-500: #c9c4b5;
-  --sand-600: #a09b8c;
-  --sand-700: #847f71;
-  --sand-800: #696557;
-  --sand-900: #4d4a3f;
-  --sand-950: #2e2c26;
+  // ... existing code ...
+  --sand-50: #faf9f6;
+  --sand-100: #f6f3ed;
+  --sand-200: #ede7dd;
+  --sand-300: #e0d5c7;
+  --sand-400: #d1c2b0;
+  --sand-500: #c3ae97;
+  --sand-600: #a99278;
+  --sand-700: #8f7a61;
+  --sand-800: #766349;
+  --sand-900: #5f4f37;
+  // ... existing code ...
 
   /* Orange-red palette */
   --orange-red-50: #fff2ef;
@@ -306,8 +307,8 @@
     --text-color: #e5e5e5;
     --text-color-muted: #a3a3a3;
     --border-color: #404040;
-    --hover-background: #262626;
-    --active-background: #333333;
+    --hover-background: #171717;
+    --active-background: #1f1f1f;
     --shadow-color: rgba(0, 0, 0, 0.3);
     --input-background: #262626;
     --input-border: #404040;

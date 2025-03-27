@@ -13,6 +13,8 @@
     align-items: center;
     min-height: 100%;
     padding: var(--size-x-small) var(--size-base);
+    color: var(--text-color-primary);
+    background-color: var(--card-background);
 
     &::before,
     &::after {
@@ -37,10 +39,20 @@
 
     &.gt-header {
       font-weight: 500;
+      background-color: var(--hover-background);
+      color: var(--text-color-secondary);
 
       &::after {
         background-color: var(--Grid-table__border-color-internal);
       }
+    }
+
+    &:hover {
+      background-color: var(--hover-background);
+    }
+
+    &:active {
+      background-color: var(--active-background);
     }
   }
 </style>
