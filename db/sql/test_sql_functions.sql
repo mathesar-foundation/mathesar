@@ -164,49 +164,217 @@ BEGIN
   RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
     ARRAY[
-      ('"Column 1"', 'text', null, null, false, null),
-      ('"Column 2"', 'text', null, null, false, null)
+      ('"Column 1"', 'text', null, null, null, null),
+      ('"Column 2"', 'text', null, null, null, null)
     ]::__msar.col_def[],
     'Should not add default "id" column when create_id is false'
   );
   RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
-    ARRAY[
-      ('id', 'integer', true, null, true, 'Mathesar default ID column'),
-      ('"Column 1"', 'text', null, null, false, null),
-      ('"Column 2"', 'text', null, null, false, null)
-    ]::__msar.col_def[],
-    'Should add default "id" column when create_id is true'
-  );
-  RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, false),
-    ARRAY[
-      ('id', 'text', null, null, false, null),
-    ]::__msar.col_def[],
-    'Should add incoming "id" column and not add default "id" column when create_id is false'
-  );
-    RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false, false),
-    ARRAY[
-      ('id', 'text', null, null, false, null),
-    ]::__msar.col_def[],
-    'Should ignore incoming "id" column and add default id column when create_id is true'
-  );
-  RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{}, {"name": "id"}]'::jsonb, false, true),
-    ARRAY[
-      ('id', 'integer', true, null, true, 'Mathesar default ID column'),
-      ('"id 1"', 'text', null, null, false, null),
-      ('"Column 1"', 'text', null, null, false, null)
-    ]::__msar.col_def[],
-    'Should rename incoming "id" column and add default id column when create_id is true'
-  );
-  RETURN NEXT is(
     __msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
     ARRAY[
-      ('"Column 1"', 'text', null, null, false, '''Some comment''')
+      ('"Column 1"', 'text', null, null, null, '''Some comment''')
     ]::__msar.col_def[],
     'Comments should be sanitized'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+-- msar.add_pkey_column -------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_add_pkey_col() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE add_pkey_col_testable (col1 integer, col2 varchar);
+  INSERT INTO add_pkey_col_testable VALUES (324, 'abc'), (567, 'def');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_uuid() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'UUIDv4',
+      drop_old_pkey_col => true,
+      col_name => 'User Id'
+    ), 3, 'Should return correct attnum'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'User Id');
+  RETURN NEXT col_type_is('add_pkey_col_testable', 'User Id', 'uuid');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_identity() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY',
+      drop_old_pkey_col => true,
+      col_name => 'Identity'
+    ), 3, 'Should return correct attnum'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'Identity');
+  RETURN NEXT col_type_is('add_pkey_col_testable', 'Identity', 'integer');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_collision() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY',
+      drop_old_pkey_col => true,
+      col_name => 'col1'
+    ), 3, 'Should return correct attnum'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'col1 1', 'rename when collision');
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY',
+      drop_old_pkey_col => true,
+      col_name => 'col1'
+    ), 4, 'Should return correct attnum'
+  );
+  RETURN NEXT col_is_pk(
+    'add_pkey_col_testable', 'col1 1', 'do not rename when collision with previous dropped pkey'
+  );
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY',
+      drop_old_pkey_col => false,
+      col_name => 'col1'
+    ), 5, 'Should return correct attnum'
+  );
+  RETURN NEXT col_is_pk(
+    'add_pkey_col_testable', 'col1 2', 'rename when collision with previous undropped pkey'
+  );
+  RETURN NEXT columns_are('add_pkey_col_testable', ARRAY['col1', 'col2', 'col1 1', 'col1 2']);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_defaults_collide() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY'
+    ), 3, 'Should return correct attnum'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'id');
+  RETURN NEXT is(
+    msar.add_pkey_column(
+      tab_id => 'add_pkey_col_testable'::regclass,
+      pkey_type => 'IDENTITY'
+    ), 4, 'Should return correct attnum'
+  );
+  RETURN NEXT col_is_pk('add_pkey_col_testable', 'id 1');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_pkey_column_malformed() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_add_pkey_col();
+  RETURN NEXT throws_like(
+    $s$SELECT msar.add_pkey_column(
+        tab_id => 'add_pkey_col_testable'::regclass,
+        pkey_type => 'ident',
+        drop_old_pkey_col => false
+    );$s$,
+    'invalid input value for enum%'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+-- msar.set_pkey_column ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_set_pkey_col() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE set_pkey_col_testable (
+    id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    col1 numeric,
+    col2 varchar,
+    "Column 3" uuid
+  );
+  INSERT INTO set_pkey_col_testable (col1, col2, "Column 3") VALUES
+    (324, 'abc', 'f2539a15-1644-413e-91e1-36008c6700e5'),
+    (567, 'def', 'e4c7d5d9-4eb3-4274-91f8-6af32c013f3a');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_set_pkey_column_numeric() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_set_pkey_col();
+  PERFORM msar.set_pkey_column(
+    tab_id => 'set_pkey_col_testable'::regclass,
+    col_id => 2,
+    default_type => 'IDENTITY',
+    drop_old_pkey_col => true
+  );
+  RETURN NEXT col_is_pk('set_pkey_col_testable', 'col1');
+  RETURN NEXT col_type_is('set_pkey_col_testable', 'col1', 'integer');
+  RETURN NEXT columns_are('set_pkey_col_testable', ARRAY['col1', 'col2', 'Column 3']);
+  INSERT INTO set_pkey_col_testable(col2) VALUES ('ghi');
+  RETURN NEXT results_eq('SELECT max(col1) FROM set_pkey_col_testable', 'VALUES (568)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_set_pkey_column_identity_reuse() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_set_pkey_col();
+  PERFORM msar.set_pkey_column(
+    tab_id => 'set_pkey_col_testable'::regclass,
+    col_id => 2,
+    default_type => 'IDENTITY',
+    drop_old_pkey_col => false
+  );
+  RETURN NEXT col_is_pk('set_pkey_col_testable', 'col1');
+  RETURN NEXT col_type_is('set_pkey_col_testable', 'col1', 'integer');
+  RETURN NEXT columns_are('set_pkey_col_testable', ARRAY['id', 'col1', 'col2', 'Column 3']);
+  PERFORM msar.set_pkey_column(
+    tab_id => 'set_pkey_col_testable'::regclass,
+    col_id => 1,
+    default_type => 'IDENTITY',
+    drop_old_pkey_col => false
+  );
+  RETURN NEXT col_is_pk('set_pkey_col_testable', 'id');
+  RETURN NEXT columns_are('set_pkey_col_testable', ARRAY['id', 'col1', 'col2', 'Column 3']);
+  INSERT INTO set_pkey_col_testable(col2) VALUES ('ghi');
+  RETURN NEXT results_eq('SELECT max(col1) FROM set_pkey_col_testable', 'VALUES (568)');
+  RETURN NEXT results_eq('SELECT max(id) FROM set_pkey_col_testable', 'VALUES (3)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_set_pkey_column_uuid() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_set_pkey_col();
+  PERFORM msar.set_pkey_column(
+    tab_id => 'set_pkey_col_testable'::regclass,
+    col_id => 4,
+    default_type => 'UUIDv4',
+    drop_old_pkey_col => false
+  );
+  RETURN NEXT col_is_pk('set_pkey_col_testable', 'Column 3');
+  RETURN NEXT columns_are('set_pkey_col_testable', ARRAY['id', 'col1', 'col2', 'Column 3']);
+  INSERT INTO set_pkey_col_testable(col2) VALUES ('ghi');
+  RETURN NEXT results_eq(
+    'SELECT COUNT(DISTINCT "Column 3") FROM set_pkey_col_testable',
+    'VALUES (3::bigint)'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -1461,7 +1629,7 @@ BEGIN
       3, 'boolean',
       4, 'date',
       5, 'numeric',
-      6, 'mathesar_types.mathesar_money',
+      6, 'interval',
       7, 'text'
     )
   );
@@ -1482,7 +1650,7 @@ CREATE OR REPLACE FUNCTION test_add_mathesar_table_minimal_id_col() RETURNS SETO
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null, null
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null, null, null
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
@@ -1504,7 +1672,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, badname, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, badname, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, badname::name);
 END;
@@ -1517,7 +1685,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
 END;
@@ -1531,10 +1699,10 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 1'::name);
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 2'::name);
@@ -1546,7 +1714,7 @@ BEGIN
   );
   RETURN NEXT hasnt_table('tab_create_schema'::name, 'Table 1'::name);
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
 END;
@@ -1565,6 +1733,7 @@ BEGIN
   PERFORM msar.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid,
     'cols_table',
+    null,
     col_defs,
     null, null, null
   );
@@ -1576,6 +1745,34 @@ BEGIN
   );
   RETURN NEXT col_type_is(
     'tab_create_schema'::name, 'cols_table'::name, 'Column 3'::name, 'character varying(128)'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_columns_rename_incoming_id() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_defs jsonb := $j$[
+    {"name": "id", "type": {"name": "numeric"}},
+    {"type": {"name": "varchar", "options": {"length": 128}}}
+  ]$j$;
+BEGIN
+  PERFORM __setup_create_table();
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid,
+    'cols_table',
+    null,
+    col_defs,
+    null, null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT col_type_is(
+    'tab_create_schema'::name, 'cols_table'::name, 'id 1'::name, 'numeric'
+  );
+  RETURN NEXT col_type_is(
+    'tab_create_schema'::name, 'cols_table'::name, 'Column 2'::name, 'character varying(128)'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -1621,7 +1818,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, null, comment_
+    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, null, null, comment_
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
@@ -1631,6 +1828,92 @@ BEGIN
     comment_,
     'created table should have specified description (comment)'
   );
+END;
+$f$ LANGUAGE plpgsql;
+
+-- msar.prepare_table_for_import --------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_null_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql', 'COPY tab_create_schema.anewtable () FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+  RETURN NEXT is((response ->> 'pkey_column_attnum')::integer, 1);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_empty_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid, 'anewtable', ARRAY[]::text[], null
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql', 'COPY tab_create_schema.anewtable () FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+  RETURN NEXT is((response ->> 'pkey_column_attnum')::integer, 1);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_prepare_table_for_import_nonempty_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+BEGIN
+  PERFORM __setup_create_table();
+  response := msar.prepare_table_for_import(
+    'tab_create_schema'::regnamespace::oid,
+    'anewtable',
+    ARRAY['My Col', 'col2'],
+    'my comment here'
+  );
+  RETURN NEXT col_is_pk(
+    'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
+  );
+  RETURN NEXT columns_are('tab_create_schema', 'anewtable', ARRAY['id', 'My Col', 'col2']);
+  RETURN NEXT col_type_is('tab_create_schema'::name, 'anewtable'::name, 'My Col'::name, 'text'::name);
+  RETURN NEXT col_type_is('tab_create_schema'::name, 'anewtable'::name, 'col2'::name, 'text'::name);
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid::regclass,
+    format('%s.%s', 'tab_create_schema', 'anewtable')::regclass
+  );
+  RETURN NEXT is(response ->> 'table_name', 'anewtable');
+  RETURN NEXT is(
+    response ->> 'copy_sql',
+    'COPY tab_create_schema.anewtable ("My Col", col2) FROM STDIN'
+  );
+  RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
+  RETURN NEXT is((response ->> 'pkey_column_attnum')::integer, 1);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2556,7 +2839,7 @@ DECLARE
   target_type_strings jsonb;
 BEGIN
   target_type_strings = msar.get_valid_target_type_strings('text');
-  RETURN NEXT is(jsonb_array_length(target_type_strings), 27);
+  RETURN NEXT is(jsonb_array_length(target_type_strings), 28);
   RETURN NEXT ok(
     target_type_strings @> jsonb_build_array(
       'real', 'double precision', 'mathesar_types.email', 'smallint', 'boolean', 'bigint',
@@ -2564,12 +2847,12 @@ BEGIN
       'timestamp with time zone', 'timestamp without time zone', 'date',
       'mathesar_types.mathesar_money', 'money', 'mathesar_types.multicurrency_money',
       'character varying', 'character', '"char"', 'text', 'name', 'mathesar_types.uri', 'numeric',
-      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json'
+      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json', 'uuid'
     ),
     'containment plus length checks order-independent equality'
   );
   target_type_strings = msar.get_valid_target_type_strings('text'::regtype::oid);
-  RETURN NEXT is(jsonb_array_length(target_type_strings), 27);
+  RETURN NEXT is(jsonb_array_length(target_type_strings), 28);
   RETURN NEXT ok(
     target_type_strings @> jsonb_build_array(
       'real', 'double precision', 'mathesar_types.email', 'smallint', 'boolean', 'bigint',
@@ -2577,7 +2860,7 @@ BEGIN
       'timestamp with time zone', 'timestamp without time zone', 'date',
       'mathesar_types.mathesar_money', 'money', 'mathesar_types.multicurrency_money',
       'character varying', 'character', '"char"', 'text', 'name', 'mathesar_types.uri', 'numeric',
-      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json'
+      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json', 'uuid'
     ),
     'containment plus length checks order-independent equality'
   );
@@ -4251,6 +4534,74 @@ BEGIN
     )
   );
   RETURN NEXT is((search_result -> 'count')::integer, 3);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_uuid_search_records_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE uuid_table (
+  id UUID PRIMARY KEY,
+  column1 TEXT,
+  column2 INTEGER,
+  column3 BOOLEAN
+  );
+  INSERT INTO uuid_table (id, column1, column2, column3) VALUES
+    ('042bb99f-5467-4645-9b9f-843d8b26b087', 'foo', 1, TRUE),
+    ('13c7c1dc-1e35-4fc5-87b0-d9c07c34db4d', 'bar', 2, FALSE),
+    ('2755d6d0-0089-4e22-b9e8-4dc2a7ff2c50', 'baz', 3, TRUE);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_search_uuid_records_from_table() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  search_result jsonb;
+BEGIN
+  PERFORM __setup_uuid_search_records_table();
+  rel_id := 'uuid_table'::regclass::oid;
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 1, 'literal', 4)
+    ),
+    3
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', '042bb99f-5467-4645-9b9f-843d8b26b087', '2', 'foo', '3', 1, '4', TRUE),
+      jsonb_build_object('1', '13c7c1dc-1e35-4fc5-87b0-d9c07c34db4d', '2', 'bar', '3', 2, '4', FALSE),
+      jsonb_build_object('1', '2755d6d0-0089-4e22-b9e8-4dc2a7ff2c50', '2', 'baz', '3', 3, '4', TRUE)
+    )
+  );
+  RETURN NEXT is ((search_result -> 'count')::integer, 3);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 1, 'literal', '1e')
+    ),
+    3
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', '13c7c1dc-1e35-4fc5-87b0-d9c07c34db4d', '2', 'bar', '3', 2, '4', FALSE)
+    )
+  );
+  RETURN NEXT is ((search_result -> 'count')::integer, 1);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 1, 'literal', 'asdf')
+    ),
+    3
+  );
+  RETURN NEXT is(search_result -> 'results', jsonb_build_array());
+  RETURN NEXT is ((search_result -> 'count')::integer, 0);
 END;
 $$ LANGUAGE plpgsql;
 

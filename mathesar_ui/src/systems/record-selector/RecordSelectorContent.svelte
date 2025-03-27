@@ -7,8 +7,10 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import type { TabularData } from '@mathesar/stores/table-data';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
+  import {
+    type TabularData,
+    extractPrimaryKeyValue,
+  } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { Button, Icon, Spinner } from '@mathesar-component-library';
@@ -36,9 +38,11 @@
     columnsDataStore,
     recordsData,
     table,
+    hasPrimaryKey,
   } = tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
-  $: canViewTable = $currentRolePrivileges.has('SELECT');
+  $: hasSelect = $currentRolePrivileges.has('SELECT');
+  $: canViewTable = $hasPrimaryKey && hasSelect;
   $: canInsertRecords = $currentRolePrivileges.has('INSERT');
   $: ({ purpose: rowType } = controller);
   $: ({ columns, fetchStatus } = columnsDataStore);
@@ -47,7 +51,7 @@
     $fetchStatus?.state !== 'processing' && constraintsState === States.Done;
   $: ({ searchFuzzy } = meta);
   $: hasSearchQueries = $searchFuzzy.size > 0;
-  $: recordsStore = recordsData.savedRecords;
+  $: recordsStore = recordsData.fetchedRecordRows;
   $: records = $recordsStore;
 
   function submitResult(result: RecordSelectorResult) {
@@ -83,7 +87,7 @@
         })
         .run();
       const record = response.results[0];
-      const recordId = getPkValueInRecord(record, $columns);
+      const recordId = extractPrimaryKeyValue(record, $columns);
 
       const recordSummary = response.record_summaries?.[recordId] ?? '';
 
@@ -119,9 +123,13 @@
     />
   {/if}
 
-  {#if !canViewTable}
+  {#if isInitialized && !canViewTable}
     <WarningBox fullWidth>
-      {$_('no_privileges_view_table')}
+      {#if !$hasPrimaryKey}
+        {$_('record_sel_no_support_for_table_without_pk')}
+      {:else if !hasSelect}
+        {$_('no_privileges_view_table')}
+      {/if}
     </WarningBox>
   {/if}
 

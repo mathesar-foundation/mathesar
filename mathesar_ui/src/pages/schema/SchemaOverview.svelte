@@ -14,9 +14,9 @@
   import { fetchTablesForCurrentSchema } from '@mathesar/stores/tables';
   import { AnchorButton, Button } from '@mathesar-component-library';
 
-  import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
-  import CreateNewTableButton from './CreateNewTableButton.svelte';
-  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
+  import CreateExplorationTutorial from './CreateExplorationTutorial.svelte';
+  import CreateTableButton from './CreateTableButton.svelte';
+  import CreateTableTutorial from './CreateTableTutorial.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
   import OverviewHeader from './OverviewHeader.svelte';
@@ -48,7 +48,7 @@
   <div class="vertical-container tables">
     <OverviewHeader title={$_('tables')}>
       <svelte:fragment slot="action">
-        <CreateNewTableButton {database} {schema} {onCreateEmptyTable} />
+        <CreateTableButton {database} {schema} {onCreateEmptyTable} />
       </svelte:fragment>
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
@@ -72,7 +72,7 @@
         </div>
       </ErrorBox>
     {:else if showTableCreationTutorial}
-      <CreateNewTableTutorial {database} {schema} {onCreateEmptyTable} />
+      <CreateTableTutorial {database} {schema} {onCreateEmptyTable} />
     {:else}
       <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {/if}
@@ -101,7 +101,7 @@
           </div>
         </ErrorBox>
       {:else if showExplorationTutorial}
-        <CreateNewExplorationTutorial {database} {schema} />
+        <CreateExplorationTutorial {database} {schema} />
       {:else}
         <ExplorationsList
           bordered={false}

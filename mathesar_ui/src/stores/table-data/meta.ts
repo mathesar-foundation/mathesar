@@ -1,6 +1,7 @@
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
 import Pagination, { type TersePagination } from '@mathesar/utils/Pagination';
 import Url64 from '@mathesar/utils/Url64';
 import {
@@ -16,6 +17,7 @@ import { SearchFuzzy } from './searchFuzzy';
 import { Sorting, type TerseSorting } from './sorting';
 import {
   type CellKey,
+  type ClientSideCellError,
   type RowKey,
   extractRowKeyFromCellKey,
   getRowStatus,
@@ -40,7 +42,7 @@ export interface RowStatus {
    * The triangle error popover indicator will display whenever this array
    * contains errors -- even if `wholeRowState` is `'success'`.
    */
-  errorsFromWholeRowAndCells: string[];
+  errorsFromWholeRowAndCells: RpcError[];
 }
 
 export interface MetaProps {
@@ -114,7 +116,7 @@ export class Meta {
 
   searchFuzzy: Writable<SearchFuzzy>;
 
-  cellClientSideErrors = new WritableMap<CellKey, string[]>();
+  cellClientSideErrors = new WritableMap<CellKey, ClientSideCellError[]>();
 
   rowsWithClientSideErrors: Readable<ImmutableSet<RowKey>>;
 
@@ -122,20 +124,23 @@ export class Meta {
    * For each cell, the status of the most recent request to update the cell. If
    * no request has been made, then no entry will be present in the map.
    */
-  cellModificationStatus = new WritableMap<CellKey, RequestStatus>();
+  cellModificationStatus = new WritableMap<
+    CellKey,
+    RequestStatus<RpcError[]>
+  >();
 
   /**
    * For each row, the status of the most recent request to delete the row. If
    * no request has been made, then no entry will be present in the map.
    */
-  rowDeletionStatus = new WritableMap<RowKey, RequestStatus>();
+  rowDeletionStatus = new WritableMap<RowKey, RequestStatus<RpcError[]>>();
 
   /**
    * For each newly added row, the status of the most recent request to add
    * the row. If no request has been made, then no entry will be present in the
    * map. Rows that are not newly added rows will never have entries here.
    */
-  rowCreationStatus = new WritableMap<RowKey, RequestStatus>();
+  rowCreationStatus = new WritableMap<RowKey, RequestStatus<RpcError[]>>();
 
   rowStatus: Readable<ImmutableMap<RowKey, RowStatus>>;
 

@@ -75,6 +75,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        columns.add_primary_key_column,
+        "columns.add_primary_key_column",
+        [user_is_authenticated]
+    ),
+    (
         columns.delete,
         "columns.delete",
         [user_is_authenticated]
@@ -130,6 +135,11 @@ METHODS = [
     (
         data_modeling.add_mapping_table,
         "data_modeling.add_mapping_table",
+        [user_is_authenticated]
+    ),
+    (
+        data_modeling.change_primary_key_column,
+        "data_modeling.change_primary_key_column",
         [user_is_authenticated]
     ),
     (

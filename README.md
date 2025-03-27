@@ -27,7 +27,7 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
 - [Join our community](#join-our-community)
   - [Contribute to Mathesar](#contribute-to-mathesar)
 - [Features](#features)
-- [Screeenshots](#screeenshots)
+- [Screenshots](#screenshots)
   - [Connecting a database](#connecting-a-database)
   - [Adding collaborators](#adding-collaborators)
   - [Viewing a Postgres schema](#viewing-a-postgres-schema)
@@ -76,7 +76,7 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 - **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Relationships" in the UI are foreign keys in the database.
 - **Custom data types**: Custom data types for emails and URLs, validated at the database level.
 
-## Screeenshots
+## Screenshots
 ### Connecting a database
 ![connect-db](https://github.com/user-attachments/assets/c115ad21-e501-4992-bf84-54758a321f41)
 

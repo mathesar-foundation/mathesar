@@ -1,7 +1,7 @@
 export { RecordsData } from './records';
 export { ColumnsDataStore } from './columns';
 export { Meta, type MetaProps } from './meta';
-export { Display, getCellStyle } from './display';
+export { Display, getCellStyle, type DisplayRowDescriptor } from './display';
 export {
   filterCombinations,
   defaultFilterCombination,
@@ -10,32 +10,33 @@ export {
 } from './filtering';
 export { Sorting } from './sorting';
 export { Grouping, type GroupEntry, type TerseGrouping } from './grouping';
+export { type TableRecordsData } from './records';
 export {
-  getRowKey,
-  rowHasRecord,
-  rowHasNewRecord,
-  isHelpTextRow,
-  isGroupHeaderRow,
-  isPlaceholderRow,
-  isNewRecordRow,
-  filterRecordRows,
-  rowHasSavedRecord,
-  type Row,
-  type RecordRow,
-  type NewRecordRow,
   type GroupHeaderRow,
   type HelpTextRow,
-  type PlaceholderRow,
-  type RecordGroup,
-  type RecordGrouping,
-  type TableRecordsData,
-} from './records';
+  type PlaceholderRecordRow,
+  isRecordRow,
+  isHelpTextRow,
+  isGroupHeaderRow,
+  isPersistedRecordRow,
+  isProvisionalRecordRow,
+  isDraftRecordRow,
+  isPlaceholderRecordRow,
+  filterRecordRows,
+  type Row,
+  type RecordRow,
+} from './Row';
 export {
   getCellKey,
   ID_ROW_CONTROL_COLUMN,
   ID_ADD_NEW_COLUMN,
   type RowKey,
   type CellKey,
+  getRowSelectionId,
+  type RecordGrouping,
+  type RecordGroup,
+  extractPrimaryKeyValue,
+  type ClientSideCellError,
 } from './utils';
 export {
   setTabularDataStoreInContext,

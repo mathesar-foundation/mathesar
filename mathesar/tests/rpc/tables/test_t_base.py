@@ -10,8 +10,6 @@ import json
 from decimal import Decimal
 from contextlib import contextmanager
 
-from db.tables import prepare_table_for_import
-from db.deprecated.types.base import PostgresType
 from mathesar.rpc import tables
 from mathesar.models.users import User
 
@@ -125,17 +123,26 @@ def test_tables_add(rf, monkeypatch, mocked_exec_msar_func):
         else:
             raise AssertionError('incorrect parameters passed')
 
+    def mock_set_meta_data(table_oid, metadata, _database_id):
+        assert table_oid == 1964474
+        assert metadata == {"mathesar_added_pkey_attnum": 1}
+        assert _database_id == 11
+
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
-    mocked_exec_msar_func.fetchone.return_value = [{"oid": 1964474, "name": "newtable"}]
+    monkeypatch.setattr(tables.base, 'set_table_meta_data', mock_set_meta_data)
+    mocked_exec_msar_func.fetchone.return_value = [
+        {"oid": 1964474, "name": "newtable", "pkey_column_attnum": 1}
+    ]
     actual_table_info = tables.add(table_name='newtable', schema_oid=2200, database_id=11, request=request)
     call_args = mocked_exec_msar_func.call_args_list[0][0]
-    assert actual_table_info == {"oid": 1964474, "name": "newtable"}
+    assert actual_table_info == {"oid": 1964474, "name": "newtable", "renamed_columns": None}
     assert call_args[2] == schema_oid
     assert call_args[3] == 'newtable'
-    assert call_args[4] == json.dumps([])
+    assert call_args[4] == json.dumps({})
     assert call_args[5] == json.dumps([])
-    assert call_args[6] is None
+    assert call_args[6] == json.dumps([])
     assert call_args[7] is None
+    assert call_args[8] is None
 
 
 def test_tables_patch(rf, monkeypatch, mocked_exec_msar_func):
@@ -194,6 +201,11 @@ def test_tables_import(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
+    def mock_set_meta_data(table_oid, metadata, _database_id):
+        assert table_oid == 1964474
+        assert metadata == {"mathesar_added_pkey_attnum": 1}
+        assert _database_id == 11
+
     def mock_table_import(_user, _data_file_id, table_name, _schema_oid, conn, comment):
         if (
             _user != request.user
@@ -201,9 +213,10 @@ def test_tables_import(rf, monkeypatch):
             and _data_file_id != data_file_id
         ):
             raise AssertionError('incorrect parameters passed')
-        return {"oid": 1964474, "name": "imported_table"}
+        return {"oid": 1964474, "name": "imported_table", "pkey_column_attnum": 1}
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
-    monkeypatch.setattr(tables.base, 'import_csv', mock_table_import)
+    monkeypatch.setattr(tables.base, 'set_table_meta_data', mock_set_meta_data)
+    monkeypatch.setattr(tables.base, 'copy_datafile_to_table', mock_table_import)
     imported_table_info = tables.import_(
         data_file_id=10,
         table_name='imported_table',
@@ -211,49 +224,9 @@ def test_tables_import(rf, monkeypatch):
         database_id=11,
         request=request
     )
-    assert imported_table_info == {"oid": 1964474, "name": "imported_table"}
-
-
-def test_prepare_table_for_import(rf, monkeypatch, mocked_exec_msar_func):
-    request = rf.post('/api/rpc/v0', data={})
-    request.user = User(username='alice', password='pass1234')
-    schema_oid = 2200
-    column_names = ['a', 'b', 'c']
-    column_data_list = [
-        {
-            "name": column_name,
-            "type": {"name": PostgresType.TEXT.id}
-        } for column_name in column_names
-    ]
-    expect_dict = {
-        'copy_sql': 'COPY public.imported_table FROM patents.csv',
-        'table_oid': 1234,
-        'table_name': 'imported_table',
-        'renamed_columns': {}
+    assert imported_table_info == {
+        "oid": 1964474, "name": "imported_table", "renamed_columns": None
     }
-    mocked_exec_msar_func.fetchone.return_value = [expect_dict]
-    copy_sql, table_oid, table_name, renamed_columns = prepare_table_for_import(
-        table_name="imported_table",
-        schema_oid=schema_oid,
-        column_names=column_names,
-        header=True,
-        conn=True
-    )
-    call_args = mocked_exec_msar_func.call_args_list[0][0]
-    assert copy_sql == expect_dict['copy_sql']
-    assert table_oid == expect_dict['table_oid']
-    assert table_name == expect_dict['table_name']
-    assert renamed_columns == expect_dict['renamed_columns']
-    assert call_args[2] == schema_oid
-    assert call_args[3] == 'imported_table'
-    assert call_args[4] == json.dumps(column_data_list)
-    # TODO: Consider parametrizing these params
-    assert call_args[5] is True   # header
-    assert call_args[6] is None   # delimiter
-    assert call_args[7] is None   # escapechar
-    assert call_args[8] is None   # quotechar
-    assert call_args[9] is None   # encoding
-    assert call_args[10] is None  # comment
 
 
 def test_tables_preview(rf, monkeypatch, mocked_exec_msar_func):

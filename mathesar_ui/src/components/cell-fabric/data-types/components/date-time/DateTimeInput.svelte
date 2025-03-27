@@ -115,7 +115,7 @@
     bind:value
     isRelative={allowRelativePresets}
     {type}
-    {formattingString}
+    {formatter}
     on:change={close}
   />
 </AttachableDropdown>

@@ -30,11 +30,13 @@
       members:
       - list_
       - add
+      - add_primary_key_column
       - patch
       - delete
       - list_with_metadata
       - ColumnInfo
       - ColumnListReturn
+      - CreatablePkColumnInfo
       - CreatableColumnInfo
       - PreviewableColumnInfo
       - SettableColumnInfo

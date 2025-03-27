@@ -255,4 +255,15 @@ export const columns = {
       void
     >(),
   },
+
+  add_primary_key_column: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      pkey_type: 'IDENTITY' | 'UUIDv4';
+      drop_existing_pkey_column?: boolean;
+      name?: string;
+    },
+    void
+  >(),
 };

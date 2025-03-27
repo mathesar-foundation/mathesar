@@ -6,6 +6,7 @@
     type RequestStatus,
     States,
   } from '@mathesar/api/rest/utils/requestUtils';
+  import type { ResultValue } from '@mathesar/api/rpc/records';
   import type { TablePrivilege } from '@mathesar/api/rpc/tables';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
@@ -18,15 +19,17 @@
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type CellKey,
+    type ClientSideCellError,
     type ProcessedColumn,
     type RecordRow,
     type RecordsData,
-    rowHasNewRecord,
+    getRowSelectionId,
+    isProvisionalRecordRow,
   } from '@mathesar/stores/table-data';
-  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
   import {
     ButtonMenuItem,
     ContextMenu,
@@ -44,16 +47,26 @@
   export let recordsData: RecordsData;
   export let selection: Writable<SheetSelection>;
   export let row: RecordRow;
+  export let recordPk: ResultValue | undefined;
   export let rowHasErrors = false;
   export let key: CellKey;
-  export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
+  export let modificationStatusMap: WritableMap<
+    CellKey,
+    RequestStatus<RpcError[]>
+  >;
   export let processedColumn: ProcessedColumn;
-  export let clientSideErrorMap: WritableMap<CellKey, string[]>;
+  export let clientSideErrorMap: WritableMap<CellKey, ClientSideCellError[]>;
   export let value: unknown = undefined;
-  export let rowKey: string;
-  export let currentRoleTablePrivileges: Set<TablePrivilege>;
+  export let canUpdateRecords: boolean;
+  export let canDeleteRecords: boolean;
 
-  $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
+  $: effectiveProcessedColumn = isProvisionalRecordRow(row)
+    ? processedColumn.withoutEnhancedPkCell()
+    : processedColumn;
+  $: cellId = makeCellId(
+    getRowSelectionId(row),
+    String(effectiveProcessedColumn.id),
+  );
 
   // To be used in case of publicly shared links where user should not be able
   // to view linked tables & explorations
@@ -61,22 +74,20 @@
 
   $: recordsDataState = recordsData.state;
   $: ({ linkedRecordSummaries } = recordsData);
-  $: ({ column, linkFk } = processedColumn);
+  $: ({ column, linkFk } = effectiveProcessedColumn);
   $: columnId = column.id;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
   $: clientErrors = $clientSideErrorMap.get(key) ?? [];
   $: errors = [...serverErrors, ...clientErrors];
-  $: hasError = !!errors.length;
+  $: hasServerError = !!serverErrors.length;
+  $: hasClientError = !!clientErrors.length;
+  $: hasError = hasClientError || hasServerError;
   $: isProcessing = modificationStatus?.state === 'processing';
-  $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
   // TODO: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
-  $: isEditable =
-    isTableEditable &&
-    !column.primary_key &&
-    processedColumn.currentRolePrivileges.has('UPDATE');
+  $: isEditable = canUpdateRecords && effectiveProcessedColumn.isEditable;
   $: canSetNull = isEditable && column.nullable && value !== null;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
@@ -92,7 +103,7 @@
       return;
     }
     value = newValue;
-    const updatedRow = rowHasNewRecord(row)
+    const updatedRow = isProvisionalRecordRow(row)
       ? await recordsData.createOrUpdateRecord(row, column)
       : await recordsData.updateCell(row, column);
     value = updatedRow.record?.[column.id] ?? value;
@@ -109,7 +120,10 @@
   selection={$selection}
   let:isActive
 >
-  <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
+  <CellBackground
+    when={hasServerError || (!isActive && hasClientError)}
+    color="var(--cell-bg-color-error)"
+  />
   <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
   {#if !(isEditable && isActive)}
     <!--
@@ -121,7 +135,7 @@
   {/if}
 
   <CellFabric
-    columnFabric={processedColumn}
+    columnFabric={effectiveProcessedColumn}
     {isActive}
     {value}
     {isProcessing}
@@ -151,34 +165,27 @@
       {$_('set_to')}
       <Null />
     </ButtonMenuItem>
-    {#if showLinkedRecordHyperLink}
-      {#if showLinkedRecordHyperLink && linkedRecordHref}
-        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-          <RichText text={$_('open_named_record')} let:slotName>
-            {#if slotName === 'recordName'}
-              <Identifier>{recordSummary}</Identifier>
-            {/if}
-          </RichText>
-        </LinkMenuItem>
-      {/if}
+    {#if showLinkedRecordHyperLink && linkedRecordHref}
+      <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
+        <RichText text={$_('open_named_record')} let:slotName>
+          {#if slotName === 'recordName'}
+            <Identifier>{recordSummary}</Identifier>
+          {/if}
+        </RichText>
+      </LinkMenuItem>
     {/if}
     <MenuDivider />
 
     <!-- Column Attributes -->
     <MenuHeading>{$_('column')}</MenuHeading>
-    <ColumnHeaderContextMenu {processedColumn} />
+    <ColumnHeaderContextMenu processedColumn={effectiveProcessedColumn} />
 
     <!-- Row -->
     <MenuDivider />
     <MenuHeading>{$_('row')}</MenuHeading>
-    <RowContextOptions
-      recordPk={rowKey}
-      {recordsData}
-      {row}
-      {isTableEditable}
-    />
+    <RowContextOptions {recordPk} {recordsData} {row} {canDeleteRecords} />
   </ContextMenu>
   {#if errors.length}
-    <CellErrors {errors} forceShowErrors={isActive} />
+    <CellErrors {serverErrors} {clientErrors} forceShowErrors={isActive} />
   {/if}
 </SheetDataCell>

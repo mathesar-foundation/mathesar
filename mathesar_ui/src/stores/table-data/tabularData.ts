@@ -1,5 +1,11 @@
 import { getContext, setContext } from 'svelte';
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  writable,
+} from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
@@ -21,11 +27,14 @@ import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
 import { ColumnsDataStore } from './columns';
-import { type ConstraintsData, ConstraintsDataStore } from './constraints';
+import { ConstraintsDataStore } from './constraints';
 import { Display } from './display';
 import { Meta } from './meta';
-import { type ProcessedColumnsStore, processColumn } from './processedColumns';
-import { RecordsData, type TableRecordsData } from './records';
+import {
+  ProcessedColumn,
+  type ProcessedColumnsStore,
+} from './processedColumns';
+import { RecordsData } from './records';
 
 function getSelectedCellData(
   selection: SheetSelection,
@@ -71,9 +80,7 @@ export interface TabularDataProps {
    * removed from view.
    */
   contextualFilters?: Map<number, number | string>;
-  hasEnhancedPrimaryKeyCell?: Parameters<
-    typeof processColumn
-  >[0]['hasEnhancedPrimaryKeyCell'];
+  hasEnhancedPrimaryKeyCell?: boolean;
   /**
    * When true, load the record summaries associated directly with each record
    * in the table. These are *not* the record summaries associated with linked
@@ -107,7 +114,13 @@ export class TabularData {
 
   selectedCellData: Readable<SelectedCellData>;
 
-  shareConsumer?: ShareConsumer;
+  hasPrimaryKey: Readable<boolean>;
+
+  canInsertRecords: Readable<boolean>;
+
+  canUpdateRecords: Readable<boolean>;
+
+  canDeleteRecords: Readable<boolean>;
 
   constructor(props: TabularDataProps) {
     this.database = props.database;
@@ -115,17 +128,14 @@ export class TabularData {
       props.contextualFilters ?? new Map<number, string | number>();
     this.table = props.table;
     this.meta = props.meta ?? new Meta();
-    this.shareConsumer = props.shareConsumer;
     this.columnsDataStore = new ColumnsDataStore({
       database: props.database,
       table: this.table,
       hiddenColumns: contextualFilters.keys(),
-      shareConsumer: this.shareConsumer,
     });
     this.constraintsDataStore = new ConstraintsDataStore({
       database: props.database,
       table: props.table,
-      shareConsumer: this.shareConsumer,
     });
     this.recordsData = new RecordsData({
       database: props.database,
@@ -133,7 +143,6 @@ export class TabularData {
       meta: this.meta,
       columnsDataStore: this.columnsDataStore,
       contextualFilters,
-      shareConsumer: this.shareConsumer,
       loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
     this.display = new Display(this.recordsData);
@@ -147,8 +156,8 @@ export class TabularData {
           new Map(
             columns.map((column, columnIndex) => [
               column.id,
-              processColumn({
-                tableId: this.table.oid,
+              new ProcessedColumn({
+                tableOid: this.table.oid,
                 column,
                 columnIndex,
                 constraints: constraintsData.constraints,
@@ -158,6 +167,29 @@ export class TabularData {
           ),
           this.table,
         ),
+    );
+
+    this.hasPrimaryKey = derived(this.processedColumns, (processedColumns) =>
+      [...processedColumns.values()].some((pc) => pc.column.primary_key),
+    );
+
+    // TODO: We should be able to insert without a primary key column
+    this.canInsertRecords = derived(
+      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
+      ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
+        hasPrimaryKey && tableCurrentRolePrivileges.has('INSERT'),
+    );
+
+    this.canUpdateRecords = derived(
+      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
+      ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
+        hasPrimaryKey && tableCurrentRolePrivileges.has('UPDATE'),
+    );
+
+    this.canDeleteRecords = derived(
+      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
+      ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
+        hasPrimaryKey && tableCurrentRolePrivileges.has('DELETE'),
     );
 
     const plane = derived(
@@ -214,13 +246,7 @@ export class TabularData {
     });
   }
 
-  refresh(): Promise<
-    [
-      Column[] | undefined,
-      TableRecordsData | undefined,
-      ConstraintsData | undefined,
-    ]
-  > {
+  refresh(): Promise<unknown> {
     return Promise.all([
       this.columnsDataStore.fetch(),
       this.recordsData.fetch(),
@@ -269,7 +295,15 @@ export class TabularData {
 
   addEmptyRecord() {
     void this.recordsData.addEmptyRecord();
-    this.selection.update((s) => s.ofNewRecordDataEntryCell());
+    const firstEditableColumnInDraftRow = [
+      ...get(this.processedColumns).values(),
+    ]
+      .map((pc) => pc.withoutEnhancedPkCell())
+      .find((pc) => pc.isEditable);
+    const columnId = firstEditableColumnInDraftRow
+      ? String(firstEditableColumnInDraftRow.id)
+      : undefined;
+    this.selection.update((s) => s.ofNewRecordDataEntryCell(columnId));
   }
 
   destroy(): void {

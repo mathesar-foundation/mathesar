@@ -3,18 +3,17 @@
   import { SheetRow, SheetRowHeaderCell } from '@mathesar/components/sheet';
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
   import {
+    type DisplayRowDescriptor,
     ID_ROW_CONTROL_COLUMN,
     type Row,
     getCellKey,
-    getRowKey,
+    getRowSelectionId,
     getTabularDataStoreFromContext,
     isGroupHeaderRow,
     isHelpTextRow,
-    isNewRecordRow,
-    isPlaceholderRow,
-    rowHasRecord,
+    isPlaceholderRecordRow,
+    isRecordRow,
   } from '@mathesar/stores/table-data';
-  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
 
   import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';
@@ -23,19 +22,20 @@
   import RowControl from './RowControl.svelte';
 
   export let row: Row;
+  export let rowDescriptor: DisplayRowDescriptor;
   export let style: { [key: string]: string | number };
 
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({
-    table,
     recordsData,
     columnsDataStore,
     meta,
     processedColumns,
     selection,
+    canUpdateRecords,
+    canDeleteRecords,
   } = $tabularData);
-  $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({
     rowStatus,
     rowCreationStatus,
@@ -46,19 +46,22 @@
 
   $: ({ pkColumn } = columnsDataStore);
   $: primaryKeyColumnId = $pkColumn?.id;
-  $: rowKey = getRowKey(row, primaryKeyColumnId);
+  $: recordPk =
+    primaryKeyColumnId && isRecordRow(row)
+      ? row.record[primaryKeyColumnId]
+      : undefined;
+
   $: rowSelectionId = getRowSelectionId(row);
-  $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
-  $: status = $rowStatus.get(rowKey);
+  $: creationStatus = $rowCreationStatus.get(row.identifier)?.state;
+  $: status = $rowStatus.get(row.identifier);
   $: wholeRowState = status?.wholeRowState;
   $: isSelected = $selection.rowIds.has(getRowSelectionId(row));
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
-  $: isTableEditable = $currentRolePrivileges.has('UPDATE');
 
   function handleMouseDown(e: MouseEvent) {
-    if (isPlaceholderRow(row)) {
+    if (isPlaceholderRecordRow(row)) {
       $tabularData.addEmptyRecord();
       e.stopPropagation(); // Prevents cell selection from starting
     }
@@ -72,21 +75,20 @@
     class:processing={wholeRowState === 'processing'}
     class:failed={hasWholeRowErrors}
     class:created={creationStatus === 'success'}
-    class:is-new={isNewRecordRow(row)}
     class:is-group-header={isGroupHeaderRow(row)}
-    class:is-add-placeholder={isPlaceholderRow(row)}
+    class:is-add-placeholder={isPlaceholderRecordRow(row)}
     {...htmlAttributes}
     style="--cell-height:{ROW_HEIGHT_PX - 1}px;{styleString}"
     on:mousedown={handleMouseDown}
   >
-    {#if rowHasRecord(row)}
+    {#if isRecordRow(row)}
       <SheetRowHeaderCell
         {rowSelectionId}
         columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
       >
         <RowControl
-          {primaryKeyColumnId}
           {row}
+          {rowDescriptor}
           {meta}
           {recordsData}
           {isSelected}
@@ -94,18 +96,16 @@
         />
         <ContextMenu>
           <RowContextOptions
-            recordPk={rowKey}
+            {recordPk}
             {recordsData}
             {row}
-            {isTableEditable}
+            canDeleteRecords={$canDeleteRecords}
           />
         </ContextMenu>
       </SheetRowHeaderCell>
     {/if}
 
-    {#if isHelpTextRow(row)}
-      <NewRecordMessage columnCount={$processedColumns.size} />
-    {:else if isGroupHeaderRow(row) && $grouping && row.group}
+    {#if isGroupHeaderRow(row) && $grouping}
       <GroupHeader
         {row}
         grouping={$grouping}
@@ -113,22 +113,25 @@
         processedColumnsMap={$processedColumns}
         recordSummariesForSheet={$linkedRecordSummaries}
       />
-    {:else if rowHasRecord(row)}
+    {:else if isRecordRow(row)}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
           {selection}
           {row}
           rowHasErrors={hasWholeRowErrors}
-          key={getCellKey(rowKey, columnId)}
+          key={getCellKey(row.identifier, columnId)}
           modificationStatusMap={cellModificationStatus}
           clientSideErrorMap={cellClientSideErrors}
           bind:value={row.record[columnId]}
           {processedColumn}
           {recordsData}
-          {rowKey}
-          currentRoleTablePrivileges={$currentRolePrivileges}
+          {recordPk}
+          canUpdateRecords={$canUpdateRecords}
+          canDeleteRecords={$canDeleteRecords}
         />
       {/each}
+    {:else if isHelpTextRow(row)}
+      <NewRecordMessage columnCount={$processedColumns.size} />
     {/if}
   </div>
 </SheetRow>

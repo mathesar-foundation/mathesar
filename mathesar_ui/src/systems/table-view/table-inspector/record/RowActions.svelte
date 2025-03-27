@@ -2,31 +2,28 @@
   import { _ } from 'svelte-i18n';
 
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
-  import type { Table } from '@mathesar/models/Table';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import type {
-    ColumnsDataStore,
-    RecordsData,
+  import {
+    extractPrimaryKeyValue,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
   import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
   import {
     AnchorButton,
     Button,
     Icon,
-    type ImmutableSet,
     iconExternalLink,
   } from '@mathesar-component-library';
 
-  export let selectedRowIds: ImmutableSet<string>;
-  export let recordsData: RecordsData;
-  export let columnsDataStore: ColumnsDataStore;
-  export let table: Table;
+  const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: ({ selection, recordsData, columnsDataStore, canDeleteRecords } =
+    $tabularData);
+  $: selectedRowIds = $selection.rowIds;
   $: selectedRowCount = selectedRowIds.size;
+
   $: ({ columns } = columnsDataStore);
   $: ({ selectableRowsMap } = recordsData);
   $: recordPageLink = (() => {
@@ -35,7 +32,7 @@
     const row = $selectableRowsMap.get(id);
     if (!row) return undefined;
     try {
-      const recordId = getPkValueInRecord(row.record, $columns);
+      const recordId = extractPrimaryKeyValue(row.record, $columns);
       return $storeToGetRecordPageUrl({ recordId });
     } catch (e) {
       return undefined;
@@ -80,7 +77,7 @@
   {/if}
   <Button
     on:click={handleDeleteRecords}
-    disabled={!$currentRolePrivileges.has('DELETE')}
+    disabled={!$canDeleteRecords}
     appearance="action"
   >
     <Icon {...iconDeleteMajor} />

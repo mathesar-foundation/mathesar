@@ -18,6 +18,7 @@ import Number from './type-configs/number';
 import Text from './type-configs/text';
 import Time from './type-configs/time';
 import Uri from './type-configs/uri';
+import Uuid from './type-configs/uuid';
 import type {
   AbstractType,
   AbstractTypeCategoryIdentifier,
@@ -49,6 +50,7 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.Date]: Date,
   [abstractTypeCategory.Time]: Time,
   [abstractTypeCategory.DateTime]: DateTime,
+  [abstractTypeCategory.Uuid]: Uuid,
 };
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
@@ -223,6 +225,11 @@ const typesResponse: AbstractTypeResponse[] = [
     db_types: [DB_TYPES.MSAR__URI],
   },
   {
+    identifier: 'uuid',
+    name: 'UUID',
+    db_types: [DB_TYPES.UUID],
+  },
+  {
     identifier: 'jsonlist',
     name: 'JSON List',
     db_types: [DB_TYPES.MSAR__MATHESAR_JSON_ARRAY],
@@ -312,4 +319,10 @@ export function getDefaultDbTypeOfAbstractType(
     return [...abstractType.dbTypes][0];
   }
   return defaultDbType;
+}
+
+export function getDbTypesForAbstractType(
+  abstractTypeIdentifier: AbstractType['identifier'],
+): Set<DbType> {
+  return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();
 }

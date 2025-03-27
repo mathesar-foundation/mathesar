@@ -17,17 +17,16 @@
   export let context: 'page' | 'widget' | 'shared-consumer-page' = 'page';
 
   $: ({
-    table,
     recordsData,
     meta,
     isLoading,
     columnsDataStore,
     constraintsDataStore,
+    canInsertRecords,
   } = $tabularData);
-  $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
-  $: ({ totalCount, state, newRecords } = recordsData);
+  $: ({ totalCount, state, newRecords, persistedNewRecords } = recordsData);
   $: recordState = $state;
   $: columnsFetchStatus = columnsDataStore.fetchStatus;
   $: pageCount = getPaginationPageCount($totalCount ?? 0, pageSize);
@@ -36,8 +35,7 @@
     $columnsFetchStatus?.state === 'failure' ||
     recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
-  $: hasNewRecordButton =
-    context !== 'widget' && $currentRolePrivileges.has('INSERT');
+  $: hasNewRecordButton = context !== 'widget' && $canInsertRecords;
   $: refreshButtonState = (() => {
     let buttonState: 'loading' | 'error' | undefined = undefined;
     if ($isLoading) {
@@ -74,19 +72,32 @@
     {/if}
     <div class="record-count">
       {#if pageCount > 0 && $totalCount}
-        {$_('showing_n_to_m_of_total_records', {
-          values: {
-            leftBound,
-            rightBound: max,
-            totalCount: $totalCount,
-          },
-        })}
-        {#if $newRecords.length > 0}
-          ({$_('count_new_records', {
+        <span>
+          {$_('showing_n_to_m_of_total_records', {
             values: {
-              count: $newRecords.length,
+              leftBound,
+              rightBound: max,
+              totalCount: $totalCount,
             },
-          })})
+          })}
+        </span>
+        {#if $persistedNewRecords.length > 0}
+          <span class="pill">
+            {$_('count_new_records', {
+              values: {
+                count: $persistedNewRecords.length,
+              },
+            })}
+          </span>
+        {/if}
+        {#if $newRecords.length - $persistedNewRecords.length > 0}
+          <span class="pill">
+            {$_('count_unsaved_records', {
+              values: {
+                count: $newRecords.length - $persistedNewRecords.length,
+              },
+            })}
+          </span>
         {/if}
       {:else if recordState !== States.Loading}
         {$_('no_records_found')}
@@ -123,6 +134,20 @@
 
     &.context-widget {
       font-size: 80%;
+    }
+
+    .record-count {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--size-super-ultra-small);
+    }
+
+    .pill {
+      font-size: var(--size-x-small);
+      display: inline-block;
+      border: 1px solid var(--slate-400);
+      border-radius: var(--border-radius-m);
+      padding: var(--size-extreme-small);
     }
   }
 

@@ -6,7 +6,7 @@
     type ProcessedColumn,
     type RecordRow,
     type SearchFuzzy,
-    rowHasSavedRecord,
+    isPersistedRecordRow,
   } from '@mathesar/stores/table-data';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 
@@ -32,7 +32,7 @@
     {value}
     {recordSummary}
     disabled
-    showAsSkeleton={!rowHasSavedRecord(row) || isLoading}
+    showAsSkeleton={!isPersistedRecordRow(row) || isLoading}
     {searchValue}
     showTruncationPopover
   />

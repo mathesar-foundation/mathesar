@@ -2,7 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import { Button, dayjs } from '@mathesar-component-library';
+  import type { DateTimeFormatter } from '@mathesar/utils/date-time';
+  import { Button, assertExhaustive } from '@mathesar-component-library';
 
   import type {
     DateTimeCellExternalProps,
@@ -13,56 +14,48 @@
 
   export let type: DateTimeCellExternalProps['type'];
   export let value: DateTimeCellProps['value'];
-  export let formattingString: DateTimeCellExternalProps['formattingString'];
+  export let formatter: DateTimeFormatter;
   export let isRelative = false;
 
-  const allPresets = {
-    now: { label: $_('now'), absoluteDate: dayjs().format(formattingString) },
-    today: {
-      label: $_('today'),
-      absoluteDate: dayjs().startOf('day').format(formattingString),
-    },
-    yesterday: {
-      label: $_('yesterday'),
-      absoluteDate: dayjs()
-        .startOf('day')
-        .subtract(1, 'day')
-        .format(formattingString),
-    },
-  };
+  interface Preset {
+    keyword: string;
+    label: string;
+  }
 
-  const presetTypeMap: Record<
-    DateTimeCellExternalProps['type'],
-    (keyof typeof allPresets)[]
-  > = {
-    date: ['today', 'yesterday'],
-    datetime: ['now', 'today'],
-    time: ['now'],
-  };
+  const now: Preset = { keyword: 'now', label: $_('now') };
+  const today: Preset = { keyword: 'today', label: $_('today') };
+  const yesterday: Preset = { keyword: 'yesterday', label: $_('yesterday') };
 
-  $: presets = presetTypeMap[type];
+  $: presets = (() => {
+    if (type === 'date') return [today, yesterday];
+    if (type === 'datetime') return [now, today];
+    if (type === 'time') return [now];
+    return assertExhaustive(type);
+  })();
+
+  function getCanonicalValue(keyword: string) {
+    return formatter.parse(keyword).value;
+  }
+
+  function getFormattedValue(keyword: string) {
+    return formatter.parseAndFormat(keyword);
+  }
 </script>
 
 <div class="presets" class:is-relative={isRelative}>
-  {#each presets as preset (preset)}
+  {#each presets as { keyword, label } (keyword)}
     <Button
-      appearance={value?.trim() === preset ? 'primary' : 'plain'}
+      appearance={value?.trim() === keyword ? 'primary' : 'plain'}
       on:click={() => {
-        value = preset;
+        value = getCanonicalValue(keyword);
         dispatch('change', value);
       }}
     >
       {#if isRelative}
-        <span class="tag-label">
-          {allPresets[preset].label}
-        </span>
+        <span class="tag-label">{label}</span>
       {:else}
-        <span>
-          {allPresets[preset].absoluteDate}
-        </span>
-        <span class="tag-label absolute-date">
-          ({allPresets[preset].label})
-        </span>
+        <span>{getFormattedValue(keyword)}</span>
+        <span class="tag-label absolute-date">({label})</span>
       {/if}
     </Button>
   {/each}
