@@ -1,6 +1,7 @@
 .tab-container {
   display: flex;
   flex-direction: column;
+
   > ul.tabs {
     align-items: center;
     display: flex;
@@ -10,7 +11,7 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border-bottom: 1px solid var(--slate-200);
+    border-bottom: 1px solid var(--sand-300);
 
     > li.tab {
       align-items: stretch;
@@ -42,7 +43,7 @@
       }
 
       &:hover {
-        border-bottom-color: var(--slate-300);
+        border-bottom-color: var(--stormy-300);
         opacity: 1;
       }
 
@@ -51,12 +52,12 @@
       }
 
       &.active {
-        border-bottom-color: var(--brand-500);
+        border-bottom-color: var(--stormy-400);
         opacity: 1;
       }
 
       &.focused {
-        border-color: var(--brand-500);
+        border-color: var(--stormy-400);
         z-index: 1;
       }
 

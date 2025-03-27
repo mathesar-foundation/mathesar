@@ -14,7 +14,7 @@
         <Icon {...icon} size="0.8em" />
       </span>
       <slot name="title" />
-      <Icon {...iconExternalHyperlink} />
+      <Icon {...iconExternalHyperlink} size="0.8em" />
     </a>
   </span>
   <div class="description"><slot name="description" /></div>
@@ -30,20 +30,20 @@
   .icon {
     display: inline-flex;
     align-items: center;
-    padding: var(--size-ultra-small);
-    border-radius: 50%;
-    background-color: var(--yellow-400);
-    color: var(--white);
+    margin-right: var(--size-super-ultra-small);
+    color: var(--text-color-tertiary);
   }
   .title {
-    font-weight: 600;
-    text-decoration: underline;
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-size-large);
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: var(--size-super-ultra-small);
+    color: var(--text-color-primary);
   }
   .description {
-    color: var(--color-text-muted);
+    color: var(--text-color-secondary);
     flex: 1 0 auto;
   }
 </style>

@@ -166,12 +166,11 @@
       width: 100%;
       list-style: none;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-
-      .schema-list-item + .schema-list-item {
-        margin-top: var(--size-base);
-      }
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      align-items: stretch;
+      margin-top: 0.5rem;
     }
   }
 </style>

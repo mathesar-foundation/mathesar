@@ -56,7 +56,8 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    border-bottom: 1px solid var(--slate-200);
+    background-color: var(--card-background);
+    border-bottom: 1px solid var(--card-row-border);
     user-select: none;
     -webkit-user-select: none; /* Safari */
     overflow: hidden;
@@ -64,6 +65,7 @@
     > div {
       position: relative;
       height: var(--sheet-header-height, 32px);
+      color: var(--text-color-primary);
     }
 
     &.inherit-font-style {

@@ -1,5 +1,5 @@
 .window {
-  background-color: var(--slate-50);
+  background-color: var(--layout-background-color);
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
   width: var(--window-width, 100%);
@@ -16,7 +16,7 @@
     justify-content: flex-end;
     align-items: flex-start;
     padding: 1rem;
-    border-bottom: 1px solid var(--slate-200);
+    border-bottom: 1px solid var(--border-color);
     .title {
       &:empty {
         display: none;
@@ -34,8 +34,8 @@
 
   > .footer {
     grid-row: 3;
-    border-top: 1px solid var(--slate-200);
-    background: var(--slate-100);
+    border-top: 1px solid var(--border-color);
+    background: var(--hover-background);
   }
 
   &.has-body-padding > .body {

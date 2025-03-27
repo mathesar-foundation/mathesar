@@ -123,8 +123,8 @@
     border-top: 1px solid var(--slate-300);
   }
   .entity-switcher .trigger {
-    border: 1px solid var(--slate-400);
-    color: var(--slate-300);
+    border: 1px solid var(--stormy-200);
+    color: var(--slate-400);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
@@ -132,9 +132,9 @@
 
     &:hover,
     &:active {
-      background-color: var(--slate-100);
-      color: var(--slate-500);
-      border-color: var(--slate-300);
+      background-color: var(--stormy-100);
+      color: var(--stormy-500);
+      border-color: var(--stormy-300);
     }
   }
 </style>

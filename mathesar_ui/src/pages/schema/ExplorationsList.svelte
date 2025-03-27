@@ -12,15 +12,11 @@
   export let explorations: SavedExploration[];
   export let database: Database;
   export let schema: Schema;
-  export let bordered = true;
 </script>
 
-<div class="container" class:bordered={explorations.length > 0 && bordered}>
+<div class="container">
   {#each explorations as exploration, index (exploration.id)}
     <ExplorationItem {exploration} {database} {schema} />
-    {#if index !== explorations.length - 1}
-      <div class="divider" />
-    {/if}
   {:else}
     <EmptyEntity icon={iconExploration}>
       <p>{$_('no_explorations')}</p>
@@ -32,14 +28,6 @@
   .container {
     display: flex;
     flex-direction: column;
-
-    &.bordered {
-      border: 1px solid var(--slate-200);
-      border-radius: var(--border-radius-l);
-    }
-  }
-
-  .divider {
-    border-bottom: 1px solid var(--slate-200);
+    gap: 0.5rem;
   }
 </style>

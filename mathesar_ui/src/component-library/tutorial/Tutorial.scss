@@ -1,12 +1,13 @@
 .tutorial {
-  border-top: 4px solid var(--brand-500);
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  border-radius: var(--border-radius-m);
-  background-color: var(--yellow-100);
+  border-left: none;
+  border-top: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: var(--border-radius-l);
+  background-color: var(--white);
   padding: var(--tutorial_padding, 1.5rem);
   display: flex;
   flex-direction: column;
-  line-height: 1.5;
+  line-height: 1.6;
 
   > * + * {
     margin-top: 1rem;
@@ -19,9 +20,10 @@
     justify-content: space-between;
 
     .title {
-      font-size: var(--text-size-x-large);
+      font-size: var(--text-size-large);
       color: var(--slate-800);
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
+      letter-spacing: -0.01em;
     }
   }
 }

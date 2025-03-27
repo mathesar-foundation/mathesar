@@ -45,8 +45,8 @@
 
 <style lang="scss">
   .entity-page-header {
-    border-bottom: 1px solid var(--slate-300);
-    background-color: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--background-color);
     position: relative;
     display: flex;
     align-items: center;
@@ -62,7 +62,7 @@
       flex-grow: 0;
       flex-shrink: 1;
       min-height: 100%;
-      border-right: 1px solid var(--slate-200);
+      border-right: 1px solid var(--border-color);
       padding: var(--size-small) var(--size-large);
 
       .icon {
@@ -80,10 +80,11 @@
         margin: 0;
         font-weight: 500;
         overflow: hidden;
+        color: var(--text-color-primary);
       }
       .description {
         font-size: var(--text-size-small);
-        color: var(--color-text-muted);
+        color: var(--text-color-secondary);
         overflow: hidden;
       }
     }

@@ -14,6 +14,10 @@
   import DatabasesList from './DatabasesList.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
+
+  $: welcomeMessage = $_('welcome_to_mathesar_user', {
+    values: { user: $userProfileStore?.getDisplayName() },
+  });
 </script>
 
 <svelte:head>
@@ -22,23 +26,16 @@
 
 <LayoutWithHeader
   restrictWidth
+  headerTitle={welcomeMessage}
   cssVariables={{
-    '--page-padding': 'var(--inset-page-padding)',
-    '--layout-background-color': 'var(--sand-100)',
+    '--page-padding': '0',
+    '--layout-margin': '2rem 0',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
-  <h1>
-    {$_('welcome_to_mathesar_user', {
-      values: { user: $userProfileStore?.getDisplayName() },
-    })}
-  </h1>
   <div class="content">
-    <div class="databases-section">
-      <DatabasesList />
-    </div>
-    <div class="resources">
-      <h2>{$_('resources')}</h2>
+    <div class="resources-sidebar">
+      <h3>{$_('resources')}</h3>
       <div class="cards">
         <DocumentationResource />
         <CommunityResource />
@@ -46,15 +43,18 @@
         <DonateResource />
       </div>
     </div>
+    <div class="databases-section">
+      <DatabasesList />
+    </div>
   </div>
 </LayoutWithHeader>
 
 <style lang="scss">
   .content {
     display: grid;
-    gap: 2rem;
+    gap: 3.5rem;
     @media screen and (min-width: 50rem) {
-      grid-template: auto / 1fr 20rem;
+      grid-template: auto / 20rem 1fr;
     }
   }
   .databases-section {
@@ -62,13 +62,23 @@
     flex-direction: column;
     gap: 2.5rem;
   }
+  .resources-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: var(--sidebar-background);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-color) 0 2px 8px;
+    border: 1px solid var(--card-border);
+  }
   .cards {
     display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
+    flex-direction: column;
+    gap: 1.5rem;
 
     & > :global(*) {
-      flex: 1 0 15rem;
+      width: 100%;
     }
   }
 </style>

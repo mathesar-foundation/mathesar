@@ -37,7 +37,7 @@
 <div class="header-cell-root">
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
   <div
-    class="header-cell-btn btn btn-ghost size-medium"
+    class="header-cell-btn btn btn-ghost"
     style="cursor: inherit;"
     on:click
     on:mousedown
@@ -70,7 +70,6 @@
   .header-cell-root {
     width: 100%;
     height: 100%;
-    padding: 0.1rem 0rem;
     cursor: inherit;
     :global(button.btn) {
       width: 100%;

@@ -24,7 +24,8 @@
     display: block;
   }
   .mathesar {
-    font-size: var(--text-size-x-large);
+    font-size: var(--text-size-xx-large);
+    font-weight: var(--font-weight-bold);
     margin-left: 0.5rem;
   }
   .home-link.compact .mathesar {
