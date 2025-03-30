@@ -5,10 +5,14 @@
   --background-color: #ffffff;
   --text-color: #171717;
   --text-color-muted: #515662;
-  --border-color: var(--slate-200);
+  --border-color: var(--sand-300);
   --hover-background: var(--stormy-50);
   --active-background: var(--stormy-200);
   --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-light: rgba(0, 0, 0, 0.05);
+  --shadow-color-dark: rgba(0, 0, 0, 0.3);
+  --shadow-color-inset: rgba(255, 255, 255, 0.1);
+  --shadow-color-inset-dark: rgba(255, 255, 255, 0.05);
   --input-background: #ffffff;
   --input-border: var(--slate-300);
   --input-text: var(--text-color);
@@ -46,10 +50,11 @@
   --card-border: var(--sand-300);
   --card-row-border: var(--sand-200);
   --card-hover-border: var(--stormy-300);
-  --card-hover-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-  --card-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
-    0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
+    0 2px 4px -2px var(--shadow-color),
+    0 0 0 1px var(--shadow-color-inset) inset;
+  --card-active-shadow: 0 1px 2px var(--shadow-color-light),
+    0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
   --card-gradient-direction: var(--gradient-direction-default);
   --sidebar-background: #ffffff;
   --modal-background: #ffffff;
@@ -307,7 +312,9 @@
     --border-color: #404040;
     --hover-background: #262626;
     --active-background: #333333;
-    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-color: var(--shadow-color-dark);
+    --shadow-color-light: rgba(0, 0, 0, 0.2);
+    --shadow-color-inset: var(--shadow-color-inset-dark);
     --input-background: #262626;
     --input-border: #404040;
     --input-text: var(--text-color);
@@ -317,11 +324,11 @@
     --card-border: #333333;
     --card-row-border: #262626;
     --card-hover-border: var(--stormy-400);
-    --card-hover-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
-      0 2px 4px -2px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    --card-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.2),
-      0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+    --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
+      0 2px 4px -2px var(--shadow-color),
+      0 0 0 1px var(--shadow-color-inset) inset;
+    --card-active-shadow: 0 1px 2px var(--shadow-color-light),
+      0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
     --card-gradient-direction: to bottom right;
     --sidebar-background: #262626;
     --modal-background: #262626;

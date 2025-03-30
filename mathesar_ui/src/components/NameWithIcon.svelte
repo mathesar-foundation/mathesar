@@ -45,7 +45,6 @@
     color: var(--icon-color, currentcolor);
     opacity: var(--NameWithIcon__icon-opacity, 0.75);
     vertical-align: bottom;
-    margin-right: 0.5em;
   }
   .icon > :global(.fa-icon + .fa-icon) {
     margin-left: 0.2em;

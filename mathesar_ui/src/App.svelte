@@ -87,8 +87,13 @@
     --cell-text-color-processing: var(--text-color-muted);
     --color-array-element: var(--sky-300);
 
-    --cell-border-horizontal: 1px solid var(--border-color);
-    --cell-border-vertical: 1px solid var(--border-color);
+    --cell-border-horizontal: 1px solid var(--slate-200);
+    --cell-border-vertical: 1px solid var(--slate-200);
+
+    @media (prefers-color-scheme: dark) {
+      --cell-border-horizontal: 1px solid var(--slate-700);
+      --cell-border-vertical: 1px solid var(--slate-700);
+    }
 
     --page-padding-x: 1em;
     --page-padding-y: 1em;
