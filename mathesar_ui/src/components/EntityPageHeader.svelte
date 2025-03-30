@@ -46,11 +46,15 @@
 <style lang="scss">
   .entity-page-header {
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--background-color);
+    background-color: linear-gradient(
+      var(--card-gradient-direction),
+      var(--card-gradient-start),
+      var(--card-gradient-end)
+    );
     position: relative;
     display: flex;
     align-items: center;
-    min-height: 4.18214rem;
+    min-height: var(--size-ultra-large);
     overflow: hidden;
 
     .heading {
@@ -66,19 +70,16 @@
       padding: var(--size-small) var(--size-large);
 
       .icon {
-        font-size: 1.5rem;
+        font-size: var(--size-large);
         padding: var(--size-ultra-small);
-        background: var(--EntityPageHeader__icon-background, var(--yellow-200));
-        border-radius: var(--size-super-ultra-small);
-        margin-right: var(--size-xx-small);
       }
       .text {
         overflow: hidden;
       }
       .name {
-        font-size: var(--text-size-large);
+        font-size: var(--text-size-x-large);
         margin: 0;
-        font-weight: 500;
+        font-weight: var(--font-weight-bold);
         overflow: hidden;
         color: var(--text-color-primary);
       }
@@ -90,7 +91,7 @@
     }
 
     .actions {
-      padding: 0 var(--size-large);
+      padding: var(--size-xx-small);
       display: flex;
       align-items: center;
       flex-grow: 1;

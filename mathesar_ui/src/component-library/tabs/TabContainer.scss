@@ -11,7 +11,7 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border-bottom: 1px solid var(--sand-300);
+    border-bottom: 1px solid var(--border-color);
 
     > li.tab {
       align-items: stretch;
@@ -23,7 +23,7 @@
       -webkit-user-select: none; /* Safari */
       list-style: none;
       overflow: hidden;
-      border-radius: 2px 2px 0px 0px;
+      border-radius: var(--border-radius-s) var(--border-radius-s) 0 0;
       border-bottom: 0.25em solid transparent;
       margin-bottom: -1px;
       margin-right: var(--Tab_margin-right, 2rem);
@@ -32,18 +32,18 @@
 
       > div,
       a {
-        padding: 0.5rem 1rem;
+        padding: var(--size-xx-small) var(--size-x-small);
         white-space: nowrap;
         text-decoration: none;
         text-overflow: ellipsis;
         overflow: hidden;
         color: inherit;
-        font-weight: var(--tab-header-font-weight, 500);
+        font-weight: var(--font-weight-medium);
         width: 100%;
       }
 
       &:hover {
-        border-bottom-color: var(--stormy-300);
+        border-bottom-color: var(--button-secondary-hover-border);
         opacity: 1;
       }
 
@@ -52,25 +52,25 @@
       }
 
       &.active {
-        border-bottom-color: var(--stormy-400);
+        border-bottom-color: var(--button-secondary-active-border);
         opacity: 1;
       }
 
       &.focused {
-        border-color: var(--stormy-400);
+        border-color: var(--button-secondary-active-border);
         z-index: 1;
       }
 
       > button.remove {
         cursor: pointer;
-        padding: 4px 10px;
+        padding: var(--size-xx-small) var(--size-x-small);
         border: none;
         background: none;
         margin: 0;
         color: inherit;
 
         &:hover {
-          background: #f3f3f3;
+          background: var(--hover-background);
         }
       }
 
@@ -93,7 +93,7 @@
   }
 
   > ul.tabs:before {
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .tab-content-holder {
@@ -119,7 +119,7 @@
         text-align: center;
         margin-right: var(--Tab_margin-right, 0);
         > div {
-          padding: 0.5rem 0;
+          padding: var(--size-ultra-small) 0;
         }
       }
     }

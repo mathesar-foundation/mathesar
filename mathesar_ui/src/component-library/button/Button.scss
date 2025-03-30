@@ -72,26 +72,52 @@
   }
 
   &.btn-secondary {
-    --button-background: var(--background-color);
-    --button-border-color: var(--stormy-200);
+    --button-background: linear-gradient(
+      to bottom right,
+      var(--card-gradient-start),
+      var(--card-gradient-end)
+    );
+    --button-border-color: var(--stormy-300);
     --button-color: var(--text-color-primary);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--stormy-200-rgb), 0.3);
+        --button-outline: 2px solid rgba(var(--stormy-300-rgb), 0.3);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        --button-border-color: var(--stormy-300);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--button-secondary-hover-gradient-start),
+          var(--button-secondary-hover-gradient-end)
+        );
+        --button-border-color: var(--stormy-400);
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.1),
+          0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       }
 
       &:active,
       &.active {
-        --button-background: var(--hover-background);
-        --button-border-color: var(--stormy-400);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--button-secondary-active-gradient-start),
+          var(--button-secondary-active-gradient-end)
+        );
+        --button-border-color: var(--stormy-500);
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.05),
+          0 1px 3px rgba(0, 0, 0, 0.1),
+          0 1px 2px -1px rgba(0, 0, 0, 0.1);
       }
     }
   }

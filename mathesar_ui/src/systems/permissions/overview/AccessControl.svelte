@@ -166,7 +166,7 @@
       </div>
     {:else}
       <div class="no-access">
-        <WarningBox>
+        <WarningBox fullWidth>
           {$_('access_not_granted_for_any_role')}
         </WarningBox>
       </div>

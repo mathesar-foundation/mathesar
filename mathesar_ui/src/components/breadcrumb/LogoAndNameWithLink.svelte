@@ -18,9 +18,12 @@
     align-items: center;
     text-decoration: none;
     color: inherit;
+    margin-right: var(--size-xx-small);
+    /* Optical adjustment to align logo with text */
+    margin-top: -4px;
   }
   .home-link > :global(svg) {
-    font-size: 2rem;
+    font-size: 1.8rem;
     display: block;
   }
   .mathesar {

@@ -123,33 +123,42 @@
     border-radius: var(--border-radius-l);
     border: 1px solid var(--card-border);
     background: linear-gradient(
-      to bottom right,
-      var(--card-gradient-start),
-      var(--card-gradient-end)
+      var(--gradient-direction-default),
+      var(--gradient-card-start),
+      var(--gradient-card-end)
     );
     padding: 1rem;
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
+    box-shadow: var(--card-active-shadow);
+    transition: all 0.2s ease-in-out;
   }
 
   .schema-row.hover {
-    border: 1px solid var(--stormy-300);
-    box-shadow: var(--shadow-color) 0 2px 4px 0;
+    border: 1px solid var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
     background: linear-gradient(
-      to bottom right,
-      var(--card-gradient-start),
-      var(--card-gradient-end)
+      var(--gradient-direction-hover),
+      var(--gradient-card-hover-start),
+      var(--gradient-card-hover-end)
     );
   }
+
   .schema-row.focus {
     outline: 2px solid var(--sand-400);
     outline-offset: 1px;
   }
+
   .schema-row.active {
     border-color: var(--stormy-400);
-    box-shadow: var(--shadow-color) 0 1px 2px 0;
+    box-shadow: var(--card-active-shadow);
+    background: linear-gradient(
+      var(--gradient-direction-active),
+      var(--gradient-card-active-start),
+      var(--gradient-card-active-end)
+    );
   }
 
   .top-row {

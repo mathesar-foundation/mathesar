@@ -14,11 +14,43 @@
   --input-text: var(--text-color);
   --input-focus-color: var(--stormy-500);
   --input-focus-shadow: var(--stormy-100);
+
+  /* Gradient System */
+  --gradient-direction-default: to bottom right;
+  --gradient-direction-hover: to bottom right;
+  --gradient-direction-active: to bottom right;
+
+  /* Base Gradients */
+  --gradient-base-start: var(--stormy-100);
+  --gradient-base-end: var(--stormy-200);
+  --gradient-base-hover-start: var(--stormy-200);
+  --gradient-base-hover-end: var(--stormy-300);
+  --gradient-base-active-start: var(--stormy-300);
+  --gradient-base-active-end: var(--stormy-400);
+
+  /* Card Gradients */
+  --gradient-card-start: var(--sand-50);
+  --gradient-card-end: var(--sand-100);
+  --gradient-card-hover-start: var(--sand-50);
+  --gradient-card-hover-end: rgba(250, 249, 246, 0.8);
+  --gradient-card-active-start: var(--sand-100);
+  --gradient-card-active-end: var(--sand-200);
+
+  /* Button Gradients */
+  --gradient-button-secondary-hover-start: rgba(255, 255, 255, 0.08);
+  --gradient-button-secondary-hover-end: rgba(255, 255, 255, 0.03);
+  --gradient-button-secondary-active-start: rgba(255, 255, 255, 0.08);
+  --gradient-button-secondary-active-end: rgba(255, 255, 255, 0.03);
+
   --card-background: #ffffff;
   --card-border: var(--sand-300);
   --card-row-border: var(--sand-200);
-  --card-gradient-start: var(--sand-50);
-  --card-gradient-end: rgba(250, 249, 246, 0.8);
+  --card-hover-border: var(--stormy-300);
+  --card-hover-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  --card-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --card-gradient-direction: var(--gradient-direction-default);
   --sidebar-background: #ffffff;
   --modal-background: #ffffff;
   --modal-overlay: rgba(0, 0, 0, 0.5);
@@ -32,11 +64,10 @@
   --collapsible-hover: var(--sand-300);
   --collapsible-active: var(--sand-400);
 
-  --gradient-light-start: var(--stormy-100);
-  --gradient-light-end: var(--stormy-200);
+  --gradient-light-start: var(--gradient-base-start);
+  --gradient-light-end: var(--gradient-base-end);
   --gradient-dark-start: var(--stormy-800);
   --gradient-dark-end: var(--stormy-900);
-  --gradient-direction: to bottom right;
 
   --button-secondary-text: var(--stormy-600);
   --button-secondary-border: var(--stormy-200);
@@ -54,15 +85,25 @@
   --danger-background-color: #fde9e9;
   --danger-border-color: #f2aaaa;
 
+  /* Utility colors */
+  --info-color: #3b82f6;
+  --info-background-color: #eff6ff;
+  --info-border-color: #bfdbfe;
+
+  --warning-color: #f59e0b;
+  --warning-background-color: #fef3c7;
+  --warning-border-color: #fcd34d;
+
+  --success-color: #10b981;
+  --success-background-color: #ecfdf5;
+  --success-border-color: #a7f3d0;
+
   // Idea here is to use the same token naming
   // between the Figma designs and the codebase
   // which then makes it easier and faster to create
   // element from design into code.
   --green-100: #e5fde6;
 
-  /* New color palettes */
-  /* Sand palette - more neutral version */
-  // ... existing code ...
   --sand-50: #faf9f6;
   --sand-100: #f6f3ed;
   --sand-200: #ede7dd;
@@ -73,9 +114,7 @@
   --sand-700: #8f7a61;
   --sand-800: #766349;
   --sand-900: #5f4f37;
-  // ... existing code ...
 
-  /* Orange-red palette */
   --orange-red-50: #fff2ef;
   --orange-red-100: #ffe2dc;
   --orange-red-200: #ffc5b8;
@@ -88,7 +127,6 @@
   --orange-red-900: #82180c;
   --orange-red-950: #470c06;
 
-  /* Stormy palette */
   --stormy-50: #f3f0f7;
   --stormy-100: #e6dff0;
   --stormy-200: #cdc0e2;
@@ -101,33 +139,6 @@
   --stormy-900: #201430;
   --stormy-950: #0f081b;
 
-  /* Sapphire palette */
-  --sapphire-50: #f6f2f9;
-  --sapphire-100: #ede5f4;
-  --sapphire-200: #ddcbea;
-  --sapphire-300: #c39fdd;
-  --sapphire-400: #9656bb;
-  --sapphire-500: #6f238f;
-  --sapphire-600: #5f1d7a;
-  --sapphire-700: #4f1865;
-  --sapphire-800: #411450;
-  --sapphire-900: #2a0d32;
-  --sapphire-950: #1d0623;
-
-  /* Plum palette */
-  --plum-50: #faf4f7;
-  --plum-100: #f3e7ee;
-  --plum-200: #e7d0dd;
-  --plum-300: #d3adc3;
-  --plum-400: #b67f9c;
-  --plum-500: #8e5573;
-  --plum-600: #6d3961;
-  --plum-700: #5f3154;
-  --plum-800: #502944;
-  --plum-900: #3d1f33;
-  --plum-950: #251219;
-
-  /* Rosy palette */
   --rosy-50: #fef3f3;
   --rosy-100: #fee5e5;
   --rosy-200: #fccfcf;
@@ -140,7 +151,6 @@
   --rosy-900: #612323;
   --rosy-950: #411414;
 
-  /* Salmon palette */
   --salmon-50: #fef4f1;
   --salmon-100: #ffe6df;
   --salmon-200: #ffd0bf;
@@ -153,7 +163,6 @@
   --salmon-900: #832411;
   --salmon-950: #441209;
 
-  /* Pumpkin palette */
   --pumpkin-50: #fefbf3;
   --pumpkin-100: #fef4de;
   --pumpkin-200: #fce7bc;
@@ -165,19 +174,6 @@
   --pumpkin-800: #874c15;
   --pumpkin-900: #6f3f15;
   --pumpkin-950: #422408;
-
-  /* Olivia palette */
-  --olivia-50: #f8f6ef;
-  --olivia-100: #efe9d7;
-  --olivia-200: #dfd0aa;
-  --olivia-300: #c6ad77;
-  --olivia-400: #b08e45;
-  --olivia-500: #9c6b23;
-  --olivia-600: #87571c;
-  --olivia-700: #6d4319;
-  --olivia-800: #5a3619;
-  --olivia-900: #3b2513;
-  --olivia-950: #2c190c;
 
   --purple-100: #ebe5fd;
   --purple-200: #d7cbfb;
@@ -223,10 +219,6 @@
   --white: white;
 
   --red-box-shadow: #eb544133;
-
-  // Setting a new variable as brand color
-  // provides the ability to later change its
-  // value and support white-labelling
 
   // Brand Color
   --brand-100: var(--red-100);
@@ -285,7 +277,6 @@
   --color-contrast-light: var(--color-blue-light);
   --color-link: var(--color-blue-dark);
   --color-text: #171717;
-  --color-text-muted: #515662;
   --text-size-xx-small: var(--size-xx-small);
   --text-size-x-small: var(--size-x-small);
   --text-size-small: var(--size-small);
@@ -301,6 +292,11 @@
   --font-weight-bold: 600;
   --font-weight-extra-bold: 700;
   --modal-z-index: 50;
+
+  --button-secondary-hover-gradient-start: rgba(255, 255, 255, 0.08);
+  --button-secondary-hover-gradient-end: rgba(255, 255, 255, 0.03);
+  --button-secondary-active-gradient-start: rgba(255, 255, 255, 0.08);
+  --button-secondary-active-gradient-end: rgba(255, 255, 255, 0.03);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -309,8 +305,8 @@
     --text-color: #e5e5e5;
     --text-color-muted: #a3a3a3;
     --border-color: #404040;
-    --hover-background: #171717;
-    --active-background: #1f1f1f;
+    --hover-background: #262626;
+    --active-background: #333333;
     --shadow-color: rgba(0, 0, 0, 0.3);
     --input-background: #262626;
     --input-border: #404040;
@@ -320,8 +316,13 @@
     --card-background: #171717;
     --card-border: #333333;
     --card-row-border: #262626;
-    --card-gradient-start: #1a1a1a;
-    --card-gradient-end: #171717;
+    --card-hover-border: var(--stormy-400);
+    --card-hover-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+      0 2px 4px -2px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    --card-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.2),
+      0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+    --card-gradient-direction: to bottom right;
     --sidebar-background: #262626;
     --modal-background: #262626;
     --modal-overlay: rgba(0, 0, 0, 0.7);
@@ -335,17 +336,32 @@
     --collapsible-hover: #404040;
     --collapsible-active: #4a4a4a;
 
-    --gradient-light-start: var(--stormy-800);
-    --gradient-light-end: var(--stormy-900);
-    --gradient-dark-start: var(--stormy-900);
-    --gradient-dark-end: var(--stormy-950);
+    --gradient-base-start: var(--stormy-800);
+    --gradient-base-end: var(--stormy-900);
+    --gradient-base-hover-start: var(--stormy-700);
+    --gradient-base-hover-end: var(--stormy-800);
+    --gradient-base-active-start: var(--stormy-600);
+    --gradient-base-active-end: var(--stormy-700);
+
+    --gradient-card-start: #1a1a1a;
+    --gradient-card-end: #171717;
+    --gradient-card-hover-start: #1a1a1a;
+    --gradient-card-hover-end: #171717;
+    --gradient-card-active-start: #262626;
+    --gradient-card-active-end: #1a1a1a;
+
+    --card-gradient-start: var(--gradient-card-start);
+    --card-gradient-end: var(--gradient-card-end);
+    --card-hover-gradient-start: var(--gradient-card-hover-start);
+    --card-hover-gradient-end: var(--gradient-card-hover-end);
+    --card-gradient-direction: var(--gradient-direction-default);
 
     --button-secondary-text: var(--stormy-200);
-    --button-secondary-border: var(--stormy-300);
+    --button-secondary-border: var(--stormy-400);
     --button-secondary-hover-bg: var(--stormy-50);
-    --button-secondary-hover-border: var(--stormy-400);
+    --button-secondary-hover-border: var(--stormy-500);
     --button-secondary-active-bg: var(--stormy-100);
-    --button-secondary-active-border: var(--stormy-500);
+    --button-secondary-active-border: var(--stormy-600);
 
     --text-color-primary: #ffffff;
     --text-color-secondary: var(--stormy-200);
@@ -356,8 +372,20 @@
     --danger-background-color: rgba(255, 107, 107, 0.1);
     --danger-border-color: rgba(255, 107, 107, 0.2);
 
-    --color-link: #60a5fa;
-    --color-contrast: #60a5fa;
-    --color-contrast-light: rgba(96, 165, 250, 0.1);
+    --info-color: #60a5fa;
+    --info-background-color: rgba(59, 130, 246, 0.15);
+    --info-border-color: rgba(59, 130, 246, 0.3);
+
+    --warning-color: #fbbf24;
+    --warning-background-color: rgba(251, 191, 36, 0.15);
+    --warning-border-color: rgba(251, 191, 36, 0.3);
+
+    --success-color: #34d399;
+    --success-background-color: rgba(16, 185, 129, 0.15);
+    --success-border-color: rgba(16, 185, 129, 0.3);
+
+    --purple-100: rgba(139, 92, 246, 0.1);
+    --purple-300: rgba(139, 92, 246, 0.3);
+    --purple-400: rgba(139, 92, 246, 0.8);
   }
 }

@@ -22,23 +22,43 @@
   .db-card {
     border-radius: var(--border-radius-l);
     border: 1px solid var(--card-border);
-    background-color: var(--card-background);
+    background: linear-gradient(
+      var(--gradient-direction-default),
+      var(--gradient-card-start),
+      var(--gradient-card-end)
+    );
     overflow: hidden;
+    box-shadow: var(--card-active-shadow);
+    transition: all 0.2s ease-in-out;
   }
+
   .db-card.hoverable {
     cursor: pointer;
   }
+
   .db-card.hoverable:hover {
-    border-color: var(--stormy-300);
-    box-shadow: var(--shadow-color) 0 2px 4px 0;
+    border: 1px solid var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
+    background: linear-gradient(
+      var(--gradient-direction-hover),
+      var(--gradient-card-hover-start),
+      var(--gradient-card-hover-end)
+    );
   }
-  .db-card.hoverable:focus,
-  .db-card.hoverable:active {
+
+  .db-card.hoverable:focus {
     outline: 2px solid var(--sand-400);
     outline-offset: 1px;
   }
+
   .db-card.hoverable:active {
     border-color: var(--stormy-400);
-    box-shadow: var(--shadow-color) 0 1px 2px 0;
+    box-shadow: var(--card-active-shadow);
+    transform: translateY(0);
+    background: linear-gradient(
+      var(--gradient-direction-active),
+      var(--gradient-card-active-start),
+      var(--gradient-card-active-end)
+    );
   }
 </style>

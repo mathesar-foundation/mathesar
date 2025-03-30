@@ -7,7 +7,7 @@
 
   li {
     position: relative;
-    padding: 6px 12px;
+    padding: var(--size-ultra-small) var(--size-small);
     cursor: default;
     box-sizing: content-box;
     line-height: 1.2;
@@ -22,15 +22,15 @@
     user-select: none;
 
     &:hover {
-      background: #f3f4f5;
+      background: var(--hover-background);
     }
 
     &.in-focus {
-      background: #f3f4f5;
+      background: var(--hover-background);
     }
 
     &.disabled {
-      color: var(--slate-300);
+      color: var(--text-color-muted);
       cursor: not-allowed;
     }
   }
@@ -40,8 +40,8 @@
       border: 1px solid transparent;
 
       &.selected {
-        border: 1px solid #39a0f5;
-        background: #39a0f530;
+        border: 1px solid var(--accent-500);
+        background: var(--accent-100);
       }
     }
   }

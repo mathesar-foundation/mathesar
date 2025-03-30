@@ -6,24 +6,24 @@
   min-width: var(--Menu__min-width, 0);
 
   .menu-heading {
-    color: var(--slate-500);
+    color: var(--text-color-muted);
     padding: 0.2em 0.5em;
   }
 
   .menu-divider {
-    border-top: 0.1em solid var(--slate-200);
+    border-top: 1px solid var(--card-row-border);
     height: 0;
   }
 
   .menu-item {
     cursor: pointer;
-    color: var(--slate-800);
+    color: var(--text-color);
     display: flex;
     flex-grow: 1;
     align-items: center;
     background-color: var(--Menu__item-background, transparent);
-    padding: 0 var(--Menu__padding-x, $padding-x-default);
-    border-radius: var(--Menu__item-border-radius, 0);
+    padding: var(--size-extreme-small)
+      var(--Menu__padding-x, $padding-x-default);
 
     &.menu-item-link {
       text-decoration: none;
@@ -39,13 +39,16 @@
     }
 
     &.danger {
-      color: var(--red-500);
+      color: var(--danger-color);
     }
     &:not(.disabled):hover {
-      background-color: var(--Menu__item-hover-background, var(--slate-100));
+      background-color: var(
+        --Menu__item-hover-background,
+        var(--hover-background)
+      );
     }
     &.disabled {
-      color: var(--slate-300);
+      color: var(--text-color-muted);
       cursor: not-allowed;
     }
     > .label {
@@ -65,16 +68,17 @@
       --checkbox-margin-bottom: 0;
     }
     &.active {
-      background-color: var(--Menu__item-active-background, transparent);
+      background-color: var(
+        --Menu__item-active-background,
+        var(--active-background)
+      );
+      color: var(--Menu__item-active-color, var(--text-color));
       &:hover {
         background-color: var(
           --Menu__item-active-hover-background,
-          var(--slate-100)
+          var(--active-background)
         );
       }
-    }
-    &:focus {
-      outline: 2px solid var(--Menu__item-focus-outline-color, transparent);
     }
   }
 

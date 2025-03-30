@@ -103,12 +103,11 @@
         <span class="label">{$_('db_server')}{staticText.COLON}</span>
         {database.server.getConnectionString()}
       </div>
-      {#if database.name !== database.displayName}
-        <div>
-          <span class="label">{$_('db_name')}{staticText.COLON}</span>
-          {database.name}
-        </div>
-      {/if}
+      <div>
+        <span class="label">{$_('db_name')}{staticText.COLON}</span>
+        {database.name}
+      </div>
+
       {#if isMathesarAdmin}
         <div class="edit-connection">
           <Button on:click={() => editModal.open()} appearance="link">
