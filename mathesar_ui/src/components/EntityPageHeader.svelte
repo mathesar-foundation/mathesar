@@ -46,11 +46,7 @@
 <style lang="scss">
   .entity-page-header {
     border-bottom: 1px solid var(--border-color);
-    background-color: linear-gradient(
-      var(--card-gradient-direction),
-      var(--card-gradient-start),
-      var(--card-gradient-end)
-    );
+    background-color: var(--card-background);
     position: relative;
     display: flex;
     align-items: center;

@@ -62,7 +62,7 @@
   }
   .specifier-tag {
     border-radius: var(--border-radius-xl);
-    background-color: var(--slate-200);
+    background-color: var(--stormy-100);
     padding: 0.228rem 0.571rem;
     font-size: var(--text-size-small);
   }

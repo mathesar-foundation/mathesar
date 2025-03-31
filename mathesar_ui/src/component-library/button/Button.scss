@@ -259,17 +259,19 @@
   }
 
   &.btn-inspector {
-    --button-background: var(--hover-background);
+    --button-background: var(--collapsible-button-background);
+    --button-color: var(--collapsible-button-text);
     transition: all 0.2s ease;
     border: 2px solid transparent;
+    box-shadow: var(--collapsible-button-shadow);
 
     &:hover {
-      --button-background: var(--active-background);
+      --button-background: var(--collapsible-button-hover);
     }
 
     &:active {
-      --button-background: var(--active-background);
-      border-color: var(--text-color-muted);
+      --button-background: var(--collapsible-button-active);
+      border-color: var(--collapsible-button-border);
     }
   }
 

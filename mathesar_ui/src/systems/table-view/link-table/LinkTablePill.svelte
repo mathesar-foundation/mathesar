@@ -17,24 +17,35 @@
 
 <style>
   .table-pill {
-    border-radius: 500px;
-    padding: 0 0.5em;
-    margin: 0 0.1em;
-    max-width: 100%;
-    display: inline-block;
-    vertical-align: -20%;
-    line-height: 1.2em;
+    border-radius: 4px;
+    padding: 0.25em 0.5em;
+    margin: 0 0.25em;
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.9em;
+    line-height: 1.2;
+    color: var(--text-color-primary);
+    font-weight: var(--font-weight-semibold);
   }
+
   .base {
     background: var(--base-fill);
-    border: solid 1px var(--base-stroke);
+    border: 1px solid var(--base-stroke);
   }
+
   .target {
     background: var(--target-fill);
-    border: solid 1px var(--target-stroke);
+    border: 1px solid var(--target-stroke);
   }
+
   .mapping {
     background: var(--mapping-fill);
-    border: solid 1px var(--mapping-stroke);
+    border: 1px solid var(--mapping-stroke);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .table-pill {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
   }
 </style>

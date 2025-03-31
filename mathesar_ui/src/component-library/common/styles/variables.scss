@@ -302,6 +302,13 @@
   --button-secondary-hover-gradient-end: rgba(255, 255, 255, 0.03);
   --button-secondary-active-gradient-start: rgba(255, 255, 255, 0.08);
   --button-secondary-active-gradient-end: rgba(255, 255, 255, 0.03);
+
+  --collapsible-button-background: var(--sand-200);
+  --collapsible-button-hover: var(--sand-300);
+  --collapsible-button-active: var(--sand-400);
+  --collapsible-button-border: var(--sand-500);
+  --collapsible-button-text: var(--text-color-primary);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -394,5 +401,12 @@
     --purple-100: rgba(139, 92, 246, 0.1);
     --purple-300: rgba(139, 92, 246, 0.3);
     --purple-400: rgba(139, 92, 246, 0.8);
+
+    --collapsible-button-background: #333333;
+    --collapsible-button-hover: #404040;
+    --collapsible-button-active: #4a4a4a;
+    --collapsible-button-border: #505050;
+    --collapsible-button-text: var(--text-color-primary);
+    --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 }

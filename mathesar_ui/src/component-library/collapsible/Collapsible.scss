@@ -12,15 +12,6 @@
       cursor: pointer;
       font-weight: inherit;
       padding: var(--Collapsible_trigger-padding, 0.5em);
-      background-color: var(--collapsible-background);
-
-      &:hover {
-        background-color: var(--collapsible-hover);
-      }
-
-      &:active {
-        background-color: var(--collapsible-active);
-      }
 
       .collapsible-header-title {
         flex-grow: 1;
