@@ -21,6 +21,6 @@
     height: 100%;
     border-right: var(--cell-border-vertical);
     border-bottom: none;
-    background: var(--slate-100);
+    background: var(--cell-bg-color-header);
   }
 </style>

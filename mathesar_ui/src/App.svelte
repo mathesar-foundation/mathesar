@@ -76,11 +76,11 @@
    */
     --cell-bg-color-base: var(--background-color);
     --cell-bg-color-error: var(--danger-background-color);
-    --cell-bg-color-header: var(--hover-background);
+    --cell-bg-color-header: var(--slate-100);
     --cell-bg-color-processing: var(--yellow-100);
-    --cell-bg-color-disabled: var(--hover-background);
-    --cell-bg-color-row-hover: var(--hover-background);
-    --cell-bg-color-row-selected: var(--sky-200);
+    --cell-bg-color-disabled: var(--slate-100);
+    --cell-bg-color-row-hover: var(--slate-100);
+    --cell-bg-color-row-selected: var(--stormy-100);
 
     --color-fk: var(--yellow-300);
     --color-error: var(--danger-color);
@@ -91,8 +91,22 @@
     --cell-border-vertical: 1px solid var(--slate-200);
 
     @media (prefers-color-scheme: dark) {
+      --cell-bg-mix-blend-mode: screen;
+      --cell-bg-color-base: var(--background-color);
+      --cell-bg-color-error: rgba(255, 107, 107, 0.15);
+      --cell-bg-color-header: rgba(39, 43, 48, 0.5);
+      --cell-bg-color-processing: rgba(251, 191, 36, 0.15);
+      --cell-bg-color-disabled: rgba(39, 43, 48, 0.3);
+      --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
+      --cell-bg-color-row-selected: rgba(122, 92, 166, 0.3);
+
       --cell-border-horizontal: 1px solid var(--slate-700);
       --cell-border-vertical: 1px solid var(--slate-700);
+
+      --color-fk: var(--yellow-400);
+      --color-error: #ff6b6b;
+      --cell-text-color-processing: var(--slate-300);
+      --color-array-element: var(--sky-400);
     }
 
     --page-padding-x: 1em;
