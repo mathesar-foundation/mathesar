@@ -1,6 +1,6 @@
 import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { Column, ColumnPatchSpec } from '@mathesar/api/rpc/columns';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type { Schema } from '@mathesar/models/Schema';
 import type { Table } from '@mathesar/models/Table';
@@ -91,17 +91,34 @@ export function buildColumnPropertiesMap(
   );
 }
 
+function finalizeColumn(
+  { id, type, primary_key, type_options }: Column,
+  name: string | undefined,
+): ColumnPatchSpec {
+  return {
+    id,
+    name,
+
+    // For most columns we include type information so that users can modify
+    // column types during import.
+    //
+    // But for PK columns we don't want to send these details to the backend. In
+    // most cases it wouldn't matter if we sent the type details, because we
+    // disable the type config form elements on the front end and it would be
+    // theoretically be a no-op to send the type details that we got back from
+    // the server. However in [#4372] we had a slippery bug that seemed best to
+    // fix on the front end by avoiding sending type details for PK columns.
+    //
+    // [#4372]: https://github.com/mathesar-foundation/mathesar/issues/4372
+    ...(primary_key ? {} : { type, type_options }),
+  };
+}
+
 export function finalizeColumns(
   columns: Column[],
   columnPropertiesMap: ColumnPropertiesMap,
 ) {
   return columns
-    .filter((column) => columnPropertiesMap[column.id]?.selected)
-    .map((column) => ({
-      id: column.id,
-      name: columnPropertiesMap[column.id]?.displayName ?? '',
-      type: column.type,
-      type_options: column.type_options,
-      metadata: column.metadata,
-    }));
+    .filter((c) => columnPropertiesMap[c.id]?.selected)
+    .map((c) => finalizeColumn(c, columnPropertiesMap[c.id]?.displayName));
 }
