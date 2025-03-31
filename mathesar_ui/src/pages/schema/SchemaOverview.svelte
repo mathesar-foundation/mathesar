@@ -163,26 +163,50 @@
 
   .explore-cta {
     margin: 1.5rem -1.5rem -1.5rem;
-    padding: 1.5rem;
+    padding: 2rem;
     background: linear-gradient(
-      var(--gradient-direction),
-      var(--gradient-light-start),
-      var(--gradient-light-end)
+      135deg,
+      var(--gradient-light-start) 0%,
+      var(--gradient-light-end) 100%
     );
     border-top: 1px solid var(--card-border);
     border-radius: 0 0 0.5rem 0.5rem;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        circle at top right,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 60%
+      );
+      pointer-events: none;
+    }
 
     .explore-title {
       font-size: var(--text-size-large);
       font-weight: var(--font-weight-bold);
       color: var(--text-color-primary);
-      margin: 0 0 0.5rem 0;
+      margin: 0 0 0.75rem 0;
+      position: relative;
     }
 
     .explore-description {
       color: var(--text-color-secondary);
       font-size: var(--text-size-base);
-      margin: 0 0 1rem 0;
+      margin: 0 0 1.5rem 0;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    > div {
+      position: relative;
     }
   }
 

@@ -48,8 +48,8 @@
 <style lang="scss">
   .exploration-inspector {
     height: 100%;
-    border-left: 1px solid var(--slate-300);
-    background: var(--sand-100);
+    border-left: 1px solid var(--inspector-border);
+    background: var(--inspector-background);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -70,14 +70,14 @@
       font-weight: 590;
     }
     :global(.collapsible > .collapsible-header > button.btn) {
-      background-color: var(--sand-200);
+      background-color: var(--inspector-background);
 
       &:hover {
-        background-color: var(--sand-300);
+        background-color: var(--inspector-hover);
       }
 
       &:active {
-        background-color: var(--sand-400);
+        background-color: var(--inspector-active);
       }
     }
     :global(

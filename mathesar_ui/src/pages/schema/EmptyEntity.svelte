@@ -14,12 +14,12 @@
 
 <style lang="scss">
   .container {
-    min-height: 18rem;
-    border: 1px solid var(--slate-300);
-    border-radius: var(--border-radius-l);
+    min-height: 12rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--hover-background);
+    border-radius: var(--border-radius-l);
   }
 
   .empty-entity {
@@ -27,7 +27,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: var(--text-size-large);
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-color-secondary);
 
     > :global(* + *) {
       margin-top: 0.5rem;

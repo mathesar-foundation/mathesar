@@ -92,7 +92,7 @@
     section {
       header {
         padding: var(--size-xx-small);
-        background: var(--sand-200);
+        background: var(--inspector-hover);
         font-weight: 590;
       }
       .content {
