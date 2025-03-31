@@ -54,7 +54,7 @@
       <div class="date">
         {$_('released_date', { values: { date: dateString } })}
       </div>
-      <a href={notesUrl} class="notes" target="_blank">
+      <a href={notesUrl} class="notes btn btn-link" target="_blank">
         {#if type === 'available-upgrade'}
           {$_('release_notes_and_upgrade_instructions')}
         {:else}
@@ -69,56 +69,70 @@
 <style>
   .release {
     border: solid 1px var(--slate-200);
-    padding: 1rem;
-    border-radius: var(--border-radius-m);
+    padding: var(--size-large);
+    border-radius: var(--border-radius-l);
+    background-color: var(--card-background);
   }
+
   .release.available-upgrade {
-    border-color: var(--yellow-200);
-    background-color: var(--yellow-100);
+    border-color: var(--warning-border-color);
+    background-color: var(--warning-background-color);
+    border-width: 1px;
   }
+
   .type {
     margin-bottom: 1rem;
+    color: var(--text-color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-size-base);
   }
+
   .details {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+    gap: 1rem;
   }
+
   .left {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
+    gap: 0.75rem;
   }
+
   .logo {
-    background: var(--white);
-    font-size: 2rem;
-    color: white;
-    padding: 0.4rem;
+    background: var(--card-background);
+    font-size: 1rem;
+    color: var(--text-color-primary);
+    padding: 0.5rem;
     display: flex;
     border: solid 1px var(--slate-200);
     border-radius: 500px;
-    margin-right: 0.5rem;
   }
-  .name,
-  .version {
+
+  .name {
     font-size: var(--text-size-large);
-    margin-right: 0.5rem;
+    color: var(--text-color-primary);
+    font-weight: var(--font-weight-medium);
   }
+
   .version {
-    font-weight: bold;
+    font-size: var(--text-size-x-large);
+    color: var(--text-color-primary);
+    font-weight: var(--font-weight-extra-bold);
   }
+
   .right {
     flex: 1 0 auto;
-    color: var(--color-text-muted);
+    color: var(--text-color-muted);
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    margin: 0.5rem 0 0.5rem 0.5rem;
-  }
-  .right > :global(* + *) {
-    margin-left: 1rem;
-  }
-  .notes {
-    color: inherit;
+    gap: 1rem;
+    margin-left: auto;
   }
 </style>
