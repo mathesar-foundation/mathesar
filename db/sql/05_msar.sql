@@ -3511,6 +3511,44 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.check_column_type_compat(
+  tab_id regclass, col_id smallint, typ_id regtype, test_perc numeric
+) RETURNS jsonb AS $$/*
+Get info about the compatibility of a given type for a given column.
+
+Args:
+  tab_id: The OID of the table whose column we're checking.
+  col_id: The attnum of the column in the table.
+  typ_id: The OID of the type we'll check against the column.
+  test_perc: The percentage of the table to use for the `cast_to_X` default check.
+
+Returns a JSONB describing the compatibility of the type for the column with the keys:
+  mathesar_casting: (bool): This is whether our custom casting function succeeded.
+  type_compatible (bool): This is a simple one-shot boolean that tells us whether to infer the
+                          column is that type in inference algorithms.
+*/
+BEGIN
+  EXECUTE format(
+    'SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L) REPEATABLE(12345);',
+    msar.build_cast_expr(tab_id, col_id, typ_id),
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    test_perc
+  );
+  RETURN jsonb_build_object(
+    'mathesar_casting', true,
+    'type_compatible', true
+  );
+EXCEPTION WHEN OTHERS THEN
+  RETURN jsonb_build_object(
+    'mathesar_casting', false,
+    'type_compatible', false
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.infer_column_data_type(
   tab_id regclass, col_id smallint, test_perc numeric DEFAULT 100
 ) RETURNS regtype AS $$/*
@@ -3553,31 +3591,17 @@ BEGIN
     msar.get_column_name(tab_id, col_id)
   ) INTO column_nonempty;
   inferred_type := atttypid FROM pg_catalog.pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
-  IF inferred_type = 'text'::regtype AND column_nonempty THEN
-    FOREACH test_type IN ARRAY infer_sequence
-      LOOP
-        BEGIN
-          EXECUTE format(
-            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM (%4$L)',
-            msar.build_cast_expr(tab_id, col_id, test_type),
-            msar.get_relation_schema_name(tab_id),
-            msar.get_relation_name(tab_id),
-            test_perc
-          );
-          inferred_type := test_type;
-          EXIT;
-        EXCEPTION WHEN OTHERS THEN
-          RAISE NOTICE 'Test failed: %', format(
-            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM (%4$L)',
-            msar.build_cast_expr(tab_id, col_id, test_type),
-            msar.get_relation_schema_name(tab_id),
-            msar.get_relation_name(tab_id),
-            test_perc
-          );
-          -- do nothing, just try the next type.
-        END;
-      END LOOP;
-    END IF;
+  IF inferred_type <> 'text'::regtype OR NOT column_nonempty THEN
+    RETURN inferred_type;
+  END IF;
+  FOREACH test_type IN ARRAY infer_sequence
+    LOOP
+      IF msar.check_column_type_compat(tab_id, col_id, test_type, test_perc)
+          -> 'type_compatible' THEN
+        inferred_type := test_type;
+        EXIT;
+      END IF;
+    END LOOP;
   RETURN inferred_type;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
