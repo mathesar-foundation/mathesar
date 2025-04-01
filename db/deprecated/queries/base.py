@@ -223,9 +223,6 @@ class DBQuery:
             and returns the SA column that the initial column represents.
             """
             nonlocal from_clause
-            nonlocal base_table
-            nonlocal map_of_jp_subpath_to_alias
-            nonlocal created_joins
             jp_path = initial_col.jp_path
             right = base_table
             for i, jp in enumerate(jp_path):
