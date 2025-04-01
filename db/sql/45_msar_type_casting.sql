@@ -4235,78 +4235,38 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(smallint)
-RETURNS numeric
-AS $$
-
-    BEGIN
-      RETURN $1::numeric;
-    END;
-
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(real) RETURNS numeric AS $$
+  BEGIN
+    RETURN $1::numeric;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(real)
-RETURNS numeric
-AS $$
-
-    BEGIN
-      RETURN $1::numeric;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(bigint)
-RETURNS numeric
-AS $$
-
-    BEGIN
-      RETURN $1::numeric;
-    END;
-
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(bigint) RETURNS numeric AS $$
+  BEGIN
+    RETURN $1::numeric;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(double precision)
-RETURNS numeric
-AS $$
-
-    BEGIN
-      RETURN $1::numeric;
-    END;
-
+RETURNS numeric AS $$
+  BEGIN
+    RETURN $1::numeric;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(numeric)
-RETURNS numeric
-AS $$
-
-    BEGIN
-      RETURN $1::numeric;
-    END;
-
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(numeric) RETURNS numeric AS $$
+  BEGIN
+    RETURN $1::numeric;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(money)
-RETURNS numeric
-AS $$
-
-    BEGIN
-      RETURN $1::numeric;
-    END;
-
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(money) RETURNS numeric AS $$
+  BEGIN
+    RETURN $1::numeric;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(integer)
-RETURNS numeric
-AS $$
-
-    BEGIN
-      RETURN $1::numeric;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(text) RETURNS numeric
-AS $$
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(text) RETURNS numeric AS $$
 DECLARE
   decimal_point text;
   is_negative boolean;
@@ -4333,17 +4293,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(boolean)
-RETURNS numeric
-AS $$
-
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(boolean) RETURNS numeric AS $$
 BEGIN
   IF $1 THEN
     RETURN 1::numeric;
   END IF;
   RETURN 0::numeric;
 END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
