@@ -3514,6 +3514,18 @@ CREATE OR REPLACE FUNCTION
 msar.check_column_type_compat(
   tab_id regclass, col_id smallint, typ_id regtype, test_perc numeric
 ) RETURNS jsonb AS $$/*
+Get info about the compatibility of a given type for a given column.
+
+Args:
+  tab_id: The OID of the table whose column we're checking.
+  col_id: The attnum of the column in the table.
+  typ_id: The OID of the type we'll check against the column.
+  test_perc: The percentage of the table to use for the `cast_to_X` default check.
+
+Returns a JSONB describing the compatibility of the type for the column with the keys:
+  mathesar_casting: (bool): This is whether our custom casting function succeeded.
+  type_compatible (bool): This is a simple one-shot boolean that tells us whether to infer the
+                          column is that type in inference algorithms.
 */
 BEGIN
   EXECUTE format(
