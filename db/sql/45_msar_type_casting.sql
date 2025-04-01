@@ -4236,35 +4236,24 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(real) RETURNS numeric AS $$
-  BEGIN
-    RETURN $1::numeric;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+  SELECT $1::numeric;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(bigint) RETURNS numeric AS $$
-  BEGIN
-    RETURN $1::numeric;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+  SELECT $1::numeric;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(double precision)
-RETURNS numeric AS $$
-  BEGIN
-    RETURN $1::numeric;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(double precision) RETURNS numeric AS $$
+  SELECT $1::numeric;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(numeric) RETURNS numeric AS $$
-  BEGIN
-    RETURN $1::numeric;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+  SELECT $1::numeric;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(money) RETURNS numeric AS $$
-  BEGIN
-    RETURN $1::numeric;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+  SELECT $1::numeric;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(text) RETURNS numeric AS $$
 DECLARE
