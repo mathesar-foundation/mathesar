@@ -4305,94 +4305,32 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(character varying)
-RETURNS numeric
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(text) RETURNS numeric
 AS $$
-
-DECLARE decimal_point text;
-DECLARE is_negative boolean;
-DECLARE numeric_arr text[];
-DECLARE numeric text;
+DECLARE
+  decimal_point text;
+  is_negative boolean;
+  numeric_arr text[];
+  numeric text;
 BEGIN
-    SELECT msar.get_numeric_array($1::text) INTO numeric_arr;
-    IF numeric_arr IS NULL THEN
-        RAISE EXCEPTION '% cannot be cast to numeric', $1;
-    END IF;
-    SELECT numeric_arr[1] INTO numeric;
-    SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-    SELECT $1::text ~ '^-.*$' INTO is_negative;
-    IF numeric_arr[2] IS NOT NULL THEN
-        SELECT regexp_replace(numeric, numeric_arr[2], '', 'gq') INTO numeric;
-    END IF;
-    IF numeric_arr[3] IS NOT NULL THEN
-        SELECT regexp_replace(numeric, numeric_arr[3], decimal_point, 'q') INTO numeric;
-    END IF;
-    IF is_negative THEN
-        RETURN ('-' || numeric)::numeric;
-    END IF;
-    RETURN numeric::numeric;
+  SELECT msar.get_numeric_array($1::text) INTO numeric_arr;
+  IF numeric_arr IS NULL THEN
+    RAISE EXCEPTION '% cannot be cast to numeric', $1;
+  END IF;
+  SELECT numeric_arr[1] INTO numeric;
+  SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
+  SELECT $1::text ~ '^-.*$' INTO is_negative;
+  IF numeric_arr[2] IS NOT NULL THEN
+    SELECT regexp_replace(numeric, numeric_arr[2], '', 'gq') INTO numeric;
+  END IF;
+  IF numeric_arr[3] IS NOT NULL THEN
+    SELECT regexp_replace(numeric, numeric_arr[3], decimal_point, 'q') INTO numeric;
+  END IF;
+  IF is_negative THEN
+    RETURN ('-' || numeric)::numeric;
+  END IF;
+  RETURN numeric::numeric;
 END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(text)
-RETURNS numeric
-AS $$
-
-DECLARE decimal_point text;
-DECLARE is_negative boolean;
-DECLARE numeric_arr text[];
-DECLARE numeric text;
-BEGIN
-    SELECT msar.get_numeric_array($1::text) INTO numeric_arr;
-    IF numeric_arr IS NULL THEN
-        RAISE EXCEPTION '% cannot be cast to numeric', $1;
-    END IF;
-    SELECT numeric_arr[1] INTO numeric;
-    SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-    SELECT $1::text ~ '^-.*$' INTO is_negative;
-    IF numeric_arr[2] IS NOT NULL THEN
-        SELECT regexp_replace(numeric, numeric_arr[2], '', 'gq') INTO numeric;
-    END IF;
-    IF numeric_arr[3] IS NOT NULL THEN
-        SELECT regexp_replace(numeric, numeric_arr[3], decimal_point, 'q') INTO numeric;
-    END IF;
-    IF is_negative THEN
-        RETURN ('-' || numeric)::numeric;
-    END IF;
-    RETURN numeric::numeric;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(character)
-RETURNS numeric
-AS $$
-
-DECLARE decimal_point text;
-DECLARE is_negative boolean;
-DECLARE numeric_arr text[];
-DECLARE numeric text;
-BEGIN
-    SELECT msar.get_numeric_array($1::text) INTO numeric_arr;
-    IF numeric_arr IS NULL THEN
-        RAISE EXCEPTION '% cannot be cast to numeric', $1;
-    END IF;
-    SELECT numeric_arr[1] INTO numeric;
-    SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-    SELECT $1::text ~ '^-.*$' INTO is_negative;
-    IF numeric_arr[2] IS NOT NULL THEN
-        SELECT regexp_replace(numeric, numeric_arr[2], '', 'gq') INTO numeric;
-    END IF;
-    IF numeric_arr[3] IS NOT NULL THEN
-        SELECT regexp_replace(numeric, numeric_arr[3], decimal_point, 'q') INTO numeric;
-    END IF;
-    IF is_negative THEN
-        RETURN ('-' || numeric)::numeric;
-    END IF;
-    RETURN numeric::numeric;
-END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(boolean)
