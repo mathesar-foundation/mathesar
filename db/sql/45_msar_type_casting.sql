@@ -4210,8 +4210,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_numeric
 
-CREATE OR REPLACE FUNCTION msar.get_numeric_array(text) RETURNS text[]
-AS $$
+CREATE OR REPLACE FUNCTION msar.get_numeric_array(text) RETURNS text[] AS $$
   DECLARE
     raw_arr text[];
     actual_number_arr text[];
@@ -4237,23 +4236,23 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(real) RETURNS numeric AS $$
   SELECT $1::numeric;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(bigint) RETURNS numeric AS $$
   SELECT $1::numeric;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(double precision) RETURNS numeric AS $$
   SELECT $1::numeric;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(numeric) RETURNS numeric AS $$
   SELECT $1::numeric;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(money) RETURNS numeric AS $$
   SELECT $1::numeric;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(text) RETURNS numeric AS $$
 DECLARE
@@ -4283,13 +4282,8 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(boolean) RETURNS numeric AS $$
-BEGIN
-  IF $1 THEN
-    RETURN 1::numeric;
-  END IF;
-  RETURN 0::numeric;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+  SELECT CASE WHEN $1 THEN 1::numeric ELSE 0::numeric END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_jsonb
