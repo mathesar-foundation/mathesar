@@ -238,5 +238,6 @@
     overflow: hidden;
     color: var(--text-color-primary);
     margin-bottom: 0.125rem;
+    line-height: 1.2;
   }
 </style>

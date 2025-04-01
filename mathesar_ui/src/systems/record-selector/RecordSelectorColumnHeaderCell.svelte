@@ -141,20 +141,20 @@
     max-height: var(--input-height);
     left: var(--padding);
     width: calc(100% - 2 * var(--padding));
-    background: var(--white);
+    background: var(--input-background);
     border-radius: 0.2rem;
     border: none;
     box-shadow: 0 0 0 0.1rem var(--slate-200);
     outline: none;
     resize: none;
-    color: inherit;
+    color: var(--text-color);
     scrollbar-width: none;
   }
   .column-header-cell :global(.record-selector-input::-webkit-scrollbar) {
     display: none;
   }
   .column-header-cell.has-nested-selector-open :global(.record-selector-input) {
-    box-shadow: 0 0 0 0.2rem var(--slate-500);
+    box-shadow: 0 0 0 0.2rem var(--slate-400);
     z-index: 2;
     pointer-events: none;
   }
@@ -162,6 +162,7 @@
   .column-header-cell :global(textarea) {
     line-height: 1;
     padding: 0.6rem 0.4rem;
+    color: var(--text-color);
   }
   .column-header-cell :global(.linked-record-input) {
     position: relative;
@@ -183,7 +184,17 @@
     left: 0;
     right: calc(-1 * var(--border-width));
     bottom: calc(-1 * var(--separator-width));
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--shadow-color);
     z-index: 1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .column-header-cell :global(.record-selector-input) {
+      box-shadow: 0 0 0 0.1rem var(--slate-700);
+    }
+    .column-header-cell.has-nested-selector-open
+      :global(.record-selector-input) {
+      box-shadow: 0 0 0 0.2rem var(--slate-600);
+    }
   }
 </style>

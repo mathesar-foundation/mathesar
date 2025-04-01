@@ -34,7 +34,7 @@
 
 <Dropdown
   closeOnInnerClick={false}
-  triggerAppearance="secondary"
+  triggerAppearance="plain"
   showArrow={false}
   ariaLabel={$_('new_column')}
   on:close={form.reset}
@@ -69,7 +69,7 @@
 
 <style lang="scss">
   .new-column-dropdown {
-    padding: 0.8em;
+    padding: var(--size-small);
     overflow: hidden;
     width: 16em;
 

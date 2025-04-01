@@ -39,7 +39,7 @@
     display: table-cell;
     vertical-align: middle;
     border-style: solid;
-    border-color: var(--border-color);
+    border-color: var(--slate-200);
     border-width: 0;
     /** Set from parent to so that first row gets border */
     border-top-width: var(--border-top-width, 0);
@@ -53,7 +53,7 @@
   }
 
   .column-header {
-    background: var(--slate-100);
+    background: var(--card-background);
     border-bottom-width: var(--separator-width);
     position: sticky;
     top: 0;
@@ -67,11 +67,11 @@
     position: sticky;
     left: 0;
     z-index: var(--z-index__record_selector__row-header);
-    background: var(--slate-100);
+    background: var(--card-background);
     min-width: 3ch;
   }
   .row-header.row-is-selected {
-    background: var(--slate-300);
+    background: var(--active-background);
   }
 
   .column-header.row-header {
@@ -91,25 +91,31 @@
      */
     --overflow-shadow-spread: 0.5rem;
     --overflow-shadow: 0 0 var(--overflow-shadow-size)
-      var(--overflow-shadow-spread) var(--overflow-shadow-color);
+      var(--overflow-shadow-spread) var(--shadow-color);
     --clip-path-size: -1rem;
   }
   .table-overflow-left.row-header {
     box-shadow: calc(-1 * var(--overflow-shadow-spread)) 0
       var(--overflow-shadow-size) var(--overflow-shadow-spread)
-      var(--overflow-shadow-color);
+      var(--shadow-color);
     clip-path: inset(0 var(--clip-path-size) 0 0);
   }
   .table-overflow-top.column-header {
     box-shadow: 0 calc(-1 * var(--overflow-shadow-spread))
       var(--overflow-shadow-size) var(--overflow-shadow-spread)
-      var(--overflow-shadow-color);
+      var(--shadow-color);
     clip-path: inset(0 0 var(--clip-path-size) 0);
   }
   .table-overflow-top.table-overflow-left.row-header.column-header {
     box-shadow: calc(-1 * var(--overflow-shadow-spread))
       calc(-1 * var(--overflow-shadow-spread)) var(--overflow-shadow-size)
-      var(--overflow-shadow-spread) var(--overflow-shadow-color);
+      var(--overflow-shadow-spread) var(--shadow-color);
     clip-path: inset(0 var(--clip-path-size) var(--clip-path-size) 0);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .td {
+      border-color: var(--slate-700);
+    }
   }
 </style>

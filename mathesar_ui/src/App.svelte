@@ -86,6 +86,7 @@
     --color-error: var(--danger-color);
     --cell-text-color-processing: var(--text-color-muted);
     --color-array-element: var(--sky-300);
+    --color-fk-border: var(--yellow-400);
 
     --cell-border-horizontal: 1px solid var(--slate-200);
     --cell-border-vertical: 1px solid var(--slate-200);
@@ -103,7 +104,8 @@
       --cell-border-horizontal: 1px solid var(--slate-700);
       --cell-border-vertical: 1px solid var(--slate-700);
 
-      --color-fk: var(--yellow-400);
+      --color-fk: rgba(235, 157, 32, 0.15);
+      --color-fk-border: var(--pumpkin-600);
       --color-error: #ff6b6b;
       --cell-text-color-processing: var(--slate-300);
       --color-array-element: var(--sky-400);
