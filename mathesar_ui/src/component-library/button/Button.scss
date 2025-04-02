@@ -8,9 +8,7 @@
   line-height: inherit;
   cursor: pointer;
   border-radius: 6px;
-  box-shadow:
-    var(--shadow-color) 0 1px 2px 0,
-    var(--shadow-color) 0 1px 3px 0;
+  box-shadow: var(--button-shadow, none);
   position: relative;
   padding: var(--input-padding) 0.8em;
   box-sizing: border-box;
@@ -35,6 +33,8 @@
   &.btn-default {
     --button-background: var(--background-color);
     --button-border-color: var(--border-color);
+    --button-shadow: var(--shadow-color) 0 1px 2px 0,
+      var(--shadow-color) 0 1px 3px 0;
 
     &:not(:disabled) {
       &:focus {
@@ -47,6 +47,8 @@
     --button-background: var(--accent-600);
     --button-border-color: var(--accent-500);
     --button-color: #ffffff;
+    --button-shadow: var(--shadow-color) 0 1px 2px 0,
+      var(--shadow-color) 0 1px 3px 0;
 
     &:not(:disabled) {
       &.focus,
@@ -59,14 +61,14 @@
       &.hover {
         --button-background: var(--accent-700);
         --button-border-color: var(--accent-700);
-        box-shadow: var(--shadow-color) 0 2px 4px 0;
+        --button-shadow: var(--shadow-color) 0 2px 4px 0;
       }
 
       &:active,
       &.active {
         --button-background: var(--accent-800);
         --button-border-color: var(--accent-800);
-        box-shadow: var(--shadow-color) 0 1px 2px 0;
+        --button-shadow: var(--shadow-color) 0 1px 2px 0;
       }
     }
   }
