@@ -6,6 +6,6 @@
 <style>
   .divider {
     height: 0;
-    border-top: solid 1px var(--slate-300);
+    border-top: solid 1px var(--border-color);
   }
 </style>

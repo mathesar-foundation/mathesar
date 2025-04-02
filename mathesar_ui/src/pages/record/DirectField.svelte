@@ -126,7 +126,7 @@
   .direct-field:not(:last-child) .cell {
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom: solid var(--color-gray-light) 1px;
+    border-bottom: solid var(--border-color) 1px;
   }
   .left {
     display: flex;
