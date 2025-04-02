@@ -1618,194 +1618,80 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(mathesar_types.mathesar_money)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(smallint)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::mathesar_types.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(real)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::mathesar_types.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_money AS $$
+  SELECT $1::numeric::mathesar_types.mathesar_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(bigint)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::mathesar_types.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_money AS $$
+  SELECT $1::numeric::mathesar_types.mathesar_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(double precision)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::mathesar_types.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_money AS $$
+  SELECT $1::numeric::mathesar_types.mathesar_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(numeric)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::mathesar_types.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(integer)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::mathesar_types.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(character varying)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    DECLARE decimal_point text;
-    DECLARE is_negative boolean;
-    DECLARE money_arr text[];
-    DECLARE money_num text;
-    BEGIN
-      SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
-      IF money_arr IS NULL THEN
-        RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
-      END IF;
-      SELECT money_arr[1] INTO money_num;
-      SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-      SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
-      IF money_arr[2] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
-      END IF;
-      IF money_arr[3] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
-      END IF;
-      IF is_negative THEN
-        RETURN ('-' || money_num)::mathesar_types.mathesar_money;
-      END IF;
-      RETURN money_num::mathesar_types.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_money AS $$
+  SELECT $1::numeric::mathesar_types.mathesar_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(text)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    DECLARE decimal_point text;
-    DECLARE is_negative boolean;
-    DECLARE money_arr text[];
-    DECLARE money_num text;
-    BEGIN
-      SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
-      IF money_arr IS NULL THEN
-        RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
-      END IF;
-      SELECT money_arr[1] INTO money_num;
-      SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-      SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
-      IF money_arr[2] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
-      END IF;
-      IF money_arr[3] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
-      END IF;
-      IF is_negative THEN
-        RETURN ('-' || money_num)::mathesar_types.mathesar_money;
-      END IF;
-      RETURN money_num::mathesar_types.mathesar_money;
-    END;
-
+RETURNS mathesar_types.mathesar_money AS $$
+  DECLARE
+    decimal_point text;
+    is_negative boolean;
+    money_arr text[];
+    money_num text;
+  BEGIN
+    SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
+    IF money_arr IS NULL THEN
+      RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
+    END IF;
+    SELECT money_arr[1] INTO money_num;
+    SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
+    SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
+    IF money_arr[2] IS NOT NULL THEN
+      SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
+    END IF;
+    IF money_arr[3] IS NOT NULL THEN
+      SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
+    END IF;
+    IF is_negative THEN
+      RETURN ('-' || money_num)::mathesar_types.mathesar_money;
+    END IF;
+    RETURN money_num::mathesar_types.mathesar_money;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(money)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    DECLARE decimal_point text;
-    DECLARE is_negative boolean;
-    DECLARE money_arr text[];
-    DECLARE money_num text;
-    BEGIN
-      SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
-      IF money_arr IS NULL THEN
-        RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
-      END IF;
-      SELECT money_arr[1] INTO money_num;
-      SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-      SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
-      IF money_arr[2] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
-      END IF;
-      IF money_arr[3] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
-      END IF;
-      IF is_negative THEN
-        RETURN ('-' || money_num)::msar.mathesar_money;
-      END IF;
-      RETURN money_num::msar.mathesar_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(character)
-RETURNS mathesar_types.mathesar_money
-AS $$
-
-    DECLARE decimal_point text;
-    DECLARE is_negative boolean;
-    DECLARE money_arr text[];
-    DECLARE money_num text;
-    BEGIN
-      SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
-      IF money_arr IS NULL THEN
-        RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
-      END IF;
-      SELECT money_arr[1] INTO money_num;
-      SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-      SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
-      IF money_arr[2] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
-      END IF;
-      IF money_arr[3] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
-      END IF;
-      IF is_negative THEN
-        RETURN ('-' || money_num)::mathesar_types.mathesar_money;
-      END IF;
-      RETURN money_num::mathesar_types.mathesar_money;
-    END;
-
+RETURNS mathesar_types.mathesar_money AS $$
+  DECLARE
+    decimal_point text;
+    is_negative boolean;
+    money_arr text[];
+    money_num text;
+  BEGIN
+    SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
+    IF money_arr IS NULL THEN
+      RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
+    END IF;
+    SELECT money_arr[1] INTO money_num;
+    SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
+    SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
+    IF money_arr[2] IS NOT NULL THEN
+      SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
+    END IF;
+    IF money_arr[3] IS NOT NULL THEN
+      SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
+    END IF;
+    IF is_negative THEN
+      RETURN ('-' || money_num)::msar.mathesar_money;
+    END IF;
+    RETURN money_num::msar.mathesar_money;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
