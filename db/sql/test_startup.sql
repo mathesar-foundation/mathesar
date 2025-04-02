@@ -15,5 +15,6 @@ CREATE DATABASE mathesar_testing;
 \ir 10_msar_joinable_tables.sql
 \ir 30_msar_custom_aggregates.sql
 \ir 45_msar_type_casting.sql
+\ir 46_msar_type_inference.sql
 \ir 50_msar_permissions.sql
 \ir test_sql_functions.sql
