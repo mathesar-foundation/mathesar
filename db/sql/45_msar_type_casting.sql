@@ -1843,6 +1843,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
+
 -- msar.cast_to_multicurrency_money
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(mathesar_types.multicurrency_money)
