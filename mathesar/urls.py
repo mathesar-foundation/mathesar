@@ -14,6 +14,7 @@ db_router.register(r'data_files', DataFileViewSet, basename='data-file')
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
     path('api/db/v0/', include(db_router.urls)),
+    path('api/export/v0/schemas/', views.export.export_schema, name="export_schema"),
     path('api/export/v0/tables/', views.export.export_table, name="export_table"),
     path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),
     path('auth/password_reset_confirm/', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
