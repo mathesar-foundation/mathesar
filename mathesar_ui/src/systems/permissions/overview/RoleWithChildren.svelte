@@ -47,7 +47,7 @@
       display: inline-flex;
       align-items: center;
       gap: var(--size-ultra-small);
-      color: var(--stormy-800);
+      color: var(--text-color-primary);
       font-size: var(--text-size-base);
     }
     .member-count {
@@ -67,6 +67,15 @@
         &:last-child {
           margin-bottom: 0;
         }
+      }
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .role-with-children {
+      .name {
+        background: var(--stormy-900);
+        border-color: var(--stormy-400);
       }
     }
   }
