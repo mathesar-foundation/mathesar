@@ -1012,6 +1012,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.cast_to_uri(text)', 'FUNCTION', NULL),
   ('msar', 'msar.cast_to_uuid(text)', 'FUNCTION', NULL),
   ('msar', 'msar.cast_to_uuid(uuid)', 'FUNCTION', NULL),
+  ('msar', 'msar.check_column_type_compat(regclass,smallint,regtype,numeric)', 'FUNCTION', NULL),
   ('msar', 'msar.col_description(oid,integer)', 'FUNCTION', NULL),
   ('msar', 'msar.collect_all_objects(text[])', 'FUNCTION', NULL),
   ('msar', 'msar.column_exists(oid,text)', 'FUNCTION', NULL),
