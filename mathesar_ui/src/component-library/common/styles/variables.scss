@@ -105,7 +105,7 @@
   --sand-500: #8f8673;
   --sand-600: #736b5c;
   --sand-700: #524c41;
-  --sand-800: #403c33;
+  --sand-800: #3a352d;
   --sand-900: #262420;
 
   --orange-red-50: #fff2ef;
@@ -128,7 +128,7 @@
   --stormy-500: #7a5ca6;
   --stormy-600: #644687;
   --stormy-700: #4d3468;
-  --stormy-800: #362249;
+  --stormy-800: #2d1f3d;
   --stormy-900: #201430;
   --stormy-950: #0f081b;
 
@@ -197,7 +197,7 @@
   --gray-500: #9e9e9e;
   --gray-600: #4a4a4a;
   --gray-700: #303030;
-  --gray-800: #1a1a1a;
+  --gray-800: #151515;
   --gray-900: #121212;
 
   // TODO: Get this incorporated in figma
@@ -354,7 +354,7 @@
       0 0 0 1px var(--shadow-color-inset) inset;
     --card-active-shadow: 0 1px 2px var(--shadow-color-light),
       0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-    --gradient-card-start: var(--gray-900);
+    --gradient-card-start: var(--gray-700);
     --gradient-card-end: var(--gray-800);
     --gradient-card-hover-start: var(--gray-800);
     --gradient-card-hover-end: var(--gray-700);
