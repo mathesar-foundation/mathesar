@@ -693,37 +693,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_smallint
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(smallint)
-RETURNS smallint
-AS $$
-
-    BEGIN
-      RETURN $1::smallint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(character varying)
-RETURNS smallint
-AS $$
-
-    BEGIN
-      RETURN $1::smallint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(bigint)
-RETURNS smallint
-AS $$
-
-    BEGIN
-      RETURN $1::smallint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(character)
 RETURNS smallint
 AS $$
 
@@ -743,32 +713,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(integer)
-RETURNS smallint
-AS $$
-
-    BEGIN
-      RETURN $1::smallint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(real)
-RETURNS smallint
-AS $$
-
-    DECLARE integer_res smallint;
-    BEGIN
-      SELECT $1::smallint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(mathesar_types.mathesar_money)
 RETURNS smallint
 AS $$
 
@@ -838,16 +783,6 @@ BEGIN
   END IF;
   RETURN 0::smallint;
 END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(smallint)
-RETURNS bigint
-AS $$
-
-    BEGIN
-      RETURN $1::bigint;
-    END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
