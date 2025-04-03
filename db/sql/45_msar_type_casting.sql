@@ -694,238 +694,133 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_smallint
 
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(bigint)
-RETURNS smallint
-AS $$
-
-    BEGIN
-      RETURN $1::smallint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS smallint AS $$
+  SELECT $1::smallint;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(text)
-RETURNS smallint
-AS $$
-
-    BEGIN
-      RETURN $1::smallint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS smallint AS $$
+  SELECT $1::smallint;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(real)
-RETURNS smallint
-AS $$
-
-    DECLARE integer_res smallint;
-    BEGIN
-      SELECT $1::smallint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
-    END;
-
+RETURNS smallint AS $$
+  DECLARE integer_res smallint;
+  BEGIN
+    SELECT $1::smallint INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(double precision)
-RETURNS smallint
-AS $$
-
-    DECLARE integer_res smallint;
-    BEGIN
-      SELECT $1::smallint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
-    END;
-
+RETURNS smallint AS $$
+  DECLARE integer_res smallint;
+  BEGIN
+    SELECT $1::smallint INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(numeric)
-RETURNS smallint
-AS $$
-
-    DECLARE integer_res smallint;
-    BEGIN
-      SELECT $1::smallint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
-    END;
-
+RETURNS smallint AS $$
+  DECLARE integer_res smallint;
+  BEGIN
+    SELECT $1::smallint INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(money)
-RETURNS smallint
-AS $$
-
-    DECLARE integer_res smallint;
-    BEGIN
-      SELECT $1::smallint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
-    END;
-
+RETURNS smallint AS $$
+  DECLARE integer_res smallint;
+  BEGIN
+    SELECT $1::smallint INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to smallint without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_smallint(boolean)
-RETURNS smallint
-AS $$
-
-BEGIN
-  IF $1 THEN
-    RETURN 1::smallint;
-  END IF;
-  RETURN 0::smallint;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS smallint AS $$
+  SELECT CASE WHEN $1 THEN 1::smallint ELSE 0::smallint END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_bigint
 
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(character varying)
-RETURNS bigint
-AS $$
-
-    BEGIN
-      RETURN $1::bigint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_bigint(bigint)
-RETURNS bigint
-AS $$
-
-    BEGIN
-      RETURN $1::bigint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(character)
-RETURNS bigint
-AS $$
-
-    BEGIN
-      RETURN $1::bigint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS bigint AS $$
+  SELECT $1::bigint;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_bigint(text)
-RETURNS bigint
-AS $$
-
-    BEGIN
-      RETURN $1::bigint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(integer)
-RETURNS bigint
-AS $$
-
-    BEGIN
-      RETURN $1::bigint;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS bigint AS $$
+  SELECT $1::bigint;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_bigint(real)
-RETURNS bigint
-AS $$
-
-    DECLARE integer_res bigint;
-    BEGIN
-      SELECT $1::bigint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(mathesar_types.mathesar_money)
-RETURNS bigint
-AS $$
-
-    DECLARE integer_res bigint;
-    BEGIN
-      SELECT $1::bigint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
-    END;
-
+RETURNS bigint AS $$
+  DECLARE integer_res bigint;
+  BEGIN
+    SELECT $1::bigint INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_bigint(double precision)
-RETURNS bigint
-AS $$
-
-    DECLARE integer_res bigint;
-    BEGIN
-      SELECT $1::bigint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
-    END;
-
+RETURNS bigint AS $$
+  DECLARE integer_res bigint;
+  BEGIN
+    SELECT $1::bigint INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_bigint(numeric)
-RETURNS bigint
-AS $$
-
-    DECLARE integer_res bigint;
-    BEGIN
-      SELECT $1::bigint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
-    END;
-
+RETURNS bigint AS $$
+  DECLARE integer_res bigint;
+  BEGIN
+    SELECT $1::bigint INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_bigint(money)
-RETURNS bigint
-AS $$
-
-    DECLARE integer_res bigint;
-    BEGIN
-      SELECT $1::bigint INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
-    END;
-
+RETURNS bigint AS $$
+  DECLARE integer_res bigint;
+  BEGIN
+    SELECT $1::bigint INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to bigint without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_bigint(boolean)
-RETURNS bigint
-AS $$
-
-BEGIN
-  IF $1 THEN
-    RETURN 1::bigint;
-  END IF;
-  RETURN 0::bigint;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS bigint AS $$
+  SELECT CASE WHEN $1 THEN 1::bigint ELSE 0::bigint END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_integer
