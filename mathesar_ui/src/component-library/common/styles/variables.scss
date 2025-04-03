@@ -21,10 +21,6 @@
 
   /* Gradient System */
   --gradient-direction-default: to bottom right;
-  --gradient-direction-hover: to bottom right;
-  --gradient-direction-active: to bottom right;
-
-  /* Base Gradients */
   --gradient-base-start: var(--stormy-100);
   --gradient-base-end: var(--stormy-200);
   --gradient-base-hover-start: var(--stormy-200);
@@ -39,12 +35,6 @@
   --gradient-card-hover-end: rgba(250, 249, 246, 0.8);
   --gradient-card-active-start: var(--sand-100);
   --gradient-card-active-end: var(--sand-200);
-
-  /* Button Gradients */
-  --gradient-button-secondary-hover-start: rgba(255, 255, 255, 0.08);
-  --gradient-button-secondary-hover-end: rgba(255, 255, 255, 0.03);
-  --gradient-button-secondary-active-start: rgba(255, 255, 255, 0.08);
-  --gradient-button-secondary-active-end: rgba(255, 255, 255, 0.03);
 
   --card-background: #ffffff;
   --card-border: var(--sand-300);

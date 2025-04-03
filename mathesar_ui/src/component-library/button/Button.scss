@@ -98,8 +98,8 @@
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--button-secondary-hover-gradient-start),
-          var(--button-secondary-hover-gradient-end)
+          var(--stormy-100),
+          var(--stormy-200)
         );
         --button-border-color: var(--stormy-400);
         box-shadow:
@@ -112,14 +112,38 @@
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--button-secondary-active-gradient-start),
-          var(--button-secondary-active-gradient-end)
+          var(--stormy-200),
+          var(--stormy-300)
         );
         --button-border-color: var(--stormy-500);
         box-shadow:
           0 1px 2px rgba(0, 0, 0, 0.05),
           0 1px 3px rgba(0, 0, 0, 0.1),
           0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &.btn-secondary {
+      &:not(:disabled) {
+        &:hover,
+        &.hover {
+          --button-background: linear-gradient(
+            to bottom right,
+            rgba(255, 255, 255, 0.08),
+            rgba(255, 255, 255, 0.03)
+          );
+        }
+
+        &:active,
+        &.active {
+          --button-background: linear-gradient(
+            to bottom right,
+            rgba(255, 255, 255, 0.08),
+            rgba(255, 255, 255, 0.03)
+          );
+        }
       }
     }
   }
