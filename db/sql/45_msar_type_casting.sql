@@ -398,16 +398,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_real
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(smallint)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_real(bigint)
 RETURNS real
 AS $$
@@ -428,47 +418,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(character)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_real(integer)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_real(real)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_real(character varying)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_real(mathesar_types.mathesar_money)
 RETURNS real
 AS $$
 
