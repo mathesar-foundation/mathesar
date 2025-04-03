@@ -525,77 +525,39 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_double_precision
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(bigint)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(double precision)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(real)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(numeric)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(text)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(money)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(boolean)
-RETURNS double precision
-AS $$
-
-BEGIN
-  IF $1 THEN
-    RETURN 1::double precision;
-  END IF;
-  RETURN 0::double precision;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT CASE WHEN $1 THEN 1::double precision ELSE 0::double precision END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_email
