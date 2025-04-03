@@ -1696,129 +1696,36 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_money
 
-CREATE OR REPLACE FUNCTION msar.cast_to_money(mathesar_types.mathesar_money)
-RETURNS money
-AS $$
+CREATE OR REPLACE FUNCTION msar.cast_to_money(money) RETURNS money AS $$
+  SELECT $1::money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-    BEGIN
-      RETURN $1::money;
-    END;
+CREATE OR REPLACE FUNCTION msar.cast_to_money(real) RETURNS money AS $$
+  SELECT $1::numeric::money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION msar.cast_to_money(bigint) RETURNS money AS $$
+  SELECT $1::numeric::money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_money(money)
-RETURNS money
-AS $$
+CREATE OR REPLACE FUNCTION msar.cast_to_money(double precision) RETURNS money AS $$
+  SELECT $1::numeric::money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-    BEGIN
-      RETURN $1::money;
-    END;
+CREATE OR REPLACE FUNCTION msar.cast_to_money(numeric) RETURNS money AS $$
+  SELECT $1::numeric::money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(smallint)
-RETURNS money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(real)
-RETURNS money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(bigint)
-RETURNS money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(double precision)
-RETURNS money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(numeric)
-RETURNS money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(integer)
-RETURNS money
-AS $$
-
-    BEGIN
-      RETURN $1::numeric::money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(character varying)
-RETURNS money
-AS $$
-
-    DECLARE currency text;
-    BEGIN
-      SELECT to_char(1, 'L') INTO currency;
-      IF ($1 LIKE '%' || currency) OR ($1 LIKE currency || '%') THEN
-        RETURN $1::money;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to money as currency symbol is missing', $1;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(text)
-RETURNS money
-AS $$
-
-    DECLARE currency text;
-    BEGIN
-      SELECT to_char(1, 'L') INTO currency;
-      IF ($1 LIKE '%' || currency) OR ($1 LIKE currency || '%') THEN
-        RETURN $1::money;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to money as currency symbol is missing', $1;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_money(character)
-RETURNS money
-AS $$
-
-    DECLARE currency text;
-    BEGIN
-      SELECT to_char(1, 'L') INTO currency;
-      IF ($1 LIKE '%' || currency) OR ($1 LIKE currency || '%') THEN
-        RETURN $1::money;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to money as currency symbol is missing', $1;
-    END;
-
+CREATE OR REPLACE FUNCTION msar.cast_to_money(text) RETURNS money AS $$
+DECLARE
+  currency text;
+BEGIN
+  SELECT to_char(1, 'L') INTO currency;
+  IF ($1 LIKE '%' || currency) OR ($1 LIKE currency || '%') THEN
+    RETURN $1::money;
+  END IF;
+  RAISE EXCEPTION '% cannot be cast to money as currency symbol is missing', $1;
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
