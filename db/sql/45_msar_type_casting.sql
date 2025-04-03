@@ -458,11 +458,6 @@ RETURNS double precision AS $$
   SELECT $1::double precision;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(money)
-RETURNS double precision AS $$
-  SELECT $1::double precision;
-$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(boolean)
 RETURNS double precision AS $$
   SELECT CASE WHEN $1 THEN 1::double precision ELSE 0::double precision END;
