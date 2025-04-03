@@ -21,6 +21,13 @@
       border-radius: var(--border-radius-m);
       padding: 2px 4px;
       font-size: var(--text-size-x-small);
+      font-weight: var(--font-weight-bold);
+
+      @media (prefers-color-scheme: dark) {
+        background-color: var(--stormy-800);
+        border: 1px solid var(--stormy-600);
+        color: var(--text-color-secondary);
+      }
     }
   }
 </style>
