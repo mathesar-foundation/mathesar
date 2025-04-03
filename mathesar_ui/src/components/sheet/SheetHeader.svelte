@@ -57,7 +57,7 @@
     flex-grow: 0;
     flex-shrink: 0;
     background-color: var(--card-background);
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 1px solid var(--gray-400);
     user-select: none;
     -webkit-user-select: none; /* Safari */
     overflow: hidden;
@@ -73,6 +73,12 @@
         font-size: inherit;
         font-weight: inherit;
       }
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-sheet-element='header-row'] {
+      border-bottom: 1px solid var(--gray-500);
     }
   }
 </style>

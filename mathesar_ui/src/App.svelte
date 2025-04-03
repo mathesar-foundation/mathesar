@@ -88,8 +88,8 @@
     --color-array-element: var(--sky-300);
     --color-fk-border: var(--yellow-400);
 
-    --cell-border-horizontal: 1px solid var(--gray-200);
-    --cell-border-vertical: 1px solid var(--gray-200);
+    --cell-border-horizontal: 1px solid var(--gray-300);
+    --cell-border-vertical: 1px solid var(--gray-300);
 
     @media (prefers-color-scheme: dark) {
       --cell-bg-mix-blend-mode: screen;
