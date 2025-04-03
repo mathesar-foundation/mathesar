@@ -18,7 +18,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--hover-background);
     border-radius: var(--border-radius-l);
   }
 

@@ -153,7 +153,7 @@
     justify-content: space-between;
     padding: 0.25rem 1rem;
     height: var(--header-height, 60px);
-    background-color: var(--background-color);
+    background-color: var(--header-background);
     overflow: hidden;
     color: var(--text-color);
   }
@@ -172,7 +172,6 @@
   }
 
   .user-switcher {
-    background-color: var(--hover-background);
     color: var(--text-color);
     border-radius: var(--border-radius-m);
     padding: 0.5rem;

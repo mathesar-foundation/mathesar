@@ -217,7 +217,7 @@
 
   .table-row.unconfirmed-import {
     color: var(--text-color-muted);
-    background-color: var(--hover-background);
+    background-color: var(--disabled-background);
   }
 
   .row-content {

@@ -25,12 +25,12 @@
   }
 
   &:disabled {
-    background: var(--hover-background);
+    background: var(--input-disabled-background);
     color: var(--text-color-muted);
   }
 
   &.read-only {
-    background: var(--hover-background);
+    background: var(--input-disabled-background);
   }
 
   &.has-error {

@@ -204,10 +204,15 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: var(--hover-background);
+    background: var(--slate-100);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
     color: var(--text-color);
+
+    @media (prefers-color-scheme: dark) {
+      background: var(--slate-900);
+      border: 1px solid var(--slate-700);
+    }
   }
 
   .block {
@@ -236,10 +241,15 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--hover-background);
+    background: var(--slate-100);
     border-radius: 3px;
     color: var(--text-color-muted);
     font-weight: bold;
+
+    @media (prefers-color-scheme: dark) {
+      background: var(--slate-900);
+      border: 1px solid var(--slate-700);
+    }
   }
 
   .bold-header {
