@@ -1,5 +1,6 @@
 .window {
   background-color: var(--layout-background-color);
+  border: 1px solid var(--border-color);
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
   width: var(--window-width, 100%);

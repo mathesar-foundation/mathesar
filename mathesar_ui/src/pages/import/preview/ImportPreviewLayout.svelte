@@ -9,7 +9,6 @@
   fitViewport
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-data-pages)',
-    '--layout-background-color': 'var(--gray-50)',
     '--inset-page-section-padding': 'var(--size-xx-large)',
     '--page-padding': 'var(--outer-page-padding-for-inset-page)',
   }}
@@ -41,11 +40,11 @@
     overflow: auto;
   }
   .page-content:not(.has-preview) {
-    background: var(--sand-200);
+    background: var(--layout-background-color);
   }
   .footer:not(:empty) {
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid var(--border-color);
     padding: 1rem 1rem 1rem 1rem;
-    background: var(--white);
+    background: var(--footer-background-color);
   }
 </style>

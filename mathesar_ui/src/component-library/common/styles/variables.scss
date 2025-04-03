@@ -5,6 +5,8 @@
   --background-color: #ffffff;
   --border-color: var(--sand-300);
   --header-background: var(--white);
+  --footer-background-color: var(--white);
+  --inset-background-color: var(--white);
   --hover-background: var(--stormy-50);
   --active-background: var(--stormy-200);
   --disabled-background: var(--sand-50);
@@ -14,7 +16,7 @@
   --shadow-color-inset: rgba(255, 255, 255, 0.1);
   --shadow-color-inset-dark: rgba(255, 255, 255, 0.05);
 
-  // Input Colors
+  // Input
   --input-background: #ffffff;
   --input-border: var(--slate-300);
   --input-text: var(--text-color);
@@ -22,7 +24,7 @@
   --input-focus-shadow: var(--stormy-100);
   --input-disabled-background: var(--sand-50);
 
-  // Text Colors
+  // Text
   --text-color: #171717;
   --text-color-primary: var(--stormy-800);
   --text-color-secondary: var(--stormy-700);
@@ -42,7 +44,7 @@
   --gradient-dark-start: var(--stormy-800);
   --gradient-dark-end: var(--stormy-900);
 
-  // Card Colors
+  // Card
   --card-background: #ffffff;
   --card-border: var(--sand-300);
   --card-row-border: var(--sand-200);
@@ -72,7 +74,7 @@
   --collapsible-hover: var(--sand-300);
   --collapsible-active: var(--sand-400);
 
-  // Utility Colors
+  // Utility
   --danger-color: #d67171;
   --danger-background-color: #fde9e9;
   --danger-border-color: #f2aaaa;
@@ -187,7 +189,6 @@
   --sky-700: #0f69c1;
   --sky-800: #3e5a80;
 
-  // Gray palette
   --gray-50: #fafafa;
   --gray-100: #f5f5f5;
   --gray-200: #eeeeee;
@@ -299,21 +300,23 @@
     --background-color: var(--gray-900);
     --border-color: var(--gray-700);
     --header-background: var(--gray-800);
-    --hover-background: var(--gray-800);
+    --footer-background-color: var(--gray-800);
+    --inset-background-color: var(--gray-800);
+    --hover-background: var(--gray-700);
     --active-background: var(--gray-700);
     --disabled-background: var(--gray-800);
     --shadow-color: var(--shadow-color-dark);
     --shadow-color-light: rgba(0, 0, 0, 0.2);
     --shadow-color-inset: var(--shadow-color-inset-dark);
 
-    // Text Colors
+    // Text
     --text-color: var(--white);
     --text-color-primary: #ffffff;
     --text-color-secondary: var(--stormy-200);
     --text-color-tertiary: var(--stormy-300);
     --text-color-muted: var(--gray-400);
 
-    // Input Colors
+    // Input
     --input-background: var(--gray-800);
     --input-border: var(--gray-700);
     --input-text: var(--text-color);
@@ -341,7 +344,7 @@
     --gradient-base-active-start: var(--stormy-600);
     --gradient-base-active-end: var(--stormy-700);
 
-    // Card Colors
+    // Card
     --card-background: var(--gray-900);
     --card-border: var(--gray-700);
     --card-row-border: var(--gray-800);
@@ -358,7 +361,7 @@
     --gradient-card-active-start: var(--gray-700);
     --gradient-card-active-end: var(--gray-600);
 
-    // Utility Colors
+    // Utility
     --danger-color: #ff6b6b;
     --danger-background-color: rgba(255, 107, 107, 0.1);
     --danger-border-color: rgba(255, 107, 107, 0.2);

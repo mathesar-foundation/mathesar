@@ -307,9 +307,8 @@
   .preview-header {
     margin: 0;
     padding: var(--size-small) var(--inset-page-section-padding);
-    border-bottom: 1px solid var(--gray-200);
-    border-top: solid 1px var(--gray-300);
-    background: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    border-top: solid 1px var(--border-color);
   }
   .preview-content {
     padding: var(--inset-page-section-padding);
@@ -319,7 +318,7 @@
     overflow-x: auto;
     overflow-y: hidden;
     margin: 0 auto;
-    border: 1px solid var(--gray-200);
+    border: 1px solid var(--border-color);
   }
   .truncation-alert {
     margin: 1rem auto 0 auto;

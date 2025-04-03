@@ -50,8 +50,8 @@
 
   .file-upload-trigger {
     display: block;
-    background: transparent;
-    border: 1px dashed var(--slate-300);
+    background: var(--card-background);
+    border: 1px dashed var(--border-color);
     border-radius: 3px;
     color: inherit;
     font-family: inherit;
@@ -92,7 +92,7 @@
       border-width: 2px;
     }
     &:hover {
-      background: var(--slate-50-tentative);
+      background: var(--hover-background);
     }
     &.dragging-over {
       background: var(--sky-200);

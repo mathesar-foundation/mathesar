@@ -72,7 +72,7 @@
       padding: 0.35rem 0.6rem;
       display: flex;
       align-items: center;
-      border-bottom: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--border-color);
 
       :global(.checkbox) {
         flex-grow: 0;

@@ -57,7 +57,7 @@
     flex-grow: 0;
     flex-shrink: 0;
     background-color: var(--card-background);
-    border-bottom: 1px solid var(--card-row-border);
+    border-bottom: 2px solid var(--border-color);
     user-select: none;
     -webkit-user-select: none; /* Safari */
     overflow: hidden;

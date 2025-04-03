@@ -69,7 +69,7 @@
 <style lang="scss">
   .import-preview {
     :global([data-sheet-element='data-cell']) {
-      background: var(--white);
+      background: var(--inset-background-color);
     }
     :global([data-sheet-element='data-cell']:last-child),
     :global([data-sheet-element='column-header-cell']:last-child) {
