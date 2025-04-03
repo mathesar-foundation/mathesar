@@ -79,56 +79,57 @@
   </div>
 
   <div class="vertical-container sidebar">
-    <section class="sidebar-section">
-      <OverviewHeader title={$_('saved_explorations')} />
-      {#if isExplorationsLoading}
-        <ExplorationSkeleton />
-      {:else if explorationsRequestStatus.state === 'failure'}
-        <ErrorBox>
-          <p>{explorationsRequestStatus.errors[0]}</p>
-          <div>
-            <SpinnerButton
-              onClick={async () => {
-                await fetchExplorationsForCurrentSchema();
-              }}
-              label={$_('retry')}
-              icon={iconRefresh}
-            />
-            <a href="../">
-              <Button>
-                <span>{$_('go_to_database')}</span>
-              </Button>
-            </a>
-          </div>
-        </ErrorBox>
-      {:else if showExplorationTutorial}
-        <CreateExplorationTutorial {database} {schema} />
-      {:else}
-        <ExplorationsList
-          bordered={false}
-          explorations={[...explorationsMap.values()]}
-          {database}
-          {schema}
-        />
-      {/if}
+    {#if showExplorationTutorial}
+      <CreateExplorationTutorial {database} {schema} />
+    {:else}
+      <section class="sidebar-section">
+        <OverviewHeader title={$_('saved_explorations')} />
+        {#if isExplorationsLoading}
+          <ExplorationSkeleton />
+        {:else if explorationsRequestStatus.state === 'failure'}
+          <ErrorBox>
+            <p>{explorationsRequestStatus.errors[0]}</p>
+            <div>
+              <SpinnerButton
+                onClick={async () => {
+                  await fetchExplorationsForCurrentSchema();
+                }}
+                label={$_('retry')}
+                icon={iconRefresh}
+              />
+              <a href="../">
+                <Button>
+                  <span>{$_('go_to_database')}</span>
+                </Button>
+              </a>
+            </div>
+          </ErrorBox>
+        {:else}
+          <ExplorationsList
+            explorations={[...explorationsMap.values()]}
+            {database}
+            {schema}
+          />
+        {/if}
 
-      {#if canExplore}
-        <div class="explore-cta">
-          <h3 class="explore-title">{$_('explore_your_data')}</h3>
-          <p class="explore-description">
-            {$_('what_is_an_exploration_mini')}
-          </p>
-          <div>
-            <AnchorButton
-              href={getDataExplorerPageUrl(database.id, schema.oid)}
-              size="small"
-            >
-              {$_('open_data_explorer')}
-            </AnchorButton>
+        {#if canExplore}
+          <div class="explore-cta">
+            <h3 class="explore-title">{$_('explore_your_data')}</h3>
+            <p class="explore-description">
+              {$_('what_is_an_exploration_mini')}
+            </p>
+            <div>
+              <AnchorButton
+                href={getDataExplorerPageUrl(database.id, schema.oid)}
+                size="small"
+              >
+                {$_('open_data_explorer')}
+              </AnchorButton>
+            </div>
           </div>
-        </div>
-      {/if}
-    </section>
+        {/if}
+      </section>
+    {/if}
   </div>
 </div>
 
