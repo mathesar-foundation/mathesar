@@ -43,10 +43,10 @@
     min-height: 4.2rem;
 
     &:hover {
-      background: var(--slate-50);
+      background: var(--gray-50);
     }
     &:focus {
-      background: var(--slate-100);
+      background: var(--gray-100);
     }
   }
 
@@ -74,12 +74,12 @@
     display: inline-block;
     width: 0.25rem;
     height: 0.25rem;
-    background-color: var(--slate-500);
+    background-color: var(--gray-500);
     border-radius: 50%;
   }
 
   .user-type {
-    background-color: var(--slate-200);
+    background-color: var(--gray-200);
     padding: 0.25rem 0.5rem;
     border-radius: 1.17rem;
     font-size: var(--text-size-small);

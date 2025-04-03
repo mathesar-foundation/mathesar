@@ -65,7 +65,7 @@
   }
 
   .help {
-    color: var(--slate-500);
+    color: var(--gray-500);
     margin-top: var(--size-extreme-small);
     font-size: var(--size-small);
   }

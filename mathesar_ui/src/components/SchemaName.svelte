@@ -12,9 +12,7 @@
 </script>
 
 <span class="schema-name" class:is-locked={isLocked}>
-  <NameWithIcon icon={iconSchema} {iconHasBox}>
-    {$name}
-  </NameWithIcon>
+  {$name}
 </span>
 
 <style>
@@ -24,7 +22,7 @@
   .schema-name.is-locked {
     --icon-color: var(
       var(--SchemaName__locked-schema-icon-color),
-      var(--slate-500)
+      var(--gray-500)
     );
   }
 </style>

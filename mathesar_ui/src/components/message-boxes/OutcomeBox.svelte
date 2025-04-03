@@ -21,7 +21,8 @@
 <style>
   .outcome-box {
     --MessageBox__background: var(--purple-100);
-    --MessageBox__border: solid 4px var(--purple-300);
+    --MessageBox__border: 4px solid var(--purple-300);
     --MessageBox__icon-color: var(--purple-400);
+    --MessageBox__text-color: var(--text-color);
   }
 </style>

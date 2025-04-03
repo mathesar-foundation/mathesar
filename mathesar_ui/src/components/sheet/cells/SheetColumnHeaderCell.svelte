@@ -27,9 +27,8 @@
     height: 100%;
     border-right: var(--cell-border-vertical);
     border-bottom: none;
-    background: var(--slate-100);
     font-size: var(--text-size-small);
-    font-weight: 500;
+    font-weight: var(--font-weight-bold);
     overflow: hidden;
   }
 </style>

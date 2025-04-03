@@ -46,8 +46,8 @@
   [data-identifier='status-bar'] {
     flex-grow: 0;
     flex-shrink: 0;
-    border-top: 1px solid var(--slate-300);
-    background-color: var(--slate-100);
+    border-top: 1px solid var(--gray-300);
+    background-color: var(--gray-100);
     padding: var(--status-bar-padding);
     display: flex;
     align-items: center;

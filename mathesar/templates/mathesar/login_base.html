@@ -7,11 +7,14 @@
   <style type="text/css">
     body {
       padding: 4rem 2rem;
-      background: var(--sand-200);
+      background: var(--layout-background-color);
       --login-page-spacing: var(--size-super-ultra-large);
-      color: var(--slate-800);
-      overflow: auto;
-      height: auto;
+      color: var(--text-color-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .align-center {
       margin-left: auto;
@@ -30,24 +33,29 @@
     }
     .login-card {
       max-width: 28rem;
-      background-color: var(--white);
+      background-color: var(--card-background);
       padding: var(--login-page-spacing);
       border-radius: var(--border-radius-l);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 6px -1px var(--shadow-color),
+                 0 2px 4px -2px var(--shadow-color),
+                 0 0 0 1px var(--shadow-color-inset) inset;
     }
     .login-card h1 {
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       font-size: var(--size-ultra-large);
-      margin: 0;
+      margin: 0 0 var(--size-xx-large);
       text-align: center;
+      color: var(--text-color-primary);
     }
     .login-card .labeled-input + .labeled-input {
       margin-top: var(--size-small);
     }
     .login-card .labeled-input .help.info {
-      color: var(--slate-700);
+      color: var(--text-color-secondary);
     }
     .login-card .labeled-input .help.error {
-      color: var(--red-600);
+      color: var(--danger-color);
     }
     .login-card .footer {
       display: flex;
@@ -62,27 +70,30 @@
     .unsupported-device {
       display: none;
       margin-top: var(--size-xx-large);
-      background: var(--red-100);
-      border: solid 1px var(--red-200);
+      background: var(--danger-background-color);
+      border: solid 1px var(--danger-border-color);
       border-radius: var(--border-radius-m);
-      padding: 0.5rem 1.5rem;
+      padding: var(--size-small) var(--size-large);
     }
     .unsupported-device .title {
-      margin-top: 0.5rem;
-      font-weight: bold;
+      margin-top: var(--size-xx-small);
+      font-weight: var(--font-weight-bold);
       font-size: var(--size-large);
       text-align: center;
+      color: var(--text-color-primary);
     }
     .unsupported-device .warning-icon {
-      margin-top: 0.5rem;
+      margin-top: var(--size-xx-small);
       font-size: var(--size-xx-large);
       text-align: center;
     }
     .login-card .language-selector {
       display: block;
-      background-color: transparent;
-      border: 1px solid var(--slate-200);
-      border-radius: 0.285rem;
+      background-color: var(--input-background);
+      border: 1px solid var(--input-border);
+      border-radius: var(--border-radius-m);
+      color: var(--text-color-primary);
+      padding: var(--size-xx-small);
       cursor: pointer;
     }
     @media (max-width: 50rem) {

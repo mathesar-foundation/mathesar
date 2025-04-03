@@ -159,9 +159,9 @@
     .content {
       margin-top: var(--size-super-ultra-small);
       padding: var(--size-x-small);
-      border: 1px solid var(--slate-200);
+      border: 1px solid var(--border-color);
       border-radius: var(--border-radius-l);
-      background: var(--white);
+      background: var(--background-color);
     }
   }
 </style>

@@ -31,7 +31,7 @@
     padding: 1rem;
     border-width: 0 1px 1px 1px;
     border-style: solid;
-    border-color: var(--slate-300);
+    border-color: var(--border-color);
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
   }

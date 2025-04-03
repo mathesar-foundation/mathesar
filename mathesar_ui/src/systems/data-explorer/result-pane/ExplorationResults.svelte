@@ -178,10 +178,10 @@
     }
 
     :global(.column-name-wrapper.selected) {
-      background: var(--slate-200) !important;
+      background: var(--gray-200) !important;
     }
     :global([data-sheet-element='data-cell'].selected) {
-      background: var(--slate-100);
+      background: var(--gray-100);
     }
   }
 </style>

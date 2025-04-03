@@ -12,9 +12,10 @@
       cursor: pointer;
       font-weight: inherit;
       padding: var(--Collapsible_trigger-padding, 0.5em);
+
       .collapsible-header-title {
         flex-grow: 1;
-        font-weight: var(--Collapsible_header-font-weight, 600);
+        font-weight: var(--font-weight-bold);
       }
       svg {
         flex-shrink: 0;

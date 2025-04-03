@@ -6,17 +6,19 @@
   export let schema: Schema;
 
   $: ({ tableCount } = schema);
+  $: actualTableCount = $tableCount;
 </script>
 
 <div class="container">
   <p class="table-count">
-    {$_('count_tables', { values: { count: $tableCount } })}
+    {actualTableCount}
   </p>
 </div>
 
 <style lang="scss">
   .table-count {
     font-size: var(--text-size-base);
+    color: var(--text-color-tertiary);
     font-weight: 400;
     margin: 0;
   }

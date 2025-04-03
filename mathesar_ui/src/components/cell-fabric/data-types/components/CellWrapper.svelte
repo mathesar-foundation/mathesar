@@ -126,7 +126,7 @@
     }
 
     &[data-active-cell] {
-      box-shadow: 0 0 0 2px var(--slate-300);
+      box-shadow: 0 0 0 2px var(--gray-300);
       border-radius: 2px;
 
       &:focus {

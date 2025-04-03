@@ -61,8 +61,8 @@
       overflow: hidden;
     }
     .add {
-      --badge-background-color: var(--slate-200);
-      --badge-text-color: var(--slate-800);
+      --badge-background-color: var(--gray-200);
+      --badge-text-color: var(--gray-800);
       --badge-padding: 0 0.45rem;
       --badge-border-radius: var(--border-radius-l);
       --badge-font-size: var(--text-size-small);

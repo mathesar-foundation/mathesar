@@ -65,8 +65,8 @@
 
     .count-container {
       --badge-font-size: var(--text-size-small);
-      --badge-text-color: var(--slate-800);
-      --badge-background-color: var(--slate-100);
+      --badge-text-color: var(--gray-800);
+      --badge-background-color: var(--gray-100);
       height: 100%;
     }
   }

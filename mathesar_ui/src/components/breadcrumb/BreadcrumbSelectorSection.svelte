@@ -62,7 +62,7 @@
     grid-gap: 0.5rem;
   }
   .detail {
-    color: var(--slate-400);
+    color: var(--gray-400);
     font-size: var(--text-size-small);
   }
   .detail:empty {

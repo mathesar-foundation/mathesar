@@ -12,10 +12,7 @@
     overflow: hidden;
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
-    transition: background-color 0.2s ease-in-out;
-    &:hover {
-      background-color: var(--slate-600);
-    }
+    transition: color 0.2s ease-in-out;
   }
   .breadcrumb-link a {
     display: block;
@@ -24,5 +21,9 @@
     color: inherit;
     font-weight: 500;
     font-size: var(--text-size-base);
+    transition: color 0.2s ease-in-out;
+  }
+  .breadcrumb-link:hover a {
+    color: var(--accent-600);
   }
 </style>

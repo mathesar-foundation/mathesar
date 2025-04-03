@@ -28,7 +28,7 @@
 
 <style>
   .db-card-needs-update {
-    background: var(--slate-100);
+    background: var(--gray-100);
     display: flex;
     flex-wrap: wrap;
     align-items: center;

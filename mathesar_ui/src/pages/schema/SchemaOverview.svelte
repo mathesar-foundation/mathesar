@@ -77,60 +77,65 @@
       <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {/if}
   </div>
-  <div class="vertical-container explorations">
-    <div class="vertical-container">
-      <OverviewHeader title={$_('saved_explorations')} />
-      {#if isExplorationsLoading}
-        <ExplorationSkeleton />
-      {:else if explorationsRequestStatus.state === 'failure'}
-        <ErrorBox>
-          <p>{explorationsRequestStatus.errors[0]}</p>
-          <div>
-            <SpinnerButton
-              onClick={async () => {
-                await fetchExplorationsForCurrentSchema();
-              }}
-              label={$_('retry')}
-              icon={iconRefresh}
-            />
-            <a href="../">
-              <Button>
-                <span>{$_('go_to_database')}</span>
-              </Button>
-            </a>
-          </div>
-        </ErrorBox>
-      {:else if showExplorationTutorial}
-        <CreateExplorationTutorial {database} {schema} />
-      {:else}
-        <ExplorationsList
-          bordered={false}
-          explorations={[...explorationsMap.values()]}
-          {database}
-          {schema}
-        />
-      {/if}
-    </div>
 
-    {#if canExplore}
-      <div class="vertical-container">
-        <OverviewHeader title={$_('explore_your_data')} />
-        <span>
-          {$_('what_is_an_exploration_mini')}
-        </span>
-        <div>
-          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.oid)}>
-            {$_('open_data_explorer')}
-          </AnchorButton>
-        </div>
-      </div>
+  <div class="vertical-container sidebar">
+    {#if showExplorationTutorial}
+      <CreateExplorationTutorial {database} {schema} />
+    {:else}
+      <section class="sidebar-section">
+        <OverviewHeader title={$_('saved_explorations')} />
+        {#if isExplorationsLoading}
+          <ExplorationSkeleton />
+        {:else if explorationsRequestStatus.state === 'failure'}
+          <ErrorBox>
+            <p>{explorationsRequestStatus.errors[0]}</p>
+            <div>
+              <SpinnerButton
+                onClick={async () => {
+                  await fetchExplorationsForCurrentSchema();
+                }}
+                label={$_('retry')}
+                icon={iconRefresh}
+              />
+              <a href="../">
+                <Button>
+                  <span>{$_('go_to_database')}</span>
+                </Button>
+              </a>
+            </div>
+          </ErrorBox>
+        {:else}
+          <ExplorationsList
+            explorations={[...explorationsMap.values()]}
+            {database}
+            {schema}
+          />
+        {/if}
+
+        {#if canExplore}
+          <div class="explore-cta">
+            <h3 class="explore-title">{$_('explore_your_data')}</h3>
+            <p class="explore-description">
+              {$_('what_is_an_exploration_mini')}
+            </p>
+            <div>
+              <AnchorButton
+                href={getDataExplorerPageUrl(database.id, schema.oid)}
+                size="small"
+              >
+                {$_('open_data_explorer')}
+              </AnchorButton>
+            </div>
+          </div>
+        {/if}
+      </section>
     {/if}
   </div>
 </div>
 
 <style lang="scss">
   .container {
-    --container-gap: 2rem;
+    --container-gap: 3rem;
     display: flex;
     flex-direction: column;
 
@@ -142,15 +147,67 @@
   .vertical-container {
     display: flex;
     flex-direction: column;
+    gap: 2rem;
+  }
+
+  .sidebar-section {
+    background-color: var(--sidebar-background);
+    border-radius: 0.5rem;
+    border: 1px solid var(--card-border);
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
     > :global(* + *) {
       margin-top: 1rem;
     }
   }
 
-  .explorations {
-    > :global(* + *) {
-      margin-top: 2rem;
+  .explore-cta {
+    margin: 1.5rem -1.5rem -1.5rem;
+    padding: 2rem;
+    background: linear-gradient(
+      135deg,
+      var(--gradient-light-start) 0%,
+      var(--gradient-light-end) 100%
+    );
+    border-top: 1px solid var(--card-border);
+    border-radius: 0 0 0.5rem 0.5rem;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        circle at top right,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 60%
+      );
+      pointer-events: none;
+    }
+
+    .explore-title {
+      font-size: var(--text-size-large);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-color-primary);
+      margin: 0 0 0.75rem 0;
+      position: relative;
+    }
+
+    .explore-description {
+      color: var(--text-color-secondary);
+      font-size: var(--text-size-base);
+      margin: 0 0 1.5rem 0;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    > div {
+      position: relative;
     }
   }
 
@@ -160,14 +217,18 @@
 
       > :global(* + *) {
         margin-left: var(--container-gap);
-        margin-top: 0rem;
+        margin-top: 0;
       }
     }
+
     .tables {
-      flex-basis: 65%;
+      flex: 1;
+      min-width: 0;
     }
-    .explorations {
-      flex-basis: 35%;
+
+    .sidebar {
+      width: 24rem;
+      flex-shrink: 0;
     }
   }
 </style>

@@ -215,7 +215,7 @@
     );
 
     &.has-border {
-      border: 1px solid var(--color-gray-medium);
+      border: 1px solid var(--border-color);
     }
 
     &.uses-virtual-list {

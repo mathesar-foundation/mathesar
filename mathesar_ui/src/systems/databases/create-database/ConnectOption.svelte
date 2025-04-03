@@ -48,7 +48,7 @@
     font-weight: 500;
   }
   .description {
-    color: var(--slate-500);
+    color: var(--gray-500);
     margin-top: var(--size-ultra-small);
   }
 </style>

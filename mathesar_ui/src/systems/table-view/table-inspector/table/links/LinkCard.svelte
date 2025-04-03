@@ -18,36 +18,45 @@
   .link-card {
     display: block;
     cursor: pointer;
-    --background: var(--white);
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --border-left: 3px solid var(--yellow-300);
-    --border-radius: 0.375rem;
+    background: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-m);
+    transition: all 0.2s ease;
   }
   .link-card,
-  .link-card.multiple .container {
-    background-color: var(--background);
-    box-shadow: var(--shadow);
-    border-left: var(--border-left);
-    border-radius: var(--border-radius);
+  .link-card.multiple {
+    box-shadow: var(--card-hover-shadow);
   }
-  .link-card:hover {
-    --background: var(--slate-50);
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  .link-card:hover,
+  .link-card.multiple:hover .container {
+    border-color: var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
   }
   .container {
-    padding: 0.5rem 0.625rem;
+    display: flex;
+    flex-direction: column;
   }
   .link-card.multiple {
-    margin-top: 1rem;
+    margin-top: var(--size-base);
   }
   .link-card.multiple .container {
     position: relative;
-    bottom: 0.5rem;
-    left: 0.5rem;
+    bottom: var(--size-xx-small);
+    left: var(--size-xx-small);
+    background: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-m);
+  }
+  .table-name {
+    color: var(--text-color-primary);
+    font-weight: var(--font-weight-medium);
+    padding: var(--size-ultra-small) var(--size-xx-small);
+    border-bottom: 1px solid var(--card-border);
   }
   .detail {
-    margin-top: 0.5rem;
+    color: var(--text-color-tertiary);
     font-size: var(--text-size-small);
-    color: var(--color-text-muted);
+    line-height: 1.4;
+    padding: var(--size-xx-small) var(--size-xx-small);
   }
 </style>

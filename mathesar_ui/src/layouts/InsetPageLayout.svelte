@@ -19,7 +19,7 @@
 
 <style lang="scss">
   .inset-page-layout {
-    background: var(--sand-200);
+    background: var(--layout-background-color);
     padding: var(--inset-page-padding);
 
     :global(.inset-page-section + .inset-page-section) {

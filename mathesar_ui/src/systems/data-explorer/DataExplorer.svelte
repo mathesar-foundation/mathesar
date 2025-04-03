@@ -81,7 +81,7 @@
       padding: 0 1rem;
       text-align: center;
       font-size: var(--text-size-x-large);
-      color: var(--slate-500);
+      color: var(--gray-500);
     }
 
     .initial-content {

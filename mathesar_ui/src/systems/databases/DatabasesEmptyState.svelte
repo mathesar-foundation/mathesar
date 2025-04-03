@@ -49,7 +49,7 @@
     --tutorial_padding: 3.5rem 1.5rem;
 
     [data-identifier='connection-icon'] {
-      color: var(--sand-800);
+      color: var(--stormy-800);
     }
     [data-identifier='no-connections-text'] {
       font-size: var(--size-large);

@@ -166,7 +166,7 @@
       </div>
     {:else}
       <div class="no-access">
-        <WarningBox>
+        <WarningBox fullWidth>
           {$_('access_not_granted_for_any_role')}
         </WarningBox>
       </div>
@@ -199,7 +199,7 @@
     padding: var(--size-base) 0;
 
     & + .access-control-row {
-      border-top: 1px solid var(--slate-100);
+      border-top: 1px solid var(--gray-100);
     }
   }
 </style>
