@@ -398,78 +398,33 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_real
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(bigint)
-RETURNS real
-AS $$
+CREATE OR REPLACE FUNCTION msar.cast_to_real(bigint) RETURNS real AS $$
+  SELECT $1::real;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-    BEGIN
-      RETURN $1::real;
-    END;
+CREATE OR REPLACE FUNCTION msar.cast_to_real(double precision) RETURNS real AS $$
+  SELECT $1::real;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION msar.cast_to_real(real) RETURNS real AS $$
+  SELECT $1::real;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(double precision)
-RETURNS real
-AS $$
+CREATE OR REPLACE FUNCTION msar.cast_to_real(numeric) RETURNS real AS $$
+  SELECT $1::real;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-    BEGIN
-      RETURN $1::real;
-    END;
+CREATE OR REPLACE FUNCTION msar.cast_to_real(text) RETURNS real AS $$
+  SELECT $1::real;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION msar.cast_to_real(money) RETURNS real AS $$
+  SELECT $1::real;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(real)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_real(numeric)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_real(text)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_real(money)
-RETURNS real
-AS $$
-
-    BEGIN
-      RETURN $1::real;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_real(boolean)
-RETURNS real
-AS $$
-
-BEGIN
-  IF $1 THEN
-    RETURN 1::real;
-  END IF;
-  RETURN 0::real;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION msar.cast_to_real(boolean) RETURNS real AS $$
+  SELECT CASE WHEN $1 THEN 1::real ELSE 0::real END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_double_precision
