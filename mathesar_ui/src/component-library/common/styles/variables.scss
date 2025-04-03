@@ -18,7 +18,7 @@
 
   // Input
   --input-background: #ffffff;
-  --input-border: var(--slate-300);
+  --input-border: var(--gray-300);
   --input-text: var(--text-color);
   --input-focus-color: var(--stormy-500);
   --input-focus-shadow: var(--stormy-100);
@@ -29,7 +29,7 @@
   --text-color-primary: var(--stormy-800);
   --text-color-secondary: var(--stormy-700);
   --text-color-tertiary: var(--stormy-600);
-  --text-color-muted: var(--slate-500);
+  --text-color-muted: var(--gray-500);
 
   // Gradients
   --gradient-direction-default: to bottom right;
@@ -180,7 +180,7 @@
   --red-600: #dd4734;
   --red-800: #c63826;
 
-  --slate-800-rgb: 39, 43, 48;
+  --gray-800-rgb: 39, 43, 48;
 
   --sky-200: #daeefb;
   --sky-300: #99d4f9;
@@ -201,7 +201,7 @@
   --gray-900: #131313;
 
   // TODO: Get this incorporated in figma
-  --slate-50-tentative: #f6f9f9;
+  --gray-50-tentative: #f6f9f9;
   --sky-600-tentative: #87bcf6;
 
   --yellow-100: #fff6e0;

@@ -1,15 +1,12 @@
-{% extends 'mathesar/app_styled_base.html' %}
-{% load i18n static %}
-{% translate "Finalizing Installation..." as creating_user_loader_text %}
-{% block title %}
-{% translate "Complete Installation" %}
-{% endblock %}
-{% block page_styles %}
+{% extends 'mathesar/app_styled_base.html' %} {% load i18n static %} {%
+translate "Finalizing Installation..." as creating_user_loader_text %} {% block
+title %} {% translate "Complete Installation" %} {% endblock %} {% block
+page_styles %}
 <style type="text/css">
   body {
     padding: 4rem 2rem;
     background: var(--sand-200);
-    color: var(--slate-800);
+    color: var(--gray-800);
     overflow-y: auto;
   }
 
@@ -47,7 +44,7 @@
 
   hr {
     width: 100%;
-    background-color: var(--slate-200);
+    background-color: var(--gray-200);
     height: 1px;
     border: none;
     margin: var(--size-ultra-small) 0;
@@ -62,14 +59,14 @@
   }
 
   .help.info {
-    color: var(--slate-700);
+    color: var(--gray-700);
   }
 
   .form-card {
     background-color: white;
     padding: var(--size-ultra-large);
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--slate-300);
+    border: 1px solid var(--gray-300);
     display: grid;
     gap: var(--size-large);
   }
@@ -119,29 +116,35 @@
     }
   }
 </style>
-{% endblock %}
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container">
   <div class="heading">
     <div class="logo">
-      <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" />
+      <img
+        src="{% static 'images/red-logo-with-text.svg' %}"
+        alt="Mathesar Logo"
+      />
     </div>
     <h1>{% translate "Finish Setting Up Mathesar" %}</h1>
     <div class="instruction">
+      <div>{% translate "Welcome to Mathesar!" %}</div>
       <div>
-        {% translate "Welcome to Mathesar!" %}
-      </div>
-      <div>
-        {% translate "Create an Admin user to start using Mathesar. You can also choose to share anonymous data to help us improve." %}
+        {% translate "Create an Admin user to start using Mathesar. You can also
+        choose to share anonymous data to help us improve." %}
       </div>
     </div>
   </div>
 
-  <form method="post" class="form-card" onsubmit="showLoadingStatus({{ creating_user_loader_text }});">
+  <form
+    method="post"
+    class="form-card"
+    onsubmit="showLoadingStatus({{ creating_user_loader_text }});"
+  >
     <div>
       <div class="form-group-title">{% translate "Create Admin User" %}</div>
       <div class="help info title-help">
-        {% translate "Set up an Admin user account. This account will have full control over your Mathesar installation." %}
+        {% translate "Set up an Admin user account. This account will have full
+        control over your Mathesar installation." %}
       </div>
     </div>
 
@@ -152,9 +155,17 @@
         <label for="id_username" class="label-component">
           {% translate "Username" %}
         </label>
-        <input type="text" name="username" class="input-element{% if form.username.errors %} has-error{% endif %}"
-          value="{% if form.username.value %}{{ form.username.value }}{% endif %}" autofocus autocapitalize="none"
-          autocomplete="username" required id="id_username" />
+        <input
+          type="text"
+          name="username"
+          class="input-element{% if form.username.errors %} has-error{% endif %}"
+          value="{% if form.username.value %}{{ form.username.value }}{% endif %}"
+          autofocus
+          autocapitalize="none"
+          autocomplete="username"
+          required
+          id="id_username"
+        />
       </div>
       {% if form.username.errors %}
       <div class="help error">
@@ -170,10 +181,17 @@
             {% translate "Password" %}
           </label>
 
-          <input type="password" name="password1"
+          <input
+            type="password"
+            name="password1"
             class="input-element{% if form.password1.errors %} has-error{% endif %}"
-            value="{% if form.password1.value %}{{ form.password1.value }}{% endif %}" autofocus autocapitalize="none"
-            autocomplete="new-password" required id="id_password1" />
+            value="{% if form.password1.value %}{{ form.password1.value }}{% endif %}"
+            autofocus
+            autocapitalize="none"
+            autocomplete="new-password"
+            required
+            id="id_password1"
+          />
         </div>
         <div>
           <label for="id_password2" class="label-component">
@@ -181,17 +199,25 @@
           </label>
 
           <div class="input">
-            <input type="password" name="password2"
+            <input
+              type="password"
+              name="password2"
               class="input-element{% if form.password2.errors %} has-error{% endif %}"
-              value="{% if form.password2.value %}{{ form.password2.value }}{% endif %}" autofocus autocapitalize="none"
-              autocomplete="new-password" required id="id_password2" />
+              value="{% if form.password2.value %}{{ form.password2.value }}{% endif %}"
+              autofocus
+              autocapitalize="none"
+              autocomplete="new-password"
+              required
+              id="id_password2"
+            />
           </div>
         </div>
       </div>
 
       <div class="help info">
-        {% translate "Your password must be at least 8 characters long." %}
-        {% translate "We recommend a mix of letters, numbers, and symbols for added security." %}
+        {% translate "Your password must be at least 8 characters long." %} {%
+        translate "We recommend a mix of letters, numbers, and symbols for added
+        security." %}
       </div>
 
       {% if form.password1.errors %}
@@ -200,9 +226,7 @@
         <span>{{ error|escape }}</span>
         {% endfor %}
       </div>
-      {% endif %}
-
-      {% if form.password2.errors %}
+      {% endif %} {% if form.password2.errors %}
       <div class="help error">
         {% for error in form.password2.errors %}
         <span>{{ error|escape }}</span>
@@ -222,42 +246,65 @@
     </div>
     {% endif %}
 
-    <hr/>
+    <hr />
 
     <div>
-      <div class="form-group-title">{% translate "Support Mathesar's Growth" %}</div>
+      <div class="form-group-title">
+        {% translate "Support Mathesar's Growth" %}
+      </div>
     </div>
 
     <div class="inputs-container">
       <div class="labeled-input layout-inline-input-first">
         <div class="label-content">
-          <input class="checkbox input" type="checkbox"
-            id="one_time_confirmation" name="one_time_installation_confirmation" checked />
+          <input
+            class="checkbox input"
+            type="checkbox"
+            id="one_time_confirmation"
+            name="one_time_installation_confirmation"
+            checked
+          />
           <label class="label label-component" for="one_time_confirmation">
-            {% translate "Send a one-time confirmation to let us know you've installed Mathesar" %}
+            {% translate "Send a one-time confirmation to let us know you've
+            installed Mathesar" %}
           </label>
           <div class="help">
-            {% translate "Let our open-source team know we have real users out there." %}
-            {% translate "No personal data is shared, just an acknowledgment of your installation." %}
+            {% translate "Let our open-source team know we have real users out
+            there." %} {% translate "No personal data is shared, just an
+            acknowledgment of your installation." %}
           </div>
         </div>
       </div>
       <div class="labeled-input layout-inline-input-first">
         <div class="label-content">
-          <input class="checkbox input" type="checkbox"
-            id="usage_stats" name="usage_stats" checked/>
+          <input
+            class="checkbox input"
+            type="checkbox"
+            id="usage_stats"
+            name="usage_stats"
+            checked
+          />
           <label class="label label-component" for="usage_stats">
             {% translate "Enable anonymous usage data collection" %}
           </label>
           <div class="help">
-            {% translate "Share anonymous usage data periodically to help us improve features." %}
-            {% translate "No personal data is collected, and you can change this setting anytime." %}
+            {% translate "Share anonymous usage data periodically to help us
+            improve features." %} {% translate "No personal data is collected,
+            and you can change this setting anytime." %}
             <!-- TODO_BETA: Add correct link to analytics information docs-page/website -->
-            <a class="help-link" href="https://docs.mathesar.org/user-guide/usage-data-collection/" target="_blank">
+            <a
+              class="help-link"
+              href="https://docs.mathesar.org/user-guide/usage-data-collection/"
+              target="_blank"
+            >
               {% translate "See what's shared." %}
             </a>
             <div>
-              <a class="help-link" href="https://mathesar.org/privacy" target="_blank">
+              <a
+                class="help-link"
+                href="https://mathesar.org/privacy"
+                target="_blank"
+              >
                 {% translate "See our privacy policy." %}
               </a>
             </div>
@@ -273,13 +320,12 @@
     </div>
   </form>
 </div>
-{% endblock %}
-{% block page_scripts %}
+{% endblock %} {% block page_scripts %}
 <script>
   function showLoadingStatus(newText) {
     const loginButton = document.querySelector('form button[type="submit"]');
     loginButton.disabled = true;
-    loginButton.innerText = newText ?? 'Loading...';
+    loginButton.innerText = newText ?? "Loading...";
   }
 </script>
 {% endblock %}
