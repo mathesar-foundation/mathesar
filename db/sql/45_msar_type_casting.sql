@@ -996,122 +996,85 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_integer
 
 CREATE OR REPLACE FUNCTION msar.cast_to_integer(bigint)
-RETURNS integer
-AS $$
-
-    BEGIN
-      RETURN $1::integer;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS integer AS $$
+  SELECT $1::integer;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_integer(text)
-RETURNS integer
-AS $$
-
-    BEGIN
-      RETURN $1::integer;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS integer AS $$
+  SELECT $1::integer;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_integer(real)
-RETURNS integer
-AS $$
-
-    DECLARE integer_res integer;
-    BEGIN
-      SELECT $1::integer INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to integer without loss', $1;
-    END;
-
+RETURNS integer AS $$
+  DECLARE integer_res integer;
+  BEGIN
+    SELECT $1::integer INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to integer without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_integer(double precision)
-RETURNS integer
-AS $$
-
-    DECLARE integer_res integer;
-    BEGIN
-      SELECT $1::integer INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to integer without loss', $1;
-    END;
-
+RETURNS integer AS $$
+  DECLARE integer_res integer;
+  BEGIN
+    SELECT $1::integer INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to integer without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_integer(numeric)
-RETURNS integer
-AS $$
-
-    DECLARE integer_res integer;
-    BEGIN
-      SELECT $1::integer INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to integer without loss', $1;
-    END;
-
+RETURNS integer AS $$
+  DECLARE integer_res integer;
+  BEGIN
+    SELECT $1::integer INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to integer without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_integer(money)
-RETURNS integer
-AS $$
-
-    DECLARE integer_res integer;
-    BEGIN
-      SELECT $1::integer INTO integer_res;
-      IF integer_res = $1 THEN
-        RETURN integer_res;
-      END IF;
-      RAISE EXCEPTION '% cannot be cast to integer without loss', $1;
-    END;
-
+RETURNS integer AS $$
+  DECLARE integer_res integer;
+  BEGIN
+    SELECT $1::integer INTO integer_res;
+    IF integer_res = $1 THEN
+      RETURN integer_res;
+    END IF;
+    RAISE EXCEPTION '% cannot be cast to integer without loss', $1;
+  END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_integer(boolean)
-RETURNS integer
-AS $$
-
-BEGIN
-  IF $1 THEN
-    RETURN 1::integer;
-  END IF;
-  RETURN 0::integer;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS integer AS $$
+  SELECT CASE WHEN $1 THEN 1::integer ELSE 0::integer END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_interval
 
 CREATE OR REPLACE FUNCTION msar.cast_to_interval(interval)
-RETURNS interval
-AS $$
-
-    BEGIN
-      RETURN $1;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS interval AS $$
+  SELECT $1;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_interval(text)
-RETURNS interval
-AS $$
- BEGIN
-      PERFORM $1::numeric;
-      RAISE EXCEPTION '% is a numeric', $1;
-      EXCEPTION
-        WHEN sqlstate '22P02' THEN
-          RETURN $1::interval;
-    END;
-
+RETURNS interval AS $$
+BEGIN
+  PERFORM $1::numeric;
+  RAISE EXCEPTION '% is a numeric', $1;
+  EXCEPTION
+    WHEN sqlstate '22P02' THEN
+      RETURN $1::interval;
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
