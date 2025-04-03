@@ -193,7 +193,7 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--slate-100);
+    border: 1px solid var(--gray-100);
     border-radius: 0.25rem;
     background: var(--white);
     min-height: 2.25em;
@@ -202,8 +202,8 @@
     cursor: default;
   }
   .disabled {
-    background: var(--slate-100);
-    border: solid 1px var(--slate-200);
+    background: var(--gray-100);
+    border: solid 1px var(--gray-200);
   }
 
   .linked-record-input:focus {

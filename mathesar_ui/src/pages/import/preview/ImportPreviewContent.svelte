@@ -302,13 +302,13 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--slate-500);
+    color: var(--gray-500);
   }
   .preview-header {
     margin: 0;
     padding: var(--size-small) var(--inset-page-section-padding);
-    border-bottom: 1px solid var(--slate-200);
-    border-top: solid 1px var(--slate-300);
+    border-bottom: 1px solid var(--gray-200);
+    border-top: solid 1px var(--gray-300);
     background: var(--white);
   }
   .preview-content {
@@ -319,7 +319,7 @@
     overflow-x: auto;
     overflow-y: hidden;
     margin: 0 auto;
-    border: 1px solid var(--slate-200);
+    border: 1px solid var(--gray-200);
   }
   .truncation-alert {
     margin: 1rem auto 0 auto;

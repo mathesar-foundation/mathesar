@@ -53,7 +53,7 @@
         {#each value as entry}
           <Chip
             display={isIndependentOfSheet ? 'inline-block' : 'inline'}
-            background="var(--slate-200)"
+            background="var(--gray-200)"
           >
             {#if entry === null}
               <Null />

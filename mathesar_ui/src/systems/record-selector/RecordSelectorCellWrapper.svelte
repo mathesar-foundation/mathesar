@@ -39,7 +39,7 @@
     display: table-cell;
     vertical-align: middle;
     border-style: solid;
-    border-color: var(--slate-200);
+    border-color: var(--gray-200);
     border-width: 0;
     /** Set from parent to so that first row gets border */
     border-top-width: var(--border-top-width, 0);
@@ -115,7 +115,7 @@
 
   @media (prefers-color-scheme: dark) {
     .td {
-      border-color: var(--slate-700);
+      border-color: var(--gray-700);
     }
   }
 </style>

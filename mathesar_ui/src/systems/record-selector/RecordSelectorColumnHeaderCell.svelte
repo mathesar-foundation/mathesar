@@ -144,7 +144,7 @@
     background: var(--input-background);
     border-radius: 0.2rem;
     border: none;
-    box-shadow: 0 0 0 0.1rem var(--slate-200);
+    box-shadow: 0 0 0 0.1rem var(--gray-200);
     outline: none;
     resize: none;
     color: var(--text-color);
@@ -154,7 +154,7 @@
     display: none;
   }
   .column-header-cell.has-nested-selector-open :global(.record-selector-input) {
-    box-shadow: 0 0 0 0.2rem var(--slate-400);
+    box-shadow: 0 0 0 0.2rem var(--gray-400);
     z-index: 2;
     pointer-events: none;
   }
@@ -190,11 +190,11 @@
 
   @media (prefers-color-scheme: dark) {
     .column-header-cell :global(.record-selector-input) {
-      box-shadow: 0 0 0 0.1rem var(--slate-700);
+      box-shadow: 0 0 0 0.1rem var(--gray-700);
     }
     .column-header-cell.has-nested-selector-open
       :global(.record-selector-input) {
-      box-shadow: 0 0 0 0.2rem var(--slate-600);
+      box-shadow: 0 0 0 0.2rem var(--gray-600);
     }
   }
 </style>

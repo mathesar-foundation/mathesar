@@ -108,7 +108,7 @@
   }
 
   .users-list {
-    border: 1px solid var(--slate-200);
+    border: 1px solid var(--gray-200);
     border-radius: var(--border-radius-m);
 
     hr {

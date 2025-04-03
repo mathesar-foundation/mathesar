@@ -157,6 +157,6 @@
     text-align: center;
     font-size: 2rem;
     padding: 2rem;
-    color: var(--slate-500);
+    color: var(--gray-500);
   }
 </style>

@@ -74,7 +74,7 @@
 
   .entity-name-container {
     font-size: var(--text-size-small);
-    background-color: var(--slate-200);
+    background-color: var(--gray-200);
     border-radius: var(--border-radius-xl);
     padding: 0.285rem 0.428rem;
     font-weight: var(--font-weight-bold);

@@ -55,13 +55,13 @@
   }
   .content {
     white-space: pre-wrap;
-    border: 1px solid var(--slate-300);
+    border: 1px solid var(--gray-300);
     padding: var(--size-xx-small);
     border-radius: var(--border-radius-m);
     margin-top: var(--size-x-small);
   }
   .no-cell-selected {
-    color: var(--slate-500);
+    color: var(--gray-500);
     padding: var(--size-large);
   }
 </style>

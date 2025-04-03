@@ -69,7 +69,7 @@
     padding: var(--size-x-small) 0;
 
     .heading {
-      color: var(--slate-400);
+      color: var(--gray-400);
       font-weight: 500;
       margin-bottom: var(--size-ultra-small);
     }

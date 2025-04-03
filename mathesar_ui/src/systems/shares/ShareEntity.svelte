@@ -220,7 +220,7 @@
       font-weight: 700;
     }
     .description {
-      color: var(--slate-400);
+      color: var(--gray-400);
       font-size: var(--size-small);
       margin-top: 0.2rem;
     }

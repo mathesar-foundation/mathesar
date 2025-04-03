@@ -41,13 +41,8 @@
   --gradient-light-end: var(--gradient-base-end);
   --gradient-dark-start: var(--stormy-800);
   --gradient-dark-end: var(--stormy-900);
-  --gradient-card-start: var(--sand-50);
-  --gradient-card-end: var(--sand-100);
-  --gradient-card-hover-start: var(--sand-50);
-  --gradient-card-hover-end: rgba(250, 249, 246, 0.8);
-  --gradient-card-active-start: var(--sand-100);
-  --gradient-card-active-end: var(--sand-200);
 
+  // Card Colors
   --card-background: #ffffff;
   --card-border: var(--sand-300);
   --card-row-border: var(--sand-200);
@@ -57,7 +52,13 @@
     0 0 0 1px var(--shadow-color-inset) inset;
   --card-active-shadow: 0 1px 2px var(--shadow-color-light),
     0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-  --card-gradient-direction: var(--gradient-direction-default);
+  --gradient-card-start: var(--white);
+  --gradient-card-end: var(--sand-50);
+  --gradient-card-hover-start: var(--sand-100);
+  --gradient-card-hover-end: var(--sand-200);
+  --gradient-card-active-start: var(--sand-100);
+  --gradient-card-active-end: var(--sand-200);
+
   --sidebar-background: #ffffff;
   --modal-background: #ffffff;
   --modal-overlay: rgba(0, 0, 0, 0.5);
@@ -71,11 +72,11 @@
   --collapsible-hover: var(--sand-300);
   --collapsible-active: var(--sand-400);
 
+  // Utility Colors
   --danger-color: #d67171;
   --danger-background-color: #fde9e9;
   --danger-border-color: #f2aaaa;
 
-  /* Utility colors */
   --info-color: #3b82f6;
   --info-background-color: #eff6ff;
   --info-border-color: #bfdbfe;
@@ -177,16 +178,6 @@
   --red-600: #dd4734;
   --red-800: #c63826;
 
-  --slate-50: #f6f9f9;
-  --slate-100: #eef0f0;
-  --slate-200: #d3d6da;
-  --slate-300: #b6bbc2;
-  --slate-400: #6c727e;
-  --slate-500: #4c515a;
-  --slate-600: #3c414a;
-  --slate-700: #393f46;
-  --slate-800: #272b30;
-
   --slate-800-rgb: 39, 43, 48;
 
   --sky-200: #daeefb;
@@ -195,6 +186,18 @@
   --sky-600: #127ed6;
   --sky-700: #0f69c1;
   --sky-800: #3e5a80;
+
+  // Gray palette
+  --gray-50: #e0e0e0;
+  --gray-100: #d0d0d0;
+  --gray-200: #c0c0c0;
+  --gray-300: #a0a0a0;
+  --gray-400: #808080;
+  --gray-500: #606060;
+  --gray-600: #404040;
+  --gray-700: #303030;
+  --gray-800: #1e1e1e;
+  --gray-900: #101010;
 
   // TODO: Get this incorporated in figma
   --slate-50-tentative: #f6f9f9;
@@ -258,11 +261,11 @@
   --color-blue-dark: #1d4ed8;
   --color-orange-dark: #7c2d12;
   --color-green-medium: #10b981;
-  --color-gray-lighter: #fafafa;
-  --color-gray-light: #f4f4f5;
-  --color-gray-medium: #d4d4d8;
-  --color-gray-dark: #a1a1aa;
-  --color-gray-darker: #27272a;
+  --color-gray-lighter: var(--gray-50);
+  --color-gray-light: var(--gray-100);
+  --color-gray-medium: var(--gray-300);
+  --color-gray-dark: var(--gray-400);
+  --color-gray-darker: var(--gray-800);
   --color-contrast: var(--color-blue-medium);
   --color-contrast-light: var(--color-blue-light);
   --color-link: var(--color-blue-dark);
@@ -293,53 +296,42 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background-color: #1a1a1a;
-    --border-color: #404040;
-    --header-background: #262626;
-    --hover-background: #262626;
-    --active-background: #333333;
-    --disabled-background: #262626;
+    --background-color: var(--gray-900);
+    --border-color: var(--gray-700);
+    --header-background: var(--gray-800);
+    --hover-background: var(--gray-800);
+    --active-background: var(--gray-700);
+    --disabled-background: var(--gray-800);
     --shadow-color: var(--shadow-color-dark);
     --shadow-color-light: rgba(0, 0, 0, 0.2);
     --shadow-color-inset: var(--shadow-color-inset-dark);
 
     // Text Colors
-    --text-color: #e5e5e5;
+    --text-color: var(--white);
     --text-color-primary: #ffffff;
     --text-color-secondary: var(--stormy-200);
     --text-color-tertiary: var(--stormy-300);
-    --text-color-muted: var(--slate-300);
+    --text-color-muted: var(--gray-400);
 
     // Input Colors
-    --input-background: #262626;
-    --input-border: #404040;
+    --input-background: var(--gray-800);
+    --input-border: var(--gray-700);
     --input-text: var(--text-color);
     --input-focus-color: var(--stormy-400);
     --input-focus-shadow: var(--stormy-800);
-    --input-disabled-background: #262626;
-
-    --card-background: #171717;
-    --card-border: #333333;
-    --card-row-border: #262626;
-    --card-hover-border: var(--stormy-400);
-    --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
-      0 2px 4px -2px var(--shadow-color),
-      0 0 0 1px var(--shadow-color-inset) inset;
-    --card-active-shadow: 0 1px 2px var(--shadow-color-light),
-      0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-    --card-gradient-direction: to bottom right;
-    --sidebar-background: #262626;
-    --modal-background: #262626;
+    --input-disabled-background: var(--gray-800);
+    --sidebar-background: var(--gray-800);
+    --modal-background: var(--gray-800);
     --modal-overlay: rgba(0, 0, 0, 0.7);
     --icon-background: var(--stormy-700);
     --layout-background-color: var(--background-color);
-    --inspector-background: #262626;
-    --inspector-border: #404040;
-    --inspector-hover: #333333;
-    --inspector-active: #404040;
-    --collapsible-background: #333333;
-    --collapsible-hover: #404040;
-    --collapsible-active: #4a4a4a;
+    --inspector-background: var(--gray-800);
+    --inspector-border: var(--gray-700);
+    --inspector-hover: var(--gray-700);
+    --inspector-active: var(--gray-600);
+    --collapsible-background: var(--gray-700);
+    --collapsible-hover: var(--gray-600);
+    --collapsible-active: var(--gray-500);
 
     // Gradients
     --gradient-base-start: var(--stormy-800);
@@ -349,19 +341,24 @@
     --gradient-base-active-start: var(--stormy-600);
     --gradient-base-active-end: var(--stormy-700);
 
-    --gradient-card-start: #1a1a1a;
-    --gradient-card-end: #171717;
-    --gradient-card-hover-start: #1a1a1a;
-    --gradient-card-hover-end: #171717;
-    --gradient-card-active-start: #262626;
-    --gradient-card-active-end: #1a1a1a;
+    // Card Colors
+    --card-background: var(--gray-900);
+    --card-border: var(--gray-700);
+    --card-row-border: var(--gray-800);
+    --card-hover-border: var(--stormy-400);
+    --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
+      0 2px 4px -2px var(--shadow-color),
+      0 0 0 1px var(--shadow-color-inset) inset;
+    --card-active-shadow: 0 1px 2px var(--shadow-color-light),
+      0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+    --gradient-card-start: var(--gray-900);
+    --gradient-card-end: var(--gray-800);
+    --gradient-card-hover-start: var(--gray-800);
+    --gradient-card-hover-end: var(--gray-700);
+    --gradient-card-active-start: var(--gray-700);
+    --gradient-card-active-end: var(--gray-600);
 
-    --card-gradient-start: var(--gradient-card-start);
-    --card-gradient-end: var(--gradient-card-end);
-    --card-hover-gradient-start: var(--gradient-card-hover-start);
-    --card-hover-gradient-end: var(--gradient-card-hover-end);
-    --card-gradient-direction: var(--gradient-direction-default);
-
+    // Utility Colors
     --danger-color: #ff6b6b;
     --danger-background-color: rgba(255, 107, 107, 0.1);
     --danger-border-color: rgba(255, 107, 107, 0.2);
@@ -382,10 +379,10 @@
     --purple-300: rgba(139, 92, 246, 0.3);
     --purple-400: rgba(139, 92, 246, 0.8);
 
-    --collapsible-button-background: #333333;
-    --collapsible-button-hover: #404040;
-    --collapsible-button-active: #4a4a4a;
-    --collapsible-button-border: #505050;
+    --collapsible-button-background: var(--gray-700);
+    --collapsible-button-hover: var(--gray-600);
+    --collapsible-button-active: var(--gray-500);
+    --collapsible-button-border: var(--gray-500);
     --collapsible-button-text: var(--text-color-primary);
     --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }

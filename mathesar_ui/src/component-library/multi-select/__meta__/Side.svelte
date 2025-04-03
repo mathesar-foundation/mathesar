@@ -17,7 +17,7 @@
 
 <style>
   .icon {
-    color: var(--slate-500);
+    color: var(--gray-500);
   }
   .price {
     font-style: italic;

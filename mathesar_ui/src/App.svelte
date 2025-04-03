@@ -76,10 +76,10 @@
    */
     --cell-bg-color-base: var(--background-color);
     --cell-bg-color-error: var(--danger-background-color);
-    --cell-bg-color-header: var(--slate-100);
+    --cell-bg-color-header: var(--gray-100);
     --cell-bg-color-processing: var(--yellow-100);
-    --cell-bg-color-disabled: var(--slate-100);
-    --cell-bg-color-row-hover: var(--slate-100);
+    --cell-bg-color-disabled: var(--gray-100);
+    --cell-bg-color-row-hover: var(--gray-100);
     --cell-bg-color-row-selected: var(--stormy-100);
 
     --color-fk: var(--yellow-300);
@@ -88,8 +88,8 @@
     --color-array-element: var(--sky-300);
     --color-fk-border: var(--yellow-400);
 
-    --cell-border-horizontal: 1px solid var(--slate-200);
-    --cell-border-vertical: 1px solid var(--slate-200);
+    --cell-border-horizontal: 1px solid var(--gray-200);
+    --cell-border-vertical: 1px solid var(--gray-200);
 
     @media (prefers-color-scheme: dark) {
       --cell-bg-mix-blend-mode: screen;
@@ -101,13 +101,13 @@
       --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
       --cell-bg-color-row-selected: rgba(122, 92, 166, 0.3);
 
-      --cell-border-horizontal: 1px solid var(--slate-700);
-      --cell-border-vertical: 1px solid var(--slate-700);
+      --cell-border-horizontal: 1px solid var(--gray-700);
+      --cell-border-vertical: 1px solid var(--gray-700);
 
       --color-fk: rgba(235, 157, 32, 0.15);
       --color-fk-border: var(--pumpkin-600);
       --color-error: #ff6b6b;
-      --cell-text-color-processing: var(--slate-300);
+      --cell-text-color-processing: var(--gray-300);
       --color-array-element: var(--sky-400);
     }
 
@@ -204,14 +204,14 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: var(--slate-100);
+    background: var(--gray-100);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
     color: var(--text-color);
 
     @media (prefers-color-scheme: dark) {
-      background: var(--slate-900);
-      border: 1px solid var(--slate-700);
+      background: var(--gray-900);
+      border: 1px solid var(--gray-700);
     }
   }
 
@@ -241,14 +241,14 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--slate-100);
+    background: var(--gray-100);
     border-radius: 3px;
     color: var(--text-color-muted);
     font-weight: bold;
 
     @media (prefers-color-scheme: dark) {
-      background: var(--slate-900);
-      border: 1px solid var(--slate-700);
+      background: var(--gray-900);
+      border: 1px solid var(--gray-700);
     }
   }
 

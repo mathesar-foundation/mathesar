@@ -68,7 +68,7 @@
 
 <style>
   .release {
-    border: solid 1px var(--slate-200);
+    border: solid 1px var(--gray-200);
     padding: var(--size-large);
     border-radius: var(--border-radius-l);
     background-color: var(--card-background);
@@ -110,7 +110,7 @@
     color: var(--text-color-primary);
     padding: 0.5rem;
     display: flex;
-    border: solid 1px var(--slate-200);
+    border: solid 1px var(--gray-200);
     border-radius: 500px;
   }
 

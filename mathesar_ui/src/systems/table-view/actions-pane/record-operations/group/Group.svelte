@@ -110,7 +110,7 @@
     }
 
     .muted {
-      color: var(--slate-400);
+      color: var(--gray-400);
     }
   }
 </style>

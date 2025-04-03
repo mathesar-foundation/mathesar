@@ -43,7 +43,7 @@
       }
 
       &:hover {
-        border-bottom-color: var(--button-secondary-hover-border);
+        border-bottom-color: var(--stormy-200);
         opacity: 1;
       }
 
@@ -52,12 +52,12 @@
       }
 
       &.active {
-        border-bottom-color: var(--button-secondary-active-border);
+        border-bottom-color: var(--stormy-500);
         opacity: 1;
       }
 
       &.focused {
-        border-color: var(--button-secondary-active-border);
+        border-color: var(--stormy-500);
         z-index: 1;
       }
 

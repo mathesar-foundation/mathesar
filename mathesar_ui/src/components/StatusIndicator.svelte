@@ -40,7 +40,7 @@
     font-size: var(--text-size-small);
     display: inline-flex;
     align-items: center;
-    color: var(--slate-400);
+    color: var(--gray-400);
     white-space: nowrap;
 
     .icon > :global(*) {

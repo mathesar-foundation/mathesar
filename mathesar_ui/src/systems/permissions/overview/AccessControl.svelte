@@ -199,7 +199,7 @@
     padding: var(--size-base) 0;
 
     & + .access-control-row {
-      border-top: 1px solid var(--slate-100);
+      border-top: 1px solid var(--gray-100);
     }
   }
 </style>

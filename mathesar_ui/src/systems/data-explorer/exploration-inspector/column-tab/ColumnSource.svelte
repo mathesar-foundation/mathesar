@@ -117,7 +117,7 @@
 
       .tag {
         padding: var(--size-extreme-small) var(--size-ultra-small);
-        background: var(--slate-200);
+        background: var(--gray-200);
         border-radius: var(--size-large);
         font-weight: 510;
         overflow: hidden;
