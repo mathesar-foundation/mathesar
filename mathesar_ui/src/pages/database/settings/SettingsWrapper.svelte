@@ -61,20 +61,8 @@
 <style lang="scss">
   .navigation {
     --Menu__min-width: 100%;
-    --Menu__item-border-radius: var(--border-radius-m);
-    --Menu__item-hover-background: var(--sand-100);
-    --Menu__item-active-background: var(--sand-200);
-    --Menu__item-active-hover-background: var(--sand-200);
-    --Menu__item-focus-outline-color: var(--sand-300);
-    padding: var(--size-x-small) 0;
-
-    .heading {
-      color: var(--gray-400);
-      font-weight: 500;
-      margin-bottom: var(--size-ultra-small);
-    }
-    .menu-divider {
-      margin: 1rem 0;
-    }
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-m);
+    overflow: hidden;
   }
 </style>

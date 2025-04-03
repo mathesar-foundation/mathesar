@@ -111,8 +111,8 @@
       --color-array-element: var(--sky-400);
     }
 
-    --page-padding-x: 1em;
-    --page-padding-y: 1em;
+    --page-padding-x: 2em;
+    --page-padding-y: 2em;
     --page-padding: var(--page-padding-x) var(--page-padding-y);
 
     --outer-page-padding-for-inset-page: 0;

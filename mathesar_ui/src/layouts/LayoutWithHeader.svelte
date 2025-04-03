@@ -48,8 +48,6 @@
     .app-layout-content {
       position: relative;
       flex-grow: 1;
-      margin: var(--layout-margin);
-      border-radius: var(--border-radius-l);
 
       &.restrict-width {
         max-width: var(--max-layout-width);
@@ -78,6 +76,7 @@
   .header-title {
     padding: var(--size-ultra-large) 0;
     border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--page-padding-y);
 
     h1 {
       margin: 0;
