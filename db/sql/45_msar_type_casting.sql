@@ -524,16 +524,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_double_precision
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(smallint)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(bigint)
 RETURNS double precision
 AS $$
@@ -554,47 +544,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(character)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(integer)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(real)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(character varying)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(mathesar_types.mathesar_money)
 RETURNS double precision
 AS $$
 
