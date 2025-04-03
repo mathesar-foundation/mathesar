@@ -562,45 +562,9 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_email
 
-CREATE OR REPLACE FUNCTION msar.cast_to_email(mathesar_types.email)
-RETURNS mathesar_types.email
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.email;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_email(character varying)
-RETURNS mathesar_types.email
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.email;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_email(text)
-RETURNS mathesar_types.email
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.email;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_email(character)
-RETURNS mathesar_types.email
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.email;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION msar.cast_to_email(text) RETURNS mathesar_types.email AS $$
+  SELECT $1::mathesar_types.email;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_smallint
