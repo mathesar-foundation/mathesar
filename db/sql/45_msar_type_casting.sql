@@ -1133,55 +1133,15 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_timestamp_with_time_zone
 
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(character varying)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(timestamp with time zone)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(character)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(timestamp without time zone)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS timestamp with time zone AS $$
+  SELECT $1::timestamp with time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(text)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS timestamp with time zone AS $$
+  SELECT $1::timestamp with time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_timestamp_without_time_zone
