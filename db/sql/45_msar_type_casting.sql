@@ -3989,27 +3989,7 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_jsonb
 
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(character varying)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(json)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(character)
 RETURNS jsonb
 AS $$
 
@@ -4029,27 +4009,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(mathesar_types.mathesar_json_array)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(text)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(mathesar_types.mathesar_json_object)
 RETURNS jsonb
 AS $$
 
@@ -4062,27 +4022,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_mathesar_json_array
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(character varying)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(json)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(character)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4102,27 +4042,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(mathesar_types.mathesar_json_array)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(text)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(mathesar_types.mathesar_json_object)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4135,27 +4055,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_mathesar_json_object
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(character varying)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(json)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(character)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
@@ -4175,27 +4075,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(mathesar_types.mathesar_json_array)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(text)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(mathesar_types.mathesar_json_object)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
