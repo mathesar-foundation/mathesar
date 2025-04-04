@@ -1108,44 +1108,14 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_time_without_time_zone
 
 CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(text)
-RETURNS time without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(character varying)
-RETURNS time without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(time without time zone)
-RETURNS time without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS time without time zone AS $$
+  SELECT $1::time without time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(time with time zone)
-RETURNS time without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS time without time zone AS $$
+  SELECT $1::time without time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_time_with_time_zone
