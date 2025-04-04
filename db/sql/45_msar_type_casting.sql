@@ -3990,100 +3990,55 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_jsonb
 
 CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(json)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS jsonb AS $$
+  SELECT $1::jsonb;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(jsonb)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS jsonb AS $$
+  SELECT $1::jsonb;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(text)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS jsonb AS $$
+  SELECT $1::jsonb;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_mathesar_json_array
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(json)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_array AS $$
+  SELECT $1::mathesar_types.mathesar_json_array;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(jsonb)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_array AS $$
+  SELECT $1::mathesar_types.mathesar_json_array;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(text)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_array AS $$
+  SELECT $1::mathesar_types.mathesar_json_array;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_mathesar_json_object
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(json)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_object AS $$
+  SELECT $1::mathesar_types.mathesar_json_object;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(jsonb)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_object AS $$
+  SELECT $1::mathesar_types.mathesar_json_object;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(text)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_object AS $$
+  SELECT $1::mathesar_types.mathesar_json_object;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_json
