@@ -2080,414 +2080,159 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 -- msar.cast_to__double_quote_char_double_quote_
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(time without time zone)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bigint)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(double precision)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.multicurrency_money)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.uri)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(time with time zone)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(integer)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(real)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_money)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tsvector)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(jsonb)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_("char")
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(interval)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(macaddr)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(smallint)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(timestamp with time zone)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(inet)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(boolean)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(int4range)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_json_object)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tstzrange)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(regclass)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(character)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tsrange)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(numrange)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(cidr)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(character varying)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(numeric)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.email)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bit)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(money)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(int8range)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(oid)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(json)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(daterange)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(timestamp without time zone)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bytea)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(date)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_json_array)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(text)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(uuid)
-RETURNS "char"
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_text
