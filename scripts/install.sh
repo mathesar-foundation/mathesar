@@ -7,6 +7,12 @@ set -euo pipefail
 # Do not assume any directory structure or try to access any other project files from
 # this script.
 
+# If there's an existing installation,
+# - If the script's Mathesar's version = installed version, it should perform all operations without affecting the installation.
+#   - Useful if the user is facing environment related issues and would like to get them fixed.
+#   - Running & re-running this script on a working Mathesar installation shoud have no effect on Mathesar itself.
+# - If the script's Mathesar's version > installed version, it should upgrade Mathesar.
+# - If the script's Mathesar's version < installed version, it should throw an error.
 
 #=======CONFIGURATIONS=========================================================
 
@@ -159,4 +165,4 @@ download_and_install_mathesar() {
 
 #=======ACTUAL INSTALLATION CALL===============================================
 
-download_and_install_mathesar
+download_and_install_mathesar || err "Mathesar installation failed"
