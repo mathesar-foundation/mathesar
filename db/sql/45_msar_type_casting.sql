@@ -2238,414 +2238,159 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_text
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(time without time zone)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(bigint)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(double precision)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.multicurrency_money)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.uri)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(time with time zone)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(integer)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(real)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.mathesar_money)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(tsvector)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(jsonb)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text("char")
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(interval)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(macaddr)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(smallint)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(timestamp with time zone)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(inet)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(boolean)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(int4range)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.mathesar_json_object)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(tstzrange)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(regclass)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(character)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(tsrange)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(numrange)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(cidr)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(character varying)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(numeric)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.email)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(bit)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(money)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(int8range)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(oid)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(json)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(daterange)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(timestamp without time zone)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(bytea)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(date)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.mathesar_json_array)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(text)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_text(uuid)
-RETURNS text
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_name
