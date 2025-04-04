@@ -13,6 +13,7 @@ export FILES_TO_COPY=(
   "LICENSE"
   "THIRDPARTY"
   "manage.py"
+  "pyproject.toml"
   "run-uv.sh"
   "requirements.txt"
 )
@@ -22,7 +23,7 @@ export DIRECTORIES_TO_COPY=(
   "db"
   "mathesar"
   "translations"
-  "scripts"
+  "setup"
 )
 export PATTERNS_TO_IGNORE=(
   "*.po"
@@ -37,7 +38,7 @@ err() {
   local reset
   red=$(tput setaf 1 2>/dev/null || echo '')
   reset=$(tput sgr0 2>/dev/null || echo '')
-  echo "${red}ERROR${reset}: $1" >&2
+  echo -e "${red}ERROR: $1${reset}" >&2
   exit 1
 }
 
@@ -110,10 +111,6 @@ package_mathesar() {
 
   echo "Building frontend"
   cd mathesar_ui && npm ci && npm run build && cd ..
-
-  echo "Setup python venv"
-  python -m venv "$PYTHON_VENV_LOCATION/mathesar-venv"
-  source "$PYTHON_VENV_LOCATION/mathesar-venv/bin/activate"
 
   echo "Compiling translations"
   pip install -r requirements.txt
