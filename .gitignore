@@ -198,6 +198,3 @@ config/settings/local.py
 
 # Transifex binary
 tx
-
-dist/__temp__
-dist/__python__

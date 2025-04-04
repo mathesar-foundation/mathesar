@@ -4,14 +4,14 @@ set -e
 # Loads various settings that are used elsewhere in the script
 # This should be called before any other functions
 docker_setup_env() {
-	declare -g DATABASE_ALREADY_EXISTS
-	# look specifically for PG_VERSION, as it is expected in the DB dir
-	if [ -s "$PGDATA/PG_VERSION" ]; then
-		DATABASE_ALREADY_EXISTS='true'
-	fi
+  declare -g DATABASE_ALREADY_EXISTS
+  # look specifically for PG_VERSION, as it is expected in the DB dir
+  if [ -s "$PGDATA/PG_VERSION" ]; then
+    DATABASE_ALREADY_EXISTS='true'
+  fi
 }
 
-start_inbuild_database() {
+start_inbuilt_database() {
   docker_setup_env
   # only run initialization on an empty data directory
   if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
@@ -30,7 +30,7 @@ if [ -z "${POSTGRES_USER}" ] || [ -z "${POSTGRES_PASSWORD}" ] \
   || [ -z "${POSTGRES_DB}" ]
 then
   echo "Starting inbuilt database"
-  start_inbuild_database
+  start_inbuilt_database
   export POSTGRES_USER=postgres
   export POSTGRES_PASSWORD=mathesar
   export POSTGRES_HOST=localhost
