@@ -1190,129 +1190,40 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_date
 
-CREATE OR REPLACE FUNCTION msar.cast_to_date(date)
-RETURNS date
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_date(character varying)
-RETURNS date
-AS $$
-
-DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
-BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
-  RAISE EXCEPTION '% is not a date', $1;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_date(text)
-RETURNS date
-AS $$
-
+RETURNS date AS $$
 DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
+  timestamp_value_with_tz NUMERIC;
+  timestamp_value NUMERIC;
+  date_value NUMERIC;
 BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
+  SET LOCAL TIME ZONE 'UTC';
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+  SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+  IF (timestamp_value_with_tz = date_value) THEN
+    RETURN $1::date;
+  END IF;
   RAISE EXCEPTION '% is not a date', $1;
 END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_date(character)
-RETURNS date
-AS $$
-
-DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
-BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
-  RAISE EXCEPTION '% is not a date', $1;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_date(timestamp without time zone)
-RETURNS date
-AS $$
-
-DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
-BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
-  RAISE EXCEPTION '% is not a date', $1;
-END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_date(timestamp with time zone)
-RETURNS date
-AS $$
-
+RETURNS date AS $$
 DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
+  timestamp_value_with_tz NUMERIC;
+  timestamp_value NUMERIC;
+  date_value NUMERIC;
 BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
+  SET LOCAL TIME ZONE 'UTC';
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+  SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+  IF (timestamp_value_with_tz = date_value) THEN
+    RETURN $1::date;
+  END IF;
   RAISE EXCEPTION '% is not a date', $1;
 END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
