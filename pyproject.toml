@@ -1,3 +1,10 @@
+[project]
+name = "mathesar"
+version = "0.2.3"
+description = "Mathesar 0.2.3"
+readme = "README.md"
+requires-python = ">=3.9"
+
 [tool.vulture]
 exclude = ["mathesar/migrations"]
 ignore_names = ["go_to_patents_data_table", "go_to_all_types_table", "go_to_table_with_numbers_in_text", "admin_user"]
