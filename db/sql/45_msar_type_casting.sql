@@ -1803,16 +1803,6 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.uri)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(time with time zone)
 RETURNS character varying
 AS $$
@@ -1823,27 +1813,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(integer)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(real)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.mathesar_money)
 RETURNS character varying
 AS $$
 
@@ -1903,16 +1873,6 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(smallint)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(timestamp with time zone)
 RETURNS character varying
 AS $$
@@ -1953,16 +1913,6 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.mathesar_json_object)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(tstzrange)
 RETURNS character varying
 AS $$
@@ -1974,16 +1924,6 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(regclass)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(character)
 RETURNS character varying
 AS $$
 
@@ -2023,27 +1963,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(character varying)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(numeric)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.email)
 RETURNS character varying
 AS $$
 
@@ -2134,16 +2054,6 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(date)
-RETURNS character varying
-AS $$
-
-    BEGIN
-      RETURN $1::text;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.mathesar_json_array)
 RETURNS character varying
 AS $$
 
