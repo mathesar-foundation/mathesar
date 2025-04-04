@@ -4209,34 +4209,19 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_json
 
 CREATE OR REPLACE FUNCTION msar.cast_to_json(json)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS json AS $$
+  SELECT $1::json;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_json(jsonb)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS json AS $$
+  SELECT $1::json;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_json(text)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS json AS $$
+  SELECT $1::json;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_uuid
 
