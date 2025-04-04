@@ -4208,27 +4208,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_json
 
-CREATE OR REPLACE FUNCTION msar.cast_to_json(character varying)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_json(json)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_json(character)
 RETURNS json
 AS $$
 
@@ -4248,16 +4228,6 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_json(mathesar_types.mathesar_json_array)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_json(text)
 RETURNS json
 AS $$
@@ -4268,15 +4238,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_json(mathesar_types.mathesar_json_object)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+-- msar.cast_to_uuid
 
 CREATE OR REPLACE FUNCTION msar.cast_to_uuid(text)
 RETURNS uuid
