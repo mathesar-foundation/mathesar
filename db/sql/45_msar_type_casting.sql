@@ -2553,84 +2553,22 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_uri
 
-CREATE OR REPLACE FUNCTION msar.cast_to_uri(character varying)
-RETURNS mathesar_types.uri
-AS $$
-
-    DECLARE uri_res mathesar_types.uri := 'https://centerofci.org';
-    DECLARE uri_tld text;
-    BEGIN
-      RETURN $1::mathesar_types.uri;
-      EXCEPTION WHEN SQLSTATE '23514' THEN
-          SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-          SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
-            INTO uri_tld;
-          IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
-            RETURN uri_res;
-          END IF;
-      RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_uri(text)
-RETURNS mathesar_types.uri
-AS $$
-
-    DECLARE uri_res mathesar_types.uri := 'https://centerofci.org';
-    DECLARE uri_tld text;
-    BEGIN
-      RETURN $1::mathesar_types.uri;
-      EXCEPTION WHEN SQLSTATE '23514' THEN
-          SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-          SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
-            INTO uri_tld;
-          IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
-            RETURN uri_res;
-          END IF;
-      RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_uri(mathesar_types.uri)
-RETURNS mathesar_types.uri
-AS $$
-
-    DECLARE uri_res mathesar_types.uri := 'https://centerofci.org';
-    DECLARE uri_tld text;
-    BEGIN
-      RETURN $1::mathesar_types.uri;
-      EXCEPTION WHEN SQLSTATE '23514' THEN
-          SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-          SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
-            INTO uri_tld;
-          IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
-            RETURN uri_res;
-          END IF;
-      RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_uri(character)
-RETURNS mathesar_types.uri
-AS $$
-
-    DECLARE uri_res mathesar_types.uri := 'https://centerofci.org';
-    DECLARE uri_tld text;
-    BEGIN
-      RETURN $1::mathesar_types.uri;
-      EXCEPTION WHEN SQLSTATE '23514' THEN
-          SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-          SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
-            INTO uri_tld;
-          IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
-            RETURN uri_res;
-          END IF;
-      RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
-    END;
-
+RETURNS mathesar_types.uri AS $$
+DECLARE
+  uri_res mathesar_types.uri := 'https://mathesar.org';
+  uri_tld text;
+BEGIN
+  RETURN $1::mathesar_types.uri;
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
+    SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
+      INTO uri_tld;
+    IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
+      RETURN uri_res;
+    END IF;
+  RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
