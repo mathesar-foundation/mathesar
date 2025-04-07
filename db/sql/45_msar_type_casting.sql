@@ -248,151 +248,60 @@ CASTING FUNCTIONS
 */
 
 -- msar.cast_to_boolean
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(boolean)
-RETURNS boolean
-AS $$
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(boolean) RETURNS boolean AS $$
+  SELECT $1::boolean;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-    BEGIN
-      RETURN $1::boolean;
-    END;
-
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(real) RETURNS boolean AS $$
+BEGIN
+  IF $1<>0 AND $1<>1 THEN
+    RAISE EXCEPTION '% is not a boolean', $1; END IF;
+  RETURN $1<>0;
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(smallint)
-RETURNS boolean
-AS $$
-  BEGIN
-    IF $1<>0 AND $1<>1 THEN
-      RAISE EXCEPTION '% is not a boolean', $1; END IF;
-    RETURN $1<>0;
-  END;
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(bigint) RETURNS boolean AS $$
+BEGIN
+  IF $1<>0 AND $1<>1 THEN
+    RAISE EXCEPTION '% is not a boolean', $1; END IF;
+  RETURN $1<>0;
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(real)
-RETURNS boolean
-AS $$
-  BEGIN
-    IF $1<>0 AND $1<>1 THEN
-      RAISE EXCEPTION '% is not a boolean', $1; END IF;
-    RETURN $1<>0;
-  END;
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(double precision) RETURNS boolean AS $$
+BEGIN
+  IF $1<>0 AND $1<>1 THEN
+    RAISE EXCEPTION '% is not a boolean', $1; END IF;
+  RETURN $1<>0;
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(bigint)
-RETURNS boolean
-AS $$
-  BEGIN
-    IF $1<>0 AND $1<>1 THEN
-      RAISE EXCEPTION '% is not a boolean', $1; END IF;
-    RETURN $1<>0;
-  END;
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(numeric) RETURNS boolean AS $$
+BEGIN
+  IF $1<>0 AND $1<>1 THEN
+    RAISE EXCEPTION '% is not a boolean', $1; END IF;
+  RETURN $1<>0;
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(double precision)
-RETURNS boolean
-AS $$
-
-    BEGIN
-      IF $1<>0 AND $1<>1 THEN
-        RAISE EXCEPTION '% is not a boolean', $1; END IF;
-      RETURN $1<>0;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(numeric)
-RETURNS boolean
-AS $$
-  BEGIN
-    IF $1<>0 AND $1<>1 THEN
-      RAISE EXCEPTION '% is not a boolean', $1; END IF;
-    RETURN $1<>0;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(integer)
-RETURNS boolean
-AS $$
-  BEGIN
-    IF $1<>0 AND $1<>1 THEN
-      RAISE EXCEPTION '% is not a boolean', $1; END IF;
-    RETURN $1<>0;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(character varying)
-RETURNS boolean
-AS $$
-  DECLARE
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(text) RETURNS boolean AS $$
+DECLARE
   istrue boolean;
-  BEGIN
-    SELECT
-      $1='1' OR lower($1) = 'on'
-      OR lower($1)='t' OR lower($1)='true'
-      OR lower($1)='y' OR lower($1)='yes'
-    INTO istrue;
-    IF istrue
-      OR $1='0' OR lower($1) = 'off'
-      OR lower($1)='f' OR lower($1)='false'
-      OR lower($1)='n' OR lower($1)='no'
-    THEN
-      RETURN istrue;
-    END IF;
-    RAISE EXCEPTION '% is not a boolean', $1;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(text)
-RETURNS boolean
-AS $$
-  DECLARE
-  istrue boolean;
-  BEGIN
-    SELECT
-      $1='1' OR lower($1) = 'on'
-      OR lower($1)='t' OR lower($1)='true'
-      OR lower($1)='y' OR lower($1)='yes'
-    INTO istrue;
-    IF istrue
-      OR $1='0' OR lower($1) = 'off'
-      OR lower($1)='f' OR lower($1)='false'
-      OR lower($1)='n' OR lower($1)='no'
-    THEN
-      RETURN istrue;
-    END IF;
-    RAISE EXCEPTION '% is not a boolean', $1;
-  END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(character)
-RETURNS boolean
-AS $$
-  DECLARE
-  istrue boolean;
-  BEGIN
-    SELECT
-      $1='1' OR lower($1) = 'on'
-      OR lower($1)='t' OR lower($1)='true'
-      OR lower($1)='y' OR lower($1)='yes'
-    INTO istrue;
-    IF istrue
-      OR $1='0' OR lower($1) = 'off'
-      OR lower($1)='f' OR lower($1)='false'
-      OR lower($1)='n' OR lower($1)='no'
-    THEN
-      RETURN istrue;
-    END IF;
-    RAISE EXCEPTION '% is not a boolean', $1;
-  END;
+BEGIN
+  SELECT
+    $1='1' OR lower($1) = 'on'
+    OR lower($1)='t' OR lower($1)='true'
+    OR lower($1)='y' OR lower($1)='yes'
+  INTO istrue;
+  IF istrue
+    OR $1='0' OR lower($1) = 'off'
+    OR lower($1)='f' OR lower($1)='false'
+    OR lower($1)='n' OR lower($1)='no'
+  THEN
+    RETURN istrue;
+  END IF;
+  RAISE EXCEPTION '% is not a boolean', $1;
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
@@ -1633,124 +1542,39 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_multicurrency_money
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(mathesar_types.multicurrency_money)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(smallint)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT $1::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(real)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(mathesar_types.mathesar_money)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(bigint)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(double precision)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(numeric)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(integer)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(character varying)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1::numeric, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(text)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1::numeric, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(money)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1::numeric, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(character)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1::numeric, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_character_varying
