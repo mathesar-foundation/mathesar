@@ -868,7 +868,19 @@ SELECT jsonb_agg(prorettype::regtype::text)
 FROM pg_proc
 WHERE
   pronamespace=msar.get_schema_oid('msar')
-  AND proargtypes[0]=typ_id
+  AND proargtypes[0]=
+    CASE WHEN typ_id = ANY(ARRAY['smallint', 'integer', 'mathesar_types.mathesar_money']::regtype[])
+      THEN 'numeric'::regtype
+    WHEN typ_id = ANY(ARRAY['"char"', 'character', 'character varying', 'mathesar_types.email', 'mathesar_types.uri']::regtype[])
+      THEN 'text'::regtype
+    WHEN typ_id = ANY(ARRAY['mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object']::regtype[])
+      THEN 'jsonb'::regtype
+    WHEN typ_id = 'time without time zone'::regtype
+      THEN 'time with time zone'::regtype
+    WHEN typ_id = 'timestamp without time zone'::regtype
+      THEN 'timestamp with time zone'::regtype
+    ELSE typ_id
+    END
   AND left(proname, 5) = 'cast_';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
