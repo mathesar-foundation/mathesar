@@ -124,8 +124,14 @@ POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default=None)
 POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default=None)
 POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default=None)
 
-if POSTGRES_DB and POSTGRES_USER and POSTGRES_PASSWORD and POSTGRES_HOST and POSTGRES_PORT:
-    DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}')
+if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
+    DATABASES['default'] = db_url(
+        f"postgres://{POSTGRES_USER}"
+        f"{':' + POSTGRES_PASSWORD if POSTGRES_PASSWORD else ''}"
+        f"@{POSTGRES_HOST}"
+        f"{':' + POSTGRES_PORT if POSTGRES_PORT else ''}"
+        f"/{POSTGRES_DB}"
+    )
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s)

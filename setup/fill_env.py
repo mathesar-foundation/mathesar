@@ -83,7 +83,7 @@ def prompt_value(key_def):
             return value
 
 
-def check_env_file(filepath = ENV_FILE):
+def check_env_file(filepath=ENV_FILE):
     """Ensure that the .env file exists and is writable."""
     if not os.path.isfile(filepath):
         sys.exit(f"Error: {filepath} file not found")
@@ -91,7 +91,7 @@ def check_env_file(filepath = ENV_FILE):
         sys.exit(f"Error: No write permission for {filepath}")
 
 
-def read_env_file(filepath = ENV_FILE):
+def read_env_file(filepath=ENV_FILE):
     """Read the .env file and return its lines and a dictionary of parsed variables."""
     try:
         with open(filepath, 'r') as f:
@@ -110,7 +110,7 @@ def read_env_file(filepath = ENV_FILE):
     return lines, env_vars
 
 
-def write_env_file(lines, filepath = ENV_FILE):
+def write_env_file(lines, filepath=ENV_FILE):
     """Write the updated lines back to the .env file."""
     try:
         with open(filepath, 'w') as f:
@@ -161,13 +161,12 @@ def obtain_missing_values(env_vars):
     if "SECRET_KEY" not in env_vars or not env_vars["SECRET_KEY"]:
         updates["SECRET_KEY"] = generate_secret_key()
 
-    # If any Postgres related key is missing or empty, prompt for all Postgres keys.
+    # If any Postgres related key is missing, prompt for all Postgres keys.
     # We should ensure that all keys exist even if values are empty.
     if any(key_def["key"] not in env_vars for key_def in POSTGRES_KEYS):
         for key_def in POSTGRES_KEYS:
             key = key_def["key"]
-            if key not in env_vars or not env_vars[key]:
-                updates[key] = prompt_value(key_def)
+            updates[key] = prompt_value(key_def)
 
     return updates
 
@@ -188,4 +187,4 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        sys.exit(f"Exiting due to keyboard interruption")
+        sys.exit("Exiting due to keyboard interruption")
