@@ -592,395 +592,145 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_time_without_time_zone
 
 CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(text)
-RETURNS time without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(character varying)
-RETURNS time without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(time without time zone)
-RETURNS time without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS time without time zone AS $$
+  SELECT $1::time without time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(time with time zone)
-RETURNS time without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS time without time zone AS $$
+  SELECT $1::time without time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_time_with_time_zone
 
 CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(text)
-RETURNS time with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(character varying)
-RETURNS time with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(time without time zone)
-RETURNS time with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS time with time zone AS $$
+  SELECT $1::time with time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(time with time zone)
-RETURNS time with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::time with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS time with time zone AS $$
+  SELECT $1::time with time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_timestamp_with_time_zone
 
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(character varying)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(timestamp with time zone)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(character)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(timestamp without time zone)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS timestamp with time zone AS $$
+  SELECT $1::timestamp with time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(text)
-RETURNS timestamp with time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS timestamp with time zone AS $$
+  SELECT $1::timestamp with time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_timestamp_without_time_zone
 
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(timestamp without time zone)
-RETURNS timestamp without time zone
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp without time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(character varying)
-RETURNS timestamp without time zone
-AS $$
-
-DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
-BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = timestamp_value) THEN
-        RETURN $1::timestamp without time zone;
-        END IF;
-
-  RAISE EXCEPTION '% is not a timestamp without time zone', $1;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS timestamp without time zone AS $$
+  SELECT $1::timestamp without time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(text)
-RETURNS timestamp without time zone
-AS $$
-
+RETURNS timestamp without time zone AS $$
 DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
+  timestamp_value_with_tz NUMERIC;
+  timestamp_value NUMERIC;
+  date_value NUMERIC;
 BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = timestamp_value) THEN
-        RETURN $1::timestamp without time zone;
-        END IF;
-
+  SET LOCAL TIME ZONE 'UTC';
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+  SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+  IF (timestamp_value_with_tz = timestamp_value) THEN
+    RETURN $1::timestamp without time zone;
+  END IF;
   RAISE EXCEPTION '% is not a timestamp without time zone', $1;
 END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(character)
-RETURNS timestamp without time zone
-AS $$
-
-DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
-BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = timestamp_value) THEN
-        RETURN $1::timestamp without time zone;
-        END IF;
-
-  RAISE EXCEPTION '% is not a timestamp without time zone', $1;
-END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(date)
-RETURNS timestamp without time zone
-AS $$
-
+RETURNS timestamp without time zone AS $$
 DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
+  timestamp_value_with_tz NUMERIC;
+  timestamp_value NUMERIC;
+  date_value NUMERIC;
 BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = timestamp_value) THEN
-        RETURN $1::timestamp without time zone;
-        END IF;
-
+  SET LOCAL TIME ZONE 'UTC';
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+  SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+  IF (timestamp_value_with_tz = timestamp_value) THEN
+    RETURN $1::timestamp without time zone;
+  END IF;
   RAISE EXCEPTION '% is not a timestamp without time zone', $1;
 END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(timestamp with time zone)
-RETURNS timestamp without time zone
-AS $$
-
+RETURNS timestamp without time zone AS $$
 DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
+  timestamp_value_with_tz NUMERIC;
+  timestamp_value NUMERIC;
+  date_value NUMERIC;
 BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = timestamp_value) THEN
-        RETURN $1::timestamp without time zone;
-        END IF;
-
+  SET LOCAL TIME ZONE 'UTC';
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+  SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+  IF (timestamp_value_with_tz = timestamp_value) THEN
+    RETURN $1::timestamp without time zone;
+  END IF;
   RAISE EXCEPTION '% is not a timestamp without time zone', $1;
 END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_date
 
 CREATE OR REPLACE FUNCTION msar.cast_to_date(date)
-RETURNS date
-AS $$
-
-    BEGIN
-      RETURN $1::timestamp with time zone;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_date(character varying)
-RETURNS date
-AS $$
-
-DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
-BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
-  RAISE EXCEPTION '% is not a date', $1;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS date AS $$
+  SELECT $1::timestamp with time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_date(text)
-RETURNS date
-AS $$
-
+RETURNS date AS $$
 DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
+  timestamp_value_with_tz NUMERIC;
+  timestamp_value NUMERIC;
+  date_value NUMERIC;
 BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
+  SET LOCAL TIME ZONE 'UTC';
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+  SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+  IF (timestamp_value_with_tz = date_value) THEN
+    RETURN $1::date;
+  END IF;
   RAISE EXCEPTION '% is not a date', $1;
 END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_date(character)
-RETURNS date
-AS $$
-
-DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
-BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
-  RAISE EXCEPTION '% is not a date', $1;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_date(timestamp without time zone)
-RETURNS date
-AS $$
-
-DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
-BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
-  RAISE EXCEPTION '% is not a date', $1;
-END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_date(timestamp with time zone)
-RETURNS date
-AS $$
-
+RETURNS date AS $$
 DECLARE
-timestamp_value_with_tz NUMERIC;
-timestamp_value NUMERIC;
-date_value NUMERIC;
+  timestamp_value_with_tz NUMERIC;
+  timestamp_value NUMERIC;
+  date_value NUMERIC;
 BEGIN
-    SET LOCAL TIME ZONE 'UTC';
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
-    SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
-    SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
-
-        IF (timestamp_value_with_tz = date_value) THEN
-        RETURN $1::date;
-        END IF;
-
+  SET LOCAL TIME ZONE 'UTC';
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+  SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+  IF (timestamp_value_with_tz = date_value) THEN
+    RETURN $1::date;
+  END IF;
   RAISE EXCEPTION '% is not a date', $1;
 END;
-
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
@@ -2051,294 +1801,76 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_jsonb
 
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(character varying)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(json)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(character)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS jsonb AS $$
+  SELECT $1::jsonb;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(jsonb)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(mathesar_types.mathesar_json_array)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS jsonb AS $$
+  SELECT $1::jsonb;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(text)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(mathesar_types.mathesar_json_object)
-RETURNS jsonb
-AS $$
-
-    BEGIN
-      RETURN $1::jsonb;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS jsonb AS $$
+  SELECT $1::jsonb;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_mathesar_json_array
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(character varying)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(json)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(character)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_array AS $$
+  SELECT $1::mathesar_types.mathesar_json_array;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(jsonb)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(mathesar_types.mathesar_json_array)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_array AS $$
+  SELECT $1::mathesar_types.mathesar_json_array;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(text)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(mathesar_types.mathesar_json_object)
-RETURNS mathesar_types.mathesar_json_array
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_array;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_array AS $$
+  SELECT $1::mathesar_types.mathesar_json_array;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_mathesar_json_object
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(character varying)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(json)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(character)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_object AS $$
+  SELECT $1::mathesar_types.mathesar_json_object;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(jsonb)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(mathesar_types.mathesar_json_array)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_object AS $$
+  SELECT $1::mathesar_types.mathesar_json_object;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(text)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(mathesar_types.mathesar_json_object)
-RETURNS mathesar_types.mathesar_json_object
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.mathesar_json_object;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.mathesar_json_object AS $$
+  SELECT $1::mathesar_types.mathesar_json_object;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_json
 
-CREATE OR REPLACE FUNCTION msar.cast_to_json(character varying)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_json(json)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_json(character)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS json AS $$
+  SELECT $1::json;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_json(jsonb)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_json(mathesar_types.mathesar_json_array)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS json AS $$
+  SELECT $1::json;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_json(text)
-RETURNS json
-AS $$
+RETURNS json AS $$
+  SELECT $1::json;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_json(mathesar_types.mathesar_json_object)
-RETURNS json
-AS $$
-
-    BEGIN
-      RETURN $1::json;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+-- msar.cast_to_uuid
 
 CREATE OR REPLACE FUNCTION msar.cast_to_uuid(text)
 RETURNS uuid
