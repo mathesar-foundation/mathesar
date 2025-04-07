@@ -653,6 +653,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(date)
+RETURNS timestamp without time zone AS $$
+DECLARE
+  timestamp_value_with_tz NUMERIC;
+  timestamp_value NUMERIC;
+  date_value NUMERIC;
+BEGIN
+  SET LOCAL TIME ZONE 'UTC';
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+  SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+  SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+  IF (timestamp_value_with_tz = timestamp_value) THEN
+    RETURN $1::timestamp without time zone;
+  END IF;
+  RAISE EXCEPTION '% is not a timestamp without time zone', $1;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(timestamp with time zone)
 RETURNS timestamp without time zone AS $$
 DECLARE
