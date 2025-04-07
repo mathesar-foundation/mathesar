@@ -334,171 +334,42 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_double_precision
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(smallint)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(bigint)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(double precision)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(character)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(integer)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(real)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(character varying)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(mathesar_types.mathesar_money)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(numeric)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(text)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(money)
-RETURNS double precision
-AS $$
-
-    BEGIN
-      RETURN $1::double precision;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT $1::double precision;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(boolean)
-RETURNS double precision
-AS $$
-
-BEGIN
-  IF $1 THEN
-    RETURN 1::double precision;
-  END IF;
-  RETURN 0::double precision;
-END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS double precision AS $$
+  SELECT CASE WHEN $1 THEN 1::double precision ELSE 0::double precision END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_email
 
-CREATE OR REPLACE FUNCTION msar.cast_to_email(mathesar_types.email)
-RETURNS mathesar_types.email
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.email;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_email(character varying)
-RETURNS mathesar_types.email
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.email;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_email(text)
-RETURNS mathesar_types.email
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.email;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_email(character)
-RETURNS mathesar_types.email
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.email;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION msar.cast_to_email(text) RETURNS mathesar_types.email AS $$
+  SELECT $1::mathesar_types.email;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_smallint
