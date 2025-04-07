@@ -674,6 +674,11 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- msar.cast_to_date
 
+CREATE OR REPLACE FUNCTION msar.cast_to_date(date)
+RETURNS date AS $$
+  SELECT $1::timestamp with time zone;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
 CREATE OR REPLACE FUNCTION msar.cast_to_date(text)
 RETURNS date AS $$
 DECLARE
