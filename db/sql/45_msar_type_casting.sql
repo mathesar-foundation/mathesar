@@ -1641,124 +1641,39 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- msar.cast_to_multicurrency_money
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(mathesar_types.multicurrency_money)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN $1::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(smallint)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT $1::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(real)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(mathesar_types.mathesar_money)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(bigint)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(double precision)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(numeric)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(integer)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(character varying)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1::numeric, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(text)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1::numeric, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(money)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1::numeric, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(character)
-RETURNS mathesar_types.multicurrency_money
-AS $$
-
-    BEGIN
-      RETURN ROW($1::numeric, 'USD')::mathesar_types.multicurrency_money;
-    END;
-
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+RETURNS mathesar_types.multicurrency_money AS $$
+  SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_character_varying
