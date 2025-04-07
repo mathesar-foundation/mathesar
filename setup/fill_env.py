@@ -176,6 +176,9 @@ def main():
     lines, env_vars = read_env_file()
     updates = obtain_missing_values(env_vars)
 
+    # Verify env file for POSTGRES connection
+    # Ask for env vars again if it fails
+
     if not updates:
         sys.exit(0)
 

@@ -13,8 +13,5 @@ then
   exit 1
 fi
 
-export DJANGO_SETTINGS_MODULE=config.settings.production
-export ALLOWED_HOSTS='*'
-
 # Start the server on port 8000.
-$SCRIPT_DIR/.mathesar-venv/bin/gunicorn config.wsgi -b 0.0.0.0:8000 $([ "$DEBUG" = "true" ] && echo -n "--log-level=debug")
+$SCRIPT_DIR/mathesar-venv/bin/gunicorn config.wsgi -b 0.0.0.0:8000 $([ "$DEBUG" = "true" ] && echo -n "--log-level=debug")

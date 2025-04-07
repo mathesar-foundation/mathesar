@@ -9,36 +9,47 @@ set -euo pipefail
 
 export UV_VERSION=0.6.11
 export FILES_TO_COPY=(
-  "README.md"
   "LICENSE"
-  "THIRDPARTY"
   "manage.py"
+  "mathesar.sh"
   "pyproject.toml"
+  "README.md"
   "run-uv.sh"
   "requirements.txt"
+  "THIRDPARTY"
 )
 export DIRECTORIES_TO_COPY=(
-  "LICENSES"
   "config"
   "db"
   "mathesar"
-  "translations"
   "setup"
+  "translations"
+  "LICENSES"
 )
 export PATTERNS_TO_IGNORE=(
   "*.po"
   "__pycache__"
 )
-
+export DIST_LOCATION="$(dirname "$0")/../dist"
 
 #=======COMMON UTILITIES=======================================================
 
+RED=$(tput setaf 1 2>/dev/null || echo "")
+GREEN=$(tput setaf 2 2>/dev/null || echo "")
+BLUE=$(tput setaf 4 2>/dev/null || echo "")
+RESET=$(tput sgr0 2>/dev/null || echo "")
+
+info() {
+  echo -e "${BLUE}==> $1${RESET}"
+}
+
+success() {
+  echo -e "${GREEN}==> $1${RESET}"
+}
+
 err() {
-  local red
-  local reset
-  red=$(tput setaf 1 2>/dev/null || echo '')
-  reset=$(tput sgr0 2>/dev/null || echo '')
-  echo -e "${red}ERROR: $1${reset}" >&2
+  echo -e "${RED}ERROR: $1${RESET}" >&2
+  echo -e "${RED}Mathesar packaging failed!${RESET}"
   exit 1
 }
 
@@ -74,31 +85,32 @@ require_command tar
 
 #=======SETUP DIRECTORY STRUCTURE==============================================
 
-CALLING_DIR="$(pwd)"
+info "Setting up dist folder"
+mkdir -p "${DIST_LOCATION}"
+rm -rf "${DIST_LOCATION}"/*
 
+info "Creating temp locations for source and python venv"
+
+PACKAGED_SOURCE_LOCATION="${DIST_LOCATION}/__source__"
+PYTHON_VENV_LOCATION="${DIST_LOCATION}/__python__"
+
+mkdir "${PACKAGED_SOURCE_LOCATION}"
+mkdir "${PYTHON_VENV_LOCATION}"
+
+info "Moving into source directory"
+
+CALLING_DIR="$(pwd)"
 # Move into the mathesar repo base directory.
 # - The parent directory to the scripts directory that
 #   contains the package.sh script
 cd "$(dirname "$0")/.."
 
-DIST_LOCATION=./dist
-PACKAGED_SOURCE_LOCATION="$DIST_LOCATION/__source__"
-PYTHON_VENV_LOCATION="$DIST_LOCATION/__python__"
-
-echo "Setting up dist folder"
-mkdir -p "$DIST_LOCATION"
-rm -rf "$DIST_LOCATION"/*
-
-echo "Creating temp locations for source and python venv"
-mkdir "$PACKAGED_SOURCE_LOCATION"
-mkdir "$PYTHON_VENV_LOCATION"
-
 cleanup() {
-  echo "Cleaning up temporary directories"
-  rm -rf "$PACKAGED_SOURCE_LOCATION" "$PYTHON_VENV_LOCATION"
+  info "Cleaning up temporary directories"
+  rm -rf "${PACKAGED_SOURCE_LOCATION}" "${PYTHON_VENV_LOCATION}"
 
-  echo "Move back into directory that called the script"
-  cd "$CALLING_DIR"
+  info "Moving back into directory that called the script"
+  cd "${CALLING_DIR}"
 }
 trap cleanup EXIT
 
@@ -106,33 +118,33 @@ trap cleanup EXIT
 #=======PACKAGING FUNCTION=====================================================
 
 package_mathesar() {
-  echo "Obtaining uv install script"
-  wget "https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh" -O "$PACKAGED_SOURCE_LOCATION/uv-installer.sh"
+  info "Obtaining uv install script"
+  wget "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-installer.sh" -O "${PACKAGED_SOURCE_LOCATION}/uv-installer.sh"
 
-  echo "Building frontend"
+  info "Building frontend"
   cd mathesar_ui && npm ci && npm run build && cd ..
 
-  echo "Compiling translations"
+  info "Compiling translations"
   pip install -r requirements.txt
   python manage.py compilemessages
 
-  echo "Copying files"
-  cp "${FILES_TO_COPY[@]}" "$PACKAGED_SOURCE_LOCATION/"
+  info "Copying files"
+  cp "${FILES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
 
-  echo "Copying directories"
+  info "Copying directories"
   EXCLUDE_OPTS=()
   for pattern in "${PATTERNS_TO_IGNORE[@]}"; do
     EXCLUDE_OPTS+=(--exclude="$pattern")
   done
-  rsync -a "${EXCLUDE_OPTS[@]}" "${DIRECTORIES_TO_COPY[@]}" "$PACKAGED_SOURCE_LOCATION/"
+  rsync -a "${EXCLUDE_OPTS[@]}" "${DIRECTORIES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
 
-  echo "Produce a packaged tar file"
-  tar -C "$PACKAGED_SOURCE_LOCATION" -cvzf dist/mathesar.tar.gz .
+  info "Producing a packaged tar file"
+  tar -C "${PACKAGED_SOURCE_LOCATION}" -cvzf "${DIST_LOCATION}/mathesar.tar.gz" .
 
-  echo "Packaged Mathesar successfully"
+  success "Packaged Mathesar successfully"
 }
 
 
 #=======ACTUAL PACKAGE CALL====================================================
 
-package_mathesar || err "Packaging Failed"
+package_mathesar
