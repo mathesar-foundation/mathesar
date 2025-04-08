@@ -28,11 +28,22 @@ set -eo pipefail
 
 #=======CONFIGURATIONS=========================================================
 
-export MATHESAR_VERSION="0.2.3"
-export REQUIRED_UV_VERSION="0.6.11"
-# Install everything in current working directory
-export INSTALL_DIR="$(pwd)"
+MATHESAR_VERSION="0.2.3"
+REQUIRED_UV_VERSION="0.6.13"
+
+INSTALL_DIR="$(pwd)"
+UV_DIR="${INSTALL_DIR}"/uv
+PACKAGE_DIR="${INSTALL_DIR}"/packages
+PACKAGE_ARCHIVE="${PACKAGE_DIR}"/mathesar-"${MATHESAR_VERSION}".tar.gz
+
+VENV_DIR_NAME="mathesar-venv"
 LOG_FILE="install.log"
+
+# Required by uv
+export UV_UNMANAGED_INSTALL="${UV_DIR}"
+export UV_CACHE_DIR="${UV_DIR}"/cache
+export UV_PYTHON_INSTALL_DIR="${UV_DIR}"/python
+export UV_PROJECT_ENVIRONMENT="${INSTALL_DIR}"/"${VENV_DIR_NAME}"
 
 # Color definitions for output
 RED=$(tput setaf 1 2>/dev/null || echo "")
@@ -68,6 +79,11 @@ require_command() {
   fi
 }
 
+# For commands that should ideally never fail
+ensure() {
+  if ! "$@"; then err "Command failed: $*"; fi
+}
+
 run_cmd() {
   # Execute the command, pipe output to indent each line with 4 spaces.
   "$@" 2>&1 | sed 's/^/    /'
@@ -90,9 +106,9 @@ download() {
 }
 
 
-#=======INSTALLER==============================================================
+#=======CORE FUNCTIONS=========================================================
 
-download_and_install_mathesar() {
+check_required_commands() {
   info "Checking required commands..."
   require_command tar
   require_command rm
@@ -100,124 +116,161 @@ download_and_install_mathesar() {
   require_command env
   require_command touch
   require_command chmod
+}
 
-  # TODO: quiet mode and force modes
-  # TODO: Check if install dir is empty or throw a warning
-  # Ask user if they still want to proceed
-
+create_directories() {
   info "Creating required directories..."
-  mkdir -p \
-    "${INSTALL_DIR}/packages" \
-    "${INSTALL_DIR}/uv" \
-    "${INSTALL_DIR}/uv/cache" \
-    "${INSTALL_DIR}/uv/python" \
-    "${INSTALL_DIR}/.media" \
+  ensure mkdir -p \
+    "${PACKAGE_DIR}" \
+    "${UV_DIR}" \
+    "${UV_CACHE_DIR}" \
+    "${UV_PYTHON_INSTALL_DIR}" \
+    "${INSTALL_DIR}"/.media
+}
 
-  UV_DIR="${INSTALL_DIR}/uv"
-
-  # Package archive location
-  PACKAGE_ARCHIVE="${INSTALL_DIR}/packages/mathesar-${MATHESAR_VERSION}.tar.gz"
-
+download_and_extract_package() {
   # For production, replace the cp command with a call to download() e.g.:
   # download "http://example.com/path/to/mathesar-${MATHESAR_VERSION}.tar.gz" "${PACKAGE_ARCHIVE}"
   if [[ ! -f "${PACKAGE_ARCHIVE}" ]]; then
     info "Simulating download (for testing only)..."
-    run_cmd cp "$(dirname "$0")/../dist/mathesar.tar.gz" "${PACKAGE_ARCHIVE}" || err "Failed to copy mathesar.tar.gz; file not found."
+    run_cmd cp "$(dirname "$0")/../dist/mathesar.tar.gz" "${PACKAGE_ARCHIVE}"
   else
     info "Package archive already exists."
   fi
 
   info "Extracting package..."
   run_cmd tar -xzf "${PACKAGE_ARCHIVE}" -C "${INSTALL_DIR}"
+}
 
-  # Set up environment variables for uv
-  export UV_UNMANAGED_INSTALL="${UV_DIR}"
-  export UV_CACHE_DIR="${UV_DIR}/cache"
-  export UV_PYTHON_INSTALL_DIR="${UV_DIR}/python"
-  export UV_PROJECT_ENVIRONMENT="${INSTALL_DIR}/mathesar-venv"
+clear_uv_cache_lock() {
+  # Clear uv cache directory, and lock file if present
+  ensure rm -rf "${UV_CACHE_DIR}"/*
+  [ -e "${INSTALL_DIR}"/uv.lock ] && ensure rm "${INSTALL_DIR}"/uv.lock
+}
 
-  #-------Check if uv is installed--------------------#
-  if [[ -x "${UV_DIR}/uv" ]]; then
-    CURRENT_UV_VERSION=$("${UV_DIR}/uv" --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-    if [[ "$CURRENT_UV_VERSION" != "${REQUIRED_UV_VERSION}" ]]; then
-      info "uv version (${CURRENT_UV_VERSION}) does not match required version (${REQUIRED_UV_VERSION})"
-      info "Removing and re-installing uv"
-      run_cmd rm -rf "${UV_DIR}/cache/*"
-      run_cmd rm "${UV_DIR}/uv" "${UV_DIR}/uvx"
-      run_cmd /usr/bin/env sh "${INSTALL_DIR}/uv-installer.sh"
+install_uv() {
+  run_cmd /usr/bin/env sh "${INSTALL_DIR}"/uv-installer.sh
+}
+
+reinstall_uv() {
+  clear_uv_cache_lock
+  install_uv
+}
+
+install_uv_if_not_present() {
+  # Install uv only if not already installed
+  if [[ -x "${UV_DIR}"/uv ]]; then
+    CURRENT_UV_VERSION=$("${UV_DIR}"/uv --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if [[ "${CURRENT_UV_VERSION}" != "${REQUIRED_UV_VERSION}" ]]; then
+      info "uv version (${CURRENT_UV_VERSION}) does not match required version (${REQUIRED_UV_VERSION})."
+      info "Re-installing uv..."
+      reinstall_uv
     else
       info "uv is already installed and up-to-date (${CURRENT_UV_VERSION})."
     fi
   else
     info "uv is not installed. Installing uv..."
-    run_cmd /usr/bin/env sh "${INSTALL_DIR}/uv-installer.sh"
+    install_uv
+  fi
+}
+
+find_python_and_configure_uv_vars() {
+  info "Finding existing Python installations..."
+
+  local python_status=0
+  local find_cmd=("${UV_DIR}/uv" python find ">=3.9,<3.14")
+
+  "${find_cmd[@]}" --managed-python || python_status=$?
+  if [ $python_status -eq 0 ]; then
+    info "Found Managed Python"
+    return 0
   fi
 
-  # TODO: Check using uv & check venv
-  # TODO: Check if venv is already present, if yes, check if it's valid and activate
-  # If venv is not present, create one if python is present in global + managed envs
-  # If python is not present, download python
-  info "Finding existing Python installations..."
-  
-  find_supported_python() {
-    local lower_minor=9 # From 3.9
-    local upper_minor=13 # Till 3.13
-    local version path
+  python_status=0
+  "${find_cmd[@]}" --system || python_status=$?
+  if [ $python_status -eq 0 ]; then
+    info "Found System Python"
+    # Important! Without this uv venv doesn't get generated correctly when using system python.
+    unset UV_PYTHON_INSTALL_DIR
+    return 0
+  fi
 
-    # Loop through potential minor versions: 3.9, 3.10, 3.11, etc.
-    for minor in $(seq $lower_minor $upper_minor); do
-      version="3.$minor"
-      path=$("${UV_DIR}/uv" python find "$version" 2>/dev/null)
-      if [ $? -eq 0 ]; then
-        return 0
-      fi
-    done
+  return 1
+}
 
-    # Python not found
-    return 1
-  }
-
-  supported_python_version=$(find_supported_python)
-  if [ $? -ne 0 ]; then
-    info "Python not found. Installing python..."
+download_python_if_not_present() {
+  local status=0
+  find_python_and_configure_uv_vars || status=$?
+  if [ $status -ne 0 ]; then
+    info "Python not found. Downloading Python locally..."
     run_cmd "${UV_DIR}/uv" python install 3.13
   fi
+}
 
-  #-------Creating venv and setting up requirements--------------------#
-  # Moving into INSTALL_DIR since it could be different from working dir when we let user configure it
+# Note: Once the venv is setup, directly invoke python from venv
+# We no longer have to rely on uv after calling the following function
+setup_venv_requirements() {
   pushd "${INSTALL_DIR}" > /dev/null
+    # System envs can be messed up! (TODO: Add a force download option)
     info "Creating Python virtual environment..."
-    run_cmd "${UV_DIR}/uv" venv ./mathesar-venv
-    source ./mathesar-venv/bin/activate
+    run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --seed --relocatable
+    ensure source ./"${VENV_DIR_NAME}"/bin/activate
 
+    # Making explicit call here to use `uv add`.
+    # `uv pip install` is buggy in Mac OS 14 - arm64 M1.
+    # `uv add` also respects UV_PROJECT_ENVIRONMENT 
     info "Installing Python packages..."
-    run_cmd "${UV_DIR}/uv" pip install -r requirements.txt
+    run_cmd "${UV_DIR}/uv" add -r requirements.txt
+  popd > /dev/null
+}
 
-    # Note: Once the venv is setup and packages are installed, directly invoke python from venv
-    # We no longer have to rely on uv after this is done
-
+setup_env_vars() {
+  pushd "${INSTALL_DIR}" > /dev/null
     info "Setting up environment configuration..."
-    run_cmd touch ".env"
+    ensure touch ".env"
 
-    ./mathesar-venv/bin/python "./setup/fill_env.py"
+    ensure ./"${VENV_DIR_NAME}"/bin/python "./setup/fill_env.py"
 
-    set -a && source .env && set +a
+    ensure set -a && ensure source .env && ensure set +a
+  popd > /dev/null
+}
 
+run_django_migrations() {
+  pushd "${INSTALL_DIR}" > /dev/null
     info "Running Django migrations & collecting static files..."
     local status=0
-    ./mathesar-venv/bin/python -m mathesar.install &> "${LOG_FILE}" || status=$?
+    ./"${VENV_DIR_NAME}"/bin/python -m mathesar.install &> "${LOG_FILE}" || status=$?
     if [ $status -ne 0 ]; then
       err "Unable to complete Django migrations. Refer ${LOG_FILE} for more information."
     fi
-
-    info "Ensuring executable permissions..."
-    chmod +x ./mathesar.sh
   popd > /dev/null
+}
+
+make_mathesar_script_executable() {
+  pushd "${INSTALL_DIR}" > /dev/null
+    info "Ensuring executable permissions..."
+    ensure chmod +x ./mathesar.sh
+  popd > /dev/null
+}
+
+#=======INSTALLATION===========================================================
+
+# TODO: quiet mode and force modes
+# TODO: Check if install dir is empty or throw a warning
+# Ask user if they still want to proceed
+
+download_and_install_mathesar() {
+  ensure check_required_commands
+  ensure create_directories
+  ensure download_and_extract_package
+  ensure install_uv_if_not_present
+  ensure download_python_if_not_present
+  ensure setup_venv_requirements
+  ensure setup_env_vars
+  ensure run_django_migrations
+  ensure make_mathesar_script_executable
 
   success "Mathesar installation completed successfully!"
 }
-
-
-#=======ACTUAL INSTALLATION CALL===============================================
 
 download_and_install_mathesar
