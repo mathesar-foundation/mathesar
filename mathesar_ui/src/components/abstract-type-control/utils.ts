@@ -15,7 +15,7 @@ import DurationConfiguration from './config-components/DurationConfiguration.sve
 export interface ColumnWithAbstractType
   extends Pick<
     Column,
-    'id' | 'type' | 'type_options' | 'metadata' | 'valid_target_types'
+    'id' | 'type' | 'type_options' | 'metadata'
   > {
   abstractType: AbstractType;
 }

@@ -168,7 +168,6 @@ interface RawColumn {
   primary_key: boolean;
   default: ColumnDefault | null;
   has_dependents: boolean;
-  valid_target_types: string[];
   current_role_priv: ColumnPrivilege[];
 }
 
