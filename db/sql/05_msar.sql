@@ -864,7 +864,7 @@ Args:
   typ_id: The type we're casting from.
 */
 
-SELECT jsonb_agg(prorettype::regtype::text)
+SELECT jsonb_agg(DISTINCT prorettype::regtype::text)
 FROM pg_proc
 WHERE
   pronamespace=msar.get_schema_oid('msar')
