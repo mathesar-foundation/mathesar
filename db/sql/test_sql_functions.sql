@@ -2958,7 +2958,7 @@ BEGIN
   );
   RETURN NEXT ok(
     jsonb_array_length(col_info -> 5 -> 'current_role_priv') > 0,
-    'current_role_priv non-empty array, valid_target_types null'
+    'current_role_priv should be a non-empty jsonb array'
   );
 
   -- Column 7
@@ -2973,7 +2973,7 @@ BEGIN
   );
   RETURN NEXT ok(
     jsonb_array_length(col_info -> 6 -> 'current_role_priv') > 0,
-    'current_role_priv non-empty array, valid_target_types null'
+    'current_role_priv should be a non-empty jsonb array'
   );
 END;
 $$ LANGUAGE plpgsql;
