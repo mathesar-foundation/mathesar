@@ -7,7 +7,7 @@ set -euo pipefail
 
 #=======CONFIGURATIONS=========================================================
 
-export UV_VERSION=0.6.11
+export UV_VERSION=0.6.13
 export FILES_TO_COPY=(
   "LICENSE"
   "manage.py"
@@ -64,6 +64,10 @@ require_command() {
   fi
 }
 
+ensure() {
+  if ! "$@"; then err "Command failed: $*"; fi
+}
+
 
 #=======PRE-REQUSITES==========================================================
 
@@ -86,16 +90,16 @@ require_command tar
 #=======SETUP DIRECTORY STRUCTURE==============================================
 
 info "Setting up dist folder"
-mkdir -p "${DIST_LOCATION}"
-rm -rf "${DIST_LOCATION}"/*
+ensure mkdir -p "${DIST_LOCATION}"
+ensure rm -rf "${DIST_LOCATION}"/*
 
 info "Creating temp locations for source and python venv"
 
 PACKAGED_SOURCE_LOCATION="${DIST_LOCATION}/__source__"
 PYTHON_VENV_LOCATION="${DIST_LOCATION}/__python__"
 
-mkdir "${PACKAGED_SOURCE_LOCATION}"
-mkdir "${PYTHON_VENV_LOCATION}"
+ensure mkdir "${PACKAGED_SOURCE_LOCATION}"
+ensure mkdir "${PYTHON_VENV_LOCATION}"
 
 info "Moving into source directory"
 
@@ -103,14 +107,14 @@ CALLING_DIR="$(pwd)"
 # Move into the mathesar repo base directory.
 # - The parent directory to the scripts directory that
 #   contains the package.sh script
-cd "$(dirname "$0")/.."
+ensure cd "$(dirname "$0")/.."
 
 cleanup() {
   info "Cleaning up temporary directories"
-  rm -rf "${PACKAGED_SOURCE_LOCATION}" "${PYTHON_VENV_LOCATION}"
+  ensure rm -rf "${PACKAGED_SOURCE_LOCATION}" "${PYTHON_VENV_LOCATION}"
 
   info "Moving back into directory that called the script"
-  cd "${CALLING_DIR}"
+  ensure cd "${CALLING_DIR}"
 }
 trap cleanup EXIT
 
@@ -119,27 +123,30 @@ trap cleanup EXIT
 
 package_mathesar() {
   info "Obtaining uv install script"
-  wget "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-installer.sh" -O "${PACKAGED_SOURCE_LOCATION}/uv-installer.sh"
+  ensure wget "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-installer.sh" -O "${PACKAGED_SOURCE_LOCATION}/uv-installer.sh"
 
   info "Building frontend"
-  cd mathesar_ui && npm ci && npm run build && cd ..
+  pushd mathesar_ui > /dev/null
+    ensure npm ci
+    ensure npm run build
+  popd > /dev/null
 
   info "Compiling translations"
-  pip install -r requirements.txt
-  python manage.py compilemessages
+  ensure pip install -r requirements.txt
+  ensure python manage.py compilemessages
 
   info "Copying files"
-  cp "${FILES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
+  ensure cp "${FILES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
 
   info "Copying directories"
   EXCLUDE_OPTS=()
   for pattern in "${PATTERNS_TO_IGNORE[@]}"; do
     EXCLUDE_OPTS+=(--exclude="$pattern")
   done
-  rsync -a "${EXCLUDE_OPTS[@]}" "${DIRECTORIES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
+  ensure rsync -a "${EXCLUDE_OPTS[@]}" "${DIRECTORIES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
 
   info "Producing a packaged tar file"
-  tar -C "${PACKAGED_SOURCE_LOCATION}" -cvzf "${DIST_LOCATION}/mathesar.tar.gz" .
+  ensure tar -C "${PACKAGED_SOURCE_LOCATION}" -cvzf "${DIST_LOCATION}/mathesar.tar.gz" .
 
   success "Packaged Mathesar successfully"
 }
