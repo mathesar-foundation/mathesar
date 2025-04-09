@@ -83,6 +83,7 @@ require_command wget
 require_command python
 require_command npm
 require_command gettext
+require_command msgfmt
 require_command rsync
 require_command tar
 
