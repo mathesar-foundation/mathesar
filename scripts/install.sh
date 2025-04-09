@@ -26,24 +26,34 @@ set -eo pipefail
 # The parent directory (mathesar in the above structure) would need to exist.
 # Users would have to cd into mathesar and run this script i.e. this would install Mathesar in the user's current directory.
 
+
 #=======CONFIGURATIONS=========================================================
 
 MATHESAR_VERSION="0.2.3"
 REQUIRED_UV_VERSION="0.6.13"
 
-INSTALL_DIR="$(pwd)"
-UV_DIR="${INSTALL_DIR}"/uv
-PACKAGE_DIR="${INSTALL_DIR}"/packages
-PACKAGE_ARCHIVE="${PACKAGE_DIR}"/mathesar-"${MATHESAR_VERSION}".tar.gz
-
 VENV_DIR_NAME="mathesar-venv"
 LOG_FILE="install.log"
 
-# Required by uv
-export UV_UNMANAGED_INSTALL="${UV_DIR}"
-export UV_CACHE_DIR="${UV_DIR}"/cache
-export UV_PYTHON_INSTALL_DIR="${UV_DIR}"/python
-export UV_PROJECT_ENVIRONMENT="${INSTALL_DIR}"/"${VENV_DIR_NAME}"
+FORCE_DOWNLOAD_PYTHON=false
+CONNECTION_STRING=""
+NO_PROMPT=false
+PACKAGE_LOCATION="https://github.com/mathesar-foundation/mathesar/releases/download/${MATHESAR_VERSION}/mathesar.tar.gz"
+
+# This is called before installation
+set_install_dir() {
+  INSTALL_DIR="$1"
+
+  UV_DIR="${INSTALL_DIR}"/uv
+  PACKAGE_DIR="${INSTALL_DIR}"/packages
+  PACKAGE_LOCAL_ARCHIVE="${PACKAGE_DIR}"/mathesar-"${MATHESAR_VERSION}".tar.gz
+
+  # Required by uv
+  export UV_UNMANAGED_INSTALL="${UV_DIR}"
+  export UV_CACHE_DIR="${UV_DIR}"/cache
+  export UV_PYTHON_INSTALL_DIR="${UV_DIR}"/python
+  export UV_PROJECT_ENVIRONMENT="${INSTALL_DIR}"/"${VENV_DIR_NAME}"
+}
 
 # Color definitions for output
 RED=$(tput setaf 1 2>/dev/null || echo "")
@@ -62,8 +72,12 @@ success() {
   echo -e "${GREEN}==> $1${RESET}"
 }
 
-err() {
+err_msgonly() {
   echo -e "${RED}ERROR: $1${RESET}" >&2
+}
+
+err() {
+  err_msgonly "$1"
   echo -e "${RED}Mathesar installation failed!${RESET}"
   exit 1
 }
@@ -129,17 +143,15 @@ create_directories() {
 }
 
 download_and_extract_package() {
-  # For production, replace the cp command with a call to download() e.g.:
-  # download "http://example.com/path/to/mathesar-${MATHESAR_VERSION}.tar.gz" "${PACKAGE_ARCHIVE}"
-  if [[ ! -f "${PACKAGE_ARCHIVE}" ]]; then
-    info "Simulating download (for testing only)..."
-    run_cmd cp "$(dirname "$0")/../dist/mathesar.tar.gz" "${PACKAGE_ARCHIVE}"
+  if [[ ! -f "${PACKAGE_LOCAL_ARCHIVE}" ]]; then
+    info "Downloading Mathesar package ${MATHESAR_VERSION}..."
+    download "${PACKAGE_LOCATION}" "${PACKAGE_LOCAL_ARCHIVE}"
   else
     info "Package archive already exists."
   fi
 
   info "Extracting package..."
-  run_cmd tar -xzf "${PACKAGE_ARCHIVE}" -C "${INSTALL_DIR}"
+  run_cmd tar -xzf "${PACKAGE_LOCAL_ARCHIVE}" -C "${INSTALL_DIR}"
 }
 
 clear_uv_cache_lock() {
@@ -198,12 +210,22 @@ find_python_and_configure_uv_vars() {
   return 1
 }
 
-download_python_if_not_present() {
-  local status=0
-  find_python_and_configure_uv_vars || status=$?
-  if [ $status -ne 0 ]; then
-    info "Python not found. Downloading Python locally..."
-    run_cmd "${UV_DIR}/uv" python install 3.13
+download_python() {
+  info "Downloading Python locally..."
+  run_cmd "${UV_DIR}/uv" python install 3.13
+}
+
+download_python_if_needed() {
+  if [ "$FORCE_DOWNLOAD_PYTHON" = true ]; then
+    download_python
+  else
+    local status=0
+    # Find existing python installations
+    find_python_and_configure_uv_vars || status=$?
+    if [ $status -ne 0 ]; then
+      info "Python not found"
+      download_python
+    fi
   fi
 }
 
@@ -253,24 +275,140 @@ make_mathesar_script_executable() {
   popd > /dev/null
 }
 
-#=======INSTALLATION===========================================================
 
-# TODO: quiet mode and force modes
-# TODO: Check if install dir is empty or throw a warning
-# Ask user if they still want to proceed
+#=======ARGUMENT PARSING=======================================================
 
-download_and_install_mathesar() {
-  ensure check_required_commands
-  ensure create_directories
-  ensure download_and_extract_package
-  ensure install_uv_if_not_present
-  ensure download_python_if_not_present
-  ensure setup_venv_requirements
-  ensure setup_env_vars
-  ensure run_django_migrations
-  ensure make_mathesar_script_executable
+usage_msg() {
+cat <<EOF
 
-  success "Mathesar installation completed successfully!"
+install.sh
+
+The installer for Mathesar "${MATHESAR_VERSION}".
+
+USAGE:
+    install.sh <install_dir>
+      [--connection-string <value> | -c <value>]
+      [--no-prompt | -n]
+      [--force-download-python | -f]
+      [--help | -h]
+
+ARGUMENTS:
+    <install_dir>
+        Specify the directory into which Mathesar needs to be installed.
+
+FLAGS:
+    -c, --connection-string
+            Specify PostgreSQL connection string for Mathesar's Django database.
+
+            A <value> needs to be passed to this flag.
+
+    -n, --no-prompt
+            Disable prompting. Useful for CI/CD environments.
+
+            The install script prompts for environment variables like the connection
+            string when it's missing or invalid. This flag disables that behaviour.
+
+            This flag needs to be used in conjunction with --connection-string, without
+            which it'll throw an error.
+
+    -f, --force-download-python
+            Always download Python.
+
+            By default, the install script detects existing Python installations to use,
+            and only downloads Python if there isn't a compatible version found.
+
+            This flag forces download of Python even if a compatible version is found.
+            The Python binaries are placed within the Mathesar installation directory and
+            do not affect any system settings.
+
+    -h, --help
+            Print help information.
+
+EOF
 }
 
-download_and_install_mathesar
+usage_err() {
+  err_msgonly "$1"
+  usage_msg
+  exit 1
+}
+
+# Iterate through all provided arguments.
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --force-download-python|-f)
+      FORCE_DOWNLOAD_PYTHON=true
+      shift
+      ;;
+    --connection-string|-c)
+      if [ -n "$2" ] && [[ "$2" != -* ]]; then
+        CONNECTION_STRING="$2"
+        shift 2
+      else
+        usage_err "--connection-string requires a non-empty argument."
+      fi
+      ;;
+    --no-prompt|-n)
+      NO_PROMPT=true
+      shift
+      ;;
+    --help|-h)
+      usage_msg
+      exit 0
+      ;;
+    --test-package-location)
+      if [ -n "$2" ] && [[ "$2" != -* ]]; then
+        echo "THIS FLAG IS ONLY MEANT FOR TESTING. USE WITH CAUTION."
+        PACKAGE_LOCATION="$2"
+        shift 2
+      else
+        usage_err "--test-package-location requires a non-empty argument."
+      fi
+      ;;
+    -*)
+      usage_err "Unknown flag: $1"
+      ;;
+    *)
+      # Assume any non-flag is the installation directory.
+      if [ -z "$INSTALL_DIR" ]; then
+        set_install_dir "$1"
+      else
+        # INSTALL_DIR is not empty
+        usage_err "Improper configuration of Installation directory"
+      fi
+      shift
+      ;;
+  esac
+done
+
+# If --no-prompt is enabled, a connection string is mandatory.
+if [ "${NO_PROMPT}" = true ] && [ -z "${CONNECTION_STRING}" ]; then
+  usage_err "When --no-prompt(or -n) is specified, you must provide a connection string via --connection-string(or -c)."
+fi
+
+if [ -z "${INSTALL_DIR}" ]; then
+  usage_err "<install_dir> is required."
+fi
+
+if [ ! -d "${INSTALL_DIR}" ]; then
+  err "The directory \"${INSTALL_DIR}\" does not exist. Please create it or specify a valid directory."
+fi
+
+if [ ! -w "${INSTALL_DIR}" ]; then
+  err "You do not have sufficient permissions to create files in \"${INSTALL_DIR}\"."
+fi
+
+
+#=======INSTALLATION===========================================================
+
+ensure check_required_commands
+ensure create_directories
+ensure download_and_extract_package
+ensure install_uv_if_not_present
+ensure download_python_if_needed
+ensure setup_venv_requirements
+ensure setup_env_vars
+ensure run_django_migrations
+ensure make_mathesar_script_executable
+
+success "Mathesar installation completed successfully!"
