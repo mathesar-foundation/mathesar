@@ -7,6 +7,13 @@ msar.find_numeric_separators(
 Given a table column, find group and decimal separators for number values in the column.
 
 Throws an error if more than one group separator or decimal separator is found.
+
+Returns:
+
+{
+  "group_sep": Optional[str],
+  "decimal_p": Optional[str]
+}
 */
 DECLARE
   separators jsonb;
@@ -31,8 +38,8 @@ ELSIF jsonb_array_length(separators -> 'decimal_p') > 1 THEN
   RAISE EXCEPTION 'Too many decimal separators found!';
 ELSE
   RETURN jsonb_build_object(
-    'group_sep', coalesce(separators -> 'group_sep' ->> 0, ''),
-    'decimal_p', coalesce(separators -> 'decimal_p' ->> 0, '')
+    'group_sep', separators -> 'group_sep' ->> 0,
+    'decimal_p', separators -> 'decimal_p' ->> 0
   );
 END IF;
 END;
@@ -41,9 +48,7 @@ $$ LANGUAGE plpgsql PARALLEL SAFE STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.downsize_table_sample(test_perc numeric) RETURNS numeric AS $$
-SELECT CASE
-  WHEN test_perc >= 100 THEN 100
-  WHEN test_perc < 100 THEN (test_perc / 100) ^ 2 * 100
+  SELECT (test_perc / 100) ^ 2 * 100
 END;
 $$ LANGUAGE SQL PARALLEL SAFE IMMUTABLE RETURNS NULL ON NULL INPUT;
 
@@ -54,52 +59,25 @@ msar.check_column_numeric_compat(
 ) RETURNS jsonb AS $$
 DECLARE
   separators jsonb;
-  inferred_group_sep "char";
-  inferred_decimal_p "char" := ltrim(to_char(1, 'D'), ' ');
 BEGIN
-  BEGIN
-    EXECUTE format(
-      'SELECT %1$I::numeric FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L) REPEATABLE(12345);',
-      msar.get_column_name(tab_id, col_id),
-      msar.get_relation_schema_name(tab_id),
-      msar.get_relation_name(tab_id),
-      test_perc
-    );
-    RETURN jsonb_build_object(
-      'mathesar_casting', false,
-      'group_sep', inferred_group_sep,
-      'decimal_p', inferred_decimal_p,
-      'type_compatible', true
-    );
-  EXCEPTION WHEN OTHERS THEN
-  END;
-  BEGIN
-    separators = msar.find_numeric_separators(
-      tab_id,
-      col_id,
-      msar.downsize_table_sample(test_perc)
-    );
-    inferred_group_sep = separators ->> 'group_sep';
-    inferred_decimal_p = separators ->> 'decimal_p';
-    EXECUTE format(
-      $s$
-      SELECT msar.cast_to_numeric(%1$I, %5$L, %6$L)
-      FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L) REPEATABLE(12345);
-      $s$,
-      msar.get_column_name(tab_id, col_id),
-      msar.get_relation_schema_name(tab_id),
-      msar.get_relation_name(tab_id),
-      test_perc,
-      inferred_group_sep,
-      inferred_decimal_p
-    );
-    RETURN jsonb_build_object(
-      'mathesar_casting', true,
-      'group_sep', inferred_group_sep,
-      'decimal_p', inferred_decimal_p,
-      'type_compatible', true
-    );
-  END;
+  separators = msar.find_numeric_separators(tab_id, col_id, msar.downsize_table_sample(test_perc));
+  EXECUTE format(
+    'SELECT msar.cast_to_numeric(%1$I, %5$L, %6$L) FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
+    msar.get_column_name(tab_id, col_id),
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    test_perc,
+    coalesce(separators ->> 'group_sep', ''),
+    coalesce(separators ->> 'decimal_p', '')
+  );
+  RETURN jsonb_build_object(
+    'mathesar_casting', true,
+    'group_sep', separators ->> 'group_sep',
+    'decimal_p', separators ->> 'decimal_p',
+    'type_compatible', true
+  );
+EXCEPTION WHEN OTHERS THEN
+  RETURN jsonb_build_object('type_compatible', false);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -127,7 +105,7 @@ BEGIN
       RETURN msar.check_column_numeric_compat(tab_id, col_id, test_perc);
     ELSE
       EXECUTE format(
-        'SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L) REPEATABLE(12345);',
+        'SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
         msar.build_cast_expr(tab_id, col_id, typ_id),
         msar.get_relation_schema_name(tab_id),
         msar.get_relation_name(tab_id),
