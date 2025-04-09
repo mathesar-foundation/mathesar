@@ -47,7 +47,7 @@ POSTGRES_KEYS = [
 
 def generate_secret_key(length=50):
     """Generate a random secret key of the specified length for Django."""
-    allowed_chars = string.ascii_letters + string.digits + "!@#$%^&*(-_=+)"
+    allowed_chars = string.ascii_letters + string.digits
     return ''.join(secrets.choice(allowed_chars) for _ in range(length))
 
 
