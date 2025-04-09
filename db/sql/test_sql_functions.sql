@@ -6585,3 +6585,49 @@ BEGIN
   RETURN NEXT is(object_counts ? 'record_count', true);
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_downsize_table_sample() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(msar.downsize_table_sample(100), 100::numeric);
+  RETURN NEXT is(msar.downsize_table_sample(50), 25::numeric);
+  RETURN NEXT is(msar.downsize_table_sample(5), 0.25::numeric);
+  RETURN NEXT is(msar.downsize_table_sample(1), 0.01::numeric);
+  RETURN NEXT is(msar.downsize_table_sample(0), 0::numeric);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_numeric_infer() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE numinfer (us_loc text, de_loc text, mangled text);
+  INSERT INTO numinfer VALUES
+    ('1,000', '1.000', '1 000 000.0'),
+    ('1,000.00', '1.000,0', '1.000.000,0');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_find_numeric_separators() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id regclass;
+  test_perc numeric := 100;
+BEGIN
+  PERFORM __setup_numeric_infer();
+  tab_id = 'numinfer'::regclass;
+  RETURN NEXT is(
+    msar.find_numeric_separators(tab_id, 1::smallint, test_perc),
+    jsonb_build_object('group_sep', ',', 'decimal_p', '.')
+  );
+  RETURN NEXT is(
+    msar.find_numeric_separators(tab_id, 2::smallint, test_perc),
+    jsonb_build_object('group_sep', '.', 'decimal_p', ',')
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_numeric_separators(
+        tab_id => 'numinfer'::regclass, col_id => '3'::smallint, test_perc => 100
+    );$s$,
+    'Too many grouping separators found!'
+  );
+END;
+$$ LANGUAGE plpgsql;
