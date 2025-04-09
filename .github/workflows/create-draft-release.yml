@@ -1,4 +1,4 @@
-name: Build static files and create draft release
+name: Package Mathesar and create draft release
 
 on:
   push:
@@ -11,23 +11,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
         with:
-          node-version: 18
+          python-version: '3.13'
 
-      - name: Build frontend static files
-        working-directory: ./mathesar_ui
-        run: npm ci && npm run build
-
-      - name: Move static files
-        run: mv ./mathesar/static/mathesar ./static_files
-
-      - name: Zip static files
-        uses: montudor/action-zip@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          args: zip -qq -r static_files.zip static_files
+          node-version: '18'
+
+      - name: Install GNU gettext
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext
+
+      - name: Run package.sh Script
+        run: |
+          chmod +x ./scripts/package.sh
+          ./scripts/package.sh
 
       - name: Create a draft release
         id: create_release
@@ -39,4 +44,4 @@ jobs:
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: static_files.zip
+          asset_path: ./dist/mathesar.tar.gz
