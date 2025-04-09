@@ -5,11 +5,12 @@ set -eo pipefail
 # This script will be called by the user directly from an external source (eg., internet link)
 
 # If there's an existing installation,
-# - If the script's Mathesar's version = installed version, it should perform all operations without affecting the installation.
+# - If the script's Mathesar's version = installed version, it performs all operations without affecting the installation.
 #   - Useful if the user is facing environment related issues and would like to get them fixed.
-#   - Running & re-running this script on a working Mathesar installation shoud have no effect on Mathesar itself.
-# - If the script's Mathesar's version > installed version, it should upgrade Mathesar.
-# - If the script's Mathesar's version < installed version, it should throw an error.
+#   - Running & re-running this script on a working Mathesar installation would have no effect on Mathesar itself.
+# - If the script's Mathesar's version != installed version, it replaces the installed version with the one on this script.
+
+# TODO: Handle Mathesar version checks!
 
 # The resulting directory structure would be as follows
 # ---mathesar
@@ -23,8 +24,7 @@ set -eo pipefail
 #   |---db
 #   |---...(other source files)
 
-# The parent directory (mathesar in the above structure) would need to exist.
-# Users would have to cd into mathesar and run this script i.e. this would install Mathesar in the user's current directory.
+# The parent directory (mathesar in the above structure) would need to exist before running this script.
 
 
 #=======CONFIGURATIONS=========================================================
@@ -232,7 +232,6 @@ download_python_if_needed() {
 # We no longer have to rely on uv after calling the following function
 setup_venv_requirements() {
   pushd "${INSTALL_DIR}" > /dev/null
-    # System envs can be messed up! (TODO: Add a force download option)
     info "Creating Python virtual environment..."
     run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --seed --relocatable
     ensure source ./"${VENV_DIR_NAME}"/bin/activate
