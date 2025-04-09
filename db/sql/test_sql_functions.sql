@@ -6631,3 +6631,15 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_cast_to_numeric() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(msar.cast_to_numeric('0', ',', '.'), 0::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('55', '.', ','), 55::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('2345', ' ', ','), 2345::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('1,00,000.5', ',', '.'), 100000.5::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('555,234', '.', ','), 555.234::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('2 345', ' ', ','), 2345::numeric);
+END;
+$$ LANGUAGE plpgsql;
