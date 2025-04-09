@@ -33,7 +33,6 @@ MATHESAR_VERSION="0.2.3"
 REQUIRED_UV_VERSION="0.6.13"
 
 VENV_DIR_NAME="mathesar-venv"
-LOG_FILE="install.log"
 
 FORCE_DOWNLOAD_PYTHON=false
 CONNECTION_STRING=""
@@ -192,14 +191,14 @@ find_python_and_configure_uv_vars() {
   local python_status=0
   local find_cmd=("${UV_DIR}/uv" python find ">=3.9,<3.14")
 
-  "${find_cmd[@]}" --managed-python || python_status=$?
+  "${find_cmd[@]}" --managed-python 2>/dev/null || python_status=$?
   if [ $python_status -eq 0 ]; then
     info "Found Managed Python"
     return 0
   fi
 
   python_status=0
-  "${find_cmd[@]}" --system || python_status=$?
+  "${find_cmd[@]}" --system 2>/dev/null || python_status=$?
   if [ $python_status -eq 0 ]; then
     info "Found System Python"
     # Important! Without this uv venv doesn't get generated correctly when using system python.
@@ -248,11 +247,12 @@ setup_venv_requirements() {
 
 setup_env_vars() {
   pushd "${INSTALL_DIR}" > /dev/null
-    info "Setting up environment configuration..."
+    info "Setting up .env file..."
     ensure touch ".env"
 
-    ensure ./"${VENV_DIR_NAME}"/bin/python "./setup/fill_env.py"
+    ensure ./"${VENV_DIR_NAME}"/bin/python ./setup/fill_env.py
 
+    info "Exporting environment variables to shell..."
     ensure set -a && ensure source .env && ensure set +a
   popd > /dev/null
 }
@@ -260,11 +260,7 @@ setup_env_vars() {
 run_django_migrations() {
   pushd "${INSTALL_DIR}" > /dev/null
     info "Running Django migrations & collecting static files..."
-    local status=0
-    ./"${VENV_DIR_NAME}"/bin/python -m mathesar.install &> "${LOG_FILE}" || status=$?
-    if [ $status -ne 0 ]; then
-      err "Unable to complete Django migrations. Refer ${LOG_FILE} for more information."
-    fi
+    run_cmd ./"${VENV_DIR_NAME}"/bin/python -m mathesar.install
   popd > /dev/null
 }
 
