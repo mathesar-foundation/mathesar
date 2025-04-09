@@ -23,11 +23,11 @@ jobs:
 
       - name: Run package.sh Script
         run: |
-          chmod +x package.sh
-          ./package.sh
+          chmod +x ./scripts/package.sh
+          ./scripts/package.sh
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: mathesar-package
-          path: dist/mathesar.tar.gz
+          path: ./dist/mathesar.tar.gz
