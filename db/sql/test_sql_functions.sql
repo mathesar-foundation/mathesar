@@ -1624,13 +1624,13 @@ BEGIN
   RETURN NEXT is(
     msar.infer_table_column_data_types('"Types Test"'::regclass),
     jsonb_build_object(
-      1, 'integer',
-      2, 'text',
-      3, 'boolean',
-      4, 'date',
-      5, 'numeric',
-      6, 'interval',
-      7, 'text'
+      1, jsonb_build_object('type', 'integer'),
+      2, jsonb_build_object('type', 'text'),
+      3, jsonb_build_object('type', 'boolean', 'details', jsonb_build_object('mathesar_casting', true)),
+      4, jsonb_build_object('type', 'date', 'details', jsonb_build_object('mathesar_casting', true)),
+      5, jsonb_build_object('type', 'numeric', 'details', jsonb_build_object('mathesar_casting', true, 'decimal_p', '.')),
+      6, jsonb_build_object('type', 'interval', 'details', jsonb_build_object('mathesar_casting', true)),
+      7, jsonb_build_object('type', 'text')
     )
   );
 END;
@@ -6617,11 +6617,17 @@ BEGIN
   tab_id = 'numinfer'::regclass;
   RETURN NEXT is(
     msar.find_numeric_separators(tab_id, 1::smallint, test_perc),
-    jsonb_build_object('group_sep', ',', 'decimal_p', '.')
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.')
+    )
   );
   RETURN NEXT is(
     msar.find_numeric_separators(tab_id, 2::smallint, test_perc),
-    jsonb_build_object('group_sep', '.', 'decimal_p', ',')
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', '.', 'decimal_p', ',')
+    )
   );
   RETURN NEXT throws_ok(
     $s$SELECT msar.find_numeric_separators(
