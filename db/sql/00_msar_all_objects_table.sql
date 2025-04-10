@@ -1185,6 +1185,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.transfer_database_ownership(regrole)', 'FUNCTION', NULL),
   ('msar', 'msar.transfer_schema_ownership(regnamespace,regrole)', 'FUNCTION', NULL),
   ('msar', 'msar.transfer_table_ownership(regclass,regrole)', 'FUNCTION', NULL),
+  ('msar', 'msar.type_compat_details', 'TYPE', NULL),
   ('msar', 'msar.update_pk_sequence_to_latest(oid,integer)', 'FUNCTION', NULL),
   ('msar', 'msar.update_pk_sequence_to_latest(text,text,text)', 'FUNCTION', NULL),
   ('msar', 'msar.uri_authority(text)', 'FUNCTION', NULL),
