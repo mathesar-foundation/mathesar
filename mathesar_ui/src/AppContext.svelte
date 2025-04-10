@@ -16,8 +16,13 @@
   } from '@mathesar/systems/record-selector/RecordSelectorController';
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
+  import { initUiTheme } from './utils/uiThemePreference';
 
   export let commonData: CommonData;
+
+  if (typeof window !== 'undefined') {
+    initUiTheme();
+  }
 
   setBreadcrumbItemsInContext([]);
 

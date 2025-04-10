@@ -91,26 +91,6 @@
     --cell-border-horizontal: 1px solid var(--gray-300);
     --cell-border-vertical: 1px solid var(--gray-300);
 
-    @media (prefers-color-scheme: dark) {
-      --cell-bg-mix-blend-mode: screen;
-      --cell-bg-color-base: var(--background-color);
-      --cell-bg-color-error: rgba(255, 107, 107, 0.15);
-      --cell-bg-color-header: rgba(39, 43, 48, 0.5);
-      --cell-bg-color-processing: rgba(251, 191, 36, 0.15);
-      --cell-bg-color-disabled: rgba(39, 43, 48, 0.3);
-      --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
-      --cell-bg-color-row-selected: rgba(122, 92, 166, 0.3);
-
-      --cell-border-horizontal: 1px solid var(--gray-700);
-      --cell-border-vertical: 1px solid var(--gray-700);
-
-      --color-fk: rgba(235, 157, 32, 0.15);
-      --color-fk-border: var(--pumpkin-600);
-      --color-error: #ff6b6b;
-      --cell-text-color-processing: var(--gray-300);
-      --color-array-element: var(--sky-400);
-    }
-
     --page-padding-x: 2em;
     --page-padding-y: 2em;
     --page-padding: var(--page-padding-x) var(--page-padding-y);
@@ -152,6 +132,26 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  body.theme-dark {
+    --cell-bg-mix-blend-mode: screen;
+    --cell-bg-color-base: var(--background-color);
+    --cell-bg-color-error: rgba(255, 107, 107, 0.15);
+    --cell-bg-color-header: rgba(39, 43, 48, 0.5);
+    --cell-bg-color-processing: rgba(251, 191, 36, 0.15);
+    --cell-bg-color-disabled: rgba(39, 43, 48, 0.3);
+    --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
+    --cell-bg-color-row-selected: rgba(122, 92, 166, 0.3);
+
+    --cell-border-horizontal: 1px solid var(--gray-700);
+    --cell-border-vertical: 1px solid var(--gray-700);
+
+    --color-fk: rgba(235, 157, 32, 0.15);
+    --color-fk-border: var(--pumpkin-600);
+    --color-error: #ff6b6b;
+    --cell-text-color-processing: var(--gray-300);
+    --color-array-element: var(--sky-400);
   }
 
   h1 {
@@ -209,7 +209,7 @@
     border-radius: 0.2em;
     color: var(--text-color);
 
-    @media (prefers-color-scheme: dark) {
+    body.theme-dark & {
       background: var(--gray-900);
       border: 1px solid var(--gray-700);
     }
@@ -246,7 +246,7 @@
     color: var(--text-color-muted);
     font-weight: bold;
 
-    @media (prefers-color-scheme: dark) {
+    body.theme-dark & {
       background: var(--gray-900);
       border: 1px solid var(--gray-700);
     }

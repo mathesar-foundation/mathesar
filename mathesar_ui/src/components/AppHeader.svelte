@@ -33,6 +33,7 @@
 
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
   import { getBreadcrumbItemsFromContext } from './breadcrumb/breadcrumbUtils';
+  import UiThemeSelect from './UiThemeSelect.svelte';
 
   const commonData = preloadCommonData();
   const userProfile = getUserProfileStoreFromContext();
@@ -76,7 +77,7 @@
         <DropdownMenu
           triggerAppearance="ghost"
           size="small"
-          closeOnInnerClick={true}
+          closeOnInnerClick={false}
           menuStyle="--Menu__padding-x: 0.3em;"
         >
           <div class="user-switcher" slot="trigger">
@@ -109,6 +110,13 @@
             </LinkMenuItem>
             <MenuDivider />
           {/if}
+
+          <MenuDivider />
+          <MenuHeading>{$_('theme')}</MenuHeading>
+          <div class="theme-switcher">
+            <UiThemeSelect />
+          </div>
+          <MenuDivider />
 
           <MenuHeading>{$_('resources')}</MenuHeading>
           <LinkMenuItem
@@ -169,6 +177,11 @@
     align-items: center;
     font-size: var(--text-size-large);
     gap: var(--size-x-small);
+  }
+
+  .theme-switcher {
+    padding: 0.5rem;
+    margin-top: -0.5rem;
   }
 
   .user-switcher {

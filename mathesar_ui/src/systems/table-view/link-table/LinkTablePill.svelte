@@ -43,9 +43,7 @@
     border: 1px solid var(--mapping-stroke);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .table-pill {
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
+  :global(body.theme-dark) .table-pill {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 </style>

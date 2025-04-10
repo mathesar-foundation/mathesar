@@ -113,9 +113,7 @@
     clip-path: inset(0 var(--clip-path-size) var(--clip-path-size) 0);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .td {
-      border-color: var(--gray-700);
-    }
+  :global(body.theme-dark) .td {
+    border-color: var(--gray-700);
   }
 </style>

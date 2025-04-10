@@ -1,7 +1,7 @@
 /**
  * File to place common css & scss variables for the component library
  */
-:root {
+body {
   --background-color: #ffffff;
   --border-color: var(--sand-300);
   --header-background: var(--white);
@@ -295,8 +295,7 @@
   --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+body.theme-dark {
     --background-color: var(--gray-900);
     --border-color: var(--gray-600);
     --header-background: var(--gray-800);
@@ -389,4 +388,3 @@
     --collapsible-button-text: var(--text-color-primary);
     --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
-}

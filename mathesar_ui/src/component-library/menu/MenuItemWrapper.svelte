@@ -12,7 +12,6 @@
   {...$$restProps}
   class="menu-item {classes}"
   role="menuitem"
-  on:click
   class:disabled
   class:danger
 >
