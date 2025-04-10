@@ -3,7 +3,7 @@ This script reads .env file content from standard input.
 It makes sure that:
   - A SECRET_KEY is generated if missing.
   - The PostgreSQL connection is verified even if PG values are present.
-  
+
 If the required PostgreSQL variables are missing or if the connection fails, a connection string must be
 provided as the first command-line argument.
 
@@ -129,7 +129,7 @@ def validate_pg_connection_string(connection_string):
         required_keys = ["host", "dbname", "user"]
         missing_keys = [key for key in required_keys if key not in conninfo_dict]
         if missing_keys:
-            sys.exit(f"Invalid: The connection string requires host, user, and dbname")
+            sys.exit("Invalid: The connection string requires host, user, and dbname")
 
         env_vars = {
             "POSTGRES_HOST": conninfo_dict["host"],
@@ -142,7 +142,7 @@ def validate_pg_connection_string(connection_string):
         reconstructed_conn_string = construct_pg_conn_str(env_vars)
 
         # Attempt to connect to validate the connection.
-        with psycopg.connect(reconstructed_conn_string) as conn:
+        with psycopg.connect(reconstructed_conn_string):
             pass
 
         return env_vars
