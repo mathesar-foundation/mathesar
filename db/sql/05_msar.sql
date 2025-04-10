@@ -857,34 +857,6 @@ SELECT nullif(
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_valid_target_type_strings(typ_id regtype) RETURNS jsonb AS $$/*
-Given a source type, return the target types for which Mathesar provides a casting function.
-
-Args:
-  typ_id: The type we're casting from.
-*/
-
-SELECT jsonb_agg(DISTINCT prorettype::regtype::text)
-FROM pg_proc
-WHERE
-  pronamespace=msar.get_schema_oid('msar')
-  AND proargtypes[0]=
-    CASE WHEN typ_id = ANY(ARRAY['smallint', 'integer', 'mathesar_types.mathesar_money']::regtype[])
-      THEN 'numeric'::regtype
-    WHEN typ_id = ANY(ARRAY['"char"', 'character', 'character varying', 'mathesar_types.email', 'mathesar_types.uri']::regtype[])
-      THEN 'text'::regtype
-    WHEN typ_id = ANY(ARRAY['mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object']::regtype[])
-      THEN 'jsonb'::regtype
-    WHEN typ_id = 'time without time zone'::regtype
-      THEN 'time with time zone'::regtype
-    WHEN typ_id = 'timestamp without time zone'::regtype
-      THEN 'timestamp with time zone'::regtype
-    ELSE typ_id
-    END
-  AND left(proname, 5) = 'cast_';
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.has_dependents(rel_id oid, att_id smallint) RETURNS boolean AS $$/*
 Return a boolean according to whether the column identified by the given oid, attnum pair is
 referenced (i.e., would dropping that column require CASCADE?).
@@ -989,8 +961,7 @@ Each returned JSON object in the array will have the form:
     "default": {"value": <str>, "is_dynamic": <bool>},
     "has_dependents": <bool>,
     "description": <str>,
-    "current_role_priv": [<str>, <str>, ...],
-    "valid_target_types": [<str>, <str>, ...]
+    "current_role_priv": [<str>, <str>, ...]
   }
 
 The `type_options` object is described in the docstring of `msar.get_type_options`. The `default`
@@ -1009,8 +980,7 @@ SELECT jsonb_agg(
     'default', msar.describe_column_default(tab_id, attnum),
     'has_dependents', msar.has_dependents(tab_id, attnum),
     'description', msar.col_description(tab_id, attnum),
-    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum),
-    'valid_target_types', msar.get_valid_target_type_strings(atttypid)
+    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum)
   )
 )
 FROM pg_attribute pga

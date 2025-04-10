@@ -57,7 +57,6 @@ describe('getRowStatus', () => {
                 primary_key: false,
                 default: null,
                 has_dependents: false,
-                valid_target_types: [],
                 current_role_priv: [],
                 metadata: null,
               },
