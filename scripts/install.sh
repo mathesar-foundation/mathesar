@@ -33,6 +33,7 @@ MATHESAR_VERSION="0.2.3"
 REQUIRED_UV_VERSION="0.6.13"
 
 VENV_DIR_NAME="mathesar-venv"
+ENV_FILE_NAME=".env"
 
 FORCE_DOWNLOAD_PYTHON=false
 CONNECTION_STRING=""
@@ -101,7 +102,7 @@ run_cmd() {
   # Execute the command, pipe output to indent each line with 4 spaces.
   "$@" 2>&1 | sed 's/^/    /'
   local status=${PIPESTATUS[0]}
-  if [ $status -ne 0 ]; then
+  if [[ $status -ne 0 ]]; then
     err "Command failed: $*"
   fi
 }
@@ -156,7 +157,7 @@ download_and_extract_package() {
 clear_uv_cache_lock() {
   # Clear uv cache directory, and lock file if present
   ensure rm -rf "${UV_CACHE_DIR}"/*
-  [ -e "${INSTALL_DIR}"/uv.lock ] && ensure rm "${INSTALL_DIR}"/uv.lock
+  [[ -e "${INSTALL_DIR}"/uv.lock ]] && ensure rm "${INSTALL_DIR}"/uv.lock
 }
 
 install_uv() {
@@ -188,18 +189,25 @@ install_uv_if_not_present() {
 find_python_and_configure_uv_vars() {
   info "Finding existing Python installations..."
 
-  local python_status=0
+  local python_status
   local find_cmd=("${UV_DIR}/uv" python find ">=3.9,<3.14")
 
-  "${find_cmd[@]}" --managed-python 2>/dev/null || python_status=$?
-  if [ $python_status -eq 0 ]; then
+  set +e
+  "${find_cmd[@]}" --managed-python 2>/dev/null
+  python_status=$?
+  set -e
+
+  if [[ $python_status -eq 0 ]]; then
     info "Found Managed Python"
     return 0
   fi
 
-  python_status=0
-  "${find_cmd[@]}" --system 2>/dev/null || python_status=$?
-  if [ $python_status -eq 0 ]; then
+  set +e
+  "${find_cmd[@]}" --system 2>/dev/null
+  python_status=$?
+  set -e
+
+  if [[ $python_status -eq 0 ]]; then
     info "Found System Python"
     # Important! Without this uv venv doesn't get generated correctly when using system python.
     unset UV_PYTHON_INSTALL_DIR
@@ -215,13 +223,18 @@ download_python() {
 }
 
 download_python_if_needed() {
-  if [ "$FORCE_DOWNLOAD_PYTHON" = true ]; then
+  if [[ "$FORCE_DOWNLOAD_PYTHON" = true ]]; then
     download_python
   else
-    local status=0
+    local status
+
     # Find existing python installations
-    find_python_and_configure_uv_vars || status=$?
-    if [ $status -ne 0 ]; then
+    set +e
+    find_python_and_configure_uv_vars
+    status=$?
+    set -e
+
+    if [[ $status -ne 0 ]]; then
       info "Python not found"
       download_python
     fi
@@ -244,12 +257,75 @@ setup_venv_requirements() {
   popd > /dev/null
 }
 
+process_env() {
+  local conn_str_argument="$1"
+  local updated_content status
+  
+  set +e
+  updated_content=$(cat "${INSTALL_DIR}"/"${ENV_FILE_NAME}" | "${INSTALL_DIR}"/"${VENV_DIR_NAME}"/bin/python ./setup/process_env.py "$conn_str_argument")
+  status=$?
+  set -e
+
+  if [[ $status -ne 0 ]]; then
+    return $status
+  fi
+
+  echo "$updated_content" > "${INSTALL_DIR}"/"${ENV_FILE_NAME}"
+  info "Environment file updated successfully."
+  
+  return 0
+}
+
 setup_env_vars() {
   pushd "${INSTALL_DIR}" > /dev/null
     info "Setting up .env file..."
-    ensure touch ".env"
+    ensure touch "${ENV_FILE_NAME}"
 
-    ensure ./"${VENV_DIR_NAME}"/bin/python ./setup/fill_env.py
+    if [[ ! -w "${ENV_FILE_NAME}" ]]; then
+      err "No write permission for \"${ENV_FILE_NAME}\""
+    fi
+
+    local process_env_status
+
+    set +e
+    if [[ -n "${CONNECTION_STRING}" ]]; then
+      process_env "${CONNECTION_STRING}"
+      process_env_status=$?
+    else
+      # Verify the .env file without getting connection string from user.
+      # Suppress printing output here.
+      process_env "" > /dev/null 2>&1
+      process_env_status=$?
+    fi
+    set -e
+
+    if [[ $process_env_status -ne 0 ]]; then
+      if [[ "${NO_PROMPT}" = true ]]; then
+        err "Invalid connection string or unable to connect."
+      fi
+
+      # If processing fails (for example, due to invalid or missing PG parameters),
+      # repeatedly prompt the user for a valid PostgreSQL connection string.
+      while true; do
+        echo ""
+        read -ep "Enter PostgreSQL connection string (format: postgres://user:password@host:port/dbname): " conn_str
+        if [[ -z "$conn_str" ]]; then
+          err_msgonly "Connection string cannot be empty. Please enter again."
+          continue
+        fi
+
+        set +e
+        process_env "$conn_str"
+        process_env_status=$?
+        set -e
+
+        if [[ $process_env_status -eq 0 ]]; then
+          break
+        else
+          err_msgonly "Invalid connection string or unable to connect. Please enter again."
+        fi
+      done
+    fi
 
     info "Exporting environment variables to shell..."
     ensure set -a && ensure source .env && ensure set +a
@@ -336,7 +412,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --connection-string|-c)
-      if [ -n "$2" ] && [[ "$2" != -* ]]; then
+      if [[ -n "$2" ]] && [[ "$2" != -* ]]; then
         CONNECTION_STRING="$2"
         shift 2
       else
@@ -352,8 +428,10 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     --test-package-location)
-      if [ -n "$2" ] && [[ "$2" != -* ]]; then
-        echo "THIS FLAG IS ONLY MEANT FOR TESTING. USE WITH CAUTION."
+      if [[ -n "$2" ]] && [[ "$2" != -* ]]; then
+        echo "============================================================================="
+        echo "THE --test-package-location FLAG IS ONLY MEANT FOR TESTING. USE WITH CAUTION."
+        echo "============================================================================="
         PACKAGE_LOCATION="$2"
         shift 2
       else
@@ -365,7 +443,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       # Assume any non-flag is the installation directory.
-      if [ -z "$INSTALL_DIR" ]; then
+      if [[ -z "$INSTALL_DIR" ]]; then
         set_install_dir "$1"
       else
         # INSTALL_DIR is not empty
@@ -377,19 +455,19 @@ while [[ $# -gt 0 ]]; do
 done
 
 # If --no-prompt is enabled, a connection string is mandatory.
-if [ "${NO_PROMPT}" = true ] && [ -z "${CONNECTION_STRING}" ]; then
+if [[ "${NO_PROMPT}" = true ]] && [[ -z "${CONNECTION_STRING}" ]]; then
   usage_err "When --no-prompt(or -n) is specified, you must provide a connection string via --connection-string(or -c)."
 fi
 
-if [ -z "${INSTALL_DIR}" ]; then
+if [[ -z "${INSTALL_DIR}" ]]; then
   usage_err "<install_dir> is required."
 fi
 
-if [ ! -d "${INSTALL_DIR}" ]; then
+if [[ ! -d "${INSTALL_DIR}" ]]; then
   err "The directory \"${INSTALL_DIR}\" does not exist. Please create it or specify a valid directory."
 fi
 
-if [ ! -w "${INSTALL_DIR}" ]; then
+if [[ ! -w "${INSTALL_DIR}" ]]; then
   err "You do not have sufficient permissions to create files in \"${INSTALL_DIR}\"."
 fi
 
