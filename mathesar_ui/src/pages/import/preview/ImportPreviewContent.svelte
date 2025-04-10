@@ -120,7 +120,7 @@
         const typeSuggestions = response.settlement.value;
         columns = columns.map((column) => ({
           ...column,
-          type: typeSuggestions[column.id] ?? column.type,
+          type: typeSuggestions[column.id].type ?? column.type,
         }));
       }
     }

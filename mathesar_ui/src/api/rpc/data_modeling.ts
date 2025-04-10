@@ -61,7 +61,17 @@ export const data_modeling = {
       database_id: number;
       table_oid: number;
     },
-    Record<string, string>
+    Record<
+      string,
+      {
+        type: string,
+        details?: {
+          mathesar_casting?: boolean;
+          group_sep: string;
+          decimal_p: string;
+        }
+      }
+    >
   >(),
 
   add_foreign_key_column: rpcMethodTypeContainer<
