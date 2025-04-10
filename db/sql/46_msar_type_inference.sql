@@ -58,9 +58,21 @@ msar.check_column_numeric_compat(
   col_id smallint,
   test_perc numeric,
   OUT compat_details msar.type_compat_details
-) AS $$
+) AS $$/*
+Determine whether we can cast the given column to numeric.
+
+Args:
+  tab_id: The OID of the table whose column we're checking.
+  col_id: The attnum of the column in the table.
+  test_perc: The percentage of the table to use for the `cast_to_X` default check.
+
+Returns:
+  Information about how to successfully cast the column to numeric.
+*/
 BEGIN
-  compat_details = msar.find_numeric_separators(tab_id, col_id, msar.downsize_table_sample(test_perc));
+  compat_details = msar.find_numeric_separators(
+    tab_id, col_id, msar.downsize_table_sample(test_perc)
+  );
   EXECUTE format(
     'SELECT msar.cast_to_numeric(%1$I, %5$L, %6$L) FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
     msar.get_column_name(tab_id, col_id),
@@ -92,10 +104,8 @@ Args:
   typ_id: The OID of the type we'll check against the column.
   test_perc: The percentage of the table to use for the `cast_to_X` default check.
 
-Returns a JSONB describing the compatibility of the type for the column with the keys:
-  mathesar_casting: (bool): This is whether our custom casting function succeeded.
-  type_compatible (bool): This is a simple one-shot boolean that tells us whether to infer the
-                          column is that type in inference algorithms.
+Returns:
+  Info about how to successfully cast the column to the given type.
 */
 BEGIN
   CASE typ_id
