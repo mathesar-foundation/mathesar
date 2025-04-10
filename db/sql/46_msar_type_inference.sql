@@ -9,19 +9,12 @@ CREATE OR REPLACE FUNCTION
 msar.find_numeric_separators(
   tab_id regclass,
   col_id smallint,
-  test_perc numeric
---  OUT compat_details msar.type_compat_details
-) RETURNS msar.type_compat_details AS $$/*
+  test_perc numeric,
+  OUT compat_details msar.type_compat_details
+) AS $$/*
 Given a table column, find group and decimal separators for number values in the column.
 
 Throws an error if more than one group separator or decimal separator is found.
-
-Returns:
-
-{
-  "group_sep": Optional[str],
-  "decimal_p": Optional[str]
-}
 */
 DECLARE
   separators jsonb;
@@ -45,13 +38,8 @@ IF jsonb_array_length(separators -> 'group_sep') > 1 THEN
 ELSIF jsonb_array_length(separators -> 'decimal_p') > 1 THEN
   RAISE EXCEPTION 'Too many decimal separators found!';
 ELSE
-  RETURN jsonb_populate_record(
-    null::msar.type_compat_details,
-    jsonb_build_object(
-      'group_sep', separators -> 'group_sep' ->> 0,
-      'decimal_p', separators -> 'decimal_p' ->> 0
-    )
-  );
+  compat_details.group_sep := separators -> 'group_sep' ->> 0;
+  compat_details.decimal_p := separators -> 'decimal_p' ->> 0;
 END IF;
 END;
 $$ LANGUAGE plpgsql PARALLEL SAFE STABLE RETURNS NULL ON NULL INPUT;
@@ -66,44 +54,36 @@ $$ LANGUAGE SQL PARALLEL SAFE IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.check_column_numeric_compat(
-  tab_id regclass, col_id smallint, test_perc numeric
-) RETURNS msar.type_compat_details AS $$
-DECLARE
-  separators msar.type_compat_details;
-  result_ msar.type_compat_details;
+  tab_id regclass,
+  col_id smallint,
+  test_perc numeric,
+  OUT compat_details msar.type_compat_details
+) AS $$
 BEGIN
-  separators = msar.find_numeric_separators(tab_id, col_id, msar.downsize_table_sample(test_perc));
+  compat_details = msar.find_numeric_separators(tab_id, col_id, msar.downsize_table_sample(test_perc));
   EXECUTE format(
     'SELECT msar.cast_to_numeric(%1$I, %5$L, %6$L) FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
     msar.get_column_name(tab_id, col_id),
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     test_perc,
-    coalesce(separators.group_sep, ''),
-    coalesce(separators.decimal_p, '')
+    coalesce(compat_details.group_sep, ''),
+    coalesce(compat_details.decimal_p, '')
   );
-  RETURN jsonb_populate_record(
-    null::msar.type_compat_details,
-    jsonb_build_object(
-      'mathesar_casting', true,
-      'group_sep', separators.group_sep,
-      'decimal_p', separators.decimal_p,
-      'type_compatible', true
-    )
-  );
-EXCEPTION WHEN OTHERS THEN
-  RETURN jsonb_populate_record(
-    null::msar.type_compat_details,
-    jsonb_build_object('type_compatible', false)
-  );
-END;
+  compat_details.mathesar_casting = true;
+  compat_details.type_compatible = true;
+EXCEPTION WHEN OTHERS THEN END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.check_column_type_compat(
-  tab_id regclass, col_id smallint, typ_id regtype, test_perc numeric
-) RETURNS msar.type_compat_details AS $$/*
+  tab_id regclass,
+  col_id smallint,
+  typ_id regtype,
+  test_perc numeric,
+  OUT compat_details msar.type_compat_details
+) AS $$/*
 Get info about the compatibility of a given type for a given column.
 
 Args:
@@ -120,7 +100,7 @@ Returns a JSONB describing the compatibility of the type for the column with the
 BEGIN
   CASE typ_id
     WHEN 'numeric'::regtype THEN
-      RETURN msar.check_column_numeric_compat(tab_id, col_id, test_perc);
+      compat_details = msar.check_column_numeric_compat(tab_id, col_id, test_perc);
     ELSE
       EXECUTE format(
         'SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
@@ -129,17 +109,10 @@ BEGIN
         msar.get_relation_name(tab_id),
         test_perc
       );
-      RETURN jsonb_populate_record(
-        null::msar.type_compat_details,
-        jsonb_build_object('mathesar_casting', true, 'type_compatible', true)
-      );
+      compat_details.mathesar_casting = true;
+      compat_details.type_compatible = true;
   END CASE;
-EXCEPTION WHEN OTHERS THEN
-  RETURN jsonb_populate_record(
-    null::msar.type_compat_details,
-    jsonb_build_object('mathesar_casting', false, 'type_compatible', false)
-  );
-END;
+EXCEPTION WHEN OTHERS THEN END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
@@ -189,7 +162,7 @@ BEGIN
   ) INTO column_nonempty;
   inferred_type := atttypid FROM pg_catalog.pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
   IF inferred_type <> 'text'::regtype OR NOT column_nonempty THEN
-    RETURN jsonb_build_object('inferred_type', inferred_type);
+    RETURN jsonb_build_object('type', inferred_type);
   END IF;
   FOREACH test_type IN ARRAY infer_sequence
     LOOP
