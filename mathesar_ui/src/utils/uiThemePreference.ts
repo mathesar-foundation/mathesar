@@ -1,16 +1,16 @@
 import { uiThemePreference } from '../stores/localStorage';
 
-export type UiTheme = 'light' | 'dark' | 'system';
+export type UiThemePreference = 'light' | 'dark' | 'system';
 
 let mediaQuery: MediaQueryList | null = null;
 
-function getSystemTheme(): Exclude<UiTheme, 'system'> {
+function getSystemTheme(): Exclude<UiThemePreference, 'system'> {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
     ? 'dark'
     : 'light';
 }
 
-function applyTheme(pref: UiTheme) {
+function applyTheme(pref: UiThemePreference) {
   const theme = pref === 'system' ? getSystemTheme() : pref;
 
   // Remove any existing "theme-" classes from the body element
