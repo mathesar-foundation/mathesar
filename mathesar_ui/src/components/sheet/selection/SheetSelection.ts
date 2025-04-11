@@ -106,15 +106,19 @@ export default class SheetSelection {
    * @returns a new selection formed by selecting the one cell that we think
    * users are most likely to want selected after choosing to add a new record.
    *
-   * We use the last row because that's where we add new records. If there is
-   * only one column, then we select the first cell in that column. Otherwise,
-   * we select the cell in the second column (because we assume the first column
-   * is probably a PK column which can't accept data entry.)
+   * We use the last row because that's where we add new records.
+   * We receive an optional columnId to select since this is a user triggered event
+   * and use the first column as default if the columnId is not passed or is invalid.
    */
-  ofNewRecordDataEntryCell(): SheetSelection {
+  ofNewRecordDataEntryCell(
+    columnIdToSelect = this.plane.columnIds.first,
+  ): SheetSelection {
     const rowId = this.plane.rowIds.last;
     if (!rowId) return this;
-    const columnId = this.plane.columnIds.at(1) ?? this.plane.columnIds.first;
+    const columnIndex = columnIdToSelect
+      ? this.plane.columnIds.getIndex(columnIdToSelect)
+      : 0;
+    const columnId = this.plane.columnIds.at(columnIndex ?? 0);
     if (!columnId) return this;
     return this.ofOneCell(makeCellId(rowId, columnId));
   }

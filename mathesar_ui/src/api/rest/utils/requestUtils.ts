@@ -46,7 +46,7 @@ function pickMostImportantRequestStatusState(
 }
 
 export function getMostImportantRequestStatusState(
-  statuses: Iterable<RequestStatus>,
+  statuses: Iterable<RequestStatus<unknown>>,
 ): RequestStatus['state'] | undefined {
   let result: RequestStatus['state'] | undefined;
   for (const { state } of statuses) {

@@ -16,6 +16,7 @@ from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_columns_meta_data
+from mathesar.utils.tables import set_table_meta_data
 
 
 class TypeOptions(TypedDict, total=False):
@@ -177,8 +178,6 @@ class ColumnInfo(TypedDict):
         has_dependents: Whether the column has dependent objects.
         description: The description of the column.
         current_role_priv: The privileges available to the user for the column.
-        valid_target_types: A list of all types to which the column can
-            be cast.
     """
     id: int
     name: str
@@ -190,7 +189,6 @@ class ColumnInfo(TypedDict):
     has_dependents: bool
     description: str
     current_role_priv: list[Literal['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']]
-    valid_target_types: list[str]
 
     @classmethod
     def from_dict(cls, col_info):
@@ -204,8 +202,7 @@ class ColumnInfo(TypedDict):
             default=ColumnDefault.from_dict(col_info.get("default")),
             has_dependents=col_info["has_dependents"],
             description=col_info.get("description"),
-            current_role_priv=col_info["current_role_priv"],
-            valid_target_types=col_info.get("valid_target_types")
+            current_role_priv=col_info["current_role_priv"]
         )
 
 
@@ -233,7 +230,8 @@ def add_primary_key_column(
         pkey_type: Literal["IDENTITY", "UUIDv4"],
         table_oid: int,
         database_id: int,
-        name: Optional[str] = "id",
+        drop_existing_pkey_column: bool = False,
+        name: str = "id",
         **kwargs
 ) -> None:
     """
@@ -259,11 +257,21 @@ def add_primary_key_column(
         pkey_type: Defines the type and default of the primary key.
         table_oid: The OID of the table getting a primary key.
         database_id: The Django id of the database containing the table.
+        drop_existing_pkey_column: Whether to drop the old pkey column.
         name: A custom name for the added primary key column.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        add_pkey_column_to_table(table_oid, pkey_type, conn, name=name)
+        pkey_attnum = add_pkey_column_to_table(
+            table_oid,
+            pkey_type,
+            conn,
+            drop_old_pkey_column=drop_existing_pkey_column,
+            name=name
+        )
+    set_table_meta_data(
+        table_oid, {"mathesar_added_pkey_attnum": pkey_attnum}, database_id
+    )
 
 
 @mathesar_rpc_method(name="columns.add", auth="login")

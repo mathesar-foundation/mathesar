@@ -168,7 +168,6 @@ interface RawColumn {
   primary_key: boolean;
   default: ColumnDefault | null;
   has_dependents: boolean;
-  valid_target_types: string[];
   current_role_priv: ColumnPrivilege[];
 }
 
@@ -255,4 +254,15 @@ export const columns = {
       void
     >(),
   },
+
+  add_primary_key_column: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      pkey_type: 'IDENTITY' | 'UUIDv4';
+      drop_existing_pkey_column?: boolean;
+      name?: string;
+    },
+    void
+  >(),
 };

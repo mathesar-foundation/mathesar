@@ -242,6 +242,7 @@ class TableMetaData(BaseModel):
     import_verified = models.BooleanField(null=True)
     column_order = models.JSONField(null=True)
     record_summary_template = models.JSONField(null=True)
+    mathesar_added_pkey_attnum = models.PositiveIntegerField(null=True)
 
     class Meta:
         constraints = [

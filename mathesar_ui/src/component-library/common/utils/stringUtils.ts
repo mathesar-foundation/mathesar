@@ -18,7 +18,7 @@ export function toAsciiLowerCase(input: string): string {
 export function* filterViaTextQuery<I>(
   items: Iterable<I>,
   query: string | undefined | null,
-  getItemText: (item: I) => string,
+  getStringRepresentation: (item: I) => string | string[],
 ): Generator<I, void, undefined> {
   if (query === undefined || query === null || query.trim() === '') {
     yield* items;
@@ -32,9 +32,11 @@ export function* filterViaTextQuery<I>(
   const normalizedQuery = normalize(query);
 
   for (const item of items) {
-    const itemText = getItemText(item);
-    if (normalize(itemText).includes(normalizedQuery)) {
-      yield item;
-    }
+    const s = getStringRepresentation(item);
+    const stringRepresentations = Array.isArray(s) ? s : [s];
+    const isMatch = stringRepresentations.some((itemText) =>
+      normalize(itemText).includes(normalizedQuery),
+    );
+    if (isMatch) yield item;
   }
 }
