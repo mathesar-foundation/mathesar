@@ -47,8 +47,7 @@ $$ LANGUAGE plpgsql PARALLEL SAFE STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.downsize_table_sample(test_perc numeric) RETURNS numeric AS $$
-  SELECT (test_perc / 100) ^ 2 * 100
-END;
+  SELECT (test_perc / 100) ^ 2 * 100;
 $$ LANGUAGE SQL PARALLEL SAFE IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
