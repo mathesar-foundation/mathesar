@@ -64,12 +64,12 @@ export const data_modeling = {
     Record<
       string,
       {
-        type: string,
+        type: string;
         details?: {
           mathesar_casting?: boolean;
           group_sep: string;
           decimal_p: string;
-        }
+        };
       }
     >
   >(),
