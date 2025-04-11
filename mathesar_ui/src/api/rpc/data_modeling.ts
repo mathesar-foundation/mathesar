@@ -90,4 +90,15 @@ export const data_modeling = {
     },
     void
   >(),
+
+  change_primary_key_column: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      column_attnum: number;
+      default: 'IDENTITY' | 'UUIDv4' | null;
+      drop_existing_pk_column: boolean;
+    },
+    void
+  >(),
 };

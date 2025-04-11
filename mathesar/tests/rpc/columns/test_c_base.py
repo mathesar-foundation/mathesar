@@ -37,8 +37,7 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'nullable': False, 'description': None, 'primary_key': True,
             'type_options': None,
             'has_dependents': True,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': ['text']
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 2, 'name': 'numcol', 'type': 'numeric',
             'default': {'value': "'8'::numeric", 'is_dynamic': False},
@@ -47,32 +46,28 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'primary_key': False,
             'type_options': None,
             'has_dependents': False,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': ['text']
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 4, 'name': 'numcolmod', 'type': 'numeric',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'scale': 3, 'precision': 5},
             'has_dependents': False,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': ['text']
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'fields': 'day to second'},
             'has_dependents': False,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': ['text']
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 10, 'name': 'arrcol', 'type': '_array',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'item_type': 'character varying', 'length': 3},
             'has_dependents': False,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': None
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }
     ]
     mocked_exec_msar_func.fetchone.return_value = [expect_col_list]
@@ -181,3 +176,54 @@ def test_columns_delete(rf, monkeypatch, mocked_exec_msar_func):
     assert actual_result == 3
     assert call_args[2] == table_oid
     assert call_args[3:6] == tuple(column_attnums)
+
+
+def test_add_primary_key_column(rf, monkeypatch, mocked_exec_msar_func):
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username='alice', password='pass1234')
+    table_oid = 23457
+    database_id = 2
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == 2 and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_set_meta_data(table_oid, metadata, _database_id):
+        assert table_oid == 23457
+        assert metadata == {"mathesar_added_pkey_attnum": 3}
+        assert _database_id == 2
+
+    monkeypatch.setattr(columns.base, 'connect', mock_connect)
+    monkeypatch.setattr(columns.base, 'set_table_meta_data', mock_set_meta_data)
+    mocked_exec_msar_func.fetchone.return_value = [3]
+    columns.add_primary_key_column(
+        pkey_type="IDENTITY",
+        table_oid=table_oid,
+        database_id=database_id,
+        request=request
+    )
+    call_args = mocked_exec_msar_func.call_args_list[0][0]
+    assert call_args[2] == table_oid
+    assert call_args[3] == "IDENTITY"
+    assert call_args[4] is False  # This should be the default
+    assert call_args[5] == 'id'  # This should be the default
+
+    columns.add_primary_key_column(
+        pkey_type="IDENTITY",
+        table_oid=table_oid,
+        database_id=database_id,
+        drop_existing_pkey_column=True,
+        name="Identity",
+        request=request
+    )
+    call_args = mocked_exec_msar_func.call_args_list[1][0]
+    assert call_args[2] == table_oid
+    assert call_args[3] == "IDENTITY"
+    assert call_args[4] is True
+    assert call_args[5] == 'Identity'

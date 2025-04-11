@@ -269,13 +269,6 @@ export function getAbstractTypeForDbType(dbType: DbType): AbstractType {
   return abstractTypeOfDbType;
 }
 
-/**
- * For columns, allowed db types should be an intersection of valid_target_types
- * and dbTypes of each abstract type. i.e
- * const allowedDBTypes = intersection(dbTargetTypeSet, abstractType.dbTypes);
- *
- * However, it is not handled here yet, since it requires additional confirmation.
- */
 export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
   dbType: DbType,
   targetDbTypes: DbType[],
@@ -319,4 +312,10 @@ export function getDefaultDbTypeOfAbstractType(
     return [...abstractType.dbTypes][0];
   }
   return defaultDbType;
+}
+
+export function getDbTypesForAbstractType(
+  abstractTypeIdentifier: AbstractType['identifier'],
+): Set<DbType> {
+  return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();
 }

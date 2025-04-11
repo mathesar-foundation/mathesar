@@ -17,14 +17,13 @@
   export let context: 'page' | 'widget' | 'shared-consumer-page' = 'page';
 
   $: ({
-    table,
     recordsData,
     meta,
     isLoading,
     columnsDataStore,
     constraintsDataStore,
+    canInsertRecords,
   } = $tabularData);
-  $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords, persistedNewRecords } = recordsData);
@@ -36,8 +35,7 @@
     $columnsFetchStatus?.state === 'failure' ||
     recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
-  $: hasNewRecordButton =
-    context !== 'widget' && $currentRolePrivileges.has('INSERT');
+  $: hasNewRecordButton = context !== 'widget' && $canInsertRecords;
   $: refreshButtonState = (() => {
     let buttonState: 'loading' | 'error' | undefined = undefined;
     if ($isLoading) {

@@ -21,7 +21,7 @@
   export let row: RecordRow;
   export let recordPk: ResultValue | undefined = undefined;
   export let recordsData: RecordsData;
-  export let isTableEditable: boolean;
+  export let canDeleteRecords: boolean;
 
   // To be used in case of publicly shared links where user should not be able
   // to view linked tables & explorations
@@ -58,7 +58,7 @@
 <ButtonMenuItem
   on:click={handleDeleteRecords}
   icon={iconDeleteMajor}
-  disabled={!isTableEditable}
+  disabled={!canDeleteRecords}
 >
   {$_('delete_records', { values: { count: 1 } })}
 </ButtonMenuItem>

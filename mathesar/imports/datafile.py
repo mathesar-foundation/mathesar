@@ -28,8 +28,8 @@ def copy_datafile_to_table(
             column_names = [
                 f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(next(reader)))
             ]
-            reader.seek(0)
-        table_oid, db_table_name, renamed_columns = create_and_import_from_rows(
+            f.seek(0)
+        import_info = create_and_import_from_rows(
             reader,
             table_name,
             schema_oid,
@@ -38,7 +38,12 @@ def copy_datafile_to_table(
             comment=comment,
         )
 
-    return {"oid": table_oid, "name": db_table_name, "renamed_columns": renamed_columns}
+    return {
+        "oid": import_info['table_oid'],
+        "name": import_info['table_name'],
+        "renamed_columns": import_info['renamed_columns'],
+        "pkey_column_attnum": import_info['pkey_column_attnum'],
+    }
 
 
 def _process_column_names(column_names):

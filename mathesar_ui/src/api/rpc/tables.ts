@@ -57,6 +57,8 @@ interface TableMetadata {
   import_verified: boolean | null;
   column_order: number[] | null;
   record_summary_template: RecordSummaryTemplate | null;
+  /** The attnum of the most recently-set pkey column (used during import) */
+  mathesar_added_pkey_attnum: number | null;
 }
 
 export interface RawTableWithMetadata extends RawTable {

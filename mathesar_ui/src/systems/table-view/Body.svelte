@@ -21,11 +21,9 @@
 
   export let usesVirtualList = false;
 
-  $: ({ table, display } = $tabularData);
+  $: ({ table, display, canInsertRecords } = $tabularData);
   $: ({ oid } = table);
   $: ({ displayRowDescriptors } = display);
-  $: ({ currentRolePrivileges } = table.currentAccess);
-  $: canAddRow = $currentRolePrivileges.has('INSERT');
 
   function getItemSizeFromRow(row: RowType) {
     if (isHelpTextRow(row)) {
@@ -68,7 +66,7 @@
       {#each items as item (item.key)}
         {@const shouldRender = !(
           isPlaceholderRecordRow($displayRowDescriptors[item.index].row) &&
-          !canAddRow
+          !$canInsertRecords
         )}
         {#if $displayRowDescriptors[item.index] && shouldRender}
           <Row

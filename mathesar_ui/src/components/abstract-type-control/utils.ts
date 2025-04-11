@@ -13,10 +13,7 @@ import type { FormBuildConfiguration } from '@mathesar-component-library/types';
 import DurationConfiguration from './config-components/DurationConfiguration.svelte';
 
 export interface ColumnWithAbstractType
-  extends Pick<
-    Column,
-    'id' | 'type' | 'type_options' | 'metadata' | 'valid_target_types'
-  > {
+  extends Pick<Column, 'id' | 'type' | 'type_options' | 'metadata'> {
   abstractType: AbstractType;
 }
 

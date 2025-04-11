@@ -25,7 +25,11 @@ from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.tables.metadata import TableMetaDataBlob
 from mathesar.rpc.utils import connect
-from mathesar.utils.tables import list_tables_meta_data, get_table_meta_data
+from mathesar.utils.tables import (
+    list_tables_meta_data,
+    get_table_meta_data,
+    set_table_meta_data
+)
 
 
 class TableInfo(TypedDict):
@@ -235,14 +239,21 @@ def add(
         comment: The comment for the new table.
 
     Returns:
-        The `oid` of the created table.
+        The `oid`, `name`, and `renamed_columns` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        created_table_oid = create_table_on_database(
+        created_table_info = create_table_on_database(
             table_name, schema_oid, conn, pkey_column_info, column_data_list, constraint_data_list, owner_oid, comment
         )
-    return created_table_oid
+
+    set_table_meta_data(
+        created_table_info['oid'],
+        {'mathesar_added_pkey_attnum': created_table_info['pkey_column_attnum']},
+        database_id,
+    )
+
+    return AddedTableInfo.from_dict(created_table_info)
 
 
 @mathesar_rpc_method(name="tables.delete", auth="login")
@@ -310,16 +321,22 @@ def import_(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return AddedTableInfo.from_dict(
-            copy_datafile_to_table(
-                user,
-                data_file_id,
-                table_name,
-                schema_oid,
-                conn,
-                comment=comment,
-            )
+        import_result = copy_datafile_to_table(
+            user,
+            data_file_id,
+            table_name,
+            schema_oid,
+            conn,
+            comment=comment,
         )
+
+    set_table_meta_data(
+        import_result['oid'],
+        {'mathesar_added_pkey_attnum': import_result['pkey_column_attnum']},
+        database_id,
+    )
+
+    return AddedTableInfo.from_dict(import_result)
 
 
 @mathesar_rpc_method(name="tables.get_import_preview", auth="login")
