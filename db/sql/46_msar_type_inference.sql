@@ -17,29 +17,27 @@ Given a table column, find group and decimal separators for number values in the
 Throws an error if more than one group separator or decimal separator is found.
 */
 DECLARE
-  separators jsonb;
+  group_sep text[];
+  decimal_p text[];
 BEGIN
 EXECUTE format(
   $q$
   WITH numarr_cte AS (
-    SELECT msar.get_numeric_array(%1$I) as n FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L)
+    SELECT msar.get_numeric_array(%1$I) AS n FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L)
   )
-  SELECT jsonb_build_object(
-    'group_sep', jsonb_agg_strict(DISTINCT n[2]), 'decimal_p', jsonb_agg_strict(DISTINCT n[3])
-  ) FROM numarr_cte;
+  SELECT array_remove(array_agg(DISTINCT n[2]), null), array_remove(array_agg(DISTINCT n[3]),  null)
+  FROM numarr_cte;
   $q$,
   msar.get_column_name(tab_id, col_id),
   msar.get_relation_schema_name(tab_id),
   msar.get_relation_name(tab_id),
   test_perc
-) INTO separators;
-IF jsonb_array_length(separators -> 'group_sep') > 1 THEN
-  RAISE EXCEPTION 'Too many grouping separators found!';
-ELSIF jsonb_array_length(separators -> 'decimal_p') > 1 THEN
-  RAISE EXCEPTION 'Too many decimal separators found!';
+) INTO group_sep, decimal_p;
+IF array_length(group_sep, 1) > 1 THEN RAISE EXCEPTION 'Too many grouping separators found!';
+ELSIF array_length(decimal_p, 1) > 1 THEN RAISE EXCEPTION 'Too many decimal separators found!';
 ELSE
-  compat_details.group_sep := separators -> 'group_sep' ->> 0;
-  compat_details.decimal_p := separators -> 'decimal_p' ->> 0;
+  compat_details.group_sep := group_sep[1];
+  compat_details.decimal_p := decimal_p[1];
 END IF;
 END;
 $$ LANGUAGE plpgsql PARALLEL SAFE STABLE RETURNS NULL ON NULL INPUT;
