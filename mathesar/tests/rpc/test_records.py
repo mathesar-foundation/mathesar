@@ -61,7 +61,6 @@ def test_records_list(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[7] is None  # group
     assert call_args[8] is True  # return_record_summaries
     assert call_args[9] == json.dumps({})  # summary template
-    assert True is False
 
 
 def test_records_get(rf, monkeypatch, mocked_exec_msar_func):
