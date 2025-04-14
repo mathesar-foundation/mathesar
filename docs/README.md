@@ -10,7 +10,7 @@ This directory contains the source code for Mathesar's user and administrator do
     pip install -r requirements.txt
     ```
 
-1. Start MkDocs
+1. Start MkDocs 
 
     ```
     mkdocs serve -a localhost:9000
