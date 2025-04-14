@@ -8,6 +8,7 @@ MATHESAR_PORT=8000
 
 SCRIPT_NAME=$(basename "$0")
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ENV_FILE="${BASE_DIR}/.env"
 
 # Default flag values.
 NO_VENV=false
@@ -26,14 +27,29 @@ info() {
   echo -e "${BLUE}==> $1${RESET}"
 }
 
-err() {
+err_msgonly() {
   echo -e "${RED}ERROR: $1${RESET}" >&2
+}
+
+err() {
+  err_msgonly "$1"
   exit 1
 }
 
 command_exists() {
   command -v "$1" > /dev/null 2>&1
   return $?
+}
+
+require_command() {
+  if ! command_exists "$1"; then
+    err "Mathesar requires '$1' (command not found)"
+  fi
+}
+
+# For commands that should ideally never fail
+ensure() {
+  if ! "$@"; then err "Command failed: $*"; fi
 }
 
 
@@ -44,18 +60,55 @@ validate_port() {
     err "Invalid port: ${MATHESAR_PORT}. Port must be a positive integer."
   fi
 
+  # Check if lsof is available.
   if command_exists lsof; then
     if lsof -i tcp:"${MATHESAR_PORT}" -sTCP:LISTEN >/dev/null 2>&1; then
-      err "Port ${MATHESAR_PORT} is already in use. Please choose a different port."
+      err "Port ${MATHESAR_PORT} is already in use (checked with lsof). Please choose a different port."
+    fi
+  elif command_exists netstat; then
+    require_command grep
+    # netstat output may include IPv4 or IPv6 addresses. We match common delimiters.
+    if netstat -an | grep -E 'LISTEN' | grep -q "[.:]${MATHESAR_PORT}[[:space:]]"; then
+      err "Port ${MATHESAR_PORT} is already in use (checked with netstat). Please choose a different port."
     fi
   else
-    echo "lsof is not installed. Skipping port-in-use check."
+    echo "No suitable tool (lsof or netstat) found. Skipping port-in-use check."
+  fi
+}
+
+set_env_vars_from_file() {
+  if [[ -f "${ENV_FILE}" ]]; then
+    info "Loading environment variables from ${ENV_FILE}"
+    require_command xargs
+
+    # Read .env file line by line.
+    while IFS= read -r line || [ -n "$line" ]; do
+      # Remove any leading and trailing whitespace.
+      trimmed="$(echo "$line" | xargs)"
+
+      # Skip blank lines and lines that start with '#' (comments).
+      if [[ -z "$trimmed" ]] || [[ "$trimmed" == \#* ]]; then
+        continue
+      fi
+
+      # Split the line at the first '=' to get the key and value.
+      var_name="${trimmed%%=*}"
+      var_value="${trimmed#*=}"
+
+      # Only export the variable if it is not already set.
+      # This check uses bash parameter expansion: if the variable is not set, ${!var_name+_} is empty.
+      # If it's set even when empty, it'll return a value (when empty, it'll return _).
+      # `!` is required below - it denotes that the value of var_name should be used as the env variable name.
+      if [[ -z "${!var_name+_}" ]]; then
+        export "$var_name"="$var_value"
+      fi
+    done < "${ENV_FILE}"
   fi
 }
 
 check_required_core_env_vars() {
   if [[ -z "${SECRET_KEY}" ]]; then
-    err "Required environment variable "${SECRET_KEY}" is not set."
+    err "Required environment variable SECRET_KEY is not set."
   fi
 }
 
@@ -121,6 +174,8 @@ select_gunicorn() {
 
 run_mathesar() {
   info "Starting Mathesar..."
+  set_env_vars_from_file
+
   validate_port
   check_required_core_env_vars
 
@@ -149,7 +204,7 @@ run_mathesar() {
 
     pushd "${BASE_DIR}" > /dev/null
       info "Running Django setup..."
-      "$python_bin" -m mathesar.install
+      ensure "$python_bin" -m mathesar.install
     popd > /dev/null
   fi
 
@@ -169,7 +224,8 @@ run_mathesar() {
   exec "$gunicorn_bin" $gunicorn_opts
 }
 
-#=======ARGUMENT PARSING AND MAIN COMMMAND=====================================
+
+#=======USAGE==================================================================
 
 # This is the help message printed for the user
 usage_msg() {
@@ -252,6 +308,15 @@ Examples:
 EOF
 }
 
+usage_err() {
+  err_msgonly "$1"
+  usage_msg
+  exit 1
+}
+
+
+#=======ARGUMENT PARSING AND COMMAND EXECUTION=================================
+
 # If no command is specified, print help and exit
 if [ $# -eq 0 ]; then
   usage_msg
@@ -261,7 +326,7 @@ fi
 COMMAND="$1"
 shift
 
-if [ "$COMMAND" = "run" ]; then
+if [ "${COMMAND}" = "run" ]; then
   # Parse run command options.
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -299,18 +364,14 @@ if [ "$COMMAND" = "run" ]; then
             n) NO_VENV=true ;;
             s) SETUP_DJANGO=true ;;
             *)
-              echo "Unknown option: -$letter"
-              usage_msg
-              exit 1
+              usage_err "Unknown option: -$letter"
               ;;
           esac
         done
         shift
         ;;
       *)
-        echo "Unknown option: $1"
-        usage_msg
-        exit 1
+        usage_err "Unknown option: $1"
         ;;
     esac
   done
@@ -330,8 +391,6 @@ case "${COMMAND}" in
     usage_internal_msg
     ;;
   *)
-    echo "Unknown command: ${COMMAND}"
-    usage_msg
-    exit 1
+    usage_err "Unknown command: ${COMMAND}"
     ;;
 esac
