@@ -178,6 +178,8 @@ export interface Column extends RawColumn {
   metadata: ColumnMetadata | null;
 }
 
+export type ColumnCastOptions = Record<string, unknown>;
+
 export interface ColumnCreationSpec {
   name?: string;
   type?: string;
@@ -193,6 +195,7 @@ export interface ColumnPatchSpec {
   type?: string | null;
   description?: string | null;
   type_options?: ColumnTypeOptions | null;
+  cast_options?: ColumnCastOptions;
   nullable?: boolean;
   default?: ColumnDefault | null;
 }
