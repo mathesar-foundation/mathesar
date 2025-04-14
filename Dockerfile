@@ -64,7 +64,7 @@ RUN pip install --no-cache-dir -r requirements-dev.txt
 
 EXPOSE 8000
 
-ENTRYPOINT ["./mathesar.dev.sh"]
+CMD ["bash", "./mathesar.dev.sh"]
 
 
 #=========== STAGE: DEVELOPMENT ==============================================#
@@ -90,11 +90,11 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Build frontend source
-RUN cd mathesar_ui && npm ci && npm run build
+RUN cd mathesar_ui && npm ci && npm run build && cd ..
 
 EXPOSE 8000 3000 6006
 
-ENTRYPOINT ["./mathesar.dev.sh"]
+CMD ["bash", "./mathesar.dev.sh"]
 
 
 #=========== STAGE: PRODUCTION ===============================================#
@@ -117,4 +117,4 @@ RUN rm -rf ./docs
 
 EXPOSE 8000
 
-ENTRYPOINT ["./mathesar.sh run -fns"]
+CMD ["bash", "./mathesar.sh", "run", "-fns"]

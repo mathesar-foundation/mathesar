@@ -148,7 +148,7 @@ run_mathesar() {
     fi
 
     info "Running Django setup..."
-    exec "$python_bin" -m mathesar.install
+    "$python_bin" -m mathesar.install
   fi
 
   local gunicorn_opts="config.wsgi -b 0.0.0.0:${MATHESAR_PORT}"
