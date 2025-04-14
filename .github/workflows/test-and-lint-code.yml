@@ -385,7 +385,7 @@ jobs:
     steps:
       - name: Check Dependency Results
         run: |
-          # Check the "all_be_tests_required" conditions
+          # Check "all_be_tests_required" conditions
           if [[ "${{ needs.all_be_tests_required.outputs.tests_should_run }}" == "true" ]]; then
             if [[ "${{ needs.python_tests.result }}" != "success"
               || "${{ needs.sql_tests.result }}" != "success"
@@ -394,7 +394,7 @@ jobs:
               echo "One or more backend tests failed."
               exit 1
             fi
-          # Check the "python_tests_required" conditions
+          # Check "python_tests_required" conditions
           elif [[ "${{ needs.python_tests_required.outputs.tests_should_run }}" == "true" ]]; then
             if [[ "${{ needs.python_tests.result }}" != "success"
               || "${{ needs.api_tests.result }}" != "success"
@@ -404,7 +404,7 @@ jobs:
             fi
           fi
 
-          # Check the "sql_tests_required" conditions
+          # Check "sql_tests_required" conditions
           if [[ "${{ needs.sql_tests_required.outputs.tests_should_run }}" == "true" ]]; then
             if [[ "${{ needs.sql_tests.result }}" != "success" ]]; then
               echo "SQL tests failed."
