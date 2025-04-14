@@ -414,15 +414,13 @@
     line-height: 1.6;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .form {
-      --base-fill: var(--stormy-800);
-      --base-stroke: var(--stormy-600);
-      --target-fill: var(--pumpkin-800);
-      --target-stroke: var(--pumpkin-600);
-      --mapping-fill: var(--salmon-800);
-      --mapping-stroke: var(--salmon-600);
-    }
+  :global(body.theme-dark) .form {
+    --base-fill: var(--stormy-800);
+    --base-stroke: var(--stormy-600);
+    --target-fill: var(--pumpkin-800);
+    --target-stroke: var(--pumpkin-600);
+    --mapping-fill: var(--salmon-800);
+    --mapping-stroke: var(--salmon-600);
   }
 
   .form.self-referential {
