@@ -38,6 +38,7 @@ RUN apt-get update && \
 
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 ENV PGDATA /var/lib/postgresql/mathesar
+ENV MATHESAR_DOCKER_IMAGE 'true'
 
 VOLUME /etc/postgresql/
 VOLUME /var/lib/postgresql/
@@ -63,7 +64,7 @@ RUN pip install --no-cache-dir -r requirements-dev.txt
 
 EXPOSE 8000
 
-ENTRYPOINT ["./dev-run.sh"]
+ENTRYPOINT ["./mathesar.dev.sh"]
 
 
 #=========== STAGE: DEVELOPMENT ==============================================#
@@ -93,7 +94,7 @@ RUN cd mathesar_ui && npm ci && npm run build
 
 EXPOSE 8000 3000 6006
 
-ENTRYPOINT ["./dev-run.sh"]
+ENTRYPOINT ["./mathesar.dev.sh"]
 
 
 #=========== STAGE: PRODUCTION ===============================================#
@@ -116,4 +117,4 @@ RUN rm -rf ./docs
 
 EXPOSE 8000
 
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["./mathesar.sh run -fns"]

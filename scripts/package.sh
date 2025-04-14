@@ -14,7 +14,6 @@ export FILES_TO_COPY=(
   "mathesar.sh"
   "pyproject.toml"
   "README.md"
-  "run-uv.sh"
   "requirements.txt"
   "THIRDPARTY"
 )
@@ -30,7 +29,8 @@ export PATTERNS_TO_IGNORE=(
   "*.po"
   "__pycache__"
 )
-export DIST_LOCATION="$(dirname "$0")/../dist"
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+export DIST_LOCATION="${BASE_DIR}/dist"
 
 #=======COMMON UTILITIES=======================================================
 
