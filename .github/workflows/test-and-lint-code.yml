@@ -94,6 +94,7 @@ jobs:
         uses: tj-actions/changed-files@v46
         with:
           files: |
+            '**.yml'
             '**.sh'
             'Dockerfile*'
       - name: echo
