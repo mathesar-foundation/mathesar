@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [python_tests_required, all_be_tests_required]
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
@@ -143,7 +143,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [sql_tests_required, all_be_tests_required]
     if: needs.sql_tests_required.outputs.tests_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
         pg-version: [13, 14, 15, 16, 17]
@@ -167,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [python_tests_required, all_be_tests_required]
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
@@ -193,7 +193,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [python_lint_required, all_be_tests_required]
     if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
