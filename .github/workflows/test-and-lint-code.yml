@@ -94,9 +94,9 @@ jobs:
         uses: tj-actions/changed-files@v46
         with:
           files: |
-            '**.yml'
-            '**.sh'
-            'Dockerfile*'
+            **.yml
+            **.sh
+            Dockerfile*
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
