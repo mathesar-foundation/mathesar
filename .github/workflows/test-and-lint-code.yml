@@ -378,7 +378,8 @@ jobs:
 ################################################################################
 
   matrix_tests:
-    if: ${{ always() }}
+    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     runs-on: ubuntu-latest
     needs: [python_tests, sql_tests, api_tests]
     steps:
