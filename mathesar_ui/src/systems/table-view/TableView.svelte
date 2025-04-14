@@ -52,8 +52,10 @@
       getRecordSummaries: () => get(recordsData.linkedRecordSummaries),
     },
     pastingContext: {
-      // TODO: pasting context should also take new records into account
-      getRecordRows: () => get(recordsData.fetchedRecordRows),
+      getRecordRows: () => [
+        ...get(recordsData.fetchedRecordRows),
+        ...get(recordsData.newRecords),
+      ],
       getSheetColumns: () => [
         ...map(({ column }) => column, get(processedColumns).values()),
       ],
