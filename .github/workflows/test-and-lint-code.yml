@@ -378,20 +378,35 @@ jobs:
 ################################################################################
 
   matrix_tests:
-    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run == 'true'
+    if: ${{ always() }}
     runs-on: ubuntu-latest
-    needs: [python_tests, sql_tests, api_tests]
+    needs: [python_tests_required, sql_tests_required, all_be_tests_required, python_tests, sql_tests, api_tests]
     steps:
       - name: Check Dependency Results
         run: |
-          # Check if any dependency did not succeed
-          if
-          [ "${{ needs.python_tests.result }}" != "success" ] ||
-          [ "${{ needs.sql_tests.result }}" != "success" ] ||
-          [ "${{ needs.api_tests.result }}" != "success" ]; then
-            echo "One or more dependent tests have failed."
-            exit 1
+          # Check the "all_be_tests_required" dependency conditions
+          if [[ "${{ needs.all_be_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.python_tests.result }}" != "success"
+              || "${{ needs.sql_tests.result }}" != "success"
+              || "${{ needs.api_tests.result }}" != "success"
+            ]]; then
+              echo "One or more backend tests failed."
+              exit 1
+            fi
+          elif [[ "${{ needs.python_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.python_tests.result }}" != "success"
+              || "${{ needs.api_tests.result }}" != "success"
+            ]]; then
+              echo "One or more python tests failed."
+              exit 1
+            fi
+          fi
+
+          if [[ "${{ needs.sql_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.sql_tests.result }}" != "success" ]]; then
+              echo "SQL tests failed."
+              exit 1
+            fi
           fi
       - name: Report success
         run: echo "All tests succeeded or skipped!"
