@@ -64,7 +64,7 @@ RUN pip install --no-cache-dir -r requirements-dev.txt
 
 EXPOSE 8000
 
-CMD ["bash", "./mathesar.dev.sh"]
+CMD ["bash", "./bin/mathesar_dev"]
 
 
 #=========== STAGE: DEVELOPMENT ==============================================#
@@ -94,7 +94,7 @@ RUN cd mathesar_ui && npm ci && npm run build && cd ..
 
 EXPOSE 8000 3000 6006
 
-CMD ["bash", "./mathesar.dev.sh"]
+CMD ["bash", "./bin/mathesar_dev"]
 
 
 #=========== STAGE: PRODUCTION ===============================================#
@@ -117,4 +117,4 @@ RUN rm -rf ./docs
 
 EXPOSE 8000
 
-CMD ["bash", "./mathesar.sh", "run", "-fns"]
+CMD ["bash", "./bin/mathesar", "run", "-fns"]

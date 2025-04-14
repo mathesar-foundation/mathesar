@@ -7,7 +7,7 @@ MATHESAR_VERSION="0.2.3"
 MATHESAR_PORT=8000
 
 SCRIPT_NAME=$(basename "$0")
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 # Default flag values.
 NO_VENV=false
@@ -107,7 +107,7 @@ select_python() {
   if [[ "${NO_VENV}" = true ]]; then
     echo "python"
   else
-    echo "${SCRIPT_DIR}/mathesar-venv/bin/python"
+    echo "${BASE_DIR}/mathesar-venv/bin/python"
   fi
 }
 
@@ -115,7 +115,7 @@ select_gunicorn() {
   if [[ "${NO_VENV}" = true ]]; then
     echo "gunicorn"
   else
-    echo "${SCRIPT_DIR}/mathesar-venv/bin/gunicorn"
+    echo "${BASE_DIR}/mathesar-venv/bin/gunicorn"
   fi
 }
 
@@ -147,8 +147,10 @@ run_mathesar() {
       err "Python not found at ${python_bin}. Ensure the virtual environment is set up."
     fi
 
-    info "Running Django setup..."
-    "$python_bin" -m mathesar.install
+    pushd "${BASE_DIR}" > /dev/null
+      info "Running Django setup..."
+      "$python_bin" -m mathesar.install
+    popd > /dev/null
   fi
 
   local gunicorn_opts="config.wsgi -b 0.0.0.0:${MATHESAR_PORT}"

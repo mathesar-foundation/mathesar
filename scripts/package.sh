@@ -11,13 +11,13 @@ export UV_VERSION=0.6.13
 export FILES_TO_COPY=(
   "LICENSE"
   "manage.py"
-  "mathesar.sh"
   "pyproject.toml"
   "README.md"
   "requirements.txt"
   "THIRDPARTY"
 )
 export DIRECTORIES_TO_COPY=(
+  "bin"
   "config"
   "db"
   "mathesar"
@@ -28,6 +28,7 @@ export DIRECTORIES_TO_COPY=(
 export PATTERNS_TO_IGNORE=(
   "*.po"
   "__pycache__"
+  "bin/mathesar_dev"
 )
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export DIST_LOCATION="${BASE_DIR}/dist"
