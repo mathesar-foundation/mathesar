@@ -26,8 +26,6 @@ jobs:
       tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v4
-      - name: echo
-        run: echo "${{ steps.changed_files.outputs.any_changed }}"
       - name: Get changed files
         id: changed_files
         uses: tj-actions/changed-files@v46
@@ -36,6 +34,8 @@ jobs:
             '*.py'
             'mathesar/**'
             'db/**'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
   python_lint_required:
     name: Check for file changes requiring python linter
@@ -44,13 +44,13 @@ jobs:
       lint_should_run: ${{ steps.changed_files.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v4
-      - name: echo
-        run: echo "${{ steps.changed_files.outputs.any_changed }}"
       - name: Get changed files
         id: changed_files
         uses: tj-actions/changed-files@v46
         with:
           files: '**.py'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
   sql_tests_required:
     name: Check for file changes requiring SQL tests
@@ -59,13 +59,13 @@ jobs:
       tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v4
-      - name: echo
-        run: echo "${{ steps.changed_files.outputs.any_changed }}"
       - name: Get changed files
         id: changed_files
         uses: tj-actions/changed-files@v46
         with:
           files: '**.sql'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
   front_end_checks_required:
     name: Check for file changes requiring front end checks
@@ -74,13 +74,13 @@ jobs:
       checks_should_run: ${{ steps.changed_files.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v4
-      - name: echo
-        run: echo "${{ steps.changed_files.outputs.any_changed }}"
       - name: Get changed files
         id: changed_files
         uses: tj-actions/changed-files@v46
         with:
           files: 'mathesar_ui/**'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
   all_be_tests_required:
     name: Check for file changes requiring all backend tests
@@ -89,8 +89,6 @@ jobs:
       tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v4
-      - name: echo
-        run: echo "${{ steps.changed_files.outputs.any_changed }}"
       - name: Get changed files
         id: changed_files
         uses: tj-actions/changed-files@v46
@@ -98,6 +96,8 @@ jobs:
           files: |
             '**.sh'
             'Dockerfile*'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
 ################################################################################
 ##                         BACK END TEST/LINT RUNNERS                         ##
