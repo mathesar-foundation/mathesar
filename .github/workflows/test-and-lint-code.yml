@@ -112,6 +112,7 @@ jobs:
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
         needs.all_be_tests_required.outputs.tests_should_run
     strategy:
+      fail-fast: false
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
         pg-version: [13, 14, 15, 16, 17]
@@ -138,6 +139,7 @@ jobs:
     if: needs.sql_tests_required.outputs.tests_should_run == 'true' ||
         needs.all_be_tests_required.outputs.tests_should_run
     strategy:
+      fail-fast: false
       matrix:
         pg-version: [13, 14, 15, 16, 17]
     steps:
@@ -162,6 +164,7 @@ jobs:
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
         needs.all_be_tests_required.outputs.tests_should_run
     strategy:
+      fail-fast: false
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
         pg-version: [13, 14, 15, 16, 17]
@@ -371,6 +374,7 @@ jobs:
 ################################################################################
 
   matrix_tests:
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     needs: [python_tests, sql_tests]
     steps:
