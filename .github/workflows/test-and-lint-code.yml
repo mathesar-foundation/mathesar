@@ -31,9 +31,9 @@ jobs:
         uses: tj-actions/changed-files@v46
         with:
           files: |
-            '*.py'
-            'mathesar/**'
-            'db/**'
+            *.py
+            mathesar/**
+            db/**
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
