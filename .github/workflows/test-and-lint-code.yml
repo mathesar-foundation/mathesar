@@ -374,7 +374,7 @@ jobs:
 ################################################################################
 
   matrix_tests:
-    # if: ${{ always() }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     needs: [python_tests, sql_tests, api_tests]
     steps:
