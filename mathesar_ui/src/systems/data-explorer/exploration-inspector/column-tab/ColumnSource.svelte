@@ -117,11 +117,17 @@
 
       .tag {
         padding: var(--size-extreme-small) var(--size-ultra-small);
-        background: var(--gray-200);
+        background: var(--stormy-100);
         border-radius: var(--size-large);
         font-weight: 510;
         overflow: hidden;
         max-width: 100%;
+
+        @media (prefers-color-scheme: dark) {
+          background: var(--stormy-800);
+          border: 1px solid var(--stormy-600);
+          color: var(--text-color-secondary);
+        }
       }
 
       span {

@@ -172,7 +172,6 @@
 
 <style lang="scss">
   .role-configuration-table {
-    background: var(--white);
     --Grid-table__template-columns: auto auto;
 
     .role-name {

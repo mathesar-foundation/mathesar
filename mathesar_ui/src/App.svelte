@@ -101,6 +101,11 @@
       --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
       --cell-bg-color-row-selected: rgba(122, 92, 166, 0.3);
 
+      --color-substring-match: var(--pumpkin-700);
+      --color-substring-match-light: rgba(166, 95, 20, 0.2);
+
+      --Match__highlight-color: var(--color-substring-match);
+
       --cell-border-horizontal: 1px solid var(--gray-700);
       --cell-border-vertical: 1px solid var(--gray-700);
 

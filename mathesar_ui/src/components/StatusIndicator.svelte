@@ -51,19 +51,19 @@
     }
 
     &.processing {
-      background: var(--sky-200);
+      background: var(--info-background-color);
     }
     &.warning {
-      background: var(--yellow-100);
+      background: var(--warning-background-color);
     }
     &.success {
-      background: var(--green-100);
+      background: var(--success-background-color);
     }
     &.failure {
-      background: var(--red-100);
+      background: var(--danger-background-color);
     }
     &.failure .icon {
-      color: var(--red-500);
+      color: var(--danger-color);
     }
   }
 </style>

@@ -196,8 +196,6 @@
     display: flex;
     align-items: center;
     border-bottom: 1px solid var(--card-row-border);
-    padding: 0.75rem 1rem;
-    transition: all 0.15s ease;
     background-color: var(--card-background);
   }
 
@@ -227,6 +225,7 @@
     gap: 1.5rem;
     cursor: pointer;
     overflow: hidden;
+    padding: 0.75rem 1rem;
   }
 
   .table-info {
@@ -269,6 +268,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    padding: 0.75rem 1rem;
   }
 
   .menu-container {
