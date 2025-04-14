@@ -16,7 +16,6 @@
   }
 
   .menu-item {
-    cursor: pointer;
     color: var(--text-color);
     display: flex;
     flex-grow: 1;
@@ -26,8 +25,14 @@
       var(--Menu__padding-x, $padding-x-default);
     line-height: 1;
 
-    &.menu-item-link {
+    &.menu-item-link,
+    &.menu-item-button {
       text-decoration: none;
+      cursor: pointer;
+    }
+    &.menu-item-link:not(.disabled):hover,
+    &.menu-item-button:not(.disabled):hover {
+      background-color: var(--hover-background);
     }
     &.menu-item-button {
       border-radius: inherit;
@@ -38,13 +43,10 @@
       text-align: inherit;
       margin: 0;
     }
-
     &.danger {
       color: var(--danger-color);
     }
-    &:not(.disabled):hover {
-      background-color: var(--hover-background);
-    }
+
     &.disabled {
       color: var(--text-color-muted);
       cursor: not-allowed;

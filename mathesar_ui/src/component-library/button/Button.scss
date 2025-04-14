@@ -124,7 +124,7 @@
     }
   }
 
-  @media (prefers-color-scheme: dark) {
+  :global(body.theme-dark) & {
     &.btn-secondary {
       &:not(:disabled) {
         &:hover,

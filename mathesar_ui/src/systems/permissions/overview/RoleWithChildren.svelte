@@ -71,12 +71,10 @@
     }
   }
 
-  @media (prefers-color-scheme: dark) {
-    .role-with-children {
-      .name {
-        background: var(--stormy-900);
-        border-color: var(--stormy-400);
-      }
+  :global(body.theme-dark) .role-with-children {
+    .name {
+      background: var(--stormy-900);
+      border-color: var(--stormy-400);
     }
   }
 </style>

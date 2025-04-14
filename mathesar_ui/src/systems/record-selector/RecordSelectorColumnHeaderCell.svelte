@@ -188,13 +188,13 @@
     z-index: 1;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .column-header-cell :global(.record-selector-input) {
-      box-shadow: 0 0 0 0.1rem var(--gray-700);
-    }
+  :global(body.theme-dark) .column-header-cell :global(.record-selector-input) {
+    box-shadow: 0 0 0 0.1rem var(--gray-700);
+  }
+
+  :global(body.theme-dark)
     .column-header-cell.has-nested-selector-open
-      :global(.record-selector-input) {
-      box-shadow: 0 0 0 0.2rem var(--gray-600);
-    }
+    :global(.record-selector-input) {
+    box-shadow: 0 0 0 0.2rem var(--gray-600);
   }
 </style>

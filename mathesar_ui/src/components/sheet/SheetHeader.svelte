@@ -76,9 +76,7 @@
     }
   }
 
-  @media (prefers-color-scheme: dark) {
-    [data-sheet-element='header-row'] {
-      border-bottom: 1px solid var(--gray-500);
-    }
+  :global(body.theme-dark) [data-sheet-element='header-row'] {
+    border-bottom: 1px solid var(--gray-500);
   }
 </style>
