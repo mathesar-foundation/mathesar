@@ -31,9 +31,9 @@ jobs:
         uses: tj-actions/changed-files@v46
         with:
           files: |
-            *.py
-            mathesar/**
-            db/**
+            '*.py'
+            'mathesar/**'
+            'db/**'
 
   python_lint_required:
     name: Check for file changes requiring python linter
@@ -88,8 +88,8 @@ jobs:
         uses: tj-actions/changed-files@v46
         with:
           files: |
-            **.sh
-            Dockerfile*
+            '**.sh'
+            'Dockerfile*'
 
 ################################################################################
 ##                         BACK END TEST/LINT RUNNERS                         ##
