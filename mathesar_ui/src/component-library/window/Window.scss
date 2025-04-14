@@ -36,7 +36,7 @@
   > .footer {
     grid-row: 3;
     border-top: 1px solid var(--border-color);
-    background: var(--background-color);
+    background: var(--footer-background-color);
   }
 
   &.has-body-padding > .body {

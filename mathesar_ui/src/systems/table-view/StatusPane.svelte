@@ -129,7 +129,7 @@
 
     &.context-page,
     &.context-shared-consumer-page {
-      background-color: var(--background-color);
+      background-color: var(--footer-background-color);
       border-top: 1px solid var(--border-color);
     }
 

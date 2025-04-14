@@ -2,34 +2,67 @@
  * File to place common css & scss variables for the component library
  */
 body {
+  // Background Colors
   --background-color: #ffffff;
-  --border-color: var(--sand-300);
   --header-background: var(--white);
-  --footer-background-color: var(--white);
+  --footer-background-color: var(--sand-50);
   --inset-background-color: var(--white);
   --hover-background: var(--stormy-50);
   --active-background: var(--stormy-200);
-  --disabled-background: var(--sand-50);
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --shadow-color-light: rgba(0, 0, 0, 0.05);
-  --shadow-color-dark: rgba(0, 0, 0, 0.3);
-  --shadow-color-inset: rgba(255, 255, 255, 0.1);
-  --shadow-color-inset-dark: rgba(255, 255, 255, 0.05);
+  --disabled-background: var(--gray-100);
+  --elevated-background: var(--sand-50);
+  --sidebar-background: var(--white);
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --icon-background: var(--stormy-100);
+  --layout-background-color: var(--sand-50);
+  --inspector-background: var(--sand-100);
 
-  // Input
-  --input-background: #ffffff;
+  // Border Colors
+  --border-color: var(--sand-300);
+  --card-border: var(--sand-300);
+  --card-row-border: var(--sand-200);
+  --card-hover-border: var(--stormy-300);
+  --inspector-border: var(--sand-200);
   --input-border: var(--gray-300);
-  --input-text: var(--text-color);
-  --input-focus-color: var(--stormy-500);
-  --input-focus-shadow: var(--stormy-100);
-  --input-disabled-background: var(--sand-50);
 
-  // Text
-  --text-color: #171717;
-  --text-color-primary: var(--stormy-800);
-  --text-color-secondary: var(--stormy-700);
-  --text-color-tertiary: var(--stormy-600);
-  --text-color-muted: var(--gray-500);
+  // Border Radius
+  --border-radius-xs: 0.071rem; //1px
+  --border-radius-s: 0.142rem; //2px
+  --border-radius-m: 0.285rem; //4px
+  --border-radius-l: 0.571rem; //8px
+  --border-radius-xl: 1.142rem; //16px
+
+  // Card Styles
+  --card-background: #ffffff;
+  --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
+    0 2px 4px -2px var(--shadow-color),
+    0 0 0 1px var(--shadow-color-inset) inset;
+  --card-active-shadow: 0 1px 2px var(--shadow-color-light),
+    0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+  --gradient-card-start: var(--white);
+  --gradient-card-end: var(--sand-50);
+  --gradient-card-hover-start: var(--sand-100);
+  --gradient-card-hover-end: var(--sand-200);
+  --gradient-card-active-start: var(--sand-100);
+  --gradient-card-active-end: var(--sand-200);
+
+  // Collapsible Styles
+  --collapsible-background: var(--sand-200);
+  --collapsible-hover: var(--sand-300);
+  --collapsible-active: var(--sand-400);
+  --collapsible-button-background: var(--sand-200);
+  --collapsible-button-hover: var(--sand-300);
+  --collapsible-button-active: var(--sand-400);
+  --collapsible-button-border: var(--sand-500);
+  --collapsible-button-text: var(--text-color-primary);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  // Font Weights
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  --font-weight-extra-bold: 700;
 
   // Gradients
   --gradient-direction-default: to bottom right;
@@ -44,37 +77,61 @@ body {
   --gradient-dark-start: var(--stormy-800);
   --gradient-dark-end: var(--stormy-900);
 
-  // Card
-  --card-background: #ffffff;
-  --card-border: var(--sand-300);
-  --card-row-border: var(--sand-200);
-  --card-hover-border: var(--stormy-300);
-  --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
-    0 2px 4px -2px var(--shadow-color),
-    0 0 0 1px var(--shadow-color-inset) inset;
-  --card-active-shadow: 0 1px 2px var(--shadow-color-light),
-    0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-  --gradient-card-start: var(--white);
-  --gradient-card-end: var(--sand-50);
-  --gradient-card-hover-start: var(--sand-100);
-  --gradient-card-hover-end: var(--sand-200);
-  --gradient-card-active-start: var(--sand-100);
-  --gradient-card-active-end: var(--sand-200);
+  // Input Styles
+  --input-background: #ffffff;
+  --input-disabled-background: var(--sand-50);
+  --input-focus-color: var(--stormy-500);
+  --input-focus-shadow: var(--stormy-100);
+  --input-padding: var(--size-xx-small);
+  --input-text: var(--text-color);
 
-  --sidebar-background: #ffffff;
-  --modal-background: #ffffff;
-  --modal-overlay: rgba(0, 0, 0, 0.5);
-  --icon-background: var(--stormy-100);
-  --layout-background-color: var(--sand-50);
-  --inspector-background: var(--sand-50);
-  --inspector-border: var(--sand-200);
+  // Inspector Styles
   --inspector-hover: var(--sand-300);
   --inspector-active: var(--sand-400);
-  --collapsible-background: var(--sand-200);
-  --collapsible-hover: var(--sand-300);
-  --collapsible-active: var(--sand-400);
 
-  // Utility
+  // Modal
+  --modal-z-index: 50;
+
+  // Shadows
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-light: rgba(0, 0, 0, 0.05);
+  --shadow-color-dark: rgba(0, 0, 0, 0.3);
+  --shadow-color-inset: rgba(255, 255, 255, 0.1);
+  --shadow-color-inset-dark: rgba(255, 255, 255, 0.05);
+
+  // Sizes
+  --size-extreme-small: 0.1429rem; // 2px
+  --size-super-ultra-small: 0.2857rem; // 4px
+  --size-ultra-small: 0.4286rem; // 6px
+  --size-xx-small: 0.5714rem; // 8px
+  --size-x-small: 0.7143rem; // 10px
+  --size-small: 0.8571rem; // 12px
+  --size-base: 1rem; // 14px
+  --size-large: 1.25rem; // 16px
+  --size-x-large: 1.4286rem; // 20px
+  --size-xx-large: 1.7143rem; // 24px
+  --size-ultra-large: 2.4rem; // 28px
+  --size-super-ultra-large: 3.2rem; // 56px
+
+  // Text Colors
+  --text-color: #171717;
+  --text-color-primary: var(--stormy-800);
+  --text-color-secondary: var(--stormy-700);
+  --text-color-tertiary: var(--stormy-600);
+  --text-color-muted: var(--gray-500);
+
+  // Text Sizes
+  --text-size-xx-small: var(--size-xx-small);
+  --text-size-x-small: var(--size-x-small);
+  --text-size-small: var(--size-small);
+  --text-size-base: var(--size-base);
+  --text-size-large: var(--size-large);
+  --text-size-x-large: var(--size-x-large);
+  --text-size-xx-large: var(--size-xx-large);
+  --text-size-ultra-large: var(--size-ultra-large);
+  --text-size-super-ultra-large: var(--size-super-ultra-large);
+
+  // Utility Colors
   --danger-color: #d67171;
   --danger-background-color: #fde9e9;
   --danger-border-color: #f2aaaa;
@@ -83,30 +140,29 @@ body {
   --info-background-color: #eff6ff;
   --info-border-color: #bfdbfe;
 
-  --warning-color: #f59e0b;
-  --warning-background-color: #fef3c7;
-  --warning-border-color: #fcd34d;
-
   --success-color: #10b981;
   --success-background-color: #ecfdf5;
   --success-border-color: #a7f3d0;
 
-  // Idea here is to use the same token naming
-  // between the Figma designs and the codebase
-  // which then makes it easier and faster to create
-  // element from design into code.
-  --green-100: #e5fde6;
+  --warning-color: #f59e0b;
+  --warning-background-color: #fef3c7;
+  --warning-border-color: #fcd34d;
 
-  --sand-50: #faf8f5;
-  --sand-100: #f5f2ec;
-  --sand-200: #e5e0d5;
-  --sand-300: #d4cdbc;
-  --sand-400: #a39b8a;
-  --sand-500: #8f8673;
-  --sand-600: #736b5c;
-  --sand-700: #524c41;
-  --sand-800: #38342d;
-  --sand-900: #272521;
+  // Color Palette
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #eeeeee;
+  --gray-300: #e0e0e0;
+  --gray-400: #bdbdbd;
+  --gray-500: #9e9e9e;
+  --gray-600: #353535;
+  --gray-700: #303030;
+  --gray-800: #1f1f1f;
+  --gray-900: #131313;
+  --gray-800-rgb: 39, 43, 48;
+  --gray-50-tentative: #f6f9f9;
+
+  --green-100: #e5fde6;
 
   --orange-red-50: #fff2ef;
   --orange-red-100: #ffe2dc;
@@ -120,17 +176,30 @@ body {
   --orange-red-900: #82180c;
   --orange-red-950: #470c06;
 
-  --stormy-50: #f3f0f7;
-  --stormy-100: #e6dff0;
-  --stormy-200: #cdc0e2;
-  --stormy-300: #b097d0;
-  --stormy-400: #9475bc;
-  --stormy-500: #7a5ca6;
-  --stormy-600: #644687;
-  --stormy-700: #4d3468;
-  --stormy-800: #2e1f3e;
-  --stormy-900: #211531;
-  --stormy-950: #0f081b;
+  --purple-100: #ebe5fd;
+  --purple-200: #d7cbfb;
+  --purple-300: #a586ff;
+  --purple-400: #6b45dd;
+  --purple-500: #4b2c9d;
+
+  --pumpkin-50: #fefbf3;
+  --pumpkin-100: #fef4de;
+  --pumpkin-200: #fce7bc;
+  --pumpkin-300: #f8d589;
+  --pumpkin-400: #f4b640;
+  --pumpkin-500: #eb9d20;
+  --pumpkin-600: #cc7d16;
+  --pumpkin-700: #a65f14;
+  --pumpkin-800: #874c15;
+  --pumpkin-900: #6f3f15;
+  --pumpkin-950: #422408;
+
+  --red-100: #fdeeed;
+  --red-200: #f9cdc8;
+  --red-500: #eb5441;
+  --red-600: #dd4734;
+  --red-800: #c63826;
+  --red-box-shadow: #eb544133;
 
   --rosy-50: #fef3f3;
   --rosy-100: #fee5e5;
@@ -156,31 +225,16 @@ body {
   --salmon-900: #832411;
   --salmon-950: #441209;
 
-  --pumpkin-50: #fefbf3;
-  --pumpkin-100: #fef4de;
-  --pumpkin-200: #fce7bc;
-  --pumpkin-300: #f8d589;
-  --pumpkin-400: #f4b640;
-  --pumpkin-500: #eb9d20;
-  --pumpkin-600: #cc7d16;
-  --pumpkin-700: #a65f14;
-  --pumpkin-800: #874c15;
-  --pumpkin-900: #6f3f15;
-  --pumpkin-950: #422408;
-
-  --purple-100: #ebe5fd;
-  --purple-200: #d7cbfb;
-  --purple-300: #a586ff;
-  --purple-400: #6b45dd;
-  --purple-500: #4b2c9d;
-
-  --red-100: #fdeeed;
-  --red-200: #f9cdc8;
-  --red-500: #eb5441;
-  --red-600: #dd4734;
-  --red-800: #c63826;
-
-  --gray-800-rgb: 39, 43, 48;
+  --sand-50: #faf8f5;
+  --sand-100: #f5f2ec;
+  --sand-200: #e5e0d5;
+  --sand-300: #d4cdbc;
+  --sand-400: #a39b8a;
+  --sand-500: #8f8673;
+  --sand-600: #736b5c;
+  --sand-700: #524c41;
+  --sand-800: #38342d;
+  --sand-900: #272521;
 
   --sky-200: #daeefb;
   --sky-300: #99d4f9;
@@ -188,40 +242,35 @@ body {
   --sky-600: #127ed6;
   --sky-700: #0f69c1;
   --sky-800: #3e5a80;
-
-  --gray-50: #fafafa;
-  --gray-100: #f5f5f5;
-  --gray-200: #eeeeee;
-  --gray-300: #e0e0e0;
-  --gray-400: #bdbdbd;
-  --gray-500: #9e9e9e;
-  --gray-600: #353535;
-  --gray-700: #303030;
-  --gray-800: #1f1f1f;
-  --gray-900: #131313;
-
-  // TODO: Get this incorporated in figma
-  --gray-50-tentative: #f6f9f9;
   --sky-600-tentative: #87bcf6;
 
+  --stormy-50: #f3f0f7;
+  --stormy-100: #e6dff0;
+  --stormy-200: #cdc0e2;
+  --stormy-300: #b097d0;
+  --stormy-400: #9475bc;
+  --stormy-500: #7a5ca6;
+  --stormy-600: #644687;
+  --stormy-700: #4d3468;
+  --stormy-800: #2e1f3e;
+  --stormy-900: #211531;
+  --stormy-950: #0f081b;
+
+  --white: white;
   --yellow-100: #fff6e0;
   --yellow-200: #fff0c0;
   --yellow-300: #f5cd8c;
   --yellow-400: #eeb159;
   --yellow-800: #944f01;
 
-  --white: white;
-
-  --red-box-shadow: #eb544133;
-
-  // Brand Color
+  // Brand Colors
   --brand-100: var(--red-100);
   --brand-500: var(--red-500);
   --brand-600: var(--red-600);
   --brand-800: var(--red-800);
   --brand-box-shadow: var(--red-box-shadow);
 
-  // Accent color
+  // Accent Colors
   --accent-100: var(--salmon-100);
   --accent-200: var(--salmon-200);
   --accent-300: var(--salmon-300);
@@ -231,31 +280,7 @@ body {
   --accent-700: var(--salmon-700);
   --accent-800: var(--salmon-800);
 
-  --size-extreme-small: 0.1429rem; // 2px
-  --size-super-ultra-small: 0.2857rem; // 4px
-  --size-ultra-small: 0.4286rem; // 6px
-  --size-xx-small: 0.5714rem; // 8px
-  --size-x-small: 0.7143rem; // 10px
-  --size-small: 0.8571rem; // 12px
-  --size-base: 1rem; // 14px
-  --size-large: 1.25rem; // 16px
-  --size-x-large: 1.4286rem; // 20px
-  --size-xx-large: 1.7143rem; // 24px
-  --size-ultra-large: 2.4rem; // 28px
-  --size-super-ultra-large: 3.2rem; // 56px
-
-  --border-radius-xs: 0.071rem; //1px
-  --border-radius-s: 0.142rem; //2px
-  --border-radius-m: 0.285rem; //4px
-  --border-radius-l: 0.571rem; //8px
-  --border-radius-xl: 1.142rem; //16px
-
-  --input-padding: var(--size-xx-small);
-
-  /*
-   A lot of the variables below are redundant and we might require
-   a refactor to reduce them.
-   */
+  // Legacy Colors
   --color-white: #ffffff;
   --color-blue-light: #e6f0ff;
   --color-blue-medium: #3b82f6;
@@ -271,120 +296,98 @@ body {
   --color-contrast-light: var(--color-blue-light);
   --color-link: var(--color-blue-dark);
   --color-text: #171717;
-  --text-size-xx-small: var(--size-xx-small);
-  --text-size-x-small: var(--size-x-small);
-  --text-size-small: var(--size-small);
-  --text-size-base: var(--size-base);
-  --text-size-large: var(--size-large);
-  --text-size-x-large: var(--size-x-large);
-  --text-size-xx-large: var(--size-xx-large);
-  --text-size-ultra-large: var(--size-ultra-large);
-  --text-size-super-ultra-large: var(--size-super-ultra-large);
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-bold: 600;
-  --font-weight-extra-bold: 700;
-  --modal-z-index: 50;
-
-  --collapsible-button-background: var(--sand-200);
-  --collapsible-button-hover: var(--sand-300);
-  --collapsible-button-active: var(--sand-400);
-  --collapsible-button-border: var(--sand-500);
-  --collapsible-button-text: var(--text-color-primary);
-  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 body.theme-dark {
-    --background-color: var(--gray-900);
-    --border-color: var(--gray-600);
-    --header-background: var(--gray-800);
-    --footer-background-color: var(--gray-800);
-    --inset-background-color: var(--gray-800);
-    --hover-background: var(--gray-800);
-    --active-background: var(--gray-700);
-    --disabled-background: var(--gray-800);
-    --shadow-color: var(--shadow-color-dark);
-    --shadow-color-light: rgba(0, 0, 0, 0.2);
-    --shadow-color-inset: var(--shadow-color-inset-dark);
+  --background-color: var(--gray-900);
+  --border-color: var(--gray-600);
+  --header-background: var(--gray-800);
+  --footer-background-color: var(--gray-800);
+  --inset-background-color: var(--gray-800);
+  --hover-background: var(--gray-800);
+  --active-background: var(--gray-700);
+  --disabled-background: var(--gray-700);
+  --elevated-background: var(--gray-800);
+  --shadow-color: var(--shadow-color-dark);
+  --shadow-color-light: rgba(0, 0, 0, 0.2);
+  --shadow-color-inset: var(--shadow-color-inset-dark);
 
-    // Text
-    --text-color: var(--white);
-    --text-color-primary: #ffffff;
-    --text-color-secondary: var(--stormy-200);
-    --text-color-tertiary: var(--stormy-300);
-    --text-color-muted: var(--gray-400);
+  // Text
+  --text-color: var(--white);
+  --text-color-primary: #ffffff;
+  --text-color-secondary: var(--stormy-200);
+  --text-color-tertiary: var(--stormy-300);
+  --text-color-muted: var(--gray-400);
 
-    // Input
-    --input-background: var(--gray-800);
-    --input-border: var(--gray-700);
-    --input-text: var(--text-color);
-    --input-focus-color: var(--stormy-400);
-    --input-focus-shadow: var(--stormy-800);
-    --input-disabled-background: var(--gray-800);
-    --sidebar-background: var(--gray-800);
-    --modal-background: var(--gray-800);
-    --modal-overlay: rgba(0, 0, 0, 0.7);
-    --icon-background: var(--stormy-700);
-    --layout-background-color: var(--background-color);
-    --inspector-background: var(--gray-800);
-    --inspector-border: var(--gray-700);
-    --inspector-hover: var(--gray-700);
-    --inspector-active: var(--gray-600);
-    --collapsible-background: var(--gray-700);
-    --collapsible-hover: var(--gray-600);
-    --collapsible-active: var(--gray-500);
+  // Input
+  --input-background: var(--gray-800);
+  --input-border: var(--gray-700);
+  --input-text: var(--text-color);
+  --input-focus-color: var(--stormy-400);
+  --input-focus-shadow: var(--stormy-800);
+  --input-disabled-background: var(--gray-800);
+  --sidebar-background: var(--gray-800);
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+  --icon-background: var(--stormy-700);
+  --layout-background-color: var(--background-color);
+  --inspector-background: var(--gray-800);
+  --inspector-border: var(--gray-700);
+  --inspector-hover: var(--gray-700);
+  --inspector-active: var(--gray-600);
+  --collapsible-background: var(--gray-700);
+  --collapsible-hover: var(--gray-600);
+  --collapsible-active: var(--gray-500);
 
-    // Gradients
-    --gradient-base-start: var(--stormy-800);
-    --gradient-base-end: var(--stormy-900);
-    --gradient-base-hover-start: var(--stormy-700);
-    --gradient-base-hover-end: var(--stormy-800);
-    --gradient-base-active-start: var(--stormy-600);
-    --gradient-base-active-end: var(--stormy-700);
+  // Gradients
+  --gradient-base-start: var(--stormy-800);
+  --gradient-base-end: var(--stormy-900);
+  --gradient-base-hover-start: var(--stormy-700);
+  --gradient-base-hover-end: var(--stormy-800);
+  --gradient-base-active-start: var(--stormy-600);
+  --gradient-base-active-end: var(--stormy-700);
 
-    // Card
-    --card-background: var(--gray-900);
-    --card-border: var(--gray-700);
-    --card-row-border: var(--gray-800);
-    --card-hover-border: var(--stormy-400);
-    --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
-      0 2px 4px -2px var(--shadow-color),
-      0 0 0 1px var(--shadow-color-inset) inset;
-    --card-active-shadow: 0 1px 2px var(--shadow-color-light),
-      0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-    --gradient-card-start: var(--gray-700);
-    --gradient-card-end: var(--gray-800);
-    --gradient-card-hover-start: var(--gray-800);
-    --gradient-card-hover-end: var(--gray-700);
-    --gradient-card-active-start: var(--gray-700);
-    --gradient-card-active-end: var(--gray-600);
+  // Card
+  --card-background: var(--gray-900);
+  --card-border: var(--gray-700);
+  --card-row-border: var(--gray-800);
+  --card-hover-border: var(--stormy-400);
+  --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
+    0 2px 4px -2px var(--shadow-color),
+    0 0 0 1px var(--shadow-color-inset) inset;
+  --card-active-shadow: 0 1px 2px var(--shadow-color-light),
+    0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+  --gradient-card-start: var(--gray-700);
+  --gradient-card-end: var(--gray-800);
+  --gradient-card-hover-start: var(--gray-800);
+  --gradient-card-hover-end: var(--gray-700);
+  --gradient-card-active-start: var(--gray-700);
+  --gradient-card-active-end: var(--gray-600);
 
-    // Utility
-    --danger-color: #ff6b6b;
-    --danger-background-color: rgba(255, 107, 107, 0.1);
-    --danger-border-color: rgba(255, 107, 107, 0.2);
+  // Utility
+  --danger-color: #ff6b6b;
+  --danger-background-color: rgba(255, 107, 107, 0.1);
+  --danger-border-color: rgba(255, 107, 107, 0.2);
 
-    --info-color: #60a5fa;
-    --info-background-color: rgba(59, 130, 246, 0.15);
-    --info-border-color: rgba(59, 130, 246, 0.3);
+  --info-color: #60a5fa;
+  --info-background-color: rgba(59, 130, 246, 0.15);
+  --info-border-color: rgba(59, 130, 246, 0.3);
 
-    --warning-color: #fbbf24;
-    --warning-background-color: rgba(251, 191, 36, 0.15);
-    --warning-border-color: rgba(251, 191, 36, 0.3);
+  --warning-color: #fbbf24;
+  --warning-background-color: rgba(251, 191, 36, 0.15);
+  --warning-border-color: rgba(251, 191, 36, 0.3);
 
-    --success-color: #34d399;
-    --success-background-color: rgba(16, 185, 129, 0.15);
-    --success-border-color: rgba(16, 185, 129, 0.3);
+  --success-color: #34d399;
+  --success-background-color: rgba(16, 185, 129, 0.15);
+  --success-border-color: rgba(16, 185, 129, 0.3);
 
-    --purple-100: rgba(139, 92, 246, 0.1);
-    --purple-300: rgba(139, 92, 246, 0.3);
-    --purple-400: rgba(139, 92, 246, 0.8);
+  --purple-100: rgba(139, 92, 246, 0.1);
+  --purple-300: rgba(139, 92, 246, 0.3);
+  --purple-400: rgba(139, 92, 246, 0.8);
 
-    --collapsible-button-background: var(--gray-700);
-    --collapsible-button-hover: var(--gray-600);
-    --collapsible-button-active: var(--gray-500);
-    --collapsible-button-border: var(--gray-500);
-    --collapsible-button-text: var(--text-color-primary);
-    --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
+  --collapsible-button-background: var(--gray-700);
+  --collapsible-button-hover: var(--gray-600);
+  --collapsible-button-active: var(--gray-500);
+  --collapsible-button-border: var(--gray-500);
+  --collapsible-button-text: var(--text-color-primary);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}

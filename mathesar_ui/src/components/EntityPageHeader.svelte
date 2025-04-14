@@ -46,7 +46,7 @@
 <style lang="scss">
   .entity-page-header {
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--card-background);
+    background-color: var(--elevated-background);
     position: relative;
     display: flex;
     align-items: center;
