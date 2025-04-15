@@ -74,7 +74,6 @@
   .header-title {
     padding: var(--size-ultra-large) 0;
     border-bottom: 1px solid var(--border-color);
-    margin-bottom: var(--page-padding-y);
 
     h1 {
       margin: 0;
@@ -87,7 +86,7 @@
         margin-left: auto;
         margin-right: auto;
         width: 100%;
-        padding: 0;
+        padding: 0 var(--page-padding-x);
       }
     }
   }

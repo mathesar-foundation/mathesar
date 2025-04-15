@@ -28,8 +28,6 @@
   restrictWidth
   headerTitle={welcomeMessage}
   cssVariables={{
-    '--page-padding': '0',
-    '--layout-margin': '2rem 0',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >

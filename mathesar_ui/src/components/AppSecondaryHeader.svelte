@@ -30,7 +30,7 @@
     margin: 0 auto;
   }
   .content {
-    padding: var(--size-ultra-large) 0;
+    padding: var(--size-ultra-large) var(--page-padding-x);
     width: var(--max-layout-width-console-pages);
   }
   .content.restrict-width {
