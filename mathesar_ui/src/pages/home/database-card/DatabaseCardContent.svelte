@@ -30,7 +30,7 @@
     </div>
   </div>
   <div class="caret-container">
-    <Icon {...iconExpandRight} size="1rem" class="caret-icon" />
+    <Icon {...iconExpandRight} size="1rem" />
   </div>
 </div>
 
@@ -81,19 +81,10 @@
     color: var(--text-color-secondary);
   }
 
-  .label {
-    color: var(--text-color-secondary);
-  }
-
   .caret-container {
     margin-left: auto;
     opacity: 0;
     transition: opacity 0.2s ease;
-  }
-
-  .caret-icon {
-    color: var(--stormy-400);
-    font-size: 1.25rem;
   }
 
   .db-card-content:hover .caret-container {

@@ -5,7 +5,6 @@
   import NameWithIcon from './NameWithIcon.svelte';
 
   export let schema: Schema;
-  export let iconHasBox = false;
 
   $: ({ name, isPublicSchema } = schema);
   $: isLocked = $isPublicSchema;

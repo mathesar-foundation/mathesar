@@ -25,7 +25,7 @@
     <div class="title-and-meta">
       <div class="title-container">
         <div class="icon-container">
-          <Icon {...iconExploration} size="0.875rem" class="exploration-icon" />
+          <Icon {...iconExploration} size="0.875rem" />
         </div>
         <span class="name">{exploration.name}</span>
       </div>
@@ -38,7 +38,7 @@
     {/if}
   </div>
   <div class="caret-container">
-    <Icon {...iconExpandRight} size="0.875rem" class="caret-icon" />
+    <Icon {...iconExpandRight} size="0.875rem" />
   </div>
 </a>
 
@@ -77,10 +77,6 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-  }
-
-  .exploration-icon {
-    color: var(--brand-500);
   }
 
   .content {
@@ -127,9 +123,5 @@
     transition: opacity 0.2s ease;
     display: flex;
     align-items: center;
-  }
-
-  .caret-icon {
-    color: var(--text-color-tertiary);
   }
 </style>

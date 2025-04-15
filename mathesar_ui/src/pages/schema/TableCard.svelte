@@ -43,7 +43,6 @@
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
 
   let isHoveringMenuTrigger = false;
-  let isHoveringBottomButton = false;
   let isTableCardFocused = false;
 
   $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
@@ -84,7 +83,6 @@
   class:focus={isTableCardFocused}
   class:no-select={!$currentRolePrivileges.has('SELECT')}
   class:hovering-menu-trigger={isHoveringMenuTrigger}
-  class:hovering-bottom-button={isHoveringBottomButton}
   class:unconfirmed-import={requiresImportConfirmation}
 >
   <a

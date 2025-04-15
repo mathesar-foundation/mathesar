@@ -14,8 +14,8 @@
     flex: 0 0 auto;
     display: block;
     font-size: 0.8em;
-    background: var(--color-green-medium);
-    color: white;
+    background: var(--success-background-color);
+    color: var(--text-color);
     height: 1.8em;
     width: 1.8em;
     padding: 0.3em 0.4em;

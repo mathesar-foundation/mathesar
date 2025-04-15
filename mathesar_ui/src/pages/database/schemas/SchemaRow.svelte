@@ -4,13 +4,11 @@
 
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
-  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import {
     iconDeleteMajor,
     iconEdit,
     iconMoreActions,
-    iconExpandRight,
     iconSchema,
     iconTable,
   } from '@mathesar/icons';
