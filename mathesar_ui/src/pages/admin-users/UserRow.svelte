@@ -38,36 +38,31 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--size-x-small);
+    padding: var(--size-small);
     cursor: pointer;
     min-height: 4.2rem;
+    transition: background-color 0.2s ease;
 
     &:hover {
-      background: var(--gray-50);
+      background: var(--hover-background);
     }
     &:focus {
-      background: var(--gray-100);
+      background: var(--active-background);
     }
   }
 
   .user-info {
     display: flex;
     flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 0.25rem;
-    }
+    gap: 0.25rem;
   }
 
   .user-detailed-info {
     display: flex;
     align-items: center;
-
     font-weight: 300;
-
-    > :global(* + *) {
-      margin-left: 0.5rem;
-    }
+    color: var(--text-color-secondary);
+    gap: 0.5rem;
   }
 
   .divider {
@@ -79,9 +74,12 @@
   }
 
   .user-type {
-    background-color: var(--gray-200);
-    padding: 0.25rem 0.5rem;
-    border-radius: 1.17rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: var(--text-size-small);
+    color: var(--text-color-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-s);
   }
 </style>
