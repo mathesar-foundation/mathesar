@@ -55,10 +55,6 @@
     flex-shrink: 0;
   }
 
-  .upgrade-required .database-icon {
-    color: var(--stormy-400);
-  }
-
   .content {
     display: flex;
     flex-direction: column;

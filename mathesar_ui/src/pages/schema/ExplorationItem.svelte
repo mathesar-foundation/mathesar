@@ -3,7 +3,7 @@
 
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconExploration, iconExpandRight } from '@mathesar/icons';
+  import { iconExpandRight, iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';

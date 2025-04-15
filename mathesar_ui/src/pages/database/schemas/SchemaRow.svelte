@@ -149,16 +149,6 @@
     outline-offset: 1px;
   }
 
-  .schema-row.active {
-    border-color: var(--stormy-400);
-    box-shadow: var(--card-active-shadow);
-    background: linear-gradient(
-      var(--gradient-direction-active),
-      var(--gradient-card-active-start),
-      var(--gradient-card-active-end)
-    );
-  }
-
   .top-row {
     display: flex;
     justify-content: space-between;
