@@ -19,3 +19,17 @@ jobs:
         run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
           TARGET: ${{ matrix.target }}
+  checkpoint:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    needs:
+      - build_tests
+    steps:
+      - name: Check results
+        run: |
+          if [[ "${{ needs.build_tests.result }}" != "success" ]]; then
+            echo "One or more backend tests failed."
+            exit 1
+          fi
+      - name: Report success
+        run: echo "All tests succeeded!"
