@@ -17,7 +17,7 @@ if [[ $EXIT_CODE -eq 0 ]]; then
     for i in {1..50}; do
         pg_isready -U mathesar -d mathesar_testing && break || sleep 0.5
     done
-    pg_prove --runtests -U mathesar -d mathesar_testing "$@"
+    pg_prove --runtests -U mathesar -d mathesar_testing -v "$@"
     EXIT_CODE=$?
 fi
 psql -q -U mathesar -d postgres -v "ON_ERROR_STOP=1" -f "$sql"/test_shutdown.sql
