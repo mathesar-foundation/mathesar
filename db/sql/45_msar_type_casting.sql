@@ -1794,6 +1794,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
+
+CREATE OR REPLACE FUNCTION
+msar.cast_to_numeric(num text, group_sep "char", decimal_p "char") RETURNS numeric AS $$/*
+Cast to numeric with prechosen group and decimal separators.
+
+For performance, this function does not check for correctness of the given number format. It simply
+replaces and removes characters as directed, then attempts to cast to numeric.
+
+Args:
+  num: The string we'll cast to numeric.
+  group_sep: Any instance of this character will be removed from `num` before casting.
+  decimal_p: Any instance of this character will be replaced with the locale decimal before casting.
+*/
+SELECT replace(replace(num, group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' '))::numeric;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.cast_to_numeric(boolean) RETURNS numeric AS $$
   SELECT CASE WHEN $1 THEN 1::numeric ELSE 0::numeric END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
