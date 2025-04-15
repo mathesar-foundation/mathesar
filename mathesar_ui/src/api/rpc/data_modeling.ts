@@ -65,11 +65,7 @@ export const data_modeling = {
       string,
       {
         type: string;
-        details?: {
-          mathesar_casting?: boolean;
-          group_sep: string;
-          decimal_p: string;
-        };
+        details?: Record<string, unknown>;
       }
     >
   >(),
