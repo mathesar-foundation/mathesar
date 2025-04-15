@@ -1,7 +1,4 @@
-import type {
-  UiTheme,
-  UiThemePreference,
-} from '@mathesar/utils/uiThemePreference';
+import type { UiThemePreference } from '@mathesar/utils/uiThemePreference';
 
 import LocalStorageStore from './LocalStorageStore';
 
