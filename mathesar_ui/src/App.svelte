@@ -108,10 +108,10 @@
     // since when the header is fixed
     // we can use this variable to add margin-top
     // to the below header content container
-    --header-height: 3.7378rem;
+    --header-height: 3rem;
 
     --table-title-header-height: 4.6428rem;
-    --status-bar-padding: 0.3rem;
+    --status-bar-padding: 0.5rem;
 
     color: var(--text-color);
 

@@ -63,14 +63,13 @@
 <div class="feedback-button">
   <DropdownMenu
     triggerAppearance="custom"
-    size="small"
     closeOnInnerClick={false}
     showArrow={false}
     menuStyle="--Menu__padding-x: 0.3em;"
     on:close={onDropdownClose}
   >
     <div class="trigger" slot="trigger">
-      <Icon {...iconFeedback} size="0.9em" />
+      <Icon {...iconFeedback} size="0.8em" />
       {#if !compactLayout}
         {$_('feedback')}
       {/if}
@@ -135,7 +134,6 @@
 <style lang="scss">
   .feedback-button {
     --button-border: none;
-    --button-color: var(--yellow-300);
   }
   .trigger {
     display: flex;

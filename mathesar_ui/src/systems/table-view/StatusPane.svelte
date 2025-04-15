@@ -122,16 +122,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid var(--border-color);
     position: relative;
     flex-shrink: 0;
     flex-basis: 32px;
-
-    &.context-page,
-    &.context-shared-consumer-page {
-      background-color: var(--footer-background-color);
-      border-top: 1px solid var(--border-color);
-    }
 
     &.context-widget {
       font-size: 80%;

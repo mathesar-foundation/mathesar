@@ -122,18 +122,25 @@
         font-weight: 510;
         overflow: hidden;
         max-width: 100%;
-
-        @media (prefers-color-scheme: dark) {
-          background: var(--stormy-800);
-          border: 1px solid var(--stormy-600);
-          color: var(--text-color-secondary);
-        }
       }
 
       span {
         display: inline-block;
         vertical-align: middle;
         margin-bottom: var(--size-super-ultra-small);
+      }
+    }
+  }
+
+  :global(body.theme-dark) {
+    [data-identifier='aggregation-source'],
+    [data-identifier='column-source'] {
+      .column-info {
+        .tag {
+          background: var(--stormy-800);
+          border: 1px solid var(--stormy-600);
+          color: var(--text-color-secondary);
+        }
       }
     }
   }

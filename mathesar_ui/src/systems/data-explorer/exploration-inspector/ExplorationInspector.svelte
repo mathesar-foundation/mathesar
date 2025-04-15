@@ -48,8 +48,10 @@
 <style lang="scss">
   .exploration-inspector {
     height: 100%;
-    border-left: 1px solid var(--inspector-border);
-    background: var(--inspector-background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-l);
+    margin-right: 0.5rem;
+    background: var(--elevated-background);
     display: flex;
     flex-direction: column;
     overflow: hidden;

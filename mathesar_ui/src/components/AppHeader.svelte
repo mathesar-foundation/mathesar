@@ -81,7 +81,11 @@
           menuStyle="--Menu__padding-x: 0.3em;"
         >
           <div class="user-switcher" slot="trigger">
-            <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
+            <Icon
+              {...iconSettingsMajor}
+              hasNotificationDot={upgradable}
+              size="1.2rem"
+            />
           </div>
           {#if database}
             <MenuHeading>{$_('database')}</MenuHeading>
@@ -159,11 +163,18 @@
   .app-header {
     display: flex;
     justify-content: space-between;
-    padding: 0.25rem 1rem;
-    height: var(--header-height, 60px);
-    background-color: var(--header-background);
+    padding: 0 0.5rem;
+    height: var(--header-height);
+    border-bottom: 1px solid var(--header-border);
+    background: linear-gradient(
+      to bottom,
+      var(--header-gradient-start),
+      var(--header-gradient-end)
+    );
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     color: var(--text-color);
+    font-size: var(--text-size-base);
   }
 
   .left {
@@ -175,7 +186,6 @@
   .right {
     display: flex;
     align-items: center;
-    font-size: var(--text-size-large);
     gap: var(--size-x-small);
   }
 
@@ -187,7 +197,6 @@
   .user-switcher {
     color: var(--text-color);
     border-radius: var(--border-radius-m);
-    padding: 0.5rem;
     display: flex;
     align-items: center;
   }

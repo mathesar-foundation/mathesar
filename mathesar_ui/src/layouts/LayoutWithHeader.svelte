@@ -42,8 +42,6 @@
       top: 0;
       z-index: var(--app-header-z-index, 2);
       flex: 0 0;
-      background-color: var(--background-color);
-      border-bottom: 1px solid var(--border-color);
     }
     .app-layout-content {
       position: relative;

@@ -316,18 +316,18 @@
   .preview-header {
     margin: 0;
     padding: var(--size-small) var(--inset-page-section-padding);
-    border-bottom: 1px solid var(--border-color);
     border-top: solid 1px var(--border-color);
   }
   .preview-content {
-    padding: var(--inset-page-section-padding);
+    padding-bottom: 1rem;
   }
   .sheet-holder {
-    max-width: fit-content;
     overflow-x: auto;
     overflow-y: hidden;
     margin: 0 auto;
-    border: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--inset-page-section-padding);
   }
   .truncation-alert {
     margin: 1rem auto 0 auto;

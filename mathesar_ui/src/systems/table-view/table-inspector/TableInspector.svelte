@@ -48,12 +48,11 @@
 <style lang="scss">
   .table-inspector {
     height: 100%;
-    box-shadow:
-      0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
     position: relative;
-    background-color: var(--inspector-background);
-    border-left: 1px solid var(--inspector-border);
+    background-color: var(--elevated-background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-l);
+    margin-right: 0.5rem;
     isolation: isolate;
 
     .tabs-container {

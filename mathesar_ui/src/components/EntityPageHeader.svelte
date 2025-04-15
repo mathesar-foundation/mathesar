@@ -45,8 +45,6 @@
 
 <style lang="scss">
   .entity-page-header {
-    border-bottom: 1px solid var(--border-color);
-    background-color: var(--elevated-background);
     position: relative;
     display: flex;
     align-items: center;
@@ -62,18 +60,17 @@
       flex-grow: 0;
       flex-shrink: 1;
       min-height: 100%;
-      border-right: 1px solid var(--border-color);
-      padding: var(--size-small) var(--size-large);
+      padding: 0.25rem;
 
       .icon {
-        font-size: var(--size-large);
+        font-size: var(--size-x-large);
         padding: var(--size-ultra-small);
       }
       .text {
         overflow: hidden;
       }
       .name {
-        font-size: var(--text-size-x-large);
+        font-size: var(--text-size-xx-large);
         margin: 0;
         font-weight: var(--font-weight-bold);
         overflow: hidden;
@@ -91,6 +88,7 @@
       display: flex;
       align-items: center;
       flex-grow: 1;
+      margin-left: 0.5rem;
 
       .actions-left {
         display: flex;

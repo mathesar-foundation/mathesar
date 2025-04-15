@@ -18,18 +18,18 @@
     align-items: center;
     text-decoration: none;
     color: inherit;
-    margin-right: var(--size-xx-small);
+    margin-right: var(--size-ultra-small);
     /* Optical adjustment to align logo with text */
-    margin-top: -2px;
+    margin-top: -1px;
   }
   .home-link > :global(svg) {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     display: block;
   }
   .mathesar {
-    font-size: var(--text-size-xx-large);
-    font-weight: var(--font-weight-bold);
-    margin-left: 0.5rem;
+    font-size: var(--text-size-x-large);
+    font-weight: var(--font-weight-extra-bold);
+    margin-left: 0.25rem;
   }
   .home-link.compact .mathesar {
     display: none;

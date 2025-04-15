@@ -5,24 +5,25 @@ body {
   // Background Colors
   --background-color: #ffffff;
   --header-background: var(--white);
+  --header-border: var(--sand-200);
+  --header-gradient-start: var(--white);
+  --header-gradient-end: var(--sand-100);
   --footer-background-color: var(--sand-50);
   --inset-background-color: var(--white);
   --hover-background: var(--stormy-50);
   --active-background: var(--stormy-200);
   --disabled-background: var(--gray-100);
-  --elevated-background: var(--sand-50);
+  --elevated-background: var(--sand-100);
   --sidebar-background: var(--white);
   --modal-overlay: rgba(0, 0, 0, 0.5);
   --icon-background: var(--stormy-100);
   --layout-background-color: var(--sand-50);
-  --inspector-background: var(--sand-100);
 
   // Border Colors
   --border-color: var(--sand-300);
   --card-border: var(--sand-300);
   --card-row-border: var(--sand-200);
   --card-hover-border: var(--stormy-300);
-  --inspector-border: var(--sand-200);
   --input-border: var(--gray-300);
 
   // Border Radius
@@ -228,7 +229,7 @@ body {
   --sand-50: #faf8f5;
   --sand-100: #f5f2ec;
   --sand-200: #e5e0d5;
-  --sand-300: #d4cdbc;
+  --sand-300: #c9c1b0;
   --sand-400: #a39b8a;
   --sand-500: #8f8673;
   --sand-600: #736b5c;
@@ -302,6 +303,9 @@ body.theme-dark {
   --background-color: var(--gray-900);
   --border-color: var(--gray-600);
   --header-background: var(--gray-800);
+  --header-border: var(--gray-700);
+  --header-gradient-start: var(--gray-800);
+  --header-gradient-end: var(--gray-800);
   --footer-background-color: var(--gray-800);
   --inset-background-color: var(--gray-800);
   --hover-background: var(--gray-800);
@@ -311,6 +315,13 @@ body.theme-dark {
   --shadow-color: var(--shadow-color-dark);
   --shadow-color-light: rgba(0, 0, 0, 0.2);
   --shadow-color-inset: var(--shadow-color-inset-dark);
+  --icon-background: var(--stormy-700);
+  --layout-background-color: var(--background-color);
+  --inspector-hover: var(--gray-700);
+  --inspector-active: var(--gray-600);
+  --collapsible-background: var(--gray-700);
+  --collapsible-hover: var(--gray-600);
+  --collapsible-active: var(--gray-500);
 
   // Text
   --text-color: var(--white);
@@ -328,15 +339,6 @@ body.theme-dark {
   --input-disabled-background: var(--gray-800);
   --sidebar-background: var(--gray-800);
   --modal-overlay: rgba(0, 0, 0, 0.7);
-  --icon-background: var(--stormy-700);
-  --layout-background-color: var(--background-color);
-  --inspector-background: var(--gray-800);
-  --inspector-border: var(--gray-700);
-  --inspector-hover: var(--gray-700);
-  --inspector-active: var(--gray-600);
-  --collapsible-background: var(--gray-700);
-  --collapsible-hover: var(--gray-600);
-  --collapsible-active: var(--gray-500);
 
   // Gradients
   --gradient-base-start: var(--stormy-800);
