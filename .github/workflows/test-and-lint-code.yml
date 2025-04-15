@@ -438,7 +438,7 @@ jobs:
           fi
 
           # Check "front_end_checks_required" conditions
-          if [[ "${{ needs.front_end_checks_required.outputs.tests_should_run }}" == "true" ]]; then
+          if [[ "${{ needs.front_end_checks_required.outputs.checks_should_run }}" == "true" ]]; then
             if [[ "${{ needs.front_end_format.result }}" != "success"
               || "${{ needs.front_end_lint.result }}" != "success"
               || "${{ needs.front_end_typecheck.result }}" != "success"
