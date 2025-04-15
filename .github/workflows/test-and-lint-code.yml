@@ -381,7 +381,13 @@ jobs:
   matrix_tests:
     if: ${{ always() }}
     runs-on: ubuntu-latest
-    needs: [python_tests_required, sql_tests_required, all_be_tests_required, python_tests, sql_tests, api_tests]
+    needs:
+      - python_tests_required
+      - sql_tests_required
+      - all_be_tests_required
+      - python_tests
+      - sql_tests
+      - api_tests
     steps:
       - name: Check Dependency Results
         run: |
