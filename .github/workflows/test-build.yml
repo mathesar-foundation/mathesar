@@ -1,3 +1,13 @@
+################################################################################
+##                         BUILD TESTER                                       ##
+##                                                                            ##
+## This job tests if we can successfully build mathesar in both development   ##
+## and production modes we don't use these build for any other tests as they  ##
+## involve building the frontend which slows down backend tests significantly ##
+## and threfore, we test to make sure that we can still build mathesar in     ##
+## these modes separately.                                                    ##
+##                                                                            ##
+################################################################################
 name: Test Build
 on:  [pull_request, merge_group]
 jobs:
@@ -28,7 +38,7 @@ jobs:
       - name: Check results
         run: |
           if [[ "${{ needs.build_tests.result }}" != "success" ]]; then
-            echo "One or more backend tests failed."
+            echo "Build failed."
             exit 1
           fi
       - name: Report success
