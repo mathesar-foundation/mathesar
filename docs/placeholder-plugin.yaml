@@ -1,3 +1,7 @@
-MATHESAR_INSTALLATION_DIR: /etc/mathesar
+MATHESAR_INSTALL_DIR: $HOME/mathesar
+# Deprecated. Exists in older files because I don't want to clutter up
+# installation related PRs, currently https://github.com/mathesar-foundation/mathesar/pull/4399.
+# TODO: Remove in a future PR.
+MATHESAR_INSTALLATION_DIR: $HOME/mathesar
 MATHESAR_PG_DIR: /var/lib/docker/volumes/mathesar_postgresql_data/_data
 DOMAIN_NAME: localhost
