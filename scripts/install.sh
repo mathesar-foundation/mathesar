@@ -14,7 +14,7 @@ set -eo pipefail
 
 # The resulting directory structure would be as follows:
 #
-# -- mathesar/ (parent installation directory - must exist)
+# ── mathesar/ (parent installation directory - must exist)
 #    ├── bin/
 #    │   ├── mathesar                   (main executable bash script)
 #    │   ├── mathesar_path_source       (path setting script for sh-like shells)
@@ -530,7 +530,7 @@ configure_path() {
       fi
     fi
 
-    if path_set_success; then
+    if $path_set_success; then
       success "Shell configurations for PATH set succesfully"
   
       info "Attempting to update the current shell environment..."
