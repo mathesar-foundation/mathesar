@@ -7,8 +7,6 @@ MATHESAR_VERSION="0.2.3"
 MATHESAR_PORT=8000
 
 SCRIPT_NAME=$(basename "$0")
-BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-ENV_FILE="${BASE_DIR}/.env"
 
 # Default flag values.
 NO_VENV=false
@@ -19,6 +17,41 @@ SETUP_DJANGO=false
 RED=$(tput setaf 1 2>/dev/null || echo "")
 BLUE=$(tput setaf 4 2>/dev/null || echo "")
 RESET=$(tput sgr0 2>/dev/null || echo "")
+
+
+#=======SET LOCATION RELATED CONFIGURATIONS====================================
+
+# Function to resolve a symlink to its absolute target
+resolve_symlink() {
+  local target="$1"
+  while [[ -L "$target" ]]; do
+    local dir
+    dir="$(cd -P "$(dirname "$target")" && pwd)"
+    local link
+    # Do not use -f since it's not supported in mac/bsd
+    link="$(readlink "$target")"
+    # If the link is a relative path, prepend the directory path
+    if [[ "$link" != /* ]]; then
+      target="$dir/$link"
+    else
+      target="$link"
+    fi
+  done
+  # Return the canonicalized absolute path
+  cd -P "$(dirname "$target")" && echo "$(pwd)/$(basename "$target")"
+}
+
+# Determine the script's real path only if it's a symlink
+if [[ -L "$0" ]]; then
+  SCRIPT_PATH=$(resolve_symlink "$0")
+else
+  SCRIPT_PATH="$(cd -P "$(dirname "$0")" && pwd)/$(basename "$0")"
+fi
+
+# Now calculate the BASE_DIR relative to the actual script location
+BASE_DIR="$(cd -P "$(dirname "$(dirname "${SCRIPT_PATH}")")" && pwd)"
+
+ENV_FILE="${BASE_DIR}/.env"
 
 
 #=======COMMON UTILITIES=======================================================
