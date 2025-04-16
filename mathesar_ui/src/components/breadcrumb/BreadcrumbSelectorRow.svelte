@@ -15,6 +15,7 @@
 </script>
 
 <li class="breadcrumb-selector-row" class:active={entry.isActive()}>
+  <div class="hover-indicator" />
   <a {href} on:click={closeSelector}>
     {#if 'table' in entry}
       <TableName table={entry.table} let:tableName>
@@ -34,7 +35,6 @@
       />
     </div>
   {/if}
-  <div class="hover-indicator" />
 </li>
 
 <style>
@@ -53,6 +53,8 @@
     padding: 0.25rem 0.5rem;
     color: inherit;
     text-decoration: none;
+    position: relative;
+    z-index: 1;
   }
 
   .hover-indicator {
@@ -61,18 +63,22 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--color-contrast-light);
-    mix-blend-mode: multiply;
+    background: var(--hover-background);
     pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
   }
-  .breadcrumb-selector-row:not(:hover) .hover-indicator {
-    display: none;
+  .breadcrumb-selector-row:hover .hover-indicator {
+    opacity: 1;
   }
 
   .record-selector {
     flex: 0 0 2rem;
     display: flex;
     align-items: stretch;
+    position: relative;
+    z-index: 1;
   }
   .record-selector > :global(*) {
     flex: 1;
