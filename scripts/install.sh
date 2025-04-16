@@ -14,20 +14,20 @@ set -eo pipefail
 
 # The resulting directory structure would be as follows:
 #
-# -- mathesar (parent installation directory)
-#    |-- bin
-#    |   |-- mathesar (executable bash script)
-#    |-- uv
-#    |-- packages
-#    |-- mathesar-venv
-#    |-- .env
-#    |-- .media
-#    |-- config
-#    |-- db
-#    |-- mathesar
-#    |-- ...(other source files)
-
-# The parent directory (mathesar in the above structure) would need to exist before running this script.
+# -- mathesar/ (parent installation directory - must exist)
+#    ├── bin/
+#    │   ├── mathesar                   (main executable bash script)
+#    │   ├── mathesar_path_source       (path setting script for sh-like shells)
+#    │   └── mathesar_path_source.fish  (path setting script for fish - if fish is installed)
+#    ├── uv/
+#    ├── packages/
+#    ├── mathesar-venv/
+#    ├── .env
+#    ├── .media
+#    ├── config/
+#    ├── db/
+#    ├── mathesar/
+#    ├── ... (other source files)
 
 
 #=======CONFIGURATIONS=========================================================
@@ -419,7 +419,6 @@ update_fish_config() {
 }
 
 update_current_shell_env() {
-  info "Attempting to update the current shell environment..."
   local current_shell
   current_shell=$(basename "$SHELL")
 
@@ -431,48 +430,89 @@ update_current_shell_env() {
         return 1
       fi
     fi
-  else
-    if [[ -f "${INSTALL_DIR}/bin/mathesar_path_source" ]]; then
-      if ! . "${INSTALL_DIR}/bin/mathesar_path_source"; then
-        echo "Warning: Unable to source mathesar_path_source in the current session."
-        echo "Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\" or restart your shell"
-        return 1
-      fi
-    fi
+  elif ! . "${INSTALL_DIR}/bin/mathesar_path_source"; then
+      echo "Warning: Unable to source mathesar_path_source in the current session."
+      echo "Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\" or restart your shell"
+      return 1
   fi
 
-  # Optionally re-exec the shell if interactive and not already sourced.
-  if [[ $- == *i* ]]; then
-    if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
-      info "Restarting the shell to apply PATH changes..."
-      exec "$SHELL" -l || {
-        echo "Warning: Unable to restart the shell automatically. Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\""
-        return 1
-      }
-    fi
+  # Re-exec the shell if interactive
+  if [[ $- == *i* ]] && [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    info "Restarting the shell to apply PATH changes..."
+    exec "$SHELL" -l || {
+      echo "Warning: Unable to restart the shell automatically. Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\""
+      return 1
+    }
   fi
 
   return 0
 }
 
-# Main PATH configuration function.
-# If symlink creation in /usr/local/bin fails, we then attempt to update the shell configuration files.
+is_valid_candidate_dir_for_symlink() {
+  local candidate="$1"
+  if [[ -z "$candidate" ]]; then
+    return 1
+  fi
+  if [[ ! -d "$candidate" ]]; then
+    mkdir -p "$candidate" 2>/dev/null || return 1
+  fi
+  if [[ ! -w "$candidate" ]]; then
+    return 1
+  fi
+  # Only pass candidate that is already in PATH
+  if [[ ":$PATH:" == *":$candidate:"* ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+determine_symlink_dir() {
+  local candidates=()
+
+  # Candidate 1: XDG_BIN_HOME (if defined).
+  if [[ -n "${XDG_BIN_HOME:-}" ]]; then
+    candidates+=("${XDG_BIN_HOME}")
+  fi
+
+  # Candidate 2: The bin directory in the parent of XDG_DATA_HOME.
+  if [[ -n "${XDG_DATA_HOME:-}" ]]; then
+    candidates+=("$(dirname "${XDG_DATA_HOME}")/bin")
+  fi
+
+  # Candidate 3: HOME/.local/bin.
+  if [[ -n "${HOME:-}" ]]; then
+    candidates+=("${HOME}/.local/bin")
+  fi
+
+  for candidate in "${candidates[@]}"; do
+    if is_valid_candidate_dir_for_symlink "$candidate"; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 configure_path() {
   set +e
   local symlink_success=false
-  info "Attempting to add a symlink in /usr/local/bin..."
-  if [[ -d "/usr/local/bin" ]] && [[ -w "/usr/local/bin" ]]; then
-    if ln -sf "${INSTALL_DIR}/bin/mathesar" /usr/local/bin/mathesar; then
-      success "Symlink created at /usr/local/bin/mathesar."
+  local target_dir=$(determine_symlink_dir)
+
+  if [[ -n "$target_dir" ]]; then
+    info "Attempting to add a symlink in ${target_dir}..."
+    if ln -sf "${INSTALL_DIR}/bin/mathesar" "${target_dir}/mathesar"; then
+      success "Symlink created at ${target_dir}/mathesar."
       symlink_success=true
     else
-      info "Unable to create symlink in /usr/local/bin."
+      info "Warning: Unable to create symlink in ${target_dir}."
     fi
-  else
-    info "/usr/local/bin is not writable."
   fi
 
   if ! $symlink_success; then
+    info "Attempting to add \"${INSTALL_DIR}/bin\" to PATH..."
+
     local path_set_success=true
     ensure write_mathesar_path_source_script
 
@@ -491,8 +531,12 @@ configure_path() {
     fi
 
     if path_set_success; then
-      info "Shell configurations for PATH set succesfully"
-      if ! update_current_shell_env; then
+      success "Shell configurations for PATH set succesfully"
+  
+      info "Attempting to update the current shell environment..."
+      if update_current_shell_env; then
+        success "Everything's ready, you can now start Mathesar by executing \"mathesar run\". Use \"mathesar help\" for more information.".
+      else
         echo "Unable to automatically update the current shell environment."
         echo "Please run the following command in your terminal to update your PATH:"
         echo "source \"${INSTALL_DIR}/bin/mathesar_path_source\""
@@ -643,5 +687,4 @@ success "Mathesar's installed successfully!"
 
 # Do this after displaying installation success message
 # since it's failure prone and user configurable
-info "Configuring PATH"
 ensure configure_path
