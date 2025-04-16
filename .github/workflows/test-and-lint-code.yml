@@ -369,11 +369,41 @@ jobs:
       - run: npm test
 
 ################################################################################
+##                         BUILD TESTER                                       ##
+##                                                                            ##
+## This job tests if we can successfully build mathesar in both development   ##
+## and production modes we don't use these build for any other tests as they  ##
+## involve building the frontend which slows down backend tests significantly ##
+## and threfore, we test to make sure that we can still build mathesar in     ##
+## these modes separately.                                                    ##
+##                                                                            ##
+################################################################################
+
+  build_tests:
+    name: Build mathesar
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [production, development]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy env file
+        run: cp .env.example .env
+      # The code is checked out under uid 1001 - reset this to 1000 for the
+      # container to run tests successfully
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+      - name: Build the stack
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service
+        env:
+          TARGET: ${{ matrix.target }}
+
+################################################################################
 ##                       REQUIRED TEST/LINT COLLECTORS                        ##
 ## Jobs in this section collect outputs from testing jobs, since these are    ##
 ## otherwise impossible to capture for branch protection purposes.            ##
 ## At the moment, they only need to have each required check as a dependency. ##
-## Required checks should skip themselves if no relevant files have changed.  ##                                                           ##
+## Required checks should skip themselves if no relevant files have changed.  ##
 ##                                                                            ##
 ################################################################################
 
@@ -398,6 +428,8 @@ jobs:
       - front_end_typecheck
       - front_end_audit
       - front_end_tests
+      # Build test
+      - build_tests
     steps:
       - name: Check Dependency Results
         run: |
@@ -448,6 +480,12 @@ jobs:
               echo "One or more frontend tests failed."
               exit 1
             fi
+          fi
+
+          # Check if build succeeds
+          if [[ "${{ needs.build_tests.result }}" != "success" ]]; then
+            echo "Build failed."
+            exit 1
           fi
       - name: Report success
         run: echo "All tests succeeded or skipped!"
