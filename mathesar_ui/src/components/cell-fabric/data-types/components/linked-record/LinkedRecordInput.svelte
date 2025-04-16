@@ -193,23 +193,23 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--gray-100);
+    border: 1px solid var(--input-border);
     border-radius: 0.25rem;
-    background: var(--white);
+    background: var(--input-background);
     min-height: 2.25em;
     padding: 0;
     --padding: 0.5rem;
     cursor: default;
   }
   .disabled {
-    background: var(--gray-100);
-    border: solid 1px var(--gray-200);
+    background: var(--disabled-background);
+    border: solid 1px var(--input-border);
   }
 
   .linked-record-input:focus {
-    border-color: var(--sky-700);
+    border-color: var(--input-focus-color);
     outline: 0;
-    box-shadow: 0 0 0 2px #2087e633;
+    box-shadow: 0 0 0 2px var(--input-focus-shadow);
   }
 
   .content {
@@ -223,10 +223,10 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    color: var(--color-gray-dark);
+    color: var(--text-color-primary);
     padding: var(--padding);
   }
   .dropdown-button:hover {
-    color: var(--color-text);
+    color: var(--text-color);
   }
 </style>

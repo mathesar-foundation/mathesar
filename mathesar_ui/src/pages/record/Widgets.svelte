@@ -61,7 +61,7 @@
 
 <style lang="scss">
   .widgets-area {
-    background: var(--background-color);
+    background: var(--elevated-background);
     border-top: 1px solid var(--border-color);
   }
   .no-widgets {
@@ -69,8 +69,6 @@
   }
   h2 {
     padding: var(--size-small);
-    border-bottom: 1px solid var(--border-color);
-    background: var(--background-color);
     color: var(--text-color-primary);
   }
   .widgets {
