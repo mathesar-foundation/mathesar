@@ -349,6 +349,159 @@ make_mathesar_script_executable() {
   popd > /dev/null
 }
 
+write_mathesar_path_source_script() {
+  local env_script="${INSTALL_DIR}/bin/mathesar_path_source"
+  info "Writing Mathesar environment script (sh) to ${env_script}..."
+  cat <<EOF > "${env_script}"
+#!/bin/sh
+# This script adds Mathesar's bin directory to PATH if not already present.
+case ":\${PATH}:" in
+  *:"${INSTALL_DIR}/bin":*)
+    ;;
+  *)
+    export PATH="${INSTALL_DIR}/bin:\${PATH}"
+    ;;
+esac
+EOF
+  ensure chmod +x "${env_script}"
+}
+
+write_mathesar_path_source_script_fish() {
+  local fish_script="${INSTALL_DIR}/bin/mathesar_path_source.fish"
+  info "Writing Mathesar environment script (fish) to ${fish_script}..."
+  cat <<EOF > "${fish_script}"
+# This script adds Mathesar's bin directory to PATH in fish if not already present.
+if not contains "${INSTALL_DIR}/bin" \$PATH
+    set -x PATH "${INSTALL_DIR}/bin" \$PATH
+end
+EOF
+  ensure chmod +x "${fish_script}"
+}
+
+# Update shell configuration files (rcfiles) to source the Mathesar environment script.
+update_rcfiles() {
+  info "Updating shell configuration files to source Mathesar environment script..."
+  local sh_rc_files=(".bashrc" ".bash_profile" ".profile" ".zshrc" ".zshenv")
+  local source_line_sh="source \"${INSTALL_DIR}/bin/mathesar_path_source\""
+  local success_rc=true
+  for rc in "${sh_rc_files[@]}"; do
+    local rcfile="$HOME/$rc"
+    if [[ -f "$rcfile" ]]; then
+      if ! grep -Fq "$source_line_sh" "$rcfile"; then
+        if ! echo -e "\n$source_line_sh" >> "$rcfile"; then
+          echo "Warning: Failed to update $rcfile. Please add the following line manually:"
+          echo "$source_line_sh"
+          success_rc=false
+        else
+          echo "Updated $rcfile."
+        fi
+      fi
+    fi
+  done
+  $success_rc && return 0 || return 1
+}
+
+# Do we really need to support fish? We could ask users to do it themselves. 
+update_fish_config() {
+  local fish_conf_dir="$HOME/.config/fish/conf.d"
+  if ! mkdir -p "$fish_conf_dir"; then
+    echo "Warning: Unable to create fish config directory. Please manually copy ${INSTALL_DIR}/bin/mathesar_path_source.fish to your fish configuration directory."
+    return 1
+  fi
+  local fish_target="${fish_conf_dir}/mathesar_path_source.fish"
+  if ! cp "${INSTALL_DIR}/bin/mathesar_path_source.fish" "$fish_target"; then
+    echo "Warning: Unable to copy mathesar_path_source.fish to $fish_target. Please copy it manually."
+    return 1
+  else
+    info "Installed Mathesar fish environment script to ${fish_target}."
+    return 0
+  fi
+}
+
+update_current_shell_env() {
+  info "Attempting to update the current shell environment..."
+  local current_shell
+  current_shell=$(basename "$SHELL")
+
+  if [[ "$current_shell" == "fish" ]]; then
+    if command_exists fish; then
+      if ! fish -c "source ${INSTALL_DIR}/bin/mathesar_path_source.fish"; then
+        echo "Warning: Unable to source mathesar_path_source.fish in the current fish session."
+        echo "Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source.fish\" or restart your shell."
+        return 1
+      fi
+    fi
+  else
+    if [[ -f "${INSTALL_DIR}/bin/mathesar_path_source" ]]; then
+      if ! . "${INSTALL_DIR}/bin/mathesar_path_source"; then
+        echo "Warning: Unable to source mathesar_path_source in the current session."
+        echo "Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\" or restart your shell"
+        return 1
+      fi
+    fi
+  fi
+
+  # Optionally re-exec the shell if interactive and not already sourced.
+  if [[ $- == *i* ]]; then
+    if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+      info "Restarting the shell to apply PATH changes..."
+      exec "$SHELL" -l || {
+        echo "Warning: Unable to restart the shell automatically. Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\""
+        return 1
+      }
+    fi
+  fi
+
+  return 0
+}
+
+# Main PATH configuration function.
+# If symlink creation in /usr/local/bin fails, we then attempt to update the shell configuration files.
+configure_path() {
+  set +e
+  local symlink_success=false
+  info "Attempting to add a symlink in /usr/local/bin..."
+  if [[ -d "/usr/local/bin" ]] && [[ -w "/usr/local/bin" ]]; then
+    if ln -sf "${INSTALL_DIR}/bin/mathesar" /usr/local/bin/mathesar; then
+      success "Symlink created at /usr/local/bin/mathesar."
+      symlink_success=true
+    else
+      info "Unable to create symlink in /usr/local/bin."
+    fi
+  else
+    info "/usr/local/bin is not writable."
+  fi
+
+  if ! $symlink_success; then
+    local path_set_success=true
+    ensure write_mathesar_path_source_script
+
+    if ! update_rcfiles; then
+      path_set_success=false
+      echo "Failed to update some shell configuration files. Please add the following line manually to your shell config:"
+      echo "source \"${INSTALL_DIR}/bin/mathesar_path_source\""
+    fi
+
+    if command_exists fish; then
+      ensure write_mathesar_path_source_script_fish
+      if ! update_fish_config; then
+        path_set_success=false
+        echo "Failed to update fish configuration. Please copy ${INSTALL_DIR}/bin/mathesar_path_source.fish into your fish configuration manually."
+      fi
+    fi
+
+    if path_set_success; then
+      info "Shell configurations for PATH set succesfully"
+      if ! update_current_shell_env; then
+        echo "Unable to automatically update the current shell environment."
+        echo "Please run the following command in your terminal to update your PATH:"
+        echo "source \"${INSTALL_DIR}/bin/mathesar_path_source\""
+      fi
+    fi
+  fi
+  set -e
+}
+
 
 #=======ARGUMENT PARSING=======================================================
 
@@ -486,5 +639,9 @@ ensure setup_venv_requirements
 ensure setup_env_vars
 ensure run_django_migrations
 ensure make_mathesar_script_executable
+success "Mathesar's installed successfully!"
 
-success "Mathesar installation completed successfully!"
+# Do this after displaying installation success message
+# since it's failure prone and user configurable
+info "Configuring PATH"
+ensure configure_path
