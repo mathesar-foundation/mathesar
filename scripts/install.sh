@@ -12,17 +12,20 @@ set -eo pipefail
 
 # TODO: Handle Mathesar version checks!
 
-# The resulting directory structure would be as follows
-# ---mathesar
-#   |---uv
-#   |---packages
-#   |---mathesar-venv (could be renamed to just venv)
-#   |---mathesar.sh
-#   |---.env
-#   |---.media
-#   |---config
-#   |---db
-#   |---...(other source files)
+# The resulting directory structure would be as follows:
+#
+# -- mathesar (parent installation directory)
+#    |-- bin
+#    |   |-- mathesar (executable bash script)
+#    |-- uv
+#    |-- packages
+#    |-- mathesar-venv
+#    |-- .env
+#    |-- .media
+#    |-- config
+#    |-- db
+#    |-- mathesar
+#    |-- ...(other source files)
 
 # The parent directory (mathesar in the above structure) would need to exist before running this script.
 
@@ -342,7 +345,7 @@ run_django_migrations() {
 make_mathesar_script_executable() {
   pushd "${INSTALL_DIR}" > /dev/null
     info "Ensuring executable permissions..."
-    ensure chmod +x ./mathesar.sh
+    ensure chmod +x ./bin/mathesar
   popd > /dev/null
 }
 
