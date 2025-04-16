@@ -4,13 +4,14 @@ set -eo pipefail
 # Do not call this script within your cloned git repo.
 # This script will be called by the user directly from an external source (eg., internet link)
 
-# If there's an existing installation,
+# If there's an existing installation in the same location,
 # - If the script's Mathesar's version = installed version, it performs all operations without affecting the installation.
 #   - Useful if the user is facing environment related issues and would like to get them fixed.
 #   - Running & re-running this script on a working Mathesar installation would have no effect on Mathesar itself.
-# - If the script's Mathesar's version != installed version, it replaces the installed version with the one on this script.
+# - If the script's Mathesar version > installed version, it updates the installed version with the one on this script.
+# - If the script's Mathesar version < installed version, it throws an error and stops.
 
-# TODO: Handle Mathesar version checks!
+# If there's an existing installation in a different location, it shows a message and prompts the user to continue.
 
 # The resulting directory structure would be as follows:
 #
@@ -27,7 +28,7 @@ set -eo pipefail
 #    ├── config/
 #    ├── db/
 #    ├── mathesar/
-#    ├── ... (other source files)
+#    └── ... (other source files)
 
 
 #=======CONFIGURATIONS=========================================================
@@ -133,6 +134,82 @@ check_required_commands() {
   require_command env
   require_command touch
   require_command chmod
+}
+
+parse_mathesar_version() {
+  local bin_path="$1"
+  "$bin_path" version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || return 1
+}
+
+compare_versions() {
+  local v1="$1" v2="$2"
+  if [[ "$v1" == "$v2" ]]; then
+    return 0
+  fi
+  local greatest
+  greatest=$(printf '%s\n%s\n' "$v1" "$v2" | sort -V | tail -n1)
+  if [[ "$greatest" == "$v1" ]]; then
+    return 1 # v1 newer
+  else
+    return -1 # v1 older
+  fi
+}
+
+preflight_version_checks() {
+  # Check if Mathesar is already installed in the <install_dir>
+  if [[ -x "${INSTALL_DIR}/bin/mathesar" ]]; then
+    local existing_bin="${INSTALL_DIR}/bin/mathesar"
+    set +e
+    local installed_ver status
+    installed_ver=$(parse_mathesar_version "$existing_bin")
+    status=$?
+    set -e
+
+    if [[ $status -ne 0 ]]; then
+      info "Unable to determine version of existing Mathesar at ${existing_bin}. Proceeding with installation..."
+      return
+    fi
+
+    info "Existing Mathesar detected in ${INSTALL_DIR} (version ${installed_ver})."
+    local cmp_result
+    cmp_result=$(compare_versions "${MATHESAR_VERSION}" "${installed_ver}")
+
+    case $cmp_result in
+      1)
+        info "Upgrading Mathesar from \"${installed_ver}\" to \"${MATHESAR_VERSION}\"..."
+        ;;
+      0)
+        info "Re-installing Mathesar \"${MATHESAR_VERSION}\". Your data will remain intact."
+        ;;
+      -1)
+        err "Installed Mathesar version (${installed_ver}) is newer than the version in this script (${MATHESAR_VERSION}). Aborting."
+        ;;
+    esac
+    return
+  fi
+
+  # 2. Mathesar NOT present in <install_dir>; look for one in PATH
+  if command_exists mathesar; then
+    local other_bin
+    other_bin=$(command -v mathesar)
+    local other_ver
+    other_ver=$(parse_mathesar_version "$other_bin") || other_ver="unknown"
+
+    info "Another Mathesar installation was found at ${other_bin} (version ${other_ver})."
+    info "The new installation will take precedence in PATH and may overwrite an existing symlink."
+
+    if [[ "${NO_PROMPT}" == true ]]; then
+      err "Refusing to continue because --no-prompt is set. Run without --no-prompt or remove the existing Mathesar first."
+    fi
+
+    while true; do
+      read -rp "Continue and install Mathesar ${MATHESAR_VERSION} to ${INSTALL_DIR}? [y/N] " reply
+      case "$reply" in
+        [Yy]*) break ;;
+        [Nn]*|"") err "Installation aborted by user." ;;
+      esac
+    done
+  fi
 }
 
 create_directories() {
@@ -498,7 +575,8 @@ determine_symlink_dir() {
 configure_path() {
   set +e
   local symlink_success=false
-  local target_dir=$(determine_symlink_dir)
+  local target_dir
+  target_dir=$(determine_symlink_dir)
 
   if [[ -n "$target_dir" ]]; then
     info "Attempting to add a symlink in ${target_dir}..."
@@ -675,6 +753,7 @@ fi
 #=======INSTALLATION===========================================================
 
 ensure check_required_commands
+ensure preflight_version_checks
 ensure create_directories
 ensure download_and_extract_package
 ensure install_uv_if_not_present
