@@ -92,7 +92,7 @@
 
       .tutorial-holder {
         margin-top: 4rem;
-        max-width: 70%;
+        max-width: 40%;
       }
 
       .help-text {

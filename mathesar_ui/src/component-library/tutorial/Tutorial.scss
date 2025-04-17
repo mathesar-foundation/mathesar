@@ -1,33 +1,78 @@
 .tutorial {
-  border-left: none;
-  border-top: none;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-radius: var(--border-radius-l);
-  background-color: var(--background-color);
-  padding: var(--size-super-ultra-large);
+  position: relative;
+  border-radius: var(--border-radius-xl);
+  padding: var(--size-xx-large);
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   line-height: 1.6;
-  border: 1px solid var(--card-border);
+  overflow: hidden;
+  background: var(--background-color);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      var(--stormy-300) 0%,
+      var(--stormy-500) 100%
+    );
+    opacity: 0.2;
+    z-index: 0;
+  }
+
+  .content {
+    text-align: center;
+    width: 100%;
+    padding: var(--size-base) 0;
+    position: relative;
+    z-index: 1;
+  }
 
   > * + * {
     margin-top: var(--size-base);
   }
 
-  .title-and-meta {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--size-extreme-small);
+  .icon {
+    margin-bottom: var(--size-large);
+    color: var(--text-color-secondary);
+  }
 
-    .title {
-      font-size: var(--text-size-xx-large);
-      color: var(--text-color-primary);
-      font-weight: var(--font-weight-bold);
-      letter-spacing: -0.01em;
-      line-height: 1.2;
-      margin: 0;
-    }
+  .title {
+    font-size: var(--size-x-large);
+    color: var(--text-color-primary);
+    font-weight: var(--font-weight-extra-bold);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0 0 var(--size-base) 0;
+    text-align: center;
+  }
+
+  .body {
+    color: var(--text-color-secondary);
+  }
+
+  .footer {
+    margin-top: var(--size-large);
+    display: flex;
+    justify-content: center;
+  }
+}
+
+:global(body.theme-dark) .tutorial {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  &::before {
+    background: linear-gradient(
+      135deg,
+      var(--stormy-600) 0%,
+      var(--stormy-800) 100%
+    );
+    opacity: 0.25;
   }
 }
