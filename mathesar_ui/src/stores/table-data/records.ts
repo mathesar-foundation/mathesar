@@ -651,6 +651,25 @@ export class RecordsData {
     return result;
   }
 
+  async duplicateRecord(sourceRow: RecordRow): Promise<void> {
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+
+    const fields = { ...sourceRow.record };
+    if (pkColumn) {
+      delete fields[pkColumn.id];
+    }
+
+    const newRow = new DraftRecordRow({
+      record: {
+        ...this.getEmptyApiRecord(),
+        ...fields,
+      },
+    });
+
+    this.newRecords.update((existing) => existing.concat(newRow));
+    await this.createRecord(newRow);
+  }
+
   async addEmptyRecord(): Promise<void> {
     const row = new DraftRecordRow({
       record: this.getEmptyApiRecord(),

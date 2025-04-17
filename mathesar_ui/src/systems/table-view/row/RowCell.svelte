@@ -57,6 +57,7 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, ClientSideCellError[]>;
   export let value: unknown = undefined;
+  export let canInsertRecords: boolean;
   export let canUpdateRecords: boolean;
   export let canDeleteRecords: boolean;
 
@@ -183,7 +184,13 @@
     <!-- Row -->
     <MenuDivider />
     <MenuHeading>{$_('row')}</MenuHeading>
-    <RowContextOptions {recordPk} {recordsData} {row} {canDeleteRecords} />
+    <RowContextOptions
+      {recordPk}
+      {recordsData}
+      {row}
+      {canDeleteRecords}
+      {canInsertRecords}
+    />
   </ContextMenu>
   {#if errors.length}
     <CellErrors {serverErrors} {clientErrors} forceShowErrors={isActive} />

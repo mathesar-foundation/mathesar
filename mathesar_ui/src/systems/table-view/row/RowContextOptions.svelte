@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { ResultValue } from '@mathesar/api/rpc/records';
-  import { iconDeleteMajor } from '@mathesar/icons';
+  import { iconDeleteMajor, iconDuplicateRecord } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -22,10 +22,13 @@
   export let recordPk: ResultValue | undefined = undefined;
   export let recordsData: RecordsData;
   export let canDeleteRecords: boolean;
+  export let canInsertRecords: boolean;
 
   // To be used in case of publicly shared links where user should not be able
   // to view linked tables & explorations
   const canViewLinkedEntities = true;
+
+  $: hasPk = recordPk !== undefined;
 
   async function handleDeleteRecords() {
     if (isRecordRow(row)) {
@@ -44,9 +47,13 @@
       });
     }
   }
+
+  function handleDuplicate() {
+    void recordsData.duplicateRecord(row);
+  }
 </script>
 
-{#if recordPk && canViewLinkedEntities}
+{#if hasPk && canViewLinkedEntities}
   <LinkMenuItem
     href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
     icon={iconExternalLink}
@@ -54,6 +61,14 @@
     {$_('go_to_record_page')}
   </LinkMenuItem>
 {/if}
+
+<ButtonMenuItem
+  on:click={handleDuplicate}
+  icon={iconDuplicateRecord}
+  disabled={!hasPk || !canInsertRecords}
+>
+  {$_('duplicate_record')}
+</ButtonMenuItem>
 
 <ButtonMenuItem
   on:click={handleDeleteRecords}
