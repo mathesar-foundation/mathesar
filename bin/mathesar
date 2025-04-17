@@ -12,6 +12,7 @@ SCRIPT_NAME=$(basename "$0")
 NO_VENV=false
 FALLBACK_TO_INBUILT_DOCKER_DB=false
 SETUP_DJANGO=false
+PREFER_EXPORTED_ENV=false
 
 # Color definitions for output
 RED=$(tput setaf 1 2>/dev/null || echo "")
@@ -128,11 +129,12 @@ set_env_vars_from_file() {
       var_name="${trimmed%%=*}"
       var_value="${trimmed#*=}"
 
-      # Only export the variable if it is not already set.
+      # If PREFER_EXPORTED_ENV is true, only set from .env if variable is not already set.
+      # If PREFER_EXPORTED_ENV is false, always set from .env
       # This check uses bash parameter expansion: if the variable is not set, ${!var_name+_} is empty.
       # If it's set even when empty, it'll return a value (when empty, it'll return _).
       # `!` is required below - it denotes that the value of var_name should be used as the env variable name.
-      if [[ -z "${!var_name+_}" ]]; then
+      if [[ "${PREFER_EXPORTED_ENV}" = false ]] || [[ -z "${!var_name+_}" ]]; then
         export "$var_name"="$var_value"
       fi
     done < "${ENV_FILE}"
@@ -241,7 +243,7 @@ run_mathesar() {
     popd > /dev/null
   fi
 
-  local gunicorn_opts="config.wsgi -b 0.0.0.0:${MATHESAR_PORT}"
+  local gunicorn_opts="config.wsgi -b 0.0.0.0:${MATHESAR_PORT} --chdir ${BASE_DIR}"
   if [ "${DEBUG}" = "true" ]; then
     gunicorn_opts+=" --log-level=debug"
   fi
@@ -254,9 +256,7 @@ run_mathesar() {
   fi
 
   info "Starting gunicorn webserver..."
-  pushd "${BASE_DIR}" > /dev/null
-    exec "$gunicorn_bin" $gunicorn_opts
-  popd > /dev/null
+  exec "$gunicorn_bin" $gunicorn_opts
 }
 
 
@@ -281,6 +281,10 @@ Commands:
 
       Options:
         --port <port>, -p <port>    Specify the port for Mathesar's web service (default is 8000).
+
+        --prefer-exported-env, -e   Prefer existing exported environment variables over the .env file.
+                                    If this option is set and required environment variables aren't exported,
+                                    the values from the .env file will be substituted for the missing ones.
 
   version
       Show version information.
@@ -385,8 +389,12 @@ if [ "${COMMAND}" = "run" ]; then
           err "The --port/-p option requires an argument."
         fi
         ;;
+      --prefer-exported-env|-e)
+        PREFER_EXPORTED_ENV=true
+        shift
+        ;;
       -*)
-        # Support clubbed short options for fallback (-f), no-venv (-n), and setup-django (-s).
+        # Support clubbed short options for fallback (-f), no-venv (-n), prefer-exported-env (-e), and setup-django (-s).
         # If the option string includes any 'p' we now no longer allow clubbing.
         shortopts="${1#-}"
         if [[ "$shortopts" == *"p"* ]]; then
@@ -398,6 +406,7 @@ if [ "${COMMAND}" = "run" ]; then
             f) FALLBACK_TO_INBUILT_DOCKER_DB=true ;;
             n) NO_VENV=true ;;
             s) SETUP_DJANGO=true ;;
+            e) PREFER_EXPORTED_ENV=true ;;
             *)
               usage_err "Unknown option: -$letter"
               ;;

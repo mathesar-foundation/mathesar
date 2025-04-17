@@ -508,9 +508,9 @@ update_current_shell_env() {
       fi
     fi
   elif ! . "${INSTALL_DIR}/bin/mathesar_path_source"; then
-      echo "Warning: Unable to source mathesar_path_source in the current session."
-      echo "Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\" or restart your shell"
-      return 1
+    echo "Warning: Unable to source mathesar_path_source in the current session."
+    echo "Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\" or restart your shell"
+    return 1
   fi
 
   # Re-exec the shell if interactive
@@ -613,11 +613,14 @@ configure_path() {
   
       info "Attempting to update the current shell environment..."
       if update_current_shell_env; then
-        success "Everything's ready, you can now start Mathesar by executing \"mathesar run\". Use \"mathesar help\" for more information.".
+        success "Everything's ready, you can now start Mathesar by executing \"mathesar run\"."
+        echo "Use \"mathesar help\" for more information.".
+        echo "Please restart your shell if the 'mathesar' command is not found."
       else
         echo "Unable to automatically update the current shell environment."
         echo "Please run the following command in your terminal to update your PATH:"
         echo "source \"${INSTALL_DIR}/bin/mathesar_path_source\""
+        echo "Please restart your shell if the 'mathesar' command is still not found."
       fi
     fi
   fi
