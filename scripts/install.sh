@@ -46,7 +46,7 @@ PACKAGE_LOCATION="https://github.com/mathesar-foundation/mathesar/releases/downl
 
 # This is called before installation
 set_install_dir() {
-  INSTALL_DIR="$1"
+  INSTALL_DIR="$(cd -P "$1" && pwd)"
 
   UV_DIR="${INSTALL_DIR}"/uv
   PACKAGE_DIR="${INSTALL_DIR}"/packages

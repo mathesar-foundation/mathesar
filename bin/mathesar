@@ -254,7 +254,9 @@ run_mathesar() {
   fi
 
   info "Starting gunicorn webserver..."
-  exec "$gunicorn_bin" $gunicorn_opts
+  pushd "${BASE_DIR}" > /dev/null
+    exec "$gunicorn_bin" $gunicorn_opts
+  popd > /dev/null
 }
 
 

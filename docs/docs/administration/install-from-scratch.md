@@ -51,8 +51,8 @@
    <input data-input-for="MATHESAR_INSTALL_DIR" aria-label="Your Mathesar installation directory"/>
 1. Create and chown it if it doesn’t exist:
 ```bash
-sudo mkdir -p "xMATHESAR_INSTALL_DIRx"
-sudo chown "$(id -u):$(id -g)" "xMATHESAR_INSTALL_DIRx"
+mkdir -p "xMATHESAR_INSTALL_DIRx"
+chown "$(id -u):$(id -g)" "xMATHESAR_INSTALL_DIRx"
 ```
 1. Move inside the installation directory.
 ```bash
@@ -63,7 +63,7 @@ cd "xMATHESAR_INSTALL_DIRx"
 
 1. Download and make the script executable:
 ```bash
-curl -sSfL https://raw.githubusercontent.com/mathesar-foundation/mathesar/{{mathesar_version}}/install.sh -o install.sh
+curl -sSfL https://raw.githubusercontent.com/mathesar-foundation/mathesar/{{mathesar_version}}/scripts/install.sh -o install.sh
 chmod +x install.sh
 ```
 1. Run it, **pointing at the Postgres DB you created**:
