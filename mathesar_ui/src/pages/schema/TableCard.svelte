@@ -29,6 +29,7 @@
     ButtonMenuItem,
     DropdownMenu,
     Icon,
+    Tooltip,
     Truncate,
   } from '@mathesar-component-library';
 
@@ -120,25 +121,31 @@
 
   <div class="actions">
     {#if !requiresImportConfirmation}
-      <a
-        href={explorationPageUrl}
-        class="btn btn-secondary size-small"
-        title={$_('explore_table')}
-        class:disabled={!$currentRolePrivileges.has('SELECT')}
-      >
-        <Icon {...iconExploration} />
-      </a>
+      <Tooltip>
+        <a
+          slot="trigger"
+          href={explorationPageUrl}
+          class="btn btn-secondary size-small"
+          class:disabled={!$currentRolePrivileges.has('SELECT')}
+        >
+          <Icon {...iconExploration} />
+        </a>
+        <span slot="content">{$_('explore_table')}</span>
+      </Tooltip>
 
-      <Button
-        on:click={handleFindRecord}
-        appearance="secondary"
-        size="small"
-        disabled={!$currentRolePrivileges.has('SELECT')}
-        title={$_('find_record')}
-        class="action-button"
-      >
-        <Icon {...iconSelectRecord} />
-      </Button>
+      <Tooltip>
+        <Button
+          slot="trigger"
+          on:click={handleFindRecord}
+          appearance="secondary"
+          size="small"
+          disabled={!$currentRolePrivileges.has('SELECT')}
+          class="action-button"
+        >
+          <Icon {...iconSelectRecord} />
+        </Button>
+        <span slot="content">{$_('find_record')}</span>
+      </Tooltip>
     {/if}
 
     <div
