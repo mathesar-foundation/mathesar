@@ -33,9 +33,9 @@
 <LayoutWithHeader
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
+    '--page-padding': '0 var(--page-padding-x)',
   }}
   restrictWidth
-  fitViewport
 >
   <AppSecondaryHeader
     slot="secondary-header"

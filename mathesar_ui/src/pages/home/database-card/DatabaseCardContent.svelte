@@ -25,13 +25,14 @@
       {/if}
     </div>
     <div class="detail">
-      <!-- <span class="label">{$_('db_server')}:</span> -->
       <span>{server}</span>
     </div>
   </div>
-  <div class="caret-container">
-    <Icon {...iconExpandRight} size="1rem" />
-  </div>
+  {#if !upgradeRequired}
+    <div class="caret-container">
+      <Icon {...iconExpandRight} size="1rem" />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">

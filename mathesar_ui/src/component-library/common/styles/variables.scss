@@ -133,19 +133,19 @@ body {
   --text-size-super-ultra-large: var(--size-super-ultra-large);
 
   // Utility Colors
-  --danger-color: #d67171;
+  --danger-color: var(--rosy-700);
   --danger-background-color: #fde9e9;
   --danger-border-color: #f2aaaa;
 
-  --info-color: #3b82f6;
+  --info-color: var(--sky-700);
   --info-background-color: #eff6ff;
   --info-border-color: #bfdbfe;
 
-  --success-color: #10b981;
+  --success-color: #0d8f6a;
   --success-background-color: #ecfdf5;
   --success-border-color: #a7f3d0;
 
-  --warning-color: #f59e0b;
+  --warning-color: var(--pumpkin-700);
   --warning-background-color: #fef3c7;
   --warning-border-color: #fcd34d;
 

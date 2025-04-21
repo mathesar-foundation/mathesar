@@ -22,7 +22,7 @@
     border-radius: 50%;
   }
   .yes :global(svg path) {
-    stroke: white;
+    stroke: var(--success-color);
     stroke-width: 60;
   }
 </style>

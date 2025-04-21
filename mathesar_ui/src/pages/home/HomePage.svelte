@@ -48,19 +48,28 @@
 </LayoutWithHeader>
 
 <style lang="scss">
+  $breakpoint: 50rem;
+
   .content {
     display: grid;
     gap: 3.5rem;
-    @media screen and (min-width: 50rem) {
-      grid-template: auto / 20rem 1fr;
+    grid-template-columns: 1fr;
+    @media screen and (min-width: $breakpoint) {
+      grid-template-columns: 20rem 1fr;
     }
   }
   .databases-section {
+    grid-row: 1;
     display: flex;
     flex-direction: column;
     gap: 2.5rem;
+    @media screen and (min-width: $breakpoint) {
+      grid-row: auto;
+      grid-column: 2;
+    }
   }
   .resources-sidebar {
+    grid-row: 2;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -69,6 +78,10 @@
     padding: 1.5rem;
     box-shadow: var(--shadow-color) 0 2px 8px;
     border: 1px solid var(--card-border);
+    @media screen and (min-width: $breakpoint) {
+      grid-row: auto;
+      grid-column: 1;
+    }
   }
   .cards {
     display: flex;

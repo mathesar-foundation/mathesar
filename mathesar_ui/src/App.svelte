@@ -201,7 +201,7 @@
   }
 
   a {
-    color: var(--text-color);
+    color: var(--link-color);
     text-decoration-thickness: 1px;
     text-underline-offset: 0.1em;
   }

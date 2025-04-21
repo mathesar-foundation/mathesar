@@ -14,45 +14,46 @@
     min-height: 100%;
     padding: var(--size-x-small) var(--size-base);
     color: var(--text-color-primary);
-    background-color: var(--card-background);
 
     &::before,
     &::after {
       content: '';
       position: absolute;
-      background-color: var(--Grid-table__cell-border-color-internal);
+      background-color: var(--border-color);
       z-index: 1;
     }
-    // row
+
+    &::before {
+      block-size: 100%;
+      inline-size: var(--border-radius-xs);
+      inset-block-start: 0;
+      inset-inline-start: calc(var(--border-radius-xs) * -1);
+    }
+
     &::after {
       inline-size: 100vw;
-      block-size: var(--Grid-table__border-size-internal);
+      block-size: var(--border-radius-xs);
       inset-inline-start: 0;
-      inset-block-end: calc(var(--Grid-table__border-size-internal) * -1);
-    }
-    // column
-    &::before {
-      inline-size: var(--Grid-table__border-size-internal);
-      block-size: 100vh;
-      inset-inline-start: calc(var(--Grid-table__border-size-internal) * -1);
+      inset-block-end: calc(var(--border-radius-xs) * -1);
     }
 
     &.gt-header {
-      font-weight: 500;
-      background-color: var(--hover-background);
+      font-weight: var(--font-weight-medium);
       color: var(--text-color-secondary);
 
       &::after {
-        background-color: var(--Grid-table__border-color-internal);
+        background-color: var(--border-color);
       }
-    }
 
-    &:hover {
-      background-color: var(--hover-background);
+      background: linear-gradient(
+        to bottom,
+        var(--header-gradient-start),
+        var(--header-gradient-end)
+      );
     }
 
     &:active {
-      background-color: var(--active-background);
+      background: var(--active-background);
     }
   }
 </style>

@@ -83,7 +83,5 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    max-height: 70vh;
-    overflow-y: auto;
   }
 </style>

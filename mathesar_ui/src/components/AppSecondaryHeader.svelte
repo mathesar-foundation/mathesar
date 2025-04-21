@@ -31,7 +31,7 @@
   }
   .content {
     padding: var(--size-ultra-large) var(--page-padding-x);
-    width: var(--max-layout-width-console-pages);
+    max-width: var(--max-layout-width-console-pages);
   }
   .content.restrict-width {
     margin-left: auto;
