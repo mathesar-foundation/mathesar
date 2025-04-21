@@ -773,7 +773,7 @@ BEGIN
                             comma_separator_lakh_system
                           );
   inner_number_group := '(' || inner_number_tree || ')';
-  required_currency_beginning := non_numeric || inner_number_group || non_numeric;
+  required_currency_beginning := non_numeric || inner_number_group || non_numeric || '?';
   required_currency_ending := non_numeric || '?' || inner_number_group || non_numeric;
   money_finding_regex := '^(?:' || required_currency_beginning || '|' || required_currency_ending || ')$';
 
