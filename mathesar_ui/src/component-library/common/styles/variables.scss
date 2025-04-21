@@ -155,7 +155,7 @@ body {
   --gray-200: #eeeeee;
   --gray-300: #e0e0e0;
   --gray-400: #bdbdbd;
-  --gray-500: #9e9e9e;
+  --gray-500: #757575;
   --gray-600: #353535;
   --gray-700: #303030;
   --gray-800: #1f1f1f;
@@ -322,7 +322,7 @@ body.theme-dark {
   --text-color-primary: #ffffff;
   --text-color-secondary: var(--stormy-200);
   --text-color-tertiary: var(--stormy-300);
-  --text-color-muted: var(--gray-400);
+  --text-color-muted: var(--gray-500);
 
   // Input
   --input-background: var(--gray-800);

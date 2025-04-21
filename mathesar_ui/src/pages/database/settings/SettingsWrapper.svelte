@@ -61,9 +61,6 @@
 <style lang="scss">
   .navigation {
     --Menu__min-width: 100%;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-m);
-    background: var(--background-color);
     overflow: hidden;
   }
 </style>
