@@ -756,13 +756,7 @@ DECLARE
   period_separator_opt_decimal text := '[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?';
   space_separator_opt_decimal text := '[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?';
   comma_separator_lakh_system text := '[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?';
-  inner_number_tree text;
-  inner_number_group text;
-  required_currency_beginning text;
-  required_currency_ending text;
-  money_finding_regex text;
-BEGIN
-  inner_number_tree := concat_ws('|',
+  inner_number_tree text := concat_ws('|',
                             no_separator_big,
                             no_separator_small,
                             comma_separator_req_decimal,
@@ -772,11 +766,11 @@ BEGIN
                             space_separator_opt_decimal,
                             comma_separator_lakh_system
                           );
-  inner_number_group := '(' || inner_number_tree || ')';
-  required_currency_beginning := non_numeric || inner_number_group || non_numeric || '?';
-  required_currency_ending := non_numeric || '?' || inner_number_group || non_numeric;
-  money_finding_regex := '^(?:' || required_currency_beginning || '|' || required_currency_ending || ')$';
-
+  inner_number_group text := '(' || inner_number_tree || ')';
+  required_currency_beginning text := non_numeric || inner_number_group || non_numeric || '?';
+  required_currency_ending text := non_numeric || '?' || inner_number_group || non_numeric;
+  money_finding_regex text := '^(?:' || required_currency_beginning || '|' || required_currency_ending || ')$';
+BEGIN
   SELECT regexp_matches($1, money_finding_regex) INTO raw_arr;
   IF raw_arr IS NULL THEN
     RETURN NULL;
