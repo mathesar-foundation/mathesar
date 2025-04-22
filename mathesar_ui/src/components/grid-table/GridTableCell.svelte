@@ -19,22 +19,22 @@
     &::after {
       content: '';
       position: absolute;
-      background-color: var(--border-color);
+      background-color: var(--card-row-border);
       z-index: 1;
     }
 
     &::before {
       block-size: 100%;
-      inline-size: var(--border-radius-xs);
+      inline-size: 1px;
       inset-block-start: 0;
-      inset-inline-start: calc(var(--border-radius-xs) * -1);
+      inset-inline-end: 0;
     }
 
     &::after {
-      inline-size: 100vw;
-      block-size: var(--border-radius-xs);
+      inline-size: 100%;
+      block-size: 1px;
       inset-inline-start: 0;
-      inset-block-end: calc(var(--border-radius-xs) * -1);
+      inset-block-end: 0;
     }
 
     &.gt-header {
@@ -42,7 +42,7 @@
       color: var(--text-color-secondary);
 
       &::after {
-        background-color: var(--border-color);
+        background-color: var(--card-row-border);
       }
 
       background: linear-gradient(

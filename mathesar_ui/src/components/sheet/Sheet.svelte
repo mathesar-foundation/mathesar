@@ -244,4 +244,8 @@
       cursor: default;
     }
   }
+
+  :global(.with-panel) .sheet {
+    margin: 0 var(--size-xx-small);
+  }
 </style>

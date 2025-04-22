@@ -316,6 +316,7 @@ body.theme-dark {
   --collapsible-background: var(--gray-700);
   --collapsible-hover: var(--gray-600);
   --collapsible-active: var(--gray-500);
+  --card-row-border: var(--gray-700);
 
   // Text
   --text-color: var(--white);
@@ -345,7 +346,6 @@ body.theme-dark {
   // Card
   --card-background: var(--gray-900);
   --card-border: var(--gray-700);
-  --card-row-border: var(--gray-800);
   --card-hover-border: var(--stormy-400);
   --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
     0 2px 4px -2px var(--shadow-color),
