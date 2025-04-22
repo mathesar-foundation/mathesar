@@ -40,8 +40,8 @@
       border: 1px solid transparent;
 
       &.selected {
-        border: 1px solid var(--accent-500);
-        background: var(--accent-100);
+        border: 1px solid var(--active-background);
+        background: var(--active-background);
       }
     }
   }

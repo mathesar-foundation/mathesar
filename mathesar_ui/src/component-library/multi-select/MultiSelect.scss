@@ -4,10 +4,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: solid 0.02em #ddd;
-  border-radius: 0.25rem;
+  border: solid 0.02em var(--input-border);
+  border-radius: var(--border-radius-m);
   padding: var(--spacing);
   min-height: 2.37em;
+  background: var(--input-background);
+  gap: var(--spacing);
 
   &.disabled {
     pointer-events: none;
@@ -17,23 +19,30 @@
   .selected-values {
     display: flex;
     flex-wrap: wrap;
+    flex: 1;
+    gap: var(--spacing);
+    align-items: center;
   }
 
   .selected-value {
     display: flex;
     padding: 0.285rem 0.428rem;
-    margin: var(--spacing);
-    background: var(--gray-100);
-    border: 1px solid var(--gray-300);
+    background: var(--hover-background);
+    border: 1px solid var(--input-border);
     border-radius: var(--border-radius-m);
+    color: var(--text-color);
+    align-items: center;
   }
 
   .icon-button {
-    color: #888;
+    color: var(--text-color-tertiary);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .icon-button:hover {
-    color: black;
+    color: var(--text-color);
   }
 
   .remove-button {
@@ -43,8 +52,10 @@
   }
 
   .clear-button {
-    padding-left: 1em;
+    padding-left: var(--spacing);
     visibility: hidden;
+    display: flex;
+    align-items: center;
   }
   &:hover .clear-button {
     visibility: visible;

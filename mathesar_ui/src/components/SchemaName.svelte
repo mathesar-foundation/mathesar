@@ -10,18 +10,4 @@
   $: isLocked = $isPublicSchema;
 </script>
 
-<span class="schema-name" class:is-locked={isLocked}>
-  {$name}
-</span>
-
-<style>
-  .schema-name {
-    --NameWithIcon__icon-opacity: 1;
-  }
-  .schema-name.is-locked {
-    --icon-color: var(
-      var(--SchemaName__locked-schema-icon-color),
-      var(--gray-500)
-    );
-  }
-</style>
+<NameWithIcon icon={iconSchema} name={$name} />

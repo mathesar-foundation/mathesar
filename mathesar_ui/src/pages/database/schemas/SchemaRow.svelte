@@ -4,7 +4,6 @@
 
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
-  import SchemaName from '@mathesar/components/SchemaName.svelte';
   import {
     iconDeleteMajor,
     iconEdit,
@@ -67,7 +66,7 @@
   </div>
 
   <div class="content">
-    <div class="name"><SchemaName {schema} /></div>
+    <div class="name">{$name}</div>
 
     {#if $description}
       <p class="description" title={$description}>
@@ -85,13 +84,6 @@
     </div>
   </div>
 
-  <!--
-  {#if $isPublicSchema}
-    <InfoBox>
-      {$_('public_schema_info')}
-    </InfoBox>
-  {/if}
--->
   <!-- svelte-ignore a11y-missing-content -->
   <a
     {href}
