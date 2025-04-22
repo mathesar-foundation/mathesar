@@ -65,7 +65,7 @@
     border-top: 1px solid var(--border-color);
   }
   .no-widgets {
-    background: var(--background-color);
+    background: var(--layout-background-color);
   }
   h2 {
     padding: var(--size-small);
