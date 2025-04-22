@@ -193,7 +193,7 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--border-color);
     border-radius: 0.25rem;
     background: var(--input-background);
     min-height: 2.25em;

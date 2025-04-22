@@ -170,7 +170,7 @@
     }
 
     .muted {
-      color: var(--gray-400);
+      color: var(--text-color-muted);
     }
   }
 </style>

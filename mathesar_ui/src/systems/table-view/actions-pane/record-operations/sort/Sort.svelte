@@ -97,7 +97,7 @@
         />
       </div>
     {:else}
-      <span>{$_('no_sorting_condition_added')}</span>
+      <span class="muted">{$_('no_sorting_condition_added')}</span>
     {/each}
   </div>
   {#if availableColumnIds.length > 0}
@@ -141,6 +141,11 @@
       grid-template-columns: auto 1fr;
       gap: 0.5rem;
       align-items: stretch;
+
+      > :global(.input-group) {
+        background-color: var(--background-color);
+        border-radius: var(--border-radius-l);
+      }
     }
     .trigger {
       display: flex;
@@ -149,6 +154,10 @@
 
     .header {
       font-weight: bolder;
+    }
+
+    .muted {
+      color: var(--text-color-muted);
     }
   }
 </style>
