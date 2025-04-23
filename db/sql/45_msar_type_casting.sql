@@ -747,7 +747,7 @@ DECLARE
   decimal_point text;
 
   -- pieces required for regex
-  non_numeric text := '(?:[^.,0-9]+)';
+  non_numeric text := '([^.,0-9]+)'; -- needs to be capturing
   no_separator_big text := '[0-9]{4,}(?:([,.])[0-9]+)?';
   no_separator_small text := '[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?';
   comma_separator_req_decimal text := '[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+';
