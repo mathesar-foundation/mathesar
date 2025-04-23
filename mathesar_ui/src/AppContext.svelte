@@ -83,7 +83,7 @@
   }
 </script>
 
-<svelte:body on:copy={handleCopy} on:paste={handlePaste} class="test-1-2-3" />
+<svelte:body on:copy={handleCopy} on:paste={handlePaste} />
 
 <ToastPresenter entries={toast.entries} />
 <Confirmation controller={confirmationController} />
