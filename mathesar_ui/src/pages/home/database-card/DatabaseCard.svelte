@@ -29,7 +29,7 @@
     );
     overflow: hidden;
     box-shadow: var(--card-active-shadow);
-    transition: all 0.2s ease-in-out;
+    transition: background 0.2s ease-in-out;
   }
 
   .db-card.hoverable {

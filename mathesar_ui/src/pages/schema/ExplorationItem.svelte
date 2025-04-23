@@ -51,7 +51,6 @@
     margin: 0 -0.75rem;
     display: flex;
     align-items: center;
-    transition: all 0.2s ease;
     border-radius: var(--border-radius-m);
 
     &:hover {

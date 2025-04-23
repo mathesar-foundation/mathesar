@@ -21,7 +21,6 @@
     background: var(--card-background);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-m);
-    transition: all 0.2s ease;
   }
   .link-card,
   .link-card.multiple {

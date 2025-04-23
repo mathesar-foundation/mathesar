@@ -128,7 +128,6 @@
     display: flex;
     align-items: center;
     padding: var(--size-ultra-small);
-    transition: all 0.2s ease-in-out;
 
     &:hover {
       background-color: var(--accent-100);

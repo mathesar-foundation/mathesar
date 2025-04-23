@@ -16,7 +16,7 @@
   color: var(--button-color, inherit);
   border-color: var(--button-border-color);
   outline: var(--button-outline, none);
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
   font-weight: var(--font-weight-medium);
 
   > * + * {
@@ -85,7 +85,6 @@
       0 1px 2px rgba(0, 0, 0, 0.05),
       0 1px 3px rgba(0, 0, 0, 0.1),
       0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-in-out;
 
     &:not(:disabled) {
       &.focus,
@@ -263,7 +262,6 @@
   &.btn-inspector {
     --button-background: var(--collapsible-button-background);
     --button-color: var(--collapsible-button-text);
-    transition: all 0.2s ease;
     border: 2px solid transparent;
     box-shadow: var(--collapsible-button-shadow);
 

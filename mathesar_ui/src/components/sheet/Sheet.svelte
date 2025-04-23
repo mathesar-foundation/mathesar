@@ -236,10 +236,6 @@
       min-width: 100%;
     }
 
-    :global([data-sheet-element='data-row']) {
-      transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
-    }
-
     &.selection-in-progress :global(*) {
       cursor: default;
     }

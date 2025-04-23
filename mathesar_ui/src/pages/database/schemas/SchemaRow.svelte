@@ -123,7 +123,7 @@
     height: 100%;
     width: 100%;
     box-shadow: var(--card-active-shadow);
-    transition: all 0.2s ease-in-out;
+    transition: background 0.2s ease-in-out;
   }
 
   .schema-row.hover {
