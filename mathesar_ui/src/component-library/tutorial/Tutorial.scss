@@ -62,7 +62,7 @@
   }
 }
 
-:global(body.theme-dark) .tutorial {
+body.theme-dark .tutorial {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 
   &::before {
