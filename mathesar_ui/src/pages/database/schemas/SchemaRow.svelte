@@ -23,7 +23,7 @@
   export let database: Database;
   export let schema: Schema;
 
-  $: ({ name, description, isPublicSchema, currentAccess } = schema);
+  $: ({ name, description, currentAccess } = schema);
   $: ({ currentRoleOwns } = currentAccess);
 
   let isHovered = false;

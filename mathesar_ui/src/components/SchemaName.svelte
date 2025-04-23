@@ -7,7 +7,6 @@
   export let schema: Schema;
 
   $: ({ name, isPublicSchema } = schema);
-  $: isLocked = $isPublicSchema;
 </script>
 
 <NameWithIcon icon={iconSchema} name={$name} />

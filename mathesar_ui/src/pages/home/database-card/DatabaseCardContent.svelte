@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { staticText } from '@mathesar/i18n/staticText';
   import { iconDatabase, iconExpandRight } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import { Icon } from '@mathesar-component-library';
