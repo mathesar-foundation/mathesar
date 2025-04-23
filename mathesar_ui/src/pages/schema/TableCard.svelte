@@ -210,6 +210,7 @@
 
   .table-row:hover {
     box-shadow: var(--shadow-color) 0 2px 4px 0;
+    background-color: var(--hover-background);
   }
 
   .table-row:active {
