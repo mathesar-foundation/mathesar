@@ -52,7 +52,6 @@
     background-color: var(--elevated-background);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-l);
-    margin-right: 0.5rem;
     isolation: isolate;
 
     .tabs-container {

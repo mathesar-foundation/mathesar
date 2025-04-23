@@ -50,7 +50,6 @@
     height: 100%;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-l);
-    margin-right: 0.5rem;
     background: var(--elevated-background);
     display: flex;
     flex-direction: column;

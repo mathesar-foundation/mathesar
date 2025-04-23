@@ -46,7 +46,7 @@
   [data-identifier='status-bar'] {
     flex-grow: 0;
     flex-shrink: 0;
-    padding: var(--status-bar-padding);
+    padding: var(--status-bar-padding) 0;
     display: flex;
     align-items: center;
   }

@@ -27,7 +27,6 @@
 <style>
   .app-secondary-header {
     width: 100%;
-    margin: 0 auto;
   }
   .content {
     padding: var(--size-ultra-large) var(--page-padding-x);

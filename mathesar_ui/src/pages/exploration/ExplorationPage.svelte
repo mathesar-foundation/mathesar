@@ -52,15 +52,17 @@
 
 <LayoutWithHeader fitViewport>
   {#if queryRunner}
-    <div class="exploration-page">
+    <div class="exploration-page" class:inspector-open={isInspectorOpen}>
       <Header bind:isInspectorOpen {query} {database} {schema} {context} />
-      <WithExplorationInspector
-        {isInspectorOpen}
-        queryHandler={queryRunner}
-        on:delete={gotoSchemaPage}
-      >
-        <ExplorationResults queryHandler={queryRunner} />
-      </WithExplorationInspector>
+      <div class="content">
+        <WithExplorationInspector
+          {isInspectorOpen}
+          queryHandler={queryRunner}
+          on:delete={gotoSchemaPage}
+        >
+          <ExplorationResults queryHandler={queryRunner} />
+        </WithExplorationInspector>
+      </div>
       <StatusBar queryHandler={queryRunner} />
     </div>
   {/if}
@@ -71,5 +73,11 @@
     display: grid;
     grid-template: auto 1fr auto / 1fr;
     height: 100%;
+  }
+  .content {
+    padding: 0 var(--size-xx-small);
+  }
+  .exploration-page.inspector-open .content :global(.with-panel) {
+    gap: var(--size-xx-small);
   }
 </style>
