@@ -80,7 +80,7 @@
     --cell-bg-color-processing: var(--yellow-100);
     --cell-bg-color-disabled: var(--gray-100);
     --cell-bg-color-row-hover: var(--gray-100);
-    --cell-bg-color-row-selected: var(--stormy-100);
+    --cell-bg-color-row-selected: var(--stormy-200);
 
     --color-fk: var(--yellow-300);
     --color-error: var(--danger-color);
@@ -142,7 +142,7 @@
     --cell-bg-color-processing: rgba(251, 191, 36, 0.15);
     --cell-bg-color-disabled: rgba(39, 43, 48, 0.3);
     --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
-    --cell-bg-color-row-selected: rgba(122, 92, 166, 0.3);
+    --cell-bg-color-row-selected: rgba(122, 92, 166, 0.4);
 
     --color-substring-match: var(--pumpkin-700);
     --color-substring-match-light: rgba(166, 95, 20, 0.2);
