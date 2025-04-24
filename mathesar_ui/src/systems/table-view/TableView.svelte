@@ -153,7 +153,6 @@
     position: relative;
     height: 100%;
     overflow-x: auto;
-    padding: 0 var(--size-xx-small);
   }
   .loading-sheet {
     text-align: center;
