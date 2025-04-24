@@ -35,6 +35,7 @@
     selection,
     canUpdateRecords,
     canDeleteRecords,
+    canInsertRecords,
   } = $tabularData);
   $: ({
     rowStatus,
@@ -99,6 +100,7 @@
             {recordPk}
             {recordsData}
             {row}
+            canInsertRecords={$canInsertRecords}
             canDeleteRecords={$canDeleteRecords}
           />
         </ContextMenu>
@@ -126,6 +128,7 @@
           {processedColumn}
           {recordsData}
           {recordPk}
+          canInsertRecords={$canInsertRecords}
           canUpdateRecords={$canUpdateRecords}
           canDeleteRecords={$canDeleteRecords}
         />

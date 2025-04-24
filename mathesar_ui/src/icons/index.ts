@@ -169,6 +169,10 @@ export const iconGrip = { data: faGrip };
 export const iconReinstall = { data: faRotateBack };
 export const iconAddPrimaryKeyColumn = iconAddNew;
 export const iconPickPrimaryKeyColumn = { data: faHandPointer };
+export const iconDuplicateRecord: IconProps = {
+  data: faClone,
+  flip: 'vertical',
+};
 
 // THINGS
 //
