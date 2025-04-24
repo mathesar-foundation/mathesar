@@ -166,6 +166,7 @@
     flex-direction: column;
     flex-grow: 1;
     gap: 0.125rem;
+    min-width: 0;
   }
 
   .hyperlink-overlay {
@@ -216,8 +217,11 @@
     font-size: var(--text-size-xx-large);
     font-weight: var(--font-weight-medium);
     overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     color: var(--text-color-primary);
     margin-bottom: 0.125rem;
     line-height: 1.2;
+    width: 100%;
   }
 </style>

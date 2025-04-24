@@ -51,9 +51,5 @@
         var(--header-gradient-end)
       );
     }
-
-    &:active {
-      background: var(--active-background);
-    }
   }
 </style>

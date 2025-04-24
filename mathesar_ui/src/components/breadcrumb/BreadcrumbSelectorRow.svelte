@@ -78,7 +78,6 @@
     display: flex;
     align-items: stretch;
     position: relative;
-    z-index: 1;
   }
   .record-selector > :global(*) {
     flex: 1;

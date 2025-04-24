@@ -66,7 +66,6 @@
     user-select: none;
     -webkit-user-select: none; /* Safari */
     overflow: hidden;
-    z-index: 1;
 
     > div {
       position: relative;
