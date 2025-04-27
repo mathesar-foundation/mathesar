@@ -54,7 +54,6 @@
     color: inherit;
     text-decoration: none;
     position: relative;
-    z-index: 1;
   }
 
   .hover-indicator {
@@ -65,7 +64,6 @@
     height: 100%;
     background: var(--hover-background);
     pointer-events: none;
-    z-index: 0;
     opacity: 0;
     transition: opacity 0.2s ease;
   }
