@@ -196,9 +196,7 @@
     border: 1px solid var(--border-color);
     border-radius: 0.25rem;
     background: var(--input-background);
-    min-height: 2.25em;
-    padding: 0;
-    --padding: 0.5rem;
+    padding: var(--size-ultra-small);
     cursor: default;
   }
   .disabled {
@@ -215,8 +213,7 @@
   .content {
     position: relative;
     display: block;
-    padding: var(--padding);
-    padding-right: 0;
+    padding: 0;
     z-index: 2;
   }
   .dropdown-button {

@@ -117,7 +117,7 @@
 <style>
   .column-header-cell {
     --input-height: 2.25rem;
-    --padding: 0.4rem;
+    --padding: var(--size-ultra-small);
     padding: var(--padding);
     height: 100%;
     display: grid;
@@ -170,6 +170,7 @@
     right: auto;
     top: auto;
     bottom: auto;
+    padding: 0 var(--size-ultra-small);
     min-width: 100%;
     width: max-content;
     max-width: 100%;

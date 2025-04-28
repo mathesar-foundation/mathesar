@@ -187,6 +187,7 @@
     position: relative;
     text-overflow: ellipsis;
     text-align: inherit;
+    padding: var(--cell-padding);
 
     &.nowrap {
       white-space: nowrap;

@@ -118,7 +118,7 @@
     flex-direction: column;
 
     &.has-padding {
-      padding: var(--cell-padding);
+      padding: 0 var(--cell-padding);
     }
 
     &.h-align-right {

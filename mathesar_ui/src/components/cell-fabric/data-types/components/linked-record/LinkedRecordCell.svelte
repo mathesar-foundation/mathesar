@@ -139,7 +139,7 @@
     justify-content: space-between;
   }
   .value {
-    padding-left: var(--cell-padding);
+    padding: var(--cell-padding);
     align-self: center;
     overflow: hidden;
     width: max-content;
