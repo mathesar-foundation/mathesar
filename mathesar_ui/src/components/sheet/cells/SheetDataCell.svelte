@@ -56,6 +56,7 @@
     -webkit-user-select: none; /* Safari */
     background: var(--cell-bg-color-base);
     --sheet-cell-selection-bg: rgba(205, 192, 226, 0.3);
+    line-height: 1.2;
   }
 
   :global(body.theme-dark) [data-sheet-element='data-cell'] {
@@ -66,5 +67,6 @@
     z-index: var(--z-index__sheet__active-cell);
     border-color: transparent;
     min-height: 100%;
+    height: auto;
   }
 </style>

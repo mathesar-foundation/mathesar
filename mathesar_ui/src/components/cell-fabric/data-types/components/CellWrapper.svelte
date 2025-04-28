@@ -118,7 +118,7 @@
     flex-direction: column;
 
     &.has-padding {
-      padding: 0 var(--cell-padding);
+      padding: var(--cell-padding);
     }
 
     &.h-align-right {
@@ -137,6 +137,7 @@
     :global(.input-element) {
       box-shadow: none;
       border: none;
+      padding: 0.42rem;
     }
 
     &.is-edit-mode {
