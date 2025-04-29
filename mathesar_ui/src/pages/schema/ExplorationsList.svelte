@@ -15,7 +15,7 @@
 </script>
 
 <div class="container">
-  {#each explorations as exploration}
+  {#each explorations as exploration (exploration.id)}
     <ExplorationItem {exploration} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconExploration}>
