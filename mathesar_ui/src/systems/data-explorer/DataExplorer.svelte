@@ -22,7 +22,7 @@
   let isInspectorOpen = true;
 </script>
 
-<div class="data-explorer">
+<div class="data-explorer" class:inspector-open={isInspectorOpen}>
   <ActionsPane
     {queryManager}
     bind:linkCollapsibleOpenState
@@ -55,13 +55,15 @@
             {$_('get_started_by_adding_columns_from_left')}
           </div>
         {:else}
-          <WithExplorationInspector
-            {isInspectorOpen}
-            queryHandler={queryManager}
-            on:delete
-          >
-            <ExplorationResults queryHandler={queryManager} />
-          </WithExplorationInspector>
+          <div class="results-wrapper">
+            <WithExplorationInspector
+              {isInspectorOpen}
+              queryHandler={queryManager}
+              on:delete
+            >
+              <ExplorationResults queryHandler={queryManager} />
+            </WithExplorationInspector>
+          </div>
         {/if}
       </WithInputSidebar>
       {#if hasColumns}
@@ -81,7 +83,7 @@
       padding: 0 1rem;
       text-align: center;
       font-size: var(--text-size-x-large);
-      color: var(--slate-500);
+      color: var(--gray-500);
     }
 
     .initial-content {
@@ -92,7 +94,7 @@
 
       .tutorial-holder {
         margin-top: 4rem;
-        max-width: 70%;
+        max-width: 40%;
       }
 
       .help-text {
@@ -107,9 +109,9 @@
       display: grid;
       grid-template: 1fr auto / 1fr;
       overflow: hidden;
-      overflow-x: auto;
-      .help-text {
-        margin-top: 10rem;
+      padding: 0 var(--size-xx-small);
+      .results-wrapper {
+        height: 100%;
       }
     }
   }

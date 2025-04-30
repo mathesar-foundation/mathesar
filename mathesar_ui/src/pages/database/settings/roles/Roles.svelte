@@ -132,6 +132,5 @@
 <style lang="scss">
   .roles-table {
     --Grid-table__template-columns: 3fr 2fr 4fr 2fr;
-    background: var(--white);
   }
 </style>

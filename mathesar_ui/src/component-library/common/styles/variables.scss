@@ -1,84 +1,106 @@
 /**
  * File to place common css & scss variables for the component library
  */
-:root {
-  // Danger colors
-  --danger-color: #d67171;
-  --danger-background-color: #fde9e9;
-  --dander-border-color: #f2aaaa;
+body {
+  // Background Colors
+  --background-color: #ffffff;
+  --header-background: var(--white);
+  --header-border: var(--sand-200);
+  --header-gradient-start: var(--white);
+  --header-gradient-end: var(--sand-100);
+  --footer-background-color: var(--sand-50);
+  --inset-background-color: var(--white);
+  --hover-background: var(--stormy-50);
+  --active-background: var(--stormy-200);
+  --disabled-background: var(--gray-100);
+  --elevated-background: var(--sand-100);
+  --sidebar-background: var(--white);
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --icon-background: var(--stormy-100);
+  --layout-background-color: var(--sand-50);
 
-  // Idea here is to use the same token naming
-  // between the Figma designs and the codebase
-  // which then makes it easier and faster to create
-  // element from design into code.
-  --green-100: #e5fde6;
+  // Border Colors
+  --border-color: var(--sand-300);
+  --card-border: var(--sand-300);
+  --card-row-border: var(--sand-200);
+  --card-hover-border: var(--stormy-300);
+  --input-border: var(--gray-300);
 
-  --purple-100: #ebe5fd;
-  --purple-200: #d7cbfb;
-  --purple-300: #a586ff;
-  --purple-400: #6b45dd;
-  --purple-500: #4b2c9d;
+  // Border Radius
+  --border-radius-xs: 0.071rem; //1px
+  --border-radius-s: 0.142rem; //2px
+  --border-radius-m: 0.285rem; //4px
+  --border-radius-l: 0.571rem; //8px
+  --border-radius-xl: 1.142rem; //16px
 
-  --red-100: #fdeeed;
-  --red-200: #f9cdc8;
-  --red-500: #eb5441;
-  --red-600: #dd4734;
-  --red-800: #c63826;
+  // Card Styles
+  --card-background: #ffffff;
+  --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
+    0 2px 4px -2px var(--shadow-color),
+    0 0 0 1px var(--shadow-color-inset) inset;
+  --card-active-shadow: 0 1px 2px var(--shadow-color-light),
+    0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+  --gradient-card-start: var(--white);
+  --gradient-card-end: var(--sand-50);
+  --gradient-card-hover-start: var(--sand-100);
+  --gradient-card-hover-end: var(--sand-200);
+  --gradient-card-active-start: var(--sand-100);
+  --gradient-card-active-end: var(--sand-200);
 
-  --slate-50: #f6f9f9;
-  --slate-100: #eef0f0;
-  --slate-200: #d3d6da;
-  --slate-300: #b6bbc2;
-  --slate-400: #6c727e;
-  --slate-500: #4c515a;
-  --slate-600: #3c414a;
-  --slate-700: #393f46;
-  --slate-800: #272b30;
+  // Collapsible Styles
+  --collapsible-background: var(--sand-200);
+  --collapsible-hover: var(--sand-300);
+  --collapsible-active: var(--sand-400);
+  --collapsible-button-background: var(--sand-200);
+  --collapsible-button-hover: var(--sand-300);
+  --collapsible-button-active: var(--sand-400);
+  --collapsible-button-border: var(--sand-500);
+  --collapsible-button-text: var(--text-color-primary);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
-  --slate-800-rgb: 39, 43, 48;
+  // Font Weights
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  --font-weight-extra-bold: 700;
 
-  --sand-50: #fdfdfc;
-  --sand-100: #f9f8f5;
-  --sand-200: #f0e9db;
-  --sand-300: #e6dcbf;
-  --sand-400: #d1c3b0;
-  --sand-500: #b8a895;
-  --sand-600: #9f8d7a;
-  --sand-700: #87725f;
-  --sand-800: #6f5744;
+  // Gradients
+  --gradient-direction-default: to bottom right;
+  --gradient-base-start: var(--stormy-100);
+  --gradient-base-end: var(--stormy-200);
+  --gradient-base-hover-start: var(--stormy-200);
+  --gradient-base-hover-end: var(--stormy-300);
+  --gradient-base-active-start: var(--stormy-300);
+  --gradient-base-active-end: var(--stormy-400);
+  --gradient-light-start: var(--gradient-base-start);
+  --gradient-light-end: var(--gradient-base-end);
+  --gradient-dark-start: var(--stormy-800);
+  --gradient-dark-end: var(--stormy-900);
 
-  --sky-200: #daeefb;
-  --sky-300: #99d4f9;
-  --sky-500: #84caf5;
-  --sky-600: #127ed6;
-  --sky-700: #0f69c1;
-  --sky-800: #3e5a80;
+  // Input Styles
+  --input-background: #ffffff;
+  --input-disabled-background: var(--sand-50);
+  --input-focus-color: var(--stormy-500);
+  --input-focus-shadow: var(--stormy-100);
+  --input-padding: var(--size-xx-small);
+  --input-text: var(--text-color);
 
-  // TODO: Get this incorporated in figma
-  --slate-50-tentative: #f6f9f9;
-  --sky-600-tentative: #87bcf6;
+  // Inspector Styles
+  --inspector-hover: var(--sand-300);
+  --inspector-active: var(--sand-400);
 
-  --yellow-100: #fff6e0;
-  --yellow-200: #fff0c0;
-  --yellow-300: #f5cd8c;
-  --yellow-400: #eeb159;
-  --yellow-800: #944f01;
+  // Modal
+  --modal-z-index: 50;
 
-  --white: white;
+  // Shadows
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-light: rgba(0, 0, 0, 0.05);
+  --shadow-color-dark: rgba(0, 0, 0, 0.3);
+  --shadow-color-inset: rgba(255, 255, 255, 0.1);
+  --shadow-color-inset-dark: rgba(255, 255, 255, 0.05);
 
-  --red-box-shadow: #eb544133;
-
-  // Setting a new variable as brand color
-  // provides the ability to later change its
-  // value and support white-labelling
-
-  // Brand Color
-  --brand-100: var(--red-100);
-  --brand-500: var(--red-500);
-  --brand-600: var(--red-600);
-  --brand-800: var(--red-800);
-  --brand-box-shadow: var(--red-box-shadow);
-
+  // Sizes
   --size-extreme-small: 0.1429rem; // 2px
   --size-super-ultra-small: 0.2857rem; // 4px
   --size-ultra-small: 0.4286rem; // 6px
@@ -86,40 +108,20 @@
   --size-x-small: 0.7143rem; // 10px
   --size-small: 0.8571rem; // 12px
   --size-base: 1rem; // 14px
-  --size-large: 1.1429rem; // 16px
-  --size-x-large: 1.2857rem; // 18px
-  --size-xx-large: 1.4286rem; // 20px
-  --size-ultra-large: 1.7143rem; // 24px
-  --size-super-ultra-large: 2rem; // 28px
+  --size-large: 1.25rem; // 16px
+  --size-x-large: 1.4286rem; // 20px
+  --size-xx-large: 1.7143rem; // 24px
+  --size-ultra-large: 2.4rem; // 28px
+  --size-super-ultra-large: 3.2rem; // 56px
 
-  --border-radius-xs: 0.071rem; //1px
-  --border-radius-s: 0.142rem; //2px
-  --border-radius-m: 0.285rem; //4px
-  --border-radius-l: 0.571rem; //8px
-  --border-radius-xl: 1.142rem; //16px
+  // Text Colors
+  --text-color: #171717;
+  --text-color-primary: var(--stormy-800);
+  --text-color-secondary: var(--stormy-700);
+  --text-color-tertiary: var(--stormy-600);
+  --text-color-muted: var(--gray-500);
 
-  --input-padding: var(--size-ultra-small);
-
-  /*
-   A lot of the variables below are redundant and we might require
-   a refactor to reduce them.
-   */
-  --color-white: #ffffff;
-  --color-blue-light: #e6f0ff;
-  --color-blue-medium: #3b82f6;
-  --color-blue-dark: #1d4ed8;
-  --color-orange-dark: #7c2d12;
-  --color-green-medium: #10b981;
-  --color-gray-lighter: #fafafa;
-  --color-gray-light: #f4f4f5;
-  --color-gray-medium: #d4d4d8;
-  --color-gray-dark: #a1a1aa;
-  --color-gray-darker: #27272a;
-  --color-contrast: var(--color-blue-medium);
-  --color-contrast-light: var(--color-blue-light);
-  --color-link: var(--color-blue-dark);
-  --color-text: #171717;
-  --color-text-muted: #515662;
+  // Text Sizes
   --text-size-xx-small: var(--size-xx-small);
   --text-size-x-small: var(--size-x-small);
   --text-size-small: var(--size-small);
@@ -129,9 +131,259 @@
   --text-size-xx-large: var(--size-xx-large);
   --text-size-ultra-large: var(--size-ultra-large);
   --text-size-super-ultra-large: var(--size-super-ultra-large);
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-bold: 600;
-  --modal-z-index: 50;
+
+  // Utility Colors
+  --danger-color: var(--rosy-700);
+  --danger-background-color: #fde9e9;
+  --danger-border-color: #f2aaaa;
+
+  --info-color: var(--sky-700);
+  --info-background-color: #eff6ff;
+  --info-border-color: #bfdbfe;
+
+  --success-color: #0d8f6a;
+  --success-background-color: #ecfdf5;
+  --success-border-color: #a7f3d0;
+
+  --warning-color: var(--pumpkin-700);
+  --warning-background-color: #fef3c7;
+  --warning-border-color: #fcd34d;
+
+  // Color Palette
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #eeeeee;
+  --gray-300: #e0e0e0;
+  --gray-400: #bdbdbd;
+  --gray-500: #757575;
+  --gray-600: #353535;
+  --gray-700: #303030;
+  --gray-800: #1f1f1f;
+  --gray-900: #131313;
+  --gray-800-rgb: 39, 43, 48;
+  --gray-50-tentative: #f6f9f9;
+
+  --green-100: #e5fde6;
+
+  --orange-red-50: #fff2ef;
+  --orange-red-100: #ffe2dc;
+  --orange-red-200: #ffc5b8;
+  --orange-red-300: #ffa08b;
+  --orange-red-400: #ff7c5d;
+  --orange-red-500: #ff5030;
+  --orange-red-600: #ea3819;
+  --orange-red-700: #c92812;
+  --orange-red-800: #a31f0e;
+  --orange-red-900: #82180c;
+  --orange-red-950: #470c06;
+
+  --purple-100: #ebe5fd;
+  --purple-200: #d7cbfb;
+  --purple-300: #a586ff;
+  --purple-400: #6b45dd;
+  --purple-500: #4b2c9d;
+
+  --pumpkin-50: #fefbf3;
+  --pumpkin-100: #fef4de;
+  --pumpkin-200: #fce7bc;
+  --pumpkin-300: #f8d589;
+  --pumpkin-400: #f4b640;
+  --pumpkin-500: #eb9d20;
+  --pumpkin-600: #cc7d16;
+  --pumpkin-700: #a65f14;
+  --pumpkin-800: #874c15;
+  --pumpkin-900: #6f3f15;
+  --pumpkin-950: #422408;
+
+  --red-100: #fdeeed;
+  --red-200: #f9cdc8;
+  --red-500: #eb5441;
+  --red-600: #dd4734;
+  --red-800: #c63826;
+  --red-box-shadow: #eb544133;
+
+  --rosy-50: #fef3f3;
+  --rosy-100: #fee5e5;
+  --rosy-200: #fccfcf;
+  --rosy-300: #f9aaaa;
+  --rosy-400: #ed7f7f;
+  --rosy-500: #e26464;
+  --rosy-600: #d14848;
+  --rosy-700: #b13535;
+  --rosy-800: #932e2e;
+  --rosy-900: #612323;
+  --rosy-950: #411414;
+
+  --salmon-50: #fef4f1;
+  --salmon-100: #ffe6df;
+  --salmon-200: #ffd0bf;
+  --salmon-300: #ffa690;
+  --salmon-400: #ff8365;
+  --salmon-500: #f96b45;
+  --salmon-600: #e04e2a;
+  --salmon-700: #c03a1b;
+  --salmon-800: #a02e16;
+  --salmon-900: #832411;
+  --salmon-950: #441209;
+
+  --sand-50: #faf8f5;
+  --sand-100: #f5f2ec;
+  --sand-200: #e5e0d5;
+  --sand-300: #c9c1b0;
+  --sand-400: #a39b8a;
+  --sand-500: #8f8673;
+  --sand-600: #736b5c;
+  --sand-700: #524c41;
+  --sand-800: #38342d;
+  --sand-900: #272521;
+
+  --sky-200: #daeefb;
+  --sky-300: #99d4f9;
+  --sky-500: #84caf5;
+  --sky-600: #127ed6;
+  --sky-700: #0f69c1;
+  --sky-800: #3e5a80;
+  --sky-600-tentative: #87bcf6;
+
+  --stormy-50: #f3f0f7;
+  --stormy-100: #e6dff0;
+  --stormy-200: #cdc0e2;
+  --stormy-300: #b097d0;
+  --stormy-400: #9475bc;
+  --stormy-500: #7a5ca6;
+  --stormy-600: #644687;
+  --stormy-700: #4d3468;
+  --stormy-800: #2e1f3e;
+  --stormy-900: #211531;
+  --stormy-950: #0f081b;
+
+  --white: white;
+  --yellow-100: #fff6e0;
+  --yellow-200: #fff0c0;
+  --yellow-300: #f5cd8c;
+  --yellow-400: #eeb159;
+  --yellow-800: #944f01;
+
+  // Brand Colors
+  --brand-100: var(--red-100);
+  --brand-500: var(--red-500);
+  --brand-600: var(--red-600);
+  --brand-800: var(--red-800);
+  --brand-box-shadow: var(--red-box-shadow);
+
+  // Accent Colors
+  --accent-100: var(--salmon-100);
+  --accent-200: var(--salmon-200);
+  --accent-300: var(--salmon-300);
+  --accent-400: var(--salmon-400);
+  --accent-500: var(--salmon-500);
+  --accent-600: var(--salmon-600);
+  --accent-700: var(--salmon-700);
+  --accent-800: var(--salmon-800);
+
+  // Legacy Colors
+  --color-blue-dark: #1d4ed8;
+  --color-gray-light: var(--gray-100);
+  --color-gray-medium: var(--gray-300);
+  --color-gray-dark: var(--gray-400);
+  --color-gray-darker: var(--gray-800);
+  --color-contrast: var(--color-blue-medium);
+  --color-contrast-light: var(--color-blue-light);
+  --color-link: var(--color-blue-dark);
+  --color-text: #171717;
+}
+
+body.theme-dark {
+  --background-color: var(--gray-900);
+  --border-color: var(--gray-600);
+  --header-background: var(--gray-800);
+  --header-border: var(--gray-700);
+  --header-gradient-start: var(--gray-800);
+  --header-gradient-end: var(--gray-800);
+  --footer-background-color: var(--gray-800);
+  --inset-background-color: var(--gray-800);
+  --hover-background: var(--gray-700);
+  --active-background: var(--gray-700);
+  --disabled-background: var(--gray-700);
+  --elevated-background: var(--gray-800);
+  --shadow-color: var(--shadow-color-dark);
+  --shadow-color-light: rgba(0, 0, 0, 0.2);
+  --shadow-color-inset: var(--shadow-color-inset-dark);
+  --icon-background: var(--stormy-700);
+  --layout-background-color: var(--background-color);
+  --inspector-hover: var(--gray-700);
+  --inspector-active: var(--gray-600);
+  --collapsible-background: var(--gray-700);
+  --collapsible-hover: var(--gray-600);
+  --collapsible-active: var(--gray-500);
+  --card-row-border: var(--gray-700);
+
+  // Text
+  --text-color: var(--white);
+  --text-color-primary: #ffffff;
+  --text-color-secondary: var(--stormy-200);
+  --text-color-tertiary: var(--stormy-300);
+  --text-color-muted: var(--gray-500);
+
+  // Input
+  --input-background: var(--gray-800);
+  --input-border: var(--gray-700);
+  --input-text: var(--text-color);
+  --input-focus-color: var(--stormy-400);
+  --input-focus-shadow: var(--stormy-800);
+  --input-disabled-background: var(--gray-800);
+  --sidebar-background: var(--gray-800);
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+
+  // Gradients
+  --gradient-base-start: var(--stormy-800);
+  --gradient-base-end: var(--stormy-900);
+  --gradient-base-hover-start: var(--stormy-700);
+  --gradient-base-hover-end: var(--stormy-800);
+  --gradient-base-active-start: var(--stormy-600);
+  --gradient-base-active-end: var(--stormy-700);
+
+  // Card
+  --card-background: var(--gray-900);
+  --card-border: var(--gray-700);
+  --card-hover-border: var(--stormy-400);
+  --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
+    0 2px 4px -2px var(--shadow-color),
+    0 0 0 1px var(--shadow-color-inset) inset;
+  --card-active-shadow: 0 1px 2px var(--shadow-color-light),
+    0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+  --gradient-card-start: var(--gray-700);
+  --gradient-card-end: var(--gray-800);
+  --gradient-card-hover-start: var(--gray-800);
+  --gradient-card-hover-end: var(--gray-700);
+  --gradient-card-active-start: var(--gray-700);
+  --gradient-card-active-end: var(--gray-600);
+
+  // Utility
+  --danger-color: #ff6b6b;
+  --danger-background-color: rgba(255, 107, 107, 0.1);
+  --danger-border-color: rgba(255, 107, 107, 0.2);
+
+  --info-color: #60a5fa;
+  --info-background-color: rgba(59, 130, 246, 0.15);
+  --info-border-color: rgba(59, 130, 246, 0.3);
+
+  --warning-color: #fbbf24;
+  --warning-background-color: rgba(251, 191, 36, 0.15);
+  --warning-border-color: rgba(251, 191, 36, 0.3);
+
+  --success-color: #34d399;
+  --success-background-color: rgba(16, 185, 129, 0.15);
+  --success-border-color: rgba(16, 185, 129, 0.3);
+
+  --purple-100: rgba(139, 92, 246, 0.1);
+  --purple-300: rgba(139, 92, 246, 0.3);
+  --purple-400: rgba(139, 92, 246, 0.8);
+
+  --collapsible-button-background: var(--gray-700);
+  --collapsible-button-hover: var(--gray-600);
+  --collapsible-button-active: var(--gray-500);
+  --collapsible-button-border: var(--gray-500);
+  --collapsible-button-text: var(--text-color-primary);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }

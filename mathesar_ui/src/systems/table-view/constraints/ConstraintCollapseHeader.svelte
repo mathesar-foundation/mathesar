@@ -43,9 +43,16 @@
 
   .column-name-container {
     font-size: var(--text-size-small);
-    background-color: var(--slate-200);
+    background-color: var(--gray-200);
     border-radius: var(--border-radius-xl);
     padding: 0.25rem 0.75rem;
     margin-bottom: var(--size-super-ultra-small);
+    font-weight: var(--font-weight-bold);
+
+    :global(body.theme-dark) & {
+      background-color: var(--stormy-800);
+      border: 1px solid var(--stormy-600);
+      color: var(--text-color-secondary);
+    }
   }
 </style>

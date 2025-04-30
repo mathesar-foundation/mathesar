@@ -45,6 +45,6 @@
     display: table-row;
   }
   .tr.selected {
-    background: var(--color-blue-light);
+    background: var(--cell-bg-color-row-selected);
   }
 </style>
