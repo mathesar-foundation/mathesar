@@ -132,6 +132,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+
+    /** Panel theming */
+    --WithPanel__gap: var(--size-xx-small);
+    --WithPanel__resizer-color: var(--stormy-500);
+    --WithPanel__resizer-size: var(--size-ultra-small);
   }
 
   body.theme-dark {

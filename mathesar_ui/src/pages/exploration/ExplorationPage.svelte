@@ -77,7 +77,4 @@
   .content {
     padding: 0 var(--size-xx-small);
   }
-  .exploration-page.inspector-open .content :global(.with-panel) {
-    gap: var(--size-xx-small);
-  }
 </style>

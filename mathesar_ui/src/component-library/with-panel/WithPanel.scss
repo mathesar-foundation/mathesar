@@ -2,25 +2,40 @@
   display: grid;
   height: 100%;
   width: 100%;
-  --resizer-size: var(--WithPanel__resizer-size, 0.3rem);
+  --gap: var(--WithPanel__gap, 0);
+  --resizer-size: var(--WithPanel__resizer-size, var(--WithPanel__gap, 0.3rem));
   --resizer-color: var(--WithPanel__resizer-color, var(--sky-700));
+  --half-gap: calc(var(--gap) / 2);
   --resizer-half-size: calc(var(--resizer-size) / 2);
+  --resizer-offset: calc(-1 * (var(--half-gap) + var(--resizer-half-size)));
 
   &.top {
     grid-template-areas: 'panel' 'main';
     grid-template-rows: auto 1fr;
+    > .panel {
+      margin-bottom: var(--gap);
+    }
   }
   &.bottom {
     grid-template-areas: 'main' 'panel';
     grid-template-rows: 1fr auto;
+    > .panel {
+      margin-top: var(--gap);
+    }
   }
   &.left {
     grid-template-areas: 'panel main';
     grid-template-columns: auto 1fr;
+    > .panel {
+      margin-right: var(--gap);
+    }
   }
   &.right {
     grid-template-areas: 'main panel';
     grid-template-columns: 1fr auto;
+    > .panel {
+      margin-left: var(--gap);
+    }
   }
 
   > .main {
@@ -33,6 +48,8 @@
     > .resizer {
       position: absolute;
       z-index: 1;
+      transition: background-color 0.2s ease;
+      transition-delay: 0s;
     }
   }
 
@@ -45,6 +62,7 @@
   &.is-resizing > .panel > .resizer,
   > .panel > .resizer:hover {
     background-color: var(--resizer-color);
+    transition-delay: 0.1s;
   }
 
   &.top > .panel > .resizer,
@@ -60,15 +78,15 @@
     cursor: col-resize;
   }
   &.top > .panel > .resizer {
-    bottom: calc(-1 * var(--resizer-half-size));
+    bottom: var(--resizer-offset);
   }
   &.bottom > .panel > .resizer {
-    top: calc(-1 * var(--resizer-half-size));
+    top: var(--resizer-offset);
   }
   &.left > .panel > .resizer {
-    right: calc(-1 * var(--resizer-half-size));
+    right: var(--resizer-offset);
   }
   &.right > .panel > .resizer {
-    left: calc(-1 * var(--resizer-half-size));
+    left: var(--resizer-offset);
   }
 }

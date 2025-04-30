@@ -112,11 +112,7 @@
       padding: 0 var(--size-xx-small);
       .results-wrapper {
         height: 100%;
-        padding-left: var(--size-xx-small);
       }
     }
-  }
-  .data-explorer.inspector-open .results-wrapper :global(.with-panel) {
-    gap: var(--size-xx-small);
   }
 </style>

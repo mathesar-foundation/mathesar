@@ -160,7 +160,4 @@
     padding: 2rem;
     color: var(--gray-500);
   }
-  .table-view.inspector-open :global(.with-panel) {
-    gap: var(--size-xx-small);
-  }
 </style>
