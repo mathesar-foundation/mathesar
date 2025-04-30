@@ -178,6 +178,12 @@ export interface Column extends RawColumn {
   metadata: ColumnMetadata | null;
 }
 
+/**
+ * The ColumnCastOptions are returned when getting column type suggestions. They
+ * are not inspected or used directly by the front end, but instead passed back
+ * to the tables.get_import_preview and/or columns.patch endpoints as needed if
+ * the user accepts Mathesar's type suggestions.
+ */
 export type ColumnCastOptions = Record<string, unknown>;
 
 export interface ColumnCreationSpec {
