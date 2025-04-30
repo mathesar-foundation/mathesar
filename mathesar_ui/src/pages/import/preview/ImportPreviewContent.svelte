@@ -322,24 +322,23 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--slate-500);
+    color: var(--gray-500);
   }
   .preview-header {
     margin: 0;
     padding: var(--size-small) var(--inset-page-section-padding);
-    border-bottom: 1px solid var(--slate-200);
-    border-top: solid 1px var(--slate-300);
-    background: var(--white);
+    border-top: solid 1px var(--border-color);
   }
   .preview-content {
-    padding: var(--inset-page-section-padding);
+    padding-bottom: 1rem;
   }
   .sheet-holder {
-    max-width: fit-content;
     overflow-x: auto;
     overflow-y: hidden;
     margin: 0 auto;
-    border: 1px solid var(--slate-200);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--inset-page-section-padding);
   }
   .truncation-alert {
     margin: 1rem auto 0 auto;

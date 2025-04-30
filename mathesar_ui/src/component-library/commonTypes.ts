@@ -9,7 +9,8 @@ export type Appearance =
   | 'outcome'
   | 'outline-primary'
   | 'inspector'
-  | 'custom';
+  | 'custom'
+  | 'link';
 
 export type Size = 'small' | 'medium' | 'large';
 

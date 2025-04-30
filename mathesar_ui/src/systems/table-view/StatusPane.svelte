@@ -122,15 +122,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid var(--color-gray-medium);
     position: relative;
     flex-shrink: 0;
     flex-basis: 32px;
-
-    &.context-page,
-    &.context-shared-consumer-page {
-      background-color: var(--slate-100);
-    }
 
     &.context-widget {
       font-size: 80%;
@@ -145,7 +139,7 @@
     .pill {
       font-size: var(--size-x-small);
       display: inline-block;
-      border: 1px solid var(--slate-400);
+      border: 1px solid var(--sand-300);
       border-radius: var(--border-radius-m);
       padding: var(--size-extreme-small);
     }

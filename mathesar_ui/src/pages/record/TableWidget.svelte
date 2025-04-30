@@ -58,16 +58,30 @@
 </div>
 
 <style lang="scss">
+  .table-widget {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-m);
+    padding: var(--size-small);
+  }
   .top {
     display: grid;
     grid-template: auto / 1fr auto;
     gap: 0.5rem;
     justify-content: space-between;
     align-items: center;
-
     overflow: hidden;
+    color: var(--text-color-primary);
+    margin-bottom: var(--size-small);
   }
   .top > :global(*) {
     overflow: hidden;
+  }
+  .bold-header {
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+  .results {
+    margin-top: var(--size-small);
   }
 </style>

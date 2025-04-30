@@ -90,8 +90,8 @@
   }
 
   .errors {
-    background: var(--red-100);
-    border: solid 0.1em var(--red-200);
+    background: var(--background-color);
+    border: solid 2px var(--danger-border-color);
     box-shadow:
       #000 0 0 0 0,
       rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,

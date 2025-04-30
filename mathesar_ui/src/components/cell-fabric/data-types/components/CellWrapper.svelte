@@ -126,7 +126,7 @@
     }
 
     &[data-active-cell] {
-      box-shadow: 0 0 0 2px var(--slate-300);
+      box-shadow: 0 0 0 2px var(--gray-400);
       border-radius: 2px;
 
       &:focus {
@@ -137,6 +137,7 @@
     :global(.input-element) {
       box-shadow: none;
       border: none;
+      padding: 0.42rem;
     }
 
     &.is-edit-mode {

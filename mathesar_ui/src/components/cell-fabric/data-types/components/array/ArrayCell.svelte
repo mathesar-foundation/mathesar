@@ -51,10 +51,7 @@
       {/if}
       <div>
         {#each value as entry}
-          <Chip
-            display={isIndependentOfSheet ? 'inline-block' : 'inline'}
-            background="var(--slate-200)"
-          >
+          <Chip display={isIndependentOfSheet ? 'inline-block' : 'inline'}>
             {#if entry === null}
               <Null />
             {:else}

@@ -63,14 +63,13 @@
 <div class="feedback-button">
   <DropdownMenu
     triggerAppearance="custom"
-    size="small"
     closeOnInnerClick={false}
     showArrow={false}
     menuStyle="--Menu__padding-x: 0.3em;"
     on:close={onDropdownClose}
   >
     <div class="trigger" slot="trigger">
-      <Icon {...iconFeedback} size="0.9em" />
+      <Icon {...iconFeedback} size="0.8em" />
       {#if !compactLayout}
         {$_('feedback')}
       {/if}
@@ -97,6 +96,7 @@
             {form}
             catchErrors
             onProceed={send}
+            size="small"
             cancelButton={{
               label: $_('clear'),
             }}
@@ -117,6 +117,7 @@
           <div>
             <AnchorButton
               appearance="primary"
+              size="small"
               href={getMarketingLink('survey')}
               target="_blank"
             >
@@ -133,16 +134,19 @@
 <style lang="scss">
   .feedback-button {
     --button-border: none;
-    --button-color: var(--yellow-300);
   }
   .trigger {
     display: flex;
     align-items: center;
     gap: var(--size-ultra-small);
+    color: var(--text-color-primary);
   }
   .feedback-content {
     padding: var(--size-small);
     max-width: 28rem;
+    background-color: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-m);
   }
   .feedback-form {
     display: flex;
@@ -152,7 +156,7 @@
 
     .help {
       font-size: var(--size-small);
-      color: var(--slate-500);
+      color: var(--text-color-secondary);
       margin-top: var(--size-extreme-small);
     }
   }
@@ -163,6 +167,7 @@
 
     .title {
       font-weight: var(--font-weight-medium);
+      color: var(--text-color-primary);
     }
   }
 </style>

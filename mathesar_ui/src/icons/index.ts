@@ -93,6 +93,7 @@ import {
   arrayIcon,
   connectDatabaseIcon,
   createDatabaseIcon,
+  databaseLineIcon,
   explorationIcon,
   outcomeIcon,
   permissionsIcon,
@@ -182,7 +183,7 @@ export const iconCommunityChat: IconProps = { data: faComments };
 export const iconConnection: IconProps = { data: faPlug };
 export const iconConstraint: IconProps = { data: faKey };
 export const iconConstraintUnique: IconProps = { data: faSnowflake };
-export const iconDatabase: IconProps = { data: faDatabase };
+export const iconDatabase: IconProps = { data: databaseLineIcon };
 export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
 export const iconDocumentation: IconProps = { data: faBook };

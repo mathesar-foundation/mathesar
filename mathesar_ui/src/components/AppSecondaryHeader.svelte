@@ -26,16 +26,13 @@
 
 <style>
   .app-secondary-header {
-    background-color: var(--sand-200);
+    width: 100%;
   }
   .content {
-    padding: var(
-      --AppSecondaryHeader__padding,
-      var(--size-large) var(--page-padding-x)
-    );
+    padding: var(--size-ultra-large) var(--page-padding-x);
+    max-width: var(--max-layout-width-console-pages);
   }
   .content.restrict-width {
-    max-width: var(--max-layout-width);
     margin-left: auto;
     margin-right: auto;
   }

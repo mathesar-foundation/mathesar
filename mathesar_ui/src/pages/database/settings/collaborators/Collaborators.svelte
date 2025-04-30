@@ -150,6 +150,5 @@
 <style lang="scss">
   .collaborators-table {
     --Grid-table__template-columns: 3fr 3fr 1fr;
-    background: var(--white);
   }
 </style>

@@ -15,7 +15,7 @@
 
 <style>
   .db-card-link:focus {
-    outline: 2px solid var(--slate-300);
+    outline: 2px solid var(--gray-300);
     outline-offset: 1px;
   }
 </style>

@@ -17,8 +17,11 @@
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
+  import { initUiTheme } from './utils/uiThemePreference';
+
   export let commonData: CommonData;
 
+  initUiTheme();
   setBreadcrumbItemsInContext([]);
 
   function setUserProfileAndReleaseStores() {
