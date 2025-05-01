@@ -38,7 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #e1cfb5;
+    background: var(--icon-background);
     height: 3.6rem;
     width: 3.6rem;
     border-radius: 3.6rem;
@@ -48,7 +48,7 @@
     font-weight: 500;
   }
   .description {
-    color: var(--slate-500);
+    color: var(--text-color-secondary);
     margin-top: var(--size-ultra-small);
   }
 </style>

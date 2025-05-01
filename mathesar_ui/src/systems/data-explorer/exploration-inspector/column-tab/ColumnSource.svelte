@@ -117,7 +117,7 @@
 
       .tag {
         padding: var(--size-extreme-small) var(--size-ultra-small);
-        background: var(--slate-200);
+        background: var(--stormy-100);
         border-radius: var(--size-large);
         font-weight: 510;
         overflow: hidden;
@@ -128,6 +128,19 @@
         display: inline-block;
         vertical-align: middle;
         margin-bottom: var(--size-super-ultra-small);
+      }
+    }
+  }
+
+  :global(body.theme-dark) {
+    [data-identifier='aggregation-source'],
+    [data-identifier='column-source'] {
+      .column-info {
+        .tag {
+          background: var(--stormy-800);
+          border: 1px solid var(--stormy-600);
+          color: var(--text-color-secondary);
+        }
       }
     }
   }

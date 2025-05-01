@@ -1,8 +1,13 @@
+import type { UiThemePreference } from '@mathesar/utils/uiThemePreference';
+
 import LocalStorageStore from './LocalStorageStore';
 
 // prettier-ignore
 export const LOCAL_STORAGE_KEYS = {
   releaseData: 'mathesar-release-data',
+
+  // UI theme
+  uiThemePreference: 'ui-theme-preference',
 
   // Table inspector
   tableInspectorVisible: 'table-inspector-visible',
@@ -87,6 +92,11 @@ export const tableInspectorColumnRecordSummaryVisible = new LocalStorageStore({
 export const tableInspectorColumnActionsVisible = new LocalStorageStore({
   key: LOCAL_STORAGE_KEYS.tableInspectorColumnActionsVisible,
   defaultValue: true,
+});
+
+export const uiThemePreference = new LocalStorageStore({
+  key: LOCAL_STORAGE_KEYS.uiThemePreference,
+  defaultValue: 'system' as UiThemePreference,
 });
 
 export const dataExplorerLeftSidebarWidth = new LocalStorageStore({

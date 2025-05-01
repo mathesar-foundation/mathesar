@@ -23,10 +23,10 @@
     top: 0;
     height: 100%;
     border-bottom: none;
-    background: var(--slate-100);
+    background: var(--cell-bg-color-header);
     font-size: var(--text-size-small);
     font-weight: 500;
     overflow: hidden;
-    padding: 0 0.2rem;
+    padding: 0;
   }
 </style>

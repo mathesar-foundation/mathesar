@@ -33,7 +33,7 @@
 
 <SheetPositionableCell index={0} columnSpan={processedColumnsMap.size + 1}>
   <div class="group-header">
-    <CellBackground color="var(--sand-200)" />
+    <CellBackground color="var(--hover-background)" />
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
         <GroupHeaderCellValue
@@ -65,8 +65,8 @@
 
     .count-container {
       --badge-font-size: var(--text-size-small);
-      --badge-text-color: var(--slate-800);
-      --badge-background-color: var(--slate-100);
+      --badge-text-color: var(--text-color);
+      --badge-background-color: var(--elevated-background);
       height: 100%;
     }
   }

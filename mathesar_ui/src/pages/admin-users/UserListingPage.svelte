@@ -101,18 +101,25 @@
   .users-list-container {
     display: flex;
     flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 1rem;
-    }
+    gap: 1.5rem;
   }
 
   .users-list {
-    border: 1px solid var(--slate-200);
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-m);
+    overflow: hidden;
 
     hr {
-      margin: 0 var(--size-xx-small);
+      margin: 0;
+      border: none;
+      border-top: 1px solid var(--border-color);
     }
+  }
+
+  .no-users-found-text {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-color-secondary);
+    font-style: italic;
   }
 </style>

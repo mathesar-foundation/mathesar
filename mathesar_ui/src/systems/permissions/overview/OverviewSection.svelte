@@ -21,7 +21,7 @@
 <style lang="scss">
   .section {
     .header {
-      border-bottom: 1px solid var(--slate-200);
+      border-bottom: 1px solid var(--gray-200);
       padding: var(--size-extreme-small) 0;
       display: flex;
       align-items: center;

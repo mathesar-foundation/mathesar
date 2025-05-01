@@ -86,7 +86,7 @@ interface ToastEntryProps {
 
 const baseDefaultProps: ToastEntryProps = {
   backgroundColor: 'var(--sky-500)',
-  textColor: 'var(--slate-800)',
+  textColor: 'var(--gray-800)',
   progressColor: 'rgba(255, 255, 255, 0.6)',
   lifetime: 6000,
   hasProgress: true,

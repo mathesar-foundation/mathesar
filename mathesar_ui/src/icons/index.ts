@@ -93,6 +93,7 @@ import {
   arrayIcon,
   connectDatabaseIcon,
   createDatabaseIcon,
+  databaseLineIcon,
   explorationIcon,
   outcomeIcon,
   permissionsIcon,
@@ -169,6 +170,10 @@ export const iconGrip = { data: faGrip };
 export const iconReinstall = { data: faRotateBack };
 export const iconAddPrimaryKeyColumn = iconAddNew;
 export const iconPickPrimaryKeyColumn = { data: faHandPointer };
+export const iconDuplicateRecord: IconProps = {
+  data: faClone,
+  flip: 'vertical',
+};
 
 // THINGS
 //
@@ -178,7 +183,7 @@ export const iconCommunityChat: IconProps = { data: faComments };
 export const iconConnection: IconProps = { data: faPlug };
 export const iconConstraint: IconProps = { data: faKey };
 export const iconConstraintUnique: IconProps = { data: faSnowflake };
-export const iconDatabase: IconProps = { data: faDatabase };
+export const iconDatabase: IconProps = { data: databaseLineIcon };
 export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
 export const iconDocumentation: IconProps = { data: faBook };
