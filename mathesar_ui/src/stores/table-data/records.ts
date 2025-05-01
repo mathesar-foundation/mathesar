@@ -412,6 +412,11 @@ export class RecordsData {
 
     forEachRow((blueprint) => {
       if (blueprint.row.record[pkColumn.id] === undefined) {
+        if (isDraftRecordRow(blueprint.row)) {
+          throw new Error(
+            'Pasting data into a selection that contains unsaved rows is not yet supported. Please open an issue if you need this feature.',
+          );
+        }
         throw new Error(
           'Unable to update record for a row with a missing primary key value',
         );
@@ -448,39 +453,39 @@ export class RecordsData {
       ),
     );
 
-    // TODO: Fix bug - Update this for new record rows as well
-    this.fetchedRecordRows.update((rows) =>
-      rows.map((row) => {
-        const responseMapValue = responseMap.get(row.identifier);
-        if (!responseMapValue) return row;
-        const { blueprint, response } = responseMapValue;
-        if (response.status === 'error') {
-          // NOTE: this is a bit weird and could potentially be improved. If we
-          // were unable to save the record we need to indicate to the user that
-          // all target cells in the record have failed to update. The code
-          // below is a rather crude way of doing this. If one cells caused the
-          // whole record to fail, then the error message will be repeated for
-          // each cell in the record. We could potentially improve on this by
-          // using our `extractDetailedFieldBasedErrors` utility. But we'd still
-          // need to figure how to show some kind of errors in other cells.
-          blueprint.cells.forEach((cell) => {
-            const cellKey = getCellKey(row.identifier, cell.columnId);
-            return cellStatus.set(cellKey, {
-              state: 'failure',
-              errors: [response],
-            });
-          });
-          return row;
-        }
-        const result = first(response.value.results);
-        if (!result) return row;
+    function mutateRow<R extends RecordRow>(row: R): R {
+      const responseMapValue = responseMap.get(row.identifier);
+      if (!responseMapValue) return row;
+      const { blueprint, response } = responseMapValue;
+      if (response.status === 'error') {
+        // NOTE: this is a bit weird and could potentially be improved. If we
+        // were unable to save the record we need to indicate to the user that
+        // all target cells in the record have failed to update. The code
+        // below is a rather crude way of doing this. If one cells caused the
+        // whole record to fail, then the error message will be repeated for
+        // each cell in the record. We could potentially improve on this by
+        // using our `extractDetailedFieldBasedErrors` utility. But we'd still
+        // need to figure how to show some kind of errors in other cells.
         blueprint.cells.forEach((cell) => {
           const cellKey = getCellKey(row.identifier, cell.columnId);
-          return cellStatus.set(cellKey, { state: 'success' });
+          return cellStatus.set(cellKey, {
+            state: 'failure',
+            errors: [response],
+          });
         });
-        return row.withRecord(result);
-      }),
-    );
+        return row;
+      }
+      const result = first(response.value.results);
+      if (!result) return row;
+      blueprint.cells.forEach((cell) => {
+        const cellKey = getCellKey(row.identifier, cell.columnId);
+        return cellStatus.set(cellKey, { state: 'success' });
+      });
+      return row.withRecord(result) as R;
+    }
+
+    this.fetchedRecordRows.update((rows) => rows.map(mutateRow));
+    this.newRecords.update((rows) => rows.map(mutateRow));
 
     let newRecordSummaries: RecordSummariesForSheet = new ImmutableMap();
     for (const response of responses) {
@@ -649,6 +654,25 @@ export class RecordsData {
     }
 
     return result;
+  }
+
+  async duplicateRecord(sourceRow: RecordRow): Promise<void> {
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+
+    const fields = { ...sourceRow.record };
+    if (pkColumn) {
+      delete fields[pkColumn.id];
+    }
+
+    const newRow = new DraftRecordRow({
+      record: {
+        ...this.getEmptyApiRecord(),
+        ...fields,
+      },
+    });
+
+    this.newRecords.update((existing) => existing.concat(newRow));
+    await this.createRecord(newRow);
   }
 
   async addEmptyRecord(): Promise<void> {

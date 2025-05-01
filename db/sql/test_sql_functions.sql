@@ -1624,13 +1624,13 @@ BEGIN
   RETURN NEXT is(
     msar.infer_table_column_data_types('"Types Test"'::regclass),
     jsonb_build_object(
-      1, 'integer',
-      2, 'text',
-      3, 'boolean',
-      4, 'date',
-      5, 'numeric',
-      6, 'interval',
-      7, 'text'
+      1, jsonb_build_object('type', 'integer'),
+      2, jsonb_build_object('type', 'text'),
+      3, jsonb_build_object('type', 'boolean', 'details', jsonb_build_object('mathesar_casting', true)),
+      4, jsonb_build_object('type', 'date', 'details', jsonb_build_object('mathesar_casting', true)),
+      5, jsonb_build_object('type', 'numeric', 'details', jsonb_build_object('mathesar_casting', true, 'decimal_p', '.')),
+      6, jsonb_build_object('type', 'interval', 'details', jsonb_build_object('mathesar_casting', true)),
+      7, jsonb_build_object('type', 'text')
     )
   );
 END;
@@ -2834,48 +2834,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_get_valid_target_type_strings() RETURNS SETOF TEXT AS $$
-DECLARE
-  target_type_strings jsonb;
-BEGIN
-  target_type_strings = msar.get_valid_target_type_strings('text');
-  RETURN NEXT is(jsonb_array_length(target_type_strings), 28);
-  RETURN NEXT ok(
-    target_type_strings @> jsonb_build_array(
-      'real', 'double precision', 'mathesar_types.email', 'smallint', 'boolean', 'bigint',
-      'integer', 'interval', 'time without time zone', 'time with time zone',
-      'timestamp with time zone', 'timestamp without time zone', 'date',
-      'mathesar_types.mathesar_money', 'money', 'mathesar_types.multicurrency_money',
-      'character varying', 'character', '"char"', 'text', 'name', 'mathesar_types.uri', 'numeric',
-      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json', 'uuid'
-    ),
-    'containment plus length checks order-independent equality'
-  );
-  target_type_strings = msar.get_valid_target_type_strings('text'::regtype::oid);
-  RETURN NEXT is(jsonb_array_length(target_type_strings), 28);
-  RETURN NEXT ok(
-    target_type_strings @> jsonb_build_array(
-      'real', 'double precision', 'mathesar_types.email', 'smallint', 'boolean', 'bigint',
-      'integer', 'interval', 'time without time zone', 'time with time zone',
-      'timestamp with time zone', 'timestamp without time zone', 'date',
-      'mathesar_types.mathesar_money', 'money', 'mathesar_types.multicurrency_money',
-      'character varying', 'character', '"char"', 'text', 'name', 'mathesar_types.uri', 'numeric',
-      'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json', 'uuid'
-    ),
-    'containment plus length checks order-independent equality'
-  );
-  target_type_strings = msar.get_valid_target_type_strings('interval');
-  RETURN NEXT is(jsonb_array_length(target_type_strings), 6);
-  RETURN NEXT ok(
-    target_type_strings @> jsonb_build_array(
-      'interval', 'character varying', 'character', '"char"', 'text', 'name'
-    ),
-    'containment plus length checks order-independent equality'
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_has_dependents() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_extract_fkey_cols();
@@ -2907,8 +2865,8 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_get_column_info() RETURNS SETOF TEXT AS $$/*
-This test doesn't inspect the contents of the current_role_priv or valid_target_types arrays, since
-the functions that generate those contents are tested elsewhere. We just make sure the arrays exist,
+This test doesn't inspect the contents of the current_role_priv array, since
+the functions that generate those contents are tested elsewhere. We just make sure the array exist,
 and are non-empty. All other contents of the returned jsonb are tested.
 */
 DECLARE
@@ -2920,7 +2878,7 @@ BEGIN
 
   -- Column 1
   RETURN NEXT is(
-    (col_info -> 0) - ARRAY['current_role_priv', 'valid_target_types'],
+    (col_info -> 0) - ARRAY['current_role_priv'],
     $j${
       "id": 1, "name": "id", "type": "integer",
       "default": {"value": "identity", "is_dynamic": true},
@@ -2929,14 +2887,13 @@ BEGIN
     }$j$
   );
   RETURN NEXT ok(
-    jsonb_array_length(col_info -> 0 -> 'current_role_priv') > 0
-    AND jsonb_array_length(col_info -> 0 -> 'valid_target_types') > 0,
-    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+    jsonb_array_length(col_info -> 0 -> 'current_role_priv') > 0,
+    'current_role_priv should be a non-empty jsonb array'
   );
 
   -- Column 2
   RETURN NEXT is(
-    (col_info -> 1) - ARRAY['current_role_priv', 'valid_target_types'],
+    (col_info -> 1) - ARRAY['current_role_priv'],
     $j${
       "id": 2, "name": "num_plain", "type": "numeric", "default": null, "nullable": false,
       "description": null, "primary_key": false, "type_options": {"scale": null, "precision": null},
@@ -2944,14 +2901,13 @@ BEGIN
     }$j$
   );
   RETURN NEXT ok(
-    jsonb_array_length(col_info -> 1 -> 'current_role_priv') > 0
-    AND jsonb_array_length(col_info -> 1 -> 'valid_target_types') > 0,
-    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+    jsonb_array_length(col_info -> 1 -> 'current_role_priv') > 0,
+    'current_role_priv should be a non-empty jsonb array'
   );
 
   -- Column 3
   RETURN NEXT is(
-    (col_info -> 2) - ARRAY['current_role_priv', 'valid_target_types'],
+    (col_info -> 2) - ARRAY['current_role_priv'],
     $j${
       "id": 3, "name": "var_128", "type": "character varying", "default": null, "nullable": true,
       "description": null, "primary_key": false, "type_options": {"length": 128},
@@ -2959,14 +2915,13 @@ BEGIN
     }$j$
   );
   RETURN NEXT ok(
-    jsonb_array_length(col_info -> 2 -> 'current_role_priv') > 0
-    AND jsonb_array_length(col_info -> 2 -> 'valid_target_types') > 0,
-    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+    jsonb_array_length(col_info -> 2 -> 'current_role_priv') > 0,
+    'current_role_priv should be a non-empty jsonb array'
   );
 
   -- Column 4
   RETURN NEXT is(
-    (col_info -> 3) - ARRAY['current_role_priv', 'valid_target_types'],
+    (col_info -> 3) - ARRAY['current_role_priv'],
     $j${
       "id": 4, "name": "txt", "type": "text", "default": {"value": "abc", "is_dynamic": false},
       "nullable": true, "description": "A super comment ;", "primary_key": false,
@@ -2974,14 +2929,13 @@ BEGIN
     }$j$
   );
   RETURN NEXT ok(
-    jsonb_array_length(col_info -> 3 -> 'current_role_priv') > 0
-    AND jsonb_array_length(col_info -> 3 -> 'valid_target_types') > 0,
-    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+    jsonb_array_length(col_info -> 3 -> 'current_role_priv') > 0,
+    'current_role_priv should be a non-empty jsonb array'
   );
 
   -- Column 5
   RETURN NEXT is(
-    (col_info -> 4) - ARRAY['current_role_priv', 'valid_target_types'],
+    (col_info -> 4) - ARRAY['current_role_priv'],
     $j${
       "id": 5, "name": "tst", "type": "timestamp without time zone",
       "default": {"value": "now()", "is_dynamic": true}, "nullable": true, "description": null,
@@ -2989,14 +2943,13 @@ BEGIN
     }$j$
   );
   RETURN NEXT ok(
-    jsonb_array_length(col_info -> 4 -> 'current_role_priv') > 0
-    AND jsonb_array_length(col_info -> 4 -> 'valid_target_types') > 0,
-    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+    jsonb_array_length(col_info -> 4 -> 'current_role_priv') > 0,
+    'current_role_priv should be a non-empty jsonb array'
   );
 
   -- Column 6
   RETURN NEXT is(
-    (col_info -> 5) - ARRAY['current_role_priv', 'valid_target_types'],
+    (col_info -> 5) - ARRAY['current_role_priv'],
     $j${
       "id": 6, "name": "int_arr", "type": "_array", "default": null, "nullable": true,
       "description": null, "primary_key": false, "type_options": {"item_type": "integer"},
@@ -3004,14 +2957,13 @@ BEGIN
     }$j$
   );
   RETURN NEXT ok(
-    jsonb_array_length(col_info -> 5 -> 'current_role_priv') > 0
-    AND col_info -> 5 -> 'valid_target_types' = 'null'::jsonb,
-    'current_role_priv non-empty array, valid_target_types null'
+    jsonb_array_length(col_info -> 5 -> 'current_role_priv') > 0,
+    'current_role_priv should be a non-empty jsonb array'
   );
 
   -- Column 7
   RETURN NEXT is(
-    (col_info -> 6) - ARRAY['current_role_priv', 'valid_target_types'],
+    (col_info -> 6) - ARRAY['current_role_priv'],
     $j${
       "id": 7, "name": "num_opt_arr", "type": "_array", "default": null, "nullable": true,
       "description": null, "primary_key": false,
@@ -3020,9 +2972,8 @@ BEGIN
     }$j$
   );
   RETURN NEXT ok(
-    jsonb_array_length(col_info -> 6 -> 'current_role_priv') > 0
-    AND col_info -> 6 -> 'valid_target_types' = 'null'::jsonb,
-    'current_role_priv non-empty array, valid_target_types null'
+    jsonb_array_length(col_info -> 6 -> 'current_role_priv') > 0,
+    'current_role_priv should be a non-empty jsonb array'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -6583,5 +6534,69 @@ BEGIN
   -- Can't check actual record count without a vacuum, since we just estimate based on catalog.
   -- So, we just check that the expected key exists.
   RETURN NEXT is(object_counts ? 'record_count', true);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_downsize_table_sample() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(msar.downsize_table_sample(100), 100::numeric);
+  RETURN NEXT is(msar.downsize_table_sample(50), 25::numeric);
+  RETURN NEXT is(msar.downsize_table_sample(5), 0.25::numeric);
+  RETURN NEXT is(msar.downsize_table_sample(1), 0.01::numeric);
+  RETURN NEXT is(msar.downsize_table_sample(0), 0::numeric);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_numeric_infer() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE numinfer (us_loc text, de_loc text, mangled text);
+  INSERT INTO numinfer VALUES
+    ('1,000', '1.000', '1 000 000.0'),
+    ('1,000.00', '1.000,0', '1.000.000,0');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_find_numeric_separators() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id regclass;
+  test_perc numeric := 100;
+BEGIN
+  PERFORM __setup_numeric_infer();
+  tab_id = 'numinfer'::regclass;
+  RETURN NEXT is(
+    msar.find_numeric_separators(tab_id, 1::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_numeric_separators(tab_id, 2::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', '.', 'decimal_p', ',')
+    )
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_numeric_separators(
+        tab_id => 'numinfer'::regclass, col_id => '3'::smallint, test_perc => 100
+    );$s$,
+    'Too many grouping separators found!'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_cast_to_numeric() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(msar.cast_to_numeric('0', ',', '.'), 0::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('55', '.', ','), 55::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('2345', ' ', ','), 2345::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('1,00,000.5', ',', '.'), 100000.5::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('555,234', '.', ','), 555.234::numeric);
+  RETURN NEXT is(msar.cast_to_numeric('2 345', ' ', ','), 2345::numeric);
 END;
 $$ LANGUAGE plpgsql;

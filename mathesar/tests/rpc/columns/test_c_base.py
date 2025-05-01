@@ -37,8 +37,7 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'nullable': False, 'description': None, 'primary_key': True,
             'type_options': None,
             'has_dependents': True,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': ['text']
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 2, 'name': 'numcol', 'type': 'numeric',
             'default': {'value': "'8'::numeric", 'is_dynamic': False},
@@ -47,32 +46,28 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'primary_key': False,
             'type_options': None,
             'has_dependents': False,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': ['text']
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 4, 'name': 'numcolmod', 'type': 'numeric',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'scale': 3, 'precision': 5},
             'has_dependents': False,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': ['text']
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'fields': 'day to second'},
             'has_dependents': False,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': ['text']
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 10, 'name': 'arrcol', 'type': '_array',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'item_type': 'character varying', 'length': 3},
             'has_dependents': False,
-            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
-            'valid_target_types': None
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }
     ]
     mocked_exec_msar_func.fetchone.return_value = [expect_col_list]

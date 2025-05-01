@@ -857,22 +857,6 @@ SELECT nullif(
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_valid_target_type_strings(typ_id regtype) RETURNS jsonb AS $$/*
-Given a source type, return the target types for which Mathesar provides a casting function.
-
-Args:
-  typ_id: The type we're casting from.
-*/
-
-SELECT jsonb_agg(prorettype::regtype::text)
-FROM pg_proc
-WHERE
-  pronamespace=msar.get_schema_oid('msar')
-  AND proargtypes[0]=typ_id
-  AND left(proname, 5) = 'cast_';
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.has_dependents(rel_id oid, att_id smallint) RETURNS boolean AS $$/*
 Return a boolean according to whether the column identified by the given oid, attnum pair is
 referenced (i.e., would dropping that column require CASCADE?).
@@ -977,8 +961,7 @@ Each returned JSON object in the array will have the form:
     "default": {"value": <str>, "is_dynamic": <bool>},
     "has_dependents": <bool>,
     "description": <str>,
-    "current_role_priv": [<str>, <str>, ...],
-    "valid_target_types": [<str>, <str>, ...]
+    "current_role_priv": [<str>, <str>, ...]
   }
 
 The `type_options` object is described in the docstring of `msar.get_type_options`. The `default`
@@ -997,8 +980,7 @@ SELECT jsonb_agg(
     'default', msar.describe_column_default(tab_id, attnum),
     'has_dependents', msar.has_dependents(tab_id, attnum),
     'description', msar.col_description(tab_id, attnum),
-    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum),
-    'valid_target_types', msar.get_valid_target_type_strings(atttypid)
+    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum)
   )
 )
 FROM pg_attribute pga
@@ -3508,128 +3490,6 @@ SELECT msar.get_cast_function_name(typ_id)
   || format('%I', msar.get_column_name(tab_id, col_id))
   || ')';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.infer_column_data_type(
-  tab_id regclass, col_id smallint, test_perc numeric DEFAULT 100
-) RETURNS regtype AS $$/*
-Infer the best type for a given column.
-
-Note that we currently only try for `text` columns, since we only do this at import. I.e.,
-if the column is some other type we just return that original type.
-
-Args:
-  tab_id: The OID of the table of the column whose type we're inferring.
-  col_id: The attnum of the column whose type we're inferring.
-*/
-DECLARE
-  inferred_type regtype;
-  infer_sequence_raw text[] := ARRAY[
-    'boolean',
-    'date',
-    'numeric',
-    'uuid',
-    'timestamp without time zone',
-    'timestamp with time zone',
-    'time without time zone',
-    'interval',
-    'mathesar_types.email',
-    'mathesar_types.mathesar_json_array',
-    'mathesar_types.mathesar_json_object',
-    'mathesar_types.uri'
-  ];
-  infer_sequence regtype[];
-  column_nonempty boolean;
-  test_type regtype;
-BEGIN
-  infer_sequence := array_agg(pg_catalog.to_regtype(t))
-    FILTER (WHERE pg_catalog.to_regtype(t) IS NOT NULL)
-    FROM unnest(infer_sequence_raw) AS x(t);
-  EXECUTE format(
-    'SELECT EXISTS (SELECT 1 FROM %1$I.%2$I WHERE %3$I IS NOT NULL)',
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id),
-    msar.get_column_name(tab_id, col_id)
-  ) INTO column_nonempty;
-  inferred_type := atttypid FROM pg_catalog.pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
-  IF inferred_type = 'text'::regtype AND column_nonempty THEN
-    FOREACH test_type IN ARRAY infer_sequence
-      LOOP
-        BEGIN
-          EXECUTE format(
-            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM (%4$L)',
-            msar.build_cast_expr(tab_id, col_id, test_type),
-            msar.get_relation_schema_name(tab_id),
-            msar.get_relation_name(tab_id),
-            test_perc
-          );
-          inferred_type := test_type;
-          EXIT;
-        EXCEPTION WHEN OTHERS THEN
-          RAISE NOTICE 'Test failed: %', format(
-            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM (%4$L)',
-            msar.build_cast_expr(tab_id, col_id, test_type),
-            msar.get_relation_schema_name(tab_id),
-            msar.get_relation_name(tab_id),
-            test_perc
-          );
-          -- do nothing, just try the next type.
-        END;
-      END LOOP;
-    END IF;
-  RETURN inferred_type;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.infer_table_column_data_types(tab_id regclass) RETURNS jsonb AS $$/*
-Infer the best type for each column in the table.
-
-Currently we only suggest different types for columns which originate as type `text`.
-
-Args:
-  tab_id: The OID of the table whose columns we're inferring types for.
-
-The response JSON will have attnum keys, and values will be the result of `format_type`
-for the inferred type of each column. Restricted to columns to which the user has access.
-
-For tables with at most 9900 rows, we infer based on entire row set. For tables with more rows, we
-decrease the percentage used to maintain an inference row set of 9,900-10,000 rows, down to a
-minimum of 5% of the rows. This increases the performance of inference on large tables, at the cost
-of possibly misidentifying the type of a column.
-
-| row count  | perc |
-|------------+------|
-|   <= 9,900 | 100% |
-|     19,900 |  50% |
-|     39,900 |  25% |
-|     99,900 |  10% |
-| >= 199,900 |   5% |
-*/
-DECLARE
-  test_perc integer;
-BEGIN
-EXECUTE(
-  format(
-    'SELECT GREATEST(LEAST(10000 / (COUNT(1) + 1), 100), 5) FROM %1$I.%2$I TABLESAMPLE SYSTEM(1)',
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id)
-  )
-) INTO test_perc;
-RETURN jsonb_object_agg(
-  attnum,
-  pg_catalog.format_type(msar.infer_column_data_type(attrelid, attnum, test_perc), null)
-)
-FROM pg_catalog.pg_attribute
-WHERE
-  attrelid = tab_id
-  AND attnum > 0
-  AND NOT attisdropped
-  AND has_column_privilege(attrelid, attnum, 'SELECT');
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION

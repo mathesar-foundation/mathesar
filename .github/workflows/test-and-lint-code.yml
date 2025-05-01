@@ -28,12 +28,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v46
         with:
           files: |
             *.py
             mathesar/**
             db/**
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
   python_lint_required:
     name: Check for file changes requiring python linter
@@ -44,9 +46,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v46
         with:
           files: '**.py'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
   sql_tests_required:
     name: Check for file changes requiring SQL tests
@@ -55,13 +59,13 @@ jobs:
       tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v4
-      - name: echo
-        run: echo "${{needs.all_tests_required.outputs.tests_should_run}}"
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v46
         with:
           files: '**.sql'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
   front_end_checks_required:
     name: Check for file changes requiring front end checks
@@ -72,9 +76,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v46
         with:
           files: 'mathesar_ui/**'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
   all_be_tests_required:
     name: Check for file changes requiring all backend tests
@@ -85,12 +91,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v46
         with:
           files: |
             **.yml
             **.sh
             Dockerfile*
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
 ################################################################################
 ##                         BACK END TEST/LINT RUNNERS                         ##
@@ -110,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [python_tests_required, all_be_tests_required]
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
@@ -136,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [sql_tests_required, all_be_tests_required]
     if: needs.sql_tests_required.outputs.tests_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
         pg-version: [13, 14, 15, 16, 17]
@@ -160,7 +168,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [python_tests_required, all_be_tests_required]
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
@@ -186,7 +194,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [python_lint_required, all_be_tests_required]
     if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -361,18 +369,123 @@ jobs:
       - run: npm test
 
 ################################################################################
-##                       REQUIRED TEST/LINT COLLECTORS                        ##
-## Jobs in this section collect outputs from matrix-strategy testing jobs,    ##
-## since these are otherwise impossible to capture for branch protection      ##
-## purposes. At the moment, they only need to have each required check as a   ##
-## dependency. Required checks should skip themselves if no relevant files    ##
-## have changed.                                                              ##
+##                         BUILD TESTER                                       ##
+##                                                                            ##
+## This job tests if we can successfully build mathesar in both development   ##
+## and production modes we don't use these build for any other tests as they  ##
+## involve building the frontend which slows down backend tests significantly ##
+## and threfore, we test to make sure that we can still build mathesar in     ##
+## these modes separately.                                                    ##
 ##                                                                            ##
 ################################################################################
 
-  matrix_tests:
+  build_tests:
+    name: Build mathesar
     runs-on: ubuntu-latest
-    needs: [python_tests, sql_tests]
+    strategy:
+      matrix:
+        target: [production, development]
     steps:
+      - uses: actions/checkout@v4
+      - name: Copy env file
+        run: cp .env.example .env
+      # The code is checked out under uid 1001 - reset this to 1000 for the
+      # container to run tests successfully
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+      - name: Build the stack
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service
+        env:
+          TARGET: ${{ matrix.target }}
+
+################################################################################
+##                       REQUIRED TEST/LINT COLLECTORS                        ##
+## Jobs in this section collect outputs from testing jobs, since these are    ##
+## otherwise impossible to capture for branch protection purposes.            ##
+## At the moment, they only need to have each required check as a dependency. ##
+## Required checks should skip themselves if no relevant files have changed.  ##
+##                                                                            ##
+################################################################################
+
+  checkpoint:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    needs:
+      # Checkers
+      - python_tests_required
+      - python_lint_required
+      - sql_tests_required
+      - front_end_checks_required
+      - all_be_tests_required
+      # Backend tests
+      - python_tests
+      - sql_tests
+      - api_tests
+      - python_lint
+      # Frontend tests
+      - front_end_format
+      - front_end_lint
+      - front_end_typecheck
+      - front_end_audit
+      - front_end_tests
+      # Build test
+      - build_tests
+    steps:
+      - name: Check Dependency Results
+        run: |
+          # Check "all_be_tests_required" conditions
+          if [[ "${{ needs.all_be_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.python_tests.result }}" != "success"
+              || "${{ needs.sql_tests.result }}" != "success"
+              || "${{ needs.api_tests.result }}" != "success"
+              || "${{ needs.python_lint.result }}" != "success"
+            ]]; then
+              echo "One or more backend tests failed."
+              exit 1
+            fi
+          # Check "python_tests_required" conditions
+          elif [[ "${{ needs.python_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.python_tests.result }}" != "success"
+              || "${{ needs.api_tests.result }}" != "success"
+            ]]; then
+              echo "One or more python tests failed."
+              exit 1
+            fi
+          fi
+          
+          # Check "python_lint_required" conditions
+          if [[ "${{ needs.python_lint_required.outputs.lint_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.python_lint.result }}" != "success" ]]; then
+              echo "python linter failed."
+              exit 1
+            fi  
+          fi
+
+          # Check "sql_tests_required" conditions
+          if [[ "${{ needs.sql_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.sql_tests.result }}" != "success" ]]; then
+              echo "SQL tests failed."
+              exit 1
+            fi
+          fi
+
+          # Check "front_end_checks_required" conditions
+          if [[ "${{ needs.front_end_checks_required.outputs.checks_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.front_end_format.result }}" != "success"
+              || "${{ needs.front_end_lint.result }}" != "success"
+              || "${{ needs.front_end_typecheck.result }}" != "success"
+              || "${{ needs.front_end_audit.result }}" != "success"
+              || "${{ needs.front_end_tests.result }}" != "success"
+            ]]; then
+              echo "One or more frontend tests failed."
+              exit 1
+            fi
+          fi
+
+          # Check if build succeeds
+          if [[ "${{ needs.build_tests.result }}" != "success" ]]; then
+            echo "Build failed."
+            exit 1
+          fi
       - name: Report success
         run: echo "All tests succeeded or skipped!"
