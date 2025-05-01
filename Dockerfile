@@ -3,7 +3,7 @@ ARG PYTHON_VERSION=3.13-bookworm
 FROM python:$PYTHON_VERSION AS base
 
 ENV PYTHONUNBUFFERED=1
-ENV DOCKERIZE_VERSION v0.6.1
+ENV DOCKERIZE_VERSION=v0.6.1
 ARG BUILD_PG_MAJOR=17
 ENV PG_MAJOR=$BUILD_PG_MAJOR
 
@@ -11,33 +11,35 @@ RUN set -eux;
 
 RUN mkdir -p /etc/apt/keyrings;
 
-# Add Postgres source
-RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - ; \
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list;
+# Add PostgreSQL signing key and source
+RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/keyrings/postgres.gpg && \
+    chmod 644 /etc/apt/keyrings/postgres.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/postgres.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
+    > /etc/apt/sources.list.d/pgdg.list
 
 # Install common dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        sudo \
-        ca-certificates \
-        curl \
-        gnupg \
-        gettext \
-        locales \
+    sudo \
+    ca-certificates \
+    curl \
+    gnupg \
+    gettext \
+    locales \
     && rm -rf /var/lib/apt/lists/*
 
 # Define Locale
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-ENV LANG en_US.utf8
+ENV LANG=en_US.utf8
 
 # Install Postgres
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        postgresql-$PG_MAJOR postgresql-client-$PG_MAJOR postgresql-contrib-$PG_MAJOR \
+    postgresql-$PG_MAJOR postgresql-client-$PG_MAJOR postgresql-contrib-$PG_MAJOR \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
-ENV PGDATA /var/lib/postgresql/mathesar
+ENV PATH=$PATH:/usr/lib/postgresql/$PG_MAJOR/bin
+ENV PGDATA=/var/lib/postgresql/mathesar
 
 VOLUME /etc/postgresql/
 VOLUME /var/lib/postgresql/
@@ -70,7 +72,7 @@ ENTRYPOINT ["./dev-run.sh"]
 
 FROM base AS development
 
-ENV NODE_MAJOR 18
+ENV NODE_MAJOR=18
 
 # Install dev requirements
 RUN pip install --no-cache-dir -r requirements-dev.txt
@@ -78,14 +80,16 @@ RUN pip install --no-cache-dir -r requirements-dev.txt
 # Compile translation files
 RUN python manage.py compilemessages
 
-# Add NodeJS source
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg; \
-    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list;
+# Add NodeJS signing key and source
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
+    chmod 644 /etc/apt/keyrings/nodesource.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" \
+    | tee /etc/apt/sources.list.d/nodesource.list
 
 # Install node
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        nodejs \
+    nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Build frontend source

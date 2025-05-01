@@ -218,6 +218,7 @@
   "drop_role_name_question": "Drop role [name]?",
   "drop_role_warning": "This role will be dropped on the database server and will not be available for any databases configured on the same server.",
   "drop_the_database": "Drop the database",
+  "duplicate_record": "Duplicate Record",
   "edit": "Edit",
   "edit_child_roles_for_parent": "Edit [parent] child roles",
   "edit_connection": "Edit Connection",
