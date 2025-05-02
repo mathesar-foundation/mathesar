@@ -29,7 +29,7 @@
     justify-content: center;
     border-bottom: var(--cell-border-horizontal);
     border-right: var(--cell-border-vertical);
-    font-size: var(--text-size-x-small);
+    font-size: var(--sm2);
     padding: 0 1.5rem;
     color: var(--color-text-muted);
     cursor: default;

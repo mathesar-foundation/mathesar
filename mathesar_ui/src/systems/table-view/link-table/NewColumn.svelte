@@ -53,7 +53,7 @@
 
 <style>
   .collapsible-detail {
-    padding: var(--size-xx-small);
+    padding: var(--sm3);
     margin-top: 0.25em;
   }
 </style>

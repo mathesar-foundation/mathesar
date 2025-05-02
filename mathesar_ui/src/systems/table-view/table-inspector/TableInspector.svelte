@@ -55,7 +55,7 @@
     isolation: isolate;
 
     .tabs-container {
-      padding: var(--size-super-ultra-small);
+      padding: var(--sm5);
     }
   }
 </style>

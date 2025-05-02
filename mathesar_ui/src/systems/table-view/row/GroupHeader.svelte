@@ -64,7 +64,7 @@
     }
 
     .count-container {
-      --badge-font-size: var(--text-size-small);
+      --badge-font-size: var(--sm1);
       --badge-text-color: var(--text-color);
       --badge-background-color: var(--elevated-background);
       height: 100%;

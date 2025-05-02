@@ -39,30 +39,30 @@
 <style lang="scss">
   .role-with-children {
     .name {
-      padding: var(--size-extreme-small) var(--size-small);
+      padding: var(--sm6) var(--sm1);
       background: var(--stormy-100);
       border: 1px solid var(--stormy-300);
       border-radius: var(--border-radius-xl);
       font-weight: var(--font-weight-bold);
       display: inline-flex;
       align-items: center;
-      gap: var(--size-ultra-small);
+      gap: var(--sm4);
       color: var(--text-color-primary);
-      font-size: var(--text-size-base);
+      font-size: 1rem;
     }
     .member-count {
-      font-size: var(--text-size-small);
+      font-size: var(--sm1);
       color: var(--text-color-muted);
-      margin-left: var(--size-ultra-small);
+      margin-left: var(--sm4);
     }
     .members {
       .member {
-        margin: var(--size-xx-small) var(--size-large);
+        margin: var(--sm3) var(--lg1);
         display: flex;
         align-items: center;
-        gap: var(--size-ultra-small);
+        gap: var(--sm4);
         color: var(--text-color-muted);
-        font-size: var(--text-size-small);
+        font-size: var(--sm1);
 
         &:last-child {
           margin-bottom: 0;

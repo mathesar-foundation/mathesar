@@ -58,6 +58,6 @@
   }
 
   .refresh {
-    margin-left: var(--size-xx-small);
+    margin-left: var(--sm3);
   }
 </style>

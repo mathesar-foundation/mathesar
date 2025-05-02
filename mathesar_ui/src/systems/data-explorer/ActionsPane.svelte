@@ -236,7 +236,7 @@
 
     .detail,
     .base-table-holder {
-      font-size: var(--text-size-large);
+      font-size: var(--lg1);
       font-weight: 500;
     }
 
@@ -245,7 +245,7 @@
       align-items: center;
       flex-grow: 0;
       flex-shrink: 0;
-      margin: 0 var(--size-small);
+      margin: 0 var(--sm1);
 
       > :global(* + *) {
         margin-left: 0.4rem;
@@ -257,7 +257,7 @@
 
       > :global(.select) {
         min-width: 12rem;
-        font-size: var(--text-size-base);
+        font-size: 1rem;
       }
     }
   }

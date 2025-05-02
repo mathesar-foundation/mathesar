@@ -68,11 +68,11 @@
     background: var(--layout-background-color);
   }
   h2 {
-    padding: var(--size-small);
+    padding: var(--sm1);
     color: var(--text-color-primary);
   }
   .widgets {
-    padding: var(--size-small);
+    padding: var(--sm1);
 
     :global(.sheet) {
       background: var(--background-color);

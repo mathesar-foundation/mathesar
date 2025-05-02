@@ -141,12 +141,12 @@
       background-color: var(--elevated-background);
 
       .loading-state {
-        padding: var(--size-large);
+        padding: var(--lg1);
       }
 
       .help-text {
-        padding: var(--size-large);
-        font-size: var(--text-size-small);
+        padding: var(--lg1);
+        font-size: var(--sm1);
       }
     }
   }

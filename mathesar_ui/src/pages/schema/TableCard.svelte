@@ -243,13 +243,13 @@
   }
 
   .table-name {
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
     color: var(--text-color-primary);
   }
 
   .description {
-    font-size: var(--text-size-base);
+    font-size: 1rem;
     color: var(--text-color-secondary);
     font-weight: var(--font-weight-normal);
     overflow: hidden;
@@ -262,7 +262,7 @@
   }
 
   .import-status {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     color: var(--color-warning);
     background: var(--color-warning-bg);
     padding: 0.25rem 0.5rem;

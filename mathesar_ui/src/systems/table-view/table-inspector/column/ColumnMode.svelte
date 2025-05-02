@@ -179,21 +179,21 @@
 
 <style lang="scss">
   .column-mode-container {
-    padding-bottom: var(--size-small);
+    padding-bottom: var(--sm1);
     display: flex;
     flex-direction: column;
 
     > :global(* + *) {
-      margin-top: var(--size-super-ultra-small);
+      margin-top: var(--sm5);
     }
   }
 
   .no-cell-selected {
-    padding: var(--size-ultra-large);
+    padding: var(--lg4);
   }
 
   .content-container {
-    padding: var(--size-small);
+    padding: var(--sm1);
     display: flex;
     flex-direction: column;
 

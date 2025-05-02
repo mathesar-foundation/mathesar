@@ -119,14 +119,14 @@
 
 <style lang="scss">
   .query-run-errors {
-    --ErrorBox__font-size: var(--text-size-large);
+    --ErrorBox__font-size: var(--lg1);
 
     .error-header,
     .strong {
       font-weight: 500;
     }
     .error-header {
-      font-size: var(--text-size-large);
+      font-size: var(--lg1);
     }
 
     p {
@@ -135,13 +135,13 @@
     p + p,
     p + ul,
     ul + p {
-      margin-top: var(--size-xx-small);
+      margin-top: var(--sm3);
     }
 
     ul {
       list-style: disc outside none;
       padding-left: 1.3rem;
-      font-size: var(--text-size-base);
+      font-size: 1rem;
     }
   }
 </style>

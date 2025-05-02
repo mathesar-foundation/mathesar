@@ -103,11 +103,11 @@
 
 <style lang="scss">
   .tabs {
-    --Tab_margin-right: var(--size-small);
+    --Tab_margin-right: var(--sm1);
 
     &.tabs-displayed {
       .tab-content {
-        margin-top: var(--size-base);
+        margin-top: 1rem;
       }
     }
   }

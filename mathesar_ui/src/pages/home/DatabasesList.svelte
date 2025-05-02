@@ -212,10 +212,10 @@
 
   .databases-container {
     display: flex;
-    margin-top: var(--size-x-large);
+    margin-top: var(--lg2);
     flex-direction: column;
     align-items: stretch;
-    gap: var(--size-x-small);
+    gap: var(--sm2);
   }
 
   .databases-list-grid {

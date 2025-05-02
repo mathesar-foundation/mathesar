@@ -37,7 +37,7 @@
 <style lang="scss">
   .db-card-content {
     padding: 1.5rem;
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
     display: flex;
     align-items: center;
     gap: 1.5rem;
@@ -61,19 +61,19 @@
   }
 
   .display-name {
-    font-size: var(--text-size-xx-large);
+    font-size: var(--lg3);
     font-weight: var(--font-weight-medium);
     color: var(--text-color-primary);
   }
 
   .db-name {
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
     font-weight: var(--font-weight-normal);
     color: var(--text-color-secondary);
   }
 
   .detail {
-    font-size: var(--text-size-base);
+    font-size: 1rem;
     color: var(--text-color-secondary);
   }
 

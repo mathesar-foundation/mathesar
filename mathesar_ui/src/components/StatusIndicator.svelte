@@ -37,7 +37,7 @@
   .status-indicator {
     border-radius: 500px;
     padding: 0.25em 0.75rem;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     display: inline-flex;
     align-items: center;
     font-weight: var(--font-weight-medium);

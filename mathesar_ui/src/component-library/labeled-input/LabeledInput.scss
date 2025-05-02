@@ -17,7 +17,7 @@
 
   .label-content > .help {
     display: block;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     color: var(--color-text-muted);
     margin-top: var(--spacing-y, var(--spacing-y-default));
     &:empty {
@@ -27,7 +27,7 @@
 
   .description {
     display: block;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     color: var(--color-text-muted);
     margin-top: var(--spacing-y, var(--spacing-y-default));
     margin-left: 1.5rem;

@@ -18,7 +18,7 @@
     align-items: center;
     text-decoration: none;
     color: inherit;
-    margin-right: var(--size-ultra-small);
+    margin-right: var(--sm4);
     /* Optical adjustment to align logo with text */
     margin-top: -1px;
   }
@@ -27,7 +27,7 @@
     display: block;
   }
   .mathesar {
-    font-size: var(--text-size-x-large);
+    font-size: var(--lg2);
     font-weight: var(--font-weight-extra-bold);
     margin-left: 0.25rem;
   }

@@ -315,7 +315,7 @@
   }
   .preview-header {
     margin: 0;
-    padding: var(--size-small) var(--inset-page-section-padding);
+    padding: var(--sm1) var(--inset-page-section-padding);
     border-top: solid 1px var(--border-color);
   }
   .preview-content {

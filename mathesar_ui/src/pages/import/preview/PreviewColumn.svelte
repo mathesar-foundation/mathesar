@@ -138,13 +138,13 @@
   }
 
   .id-rename {
-    font-size: var(--size-small);
+    font-size: var(--sm1);
   }
 
   .type-options-content {
     min-width: 18rem;
     max-width: 22rem;
-    padding: var(--size-small);
+    padding: var(--sm1);
   }
 
   .pk-indicator {

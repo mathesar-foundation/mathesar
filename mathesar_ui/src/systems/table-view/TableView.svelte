@@ -149,7 +149,7 @@
     grid-template: 1fr auto / 1fr;
     height: 100%;
     overflow: hidden;
-    padding: 0 var(--size-xx-small);
+    padding: 0 var(--sm3);
   }
   .sheet-area {
     position: relative;

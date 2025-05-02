@@ -65,7 +65,7 @@
     display: flex;
     flex-direction: column;
 
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
 
     > :global(* + *) {
       margin-top: 0.5rem;
@@ -73,7 +73,7 @@
   }
 
   .entity-name-container {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     background-color: var(--gray-200);
     border-radius: var(--border-radius-xl);
     padding: 0.285rem 0.428rem;
