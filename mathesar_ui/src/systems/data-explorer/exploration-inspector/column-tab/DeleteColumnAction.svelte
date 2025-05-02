@@ -84,7 +84,7 @@
     >
       <Icon {...iconDeleteMajor} />
       <span>
-        {$_('delete_columns_count', {
+        {$_('remove_columns_from_query', {
           values: { count: selectedColumnAliases.length },
         })}
       </span>
