@@ -4,7 +4,7 @@
 
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import { api } from '@mathesar/api/rpc';
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { Column, ColumnCastOptions } from '@mathesar/api/rpc/columns';
   import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
   import {
     Field,
@@ -41,6 +41,7 @@
   import ErrorInfo from './ErrorInfo.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
   import {
+    buildColumnPreviewSpec,
     buildColumnPropertiesMap,
     finalizeColumns,
     getSkeletonRecords,
@@ -61,7 +62,7 @@
   export let refreshTable: () => Promise<void>;
 
   let columns: Column[] = [];
-  let columnPropertiesMap = buildColumnPropertiesMap([]);
+  let columnPropertiesMap = buildColumnPropertiesMap([], {});
 
   $: otherTableNames = $currentTables
     .filter((t) => t.oid !== table.oid)
@@ -113,7 +114,8 @@
       return;
     }
     columns = fetchedColumns;
-    columnPropertiesMap = buildColumnPropertiesMap(columns);
+    let castOptionsMap: Record<Column['id'], ColumnCastOptions | undefined> =
+      {};
     if (useColumnTypeInference) {
       const response = await typeSuggestionsRequest.run();
       if (response.settlement?.state === 'resolved') {
@@ -122,9 +124,16 @@
           ...column,
           type: typeSuggestions[column.id]?.type ?? column.type,
         }));
+        castOptionsMap = columns.reduce((acc, c) => {
+          acc[c.id] = typeSuggestions[c.id]?.details;
+          return acc;
+        }, castOptionsMap);
       }
     }
-    await previewRequest.run(columns);
+    columnPropertiesMap = buildColumnPropertiesMap(columns, castOptionsMap);
+    await previewRequest.run(
+      buildColumnPreviewSpec(columns, columnPropertiesMap),
+    );
   }
   $: table, useColumnTypeInference, void init();
 
@@ -170,7 +179,9 @@
     columns = columns.map((c) =>
       c.id === updatedColumn.id ? updatedColumn : c,
     );
-    return previewRequest.run(columns);
+    return previewRequest.run(
+      buildColumnPreviewSpec(columns, columnPropertiesMap),
+    );
   }
 
   async function onPkConfigUpdated() {
