@@ -143,7 +143,6 @@
   cssVariables={{
     '--page-padding': 'var(--inset-page-padding)',
     '--max-layout-width': 'var(--max-layout-width-data-pages)',
-    '--layout-background-color': 'var(--sand-200)',
   }}
 >
   <h1>{$_('create_a_table_by_importing')}</h1>
@@ -235,9 +234,9 @@
 <style>
   .import-file-view {
     padding: var(--size-xx-large);
-    border: 1px solid var(--slate-300);
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-m);
-    background-color: var(--white);
+    background-color: var(--inset-background-color);
     margin-bottom: 2rem;
   }
 
@@ -247,13 +246,13 @@
 
   .upload-format-help {
     line-height: 1.2;
-    color: var(--slate-500);
+    color: var(--gray-500);
     text-align: right;
     font-size: var(--text-size-small);
   }
 
   .processing-spinner {
-    color: var(--slate-400);
+    color: var(--gray-400);
     font-size: 1.5rem;
     margin-bottom: 1rem;
   }

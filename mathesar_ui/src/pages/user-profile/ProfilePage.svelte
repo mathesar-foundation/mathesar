@@ -22,7 +22,6 @@
 <LayoutWithHeader
   cssVariables={{
     '--page-padding': 'var(--outer-page-padding-for-inset-page)',
-    '--layout-background-color': 'var(--sand-200)',
     '--inset-page-section-padding':
       'var(--size-ultra-large) var(--size-xx-large)',
   }}

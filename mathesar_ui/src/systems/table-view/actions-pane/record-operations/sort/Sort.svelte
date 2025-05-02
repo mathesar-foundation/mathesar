@@ -79,25 +79,27 @@
     {#each [...$sorting] as [columnId, sortDirection] (columnId)}
       <div use:sortableItem class="item">
         <div use:sortableTrigger class="trigger"><Icon {...iconGrip} /></div>
-        <SortEntry
-          columns={$processedColumns}
-          columnsAllowedForSelection={availableColumnIds}
-          getColumnLabel={(c) => c?.column.name ?? ''}
-          getColumnConstraintType={(column) =>
-            getColumnConstraintTypeByColumnId(column.id, $processedColumns)}
-          columnIdentifier={columnId}
-          {sortDirection}
-          on:remove={() => removeSortColumn(columnId)}
-          on:update={(e) =>
-            updateSortEntry(
-              columnId,
-              e.detail.columnIdentifier,
-              e.detail.sortDirection,
-            )}
-        />
+        <div class="sort-entry">
+          <SortEntry
+            columns={$processedColumns}
+            columnsAllowedForSelection={availableColumnIds}
+            getColumnLabel={(c) => c?.column.name ?? ''}
+            getColumnConstraintType={(column) =>
+              getColumnConstraintTypeByColumnId(column.id, $processedColumns)}
+            columnIdentifier={columnId}
+            {sortDirection}
+            on:remove={() => removeSortColumn(columnId)}
+            on:update={(e) =>
+              updateSortEntry(
+                columnId,
+                e.detail.columnIdentifier,
+                e.detail.sortDirection,
+              )}
+          />
+        </div>
       </div>
     {:else}
-      <span>{$_('no_sorting_condition_added')}</span>
+      <span class="muted">{$_('no_sorting_condition_added')}</span>
     {/each}
   </div>
   {#if availableColumnIds.length > 0}
@@ -141,6 +143,13 @@
       grid-template-columns: auto 1fr;
       gap: 0.5rem;
       align-items: stretch;
+
+      .sort-entry {
+        // Background and border radius are set so that the items look clean
+        // while the user is rearranging them.
+        background-color: var(--background-color);
+        border-radius: var(--border-radius-l);
+      }
     }
     .trigger {
       display: flex;
@@ -149,6 +158,10 @@
 
     .header {
       font-weight: bolder;
+    }
+
+    .muted {
+      color: var(--text-color-muted);
     }
   }
 </style>

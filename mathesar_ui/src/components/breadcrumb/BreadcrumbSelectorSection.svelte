@@ -57,12 +57,11 @@
     grid-gap: 0.5rem;
   }
   .content {
-    margin-left: 0.5rem;
     display: grid;
     grid-gap: 0.5rem;
   }
   .detail {
-    color: var(--slate-400);
+    color: var(--text-color-secondary);
     font-size: var(--text-size-small);
   }
   .detail:empty {

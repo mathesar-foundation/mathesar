@@ -4,13 +4,17 @@
 
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
-  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
-  import SchemaName from '@mathesar/components/SchemaName.svelte';
-  import { iconDeleteMajor, iconEdit, iconMoreActions } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconEdit,
+    iconMoreActions,
+    iconSchema,
+    iconTable,
+  } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { ButtonMenuItem } from '@mathesar-component-library';
+  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
 
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
@@ -19,7 +23,7 @@
   export let database: Database;
   export let schema: Schema;
 
-  $: ({ name, description, isPublicSchema, currentAccess } = schema);
+  $: ({ name, description, currentAccess } = schema);
   $: ({ currentRoleOwns } = currentAccess);
 
   let isHovered = false;
@@ -29,9 +33,10 @@
 </script>
 
 <div class="schema-row" class:hover={isHovered} class:focus={isFocused}>
-  <div class="title-and-meta">
-    <div class="name"><SchemaName {schema} iconHasBox /></div>
-
+  <div class="top-row">
+    <div class="icon-container">
+      <Icon {...iconSchema} size="1rem" />
+    </div>
     <div class="menu-trigger">
       <DropdownMenu
         showArrow={false}
@@ -60,19 +65,24 @@
     </div>
   </div>
 
-  {#if $description}
-    <p class="description" title={$description}>
-      {$description}
-    </p>
-  {/if}
+  <div class="content">
+    <div class="name">{$name}</div>
 
-  <SchemaConstituentCounts {schema} />
+    {#if $description}
+      <p class="description" title={$description}>
+        {$description}
+      </p>
+    {:else}
+      <div class="description-placeholder"></div>
+    {/if}
 
-  {#if $isPublicSchema}
-    <InfoBox>
-      {$_('public_schema_info')}
-    </InfoBox>
-  {/if}
+    <div class="bottom-row">
+      <div class="table-count">
+        <Icon {...iconTable} size="1rem" />
+        <SchemaConstituentCounts {schema} />
+      </div>
+    </div>
+  </div>
 
   <!-- svelte-ignore a11y-missing-content -->
   <a
@@ -94,32 +104,69 @@
   />
 </div>
 
-<style>
+<style lang="scss">
   .schema-row {
     position: relative;
     isolation: isolate;
     --z-index-hyperlink-overlay: 1;
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--slate-200);
-    background-color: var(--white);
-    padding: 1em;
+    border: 1px solid var(--card-border);
+    background: linear-gradient(
+      var(--gradient-direction-default),
+      var(--gradient-card-start),
+      var(--gradient-card-end)
+    );
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-  }
-
-  .schema-row > :global(* + *:not(.hyperlink-overlay)) {
-    margin-top: 0.75rem;
+    height: 100%;
+    width: 100%;
+    box-shadow: var(--card-active-shadow);
+    transition: background 0.2s ease-in-out;
   }
 
   .schema-row.hover {
-    border: 1px solid var(--slate-300);
-    background-color: var(--slate-50);
-    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
+    background: linear-gradient(
+      var(--gradient-direction-hover),
+      var(--gradient-card-hover-start),
+      var(--gradient-card-hover-end)
+    );
   }
+
   .schema-row.focus {
-    outline: 2px solid var(--slate-300);
+    outline: 2px solid var(--sand-400);
     outline-offset: 1px;
+  }
+
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 0.125rem;
+  }
+
+  .icon-container {
+    background-color: var(--icon-background);
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: var(--z-index-menu-trigger);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 0.125rem;
+    min-width: 0;
   }
 
   .hyperlink-overlay {
@@ -138,26 +185,43 @@
   .description {
     font-weight: 400;
     font-size: var(--text-size-base);
-    color: var(--slate-500);
+    color: var(--text-color-secondary);
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 1.5rem;
   }
 
-  .title-and-meta {
+  .description-placeholder {
+    min-height: 1.5rem;
+  }
+
+  .bottom-row {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-end;
+    margin-top: 0.25rem;
+  }
+
+  .table-count {
+    display: flex;
     align-items: center;
-    flex-grow: 1;
+    gap: 0.375rem;
+    color: var(--text-color-tertiary);
+    font-size: var(--text-size-small);
   }
 
   .name {
     font-size: var(--text-size-xx-large);
     font-weight: var(--font-weight-medium);
-    --icon-color: var(--brand-500);
     overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-color-primary);
+    margin-bottom: 0.125rem;
+    line-height: 1.2;
+    width: 100%;
   }
 </style>

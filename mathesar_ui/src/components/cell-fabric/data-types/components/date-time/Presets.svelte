@@ -81,7 +81,7 @@
 
     :global(button.btn.selected) {
       background: var(--color-contrast);
-      color: var(--color-white);
+      color: var(--white);
     }
 
     .tag-label {

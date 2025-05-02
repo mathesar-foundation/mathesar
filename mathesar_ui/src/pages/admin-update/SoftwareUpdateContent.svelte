@@ -76,7 +76,7 @@
   <div class="check-button">
     <SpinnerButton
       label={$_('check_for_updates')}
-      appearance="default"
+      appearance="link"
       icon={iconRefresh}
       onClick={refresh}
     />
