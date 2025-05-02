@@ -1,5 +1,7 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
+import type { ColumnCastOptions } from './columns';
+
 interface Referent {
   referent_table: number;
   column_name: string;
@@ -65,7 +67,7 @@ export const data_modeling = {
       string,
       {
         type: string;
-        details?: Record<string, unknown>;
+        details?: ColumnCastOptions;
       }
     >
   >(),

@@ -1,7 +1,7 @@
 import type { RecursivePartial } from '@mathesar/component-library';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-import type { ColumnTypeOptions } from './columns';
+import type { ColumnCastOptions, ColumnTypeOptions } from './columns';
 import type { RawDatabase } from './databases';
 import type { RawRole } from './roles';
 
@@ -117,6 +117,7 @@ export interface ColumnPreviewSpec {
   /** The new type to be applied to the column */
   type?: string;
   type_options?: ColumnTypeOptions | null;
+  cast_options?: ColumnCastOptions;
 }
 
 export type NewPkColumnType = 'IDENTITY' | 'UUIDv4';
