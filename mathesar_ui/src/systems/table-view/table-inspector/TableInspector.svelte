@@ -8,6 +8,7 @@
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';
   import TableMode from './table/TableMode.svelte';
+  import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
 
   const tabMap = {
     table: { label: $_('table'), component: TableMode },
@@ -38,9 +39,9 @@
     on:tabSelected={handleTabSelected}
   >
     {#if activeTab}
-      <div class="tabs-container">
+      <InspectorTabContent>
         <svelte:component this={activeTab.component} />
-      </div>
+      </InspectorTabContent>
     {/if}
   </TabContainer>
 </div>
@@ -53,9 +54,5 @@
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-l);
     isolation: isolate;
-
-    .tabs-container {
-      padding: var(--sm5);
-    }
   }
 </style>
