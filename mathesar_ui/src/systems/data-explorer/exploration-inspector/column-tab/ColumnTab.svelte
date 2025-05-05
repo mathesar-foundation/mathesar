@@ -3,8 +3,8 @@
   import { onDestroy } from 'svelte';
   import { _ } from 'svelte-i18n';
 
+  import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import {
-    Collapsible,
     LabeledInput,
     TextInput,
     isDefinedNonNullable,
@@ -75,26 +75,25 @@
     })}
   </div>
 {:else if selectedColumn}
-  <Collapsible isOpen triggerAppearance="plain">
-    <span slot="header">{$_('properties')}</span>
-    <div slot="content" class="section-content">
-      <LabeledInput label={$_('name')} layout="stacked">
-        <TextInput
-          value={selectedColumn.column.display_name}
-          on:input={onNameInput}
-          on:change={onNameChange}
-          disabled={!queryManager}
-        />
-      </LabeledInput>
-      {#if columnInformation}
-        <ColumnSource {columnInformation} columnsMetaData={$columnsMetaData} />
-      {/if}
-    </div>
-  </Collapsible>
+  <InspectorSection title={$_('properties')}>
+    <LabeledInput label={$_('name')} layout="stacked">
+      <TextInput
+        value={selectedColumn.column.display_name}
+        on:input={onNameInput}
+        on:change={onNameChange}
+        disabled={!queryManager}
+      />
+    </LabeledInput>
+    {#if columnInformation}
+      <ColumnSource {columnInformation} columnsMetaData={$columnsMetaData} />
+    {/if}
+  </InspectorSection>
 {/if}
 
 {#if selectedColumns.length > 0 && queryManager}
-  <DeleteColumnAction {selectedColumns} {queryManager} />
+  <InspectorSection title={$_('actions')}>
+    <DeleteColumnAction {selectedColumns} {queryManager} />
+  </InspectorSection>
 {/if}
 
 {#if !selectedColumn}

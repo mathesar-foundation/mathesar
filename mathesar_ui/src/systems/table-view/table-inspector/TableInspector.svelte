@@ -2,13 +2,13 @@
   import { _ } from 'svelte-i18n';
 
   import type { Tab } from '@mathesar/component-library/types';
+  import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
   import { TabContainer, defined } from '@mathesar-component-library';
 
   import CellMode from './cell/CellMode.svelte';
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';
   import TableMode from './table/TableMode.svelte';
-  import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
 
   const tabMap = {
     table: { label: $_('table'), component: TableMode },
