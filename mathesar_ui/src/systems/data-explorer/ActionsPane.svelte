@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
@@ -11,6 +10,7 @@
     iconExploration,
     iconInspector,
     iconRedo,
+    iconSave,
     iconUndo,
   } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
@@ -20,19 +20,15 @@
   import { toast } from '@mathesar/stores/toast';
   import {
     Button,
-    ButtonMenuItem,
-    DropdownMenu,
     Help,
     Icon,
     InputGroup,
     SpinnerButton,
-    iconExpandDown,
   } from '@mathesar-component-library';
 
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
 
-  const dispatch = createEventDispatcher();
   const saveModalController = modal.spawnModalController();
 
   export let queryManager: QueryManager;
@@ -76,13 +72,6 @@
     } catch (err) {
       toast.fromError(err);
       return { success: false };
-    }
-  }
-
-  async function saveAndClose() {
-    const { success } = await save();
-    if (success) {
-      dispatch('close');
     }
   }
 
@@ -154,35 +143,14 @@
 
     <svelte:fragment slot="actions-right">
       {#if currentTable}
-        <InputGroup>
-          <!-- TODO: Change disabled condition to is_valid(query) -->
-          <SpinnerButton
-            label={querySaveRequestStatus === 'processing'
-              ? $_('saving')
-              : $_('save')}
-            disabled={!$query.base_table_oid ||
-              hasNoColumns ||
-              querySaveRequestStatus === 'processing'}
-            onClick={saveExistingOrCreateNew}
-          />
-          {#if isSaved}
-            <DropdownMenu
-              triggerAppearance="primary"
-              placements={['bottom-end']}
-              closeOnInnerClick={true}
-              icon={{
-                ...iconExpandDown,
-                size: '0.8em',
-              }}
-              showArrow={false}
-            >
-              <ButtonMenuItem on:click={save}>{$_('save')}</ButtonMenuItem>
-              <ButtonMenuItem on:click={saveAndClose}>
-                {$_('save_and_close')}
-              </ButtonMenuItem>
-            </DropdownMenu>
-          {/if}
-        </InputGroup>
+        <SpinnerButton
+          icon={iconSave}
+          label={$_('save')}
+          disabled={!$query.base_table_oid ||
+            hasNoColumns ||
+            querySaveRequestStatus === 'processing'}
+          onClick={saveExistingOrCreateNew}
+        />
 
         <InputGroup>
           <Button

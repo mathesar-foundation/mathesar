@@ -27,7 +27,6 @@
     {queryManager}
     bind:linkCollapsibleOpenState
     bind:isInspectorOpen
-    on:close
   />
   {#if !$query.base_table_oid}
     <div class="initial-content">

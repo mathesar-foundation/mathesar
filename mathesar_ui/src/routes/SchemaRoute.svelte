@@ -10,8 +10,8 @@
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
 
+  import DataExplorerRedirect from './DataExplorerRedirect.svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
-  import ExplorationRoute from './ExplorationRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
   import TableRoute from './TableRoute.svelte';
 
@@ -43,17 +43,17 @@
     />
   </Route>
 
-  <Route path="/explorations/:queryId" let:meta firstmatch>
-    <ExplorationRoute
+  <Route path="/explorations/:queryId/edit" let:meta>
+    <DataExplorerRedirect
       {database}
       {schema}
-      queryId={parseInt(meta.params.queryId, 10)}
+      query={{ id: parseInt(meta.params.queryId, 10) }}
     />
   </Route>
 
   <MultiPathRoute
     paths={[
-      { name: 'edit-exploration', path: '/explorations/:queryId/edit/' },
+      { name: 'edit-exploration', path: '/explorations/:queryId' },
       { name: 'new-exploration', path: '/data-explorer/' },
     ]}
     let:path
