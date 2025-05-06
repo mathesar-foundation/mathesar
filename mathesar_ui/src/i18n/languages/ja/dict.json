@@ -218,6 +218,7 @@
   "drop_role_name_question": "ロール [name] をドロップしますか？",
   "drop_role_warning": "このロールはデータベースサーバ上でドロップされ、同じサーバ上に設定されたすべてのデータベースで使用できなくなります。",
   "drop_the_database": "データベースの接続解除",
+  "duplicate_record": "レコードを複製",
   "edit": "編集",
   "edit_child_roles_for_parent": "[parent] 子ロールを編集",
   "edit_connection": "接続を編集",
