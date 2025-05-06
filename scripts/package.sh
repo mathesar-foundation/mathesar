@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# This script packages Mathesar as a distributable archive
-# Primary purpose is to run on our CI/CD
+# This script packages Mathesar as a distributable archive and generates
+# an install.sh script that installs the archive
 
+# Primary purpose is to run on our CI/CD
+# For dev & test purposes, execute within Mathesar docker container
 
 #=======CONFIGURATIONS=========================================================
 
-export UV_VERSION=0.6.13
+export UV_VERSION=0.7.2
 export FILES_TO_COPY=(
   "LICENSE"
   "manage.py"
@@ -30,6 +32,8 @@ export PATTERNS_TO_IGNORE=(
   "__pycache__"
   "bin/mathesar_dev"
 )
+export INSTALLATION_RAW_INPUT_FILE="scripts/install.sh"
+
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export DIST_LOCATION="${BASE_DIR}/dist"
 
@@ -65,10 +69,6 @@ require_command() {
   fi
 }
 
-ensure() {
-  if ! "$@"; then err "Command failed: $*"; fi
-}
-
 
 #=======PRE-REQUSITES==========================================================
 
@@ -79,6 +79,7 @@ ensure() {
 # - GNU gettext
 # - rsync
 # - tar
+# - sed
 
 require_command wget
 require_command python
@@ -87,21 +88,22 @@ require_command gettext
 require_command msgfmt
 require_command rsync
 require_command tar
+require_command sed
 
 
 #=======SETUP DIRECTORY STRUCTURE==============================================
 
 info "Setting up dist folder"
-ensure mkdir -p "${DIST_LOCATION}"
-ensure rm -rf "${DIST_LOCATION}"/*
+mkdir -p "${DIST_LOCATION}"
+rm -rf "${DIST_LOCATION}"/*
 
 info "Creating temp locations for source and python venv"
 
 PACKAGED_SOURCE_LOCATION="${DIST_LOCATION}/__source__"
 PYTHON_VENV_LOCATION="${DIST_LOCATION}/__python__"
 
-ensure mkdir "${PACKAGED_SOURCE_LOCATION}"
-ensure mkdir "${PYTHON_VENV_LOCATION}"
+mkdir "${PACKAGED_SOURCE_LOCATION}"
+mkdir "${PYTHON_VENV_LOCATION}"
 
 info "Moving into source directory"
 
@@ -109,46 +111,68 @@ CALLING_DIR="$(pwd)"
 # Move into the mathesar repo base directory.
 # - The parent directory to the scripts directory that
 #   contains the package.sh script
-ensure cd "$(dirname "$0")/.."
+cd "${BASE_DIR}"
 
 cleanup() {
   info "Cleaning up temporary directories"
-  ensure rm -rf "${PACKAGED_SOURCE_LOCATION}" "${PYTHON_VENV_LOCATION}"
+  rm -rf "${PACKAGED_SOURCE_LOCATION}" "${PYTHON_VENV_LOCATION}"
 
   info "Moving back into directory that called the script"
-  ensure cd "${CALLING_DIR}"
+  cd "${CALLING_DIR}"
 }
 trap cleanup EXIT
 
 
-#=======PACKAGING FUNCTION=====================================================
+#=======PACKAGING FUNCTIONS====================================================
+
+generate_install_script_with_substitutions() {
+  local generated_install_file="${DIST_LOCATION}/install.sh"
+
+  declare -A substitutions=(
+    ["___MATHESAR_VERSION___"]="0.2.3"
+    ["___UV_VERSION___"]="${UV_VERSION}"
+  )
+
+  # Build sed expression
+  local sed_args=()
+  for key in "${!substitutions[@]}"; do
+    sed_args+=("-e" "s|$key|\"${substitutions[$key]}\"|g")
+  done
+
+  sed "${sed_args[@]}" "${INSTALLATION_RAW_INPUT_FILE}" > "$generated_install_file"
+  chmod +x "$generated_install_file"
+  echo "Generated $generated_install_file with substitutions"
+}
 
 package_mathesar() {
   info "Obtaining uv install script"
-  ensure wget "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-installer.sh" -O "${PACKAGED_SOURCE_LOCATION}/uv-installer.sh"
+  wget "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-installer.sh" -O "${PACKAGED_SOURCE_LOCATION}/uv-installer.sh"
 
   info "Building frontend"
   pushd mathesar_ui > /dev/null
-    ensure npm ci
-    ensure npm run build
+    npm ci
+    npm run build
   popd > /dev/null
 
   info "Compiling translations"
-  ensure pip install -r requirements.txt
-  ensure python manage.py compilemessages
+  pip install -r requirements.txt
+  python manage.py compilemessages
 
   info "Copying files"
-  ensure cp "${FILES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
+  cp "${FILES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
 
   info "Copying directories"
   EXCLUDE_OPTS=()
   for pattern in "${PATTERNS_TO_IGNORE[@]}"; do
     EXCLUDE_OPTS+=(--exclude="$pattern")
   done
-  ensure rsync -a "${EXCLUDE_OPTS[@]}" "${DIRECTORIES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
+  rsync -a "${EXCLUDE_OPTS[@]}" "${DIRECTORIES_TO_COPY[@]}" "${PACKAGED_SOURCE_LOCATION}/"
 
   info "Producing a packaged tar file"
-  ensure tar -C "${PACKAGED_SOURCE_LOCATION}" -cvzf "${DIST_LOCATION}/mathesar.tar.gz" .
+  tar -C "${PACKAGED_SOURCE_LOCATION}" -cvzf "${DIST_LOCATION}/mathesar.tar.gz" .
+
+  info "Generate install.sh file"
+  generate_install_script_with_substitutions
 
   success "Packaged Mathesar successfully"
 }

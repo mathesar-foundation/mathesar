@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# Do not call this script within your cloned git repo.
-# This script will be called by the user directly from an external source (eg., internet link)
+# This script will be called by the user directly from the GH releases link (or a link from our website).
 
 # If there's an existing installation in the same location,
 # - If the script's Mathesar's version = installed version, it performs all operations without affecting the installation.
@@ -30,12 +29,20 @@ set -eo pipefail
 #    ├── mathesar/
 #    └── ... (other source files)
 
+# For Maintainers:
+# - Portions of this script are updated dynamically by `package.sh`.
+# - Do not call this script within your cloned git repo.
+# - Avoid testing on the Mathesar dev environment since existing environment variables
+#   would interfere with the new installation.
+
 
 #=======CONFIGURATIONS=========================================================
 
-MATHESAR_VERSION="0.2.3"
-REQUIRED_UV_VERSION="0.6.13"
+# This is replaced during packaging
+MATHESAR_VERSION=___MATHESAR_VERSION___
+REQUIRED_UV_VERSION=___UV_VERSION___
 
+PYTHON_VERSION_SPECIFIER=">=3.9"
 VENV_DIR_NAME="mathesar-venv"
 ENV_FILE_NAME=".env"
 
@@ -252,7 +259,7 @@ reinstall_uv() {
 install_uv_if_not_present() {
   # Install uv only if not already installed
   if [[ -x "${UV_DIR}"/uv ]]; then
-    CURRENT_UV_VERSION=$("${UV_DIR}"/uv --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    CURRENT_UV_VERSION=$("${UV_DIR}"/uv self version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
     if [[ "${CURRENT_UV_VERSION}" != "${REQUIRED_UV_VERSION}" ]]; then
       info "uv version (${CURRENT_UV_VERSION}) does not match required version (${REQUIRED_UV_VERSION})."
       info "Re-installing uv..."
@@ -270,7 +277,7 @@ find_python_and_configure_uv_vars() {
   info "Finding existing Python installations..."
 
   local python_status
-  local find_cmd=("${UV_DIR}/uv" python find ">=3.9,<3.14")
+  local find_cmd=("${UV_DIR}/uv" python find "${PYTHON_VERSION_SPECIFIER}")
 
   set +e
   "${find_cmd[@]}" --managed-python 2>/dev/null
@@ -326,14 +333,13 @@ download_python_if_needed() {
 setup_venv_requirements() {
   pushd "${INSTALL_DIR}" > /dev/null
     info "Creating Python virtual environment..."
-    run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --seed --relocatable
+    run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --python "${PYTHON_VERSION_SPECIFIER}" --seed --relocatable
+
+    info "Activating Python virtual environment..."
     ensure source ./"${VENV_DIR_NAME}"/bin/activate
 
-    # Making explicit call here to use `uv add`.
-    # `uv pip install` is buggy in Mac OS 14 - arm64 M1.
-    # `uv add` also respects UV_PROJECT_ENVIRONMENT 
     info "Installing Python packages..."
-    run_cmd "${UV_DIR}/uv" add -r requirements.txt
+    run_cmd "${UV_DIR}/uv" pip install -r requirements.txt
   popd > /dev/null
 }
 

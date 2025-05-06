@@ -1,10 +1,3 @@
-[project]
-name = "mathesar"
-version = "0.2.3"
-description = "Mathesar 0.2.3"
-readme = "README.md"
-requires-python = ">=3.9"
-
 [tool.uv]
 python-downloads = "manual"
 
