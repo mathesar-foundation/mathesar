@@ -5,12 +5,7 @@
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import {
-    iconExploration,
-    iconInspector,
-    iconRedo,
-    iconUndo,
-  } from '@mathesar/icons';
+  import { iconExploration, iconInspector } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
@@ -30,7 +25,7 @@
     {};
   export let isInspectorOpen: boolean;
 
-  $: ({ query, state, queryHasUnsavedChanges } = queryManager);
+  $: ({ query, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table_oid
     ? $tablesDataStore.tablesMap.get($query.base_table_oid)
     : undefined;
@@ -133,24 +128,7 @@
     <svelte:fragment slot="actions-right">
       {#if currentTable}
         <SaveButton {canSave} onSave={saveExistingOrCreateNew} />
-        <InputGroup>
-          <Button
-            appearance="secondary"
-            disabled={!$state.isUndoPossible}
-            on:click={() => queryManager.undo()}
-          >
-            <Icon {...iconUndo} size="0.8rem" />
-            <span>{$_('undo')}</span>
-          </Button>
-          <Button
-            appearance="secondary"
-            disabled={!$state.isRedoPossible}
-            on:click={() => queryManager.redo()}
-          >
-            <Icon {...iconRedo} size="0.8rem" />
-            <span>{$_('redo')}</span>
-          </Button>
-        </InputGroup>
+
         <Button
           appearance="secondary"
           disabled={!hasColumns}
