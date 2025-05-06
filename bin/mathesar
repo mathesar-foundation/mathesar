@@ -3,7 +3,6 @@ set -eo pipefail
 
 #=======CONFIGURATIONS=========================================================
 
-MATHESAR_VERSION="0.2.3"
 MATHESAR_PORT=8000
 
 SCRIPT_NAME=$(basename "$0")
@@ -88,6 +87,49 @@ ensure() {
 
 
 #=======CORE FUNCTIONS=========================================================
+
+select_python() {
+  if [[ "${NO_VENV}" = true ]]; then
+    echo "python3"
+  else
+    echo "${BASE_DIR}/mathesar-venv/bin/python"
+  fi
+}
+
+# This function is for internal use in the script, eg., identifying version.
+# This does not consider NO_VENV, which should be obeyed during `mathesar run`.
+# Use `select_python` for python executions that need to be made during `mathesar run`.
+auto_detect_python() {
+  local venv_python="${BASE_DIR}/mathesar-venv/bin/python"
+
+  if [[ -x "$venv_python" ]]; then
+    echo "$venv_python"
+  elif command_exists python3; then
+    echo "python3"
+  fi
+}
+
+get_mathesar_version() {
+  local python_bin
+  python_bin=$(auto_detect_python)
+
+  if [[ -z "$python_bin" ]]; then
+    echo "unknown"
+    return
+  fi
+
+  local version
+  pushd "${BASE_DIR}" > /dev/null
+    version=$("$python_bin" -c "from mathesar import __version__; print(__version__)" 2>/dev/null || echo "unknown")
+  popd > /dev/null
+
+  echo "${version}"
+}
+
+print_mathesar_version() {
+  local version=$(get_mathesar_version)
+  echo "Mathesar version ${version}"
+}
 
 validate_port() {
   if ! [[ "${MATHESAR_PORT}" =~ ^[0-9]+$ ]]; then
@@ -191,14 +233,6 @@ initialize_inbuilt_db() {
   pg_ctlcluster "${PG_MAJOR}" mathesar start
 }
 
-select_python() {
-  if [[ "${NO_VENV}" = true ]]; then
-    echo "python"
-  else
-    echo "${BASE_DIR}/mathesar-venv/bin/python"
-  fi
-}
-
 select_gunicorn() {
   if [[ "${NO_VENV}" = true ]]; then
     echo "gunicorn"
@@ -264,9 +298,10 @@ run_mathesar() {
 
 # This is the help message printed for the user
 usage_msg() {
-cat <<EOF
+local version=$(get_mathesar_version)
 
-Mathesar - ${MATHESAR_VERSION}
+cat <<EOF
+Mathesar - ${version}
 
 An intuitive spreadsheet-like interface that lets users of all technical skill levels view, edit,
 query, and collaborate on Postgres data directly, with native Postgres access controls.
@@ -426,7 +461,7 @@ case "${COMMAND}" in
     run_mathesar
     ;;
   version)
-    echo "Mathesar version ${MATHESAR_VERSION}"
+    print_mathesar_version
     ;;
   help)
     usage_msg
