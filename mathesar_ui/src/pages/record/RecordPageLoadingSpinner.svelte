@@ -9,7 +9,7 @@
 <style>
   .record-page-loading-spinner {
     height: 100%;
-    font-size: var(--text-size-x-large);
+    font-size: var(--lg2);
     background: var(--sand-200);
     color: var(--sand-800);
     padding: 3rem;

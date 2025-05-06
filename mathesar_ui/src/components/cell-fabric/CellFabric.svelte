@@ -71,7 +71,7 @@
 
     &:not(.is-independent) {
       --default-cell-height: 29px;
-      --cell-padding: var(--size-ultra-small);
+      --cell-padding: var(--sm4);
       min-height: var(--cell-height, var(--default-cell-height));
     }
     &.is-independent {

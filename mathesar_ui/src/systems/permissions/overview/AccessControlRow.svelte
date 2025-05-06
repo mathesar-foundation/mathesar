@@ -134,15 +134,15 @@
   .access-selection {
     display: grid;
     grid-template-columns: 2fr 1fr auto;
-    gap: var(--size-ultra-small);
+    gap: var(--sm4);
   }
   .access-selection-option {
     .name {
       font-weight: 500;
     }
     .help {
-      margin-top: var(--size-extreme-small);
-      font-size: var(--text-size-small);
+      margin-top: var(--sm6);
+      font-size: var(--sm1);
       white-space: normal;
       max-width: 15rem;
     }
@@ -152,13 +152,13 @@
     font-weight: 500;
   }
   .role-permissions {
-    margin-top: var(--size-xx-small);
-    --Collapsible_trigger-padding: var(--size-extreme-small) 0;
+    margin-top: var(--sm3);
+    --Collapsible_trigger-padding: var(--sm6) 0;
     --Collapsible_header-font-weight: 400;
 
     .content {
-      margin-top: var(--size-super-ultra-small);
-      padding: var(--size-x-small);
+      margin-top: var(--sm5);
+      padding: var(--sm2);
       border: 1px solid var(--border-color);
       border-radius: var(--border-radius-l);
       background: var(--background-color);

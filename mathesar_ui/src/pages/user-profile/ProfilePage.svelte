@@ -22,8 +22,7 @@
 <LayoutWithHeader
   cssVariables={{
     '--page-padding': 'var(--outer-page-padding-for-inset-page)',
-    '--inset-page-section-padding':
-      'var(--size-ultra-large) var(--size-xx-large)',
+    '--inset-page-section-padding': 'var(--lg4) var(--lg3)',
   }}
 >
   <InsetPageLayout hasMultipleSections>

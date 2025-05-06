@@ -50,8 +50,8 @@
     color: var(--MessageBox__icon-color, currentcolor);
   }
   .title {
-    font-size: var(--size-large);
+    font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    margin-bottom: var(--size-ultra-small);
+    margin-bottom: var(--sm4);
   }
 </style>

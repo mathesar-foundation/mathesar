@@ -75,6 +75,6 @@
 <style lang="scss">
   div.connect-db-options {
     display: grid;
-    grid-gap: var(--size-xx-small);
+    grid-gap: var(--sm3);
   }
 </style>

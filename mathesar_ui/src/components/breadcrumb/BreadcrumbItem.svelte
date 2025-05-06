@@ -114,7 +114,7 @@
     :global(.postgres-keyword) {
       color: var(--white);
       background: var(--text-color-muted);
-      padding: var(--size-xx-small) var(--size-x-small);
+      padding: var(--sm3) var(--sm2);
       border-radius: var(--border-radius-s);
     }
   }

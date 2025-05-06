@@ -29,7 +29,7 @@
     width: 100%;
   }
   .content {
-    padding: var(--size-ultra-large) var(--page-padding-x);
+    padding: var(--lg4) var(--page-padding-x);
     max-width: var(--max-layout-width-console-pages);
   }
   .content.restrict-width {

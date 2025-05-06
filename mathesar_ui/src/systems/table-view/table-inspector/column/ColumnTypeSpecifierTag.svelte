@@ -64,7 +64,7 @@
     border-radius: var(--border-radius-xl);
     background-color: var(--stormy-100);
     padding: 0.228rem 0.571rem;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     color: var(--text-color-primary);
     font-weight: var(--font-weight-bold);
 

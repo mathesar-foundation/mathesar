@@ -12,7 +12,7 @@
     position: relative;
     align-items: center;
     min-height: 100%;
-    padding: var(--size-x-small) var(--size-base);
+    padding: var(--sm2) 1rem;
     color: var(--text-color-primary);
 
     &::before,

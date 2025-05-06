@@ -41,7 +41,7 @@
 <style lang="scss">
   .tag {
     .name {
-      font-size: var(--text-size-small);
+      font-size: var(--sm1);
       color: var(--color-text-muted);
       display: flex;
       align-items: center;
@@ -49,14 +49,14 @@
       margin-bottom: 0.2rem;
 
       .preproc {
-        font-size: var(--text-size-xx-small);
+        font-size: var(--sm3);
         border: 1px solid var(--color-text-muted);
         padding: 0rem 0.3rem;
         border-radius: 5rem;
       }
     }
     .value {
-      font-size: var(--text-size-large);
+      font-size: var(--lg1);
     }
   }
 </style>

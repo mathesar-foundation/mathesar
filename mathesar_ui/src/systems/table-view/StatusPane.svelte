@@ -133,15 +133,15 @@
     .record-count {
       display: inline-flex;
       align-items: center;
-      gap: var(--size-super-ultra-small);
+      gap: var(--sm5);
     }
 
     .pill {
-      font-size: var(--size-x-small);
+      font-size: var(--sm2);
       display: inline-block;
       border: 1px solid var(--sand-300);
       border-radius: var(--border-radius-m);
-      padding: var(--size-extreme-small);
+      padding: var(--sm6);
     }
   }
 

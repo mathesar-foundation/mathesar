@@ -75,6 +75,6 @@
     height: 100%;
   }
   .content {
-    padding: 0 var(--size-xx-small);
+    padding: 0 var(--sm3);
   }
 </style>

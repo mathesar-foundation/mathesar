@@ -216,6 +216,6 @@
     gap: 0.7rem;
   }
   .submit-section {
-    --form-submit-margin: var(--size-xx-large) 0 0 0;
+    --form-submit-margin: var(--lg3) 0 0 0;
   }
 </style>

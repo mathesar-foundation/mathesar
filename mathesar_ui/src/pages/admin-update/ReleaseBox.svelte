@@ -69,7 +69,7 @@
 <style>
   .release {
     border: solid 1px var(--border-color);
-    padding: var(--size-large);
+    padding: var(--lg1);
     border-radius: var(--border-radius-l);
     background-color: var(--card-background);
   }
@@ -87,7 +87,7 @@
     align-items: center;
     gap: 0.5rem;
     font-weight: var(--font-weight-medium);
-    font-size: var(--text-size-base);
+    font-size: 1rem;
   }
 
   .details {
@@ -115,13 +115,13 @@
   }
 
   .name {
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
     color: var(--text-color-primary);
     font-weight: var(--font-weight-medium);
   }
 
   .version {
-    font-size: var(--text-size-x-large);
+    font-size: var(--lg2);
     color: var(--text-color-primary);
     font-weight: var(--font-weight-extra-bold);
   }

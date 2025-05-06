@@ -16,21 +16,21 @@
 
 <style lang="scss">
   .settings-content {
-    padding: var(--size-x-small);
+    padding: var(--sm2);
 
     header {
       display: flex;
       align-items: center;
     }
     .title {
-      font-size: var(--text-size-x-large);
+      font-size: var(--lg2);
       font-weight: 500;
     }
     .actions {
       margin-left: auto;
     }
     .content {
-      padding: var(--size-x-large) 0;
+      padding: var(--lg2) 0;
     }
   }
 </style>

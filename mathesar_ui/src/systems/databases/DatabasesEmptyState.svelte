@@ -17,7 +17,7 @@
 <div class="content" data-identifier="connection-empty-text">
   <Tutorial>
     <div slot="icon" data-identifier="connection-icon">
-      <Icon {...iconConnection} size="var(--size-super-ultra-large)" />
+      <Icon {...iconConnection} size="var(--lg5)" />
     </div>
     <div slot="title">
       {$_('no_databases_connected')}
@@ -52,7 +52,7 @@
       color: var(--text-color-secondary);
     }
     [data-identifier='no-connections-help'] {
-      margin-top: var(--size-super-ultra-small);
+      margin-top: var(--sm5);
     }
   }
 </style>

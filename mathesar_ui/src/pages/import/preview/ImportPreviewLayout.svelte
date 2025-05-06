@@ -9,7 +9,7 @@
   fitViewport
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-data-pages)',
-    '--inset-page-section-padding': 'var(--size-xx-large)',
+    '--inset-page-section-padding': 'var(--lg3)',
     '--page-padding': 'var(--outer-page-padding-for-inset-page)',
   }}
 >
