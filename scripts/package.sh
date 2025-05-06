@@ -127,9 +127,14 @@ trap cleanup EXIT
 
 generate_install_script_with_substitutions() {
   local generated_install_file="${DIST_LOCATION}/install.sh"
+  local mathesar_version
+
+  if ! mathesar_version=$(python -c "from mathesar import __version__; print(__version__)"); then
+    err "Unable to detect Mathesar version"
+  fi
 
   declare -A substitutions=(
-    ["___MATHESAR_VERSION___"]="0.2.3"
+    ["___MATHESAR_VERSION___"]="${mathesar_version}"
     ["___UV_VERSION___"]="${UV_VERSION}"
   )
 
