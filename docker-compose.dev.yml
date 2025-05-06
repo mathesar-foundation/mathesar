@@ -36,6 +36,7 @@ services:
   dev-service:
     container_name: mathesar_service_dev
     image: mathesar/mathesar-dev:latest
+    pull_policy: never
     build:
       context: .
       target: development
