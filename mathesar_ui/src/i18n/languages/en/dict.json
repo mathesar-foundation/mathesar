@@ -238,6 +238,7 @@
   "error_fetching_joinable_links": "There was an error fetching joinable links",
   "error_saving_query": "An error occurred while trying to save the query",
   "exploration": "Exploration",
+  "exploration_has_unsaved_changes": "Click to save changes to the exploration query definition and display options",
   "exploration_name_cannot_be_empty": "The Exploration name cannot be empty.",
   "exploration_not_found": "Exploration not found.",
   "exploration_not_shared": "This exploration is currently not shared.",

@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
-  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -10,7 +9,6 @@
     iconExploration,
     iconInspector,
     iconRedo,
-    iconSave,
     iconUndo,
   } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
@@ -18,16 +16,12 @@
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesDataStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import {
-    Button,
-    Help,
-    Icon,
-    InputGroup,
-    SpinnerButton,
-  } from '@mathesar-component-library';
+  import { Button, Help, Icon, InputGroup } from '@mathesar-component-library';
 
-  import type QueryManager from './QueryManager';
-  import type { ColumnWithLink } from './utils';
+  import type QueryManager from '../QueryManager';
+  import type { ColumnWithLink } from '../utils';
+
+  import SaveButton from './SaveButton.svelte';
 
   const saveModalController = modal.spawnModalController();
 
@@ -41,8 +35,8 @@
     ? $tablesDataStore.tablesMap.get($query.base_table_oid)
     : undefined;
   $: isSaved = $query.isSaved();
-  $: hasNoColumns = $query.initial_columns.length === 0;
-  $: querySaveRequestStatus = $state.saveState?.state;
+  $: hasColumns = $query.initial_columns.length > 0;
+  $: canSave = !!$query.base_table_oid && hasColumns && $queryHasUnsavedChanges;
 
   function updateBaseTable(table: Table | undefined) {
     void queryManager.update((q) =>
@@ -113,11 +107,13 @@
         {#if currentTable}
           <TableName table={currentTable} />
         {:else}
-          <SelectTableWithinCurrentSchema
-            autoSelect="none"
-            value={currentTable}
-            on:change={(e) => updateBaseTable(e.detail)}
-          />
+          <span class="select-table">
+            <SelectTableWithinCurrentSchema
+              autoSelect="none"
+              value={currentTable}
+              on:change={(e) => updateBaseTable(e.detail)}
+            />
+          </span>
         {/if}
         <Help>
           {$_('base_table_exploration_help')}
@@ -132,26 +128,11 @@
           {$_('start_over')}
         </Button>
       {/if}
-
-      {#if isSaved}
-        <ModificationStatus
-          requestState={$state.saveState?.state}
-          hasChanges={$queryHasUnsavedChanges}
-        />
-      {/if}
     </div>
 
     <svelte:fragment slot="actions-right">
       {#if currentTable}
-        <SpinnerButton
-          icon={iconSave}
-          label={$_('save')}
-          disabled={!$query.base_table_oid ||
-            hasNoColumns ||
-            querySaveRequestStatus === 'processing'}
-          onClick={saveExistingOrCreateNew}
-        />
-
+        <SaveButton {canSave} onSave={saveExistingOrCreateNew} />
         <InputGroup>
           <Button
             appearance="secondary"
@@ -172,7 +153,7 @@
         </InputGroup>
         <Button
           appearance="secondary"
-          disabled={hasNoColumns}
+          disabled={!hasColumns}
           on:click={() => {
             isInspectorOpen = !isInspectorOpen;
           }}
@@ -224,7 +205,7 @@
         font-weight: 500;
       }
 
-      > :global(.select) {
+      .select-table {
         min-width: 12rem;
         font-size: 1rem;
       }

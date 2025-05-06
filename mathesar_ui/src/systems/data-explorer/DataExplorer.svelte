@@ -4,7 +4,7 @@
   import { queries } from '@mathesar/stores/queries';
   import { Tutorial } from '@mathesar-component-library';
 
-  import ActionsPane from './ActionsPane.svelte';
+  import ActionsPane from './action-pane/ActionsPane.svelte';
   import { WithExplorationInspector } from './exploration-inspector';
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
   import type QueryManager from './QueryManager';
