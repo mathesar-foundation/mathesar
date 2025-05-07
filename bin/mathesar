@@ -74,12 +74,6 @@ command_exists() {
   return $?
 }
 
-require_command() {
-  if ! command_exists "$1"; then
-    err "Mathesar requires '$1' (command not found)"
-  fi
-}
-
 # For commands that should ideally never fail
 ensure() {
   if ! "$@"; then err "Command failed: $*"; fi
@@ -134,7 +128,6 @@ print_mathesar_version() {
 set_env_vars_from_file() {
   if [[ -f "${ENV_FILE}" ]]; then
     info "Loading environment variables from ${ENV_FILE}"
-    require_command xargs
 
     # Read .env file line by line.
     while IFS= read -r line || [ -n "$line" ]; do
