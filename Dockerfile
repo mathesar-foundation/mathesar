@@ -1,4 +1,5 @@
 #=========== STAGE: BASE =====================================================#
+
 ARG PYTHON_VERSION=3.13-bookworm
 FROM python:$PYTHON_VERSION AS base
 
@@ -26,6 +27,7 @@ RUN apt-get update && \
     gnupg \
     gettext \
     locales \
+    rsync \
     && rm -rf /var/lib/apt/lists/*
 
 # Define Locale
@@ -49,7 +51,6 @@ EXPOSE 5432
 
 # Mathesar source
 WORKDIR /code/
-COPY . .
 
 
 #=========== STAGE: TESTING ==================================================#
@@ -69,9 +70,11 @@ EXPOSE 8000
 CMD ["bash", "./bin/mathesar_dev"]
 
 
-#=========== STAGE: DEVELOPMENT ==============================================#
+#=========== STAGE: DEVELOPMENT_BASE =========================================#
 
-FROM base AS development
+FROM base AS development_base
+
+COPY . .
 
 ENV NODE_MAJOR=18
 
@@ -93,32 +96,41 @@ RUN apt-get update && \
     nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Build frontend source
-RUN cd mathesar_ui && npm ci && npm run build && cd ..
+
+#=========== STAGE: DEVELOPMENT ==============================================#
+
+FROM development_base AS development
+
+# Install npm packages
+RUN cd mathesar_ui && npm ci && cd ..
 
 EXPOSE 8000 3000 6006
 
 CMD ["bash", "./bin/mathesar_dev"]
 
 
+#=========== STAGE: PRE_PRODUCTION ===========================================#
+
+FROM development_base AS pre_production
+
+RUN bash ./scripts/package.sh
+
+
 #=========== STAGE: PRODUCTION ===============================================#
 
 FROM base AS production
 
+# Copy packaged source files
+COPY --from=pre_production /code/dist/mathesar.tar.gz ./
+
+RUN tar -xzf mathesar.tar.gz && rm mathesar.tar.gz
+
+# Create directory for media files
+RUN mkdir -p .media
+
 # Install prod requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Compile translation files
-RUN python manage.py compilemessages
-
-# Copy built frontend static files
-COPY --from=development /code/mathesar/static/mathesar ./mathesar/static/mathesar/
-
-# Remove FE source, tests, docs
-RUN rm -rf ./mathesar_ui
-RUN rm -rf ./mathesar/tests ./db/tests
-RUN rm -rf ./docs
-
 EXPOSE 8000
 
-CMD ["bash", "./bin/mathesar", "run", "-fns"]
+CMD ["bash", "./bin/mathesar", "run", "-fnse"]
