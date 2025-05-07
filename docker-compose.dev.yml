@@ -81,6 +81,7 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=mathesar_dev_db
       - POSTGRES_PORT=5432
+    pull_policy: never
     build:
       context: .
       target: ${TARGET-testing}
