@@ -111,4 +111,41 @@ jobs:
         run: |
           cd ./mathesar-dist
           chmod +x ./install.sh
-          ./install.sh . -c "postgres://testuser:testpass@localhost:5432/testdb" --test-package-location "file:///$(pwd)/mathesar.tar.gz"
+          ./install.sh . -n -c "postgres://testuser:testpass@localhost:5432/testdb" --test-package-location "file:///$(pwd)/mathesar.tar.gz"
+
+      - name: Start Mathesar server
+        run: |
+          ./mathesar-dist/mathesar run --port 8000 > server.log 2>&1 &
+          echo $! > pidfile
+          sleep 10
+
+      - name: Check if Mathesar is running
+        run: |
+          curl -s -D headers.txt http://localhost:8000 -o response_body.txt
+
+          STATUS_CODE=$(grep HTTP headers.txt | awk '{print $2}')
+          CONTENT_TYPE=$(grep -i 'Content-Type:' headers.txt)
+
+          if [[ "$STATUS_CODE" != "200" ]]; then
+            echo "Unexpected HTTP status: $STATUS_CODE"
+            cat server.log
+            exit 1
+          fi
+
+          if ! grep -qi 'text/html' <<< "$CONTENT_TYPE"; then
+            echo "Content-Type is not HTML: $CONTENT_TYPE"
+            cat headers.txt
+            exit 1
+          fi
+
+          if ! grep -q "Welcome to Mathesar!" response_body.txt; then
+            echo "HTML does not contain expected text: 'Welcome to Mathesar!'"
+            echo "--- Partial HTML ---"
+            head -n 20 response_body.txt
+            exit 1
+          fi
+
+          echo "Mathesar server started successfully"
+
+      - name: Stop Mathesar server
+        run: kill $(cat pidfile)
