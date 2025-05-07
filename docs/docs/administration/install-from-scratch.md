@@ -80,7 +80,7 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
 1. Download the install script and make it executable:
 
     ```bash
-    curl -sSfL https://raw.githubusercontent.com/mathesar-foundation/mathesar/{{mathesar_version}}/scripts/install.sh -o install.sh
+    curl -sSfL https://github.com/mathesar-foundation/mathesar/releases/download/{{mathesar_version}}/install.sh -o install.sh
     chmod +x install.sh
     ```
 
