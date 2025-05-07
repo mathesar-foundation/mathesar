@@ -26,7 +26,6 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
-  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     Button,
     ButtonMenuItem,
@@ -43,13 +42,13 @@
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
   $: void underlyingDatabase.runConservatively({ database_id: database.id });
 
-  const commonData = preloadCommonData();
-
-  $: currentRoleOwnsDatabase =
-    $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
-  $: isDatabaseInInternalServer =
-    database.server.host === commonData.internal_db.host &&
-    database.server.port === commonData.internal_db.port;
+  // // TODO Allow dropping databases
+  // const commonData = preloadCommonData();
+  // $: currentRoleOwnsDatabase =
+  //   $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
+  // $: isDatabaseInInternalServer =
+  //   database.server.host === commonData.internal_db.host &&
+  //   database.server.port === commonData.internal_db.port;
 
   const permissionsModal = modal.spawnModalController();
   const disconnectModal = modal.spawnModalController<Database>();
