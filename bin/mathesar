@@ -355,7 +355,7 @@ EOF
 usage_err() {
   err_msgonly "$1"
   usage_msg
-  exit 1
+  exit 2
 }
 
 
@@ -364,7 +364,7 @@ usage_err() {
 # If no command is specified, print help and exit
 if [ $# -eq 0 ]; then
   usage_msg
-  exit 0
+  exit 2
 fi
 
 COMMAND="$1"

@@ -688,7 +688,7 @@ EOF
 usage_err() {
   err_msgonly "$1"
   usage_msg
-  exit 1
+  exit 2
 }
 
 # Iterate through all provided arguments.
