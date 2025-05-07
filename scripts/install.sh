@@ -88,8 +88,17 @@ err_msgonly() {
 }
 
 err() {
+  echo ""
   err_msgonly "$1"
-  err_msgonly "Mathesar installation failed!"
+  echo -e "${RED}Mathesar installation failed!${RESET}" >&2
+  cat <<EOF
+
+Refer Mathesar's documentation or reach out to the Mathesar team for additional support:
+  * Documentation      : https://docs.mathesar.org
+  * Github repo        : https://github.com/mathesar-foundation/mathesar
+  * Community channels : https://mathesar.org/community
+
+EOF
   exit 1
 }
 
@@ -106,7 +115,7 @@ require_command() {
 
 # For commands that should ideally never fail
 ensure() {
-  if ! "$@"; then err "Command failed: $*"; fi
+  if ! "$@"; then err "The command '$*' failed. Refer the lines above for the cause."; fi
 }
 
 run_cmd() {
@@ -114,7 +123,7 @@ run_cmd() {
   "$@" 2>&1 | sed 's/^/    /'
   local status=${PIPESTATUS[0]}
   if [[ $status -ne 0 ]]; then
-    err "Command failed: $*"
+    err "The command '$*' failed. Refer the lines above for the cause."
   fi
 }
 

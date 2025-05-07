@@ -73,14 +73,23 @@ command_exists() {
 #=======CORE FUNCTIONS=========================================================
 
 run_err() {
+  echo ""
   err_msgonly "$1"
-  err_msgonly "Mathesar startup failed!"
+  echo -e "${RED}Unable to start Mathesar!${RESET}" >&2
+  cat <<EOF
+
+Refer Mathesar's documentation or reach out to the Mathesar team for additional support:
+  * Documentation      : https://docs.mathesar.org
+  * Github repo        : https://github.com/mathesar-foundation/mathesar
+  * Community channels : https://mathesar.org/community
+
+EOF
   exit 1
 }
 
 # For commands that should ideally never fail
 ensure() {
-  if ! "$@"; then run_err "Command failed: $*"; fi
+  if ! "$@"; then run_err "The command '$*' failed. Refer the lines above for the cause."; fi
 }
 
 select_python() {
