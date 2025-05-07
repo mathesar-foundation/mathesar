@@ -11,7 +11,7 @@
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesDataStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { Button, Help, Icon, InputGroup } from '@mathesar-component-library';
+  import { Button, Help, Icon } from '@mathesar-component-library';
 
   import type QueryManager from '../QueryManager';
   import type { ColumnWithLink } from '../utils';
