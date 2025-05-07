@@ -131,27 +131,6 @@ print_mathesar_version() {
   echo "Mathesar version ${version}"
 }
 
-validate_port() {
-  if ! [[ "${MATHESAR_PORT}" =~ ^[0-9]+$ ]]; then
-    err "Invalid port: ${MATHESAR_PORT}. Port must be a positive integer."
-  fi
-
-  # Check if lsof is available.
-  if command_exists lsof; then
-    if lsof -i tcp:"${MATHESAR_PORT}" -sTCP:LISTEN >/dev/null 2>&1; then
-      err "Port ${MATHESAR_PORT} is already in use (checked with lsof). Please choose a different port."
-    fi
-  elif command_exists netstat; then
-    require_command grep
-    # netstat output may include IPv4 or IPv6 addresses. We match common delimiters.
-    if netstat -an | grep -E 'LISTEN' | grep -q "[.:]${MATHESAR_PORT}[[:space:]]"; then
-      err "Port ${MATHESAR_PORT} is already in use (checked with netstat). Please choose a different port."
-    fi
-  else
-    echo "No suitable tool (lsof or netstat) found. Skipping port-in-use check."
-  fi
-}
-
 set_env_vars_from_file() {
   if [[ -f "${ENV_FILE}" ]]; then
     info "Loading environment variables from ${ENV_FILE}"
@@ -244,8 +223,6 @@ select_gunicorn() {
 run_mathesar() {
   info "Starting Mathesar..."
   set_env_vars_from_file
-
-  validate_port
   check_required_core_env_vars
 
   if ! check_required_postgres_env_vars; then
