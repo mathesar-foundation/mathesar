@@ -745,6 +745,8 @@ DECLARE
   actual_number text;
   group_divider text;
   decimal_point text;
+  currency_prefix text;
+  currency_suffix text;
 
   -- pieces required for regex
   non_numeric text := '(?:[^.,0-9]+)';
@@ -781,7 +783,10 @@ BEGIN
   SELECT actual_number_arr[1] INTO actual_number;
   SELECT group_divider_arr[1] INTO group_divider;
   SELECT decimal_point_arr[1] INTO decimal_point;
-  RETURN ARRAY[actual_number, group_divider, decimal_point, replace($1, actual_number, '')];
+  SELECT split_part($1, actual_number, 1) INTO currency_prefix;
+  SELECT split_part($1, actual_number, -1) INTO currency_suffix;
+  raise notice 'actual_number= % group_divider= % decimal_point= % currency_prefix= % currency_suffix= %', actual_number, group_divider, decimal_point, currency_prefix, currency_suffix;
+  RETURN ARRAY[actual_number, group_divider, decimal_point, currency_prefix, currency_suffix];
 END;
 $$ LANGUAGE plpgsql;
 
