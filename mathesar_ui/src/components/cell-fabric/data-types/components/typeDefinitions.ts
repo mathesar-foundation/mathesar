@@ -1,7 +1,5 @@
-import type {
-  ColumnMetadata,
-  ColumnTypeOptions,
-} from '@mathesar/api/rpc/columns';
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
 import type { FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
