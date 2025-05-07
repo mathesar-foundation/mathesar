@@ -3,7 +3,6 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { ResultValue } from '@mathesar/api/rpc/records';
 import {
   type RecordRow,
   type RecordsData,
@@ -101,8 +100,11 @@ function getDestinationColumns(
 }
 
 function insertViaPaste(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   payload: Payload,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selection: SheetSelection,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   context: PastingContext,
 ) {
   throw new Error('Insert via paste is not yet implemented.');

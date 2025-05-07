@@ -6,7 +6,7 @@
 
   export let schema: Schema;
 
-  $: ({ name, isPublicSchema } = schema);
+  $: ({ name } = schema);
 </script>
 
 <NameWithIcon icon={iconSchema} name={$name} />
