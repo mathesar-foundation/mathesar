@@ -44,4 +44,4 @@ jobs:
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/mathesar.tar.gz
+          asset_path: ./dist/*
