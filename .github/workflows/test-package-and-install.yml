@@ -115,7 +115,7 @@ jobs:
 
       - name: Start Mathesar server
         run: |
-          ./mathesar-dist/mathesar run --port 8000 > server.log 2>&1 &
+          ./bin/mathesar run --port 8000 > server.log 2>&1 &
           echo $! > pidfile
           sleep 10
 
@@ -146,6 +146,15 @@ jobs:
           fi
 
           echo "Mathesar server started successfully"
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathesar-debug-logs
+          path: |
+            server.log
+            response_body.txt
 
       - name: Stop Mathesar server
         run: kill $(cat pidfile)
