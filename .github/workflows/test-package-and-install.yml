@@ -152,7 +152,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: mathesar-debug-logs
+          name: mathesar-debug-logs-${{ matrix.os }}-${{ matrix.arch }}
           path: |
             server.log
             response_body.txt
