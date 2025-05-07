@@ -1,5 +1,5 @@
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-import type { Column, ColumnMetadata } from '@mathesar/api/rpc/columns';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { JoinPath } from '@mathesar/api/rpc/tables';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
@@ -137,7 +137,6 @@ export interface QueryResultColumn {
   display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
-  metadata: ColumnMetadata | null;
 }
 
 export interface QueryInitialColumnSource {

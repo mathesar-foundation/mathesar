@@ -342,7 +342,6 @@ function processColumn(
     display_name: columnInfo.display_name ?? columnInfo.alias,
     type: columnInfo.type ?? 'unknown',
     type_options: columnInfo.type_options ?? null,
-    metadata: columnInfo.metadata ?? null,
   };
 
   const abstractType = getAbstractTypeForDbType(column.type);
@@ -469,7 +468,6 @@ export function speculateColumnMetaData({
               display_name: null,
               type: inputColumn?.type ?? 'unknown',
               type_options: inputColumn?.type_options ?? null,
-              metadata: inputColumn?.metadata ?? null,
               is_initial_column: false,
               input_alias: group.inputAlias,
             }),
@@ -494,7 +492,6 @@ export function speculateColumnMetaData({
                           ?.column.type ?? 'unknown',
                     }
                   : null,
-              metadata: null,
               is_initial_column: false,
               input_alias: aggregation.inputAlias,
             }),
