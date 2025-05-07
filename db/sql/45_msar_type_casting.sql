@@ -869,7 +869,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.cast_to_mathesar_money(num text, group_sep "char", decimal_p "char", curr_pref text, curr_suff text)
 RETURNS mathesar_types.mathesar_money AS $$
-  SELECT replace(replace(replace(replace(num, curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' '))::mathesar_types::mathesar_money;
+  SELECT replace(replace(replace(replace(num, curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' '))::mathesar_types.mathesar_money;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
