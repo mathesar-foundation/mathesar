@@ -89,7 +89,7 @@ err_msgonly() {
 
 err() {
   err_msgonly "$1"
-  echo -e "${RED}Mathesar installation failed!${RESET}"
+  err_msgonly "Mathesar installation failed!"
   exit 1
 }
 

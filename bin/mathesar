@@ -64,23 +64,24 @@ err_msgonly() {
   echo -e "${RED}ERROR: $1${RESET}" >&2
 }
 
-err() {
-  err_msgonly "$1"
-  exit 1
-}
-
 command_exists() {
   command -v "$1" > /dev/null 2>&1
   return $?
 }
 
-# For commands that should ideally never fail
-ensure() {
-  if ! "$@"; then err "Command failed: $*"; fi
-}
-
 
 #=======CORE FUNCTIONS=========================================================
+
+run_err() {
+  err_msgonly "$1"
+  err_msgonly "Mathesar startup failed!"
+  exit 1
+}
+
+# For commands that should ideally never fail
+ensure() {
+  if ! "$@"; then run_err "Command failed: $*"; fi
+}
 
 select_python() {
   if [[ "${NO_VENV}" = true ]]; then
@@ -157,7 +158,7 @@ set_env_vars_from_file() {
 
 check_required_core_env_vars() {
   if [[ -z "${SECRET_KEY}" ]]; then
-    err "Required environment variable SECRET_KEY is not set."
+    run_err "Required environment variable SECRET_KEY is not set."
   fi
 }
 
@@ -177,12 +178,12 @@ check_required_postgres_env_vars() {
 
 verify_docker_setup() {
   if [[ -z "${MATHESAR_DOCKER_IMAGE}" ]]; then
-    err "Cannot verify environment as Mathesar's docker image."
+    run_err "Cannot verify environment as Mathesar's docker image."
   fi
 
   # Verify that PGDATA is set; it's required to detect an existing DB.
   if [[ -z "${PGDATA}" ]]; then
-    err "PGDATA is not set. Cannot verify existing database."
+    run_err "PGDATA is not set. Cannot verify existing database."
   fi
 
   declare -g DATABASE_ALREADY_EXISTS
@@ -228,7 +229,7 @@ run_mathesar() {
       export POSTGRES_PORT=5432
       export POSTGRES_DB=mathesar_django
     else
-      err "Required environment variables are not set."
+      run_err "Required environment variables are not set."
     fi
   fi
 
@@ -238,7 +239,7 @@ run_mathesar() {
     python_bin=$(select_python)
 
     if [[ "${NO_VENV}" != true ]] && [[ ! -x "${python_bin}" ]]; then
-      err "Python not found at ${python_bin}. Ensure the virtual environment is set up."
+      run_err "Python not found at ${python_bin}. Ensure the virtual environment is set up."
     fi
 
     pushd "${BASE_DIR}" > /dev/null
@@ -256,7 +257,7 @@ run_mathesar() {
   gunicorn_bin=$(select_gunicorn)
 
   if [[ "${NO_VENV}" != true ]] && [[ ! -x "${gunicorn_bin}" ]]; then
-    err "Gunicorn not found at ${gunicorn_bin}. Ensure the virtual environment is set up."
+    run_err "Gunicorn not found at ${gunicorn_bin}. Ensure the virtual environment is set up."
   fi
 
   info "Starting gunicorn webserver..."
