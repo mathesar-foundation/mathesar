@@ -187,7 +187,7 @@ check_required_postgres_env_vars() {
 
 verify_docker_setup() {
   if [[ -z "${MATHESAR_DOCKER_IMAGE}" ]]; then
-    run_err "Cannot verify environment as Mathesar's docker image."
+    run_err "Not running in a Mathesar docker container."
   fi
 
   # Verify that PGDATA is set; it's required to detect an existing DB.
