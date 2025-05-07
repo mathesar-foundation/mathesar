@@ -391,7 +391,7 @@ if [ "${COMMAND}" = "run" ]; then
           MATHESAR_PORT="$2"
           shift 2
         else
-          err "The --port/-p option requires an argument."
+          usage_err "The --port/-p option requires an argument."
         fi
         ;;
       --prefer-exported-env|-e)
@@ -399,11 +399,12 @@ if [ "${COMMAND}" = "run" ]; then
         shift
         ;;
       -*)
-        # Support clubbed short options for fallback (-f), no-venv (-n), prefer-exported-env (-e), and setup-django (-s).
-        # If the option string includes any 'p' we now no longer allow clubbing.
+        # Support combined short options for fallback (-f), no-venv (-n), prefer-exported-env (-e), and setup-django (-s).
+        # Eg., `mathesar run -fnes`.
+        # Don't allow `p` in the the option string since `-p` requires an argument.
         shortopts="${1#-}"
         if [[ "$shortopts" == *"p"* ]]; then
-          err "The -p option cannot be clubbed with other options."
+          usage_err "The -p option cannot be combined with other options. Please specify it separately, eg., 'mathesar -e -p 8000'."
         fi
         for (( i=0; i<${#shortopts}; i++ )); do
           letter="${shortopts:i:1}"
