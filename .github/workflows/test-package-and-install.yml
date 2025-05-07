@@ -112,10 +112,11 @@ jobs:
           cd ./mathesar-dist
           chmod +x ./install.sh
           ./install.sh . -n -c "postgres://testuser:testpass@localhost:5432/testdb" --test-package-location "file:///$(pwd)/mathesar.tar.gz"
+          cd ..
 
       - name: Start Mathesar server
         run: |
-          ./bin/mathesar run --port 8000 > server.log 2>&1 &
+          ./mathesar-dist/bin/mathesar run --port 8000 > server.log 2>&1 &
           echo $! > pidfile
           sleep 10
 
