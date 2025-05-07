@@ -7,7 +7,6 @@
     States,
   } from '@mathesar/api/rest/utils/requestUtils';
   import type { ResultValue } from '@mathesar/api/rpc/records';
-  import type { TablePrivilege } from '@mathesar/api/rpc/tables';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
