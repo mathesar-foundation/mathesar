@@ -1,5 +1,4 @@
-import { get, readable } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { readable } from 'svelte/store';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { ImmutableMap } from '@mathesar/component-library';
