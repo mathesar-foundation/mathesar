@@ -122,10 +122,10 @@ jobs:
 
       - name: Check if Mathesar is running
         run: |
-          curl -s -D headers.txt http://localhost:8000 -o response_body.txt
+          curl -sL -D headers.txt http://localhost:8000 -o response_body.txt
 
-          STATUS_CODE=$(grep HTTP headers.txt | awk '{print $2}')
-          CONTENT_TYPE=$(grep -i 'Content-Type:' headers.txt)
+          STATUS_CODE=$(grep HTTP headers.txt | tail -1 | awk '{print $2}')
+          CONTENT_TYPE=$(grep -i 'Content-Type:' headers.txt | tail -1)
 
           if [[ "$STATUS_CODE" != "200" ]]; then
             echo "Unexpected HTTP status: $STATUS_CODE"
