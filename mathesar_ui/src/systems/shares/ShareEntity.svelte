@@ -221,7 +221,7 @@
     }
     .description {
       color: var(--gray-400);
-      font-size: var(--size-small);
+      font-size: var(--sm1);
       margin-top: 0.2rem;
     }
     .content {

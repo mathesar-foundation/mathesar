@@ -61,7 +61,7 @@
   .table-widget {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-m);
-    padding: var(--size-small);
+    padding: var(--sm1);
   }
   .top {
     display: grid;
@@ -71,7 +71,7 @@
     align-items: center;
     overflow: hidden;
     color: var(--text-color-primary);
-    margin-bottom: var(--size-small);
+    margin-bottom: var(--sm1);
   }
   .top > :global(*) {
     overflow: hidden;
@@ -82,6 +82,6 @@
     align-items: center;
   }
   .results {
-    margin-top: var(--size-small);
+    margin-top: var(--sm1);
   }
 </style>

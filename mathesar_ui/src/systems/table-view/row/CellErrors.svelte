@@ -86,7 +86,7 @@
 
   .required {
     color: var(--red-800);
-    font-size: var(--text-size-x-large);
+    font-size: var(--lg2);
   }
 
   .errors {
@@ -101,7 +101,7 @@
     max-width: 20em;
     padding: 0.5em;
     z-index: var(--cell-errors-z-index);
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     word-wrap: break-word;
   }
 </style>

@@ -18,9 +18,9 @@
 
 <style lang="scss">
   .input-row + :global(.input-row .cell) {
-    margin-top: var(--size-large);
+    margin-top: var(--lg1);
   }
   .input-row :global(.right + .left) {
-    padding-left: var(--size-base);
+    padding-left: 1rem;
   }
 </style>

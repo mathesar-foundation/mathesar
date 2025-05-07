@@ -191,7 +191,7 @@
     }
 
     .explore-title {
-      font-size: var(--text-size-large);
+      font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
       color: var(--text-color-primary);
       margin: 0 0 0.75rem 0;
@@ -200,7 +200,7 @@
 
     .explore-description {
       color: var(--text-color-secondary);
-      font-size: var(--text-size-base);
+      font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;
       line-height: 1.5;

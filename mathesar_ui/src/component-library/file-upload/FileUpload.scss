@@ -7,13 +7,13 @@
     min-width: calc(50% - 8px);
 
     .file {
-      padding: var(--size-xx-small);
+      padding: var(--sm3);
       border: 1px solid var(--gray-300);
       border-radius: var(--border-radius-l);
       display: flex;
 
       & + .file {
-        margin-top: var(--size-xx-small);
+        margin-top: var(--sm3);
       }
 
       > svg {
@@ -26,7 +26,7 @@
         width: 100%;
 
         > .file-name {
-          font-size: var(--size-large);
+          font-size: var(--lg1);
 
           span {
             font-weight: 500;
@@ -34,9 +34,9 @@
         }
 
         > .progress {
-          height: var(--size-xx-small);
-          border-radius: var(--size-super-ultra-small);
-          margin: var(--size-xx-small) 0;
+          height: var(--sm3);
+          border-radius: var(--sm5);
+          margin: var(--sm3) 0;
         }
 
         > .upload-info {
@@ -70,19 +70,19 @@
       text-align: center;
 
       .icon-holder {
-        font-size: var(--size-super-ultra-large);
+        font-size: var(--lg5);
       }
 
       .text {
-        margin-top: var(--size-xx-small);
+        margin-top: var(--sm3);
 
         .title {
           font-weight: 500;
-          font-size: var(--size-large);
+          font-size: var(--lg1);
         }
         .desc {
           color: var(--gray-500);
-          margin-top: var(--size-extreme-small);
+          margin-top: var(--sm6);
         }
       }
     }

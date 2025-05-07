@@ -26,7 +26,6 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
-  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     Button,
     ButtonMenuItem,
@@ -43,13 +42,13 @@
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
   $: void underlyingDatabase.runConservatively({ database_id: database.id });
 
-  const commonData = preloadCommonData();
-
-  $: currentRoleOwnsDatabase =
-    $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
-  $: isDatabaseInInternalServer =
-    database.server.host === commonData.internal_db.host &&
-    database.server.port === commonData.internal_db.port;
+  // // TODO Allow dropping databases
+  // const commonData = preloadCommonData();
+  // $: currentRoleOwnsDatabase =
+  //   $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
+  // $: isDatabaseInInternalServer =
+  //   database.server.host === commonData.internal_db.host &&
+  //   database.server.port === commonData.internal_db.port;
 
   const permissionsModal = modal.spawnModalController();
   const disconnectModal = modal.spawnModalController<Database>();
@@ -207,25 +206,25 @@
 
 <style>
   .tab-container {
-    padding: var(--size-xx-large) 0;
+    padding: var(--lg3) 0;
   }
   .details {
-    font-size: var(--text-size-base);
+    font-size: 1rem;
     color: var(--text-color-secondary);
-    margin-top: var(--size-super-ultra-small);
+    margin-top: var(--sm5);
   }
   .details .label {
     color: var(--text-color-secondary);
     font-weight: var(--font-weight-medium);
   }
   .edit-connection {
-    margin-top: var(--size-small);
+    margin-top: var(--sm1);
     display: inline-flex;
   }
   .actions-container {
     display: flex;
     align-items: center;
-    gap: var(--size-x-large);
+    gap: var(--lg2);
   }
   .dropdown-container {
     margin-left: auto;

@@ -174,7 +174,7 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     color: var(--text-color);
-    font-size: var(--text-size-base);
+    font-size: 1rem;
   }
 
   .left {
@@ -186,7 +186,7 @@
   .right {
     display: flex;
     align-items: center;
-    gap: var(--size-x-small);
+    gap: var(--sm2);
   }
 
   .theme-switcher {

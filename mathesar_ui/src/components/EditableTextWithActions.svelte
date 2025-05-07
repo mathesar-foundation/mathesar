@@ -104,6 +104,6 @@
 
   .error {
     color: var(--color-error);
-    font-size: var(--text-size-x-small);
+    font-size: var(--sm2);
   }
 </style>

@@ -27,12 +27,12 @@
       border-bottom: 0.25em solid transparent;
       margin-bottom: -1px;
       margin-right: var(--Tab_margin-right, 2rem);
-      font-size: var(--text-size-large);
+      font-size: var(--lg1);
       opacity: 0.75;
 
       > div,
       a {
-        padding: var(--size-xx-small) var(--size-x-small);
+        padding: var(--sm3) var(--sm2);
         white-space: nowrap;
         text-decoration: none;
         text-overflow: ellipsis;
@@ -63,7 +63,7 @@
 
       > button.remove {
         cursor: pointer;
-        padding: var(--size-xx-small) var(--size-x-small);
+        padding: var(--sm3) var(--sm2);
         border: none;
         background: none;
         margin: 0;
@@ -115,11 +115,11 @@
   &.compact {
     > ul.tabs {
       > li.tab {
-        font-size: var(--text-size-base);
+        font-size: 1rem;
         text-align: center;
         margin-right: var(--Tab_margin-right, 0);
         > div {
-          padding: var(--size-ultra-small) 0;
+          padding: var(--sm4) 0;
         }
       }
     }

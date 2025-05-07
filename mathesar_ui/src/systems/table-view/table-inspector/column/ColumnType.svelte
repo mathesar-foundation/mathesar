@@ -59,6 +59,6 @@
 
 <style lang="scss">
   .info-alert {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
   }
 </style>

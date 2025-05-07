@@ -47,6 +47,6 @@
 
 <style>
   .no-access {
-    padding: var(--size-base);
+    padding: 1rem;
   }
 </style>

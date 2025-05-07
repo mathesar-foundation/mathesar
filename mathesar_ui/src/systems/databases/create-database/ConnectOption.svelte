@@ -30,9 +30,9 @@
     display: grid;
     align-items: center;
     grid-template-columns: auto 1fr;
-    gap: var(--size-large);
+    gap: var(--lg1);
     text-align: left;
-    padding: var(--size-large);
+    padding: var(--lg1);
   }
   .icon-circle {
     display: flex;
@@ -44,11 +44,11 @@
     border-radius: 3.6rem;
   }
   .header {
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
     font-weight: 500;
   }
   .description {
     color: var(--text-color-secondary);
-    margin-top: var(--size-ultra-small);
+    margin-top: var(--sm4);
   }
 </style>

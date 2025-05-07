@@ -93,6 +93,6 @@
     height: 100%;
   }
   .warning {
-    padding: var(--size-base);
+    padding: 1rem;
   }
 </style>

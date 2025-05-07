@@ -59,14 +59,14 @@
     display: flex;
     align-items: flex-start;
     justify-content: end;
-    margin-right: var(--size-large);
-    padding-top: var(--size-ultra-small);
-    margin-left: var(--size-large);
+    margin-right: var(--lg1);
+    padding-top: var(--sm4);
+    margin-left: var(--lg1);
   }
 
   .help {
     color: var(--gray-500);
-    margin-top: var(--size-extreme-small);
-    font-size: var(--size-small);
+    margin-top: var(--sm6);
+    font-size: var(--sm1);
   }
 </style>

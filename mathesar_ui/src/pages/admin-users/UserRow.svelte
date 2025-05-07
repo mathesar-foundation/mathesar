@@ -38,7 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--size-small);
+    padding: var(--sm1);
     cursor: pointer;
     min-height: 4.2rem;
     transition: background-color 0.2s ease;
@@ -77,7 +77,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     color: var(--text-color-secondary);
     padding: 0.25rem 0.5rem;
     border-radius: var(--border-radius-s);

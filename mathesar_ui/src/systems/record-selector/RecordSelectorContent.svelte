@@ -240,7 +240,7 @@
   .footer .message {
     flex: 1 0 10rem;
     margin-left: 1rem;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     color: var(--color-text-muted);
     text-align: right;
   }

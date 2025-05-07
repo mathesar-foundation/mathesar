@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type { Schema } from '@mathesar/models/Schema';
 
   export let schema: Schema;
@@ -17,7 +15,7 @@
 
 <style lang="scss">
   .table-count {
-    font-size: var(--text-size-base);
+    font-size: 1rem;
     color: var(--text-color-tertiary);
     font-weight: 400;
     margin: 0;

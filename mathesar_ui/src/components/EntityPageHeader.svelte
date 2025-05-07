@@ -48,7 +48,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    min-height: var(--size-ultra-large);
+    min-height: var(--lg4);
     overflow: hidden;
 
     .heading {
@@ -63,28 +63,28 @@
       padding: 0.25rem;
 
       .icon {
-        font-size: var(--size-x-large);
-        padding: var(--size-ultra-small);
+        font-size: var(--lg2);
+        padding: var(--sm4);
       }
       .text {
         overflow: hidden;
       }
       .name {
-        font-size: var(--text-size-xx-large);
+        font-size: var(--lg3);
         margin: 0;
         font-weight: var(--font-weight-bold);
         overflow: hidden;
         color: var(--text-color-primary);
       }
       .description {
-        font-size: var(--text-size-small);
+        font-size: var(--sm1);
         color: var(--text-color-secondary);
         overflow: hidden;
       }
     }
 
     .actions {
-      padding: var(--size-xx-small);
+      padding: var(--sm3);
       display: flex;
       align-items: center;
       flex-grow: 1;
@@ -95,13 +95,13 @@
         flex-shrink: 0;
 
         > :global(* + *) {
-          margin-left: var(--size-xx-small);
+          margin-left: var(--sm3);
         }
       }
 
       &.has-right-actions {
         .actions-left {
-          margin-right: var(--size-x-large);
+          margin-right: var(--lg2);
         }
       }
 
@@ -116,7 +116,7 @@
         display: grid;
         grid-auto-flow: column;
         align-items: center;
-        gap: var(--size-xx-small);
+        gap: var(--sm3);
       }
     }
 

@@ -96,7 +96,7 @@
     --page-padding: var(--page-padding-x) var(--page-padding-y);
 
     --outer-page-padding-for-inset-page: 0;
-    --inset-page-padding: var(--size-super-ultra-large) var(--size-base);
+    --inset-page-padding: var(--lg5) 1rem;
 
     --max-layout-width: 54rem;
     // For database page, schema page, and admin pages
@@ -134,9 +134,9 @@
     text-rendering: optimizeLegibility;
 
     /** Panel theming */
-    --WithPanel__gap: var(--size-xx-small);
+    --WithPanel__gap: var(--sm3);
     --WithPanel__resizer-color: var(--stormy-500);
-    --WithPanel__resizer-size: var(--size-ultra-small);
+    --WithPanel__resizer-size: var(--sm4);
   }
 
   body.theme-dark {
@@ -166,14 +166,14 @@
 
   h1 {
     margin: 0 0 1.5rem 0;
-    font-size: var(--size-ultra-large);
+    font-size: var(--lg4);
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.02em;
   }
 
   h2 {
-    font-size: var(--size-xx-large);
+    font-size: var(--lg3);
     font-weight: 600;
     margin: 0 0 1rem 0;
     line-height: 1.3;
@@ -181,7 +181,7 @@
   }
 
   h3 {
-    font-size: var(--size-x-large);
+    font-size: var(--lg2);
     font-weight: 600;
     margin: 0 0 0.75rem 0;
     line-height: 1.4;

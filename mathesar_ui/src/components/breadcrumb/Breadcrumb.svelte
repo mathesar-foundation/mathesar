@@ -18,7 +18,7 @@
 
 <style lang="scss">
   .breadcrumb {
-    --breadcrumb-spacing: var(--size-xx-small);
+    --breadcrumb-spacing: var(--sm3);
     display: flex;
     overflow: hidden;
     align-items: center;

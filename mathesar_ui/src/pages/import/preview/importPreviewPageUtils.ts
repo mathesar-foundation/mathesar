@@ -1,6 +1,11 @@
 import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-import type { Column, ColumnPatchSpec } from '@mathesar/api/rpc/columns';
+import type {
+  Column,
+  ColumnCastOptions,
+  ColumnPatchSpec,
+} from '@mathesar/api/rpc/columns';
+import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type { Schema } from '@mathesar/models/Schema';
 import type { Table } from '@mathesar/models/Table';
@@ -75,29 +80,46 @@ export function makeHeaderUpdateRequest({
 export interface ColumnProperties {
   selected: boolean;
   displayName: string;
+  castOptions?: ColumnCastOptions;
 }
 
-function makeColumnProperties(column: Column): ColumnProperties {
-  return { selected: true, displayName: column.name };
+function makeColumnProperties(
+  column: Column,
+  castOptions?: ColumnCastOptions,
+): ColumnProperties {
+  return { selected: true, displayName: column.name, castOptions };
 }
 
 type ColumnPropertiesMap = Record<Column['id'], ColumnProperties>;
 
 export function buildColumnPropertiesMap(
   columns: Column[],
+  castOptionsMap: Record<Column['id'], ColumnCastOptions | undefined>,
 ): Record<Column['id'], ColumnProperties> {
   return Object.fromEntries(
-    columns.map((c) => [c.id, makeColumnProperties(c)]),
+    columns.map((c) => [c.id, makeColumnProperties(c, castOptionsMap?.[c.id])]),
   );
+}
+
+export function buildColumnPreviewSpec(
+  columns: Column[],
+  columnPropertiesMap: ColumnPropertiesMap,
+): ColumnPreviewSpec[] {
+  return columns.map((c) => ({
+    ...c,
+    cast_options: columnPropertiesMap[c.id]?.castOptions,
+  }));
 }
 
 function finalizeColumn(
   { id, type, primary_key, type_options }: Column,
   name: string | undefined,
+  cast_options?: ColumnCastOptions,
 ): ColumnPatchSpec {
   return {
     id,
     name,
+    cast_options,
 
     // For most columns we include type information so that users can modify
     // column types during import.
@@ -120,5 +142,11 @@ export function finalizeColumns(
 ) {
   return columns
     .filter((c) => columnPropertiesMap[c.id]?.selected)
-    .map((c) => finalizeColumn(c, columnPropertiesMap[c.id]?.displayName));
+    .map((c) =>
+      finalizeColumn(
+        c,
+        columnPropertiesMap[c.id]?.displayName,
+        columnPropertiesMap[c.id]?.castOptions,
+      ),
+    );
 }

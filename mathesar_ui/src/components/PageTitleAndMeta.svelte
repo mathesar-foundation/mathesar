@@ -78,11 +78,11 @@
   .left-meta-container {
     display: flex;
     flex-direction: column;
-    gap: var(--size-super-ultra-small);
+    gap: var(--sm5);
   }
 
   .entity-type-name {
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
     font-weight: 500;
     line-height: 1;
     color: var(--text-color-secondary);
@@ -90,7 +90,7 @@
 
   .entity-name {
     font-weight: var(--font-weight-extra-bold);
-    font-size: var(--text-size-super-ultra-large);
+    font-size: var(--lg5);
     line-height: 1;
     color: var(--text-color-primary);
   }

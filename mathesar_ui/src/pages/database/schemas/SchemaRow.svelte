@@ -184,7 +184,7 @@
 
   .description {
     font-weight: 400;
-    font-size: var(--text-size-base);
+    font-size: 1rem;
     color: var(--text-color-secondary);
     margin-bottom: 0;
     display: -webkit-box;
@@ -210,11 +210,11 @@
     align-items: center;
     gap: 0.375rem;
     color: var(--text-color-tertiary);
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
   }
 
   .name {
-    font-size: var(--text-size-xx-large);
+    font-size: var(--lg3);
     font-weight: var(--font-weight-medium);
     overflow: hidden;
     white-space: nowrap;

@@ -122,7 +122,7 @@
 
 <style lang="scss">
   .quick-access {
-    --badge-font-size: var(--text-size-small);
+    --badge-font-size: var(--sm1);
     display: flex;
     flex-direction: row;
 

@@ -57,13 +57,13 @@
     --spacing-y: 0.4em;
 
     :global(.section-content) {
-      padding: var(--size-large);
+      padding: var(--lg1);
     }
     :global(.section-content .form) {
-      --form-field-spacing: var(--size-large);
+      --form-field-spacing: var(--lg1);
     }
     :global(.section-content h1) {
-      font-size: var(--text-size-base);
+      font-size: 1rem;
       font-weight: 590;
       margin: 0;
     }

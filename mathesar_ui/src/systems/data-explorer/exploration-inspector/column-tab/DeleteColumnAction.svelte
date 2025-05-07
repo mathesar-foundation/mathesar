@@ -94,6 +94,6 @@
 
 <style>
   .warning {
-    margin-bottom: var(--size-large);
+    margin-bottom: var(--lg1);
   }
 </style>

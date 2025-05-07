@@ -428,10 +428,10 @@
     --target-stroke: var(--base-stroke);
   }
   .collapsible-detail {
-    padding: var(--size-xx-small);
+    padding: var(--sm3);
     margin-top: 0.25em;
   }
   .collapsible-sections > :global(* + *) {
-    margin-top: var(--size-xx-small);
+    margin-top: var(--sm3);
   }
 </style>
