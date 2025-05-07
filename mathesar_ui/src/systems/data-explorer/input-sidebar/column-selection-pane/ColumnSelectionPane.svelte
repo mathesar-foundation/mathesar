@@ -91,15 +91,15 @@
 
     section {
       header {
-        padding: var(--size-xx-small);
+        padding: var(--sm3);
         background: var(--inspector-hover);
         font-weight: 590;
       }
       .content {
-        padding: var(--size-large);
+        padding: var(--lg1);
 
         .help-text {
-          font-size: var(--text-size-small);
+          font-size: var(--sm1);
         }
       }
     }

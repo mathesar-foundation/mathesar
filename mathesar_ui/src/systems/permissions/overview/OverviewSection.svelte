@@ -22,7 +22,7 @@
   .section {
     .header {
       border-bottom: 1px solid var(--gray-200);
-      padding: var(--size-extreme-small) 0;
+      padding: var(--sm6) 0;
       display: flex;
       align-items: center;
 
@@ -30,17 +30,17 @@
         font-weight: 600;
       }
       .actions {
-        --input-padding: var(--size-extreme-small);
+        --input-padding: var(--sm6);
         margin-left: auto;
       }
     }
 
     .content {
-      margin-top: var(--size-base);
+      margin-top: 1rem;
     }
 
     & + :global(.section) {
-      margin-top: var(--size-x-large);
+      margin-top: var(--lg2);
     }
   }
 </style>

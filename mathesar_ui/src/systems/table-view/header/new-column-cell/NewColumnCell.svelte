@@ -69,7 +69,7 @@
 
 <style lang="scss">
   .new-column-dropdown {
-    padding: var(--size-small);
+    padding: var(--sm1);
     overflow: hidden;
     width: 16em;
 

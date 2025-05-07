@@ -82,7 +82,7 @@
     .help-text {
       padding: 0 1rem;
       text-align: center;
-      font-size: var(--text-size-x-large);
+      font-size: var(--lg2);
       color: var(--gray-500);
     }
 
@@ -109,7 +109,7 @@
       display: grid;
       grid-template: 1fr auto / 1fr;
       overflow: hidden;
-      padding: 0 var(--size-xx-small);
+      padding: 0 var(--sm3);
       .results-wrapper {
         height: 100%;
       }

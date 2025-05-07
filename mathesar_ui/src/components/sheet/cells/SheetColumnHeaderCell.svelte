@@ -27,7 +27,7 @@
     height: 100%;
     border-right: var(--cell-border-vertical);
     border-bottom: none;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     font-weight: var(--font-weight-bold);
     overflow: hidden;
   }

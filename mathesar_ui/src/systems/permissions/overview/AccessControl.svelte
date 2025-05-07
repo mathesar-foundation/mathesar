@@ -192,11 +192,11 @@
 
 <style lang="scss">
   .access-control-rows:not(.empty) {
-    margin-block: calc(-1 * var(--size-base));
+    margin-block: calc(-1 * 1rem);
   }
 
   .access-control-row {
-    padding: var(--size-base) 0;
+    padding: 1rem 0;
 
     & + .access-control-row {
       border-top: 1px solid var(--gray-100);

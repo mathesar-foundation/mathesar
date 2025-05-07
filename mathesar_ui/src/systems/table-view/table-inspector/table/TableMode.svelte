@@ -110,15 +110,15 @@
 
 <style lang="scss">
   .table-mode-container {
-    padding-bottom: var(--size-small);
+    padding-bottom: var(--sm1);
 
     > :global(* + *) {
-      margin-top: var(--size-super-ultra-small);
+      margin-top: var(--sm5);
     }
   }
 
   .content-container {
-    padding: var(--size-small);
+    padding: var(--sm1);
     display: flex;
     flex-direction: column;
 

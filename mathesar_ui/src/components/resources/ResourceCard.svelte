@@ -25,21 +25,21 @@
     border-radius: var(--border-radius-l);
     display: flex;
     flex-direction: column;
-    gap: var(--size-ultra-small);
+    gap: var(--sm4);
   }
   .icon {
     display: inline-flex;
     align-items: center;
-    margin-right: var(--size-super-ultra-small);
+    margin-right: var(--sm5);
     color: var(--text-color-tertiary);
   }
   .title {
     font-weight: var(--font-weight-medium);
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: var(--size-super-ultra-small);
+    gap: var(--sm5);
     color: var(--text-color-primary);
   }
   .description {

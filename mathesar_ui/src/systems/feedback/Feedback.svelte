@@ -138,11 +138,11 @@
   .trigger {
     display: flex;
     align-items: center;
-    gap: var(--size-ultra-small);
+    gap: var(--sm4);
     color: var(--text-color-primary);
   }
   .feedback-content {
-    padding: var(--size-small);
+    padding: var(--sm1);
     max-width: 28rem;
     background-color: var(--card-background);
     border: 1px solid var(--card-border);
@@ -151,19 +151,19 @@
   .feedback-form {
     display: flex;
     flex-direction: column;
-    gap: var(--size-xx-small);
+    gap: var(--sm3);
     --text-area-min-height: 6rem;
 
     .help {
-      font-size: var(--size-small);
+      font-size: var(--sm1);
       color: var(--text-color-secondary);
-      margin-top: var(--size-extreme-small);
+      margin-top: var(--sm6);
     }
   }
   .follow-up {
     display: flex;
     flex-direction: column;
-    gap: var(--size-xx-small);
+    gap: var(--sm3);
 
     .title {
       font-weight: var(--font-weight-medium);

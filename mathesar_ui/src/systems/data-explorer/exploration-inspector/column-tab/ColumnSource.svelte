@@ -109,16 +109,16 @@
 <style lang="scss">
   [data-identifier='aggregation-source'],
   [data-identifier='column-source'] {
-    margin-top: var(--size-large);
+    margin-top: var(--lg1);
 
     .column-info {
       margin-top: var(--spacing-y);
       max-width: 100%;
 
       .tag {
-        padding: var(--size-extreme-small) var(--size-ultra-small);
+        padding: var(--sm6) var(--sm4);
         background: var(--stormy-100);
-        border-radius: var(--size-large);
+        border-radius: var(--lg1);
         font-weight: 510;
         overflow: hidden;
         max-width: 100%;
@@ -127,7 +127,7 @@
       span {
         display: inline-block;
         vertical-align: middle;
-        margin-bottom: var(--size-super-ultra-small);
+        margin-bottom: var(--sm5);
       }
     }
   }

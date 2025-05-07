@@ -79,7 +79,7 @@
       }
     }
     .fk-column {
-      font-size: var(--text-size-small);
+      font-size: var(--sm1);
       display: block;
       max-width: 100%;
       overflow: hidden;
@@ -100,7 +100,7 @@
     }
 
     + :global(.table-group) {
-      margin-top: var(--size-small);
+      margin-top: var(--sm1);
     }
   }
 </style>

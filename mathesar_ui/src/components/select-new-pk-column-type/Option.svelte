@@ -22,6 +22,6 @@
     color: var(--color-text-muted);
   }
   .default-value {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
   }
 </style>

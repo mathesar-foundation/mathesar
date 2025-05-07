@@ -233,7 +233,7 @@
 
 <style>
   .import-file-view {
-    padding: var(--size-xx-large);
+    padding: var(--lg3);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-m);
     background-color: var(--inset-background-color);
@@ -248,7 +248,7 @@
     line-height: 1.2;
     color: var(--gray-500);
     text-align: right;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
   }
 
   .processing-spinner {

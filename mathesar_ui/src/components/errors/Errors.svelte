@@ -32,6 +32,6 @@
 <style>
   .errors {
     display: grid;
-    gap: var(--size-small);
+    gap: var(--sm1);
   }
 </style>

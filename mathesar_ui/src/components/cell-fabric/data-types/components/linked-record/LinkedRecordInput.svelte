@@ -196,7 +196,7 @@
     border: 1px solid var(--border-color);
     border-radius: 0.25rem;
     background: var(--input-background);
-    padding: var(--size-ultra-small);
+    padding: var(--sm4);
     cursor: default;
   }
   .disabled {

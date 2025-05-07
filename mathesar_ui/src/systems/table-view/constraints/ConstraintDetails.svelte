@@ -13,6 +13,6 @@
 
 <style lang="scss">
   .constraint-details {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
   }
 </style>

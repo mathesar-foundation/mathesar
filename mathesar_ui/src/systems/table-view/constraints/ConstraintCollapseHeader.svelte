@@ -35,18 +35,18 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    margin-bottom: calc(var(--size-super-ultra-small) * -1);
+    margin-bottom: calc(var(--sm5) * -1);
     > :global(* + *) {
       margin-left: 0.25rem;
     }
   }
 
   .column-name-container {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     background-color: var(--gray-200);
     border-radius: var(--border-radius-xl);
     padding: 0.25rem 0.75rem;
-    margin-bottom: var(--size-super-ultra-small);
+    margin-bottom: var(--sm5);
     font-weight: var(--font-weight-bold);
 
     :global(body.theme-dark) & {

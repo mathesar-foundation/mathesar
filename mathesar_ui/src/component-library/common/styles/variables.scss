@@ -83,7 +83,7 @@ body {
   --input-disabled-background: var(--sand-50);
   --input-focus-color: var(--stormy-500);
   --input-focus-shadow: var(--stormy-100);
-  --input-padding: var(--size-xx-small);
+  --input-padding: var(--sm3);
   --input-text: var(--text-color);
 
   // Inspector Styles
@@ -101,18 +101,17 @@ body {
   --shadow-color-inset-dark: rgba(255, 255, 255, 0.05);
 
   // Sizes
-  --size-extreme-small: 0.1429rem; // 2px
-  --size-super-ultra-small: 0.2857rem; // 4px
-  --size-ultra-small: 0.4286rem; // 6px
-  --size-xx-small: 0.5714rem; // 8px
-  --size-x-small: 0.7143rem; // 10px
-  --size-small: 0.8571rem; // 12px
-  --size-base: 1rem; // 14px
-  --size-large: 1.25rem; // 16px
-  --size-x-large: 1.4286rem; // 20px
-  --size-xx-large: 1.7143rem; // 24px
-  --size-ultra-large: 2.4rem; // 28px
-  --size-super-ultra-large: 3.2rem; // 56px
+  --sm6: 0.1429rem; // 2px
+  --sm5: 0.2857rem; // 4px
+  --sm4: 0.4286rem; // 6px
+  --sm3: 0.5714rem; // 8px
+  --sm2: 0.7143rem; // 10px
+  --sm1: 0.8571rem; // 12px
+  --lg1: 1.25rem; // 16px
+  --lg2: 1.4286rem; // 20px
+  --lg3: 1.7143rem; // 24px
+  --lg4: 2.4rem; // 28px
+  --lg5: 3.2rem; // 56px
 
   // Text Colors
   --text-color: #171717;
@@ -120,17 +119,6 @@ body {
   --text-color-secondary: var(--stormy-700);
   --text-color-tertiary: var(--stormy-600);
   --text-color-muted: var(--gray-500);
-
-  // Text Sizes
-  --text-size-xx-small: var(--size-xx-small);
-  --text-size-x-small: var(--size-x-small);
-  --text-size-small: var(--size-small);
-  --text-size-base: var(--size-base);
-  --text-size-large: var(--size-large);
-  --text-size-x-large: var(--size-x-large);
-  --text-size-xx-large: var(--size-xx-large);
-  --text-size-ultra-large: var(--size-ultra-large);
-  --text-size-super-ultra-large: var(--size-super-ultra-large);
 
   // Utility Colors
   --danger-color: var(--rosy-700);

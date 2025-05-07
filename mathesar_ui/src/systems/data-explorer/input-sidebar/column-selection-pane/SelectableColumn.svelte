@@ -65,7 +65,7 @@
       --badge-text-color: var(--gray-800);
       --badge-padding: 0 0.45rem;
       --badge-border-radius: var(--border-radius-l);
-      --badge-font-size: var(--text-size-small);
+      --badge-font-size: var(--sm1);
       flex-shrink: 0;
     }
 
@@ -76,11 +76,11 @@
     }
 
     + :global(.selectable-column) {
-      margin-top: var(--size-super-ultra-small);
+      margin-top: var(--sm5);
     }
 
     + :global(.table-group) {
-      margin-top: var(--size-small);
+      margin-top: var(--sm1);
     }
   }
 </style>

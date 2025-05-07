@@ -36,12 +36,12 @@
     flex-direction: column;
   }
   .link-card.multiple {
-    margin-top: var(--size-base);
+    margin-top: 1rem;
   }
   .link-card.multiple .container {
     position: relative;
-    bottom: var(--size-xx-small);
-    left: var(--size-xx-small);
+    bottom: var(--sm3);
+    left: var(--sm3);
     background: var(--card-background);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-m);
@@ -49,13 +49,13 @@
   .table-name {
     color: var(--text-color-primary);
     font-weight: var(--font-weight-medium);
-    padding: var(--size-ultra-small) var(--size-xx-small);
+    padding: var(--sm4) var(--sm3);
     border-bottom: 1px solid var(--card-border);
   }
   .detail {
     color: var(--text-color-tertiary);
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     line-height: 1.4;
-    padding: var(--size-xx-small) var(--size-xx-small);
+    padding: var(--sm3) var(--sm3);
   }
 </style>

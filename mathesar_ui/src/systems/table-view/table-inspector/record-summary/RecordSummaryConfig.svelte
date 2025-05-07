@@ -126,7 +126,7 @@
 
 <style>
   .help {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
   }
   .record-summary-config > :global(* + *) {
     margin-top: 1rem;

@@ -8,7 +8,7 @@
     body {
       padding: 4rem 2rem;
       background: var(--layout-background-color);
-      --login-page-spacing: var(--size-super-ultra-large);
+      --login-page-spacing: var(--lg5);
       color: var(--text-color-primary);
       min-height: 100vh;
       display: flex;
@@ -26,10 +26,10 @@
     }
     .tutorial {
       max-width: 48rem;
-      line-height: var(--size-xx-large);
+      line-height: var(--lg3);
     }
     .tutorial .body {
-      margin-top: var(--size-xx-small);
+      margin-top: var(--sm3);
     }
     .login-card {
       max-width: 28rem;
@@ -43,13 +43,13 @@
     }
     .login-card h1 {
       font-weight: var(--font-weight-medium);
-      font-size: var(--size-ultra-large);
-      margin: 0 0 var(--size-xx-large);
+      font-size: var(--lg4);
+      margin: 0 0 var(--lg3);
       text-align: center;
       color: var(--text-color-primary);
     }
     .login-card .labeled-input + .labeled-input {
-      margin-top: var(--size-small);
+      margin-top: var(--sm1);
     }
     .login-card .labeled-input .help.info {
       color: var(--text-color-secondary);
@@ -61,7 +61,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--size-xx-large);
+      gap: var(--lg3);
     }
     .tutorial, .login-card,
     .login-card form, .login-card .footer {
@@ -69,22 +69,22 @@
     }
     .unsupported-device {
       display: none;
-      margin-top: var(--size-xx-large);
+      margin-top: var(--lg3);
       background: var(--danger-background-color);
       border: solid 1px var(--danger-border-color);
       border-radius: var(--border-radius-m);
-      padding: var(--size-small) var(--size-large);
+      padding: var(--sm1) var(--lg1);
     }
     .unsupported-device .title {
-      margin-top: var(--size-xx-small);
+      margin-top: var(--sm3);
       font-weight: var(--font-weight-bold);
-      font-size: var(--size-large);
+      font-size: var(--lg1);
       text-align: center;
       color: var(--text-color-primary);
     }
     .unsupported-device .warning-icon {
-      margin-top: var(--size-xx-small);
-      font-size: var(--size-xx-large);
+      margin-top: var(--sm3);
+      font-size: var(--lg3);
       text-align: center;
     }
     .login-card .language-selector {
@@ -93,7 +93,7 @@
       border: 1px solid var(--input-border);
       border-radius: var(--border-radius-m);
       color: var(--text-color-primary);
-      padding: var(--size-xx-small);
+      padding: var(--sm3);
       cursor: pointer;
     }
     @media (max-width: 50rem) {

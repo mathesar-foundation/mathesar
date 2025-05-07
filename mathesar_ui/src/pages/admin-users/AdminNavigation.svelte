@@ -60,7 +60,7 @@
 
 <style lang="scss">
   .admin-navigation {
-    font-size: var(--text-size-base);
+    font-size: 1rem;
     --Menu__min-width: 100%;
     overflow: hidden;
   }

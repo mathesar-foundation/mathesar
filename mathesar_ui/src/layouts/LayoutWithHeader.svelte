@@ -72,7 +72,7 @@
   }
 
   .header-title {
-    padding: var(--size-ultra-large) 0;
+    padding: var(--lg4) 0;
     border-bottom: 1px solid var(--border-color);
 
     h1 {

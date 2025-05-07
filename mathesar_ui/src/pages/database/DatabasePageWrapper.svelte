@@ -207,25 +207,25 @@
 
 <style>
   .tab-container {
-    padding: var(--size-xx-large) 0;
+    padding: var(--lg3) 0;
   }
   .details {
-    font-size: var(--text-size-base);
+    font-size: 1rem;
     color: var(--text-color-secondary);
-    margin-top: var(--size-super-ultra-small);
+    margin-top: var(--sm5);
   }
   .details .label {
     color: var(--text-color-secondary);
     font-weight: var(--font-weight-medium);
   }
   .edit-connection {
-    margin-top: var(--size-small);
+    margin-top: var(--sm1);
     display: inline-flex;
   }
   .actions-container {
     display: flex;
     align-items: center;
-    gap: var(--size-x-large);
+    gap: var(--lg2);
   }
   .dropdown-container {
     margin-left: auto;

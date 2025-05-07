@@ -150,7 +150,7 @@
   .description {
     align-self: end;
     display: block;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     overflow: hidden;
   }
 

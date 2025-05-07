@@ -1,7 +1,7 @@
 .tutorial {
   position: relative;
   border-radius: var(--border-radius-xl);
-  padding: var(--size-xx-large);
+  padding: var(--lg3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,26 +28,26 @@
   .content {
     text-align: center;
     width: 100%;
-    padding: var(--size-base) 0;
+    padding: 1rem 0;
     position: relative;
   }
 
   > * + * {
-    margin-top: var(--size-base);
+    margin-top: 1rem;
   }
 
   .icon {
-    margin-bottom: var(--size-large);
+    margin-bottom: var(--lg1);
     color: var(--text-color-secondary);
   }
 
   .title {
-    font-size: var(--size-x-large);
+    font-size: var(--lg2);
     color: var(--text-color-primary);
     font-weight: var(--font-weight-extra-bold);
     letter-spacing: -0.02em;
     line-height: 1.2;
-    margin: 0 0 var(--size-base) 0;
+    margin: 0 0 1rem 0;
     text-align: center;
   }
 
@@ -56,7 +56,7 @@
   }
 
   .footer {
-    margin-top: var(--size-large);
+    margin-top: var(--lg1);
     display: flex;
     justify-content: center;
   }

@@ -175,7 +175,7 @@
 <style lang="scss">
   .password-change-form {
     .password-change-warning {
-      margin-bottom: var(--size-large);
+      margin-bottom: var(--lg1);
     }
 
     .password-inputs {
@@ -183,11 +183,11 @@
       grid-template-columns: repeat(4, 1fr);
 
       .change-password-button {
-        margin-left: var(--size-large);
+        margin-left: var(--lg1);
       }
     }
     .submit-section {
-      --form-submit-margin: var(--size-xx-large) 0 0 0;
+      --form-submit-margin: var(--lg3) 0 0 0;
     }
   }
 </style>

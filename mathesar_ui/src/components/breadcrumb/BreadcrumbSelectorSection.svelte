@@ -62,7 +62,7 @@
   }
   .detail {
     color: var(--text-color-secondary);
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
   }
   .detail:empty {
     display: none;

@@ -109,7 +109,7 @@
   .no-fields {
     text-align: center;
     color: var(--color-text-muted);
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
   }
   .add {
     margin-top: 1rem;
