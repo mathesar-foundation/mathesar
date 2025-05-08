@@ -205,10 +205,10 @@ export default class QueryManager extends QueryRunner {
       ..._state,
       saveState: undefined,
     }));
-    const updateDiff = callback(this.getQueryModel());
-    const { isRunnable } = await this.updateQuery(updateDiff.model);
+    const { model, type } = callback(this.getQueryModel());
+    const { isRunnable } = await this.updateQuery(model);
     if (isRunnable) {
-      switch (updateDiff.type) {
+      switch (type) {
         case 'baseTable':
           this.resetResults();
           this.confirmationNeededForMultipleResults.set(true);
@@ -219,7 +219,7 @@ export default class QueryManager extends QueryRunner {
           this.speculateColumns();
           break;
         case 'initialColumnsArray':
-          if (!updateDiff.diff.initial_columns?.length) {
+          if (!model.initial_columns?.length) {
             // All columns have been deleted
             this.resetResults();
           } else {

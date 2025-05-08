@@ -26,7 +26,6 @@ export interface QueryModelUpdateDiff {
     | 'initialColumnName'
     | 'transformations'
     | 'initialColumnsAndTransformations';
-  diff: Partial<MaybeSavedExploration>;
 }
 
 export type QueryTransformationModel =
@@ -126,9 +125,6 @@ export default class QueryModel {
     return {
       model,
       type: 'baseTable',
-      diff: {
-        base_table_oid: base_table,
-      },
     };
   }
 
@@ -140,9 +136,6 @@ export default class QueryModel {
     return {
       model,
       type: 'id',
-      diff: {
-        id,
-      },
     };
   }
 
@@ -154,9 +147,6 @@ export default class QueryModel {
     return {
       model,
       type: 'name',
-      diff: {
-        name,
-      },
     };
   }
 
@@ -168,9 +158,6 @@ export default class QueryModel {
     return {
       model,
       type: 'name',
-      diff: {
-        description,
-      },
     };
   }
 
@@ -187,9 +174,6 @@ export default class QueryModel {
     return {
       model,
       type: 'initialColumnsArray',
-      diff: {
-        initial_columns: initialColumns,
-      },
     };
   }
 
@@ -204,9 +188,6 @@ export default class QueryModel {
     return {
       model,
       type: 'initialColumnsArray',
-      diff: {
-        initial_columns: initialColumns,
-      },
     };
   }
 
@@ -229,9 +210,6 @@ export default class QueryModel {
     return {
       model,
       type: 'initialColumnName',
-      diff: {
-        display_names: displayNames,
-      },
     };
   }
 
@@ -256,9 +234,6 @@ export default class QueryModel {
     return {
       model,
       type: 'displayOptions',
-      diff: {
-        display_options: displayOptions,
-      },
     };
   }
 
@@ -272,9 +247,6 @@ export default class QueryModel {
     return {
       model,
       type: 'transformations',
-      diff: {
-        transformations: model.toMaybeSavedExploration().transformations,
-      },
     };
   }
 
@@ -316,9 +288,6 @@ export default class QueryModel {
     return {
       model,
       type: 'transformations',
-      diff: {
-        transformations: model.toMaybeSavedExploration().transformations,
-      },
     };
   }
 
@@ -335,9 +304,6 @@ export default class QueryModel {
     return {
       model,
       type: 'transformations',
-      diff: {
-        transformations: model.toMaybeSavedExploration().transformations,
-      },
     };
   }
 
@@ -418,10 +384,6 @@ export default class QueryModel {
     return {
       model,
       type: 'initialColumnsAndTransformations',
-      diff: {
-        initial_columns: initialColumns,
-        transformations: model.toMaybeSavedExploration().transformations,
-      },
     };
   }
 
