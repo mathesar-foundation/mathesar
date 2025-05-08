@@ -768,24 +768,38 @@ DECLARE
                             space_separator_opt_decimal,
                             comma_separator_lakh_system
                           );
-  inner_number_group text := '(' || inner_number_tree || ')';
+  inner_number_group text := '(' || inner_number_tree || ')';/* Numbers without currency,
+  including inner_number_group as its own capturing group in the money_finding_regex allows us to
+  match columns without any currency symbols allowing users the flexibility
+  to add currency prefixes and suffixes afterwards in the cases of type inference/data imports. */
   required_currency_beginning text := non_numeric || inner_number_group || non_numeric || '?';
   required_currency_ending text := non_numeric || '?' || inner_number_group || non_numeric;
-  money_finding_regex text := '^(?:' || required_currency_beginning || '|' || required_currency_ending || ')$';
+  money_finding_regex text := '^(?:' || required_currency_beginning || '|' || required_currency_ending || '|' || inner_number_group || ')$';
 BEGIN
   SELECT regexp_matches($1, money_finding_regex) INTO raw_arr;
   IF raw_arr IS NULL THEN
     RETURN NULL;
   END IF;
-  SELECT array_remove(ARRAY[raw_arr[1],raw_arr[16]], null) INTO actual_number_arr;
-  SELECT array_remove(ARRAY[raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[14],raw_arr[19],raw_arr[21],raw_arr[23],raw_arr[25],raw_arr[27],raw_arr[29]], null) INTO group_divider_arr;
-  SELECT array_remove(ARRAY[raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[15],raw_arr[17],raw_arr[18],raw_arr[20],raw_arr[22],raw_arr[24],raw_arr[26],raw_arr[28],raw_arr[30]], null) INTO decimal_point_arr;
+  SELECT array_remove(ARRAY[
+    raw_arr[1], -- required_currency_beginning[x]
+    raw_arr[16], -- required_currency_ending[x+15]
+    raw_arr[31] -- inner_number_group[x+30]
+  ], null) INTO actual_number_arr;
+  SELECT array_remove(ARRAY[
+    raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[14], -- required_currency_beginning[x]
+    raw_arr[19],raw_arr[21],raw_arr[23],raw_arr[25],raw_arr[27],raw_arr[29], -- required_currency_ending[x+15]
+    raw_arr[34],raw_arr[36],raw_arr[38],raw_arr[40],raw_arr[42],raw_arr[44] -- inner_number_group[x+30]
+  ], null) INTO group_divider_arr;
+  SELECT array_remove(ARRAY[
+    raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[15], -- required_currency_beginning[x]
+    raw_arr[17],raw_arr[18],raw_arr[20],raw_arr[22],raw_arr[24],raw_arr[26],raw_arr[28],raw_arr[30], -- required_currency_ending[x+15]
+    raw_arr[32],raw_arr[33],raw_arr[35],raw_arr[37],raw_arr[39],raw_arr[41],raw_arr[43],raw_arr[45] -- inner_number_group[x+30]
+  ], null) INTO decimal_point_arr;
   SELECT actual_number_arr[1] INTO actual_number;
   SELECT group_divider_arr[1] INTO group_divider;
   SELECT decimal_point_arr[1] INTO decimal_point;
   SELECT split_part($1, actual_number, 1) INTO currency_prefix;
   SELECT split_part($1, actual_number, -1) INTO currency_suffix;
-  raise notice 'actual_number= % group_divider= % decimal_point= % currency_prefix= % currency_suffix= %', actual_number, group_divider, decimal_point, currency_prefix, currency_suffix;
   RETURN ARRAY[actual_number, group_divider, decimal_point, currency_prefix, currency_suffix];
 END;
 $$ LANGUAGE plpgsql;
