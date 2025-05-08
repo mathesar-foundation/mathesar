@@ -798,8 +798,11 @@ BEGIN
   SELECT actual_number_arr[1] INTO actual_number;
   SELECT group_divider_arr[1] INTO group_divider;
   SELECT decimal_point_arr[1] INTO decimal_point;
-  SELECT split_part($1, actual_number, 1) INTO currency_prefix;
-  SELECT split_part($1, actual_number, -1) INTO currency_suffix;
+  SELECT replace(replace(split_part($1, actual_number, 1), '-', ''), '(', '') INTO currency_prefix;
+  SELECT replace(replace(split_part($1, actual_number, -1), '-', ''), ')', '') INTO currency_suffix;
+  IF $1::text ~ '^.*(-|\(.+\)).*$' THEN -- Handle negative values
+    actual_number := '-' || actual_number;
+  END IF;
   RETURN ARRAY[actual_number, group_divider, decimal_point, currency_prefix, currency_suffix];
 END;
 $$ LANGUAGE plpgsql;
@@ -838,15 +841,11 @@ BEGIN
   END IF;
   SELECT money_arr[1] INTO money_num;
   SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-  SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
   IF money_arr[2] IS NOT NULL THEN
     SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
   END IF;
   IF money_arr[3] IS NOT NULL THEN
     SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
-  END IF;
-  IF is_negative THEN
-    RETURN ('-' || money_num)::mathesar_types.mathesar_money;
   END IF;
   RETURN money_num::mathesar_types.mathesar_money;
 END;
@@ -866,15 +865,11 @@ BEGIN
   END IF;
   SELECT money_arr[1] INTO money_num;
   SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-  SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
   IF money_arr[2] IS NOT NULL THEN
     SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
   END IF;
   IF money_arr[3] IS NOT NULL THEN
     SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
-  END IF;
-  IF is_negative THEN
-    RETURN ('-' || money_num)::mathesar_types.mathesar_money;
   END IF;
   RETURN money_num::mathesar_types.mathesar_money;
 END;
@@ -883,7 +878,11 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.cast_to_mathesar_money(num text, group_sep "char", decimal_p "char", curr_pref text, curr_suff text)
 RETURNS mathesar_types.mathesar_money AS $$
-  SELECT replace(replace(replace(replace(num, curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' '))::mathesar_types.mathesar_money;
+  SELECT CASE WHEN num ~ '^.*(-|\(.+\)).*$' THEN -- Handle negative values
+    ('-' || replace(replace(replace(replace(replace(replace(replace(num, '-', ''), '(', ''), ')', ''), curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' ')))::mathesar_types.mathesar_money
+  ELSE
+    replace(replace(replace(replace(num, curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' '))::mathesar_types.mathesar_money
+  END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
