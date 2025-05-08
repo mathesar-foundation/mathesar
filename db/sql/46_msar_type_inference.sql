@@ -168,7 +168,7 @@ BEGIN
     /* %5 */ coalesce(compat_details.group_sep, ''),
     /* %6 */ coalesce(compat_details.decimal_p, ''),
     /* %7 */ coalesce(compat_details.curr_pref, ''),
-    /* %8 */ coalesce(compat_details.curr_suff, ''),
+    /* %8 */ coalesce(compat_details.curr_suff, '')
   );
   compat_details.mathesar_casting = true;
   compat_details.type_compatible = true;
