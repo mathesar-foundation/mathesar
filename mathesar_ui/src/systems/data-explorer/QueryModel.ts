@@ -34,7 +34,7 @@ export type QueryTransformationModel =
   | QueryHideTransformationModel
   | QuerySortTransformationModel;
 
-function getTransformationModel(
+export function getTransformationModel(
   transformation: QueryInstanceTransformation,
 ): QueryTransformationModel {
   switch (transformation.type) {
@@ -63,7 +63,7 @@ function validate(
   return { isValid, isRunnable: true };
 }
 
-export default class QueryModel {
+export class QueryModel {
   readonly database_id: MaybeSavedExploration['database_id'];
 
   readonly schema_oid: MaybeSavedExploration['schema_oid'];

@@ -26,7 +26,7 @@ import {
 } from '@mathesar-component-library';
 
 import QueryInspector from './QueryInspector';
-import type QueryModel from './QueryModel';
+import type { QueryModel } from './QueryModel';
 import {
   type InputColumnsStoreSubstance,
   type ProcessedQueryOutputColumnMap,
@@ -81,29 +81,19 @@ export class QueryRunner {
 
   private runMode: QueryRunMode;
 
-  private onRunWithObjectCallback?: (results: ExplorationResult) => unknown;
-
-  private onRunWithIdCallback?: (results: ExplorationResult) => unknown;
-
   private shareConsumer?: ShareConsumer;
 
   constructor({
     query,
     runMode,
-    onRunWithObject,
-    onRunWithId,
     shareConsumer,
   }: {
     query: QueryModel;
     runMode?: QueryRunMode;
-    onRunWithObject?: (instance: ExplorationResult) => unknown;
-    onRunWithId?: (instance: ExplorationResult) => unknown;
     shareConsumer?: ShareConsumer;
   }) {
     this.runMode = runMode ?? 'queryObject';
     this.query = writable(query);
-    this.onRunWithObjectCallback = onRunWithObject;
-    this.onRunWithIdCallback = onRunWithId;
     this.shareConsumer = shareConsumer;
     this.speculateProcessedColumns();
     void this.run();
@@ -164,7 +154,6 @@ export class QueryRunner {
     }
 
     let response: ExplorationResult;
-    let triggerCallback: () => unknown;
     try {
       const paginationParams = get(this.pagination).recordsRequestParams();
       this.runState.set({ state: 'processing' });
@@ -178,8 +167,6 @@ export class QueryRunner {
         this.runPromise = internalRunPromise;
         const internalResponse = await internalRunPromise;
         response = internalResponse;
-        triggerCallback = () =>
-          this.onRunWithObjectCallback?.(internalResponse);
       } else {
         const queryId = queryModel.id;
         if (!queryId) {
@@ -194,7 +181,6 @@ export class QueryRunner {
           ...this.shareConsumer?.getQueryParams(),
         });
         response = await this.runPromise;
-        triggerCallback = () => this.onRunWithIdCallback?.(response);
       }
 
       const columnsMetaData = processColumnMetaData(response.column_metadata);
@@ -211,8 +197,8 @@ export class QueryRunner {
           rowIndex: index,
         })),
       });
-      await triggerCallback();
       this.runState.set({ state: 'success' });
+      this.afterRun(response);
       return response;
     } catch (err) {
       if (err instanceof ApiMultiError) {
@@ -227,6 +213,15 @@ export class QueryRunner {
     }
     return undefined;
   }
+
+  /**
+   * This function can be implemented by subclasses to perform special actions
+   * after the query runs.
+   */
+  protected afterRun(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    result: ExplorationResult,
+  ): void {}
 
   async setPagination(pagination: Pagination): Promise<void> {
     this.pagination.set(pagination);

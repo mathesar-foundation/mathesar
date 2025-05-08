@@ -36,7 +36,7 @@ import type {
   ComponentAndProps,
 } from '@mathesar-component-library/types';
 
-import type QueryModel from './QueryModel';
+import type { QueryModel } from './QueryModel';
 
 type ProcessedQueryResultColumnSource =
   | (Pick<QueryInitialColumnSource, 'is_initial_column'> &

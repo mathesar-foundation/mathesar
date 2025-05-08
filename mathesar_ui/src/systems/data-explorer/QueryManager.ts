@@ -14,7 +14,11 @@ import { addExploration, replaceExploration } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
 
-import QueryModel, { type QueryModelUpdateDiff } from './QueryModel';
+import {
+  type QueryModel,
+  type QueryModelUpdateDiff,
+  getTransformationModel,
+} from './QueryModel';
 import { QueryRunner } from './QueryRunner';
 import { QuerySummarizationTransformationModel } from './QuerySummarizationTransformationModel';
 import {
@@ -68,18 +72,7 @@ export default class QueryManager extends QueryRunner {
     query: QueryModel;
     onSave?: (instance: SavedExploration) => unknown;
   }) {
-    super({
-      query,
-      onRunWithObject: (response: ExplorationResult) => {
-        this.checkAndUpdateSummarizationAfterRun(
-          new QueryModel({
-            database_id: query.database_id,
-            schema_oid: query.schema_oid,
-            ...response.query,
-          }),
-        );
-      },
-    });
+    super({ query });
     this.onSaveCallback = onSave ?? (() => {});
     void this.calculateInputColumnTree();
   }
@@ -161,12 +154,23 @@ export default class QueryManager extends QueryRunner {
     return { isValid: queryModel.isValid, isRunnable: queryModel.isRunnable };
   }
 
-  private checkAndUpdateSummarizationAfterRun(queryModel: QueryModel) {
+  /**
+   * There are cases where the server response contains a _different query_ than
+   * the one we sent. This can happen if the server knows that the query needs
+   * to be adjusted in specific ways in order to remain valid. This function
+   * updates the saved query to be consistent with the query details we got back
+   * from the server after running a query.
+   */
+  private reconcileQueryWithServerResponse(serverResponse: ExplorationResult) {
+    const { transformations } = serverResponse.query;
+    if (!transformations) return;
+    const transformationModels = transformations.map(getTransformationModel);
+
     const thisQueryModel = this.getQueryModel();
     let newQueryModel = thisQueryModel;
     let isChangeNeeded = false;
     thisQueryModel.transformationModels.forEach((thisTransform, index) => {
-      const thatTransform = queryModel.transformationModels[index];
+      const thatTransform = transformationModels[index];
       if (
         thisTransform.type === 'summarize' &&
         thatTransform &&
@@ -196,6 +200,10 @@ export default class QueryManager extends QueryRunner {
     if (isChangeNeeded) {
       this.query.set(newQueryModel);
     }
+  }
+
+  protected afterRun(result: ExplorationResult): void {
+    this.reconcileQueryWithServerResponse(result);
   }
 
   async update(
