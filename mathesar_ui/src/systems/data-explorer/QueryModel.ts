@@ -1,5 +1,7 @@
 import type {
   AnonymousExploration,
+  ColumnDisplayOptionsEntry,
+  ExplorationDisplayOptions,
   InitialColumn,
   MaybeSavedExploration,
   QueryInstanceTransformation,
@@ -18,6 +20,7 @@ export interface QueryModelUpdateDiff {
   type:
     | 'id'
     | 'name'
+    | 'displayOptions'
     | 'baseTable'
     | 'initialColumnsArray'
     | 'initialColumnName'
@@ -80,6 +83,8 @@ export default class QueryModel {
 
   readonly display_names: NonNullable<SavedExploration['display_names']>;
 
+  readonly display_options: ExplorationDisplayOptions;
+
   readonly isValid: boolean;
 
   readonly isRunnable: boolean;
@@ -101,6 +106,7 @@ export default class QueryModel {
     }
     this.transformationModels = transformationModels;
     this.display_names = model.display_names ?? {};
+    this.display_options = model.display_options ?? {};
     const validationResult = validate({
       base_table_oid: model.base_table_oid,
       transformationModels,
@@ -225,6 +231,33 @@ export default class QueryModel {
       type: 'initialColumnName',
       diff: {
         display_names: displayNames,
+      },
+    };
+  }
+
+  withColumnDisplayOptions(
+    entry: ColumnDisplayOptionsEntry,
+  ): QueryModelUpdateDiff {
+    const displayOptions = {
+      ...this.display_options,
+      columnDisplayOptions: {
+        ...(this.display_options.columnDisplayOptions ?? {}),
+        [entry.column.index]: {
+          column: entry.column,
+          displayOptions: entry.displayOptions,
+        },
+      },
+    };
+
+    const model = new QueryModel({
+      ...this,
+      display_options: displayOptions,
+    });
+    return {
+      model,
+      type: 'displayOptions',
+      diff: {
+        display_options: displayOptions,
       },
     };
   }
@@ -479,6 +512,7 @@ export default class QueryModel {
       initial_columns: this.initial_columns,
       transformations: this.transformationModels.map((entry) => entry.toJson()),
       display_names: this.display_names,
+      display_options: this.display_options,
     };
   }
 

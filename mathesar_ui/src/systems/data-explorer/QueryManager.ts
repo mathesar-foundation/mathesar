@@ -2,6 +2,7 @@ import { type Writable, get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import {
   type ExplorationResult,
   type SavedExploration,
@@ -25,6 +26,7 @@ import {
 
 export default class QueryManager extends QueryRunner {
   private cacheManagers: {
+    /** Keys are table OIDs */
     inputColumns: CacheManager<number, InputColumnsStoreSubstance>;
   } = {
     inputColumns: new CacheManager(5),
@@ -276,6 +278,30 @@ export default class QueryManager extends QueryRunner {
       }));
       throw err;
     }
+  }
+
+  async setColumnDisplayOptions(
+    columnIndex: number,
+    displayOptions: ColumnMetadata,
+  ): Promise<void> {
+    const column = [...get(this.processedColumns).values()][columnIndex];
+    if (!column) {
+      return;
+    }
+
+    await this.update((query) =>
+      query.withColumnDisplayOptions({
+        column: {
+          index: columnIndex,
+          name: column.column.alias,
+          type: {
+            name: column.column.type,
+            item_type: column.column.type_options?.item_type ?? undefined,
+          },
+        },
+        displayOptions,
+      }),
+    );
   }
 
   getAutoSummarizationTransformModel():

@@ -4,6 +4,8 @@ import type { JoinPath } from '@mathesar/api/rpc/tables';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
 
+import type { ColumnMetadata } from './_common/columnDisplayOptions';
+
 export interface InitialColumn {
   alias: string;
   /** The PostgreSQL attnum of the column */
@@ -78,6 +80,30 @@ export type QueryInstanceTransformation =
   | QueryInstanceHideTransformation
   | QueryInstanceSortTransformation;
 
+interface ColumnAnchor {
+  name: string;
+  index: number;
+  type: {
+    name: string;
+    item_type?: string;
+  };
+}
+
+export interface ColumnDisplayOptionsEntry {
+  column: ColumnAnchor;
+  displayOptions: ColumnMetadata;
+}
+
+/**
+ * Keys are the stringified indexes (zero-based) of the column in the
+ * exploration result set.
+ */
+export type ColumnDisplayOptions = Record<string, ColumnDisplayOptionsEntry>;
+
+export interface ExplorationDisplayOptions {
+  columnDisplayOptions?: ColumnDisplayOptions | null;
+}
+
 /** The data an exploration contains when the data explorer opens */
 export interface InitialExploration {
   database_id: number;
@@ -90,12 +116,12 @@ export interface AnonymousExploration extends InitialExploration {
   initial_columns: InitialColumn[];
   transformations?: QueryInstanceTransformation[];
   display_names?: Record<string, string> | null;
-  display_options?: unknown[];
 }
 
 export interface AddableExploration extends AnonymousExploration {
   name: string;
   description?: string;
+  display_options?: ExplorationDisplayOptions | null;
 }
 
 export interface SavedExploration extends AddableExploration {
