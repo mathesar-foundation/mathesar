@@ -243,7 +243,7 @@ DECLARE
     'time without time zone',
     'interval',
     'mathesar_types.email',
-    'mathesar_types.mathesar_money'
+    'mathesar_types.mathesar_money',
     'mathesar_types.mathesar_json_array',
     'mathesar_types.mathesar_json_object',
     'mathesar_types.uri'
