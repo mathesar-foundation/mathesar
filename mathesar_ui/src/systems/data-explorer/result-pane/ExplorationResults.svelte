@@ -3,7 +3,6 @@
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type { ColumnDisplayOptions } from '@mathesar/api/rpc/explorations';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import {
     Sheet,
@@ -19,6 +18,7 @@
   import { arrayIndex } from '@mathesar/utils/typeUtils';
   import { ImmutableMap } from '@mathesar-component-library';
 
+  import { getCustomColumnWidths } from '../displayOptions';
   import QueryManager from '../QueryManager';
   import { type QueryRunner, getRowSelectionId } from '../QueryRunner';
 
@@ -29,15 +29,6 @@
   export let queryHandler: QueryRunner | QueryManager;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
-
-  function* getCustomColumnWidths(columnDisplayOptions: ColumnDisplayOptions) {
-    const columnDisplayOptionEntries = Object.values(columnDisplayOptions);
-    for (const { column, displayOptions } of columnDisplayOptionEntries) {
-      const width = displayOptions.display_width ?? undefined;
-      if (!width) continue;
-      yield [column.name, width] as [string, number];
-    }
-  }
 
   $: ({
     query,
@@ -52,7 +43,7 @@
   $: ({ initial_columns, display_options } = $query);
   $: columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
-    ...getCustomColumnWidths(display_options.columnDisplayOptions ?? {}),
+    ...getCustomColumnWidths(display_options),
   ]);
   $: clipboardHandler = new SheetClipboardHandler({
     copyingContext: {

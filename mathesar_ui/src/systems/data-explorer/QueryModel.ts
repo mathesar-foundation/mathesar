@@ -1,7 +1,5 @@
 import type {
   AnonymousExploration,
-  ColumnDisplayOptionsEntry,
-  ExplorationDisplayOptions,
   InitialColumn,
   MaybeSavedExploration,
   QueryInstanceTransformation,
@@ -9,6 +7,11 @@ import type {
 } from '@mathesar/api/rpc/explorations';
 import { assertExhaustive } from '@mathesar-component-library';
 
+import {
+  type ColumnDisplayOptionsEntry,
+  type ExplorationDisplayOptions,
+  validateDisplayOptions,
+} from './displayOptions';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
 import QuerySortTransformationModel from './QuerySortTransformationModel';
@@ -105,7 +108,7 @@ export class QueryModel {
     }
     this.transformationModels = transformationModels;
     this.display_names = model.display_names ?? {};
-    this.display_options = model.display_options ?? {};
+    this.display_options = validateDisplayOptions(model.display_options);
     const validationResult = validate({
       base_table_oid: model.base_table_oid,
       transformationModels,

@@ -14,6 +14,7 @@ import { addExploration, replaceExploration } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
 
+import { makeColumnAnchor } from './displayOptions';
 import {
   type QueryModel,
   type QueryModelUpdateDiff,
@@ -299,14 +300,7 @@ export default class QueryManager extends QueryRunner {
 
     await this.update((query) =>
       query.withColumnDisplayOptions({
-        column: {
-          index: columnIndex,
-          name: column.column.alias,
-          type: {
-            name: column.column.type,
-            item_type: column.column.type_options?.item_type ?? undefined,
-          },
-        },
+        column: makeColumnAnchor(column.column, columnIndex),
         displayOptions,
       }),
     );
