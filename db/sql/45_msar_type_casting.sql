@@ -799,7 +799,7 @@ BEGIN
   SELECT group_divider_arr[1] INTO group_divider;
   SELECT decimal_point_arr[1] INTO decimal_point;
   SELECT replace(replace(split_part($1, actual_number, 1), '-', ''), '(', '') INTO currency_prefix;
-  SELECT replace(replace(split_part($1, actual_number, -1), '-', ''), ')', '') INTO currency_suffix;
+  SELECT replace(replace(split_part($1, actual_number, 2), '-', ''), ')', '') INTO currency_suffix;
   IF $1::text ~ '^.*(-|\(.+\)).*$' THEN -- Handle negative values
     actual_number := '-' || actual_number;
   END IF;
