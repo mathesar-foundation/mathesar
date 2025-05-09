@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Pull and save python images
         run: |
-          mkdir -p docker-images
+          mkdir -p docker-images && cd docker-images
           docker pull python:3.9-bookworm && docker save python:3.9-bookworm -o python:3.9-bookworm.tar
           docker pull python:3.10-bookworm && docker save python:3.10-bookworm -o python:3.10-bookworm.tar
           docker pull python:3.11-bookworm && docker save python:3.11-bookworm -o python:3.11-bookworm.tar
