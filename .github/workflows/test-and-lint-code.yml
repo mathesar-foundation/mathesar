@@ -26,11 +26,6 @@ jobs:
           key: ${{ runner.os }}-docker-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-docker-
-      # - name: Upload all docker images
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: python-images
-      #     path: docker-images
 ################################################################################
 ##                         FILE CHANGE CHECKERS                               ##
 ##                                                                            ##
@@ -153,11 +148,6 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      # - name: Download docker image actions/upload-artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: python-images
-      #     path: docker-images
       - name: Restore Docker images
         uses: actions/cache@v3
         with:
@@ -203,7 +193,7 @@ jobs:
   api_tests:
     name: Run API scenario tests
     runs-on: ubuntu-latest
-    needs: [python_tests_required, all_be_tests_required]
+    needs: [python_tests_required, all_be_tests_required, cache-images]
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
         needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
@@ -219,6 +209,16 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
+      - name: Restore Docker images
+        uses: actions/cache@v3
+        with:
+          path: /tmp/docker-images
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+      - name: Load docker image
+        run: |
+          docker load -i /tmp/docker-images/python-${{ matrix.py-version }}.tar
       - name: Run tests
         run: sh run_api_tests.sh
         env:
