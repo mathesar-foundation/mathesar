@@ -11,6 +11,7 @@ jobs:
   cache-images:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - id: docker-cache
         uses: actions/cache@v3
         with:
