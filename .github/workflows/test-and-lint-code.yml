@@ -19,6 +19,11 @@ jobs:
           docker pull python:3.11-bookworm && docker save python:3.11-bookworm -o python-3.11-bookworm.tar
           docker pull python:3.12-bookworm && docker save python:3.12-bookworm -o python-3.12-bookworm.tar
           docker pull python:3.13-bookworm && docker save python:3.13-bookworm -o python-3.13-bookworm.tar
+          docker pull postgres:13 && docker save postgres:13 -o postgres-13.tar
+          docker pull postgres:14 && docker save postgres:14 -o postgres-14.tar
+          docker pull postgres:15 && docker save postgres:15 -o postgres-15.tar
+          docker pull postgres:16 && docker save postgres:16 -o postgres-16.tar
+          docker pull postgres:17 && docker save postgres:17 -o postgres-17.tar
       - name: Cache Docker images
         uses: actions/cache@v3
         with:
@@ -148,16 +153,16 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - name: Restore Docker images
+      - name: Restore cached docker images
         uses: actions/cache@v3
         with:
           path: /tmp/docker-images
           key: ${{ runner.os }}-docker-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
+          restore-keys: ${{ runner.os }}-docker-
       - name: Load docker image
         run: |
           docker load -i /tmp/docker-images/python-${{ matrix.py-version }}.tar
+          docker load -i /tmp/docker-images/postgres-${{ matrix.pg-version }}.tar
       - name: Build the stack
         run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
@@ -169,7 +174,7 @@ jobs:
   sql_tests:
     name: Run SQL tests
     runs-on: ubuntu-latest
-    needs: [sql_tests_required, all_be_tests_required]
+    needs: [sql_tests_required, all_be_tests_required, cache-images]
     if: needs.sql_tests_required.outputs.tests_should_run == 'true' ||
         needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
@@ -183,6 +188,14 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
+      - name: Restore cached docker images
+        uses: actions/cache@v3
+        with:
+          path: /tmp/docker-images
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-docker-
+      - name: Load docker image
+        run: docker load -i /tmp/docker-images/postgres-${{ matrix.pg-version }}.tar
       - name: Build the test DB
         run: docker compose -f docker-compose.dev.yml up --build -d dev-db
         env:
@@ -209,16 +222,16 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - name: Restore Docker images
+      - name: Restore cached docker images
         uses: actions/cache@v3
         with:
           path: /tmp/docker-images
           key: ${{ runner.os }}-docker-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
+          restore-keys: ${{ runner.os }}-docker-
       - name: Load docker image
         run: |
           docker load -i /tmp/docker-images/python-${{ matrix.py-version }}.tar
+          docker load -i /tmp/docker-images/postgres-${{ matrix.pg-version }}.tar
       - name: Run tests
         run: sh run_api_tests.sh
         env:
