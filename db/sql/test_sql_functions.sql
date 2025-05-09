@@ -1605,15 +1605,16 @@ CREATE TABLE "Types Test" (
   "Date" text,
   "Numeric" text,
   "Interval" text,
-  "Text" text
+  "Text" text,
+  "Money" text
 );
 INSERT INTO "Types Test"
-  ("Boolean", "Date", "Numeric", "Interval", "Text")
+  ("Boolean", "Date", "Numeric", "Interval", "Text", "Money")
 VALUES
-  ('0', '2000-01-01', '0', '3 days', 'cat'),
-  ('1', '6/23/2004', '3.14', '3 hours', 'bat'),
-  ('t', 'May-2007-29', '-234.22', '3 minutes', 'rat'),
-  ('false', '20200909', '1', '3 seconds', 'mat');
+  ('0', '2000-01-01', '0', '3 days', 'cat', '$9,850,000.00'),
+  ('1', '6/23/2004', '3.14', '3 hours', 'bat', '-$320'),
+  ('t', 'May-2007-29', '-234.22', '3 minutes', 'rat', '$(123.12)'),
+  ('false', '20200909', '1', '3 seconds', 'mat', '$11.00');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1630,7 +1631,8 @@ BEGIN
       4, jsonb_build_object('type', 'date', 'details', jsonb_build_object('mathesar_casting', true)),
       5, jsonb_build_object('type', 'numeric', 'details', jsonb_build_object('mathesar_casting', true, 'decimal_p', '.')),
       6, jsonb_build_object('type', 'interval', 'details', jsonb_build_object('mathesar_casting', true)),
-      7, jsonb_build_object('type', 'text')
+      7, jsonb_build_object('type', 'text'),
+      8, jsonb_build_object('type', 'mathesar_types.mathesar_money', 'details', jsonb_build_object('curr_pref', '$', 'curr_suff', '', 'decimal_p', '.', 'group_sep', ',', 'mathesar_casting', true))
     )
   );
 END;
