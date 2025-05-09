@@ -19,11 +19,18 @@ jobs:
           docker pull python:3.11-bookworm && docker save python:3.11-bookworm -o python-3.11-bookworm.tar
           docker pull python:3.12-bookworm && docker save python:3.12-bookworm -o python-3.12-bookworm.tar
           docker pull python:3.13-bookworm && docker save python:3.13-bookworm -o python-3.13-bookworm.tar
-      - name: Upload all docker images
-        uses: actions/upload-artifact@v4
+      - name: Cache Docker images
+        uses: actions/cache@v3
         with:
-          name: python-images
           path: docker-images
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+      # - name: Upload all docker images
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: python-images
+      #     path: docker-images
 ################################################################################
 ##                         FILE CHANGE CHECKERS                               ##
 ##                                                                            ##
@@ -146,12 +153,19 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - name: Download docker image actions/upload-artifact
-        uses: actions/download-artifact@v4
+      # - name: Download docker image actions/upload-artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: python-images
+      #     path: docker-images
+      - name: Restore Docker images
+        uses: actions/cache@v3
         with:
-          name: python-images
           path: docker-images
-      - name: Load docker artifact
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+      - name: Load docker image
         run: |
           docker load -i docker-images/python-${{ matrix.py-version }}.tar
       - name: Build the stack
