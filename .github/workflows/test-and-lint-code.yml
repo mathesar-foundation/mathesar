@@ -8,7 +8,22 @@
 name: Test and Lint Code
 on:  [pull_request, merge_group]
 jobs:
-
+  cache-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull and save python images
+        run: |
+          mkdir -p docker-images
+          docker pull python:3.9-bookworm && docker save python:3.9-bookworm -o python:3.9-bookworm.tar
+          docker pull python:3.10-bookworm && docker save python:3.10-bookworm -o python:3.10-bookworm.tar
+          docker pull python:3.11-bookworm && docker save python:3.11-bookworm -o python:3.11-bookworm.tar
+          docker pull python:3.12-bookworm && docker save python:3.12-bookworm -o python:3.12-bookworm.tar
+          docker pull python:3.13-bookworm && docker save python:3.13-bookworm -o python:3.13-bookworm.tar
+      - name: Upload all docker images
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-images
+          path: docker-images
 ################################################################################
 ##                         FILE CHANGE CHECKERS                               ##
 ##                                                                            ##
@@ -131,6 +146,14 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
+      - name: Download docker image actions/upload-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: python-images
+          path: docker-images
+      - name: Load docker artifact
+        run: |
+          docker load -i docker-images/${{ matrix.py-version }}.tar
       - name: Build the stack
         run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
