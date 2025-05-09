@@ -131,7 +131,7 @@ jobs:
   python_tests:
     name: Run Python tests
     runs-on: ubuntu-latest
-    needs: [python_tests_required, all_be_tests_required]
+    needs: [python_tests_required, all_be_tests_required, cache-images]
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
         needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
