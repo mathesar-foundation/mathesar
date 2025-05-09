@@ -6602,3 +6602,151 @@ BEGIN
   RETURN NEXT is(msar.cast_to_numeric('2 345', ' ', ','), 2345::numeric);
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_mathesar_money_inference() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE moneyinfer (
+    us_loc text, de_loc text, us_loc_verbose text, in_loc text, no_curr text, many_group_seps text, many_decimal_ps text, many_curr_prefs text, many_curr_suffs text
+  );
+  INSERT INTO moneyinfer VALUES
+    ('$1,000', '€1.000', 'USD 1,000', '₹1,000', '1,000', '1 000 000.0', '1.0', '₹1,000.0', '1,000.0₹'),
+    ('$1,000.00', '€1.000,0', 'USD 1,000.00', '₹1,00,000.00', '1,000.00', '1.000.000,0', '999,0', '$1,000.0', '1,000.0$'),
+    ('-$1,000.00', '-€1.000,0', '-USD 1,000.00', '-₹1,00,000.00', '-10,000.00', '1.000.000,0', '10.0', '$1,000.0', '1,000.0$'),
+    ('$-1,000.00', '€-1.000,0', 'USD -1,000.00', '₹-1,00,000.00', '-1,000.00', '1.000.000,0', '5.0', '₹1,000.0', '1,000.0₹'),
+    ('$(1,000.00)', '€(1.000,0)', 'USD (1,000.00)', '₹(1,00,000.00)', '(1,000.00)', '1.000.000,0', '100,0', '₹1,000.0', '1,000.0₹');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_find_mathesar_money_attrs() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id regclass;
+  test_perc numeric := 100;
+BEGIN
+  PERFORM __setup_mathesar_money_inference();
+  tab_id = 'moneyinfer'::regclass;
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 1::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '$', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 2::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', '.', 'decimal_p', ',', 'curr_pref', '€', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 3::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', 'USD ', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 4::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '₹', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 5::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_mathesar_money_attrs(
+        tab_id => 'moneyinfer'::regclass, col_id => '6'::smallint, test_perc => 100
+    );$s$,
+    'Too many grouping separators found!'
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_mathesar_money_attrs(
+        tab_id => 'moneyinfer'::regclass, col_id => '7'::smallint, test_perc => 100
+    );$s$,
+    'Too many decimal separators found!'
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_mathesar_money_attrs(
+        tab_id => 'moneyinfer'::regclass, col_id => '8'::smallint, test_perc => 100
+    );$s$,
+    'Too many currency prefixes found!'
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_mathesar_money_attrs(
+        tab_id => 'moneyinfer'::regclass, col_id => '9'::smallint, test_perc => 100
+    );$s$,
+    'Too many currency suffixes found!'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_cast_to_mathesar_money()
+RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_mathesar_money_inference();
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(us_loc, ',', '.', '$', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '1000.00', '-1000.00', '-1000.00', '-1000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(de_loc, '.', ',', '€', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '1000.00', '-1000.00', '-1000.00', '-1000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(us_loc_verbose, ',', '.', 'USD ', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '1000.00', '-1000.00', '-1000.00', '-1000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(in_loc, ',', '.', '₹', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '100000.00' , '-100000.00', '-100000.00', '-100000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(no_curr, ',', '.', '', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '1000.00', '-10000.00', '-1000.00', '-1000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
