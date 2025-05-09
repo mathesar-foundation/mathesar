@@ -11,29 +11,25 @@ jobs:
   cache-images:
     runs-on: ubuntu-latest
     steps:
-      - name: Cache Docker images
-        id: docker-cache
+      - id: docker-cache
         uses: actions/cache@v3
         with:
           path: /tmp/docker-images
           key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
           restore-keys: |
             ${{ runner.os }}-docker-
-      - name: Pull and save python images
+      - name: Pull and save python images on cache misses
         if: steps.docker-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p /tmp/docker-images && cd /tmp/docker-images
-          docker pull python:3.9-bookworm && docker save python:3.9-bookworm -o python-3.9-bookworm.tar
-          docker pull python:3.10-bookworm && docker save python:3.10-bookworm -o python-3.10-bookworm.tar
-          docker pull python:3.11-bookworm && docker save python:3.11-bookworm -o python-3.11-bookworm.tar
-          docker pull python:3.12-bookworm && docker save python:3.12-bookworm -o python-3.12-bookworm.tar
-          docker pull python:3.13-bookworm && docker save python:3.13-bookworm -o python-3.13-bookworm.tar
-          docker pull postgres:13 && docker save postgres:13 -o postgres-13.tar
-          docker pull postgres:14 && docker save postgres:14 -o postgres-14.tar
-          docker pull postgres:15 && docker save postgres:15 -o postgres-15.tar
-          docker pull postgres:16 && docker save postgres:16 -o postgres-16.tar
-          docker pull postgres:17 && docker save postgres:17 -o postgres-17.tar
-      
+          for version in 3.9 3.10 3.11 3.12 3.13; do
+            docker pull python:$version-bookworm && docker save python:$version-bookworm -o python-$version-bookworm.tar
+          done
+
+          for version in 13 14 15 16 17; do
+            docker pull postgres:$version && docker save postgres:$version -o postgres-$version.tar
+          done
+
 ################################################################################
 ##                         FILE CHANGE CHECKERS                               ##
 ##                                                                            ##
@@ -156,7 +152,7 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - name: Restore cached docker images
+      - id: docker-cache
         uses: actions/cache@v3
         with:
           path: /tmp/docker-images
@@ -191,7 +187,7 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - name: Restore cached docker images
+      - id: docker-cache
         uses: actions/cache@v3
         with:
           path: /tmp/docker-images
@@ -225,7 +221,7 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - name: Restore cached docker images
+      - id: docker-cache
         uses: actions/cache@v3
         with:
           path: /tmp/docker-images
