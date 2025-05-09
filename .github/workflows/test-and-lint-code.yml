@@ -165,6 +165,7 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
+          COMPOSE_BAKE: true
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
 
@@ -196,6 +197,7 @@ jobs:
         run: docker compose -f docker-compose.dev.yml up --build -d dev-db
         env:
           PG_VERSION: ${{ matrix.pg-version }}
+          COMPOSE_BAKE: true
       - name: Run tests with pg_prove
         run: docker exec mathesar_dev_db /bin/bash /sql/run_tests.sh
 
@@ -233,6 +235,7 @@ jobs:
           PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
           POSTGRES_INITDB_ARGS: ${{ matrix.init-db-args }}
+          COMPOSE_BAKE: true
 
   python_lint:
     name: Run Python linter
