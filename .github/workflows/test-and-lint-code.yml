@@ -17,8 +17,6 @@ jobs:
         with:
           path: /tmp/docker-images
           key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
       - name: Pull and save python images on cache misses
         if: steps.docker-cache.outputs.cache-hit != 'true'
         run: |
@@ -158,7 +156,6 @@ jobs:
         with:
           path: /tmp/docker-images
           key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-          restore-keys: ${{ runner.os }}-docker-
       - name: Load docker image
         run: |
           docker load -i /tmp/docker-images/python-${{ matrix.py-version }}.tar
@@ -193,7 +190,6 @@ jobs:
         with:
           path: /tmp/docker-images
           key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-          restore-keys: ${{ runner.os }}-docker-
       - name: Load docker image
         run: docker load -i /tmp/docker-images/postgres-${{ matrix.pg-version }}.tar
       - name: Build the test DB
@@ -227,7 +223,6 @@ jobs:
         with:
           path: /tmp/docker-images
           key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-          restore-keys: ${{ runner.os }}-docker-
       - name: Load docker image
         run: |
           docker load -i /tmp/docker-images/python-${{ matrix.py-version }}.tar
