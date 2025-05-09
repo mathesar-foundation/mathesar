@@ -167,7 +167,7 @@ jobs:
             ${{ runner.os }}-docker-
       - name: Load docker image
         run: |
-          docker load -i docker-images/python-${{ matrix.py-version }}.tar
+          docker load -i /tmp/docker-images/python-${{ matrix.py-version }}.tar
       - name: Build the stack
         run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
