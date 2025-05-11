@@ -198,7 +198,7 @@ export class QueryRunner {
         })),
       });
       this.runState.set({ state: 'success' });
-      this.afterRun(response);
+      await this.afterRun(response);
       return response;
     } catch (err) {
       if (err instanceof ApiMultiError) {
@@ -218,10 +218,13 @@ export class QueryRunner {
    * This function can be implemented by subclasses to perform special actions
    * after the query runs.
    */
-  protected afterRun(
+  protected async afterRun(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     result: ExplorationResult,
-  ): void {}
+  ): Promise<void> {
+    // eslint-disable-next-line no-useless-return
+    return;
+  }
 
   async setPagination(pagination: Pagination): Promise<void> {
     this.pagination.set(pagination);

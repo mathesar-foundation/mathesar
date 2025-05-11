@@ -14,7 +14,10 @@ import { addExploration, replaceExploration } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
 
-import { makeColumnAnchor } from './displayOptions';
+import {
+  makeColumnAnchor,
+  reconcileDisplayOptionsWithServerResponse,
+} from './displayOptions';
 import {
   type QueryModel,
   type QueryModelUpdateDiff,
@@ -203,8 +206,26 @@ export default class QueryManager extends QueryRunner {
     }
   }
 
-  protected afterRun(result: ExplorationResult): void {
+  private async reconcileDisplayOptions(serverResponse: ExplorationResult) {
+    const reconciliation = reconcileDisplayOptionsWithServerResponse(
+      this.getQueryModel().display_options,
+      serverResponse,
+    );
+    if (!reconciliation.hasChanged) return;
+
+    const newDisplayOptions = reconciliation.newValue;
+    const shouldAutoSave = !get(this.queryHasUnsavedChanges);
+    await this.update((q) =>
+      q.withAllDisplayOptionsReplaced(newDisplayOptions),
+    );
+    if (shouldAutoSave) {
+      await this.save();
+    }
+  }
+
+  protected async afterRun(result: ExplorationResult): Promise<void> {
     this.reconcileQueryWithServerResponse(result);
+    await this.reconcileDisplayOptions(result);
   }
 
   async update(
@@ -299,7 +320,7 @@ export default class QueryManager extends QueryRunner {
     }
 
     await this.update((query) =>
-      query.withColumnDisplayOptions({
+      query.withColumnDisplayOptionsEntry({
         column: makeColumnAnchor(column.column, columnIndex),
         displayOptions,
       }),

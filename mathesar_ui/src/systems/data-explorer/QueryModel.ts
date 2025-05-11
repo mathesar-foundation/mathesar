@@ -216,7 +216,7 @@ export class QueryModel {
     };
   }
 
-  withColumnDisplayOptions(
+  withColumnDisplayOptionsEntry(
     entry: ColumnDisplayOptionsEntry,
   ): QueryModelUpdateDiff {
     const displayOptions = {
@@ -230,6 +230,19 @@ export class QueryModel {
       },
     };
 
+    const model = new QueryModel({
+      ...this,
+      display_options: displayOptions,
+    });
+    return {
+      model,
+      type: 'displayOptions',
+    };
+  }
+
+  withAllDisplayOptionsReplaced(
+    displayOptions: ExplorationDisplayOptions,
+  ): QueryModelUpdateDiff {
     const model = new QueryModel({
       ...this,
       display_options: displayOptions,

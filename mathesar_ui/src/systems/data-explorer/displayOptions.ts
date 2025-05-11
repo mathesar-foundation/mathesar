@@ -1,10 +1,69 @@
+/**
+ * @file
+ *
+ * This module handles display options within explorations.
+ *
+ * THE PROBLEM SPACE
+ *
+ * Our original column display options for the Table Page were quite simple. We
+ * associated a bunch of optional settings with a column attnum. That worked
+ * great because attnums are immutable. Although a user could potentially lose
+ * their display options upon dropping and re-adding a column, that's no big
+ * deal. Display options would still be resilient against column renaming.
+ *
+ * Within the context of an exploration, things get trickier because we don't
+ * have a stable column identifier!
+ *
+ * DIFFERENT SOLUTIONS WE CONSIDERED
+ *
+ * We discussed the following approaches to solving this problem:
+ *
+ * - (A) Store our display options as associated with the query column NAMES
+ *   (aka aliases). Then, adjust the UI code for renaming query columns so that
+ *   it also mutates the display options in order to keep the set of display
+ *   options in sync with the query.
+ *
+ * - (B) Use an approach like (A) but with column INDEXES instead. Catch user
+ *   actions early on when columns are deleted or rearranged in order to keep
+ *   the display options in sync.
+ *
+ * - (C) Don't bother watching how the user edits the query directly. Instead,
+ *   associate column display options with query column MULTIPLE attributes.
+ *   Then reconcile the display options with the new result column every time
+ *   the query is run.
+ *
+ * While (A) and (B) are arguably simpler, we ended up going with (C) so that we
+ * can eventually support queries that the user has built with tools that are
+ * more difficult to observe directly, (e.g. manually written SQL or
+ * AI-generated).
+ *
+ * HOW IT WORKS
+ *
+ * 1. We associate column display options with the query column's name, index,
+ *    and type.
+ * 1. Every time the query runs, we perform a reconciliation step. For each
+ *    column that we're storing display options, we look at the stored name,
+ *    index, and type — and then we try to match that stored column with a valid
+ *    column in the current result set. We use some clever logic to build a new
+ *    set of display options if necessary to keep things in sync.
+ *
+ */
+
+import { map } from 'iter-tools';
+
 import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type {
   AddableExploration,
   ExplorationResult,
   QueryResultColumn,
 } from '@mathesar/api/rpc/explorations';
+import { Counter } from '@mathesar/utils/Counter';
 
+/**
+ * This type represents enough information about an exploration column for us to
+ * "anchor" some display options to it. We store multiple pieces of information
+ * here so that we can reconcile the display options when the query changes.
+ */
 interface ColumnAnchor {
   name: string;
   index: number;
@@ -12,6 +71,15 @@ interface ColumnAnchor {
     name: string;
     item_type?: string;
   };
+}
+
+function anchorTypeEq(
+  a: ColumnAnchor['type'],
+  b: ColumnAnchor['type'],
+): boolean {
+  if (a.name !== b.name) return false;
+  if (a.item_type !== b.item_type) return false;
+  return true;
 }
 
 export interface ColumnDisplayOptionsEntry {
@@ -25,6 +93,18 @@ export interface ColumnDisplayOptionsEntry {
  */
 type ColumnDisplayOptions = Record<string, ColumnDisplayOptionsEntry>;
 
+/**
+ * Instances of this type get written to Explorations.display_options in the
+ * internal database, but the back end never uses it.
+ *
+ * ⚠️ Beware that breaking changes to this type (and contained types) might
+ * require a migration step in order to preserve functionality for
+ * previously-saved explorations.
+ *
+ * That's why we have a child property that might seem to present unnecessary
+ * indirection — the nesting exists to allow us to add more properties here
+ * without making breaking changes.
+ */
 export interface ExplorationDisplayOptions {
   columnDisplayOptions?: ColumnDisplayOptions | null;
 }
@@ -88,4 +168,169 @@ export function* getCustomColumnWidths(opts: ExplorationDisplayOptions) {
     if (!width) continue;
     yield [column.name, width] as [string, number];
   }
+}
+
+/**
+ * This type classifies the comparison of two ColumnAnchor objects according to
+ * what information seems to have changed between them.
+ *
+ * Conceptually these labels are framed and documented with respect to one side
+ * of the comparison (the column for which we have display options). But the
+ * comparison is logically symmetric.
+ *
+ * - `'new-index'`: The anchor index has changed (e.g. when the user has
+ *   rearranged columns).
+ *
+ * - `'new-name'`: The anchor name has changed (e.g. when the user has changed
+ *   the alias of the column in the query).
+ *
+ * - `'new-type'`: The anchor data type has changed (e.g. when the type of the
+ *   column in Postgres has changed).
+ *
+ * - `'unchanged'`: When the index, name, and type all match.
+ *
+ * - `'removed'`: The user deleted the column from the query — or too many
+ *   things changed at once for us to successfully reconcile the column.
+ */
+type ReconciledAnchorOutcome =
+  | 'new-index'
+  | 'new-name'
+  | 'new-type'
+  | 'unchanged'
+  | 'removed';
+
+interface ReconciledEntry {
+  outcome: ReconciledAnchorOutcome;
+  entry: ColumnDisplayOptionsEntry;
+}
+
+/**
+ * ⚠️ The `newAnchors` array must be sorted by the index of each anchor. That
+ * invariant should be upheld by virtue of the code within
+ * `reconcileDisplayOptionsWithServerResponse` relying on the `output_columns`
+ * property from the `explorations.run` API.
+ */
+function reconcileEntry(
+  oldEntry: ColumnDisplayOptionsEntry,
+  /** Must be sorted by index */
+  newAnchors: ColumnAnchor[],
+): ReconciledEntry {
+  const oldAnchor = oldEntry.column;
+
+  // Try finding the anchor via index. Use it if the name also matches.
+  const newAnchorAtIndex = newAnchors.at(oldAnchor.index);
+  if (oldAnchor.name === newAnchorAtIndex?.name) {
+    if (anchorTypeEq(oldAnchor.type, newAnchorAtIndex.type)) {
+      // name:✅ index:✅ type:✅  (The happy path 🙂)
+      return { outcome: 'unchanged', entry: oldEntry };
+    }
+    const newEntry = { ...oldEntry, column: newAnchorAtIndex };
+    // name:✅ index:✅ type:❌
+    return { outcome: 'new-type', entry: newEntry };
+  }
+
+  // Try finding the anchor via name. Use it if the type also matches.
+  const newAnchorAtName = newAnchors.find((a) => a.name === oldAnchor.name);
+  if (newAnchorAtName && anchorTypeEq(oldAnchor.type, newAnchorAtName.type)) {
+    const newEntry = { ...oldEntry, column: newAnchorAtName };
+    // name:✅ index:❌ type:✅
+    return { outcome: 'new-index', entry: newEntry };
+  }
+
+  // If an anchor exists that matches the index and type, then use it as a last
+  // resort.
+  if (oldAnchor.type === newAnchorAtIndex?.type) {
+    const newEntry = { ...oldEntry, column: newAnchorAtIndex };
+    // name:❌ index:✅ type:✅
+    return { outcome: 'new-name', entry: newEntry };
+  }
+
+  // Otherwise, if too much has changed, we assume the anchor has been removed.
+  // name:❌ index:❌ type:✅
+  // name:❌ index:✅ type:❌
+  // name:✅ index:❌ type:❌
+  // name:❌ index:❌ type:❌
+  return { outcome: 'removed', entry: oldEntry };
+}
+
+export type Reconciliation<T> =
+  | { hasChanged: true; newValue: T }
+  | { hasChanged: false };
+
+/**
+ * This is the top-level of the real meat of the reconciliation process.
+ */
+function reconcileColumnDisplayOptions(
+  oldEntries: Iterable<ColumnDisplayOptionsEntry>,
+  /** Must be sorted by index */
+  newAnchors: ColumnAnchor[],
+): Reconciliation<ColumnDisplayOptions> {
+  const reconciledEntries = [...oldEntries].map((oldEntry) =>
+    reconcileEntry(oldEntry, newAnchors),
+  );
+  const outcomeCounts = new Counter(map((e) => e.outcome, reconciledEntries));
+
+  // If nothing changed — the happy path 🙂
+  if (outcomeCounts.isSubsetOf(['unchanged'])) {
+    return { hasChanged: false };
+  }
+
+  // If certain types of changes have happened in isolation, then we return the
+  // reconciled display options for those changes.
+  if (
+    // The user has rearranged or deleted some columns
+    outcomeCounts.isSubsetOf(['unchanged', 'removed', 'new-index']) ||
+    // The user has renamed some columns
+    outcomeCounts.isSubsetOf(['unchanged', 'new-name']) ||
+    // Some types in Postgres have changed
+    outcomeCounts.isSubsetOf(['unchanged', 'new-type'])
+  ) {
+    // Return all entries
+    return {
+      hasChanged: true,
+      newValue: Object.fromEntries(
+        reconciledEntries
+          .filter((r) => r.outcome !== 'removed')
+          .map(({ entry }) => [entry.column.index, entry]),
+      ),
+    };
+  }
+
+  // Otherwise, (if too many changes happened at once) then we err on the side
+  // of preserving only the information we're fairly certain to be accurate,
+  // returning the unchanged display options.
+  return {
+    hasChanged: true,
+    newValue: Object.fromEntries(
+      reconciledEntries
+        .filter((reconciledEntry) => reconciledEntry.outcome === 'unchanged')
+        .map(({ entry }) => [entry.column.index, entry]),
+    ),
+  };
+}
+
+export function reconcileDisplayOptionsWithServerResponse(
+  explorationDisplayOptions: ExplorationDisplayOptions,
+  result: ExplorationResult,
+): Reconciliation<ExplorationDisplayOptions> {
+  const { columnDisplayOptions } = explorationDisplayOptions;
+  if (!columnDisplayOptions) return { hasChanged: false };
+
+  const newColumnAnchors = result.output_columns.map((columnName, index) =>
+    makeColumnAnchor(result.column_metadata[columnName], index),
+  );
+
+  const columnDisplayOptionsReconciliation = reconcileColumnDisplayOptions(
+    Object.values(columnDisplayOptions),
+    newColumnAnchors,
+  );
+
+  if (!columnDisplayOptionsReconciliation.hasChanged) {
+    return { hasChanged: false };
+  }
+  const newDisplayOptions = {
+    ...explorationDisplayOptions,
+    columnDisplayOptions: columnDisplayOptionsReconciliation.newValue,
+  };
+  return { hasChanged: true, newValue: newDisplayOptions };
 }
