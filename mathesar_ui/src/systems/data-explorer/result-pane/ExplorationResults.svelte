@@ -70,7 +70,7 @@
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
 
-  function handleResizeColumn(index: number, width: number) {
+  function setColumnWidth(index: number, width: number | null) {
     if (queryHandler instanceof QueryManager) {
       void queryHandler.setColumnDisplayOptions(index, {
         display_width: width,
@@ -109,7 +109,7 @@
             {processedQueryColumn}
             queryRunner={queryHandler}
             isSelected={columnIds.has(processedQueryColumn.id)}
-            onResizeColumn={(width) => handleResizeColumn(i, width)}
+            setColumnWidth={(width) => setColumnWidth(i, width)}
           />
         {/each}
       </SheetHeader>
