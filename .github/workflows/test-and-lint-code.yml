@@ -116,8 +116,6 @@ jobs:
         id: verifysha
         if: steps.docker-cache.outputs.cache-hit == 'true'
         run: |
-          sudo apt update && sudo apt install -y skopeo jq
-
           touch /tmp/live-images-sha.txt
 
           for version in 13 14 15 16 17; do
@@ -130,9 +128,13 @@ jobs:
 
           if diff <(sort -k2 /tmp/live-images-sha.txt) <(sort -k2 /tmp/docker-images/cached-images-sha.txt); then
             echo "needs-update=false" >> $GITHUB_OUTPUT;
+            echo "exit code $?";
           else
             echo "needs-update=true" >> $GITHUB_OUTPUT;
+            echo "exit code $?";
           fi
+
+          echo "needs-update=${{ steps.verifysha.outputs.needs-update }}"
       - name: Pull and save python images on cache misses
         if: steps.docker-cache.outputs.cache-hit != 'true' || steps.verifysha.outputs.needs-update == 'true'
         run: |
