@@ -39,6 +39,7 @@
       on:click={() => {
         isInspectorOpen = !isInspectorOpen;
       }}
+      active={isInspectorOpen}
     >
       <Icon {...iconInspector} />
       <span>{$_('inspector')}</span>

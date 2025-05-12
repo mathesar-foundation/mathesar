@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import { Button, Collapsible, Icon } from '@mathesar-component-library';
+  import { Button, Icon } from '@mathesar-component-library';
 
   import type QueryManager from '../../QueryManager';
   import type { ProcessedQueryOutputColumn } from '../../utils';
@@ -55,45 +55,42 @@
   }
 </script>
 
-<Collapsible isOpen triggerAppearance="plain">
-  <span slot="header">{$_('actions')}</span>
-  <div slot="content" class="section-content actions">
-    {#if disallowColumnDeletion}
-      <div class="warning">
-        <WarningBox>
-          {#if selectedColumnAliases.length === 1}
-            {#if denyDeletionDueToLastRemainingBaseColumn}
-              {$_('single_column_delete_error_last_base_column')}
-            {:else}
-              {$_('single_column_delete_error_used_in_transformations')}
-            {/if}
-          {:else if denyDeletionDueToLastRemainingBaseColumn}
-            {$_('multiple_column_delete_error_last_base_column')}
-          {:else}
-            {$_('multiple_column_delete_error_used_in_transformations')}
-          {/if}
-        </WarningBox>
-      </div>
-    {/if}
-
+<div class="delete-column">
+  <Tooltip enabled={disallowColumnDeletion}>
     <Button
-      class="delete-button"
+      slot="trigger"
       appearance="outline-primary"
       disabled={disallowColumnDeletion}
       on:click={deleteSelectedColumn}
     >
       <Icon {...iconDeleteMajor} />
       <span>
-        {$_('delete_columns_count', {
+        {$_('remove_columns_from_query', {
           values: { count: selectedColumnAliases.length },
         })}
       </span>
     </Button>
-  </div>
-</Collapsible>
+
+    <div slot="content">
+      {#if selectedColumnAliases.length === 1}
+        {#if denyDeletionDueToLastRemainingBaseColumn}
+          {$_('single_column_delete_error_last_base_column')}
+        {:else}
+          {$_('single_column_delete_error_used_in_transformations')}
+        {/if}
+      {:else if denyDeletionDueToLastRemainingBaseColumn}
+        {$_('multiple_column_delete_error_last_base_column')}
+      {:else}
+        {$_('multiple_column_delete_error_used_in_transformations')}
+      {/if}
+    </div>
+  </Tooltip>
+</div>
 
 <style>
-  .warning {
-    margin-bottom: var(--lg1);
+  .delete-column > :global(*) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 </style>
