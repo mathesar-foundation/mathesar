@@ -61,7 +61,7 @@
 
 {#if aggregationColumn}
   <div data-identifier="aggregation-source">
-    <h1>{$_('aggregated_from')}</h1>
+    <div>{$_('aggregated_from')}</div>
     <div class="column-info">
       <span class="tag">
         <ColumnName
@@ -78,7 +78,7 @@
 
 {#if source}
   <div data-identifier="column-source">
-    <h1>{$_('source_column')}</h1>
+    <div>{$_('source_column')}</div>
     <div class="column-info">
       <RichText text={$_('column_from_table')} let:slotName let:translatedArg>
         {#if slotName === 'columnName'}
@@ -109,10 +109,9 @@
 <style lang="scss">
   [data-identifier='aggregation-source'],
   [data-identifier='column-source'] {
-    margin-top: var(--lg1);
+    margin-top: var(--sm4);
 
     .column-info {
-      margin-top: var(--spacing-y);
       max-width: 100%;
 
       .tag {
@@ -127,7 +126,6 @@
       span {
         display: inline-block;
         vertical-align: middle;
-        margin-bottom: var(--sm5);
       }
     }
   }

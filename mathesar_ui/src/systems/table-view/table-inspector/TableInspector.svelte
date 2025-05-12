@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { Tab } from '@mathesar/component-library/types';
+  import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
   import { TabContainer, defined } from '@mathesar-component-library';
 
   import CellMode from './cell/CellMode.svelte';
@@ -38,9 +39,9 @@
     on:tabSelected={handleTabSelected}
   >
     {#if activeTab}
-      <div class="tabs-container">
+      <InspectorTabContent>
         <svelte:component this={activeTab.component} />
-      </div>
+      </InspectorTabContent>
     {/if}
   </TabContainer>
 </div>
@@ -53,9 +54,5 @@
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-l);
     isolation: isolate;
-
-    .tabs-container {
-      padding: var(--sm5);
-    }
   }
 </style>

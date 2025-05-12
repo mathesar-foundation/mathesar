@@ -5,6 +5,7 @@
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
+  import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import {
@@ -17,7 +18,6 @@
   import {
     Button,
     CancelOrProceedButtonPair,
-    Collapsible,
     Icon,
     LabeledInput,
     TextArea,
@@ -103,55 +103,45 @@
   }
 </script>
 
-<Collapsible isOpen triggerAppearance="plain">
-  <span slot="header">{$_('properties')}</span>
-  <div slot="content" class="section-content">
-    <Form>
-      <FormField>
-        <LabeledInput label={$_('name')} layout="stacked">
-          <TextInput
-            value={name}
-            aria-label={$_('name')}
-            on:change={handleNameChange}
-            on:input={setHasChangesToTrue}
-          />
-        </LabeledInput>
-      </FormField>
-      <FormField>
-        <LabeledInput label={$_('description')} layout="stacked">
-          <TextArea
-            value={description}
-            aria-label={$_('description')}
-            on:change={handleDescriptionChange}
-            on:input={setHasChangesToTrue}
-          />
-        </LabeledInput>
-      </FormField>
+<InspectorSection title={$_('properties')}>
+  <Form>
+    <FormField>
+      <LabeledInput label={$_('name')} layout="stacked">
+        <TextInput
+          value={name}
+          aria-label={$_('name')}
+          on:change={handleNameChange}
+          on:input={setHasChangesToTrue}
+        />
+      </LabeledInput>
+    </FormField>
+    <FormField>
+      <LabeledInput label={$_('description')} layout="stacked">
+        <TextArea
+          value={description}
+          aria-label={$_('description')}
+          on:change={handleDescriptionChange}
+          on:input={setHasChangesToTrue}
+        />
+      </LabeledInput>
+    </FormField>
 
-      {#if !hasManager && hasChanges}
-        <FormField>
-          <CancelOrProceedButtonPair
-            cancelButton={{ icon: undefined }}
-            proceedButton={{ icon: undefined, label: $_('save') }}
-            onCancel={handleCancel}
-            onProceed={handleSave}
-          />
-        </FormField>
-      {/if}
-    </Form>
-  </div>
-</Collapsible>
+    {#if !hasManager && hasChanges}
+      <FormField>
+        <CancelOrProceedButtonPair
+          cancelButton={{ icon: undefined }}
+          proceedButton={{ icon: undefined, label: $_('save') }}
+          onCancel={handleCancel}
+          onProceed={handleSave}
+        />
+      </FormField>
+    {/if}
+  </Form>
+</InspectorSection>
 
-<Collapsible isOpen triggerAppearance="plain">
-  <span slot="header">{$_('actions')}</span>
-  <div slot="content" class="section-content actions">
-    <Button
-      class="delete-button"
-      appearance="outline-primary"
-      on:click={handleDeleteExploration}
-    >
-      <Icon {...iconDeleteMajor} />
-      <span>{$_('delete_exploration')}</span>
-    </Button>
-  </div>
-</Collapsible>
+<InspectorSection title={$_('actions')}>
+  <Button appearance="outline-primary" on:click={handleDeleteExploration}>
+    <Icon {...iconDeleteMajor} />
+    <span>{$_('delete_exploration')}</span>
+  </Button>
+</InspectorSection>
