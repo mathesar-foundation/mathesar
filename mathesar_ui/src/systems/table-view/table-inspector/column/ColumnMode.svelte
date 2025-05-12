@@ -16,7 +16,7 @@
   import { defined } from '@mathesar-component-library';
 
   import ColumnActions from './ColumnActions.svelte';
-  import ColumnFormatting from './ColumnFormatting.svelte';
+  import ColumnFormatting from '../../../../components/ColumnFormatting.svelte';
   import ColumnNameAndDescription from './ColumnNameAndDescription.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
@@ -25,7 +25,13 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ table, processedColumns, selection, selectedCellData } = $tabularData);
+  $: ({
+    table,
+    processedColumns,
+    selection,
+    selectedCellData,
+    columnsDataStore,
+  } = $tabularData);
   $: ({ currentRoleOwns } = table.currentAccess);
   $: selectedColumns = (() => {
     const ids = $selection.columnIds;
@@ -75,7 +81,7 @@
       >
         <ColumnNameAndDescription
           {column}
-          columnsDataStore={$tabularData.columnsDataStore}
+          {columnsDataStore}
           currentRoleOwnsTable={$currentRoleOwns}
         />
         {#if column.column.primary_key}
@@ -86,7 +92,7 @@
           {/if}
           <ColumnOptions
             {column}
-            columnsDataStore={$tabularData.columnsDataStore}
+            {columnsDataStore}
             constraintsDataStore={$tabularData.constraintsDataStore}
             currentRoleOwnsTable={$currentRoleOwns}
           />
@@ -121,7 +127,13 @@
       bind:isOpen={$tableInspectorColumnFormattingVisible}
     >
       {#key column}
-        <ColumnFormatting {column} />
+        <ColumnFormatting
+          {column}
+          onSave={async (displayOptions) => {
+            if (!column) return;
+            await columnsDataStore.setDisplayOptions(column, displayOptions);
+          }}
+        />
       {/key}
     </InspectorSection>
   {/if}
