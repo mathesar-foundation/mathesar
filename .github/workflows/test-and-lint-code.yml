@@ -128,7 +128,7 @@ jobs:
             echo "$(skopeo inspect docker://python:$version-bookworm | jq -r '.Digest') python:$version-bookworm" >> /tmp/live-images-sha.txt
           done
 
-          if diff /tmp/live-images-sha.txt /tmp/docker-images/cached-images-sha.txt; then
+          if diff <(sort -k2 /tmp/live-images-sha.txt) <(sort -k2 /tmp/docker-images/cached-images-sha.txt); then
             echo "needs-update=false" >> $GITHUB_OUTPUT;
           else
             echo "needs-update=true" >> $GITHUB_OUTPUT;
