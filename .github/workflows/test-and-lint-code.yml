@@ -133,8 +133,8 @@ jobs:
             echo "needs-update=true" >> $GITHUB_OUTPUT;
             echo "exit code $?";
           fi
-
-          echo "needs-update=${{ steps.verifysha.outputs.needs-update }}"
+      - name: echo
+        run: echo "${{ steps.verifysha.outputs.needs-update }}"
       - name: Pull and save python images on cache misses
         if: steps.docker-cache.outputs.cache-hit != 'true' || steps.verifysha.outputs.needs-update == 'true'
         run: |
