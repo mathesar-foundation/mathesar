@@ -6,10 +6,7 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import {
-    getExplorationPageUrl,
-    getSchemaPageUrl,
-  } from '@mathesar/routes/urls';
+  import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { DataExplorer } from '@mathesar/systems/data-explorer';
   import type { QueryManager } from '@mathesar/systems/data-explorer/types';
 
@@ -22,12 +19,6 @@
   function gotoSchemaPage() {
     router.goto(getSchemaPageUrl(database.id, schema.oid));
   }
-
-  function gotoExplorationPage() {
-    if ($query.id) {
-      router.goto(getExplorationPageUrl(database.id, schema.oid, $query.id));
-    }
-  }
 </script>
 
 <svelte:head>
@@ -35,9 +26,5 @@
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
-  <DataExplorer
-    {queryManager}
-    on:close={gotoExplorationPage}
-    on:delete={gotoSchemaPage}
-  />
+  <DataExplorer {queryManager} on:delete={gotoSchemaPage} />
 </LayoutWithHeader>

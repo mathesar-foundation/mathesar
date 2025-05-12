@@ -16,7 +16,6 @@ import type { CancellablePromise } from '@mathesar-component-library';
 import QueryModel, { type QueryModelUpdateDiff } from './QueryModel';
 import { QueryRunner } from './QueryRunner';
 import { QuerySummarizationTransformationModel } from './QuerySummarizationTransformationModel';
-import QueryUndoRedoManager from './QueryUndoRedoManager';
 import {
   type InputColumnsStoreSubstance,
   type QueryTableStructure,
@@ -25,8 +24,6 @@ import {
 } from './utils';
 
 export default class QueryManager extends QueryRunner {
-  private undoRedoManager: QueryUndoRedoManager;
-
   private cacheManagers: {
     inputColumns: CacheManager<number, InputColumnsStoreSubstance>;
   } = {
@@ -36,12 +33,7 @@ export default class QueryManager extends QueryRunner {
   state: Writable<{
     inputColumnsFetchState?: RequestStatus;
     saveState?: RequestStatus;
-    isUndoPossible: boolean;
-    isRedoPossible: boolean;
-  }> = writable({
-    isUndoPossible: false,
-    isRedoPossible: false,
-  });
+  }> = writable({});
 
   inputColumns: Writable<InputColumnsStoreSubstance> = writable({
     baseTableColumns: new Map(),
@@ -87,9 +79,6 @@ export default class QueryManager extends QueryRunner {
       },
     });
     this.onSaveCallback = onSave ?? (() => {});
-    const undoRedoManager = new QueryUndoRedoManager();
-    undoRedoManager.pushState(query, query.isValid);
-    this.undoRedoManager = undoRedoManager;
     void this.calculateInputColumnTree();
   }
 
@@ -170,14 +159,6 @@ export default class QueryManager extends QueryRunner {
     return { isValid: queryModel.isValid, isRunnable: queryModel.isRunnable };
   }
 
-  private setUndoRedoStates(): void {
-    this.state.update((_state) => ({
-      ..._state,
-      isUndoPossible: this.undoRedoManager.isUndoPossible(),
-      isRedoPossible: this.undoRedoManager.isRedoPossible(),
-    }));
-  }
-
   private checkAndUpdateSummarizationAfterRun(queryModel: QueryModel) {
     const thisQueryModel = this.getQueryModel();
     let newQueryModel = thisQueryModel;
@@ -223,15 +204,11 @@ export default class QueryManager extends QueryRunner {
       saveState: undefined,
     }));
     const updateDiff = callback(this.getQueryModel());
-    const { isValid, isRunnable } = await this.updateQuery(updateDiff.model);
-    this.undoRedoManager.pushState(updateDiff.model, isValid);
-    this.setUndoRedoStates();
+    const { isRunnable } = await this.updateQuery(updateDiff.model);
     if (isRunnable) {
       switch (updateDiff.type) {
         case 'baseTable':
           this.resetResults();
-          this.undoRedoManager.clear();
-          this.setUndoRedoStates();
           this.confirmationNeededForMultipleResults.set(true);
           this.queryHasUnsavedChanges.set(false);
           await this.calculateInputColumnTree();
@@ -256,33 +233,6 @@ export default class QueryManager extends QueryRunner {
           break;
       }
     }
-  }
-
-  private async performUndoRedoSync(query?: QueryModel): Promise<void> {
-    if (query) {
-      const currentQueryModelData = this.getQueryModel();
-      let queryToSet = query;
-      if (currentQueryModelData?.id) {
-        queryToSet = query.withId(currentQueryModelData.id).model;
-      }
-      this.query.set(queryToSet);
-      this.speculateColumns();
-      await this.updateQuery(queryToSet);
-      this.setUndoRedoStates();
-      await this.run();
-    } else {
-      this.setUndoRedoStates();
-    }
-  }
-
-  async undo(): Promise<void> {
-    const query = this.undoRedoManager.undo();
-    await this.performUndoRedoSync(query);
-  }
-
-  async redo(): Promise<void> {
-    const query = this.undoRedoManager.redo();
-    await this.performUndoRedoSync(query);
   }
 
   /**

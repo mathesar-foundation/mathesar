@@ -4,7 +4,7 @@
   import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/rest/utils/errorCodes';
   import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
+  import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { Button, hasProperty } from '@mathesar-component-library';
@@ -89,7 +89,7 @@
                 <p>
                   <a
                     class="btn btn-secondary"
-                    href={getExplorationEditorPageUrl(
+                    href={getExplorationPageUrl(
                       $currentDatabase.id,
                       $currentSchema.oid,
                       $query.id,
