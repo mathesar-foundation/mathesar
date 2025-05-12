@@ -118,12 +118,12 @@ jobs:
         run: |
           touch /tmp/live-images-sha.txt
 
-          for version in 13 14 15 16 17; do
-            echo "$(skopeo inspect docker://postgres:$version | jq -r '.Digest') postgres:$version" >> /tmp/live-images-sha.txt
-          done
-
           for version in 3.9 3.10 3.11 3.12 3.13; do
             echo "$(skopeo inspect docker://python:$version-bookworm | jq -r '.Digest') python:$version-bookworm" >> /tmp/live-images-sha.txt
+          done
+
+          for version in 13 14 15 16 17; do
+            echo "$(skopeo inspect docker://postgres:$version | jq -r '.Digest') postgres:$version" >> /tmp/live-images-sha.txt
           done
 
           if diff <(sort -k2 /tmp/live-images-sha.txt) <(sort -k2 /tmp/docker-images/cached-images-sha.txt); then
