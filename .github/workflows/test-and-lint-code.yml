@@ -145,7 +145,7 @@ jobs:
             docker pull postgres:$version && docker save postgres:$version -o postgres-$version.tar
           done
 
-          docker images --digests --format '{{.Digest}} {{.Repository}}:{{.Tag}}' | sort > cached-images-sha.txt
+          docker images --digests --format '{{.Digest}} {{.Repository}}:{{.Tag}}' | sort -k2 > cached-images-sha.txt
 
           cat cached-images-sha.txt
 
