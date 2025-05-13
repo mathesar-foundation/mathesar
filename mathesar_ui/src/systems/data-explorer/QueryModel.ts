@@ -219,13 +219,20 @@ export class QueryModel {
   withColumnDisplayOptionsEntry(
     entry: ColumnDisplayOptionsEntry,
   ): QueryModelUpdateDiff {
+    const previousColumnMetadata =
+      (this.display_options.columnDisplayOptions ?? {})[entry.column.index]
+        ?.displayOptions ?? {};
+
     const displayOptions = {
       ...this.display_options,
       columnDisplayOptions: {
         ...(this.display_options.columnDisplayOptions ?? {}),
         [entry.column.index]: {
           column: entry.column,
-          displayOptions: entry.displayOptions,
+          displayOptions: {
+            ...previousColumnMetadata,
+            ...entry.displayOptions,
+          },
         },
       },
     };

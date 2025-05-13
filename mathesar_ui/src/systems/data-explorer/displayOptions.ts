@@ -90,8 +90,21 @@ export interface ColumnDisplayOptionsEntry {
 /**
  * Keys are the stringified indexes (zero-based) of the column in the
  * exploration result set.
+ *
+ * We're using `Partial` here for increased type safety on indexed access. But
+ * this does come with the downside of making it cumbersome to iterate over the
+ * entries. Use the `getColumnDisplayOptionsEntries` helper function for that.
  */
-type ColumnDisplayOptions = Record<string, ColumnDisplayOptionsEntry>;
+type ColumnDisplayOptions = Partial<Record<string, ColumnDisplayOptionsEntry>>;
+
+function* getColumnDisplayOptionsEntries(
+  opts: ColumnDisplayOptions,
+): Iterable<ColumnDisplayOptionsEntry> {
+  for (const entry of Object.values(opts)) {
+    if (!entry) continue;
+    yield entry;
+  }
+}
 
 /**
  * Instances of this type get written to Explorations.display_options in the
@@ -161,9 +174,18 @@ export function makeColumnAnchor(
   };
 }
 
+export function getDisplayOptionsForColumn(
+  opts: ExplorationDisplayOptions,
+  columnIndex: number,
+): ColumnMetadata {
+  const columnDisplayOptions = opts.columnDisplayOptions ?? {};
+  return columnDisplayOptions[columnIndex]?.displayOptions ?? {};
+}
+
 export function* getCustomColumnWidths(opts: ExplorationDisplayOptions) {
   const columnOptions = opts.columnDisplayOptions ?? {};
-  for (const { column, displayOptions } of Object.values(columnOptions)) {
+  for (const entry of getColumnDisplayOptionsEntries(columnOptions)) {
+    const { column, displayOptions } = entry;
     const width = displayOptions.display_width ?? undefined;
     if (!width) continue;
     yield [column.name, width] as [string, number];
@@ -321,7 +343,7 @@ export function reconcileDisplayOptionsWithServerResponse(
   );
 
   const columnDisplayOptionsReconciliation = reconcileColumnDisplayOptions(
-    Object.values(columnDisplayOptions),
+    getColumnDisplayOptionsEntries(columnDisplayOptions),
     newColumnAnchors,
   );
 

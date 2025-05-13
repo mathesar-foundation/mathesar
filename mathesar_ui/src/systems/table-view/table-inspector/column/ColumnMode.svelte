@@ -15,8 +15,9 @@
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
   import { defined } from '@mathesar-component-library';
 
-  import ColumnActions from './ColumnActions.svelte';
   import ColumnFormatting from '../../../../components/ColumnFormatting.svelte';
+
+  import ColumnActions from './ColumnActions.svelte';
   import ColumnNameAndDescription from './ColumnNameAndDescription.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
@@ -129,6 +130,7 @@
       {#key column}
         <ColumnFormatting
           {column}
+          initialDisplayOptions={column.column.metadata ?? {}}
           onSave={async (displayOptions) => {
             if (!column) return;
             await columnsDataStore.setDisplayOptions(column, displayOptions);
