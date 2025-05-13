@@ -35,6 +35,7 @@ You can self-host Mathesar by following one of the guides below:
 
 - [Install using Docker compose](./administration/install-via-docker-compose.md) — a production setup with separate reverse-proxy and database containers.
 - [Install from scratch](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
+- [Deploy via One-Click Button](./administration/deploy-via-one-click-button.md) — deploy Mathesar to various Cloud provider via One-Click Deploy Button.
 
 
 ## Help out
