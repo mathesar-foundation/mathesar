@@ -847,7 +847,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.cast_to_mathesar_money(real)', 'FUNCTION', NULL),
   ('msar', 'msar.cast_to_mathesar_money(smallint)', 'FUNCTION', NULL),
   ('msar', 'msar.cast_to_mathesar_money(text)', 'FUNCTION', NULL),
-  ('msar', 'msar.cast_to_money(bigint)', 'FUNCTION', NULL),
+  ('msar', 'msar.cast_to_money(bigint)', 'FUNCTION', NULL), 
   ('msar', 'msar.cast_to_money(character varying)', 'FUNCTION', NULL),
   ('msar', 'msar.cast_to_money(character)', 'FUNCTION', NULL),
   ('msar', 'msar.cast_to_money(double precision)', 'FUNCTION', NULL),
