@@ -109,14 +109,6 @@ export function getExplorationPageUrl(
   )}${queryId}/`;
 }
 
-export function getExplorationEditorPageUrl(
-  databaseId: number,
-  schemaId: number,
-  queryId: number,
-): string {
-  return `${getExplorationPageUrl(databaseId, schemaId, queryId)}edit/`;
-}
-
 export function getTablePageUrl(
   databaseId: number,
   schemaId: number,

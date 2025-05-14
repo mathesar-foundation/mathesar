@@ -7,6 +7,8 @@
   /** When true, the tooltip will remain open when hovered */
   export let allowHover = false;
   export let placements: Placement[] = ['top', 'right', 'bottom', 'left'];
+  /** Set this to false to bypass the dropdown and only display the trigger */
+  export let enabled = true;
 
   let trigger: HTMLElement | undefined;
   let triggerIsHovered = false;
@@ -35,17 +37,19 @@
   <slot name="trigger" />
 </span>
 
-<AttachableDropdown
-  {trigger}
-  {isOpen}
-  {placements}
-  class="tooltip trim-child-margins {tooltipClass}"
-  on:mouseenter={() => {
-    contentIsHovered = true;
-  }}
-  on:mouseleave={() => {
-    contentIsHovered = false;
-  }}
->
-  <slot name="content" />
-</AttachableDropdown>
+{#if enabled}
+  <AttachableDropdown
+    {trigger}
+    {isOpen}
+    {placements}
+    class="tooltip trim-child-margins {tooltipClass}"
+    on:mouseenter={() => {
+      contentIsHovered = true;
+    }}
+    on:mouseleave={() => {
+      contentIsHovered = false;
+    }}
+  >
+    <slot name="content" />
+  </AttachableDropdown>
+{/if}
