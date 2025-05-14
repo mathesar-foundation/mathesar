@@ -114,6 +114,24 @@
     color: var(--sky-600);
   }
 
+  
+  .language-selector-form {
+    position: fixed;
+    bottom: 2%;
+    right: 2%;
+  }
+
+  .language-selector {
+    display: block;
+    background-color: var(--input-background);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius-m);
+    color: var(--text-color-primary);
+    padding: var(--sm3);
+    cursor: pointer;
+  }
+
+
   @media (max-width: 54rem) {
     .container {
       grid-template-columns: none;
@@ -321,6 +339,19 @@
         {% translate "Complete Installation" %}
       </button>
     </div>
+  </form>
+  <form class="language-selector-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+    <input name="next" type="hidden" value="{{ redirect_to }}">
+    <select name="language" onchange="form.submit()" class="language-selector align-center" aria-label="Display Language">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% get_language_info_list for LANGUAGES as languages %}
+        {% for language in languages %}
+            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                {{ language.name_local }} ({{ language.code }})
+            </option>
+        {% endfor %}
+    </select>
   </form>
 </div>
 {% endblock %}
