@@ -180,6 +180,7 @@ def _get_exploration_column_metadata(
             "alias": alias,
             "display_name": display_names.get(alias) if display_names is not None else None,
             "type": sa_col.db_type.id,
+            "primary_key": sa_col.primary_key,
             "type_options": sa_col.type_options,
             "metadata": ColumnMetaDataRecord.from_model(column_metadata) if column_metadata else None,
             "is_initial_column": True if initial_column else False,
