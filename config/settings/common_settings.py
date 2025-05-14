@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 from urllib.parse import unquote
 
-from config.database_config import PostgresConfig
+from config.database_config import PostgresConfig, parse_port
 
 
 # We use a 'tuple' with pipes as delimiters as decople naively splits the global
@@ -114,7 +114,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # MATHESAR_DATABASES should be of the form '({db_name}|{db_url}), ({db_name}|{db_url})'
 # See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
-    db_key: PostgresConfig(url_string).to_django_dict()
+    db_key: PostgresConfig.from_connection_string(url_string).to_django_dict()
     for db_key, url_string in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']
 }
 
@@ -135,7 +135,7 @@ if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
         # Currently, the encoding is no longer a technical requirement, however, we expect
         # users upgrading to the latest version having an url-encoded value for host.
         host=unquote(POSTGRES_HOST),
-        port=POSTGRES_PORT,
+        port=parse_port(POSTGRES_PORT),
         role=POSTGRES_USER,
         password=POSTGRES_PASSWORD,
     ).to_django_dict()

@@ -112,8 +112,7 @@ class PostgresConfig(DBConfig):
 
     @classmethod
     def from_connection_string(cls, url: str) -> "PostgresConfig":
-        ci = conninfo.make_conninfo(url)
-        params = ci.get_parameters()
+        params = conninfo.conninfo_to_dict(url)
         dbname = params.get("dbname")
         if not dbname:
             raise ValueError("PostgresConfig.from_connection_string: missing database name in URL")
