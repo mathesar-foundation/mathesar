@@ -9,7 +9,7 @@
   export let database: Database;
   export let upgradeRequired = false;
 
-  $: server = `${database.server.host}:${database.server.port}`;
+  $: server = database.server.getConnectionString();
 </script>
 
 <div class="db-card-content" class:upgrade-required={upgradeRequired}>
