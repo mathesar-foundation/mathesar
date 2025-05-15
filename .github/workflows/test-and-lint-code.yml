@@ -136,6 +136,10 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Pull images
+        run: |
+          docker pull ${{ matrix.py-version }}
+          docker pull ${{ matrix.pg-version }}
       - name: Build the stack
         run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
@@ -166,6 +170,9 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Pull image
+        run: |
+          docker pull ${{ matrix.pg-version }}
       - name: Build the test DB
         run: docker compose -f docker-compose.dev.yml up --build -d dev-db
         env:
@@ -197,6 +204,10 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Pull images
+        run: |
+          docker pull ${{ matrix.py-version }}
+          docker pull ${{ matrix.pg-version }}
       - name: Run tests
         run: sh run_api_tests.sh
         env:
@@ -413,6 +424,10 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Pull images
+        run: |
+          docker pull ${{ matrix.py-version }}
+          docker pull ${{ matrix.pg-version }}
       - name: Build the stack
         run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
