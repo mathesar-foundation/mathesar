@@ -642,6 +642,7 @@
   "summarize_in_data_explorer": "Summarize in Data Explorer",
   "summarize_in_data_explorer_help": "Open a pre-configured exploration based on the current table display.",
   "support_our_mission": "Support Our Mission",
+  "support_time_zone_helper": "When this box is not checked, values will be stored irrespective of any specific time zone. All Mathesar users will see the values displayed identically, regardless of the time zone in which they happen to be viewing the data. This is a simpler option and is appropriate when the intended timezone of the data is obvious to all users. When this box is checked, all values will be stored in UTC time. Values will be converted to local time for display using the time zone offset supplied by the user's web browser. This means that Mathesar users in different time zones will see values displayed differently, in order for their understanding of those values to be synchronized. User input will be assumed to be in local time and will be converted to UTC for storage. This means that if you un-check this box later or convert this column to Text, the values after conversion will all be displayed in UTC time.",
   "table": "Table",
   "table_access_read_help": "Can read table records",
   "table_access_write_help": "Can read, update, delete, and create table records",
