@@ -75,7 +75,6 @@
           {#if slotName === 'docsLink'}
             <DocsLink page="usageDataCollection">
               {translatedArg}
-              <Icon {...iconExternalHyperlink} />
             </DocsLink>
           {/if}
           {#if slotName === 'privacyPolicyLink'}
