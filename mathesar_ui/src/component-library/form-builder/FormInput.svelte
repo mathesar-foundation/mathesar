@@ -22,7 +22,7 @@
     {label}
     layout={type === 'boolean' ? 'inline-input-first' : 'stacked'}
     userHelperInfoText={text?.info?.richTextKey || undefined}
-    >
+  >
     <DataTypeBasedInput
       {...$$restProps}
       dataType={type}

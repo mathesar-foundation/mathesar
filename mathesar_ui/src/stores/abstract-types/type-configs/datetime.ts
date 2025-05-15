@@ -32,9 +32,9 @@ const dbForm: AbstractTypeConfigForm = {
         label: 'Support Time Zones',
         text: {
           info: {
-            richTextKey: 'support_time_zone_helper'
-          }
-        }
+            richTextKey: 'support_time_zone_helper',
+          },
+        },
       },
     ],
   },

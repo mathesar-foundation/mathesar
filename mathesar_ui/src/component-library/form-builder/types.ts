@@ -11,7 +11,7 @@ export interface FormInputBaseElement {
   // TODO: Support customizable text (eg., errors, info etc.,)
   text?: {
     info?: {
-      richTextKey?: string
+      richTextKey?: string;
     };
     validation?: {
       isEmpty?: string;
