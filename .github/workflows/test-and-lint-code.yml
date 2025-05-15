@@ -424,10 +424,6 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Pull images
-        run: |
-          docker pull "python:${{ matrix.py-version }}"
-          docker pull "postgres:${{ matrix.pg-version }}"
       - name: Build the stack
         run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
