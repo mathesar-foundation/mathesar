@@ -745,18 +745,65 @@ DECLARE
   actual_number text;
   group_divider text;
   decimal_point text;
+  currency_prefix text;
+  currency_suffix text;
+
+  -- pieces required for regex
+  non_numeric text := '(?:[^.,0-9]+)';
+  no_separator_big text := '[0-9]{4,}(?:([,.])[0-9]+)?';
+  no_separator_small text := '[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?';
+  comma_separator_req_decimal text := '[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+';
+  period_separator_req_decimal text := '[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+';
+  comma_separator_opt_decimal text := '[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?';
+  period_separator_opt_decimal text := '[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?';
+  space_separator_opt_decimal text := '[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?';
+  comma_separator_lakh_system text := '[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?';
+  inner_number_tree text := concat_ws('|',
+                            no_separator_big,
+                            no_separator_small,
+                            comma_separator_req_decimal,
+                            period_separator_req_decimal,
+                            comma_separator_opt_decimal,
+                            period_separator_opt_decimal,
+                            space_separator_opt_decimal,
+                            comma_separator_lakh_system
+                          );
+  inner_number_group text := '(' || inner_number_tree || ')';/* Numbers without currency,
+  including inner_number_group as its own capturing group in the money_finding_regex allows us to
+  match columns without any currency symbols allowing users the flexibility
+  to add currency prefixes and suffixes afterwards in the cases of type inference/data imports. */
+  required_currency_beginning text := non_numeric || inner_number_group || non_numeric || '?';
+  required_currency_ending text := non_numeric || '?' || inner_number_group || non_numeric;
+  money_finding_regex text := '^(?:' || required_currency_beginning || '|' || required_currency_ending || '|' || inner_number_group || ')$';
 BEGIN
-  SELECT regexp_matches($1, '^(?:(?:[^.,0-9]+)([0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?|[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?)(?:[^.,0-9]+)?|(?:[^.,0-9]+)?([0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?|[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?)(?:[^.,0-9]+))$') INTO raw_arr;
+  SELECT regexp_matches($1, money_finding_regex) INTO raw_arr;
   IF raw_arr IS NULL THEN
     RETURN NULL;
   END IF;
-  SELECT array_remove(ARRAY[raw_arr[1],raw_arr[16]], null) INTO actual_number_arr;
-  SELECT array_remove(ARRAY[raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[14],raw_arr[19],raw_arr[21],raw_arr[23],raw_arr[25],raw_arr[27],raw_arr[29]], null) INTO group_divider_arr;
-  SELECT array_remove(ARRAY[raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[15],raw_arr[17],raw_arr[18],raw_arr[20],raw_arr[22],raw_arr[24],raw_arr[26],raw_arr[28],raw_arr[30]], null) INTO decimal_point_arr;
+  SELECT array_remove(ARRAY[
+    raw_arr[1], -- required_currency_beginning[x]
+    raw_arr[16], -- required_currency_ending[x+15]
+    raw_arr[31] -- inner_number_group[x+30]
+  ], null) INTO actual_number_arr;
+  SELECT array_remove(ARRAY[
+    raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[14], -- required_currency_beginning[x]
+    raw_arr[19],raw_arr[21],raw_arr[23],raw_arr[25],raw_arr[27],raw_arr[29], -- required_currency_ending[x+15]
+    raw_arr[34],raw_arr[36],raw_arr[38],raw_arr[40],raw_arr[42],raw_arr[44] -- inner_number_group[x+30]
+  ], null) INTO group_divider_arr;
+  SELECT array_remove(ARRAY[
+    raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[15], -- required_currency_beginning[x]
+    raw_arr[17],raw_arr[18],raw_arr[20],raw_arr[22],raw_arr[24],raw_arr[26],raw_arr[28],raw_arr[30], -- required_currency_ending[x+15]
+    raw_arr[32],raw_arr[33],raw_arr[35],raw_arr[37],raw_arr[39],raw_arr[41],raw_arr[43],raw_arr[45] -- inner_number_group[x+30]
+  ], null) INTO decimal_point_arr;
   SELECT actual_number_arr[1] INTO actual_number;
   SELECT group_divider_arr[1] INTO group_divider;
   SELECT decimal_point_arr[1] INTO decimal_point;
-  RETURN ARRAY[actual_number, group_divider, decimal_point, replace($1, actual_number, '')];
+  SELECT replace(replace(split_part($1, actual_number, 1), '-', ''), '(', '') INTO currency_prefix;
+  SELECT replace(replace(split_part($1, actual_number, 2), '-', ''), ')', '') INTO currency_suffix;
+  IF $1::text ~ '^.*(-|\(.+\)).*$' THEN -- Handle negative values
+    actual_number := '-' || actual_number;
+  END IF;
+  RETURN ARRAY[actual_number, group_divider, decimal_point, currency_prefix, currency_suffix];
 END;
 $$ LANGUAGE plpgsql;
 
@@ -794,15 +841,11 @@ BEGIN
   END IF;
   SELECT money_arr[1] INTO money_num;
   SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-  SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
   IF money_arr[2] IS NOT NULL THEN
     SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
   END IF;
   IF money_arr[3] IS NOT NULL THEN
     SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
-  END IF;
-  IF is_negative THEN
-    RETURN ('-' || money_num)::mathesar_types.mathesar_money;
   END IF;
   RETURN money_num::mathesar_types.mathesar_money;
 END;
@@ -822,19 +865,25 @@ BEGIN
   END IF;
   SELECT money_arr[1] INTO money_num;
   SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-  SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
   IF money_arr[2] IS NOT NULL THEN
     SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
   END IF;
   IF money_arr[3] IS NOT NULL THEN
     SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
   END IF;
-  IF is_negative THEN
-    RETURN ('-' || money_num)::msar.mathesar_money;
-  END IF;
-  RETURN money_num::msar.mathesar_money;
+  RETURN money_num::mathesar_types.mathesar_money;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.cast_to_mathesar_money(num text, group_sep "char", decimal_p "char", curr_pref text, curr_suff text)
+RETURNS mathesar_types.mathesar_money AS $$
+  SELECT CASE WHEN num ~ '^.*(-|\(.+\)).*$' THEN -- Handle negative values
+    ('-' || replace(replace(replace(replace(replace(replace(replace(num, '-', ''), '(', ''), ')', ''), curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' ')))::mathesar_types.mathesar_money
+  ELSE
+    replace(replace(replace(replace(num, curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' '))::mathesar_types.mathesar_money
+  END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 -- msar.cast_to_money
