@@ -117,7 +117,7 @@
       var(--gradient-card-start),
       var(--gradient-card-end)
     );
-    padding: 1rem;
+    padding: var(--lg1) var(--lg1);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -154,6 +154,7 @@
     border-radius: 50%;
     width: 2rem;
     height: 2rem;
+    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -214,14 +215,19 @@
   }
 
   .name {
-    font-size: var(--lg3);
+    font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--text-color-primary);
-    margin-bottom: 0.125rem;
     line-height: 1.2;
     width: 100%;
+    word-break: break-word;
+    hyphens: auto;
+    min-height: 2.4em;
   }
 </style>
