@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 import os
 from pathlib import Path
-from urllib.parse import unquote
 
 from config.database_config import PostgresConfig, parse_port
 
@@ -125,16 +124,10 @@ POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default=None)
 POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default=None)
 
 # POSTGRES_DB, POSTGRES_USER, and POSTGRES_HOST are required env variables for forming a pg connection string for the django database
-# We expect the environment variables to be url-encoded
 if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
     DATABASES['default'] = PostgresConfig(
         dbname=POSTGRES_DB,
-        # We're doing unquote only for backwards compatibility.
-        # Previously, we used a separate package dj-database-url, which required the entire
-        # url. This meant that all params had to be url-encoded, which primarily affects host.
-        # Currently, the encoding is no longer a technical requirement, however, we expect
-        # users upgrading to the latest version having an url-encoded value for host.
-        host=unquote(POSTGRES_HOST),
+        host=POSTGRES_HOST,
         port=parse_port(POSTGRES_PORT),
         role=POSTGRES_USER,
         password=POSTGRES_PASSWORD,
