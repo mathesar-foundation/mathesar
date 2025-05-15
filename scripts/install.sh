@@ -160,14 +160,17 @@ parse_mathesar_version() {
 compare_versions() {
   local v1="$1" v2="$2"
   if [[ "$v1" == "$v2" ]]; then
-    return 0
+    echo 0
+    return
   fi
   local greatest
   greatest=$(printf '%s\n%s\n' "$v1" "$v2" | sort -V | tail -n1)
   if [[ "$greatest" == "$v1" ]]; then
-    return 1 # v1 newer
+     # v1 newer
+    echo 1
   else
-    return -1 # v1 older
+    # v1 older
+    echo -1
   fi
 }
 
