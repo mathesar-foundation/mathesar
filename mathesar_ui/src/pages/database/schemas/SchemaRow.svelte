@@ -33,40 +33,39 @@
 </script>
 
 <div class="schema-row" class:hover={isHovered} class:focus={isFocused}>
-  <div class="top-row">
-    <div class="icon-container">
-      <Icon {...iconSchema} size="1rem" />
-    </div>
-    <div class="menu-trigger">
-      <DropdownMenu
-        showArrow={false}
-        triggerAppearance="plain"
-        preferredPlacement="bottom-end"
-        icon={iconMoreActions}
-        menuStyle="--Menu__padding-x:0.8em;"
-      >
-        <ButtonMenuItem
-          on:click={() => dispatch('edit')}
-          icon={iconEdit}
-          disabled={!$currentRoleOwns}
-        >
-          {$_('edit_schema')}
-        </ButtonMenuItem>
-        <MenuDivider />
-        <ButtonMenuItem
-          danger
-          on:click={() => dispatch('delete')}
-          icon={iconDeleteMajor}
-          disabled={!$currentRoleOwns}
-        >
-          {$_('delete_schema')}
-        </ButtonMenuItem>
-      </DropdownMenu>
-    </div>
-  </div>
-
   <div class="content">
-    <div class="name">{$name}</div>
+    <div class="content-header">
+      <div class="icon-container">
+        <Icon {...iconSchema} size="1rem" />
+      </div>
+      <div class="name">{$name}</div>
+      <div class="menu-trigger">
+        <DropdownMenu
+          showArrow={false}
+          triggerAppearance="plain"
+          preferredPlacement="bottom-end"
+          icon={iconMoreActions}
+          menuStyle="--Menu__padding-x:0.8em;"
+        >
+          <ButtonMenuItem
+            on:click={() => dispatch('edit')}
+            icon={iconEdit}
+            disabled={!$currentRoleOwns}
+          >
+            {$_('edit_schema')}
+          </ButtonMenuItem>
+          <MenuDivider />
+          <ButtonMenuItem
+            danger
+            on:click={() => dispatch('delete')}
+            icon={iconDeleteMajor}
+            disabled={!$currentRoleOwns}
+          >
+            {$_('delete_schema')}
+          </ButtonMenuItem>
+        </DropdownMenu>
+      </div>
+    </div>
 
     {#if $description}
       <p class="description" title={$description}>
@@ -141,12 +140,18 @@
     outline-offset: 1px;
   }
 
-  .top-row {
+  .content {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: var(--sm3);
+    min-width: 0;
+  }
+
+  .content-header {
+    display: flex;
     align-items: center;
-    width: 100%;
-    margin-bottom: 0.125rem;
+    gap: var(--sm3);
   }
 
   .icon-container {
@@ -154,20 +159,11 @@
     border-radius: 50%;
     width: 2rem;
     height: 2rem;
-    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     z-index: var(--z-index-menu-trigger);
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    gap: 0.125rem;
-    min-width: 0;
   }
 
   .hyperlink-overlay {
@@ -203,7 +199,6 @@
   .bottom-row {
     display: flex;
     justify-content: flex-end;
-    margin-top: 0.25rem;
   }
 
   .table-count {
@@ -217,17 +212,9 @@
   .name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
     color: var(--text-color-primary);
-    line-height: 1.2;
     width: 100%;
     word-break: break-word;
     hyphens: auto;
-    min-height: 2.4em;
   }
 </style>

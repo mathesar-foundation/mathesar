@@ -5,7 +5,7 @@
   border: var(--button-border, 1px solid);
   font-family: inherit;
   font-size: inherit;
-  line-height: inherit;
+  line-height: var(--input-line-height);
   cursor: pointer;
   border-radius: 6px;
   box-shadow: var(--button-shadow, none);
