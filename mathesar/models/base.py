@@ -42,7 +42,7 @@ class Server(BaseModel):
                 name="unique_server_host_port_not_null",
             ),
             models.UniqueConstraint(
-                fields=["host", "port"],
+                fields=["host"],
                 condition=models.Q(port__isnull=True),
                 name="unique_server_null_port",
             ),

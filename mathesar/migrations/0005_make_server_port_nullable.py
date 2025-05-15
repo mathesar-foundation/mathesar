@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='server',
-            constraint=models.UniqueConstraint(condition=models.Q(('port__isnull', True)), fields=('host', 'port'), name='unique_server_null_port'),
+            constraint=models.UniqueConstraint(condition=models.Q(('port__isnull', True)), fields=('host',), name='unique_server_null_port'),
         ),
     ]
