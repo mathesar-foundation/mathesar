@@ -39,6 +39,10 @@
         <Icon {...iconSchema} size="1rem" />
       </div>
       <div class="name">{$name}</div>
+      <div class="table-count">
+        <Icon {...iconTable} size="1rem" />
+        <SchemaConstituentCounts {schema} />
+      </div>
       <div class="menu-trigger">
         <DropdownMenu
           showArrow={false}
@@ -74,13 +78,6 @@
     {:else}
       <div class="description-placeholder"></div>
     {/if}
-
-    <div class="bottom-row">
-      <div class="table-count">
-        <Icon {...iconTable} size="1rem" />
-        <SchemaConstituentCounts {schema} />
-      </div>
-    </div>
   </div>
 
   <!-- svelte-ignore a11y-missing-content -->
@@ -116,7 +113,7 @@
       var(--gradient-card-start),
       var(--gradient-card-end)
     );
-    padding: var(--lg1) var(--lg1);
+    padding: var(--lg1);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -144,14 +141,13 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    gap: var(--sm3);
     min-width: 0;
   }
 
   .content-header {
     display: flex;
     align-items: center;
-    gap: var(--sm3);
+    gap: var(--sm2);
   }
 
   .icon-container {
@@ -189,16 +185,10 @@
     line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 1.5rem;
   }
 
   .description-placeholder {
     min-height: 1.5rem;
-  }
-
-  .bottom-row {
-    display: flex;
-    justify-content: flex-end;
   }
 
   .table-count {
@@ -207,13 +197,15 @@
     gap: 0.375rem;
     color: var(--text-color-tertiary);
     font-size: var(--sm1);
+    margin-left: auto;
+    margin-right: var(--sm3);
   }
 
   .name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
     color: var(--text-color-primary);
-    width: 100%;
+    flex: 1;
     word-break: break-word;
     hyphens: auto;
   }
