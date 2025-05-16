@@ -29,17 +29,19 @@ This page contains all available environment variables supported by Mathesar. Se
 !!!info
     The database specified in this section will be used to store Mathesar's internal data. Additionally, it can be optionally repurposed via Mathesar's UI to store user data.
 
+Note: The default values specified here refer to those in Mathesar's [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file, as part of our recommended [docker compose installation method](./install-via-docker-compose.md).
+
 ### `POSTGRES_DB`
 
 - **Description**: Specifies a name for the database that will be created and used by Mathesar for managing internal data.
-- **Default value**: `mathesar_django`
+- **Default value**: `mathesar_db`
 
 ### `POSTGRES_USER`
 
 - **Description**: Specifies creation of a user with superuser privileges and a database with the same name.
 - **Default value**: `mathesar`
 
-### `POSTGRES_PASSWORD`
+### `POSTGRES_PASSWORD` (optional)
 
 - **Description**: Specifies the superuser password that is required to be set for the PostgreSQL docker image.
 - **Default value**: `mathesar`
@@ -47,9 +49,13 @@ This page contains all available environment variables supported by Mathesar. Se
 ### `POSTGRES_HOST`
 
 - **Description**: Specifies the host name on which portgres listen for connections from client applications.
-- **Default value**: `mathesar_db`
+- **Default value**: `mathesar_django`
+    - When installing via docker, this value can reference:
+        - A Docker service name (e.g., `mathesar_django`)
+        - A TCP host address (e.g., `host.docker.internal`)
+        - A Unix socket path (e.g., `/var/run/postgresql`)
 
-### `POSTGRES_PORT`
+### `POSTGRES_PORT` (optional)
 
 - **Description**: Specifies the port on which portgres listen for connections from client applications.
 - **Default value**: `5432`
@@ -60,7 +66,7 @@ This page contains all available environment variables supported by Mathesar. Se
 !!!note
     These variables are only needed if you're using the Caddy configuration in our [default Docker Compose](install-via-docker-compose.md#steps) file.
 
-### `DOMAIN_NAME`
+
 
 - **Description**: The public URL that will be used to access Mathesar ([see Caddy docs](https://caddyserver.com/docs/caddyfile/concepts#addresses)).
 - **Format**: A URL or hostname

@@ -22,8 +22,8 @@
 1. Open the downloaded docker-compose file using your text editor.
 
 1. Set the required environment variables in the **x-config** section of the docker compose file.
-    
-    !!! Config       
+
+    !!! Config
         ```yaml
         x-config: &config
           # (REQUIRED) Replace '?' with '-' followed by a 50 character random string.
@@ -117,3 +117,35 @@ If you'd like to use an external PostgreSQL server for Mathesar's internal datab
     ```
 
 1. Configure the [internal database environment variables](./environment-variables.md#db) to point to the database you just created. Ensure that you change the default values for the user, password, and host.
+
+#### Docker Host Networking Considerations
+
+When connecting to PostgreSQL running on the Docker host machine over the network (TCP/IP), remember the following:
+
+- Using `localhost` within Docker will reference the container itself, not your host.
+- On macOS or Windows, `host.docker.internal` typically works to access the host network.
+- On Linux, you _can_ use `host.docker.internal`, but it must be explicitly configured in your docker compose file like so:
+  ```yaml
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  ```
+    -  Alternatively, try the Docker network gateway IP (`172.17.0.1`) or your host machine's local network IP.
+
+
+#### Connecting via Unix Socket
+
+If you're connecting Mathesar to PostgreSQL via a Unix socket, ensure the following:
+
+- Set `POSTGRES_HOST` to the directory containing your PostgreSQL Unix socket (typically `/var/run/postgresql`).
+- You may omit `POSTGRES_PORT` if using the default value (`5432`), but must specify it when using a non-standard port.
+- Adjust your PostgreSQL server permissions (`pg_hba.conf`) to allow socket connections using appropriate authentication for the `POSTGRES_USER`  (such as `md5`). Refer to [PostgreSQL Authentication docs](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html) for more information.
+- In Docker, mount the Unix socket directory as a volume to enable container access. For example:
+
+```yaml
+ service:
+    container_name: mathesar_service
+    image: mathesar/mathesar:latest
+    volumes:
+       # Add this line
+       - /var/run/postgresql:/var/run/postgresql
+```

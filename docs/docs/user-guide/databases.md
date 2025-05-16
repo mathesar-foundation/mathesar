@@ -20,6 +20,15 @@ Once you've connected a database, you can navigate to Mathesar's page for it whe
 
 Mathesar will remember the connection even after the application is shut down. Your Mathesar [user](./users.md) will be added as a [collaborator](./collaborators.md) on the database (along with the PostgreSQL [role](./roles.md) you entered). The password you entered for that role will be stored in Mathesar's [internal database](#internal), encrypted using Mathesar's [SECRET_KEY](../administration/environment-variables.md#secret_key).
 
+???+ tip "Trouble connecting a database?"
+    - If you are running Mathesar via [Docker](../administration/install-via-docker-compose.md), keep in mind that setting the "Host" to `localhost` may not work as expected. Instead:
+        - On macOS and Windows, `host.docker.internal` generally works instead of `localhost` without additional setup.
+        - On Linux, configure `host.docker.internal` explicitly, or try the Docker network gateway IP `172.17.0.1`.
+    - To connect to PostgreSQL via Unix socket, set the "Host" value as the path to the socket, for example: (`/var/run/postgresql`). You may omit the "Port" if using the default (`5432`) or otherwise specify.
+        - When using Docker, make sure the container can access the socket path as a mounted volume.
+
+
+
 ## Creating a new database
 
 If you're starting your database from scratch with Mathesar you can either:
