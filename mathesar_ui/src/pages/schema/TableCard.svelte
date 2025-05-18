@@ -230,7 +230,7 @@
     gap: 1.5rem;
     cursor: pointer;
     overflow: hidden;
-    padding: var(--lg1);
+    padding: var(--sm2) var(--lg1);
   }
 
   .table-info {
