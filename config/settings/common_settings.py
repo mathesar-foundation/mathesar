@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
-from dj_database_url import parse as db_url
+from config.database_config import PostgresConfig, parse_port
 
 
 # We use a 'tuple' with pipes as delimiters as decople naively splits the global
@@ -113,7 +113,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # MATHESAR_DATABASES should be of the form '({db_name}|{db_url}), ({db_name}|{db_url})'
 # See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
-    db_key: db_url(url_string)
+    db_key: PostgresConfig.from_connection_string(url_string).to_django_dict()
     for db_key, url_string in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']
 }
 
@@ -124,15 +124,14 @@ POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default=None)
 POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default=None)
 
 # POSTGRES_DB, POSTGRES_USER, and POSTGRES_HOST are required env variables for forming a pg connection string for the django database
-# We expect the environment variables to be url-encoded, we do not do additional encoding here
 if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
-    DATABASES['default'] = db_url(
-        f"postgres://{POSTGRES_USER}"
-        f"{':' + POSTGRES_PASSWORD if POSTGRES_PASSWORD else ''}"
-        f"@{POSTGRES_HOST}"
-        f"{':' + POSTGRES_PORT if POSTGRES_PORT else ''}"
-        f"/{POSTGRES_DB}"
-    )
+    DATABASES['default'] = PostgresConfig(
+        dbname=POSTGRES_DB,
+        host=POSTGRES_HOST,
+        port=parse_port(POSTGRES_PORT),
+        role=POSTGRES_USER,
+        password=POSTGRES_PASSWORD,
+    ).to_django_dict()
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s)
