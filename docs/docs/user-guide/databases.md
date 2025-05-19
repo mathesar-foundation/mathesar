@@ -27,8 +27,6 @@ Mathesar will remember the connection even after the application is shut down. Y
     - To connect to PostgreSQL via Unix socket, set the "Host" value as the path to the socket, for example: (`/var/run/postgresql`). You may omit the "Port" if using the default (`5432`) or otherwise specify.
         - When using Docker, make sure the container can access the socket path as a mounted volume.
 
-
-
 ## Creating a new database
 
 If you're starting your database from scratch with Mathesar you can either:

@@ -34,7 +34,7 @@ Note: The default values specified here refer to those in Mathesar's [docker-com
 ### `POSTGRES_DB`
 
 - **Description**: Specifies a name for the database that will be created and used by Mathesar for managing internal data.
-- **Default value**: `mathesar_db`
+- **Default value**: `mathesar_django`
 
 ### `POSTGRES_USER`
 
@@ -49,7 +49,7 @@ Note: The default values specified here refer to those in Mathesar's [docker-com
 ### `POSTGRES_HOST`
 
 - **Description**: Specifies the host name on which portgres listen for connections from client applications.
-- **Default value**: `mathesar_django`
+- **Default value**: `mathesar_db`
     - When installing via docker, this value can reference:
         - A Docker service name (e.g., `mathesar_django`)
         - A TCP host address (e.g., `host.docker.internal`)
@@ -66,7 +66,7 @@ Note: The default values specified here refer to those in Mathesar's [docker-com
 !!!note
     These variables are only needed if you're using the Caddy configuration in our [default Docker Compose](install-via-docker-compose.md#steps) file.
 
-
+### `DOMAIN_NAME`
 
 - **Description**: The public URL that will be used to access Mathesar ([see Caddy docs](https://caddyserver.com/docs/caddyfile/concepts#addresses)).
 - **Format**: A URL or hostname
