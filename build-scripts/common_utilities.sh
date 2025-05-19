@@ -54,6 +54,14 @@ run_cmd() {
   local tmpfile
   tmpfile=$(mktemp) || { err "run_cmd: mktemp failed"; }
 
+  # Why are we writing to a tempfile?
+  # - This is because some scripts re-route stdout to stderr & vice-versa.
+  # - Eg., uv installer has these lines: `say "downloading $APP_NAME $APP_VERSION ${_arch}" 1>&2`
+  # - Even if we color only stderr and print stdout as it is, the stdout from the above line
+  #   will still be colored. There's no way to control that behaviour from our scripts.
+  # - So, we write all output to the tmpfile, while still displaying it, and reprint a colored
+  #   output when there's a failure.
+
   ( "$@" 2>&1 | tee "$tmpfile" | sed 's/^/    /' ) || status=${PIPESTATUS[0]}
 
   if [[ $status -ne 0 ]]; then
