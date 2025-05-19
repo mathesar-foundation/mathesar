@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euo pipefail
+
+#< The location of this file after packaging will be `<install_root>/bin/mathesar`
+
+#<======THIS SECTION IS UPDATED DYNAMICALLY DURING PACKAGING===================
+
+include_source "../common_utilities.sh"
+
 
 #=======CONFIGURATIONS=========================================================
 
@@ -12,11 +19,6 @@ NO_VENV=false
 FALLBACK_TO_INBUILT_DOCKER_DB=false
 SETUP_DJANGO=false
 PREFER_EXPORTED_ENV=false
-
-# Color definitions for output
-RED=$(tput setaf 1 2>/dev/null || echo "")
-BLUE=$(tput setaf 4 2>/dev/null || echo "")
-RESET=$(tput sgr0 2>/dev/null || echo "")
 
 
 #=======SET LOCATION RELATED CONFIGURATIONS====================================
@@ -54,43 +56,7 @@ BASE_DIR="$(cd -P "$(dirname "$(dirname "${SCRIPT_PATH}")")" && pwd)"
 ENV_FILE="${BASE_DIR}/.env"
 
 
-#=======COMMON UTILITIES=======================================================
-
-info() {
-  echo -e "${BLUE}==> $1${RESET}"
-}
-
-err_msgonly() {
-  echo -e "${RED}ERROR: $1${RESET}" >&2
-}
-
-command_exists() {
-  command -v "$1" > /dev/null 2>&1
-  return $?
-}
-
-
 #=======CORE FUNCTIONS=========================================================
-
-run_err() {
-  echo ""
-  err_msgonly "$1"
-  echo -e "${RED}Unable to start Mathesar!${RESET}" >&2
-  cat <<EOF
-
-Refer Mathesar's documentation or reach out to the Mathesar team for additional support:
-  * Documentation      : https://docs.mathesar.org
-  * Github repo        : https://github.com/mathesar-foundation/mathesar
-  * Community channels : https://mathesar.org/community
-
-EOF
-  exit 1
-}
-
-# For commands that should ideally never fail
-ensure() {
-  if ! "$@"; then run_err "The command '$*' failed. Refer the lines above for the cause."; fi
-}
 
 select_python() {
   if [[ "${NO_VENV}" = true ]]; then
@@ -167,7 +133,7 @@ set_env_vars_from_file() {
 
 check_required_core_env_vars() {
   if [[ -z "${SECRET_KEY}" ]]; then
-    run_err "Required environment variable SECRET_KEY is not set."
+    err "Required environment variable SECRET_KEY is not set."
   fi
 }
 
@@ -187,12 +153,12 @@ check_required_postgres_env_vars() {
 
 verify_docker_setup() {
   if [[ -z "${MATHESAR_DOCKER_IMAGE}" ]]; then
-    run_err "Not running in a Mathesar docker container."
+    err "Not running in a Mathesar docker container."
   fi
 
   # Verify that PGDATA is set; it's required to detect an existing DB.
   if [[ -z "${PGDATA}" ]]; then
-    run_err "PGDATA is not set. Cannot verify existing database."
+    err "PGDATA is not set. Cannot verify existing database."
   fi
 
   declare -g DATABASE_ALREADY_EXISTS
@@ -238,7 +204,7 @@ run_mathesar() {
       export POSTGRES_PORT=5432
       export POSTGRES_DB=mathesar_django
     else
-      run_err "Required environment variables are not set."
+      err "Required environment variables are not set."
     fi
   fi
 
@@ -248,12 +214,12 @@ run_mathesar() {
     python_bin=$(select_python)
 
     if [[ "${NO_VENV}" != true ]] && [[ ! -x "${python_bin}" ]]; then
-      run_err "Python not found at ${python_bin}. Ensure the virtual environment is set up."
+      err "Python not found at ${python_bin}. Ensure the virtual environment is set up."
     fi
 
     pushd "${BASE_DIR}" > /dev/null
       info "Running Django setup..."
-      ensure "$python_bin" -m mathesar.install
+      run_cmd "$python_bin" -m mathesar.install
     popd > /dev/null
   fi
 
@@ -266,7 +232,7 @@ run_mathesar() {
   gunicorn_bin=$(select_gunicorn)
 
   if [[ "${NO_VENV}" != true ]] && [[ ! -x "${gunicorn_bin}" ]]; then
-    run_err "Gunicorn not found at ${gunicorn_bin}. Ensure the virtual environment is set up."
+    err "Gunicorn not found at ${gunicorn_bin}. Ensure the virtual environment is set up."
   fi
 
   info "Starting gunicorn webserver..."
@@ -339,7 +305,7 @@ EOF
 }
 
 usage_err() {
-  err_msgonly "$1"
+  danger "$1"
   usage_msg
   exit 2
 }
