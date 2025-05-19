@@ -276,7 +276,6 @@ run_mathesar() {
 
 #=======USAGE==================================================================
 
-# This is the help message printed for the user
 usage_msg() {
 local version=$(get_mathesar_version)
 
@@ -291,15 +290,25 @@ Open source, self-hosted, and maintained by Mathesar Foundation, a 501(c)(3) non
 Usage: ${SCRIPT_NAME} <command> [options]
 
 Commands:
-  run [--port <port> | -p <port>]
+  run [options]
       Run Mathesar.
 
       Options:
-        --port <port>, -p <port>    Specify the port for Mathesar's web service (default is 8000).
+        --port <port>, -p <port>        Specify the port for Mathesar's web service (default is 8000).
 
-        --prefer-exported-env, -e   Prefer existing exported environment variables over the .env file.
-                                    If this option is set and required environment variables aren't exported,
-                                    the values from the .env file will be substituted for the missing ones.
+      Advanced options (for CI/CD):
+        --prefer-exported-env, -e       Prefer existing exported environment variables over the .env file.
+                                        If this option is set and required environment variables aren't exported,
+                                        the values from the .env file will be substituted for the missing ones.
+
+        --fallback-to-inbuilt-db, -f    If set and the required PostgreSQL environment variables are missing,
+                                        falls back to starting the inbuilt database from Mathesar's Docker image
+                                        and exports default values.
+
+        --no-venv, -n                   Use the system gunicorn (from the PATH) rather than the one in the
+                                        virtual environment.
+
+        --setup-django, -s              Run "python -m mathesar.install" to set up Django.
 
   version
       Show version information.
@@ -307,47 +316,9 @@ Commands:
   help
       Show this help message.
 
-Links:
-  Documentation : docs.mathesar.org
-  Website       : mathesar.org
-  Github repo   : github.com/mathesar-foundation/mathesar
-
-EOF
-}
-
-usage_internal_msg()  {
-usage_msg
-
-cat <<EOF
-Internal commands and options used by the Mathesar team and for anyone digging around for advanced operations.
-
-Internal commands and options:
-  run [--fallback-to-inbuilt-db | -f] [--no-venv | -n] [--setup-django | -s] [--port <port> | -p <port>]
-      Run Mathesar.
-
-      By default, Mathesar assumes it runs outside our Docker image, and expects that all
-      required environment variables are set and uses gunicorn from the virtual environment.
-
-      Options:
-        --fallback-to-inbuilt-db, -f   If set and the required PostgreSQL environment
-                                       variables are missing, fallback to starting
-                                       the inbuilt database from our Docker image and
-                                       exports default values.
-
-        --no-venv, -n                  Use the system gunicorn (from the PATH) rather
-                                       than the one in the virtual environment.
-
-        --setup-django, -s             Run "python -m mathesar.install" to set up Django.
-
-        --port <port>, -p <port>       Specify the port for Gunicorn (default is 8000).
-                                       NOTE: This option must be provided as a separate token.
-
-  help-internal
-      Show these internal commands and options.
-
 Examples:
-  ${SCRIPT_NAME} run
-      # Runs using gunicorn from the virtual environment on port 8000.
+  ${SCRIPT_NAME} run -p 9000
+      # Runs using gunicorn from the virtual environment on port 9000.
 
   ${SCRIPT_NAME} run --no-venv
       # Runs using system gunicorn.
@@ -358,6 +329,11 @@ Examples:
 
   ${SCRIPT_NAME} run -fns -p 8080
       # Combines short options for fallback, no-venv, and setup-django with port 8080.
+
+Links:
+  Documentation : docs.mathesar.org
+  Website       : mathesar.org
+  Github repo   : github.com/mathesar-foundation/mathesar
 
 EOF
 }
@@ -446,9 +422,6 @@ case "${COMMAND}" in
     ;;
   help)
     usage_msg
-    ;;
-  help-internal)
-    usage_internal_msg
     ;;
   *)
     usage_err "Unknown command: ${COMMAND}"
