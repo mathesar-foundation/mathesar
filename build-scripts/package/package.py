@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Packages Mathesar as a distributable archive.
 
@@ -10,7 +9,7 @@ Note:
 
 Usage:
   Run this from the root of the Mathesar repo:
-    python3 ./build-scripts/packaging/package.py
+    python3 ./build-scripts/package/package.py
 """
 
 import sys
@@ -41,7 +40,8 @@ SOURCE_CONTENTS_TO_COPY = [
     "translations",
 ]
 PATTERNS_TO_IGNORE = ["*.po", "__pycache__", "bin/mathesar_dev"]
-INSTALLATION_RAW_INPUT_FILE = "build-scripts/install.sh"
+INSTALLATION_RAW_INPUT_FILE = "build-scripts/install/install.sh"
+MATHESAR_EXECUTABLE_RAW_INPUT_FILE = "build-scripts/bin/mathesar.sh"
 
 
 logger = logging.getLogger('package_mathesar')
@@ -188,6 +188,24 @@ def generate_install_script(base_dir: Path, dist_dir: Path) -> None:
     logger.info(f"Installer written to {installer_path}")
 
 
+def generate_startup_script(base_dir: Path, package_src_dir: Path) -> None:
+    logger.info("Generating mathesar startup script")
+    package_src_bin_dir = package_src_dir / "bin"
+    package_src_bin_dir.mkdir(parents=True, exist_ok=True)
+
+    root_file = (base_dir / MATHESAR_EXECUTABLE_RAW_INPUT_FILE).resolve()
+    seen, func_defs = set(), {}
+    combined_lines = inline_bash_sources(
+        Path(MATHESAR_EXECUTABLE_RAW_INPUT_FILE), base_dir, base_dir, seen, func_defs, root_file
+    )
+    text = "\n".join(combined_lines)
+
+    executable_path = package_src_bin_dir / "mathesar"
+    executable_path.write_text(text + "\n", encoding='utf-8')
+    executable_path.chmod(executable_path.stat().st_mode | 0o111)
+    logger.info(f"Mathesar executable script written to {executable_path}")
+
+
 def package_mathesar(base_dir: Path, dist_dir: Path) -> None:
     src_dir = dist_dir / "__source__"
 
@@ -228,12 +246,15 @@ def package_mathesar(base_dir: Path, dist_dir: Path) -> None:
         else:
             raise Exception(f"Missing source file/directory: {src}")
 
+    # Write startup script to source dir, which is packaged
+    generate_startup_script(base_dir, src_dir)
     logger.info("Packing archive")
     tar_path = dist_dir / "mathesar.tar.gz"
     with tarfile.open(tar_path, "w:gz") as tf:
         for item in src_dir.iterdir():
             tf.add(item, arcname=item.name)
 
+    # Write install script to dist dir
     generate_install_script(base_dir, dist_dir)
 
     shutil.rmtree(src_dir)

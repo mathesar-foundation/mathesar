@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
 #<======THIS SECTION IS UPDATED DYNAMICALLY DURING PACKAGING===================
 
 #< Replaced by the content of each shell script.

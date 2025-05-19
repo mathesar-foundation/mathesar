@@ -28,8 +28,7 @@ jobs:
 
       - name: Run package Script
         run: |
-          chmod +x ./build-scripts/packaging/package.py
-          ./build-scripts/packaging/package.py
+          python3 ./build-scripts/package/package.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

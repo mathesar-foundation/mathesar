@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 #< The location of this file after packaging will be `<install_root>/bin/mathesar`
 
@@ -224,7 +224,7 @@ run_mathesar() {
   fi
 
   local gunicorn_opts="config.wsgi -b 0.0.0.0:${MATHESAR_PORT} --chdir ${BASE_DIR}"
-  if [ "${DEBUG}" = "true" ]; then
+  if [[ "${DEBUG}" = "true" ]]; then
     gunicorn_opts+=" --log-level=debug"
   fi
 

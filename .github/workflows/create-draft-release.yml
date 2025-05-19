@@ -31,8 +31,7 @@ jobs:
 
       - name: Run package Script
         run: |
-          chmod +x ./build-scripts/packaging/package.py
-          ./build-scripts/packaging/package.py
+          python3 ./build-scripts/package/package.py
 
       - name: Create a draft release
         id: create_release
