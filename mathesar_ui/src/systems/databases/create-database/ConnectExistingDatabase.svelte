@@ -34,7 +34,7 @@
   const databaseName = requiredField('');
   const nickname = optionalField<string | undefined>(undefined);
   const host = requiredField('localhost');
-  const port = requiredField(5432);
+  const port = optionalField(5432);
   const role = requiredField('');
   const password = optionalField('');
   const installationSchemas = requiredField<InstallationSchema[]>(['internal']);
