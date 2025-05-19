@@ -73,6 +73,9 @@ run_cmd() {
       done
     )
     echo -n ""
+    rm "$tmpfile"
     err "Unable to continue"
+  else
+    rm "$tmpfile"
   fi
 }
