@@ -15,14 +15,12 @@ success() {
   echo -e "${GREEN}==> $1${RESET}"
 }
 
-err_msgonly() {
-  echo -e "${RED}ERROR: $1${RESET}" >&2
+danger() {
+  echo -e "${RED}$1${RESET}" >&2
 }
 
 err() {
-  echo ""
-  err_msgonly "$1"
-  echo -e "${RED}Mathesar installation failed!${RESET}" >&2
+  danger "ERROR: $1"
   cat <<EOF
 
 Refer Mathesar's documentation or reach out to the Mathesar team for additional support:
@@ -52,22 +50,21 @@ run_cmd() {
     err "run_cmd: no command specified"
   fi
 
-  local status
+  local status=0
+  local tmpfile
+  tmpfile=$(mktemp) || { err "run_cmd: mktemp failed"; }
 
-  set +e
-  "$@" \
-    2> >(
-      while IFS= read -r line; do
-        echo -e "${RED}    $1${RESET}" >&2
-      done
-    ) \
-    | sed 's/^/    /'
-
-  # Capture the exit status of the command, not sed
-  status=${PIPESTATUS[0]}
-  set -e
+  ( "$@" 2>&1 | tee "$tmpfile" | sed 's/^/    /' ) || status=${PIPESTATUS[0]}
 
   if [[ $status -ne 0 ]]; then
-    err "The command '$*' failed with status '$status'. Refer the lines above for the cause."
+    echo ""
+    danger "The command '$*' failed with status '$status' with the following error,${RESET}"
+    cat "$tmpfile" | (
+      while IFS= read -r line; do
+        danger "$line"
+      done
+    )
+    echo -n ""
+    err "Unable to continue"
   fi
 }

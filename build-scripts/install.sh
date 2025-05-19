@@ -4,9 +4,11 @@ set -euo pipefail
 
 #<======THIS SECTION IS UPDATED DYNAMICALLY DURING PACKAGING===================
 
-#< Replaced by the content of each shell script
-source "./install_utilities.sh"
-source "./install_path_handler.sh"
+#< Replaced by the content of each shell script.
+#< We are not using `source` directly because it's used in other parts of the code
+#< during runtime, which we don't want to replace.
+include_source "./install_utilities.sh"
+include_source "./install_path_handler.sh"
 
 MATHESAR_VERSION=___MATHESAR_VERSION___
 REQUIRED_UV_VERSION=___UV_VERSION___
@@ -17,6 +19,7 @@ REQUIRED_UV_VERSION=___UV_VERSION___
 PACKAGE_LINK="https://github.com/mathesar-foundation/mathesar/releases/download/${MATHESAR_VERSION}/mathesar.tar.gz"
 PYTHON_SPEC=">=3.9"
 VENV_DIR_NAME="mathesar-venv"
+ENV_FILE_NAME=".env"
 
 INSTALL_DIR=""
 CONNECTION_STRING=""
@@ -77,7 +80,7 @@ EOF
 }
 
 usage_err() {
-  err_msgonly "$1"
+  danger "$1"
   usage
 }
 
@@ -175,17 +178,17 @@ check_required_commands() {
   require_command chmod
   require_command grep
   require_command cat
+  require_command mktemp
+  require_command tee
 }
 
 preflight_version_checks() {
   # Check if Mathesar is already installed in the <install_dir>
   if [[ -x "${INSTALL_DIR}/bin/mathesar" ]]; then
     local existing_bin="${INSTALL_DIR}/bin/mathesar"
-    set +e
-    local installed_ver status
-    installed_ver=$(parse_mathesar_version "$existing_bin")
-    status=$?
-    set -e
+    local installed_ver
+    local status=0
+    installed_ver=$(parse_mathesar_version "$existing_bin") || status=$?
 
     if [[ $status -ne 0 ]]; then
       err "Unable to determine version of existing Mathesar installation at ${existing_bin}. Aborting."
@@ -280,23 +283,17 @@ ensure_python() {
 
   info "Finding existing Python installations..."
 
-  local python_status
-  local find_cmd=("${UV_DIR}/uv" python find "${PYTHON_VERSION_SPECIFIER}")
+  local python_status=0
+  local find_cmd=("${UV_DIR}/uv" python find "${PYTHON_SPEC}")
 
-  set +e
-  "${find_cmd[@]}" --managed-python 2>/dev/null
-  python_status=$?
-  set -e
+  "${find_cmd[@]}" --managed-python 2>/dev/null || python_status=$?
 
   if [[ $python_status -eq 0 ]]; then
     info "Found Managed Python"
     return
   fi
 
-  set +e
-  "${find_cmd[@]}" --system 2>/dev/null
-  python_status=$?
-  set -e
+  "${find_cmd[@]}" --system 2>/dev/null || python_status=$?
 
   if [[ $python_status -eq 0 ]]; then
     info "Found System Python"
@@ -314,14 +311,31 @@ ensure_python() {
 setup_venv_and_requirements() {
   pushd "${INSTALL_DIR}" > /dev/null
     info "Creating Python virtual environment..."
-    run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --python "${PYTHON_VERSION_SPECIFIER}" --seed --relocatable
+    run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --python "${PYTHON_SPEC}" --seed --relocatable
 
     info "Activating Python virtual environment..."
-    run_cmd source ./"${VENV_DIR_NAME}"/bin/activate
+    source ./"${VENV_DIR_NAME}"/bin/activate
 
     info "Installing Python packages..."
     run_cmd "${UV_DIR}/uv" pip install -r requirements.txt
   popd > /dev/null
+}
+
+process_env() {
+  local conn_str_argument="$1"
+  local updated_content
+  local status=0
+
+  updated_content=$(
+    cat "${INSTALL_DIR}"/"${ENV_FILE_NAME}" | "${INSTALL_DIR}"/"${VENV_DIR_NAME}"/bin/python ./setup/process_env.py "$conn_str_argument"
+  ) || status=$?
+
+  if [[ "$status" -eq 0 ]]; then
+    echo "$updated_content" > "${INSTALL_DIR}"/"${ENV_FILE_NAME}"
+    info "Environment file updated successfully."
+  fi
+
+  return "$status"
 }
 
 setup_env_vars() {
@@ -333,19 +347,14 @@ setup_env_vars() {
       err "No write permission for \"${ENV_FILE_NAME}\""
     fi
 
-    local process_env_status
+    local process_env_status=0
 
-    set +e
     if [[ -n "${CONNECTION_STRING}" ]]; then
-      process_env "${CONNECTION_STRING}"
-      process_env_status=$?
+      process_env "${CONNECTION_STRING}" || process_env_status=$?
     else
       # Verify the .env file without getting connection string from user.
-      # Suppress printing output here.
-      process_env "" > /dev/null 2>&1
-      process_env_status=$?
+      process_env "" || process_env_status=$?
     fi
-    set -e
 
     if [[ $process_env_status -ne 0 ]]; then
       if [[ "${NO_PROMPT}" = true ]]; then
@@ -358,26 +367,24 @@ setup_env_vars() {
         echo ""
         read -ep "Enter PostgreSQL connection string (format: postgres://user:password@host:port/dbname): " conn_str
         if [[ -z "$conn_str" ]]; then
-          err_msgonly "Connection string cannot be empty. Please enter again."
+          echo "Connection string cannot be empty. Please enter again."
           continue
         fi
 
-        set +e
-        process_env "$conn_str"
-        process_env_status=$?
-        set -e
+        local inner_process_env_status=0
+        process_env "$conn_str" || inner_process_env_status=$?
 
-        if [[ $process_env_status -eq 0 ]]; then
+        if [[ $inner_process_env_status -eq 0 ]]; then
           break
         else
-          err_msgonly "Invalid connection string or unable to connect. Please enter again."
+          echo "Invalid connection string or unable to connect. Please enter again."
         fi
       done
     fi
 
     info "Exporting environment variables to shell..."
     set -a
-    run_cmd source .env
+    source .env
     set +a
 
   popd > /dev/null

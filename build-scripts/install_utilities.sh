@@ -5,7 +5,9 @@ set -euo pipefail
 #<=======THIS SECTION IS UPDATED DYNAMICALLY DURING PACKAGING==================
 
 #< Replaced by the content of common_utilities.sh
-source "./common_utilities.sh"
+#< We are not using `source` directly because it's used in other parts of the code
+#< during runtime, which we don't want to replace.
+include_source "./common_utilities.sh"
 
 
 #=======INSTALL UTILITY FUNCTIONS==============================================

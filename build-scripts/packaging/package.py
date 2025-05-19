@@ -109,7 +109,7 @@ def inline_bash_sources(
             prev_line_empty = False
 
         # Handle source inlining with shlex parsing
-        if stripped.startswith("source ") or stripped.startswith("."):
+        if stripped.startswith("include_source "):
             parts = shlex.split(stripped)
             if len(parts) >= 2:
                 src = parts[1]
