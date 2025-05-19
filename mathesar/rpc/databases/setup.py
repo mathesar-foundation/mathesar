@@ -76,7 +76,7 @@ def create_new(
 def connect_existing(
         *,
         host: str,
-        port: int,
+        port: Optional[int] = None,
         database: str,
         role: str,
         password: str,

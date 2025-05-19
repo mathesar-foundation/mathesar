@@ -3,7 +3,7 @@ import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-build
 export interface RawServer {
   id: number;
   host: string;
-  port: number;
+  port: number | null;
 }
 
 export const servers = {
@@ -14,7 +14,7 @@ export const servers = {
         server_id: RawServer['id'];
         patch: {
           host?: string;
-          port?: number;
+          port?: number | null;
         };
       },
       Array<RawServer>

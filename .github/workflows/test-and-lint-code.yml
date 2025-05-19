@@ -463,13 +463,13 @@ jobs:
               exit 1
             fi
           fi
-          
+
           # Check "python_lint_required" conditions
           if [[ "${{ needs.python_lint_required.outputs.lint_should_run }}" == "true" ]]; then
             if [[ "${{ needs.python_lint.result }}" != "success" ]]; then
               echo "python linter failed."
               exit 1
-            fi  
+            fi
           fi
 
           # Check "sql_tests_required" conditions
