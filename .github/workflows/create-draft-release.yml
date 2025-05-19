@@ -29,10 +29,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gettext
 
-      - name: Run package.sh Script
+      - name: Run package Script
         run: |
-          chmod +x ./scripts/package.sh
-          ./scripts/package.sh
+          chmod +x ./build-scripts/packaging/package.py
+          ./build-scripts/packaging/package.py
 
       - name: Create a draft release
         id: create_release

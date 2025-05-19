@@ -113,7 +113,7 @@ CMD ["bash", "./bin/mathesar_dev"]
 
 FROM development_base AS pre_production
 
-RUN bash ./scripts/package.sh
+RUN python3 ./build-scripts/packaging/package.py
 
 
 #=========== STAGE: PRODUCTION ===============================================#

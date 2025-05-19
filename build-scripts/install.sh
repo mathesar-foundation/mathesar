@@ -256,7 +256,9 @@ download_and_extract_package() {
 clear_uv_cache_lock() {
   # Clear uv cache directory, and lock file if present
   run_cmd rm -rf "${UV_CACHE_DIR}"/*
-  [[ -e "${INSTALL_DIR}"/uv.lock ]] && run_cmd rm "${INSTALL_DIR}"/uv.lock
+  if [[ -e "${INSTALL_DIR}"/uv.lock ]]; then
+    run_cmd rm "${INSTALL_DIR}"/uv.lock
+  fi
 }
 
 install_uv() {
@@ -400,9 +402,11 @@ make_mathesar_script_executable() {
 check_required_commands
 preflight_version_checks
 create_directories
+download_and_extract_package
 install_uv
 ensure_python
 setup_venv_and_requirements
+setup_env_vars
 run_django_migrations
 make_mathesar_script_executable
 success "Mathesar's installed successfully!"

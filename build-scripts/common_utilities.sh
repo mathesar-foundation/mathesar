@@ -54,16 +54,18 @@ run_cmd() {
 
   local status
 
+  set +e
   "$@" \
     2> >(
       while IFS= read -r line; do
-        err_msg "    $line"
+        echo -e "${RED}    $1${RESET}" >&2
       done
     ) \
     | sed 's/^/    /'
 
   # Capture the exit status of the command, not sed
   status=${PIPESTATUS[0]}
+  set -e
 
   if [[ $status -ne 0 ]]; then
     err "The command '$*' failed with status '$status'. Refer the lines above for the cause."
