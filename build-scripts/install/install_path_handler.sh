@@ -207,11 +207,6 @@ configure_path() {
         success "Everything's ready, you can now start Mathesar by executing \"mathesar run\"."
         echo "Use \"mathesar help\" for more information.".
         echo "Please restart your shell if the 'mathesar' command is not found."
-      else
-        echo "Unable to automatically update the current shell environment."
-        echo "Please run the following command in your terminal to update your PATH:"
-        echo "source \"${INSTALL_DIR}/bin/mathesar_path_source\""
-        echo "Please restart your shell if the 'mathesar' command is still not found."
       fi
     fi
   fi
