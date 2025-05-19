@@ -22,9 +22,9 @@ def create_future_engine(
         username, password, hostname, database, port, *args, **kwargs
 ):
     query = {}
-    if hostname.startswith("/") or hostname.startswith("%2F") :
+    if hostname.startswith("/"):
         query = {"host": hostname}
-    hostname=None
+    hostname = None
     conn_url = URL.create(
         "postgresql",
         username=username,
