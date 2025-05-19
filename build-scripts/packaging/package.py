@@ -183,7 +183,7 @@ def generate_install_script(base_dir: Path, dist_dir: Path) -> None:
         text = text.replace(key, val)
 
     installer_path = dist_dir / "install.sh"
-    installer_path.write_text(text+"\n", encoding='utf-8')
+    installer_path.write_text(text + "\n", encoding='utf-8')
     installer_path.chmod(installer_path.stat().st_mode | 0o111)
     logger.info(f"Installer written to {installer_path}")
 
