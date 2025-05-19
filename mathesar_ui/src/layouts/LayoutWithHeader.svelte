@@ -5,7 +5,6 @@
   export let fitViewport = false;
   export let restrictWidth = false;
   export let cssVariables: Record<string, string> | undefined = undefined;
-  export let headerTitle: string | undefined = undefined;
 
   $: style = cssVariables
     ? makeStyleStringFromCssVariables(cssVariables)
@@ -17,13 +16,6 @@
     <AppHeader />
   </div>
   <slot name="secondary-header" />
-  {#if headerTitle}
-    <div class="header-title">
-      <div class="header-title-inner" class:restrict-width={restrictWidth}>
-        <h1>{headerTitle}</h1>
-      </div>
-    </div>
-  {/if}
   <main class="app-layout-content" class:restrict-width={restrictWidth}>
     <slot />
   </main>
@@ -69,25 +61,5 @@
 
   .app-layout:not(.fit-viewport) .app-layout-content {
     padding: var(--page-padding);
-  }
-
-  .header-title {
-    padding: var(--lg4) 0;
-    border-bottom: 1px solid var(--border-color);
-
-    h1 {
-      margin: 0;
-      color: var(--text-color-primary);
-    }
-
-    .header-title-inner {
-      &.restrict-width {
-        max-width: var(--max-layout-width);
-        margin-left: auto;
-        margin-right: auto;
-        width: 100%;
-        padding: 0 var(--page-padding-x);
-      }
-    }
   }
 </style>

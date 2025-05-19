@@ -197,7 +197,6 @@
   .sheet {
     border: 1px solid var(--border-color);
     margin: 0;
-    background-color: var(--elevated-background);
     border-radius: 0.5rem;
     overflow: hidden;
     display: flex;

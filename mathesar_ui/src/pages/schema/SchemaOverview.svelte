@@ -151,27 +151,20 @@
   }
 
   .sidebar-section {
-    background-color: var(--sidebar-background);
-    border-radius: 0.5rem;
-    border: 1px solid var(--card-border);
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-
     > :global(* + *) {
-      margin-top: 1rem;
+      margin-top: var(--sm2);
     }
   }
 
   .explore-cta {
-    margin: 1.5rem -1.5rem -1.5rem;
-    padding: 2rem;
+    padding: var(--lg3);
     background: linear-gradient(
       135deg,
-      var(--gradient-light-start) 0%,
-      var(--gradient-light-end) 100%
+      var(--pumpkin-100) 0%,
+      var(--pumpkin-200) 100%
     );
-    border-top: 1px solid var(--card-border);
-    border-radius: 0 0 0.5rem 0.5rem;
+    border: 1px solid var(--pumpkin-300);
+    border-radius: var(--sm2);
     position: relative;
     overflow: hidden;
 
@@ -184,7 +177,7 @@
       bottom: 0;
       background: radial-gradient(
         circle at top right,
-        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.2) 0%,
         transparent 60%
       );
       pointer-events: none;
@@ -193,13 +186,13 @@
     .explore-title {
       font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
-      color: var(--text-color-primary);
+      color: var(--pumpkin-800);
       margin: 0 0 0.75rem 0;
       position: relative;
     }
 
     .explore-description {
-      color: var(--text-color-secondary);
+      color: var(--pumpkin-700);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;
@@ -208,6 +201,31 @@
 
     > div {
       position: relative;
+    }
+  }
+
+  :global(body.theme-dark) .explore-cta {
+    background: linear-gradient(
+      135deg,
+      var(--pumpkin-900) 0%,
+      var(--pumpkin-950) 100%
+    );
+    border: 1px solid var(--pumpkin-800);
+
+    &::before {
+      background: radial-gradient(
+        circle at top right,
+        rgba(255, 255, 255, 0.05) 0%,
+        transparent 60%
+      );
+    }
+
+    .explore-title {
+      color: var(--pumpkin-100);
+    }
+
+    .explore-description {
+      color: var(--pumpkin-200);
     }
   }
 

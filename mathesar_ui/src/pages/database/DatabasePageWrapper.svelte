@@ -214,8 +214,8 @@
     margin-top: var(--sm5);
   }
   .details .label {
-    color: var(--text-color-secondary);
-    font-weight: var(--font-weight-medium);
+    color: var(--text-color-primary);
+    font-weight: var(--font-weight-bold);
   }
   .edit-connection {
     margin-top: var(--sm1);

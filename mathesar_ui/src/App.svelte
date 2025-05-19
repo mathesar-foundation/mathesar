@@ -38,8 +38,8 @@
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   :root {
-    --color-substring-match: rgb(254, 221, 72);
-    --color-substring-match-light: rgba(254, 221, 72, 0.2);
+    --color-substring-match: var(--salmon-300);
+    --color-substring-match-light: var(--salmon-100);
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
@@ -80,13 +80,13 @@
     --cell-bg-color-processing: var(--yellow-100);
     --cell-bg-color-disabled: var(--gray-100);
     --cell-bg-color-row-hover: var(--gray-100);
-    --cell-bg-color-row-selected: var(--stormy-200);
+    --cell-bg-color-row-selected: var(--sky-200);
 
-    --color-fk: var(--yellow-300);
+    --color-fk: var(--salmon-200);
     --color-error: var(--danger-color);
     --cell-text-color-processing: var(--text-color-muted);
     --color-array-element: var(--sky-300);
-    --color-fk-border: var(--yellow-400);
+    --color-fk-border: var(--salmon-400);
 
     --cell-border-horizontal: 1px solid var(--gray-300);
     --cell-border-vertical: 1px solid var(--gray-300);
@@ -147,18 +147,18 @@
     --cell-bg-color-processing: rgba(251, 191, 36, 0.15);
     --cell-bg-color-disabled: rgba(39, 43, 48, 0.3);
     --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
-    --cell-bg-color-row-selected: rgba(122, 92, 166, 0.4);
+    --cell-bg-color-row-selected: rgba(15, 105, 193, 0.25);
 
-    --color-substring-match: var(--pumpkin-700);
-    --color-substring-match-light: rgba(166, 95, 20, 0.2);
+    --color-substring-match: var(--pumpkin-800);
+    --color-substring-match-light: var(--pumpkin-950);
 
     --Match__highlight-color: var(--color-substring-match);
 
     --cell-border-horizontal: 1px solid var(--gray-700);
     --cell-border-vertical: 1px solid var(--gray-700);
 
-    --color-fk: rgba(235, 157, 32, 0.15);
-    --color-fk-border: var(--pumpkin-600);
+    --color-fk: var(--pumpkin-900);
+    --color-fk-border: var(--pumpkin-800);
     --color-error: #ff6b6b;
     --cell-text-color-processing: var(--gray-300);
     --color-array-element: var(--sky-400);
