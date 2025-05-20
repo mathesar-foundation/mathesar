@@ -1,0 +1,18 @@
+name: ShellCheck Lint
+on: [pull_request, merge_group]
+
+jobs:
+
+  # Reference: https://github.com/koalaman/shellcheck/wiki/GitHub-Actions#github-advanced-security-integration
+  lint_sh:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write  # required for uploading SARIF results
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run shellcheck
+        uses: reactive-firewall/shellcheck-scan@v1
+        with:
+          match: 'build-scripts/{*.sh,**/*.sh} bin/*'
