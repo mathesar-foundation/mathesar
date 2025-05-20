@@ -224,9 +224,14 @@ run_mathesar() {
     popd > /dev/null
   fi
 
-  local gunicorn_opts="config.wsgi -b 0.0.0.0:${MATHESAR_PORT} --chdir ${BASE_DIR}"
+  local gunicorn_args
+  gunicorn_args=(
+    config.wsgi
+    -b "0.0.0.0:${MATHESAR_PORT}"
+    --chdir "${BASE_DIR}"
+  )
   if [[ "${DEBUG}" = "true" ]]; then
-    gunicorn_opts+=" --log-level=debug"
+    gunicorn_args+=("--log-level=debug")
   fi
 
   local gunicorn_bin
@@ -237,7 +242,7 @@ run_mathesar() {
   fi
 
   info "Starting gunicorn webserver..."
-  exec "$gunicorn_bin" "$gunicorn_opts"
+  exec "$gunicorn_bin" "${gunicorn_args[@]}"
 }
 
 
