@@ -15,7 +15,7 @@ class ConfiguredServerInfo(TypedDict):
     """
     id: int
     host: str
-    port: int
+    port: Optional[int]
 
     @classmethod
     def from_model(cls, model):

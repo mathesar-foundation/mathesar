@@ -6,7 +6,7 @@
   color: var(--input-text);
   margin: 0;
   padding: var(--input-padding);
-  line-height: inherit;
+  line-height: var(--input-line-height);
   font-family: inherit;
   font-size: inherit;
   display: block;
