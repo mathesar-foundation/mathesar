@@ -166,10 +166,9 @@
       width: 100%;
       list-style: none;
       padding: 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
-      align-items: stretch;
       margin-top: 0.5rem;
     }
   }

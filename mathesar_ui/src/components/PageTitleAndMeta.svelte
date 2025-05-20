@@ -44,7 +44,7 @@
     flex-wrap: wrap;
     gap: 1rem;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
   }
 
@@ -90,7 +90,7 @@
 
   .entity-name {
     font-weight: var(--font-weight-extra-bold);
-    font-size: var(--lg5);
+    font-size: var(--lg4);
     line-height: 1;
     color: var(--text-color-primary);
   }
