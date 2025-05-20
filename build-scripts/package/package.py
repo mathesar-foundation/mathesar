@@ -176,7 +176,6 @@ def generate_install_script(base_dir: Path, dist_dir: Path) -> None:
     # Placeholder substitutions (use safe templating if expanded)
     subs = {
         "___MATHESAR_VERSION___": f'"{mathesar_version}"',
-        "___UV_VERSION___": f'"{UV_VERSION}"',
     }
     text = "\n".join(combined_lines)
     for key, val in subs.items():

@@ -97,7 +97,8 @@ get_mathesar_version() {
 }
 
 print_mathesar_version() {
-  local version=$(get_mathesar_version)
+  local version
+  version=$(get_mathesar_version)
   echo "Mathesar version ${version}"
 }
 
@@ -236,14 +237,15 @@ run_mathesar() {
   fi
 
   info "Starting gunicorn webserver..."
-  exec "$gunicorn_bin" $gunicorn_opts
+  exec "$gunicorn_bin" "$gunicorn_opts"
 }
 
 
 #=======USAGE==================================================================
 
 usage_msg() {
-local version=$(get_mathesar_version)
+local version
+version=$(get_mathesar_version)
 
 cat <<EOF
 Mathesar - ${version}

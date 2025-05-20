@@ -67,11 +67,11 @@ run_cmd() {
   if [[ $status -ne 0 ]]; then
     echo ""
     danger "The command '$*' failed with status '$status' with the following error,${RESET}"
-    cat "$tmpfile" | (
+    (
       while IFS= read -r line; do
         danger "$line"
       done
-    )
+    ) < "$tmpfile"
     echo -n ""
     rm "$tmpfile"
     err "Unable to continue"

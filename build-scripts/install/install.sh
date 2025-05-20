@@ -10,7 +10,6 @@ include_source "./install_utilities.sh"
 include_source "./install_path_handler.sh"
 
 MATHESAR_VERSION=___MATHESAR_VERSION___
-REQUIRED_UV_VERSION=___UV_VERSION___
 
 
 #=======DEFAULTS===============================================================
@@ -313,6 +312,7 @@ setup_venv_and_requirements() {
     run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --python "${PYTHON_SPEC}" --seed --relocatable
 
     info "Activating Python virtual environment..."
+    # shellcheck source=/dev/null
     source ./"${VENV_DIR_NAME}"/bin/activate
 
     info "Installing Python packages..."
@@ -326,7 +326,7 @@ process_env() {
   local status=0
 
   updated_content=$(
-    cat "${INSTALL_DIR}"/"${ENV_FILE_NAME}" | "${INSTALL_DIR}"/"${VENV_DIR_NAME}"/bin/python ./setup/process_env.py "$conn_str_argument"
+    "${INSTALL_DIR}"/"${VENV_DIR_NAME}"/bin/python ./setup/process_env.py "$conn_str_argument" < "${INSTALL_DIR}"/"${ENV_FILE_NAME}"
   ) || status=$?
 
   if [[ "$status" -eq 0 ]]; then
@@ -339,7 +339,7 @@ process_env() {
 
 setup_env_vars() {
   pushd "${INSTALL_DIR}" > /dev/null
-    info "Setting up .env file..."
+    info "Setting up environment file (.env)..."
     run_cmd touch "${ENV_FILE_NAME}"
 
     if [[ ! -w "${ENV_FILE_NAME}" ]]; then
@@ -364,7 +364,7 @@ setup_env_vars() {
       # repeatedly prompt the user for a valid PostgreSQL connection string.
       while true; do
         echo ""
-        read -ep "Enter PostgreSQL connection string (format: postgres://user:password@host:port/dbname): " conn_str
+        read -rep "Enter PostgreSQL connection string (format: postgres://user:password@host:port/dbname): " conn_str
         if [[ -z "$conn_str" ]]; then
           echo "Connection string cannot be empty. Please enter again."
           continue
@@ -383,7 +383,8 @@ setup_env_vars() {
 
     info "Exporting environment variables to shell..."
     set -a
-    source .env
+    # shellcheck source=/dev/null
+    source "${ENV_FILE_NAME}"
     set +a
 
   popd > /dev/null

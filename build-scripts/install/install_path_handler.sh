@@ -98,10 +98,13 @@ update_current_shell_env() {
         return 1
       fi
     fi
-  elif ! . "${INSTALL_DIR}/bin/mathesar_path_source"; then
-    echo "Warning: Unable to source mathesar_path_source in the current session."
-    echo "Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\" or restart your shell"
-    return 1
+  else
+    # shellcheck source=/dev/null
+    if ! . "${INSTALL_DIR}/bin/mathesar_path_source"; then
+      echo "Warning: Unable to source mathesar_path_source in the current session."
+      echo "Please run: source \"${INSTALL_DIR}/bin/mathesar_path_source\" or restart your shell"
+      return 1
+    fi
   fi
 
   # Re-exec the shell if interactive
