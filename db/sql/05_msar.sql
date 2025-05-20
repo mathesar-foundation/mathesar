@@ -3695,6 +3695,39 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.set_not_null(tab_id regclass, col_id smallint, not_null boolean) RETURNS text AS $$/*
+Alter a column's NOT NULL setting, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table containing the column whose nullability we'll alter.
+  col_id: The attnum of the column whose nullability we'll alter.
+  not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
+*/
+  SELECT __msar.exec_ddl(
+    'ALTER TABLE %I ALTER COLUMN %I %s NOT NULL',
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    CASE WHEN not_null THEN 'SET' ELSE 'DROP' END
+  );
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$
+  FOR _ IN
+    SELECT
+      (col_alter_obj ->> 'attnum')::smallint AS col_id,
+      (col_alter_obj -> 'not_null')::boolean AS not_null,
+      (col_alter_obj -> 'name')::text AS name,
+      col_alter_obj->>'description' AS comment_
+    FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
+  LOOP
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$/*
 Alter columns of the given table in bulk, returning the IDs of the columns so altered.
 
