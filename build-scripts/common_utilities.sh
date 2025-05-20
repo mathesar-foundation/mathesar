@@ -23,7 +23,7 @@ err() {
   danger "ERROR: $1"
   cat <<EOF
 
-Refer Mathesar's documentation or reach out to the Mathesar team for additional support:
+Please refer to Mathesar's documentation or reach out to the Mathesar team for additional support:
   * Documentation      : https://docs.mathesar.org
   * Github repo        : https://github.com/mathesar-foundation/mathesar
   * Community channels : https://mathesar.org/community
