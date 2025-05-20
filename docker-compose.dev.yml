@@ -53,16 +53,17 @@ services:
       - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
       - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
       - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL-https://example.com/feedback}
-      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
+      # - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
       - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
-      - POSTGRES_USER=mathesar
+      - POSTGRES_USER=mathesar_unix
       - POSTGRES_PASSWORD=mathesar
-      - POSTGRES_HOST=mathesar_dev_db
-      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=/var/run/postgresql
+      - POSTGRES_PORT=5555
     volumes:
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/
+      - /var/run/postgresql:/var/run/postgresql
     depends_on:
       dev-db:
         condition: service_healthy
@@ -71,6 +72,8 @@ services:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   test-service:
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
