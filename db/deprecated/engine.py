@@ -24,7 +24,7 @@ def create_future_engine(
     query = {}
     if hostname.startswith("/"):
         query = {"host": hostname}
-    hostname = None
+        hostname = None
     conn_url = URL.create(
         "postgresql",
         username=username,
