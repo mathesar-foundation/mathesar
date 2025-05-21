@@ -291,6 +291,7 @@ ensure_python() {
     return
   fi
 
+  python_status=0
   "${find_cmd[@]}" --system 2>/dev/null || python_status=$?
 
   if [[ $python_status -eq 0 ]]; then
