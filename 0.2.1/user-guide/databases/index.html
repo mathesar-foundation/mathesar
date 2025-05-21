@@ -1009,8 +1009,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../releases/0.2.1/" class="md-nav__link">
-        0.2.1
+      <a href="../../releases/0.2.5/" class="md-nav__link">
+        0.2.5
       </a>
     </li>
   
@@ -1042,6 +1042,62 @@
           Previous releases
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.4/" class="md-nav__link">
+        0.2.4
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.3/" class="md-nav__link">
+        0.2.3
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.2/" class="md-nav__link">
+        0.2.2
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.1/" class="md-nav__link">
+        0.2.1
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -1290,6 +1346,20 @@
 <p>Click the <strong>Connect Database</strong> button from the home page of your Mathesar application and follow the prompts.</p>
 <p>Once you&rsquo;ve connected a database, you can navigate to Mathesar&rsquo;s page for it where you can browse the database&rsquo;s <a href="../schemas/">schemas</a> and configure various settings for it.</p>
 <p>Mathesar will remember the connection even after the application is shut down. Your Mathesar <a href="../users/">user</a> will be added as a <a href="../collaborators/">collaborator</a> on the database (along with the PostgreSQL <a href="../roles/">role</a> you entered). The password you entered for that role will be stored in Mathesar&rsquo;s <a href="#internal">internal database</a>, encrypted using Mathesar&rsquo;s <a href="../../administration/environment-variables/#secret_key">SECRET_KEY</a>.</p>
+<details class="tip" open="open">
+<summary>Trouble connecting a database?</summary>
+<ul>
+<li>If you are running Mathesar via <a href="../../administration/install-via-docker-compose/">Docker</a>, keep in mind that setting the &ldquo;Host&rdquo; to <code>localhost</code> may not work as expected. Instead:<ul>
+<li>On macOS and Windows, <code>host.docker.internal</code> generally works instead of <code>localhost</code> without additional setup.</li>
+<li>On Linux, configure <code>host.docker.internal</code> explicitly, or try the Docker network gateway IP <code>172.17.0.1</code>.</li>
+</ul>
+</li>
+<li>To connect to PostgreSQL via Unix socket, set the &ldquo;Host&rdquo; value as the path to the socket, for example: (<code>/var/run/postgresql</code>). You may omit the &ldquo;Port&rdquo; if using the default (<code>5432</code>) or otherwise specify.<ul>
+<li>When using Docker, make sure the container can access the socket path as a mounted volume.</li>
+</ul>
+</li>
+</ul>
+</details>
 <h2 id="creating-a-new-database">Creating a new database<a class="headerlink" href="#creating-a-new-database" title="Permanent link">&para;</a></h2>
 <p>If you&rsquo;re starting your database from scratch with Mathesar you can either:</p>
 <ul>
