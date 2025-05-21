@@ -3683,7 +3683,6 @@ SELECT string_agg(
       __msar.build_col_drop_default_expr(tab_id, col_id, new_type, new_default),
       __msar.build_col_retype_expr(tab_id, col_id, new_type),
       __msar.build_col_default_expr(tab_id, col_id, old_default, new_default, new_type),
-      __msar.build_col_not_null_expr(tab_id, col_id, not_null),
       __msar.build_col_drop_text(tab_id, col_id, delete_)
     ),
     ''
@@ -3713,21 +3712,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$
-  FOR _ IN
-    SELECT
-      (col_alter_obj ->> 'attnum')::smallint AS col_id,
-      (col_alter_obj -> 'not_null')::boolean AS not_null,
-      (col_alter_obj -> 'name')::text AS name,
-      col_alter_obj->>'description' AS comment_
-    FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
-  LOOP
-  END LOOP;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$/*
 Alter columns of the given table in bulk, returning the IDs of the columns so altered.
 
@@ -3737,18 +3721,17 @@ Args:
 
 For the specification of the col_alters JSONB, see the msar.process_col_alter_jsonb function.
 
-Note that all alterations except renaming are done in bulk, and then all name changes are done one
-at a time afterwards. This is because the SQL design specifies at most one name-changing clause per
-query.
+Note that all alterations except renaming, commenting & setting/unsetting not-null are done in bulk,
+and then all name changes are done one at a time afterwards. This is because the SQL design specifies
+at most one name-changing clause per query.
 */
 DECLARE
-  r RECORD;
-  col_alter_str TEXT;
-  description_alter RECORD;
+  col RECORD;
+  col_alter_str text := msar.process_col_alter_jsonb(tab_id, col_alters);
+  return_attnum_arr integer[];
 BEGIN
-  -- Get the string specifying all non-name-change alterations to perform.
-  col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
-  -- Perform the non-name-change alterations
+  -- TODO: This section for bulk alter is to be removed entirely.
+  --*************************************************
   IF col_alter_str IS NOT NULL THEN
     PERFORM __msar.exec_ddl(
       'ALTER TABLE %s %s',
@@ -3756,26 +3739,26 @@ BEGIN
       msar.process_col_alter_jsonb(tab_id, col_alters)
     );
   END IF;
-  -- Here, we perform all description-changing alterations.
-  FOR description_alter IN
+  --**************************************************
+  FOR col IN
     SELECT
-      (col_alter->>'attnum')::integer AS col_id,
-      col_alter->>'description' AS comment_
-    FROM jsonb_array_elements(col_alters) AS col_alter
-    WHERE __msar.jsonb_key_exists(col_alter, 'description')
+      (col_alter_obj ->> 'attnum')::smallint AS attnum,
+      (col_alter_obj -> 'not_null')::boolean AS not_null,
+      (col_alter_obj ->> 'name')::text AS new_name,
+
+      col_alter_obj->>'description' AS comment_,
+      __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment
+
+    FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
   LOOP
-    PERFORM msar.comment_on_column(
-      tab_id := tab_id,
-      col_id := description_alter.col_id,
-      comment_ := description_alter.comment_
-    );
+    PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
+    PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
+    IF col.has_comment THEN
+      PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
+    END IF;
+    return_attnum_arr := return_attnum_arr || col.attnum;
   END LOOP;
-  -- Here, we perform all name-changing alterations.
-  FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
-  LOOP
-    PERFORM msar.rename_column(tab_id, r.attnum, r.name);
-  END LOOP;
-  RETURN array_agg(x.attnum) FROM jsonb_to_recordset(col_alters) AS x(attnum integer);
+  RETURN return_attnum_arr; -- do we really need this??
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
