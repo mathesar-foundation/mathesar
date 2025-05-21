@@ -34,8 +34,8 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Nunito Sans";--md-code-font:"Fira Code"}</style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
       
     
     
@@ -481,7 +481,7 @@
   
     <li class="md-nav__item">
       <a href="../environment-variables/" class="md-nav__link">
-        Environment Variables
+        Environment variables
       </a>
     </li>
   
@@ -537,7 +537,7 @@
   
     <li class="md-nav__item">
       <a href="../version-support/" class="md-nav__link">
-        Postgres & Python Versions
+        Postgres & Python versions
       </a>
     </li>
   
@@ -712,14 +712,14 @@
       
       
         <label class="md-nav__link" for="__nav_3_3">
-          Access Control
+          Access control
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Access Control" data-md-level="2">
+      <nav class="md-nav" aria-label="Access control" data-md-level="2">
         <label class="md-nav__title" for="__nav_3_3">
           <span class="md-nav__icon md-icon"></span>
-          Access Control
+          Access control
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -744,7 +744,7 @@
   
     <li class="md-nav__item">
       <a href="../../user-guide/users/" class="md-nav__link">
-        Mathesar Users
+        Mathesar users
       </a>
     </li>
   
@@ -758,7 +758,7 @@
   
     <li class="md-nav__item">
       <a href="../../user-guide/roles/" class="md-nav__link">
-        PostgreSQL Roles
+        PostgreSQL roles
       </a>
     </li>
   
@@ -771,8 +771,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/stored-role-passwords/" class="md-nav__link">
-        Stored Role Passwords
+      <a href="../../user-guide/stored-roles/" class="md-nav__link">
+        Stored roles
       </a>
     </li>
   
@@ -955,7 +955,7 @@
   
     <li class="md-nav__item">
       <a href="../../user-guide/usage-data-collection/" class="md-nav__link">
-        Usage Data Collection
+        Usage data collection
       </a>
     </li>
   
@@ -1075,8 +1075,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../releases/0.2.0/" class="md-nav__link">
-        0.2.0
+      <a href="../../releases/0.2.5/" class="md-nav__link">
+        0.2.5
       </a>
     </li>
   
@@ -1098,16 +1098,86 @@
       
       
         <label class="md-nav__link" for="__nav_5_2">
-          Previous Releases
+          Previous releases
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Previous Releases" data-md-level="2">
+      <nav class="md-nav" aria-label="Previous releases" data-md-level="2">
         <label class="md-nav__title" for="__nav_5_2">
           <span class="md-nav__icon md-icon"></span>
-          Previous Releases
+          Previous releases
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.4/" class="md-nav__link">
+        0.2.4
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.3/" class="md-nav__link">
+        0.2.3
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.2/" class="md-nav__link">
+        0.2.2
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.1/" class="md-nav__link">
+        0.2.1
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.0/" class="md-nav__link">
+        0.2.0
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -1518,8 +1588,8 @@
 </span></code></pre></div>
 </li>
 <li>
-<p>Check out the tag of the release or build you&rsquo;d like to install, <code>0.2.0</code>.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>git checkout 0.2.0
+<p>Check out the tag of the release or build you&rsquo;d like to install, <code>0.2.5</code>.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>git checkout 0.2.5
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Important</p>
@@ -1562,15 +1632,19 @@
 <div class="admonition example">
 <p class="admonition-title">Example</p>
 <p>Your <code>.env</code> file should look something like this</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>SECRET_KEY=REPLACE_THIS_WITH_YOUR_50_CHAR_RANDOMLY_GENERATED_STRING
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>ALLOWED_HOSTS=xDOMAIN_NAMEx
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>DOMAIN_NAME=xDOMAIN_NAMEx
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>POSTGRES_DB=mathesar_django
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>POSTGRES_USER=mathesar
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>POSTGRES_PASSWORD=REPLACE_THIS_WITH_APPROPRIATE_PASSWORD_FOR_THE_CHOSEN_POSTGRES_USER
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>POSTGRES_HOST=localhost
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>POSTGRES_PORT=5432
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>SECRET_KEY=&quot;REPLACE_THIS_WITH_YOUR_50_CHAR_RANDOMLY_GENERATED_STRING&quot;
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>ALLOWED_HOSTS=&quot;xDOMAIN_NAMEx&quot;
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>DOMAIN_NAME=&quot;xDOMAIN_NAMEx&quot;
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>POSTGRES_DB=&quot;mathesar_django&quot;
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>POSTGRES_USER=&quot;mathesar&quot;
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>POSTGRES_PASSWORD=&quot;REPLACE_THIS_WITH_APPROPRIATE_PASSWORD_FOR_THE_CHOSEN_POSTGRES_USER&quot;
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>POSTGRES_HOST=&quot;localhost&quot;
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>POSTGRES_PORT=&quot;5432&quot;
 </span></code></pre></div>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Note</p>
+<p>Each value in the environment file must be enclosed in double quotes(<code>""</code>).</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -1580,16 +1654,16 @@
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>If you want to host Mathesar on multiple domains/subdomains you can do so by adding multiple comma separated domain names to the following env variables without a whitespace: </p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>DOMAIN_NAME=xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>ALLOWED_HOSTS=xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org
+<p>To host Mathesar on multiple domains/subdomains simply list the domain names separated by a comma and a whitespace to the following env variables: </p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>DOMAIN_NAME=&quot;xDOMAIN_NAMEx, xDOMAIN_NAMEx.example.org&quot;
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>ALLOWED_HOSTS=&quot;xDOMAIN_NAMEx, xDOMAIN_NAMEx.example.org&quot;
 </span></code></pre></div>
 </div>
 </li>
 <li>
 <p>Add the environment variables to the shell</p>
 <p>You need to <code>export</code> the environment variables listed in the <code>.env</code> file to your shell. The easiest way would be to run the below command.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>export $(cat .env)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>set -a &amp;&amp; source .env &amp;&amp; set +a
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Important</p>
@@ -1600,7 +1674,7 @@
 </li>
 <li>
 <p>Download release static files and extract into the correct directory</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>wget https://github.com/mathesar-foundation/mathesar/releases/download/0.2.0/static_files.zip
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>wget https://github.com/mathesar-foundation/mathesar/releases/download/0.2.5/static_files.zip
 </span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>unzip static_files.zip &amp;&amp; mv static_files mathesar/static/mathesar &amp;&amp; rm static_files.zip
 </span></code></pre></div>
 </li>
@@ -1616,7 +1690,7 @@
 </li>
 <li>
 <p>Run Django migrations and collect static files:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>python -m mathesar.install --skip-confirm | tee /tmp/install.py.log
+<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>python -m mathesar.install | tee /tmp/install.py.log
 </span></code></pre></div>
 </li>
 </ol>
@@ -1685,7 +1759,7 @@
 </li>
 <li>
 <p>Add the configuration details to the CaddyFile</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>{$DOMAIN_NAME:xDOMAIN_NAMEx} {
+<div class="language-text highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>{$DOMAIN_NAME} {
 </span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>    log {
 </span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>        output stdout
 </span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>    }
@@ -1733,17 +1807,18 @@
 </span><span id="__span-29-8"><a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a>Type=notify
 </span><span id="__span-29-9"><a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a>User=caddy
 </span><span id="__span-29-10"><a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a>Group=caddy
-</span><span id="__span-29-11"><a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a>ExecStart=/usr/bin/caddy run --config /etc/caddy/Caddyfile
-</span><span id="__span-29-12"><a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a>ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile --force
-</span><span id="__span-29-13"><a id="__codelineno-29-13" name="__codelineno-29-13" href="#__codelineno-29-13"></a>TimeoutStopSec=5s
-</span><span id="__span-29-14"><a id="__codelineno-29-14" name="__codelineno-29-14" href="#__codelineno-29-14"></a>LimitNOFILE=1048576
-</span><span id="__span-29-15"><a id="__codelineno-29-15" name="__codelineno-29-15" href="#__codelineno-29-15"></a>LimitNPROC=512
-</span><span id="__span-29-16"><a id="__codelineno-29-16" name="__codelineno-29-16" href="#__codelineno-29-16"></a>PrivateTmp=true
-</span><span id="__span-29-17"><a id="__codelineno-29-17" name="__codelineno-29-17" href="#__codelineno-29-17"></a>ProtectSystem=full
-</span><span id="__span-29-18"><a id="__codelineno-29-18" name="__codelineno-29-18" href="#__codelineno-29-18"></a>AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-</span><span id="__span-29-19"><a id="__codelineno-29-19" name="__codelineno-29-19" href="#__codelineno-29-19"></a>
-</span><span id="__span-29-20"><a id="__codelineno-29-20" name="__codelineno-29-20" href="#__codelineno-29-20"></a>[Install]
-</span><span id="__span-29-21"><a id="__codelineno-29-21" name="__codelineno-29-21" href="#__codelineno-29-21"></a>WantedBy=multi-user.target
+</span><span id="__span-29-11"><a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a>EnvironmentFile=xMATHESAR_INSTALLATION_DIRx/.env
+</span><span id="__span-29-12"><a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a>ExecStart=/usr/bin/caddy run --config /etc/caddy/Caddyfile
+</span><span id="__span-29-13"><a id="__codelineno-29-13" name="__codelineno-29-13" href="#__codelineno-29-13"></a>ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile --force
+</span><span id="__span-29-14"><a id="__codelineno-29-14" name="__codelineno-29-14" href="#__codelineno-29-14"></a>TimeoutStopSec=5s
+</span><span id="__span-29-15"><a id="__codelineno-29-15" name="__codelineno-29-15" href="#__codelineno-29-15"></a>LimitNOFILE=1048576
+</span><span id="__span-29-16"><a id="__codelineno-29-16" name="__codelineno-29-16" href="#__codelineno-29-16"></a>LimitNPROC=512
+</span><span id="__span-29-17"><a id="__codelineno-29-17" name="__codelineno-29-17" href="#__codelineno-29-17"></a>PrivateTmp=true
+</span><span id="__span-29-18"><a id="__codelineno-29-18" name="__codelineno-29-18" href="#__codelineno-29-18"></a>ProtectSystem=full
+</span><span id="__span-29-19"><a id="__codelineno-29-19" name="__codelineno-29-19" href="#__codelineno-29-19"></a>AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+</span><span id="__span-29-20"><a id="__codelineno-29-20" name="__codelineno-29-20" href="#__codelineno-29-20"></a>
+</span><span id="__span-29-21"><a id="__codelineno-29-21" name="__codelineno-29-21" href="#__codelineno-29-21"></a>[Install]
+</span><span id="__span-29-22"><a id="__codelineno-29-22" name="__codelineno-29-22" href="#__codelineno-29-22"></a>WantedBy=multi-user.target
 </span></code></pre></div>
 </li>
 <li>
@@ -1798,13 +1873,13 @@
       
       
         
-        <a href="../environment-variables/" class="md-footer__link md-footer__link--next" aria-label="Next: Environment Variables" rel="next">
+        <a href="../environment-variables/" class="md-footer__link md-footer__link--next" aria-label="Next: Environment variables" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Environment Variables
+              Environment variables
             </div>
           </div>
           <div class="md-footer__button md-icon">
