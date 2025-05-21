@@ -922,8 +922,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../0.2.4/" class="md-nav__link">
-        0.2.4
+      <a href="../0.2.5/" class="md-nav__link">
+        0.2.5
       </a>
     </li>
   
@@ -957,6 +957,20 @@
           Previous releases
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.2.4/" class="md-nav__link">
+        0.2.4
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -1446,7 +1460,9 @@
 <h1 id="mathesar-022">Mathesar 0.2.2<a class="headerlink" href="#mathesar-022" title="Permanent link">&para;</a></h1>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
 <p>Mathesar 0.2.2 introduces several improvements, including enhanced primary key handling, smart pasting for easier data entry, and various bug fixes. Users can now choose UUIDs as primary keys, designate any existing column as a primary key during data import, and benefit from a new UUID column type.</p>
-<p><em>This page provides a comprehensive list of all changes in the release.</em></p>
+<div class="admonition info">
+<p>This page provides a comprehensive list of all changes in the release.</p>
+</div>
 <h2 id="improvements">Improvements<a class="headerlink" href="#improvements" title="Permanent link">&para;</a></h2>
 <h3 id="inserting-records-when-the-primary-key-has-no-default-value">Inserting records when the primary key has no default value<a class="headerlink" href="#inserting-records-when-the-primary-key-has-no-default-value" title="Permanent link">&para;</a></h3>
 <p>Previously, Mathesar required a default value to be set on the primary key column in order to insert records. However there are some valid use cases for primary keys without default values, such as a TEXT column that receives a manually-supplied value on each insert. In 0.2.2 Mathesar now allows you to insert records into such tables by entering the primary key values during the insert.</p>
