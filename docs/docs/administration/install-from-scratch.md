@@ -35,7 +35,7 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
 
     _(Modify as necessary based on your Postgres installation.)_
 
-1. Create a Postgres user for Mathesar
+1. Create a Postgres user for Mathesar.
 
     ```postgresql
     CREATE USER mathesar WITH ENCRYPTED PASSWORD 'strong‑pw‑here';
@@ -44,7 +44,7 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
     !!! warning "Use a real password"
         Replace `strong‑pw‑here` with something private and record it—you’ll need it below.
 
-1. Create a database for storing Mathesar metadata. Your PostgreSQL user will either need to be the `OWNER` of this database.
+1. Create a database for storing Mathesar metadata. The Postgres user you created in the previous step should be the `OWNER` of this database.
 
     ```postgresql
     CREATE DATABASE mathesar_django OWNER mathesar;
