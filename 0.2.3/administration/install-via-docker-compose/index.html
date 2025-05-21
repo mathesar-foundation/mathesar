@@ -395,6 +395,26 @@
     Using an external PostgreSQL server for Mathesar's internal database
   </a>
   
+    <nav class="md-nav" aria-label="Using an external PostgreSQL server for Mathesar's internal database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-host-networking-considerations" class="md-nav__link">
+    Docker Host Networking Considerations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connecting-via-unix-socket" class="md-nav__link">
+    Connecting via Unix Socket
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1026,8 +1046,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../releases/0.2.3/" class="md-nav__link">
-        0.2.3
+      <a href="../../releases/0.2.5/" class="md-nav__link">
+        0.2.5
       </a>
     </li>
   
@@ -1059,6 +1079,34 @@
           Previous releases
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.4/" class="md-nav__link">
+        0.2.4
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.3/" class="md-nav__link">
+        0.2.3
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -1316,6 +1364,26 @@
     Using an external PostgreSQL server for Mathesar's internal database
   </a>
   
+    <nav class="md-nav" aria-label="Using an external PostgreSQL server for Mathesar's internal database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-host-networking-considerations" class="md-nav__link">
+    Docker Host Networking Considerations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connecting-via-unix-socket" class="md-nav__link">
+    Connecting via Unix Socket
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1368,8 +1436,8 @@
 
 <ol>
 <li>
-<p>Download our <a href="https://github.com/mathesar-foundation/mathesar/raw/0.2.3/docker-compose.yml">docker-compose.yml</a> file.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>wget https://github.com/mathesar-foundation/mathesar/raw/0.2.3/docker-compose.yml
+<p>Download our <a href="https://github.com/mathesar-foundation/mathesar/raw/0.2.5/docker-compose.yml">docker-compose.yml</a> file.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>wget https://github.com/mathesar-foundation/mathesar/raw/0.2.5/docker-compose.yml
 </span></code></pre></div>
 </li>
 <li>
@@ -1465,6 +1533,34 @@
 <p>Configure the <a href="../environment-variables/#db">internal database environment variables</a> to point to the database you just created. Ensure that you change the default values for the user, password, and host.</p>
 </li>
 </ol>
+<h4 id="docker-host-networking-considerations">Docker Host Networking Considerations<a class="headerlink" href="#docker-host-networking-considerations" title="Permanent link">&para;</a></h4>
+<p>When connecting to PostgreSQL running on the Docker host machine over the network (TCP/IP), remember the following:</p>
+<ul>
+<li>Using <code>localhost</code> within Docker will reference the container itself, not your host.</li>
+<li>On macOS or Windows, <code>host.docker.internal</code> typically works to access the host network.</li>
+<li>On Linux, you <em>can</em> use <code>host.docker.internal</code>, but it must be explicitly configured in your docker compose file like so:
+  <div class="language-yaml highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">extra_hosts</span><span class="p">:</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;host.docker.internal:host-gateway&quot;</span>
+</span></code></pre></div><ul>
+<li>Alternatively, try the Docker network gateway IP (<code>172.17.0.1</code>) or your host machine&rsquo;s local network IP.</li>
+</ul>
+</li>
+</ul>
+<h4 id="connecting-via-unix-socket">Connecting via Unix Socket<a class="headerlink" href="#connecting-via-unix-socket" title="Permanent link">&para;</a></h4>
+<p>If you&rsquo;re connecting Mathesar to PostgreSQL via a Unix socket, ensure the following:</p>
+<ul>
+<li>Set <code>POSTGRES_HOST</code> to the directory containing your PostgreSQL Unix socket (typically <code>/var/run/postgresql</code>).</li>
+<li>You may omit <code>POSTGRES_PORT</code> if using the default value (<code>5432</code>), but must specify it when using a non-standard port.</li>
+<li>Adjust your PostgreSQL server permissions (<code>pg_hba.conf</code>) to allow socket connections using appropriate authentication for the <code>POSTGRES_USER</code>  (such as <code>md5</code>). Refer to <a href="https://www.postgresql.org/docs/current/auth-pg-hba-conf.html">PostgreSQL Authentication docs</a> for more information.</li>
+<li>In Docker, mount the Unix socket directory as a volume to enable container access. For example:</li>
+</ul>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="w"> </span><span class="nt">service</span><span class="p">:</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mathesar_service</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mathesar/mathesar:latest</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">       </span><span class="c1"># Add this line</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/postgresql:/var/run/postgresql</span>
+</span></code></pre></div>
 
 
 
