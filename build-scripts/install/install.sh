@@ -15,7 +15,21 @@ MATHESAR_VERSION=___MATHESAR_VERSION___
 #=======DEFAULTS===============================================================
 
 PACKAGE_LINK="https://github.com/mathesar-foundation/mathesar/releases/download/${MATHESAR_VERSION}/mathesar.tar.gz"
-PYTHON_SPEC=">=3.9"
+
+# Allow system python versions >=3.9
+# - If the user has the latest version, we assume they have the necessary knowledge
+#   and requirements to also have `build-essential` installed.
+# - If they run into issues, they could always trigger the install script with the `-f` flag
+#   to force download python.
+# - We only specify the lowest supported python version here.
+SYSTEM_PYTHON_DETECTION_SPEC=">=3.9"
+
+# For uv-managed versions, allow only 3.9 to 3.11
+# When we download python, we always download 3.11
+# These versions should always pass with the `SYSTEM_PYTHON_DETECTION_SPEC` version checks.
+MANAGED_PYTHON_DETECTION_SPEC=">=3.9,<3.12"
+MANAGED_DEFAULT_PYTHON_DOWNLOAD_VERSION="3.11"
+
 VENV_DIR_NAME="mathesar-venv"
 ENV_FILE_NAME=".env"
 
@@ -270,7 +284,7 @@ install_uv() {
 
 download_python() {
   info "Downloading Python locally..."
-  run_cmd "${UV_DIR}/uv" python install 3.13
+  run_cmd "${UV_DIR}/uv" python install "${MANAGED_DEFAULT_PYTHON_DOWNLOAD_VERSION}"
 }
 
 ensure_python() {
@@ -282,9 +296,7 @@ ensure_python() {
   info "Finding existing Python installations..."
 
   local python_status=0
-  local find_cmd=("${UV_DIR}/uv" python find "${PYTHON_SPEC}")
-
-  "${find_cmd[@]}" --managed-python 2>/dev/null || python_status=$?
+  "${UV_DIR}/uv" python find "${MANAGED_PYTHON_DETECTION_SPEC}" --managed-python 2>/dev/null || python_status=$?
 
   if [[ $python_status -eq 0 ]]; then
     info "Found Managed Python"
@@ -292,7 +304,7 @@ ensure_python() {
   fi
 
   python_status=0
-  "${find_cmd[@]}" --system 2>/dev/null || python_status=$?
+  "${UV_DIR}/uv" python find "${SYSTEM_PYTHON_DETECTION_SPEC}" --system 2>/dev/null || python_status=$?
 
   if [[ $python_status -eq 0 ]]; then
     info "Found System Python"
@@ -310,7 +322,7 @@ ensure_python() {
 setup_venv_and_requirements() {
   pushd "${INSTALL_DIR}" > /dev/null
     info "Creating Python virtual environment..."
-    run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --python "${PYTHON_SPEC}" --seed --relocatable
+    run_cmd "${UV_DIR}/uv" venv ./"${VENV_DIR_NAME}" --python "${SYSTEM_PYTHON_DETECTION_SPEC}" --seed --relocatable
 
     info "Activating Python virtual environment..."
     # shellcheck source=/dev/null
