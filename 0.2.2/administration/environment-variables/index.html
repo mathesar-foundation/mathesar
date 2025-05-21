@@ -412,8 +412,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#postgres_password" class="md-nav__link">
-    POSTGRES_PASSWORD
+  <a href="#postgres_password-optional" class="md-nav__link">
+    POSTGRES_PASSWORD (optional)
   </a>
   
 </li>
@@ -426,8 +426,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#postgres_port" class="md-nav__link">
-    POSTGRES_PORT
+  <a href="#postgres_port-optional" class="md-nav__link">
+    POSTGRES_PORT (optional)
   </a>
   
 </li>
@@ -1053,8 +1053,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../releases/0.2.2/" class="md-nav__link">
-        0.2.2
+      <a href="../../releases/0.2.5/" class="md-nav__link">
+        0.2.5
       </a>
     </li>
   
@@ -1086,6 +1086,48 @@
           Previous releases
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.4/" class="md-nav__link">
+        0.2.4
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.3/" class="md-nav__link">
+        0.2.3
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/0.2.2/" class="md-nav__link">
+        0.2.2
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -1318,8 +1360,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#postgres_password" class="md-nav__link">
-    POSTGRES_PASSWORD
+  <a href="#postgres_password-optional" class="md-nav__link">
+    POSTGRES_PASSWORD (optional)
   </a>
   
 </li>
@@ -1332,8 +1374,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#postgres_port" class="md-nav__link">
-    POSTGRES_PORT
+  <a href="#postgres_port-optional" class="md-nav__link">
+    POSTGRES_PORT (optional)
   </a>
   
 </li>
@@ -1408,6 +1450,7 @@
 <p class="admonition-title">Info</p>
 <p>The database specified in this section will be used to store Mathesar&rsquo;s internal data. Additionally, it can be optionally repurposed via Mathesar&rsquo;s UI to store user data.</p>
 </div>
+<p>Note: The default values specified here refer to those in Mathesar&rsquo;s <a href="https://github.com/mathesar-foundation/mathesar/raw/0.2.5/docker-compose.yml">docker-compose.yml</a> file, as part of our recommended <a href="../install-via-docker-compose/">docker compose installation method</a>.</p>
 <h3 id="postgres_db"><code>POSTGRES_DB</code><a class="headerlink" href="#postgres_db" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Description</strong>: Specifies a name for the database that will be created and used by Mathesar for managing internal data.</li>
@@ -1418,7 +1461,7 @@
 <li><strong>Description</strong>: Specifies creation of a user with superuser privileges and a database with the same name.</li>
 <li><strong>Default value</strong>: <code>mathesar</code></li>
 </ul>
-<h3 id="postgres_password"><code>POSTGRES_PASSWORD</code><a class="headerlink" href="#postgres_password" title="Permanent link">&para;</a></h3>
+<h3 id="postgres_password-optional"><code>POSTGRES_PASSWORD</code> (optional)<a class="headerlink" href="#postgres_password-optional" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Description</strong>: Specifies the superuser password that is required to be set for the PostgreSQL docker image.</li>
 <li><strong>Default value</strong>: <code>mathesar</code></li>
@@ -1426,9 +1469,17 @@
 <h3 id="postgres_host"><code>POSTGRES_HOST</code><a class="headerlink" href="#postgres_host" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Description</strong>: Specifies the host name on which portgres listen for connections from client applications.</li>
-<li><strong>Default value</strong>: <code>mathesar_db</code></li>
+<li><strong>Default value</strong>: <code>mathesar_db</code><ul>
+<li>When installing via docker, this value can reference:<ul>
+<li>A Docker service name (e.g., <code>mathesar_django</code>)</li>
+<li>A TCP host address (e.g., <code>host.docker.internal</code>)</li>
+<li>A Unix socket path (e.g., <code>/var/run/postgresql</code>)</li>
 </ul>
-<h3 id="postgres_port"><code>POSTGRES_PORT</code><a class="headerlink" href="#postgres_port" title="Permanent link">&para;</a></h3>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="postgres_port-optional"><code>POSTGRES_PORT</code> (optional)<a class="headerlink" href="#postgres_port-optional" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Description</strong>: Specifies the port on which portgres listen for connections from client applications.</li>
 <li><strong>Default value</strong>: <code>5432</code></li>
