@@ -279,7 +279,7 @@ clear_uv_cache_lock() {
 install_uv() {
   info "Installing uv..."
   clear_uv_cache_lock
-  run_cmd /usr/bin/env bash "${INSTALL_DIR}"/uv-installer.sh
+  run_cmd env bash "${INSTALL_DIR}"/uv-installer.sh
 }
 
 download_python() {
