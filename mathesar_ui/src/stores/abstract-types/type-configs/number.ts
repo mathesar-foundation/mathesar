@@ -1,9 +1,8 @@
-import {
-  type Column,
-  type NumberFormat,
-  type NumberGrouping,
-  getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+import type {
+  NumberFormat,
+  NumberGrouping,
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeNumber } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';

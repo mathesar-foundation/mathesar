@@ -2,6 +2,7 @@ import { type Writable, get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import {
   type ExplorationResult,
   type SavedExploration,
@@ -13,7 +14,15 @@ import { addExploration, replaceExploration } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
 
-import QueryModel, { type QueryModelUpdateDiff } from './QueryModel';
+import {
+  makeColumnAnchor,
+  reconcileDisplayOptionsWithServerResponse,
+} from './displayOptions';
+import {
+  type QueryModel,
+  type QueryModelUpdateDiff,
+  getTransformationModel,
+} from './QueryModel';
 import { QueryRunner } from './QueryRunner';
 import { QuerySummarizationTransformationModel } from './QuerySummarizationTransformationModel';
 import {
@@ -25,6 +34,7 @@ import {
 
 export default class QueryManager extends QueryRunner {
   private cacheManagers: {
+    /** Keys are table OIDs */
     inputColumns: CacheManager<number, InputColumnsStoreSubstance>;
   } = {
     inputColumns: new CacheManager(5),
@@ -66,18 +76,7 @@ export default class QueryManager extends QueryRunner {
     query: QueryModel;
     onSave?: (instance: SavedExploration) => unknown;
   }) {
-    super({
-      query,
-      onRunWithObject: (response: ExplorationResult) => {
-        this.checkAndUpdateSummarizationAfterRun(
-          new QueryModel({
-            database_id: query.database_id,
-            schema_oid: query.schema_oid,
-            ...response.query,
-          }),
-        );
-      },
-    });
+    super({ query });
     this.onSaveCallback = onSave ?? (() => {});
     void this.calculateInputColumnTree();
   }
@@ -159,12 +158,23 @@ export default class QueryManager extends QueryRunner {
     return { isValid: queryModel.isValid, isRunnable: queryModel.isRunnable };
   }
 
-  private checkAndUpdateSummarizationAfterRun(queryModel: QueryModel) {
+  /**
+   * There are cases where the server response contains a _different query_ than
+   * the one we sent. This can happen if the server knows that the query needs
+   * to be adjusted in specific ways in order to remain valid. This function
+   * updates the saved query to be consistent with the query details we got back
+   * from the server after running a query.
+   */
+  private reconcileQueryWithServerResponse(serverResponse: ExplorationResult) {
+    const { transformations } = serverResponse.query;
+    if (!transformations) return;
+    const transformationModels = transformations.map(getTransformationModel);
+
     const thisQueryModel = this.getQueryModel();
     let newQueryModel = thisQueryModel;
     let isChangeNeeded = false;
     thisQueryModel.transformationModels.forEach((thisTransform, index) => {
-      const thatTransform = queryModel.transformationModels[index];
+      const thatTransform = transformationModels[index];
       if (
         thisTransform.type === 'summarize' &&
         thatTransform &&
@@ -196,6 +206,28 @@ export default class QueryManager extends QueryRunner {
     }
   }
 
+  private async reconcileDisplayOptions(serverResponse: ExplorationResult) {
+    const reconciliation = reconcileDisplayOptionsWithServerResponse(
+      this.getQueryModel().display_options,
+      serverResponse,
+    );
+    if (!reconciliation.hasChanged) return;
+
+    const newDisplayOptions = reconciliation.newValue;
+    const shouldAutoSave = !get(this.queryHasUnsavedChanges);
+    await this.update((q) =>
+      q.withAllDisplayOptionsReplaced(newDisplayOptions),
+    );
+    if (shouldAutoSave) {
+      await this.save();
+    }
+  }
+
+  protected async afterRun(result: ExplorationResult): Promise<void> {
+    this.reconcileQueryWithServerResponse(result);
+    await this.reconcileDisplayOptions(result);
+  }
+
   async update(
     callback: (queryModel: QueryModel) => QueryModelUpdateDiff,
   ): Promise<void> {
@@ -203,10 +235,10 @@ export default class QueryManager extends QueryRunner {
       ..._state,
       saveState: undefined,
     }));
-    const updateDiff = callback(this.getQueryModel());
-    const { isRunnable } = await this.updateQuery(updateDiff.model);
+    const { model, type } = callback(this.getQueryModel());
+    const { isRunnable } = await this.updateQuery(model);
     if (isRunnable) {
-      switch (updateDiff.type) {
+      switch (type) {
         case 'baseTable':
           this.resetResults();
           this.confirmationNeededForMultipleResults.set(true);
@@ -217,7 +249,7 @@ export default class QueryManager extends QueryRunner {
           this.speculateColumns();
           break;
         case 'initialColumnsArray':
-          if (!updateDiff.diff.initial_columns?.length) {
+          if (!model.initial_columns?.length) {
             // All columns have been deleted
             this.resetResults();
           } else {
@@ -276,6 +308,23 @@ export default class QueryManager extends QueryRunner {
       }));
       throw err;
     }
+  }
+
+  async setColumnDisplayOptions(
+    columnIndex: number,
+    displayOptions: ColumnMetadata,
+  ): Promise<void> {
+    const column = [...get(this.processedColumns).values()][columnIndex];
+    if (!column) {
+      return;
+    }
+
+    await this.update((query) =>
+      query.withColumnDisplayOptionsEntry({
+        column: makeColumnAnchor(column.column, columnIndex),
+        displayOptions,
+      }),
+    );
   }
 
   getAutoSummarizationTransformModel():
