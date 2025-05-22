@@ -2986,8 +2986,8 @@ BEGIN
     PERFORM msar.copy_constraint(oid, col_id, created_col_id)
     FROM pg_constraint
     WHERE conrelid=tab_id AND ARRAY[col_id] <@ conkey;
-    PERFORM __msar.set_not_nulls(
-      tab_name, ARRAY[(col_defs[1].name_, attnotnull)::__msar.not_null_def]
+    PERFORM msar.set_not_null(
+      tab_id, created_col_id, attnotnull
     )
     FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
   END IF;
