@@ -468,6 +468,7 @@ export class QueryModel {
       initial_columns: this.initial_columns,
       transformations: transformations.map((entry) => entry.toJson()),
       display_names: this.display_names,
+      display_options: this.display_options,
     };
   }
 
@@ -481,16 +482,10 @@ export class QueryModel {
 
   toMaybeSavedExploration(): MaybeSavedExploration {
     return {
-      database_id: this.database_id,
-      schema_oid: this.schema_oid,
+      ...this.toAnonymousExploration(),
       id: this.id,
       name: this.name,
       description: this.description,
-      base_table_oid: this.base_table_oid,
-      initial_columns: this.initial_columns,
-      transformations: this.transformationModels.map((entry) => entry.toJson()),
-      display_names: this.display_names,
-      display_options: this.display_options,
     };
   }
 
