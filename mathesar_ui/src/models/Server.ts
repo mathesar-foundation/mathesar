@@ -5,7 +5,7 @@ export class Server {
 
   readonly host: string;
 
-  readonly port: number;
+  readonly port: number | null;
 
   constructor(props: { rawServer: RawServer }) {
     this.id = props.rawServer.id;
@@ -14,6 +14,9 @@ export class Server {
   }
 
   getConnectionString() {
+    if (this.port == null) {
+      return this.host;
+    }
     return `${this.host}:${this.port}`;
   }
 
