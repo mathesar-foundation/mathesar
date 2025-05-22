@@ -97,7 +97,7 @@ export interface ColumnDisplayOptionsEntry {
  */
 type ColumnDisplayOptions = Partial<Record<string, ColumnDisplayOptionsEntry>>;
 
-function* getColumnDisplayOptionsEntries(
+export function* getColumnDisplayOptionsEntries(
   opts: ColumnDisplayOptions,
 ): Iterable<ColumnDisplayOptionsEntry> {
   for (const entry of Object.values(opts)) {

@@ -4,6 +4,8 @@ import type { JoinPath } from '@mathesar/api/rpc/tables';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
 
+import type { ColumnMetadata } from './_common/columnDisplayOptions';
+
 export interface InitialColumn {
   alias: string;
   /** The PostgreSQL attnum of the column */
@@ -143,6 +145,7 @@ export interface QueryResultColumn {
   display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
+  metadata: ColumnMetadata | null; // TODO  remove later
 }
 
 export interface QueryInitialColumnSource {
@@ -179,6 +182,7 @@ export interface ExplorationResult {
   records: QueryResultRecords;
   /** Each string is a column alias */
   output_columns: string[];
+  /** Each key is a column alias */
   column_metadata: Record<string, QueryColumnMetaData>;
   query: {
     /** The schema OID */

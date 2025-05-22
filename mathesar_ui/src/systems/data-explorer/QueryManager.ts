@@ -257,6 +257,10 @@ export default class QueryManager extends QueryRunner {
             await this.run();
           }
           break;
+        case 'displayOptions':
+          this.speculateColumns();
+          await this.run();
+          break;
         case 'transformations':
         case 'initialColumnsAndTransformations':
           await this.resetPaginationAndRun();
