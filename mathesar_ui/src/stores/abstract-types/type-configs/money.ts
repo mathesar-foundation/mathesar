@@ -1,10 +1,9 @@
-import {
-  type Column,
-  type CurrencyLocation,
-  type NumberFormat,
-  type NumberGrouping,
-  getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+import type {
+  CurrencyLocation,
+  NumberFormat,
+  NumberGrouping,
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import { iconUiTypeMoney } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
