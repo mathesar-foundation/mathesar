@@ -3722,8 +3722,8 @@ Args:
 For the specification of the col_alters JSONB, see the msar.process_col_alter_jsonb function.
 
 Note that all alterations except renaming, commenting & setting/unsetting not-null are done in bulk,
-and then all name changes are done one at a time afterwards. This is because the SQL design specifies
-at most one name-changing clause per query.
+and then all name changes are done one at a time afterwards. This is because the SQL design
+specifies at most one name-changing clause per query.
 */
 DECLARE
   col RECORD;
@@ -3756,7 +3756,8 @@ BEGIN
     IF col.has_comment THEN
       PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
     END IF;
-    return_attnum_arr := return_attnum_arr || col.attnum;
+    -- PG13 doesn't allow concat b/w integer[] and smallint need to typecast
+    return_attnum_arr := return_attnum_arr || col.attnum::integer; 
   END LOOP;
   RETURN return_attnum_arr; -- do we really need this??
 END;
