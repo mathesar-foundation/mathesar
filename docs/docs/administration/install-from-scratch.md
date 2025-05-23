@@ -1,4 +1,4 @@
-# Install Mathesar from Scratch
+# Install Mathesar directly on Linux · macOS · WSL
 
 !!! warning "For experienced system administrators"
     This guide assumes you are comfortable with the command line, package management
@@ -9,17 +9,14 @@
 ## Requirements
 
 - **Hardware:**
-    - ≥ 60 GB disk
-    - ≥ 4 GB RAM *(Recommended)*
+    - ≥ 60 GB disk.
+    - ≥ 4 GB RAM. *(Recommended)*
 - **OS:**
     - Should work on most modern Linux distributions and macOS versions.
-    - Tested on **Debian 12**, **Ubuntu 22.04**, **Fedora 40**, and **macOS 14**.
+    - Tested on **Debian 12**, **Ubuntu 22.04**, and **macOS 14**.
     - On Windows, install under **WSL 2** (Ubuntu or Debian).
 - **Software:**
-    - PostgreSQL 13+
-- **Privileges:**
-    - You'll need access to a PostgreSQL role with `CREATE USER` and `CREATE DATABASE` privileges.
-    - Some optional deployment steps require `sudo` privileges.
+    - [PostgreSQL](https://www.postgresql.org/download/) 13 or newer.
 
 ## Installation
 
@@ -38,11 +35,28 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
 1. Create a Postgres user for Mathesar.
 
     ```postgresql
-    CREATE USER mathesar WITH ENCRYPTED PASSWORD 'strong‑pw‑here';
+    CREATE USER mathesar WITH ENCRYPTED PASSWORD 'strong‑pw‑here' CREATEDB;
     ```
 
     !!! warning "Use a real password"
-        Replace `strong‑pw‑here` with something private and record it—you’ll need it below.
+        Replace `strong‑pw‑here` with a strong, private password and make a note of it, you’ll need it later.
+
+    !!! tip
+        About the extra privileges in the command,
+
+        - **`CREATEDB`: gives the Postgres user permission to create new databases.**
+            - It’s handy if you want Mathesar admins to spin up databases from the web interface.
+            - Don’t need that capability? Just remove `CREATEDB` from the command, everything else will still work.
+
+        - **`CREATEROLE`: allows the Postgres user to create and manage other Postgres roles.**
+            - If you’d like Mathesar admins to handle role management (create, drop, alter roles) from the web interface, add this attribute as well:
+            ```postgresql
+            CREATE USER mathesar WITH ENCRYPTED PASSWORD 'strong-pw-here' CREATEDB CREATEROLE;
+            ```
+
+        - You could refer to [the official Postgres documentation](https://www.postgresql.org/docs/17/sql-createrole.html) to learn more about these attributes.
+
+        _(Both attributes are optional, so feel free to include only what matches your comfort level.)_
 
 1. Create a database for storing Mathesar metadata. The Postgres user you created in the previous step should be the `OWNER` of this database.
 
@@ -56,18 +70,37 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
 
 1. Choose a directory where you will install Mathesar.
 
-    For example: `$HOME/mathesar`, or `/etc/mathesar`, or `/opt/mathesar`.
+    For example: `/home/your_user_name/mathesar`, or `/etc/mathesar`
 
 1. Enter your installation directory into the box below and press <kbd>Enter</kbd> to personalize this guide:
 
     <input data-input-for="MATHESAR_INSTALL_DIR" aria-label="Your Mathesar installation directory"/>
 
-1. Ensure your installation directory exists and has the proper permissions.
+    - Do _not_ include a trailing slash.
+    - Do _not_ use any variables like `$HOME`.
+
+1. Create your installation directory and ensure it has proper permissions.
 
     ```bash
     mkdir -p "xMATHESAR_INSTALL_DIRx"
     chown "$(id -u):$(id -g)" "xMATHESAR_INSTALL_DIRx"
     ```
+
+    !!! note "When installing outside your home folder"
+        If you choose a directory outside your home folder, like **/etc/mathesar** or **/opt/mathesar**, you’ll need super-user rights for this step:
+
+        ```bash
+        sudo mkdir -p /etc/mathesar
+        sudo chown <desired-owner>:<desired-group> /etc/mathesar
+        ```
+
+        *Choose an owner that makes sense for your setup:*
+
+        - **`root`**: if only admins will touch the files
+        - **your own user**: if you’ll run everything yourself
+        - **a dedicated `mathesar` user**: nice for shared or production servers
+
+        The remainder of this guide requires you to **run commands with full permissions inside your installation directory**.
 
 1. Move inside the installation directory.
 
@@ -84,16 +117,16 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
     chmod +x install.sh
     ```
 
-1. Run it, **pointing at the Postgres DB you created**:
+1. Run it, **pointing at the Postgres DB and user you created earlier**:
 
     ```bash
     ./install.sh . \
       -c "postgres://mathesar:strong‑pw‑here@localhost:5432/mathesar_django"
     ```
 
-    - Any valid PostgreSQL connection string can be used as the argument for `-c`.
+    - Any valid [PostgreSQL connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS) can be used as the argument for `-c`.
 
-    - If your PostgreSQL installation runs over the unix socket, you could use:
+    - If your PostgreSQL installation runs over the unix socket, you could use the following format:
 
         ```
         postgres://mathesar:strong‑pw‑here/mathesar_django?host=/var/run/postgresql
@@ -105,37 +138,51 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
         | `-h` &nbsp; `--help`                  | Show help |
         | `-c` &nbsp; `--connection-string`     | Non‑interactive DB setup |
         | `-n` &nbsp; `--no-prompt`             | Fail instead of prompting (CI) |
-        | `-f` &nbsp; `--force-download-python` | Always download Python 3.13 even if system Python is OK |
+        | `-f` &nbsp; `--force-download-python` | Always download Python even if system Python is OK |
 
-1. When it's successful you’ll see:
+1. When it's successful, you’ll see:
 
     > Mathesar's installed successfully!
 
-    The script attempts to add the Mathesar executable to your PATH. If it succeeds, you'll see:
+    The script attempts to add the `mathesar` executable to **your** `PATH`.
+
+    If that works you’ll also see:
 
     > Everything's ready, you can now start Mathesar by executing "mathesar run".
 
-    If setting the PATH fails, it'll show instructions on how to add the mathesar executable to your PATH. Follow those instructions.
+    You may have to open a new terminal (or re-source your shell profile) for the change to take effect.
+
+    If the script can’t update your `PATH`, it will provide you instructions on how to add it yourself.
+
+    !!! tip "Tip: Want to allow *all* system users to run Mathesar?"
+        For security purposes, the installer only sets up the command and necessary permissions for the user who runs it.
+
+        To make `mathesar` available system-wide,
+
+        - Create a symlink in `/usr/local/bin`:
+            ```bash
+            sudo ln -s "xMATHESAR_INSTALL_DIRx/bin/mathesar" /usr/local/bin/mathesar
+            ```
+        - Provide read access to the installation directory and it's contents to all users.
+            ```bash
+            sudo chmod -R a+rX xMATHESAR_INSTALL_DIRx
+            ```
+        - Provide write access to the `.media` directory within `xMATHESAR_INSTALL_DIRx` to all users.
+            ```bash
+            sudo chmod -R a+rwX xMATHESAR_INSTALL_DIRx/.media
+            ```
 
 ### Run Mathesar
 
-1. Open a new shell and verify the installation:
+1. Open a new shell and verify the installation. This command should print your Mathesar version.
 
-    - This should print your Mathesar version:
-
-        ```
-        mathesar version
-        ```
-
-    - This should print help content:
-
-        ```
-        mathesar help
-        ```
+    ```bash
+    mathesar version
+    ```
 
 1. Start Mathesar:
 
-    ```
+    ```bash
     mathesar run
     ```
 
@@ -143,45 +190,43 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
 
 ## Deployment
 
-The steps below convert your installation into a public-facing production service with a Caddy reverse‑proxy to handle HTTPS.
+Turn your local Mathesar installation into a public-facing production service.
 
 !!! note "Optional - Server hosting only"
-    Follow this section if you want Mathesar to run continuously on a server and be reachable by other users (with or without a public domain). For personal use, evaluation, or on‑prem workstations you can simply start Mathesar on demand with `mathesar run` and skip ahead to the First‑time access section.
+    - Follow this section if you want Mathesar to run continuously on a server and be reachable by other users (with or without a public domain).
+    - For personal use, evaluation, or on‑prem workstations, you can simply start Mathesar on demand with `mathesar run` and skip ahead to setting up your user account.
 
 !!! note "Linux-only"
-    - The steps below rely on **systemd** and therefore **only target Linux servers**.
-    - On macOS you can adapt these steps to `launchd` if you need to run mathesar as a service.
+    - The steps below **only target Linux servers** that use **systemd**.
+    - On macOS, you can adapt the service portion to `launchd`.
     - On Windows, deploy from a Linux VM or WSL 2.
 
 !!! note "Elevated permissions needed"
     Most of the commands below need to be run as a root user, or using `sudo`. If you try to run one of these commands, and see an error about "permission denied", run again with elevated privileges.
 
-### Add a systemd unit
+### Run Mathesar as a systemd service
 
-These steps create a systemd unit file, making it easy to start and stop the Mathesar service along with other services on your server.
+These steps create a systemd service to run Mathesar continuously - 24x7.
 
-1. Create a user for running Mathesar
+1. Create a dedicated user for running Mathesar.
 
     ```
     groupadd mathesar && \
     useradd mathesar -g mathesar
     ```
 
-1. Make the `mathesar` user the owner of the `.media` directory
+1. Make the `mathesar` user the owner of the `.media` directory within Mathesar's installation folder.
 
     ```
-    chown -R mathesar:mathesar .media/
+    chown -R mathesar:mathesar "xMATHESAR_INSTALL_DIRx/.media/"
     ```
 
-1. Create the Mathesar SystemD service file.
+1. Write the systemd unit.
+
+    `/etc/systemd/system/mathesar.service` is the conventional location to create the service file.
 
     ```
-    touch /lib/systemd/system/mathesar.service
-    ```
-
-    and copy the following code into it.
-
-    ```text
+    cat >/etc/systemd/system/mathesar.service <<'EOF'
     [Unit]
     Description=mathesar daemon
     After=network.target network-online.target
@@ -192,15 +237,18 @@ These steps create a systemd unit file, making it easy to start and stop the Mat
     User=mathesar
     Group=mathesar
     RuntimeDirectory=mathesar
-    WorkingDirectory="xMATHESAR_INSTALL_DIRx"
-    ExecStart=/bin/bash -c '"xMATHESAR_INSTALL_DIRx"/bin/mathesar run'
+    WorkingDirectory=xMATHESAR_INSTALL_DIRx
+    ExecStart=/bin/bash -c 'xMATHESAR_INSTALL_DIRx/bin/mathesar run'
     EnvironmentFile=xMATHESAR_INSTALL_DIRx/.env
+    Restart=on-failure
+    RestartSec=5s
     
     [Install]
     WantedBy=multi-user.target
+    EOF
     ```
 
-1. Reload `systemctl` and start the Mathesar service
+1. Reload `systemctl` and start the Mathesar service.
 
     ```
     systemctl daemon-reload
@@ -208,58 +256,52 @@ These steps create a systemd unit file, making it easy to start and stop the Mat
     systemctl enable mathesar.service
     ```
 
-1. Check the logs to verify if Mathesar is running without any errors
+1. Check the logs to verify if Mathesar is running without any errors.
     
     ```
     journalctl --unit=mathesar.service
     ```
 
-### Set up your domain name
+### Serve over HTTPS with a domain
+
+These steps put Caddy in front of Mathesar as a reverse proxy, serving the app over HTTPS while automatically fetching and renewing Let’s Encrypt certificates.
+
+If you prefer nginx or another proxy, please refer to their documentation.
+
+#### Set your domain
 
 !!! info "Optional"
-    This section is optional. You can skip these steps if you only plan to use Mathesar from `localhost`.
+    You can skip this step if you only plan to use Mathesar from `localhost`.
 
-1. Make sure your DNS `A` and/or `AAAA` records resolve to your server.
+1. Ensure that your DNS `A` and/or `AAAA` records are configured correctly. `<your-domain>` should resolve to your server's IP.
 
 1. Enter your domain and press <kbd>Enter</kbd> to customize the remaining steps in this guide.
 
     <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
 
-    - For example:
-
-        `example.com`
-
+    - For example: `example.com`
     - Do _not_ precede your domain with `https://`
     - Do _not_ use a trailing slash
 
-### Add Environment variables
+    !!! tip
+        To specify multiple domains/subdomains, type in the domain names separated by a comma. Make sure that there are no whitespaces between them:
 
-Add the following environment variables to the `.env` file in your Mathesar installation (located at `xMATHESAR_INSTALL_DIRx/.env`):
+        - For example: `localhost,example.com,subdomain.example.com`
 
-```
-ALLOWED_HOSTS="xDOMAIN_NAMEx"
-DOMAIN_NAME="xDOMAIN_NAMEx"
-```
+#### Configure `ALLOWED_HOSTS`
 
-You can refer the list of [environment variables](./environment-variables.md) to configure Mathesar.
-
-!!! tip
-    To host Mathesar on multiple domains/subdomains simply list the domain names separated by a comma and a whitespace to the following env variables: 
+- Add the environment variable `ALLOWED_HOSTS` to the end of the `.env` file in your Mathesar installation (located at `xMATHESAR_INSTALL_DIRx/.env`):
     ```
-    DOMAIN_NAME="xDOMAIN_NAMEx, xDOMAIN_NAMEx.example.org"
-    ALLOWED_HOSTS="xDOMAIN_NAMEx, xDOMAIN_NAMEx.example.org"
+    ALLOWED_HOSTS=xDOMAIN_NAMEx
     ```
+- If there multiple values for `ALLOWED_HOSTS`, they should be comma-separated, with no spaces.
+- Please refer to the list of [environment variables](./environment-variables.md) to further configure Mathesar.
 
+#### Install and configure Caddy
 
-### Configure Caddy
+1. Install Caddy by following the instructions from the [Caddy documentation](https://caddyserver.com/docs/install).
 
-1. Create the CaddyFile
-
-    ```
-    touch /etc/caddy/Caddyfile
-    ```
-
-2. Add the configuration details to the CaddyFile
+1. Create the [Caddyfile](https://caddyserver.com/docs/caddyfile) at `/etc/caddy/Caddyfile`, with the content:
 
     ```
     {$DOMAIN_NAME} {
@@ -289,22 +331,17 @@ You can refer the list of [environment variables](./environment-variables.md) to
     }
     ```
 
-1. Create a user for running Caddy
+1. Create a dedicated user for running Caddy.
 
     ```
     groupadd caddy && \
     useradd caddy -g caddy
     ```
 
-1. Create the Caddy systemd service file.
+1. Create the Caddy systemd service file, `/lib/systemd/system/caddy.service`.
 
     ```
-    touch /lib/systemd/system/caddy.service
-    ```
-
-    and copy the following code into it.
-
-    ```
+    cat >/lib/systemd/system/caddy.service <<'EOF'
     [Unit]
     Description=Caddy
     Documentation=https://caddyserver.com/docs/
@@ -329,8 +366,7 @@ You can refer the list of [environment variables](./environment-variables.md) to
     WantedBy=multi-user.target
     ```
 
-
-1. Reload the systemctl and start the Caddy socket
+1. Reload `systemctl` and start the Caddy service.
 
     ```
     systemctl daemon-reload && \
@@ -344,13 +380,68 @@ You can refer the list of [environment variables](./environment-variables.md) to
     journalctl --unit=caddy.service
     ```
 
-Caddy will obtain and renew Let’s Encrypt certificates automatically.
-
-## User setup
+## Set up your user account
 
 1. Use your web browser to navigate to your Mathesar URL.
 
-    - **With a domain** `https://xDOMAIN_NAMEx`
-    - **Without**    `http://<server‑ip>:8000`
+    - **With a domain** `https://<your_domain>`
+    - **Without**    `http://localhost:8000`
 
 1. Follow the on‑screen wizard to create the first admin account and start using Mathesar!
+
+## Troubleshooting
+
+Following are some troubleshooting steps to take if you run into issues during installation or running Mathesar.
+
+If you're unable to resolve any issue you're facing, please reach out to us via our [community channels](https://mathesar.org/community), or [report a bug](https://github.com/mathesar-foundation/mathesar/issues/new?template=bug_report.md) on our Github repo.
+
+- **Installer stops with “Permission denied” / mkdir fails**
+
+    _Possible cause_: Installing into a root-owned directory without privileges.
+
+    _Resolution_: Re-run the command with sudo, or install in a directory you have write privileges on.
+
+- **Installer fails while building Python dependencies**
+
+    _Possible cause_: Build tools/headers are not present in your environment.
+
+    _Resolution_:
+
+    - Run the install script with `-f` flag to force download a self contained python distributable.
+    - Or, install build tools: `build-essential python3-dev libpq-dev` in your environment.
+
+- **Paths with spaces break service**
+
+    _Possible cause_: Missing escapes in commands & unit files.
+
+    _Resolution_:
+
+    - Always escape spaces in systemd and .env files.
+    - Eg., `WorkingDirectory=/etc/mathesar\ install\ dir`
+
+- **Caddy returning blank page / 502**
+
+    _Possible causes_:
+
+    - Caddy does not have permissions to read `/static` folder.
+    - Mathesar not running or crashed.
+
+    _Resolution_:
+    
+    - Ensure that the caddy service user has read permissions on the `static` folder and it's contents, within your installation directory.
+    - Check the Mathesar logs to drilldown errors, if Mathesar has crashed.
+
+- **Uploading CSV fails (500 error)**
+
+    _Possible cause_: `.media` folder not writable by Mathesar service or other users.
+
+    _Resolution_:
+
+    - Ensure that the mathesar service user has write permissions on the `.media` folder and it's contents, within your installation directory.
+    - If Mathesar has system-wide permissions, ensure other users of the system have write permissions on the `.media` folder and it's contents.
+
+- **Browser shows “Not Secure” / HTTP padlock**
+
+    _Possible cause_: Using plain HTTP over a domain/IP.
+
+    _Resolution_: Serve Mathesar over https using Caddy, if it needs to be accessible over a domain or an IP address.
