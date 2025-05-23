@@ -18,7 +18,8 @@
   import { arrayIndex } from '@mathesar/utils/typeUtils';
   import { ImmutableMap } from '@mathesar-component-library';
 
-  import type QueryManager from '../QueryManager';
+  import { getCustomColumnWidths } from '../displayOptions';
+  import QueryManager from '../QueryManager';
   import { type QueryRunner, getRowSelectionId } from '../QueryRunner';
 
   import QueryRunErrors from './QueryRunErrors.svelte';
@@ -28,9 +29,6 @@
   export let queryHandler: QueryRunner | QueryManager;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
-  const columnWidths = new ImmutableMap([
-    [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
-  ]);
 
   $: ({
     query,
@@ -42,7 +40,11 @@
     selection,
     inspector,
   } = queryHandler);
-  $: ({ initial_columns } = $query);
+  $: ({ initial_columns, display_options } = $query);
+  $: columnWidths = new ImmutableMap([
+    [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
+    ...getCustomColumnWidths(display_options),
+  ]);
   $: clipboardHandler = new SheetClipboardHandler({
     copyingContext: {
       getRows: () =>
@@ -67,6 +69,14 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
+
+  function setColumnWidth(index: number, width: number | null) {
+    if (queryHandler instanceof QueryManager) {
+      void queryHandler.setColumnDisplayOptions(index, {
+        display_width: width,
+      });
+    }
+  }
 </script>
 
 <div data-identifier="query-run-result">
@@ -94,11 +104,12 @@
     >
       <SheetHeader>
         <SheetOriginCell columnIdentifierKey={ID_ROW_CONTROL_COLUMN} />
-        {#each columnList as processedQueryColumn (processedQueryColumn.id)}
+        {#each columnList as processedQueryColumn, i (processedQueryColumn.id)}
           <ResultHeaderCell
             {processedQueryColumn}
             queryRunner={queryHandler}
             isSelected={columnIds.has(processedQueryColumn.id)}
+            setColumnWidth={(width) => setColumnWidth(i, width)}
           />
         {/each}
       </SheetHeader>

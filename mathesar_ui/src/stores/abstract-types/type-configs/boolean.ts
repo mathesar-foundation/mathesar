@@ -1,8 +1,5 @@
-import {
-  type BooleanInputType,
-  type Column,
-  getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+import type { BooleanInputType } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import { iconUiTypeBoolean } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 

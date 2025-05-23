@@ -1,9 +1,8 @@
-import {
-  type Column,
-  type ColumnMetadata,
-  type DurationUnit,
-  getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+import type {
+  ColumnMetadata,
+  DurationUnit,
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import { iconUiTypeDuration } from '@mathesar/icons';
 import { DurationSpecification } from '@mathesar/utils/duration';
 import type { FormValues } from '@mathesar-component-library/types';

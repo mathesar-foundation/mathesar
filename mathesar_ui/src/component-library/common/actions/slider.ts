@@ -14,7 +14,7 @@ interface Options {
   /**
    * This function will be called when the user starts moving the slider.
    */
-  onStart?: () => void;
+  onStart?: (startingValue: number) => void;
   /**
    * This function will be called with the final value when the user stops
    * moving the slider.
@@ -130,8 +130,9 @@ export default function slider(
   function start(e: MouseEvent | TouchEvent) {
     e.stopPropagation();
     e.preventDefault();
-    opts.onStart();
     startingValue = opts.getStartingValue();
+    setValue(startingValue);
+    opts.onStart(startingValue);
     startingPosition = getPosition(e, opts.axis);
     window.addEventListener('mousemove', move, true);
     window.addEventListener('touchmove', move, true);

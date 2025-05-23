@@ -11,9 +11,19 @@
   export let minColumnWidth = MIN_COLUMN_WIDTH_PX;
   export let maxColumnWidth = MAX_COLUMN_WIDTH_PX;
   export let columnIdentifierKey: SheetColumnIdentifierKey;
+
+  /**
+   * Runs once — when the resize is finished. Does NOT run in realtime on each
+   * pixel movement.
+   */
   export let afterResize: (width: number) => void = () => {};
 
-  let isResizing = false;
+  /**
+   * Runs after the user double-clicks the resizer (to reset the column width).
+   */
+  export let onReset: () => void = () => {};
+
+  let startingWidth: number | undefined = undefined;
 
   $: ({ selectionInProgress } = stores);
 </script>
@@ -21,21 +31,26 @@
 <div
   class="column-resizer"
   class:selection-in-progress={$selectionInProgress}
-  class:is-resizing={isResizing}
+  class:is-resizing={!!startingWidth}
   use:slider={{
     getStartingValue: () => api.getColumnWidth(columnIdentifierKey) ?? 0,
-    onMove: (value) => api.setColumnWidth(columnIdentifierKey, value),
-    onStart: () => {
-      isResizing = true;
+    onMove: (width) => api.setColumnWidth(columnIdentifierKey, width),
+    onStart: (startingValue) => {
+      startingWidth = startingValue;
     },
-    onStop: (value) => {
-      isResizing = false;
-      afterResize(value);
+    onStop: (width) => {
+      if (width !== startingWidth) {
+        afterResize(width);
+      }
+      startingWidth = undefined;
     },
     min: minColumnWidth,
     max: maxColumnWidth,
   }}
-  on:dblclick={() => api.resetColumnWidth(columnIdentifierKey)}
+  on:dblclick={() => {
+    api.resetColumnWidth(columnIdentifierKey);
+    onReset();
+  }}
 >
   <div class="indicator" />
 </div>

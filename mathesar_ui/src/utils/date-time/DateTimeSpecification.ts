@@ -1,4 +1,7 @@
-import type { DateFormat, TimeFormat } from '@mathesar/api/rpc/columns';
+import type {
+  DateFormat,
+  TimeFormat,
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import { dayjs } from '@mathesar-component-library';
 
 interface DateConfig {

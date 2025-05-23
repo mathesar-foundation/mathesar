@@ -1,4 +1,5 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
 import type { FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
@@ -9,7 +10,12 @@ import type {
   SelectProps,
 } from '@mathesar-component-library/types';
 
-export type CellColumnLike = Pick<Column, 'type' | 'type_options' | 'metadata'>;
+export interface CellColumnLike {
+  /** The PostgreSQL data type */
+  type: string;
+  type_options: ColumnTypeOptions | null;
+  metadata?: ColumnMetadata | null;
+}
 
 export interface CellColumnFabric {
   id: string | number;

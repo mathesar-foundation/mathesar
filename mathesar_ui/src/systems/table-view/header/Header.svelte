@@ -99,7 +99,7 @@
     newColumnOrder = [];
   }
 
-  function saveColumnWidth(column: ProcessedColumn, width: number) {
+  function saveColumnWidth(column: ProcessedColumn, width: number | null) {
     void columnsDataStore.setDisplayOptions(column, { display_width: width });
   }
 </script>
@@ -135,6 +135,7 @@
       <SheetCellResizer
         columnIdentifierKey={columnId}
         afterResize={(width) => saveColumnWidth(processedColumn, width)}
+        onReset={() => saveColumnWidth(processedColumn, null)}
       />
       <ContextMenu>
         <ColumnHeaderContextMenu {processedColumn} />
