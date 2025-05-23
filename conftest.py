@@ -2,7 +2,6 @@ import pytest
 import random
 import string
 import os
-import psycopg
 
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
 from django.db import connection as dj_connection
@@ -13,7 +12,7 @@ from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from db.deprecated.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
 from db.sql import install as sql_install
-from db.deprecated.utils import get_pg_catalog_table
+from db.deprecated.utils import get_pg_catalog_table, engine_to_psycopg_conn
 from db.deprecated.metadata import get_empty_metadata
 
 
@@ -70,7 +69,7 @@ def create_db(request, engine_cache):
         create_database(engine.url)
         created_dbs.add(db_name)
         # Our default testing database has our types and functions preinstalled.
-        with psycopg.connect(str(engine.url)) as conn:
+        with engine_to_psycopg_conn(engine) as conn:
             sql_install.install(conn)
         engine.dispose()
         return db_name
