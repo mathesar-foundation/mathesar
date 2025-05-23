@@ -44,8 +44,12 @@
   }
 
   &.btn-primary {
-    --button-background: var(--accent-600);
-    --button-border-color: var(--accent-500);
+    --button-background: linear-gradient(
+      to bottom right,
+      var(--stormy-600),
+      var(--stormy-700)
+    );
+    --button-border-color: var(--stormy-700);
     --button-color: #ffffff;
     --button-shadow: var(--shadow-color) 0 1px 2px 0,
       var(--shadow-color) 0 1px 3px 0;
@@ -53,21 +57,29 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--accent-500-rgb), 0.25);
+        --button-outline: 2px solid rgba(var(--stormy-700-rgb), 0.25);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        --button-background: var(--accent-700);
-        --button-border-color: var(--accent-700);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--stormy-700),
+          var(--stormy-800)
+        );
+        --button-border-color: var(--stormy-800);
         --button-shadow: var(--shadow-color) 0 2px 4px 0;
       }
 
       &:active,
       &.active {
-        --button-background: var(--accent-800);
-        --button-border-color: var(--accent-800);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--stormy-800),
+          var(--stormy-900)
+        );
+        --button-border-color: var(--stormy-900);
         --button-shadow: var(--shadow-color) 0 1px 2px 0;
       }
     }
@@ -76,10 +88,10 @@
   &.btn-secondary {
     --button-background: linear-gradient(
       to bottom right,
-      var(--card-gradient-start),
-      var(--card-gradient-end)
+      var(--gray-100),
+      var(--gray-200)
     );
-    --button-border-color: var(--stormy-300);
+    --button-border-color: var(--gray-400);
     --button-color: var(--text-color-primary);
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.05),
@@ -89,7 +101,7 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--stormy-300-rgb), 0.3);
+        --button-outline: 2px solid rgba(var(--gray-400-rgb), 0.3);
         outline-offset: 1px;
       }
 
@@ -97,10 +109,10 @@
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--stormy-100),
-          var(--stormy-200)
+          var(--gray-200),
+          var(--gray-300)
         );
-        --button-border-color: var(--stormy-400);
+        --button-border-color: var(--gray-500);
         box-shadow:
           0 4px 6px -1px rgba(0, 0, 0, 0.1),
           0 2px 4px -2px rgba(0, 0, 0, 0.1),
@@ -111,10 +123,10 @@
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--stormy-200),
-          var(--stormy-300)
+          var(--gray-300),
+          var(--gray-400)
         );
-        --button-border-color: var(--stormy-500);
+        --button-border-color: var(--gray-600);
         box-shadow:
           0 1px 2px rgba(0, 0, 0, 0.05),
           0 1px 3px rgba(0, 0, 0, 0.1),
@@ -257,18 +269,31 @@
   }
 
   &.btn-inspector {
-    --button-background: var(--collapsible-button-background);
-    --button-color: var(--collapsible-button-text);
-    border: 2px solid transparent;
+    --button-background: linear-gradient(
+      to bottom right,
+      var(--stormy-50),
+      var(--stormy-100)
+    );
+    --button-color: var(--text-color-primary);
+    border: 1px solid var(--stormy-200);
     box-shadow: var(--collapsible-button-shadow);
 
     &:hover {
-      --button-background: var(--collapsible-button-hover);
+      --button-background: linear-gradient(
+        to bottom right,
+        var(--stormy-100),
+        var(--stormy-200)
+      );
+      border-color: var(--stormy-300);
     }
 
     &:active {
-      --button-background: var(--collapsible-button-active);
-      border-color: var(--collapsible-button-border);
+      --button-background: linear-gradient(
+        to bottom right,
+        var(--stormy-200),
+        var(--stormy-300)
+      );
+      border-color: var(--stormy-400);
     }
   }
 
@@ -301,30 +326,77 @@
 
 body.theme-dark .btn {
   &.btn-secondary {
+    --button-background: linear-gradient(
+      to bottom right,
+      var(--gray-700),
+      var(--gray-800)
+    );
+    --button-border-color: var(--gray-600);
+    --button-color: var(--text-color-primary);
+
     &:not(:disabled) {
+      &.focus,
+      &:focus {
+        --button-outline: 2px solid rgba(var(--gray-600-rgb), 0.3);
+        outline-offset: 1px;
+      }
+
       &:hover,
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          rgba(255, 255, 255, 0.08),
-          rgba(255, 255, 255, 0.03)
+          var(--gray-600),
+          var(--gray-700)
         );
+        --button-border-color: var(--gray-500);
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.2),
+          0 2px 4px -2px rgba(0, 0, 0, 0.2),
+          0 0 0 1px rgba(255, 255, 255, 0.05) inset;
       }
 
       &:active,
       &.active {
         --button-background: linear-gradient(
-          to top left,
-          rgba(0, 0, 0, 0.4),
-          rgba(0, 0, 0, 0.3)
+          to bottom right,
+          var(--gray-500),
+          var(--gray-600)
         );
-        --button-border-color: var(--stormy-500);
-        border: 1px solid var(--stormy-500);
+        --button-border-color: var(--gray-400);
         box-shadow:
-          inset 0 2px 4px rgba(0, 0, 0, 0.4),
-          inset 0 1px 3px rgba(0, 0, 0, 0.3),
-          0 0 0 1px rgba(0, 0, 0, 0.2);
+          0 1px 2px rgba(0, 0, 0, 0.2),
+          0 1px 3px rgba(0, 0, 0, 0.2),
+          0 1px 2px -1px rgba(0, 0, 0, 0.2);
       }
+    }
+  }
+
+  &.btn-inspector {
+    --button-background: linear-gradient(
+      to bottom right,
+      var(--stormy-700),
+      var(--stormy-800)
+    );
+    --button-color: var(--text-color-primary);
+    border: 1px solid var(--stormy-600);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      --button-background: linear-gradient(
+        to bottom right,
+        var(--stormy-600),
+        var(--stormy-700)
+      );
+      border-color: var(--stormy-500);
+    }
+
+    &:active {
+      --button-background: linear-gradient(
+        to bottom right,
+        var(--stormy-500),
+        var(--stormy-600)
+      );
+      border-color: var(--stormy-400);
     }
   }
 }

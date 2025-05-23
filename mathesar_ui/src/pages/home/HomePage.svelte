@@ -26,14 +26,18 @@
 
 <LayoutWithHeader
   restrictWidth
-  headerTitle={welcomeMessage}
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
+  <div slot="secondary-header" class="home-page-header-title">
+    <div class="home-page-header-title-inner">
+      <h1>{welcomeMessage}</h1>
+    </div>
+  </div>
   <div class="content">
     <div class="resources-sidebar">
-      <h3>{$_('resources')}</h3>
+      <h2>{$_('resources')}</h2>
       <div class="cards">
         <DocumentationResource />
         <CommunityResource />
@@ -49,6 +53,26 @@
 
 <style lang="scss">
   $breakpoint: 50rem;
+
+  .home-page-header-title {
+    max-width: var(--max-layout-width);
+    width: 100%;
+    margin: var(--lg1) auto;
+    padding: 0 var(--page-padding-x);
+  }
+
+  .home-page-header-title-inner {
+    background-color: var(--secondary-header-background);
+    padding: var(--lg4);
+    display: flex;
+    align-items: center;
+    border-radius: var(--sm2);
+
+    h1 {
+      margin: 0;
+      color: var(--text-color-primary);
+    }
+  }
 
   .content {
     display: grid;
@@ -73,11 +97,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background-color: var(--sidebar-background);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-color) 0 2px 8px;
-    border: 1px solid var(--card-border);
     @media screen and (min-width: $breakpoint) {
       grid-row: auto;
       grid-column: 1;

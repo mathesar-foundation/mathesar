@@ -72,7 +72,7 @@
 
 <style lang="scss">
   .tables-list {
-    border-radius: var(--border-radius-m);
+    border-radius: var(--border-radius-l);
     border: 1px solid var(--card-border);
     overflow: hidden;
     background-color: var(--card-background);

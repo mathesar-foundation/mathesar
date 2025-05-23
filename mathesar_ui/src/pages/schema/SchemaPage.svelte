@@ -43,7 +43,6 @@
 <LayoutWithHeader
   restrictWidth
   cssVariables={{
-    '--page-padding': '0 var(--page-padding-x)',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >

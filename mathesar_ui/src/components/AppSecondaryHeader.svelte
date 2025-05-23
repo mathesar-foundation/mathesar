@@ -27,10 +27,16 @@
 <style>
   .app-secondary-header {
     width: 100%;
+    padding: var(--lg1) var(--page-padding-x);
+    max-width: var(--max-layout-width-console-pages);
+    margin-left: auto;
+    margin-right: auto;
   }
   .content {
-    padding: var(--lg4) var(--page-padding-x);
-    max-width: var(--max-layout-width-console-pages);
+    padding: var(--lg4);
+
+    background-color: var(--secondary-header-background);
+    border-radius: var(--sm2);
   }
   .content.restrict-width {
     margin-left: auto;

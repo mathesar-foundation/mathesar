@@ -10,11 +10,11 @@
 <div class="resource-card">
   <span>
     <a class="title" {href} target="_blank">
-      <span class="icon">
-        <Icon {...icon} size="0.8em" />
+      <span class="icon-wrapper">
+        <Icon {...icon} size="0.7em" />
       </span>
       <slot name="title" />
-      <Icon {...iconExternalHyperlink} size="0.8em" />
+      <Icon {...iconExternalHyperlink} size="0.7em" />
     </a>
   </span>
   <div class="description"><slot name="description" /></div>
@@ -27,11 +27,15 @@
     flex-direction: column;
     gap: var(--sm4);
   }
-  .icon {
+  .icon-wrapper {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     margin-right: var(--sm5);
-    color: var(--text-color-tertiary);
+    color: var(--accent-color);
+    background-color: var(--icon-background);
+    border-radius: 50%;
+    padding: var(--sm3);
   }
   .title {
     font-weight: var(--font-weight-medium);
@@ -41,6 +45,9 @@
     align-items: center;
     gap: var(--sm5);
     color: var(--text-color-primary);
+  }
+  .title:hover {
+    text-decoration: underline;
   }
   .description {
     color: var(--text-color-secondary);
