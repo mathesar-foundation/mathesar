@@ -8,7 +8,7 @@ nav:
   - Introduction: index.md
   - Administrator Guide:
       - Install using Docker Compose: administration/install-via-docker-compose.md
-      - Install from scratch: administration/install-from-scratch.md
+      - Install on Linux · macOS · WSL: administration/install-from-scratch.md
       - Environment variables: administration/environment-variables.md
       - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
