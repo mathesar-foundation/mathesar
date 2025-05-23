@@ -1,4 +1,3 @@
-import psycopg
 from sqlalchemy import inspect
 
 from db.tables import list_joinable_tables

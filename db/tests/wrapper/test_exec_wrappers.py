@@ -1,7 +1,6 @@
 import ast
 import os
 
-import psycopg
 from psycopg import sql
 import pytest
 

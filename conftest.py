@@ -2,7 +2,6 @@ import pytest
 import random
 import string
 import os
-import psycopg
 
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
 from django.db import connection as dj_connection
