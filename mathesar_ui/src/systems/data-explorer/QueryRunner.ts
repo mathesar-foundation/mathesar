@@ -1,3 +1,4 @@
+import { execPipe, filter, map } from 'iter-tools';
 import {
   type Readable,
   type Writable,
@@ -9,6 +10,7 @@ import {
 import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type {
   ExplorationResult,
   QueryColumnMetaData,
@@ -23,8 +25,10 @@ import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
   type CancellablePromise,
   ImmutableMap,
+  isDefinedNonNullable,
 } from '@mathesar-component-library';
 
+import { getColumnDisplayOptionsEntries } from './displayOptions';
 import QueryInspector from './QueryInspector';
 import type { QueryModel } from './QueryModel';
 import {
@@ -183,7 +187,38 @@ export class QueryRunner {
         response = await this.runPromise;
       }
 
-      const columnsMetaData = processColumnMetaData(response.column_metadata);
+      // const a = response.output_columns;
+      // const b = get(this.query).display_options.columnDisplayOptions;
+
+      const mapColumnAliasesToDisplayOptions = Object.fromEntries(
+        execPipe(
+          getColumnDisplayOptionsEntries(
+            get(this.query).display_options.columnDisplayOptions ?? {},
+          ),
+          map((opts) => {
+            const { column, displayOptions } = opts;
+            // const index = response.output_columns.findIndex(column);
+            const alias = response.output_columns.at(column.index);
+            if (!alias) return undefined;
+            return [alias, displayOptions] as [string, ColumnMetadata];
+          }),
+          filter(isDefinedNonNullable),
+        ),
+      );
+
+      const a = Object.fromEntries(
+        [...Object.entries(response.column_metadata)].map(([alias, v]) => [
+          alias,
+          {
+            ...v,
+            metadata: mapColumnAliasesToDisplayOptions[alias] ?? null,
+          },
+        ]),
+      );
+
+      // const columnsMetaData = processColumnMetaData(response.column_metadata);
+      const columnsMetaData = processColumnMetaData(a);
+
       this.columnsMetaData.set(columnsMetaData);
       this.processedColumns.set(
         new ImmutableMap(

@@ -70,11 +70,12 @@
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
 
-  function setColumnWidth(index: number, width: number | null) {
+  function setColumnWidth(columnIndex: number, width: number | null) {
     if (queryHandler instanceof QueryManager) {
-      void queryHandler.setColumnDisplayOptions(index, {
-        display_width: width,
-      });
+      void queryHandler.setColumnDisplayOptions(
+        { columnIndex },
+        { display_width: width },
+      );
     }
   }
 </script>

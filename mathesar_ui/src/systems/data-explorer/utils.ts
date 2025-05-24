@@ -1,4 +1,5 @@
 import { api } from '@mathesar/api/rpc';
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type { Column } from '@mathesar/api/rpc/columns';
 import type {
   ExplorationResult,
@@ -335,13 +336,14 @@ export function getInputColumns(
 function processColumn(
   columnInfo: Pick<QueryColumnMetaData, 'alias'> &
     ProcessedQueryResultColumnSource &
-    Partial<QueryColumnMetaData>,
+    Partial<QueryColumnMetaData> & { metadata?: ColumnMetadata | null },
 ): ProcessedQueryResultColumn {
-  const column: QueryResultColumn = {
+  const column: QueryResultColumn & { metadata?: ColumnMetadata | null } = {
     alias: columnInfo.alias,
     display_name: columnInfo.display_name ?? columnInfo.alias,
     type: columnInfo.type ?? 'unknown',
     type_options: columnInfo.type_options ?? null,
+    metadata: columnInfo.metadata ?? null,
   };
 
   const abstractType = getAbstractTypeForDbType(column.type);

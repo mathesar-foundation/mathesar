@@ -1,73 +1,64 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
   import { createValidationContext } from '@mathesar/component-library';
   import CancelOrProceedButtonPair from '@mathesar/component-library/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
   import AbstractTypeDisplayOptions from '@mathesar/components/abstract-type-control/AbstractTypeDisplayOptions.svelte';
   import { constructDisplayForm } from '@mathesar/components/abstract-type-control/utils';
-  import {
-    type ProcessedColumn,
-    getTabularDataStoreFromContext,
-  } from '@mathesar/stores/table-data';
+  import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
   import { toast } from '@mathesar/stores/toast';
 
-  export let column: ProcessedColumn;
+  const validationContext = createValidationContext();
+
+  export let column: CellColumnFabric;
+  export let onSave: (columnMetadata: ColumnMetadata) => Promise<void>;
+  export let initialDisplayOptions: ColumnMetadata;
 
   let actionButtonsVisible = false;
+  let isProcessing = false;
+  let displayOptions: ColumnMetadata;
 
-  const tabularData = getTabularDataStoreFromContext();
-  $: ({ columnsDataStore } = $tabularData);
-
-  let displayOptions: ColumnMetadata = column.column.metadata ?? {};
-  let typeChangeState: RequestStatus;
-
-  const validationContext = createValidationContext();
+  $: displayOptions = initialDisplayOptions;
   $: ({ validationResult } = validationContext);
-
   $: ({ displayOptionsConfig, displayForm, displayFormValues } =
-    constructDisplayForm(column.abstractType, column.column.type, {
-      ...column.column,
-      abstractType: column.abstractType,
-    }));
+    constructDisplayForm(column.abstractType, initialDisplayOptions));
+  $: isSaveDisabled = isProcessing || !$validationResult;
+  $: isFormDisabled = isProcessing;
 
-  async function save() {
-    typeChangeState = { state: 'processing' };
+  // TODO_EXPLORATION_DISPLAY_IMPROVEMENTS: Re-enable this line once
+  // `QueryResultColumn` contains the necessary data from the API.
+  //
+  // $: isFkOrPk = column.column.primary_key || !!column.linkFk;
+  $: isFkOrPk = false;
+
+  async function handleProceed() {
+    isProcessing = true;
     try {
-      await columnsDataStore.setDisplayOptions(column, displayOptions);
+      await onSave(displayOptions);
       actionButtonsVisible = false;
-      typeChangeState = { state: 'success' };
+      isProcessing = false;
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
           : $_('unable_to_change_display_opts');
       toast.error(message);
-      typeChangeState = { state: 'failure', errors: [message] };
+      isProcessing = true;
     }
   }
 
   function cancel() {
-    typeChangeState = { state: 'success' };
-    displayOptions = column.column.metadata ?? {};
+    isProcessing = false;
+    displayOptions = initialDisplayOptions;
     actionButtonsVisible = false;
     ({ displayOptionsConfig, displayForm, displayFormValues } =
-      constructDisplayForm(column.abstractType, column.column.type, {
-        ...column.column,
-        abstractType: column.abstractType,
-      }));
+      constructDisplayForm(column.abstractType, initialDisplayOptions));
   }
-
-  $: isSaveDisabled =
-    typeChangeState?.state === 'processing' || !$validationResult;
 
   function showActionButtons() {
     actionButtonsVisible = true;
   }
-
-  $: isFkOrPk = column.column.primary_key || !!column.linkFk;
-  $: isFormDisabled = typeChangeState?.state === 'processing';
 </script>
 
 {#if displayOptionsConfig && displayForm && !isFkOrPk}
@@ -83,9 +74,9 @@
     {#if actionButtonsVisible}
       <div class="footer">
         <CancelOrProceedButtonPair
-          onProceed={save}
+          onProceed={handleProceed}
           onCancel={cancel}
-          isProcessing={typeChangeState?.state === 'processing'}
+          {isProcessing}
           canProceed={!isSaveDisabled}
           proceedButton={{ label: $_('save') }}
           size="small"

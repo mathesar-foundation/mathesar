@@ -257,6 +257,10 @@ export default class QueryManager extends QueryRunner {
             await this.run();
           }
           break;
+        case 'displayOptions':
+          this.speculateColumns();
+          await this.run();
+          break;
         case 'transformations':
         case 'initialColumnsAndTransformations':
           await this.resetPaginationAndRun();
@@ -311,17 +315,26 @@ export default class QueryManager extends QueryRunner {
   }
 
   async setColumnDisplayOptions(
-    columnIndex: number,
+    columnLookup: { columnIndex: number } | { columnName: string },
     displayOptions: ColumnMetadata,
   ): Promise<void> {
-    const column = [...get(this.processedColumns).values()][columnIndex];
-    if (!column) {
-      return;
-    }
+    const anchor = (() => {
+      if ('columnIndex' in columnLookup) {
+        const { columnIndex } = columnLookup;
+        const column = [...get(this.processedColumns).values()].at(columnIndex);
+        if (!column) return undefined;
+        return makeColumnAnchor(column.column, columnIndex);
+      }
+      const { columnName } = columnLookup;
+      const column = get(this.processedColumns).get(columnName);
+      if (!column) return undefined;
+      return makeColumnAnchor(column.column, column.columnIndex);
+    })();
+    if (!anchor) return;
 
     await this.update((query) =>
       query.withColumnDisplayOptionsEntry({
-        column: makeColumnAnchor(column.column, columnIndex),
+        column: anchor,
         displayOptions,
       }),
     );
