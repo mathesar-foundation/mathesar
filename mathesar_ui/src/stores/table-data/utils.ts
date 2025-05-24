@@ -54,7 +54,7 @@ export function extractRowKeyFromCellKey(cellKey: CellKey): RowKey {
 
 export const CLIENT_VALIDATION_CANNOT_BE_NULL = 101;
 
-export function getClientSideCellErrors(
+function getClientSideCellErrors(
   cellValue: unknown,
   column: Column,
 ): ClientSideCellError[] {
@@ -203,7 +203,7 @@ export function getSheetState(props: {
   return getMostImportantRequestStatusState(allStatuses);
 }
 
-export function validateCell({
+function validateCell({
   cellValue,
   column,
   cellKey,
