@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-Mathesar MCP Server - Simplified Dynamic Tool Registration
+Mathesar MCP Server - Category-Based Tool Registration
 
-A Model Context Protocol server that dynamically registers each Mathesar RPC method
-as individual MCP tools using simple environment variable authentication.
+A Model Context Protocol server that registers Mathesar RPC methods as category-based
+MCP tools (tables, records, columns, etc.) to keep tool count manageable while providing
+access to all Mathesar functionality through method parameters.
 """
 
 import os
 import logging
-from typing import Any, Dict, List, Optional, Set, Union, Annotated
+from typing import Any, Dict, List, Optional, Set
 import httpx
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
 import inspect
-from types import FunctionType
 
 # Set up logging
 logging.basicConfig(
@@ -24,7 +24,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize the MCP server
-mcp = FastMCP("Mathesar MCP Server")
+mcp = FastMCP("Mathesar MCP Server - Category-Based")
 
 # Configuration from environment variables
 MATHESAR_BASE_URL = os.getenv("MATHESAR_BASE_URL", "http://localhost:8000")
@@ -80,6 +80,7 @@ async def make_rpc_call(method: str, params: Dict[str, Any] = None) -> Any:
         params = {}
 
     request = RPCRequest(method=method, params=params)
+    logger.info(f"[make_rpc_call] Attempting to send RPC request: {request.model_dump(exclude_none=True)}")
 
     try:
         async with httpx.AsyncClient() as client:
@@ -213,13 +214,61 @@ def convert_type_annotation(param_type: str) -> Any:
     # Default to Any for complex types
     return Any
 
+def convert_default_value(default_value: Any) -> Any:
+    """Convert default value from parameter metadata to a usable Python value."""
+    if default_value is None or default_value == "None":
+        return None
+
+    # Handle string representations of Python literals
+    if isinstance(default_value, str):
+        # Handle common string patterns
+        if default_value == "Required":
+            return inspect.Parameter.empty
+        elif default_value.lower() == "none":
+            return None
+        elif default_value.lower() == "true":
+            return True
+        elif default_value.lower() == "false":
+            return False
+        elif default_value == "[]":
+            return []
+        elif default_value == "{}":
+            return {}
+        else:
+            # Try to evaluate as a literal
+            try:
+                import ast
+                return ast.literal_eval(default_value)
+            except (ValueError, SyntaxError):
+                # If it can't be parsed as a literal, return as string
+                return default_value
+
+    # Return the value as-is for other types
+    return default_value
+
 def create_parameter_annotation(param_name: str, param_info: Dict[str, Any], parsed_args: Dict[str, Any]) -> tuple:
-    """Create a proper type annotation and default for a parameter."""
+    """Create a proper type annotation and default for a parameter.
+
+    CRITICAL FIX: JSON Number Type Handling
+    =====================================
+    JSON-RPC doesn't distinguish between integers and floats - both are "number" type.
+    This caused Pydantic validation errors when Mathesar expected integer parameters.
+
+    Our solution: Convert 'int' parameters to 'Union[int, float]' to accept JSON numbers.
+    This allows the MCP framework to properly handle numeric parameters from JSON-RPC calls.
+
+    Args:
+        param_name: Name of the parameter
+        param_info: Parameter metadata from Mathesar RPC introspection
+        parsed_args: Parsed documentation arguments
+
+    Returns:
+        tuple: (type_annotation, default_value) for the parameter
+    """
     param_type = param_info.get("type", "Any")
     default_value = param_info.get("default", "Required")
 
     # Get description from parsed documentation
-    # parsed_args values are strings directly, not dictionaries
     description = parsed_args.get(param_name, f"Parameter {param_name}")
     if not description or not str(description).strip():
         description = f"Parameter {param_name}"
@@ -227,160 +276,278 @@ def create_parameter_annotation(param_name: str, param_info: Dict[str, Any], par
     # Enhance description with type information
     if param_type and param_type != "Any":
         # Clean up type display
-        clean_type = param_type.replace("<class '", "").replace("'>", "").replace("mathesar.rpc.", "")
-        if clean_type != "Any":
-            description = f"{description} (Type: {clean_type})"
+        clean_type = param_type.replace("<class '", "").replace("'>", "").replace("typing.", "")
+        description = f"{description} (Type: {clean_type})"
 
     # Convert type annotation
     base_type = convert_type_annotation(param_type)
 
-        # Handle default values and create proper annotations
+    # CRITICAL FIX: Handle JSON number ambiguity for integers
+    # JSON doesn't distinguish between int and float, everything is "number"
+    # So we need to be more permissive to handle JSON-RPC serialization
+    if base_type is int:
+        # Use Union[int, float] to handle JSON number type
+        # This allows Pydantic to accept numeric values from JSON-RPC
+        # regardless of whether they're transmitted as integers or floats
+        from typing import Union
+        base_type = Union[int, float]
+        logger.debug(f"Parameter '{param_name}' converted from int to Union[int, float] for JSON compatibility")
+
     if default_value == "Required":
-        # Required parameter with Pydantic Field
-        from typing import Annotated
-        annotation = Annotated[base_type, Field(description=description)]
+        # Required parameter
+        annotation = base_type
         default = inspect.Parameter.empty
     elif default_value is None or default_value == "None":
         # Optional parameter with None default
-        from typing import Annotated
-        annotation = Annotated[Optional[base_type], Field(default=None, description=description)]
+        annotation = Optional[base_type]
         default = None
     else:
-        # Optional parameter with specific default
-        try:
-            if isinstance(default_value, str):
-                if default_value.lower() == "true":
-                    parsed_default = True
-                elif default_value.lower() == "false":
-                    parsed_default = False
-                elif default_value.isdigit():
-                    parsed_default = int(default_value)
-                else:
-                    parsed_default = default_value
-            else:
-                parsed_default = default_value
-        except:
-            parsed_default = default_value
-
-        from typing import Annotated
-        annotation = Annotated[Optional[base_type], Field(default=parsed_default, description=description)]
-        default = parsed_default
+        # Parameter with specific default value
+        annotation = Optional[base_type]
+        default = convert_default_value(default_value)
 
     return annotation, default
 
-async def create_and_register_tool(method_name: str, metadata: Dict[str, Any]) -> bool:
-    """Create and register a dynamic tool for a Mathesar RPC method with proper parameter definitions."""
-    try:
-        # Extract metadata
-        summary = metadata.get('parsed_doc', {}).get('summary', f'Call {method_name} method')
-        full_description = metadata.get('docstring', summary)
+def group_methods_by_category(methods_metadata: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    """Group RPC methods by their top-level category."""
+    categories = {}
+    total_methods = len(methods_metadata)
+    processed_methods = 0
+    skipped_methods = []
+
+    for method_name, metadata in methods_metadata.items():
+        # Log all methods being processed for debugging
+        logger.debug(f"Processing method: {method_name}")
+
+        # Skip internal system methods that shouldn't be exposed as tools
+        # but be more permissive than before
+        if method_name.startswith('system.') and method_name not in [
+            'system.introspect_methods',
+            'system.listMethods',  # Allow basic system methods
+            'system.methodSignature',
+            'system.methodHelp'
+        ]:
+            skipped_methods.append(method_name)
+            continue
+
+        # Extract category from method name (e.g., "tables.list" -> "tables")
+        parts = method_name.split('.')
+        if len(parts) >= 2:
+            category = parts[0]
+            action = '.'.join(parts[1:])  # Handle nested actions like "configured.list"
+        else:
+            category = 'system'
+            action = method_name
+
+        if category not in categories:
+            categories[category] = {}
+
+        categories[category][action] = {
+            'method_name': method_name,
+            'metadata': metadata
+        }
+        processed_methods += 1
+
+    logger.info(f"Method grouping complete: {processed_methods}/{total_methods} methods processed into {len(categories)} categories")
+    if skipped_methods:
+        logger.info(f"Skipped {len(skipped_methods)} system methods: {skipped_methods[:5]}{'...' if len(skipped_methods) > 5 else ''}")
+
+    return categories
+
+def build_category_documentation(category: str, methods: Dict[str, Any]) -> str:
+    """Build comprehensive documentation for a category tool."""
+    docs = [f"Execute {category} operations in Mathesar.\n"]
+
+    # Group methods by characteristics
+    read_methods = []
+    write_methods = []
+    destructive_methods = []
+
+    for action, method_info in methods.items():
+        method_name = method_info['method_name']
+        metadata = method_info['metadata']
+        summary = metadata.get('parsed_doc', {}).get('summary', f'{action} operation')
+
+        characteristics = analyze_method_characteristics(method_name, metadata)
+
+        method_doc = f"  - {action}: {summary}"
+
+        if characteristics.get('destructiveHint'):
+            destructive_methods.append(method_doc)
+        elif characteristics.get('readOnlyHint'):
+            read_methods.append(method_doc)
+        else:
+            write_methods.append(method_doc)
+
+    if read_methods:
+        docs.append("📖 Read Operations:")
+        docs.extend(read_methods)
+        docs.append("")
+
+    if write_methods:
+        docs.append("✏️ Write Operations:")
+        docs.extend(write_methods)
+        docs.append("")
+
+    if destructive_methods:
+        docs.append("⚠️ Destructive Operations:")
+        docs.extend(destructive_methods)
+        docs.append("")
+
+    docs.append("Parameters vary by method - provide only the parameters needed for your chosen method.")
+
+    return "\n".join(docs)
+
+def collect_all_parameters_for_category(methods: Dict[str, Any]) -> Dict[str, Any]:
+    """Collect all unique parameters used across methods in a category."""
+    all_params = {}
+
+    for action, method_info in methods.items():
+        metadata = method_info['metadata']
         parameters = metadata.get('parameters', {})
         args_list = metadata.get('args', [])
         parsed_args = metadata.get('parsed_doc', {}).get('args', {})
-        characteristics = analyze_method_characteristics(method_name, metadata)
 
-        # Extract additional metadata for richer descriptions
-        category = metadata.get('category', '')
-        action = metadata.get('action', '')
-        return_doc = metadata.get('return_doc', {})
-        return_type = return_doc.get('type', '') if return_doc else ''
-
-        # Build enhanced description
-        enhanced_description = full_description
-        if category and action:
-            enhanced_description = f"[{category}.{action}] {enhanced_description}"
-        if return_type:
-            returns_text = metadata.get('parsed_doc', {}).get('returns', 'Result data')
-            enhanced_description += f"\n\nReturns ({return_type}): {returns_text}"
-
-        # Filter out 'kwargs' from parameters as it's a catch-all
+        # Filter out 'kwargs' from parameters
         filtered_params = {k: v for k, v in parameters.items() if k != 'kwargs'}
-        filtered_args = [arg for arg in args_list if arg != 'kwargs']
 
-        tool_name = method_name.replace('.', '_')
+        for param_name in args_list:
+            if param_name != 'kwargs' and param_name in filtered_params:
+                param_info = filtered_params[param_name]
+                if param_name not in all_params:
+                    # Store parameter info with enhanced description
+                    enhanced_desc = parsed_args.get(param_name, f"Parameter {param_name}")
+                    param_type = param_info.get("type", "Any")
 
-        # If no meaningful parameters, create simple function
-        if not filtered_params:
-            async def simple_tool():
-                logger.debug(f"Calling {method_name} with no params")
-                return await make_rpc_call(method_name, {})
+                    # Add type info to description
+                    clean_type = param_type.replace("<class '", "").replace("'>", "").replace("mathesar.rpc.", "")
+                    if clean_type != "Any":
+                        enhanced_desc = f"{enhanced_desc} (Type: {clean_type})"
 
-            simple_tool.__name__ = tool_name
-            simple_tool.__doc__ = enhanced_description
-            tool_func = mcp.tool(annotations=characteristics)(simple_tool)
-            logger.info(f"Registered simple tool: {tool_name}")
-            return True
+                    all_params[param_name] = {
+                        'type': param_type,
+                        'description': enhanced_desc,
+                        'default': param_info.get('default', 'Required')
+                    }
 
-                # Create function code with proper parameters
+    return all_params
+
+async def create_category_tool(category: str, methods: Dict[str, Any]) -> bool:
+    """Create a single tool for an entire category of methods."""
+    try:
+        # Build documentation
+        category_docs = build_category_documentation(category, methods)
+
+        # Collect all parameters
+        all_params = collect_all_parameters_for_category(methods)
+
+        # Analyze overall characteristics (if most methods are read-only, mark as such)
+        read_only_count = sum(1 for _, method_info in methods.items()
+                             if analyze_method_characteristics(method_info['method_name'], method_info['metadata']).get('readOnlyHint'))
+        destructive_count = sum(1 for _, method_info in methods.items()
+                               if analyze_method_characteristics(method_info['method_name'], method_info['metadata']).get('destructiveHint'))
+
+        characteristics = {
+            "readOnlyHint": read_only_count > len(methods) * 0.6,  # Majority are read-only
+            "destructiveHint": destructive_count > 0,  # Any destructive methods
+            "idempotentHint": read_only_count > len(methods) * 0.6,
+            "openWorldHint": True
+        }
+
+        # Create parameter annotations
         param_annotations = {}
         param_defaults = {}
 
-        for param_name in filtered_args:
-            if param_name in filtered_params:
-                param_info = filtered_params[param_name]
-                annotation, default = create_parameter_annotation(param_name, param_info, parsed_args)
-                param_annotations[param_name] = annotation
-                if default is not inspect.Parameter.empty:
-                    param_defaults[param_name] = default
+        # Always include method parameter first
+        from typing import Annotated
+        method_choices = list(methods.keys())
+        param_annotations['method'] = Annotated[str, Field(description=f"The {category} method to execute. Available: {', '.join(method_choices)}")]
 
-        # Create the dynamic function with proper signature
-        def create_dynamic_function():
-            # Create parameter list for function signature
-            sig_params = []
-            for param_name in filtered_args:
-                if param_name in param_annotations:
-                    if param_name in param_defaults:
-                        param = inspect.Parameter(
-                            param_name,
-                            inspect.Parameter.KEYWORD_ONLY,
-                            default=param_defaults[param_name],
-                            annotation=param_annotations[param_name]
-                        )
-                    else:
-                        param = inspect.Parameter(
-                            param_name,
-                            inspect.Parameter.KEYWORD_ONLY,
-                            annotation=param_annotations[param_name]
-                        )
-                    sig_params.append(param)
+        # Add all collected parameters as optional
+        for param_name, param_info in all_params.items():
+            annotation, default = create_parameter_annotation(param_name, param_info, {param_name: param_info['description']})
+            param_annotations[param_name] = annotation
+            if default is not inspect.Parameter.empty:
+                param_defaults[param_name] = default
 
-            # Create the signature
-            signature = inspect.Signature(sig_params)
+        # Create function signature
+        sig_params = []
 
-            # Create the actual function
-            async def dynamic_tool_impl(**kwargs):
-                # Filter out None values and prepare parameters
-                filtered_kwargs = {k: v for k, v in kwargs.items() if v is not None}
-                logger.debug(f"Calling {method_name} with params: {list(filtered_kwargs.keys())}")
-                return await make_rpc_call(method_name, filtered_kwargs)
+        # Method parameter (required)
+        sig_params.append(inspect.Parameter(
+            'method',
+            inspect.Parameter.KEYWORD_ONLY,
+            annotation=param_annotations['method']
+        ))
 
-            # Set the signature on the function
-            dynamic_tool_impl.__signature__ = signature
-            dynamic_tool_impl.__name__ = tool_name
-            dynamic_tool_impl.__doc__ = enhanced_description
+        # All other parameters (optional)
+        for param_name in sorted(all_params.keys()):
+            if param_name in param_annotations:
+                param = inspect.Parameter(
+                    param_name,
+                    inspect.Parameter.KEYWORD_ONLY,
+                    default=param_defaults.get(param_name, None),
+                    annotation=param_annotations[param_name]
+                )
+                sig_params.append(param)
 
-            return dynamic_tool_impl
+        signature = inspect.Signature(sig_params)
 
-        # Create and register the function
-        dynamic_tool = create_dynamic_function()
-        tool_func = mcp.tool(annotations=characteristics)(dynamic_tool)
+        # Create the implementation
+        async def category_tool_impl(**kwargs):
+            logger.info(f"[category_tool_impl] Received kwargs: {kwargs}")
+            method_action = kwargs.pop('method', None)
+            logger.info(f"[category_tool_impl] Kwargs after popping 'method': {kwargs}, method_action: {method_action}")
 
-        logger.info(f"Registered parameterized tool: {tool_name} with {len(filtered_params)} parameters")
+            if not method_action:
+                return {
+                    "error": "Missing method parameter",
+                    "message": f"Must specify which {category} method to execute",
+                    "available_methods": list(methods.keys()),
+                    "isError": True
+                }
+
+            if method_action not in methods:
+                return {
+                    "error": "Invalid method",
+                    "message": f"Method '{method_action}' not available for {category}",
+                    "available_methods": list(methods.keys()),
+                    "isError": True
+                }
+
+            # Get the full method name
+            full_method_name = methods[method_action]['method_name']
+
+            # Filter out None values and prepare parameters
+            filtered_kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+            logger.info(f"[category_tool_impl] Calling {full_method_name} with filtered_kwargs: {filtered_kwargs}")
+            return await make_rpc_call(full_method_name, filtered_kwargs)
+
+        # Set function metadata
+        category_tool_impl.__signature__ = signature
+        category_tool_impl.__name__ = f"{category}"
+        category_tool_impl.__doc__ = category_docs
+
+        # Register the tool
+        tool_func = mcp.tool(annotations=characteristics)(category_tool_impl)
+
+        logger.info(f"Registered category tool: {category} with {len(methods)} methods and {len(all_params)} parameters")
         return True
 
     except Exception as e:
-        logger.error(f"Failed to create tool for {method_name}: {e}")
+        logger.error(f"Failed to create category tool for {category}: {e}")
         logger.exception("Full traceback:")
         return False
 
 async def register_dynamic_tools() -> Dict[str, Any]:
-    """Register all Mathesar RPC methods as individual MCP tools."""
+    """Register Mathesar RPC methods as category-based MCP tools."""
     auth_error = check_auth_config()
     if auth_error:
         return {"error": auth_error}
 
     try:
-        logger.info("Starting dynamic tool registration...")
+        logger.info("Starting category-based tool registration...")
 
         # Get method information using system.introspect_methods
         introspection = await make_rpc_call("system.introspect_methods")
@@ -395,34 +562,46 @@ async def register_dynamic_tools() -> Dict[str, Any]:
         total_methods = len(methods_metadata)
         logger.info(f"Found {total_methods} methods to process")
 
-        # Process methods and register tools
+        # Log a sample of methods for debugging
+        method_names = list(methods_metadata.keys())
+        if method_names:
+            logger.info(f"Sample methods: {method_names[:10]}{'...' if len(method_names) > 10 else ''}")
+
+        # Group methods by category
+        categories = group_methods_by_category(methods_metadata)
+        logger.info(f"Grouped into {len(categories)} categories: {list(categories.keys())}")
+
+        # Log category details
+        for category, methods in categories.items():
+            method_count = len(methods)
+            method_list = list(methods.keys())
+            logger.debug(f"Category '{category}': {method_count} methods - {method_list[:5]}{'...' if method_count > 5 else ''}")
+
+        # Register category tools
         tools_registered = 0
-        failed_methods = []
+        failed_categories = []
 
-        for method_name, metadata in methods_metadata.items():
-            # Skip certain system methods
-            if method_name.startswith('system.') and method_name not in ['system.introspect_methods']:
-                continue
-
+        for category, methods in categories.items():
             try:
-                success = await create_and_register_tool(method_name, metadata)
+                success = await create_category_tool(category, methods)
                 if success:
                     tools_registered += 1
-                    _registered_tools.add(method_name)
+                    _registered_tools.add(category)
                 else:
-                    failed_methods.append(method_name)
+                    failed_categories.append(category)
 
             except Exception as e:
-                failed_methods.append(f"{method_name}: {str(e)}")
-                logger.error(f"Exception registering {method_name}: {e}")
+                failed_categories.append(f"{category}: {str(e)}")
+                logger.error(f"Exception registering category {category}: {e}")
 
-        logger.info(f"Registration complete: {tools_registered} tools registered, {len(failed_methods)} failed")
+        logger.info(f"Registration complete: {tools_registered} category tools registered")
 
         return {
             "success": True,
-            "tools_registered": tools_registered,
+            "category_tools_registered": tools_registered,
             "total_methods": total_methods,
-            "failed_methods": failed_methods[:10]
+            "categories": list(categories.keys()),
+            "failed_categories": failed_categories[:10]
         }
 
     except Exception as e:
@@ -431,13 +610,13 @@ async def register_dynamic_tools() -> Dict[str, Any]:
 
 @mcp.tool()
 async def mathesar_status() -> str:
-    """Get the current status of the Mathesar MCP server."""
+    """Get diagnostic information about the Mathesar MCP server connection and registered tools."""
     auth_error = check_auth_config()
     if auth_error:
-        return f"""❌ Mathesar MCP Server Status
+        return f"""❌ Mathesar MCP Server Diagnostics
 
 🔐 Authentication: Not configured
-🛠️ Dynamic Tools: 0 registered
+🛠️ Tools: 0 registered
 🌐 Server URL: {MATHESAR_BASE_URL}
 
 Error: {auth_error}
@@ -461,77 +640,24 @@ Please configure:
     except Exception as e:
         connection_status = f"❌ Connection Error: {e}"
 
-    return f"""✅ Mathesar MCP Server Status
+    return f"""✅ Mathesar MCP Server Diagnostics
 
 🔐 Authentication: ✅ Configured (User: {MATHESAR_USERNAME})
-🛠️ Dynamic Tools: {registered_count} registered
+🛠️ Tools: {registered_count} registered
 🌐 Server URL: {MATHESAR_BASE_URL}
 🔗 Connection: {connection_status}
 
-💡 All Mathesar RPC methods are available as individual MCP tools!"""
-
-@mcp.tool()
-async def mathesar_register_tools() -> str:
-    """Register all available Mathesar RPC methods as individual MCP tools."""
-    result = await register_dynamic_tools()
-
-    if result.get("error"):
-        return f"❌ Registration failed: {result['error']}"
-
-    tools_registered = result.get("tools_registered", 0)
-    total_methods = result.get("total_methods", 0)
-    failed_methods = result.get("failed_methods", [])
-
-    status = f"✅ Dynamic tool registration complete!\n\n"
-    status += f"📊 Results:\n"
-    status += f"- Tools registered: {tools_registered}\n"
-    status += f"- Total methods found: {total_methods}\n"
-    status += f"- Failed registrations: {len(failed_methods)}\n"
-
-    if failed_methods:
-        status += f"\n❌ Failed methods (first 10):\n"
-        for method in failed_methods:
-            status += f"- {method}\n"
-
-    status += f"\n💡 Use tool names like: mathesar_tables_list, mathesar_records_add, etc."
-
-    return status
-
-# Note: The LLMs strongly prefer using this tool over the dynamic ones if it is enabled.
-# I'm not sure why, but it's a good idea to keep it disabled.
-#
-# @mcp.tool()
-# async def mathesar_call_method(
-#     method: str,
-#     params: Optional[Dict[str, Any]] = None
-# ) -> Any:
-#     """
-#     Call any Mathesar RPC method directly (fallback method).
-
-#     Args:
-#         method: The RPC method name (e.g., "tables.list", "records.add")
-#         params: Optional parameters for the method as a dictionary
-
-#     Returns:
-#         The result of the RPC method call, or an error object
-#     """
-#     if not method or not isinstance(method, str):
-#         return {
-#             "error": "Invalid method",
-#             "message": "Method must be a non-empty string",
-#             "isError": True
-#         }
-
-#     return await make_rpc_call(method, params or {})
+💡 Available tools: {', '.join(sorted(_registered_tools))}
+Each tool accepts a 'method' parameter to specify the operation."""
 
 async def startup():
-    """Initialize the server by registering dynamic tools."""
+    """Initialize the server by registering category-based tools."""
     logger.info("Starting Mathesar MCP Server...")
 
     auth_error = check_auth_config()
     if auth_error:
         logger.warning(f"Authentication not configured: {auth_error}")
-        logger.info("Use mathesar_register_tools() after configuring environment variables")
+        logger.info("Configure environment variables and restart to connect to Mathesar")
         return
 
     # Automatically register tools on startup
@@ -540,14 +666,20 @@ async def startup():
 
     if result.get("error"):
         logger.error(f"Automatic registration failed: {result['error']}")
-        logger.info("Use mathesar_register_tools() to retry registration")
+        logger.info("Check authentication and Mathesar server connection")
     else:
-        tools_count = result.get("tools_registered", 0)
-        logger.info(f"Successfully registered {tools_count} dynamic tools!")
+        category_tools = result.get("category_tools_registered", 0)
+        categories = result.get("categories", [])
+        logger.info(f"Successfully registered {category_tools} category tools!")
+        logger.info(f"Available categories: {', '.join(sorted(categories))}")
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for the Mathesar MCP Server."""
     import asyncio
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(startup())
     mcp.run()
+
+if __name__ == "__main__":
+    main()
