@@ -27,7 +27,8 @@ This project uses [UV](https://docs.astral.sh/uv/).
    uv sync
    ```
 3. Run Mathesar locally
-4. Add the MCP Server config to Cursor, VS Code, etc.
+4. Login to Mathesar in your browser, and grab the CSRF token and session ID from developer tools.
+5. Add the MCP Server config to Cursor, VS Code, etc.
     ```json
    {
      "mcpServers": {
