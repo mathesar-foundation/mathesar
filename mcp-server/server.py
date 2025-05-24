@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
 """
-Mathesar MCP Server - Dynamic Tool Registration
+Mathesar MCP Server - Simplified Dynamic Tool Registration
 
 A Model Context Protocol server that dynamically registers each Mathesar RPC method
-as individual MCP tools with rich metadata, proper annotations, and type safety.
+as individual MCP tools using simple environment variable authentication.
 """
 
 import os
 import logging
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Union, Annotated
 import httpx
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
+import inspect
+from types import FunctionType
 
-# Set up file logging (not stdout to avoid MCP protocol interference)
+# Set up logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('/tmp/mathesar_mcp_debug.log'),
-        logging.StreamHandler()  # This goes to stderr, not stdout
-    ]
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
@@ -29,14 +28,11 @@ mcp = FastMCP("Mathesar MCP Server")
 
 # Configuration from environment variables
 MATHESAR_BASE_URL = os.getenv("MATHESAR_BASE_URL", "http://localhost:8000")
+MATHESAR_USERNAME = os.getenv("MATHESAR_USERNAME")
+MATHESAR_PASSWORD = os.getenv("MATHESAR_PASSWORD")
+MATHESAR_CSRF_TOKEN = os.getenv("MATHESAR_CSRF_TOKEN")
+MATHESAR_SESSION_ID = os.getenv("MATHESAR_SESSION_ID")
 RPC_ENDPOINT = f"{MATHESAR_BASE_URL}/api/rpc/v0/"
-
-class MathesarCredentials(BaseModel):
-    """Credentials for authenticating with Mathesar"""
-    username: str
-    password: str
-    csrf_token: Optional[str] = None
-    session_id: Optional[str] = None
 
 class RPCRequest(BaseModel):
     """JSON-RPC request format"""
@@ -52,51 +48,31 @@ class RPCResponse(BaseModel):
     error: Optional[Dict[str, Any]] = None
     jsonrpc: str
 
-# Global storage
-_credentials: Optional[MathesarCredentials] = None
+# Global storage for registered tools
 _registered_tools: Set[str] = set()
-_authentication_error: Optional[str] = None
-_registration_debug_info: List[str] = []
 
-# Keywords that indicate destructive operations
+# Keywords for method analysis
 DESTRUCTIVE_KEYWORDS = {
     'delete', 'remove', 'drop', 'destroy', 'purge', 'clear', 'reset', 'truncate'
 }
 
-# Keywords that indicate read-only operations
 READ_ONLY_KEYWORDS = {
     'get', 'list', 'read', 'fetch', 'find', 'search', 'query', 'browse', 'view', 'show'
 }
 
-def load_credentials_from_env() -> Optional[MathesarCredentials]:
-    """Load authentication credentials from environment variables."""
-    username = os.getenv("MATHESAR_USERNAME")
-    password = os.getenv("MATHESAR_PASSWORD")
-    csrf_token = os.getenv("MATHESAR_CSRF_TOKEN")
-    session_id = os.getenv("MATHESAR_SESSION_ID")
-
-    if not username or not password:
-        return None
-
-    return MathesarCredentials(
-        username=username,
-        password=password,
-        csrf_token=csrf_token,
-        session_id=session_id
-    )
+def check_auth_config() -> Optional[str]:
+    """Check if required authentication is configured."""
+    if not MATHESAR_USERNAME or not MATHESAR_PASSWORD:
+        return "Missing MATHESAR_USERNAME or MATHESAR_PASSWORD environment variables"
+    return None
 
 async def make_rpc_call(method: str, params: Dict[str, Any] = None) -> Any:
     """Make an authenticated JSON-RPC call to Mathesar."""
-    if not _credentials:
-        if _authentication_error:
-            return {
-                "error": "Authentication failed",
-                "message": _authentication_error,
-                "isError": True
-            }
+    auth_error = check_auth_config()
+    if auth_error:
         return {
             "error": "Authentication required",
-            "message": "Please configure MATHESAR_USERNAME and MATHESAR_PASSWORD environment variables",
+            "message": auth_error,
             "isError": True
         }
 
@@ -107,43 +83,22 @@ async def make_rpc_call(method: str, params: Dict[str, Any] = None) -> Any:
 
     try:
         async with httpx.AsyncClient() as client:
-            # First, get CSRF token if we don't have one
             headers = {}
             cookies = {}
 
-            if not _credentials.csrf_token:
-                # Get CSRF token from the main page
-                csrf_response = await client.get(
-                    f"{MATHESAR_BASE_URL}/",
-                    auth=(_credentials.username, _credentials.password),
-                    timeout=30.0
-                )
-
-                # Extract CSRF token from cookies
-                csrf_cookie = None
-                for cookie_name, cookie_value in csrf_response.cookies.items():
-                    if cookie_name == 'csrftoken':
-                        csrf_cookie = cookie_value
-                        _credentials.csrf_token = cookie_value
-                        break
-
-                if csrf_cookie:
-                    cookies["csrftoken"] = csrf_cookie
-
-            # Add CSRF token to headers and cookies
-            if _credentials.csrf_token:
-                headers["X-CSRFToken"] = _credentials.csrf_token
-                if "csrftoken" not in cookies:
-                    cookies["csrftoken"] = _credentials.csrf_token
+            # Add CSRF token if available
+            if MATHESAR_CSRF_TOKEN:
+                headers["X-CSRFToken"] = MATHESAR_CSRF_TOKEN
+                cookies["csrftoken"] = MATHESAR_CSRF_TOKEN
 
             # Add session cookie if available
-            if _credentials.session_id:
-                cookies["sessionid"] = _credentials.session_id
+            if MATHESAR_SESSION_ID:
+                cookies["sessionid"] = MATHESAR_SESSION_ID
 
             response = await client.post(
                 RPC_ENDPOINT,
                 json=request.model_dump(),
-                auth=(_credentials.username, _credentials.password),
+                auth=(MATHESAR_USERNAME, MATHESAR_PASSWORD),
                 headers=headers,
                 cookies=cookies,
                 timeout=30.0
@@ -162,7 +117,6 @@ async def make_rpc_call(method: str, params: Dict[str, Any] = None) -> Any:
                 return {
                     "error": "Invalid JSON response",
                     "message": f"Could not parse JSON: {e}",
-                    "response_text": response.text[:1000],
                     "isError": True
                 }
 
@@ -194,27 +148,21 @@ async def make_rpc_call(method: str, params: Dict[str, Any] = None) -> Any:
         return {
             "error": "Unexpected error",
             "message": f"Unexpected error calling {method}: {e}",
-            "exception_type": type(e).__name__,
             "isError": True
         }
 
 def analyze_method_characteristics(method_name: str, metadata: Dict[str, Any]) -> Dict[str, bool]:
     """Analyze a method to determine its characteristics for annotations."""
     method_lower = method_name.lower()
-    action = metadata.get('action', '').lower()
     summary = metadata.get('parsed_doc', {}).get('summary', '').lower()
 
     # Check for destructive operations
     is_destructive = any(keyword in method_lower for keyword in DESTRUCTIVE_KEYWORDS)
     if not is_destructive:
-        is_destructive = any(keyword in action for keyword in DESTRUCTIVE_KEYWORDS)
-    if not is_destructive:
         is_destructive = any(keyword in summary for keyword in DESTRUCTIVE_KEYWORDS)
 
     # Check for read-only operations
     is_read_only = any(keyword in method_lower for keyword in READ_ONLY_KEYWORDS)
-    if not is_read_only:
-        is_read_only = any(keyword in action for keyword in READ_ONLY_KEYWORDS)
     if not is_read_only:
         is_read_only = any(keyword in summary for keyword in READ_ONLY_KEYWORDS)
 
@@ -222,319 +170,288 @@ def analyze_method_characteristics(method_name: str, metadata: Dict[str, Any]) -
     if is_destructive:
         is_read_only = False
 
-    # Check for idempotent operations (get/read operations are typically idempotent)
+    # Check for idempotent operations
     is_idempotent = is_read_only or 'get' in method_lower or 'list' in method_lower
 
     return {
         "readOnlyHint": is_read_only,
         "destructiveHint": is_destructive,
         "idempotentHint": is_idempotent,
-        "openWorldHint": True  # Most Mathesar operations interact with external database
+        "openWorldHint": True
     }
 
-def convert_python_type_to_annotation(param_type: str) -> str:
-    """Convert a Python type annotation string to a proper type annotation for function signatures."""
-    # Handle common types
-    if param_type in ['int', 'integer', '<class \'int\'>']:
-        return 'int'
-    elif param_type in ['str', 'string', '<class \'str\'>']:
-        return 'str'
-    elif param_type in ['float', '<class \'float\'>']:
-        return 'float'
-    elif param_type in ['bool', 'boolean', '<class \'bool\'>']:
-        return 'bool'
-    elif param_type in ['list', 'List', '<class \'list\'>']:
-        return 'List[Any]'
-    elif param_type in ['dict', 'Dict', '<class \'dict\'>']:
-        return 'Dict[str, Any]'
-    elif 'Optional' in param_type or 'Union' in param_type:
-        # For optional types, try to extract the base type
-        if 'int' in param_type:
-            return 'Optional[int]'
-        elif 'str' in param_type:
-            return 'Optional[str]'
-        elif 'bool' in param_type:
-            return 'Optional[bool]'
-        elif 'float' in param_type:
-            return 'Optional[float]'
-        else:
-            return 'Optional[Any]'
+def convert_type_annotation(param_type: str) -> Any:
+    """Convert parameter type string to Python type annotation."""
+    # Handle common type mappings
+    type_mapping = {
+        "<class 'int'>": int,
+        "<class 'str'>": str,
+        "<class 'bool'>": bool,
+        "<class 'float'>": float,
+        "<class 'dict'>": dict,
+        "<class 'list'>": list,
+        "Any": Any,
+    }
+
+    # Check for exact matches first
+    if param_type in type_mapping:
+        return type_mapping[param_type]
+
+    # Handle list types like "list[mathesar.rpc.columns.base.SettableColumnInfo]"
+    if param_type.startswith("list[") and param_type.endswith("]"):
+        return List[Any]  # Simplify complex list types to List[Any]
+
+    # Handle dict types
+    if "dict" in param_type.lower():
+        return Dict[str, Any]
+
+    # Handle specific Mathesar types
+    if "mathesar.rpc" in param_type:
+        # These are complex Mathesar objects, treat as Dict[str, Any] for flexibility
+        return Dict[str, Any]
+
+    # Default to Any for complex types
+    return Any
+
+def create_parameter_annotation(param_name: str, param_info: Dict[str, Any], parsed_args: Dict[str, Any]) -> tuple:
+    """Create a proper type annotation and default for a parameter."""
+    param_type = param_info.get("type", "Any")
+    default_value = param_info.get("default", "Required")
+
+    # Get description from parsed documentation
+    # parsed_args values are strings directly, not dictionaries
+    description = parsed_args.get(param_name, f"Parameter {param_name}")
+    if not description or not str(description).strip():
+        description = f"Parameter {param_name}"
+
+    # Enhance description with type information
+    if param_type and param_type != "Any":
+        # Clean up type display
+        clean_type = param_type.replace("<class '", "").replace("'>", "").replace("mathesar.rpc.", "")
+        if clean_type != "Any":
+            description = f"{description} (Type: {clean_type})"
+
+    # Convert type annotation
+    base_type = convert_type_annotation(param_type)
+
+        # Handle default values and create proper annotations
+    if default_value == "Required":
+        # Required parameter with Pydantic Field
+        from typing import Annotated
+        annotation = Annotated[base_type, Field(description=description)]
+        default = inspect.Parameter.empty
+    elif default_value is None or default_value == "None":
+        # Optional parameter with None default
+        from typing import Annotated
+        annotation = Annotated[Optional[base_type], Field(default=None, description=description)]
+        default = None
     else:
-        # Default to Any for unknown types
-        return 'Any'
+        # Optional parameter with specific default
+        try:
+            if isinstance(default_value, str):
+                if default_value.lower() == "true":
+                    parsed_default = True
+                elif default_value.lower() == "false":
+                    parsed_default = False
+                elif default_value.isdigit():
+                    parsed_default = int(default_value)
+                else:
+                    parsed_default = default_value
+            else:
+                parsed_default = default_value
+        except:
+            parsed_default = default_value
 
-async def register_dynamic_tools():
+        from typing import Annotated
+        annotation = Annotated[Optional[base_type], Field(default=parsed_default, description=description)]
+        default = parsed_default
+
+    return annotation, default
+
+async def create_and_register_tool(method_name: str, metadata: Dict[str, Any]) -> bool:
+    """Create and register a dynamic tool for a Mathesar RPC method with proper parameter definitions."""
+    try:
+        # Extract metadata
+        summary = metadata.get('parsed_doc', {}).get('summary', f'Call {method_name} method')
+        full_description = metadata.get('docstring', summary)
+        parameters = metadata.get('parameters', {})
+        args_list = metadata.get('args', [])
+        parsed_args = metadata.get('parsed_doc', {}).get('args', {})
+        characteristics = analyze_method_characteristics(method_name, metadata)
+
+        # Extract additional metadata for richer descriptions
+        category = metadata.get('category', '')
+        action = metadata.get('action', '')
+        return_doc = metadata.get('return_doc', {})
+        return_type = return_doc.get('type', '') if return_doc else ''
+
+        # Build enhanced description
+        enhanced_description = full_description
+        if category and action:
+            enhanced_description = f"[{category}.{action}] {enhanced_description}"
+        if return_type:
+            returns_text = metadata.get('parsed_doc', {}).get('returns', 'Result data')
+            enhanced_description += f"\n\nReturns ({return_type}): {returns_text}"
+
+        # Filter out 'kwargs' from parameters as it's a catch-all
+        filtered_params = {k: v for k, v in parameters.items() if k != 'kwargs'}
+        filtered_args = [arg for arg in args_list if arg != 'kwargs']
+
+        tool_name = method_name.replace('.', '_')
+
+        # If no meaningful parameters, create simple function
+        if not filtered_params:
+            async def simple_tool():
+                logger.debug(f"Calling {method_name} with no params")
+                return await make_rpc_call(method_name, {})
+
+            simple_tool.__name__ = tool_name
+            simple_tool.__doc__ = enhanced_description
+            tool_func = mcp.tool(annotations=characteristics)(simple_tool)
+            logger.info(f"Registered simple tool: {tool_name}")
+            return True
+
+                # Create function code with proper parameters
+        param_annotations = {}
+        param_defaults = {}
+
+        for param_name in filtered_args:
+            if param_name in filtered_params:
+                param_info = filtered_params[param_name]
+                annotation, default = create_parameter_annotation(param_name, param_info, parsed_args)
+                param_annotations[param_name] = annotation
+                if default is not inspect.Parameter.empty:
+                    param_defaults[param_name] = default
+
+        # Create the dynamic function with proper signature
+        def create_dynamic_function():
+            # Create parameter list for function signature
+            sig_params = []
+            for param_name in filtered_args:
+                if param_name in param_annotations:
+                    if param_name in param_defaults:
+                        param = inspect.Parameter(
+                            param_name,
+                            inspect.Parameter.KEYWORD_ONLY,
+                            default=param_defaults[param_name],
+                            annotation=param_annotations[param_name]
+                        )
+                    else:
+                        param = inspect.Parameter(
+                            param_name,
+                            inspect.Parameter.KEYWORD_ONLY,
+                            annotation=param_annotations[param_name]
+                        )
+                    sig_params.append(param)
+
+            # Create the signature
+            signature = inspect.Signature(sig_params)
+
+            # Create the actual function
+            async def dynamic_tool_impl(**kwargs):
+                # Filter out None values and prepare parameters
+                filtered_kwargs = {k: v for k, v in kwargs.items() if v is not None}
+                logger.debug(f"Calling {method_name} with params: {list(filtered_kwargs.keys())}")
+                return await make_rpc_call(method_name, filtered_kwargs)
+
+            # Set the signature on the function
+            dynamic_tool_impl.__signature__ = signature
+            dynamic_tool_impl.__name__ = tool_name
+            dynamic_tool_impl.__doc__ = enhanced_description
+
+            return dynamic_tool_impl
+
+        # Create and register the function
+        dynamic_tool = create_dynamic_function()
+        tool_func = mcp.tool(annotations=characteristics)(dynamic_tool)
+
+        logger.info(f"Registered parameterized tool: {tool_name} with {len(filtered_params)} parameters")
+        return True
+
+    except Exception as e:
+        logger.error(f"Failed to create tool for {method_name}: {e}")
+        logger.exception("Full traceback:")
+        return False
+
+async def register_dynamic_tools() -> Dict[str, Any]:
     """Register all Mathesar RPC methods as individual MCP tools."""
-    global _registration_debug_info
-    _registration_debug_info = []
-
-    if not _credentials:
-        logger.error("No credentials available for dynamic tool registration")
-        _registration_debug_info.append("ERROR: No credentials available")
-        return {"error": "Not authenticated"}
+    auth_error = check_auth_config()
+    if auth_error:
+        return {"error": auth_error}
 
     try:
         logger.info("Starting dynamic tool registration...")
-        _registration_debug_info.append("Starting method introspection...")
 
-        # Get comprehensive method information using system.introspect_methods
+        # Get method information using system.introspect_methods
         introspection = await make_rpc_call("system.introspect_methods")
-        logger.debug(f"Introspection result type: {type(introspection)}")
 
         if isinstance(introspection, dict) and introspection.get("isError"):
-            error_msg = f"Introspection failed: {introspection.get('message')}"
-            logger.error(error_msg)
-            _registration_debug_info.append(f"ERROR: {error_msg}")
-            return {"error": error_msg}
+            return {"error": f"Introspection failed: {introspection.get('message')}"}
 
         if not introspection.get("introspection_successful"):
-            error_msg = "Introspection was not successful"
-            logger.error(error_msg)
-            _registration_debug_info.append(f"ERROR: {error_msg}")
-            return {"error": error_msg}
+            return {"error": "Introspection was not successful"}
 
         methods_metadata = introspection.get("methods", {})
         total_methods = len(methods_metadata)
         logger.info(f"Found {total_methods} methods to process")
-        _registration_debug_info.append(f"Found {total_methods} methods to process")
 
         # Process methods and register tools
         tools_registered = 0
         failed_methods = []
 
         for method_name, metadata in methods_metadata.items():
-            logger.debug(f"Processing method: {method_name}")
-
-            # Skip certain system methods that don't make good tools
+            # Skip certain system methods
             if method_name.startswith('system.') and method_name not in ['system.introspect_methods']:
-                logger.debug(f"Skipping system method: {method_name}")
                 continue
 
             try:
-                # Try to create and register the tool using a simpler approach
                 success = await create_and_register_tool(method_name, metadata)
                 if success:
                     tools_registered += 1
                     _registered_tools.add(method_name)
-                    logger.info(f"Successfully registered tool for {method_name}")
-                    _registration_debug_info.append(f"✅ Registered: {method_name}")
                 else:
                     failed_methods.append(method_name)
-                    logger.warning(f"Failed to register tool for {method_name}")
-                    _registration_debug_info.append(f"❌ Failed: {method_name}")
 
             except Exception as e:
-                error_msg = f"{method_name}: {str(e)}"
-                failed_methods.append(error_msg)
-                logger.error(f"Exception registering {method_name}: {e}", exc_info=True)
-                _registration_debug_info.append(f"❌ Exception: {error_msg}")
+                failed_methods.append(f"{method_name}: {str(e)}")
+                logger.error(f"Exception registering {method_name}: {e}")
 
         logger.info(f"Registration complete: {tools_registered} tools registered, {len(failed_methods)} failed")
-        _registration_debug_info.append(f"Registration complete: {tools_registered} registered, {len(failed_methods)} failed")
 
         return {
             "success": True,
             "tools_registered": tools_registered,
             "total_methods": total_methods,
-            "failed_methods": failed_methods[:10]  # Limit to first 10 failures
+            "failed_methods": failed_methods[:10]
         }
 
     except Exception as e:
-        error_msg = f"Registration failed: {str(e)}"
-        logger.error(error_msg, exc_info=True)
-        _registration_debug_info.append(f"FATAL ERROR: {error_msg}")
-        return {"error": error_msg}
+        logger.error(f"Registration failed: {str(e)}")
+        return {"error": str(e)}
 
-
-async def create_and_register_tool(method_name: str, metadata: Dict[str, Any]) -> bool:
-    """Create and register a dynamic tool using a simpler approach."""
-    try:
-        # Get basic info
-        parameters = metadata.get('parameters', {})
-        summary = metadata.get('parsed_doc', {}).get('summary', f'Call {method_name} method')
-
-        logger.debug(f"Creating tool for {method_name} with {len(parameters)} parameters")
-
-        # Create a simple wrapper function that accepts **kwargs
-        async def dynamic_tool(**kwargs):
-            # Filter out None values
-            filtered_params = {k: v for k, v in kwargs.items() if v is not None}
-            logger.debug(f"Calling {method_name} with params: {list(filtered_params.keys())}")
-            return await make_rpc_call(method_name, filtered_params)
-
-        # Set function metadata
-        dynamic_tool.__name__ = f"mathesar_{method_name.replace('.', '_')}"
-        dynamic_tool.__doc__ = summary
-
-        # Register with FastMCP using the decorator approach
-        tool_func = mcp.tool()(dynamic_tool)
-
-        logger.debug(f"Successfully created and registered tool: {dynamic_tool.__name__}")
-        return True
-
-    except Exception as e:
-        logger.error(f"Failed to create tool for {method_name}: {e}", exc_info=True)
-        return False
-
-
-# Add a debug tool to see what's happening
 @mcp.tool()
-async def mathesar_debug_registration() -> str:
-    """
-    Get detailed debugging information about the dynamic tool registration process.
-
-    Returns:
-        Detailed log of the registration process and any errors encountered
-    """
-    global _registration_debug_info
-
-    debug_log = "\n".join(_registration_debug_info) if _registration_debug_info else "No registration attempts logged yet"
-
-    status_info = f"""
-🔧 Dynamic Tool Registration Debug
-
-📊 Current Status:
-- Authenticated: {'✅' if _credentials else '❌'}
-- Tools Registered: {len(_registered_tools)}
-- Log File: /tmp/mathesar_mcp_debug.log
-
-📝 Registration Log:
-{debug_log}
-
-🔍 Registered Tool Names:
-{', '.join(sorted(_registered_tools)) if _registered_tools else 'None'}
-
-💡 Check /tmp/mathesar_mcp_debug.log for detailed logs
-"""
-
-    return status_info
-
-async def authenticate_and_register_tools() -> Dict[str, Any]:
-    """Authenticate with Mathesar and register all RPC methods as individual MCP tools."""
-    global _credentials, _registered_tools, _authentication_error
-
-    # Try to load credentials from environment variables
-    _credentials = load_credentials_from_env()
-
-    if not _credentials:
-        _authentication_error = """❌ Missing authentication credentials
-
-Please configure the following environment variables:
-- MATHESAR_USERNAME: Your Mathesar username
-- MATHESAR_PASSWORD: Your Mathesar password
-- MATHESAR_CSRF_TOKEN: (optional) CSRF token if required
-- MATHESAR_SESSION_ID: (optional) Session ID if using session auth
-- MATHESAR_BASE_URL: (optional) Mathesar server URL (default: http://localhost:8000)
-
-Example configuration:
-export MATHESAR_USERNAME="your_username"
-export MATHESAR_PASSWORD="your_password"
-export MATHESAR_BASE_URL="http://localhost:8000"
-"""
-        return {"error": _authentication_error}
-
-    # Test authentication by trying to list methods
-    try:
-        methods = await make_rpc_call("system.listMethods")
-
-        if isinstance(methods, dict) and methods.get("isError"):
-            _authentication_error = f"""❌ Authentication failed
-👤 User: {_credentials.username}
-🔍 Error: {methods.get('message', 'Unknown error')}
-
-Please verify:
-- MATHESAR_USERNAME and MATHESAR_PASSWORD are correct
-- Mathesar server is running at {MATHESAR_BASE_URL}
-- Network connectivity is working
-- If using session auth, check MATHESAR_CSRF_TOKEN and MATHESAR_SESSION_ID"""
-
-            _credentials = None
-            return {"error": _authentication_error}
-
-        if not isinstance(methods, list):
-            _authentication_error = f"""❌ Authentication failed - Invalid response
-👤 User: {_credentials.username}
-🔍 Expected method list, got: {type(methods)}"""
-
-            _credentials = None
-            return {"error": _authentication_error}
-
-        # Now register all methods as dynamic tools
-        registration_result = await register_dynamic_tools()
-
-        if registration_result.get("error"):
-            return {
-                "success": False,
-                "authenticated": True,
-                "username": _credentials.username,
-                "methods_count": len(methods),
-                "registration_error": registration_result['error']
-            }
-
-        registered_count = registration_result.get("tools_registered", 0)
-        categories = registration_result.get("categories", {})
-
-        return {
-            "success": True,
-            "authenticated": True,
-            "username": _credentials.username,
-            "methods_count": len(methods),
-            "registered_count": registered_count,
-            "categories": list(categories.keys()) if categories else []
-        }
-
-    except Exception as e:
-        _authentication_error = f"""❌ Authentication failed
-👤 User: {_credentials.username if _credentials else 'unknown'}
-🔍 Error: {e}
-
-Please check your environment variables and server connectivity."""
-
-        _credentials = None
-        return {"error": _authentication_error}
-
-@mcp.tool(
-    annotations={
-        "title": "Get Mathesar Server Status",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True
-    }
-)
 async def mathesar_status() -> str:
-    """
-    Get the current authentication and tool registration status of the Mathesar MCP server.
-
-    Returns:
-        Current status including authentication state, registered tools count, and configuration help
-    """
-    if not _credentials:
-        if _authentication_error:
-            return f"""❌ Mathesar MCP Server Status
-
-🔐 Authentication: Failed
-🛠️ Dynamic Tools: 0 registered
-🌐 Server URL: {MATHESAR_BASE_URL}
-
-{_authentication_error}"""
-        else:
-            return f"""⚠️ Mathesar MCP Server Status
+    """Get the current status of the Mathesar MCP server."""
+    auth_error = check_auth_config()
+    if auth_error:
+        return f"""❌ Mathesar MCP Server Status
 
 🔐 Authentication: Not configured
 🛠️ Dynamic Tools: 0 registered
 🌐 Server URL: {MATHESAR_BASE_URL}
 
-Please configure the following environment variables:
-- MATHESAR_USERNAME: Your Mathesar username
-- MATHESAR_PASSWORD: Your Mathesar password
-- MATHESAR_CSRF_TOKEN: (optional) CSRF token if required
-- MATHESAR_SESSION_ID: (optional) Session ID if using session auth
-- MATHESAR_BASE_URL: (optional) Mathesar server URL (default: http://localhost:8000)"""
+Error: {auth_error}
+
+Please configure:
+- MATHESAR_USERNAME: Your username
+- MATHESAR_PASSWORD: Your password
+- MATHESAR_CSRF_TOKEN: (optional) CSRF token
+- MATHESAR_SESSION_ID: (optional) Session ID
+- MATHESAR_BASE_URL: (optional) Server URL"""
 
     registered_count = len(_registered_tools)
 
-    # Try to get a fresh status by calling a simple method
+    # Test connection
     try:
         methods = await make_rpc_call("system.listMethods")
         if isinstance(methods, dict) and methods.get("isError"):
@@ -546,169 +463,89 @@ Please configure the following environment variables:
 
     return f"""✅ Mathesar MCP Server Status
 
-🔐 Authentication: ✅ Authenticated as {_credentials.username}
+🔐 Authentication: ✅ Configured (User: {MATHESAR_USERNAME})
 🛠️ Dynamic Tools: {registered_count} registered
 🌐 Server URL: {MATHESAR_BASE_URL}
 🔗 Connection: {connection_status}
 
-💡 All Mathesar RPC methods are available as individual MCP tools!
-🔍 Use tool names like: mathesar_tables_list, mathesar_records_add, etc.
-⚡ Each tool has proper type checking, documentation, and safety annotations!"""
+💡 All Mathesar RPC methods are available as individual MCP tools!"""
 
-# Keep a basic call method as fallback
-@mcp.tool(
-    annotations={
-        "title": "Call Mathesar RPC Method (Fallback)",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": False,
-        "openWorldHint": True
-    }
-)
-async def mathesar_call_method(
-    method: str,
-    params: Optional[Dict[str, Any]] = None
-) -> Any:
-    """
-    Fallback method to call any Mathesar RPC method directly.
+@mcp.tool()
+async def mathesar_register_tools() -> str:
+    """Register all available Mathesar RPC methods as individual MCP tools."""
+    result = await register_dynamic_tools()
 
-    Note: Prefer using the specific dynamic tools created after authentication
-    as they provide better type safety and documentation.
+    if result.get("error"):
+        return f"❌ Registration failed: {result['error']}"
 
-    Args:
-        method: The RPC method name (e.g., "tables.list", "records.add")
-        params: Optional parameters for the method as a dictionary
+    tools_registered = result.get("tools_registered", 0)
+    total_methods = result.get("total_methods", 0)
+    failed_methods = result.get("failed_methods", [])
 
-    Returns:
-        The result of the RPC method call, or an error object with isError=True
-    """
-    if not method or not isinstance(method, str):
-        return {
-            "error": "Invalid method",
-            "message": "Method must be a non-empty string",
-            "isError": True
-        }
+    status = f"✅ Dynamic tool registration complete!\n\n"
+    status += f"📊 Results:\n"
+    status += f"- Tools registered: {tools_registered}\n"
+    status += f"- Total methods found: {total_methods}\n"
+    status += f"- Failed registrations: {len(failed_methods)}\n"
 
-    return await make_rpc_call(method, params or {})
+    if failed_methods:
+        status += f"\n❌ Failed methods (first 10):\n"
+        for method in failed_methods:
+            status += f"- {method}\n"
 
-# Resource for help information
-@mcp.resource("mathesar://api/help")
-def get_api_help() -> str:
-    """Get help information about the Mathesar MCP server."""
-    registered_count = len(_registered_tools)
+    status += f"\n💡 Use tool names like: mathesar_tables_list, mathesar_records_add, etc."
 
-    return f"""
-# 🚀 Mathesar MCP Server (Dynamic Tools with Auto-Authentication)
+    return status
 
-## 📊 Current Status
+# Note: The LLMs strongly prefer using this tool over the dynamic ones if it is enabled.
+# I'm not sure why, but it's a good idea to keep it disabled.
+#
+# @mcp.tool()
+# async def mathesar_call_method(
+#     method: str,
+#     params: Optional[Dict[str, Any]] = None
+# ) -> Any:
+#     """
+#     Call any Mathesar RPC method directly (fallback method).
 
-- **Authenticated**: {'✅ Yes' if _credentials else '❌ No'}
-- **Dynamic Tools Registered**: {registered_count}
-- **Server URL**: {MATHESAR_BASE_URL}
+#     Args:
+#         method: The RPC method name (e.g., "tables.list", "records.add")
+#         params: Optional parameters for the method as a dictionary
 
-## 🔐 Environment-Based Authentication
+#     Returns:
+#         The result of the RPC method call, or an error object
+#     """
+#     if not method or not isinstance(method, str):
+#         return {
+#             "error": "Invalid method",
+#             "message": "Method must be a non-empty string",
+#             "isError": True
+#         }
 
-This server automatically authenticates using environment variables on startup:
-
-### Required Environment Variables:
-```bash
-export MATHESAR_USERNAME="your_username"
-export MATHESAR_PASSWORD="your_password"
-```
-
-### Optional Environment Variables:
-```bash
-export MATHESAR_BASE_URL="http://localhost:8000"  # Default server URL
-export MATHESAR_CSRF_TOKEN="csrf_token"           # If CSRF protection enabled
-export MATHESAR_SESSION_ID="session_id"           # If using session authentication
-```
-
-### Configuration Example:
-```bash
-# Basic configuration
-export MATHESAR_USERNAME="admin"
-export MATHESAR_PASSWORD="your_secure_password"
-export MATHESAR_BASE_URL="http://localhost:8000"
-
-# Then start your MCP client - authentication happens automatically!
-```
-
-## 🛠️ Dynamic Tools
-
-Each Mathesar RPC method is automatically registered as a separate tool with:
-- **Proper type checking** from JSON schemas
-- **Rich documentation** from method introspection
-- **Safety annotations** (read-only, destructive, idempotent hints)
-- **Clear naming** like `mathesar_tables_list`, `mathesar_records_add`
-
-## 🎯 Tool Categories
-
-Dynamic tools are created for all Mathesar operations:
-- **Tables**: mathesar_tables_list, mathesar_tables_get, mathesar_tables_add...
-- **Records**: mathesar_records_list, mathesar_records_add, mathesar_records_update...
-- **Schemas**: mathesar_schemas_list, mathesar_schemas_get...
-- **Database**: mathesar_databases_configured_list...
-- **And many more!**
-
-## 🛡️ Safety Features
-
-- **Destructive operations** are marked with `destructiveHint: true`
-- **Read-only operations** are marked with `readOnlyHint: true`
-- **Idempotent operations** are properly annotated
-- **Type validation** prevents invalid parameters
-
-## 🚀 Examples
-
-### Check server status
-```
-mathesar_status()
-```
-
-### List tables (auto-authenticated)
-```
-mathesar_tables_list(schema_oid=123, database_id=1)
-```
-
-### Add a record (auto-authenticated)
-```
-mathesar_records_add(
-    table_oid=456,
-    database_id=1,
-    record_def={{"name": "John", "age": 30}}
-)
-```
-
-### Fallback for any method
-```
-mathesar_call_method("custom.method", {{"param": "value"}})
-```
-
-## 🔄 How It Works
-
-1. **Startup**: Server reads credentials from environment variables
-2. **Auto-Authentication**: Automatically authenticates and discovers RPC methods
-3. **Dynamic Registration**: Each method becomes an individual MCP tool
-4. **Type Safety**: JSON schemas are generated from method signatures
-5. **Annotations**: Safety hints are inferred from method names and descriptions
-
-## 🐛 Troubleshooting
-
-If authentication fails:
-1. Check that environment variables are set correctly
-2. Verify Mathesar server is running and accessible
-3. Use `mathesar_status()` to see detailed error information
-4. Check network connectivity to {MATHESAR_BASE_URL}
-
-This approach provides better security (no credentials in prompts), convenience (automatic setup), and user experience!
-"""
+#     return await make_rpc_call(method, params or {})
 
 async def startup():
-    """Initialize the server by attempting authentication and tool registration."""
-    # Attempt automatic authentication and tool registration
-    result = await authenticate_and_register_tools()
+    """Initialize the server by registering dynamic tools."""
+    logger.info("Starting Mathesar MCP Server...")
+
+    auth_error = check_auth_config()
+    if auth_error:
+        logger.warning(f"Authentication not configured: {auth_error}")
+        logger.info("Use mathesar_register_tools() after configuring environment variables")
+        return
+
+    # Automatically register tools on startup
+    logger.info("Attempting automatic tool registration...")
+    result = await register_dynamic_tools()
+
+    if result.get("error"):
+        logger.error(f"Automatic registration failed: {result['error']}")
+        logger.info("Use mathesar_register_tools() to retry registration")
+    else:
+        tools_count = result.get("tools_registered", 0)
+        logger.info(f"Successfully registered {tools_count} dynamic tools!")
 
 if __name__ == "__main__":
-    # Initialize authentication on startup
     import asyncio
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
