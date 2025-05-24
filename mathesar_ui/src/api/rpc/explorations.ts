@@ -92,18 +92,17 @@ export interface AnonymousExploration extends InitialExploration {
   initial_columns: InitialColumn[];
   transformations?: QueryInstanceTransformation[];
   display_names?: Record<string, string> | null;
-}
-
-export interface AddableExploration extends AnonymousExploration {
-  name: string;
-  description?: string;
-
   /**
    * This will likely be `ExplorationDisplayOptions | null`. But we're using
    * `unknown` to force consumers to call the `validateDisplayOptions`. See more
    * docs there.
    */
   display_options?: unknown;
+}
+
+export interface AddableExploration extends AnonymousExploration {
+  name: string;
+  description?: string;
 }
 
 export interface SavedExploration extends AddableExploration {
