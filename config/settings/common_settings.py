@@ -83,7 +83,7 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.tables.metadata',
     'mathesar.rpc.tables.privileges',
     'mathesar.rpc.users',
-    'mathesar.rpc.system_introspection',
+    'mathesar.rpc.rpc_introspection',
 ]
 
 TEMPLATES = [
