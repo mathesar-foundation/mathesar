@@ -248,22 +248,6 @@ def convert_default_value(default_value: Any) -> Any:
 
 def create_parameter_annotation(param_name: str, param_info: Dict[str, Any], parsed_args: Dict[str, Any]) -> tuple:
     """Create a proper type annotation and default for a parameter.
-
-    CRITICAL FIX: JSON Number Type Handling
-    =====================================
-    JSON-RPC doesn't distinguish between integers and floats - both are "number" type.
-    This caused Pydantic validation errors when Mathesar expected integer parameters.
-
-    Our solution: Convert 'int' parameters to 'Union[int, float]' to accept JSON numbers.
-    This allows the MCP framework to properly handle numeric parameters from JSON-RPC calls.
-
-    Args:
-        param_name: Name of the parameter
-        param_info: Parameter metadata from Mathesar RPC introspection
-        parsed_args: Parsed documentation arguments
-
-    Returns:
-        tuple: (type_annotation, default_value) for the parameter
     """
     param_type = param_info.get("type", "Any")
     default_value = param_info.get("default", "Required")
@@ -282,9 +266,7 @@ def create_parameter_annotation(param_name: str, param_info: Dict[str, Any], par
     # Convert type annotation
     base_type = convert_type_annotation(param_type)
 
-    # CRITICAL FIX: Handle JSON number ambiguity for integers
-    # JSON doesn't distinguish between int and float, everything is "number"
-    # So we need to be more permissive to handle JSON-RPC serialization
+    # Convert 'int' parameters to 'Union[int, float]' to accept JSON numbers.
     if base_type is int:
         # Use Union[int, float] to handle JSON number type
         # This allows Pydantic to accept numeric values from JSON-RPC
@@ -320,12 +302,8 @@ def group_methods_by_category(methods_metadata: Dict[str, Any]) -> Dict[str, Dic
         logger.debug(f"Processing method: {method_name}")
 
         # Skip internal system methods that shouldn't be exposed as tools
-        # but be more permissive than before
         if method_name.startswith('system.') and method_name not in [
             'system.introspect_methods',
-            'system.listMethods',  # Allow basic system methods
-            'system.methodSignature',
-            'system.methodHelp'
         ]:
             skipped_methods.append(method_name)
             continue
@@ -448,10 +426,10 @@ async def create_category_tool(category: str, methods: Dict[str, Any]) -> bool:
                                if analyze_method_characteristics(method_info['method_name'], method_info['metadata']).get('destructiveHint'))
 
         characteristics = {
-            "readOnlyHint": read_only_count > len(methods) * 0.6,  # Majority are read-only
-            "destructiveHint": destructive_count > 0,  # Any destructive methods
+            "readOnlyHint": read_only_count > len(methods) * 0.6,
+            "destructiveHint": destructive_count > 0,
             "idempotentHint": read_only_count > len(methods) * 0.6,
-            "openWorldHint": True
+            "openWorldHint": False
         }
 
         # Create parameter annotations
