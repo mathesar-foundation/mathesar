@@ -43,7 +43,7 @@
   }
 
   .icon-container {
-    background-color: var(--icon-background);
+    background-color: var(--pumpkin-400);
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -51,6 +51,10 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+  }
+
+  .database-icon {
+    color: var(--pumpkin-900);
   }
 
   .content {
@@ -72,7 +76,7 @@
 
   .detail {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--text-color-muted);
   }
 
   .caret-container {
@@ -83,5 +87,13 @@
 
   .db-card-content:hover .caret-container {
     opacity: 1;
+  }
+
+  :global(body.theme-dark) .icon-container {
+    background-color: var(--pumpkin-800);
+  }
+
+  :global(body.theme-dark) .database-icon {
+    color: var(--pumpkin-200);
   }
 </style>

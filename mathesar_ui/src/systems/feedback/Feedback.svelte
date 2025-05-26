@@ -62,7 +62,8 @@
 
 <div class="feedback-button">
   <DropdownMenu
-    triggerAppearance="custom"
+    triggerAppearance="feedback"
+    triggerClass="padding-compact"
     closeOnInnerClick={false}
     showArrow={false}
     menuStyle="--Menu__padding-x: 0.3em;"
@@ -135,18 +136,16 @@
   .feedback-button {
     --button-border: none;
   }
+
   .trigger {
     display: flex;
     align-items: center;
     gap: var(--sm4);
-    color: var(--text-color-primary);
   }
+
   .feedback-content {
-    padding: var(--sm1);
     max-width: 28rem;
-    background-color: var(--card-background);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius-m);
+    padding: 0 var(--sm3);
   }
   .feedback-form {
     display: flex;

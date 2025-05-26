@@ -18,7 +18,7 @@
     align-items: center;
     text-decoration: none;
     color: inherit;
-    margin-right: var(--sm4);
+    margin-right: var(--sm6);
     /* Optical adjustment to align logo with text */
     margin-top: -1px;
   }

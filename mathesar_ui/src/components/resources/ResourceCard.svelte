@@ -11,10 +11,12 @@
   <span>
     <a class="title" {href} target="_blank">
       <span class="icon-wrapper">
-        <Icon {...icon} size="0.7em" />
+        <Icon {...icon} size="0.7em" class="resource-icon" />
       </span>
       <slot name="title" />
-      <Icon {...iconExternalHyperlink} size="0.7em" />
+      <span class="external-link-wrapper">
+        <Icon {...iconExternalHyperlink} size="0.7em" />
+      </span>
     </a>
   </span>
   <div class="description"><slot name="description" /></div>
@@ -32,8 +34,8 @@
     align-items: center;
     justify-content: center;
     margin-right: var(--sm5);
-    color: var(--accent-color);
-    background-color: var(--icon-background);
+    color: var(--pumpkin-800);
+    background-color: var(--pumpkin-200);
     border-radius: 50%;
     padding: var(--sm3);
   }
@@ -52,5 +54,11 @@
   .description {
     color: var(--text-color-secondary);
     flex: 1 0 auto;
+  }
+  .external-link-wrapper {
+    margin-left: var(--sm3);
+    color: var(--text-color-muted);
+    display: inline-flex;
+    align-items: center;
   }
 </style>

@@ -34,9 +34,21 @@
   }
   .content {
     padding: var(--lg4);
-
-    background-color: var(--secondary-header-background);
-    border-radius: var(--sm2);
+    background: linear-gradient(
+      135deg,
+      var(--stormy-100) 0%,
+      var(--stormy-200) 50%,
+      var(--pumpkin-100) 100%
+    );
+    border-radius: var(--border-radius-l);
+  }
+  :global(body.theme-dark) .content {
+    background: linear-gradient(
+      135deg,
+      var(--stormy-800) 0%,
+      var(--stormy-700) 50%,
+      var(--pumpkin-900) 100%
+    );
   }
   .content.restrict-width {
     margin-left: auto;

@@ -9,6 +9,7 @@ export type Appearance =
   | 'outcome'
   | 'outline-primary'
   | 'inspector'
+  | 'feedback'
   | 'custom'
   | 'link';
 

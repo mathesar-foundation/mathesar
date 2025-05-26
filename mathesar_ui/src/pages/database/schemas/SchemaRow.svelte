@@ -108,28 +108,20 @@
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
     border: 1px solid var(--card-border);
-    background: linear-gradient(
-      var(--gradient-direction-default),
-      var(--gradient-card-start),
-      var(--gradient-card-end)
-    );
+    background-color: var(--card-background);
     padding: var(--lg1);
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
     box-shadow: var(--card-active-shadow);
-    transition: background 0.2s ease-in-out;
+    transition: background-color 0.2s ease-in-out;
   }
 
   .schema-row.hover {
     border: 1px solid var(--card-hover-border);
     box-shadow: var(--card-hover-shadow);
-    background: linear-gradient(
-      var(--gradient-direction-hover),
-      var(--gradient-card-hover-start),
-      var(--gradient-card-hover-end)
-    );
+    background-color: var(--card-background);
   }
 
   .schema-row.focus {

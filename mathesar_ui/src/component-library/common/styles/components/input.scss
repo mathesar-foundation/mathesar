@@ -15,7 +15,7 @@
   text-align: var(--input-element-text-align, 'left');
 
   &::placeholder {
-    color: var(--text-color-tertiary);
+    color: var(--text-color-muted);
   }
 
   &:focus {

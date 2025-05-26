@@ -36,6 +36,9 @@
     </div>
   </div>
   <div class="content">
+    <div class="databases-section">
+      <DatabasesList />
+    </div>
     <div class="resources-sidebar">
       <h2>{$_('resources')}</h2>
       <div class="cards">
@@ -44,9 +47,6 @@
         <MailingListResource />
         <DonateResource />
       </div>
-    </div>
-    <div class="databases-section">
-      <DatabasesList />
     </div>
   </div>
 </LayoutWithHeader>
@@ -62,15 +62,26 @@
   }
 
   .home-page-header-title-inner {
-    background-color: var(--secondary-header-background);
-    padding: var(--lg4);
-    display: flex;
-    align-items: center;
-    border-radius: var(--sm2);
+    border: 1px solid var(--pumpkin-300);
+    background: var(--pumpkin-50);
+    padding: var(--sm4) var(--sm2);
+    border-radius: var(--border-radius-l);
+    font-weight: var(--font-weight-medium);
 
     h1 {
       margin: 0;
-      color: var(--text-color-primary);
+      color: var(--pumpkin-800);
+      font-size: var(--text-size-base);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+
+  :global(body.theme-dark) .home-page-header-title-inner {
+    border: 1px solid var(--pumpkin-700);
+    background: var(--pumpkin-900);
+
+    h1 {
+      color: var(--pumpkin-200);
     }
   }
 
@@ -79,7 +90,7 @@
     gap: 3.5rem;
     grid-template-columns: 1fr;
     @media screen and (min-width: $breakpoint) {
-      grid-template-columns: 20rem 1fr;
+      grid-template-columns: 1fr 20rem;
     }
   }
   .databases-section {
@@ -89,7 +100,7 @@
     gap: 2.5rem;
     @media screen and (min-width: $breakpoint) {
       grid-row: auto;
-      grid-column: 2;
+      grid-column: 1;
     }
   }
   .resources-sidebar {
@@ -99,7 +110,7 @@
     gap: 0.5rem;
     @media screen and (min-width: $breakpoint) {
       grid-row: auto;
-      grid-column: 1;
+      grid-column: 2;
     }
   }
   .cards {

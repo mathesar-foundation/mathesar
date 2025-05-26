@@ -101,7 +101,7 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--gray-400-rgb), 0.3);
+        --button-outline: 2px solid rgba(189, 193, 198, 0.3);
         outline-offset: 1px;
       }
 
@@ -194,7 +194,13 @@
 
       &:focus,
       &.focus {
-        box-shadow: 0 0 0 2px var(--hover-background) !important;
+        --button-background: var(--hover-background);
+        border-color: var(--accent-700);
+        --button-color: var(--accent-800);
+        box-shadow:
+          0 2px 4px rgba(0, 0, 0, 0.15),
+          0 1px 2px rgba(0, 0, 0, 0.1);
+        outline: none;
       }
     }
   }
@@ -214,6 +220,10 @@
 
   &.padding-zero {
     padding: 0px;
+  }
+
+  &.padding-compact {
+    padding: var(--sm4) var(--sm3);
   }
 
   &.full-width {
@@ -300,7 +310,7 @@
   &.btn-link {
     --button-background: transparent;
     --button-border-color: transparent;
-    --button-color: var(--accent-600, var(--brand-600));
+    --button-color: var(--accent-700, var(--brand-700));
     box-shadow: none;
     padding: 0;
     height: auto;
@@ -322,6 +332,44 @@
       }
     }
   }
+
+  &.btn-feedback {
+    --button-background: var(--background-color);
+    --button-color: var(--text-color-tertiary);
+    --button-border-color: var(--accent-500);
+    border: 2px solid var(--button-border-color);
+    border-radius: var(--lg2);
+    padding: var(--sm4) var(--sm2);
+    font-weight: var(--font-weight-medium);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-background: var(--hover-background);
+        --button-border-color: var(--accent-600);
+        --button-shadow: var(--card-hover-shadow);
+        box-shadow: var(--button-shadow);
+      }
+
+      &:active,
+      &.active {
+        --button-background: var(--active-background);
+        --button-border-color: var(--accent-700);
+        --button-shadow: var(--shadow-color) 0 1px 2px 0;
+        box-shadow: var(--button-shadow);
+      }
+
+      &:focus,
+      &.focus {
+        border-radius: 2rem;
+        --button-background: var(--hover-background);
+        --button-shadow: var(--shadow-color) 0 2px 4px 0,
+          var(--shadow-color-light) 0 1px 2px 0;
+        box-shadow: var(--button-shadow);
+        outline: none;
+      }
+    }
+  }
 }
 
 body.theme-dark .btn {
@@ -337,7 +385,7 @@ body.theme-dark .btn {
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--gray-600-rgb), 0.3);
+        --button-outline: 2px solid rgba(95, 99, 104, 0.3);
         outline-offset: 1px;
       }
 
@@ -397,6 +445,20 @@ body.theme-dark .btn {
         var(--stormy-600)
       );
       border-color: var(--stormy-400);
+    }
+  }
+
+  &.btn-feedback {
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-color: var(--accent-300);
+      }
+
+      &:active,
+      &.active {
+        --button-color: var(--accent-200);
+      }
     }
   }
 }

@@ -224,7 +224,7 @@
   .actions-container {
     display: flex;
     align-items: center;
-    gap: var(--lg2);
+    gap: var(--sm1);
   }
   .dropdown-container {
     margin-left: auto;

@@ -75,7 +75,8 @@
 
       {#if $userProfile}
         <DropdownMenu
-          triggerAppearance="ghost"
+          triggerAppearance="action"
+          triggerClass="padding-compact"
           size="small"
           closeOnInnerClick={false}
           menuStyle="--Menu__padding-x: 0.3em;"
@@ -165,7 +166,9 @@
     justify-content: space-between;
     padding: 0 0.5rem;
     height: var(--header-height);
+    background: var(--header-background);
     border-bottom: 1px solid var(--header-border);
+    box-shadow: var(--shadow-color) 0 1px 3px 0;
     overflow: hidden;
     color: var(--text-color);
     font-size: 1rem;

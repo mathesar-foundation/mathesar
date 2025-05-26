@@ -84,4 +84,8 @@
     flex-direction: column;
     gap: 0;
   }
+
+  .tables-container :global(.table-row:last-child) {
+    border-bottom: none;
+  }
 </style>
