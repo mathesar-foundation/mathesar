@@ -53,10 +53,6 @@
     flex-shrink: 0;
   }
 
-  .database-icon {
-    color: var(--pumpkin-900);
-  }
-
   .content {
     display: flex;
     flex-direction: column;
@@ -91,9 +87,5 @@
 
   :global(body.theme-dark) .icon-container {
     background-color: var(--pumpkin-800);
-  }
-
-  :global(body.theme-dark) .database-icon {
-    color: var(--pumpkin-200);
   }
 </style>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { iconConnection, iconAddNew } from '@mathesar/icons';
+  import { iconAddNew, iconConnection } from '@mathesar/icons';
   import {
     ControlledModal,
     type ModalController,
