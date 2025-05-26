@@ -189,6 +189,12 @@ def _get_exploration_column_metadata(
             "input_table_id": initial_column.reloid if initial_column else None,
             "input_alias": db_query.get_input_alias_for_output_alias(alias)
         }
+    for alias, metadata in exploration_column_metadata.items():
+        input_alias = metadata["input_alias"] or alias
+        metadata["is_base_table_column"] = (
+            exploration_column_metadata[input_alias]["input_table_id"]
+            == exploration_def["base_table_oid"]
+        )
     return exploration_column_metadata
 
 
