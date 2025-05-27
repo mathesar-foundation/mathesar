@@ -126,14 +126,8 @@ for db_key, db_dict in DATABASES.items():
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
         )
 
-# pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
-# and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
+# TODO: We use this variable for analytics, consider removing/renaming it.
 TEST = bool(os.environ.get('TEST', default=False))
-# if TEST:
-#     for db_key, _ in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']:
-#         #print('TESTING*****', db_key)
-#         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
-
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")
