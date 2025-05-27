@@ -21,12 +21,30 @@ class BaseModel(models.Model):
 
 class Server(BaseModel):
     host = models.CharField(max_length=255)
-    port = models.IntegerField()
+    port = models.IntegerField(null=True, blank=True)
 
     class Meta:
         constraints = [
+            # We're adding two constraints here because postgres considers NULL
+            # in unique constraints as separate distinct values, so when it performs
+            # the check, NULL does not equal NULL, allowing multiple rows with the
+            # same host and null for port.
+            #
+            # We should only allow one null value per host
+            #
+            # nulls_distinct option is only present in Django 5.2+ & Postgres 15+, which
+            # is not feasible for us:
+            # https://docs.djangoproject.com/en/5.2/ref/models/constraints/#nulls-distinct
+
             models.UniqueConstraint(
-                fields=["host", "port"], name="unique_server"
+                fields=["host", "port"],
+                condition=models.Q(port__isnull=False),
+                name="unique_server_host_port_not_null",
+            ),
+            models.UniqueConstraint(
+                fields=["host"],
+                condition=models.Q(port__isnull=True),
+                name="unique_server_null_port",
             ),
         ]
 

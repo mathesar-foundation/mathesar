@@ -20,14 +20,16 @@ This page contains all available environment variables supported by Mathesar. Se
 ### `ALLOWED_HOSTS` {: #allowed_hosts}
 
 - **Description**: A set of strings representing the host/domain names that Django is allowed to serve. This is a security measure to prevent HTTP Host header attacks ([see Django docs](https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts)).
-- **Format**: A set of host/domain names separated by a comma and a whitespace
-- **Default value**: `.localhost, 127.0.0.1, [::1]`
+- **Format**: A set of host/domain names separated by a comma
+- **Default value**: `.localhost,127.0.0.1,[::1]`
 
 
 ## Internal Database configuration {: #db}
 
 !!!info
     The database specified in this section will be used to store Mathesar's internal data. Additionally, it can be optionally repurposed via Mathesar's UI to store user data.
+
+Note: The default values specified here refer to those in Mathesar's [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file, as part of our recommended [docker compose installation method](./install-via-docker-compose.md).
 
 ### `POSTGRES_DB`
 
@@ -39,7 +41,7 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Description**: Specifies creation of a user with superuser privileges and a database with the same name.
 - **Default value**: `mathesar`
 
-### `POSTGRES_PASSWORD`
+### `POSTGRES_PASSWORD` (optional)
 
 - **Description**: Specifies the superuser password that is required to be set for the PostgreSQL docker image.
 - **Default value**: `mathesar`
@@ -48,8 +50,12 @@ This page contains all available environment variables supported by Mathesar. Se
 
 - **Description**: Specifies the host name on which portgres listen for connections from client applications.
 - **Default value**: `mathesar_db`
+    - When installing via docker, this value can reference:
+        - A Docker service name (e.g., `mathesar_django`)
+        - A TCP host address (e.g., `host.docker.internal`)
+        - A Unix socket path (e.g., `/var/run/postgresql`)
 
-### `POSTGRES_PORT`
+### `POSTGRES_PORT` (optional)
 
 - **Description**: Specifies the port on which portgres listen for connections from client applications.
 - **Default value**: `5432`

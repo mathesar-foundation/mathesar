@@ -76,7 +76,7 @@ export function getDbTypeBasedFilterCap(
 ): ComponentAndProps {
   const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
   const factory = DataTypes[cellInfo?.type ?? 'string'];
-  if (factory.getFilterInput) {
+  if (fkTargetTableId === undefined && factory.getFilterInput) {
     const config = getCellConfiguration(column.type, cellInfo);
     return factory.getFilterInput(column, config);
   }

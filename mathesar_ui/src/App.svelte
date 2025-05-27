@@ -2,6 +2,7 @@
   import { isLoading as isTranslationLoading, locale } from 'svelte-i18n';
 
   import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import '@mathesar/utils/polyfills';
   import { Spinner } from '@mathesar-component-library';
 
   import AppContext from './AppContext.svelte';
