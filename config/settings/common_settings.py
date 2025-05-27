@@ -16,15 +16,6 @@ from pathlib import Path
 from config.database_config import PostgresConfig, parse_port
 
 
-# We use a 'tuple' with pipes as delimiters as decople naively splits the global
-# variables on commas when casting to Csv()
-def pipe_delim(pipe_string):
-    # Remove opening and closing brackets
-    pipe_string = pipe_string[1:-1]
-    # Split on pipe delim
-    return pipe_string.split("|")
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -110,13 +101,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # TODO: Add to documentation that database keys should not be than 128 characters.
 
-# MATHESAR_DATABASES should be of the form '({db_name}|{db_url}), ({db_name}|{db_url})'
-# See pipe_delim above for why we use pipes as delimiters
-DATABASES = {
-    db_key: PostgresConfig.from_connection_string(url_string).to_django_dict()
-    for db_key, url_string in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']
-}
-
+DATABASES = {}
 POSTGRES_DB = os.environ.get('POSTGRES_DB', default=None)
 POSTGRES_USER = os.environ.get('POSTGRES_USER', default=None)
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default=None)
@@ -144,9 +129,10 @@ for db_key, db_dict in DATABASES.items():
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
 TEST = bool(os.environ.get('TEST', default=False))
-if TEST:
-    for db_key, _ in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']:
-        DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
+# if TEST:
+#     for db_key, _ in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']:
+#         #print('TESTING*****', db_key)
+#         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
