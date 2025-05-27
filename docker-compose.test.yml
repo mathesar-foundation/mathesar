@@ -64,6 +64,12 @@ services:
         condition: service_healthy
       test-user-db:
         condition: service_healthy
+    environment:
+      - POSTGRES_HOST=/var/dev_postgres_socket
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
     volumes:
       - ./api_tests/:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
