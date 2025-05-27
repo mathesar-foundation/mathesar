@@ -75,7 +75,7 @@ def get_pg_catalog_table(table_name, engine, metadata):
 
 def engine_to_psycopg_conn(engine):
     return psycopg.connect(
-        host=engine.url.host,
+        host=engine.url.host or engine.url.query["host"],
         port=engine.url.port,
         dbname=engine.url.database,
         user=engine.url.username,

@@ -7,6 +7,9 @@ services:
       service: dev-db-base
     expose:
       - "5432"
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+      - dev_postgres_socket:/var/run/postgresql
     healthcheck:
       interval: 1s
       start_period: 2s
@@ -32,12 +35,13 @@ services:
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
-      - POSTGRES_HOST=mathesar-test-db
+      - POSTGRES_HOST=/var/dev_postgres_socket
       - POSTGRES_PORT=5432
       - DEBUG=true
       - SKIP_STATIC_COLLECTION=true
     volumes:
       - .:/code/
+      - dev_postgres_socket:/var/dev_postgres_socket
     depends_on:
       test-db:
         condition: service_healthy
@@ -62,5 +66,8 @@ services:
         condition: service_healthy
     volumes:
       - ./api_tests/:/code/
+      - dev_postgres_socket:/var/dev_postgres_socket
 volumes:
   ui_node_modules_test:
+  dev_postgres_data:
+  dev_postgres_socket:
