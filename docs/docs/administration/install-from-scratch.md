@@ -268,16 +268,16 @@ These steps put Caddy in front of Mathesar as a reverse proxy, serving the app o
 
 If you prefer nginx or another proxy, please refer to their documentation.
 
-#### Set your domain
-
 !!! info "Optional"
-    You can skip this step if you only plan to use Mathesar from `localhost`.
+    You can skip this if you only plan to use Mathesar from `localhost`. The following steps assume that you have a domain name.
+
+#### Set your domain
 
 1. Ensure that your DNS `A` and/or `AAAA` records are configured correctly. Your domain should resolve to your server's IP.
 
 1. Enter your domain and press <kbd>Enter</kbd> to customize the remaining steps in this guide.
 
-    <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
+    <input data-input-for="MATHESAR_DEPLOY_DOMAIN_NAME" aria-label="Your Domain name "/>
 
     - For example: `example.com`
     - Do _not_ precede your domain with `http://` or `https://`
@@ -292,7 +292,7 @@ If you prefer nginx or another proxy, please refer to their documentation.
 
 - Add the environment variable `ALLOWED_HOSTS` to the end of the `.env` file in your Mathesar installation (located at `xMATHESAR_INSTALL_DIRx/.env`):
   ```
-  ALLOWED_HOSTS=xDOMAIN_NAMEx
+  ALLOWED_HOSTS=xMATHESAR_DEPLOY_DOMAIN_NAMEx
   ```
 - If there multiple values for `ALLOWED_HOSTS`, they should be comma-separated, with no spaces.
 - Please refer to the list of [environment variables](./environment-variables.md) to further configure Mathesar.
@@ -309,7 +309,7 @@ If you prefer nginx or another proxy, please refer to their documentation.
 
     ```
     # The below line specifies your domain names
-    xDOMAIN_NAMEx {
+    xMATHESAR_DEPLOY_DOMAIN_NAMEx {
 
       log {
         output stdout
@@ -364,7 +364,7 @@ If you prefer nginx or another proxy, please refer to their documentation.
 
 1. Use your web browser to navigate to your Mathesar URL.
 
-    - **With a domain** `https://<your_domain>`
+    - **With a domain** `https://xMATHESAR_DEPLOY_DOMAIN_NAMEx`
     - **Without**    `http://localhost:8000`
 
 1. Follow the on‑screen wizard to create the first admin account and start using Mathesar!
