@@ -35,7 +35,7 @@ services:
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
-      - POSTGRES_HOST=/var/dev_postgres_socket
+      - POSTGRES_HOST=mathesar-test-db
       - POSTGRES_PORT=5432
       - DEBUG=true
       - SKIP_STATIC_COLLECTION=true
