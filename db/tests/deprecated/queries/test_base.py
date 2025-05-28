@@ -1,8 +1,10 @@
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 from db.deprecated.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.deprecated.columns import get_column_attnum_from_name as get_attnum
 from db.deprecated.transforms import base as tbase
 from db.deprecated.metadata import get_empty_metadata
+from db.deprecated.utils import engine_to_psycopg_conn
+from mathesar.utils.explorations import run_exploration
 
 
 def _extract_col_properties_dict(col):
@@ -16,6 +18,11 @@ def _get_oid_from_table(name, schema, engine):
     inspector = inspect(engine)
     return inspector.get_table_oid(name, schema=schema)
 
+def _get_oid_from_schema(schema_name, engine):
+    with engine.connect() as conn:
+        return conn.execute(
+            text(f"SELECT oid FROM pg_namespace WHERE nspname = '{schema_name}'"),
+        ).fetchone()
 
 def test_DBQuery_all_sa_columns_map_initial_columns(engine_with_academics):
     engine, schema = engine_with_academics
@@ -328,3 +335,60 @@ def test_DBQuery_all_sa_columns_map_overwriting(engine_with_library):
         for k, v in dbq.all_sa_columns_map.items()
     }
     assert actual_columns == expect_columns
+
+
+def test_run_explorations(db, engine_with_library):
+    # This test exists to make sure we're able to run explorations with both TCP & Unix socket connections to postgres.
+    engine, schema = engine_with_library
+    schema_oid = _get_oid_from_schema(schema, engine)
+    checkouts_oid = _get_oid_from_table("Checkouts", schema, engine)
+    items_oid = _get_oid_from_table("Items", schema, engine)
+    conn = engine_to_psycopg_conn(engine)
+    exploration_def = {
+        "database_id": 1,
+        "schema_oid": schema_oid,
+        "base_table_oid": checkouts_oid,
+        "initial_columns": [
+          {
+            "alias": "Checkouts_Due Date",
+            "attnum": 5
+          },
+          {
+            "alias": "Items_Acquisition Date",
+            "attnum": 3,
+            "join_path": [
+              [
+                [
+                  checkouts_oid,
+                  2
+                ],
+                [
+                  items_oid,
+                  1
+                ]
+              ]
+            ]
+          }
+        ],
+        "transformations": [],
+        "display_names": {
+          "Checkouts_Due Date": "Checkouts_Due Date",
+          "Items_Acquisition Price": "Items_Acquisition Price",
+          "Items_Acquisition Date": "Items_Acquisition Date"
+        },
+        "display_options": {
+          "columnDisplayOptions": {}
+        }
+    }
+    with conn:
+        actual_results = run_exploration(exploration_def, conn, limit=1, offset=0)
+    expected_results = {
+        'count': 104,
+        'results': [
+            {
+                'Checkouts_Due Date': '2022-05-16 AD',
+                'Items_Acquisition Date': '2014-05-16 AD'
+            }
+        ]
+    }
+    assert expected_results == actual_results['records']
