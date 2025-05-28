@@ -131,7 +131,8 @@
       <DropdownMenu
         label={$_('add_roles')}
         icon={iconAddNew}
-        triggerAppearance="plain-primary"
+        class="padding-compact"
+        triggerAppearance="secondary"
       >
         {#each [...roles.values()] as role (role.oid)}
           <ButtonMenuItem

@@ -20,9 +20,11 @@
 
 <style lang="scss">
   .section {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: var(--sm2);
+
     .header {
-      border-bottom: 1px solid var(--gray-200);
-      padding: var(--sm6) 0;
       display: flex;
       align-items: center;
 
@@ -30,7 +32,6 @@
         font-weight: 600;
       }
       .actions {
-        --input-padding: var(--sm6);
         margin-left: auto;
       }
     }
@@ -40,7 +41,7 @@
     }
 
     & + :global(.section) {
-      margin-top: var(--lg2);
+      margin-top: var(--sm2);
     }
   }
 </style>
