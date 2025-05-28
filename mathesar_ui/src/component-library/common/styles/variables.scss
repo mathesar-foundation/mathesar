@@ -13,7 +13,7 @@ body {
   --header-gradient-start: var(--gray-200);
   --header-gradient-end: var(--gray-300);
   --footer-background-color: var(--white);
-  --inset-background-color: var(--gray-200);
+  --inset-background-color: var(--gray-100);
   --hover-background: var(--stormy-25);
   --active-background: var(--stormy-100);
   --disabled-background: var(--gray-300);
@@ -272,7 +272,7 @@ body {
   --slate-400: #6b7684;
   --slate-500: #4a5568;
   --slate-600: #2b3340;
-  --slate-700: #1a202c;
+  --slate-700: #202630;
   --slate-800: #19222a;
   --slate-850: #11181d;
   --slate-900: #101215;
@@ -319,7 +319,7 @@ body {
 
 body.theme-dark {
   --background-color: var(--slate-900);
-  --border-color: var(--slate-800);
+  --border-color: var(--slate-600);
   --header-background: linear-gradient(
     var(--gradient-direction-default),
     var(--header-gradient-start),
@@ -329,7 +329,7 @@ body.theme-dark {
   --header-gradient-start: var(--slate-800);
   --header-gradient-end: var(--slate-800);
   --footer-background-color: var(--slate-800);
-  --inset-background-color: var(--slate-800);
+  --inset-background-color: var(--slate-850);
   --hover-background: var(--slate-800);
   --active-background: var(--slate-700);
   --disabled-background: var(--slate-700);
@@ -361,7 +361,7 @@ body.theme-dark {
   --text-color-muted: var(--slate-400);
 
   // Input
-  --input-background: var(--slate-800);
+  --input-background: var(--slate-700);
   --input-border: var(--slate-600);
   --input-text: var(--text-color);
   --input-focus-color: var(--indigo-400);
