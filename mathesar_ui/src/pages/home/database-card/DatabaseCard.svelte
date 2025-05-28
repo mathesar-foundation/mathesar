@@ -35,18 +35,18 @@
   .db-card.hoverable:hover {
     border: 1px solid var(--card-hover-border);
     box-shadow: var(--card-hover-shadow);
-    background-color: var(--card-background);
+    background: var(--card-hover-background);
   }
 
   .db-card.hoverable:focus {
-    outline: 2px solid var(--sand-400);
+    outline: 2px solid var(--salmon-600);
     outline-offset: 1px;
   }
 
   .db-card.hoverable:active {
-    border-color: var(--stormy-400);
+    border-color: var(--card-active-border);
     box-shadow: var(--card-active-shadow);
     transform: translateY(0);
-    background-color: var(--card-background);
+    background: var(--card-active-background);
   }
 </style>

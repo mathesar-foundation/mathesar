@@ -200,6 +200,7 @@
     display: flex;
     align-items: center;
     border-bottom: 1px solid var(--card-row-border);
+    border-left: 3px solid transparent;
     background-color: var(--card-background);
   }
 
@@ -210,12 +211,14 @@
 
   .table-row:hover {
     box-shadow: var(--shadow-color) 0 2px 4px 0;
-    background-color: var(--hover-background);
+    background: var(--card-hover-background);
+    border-left-color: var(--salmon-400);
   }
 
   .table-row:active {
     border-color: var(--stormy-400);
     box-shadow: var(--shadow-color) 0 1px 2px 0;
+    background: var(--card-active-background);
   }
 
   .table-row.unconfirmed-import {

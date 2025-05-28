@@ -146,6 +146,7 @@
   .feedback-content {
     max-width: 28rem;
     padding: 0 var(--sm3);
+    color: var(--text-color-primary);
   }
   .feedback-form {
     display: flex;
@@ -153,9 +154,14 @@
     gap: var(--sm3);
     --text-area-min-height: 6rem;
 
+    .title {
+      font-weight: var(--font-weight-medium);
+      color: var(--text-color-primary);
+    }
+
     .help {
       font-size: var(--sm1);
-      color: var(--text-color-secondary);
+      color: var(--text-color-primary);
       margin-top: var(--sm6);
     }
   }
@@ -163,6 +169,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--sm3);
+    color: var(--text-color-primary);
 
     .title {
       font-weight: var(--font-weight-medium);

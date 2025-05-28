@@ -160,10 +160,10 @@
     padding: var(--lg3);
     background: linear-gradient(
       135deg,
-      var(--pumpkin-100) 0%,
-      var(--pumpkin-200) 100%
+      var(--pumpkin-200) 0%,
+      var(--pumpkin-300) 100%
     );
-    border: 1px solid var(--pumpkin-300);
+    border: 1px solid var(--pumpkin-400);
     border-radius: var(--sm2);
     position: relative;
     overflow: hidden;
@@ -177,7 +177,7 @@
       bottom: 0;
       background: radial-gradient(
         circle at top right,
-        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.15) 0%,
         transparent 60%
       );
       pointer-events: none;
@@ -186,13 +186,13 @@
     .explore-title {
       font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
-      color: var(--pumpkin-800);
+      color: var(--pumpkin-900);
       margin: 0 0 0.75rem 0;
       position: relative;
     }
 
     .explore-description {
-      color: var(--pumpkin-700);
+      color: var(--pumpkin-800);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;

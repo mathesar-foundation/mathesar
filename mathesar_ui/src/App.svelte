@@ -75,16 +75,16 @@
    * background colors are applied. We need this in case there is a background
    * color applied underneath the cell, e.g. on the table or page.
    */
-    --cell-bg-color-base: var(--background-color);
-    --cell-bg-color-error: var(--danger-background-color);
-    --cell-bg-color-header: var(--gray-100);
+    --cell-bg-color-base: var(--white);
+    --cell-bg-color-error: var(--red-100);
+    --cell-bg-color-header: var(--slate-100);
     --cell-bg-color-processing: var(--yellow-100);
-    --cell-bg-color-disabled: var(--gray-100);
-    --cell-bg-color-row-hover: var(--gray-100);
+    --cell-bg-color-disabled: var(--slate-100);
+    --cell-bg-color-row-hover: var(--slate-100);
     --cell-bg-color-row-selected: var(--sky-200);
 
     --color-fk: var(--salmon-200);
-    --color-error: var(--danger-color);
+    --color-error: var(--red-600);
     --cell-text-color-processing: var(--text-color-muted);
     --color-array-element: var(--sky-300);
     --color-fk-border: var(--salmon-400);
@@ -142,25 +142,25 @@
 
   body.theme-dark {
     --cell-bg-mix-blend-mode: screen;
-    --cell-bg-color-base: var(--background-color);
-    --cell-bg-color-error: rgba(255, 107, 107, 0.15);
-    --cell-bg-color-header: rgba(39, 43, 48, 0.5);
-    --cell-bg-color-processing: rgba(251, 191, 36, 0.15);
-    --cell-bg-color-disabled: rgba(39, 43, 48, 0.3);
-    --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
-    --cell-bg-color-row-selected: rgba(15, 105, 193, 0.25);
+    --cell-bg-color-base: var(--slate-850);
+    --cell-bg-color-error: var(--red-900);
+    --cell-bg-color-header: var(--slate-800);
+    --cell-bg-color-processing: var(--yellow-900);
+    --cell-bg-color-disabled: var(--slate-800);
+    --cell-bg-color-row-hover: var(--slate-800);
+    --cell-bg-color-row-selected: var(--sky-900);
 
     --color-substring-match: var(--pumpkin-800);
     --color-substring-match-light: var(--pumpkin-950);
 
     --Match__highlight-color: var(--color-substring-match);
 
-    --cell-border-horizontal: 1px solid var(--gray-700);
-    --cell-border-vertical: 1px solid var(--gray-700);
+    --cell-border-horizontal: 1px solid var(--slate-700);
+    --cell-border-vertical: 1px solid var(--slate-700);
 
-    --color-fk: var(--pumpkin-900);
-    --color-fk-border: var(--pumpkin-800);
-    --color-error: #ff6b6b;
+    --color-fk: var(--pumpkin-800);
+    --color-fk-border: var(--pumpkin-600);
+    --color-error: var(--red-400);
     --cell-text-color-processing: var(--gray-300);
     --color-array-element: var(--sky-400);
   }

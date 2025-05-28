@@ -43,7 +43,7 @@
   }
 
   .icon-container {
-    background-color: var(--pumpkin-400);
+    background: linear-gradient(135deg, var(--salmon-400), var(--salmon-600));
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -51,6 +51,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    color: var(--white);
   }
 
   .content {
@@ -83,9 +84,5 @@
 
   .db-card-content:hover .caret-container {
     opacity: 1;
-  }
-
-  :global(body.theme-dark) .icon-container {
-    background-color: var(--pumpkin-800);
   }
 </style>

@@ -27,27 +27,28 @@
 <style>
   .app-secondary-header {
     width: 100%;
-    padding: var(--lg1) var(--page-padding-x);
+    padding: 0;
+    margin-bottom: var(--lg4);
+    background: linear-gradient(
+      135deg,
+      var(--gray-200) 0%,
+      var(--gray-300) 50%,
+      var(--gray-400) 100%
+    );
+  }
+  .content {
+    padding: var(--lg4) var(--page-padding-x);
+    border-radius: var(--border-radius-l);
     max-width: var(--max-layout-width-console-pages);
     margin-left: auto;
     margin-right: auto;
   }
-  .content {
-    padding: var(--lg4);
+  :global(body.theme-dark) .app-secondary-header {
     background: linear-gradient(
       135deg,
-      var(--stormy-100) 0%,
-      var(--stormy-200) 50%,
-      var(--pumpkin-100) 100%
-    );
-    border-radius: var(--border-radius-l);
-  }
-  :global(body.theme-dark) .content {
-    background: linear-gradient(
-      135deg,
-      var(--stormy-800) 0%,
-      var(--stormy-700) 50%,
-      var(--pumpkin-900) 100%
+      var(--slate-850) 0%,
+      var(--slate-800) 50%,
+      var(--slate-700) 100%
     );
   }
   .content.restrict-width {

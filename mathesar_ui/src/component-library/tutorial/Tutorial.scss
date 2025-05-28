@@ -19,10 +19,10 @@
     bottom: 0;
     background: linear-gradient(
       135deg,
-      var(--stormy-300) 0%,
-      var(--stormy-500) 100%
+      var(--mint-500) 0%,
+      var(--mint-700) 100%
     );
-    opacity: 0.2;
+    opacity: 0.35;
   }
 
   .content {
@@ -38,7 +38,7 @@
 
   .icon {
     margin-bottom: var(--lg1);
-    color: var(--text-color-secondary);
+    color: var(--text-color-primary);
   }
 
   .title {
@@ -52,7 +52,7 @@
   }
 
   .body {
-    color: var(--text-color-secondary);
+    color: var(--text-color-primary);
   }
 
   .footer {
@@ -68,9 +68,9 @@ body.theme-dark .tutorial {
   &::before {
     background: linear-gradient(
       135deg,
-      var(--stormy-600) 0%,
-      var(--stormy-800) 100%
+      var(--mint-500) 0%,
+      var(--mint-700) 100%
     );
-    opacity: 0.25;
+    opacity: 0.2;
   }
 }
