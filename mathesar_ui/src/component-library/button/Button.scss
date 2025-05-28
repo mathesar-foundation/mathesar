@@ -405,10 +405,10 @@ body.theme-dark .btn {
   &.btn-secondary {
     --button-background: linear-gradient(
       to bottom right,
-      var(--dark-700),
-      var(--dark-800)
+      var(--slate-700),
+      var(--slate-800)
     );
-    --button-border-color: var(--dark-600);
+    --button-border-color: var(--slate-500);
     --button-color: var(--text-color-primary);
 
     &:not(:disabled) {
@@ -422,10 +422,10 @@ body.theme-dark .btn {
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--dark-600),
-          var(--dark-700)
+          var(--slate-600),
+          var(--slate-700)
         );
-        --button-border-color: var(--dark-500);
+        --button-border-color: var(--slate-500);
         box-shadow:
           0 4px 6px -1px rgba(0, 0, 0, 0.2),
           0 2px 4px -2px rgba(0, 0, 0, 0.2),
@@ -436,10 +436,10 @@ body.theme-dark .btn {
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--dark-500),
-          var(--dark-600)
+          var(--slate-500),
+          var(--slate-600)
         );
-        --button-border-color: var(--dark-400);
+        --button-border-color: var(--slate-400);
         box-shadow:
           0 1px 2px rgba(0, 0, 0, 0.2),
           0 1px 3px rgba(0, 0, 0, 0.2),
