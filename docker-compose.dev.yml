@@ -89,7 +89,6 @@ services:
       args:
         PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     volumes:
-      - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
     depends_on:
       - dev-db
