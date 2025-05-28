@@ -39,9 +39,9 @@
 <style lang="scss">
   .role-with-children {
     .name {
-      padding: var(--sm6) var(--sm1);
-      background: var(--stormy-100);
-      border: 1px solid var(--stormy-300);
+      padding: var(--sm6) var(--sm2);
+      background: var(--gray-50);
+      border: 1px solid var(--gray-300);
       border-radius: var(--border-radius-xl);
       font-weight: var(--font-weight-bold);
       display: inline-flex;
@@ -73,8 +73,8 @@
 
   :global(body.theme-dark) .role-with-children {
     .name {
-      background: var(--stormy-900);
-      border-color: var(--stormy-400);
+      background: var(--slate-800);
+      border-color: var(--slate-600);
     }
   }
 </style>
