@@ -208,25 +208,25 @@ Turn your local Mathesar installation into a public-facing production service.
 
 These steps create a systemd service to run Mathesar continuously - 24x7.
 
+Before proceeding, stop Mathesar if it's currently running.
+
 1. Create a dedicated user for running Mathesar.
 
     ```
-    groupadd mathesar && \
-    useradd mathesar -g mathesar
+    sudo groupadd mathesar && \
+    sudo useradd mathesar -g mathesar
     ```
 
 1. Make the `mathesar` user the owner of the `.media` directory within Mathesar's installation folder.
 
     ```
-    chown -R mathesar:mathesar "xMATHESAR_INSTALL_DIRx/.media/"
+    sudo chown -R mathesar:mathesar "xMATHESAR_INSTALL_DIRx/.media/"
     ```
 
 1. Write the systemd unit.
 
-    `/etc/systemd/system/mathesar.service` is the conventional location to create the service file.
-
     ```
-    cat >/etc/systemd/system/mathesar.service <<'EOF'
+    cat <<'EOF' | sudo tee /etc/systemd/system/mathesar.service >/dev/null
     [Unit]
     Description=mathesar daemon
     After=network.target network-online.target
@@ -251,9 +251,9 @@ These steps create a systemd service to run Mathesar continuously - 24x7.
 1. Reload `systemctl` and start the Mathesar service.
 
     ```
-    systemctl daemon-reload
-    systemctl start mathesar.service
-    systemctl enable mathesar.service
+    sudo systemctl daemon-reload
+    sudo systemctl start mathesar.service
+    sudo systemctl enable mathesar.service
     ```
 
 1. Check the logs to verify if Mathesar is running without any errors.
@@ -268,19 +268,19 @@ These steps put Caddy in front of Mathesar as a reverse proxy, serving the app o
 
 If you prefer nginx or another proxy, please refer to their documentation.
 
+!!! info "Optional"
+    You can skip this if you only plan to use Mathesar from `localhost`. The following steps assume that you have a domain name.
+
 #### Set your domain
 
-!!! info "Optional"
-    You can skip this step if you only plan to use Mathesar from `localhost`.
-
-1. Ensure that your DNS `A` and/or `AAAA` records are configured correctly. `<your-domain>` should resolve to your server's IP.
+1. Ensure that your DNS `A` and/or `AAAA` records are configured correctly. Your domain should resolve to your server's IP.
 
 1. Enter your domain and press <kbd>Enter</kbd> to customize the remaining steps in this guide.
 
-    <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
+    <input data-input-for="MATHESAR_DEPLOY_DOMAIN_NAME" aria-label="Your Domain name "/>
 
     - For example: `example.com`
-    - Do _not_ precede your domain with `https://`
+    - Do _not_ precede your domain with `http://` or `https://`
     - Do _not_ use a trailing slash
 
     !!! tip
@@ -291,87 +291,67 @@ If you prefer nginx or another proxy, please refer to their documentation.
 #### Configure `ALLOWED_HOSTS`
 
 - Add the environment variable `ALLOWED_HOSTS` to the end of the `.env` file in your Mathesar installation (located at `xMATHESAR_INSTALL_DIRx/.env`):
-    ```
-    ALLOWED_HOSTS=xDOMAIN_NAMEx
-    ```
+  ```
+  ALLOWED_HOSTS=xMATHESAR_DEPLOY_DOMAIN_NAMEx
+  ```
 - If there multiple values for `ALLOWED_HOSTS`, they should be comma-separated, with no spaces.
 - Please refer to the list of [environment variables](./environment-variables.md) to further configure Mathesar.
+- Once the environment variables are configured, restart the Mathesar service:
+  ```
+  sudo systemctl restart mathesar.service
+  ```
 
 #### Install and configure Caddy
 
 1. Install Caddy by following the instructions from the [Caddy documentation](https://caddyserver.com/docs/install).
 
-1. Create the [Caddyfile](https://caddyserver.com/docs/caddyfile) at `/etc/caddy/Caddyfile`, with the content:
+1. Create/modify the [Caddyfile](https://caddyserver.com/docs/caddyfile) at `/etc/caddy/Caddyfile`, with the following content:
 
     ```
-    {$DOMAIN_NAME} {
-        log {
-            output stdout
+    # The below line specifies your domain names
+    xMATHESAR_DEPLOY_DOMAIN_NAMEx {
+
+      log {
+        output stdout
+      }
+
+      respond /caddy-health-check 200
+      encode zstd gzip
+
+      handle_path /media/* {
+        @downloads {
+          query dl=*
         }
-        respond /caddy-health-check 200
-        encode zstd gzip
-        handle_path /media/* {
-            @downloads {
-                query dl=*
-            }
-            header @downloads Content-disposition "attachment; filename={query.dl}"
-    
-            file_server {
-                precompressed br zstd gzip
-                root {$MEDIA_ROOT:"xMATHESAR_INSTALL_DIRx/.media/"}
-            }
+        header @downloads Content-disposition "attachment; filename={query.dl}"
+
+        file_server {
+          precompressed br zstd gzip
+          root "xMATHESAR_INSTALL_DIRx/.media/"
         }
-        handle_path /static/* {
-            file_server {
-                precompressed br zstd gzip
-                root {$STATIC_ROOT:"xMATHESAR_INSTALL_DIRx/static/"}
-            }
+      }
+
+      handle_path /static/* {
+        file_server {
+          precompressed br zstd gzip
+          root "xMATHESAR_INSTALL_DIRx/static/"
         }
-        reverse_proxy localhost:8000
+      }
+
+      # This is the address at which Mathesar is running
+      reverse_proxy localhost:8000
     }
     ```
 
-1. Create a dedicated user for running Caddy.
+1. Most Caddy installation methods automatically set up Caddy to run as a service, with a systemd unit and a user account. You can verify it by running:
+    ```
+    systemctl status caddy.service
+    ```
+    If you encounter any error mentioning that the service is not found, you can manually set up a service by following [their documentation](https://caddyserver.com/docs/running#manual-installation).
+
+1. Restart the Caddy service.
 
     ```
-    groupadd caddy && \
-    useradd caddy -g caddy
-    ```
-
-1. Create the Caddy systemd service file, `/lib/systemd/system/caddy.service`.
-
-    ```
-    cat >/lib/systemd/system/caddy.service <<'EOF'
-    [Unit]
-    Description=Caddy
-    Documentation=https://caddyserver.com/docs/
-    After=network.target network-online.target
-    Requires=network-online.target
-    
-    [Service]
-    Type=notify
-    User=caddy
-    Group=caddy
-    EnvironmentFile=xMATHESAR_INSTALL_DIRx/.env
-    ExecStart=/usr/bin/caddy run --config /etc/caddy/Caddyfile
-    ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile --force
-    TimeoutStopSec=5s
-    LimitNOFILE=1048576
-    LimitNPROC=512
-    PrivateTmp=true
-    ProtectSystem=full
-    AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-    
-    [Install]
-    WantedBy=multi-user.target
-    ```
-
-1. Reload `systemctl` and start the Caddy service.
-
-    ```
-    systemctl daemon-reload && \
-    systemctl start caddy.service && \
-    systemctl enable caddy.service
+    sudo systemctl restart caddy.service
     ```
 
 1. Check the logs to verify if Caddy is running without any errors
@@ -384,16 +364,16 @@ If you prefer nginx or another proxy, please refer to their documentation.
 
 1. Use your web browser to navigate to your Mathesar URL.
 
-    - **With a domain** `https://<your_domain>`
+    - **With a domain** `https://xMATHESAR_DEPLOY_DOMAIN_NAMEx`
     - **Without**    `http://localhost:8000`
 
 1. Follow the on‑screen wizard to create the first admin account and start using Mathesar!
 
 ## Troubleshooting
 
-Following are some troubleshooting steps to take if you run into issues during installation or running Mathesar.
+If you encounter any issues during the installation or while running Mathesar, try the troubleshooting steps below.
 
-If you're unable to resolve any issue you're facing, please reach out to us via our [community channels](https://mathesar.org/community), or [report a bug](https://github.com/mathesar-foundation/mathesar/issues/new?template=bug_report.md) on our Github repo.
+If you're unable to resolve the problem, feel free to reach out through our [community channels](https://mathesar.org/community) or [report a bug](https://github.com/mathesar-foundation/mathesar/issues/new?template=bug_report.md) on our Github repository.
 
 - **Installer stops with “Permission denied” / mkdir fails**
 
@@ -416,7 +396,7 @@ If you're unable to resolve any issue you're facing, please reach out to us via 
 
     _Resolution_:
 
-    - Always escape spaces in systemd and .env files.
+    - Always escape spaces in systemd unit files.
     - Eg., `WorkingDirectory=/etc/mathesar\ install\ dir`
 
 - **Caddy returning blank page / 502**
@@ -424,12 +404,12 @@ If you're unable to resolve any issue you're facing, please reach out to us via 
     _Possible causes_:
 
     - Caddy does not have permissions to read `/static` folder.
-    - Mathesar not running or crashed.
+    - Mathesar is not running or has crashed.
 
     _Resolution_:
     
-    - Ensure that the caddy service user has read permissions on the `static` folder and it's contents, within your installation directory.
-    - Check the Mathesar logs to drilldown errors, if Mathesar has crashed.
+    - Ensure that the Caddy service user has read permissions on the `static` folder and its contents within your installation directory.
+    - If Mathesar has crashed, check the logs to investigate the error.
 
 - **Uploading CSV fails (500 error)**
 
@@ -437,11 +417,18 @@ If you're unable to resolve any issue you're facing, please reach out to us via 
 
     _Resolution_:
 
-    - Ensure that the mathesar service user has write permissions on the `.media` folder and it's contents, within your installation directory.
-    - If Mathesar has system-wide permissions, ensure other users of the system have write permissions on the `.media` folder and it's contents.
+    - Ensure that the Mathesar service user has write permissions on the `.media` folder and its contents within your installation directory.
+    - If Mathesar was installed system-wide, ensure other users of the system have write permissions on the `.media` folder and it's contents.
 
 - **Browser shows “Not Secure” / HTTP padlock**
 
-    _Possible cause_: Using plain HTTP over a domain/IP.
+    _Possible causes_:
 
-    _Resolution_: Serve Mathesar over https using Caddy, if it needs to be accessible over a domain or an IP address.
+    - Using plain HTTP.
+    - Using an IP address instead of a domain name in Caddyfile.
+
+    _Resolution_:
+    
+    - Serve Mathesar over HTTPS using Caddy.
+    - Make sure that you mention a valid domain name in the Caddyfile, and not an IP address.
+    - Ensure that your A/AAAA records are configured correctly so that your domain name resolves to your server's IP address.
