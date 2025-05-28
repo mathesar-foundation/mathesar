@@ -97,14 +97,16 @@
     entityTypeName={$_('database')}
     icon={iconDatabase}
   >
-    <div slot="subText" class="details">
-      <div>
-        <span class="label">{$_('db_server')}{staticText.COLON}</span>
-        {database.server.getConnectionString()}
-      </div>
-      <div>
-        <span class="label">{$_('db_name')}{staticText.COLON}</span>
-        {database.name}
+    <div slot="subText" class="database-info">
+      <div class="connection-details">
+        <div>
+          <span class="label">{$_('db_server')}{staticText.COLON}</span>
+          {database.server.getConnectionString()}
+        </div>
+        <div>
+          <span class="label">{$_('db_name')}{staticText.COLON}</span>
+          {database.name}
+        </div>
       </div>
 
       {#if isMathesarAdmin}
@@ -208,12 +210,18 @@
   .tab-container {
     padding: var(--lg3) 0;
   }
-  .details {
+  .database-info {
     font-size: 1rem;
     color: var(--text-color-secondary);
     margin-top: var(--sm5);
   }
-  .details .label {
+  .connection-details {
+    display: flex;
+    align-items: center;
+    gap: var(--lg1);
+    flex-wrap: wrap;
+  }
+  .database-info .label {
     color: var(--text-color-primary);
     font-weight: var(--font-weight-bold);
   }
