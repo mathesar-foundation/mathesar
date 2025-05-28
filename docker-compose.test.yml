@@ -1,4 +1,3 @@
----
 services:
   test-db:
     container_name: mathesar-test-db
@@ -10,8 +9,11 @@ services:
     volumes:
       - dev_postgres_socket:/var/run/postgresql
     healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
-      start_period: 2s
+      start_period: 5s
+      retries: 30
+
   test-user-db:
     container_name: mathesar-test-user-db
     extends:
@@ -20,6 +22,7 @@ services:
       - POSTGRES_DB=my_data
       - POSTGRES_USER=data_admin
       - POSTGRES_PASSWORD=data1234
+
   api-test-service:
     container_name: mathesar-api-test-service
     build:
@@ -34,13 +37,13 @@ services:
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
-      - POSTGRES_HOST=/var/dev_postgres_socket
+      - POSTGRES_HOST=/var/run/postgresql
       - POSTGRES_PORT=5432
       - DEBUG=true
       - SKIP_STATIC_COLLECTION=true
     volumes:
       - .:/code/
-      - dev_postgres_socket:/var/dev_postgres_socket
+      - dev_postgres_socket:/var/run/postgresql
     depends_on:
       test-db:
         condition: service_healthy
@@ -52,6 +55,7 @@ services:
       start_period: 3s
     expose:
       - "8000"
+
   test-runner:
     container_name: mathesar-api-test-runner
     build:
@@ -64,14 +68,15 @@ services:
       test-user-db:
         condition: service_healthy
     environment:
-      - POSTGRES_HOST=/var/dev_postgres_socket
+      - POSTGRES_HOST=/var/run/postgresql
       - POSTGRES_PORT=5432
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
     volumes:
       - ./api_tests/:/code/
-      - dev_postgres_socket:/var/dev_postgres_socket
+      - dev_postgres_socket:/var/run/postgresql
+
 volumes:
   ui_node_modules_test:
   dev_postgres_socket:
