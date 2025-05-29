@@ -101,11 +101,12 @@
   .users-list-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--lg1);
   }
 
   .users-list {
     border: 1px solid var(--border-color);
+    background-color: var(--inset-background-color);
     border-radius: var(--border-radius-m);
     overflow: hidden;
 

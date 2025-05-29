@@ -41,7 +41,6 @@
     padding: var(--sm1);
     cursor: pointer;
     min-height: 4.2rem;
-    transition: background-color 0.2s ease;
 
     &:hover {
       background: var(--hover-background);
@@ -54,15 +53,14 @@
   .user-info {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
   }
 
   .user-detailed-info {
     display: flex;
     align-items: center;
-    font-weight: 300;
+    font-weight: var(--font-weight-light);
     color: var(--text-color-secondary);
-    gap: 0.5rem;
+    gap: var(--sm1);
   }
 
   .divider {
