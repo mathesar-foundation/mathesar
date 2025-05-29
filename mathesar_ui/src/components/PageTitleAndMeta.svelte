@@ -85,7 +85,7 @@
     font-size: var(--lg1);
     font-weight: 500;
     line-height: 1;
-    color: var(--text-color-secondary);
+    color: var(--text-color-tertiary);
   }
 
   .entity-name {

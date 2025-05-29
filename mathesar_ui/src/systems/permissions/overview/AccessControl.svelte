@@ -130,9 +130,9 @@
     {#if $currentRoleOwns}
       <DropdownMenu
         label={$_('add_roles')}
-        icon={iconAddNew}
-        class="padding-compact"
         triggerAppearance="secondary"
+        icon={iconAddNew}
+        triggerClass="padding-compact"
       >
         {#each [...roles.values()] as role (role.oid)}
           <ButtonMenuItem

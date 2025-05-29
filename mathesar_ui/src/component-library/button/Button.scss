@@ -177,6 +177,12 @@
     box-shadow: none !important;
   }
 
+  &.btn-borderless {
+    --button-border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
   &.btn-default,
   &.btn-plain,
   &.btn-plain-primary {
