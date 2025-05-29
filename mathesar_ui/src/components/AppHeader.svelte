@@ -75,7 +75,7 @@
 
       {#if $userProfile}
         <DropdownMenu
-          triggerAppearance="action"
+          triggerAppearance="secondary"
           triggerClass="padding-compact"
           size="small"
           closeOnInnerClick={false}

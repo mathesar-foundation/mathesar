@@ -30,7 +30,7 @@ body {
 
   // Border Colors
   --border-color: var(--gray-300);
-  --card-border: var(--gray-300);
+  --card-border: var(--gray-400);
   --card-row-border: var(--gray-300);
   --card-hover-border: var(--salmon-500);
   --card-active-border: var(--salmon-600);
@@ -360,7 +360,7 @@ body.theme-dark {
   --collapsible-background: var(--slate-700);
   --collapsible-hover: var(--slate-700);
   --collapsible-active: var(--slate-600);
-  --card-border: var(--slate-800);
+  --card-border: var(--slate-600);
   --card-row-border: var(--slate-800);
   --sheet-background: var(--slate-900);
   --window-background-color: var(--slate-850);
