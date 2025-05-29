@@ -65,12 +65,12 @@ body {
   --collapsible-background: var(--gray-300);
   --collapsible-hover: var(--gray-400);
   --collapsible-active: var(--gray-500);
-  --collapsible-button-background: var(--gray-200);
-  --collapsible-button-hover: var(--gray-300);
-  --collapsible-button-active: var(--gray-400);
-  --collapsible-button-border: var(--gray-400);
+  --collapsible-button-background: var(--gray-300);
+  --collapsible-button-hover: var(--gray-400);
+  --collapsible-button-active: var(--gray-600);
+  --collapsible-button-border: var(--gray-500);
   --collapsible-button-text: var(--text-color-primary);
-  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 
   // Font Weights
   --font-weight-light: 300;
@@ -102,6 +102,7 @@ body {
   --input-text: var(--text-color);
 
   // Inspector Styles
+  --inspector-background: var(--gray-100);
   --inspector-hover: var(--gray-300);
   --inspector-active: var(--gray-400);
 
@@ -165,7 +166,17 @@ body {
   --gray-800: #221e1a;
   --gray-900: #0f0d0b;
 
-  --green-100: #e5fde6;
+  --emerald-50: #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
+  --emerald-950: #022c22;
 
   --orange-red-50: #fff2ef;
   --orange-red-100: #ffe2dc;
@@ -342,6 +353,7 @@ body.theme-dark {
   --resource-icon-color: var(--pumpkin-700);
   --resource-icon-background: var(--pumpkin-950);
   --layout-background-color: var(--background-color);
+  --inspector-background: var(--slate-700);
   --inspector-hover: var(--slate-800);
   --inspector-active: var(--slate-700);
   --secondary-header-background: var(--slate-800);
@@ -361,11 +373,11 @@ body.theme-dark {
   --text-color-muted: var(--slate-400);
 
   // Input
-  --input-background: var(--slate-700);
-  --input-border: var(--slate-600);
+  --input-background: var(--slate-600);
+  --input-border: var(--slate-500);
   --input-text: var(--text-color);
-  --input-focus-color: var(--indigo-400);
-  --input-focus-shadow: var(--indigo-800);
+  --input-focus-color: var(--slate-400);
+  --input-focus-shadow: var(--slate-800);
   --input-disabled-background: var(--slate-800);
   --sidebar-background: var(--slate-800);
   --modal-overlay: rgba(0, 0, 0, 0.6);
@@ -415,12 +427,12 @@ body.theme-dark {
   --success-background-color: rgba(52, 211, 153, 0.15);
   --success-border-color: rgba(52, 211, 153, 0.3);
 
-  --collapsible-button-background: var(--slate-700);
-  --collapsible-button-hover: var(--slate-600);
+  --collapsible-button-background: var(--slate-850);
+  --collapsible-button-hover: var(--slate-700);
   --collapsible-button-active: var(--slate-600);
-  --collapsible-button-border: var(--slate-600);
+  --collapsible-button-border: var(--slate-700);
   --collapsible-button-text: var(--text-color-primary);
-  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 
   --accent-100: var(--stormy-800);
   --accent-200: var(--stormy-700);

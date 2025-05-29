@@ -281,17 +281,16 @@
   &.btn-inspector {
     --button-background: var(--collapsible-button-background);
     --button-color: var(--collapsible-button-text);
-    border: 1px solid var(--collapsible-button-border);
+    border: none;
+    border-radius: 0;
     box-shadow: var(--collapsible-button-shadow);
 
     &:hover {
       --button-background: var(--collapsible-button-hover);
-      border-color: var(--collapsible-button-border);
     }
 
     &:active {
       --button-background: var(--collapsible-button-active);
-      border-color: var(--collapsible-button-border);
     }
   }
 
@@ -377,7 +376,6 @@ body.theme-dark .btn {
       &.focus,
       &:focus {
         --button-outline: 2px solid rgba(122, 95, 160, 0.7);
-        outline-offset: 1px;
       }
 
       &:hover,
@@ -409,13 +407,11 @@ body.theme-dark .btn {
       var(--slate-800)
     );
     --button-border-color: var(--slate-500);
-    --button-color: var(--text-color-primary);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
         --button-outline: 2px solid rgba(95, 99, 104, 0.3);
-        outline-offset: 1px;
       }
 
       &:hover,
@@ -425,7 +421,6 @@ body.theme-dark .btn {
           var(--slate-600),
           var(--slate-700)
         );
-        --button-border-color: var(--slate-500);
         box-shadow:
           0 4px 6px -1px rgba(0, 0, 0, 0.2),
           0 2px 4px -2px rgba(0, 0, 0, 0.2),
@@ -451,17 +446,14 @@ body.theme-dark .btn {
   &.btn-inspector {
     --button-background: var(--collapsible-button-background);
     --button-color: var(--collapsible-button-text);
-    border: 1px solid var(--collapsible-button-border);
     box-shadow: var(--collapsible-button-shadow);
 
     &:hover {
       --button-background: var(--collapsible-button-hover);
-      border-color: var(--collapsible-button-border);
     }
 
     &:active {
       --button-background: var(--collapsible-button-active);
-      border-color: var(--collapsible-button-border);
     }
   }
 
@@ -472,32 +464,20 @@ body.theme-dark .btn {
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--hover-background);
         --button-border-color: var(--stormy-300);
         --button-color: var(--stormy-200);
-        --button-shadow: var(--shadow-color) 0 1px 2px 0,
-          var(--shadow-color) 0 1px 3px 0;
-        box-shadow: var(--button-shadow);
       }
 
       &:active,
       &.active {
-        --button-background: var(--active-background);
         --button-border-color: var(--stormy-200);
         --button-color: var(--stormy-100);
-        --button-shadow: var(--shadow-color) 0 1px 2px 0;
-        box-shadow: var(--button-shadow);
       }
 
       &:focus,
       &.focus {
-        --button-background: var(--hover-background);
         --button-border-color: var(--stormy-300);
         --button-color: var(--stormy-200);
-        --button-shadow: var(--shadow-color) 0 2px 4px 0,
-          var(--shadow-color) 0 1px 3px 0;
-        box-shadow: var(--button-shadow);
-        outline: none;
       }
     }
   }
