@@ -95,8 +95,8 @@ body {
   // Input Styles
   --input-background: #ffffff;
   --input-disabled-background: var(--gray-50);
-  --input-focus-color: var(--stormy-500);
-  --input-focus-shadow: var(--stormy-100);
+  --input-focus-color: var(--salmon-500);
+  --input-focus-shadow: var(--salmon-100);
   --input-padding: var(--sm2);
   --input-line-height: 1;
   --input-text: var(--text-color);
@@ -373,8 +373,8 @@ body.theme-dark {
   --text-color-muted: var(--slate-400);
 
   // Input
-  --input-background: var(--slate-600);
-  --input-border: var(--slate-500);
+  --input-background: var(--slate-850);
+  --input-border: var(--slate-600);
   --input-text: var(--text-color);
   --input-focus-color: var(--slate-400);
   --input-focus-shadow: var(--slate-800);
