@@ -88,8 +88,8 @@
   &.btn-secondary {
     --button-background: linear-gradient(
       to bottom right,
-      var(--neutral-100),
-      var(--neutral-200)
+      var(--neutral-50),
+      var(--neutral-100)
     );
     --button-border-color: var(--neutral-400);
     --button-color: var(--text-color-primary);
