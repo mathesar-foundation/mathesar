@@ -1,6 +1,7 @@
 .tutorial {
   position: relative;
   border-radius: var(--border-radius-xl);
+  border: 1px solid var(--pumpkin-600);
   padding: var(--lg3);
   display: flex;
   align-items: center;
@@ -19,8 +20,8 @@
     bottom: 0;
     background: linear-gradient(
       135deg,
-      var(--mint-500) 0%,
-      var(--mint-700) 100%
+      var(--pumpkin-400) 0%,
+      var(--pumpkin-600) 100%
     );
     opacity: 0.35;
   }
@@ -63,13 +64,14 @@
 }
 
 body.theme-dark .tutorial {
+  border-color: var(--pumpkin-900);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 
   &::before {
     background: linear-gradient(
       135deg,
-      var(--mint-500) 0%,
-      var(--mint-700) 100%
+      var(--pumpkin-400) 0%,
+      var(--pumpkin-600) 100%
     );
     opacity: 0.2;
   }
