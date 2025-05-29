@@ -5,11 +5,13 @@
 
   $: ({ tableCount } = schema);
   $: actualTableCount = $tableCount;
+  $: tableText = actualTableCount === 1 ? 'table' : 'tables';
 </script>
 
 <div class="container">
   <p class="table-count">
     {actualTableCount}
+    {tableText}
   </p>
 </div>
 
@@ -17,7 +19,7 @@
   .table-count {
     font-size: 1rem;
     color: var(--text-color-tertiary);
-    font-weight: 400;
+    font-weight: var(--font-weight-medium);
     margin: 0;
   }
 
