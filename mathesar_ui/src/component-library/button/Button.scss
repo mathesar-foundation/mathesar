@@ -321,39 +321,58 @@
   }
 
   &.btn-feedback {
-    --button-background: var(--background-color);
-    --button-color: var(--stormy-700);
-    --button-border-color: var(--stormy-600);
+    --button-background: linear-gradient(
+      to bottom right,
+      var(--salmon-400),
+      var(--salmon-600)
+    );
+    --button-color: var(--white);
+    --button-border-color: var(--salmon-500);
     border: 1px solid var(--button-border-color);
     border-radius: var(--border-radius-m);
     padding: var(--sm4) var(--sm2);
     font-weight: var(--font-weight-medium);
+    --button-shadow: var(--shadow-color) 0 1px 2px 0,
+      var(--shadow-color) 0 1px 3px 0;
+    box-shadow: var(--button-shadow);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--hover-background);
-        --button-border-color: var(--stormy-700);
-        --button-color: var(--stormy-800);
-        --button-shadow: var(--shadow-color) 0 1px 2px 0,
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--salmon-300),
+          var(--salmon-500)
+        );
+        --button-border-color: var(--salmon-400);
+        --button-color: var(--white);
+        --button-shadow: var(--shadow-color) 0 2px 4px 0,
           var(--shadow-color) 0 1px 3px 0;
         box-shadow: var(--button-shadow);
       }
 
       &:active,
       &.active {
-        --button-background: var(--active-background);
-        --button-border-color: var(--stormy-800);
-        --button-color: var(--stormy-900);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--salmon-500),
+          var(--salmon-700)
+        );
+        --button-border-color: var(--salmon-600);
+        --button-color: var(--white);
         --button-shadow: var(--shadow-color) 0 1px 2px 0;
         box-shadow: var(--button-shadow);
       }
 
       &:focus,
       &.focus {
-        --button-background: var(--hover-background);
-        --button-border-color: var(--stormy-700);
-        --button-color: var(--stormy-800);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--salmon-300),
+          var(--salmon-500)
+        );
+        --button-border-color: var(--salmon-400);
+        --button-color: var(--white);
         --button-shadow: var(--shadow-color) 0 2px 4px 0,
           var(--shadow-color) 0 1px 3px 0;
         box-shadow: var(--button-shadow);
@@ -458,26 +477,46 @@ body.theme-dark .btn {
   }
 
   &.btn-feedback {
-    --button-color: var(--stormy-300);
-    --button-border-color: var(--stormy-400);
+    --button-background: linear-gradient(
+      to bottom right,
+      var(--salmon-500),
+      var(--salmon-700)
+    );
+    --button-color: var(--white);
+    --button-border-color: var(--salmon-600);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-border-color: var(--stormy-300);
-        --button-color: var(--stormy-200);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--salmon-400),
+          var(--salmon-600)
+        );
+        --button-border-color: var(--salmon-500);
+        --button-color: var(--white);
       }
 
       &:active,
       &.active {
-        --button-border-color: var(--stormy-200);
-        --button-color: var(--stormy-100);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--salmon-600),
+          var(--salmon-800)
+        );
+        --button-border-color: var(--salmon-700);
+        --button-color: var(--white);
       }
 
       &:focus,
       &.focus {
-        --button-border-color: var(--stormy-300);
-        --button-color: var(--stormy-200);
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--salmon-400),
+          var(--salmon-600)
+        );
+        --button-border-color: var(--salmon-500);
+        --button-color: var(--white);
       }
     }
   }
