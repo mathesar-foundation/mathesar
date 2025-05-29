@@ -69,7 +69,7 @@
     display: inline-block;
     width: 0.25rem;
     height: 0.25rem;
-    background-color: var(--gray-500);
+    background-color: var(--neutral-500);
     border-radius: 50%;
   }
 

@@ -8,7 +8,7 @@
 
     .file {
       padding: var(--sm3);
-      border: 1px solid var(--gray-300);
+      border: 1px solid var(--neutral-300);
       border-radius: var(--border-radius-l);
       display: flex;
 
@@ -42,7 +42,7 @@
         > .upload-info {
           display: flex;
           justify-content: space-between;
-          color: var(--gray-500);
+          color: var(--neutral-500);
         }
       }
     }
@@ -81,7 +81,7 @@
           font-size: var(--lg1);
         }
         .desc {
-          color: var(--gray-500);
+          color: var(--neutral-500);
           margin-top: var(--sm6);
         }
       }

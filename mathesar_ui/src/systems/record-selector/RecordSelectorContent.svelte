@@ -202,7 +202,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--gray-200);
+    color: var(--neutral-200);
     z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
@@ -215,7 +215,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--gray-200);
+    color: var(--neutral-200);
   }
   .no-results {
     padding: 1.5rem;

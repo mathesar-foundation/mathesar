@@ -40,8 +40,8 @@
   .role-with-children {
     .name {
       padding: var(--sm6) var(--sm2);
-      background: var(--gray-50);
-      border: 1px solid var(--gray-300);
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-300);
       border-radius: var(--border-radius-xl);
       font-weight: var(--font-weight-bold);
       display: inline-flex;

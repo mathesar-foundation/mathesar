@@ -142,6 +142,7 @@
           class="action-button"
         >
           <Icon {...iconSelectRecord} />
+          <span>{$_('find_record')}</span>
         </Button>
         <span slot="content">{$_('find_record')}</span>
       </Tooltip>

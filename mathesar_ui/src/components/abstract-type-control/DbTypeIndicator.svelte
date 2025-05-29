@@ -17,7 +17,7 @@
 
     span {
       text-transform: uppercase;
-      background-color: var(--gray-200);
+      background-color: var(--neutral-200);
       border-radius: var(--border-radius-m);
       padding: 2px 4px;
       font-size: var(--sm2);

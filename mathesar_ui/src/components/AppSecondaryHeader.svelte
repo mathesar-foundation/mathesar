@@ -31,9 +31,9 @@
     margin-bottom: var(--lg4);
     background: linear-gradient(
       135deg,
-      var(--gray-200) 0%,
-      var(--gray-300) 50%,
-      var(--gray-400) 100%
+      var(--neutral-200) 0%,
+      var(--neutral-300) 50%,
+      var(--neutral-400) 100%
     );
   }
   .content {

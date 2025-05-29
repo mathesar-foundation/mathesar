@@ -21,8 +21,8 @@
 
 <style lang="scss">
   .trigger {
-    border: 1px solid var(--gray-400);
-    color: var(--gray-300);
+    border: 1px solid var(--neutral-400);
+    color: var(--neutral-300);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
@@ -31,14 +31,14 @@
     align-items: center;
 
     :global(.expand-right-icon) {
-      color: var(--gray-500);
+      color: var(--neutral-500);
     }
 
     &:hover,
     &:active {
-      background-color: var(--gray-100);
-      color: var(--gray-500);
-      border-color: var(--gray-300);
+      background-color: var(--neutral-100);
+      color: var(--neutral-500);
+      border-color: var(--neutral-300);
     }
   }
 </style>

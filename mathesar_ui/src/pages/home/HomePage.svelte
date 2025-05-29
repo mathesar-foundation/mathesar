@@ -62,11 +62,11 @@
   }
 
   .home-page-header-title-inner {
-    border: 1px solid var(--gray-400);
+    border: 1px solid var(--neutral-400);
     background: linear-gradient(
       135deg,
-      var(--gray-100) 0%,
-      var(--gray-200) 100%
+      var(--neutral-100) 0%,
+      var(--neutral-200) 100%
     );
     padding: var(--sm4) var(--sm2);
     border-radius: var(--border-radius-l);
@@ -77,7 +77,7 @@
 
     h1 {
       margin: 0;
-      color: var(--gray-900);
+      color: var(--neutral-900);
       font-size: var(--text-size-base);
       font-weight: var(--font-weight-bold);
       text-shadow: none;

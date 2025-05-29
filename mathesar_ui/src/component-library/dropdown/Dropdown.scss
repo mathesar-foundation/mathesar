@@ -44,7 +44,7 @@ button.dropdown.trigger {
   overflow: auto;
 
   body.theme-dark & {
-    border: var(--Dropdown__border, 1px solid var(--slate-600));
+    border: var(--Dropdown__border, 1px solid var(--neutral-600));
   }
 
   &[data-popper-placement='top-start'] {

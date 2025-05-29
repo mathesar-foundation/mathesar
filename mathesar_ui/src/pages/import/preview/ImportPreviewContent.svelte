@@ -322,7 +322,7 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--gray-500);
+    color: var(--neutral-500);
   }
   .preview-header {
     margin: 0;

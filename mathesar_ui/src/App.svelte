@@ -89,8 +89,8 @@
     --color-array-element: var(--sky-300);
     --color-fk-border: var(--salmon-400);
 
-    --cell-border-horizontal: 1px solid var(--gray-300);
-    --cell-border-vertical: 1px solid var(--gray-300);
+    --cell-border-horizontal: 1px solid var(--neutral-300);
+    --cell-border-vertical: 1px solid var(--neutral-300);
 
     --page-padding-x: var(--lg1);
     --page-padding-y: var(--lg1);
@@ -131,7 +131,7 @@
     line-height: var(--line-height-base);
     letter-spacing: var(--letter-spacing-base);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -moz-osx-font-smoothing: neutralscale;
     text-rendering: optimizeLegibility;
 
     /** Panel theming */
@@ -161,7 +161,7 @@
     --color-fk: var(--pumpkin-800);
     --color-fk-border: var(--pumpkin-600);
     --color-error: var(--red-400);
-    --cell-text-color-processing: var(--gray-300);
+    --cell-text-color-processing: var(--neutral-300);
     --color-array-element: var(--sky-400);
   }
 
@@ -215,14 +215,14 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: var(--gray-100);
+    background: var(--neutral-100);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
     color: var(--text-color);
 
     body.theme-dark & {
-      background: var(--gray-900);
-      border: 1px solid var(--gray-700);
+      background: var(--neutral-900);
+      border: 1px solid var(--neutral-700);
     }
   }
 
@@ -252,14 +252,14 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--gray-100);
+    background: var(--neutral-100);
     border-radius: 3px;
     color: var(--text-color-muted);
     font-weight: bold;
 
     body.theme-dark & {
-      background: var(--gray-900);
-      border: 1px solid var(--gray-700);
+      background: var(--neutral-900);
+      border: 1px solid var(--neutral-700);
     }
   }
 
