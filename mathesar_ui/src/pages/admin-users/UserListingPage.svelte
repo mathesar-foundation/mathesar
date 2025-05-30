@@ -46,7 +46,7 @@
 
 <svelte:head><title>{makeSimplePageTitle($_('users'))}</title></svelte:head>
 
-<h1>{$_('users')} {userCountText}</h1>
+<h2>{$_('users')} {userCountText}</h2>
 
 <section class="users-list-container">
   {#if $requestStatus?.state === 'processing'}

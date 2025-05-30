@@ -136,15 +136,14 @@
   }
 
   &.btn-outline-primary {
-    --button-background: var(--background-color);
-    --button-border-color: var(--accent-500, var(--brand-500));
-    --button-color: var(--accent-500, var(--brand-500));
+    --button-background: var(--card-background);
+    --button-border-color: var(--neutral-300, var(--brand-500));
+    --button-color: var(--neutral-700, var(--brand-500));
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--hover-background);
-        --button-border-color: var(--accent-600, var(--brand-600));
+        --button-background: var(--neutral-200);
       }
 
       &:active,
@@ -156,9 +155,16 @@
     }
   }
 
-  &.btn-plain,
-  &.btn-plain-primary {
+  &.btn-plain {
     --button-background: transparent;
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-background: var(--hover-background);
+        --button-color: var(--text-color-primary);
+      }
+    }
   }
 
   &.btn-plain-primary {
@@ -464,6 +470,28 @@ body.theme-dark .btn {
           0 1px 2px rgba(0, 0, 0, 0.2),
           0 1px 3px rgba(0, 0, 0, 0.2),
           0 1px 2px -1px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+
+  &.btn-outline-primary {
+    --button-background: transparent;
+    --button-border-color: var(--neutral-600);
+    --button-color: var(--neutral-300);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-background: var(--neutral-800);
+        --button-border-color: var(--neutral-500);
+        --button-color: var(--neutral-200);
+      }
+
+      &:active,
+      &.active {
+        --button-background: var(--neutral-700);
+        --button-border-color: var(--neutral-400);
+        --button-color: var(--neutral-100);
       }
     }
   }

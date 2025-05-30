@@ -49,10 +49,10 @@
   <title>{makeSimplePageTitle($_('settings'))}</title>
 </svelte:head>
 
-<h1>{$_('settings')}</h1>
+<h2>{$_('settings')}</h2>
 
 <div>
-  <h2>{$_('usage_data_collection')}</h2>
+  <h3>{$_('usage_data_collection')}</h3>
   <div>
     <LabeledInput layout="inline-input-first">
       <span slot="label">

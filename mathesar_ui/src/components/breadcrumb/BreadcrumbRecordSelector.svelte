@@ -21,8 +21,8 @@
 
 <style lang="scss">
   .trigger {
-    border: 1px solid var(--neutral-400);
-    color: var(--neutral-300);
+    border: 1px solid var(--card-border);
+    color: var(--text-color-secondary);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
@@ -31,7 +31,7 @@
     align-items: center;
 
     :global(.expand-right-icon) {
-      color: var(--neutral-500);
+      color: var(--text-color-secondary);
     }
 
     &:hover,
