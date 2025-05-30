@@ -137,8 +137,8 @@
 
   &.btn-outline-primary {
     --button-background: transparent;
-    --button-border-color: var(--neutral-600);
-    --button-color: var(--neutral-300);
+    --button-border-color: var(--neutral-400);
+    --button-color: var(--neutral-600);
 
     &:not(:disabled) {
       &:hover,
