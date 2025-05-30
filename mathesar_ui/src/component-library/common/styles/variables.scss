@@ -320,14 +320,14 @@ body {
   --brand-box-shadow: var(--red-box-shadow);
 
   // Accent Colors
-  --accent-100: var(--stormy-100);
-  --accent-200: var(--stormy-200);
-  --accent-300: var(--stormy-300);
-  --accent-400: var(--stormy-400);
-  --accent-500: var(--stormy-500);
-  --accent-600: var(--stormy-600);
-  --accent-700: var(--stormy-700);
-  --accent-800: var(--stormy-800);
+  --accent-100: var(--salmon-100);
+  --accent-200: var(--salmon-200);
+  --accent-300: var(--salmon-300);
+  --accent-400: var(--salmon-400);
+  --accent-500: var(--salmon-500);
+  --accent-600: var(--salmon-600);
+  --accent-700: var(--salmon-700);
+  --accent-800: var(--salmon-800);
 
   // Legacy Colors
   --color-blue-dark: var(--stormy-700);
@@ -460,12 +460,12 @@ body.theme-dark {
   --collapsible-button-text: var(--text-color-primary);
   --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 
-  --accent-100: var(--stormy-800);
-  --accent-200: var(--stormy-700);
-  --accent-300: var(--stormy-600);
-  --accent-400: var(--stormy-500);
-  --accent-500: var(--stormy-400);
-  --accent-600: var(--stormy-300);
-  --accent-700: var(--stormy-200);
-  --accent-800: var(--stormy-100);
+  --accent-100: var(--salmon-800);
+  --accent-200: var(--salmon-700);
+  --accent-300: var(--salmon-600);
+  --accent-400: var(--salmon-500);
+  --accent-500: var(--salmon-400);
+  --accent-600: var(--salmon-300);
+  --accent-700: var(--salmon-200);
+  --accent-800: var(--salmon-100);
 }
