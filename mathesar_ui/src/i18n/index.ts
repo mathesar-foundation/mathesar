@@ -6,6 +6,7 @@ import type { LangObject } from './languages/utils';
 const loaders = {
   en: () => import('./languages/en'),
   ja: () => import('./languages/ja'),
+  de: () => import('./languages/de'),
 };
 
 async function loadDictionaryAsync(
@@ -24,6 +25,7 @@ function setLanguageCookie(language: LangObject['language']) {
 export async function initI18n(language: LangObject['language']) {
   register('en', () => loadDictionaryAsync('en'));
   register('ja', () => loadDictionaryAsync('ja'));
+  register('de', () => loadDictionaryAsync('de'));
 
   const { translations } = window.Mathesar || {};
   const dictionary =
