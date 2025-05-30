@@ -1,7 +1,10 @@
 MATHESAR_INSTALL_DIR: /home/my_user_name/mathesar
-# Deprecated. Exists in older files because I don't want to clutter up
-# installation related PRs, currently https://github.com/mathesar-foundation/mathesar/pull/4399.
-# TODO: Remove in a future PR.
-MATHESAR_INSTALLATION_DIR: /home/my_user_name/mathesar
+MATHESAR_DEPLOY_DOMAIN_NAME: your.domain.com
 MATHESAR_PG_DIR: /var/lib/docker/volumes/mathesar_postgresql_data/_data
+# Deprecated.
+# The following variables are used in older documentation.
+# We're using new variables from https://github.com/mathesar-foundation/mathesar/pull/4399.
+# We're using separate variables since the browser stores these in localstorage
+# and does not auto-update.
+MATHESAR_INSTALLATION_DIR: /home/my_user_name/mathesar
 DOMAIN_NAME: localhost
