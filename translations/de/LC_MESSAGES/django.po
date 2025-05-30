@@ -1,0 +1,155 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-30 10:57+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Iven Schlösser <EMAIL@ADDRESS>\n"
+"Language-Team: German <LL@li.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mathesar/templates/installation/complete_installation.html:3
+msgid "Finalizing Installation..."
+msgstr "Installation wird abgeschlossen..."
+
+#: mathesar/templates/installation/complete_installation.html:5
+#: mathesar/templates/installation/complete_installation.html:268
+msgid "Complete Installation"
+msgstr "Installation abschließen"
+
+#: mathesar/templates/installation/complete_installation.html:129
+msgid "Finish Setting Up Mathesar"
+msgstr "Mathesar-Einrichtung abschließen"
+
+#: mathesar/templates/installation/complete_installation.html:132
+msgid "Welcome to Mathesar!"
+msgstr "Willkommen bei Mathesar!"
+
+#: mathesar/templates/installation/complete_installation.html:135
+msgid ""
+"Create an Admin user to start using Mathesar. You can also choose to share "
+"anonymous data to help us improve."
+msgstr "Erstellen Sie einen Administratorbenutzer, um Mathesar zu nutzen. Sie können außerdem anonyme Daten freigeben, um uns bei Verbesserungen zu unterstützen."
+
+#: mathesar/templates/installation/complete_installation.html:142
+msgid "Create Admin User"
+msgstr "Administratorbenutzer anlegen"
+
+#: mathesar/templates/installation/complete_installation.html:144
+msgid ""
+"Set up an Admin user account. This account will have full control over your "
+"Mathesar installation."
+msgstr "Richten Sie ein Administrator-Benutzerkonto ein. Dieser Account erhält die vollständige Kontrolle über Ihre Mathesar-Installation."
+
+#: mathesar/templates/installation/complete_installation.html:153
+#: mathesar/templates/registration/login.html:16
+msgid "Username"
+msgstr "Benutzername"
+
+#: mathesar/templates/installation/complete_installation.html:170
+#: mathesar/templates/registration/login.html:37
+msgid "Password"
+msgstr "Passwort"
+
+#: mathesar/templates/installation/complete_installation.html:180
+msgid "Confirm Password"
+msgstr "Passwort bestätigen"
+
+#: mathesar/templates/installation/complete_installation.html:193
+msgid "Your password must be at least 8 characters long."
+msgstr "Ihr Passwort muss mindestens 8 Zeichen lang sein."
+
+#: mathesar/templates/installation/complete_installation.html:194
+msgid "We recommend a mix of letters, numbers, and symbols for added security."
+msgstr "Für zusätzliche Sicherheit empfehlen wir eine Mischung aus Buchstaben, Zahlen und Symbolen."
+
+#: mathesar/templates/installation/complete_installation.html:228
+msgid "Support Mathesar's Growth"
+msgstr "Unterstützen Sie Mathesar beim Wachsen"
+
+#: mathesar/templates/installation/complete_installation.html:237
+msgid "Send a one-time confirmation to let us know you've installed Mathesar"
+msgstr "Senden Sie eine einmalige Bestätigung, damit wir wissen, dass Sie Mathesar installiert haben"
+
+#: mathesar/templates/installation/complete_installation.html:240
+msgid "Let our open-source team know we have real users out there."
+msgstr "Lassen Sie unser Open-Source-Team wissen, dass es echte Nutzer gibt."
+
+#: mathesar/templates/installation/complete_installation.html:241
+msgid ""
+"No personal data is shared, just an acknowledgment of your installation."
+msgstr "Es werden keine persönlichen Daten übermittelt, nur die Bestätigung Ihrer Installation."
+
+#: mathesar/templates/installation/complete_installation.html:243
+#: mathesar/templates/installation/complete_installation.html:259
+msgid "See what's shared."
+msgstr "Sehen Sie, was geteilt wird."
+
+#: mathesar/templates/installation/complete_installation.html:253
+msgid "Enable anonymous usage data collection"
+msgstr "Anonyme Nutzungsdatenerfassung aktivieren"
+
+#: mathesar/templates/installation/complete_installation.html:256
+msgid "Share anonymous usage data periodically to help us improve features."
+msgstr "Teilen Sie regelmäßig anonyme Nutzungsdaten, damit wir Mathesar verbessern können."
+
+#: mathesar/templates/installation/complete_installation.html:257
+msgid "No personal data is collected, and you can change this setting anytime."
+msgstr "Es werden keine persönlichen Daten erhoben und Sie können diese Einstellung jederzeit ändern."
+
+#: mathesar/templates/mathesar/login_base.html:4
+msgid "Login"
+msgstr "Anmelden"
+
+#: mathesar/templates/registration/login.html:3
+msgid "Logging In..."
+msgstr "Anmeldung läuft..."
+
+#: mathesar/templates/registration/login.html:5
+msgid "Log in to Mathesar"
+msgstr "Anmelden bei Mathesar"
+
+#: mathesar/templates/registration/login.html:65
+msgid "Log In"
+msgstr "Anmelden"
+
+#: mathesar/templates/users/password_reset_confirmation.html:4
+msgid "Update Your Password"
+msgstr "Passwort aktualisieren"
+
+#: mathesar/templates/users/password_reset_confirmation.html:8
+msgid ""
+"Since your password was set by an administrator, you need to update your "
+"password to continue."
+msgstr "Da Ihr Passwort von einem Administrator gesetzt wurde, müssen Sie es ändern, um fortzufahren."
+
+#: mathesar/templates/users/password_reset_confirmation.html:14
+msgid "New Password"
+msgstr "Neues Passwort"
+
+#: mathesar/templates/users/password_reset_confirmation.html:41
+msgid "Confirm"
+msgstr "Bestätigen"
+
+#: mathesar/templates/users/password_reset_confirmation.html:67
+msgid "Update Password"
+msgstr "Passwort aktualisieren"
+
+#: mathesar/templates/users/password_reset_confirmation.html:71
+msgid "After updating your password, you'll need to log in again."
+msgstr "Nach dem Ändern Ihres Passworts müssen Sie sich erneut anmelden."
+
+#: mathesar/templates/users/password_reset_confirmation.html:76
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr "Der Passwort-Zurücksetzungslink war ungültig, möglicherweise weil er bereits verwendet wurde. Fordern Sie bitte einen neuen Link an."
+
+#: mathesar/views/users/password_reset.py:24
+msgid "Change Default Password"
+msgstr "Standardpasswort ändern"
