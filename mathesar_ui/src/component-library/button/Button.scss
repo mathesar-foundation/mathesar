@@ -136,21 +136,51 @@
   }
 
   &.btn-outline-primary {
-    --button-background: var(--card-background);
-    --button-border-color: var(--neutral-300, var(--brand-500));
-    --button-color: var(--neutral-700, var(--brand-500));
+    --button-background: transparent;
+    --button-border-color: var(--neutral-600);
+    --button-color: var(--neutral-300);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--neutral-200);
+        --button-background: var(--neutral-800);
+        --button-border-color: var(--neutral-500);
+        --button-color: var(--neutral-200);
       }
 
       &:active,
       &.active {
-        --button-background: var(--active-background);
-        --button-border-color: var(--accent-800, var(--brand-800));
-        --button-color: var(--accent-800, var(--brand-800));
+        --button-background: var(--neutral-700);
+        --button-border-color: var(--neutral-400);
+        --button-color: var(--neutral-100);
+      }
+    }
+  }
+
+  &.btn-outline-danger {
+    --button-background: transparent;
+    --button-border-color: var(--danger-border-color);
+    --button-color: var(--danger-color);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-background: var(--danger-background-color);
+        --button-border-color: var(--danger-border-color);
+        --button-color: var(--danger-color);
+      }
+
+      &:active,
+      &.active {
+        --button-background: var(--danger-background-color);
+        --button-border-color: var(--danger-color);
+        --button-color: var(--danger-color);
+      }
+
+      &:focus,
+      &.focus {
+        --button-outline: 2px solid var(--danger-border-color);
+        outline-offset: 1px;
       }
     }
   }
@@ -492,6 +522,34 @@ body.theme-dark .btn {
         --button-background: var(--neutral-700);
         --button-border-color: var(--neutral-400);
         --button-color: var(--neutral-100);
+      }
+    }
+  }
+
+  &.btn-outline-danger {
+    --button-background: transparent;
+    --button-border-color: var(--danger-border-color);
+    --button-color: var(--danger-color);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-background: var(--danger-background-color);
+        --button-border-color: var(--danger-border-color);
+        --button-color: var(--danger-color);
+      }
+
+      &:active,
+      &.active {
+        --button-background: var(--danger-background-color);
+        --button-border-color: var(--danger-color);
+        --button-color: var(--danger-color);
+      }
+
+      &:focus,
+      &.focus {
+        --button-outline: 2px solid var(--danger-border-color);
+        outline-offset: 1px;
       }
     }
   }

@@ -8,6 +8,7 @@ export type Appearance =
   | 'action'
   | 'outcome'
   | 'outline-primary'
+  | 'outline-danger'
   | 'inspector'
   | 'feedback'
   | 'custom'
