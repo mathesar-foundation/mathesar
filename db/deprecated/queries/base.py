@@ -345,7 +345,7 @@ class InitialColumn:
         """
         A base column is an initial column on a query's base table.
         """
-        return self.jp_path is None
+        return not self.jp_path
 
     def __eq__(self, other):
         """Instances are equal when attributes are equal."""
