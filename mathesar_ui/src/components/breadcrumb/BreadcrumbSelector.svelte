@@ -123,20 +123,28 @@
     border-top: 1px solid var(--border-color);
   }
   .entity-switcher .trigger {
-    color: var(--text-color-muted);
+    color: var(--text-color-primary);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
     padding: var(--sm4);
 
     &:hover {
-      background-color: var(--accent-100);
-      color: var(--accent-600);
+      background-color: rgba(255, 117, 76, 0.15);
+      color: var(--salmon-800);
     }
 
     &:active {
-      background-color: var(--accent-200);
-      color: var(--accent-700);
+      background-color: rgba(255, 117, 76, 0.25);
+      color: var(--salmon-800);
+    }
+
+    :global(body.theme-dark) &:hover {
+      color: var(--salmon-200);
+    }
+
+    :global(body.theme-dark) &:active {
+      color: var(--salmon-200);
     }
   }
 </style>
