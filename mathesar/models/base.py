@@ -283,6 +283,57 @@ class Explorations(BaseModel):
     description = models.CharField(null=True)
 
 
+class Form(BaseModel):
+    id = models.UUIDField(primary_key=True)
+    name = models.CharField()
+    version = models.IntegerField()
+    database = models.ForeignKey('Database', on_delete=models.CASCADE)
+    base_table_oid = models.PositiveBigIntegerField()
+    schema_oid = models.PositiveBigIntegerField()
+    description = models.CharField(null=True)
+    header = models.OneToOneField('FormHeader', on_delete=models.DO_NOTHING)
+    submission = models.ForeignKey('SubmissionSettings', on_delete=models.CASCADE)
+    is_public = models.BooleanField(default=False)
+
+
+class FormHeader(BaseModel):
+    title = models.CharField()
+    subtitle = models.CharField(null=True)
+
+
+class SubmissionSettings(BaseModel):
+    role = models.ForeignKey('ConfiguredRole', on_delete=models.CASCADE)
+    message = models.CharField(null=True)
+    redirect_url = models.URLField(null=True)
+    submit_label = models.CharField(null=True)
+
+
+class FormField(BaseModel):
+    id = models.CharField()
+    attnum = models.SmallIntegerField()
+    related_form = models.ForeignKey('Form', on_delete=models.CASCADE)
+    kind = models.CharField(
+        choices=[
+            ("scalar_column", "scalar_column"),
+            ("foreign_key", "foreign_key"),
+            ("reverse_foreign_key", "reverse_foreign_key")
+        ],
+    )
+    label = models.CharField(null=True)
+    help = models.CharField(null=True)
+    placeholder = models.CharField(null=True)
+    readonly = models.BooleanField(default=False)
+    styling = models.JSONField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["related_form", "attnum"],
+                name="unique_attnum_per_form"
+            )
+        ]
+
+
 class DataFile(BaseModel):
     def _user_directory_path(instance, filename):
         user_identifier = instance.user.username if instance.user else 'anonymous'
