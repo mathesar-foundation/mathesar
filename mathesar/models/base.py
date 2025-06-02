@@ -312,7 +312,7 @@ class FormField(BaseModel):
     id = models.CharField(primary_key=True)
     attnum = models.SmallIntegerField()
     table_oid = models.PositiveBigIntegerField()
-    related_form = models.ForeignKey('Form', on_delete=models.CASCADE)
+    related_form = models.ForeignKey('Form', on_delete=models.CASCADE, related_name='form_field')
     kind = models.CharField(
         choices=[
             ("scalar_column", "scalar_column"),
