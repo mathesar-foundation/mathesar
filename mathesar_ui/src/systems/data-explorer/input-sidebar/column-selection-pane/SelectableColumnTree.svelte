@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
 
-  import type QueryModel from '../../QueryModel';
+  import type { QueryModel } from '../../QueryModel';
   import type { ColumnWithLink } from '../../utils';
 
   import SelectableColumn from './SelectableColumn.svelte';

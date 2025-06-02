@@ -1,5 +1,5 @@
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-import type { Column, ColumnMetadata } from '@mathesar/api/rpc/columns';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { JoinPath } from '@mathesar/api/rpc/tables';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
@@ -90,7 +90,12 @@ export interface AnonymousExploration extends InitialExploration {
   initial_columns: InitialColumn[];
   transformations?: QueryInstanceTransformation[];
   display_names?: Record<string, string> | null;
-  display_options?: unknown[];
+  /**
+   * This will likely be `ExplorationDisplayOptions | null`. But we're using
+   * `unknown` to force consumers to call the `validateDisplayOptions`. See more
+   * docs there.
+   */
+  display_options?: unknown;
 }
 
 export interface AddableExploration extends AnonymousExploration {
@@ -137,7 +142,6 @@ export interface QueryResultColumn {
   display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
-  metadata: ColumnMetadata | null;
 }
 
 export interface QueryInitialColumnSource {

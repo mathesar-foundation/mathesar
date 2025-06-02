@@ -1,12 +1,11 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import {
-  type Column,
-  type DateFormat,
-  type TimeFormat,
-  getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+import type {
+  DateFormat,
+  TimeFormat,
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import { iconUiTypeDateTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 

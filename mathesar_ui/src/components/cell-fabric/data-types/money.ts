@@ -1,8 +1,5 @@
-import {
-  type Column,
-  type NumberFormat,
-  getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+import type { NumberFormat } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import {
   StringifiedNumberFormatter,
   isDefinedNonNullable,

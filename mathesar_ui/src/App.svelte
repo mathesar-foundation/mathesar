@@ -2,6 +2,7 @@
   import { isLoading as isTranslationLoading, locale } from 'svelte-i18n';
 
   import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import '@mathesar/utils/polyfills';
   import { Spinner } from '@mathesar-component-library';
 
   import AppContext from './AppContext.svelte';
@@ -91,12 +92,12 @@
     --cell-border-horizontal: 1px solid var(--gray-300);
     --cell-border-vertical: 1px solid var(--gray-300);
 
-    --page-padding-x: 2em;
-    --page-padding-y: 2em;
+    --page-padding-x: var(--lg1);
+    --page-padding-y: var(--lg1);
     --page-padding: var(--page-padding-x) var(--page-padding-y);
 
     --outer-page-padding-for-inset-page: 0;
-    --inset-page-padding: var(--lg5) 1rem;
+    --inset-page-padding: var(--lg5) var(--lg1);
 
     --max-layout-width: 54rem;
     // For database page, schema page, and admin pages
