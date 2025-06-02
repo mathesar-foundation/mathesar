@@ -1,3 +1,6 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import {
   type Column,
   type DateFormat,
@@ -16,7 +19,7 @@ import type {
 
 import { getDateFormatOptions, getTimeFormatOptions } from './utils';
 
-const dbForm: AbstractTypeConfigForm = {
+const getDbForm: () => AbstractTypeConfigForm = () => ({
   variables: {
     supportTimeZones: {
       type: 'boolean',
@@ -29,14 +32,14 @@ const dbForm: AbstractTypeConfigForm = {
       {
         type: 'input',
         variable: 'supportTimeZones',
-        label: 'Support Time Zones',
+        label: get(_)('support_time_zones'),
         text: {
-          help: 'support_time_zone_helper',
+          help: get(_)('support_time_zone_helper'),
         },
       },
     ],
   },
-};
+});
 
 function determineDbTypeAndOptions(
   dbFormValues: FormValues,
@@ -126,7 +129,7 @@ const dateTimeType: AbstractTypeConfiguration = {
     },
   },
   getDbConfig: () => ({
-    form: dbForm,
+    form: getDbForm(),
     determineDbTypeAndOptions,
     constructDbFormValuesFromTypeOptions,
   }),
