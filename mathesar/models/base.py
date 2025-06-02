@@ -311,6 +311,7 @@ class SubmissionSettings(BaseModel):
 class FormField(BaseModel):
     id = models.CharField()
     attnum = models.SmallIntegerField()
+    target_table_oid = models.PositiveBigIntegerField(null=True)
     related_form = models.ForeignKey('Form', on_delete=models.CASCADE)
     kind = models.CharField(
         choices=[
@@ -319,17 +320,19 @@ class FormField(BaseModel):
             ("reverse_foreign_key", "reverse_foreign_key")
         ],
     )
+    record_summary_template = models.JSONField(null=True)
     label = models.CharField(null=True)
     help = models.CharField(null=True)
     placeholder = models.CharField(null=True)
+    needs_validation = models.BooleanField(default=False)
     readonly = models.BooleanField(default=False)
     styling = models.JSONField(null=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["related_form", "attnum"],
-                name="unique_attnum_per_form"
+                fields=["attnum", "table_oid", "related_form"],
+                name="unique_attnum_table_oid_form"
             )
         ]
 
