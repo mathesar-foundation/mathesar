@@ -8,7 +8,9 @@
   export let label: string | undefined = undefined;
   export let help: string | undefined = undefined;
   export let layout: LabeledInputLayout = 'inline';
-  export let userHelperInfoText: string | undefined = undefined;
+  export let helpType: 'inline' | 'tooltip' = 'inline';
+
+  $: displayHelp = $$slots.help || help;
 </script>
 
 <div
@@ -24,18 +26,18 @@
         CSS that uses the `:empty` pseudo-class which does not work if there is
         white space.
       -->
-      {#if userHelperInfoText && userHelperInfoText !== ''}
-        <div style="display: flex; position: relative;">
-          <span class="label">{label ?? ''}<slot name="label" /></span>
-          <div style="position: absolute; right: -15px;">
-            <Help>{userHelperInfoText}</Help>
-          </div>
-        </div>
-      {:else}
-        <span class="label">{label ?? ''}<slot name="label" /></span>
-      {/if}
+      <span class="label">
+        {label ?? ''}
+        <slot name="label" />
+
+        {#if displayHelp && helpType === 'tooltip'}
+          <Help>{help ?? ''}<slot name="help" /></Help>
+        {/if}
+      </span>
       <span class="input"><slot /></span>
-      <span class="help">{help ?? ''}<slot name="help" /></span>
+      {#if displayHelp && helpType === 'inline'}
+        <span class="help">{help ?? ''}<slot name="help" /></span>
+      {/if}
     </span>
   </Label>
 </div>

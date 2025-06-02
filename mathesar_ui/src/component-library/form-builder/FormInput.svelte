@@ -21,7 +21,8 @@
   <LabeledInput
     {label}
     layout={type === 'boolean' ? 'inline-input-first' : 'stacked'}
-    userHelperInfoText={text?.info?.richTextKey || undefined}
+    help={text?.help}
+    helpType="tooltip"
   >
     <DataTypeBasedInput
       {...$$restProps}
