@@ -309,7 +309,7 @@ class SubmissionSettings(BaseModel):
 
 
 class FormField(BaseModel):
-    id = models.CharField()
+    id = models.CharField(primary_key=True)
     attnum = models.SmallIntegerField()
     table_oid = models.PositiveBigIntegerField()
     related_form = models.ForeignKey('Form', on_delete=models.CASCADE)
