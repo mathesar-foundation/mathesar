@@ -311,7 +311,7 @@ class SubmissionSettings(BaseModel):
 class FormField(BaseModel):
     id = models.CharField()
     attnum = models.SmallIntegerField()
-    target_table_oid = models.PositiveBigIntegerField(null=True)
+    table_oid = models.PositiveBigIntegerField()
     related_form = models.ForeignKey('Form', on_delete=models.CASCADE)
     kind = models.CharField(
         choices=[
