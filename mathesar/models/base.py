@@ -284,35 +284,28 @@ class Explorations(BaseModel):
 
 
 class Form(BaseModel):
-    id = models.UUIDField(primary_key=True)
+    token = models.UUIDField(unique=True)
     name = models.CharField()
+    description = models.CharField(null=True)
     version = models.IntegerField()
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
-    base_table_oid = models.PositiveBigIntegerField()
     schema_oid = models.PositiveBigIntegerField()
-    description = models.CharField(null=True)
-    header = models.OneToOneField('FormHeader', on_delete=models.DO_NOTHING)
-    submission = models.ForeignKey('SubmissionSettings', on_delete=models.CASCADE)
+    base_table_oid = models.PositiveBigIntegerField()
     is_public = models.BooleanField(default=False)
-
-
-class FormHeader(BaseModel):
-    title = models.CharField()
-    subtitle = models.CharField(null=True)
-
-
-class SubmissionSettings(BaseModel):
-    role = models.ForeignKey('ConfiguredRole', on_delete=models.CASCADE)
-    message = models.CharField(null=True)
+    # Header related settings
+    header_title = models.JSONField()
+    header_subtitle = models.JSONField(null=True)
+    # Submission related settings
+    submit_role = models.ForeignKey('ConfiguredRole', on_delete=models.DO_NOTHING, null=True)
+    submit_message = models.JSONField(null=True)
     redirect_url = models.URLField(null=True)
     submit_label = models.CharField(null=True)
 
 
 class FormField(BaseModel):
-    id = models.CharField(primary_key=True)
+    key = models.CharField()
     attnum = models.SmallIntegerField()
-    table_oid = models.PositiveBigIntegerField()
-    related_form = models.ForeignKey('Form', on_delete=models.CASCADE, related_name='form_field')
+    form = models.ForeignKey('Form', on_delete=models.CASCADE, related_name='fields')
     kind = models.CharField(
         choices=[
             ("scalar_column", "scalar_column"),
@@ -320,19 +313,22 @@ class FormField(BaseModel):
             ("reverse_foreign_key", "reverse_foreign_key")
         ],
     )
-    record_summary_template = models.JSONField(null=True)
     label = models.CharField(null=True)
     help = models.CharField(null=True)
-    placeholder = models.CharField(null=True)
-    needs_validation = models.BooleanField(default=False)
     readonly = models.BooleanField(default=False)
     styling = models.JSONField(null=True)
+    is_required = models.BooleanField(default=False)
+    # foreign_key/reverse_foreign_key related settings
+    parent_field = models.ForeignKey('self', on_delete=models.CASCADE, related_name='child_fields', null=True)
+    target_table_oid = models.PositiveBigIntegerField(null=True)
+    allow_create = models.BooleanField(default=False)
+    create_label = models.CharField(null=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["attnum", "table_oid", "related_form"],
-                name="unique_attnum_table_oid_form"
+                fields=["key", "related_form"],
+                name="unique_key_per_form"
             )
         ]
 
