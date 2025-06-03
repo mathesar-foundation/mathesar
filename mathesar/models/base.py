@@ -327,7 +327,7 @@ class FormField(BaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["key", "related_form"],
+                fields=["key", "form"],
                 name="unique_key_per_form"
             )
         ]
