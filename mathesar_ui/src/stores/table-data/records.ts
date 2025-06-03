@@ -16,6 +16,7 @@ import type {
   RecordsListParams,
   RecordsResponse,
   RecordsSearchParams,
+  ResultValue,
 } from '@mathesar/api/rpc/records';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
@@ -394,6 +395,7 @@ export class RecordsData {
     }[],
   ): Promise<void> {
     const cellStatus = this.meta.cellModificationStatus;
+    const { cellClientSideErrors, rowCreationStatus } = this.meta;
 
     function forEachRow(fn: (b: (typeof rowBlueprints)[number]) => void) {
       rowBlueprints.forEach(fn);
@@ -410,13 +412,9 @@ export class RecordsData {
     const pkColumn = get(this.columnsDataStore.pkColumn);
     if (!pkColumn) throw new Error('Unable to update without primary key');
 
-    forEachRow((blueprint) => {
-      if (blueprint.row.record[pkColumn.id] === undefined) {
-        if (isDraftRecordRow(blueprint.row)) {
-          throw new Error(
-            'Pasting data into a selection that contains unsaved rows is not yet supported. Please open an issue if you need this feature.',
-          );
-        }
+    forEachRow(({ row }) => {
+      const primaryKeyValue = row.record[pkColumn.id];
+      if (isPersistedRecordRow(row) && primaryKeyValue === undefined) {
         throw new Error(
           'Unable to update record for a row with a missing primary key value',
         );
@@ -427,20 +425,29 @@ export class RecordsData {
       cellStatus.set(cellKey, { state: 'processing' });
       this.updatePromises?.get(cellKey)?.cancel();
     });
-    forEachRow(
-      (blueprint) =>
-        this.updatePromises?.get(blueprint.row.identifier)?.cancel(),
-    );
+    forEachRow(({ row }) => {
+      if (isDraftRecordRow(row)) {
+        rowCreationStatus.set(row.identifier, { state: 'processing' });
+      }
+      this.updatePromises?.get(row.identifier)?.cancel();
+    });
 
-    const requests = rowBlueprints.map((blueprint) =>
-      api.records.patch({
+    const requests = rowBlueprints.map((blueprint) => {
+      const recordDef = Object.fromEntries(
+        blueprint.cells.map((cell) => [cell.columnId, cell.value]),
+      );
+      if (isDraftRecordRow(blueprint.row)) {
+        return api.records.add({
+          ...this.apiContext,
+          record_def: recordDef,
+        });
+      }
+      return api.records.patch({
         ...this.apiContext,
         record_id: blueprint.row.record[pkColumn.id],
-        record_def: Object.fromEntries(
-          blueprint.cells.map((cell) => [cell.columnId, cell.value]),
-        ),
-      }),
-    );
+        record_def: recordDef,
+      });
+    });
 
     const responses = await batchSend(requests);
     const responseMap = new Map(
@@ -453,10 +460,29 @@ export class RecordsData {
       ),
     );
 
-    function mutateRow<R extends RecordRow>(row: R): R {
+    /**
+     * @returns the `RecordRow` we want to persist on the front end going
+     * forward
+     */
+    function followUp<R extends RecordRow>(row: R): R {
+      if (isDraftRecordRow(row)) {
+        rowCreationStatus.delete(row.identifier);
+      }
       const responseMapValue = responseMap.get(row.identifier);
       if (!responseMapValue) return row;
       const { blueprint, response } = responseMapValue;
+
+      /** Generate a row using the blueprint instead of the API return value */
+      function makeFallbackRow() {
+        const updatedValues = Object.fromEntries(
+          blueprint.cells.map(({ columnId, value }) => [
+            columnId,
+            value as ResultValue,
+          ]),
+        );
+        return row.withRecord({ ...row.record, ...updatedValues }) as R;
+      }
+
       if (response.status === 'error') {
         // NOTE: this is a bit weird and could potentially be improved. If we
         // were unable to save the record we need to indicate to the user that
@@ -468,24 +494,30 @@ export class RecordsData {
         // need to figure how to show some kind of errors in other cells.
         blueprint.cells.forEach((cell) => {
           const cellKey = getCellKey(row.identifier, cell.columnId);
-          return cellStatus.set(cellKey, {
+          cellStatus.set(cellKey, {
             state: 'failure',
             errors: [response],
           });
         });
-        return row;
+        return makeFallbackRow();
       }
       const result = first(response.value.results);
-      if (!result) return row;
-      blueprint.cells.forEach((cell) => {
-        const cellKey = getCellKey(row.identifier, cell.columnId);
-        return cellStatus.set(cellKey, { state: 'success' });
-      });
+      if (!result) return makeFallbackRow();
+
+      for (const columnId of Object.keys(row.record)) {
+        const cellKey = getCellKey(row.identifier, columnId);
+        cellStatus.set(cellKey, { state: 'success' });
+        cellClientSideErrors.delete(cellKey);
+      }
+
+      if (isDraftRecordRow(row)) {
+        return PersistedRecordRow.fromDraft(row.withRecord(result)) as R;
+      }
       return row.withRecord(result) as R;
     }
 
-    this.fetchedRecordRows.update((rows) => rows.map(mutateRow));
-    this.newRecords.update((rows) => rows.map(mutateRow));
+    this.fetchedRecordRows.update((rows) => rows.map(followUp));
+    this.newRecords.update((rows) => rows.map(followUp));
 
     let newRecordSummaries: RecordSummariesForSheet = new ImmutableMap();
     for (const response of responses) {
