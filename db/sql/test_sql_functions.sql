@@ -1922,7 +1922,8 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION __setup_column_alter() RETURNS SETOF TEXT AS $$
 BEGIN
-  CREATE TABLE col_alters (
+  CREATE SCHEMA test_schema;
+  CREATE TABLE test_schema.col_alters (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     col1 text NOT NULL,
     col2 numeric DEFAULT 5,
@@ -1947,7 +1948,7 @@ DECLARE
   tab_id oid;
 BEGIN
   PERFORM __setup_column_alter();
-  tab_id := 'col_alters'::regclass::oid;
+  tab_id := 'test_schema.col_alters'::regclass::oid;
   RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2}]'), null);
   RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2, "name": "blah"}]'), null);
   RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[]'), null);
@@ -1960,8 +1961,9 @@ DECLARE
   col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
   RETURN NEXT columns_are(
+    'test_schema',
     'col_alters',
     ARRAY['id', 'blah', 'col2', 'Col sp', 'col_opts', 'coltim']
   );
@@ -1977,8 +1979,9 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
   RETURN NEXT columns_are(
+    'test_schema',
     'col_alters',
     ARRAY['id', 'new space', 'col2', 'nospace', 'col_opts', 'coltim']
   );
@@ -1995,11 +1998,11 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4]);
-  RETURN NEXT col_type_is('col_alters', 'col1', 'character varying(48)');
-  RETURN NEXT col_type_is('col_alters', 'col2', 'integer');
-  RETURN NEXT col_default_is('col_alters', 'col2', 5);
-  RETURN NEXT col_type_is('col_alters', 'Col sp', 'integer');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4]);
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'col1', 'character varying(48)', 'type should be varchar');
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'col2', 'integer', 'type should be integer');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col2', 5, 'default should be 5');
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'Col sp', 'integer', 'type should be integer');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2011,8 +2014,8 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[5]);
-  RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(4,0)');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[5]);
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'col_opts', 'numeric(4,0)', 'type should be numeric');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2025,8 +2028,8 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
-  RETURN NEXT columns_are('col_alters', ARRAY['id', 'col2', 'Col sp', 'coltim']);
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT columns_are('test_schema', 'col_alters', ARRAY['id', 'col2', 'Col sp', 'coltim']);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2039,9 +2042,9 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
-  RETURN NEXT col_is_null('col_alters', 'col1');
-  RETURN NEXT col_not_null('col_alters', 'col_opts');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT col_is_null('test_schema', 'col_alters', 'col1', 'should allow null');
+  RETURN NEXT col_not_null('test_schema', 'col_alters', 'col_opts', 'should not allow null');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2054,9 +2057,9 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
-  RETURN NEXT col_default_is('col_alters', 'col2', '5');
-  RETURN NEXT col_default_is('col_alters', 'coltim', '(now())::date');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col2', '5', 'default should be 5');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'coltim', '(now())::date', 'default should be now()');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2069,9 +2072,9 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
-  RETURN NEXT col_hasnt_default('col_alters', 'col2');
-  RETURN NEXT col_hasnt_default('col_alters', 'coltim');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT col_hasnt_default('test_schema', 'col_alters', 'col2', 'should have no default');
+  RETURN NEXT col_hasnt_default('test_schema', 'col_alters', 'coltim', 'should have no default');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2087,13 +2090,13 @@ DECLARE
 BEGIN
   PERFORM __setup_column_alter();
   RETURN NEXT is(
-    msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb),
+    msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb),
     ARRAY[2, 3, 5, 6]
   );
-  RETURN NEXT col_default_is('col_alters', 'col1', 'test34');
-  RETURN NEXT col_default_is('col_alters', 'col2', '8');
-  RETURN NEXT col_default_is('col_alters', 'col_opts', '7');
-  RETURN NEXT col_default_is('col_alters', 'coltim', 'test12');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col1', 'test34', 'default should be test34');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col2', '8', 'default should be 8');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col_opts', '7', 'default should be 7');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'coltim', 'test12', 'default should be test12');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2116,19 +2119,19 @@ DECLARE
 BEGIN
   PERFORM __setup_column_alter();
   RETURN NEXT is(
-    msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4, 5, 6]
+    msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4, 5, 6]
   );
   RETURN NEXT columns_are(
-    'col_alters', ARRAY['id', 'nullab numeric', 'newcol2', 'col_opts', 'timecol']
+    'test_schema', 'col_alters', ARRAY['id', 'nullab numeric', 'newcol2', 'col_opts', 'timecol']
   );
-  RETURN NEXT col_is_null('col_alters', 'nullab numeric');
-  RETURN NEXT col_type_is('col_alters', 'nullab numeric', 'numeric(8,4)');
+  RETURN NEXT col_is_null('test_schema', 'col_alters', 'nullab numeric', 'should be null');
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'nullab numeric', 'numeric(8,4)', 'type should be numeric(8,4)');
   -- This test checks that nothing funny happened when dropping column 4
-  RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(5,3)');
-  RETURN NEXT col_not_null('col_alters', 'col_opts');
-  RETURN NEXT col_not_null('col_alters', 'timecol');
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!');
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), NULL);
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'col_opts', 'numeric(5,3)', 'type should be numeric(5,3)');
+  RETURN NEXT col_not_null('test_schema', 'col_alters', 'col_opts', 'should not allow null');
+  RETURN NEXT col_not_null('test_schema', 'col_alters', 'timecol', 'should not allow null');
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!');
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), NULL);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2179,17 +2182,17 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), NULL);
-  PERFORM msar.alter_columns('col_alters'::regclass::oid, change1);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change1col2description');
-  PERFORM msar.alter_columns('col_alters'::regclass::oid, change2);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change2col2description');
-  PERFORM msar.alter_columns('col_alters'::regclass::oid, change3);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change2col2description');
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), 'change2col3description');
-  PERFORM msar.alter_columns('col_alters'::regclass::oid, change4);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), NULL);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), 'change2col3description');
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), NULL);
+  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change1);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change1col2description');
+  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change2);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change2col2description');
+  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change3);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change2col2description');
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), 'change2col3description');
+  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change4);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), NULL);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), 'change2col3description');
 END;
 $$ LANGUAGE plpgsql;
 
