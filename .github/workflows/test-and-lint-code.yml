@@ -123,6 +123,7 @@ jobs:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
         pg-version: [13, 14, 15, 16, 17]
+        connection-type: ['mathesar_dev_db', '/var/dev_postgres_socket']
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
@@ -140,6 +141,7 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
+          POSTGRES_HOST: ${{ matrix.connection-type }}
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
 
