@@ -139,10 +139,14 @@ def validate_pg_connection_string(connection_string):
             "POSTGRES_PASSWORD": conninfo_dict.get("password", "")
         }
 
-        reconstructed_conn_string = construct_pg_conn_str(env_vars)
-
         # Attempt to connect to validate the connection.
-        with psycopg.connect(reconstructed_conn_string):
+        with psycopg.connect(
+            host=env_vars['POSTGRES_HOST'],
+            port=env_vars['POSTGRES_PORT'],
+            dbname=env_vars['POSTGRES_DB'],
+            user=env_vars['POSTGRES_USER'],
+            password=env_vars['POSTGRES_PASSWORD']
+        ):
             pass
 
         return env_vars

@@ -642,6 +642,8 @@
   "summarize_in_data_explorer": "Summarize in Data Explorer",
   "summarize_in_data_explorer_help": "Open a pre-configured exploration based on the current table display.",
   "support_our_mission": "Support Our Mission",
+  "support_time_zone_helper": "When unchecked, input is stored exactly as entered, with no time zone, and displayed identically to all users. When checked, input is treated as local time, stored in UTC, and displayed in each viewer's local time.",
+  "support_time_zones": "Support Time Zones",
   "table": "Table",
   "table_access_read_help": "Can read table records",
   "table_access_write_help": "Can read, update, delete, and create table records",
