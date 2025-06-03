@@ -296,7 +296,7 @@ class Form(BaseModel):
     header_title = models.JSONField()
     header_subtitle = models.JSONField(null=True)
     # Submission related settings
-    submit_role = models.ForeignKey('ConfiguredRole', on_delete=models.DO_NOTHING, null=True)
+    submit_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
     submit_message = models.JSONField(null=True)
     redirect_url = models.URLField(null=True)
     submit_label = models.CharField(null=True)
