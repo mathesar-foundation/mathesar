@@ -3703,7 +3703,8 @@ Args:
   not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
 */
   SELECT __msar.exec_ddl(
-    'ALTER TABLE %I ALTER COLUMN %I %s NOT NULL',
+    'ALTER TABLE %I.%I ALTER COLUMN %I %s NOT NULL',
+    msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     msar.get_column_name(tab_id, col_id),
     CASE WHEN not_null THEN 'SET' ELSE 'DROP' END
