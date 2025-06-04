@@ -4487,6 +4487,23 @@ BEGIN
     )
   );
   RETURN NEXT is((search_result -> 'count')::integer, 3);
+
+  -- Test that LIMIT and OFFSET work
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'bc')
+    ),
+    1, -- LIMIT
+    1  -- OFFSET
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 2);
 END;
 $$ LANGUAGE plpgsql;
 

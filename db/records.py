@@ -86,6 +86,7 @@ def search_records_from_table(
     table_oid,
     search=[],
     limit=10,
+    offset=0,
     return_record_summaries=False,
     table_record_summary_templates=None,
 ):
@@ -111,6 +112,7 @@ def search_records_from_table(
         table_oid,
         json.dumps(search),
         limit,
+        offset,
         return_record_summaries,
         _json_or_none(table_record_summary_templates),
     ).fetchone()[0]

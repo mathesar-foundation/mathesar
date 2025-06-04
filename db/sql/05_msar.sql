@@ -5297,6 +5297,7 @@ msar.search_records_from_table(
   tab_id oid,
   search_ jsonb,
   limit_ integer,
+  offset_ integer DEFAULT 0,
   return_record_summaries boolean DEFAULT false,
   table_record_summary_templates jsonb DEFAULT NULL
 ) RETURNS jsonb AS $$/*
@@ -5308,6 +5309,7 @@ Args:
   tab_id: The OID of the table whose records we'll get
   search_: An array of search definition objects.
   limit_: The maximum number of rows we'll return.
+  offset_: The number of rows to skip before returning records from following rows
 
 The search definition objects should have the form
   {"attnum": <int>, "literal": <any>}
@@ -5322,11 +5324,11 @@ BEGIN
       SELECT count(1) AS count FROM %2$I.%3$I %4$s
     ),
     results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L
+      SELECT %1$s FROM %2$I.%3$I %4$s %7$s LIMIT %5$L OFFSET %6$L
     ),
-    summary_cte_self AS (%7$s)
-    %8$s,
-    summary_cte AS ( SELECT %10$s FROM results_cte %9$s ),
+    summary_cte_self AS (%8$s)
+    %9$s,
+    summary_cte AS ( SELECT %11$s FROM results_cte %10$s ),
     summaries_json_cte AS (
       SELECT
         jsonb_build_object(
@@ -5359,21 +5361,22 @@ BEGIN
     /* %3 */ msar.get_relation_name(tab_id),
     /* %4 */ 'WHERE ' || msar.get_score_expr(tab_id, search_) || ' > 0',
     /* %5 */ limit_,
-    /* %6 */ 'ORDER BY ' || NULLIF(
+    /* %6 */ offset_,
+    /* %7 */ 'ORDER BY ' || NULLIF(
       concat(
         msar.get_score_expr(tab_id, search_) || ' DESC, ',
         msar.build_total_order_expr(tab_id, null)
       ),
       ''
     ),
-    /* %7 */ msar.build_record_summary_query_for_table(
+    /* %8 */ msar.build_record_summary_query_for_table(
       tab_id,
       msar.get_selectable_pkey_attnum(tab_id),
       table_record_summary_templates
     ),
-    /* %8 */ msar.build_linked_record_summaries_ctes(tab_id),
-    /* %9 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
-    /* %10 */ COALESCE(
+    /* %9 */ msar.build_linked_record_summaries_ctes(tab_id),
+    /* %10 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
+    /* %11 */ COALESCE(
       NULLIF(
         concat_ws(', ',
           msar.build_summary_json_expr_for_table(tab_id),
