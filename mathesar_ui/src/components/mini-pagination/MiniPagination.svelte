@@ -10,7 +10,6 @@
     iconChooseItemPrevious,
   } from '@mathesar-component-library';
 
-
   import PageJumper from './PageJumper.svelte';
 
   export let pagination: Pagination;
