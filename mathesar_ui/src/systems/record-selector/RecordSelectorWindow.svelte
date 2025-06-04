@@ -36,7 +36,7 @@
     $tableId && table
       ? new TabularData({
           database: table.schema.database,
-          meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
+          meta: new Meta({ pagination: new Pagination({ size: 100 }) }),
           hasEnhancedPrimaryKeyCell: false,
           table,
           loadIntrinsicRecordSummaries: true,
