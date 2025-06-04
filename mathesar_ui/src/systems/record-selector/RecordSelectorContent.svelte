@@ -5,6 +5,7 @@
   import { States } from '@mathesar/api/rest/utils/requestUtils';
   import { api } from '@mathesar/api/rpc';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { MiniPagination } from '@mathesar/components/mini-pagination';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -29,6 +30,7 @@
   let isSubmittingNewRecord = false;
   /** true when the user is hover on the "Create new record" button. */
   let isHoveringCreate = false;
+  let pageJumperIsOpen = false;
 
   $: ({
     database,
@@ -49,10 +51,14 @@
   $: ({ state: constraintsState } = $constraintsDataStore);
   $: isInitialized =
     $fetchStatus?.state !== 'processing' && constraintsState === States.Done;
-  $: ({ searchFuzzy } = meta);
+  $: ({ searchFuzzy, pagination } = meta);
   $: hasSearchQueries = $searchFuzzy.size > 0;
   $: recordsStore = recordsData.fetchedRecordRows;
+  $: recordCount = recordsData.totalCount;
   $: records = $recordsStore;
+  $: showFooterLeft = hasSearchQueries && canInsertRecords;
+  $: showFooterRight = isInitialized && ($recordCount ?? 0) > $pagination.size;
+  $: showFooter = showFooterLeft || showFooterRight;
 
   function submitResult(result: RecordSelectorResult) {
     if ($rowType === 'dataEntry') {
@@ -120,6 +126,7 @@
       {nestedController}
       {submitResult}
       {isHoveringCreate}
+      handleKeyboardNavigation={!pageJumperIsOpen}
     />
   {/if}
 
@@ -153,35 +160,37 @@
     {/if}
   {/if}
 
-  <div class="footer">
-    {#if hasSearchQueries && canInsertRecords}
-      <div class="button">
-        <Button
-          size="small"
-          appearance="secondary"
-          on:click={submitNewRecord}
-          on:mouseenter={() => {
-            isHoveringCreate = true;
-          }}
-          on:mouseleave={() => {
-            isHoveringCreate = false;
-          }}
-        >
-          <Icon {...iconAddNew} />
-          <span>{$_('create_record_from_search')}</span>
-        </Button>
-      </div>
-    {/if}
-    {#if records.length === 10 && isInitialized}
-      <div class="message">
-        {#if hasSearchQueries}
-          {$_('ten_best_matches_shown')}
-        {:else}
-          {$_('first_ten_records_shown')}
+  {#if showFooter}
+    <div class="footer">
+      <div class="left">
+        {#if showFooterLeft}
+          <Button
+            size="small"
+            appearance="secondary"
+            on:click={submitNewRecord}
+            on:mouseenter={() => {
+              isHoveringCreate = true;
+            }}
+            on:mouseleave={() => {
+              isHoveringCreate = false;
+            }}
+          >
+            <Icon {...iconAddNew} />
+            <span>{$_('create_record_from_search')}</span>
+          </Button>
         {/if}
       </div>
-    {/if}
-  </div>
+      {#if showFooterRight}
+        <div class="right">
+          <MiniPagination
+            bind:pagination={$pagination}
+            recordCount={$recordCount ?? 0}
+            bind:pageJumperIsOpen
+          />
+        </div>
+      {/if}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -202,7 +211,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--gray-200);
+    color: var(--gray-400);
     z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
@@ -215,7 +224,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--gray-200);
+    color: var(--gray-400);
   }
   .no-results {
     padding: 1.5rem;
@@ -224,24 +233,10 @@
   }
 
   .footer {
-    --spacing: 0.5rem;
-    margin: calc(-1 * var(--spacing));
-    margin-top: var(--spacing);
-    display: flex;
-    flex-wrap: wrap;
+    margin-top: var(--sm1);
+    display: grid;
+    grid-template: auto / auto auto;
     align-items: center;
-  }
-  .footer > :global(*) {
-    margin: var(--spacing);
-  }
-  .footer .button {
-    flex: 0 0 auto;
-  }
-  .footer .message {
-    flex: 1 0 10rem;
-    margin-left: 1rem;
-    font-size: var(--sm1);
-    color: var(--color-text-muted);
-    text-align: right;
+    justify-content: space-between;
   }
 </style>
