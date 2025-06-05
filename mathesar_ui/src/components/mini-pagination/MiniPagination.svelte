@@ -94,6 +94,7 @@
 <style>
   .mini-pagination {
     display: grid;
+    max-width: min-content;
     grid-auto-flow: column;
     --button-border: none;
   }

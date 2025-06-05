@@ -22,6 +22,8 @@
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
 
+  const numberFormatter = new Intl.NumberFormat();
+
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
   export let nestedController: RecordSelectorController;
@@ -31,6 +33,7 @@
   /** true when the user is hover on the "Create new record" button. */
   let isHoveringCreate = false;
   let pageJumperIsOpen = false;
+  let footerHeight: number;
 
   $: ({
     database,
@@ -56,9 +59,15 @@
   $: recordsStore = recordsData.fetchedRecordRows;
   $: recordCount = recordsData.totalCount;
   $: records = $recordsStore;
-  $: showFooterLeft = hasSearchQueries && canInsertRecords;
-  $: showFooterRight = isInitialized && ($recordCount ?? 0) > $pagination.size;
-  $: showFooter = showFooterLeft || showFooterRight;
+  $: hasAddRecordButton = hasSearchQueries && canInsertRecords;
+  $: hasPagination = isInitialized && ($recordCount ?? 0) > $pagination.size;
+  $: showingMin = $pagination.leftBound;
+  $: showingMax = Math.min($pagination.rightBound, $recordCount ?? 0);
+  /**
+   * We use this to apply custom CSS for the case when there is no flex
+   * wrapping in the footer.
+   */
+  $: footerIsTall = footerHeight > 45;
 
   function submitResult(result: RecordSelectorResult) {
     if ($rowType === 'dataEntry') {
@@ -107,7 +116,11 @@
   }
 </script>
 
-<div class="record-selector-content" bind:clientHeight={height}>
+<div
+  class="record-selector-content"
+  bind:clientHeight={height}
+  class:loading={$isLoading}
+>
   {#if $isLoading || isSubmittingNewRecord}
     <div
       class="content-loading"
@@ -160,40 +173,61 @@
     {/if}
   {/if}
 
-  {#if showFooter}
-    <div class="footer">
-      <div class="left">
-        {#if showFooterLeft}
-          <Button
-            size="small"
-            appearance="secondary"
-            on:click={submitNewRecord}
-            on:mouseenter={() => {
-              isHoveringCreate = true;
-            }}
-            on:mouseleave={() => {
-              isHoveringCreate = false;
-            }}
-          >
-            <Icon {...iconAddNew} />
-            <span>{$_('create_record_from_search')}</span>
-          </Button>
+  <div
+    class="footer"
+    bind:clientHeight={footerHeight}
+    class:wrapping={footerIsTall}
+    class:has-add-button={hasAddRecordButton}
+    class:has-pagination={hasPagination}
+  >
+    {#if $recordCount}
+      <div class="stats">
+        {#if hasPagination}
+          {$_('showing_n_to_m_of_total', {
+            values: {
+              leftBound: numberFormatter.format(showingMin),
+              rightBound: numberFormatter.format(showingMax),
+              totalCount: numberFormatter.format($recordCount),
+            },
+          })}
+        {:else}
+          {$_('count_records', { values: { count: $recordCount } })}
         {/if}
       </div>
-      {#if showFooterRight}
-        <div class="right">
+    {/if}
+    {#if hasAddRecordButton}
+      <div class="add-button">
+        <Button
+          size="small"
+          appearance="secondary"
+          on:click={submitNewRecord}
+          on:mouseenter={() => {
+            isHoveringCreate = true;
+          }}
+          on:mouseleave={() => {
+            isHoveringCreate = false;
+          }}
+        >
+          <Icon {...iconAddNew} />
+          <span>{$_('create_record_from_search')}</span>
+        </Button>
+      </div>
+    {/if}
+    {#if hasPagination}
+      <div class="pager">
+        <div class="positioner">
           <MiniPagination
             bind:pagination={$pagination}
             recordCount={$recordCount ?? 0}
             bind:pageJumperIsOpen
           />
         </div>
-      {/if}
-    </div>
-  {/if}
+      </div>
+    {/if}
+  </div>
 </div>
 
-<style>
+<style lang="scss">
   .record-selector-content {
     position: relative;
     display: flex;
@@ -232,11 +266,74 @@
     color: var(--color-gray-dark);
   }
 
+  .loading .stats {
+    visibility: hidden;
+  }
+
   .footer {
     margin-top: var(--sm1);
-    display: grid;
-    grid-template: auto / auto auto;
+    display: flex;
+    // We're using 'reverse' so that when things wrap, we end up with one thing
+    // on top instead of one thing on bottom.
+    flex-direction: row-reverse;
+    flex-wrap: wrap-reverse;
     align-items: center;
     justify-content: space-between;
+    gap: var(--sm4);
+
+    & > * {
+      flex: 1 1 auto;
+    }
+
+    .stats {
+      order: 3;
+      text-align: center;
+      font-size: var(--sm1);
+      color: var(--text-color-muted);
+    }
+    .add-button {
+      order: 2;
+    }
+    .pager {
+      order: 1;
+      & > .positioner {
+        max-width: min-content;
+        margin-left: auto;
+      }
+    }
+
+    // WITH PAGINATION
+    &.has-pagination {
+      .stats {
+        text-align: left;
+      }
+      &:not(.wrapping) .add-button {
+        order: 4;
+      }
+    }
+
+    // WITH ADD RECORD BUTTON
+    &.has-add-button {
+      &:not(.wrapping) {
+        .stats {
+          text-align: right;
+        }
+        .add-button {
+          order: 4;
+        }
+      }
+    }
+
+    // WITH PAGINATION AND ADD RECORD BUTTON
+    &.has-pagination.has-add-button {
+      .add-button {
+        order: 4;
+      }
+      &:not(.wrapping) {
+        .stats {
+          text-align: center;
+        }
+      }
+    }
   }
 </style>

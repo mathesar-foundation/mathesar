@@ -2,8 +2,6 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import { FieldLayout } from '@mathesar/components/form';
-  import { staticText } from '@mathesar/i18n/staticText';
   import type Pagination from '@mathesar/utils/Pagination';
   import {
     Button,
@@ -14,6 +12,7 @@
   } from '@mathesar-component-library';
 
   const labelController = new LabelController();
+  const numberFormatter = new Intl.NumberFormat();
 
   export let pagination: Pagination;
   export let recordCount: number;
@@ -22,8 +21,6 @@
   let { page } = pagination;
   let input: HTMLInputElement;
 
-  $: showingMin = pagination.leftBound;
-  $: showingMax = Math.min(pagination.rightBound, recordCount);
   $: maxPage = pagination.getMaxPage(recordCount);
 
   onMount(() => {
@@ -32,25 +29,18 @@
   });
 </script>
 
-<FieldLayout>
-  <div>{$_('total_records')}: {recordCount}</div>
-  <div>{$_('showing')}: {showingMin}{staticText.EN_DASH}{showingMax}</div>
-</FieldLayout>
-
-<FieldLayout>
-  <form on:submit={() => goToPage(page)}>
-    <Label controller={labelController}>{$_('go_to_page')}</Label>
-    <div class="input">
-      <InputGroup>
-        <NumberInput {labelController} bind:value={page} bind:element={input} />
-        <Button appearance="primary" type="submit">{$_('go')}</Button>
-      </InputGroup>
-    </div>
-  </form>
-  <div class="help">
-    {$_('enter_a_number_between_1_and_max', { values: { max: maxPage } })}
+<form on:submit={() => goToPage(page)}>
+  <Label controller={labelController}>{$_('go_to_page')}</Label>
+  <div class="input">
+    <InputGroup>
+      <NumberInput {labelController} bind:value={page} bind:element={input} />
+      <Button appearance="primary" type="submit">{$_('go')}</Button>
+    </InputGroup>
   </div>
-</FieldLayout>
+</form>
+<div class="help">
+  {$_('total_pages')}: {numberFormatter.format(maxPage)}
+</div>
 
 <style>
   .input {
