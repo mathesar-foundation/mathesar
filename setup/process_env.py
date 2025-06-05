@@ -90,7 +90,7 @@ def validate_pg_env_variables(env_vars):
 
         return True
     except Exception as e:
-        sys.exit(f"Invalid: Unable to connect to the database. {e}")
+        sys.exit(f"Unable to connect to the database. {e}")
 
 
 def construct_env_vars_from_connection_string(connection_string):
