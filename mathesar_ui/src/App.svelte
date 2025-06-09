@@ -38,7 +38,7 @@
   @import 'component-library/styles.scss';
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
-  :root {
+  body {
     --color-substring-match: var(--salmon-300);
     --color-substring-match-light: var(--salmon-100);
     --modal-record-selector-z-index: 50;
@@ -54,9 +54,7 @@
       'Liberation Mono', 'Courier New', monospace;
     --line-height-base: 1.5;
     --letter-spacing-base: -0.011em;
-  }
 
-  body {
     /**
    * This sets the `mix-blend-mode` property for cell backgrounds.
    *
