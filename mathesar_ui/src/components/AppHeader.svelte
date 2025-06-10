@@ -160,6 +160,7 @@
 <style lang="scss">
   .app-header {
     display: flex;
+    gap: var(--sm4);
     justify-content: space-between;
     padding: 0 0.5rem;
     height: var(--header-height);
@@ -180,7 +181,7 @@
   .right {
     display: flex;
     align-items: center;
-    gap: var(--sm2);
+    gap: var(--sm3);
   }
 
   .theme-switcher {

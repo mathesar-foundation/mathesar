@@ -14,14 +14,13 @@
 
 <Button on:click={handleClick} appearance="ghost" class="padding-zero">
   <span class="trigger">
-    <Icon {...iconSearch} />
+    <span class="icon"><Icon {...iconSearch} /></span>
     <Icon {...iconExpandRight} class="expand-right-icon" />
   </span>
 </Button>
 
 <style lang="scss">
   .trigger {
-    border: 1px solid var(--card-border);
     color: var(--text-color-secondary);
     border-radius: var(--border-radius-m);
     display: flex;
@@ -29,6 +28,10 @@
     padding: 0.25rem;
     display: flex;
     align-items: center;
+
+    .icon {
+      font-size: 90%;
+    }
 
     :global(.expand-right-icon) {
       color: var(--text-color-secondary);
