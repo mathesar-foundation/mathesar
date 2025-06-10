@@ -100,17 +100,17 @@
     display: flex;
   }
   .entity-switcher-content {
-    padding: var(--sm3);
+    padding: var(--sm4);
     min-width: 12rem;
     display: grid;
     grid-template: auto 1fr / 1fr;
-    grid-gap: var(--sm3);
+    grid-gap: var(--sm4);
     max-height: calc(100vh - 2rem);
   }
   .sections {
     overflow-y: auto;
     display: grid;
-    grid-gap: var(--sm3);
+    grid-gap: var(--sm4);
   }
   .actions {
     list-style: none;
