@@ -4,20 +4,16 @@
   display: inline-flex;
   flex-direction: column;
   min-width: var(--Menu__min-width, 0);
-  padding: var(--sm3) 0;
 
   .menu-heading {
     color: var(--text-color-muted);
     padding: 0 var(--sm3);
     margin-top: var(--sm3);
     font-weight: var(--font-weight-medium);
-
-    &:first-child {
-      margin-top: 0;
-    }
   }
 
   .menu-divider {
+    border-top: 0.1em solid var(--Menu__divider-color, var(--border-color));
     height: 0;
   }
 
@@ -27,9 +23,8 @@
     flex-grow: 1;
     align-items: center;
     background-color: transparent;
-    padding: var(--sm6) var(--Menu__padding-x, $padding-x-default);
+    padding: 0 var(--Menu__padding-x, $padding-x-default);
     border-radius: var(--border-radius-m);
-    margin: 0 var(--sm3);
 
     &.menu-item-link,
     &.menu-item-button {

@@ -79,7 +79,6 @@
           triggerClass="padding-compact"
           size="small"
           closeOnInnerClick={false}
-          menuStyle="--Menu__padding-x: 0.3em;"
         >
           <div class="user-switcher" slot="trigger">
             <Icon
@@ -98,12 +97,11 @@
             </LinkMenuItem>
             <MenuDivider />
           {/if}
+
           <MenuHeading>{$_('signed_in_as')}</MenuHeading>
           <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
-
-          <MenuDivider />
 
           {#if $userProfile.isMathesarAdmin}
             <LinkMenuItem
@@ -113,10 +111,9 @@
             >
               {$_('administration')}
             </LinkMenuItem>
-            <MenuDivider />
           {/if}
-
           <MenuDivider />
+
           <MenuHeading>{$_('theme')}</MenuHeading>
           <div class="theme-switcher">
             <UiThemeSelect />

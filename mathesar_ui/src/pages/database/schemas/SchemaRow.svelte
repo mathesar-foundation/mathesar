@@ -3,7 +3,6 @@
   import { _ } from 'svelte-i18n';
 
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
-  import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
   import {
     iconDeleteMajor,
     iconEdit,
@@ -49,7 +48,6 @@
           triggerAppearance="plain"
           preferredPlacement="bottom-end"
           icon={iconMoreActions}
-          menuStyle="--Menu__padding-x:0.8em;"
         >
           <ButtonMenuItem
             on:click={() => dispatch('edit')}
@@ -58,7 +56,6 @@
           >
             {$_('edit_schema')}
           </ButtonMenuItem>
-          <MenuDivider />
           <ButtonMenuItem
             danger
             on:click={() => dispatch('delete')}

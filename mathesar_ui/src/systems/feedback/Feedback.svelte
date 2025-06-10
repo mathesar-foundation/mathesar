@@ -16,7 +16,7 @@
   import { getMarketingLink } from '@mathesar/routes/urls';
   import {
     AnchorButton,
-    DropdownMenu,
+    Dropdown,
     Icon,
     TextArea,
   } from '@mathesar-component-library';
@@ -61,12 +61,11 @@
 </script>
 
 <div class="feedback-button">
-  <DropdownMenu
+  <Dropdown
     triggerAppearance="feedback"
     triggerClass="padding-compact"
     closeOnInnerClick={false}
     showArrow={false}
-    menuStyle="--Menu__padding-x: 0.3em;"
     on:close={onDropdownClose}
   >
     <div class="trigger" slot="trigger">
@@ -75,7 +74,7 @@
         {$_('feedback')}
       {/if}
     </div>
-    <div class="feedback-content">
+    <div class="feedback-content" slot="content">
       {#if !isSuccessfullySubmitted}
         <div class="feedback-form">
           {#if compactLayout}
@@ -129,7 +128,7 @@
         </div>
       {/if}
     </div>
-  </DropdownMenu>
+  </Dropdown>
 </div>
 
 <style lang="scss">
@@ -145,7 +144,7 @@
 
   .feedback-content {
     max-width: 28rem;
-    padding: 0 var(--sm3);
+    padding: var(--sm3);
     color: var(--text-color-primary);
   }
   .feedback-form {
