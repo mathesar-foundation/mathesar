@@ -271,6 +271,6 @@
     align-items: center;
     justify-content: center;
     display: flex;
-    background-color: var(--background-color);
+    background-color: var(--neutral-100);
   }
 </style>
