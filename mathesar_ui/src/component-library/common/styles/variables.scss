@@ -153,9 +153,9 @@ body {
   --info-background-color: var(--sky-200);
   --info-border-color: var(--sky-600);
 
-  --success-color: var(--emerald-700);
-  --success-background-color: var(--emerald-200);
-  --success-border-color: var(--emerald-500);
+  --success-color: var(--pistachio-900);
+  --success-background-color: var(--pistachio-200);
+  --success-border-color: var(--pistachio-600);
 
   --warning-color: var(--yellow-800);
   --warning-background-color: var(--yellow-200);
@@ -188,17 +188,17 @@ body {
   --gray-900: #171312;
   --gray-950: #0c0a09;
 
-  --emerald-50: #ecfdf5;
-  --emerald-100: #d1fae5;
-  --emerald-200: #a7f3d0;
-  --emerald-300: #6ee7b7;
-  --emerald-400: #34d399;
-  --emerald-500: #10b981;
-  --emerald-600: #059669;
-  --emerald-700: #047857;
-  --emerald-800: #065f46;
-  --emerald-900: #064e3b;
-  --emerald-950: #022c22;
+  --pistachio-50: #F5F9F1;
+  --pistachio-100: #E0EDD4;
+  --pistachio-200: #C3D8AB;
+  --pistachio-300: #B7D59A;
+  --pistachio-400: #A2C97E;
+  --pistachio-500: #8DBD61;
+  --pistachio-600: #79AD48;
+  --pistachio-700: #65903C;
+  --pistachio-800: #507330;
+  --pistachio-900: #32481E;
+  --pistachio-950: #141D0C;
 
   --highlighter-100: #FBFAD2;
   --highlighter-300: #FDF90C;
@@ -466,9 +466,9 @@ body.theme-dark {
   --warning-background-color: rgba(245, 158, 11, 0.15);
   --warning-border-color: rgba(245, 158, 11, 0.3);
 
-  --success-color: var(--emerald-400);
-  --success-background-color: rgba(52, 211, 153, 0.15);
-  --success-border-color: rgba(52, 211, 153, 0.3);
+  --success-color: var(--pistachio-200);
+  --success-background-color: rgba(121, 173, 72, 0.15);
+  --success-border-color: rgba(121, 173, 72, 0.3);
 
   --collapsible-button-background: var(--neutral-850);
   --collapsible-button-hover: var(--neutral-700);
