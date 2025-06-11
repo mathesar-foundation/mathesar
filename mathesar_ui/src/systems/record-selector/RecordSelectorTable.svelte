@@ -32,6 +32,7 @@
   export let nestedController: RecordSelectorController;
   export let submitResult: (result: RecordSelectorResult) => void;
   export let isHoveringCreate = false;
+  export let handleKeyboardNavigation = false;
 
   const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
@@ -149,9 +150,8 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if ($nestedSelectorIsOpen) {
-      return;
-    }
+    if (!handleKeyboardNavigation) return;
+    if ($nestedSelectorIsOpen) return;
     let handled = true;
     switch (e.key) {
       case 'ArrowUp':

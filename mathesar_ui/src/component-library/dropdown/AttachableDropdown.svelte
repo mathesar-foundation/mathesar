@@ -134,6 +134,7 @@
     on:click={checkAndCloseOnInnerClick}
     on:mouseenter
     on:mouseleave
+    data-attachable-dropdown
   >
     {#if $$slots.default}
       <slot {close} />
