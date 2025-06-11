@@ -250,11 +250,14 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    color: var(--neutral-300);
-    font-weight: var(--font-weight-light);
+    background: var(--neutral-100);
+    border-radius: 3px;
+    color: var(--text-color-muted);
+    font-weight: bold;
 
     body.theme-dark & {
-      color: var(--slate-500);
+      background: var(--neutral-900);
+      border: 1px solid var(--neutral-700);
     }
   }
 
