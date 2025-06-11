@@ -27,6 +27,7 @@ body {
   --resource-icon-background: var(--pumpkin-100);
   --layout-background-color: var(--neutral-200);
   --window-background-color: var(--white);
+  --progress-foreground: rgba(255, 255, 255, 0.8);
 
   // Border Colors
   --border-color: var(--neutral-300);
@@ -60,6 +61,13 @@ body {
     0 0 0 1px var(--shadow-color-inset) inset;
   --card-active-shadow: 0 1px 2px var(--shadow-color-light),
     0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+
+  // Toast
+  --ToastItem__background-color: var(--info-background-color);
+  --ToastItem__background-color--success: var(--success-background-color);
+  --ToastItem__background-color--error: var(--danger-background-color);
+  --ToastItem__text-color: var(--text-color-primary);
+  --ToastItem__progress-color: var(--progress-foreground);
 
   // Collapsible Styles
   --collapsible-background: var(--neutral-300);
@@ -378,6 +386,7 @@ body.theme-dark {
   --card-row-border: var(--neutral-800);
   --sheet-background: var(--neutral-900);
   --window-background-color: var(--neutral-850);
+  --progress-foreground: rgba(0, 0, 0, 0.6);
 
   --neutral-25: var(--slate-50);
   --neutral-50: var(--slate-50);

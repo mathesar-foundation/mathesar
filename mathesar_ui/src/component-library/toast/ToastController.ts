@@ -39,9 +39,9 @@ interface ToastEntryProps {
     | Readable<Record<string, unknown>>
     | Record<string, unknown>;
   icon?: Readable<IconProps> | IconProps;
-  backgroundColor: Readable<string> | string;
-  textColor: Readable<string> | string;
-  progressColor: Readable<string> | string;
+  backgroundColor?: Readable<string | undefined> | string;
+  textColor?: Readable<string | undefined> | string;
+  progressColor?: Readable<string | undefined> | string;
   /**
    * The time (ms) the toast message will stay open. When 0, the toast will not
    * auto-close.
@@ -85,9 +85,6 @@ interface ToastEntryProps {
 }
 
 const baseDefaultProps: ToastEntryProps = {
-  backgroundColor: 'var(--sky-500)',
-  textColor: 'var(--gray-800)',
-  progressColor: 'rgba(255, 255, 255, 0.6)',
   lifetime: 6000,
   hasProgress: true,
   initialProgress: 1,
@@ -211,7 +208,7 @@ export function makeToast(
   function success(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconSuccess,
-      backgroundColor: 'var(--green-100)',
+      backgroundColor: 'var(--ToastItem__background-color--success)',
       ...makeToastProps(detail),
     });
   }
@@ -219,7 +216,7 @@ export function makeToast(
   function error(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconError,
-      backgroundColor: 'var(--red-100)',
+      backgroundColor: 'var(--ToastItem__background-color--error)',
       ...makeToastProps(detail),
     });
   }
