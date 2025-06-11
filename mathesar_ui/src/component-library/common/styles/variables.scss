@@ -149,9 +149,9 @@ body {
   --danger-background-color: var(--rosy-200);
   --danger-border-color: var(--rosy-500);
 
-  --info-color: var(--sky-700);
+  --info-color: var(--sky-800);
   --info-background-color: var(--sky-200);
-  --info-border-color: var(--sky-500);
+  --info-border-color: var(--sky-600);
 
   --success-color: var(--emerald-700);
   --success-background-color: var(--emerald-200);
@@ -185,7 +185,7 @@ body {
   --gray-600: #5d5850;
   --gray-700: #3a342e;
   --gray-800: #221e1a;
-  --gray-900: #0f0d0b;
+  --gray-900: #171312;
   --gray-950: #0c0a09;
 
   --emerald-50: #ecfdf5;
@@ -199,6 +199,11 @@ body {
   --emerald-800: #065f46;
   --emerald-900: #064e3b;
   --emerald-950: #022c22;
+
+  --highlighter-100: #FBFAD2;
+  --highlighter-300: #FDF90C;
+  --highlighter-500: #81570E;
+  --highlighter-800: #251904;
 
   --orange-red-50: #fff2ef;
   --orange-red-100: #ffe2dc;
@@ -270,11 +275,13 @@ body {
   --sky-600: #127ed6;
   --sky-700: #0f69c1;
   --sky-800: #3e5a80;
+  --sky-900: #141D29;
   --sky-600-tentative: #87bcf6;
 
   --stormy-25: #faf9fb;
   --stormy-50: #f5f3f8;
   --stormy-100: #ebe7f0;
+  --stormy-150: #E0D9E7;
   --stormy-200: #d6cde3;
   --stormy-300: #beb0d2;
   --stormy-400: #a592c0;
@@ -375,7 +382,7 @@ body.theme-dark {
   --resource-icon-color: var(--pumpkin-700);
   --resource-icon-background: var(--pumpkin-950);
   --layout-background-color: var(--background-color);
-  --inspector-background: var(--neutral-700);
+  --inspector-background: var(--gray-900);
   --inspector-hover: var(--neutral-800);
   --inspector-active: var(--neutral-700);
   --secondary-header-background: var(--neutral-800);
@@ -409,7 +416,7 @@ body.theme-dark {
   --text-color-muted: var(--neutral-400);
 
   // Input
-  --input-background: var(--neutral-850);
+  --input-background: var(--gray-950);
   --input-border: var(--neutral-600);
   --input-text: var(--text-color);
   --input-focus-color: var(--neutral-400);
@@ -451,9 +458,9 @@ body.theme-dark {
   --danger-background-color: rgba(226, 100, 100, 0.15);
   --danger-border-color: rgba(226, 100, 100, 0.3);
 
-  --info-color: var(--cyan-400);
-  --info-background-color: rgba(34, 211, 238, 0.15);
-  --info-border-color: rgba(34, 211, 238, 0.3);
+  --info-color: var(--sky-200);
+  --info-background-color: var(--sky-900);
+  --info-border-color: var(--sky-600);
 
   --warning-color: var(--yellow-400);
   --warning-background-color: rgba(245, 158, 11, 0.15);

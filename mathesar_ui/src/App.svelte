@@ -39,8 +39,8 @@
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   body {
-    --color-substring-match: var(--sky-500);
-    --color-substring-match-light: var(--cell-background-base);
+    --color-substring-match: var(--highlighter-300);
+    --color-substring-match-light: var(--highlighter-100);
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
@@ -81,11 +81,11 @@
     --cell-bg-color-row-hover: var(--slate-100);
     --cell-bg-color-row-selected: var(--sky-200);
 
-    --color-fk: var(--salmon-200);
+    --color-fk: var(--stormy-200);
     --color-error: var(--red-600);
     --cell-text-color-processing: var(--text-color-muted);
     --color-array-element: var(--sky-300);
-    --color-fk-border: var(--salmon-400);
+    --color-fk-border: var(--stormy-300);
 
     --cell-border-horizontal: 1px solid var(--neutral-300);
     --cell-border-vertical: 1px solid var(--neutral-300);
@@ -148,16 +148,16 @@
     --cell-bg-color-row-hover: var(--slate-800);
     --cell-bg-color-row-selected: var(--slate-700);
 
-    --color-substring-match: var(--accent-100);
-    --color-substring-match-light: var(--cell-background-base);
+    --color-substring-match: var(--highlighter-500);
+    --color-substring-match-light: var(--highlighter-800);
 
     --Match__highlight-color: var(--color-substring-match);
 
     --cell-border-horizontal: 1px solid var(--slate-700);
     --cell-border-vertical: 1px solid var(--slate-700);
 
-    --color-fk: var(--pumpkin-800);
-    --color-fk-border: var(--pumpkin-600);
+    --color-fk: var(--stormy-800);
+    --color-fk-border: var(--stormy-700);
     --color-error: var(--red-400);
     --cell-text-color-processing: var(--neutral-300);
     --color-array-element: var(--sky-400);
