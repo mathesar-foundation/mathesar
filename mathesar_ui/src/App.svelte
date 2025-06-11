@@ -77,8 +77,8 @@
     --cell-bg-color-error: var(--red-100);
     --cell-bg-color-header: transparent;
     --cell-bg-color-processing: var(--yellow-100);
-    --cell-bg-color-disabled: var(--slate-100);
-    --cell-bg-color-row-hover: var(--slate-100);
+    --cell-bg-color-disabled: var(--gray-100);
+    --cell-bg-color-row-hover: var(--gray-100);
     --cell-bg-color-row-selected: var(--sky-200);
 
     --color-fk: var(--stormy-200);
@@ -144,8 +144,8 @@
     --cell-bg-color-error: var(--rosy-950);
     --cell-bg-color-header: transparent;
     --cell-bg-color-processing: var(--yellow-900);
-    --cell-bg-color-disabled: var(--slate-800);
-    --cell-bg-color-row-hover: var(--slate-800);
+    --cell-bg-color-disabled: var(--slate-900);
+    --cell-bg-color-row-hover: var(--slate-900);
     --cell-bg-color-row-selected: var(--slate-700);
 
     --color-substring-match: var(--highlighter-500);
