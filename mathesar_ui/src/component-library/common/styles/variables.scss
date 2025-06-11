@@ -178,6 +178,7 @@ body {
   --gray-700: #3a342e;
   --gray-800: #221e1a;
   --gray-900: #0f0d0b;
+  --gray-950: #0c0a09;
 
   --emerald-50: #ecfdf5;
   --emerald-100: #d1fae5;
@@ -342,7 +343,7 @@ body {
 }
 
 body.theme-dark {
-  --background-color: var(--neutral-900);
+  --background-color: var(--slate-900);
   --border-color: var(--neutral-600);
   --header-background: linear-gradient(
     var(--gradient-direction-default),

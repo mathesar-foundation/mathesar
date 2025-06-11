@@ -75,7 +75,7 @@
    */
     --cell-bg-color-base: var(--white);
     --cell-bg-color-error: var(--red-100);
-    --cell-bg-color-header: var(--slate-100);
+    --cell-bg-color-header: transparent;
     --cell-bg-color-processing: var(--yellow-100);
     --cell-bg-color-disabled: var(--slate-100);
     --cell-bg-color-row-hover: var(--slate-100);
@@ -140,9 +140,9 @@
 
   body.theme-dark {
     --cell-bg-mix-blend-mode: screen;
-    --cell-bg-color-base: var(--slate-850);
+    --cell-bg-color-base: var(--gray-950);
     --cell-bg-color-error: var(--rosy-950);
-    --cell-bg-color-header: var(--slate-800);
+    --cell-bg-color-header: transparent;
     --cell-bg-color-processing: var(--yellow-900);
     --cell-bg-color-disabled: var(--slate-800);
     --cell-bg-color-row-hover: var(--slate-800);
