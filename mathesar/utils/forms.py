@@ -27,15 +27,15 @@ def create_form(form_def):
             key=field["key"],
             attnum=field["attnum"],
             form=form_model,
-            order=field["order"],
+            index=field["index"],
             kind=field["kind"],
             label=field.get("label"),
             help=field.get("help"),
             readonly=field.get("readonly"),
             styling=field.get("styling"),
             is_required=field.get("is_required"),
-            parent_field=FormField.objects.get(key=field["key"], form=form_model) if
-            len(FormField.objects.filter(key=field["key"], form=form_model)) else None,
+            parent_field=FormField.objects.get(key=field.get("parent_field_key"), form=form_model) if
+            len(FormField.objects.filter(key=field.get("parent_field_key"), form=form_model)) else None,
             target_table_oid=field.get("target_table_oid"),
             allow_create=field.get("allow_create"),
             create_label=field.get("create_label")
