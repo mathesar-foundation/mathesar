@@ -10,6 +10,6 @@ frozendict==2.4.6
 gunicorn==23.0.0
 psycopg[binary]==3.2.6
 psycopg2-binary==2.9.10
-requests==2.32.3
+requests==2.32.4
 SQLAlchemy==1.4.54
 whitenoise==6.7.0
