@@ -39,8 +39,8 @@
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   body {
-    --color-substring-match: var(--salmon-300);
-    --color-substring-match-light: var(--salmon-100);
+    --color-substring-match: var(--sky-500);
+    --color-substring-match-light: var(--cell-background-base);
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
@@ -146,10 +146,10 @@
     --cell-bg-color-processing: var(--yellow-900);
     --cell-bg-color-disabled: var(--slate-800);
     --cell-bg-color-row-hover: var(--slate-800);
-    --cell-bg-color-row-selected: var(--sky-900);
+    --cell-bg-color-row-selected: var(--slate-700);
 
-    --color-substring-match: var(--pumpkin-800);
-    --color-substring-match-light: var(--pumpkin-950);
+    --color-substring-match: var(--accent-100);
+    --color-substring-match-light: var(--cell-background-base);
 
     --Match__highlight-color: var(--color-substring-match);
 

@@ -71,7 +71,7 @@
     min-width: 3ch;
   }
   .row-header.row-is-selected {
-    background: var(--active-background);
+    background: var(--cell-bg-color-row-selected);
   }
 
   .column-header.row-header {
