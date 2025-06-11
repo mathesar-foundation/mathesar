@@ -46,7 +46,6 @@
   .db-card.hoverable:active {
     border-color: var(--card-active-border);
     box-shadow: var(--card-active-shadow);
-    transform: translateY(0);
     background: var(--card-active-background);
   }
 </style>
