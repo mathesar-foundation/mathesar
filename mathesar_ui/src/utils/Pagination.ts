@@ -43,4 +43,8 @@ export default class Pagination {
       size: terse[1],
     });
   }
+
+  getMaxPage(recordCount: number): number {
+    return Math.ceil(recordCount / this.size);
+  }
 }
