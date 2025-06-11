@@ -141,7 +141,7 @@
   body.theme-dark {
     --cell-bg-mix-blend-mode: screen;
     --cell-bg-color-base: var(--slate-850);
-    --cell-bg-color-error: var(--red-900);
+    --cell-bg-color-error: var(--rosy-950);
     --cell-bg-color-header: var(--slate-800);
     --cell-bg-color-processing: var(--yellow-900);
     --cell-bg-color-disabled: var(--slate-800);
@@ -250,14 +250,11 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--neutral-100);
-    border-radius: 3px;
-    color: var(--text-color-muted);
-    font-weight: bold;
+    color: var(--neutral-300);
+    font-weight: var(--font-weight-light);
 
     body.theme-dark & {
-      background: var(--neutral-900);
-      border: 1px solid var(--neutral-700);
+      color: var(--slate-500);
     }
   }
 
