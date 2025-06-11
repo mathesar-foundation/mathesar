@@ -229,7 +229,9 @@ export class RecordsData {
       const fuzzySearchParams = params.searchFuzzy.getSearchParams();
       const recordSearchParams: RecordsSearchParams = {
         ...this.apiContext,
+        ...params.pagination.recordsRequestParams(),
         search_params: fuzzySearchParams,
+        return_record_summaries: this.loadIntrinsicRecordSummaries,
       };
 
       this.promise = fuzzySearchParams.length

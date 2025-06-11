@@ -5,6 +5,7 @@
   import { States } from '@mathesar/api/rest/utils/requestUtils';
   import { api } from '@mathesar/api/rpc';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { MiniPagination } from '@mathesar/components/mini-pagination';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -21,6 +22,8 @@
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
 
+  const numberFormatter = new Intl.NumberFormat();
+
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
   export let nestedController: RecordSelectorController;
@@ -29,6 +32,8 @@
   let isSubmittingNewRecord = false;
   /** true when the user is hover on the "Create new record" button. */
   let isHoveringCreate = false;
+  let pageJumperIsOpen = false;
+  let footerHeight: number;
 
   $: ({
     database,
@@ -49,10 +54,20 @@
   $: ({ state: constraintsState } = $constraintsDataStore);
   $: isInitialized =
     $fetchStatus?.state !== 'processing' && constraintsState === States.Done;
-  $: ({ searchFuzzy } = meta);
+  $: ({ searchFuzzy, pagination } = meta);
   $: hasSearchQueries = $searchFuzzy.size > 0;
   $: recordsStore = recordsData.fetchedRecordRows;
+  $: recordCount = recordsData.totalCount;
   $: records = $recordsStore;
+  $: hasAddRecordButton = hasSearchQueries && canInsertRecords;
+  $: hasPagination = isInitialized && ($recordCount ?? 0) > $pagination.size;
+  $: showingMin = $pagination.leftBound;
+  $: showingMax = Math.min($pagination.rightBound, $recordCount ?? 0);
+  /**
+   * We use this to apply custom CSS for the case when there is no flex
+   * wrapping in the footer.
+   */
+  $: footerIsTall = footerHeight > 45;
 
   function submitResult(result: RecordSelectorResult) {
     if ($rowType === 'dataEntry') {
@@ -101,7 +116,11 @@
   }
 </script>
 
-<div class="record-selector-content" bind:clientHeight={height}>
+<div
+  class="record-selector-content"
+  bind:clientHeight={height}
+  class:loading={$isLoading}
+>
   {#if $isLoading || isSubmittingNewRecord}
     <div
       class="content-loading"
@@ -120,6 +139,7 @@
       {nestedController}
       {submitResult}
       {isHoveringCreate}
+      handleKeyboardNavigation={!pageJumperIsOpen}
     />
   {/if}
 
@@ -153,9 +173,30 @@
     {/if}
   {/if}
 
-  <div class="footer">
-    {#if hasSearchQueries && canInsertRecords}
-      <div class="button">
+  <div
+    class="footer"
+    bind:clientHeight={footerHeight}
+    class:wrapping={footerIsTall}
+    class:has-add-button={hasAddRecordButton}
+    class:has-pagination={hasPagination}
+  >
+    {#if $recordCount}
+      <div class="stats">
+        {#if hasPagination}
+          {$_('showing_n_to_m_of_total', {
+            values: {
+              leftBound: numberFormatter.format(showingMin),
+              rightBound: numberFormatter.format(showingMax),
+              totalCount: numberFormatter.format($recordCount),
+            },
+          })}
+        {:else}
+          {$_('count_records', { values: { count: $recordCount } })}
+        {/if}
+      </div>
+    {/if}
+    {#if hasAddRecordButton}
+      <div class="add-button">
         <Button
           size="small"
           appearance="secondary"
@@ -172,19 +213,21 @@
         </Button>
       </div>
     {/if}
-    {#if records.length === 10 && isInitialized}
-      <div class="message">
-        {#if hasSearchQueries}
-          {$_('ten_best_matches_shown')}
-        {:else}
-          {$_('first_ten_records_shown')}
-        {/if}
+    {#if hasPagination}
+      <div class="pager">
+        <div class="positioner">
+          <MiniPagination
+            bind:pagination={$pagination}
+            recordCount={$recordCount ?? 0}
+            bind:pageJumperIsOpen
+          />
+        </div>
       </div>
     {/if}
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .record-selector-content {
     position: relative;
     display: flex;
@@ -202,7 +245,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--neutral-200);
+    color: var(--gray-400);
     z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
@@ -215,7 +258,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--neutral-200);
+    color: var(--gray-400);
   }
   .no-results {
     padding: 1.5rem;
@@ -223,25 +266,74 @@
     color: var(--color-gray-dark);
   }
 
+  .loading .stats {
+    visibility: hidden;
+  }
+
   .footer {
-    --spacing: 0.5rem;
-    margin: calc(-1 * var(--spacing));
-    margin-top: var(--spacing);
+    margin-top: var(--sm1);
     display: flex;
-    flex-wrap: wrap;
+    // We're using 'reverse' so that when things wrap, we end up with one thing
+    // on top instead of one thing on bottom.
+    flex-direction: row-reverse;
+    flex-wrap: wrap-reverse;
     align-items: center;
-  }
-  .footer > :global(*) {
-    margin: var(--spacing);
-  }
-  .footer .button {
-    flex: 0 0 auto;
-  }
-  .footer .message {
-    flex: 1 0 10rem;
-    margin-left: 1rem;
-    font-size: var(--sm1);
-    color: var(--color-text-muted);
-    text-align: right;
+    justify-content: space-between;
+    gap: var(--sm4);
+
+    & > * {
+      flex: 1 1 auto;
+    }
+
+    .stats {
+      order: 3;
+      text-align: center;
+      font-size: var(--sm1);
+      color: var(--text-color-muted);
+    }
+    .add-button {
+      order: 2;
+    }
+    .pager {
+      order: 1;
+      & > .positioner {
+        max-width: min-content;
+        margin-left: auto;
+      }
+    }
+
+    // WITH PAGINATION
+    &.has-pagination {
+      .stats {
+        text-align: left;
+      }
+      &:not(.wrapping) .add-button {
+        order: 4;
+      }
+    }
+
+    // WITH ADD RECORD BUTTON
+    &.has-add-button {
+      &:not(.wrapping) {
+        .stats {
+          text-align: right;
+        }
+        .add-button {
+          order: 4;
+        }
+      }
+    }
+
+    // WITH PAGINATION AND ADD RECORD BUTTON
+    &.has-pagination.has-add-button {
+      .add-button {
+        order: 4;
+      }
+      &:not(.wrapping) {
+        .stats {
+          text-align: center;
+        }
+      }
+    }
   }
 </style>
