@@ -3,13 +3,15 @@ Classes and functions exposed to the RPC endpoint for managing forms.
 """
 from typing import Optional, TypedDict
 
+from modernrpc.core import REQUEST_KEY
+
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.utils.forms import create_form
 
 
 class FormInfo(TypedDict):
     @classmethod
-    def from_model(cls, model):
+    def from_model(cls, form_model, field_models):
         pass
     pass
 
@@ -49,6 +51,7 @@ class FormDef(TypedDict):
 
 
 @mathesar_rpc_method(name="forms.add", auth="login")
-def add(*, form_def: FormDef) -> FormInfo:
-    form_model = create_form(form_def)
-    return FormInfo.from_model(form_model)
+def add(*, form_def: FormDef, **kwargs) -> FormInfo:
+    user = kwargs.get(REQUEST_KEY).user
+    form_model, field_models = create_form(form_def, user)
+    return FormInfo.from_model(form_model, field_models)
