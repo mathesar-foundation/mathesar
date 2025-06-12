@@ -145,22 +145,51 @@ body {
   --text-color-tertiary: var(--pumpkin-800);
   --text-color-muted: var(--neutral-600);
 
-  // Utility Colors
-  --danger-color: var(--rosy-700);
-  --danger-background-color: var(--rosy-200);
-  --danger-border-color: var(--rosy-500);
-
-  --info-color: var(--sky-800);
+  // Status boxes
+  --info-color: var(--sky-900);
   --info-background-color: var(--sky-200);
   --info-border-color: var(--sky-600);
+  &.theme-dark {
+    --info-color: var(--sky-200);
+    --info-background-color: var(--sky-900);
+    --info-border-color: var(--sky-600);
+  }
 
-  --success-color: var(--pistachio-900);
-  --success-background-color: var(--pistachio-200);
-  --success-border-color: var(--pistachio-600);
-
-  --warning-color: var(--yellow-800);
+  --warning-color: var(--yellow-900);
   --warning-background-color: var(--yellow-200);
   --warning-border-color: var(--yellow-500);
+  &.theme-dark {
+    --warning-color: var(--pumpkin-300);
+    --warning-background-color: var(--pumpkin-950);
+    --warning-border-color: var(--pumpkin-800);
+  }
+
+  --danger-color: var(--rosy-900);
+  --danger-background-color: var(--rosy-200);
+  --danger-border-color: var(--rosy-500);
+  &.theme-dark {
+    --danger-color: var(--rosy-100);
+    --danger-background-color: var(--rosy-950);
+    --danger-border-color: var(--rosy-800);
+  }
+
+  --success-color: var(--pistachio-950);
+  --success-background-color: var(--pistachio-200);
+  --success-border-color: var(--pistachio-600);
+  &.theme-dark {
+    --success-color: var(--pistachio-200);
+    --success-background-color: var(--pistachio-900);
+    --success-border-color: var(--pistachio-800);
+  }
+
+  --outcome-color: var(--stormy-800);
+  --outcome-background-color: var(--purple-100);
+  --outcome-border-color: var(--purple-300);
+  &.theme-dark {
+    --outcome-color: var(--purple-900);
+    --outcome-background-color: var(--stormy-800);
+    --outcome-border-color: var(--purple-400);
+  }
 
   --neutral-25: var(--gray-25);
   --neutral-50: var(--gray-50);
@@ -453,23 +482,6 @@ body.theme-dark {
     0 0 0 1px var(--shadow-color-inset) inset;
   --card-active-shadow: 0 1px 2px var(--shadow-color-light),
     0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-
-  // Utility
-  --danger-color: var(--rosy-400);
-  --danger-background-color: rgba(226, 100, 100, 0.15);
-  --danger-border-color: rgba(226, 100, 100, 0.3);
-
-  --info-color: var(--sky-200);
-  --info-background-color: var(--sky-900);
-  --info-border-color: var(--sky-600);
-
-  --warning-color: var(--yellow-400);
-  --warning-background-color: rgba(245, 158, 11, 0.15);
-  --warning-border-color: rgba(245, 158, 11, 0.3);
-
-  --success-color: var(--pistachio-200);
-  --success-background-color: rgba(121, 173, 72, 0.15);
-  --success-border-color: rgba(121, 173, 72, 0.3);
 
   --collapsible-button-background: var(--neutral-850);
   --collapsible-button-hover: var(--neutral-700);
