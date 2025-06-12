@@ -31,7 +31,21 @@ class FieldDef(TypedDict):
 
 
 class FormDef(TypedDict):
-    pass
+    token: str
+    name: str
+    description: Optional[str]
+    version: int
+    database_id: int
+    schema_oid: int
+    base_table_oid: int
+    is_public: Optional[bool]
+    header_title: dict
+    header_subtitle: Optional[dict]
+    submit_role_id: Optional[int]
+    submit_message: Optional[dict]
+    redirect_url: Optional[str]
+    submit_label: Optional[str]
+    fields: Optional[list[FieldDef]]
 
 
 @mathesar_rpc_method(name="forms.add", auth="login")
