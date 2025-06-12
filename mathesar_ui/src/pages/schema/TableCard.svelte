@@ -221,10 +221,12 @@
   }
 
   .table-row:first-child {
-    border-radius: var(--border-radius-l) var(--border-radius-l) 0 0;
+    border-top-left-radius: var(--border-radius-l);
+    border-top-right-radius: var(--border-radius-l);
   }
   .table-row:last-child {
-    border-radius: 0 0 var(--border-radius-l) var(--border-radius-l);
+    border-bottom-left-radius: var(--border-radius-l);
+    border-bottom-right-radius: var(--border-radius-l);
   }
 
   .table-row.focus:not(:hover) {
