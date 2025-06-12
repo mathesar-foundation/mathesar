@@ -139,7 +139,7 @@
     .pill {
       font-size: var(--sm2);
       display: inline-block;
-      border: 1px solid var(--sand-300);
+      border: 1px solid var(--gray-400);
       border-radius: var(--border-radius-m);
       padding: var(--sm6);
     }
