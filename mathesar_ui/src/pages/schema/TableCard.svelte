@@ -39,6 +39,7 @@
   export let schema: Schema;
   export let openEditTableModal: (_table: Table) => void;
   export let openTablePermissionsModal: (_table: Table) => void;
+  export let condensed = false;
 
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
 
@@ -120,7 +121,7 @@
 
   <div class="actions">
     {#if !requiresImportConfirmation}
-      <Tooltip>
+      <Tooltip enabled={condensed}>
         <a
           slot="trigger"
           href={explorationPageUrl}
@@ -128,11 +129,14 @@
           class:disabled={!$currentRolePrivileges.has('SELECT')}
         >
           <Icon {...iconExploration} />
+          {#if !condensed}
+            <span class="hide">{$_('explore_table')}</span>
+          {/if}
         </a>
         <span slot="content">{$_('explore_table')}</span>
       </Tooltip>
 
-      <Tooltip>
+      <Tooltip enabled={condensed}>
         <Button
           slot="trigger"
           on:click={handleFindRecord}
@@ -142,7 +146,9 @@
           class="action-button"
         >
           <Icon {...iconSelectRecord} />
-          <span>{$_('find_record')}</span>
+          {#if !condensed}
+            <span>{$_('find_record')}</span>
+          {/if}
         </Button>
         <span slot="content">{$_('find_record')}</span>
       </Tooltip>

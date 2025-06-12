@@ -22,6 +22,7 @@
 
   let tableForEditing: Table | undefined;
   let tableForPermissions: Table | undefined;
+  let tablesContainerWidth: number;
 
   function openEditTableModal(table: Table) {
     tableForEditing = table;
@@ -41,6 +42,7 @@
       use:highlightNewItems={{
         scrollHint: $_('table_new_items_scroll_hint'),
       }}
+      bind:clientWidth={tablesContainerWidth}
     >
       {#each tables as table (table.oid)}
         <TableCard
@@ -49,6 +51,7 @@
           {schema}
           {openEditTableModal}
           {openTablePermissionsModal}
+          condensed={tablesContainerWidth < 550}
         />
       {/each}
     </div>
