@@ -203,23 +203,40 @@
 
 <style>
   .table-row {
+    --hover-highlight-width: 3px;
+    --border-width: 1px;
+    --padding-compensation: calc(
+      var(--hover-highlight-width) - var(--border-width)
+    );
     position: relative;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--card-row-border);
-    border-left: 3px solid transparent;
+    border: var(--border-width) solid var(--card-border);
+    padding-left: var(--padding-compensation);
     background-color: var(--card-background);
   }
 
-  .table-row.focus {
-    outline: 2px solid var(--sand-400);
-    outline-offset: -2px;
+  .table-row + :global(.table-row) {
+    border-top: none;
+  }
+
+  .table-row:first-child {
+    border-radius: var(--border-radius-l) var(--border-radius-l) 0 0;
+  }
+  .table-row:last-child {
+    border-radius: 0 0 var(--border-radius-l) var(--border-radius-l);
+  }
+
+  .table-row.focus:not(:hover) {
+    outline: 1px solid var(--card-focus-outline);
+    outline-offset: -1px;
   }
 
   .table-row:hover {
     box-shadow: var(--shadow-color) 0 2px 4px 0;
     background: var(--card-hover-background);
-    border-left-color: var(--salmon-400);
+    border-left: solid var(--hover-highlight-width) var(--salmon-400);
+    padding-left: 0;
   }
 
   .table-row:active {

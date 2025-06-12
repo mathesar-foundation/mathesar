@@ -22,7 +22,7 @@
 
   let tableForEditing: Table | undefined;
   let tableForPermissions: Table | undefined;
-  let tablesContainerWidth: number;
+  let containerWidth: number;
 
   function openEditTableModal(table: Table) {
     tableForEditing = table;
@@ -35,14 +35,13 @@
   }
 </script>
 
-<div class="tables-list">
+<div class="tables-list" bind:clientWidth={containerWidth}>
   {#if tables.length > 0}
     <div
       class="tables-container"
       use:highlightNewItems={{
         scrollHint: $_('table_new_items_scroll_hint'),
       }}
-      bind:clientWidth={tablesContainerWidth}
     >
       {#each tables as table (table.oid)}
         <TableCard
@@ -51,7 +50,7 @@
           {schema}
           {openEditTableModal}
           {openTablePermissionsModal}
-          condensed={tablesContainerWidth < 550}
+          condensed={containerWidth < 550}
         />
       {/each}
     </div>
@@ -72,23 +71,3 @@
     table={tableForPermissions}
   />
 {/if}
-
-<style lang="scss">
-  .tables-list {
-    border-radius: var(--border-radius-l);
-    border: 1px solid var(--card-border);
-    overflow: hidden;
-    background-color: var(--card-background);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .tables-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .tables-container :global(.table-row:last-child) {
-    border-bottom: none;
-  }
-</style>
