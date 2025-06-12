@@ -308,18 +308,4 @@
   .menu-container {
     display: flex;
   }
-
-  .menu-container :global(.dropdown-menu-button) {
-    width: 2.5rem;
-    height: 2.5rem;
-    color: var(--text-color-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .menu-container :global(.dropdown-menu-button:hover) {
-    color: var(--text-color-secondary);
-    background: var(--hover-background);
-  }
 </style>
