@@ -50,7 +50,7 @@
           {schema}
           {openEditTableModal}
           {openTablePermissionsModal}
-          condensed={containerWidth < 550}
+          condensed={containerWidth < 400}
         />
       {/each}
     </div>

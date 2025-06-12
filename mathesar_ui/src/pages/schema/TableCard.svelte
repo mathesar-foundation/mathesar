@@ -28,6 +28,7 @@
     ButtonMenuItem,
     DropdownMenu,
     Icon,
+    LinkMenuItem,
     Tooltip,
     Truncate,
   } from '@mathesar-component-library';
@@ -122,21 +123,6 @@
   <div class="actions">
     {#if !requiresImportConfirmation}
       <Tooltip enabled={condensed}>
-        <a
-          slot="trigger"
-          href={explorationPageUrl}
-          class="btn btn-secondary size-small"
-          class:disabled={!$currentRolePrivileges.has('SELECT')}
-        >
-          <Icon {...iconExploration} />
-          {#if !condensed}
-            <span class="hide">{$_('explore_table')}</span>
-          {/if}
-        </a>
-        <span slot="content">{$_('explore_table')}</span>
-      </Tooltip>
-
-      <Tooltip enabled={condensed}>
         <Button
           slot="trigger"
           on:click={handleFindRecord}
@@ -174,6 +160,13 @@
         size="small"
       >
         {#if !requiresImportConfirmation}
+          <LinkMenuItem
+            href={explorationPageUrl}
+            icon={iconExploration}
+            disabled={!$currentRolePrivileges.has('SELECT')}
+          >
+            {$_('explore_table')}
+          </LinkMenuItem>
           <ButtonMenuItem
             on:click={() => openEditTableModal(table)}
             icon={iconEdit}
