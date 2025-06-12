@@ -38,6 +38,7 @@ def create_form(form_def, user):
     )
     field_models = []
     for field in form_def["fields"]:
+        # TODO: consider bulk_create
         field_model = FormField.objects.create(
             key=field["key"],
             attnum=field["attnum"],
