@@ -67,8 +67,8 @@
         padding: var(--sm4);
         background: linear-gradient(
           135deg,
-          var(--salmon-400),
-          var(--salmon-600)
+          var(--pumpkin-700),
+          var(--pumpkin-900)
         );
         border-radius: var(--border-radius-l);
         margin-right: var(--sm2);

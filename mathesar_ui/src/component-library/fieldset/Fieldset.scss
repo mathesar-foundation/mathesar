@@ -5,8 +5,7 @@
   legend {
     padding: 0;
     margin-bottom: 0.5rem;
-    color: var(--text-color-primary);
-    font-weight: var(--font-weight-bold);
+    color: var(--text-accent-muted);
   }
   legend:empty {
     display: none;
@@ -16,7 +15,7 @@
     border: 0;
   }
   &.boxed {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-base);
     border-radius: var(--border-radius-m);
     padding: 1em;
     padding-top: 0;

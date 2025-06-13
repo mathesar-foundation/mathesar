@@ -43,7 +43,7 @@
       }
 
       &:hover {
-        border-bottom-color: var(--salmon-300);
+        border-bottom-color: var(--accent-primary-hover);
         opacity: 1;
       }
 
@@ -52,12 +52,12 @@
       }
 
       &.active {
-        border-bottom-color: var(--salmon-600);
+        border-bottom-color: var(--accent-primary);
         opacity: 1;
       }
 
       &.focused {
-        border-color: var(--salmon-600);
+        border-color: var(--accent-primary);
         z-index: 1;
       }
 

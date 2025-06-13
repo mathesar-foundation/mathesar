@@ -13,7 +13,6 @@ body {
   --header-gradient-start: var(--neutral-200);
   --header-gradient-end: var(--neutral-300);
   --footer-background-color: var(--white);
-  --inset-background-color: var(--neutral-50);
   --hover-background: var(--neutral-100);
   --active-background: var(--salmon-100);
   --disabled-background: var(--neutral-100);
@@ -71,13 +70,9 @@ body {
   --ToastItem__progress-color: var(--progress-foreground);
 
   // Collapsible Styles
-  --collapsible-background: var(--neutral-300);
-  --collapsible-hover: var(--neutral-400);
-  --collapsible-active: var(--neutral-500);
   --collapsible-button-background: var(--neutral-300);
   --collapsible-button-hover: var(--neutral-400);
   --collapsible-button-active: var(--neutral-600);
-  --collapsible-button-border: var(--neutral-500);
   --collapsible-button-text: var(--text-color-primary);
   --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 
@@ -387,42 +382,78 @@ body {
   --color-text: #171717;
 }
 
+
 body.theme-dark {
-  --background-color: var(--slate-900);
-  --border-color: var(--neutral-600);
+  // Theme Colors
+  --surface-base: #0A070D;
+  --surface-primary: #040305;
+  --surface-secondary: #141414;
+  --surface-tertiary: #1E1E1F; 
+  --surface-elevated: #1A161D;
+  --surface-inset: #0E0B11;
+  --surface-deep-inset: #08070A;
+  --surface-disabled: #131515;
+  --surface-primary-hover: #0F0E0E;
+  --surface-hover:  linear-gradient(
+      rgba(255, 117, 76, 0.08),
+      rgba(255, 117, 76, 0.08)
+    )
+    var(--surface-inset);
+  --surface-active: linear-gradient(
+    rgba(255, 117, 76, 0.12),
+    rgba(255, 117, 76, 0.12)
+  ),
+  var(--surface-inset);
+  --border-base: #2B2B2B;
+  --border-subtle: #171A1A;
+  --border-strong: var(--slate-500);
+  --border-focus: #262130;
+
+  --accent-primary: var(--pumpkin-500);
+  --accent-primary-hover: var(--pumpkin-300);
+  --accent-primary-muted: var(--pumpkin-950);
+  --accent-muted: var(--slate-900);
+  --text-accent-primary: var(--pumpkin-600);
+  --text-accent-secondary: var(--salmon-400);
+  --text-accent-muted: var(--stormy-400);
+  --text-accent-light: var(--stormy-200);
+
+  --background-color: var(--surface-primary);
+  --border-color: var(--border-base);
   --header-background: linear-gradient(
     var(--gradient-direction-default),
     var(--header-gradient-start),
     var(--header-gradient-end)
   );
-  --header-border: var(--neutral-800);
-  --header-gradient-start: var(--neutral-800);
-  --header-gradient-end: var(--neutral-800);
-  --footer-background-color: var(--neutral-800);
-  --inset-background-color: var(--neutral-850);
-  --hover-background: var(--neutral-800);
-  --active-background: var(--neutral-700);
-  --disabled-background: var(--neutral-700);
-  --elevated-background: var(--neutral-850);
+  --header-border: var(--surface-elevated);
+  --header-gradient-start: var(--surface-base);
+  --header-gradient-end: var(--surface-secondary);
+  --footer-background-color:  var(--surface-elevated);
+  --hover-background: var(--surface-hover);
+  --active-background: var(--surface-active);
+  --disabled-background: var(--surface-disabled);
+  --elevated-background: var(--surface-inset);
   --shadow-color: var(--shadow-color-dark);
   --shadow-color-light: rgba(0, 0, 0, 0.2);
   --shadow-color-inset: var(--shadow-color-inset-dark);
   --icon-background: var(--rosy-600);
   --card-icon-color: var(--rosy-50);
   --resource-icon-color: var(--pumpkin-700);
-  --resource-icon-background: var(--pumpkin-950);
-  --layout-background-color: var(--background-color);
-  --inspector-background: var(--gray-900);
-  --inspector-hover: var(--neutral-800);
-  --inspector-active: var(--neutral-700);
-  --secondary-header-background: var(--neutral-800);
-  --collapsible-background: var(--neutral-700);
-  --collapsible-hover: var(--neutral-700);
-  --collapsible-active: var(--neutral-600);
-  --card-border: var(--neutral-600);
-  --card-row-border: var(--neutral-800);
-  --sheet-background: var(--neutral-900);
-  --window-background-color: var(--neutral-850);
+  --resource-icon-background: var(--accent-primary-muted);
+  --layout-background-color: var(--surface-base);
+  --inspector-background: var(--surface-inset);
+  --inspector-hover: var(--surface-tertiary);
+  --inspector-active: var(--surface-inset);
+  --secondary-header-background: var(--surface-secondary);
+  --collapsible-button-background: var(--surface-tertiary);
+  --collapsible-button-hover: var(--surface-hover);
+  --collapsible-button-active: var(--surface-active);
+  --collapsible-button-text: var(--text-color-primary);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --card-border: var(--border-base);
+  --card-row-border: var(--border-strong);
+  --sheet-background: var(--surface-primary);
+  --window-background-color: var(--surface-elevated);
   --progress-foreground: rgba(0, 0, 0, 0.6);
 
   --neutral-25: var(--slate-50);
@@ -438,21 +469,22 @@ body.theme-dark {
   --neutral-850: var(--slate-850);
   --neutral-900: var(--slate-900);
 
+
   // Text
-  --text-color: var(--neutral-50);
-  --text-color-primary: var(--neutral-100);
-  --text-color-secondary: var(--neutral-300);
+  --text-color: var(--slate-50);
+  --text-color-primary: var(--slate-100);
+  --text-color-secondary: var(--slate-300);
   --text-color-tertiary: var(--salmon-200);
-  --text-color-muted: var(--neutral-400);
+  --text-color-muted: var(--slate-400);
 
   // Input
-  --input-background: var(--gray-950);
-  --input-border: var(--neutral-600);
+  --input-background: var(--surface-deep-inset);
+  --input-border: var(--border-subtle);
   --input-text: var(--text-color);
-  --input-focus-color: var(--neutral-400);
-  --input-focus-shadow: var(--neutral-800);
-  --input-disabled-background: var(--neutral-800);
-  --sidebar-background: var(--neutral-800);
+  --input-focus-color: var(--slate-400);
+  --input-focus-shadow: var(--slate-800);
+  --input-disabled-background: var(--surface-disabled);
+  --sidebar-background: var(--inspector-background);
   --modal-overlay: rgba(0, 0, 0, 0.6);
 
   // Gradients
@@ -464,17 +496,9 @@ body.theme-dark {
   --gradient-base-active-end: var(--stormy-700);
 
   // Card
-  --card-background: var(--neutral-850);
-  --card-hover-background: linear-gradient(
-      rgba(255, 117, 76, 0.08),
-      rgba(255, 117, 76, 0.08)
-    ),
-    var(--card-background);
-  --card-active-background: linear-gradient(
-      rgba(255, 117, 76, 0.12),
-      rgba(255, 117, 76, 0.12)
-    ),
-    var(--card-background);
+  --card-background: var(--surface-inset);
+  --card-hover-background: var(--hover-background);
+  --card-active-background: var(--active-background);
   --card-hover-border: var(--salmon-400);
   --card-active-border: var(--salmon-500);
   --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
@@ -482,13 +506,6 @@ body.theme-dark {
     0 0 0 1px var(--shadow-color-inset) inset;
   --card-active-shadow: 0 1px 2px var(--shadow-color-light),
     0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-
-  --collapsible-button-background: var(--neutral-850);
-  --collapsible-button-hover: var(--neutral-700);
-  --collapsible-button-active: var(--neutral-600);
-  --collapsible-button-border: var(--neutral-700);
-  --collapsible-button-text: var(--text-color-primary);
-  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 
   --accent-100: var(--salmon-800);
   --accent-200: var(--salmon-700);

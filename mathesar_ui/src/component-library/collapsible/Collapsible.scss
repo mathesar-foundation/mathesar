@@ -31,5 +31,8 @@
   }
   .collapsible-content {
     position: relative;
+    .label {
+      color: var(--text-accent-light);
+    }
   }
 }

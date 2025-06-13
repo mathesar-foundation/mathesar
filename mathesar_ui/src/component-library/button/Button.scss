@@ -426,34 +426,38 @@
 
 body.theme-dark .btn {
   &.btn-primary {
-    --button-background: linear-gradient(to bottom right, #7753b9, #4f3676);
-    --button-border-color: #71519a;
+    --button-background: linear-gradient(
+      to bottom right, 
+      var(--rosy-800), 
+      var(--rosy-900)
+      );
+    --button-border-color: var(--pumpkin-950);
     --button-color: var(--white);
     box-shadow:
-      0 2px 6px rgba(122, 95, 160, 0.1),
+      0 2px 6px rgba(208, 72, 72, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(122, 95, 160, 0.7);
+        --button-outline: 2px solid rgba(208, 72, 72, 0.7);
       }
 
       &:hover,
       &.hover {
-        --button-background: linear-gradient(to bottom right, #8b6bb0, #7a5fa0);
-        --button-border-color: #7a5fa0;
+        --button-background: linear-gradient(to bottom right, var(--rosy-700),  var(--rosy-900));
+        --button-border-color: var(--rosy-900);
         box-shadow:
-          0 3px 8px rgba(122, 95, 160, 0.5),
+          0 3px 8px rgba(1208, 72, 72, 0.5),
           inset 0 1px 0 rgba(255, 255, 255, 0.25);
       }
 
       &:active,
       &.active {
-        --button-background: linear-gradient(to bottom right, #5d4580, #4a3366);
-        --button-border-color: #4a3366;
+        --button-background: linear-gradient(to bottom right, var(--rosy-900),  var(--rosy-950));
+        --button-border-color: var(--rosy-900);
         box-shadow:
-          0 1px 3px rgba(122, 95, 160, 0.3),
+          0 1px 3px rgba(208, 72, 72, 0.3),
           inset 0 1px 0 rgba(255, 255, 255, 0.15);
       }
     }
@@ -462,10 +466,10 @@ body.theme-dark .btn {
   &.btn-secondary {
     --button-background: linear-gradient(
       to bottom right,
-      var(--neutral-700),
-      var(--neutral-800)
+      var(--slate-700),
+      var(--surface-elevated)
     );
-    --button-border-color: var(--neutral-500);
+    --button-border-color: var(--border-strong);
 
     &:not(:disabled) {
       &.focus,
@@ -569,21 +573,21 @@ body.theme-dark .btn {
   &.btn-feedback {
     --button-background: linear-gradient(
       to bottom right,
-      var(--salmon-500),
-      var(--salmon-700)
+      var(--yellow-950),
+      var(--pumpkin-950)
     );
     --button-color: var(--white);
-    --button-border-color: var(--salmon-600);
+    --button-border-color: var(--stormy-900);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--salmon-400),
-          var(--salmon-600)
+          var(--yellow-900),
+          var(--pumpkin-900)
         );
-        --button-border-color: var(--salmon-500);
+        --button-border-color: var(--pumpkin-900);
         --button-color: var(--white);
       }
 
@@ -591,10 +595,10 @@ body.theme-dark .btn {
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--salmon-600),
-          var(--salmon-800)
+          var(--yellow-900),
+          var(--pumpkin-800)
         );
-        --button-border-color: var(--salmon-700);
+        --button-border-color: var(--pumpkin-800);
         --button-color: var(--white);
       }
 
@@ -602,27 +606,27 @@ body.theme-dark .btn {
       &.focus {
         --button-background: linear-gradient(
           to bottom right,
-          var(--salmon-400),
-          var(--salmon-600)
+          var(--yellow-800),
+          var(--pumpkin-800)
         );
-        --button-border-color: var(--salmon-500);
+        --button-border-color: var(--pumpkin-800);
         --button-color: var(--white);
       }
     }
   }
 
   &.btn-link {
-    --button-color: var(--salmon-400);
+    --button-color: var(--salmon-600);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-color: var(--salmon-300);
+        --button-color: var(--salmon-400);
       }
 
       &:active,
       &.active {
-        --button-color: var(--salmon-200);
+        --button-color: var(--salmon-300);
       }
     }
   }

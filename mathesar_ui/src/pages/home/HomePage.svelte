@@ -32,7 +32,7 @@
 >
   <div slot="secondary-header" class="home-page-header-title">
     <div class="home-page-header-title-inner">
-      <h1>{welcomeMessage}</h1>
+        {welcomeMessage}
     </div>
   </div>
   <div class="content">
@@ -59,47 +59,7 @@
     width: 100%;
     margin: var(--lg1) auto;
     padding: 0 var(--page-padding-x);
-  }
-
-  .home-page-header-title-inner {
-    border: 1px solid var(--neutral-400);
-    background: linear-gradient(
-      135deg,
-      var(--neutral-100) 0%,
-      var(--neutral-200) 100%
-    );
-    padding: var(--sm4) var(--sm2);
-    border-radius: var(--border-radius-l);
-    font-weight: var(--font-weight-medium);
-    box-shadow:
-      0 4px 12px rgba(147, 142, 126, 0.15),
-      0 2px 6px rgba(147, 142, 126, 0.1);
-
-    h1 {
-      margin: 0;
-      color: var(--neutral-900);
-      font-size: var(--text-size-base);
-      font-weight: var(--font-weight-bold);
-      text-shadow: none;
-    }
-  }
-
-  :global(body.theme-dark) .home-page-header-title-inner {
-    border: 1px solid var(--slate-600);
-    background: linear-gradient(
-      135deg,
-      var(--slate-700) 0%,
-      var(--slate-800) 100%
-    );
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      0 2px 6px rgba(0, 0, 0, 0.3);
-
-    h1 {
-      color: var(--slate-50);
-      font-weight: var(--font-weight-bold);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-    }
+     color: var(--text-accent-muted);
   }
 
   .content {
