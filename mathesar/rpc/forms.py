@@ -46,9 +46,11 @@ class FormInfo(TypedDict):
     redirect_url: Optional[str]
     submit_label: Optional[str]
     fields: Optional[list[FieldInfo]]
+
     @classmethod
     def from_model(cls, form_model):
-        rm_keys = lambda x, keys: {k: v for k, v in x.__dict__.items() if k not in keys}
+        def rm_keys(model, keys):
+            return {k: v for k, v in model.__dict__.items() if k not in keys}
         return {**rm_keys(form_model, ('_state')), "fields": [rm_keys(f, ('_state', 'created_at', 'updated_at')) for f in form_model.fields.all()]}
 
 
