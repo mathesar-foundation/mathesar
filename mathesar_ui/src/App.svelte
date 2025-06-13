@@ -169,7 +169,6 @@
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.02em;
-    color: var(--DARK-MODE-text-accent-primary);
   }
 
   h2 {
@@ -178,7 +177,6 @@
     margin: 0 0 1rem 0;
     line-height: 1.3;
     letter-spacing: -0.015em;
-    color: var(--DARK-MODE-text-accent-primary);
   }
 
   h3 {
@@ -186,7 +184,6 @@
     font-weight: 600;
     margin: 0 0 0.75rem 0;
     line-height: 1.4;
-    color: var(--DARK-MODE-text-accent-secondary);
   }
 
   h4 {

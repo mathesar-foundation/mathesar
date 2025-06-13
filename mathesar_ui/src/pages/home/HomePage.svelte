@@ -59,7 +59,6 @@
     width: 100%;
     margin: var(--lg1) auto;
     padding: 0 var(--page-padding-x);
-    color: var(--DARK-MODE-text-accent-muted);
   }
 
   .content {

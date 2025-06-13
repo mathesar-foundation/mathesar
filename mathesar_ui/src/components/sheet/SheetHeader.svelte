@@ -56,7 +56,7 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: var(--DARK-MODE-surface-secondary);
+    background-color: var(--card-background);
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 2px 4px var(--shadow-color);
     user-select: none;

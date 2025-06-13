@@ -236,7 +236,7 @@
     padding: var(--lg3);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-m);
-    background-color: var(--DARK-MODE-surface-inset);
+    background-color: var(--inset-background-color);
     margin-bottom: 2rem;
   }
 

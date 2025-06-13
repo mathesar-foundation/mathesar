@@ -106,7 +106,7 @@
 
   .users-list {
     border: 1px solid var(--border-color);
-    background-color: var(--DARK-MODE-surface-inset);
+    background-color: var(--inset-background-color);
     border-radius: var(--border-radius-m);
     overflow: hidden;
 

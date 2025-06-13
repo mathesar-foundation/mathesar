@@ -7,7 +7,7 @@
 
 <style>
   .section {
-    background: var(--DARK-MODE-surface-inset);
+    background: var(--inset-background-color);
     padding: var(--inset-page-section-padding, 2rem 1.5rem);
     border: solid 1px var(--border-color);
     border-radius: 0.3rem;
