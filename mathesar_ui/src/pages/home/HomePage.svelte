@@ -32,7 +32,7 @@
 >
   <div slot="secondary-header" class="home-page-header-title">
     <div class="home-page-header-title-inner">
-        {welcomeMessage}
+      {welcomeMessage}
     </div>
   </div>
   <div class="content">
@@ -59,7 +59,7 @@
     width: 100%;
     margin: var(--lg1) auto;
     padding: 0 var(--page-padding-x);
-     color: var(--text-accent-muted);
+    color: var(--text-accent-muted);
   }
 
   .content {

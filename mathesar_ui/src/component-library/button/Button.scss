@@ -427,10 +427,10 @@
 body.theme-dark .btn {
   &.btn-primary {
     --button-background: linear-gradient(
-      to bottom right, 
-      var(--rosy-800), 
+      to bottom right,
+      var(--rosy-800),
       var(--rosy-900)
-      );
+    );
     --button-border-color: var(--pumpkin-950);
     --button-color: var(--white);
     box-shadow:
@@ -445,7 +445,11 @@ body.theme-dark .btn {
 
       &:hover,
       &.hover {
-        --button-background: linear-gradient(to bottom right, var(--rosy-700),  var(--rosy-900));
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--rosy-700),
+          var(--rosy-900)
+        );
         --button-border-color: var(--rosy-900);
         box-shadow:
           0 3px 8px rgba(1208, 72, 72, 0.5),
@@ -454,7 +458,11 @@ body.theme-dark .btn {
 
       &:active,
       &.active {
-        --button-background: linear-gradient(to bottom right, var(--rosy-900),  var(--rosy-950));
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--rosy-900),
+          var(--rosy-950)
+        );
         --button-border-color: var(--rosy-900);
         box-shadow:
           0 1px 3px rgba(208, 72, 72, 0.3),

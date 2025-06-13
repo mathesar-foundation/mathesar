@@ -382,30 +382,29 @@ body {
   --color-text: #171717;
 }
 
-
 body.theme-dark {
   // Theme Colors
-  --surface-base: #0A070D;
+  --surface-base: #0a070d;
   --surface-primary: #040305;
   --surface-secondary: #141414;
-  --surface-tertiary: #1E1E1F; 
-  --surface-elevated: #1A161D;
-  --surface-inset: #0E0B11;
-  --surface-deep-inset: #08070A;
+  --surface-tertiary: #1e1e1f;
+  --surface-elevated: #1a161d;
+  --surface-inset: #0e0b11;
+  --surface-deep-inset: #08070a;
   --surface-disabled: #131515;
-  --surface-primary-hover: #0F0E0E;
-  --surface-hover:  linear-gradient(
+  --surface-primary-hover: #0f0e0e;
+  --surface-hover: linear-gradient(
       rgba(255, 117, 76, 0.08),
       rgba(255, 117, 76, 0.08)
     )
     var(--surface-inset);
   --surface-active: linear-gradient(
-    rgba(255, 117, 76, 0.12),
-    rgba(255, 117, 76, 0.12)
-  ),
-  var(--surface-inset);
-  --border-base: #2B2B2B;
-  --border-subtle: #171A1A;
+      rgba(255, 117, 76, 0.12),
+      rgba(255, 117, 76, 0.12)
+    ),
+    var(--surface-inset);
+  --border-base: #2b2b2b;
+  --border-subtle: #171a1a;
   --border-strong: var(--slate-500);
   --border-focus: #262130;
 
@@ -428,7 +427,7 @@ body.theme-dark {
   --header-border: var(--surface-elevated);
   --header-gradient-start: var(--surface-base);
   --header-gradient-end: var(--surface-secondary);
-  --footer-background-color:  var(--surface-elevated);
+  --footer-background-color: var(--surface-elevated);
   --hover-background: var(--surface-hover);
   --active-background: var(--surface-active);
   --disabled-background: var(--surface-disabled);
@@ -468,7 +467,6 @@ body.theme-dark {
   --neutral-800: var(--slate-800);
   --neutral-850: var(--slate-850);
   --neutral-900: var(--slate-900);
-
 
   // Text
   --text-color: var(--slate-50);
