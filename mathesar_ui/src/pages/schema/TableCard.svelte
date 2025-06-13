@@ -194,19 +194,20 @@
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .table-row {
-    --hover-highlight-width: 3px;
-    --border-width: 1px;
-    --padding-compensation: calc(
-      var(--hover-highlight-width) - var(--border-width)
-    );
     position: relative;
     display: flex;
     align-items: center;
-    border: var(--border-width) solid var(--card-border);
-    padding-left: var(--padding-compensation);
+    border: 1px solid var(--card-border);
     background-color: var(--card-background);
+    overflow: hidden;
+    border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
+      var(--corner-bl);
+    --corner-tl: 0;
+    --corner-tr: 0;
+    --corner-br: 0;
+    --corner-bl: 0;
   }
 
   .table-row + :global(.table-row) {
@@ -214,12 +215,12 @@
   }
 
   .table-row:first-child {
-    border-top-left-radius: var(--border-radius-l);
-    border-top-right-radius: var(--border-radius-l);
+    --corner-tl: var(--border-radius-l);
+    --corner-tr: var(--border-radius-l);
   }
   .table-row:last-child {
-    border-bottom-left-radius: var(--border-radius-l);
-    border-bottom-right-radius: var(--border-radius-l);
+    --corner-br: var(--border-radius-l);
+    --corner-bl: var(--border-radius-l);
   }
 
   .table-row.focus:not(:hover) {
@@ -230,8 +231,19 @@
   .table-row:hover {
     box-shadow: var(--shadow-color) 0 2px 4px 0;
     background: var(--card-hover-background);
-    border-left: solid var(--hover-highlight-width) var(--salmon-400);
     padding-left: 0;
+    &::before {
+      content: '';
+      border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
+        var(--corner-bl);
+      border-left: solid 3px var(--salmon-400);
+      position: absolute;
+      height: 100%;
+      width: 10px;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
   }
 
   .table-row:active {
