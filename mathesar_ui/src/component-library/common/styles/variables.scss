@@ -13,6 +13,7 @@ body {
   --header-gradient-start: var(--neutral-200);
   --header-gradient-end: var(--neutral-300);
   --footer-background-color: var(--white);
+  --inset-background-color: var(--neutral-50);
   --hover-background: var(--neutral-100);
   --active-background: var(--salmon-100);
   --disabled-background: var(--neutral-100);
@@ -433,6 +434,7 @@ body.theme-dark {
   --header-gradient-start: var(--DARK-MODE-surface-base);
   --header-gradient-end: var(--DARK-MODE-surface-secondary);
   --footer-background-color: var(--DARK-MODE-surface-elevated);
+  --inset-background-color: var(--neutral-850);
   --hover-background: var(--DARK-MODE-surface-hover);
   --active-background: var(--DARK-MODE-surface-active);
   --disabled-background: var(--DARK-MODE-surface-disabled);
