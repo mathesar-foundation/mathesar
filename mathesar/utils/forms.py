@@ -36,10 +36,8 @@ def create_form(form_def, user):
         redirect_url=form_def.get("redirect_url"),
         submit_label=form_def.get("submit_label")
     )
-    field_models = []
-    for field in form_def["fields"]:
-        # TODO: consider bulk_create
-        field_model = FormField.objects.create(
+    field_instances = [
+        FormField(
             key=field["key"],
             attnum=field["attnum"],
             form=form_model,
@@ -50,11 +48,18 @@ def create_form(form_def, user):
             readonly=field.get("readonly"),
             styling=field.get("styling"),
             is_required=field.get("is_required"),
-            parent_field=FormField.objects.get(key=field.get("parent_field_key"), form=form_model) if
-            len(FormField.objects.filter(key=field.get("parent_field_key"), form=form_model)) else None,
+            parent_field=None,
             target_table_oid=field.get("target_table_oid"),
             allow_create=field.get("allow_create"),
             create_label=field.get("create_label")
-        )
-        field_models.append(field_model)
-    return form_model, tuple(field_models)
+        ) for field in form_def["fields"]
+    ]
+    FormField.objects.bulk_create(field_instances)
+    field_key_model_dict = FormField.objects.filter(form=form_model).in_bulk(field_name="key")
+    update_field_instances = []
+    for field in field["fields"]:
+        if field.get("parent_field_key"):
+            field_key_model_dict[field["key"]].parent_field = field_key_model_dict["parent_field_key"]
+            update_field_instances.append(field_key_model_dict[field["key"]])
+    if update_field_instances:
+        FormField.objects.bulk_update(update_field_instances, ["parent_field"])
