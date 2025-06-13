@@ -1165,6 +1165,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.process_col_alter_jsonb(oid,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.process_col_def_jsonb(oid,jsonb,boolean,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.process_con_def_jsonb(oid,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.related_fields_exist(jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.rename_column(oid,integer,text)', 'FUNCTION', NULL),
   ('msar', 'msar.rename_schema(oid,text)', 'FUNCTION', NULL),
   ('msar', 'msar.rename_schema(text,text)', 'FUNCTION', NULL),
