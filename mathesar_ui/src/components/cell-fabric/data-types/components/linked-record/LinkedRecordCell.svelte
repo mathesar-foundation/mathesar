@@ -1,12 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import Default from '@mathesar/components/Default.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
+  // TODO: Get Table here instead of tableId and remove need for the currentDatabase store
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
+  import AttachableRowSeekerController from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   // eslint-disable-next-line import/no-cycle
-  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import {
     Icon,
     compareWholeValues,
@@ -19,7 +23,6 @@
   type $$Props = LinkedRecordCellProps;
 
   const dispatch = createEventDispatcher();
-  const recordSelector = getRecordSelectorFromContext();
 
   export let isActive: $$Props['isActive'];
   export let columnFabric: $$Props['columnFabric'];
@@ -37,33 +40,55 @@
   $: hasValue = value !== undefined && value !== null;
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
+  $: attachableRowSeekerController = new AttachableRowSeekerController(
+    cellWrapperElement,
+    {
+      onClose: () => {
+        cellWrapperElement?.focus();
+      },
+      rowSeekerProps: {
+        targetTable: {
+          databaseId: $currentDatabase.id,
+          tableOid: tableId,
+        },
+      },
+    },
+  );
+
   async function launchRecordSelector(event?: MouseEvent) {
     if (disabled) {
       return;
     }
-    event?.stopPropagation();
-    const result = await recordSelector.acquireUserInput({ tableId });
     const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
-    if (result) {
-      if (linkedFkColumnId) {
-        value = result.record[linkedFkColumnId];
-      } else {
-        value = result.recordId;
-      }
-      setRecordSummary(String(result.recordId), result.recordSummary);
-      dispatch('update', { value });
+    if (!linkedFkColumnId) {
+      throw Error('Linked fk column not present. This should never occur');
     }
 
-    // Re-focus the cell element so that the user can yes the keyboard to move
-    // the active cell.
-    cellWrapperElement.focus();
+    const result = await attachableRowSeekerController.acquireUserSelection();
+
+    value = result.record[linkedFkColumnId];
+
+    setRecordSummary(String(value), result.recordSummary);
+    dispatch('update', { value });
+  }
+
+  function closeRecordSelector() {
+    attachableRowSeekerController.close();
+  }
+
+  async function toggleRecordSelector(event?: MouseEvent) {
+    if (get(attachableRowSeekerController.isOpen)) {
+      closeRecordSelector();
+    } else {
+      await launchRecordSelector(event);
+    }
   }
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
         if (isActive) {
-          void launchRecordSelector();
+          void toggleRecordSelector();
         }
         break;
       case 'Tab':
@@ -75,6 +100,10 @@
           originalEvent: e,
           key: e.key,
         });
+        closeRecordSelector();
+        break;
+      case 'Escape':
+        closeRecordSelector();
         break;
       default:
         break;
@@ -88,7 +117,7 @@
 
   function handleClick() {
     if (wasActiveBeforeClick) {
-      void launchRecordSelector();
+      void toggleRecordSelector();
     }
   }
 </script>
@@ -122,7 +151,6 @@
     {#if !disabled}
       <button
         class="dropdown-button passthrough"
-        on:click={launchRecordSelector}
         aria-label={$_('pick_record')}
         title={$_('pick_record')}
       >
@@ -131,6 +159,8 @@
     {/if}
   </div>
 </CellWrapper>
+
+<AttachableRowSeeker controller={attachableRowSeekerController} />
 
 <style>
   .linked-record-cell {
@@ -151,7 +181,6 @@
     color: var(--text-color-muted);
   }
   .dropdown-button {
-    cursor: pointer;
     padding: 0 var(--cell-padding);
     display: flex;
     align-items: center;

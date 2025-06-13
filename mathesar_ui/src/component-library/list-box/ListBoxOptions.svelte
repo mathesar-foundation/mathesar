@@ -7,7 +7,7 @@
 
   type Option = $$Generic;
 
-  export let id: string;
+  export let id: string | undefined = undefined;
   let classes = '';
   export { classes as class };
   export let truncateOnOverflow = true;
@@ -77,15 +77,21 @@
       $staticProps.checkEquality(opt, option),
     )}
     {@const isDisabled = $staticProps.checkIfOptionIsDisabled(option)}
+    {@const inFocus = index === $focusedOptionIndex}
     <li
       role="option"
       class:selected={isSelected}
       class:disabled={isDisabled}
-      class:in-focus={index === $focusedOptionIndex}
+      class:in-focus={inFocus}
       aria-selected={isSelected ? true : undefined}
       on:click={() => api.pick(option)}
     >
-      <slot {option} label={$staticProps.getLabel(option)}>
+      <slot
+        {option}
+        {isSelected}
+        {inFocus}
+        label={$staticProps.getLabel(option)}
+      >
         <StringOrComponent arg={$staticProps.getLabel(option)} />
       </slot>
     </li>
