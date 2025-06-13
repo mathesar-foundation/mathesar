@@ -13,6 +13,7 @@
 
   import type RowSeekerController from './RowSeekerController';
   import RowSeekerOption from './RowSeekerOption.svelte';
+  import RowSeekerSearch from './RowSeekerSearch.svelte';
 
   const dispatch = createEventDispatcher<{ escape: never }>();
 
@@ -24,8 +25,6 @@
   $: linkedRecordSummaries = resolvedRecords?.linked_record_summaries ?? {};
   $: recordsArray = resolvedRecords?.results ?? [];
   $: columnsArray = $columns.resolvedValue ?? [];
-
-  let searchElement: HTMLInputElement | undefined;
 
   onMount(() => {
     //
@@ -60,21 +59,21 @@
     on:change={(e) => selectRecord(e.detail)}
     let:api
   >
-    <div data-row-seeker-search>
-      <input
-        class="search-bar"
-        type="text"
-        bind:this={searchElement}
-        placeholder={$_('search')}
-        on:keydown={(e) => handleKeyDown(api, e)}
+    <div data-row-seeker-controls>
+      <RowSeekerSearch
+        {controller}
+        {columnsArray}
+        on:artificialKeydown={(e) => handleKeyDown(api, e.detail)}
       />
-      <div class="spinner">
+      <div class="actions">
         {#if isLoading}
-          <Spinner />
+          <div class="spinner">
+            <Spinner />
+          </div>
         {/if}
       </div>
-      <div class="sub-actions"></div>
     </div>
+
     <div class="option-container">
       {#if recordsArray.length > 0 && columnsArray.length > 0}
         <ListBoxOptions
@@ -85,6 +84,7 @@
         >
           {@const record = getTypeCastedOption(option)}
           <RowSeekerOption
+            {controller}
             {isSelected}
             {inFocus}
             {record}
@@ -102,36 +102,29 @@
 
 <style lang="scss">
   div[data-row-seeker] {
+    min-width: 20rem;
     max-width: 45rem;
     overflow: hidden;
     position: relative;
   }
 
-  [data-row-seeker-search] {
-    display: grid;
-    column-gap: 0.1rem;
-    grid-template-columns: 1fr 2rem;
+  [data-row-seeker-controls] {
+    display: flex;
+    overflow: hidden;
+    gap: 0.1rem;
     border-bottom: 1px solid var(--border-color);
 
-    .search-bar {
-      border: none;
-      padding: var(--input-padding);
-      line-height: var(--input-line-height);
-
-      &::placeholder {
-        color: var(--text-color-tertiary);
-      }
-
-      &:focus {
-        outline: 0;
-        border-color: var(--input-focus-color);
-      }
+    .actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
     }
 
     .spinner {
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 2rem;
     }
   }
 

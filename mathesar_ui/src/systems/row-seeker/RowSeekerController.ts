@@ -1,9 +1,16 @@
 import { tick } from 'svelte';
+import { type Writable, get, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
+import type {
+  Result as ApiRecord,
+  SqlColumn,
+  SqlComparison,
+  SqlExpr,
+  SqlLiteral,
+} from '@mathesar/api/rpc/records';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-import { getGloballyUniqueId } from '@mathesar-component-library';
+import { ImmutableMap, getGloballyUniqueId } from '@mathesar-component-library';
 
 export interface RowSeekerProps {
   targetTable: {
@@ -16,6 +23,11 @@ interface RowSeekerResult {
   recordSummary: string;
   record: ApiRecord;
 }
+
+export type RowSeekerFilterMap = ImmutableMap<
+  SqlColumn['value'],
+  Set<SqlLiteral['value']>
+>;
 
 export default class RowSeekerController {
   elementId = getGloballyUniqueId();
@@ -36,14 +48,10 @@ export default class RowSeekerController {
 
   select: (v: RowSeekerResult) => void = () => {};
 
+  filters: Writable<RowSeekerFilterMap> = writable(new ImmutableMap());
+
   constructor(props: RowSeekerProps) {
     this.targetTable = props.targetTable;
-    // this.targetColumn = props.targetColumn;
-    // this.value = props.value;
-  }
-
-  async fetchRows() {
-    //
   }
 
   async focusSearch() {
@@ -68,16 +76,95 @@ export default class RowSeekerController {
     ]);
   }
 
+  getFilterSqlExpr(): SqlExpr {
+    const filters = get(this.filters);
+
+    const getLiteral = (val: SqlLiteral['value']) => ({
+      type: 'literal' as const,
+      value: val,
+    });
+
+    const getEqualsComparison: (
+      c: SqlColumn,
+      l: SqlLiteral,
+    ) => SqlComparison = (c, l) => ({
+      type: 'equal' as const,
+      args: [c, l],
+    });
+
+    const sameColumnComparisons = [...filters.entries()].map(
+      ([columnId, literalValues]) => {
+        const column: SqlColumn = { type: 'attnum', value: columnId };
+        const [firstComparison, ...rest] = [...literalValues]
+          .map(getLiteral)
+          .map((literal) => getEqualsComparison(column, literal));
+
+        return rest.reduce(
+          (accumulator: SqlComparison, currComparison: SqlComparison) => {
+            const orComparison: SqlComparison = {
+              type: 'or' as const,
+              args: [currComparison, accumulator],
+            };
+            return orComparison;
+          },
+          firstComparison,
+        );
+      },
+    );
+
+    const [firstComparison, ...rest] = sameColumnComparisons;
+    return rest.reduce(
+      (accumulator: SqlComparison, currComparison: SqlComparison) => {
+        const andComparison: SqlComparison = {
+          type: 'and' as const,
+          args: [currComparison, accumulator],
+        };
+        return andComparison;
+      },
+      firstComparison,
+    );
+  }
+
   async getRecords() {
     await this.records.run({
       database_id: this.targetTable.databaseId,
       table_oid: this.targetTable.tableOid,
-      limit: 1000,
+      limit: 500,
       offset: 0,
       // order?: SortingEntry[];
-      // filter?: SqlExpr;
+      filter: this.getFilterSqlExpr(),
       return_record_summaries: true,
     });
+    await this.focusSearch();
+  }
+
+  async addToFilter(
+    columnId: SqlColumn['value'],
+    literal: SqlLiteral['value'],
+  ) {
+    this.filters.update((map) => {
+      const literals = [...(map.get(columnId) ?? []), literal];
+      return map.with(columnId, new Set(literals));
+    });
+    await this.getRecords();
+  }
+
+  async removeFromFilter(
+    columnId: SqlColumn['value'],
+    literal: SqlLiteral['value'],
+  ) {
+    this.filters.update((map) => {
+      const literalSet = map.get(columnId);
+      literalSet?.delete(literal);
+      const literals = [...(literalSet ?? [])];
+      return map.with(columnId, new Set(literals));
+    });
+    await this.getRecords();
+  }
+
+  async removeColumnFromFilter(columnId: SqlColumn['value']) {
+    this.filters.update((map) => map.without(columnId));
+    await this.getRecords();
   }
 
   async getReady() {

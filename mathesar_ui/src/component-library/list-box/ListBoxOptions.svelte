@@ -84,6 +84,7 @@
       class:disabled={isDisabled}
       class:in-focus={inFocus}
       aria-selected={isSelected ? true : undefined}
+      on:mousedown={() => api.focusOption(option)}
       on:click={() => api.pick(option)}
     >
       <slot

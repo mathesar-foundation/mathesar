@@ -4,17 +4,22 @@
   import CellValue from '@mathesar/components/CellValue.svelte';
   import { Truncate } from '@mathesar-component-library';
 
+  import type RowSeekerController from './RowSeekerController';
+
+  export let controller: RowSeekerController;
   export let columnDisplayInfo: {
     id: number;
     column: Column;
-    display: {
-      value: ResultValue;
-      summary?: string;
-    };
+    value: ResultValue;
+    summary?: string;
   };
 
-  function addFilter(e) {
+  async function addToFilter(e: Event) {
     e.stopPropagation();
+    await controller.addToFilter(
+      columnDisplayInfo.id,
+      String(columnDisplayInfo.value),
+    );
   }
 </script>
 
@@ -26,11 +31,11 @@
   </div>
   <div class="column-value">
     <Truncate>
-      <span on:click={(e) => addFilter(e)}>
-        {#if columnDisplayInfo.display.summary}
-          {columnDisplayInfo.display.summary}
+      <span on:click={addToFilter}>
+        {#if columnDisplayInfo.summary}
+          {columnDisplayInfo.summary}
         {:else}
-          <CellValue value={columnDisplayInfo.display.value} />
+          <CellValue value={columnDisplayInfo.value} />
         {/if}
       </span>
     </Truncate>

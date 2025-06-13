@@ -7,8 +7,10 @@
   import { iconExpandRight } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
 
+  import type RowSeekerController from './RowSeekerController';
   import RowSeekerField from './RowSeekerField.svelte';
 
+  export let controller: RowSeekerController;
   export let isSelected: boolean;
   export let inFocus: boolean;
   export let columns: Column[];
@@ -21,24 +23,17 @@
 
   let isExpanded = false;
 
-  function getColumnDisplayValue(column: Column) {
+  function getLinkedRecordSummary(column: Column) {
     const value = record[column.id];
     const linkedSummary = linkedRecordSummaries[column.id];
-    if (linkedSummary?.[String(value)]) {
-      return {
-        summary: linkedSummary?.[String(value)],
-        value,
-      };
-    }
-    return {
-      value,
-    };
+    return linkedSummary?.[String(value)] ?? undefined;
   }
 
   $: columnDisplayInfo = columns.map((column) => ({
     id: column.id,
     column,
-    display: getColumnDisplayValue(column),
+    value: record[column.id],
+    summary: getLinkedRecordSummary(column),
   }));
   $: columnsThatMaybeUseful = (() => {
     // TODO: Come up with an algorithm to decide
@@ -53,9 +48,10 @@
   })();
   $: expandedColumnsToDisplay = columnDisplayInfo.slice(0, 10);
 
-  function toggleExpansion(e: Event) {
+  async function toggleExpansion(e: Event) {
     e.stopPropagation();
     isExpanded = !isExpanded;
+    await controller.focusSearch();
   }
 </script>
 
@@ -71,16 +67,18 @@
     </div>
   </div>
   {#if !isExpanded && columnsThatMaybeUseful.length}
-    <div class="column-tags">
+    <div class="column-content column-tags">
       {#each columnsThatMaybeUseful as cdi (cdi.id)}
-        <RowSeekerField columnDisplayInfo={cdi} />
+        <RowSeekerField {controller} columnDisplayInfo={cdi} />
       {/each}
     </div>
   {:else if isExpanded}
-    <div class="column-tags">
-      {#each expandedColumnsToDisplay as cdi (cdi.id)}
-        <RowSeekerField columnDisplayInfo={cdi} />
-      {/each}
+    <div class="column-content all-columns">
+      <div class="column-tags">
+        {#each expandedColumnsToDisplay as cdi (cdi.id)}
+          <RowSeekerField {controller} columnDisplayInfo={cdi} />
+        {/each}
+      </div>
     </div>
   {/if}
 </div>
@@ -88,6 +86,11 @@
 <style lang="scss">
   .record {
     white-space: normal;
+    border-bottom: 1px solid var(--gray-200);
+
+    &:hover:not(.in-focus) {
+      background-color: var(--gray-100);
+    }
   }
 
   .header {
@@ -116,12 +119,15 @@
     }
   }
 
+  .column-content {
+    padding-bottom: var(--sm3);
+    padding-left: var(--sm1);
+    padding-right: var(--sm1);
+  }
+
   .column-tags {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--sm4);
-    padding-bottom: var(--sm3);
-    padding-left: var(--sm1);
-    padding-right: var(--sm1);
   }
 </style>
