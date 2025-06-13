@@ -5602,13 +5602,12 @@ msar.related_fields_exist(oid_attn_map jsonb)
 RETURNS boolean AS $$
   SELECT BOOL_AND(actual_attn_arr @> expected_attn_arr)
   FROM (
-    SELECT key::oid AS tab_oid,
-    value AS expected_attn_arr,
+    SELECT attnums AS expected_attn_arr,
     (
       SELECT jsonb_agg(pga.attnum)
       FROM pg_catalog.pg_attribute pga
-      WHERE pga.attrelid = key::oid AND NOT pga.attisdropped
+      WHERE pga.attrelid = tab_oid::oid AND NOT pga.attisdropped
     ) AS actual_attn_arr
-    FROM jsonb_each(oid_attn_map)
-  )
+    FROM jsonb_each(oid_attn_map) AS x(tab_oid, attnums)
+  ) t;
 $$ LANGUAGE SQL;
