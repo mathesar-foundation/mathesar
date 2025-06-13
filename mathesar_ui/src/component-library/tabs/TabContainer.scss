@@ -43,7 +43,7 @@
       }
 
       &:hover {
-        border-bottom-color: var(--accent-primary-hover);
+        border-bottom-color: var(--DARK-MODE-accent-primary-hover);
         opacity: 1;
       }
 
@@ -52,12 +52,12 @@
       }
 
       &.active {
-        border-bottom-color: var(--accent-primary);
+        border-bottom-color: var(--DARK-MODE-accent-primary);
         opacity: 1;
       }
 
       &.focused {
-        border-color: var(--accent-primary);
+        border-color: var(--DARK-MODE-accent-primary);
         z-index: 1;
       }
 

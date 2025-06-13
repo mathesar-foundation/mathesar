@@ -140,12 +140,12 @@
 
   body.theme-dark {
     --cell-bg-mix-blend-mode: screen;
-    --cell-bg-color-base: var(--surface-primary);
+    --cell-bg-color-base: var(--DARK-MODE-surface-primary);
     --cell-bg-color-error: var(--rosy-950);
-    --cell-bg-color-header: var(--surface-secondary);
+    --cell-bg-color-header: var(--DARK-MODE-surface-secondary);
     --cell-bg-color-processing: var(--yellow-900);
-    --cell-bg-color-disabled: var(--surface-disabled);
-    --cell-bg-color-row-hover: var(--surface-primary-hover);
+    --cell-bg-color-disabled: var(--DARK-MODE-surface-disabled);
+    --cell-bg-color-row-hover: var(--DARK-MODE-surface-primary-hover);
     --cell-bg-color-row-selected: var(--slate-600);
 
     --color-substring-match: var(--highlighter-500);
@@ -153,8 +153,8 @@
 
     --Match__highlight-color: var(--color-substring-match);
 
-    --cell-border-horizontal: 1px solid var(--border-subtle);
-    --cell-border-vertical: 1px solid var(--border-subtle);
+    --cell-border-horizontal: 1px solid var(--DARK-MODE-border-subtle);
+    --cell-border-vertical: 1px solid var(--DARK-MODE-border-subtle);
 
     --color-fk: var(--stormy-800);
     --color-fk-border: var(--stormy-700);
@@ -169,7 +169,7 @@
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.02em;
-    color: var(--text-accent-primary);
+    color: var(--DARK-MODE-text-accent-primary);
   }
 
   h2 {
@@ -178,7 +178,7 @@
     margin: 0 0 1rem 0;
     line-height: 1.3;
     letter-spacing: -0.015em;
-    color: var(--text-accent-primary);
+    color: var(--DARK-MODE-text-accent-primary);
   }
 
   h3 {
@@ -186,7 +186,7 @@
     font-weight: 600;
     margin: 0 0 0.75rem 0;
     line-height: 1.4;
-    color: var(--text-accent-secondary);
+    color: var(--DARK-MODE-text-accent-secondary);
   }
 
   h4 {

@@ -475,9 +475,9 @@ body.theme-dark .btn {
     --button-background: linear-gradient(
       to bottom right,
       var(--slate-700),
-      var(--surface-elevated)
+      var(--DARK-MODE-surface-elevated)
     );
-    --button-border-color: var(--border-strong);
+    --button-border-color: var(--DARK-MODE-border-strong);
 
     &:not(:disabled) {
       &.focus,

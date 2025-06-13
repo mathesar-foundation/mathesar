@@ -383,76 +383,81 @@ body {
 }
 
 body.theme-dark {
-  // Theme Colors
-  --surface-base: #0a070d;
-  --surface-primary: #040305;
-  --surface-secondary: #141414;
-  --surface-tertiary: #1e1e1f;
-  --surface-elevated: #1a161d;
-  --surface-inset: #0e0b11;
-  --surface-deep-inset: #08070a;
-  --surface-disabled: #131515;
-  --surface-primary-hover: #0f0e0e;
-  --surface-hover: linear-gradient(
+  // These "DARK-MODE" variables are mess introduced in [4439][4439]. We need to
+  // refactor this code to follow better patterns. For now, the weird naming
+  // exists to cue devs that these variables only have definitions in dark mode
+  // — so they should only be applied in dark mode.
+  //
+  // [4439]: https://github.com/mathesar-foundation/mathesar/pull/4439
+  --DARK-MODE-surface-base: #0a070d;
+  --DARK-MODE-surface-primary: #040305;
+  --DARK-MODE-surface-secondary: #141414;
+  --DARK-MODE-surface-tertiary: #1e1e1f;
+  --DARK-MODE-surface-elevated: #1a161d;
+  --DARK-MODE-surface-inset: #0e0b11;
+  --DARK-MODE-surface-deep-inset: #08070a;
+  --DARK-MODE-surface-disabled: #131515;
+  --DARK-MODE-surface-primary-hover: #0f0e0e;
+  --DARK-MODE-surface-hover: linear-gradient(
       rgba(255, 117, 76, 0.08),
       rgba(255, 117, 76, 0.08)
     )
-    var(--surface-inset);
-  --surface-active: linear-gradient(
+    var(--DARK-MODE-surface-inset);
+  --DARK-MODE-surface-active: linear-gradient(
       rgba(255, 117, 76, 0.12),
       rgba(255, 117, 76, 0.12)
     ),
-    var(--surface-inset);
-  --border-base: #2b2b2b;
-  --border-subtle: #171a1a;
-  --border-strong: var(--slate-500);
-  --border-focus: #262130;
+    var(--DARK-MODE-surface-inset);
+  --DARK-MODE-border-base: #2b2b2b;
+  --DARK-MODE-border-subtle: #171a1a;
+  --DARK-MODE-border-strong: var(--slate-500);
+  --DARK-MODE-border-focus: #262130;
 
-  --accent-primary: var(--pumpkin-500);
-  --accent-primary-hover: var(--pumpkin-300);
-  --accent-primary-muted: var(--pumpkin-950);
-  --accent-muted: var(--slate-900);
-  --text-accent-primary: var(--pumpkin-600);
-  --text-accent-secondary: var(--salmon-400);
-  --text-accent-muted: var(--stormy-400);
-  --text-accent-light: var(--stormy-200);
+  --DARK-MODE-accent-primary: var(--pumpkin-500);
+  --DARK-MODE-accent-primary-hover: var(--pumpkin-300);
+  --DARK-MODE-accent-primary-muted: var(--pumpkin-950);
+  --DARK-MODE-accent-muted: var(--slate-900);
+  --DARK-MODE-text-accent-primary: var(--pumpkin-600);
+  --DARK-MODE-text-accent-secondary: var(--salmon-400);
+  --DARK-MODE-text-accent-muted: var(--stormy-400);
+  --DARK-MODE-text-accent-light: var(--stormy-200);
 
-  --background-color: var(--surface-primary);
-  --border-color: var(--border-base);
+  --background-color: var(--DARK-MODE-surface-primary);
+  --border-color: var(--DARK-MODE-border-base);
   --header-background: linear-gradient(
     var(--gradient-direction-default),
     var(--header-gradient-start),
     var(--header-gradient-end)
   );
-  --header-border: var(--surface-elevated);
-  --header-gradient-start: var(--surface-base);
-  --header-gradient-end: var(--surface-secondary);
-  --footer-background-color: var(--surface-elevated);
-  --hover-background: var(--surface-hover);
-  --active-background: var(--surface-active);
-  --disabled-background: var(--surface-disabled);
-  --elevated-background: var(--surface-inset);
+  --header-border: var(--DARK-MODE-surface-elevated);
+  --header-gradient-start: var(--DARK-MODE-surface-base);
+  --header-gradient-end: var(--DARK-MODE-surface-secondary);
+  --footer-background-color: var(--DARK-MODE-surface-elevated);
+  --hover-background: var(--DARK-MODE-surface-hover);
+  --active-background: var(--DARK-MODE-surface-active);
+  --disabled-background: var(--DARK-MODE-surface-disabled);
+  --elevated-background: var(--DARK-MODE-surface-inset);
   --shadow-color: var(--shadow-color-dark);
   --shadow-color-light: rgba(0, 0, 0, 0.2);
   --shadow-color-inset: var(--shadow-color-inset-dark);
   --icon-background: var(--rosy-600);
   --card-icon-color: var(--rosy-50);
   --resource-icon-color: var(--pumpkin-700);
-  --resource-icon-background: var(--accent-primary-muted);
-  --layout-background-color: var(--surface-base);
-  --inspector-background: var(--surface-inset);
-  --inspector-hover: var(--surface-tertiary);
-  --inspector-active: var(--surface-inset);
-  --secondary-header-background: var(--surface-secondary);
-  --collapsible-button-background: var(--surface-tertiary);
-  --collapsible-button-hover: var(--surface-hover);
-  --collapsible-button-active: var(--surface-active);
+  --resource-icon-background: var(--DARK-MODE-accent-primary-muted);
+  --layout-background-color: var(--DARK-MODE-surface-base);
+  --inspector-background: var(--DARK-MODE-surface-inset);
+  --inspector-hover: var(--DARK-MODE-surface-tertiary);
+  --inspector-active: var(--DARK-MODE-surface-inset);
+  --secondary-header-background: var(--DARK-MODE-surface-secondary);
+  --collapsible-button-background: var(--DARK-MODE-surface-tertiary);
+  --collapsible-button-hover: var(--DARK-MODE-surface-hover);
+  --collapsible-button-active: var(--DARK-MODE-surface-active);
   --collapsible-button-text: var(--text-color-primary);
   --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --card-border: var(--border-base);
-  --card-row-border: var(--border-strong);
-  --sheet-background: var(--surface-primary);
-  --window-background-color: var(--surface-elevated);
+  --card-border: var(--DARK-MODE-border-base);
+  --card-row-border: var(--DARK-MODE-border-strong);
+  --sheet-background: var(--DARK-MODE-surface-primary);
+  --window-background-color: var(--DARK-MODE-surface-elevated);
   --progress-foreground: rgba(0, 0, 0, 0.6);
 
   --neutral-25: var(--slate-50);
@@ -476,12 +481,12 @@ body.theme-dark {
   --text-color-muted: var(--slate-400);
 
   // Input
-  --input-background: var(--surface-deep-inset);
-  --input-border: var(--border-subtle);
+  --input-background: var(--DARK-MODE-surface-deep-inset);
+  --input-border: var(--DARK-MODE-border-subtle);
   --input-text: var(--text-color);
   --input-focus-color: var(--slate-400);
   --input-focus-shadow: var(--slate-800);
-  --input-disabled-background: var(--surface-disabled);
+  --input-disabled-background: var(--DARK-MODE-surface-disabled);
   --sidebar-background: var(--inspector-background);
   --modal-overlay: rgba(0, 0, 0, 0.6);
 
@@ -494,7 +499,7 @@ body.theme-dark {
   --gradient-base-active-end: var(--stormy-700);
 
   // Card
-  --card-background: var(--surface-inset);
+  --card-background: var(--DARK-MODE-surface-inset);
   --card-hover-background: var(--hover-background);
   --card-active-background: var(--active-background);
   --card-hover-border: var(--salmon-400);

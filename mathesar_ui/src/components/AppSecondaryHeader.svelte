@@ -46,9 +46,9 @@
   :global(body.theme-dark) .app-secondary-header {
     background: linear-gradient(
       135deg,
-      var(--accent-primary-muted) 0%,
-      var(--surface-base) 50%,
-      var(--accent-muted) 100%
+      var(--DARK-MODE-accent-primary-muted) 0%,
+      var(--DARK-MODE-surface-base) 50%,
+      var(--DARK-MODE-accent-muted) 100%
     );
   }
   .content.restrict-width {

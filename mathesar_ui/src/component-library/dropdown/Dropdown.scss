@@ -43,8 +43,8 @@ button.dropdown.trigger {
   overflow: auto;
 
   body.theme-dark & {
-    border: var(--Dropdown__border, 1px solid var(--border-base));
-    background: var(--Dropdown__background, var(--surface-elevated));
+    border: var(--Dropdown__border, 1px solid var(--DARK-MODE-border-base));
+    background: var(--Dropdown__background, var(--DARK-MODE-surface-elevated));
   }
 
   &[data-popper-placement='top-start'] {
