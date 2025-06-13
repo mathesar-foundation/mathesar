@@ -307,16 +307,15 @@
   }
 
   &.btn-outcome {
-    --button-background: var(--purple-100);
-    border: 1px solid var(--purple-200);
+    --button-background: var(--outcome-background-color);
+    border: 1px solid var(--outcome-border-color);
 
     &:hover {
-      border: 1px solid var(--purple-300);
+      border: 1px solid var(--outcome-color);
     }
 
     &:active {
-      --button-background: var(--purple-200);
-      border: 1px solid var(--purple-400);
+      border: 1px solid var(--outcome-color);
     }
   }
 
