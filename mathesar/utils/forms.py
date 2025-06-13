@@ -8,7 +8,7 @@ from mathesar.models.base import Form, FormField, Database, ConfiguredRole, User
 def create_form(form_def, user):
     database = Database.objects.get(id=form_def["database_id"])
     user_dbrm = UserDatabaseRoleMap.objects.get(user=user, database=database)
-    with user_dbrm.connection() as conn:
+    with user_dbrm.connection as conn:
         submit_role = (
             ConfiguredRole.objects.filter(id=form_def.get("submit_role_id")).first()
             or user_dbrm.configured_role
@@ -28,7 +28,7 @@ def create_form(form_def, user):
         database=database,
         schema_oid=form_def["schema_oid"],
         base_table_oid=form_def["base_table_oid"],
-        is_public=form_def.get("is_public"),
+        is_public=form_def.get("is_public", False),
         header_title=form_def["header_title"],
         header_subtitle=form_def.get("header_subtitle"),
         submit_role=submit_role,
@@ -54,12 +54,13 @@ def create_form(form_def, user):
             create_label=field.get("create_label")
         ) for field in form_def["fields"]
     ]
-    FormField.objects.bulk_create(field_instances)
-    field_key_model_dict = FormField.objects.filter(form=form_model).in_bulk(field_name="key")
+    created_fields = FormField.objects.bulk_create(field_instances)
+    field_key_model_dict = { field.key: field for field in created_fields }
     update_field_instances = []
-    for field in field["fields"]:
+    for field in form_def["fields"]:
         if field.get("parent_field_key"):
             field_key_model_dict[field["key"]].parent_field = field_key_model_dict["parent_field_key"]
             update_field_instances.append(field_key_model_dict[field["key"]])
     if update_field_instances:
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
+    return form_model

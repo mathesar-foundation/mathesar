@@ -11,7 +11,7 @@ from mathesar.utils.forms import create_form
 
 class FormInfo(TypedDict):
     @classmethod
-    def from_model(cls, form_model, field_models):
+    def from_model(cls, form_model, field_models=None):
         pass
     pass
 
@@ -53,5 +53,5 @@ class FormDef(TypedDict):
 @mathesar_rpc_method(name="forms.add", auth="login")
 def add(*, form_def: FormDef, **kwargs) -> FormInfo:
     user = kwargs.get(REQUEST_KEY).user
-    form_model, field_models = create_form(form_def, user)
-    return FormInfo.from_model(form_model, field_models)
+    form_model = create_form(form_def, user)
+    return FormInfo.from_model(form_model)
