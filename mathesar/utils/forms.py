@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.db import transaction
 
 from db.roles import get_current_role_from_db
@@ -21,7 +23,7 @@ def create_form(form_def, user):
             or submit_role.name in parent_names
         ), "Insufficient Privileges for selected submit_role"
     form_model = Form.objects.create(
-        token=form_def["token"],
+        token=form_def.get("token", uuid4()),
         name=form_def["name"],
         description=form_def.get("description"),
         version=form_def["version"],
@@ -45,17 +47,17 @@ def create_form(form_def, user):
             kind=field["kind"],
             label=field.get("label"),
             help=field.get("help"),
-            readonly=field.get("readonly"),
+            readonly=field.get("readonly", False),
             styling=field.get("styling"),
-            is_required=field.get("is_required"),
+            is_required=field.get("is_required", False),
             parent_field=None,
             target_table_oid=field.get("target_table_oid"),
-            allow_create=field.get("allow_create"),
+            allow_create=field.get("allow_create", False),
             create_label=field.get("create_label")
         ) for field in form_def["fields"]
     ]
     created_fields = FormField.objects.bulk_create(field_instances)
-    field_key_model_dict = { field.key: field for field in created_fields }
+    field_key_model_dict = {field.key: field for field in created_fields}
     update_field_instances = []
     for field in form_def["fields"]:
         if field.get("parent_field_key"):
