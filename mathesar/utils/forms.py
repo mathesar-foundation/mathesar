@@ -61,7 +61,7 @@ def create_form(form_def, user):
     update_field_instances = []
     for field in form_def["fields"]:
         if field.get("parent_field_key"):
-            field_key_model_dict[field["key"]].parent_field = field_key_model_dict["parent_field_key"]
+            field_key_model_dict[field["key"]].parent_field = field_key_model_dict[field["parent_field_key"]]
             update_field_instances.append(field_key_model_dict[field["key"]])
     if update_field_instances:
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
