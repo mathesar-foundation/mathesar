@@ -51,7 +51,7 @@ class FormInfo(TypedDict):
     """
     Information about a form.
 
-    Atrributes:
+    Attributes:
         id: The Django id of the Form on the database.
         created_at: The time at which the form model got created.
         updated_at: The time at which the form model was last updated.
@@ -171,6 +171,15 @@ class FormDef(TypedDict):
 
 @mathesar_rpc_method(name="forms.add", auth="login")
 def add(*, form_def: FormDef, **kwargs) -> FormInfo:
+    """
+    Add a new form.
+
+    Args:
+        form_def: A dict describing the form to create.
+
+    Returns:
+        The details for the newly created form.
+    """
     user = kwargs.get(REQUEST_KEY).user
     form_model = create_form(form_def, user)
     return FormInfo.from_model(form_model)
