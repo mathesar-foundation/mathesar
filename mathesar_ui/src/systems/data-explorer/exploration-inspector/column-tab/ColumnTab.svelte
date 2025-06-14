@@ -3,13 +3,16 @@
   import { onDestroy } from 'svelte';
   import { _ } from 'svelte-i18n';
 
+  import ColumnFormatting from '@mathesar/components/ColumnFormatting.svelte';
   import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import {
     LabeledInput,
     TextInput,
+    defined,
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
+  import { getDisplayOptionsForColumn } from '../../displayOptions';
   import QueryManager from '../../QueryManager';
   import type { QueryRunner } from '../../QueryRunner';
 
@@ -20,7 +23,7 @@
 
   $: queryManager =
     queryHandler instanceof QueryManager ? queryHandler : undefined;
-  $: ({ selection, columnsMetaData, processedColumns } = queryHandler);
+  $: ({ selection, columnsMetaData, processedColumns, query } = queryHandler);
   $: ({ columnIds } = $selection);
   $: selectedColumns = Array.from(
     execPipe(
@@ -35,6 +38,10 @@
   $: columnInformation = selectedColumn
     ? $columnsMetaData.get(selectedColumn.column.alias)
     : undefined;
+  $: initialDisplayOptions =
+    defined(selectedColumn, ({ columnIndex }) =>
+      getDisplayOptionsForColumn($query.display_options, columnIndex),
+    ) ?? {};
 
   let timer: number;
 
@@ -87,6 +94,23 @@
     {#if columnInformation}
       <ColumnSource {columnInformation} columnsMetaData={$columnsMetaData} />
     {/if}
+  </InspectorSection>
+{/if}
+
+{#if selectedColumn}
+  <InspectorSection title={$_('formatting')}>
+    <ColumnFormatting
+      column={selectedColumn}
+      {initialDisplayOptions}
+      onSave={async (displayOptions) => {
+        if (!selectedColumn) return;
+        if (!(queryHandler instanceof QueryManager)) return;
+        await queryHandler.setColumnDisplayOptions(
+          { columnName: selectedColumn.id },
+          displayOptions,
+        );
+      }}
+    />
   </InspectorSection>
 {/if}
 

@@ -1,5 +1,6 @@
 import { readable } from 'svelte/store';
 
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type { Column } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import type {
@@ -62,8 +63,7 @@ export function constructDbForm(
 
 export function constructDisplayForm(
   selectedAbstractType: AbstractType,
-  selectedDbType: DbType,
-  column: ColumnWithAbstractType,
+  columnMetadata: ColumnMetadata,
 ): {
   displayOptionsConfig?: AbstractTypeDisplayConfig;
   displayForm?: FormBuildConfiguration;
@@ -74,11 +74,9 @@ export function constructDisplayForm(
   let displayForm;
   if (displayOptionsConfig) {
     const displayFormValues =
-      column.type === selectedDbType
-        ? displayOptionsConfig.constructDisplayFormValuesFromDisplayOptions(
-            column.metadata,
-          )
-        : {};
+      displayOptionsConfig.constructDisplayFormValuesFromDisplayOptions(
+        columnMetadata,
+      );
     displayForm = makeForm(displayOptionsConfig.form, displayFormValues, {
       'duration-config-menu': DurationConfiguration,
     });
