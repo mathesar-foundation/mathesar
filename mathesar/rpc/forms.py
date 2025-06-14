@@ -57,12 +57,12 @@ class FormInfo(TypedDict):
         updated_at: The time at which the form model was last updated.
         token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
-        description: The desciription of the form.
+        description: The description of the form.
         version: The version of the form.
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        is_public: Specifies wheather the form is publically accessible.
+        is_public: Specifies whether the form is publicly accessible.
         header_title: The Django id of the configured role to be used while submitting a form.
         header_subtitle: ???
         submit_role_id: ???
@@ -138,12 +138,12 @@ class FormDef(TypedDict):
     Attributes:
         token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
-        description: The desciription of the form.
+        description: The description of the form.
         version: The version of the form.
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        is_public: Specifies wheather the form is publically accessible.
+        is_public: Specifies whether the form is publicly accessible.
         header_title: ???
         header_subtitle: ???
         submit_role_id: The Django id of the configured role to be used while submitting a form.
