@@ -63,9 +63,9 @@ class FormInfo(TypedDict):
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
         is_public: Specifies whether the form is publicly accessible.
-        header_title: The Django id of the configured role to be used while submitting a form.
+        header_title: ???
         header_subtitle: ???
-        submit_role_id: ???
+        submit_role_id: The Django id of the configured role to be used while submitting a form.
         submit_message: Message to be displayed upon submission.
         redirect_url: Redirect path after submission.
         submit_label: Text to be displayed on the submit button.
