@@ -22,6 +22,7 @@
 
   let tableForEditing: Table | undefined;
   let tableForPermissions: Table | undefined;
+  let containerWidth: number;
 
   function openEditTableModal(table: Table) {
     tableForEditing = table;
@@ -34,7 +35,7 @@
   }
 </script>
 
-<div class="tables-list">
+<div class="tables-list" bind:clientWidth={containerWidth}>
   {#if tables.length > 0}
     <div
       class="tables-container"
@@ -49,6 +50,7 @@
           {schema}
           {openEditTableModal}
           {openTablePermissionsModal}
+          condensed={containerWidth < 400}
         />
       {/each}
     </div>
@@ -69,19 +71,3 @@
     table={tableForPermissions}
   />
 {/if}
-
-<style lang="scss">
-  .tables-list {
-    border-radius: var(--border-radius-m);
-    border: 1px solid var(--card-border);
-    overflow: hidden;
-    background-color: var(--card-background);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .tables-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-</style>

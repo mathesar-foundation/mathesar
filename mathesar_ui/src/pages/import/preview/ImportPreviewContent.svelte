@@ -255,7 +255,7 @@
   </FieldLayout>
 
   <svelte:fragment slot="preview">
-    <h2 class="preview-header">{$_('table_preview')}</h2>
+    <h3 class="preview-header">{$_('table_preview')}</h3>
     <div class="preview-content">
       {#if $columnsFetch.error}
         <ErrorInfo
@@ -322,27 +322,35 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--gray-500);
+    color: var(--neutral-500);
   }
   .preview-header {
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
-    border-top: solid 1px var(--border-color);
+    background-color: var(--neutral-300);
+    border-top: 1px solid var(--card-border);
   }
   .preview-content {
     padding-bottom: 1rem;
+    background-color: var(--neutral-100);
   }
   .sheet-holder {
     overflow-x: auto;
     overflow-y: hidden;
     margin: 0 auto;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
     padding: var(--inset-page-section-padding);
   }
   .truncation-alert {
     margin: 1rem auto 0 auto;
     max-width: max-content;
     color: var(--color-text-muted);
+  }
+
+  :global(body.theme-dark) .preview-header {
+    background-color: var(--neutral-800);
+  }
+
+  :global(body.theme-dark) .preview-content {
+    background-color: var(--neutral-900);
   }
 </style>

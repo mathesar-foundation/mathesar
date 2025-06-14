@@ -26,14 +26,21 @@
 
 <LayoutWithHeader
   restrictWidth
-  headerTitle={welcomeMessage}
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
+  <div slot="secondary-header" class="home-page-header-title">
+    <div class="home-page-header-title-inner">
+      {welcomeMessage}
+    </div>
+  </div>
   <div class="content">
+    <div class="databases-section">
+      <DatabasesList />
+    </div>
     <div class="resources-sidebar">
-      <h3>{$_('resources')}</h3>
+      <h2>{$_('resources')}</h2>
       <div class="cards">
         <DocumentationResource />
         <CommunityResource />
@@ -41,21 +48,25 @@
         <DonateResource />
       </div>
     </div>
-    <div class="databases-section">
-      <DatabasesList />
-    </div>
   </div>
 </LayoutWithHeader>
 
 <style lang="scss">
   $breakpoint: 50rem;
 
+  .home-page-header-title {
+    max-width: var(--max-layout-width);
+    width: 100%;
+    margin: var(--lg1) auto;
+    padding: 0 var(--page-padding-x);
+  }
+
   .content {
     display: grid;
     gap: 3.5rem;
     grid-template-columns: 1fr;
     @media screen and (min-width: $breakpoint) {
-      grid-template-columns: 20rem 1fr;
+      grid-template-columns: 1fr 20rem;
     }
   }
   .databases-section {
@@ -65,7 +76,7 @@
     gap: 2.5rem;
     @media screen and (min-width: $breakpoint) {
       grid-row: auto;
-      grid-column: 2;
+      grid-column: 1;
     }
   }
   .resources-sidebar {
@@ -73,14 +84,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background-color: var(--sidebar-background);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-color) 0 2px 8px;
-    border: 1px solid var(--card-border);
     @media screen and (min-width: $breakpoint) {
       grid-row: auto;
-      grid-column: 1;
+      grid-column: 2;
     }
   }
   .cards {

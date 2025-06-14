@@ -323,7 +323,6 @@
     overflow: auto;
     position: relative;
     border-spacing: 0;
-    background-color: var(--background-color);
     --border-width: 1px;
     --border-color: var(--border-color);
     --row-height: 2.25rem;

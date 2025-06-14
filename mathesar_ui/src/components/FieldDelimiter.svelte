@@ -1,7 +1,7 @@
 <!--
 @component This component is used:
 
-- to display a separarator between a table and a column within it
+- to display a separator between a table and a column within it
 - to display a separator between columns in a chain of FK references
 -->
 
@@ -14,6 +14,6 @@
 
 <style>
   .field-delimiter {
-    color: var(--sand-600);
+    color: var(--text-color-muted);
   }
 </style>

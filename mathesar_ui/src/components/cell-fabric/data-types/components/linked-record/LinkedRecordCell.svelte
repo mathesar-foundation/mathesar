@@ -148,7 +148,6 @@
   }
   .disabled .value {
     padding-right: var(--cell-padding);
-    color: var(--text-color-muted);
   }
   .dropdown-button {
     cursor: pointer;

@@ -60,11 +60,19 @@
       flex-grow: 0;
       flex-shrink: 1;
       min-height: 100%;
-      padding: 0.25rem;
+      padding: var(--sm2);
 
       .icon {
         font-size: var(--lg2);
         padding: var(--sm4);
+        background: linear-gradient(
+          135deg,
+          var(--pumpkin-700),
+          var(--pumpkin-900)
+        );
+        border-radius: var(--border-radius-l);
+        margin-right: var(--sm2);
+        color: var(--white);
       }
       .text {
         overflow: hidden;

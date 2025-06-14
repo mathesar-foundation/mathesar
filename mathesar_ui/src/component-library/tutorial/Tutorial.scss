@@ -1,6 +1,7 @@
 .tutorial {
   position: relative;
   border-radius: var(--border-radius-xl);
+  border: 1px solid var(--pumpkin-600);
   padding: var(--lg3);
   display: flex;
   align-items: center;
@@ -19,10 +20,10 @@
     bottom: 0;
     background: linear-gradient(
       135deg,
-      var(--stormy-300) 0%,
-      var(--stormy-500) 100%
+      var(--pumpkin-400) 0%,
+      var(--pumpkin-600) 100%
     );
-    opacity: 0.2;
+    opacity: 0.35;
   }
 
   .content {
@@ -38,7 +39,7 @@
 
   .icon {
     margin-bottom: var(--lg1);
-    color: var(--text-color-secondary);
+    color: var(--text-color-primary);
   }
 
   .title {
@@ -52,7 +53,7 @@
   }
 
   .body {
-    color: var(--text-color-secondary);
+    color: var(--text-color-primary);
   }
 
   .footer {
@@ -63,14 +64,15 @@
 }
 
 body.theme-dark .tutorial {
+  border-color: var(--pumpkin-900);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 
   &::before {
     background: linear-gradient(
       135deg,
-      var(--stormy-600) 0%,
-      var(--stormy-800) 100%
+      var(--pumpkin-400) 0%,
+      var(--pumpkin-600) 100%
     );
-    opacity: 0.25;
+    opacity: 0.2;
   }
 }

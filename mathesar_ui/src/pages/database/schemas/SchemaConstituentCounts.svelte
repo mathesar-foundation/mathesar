@@ -1,15 +1,16 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import type { Schema } from '@mathesar/models/Schema';
 
   export let schema: Schema;
 
   $: ({ tableCount } = schema);
-  $: actualTableCount = $tableCount;
 </script>
 
 <div class="container">
   <p class="table-count">
-    {actualTableCount}
+    {$_('count_tables', { values: { count: $tableCount } })}
   </p>
 </div>
 
@@ -17,7 +18,7 @@
   .table-count {
     font-size: 1rem;
     color: var(--text-color-tertiary);
-    font-weight: 400;
+    font-weight: var(--font-weight-medium);
     margin: 0;
   }
 

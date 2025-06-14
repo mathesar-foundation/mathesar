@@ -21,23 +21,31 @@
     background: var(--card-background);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-m);
+    box-shadow: var(--card-hover-shadow);
+    transition: all 0.2s ease;
   }
-  .link-card,
+
+  .link-card:hover {
+    border: 1px solid var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
+    background: var(--card-hover-background);
+  }
+
   .link-card.multiple {
-    box-shadow: var(--card-hover-shadow);
+    margin-top: 1rem;
   }
-  .link-card:hover,
+
   .link-card.multiple:hover .container {
-    border-color: var(--card-hover-border);
+    border: 1px solid var(--card-hover-border);
     box-shadow: var(--card-hover-shadow);
+    background: var(--card-hover-background);
   }
+
   .container {
     display: flex;
     flex-direction: column;
   }
-  .link-card.multiple {
-    margin-top: 1rem;
-  }
+
   .link-card.multiple .container {
     position: relative;
     bottom: var(--sm3);
@@ -46,12 +54,14 @@
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-m);
   }
+
   .table-name {
     color: var(--text-color-primary);
     font-weight: var(--font-weight-medium);
     padding: var(--sm4) var(--sm3);
     border-bottom: 1px solid var(--card-border);
   }
+
   .detail {
     color: var(--text-color-tertiary);
     font-size: var(--sm1);
