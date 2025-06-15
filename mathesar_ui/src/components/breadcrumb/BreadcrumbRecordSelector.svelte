@@ -41,7 +41,7 @@
     &:active {
       background-color: var(--SYS-surface-elevated-active);
       color: var(--SYS-text-primary-active);
-      border-color: var(--SYS-border-elevation-mid);
+      border-color: var(--SYS-border-elevated-mid);
     }
   }
 </style>

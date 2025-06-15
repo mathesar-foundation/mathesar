@@ -1,8 +1,13 @@
 .dropdown.content.tooltip {
   max-width: min(80vw, 25rem);
-  --Dropdown__background: rgba(23, 23, 23, 0.85);
-  --Dropdown__box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  --Dropdown__border: solid 1px rgba(255, 255, 255, 0.5);
+  background: color-mix(in srgb, var(--SYS-color-help-bg), transparent 2%);
+  border: solid 1px color-mix(in srgb, var(--SYS-color-help-border), transparent 2%);
+  box-shadow: 
+    var(--SYS-color-help-bg) 0 0 0 0,
+    var(--SYS-color-help-bg) 0px 0px 0px 1px,
+    var(--SYS-color-help-bg) 0px 4px 4px -3px,
+    var(--SYS-color-help-bg) 0px 4px 4px -2px
+  ;
   color: var(--SYS-text-tooltip);
   padding: var(--sm2);
 }

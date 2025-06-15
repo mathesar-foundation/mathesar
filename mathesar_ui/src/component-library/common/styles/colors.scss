@@ -120,20 +120,20 @@ $border-roles: (
   "grid": 10%,
   "avatar": 10%,
   "token": 10%,
+  "dropdown": 10%,
   "modal": 15%,
   "container": 12%,
-  "elevation-low": 20%,
-  "elevation-mid": 25%,
-  "card": 26%,
+  "card": 15%,
+  "elevated-low": 20%,
+  "elevated-mid": 25%,
   "fieldset": 26%,
   "row": 26%,
-  "elevation-high": 30%,
+  "elevated-high": 30%,
+  "input": 30%
   "canvas": 30%,
-  "dropdown": 30%,
   "section": 30%,
   "control": 40%,
   "table-header": 40%,
-  "input": 50%
 );
 
 $border-states-light: (
@@ -304,10 +304,10 @@ $button-roles-light: (
 );
 
 $button-roles-dark: (
-  "bg": 16%,
+  "bg": 10%,
   "text": 70%,
   "icon": 65%,
-  "border": 40%
+  "border": 15%
 );
 
 $button-state-deltas-light: (
