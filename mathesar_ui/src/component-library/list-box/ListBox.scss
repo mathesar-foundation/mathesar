@@ -30,7 +30,7 @@
     }
 
     &.disabled {
-      color: var(--text-color-muted);
+      color: var(--SYS-text-disabled);
       cursor: not-allowed;
     }
   }

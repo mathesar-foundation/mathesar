@@ -26,9 +26,9 @@
 
 <style>
   .record-page-link {
-    color: var(--neutral-300);
+    color: var(--SYS-text-link);
   }
   .record-page-link:hover {
-    color: var(--neutral-800);
+    color: var(--SYS-text-hover);
   }
 </style>

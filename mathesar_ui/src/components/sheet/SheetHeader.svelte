@@ -57,7 +57,7 @@
     flex-grow: 0;
     flex-shrink: 0;
     background-color: var(--card-background);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--SYS-border-section);
     box-shadow: 0 2px 4px var(--shadow-color);
     user-select: none;
     -webkit-user-select: none; /* Safari */
@@ -66,7 +66,7 @@
     > div {
       position: relative;
       height: var(--sheet-header-height, 32px);
-      color: var(--text-color-primary);
+      color: var(--SYS-text-primary);
     }
 
     &.inherit-font-style {

@@ -234,7 +234,7 @@
 <style>
   .import-file-view {
     padding: var(--lg3);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--SYS-border-section);
     border-radius: var(--border-radius-m);
     background-color: var(--inset-background-color);
     margin-bottom: 2rem;
@@ -246,7 +246,7 @@
 
   .upload-format-help {
     line-height: 1.2;
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     text-align: right;
     font-size: var(--sm1);
   }

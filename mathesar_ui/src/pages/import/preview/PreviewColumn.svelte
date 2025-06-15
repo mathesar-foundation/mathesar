@@ -148,7 +148,7 @@
   }
 
   .pk-indicator {
-    color: var(--slate-400);
+    color: var(--SYS-text-code);
     display: flex;
     align-items: center;
     justify-content: center;

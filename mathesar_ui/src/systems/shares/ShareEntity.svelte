@@ -220,7 +220,7 @@
       font-weight: 700;
     }
     .description {
-      color: var(--neutral-400);
+      color: var(--SYS-text-muted);
       font-size: var(--sm1);
       margin-top: 0.2rem;
     }

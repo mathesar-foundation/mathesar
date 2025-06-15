@@ -65,7 +65,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--text-color-tertiary);
+    color: var(--SYS-text-tertiary);
     margin-right: var(--sm2);
   }
 
@@ -85,13 +85,13 @@
     font-size: var(--lg1);
     font-weight: 500;
     line-height: 1;
-    color: var(--text-color-tertiary);
+    color: var(--SYS-text-tertiary);
   }
 
   .entity-name {
     font-weight: var(--font-weight-extra-bold);
     font-size: var(--lg4);
     line-height: 1;
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
   }
 </style>

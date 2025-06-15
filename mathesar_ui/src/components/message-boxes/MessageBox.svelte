@@ -34,8 +34,8 @@
     border-radius: var(--border-radius-m);
     margin: var(--MessageBox__margin);
     background: var(--MessageBox__background, var(--background-color));
-    border-left: var(--MessageBox__border, 4px solid var(--border-color));
-    color: var(--MessageBox__text-color, var(--text-color));
+    border-left: var(--MessageBox__border, 4px solid var(--SYS-border-section));
+    color: var(--MessageBox__text-color, var(--SYS-text-primary));
   }
   .message-box:not(.full-width) {
     max-width: max-content;

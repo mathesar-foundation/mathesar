@@ -24,8 +24,8 @@
     border: 1px solid var(--card-border);
     background-color: var(--card-background);
     overflow: hidden;
-    box-shadow: var(--card-active-shadow);
-    transition: background-color 0.2s ease-in-out;
+    box-shadow: var(--card-shadow);
+    transition: background 120ms ease, box-shadow 120ms ease;
   }
 
   .db-card.hoverable {
@@ -39,12 +39,12 @@
   }
 
   .db-card.hoverable:focus {
-    outline: 2px solid var(--salmon-600);
+    outline: 2px solid var(--SYS-accent-salmon-base);
     outline-offset: 1px;
   }
 
   .db-card.hoverable:active {
-    border-color: var(--card-active-border);
+    border: 1px solid var(--card-active-border);
     box-shadow: var(--card-active-shadow);
     background: var(--card-active-background);
   }

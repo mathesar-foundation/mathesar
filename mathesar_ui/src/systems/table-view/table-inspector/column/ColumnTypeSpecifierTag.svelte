@@ -65,7 +65,7 @@
     background-color: var(--card-background);
     padding: 0.228rem 0.571rem;
     font-size: var(--sm1);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     font-weight: var(--font-weight-bold);
   }
 </style>

@@ -405,24 +405,14 @@
 
 <style>
   .form {
-    --base-fill: var(--stormy-100);
-    --base-stroke: var(--stormy-300);
-    --target-fill: var(--pumpkin-200);
-    --target-stroke: var(--pumpkin-300);
-    --mapping-fill: var(--salmon-100);
-    --mapping-stroke: var(--salmon-300);
+    --base-fill: var(--SYS-accent-asparagus-light);
+    --base-stroke: var(--SYS-accent-asparagus-border);
+    --target-fill:  var(--SYS-accent-pumpkin-light);
+    --target-stroke: var(--SYS-accent-pumpkin-border);
+    --mapping-fill: var(--SYS-accent-glacier-light);
+    --mapping-stroke: var(--SYS-accent-glacier-border);
     line-height: 1.6;
   }
-
-  :global(body.theme-dark) .form {
-    --base-fill: var(--stormy-800);
-    --base-stroke: var(--stormy-600);
-    --target-fill: var(--pumpkin-800);
-    --target-stroke: var(--pumpkin-600);
-    --mapping-fill: var(--salmon-800);
-    --mapping-stroke: var(--salmon-600);
-  }
-
   .form.self-referential {
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);

@@ -24,7 +24,7 @@
     align-items: center;
     font-size: 0.9em;
     line-height: 1.2;
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     font-weight: var(--font-weight-semibold);
   }
 
@@ -41,9 +41,5 @@
   .mapping {
     background: var(--mapping-fill);
     border: 1px solid var(--mapping-stroke);
-  }
-
-  :global(body.theme-dark) .table-pill {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 </style>

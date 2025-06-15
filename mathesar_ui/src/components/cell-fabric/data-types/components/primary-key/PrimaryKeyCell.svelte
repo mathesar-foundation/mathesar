@@ -102,9 +102,9 @@
     display: flex;
     align-items: center;
     padding: 0 var(--cell-padding);
-    color: var(--color-gray-dark);
+    color: var(--SYS-text-link);
   }
   .link:hover {
-    color: var(--color-text);
+    color: var(--SYS-text-link-hover);
   }
 </style>

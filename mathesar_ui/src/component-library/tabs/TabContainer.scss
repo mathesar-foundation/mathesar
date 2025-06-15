@@ -11,7 +11,8 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border-bottom: 1px solid var(--border-color);
+    background-color: var(--SYS-surface-elevated);
+    border-bottom: 1px solid var(--SYS-border-section);
 
     > li.tab {
       align-items: stretch;
@@ -43,7 +44,7 @@
       }
 
       &:hover {
-        border-bottom-color: var(--salmon-300);
+        border-bottom-color: var(--SYS-accent-pumpkin-lighter-hover);
         opacity: 1;
       }
 
@@ -52,12 +53,12 @@
       }
 
       &.active {
-        border-bottom-color: var(--salmon-600);
+        border-bottom-color: var(--SYS-accent-pumpkin-base);
         opacity: 1;
       }
 
       &.focused {
-        border-color: var(--salmon-600);
+        border-color: var(--SYS-accent-pumpkin-base-focused);
         z-index: 1;
       }
 
@@ -93,7 +94,7 @@
   }
 
   > ul.tabs:before {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--SYS-accent-fjord-light);
   }
 
   .tab-content-holder {

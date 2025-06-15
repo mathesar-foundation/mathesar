@@ -63,7 +63,7 @@
 
 <style lang="scss">
   .presets {
-    border-top: 1px solid var(--color-gray-light);
+    border-top: 1px solid var(--SYS-border-control);
     padding: 0.4rem 0.6rem;
     display: flex;
     align-items: center;
@@ -74,14 +74,14 @@
     }
 
     :global(button.btn) {
-      border: 1px solid var(--color-gray-light);
+      border: 1px solid var(--SYS-border-control);
       border-radius: 1rem;
       padding: 0.3rem 0.6rem;
     }
 
     :global(button.btn.selected) {
-      background: var(--color-contrast);
-      color: var(--white);
+      background: var(--SYS-surface-control-selected);
+      color: var(--SYS-text-inverted);
     }
 
     .tag-label {

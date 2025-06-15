@@ -134,7 +134,7 @@
   .no-pk-warning {
     display: flex;
     align-items: center;
-    color: var(--yellow-400);
+    color: var(--SYS-color-warning-icon);
   }
 
   .aux-actions {

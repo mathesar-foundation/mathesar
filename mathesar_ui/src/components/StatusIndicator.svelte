@@ -52,36 +52,36 @@
     }
 
     &.processing {
-      background: var(--info-background-color);
-      color: var(--info-color);
-      border-color: var(--info-border-color);
+      background: var(--SYS-color-info-bg);
+      color: var(--SYS-color-info-text);
+      border-color: var(--SYS-color-info-border);
     }
     &.processing .icon {
-      color: var(--info-color);
+      color: var(--SYS-color-info-text);
     }
     &.warning {
-      background: var(--warning-background-color);
-      color: var(--warning-color);
-      border-color: var(--warning-border-color);
+      background: var(--SYS-color-warning-background);
+      color: var(--SYS-color-warning-text);
+      border-color: var(--SYS-color-warning-border);
     }
     &.warning .icon {
-      color: var(--warning-color);
+      color: var(--SYS-color-warning-text);
     }
     &.success {
-      background: var(--success-background-color);
-      color: var(--success-color);
-      border-color: var(--success-border-color);
+      background: var(--SYS-color-success-background);
+      color: var(--SYS-color-success-text);
+      border-color: var(--SYS-color-success-border);
     }
     &.success .icon {
-      color: var(--success-color);
+      color: var(--SYS-color-success-text);
     }
     &.failure {
-      background: var(--danger-background-color);
-      color: var(--danger-color);
-      border-color: var(--danger-border-color);
+      background: var(--SYS-color-danger-bg);
+      color: var(--SYS-color-danger-text);
+      border-color: var(--SYS-color-danger-border);
     }
     &.failure .icon {
-      color: var(--danger-color);
+      color: var(--SYS-color-danger-text);
     }
   }
 </style>

@@ -117,7 +117,7 @@
       .tag {
         padding: var(--sm6) var(--sm2);
         background: var(--card-background);
-        color: var(--text-color-secondary);
+        color: var(--SYS-text-secondary);
         border: 1px solid var(--card-border);
         border-radius: var(--lg1);
         font-weight: var(--font-weight-medium);

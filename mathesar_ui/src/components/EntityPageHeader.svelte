@@ -67,12 +67,12 @@
         padding: var(--sm4);
         background: linear-gradient(
           135deg,
-          var(--pumpkin-700),
-          var(--pumpkin-900)
+          var(--SYS-accent-pumpkin-dark),
+          var(--SYS-accent-pumpkin-darkest)
         );
         border-radius: var(--border-radius-l);
         margin-right: var(--sm2);
-        color: var(--white);
+        color: var(--SYS-text-inverted);
       }
       .text {
         overflow: hidden;
@@ -82,11 +82,11 @@
         margin: 0;
         font-weight: var(--font-weight-bold);
         overflow: hidden;
-        color: var(--text-color-primary);
+        color: var(--SYS-text-primary);
       }
       .description {
         font-size: var(--sm1);
-        color: var(--text-color-secondary);
+        color: var(--SYS-text-secondary);
         overflow: hidden;
       }
     }

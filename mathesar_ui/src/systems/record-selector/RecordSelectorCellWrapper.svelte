@@ -34,12 +34,12 @@
 <style>
   .td {
     --max-column-width: 30ch;
-    --outline-color: var(--sky-600);
+    --outline-color: var(--SYS-color-help-border);
     --separator-width: 7px;
     display: table-cell;
     vertical-align: middle;
     border-style: solid;
-    border-color: var(--neutral-300);
+    border-color: var(--SYS-border-section);
     border-width: 0;
     /** Set from parent to so that first row gets border */
     border-top-width: var(--border-top-width, 0);
@@ -111,9 +111,5 @@
       calc(-1 * var(--overflow-shadow-spread)) var(--overflow-shadow-size)
       var(--overflow-shadow-spread) var(--shadow-color);
     clip-path: inset(0 var(--clip-path-size) var(--clip-path-size) 0);
-  }
-
-  :global(body.theme-dark) .td {
-    border-color: var(--slate-600);
   }
 </style>

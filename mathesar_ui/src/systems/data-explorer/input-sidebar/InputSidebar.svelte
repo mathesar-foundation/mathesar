@@ -126,7 +126,7 @@
 <style lang="scss">
   aside.input-sidebar {
     height: 100%;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--SYS-border-section);
     border-radius: var(--border-radius-l);
     flex-shrink: 0;
     flex-grow: 0;

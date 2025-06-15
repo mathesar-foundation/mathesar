@@ -35,13 +35,13 @@
 
 <style>
   .record-selector-navigation-button {
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
   .record-selector-navigation-button:hover {
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
   }
 </style>

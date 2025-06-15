@@ -89,7 +89,7 @@
       padding: 0.3rem 0.5rem;
       border-radius: 0.2rem;
       font-weight: 500;
-      background: var(--neutral-100);
+      background: var(--SYS-surface-overlay);
     }
   }
 </style>

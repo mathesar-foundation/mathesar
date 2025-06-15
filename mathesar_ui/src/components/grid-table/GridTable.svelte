@@ -7,7 +7,7 @@
 <style>
   .grid-table {
     display: grid;
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--SYS-border-grid);
     border-radius: var(--border-radius-l);
     overflow: hidden;
     grid-template-columns: var(--Grid-table__template-columns);

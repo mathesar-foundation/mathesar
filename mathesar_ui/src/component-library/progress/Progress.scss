@@ -1,7 +1,7 @@
 .progress {
   height: 10px;
   border-radius: 2px;
-  background: var(--info-background-color);
+  background: var(--SYS-color-info-bg);
   position: relative;
   overflow: hidden;
 
@@ -10,6 +10,6 @@
     top: 0;
     left: 0;
     bottom: 0;
-    background: var(--sky-600-tentative);
+    background: var(--SYS-button-info-solid-bg);
   }
 }

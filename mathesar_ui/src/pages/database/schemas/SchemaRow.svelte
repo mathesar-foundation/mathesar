@@ -115,13 +115,13 @@
   }
 
   .schema-row.hover {
-    border: 1px solid var(--salmon-400);
+    border: 1px solid var(--SYS-accent-salmon-light);
     box-shadow: var(--card-hover-shadow);
     background: var(--card-hover-background);
   }
 
   .schema-row.focus {
-    outline: 2px solid var(--salmon-500);
+    outline: 2px solid var(--SYS-accent-salmon-border);
     outline-offset: 1px;
   }
 
@@ -139,7 +139,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--salmon-600), var(--salmon-700));
+    background: linear-gradient(135deg, var(--SYS-accent-glacier-dark), var(--SYS-accent-fjord-dark));
     border-radius: 50%;
     width: 2rem;
     height: 2rem;
@@ -148,7 +148,7 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: var(--z-index-menu-trigger);
-    color: var(--white);
+    color: var(--SYS-text-inverted);
   }
 
   .hyperlink-overlay {
@@ -167,7 +167,7 @@
   .description {
     font-weight: 400;
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -184,7 +184,7 @@
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    color: var(--text-color-tertiary);
+    color: var(--SYS-text-tertiary);
     font-size: var(--sm1);
     margin-left: auto;
     margin-right: var(--sm3);
@@ -193,7 +193,7 @@
   .name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     flex: 1;
     word-break: break-word;
     hyphens: auto;

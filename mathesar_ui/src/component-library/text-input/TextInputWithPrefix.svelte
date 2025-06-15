@@ -51,7 +51,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--stormy-400);
+      color: var(--SYS-accent-amethyst-light);
     }
 
     :global(.prefixed-input) {

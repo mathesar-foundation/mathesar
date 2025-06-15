@@ -61,7 +61,7 @@
     grid-gap: var(--sm4);
   }
   .detail {
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     font-size: var(--sm1);
   }
   .detail:empty {

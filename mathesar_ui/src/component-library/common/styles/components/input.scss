@@ -1,41 +1,41 @@
 .input-element {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--SYS-border-input);
   align-items: center;
   border-radius: var(--border-radius-m);
-  background: var(--input-background);
-  color: var(--input-text);
+  background: var(--SYS-surface-input);
+  color: var(--SYS-text-input);
   margin: 0;
   padding: var(--input-padding);
   line-height: var(--input-line-height);
   font-family: inherit;
-  font-size: inherit;
+  font-size: 1.1em;
   display: block;
   width: 100%;
   box-sizing: border-box;
   text-align: var(--input-element-text-align, 'left');
 
   &::placeholder {
-    color: var(--text-color-muted);
+    color: var(--SYS-text-disabled);
   }
 
   &:focus {
-    border-color: var(--input-focus-color);
+    border-color: var(--SYS-indicator-input);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--input-focus-shadow);
+    box-shadow: 0 0 0 2px var(--SYS-surface-input-focused);
   }
 
   &:disabled {
-    background: var(--input-disabled-background);
-    color: var(--text-color-muted);
+    background: var(--SYS-surface-input-disabled);
+    color: var(--SYS-text-disabled);
   }
 
   &.read-only {
-    background: var(--input-disabled-background);
+    background: var(--SYS-surface-input-disabled);
   }
 
   &.has-error {
-    border-color: var(--danger-color);
-    background: var(--danger-background-color);
+    border-color: var(--SYS-color-danger-text);
+    background: var(--SYS-color-danger-bg);
   }
 
   &.text-area {

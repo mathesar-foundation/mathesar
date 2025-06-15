@@ -212,7 +212,7 @@
   }
   .database-info {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     margin-top: var(--sm5);
   }
   .connection-details {
@@ -222,7 +222,7 @@
     flex-wrap: wrap;
   }
   .database-info .label {
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     font-weight: var(--font-weight-bold);
   }
   .edit-connection {

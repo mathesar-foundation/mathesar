@@ -72,7 +72,7 @@
     position: relative;
     height: 100%;
     width: 0.3rem;
-    background: var(--sky-700);
+    background: var(--SYS-color-help-icon);
   }
   .column-resizer:not(:hover):not(.is-resizing) .indicator {
     display: none;

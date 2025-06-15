@@ -14,9 +14,9 @@
 
 <style>
   .info-box {
-    --MessageBox__background: var(--info-background-color);
-    --MessageBox__border: 4px solid var(--info-border-color);
-    --MessageBox__icon-color: var(--info-border-color);
-    --MessageBox__text-color: var(--info-color);
+    --MessageBox__background: var(--SYS-color-info-bg);
+    --MessageBox__border: 4px solid var(--SYS-color-info-border);
+    --MessageBox__icon-color: var(--SYS-color-info-border);
+    --MessageBox__text-color: var(--SYS-color-info-text);
   }
 </style>

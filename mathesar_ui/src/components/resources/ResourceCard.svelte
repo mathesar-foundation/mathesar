@@ -47,20 +47,20 @@
     display: inline-flex;
     align-items: center;
     gap: var(--sm5);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
   }
 
   .title:hover {
     text-decoration: underline;
   }
   .description {
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     flex: 1 0 auto;
   }
 
   .external-link-wrapper {
     margin-left: var(--sm3);
-    color: var(--text-color-muted);
+    color: var(--SYS-text-disabled);
     display: inline-flex;
     align-items: center;
   }

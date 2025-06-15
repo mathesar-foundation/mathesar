@@ -1,0 +1,544 @@
+// ********************************************
+// Token system with light/dark mode & interaction states
+// ********************************************
+
+// Utility functions
+@function adjust-lightness($color, $delta) {
+  @if type-of($delta) == "number" {
+    @if $delta > 0 {
+      @return lighten($color, $delta);
+    } @else {
+      @return darken($color, abs($delta));
+    }
+  } @else {
+    @warn "adjust-lightness() expects a numeric percentage, got #{$delta}";
+    @return $color;
+  }
+}
+
+// ------------------------------------------
+// Base colors
+// ------------------------------------------
+
+// Light
+$base-hue-light: 42;
+$base-saturation-light: 5%;
+
+// Dark
+$base-hue-dark: 230;
+$base-saturation-dark: 4%;
+
+// ------------------------------------------
+// Surfaces
+// ------------------------------------------
+
+
+// Light mode anchors
+$surface-base-light: hsl($base-hue-light, $base-saturation-light, 98%);
+$surface-canvas-light: hsl($base-hue-light, $base-saturation-light, 96%);
+$surface-overlay-light: hsl($base-hue-light, $base-saturation-light, 82%);
+$surface-tooltip-light: hsl($base-hue-light, $base-saturation-light, 76%);
+
+// Lightness adjustments
+$surface-deltas-light: (
+  "supporting": 0%,
+  "header-primary": 3%,
+  "header-table": 4%,
+  "header-section": -8%,
+  "footer": 3%,
+  "input": 1%,
+  "control": -7%,
+  "inset": 5%,
+  "card": -9%,
+  "fieldset": -9%,
+  "elevated": -3%,
+  "inverted": 90%,
+  "overlay-secondary": -1%,
+  "overlay-tertiary": -2%
+);
+
+// Dark mode anchors
+$surface-base-dark: hsl($base-hue-dark, $base-saturation-dark, 2%);
+$surface-canvas-dark: hsl($base-hue-dark, $base-saturation-dark, 4%);
+$surface-overlay-dark: hsl($base-hue-dark, $base-saturation-dark, 11%);
+$surface-tooltip-dark: hsl($base-hue-dark, $base-saturation-dark, 12%);
+
+// Darkness adjustments
+$surface-deltas-dark: (
+  "supporting": 2%,
+  "header-primary": 3%,
+  "header-table": 4%,
+  "header-section": 9%,
+  "footer": 3%,
+  "input": -4%,
+  "control": -7%,
+  "inset": -4%,
+  "card": -9%,
+  "fieldset": -9%,
+  "elevated": -3%,
+  "inverted": 90%,
+  "overlay-secondary": -1%,
+  "overlay-tertiary": -2%
+);
+
+$surface-states-light: (
+  "hover": -3%,
+  "active": -6%,
+  "focused": 2%,
+  "disabled": 8%,
+  "muted": 5%,
+  "selected": -5%,
+  "highlighted": -6%,
+  "highlighted-secondary": -3%
+);
+
+$surface-states-dark: (
+  "hover": 5%,
+  "active": 6%,
+  "focused": 2%,
+  "disabled": 1%,
+  "muted": 5%,
+  "selected": 5%,
+  "highlighted": 6%,
+  "highlighted-secondary": 3%
+);
+
+// Token generator mixin
+@mixin generate-surface-tokens($prefix, $base-color, $states) {
+  --SYS-surface-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    --SYS-surface-#{$prefix}-#{$state}: #{adjust-lightness($base-color, $delta)};
+  }
+}
+
+
+// ------------------------------------------
+// Borders
+// ------------------------------------------
+
+$border-tiers-light: (
+  "bold": 50%,
+  "strong": 40%,
+  "normal": 50%,
+  "soft": 60%,
+  "subtle": 90%
+);
+
+$border-tiers-dark: (
+  "bold": 70%,
+  "strong": 40%,
+  "normal": 30%,
+  "soft": 26%,
+  "subtle": 10%
+);
+
+$border-roles: (
+  "table-header": strong,
+  "modal": strong,
+  "elevation-high": strong,
+  "control": strong,
+  "input": strong,
+  "section": normal,
+  "canvas": normal,
+  "dropdown": normal,
+  "elevation-mid": normal,
+  "container": soft,
+  "card": soft,
+  "fieldset": soft,
+  "row": soft,
+  "elevation-low": soft,
+  "grid": subtle,
+  "token": subtle,
+  "avatar": subtle
+);
+
+$border-states-light: (
+  "hover": -3%,
+  "active": -6%,
+  "focused": -4%,
+  "disabled": 10%,
+  "muted": 5%,
+  "selected": -5%,
+  "highlighted": -4%
+);
+
+$border-states-dark: (
+  "hover": 6%,
+  "active": 14%,
+  "focused": 10%,
+  "disabled": 8%,
+  "muted": 5%,
+  "selected": 5%,
+  "highlighted": 4%
+);
+
+// Token generator mixin
+@mixin generate-border-tokens($prefix, $base-color, $states) {
+  --SYS-border-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    --SYS-border-#{$prefix}-#{$state}: #{adjust-lightness($base-color, $delta)};
+  }
+}
+
+
+// ------------------------------------------
+// Focus Indicators
+// ------------------------------------------
+$focus-indicator-tokens: (
+  "input": (l: 35%, s: 7%),
+  "control": (l: 32%, s: 10%),
+  "table-cell": (l: 34%, s: 6%),
+  "row": (l: 33%, s: 6%),
+  "modal": (l: 30%, s: 5%),
+  "menu-item": (l: 36%, s: 8%),
+  "card": (l: 38%, s: 4%),
+  "tag": (l: 37%, s: 6%),
+  "custom": (l: 32%, s: 10%)
+);
+
+// Token generator mixin
+@mixin generate-focus-indicator-tokens($tokens, $base-hue) {
+  @each $name, $props in $tokens {
+    $l: map-get($props, l);
+    $s: map-get($props, s);
+    $color: hsl($base-hue, $s, $l);
+    --SYS-indicator-#{$name}: #{$color};
+  }
+}
+
+
+// ------------------------------------------
+// Text
+// ------------------------------------------
+$text-tokens-light: (
+  "canvas": (l: 30%, s: 3%),
+  "code": (l: 15%, s: 4%),
+  "container-title": (l: 10%, s: 5%),
+  "control": (l: 10%, s: 5%),
+  "disabled": (l: 60%, s: -4%),
+  "elevated": (l: 10%, s: 5%),
+  "footnote": (l: 30%, s: 3%),
+  "header-primary": (l: 8%, s: 5%),
+  "header-secondary": (l: 10%, s: 5%),
+  "header-tertiary": (l: 25%, s: 3%),
+  "header-subsection": (l: 20%, s: 4%),
+  "input": (l: 10%, s: 5%),
+  "input-label": (l: 20%, s: 4%),
+  "inverse": (l: 95%, s: 4%),
+  "label-fieldset": (l: 20%, s: 4%),
+  "link": (l: 10%, s: 5%),
+  "muted": (l: 35%, s: 2%),
+  "overlay": (l: 10%, s: 5%),
+  "primary": (l: 10%, s: 5%),
+  "secondary": (l: 20%, s: 4%),
+  "section-label": (l: 20%, s: 4%),
+  "tertiary": (l: 30%, s: 3%),
+  "token": (l: 10%, s: 5%),
+  "tooltip": (l: 10%, s: 5%)
+);
+
+$text-tokens-dark: (
+  "canvas": (l: 60%, s: 3%),
+  "code": (l: 80%, s: 4%),
+  "container-title": (l: 92%, s: 5%),
+  "control": (l: 90%, s: 5%),
+  "disabled": (l: 35%, s: 2%),
+  "elevated": (l: 90%, s: 5%),
+  "faint": (l: 15%, s: 1%),
+  "footnote": (l: 55%, s: 3%),
+  "header-primary": (l: 92%, s: 5%),
+  "header-secondary": (l: 75%, s: 12%),
+  "header-tertiary": (l: 55%, s: 3%),
+  "header-subsection": (l: 75%, s: 4%),
+  "input": (l: 95%, s: 10%),
+  "input-label": (l: 65%, s: 4%),
+  "inverse": (l: 10%, s: 4%),
+  "label-fieldset": (l: 75%, s: 4%),
+  "link": (l: 90%, s: 5%),
+  "muted": (l: 45%, s: 2%),
+  "overlay": (l: 90%, s: 5%),
+  "primary": (l: 90%, s: 5%),
+  "secondary": (l: 70%, s: 4%),
+  "section-label": (l: 75%, s: 4%),
+  "tertiary": (l: 50%, s: 3%),
+  "token": (l: 85%, s: 4%),
+  "tooltip": (l: 88%, s: 4%)
+);
+
+
+$text-states-light: (
+  "hover": -3%,
+  "active": -6%,
+  "focused": -4%,
+  "disabled": 10%,
+  "muted": 5%,
+  "selected": -5%,
+  "highlighted": -4%
+);
+
+$text-states-dark: (
+  "hover": 3%,
+  "active": 6%,
+  "focused": 4%,
+  "disabled": -10%,
+  "muted": -5%,
+  "selected": 5%,
+  "highlighted": 4%
+);
+
+// Token generator mixin
+@mixin generate-text-tokens($prefix, $base-color, $states) {
+  --SYS-text-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    --SYS-text-#{$prefix}-#{$state}: #{adjust-lightness($base-color, $delta)};
+  }
+}
+
+// ------------------------------------------
+// Utility boxes + buttons
+// ------------------------------------------
+
+$button-intents: (
+  "success": 145,
+  "warning": 50,
+  "danger": 8,
+  "info": 215,
+  "help": 185,
+  "tip": 165,
+  "outcome": 275
+);
+
+$button-saturation: 35%;
+$button-tones: (solid, soft, outlined, ghost);
+$button-roles: (bg, text, icon, border);
+
+$button-roles-light: (
+  "bg": 94%,
+  "text": 30%,
+  "icon": 35%,
+  "border": 80%
+);
+
+$button-roles-dark: (
+  "bg": 16%,
+  "text": 70%,
+  "icon": 65%,
+  "border": 40%
+);
+
+$button-state-deltas-light: (
+  "hover": (-3%, 3%, 0),
+  "active": (-6%, 0%, 0),
+  "focused": (-3%, 5%, 5),
+  "disabled": (10%, -100%, 0),
+  "muted": (5%, -20%, 0),
+  "selected": (-5%, 10%, 0),
+  "highlighted": (-4%, 8%, -10)
+);
+
+$button-state-deltas-dark: (
+  "hover": (3%, 3%, 0),
+  "active": (6%, 0%, 0),
+  "focused": (3%, 5%, 5),
+  "disabled": (-10%, -100%, 0),
+  "muted": (-5%, -20%, 0),
+  "selected": (5%, 10%, 0),
+  "highlighted": (4%, 8%, -10)
+);
+
+// Token generator mixin
+@mixin generate-color-tokens($intent, $hue, $roles) {
+  @each $role, $l in $roles {
+    $color: hsl($hue, $button-saturation, $l);
+    --SYS-color-#{$intent}-#{$role}: #{$color};
+  }
+}
+
+// Token generator mixin
+@mixin generate-button-tokens($intent, $tone, $base-values, $deltas) {
+  @each $role in $button-roles {
+    $val: map-get($base-values, $role);
+    @if $val != null {
+      $hue: nth($val, 1);
+      $s: nth($val, 2);
+      $l: nth($val, 3);
+      $color: hsl($hue, $s, $l);
+      --SYS-button-#{$intent}-#{$tone}-#{$role}: #{$color};
+      @each $state, $delta in $deltas {
+        $dl: nth($delta, 1);
+        $ds: nth($delta, 2);
+        $dh: nth($delta, 3);
+        $lh: ($hue + $dh) % 360;
+        $ls: max(0%, min(100%, $s + $ds));
+        $ll: max(0%, min(100%, $l + $dl));
+        $variant: hsl($lh, $ls, $ll);
+        --SYS-button-#{$intent}-#{$tone}-#{$role}-#{$state}: #{$variant};
+      }
+    }
+  }
+}
+
+
+// ------------------------------------------
+// Accents
+// ------------------------------------------
+
+$accent-families: (
+  "tomato": (8, 60%),
+  "pumpkin": (33, 90%),
+  "amethyst": (270, 35%),
+  "salmon": (12, 79%),
+  "wisteria": (250, 35%),
+  "glacier": (190, 35%),
+  "asparagus": (90, 45%),
+  "fjord": (220, 30%)
+);
+
+$accent-roles-light: (
+  "base": (1.0, 1.0, 50%),
+  "lightest": (1.0, 0.6, 95%),
+  "lighter": (1.0, 0.6, 80%),
+  "light": (1.0, 0.6, 75%),
+  "dark": (1.0, 1.0, 30%),
+  "darker": (1.0, 1.0, 15%),
+  "darkest": (1.0, 1.0, 5%),
+  "text": (1.2, 1.0, 35%),
+  "on": (0.05, 1.0, 96%),
+  "border": (0.6, 1.0, 70%)
+);
+
+$accent-roles-dark: (
+  "base": (1.0, 1.0, 50%),
+  "lightest": (1.0, 0.6, 5%),
+  "lighter": (1.0, 0.6, 15%),
+  "light": (1.0, 0.6, 30%),
+  "dark": (1.0, 1.0, 75%),
+  "darker": (1.0, 1.0, 85%),
+  "darkest": (1.0, 1.0, 95%),
+  "text": (1.2, 1.0, 65%),
+  "on": (0.05, 1.0, 10%),
+  "border": (0.6, 1.0, 40%)
+);
+
+$accent-states: (
+  "hover": (-3%, 3%, 0),
+  "active": (-6%, 0%, 0),
+  "focused": (-3%, 5%, 5),
+  "disabled": (10%, -100%, 0),
+  "muted": (5%, -20%, 0),
+  "selected": (-5%, 10%, 0),
+  "highlighted": (-4%, 8%, -10)
+);
+
+// Token generator mixin
+@mixin generate-accent-tokens($name, $hue, $sat, $roles) {
+  @each $role, $params in $roles {
+    $sat-mult: nth($params, 1);
+    $light-mult: nth($params, 2);
+    $light: nth($params, 3);
+    $s: $sat * $sat-mult;
+    $l: $light;
+    $color: hsl($hue, $s, $l);
+    --SYS-accent-#{$name}-#{$role}: #{$color};
+    @each $state, $delta in $accent-states {
+      $dl: nth($delta, 1);
+      $ds: nth($delta, 2);
+      $dh: nth($delta, 3);
+      $sh: max(0%, min(100%, $s + $ds));
+      $lh: max(0%, min(100%, $l + $dl));
+      $hh: ($hue + $dh) % 360;
+      $variant: hsl($hh, $sh, $lh);
+      --SYS-accent-#{$name}-#{$role}-#{$state}: #{$variant};
+    }
+  }
+}
+
+
+// ------------------------------------------
+// GENERATE COLORS IN THEMES
+// ------------------------------------------
+body {
+  @include generate-focus-indicator-tokens($focus-indicator-tokens,  $base-hue-light);
+  @include generate-surface-tokens(base, $surface-base-light, $surface-states-light);
+  @include generate-surface-tokens(canvas, $surface-canvas-light, $surface-states-light);
+  @include generate-surface-tokens(overlay, $surface-overlay-light, $surface-states-light);
+  @include generate-surface-tokens(tooltip, $surface-tooltip-light, $surface-states-light);
+
+  @each $name, $delta in $surface-deltas-light {
+    $base: adjust-lightness($surface-canvas-light, $delta);
+    @include generate-surface-tokens(#{$name}, $base, $surface-states-light);
+  }
+
+  @each $name, $tier in $border-roles {
+    $base: hsl($base-hue-light, $base-saturation-light, map-get($border-tiers-light, $tier));
+    @include generate-border-tokens(#{$name}, $base, $border-states-light);
+  }
+
+  @each $name, $props in $text-tokens-light {
+    $base: hsl($base-hue-light, map-get($props, s), map-get($props, l));
+    @include generate-text-tokens(#{$name}, $base, $text-states-light);
+  }
+
+  @each $intent, $hue in $button-intents {
+    @include generate-color-tokens($intent, $hue, $button-roles-light);
+
+    $solid: (bg: ($hue, $button-saturation, 30%), text: ($hue, 5%, 96%), icon: ($hue, 5%, 96%), border: ($hue, $button-saturation, 24%));
+    $soft: (bg: ($hue, $button-saturation * 0.4, 92%), text: ($hue, $button-saturation, 32%), icon: ($hue, $button-saturation, 32%), border: ($hue, $button-saturation * 0.6, 84%));
+    $outlined: (bg: null, text: ($hue, $button-saturation, 32%), icon: ($hue, $button-saturation, 32%), border: ($hue, $button-saturation * 0.8, 70%));
+    $ghost: (bg: null, text: ($hue, $button-saturation * 0.5, 45%), icon: ($hue, $button-saturation * 0.5, 45%), border: null);
+
+    @include generate-button-tokens($intent, solid, $solid, $button-state-deltas-light);
+    @include generate-button-tokens($intent, soft, $soft, $button-state-deltas-light);
+    @include generate-button-tokens($intent, outlined, $outlined, $button-state-deltas-light);
+    @include generate-button-tokens($intent, ghost, $ghost, $button-state-deltas-light);
+  }
+
+  @each $name, $props in $accent-families {
+    $hue: nth($props, 1);
+    $sat: nth($props, 2);
+    @include generate-accent-tokens($name, $hue, $sat, $accent-roles-light);
+  }
+  // Dark theme
+  &.theme-dark {
+    @include generate-focus-indicator-tokens($focus-indicator-tokens, $base-hue-dark);
+    @include generate-surface-tokens(base, $surface-base-dark, $surface-states-dark);
+    @include generate-surface-tokens(canvas, $surface-canvas-dark, $surface-states-dark);
+    @include generate-surface-tokens(overlay, $surface-overlay-dark, $surface-states-dark);
+    @include generate-surface-tokens(tooltip, $surface-tooltip-dark, $surface-states-dark);
+
+    @each $name, $delta in $surface-deltas-dark {
+      $base: adjust-lightness($surface-canvas-dark, $delta);
+      @include generate-surface-tokens(#{$name}, $base, $surface-states-dark);
+    }
+
+    @each $name, $tier in $border-roles {
+      $base: hsl($base-hue-dark, $base-saturation-dark, map-get($border-tiers-dark, $tier));
+      @include generate-border-tokens(#{$name}, $base, $border-states-dark);
+    }
+
+    @each $name, $props in $text-tokens-dark {
+      $base: hsl($base-hue-dark, map-get($props, s), map-get($props, l));
+      @include generate-text-tokens(#{$name}, $base, $text-states-dark);
+    }
+
+    @each $intent, $hue in $button-intents {
+      @include generate-color-tokens($intent, $hue, $button-roles-dark);
+
+      $solid: (bg: ($hue, $button-saturation, 70%), text: ($hue, 5%, 10%), icon: ($hue, 5%, 10%), border: ($hue, $button-saturation, 64%));
+      $soft: (bg: ($hue, $button-saturation * 0.4, 18%), text: ($hue, $button-saturation, 75%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.6, 26%));
+      $outlined: (bg: null, text: ($hue, $button-saturation, 75%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.8, 30%));
+      $ghost: (bg: null, text: ($hue, $button-saturation * 0.5, 60%), icon: ($hue, $button-saturation * 0.5, 60%), border: null);
+
+      @include generate-button-tokens($intent, solid, $solid, $button-state-deltas-dark);
+      @include generate-button-tokens($intent, soft, $soft, $button-state-deltas-dark);
+      @include generate-button-tokens($intent, outlined, $outlined, $button-state-deltas-dark);
+      @include generate-button-tokens($intent, ghost, $ghost, $button-state-deltas-dark);
+    }
+
+    @each $name, $props in $accent-families {
+      $hue: nth($props, 1);
+      $sat: nth($props, 2);
+      @include generate-accent-tokens($name, $hue, $sat, $accent-roles-dark);
+    }
+  }
+}

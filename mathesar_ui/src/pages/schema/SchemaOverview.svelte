@@ -160,10 +160,10 @@
     padding: var(--lg3);
     background: linear-gradient(
       135deg,
-      var(--pumpkin-200) 0%,
-      var(--pumpkin-300) 100%
+      var(--SYS-accent-pumpkin-lighter) 0%,
+      var(--SYS-accent-pumpkin-lightest) 100%
     );
-    border: 1px solid var(--pumpkin-400);
+    border: 1px solid var(--SYS-accent-pumpkin-base);
     border-radius: var(--sm2);
     position: relative;
     overflow: hidden;
@@ -186,13 +186,13 @@
     .explore-title {
       font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
-      color: var(--pumpkin-900);
+      color: var(--SYS-accent-pumpkin-darkest-highlighted);
       margin: 0 0 0.75rem 0;
       position: relative;
     }
 
     .explore-description {
-      color: var(--pumpkin-800);
+      color: var(--SYS-accent-pumpkin-darkest);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;
@@ -201,31 +201,6 @@
 
     > div {
       position: relative;
-    }
-  }
-
-  :global(body.theme-dark) .explore-cta {
-    background: linear-gradient(
-      135deg,
-      var(--pumpkin-900) 0%,
-      var(--pumpkin-950) 100%
-    );
-    border: 1px solid var(--pumpkin-800);
-
-    &::before {
-      background: radial-gradient(
-        circle at top right,
-        rgba(255, 255, 255, 0.05) 0%,
-        transparent 60%
-      );
-    }
-
-    .explore-title {
-      color: var(--pumpkin-100);
-    }
-
-    .explore-description {
-      color: var(--pumpkin-200);
     }
   }
 

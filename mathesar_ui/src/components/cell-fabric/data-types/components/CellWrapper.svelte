@@ -126,11 +126,11 @@
     }
 
     &[data-active-cell] {
-      box-shadow: 0 0 0 2px var(--neutral-400);
+      box-shadow: 0 0 0 2px var(--SYS-surface-supporting);
       border-radius: 2px;
 
       &:focus {
-        box-shadow: 0 0 0 2px var(--sky-700);
+        box-shadow: 0 0 0 3px var(--SYS-accent-glacier-base-selected);
       }
     }
 
@@ -143,7 +143,7 @@
     &.is-edit-mode {
       padding: 0px;
       box-shadow:
-        0 0 0 3px var(--sky-700),
+        0 0 0 3px var(--SYS-accent-glacier-base-focused),
         0 0 8px #000000 !important;
     }
 

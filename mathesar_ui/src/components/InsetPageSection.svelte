@@ -9,7 +9,7 @@
   .section {
     background: var(--inset-background-color);
     padding: var(--inset-page-section-padding, 2rem 1.5rem);
-    border: solid 1px var(--border-color);
+    border: solid 1px var(--SYS-border-section);
     border-radius: 0.3rem;
   }
 </style>

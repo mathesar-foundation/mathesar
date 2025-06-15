@@ -59,7 +59,7 @@
 
 <style lang="scss">
   .table-widget {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--SYS-border-section);
     border-radius: var(--border-radius-m);
     padding: var(--sm1);
   }
@@ -70,7 +70,7 @@
     justify-content: space-between;
     align-items: center;
     overflow: hidden;
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     margin-bottom: var(--sm1);
   }
   .top > :global(*) {

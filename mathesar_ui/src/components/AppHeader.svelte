@@ -168,7 +168,7 @@
     border-bottom: 1px solid var(--header-border);
     box-shadow: var(--shadow-color) 0 1px 3px 0;
     overflow: hidden;
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
     font-size: 1rem;
   }
 
@@ -190,7 +190,7 @@
   }
 
   .user-switcher {
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;

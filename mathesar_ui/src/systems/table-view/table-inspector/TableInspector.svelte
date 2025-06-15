@@ -50,8 +50,8 @@
   .table-inspector {
     height: 100%;
     position: relative;
-    background-color: var(--inspector-background);
-    border: 1px solid var(--border-color);
+    background-color: var(--SYS-surface-supporting);
+    border: 1px solid var(--SYS-border-section);
     border-radius: var(--border-radius-l);
     isolation: isolate;
   }

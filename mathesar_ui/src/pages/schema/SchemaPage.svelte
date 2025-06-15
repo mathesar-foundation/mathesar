@@ -96,7 +96,7 @@
 
 <style>
   .description {
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
   }
 
   .action-buttons {

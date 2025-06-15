@@ -157,7 +157,7 @@
       }
 
       &:not(:last-child) {
-        border-bottom: 1px solid var(--neutral-200);
+        border-bottom: 1px solid var(--SYS-border-row);
       }
     }
   }

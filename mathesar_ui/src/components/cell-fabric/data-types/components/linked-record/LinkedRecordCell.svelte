@@ -144,7 +144,7 @@
     overflow: hidden;
     width: max-content;
     max-width: 100%;
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
   }
   .disabled .value {
     padding-right: var(--cell-padding);
@@ -154,9 +154,9 @@
     padding: 0 var(--cell-padding);
     display: flex;
     align-items: center;
-    color: var(--text-color-muted);
+    color: var(--SYS-text-disabled);
   }
   .dropdown-button:hover {
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
   }
 </style>

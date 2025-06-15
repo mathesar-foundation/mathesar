@@ -236,7 +236,7 @@
       content: '';
       border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
         var(--corner-bl);
-      border-left: solid 3px var(--salmon-400);
+      border-left: solid 3px var(--SYS-accent-salmon-light);
       position: absolute;
       height: 100%;
       width: 10px;
@@ -247,13 +247,13 @@
   }
 
   .table-row:active {
-    border-color: var(--stormy-400);
+    border-color: var(--SYS-border-table-header);
     box-shadow: var(--shadow-color) 0 1px 2px 0;
     background: var(--card-active-background);
   }
 
   .table-row.unconfirmed-import {
-    color: var(--text-color-muted);
+    color: var(--SYS-text-disabled);
     background-color: var(--disabled-background);
   }
 
@@ -279,12 +279,12 @@
   .table-name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
   }
 
   .description {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     font-weight: var(--font-weight-normal);
     overflow: hidden;
     line-height: 1.2;

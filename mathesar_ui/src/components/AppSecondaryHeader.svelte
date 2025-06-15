@@ -31,9 +31,9 @@
     margin-bottom: var(--lg4);
     background: linear-gradient(
       135deg,
-      var(--neutral-200) 0%,
-      var(--neutral-300) 50%,
-      var(--neutral-400) 100%
+      var(--SYS-accent-pumpkin-lighter) 0%,
+      var(--SYS-surface-base) 50%,
+      var(--SYS-accent-amethyst-lightest) 100%
     );
   }
   .content {
@@ -42,14 +42,6 @@
     max-width: var(--max-layout-width-console-pages);
     margin-left: auto;
     margin-right: auto;
-  }
-  :global(body.theme-dark) .app-secondary-header {
-    background: linear-gradient(
-      135deg,
-      var(--DARK-MODE-accent-primary-muted) 0%,
-      var(--DARK-MODE-surface-base) 50%,
-      var(--DARK-MODE-accent-muted) 100%
-    );
   }
   .content.restrict-width {
     margin-left: auto;

@@ -193,9 +193,9 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--SYS-border-section);
     border-radius: 0.25rem;
-    background: var(--input-background);
+    background: var(--SYS-surface-input);
     padding: var(--sm4);
     cursor: default;
   }
@@ -205,9 +205,9 @@
   }
 
   .linked-record-input:focus {
-    border-color: var(--input-focus-color);
+    border-color: var(--SYS-indicator-input);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--input-focus-shadow);
+    box-shadow: 0 0 0 2px var(--SYS-surface-input-focused);
   }
 
   .content {
@@ -220,10 +220,10 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     padding: var(--padding);
   }
   .dropdown-button:hover {
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
   }
 </style>

@@ -8,7 +8,7 @@
   border-radius: var(--border-radius-m);
   padding: var(--spacing);
   min-height: 2.37em;
-  background: var(--input-background);
+  background: var(--SYS-surface-input);
   gap: var(--spacing);
 
   &.disabled {
@@ -30,19 +30,19 @@
     background: var(--hover-background);
     border: 1px solid var(--input-border);
     border-radius: var(--border-radius-m);
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
     align-items: center;
   }
 
   .icon-button {
-    color: var(--text-color-tertiary);
+    color: var(--SYS-text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .icon-button:hover {
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
   }
 
   .remove-button {

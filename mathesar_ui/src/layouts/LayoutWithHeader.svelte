@@ -27,7 +27,7 @@
     display: flex;
     flex-direction: column;
     background-color: var(--layout-background-color);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
 
     .app-layout-header {
       position: sticky;

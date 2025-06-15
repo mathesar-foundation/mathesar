@@ -50,9 +50,9 @@
     border-left: 0.2rem solid transparent !important;
   }
   .droppable.dragged_over.dragged_over_left > :global(div) {
-    border-left: 0.2rem solid var(--sky-700) !important;
+    border-left: 0.2rem solid var(--SYS-color-help-border) !important;
   }
   .droppable.dragged_over.dragged_over_right > :global(div) {
-    border-right: 0.2rem solid var(--sky-700) !important;
+    border-right: 0.2rem solid var(--SYS-color-help-border) !important;
   }
 </style>

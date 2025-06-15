@@ -11,6 +11,8 @@
       text-align: left;
       cursor: pointer;
       font-weight: inherit;
+      background-color: var(--SYS-surface-header-section);
+      color: var(--SYS-text-header-secondary);
       padding: var(--Collapsible_trigger-padding, 0.5em);
 
       .collapsible-header-title {
@@ -31,5 +33,8 @@
   }
   .collapsible-content {
     position: relative;
+    .label {
+      color: var(--SYS-text-input-label);
+    }
   }
 }

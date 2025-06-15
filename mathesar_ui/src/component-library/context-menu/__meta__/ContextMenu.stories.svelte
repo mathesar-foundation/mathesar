@@ -57,7 +57,7 @@
 <style>
   .box {
     padding: 0 1em;
-    border: solid 0.1em var(--neutral-200);
+    border: solid 0.1em var(--SYS-surface-supporting);
     border-radius: 0.5em;
     margin: 1em 0;
   }

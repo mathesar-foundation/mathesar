@@ -102,14 +102,14 @@
   .name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     line-height: 1.2;
     transition: color 0.2s ease;
   }
 
   .detail {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     display: flex;
     gap: 0.5rem;
     align-items: center;

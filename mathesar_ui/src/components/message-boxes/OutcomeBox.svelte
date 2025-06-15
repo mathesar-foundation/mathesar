@@ -20,9 +20,9 @@
 
 <style>
   .outcome-box {
-    --MessageBox__background: var(--outcome-background-color);
-    --MessageBox__border: 4px solid var(--outcome-border-color);
-    --MessageBox__icon-color: var(--outcome-color);
-    --MessageBox__text-color: var(--outcome-color);
+    --MessageBox__background: var(--SYS-color-outcome-background);
+    --MessageBox__border: 4px solid var(--SYS-color-outcome-border);
+    --MessageBox__icon-color: var(--SYS-color-outcome-text);
+    --MessageBox__text-color: var(--SYS-color-outcome-text);
   }
 </style>

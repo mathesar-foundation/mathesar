@@ -96,7 +96,7 @@
       top: -0.7rem;
       bottom: 0;
       left: 0.25rem;
-      border: 1px dashed var(--neutral-200);
+      border: 1px dashed var(--SYS-border-section);
     }
 
     + :global(.table-group) {

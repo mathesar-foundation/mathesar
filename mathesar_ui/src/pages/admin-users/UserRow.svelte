@@ -59,7 +59,7 @@
     display: flex;
     align-items: center;
     font-weight: var(--font-weight-light);
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     gap: var(--sm1);
   }
 
@@ -67,7 +67,7 @@
     display: inline-block;
     width: 0.25rem;
     height: 0.25rem;
-    background-color: var(--neutral-500);
+    background-color: var(--SYS-border-section);
     border-radius: 50%;
   }
 
@@ -76,7 +76,7 @@
     align-items: center;
     gap: 0.5rem;
     font-size: var(--sm1);
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
     padding: 0.25rem 0.5rem;
     border-radius: var(--border-radius-s);
   }

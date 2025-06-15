@@ -245,7 +245,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--gray-400);
+    color: var(--SYS-text-muted);
     z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
@@ -258,12 +258,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--gray-400);
+    color: var(--SYS-text-muted);
   }
   .no-results {
     padding: 1.5rem;
     text-align: center;
-    color: var(--color-gray-dark);
+    color: var(--SYS-text-tertiary);
   }
 
   .loading .stats {
@@ -289,7 +289,7 @@
       order: 3;
       text-align: center;
       font-size: var(--sm1);
-      color: var(--text-color-muted);
+      color: var(--SYS-text-disabled);
     }
     .add-button {
       order: 2;

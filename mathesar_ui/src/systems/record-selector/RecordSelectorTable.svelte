@@ -324,7 +324,7 @@
     position: relative;
     border-spacing: 0;
     --border-width: 1px;
-    --border-color: var(--border-color);
+    --border-color: var(--SYS-border-section);
     --row-height: 2.25rem;
   }
   .thead {

@@ -14,9 +14,9 @@
 
 <style>
   .warning-box {
-    --MessageBox__background: var(--warning-background-color);
-    --MessageBox__border: 4px solid var(--warning-border-color);
-    --MessageBox__icon-color: var(--warning-color);
-    --MessageBox__text-color: var(--warning-color);
+    --MessageBox__background: var(--SYS-color-warning-background);
+    --MessageBox__border: 4px solid var(--SYS-color-warning-border);
+    --MessageBox__icon-color: var(--SYS-color-warning-text);
+    --MessageBox__text-color: var(--SYS-color-warning-text);
   }
 </style>

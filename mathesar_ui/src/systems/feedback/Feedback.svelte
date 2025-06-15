@@ -145,7 +145,7 @@
   .feedback-content {
     max-width: 28rem;
     padding: var(--sm3);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
   }
   .feedback-form {
     display: flex;
@@ -155,12 +155,12 @@
 
     .title {
       font-weight: var(--font-weight-medium);
-      color: var(--text-color-primary);
+      color: var(--SYS-text-primary);
     }
 
     .help {
       font-size: var(--sm1);
-      color: var(--text-color-primary);
+      color: var(--SYS-text-primary);
       margin-top: var(--sm6);
     }
   }
@@ -168,11 +168,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--sm3);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
 
     .title {
       font-weight: var(--font-weight-medium);
-      color: var(--text-color-primary);
+      color: var(--SYS-text-primary);
     }
   }
 </style>

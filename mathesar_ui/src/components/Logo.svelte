@@ -16,6 +16,6 @@
     fill: none;
   }
   .inner {
-    fill: var(--brand-500);
+    fill: var(--SYS-accent-tomato-base);
   }
 </style>

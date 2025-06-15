@@ -37,7 +37,7 @@
     height: var(--size);
     width: var(--size);
     border-radius: 50%;
-    background: var(--red-500);
+    background: var(--SYS-color-danger-icon);
     pointer-events: none;
   }
 </style>

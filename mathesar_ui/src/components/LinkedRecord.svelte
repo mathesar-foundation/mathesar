@@ -99,7 +99,7 @@
     isolation: isolate;
   }
   .disabled {
-    color: var(--text-color-muted);
+    color: var(--SYS-text-disabled);
   }
   .background {
     position: absolute;

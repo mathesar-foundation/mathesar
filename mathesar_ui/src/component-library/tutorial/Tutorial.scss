@@ -1,7 +1,7 @@
 .tutorial {
   position: relative;
   border-radius: var(--border-radius-xl);
-  border: 1px solid var(--pumpkin-600);
+  border: 1px solid var(--SYS-accent-pumpkin-dark);
   padding: var(--lg3);
   display: flex;
   align-items: center;
@@ -20,8 +20,8 @@
     bottom: 0;
     background: linear-gradient(
       135deg,
-      var(--pumpkin-400) 0%,
-      var(--pumpkin-600) 100%
+      var(--SYS-accent-pumpkin-base) 0%,
+      var(--SYS-accent-pumpkin-dark) 100%
     );
     opacity: 0.35;
   }
@@ -39,12 +39,12 @@
 
   .icon {
     margin-bottom: var(--lg1);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
   }
 
   .title {
     font-size: var(--lg2);
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     font-weight: var(--font-weight-extra-bold);
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -53,26 +53,12 @@
   }
 
   .body {
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
   }
 
   .footer {
     margin-top: var(--lg1);
     display: flex;
     justify-content: center;
-  }
-}
-
-body.theme-dark .tutorial {
-  border-color: var(--pumpkin-900);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-
-  &::before {
-    background: linear-gradient(
-      135deg,
-      var(--pumpkin-400) 0%,
-      var(--pumpkin-600) 100%
-    );
-    opacity: 0.2;
   }
 }

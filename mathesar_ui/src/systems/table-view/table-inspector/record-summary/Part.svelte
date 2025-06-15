@@ -40,6 +40,6 @@
     margin: 0.3rem -0.5rem 0 0;
   }
   .delete:not(:hover) {
-    color: var(--text-color-muted);
+    color: var(--SYS-text-disabled);
   }
 </style>

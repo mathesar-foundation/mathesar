@@ -159,7 +159,7 @@
     .content {
       margin-top: var(--sm5);
       padding: var(--sm2);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--SYS-border-section);
       border-radius: var(--border-radius-l);
       background: var(--background-color);
     }

@@ -39,12 +39,12 @@
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   body {
-    --color-substring-match: var(--highlighter-300);
-    --color-substring-match-light: var(--highlighter-100);
+    --color-substring-match: var(--SYS-surface-inset-highlighted);
+    --color-substring-match-light: var(--SYS-surface-inset-highlighted-secondary);
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
-    --Match__highlight-color: var(--color-substring-match);
+    --Match__highlight-color: var(--SYS-surface-inset-highlighted);
 
     /* Typography variables */
     --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
@@ -73,22 +73,23 @@
    * background colors are applied. We need this in case there is a background
    * color applied underneath the cell, e.g. on the table or page.
    */
-    --cell-bg-color-base: var(--white);
-    --cell-bg-color-error: var(--red-100);
-    --cell-bg-color-header: transparent;
-    --cell-bg-color-processing: var(--yellow-100);
-    --cell-bg-color-disabled: var(--gray-100);
-    --cell-bg-color-row-hover: var(--gray-100);
-    --cell-bg-color-row-selected: var(--sky-200);
+ 
+     --cell-border-horizontal: 1px solid var(--SYS-border-grid);
+     --cell-border-vertical: 1px solid var(--SYS-border-grid);
+ 
+    --cell-bg-mix-blend-mode: screen;
+    --cell-bg-color-base: var(--SYS-surface-inset);
+    --cell-bg-color-error: var(--SYS-color-danger-bg);
+    --cell-bg-color-header: var(--SYS-surface-header-table);
+    --cell-bg-color-processing: var(--SYS-color-warning-bg-light);
+    --cell-bg-color-disabled: var(--SYS-surface-inset-disabled);
+    --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
+    --cell-bg-color-row-selected: var(--SYS-accent-glacier-lighter-selected);
 
-    --color-fk: var(--stormy-200);
-    --color-error: var(--red-600);
-    --cell-text-color-processing: var(--text-color-muted);
-    --color-array-element: var(--sky-300);
-    --color-fk-border: var(--stormy-300);
-
-    --cell-border-horizontal: 1px solid var(--neutral-300);
-    --cell-border-vertical: 1px solid var(--neutral-300);
+    --color-fk: var(--SYS-accent-amethyst-light);
+    --color-fk-border: var(--SYS-accent-amethyst-border);
+    --color-error: var(--SYS-color-danger-text);
+    --cell-text-color-processing:var(--SYS-text-muted);
 
     --page-padding-x: var(--lg1);
     --page-padding-y: var(--lg1);
@@ -112,7 +113,7 @@
     --table-title-header-height: 4.6428rem;
     --status-bar-padding: 0.5rem;
 
-    color: var(--text-color);
+    color: var(--SYS-text-primary);
 
     --modal-z-index: 1;
     --dropdown-z-index: 1;
@@ -134,33 +135,8 @@
 
     /** Panel theming */
     --WithPanel__gap: var(--sm3);
-    --WithPanel__resizer-color: var(--stormy-500);
+    --WithPanel__resizer-color: var(--SYS-accent-pumpkin-base);
     --WithPanel__resizer-size: var(--sm4);
-  }
-
-  body.theme-dark {
-    --cell-bg-mix-blend-mode: screen;
-    --cell-bg-color-base: var(--DARK-MODE-surface-primary);
-    --cell-bg-color-error: var(--rosy-950);
-    --cell-bg-color-header: var(--DARK-MODE-surface-secondary);
-    --cell-bg-color-processing: var(--yellow-900);
-    --cell-bg-color-disabled: var(--DARK-MODE-surface-disabled);
-    --cell-bg-color-row-hover: var(--DARK-MODE-surface-primary-hover);
-    --cell-bg-color-row-selected: var(--slate-600);
-
-    --color-substring-match: var(--highlighter-500);
-    --color-substring-match-light: var(--highlighter-800);
-
-    --Match__highlight-color: var(--color-substring-match);
-
-    --cell-border-horizontal: 1px solid var(--DARK-MODE-border-subtle);
-    --cell-border-vertical: 1px solid var(--DARK-MODE-border-subtle);
-
-    --color-fk: var(--stormy-800);
-    --color-fk-border: var(--stormy-700);
-    --color-error: var(--red-400);
-    --cell-text-color-processing: var(--neutral-300);
-    --color-array-element: var(--sky-400);
   }
 
   h1 {
@@ -200,12 +176,12 @@
   hr {
     margin: 0;
     border: 0;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--SYS-border-section);
     display: block;
   }
 
   a {
-    color: var(--link-color);
+    color: var(--SYS-text-link);
     text-decoration-thickness: 1px;
     text-underline-offset: 0.1em;
   }
@@ -213,15 +189,10 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: var(--neutral-100);
+    background: var(--SYS-surface-inset);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
-    color: var(--text-color);
-
-    body.theme-dark & {
-      background: var(--neutral-900);
-      border: 1px solid var(--neutral-700);
-    }
+    color: var(--SYS-text-primary);
   }
 
   .block {
@@ -250,16 +221,15 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--neutral-100);
+    background: var(--SYS-surface-inset-muted);
     border-radius: 3px;
-    color: var(--text-color-muted);
+    color: var(--SYS-text-tertiary);
     font-weight: bold;
-
-    body.theme-dark & {
-      background: var(--neutral-900);
-      border: 1px solid var(--neutral-700);
-    }
   }
+
+  .cell-wrapper .postgres-keyword {
+    color: var(--SYS-text-faint);
+  } 
 
   .bold-header {
     font-weight: 500;
@@ -271,6 +241,6 @@
     align-items: center;
     justify-content: center;
     display: flex;
-    background-color: var(--neutral-100);
+    background-color: var(--SYS-surface-canvas);
   }
 </style>

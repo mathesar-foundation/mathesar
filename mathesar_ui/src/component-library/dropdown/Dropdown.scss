@@ -30,22 +30,17 @@ button.dropdown.trigger {
 .dropdown.content {
   box-shadow: var(
     --Dropdown__box-shadow,
-    var(--shadow-color) 0 0 0 0,
-    var(--shadow-color) 0px 0px 0px 1px,
-    var(--shadow-color) 0px 10px 15px -3px,
-    var(--shadow-color) 0px 4px 6px -2px
+    var(--SYS-border-dropdown) 0 0 0 0,
+    var(--SYS-border-dropdown) 0px 0px 0px 1px,
+    var(--SYS-border-dropdown) 0px 10px 15px -3px,
+    var(--SYS-border-dropdown) 0px 4px 6px -2px
   );
-  border: var(--Dropdown__border, none);
+  border: var(--SYS-border-dropdown, 2px solid);
+  background: var(--SYS-surface-elevated);
   border-radius: var(--border-radius-m);
-  background: var(--Dropdown__background, var(--neutral-50));
   z-index: var(--dropdown-z-index, 100);
   max-height: calc(100vh - 0.5rem);
   overflow: auto;
-
-  body.theme-dark & {
-    border: var(--Dropdown__border, 1px solid var(--DARK-MODE-border-base));
-    background: var(--Dropdown__background, var(--DARK-MODE-surface-elevated));
-  }
 
   &[data-popper-placement='top-start'] {
     box-shadow:

@@ -120,31 +120,23 @@
     margin-top: var(--sm5);
     padding-left: 0;
     padding-top: var(--sm5);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--SYS-border-section);
   }
   .entity-switcher .trigger {
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
     padding: var(--sm4);
 
     &:hover {
-      background-color: rgba(255, 117, 76, 0.15);
-      color: var(--salmon-800);
+      background-color: color-mix(in srgb, var(--SYS-accent-salmon-base), transparent 15%);
+      color: var(--SYS-accent-salmon-darker);
     }
 
     &:active {
-      background-color: rgba(255, 117, 76, 0.25);
-      color: var(--salmon-800);
-    }
-
-    :global(body.theme-dark) &:hover {
-      color: var(--salmon-200);
-    }
-
-    :global(body.theme-dark) &:active {
-      color: var(--salmon-200);
+      background-color: color-mix(in srgb, var(--SYS-accent-salmon-base), transparent 25%);
+      color: var(--SYS-accent-salmon-darker);
     }
   }
 </style>

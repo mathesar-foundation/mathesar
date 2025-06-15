@@ -56,14 +56,14 @@
   }
 
   .table-name {
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
     font-weight: var(--font-weight-medium);
     padding: var(--sm4) var(--sm3);
     border-bottom: 1px solid var(--card-border);
   }
 
   .detail {
-    color: var(--text-color-tertiary);
+    color: var(--SYS-text-tertiary);
     font-size: var(--sm1);
     line-height: 1.4;
     padding: var(--sm3) var(--sm3);

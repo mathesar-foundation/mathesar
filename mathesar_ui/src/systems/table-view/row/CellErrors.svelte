@@ -80,18 +80,18 @@
   }
 
   path {
-    fill: var(--red-800);
+    fill: var(--SYS-color-danger-icon);
     stroke: none;
   }
 
   .required {
-    color: var(--red-800);
+    color: var(--SYS-color-danger-icon);
     font-size: var(--lg2);
   }
 
   .errors {
     background: var(--background-color);
-    border: solid 2px var(--danger-border-color);
+    border: solid 2px var(--SYS-color-danger-border);
     box-shadow:
       #000 0 0 0 0,
       rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,

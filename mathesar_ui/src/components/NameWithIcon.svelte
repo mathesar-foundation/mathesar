@@ -57,7 +57,7 @@
     vertical-align: -10%;
   }
   .name-with-icon.boxed .icon > :global(svg) {
-    color: var(--white);
+    color: var(--SYS-text-inverted);
   }
   .name {
     color: var(--name-color, currentcolor);

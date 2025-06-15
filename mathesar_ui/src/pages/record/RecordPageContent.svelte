@@ -144,12 +144,12 @@
     grid-column: 1;
     margin: 0;
     overflow: hidden;
-    color: var(--text-color-primary);
+    color: var(--SYS-text-primary);
   }
   .table-name {
     grid-row: 2;
     grid-column: 1;
-    color: var(--text-color-secondary);
+    color: var(--SYS-text-secondary);
   }
   .form-status {
     grid-row: 1 / span 2;

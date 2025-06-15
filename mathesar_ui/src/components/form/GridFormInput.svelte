@@ -65,7 +65,7 @@
   }
 
   .help {
-    color: var(--neutral-500);
+    color: var(--SYS-color-help-text);
     margin-top: var(--sm6);
     font-size: var(--sm1);
   }

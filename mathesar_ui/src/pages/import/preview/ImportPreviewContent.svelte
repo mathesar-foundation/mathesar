@@ -322,17 +322,17 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--neutral-500);
+    color: var(--SYS-text-canvas);
   }
   .preview-header {
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
-    background-color: var(--neutral-300);
+    background-color: var(--SYS-surface-header-table);
     border-top: 1px solid var(--card-border);
   }
   .preview-content {
     padding-bottom: 1rem;
-    background-color: var(--neutral-100);
+    background-color: var(--SYS-surface-canvas);
   }
   .sheet-holder {
     overflow-x: auto;
@@ -344,13 +344,5 @@
     margin: 1rem auto 0 auto;
     max-width: max-content;
     color: var(--color-text-muted);
-  }
-
-  :global(body.theme-dark) .preview-header {
-    background-color: var(--neutral-800);
-  }
-
-  :global(body.theme-dark) .preview-content {
-    background-color: var(--neutral-900);
   }
 </style>
