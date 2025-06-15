@@ -30,7 +30,7 @@ body > .new-item-highlighter {
 body > .new-item-highlighter__hint {
   position: absolute;
   z-index: var(--new-item-highlighter-z-index, 1000);
-  --background: rgba(0, 0, 0, 0.7);
+  --background:  color-mix(in srgb, var(--SYS-surface-dark), transparent 70%);
   inset: 0px auto auto 0px;
   display: flex;
   flex-direction: column;

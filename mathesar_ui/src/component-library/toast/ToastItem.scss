@@ -7,8 +7,8 @@
   background-color: var(--ToastItem__background-color);
   color: var(--ToastItem__text-color);
   box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    0 4px 6px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
+    0 2px 4px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 6%);
   border: none;
   border-radius: var(--sm4);
   position: relative;

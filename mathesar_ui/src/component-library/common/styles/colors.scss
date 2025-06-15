@@ -37,6 +37,8 @@ $surface-base-light: hsl($base-hue-light, $base-saturation-light, 98%);
 
 // Lightness adjustments
 $surface-deltas-light: (
+  "black": 100%,
+  "white": 0%,
   "input": -2%,
   "inset": -1%,
   "canvas": 2%,
@@ -61,6 +63,8 @@ $surface-base-dark: hsl($base-hue-dark, $base-saturation-dark, 2%);
 
 // Darkness adjustments, ordered by elevation
 $surface-deltas-dark: (
+  "black": 0%,
+  "white": 100%,
   "input": -2%,
   "inset": -1%,
   "canvas": 2%,
@@ -129,11 +133,11 @@ $border-roles: (
   "fieldset": 26%,
   "row": 26%,
   "elevated-high": 30%,
-  "input": 30%
+  "input": 30%,
   "canvas": 30%,
   "section": 30%,
   "control": 40%,
-  "table-header": 40%,
+  "table-header": 40%
 );
 
 $border-states-light: (

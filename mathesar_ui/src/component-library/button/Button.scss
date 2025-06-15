@@ -91,9 +91,9 @@
     --button-border: 0.5px var(--SYS-accent-glacier-muted);
     --button-color: var(--SYS-text-control);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.05),
-      0 1px 3px rgba(0, 0, 0, 0.1),
-      0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      0 1px 2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 5%),
+      0 1px 3px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
+      0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%);
 
     &:not(:disabled) {
       &.focus,
@@ -107,8 +107,8 @@
         background-color: var(--SYS-accent-glacier-muted-hover);
         --button-border-color: var(--SYS-accent-glacier-dull-hover);
         box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -2px rgba(0, 0, 0, 0.1),
+          0 4px 6px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
+          0 2px 4px -2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
           0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       }
 
@@ -121,9 +121,9 @@
         );
         --button-border-color: var(--SYS-accent-glacier-muted);
         box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.05),
-          0 1px 3px rgba(0, 0, 0, 0.1),
-          0 1px 2px -1px rgba(0, 0, 0, 0.1);
+          0 1px 2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 5%),
+          0 1px 3px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
+          0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%);
       }
     }
   }
@@ -133,9 +133,9 @@
     --button-border-color: var(--SYS-border-elevated-mid);
     --button-color: var(--SYS-text-control);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.05),
-      0 1px 3px rgba(0, 0, 0, 0.1),
-      0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      0 1px 2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 5%),
+      0 1px 3px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
+      0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%);
 
     &:not(:disabled) {
       &.focus,
@@ -149,8 +149,8 @@
         background-color: color-mix(in srgb, var(--SYS-accent-asparagus-dull), transparent 96%);
         --button-border-color: var(--SYS-accent-asparagus-muted-hover);
         box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -2px rgba(0, 0, 0, 0.1),
+          0 4px 6px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
+          0 2px 4px -2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
           0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       }
 
@@ -159,9 +159,9 @@
        background-color:  color-mix(in srgb, var(--SYS-accent-asparagus-dull), transparent 93%);
         --button-border-color: var(--SYS-accent-asparagus-muted);
         box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.05),
-          0 1px 3px rgba(0, 0, 0, 0.1),
-          0 1px 2px -1px rgba(0, 0, 0, 0.1);
+          0 1px 2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 5%),
+          0 1px 3px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
+          0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%);
       }
     }
   }
@@ -271,8 +271,8 @@
         --button-color: var(--SYS-text-control-focused);
         border-color:  var(--SYS-border-control-focused);
         box-shadow:
-          0 2px 4px rgba(0, 0, 0, 0.15),
-          0 1px 2px rgba(0, 0, 0, 0.1);
+          0 2px 4px  color-mix(in srgb, var(--SYS-surface-dark), transparent 15%),
+          0 1px 2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%);
         outline: none;
       }
       &.close-button {
