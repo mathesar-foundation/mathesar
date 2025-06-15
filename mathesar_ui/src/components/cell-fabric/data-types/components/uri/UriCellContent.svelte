@@ -24,9 +24,9 @@
     text-decoration: underline;
   }
   .link {
-    color: var(--SYS-accent-fjord-dark);
+    color: var(--SYS-accent-fjord-bright);
   }
   .link:visited {
-    color: var(--SYS-accent-wisteria-darker);
+    color: var(--SYS-accent-wisteria-brighter);
   }
 </style>

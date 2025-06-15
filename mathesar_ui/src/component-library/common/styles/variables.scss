@@ -17,17 +17,17 @@ body {
   --inset-background-color: var(--SYS-surface-inset);
 
   
-  --hover-background: color-mix(in srgb, var(--SYS-accent-glacier-light), transparent 20%);
-  --active-background: color-mix(in srgb, var(--SYS-accent-glacier-light-active), transparent 20%);
-  --disabled-background: var(--SYS-accent-wisteria-light-disabled);
+  --hover-background: color-mix(in srgb, var(--SYS-accent-glacier-faint), transparent 20%);
+  --active-background: color-mix(in srgb, var(--SYS-accent-glacier-faint-active), transparent 20%);
+  --disabled-background: var(--SYS-accent-wisteria-faint-disabled);
   --elevated-background: var(--SYS-surface-elevated);
   --sidebar-background: var(--SYS-surface-supporting);
   --sheet-background: var(--SYS-surface-canvas);
   --sheet-cell-selection-bg: color-mix(in srgb, var(--SYS-accent-glacier-base), transparent 75%);
   --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
-  --icon-background: var(--SYS-accent-pumpkin-light);
-  --resource-icon-color: var(--SYS-accent-asparagus-dark-muted);
-  --resource-icon-background: var(--SYS-accent-asparagus-light-muted);
+  --icon-background: var(--SYS-accent-pumpkin-faint);
+  --resource-icon-color: var(--SYS-accent-fjord-bright-muted);
+  --resource-icon-background: var(--SYS-accent-fjord-faint-muted);
   --layout-background-color: var(--SYS-surface-base);
   --window-background-color: var(--SYS-surface-overlay);
   --progress-foreground: color-mix(in srgb, var(--SYS-surface-elevated), transparent 80%);
@@ -49,15 +49,15 @@ body {
   --shadow-color-inset: color-mix(in srgb, var(--SYS-surface-canvas), transparent 10%);
 
   // Card Styles
-  --card-border: 1px solid transparent;
+  --card-border: var(--SYS-border-card);
   --card-row-border: var(--SYS-border-row);
-  --card-background: var(--SYS-surface-inset);
-  --card-hover-background: color-mix(in srgb, var(--SYS-accent-pumpkin-light), transparent 78%);
+  --card-background: var(--SYS-surface-elevated);
+  --card-hover-background: var(--SYS-surface-elevated-hover);
   --card-hover-border: var(--SYS-border-card-hover);
-  --card-hover-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-pumpkin-dark), transparent 80%);
-  --card-active-background: color-mix(in srgb, var(--SYS-accent-pumpkin-base), transparent 95%);
+  --card-hover-shadow: 0 1px 2px 0  var(--SYS-surface-elevated-muted);
+  --card-active-background: var(--SYS-surface-elevated-active);
   --card-active-border: var(--SYS-border-card-active);
-  --card-active-shadow: inset 0 0 0 1px color-mix(in srgb, var(--SYS-accent-pumpkin-base), transparent 60%);
+  --card-active-shadow: inset 0 0 0 1px var(--SYS-surface-elevated-muted);
   --card-focus-outline: var(--SYS-indicator-row);
 
 
@@ -94,4 +94,23 @@ body {
   --lg3: 1.7143rem; // 24px
   --lg4: 2.4rem; // 28px
   --lg5: 3.2rem; // 56px
+
+  // Headers
+  --db-page-header: linear-gradient(
+    135deg,
+    var(--SYS-accent-salmon-faintest) 0%,
+    var(--SYS-accent-pumpkin-faintest) 30%,
+    var(--SYS-accent-asparagus-faintest) 60%,
+    var(--SYS-accent-glacier-faintest) 70%,
+    var(--SYS-accent-fjord-faintest) 80%,
+    var(--SYS-accent-amethyst-faintest) 100%
+  );
+
+  // Headers
+  --schema-page-header: linear-gradient(
+      135deg,
+      var(--SYS-accent-glacier-fainter) 0%,
+      var(--SYS-accent-asparagus-faintest) 30%,
+      var(--SYS-accent-fjord-faintest) 100%
+    );
 }

@@ -67,8 +67,8 @@
         padding: var(--sm4);
         background: linear-gradient(
           135deg,
-          var(--SYS-accent-pumpkin-dark),
-          var(--SYS-accent-pumpkin-darkest)
+          var(--SYS-accent-pumpkin-faint),
+          var(--SYS-accent-pumpkin-base)
         );
         border-radius: var(--border-radius-l);
         margin-right: var(--sm2);

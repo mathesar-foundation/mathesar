@@ -14,7 +14,7 @@
         {#if entityTypeName}
           <div class="entity-type-container">
             <div class="entity-icon">
-              <Icon {...icon} size="1em" />
+              <Icon {...icon} size="1.5em" />
             </div>
             <span class="entity-type-name">{entityTypeName}</span>
           </div>
@@ -65,8 +65,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--SYS-text-tertiary);
-    margin-right: var(--sm2);
+    color: var(--SYS-accent-salmon-base-muted);
+    margin-right: var(--sm5);
   }
 
   .entity-type-container {
@@ -82,16 +82,17 @@
   }
 
   .entity-type-name {
-    font-size: var(--lg1);
-    font-weight: 500;
+    font-size: var(--lg2);
+    font-weight: 700;
     line-height: 1;
-    color: var(--SYS-text-tertiary);
+    color: var(--SYS-accent-salmon-base-muted);
   }
 
   .entity-name {
-    font-weight: var(--font-weight-extra-bold);
-    font-size: var(--lg4);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--lg3);
     line-height: 1;
-    color: var(--SYS-text-primary);
+    margin-bottom: var(--sm6);
+    color: var(--SYS-accent-pumpkin-bright);
   }
 </style>

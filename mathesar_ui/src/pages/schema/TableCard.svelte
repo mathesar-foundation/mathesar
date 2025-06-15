@@ -236,7 +236,7 @@
       content: '';
       border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
         var(--corner-bl);
-      border-left: solid 3px var(--SYS-accent-salmon-light);
+      border-left: solid 3px var(--SYS-accent-salmon-faint);
       position: absolute;
       height: 100%;
       width: 10px;

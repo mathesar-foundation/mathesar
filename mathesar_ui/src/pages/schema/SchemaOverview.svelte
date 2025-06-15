@@ -160,8 +160,8 @@
     padding: var(--lg3);
     background: linear-gradient(
       135deg,
-      var(--SYS-accent-pumpkin-lighter) 0%,
-      var(--SYS-accent-pumpkin-lightest) 100%
+      var(--SYS-accent-pumpkin-fainter) 0%,
+      var(--SYS-accent-pumpkin-faintest) 100%
     );
     border: 1px solid var(--SYS-accent-pumpkin-base);
     border-radius: var(--sm2);
@@ -186,13 +186,13 @@
     .explore-title {
       font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
-      color: var(--SYS-accent-pumpkin-darkest-highlighted);
+      color: var(--SYS-accent-pumpkin-brightest-highlighted);
       margin: 0 0 0.75rem 0;
       position: relative;
     }
 
     .explore-description {
-      color: var(--SYS-accent-pumpkin-darkest);
+      color: var(--SYS-accent-pumpkin-brightest);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;

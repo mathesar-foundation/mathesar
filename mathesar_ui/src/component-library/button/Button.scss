@@ -47,18 +47,18 @@
   &.btn-primary {
     --button-background: linear-gradient(
       to bottom right,
-      var(--SYS-accent-asparagus-light),
-      var(--SYS-accent-asparagus-lighter)
+      var(--SYS-accent-asparagus-faint),
+      var(--SYS-accent-asparagus-fainter)
     );
-    --button-border-color: var(--SYS-accent-asparagus-lightest);
+    --button-border-color: var(--SYS-accent-asparagus-faintest);
     --button-color: var(--SYS-text-primary);
     --button-shadow: var(--SYS-surface-base) 0 1px 2px 0,
-      var(--SYS-accent-asparagus-light) 0 1px 3px 0;
+      var(--SYS-accent-asparagus-faint) 0 1px 3px 0;
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--SYS-accent-asparagus-dark-rgb), 0.25);
+        --button-outline: 2px solid rgba(var(--SYS-accent-asparagus-bright-rgb), 0.25);
         outline-offset: 1px;
       }
 
@@ -66,10 +66,10 @@
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-accent-asparagus-light-hover),
-          var(--SYS-accent-asparagus-lighter-hover)
+          var(--SYS-accent-asparagus-faint-hover),
+          var(--SYS-accent-asparagus-fainter-hover)
         );
-        --button-border-color: var(--SYS-accent-asparagus-lighter-hover);
+        --button-border-color: var(--SYS-accent-asparagus-faint-hover);
         --button-shadow: var(--shadow-color) 0 2px 4px 0;
       }
 
@@ -77,18 +77,18 @@
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-accent-asparagus-lighter-active),
-          var(--SYS-accent-asparagus-light-active)
+          var(--SYS-accent-asparagus-faint-active),
+          var(--SYS-accent-asparagus-fainter-active)
         );
-        --button-border-color: var(--SYS-accent-asparagus-lighter-active);
+        --button-border-color: var(--SYS-accent-asparagus-fainter-active);
         --button-shadow: var(--shadow-color) 0 1px 2px 0;
       }
     }
   }
 
   &.btn-secondary {
-    background-color: color-mix(in srgb, var(--SYS-accent-glacier-light), transparent 80%);
-    --button-border: 0.5px var(--SYS-accent-glacier-lighter);
+    background-color: color-mix(in srgb, var(--SYS-accent-glacier-faint), transparent 80%);
+    --button-border: 0.5px var(--SYS-accent-glacier-fainter);
     --button-color: var(--SYS-text-control);
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.05),
@@ -104,8 +104,8 @@
 
       &:hover,
       &.hover {
-        --button-background: var(--SYS-accent-glacier-light-hover);
-        --button-border-color: var(--SYS-accent-glacier-lighter-hover);
+        --button-background: var(--SYS-accent-glacier-base-hover);
+        --button-border-color: var(--SYS-accent-glacier-faint-hover);
         box-shadow:
           0 4px 6px -1px rgba(0, 0, 0, 0.1),
           0 2px 4px -2px rgba(0, 0, 0, 0.1),
@@ -116,10 +116,10 @@
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-accent-fjord-lighter),
-          var(--SYS-accent-fjord-lighestt)
+          var(--SYS-accent-fjord-fainter),
+          var(--SYS-accent-fjord-faintest)
         );
-        --button-border-color: var(--SYS-accent-fjord-darker);
+        --button-border-color: var(--SYS-accent-fjord-brighter);
         box-shadow:
           0 1px 2px rgba(0, 0, 0, 0.05),
           0 1px 3px rgba(0, 0, 0, 0.1),
@@ -131,21 +131,21 @@
   &.btn-outline-primary {
     --button-background: transparent;
     --button-border-color: var(--SYS-accent-fjord-base);
-    --button-color: var(--SYS-accent-fjord-darker);
+    --button-color: var(--SYS-accent-fjord-brighter);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--SYS-accent-fjord-darkest);
-        --button-border-color: var(--SYS-accent-fjord-dark);
-        --button-color: var(--SYS-accent-fjord-light);
+        --button-background: var(--SYS-accent-fjord-brightest);
+        --button-border-color: var(--SYS-accent-fjord-bright);
+        --button-color: var(--SYS-accent-fjord-faint);
       }
 
       &:active,
       &.active {
-        --button-background: var(--SYS-accent-fjord-darkest);
+        --button-background: var(--SYS-accent-fjord-brightest);
         --button-border-color: var(--SYS-accent-fjord-base);
-        --button-color: var(--SYS-accent-fjord-lightest);
+        --button-color: var(--SYS-accent-fjord-faintest);
       }
     }
   }
@@ -329,27 +329,24 @@
   }
 
   &.btn-link {
-    --button-background: transparent;
-    --button-border-color: transparent;
-    --button-color: var(--SYS-accent-salmon-dark);
     box-shadow: none;
-    padding: 0;
+    padding: 0.3em;
     height: auto;
     min-height: 0;
-    background-color: transparent;
+    color: var(--SYS-accent-glacier-text-highlighted);
+    background-color: color-mix(in srgb, var(--SYS-accent-fjord-fainter), transparent 65%);
+    border: 0.5px dotted var(--SYS-accent-glacier-faintest);
     border-radius: 4px;
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        background-color: transparent;
-        --button-color: var(--SYS-accent-salmon-darker);
+        background-color: color-mix(in srgb, var(--SYS-accent-fjord-fainter), transparent 50%);
       }
 
       &:active,
       &.active {
-        background-color: transparent;
-        --button-color: var(--SYS-accent-salmon-darkest);
+        background-color: color-mix(in srgb, var(--SYS-accent-glacier-fainter), transparent 67%);
       }
     }
   }
@@ -357,11 +354,11 @@
   &.btn-feedback {
     --button-background: linear-gradient(
       to bottom right,
-      var(--SYS-accent-fjord-lighter),
-      var(--SYS-accent-fjord-light)
+      var(--SYS-accent-fjord-fainter),
+      var(--SYS-accent-fjord-faint)
     );
     --button-color: var(--SYS-text-inverted);
-    --button-border-color: var(--SYS-accent-fjord-lighter);
+    --button-border-color: var(--SYS-accent-fjord-fainter);
     border: 1px solid var(--button-border-color);
     border-radius: var(--border-radius-m);
     padding: var(--sm4) var(--sm2);
@@ -375,10 +372,10 @@
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-accent-fjord-lighter),
+          var(--SYS-accent-fjord-fainter),
           var(--SYS-accent-fjord-base)
         );
-        --button-border-color: var(--SYS-accent-fjord-light);
+        --button-border-color: var(--SYS-accent-fjord-faint);
         --button-color: var(--SYS-text-inverted);
         --button-shadow: var(--shadow-color) 0 2px 4px 0,
           var(--shadow-color) 0 1px 3px 0;
@@ -390,7 +387,7 @@
         --button-background: linear-gradient(
           to bottom right,
           var(--SYS-accent-fjord-base),
-          var(--SYS-accent-fjord-dark)
+          var(--SYS-accent-fjord-bright)
         );
         --button-border-color: var(--SYS-accent-fjord-base);
         --button-color: var(--SYS-text-inverted);
@@ -402,10 +399,10 @@
       &.focus {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-accent-fjord-lighter),
+          var(--SYS-accent-fjord-fainter),
           var(--SYS-accent-fjord-base)
         );
-        --button-border-color: var(--SYS-accent-fjord-light);
+        --button-border-color: var(--SYS-accent-fjord-faint);
         --button-color: var(--SYS-text-inverted);
         --button-shadow: var(--shadow-color) 0 2px 4px 0,
           var(--shadow-color) 0 1px 3px 0;

@@ -29,12 +29,7 @@
     width: 100%;
     padding: 0;
     margin-bottom: var(--lg4);
-    background: linear-gradient(
-      135deg,
-      var(--SYS-accent-pumpkin-lighter) 0%,
-      var(--SYS-surface-base) 50%,
-      var(--SYS-accent-amethyst-lightest) 100%
-    );
+    background: var(--header-color, var(--SYS-surface-overlay));
   }
   .content {
     padding: var(--lg4) var(--page-padding-x);

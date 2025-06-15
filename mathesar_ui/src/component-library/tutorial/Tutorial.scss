@@ -1,7 +1,7 @@
 .tutorial {
   position: relative;
   border-radius: var(--border-radius-xl);
-  border: 1px solid var(--SYS-accent-pumpkin-dark);
+  border: 1px solid var(--SYS-accent-pumpkin-bright);
   padding: var(--lg3);
   display: flex;
   align-items: center;
@@ -21,7 +21,7 @@
     background: linear-gradient(
       135deg,
       var(--SYS-accent-pumpkin-base) 0%,
-      var(--SYS-accent-pumpkin-dark) 100%
+      var(--SYS-accent-pumpkin-bright) 100%
     );
     opacity: 0.35;
   }

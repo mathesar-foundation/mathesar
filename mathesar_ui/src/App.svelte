@@ -84,9 +84,9 @@
     --cell-bg-color-processing: var(--SYS-color-warning-bg-light);
     --cell-bg-color-disabled: var(--SYS-surface-inset-disabled);
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
-    --cell-bg-color-row-selected: var(--SYS-accent-glacier-lighter-selected);
+    --cell-bg-color-row-selected: var(--SYS-accent-glacier-fainter-selected);
 
-    --color-fk: var(--SYS-accent-amethyst-light);
+    --color-fk: var(--SYS-accent-amethyst-faint);
     --color-fk-border: var(--SYS-accent-amethyst-border);
     --color-error: var(--SYS-color-danger-text);
     --cell-text-color-processing:var(--SYS-text-muted);

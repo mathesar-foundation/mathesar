@@ -18,7 +18,7 @@
   }
 
   .menu-item {
-    color: var(--SYS-text-primary);
+    color: var(--SYS-text-overlay);
     display: flex;
     flex-grow: 1;
     align-items: center;
@@ -33,8 +33,8 @@
     }
     &.menu-item-link:not(.disabled):hover,
     &.menu-item-button:not(.disabled):hover {
-      background-color: var(--SYS-accent-salmon-light);
-      color: var(--SYS-accent-salmon-darkest);
+      background-color: var(--SYS-accent-fjord-faint-hover);
+      color: var(--SYS-accent-fjord-base-on);
     }
     &.menu-item-button {
       border: inherit;
@@ -70,18 +70,18 @@
       display: inline-flex;
       align-items: center;
       flex-grow: 0;
+      color: var(--SYS-accent-salmon-bright);
     }
     > .control {
       --checkbox-margin-bottom: 0;
     }
     &.active {
-      background-color: var(--SYS-accent-salmon-light-active);
-      color: var(--SYS-accent-salmon-darkest-active);
+      background-color: var(--SYS-accent-fjord-faint);
       font-weight: var(--font-weight-medium);
 
       &:hover {
-        background-color: var(--SYS-accent-salmon-light-hover);
-        color: var(--SYS-accent-salmon-darkest-hover);
+      background-color: var(--SYS-accent-salmon-base-hover);
+      color: var(--SYS-text-inverted);
       }
     }
   }

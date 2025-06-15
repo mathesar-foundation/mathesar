@@ -93,30 +93,22 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
+    icon={iconDatabase}
     name={database.displayName}
     entityTypeName={$_('database')}
-    icon={iconDatabase}
+    --header-color='var(--db-page-header)'
   >
     <div slot="subText" class="database-info">
       <div class="connection-details">
         <div>
           <span class="label">{$_('db_server')}{staticText.COLON}</span>
-          {database.server.getConnectionString()}
+          <span class="code">{database.server.getConnectionString()}</span>
         </div>
         <div>
           <span class="label">{$_('db_name')}{staticText.COLON}</span>
           {database.name}
         </div>
       </div>
-
-      {#if isMathesarAdmin}
-        <div class="edit-connection">
-          <Button on:click={() => editModal.open()} appearance="link">
-            <Icon {...iconEdit} />
-            <span>{$_('edit_connection')}</span>
-          </Button>
-        </div>
-      {/if}
     </div>
     <div slot="action">
       <div class="actions-container">
@@ -124,7 +116,6 @@
           <Icon {...iconPermissions} />
           <span>{$_('database_permissions')}</span>
         </Button>
-
         {#if isMathesarAdmin}
           <div class="dropdown-container">
             <DropdownMenu
@@ -139,6 +130,12 @@
                 on:click={() => disconnectModal.open(database)}
               >
                 {$_('disconnect_database')}
+              </ButtonMenuItem>
+              <ButtonMenuItem
+                icon={iconEdit}
+                on:click={() => editModal.open()}
+              >
+                {$_('edit_connection')}
               </ButtonMenuItem>
               <ButtonMenuItem
                 icon={iconReinstall}
@@ -212,7 +209,8 @@
   }
   .database-info {
     font-size: 1rem;
-    color: var(--SYS-text-secondary);
+    font-weight: var(--font-weight-bold);
+    color: var(--SYS-text-primary);
     margin-top: var(--sm5);
   }
   .connection-details {
@@ -222,12 +220,8 @@
     flex-wrap: wrap;
   }
   .database-info .label {
-    color: var(--SYS-text-primary);
-    font-weight: var(--font-weight-bold);
-  }
-  .edit-connection {
-    margin-top: var(--sm1);
-    display: inline-flex;
+    color: var(--SYS-text-secondary);
+    margin-right: var(--sm5);
   }
   .actions-container {
     display: flex;

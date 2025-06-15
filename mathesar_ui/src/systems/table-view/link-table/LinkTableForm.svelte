@@ -405,11 +405,11 @@
 
 <style>
   .form {
-    --base-fill: var(--SYS-accent-asparagus-light);
+    --base-fill: var(--SYS-accent-asparagus-faint);
     --base-stroke: var(--SYS-accent-asparagus-border);
-    --target-fill:  var(--SYS-accent-pumpkin-light);
+    --target-fill:  var(--SYS-accent-pumpkin-faint);
     --target-stroke: var(--SYS-accent-pumpkin-border);
-    --mapping-fill: var(--SYS-accent-glacier-light);
+    --mapping-fill: var(--SYS-accent-glacier-faint);
     --mapping-stroke: var(--SYS-accent-glacier-border);
     line-height: 1.6;
   }
