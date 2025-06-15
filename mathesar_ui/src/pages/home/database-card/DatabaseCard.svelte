@@ -33,9 +33,9 @@
   }
 
   .db-card.hoverable:hover {
-    border: 1px solid color-mix(in srgb, var(--SYS-accent-tomato-contrast), transparent 70%);
-    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-tomato-contrast), transparent 80%);
-    background: color-mix(in srgb, var(--SYS-accent-tomato-dull), transparent 78%);
+    border: 1px solid color-mix(in srgb, var(--SYS-accent-amethyst-base-muted), transparent 70%);
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-amethyst-dull), transparent 80%);
+    background: color-mix(in srgb, var(--SYS-accent-amethyst-muted), transparent 78%);
   }
 
   .db-card.hoverable:focus {
@@ -44,8 +44,8 @@
   }
 
   .db-card.hoverable:active {
-    border: 1px solid color-mix(in srgb, var(--SYS-accent-tomato-dull), transparent 90%);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--SYS-accent-tomato-bright), transparent 60%);
-    background: color-mix(in srgb, var(--SYS-accent-tomato-dull), transparent 85%);
+    border: 1px solid color-mix(in srgb, var(--SYS-accent-amethyst-dull), transparent 90%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--SYS-accent-amethyst-bright), transparent 60%);
+    background: color-mix(in srgb, var(--SYS-accent-amethyst-dull), transparent 85%);
   }
 </style>

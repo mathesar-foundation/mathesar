@@ -72,7 +72,7 @@
 </script>
 
 <div class="databases-list">
-  <h2>
+  <h2 class="page-header">
     {$_('databases')}
     <Help>
       <RichText text={$_('databases_list_help')} let:slotName let:translatedArg>

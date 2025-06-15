@@ -211,58 +211,58 @@ $focus-indicator-tokens: (
 // Text
 // ------------------------------------------
 $text-tokens-light: (
-  "canvas": (l: 30%, s: 3%),
-  "code": (l: 15%, s: 4%),
-  "container-title": (l: 10%, s: 5%),
-  "control": (l: 10%, s: 5%),
-  "disabled": (l: 60%, s: -4%),
-  "elevated": (l: 10%, s: 5%),
-  "footnote": (l: 30%, s: 3%),
-  "header-primary": (l: 8%, s: 5%),
-  "header-secondary": (l: 10%, s: 5%),
-  "header-tertiary": (l: 25%, s: 3%),
-  "header-subsection": (l: 20%, s: 4%),
-  "input": (l: 10%, s: 5%),
-  "input-label": (l: 20%, s: 4%),
-  "inverse": (l: 95%, s: 4%),
-  "label-fieldset": (l: 20%, s: 4%),
-  "link": (l: 10%, s: 5%),
-  "muted": (l: 35%, s: 2%),
-  "overlay": (l: 10%, s: 5%),
-  "primary": (l: 10%, s: 5%),
-  "secondary": (l: 20%, s: 4%),
-  "section-label": (l: 20%, s: 4%),
-  "tertiary": (l: 30%, s: 3%),
-  "token": (l: 10%, s: 5%),
-  "tooltip": (l: 10%, s: 5%)
+  "canvas": (h: none, l:30%, s: 3%),
+  "code": (h: none, l:15%, s: 4%),
+  "container-title": (h: none, l:10%, s: 5%),
+  "control": (h: none, l:10%, s: 5%),
+  "disabled": (h: none, l:60%, s: -4%),
+  "elevated": (h: none, l:10%, s: 5%),
+  "footnote": (h: none, l:30%, s: 3%),
+  "header-primary": (h: none, l:8%, s: 5%),
+  "header-secondary": (h: none, l:10%, s: 5%),
+  "header-tertiary": (h: none, l:25%, s: 3%),
+  "header-subsection": (h: none, l:20%, s: 4%),
+  "input": (h: none, l:10%, s: 5%),
+  "input-label": (h: none, l:20%, s: 4%),
+  "inverse": (h: none, l:95%, s: 4%),
+  "label-fieldset": (h: none, l:20%, s: 4%),
+  "link": (h: none, l:10%, s: 5%),
+  "muted": (h: none, l:35%, s: 2%),
+  "overlay": (h: none, l:10%, s: 5%),
+  "primary": (h: none, l:10%, s: 5%),
+  "secondary": (h: none, l:20%, s: 4%),
+  "section-label": (h: none, l:20%, s: 4%),
+  "tertiary": (h: none, l:30%, s: 3%),
+  "token": (h: none, l:10%, s: 5%),
+  "tooltip": (h: none, l:10%, s: 5%)
 );
 
 $text-tokens-dark: (
-  "canvas": (l: 60%, s: 3%),
-  "code": (l: 80%, s: 4%),
-  "container-title": (l: 92%, s: 5%),
-  "control": (l: 90%, s: 5%),
-  "disabled": (l: 35%, s: 2%),
-  "elevated": (l: 90%, s: 5%),
-  "faint": (l: 15%, s: 1%),
-  "footnote": (l: 55%, s: 3%),
-  "header-primary": (l: 92%, s: 5%),
-  "header-secondary": (l: 75%, s: 12%),
-  "header-tertiary": (l: 55%, s: 3%),
-  "header-subsection": (l: 75%, s: 4%),
-  "input": (l: 95%, s: 10%),
-  "input-label": (l: 65%, s: 4%),
-  "inverse": (l: 10%, s: 4%),
-  "label-fieldset": (l: 75%, s: 4%),
-  "link": (l: 90%, s: 5%),
-  "muted": (l: 45%, s: 2%),
-  "overlay": (l: 90%, s: 5%),
-  "primary": (l: 90%, s: 5%),
-  "secondary": (l: 70%, s: 4%),
-  "section-label": (l: 75%, s: 4%),
-  "tertiary": (l: 50%, s: 3%),
-  "token": (l: 85%, s: 4%),
-  "tooltip": (l: 88%, s: 4%)
+  "canvas": (h: none, l:60%, s: 3%),
+  "code": (h: none, l:80%, s: 4%),
+  "container-title": (h: none, l:92%, s: 5%),
+  "control": (h: none, l:90%, s: 5%),
+  "disabled": (h: none, l:35%, s: 2%),
+  "elevated": (h: none, l:90%, s: 5%),
+  "faint": (h: none, l:15%, s: 1%),
+  "footnote": (h: none, l:55%, s: 3%),
+  "header-primary": (h: none, l:92%, s: 5%),
+  "header-secondary": (h: none, l:75%, s: 12%),
+  "header-tertiary": (h: none, l:55%, s: 3%),
+  "header-subsection": (h: none, l:75%, s: 4%),
+  "input": (h: none, l:95%, s: 10%),
+  "input-label": (h: none, l:65%, s: 4%),
+  "inverse": (h: none, l:10%, s: 4%),
+  "label-fieldset": (h: none, l:75%, s: 4%),
+  "link": (h: none, l:90%, s: 5%),
+  "muted": (h: none, l:45%, s: 2%),
+  "overlay": (h: none, l:90%, s: 5%),
+  "primary": (h: none, l:90%, s: 5%),
+  "secondary": (h: none, l:70%, s: 4%),
+  "section-label": (h: none, l:75%, s: 4%),
+  "tertiary": (h: none, l:50%, s: 3%),
+  "token": (h: none, l:85%, s: 4%),
+  "tooltip": (h: none, l:88%, s: 4%)
 );
 
 
@@ -517,7 +517,11 @@ body {
     }
 
     @each $name, $props in $text-tokens-dark {
-      $base: hsl($base-hue-dark, map-get($props, s), map-get($props, l));
+      $hue: map-get($props, h);
+      @if $hue == none {
+        $hue: $base-hue-dark;
+      }
+      $base: hsl($hue, map-get($props, s), map-get($props, l));
       @include generate-text-tokens(#{$name}, $base, $text-states-dark);
     }
 

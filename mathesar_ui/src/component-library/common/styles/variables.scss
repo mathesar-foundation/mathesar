@@ -113,4 +113,8 @@ body {
       var(--SYS-accent-asparagus-faint) 30%,
       var(--SYS-accent-fjord-faint) 100%
     );
+
+    .page-header {
+      color: var(--SYS-text-header-primary);
+    }
 }
