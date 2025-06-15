@@ -128,6 +128,48 @@
     }
   }
 
+  &.btn-option-card {
+    background-color: var(--SYS-surface-overlay-secondary);
+    --button-border: 0.5px var(--SYS-accent-glacier-muted);
+    --button-color: var(--SYS-text-control);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+    &:not(:disabled) {
+      &.focus,
+      &:focus {
+        --button-outline: 2px solid rgba(189, 193, 198, 0.3);
+        outline-offset: 1px;
+      }
+
+      &:hover,
+      &.hover {
+        --button-background: var(--SYS-accent-glacier-base-hover);
+        --button-border-color: var(--SYS-accent-glacier-dull-hover);
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.1),
+          0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      }
+
+      &:active,
+      &.active {
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--SYS-accent-fjord-muted),
+          var(--SYS-accent-fjord-faint)
+        );
+        --button-border-color: var(--SYS-accent-fjord-contrast);
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.05),
+          0 1px 3px rgba(0, 0, 0, 0.1),
+          0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
   &.btn-outline-primary {
     --button-background: transparent;
     --button-border-color: var(--SYS-accent-fjord-base);

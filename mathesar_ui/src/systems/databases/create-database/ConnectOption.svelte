@@ -9,7 +9,7 @@
   export let description: string;
 </script>
 
-<Button on:click={changeView} appearance="secondary">
+<Button on:click={changeView} appearance="option-card">
   <div class="content">
     <div class="icon-circle">
       <Icon {...icon} size="2rem" />
@@ -38,7 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--SYS-accent-amethyst-base);
+    color: var(--SYS-accent-amethyst-contrast);
   }
   .header {
     font-size: var(--lg1);

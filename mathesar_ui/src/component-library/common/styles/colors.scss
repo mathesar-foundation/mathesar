@@ -32,53 +32,54 @@ $base-saturation-dark: 4%;
 // Surfaces
 // ------------------------------------------
 
-
-// Light mode anchors
+// Light mode anchor
 $surface-base-light: hsl($base-hue-light, $base-saturation-light, 98%);
-$surface-canvas-light: hsl($base-hue-light, $base-saturation-light, 96%);
-$surface-overlay-light: hsl($base-hue-light, $base-saturation-light, 82%);
-$surface-tooltip-light: hsl($base-hue-light, $base-saturation-light, 76%);
 
 // Lightness adjustments
 $surface-deltas-light: (
-  "supporting": 0%,
-  "header-primary": 3%,
-  "header-table": 4%,
-  "header-section": -8%,
-  "footer": 3%,
-  "input": 1%,
+  "fieldset": -9%,
+  "card": -9%,
   "control": -7%,
   "inset": 5%,
-  "card": -9%,
-  "fieldset": -9%,
-  "elevated": -3%,
+  "input": 1%,
+  "base": 2%,
+  "supporting": 0%,
+  "header-primary": 3%,
+  "footer": 3%,
+  "canvas": 4%,
+  "elevated": 4%,
+  "header-table": 4%,
+  "header-section": 6%,
+  "overlay": 8%,
+  "overlay-secondary": 12%,
+  "overlay-tertiary": 16%,  
+  "tooltip": 20%,
   "inverted": 90%,
-  "overlay-secondary": -1%,
-  "overlay-tertiary": -2%
 );
 
-// Dark mode anchors
+// Dark mode anchor
 $surface-base-dark: hsl($base-hue-dark, $base-saturation-dark, 2%);
-$surface-canvas-dark: hsl($base-hue-dark, $base-saturation-dark, 4%);
-$surface-overlay-dark: hsl($base-hue-dark, $base-saturation-dark, 11%);
-$surface-tooltip-dark: hsl($base-hue-dark, $base-saturation-dark, 12%);
 
-// Darkness adjustments
+// Darkness adjustments, ordered by elevation
 $surface-deltas-dark: (
-  "supporting": 2%,
-  "header-primary": 3%,
-  "header-table": 4%,
-  "header-section": 9%,
-  "footer": 3%,
-  "input": -4%,
+  "fieldset": -9%,
+  "card": -9%,
   "control": -7%,
   "inset": -4%,
-  "card": -9%,
-  "fieldset": -9%,
+  "input": -4%,
+  "base": 2%,
+  "supporting": 2%,
+  "header-primary": 3%,
+  "footer": 3%,
+  "canvas": 4%,
   "elevated": 4%,
-  "inverted": 90%,
-  "overlay-secondary": -1%,
-  "overlay-tertiary": -2%
+  "header-table": 4%,
+  "header-section": 6%,
+  "overlay": 8%,
+  "overlay-secondary": 12%,
+  "overlay-tertiary": 16%,
+  "tooltip": 20%,
+  "inverted": 90%
 );
 
 $surface-states-light: (
@@ -458,27 +459,34 @@ $accent-states: (
 // GENERATE COLORS IN THEMES
 // ------------------------------------------
 body {
-  @include generate-focus-indicator-tokens($focus-indicator-tokens,  $base-hue-light);
+  // Surfaces
   @include generate-surface-tokens(base, $surface-base-light, $surface-states-light);
-  @include generate-surface-tokens(canvas, $surface-canvas-light, $surface-states-light);
-  @include generate-surface-tokens(overlay, $surface-overlay-light, $surface-states-light);
-  @include generate-surface-tokens(tooltip, $surface-tooltip-light, $surface-states-light);
 
   @each $name, $delta in $surface-deltas-light {
-    $base: adjust-lightness($surface-canvas-light, $delta);
+    $base: adjust-lightness($surface-base-light, $delta);
     @include generate-surface-tokens(#{$name}, $base, $surface-states-light);
   }
 
+  // Borders
   @each $name, $tier in $border-roles {
     $base: hsl($base-hue-light, $base-saturation-light, map-get($border-tiers-light, $tier));
     @include generate-border-tokens(#{$name}, $base, $border-states-light);
   }
 
+  // Focus indicators
+  @include generate-focus-indicator-tokens($focus-indicator-tokens,  $base-hue-light);
+
+  // Text
   @each $name, $props in $text-tokens-light {
-    $base: hsl($base-hue-light, map-get($props, s), map-get($props, l));
+    $hue: map-get($props, h);
+    @if $hue == none {
+      $hue: $base-hue-light;
+    }
+    $base: hsl($hue, map-get($props, s), map-get($props, l));
     @include generate-text-tokens(#{$name}, $base, $text-states-light);
   }
 
+  // Semantic colors and buttons
   @each $intent, $hue in $button-intents {
     @include generate-color-tokens($intent, $hue, $button-roles-light);
 
@@ -493,29 +501,35 @@ body {
     @include generate-button-tokens($intent, ghost, $ghost, $button-state-deltas-light);
   }
 
+  // Accent colors
   @each $name, $props in $accent-families {
     $hue: nth($props, 1);
     $sat: nth($props, 2);
     @include generate-accent-tokens($name, $hue, $sat, $accent-roles-light);
   }
+  //**********
   // Dark theme
+  //**********
   &.theme-dark {
-    @include generate-focus-indicator-tokens($focus-indicator-tokens, $base-hue-dark);
+
+    // Surfaces
     @include generate-surface-tokens(base, $surface-base-dark, $surface-states-dark);
-    @include generate-surface-tokens(canvas, $surface-canvas-dark, $surface-states-dark);
-    @include generate-surface-tokens(overlay, $surface-overlay-dark, $surface-states-dark);
-    @include generate-surface-tokens(tooltip, $surface-tooltip-dark, $surface-states-dark);
 
     @each $name, $delta in $surface-deltas-dark {
-      $base: adjust-lightness($surface-canvas-dark, $delta);
+      $base: adjust-lightness($surface-base-dark, $delta);
       @include generate-surface-tokens(#{$name}, $base, $surface-states-dark);
     }
 
+    // Borders
     @each $name, $tier in $border-roles {
       $base: hsl($base-hue-dark, $base-saturation-dark, map-get($border-tiers-dark, $tier));
       @include generate-border-tokens(#{$name}, $base, $border-states-dark);
     }
 
+    // Focus indicators
+    @include generate-focus-indicator-tokens($focus-indicator-tokens, $base-hue-dark);
+
+    // Text
     @each $name, $props in $text-tokens-dark {
       $hue: map-get($props, h);
       @if $hue == none {
@@ -525,6 +539,7 @@ body {
       @include generate-text-tokens(#{$name}, $base, $text-states-dark);
     }
 
+    // Semantic colors and buttons
     @each $intent, $hue in $button-intents {
       @include generate-color-tokens($intent, $hue, $button-roles-dark);
 
@@ -539,6 +554,7 @@ body {
       @include generate-button-tokens($intent, ghost, $ghost, $button-state-deltas-dark);
     }
 
+    // Accent colors
     @each $name, $props in $accent-families {
       $hue: nth($props, 1);
       $sat: nth($props, 2);
