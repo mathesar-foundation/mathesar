@@ -93,7 +93,72 @@ def test_forms_add(rf, monkeypatch):
         mock_fields_manager = MagicMock()
         mock_fields_manager.all.return_value = fields
         type(form).fields = PropertyMock(return_value=mock_fields_manager)
-        return form
+        field_col_info_map = {
+            "k1": {
+                "column": {
+                    "id": 10,
+                    "name": "Author",
+                    "type": "integer",
+                    "default": None,
+                    "nullable": True,
+                    "description": None,
+                    "primary_key": False,
+                    "type_options": None,
+                    "has_dependents": False,
+                    "current_role_priv": [
+                        "SELECT",
+                        "INSERT",
+                        "UPDATE",
+                        "REFERENCES"
+                    ],
+                    "metadata": None
+                },
+                "error": None
+            },
+            "k2": {
+                "column": {
+                    "id": 2,
+                    "name": "First Name",
+                    "type": "text",
+                    "default": None,
+                    "nullable": True,
+                    "description": None,
+                    "primary_key": False,
+                    "type_options": None,
+                    "has_dependents": False,
+                    "current_role_priv": [
+                        "SELECT",
+                        "INSERT",
+                        "UPDATE",
+                        "REFERENCES"
+                    ],
+                    "metadata": None
+                },
+                "error": None
+            },
+            "k3": {
+                "column": {
+                    "id": 3,
+                    "name": "Last Name",
+                    "type": "text",
+                    "default": None,
+                    "nullable": True,
+                    "description": None,
+                    "primary_key": False,
+                    "type_options": None,
+                    "has_dependents": False,
+                    "current_role_priv": [
+                        "SELECT",
+                        "INSERT",
+                        "UPDATE",
+                        "REFERENCES"
+                    ],
+                    "metadata": None
+                },
+                "error": None
+            }
+        }
+        return form, field_col_info_map
     monkeypatch.setattr(forms, 'create_form', mock_forms_info)
     expect_form_info = {
         "id": 42,
@@ -167,7 +232,72 @@ def test_forms_add(rf, monkeypatch):
                 "allow_create": False,
                 "create_label": None
             }
-        ]
+        ],
+        "field_col_info_map": {
+            "k1": {
+                "column": {
+                    "id": 10,
+                    "name": "Author",
+                    "type": "integer",
+                    "default": None,
+                    "nullable": True,
+                    "description": None,
+                    "primary_key": False,
+                    "type_options": None,
+                    "has_dependents": False,
+                    "current_role_priv": [
+                        "SELECT",
+                        "INSERT",
+                        "UPDATE",
+                        "REFERENCES"
+                    ],
+                    "metadata": None
+                },
+                "error": None
+            },
+            "k2": {
+                "column": {
+                    "id": 2,
+                    "name": "First Name",
+                    "type": "text",
+                    "default": None,
+                    "nullable": True,
+                    "description": None,
+                    "primary_key": False,
+                    "type_options": None,
+                    "has_dependents": False,
+                    "current_role_priv": [
+                        "SELECT",
+                        "INSERT",
+                        "UPDATE",
+                        "REFERENCES"
+                    ],
+                    "metadata": None
+                },
+                "error": None
+            },
+            "k3": {
+                "column": {
+                    "id": 3,
+                    "name": "Last Name",
+                    "type": "text",
+                    "default": None,
+                    "nullable": True,
+                    "description": None,
+                    "primary_key": False,
+                    "type_options": None,
+                    "has_dependents": False,
+                    "current_role_priv": [
+                        "SELECT",
+                        "INSERT",
+                        "UPDATE",
+                        "REFERENCES"
+                    ],
+                    "metadata": None
+                },
+                "error": None
+            }
+        }
     }
     form_def = {
         "name": "form1",

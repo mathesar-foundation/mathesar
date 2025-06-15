@@ -70,6 +70,7 @@ class FormInfo(TypedDict):
         redirect_url: Redirect path after submission.
         submit_label: Text to be displayed on the submit button.
         fields: Definition of Fields within the form.
+        field_col_info_map: A map between field_keys and column info with metadata.
     """
     id: int
     created_at: str
@@ -91,10 +92,14 @@ class FormInfo(TypedDict):
     fields: Optional[list[FieldInfo]]
 
     @classmethod
-    def from_model(cls, form_model):
+    def from_model(cls, form_model, field_col_info_map=None):
         def rm_keys(model, keys):
             return {k: v for k, v in model.__dict__.items() if k not in keys}
-        return {**rm_keys(form_model, ('_state')), "fields": [rm_keys(f, ('_state', 'created_at', 'updated_at')) for f in form_model.fields.all()]}
+        return {
+            **rm_keys(form_model, ('_state')),
+            "fields": [rm_keys(f, ('_state', 'created_at', 'updated_at'))for f in form_model.fields.all()],
+            "field_col_info_map": field_col_info_map
+        }
 
 
 class FieldDef(TypedDict):
@@ -181,5 +186,5 @@ def add(*, form_def: FormDef, **kwargs) -> FormInfo:
         The details for the newly created form.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model = create_form(form_def, user)
-    return FormInfo.from_model(form_model)
+    form_model, field_col_info_map = create_form(form_def, user)
+    return FormInfo.from_model(form_model, field_col_info_map)

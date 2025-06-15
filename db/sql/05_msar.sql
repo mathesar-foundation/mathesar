@@ -5598,9 +5598,9 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.related_fields_exist(oid_attn_map jsonb)
+msar.fields_exist(oid_attn_map jsonb)
 RETURNS boolean AS $$/*
-Utility function to determine that related form fields passed through the forms API actually exists on the db.
+Utility function to determine that form fields passed through the forms via API exists on the db.
 
 oid_attn_map should have the following form:
 {
@@ -5618,4 +5618,55 @@ oid_attn_map should have the following form:
     ) AS actual_attn_arr
     FROM jsonb_each(oid_attn_map) AS x(tab_oid, attnums)
   ) t;
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_oid_col_info_map(oid_attn_map jsonb)
+RETURNS jsonb AS $$/*
+Returns column_info for a given oid_attn_map.
+
+oid_attn_map should have the following form:
+{
+  "table_oid_1": [col_att1,col_att2,col_att3],
+  "table_oid_2": [col_att1, col_att5]
+}
+
+Returns:
+{
+  "table_oid_1": {"col_att1": col_info(), "col_att2": col_info(), "col_att3": col_info()},
+  "table_oid_2": {"col_att1": col_info(), "col_att5": col_info()}
+}
+*/
+  WITH cte AS (
+    SELECT
+      tab_id::oid,
+      ARRAY(SELECT jsonb_array_elements_text(attnums))::int[] AS attnums
+    FROM jsonb_each(oid_attn_map) AS x(tab_id, attnums)
+  ), col_info_cte AS (
+    SELECT
+      cte.tab_id AS tab_oid,
+      jsonb_object_agg(
+        attnum,
+        jsonb_build_object(
+          'id', attnum,
+          'name', attname,
+          'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END,
+          'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
+          'nullable', NOT attnotnull,
+          'primary_key', COALESCE(pgi.indisprimary, false),
+          'default', msar.describe_column_default(tab_id, attnum),
+          'has_dependents', msar.has_dependents(tab_id, attnum),
+          'description', msar.col_description(tab_id, attnum),
+          'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum)
+        )
+      ) AS col_info_arr
+    FROM cte
+      LEFT JOIN pg_attribute pga ON cte.tab_id=pga.attrelid
+      LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
+      LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
+    WHERE pga.attrelid=tab_id AND pga.attnum = ANY(cte.attnums) AND NOT attisdropped
+    GROUP BY cte.tab_id
+  )
+  SELECT jsonb_object_agg(tab_oid, col_info_arr) FROM col_info_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;

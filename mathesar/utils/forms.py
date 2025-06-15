@@ -3,9 +3,11 @@ from collections import defaultdict
 
 from django.db import transaction
 
-from db.forms import related_fields_exist
+from db.forms import fields_exist, get_oid_col_info_map
 from db.roles import get_current_role_from_db
-from mathesar.models.base import Form, FormField, Database, ConfiguredRole, UserDatabaseRoleMap
+from mathesar.models.base import (
+    Form, FormField, Database, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
+)
 
 
 def validate_submit_role(user_dbrm, submit_role_id=None):
@@ -24,10 +26,46 @@ def validate_submit_role(user_dbrm, submit_role_id=None):
     return submit_role
 
 
-def validate_related_fields(tab_attn_map, user_dbrm, submit_role):
-    user_dbrm.cofigured_role = submit_role  # DANGEROUS!!!
+def get_oid_attnums_map(form_model):
+    oam = defaultdict(list)
+    fields = {field.key: field for field in form_model.fields.all()}
+    for field in fields.values():
+        table_oid = field.parent_field.target_table_oid if field.parent_field else form_model.base_table_oid
+        oam[table_oid].append(field.attnum)
+    return oam
+
+
+def validate_fields(form_model, user_dbrm):
+    oam = get_oid_attnums_map(form_model)
+    user_dbrm.cofigured_role = form_model.submit_role  # DANGEROUS!!!
     with user_dbrm.connection as conn:
-        assert related_fields_exist(tab_attn_map, conn), "Invalid related fields"
+        assert fields_exist(oam, conn), "Invalid fields"
+
+
+def get_field_col_info_map(form_model, user_dbrm):
+    oam = get_oid_attnums_map(form_model)
+    fields_map = {field.key: field for field in form_model.fields.all()}
+
+    user_dbrm.cofigured_role = form_model.submit_role  # DANGEROUS!!!
+    with user_dbrm.connection as conn:
+        oid_col_info_map = get_oid_col_info_map(oam, conn)
+
+    def rm_keys(model, keys):
+        return {k: v for k, v in model.__dict__.items() if k not in keys}
+    metadata_map = {}
+    for oid, attnums in oam.items():
+        metadata_map[oid] = {
+            meta.attnum: rm_keys(meta, ["_state", "database_id", "table_oid"]) for meta in ColumnMetaData.objects.filter(attnum__in=attnums, table_oid=oid, database=form_model.database)
+        }
+
+    fcim = defaultdict(lambda: {"column": None, "error": None})
+    for key, field in fields_map.items():
+        try:
+            table_oid = field.parent_field.target_table_oid if field.parent_field else form_model.base_table_oid
+            fcim[key]["column"] = oid_col_info_map[str(table_oid)][str(field.attnum)] | {'metadata': metadata_map[table_oid].get(field.attnum)}
+        except KeyError as e:
+            fcim[key]["error"] = {"code": -31025, "message": f"Column {e} not found for field {key}"}
+    return fcim
 
 
 @transaction.atomic
@@ -70,15 +108,14 @@ def create_form(form_def, user):
         ) for field in form_def["fields"]
     ]
     created_fields = FormField.objects.bulk_create(field_instances)
-    field_key_model_map = {field.key: field for field in created_fields}
+    fields_map = {field.key: field for field in created_fields}
     update_field_instances = []
-    tab_attn_map = defaultdict(list)
     for field in form_def["fields"]:
         if field.get("parent_field_key"):
-            field_key_model_map[field["key"]].parent_field = field_key_model_map[field["parent_field_key"]]
-            update_field_instances.append(field_key_model_map[field["key"]])
-            tab_attn_map[field_key_model_map[field["parent_field_key"]].target_table_oid].append(field_key_model_map[field["key"]].attnum)
+            fields_map[field["key"]].parent_field = fields_map[field["parent_field_key"]]
+            update_field_instances.append(fields_map[field["key"]])
     if update_field_instances:
-        validate_related_fields(tab_attn_map, user_dbrm, submit_role)
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
-    return form_model
+    validate_fields(form_model, user_dbrm)
+    field_col_info_map = get_field_col_info_map(form_model, user_dbrm)
+    return form_model, field_col_info_map
