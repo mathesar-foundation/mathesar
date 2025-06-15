@@ -27,6 +27,6 @@
     color: var(--SYS-accent-fjord-bright);
   }
   .link:visited {
-    color: var(--SYS-accent-wisteria-brighter);
+    color: var(--SYS-accent-wisteria-contrast);
   }
 </style>

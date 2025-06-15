@@ -17,17 +17,17 @@ body {
   --inset-background-color: var(--SYS-surface-inset);
 
   
-  --hover-background: color-mix(in srgb, var(--SYS-accent-glacier-faint), transparent 20%);
-  --active-background: color-mix(in srgb, var(--SYS-accent-glacier-faint-active), transparent 20%);
-  --disabled-background: var(--SYS-accent-wisteria-faint-disabled);
+  --hover-background: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 20%);
+  --active-background: color-mix(in srgb, var(--SYS-accent-glacier-dull-active), transparent 20%);
+  --disabled-background: var(--SYS-accent-wisteria-dull-disabled);
   --elevated-background: var(--SYS-surface-elevated);
   --sidebar-background: var(--SYS-surface-supporting);
   --sheet-background: var(--SYS-surface-canvas);
   --sheet-cell-selection-bg: color-mix(in srgb, var(--SYS-accent-glacier-base), transparent 75%);
   --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
-  --icon-background: var(--SYS-accent-pumpkin-faint);
+  --icon-background: var(--SYS-accent-pumpkin-dull);
   --resource-icon-color: var(--SYS-accent-fjord-bright-muted);
-  --resource-icon-background: var(--SYS-accent-fjord-faint-muted);
+  --resource-icon-background: var(--SYS-accent-fjord-dull-muted);
   --layout-background-color: var(--SYS-surface-base);
   --window-background-color: var(--SYS-surface-overlay);
   --progress-foreground: color-mix(in srgb, var(--SYS-surface-elevated), transparent 80%);
@@ -98,19 +98,19 @@ body {
   // Headers
   --db-page-header: linear-gradient(
     135deg,
-    var(--SYS-accent-salmon-faintest) 0%,
-    var(--SYS-accent-pumpkin-faintest) 30%,
-    var(--SYS-accent-asparagus-faintest) 60%,
-    var(--SYS-accent-glacier-faintest) 70%,
-    var(--SYS-accent-fjord-faintest) 80%,
-    var(--SYS-accent-amethyst-faintest) 100%
+    var(--SYS-accent-salmon-faint) 0%,
+    var(--SYS-accent-pumpkin-faint) 30%,
+    var(--SYS-accent-asparagus-faint) 60%,
+    var(--SYS-accent-glacier-faint) 70%,
+    var(--SYS-accent-fjord-faint) 80%,
+    var(--SYS-accent-amethyst-faint) 100%
   );
 
   // Headers
   --schema-page-header: linear-gradient(
       135deg,
-      var(--SYS-accent-glacier-fainter) 0%,
-      var(--SYS-accent-asparagus-faintest) 30%,
-      var(--SYS-accent-fjord-faintest) 100%
+      var(--SYS-accent-glacier-muted) 0%,
+      var(--SYS-accent-asparagus-faint) 30%,
+      var(--SYS-accent-fjord-faint) 100%
     );
 }

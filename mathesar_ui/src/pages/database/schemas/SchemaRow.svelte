@@ -115,7 +115,7 @@
   }
 
   .schema-row.hover {
-    border: 1px solid var(--SYS-accent-salmon-faint);
+    border: 1px solid var(--SYS-accent-salmon-dull);
     box-shadow: var(--card-hover-shadow);
     background: var(--card-hover-background);
   }
@@ -139,7 +139,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--SYS-accent-salmon-base), var(--SYS-accent-pumpkin-faint));
+    background: linear-gradient(135deg, var(--SYS-accent-salmon-base), var(--SYS-accent-pumpkin-dull));
     border-radius: 50%;
     width: 2rem;
     height: 2rem;

@@ -43,7 +43,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--SYS-accent-tomato-base), var(--SYS-accent-tomato-faint));
+    background: linear-gradient(135deg, var(--SYS-accent-glacier-dull), var(--SYS-accent-glacier-base));
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -51,7 +51,6 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--SYS-text-inverted);
   }
 
   .content {

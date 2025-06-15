@@ -44,7 +44,7 @@
       }
 
       &:hover {
-        border-bottom-color: var(--SYS-accent-pumpkin-fainter-hover);
+        border-bottom-color: var(--SYS-accent-pumpkin-muted-hover);
         opacity: 1;
       }
 
@@ -94,7 +94,7 @@
   }
 
   > ul.tabs:before {
-    border-bottom: 1px solid var(--SYS-accent-fjord-faint);
+    border-bottom: 1px solid var(--SYS-accent-fjord-dull);
   }
 
   .tab-content-holder {

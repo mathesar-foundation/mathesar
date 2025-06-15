@@ -47,17 +47,17 @@ ul.pagination {
 
     &.active {
       .page {
-        background-color: color-mix(in srgb, var(--SYS-accent-pumpkin-faint), transparent 90%);
+        background-color: color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 90%);
         color: var(--SYS-accent-pumpkin-bright);
-        border-color: var(--SYS-accent-pumpkin-faint);
+        border-color: var(--SYS-accent-pumpkin-dull);
       }
     }
 
     &.hover {
       .page {
-        background-color: color-mix(in srgb, var(--SYS-accent-pumpkin-faint-hover), transparent 90%);
+        background-color: color-mix(in srgb, var(--SYS-accent-pumpkin-dull-hover), transparent 90%);
         color: var(--SYS-accent-pumpkin-bright-hover);
-        border-color: var(--SYS-accent-pumpkin-faint-hover);
+        border-color: var(--SYS-accent-pumpkin-dull-hover);
       }
     }
   }
