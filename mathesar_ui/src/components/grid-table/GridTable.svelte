@@ -12,7 +12,7 @@
     overflow: hidden;
     grid-template-columns: var(--Grid-table__template-columns);
     grid-template-rows: var(--Grid-table__template-rows);
-    background: var(--card-background);
+    background: var(--SYS-surface-card);
     box-shadow:
       0 1px 2px var(--shadow-color-light),
       0 1px 3px var(--shadow-color);

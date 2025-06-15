@@ -56,7 +56,7 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: var(--card-background);
+    background-color: var(--SYS-surface-card);
     border-bottom: 1px solid var(--SYS-border-section);
     box-shadow: 0 2px 4px var(--shadow-color);
     user-select: none;

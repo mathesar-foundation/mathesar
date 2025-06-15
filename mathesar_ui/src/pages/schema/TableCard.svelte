@@ -200,7 +200,7 @@
     display: flex;
     align-items: center;
     border: 1px solid var(--card-border);
-    background-color: var(--card-background);
+    background-color: var(--SYS-surface-card);
     overflow: hidden;
     border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
       var(--corner-bl);

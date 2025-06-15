@@ -121,7 +121,7 @@
     border-radius: 0.5rem;
     border: solid 0.15rem var(--SYS-border-card);
     padding: 0.7rem 1rem;
-    background: var(--card-background);
+    background: var(--SYS-surface-card);
   }
   .link-type-option.checked {
     border-color: var(--color-checked);

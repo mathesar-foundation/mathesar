@@ -22,7 +22,7 @@
   .db-card {
     border-radius: var(--border-radius-l);
     border: 1px solid var(--card-border);
-    background-color: var(--card-background);
+    background-color: var(--SYS-surface-card);
     overflow: hidden;
     box-shadow: var(--card-shadow);
     transition: background 120ms ease, box-shadow 120ms ease;

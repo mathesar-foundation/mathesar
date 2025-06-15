@@ -18,7 +18,7 @@
   .link-card {
     display: block;
     cursor: pointer;
-    background: var(--card-background);
+    background: var(--SYS-surface-card);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-m);
     box-shadow: var(--card-hover-shadow);
@@ -50,7 +50,7 @@
     position: relative;
     bottom: var(--sm3);
     left: var(--sm3);
-    background: var(--card-background);
+    background: var(--SYS-surface-card);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-m);
   }

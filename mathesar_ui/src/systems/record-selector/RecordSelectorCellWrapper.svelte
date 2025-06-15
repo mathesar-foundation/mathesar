@@ -53,7 +53,7 @@
   }
 
   .column-header {
-    background: var(--card-background);
+    background: var(--SYS-surface-card);
     border-bottom-width: var(--separator-width);
     position: sticky;
     top: 0;
@@ -67,7 +67,7 @@
     position: sticky;
     left: 0;
     z-index: var(--z-index__record_selector__row-header);
-    background: var(--card-background);
+    background: var(--SYS-surface-card);
     min-width: 3ch;
   }
   .row-header.row-is-selected {

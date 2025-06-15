@@ -116,7 +116,7 @@
 
       .tag {
         padding: var(--sm6) var(--sm2);
-        background: var(--card-background);
+        background: var(--SYS-surface-card);
         color: var(--SYS-text-secondary);
         border: 1px solid var(--card-border);
         border-radius: var(--lg1);

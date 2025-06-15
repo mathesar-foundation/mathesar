@@ -62,7 +62,7 @@
   }
   .specifier-tag {
     border-radius: var(--border-radius-xl);
-    background-color: var(--card-background);
+    background-color: var(--SYS-surface-card);
     padding: 0.228rem 0.571rem;
     font-size: var(--sm1);
     color: var(--SYS-text-primary);

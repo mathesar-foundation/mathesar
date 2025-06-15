@@ -67,7 +67,7 @@
     .count-container {
       --badge-font-size: var(--sm1);
       --badge-text-color: var(--SYS-text-secondary);
-      --badge-background-color: var(--card-background);
+      --badge-background-color: var(--SYS-surface-card);
       height: 100%;
     }
   }

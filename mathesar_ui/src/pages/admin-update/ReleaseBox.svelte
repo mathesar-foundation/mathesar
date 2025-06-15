@@ -71,7 +71,7 @@
     border: solid 1px var(--SYS-border-section);
     padding: var(--lg1);
     border-radius: var(--border-radius-l);
-    background-color: var(--card-background);
+    background-color: var(--SYS-surface-card);
   }
 
   .release.available-upgrade {
@@ -105,7 +105,7 @@
   }
 
   .logo {
-    background: var(--card-background);
+    background: var(--SYS-surface-card);
     font-size: 1rem;
     color: var(--SYS-text-primary);
     padding: 0.5rem;

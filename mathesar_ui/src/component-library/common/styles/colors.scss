@@ -37,24 +37,23 @@ $surface-base-light: hsl($base-hue-light, $base-saturation-light, 98%);
 
 // Lightness adjustments
 $surface-deltas-light: (
-  "fieldset": -9%,
-  "card": -9%,
-  "control": -7%,
-  "inset": 5%,
-  "input": 1%,
-  "base": 2%,
-  "supporting": 0%,
-  "header-primary": 3%,
-  "footer": 3%,
-  "canvas": 4%,
-  "elevated": 4%,
+  "input": -2%,
+  "inset": -1%,
+  "canvas": 2%,
+  "supporting": 3%,
+  "header-primary": 4%,
+  "footer": 4%,
   "header-table": 4%,
-  "header-section": 6%,
+  "fieldset": 4%,
+  "card": 5%,
+  "control": 5%,
+  "header-section": 5%,
+  "elevated": 6%,
   "overlay": 8%,
   "overlay-secondary": 12%,
-  "overlay-tertiary": 16%,  
-  "tooltip": 20%,
-  "inverted": 90%,
+  "overlay-tertiary": 16%,
+  "tooltip": 18%,
+  "inverted": 90%
 );
 
 // Dark mode anchor
@@ -62,23 +61,22 @@ $surface-base-dark: hsl($base-hue-dark, $base-saturation-dark, 2%);
 
 // Darkness adjustments, ordered by elevation
 $surface-deltas-dark: (
-  "fieldset": -9%,
-  "card": -9%,
-  "control": -7%,
-  "inset": -4%,
-  "input": -4%,
-  "base": 2%,
-  "supporting": 2%,
-  "header-primary": 3%,
-  "footer": 3%,
-  "canvas": 4%,
-  "elevated": 4%,
+  "input": -2%,
+  "inset": -1%,
+  "canvas": 2%,
+  "supporting": 3%,
+  "header-primary": 4%,
+  "footer": 4%,
   "header-table": 4%,
-  "header-section": 6%,
+  "fieldset": 4%,
+  "card": 5%,
+  "control": 5%,
+  "header-section": 5%,
+  "elevated": 6%,
   "overlay": 8%,
   "overlay-secondary": 12%,
   "overlay-tertiary": 16%,
-  "tooltip": 20%,
+  "tooltip": 18%,
   "inverted": 90%
 );
 
@@ -117,40 +115,24 @@ $surface-states-dark: (
 // Borders
 // ------------------------------------------
 
-$border-tiers-light: (
-  "bold": 50%,
-  "strong": 40%,
-  "normal": 50%,
-  "soft": 60%,
-  "subtle": 90%
-);
-
-$border-tiers-dark: (
-  "bold": 70%,
-  "strong": 40%,
-  "normal": 30%,
-  "soft": 26%,
-  "subtle": 10%
-);
-
 $border-roles: (
-  "table-header": strong,
-  "modal": strong,
-  "elevation-high": strong,
-  "control": strong,
-  "input": strong,
-  "section": normal,
-  "canvas": normal,
-  "dropdown": normal,
-  "elevation-mid": normal,
-  "container": soft,
-  "card": soft,
-  "fieldset": soft,
-  "row": soft,
-  "elevation-low": soft,
-  "grid": subtle,
-  "token": subtle,
-  "avatar": subtle
+  "avatar": 10%,
+  "canvas": 30%,
+  "card": 26%,
+  "container": 26%,
+  "control": 40%,
+  "dropdown": 30%,
+  "elevation-high": 10%,
+  "elevation-low": 26%,
+  "elevation-mid": 30%,
+  "fieldset": 26%,
+  "grid": 10%,
+  "input": 50%,
+  "modal": 10%,
+  "row": 26%,
+  "section": 30%,
+  "table-header": 40%,
+  "token": 10%
 );
 
 $border-states-light: (
@@ -468,8 +450,8 @@ body {
   }
 
   // Borders
-  @each $name, $tier in $border-roles {
-    $base: hsl($base-hue-light, $base-saturation-light, map-get($border-tiers-light, $tier));
+  @each $name, $delta in $border-roles {
+    $base: hsl($base-hue-light, $base-saturation-light, $delta);
     @include generate-border-tokens(#{$name}, $base, $border-states-light);
   }
 
@@ -521,8 +503,8 @@ body {
     }
 
     // Borders
-    @each $name, $tier in $border-roles {
-      $base: hsl($base-hue-dark, $base-saturation-dark, map-get($border-tiers-dark, $tier));
+    @each $name, $delta in $border-roles {
+      $base: hsl($base-hue-dark, $base-saturation-dark, $delta);
       @include generate-border-tokens(#{$name}, $base, $border-states-dark);
     }
 
