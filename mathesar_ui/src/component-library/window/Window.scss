@@ -36,7 +36,7 @@
   > .footer {
     grid-row: 3;
     border-top: 1px solid var(--SYS-border-section);
-    background: var(--footer-background-color);
+    background: var(--SYS-surface-overlay);
   }
 
   &.has-body-padding > .body {

@@ -20,7 +20,7 @@ body > .new-item-highlighter {
 
   @starting-style {
     .effect {
-      background: rgba(254, 221, 72, 0.3);
+      background: color-mix(in srgb, var(--SYS-color-outcome-bg), transparent 30%);
       border-radius: 0.5rem;
       inset: 0;
     }

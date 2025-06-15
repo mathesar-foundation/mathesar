@@ -38,7 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--SYS-accent-amethyst-contrast);
+    color: var(--SYS-accent-asparagus-base);
   }
   .header {
     font-size: var(--lg1);
@@ -46,7 +46,7 @@
     color: var(--SYS-text-primary);
   }
   .description {
-    color: var(--SYS-text-disabled);
+    color: var(--SYS-text-tertiary);
     margin-top: var(--sm4);
   }
 </style>

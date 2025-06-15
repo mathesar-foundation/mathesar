@@ -53,12 +53,12 @@
     --button-border-color: var(--SYS-accent-asparagus-faint);
     --button-color: var(--SYS-text-primary);
     --button-shadow: var(--SYS-surface-base) 0 1px 2px 0,
-      var(--SYS-accent-asparagus-dull) 0 1px 3px 0;
+      var(--shadow-color) 0 1px 3px 0;
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--SYS-accent-asparagus-bright-rgb), 0.25);
+        --button-outline: 2px solid rgba(var(--SYS-accent-asparagus-bright), 0.25);
         outline-offset: 1px;
       }
 
@@ -69,7 +69,7 @@
           var(--SYS-accent-asparagus-dull-hover),
           var(--SYS-accent-asparagus-muted-hover)
         );
-        --button-border-color: var(--SYS-accent-asparagus-dull-hover);
+        --button-border-color: var(--SYS-accent-asparagus-faint-hover);
         --button-shadow: var(--shadow-color) 0 2px 4px 0;
       }
 
@@ -104,7 +104,7 @@
 
       &:hover,
       &.hover {
-        --button-background: var(--SYS-accent-glacier-base-hover);
+        background-color: var(--SYS-accent-glacier-muted-hover);
         --button-border-color: var(--SYS-accent-glacier-dull-hover);
         box-shadow:
           0 4px 6px -1px rgba(0, 0, 0, 0.1),
@@ -116,10 +116,10 @@
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-accent-fjord-muted),
-          var(--SYS-accent-fjord-faint)
+          var(--SYS-accent-glacier-muted),
+          var(--SYS-accent-glacier-faint)
         );
-        --button-border-color: var(--SYS-accent-fjord-contrast);
+        --button-border-color: var(--SYS-accent-glacier-muted);
         box-shadow:
           0 1px 2px rgba(0, 0, 0, 0.05),
           0 1px 3px rgba(0, 0, 0, 0.1),
@@ -130,7 +130,7 @@
 
   &.btn-option-card {
     background-color: var(--SYS-surface-overlay-secondary);
-    --button-border: 0.5px var(--SYS-accent-glacier-muted);
+    --button-border-color: var(--SYS-border-elevation-mid);
     --button-color: var(--SYS-text-control);
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.05),
@@ -146,8 +146,8 @@
 
       &:hover,
       &.hover {
-        --button-background: var(--SYS-accent-glacier-base-hover);
-        --button-border-color: var(--SYS-accent-glacier-dull-hover);
+        background-color: color-mix(in srgb, var(--SYS-accent-asparagus-dull), transparent 96%);
+        --button-border-color: var(--SYS-accent-asparagus-muted-hover);
         box-shadow:
           0 4px 6px -1px rgba(0, 0, 0, 0.1),
           0 2px 4px -2px rgba(0, 0, 0, 0.1),
@@ -156,12 +156,8 @@
 
       &:active,
       &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--SYS-accent-fjord-muted),
-          var(--SYS-accent-fjord-faint)
-        );
-        --button-border-color: var(--SYS-accent-fjord-contrast);
+       background-color:  color-mix(in srgb, var(--SYS-accent-asparagus-dull), transparent 93%);
+        --button-border-color: var(--SYS-accent-asparagus-muted);
         box-shadow:
           0 1px 2px rgba(0, 0, 0, 0.05),
           0 1px 3px rgba(0, 0, 0, 0.1),
@@ -194,27 +190,27 @@
 
   &.btn-outline-danger {
     --button-background: transparent;
-    --button-border-color: var(--SYS-color-danger-border);
-    --button-color: var(--SYS-color-danger-text);
+    --button-border-color: var(--SYS-button-danger-outline-border);
+    --button-color: var(--SYS-button-danger-outline-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--SYS-color-danger-bg);
-        --button-border-color: var(--SYS-color-danger-border);
-        --button-color: var(--SYS-color-danger-text);
+        --button-background: var(--SYS-button-danger-outline-bg);
+        --button-border-color: var(--SYS-button-danger-outline-border);
+        --button-color: var(--SYS-button-danger-outline-text);
       }
 
       &:active,
       &.active {
-        --button-background: var(--SYS-color-danger-bg);
-        --button-border-color: var(--SYS-color-danger-text);
-        --button-color: var(--SYS-color-danger-text);
+        --button-background: var(--SYS-button-danger-outline-bg);
+        --button-border-color: var(--SYS-button-danger-outline-text);
+        --button-color: var(--SYS-button-danger-outline-text);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-color-danger-border);
+        --button-outline: 2px solid var(--SYS-button-danger-outline-border);
         outline-offset: 1px;
       }
     }
@@ -260,24 +256,42 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--surface-control-hover);
+        --button-background: var(--SYS-surface-control-hover);
       }
 
       &:active,
       &.active {
-        --button-background: var(--surface-control-active);
-        box-shadow: 0 0 0 2px var(--surface-control-active) !important;
+        --button-background: var(--SYS-surface-control-active);
+        box-shadow: 0 0 0 2px var(--SYS-surface-control-active) !important;
       }
 
       &:focus,
       &.focus {
-        --button-background: var(--surface-control-focused);
-        border-color:  var(--border-control);
-        --button-color: var(--text-input);
+        --button-background: var(--SYS-surface-control-focused);
+        --button-color: var(--SYS-text-control-focused);
+        border-color:  var(--SYS-border-control-focused);
         box-shadow:
           0 2px 4px rgba(0, 0, 0, 0.15),
           0 1px 2px rgba(0, 0, 0, 0.1);
         outline: none;
+      }
+      &.close-button {
+        --button-background: transparent;
+        &:hover,
+        &.hover {
+          color: var(--SYS-text-muted);
+        }
+
+        &:active,
+        &.active {
+          color: var(--SYS-text-muted);
+        }
+
+        &:focus,
+        &.focus {
+          --button-background: transparent;
+          color: var(--SYS-text-muted);
+        }
       }
     }
   }
@@ -342,15 +356,15 @@
   }
 
   &.btn-outcome {
-    --button-background: var(--SYS-color-outcome-background);
-    border: 1px solid var(--SYS-color-outcome-border);
+    --button-background: var(--SYS-button-danger-solid-bg);
+    border: 1px solid var(--SYS-button-danger-solid-border);
 
     &:hover {
-      border: 1px solid var(--SYS-color-outcome-text);
+      border: 1px solid var(--SYS-button-danger-solid-text);
     }
 
     &:active {
-      border: 1px solid var(--SYS-color-outcome-text);
+      border: 1px solid var(--SYS-button-danger-solid-text);
     }
   }
 

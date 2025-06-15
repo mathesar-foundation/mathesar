@@ -92,7 +92,7 @@ $surface-states-light: (
 );
 
 $surface-states-dark: (
-  "hover": 5%,
+  "hover": 3%,
   "active": 6%,
   "focused": 2%,
   "disabled": 1%,
@@ -115,24 +115,25 @@ $surface-states-dark: (
 // Borders
 // ------------------------------------------
 
+// Ordered by prominence.
 $border-roles: (
+  "grid": 10%,
   "avatar": 10%,
-  "canvas": 30%,
+  "token": 10%,
+  "modal": 15%,
+  "elevation-low": 20%,
+  "elevation-mid": 25%,
   "card": 26%,
   "container": 26%,
-  "control": 40%,
-  "dropdown": 30%,
-  "elevation-high": 10%,
-  "elevation-low": 26%,
-  "elevation-mid": 30%,
   "fieldset": 26%,
-  "grid": 10%,
-  "input": 50%,
-  "modal": 10%,
   "row": 26%,
+  "elevation-high": 30%,
+  "canvas": 30%,
+  "dropdown": 30%,
   "section": 30%,
+  "control": 40%,
   "table-header": 40%,
-  "token": 10%
+  "input": 50%
 );
 
 $border-states-light: (
@@ -234,16 +235,16 @@ $text-tokens-dark: (
   "header-tertiary": (h: none, l:55%, s: 3%),
   "header-subsection": (h: none, l:75%, s: 4%),
   "input": (h: none, l:95%, s: 10%),
-  "input-label": (h: none, l:65%, s: 4%),
+  "input-label": (h: none, l:70%, s: 4%),
   "inverse": (h: none, l:10%, s: 4%),
-  "label-fieldset": (h: none, l:75%, s: 4%),
+  "label-fieldset": (h: none, l:60%, s: 4%),
   "link": (h: none, l:90%, s: 5%),
   "muted": (h: none, l:45%, s: 2%),
   "overlay": (h: none, l:90%, s: 5%),
   "primary": (h: none, l:90%, s: 5%),
-  "secondary": (h: none, l:70%, s: 4%),
+  "secondary": (h: none, l:65%, s: 4%),
   "section-label": (h: none, l:75%, s: 4%),
-  "tertiary": (h: none, l:50%, s: 3%),
+  "tertiary": (h: none, l:60%, s: 3%),
   "token": (h: none, l:85%, s: 4%),
   "tooltip": (h: none, l:88%, s: 4%)
 );
