@@ -5,9 +5,8 @@
 body {
   // Background Colors
   --background-color: var(--SYS-surface-base);
-  --header-gradient-start: var(--SYS-surface-supporting);
+  --header-gradient-start: var(--SYS-surface-header-primary-highlighted);
   --header-gradient-end: var(--SYS-surface-header-primary);
-  --header-border: var(--SYS-border-canvas);
   --header-background: linear-gradient(
     to bottom right,
     var(--header-gradient-start),
@@ -94,6 +93,13 @@ body {
   --lg5: 3.2rem; // 56px
 
   // Headers
+  --home-page-header: linear-gradient(
+    135deg,
+    var(--SYS-surface-elevated) 20%,
+    var(--SYS-surface-supporting) 40%,
+    var(--SYS-accent-amethyst-faint) 100%
+  );
+
   --db-page-header: linear-gradient(
     135deg,
     var(--SYS-accent-salmon-faint) 0%,

@@ -165,7 +165,7 @@
     padding: 0 0.5rem;
     height: var(--header-height);
     background: var(--header-background);
-    border-bottom: 1px solid var(--header-border);
+    border-bottom: 1px solid var(--SYS-border-container);
     box-shadow: var(--shadow-color) 0 1px 3px 0;
     overflow: hidden;
     color: var(--SYS-text-primary);

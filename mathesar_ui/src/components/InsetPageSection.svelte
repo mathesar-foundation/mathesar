@@ -7,7 +7,7 @@
 
 <style>
   .section {
-    background: var(--inset-background-color);
+    background: var(--SYS-surface-card);
     padding: var(--inset-page-section-padding, 2rem 1.5rem);
     border: solid 1px var(--SYS-border-section);
     border-radius: 0.3rem;

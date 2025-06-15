@@ -90,9 +90,9 @@
 
   .entity-name {
     font-weight: var(--font-weight-bold);
-    font-size: var(--lg3);
+    font-size: var(--lg1);
     line-height: 1;
     margin-bottom: var(--sm6);
-    color: var(--SYS-accent-pumpkin-bright);
+    color: var(--SYS-text-primary);
   }
 </style>

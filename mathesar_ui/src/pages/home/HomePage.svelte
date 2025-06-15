@@ -7,6 +7,7 @@
     DonateResource,
     MailingListResource,
   } from '@mathesar/components/resources';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -30,11 +31,12 @@
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
-  <div slot="secondary-header" class="home-page-header-title">
-    <div class="home-page-header-title-inner">
-      {welcomeMessage}
-    </div>
-  </div>
+  <AppSecondaryHeader
+    slot="secondary-header"
+    name={$_(welcomeMessage)}
+    icon={CommunityResource}
+     --header-color='var(--home-page-header)'
+  />
   <div class="content">
     <div class="databases-section">
       <DatabasesList />
@@ -53,13 +55,6 @@
 
 <style lang="scss">
   $breakpoint: 50rem;
-
-  .home-page-header-title {
-    max-width: var(--max-layout-width);
-    width: 100%;
-    margin: var(--lg1) auto;
-    padding: 0 var(--page-padding-x);
-  }
 
   .content {
     display: grid;
