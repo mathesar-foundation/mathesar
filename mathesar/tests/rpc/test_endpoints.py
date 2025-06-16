@@ -259,6 +259,21 @@ METHODS = [
         "forms.add",
         [user_is_authenticated]
     ),
+    (
+        forms.get,
+        "forms.get",
+        [user_is_authenticated]
+    ),
+    (
+        forms.list_,
+        "forms.list",
+        [user_is_authenticated]
+    ),
+    (
+        forms.delete,
+        "forms.delete",
+        [user_is_authenticated]
+    ),
 
     (
         records.add,

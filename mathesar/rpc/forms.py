@@ -6,7 +6,7 @@ from typing import Optional, TypedDict, Literal
 from modernrpc.core import REQUEST_KEY
 
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form
+from mathesar.utils.forms import create_form, get_form, list_forms, delete_form
 
 
 class FieldInfo(TypedDict):
@@ -223,3 +223,46 @@ def add(*, form_def: FormDef, **kwargs) -> FormInfo:
     user = kwargs.get(REQUEST_KEY).user
     form_model, field_col_info_map = create_form(form_def, user)
     return FormInfo.from_model(form_model, field_col_info_map)
+
+
+@mathesar_rpc_method(name="forms.get", auth="login")
+def get(*, form_id: int, **kwargs) -> FormInfo:
+    """
+    List information about a form.
+
+    Args:
+        form_id: The Django id of the form.
+
+    Returns:
+        Form details for a given form_id.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    form_model, field_col_info_map = get_form(form_id, user)
+    return FormInfo.from_model(form_model, field_col_info_map)
+
+
+@mathesar_rpc_method(name="forms.list", auth="login")
+def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
+    """
+    List information about forms for a database. Exposed as `list`.
+
+    Args:
+        database_id: The Django id of the database containing the form.
+        schema_oid: The OID of the schema containing the base table(s) of the forms(s).
+
+    Returns:
+        A list of form info.
+    """
+    forms = list_forms(database_id, schema_oid)
+    return [FormInfo.from_model(form) for form in forms]
+
+
+@mathesar_rpc_method(name="forms.delete", auth="login")
+def delete(*, form_id: int, **kwargs) -> None:
+    """
+    Delete a form.
+
+    Args:
+        form_id: The Django id of the form to delete.
+    """
+    delete_form(form_id)

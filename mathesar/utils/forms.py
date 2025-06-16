@@ -111,3 +111,17 @@ def create_form(form_def, user):
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
     field_col_info_map = get_field_col_info_map(user, form_model)
     return form_model, field_col_info_map
+
+
+def get_form(form_id, user):
+    form_model = Form.objects.get(id=form_id)
+    field_col_info_map = get_field_col_info_map(user, form_model)
+    return form_model, field_col_info_map
+
+
+def list_forms(database_id, schema_oid):
+    return Form.objects.filter(database__id=database_id, schema_oid=schema_oid)
+
+
+def delete_form(form_id):
+    Form.objects.get(id=form_id).delete()
