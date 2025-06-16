@@ -6,14 +6,15 @@ from django.db import transaction
 from db.forms import get_oid_col_info_map
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
-    Form, FormField, Database, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
+    Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
 
 
-def get_submit_role(user_dbrm, submit_role_id=None):
+def get_submit_role(user, database_id, submit_role_id=None):
+    user_dbrm = UserDatabaseRoleMap.objects.get(user=user, database__id=database_id)
     with user_dbrm.connection as conn:
         submit_role = (
-            ConfiguredRole.objects.filter(id=submit_role_id).first()
+            ConfiguredRole.objects.get(id=submit_role_id) if submit_role_id else None
             or user_dbrm.configured_role
         )
         current_role = get_current_role_from_db(conn)
@@ -35,7 +36,8 @@ def get_oid_attnums_map(form_model):
     return oam
 
 
-def get_field_col_info_map(form_model, user_dbrm):
+def get_field_col_info_map(user, form_model):
+    user_dbrm = UserDatabaseRoleMap.objects.get(user=user, database=form_model.database)
     oam = get_oid_attnums_map(form_model)
     fields_map = {field.key: field for field in form_model.fields.all()}
 
@@ -63,15 +65,14 @@ def get_field_col_info_map(form_model, user_dbrm):
 
 @transaction.atomic
 def create_form(form_def, user):
-    database = Database.objects.get(id=form_def["database_id"])
-    user_dbrm = UserDatabaseRoleMap.objects.get(user=user, database=database)
-    submit_role = get_submit_role(user_dbrm, submit_role_id=form_def.get("submit_role_id"))
+    database_id = form_def["database_id"]
+    submit_role = get_submit_role(user, database_id, submit_role_id=form_def.get("submit_role_id"))
     form_model = Form.objects.create(
         token=form_def.get("token", uuid4()),
         name=form_def["name"],
         description=form_def.get("description"),
         version=form_def["version"],
-        database=database,
+        database_id=database_id,
         schema_oid=form_def["schema_oid"],
         base_table_oid=form_def["base_table_oid"],
         is_public=form_def.get("is_public", False),
@@ -109,5 +110,5 @@ def create_form(form_def, user):
             update_field_instances.append(fields_map[field["key"]])
     if update_field_instances:
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
-    field_col_info_map = get_field_col_info_map(form_model, user_dbrm)
+    field_col_info_map = get_field_col_info_map(user, form_model)
     return form_model, field_col_info_map
