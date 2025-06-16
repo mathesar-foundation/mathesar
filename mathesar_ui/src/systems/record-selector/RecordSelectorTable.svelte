@@ -323,8 +323,9 @@
     overflow: auto;
     position: relative;
     border-spacing: 0;
+    background: var(--SYS-surface-inset);
     --border-width: 1px;
-    --border-color: var(--SYS-border-section);
+    --border-color: var(--SYS-border-table-header);
     --row-height: 2.25rem;
   }
   .thead {
@@ -348,7 +349,6 @@
   }
   .tr {
     display: table-row;
-    background: var(--SYS-surface-inset);
   }
 
   .inset-shadow {
