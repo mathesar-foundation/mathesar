@@ -91,8 +91,7 @@ $surface-states-light: (
   "disabled": 8%,
   "muted": 5%,
   "selected": -5%,
-  "highlighted": -6%,
-  "highlighted-secondary": -3%
+  "highlighted": -6%
 );
 
 $surface-states-dark: (
@@ -102,8 +101,7 @@ $surface-states-dark: (
   "disabled": 1%,
   "muted": 5%,
   "selected": 5%,
-  "highlighted": 6%,
-  "highlighted-secondary": 3%
+  "highlighted": 6%
 );
 
 // Token generator mixin
@@ -210,6 +208,8 @@ $text-tokens-light: (
   "header-secondary": (h: none, l:10%, s: 5%),
   "header-tertiary": (h: none, l:25%, s: 3%),
   "header-subsection": (h: none, l:20%, s: 4%),
+  "highlighted": (h: 59, l:90%, s: 84%),
+  "highlighted-elevated": (h:59, l:52%, s: 98%),
   "icon": (h: 90, l:85%, s: 4%),
   "input": (h: none, l:10%, s: 5%),
   "input-label": (h: none, l:20%, s: 4%),
@@ -235,6 +235,8 @@ $text-tokens-dark: (
   "elevated": (h: none, l:90%, s: 5%),
   "faint": (h: none, l:15%, s: 1%),
   "footnote": (h: none, l:55%, s: 3%),
+  "highlighted": (h: 38, l:8%, s: 80%),
+  "highlighted-elevated": (h: 38, l:30%, s: 80%),
   "header-primary": (h: none, l:92%, s: 5%),
   "header-secondary": (h: none, l:75%, s: 12%),
   "header-tertiary": (h: none, l:55%, s: 3%),

@@ -39,12 +39,12 @@
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   body {
-    --color-substring-match: var(--SYS-surface-inset-highlighted);
-    --color-substring-match-light: var(--SYS-surface-inset-highlighted-secondary);
+    --color-substring-match: var(--SYS-text-highlighted-elevated);
+    --color-substring-match-light: var(--SYS-text-highlighted);
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
-    --Match__highlight-color: var(--SYS-surface-inset-highlighted);
+    --Match__highlight-color: var(--SYS-text-highlighted-elevated);
 
     /* Typography variables */
     --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
