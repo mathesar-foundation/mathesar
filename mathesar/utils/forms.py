@@ -8,6 +8,7 @@ from db.roles import get_current_role_from_db
 from mathesar.models.base import (
     Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
+from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 
 
 def get_submit_role(user, database_id, submit_role_id=None):
@@ -45,12 +46,10 @@ def get_field_col_info_map(user, form_model):
     with user_dbrm.connection as conn:
         oid_col_info_map = get_oid_col_info_map(oam, conn)
 
-    def rm_keys(model, keys):
-        return {k: v for k, v in model.__dict__.items() if k not in keys}
     metadata_map = {}
     for oid, attnums in oam.items():
         metadata_map[oid] = {
-            meta.attnum: rm_keys(meta, ["_state", "database_id", "table_oid"]) for meta in ColumnMetaData.objects.filter(attnum__in=attnums, table_oid=oid, database=form_model.database)
+            meta.attnum: ColumnMetaDataBlob.from_model(meta) for meta in ColumnMetaData.objects.filter(attnum__in=attnums, table_oid=oid, database=form_model.database)
         }
 
     fcim = defaultdict(lambda: {"column": None, "error": None})

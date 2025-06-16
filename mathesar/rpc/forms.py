@@ -46,6 +46,26 @@ class FieldInfo(TypedDict):
     allow_create: bool
     create_label: Optional[str]
 
+    @classmethod
+    def from_model(cls, model):
+        return cls(
+            id=model.id,
+            key=model.key,
+            attnum=model.attnum,
+            form_id=model.form_id,
+            index=model.index,
+            kind=model.kind,
+            label=model.label,
+            help=model.help,
+            readonly=model.readonly,
+            styling=model.styling,
+            is_required=model.is_required,
+            parent_field_id=model.parent_field_id,
+            target_table_oid=model.target_table_oid,
+            allow_create=model.allow_create,
+            create_label=model.create_label
+        )
+
 
 class FormInfo(TypedDict):
     """
@@ -90,16 +110,31 @@ class FormInfo(TypedDict):
     redirect_url: Optional[str]
     submit_label: Optional[str]
     fields: Optional[list[FieldInfo]]
+    field_col_info_map: Optional[dict]
 
     @classmethod
     def from_model(cls, form_model, field_col_info_map=None):
-        def rm_keys(model, keys):
-            return {k: v for k, v in model.__dict__.items() if k not in keys}
-        return {
-            **rm_keys(form_model, ('_state')),
-            "fields": [rm_keys(f, ('_state', 'created_at', 'updated_at'))for f in form_model.fields.all()],
-            "field_col_info_map": field_col_info_map
-        }
+        return cls(
+            id=form_model.id,
+            created_at=form_model.created_at,
+            updated_at=form_model.updated_at,
+            token=form_model.token,
+            name=form_model.name,
+            description=form_model.description,
+            version=form_model.version,
+            database_id=form_model.database_id,
+            schema_oid=form_model.schema_oid,
+            base_table_oid=form_model.base_table_oid,
+            is_public=form_model.is_public,
+            header_title=form_model.header_title,
+            header_subtitle=form_model.header_subtitle,
+            submit_role_id=form_model.submit_role_id,
+            submit_message=form_model.submit_message,
+            redirect_url=form_model.redirect_url,
+            submit_label=form_model.submit_label,
+            fields=[FieldInfo.from_model(field) for field in form_model.fields.all()],
+            field_col_info_map=field_col_info_map
+        )
 
 
 class FieldDef(TypedDict):
