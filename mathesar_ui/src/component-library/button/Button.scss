@@ -91,9 +91,9 @@
     --button-border: 0.5px var(--SYS-accent-glacier-muted);
     --button-color: var(--SYS-text-control);
     box-shadow:
-      0 1px 2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 5%),
-      0 1px 3px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
-      0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%);
+      0 1px 2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 75%),
+      0 1px 3px  color-mix(in srgb, var(--SYS-surface-dark), transparent 80%),
+      0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 80%);
 
     &:not(:disabled) {
       &.focus,

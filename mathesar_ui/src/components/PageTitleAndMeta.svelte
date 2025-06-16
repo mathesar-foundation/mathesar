@@ -14,7 +14,7 @@
         {#if entityTypeName}
           <div class="entity-type-container">
             <div class="entity-icon">
-              <Icon {...icon} size="1.5em" />
+              <Icon {...icon} size="1.2em" />
             </div>
             <span class="entity-type-name">{entityTypeName}</span>
           </div>
@@ -82,15 +82,15 @@
   }
 
   .entity-type-name {
-    font-size: var(--lg2);
-    font-weight: 700;
+    font-size: var(--lg1);
+    font-weight: 300;
     line-height: 1;
     color: var(--SYS-accent-salmon-base-muted);
   }
 
   .entity-name {
     font-weight: var(--font-weight-bold);
-    font-size: var(--lg1);
+    font-size: var(--lg3);
     line-height: 1;
     margin-bottom: var(--sm6);
     color: var(--SYS-text-primary);

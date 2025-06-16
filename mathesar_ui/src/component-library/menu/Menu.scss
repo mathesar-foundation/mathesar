@@ -50,6 +50,9 @@
         background-color: var(--SYS-color-danger-bg);
         color: var(--SYS-color-danger-text);
       }
+      .icon {
+         color: var(--SYS-color-danger-icon);
+      }
     }
 
     &.disabled {
@@ -66,11 +69,11 @@
         calc(var(--Menu__padding-x, $padding-x-default) / 2);
     }
     > .control,
-    > .icon {
+    > .icon{
       display: inline-flex;
       align-items: center;
       flex-grow: 0;
-      color: var(--SYS-accent-salmon-bright);
+      color: var(--SYS-text-icon);
     }
     > .control {
       --checkbox-margin-bottom: 0;
@@ -80,7 +83,7 @@
       font-weight: var(--font-weight-medium);
 
       &:hover {
-      background-color: var(--SYS-accent-salmon-base-hover);
+      background-color: var(--SYS-accent-fjord-base-hover);
       color: var(--SYS-text-inverted);
       }
     }

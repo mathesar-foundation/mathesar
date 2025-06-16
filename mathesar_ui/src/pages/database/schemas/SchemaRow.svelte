@@ -115,13 +115,19 @@
   }
 
   .schema-row.hover {
-    border: 1px solid var(--SYS-accent-salmon-dull);
-    box-shadow: var(--card-hover-shadow);
-    background: var(--card-hover-background);
+    border: 1px solid color-mix(in srgb, var(--SYS-accent-salmon-base-muted), transparent 80%);
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-salmon-dull), transparent 80%);
+    background: color-mix(in srgb, var(--SYS-accent-salmon-bright), transparent 95%);
+  }
+
+  .schema-row:active {
+    border: 1px solid color-mix(in srgb, var(--SYS-accent-salmon-base-muted), transparent 90%);
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-salmon-dull), transparent 60%);
+    background: color-mix(in srgb, var(--SYS-accent-salmon-bright), transparent 90%);
   }
 
   .schema-row.focus {
-    outline: 2px solid var(--SYS-accent-salmon-border);
+    outline: 1px solid color-mix(in srgb, var(--SYS-accent-salmon-base-muted), transparent 90%);
     outline-offset: 1px;
   }
 
@@ -139,7 +145,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--SYS-accent-salmon-base), var(--SYS-accent-pumpkin-dull));
+    background: linear-gradient(135deg, var(--SYS-accent-salmon-base-muted), var(--SYS-accent-salmon-base));
     border-radius: 50%;
     width: 2rem;
     height: 2rem;

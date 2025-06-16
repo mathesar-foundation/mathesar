@@ -48,12 +48,12 @@ body {
   // Card Styles
   --card-border: var(--SYS-border-card);
   --card-row-border: var(--SYS-border-row);
-  --card-hover-background: var(--SYS-surface-elevated-hover);
+  --card-hover-background: var(--SYS-surface-card-hover);
   --card-hover-border: var(--SYS-border-card-hover);
-  --card-hover-shadow: 0 1px 2px 0  var(--SYS-surface-elevated-muted);
-  --card-active-background: var(--SYS-surface-elevated-active);
+  --card-hover-shadow: 0 1px 2px 0  var(--SYS-surface-card-muted);
+  --card-active-background: var(--SYS-surface-card-active);
   --card-active-border: var(--SYS-border-card-active);
-  --card-active-shadow: inset 0 0 0 1px var(--SYS-surface-elevated-muted);
+  --card-active-shadow: inset 0 0 0 1px var(--SYS-surface-card-muted);
   --card-focus-outline: var(--SYS-indicator-row);
 
 
@@ -94,19 +94,17 @@ body {
   // Headers
   --home-page-header: linear-gradient(
     135deg,
-    var(--SYS-surface-elevated) 20%,
-    var(--SYS-surface-supporting) 40%,
+    var(--SYS-surface-elevated) 10%,
+    var(--SYS-surface-supporting) 30%,
     var(--SYS-accent-amethyst-faint) 100%
   );
 
   --db-page-header: linear-gradient(
     135deg,
-    var(--SYS-accent-salmon-faint) 0%,
-    var(--SYS-accent-pumpkin-faint) 30%,
-    var(--SYS-accent-asparagus-faint) 60%,
-    var(--SYS-accent-glacier-faint) 70%,
-    var(--SYS-accent-fjord-faint) 80%,
-    var(--SYS-accent-amethyst-faint) 100%
+    var(--SYS-accent-salmon-faint) 10%,
+    var(--SYS-surface-supporting) 50%,
+    var(--SYS-accent-pumpkin-faint) 90%,
+    var(--SYS-accent-tomato-faint) 100%
   );
 
   // Headers

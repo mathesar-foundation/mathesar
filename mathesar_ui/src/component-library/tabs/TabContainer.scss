@@ -11,8 +11,8 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    background-color: var(--SYS-surface-elevated);
-    border-bottom: 1px solid var(--SYS-border-section);
+    background: transparent;
+    border-bottom: 0.5px solid var(--SYS-border-canvas);
 
     > li.tab {
       align-items: stretch;

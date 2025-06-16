@@ -102,11 +102,7 @@
       <div class="connection-details">
         <div>
           <span class="label">{$_('db_server')}{staticText.COLON}</span>
-          <span class="code">{database.server.getConnectionString()}</span>
-        </div>
-        <div>
-          <span class="label">{$_('db_name')}{staticText.COLON}</span>
-          {database.name}
+          <code>{database.name} @ {database.server.getConnectionString()}</code>
         </div>
       </div>
     </div>

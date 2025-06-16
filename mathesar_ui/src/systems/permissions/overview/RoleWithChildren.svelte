@@ -40,14 +40,14 @@
   .role-with-children {
     .name {
       padding: var(--sm6) var(--sm2);
-      background: var(--SYS-surface-elevated);
-      border: 1px solid var(--SYS-border-row);
+      background: var(--SYS-accent-fjord-muted);
+      border: 1px solid var(--SYS-accent-fjord-dull);
       border-radius: var(--border-radius-xl);
-      font-weight: var(--font-weight-bold);
+      font-weight: var(--font-weight-medium);
       display: inline-flex;
       align-items: center;
       gap: var(--sm4);
-      color: var(--SYS-text-primary);
+      color: var(--SYS-accent-fjord-text-highlighted);
       font-size: 1rem;
     }
     .member-count {
