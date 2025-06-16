@@ -228,7 +228,9 @@
   }
 
   .cell-wrapper .postgres-keyword {
-    color: var(--SYS-text-dull);
+    color: var(--SYS-text-faint);
+    font-weight: 300;
+    background: transparent;
   } 
 
   .bold-header {

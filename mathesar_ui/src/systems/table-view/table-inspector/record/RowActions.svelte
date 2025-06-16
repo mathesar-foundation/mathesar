@@ -78,7 +78,7 @@
   <Button
     on:click={handleDeleteRecords}
     disabled={!$canDeleteRecords}
-    appearance="action"
+    appearance="danger"
   >
     <Icon {...iconDeleteMajor} />
     <span>

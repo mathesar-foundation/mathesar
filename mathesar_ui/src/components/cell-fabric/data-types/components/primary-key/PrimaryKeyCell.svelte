@@ -107,4 +107,7 @@
   .link:hover {
     color: var(--SYS-text-link-hover);
   }
+  .link:active {
+    color: var(--SYS-text-link-active);
+  }
 </style>

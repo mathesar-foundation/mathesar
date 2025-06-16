@@ -244,17 +244,12 @@
     }
   }
 
-  &.btn-plain-primary {
-    --button-color: var(--SYS-surface-control);
-  }
-
   &.btn-ghost {
     --button-background: transparent;
   }
 
   &.btn-plain,
-  &.btn-ghost,
-  &.btn-plain-primary {
+  &.btn-ghost {
     --button-border-color: transparent;
     border-radius: var(--border-radius-m);
     box-shadow: none !important;
@@ -267,8 +262,7 @@
   }
 
   &.btn-default,
-  &.btn-plain,
-  &.btn-plain-primary {
+  &.btn-plain {
     &:not(:disabled) {
       &:hover,
       &.hover {
@@ -306,8 +300,32 @@
         &:focus,
         &.focus {
           --button-background: transparent;
-          color: var(--SYS-text-muted);
+          color: var(--SYS-color-danger-bg);
         }
+      }
+    }
+  }
+
+  &.btn-danger-ghost {
+    --button-background: transparent;
+    border: transparent;
+    --button-color: var(--SYS-button-danger-ghost-text);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-color: var(--SYS-button-danger-ghost-text-hover);
+      }
+
+      &:active,
+      &.active {
+        --button-color: var(--SYS-button-danger-ghost-text-active);
+      }
+
+      &:focus,
+      &.focus {
+        --button-outline: 2px solid var(--SYS-button-danger-outlined-border-focused);
+        outline-offset: 1px;
       }
     }
   }
@@ -392,19 +410,63 @@
     }
   }
 
-  &.btn-inspector {
-    --button-background: var(----SYS-surface-header-section);
-    --button-color: var(----SYS-text-header-secondary);
-    border: none;
-    border-radius: 0;
-    box-shadow:  0 1px 2px  color-mix(in srgb, var(--SYS-surface-base), transparent 20%);
+  &.btn-refresh {
+    background: var(--SYS-accent-asparagus-faint);
+    border: 0.25px solid var(--SYS-accent-asparagus-muted);
+    color: var(--SYS-accent-asparagus-dull);
 
     &:hover {
-      --button-background: var(----SYS-surface-header-section-hover);
+      background: var(--SYS-accent-asparagus-faint-hover);
+      border: 0.25px solid var(--SYS-accent-asparagus-muted-hover);
+      color: var(--SYS-accent-asparagus-dull-hover);
     }
 
     &:active {
-      --button-background: var(----SYS-surface-header-section-active);
+      background: var(--SYS-accent-asparagus-faint-active);
+      border: 0.25px solid var(--SYS-accent-asparagus-muted-active);
+      color: var(--SYS-accent-asparagus-dull-active);
+    }
+  }
+
+  &.btn-inspector {
+    background-color: color-mix(in srgb, var(--SYS-accent-fjord-base), transparent 75%);
+    --button-border: 0.5px var(--SYS-accent-fjord-dull);
+    --button-color: var(--SYS-text-control);
+    box-shadow:
+      0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
+      0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
+      0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%);
+
+    &:not(:disabled) {
+      &.focus,
+      &:focus {
+        --button-outline: 2px solid var(--SYS-accent-fjord-dull-focused);
+        outline-offset: 1px;
+      }
+
+      &:hover,
+      &.hover {
+        background-color: var(--SYS-accent-fjord-dull-hover);
+        --button-border-color: var(--SYS-accent-fjord-muted-hover);
+        box-shadow:
+          0 4px 6px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
+          0 2px 4px -2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
+          0 0 0 1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) inset;
+      }
+
+      &:active,
+      &.active {
+        --button-background: linear-gradient(
+          to bottom right,
+          var(--SYS-accent-fjord-muted),
+          var(--SYS-accent-fjord-dull)
+        );
+        --button-border-color: var(--SYS-accent-fjord-muted);
+        box-shadow:
+          0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
+          0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
+          0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%);
+      }
     }
   }
 
@@ -413,20 +475,20 @@
     padding: 0.3em;
     height: auto;
     min-height: 0;
-    color: var(--SYS-accent-glacier-text-highlighted);
-    background-color: color-mix(in srgb, var(--SYS-accent-fjord-muted), transparent 65%);
-    border: 0.5px dotted var(--SYS-accent-glacier-faint);
+    color: var(--SYS-accent-fjord-base);
+    background-color: transparent;
+    border: transparent;
     border-radius: 4px;
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        background-color: color-mix(in srgb, var(--SYS-accent-fjord-muted), transparent 50%);
+        color: var(--SYS-accent-fjord-bright-hover);
       }
 
       &:active,
       &.active {
-        background-color: color-mix(in srgb, var(--SYS-accent-glacier-muted), transparent 67%);
+        color: var(--SYS-accent-fjord-bright-active);
       }
     }
   }

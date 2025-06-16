@@ -123,18 +123,18 @@
     border-top: 1px solid var(--SYS-border-section);
   }
   .entity-switcher .trigger {
-    color: var(--SYS-text-primary);
+    color: var(--SYS-text-navigation);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
     padding: var(--sm4);
 
     &:hover {
-      color: var(--SYS-accent-glacier-base-muted);
+      color: var(--SYS-text-navigation-hover);
     }
 
     &:active {
-      color: var(--SYS-accent-glacier-base-active);
+      color: var(--SYS-text-navigation-active);
     }
   }
 </style>

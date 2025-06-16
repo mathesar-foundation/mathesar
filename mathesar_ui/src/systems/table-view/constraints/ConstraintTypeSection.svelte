@@ -83,7 +83,7 @@
       <Help>{helpMap[constraintType]}</Help>
     </span>
     {#if canAdd}
-      <Button appearance="plain-primary" size="small" on:click={addConstraint}>
+      <Button appearance="link" size="small" on:click={addConstraint}>
         {$_('add')}
       </Button>
     {/if}
@@ -105,9 +105,9 @@
       <span slot="trigger-aside">
         {#if canDrop}
           <Button
-            on:click={() => handleDrop(constraint)}
+            appearance="danger-ghost"
             size="small"
-            appearance="plain"
+            on:click={() => handleDrop(constraint)}
           >
             <Icon {...iconDeleteMajor} />
           </Button>
@@ -162,8 +162,9 @@
   }
 
   .add-constraint {
+    background-color: var(--SYS-surface-fieldset);
     padding: 1rem;
-    border: 1px solid var(--SYS-border-section);
+    border: 1px solid var(--SYS-border-fieldset);
     border-radius: var(--border-radius-m);
   }
 </style>

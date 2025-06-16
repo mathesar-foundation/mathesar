@@ -106,7 +106,7 @@
       </Tooltip>
 
       <Button
-        appearance="secondary"
+        appearance="inspector"
         size="medium"
         disabled={$isLoading}
         on:click={toggleTableInspector}

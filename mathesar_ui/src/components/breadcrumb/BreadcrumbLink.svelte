@@ -15,10 +15,10 @@
     display: block;
     overflow: hidden;
     text-decoration: none;
-    color: inherit;
+    color: var(--SYS-text-navigation);
     font-weight: var(--font-weight-medium);
   }
   .breadcrumb-link:hover a {
-    color: var(--SYS-accent-glacier-base-muted);
+    color: var(--SYS-text-navigation-hover);
   }
 </style>

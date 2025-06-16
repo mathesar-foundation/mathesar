@@ -11,8 +11,7 @@
 </script>
 
 <Button
-  class="refresh-button"
-  appearance="secondary"
+  appearance="refresh"
   size="medium"
   disabled={isLoading}
   on:click

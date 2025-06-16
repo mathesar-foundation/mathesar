@@ -18,11 +18,11 @@
   <div class="hover-indicator" />
   <a {href} on:click={closeSelector}>
     {#if 'table' in entry}
-      <TableName table={entry.table} let:tableName>
+      <TableName table={entry.table} --name-color='var(--SYS-text-navigation)'  let:tableName>
         <MatchHighlighter text={tableName} substring={filterString} />
       </TableName>
     {:else}
-      <NameWithIcon {icon}>
+      <NameWithIcon {icon} --name-color='var(--SYS-text-navigation)'>
         <MatchHighlighter text={label} substring={filterString} />
       </NameWithIcon>
     {/if}
@@ -51,7 +51,7 @@
     flex: 1 1 auto;
     display: block;
     padding: var(--sm6) var(--sm3);
-    color: inherit;
+    color: var(--SYS-text-navigation);
     text-decoration: none;
     position: relative;
   }

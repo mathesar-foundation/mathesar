@@ -4,7 +4,6 @@ export type Appearance =
   | 'secondary'
   | 'plain'
   | 'ghost'
-  | 'plain-primary'
   | 'action'
   | 'outcome'
   | 'tip'

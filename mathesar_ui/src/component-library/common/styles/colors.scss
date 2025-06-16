@@ -206,7 +206,7 @@ $text-tokens-light: (
   "header-primary": (h: none, l:8%, s: 5%),
   "header-secondary": (h: none, l:10%, s: 5%),
   "header-tertiary": (h: none, l:25%, s: 3%),
-  "header-subsection": (h: none, l:20%, s: 4%),
+  "navigation": (h: none, l:20%, s: 4%),
   "highlighted": (h: 59, l:90%, s: 84%),
   "highlighted-elevated": (h:59, l:52%, s: 98%),
   "icon": (h: 90, l:35%, s: 10%),
@@ -239,13 +239,13 @@ $text-tokens-dark: (
   "header-primary": (h: none, l:92%, s: 5%),
   "header-secondary": (h: none, l:75%, s: 12%),
   "header-tertiary": (h: none, l:55%, s: 3%),
-  "header-subsection": (h: none, l:75%, s: 4%),
+  "navigation": (h: none, l:85%, s: 8%),
   "icon": (h: 90, l:55%, s: 10%),
   "input": (h: none, l:95%, s: 10%),
   "input-label": (h: none, l:70%, s: 4%),
   "inverse": (h: none, l:10%, s: 4%),
   "label-fieldset": (h: none, l:60%, s: 4%),
-  "link": (h: none, l:90%, s: 5%),
+  "link": (h: 220, l:60%, s: 20%),
   "muted": (h: none, l:45%, s: 2%),
   "overlay": (h: 32, l:80%, s: 10%),
   "primary": (h: 32, l:80%, s: 12%),
@@ -268,9 +268,9 @@ $text-states-light: (
 );
 
 $text-states-dark: (
-  "hover": 3%,
-  "active": 6%,
-  "focused": 4%,
+  "hover": 12%,
+  "active": 18%,
+  "focused": 24%,
   "disabled": -10%,
   "muted": -5%,
   "selected": 5%,
@@ -328,8 +328,8 @@ $button-state-deltas-light: (
 );
 
 $button-state-deltas-dark: (
-  "hover": (3%, 3%, 0),
-  "active": (6%, 0%, 0),
+  "hover": (6%, 6%, 0),
+  "active": (10%, 2%, 0),
   "focused": (3%, 5%, 5),
   "disabled": (-10%, -100%, 0),
   "muted": (-5%, -20%, 0),
@@ -536,7 +536,7 @@ body {
       $solid: (bg: ($hue, $button-saturation, 70%), text: ($hue, 5%, 10%), icon: ($hue, 5%, 10%), border: ($hue, $button-saturation, 64%));
       $soft: (bg: ($hue, $button-saturation * 0.6, 18%), text: ($hue, $button-saturation *0.3, 55%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.6, 26%));
       $outlined: (bg: null, text: ($hue, $button-saturation, 75%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.8, 30%));
-      $ghost: (bg: null, text: ($hue, $button-saturation * 0.5, 60%), icon: ($hue, $button-saturation * 0.5, 60%), border: null);
+      $ghost: (bg: null, text: ($hue, $button-saturation * 0.7, 50%), icon: ($hue, $button-saturation * 0.5, 60%), border: null);
 
       @include generate-button-tokens($intent, solid, $solid, $button-state-deltas-dark);
       @include generate-button-tokens($intent, soft, $soft, $button-state-deltas-dark);
