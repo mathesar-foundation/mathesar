@@ -111,15 +111,15 @@ class FieldDef(TypedDict):
         attnum: The attnum of column to be selected as a field.
         index: The order in which the field should be displayed.
         kind: Type of the selected column(scalar_column, foreign_key, reverse_foreign_key)
-        label: ???
-        help: ???
+        label: The text to be displayed within the field.
+        help: The help text to be displayed for a field.
         readonly: Specifies whether the selected field is readonly.
-        styling: ???
+        styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
         parent_field_key: Field key to specify parent field for foreign_key or reverse_foreign_key.
         target_table_oid: The OID of the related table.
         allow_create: Specifies whether adding new records is allowed within related fields.
-        create_label: ???
+        create_label: The label to be shown while inserting a new related record.
     """
     key: str
     attnum: int
@@ -149,8 +149,8 @@ class FormDef(TypedDict):
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
         is_public: Specifies whether the form is publicly accessible.
-        header_title: ???
-        header_subtitle: ???
+        header_title: The title of the rendered form.
+        header_subtitle: The subtitle of the rendered form.
         submit_role_id: The Django id of the configured role to be used while submitting a form.
         submit_message: Message to be displayed upon submission.
         redirect_url: Redirect path after submission.
