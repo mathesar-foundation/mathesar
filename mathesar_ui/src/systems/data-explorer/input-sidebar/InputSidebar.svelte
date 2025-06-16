@@ -138,7 +138,7 @@
       flex-grow: 1;
       overflow: hidden;
       position: relative;
-      background-color: var(--elevated-background);
+      background-color: var(--SYS-surface-elevated);
 
       .loading-state {
         padding: var(--lg1);

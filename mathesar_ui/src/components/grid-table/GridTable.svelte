@@ -14,7 +14,7 @@
     grid-template-rows: 1fr auto;
     background: var(--SYS-surface-card);
     box-shadow:
-      0 1px 2px var(--SYS-surface-dark),
-      0 1px 3px var(--SYS-surface-dark);
+      0 1px 2px var(--SYS-border-shadow),
+      0 1px 3px var(--SYS-border-shadow);
   }
 </style>

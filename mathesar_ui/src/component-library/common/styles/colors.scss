@@ -33,15 +33,15 @@ $base-saturation-dark: 4%;
 // ------------------------------------------
 
 // Light mode anchor
-$surface-base-light: hsl($base-hue-light, $base-saturation-light, 98%);
+$surface-base-light: hsl($base-hue-light, $base-saturation-light, 95%);
 
 // Lightness adjustments
 $surface-deltas-light: (
   "dark": 100%,
   "light": 0%,
-  "inset": -2%,
+  "inset": -10%,
   "input": 1%,
-  "canvas": 2%,
+  "canvas": -1%,
   "header-primary": 2%,
   "supporting": 3%,
   "card": 3%,
@@ -49,9 +49,9 @@ $surface-deltas-light: (
   "header-table": 4%,
   "fieldset": 4%,
   "control": 5%,
-  "header-section": 5%,
   "elevated": 5%,
-  "overlay": 6%,
+  "header-section": 6%,
+  "overlay": 7%,
   "overlay-secondary": 12%,
   "overlay-tertiary": 16%,
   "inverted": 90%
@@ -66,7 +66,7 @@ $surface-deltas-dark: (
   "light": 100%,
   "inset": -2%,
   "input": 1%,
-  "canvas": 2%,
+  "canvas": 1%,
   "header-primary": 2%,
   "supporting": 3%,
   "card": 3%,
@@ -96,7 +96,7 @@ $surface-states-dark: (
   "hover": 3%,
   "active": 6%,
   "focused": 2%,
-  "disabled": 1%,
+  "disabled": 8%,
   "muted": 5%,
   "selected": 5%,
   "highlighted": 6%
@@ -117,7 +117,7 @@ $surface-states-dark: (
 
 // Ordered by prominence.
 $border-roles: (
-  "canvas": 15%,
+  "shadow": 8%,
   "grid": 10%,
   "avatar": 10%,
   "row": 12%,
@@ -209,7 +209,7 @@ $text-tokens-light: (
   "header-subsection": (h: none, l:20%, s: 4%),
   "highlighted": (h: 59, l:90%, s: 84%),
   "highlighted-elevated": (h:59, l:52%, s: 98%),
-  "icon": (h: 90, l:85%, s: 4%),
+  "icon": (h: 90, l:35%, s: 10%),
   "input": (h: none, l:10%, s: 5%),
   "input-label": (h: none, l:20%, s: 4%),
   "inverse": (h: none, l:95%, s: 4%),
@@ -453,13 +453,13 @@ body {
   @include generate-surface-tokens(base, $surface-base-light, $surface-states-light);
 
   @each $name, $delta in $surface-deltas-light {
-    $base: adjust-lightness($surface-base-light, $delta);
+    $base: adjust-lightness($surface-base-light, -$delta);
     @include generate-surface-tokens(#{$name}, $base, $surface-states-light);
   }
 
   // Borders
   @each $name, $delta in $border-roles {
-    $base: hsl($base-hue-light, $base-saturation-light, $delta);
+    $base: hsl($base-hue-light, $base-saturation-light, lightness($surface-base-light)-$delta);
     @include generate-border-tokens(#{$name}, $base, $border-states-light);
   }
 

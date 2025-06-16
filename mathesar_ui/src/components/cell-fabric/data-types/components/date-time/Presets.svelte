@@ -87,7 +87,7 @@
     .tag-label {
       &.absolute-date {
         font-size: var(--sm2);
-        color: var(--color-text-muted);
+        color: var(--SYS-text-muted);
       }
     }
   }

@@ -81,10 +81,10 @@
     --cell-bg-color-base: var(--SYS-surface-inset);
     --cell-bg-color-error: var(--SYS-color-danger-bg);
     --cell-bg-color-header: var(--SYS-surface-header-table);
-    --cell-bg-color-processing: var(--SYS-color-warning-bg-light);
+    --cell-bg-color-processing: var(--SYS-color-warning-bg);
     --cell-bg-color-disabled: var(--SYS-surface-inset-disabled);
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
-    --cell-bg-color-row-selected: var(--SYS-accent-glacier-muted-selected);
+    --cell-bg-color-row-selected: var(--SYS-accent-glacier-dull-selected);
 
     --color-fk: var(--SYS-accent-amethyst-dull);
     --color-fk-border: var(--SYS-accent-amethyst-border);
@@ -135,7 +135,7 @@
 
     /** Panel theming */
     --WithPanel__gap: var(--sm3);
-    --WithPanel__resizer-color: var(--SYS-accent-pumpkin-base);
+    --WithPanel__resizer-color: var(--SYS-color-help-bg);
     --WithPanel__resizer-size: var(--sm4);
   }
 
@@ -241,6 +241,6 @@
     align-items: center;
     justify-content: center;
     display: flex;
-    background-color: var(--SYS-surface-canvas);
+    background-color: var(--SYS-surface-base);
   }
 </style>

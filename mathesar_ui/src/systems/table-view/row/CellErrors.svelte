@@ -94,9 +94,9 @@
     border: solid 2px var(--SYS-color-danger-border);
     box-shadow:
       #000 0 0 0 0,
-       color-mix(in srgb, var(--SYS-surface-dark), transparent 5%) 0px 0px 0px 1px,
-       color-mix(in srgb, var(--SYS-surface-dark), transparent 10%) 0px 10px 15px -3px,
-       color-mix(in srgb, var(--SYS-surface-dark), transparent 5%) 0px 4px 6px -2px;
+       color-mix(in srgb, var(--SYS-border-shadow), transparent 5%) 0px 0px 0px 1px,
+       color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) 0px 10px 15px -3px,
+       color-mix(in srgb, var(--SYS-border-shadow), transparent 5%) 0px 4px 6px -2px;
     border-radius: 0.4em;
     max-width: 20em;
     padding: 0.5em;

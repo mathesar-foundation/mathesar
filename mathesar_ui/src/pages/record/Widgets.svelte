@@ -61,7 +61,7 @@
 
 <style lang="scss">
   .widgets-area {
-    background: var(--elevated-background);
+    background: var(--SYS-surface-elevated);
     border-top: 1px solid var(--SYS-border-section);
   }
   .no-widgets {

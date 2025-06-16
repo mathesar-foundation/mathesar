@@ -51,7 +51,7 @@
     height: 100%;
     position: relative;
     background-color: var(--SYS-surface-supporting);
-    border: 1px solid var(--SYS-border-section);
+    border: 1px solid var(--SYS-border-container);
     border-radius: var(--border-radius-l);
     isolation: isolate;
   }

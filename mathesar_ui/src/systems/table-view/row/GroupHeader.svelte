@@ -56,7 +56,7 @@
 <style lang="scss">
   .group-header {
     padding: var(--sm4) var(--lg1);
-    background-color: var(--elevated-background);
+    background-color: var(--SYS-surface-elevated);
 
     .groups-data {
       align-items: start;

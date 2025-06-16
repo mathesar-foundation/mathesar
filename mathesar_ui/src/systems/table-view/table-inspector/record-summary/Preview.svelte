@@ -54,7 +54,7 @@
 <style>
   .help {
     font-size: var(--sm1);
-    color: var(--color-text-muted);
+    color: var(--SYS-text-muted);
     margin-top: 0.5rem;
   }
 </style>

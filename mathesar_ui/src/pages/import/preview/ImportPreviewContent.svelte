@@ -343,6 +343,6 @@
   .truncation-alert {
     margin: 1rem auto 0 auto;
     max-width: max-content;
-    color: var(--color-text-muted);
+    color: var(--SYS-text-muted);
   }
 </style>

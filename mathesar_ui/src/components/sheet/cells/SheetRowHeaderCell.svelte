@@ -31,7 +31,7 @@
     border-right: var(--cell-border-vertical);
     font-size: var(--sm2);
     padding: 0 1.5rem;
-    color: var(--color-text-muted);
+    color: var(--SYS-text-muted);
     cursor: default;
   }
 </style>
