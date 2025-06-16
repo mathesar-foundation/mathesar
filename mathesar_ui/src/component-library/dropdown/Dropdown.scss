@@ -22,7 +22,7 @@ button.dropdown.trigger {
     padding: 0 0.1rem;
   }
   &:focus {
-    outline: 2px solid var(--SYS-border-dropdown-focused);
+    outline: 1px solid var(--SYS-border-dropdown-focused);
     outline-offset: 1px;
   }
 }

@@ -494,62 +494,30 @@
   }
 
   &.btn-feedback {
-    --button-background: linear-gradient(
-      to bottom right,
-      var(--SYS-accent-fjord-muted),
-      var(--SYS-accent-fjord-dull)
-    );
-    --button-color: var(--SYS-text-inverted);
-    --button-border-color: var(--SYS-accent-fjord-muted);
-    border: 1px solid var(--button-border-color);
-    border-radius: var(--border-radius-m);
+    --button-background: transparent;
+    --button-color: var(--SYS-accent-tomato-bright);
+    border: 0px;
     padding: var(--sm4) var(--sm2);
-    font-weight: var(--font-weight-medium);
-    --button-shadow: var(--shadow-color) 0 1px 2px 0,
-      var(--shadow-color) 0 1px 3px 0;
-    box-shadow: var(--button-shadow);
+    font-weight: var(--font-weight-bold);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--SYS-accent-fjord-muted),
-          var(--SYS-accent-fjord-base)
-        );
-        --button-border-color: var(--SYS-accent-fjord-dull);
-        --button-color: var(--SYS-text-inverted);
-        --button-shadow: var(--shadow-color) 0 2px 4px 0,
-          var(--shadow-color) 0 1px 3px 0;
-        box-shadow: var(--button-shadow);
+        --button-color: var(--SYS-accent-tomato-base);
       }
 
       &:active,
       &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--SYS-accent-fjord-base),
-          var(--SYS-accent-fjord-bright)
-        );
-        --button-border-color: var(--SYS-accent-fjord-base);
-        --button-color: var(--SYS-text-inverted);
-        --button-shadow: var(--shadow-color) 0 1px 2px 0;
-        box-shadow: var(--button-shadow);
+        --button-color: var(--SYS-accent-tomato-base-active);
+        --button-background: transparent;
+        border: 1px solid var(--SYS-accent-tomato-muted);
       }
 
       &:focus,
       &.focus {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--SYS-accent-fjord-muted),
-          var(--SYS-accent-fjord-base)
-        );
-        --button-border-color: var(--SYS-accent-fjord-dull);
-        --button-color: var(--SYS-text-inverted);
-        --button-shadow: var(--shadow-color) 0 2px 4px 0,
-          var(--shadow-color) 0 1px 3px 0;
-        box-shadow: var(--button-shadow);
-        outline: none;
+        --button-background: transparent;
+        --button-color: var(--SYS-accent-tomato-base-focused);
+        border: 1px solid var(--SYS-accent-tomato-muted);
       }
     }
   }
