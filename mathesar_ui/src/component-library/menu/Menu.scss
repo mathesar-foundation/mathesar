@@ -34,8 +34,8 @@
     }
     &.menu-item-link:not(.disabled):hover,
     &.menu-item-button:not(.disabled):hover {
-      background-color: var(--SYS-accent-pumpkin-muted-hover);
-      color: var(--SYS-accent-pumpkin-base-on);
+      background-color: var(--SYS-accent-fjord-dull-hover);
+      color: var(--SYS-accent-fjord-base-on);
     }
     &.menu-item-button {
       border: inherit;
@@ -80,11 +80,11 @@
       --checkbox-margin-bottom: 0;
     }
     &.active {
-      background-color: var(--SYS-accent-pumpkin-muted);
+      background-color: var(--SYS-accent-fjord-dull);
       font-weight: var(--font-weight-medium);
 
       &:hover {
-      background-color: var(--SYS-accent-pumpkin-muted-hover);
+      background-color: var(--SYS-accent-fjord-dull-hover);
       color: var(--SYS-text-inverted);
       }
     }

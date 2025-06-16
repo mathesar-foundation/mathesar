@@ -8,6 +8,6 @@
   export let iconHasBox = false;
 </script>
 
-<NameWithIcon icon={iconDatabase} {iconHasBox}>
+<NameWithIcon icon={iconDatabase} {iconHasBox}  --icon-color='var(--SYS-accent-amethyst-bright-highlighted)' >
   {database.displayName}
 </NameWithIcon>

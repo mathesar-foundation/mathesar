@@ -97,7 +97,7 @@
     name={database.displayName}
     entityTypeName={$_('database')}
     --header-color='var(--db-page-header)'
-    --entity-name-color='var(--SYS-accent-salmon-base-muted)'
+    --entity-name-color='var(--SYS-accent-amethyst-bright-highlighted)'
   >
     <div slot="subText" class="database-info">
       <div class="connection-details">

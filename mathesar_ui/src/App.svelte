@@ -84,7 +84,7 @@
     --cell-bg-color-processing: var(--SYS-color-warning-bg);
     --cell-bg-color-disabled: var(--SYS-surface-inset-disabled);
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
-    --cell-bg-color-row-selected: var(--SYS-accent-glacier-dull-selected);
+    --cell-bg-color-row-selected: var(--SYS-accent-glacier-dull-muted);
 
     --color-fk: var(--SYS-accent-amethyst-dull);
     --color-fk-border: var(--SYS-accent-amethyst-border);
