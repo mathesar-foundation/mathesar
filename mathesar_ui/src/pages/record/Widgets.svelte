@@ -61,8 +61,15 @@
 
 <style lang="scss">
   .widgets-area {
-    background: var(--SYS-surface-elevated);
-    border-top: 1px solid var(--SYS-border-section);
+    background: linear-gradient(
+      135deg,
+      var(--SYS-surface-base) 40%,
+      var(--SYS-accent-asparagus-faint-hover), 55%,
+      var(--SYS-accent-glacier-faint) 75%,
+      var(--SYS-accent-asparagus-faint) 80%,
+      var(--SYS-surface-base) 100%
+    );
+    border-top: 2px solid var(--SYS-border-container);
   }
   .no-widgets {
     background: var(--layout-background-color);

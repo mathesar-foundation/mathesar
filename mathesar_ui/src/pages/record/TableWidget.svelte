@@ -59,7 +59,8 @@
 
 <style lang="scss">
   .table-widget {
-    border: 1px solid var(--SYS-border-section);
+    border: 1px solid var(--SYS-border-container);
+    background: var(--SYS-surface-elevated);
     border-radius: var(--border-radius-m);
     padding: var(--sm1);
   }
@@ -83,5 +84,6 @@
   }
   .results {
     margin-top: var(--sm1);
+    border: transparent;
   }
 </style>

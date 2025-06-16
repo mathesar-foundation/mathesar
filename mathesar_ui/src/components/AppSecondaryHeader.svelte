@@ -28,7 +28,7 @@
   .app-secondary-header {
     width: 100%;
     padding: 0;
-    margin-bottom: var(--lg4);
+    margin-bottom: var(--bottom-margin, var(--lg4));
     background: var(--header-color, var(--SYS-surface-supporting));
   }
   .content {

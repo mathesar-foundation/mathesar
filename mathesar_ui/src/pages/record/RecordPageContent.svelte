@@ -14,6 +14,7 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import type { Table } from '@mathesar/models/Table';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
@@ -72,22 +73,29 @@
     await record.patch(patch);
   }
 </script>
-
 <div class="record-page-content">
-  <InsetPageLayout>
-    <div slot="header" class="header">
-      <h1 class="title">
-        <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
-      </h1>
-      <div class="table-name">
-        <RichText text={$_('record_in_table')} let:slotName>
-          {#if slotName === 'tableName'}
-            <TableName {table} truncate={false} />
-          {/if}
-        </RichText>
-      </div>
+  <AppSecondaryHeader
+    slot="secondary-header"
+    name={$summary}
+    icon={iconRecord}
+    entityTypeName={$_('record')}
+    --header-color='var(--record-page-header)'
+    --entity-name-color='var(--SYS-accent-asparagus-base-muted)'
+    --bottom-margin='var(--sm1)'
+    --page-padding-x='6rem'
+  >
+    <div slot="subText" class="table-name">
+      <RichText text={$_('record_in_table')} let:slotName>
+        {#if slotName === 'tableName'}
+          <TableName {table} truncate={false} />
+        {/if}
+      </RichText>
+    </div>
+    <div slot="action">
       <div class="form-status"><FormStatus {form} /></div>
     </div>
+  </AppSecondaryHeader>
+  <InsetPageLayout --inset-page-padding='0rem 0rem 2rem 0rem'>
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
         <DirectField
@@ -130,6 +138,9 @@
     display: grid;
     grid-template: auto 1fr / auto;
     overflow-y: auto;
+  }
+  .record-page-content .app-secondary-header {
+    margin-bottom: 0px;
   }
   .header {
     display: grid;
