@@ -80,11 +80,11 @@
     --cell-bg-mix-blend-mode: screen;
     --cell-bg-color-base: var(--SYS-surface-inset);
     --cell-bg-color-error: var(--SYS-color-danger-bg);
-    --cell-bg-color-header: var(--SYS-surface-header-table);
+    --cell-bg-color-header: var(--SYS-surface-table-header);
     --cell-bg-color-processing: var(--SYS-color-warning-bg);
     --cell-bg-color-disabled: var(--SYS-surface-inset-disabled);
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
-    --cell-bg-color-row-selected: var(--SYS-accent-glacier-dull-muted);
+    --cell-bg-color-row-selected: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 40%);
 
     --color-fk: var(--SYS-accent-amethyst-dull);
     --color-fk-border: var(--SYS-accent-amethyst-border);

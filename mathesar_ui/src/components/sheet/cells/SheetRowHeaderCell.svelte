@@ -27,8 +27,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: var(--cell-border-horizontal);
-    border-right: var(--cell-border-vertical);
+    border-bottom: 1px solid var(--SYS-border-table-header);
+    border-right: 1px solid var(--SYS-border-table-header);
     font-size: var(--sm2);
     padding: 0 1.5rem;
     color: var(--SYS-text-muted);

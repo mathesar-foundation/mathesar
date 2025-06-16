@@ -42,6 +42,11 @@
         --button-border-color: var(--SYS-border-control-focus);
       }
     }
+    
+    &.dropdown {
+      background: var(--SYS-surface-input);
+      --button-border-color: var(--SYS-border-input);
+    }
   }
 
   &.btn-primary {
@@ -171,51 +176,29 @@
     }
   }
 
-  &.btn-outline-primary {
+  &.btn-danger {
     --button-background: transparent;
-    --button-border-color: var(--SYS-accent-fjord-base);
-    --button-color: var(--SYS-accent-fjord-contrast);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: var(--SYS-accent-fjord-inverted);
-        --button-border-color: var(--SYS-accent-fjord-bright);
-        --button-color: var(--SYS-accent-fjord-dull);
-      }
-
-      &:active,
-      &.active {
-        --button-background: var(--SYS-accent-fjord-inverted);
-        --button-border-color: var(--SYS-accent-fjord-base);
-        --button-color: var(--SYS-accent-fjord-faint);
-      }
-    }
-  }
-
-  &.btn-outline-danger {
-    --button-background: transparent;
-    --button-border-color: var(--SYS-button-danger-outlined-border);
+    border: transparent;
     --button-color: var(--SYS-button-danger-outlined-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--SYS-button-danger-outlined-bg);
-        --button-border-color: var(--SYS-button-danger-outlined-border);
-        --button-color: var(--SYS-button-danger-outlined-text);
+        --button-background: color-mix(in srgb, var(--SYS-button-danger-soft-bg), transparent 60%);
+        border: 2px solid var(--SYS-button-danger-soft-border-muted);
+        --button-color: var(--SYS-button-danger-outlined-text-hover);
       }
 
       &:active,
       &.active {
-        --button-background: var(--SYS-button-danger-outlined-bg);
-        --button-border-color: var(--SYS-button-danger-outlined-text);
-        --button-color: var(--SYS-button-danger-outlined-text);
+        --button-background: color-mix(in srgb, var(--SYS-button-danger-soft-bg), transparent 50%);
+        --button-border-color: var(--SYS-button-danger-soft-border-highlighted);
+        --button-color: var(--SYS-button-danger-outlined-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-button-danger-outlined-border);
+        --button-outline: 2px solid var(--SYS-button-danger-outlined-border-focused);
         outline-offset: 1px;
       }
     }
@@ -337,24 +320,27 @@
   }
 
   &.btn-action {
-    --button-background: var(--background-color);
-    --button-border-color: var(--SYS-border-section);
+    --button-background: var(--SYS-accent-fjord-faint);
+    color: var(--SYS-accent-fjord-text-muted);
+    border: transparent;
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-border-color: var(--SYS-text-disabled);
+        --button-background: color-mix(in srgb, var(--SYS-accent-fjord-muted), transparent 60%);
+        border: 2px solid var(--SYS-accent-fjord-muted-hover);
+        
       }
 
       &:active,
       &.active {
-        --button-background: var(--active-background);
-        --button-border-color: var(--SYS-text-disabled);
+        --button-background: var(--SYS-accent-fjord-muted-active);
+        --button-border-color: var(--SYS-accent-fjord-dull-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-border-section);
+        --button-outline: 2px solid var(--SYS-accent-fjord-dull-focused);
         outline-offset: 1px;
       }
     }

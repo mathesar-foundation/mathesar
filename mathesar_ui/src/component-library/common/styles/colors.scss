@@ -46,7 +46,7 @@ $surface-deltas-light: (
   "supporting": 3%,
   "card": 3%,
   "footer": 4%,
-  "header-table": 4%,
+  "table-header": 4%,
   "fieldset": 4%,
   "control": 5%,
   "elevated": 5%,
@@ -71,12 +71,12 @@ $surface-deltas-dark: (
   "supporting": 3%,
   "card": 3%,
   "footer": 4%,
-  "header-table": 4%,
+  "table-header": 5%,
   "fieldset": 4%,
   "control": 5%,
   "elevated": 5%,
-  "header-section": 6%,
   "overlay": 7%,
+  "header-section": 9%,
   "overlay-secondary": 12%,
   "overlay-tertiary": 16%,
   "inverted": 90%
@@ -127,14 +127,14 @@ $border-roles: (
   "modal": 15%,
   "container": 12%,
   "card": 15%,
+  "table-header": 20%,
   "elevated-low": 20%,
   "elevated-mid": 25%,
   "fieldset": 26%,
   "elevated-high": 30%,
   "input": 25%,
-  "section": 30%,
-  "control": 40%,
-  "table-header": 40%
+  "control": 25%,
+  "section": 30%
 );
 
 $border-states-light: (

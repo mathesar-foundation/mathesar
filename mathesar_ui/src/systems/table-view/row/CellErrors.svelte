@@ -90,7 +90,7 @@
   }
 
   .errors {
-    background: var(--background-color);
+    background: var(--SYS-surface-inset);
     border: solid 2px var(--SYS-color-danger-border);
     box-shadow:
       #000 0 0 0 0,

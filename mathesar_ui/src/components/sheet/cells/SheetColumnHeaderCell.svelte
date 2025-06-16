@@ -25,10 +25,12 @@
     left: 0;
     top: 0;
     height: 100%;
-    border-right: var(--cell-border-vertical);
+    border-top: 1px solid var(--SYS-border-table-header);
+    border-left: 1px solid var(--SYS-border-table-header);
     border-bottom: none;
-    font-size: var(--sm1);
-    font-weight: var(--font-weight-bold);
+    font-size: 1rem;
+    font-weight: var(font-weight-bold);
     overflow: hidden;
+    color: var(--SYS-text-primary);
   }
 </style>

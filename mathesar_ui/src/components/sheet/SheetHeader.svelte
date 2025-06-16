@@ -56,8 +56,8 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: var(--SYS-surface-card);
-    border-bottom: 1px solid var(--SYS-border-section);
+    background-color: var(--SYS-surface-table-header);
+    border-bottom: 1px solid var(--SYS-border-table-header);
     box-shadow: 0 2px 4px var(--shadow-color);
     user-select: none;
     -webkit-user-select: none; /* Safari */

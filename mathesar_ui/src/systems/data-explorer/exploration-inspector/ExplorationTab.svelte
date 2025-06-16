@@ -140,7 +140,7 @@
 </InspectorSection>
 
 <InspectorSection title={$_('actions')}>
-  <Button appearance="outline-primary" on:click={handleDeleteExploration}>
+  <Button appearance="danger" on:click={handleDeleteExploration}>
     <Icon {...iconDeleteMajor} />
     <span>{$_('delete_exploration')}</span>
   </Button>

@@ -84,7 +84,7 @@
     right: 1px;
     bottom: 1px;
     position: absolute;
-    background: var(--background-color);
+    background: var(--SYS-surface-base);
     z-index: 1;
   }
   .bg {

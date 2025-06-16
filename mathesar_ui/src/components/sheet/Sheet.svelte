@@ -220,7 +220,7 @@
     );
 
     &.has-border {
-      border: 1px solid var(--SYS-border-section);
+      border: 1px solid var(--SYS-border-table-header);
     }
 
     &.uses-virtual-list {
