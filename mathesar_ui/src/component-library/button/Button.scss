@@ -227,7 +227,7 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--hover-background);
+        --button-background: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 20%);
         --button-color: var(--SYS-text-primary);
       }
     }

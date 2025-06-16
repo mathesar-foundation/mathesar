@@ -348,6 +348,7 @@
   }
   .tr {
     display: table-row;
+    background: var(--SYS-surface-inset);
   }
 
   .inset-shadow {

@@ -53,7 +53,9 @@
     border-radius: var(--border-radius-m);
 
     &:hover {
-      background-color: var(--hover-background);
+      border: 1px solid color-mix(in srgb, var(--SYS-accent-glacier-base-muted), transparent 80%);
+      box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 80%);
+      background: color-mix(in srgb, var(--SYS-accent-glacier-bright), transparent 95%);
 
       .caret-container {
         opacity: 1;
@@ -61,13 +63,14 @@
     }
 
     &:focus {
-      outline: none;
-      background-color: var(--active-background);
+      border: 1px solid color-mix(in srgb, var(--SYS-accent-glacier-base-muted), transparent 80%);
+      box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 60%);
+      background: color-mix(in srgb, var(--SYS-accent-glacier-bright), transparent 90%);
     }
   }
 
   .icon-container {
-    background-color: var(--SYS-accent-pumpkin-dull-muted);
+    background-color: var(--SYS-accent-glacier-dull-muted);
     border-radius: 50%;
     width: 1.25rem;
     height: 1.25rem;

@@ -39,7 +39,7 @@
     display: table-cell;
     vertical-align: middle;
     border-style: solid;
-    border-color: var(--SYS-border-section);
+    border-color: var(--SYS-border-grid);
     border-width: 0;
     /** Set from parent to so that first row gets border */
     border-top-width: var(--border-top-width, 0);
@@ -53,7 +53,7 @@
   }
 
   .column-header {
-    background: var(--SYS-surface-card);
+    background: var(--SYS-surface-header-table);
     border-bottom-width: var(--separator-width);
     position: sticky;
     top: 0;
@@ -67,7 +67,7 @@
     position: sticky;
     left: 0;
     z-index: var(--z-index__record_selector__row-header);
-    background: var(--SYS-surface-card);
+    background: var(--SYS-surface-header-table);
     min-width: 3ch;
   }
   .row-header.row-is-selected {
