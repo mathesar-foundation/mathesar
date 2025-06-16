@@ -21,10 +21,10 @@
 <style lang="scss">
   .db-card {
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--SYS-border-card);
     background-color: var(--SYS-surface-card);
     overflow: hidden;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-border-shadow), transparent 80%);
     transition: background 120ms ease, box-shadow 120ms ease;
   }
 

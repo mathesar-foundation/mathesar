@@ -40,17 +40,6 @@ body {
   --shadow-color-light: color-mix(in srgb, var(--SYS-surface-base), transparent 5%);
   --shadow-color-inset: color-mix(in srgb, var(--SYS-surface-canvas), transparent 10%);
 
-  // Card Styles
-  --card-border: var(--SYS-border-card);
-  --card-hover-background: var(--SYS-surface-card-hover);
-  --card-hover-border: var(--SYS-border-card-hover);
-  --card-hover-shadow: 0 1px 2px 0  var(--SYS-surface-card-muted);
-  --card-active-background: var(--SYS-surface-card-active);
-  --card-active-border: var(--SYS-border-card-active);
-  --card-active-shadow: inset 0 0 0 1px var(--SYS-surface-card-muted);
-  --card-focus-outline: var(--SYS-indicator-row);
-
-
   // Toast
   --ToastItem__background-color: var(--SYS-color-info-bg);
   --ToastItem__background-color--success: var(--SYS-color-info-success);
@@ -104,9 +93,9 @@ body {
   // Headers
   --schema-page-header: linear-gradient(
       135deg,
-      var(--SYS-accent-glacier-muted) 0%,
-      var(--SYS-accent-asparagus-faint) 30%,
-      var(--SYS-accent-fjord-faint) 100%
+      var(--SYS-accent-pumpkin-faint-selected) 10%,
+      var(--SYS-accent-pumpkin-faint) 50%,
+      var(--SYS-surface-base) 100%
     );
 
     .page-header {

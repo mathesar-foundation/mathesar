@@ -328,7 +328,7 @@
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
     background-color: var(--SYS-surface-header-table);
-    border-top: 1px solid var(--card-border);
+    border-top: 1px solid var(--SYS-border-card);
   }
   .preview-content {
     padding-bottom: 1rem;

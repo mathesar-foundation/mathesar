@@ -118,7 +118,7 @@
         padding: var(--sm6) var(--sm2);
         background: var(--SYS-surface-card);
         color: var(--SYS-text-secondary);
-        border: 1px solid var(--card-border);
+        border: 1px solid var(--SYS-border-card);
         border-radius: var(--lg1);
         font-weight: var(--font-weight-medium);
         overflow: hidden;

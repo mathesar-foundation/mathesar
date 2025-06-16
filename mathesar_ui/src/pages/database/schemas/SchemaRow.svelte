@@ -104,14 +104,14 @@
     --z-index-hyperlink-overlay: 1;
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--SYS-border-card);
     background-color: var(--SYS-surface-card);
     padding: var(--lg1);
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
-    box-shadow: var(--card-active-shadow);
+    box-shadow: inset 0 0 0 1px var(--SYS-surface-card-muted);
   }
 
   .schema-row.hover {

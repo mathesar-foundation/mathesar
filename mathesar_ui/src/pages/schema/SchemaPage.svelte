@@ -52,6 +52,7 @@
     icon={iconSchema}
     entityTypeName={$_('schema')}
     --header-color='var(--schema-page-header)'
+    --entity-name-color='var(--SYS-accent-pumpkin-base)'
   >
     <div slot="action" class="action-buttons">
       <Button

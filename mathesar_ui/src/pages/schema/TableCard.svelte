@@ -199,7 +199,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--SYS-border-card);
     background-color: var(--SYS-surface-card);
     overflow: hidden;
     border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
@@ -224,19 +224,20 @@
   }
 
   .table-row.focus:not(:hover) {
-    outline: 1px solid var(--card-focus-outline);
+    outline: 1px solid var(--SYS-indicator-row);
     outline-offset: -1px;
   }
 
   .table-row:hover {
-    box-shadow: var(--shadow-color) 0 2px 4px 0;
-    background: var(--card-hover-background);
+    border: 1px solid color-mix(in srgb, var(--SYS-accent-pumpkin-base-muted), transparent 80%);
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 80%);
+    background: color-mix(in srgb, var(--SYS-accent-pumpkin-bright), transparent 95%);
     padding-left: 0;
     &::before {
       content: '';
       border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
         var(--corner-bl);
-      border-left: solid 3px var(--SYS-accent-salmon-dull);
+      border-left: solid 3px var(--SYS-accent-pumpkin-dull);
       position: absolute;
       height: 100%;
       width: 10px;
@@ -247,9 +248,9 @@
   }
 
   .table-row:active {
-    border-color: var(--SYS-border-table-header);
-    box-shadow: var(--shadow-color) 0 1px 2px 0;
-    background: var(--card-active-background);
+    border: 1px solid color-mix(in srgb, var(--SYS-accent-pumpkin-base-muted), transparent 80%);
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 60%);
+    background: color-mix(in srgb, var(--SYS-accent-pumpkin-bright), transparent 90%);
   }
 
   .table-row.unconfirmed-import {

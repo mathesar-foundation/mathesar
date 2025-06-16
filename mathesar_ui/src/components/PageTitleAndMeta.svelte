@@ -65,7 +65,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--SYS-accent-salmon-base-muted);
+    color: var(--entity-name-color, var(--SYS-text-tertiary));
     margin-right: var(--sm5);
   }
 
@@ -85,7 +85,7 @@
     font-size: var(--lg1);
     font-weight: 300;
     line-height: 1;
-    color: var(--SYS-accent-salmon-base-muted);
+    color: var(--entity-name-color, var(--SYS-text-tertiary));
   }
 
   .entity-name {
