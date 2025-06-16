@@ -24,8 +24,6 @@ body {
   --sheet-cell-selection-bg: color-mix(in srgb, var(--SYS-accent-glacier-base), transparent 75%);
   --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
   --icon-background: var(--SYS-accent-pumpkin-dull);
-  --resource-icon-color: var(--SYS-accent-fjord-bright-muted);
-  --resource-icon-background: var(--SYS-accent-fjord-dull-muted);
   --layout-background-color: var(--SYS-surface-base);
   --progress-foreground: color-mix(in srgb, var(--SYS-surface-elevated), transparent 80%);
 
@@ -47,7 +45,6 @@ body {
 
   // Card Styles
   --card-border: var(--SYS-border-card);
-  --card-row-border: var(--SYS-border-row);
   --card-hover-background: var(--SYS-surface-card-hover);
   --card-hover-border: var(--SYS-border-card-hover);
   --card-hover-shadow: 0 1px 2px 0  var(--SYS-surface-card-muted);

@@ -16,7 +16,7 @@
   .info-box {
     --MessageBox__background: var(--SYS-color-info-bg);
     --MessageBox__border: 4px solid var(--SYS-color-info-border);
-    --MessageBox__icon-color: var(--SYS-color-info-border);
+    --MessageBox__icon-color: var(--SYS-color-info-icon);
     --MessageBox__text-color: var(--SYS-color-info-text);
   }
 </style>

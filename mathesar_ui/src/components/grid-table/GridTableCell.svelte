@@ -14,12 +14,13 @@
     min-height: 100%;
     padding: var(--sm2) 1rem;
     color: var(--SYS-text-primary);
+    border: 1px solid var(--SYS-border-row);
 
     &::before,
     &::after {
       content: '';
       position: absolute;
-      background-color: var(--card-row-border);
+      background-color: var(--SYS-surface-card);
       z-index: 1;
     }
 
@@ -40,10 +41,10 @@
     &.gt-header {
       font-weight: var(--font-weight-medium);
       color: var(--SYS-text-primary);
-      background: var(--elevated-background);
+      background: var(--SYS-surface-header-section);
 
       &::after {
-        background-color: var(--card-row-border);
+        background-color: var(--SYS-surface-header-section);
       }
     }
   }

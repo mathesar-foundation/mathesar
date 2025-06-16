@@ -34,8 +34,8 @@
     align-items: center;
     justify-content: center;
     margin-right: var(--sm5);
-    color: var(--resource-icon-color);
-    background-color: var(--resource-icon-background);
+    color: var(--SYS-accent-fjord-bright-muted);
+    background-color: var(--SYS-accent-fjord-dull-muted);
     border-radius: 50%;
     padding: var(--sm3);
   }

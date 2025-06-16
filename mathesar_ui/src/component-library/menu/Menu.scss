@@ -13,7 +13,8 @@
   }
 
   .menu-divider {
-    border-top: 0.1em solid var(--Menu__divider-color, var(--SYS-border-section));
+    margin-top: var(--sm5);
+    border-top: 0.1em solid var(--Menu__divider-color, var(--SYS-border-divider));
     height: 0;
   }
 
@@ -33,8 +34,8 @@
     }
     &.menu-item-link:not(.disabled):hover,
     &.menu-item-button:not(.disabled):hover {
-      background-color: var(--SYS-accent-fjord-dull-hover);
-      color: var(--SYS-accent-fjord-base-on);
+      background-color: var(--SYS-accent-pumpkin-muted-hover);
+      color: var(--SYS-accent-pumpkin-base-on);
     }
     &.menu-item-button {
       border: inherit;
@@ -79,11 +80,11 @@
       --checkbox-margin-bottom: 0;
     }
     &.active {
-      background-color: var(--SYS-accent-fjord-dull);
+      background-color: var(--SYS-accent-pumpkin-muted);
       font-weight: var(--font-weight-medium);
 
       &:hover {
-      background-color: var(--SYS-accent-fjord-base-hover);
+      background-color: var(--SYS-accent-pumpkin-muted-hover);
       color: var(--SYS-text-inverted);
       }
     }

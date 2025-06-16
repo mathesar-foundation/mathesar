@@ -42,19 +42,18 @@ $surface-deltas-light: (
   "inset": -2%,
   "input": 1%,
   "canvas": 2%,
+  "header-primary": 2%,
   "supporting": 3%,
-  "header-primary": 4%,
+  "card": 3%,
   "footer": 4%,
   "header-table": 4%,
   "fieldset": 4%,
-  "card": 5%,
   "control": 5%,
   "header-section": 5%,
-  "elevated": 6%,
-  "overlay": 8%,
+  "elevated": 5%,
+  "overlay": 6%,
   "overlay-secondary": 12%,
   "overlay-tertiary": 16%,
-  "tooltip": 18%,
   "inverted": 90%
 );
 
@@ -75,12 +74,11 @@ $surface-deltas-dark: (
   "header-table": 4%,
   "fieldset": 4%,
   "control": 5%,
-  "header-section": 5%,
-  "elevated": 6%,
-  "overlay": 8%,
+  "elevated": 5%,
+  "header-section": 6%,
+  "overlay": 7%,
   "overlay-secondary": 12%,
   "overlay-tertiary": 16%,
-  "tooltip": 18%,
   "inverted": 90%
 );
 
@@ -122,6 +120,8 @@ $border-roles: (
   "canvas": 15%,
   "grid": 10%,
   "avatar": 10%,
+  "row": 12%,
+  "divider": 15%,
   "token": 20%,
   "dropdown": 15%,
   "modal": 15%,
@@ -130,9 +130,8 @@ $border-roles: (
   "elevated-low": 20%,
   "elevated-mid": 25%,
   "fieldset": 26%,
-  "row": 26%,
   "elevated-high": 30%,
-  "input": 30%,
+  "input": 25%,
   "section": 30%,
   "control": 40%,
   "table-header": 40%
@@ -314,7 +313,7 @@ $button-roles-light: (
 $button-roles-dark: (
   "bg": 10%,
   "text": 70%,
-  "icon": 65%,
+  "icon": 40%,
   "border": 15%
 );
 

@@ -50,10 +50,12 @@
       var(--SYS-accent-asparagus-dull),
       var(--SYS-accent-asparagus-muted)
     );
-    --button-border-color: var(--SYS-accent-asparagus-faint);
+    --button-border-color: var(--SYS-accent-asparagus-muted);
     --button-color: var(--SYS-text-primary);
-    --button-shadow: var(--SYS-surface-base) 0 1px 2px 0,
-      var(--shadow-color) 0 1px 3px 0;
+    box-shadow:
+      0 1px 2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 75%),
+      0 1px 3px  color-mix(in srgb, var(--SYS-surface-dark), transparent 80%),
+      0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 80%);
 
     &:not(:disabled) {
       &.focus,
@@ -69,8 +71,11 @@
           var(--SYS-accent-asparagus-dull-hover),
           var(--SYS-accent-asparagus-muted-hover)
         );
-        --button-border-color: var(--SYS-accent-asparagus-faint-hover);
-        --button-shadow: var(--shadow-color) 0 2px 4px 0;
+        --button-border-color: var(--SYS-accent-asparagus-muted-hover);
+        box-shadow:
+          0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 75%),
+          0 1px 3px -2px color-mix(in srgb, var(--SYS-surface-dark), transparent 80%),
+          0 1px 2px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 80%);
       }
 
       &:active,
@@ -190,27 +195,27 @@
 
   &.btn-outline-danger {
     --button-background: transparent;
-    --button-border-color: var(--SYS-button-danger-outline-border);
-    --button-color: var(--SYS-button-danger-outline-text);
+    --button-border-color: var(--SYS-button-danger-outlined-border);
+    --button-color: var(--SYS-button-danger-outlined-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--SYS-button-danger-outline-bg);
-        --button-border-color: var(--SYS-button-danger-outline-border);
-        --button-color: var(--SYS-button-danger-outline-text);
+        --button-background: var(--SYS-button-danger-outlined-bg);
+        --button-border-color: var(--SYS-button-danger-outlined-border);
+        --button-color: var(--SYS-button-danger-outlined-text);
       }
 
       &:active,
       &.active {
-        --button-background: var(--SYS-button-danger-outline-bg);
-        --button-border-color: var(--SYS-button-danger-outline-text);
-        --button-color: var(--SYS-button-danger-outline-text);
+        --button-background: var(--SYS-button-danger-outlined-bg);
+        --button-border-color: var(--SYS-button-danger-outlined-text);
+        --button-color: var(--SYS-button-danger-outlined-text);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-button-danger-outline-border);
+        --button-outline: 2px solid var(--SYS-button-danger-outlined-border);
         outline-offset: 1px;
       }
     }
