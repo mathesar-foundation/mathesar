@@ -115,10 +115,12 @@
       max-width: 100%;
 
       .tag {
-        padding: var(--sm6) var(--sm4);
-        background: var(--stormy-100);
+        padding: var(--sm6) var(--sm2);
+        background: var(--card-background);
+        color: var(--text-color-secondary);
+        border: 1px solid var(--card-border);
         border-radius: var(--lg1);
-        font-weight: 510;
+        font-weight: var(--font-weight-medium);
         overflow: hidden;
         max-width: 100%;
       }
@@ -126,19 +128,6 @@
       span {
         display: inline-block;
         vertical-align: middle;
-      }
-    }
-  }
-
-  :global(body.theme-dark) {
-    [data-identifier='aggregation-source'],
-    [data-identifier='column-source'] {
-      .column-info {
-        .tag {
-          background: var(--stormy-800);
-          border: 1px solid var(--stormy-600);
-          color: var(--text-color-secondary);
-        }
       }
     }
   }

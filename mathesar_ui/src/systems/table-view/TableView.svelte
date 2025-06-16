@@ -160,6 +160,6 @@
     text-align: center;
     font-size: 2rem;
     padding: 2rem;
-    color: var(--gray-500);
+    color: var(--neutral-500);
   }
 </style>

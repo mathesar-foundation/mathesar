@@ -246,13 +246,13 @@
 
   .upload-format-help {
     line-height: 1.2;
-    color: var(--gray-500);
+    color: var(--text-color-secondary);
     text-align: right;
     font-size: var(--sm1);
   }
 
   .processing-spinner {
-    color: var(--gray-400);
+    color: var(--icon-color);
     font-size: 1.5rem;
     margin-bottom: 1rem;
   }

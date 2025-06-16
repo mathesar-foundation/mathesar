@@ -50,7 +50,7 @@
   .breadcrumb-selector-row a {
     flex: 1 1 auto;
     display: block;
-    padding: 0.25rem 0.5rem;
+    padding: var(--sm6) var(--sm3);
     color: inherit;
     text-decoration: none;
     position: relative;

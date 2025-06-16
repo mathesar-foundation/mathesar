@@ -43,7 +43,7 @@
   }
 
   .icon-container {
-    background-color: var(--icon-background);
+    background: linear-gradient(135deg, var(--salmon-400), var(--salmon-600));
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -51,6 +51,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    color: var(--white);
   }
 
   .content {
@@ -72,7 +73,7 @@
 
   .detail {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--text-color-muted);
   }
 
   .caret-container {
