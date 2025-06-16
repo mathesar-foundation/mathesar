@@ -58,7 +58,7 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--SYS-accent-asparagus-bright), 0.25);
+        --button-outline: 2px solid var(--SYS-accent-asparagus-bright-focused);
         outline-offset: 1px;
       }
 
@@ -98,7 +98,7 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(189, 193, 198, 0.3);
+        --button-outline: 2px solid var(--SYS-accent-glacier-dull-focused);
         outline-offset: 1px;
       }
 
@@ -109,7 +109,7 @@
         box-shadow:
           0 4px 6px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
           0 2px 4px -2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
-          0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+          0 0 0 1px  color-mix(in srgb, var(--SYS-surface-light), transparent 10%) inset;
       }
 
       &:active,
@@ -140,7 +140,7 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(189, 193, 198, 0.3);
+        --button-outline: 2px solid var(--SYS-accent-glacier-dull-focused);
         outline-offset: 1px;
       }
 
@@ -151,7 +151,7 @@
         box-shadow:
           0 4px 6px -1px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
           0 2px 4px -2px  color-mix(in srgb, var(--SYS-surface-dark), transparent 10%),
-          0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+          0 0 0 1px  color-mix(in srgb, var(--SYS-surface-light), transparent 10%) inset;
       }
 
       &:active,

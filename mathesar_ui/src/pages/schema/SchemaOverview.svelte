@@ -177,7 +177,7 @@
       bottom: 0;
       background: radial-gradient(
         circle at top right,
-        rgba(255, 255, 255, 0.15) 0%,
+        rgba color-mix(in srgb, var(--SYS-surface-light), transparent 15%) 0%,
         transparent 60%
       );
       pointer-events: none;

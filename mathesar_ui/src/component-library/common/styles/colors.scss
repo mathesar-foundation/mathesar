@@ -37,8 +37,8 @@ $surface-base-light: hsl($base-hue-light, $base-saturation-light, 98%);
 
 // Lightness adjustments
 $surface-deltas-light: (
-  "black": 100%,
-  "white": 0%,
+  "dark": 100%,
+  "light": 0%,
   "input": -2%,
   "inset": -1%,
   "canvas": 2%,
@@ -63,8 +63,8 @@ $surface-base-dark: hsl($base-hue-dark, $base-saturation-dark, 2%);
 
 // Darkness adjustments, ordered by elevation
 $surface-deltas-dark: (
-  "black": 0%,
-  "white": 100%,
+  "dark": 0%,
+  "light": 100%,
   "input": -2%,
   "inset": -1%,
   "canvas": 2%,
@@ -210,6 +210,7 @@ $text-tokens-light: (
   "header-secondary": (h: none, l:10%, s: 5%),
   "header-tertiary": (h: none, l:25%, s: 3%),
   "header-subsection": (h: none, l:20%, s: 4%),
+  "icon": (h: 90, l:85%, s: 4%),
   "input": (h: none, l:10%, s: 5%),
   "input-label": (h: none, l:20%, s: 4%),
   "inverse": (h: none, l:95%, s: 4%),
@@ -238,6 +239,7 @@ $text-tokens-dark: (
   "header-secondary": (h: none, l:75%, s: 12%),
   "header-tertiary": (h: none, l:55%, s: 3%),
   "header-subsection": (h: none, l:75%, s: 4%),
+  "icon": (h: 90, l:55%, s: 10%),
   "input": (h: none, l:95%, s: 10%),
   "input-label": (h: none, l:70%, s: 4%),
   "inverse": (h: none, l:10%, s: 4%),

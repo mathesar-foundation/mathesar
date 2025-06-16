@@ -252,7 +252,7 @@
   }
 
   .processing-spinner {
-    color: var(--icon-color);
+    color: var(--SYS-text-icon);
     font-size: 1.5rem;
     margin-bottom: 1rem;
   }

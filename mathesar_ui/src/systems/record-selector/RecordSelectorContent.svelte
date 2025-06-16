@@ -251,7 +251,7 @@
   }
   .content-loading.prevent-user-entry {
     pointer-events: all;
-    background: rgba(255, 255, 255, 0.5);
+    background: color-mix(in srgb, var(--SYS-surface-light), transparent 50%);
   }
   .results-loading {
     padding: 1rem;
