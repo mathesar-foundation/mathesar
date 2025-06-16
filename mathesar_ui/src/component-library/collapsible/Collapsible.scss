@@ -38,3 +38,15 @@
     }
   }
 }
+
+.collapsible .collapsible-header > .btn-outcome {
+  background-color: var(--SYS-button-outcome-soft-bg);
+  border: 2px solid var(--SYS-button-outcome-soft-border);
+  color: var(--SYS-button-outcome-soft-text);
+  
+  &:hover,
+  &.hover {
+    background-color: var(--SYS-button-outcome-soft-bg-hover);
+    border: 2px solid var(--SYS-button-outcome-soft-border-hover);
+  }
+}

@@ -405,12 +405,12 @@
 
 <style>
   .form {
-    --base-fill: var(--SYS-accent-asparagus-dull);
-    --base-stroke: var(--SYS-accent-asparagus-border);
-    --target-fill:  var(--SYS-accent-pumpkin-dull);
-    --target-stroke: var(--SYS-accent-pumpkin-border);
-    --mapping-fill: var(--SYS-accent-glacier-dull);
-    --mapping-stroke: var(--SYS-accent-glacier-border);
+    --base-fill: var(--SYS-accent-salmon-muted);
+    --base-stroke: var(--SYS-accent-salmon-border);
+    --target-fill:  var(--SYS-accent-glacier-muted);
+    --target-stroke: var(--SYS-accent-glacier-border);
+    --mapping-fill: var(--SYS-accent-asparagus-muted);
+    --mapping-stroke: var(--SYS-accent-asparagus-border);
     line-height: 1.6;
   }
   .form.self-referential {

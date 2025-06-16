@@ -204,6 +204,34 @@
     }
   }
 
+  &.btn-outcome {
+    --button-background: transparent;
+    border: transparent;
+    --button-color: var(--SYS-button-outcome-outlined-text);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-background: color-mix(in srgb, var(--SYS-button-outcome-soft-bg), transparent 60%);
+        border: 2px solid var(--SYS-button-outcome-soft-border-muted);
+        --button-color: var(--SYS-button-outcome-outlined-text-hover);
+      }
+
+      &:active,
+      &.active {
+        --button-background: color-mix(in srgb, var(--SYS-button-outcome-soft-bg), transparent 50%);
+        --button-border-color: var(--SYS-button-outcome-soft-border-highlighted);
+        --button-color: var(--SYS-button-outcome-outlined-text-active);
+      }
+
+      &:focus,
+      &.focus {
+        --button-outline: 2px solid var(--SYS-button-outcome-outlined-border-focused);
+        outline-offset: 1px;
+      }
+    }
+  }
+
   &.btn-plain {
     --button-background: transparent;
 
