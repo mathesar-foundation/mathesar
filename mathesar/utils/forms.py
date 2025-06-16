@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.db import transaction
 
-from db.forms import fields_exist, get_oid_col_info_map
+from db.forms import get_oid_col_info_map
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
     Form, FormField, Database, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
@@ -33,13 +33,6 @@ def get_oid_attnums_map(form_model):
         table_oid = field.parent_field.target_table_oid if field.parent_field else form_model.base_table_oid
         oam[table_oid].append(field.attnum)
     return oam
-
-
-def validate_fields(form_model, user_dbrm):
-    oam = get_oid_attnums_map(form_model)
-    user_dbrm.cofigured_role = form_model.submit_role  # DANGEROUS!!!
-    with user_dbrm.connection as conn:
-        assert fields_exist(oam, conn), "Invalid fields"
 
 
 def get_field_col_info_map(form_model, user_dbrm):
@@ -116,6 +109,5 @@ def create_form(form_def, user):
             update_field_instances.append(fields_map[field["key"]])
     if update_field_instances:
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
-    validate_fields(form_model, user_dbrm)
     field_col_info_map = get_field_col_info_map(form_model, user_dbrm)
     return form_model, field_col_info_map

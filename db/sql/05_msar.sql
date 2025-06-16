@@ -5598,30 +5598,6 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.fields_exist(oid_attn_map jsonb)
-RETURNS boolean AS $$/*
-Utility function to determine that form fields passed through the forms via API exists on the db.
-
-oid_attn_map should have the following form:
-{
-  "table_oid_1": [col_att1,col_att2,col_att3],
-  "table_oid_2": [col_att1, col_att5]
-}
-*/
-  SELECT BOOL_AND(actual_attn_arr @> expected_attn_arr)
-  FROM (
-    SELECT attnums AS expected_attn_arr,
-    (
-      SELECT jsonb_agg(pga.attnum)
-      FROM pg_catalog.pg_attribute pga
-      WHERE pga.attrelid = tab_oid::oid AND NOT pga.attisdropped
-    ) AS actual_attn_arr
-    FROM jsonb_each(oid_attn_map) AS x(tab_oid, attnums)
-  ) t;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.get_oid_col_info_map(oid_attn_map jsonb)
 RETURNS jsonb AS $$/*
 Returns column_info for a given oid_attn_map.

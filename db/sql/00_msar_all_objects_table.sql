@@ -1061,7 +1061,6 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.expr_templates', 'TYPE', NULL),
   ('msar', 'msar.extract_columns_from_table(oid,integer[],text,text)', 'FUNCTION', NULL),
   ('msar', 'msar.extract_smallints(jsonb)', 'FUNCTION', NULL),
-  ('msar', 'msar.fields_exist(jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.find_mathesar_money_attrs(regclass,smallint,numeric)', 'FUNCTION', NULL),
   ('msar', 'msar.find_numeric_separators(regclass,smallint,numeric)', 'FUNCTION', NULL),
   ('msar', 'msar.format_data(anyelement)', 'FUNCTION', NULL),
