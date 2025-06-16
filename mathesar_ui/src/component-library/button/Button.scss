@@ -360,16 +360,21 @@
     }
   }
 
-  &.btn-outcome {
-    --button-background: var(--SYS-button-danger-solid-bg);
-    border: 1px solid var(--SYS-button-danger-solid-border);
+  &.btn-tip {
+    background: var(--SYS-button-tip-soft-bg);
+    border: 1px soft var(--SYS-button-tip-soft-border);
+    color: var(--SYS-button-tip-soft-text);
 
     &:hover {
-      border: 1px solid var(--SYS-button-danger-solid-text);
+      background: var(--SYS-button-tip-soft-bg-hover);
+      border: 1px soft var(--SYS-button-tip-soft-border-hover);
+      color: var(--SYS-button-tip-soft-text-hover);
     }
 
     &:active {
-      border: 1px solid var(--SYS-button-danger-solid-text);
+      background: var(--SYS-button-tip-soft-bg-active);
+      border: 1px soft var(--SYS-button-tip-soft-border-active);
+      color: var(--SYS-button-tip-soft-text-active);
     }
   }
 

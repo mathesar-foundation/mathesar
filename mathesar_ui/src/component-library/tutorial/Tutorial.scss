@@ -1,15 +1,15 @@
 .tutorial {
   position: relative;
   border-radius: var(--border-radius-xl);
-  border: 1px solid var(--SYS-accent-pumpkin-bright);
+  border: 1px solid var(--SYS-color-tip-border);
   padding: var(--lg3);
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1.6;
   overflow: hidden;
-  background: var(--background-color);
-  box-shadow: 0 8px 32px  color-mix(in srgb, var(--SYS-border-shadow), transparent 8%);
+  background: var(--SYS-color-tip-bg);
+  box-shadow: 0 4px 8px  color-mix(in srgb, var(--SYS-border-shadow), transparent 8%);
 
   &::before {
     content: '';
@@ -18,12 +18,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-      135deg,
-      var(--SYS-accent-pumpkin-base) 0%,
-      var(--SYS-accent-pumpkin-bright) 100%
-    );
-    opacity: 0.35;
+    background: var(--SYS-color-tip-bg);
   }
 
   .content {
@@ -39,12 +34,12 @@
 
   .icon {
     margin-bottom: var(--lg1);
-    color: var(--SYS-text-primary);
+    color: var(--SYS-color-tip-icon);
   }
 
   .title {
     font-size: var(--lg2);
-    color: var(--SYS-text-primary);
+    color: var(--SYS-color-tip-text);
     font-weight: var(--font-weight-extra-bold);
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -53,12 +48,13 @@
   }
 
   .body {
-    color: var(--SYS-text-primary);
+    color: var(--SYS-text-seondary);
   }
 
   .footer {
     margin-top: var(--lg1);
     display: flex;
+    color: var(--SYS-color-tip-icon);
     justify-content: center;
   }
 }

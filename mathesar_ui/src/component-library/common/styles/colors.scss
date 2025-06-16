@@ -311,10 +311,10 @@ $button-roles-light: (
 );
 
 $button-roles-dark: (
-  "bg": 10%,
-  "text": 70%,
-  "icon": 40%,
-  "border": 15%
+  "bg": 5%,
+  "text": 50%,
+  "icon": 70%,
+  "border": 10%
 );
 
 $button-state-deltas-light: (
@@ -534,7 +534,7 @@ body {
       @include generate-color-tokens($intent, $hue, $button-roles-dark);
 
       $solid: (bg: ($hue, $button-saturation, 70%), text: ($hue, 5%, 10%), icon: ($hue, 5%, 10%), border: ($hue, $button-saturation, 64%));
-      $soft: (bg: ($hue, $button-saturation * 0.4, 18%), text: ($hue, $button-saturation, 75%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.6, 26%));
+      $soft: (bg: ($hue, $button-saturation * 0.6, 18%), text: ($hue, $button-saturation *0.3, 55%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.6, 26%));
       $outlined: (bg: null, text: ($hue, $button-saturation, 75%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.8, 30%));
       $ghost: (bg: null, text: ($hue, $button-saturation * 0.5, 60%), icon: ($hue, $button-saturation * 0.5, 60%), border: null);
 

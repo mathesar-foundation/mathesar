@@ -42,7 +42,7 @@
     font-weight: var(--font-weight-medium);
   }
   .icon {
-    color: var(--SYS-text-icon, currentcolor);
+    color: var(--icon-color, var(--SYS-text-icon, currentcolor));
     opacity: var(--NameWithIcon__icon-opacity, 0.75);
     vertical-align: bottom;
   }
@@ -53,7 +53,7 @@
     display: inline-flex;
     border-radius: 0.25em;
     padding: 0.2em;
-    background: var(--SYS-text-icon, currentcolor);
+    background: var(--icon-color, var(--SYS-text-icon, currentcolor));
     vertical-align: -10%;
   }
   .name-with-icon.boxed .icon > :global(svg) {

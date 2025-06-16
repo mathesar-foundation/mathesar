@@ -100,7 +100,7 @@
   >
     <div class="table-info">
       <div class="table-name">
-        <TableName {table} />
+        <TableName {table} --icon-color='var(--SYS-accent-pumpkin-base-muted)' />
       </div>
       {#if description}
         <div class="description">

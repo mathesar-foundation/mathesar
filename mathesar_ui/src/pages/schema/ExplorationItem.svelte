@@ -67,7 +67,7 @@
   }
 
   .icon-container {
-    background-color: var(--icon-background);
+    background-color: var(--SYS-accent-pumpkin-dull-muted);
     border-radius: 50%;
     width: 1.25rem;
     height: 1.25rem;

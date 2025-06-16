@@ -122,6 +122,7 @@
               <AnchorButton
                 href={getDataExplorerPageUrl(database.id, schema.oid)}
                 size="small"
+                appearance="tip"
               >
                 {$_('open_data_explorer')}
               </AnchorButton>
@@ -158,12 +159,8 @@
 
   .explore-cta {
     padding: var(--lg3);
-    background: linear-gradient(
-      135deg,
-      var(--SYS-accent-pumpkin-muted) 0%,
-      var(--SYS-accent-pumpkin-faint) 100%
-    );
-    border: 1px solid var(--SYS-accent-pumpkin-base);
+    background: var(--SYS-color-tip-bg);
+    border: 1px solid var(--SYS-color-tip-border);
     border-radius: var(--sm2);
     position: relative;
     overflow: hidden;
@@ -186,13 +183,13 @@
     .explore-title {
       font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
-      color: var(--SYS-accent-pumpkin-inverted-highlighted);
+      color: var(--SYS-color-tip-text);
       margin: 0 0 0.75rem 0;
       position: relative;
     }
 
     .explore-description {
-      color: var(--SYS-accent-pumpkin-inverted);
+      color: var(--SYS-color-text-secondary);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;

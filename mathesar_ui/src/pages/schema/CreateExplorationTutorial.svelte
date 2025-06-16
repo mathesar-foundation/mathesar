@@ -20,7 +20,7 @@
   <AnchorButton
     slot="footer"
     href={getDataExplorerPageUrl(database.id, schema.oid)}
-    appearance="secondary"
+    appearance="tip"
   >
     {$_('open_data_explorer')}
   </AnchorButton>
