@@ -13,7 +13,7 @@
   export let controller: RowSeekerController;
 
   $: columnMap = new Map(columnsArray.map((cr) => [cr.id, cr]));
-  $: ({ filters } = controller);
+  $: ({ filters, searchValue } = controller);
 
   let searchElement: HTMLInputElement;
 
@@ -39,9 +39,11 @@
     </div>
     <input
       bind:this={searchElement}
+      bind:value={$searchValue}
       class="search-bar"
       type="text"
       placeholder={$_('search')}
+      on:input={() => controller.getRecords()}
       on:keydown={onKeyDown}
     />
   </div>

@@ -44,11 +44,13 @@ export default class RowSeekerController {
 
   columns = new AsyncRpcApiStore(api.columns.list_with_metadata);
 
-  records = new AsyncRpcApiStore(api.records.list);
+  records = new AsyncRpcApiStore(api.records.list_by_summaries);
 
   select: (v: RowSeekerResult) => void = () => {};
 
   filters: Writable<RowSeekerFilterMap> = writable(new ImmutableMap());
+
+  searchValue: Writable<string> = writable('');
 
   constructor(props: RowSeekerProps) {
     this.targetTable = props.targetTable;
@@ -131,9 +133,9 @@ export default class RowSeekerController {
       table_oid: this.targetTable.tableOid,
       limit: 500,
       offset: 0,
-      // order?: SortingEntry[];
+      search: get(this.searchValue) || null,
       filter: this.getFilterSqlExpr(),
-      return_record_summaries: true,
+      return_linked_record_summaries: true,
     });
     await this.focusSearch();
   }

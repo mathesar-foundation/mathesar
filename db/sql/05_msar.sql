@@ -5598,3 +5598,150 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION msar.list_by_record_summaries(
+  tab_id oid,
+  limit_ integer,
+  offset_ integer,
+  filter_ jsonb,
+  search_ text DEFAULT NULL,
+  table_record_summary_templates jsonb DEFAULT NULL,
+  include_linked_summaries boolean DEFAULT TRUE,
+  debug boolean DEFAULT FALSE
+) RETURNS jsonb
+LANGUAGE plpgsql STABLE
+AS $$
+DECLARE
+  pk_attnum smallint := msar.get_pk_column(tab_id);
+
+  schema_name text := msar.get_relation_schema_name(tab_id);
+  table_name text := msar.get_relation_name(tab_id);
+  selectable_columns_expr text := msar.build_selectable_column_expr(tab_id);
+
+  filter_where_clause text := msar.build_where_clause(tab_id, filter_);
+  search_where_clause text := '';
+  limit_offset_clause text := '';
+
+  linked_summary_ctes text := '';
+  join_expr_base text := '';
+  join_expr_filtered text := ''; 
+  summary_json_expr text := '';
+  summaries_json_cte_blk text;
+
+  final_sql text;
+  result_json jsonb;
+BEGIN
+
+  IF search_ IS NOT NULL AND search_ <> '' THEN
+    search_where_clause := format(' WHERE summary ILIKE %L', '%'||search_||'%');
+  END IF;
+
+  limit_offset_clause := limit_offset_clause || format(' LIMIT %s', limit_);
+  limit_offset_clause := limit_offset_clause || format(' OFFSET %s', offset_);
+
+  IF include_linked_summaries THEN
+    /* already includes summary_cte_self */
+    linked_summary_ctes := msar.build_linked_record_summaries_ctes(tab_id, table_record_summary_templates);
+    join_expr_base := msar.build_summary_join_expr_for_table(tab_id, 'results_base_cte');
+    join_expr_filtered := msar.build_summary_join_expr_for_table(tab_id, 'filtered_cte');
+
+    summary_json_expr := COALESCE(
+      NULLIF(
+        concat_ws(', ',
+          msar.build_summary_json_expr_for_table(tab_id),
+          msar.build_self_summary_json_expr(tab_id)
+        ), ''
+      ),
+      'COUNT(1) AS count_hack'
+    );
+
+    summaries_json_cte_blk := ',
+      summaries_json_cte AS (
+        SELECT jsonb_build_object(
+          ''linked_record_summaries'',
+          NULLIF(
+            to_jsonb(summary_cte) - ''summary_self'' - ''count_hack'',
+            ''{}''::jsonb
+          )
+        ) AS sj
+        FROM summary_cte
+      )';
+  ELSE
+    join_expr_base := format(
+      ' LEFT JOIN summary_cte_self ON results_base_cte."%s" = summary_cte_self.key',
+      pk_attnum::text);
+
+    join_expr_filtered := '';
+    summary_json_expr  := 'COUNT(1) AS count_hack';
+
+    summaries_json_cte_blk := ', summaries_json_cte AS ( SELECT ''{}''::jsonb AS sj )';
+  END IF;
+
+  final_sql := format(
+    $q$
+    WITH
+    results_base_cte AS (
+      SELECT %1$s FROM %2$I.%3$I %12$s
+    ),
+    summary_cte_self AS (
+      %4$s
+    )%5$s,
+    joined_cte AS (
+      SELECT results_base_cte.*, summary_cte_self.summary
+      FROM results_base_cte
+      %6$s
+    ),
+    filtered_cte AS (
+      SELECT * FROM joined_cte %7$s
+    ),
+    count_cte AS (
+      SELECT COUNT(*) AS count FROM filtered_cte
+    ),
+    results_cte AS (
+      SELECT * FROM filtered_cte
+      ORDER BY summary %8$s
+    ),
+    summary_cte AS (
+      SELECT %9$s FROM filtered_cte%10$s
+    )%11$s,
+    results_json_cte AS (
+      SELECT jsonb_build_object(
+              'results',
+                COALESCE(
+                  jsonb_agg(
+                    jsonb_build_object(
+                      'values',  to_jsonb(results_cte) - 'summary',
+                      'summary', results_cte.summary
+                    )
+                  ), jsonb_build_array()
+                ),
+              'count', MAX(count_cte.count)
+            ) AS rj
+      FROM results_cte CROSS JOIN count_cte
+    )
+    SELECT results_json_cte.rj || summaries_json_cte.sj
+    FROM   results_json_cte, summaries_json_cte;
+    $q$,
+    /*1 */ selectable_columns_expr,
+    /*2 */ schema_name,
+    /*3 */ table_name,
+    /*4 */ msar.build_record_summary_query_for_table(tab_id, NULL, table_record_summary_templates),
+    /*5 */ linked_summary_ctes,
+    /*6 */ join_expr_base,
+    /*7 */ search_where_clause,
+    /*8 */ limit_offset_clause,
+    /*9 */ summary_json_expr,
+    /*10*/ join_expr_filtered,
+    /*11*/ summaries_json_cte_blk,
+    /*12*/ filter_where_clause
+  );
+
+  IF debug THEN
+    RAISE NOTICE E'\nFINAL SQL:\n%s', final_sql;
+  END IF;
+
+  EXECUTE final_sql INTO result_json;
+  RETURN result_json;
+END;
+$$;

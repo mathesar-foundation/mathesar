@@ -2,7 +2,7 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Result } from '@mathesar/api/rpc/records';
+  import type { RecordSummaryListResult } from '@mathesar/api/rpc/records';
   import { extractPrimaryKeyValue } from '@mathesar/stores/table-data';
   import {
     ListBox,
@@ -21,7 +21,6 @@
   $: ({ elementId, records, columns } = controller);
   $: isLoading = $records.isLoading || $columns.isLoading;
   $: resolvedRecords = $records.resolvedValue;
-  $: recordSummaries = resolvedRecords?.record_summaries ?? {};
   $: linkedRecordSummaries = resolvedRecords?.linked_record_summaries ?? {};
   $: recordsArray = resolvedRecords?.results ?? [];
   $: columnsArray = $columns.resolvedValue ?? [];
@@ -30,24 +29,26 @@
     //
   });
 
-  function selectRecord(val: Result[]) {
-    const record = val[0];
+  function selectRecord(val: RecordSummaryListResult[]) {
+    const res = val[0];
+    if (!res) {
+      throw new Error("Value not selected");
+    }
     controller.select({
-      recordSummary:
-        recordSummaries[extractPrimaryKeyValue(record, columnsArray)],
-      record,
+      recordSummary: res.summary,
+      record: res.values,
     });
   }
 
-  function handleKeyDown(api: ListBoxApi<Result>, e: KeyboardEvent) {
+  function handleKeyDown(api: ListBoxApi<RecordSummaryListResult>, e: KeyboardEvent) {
     api.handleKeyDown(e);
     if (e.key === 'Escape') {
       dispatch('escape');
     }
   }
 
-  function getTypeCastedOption(opt: unknown): Result {
-    return opt as Result;
+  function getTypeCastedOption(opt: unknown): RecordSummaryListResult {
+    return opt as RecordSummaryListResult;
   }
 </script>
 
@@ -82,15 +83,12 @@
           let:isSelected
           let:inFocus
         >
-          {@const record = getTypeCastedOption(option)}
+          {@const result = getTypeCastedOption(option)}
           <RowSeekerOption
             {controller}
             {isSelected}
             {inFocus}
-            {record}
-            summary={recordSummaries[
-              extractPrimaryKeyValue(record, columnsArray)
-            ]}
+            {result}
             columns={columnsArray}
             {linkedRecordSummaries}
           />

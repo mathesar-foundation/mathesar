@@ -2,7 +2,7 @@
   import type { Column } from '@mathesar/api/rpc/columns';
   import type {
     RecordSummaryColumnData,
-    Result,
+    RecordSummaryListResult,
   } from '@mathesar/api/rpc/records';
   import { iconExpandRight } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
@@ -14,8 +14,7 @@
   export let isSelected: boolean;
   export let inFocus: boolean;
   export let columns: Column[];
-  export let record: Result;
-  export let summary: string;
+  export let result: RecordSummaryListResult;
   export let linkedRecordSummaries: Record<
     string,
     RecordSummaryColumnData | undefined
@@ -24,7 +23,7 @@
   let isExpanded = false;
 
   function getLinkedRecordSummary(column: Column) {
-    const value = record[column.id];
+    const value = result.values[column.id];
     const linkedSummary = linkedRecordSummaries[column.id];
     return linkedSummary?.[String(value)] ?? undefined;
   }
@@ -32,7 +31,7 @@
   $: columnDisplayInfo = columns.map((column) => ({
     id: column.id,
     column,
-    value: record[column.id],
+    value: result.values[column.id],
     summary: getLinkedRecordSummary(column),
   }));
   $: columnsThatMaybeUseful = (() => {
@@ -58,7 +57,7 @@
 <div class="record" class:selected={isSelected} class:in-focus={inFocus}>
   <div class="header">
     <div class="summary">
-      {summary}
+      {result.summary}
     </div>
     <div class="expand">
       <Button appearance="plain" on:click={(e) => toggleExpansion(e)}>
