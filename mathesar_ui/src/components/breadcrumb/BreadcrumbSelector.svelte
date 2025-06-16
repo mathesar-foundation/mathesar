@@ -130,11 +130,11 @@
     padding: var(--sm4);
 
     &:hover {
-      color: var(--SYS-accent-salmon-base-muted);
+      color: var(--SYS-accent-glacier-base-muted);
     }
 
     &:active {
-      color: var(--SYS-accent-salmon-base-active);
+      color: var(--SYS-accent-glacier-base-active);
     }
   }
 </style>

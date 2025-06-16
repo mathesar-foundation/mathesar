@@ -19,6 +19,6 @@
     font-weight: var(--font-weight-medium);
   }
   .breadcrumb-link:hover a {
-    color: var(--SYS-accent-salmon-bright);
+    color: var(--SYS-accent-glacier-base-muted);
   }
 </style>
