@@ -10,7 +10,7 @@ from mathesar.models.base import (
 )
 
 
-def validate_submit_role(user_dbrm, submit_role_id=None):
+def get_submit_role(user_dbrm, submit_role_id=None):
     with user_dbrm.connection as conn:
         submit_role = (
             ConfiguredRole.objects.filter(id=submit_role_id).first()
@@ -65,7 +65,7 @@ def get_field_col_info_map(form_model, user_dbrm):
 def create_form(form_def, user):
     database = Database.objects.get(id=form_def["database_id"])
     user_dbrm = UserDatabaseRoleMap.objects.get(user=user, database=database)
-    submit_role = validate_submit_role(user_dbrm, submit_role_id=form_def.get("submit_role_id"))
+    submit_role = get_submit_role(user_dbrm, submit_role_id=form_def.get("submit_role_id"))
     form_model = Form.objects.create(
         token=form_def.get("token", uuid4()),
         name=form_def["name"],
