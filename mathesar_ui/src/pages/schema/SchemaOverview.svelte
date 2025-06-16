@@ -158,10 +158,10 @@
   }
 
   .explore-cta {
-    padding: var(--lg3);
-    background: var(--SYS-color-tip-bg);
+    padding: var(--lg1);
+    background: color-mix(in srgb, var(-SYS-color-tip-bg), transparent 90%);
     border: 1px solid var(--SYS-color-tip-border);
-    border-radius: var(--sm2);
+    border-radius: var(--sm1);
     position: relative;
     overflow: hidden;
 
@@ -172,24 +172,19 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: radial-gradient(
-        circle at top right,
-        rgba color-mix(in srgb, var(--SYS-surface-light), transparent 15%) 0%,
-        transparent 60%
-      );
       pointer-events: none;
     }
 
     .explore-title {
       font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
-      color: var(--SYS-color-tip-text);
+      color: var(--SYS-button-tip-outlined-text-muted);
       margin: 0 0 0.75rem 0;
       position: relative;
     }
 
     .explore-description {
-      color: var(--SYS-color-text-secondary);
+      color: var(--SYS-button-tip-outlined-text-muted);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;
