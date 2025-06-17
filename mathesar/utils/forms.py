@@ -111,9 +111,9 @@ def create_form(form_def, user):
     return form_model, field_col_info_map
 
 
-def get_form(form_id, user):
+def get_form(form_id):
     form_model = Form.objects.get(id=form_id)
-    field_col_info_map = get_field_col_info_map(user, form_model)
+    field_col_info_map = get_field_col_info_map(form_model)
     return form_model, field_col_info_map
 
 

@@ -236,8 +236,7 @@ def get(*, form_id: int, **kwargs) -> FormInfo:
     Returns:
         Form details for a given form_id.
     """
-    user = kwargs.get(REQUEST_KEY).user
-    form_model, field_col_info_map = get_form(form_id, user)
+    form_model, field_col_info_map = get_form(form_id)
     return FormInfo.from_model(form_model, field_col_info_map)
 
 
