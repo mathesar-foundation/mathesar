@@ -14,12 +14,22 @@
     summary?: string;
   };
 
+  $: ({ mode } = controller);
+
   async function addToFilter(e: Event) {
-    e.stopPropagation();
-    await controller.addToFilter(
-      columnDisplayInfo.id,
-      String(columnDisplayInfo.value),
-    );
+    if ($mode === 'complete') {
+      e.stopPropagation();
+      await controller.addToFilter(
+        columnDisplayInfo.id,
+        String(columnDisplayInfo.value),
+      );
+    }
+  }
+
+  function onMouseDown(e: MouseEvent) {
+    if ($mode === 'complete') {
+      e.stopPropagation();
+    }
   }
 </script>
 
@@ -31,7 +41,11 @@
   </div>
   <div class="column-value">
     <Truncate>
-      <span on:mousedown|stopPropagation on:click={addToFilter}>
+      <span
+        class:allow-filter={$mode === 'complete'}
+        on:mousedown={onMouseDown}
+        on:click={addToFilter}
+      >
         {#if columnDisplayInfo.summary}
           {columnDisplayInfo.summary}
         {:else}
@@ -58,7 +72,7 @@
   .column-value {
     font-size: var(--sm1);
 
-    span {
+    span.allow-filter {
       cursor: pointer;
 
       &:hover {

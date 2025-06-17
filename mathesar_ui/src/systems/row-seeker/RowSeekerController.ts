@@ -5,6 +5,7 @@ import { api } from '@mathesar/api/rpc';
 import type { Column } from '@mathesar/api/rpc/columns';
 import type {
   Result as ApiRecord,
+  ResultValue,
   SqlColumn,
   SqlComparison,
   SqlExpr,
@@ -19,11 +20,13 @@ export interface RowSeekerProps {
     databaseId: number;
     tableOid: number;
   };
+  mode?: 'basic' | 'complete';
 }
 
 interface RowSeekerResult {
   recordSummary: string;
   record: ApiRecord;
+  recordPk?: ResultValue;
 }
 
 export type RowSeekerFilterMap = ImmutableMap<
@@ -54,8 +57,11 @@ export default class RowSeekerController {
 
   unappliedFilterColumn: Writable<Column | undefined> = writable();
 
+  mode: Writable<'basic' | 'complete'>;
+
   constructor(props: RowSeekerProps) {
     this.targetTable = props.targetTable;
+    this.mode = writable(props.mode ?? 'complete');
   }
 
   async focusSearch() {
@@ -102,7 +108,9 @@ export default class RowSeekerController {
       c,
       l,
     ) => ({
-      type: isTextType(c) ? ('contains' as const) : ('equal' as const),
+      type: isTextType(c)
+        ? ('contains_case_insensitive' as const)
+        : ('equal' as const),
       args: [c, l],
     });
 

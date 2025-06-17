@@ -32,7 +32,7 @@
 
   export let controller: RowSeekerController;
 
-  $: ({ elementId, records, columns, pagination, tableWithMetadata } =
+  $: ({ elementId, records, columns, pagination, tableWithMetadata, mode } =
     controller);
   $: isLoading = $records.isLoading || $columns.isLoading;
   $: resolvedRecords = $records.resolvedValue;
@@ -71,6 +71,9 @@
       controller.select({
         recordSummary: res.summary,
         record: res.values,
+        recordPk: primaryKeyColumn
+          ? String(res.values[primaryKeyColumn.id])
+          : undefined,
       });
     }
   }
@@ -115,7 +118,9 @@
           </div>
         {/if}
 
-        <RowSeekerFilterDrilldown {columnsArray} {controller} />
+        {#if $mode === 'complete'}
+          <RowSeekerFilterDrilldown {columnsArray} {controller} />
+        {/if}
       </div>
     </div>
 
@@ -166,14 +171,16 @@
         <span class="table-name">
           <TableName table={{ name: tableName }} />
         </span>
-        <Tooltip>
-          <svelte:fragment slot="trigger">
-            <Icon {...iconSettings} />
-          </svelte:fragment>
-          <svelte:fragment slot="content">
-            <span>{$_('Configure Record summary and Lookup columns')}</span>
-          </svelte:fragment>
-        </Tooltip>
+        {#if $mode === 'complete'}
+          <Tooltip>
+            <svelte:fragment slot="trigger">
+              <Icon {...iconSettings} />
+            </svelte:fragment>
+            <svelte:fragment slot="content">
+              <span>{$_('Configure Record summary and Lookup columns')}</span>
+            </svelte:fragment>
+          </Tooltip>
+        {/if}
       </div>
     </div>
   </ListBox>

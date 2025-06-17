@@ -20,7 +20,7 @@
     RecordSummaryColumnData | undefined
   >;
 
-  $: ({ searchValue } = controller);
+  $: ({ searchValue, mode } = controller);
 
   let isExpanded = false;
 
@@ -72,13 +72,15 @@
       </Button>
     </div>
   </div>
-  {#if !isExpanded && columnsThatMaybeUseful.length}
+  {#if $mode === 'complete' && !isExpanded && columnsThatMaybeUseful.length}
     <div class="column-content column-tags">
       {#each columnsThatMaybeUseful as cdi (cdi.id)}
         <RowSeekerField {controller} columnDisplayInfo={cdi} />
       {/each}
     </div>
-  {:else if isExpanded}
+  {/if}
+
+  {#if isExpanded}
     <div class="column-content all-columns">
       <div class="column-tags">
         {#each expandedColumnsToDisplay as cdi (cdi.id)}
