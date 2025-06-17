@@ -301,6 +301,16 @@ class Form(BaseModel):
     redirect_url = models.URLField(null=True)
     submit_label = models.CharField(null=True)
 
+    @property
+    def connection(self):
+        return psycopg.connect(
+            host=self.database.server.host,
+            port=self.database.server.port,
+            dbname=self.database.name,
+            user=self.submit_role.name,
+            password=self.submit_role.password,
+        )
+
 
 class FormField(BaseModel):
     key = models.CharField()
