@@ -6,6 +6,13 @@
   import type AttachableRowSeekerController from './AttachableRowSeekerController';
   import RowSeeker from './RowSeeker.svelte';
 
+  export let selectedRecord:
+    | {
+        summary: string;
+        pk: string | number | boolean | null;
+      }
+    | undefined = undefined;
+
   export let controller: AttachableRowSeekerController;
   $: ({ isOpen, node, rowSeeker } = controller);
 
@@ -33,7 +40,11 @@
   {portalTarget}
   on:close={() => controller.close()}
 >
-  <RowSeeker controller={rowSeeker} on:escape={() => controller.close()} />
+  <RowSeeker
+    controller={rowSeeker}
+    {selectedRecord}
+    on:escape={() => controller.close()}
+  />
 </AttachableDropdown>
 
 <style lang="scss">

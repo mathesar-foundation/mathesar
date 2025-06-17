@@ -36,6 +36,7 @@ export default class AttachableRowSeekerController {
 
   close() {
     this.isOpen.set(false);
+    this.rowSeeker.clearRecords();
     this.onClose?.();
   }
 }

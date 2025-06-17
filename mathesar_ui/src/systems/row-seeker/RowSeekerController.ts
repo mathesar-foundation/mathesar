@@ -174,6 +174,12 @@ export default class RowSeekerController {
     await Promise.all([this.getStructure(), this.getRecords()]);
   }
 
+  clearRecords() {
+    this.records.reset();
+    this.searchValue.set('');
+    this.filters.update((filter) => filter.drained());
+  }
+
   async acquireUserSelection(): Promise<RowSeekerResult> {
     return new Promise((resolve) => {
       this.select = (v) => {

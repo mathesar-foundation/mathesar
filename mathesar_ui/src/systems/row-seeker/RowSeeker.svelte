@@ -3,8 +3,9 @@
   import { _ } from 'svelte-i18n';
 
   import type { RecordSummaryListResult } from '@mathesar/api/rpc/records';
-  import { extractPrimaryKeyValue } from '@mathesar/stores/table-data';
+  import { iconAddFilter } from '@mathesar/icons';
   import {
+    Icon,
     ListBox,
     ListBoxOptions,
     Spinner,
@@ -17,30 +18,62 @@
 
   const dispatch = createEventDispatcher<{ escape: never }>();
 
+  export let selectedRecord:
+    | {
+        summary: string;
+        pk: string | number | boolean | null;
+      }
+    | undefined = undefined;
+
   export let controller: RowSeekerController;
+
   $: ({ elementId, records, columns } = controller);
   $: isLoading = $records.isLoading || $columns.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: linkedRecordSummaries = resolvedRecords?.linked_record_summaries ?? {};
   $: recordsArray = resolvedRecords?.results ?? [];
   $: columnsArray = $columns.resolvedValue ?? [];
+  $: primaryKeyColumn = columnsArray.find((c) => c.primary_key);
+  $: selectedValue =
+    selectedRecord && primaryKeyColumn
+      ? {
+          summary: selectedRecord.summary,
+          values: {
+            [primaryKeyColumn.id]: selectedRecord.pk,
+          },
+        }
+      : undefined;
 
   onMount(() => {
     //
   });
 
-  function selectRecord(val: RecordSummaryListResult[]) {
-    const res = val[0];
-    if (!res) {
-      throw new Error("Value not selected");
+  function checkEquality(
+    opt1?: RecordSummaryListResult,
+    opt2?: RecordSummaryListResult,
+  ) {
+    if (primaryKeyColumn) {
+      return (
+        opt1?.values[primaryKeyColumn.id] === opt2?.values[primaryKeyColumn.id]
+      );
     }
-    controller.select({
-      recordSummary: res.summary,
-      record: res.values,
-    });
+    return false;
   }
 
-  function handleKeyDown(api: ListBoxApi<RecordSummaryListResult>, e: KeyboardEvent) {
+  function selectRecord(val: RecordSummaryListResult[]) {
+    const res = val[0];
+    if (res) {
+      controller.select({
+        recordSummary: res.summary,
+        record: res.values,
+      });
+    }
+  }
+
+  function handleKeyDown(
+    api: ListBoxApi<RecordSummaryListResult>,
+    e: KeyboardEvent,
+  ) {
     api.handleKeyDown(e);
     if (e.key === 'Escape') {
       dispatch('escape');
@@ -56,8 +89,11 @@
   <ListBox
     selectionType="single"
     mode="static"
+    value={selectedValue ? [selectedValue] : undefined}
     options={recordsArray}
     on:change={(e) => selectRecord(e.detail)}
+    on:pick={() => dispatch('escape')}
+    {checkEquality}
     let:api
   >
     <div data-row-seeker-controls>
@@ -72,6 +108,10 @@
             <Spinner />
           </div>
         {/if}
+
+        <div class="drilldown">
+          <Icon {...iconAddFilter} />
+        </div>
       </div>
     </div>
 
@@ -111,11 +151,24 @@
     overflow: hidden;
     gap: 0.1rem;
     border-bottom: 1px solid var(--border-color);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      0 1px 2px -1px rgba(0, 0, 0, 0.1);
 
     .actions {
       margin-left: auto;
       display: flex;
       align-items: center;
+    }
+
+    .drilldown {
+      color: var(--gray-500);
+      font-size: var(--sm1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 var(--sm3);
     }
 
     .spinner {

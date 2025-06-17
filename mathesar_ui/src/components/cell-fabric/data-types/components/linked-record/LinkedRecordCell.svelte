@@ -160,7 +160,15 @@
   </div>
 </CellWrapper>
 
-<AttachableRowSeeker controller={attachableRowSeekerController} />
+<AttachableRowSeeker
+  selectedRecord={value
+    ? {
+        summary: recordSummary ?? '',
+        pk: value,
+      }
+    : undefined}
+  controller={attachableRowSeekerController}
+/>
 
 <style>
   .linked-record-cell {

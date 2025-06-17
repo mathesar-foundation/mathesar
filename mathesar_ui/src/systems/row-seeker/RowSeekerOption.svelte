@@ -5,7 +5,7 @@
     RecordSummaryListResult,
   } from '@mathesar/api/rpc/records';
   import { iconExpandRight } from '@mathesar/icons';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Button, Icon, MatchHighlighter } from '@mathesar-component-library';
 
   import type RowSeekerController from './RowSeekerController';
   import RowSeekerField from './RowSeekerField.svelte';
@@ -19,6 +19,8 @@
     string,
     RecordSummaryColumnData | undefined
   >;
+
+  $: ({ searchValue } = controller);
 
   let isExpanded = false;
 
@@ -57,7 +59,7 @@
 <div class="record" class:selected={isSelected} class:in-focus={inFocus}>
   <div class="header">
     <div class="summary">
-      {result.summary}
+      <MatchHighlighter text={result.summary} substring={$searchValue} />
     </div>
     <div class="expand">
       <Button appearance="plain" on:click={(e) => toggleExpansion(e)}>
@@ -85,7 +87,7 @@
 <style lang="scss">
   .record {
     white-space: normal;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--border-color);
 
     &:hover:not(.in-focus) {
       background-color: var(--gray-100);

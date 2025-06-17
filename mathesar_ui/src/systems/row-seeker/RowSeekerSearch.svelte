@@ -3,8 +3,6 @@
   import { _ } from 'svelte-i18n';
 
   import type { Column } from '@mathesar/api/rpc/columns';
-  import { Icon } from '@mathesar/component-library';
-  import { iconAddFilter } from '@mathesar/icons';
 
   import type RowSeekerController from './RowSeekerController';
   import RowSeekerFilterTag from './RowSeekerFilterTag.svelte';
@@ -26,57 +24,39 @@
   }
 </script>
 
-<div class="search-container">
-  <div
-    class="search-box"
-    data-row-seeker-search
-    on:click={() => searchElement.focus()}
-  >
-    <div class="tags">
-      {#each [...$filters.entries()] as filter (filter)}
-        <RowSeekerFilterTag {controller} {columnMap} {filter} />
-      {/each}
-    </div>
-    <input
-      bind:this={searchElement}
-      bind:value={$searchValue}
-      class="search-bar"
-      type="text"
-      placeholder={$_('search')}
-      on:input={() => controller.getRecords()}
-      on:keydown={onKeyDown}
-    />
+<div
+  class="search-box"
+  data-row-seeker-search
+  on:click={() => searchElement.focus()}
+>
+  <div class="tags">
+    {#each [...$filters.entries()] as filter (filter)}
+      <RowSeekerFilterTag {controller} {columnMap} {filter} />
+    {/each}
   </div>
-
-  <div class="drilldown">
-    <Icon {...iconAddFilter} />
-  </div>
+  <input
+    bind:this={searchElement}
+    bind:value={$searchValue}
+    class="search-bar"
+    type="text"
+    placeholder={$_('search')}
+    on:input={() => controller.getRecords()}
+    on:keydown={onKeyDown}
+  />
 </div>
 
 <style lang="scss">
-  .search-container {
-    flex-grow: 1;
-    display: flex;
-  }
-
   .search-box {
     flex-grow: 1;
-    padding: var(--input-padding);
+    padding: var(--sm2);
     padding-bottom: var(--sm4);
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .tags {
     display: inline-block;
     margin-right: var(--sm5);
-  }
-
-  .drilldown {
-    color: var(--gray-500);
-    font-size: var(--sm1);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 var(--sm3);
   }
 
   .search-bar {
@@ -85,6 +65,9 @@
     padding: 0;
     line-height: var(--input-line-height);
     margin-bottom: var(--sm5);
+    background: inherit;
+    color: var(--input-text);
+    flex-grow: 1;
 
     &::placeholder {
       color: var(--text-color-tertiary);
