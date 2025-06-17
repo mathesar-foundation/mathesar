@@ -1,14 +1,18 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import type { RecordSummaryListResult } from '@mathesar/api/rpc/records';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { MiniPagination } from '@mathesar/components/mini-pagination';
+  import TableName from '@mathesar/components/TableName.svelte';
   import { iconAddFilter } from '@mathesar/icons';
   import {
     Icon,
     ListBox,
     ListBoxOptions,
     Spinner,
+    iconSettings,
   } from '@mathesar-component-library';
   import type { ListBoxApi } from '@mathesar-component-library/types';
 
@@ -27,11 +31,13 @@
 
   export let controller: RowSeekerController;
 
-  $: ({ elementId, records, columns } = controller);
+  $: ({ elementId, records, columns, pagination, tableWithMetadata } =
+    controller);
   $: isLoading = $records.isLoading || $columns.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: linkedRecordSummaries = resolvedRecords?.linked_record_summaries ?? {};
   $: recordsArray = resolvedRecords?.results ?? [];
+  $: recordsCount = resolvedRecords?.count ?? 0;
   $: columnsArray = $columns.resolvedValue ?? [];
   $: primaryKeyColumn = columnsArray.find((c) => c.primary_key);
   $: selectedValue =
@@ -43,10 +49,8 @@
           },
         }
       : undefined;
-
-  onMount(() => {
-    //
-  });
+  $: hasPagination = recordsCount > $pagination.size;
+  $: tableName = $tableWithMetadata.resolvedValue?.name ?? '';
 
   function checkEquality(
     opt1?: RecordSummaryListResult,
@@ -133,7 +137,37 @@
             {linkedRecordSummaries}
           />
         </ListBoxOptions>
+      {:else}
+        <div class="empty-states">
+          {#if isLoading}
+            {$_('loading')}
+          {:else if $records.error}
+            <ErrorBox>
+              {$records.error.message}
+            </ErrorBox>
+          {:else}
+            {$_('no_records_found')}
+          {/if}
+        </div>
       {/if}
+    </div>
+
+    <div class="footer">
+      {#if hasPagination}
+        <div class="pagination">
+          <MiniPagination
+            bind:pagination={$pagination}
+            on:change={() => controller.getRecords()}
+            recordCount={recordsCount}
+          />
+        </div>
+      {/if}
+      <div class="settings">
+        <span class="table-name">
+          <TableName table={{ name: tableName }} />
+        </span>
+        <Icon {...iconSettings} />
+      </div>
     </div>
   </ListBox>
 </div>
@@ -179,6 +213,10 @@
     }
   }
 
+  .empty-states {
+    padding: var(--sm4) var(--sm2);
+  }
+
   .option-container {
     overflow-x: hidden;
     overflow-y: auto;
@@ -187,6 +225,38 @@
     :global(.option-list-box) {
       max-height: 25rem;
       overflow-y: auto;
+    }
+  }
+
+  .footer {
+    border-top: 1px solid var(--border-color);
+    padding: var(--sm6);
+    display: flex;
+    align-items: center;
+
+    .pagination {
+      font-size: var(--sm2);
+    }
+
+    .settings {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+      gap: var(--sm4);
+      margin-left: auto;
+
+      .table-name {
+        font-size: var(--sm2);
+        max-width: 7rem;
+        padding: var(--sm6) var(--sm5);
+        border-radius: var(--sm5);
+        cursor: pointer;
+      }
+
+      :global(svg) {
+        cursor: pointer;
+      }
     }
   }
 </style>

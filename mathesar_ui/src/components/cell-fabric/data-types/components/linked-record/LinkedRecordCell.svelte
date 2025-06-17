@@ -7,6 +7,7 @@
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
   // TODO: Get Table here instead of tableId and remove need for the currentDatabase store
+  import type { Database } from '@mathesar/models/Database';
   import { currentDatabase } from '@mathesar/stores/databases';
   import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
   import AttachableRowSeekerController from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
@@ -40,19 +41,28 @@
   $: hasValue = value !== undefined && value !== null;
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
-  $: attachableRowSeekerController = new AttachableRowSeekerController(
-    cellWrapperElement,
-    {
+  function getController(
+    _wrapper: HTMLElement,
+    _tableId: number,
+    _db: Database,
+  ) {
+    return new AttachableRowSeekerController(_wrapper, {
       onClose: () => {
-        cellWrapperElement?.focus();
+        _wrapper?.focus();
       },
       rowSeekerProps: {
         targetTable: {
-          databaseId: $currentDatabase.id,
-          tableOid: tableId,
+          databaseId: _db.id,
+          tableOid: _tableId,
         },
       },
-    },
+    });
+  }
+
+  $: attachableRowSeekerController = getController(
+    cellWrapperElement,
+    tableId,
+    $currentDatabase,
   );
 
   async function launchRecordSelector(event?: MouseEvent) {

@@ -10,6 +10,7 @@ import type {
   SqlLiteral,
 } from '@mathesar/api/rpc/records';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+import Pagination from '@mathesar/utils/Pagination';
 import { ImmutableMap, getGloballyUniqueId } from '@mathesar-component-library';
 
 export interface RowSeekerProps {
@@ -51,6 +52,8 @@ export default class RowSeekerController {
   filters: Writable<RowSeekerFilterMap> = writable(new ImmutableMap());
 
   searchValue: Writable<string> = writable('');
+
+  pagination: Writable<Pagination> = writable(new Pagination());
 
   constructor(props: RowSeekerProps) {
     this.targetTable = props.targetTable;
@@ -128,11 +131,11 @@ export default class RowSeekerController {
   }
 
   async getRecords() {
+    const pagination = get(this.pagination);
     await this.records.run({
       database_id: this.targetTable.databaseId,
       table_oid: this.targetTable.tableOid,
-      limit: 500,
-      offset: 0,
+      ...pagination.recordsRequestParams(),
       search: get(this.searchValue) || null,
       filter: this.getFilterSqlExpr(),
       return_linked_record_summaries: true,
