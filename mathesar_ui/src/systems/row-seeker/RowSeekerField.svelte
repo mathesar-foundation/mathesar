@@ -31,7 +31,7 @@
   </div>
   <div class="column-value">
     <Truncate>
-      <span on:click={addToFilter}>
+      <span on:mousedown|stopPropagation on:click={addToFilter}>
         {#if columnDisplayInfo.summary}
           {columnDisplayInfo.summary}
         {:else}

@@ -56,7 +56,12 @@
   }
 </script>
 
-<div class="record" class:selected={isSelected} class:in-focus={inFocus}>
+<div
+  class="record"
+  class:selected={isSelected}
+  class:in-focus={inFocus}
+  style:min-width="{columnsThatMaybeUseful.length * 12}rem"
+>
   <div class="header">
     <div class="summary">
       <MatchHighlighter text={result.summary} substring={$searchValue} />
@@ -89,8 +94,8 @@
     white-space: normal;
     border-bottom: 1px solid var(--border-color);
 
-    &:hover:not(.in-focus) {
-      background-color: var(--gray-100);
+    &.selected {
+      background-color: var(--active-background);
     }
   }
 

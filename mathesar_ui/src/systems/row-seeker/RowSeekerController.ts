@@ -2,6 +2,7 @@ import { tick } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type {
   Result as ApiRecord,
   SqlColumn,
@@ -53,7 +54,11 @@ export default class RowSeekerController {
 
   searchValue: Writable<string> = writable('');
 
-  pagination: Writable<Pagination> = writable(new Pagination());
+  pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
+
+  unappliedFilter: Writable<
+    { column: Column; value: SqlLiteral['value'] } | undefined
+  > = writable();
 
   constructor(props: RowSeekerProps) {
     this.targetTable = props.targetTable;
@@ -63,7 +68,7 @@ export default class RowSeekerController {
     await tick();
     const rowSeekerComponentElement = document.getElementById(this.elementId);
     const searchBox = rowSeekerComponentElement?.querySelector<HTMLElement>(
-      "[data-row-seeker-search] input[type='text']",
+      "[data-row-seeker-search] input[type='text'][data-row-seeker-search-box]",
     );
     searchBox?.focus?.();
   }
@@ -143,6 +148,11 @@ export default class RowSeekerController {
     await this.focusSearch();
   }
 
+  async resetPaginationAndGetRecords() {
+    this.pagination.set(new Pagination({ size: 200, page: 1 }));
+    await this.getRecords();
+  }
+
   async addToFilter(
     columnId: SqlColumn['value'],
     literal: SqlLiteral['value'],
@@ -151,7 +161,7 @@ export default class RowSeekerController {
       const literals = [...(map.get(columnId) ?? []), literal];
       return map.with(columnId, new Set(literals));
     });
-    await this.getRecords();
+    await this.resetPaginationAndGetRecords();
   }
 
   async removeFromFilter(
@@ -164,17 +174,29 @@ export default class RowSeekerController {
       const literals = [...(literalSet ?? [])];
       return map.with(columnId, new Set(literals));
     });
-    await this.getRecords();
+    await this.resetPaginationAndGetRecords();
   }
 
   async removeColumnFromFilter(columnId: SqlColumn['value']) {
     this.filters.update((map) => map.without(columnId));
-    await this.getRecords();
+    await this.resetPaginationAndGetRecords();
   }
 
   async getReady() {
     await this.focusSearch();
     await Promise.all([this.getStructure(), this.getRecords()]);
+  }
+
+  addUnappliedFilter(column: Column) {
+    this.unappliedFilter.update((fil) => {
+      if (fil?.column.id !== column.id) {
+        return {
+          column,
+          value: null,
+        };
+      }
+      return fil;
+    });
   }
 
   clearRecords() {

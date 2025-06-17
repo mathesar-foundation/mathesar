@@ -6,12 +6,13 @@
 
   import type RowSeekerController from './RowSeekerController';
   import RowSeekerFilterTag from './RowSeekerFilterTag.svelte';
+  import UnappliedRowSeekerFilterTag from './UnappliedRowSeekerFilterTag.svelte';
 
   export let columnsArray: Column[];
   export let controller: RowSeekerController;
 
   $: columnMap = new Map(columnsArray.map((cr) => [cr.id, cr]));
-  $: ({ filters, searchValue } = controller);
+  $: ({ filters, searchValue, unappliedFilter } = controller);
 
   let searchElement: HTMLInputElement;
 
@@ -24,23 +25,23 @@
   }
 </script>
 
-<div
-  class="search-box"
-  data-row-seeker-search
-  on:click={() => searchElement.focus()}
->
-  <div class="tags">
+<div class="search-box" data-row-seeker-search>
+  <div class="tags" on:click={() => searchElement.focus()}>
     {#each [...$filters.entries()] as filter (filter)}
       <RowSeekerFilterTag {controller} {columnMap} {filter} />
     {/each}
   </div>
+  {#if $unappliedFilter}
+    <UnappliedRowSeekerFilterTag {controller} />
+  {/if}
   <input
     bind:this={searchElement}
     bind:value={$searchValue}
     class="search-bar"
     type="text"
+    data-row-seeker-search-box
     placeholder={$_('search')}
-    on:input={() => controller.getRecords()}
+    on:input={() => controller.resetPaginationAndGetRecords()}
     on:keydown={onKeyDown}
   />
 </div>

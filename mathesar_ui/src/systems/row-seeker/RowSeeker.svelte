@@ -3,11 +3,15 @@
   import { _ } from 'svelte-i18n';
 
   import type { RecordSummaryListResult } from '@mathesar/api/rpc/records';
+  import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconAddFilter } from '@mathesar/icons';
   import {
+    ButtonMenuItem,
+    DropdownMenu,
     Icon,
     ListBox,
     ListBoxOptions,
@@ -114,7 +118,15 @@
         {/if}
 
         <div class="drilldown">
-          <Icon {...iconAddFilter} />
+          <DropdownMenu icon={iconAddFilter}>
+            {#each [...columnsArray.values()] as column (column.id)}
+              <ButtonMenuItem
+                on:click={() => controller.addUnappliedFilter(column)}
+              >
+                <ColumnName {column} />
+              </ButtonMenuItem>
+            {/each}
+          </DropdownMenu>
         </div>
       </div>
     </div>
@@ -166,7 +178,14 @@
         <span class="table-name">
           <TableName table={{ name: tableName }} />
         </span>
-        <Icon {...iconSettings} />
+        <Tooltip>
+          <svelte:fragment slot="trigger">
+            <Icon {...iconSettings} />
+          </svelte:fragment>
+          <svelte:fragment slot="content">
+            <span>{$_('Configure Record summary and Lookup columns')}</span>
+          </svelte:fragment>
+        </Tooltip>
       </div>
     </div>
   </ListBox>

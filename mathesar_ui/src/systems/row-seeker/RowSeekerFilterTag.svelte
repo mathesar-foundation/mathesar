@@ -36,13 +36,14 @@
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
-    border: 1px solid var(--purple-300);
+    border: 1px solid var(--salmon-300);
     margin-right: var(--sm5);
     margin-bottom: var(--sm5);
 
     .column {
-      background-color: var(--purple-100);
+      background-color: var(--salmon-100);
       padding: 0 var(--sm6);
+      color: var(--slate-900);
     }
     .values {
       padding: 0 var(--sm6);
