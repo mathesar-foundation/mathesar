@@ -37,13 +37,11 @@ def get_oid_attnums_map(form_model):
     return oam
 
 
-def get_field_col_info_map(user, form_model):
-    user_dbrm = UserDatabaseRoleMap.objects.get(user=user, database=form_model.database)
+def get_field_col_info_map(form_model):
     oam = get_oid_attnums_map(form_model)
     fields_map = {field.key: field for field in form_model.fields.all()}
 
-    user_dbrm.cofigured_role = form_model.submit_role  # DANGEROUS!!!
-    with user_dbrm.connection as conn:
+    with form_model.connection as conn:
         oid_col_info_map = get_oid_col_info_map(oam, conn)
 
     metadata_map = {}
@@ -109,7 +107,7 @@ def create_form(form_def, user):
             update_field_instances.append(fields_map[field["key"]])
     if update_field_instances:
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
-    field_col_info_map = get_field_col_info_map(user, form_model)
+    field_col_info_map = get_field_col_info_map(form_model)
     return form_model, field_col_info_map
 
 
