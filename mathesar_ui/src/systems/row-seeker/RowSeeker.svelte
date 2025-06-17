@@ -4,14 +4,10 @@
 
   import type { RecordSummaryListResult } from '@mathesar/api/rpc/records';
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconAddFilter } from '@mathesar/icons';
   import {
-    ButtonMenuItem,
-    DropdownMenu,
     Icon,
     ListBox,
     ListBoxOptions,
@@ -21,6 +17,7 @@
   import type { ListBoxApi } from '@mathesar-component-library/types';
 
   import type RowSeekerController from './RowSeekerController';
+  import RowSeekerFilterDrilldown from './RowSeekerFilterDrilldown.svelte';
   import RowSeekerOption from './RowSeekerOption.svelte';
   import RowSeekerSearch from './RowSeekerSearch.svelte';
 
@@ -118,17 +115,7 @@
           </div>
         {/if}
 
-        <div class="drilldown">
-          <DropdownMenu icon={iconAddFilter} triggerAppearance="plain">
-            {#each [...columnsArray.values()] as column (column.id)}
-              <ButtonMenuItem
-                on:click={() => controller.addUnappliedFilter(column)}
-              >
-                <ColumnName {column} />
-              </ButtonMenuItem>
-            {/each}
-          </DropdownMenu>
-        </div>
+        <RowSeekerFilterDrilldown {columnsArray} {controller} />
       </div>
     </div>
 
@@ -209,20 +196,15 @@
       0 1px 2px rgba(0, 0, 0, 0.05),
       0 1px 3px rgba(0, 0, 0, 0.1),
       0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    background: var(--input-background);
 
     .actions {
       margin-left: auto;
       display: flex;
-      align-items: center;
-    }
-
-    .drilldown {
-      color: var(--gray-500);
-      font-size: var(--sm1);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 var(--sm3);
+      align-items: flex-start;
+      padding: var(--sm2) 0;
+      padding-bottom: var(--sm4);
+      flex-shrink: 0;
     }
 
     .spinner {
@@ -230,11 +212,13 @@
       align-items: center;
       justify-content: center;
       width: 2rem;
+      height: 1.2rem;
     }
   }
 
   .empty-states {
     padding: var(--sm4) var(--sm2);
+    max-height: 20rem;
   }
 
   .option-container {

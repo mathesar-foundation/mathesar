@@ -7,7 +7,6 @@
 
   import type RowSeekerController from './RowSeekerController';
   import RowSeekerFilterTag from './RowSeekerFilterTag.svelte';
-  import UnappliedRowSeekerFilterTag from './UnappliedRowSeekerFilterTag.svelte';
 
   export let columnsArray: Column[];
   export let controller: RowSeekerController;
@@ -17,7 +16,7 @@
   >;
 
   $: columnMap = new Map(columnsArray.map((cr) => [cr.id, cr]));
-  $: ({ filters, searchValue, unappliedFilter } = controller);
+  $: ({ filters, searchValue } = controller);
 
   let searchElement: HTMLInputElement;
 
@@ -30,8 +29,12 @@
   }
 </script>
 
-<div class="search-box" data-row-seeker-search>
-  <div class="tags" on:click={() => searchElement.focus()}>
+<div
+  class="search-box"
+  data-row-seeker-search
+  on:click={() => searchElement.focus()}
+>
+  <div class="tags">
     {#each [...$filters.entries()] as filter (filter)}
       <RowSeekerFilterTag
         {controller}
@@ -41,9 +44,6 @@
       />
     {/each}
   </div>
-  {#if $unappliedFilter}
-    <UnappliedRowSeekerFilterTag {controller} />
-  {/if}
   <input
     bind:this={searchElement}
     bind:value={$searchValue}

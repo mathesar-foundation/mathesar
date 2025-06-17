@@ -38,10 +38,6 @@ export default class RowSeekerController {
 
   onFocusCallback = () => {};
 
-  // targetColumn: number;
-
-  // value: FkCellValue;
-
   tableWithMetadata = new AsyncRpcApiStore(api.tables.get_with_metadata);
 
   columns = new AsyncRpcApiStore(api.columns.list_with_metadata);
@@ -56,9 +52,7 @@ export default class RowSeekerController {
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
 
-  unappliedFilter: Writable<
-    { column: Column; value: SqlLiteral['value'] } | undefined
-  > = writable();
+  unappliedFilterColumn: Writable<Column | undefined> = writable();
 
   constructor(props: RowSeekerProps) {
     this.targetTable = props.targetTable;
@@ -89,16 +83,26 @@ export default class RowSeekerController {
   getFilterSqlExpr(): SqlExpr {
     const filters = get(this.filters);
 
+    const columnsArray = get(this.columns).resolvedValue ?? [];
+    const columnMap = new Map(columnsArray.map((e) => [e.id, e]));
+
     const getLiteral = (val: SqlLiteral['value']) => ({
       type: 'literal' as const,
       value: val,
     });
 
-    const getEqualsComparison: (
-      c: SqlColumn,
-      l: SqlLiteral,
-    ) => SqlComparison = (c, l) => ({
-      type: 'equal' as const,
+    const isTextType = (c: SqlColumn) => {
+      if (columnMap.get(c.value)?.type === 'text') {
+        return true;
+      }
+      return false;
+    };
+
+    const getComparison: (c: SqlColumn, l: SqlLiteral) => SqlComparison = (
+      c,
+      l,
+    ) => ({
+      type: isTextType(c) ? ('contains' as const) : ('equal' as const),
       args: [c, l],
     });
 
@@ -107,7 +111,7 @@ export default class RowSeekerController {
         const column: SqlColumn = { type: 'attnum', value: columnId };
         const [firstComparison, ...rest] = [...literalValues]
           .map(getLiteral)
-          .map((literal) => getEqualsComparison(column, literal));
+          .map((literal) => getComparison(column, literal));
 
         return rest.reduce(
           (accumulator: SqlComparison, currComparison: SqlComparison) => {
@@ -172,13 +176,11 @@ export default class RowSeekerController {
       const literalSet = map.get(columnId);
       literalSet?.delete(literal);
       const literals = [...(literalSet ?? [])];
+      if (!literals.length) {
+        return map.without(columnId);
+      }
       return map.with(columnId, new Set(literals));
     });
-    await this.resetPaginationAndGetRecords();
-  }
-
-  async removeColumnFromFilter(columnId: SqlColumn['value']) {
-    this.filters.update((map) => map.without(columnId));
     await this.resetPaginationAndGetRecords();
   }
 
@@ -187,21 +189,14 @@ export default class RowSeekerController {
     await Promise.all([this.getStructure(), this.getRecords()]);
   }
 
-  addUnappliedFilter(column: Column) {
-    this.unappliedFilter.update((fil) => {
-      if (fil?.column.id !== column.id) {
-        return {
-          column,
-          value: null,
-        };
-      }
-      return fil;
-    });
+  newUnappliedFilter(column: Column) {
+    this.unappliedFilterColumn.set(column);
   }
 
   clearRecords() {
     this.records.reset();
     this.searchValue.set('');
+    this.unappliedFilterColumn.set(undefined);
     this.filters.update((filter) => filter.drained());
   }
 

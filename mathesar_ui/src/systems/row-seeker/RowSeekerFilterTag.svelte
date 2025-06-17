@@ -25,24 +25,22 @@
   $: [columnId, literalsSet] = filter;
 </script>
 
-<div class="filter-tag">
-  <div class="column">
-    {columnMap.get(columnId)?.name ?? ''}
+{#each [...literalsSet] as literal (literal)}
+  <div class="filter-tag">
+    <div class="column">
+      {columnMap.get(columnId)?.name ?? ''}
+    </div>
+    <div class="value">
+      {getLinkedRecordSummary(columnId, literal) ?? literal}
+    </div>
+    <div
+      class="close"
+      on:click={() => controller.removeFromFilter(columnId, literal)}
+    >
+      <Icon {...iconClose} />
+    </div>
   </div>
-  <div class="values">
-    {#each [...literalsSet] as literal (literal)}
-      <div class="val">
-        {getLinkedRecordSummary(columnId, literal) ?? literal}
-      </div>
-    {/each}
-  </div>
-  <div
-    class="close"
-    on:click={() => controller.removeColumnFromFilter(columnId)}
-  >
-    <Icon {...iconClose} />
-  </div>
-</div>
+{/each}
 
 <style lang="scss">
   .filter-tag {
@@ -58,7 +56,7 @@
       padding: 0 var(--sm6);
       color: var(--slate-900);
     }
-    .values {
+    .value {
       padding: 0 var(--sm6);
     }
     .close {
