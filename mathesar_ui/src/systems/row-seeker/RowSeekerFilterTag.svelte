@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { Column } from '@mathesar/api/rpc/columns';
-  import type { SqlColumn, SqlLiteral } from '@mathesar/api/rpc/records';
+  import type {
+    RecordSummaryColumnData,
+    SqlColumn,
+    SqlLiteral,
+  } from '@mathesar/api/rpc/records';
   import { Icon, iconClose } from '@mathesar-component-library';
 
   import type RowSeekerController from './RowSeekerController';
@@ -8,6 +12,15 @@
   export let controller: RowSeekerController;
   export let columnMap: Map<Column['id'], Column>;
   export let filter: [SqlColumn['value'], Set<SqlLiteral['value']>];
+  export let linkedRecordSummaries: Record<
+    string,
+    RecordSummaryColumnData | undefined
+  >;
+
+  function getLinkedRecordSummary(columnId: number, literal: unknown) {
+    const linkedSummary = linkedRecordSummaries[columnId];
+    return linkedSummary?.[String(literal)] ?? undefined;
+  }
 
   $: [columnId, literalsSet] = filter;
 </script>
@@ -19,7 +32,7 @@
   <div class="values">
     {#each [...literalsSet] as literal (literal)}
       <div class="val">
-        {literal}
+        {getLinkedRecordSummary(columnId, literal) ?? literal}
       </div>
     {/each}
   </div>

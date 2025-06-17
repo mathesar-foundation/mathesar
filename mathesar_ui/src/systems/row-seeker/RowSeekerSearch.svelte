@@ -3,6 +3,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RecordSummaryColumnData } from '@mathesar/api/rpc/records';
 
   import type RowSeekerController from './RowSeekerController';
   import RowSeekerFilterTag from './RowSeekerFilterTag.svelte';
@@ -10,6 +11,10 @@
 
   export let columnsArray: Column[];
   export let controller: RowSeekerController;
+  export let linkedRecordSummaries: Record<
+    string,
+    RecordSummaryColumnData | undefined
+  >;
 
   $: columnMap = new Map(columnsArray.map((cr) => [cr.id, cr]));
   $: ({ filters, searchValue, unappliedFilter } = controller);
@@ -28,7 +33,12 @@
 <div class="search-box" data-row-seeker-search>
   <div class="tags" on:click={() => searchElement.focus()}>
     {#each [...$filters.entries()] as filter (filter)}
-      <RowSeekerFilterTag {controller} {columnMap} {filter} />
+      <RowSeekerFilterTag
+        {controller}
+        {columnMap}
+        {filter}
+        {linkedRecordSummaries}
+      />
     {/each}
   </div>
   {#if $unappliedFilter}

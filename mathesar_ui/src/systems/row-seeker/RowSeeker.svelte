@@ -108,6 +108,7 @@
       <RowSeekerSearch
         {controller}
         {columnsArray}
+        {linkedRecordSummaries}
         on:artificialKeydown={(e) => handleKeyDown(api, e.detail)}
       />
       <div class="actions">
@@ -118,7 +119,7 @@
         {/if}
 
         <div class="drilldown">
-          <DropdownMenu icon={iconAddFilter}>
+          <DropdownMenu icon={iconAddFilter} triggerAppearance="plain">
             {#each [...columnsArray.values()] as column (column.id)}
               <ButtonMenuItem
                 on:click={() => controller.addUnappliedFilter(column)}
