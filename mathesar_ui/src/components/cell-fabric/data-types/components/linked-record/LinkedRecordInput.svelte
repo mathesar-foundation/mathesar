@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, getContext, onMount, tick } from 'svelte';
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   // TODO remove dependency cycle
@@ -8,8 +9,11 @@
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  import type { Database } from '@mathesar/models/Database';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
+  import AttachableRowSeekerController from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   import {
     type AccompanyingElements,
     Icon,
@@ -32,7 +36,6 @@
   }
 
   const labelController = getLabelControllerFromContainingLabel();
-  const recordSelector = getRecordSelectorFromContext();
   const dropdownAccompanyingElements = getContext<
     AccompanyingElements | undefined
   >('dropdownAccompanyingElements');
@@ -50,6 +53,30 @@
 
   let isAcquiringInput = false;
   let element: HTMLSpanElement;
+
+  function getController(
+    _wrapper: HTMLElement,
+    _tableId: number,
+    _db: Database,
+  ) {
+    return new AttachableRowSeekerController(_wrapper, {
+      onClose: () => {
+        _wrapper?.focus();
+      },
+      rowSeekerProps: {
+        targetTable: {
+          databaseId: _db.id,
+          tableOid: _tableId,
+        },
+      },
+    });
+  }
+
+  $: attachableRowSeekerController = getController(
+    element,
+    tableId,
+    $currentDatabase,
+  );
 
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
@@ -90,7 +117,8 @@
     }
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
-    const recordSelectorPromise = recordSelector.acquireUserInput({ tableId });
+    const recordSelectorPromise =
+      attachableRowSeekerController.acquireUserSelection();
     await tick();
     const cleanupDropdown = setRecordSelectorToAccompanyDropdown();
     const result = await recordSelectorPromise;
@@ -99,8 +127,8 @@
     if (result === undefined) {
       dispatch('recordSelectorCancel');
     } else {
-      value = result.recordId;
-      setRecordSummary(String(result.recordId), result.recordSummary);
+      value = result.recordPk;
+      setRecordSummary(String(result.recordPk), result.recordSummary);
       dispatch('recordSelectorSubmit');
       dispatch('artificialChange', value);
       dispatch('artificialInput', value);
@@ -109,13 +137,28 @@
     element.focus();
   }
 
+  function closeRecordSelector() {
+    attachableRowSeekerController.close();
+  }
+
+  async function toggleRecordSelector() {
+    if (get(attachableRowSeekerController.isOpen)) {
+      closeRecordSelector();
+    } else {
+      await launchRecordSelector();
+    }
+  }
+
   function handleKeydown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
-        void launchRecordSelector();
+        if (e.target === element) {
+          void toggleRecordSelector();
+        }
         break;
       case 'Delete':
         clear();
+        closeRecordSelector();
         break;
       default:
         break;
@@ -145,7 +188,7 @@
   class:is-acquiring-input={isAcquiringInput}
   tabindex={isAcquiringInput || disabled ? undefined : 0}
   bind:this={element}
-  on:click={launchRecordSelector}
+  on:click={toggleRecordSelector}
   on:focus={handleFocus}
   on:focus
   on:blur={handleBlur}
@@ -184,6 +227,16 @@
     </span>
   {/if}
 </span>
+
+<AttachableRowSeeker
+  selectedRecord={value
+    ? {
+        summary: recordSummary ?? '',
+        pk: value,
+      }
+    : undefined}
+  controller={attachableRowSeekerController}
+/>
 
 <style>
   /* TODO resolve some code duplication with `.input-element` */

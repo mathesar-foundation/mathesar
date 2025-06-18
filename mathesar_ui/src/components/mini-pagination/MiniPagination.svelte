@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import Pagination from '@mathesar/utils/Pagination';
@@ -16,6 +17,10 @@
   export let recordCount: number;
   export let pageJumperIsOpen = false;
 
+  const dispatch = createEventDispatcher<{
+    change: Pagination;
+  }>();
+
   $: ({ page } = pagination);
   $: maxPage = pagination.getMaxPage(recordCount);
   $: canGoBackward = page > 1;
@@ -27,6 +32,7 @@
       size: pagination.size,
       page: nearestValidPage,
     });
+    dispatch('change', pagination);
   }
 
   function goBackward() {

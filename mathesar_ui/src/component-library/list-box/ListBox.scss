@@ -7,11 +7,11 @@
 
   li {
     position: relative;
-    padding: var(--sm4) var(--sm1);
+    padding: var(--list-box-options-padding, var(--sm4) var(--sm1));
     cursor: default;
     box-sizing: content-box;
-    line-height: 1.2;
-    min-height: 1.2em;
+    line-height: 1.5;
+    min-height: 1.5em;
 
     // Disable text selection. Without this, if I inadvertently drag my mouse
     // over some blank space in the option, then I select text outside the
