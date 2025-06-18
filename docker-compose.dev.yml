@@ -15,6 +15,7 @@ services:
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
+    image: mathesar/mathesar-dev-db:latest
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
       interval: 5s
@@ -22,7 +23,6 @@ services:
       retries: 30
       start_period: 5s
   dev-db:
-    image: mathesar-dev-db:latest
     container_name: mathesar_dev_db
     extends:
       service: dev-db-base
