@@ -97,5 +97,11 @@
 {/if}
 
 {#if !selectedColumn}
-  <div class="section-content">{$_('select_columns_view_properties')}</div>
+  <div class="section-content no-column-selected">{$_('select_columns_view_properties')}</div>
 {/if}
+
+<style>
+  .no-column-selected{
+    padding: var(--lg1);
+  }
+</style>
