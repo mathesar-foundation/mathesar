@@ -71,24 +71,7 @@
     border: solid 1px var(--SYS-border-card);
     padding: var(--lg1);
     border-radius: var(--border-radius-l);
-    background-color: var(--SYS-surface-card);
-  }
-
-  .release:hover {
-    border: 1px solid color-mix(in srgb, var(--SYS-accent-fjord-base-muted), transparent 80%);
-    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-fjord-dull), transparent 80%);
-    background: color-mix(in srgb, var(--SYS-accent-fjord-bright), transparent 95%);
-  }
-
-  .release:active {
-    border: 1px solid color-mix(in srgb, var(--SYS-accent-fjord-base-muted), transparent 90%);
-    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-fjord-dull), transparent 60%);
-    background: color-mix(in srgb, var(--SYS-accent-fjord-bright), transparent 90%);
-  }
-
-  .release:focus {
-    outline: 1px solid color-mix(in srgb, var(--SYS-accent-fjord-base-muted), transparent 90%);
-    outline-offset: 1px;
+    background-color: var(--SYS-surface-overlay);
   }
 
   .release.available-upgrade {
