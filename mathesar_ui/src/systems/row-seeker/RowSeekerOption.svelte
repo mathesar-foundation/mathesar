@@ -66,11 +66,13 @@
     <div class="summary">
       <MatchHighlighter text={result.summary} substring={$searchValue} />
     </div>
-    <div class="expand">
-      <Button appearance="plain" on:click={(e) => toggleExpansion(e)}>
-        <Icon {...iconExpandRight} rotate={isExpanded ? 90 : undefined} />
-      </Button>
-    </div>
+    {#if $mode === 'complete'}
+      <div class="expand">
+        <Button appearance="plain" on:click={(e) => toggleExpansion(e)}>
+          <Icon {...iconExpandRight} rotate={isExpanded ? 90 : undefined} />
+        </Button>
+      </div>
+    {/if}
   </div>
   {#if $mode === 'complete' && !isExpanded && columnsThatMaybeUseful.length}
     <div class="column-content column-tags">

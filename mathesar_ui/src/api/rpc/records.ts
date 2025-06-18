@@ -114,7 +114,7 @@ export interface RecordsResponse {
 
 export interface RecordSummaryListResult {
   summary: string;
-  values: Result
+  values: Result;
 }
 
 export interface RecordsSummaryListResponse {
@@ -172,7 +172,10 @@ export const records = {
 
   search: rpcMethodTypeContainer<RecordsSearchParams, RecordsResponse>(),
 
-  list_by_summaries: rpcMethodTypeContainer<RecordsSummaryListParams, RecordsSummaryListResponse>(),
+  list_by_summaries: rpcMethodTypeContainer<
+    RecordsSummaryListParams,
+    RecordsSummaryListResponse
+  >(),
 
   delete: rpcMethodTypeContainer<
     {
