@@ -159,7 +159,7 @@
 
   .explore-cta {
     padding: var(--lg1);
-    background: color-mix(in srgb, var(-SYS-color-tip-bg), transparent 90%);
+    background: color-mix(in srgb, var(--SYS-color-tip-bg), transparent 60%);
     border: 1px solid var(--SYS-color-tip-border);
     border-radius: var(--sm1);
     position: relative;

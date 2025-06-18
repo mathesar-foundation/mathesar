@@ -67,7 +67,7 @@
     display: inline-block;
     width: 0.25rem;
     height: 0.25rem;
-    background-color: var(--SYS-border-section);
+    background-color: var(--SYS-border-row);
     border-radius: 50%;
   }
 

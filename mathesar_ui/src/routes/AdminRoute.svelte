@@ -41,6 +41,7 @@
     slot="secondary-header"
     name={$_('administration')}
     icon={iconSettingsMajor}
+    --header-color='var(--admin-header)'
   />
   <PageLayoutWithSidebar>
     <AdminNavigation slot="sidebar" />

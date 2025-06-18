@@ -14,8 +14,8 @@ body {
   --footer-background-color: var(--SYS-surface-footer);
   --inset-background-color: var(--SYS-surface-inset);
   
-  --hover-background: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 20%);
-  --active-background: color-mix(in srgb, var(--SYS-accent-glacier-dull-active), transparent 20%);
+  --hover-background: color-mix(in srgb, var(--SYS-accent-fjord-muted), transparent 20%);
+  --active-background: color-mix(in srgb, var(--SYS-accent-fjord-muted-active), transparent 20%);
   --disabled-background: var(--SYS-accent-wisteria-dull-disabled);
   --sidebar-background: var(--SYS-surface-supporting);
   --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
@@ -105,7 +105,14 @@ body {
       var(--SYS-accent-glacier-faint) 45%,
       var(--SYS-surface-base) 50%,
       var(--SYS-accent-asparagus-muted-focused) 100%
-    );;
+    );
+
+    --admin-header: linear-gradient(
+      135deg,
+      var(--SYS-accent-fjord-muted-focused), 35%,
+      var(--SYS-surface-base) 50%,
+      var(--SYS-accent-fjord-faint) 100%
+    );
 
     .page-header {
       color: var(--SYS-text-header-primary);
