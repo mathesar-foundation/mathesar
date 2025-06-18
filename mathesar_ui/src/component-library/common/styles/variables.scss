@@ -76,33 +76,35 @@ body {
   // Headers
   --home-page-header: linear-gradient(
     135deg,
-    var(--SYS-surface-elevated) 10%,
-    var(--SYS-surface-supporting) 30%,
-    var(--SYS-accent-amethyst-faint) 100%
+    var(--SYS-accent-amethyst-muted-focused) 25%,
+    var(--SYS-accent-tomato-muted-focused) 50%,
+    var(--SYS-accent-pumpkin-muted-focused) 75%,
+    var(--SYS-surface-base) 100%
   );
 
   --db-page-header: linear-gradient(
     135deg,
-    var(--SYS-accent-salmon-faint) 10%,
-    var(--SYS-surface-supporting) 50%,
-    var(--SYS-accent-pumpkin-faint) 90%,
-    var(--SYS-accent-tomato-faint) 100%
+    var(--SYS-surface-elevated) 10%,
+    var(--SYS-surface-supporting) 30%,
+    var(--SYS-accent-amethyst-muted-focused) 50%,
+    var(--SYS-accent-amethyst-faint) 100%
   );
 
   --schema-page-header: linear-gradient(
       135deg,
-      var(--SYS-accent-pumpkin-faint-selected) 10%,
-      var(--SYS-accent-pumpkin-faint) 50%,
-      var(--SYS-surface-base) 100%
+      var(--SYS-accent-salmon-faint) 10%,
+      var(--SYS-surface-supporting) 50%,
+      var(--SYS-accent-salmon-muted-focused) 90%,
+      var(--SYS-accent-tomato-faint) 100%
     );
 
     --record-page-header: linear-gradient(
       135deg,
-      var(--SYS-accent-asparagus-faint-hover) 20%,
+      var(--SYS-accent-asparagus-faint) 20%,
       var(--SYS-surface-base), 35%,
       var(--SYS-accent-glacier-faint) 45%,
       var(--SYS-surface-base) 50%,
-      var(--SYS-accent-asparagus-faint) 100%
+      var(--SYS-accent-asparagus-muted-focused) 100%
     );;
 
     .page-header {

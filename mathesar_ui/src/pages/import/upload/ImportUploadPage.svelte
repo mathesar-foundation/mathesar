@@ -236,9 +236,16 @@
     padding: var(--lg3);
     border: 1px solid var(--SYS-border-section);
     border-radius: var(--border-radius-m);
-    background-color: var(--inset-background-color);
+    background-color: var(--SYS-surface-elevated);
     margin-bottom: 2rem;
   }
+
+  .fieldset {
+    border: 1px solid var(--SYS-border-section);
+    border-radius: var(--border-radius-m);
+    background-color: var(--SYS-surface-overlay-secondary);
+  }
+
 
   .data-source-input {
     margin: 1rem 0;

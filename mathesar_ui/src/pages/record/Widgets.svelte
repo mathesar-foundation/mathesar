@@ -63,10 +63,9 @@
   .widgets-area {
     background: linear-gradient(
       135deg,
-      var(--SYS-surface-base) 40%,
-      var(--SYS-accent-asparagus-faint-hover), 55%,
-      var(--SYS-accent-glacier-faint) 75%,
-      var(--SYS-accent-asparagus-faint) 80%,
+      var(--SYS-surface-base) 10%,
+      var(--SYS-accent-asparagus-faint) 30%,
+      var(--SYS-accent-asparagus-faint-focused) 40%,
       var(--SYS-surface-base) 100%
     );
     border-top: 2px solid var(--SYS-border-container);
