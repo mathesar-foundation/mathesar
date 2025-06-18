@@ -130,7 +130,7 @@
         <SaveButton {canSave} onSave={saveExistingOrCreateNew} />
 
         <Button
-          appearance="secondary"
+          appearance="inspector"
           disabled={!hasColumns}
           on:click={() => {
             isInspectorOpen = !isInspectorOpen;
