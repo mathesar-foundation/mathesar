@@ -137,7 +137,7 @@ jobs:
           docker pull python:${{ matrix.py-version }}
           docker pull postgres:${{ matrix.pg-version }}
       - name: Build the stack
-        run: docker compose -f docker-compose.dev.yml up --build -d test-service
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service dev-db
         env:
           PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
