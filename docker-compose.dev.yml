@@ -4,6 +4,7 @@ services:
   # but with additional testing dependencies.
   # It is used to run automated test cases to verify if the app works as intended
   dev-db-base:
+    image: mathesar-dev-db:latest
     command: ["postgres", "-c", "shared_preload_libraries=plugin_debugger"]
     build:
       context: .
