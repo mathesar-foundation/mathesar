@@ -61,7 +61,7 @@ export default class RowSeekerController {
 
   constructor(props: RowSeekerProps) {
     this.targetTable = props.targetTable;
-    this.mode = writable(props.mode ?? 'basic');
+    this.mode = writable(props.mode ?? 'complete');
   }
 
   async focusSearch() {
