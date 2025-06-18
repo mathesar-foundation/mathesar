@@ -407,7 +407,7 @@ jobs:
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
       - name: Build the stack
-        run: docker compose -f docker-compose.dev.yml up --build -d test-service
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service dev-db
         env:
           TARGET: ${{ matrix.target }}
 
