@@ -255,7 +255,7 @@
 
   .table-row.unconfirmed-import {
     color: var(--SYS-text-disabled);
-    background-color: var(--disabled-background);
+    background-color: var(--SYS-surface-card-disabled);
   }
 
   .row-content {

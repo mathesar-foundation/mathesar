@@ -301,7 +301,7 @@ $button-intents: (
   "outcome": 275
 );
 
-$button-saturation: 35%;
+$button-saturation: 60%;
 $button-tones: (solid, soft, outlined, ghost);
 $button-roles: (bg, text, icon, border);
 
@@ -314,7 +314,7 @@ $button-roles-light: (
 
 $button-roles-dark: (
   "bg": 7%,
-  "text": 60%,
+  "text": 50%,
   "icon": 70%,
   "border": 10%
 );
@@ -537,7 +537,7 @@ body {
 
       $solid: (bg: ($hue, $button-saturation, 70%), text: ($hue, 5%, 10%), icon: ($hue, 5%, 10%), border: ($hue, $button-saturation, 64%));
       $soft: (bg: ($hue, $button-saturation * 0.6, 18%), text: ($hue, $button-saturation *0.3, 55%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.6, 26%));
-      $outlined: (bg: null, text: ($hue, $button-saturation, 75%), icon: ($hue, $button-saturation, 75%), border: ($hue, $button-saturation * 0.8, 30%));
+      $outlined: (bg: null, text: ($hue, $button-saturation, 45%), icon: ($hue, $button-saturation, 45%), border: ($hue, $button-saturation * 0.8, 30%));
       $ghost: (bg: null, text: ($hue, $button-saturation * 0.7, 50%), icon: ($hue, $button-saturation * 0.5, 60%), border: null);
 
       @include generate-button-tokens($intent, solid, $solid, $button-state-deltas-dark);

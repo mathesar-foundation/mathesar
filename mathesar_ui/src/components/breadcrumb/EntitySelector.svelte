@@ -3,7 +3,7 @@
   import { meta } from 'tinro';
 
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
-  import { iconTable } from '@mathesar/icons';
+  import { iconTable, iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
@@ -42,10 +42,10 @@
     queryInstance: SavedExploration,
   ): SimpleBreadcrumbSelectorEntry {
     return {
-      type: 'simple',
+      type: 'exploration',
       label: queryInstance.name,
       href: getExplorationPageUrl(database.id, schema.oid, queryInstance.id),
-      icon: iconTable,
+      icon: iconExploration,
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
         const entryhref = getExplorationPageUrl(

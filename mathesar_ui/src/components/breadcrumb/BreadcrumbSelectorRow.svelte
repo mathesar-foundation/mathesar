@@ -4,6 +4,9 @@
   import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
 
   import TableName from '../TableName.svelte';
+  import QueryName from '@mathesar/components/QueryName.svelte';
+  import SchemaName from '@mathesar/components/SchemaName.svelte';
+  import DatabaseDisplayNameWithIcon from '@mathesar/components/DatabaseDisplayNameWithIcon.svelte';
 
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
@@ -21,8 +24,16 @@
       <TableName table={entry.table} --name-color='var(--SYS-text-navigation)'  let:tableName>
         <MatchHighlighter text={tableName} substring={filterString} />
       </TableName>
-    {:else}
-      <NameWithIcon {icon} --name-color='var(--SYS-text-navigation)'>
+    {:else if entry.type === 'exploration'}
+      <QueryName query={label} --name-color='var(--SYS-text-navigation)'>
+        <MatchHighlighter text={label} substring={filterString} />
+      </QueryName>
+    {:else if entry.type === 'database'}
+      <DatabaseDisplayNameWithIcon database={label} --name-color='var(--SYS-text-navigation)'>
+        <MatchHighlighter text={label.displayName} substring={filterString} />
+      </DatabaseDisplayNameWithIcon>
+    {:else if entry.type === 'schema'}
+      <NameWithIcon {icon} --name-color='var(--SYS-text-navigation)'  --icon-color='var(--SYS-accent-salmon-base-muted)'>
         <MatchHighlighter text={label} substring={filterString} />
       </NameWithIcon>
     {/if}

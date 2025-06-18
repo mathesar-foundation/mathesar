@@ -65,14 +65,10 @@
       .icon {
         font-size: var(--lg2);
         padding: var(--sm4);
-        background: linear-gradient(
-          135deg,
-          var(--SYS-accent-pumpkin-dull),
-          var(--SYS-accent-pumpkin-base)
-        );
+        background: var(--icon-fill-color);
         border-radius: var(--border-radius-l);
         margin-right: var(--sm2);
-        color: var(--SYS-text-inverted);
+        color: var(--icon-stroke-color);
       }
       .text {
         overflow: hidden;

@@ -15,8 +15,8 @@
     database: Database,
   ): BreadcrumbSelectorEntry {
     return {
-      type: 'simple',
-      label: database.displayName,
+      type: 'database',
+      label: database,
       href: getDatabasePageUrl(database.id),
       icon: iconDatabase,
       isActive: () => database.id === $currentDatabase?.id,

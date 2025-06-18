@@ -18,7 +18,7 @@
 
   function makeBreadcrumbSelectorItem(schema: Schema): BreadcrumbSelectorEntry {
     return {
-      type: 'simple',
+      type: 'schema',
       // TODO: Make label a store
       label: get(schema.name),
       href: getSchemaPageUrl(database.id, schema.oid),

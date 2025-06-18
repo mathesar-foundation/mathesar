@@ -4,7 +4,8 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconExploration, iconRecord } from '@mathesar/icons';
+  import QueryName from '@mathesar/components/QueryName.svelte';
+  import { iconRecord } from '@mathesar/icons';
   import {
     getDatabasePageUrl,
     getExplorationPageUrl,
@@ -68,7 +69,7 @@
         item.query.id,
       )}
     >
-      <NameWithIcon icon={iconExploration}>{item.query.name}</NameWithIcon>
+      <QueryName query={item.query.name} />
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'simple'}
