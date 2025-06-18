@@ -128,6 +128,7 @@
       padding: 0.35rem 0.6rem;
       display: flex;
       align-items: center;
+      border-bottom: 1px solid var(--SYS-border-table-header);
 
       :global(.checkbox) {
         flex-grow: 0;
