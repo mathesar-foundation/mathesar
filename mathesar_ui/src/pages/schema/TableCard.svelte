@@ -102,7 +102,6 @@
       <div class="table-name">
         <TableName
           {table}
-          --icon-color="var(--SYS-accent-pumpkin-base-muted)"
         />
       </div>
       {#if description}
@@ -232,21 +231,15 @@
   }
 
   .table-row:hover {
-    border: 1px solid
-      color-mix(in srgb, var(--SYS-accent-pumpkin-base-muted), transparent 80%);
-    box-shadow: 0 1px 2px 0
-      color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 80%);
-    background: color-mix(
-      in srgb,
-      var(--SYS-accent-pumpkin-bright),
-      transparent 95%
-    );
+    border: 1px solid var(--SYS-color-table-15);
+    box-shadow: 0 1px 2px 0 var(--SYS-color-table-hover-15);
+    background: var(--SYS-color-table-hover-10);
     padding-left: 0;
     &::before {
       content: '';
       border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
         var(--corner-bl);
-      border-left: solid 3px var(--SYS-accent-pumpkin-dull);
+      border-left: solid 3px var(--SYS-color-table-40);
       position: absolute;
       height: 100%;
       width: 10px;
@@ -257,15 +250,9 @@
   }
 
   .table-row:active {
-    border: 1px solid
-      color-mix(in srgb, var(--SYS-accent-pumpkin-base-muted), transparent 80%);
-    box-shadow: 0 1px 2px 0
-      color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 60%);
-    background: color-mix(
-      in srgb,
-      var(--SYS-accent-pumpkin-bright),
-      transparent 90%
-    );
+    border: 1px solid var(--SYS-color-table-20);
+    box-shadow: 0 1px 2px 0 var(--SYS-color-table-active-20);
+    background: var(--SYS-color-table-active-15);
   }
 
   .table-row.unconfirmed-import {

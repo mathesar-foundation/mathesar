@@ -23,7 +23,7 @@
   icon={iconTable}
   {isLoading}
   {...$$restProps}
-  --icon-color="var(--table-icon-color, var(--SYS-accent-pumpkin-base-muted))"
+  --icon-color="var(--table-icon-color, var(--SYS-color-table))"
   bold
 >
   <slot tableName={table.name}>

@@ -515,8 +515,8 @@ span.flatpickr-weekday {
 .flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
-  -webkit-box-shadow: -10px 0 0 var(--SYS-accent-pumpkin-base);
-  box-shadow: -10px 0 0 var(--SYS-accent-pumpkin-base);
+  -webkit-box-shadow: -10px 0 0 var(--SYS-border-shadow);
+  box-shadow: -10px 0 0 var(--SYS-border-shadow);
 }
 .flatpickr-day.selected.startRange.endRange,
 .flatpickr-day.startRange.startRange.endRange,
@@ -552,11 +552,11 @@ span.flatpickr-weekday {
 .flatpickr-day.week.selected {
   border-radius: 0;
   -webkit-box-shadow:
-    -5px 0 0 var(--SYS-accent-pumpkin-base),
-    5px 0 0 var(--SYS-accent-pumpkin-base);
+    -5px 0 0 var(--SYS-border-shadow),
+    5px 0 0 var(--SYS-border-shadow);
   box-shadow:
-    -5px 0 0 var(--SYS-accent-pumpkin-base),
-    5px 0 0 var(--SYS-accent-pumpkin-base);
+    -5px 0 0 var(--SYS-border-shadow),
+    5px 0 0 var(--SYS-border-shadow);
 }
 .flatpickr-day.hidden {
   visibility: hidden;
@@ -569,8 +569,8 @@ span.flatpickr-weekday {
 }
 .flatpickr-weekwrapper .flatpickr-weeks {
   padding: 0 12px;
-  -webkit-box-shadow: 1px 0 0 var(--accent-pumpkin-base);
-  box-shadow: 1px 0 0 var(--accent-pumpkin-base);
+  -webkit-box-shadow: 1px 0 0 var(--border-shadow);
+  box-shadow: 1px 0 0 var(--border-shadow);
 }
 .flatpickr-weekwrapper .flatpickr-weekday {
   float: none;
@@ -702,7 +702,7 @@ span.flatpickr-weekday {
 .flatpickr-time .flatpickr-am-pm:hover,
 .flatpickr-time input:focus,
 .flatpickr-time .flatpickr-am-pm:focus {
-  background: var(--SYS-pumpkin-faint);
+  background: var(--SYS-surface-elevated-high);
 }
 .flatpickr-input {
   display: none;

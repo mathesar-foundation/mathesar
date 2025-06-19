@@ -27,7 +27,8 @@ $utility-colors: (
   'database': $amethyst,
   'table': $pumpkin,
   'column': $wisteria,
-  'exploration': hsl(hue($pumpkin), 60%, 70%),
+  'record': $asparagus,
+  'exploration': $fjord,
   'highlight-salmon': hsl(hue($salmon), 60%, 60%),
   'brand-muted': hsl(hue($tomato), 40%, 60%),
 );

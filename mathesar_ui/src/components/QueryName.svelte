@@ -11,5 +11,5 @@
 
 <NameWithIcon
   icon={iconExploration}
-  --icon-color="var(--SYS-accent-pumpkin-contrast)">{query}</NameWithIcon
+  --icon-color="var(--SYS-color-exploration)">{query}</NameWithIcon
 >

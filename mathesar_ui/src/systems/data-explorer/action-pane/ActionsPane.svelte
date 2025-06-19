@@ -93,8 +93,8 @@
           icon: iconExploration,
         }
       : undefined}
-    --icon-fill-color="linear-gradient(135deg, var(--SYS-accent-pumpkin-bright), var(--SYS-accent-pumpkin-contrast-muted))"
-    --icon-stroke-color="var(--SYS-surface-base)"
+    --icon-fill-color="linear-gradient(135deg, var(--SYS-color-exploration), var(--SYS-color-exploration-40))"
+    --icon-stroke-color="var(--SYS-surface-inverted)"
   >
     <div class="detail-wrapper">
       <div class="detail">

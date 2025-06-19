@@ -54,7 +54,7 @@
     description: table.description ?? undefined,
     icon: iconTable,
   }}
-  --icon-fill-color="linear-gradient(135deg, var(--SYS-accent-pumpkin-dull), var(--SYS-accent-pumpkin-base))"
+  --icon-fill-color="linear-gradient(135deg, var(--SYS-color-table), var(--SYS-color-table-80))"
   --icon-stroke-color="var(--SYS-text-inverted)"
 >
   {#if isSelectable}
