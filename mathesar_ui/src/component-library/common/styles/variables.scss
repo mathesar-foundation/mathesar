@@ -9,7 +9,7 @@ body {
   --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
 
    // Progress Colors
-  --progress-foreground: color-mix(in srgb, var(--SYS-surface-elevated), transparent 80%);
+  --progress-foreground: color-mix(in srgb, var(--SYS-surface-elevated-low), transparent 80%);
   --ToastItem__progress-color: var(--progress-foreground);
   
   // Border Radius

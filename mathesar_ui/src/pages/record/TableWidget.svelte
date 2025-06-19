@@ -60,7 +60,7 @@
 <style lang="scss">
   .table-widget {
     border: 1px solid var(--SYS-border-container);
-    background: var(--SYS-surface-elevated);
+    background: var(--SYS-surface-elevated-low);
     border-radius: var(--border-radius-m);
     padding: var(--sm1);
   }

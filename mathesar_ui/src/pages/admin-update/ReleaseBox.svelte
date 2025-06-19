@@ -71,7 +71,7 @@
     border: solid 1px var(--SYS-border-card);
     padding: var(--lg1);
     border-radius: var(--border-radius-l);
-    background-color: var(--SYS-surface-overlay);
+    background-color: var(--SYS-surface-elevated-mid);
   }
 
   .release.available-upgrade {

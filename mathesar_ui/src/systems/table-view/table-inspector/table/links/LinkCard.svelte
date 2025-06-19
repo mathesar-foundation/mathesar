@@ -18,17 +18,17 @@
   .link-card {
     display: block;
     cursor: pointer;
-    background: var(--SYS-surface-overlay);
+    background: var(--SYS-surface-elevated-mid);
     border: 1px solid var(--SYS-border-container);
     border-radius: var(--border-radius-m);
-    box-shadow: 0 1px 2px 0  var(--SYS-surface-overlay-muted);
+    box-shadow: 0 1px 2px 0  var(--SYS-surface-elevated-mid-muted);
     transition: all 0.2s ease;
   }
 
   .link-card:hover {
     border: 1px solid var(--SYS-border-container-hover);
-    box-shadow: 0 1px 2px 0  var(--SYS-surface-overlay-muted);
-    background: var(--SYS-surface-overlay-hover);
+    box-shadow: 0 1px 2px 0  var(--SYS-surface-elevated-mid-muted);
+    background: var(--SYS-surface-elevated-mid-hover);
   }
 
   .link-card.multiple {
@@ -37,8 +37,8 @@
 
   .link-card.multiple:hover .container {
     border: 1px solid var(--SYS-border-container-hover);
-    box-shadow: 0 1px 2px 0  var(--SYS-surface-overlay-muted);
-    background: var(--SYS-surface-overlay-secondary-hover);
+    box-shadow: 0 1px 2px 0  var(--SYS-surface-elevated-mid-muted);
+    background: var(--SYS-surface-elevated-high-hover);
   }
 
   .container {
@@ -50,7 +50,7 @@
     position: relative;
     bottom: var(--sm3);
     left: var(--sm3);
-    background: var(--SYS-surface-overlay-secondary);
+    background: var(--SYS-surface-elevated-high);
     border: 1px solid var(--SYS-border-container);
     border-radius: var(--border-radius-m);
   }

@@ -17,7 +17,7 @@
 
     span {
       text-transform: uppercase;
-      background-color: var(--SYS-surface-overlay-secondary);
+      background-color: var(--SYS-surface-elevated-high);
       border-radius: var(--border-radius-m);
       padding: 2px 4px;
       font-size: var(--sm2);

@@ -160,6 +160,6 @@
     text-align: center;
     font-size: 2rem;
     padding: 2rem;
-    color: var(--SYS-surface-elevated);
+    color: var(--SYS-surface-elevated-low);
   }
 </style>

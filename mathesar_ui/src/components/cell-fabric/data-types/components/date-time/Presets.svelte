@@ -80,7 +80,7 @@
     }
 
     :global(button.btn.selected) {
-      background: var(--SYS-surface-control-selected);
+      background: var(--SYS-surface-input-fill);
       color: var(--SYS-text-inverted);
     }
 

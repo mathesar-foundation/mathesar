@@ -166,8 +166,8 @@
     height: var(--header-height);
     background: linear-gradient(
       to bottom right,
-      var(--SYS-surface-supporting-highlighted),
-      var(--SYS-surface-supporting)
+      var(--SYS-surface-base),
+      var(--SYS-surface-elevated-mid)
     );
     border-bottom: 1px solid var(--SYS-border-container);
     box-shadow: var(--SYS-border-shadow) 0 1px 3px 0;

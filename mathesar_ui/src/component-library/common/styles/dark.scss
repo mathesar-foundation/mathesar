@@ -20,54 +20,55 @@
 // Base color
 // ------------------------------------------
 
-// Dark
 $base-hue: 230;
-$base-saturation: 4%;
+$base-sat: 4%;
 
 // ------------------------------------------
 // Surfaces
 // ------------------------------------------
 
-// Dark mode anchor
-$surface-base: hsl($base-hue, $base-saturation, 2%);
-
-// Darkness adjustments, ordered by elevation
-$surface-deltas: (
-  "light": 100%,
-  "inset": -2%,
-  "input": 1%,
-  "canvas": 1%,
-  "supporting": 3%,
-  "card": 3%,
-  "header": 5%,
-  "fieldset": 4%,
-  "control": 5%,
-  "elevated": 5%,
-  "overlay": 7%,
-  "header-secondary": 9%,
-  "overlay-secondary": 12%,
-  "overlay-tertiary": 16%,
-  "token": 20%
+// Colors, ordered by elevation / lightness
+$surface-colors: (
+  "inset": hsl($base-hue, $base-sat, 0%),
+  "input": hsl($base-hue, $base-sat, 1%),
+  "base": hsl($base-hue, $base-sat, 2%),
+  "card": hsl($base-hue, $base-sat, 3%),
+  "canvas": hsl($base-hue, $base-sat, 3%),
+  "supporting": hsl($base-hue, $base-sat, 3%),
+  "fieldset": hsl($base-hue, $base-sat, 4%),
+  "header": hsl($base-hue, $base-sat, 5%),
+  "control": hsl($base-hue, $base-sat, 5%),
+  "elevated-low": hsl($base-hue, $base-sat, 5%),
+  "elevated-mid": hsl($base-hue, $base-sat, 7%),
+  "elevated-high": hsl($base-hue, $base-sat, 10%),
+  "elevated-top": hsl($base-hue, $base-sat, 15%),
+  "token": hsl($base-hue, $base-sat, 20%),
+  "input-fill": hsl(212, 84%, 44.1%),
+  "light": hsl($base-hue, $base-sat, 100%)
 );
 
 $surface-states: (
-  "hover": 3%,
-  "active": 6%,
-  "focused": 2%,
-  "disabled": 8%,
-  "muted": 5%,
-  "selected": 5%,
-  "highlighted": 6%
+  "hover": (0, 0%, 7%),
+  "active": (0, 0%, 9%),
+  "focused": (0, 0%, 2%),
+  "disabled": (0, 0%, 20%),
+  "muted": (0, 0%, -5%)
 );
 
 // Token generator mixin
 @mixin generate-surface-tokens($prefix, $base-color, $states) {
   --SYS-surface-#{$prefix}: #{$base-color};
   @each $state, $delta in $states {
-    --SYS-surface-#{$prefix}-#{$state}: #{adjust-lightness($base-color, $delta)};
+    $dh: nth($delta, 1);
+    $ds: nth($delta, 2);
+    $dl: nth($delta, 3);
+    $h-new: (hue($base-color) + $dh) % 360;
+    $s-new: max(0%, min(100%,  saturation($base-color) + $ds));
+    $l-new: max(0%, min(100%,  lightness($base-color) + $dl));
+    $variant: hsl($h-new, $s-new, $l-new);
+    --SYS-surface-#{$prefix}-#{$state}: #{$variant};
   }
 }
-
 
 // ------------------------------------------
 // Borders
@@ -75,7 +76,7 @@ $surface-states: (
 
 // Ordered by prominence.
 $border-roles: (
-  "grid": 10%,
+  "grid": 12%,
   "container": 12%,
   "row": 12%,
   "shadow": 12%,
@@ -259,16 +260,13 @@ $accent-states: (
 // ------------------------------------------
 body.theme-dark {
   // Surfaces
-  @include generate-surface-tokens(base, $surface-base, $surface-states);
-
-  @each $name, $delta in $surface-deltas {
-    $base: adjust-lightness($surface-base, $delta);
-    @include generate-surface-tokens(#{$name}, $base, $surface-states);
+  @each $name, $color in $surface-colors {
+    @include generate-surface-tokens(#{$name}, $color, $surface-states);
   }
 
   // Borders
   @each $name, $delta in $border-roles {
-    $base: hsl($base-hue, $base-saturation, $delta);
+    $base: hsl($base-hue, $base-sat, $delta);
     @include generate-border-tokens(#{$name}, $base, $border-states);
   }
 
