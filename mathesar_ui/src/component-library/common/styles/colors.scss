@@ -24,7 +24,7 @@ $input-fill: hsl(212, 84%, 44.1%);
 $utility-colors: (
   'brand': $tomato,
   'schema': $salmon,
-  'illustration-red': hsl(hue($salmon), 60%, 60%),
+  'highlight-salmon': hsl(hue($salmon), 60%, 60%),
   'brand-muted': hsl(hue($tomato), 40%, 60%),
 );
 

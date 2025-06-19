@@ -407,8 +407,8 @@
 
 <style>
   .form {
-    --base-fill: var(--SYS-color-illustration-red-40);
-    --base-stroke: var(--SYS-color-illustration-red);
+    --base-fill: var(--SYS-color-highlight-salmon-40);
+    --base-stroke: var(--SYS-color-highlight-salmon);
     --target-fill: var(--SYS-accent-glacier-muted);
     --target-stroke: var(--SYS-accent-glacier-base-highlighted);
     --mapping-fill: var(--SYS-accent-asparagus-muted);

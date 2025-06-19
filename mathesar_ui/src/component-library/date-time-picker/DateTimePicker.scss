@@ -467,14 +467,14 @@ span.flatpickr-weekday {
   border-color: var(--SYS-border-section);
 }
 .flatpickr-day.today {
-  border-color: var(--SYS-color-illustration-red-40);
-  background: var(--SYS-color-illustration-red-20);
+  border-color: var(--SYS-color-highlight-salmon-40);
+  background: var(--SYS-color-highlight-salmon-20);
   color: var(--SYS-text-control);
 }
 .flatpickr-day.today:hover,
 .flatpickr-day.today:focus {
-  border-color: var(--SYS-color-illustration-red-60);
-  background: var(--SYS-color-illustration-red-40);
+  border-color: var(--SYS-color-highlight-salmon-60);
+  background: var(--SYS-color-highlight-salmon-40);
   color: var(--SYS-text-control);
 }
 .flatpickr-day.selected,
