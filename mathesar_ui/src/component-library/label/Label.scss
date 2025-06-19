@@ -4,7 +4,7 @@
     cursor: pointer;
   }
   &.disabled {
-    color: #777;
+    color: var(--SYS-text-disabled);
     cursor: not-allowed;
   }
 }
