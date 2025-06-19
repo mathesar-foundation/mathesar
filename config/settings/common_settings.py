@@ -64,6 +64,7 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.databases.privileges',
     'mathesar.rpc.databases.setup',
     'mathesar.rpc.explorations',
+    'mathesar.rpc.forms',
     'mathesar.rpc.records',
     'mathesar.rpc.roles',
     'mathesar.rpc.roles.configured',
