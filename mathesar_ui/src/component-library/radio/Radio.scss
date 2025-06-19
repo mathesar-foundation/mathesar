@@ -33,7 +33,7 @@ $stroke: encodecolor($input-color);
     background-color: var(--SYS-surface-input-hover);
   }
   &:disabled {
-     background-color: var(--SYS-surface-input-disabled);
+    background-color: var(--SYS-surface-input-disabled);
   }
   &:disabled:not(:checked) {
     background: var(--SYS-surface-input-disabled);

@@ -4,14 +4,26 @@
 
 body {
   // Background Colors
-  --hover-background: color-mix(in srgb, var(--SYS-accent-fjord-muted), transparent 20%);
-  --active-background: color-mix(in srgb, var(--SYS-accent-fjord-muted-active), transparent 20%);
+  --hover-background: color-mix(
+    in srgb,
+    var(--SYS-accent-fjord-muted),
+    transparent 20%
+  );
+  --active-background: color-mix(
+    in srgb,
+    var(--SYS-accent-fjord-muted-active),
+    transparent 20%
+  );
   --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
 
-   // Progress Colors
-  --progress-foreground: color-mix(in srgb, var(--SYS-surface-elevated-low), transparent 80%);
+  // Progress Colors
+  --progress-foreground: color-mix(
+    in srgb,
+    var(--SYS-surface-elevated-low),
+    transparent 80%
+  );
   --ToastItem__progress-color: var(--progress-foreground);
-  
+
   // Border Radius
   --border-radius-xs: 0.071rem; //1px
   --border-radius-s: 0.142rem; //2px

@@ -13,6 +13,11 @@
   $: icon = getColumnIconProps(column);
 </script>
 
-<NameWithIcon on:click {icon} {...$$restProps} --icon-color='var(--SYS-accent-tomato-base-muted)'>
+<NameWithIcon
+  on:click
+  {icon}
+  {...$$restProps}
+  --icon-color="var(--SYS-accent-tomato-base-muted)"
+>
   {column.name}
 </NameWithIcon>

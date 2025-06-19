@@ -164,15 +164,24 @@
   line-height: 50%;
   opacity: 0;
   cursor: pointer;
-  border: 1px solid color-mix(in srgb, var(--SYS-border-control), transparent 75%);
+  border: 1px solid
+    color-mix(in srgb, var(--SYS-border-control), transparent 75%);
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 .numInputWrapper span:hover {
-  background: color-mix(in srgb, var(--SYS-surface-base-hover),  transparent 50%);
+  background: color-mix(
+    in srgb,
+    var(--SYS-surface-base-hover),
+    transparent 50%
+  );
 }
 .numInputWrapper span:active {
-   background: color-mix(in srgb, var(--SYS-surface-base-active),  transparent 50%);
+  background: color-mix(
+    in srgb,
+    var(--SYS-surface-base-active),
+    transparent 50%
+  );
 }
 .numInputWrapper span:after {
   display: block;
@@ -186,7 +195,8 @@
 .numInputWrapper span.arrowUp:after {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
-  border-bottom: 4px solid color-mix(in srgb, var(--SYS-border-grid), transparent 60%);
+  border-bottom: 4px solid
+    color-mix(in srgb, var(--SYS-border-grid), transparent 60%);
   top: 26%;
 }
 .numInputWrapper span.arrowDown {
@@ -195,7 +205,8 @@
 .numInputWrapper span.arrowDown:after {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
-  border-top: 4px solid color-mix(in srgb, var(--SYS-border-grid), transparent 60%);
+  border-top: 4px solid
+    color-mix(in srgb, var(--SYS-border-grid), transparent 60%);
   top: 40%;
 }
 .numInputWrapper span svg {
@@ -206,7 +217,11 @@
   fill: var(--SYS-text-primary);
 }
 .numInputWrapper:hover {
-  background:  color-mix(in srgb, var(--SYS-surface-elevated-low-hover),  transparent 60%);
+  background: color-mix(
+    in srgb,
+    var(--SYS-surface-elevated-low-hover),
+    transparent 60%
+  );
 }
 .numInputWrapper:hover span {
   opacity: 1;
@@ -240,10 +255,18 @@
   display: inline-block;
 }
 .flatpickr-current-month .numInputWrapper span.arrowUp:after {
-  border-bottom-color: color-mix(in srgb, var(--SYS-border-control), transparent 60%);
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--SYS-border-control),
+    transparent 60%
+  );
 }
 .flatpickr-current-month .numInputWrapper span.arrowDown:after {
-  border-top-color: color-mix(in srgb, var(--SYS-border-control), transparent 60%);
+  border-top-color: color-mix(
+    in srgb,
+    var(--SYS-border-control),
+    transparent 60%
+  );
 }
 .flatpickr-current-month input.cur-year {
   background: transparent;
@@ -436,12 +459,16 @@ span.flatpickr-weekday {
 .flatpickr-months .flatpickr-next-month:hover {
   cursor: pointer;
   outline: 0;
-  background:  color-mix(in srgb, var(--SYS-surface-elevated-low-hover),  transparent 50%);
-  border-color:   var(--SYS-border-section);
+  background: color-mix(
+    in srgb,
+    var(--SYS-surface-elevated-low-hover),
+    transparent 50%
+  );
+  border-color: var(--SYS-border-section);
 }
 .flatpickr-day.today {
-  border-color:  var(--SYS-accent-tomato-faint);
-  background:   var(--SYS-accent-tomato-muted-muted);
+  border-color: var(--SYS-accent-tomato-faint);
+  background: var(--SYS-accent-tomato-muted-muted);
   color: var(--SYS-text-control);
 }
 .flatpickr-day.today:hover,

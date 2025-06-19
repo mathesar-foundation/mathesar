@@ -42,7 +42,7 @@
         --button-border-color: var(--SYS-border-control-focus);
       }
     }
-    
+
     &.dropdown {
       background: var(--SYS-surface-input);
       --button-border-color: var(--SYS-border-input);
@@ -58,9 +58,10 @@
     --button-border-color: var(--SYS-accent-asparagus-muted);
     --button-color: var(--SYS-text-primary);
     box-shadow:
-      0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
-      0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
-      0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%);
+      0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+            80%);
 
     &:not(:disabled) {
       &.focus,
@@ -78,9 +79,12 @@
         );
         --button-border-color: var(--SYS-accent-asparagus-muted-hover);
         box-shadow:
-          0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
-          0 1px 3px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
-          0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%);
+          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                75%),
+          0 1px 3px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                80%),
+          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                80%);
       }
 
       &:active,
@@ -97,13 +101,18 @@
   }
 
   &.btn-secondary {
-    background-color: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 80%);
+    background-color: color-mix(
+      in srgb,
+      var(--SYS-accent-glacier-dull),
+      transparent 80%
+    );
     --button-border: 0.5px var(--SYS-accent-glacier-muted);
     --button-color: var(--SYS-text-control);
     box-shadow:
-      0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
-      0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
-      0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%);
+      0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+            80%);
 
     &:not(:disabled) {
       &.focus,
@@ -117,9 +126,12 @@
         background-color: var(--SYS-accent-glacier-muted-hover);
         --button-border-color: var(--SYS-accent-glacier-dull-hover);
         box-shadow:
-          0 4px 6px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 2px 4px -2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 0 0 1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) inset;
+          0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%),
+          0 2px 4px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%),
+          0 0 0 1px
+            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) inset;
       }
 
       &:active,
@@ -131,9 +143,11 @@
         );
         --button-border-color: var(--SYS-accent-glacier-muted);
         box-shadow:
-          0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
-          0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%);
+          0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
+          0 1px 3px
+            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%);
       }
     }
   }
@@ -143,9 +157,10 @@
     --button-border-color: var(--SYS-border-elevated-mid);
     --button-color: var(--SYS-text-control);
     box-shadow:
-      0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
-      0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-      0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%);
+      0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
+      0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
+      0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+            10%);
 
     &:not(:disabled) {
       &.focus,
@@ -156,22 +171,35 @@
 
       &:hover,
       &.hover {
-        background-color: color-mix(in srgb, var(--SYS-accent-asparagus-dull), transparent 96%);
+        background-color: color-mix(
+          in srgb,
+          var(--SYS-accent-asparagus-dull),
+          transparent 96%
+        );
         --button-border-color: var(--SYS-accent-asparagus-muted-hover);
         box-shadow:
-          0 4px 6px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 2px 4px -2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 0 0 1px  color-mix(in srgb, var(--SYS-surface-light), transparent 10%) inset;
+          0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%),
+          0 2px 4px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%),
+          0 0 0 1px
+            color-mix(in srgb, var(--SYS-surface-light), transparent 10%) inset;
       }
 
       &:active,
       &.active {
-       background-color:  color-mix(in srgb, var(--SYS-accent-asparagus-dull), transparent 93%);
+        background-color: color-mix(
+          in srgb,
+          var(--SYS-accent-asparagus-dull),
+          transparent 93%
+        );
         --button-border-color: var(--SYS-accent-asparagus-muted);
         box-shadow:
-          0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
-          0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%);
+          0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
+          0 1px 3px
+            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%);
       }
     }
   }
@@ -184,21 +212,30 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(in srgb, var(--SYS-semantic-danger-inner-bg), transparent 60%);
+        --button-background: color-mix(
+          in srgb,
+          var(--SYS-semantic-danger-inner-bg),
+          transparent 60%
+        );
         border: 2px solid var(--SYS-semantic-danger-inner-border-hover);
         --button-color: var(--SYS-semantic-danger-text-hover);
       }
 
       &:active,
       &.active {
-        --button-background: color-mix(in srgb, var(--SYS-semantic-danger-inner-bg), transparent 50%);
+        --button-background: color-mix(
+          in srgb,
+          var(--SYS-semantic-danger-inner-bg),
+          transparent 50%
+        );
         --button-border-color: var(--SYS-semantic-danger-inner-border-active);
         --button-color: var(--SYS-semantic-danger-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-semantic-danger-inner-border-focused);
+        --button-outline: 2px solid
+          var(--SYS-semantic-danger-inner-border-focused);
         outline-offset: 1px;
       }
     }
@@ -212,14 +249,22 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(in srgb, var(--SYS-semantic-outcome-inner-bg), transparent 60%);
+        --button-background: color-mix(
+          in srgb,
+          var(--SYS-semantic-outcome-inner-bg),
+          transparent 60%
+        );
         border: 2px solid var(--SYS-semantic-outcome-inner-border-hover);
         --button-color: var(--SYS-semantic-outcome-text-hover);
       }
 
       &:active,
       &.active {
-        --button-background: color-mix(in srgb, var(--SYS-semantic-outcome-inner-bg), transparent 50%);
+        --button-background: color-mix(
+          in srgb,
+          var(--SYS-semantic-outcome-inner-bg),
+          transparent 50%
+        );
         --button-border-color: var(--SYS-semantic-outcome-inner-border-active);
         --button-color: var(--SYS-semantic-outcome-text-active);
       }
@@ -238,7 +283,11 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 20%);
+        --button-background: color-mix(
+          in srgb,
+          var(--SYS-accent-glacier-dull),
+          transparent 20%
+        );
         --button-color: var(--SYS-text-primary);
       }
     }
@@ -278,10 +327,12 @@
       &:focus,
       &.focus {
         --button-background: var(--SYS-surface-control-focused);
-        border-color:  var(--SYS-border-control-focused);
+        border-color: var(--SYS-border-control-focused);
         box-shadow:
-          0 2px 4px  color-mix(in srgb, var(--SYS-border-shadow), transparent 15%),
-          0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%);
+          0 2px 4px
+            color-mix(in srgb, var(--SYS-border-shadow), transparent 15%),
+          0 1px 2px
+            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%);
         outline: none;
       }
       &.close-button {
@@ -372,9 +423,12 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(in srgb, var(--SYS-accent-fjord-muted), transparent 60%);
+        --button-background: color-mix(
+          in srgb,
+          var(--SYS-accent-fjord-muted),
+          transparent 60%
+        );
         border: 2px solid var(--SYS-accent-fjord-muted-hover);
-        
       }
 
       &:active,
@@ -428,13 +482,18 @@
   }
 
   &.btn-inspector {
-    background-color: color-mix(in srgb, var(--SYS-accent-fjord-base), transparent 75%);
+    background-color: color-mix(
+      in srgb,
+      var(--SYS-accent-fjord-base),
+      transparent 75%
+    );
     --button-border: 0.5px var(--SYS-accent-fjord-dull);
     --button-color: var(--SYS-text-control);
     box-shadow:
-      0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
-      0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
-      0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 80%);
+      0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+            80%);
 
     &:not(:disabled) {
       &.focus,
@@ -448,9 +507,12 @@
         background-color: var(--SYS-accent-fjord-dull-hover);
         --button-border-color: var(--SYS-accent-fjord-muted-hover);
         box-shadow:
-          0 4px 6px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 2px 4px -2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 0 0 1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) inset;
+          0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%),
+          0 2px 4px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%),
+          0 0 0 1px
+            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) inset;
       }
 
       &:active,
@@ -462,9 +524,11 @@
         );
         --button-border-color: var(--SYS-accent-fjord-muted);
         box-shadow:
-          0 1px 2px  color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
-          0 1px 3px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 1px 2px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%);
+          0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
+          0 1px 3px
+            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+                10%);
       }
     }
   }

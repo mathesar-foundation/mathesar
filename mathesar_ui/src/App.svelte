@@ -71,10 +71,10 @@
    * background colors are applied. We need this in case there is a background
    * color applied underneath the cell, e.g. on the table or page.
    */
- 
-     --cell-border-horizontal: 1px solid var(--SYS-border-grid);
-     --cell-border-vertical: 1px solid var(--SYS-border-grid);
- 
+
+    --cell-border-horizontal: 1px solid var(--SYS-border-grid);
+    --cell-border-vertical: 1px solid var(--SYS-border-grid);
+
     --cell-bg-mix-blend-mode: screen;
     --cell-bg-color-base: var(--SYS-surface-inset);
     --cell-bg-color-error: var(--SYS-semantic-danger-bg);
@@ -82,9 +82,13 @@
     --cell-bg-color-processing: var(--SYS-semantic-warning-bg);
     --cell-bg-color-disabled: var(--SYS-surface-inset-muted);
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
-    --cell-bg-color-row-selected: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 40%);
+    --cell-bg-color-row-selected: color-mix(
+      in srgb,
+      var(--SYS-accent-glacier-dull),
+      transparent 40%
+    );
 
-    --cell-text-color-processing:var(--SYS-text-muted);
+    --cell-text-color-processing: var(--SYS-text-muted);
 
     --page-padding-x: var(--lg1);
     --page-padding-y: var(--lg1);
@@ -226,7 +230,7 @@
     color: var(--SYS-text-faint);
     font-weight: 300;
     background: transparent;
-  } 
+  }
 
   .bold-header {
     font-weight: 500;

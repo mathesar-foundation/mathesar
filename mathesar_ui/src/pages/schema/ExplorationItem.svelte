@@ -53,9 +53,19 @@
     border-radius: var(--border-radius-m);
 
     &:hover {
-      border: 1px solid color-mix(in srgb, var(--SYS-accent-pumpkin-base-contrast), transparent 80%);
-      box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-pumpkin-bright), transparent 80%);
-      background: color-mix(in srgb, var(--SYS-accent-pumpkin-base), transparent 95%);
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--SYS-accent-pumpkin-base-contrast),
+          transparent 80%
+        );
+      box-shadow: 0 1px 2px 0
+        color-mix(in srgb, var(--SYS-accent-pumpkin-bright), transparent 80%);
+      background: color-mix(
+        in srgb,
+        var(--SYS-accent-pumpkin-base),
+        transparent 95%
+      );
 
       .caret-container {
         opacity: 1;
@@ -63,14 +73,28 @@
     }
 
     &:focus {
-      border: 1px solid color-mix(in srgb, var(--SYS-accent-pumpkin-base-contrast), transparent 80%);
-      box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-pumpkin-bright), transparent 60%);
-      background: color-mix(in srgb, var(--SYS-accent-pumpkin-base), transparent 90%);
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--SYS-accent-pumpkin-base-contrast),
+          transparent 80%
+        );
+      box-shadow: 0 1px 2px 0
+        color-mix(in srgb, var(--SYS-accent-pumpkin-bright), transparent 60%);
+      background: color-mix(
+        in srgb,
+        var(--SYS-accent-pumpkin-base),
+        transparent 90%
+      );
     }
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--SYS-accent-pumpkin-bright), var(--SYS-accent-pumpkin-contrast-muted));
+    background: linear-gradient(
+      135deg,
+      var(--SYS-accent-pumpkin-bright),
+      var(--SYS-accent-pumpkin-contrast-muted)
+    );
     color: var(--SYS-text-inverted);
     border-radius: var(--border-radius-m);
     width: 1.25rem;

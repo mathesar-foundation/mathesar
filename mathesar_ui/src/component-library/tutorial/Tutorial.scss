@@ -8,8 +8,9 @@
   justify-content: center;
   line-height: 1.6;
   overflow: hidden;
-  background:  color-mix(in srgb, var(--SYS-semantic-tip-bg), transparent 60%);
-  box-shadow: 0 4px 8px  color-mix(in srgb, var(--SYS-border-shadow), transparent 8%);
+  background: color-mix(in srgb, var(--SYS-semantic-tip-bg), transparent 60%);
+  box-shadow: 0 4px 8px
+    color-mix(in srgb, var(--SYS-border-shadow), transparent 8%);
 
   &::before {
     content: '';
@@ -18,7 +19,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background:  color-mix(in srgb, var-(--SYS-semantic-tip-bg), transparent 60%);
+    background: color-mix(
+      in srgb,
+      var-(--SYS-semantic-tip-bg),
+      transparent 60%
+    );
   }
 
   .content {

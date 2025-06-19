@@ -21,13 +21,13 @@
     background: var(--SYS-surface-elevated-mid);
     border: 1px solid var(--SYS-border-container);
     border-radius: var(--border-radius-m);
-    box-shadow: 0 1px 2px 0  var(--SYS-surface-elevated-mid-muted);
+    box-shadow: 0 1px 2px 0 var(--SYS-surface-elevated-mid-muted);
     transition: all 0.2s ease;
   }
 
   .link-card:hover {
     border: 1px solid var(--SYS-border-container-hover);
-    box-shadow: 0 1px 2px 0  var(--SYS-surface-elevated-mid-muted);
+    box-shadow: 0 1px 2px 0 var(--SYS-surface-elevated-mid-muted);
     background: var(--SYS-surface-elevated-mid-hover);
   }
 
@@ -37,7 +37,7 @@
 
   .link-card.multiple:hover .container {
     border: 1px solid var(--SYS-border-container-hover);
-    box-shadow: 0 1px 2px 0  var(--SYS-surface-elevated-mid-muted);
+    box-shadow: 0 1px 2px 0 var(--SYS-surface-elevated-mid-muted);
     background: var(--SYS-surface-elevated-high-hover);
   }
 

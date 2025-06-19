@@ -21,19 +21,30 @@
   <div class="hover-indicator" />
   <a {href} on:click={closeSelector}>
     {#if 'table' in entry}
-      <TableName table={entry.table} --name-color='var(--SYS-text-navigation)'  let:tableName>
+      <TableName
+        table={entry.table}
+        --name-color="var(--SYS-text-navigation)"
+        let:tableName
+      >
         <MatchHighlighter text={tableName} substring={filterString} />
       </TableName>
     {:else if entry.type === 'exploration'}
-      <QueryName query={label} --name-color='var(--SYS-text-navigation)'>
+      <QueryName query={label} --name-color="var(--SYS-text-navigation)">
         <MatchHighlighter text={label} substring={filterString} />
       </QueryName>
     {:else if entry.type === 'database'}
-      <DatabaseDisplayNameWithIcon database={label} --name-color='var(--SYS-text-navigation)'>
+      <DatabaseDisplayNameWithIcon
+        database={label}
+        --name-color="var(--SYS-text-navigation)"
+      >
         <MatchHighlighter text={label.displayName} substring={filterString} />
       </DatabaseDisplayNameWithIcon>
     {:else if entry.type === 'schema'}
-      <NameWithIcon {icon} --name-color='var(--SYS-text-navigation)'  --icon-color='var(--SYS-color-schema)'>
+      <NameWithIcon
+        {icon}
+        --name-color="var(--SYS-text-navigation)"
+        --icon-color="var(--SYS-color-schema)"
+      >
         <MatchHighlighter text={label} substring={filterString} />
       </NameWithIcon>
     {/if}

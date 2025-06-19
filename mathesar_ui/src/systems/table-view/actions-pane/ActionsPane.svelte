@@ -54,8 +54,8 @@
     description: table.description ?? undefined,
     icon: iconTable,
   }}
-   --icon-fill-color='linear-gradient(135deg, var(--SYS-accent-pumpkin-dull), var(--SYS-accent-pumpkin-base))'
-   --icon-stroke-color='var(--SYS-text-inverted)'
+  --icon-fill-color="linear-gradient(135deg, var(--SYS-accent-pumpkin-dull), var(--SYS-accent-pumpkin-base))"
+  --icon-stroke-color="var(--SYS-text-inverted)"
 >
   {#if isSelectable}
     <div class="quick-access">

@@ -41,12 +41,12 @@
     slot="secondary-header"
     name={$_('administration')}
     icon={iconSettingsMajor}
-    --header-color='linear-gradient(
+    --header-color="linear-gradient(
       135deg,
       var(--SYS-accent-fjord-muted-focused), 35%,
       var(--SYS-surface-base) 50%,
       var(--SYS-accent-fjord-faint) 100%
-    )'
+    )"
   />
   <PageLayoutWithSidebar>
     <AdminNavigation slot="sidebar" />

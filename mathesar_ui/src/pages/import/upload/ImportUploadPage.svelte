@@ -246,7 +246,6 @@
     background-color: var(--SYS-surface-elevated-high);
   }
 
-
   .data-source-input {
     margin: 1rem 0;
   }

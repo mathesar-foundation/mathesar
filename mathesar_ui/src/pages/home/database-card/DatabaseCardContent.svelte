@@ -43,7 +43,11 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--SYS-accent-amethyst-muted), var(--SYS-accent-amethyst-dull-highlighted));
+    background: linear-gradient(
+      135deg,
+      var(--SYS-accent-amethyst-muted),
+      var(--SYS-accent-amethyst-dull-highlighted)
+    );
     border-radius: 50%;
     width: 3rem;
     height: 3rem;

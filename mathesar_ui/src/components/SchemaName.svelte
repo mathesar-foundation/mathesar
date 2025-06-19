@@ -9,4 +9,8 @@
   $: ({ name } = schema);
 </script>
 
-<NameWithIcon icon={iconSchema} name={$name} --icon-color='var(--SYS-color-schema)' />
+<NameWithIcon
+  icon={iconSchema}
+  name={$name}
+  --icon-color="var(--SYS-color-schema)"
+/>

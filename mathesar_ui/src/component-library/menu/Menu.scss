@@ -14,7 +14,8 @@
 
   .menu-divider {
     margin-top: var(--sm5);
-    border-top: 0.1em solid var(--Menu__divider-color, var(--SYS-border-divider));
+    border-top: 0.1em solid
+      var(--Menu__divider-color, var(--SYS-border-divider));
     height: 0;
   }
 
@@ -52,7 +53,7 @@
         color: var(--SYS-semantic-danger-text);
       }
       .icon {
-         color: var(--SYS-semantic-danger-icon);
+        color: var(--SYS-semantic-danger-icon);
       }
     }
 
@@ -70,7 +71,7 @@
         calc(var(--Menu__padding-x, $padding-x-default) / 2);
     }
     > .control,
-    > .icon{
+    > .icon {
       display: inline-flex;
       align-items: center;
       flex-grow: 0;
@@ -84,8 +85,8 @@
       font-weight: var(--font-weight-medium);
 
       &:hover {
-      background-color: var(--SYS-accent-fjord-dull-hover);
-      color: var(--SYS-text-inverted);
+        background-color: var(--SYS-accent-fjord-dull-hover);
+        color: var(--SYS-text-inverted);
       }
     }
   }

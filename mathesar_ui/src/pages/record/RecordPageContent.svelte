@@ -73,23 +73,24 @@
     await record.patch(patch);
   }
 </script>
+
 <div class="record-page-content">
   <AppSecondaryHeader
     slot="secondary-header"
     name={$summary}
     icon={iconRecord}
     entityTypeName={$_('record')}
-    --header-color='linear-gradient(
+    --header-color="linear-gradient(
       135deg,
       var(--SYS-accent-asparagus-faint) 20%,
       var(--SYS-surface-base), 35%,
       var(--SYS-accent-glacier-faint) 45%,
       var(--SYS-surface-base) 50%,
       var(--SYS-accent-asparagus-muted-focused) 100%
-    )'
-    --entity-name-color='var(--SYS-accent-asparagus-base-muted)'
-    --bottom-margin='var(--sm1)'
-    --page-padding-x='6rem'
+    )"
+    --entity-name-color="var(--SYS-accent-asparagus-base-muted)"
+    --bottom-margin="var(--sm1)"
+    --page-padding-x="6rem"
   >
     <div slot="subText" class="table-name">
       <RichText text={$_('record_in_table')} let:slotName>
@@ -102,7 +103,7 @@
       <div class="form-status"><FormStatus {form} /></div>
     </div>
   </AppSecondaryHeader>
-  <InsetPageLayout --inset-page-padding='0rem 0rem 2rem 0rem'>
+  <InsetPageLayout --inset-page-padding="0rem 0rem 2rem 0rem">
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
         <DirectField

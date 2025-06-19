@@ -96,14 +96,14 @@
     icon={iconDatabase}
     name={database.displayName}
     entityTypeName={$_('database')}
-    --header-color='linear-gradient(
+    --header-color="linear-gradient(
       135deg,
       var(--SYS-surface-elevated-low) 10%,
       var(--SYS-surface-supporting) 30%,
       var(--SYS-accent-amethyst-muted-focused) 50%,
       var(--SYS-accent-amethyst-faint) 100%
-    )'
-    --entity-name-color='var(--SYS-accent-amethyst-bright-highlighted)'
+    )"
+    --entity-name-color="var(--SYS-accent-amethyst-bright-highlighted)"
   >
     <div slot="subText" class="database-info">
       <div class="connection-details">
@@ -134,10 +134,7 @@
               >
                 {$_('disconnect_database')}
               </ButtonMenuItem>
-              <ButtonMenuItem
-                icon={iconEdit}
-                on:click={() => editModal.open()}
-              >
+              <ButtonMenuItem icon={iconEdit} on:click={() => editModal.open()}>
                 {$_('edit_connection')}
               </ButtonMenuItem>
               <ButtonMenuItem

@@ -37,7 +37,10 @@
   style={$style}
 >
   {#if hasSelectionBackground}
-    <CellBackground color="color-mix(in srgb, var(--SYS-accent-glacier-base), transparent 85%)" when={isSelected} />
+    <CellBackground
+      color="color-mix(in srgb, var(--SYS-accent-glacier-base), transparent 85%)"
+      when={isSelected}
+    />
   {/if}
   <slot {isActive} {isSelected} />
 </div>

@@ -100,7 +100,10 @@
   >
     <div class="table-info">
       <div class="table-name">
-        <TableName {table} --icon-color='var(--SYS-accent-pumpkin-base-muted)' />
+        <TableName
+          {table}
+          --icon-color="var(--SYS-accent-pumpkin-base-muted)"
+        />
       </div>
       {#if description}
         <div class="description">
@@ -229,9 +232,15 @@
   }
 
   .table-row:hover {
-    border: 1px solid color-mix(in srgb, var(--SYS-accent-pumpkin-base-muted), transparent 80%);
-    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 80%);
-    background: color-mix(in srgb, var(--SYS-accent-pumpkin-bright), transparent 95%);
+    border: 1px solid
+      color-mix(in srgb, var(--SYS-accent-pumpkin-base-muted), transparent 80%);
+    box-shadow: 0 1px 2px 0
+      color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 80%);
+    background: color-mix(
+      in srgb,
+      var(--SYS-accent-pumpkin-bright),
+      transparent 95%
+    );
     padding-left: 0;
     &::before {
       content: '';
@@ -248,9 +257,15 @@
   }
 
   .table-row:active {
-    border: 1px solid color-mix(in srgb, var(--SYS-accent-pumpkin-base-muted), transparent 80%);
-    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 60%);
-    background: color-mix(in srgb, var(--SYS-accent-pumpkin-bright), transparent 90%);
+    border: 1px solid
+      color-mix(in srgb, var(--SYS-accent-pumpkin-base-muted), transparent 80%);
+    box-shadow: 0 1px 2px 0
+      color-mix(in srgb, var(--SYS-accent-pumpkin-dull), transparent 60%);
+    background: color-mix(
+      in srgb,
+      var(--SYS-accent-pumpkin-bright),
+      transparent 90%
+    );
   }
 
   .table-row.unconfirmed-import {

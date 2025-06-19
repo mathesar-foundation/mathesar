@@ -133,7 +133,8 @@
     left: calc(-1 * var(--border-width));
     top: calc(-1 * var(--border-width));
     box-sizing: content-box;
-    border: solid var(--border-width) var(--SYS-accent-amethyst-base-highlighted);
+    border: solid var(--border-width)
+      var(--SYS-accent-amethyst-base-highlighted);
   }
   .record-summary {
     position: relative;
