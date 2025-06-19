@@ -100,10 +100,10 @@
       135deg,
       var(--SYS-surface-elevated-low) 10%,
       var(--SYS-surface-supporting) 30%,
-      var(--SYS-accent-amethyst-muted-focused) 50%,
-      var(--SYS-accent-amethyst-faint) 100%
+      var(--SYS-color-database-20) 50%,
+      var(--SYS-color-database-10) 100%
     )"
-    --entity-name-color="var(--SYS-accent-amethyst-bright-highlighted)"
+    --entity-name-color="var(--SYS-color-database)"
   >
     <div slot="subText" class="database-info">
       <div class="connection-details">

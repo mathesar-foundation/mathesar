@@ -1,7 +1,7 @@
 // Accent colors
 $tomato: hsl(8, 60%, 50%);
 $pumpkin: hsl(33, 90%, 50%);
-$amethyst: hsl(270, 35%, 50%);
+$amethyst: hsl(270, 40%, 55%);
 $salmon: hsl(12, 79%, 50%);
 $wisteria: hsl(250, 35%, 50%);
 $glacier: hsl(190, 60%, 50%);
@@ -24,6 +24,10 @@ $input-fill: hsl(212, 84%, 44.1%);
 $utility-colors: (
   'brand': $tomato,
   'schema': $salmon,
+  'database': $amethyst,
+  'table': $pumpkin,
+  'column': $wisteria,
+  'exploration': hsl(hue($pumpkin), 60%, 70%),
   'highlight-salmon': hsl(hue($salmon), 60%, 60%),
   'brand-muted': hsl(hue($tomato), 40%, 60%),
 );

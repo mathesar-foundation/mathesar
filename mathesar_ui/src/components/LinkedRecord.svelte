@@ -107,10 +107,10 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--SYS-accent-amethyst-dull);
+    background: var(--SYS-accent-asparagus-dull);
     border-radius: 0.25rem;
     z-index: 0;
-    border: 1px solid var(--SYS-accent-amethyst-base-highlighted);
+    border: 1px solid var(--SYS-accent-asparagus-base-highlighted);
   }
   .exact-match .background {
     background: var(--SYS-text-highlight-elevated);
@@ -134,7 +134,7 @@
     top: calc(-1 * var(--border-width));
     box-sizing: content-box;
     border: solid var(--border-width)
-      var(--SYS-accent-amethyst-base-highlighted);
+      var(--SYS-accent-asparagus-base-highlighted);
   }
   .record-summary {
     position: relative;
