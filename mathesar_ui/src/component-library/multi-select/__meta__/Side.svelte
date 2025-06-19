@@ -21,6 +21,6 @@
   }
   .price {
     font-style: italic;
-    color: var(--SYS-accent-fjord-contrast);
+    color: var(--SYS-text-tertiary);
   }
 </style>

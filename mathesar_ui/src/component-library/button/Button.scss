@@ -416,8 +416,8 @@
   }
 
   &.btn-action {
-    --button-background: var(--SYS-accent-fjord-faint);
-    color: var(--SYS-accent-fjord-bright);
+    --button-background: var(--SYS-color-navigation-10);
+    color: var(--SYS-text-navigation);
     border: transparent;
 
     &:not(:disabled) {
@@ -425,21 +425,21 @@
       &.hover {
         --button-background: color-mix(
           in srgb,
-          var(--SYS-accent-fjord-muted),
+          var(--SYS-color-navigation-20),
           transparent 60%
         );
-        border: 2px solid var(--SYS-accent-fjord-muted-hover);
+        border: 2px solid var(--SYS-color-navigation-hover-20);
       }
 
       &:active,
       &.active {
-        --button-background: var(--SYS-accent-fjord-muted-active);
-        --button-border-color: var(--SYS-accent-fjord-dull-active);
+        --button-background: var(--SYS-color-navigation-active-20);
+        --button-border-color: var(--SYS-color-navigation-active-40);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-accent-fjord-dull-focused);
+        --button-outline: 2px solid var(--SYS-color-navigation-active-40);
         outline-offset: 1px;
       }
     }
@@ -482,12 +482,8 @@
   }
 
   &.btn-inspector {
-    background-color: color-mix(
-      in srgb,
-      var(--SYS-accent-fjord-base),
-      transparent 75%
-    );
-    --button-border: 0.5px var(--SYS-accent-fjord-dull);
+    background-color: var(--SYS-color-navigation-15);
+    border: 1px solid var(--SYS-color-navigation-20);
     --button-color: var(--SYS-text-control);
     box-shadow:
       0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
@@ -498,14 +494,14 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--SYS-accent-fjord-dull-focused);
+        --button-outline: 2px solid var(--SYS-color-navigation-active-40);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        background-color: var(--SYS-accent-fjord-dull-hover);
-        --button-border-color: var(--SYS-accent-fjord-muted-hover);
+        background-color: var(--SYS-color-navigation-20);
+        --button-border-color: var(--SYS-color-navigation-hover-40);
         box-shadow:
           0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
                 10%),
@@ -517,12 +513,8 @@
 
       &:active,
       &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--SYS-accent-fjord-muted),
-          var(--SYS-accent-fjord-dull)
-        );
-        --button-border-color: var(--SYS-accent-fjord-muted);
+        background-color: var(--SYS-color-navigation-40);
+        --button-border-color: var(--SYS-color-navigation-60);
         box-shadow:
           0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
           0 1px 3px
@@ -538,7 +530,7 @@
     padding: 0.3em;
     height: auto;
     min-height: 0;
-    color: var(--SYS-accent-fjord-base-highlighted);
+    color: var(--SYS-color-database);
     background-color: transparent;
     border: transparent;
     border-radius: 4px;
@@ -546,12 +538,12 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        color: var(--SYS-accent-fjord-bright-hover);
+        color: var(--SYS-color-database-hover);
       }
 
       &:active,
       &.active {
-        color: var(--SYS-accent-fjord-bright-active);
+        color: var(--SYS-color-database-active);
       }
     }
   }

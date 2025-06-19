@@ -4,16 +4,8 @@
 
 body {
   // Background Colors
-  --hover-background: color-mix(
-    in srgb,
-    var(--SYS-accent-fjord-muted),
-    transparent 20%
-  );
-  --active-background: color-mix(
-    in srgb,
-    var(--SYS-accent-fjord-muted-active),
-    transparent 20%
-  );
+  --hover-background: var(--SYS-color-navigation-hover-20);
+  --active-background: var(--SYS-color-navigation-active-20);
   --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
 
   // Progress Colors
