@@ -24,7 +24,7 @@
   }
   &:checked,
   &:indeterminate {
-    border-color: var(--SYS-surface-input-fill-muted);
+    border: 0.05em solid var(--SYS-border-input);
     background: var(--SYS-surface-input-fill);
     background-position: center;
     background-repeat: no-repeat;

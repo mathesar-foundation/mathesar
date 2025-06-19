@@ -206,7 +206,7 @@
   fill: var(--SYS-text-primary);
 }
 .numInputWrapper:hover {
-  background:  color-mix(in srgb, var(--SYS-surface-elevated-hover),  transparent 60%);
+  background:  color-mix(in srgb, var(--SYS-surface-elevated-low-hover),  transparent 60%);
 }
 .numInputWrapper:hover span {
   opacity: 1;
@@ -436,7 +436,7 @@ span.flatpickr-weekday {
 .flatpickr-months .flatpickr-next-month:hover {
   cursor: pointer;
   outline: 0;
-  background:  color-mix(in srgb, var(--SYS-surface-elevated-hover),  transparent 50%);
+  background:  color-mix(in srgb, var(--SYS-surface-elevated-low-hover),  transparent 50%);
   border-color:   var(--SYS-border-section);
 }
 .flatpickr-day.today {

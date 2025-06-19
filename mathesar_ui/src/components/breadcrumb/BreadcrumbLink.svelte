@@ -19,6 +19,6 @@
     font-weight: var(--font-weight-medium);
   }
   .breadcrumb-link:hover a {
-    color: var(--SYS-text-navigation-hover);
+    color: var(--SYS-text-navigation-active);
   }
 </style>

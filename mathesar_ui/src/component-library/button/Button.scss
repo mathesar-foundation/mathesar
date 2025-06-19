@@ -184,21 +184,21 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(in srgb, var(--SYS-semantic-danger-button-bg), transparent 60%);
-        border: 2px solid var(--SYS-semantic-danger-button-border-hover);
+        --button-background: color-mix(in srgb, var(--SYS-semantic-danger-inner-bg), transparent 60%);
+        border: 2px solid var(--SYS-semantic-danger-inner-border-hover);
         --button-color: var(--SYS-semantic-danger-text-hover);
       }
 
       &:active,
       &.active {
-        --button-background: color-mix(in srgb, var(--SYS-semantic-danger-button-bg), transparent 50%);
-        --button-border-color: var(--SYS-semantic-danger-button-border-active);
+        --button-background: color-mix(in srgb, var(--SYS-semantic-danger-inner-bg), transparent 50%);
+        --button-border-color: var(--SYS-semantic-danger-inner-border-active);
         --button-color: var(--SYS-semantic-danger-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-semantic-danger-button-border-focused);
+        --button-outline: 2px solid var(--SYS-semantic-danger-inner-border-focused);
         outline-offset: 1px;
       }
     }
@@ -212,15 +212,15 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(in srgb, var(--SYS-semantic-outcome-button-bg), transparent 60%);
-        border: 2px solid var(--SYS-semantic-outcome-button-border-hover);
+        --button-background: color-mix(in srgb, var(--SYS-semantic-outcome-inner-bg), transparent 60%);
+        border: 2px solid var(--SYS-semantic-outcome-inner-border-hover);
         --button-color: var(--SYS-semantic-outcome-text-hover);
       }
 
       &:active,
       &.active {
-        --button-background: color-mix(in srgb, var(--SYS-semantic-outcome-button-bg), transparent 50%);
-        --button-border-color: var(--SYS-semantic-outcome-button-border-active);
+        --button-background: color-mix(in srgb, var(--SYS-semantic-outcome-inner-bg), transparent 50%);
+        --button-border-color: var(--SYS-semantic-outcome-inner-border-active);
         --button-color: var(--SYS-semantic-outcome-text-active);
       }
 
@@ -392,20 +392,20 @@
   }
 
   &.btn-tip {
-    background: var(--SYS-semantic-tip-button-bg);
-    border: 1px soft var(--SYS-semantic-tip-button-border);
-    color: var(--SYS-semantic-tip-button-text);
+    background: var(--SYS-semantic-tip-inner-bg);
+    border: 1px soft var(--SYS-semantic-tip-inner-border);
+    color: var(--SYS-semantic-tip-inner-text);
 
     &:hover {
-      background: var(--SYS-semantic-tip-button-bg-hover);
-      border: 1px soft var(--SYS-semantic-tip-button-border-hover);
-      color: var(--SYS-semantic-tip-button-text-hover);
+      background: var(--SYS-semantic-tip-inner-bg-hover);
+      border: 1px soft var(--SYS-semantic-tip-inner-border-hover);
+      color: var(--SYS-semantic-tip-inner-text-hover);
     }
 
     &:active {
-      background: var(--SYS-semantic-tip-button-bg-active);
-      border: 1px soft var(--SYS-semantic-tip-button-border-active);
-      color: var(--SYS-semantic-tip-button-text-active);
+      background: var(--SYS-semantic-tip-inner-bg-active);
+      border: 1px soft var(--SYS-semantic-tip-inner-border-active);
+      color: var(--SYS-semantic-tip-inner-text-active);
     }
   }
 

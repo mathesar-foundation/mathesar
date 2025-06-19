@@ -39,12 +39,12 @@
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   body {
-    --color-substring-match: var(--SYS-text-highlighted-elevated);
-    --color-substring-match-light: var(--SYS-text-highlighted);
+    --color-substring-match: var(--SYS-text-highlight-elevated);
+    --color-substring-match-light: var(--SYS-text-highlight);
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
-    --Match__highlight-color: var(--SYS-text-highlighted-elevated);
+    --Match__highlight-color: var(--SYS-text-highlight-elevated);
 
     /* Typography variables */
     --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
@@ -82,7 +82,7 @@
     --cell-bg-color-error: var(--SYS-semantic-danger-bg);
     --cell-bg-color-header: var(--SYS-surface-header);
     --cell-bg-color-processing: var(--SYS-semantic-warning-bg);
-    --cell-bg-color-disabled: var(--SYS-surface-inset-disabled);
+    --cell-bg-color-disabled: var(--SYS-surface-inset-muted);
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
     --cell-bg-color-row-selected: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 40%);
 

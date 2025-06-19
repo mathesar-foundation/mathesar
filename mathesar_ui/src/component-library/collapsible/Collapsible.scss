@@ -40,13 +40,13 @@
 }
 
 .collapsible .collapsible-header > .btn-outcome {
-  background-color: var(--SYS-semantic-outcome-button-bg);
-  border: 2px solid var(--SYS-semantic-outcome-button-border);
-  color: var(--SYS-semantic-outcome-button-text);
+  background-color: var(--SYS-semantic-outcome-inner-bg);
+  border: 2px solid var(--SYS-semantic-outcome-inner-border);
+  color: var(--SYS-semantic-outcome-inner-text);
   
   &:hover,
   &.hover {
-    background-color: var(--SYS-semantic-outcome-button-bg-hover);
-    border: 2px solid var(--SYS-semantic-outcome-button-border-hover);
+    background-color: var(--SYS-semantic-outcome-inner-bg-hover);
+    border: 2px solid var(--SYS-semantic-outcome-inner-border-hover);
   }
 }

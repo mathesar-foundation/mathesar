@@ -129,12 +129,11 @@
     align-items: center;
     padding: var(--sm4);
 
-    &:hover {
-      color: var(--SYS-text-navigation-hover);
-    }
-
+    &:hover,
     &:active {
-      color: var(--SYS-text-navigation-active);
+      background-color: var(--SYS-surface-elevated-low-active);
+      color: var(--SYS-text-navigation-hover);
+      border-color: var(--SYS-border-elevated-low);
     }
   }
 </style>

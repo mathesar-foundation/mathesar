@@ -161,7 +161,7 @@
     padding: var(--lg1);
     background:  color-mix(in srgb, var(--SYS-semantic-tip-bg), transparent 60%);
     box-shadow: 0 4px 8px  color-mix(in srgb, var(--SYS-border-shadow), transparent 8%);
-    border: 1px solid var(--SYS-semantic-tip-button-border);
+    border: 1px solid var(--SYS-semantic-tip-inner-border);
     border-radius: var(--sm1);
     position: relative;
     overflow: hidden;
@@ -185,7 +185,7 @@
     }
 
     .explore-description {
-      color: var(--SYS-semantic-tip-button-text);
+      color: var(--SYS-semantic-tip-inner-text);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;

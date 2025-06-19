@@ -2,6 +2,7 @@ button.dropdown.trigger {
   position: relative;
 
   > .label {
+    color: var(--SYS-text-input);
     display: inline-flex;
     align-items: center;
     position: relative;

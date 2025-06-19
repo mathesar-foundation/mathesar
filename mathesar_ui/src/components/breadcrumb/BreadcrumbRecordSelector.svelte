@@ -34,14 +34,14 @@
     }
 
     :global(.expand-right-icon) {
-      color: var(--SYS-text-secondary);
+      color: var(--SYS-text-navigation);
     }
 
     &:hover,
     &:active {
-      background-color: var(--SYS-surface-elevated-active);
-      color: var(--SYS-text-primary-active);
-      border-color: var(--SYS-border-elevated-mid);
+      background-color: var(--SYS-surface-elevated-low-active);
+      color: var(--SYS-text-navigation-active);
+      border-color: var(--SYS-border-elevated-low);
     }
   }
 </style>
