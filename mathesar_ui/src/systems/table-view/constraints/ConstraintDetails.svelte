@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Constraint } from '@mathesar/api/rpc/constraints';
+  import type { RawConstraint } from '@mathesar/api/rpc/constraints';
 
-  export let constraint: Constraint;
+  export let constraint: RawConstraint;
 </script>
 
 <div class="constraint-details">

@@ -13,7 +13,7 @@ import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
-  Constraint,
+  RawConstraint,
   ConstraintRecipe,
 } from '@mathesar/api/rpc/constraints';
 import type { Database } from '@mathesar/models/Database';
@@ -24,7 +24,7 @@ import type { CancellablePromise } from '@mathesar-component-library';
 export interface ConstraintsData {
   state: States;
   error?: string;
-  constraints: Constraint[];
+  constraints: RawConstraint[];
 }
 
 /**
@@ -34,10 +34,10 @@ export interface ConstraintsData {
  * _not_ be returned.
  */
 function filterConstraintsByColumnSet(
-  constraints: Constraint[],
+  constraints: RawConstraint[],
   columnIds: number[],
-): Constraint[] {
-  function isMatch(constraint: Constraint) {
+): RawConstraint[] {
+  function isMatch(constraint: RawConstraint) {
     if (constraint.columns.length !== columnIds.length) {
       return false;
     }
@@ -71,7 +71,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   private store: Writable<ConstraintsData>;
 
-  private promise: CancellablePromise<Constraint[]> | undefined;
+  private promise: CancellablePromise<RawConstraint[]> | undefined;
 
   readonly shareConsumer?: ShareConsumer;
 

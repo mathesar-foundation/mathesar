@@ -1,7 +1,10 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { Constraint, FkConstraint } from '@mathesar/api/rpc/constraints';
+import type {
+  RawConstraint,
+  FkConstraint,
+} from '@mathesar/api/rpc/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 import {
   type ValidationOutcome,
@@ -43,7 +46,7 @@ export function getLinkedTables({
   columns,
   tables,
 }: {
-  constraints: Constraint[];
+  constraints: RawConstraint[];
   columns: Map<number, ProcessedColumn>;
   tables: Map<number, Table>;
 }): LinkedTable[] {

@@ -3,7 +3,7 @@
 
   import { States } from '@mathesar/api/rest/utils/requestUtils';
   import type {
-    Constraint,
+    RawConstraint,
     ConstraintType,
   } from '@mathesar/api/rpc/constraints';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
@@ -33,7 +33,7 @@
       groupedConstraints.set(constraint.type, [constraint]);
       return groupedConstraints;
     },
-    new Map<ConstraintType, Constraint[]>(),
+    new Map<ConstraintType, RawConstraint[]>(),
   );
 
   $: isEmpty = constraints.length === 0;

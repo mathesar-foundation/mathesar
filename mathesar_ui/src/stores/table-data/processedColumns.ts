@@ -4,7 +4,10 @@ import type {
   RawColumnWithMetadata,
   ColumnPrivilege,
 } from '@mathesar/api/rpc/columns';
-import type { Constraint, FkConstraint } from '@mathesar/api/rpc/constraints';
+import type {
+  RawConstraint,
+  FkConstraint,
+} from '@mathesar/api/rpc/constraints';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
@@ -47,13 +50,13 @@ export class ProcessedColumn implements CellColumnFabric {
   readonly tableOid: Table['oid'];
 
   /** All constriants relevant to this column */
-  readonly relevantConstraints: Constraint[];
+  readonly relevantConstraints: RawConstraint[];
 
   /** Constraints whose columns include only this column */
-  readonly exclusiveConstraints: Constraint[];
+  readonly exclusiveConstraints: RawConstraint[];
 
   /** Constraints whose columns include this column and other columns too */
-  readonly sharedConstraints: Constraint[];
+  readonly sharedConstraints: RawConstraint[];
 
   readonly abstractType: AbstractType;
 
@@ -86,7 +89,7 @@ export class ProcessedColumn implements CellColumnFabric {
     tableOid: Table['oid'];
     column: RawColumnWithMetadata;
     columnIndex: number;
-    constraints: Constraint[];
+    constraints: RawConstraint[];
     hasEnhancedPrimaryKeyCell?: boolean;
   }) {
     this.id = props.column.id;

@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type {
-    Constraint,
+    RawConstraint,
     ConstraintType,
   } from '@mathesar/api/rpc/constraints';
   import { Button, Collapsible, Help, Icon } from '@mathesar/component-library';
@@ -17,7 +17,7 @@
   import NewUniqueConstraint from './NewUniqueConstraint.svelte';
 
   export let constraintType: ConstraintType;
-  export let constraints: Constraint[];
+  export let constraints: RawConstraint[];
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -58,7 +58,7 @@
     isAddingNewConstraint = false;
   }
 
-  function handleDrop(constraint: Constraint) {
+  function handleDrop(constraint: RawConstraint) {
     void confirmDelete({
       identifierType: $_('constraint'),
       identifierName: constraint.name,
