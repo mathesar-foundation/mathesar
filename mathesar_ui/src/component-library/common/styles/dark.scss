@@ -12,7 +12,7 @@ $base: hsl(230, 4%, 2%);
 // Special semantic colors
 $highlight: hsl(38, 8%, 80%);
 $highlight-elevated: hsl(38, 30%, 80%);
-$icon: hsl(hue($fjord), 55%, 90%);
+$icon: hsl(hue($wisteria), 10%, 75%);
 $link: hsl(hue($fjord), 50%, 80%);
 $visited-link: hsl(hue($wisteria), 90%, 70%);
 
@@ -91,7 +91,7 @@ $text-colors: (
   'header': hsl(hue($base), 22%, 90%),
   'highlight': $highlight,
   'highlight-elevated': $highlight-elevated,
-  'navigation': hsl(hue($base), 85%, 92%),
+  'navigation': hsl(hue($wisteria), 40%, 98%),
   'icon': $icon,
   'input': hsl(hue($pumpkin), 90%, 100%),
   'label': hsl(hue($pumpkin), 20%, 80%),

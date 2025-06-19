@@ -12,7 +12,7 @@ $base: hsl(42, 5%, 97%);
 // Special semantic colors
 $highlight: hsl(59, 84%, 90%);
 $highlight-elevated: hsl(59, 98%, 52%);
-$icon: hsl(hue($fjord), 45%, 10%);
+$icon: hsl(hue($wisteria), 45%, 10%);
 $link: hsl(hue($fjord), 80%, 55%);
 $visited-link: hsl(hue($wisteria), 50%, 30%);
 
@@ -91,7 +91,7 @@ $text-colors: (
   'header': hsl(hue($base), 22%, 5%),
   'highlight': $highlight,
   'highlight-elevated': $highlight-elevated,
-  'navigation': hsl(hue($base), 15%, 8%),
+  'navigation': hsl(hue($wisteria), 15%, 8%),
   'icon': $icon,
   'input': hsl(hue($pumpkin), 90%, 10%),
   'label': hsl(hue($pumpkin), 20%, 4%),
@@ -150,7 +150,6 @@ $semantic-states: (
 $accent-colors: (
   'glacier': $glacier,
   'asparagus': $asparagus,
-  'fjord': $fjord,
 );
 
 $accent-roles: (
