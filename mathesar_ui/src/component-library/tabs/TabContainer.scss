@@ -44,7 +44,7 @@
       }
 
       &:hover {
-        border-bottom-color: var(--SYS-accent-wisteria-muted-hover);
+        border-bottom-color: var(--SYS-color-navigation-hover-40);
         opacity: 1;
       }
 
@@ -53,12 +53,12 @@
       }
 
       &.active {
-        border-bottom-color: var(--SYS-accent-wisteria-base);
+        border-bottom-color: var(--SYS-color-navigation-active);
         opacity: 1;
       }
 
       &.focused {
-        border-color: var(--SYS-accent-wisteria-base-focused);
+        border-color: var(--SYS-color-navigation-active);
         z-index: 1;
       }
 
@@ -94,7 +94,7 @@
   }
 
   > ul.tabs:before {
-    border-bottom: 1px solid var(--SYS-accent-wisteria-dull);
+    border-bottom: 1px solid var(--SYS-color-navigation);
   }
 
   .tab-content-holder {

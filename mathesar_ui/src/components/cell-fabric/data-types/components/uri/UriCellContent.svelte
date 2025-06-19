@@ -21,15 +21,15 @@
 
 <style>
   .link {
-    color: var(--SYS-accent-fjord-base);
+    color: var(--SYS-text-link);
   }
   .link:hover {
-    color: var(--SYS-accent-fjord-bright);
+    color: var(--SYS-text-link-hover);
   }
   .link:visited {
-    color: var(--SYS-accent-wisteria-base);
+    color: var(--SYS-text-visited-link);
   }
   .link:visited:hover {
-    color: var(--SYS-accent-wisteria-bright);
+    color: var(--SYS-text-visited-link-hover);
   }
 </style>

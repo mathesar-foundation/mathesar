@@ -99,6 +99,12 @@
   tabindex={-1}
   {...$$restProps}
 >
+  {#if mode !== 'edit'}
+    <CellBackground
+      color="var(--cell-background-color)"
+      when={valueComparisonOutcome !== 'noMatch'}
+    />
+  {/if}
   <slot />
 </div>
 

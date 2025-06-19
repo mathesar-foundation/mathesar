@@ -3,10 +3,10 @@ $tomato: hsl(8, 60%, 50%);
 $pumpkin: hsl(33, 90%, 50%);
 $amethyst: hsl(270, 40%, 55%);
 $salmon: hsl(12, 60%, 50%);
-$wisteria: hsl(250, 35%, 50%);
+$wisteria: hsl(250, 45%, 60%);
 $glacier: hsl(190, 60%, 50%);
 $asparagus: hsl(90, 45%, 50%);
-$fjord: hsl(220, 30%, 50%);
+$fjord: hsl(220, 60%, 60%);
 
 // Main semantic colors
 $success: hsl(145, 50%, 50%);
@@ -29,6 +29,7 @@ $utility-colors: (
   'column': $wisteria,
   'record': $asparagus,
   'exploration': $fjord,
+  'navigation': hsl(hue($wisteria), 10%, 70%),
   'highlight-salmon': hsl(hue($salmon), 60%, 60%),
   'brand-muted': hsl(hue($tomato), 40%, 60%),
 );

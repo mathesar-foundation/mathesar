@@ -13,7 +13,8 @@ $base: hsl(230, 4%, 2%);
 $highlight: hsl(38, 8%, 80%);
 $highlight-elevated: hsl(38, 30%, 80%);
 $icon: hsl(hue($fjord), 55%, 90%);
-$link: hsl(hue($fjord), 55%, 90%);
+$link: hsl(hue($fjord), 50%, 80%);
+$visited-link: hsl(hue($wisteria), 90%, 70%);
 
 // ------------------------------------------
 // Surfaces
@@ -96,6 +97,7 @@ $text-colors: (
   'label': hsl(hue($pumpkin), 20%, 80%),
   'inverted': hsl(hue($base), 10%, 4%),
   'link': $link,
+  'visited-link': $visited-link,
   'muted': hsl(hue($base), 15%, 40%),
   'primary': hsl(hue($pumpkin), 80%, 96%),
   'secondary': hsl(hue($pumpkin), 65%, 94%),
@@ -135,7 +137,6 @@ $semantic-states: (
 // ------------------------------------------
 
 $accent-colors: (
-  'wisteria': $wisteria,
   'glacier': $glacier,
   'asparagus': $asparagus,
   'fjord': $fjord,
