@@ -183,4 +183,6 @@ body.theme-dark {
   @each $name, $color in $accent-colors {
     @include generate-accent-tokens(#{$name}, $color, $accent-roles);
   }
+  
+  --SYS-mix-blend-mode: screen;
 }

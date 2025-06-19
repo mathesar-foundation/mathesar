@@ -65,7 +65,7 @@
    * something like `screen` or `lighten` so that as more backgrounds are
    * applied, the resulting blended background gets lighter instead of darker.
    */
-    --cell-bg-mix-blend-mode: multiply;
+    --cell-bg-mix-blend-mode: var(--SYS-mix-blend-mode);
     /**
    * This establishes a base background color for the cell when no additional
    * background colors are applied. We need this in case there is a background
@@ -75,7 +75,6 @@
     --cell-border-horizontal: 1px solid var(--SYS-border-grid);
     --cell-border-vertical: 1px solid var(--SYS-border-grid);
 
-    --cell-bg-mix-blend-mode: screen;
     --cell-bg-color-base: var(--SYS-surface-inset);
     --cell-bg-color-error: var(--SYS-semantic-danger-bg);
     --cell-bg-color-header: var(--SYS-surface-header);
