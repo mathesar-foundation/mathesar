@@ -20,13 +20,16 @@
 </a>
 
 <style>
-  .external-uri {
-    text-decoration: underline;
-  }
   .link {
+    color: var(--SYS-accent-fjord-base);
+  }
+  .link:hover {
     color: var(--SYS-accent-fjord-bright);
   }
   .link:visited {
-    color: var(--SYS-accent-wisteria-contrast);
+    color: var(--SYS-accent-wisteria-base);
+  }
+  .link:visited:hover {
+    color: var(--SYS-accent-wisteria-bright);
   }
 </style>
