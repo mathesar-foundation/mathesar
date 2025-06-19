@@ -6,7 +6,7 @@
   .entity-type {
     font-size: var(--sm2);
     font-weight: 500;
-    color: var(--color-text-secondary);
+    color: var(-SYS-text-secondary);
     text-transform: uppercase;
     line-height: 1;
   }

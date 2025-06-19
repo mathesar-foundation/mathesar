@@ -107,19 +107,19 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--color-fk);
+    background: var(--SYS-accent-amethyst-dull);
     border-radius: 0.25rem;
     z-index: 0;
-    border: 1px solid var(--color-fk-border);
+    border: 1px solid var(--SYS-accent-amethyst-base-highlighted);
   }
   .exact-match .background {
-    background: var(--color-substring-match);
+    background: var(--SYS-text-highlight-elevated);
   }
   .no-match {
     text-decoration: line-through;
   }
   .no-match .background {
-    background: var(--color-substring-match-light);
+    background: var(--SYS-text-highlight);
   }
   .record-page-link {
     color: inherit;
@@ -133,7 +133,7 @@
     left: calc(-1 * var(--border-width));
     top: calc(-1 * var(--border-width));
     box-sizing: content-box;
-    border: solid var(--border-width) var(--color-fk-border);
+    border: solid var(--border-width) var(--SYS-accent-amethyst-base-highlighted);
   }
   .record-summary {
     position: relative;
@@ -153,7 +153,7 @@
     padding: 0 0.3rem;
   }
   .linked-record.is-hovering-delete .background {
-    background: var(--color-substring-match-light);
+    background: var(--SYS-text-highlight);
     opacity: 0.5;
   }
   .linked-record.is-hovering-delete .record-summary {

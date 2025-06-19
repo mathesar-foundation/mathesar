@@ -39,8 +39,6 @@
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   body {
-    --color-substring-match: var(--SYS-text-highlight-elevated);
-    --color-substring-match-light: var(--SYS-text-highlight);
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
@@ -86,9 +84,6 @@
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
     --cell-bg-color-row-selected: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 40%);
 
-    --color-fk: var(--SYS-accent-amethyst-dull);
-    --color-fk-border: var(--SYS-accent-amethyst-base-highlighted);
-    --color-error: var(--SYS-semantic-danger-text);
     --cell-text-color-processing:var(--SYS-text-muted);
 
     --page-padding-x: var(--lg1);

@@ -58,7 +58,7 @@
       var(--SYS-accent-salmon-muted-focused) 90%,
       var(--SYS-accent-tomato-faint) 100%
     )'
-    --entity-name-color='var(--SYS-accent-salmon-base-muted)'
+    --entity-name-color='var(--SYS-color-schema)'
   >
     <div slot="action" class="action-buttons">
       <Button

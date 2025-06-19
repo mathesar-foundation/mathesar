@@ -39,7 +39,7 @@
   }
 
   .db-card.hoverable:focus {
-    outline: 2px solid var(--SYS-accent-salmon-base);
+    outline: 2px solid var(--SYS-accent-amethyst-base);
     outline-offset: 1px;
   }
 

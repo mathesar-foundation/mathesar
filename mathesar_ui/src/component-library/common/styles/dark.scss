@@ -1,3 +1,4 @@
+@import './colors.scss';
 // ********************************************
 // DARK MODE
 // ********************************************
@@ -8,30 +9,10 @@
 
 $base: hsl(230, 4%, 2%);
 
-// Accent colors
-$tomato: hsl(8, 60%, 50%);
-$pumpkin: hsl(33, 90%, 50%);
-$amethyst: hsl(270, 35%, 50%);
-$salmon: hsl(12, 79%, 50%);
-$wisteria: hsl(250, 35%, 50%);
-$glacier: hsl(190, 60%, 50%);
-$asparagus: hsl(90, 45%, 50%);
-$fjord: hsl(220, 30%, 50%);
-
-// Main semantic colors
-$success: hsl(145, 50%, 50%);
-$warning: hsl(50, 50%, 50%);
-$danger: hsl(12, 50%, 70%);
-$info: hsl(215, 40%, 50%);
-$help: hsl(185, 50%, 40%);
-$tip: hsl(150, 50%, 50%);
-$outcome: hsl(275, 40%, 50%);
-
 // Special semantic colors
 $highlight: hsl(38, 8%, 80%);
 $highlight-elevated: hsl(38, 30%, 80%);
 $icon: hsl(hue($fjord), 55%, 90%);
-$input-fill: hsl(212, 84%, 44.1%);
 $link: hsl(hue($fjord), 55%, 90%);
 
 // ------------------------------------------
@@ -42,7 +23,7 @@ $link: hsl(hue($fjord), 55%, 90%);
 $surface-colors: (
   "inset": hsl(hue($base), saturation($base), 0%),
   "input": hsl(hue($base), saturation($base), 1%),
-  "base": hsl(hue($base), saturation($base), 2%),
+  "base": $base,
   "card": hsl(hue($base), saturation($base), 3%),
   "canvas": hsl(hue($base), saturation($base), 3%),
   "supporting": hsl(hue($base), saturation($base), 3%),
@@ -144,7 +125,7 @@ $text-colors: (
   "icon": $icon,
   "input": hsl(hue($pumpkin), 90%, 100%),
   "label": hsl(hue($pumpkin), 20%, 80%),
-  "inverted": hsl(hue($base), 10%, 96%),
+  "inverted": hsl(hue($base), 10%, 4%),
   "link": $link,
   "muted": hsl(hue($base), 15%, 40%),
   "primary": hsl(hue($pumpkin), 80%, 96%),
@@ -258,7 +239,7 @@ $accent-states: (
   "hover": (0, 3%, -3%),
   "active": (0, 0%, -6%),
   "focused": (5, 5%, -3%),
-  "muted": (0, -20%, 5%),
+  "muted": (0, 20%, -5%),
   "highlighted": (-10, -12%, -4%)
 );
 

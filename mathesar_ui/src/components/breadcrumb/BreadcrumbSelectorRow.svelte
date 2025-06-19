@@ -33,7 +33,7 @@
         <MatchHighlighter text={label.displayName} substring={filterString} />
       </DatabaseDisplayNameWithIcon>
     {:else if entry.type === 'schema'}
-      <NameWithIcon {icon} --name-color='var(--SYS-text-navigation)'  --icon-color='var(--SYS-accent-salmon-base-muted)'>
+      <NameWithIcon {icon} --name-color='var(--SYS-text-navigation)'  --icon-color='var(--SYS-color-schema)'>
         <MatchHighlighter text={label} substring={filterString} />
       </NameWithIcon>
     {/if}

@@ -298,8 +298,8 @@
 
   .import-status {
     font-size: var(--sm1);
-    color: var(--color-warning);
-    background: var(--color-warning-bg);
+    color: var(--SYS-semantic-warning-text);
+    background: var(--SYS-semantic-warning-bg);
     padding: 0.25rem 0.5rem;
     border-radius: var(--border-radius-m);
   }

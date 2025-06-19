@@ -115,19 +115,19 @@
   }
 
   .schema-row.hover {
-    border: 1px solid color-mix(in srgb, var(--SYS-accent-salmon-base-muted), transparent 80%);
-    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-salmon-dull), transparent 80%);
-    background: color-mix(in srgb, var(--SYS-accent-salmon-bright), transparent 95%);
+    border: 1px solid color-mix(in srgb, var(--SYS-color-schema), transparent 80%);
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-color-schema-active), transparent 80%);
+    background: color-mix(in srgb, var(--SYS-color-schema-hover), transparent 95%);
   }
 
   .schema-row:active {
-    border: 1px solid color-mix(in srgb, var(--SYS-accent-salmon-base-muted), transparent 90%);
-    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-accent-salmon-dull), transparent 60%);
-    background: color-mix(in srgb, var(--SYS-accent-salmon-bright), transparent 90%);
+    border: 1px solid color-mix(in srgb, var(--SYS-color-schema), transparent 90%);
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--SYS-color-schema-active), transparent 60%);
+    background: color-mix(in srgb, var(--SYS-color-schema-hover), transparent 90%);
   }
 
   .schema-row.focus {
-    outline: 1px solid color-mix(in srgb, var(--SYS-accent-salmon-base-muted), transparent 90%);
+    outline: 1px solid color-mix(in srgb, var(--SYS-color-schema), transparent 90%);
     outline-offset: 1px;
   }
 
@@ -145,7 +145,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--SYS-accent-salmon-base-muted), var(--SYS-accent-salmon-base));
+    background: linear-gradient(135deg, var(--SYS-color-schema), var(--SYS-color-schema-muted));
     border-radius: 50%;
     width: 2rem;
     height: 2rem;
