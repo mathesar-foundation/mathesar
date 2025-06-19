@@ -75,7 +75,7 @@
       display: inline-flex;
       align-items: center;
       flex-grow: 0;
-      color: var(--SYS-text-icon);
+      color: var(--icon-fill-color, var(--SYS-text-icon));
     }
     > .control {
       --checkbox-margin-bottom: 0;

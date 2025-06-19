@@ -142,6 +142,7 @@
             href={getMarketingLink('donate')}
             tinro-ignore
             target="_blank"
+            --icon-fill-color='var(--SYS-color-brand)'
           >
             {$_('donate_to_mathesar')}
           </LinkMenuItem>

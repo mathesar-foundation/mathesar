@@ -6,7 +6,7 @@
   import { getMarketingLink } from '@mathesar/routes/urls';
 </script>
 
-<ResourceCard icon={iconDonation} href={getMarketingLink('donate')}>
+<ResourceCard icon={iconDonation} href={getMarketingLink('donate')} --icon-fill-color='var(--SYS-color-brand)' --icon-bg-color='var(--SYS-color-brand-10)'>
   <span slot="title">{$_('support_our_mission')}</span>
   <span slot="description">{$_('donate_blurb')}</span>
 </ResourceCard>
