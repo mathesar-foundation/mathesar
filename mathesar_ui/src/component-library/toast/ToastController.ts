@@ -208,7 +208,7 @@ export function makeToast(
   function success(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconSuccess,
-      backgroundColor: 'var(--ToastItem__background-color--success)',
+      backgroundColor: 'var(--SYS-semantic-success-bg)',
       ...makeToastProps(detail),
     });
   }
@@ -216,7 +216,7 @@ export function makeToast(
   function error(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconError,
-      backgroundColor: 'var(--ToastItem__background-color--error)',
+      backgroundColor: 'var(--SYS-semantic-danger-bg)',
       ...makeToastProps(detail),
     });
   }

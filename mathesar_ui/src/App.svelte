@@ -79,16 +79,16 @@
  
     --cell-bg-mix-blend-mode: screen;
     --cell-bg-color-base: var(--SYS-surface-inset);
-    --cell-bg-color-error: var(--SYS-color-danger-bg);
-    --cell-bg-color-header: var(--SYS-surface-table-header);
-    --cell-bg-color-processing: var(--SYS-color-warning-bg);
+    --cell-bg-color-error: var(--SYS-semantic-danger-bg);
+    --cell-bg-color-header: var(--SYS-surface-header);
+    --cell-bg-color-processing: var(--SYS-semantic-warning-bg);
     --cell-bg-color-disabled: var(--SYS-surface-inset-disabled);
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
     --cell-bg-color-row-selected: color-mix(in srgb, var(--SYS-accent-glacier-dull), transparent 40%);
 
     --color-fk: var(--SYS-accent-amethyst-dull);
-    --color-fk-border: var(--SYS-accent-amethyst-border);
-    --color-error: var(--SYS-color-danger-text);
+    --color-fk-border: var(--SYS-accent-amethyst-base-highlighted);
+    --color-error: var(--SYS-semantic-danger-text);
     --cell-text-color-processing:var(--SYS-text-muted);
 
     --page-padding-x: var(--lg1);
@@ -135,7 +135,7 @@
 
     /** Panel theming */
     --WithPanel__gap: var(--sm3);
-    --WithPanel__resizer-color: var(--SYS-color-help-bg);
+    --WithPanel__resizer-color: var(--SYS-semantic-help-bg);
     --WithPanel__resizer-size: var(--sm4);
   }
 

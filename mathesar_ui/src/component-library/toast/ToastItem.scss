@@ -4,8 +4,8 @@
   min-height: 2.5rem;
   margin: 0 0 0.5rem 0;
   padding: var(--sm1);
-  background-color: var(--ToastItem__background-color);
-  color: var(--ToastItem__text-color);
+  background-color: var(--SYS-semantic-info-bg);
+  color: var(--SYS-text-primary);
   box-shadow:
     0 4px 6px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
     0 2px 4px -1px  color-mix(in srgb, var(--SYS-border-shadow), transparent 6%);

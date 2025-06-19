@@ -1,0 +1,293 @@
+// ********************************************
+// LIGHT MODE
+// ********************************************
+
+// Utility functions
+@function adjust-lightness($color, $delta) {
+  @if type-of($delta) == "number" {
+    @if $delta > 0 {
+      @return lighten($color, $delta);
+    } @else {
+      @return darken($color, abs($delta));
+    }
+  } @else {
+    @warn "adjust-lightness() expects a numeric percentage, got #{$delta}";
+    @return $color;
+  }
+}
+
+// ------------------------------------------
+// Base color
+// ------------------------------------------
+
+$base-hue: 42;
+$base-saturation: 5%;
+
+// ------------------------------------------
+// Surfaces
+// ------------------------------------------
+
+// Light mode anchor
+$surface-base: hsl($base-hue, $base-saturation, 97%);
+
+// Lightness adjustments
+$surface-deltas: (
+  "light": 0%,
+  "inset": 2%,
+  "input": 3%,
+  "canvas": -2%,
+  "supporting": 1%,
+  "card": 2%,
+  "header": 3%,
+  "fieldset": 3%,
+  "control": 3%,
+  "elevated": 3%,
+  "overlay": 4%,
+  "header-secondary": 6%,
+  "overlay-secondary": 6%,
+  "overlay-tertiary": 8%,
+  "token": 20%
+);
+
+$surface-states: (
+  "hover": 3%,
+  "active": 6%,
+  "focused": -2%,
+  "disabled": -80%,
+  "muted": -5%,
+  "selected": 5%,
+  "highlighted": 6%
+);
+
+// Token generator mixin
+@mixin generate-surface-tokens($prefix, $base-color, $states) {
+  --SYS-surface-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    --SYS-surface-#{$prefix}-#{$state}: #{adjust-lightness($base-color, $delta)};
+  }
+}
+
+// ------------------------------------------
+// Borders
+// ------------------------------------------
+
+// Ordered by prominence.
+$border-roles: (
+  "grid": 10%,
+  "container": 12%,
+  "row": 12%,
+  "shadow": 12%,
+  "card": 15%,
+  "dropdown": 15%,
+  "elevated-low": 20%,
+  "divider": 20%,
+  "control": 25%,
+  "elevated-mid": 25%,
+  "fieldset": 25%,
+  "input": 25%,
+  "elevated-high": 30%,
+  "section": 30%,
+  "token": 40%
+);
+
+$border-states: (
+  "hover": 6%,
+  "active": 14%,
+  "focused": 10%
+);
+
+// Token generator mixin
+@mixin generate-border-tokens($prefix, $base-color, $states) {
+  --SYS-border-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    --SYS-border-#{$prefix}-#{$state}: #{adjust-lightness($base-color, $delta)};
+  }
+}
+
+// ------------------------------------------
+// Text
+// ------------------------------------------
+$text-tokens: (
+  "code": (h: none, l:15%, s: 4%),
+  "control": (h: none, l:10%, s: 5%),
+  "disabled": (h: none, l:60%, s: -4%),
+  "faint": (h: none, l:15%, s: 1%),
+  "header": (h: none, l:8%, s: 5%),
+  "highlighted": (h: 59, l:90%, s: 84%),
+  "highlighted-elevated": (h:59, l:52%, s: 98%),
+  "navigation": (h: none, l:20%, s: 4%),
+  "icon": (h: 220, l:65%, s: 20%),
+  "input": (h: none, l:10%, s: 5%),
+  "label": (h: none, l:20%, s: 4%),
+  "inverted": (h: none, l:95%, s: 4%),
+  "link": (h: none, l:10%, s: 5%),
+  "muted": (h: none, l:35%, s: 2%),
+  "primary": (h: none, l:10%, s: 5%),
+  "secondary": (h: none, l:20%, s: 4%),
+  "tertiary": (h: none, l:30%, s: 3%),
+  "token": (h: none, l:10%, s: 5%),
+  "tooltip": (h: none, l:10%, s: 5%)
+);
+
+$text-states: (
+  "hover": 3%,
+  "active": 6%
+);
+
+// Token generator mixin
+@mixin generate-text-tokens($prefix, $base-color, $states) {
+  --SYS-text-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    --SYS-text-#{$prefix}-#{$state}: #{adjust-lightness($base-color, $delta)};
+  }
+}
+
+// ------------------------------------------
+// Utility boxes + buttons
+// ------------------------------------------
+
+$semantic-families: (
+  "success": (145, 40%),
+  "warning": (50, 40%),
+  "danger": (8, 40%),
+  "info": (215, 40%),
+  "help": (185, 40%),
+  "tip": (150, 40%),
+  "outcome": (275, 40%)
+);
+
+$semantic-roles: (
+  "bg": (1.0, 85%),
+  "text": (1.0, 30%),
+  "icon": (1.0, 35%),
+  "border": (0.8, 80%),
+  "button-bg": (0.4, 92%),
+  "button-text": (1, 32%),
+  "button-icon": (1.0, 32%),
+  "button-border": (0.6, 84%)
+);
+
+$semantic-states: (
+  "hover": (3%, -3%, 0),
+  "active": (6%, 0%, 0),
+  "focused": (3%, -5%, -5)
+);
+
+@mixin generate-semantic-tokens($name, $hue, $sat, $roles) {
+   @each $role, $params in $roles {
+      $sat-mult: nth($params, 1);
+      $l: nth($params, 2);
+      $s: $sat * $sat-mult;
+      $color: hsl($hue, $s, $l);
+      --SYS-semantic-#{$name}-#{$role}: #{$color};
+      @each $state, $delta in $semantic-states {
+        $dl: nth($delta, 1);
+        $ds: nth($delta, 2);
+        $dh: nth($delta, 3);
+        $sh: max(0%, min(100%, $s + $ds));
+        $lh: max(0%, min(100%, $l + $dl));
+        $hh: ($hue + $dh) % 360;
+        $variant: hsl($hh, $sh, $lh);
+        --SYS-semantic-#{$name}-#{$role}-#{$state}: #{$variant};
+      }
+   }
+}
+
+
+// ------------------------------------------
+// Accents
+// ------------------------------------------
+
+$accent-families: (
+  "tomato": (8, 60%),
+  "pumpkin": (33, 90%),
+  "amethyst": (270, 35%),
+  "salmon": (12, 79%),
+  "wisteria": (250, 35%),
+  "glacier": (190, 35%),
+  "asparagus": (90, 45%),
+  "fjord": (220, 30%)
+);
+
+$accent-roles: (
+  "base": (1.0, 50%),
+  "faint": (1.0, 95%),
+  "muted": (1.0, 85%),
+  "dull": (1.0, 70%),
+  "bright": (1.0, 25%),
+  "contrast": (1.0, 15%),
+  "inverted": (1.0, 5%)
+);
+
+$accent-states: (
+  "hover": (-3%, 3%, 0),
+  "active": (-6%, 0%, 0),
+  "focused": (-3%, 5%, 5),
+  "muted": (5%, -20%, 0),
+  "highlighted": (-4%, 8%, -10)
+);
+
+// Token generator mixin
+@mixin generate-accent-tokens($name, $hue, $sat, $roles) {
+  @each $role, $params in $roles {
+    $sat-mult: nth($params, 1);
+    $l: nth($params, 2);
+    $s: $sat * $sat-mult;
+    $color: hsl($hue, $s, $l);
+    --SYS-accent-#{$name}-#{$role}: #{$color};
+    @each $state, $delta in $accent-states {
+      $dl: nth($delta, 1);
+      $ds: nth($delta, 2);
+      $dh: nth($delta, 3);
+      $sh: max(0%, min(100%, $s + $ds));
+      $lh: max(0%, min(100%, $l + $dl));
+      $hh: ($hue + $dh) % 360;
+      $variant: hsl($hh, $sh, $lh);
+      --SYS-accent-#{$name}-#{$role}-#{$state}: #{$variant};
+    }
+  }
+}
+
+
+// ------------------------------------------
+// GENERATE COLORS FOR THEME
+// ------------------------------------------
+body {
+  // Surfaces
+  @include generate-surface-tokens(base, $surface-base, $surface-states);
+
+  @each $name, $delta in $surface-deltas {
+    $base: adjust-lightness($surface-base, $delta);
+    @include generate-surface-tokens(#{$name}, $base, $surface-states);
+  }
+
+  // Borders
+  @each $name, $delta in $border-roles {
+    $base: hsl($base-hue, $base-saturation, lightness($surface-base)-$delta);
+    @include generate-border-tokens(#{$name}, $base, $border-states);
+  }
+
+  // Text
+  @each $name, $props in $text-tokens {
+    $hue: map-get($props, h);
+    @if $hue == none {
+      $hue: $base-hue;
+    }
+    $base: hsl($hue, map-get($props, s), map-get($props, l));
+    @include generate-text-tokens(#{$name}, $base, $text-states);
+  }
+
+  // Semantic colors
+  @each $name, $props in $semantic-families {
+    $hue: nth($props, 1);
+    $sat: nth($props, 2);
+    @include generate-semantic-tokens($name, $hue, $sat, $semantic-roles);
+  }
+
+  // Accent colors
+  @each $name, $props in $accent-families {
+    $hue: nth($props, 1);
+    $sat: nth($props, 2);
+    @include generate-accent-tokens($name, $hue, $sat, $accent-roles);
+  }
+}

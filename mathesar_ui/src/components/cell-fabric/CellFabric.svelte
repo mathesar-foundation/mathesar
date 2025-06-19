@@ -93,7 +93,7 @@
     right: var(--cell-padding);
     bottom: var(--cell-padding);
     position: absolute;
-    background: var(--disabled-background);
+    background: var(--SYS-surface-inset-disabled);
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;

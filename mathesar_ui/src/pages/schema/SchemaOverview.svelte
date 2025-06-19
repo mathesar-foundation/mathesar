@@ -159,8 +159,9 @@
 
   .explore-cta {
     padding: var(--lg1);
-    background: color-mix(in srgb, var(--SYS-color-tip-bg), transparent 60%);
-    border: 1px solid var(--SYS-color-tip-border);
+    background:  color-mix(in srgb, var(--SYS-semantic-tip-bg), transparent 60%);
+    box-shadow: 0 4px 8px  color-mix(in srgb, var(--SYS-border-shadow), transparent 8%);
+    border: 1px solid var(--SYS-semantic-tip-button-border);
     border-radius: var(--sm1);
     position: relative;
     overflow: hidden;
@@ -178,13 +179,13 @@
     .explore-title {
       font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
-      color: var(--SYS-button-tip-outlined-text-muted);
+      color: var(--SYS-semantic-tip-text);
       margin: 0 0 0.75rem 0;
       position: relative;
     }
 
     .explore-description {
-      color: var(--SYS-button-tip-outlined-text-muted);
+      color: var(--SYS-semantic-tip-button-text);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;

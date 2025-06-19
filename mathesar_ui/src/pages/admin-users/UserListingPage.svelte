@@ -106,7 +106,7 @@
 
   .users-list {
     border: 1px solid var(--SYS-border-section);
-    background-color: var(--inset-background-color);
+    background-color: var(--SYS-surface-card);
     border-radius: var(--border-radius-m);
     overflow: hidden;
 

@@ -144,7 +144,7 @@
     background: var(--SYS-surface-input);
     border-radius: 0.2rem;
     border: none;
-    box-shadow: 0 0 0 0.1rem var(--SYS-border-table-header-muted);
+    box-shadow: 0 0 0 0.1rem var(--SYS-border-shadow);
     outline: none;
     resize: none;
     color: var(--SYS-text-primary);
@@ -154,7 +154,7 @@
     display: none;
   }
   .column-header-cell.has-nested-selector-open :global(.record-selector-input) {
-    box-shadow: 0 0 0 0.2rem var(--SYS-border-table-header);
+    box-shadow: 0 0 0 0.2rem var(--SYS-border-header);
     z-index: 2;
     pointer-events: none;
   }
@@ -185,7 +185,7 @@
     left: 0;
     right: calc(-1 * var(--border-width));
     bottom: calc(-1 * var(--separator-width));
-    background: var(--shadow-color);
+    background: var(--SYS-border-shadow);
     z-index: 1;
   }
 </style>

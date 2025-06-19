@@ -25,8 +25,8 @@
     left: 0;
     top: 0;
     height: 100%;
-    border-top: 1px solid var(--SYS-border-table-header);
-    border-left: 1px solid var(--SYS-border-table-header);
+    border-top: 1px solid var(--SYS-border-header);
+    border-left: 1px solid var(--SYS-border-header);
     border-bottom: none;
     font-size: 1rem;
     font-weight: var(font-weight-bold);

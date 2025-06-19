@@ -17,7 +17,7 @@
 
 <style>
   .new-record-message {
-    background: var(--SYS-color-info-bg);
+    background: var(--SYS-semantic-info-bg);
     position: absolute;
     inset: 0;
     display: flex;

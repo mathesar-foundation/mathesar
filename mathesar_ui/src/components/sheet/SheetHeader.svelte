@@ -56,9 +56,9 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: var(--SYS-surface-table-header);
-    border-bottom: 1px solid var(--SYS-border-table-header);
-    box-shadow: 0 2px 4px var(--shadow-color);
+    background-color: var(--SYS-surface-header);
+    border-bottom: 1px solid var(--SYS-border-header);
+    box-shadow: 0 2px 4px var(--SYS-border-shadow);
     user-select: none;
     -webkit-user-select: none; /* Safari */
     overflow: hidden;

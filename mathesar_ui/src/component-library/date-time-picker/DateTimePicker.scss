@@ -51,7 +51,7 @@
   isolation: isolate;
 }
 .flatpickr-months .flatpickr-month {
-  background: var(--SYS-surface-header-section);
+  background: var(--SYS-surface-header-secondary);
   color: var(--SYS-text-primary);
   fill: var(--SYS-text-control);
   height: 34px;
@@ -169,10 +169,10 @@
   box-sizing: border-box;
 }
 .numInputWrapper span:hover {
-  background: color-mix(in srgb, var(--SYS-surface-footer-hover),  transparent 50%);
+  background: color-mix(in srgb, var(--SYS-surface-base-hover),  transparent 50%);
 }
 .numInputWrapper span:active {
-   background: color-mix(in srgb, var(--SYS-surface-footer-active),  transparent 50%);
+   background: color-mix(in srgb, var(--SYS-surface-base-active),  transparent 50%);
 }
 .numInputWrapper span:after {
   display: block;

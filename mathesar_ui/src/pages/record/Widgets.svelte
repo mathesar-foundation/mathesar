@@ -71,7 +71,7 @@
     border-top: 2px solid var(--SYS-border-container);
   }
   .no-widgets {
-    background: var(--layout-background-color);
+    background: var(--SYS-surface-base);
   }
   h2 {
     padding: var(--sm1);

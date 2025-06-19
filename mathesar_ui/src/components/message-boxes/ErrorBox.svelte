@@ -14,10 +14,10 @@
 
 <style>
   .error-box {
-    --MessageBox__background: var(--SYS-color-danger-bg);
-    --MessageBox__border: 4px solid var(--SYS-color-danger-border);
-    --MessageBox__icon-color: var(--SYS-color-danger-icon);
-    --MessageBox__text-color: var(--SYS-color-danger-text);
+    --MessageBox__background: var(--SYS-semantic-danger-bg);
+    --MessageBox__border: 4px solid var(--SYS-semantic-danger-border);
+    --MessageBox__icon-color: var(--SYS-semantic-danger-icon);
+    --MessageBox__text-color: var(--SYS-semantic-danger-text);
     font-size: var(--ErrorBox__font-size, var(--sm1));
   }
 </style>

@@ -47,7 +47,7 @@
       display: inline-flex;
       align-items: center;
       gap: var(--sm4);
-      color: var(--SYS-accent-fjord-text-highlighted);
+      color: var(--SYS-accent-fjord-bright-highlighted);
       font-size: 1rem;
     }
     .member-count {

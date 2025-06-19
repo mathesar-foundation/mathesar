@@ -4,47 +4,20 @@
 
 body {
   // Background Colors
-  --header-gradient-start: var(--SYS-surface-header-primary-highlighted);
-  --header-gradient-end: var(--SYS-surface-header-primary);
-  --header-background: linear-gradient(
-    to bottom right,
-    var(--header-gradient-start),
-    var(--header-gradient-end)
-  );
-  --footer-background-color: var(--SYS-surface-footer);
-  --inset-background-color: var(--SYS-surface-inset);
-  
   --hover-background: color-mix(in srgb, var(--SYS-accent-fjord-muted), transparent 20%);
   --active-background: color-mix(in srgb, var(--SYS-accent-fjord-muted-active), transparent 20%);
-  --disabled-background: var(--SYS-accent-wisteria-dull-disabled);
-  --sidebar-background: var(--SYS-surface-supporting);
   --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
-  --icon-background: var(--SYS-accent-pumpkin-dull);
-  --layout-background-color: var(--SYS-surface-base);
+
+   // Progress Colors
   --progress-foreground: color-mix(in srgb, var(--SYS-surface-elevated), transparent 80%);
-
-  // Border Colors
-  --border-color: var(--SYS-border-section);
-  --input-border: var(--SYS-border-input);
-
+  --ToastItem__progress-color: var(--progress-foreground);
+  
   // Border Radius
   --border-radius-xs: 0.071rem; //1px
   --border-radius-s: 0.142rem; //2px
   --border-radius-m: 0.285rem; //4px
   --border-radius-l: 0.571rem; //8px
   --border-radius-xl: 1.142rem; //16px
-
-  // Shadows
-  --shadow-color: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
-  --shadow-color-light: color-mix(in srgb, var(--SYS-surface-base), transparent 5%);
-  --shadow-color-inset: color-mix(in srgb, var(--SYS-surface-canvas), transparent 10%);
-
-  // Toast
-  --ToastItem__background-color: var(--SYS-color-info-bg);
-  --ToastItem__background-color--success: var(--SYS-color-info-success);
-  --ToastItem__background-color--error: var(--SYS-color-info-danger);
-  --ToastItem__text-color: var(--SYS-text-primary);
-  --ToastItem__progress-color: var(--progress-foreground);
 
   // Font Weights
   --font-weight-light: 300;
@@ -72,49 +45,4 @@ body {
   --lg3: 1.7143rem; // 24px
   --lg4: 2.4rem; // 28px
   --lg5: 3.2rem; // 56px
-
-  // Headers
-  --home-page-header: linear-gradient(
-    135deg,
-    var(--SYS-accent-amethyst-muted-focused) 25%,
-    var(--SYS-accent-tomato-muted-focused) 50%,
-    var(--SYS-accent-pumpkin-muted-focused) 75%,
-    var(--SYS-surface-base) 100%
-  );
-
-  --db-page-header: linear-gradient(
-    135deg,
-    var(--SYS-surface-elevated) 10%,
-    var(--SYS-surface-supporting) 30%,
-    var(--SYS-accent-amethyst-muted-focused) 50%,
-    var(--SYS-accent-amethyst-faint) 100%
-  );
-
-  --schema-page-header: linear-gradient(
-      135deg,
-      var(--SYS-accent-salmon-faint) 10%,
-      var(--SYS-surface-supporting) 50%,
-      var(--SYS-accent-salmon-muted-focused) 90%,
-      var(--SYS-accent-tomato-faint) 100%
-    );
-
-    --record-page-header: linear-gradient(
-      135deg,
-      var(--SYS-accent-asparagus-faint) 20%,
-      var(--SYS-surface-base), 35%,
-      var(--SYS-accent-glacier-faint) 45%,
-      var(--SYS-surface-base) 50%,
-      var(--SYS-accent-asparagus-muted-focused) 100%
-    );
-
-    --admin-header: linear-gradient(
-      135deg,
-      var(--SYS-accent-fjord-muted-focused), 35%,
-      var(--SYS-surface-base) 50%,
-      var(--SYS-accent-fjord-faint) 100%
-    );
-
-    .page-header {
-      color: var(--SYS-text-header-primary);
-    }
 }

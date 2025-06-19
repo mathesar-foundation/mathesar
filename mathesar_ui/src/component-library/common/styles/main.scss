@@ -1,5 +1,6 @@
 @import './variables.scss';
-@import './colors.scss';
+@import './light.scss';
+@import './dark.scss';
 @import 'components/input.scss';
 
 .trim-child-margins > :first-child {

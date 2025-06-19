@@ -33,8 +33,8 @@
         if (!value) return;
         styles.push(`${propertyName}: ${value};`);
       }
-      add('--ToastItem__background-color', backgroundColor);
-      add('--ToastItem__text-color', textColor);
+      add('--SYS-semantic-info-bg', backgroundColor);
+      add('--SYS-text-primary', textColor);
       add('--ToastItem__progress-color', progressColor);
       return styles.join(' ');
     },

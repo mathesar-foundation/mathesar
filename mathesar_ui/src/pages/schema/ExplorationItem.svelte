@@ -70,7 +70,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--SYS-accent-pumpkin-bright), var(--SYS-accent-pumpkin-inverted));
+    background: linear-gradient(135deg, var(--SYS-accent-pumpkin-bright), var(--SYS-accent-pumpkin-contrast-muted));
     color: var(--SYS-text-inverted);
     border-radius: var(--border-radius-m);
     width: 1.25rem;

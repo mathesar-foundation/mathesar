@@ -200,12 +200,12 @@
     cursor: default;
   }
   .disabled {
-    background: var(--disabled-background);
-    border: solid 1px var(--input-border);
+    background: var(--SYS-surface-inset-disabled);
+    border: solid 1px var(--SYS-border-input);
   }
 
   .linked-record-input:focus {
-    border-color: var(--SYS-indicator-input);
+    border-color: var(--SYS-border-input-focused);
     outline: 0;
     box-shadow: 0 0 0 2px var(--SYS-surface-input-focused);
   }

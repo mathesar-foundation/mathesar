@@ -164,9 +164,13 @@
     justify-content: space-between;
     padding: 0 0.5rem;
     height: var(--header-height);
-    background: var(--header-background);
+    background: linear-gradient(
+      to bottom right,
+      var(--SYS-surface-supporting-highlighted),
+      var(--SYS-surface-supporting)
+    );
     border-bottom: 1px solid var(--SYS-border-container);
-    box-shadow: var(--shadow-color) 0 1px 3px 0;
+    box-shadow: var(--SYS-border-shadow) 0 1px 3px 0;
     overflow: hidden;
     color: var(--SYS-text-primary);
     font-size: 1rem;

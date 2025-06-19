@@ -41,10 +41,10 @@
     &.gt-header {
       font-weight: var(--font-weight-medium);
       color: var(--SYS-text-primary);
-      background: var(--SYS-surface-header-section);
+      background: var(--SYS-surface-header-secondary);
 
       &::after {
-        background-color: var(--SYS-surface-header-section);
+        background-color: var(--SYS-surface-header-secondary);
       }
     }
   }

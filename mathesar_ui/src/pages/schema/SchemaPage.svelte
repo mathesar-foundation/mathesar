@@ -51,7 +51,13 @@
     name={$name}
     icon={iconSchema}
     entityTypeName={$_('schema')}
-    --header-color='var(--schema-page-header)'
+    --header-color='linear-gradient(
+      135deg,
+      var(--SYS-accent-salmon-faint) 10%,
+      var(--SYS-surface-supporting) 50%,
+      var(--SYS-accent-salmon-muted-focused) 90%,
+      var(--SYS-accent-tomato-faint) 100%
+    )'
     --entity-name-color='var(--SYS-accent-salmon-base-muted)'
   >
     <div slot="action" class="action-buttons">

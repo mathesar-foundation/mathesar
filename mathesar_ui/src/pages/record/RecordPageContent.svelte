@@ -79,7 +79,14 @@
     name={$summary}
     icon={iconRecord}
     entityTypeName={$_('record')}
-    --header-color='var(--record-page-header)'
+    --header-color='linear-gradient(
+      135deg,
+      var(--SYS-accent-asparagus-faint) 20%,
+      var(--SYS-surface-base), 35%,
+      var(--SYS-accent-glacier-faint) 45%,
+      var(--SYS-surface-base) 50%,
+      var(--SYS-accent-asparagus-muted-focused) 100%
+    )'
     --entity-name-color='var(--SYS-accent-asparagus-base-muted)'
     --bottom-margin='var(--sm1)'
     --page-padding-x='6rem'

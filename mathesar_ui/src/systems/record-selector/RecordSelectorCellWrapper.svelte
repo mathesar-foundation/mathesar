@@ -34,7 +34,7 @@
 <style>
   .td {
     --max-column-width: 30ch;
-    --outline-color: var(--SYS-color-help-border);
+    --outline-color: var(--SYS-semantic-help-border);
     --separator-width: 7px;
     display: table-cell;
     vertical-align: middle;
@@ -53,7 +53,7 @@
   }
 
   .column-header {
-    background: var(--SYS-surface-table-header);
+    background: var(--SYS-surface-header);
     border-bottom-width: var(--separator-width);
     position: sticky;
     top: 0;
@@ -67,7 +67,7 @@
     position: sticky;
     left: 0;
     z-index: var(--z-index__record_selector__row-header);
-    background: var(--SYS-surface-table-header);
+    background: var(--SYS-surface-header);
     min-width: 3ch;
   }
   .row-header.row-is-selected {
@@ -91,25 +91,25 @@
      */
     --overflow-shadow-spread: 0.5rem;
     --overflow-shadow: 0 0 var(--overflow-shadow-size)
-      var(--overflow-shadow-spread) var(--shadow-color);
+      var(--overflow-shadow-spread) var(--SYS-border-shadow);
     --clip-path-size: -1rem;
   }
   .table-overflow-left.row-header {
     box-shadow: calc(-1 * var(--overflow-shadow-spread)) 0
       var(--overflow-shadow-size) var(--overflow-shadow-spread)
-      var(--shadow-color);
+      var(--SYS-border-shadow);
     clip-path: inset(0 var(--clip-path-size) 0 0);
   }
   .table-overflow-top.column-header {
     box-shadow: 0 calc(-1 * var(--overflow-shadow-spread))
       var(--overflow-shadow-size) var(--overflow-shadow-spread)
-      var(--shadow-color);
+      var(--SYS-border-shadow);
     clip-path: inset(0 0 var(--clip-path-size) 0);
   }
   .table-overflow-top.table-overflow-left.row-header.column-header {
     box-shadow: calc(-1 * var(--overflow-shadow-spread))
       calc(-1 * var(--overflow-shadow-spread)) var(--overflow-shadow-size)
-      var(--overflow-shadow-spread) var(--shadow-color);
+      var(--overflow-shadow-spread) var(--SYS-border-shadow);
     clip-path: inset(0 var(--clip-path-size) var(--clip-path-size) 0);
   }
 </style>

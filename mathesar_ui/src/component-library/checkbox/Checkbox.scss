@@ -54,6 +54,6 @@
   }
 
   &:not(:disabled):focus {
-    outline: 1px solid var(--SYS-indicator-input);
+    outline: 1px solid var(--SYS-border-input-focused);
   }
 }

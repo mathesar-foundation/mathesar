@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: solid 0.02em var(--input-border);
+  border: solid 0.02em var(--SYS-border-input);
   border-radius: var(--border-radius-m);
   padding: var(--spacing);
   min-height: 2.37em;
@@ -28,7 +28,7 @@
     display: flex;
     padding: 0.285rem 0.428rem;
     background: var(--hover-background);
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--SYS-border-input);
     border-radius: var(--border-radius-m);
     color: var(--SYS-text-primary);
     align-items: center;

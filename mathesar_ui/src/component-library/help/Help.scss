@@ -1,10 +1,10 @@
 .help-trigger {
-  color: var(--SYS-button-help-outlined-border);
+  color: var(--SYS-semantic-help-border);
   opacity: 0.9;
   transition: opacity 0.1s ease-in-out;
 
   &:hover {
     opacity: 1;
-    color: var(--SYS-button-help-outlined-border-hover);
+    color: var(--SYS-semantic-help-border-hover);
   }
 }

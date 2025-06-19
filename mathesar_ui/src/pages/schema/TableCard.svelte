@@ -224,7 +224,7 @@
   }
 
   .table-row.focus:not(:hover) {
-    outline: 1px solid var(--SYS-indicator-row);
+    outline: 1px solid var(--SYS-border-card-focused);
     outline-offset: -1px;
   }
 

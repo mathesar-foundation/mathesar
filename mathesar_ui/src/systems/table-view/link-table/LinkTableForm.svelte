@@ -406,11 +406,11 @@
 <style>
   .form {
     --base-fill: var(--SYS-accent-salmon-muted);
-    --base-stroke: var(--SYS-accent-salmon-border);
+    --base-stroke: var(--SYS-accent-salmon-base-highlighted);
     --target-fill:  var(--SYS-accent-glacier-muted);
-    --target-stroke: var(--SYS-accent-glacier-border);
+    --target-stroke: var(--SYS-accent-glacier-base-highlighted);
     --mapping-fill: var(--SYS-accent-asparagus-muted);
-    --mapping-stroke: var(--SYS-accent-asparagus-border);
+    --mapping-stroke: var(--SYS-accent-asparagus-base-highlighted);
     line-height: 1.6;
   }
   .form.self-referential {

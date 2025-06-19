@@ -19,7 +19,7 @@
   }
 
   .menu-item {
-    color: var(--SYS-text-overlay);
+    color: var(--SYS-text-secondary);
     display: flex;
     flex-grow: 1;
     align-items: center;
@@ -35,7 +35,7 @@
     &.menu-item-link:not(.disabled):hover,
     &.menu-item-button:not(.disabled):hover {
       background-color: var(--SYS-accent-fjord-dull-hover);
-      color: var(--SYS-accent-fjord-base-on);
+      color: var(--SYS-accent-fjord-contrast-hover);
     }
     &.menu-item-button {
       border: inherit;
@@ -45,14 +45,14 @@
       text-align: inherit;
     }
     &.danger {
-      color: var(--SYS-color-danger-text);
+      color: var(--SYS-semantic-danger-text);
 
       &:hover {
-        background-color: var(--SYS-color-danger-bg);
-        color: var(--SYS-color-danger-text);
+        background-color: var(--SYS-semantic-danger-bg);
+        color: var(--SYS-semantic-danger-text);
       }
       .icon {
-         color: var(--SYS-color-danger-icon);
+         color: var(--SYS-semantic-danger-icon);
       }
     }
 

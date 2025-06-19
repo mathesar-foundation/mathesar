@@ -190,6 +190,10 @@
 />
 
 <style lang="scss">
+  .page-header {
+    color: var(--SYS-text-header);
+  }
+
   .message-area {
     margin-bottom: 1rem;
   }

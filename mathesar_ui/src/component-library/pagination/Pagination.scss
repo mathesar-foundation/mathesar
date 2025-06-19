@@ -22,7 +22,7 @@ ul.pagination {
       }
 
       &:disabled {
-        color: var(--SYS-text-control-disabled);
+        color: var(--SYS-text-disabled);
         background-color: inherit;
         cursor: not-allowed;
       }
@@ -30,7 +30,7 @@ ul.pagination {
 
     button {
       .ellipsis {
-        color: var(--SYS-text-control-muted);
+        color: var(--SYS-text-muted);
       }
 
       &:hover {

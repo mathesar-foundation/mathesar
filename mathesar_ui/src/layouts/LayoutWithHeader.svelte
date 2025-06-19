@@ -26,7 +26,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: var(--layout-background-color);
+    background-color: var(--SYS-surface-base);
     color: var(--SYS-text-primary);
 
     .app-layout-header {

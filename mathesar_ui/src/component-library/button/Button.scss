@@ -34,7 +34,7 @@
     --button-background: var(--SYS-surface-control);
     --button-border-color: var(--SYS-border-control);
     --button-shadow: var(--SYS-surface-base) 0 1px 2px 0,
-      var(--shadow-color) 0 1px 3px 0;
+      var(--SYS-border-shadow) 0 1px 3px 0;
 
     &:not(:disabled) {
       &:focus {
@@ -91,7 +91,7 @@
           var(--SYS-accent-asparagus-muted-active)
         );
         --button-border-color: var(--SYS-accent-asparagus-muted-active);
-        --button-shadow: var(--shadow-color) 0 1px 2px 0;
+        --button-shadow: var(--SYS-border-shadow) 0 1px 2px 0;
       }
     }
   }
@@ -179,26 +179,26 @@
   &.btn-danger {
     --button-background: transparent;
     border: transparent;
-    --button-color: var(--SYS-button-danger-outlined-text);
+    --button-color: var(--SYS-semantic-danger-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(in srgb, var(--SYS-button-danger-soft-bg), transparent 60%);
-        border: 2px solid var(--SYS-button-danger-soft-border-muted);
-        --button-color: var(--SYS-button-danger-outlined-text-hover);
+        --button-background: color-mix(in srgb, var(--SYS-semantic-danger-button-bg), transparent 60%);
+        border: 2px solid var(--SYS-semantic-danger-button-border-hover);
+        --button-color: var(--SYS-semantic-danger-text-hover);
       }
 
       &:active,
       &.active {
-        --button-background: color-mix(in srgb, var(--SYS-button-danger-soft-bg), transparent 50%);
-        --button-border-color: var(--SYS-button-danger-soft-border-highlighted);
-        --button-color: var(--SYS-button-danger-outlined-text-active);
+        --button-background: color-mix(in srgb, var(--SYS-semantic-danger-button-bg), transparent 50%);
+        --button-border-color: var(--SYS-semantic-danger-button-border-active);
+        --button-color: var(--SYS-semantic-danger-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-button-danger-outlined-border-focused);
+        --button-outline: 2px solid var(--SYS-semantic-danger-button-border-focused);
         outline-offset: 1px;
       }
     }
@@ -207,26 +207,26 @@
   &.btn-outcome {
     --button-background: transparent;
     border: transparent;
-    --button-color: var(--SYS-button-outcome-outlined-text);
+    --button-color: var(--SYS-semantic-outcome-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(in srgb, var(--SYS-button-outcome-soft-bg), transparent 60%);
-        border: 2px solid var(--SYS-button-outcome-soft-border-muted);
-        --button-color: var(--SYS-button-outcome-outlined-text-hover);
+        --button-background: color-mix(in srgb, var(--SYS-semantic-outcome-button-bg), transparent 60%);
+        border: 2px solid var(--SYS-semantic-outcome-button-border-hover);
+        --button-color: var(--SYS-semantic-outcome-text-hover);
       }
 
       &:active,
       &.active {
-        --button-background: color-mix(in srgb, var(--SYS-button-outcome-soft-bg), transparent 50%);
-        --button-border-color: var(--SYS-button-outcome-soft-border-highlighted);
-        --button-color: var(--SYS-button-outcome-outlined-text-active);
+        --button-background: color-mix(in srgb, var(--SYS-semantic-outcome-button-bg), transparent 50%);
+        --button-border-color: var(--SYS-semantic-outcome-button-border-active);
+        --button-color: var(--SYS-semantic-outcome-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-button-outcome-outlined-border-focused);
+        --button-outline: 2px solid var(--SYS-semantic-outcome-border-focused);
         outline-offset: 1px;
       }
     }
@@ -278,7 +278,6 @@
       &:focus,
       &.focus {
         --button-background: var(--SYS-surface-control-focused);
-        --button-color: var(--SYS-text-control-focused);
         border-color:  var(--SYS-border-control-focused);
         box-shadow:
           0 2px 4px  color-mix(in srgb, var(--SYS-border-shadow), transparent 15%),
@@ -300,7 +299,7 @@
         &:focus,
         &.focus {
           --button-background: transparent;
-          color: var(--SYS-color-danger-bg);
+          color: var(--SYS-semantic-danger-bg);
         }
       }
     }
@@ -309,22 +308,22 @@
   &.btn-danger-ghost {
     --button-background: transparent;
     border: transparent;
-    --button-color: var(--SYS-button-danger-ghost-text);
+    --button-color: var(--SYS-semantic-danger-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-color: var(--SYS-button-danger-ghost-text-hover);
+        --button-color: var(--SYS-semantic-danger-text-hover);
       }
 
       &:active,
       &.active {
-        --button-color: var(--SYS-button-danger-ghost-text-active);
+        --button-color: var(--SYS-semantic-danger-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-button-danger-outlined-border-focused);
+        --button-outline: 2px solid var(--SYS-semantic-danger-border-focused);
         outline-offset: 1px;
       }
     }
@@ -356,7 +355,7 @@
   }
 
   &.danger {
-    --button-color: var(--SYS-color-danger-text);
+    --button-color: var(--SYS-semantic-danger-text);
   }
 
   /* State */
@@ -367,7 +366,7 @@
 
   &.btn-action {
     --button-background: var(--SYS-accent-fjord-faint);
-    color: var(--SYS-accent-fjord-text-muted);
+    color: var(--SYS-accent-fjord-bright);
     border: transparent;
 
     &:not(:disabled) {
@@ -393,20 +392,20 @@
   }
 
   &.btn-tip {
-    background: var(--SYS-button-tip-soft-bg);
-    border: 1px soft var(--SYS-button-tip-soft-border);
-    color: var(--SYS-button-tip-soft-text);
+    background: var(--SYS-semantic-tip-button-bg);
+    border: 1px soft var(--SYS-semantic-tip-button-border);
+    color: var(--SYS-semantic-tip-button-text);
 
     &:hover {
-      background: var(--SYS-button-tip-soft-bg-hover);
-      border: 1px soft var(--SYS-button-tip-soft-border-hover);
-      color: var(--SYS-button-tip-soft-text-hover);
+      background: var(--SYS-semantic-tip-button-bg-hover);
+      border: 1px soft var(--SYS-semantic-tip-button-border-hover);
+      color: var(--SYS-semantic-tip-button-text-hover);
     }
 
     &:active {
-      background: var(--SYS-button-tip-soft-bg-active);
-      border: 1px soft var(--SYS-button-tip-soft-border-active);
-      color: var(--SYS-button-tip-soft-text-active);
+      background: var(--SYS-semantic-tip-button-bg-active);
+      border: 1px soft var(--SYS-semantic-tip-button-border-active);
+      color: var(--SYS-semantic-tip-button-text-active);
     }
   }
 

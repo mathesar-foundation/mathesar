@@ -322,12 +322,12 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--SYS-text-canvas);
+    color: var(--SYS-text-secondary);
   }
   .preview-header {
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
-    background-color: var(--SYS-surface-table-header);
+    background-color: var(--SYS-surface-header);
     border-top: 1px solid var(--SYS-border-card);
   }
   .preview-content {

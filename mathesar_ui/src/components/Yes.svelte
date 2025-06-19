@@ -22,7 +22,7 @@
     border-radius: 50%;
   }
   .yes :global(svg path) {
-    stroke: var(--SYS-accent-asparagus-on);
+    stroke: var(--SYS-accent-asparagus-muted);
     stroke-width: 60;
   }
 </style>

@@ -5,9 +5,9 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   box-sizing: content-box;
-  background-color: var(--SYS-accent-amethyst-muted);
+  background-color: var(--SYS-surface-token);
   color: var(--SYS-text-primary);
-  border: 1px solid var(--SYS-accent-amethyst-border);
+  border: 1px solid var(--SYS-border-token);
 
   &.display-block {
     display: block;

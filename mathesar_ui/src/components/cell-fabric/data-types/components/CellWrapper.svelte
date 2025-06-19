@@ -130,7 +130,7 @@
       border-radius: 2px;
 
       &:focus {
-        box-shadow: 0 0 0 3px var(--SYS-accent-glacier-base-selected);
+        box-shadow: 0 0 0 3px var(--SYS-accent-glacier-base-highlighted);
       }
     }
 

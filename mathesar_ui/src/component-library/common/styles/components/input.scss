@@ -19,7 +19,7 @@
   }
 
   &:focus {
-    border-color: var(--SYS-indicator-input);
+    border-color: var(--SYS-border-input-focused);
     outline: 0;
     box-shadow: 0 0 0 2px var(--SYS-surface-input-focused);
   }
@@ -34,8 +34,8 @@
   }
 
   &.has-error {
-    border-color: var(--SYS-color-danger-text);
-    background: var(--SYS-color-danger-bg);
+    border-color: var(--SYS-semantic-danger-text);
+    background: var(--SYS-semantic-danger-bg);
   }
 
   &.text-area {

@@ -22,7 +22,7 @@
 <style>
   .errors {
     margin: 0.5em 0 0 0em;
-    color: var(--SYS-color-danger-text);
+    color: var(--SYS-semantic-danger-text);
   }
 
   ul {
