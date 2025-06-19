@@ -40,47 +40,12 @@ $surface-colors: (
 );
 
 $surface-states: (
-  'hover': (
-    0,
-    0%,
-    7%,
-  ),
-  'active': (
-    0,
-    0%,
-    9%,
-  ),
-  'focused': (
-    0,
-    0%,
-    2%,
-  ),
-  'disabled': (
-    0,
-    0%,
-    20%,
-  ),
-  'muted': (
-    0,
-    0%,
-    10%,
-  ),
+  'hover': ('h_delta': 0, 's_delta': 0, 'l_delta': 7),
+  'active': ('h_delta': 0, 's_delta': 0, 'l_delta': 9),
+  'focused': ('h_delta': 0, 's_delta': 0, 'l_delta': 2),
+  'disabled': ('h_delta': 0, 's_delta': 0, 'l_delta': 20),
+  'muted': ('h_delta': 0, 's_delta': 0, 'l_delta': 10),
 );
-
-// Token generator mixin
-@mixin generate-surface-tokens($prefix, $base-color, $states) {
-  --SYS-surface-#{$prefix}: #{$base-color};
-  @each $state, $delta in $states {
-    $dh: nth($delta, 1);
-    $ds: nth($delta, 2);
-    $dl: nth($delta, 3);
-    $h-new: (hue($base-color) + $dh) % 360;
-    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
-    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
-    $variant: hsl($h-new, $s-new, $l-new);
-    --SYS-surface-#{$prefix}-#{$state}: #{$variant};
-  }
-}
 
 // ------------------------------------------
 // Borders
@@ -108,37 +73,10 @@ $border-colors: (
 );
 
 $border-states: (
-  'hover': (
-    0,
-    0%,
-    6%,
-  ),
-  'active': (
-    0,
-    0%,
-    14%,
-  ),
-  'focused': (
-    0,
-    0%,
-    10%,
-  ),
+  'hover': ('h_delta': 0, 's_delta': 0, 'l_delta': 6),
+  'active': ('h_delta': 0, 's_delta': 0, 'l_delta': 14),
+  'focused': ('h_delta': 0, 's_delta': 0, 'l_delta': 10),
 );
-
-// Token generator mixin
-@mixin generate-border-tokens($prefix, $base-color, $states) {
-  --SYS-border-#{$prefix}: #{$base-color};
-  @each $state, $delta in $states {
-    $dh: nth($delta, 1);
-    $ds: nth($delta, 2);
-    $dl: nth($delta, 3);
-    $h-new: (hue($base-color) + $dh) % 360;
-    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
-    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
-    $variant: hsl($h-new, $s-new, $l-new);
-    --SYS-border-#{$prefix}-#{$state}: #{$variant};
-  }
-}
 
 // ------------------------------------------
 // Text
@@ -167,130 +105,30 @@ $text-colors: (
 );
 
 $text-states: (
-  'hover': (
-    0,
-    0%,
-    12%,
-  ),
-  'active': (
-    0,
-    0%,
-    18%,
-  ),
+  'hover': ('h_delta': 0, 's_delta': 0, 'l_delta': 12),
+  'active': ('h_delta': 0, 's_delta': 0, 'l_delta': 18),
 );
-
-// Token generator mixin
-@mixin generate-text-tokens($prefix, $base-color, $states) {
-  --SYS-text-#{$prefix}: #{$base-color};
-  @each $state, $delta in $states {
-    $dh: nth($delta, 1);
-    $ds: nth($delta, 2);
-    $dl: nth($delta, 3);
-    $h-new: (hue($base-color) + $dh) % 360;
-    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
-    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
-    $variant: hsl($h-new, $s-new, $l-new);
-    --SYS-text-#{$prefix}-#{$state}: #{$variant};
-  }
-}
 
 // ------------------------------------------
 // Utility boxes + buttons
 // ------------------------------------------
 
-$semantic-colors: (
-  'success': $success,
-  'warning': $warning,
-  'danger': $danger,
-  'info': $info,
-  'help': $help,
-  'tip': $tip,
-  'outcome': $outcome,
-);
-
 $semantic-roles: (
-  'bg': (
-    0,
-    0%,
-    -30%,
-  ),
-  'text': (
-    0,
-    0%,
-    20%,
-  ),
-  'icon': (
-    0,
-    0%,
-    20%,
-  ),
-  'border': (
-    0,
-    -20%,
-    -20%,
-  ),
-  'inner-bg': (
-    0,
-    -20%,
-    -20%,
-  ),
-  'inner-text': (
-    0,
-    0%,
-    30%,
-  ),
-  'inner-icon': (
-    0,
-    0%,
-    30%,
-  ),
-  'inner-border': (
-    0,
-    -10%,
-    -25%,
-  ),
+  'bg': ('h_delta': 0, 's_delta': 0, 'l_delta': -30),
+  'text': ('h_delta': 0, 's_delta': 0, 'l_delta': 20),
+  'icon': ('h_delta': 0, 's_delta': 0, 'l_delta': 20),
+  'border': ('h_delta': 0, 's_delta': -20, 'l_delta': -20),
+  'inner-bg': ('h_delta': 0, 's_delta': -20, 'l_delta': -20),
+  'inner-text': ('h_delta': 0, 's_delta': 0, 'l_delta': 30),
+  'inner-icon': ('h_delta': 0, 's_delta': 0, 'l_delta': 30),
+  'inner-border': ('h_delta': 0, 's_delta': -10, 'l_delta': -25),
 );
 
 $semantic-states: (
-  'hover': (
-    0,
-    6%,
-    6%,
-  ),
-  'active': (
-    0,
-    2%,
-    10%,
-  ),
-  'focused': (
-    5,
-    5%,
-    3%,
-  ),
+  'hover': ('h_delta': 0, 's_delta': 6, 'l_delta': 6),
+  'active': ('h_delta': 0, 's_delta': 2, 'l_delta': 10),
+  'focused': ('h_delta': 5, 's_delta': 5, 'l_delta': 3),
 );
-
-@mixin generate-semantic-tokens($name, $base-color, $roles) {
-  @each $role, $role-delta in $roles {
-    $role-dh: nth($role-delta, 1);
-    $role-ds: nth($role-delta, 2);
-    $role-dl: nth($role-delta, 3);
-    $h-role-new: (hue($base-color) + $role-dh) % 360;
-    $s-role-new: max(0%, min(100%, saturation($base-color) + $role-ds));
-    $l-role-new: max(0%, min(100%, lightness($base-color) + $role-dl));
-    $role-variant: hsl($h-role-new, $s-role-new, $l-role-new);
-    --SYS-semantic-#{$name}-#{$role}: #{$role-variant};
-    @each $state, $state-delta in $semantic-states {
-      $state-dh: nth($state-delta, 1);
-      $state-ds: nth($state-delta, 2);
-      $state-dl: nth($state-delta, 3);
-      $h-state-new: (hue($role-variant) + $state-dh) % 360;
-      $s-state-new: max(0%, min(100%, saturation($role-variant) + $state-ds));
-      $l-state-new: max(0%, min(100%, lightness($role-variant) + $state-dl));
-      $state-variant: hsl($h-state-new, $s-state-new, $l-state-new);
-      --SYS-semantic-#{$name}-#{$role}-#{$state}: #{$state-variant};
-    }
-  }
-}
 
 // ------------------------------------------
 // Accents
@@ -308,93 +146,23 @@ $accent-colors: (
 );
 
 $accent-roles: (
-  'base': (
-    0,
-    0%,
-    0%,
-  ),
-  'faint': (
-    0,
-    -30%,
-    -45%,
-  ),
-  'muted': (
-    0,
-    -20%,
-    -35%,
-  ),
-  'dull': (
-    0,
-    -10%,
-    -20%,
-  ),
-  'bright': (
-    0,
-    0%,
-    25%,
-  ),
-  'contrast': (
-    0,
-    0%,
-    35%,
-  ),
-  'inverted': (
-    0,
-    0%,
-    45%,
-  ),
+  'base': ('h_delta': 0, 's_delta': 0, 'l_delta': 0),
+  'faint': ('h_delta': 0, 's_delta': -30, 'l_delta': -45),
+  'muted': ('h_delta': 0, 's_delta': -20, 'l_delta': -35),
+  'dull': ('h_delta': 0, 's_delta': -10, 'l_delta': -20),
+  'bright': ('h_delta': 0, 's_delta': 0, 'l_delta': 25),
+  'contrast': ('h_delta': 0, 's_delta': 0, 'l_delta': 35),
+  'inverted': ('h_delta': 0, 's_delta': 0, 'l_delta': 45),
 );
+
 
 $accent-states: (
-  'hover': (
-    0,
-    3%,
-    -3%,
-  ),
-  'active': (
-    0,
-    0%,
-    -6%,
-  ),
-  'focused': (
-    5,
-    5%,
-    -3%,
-  ),
-  'muted': (
-    0,
-    20%,
-    -5%,
-  ),
-  'highlighted': (
-    -10,
-    -12%,
-    -4%,
-  ),
+  'hover': ('h_delta': 0, 's_delta': 3%, 'l_delta':-3%),
+  'active': ('h_delta': 0, 's_delta': 0%, 'l_delta':-6%),
+  'focused': ('h_delta': 5, 's_delta': 5%, 'l_delta':-3%),
+  'muted': ('h_delta': 0, 's_delta': -20%, 'l_delta':10%),
+  'highlighted': ('h_delta': -10, 's_delta': -12%, 'l_delta':-4%),
 );
-
-@mixin generate-accent-tokens($name, $base-color, $roles) {
-  @each $role, $role-delta in $roles {
-    $role-dh: nth($role-delta, 1);
-    $role-ds: nth($role-delta, 2);
-    $role-dl: nth($role-delta, 3);
-    $h-role-new: (hue($base-color) + $role-dh) % 360;
-    $s-role-new: max(0%, min(100%, saturation($base-color) + $role-ds));
-    $l-role-new: max(0%, min(100%, lightness($base-color) + $role-dl));
-    $role-variant: hsl($h-role-new, $s-role-new, $l-role-new);
-    --SYS-accent-#{$name}-#{$role}: #{$role-variant};
-    @each $state, $state-delta in $accent-states {
-      $state-dh: nth($state-delta, 1);
-      $state-ds: nth($state-delta, 2);
-      $state-dl: nth($state-delta, 3);
-      $h-state-new: (hue($role-variant) + $state-dh) % 360;
-      $s-state-new: max(0%, min(100%, saturation($role-variant) + $state-ds));
-      $l-state-new: max(0%, min(100%, lightness($role-variant) + $state-dl));
-      $state-variant: hsl($h-state-new, $s-state-new, $l-state-new);
-      --SYS-accent-#{$name}-#{$role}-#{$state}: #{$state-variant};
-    }
-  }
-}
 
 // ------------------------------------------
 // GENERATE COLORS FOR THEME

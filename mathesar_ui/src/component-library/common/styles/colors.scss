@@ -18,5 +18,150 @@ $tip: hsl(150, 50%, 50%);
 $outcome: hsl(275, 40%, 50%);
 
 // Special semantic colors
-$brand: $tomato;
 $input-fill: hsl(212, 84%, 44.1%);
+
+// Color definition by usage
+$utility-colors: (
+  'brand': $tomato,
+  'schema': $salmon,
+);
+
+$semantic-colors: (
+  'success': $success,
+  'warning': $warning,
+  'danger': $danger,
+  'info': $info,
+  'help': $help,
+  'tip': $tip,
+  'outcome': $outcome,
+);
+
+$color-states: (
+  'hover': ('h_delta': 0, 's_delta': 3%, 'l_delta':-3%),
+  'active': ('h_delta': 0, 's_delta': 0%, 'l_delta':-6%),
+  'focused': ('h_delta': 5, 's_delta': 5%, 'l_delta':-3%),
+  'muted': ('h_delta': 0, 's_delta': -20%, 'l_delta':10%),
+  'highlighted': ('h_delta': -10, 's_delta': -12%, 'l_delta':-4%),
+);
+
+//-----------------------------
+// MIXINS FOR GENERATING COLORS
+//-----------------------------
+
+// Surface colors
+@mixin generate-surface-tokens($prefix, $base-color, $states) {
+  --SYS-surface-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    $dh: map-get($delta, 'h_delta');
+    $ds: map-get($delta, 's_delta');
+    $dl: map-get($delta, 'l_delta');
+    $h-new: hue($base-color) + $dh;
+    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
+    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
+    $variant: hsl($h-new, $s-new, $l-new);
+    --SYS-surface-#{$prefix}-#{$state}: #{$variant};
+  }
+}
+
+// Border colors
+@mixin generate-border-tokens($prefix, $base-color, $states) {
+  --SYS-border-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    $dh: map-get($delta, 'h_delta');
+    $ds: map-get($delta, 's_delta');
+    $dl: map-get($delta, 'l_delta');
+    $h-new: (hue($base-color) + $dh) % 360deg;
+    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
+    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
+    $variant: hsl($h-new, $s-new, $l-new);
+    --SYS-border-#{$prefix}-#{$state}: #{$variant};
+  }
+}
+
+// Text colors
+@mixin generate-text-tokens($prefix, $base-color, $states) {
+  --SYS-text-#{$prefix}: #{$base-color};
+  @each $state, $delta in $states {
+    $dh: map-get($delta, 'h_delta');
+    $ds: map-get($delta, 's_delta');
+    $dl: map-get($delta, 'l_delta');
+    $h-new: (hue($base-color) + $dh) % 360deg;
+    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
+    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
+    $variant: hsl($h-new, $s-new, $l-new);
+    --SYS-text-#{$prefix}-#{$state}: #{$variant};
+  }
+}
+
+// Semantic colors
+@mixin generate-semantic-tokens($name, $base-color, $roles) {
+  @each $role, $role-delta in $roles {
+    $role-dh: map-get($role-delta, 'h_delta');
+    $role-ds: map-get($role-delta, 's_delta');
+    $role-dl: map-get($role-delta, 'l_delta');
+    $h-role-new: (hue($base-color) + $role-dh) % 360deg;
+    $s-role-new: max(0%, min(100%, saturation($base-color) + $role-ds));
+    $l-role-new: max(0%, min(100%, lightness($base-color) + $role-dl));
+    $role-variant: hsl($h-role-new, $s-role-new, $l-role-new);
+    --SYS-semantic-#{$name}-#{$role}: #{$role-variant};
+    @each $state, $state-delta in $semantic-states {
+      $state-dh: map-get($state-delta, 'h_delta');
+      $state-ds: map-get($state-delta, 's_delta');
+      $state-dl: map-get($state-delta, 'l_delta');
+      $h-state-new: (hue($role-variant) + $state-dh) % 360deg;
+      $s-state-new: max(0%, min(100%, saturation($role-variant) + $state-ds));
+      $l-state-new: max(0%, min(100%, lightness($role-variant) + $state-dl));
+      $state-variant: hsl($h-state-new, $s-state-new, $l-state-new);
+      --SYS-semantic-#{$name}-#{$role}-#{$state}: #{$state-variant};
+    }
+  }
+}
+
+
+// Accent colors
+@mixin generate-accent-tokens($name, $base-color, $roles) {
+  @each $role, $role-delta in $roles {
+    $role-dh: map-get($role-delta, 'h_delta');
+    $role-ds: map-get($role-delta, 's_delta');
+    $role-dl: map-get($role-delta, 'l_delta');
+    $h-role-new: (hue($base-color) + $role-dh) % 360deg;
+    $s-role-new: max(0%, min(100%, saturation($base-color) + $role-ds));
+    $l-role-new: max(0%, min(100%, lightness($base-color) + $role-dl));
+    $role-variant: hsl($h-role-new, $s-role-new, $l-role-new);
+    --SYS-accent-#{$name}-#{$role}: #{$role-variant};
+    @each $state, $state-delta in $accent-states {
+      $state-dh: map-get($state-delta, 'h_delta');
+      $state-ds: map-get($state-delta, 's_delta');
+      $state-dl: map-get($state-delta, 'l_delta');
+      $h-state-new: (hue($role-variant) + $state-dh) % 360deg;
+      $s-state-new: max(0%, min(100%, saturation($role-variant) + $state-ds));
+      $l-state-new: max(0%, min(100%, lightness($role-variant) + $state-dl));
+      $state-variant: hsl($h-state-new, $s-state-new, $l-state-new);
+      --SYS-accent-#{$name}-#{$role}-#{$state}: #{$state-variant};
+    }
+  }
+}
+
+// Colors by usage
+@mixin generate-color-tokens($name, $base-color, $states) {
+  --SYS-color-#{$name}: #{$base-color};
+  @each $state, $delta in $states {
+    $dh: map-get($delta, 'h_delta');
+    $ds: map-get($delta, 's_delta');
+    $dl: map-get($delta, 'l_delta');
+    $h-new: (hue($base-color) + $dh) % 360deg;
+    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
+    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
+    $variant: hsl($h-new, $s-new, $l-new);
+    --SYS-color-#{$name}-#{$state}: #{$variant};
+  }
+}
+
+// ----------------------
+// GENERATE COMMON COLORS
+// ----------------------
+body {
+  @each $name, $color in $utility-colors {
+    @include generate-color-tokens(#{$name}, $color, $color-states);
+  }
+}
