@@ -1,4 +1,7 @@
-import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { Select, isDefinedNonNullable } from '@mathesar-component-library';
 import type {
   ComponentAndProps,
@@ -22,7 +25,7 @@ interface BooleanLabels {
   false: string;
 }
 
-function getLabels(column: Column): BooleanLabels {
+function getLabels(column: RawColumnWithMetadata): BooleanLabels {
   return {
     true: getColumnMetadataValue(column, 'bool_true'),
     false: getColumnMetadataValue(column, 'bool_false'),
@@ -40,7 +43,7 @@ function getFormattedValue(
 }
 
 function getProps(
-  column: Column,
+  column: RawColumnWithMetadata,
 ): SingleSelectCellExternalProps<boolean | null> {
   const labels = getLabels(column);
   return {
@@ -51,7 +54,7 @@ function getProps(
 
 const booleanType: CellComponentFactory = {
   initialInputValue: null,
-  get: (column: Column): ComponentAndProps<Props> => {
+  get: (column: RawColumnWithMetadata): ComponentAndProps<Props> => {
     const displayOptions = column.metadata ?? undefined;
     if (displayOptions && displayOptions.bool_input === 'dropdown') {
       return {
@@ -62,12 +65,12 @@ const booleanType: CellComponentFactory = {
     return { component: CheckboxCell, props: {} };
   },
   getInput: (
-    column: Column,
+    column: RawColumnWithMetadata,
   ): ComponentAndProps<SelectProps<boolean | null>> => ({
     component: Select,
     props: getProps(column),
   }),
-  getDisplayFormatter(column: Column) {
+  getDisplayFormatter(column: RawColumnWithMetadata) {
     const labels = getLabels(column);
     return (value: unknown) => {
       if (value === null || value === undefined || typeof value === 'boolean') {

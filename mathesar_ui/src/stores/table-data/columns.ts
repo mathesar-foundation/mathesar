@@ -4,7 +4,7 @@ import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type {
-  Column,
+  RawColumnWithMetadata,
   ColumnCreationSpec,
   ColumnPatchSpec,
 } from '@mathesar/api/rpc/columns';
@@ -21,7 +21,7 @@ import {
 export class ColumnsDataStore extends EventHandler<{
   columnRenamed: void;
   columnAdded: void;
-  columnDeleted: Column['id'];
+  columnDeleted: RawColumnWithMetadata['id'];
   columnPatched: void;
 }> {
   private apiContext: {
@@ -29,18 +29,18 @@ export class ColumnsDataStore extends EventHandler<{
     table_oid: Table['oid'];
   };
 
-  private promise: CancellablePromise<Column[]> | undefined;
+  private promise: CancellablePromise<RawColumnWithMetadata[]> | undefined;
 
-  private fetchedColumns = writable<Column[]>([]);
+  private fetchedColumns = writable<RawColumnWithMetadata[]>([]);
 
   fetchStatus = writable<RequestStatus | undefined>(undefined);
 
   hiddenColumns: WritableSet<number>;
 
   /** Will only show visible columns */
-  columns: Readable<Column[]>;
+  columns: Readable<RawColumnWithMetadata[]>;
 
-  pkColumn: Readable<Column | undefined>;
+  pkColumn: Readable<RawColumnWithMetadata | undefined>;
 
   readonly shareConsumer?: ShareConsumer;
 
@@ -70,7 +70,7 @@ export class ColumnsDataStore extends EventHandler<{
     void this.fetch();
   }
 
-  async fetch(): Promise<Column[] | undefined> {
+  async fetch(): Promise<RawColumnWithMetadata[] | undefined> {
     try {
       this.fetchStatus.set({ state: 'processing' });
       this.promise?.cancel();
@@ -97,7 +97,7 @@ export class ColumnsDataStore extends EventHandler<{
     await this.fetch();
   }
 
-  async rename(id: Column['id'], name: string): Promise<void> {
+  async rename(id: RawColumnWithMetadata['id'], name: string): Promise<void> {
     await api.columns
       .patch({ ...this.apiContext, column_data_list: [{ id, name }] })
       .run();
@@ -105,7 +105,7 @@ export class ColumnsDataStore extends EventHandler<{
   }
 
   async updateDescription(
-    id: Column['id'],
+    id: RawColumnWithMetadata['id'],
     description: string | null,
   ): Promise<void> {
     await api.columns
@@ -117,7 +117,7 @@ export class ColumnsDataStore extends EventHandler<{
   }
 
   async setNullabilityOfColumn(
-    column: Column,
+    column: RawColumnWithMetadata,
     nullable: boolean,
   ): Promise<void> {
     if (column.primary_key) {
@@ -146,7 +146,7 @@ export class ColumnsDataStore extends EventHandler<{
   }
 
   async setDisplayOptions(
-    column: Pick<Column, 'id'>,
+    column: Pick<RawColumnWithMetadata, 'id'>,
     displayOptions: ColumnMetadata | null,
   ): Promise<void> {
     await api.columns.metadata
@@ -174,7 +174,7 @@ export class ColumnsDataStore extends EventHandler<{
     super.destroy();
   }
 
-  async deleteColumn(columnId: Column['id']): Promise<void> {
+  async deleteColumn(columnId: RawColumnWithMetadata['id']): Promise<void> {
     await api.columns
       .delete({ ...this.apiContext, column_attnums: [columnId] })
       .run();

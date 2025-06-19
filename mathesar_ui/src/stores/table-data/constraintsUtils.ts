@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { Constraint, FkConstraint } from '@mathesar/api/rpc/constraints';
 
 export function constraintIsFk(c: Constraint): c is FkConstraint {
@@ -15,7 +15,7 @@ export function constraintIsFk(c: Constraint): c is FkConstraint {
  */
 export function findFkConstraintsForColumn(
   constraints: Constraint[],
-  columnId: Column['id'],
+  columnId: RawColumnWithMetadata['id'],
 ): FkConstraint[] {
   return constraints.filter(constraintIsFk).filter(
     (constraint) =>

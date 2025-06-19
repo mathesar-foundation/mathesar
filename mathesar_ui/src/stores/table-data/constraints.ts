@@ -11,7 +11,7 @@ import {
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   Constraint,
   ConstraintRecipe,
@@ -156,7 +156,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
   }
 
   async setUniquenessOfColumn(
-    column: Column,
+    column: RawColumnWithMetadata,
     shouldBeUnique: boolean,
   ): Promise<void> {
     if (column.primary_key) {

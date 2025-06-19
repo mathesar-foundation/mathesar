@@ -1,5 +1,5 @@
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { JoinPath } from '@mathesar/api/rpc/tables';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
@@ -7,7 +7,7 @@ import type { FilterId } from '@mathesar/stores/abstract-types/types';
 export interface InitialColumn {
   alias: string;
   /** The PostgreSQL attnum of the column */
-  attnum: Column['id'];
+  attnum: RawColumnWithMetadata['id'];
   join_path?: JoinPath;
 }
 
@@ -140,8 +140,8 @@ export interface ExplorationRunParams {
 export interface QueryResultColumn {
   alias: string;
   display_name: string | null;
-  type: Column['type'];
-  type_options: Column['type_options'];
+  type: RawColumnWithMetadata['type'];
+  type_options: RawColumnWithMetadata['type_options'];
 }
 
 export interface QueryInitialColumnSource {

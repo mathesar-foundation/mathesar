@@ -1,4 +1,7 @@
-import type { Column, ColumnTypeOptions } from '@mathesar/api/rpc/columns';
+import type {
+  RawColumnWithMetadata,
+  ColumnTypeOptions,
+} from '@mathesar/api/rpc/columns';
 import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
@@ -11,8 +14,8 @@ import type { IconProps } from '@mathesar-component-library/types';
 import { makeSingular } from './languageUtils';
 
 export function getColumnIconProps(column: {
-  type: Column['type'];
-  type_options: Column['type_options'];
+  type: RawColumnWithMetadata['type'];
+  type_options: RawColumnWithMetadata['type_options'];
   constraintsType?: ConstraintType[];
 }): IconProps | IconProps[] {
   if (column.constraintsType?.includes('primary')) {

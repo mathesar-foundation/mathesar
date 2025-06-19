@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import GrowableTextArea from '@mathesar/components/GrowableTextArea.svelte';
 import { TextInput, optionalNonNullable } from '@mathesar-component-library';
 import type {
@@ -17,7 +17,7 @@ import type { CellComponentFactory } from './typeDefinitions';
 const stringType: CellComponentFactory = {
   initialInputValue: '',
   get: (
-    column: Column,
+    column: RawColumnWithMetadata,
     config?: { multiLine?: boolean },
   ): ComponentAndProps<
     TextBoxCellExternalProps | TextAreaCellExternalProps
@@ -27,7 +27,7 @@ const stringType: CellComponentFactory = {
     return { component, props: typeOptions };
   },
   getInput: (
-    column: Column,
+    column: RawColumnWithMetadata,
     config?: { multiLine?: boolean },
   ): ComponentAndProps<TextInputProps> => {
     const component = config?.multiLine ? GrowableTextArea : TextInput;
@@ -38,7 +38,9 @@ const stringType: CellComponentFactory = {
       },
     };
   },
-  getFilterInput: (column: Column): ComponentAndProps<TextInputProps> => ({
+  getFilterInput: (
+    column: RawColumnWithMetadata,
+  ): ComponentAndProps<TextInputProps> => ({
     component: TextInput,
     props: {
       maxlength: optionalNonNullable(column.type_options?.length),

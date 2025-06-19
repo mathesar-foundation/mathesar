@@ -1,6 +1,9 @@
 import type { Readable } from 'svelte/store';
 
-import type { Column, ColumnPrivilege } from '@mathesar/api/rpc/columns';
+import type {
+  RawColumnWithMetadata,
+  ColumnPrivilege,
+} from '@mathesar/api/rpc/columns';
 import type { Constraint, FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
@@ -35,9 +38,9 @@ export class ProcessedColumn implements CellColumnFabric {
    * This property is also available via `column.id`, but it's duplicated at a
    * higher level for brevity's sake because it's used so frequently.
    */
-  readonly id: Column['id'];
+  readonly id: RawColumnWithMetadata['id'];
 
-  readonly column: Column;
+  readonly column: RawColumnWithMetadata;
 
   readonly columnIndex: number;
 
@@ -81,7 +84,7 @@ export class ProcessedColumn implements CellColumnFabric {
 
   constructor(props: {
     tableOid: Table['oid'];
-    column: Column;
+    column: RawColumnWithMetadata;
     columnIndex: number;
     constraints: Constraint[];
     hasEnhancedPrimaryKeyCell?: boolean;

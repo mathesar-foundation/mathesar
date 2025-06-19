@@ -2,7 +2,10 @@ import type {
   ColumnMetadata,
   DurationUnit,
 } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeDuration } from '@mathesar/icons';
 import { DurationSpecification } from '@mathesar/utils/duration';
 import type { FormValues } from '@mathesar-component-library/types';
@@ -48,7 +51,7 @@ function determineDisplayOptions(formValues: FormValues): ColumnMetadata {
     max: DurationUnit;
     min: DurationUnit;
   };
-  const displayOptions: Column['metadata'] = {
+  const displayOptions: RawColumnWithMetadata['metadata'] = {
     duration_max: durationConfig.max,
     duration_min: durationConfig.min,
   };
@@ -56,7 +59,7 @@ function determineDisplayOptions(formValues: FormValues): ColumnMetadata {
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: Column['metadata'],
+  metadata: RawColumnWithMetadata['metadata'],
 ): FormValues {
   const column = { metadata };
   const formValues: FormValues = {
