@@ -17,7 +17,7 @@
   on:click
   {icon}
   {...$$restProps}
-  --icon-color="var(--SYS-accent-tomato-base-muted)"
+  --icon-color="var(--SYS-accent-wisteria-base)"
 >
   {column.name}
 </NameWithIcon>

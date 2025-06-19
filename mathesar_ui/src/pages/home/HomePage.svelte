@@ -38,7 +38,7 @@
     --header-color="linear-gradient(
       135deg,
       var(--SYS-accent-amethyst-muted-focused) 25%,
-      var(--SYS-accent-tomato-muted-focused) 50%,
+      var(--SYS-color-brand-20) 50%,
       var(--SYS-accent-pumpkin-muted-focused) 75%,
       var(--SYS-surface-base) 100%
     )"

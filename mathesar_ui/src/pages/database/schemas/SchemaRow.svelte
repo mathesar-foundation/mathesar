@@ -115,32 +115,19 @@
   }
 
   .schema-row.hover {
-    border: 1px solid
-      color-mix(in srgb, var(--SYS-color-schema), transparent 80%);
-    box-shadow: 0 1px 2px 0
-      color-mix(in srgb, var(--SYS-color-schema-active), transparent 80%);
-    background: color-mix(
-      in srgb,
-      var(--SYS-color-schema-hover),
-      transparent 95%
-    );
+    border: 1px solid var(--SYS-color-schema-10);
+    box-shadow: 0 1px 2px 0 var(--SYS-color-schema-hover-10);
+    background: var(--SYS-color-schema-active-5);
   }
 
   .schema-row:active {
-    border: 1px solid
-      color-mix(in srgb, var(--SYS-color-schema), transparent 90%);
-    box-shadow: 0 1px 2px 0
-      color-mix(in srgb, var(--SYS-color-schema-active), transparent 60%);
-    background: color-mix(
-      in srgb,
-      var(--SYS-color-schema-hover),
-      transparent 90%
-    );
+    border: 1px solid var(--SYS-color-schema-20);
+    box-shadow: 0 1px 2px 0 var(--SYS-color-schema-active-20);
+    background: var(--SYS-color-schema-active-10);
   }
 
   .schema-row.focus {
-    outline: 1px solid
-      color-mix(in srgb, var(--SYS-color-schema), transparent 90%);
+    outline: 1px solid var(--SYS-color-schema-active-20);
     outline-offset: 1px;
   }
 
@@ -158,11 +145,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(
-      135deg,
-      var(--SYS-color-schema),
-      var(--SYS-color-schema-muted)
-    );
+    background: var(--SYS-color-schema-80);
     border-radius: 50%;
     width: 2rem;
     height: 2rem;
@@ -171,7 +154,7 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: var(--z-index-menu-trigger);
-    color: var(--SYS-text-inverted);
+    color: var(--SYS-surface-light);
   }
 
   .hyperlink-overlay {

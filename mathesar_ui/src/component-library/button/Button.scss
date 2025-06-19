@@ -558,7 +558,7 @@
 
   &.btn-feedback {
     --button-background: transparent;
-    --button-color: var(--SYS-accent-tomato-bright);
+    --button-color: var(--SYS-color-brand-muted);
     border: 0px;
     padding: var(--sm4) var(--sm2);
     font-weight: var(--font-weight-bold);
@@ -566,21 +566,16 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-color: var(--SYS-accent-tomato-base);
+        --button-color: var(--SYS-color-brand);
       }
 
       &:active,
-      &.active {
-        --button-color: var(--SYS-accent-tomato-base-active);
-        --button-background: transparent;
-        border: 1px solid var(--SYS-accent-tomato-muted);
-      }
-
+      &.active,
       &:focus,
       &.focus {
+        --button-color: var(--SYS-color-brand-active);
         --button-background: transparent;
-        --button-color: var(--SYS-accent-tomato-base-focused);
-        border: 1px solid var(--SYS-accent-tomato-muted);
+        border: 1px solid var(--SYS-color-brand-muted);
       }
     }
   }

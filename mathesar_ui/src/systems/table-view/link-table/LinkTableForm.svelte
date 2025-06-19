@@ -272,12 +272,14 @@
           {#if $linkType === 'oneToMany'}
             <NewColumn
               base={target}
+              baseWhich='base'
               target={base}
+              targetWhich='target'
               field={columnNameInTarget}
               {targetColumnsAreLoading}
             />
           {:else if $linkType === 'manyToOne'}
-            <NewColumn {base} {target} field={columnNameInBase} />
+            <NewColumn {base} {target} baseWhich='target' targetWhich='base' field={columnNameInBase} />
           {:else if $linkType === 'manyToMany'}
             {#if isSelfReferential}
               <Collapsible
@@ -405,8 +407,8 @@
 
 <style>
   .form {
-    --base-fill: var(--SYS-accent-salmon-muted);
-    --base-stroke: var(--SYS-accent-salmon-base-highlighted);
+    --base-fill: var(--SYS-color-illustration-red-40);
+    --base-stroke: var(--SYS-color-illustration-red);
     --target-fill: var(--SYS-accent-glacier-muted);
     --target-stroke: var(--SYS-accent-glacier-base-highlighted);
     --mapping-fill: var(--SYS-accent-asparagus-muted);

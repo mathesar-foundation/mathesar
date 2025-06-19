@@ -53,10 +53,10 @@
     entityTypeName={$_('schema')}
     --header-color="linear-gradient(
       135deg,
-      var(--SYS-accent-salmon-faint) 10%,
+      var(--SYS-color-schema-10) 10%,
       var(--SYS-surface-supporting) 50%,
-      var(--SYS-accent-salmon-muted-focused) 90%,
-      var(--SYS-accent-tomato-faint) 100%
+      var(--SYS-color-schema-15) 90%,
+      var(--SYS-color-brand-10) 100%
     )"
     --entity-name-color="var(--SYS-color-schema)"
   >

@@ -83,7 +83,7 @@
 
   .entity-type-name {
     font-size: var(--lg1);
-    font-weight: 300;
+    font-weight: 600;
     line-height: 1;
     color: var(--entity-name-color, var(--SYS-text-tertiary));
   }

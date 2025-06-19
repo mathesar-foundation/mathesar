@@ -24,6 +24,8 @@ $input-fill: hsl(212, 84%, 44.1%);
 $utility-colors: (
   'brand': $tomato,
   'schema': $salmon,
+  'illustration-red': hsl(hue($salmon), 60%, 60%),
+  'brand-muted': hsl(hue($tomato), 40%, 60%),
 );
 
 $semantic-colors: (
@@ -36,12 +38,19 @@ $semantic-colors: (
   'outcome': $outcome,
 );
 
+$color-roles: (
+  '5': 5%,
+  '10': 10%,
+  '15': 15%,
+  '20': 20%,
+  '40': 40%,
+  '60': 60%,
+  '80': 80%,
+);
+
 $color-states: (
   'hover': ('h_delta': 0, 's_delta': 3%, 'l_delta':-3%),
-  'active': ('h_delta': 0, 's_delta': 0%, 'l_delta':-6%),
-  'focused': ('h_delta': 5, 's_delta': 5%, 'l_delta':-3%),
-  'muted': ('h_delta': 0, 's_delta': -20%, 'l_delta':10%),
-  'highlighted': ('h_delta': -10, 's_delta': -12%, 'l_delta':-4%),
+  'active': ('h_delta': 0, 's_delta': 0%, 'l_delta':-6%)
 );
 
 //-----------------------------
@@ -154,6 +163,12 @@ $color-states: (
     $l-new: max(0%, min(100%, lightness($base-color) + $dl));
     $variant: hsl($h-new, $s-new, $l-new);
     --SYS-color-#{$name}-#{$state}: #{$variant};
+    @each $role, $delta in $color-roles {
+      $base-variant: hsla(hue($base-color), saturation($base-color), lightness($base-color), $delta);
+      $new-variant: hsla($h-new, $s-new, $l-new, $delta);
+      --SYS-color-#{$name}-#{$role}: #{$base-variant};
+      --SYS-color-#{$name}-#{$state}-#{$role}: #{$new-variant};
+    }
   }
 }
 
