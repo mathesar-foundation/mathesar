@@ -96,6 +96,7 @@ $text-colors: (
   'input': hsl(hue($pumpkin), 90%, 10%),
   'label': hsl(hue($pumpkin), 20%, 4%),
   'inverted': hsl(hue($base), 10%, 96%),
+  'light': hsl(hue($pumpkin), 80%, 100%),
   'link': $link,
   'visited-link': $visited-link,
   'muted': hsl(hue($base), 15%, 60%),

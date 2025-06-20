@@ -55,8 +55,8 @@
       var(--SYS-color-primary),
       var(--SYS-color-primary-60)
     );
-    --button-border-color: var(--SYS-color-primary);
-    --button-color: var(--SYS-text-primary);
+    --button-border-color: var(--SYS-border-control);
+    --button-color: var(--SYS-text-light);
     box-shadow:
       0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
       0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
@@ -74,10 +74,10 @@
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-color-primary-hover),
+          var(--SYS-color-primary-hover-80),
           var(--SYS-color-primary-hover-60)
         );
-        --button-border-color: var(--SYS-color-primary-hover-60);
+        --button-border-color: var(--SYS-border-control-hover);
         box-shadow:
           0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
                 75%),
@@ -91,10 +91,10 @@
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-color-primary-active),
+          var(--SYS-color-primary-active-80),
           var(--SYS-color-primary-active-60)
         );
-        --button-border-color: var(--SYS-color-primary-active-60);
+        --button-border-color: var(--SYS-border-control-hover);
         --button-shadow: var(--SYS-border-shadow) 0 1px 2px 0;
       }
     }
