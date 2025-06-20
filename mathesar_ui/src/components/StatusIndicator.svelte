@@ -60,7 +60,7 @@
       color: var(--SYS-semantic-info-text);
     }
     &.warning {
-      background: var(--SYS-semantic-warning-background);
+      background: var(--SYS-semantic-warning-bg);
       color: var(--SYS-semantic-warning-text);
       border-color: var(--SYS-semantic-warning-border);
     }
@@ -68,7 +68,7 @@
       color: var(--SYS-semantic-warning-text);
     }
     &.success {
-      background: var(--SYS-semantic-success-background);
+      background: var(--SYS-semantic-success-bg);
       color: var(--SYS-semantic-success-text);
       border-color: var(--SYS-semantic-success-border);
     }

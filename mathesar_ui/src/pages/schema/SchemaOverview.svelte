@@ -162,7 +162,7 @@
     background: color-mix(in srgb, var(--SYS-semantic-tip-bg), transparent 60%);
     box-shadow: 0 4px 8px
       color-mix(in srgb, var(--SYS-border-shadow), transparent 8%);
-    border: 1px solid var(--SYS-semantic-tip-inner-border);
+    border: 1px solid var(--SYS-semantic-tip-border);
     border-radius: var(--sm1);
     position: relative;
     overflow: hidden;

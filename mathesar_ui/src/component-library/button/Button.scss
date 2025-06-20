@@ -427,18 +427,18 @@
 
   &.btn-tip {
     background: var(--SYS-semantic-tip-inner-bg);
-    border: 1px soft var(--SYS-semantic-tip-inner-border);
+    border: 1px soft var(--SYS-semantic-tip-border);
     color: var(--SYS-semantic-tip-inner-text);
 
     &:hover {
       background: var(--SYS-semantic-tip-inner-bg-hover);
-      border: 1px soft var(--SYS-semantic-tip-inner-border-hover);
+      border: 1px soft var(--SYS-semantic-tip-border-hover);
       color: var(--SYS-semantic-tip-inner-text-hover);
     }
 
     &:active {
       background: var(--SYS-semantic-tip-inner-bg-active);
-      border: 1px soft var(--SYS-semantic-tip-inner-border-active);
+      border: 1px soft var(--SYS-semantic-tip-border-active);
       color: var(--SYS-semantic-tip-inner-text-active);
     }
   }

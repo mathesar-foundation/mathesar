@@ -10,12 +10,12 @@ $fjord: hsl(220, 60%, 60%);
 
 // Main semantic colors
 $success: hsl(145, 50%, 50%);
-$warning: hsl(50, 50%, 50%);
-$danger: hsl(12, 50%, 70%);
-$info: hsl(215, 40%, 50%);
-$help: hsl(185, 50%, 40%);
-$tip: hsl(150, 50%, 50%);
-$outcome: hsl(275, 40%, 50%);
+$warning: hsl(50, 30%, 40%);
+$danger: hsl(12, 60%, 20%);
+$info: hsl(215, 30%, 50%);
+$help: hsl(185, 20%, 20%);
+$tip: hsl(150, 20%, 30%);
+$outcome: hsl(275, 15%, 35%);
 
 // Special semantic colors
 $input-fill: hsl(212, 84%, 44.1%);
@@ -23,11 +23,11 @@ $input-fill: hsl(212, 84%, 44.1%);
 // Color definition by usage
 $utility-colors: (
   'brand': $tomato,
-  'brand-muted': hsl(hue($tomato), 40%, 60%),
+  'brand-muted': hsl(hue($tomato), 40%, 50%),
   'schema': $salmon,
   'database': $amethyst,
   'table': $pumpkin,
-  'column': $wisteria,
+  'column': hsl(hue($pumpkin), 50%, 60%),
   'record': $asparagus,
   'record-fk': hsl(hue($asparagus), 80%, 60%),
   'exploration': $fjord,

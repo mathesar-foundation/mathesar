@@ -57,7 +57,7 @@
         item.record.pk,
       )}
     >
-      <NameWithIcon icon={iconRecord}>{item.record.summary}</NameWithIcon>
+      <NameWithIcon icon={iconRecord} --icon-color='var(--SYS-color-record)'>{item.record.summary}</NameWithIcon>
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'exploration'}

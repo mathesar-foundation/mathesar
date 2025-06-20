@@ -40,7 +40,7 @@
       <Help>
         <RichText text={$_('related_records_help')} let:slotName>
           {#if slotName === 'recordSummary'}
-            <NameWithIcon icon={iconRecord} truncate={false}>
+            <NameWithIcon icon={iconRecord} --icon-color='var(--SYS-color-record)' truncate={false}>
               <strong>{recordSummary}</strong>
             </NameWithIcon>
           {/if}

@@ -13,7 +13,7 @@ $base: hsl(42, 5%, 97%);
 $highlight: hsl(59, 84%, 90%);
 $highlight-elevated: hsl(59, 98%, 52%);
 $icon: hsl(hue($wisteria), 45%, 10%);
-$link: hsl(hue($fjord), 80%, 55%);
+$link: hsl(hue($fjord), 40%, 55%);
 $visited-link: hsl(hue($wisteria), 50%, 30%);
 
 // ------------------------------------------
@@ -127,14 +127,14 @@ $semantic-colors: (
 );
 
 $semantic-roles: (
-  'bg': ('h_delta': 0, 's_delta': 0, 'l_delta': 40),
-  'text': ('h_delta': 0, 's_delta': 0, 'l_delta': -20),
-  'icon': ('h_delta': 0, 's_delta': 0, 'l_delta': -25),
-  'border': ('h_delta': 0, 's_delta': -20, 'l_delta': 20),
-  'inner-bg': ('h_delta': 0, 's_delta': 0, 'l_delta': 20),
-  'inner-text': ('h_delta': 0, 's_delta': 0, 'l_delta': -15),
-  'inner-icon': ('h_delta': 0, 's_delta': 0, 'l_delta': -5),
-  'inner-border': ('h_delta': 0, 's_delta': -10, 'l_delta': 25),
+  'bg': ('h_delta': 0, 's_delta': 10%, 'l_delta': 35%),
+  'text': ('h_delta': 10, 's_delta': 10%, 'l_delta': -20%),
+  'icon': ('h_delta': 0, 's_delta': 30%, 'l_delta': 0%),
+  'border': ('h_delta': 0, 's_delta': 0, 'l_delta': 10%),
+  'inner-bg': ('h_delta': 0, 's_delta': 0, 'l_delta': 60%),
+  'inner-text': ('h_delta': -10, 's_delta': -10%, 'l_delta': -20%),
+  'inner-icon': ('h_delta': 0, 's_delta': 30%, 'l_delta': 10%),
+  'inner-border': ('h_delta': 0, 's_delta': 0, 'l_delta': 40%),
 );
 
 $semantic-states: (

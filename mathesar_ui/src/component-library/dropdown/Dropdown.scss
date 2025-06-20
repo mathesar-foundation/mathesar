@@ -40,7 +40,7 @@ button.dropdown.trigger {
     var(--SYS-border-shadow) 0px 4px 6px -2px
   );
   border: var(--SYS-border-dropdown, 2px solid);
-  background: var(--SYS-surface-elevated-low);
+  background: var(--SYS-surface-elevated-high);
   border-radius: var(--border-radius-m);
   z-index: var(--dropdown-z-index, 100);
   max-height: calc(100vh - 0.5rem);
