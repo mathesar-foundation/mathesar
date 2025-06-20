@@ -43,11 +43,31 @@ $surface-colors: (
 );
 
 $surface-states: (
-  'hover': ('h_delta': 0, 's_delta': 0, 'l_delta': -7),
-  'active': ('h_delta': 0, 's_delta': 0, 'l_delta': -9),
-  'focused': ('h_delta': 0, 's_delta': 0, 'l_delta': -2),
-  'disabled': ('h_delta': 0, 's_delta': 0, 'l_delta': -20),
-  'muted': ('h_delta': 0, 's_delta': 0, 'l_delta': 10),
+  'hover': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': -7,
+  ),
+  'active': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': -9,
+  ),
+  'focused': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': -2,
+  ),
+  'disabled': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': -20,
+  ),
+  'muted': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': 10,
+  ),
 );
 
 // ------------------------------------------
@@ -76,9 +96,21 @@ $border-colors: (
 );
 
 $border-states: (
-  'hover': ('h_delta': 0, 's_delta': 0, 'l_delta': 6),
-  'active': ('h_delta': 0, 's_delta': 0, 'l_delta': 14),
-  'focused': ('h_delta': 0, 's_delta': 0, 'l_delta': 10),
+  'hover': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': 6,
+  ),
+  'active': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': 14,
+  ),
+  'focused': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': 10,
+  ),
 );
 
 // ------------------------------------------
@@ -109,8 +141,16 @@ $text-colors: (
 );
 
 $text-states: (
-  'hover': ('h_delta': 0, 's_delta': 0, 'l_delta': 12),
-  'active': ('h_delta': 0, 's_delta': 0, 'l_delta': 18),
+  'hover': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': 12,
+  ),
+  'active': (
+    'h_delta': 0,
+    's_delta': 0,
+    'l_delta': 18,
+  ),
 );
 
 // ------------------------------------------
@@ -128,20 +168,64 @@ $semantic-colors: (
 );
 
 $semantic-roles: (
-  'bg': ('h_delta': 0, 's_delta': 0%, 'l_delta': 50%),
-  'text': ('h_delta': 0, 's_delta': 0%, 'l_delta': -25%),
-  'icon': ('h_delta': 0, 's_delta': 0%, 'l_delta': 10%),
-  'border': ('h_delta': 0, 's_delta': 0%, 'l_delta': 20%),
-  'inner-bg': ('h_delta': 0, 's_delta': 0%, 'l_delta': 45%),
-  'inner-text': ('h_delta': 0, 's_delta': 0%, 'l_delta': -20%),
-  'inner-icon': ('h_delta': 0, 's_delta': 0%, 'l_delta': 0%),
-  'inner-border': ('h_delta': 0, 's_delta': 0%, 'l_delta': 25%),
+  'bg': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': 50%,
+  ),
+  'text': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': -25%,
+  ),
+  'icon': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': 10%,
+  ),
+  'border': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': 20%,
+  ),
+  'inner-bg': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': 45%,
+  ),
+  'inner-text': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': -20%,
+  ),
+  'inner-icon': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': 0%,
+  ),
+  'inner-border': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': 25%,
+  ),
 );
 
 $semantic-states: (
-  'hover': ('h_delta': 0, 's_delta': 6, 'l_delta': 6),
-  'active': ('h_delta': 0, 's_delta': 2, 'l_delta': 10),
-  'focused': ('h_delta': 5, 's_delta': 5, 'l_delta': 3),
+  'hover': (
+    'h_delta': 0,
+    's_delta': 6,
+    'l_delta': 6,
+  ),
+  'active': (
+    'h_delta': 0,
+    's_delta': 2,
+    'l_delta': 10,
+  ),
+  'focused': (
+    'h_delta': 5,
+    's_delta': 5,
+    'l_delta': 3,
+  ),
 );
 
 // ------------------------------------------
@@ -164,5 +248,5 @@ body {
     @include generate-semantic-tokens(#{$name}, $color, $semantic-roles);
   }
 
-  --SYS-mix-blend-mode: multiply;
+  --mix-blend-mode: multiply;
 }

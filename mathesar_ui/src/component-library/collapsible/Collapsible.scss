@@ -11,8 +11,8 @@
       text-align: left;
       cursor: pointer;
       font-weight: inherit;
-      background-color: var(--SYS-surface-elevated-high);
-      color: var(--SYS-text-header);
+      background-color: var(--surface-elevated-high);
+      color: var(--text-header);
       padding: var(--Collapsible_trigger-padding, 0.5em);
 
       .collapsible-header-title {
@@ -34,19 +34,19 @@
   .collapsible-content {
     position: relative;
     .label {
-      color: var(--SYS-text-label);
+      color: var(--text-label);
     }
   }
 }
 
 .collapsible .collapsible-header > .btn-outcome {
-  background-color: var(--SYS-semantic-outcome-inner-bg);
-  border: 2px solid var(--SYS-semantic-outcome-inner-border);
-  color: var(--SYS-semantic-outcome-inner-text);
+  background-color: var(--semantic-outcome-inner-bg);
+  border: 2px solid var(--semantic-outcome-inner-border);
+  color: var(--semantic-outcome-inner-text);
 
   &:hover,
   &.hover {
-    background-color: var(--SYS-semantic-outcome-inner-bg-hover);
-    border: 2px solid var(--SYS-semantic-outcome-inner-border-hover);
+    background-color: var(--semantic-outcome-inner-bg-hover);
+    border: 2px solid var(--semantic-outcome-inner-border-hover);
   }
 }

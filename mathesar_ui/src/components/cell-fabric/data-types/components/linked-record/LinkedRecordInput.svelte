@@ -193,21 +193,21 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--SYS-border-section);
+    border: 1px solid var(--border-section);
     border-radius: 0.25rem;
-    background: var(--SYS-surface-input);
+    background: var(--surface-input);
     padding: var(--sm4);
     cursor: default;
   }
   .disabled {
-    background: var(--SYS-surface-inset-disabled);
-    border: solid 1px var(--SYS-border-input);
+    background: var(--surface-inset-disabled);
+    border: solid 1px var(--border-input);
   }
 
   .linked-record-input:focus {
-    border-color: var(--SYS-border-input-focused);
+    border-color: var(--border-input-focused);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--SYS-surface-input-focused);
+    box-shadow: 0 0 0 2px var(--surface-input-focused);
   }
 
   .content {
@@ -220,10 +220,10 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
     padding: var(--padding);
   }
   .dropdown-button:hover {
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
 </style>

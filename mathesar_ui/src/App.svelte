@@ -42,7 +42,7 @@
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
-    --Match__highlight-color: var(--SYS-text-highlight-elevated);
+    --Match__highlight-color: var(--text-highlight-elevated);
 
     /* Typography variables */
     --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
@@ -65,25 +65,25 @@
    * something like `screen` or `lighten` so that as more backgrounds are
    * applied, the resulting blended background gets lighter instead of darker.
    */
-    --cell-bg-mix-blend-mode: var(--SYS-mix-blend-mode);
+    --cell-bg-mix-blend-mode: var(--mix-blend-mode);
     /**
    * This establishes a base background color for the cell when no additional
    * background colors are applied. We need this in case there is a background
    * color applied underneath the cell, e.g. on the table or page.
    */
 
-    --cell-border-horizontal: 1px solid var(--SYS-border-grid);
-    --cell-border-vertical: 1px solid var(--SYS-border-grid);
+    --cell-border-horizontal: 1px solid var(--border-grid);
+    --cell-border-vertical: 1px solid var(--border-grid);
 
-    --cell-bg-color-base: var(--SYS-surface-inset);
-    --cell-bg-color-error: var(--SYS-semantic-danger-bg);
-    --cell-bg-color-header: var(--SYS-surface-header);
-    --cell-bg-color-processing: var(--SYS-semantic-warning-bg);
-    --cell-bg-color-disabled: var(--SYS-surface-inset-muted);
-    --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
-    --cell-bg-color-row-selected: var(--SYS-color-selection-40);
+    --cell-bg-color-base: var(--surface-inset);
+    --cell-bg-color-error: var(--semantic-danger-bg);
+    --cell-bg-color-header: var(--surface-header);
+    --cell-bg-color-processing: var(--semantic-warning-bg);
+    --cell-bg-color-disabled: var(--surface-inset-muted);
+    --cell-bg-color-row-hover: var(--surface-inset-hover);
+    --cell-bg-color-row-selected: var(--color-selection-40);
 
-    --cell-text-color-processing: var(--SYS-text-muted);
+    --cell-text-color-processing: var(--text-muted);
 
     --page-padding-x: var(--lg1);
     --page-padding-y: var(--lg1);
@@ -107,7 +107,7 @@
     --table-title-header-height: 4.6428rem;
     --status-bar-padding: 0.5rem;
 
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
 
     --modal-z-index: 1;
     --dropdown-z-index: 1;
@@ -129,7 +129,7 @@
 
     /** Panel theming */
     --WithPanel__gap: var(--sm3);
-    --WithPanel__resizer-color: var(--SYS-semantic-help-bg);
+    --WithPanel__resizer-color: var(--semantic-help-bg);
     --WithPanel__resizer-size: var(--sm4);
   }
 
@@ -170,12 +170,12 @@
   hr {
     margin: 0;
     border: 0;
-    border-top: 1px solid var(--SYS-border-section);
+    border-top: 1px solid var(--border-section);
     display: block;
   }
 
   a {
-    color: var(--SYS-text-link);
+    color: var(--text-link);
     text-decoration-thickness: 1px;
     text-underline-offset: 0.1em;
   }
@@ -183,10 +183,10 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: var(--SYS-surface-inset);
+    background: var(--surface-inset);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
 
   .block {
@@ -215,15 +215,15 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--SYS-surface-inset-muted);
+    background: var(--surface-inset-muted);
     border-radius: 3px;
-    color: var(--SYS-text-tertiary);
+    color: var(--text-tertiary);
     font-weight: bold;
   }
 
-  .input .null .postgres-keyword, 
+  .input .null .postgres-keyword,
   .cell-wrapper .postgres-keyword {
-    color: var(--SYS-text-faint);
+    color: var(--text-faint);
     font-weight: 300;
     background: transparent;
   }
@@ -238,6 +238,6 @@
     align-items: center;
     justify-content: center;
     display: flex;
-    background-color: var(--SYS-surface-base);
+    background-color: var(--surface-base);
   }
 </style>

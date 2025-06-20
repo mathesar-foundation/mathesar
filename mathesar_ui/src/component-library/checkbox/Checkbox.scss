@@ -12,27 +12,27 @@
   width: var(--size);
   height: var(--size);
   appearance: none;
-  border: solid var(--SYS-border-input) 0.15em;
+  border: solid var(--border-input) 0.15em;
   border-radius: 0.15em;
-  background: var(--SYS-surface-input);
+  background: var(--surface-input);
 
   &:not(:disabled):not(:checked):not(:indeterminate):hover {
-    background-color: var(--SYS-surface-input-hover);
+    background-color: var(--surface-input-hover);
   }
   &:not(:disabled):hover {
-    background-color: var(--SYS-surface-input-fill-hover);
+    background-color: var(--surface-input-fill-hover);
   }
   &:checked,
   &:indeterminate {
-    border: 0.05em solid var(--SYS-border-input);
-    background: var(--SYS-surface-input-fill);
+    border: 0.05em solid var(--border-input);
+    background: var(--surface-input-fill);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 0.75em auto;
   }
   &:disabled {
-    background-color: var(--SYS-surface-input-disabled);
-    border-color: var(--SYS-border-input);
+    background-color: var(--surface-input-disabled);
+    border-color: var(--border-input);
   }
   &:checked {
     background-image: var(--icon-check);
@@ -47,6 +47,6 @@
   }
 
   &:not(:disabled):focus {
-    outline: 1px solid var(--SYS-border-input-focused);
+    outline: 1px solid var(--border-input-focused);
   }
 }

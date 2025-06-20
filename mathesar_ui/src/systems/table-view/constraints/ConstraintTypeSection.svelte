@@ -156,15 +156,15 @@
     align-items: center;
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    border-bottom: 1px solid var(--SYS-border-section);
+    border-bottom: 1px solid var(--border-section);
     min-height: 2.5rem;
     margin-bottom: var(--sm3);
   }
 
   .add-constraint {
-    background-color: var(--SYS-surface-fieldset);
+    background-color: var(--surface-fieldset);
     padding: 1rem;
-    border: 1px solid var(--SYS-border-fieldset);
+    border: 1px solid var(--border-fieldset);
     border-radius: var(--border-radius-m);
   }
 </style>

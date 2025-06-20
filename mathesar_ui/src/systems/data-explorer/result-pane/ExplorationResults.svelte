@@ -190,7 +190,7 @@
     }
 
     :global(.column-name-wrapper.selected) {
-      background: var(--SYS-color-selection-40);
+      background: var(--color-selection-40);
     }
     :global([data-sheet-element='data-cell'].selected) {
       background: var(--hover-background);

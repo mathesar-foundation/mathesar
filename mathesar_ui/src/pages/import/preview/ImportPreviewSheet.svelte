@@ -77,7 +77,7 @@
 <style lang="scss">
   .import-preview {
     :global([data-sheet-element='data-cell']) {
-      background: var(--SYS-surface-inset);
+      background: var(--surface-inset);
     }
     :global([data-sheet-element='data-cell']:last-child),
     :global([data-sheet-element='column-header-cell']:last-child) {

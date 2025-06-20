@@ -53,9 +53,9 @@
     border-radius: var(--border-radius-m);
 
     &:hover {
-      border: 1px solid var(--SYS-color-exploration-20);
-      box-shadow: 0 1px 2px 0 var(--SYS-color-exploration-20);
-      background: var(--SYS-color-exploration-active-10);
+      border: 1px solid var(--color-exploration-20);
+      box-shadow: 0 1px 2px 0 var(--color-exploration-20);
+      background: var(--color-exploration-active-10);
 
       .caret-container {
         opacity: 1;
@@ -63,15 +63,15 @@
     }
 
     &:focus {
-      border: 1px solid var(--SYS-color-exploration-40);
-      box-shadow: 0 1px 2px 0 var(--SYS-color-exploration-40);
-      background: var(--SYS-color-exploration-active-20);
+      border: 1px solid var(--color-exploration-40);
+      box-shadow: 0 1px 2px 0 var(--color-exploration-40);
+      background: var(--color-exploration-active-20);
     }
   }
 
   .icon-container {
     background: transparent;
-    color: var(--SYS-color-exploration);
+    color: var(--color-exploration);
     border-radius: var(--border-radius-m);
     width: 1.25rem;
     height: 1.25rem;
@@ -106,14 +106,14 @@
   .name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
     line-height: 1.2;
     transition: color 0.2s ease;
   }
 
   .detail {
     font-size: 1rem;
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
     display: flex;
     gap: 0.5rem;
     align-items: center;

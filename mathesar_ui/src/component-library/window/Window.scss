@@ -1,6 +1,6 @@
 .window {
-  background-color: var(--SYS-surface-elevated-mid);
-  border: 1px solid var(--SYS-border-dropdown);
+  background-color: var(--surface-elevated-mid);
+  border: 1px solid var(--border-dropdown);
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
   width: var(--window-width, 100%);
@@ -8,7 +8,7 @@
   display: grid;
   grid-template: auto 1fr auto / auto;
   box-shadow: 0 0 0.5em
-    color-mix(in srgb, var(--SYS-border-shadow), transparent 30%);
+    color-mix(in srgb, var(--border-shadow), transparent 30%);
   position: relative;
   isolation: isolate;
 
@@ -18,7 +18,7 @@
     justify-content: flex-end;
     align-items: flex-start;
     padding: 1rem;
-    border-bottom: 1px solid var(--SYS-border-section);
+    border-bottom: 1px solid var(--border-section);
     .title {
       &:empty {
         display: none;
@@ -36,8 +36,8 @@
 
   > .footer {
     grid-row: 3;
-    border-top: 1px solid var(--SYS-border-section);
-    background: var(--SYS-surface-elevated-mid);
+    border-top: 1px solid var(--border-section);
+    background: var(--surface-elevated-mid);
   }
 
   &.has-body-padding > .body {

@@ -14,9 +14,9 @@
 
 <style>
   .info-box {
-    --MessageBox__background: var(--SYS-semantic-info-bg);
-    --MessageBox__border: 4px solid var(--SYS-semantic-info-border);
-    --MessageBox__icon-color: var(--SYS-semantic-info-icon);
-    --MessageBox__text-color: var(--SYS-semantic-info-text);
+    --MessageBox__background: var(--semantic-info-bg);
+    --MessageBox__border: 4px solid var(--semantic-info-border);
+    --MessageBox__icon-color: var(--semantic-info-icon);
+    --MessageBox__text-color: var(--semantic-info-text);
   }
 </style>

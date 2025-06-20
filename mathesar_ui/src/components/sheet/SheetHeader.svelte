@@ -56,9 +56,9 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: var(--SYS-surface-header);
-    border-bottom: 1px solid var(--SYS-border-header);
-    box-shadow: 0 2px 4px var(--SYS-border-shadow);
+    background-color: var(--surface-header);
+    border-bottom: 1px solid var(--border-header);
+    box-shadow: 0 2px 4px var(--border-shadow);
     user-select: none;
     -webkit-user-select: none; /* Safari */
     overflow: hidden;
@@ -66,7 +66,7 @@
     > div {
       position: relative;
       height: var(--sheet-header-height, 32px);
-      color: var(--SYS-text-primary);
+      color: var(--text-primary);
     }
 
     &.inherit-font-style {

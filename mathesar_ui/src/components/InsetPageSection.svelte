@@ -7,9 +7,9 @@
 
 <style>
   .section {
-    background: var(--SYS-surface-card);
+    background: var(--surface-card);
     padding: var(--inset-page-section-padding, 2rem 1.5rem);
-    border: solid 1px var(--SYS-border-section);
+    border: solid 1px var(--border-section);
     border-radius: 0.3rem;
   }
 </style>

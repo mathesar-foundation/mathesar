@@ -21,7 +21,7 @@
 
 <style lang="scss">
   .trigger {
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
@@ -34,14 +34,14 @@
     }
 
     :global(.expand-right-icon) {
-      color: var(--SYS-text-navigation);
+      color: var(--text-navigation);
     }
 
     &:hover,
     &:active {
-      background-color: var(--SYS-surface-elevated-low-active);
-      color: var(--SYS-text-navigation-active);
-      border-color: var(--SYS-border-elevated-low);
+      background-color: var(--surface-elevated-low-active);
+      color: var(--text-navigation-active);
+      border-color: var(--border-elevated-low);
     }
   }
 </style>

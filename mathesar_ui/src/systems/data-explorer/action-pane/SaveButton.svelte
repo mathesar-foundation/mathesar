@@ -37,7 +37,7 @@
     height: var(--size);
     width: var(--size);
     border-radius: 50%;
-    background: var(--SYS-semantic-danger-bg);
+    background: var(--semantic-danger-bg);
     pointer-events: none;
   }
 </style>

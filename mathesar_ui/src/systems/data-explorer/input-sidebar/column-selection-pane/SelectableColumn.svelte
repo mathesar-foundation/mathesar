@@ -61,8 +61,8 @@
       overflow: hidden;
     }
     .add {
-      --badge-background-color: var(--SYS-surface-control);
-      --badge-text-color: var(--SYS-text-control);
+      --badge-background-color: var(--surface-control);
+      --badge-text-color: var(--text-control);
       --badge-padding: 0 0.45rem;
       --badge-border-radius: var(--border-radius-l);
       --badge-font-size: var(--sm1);

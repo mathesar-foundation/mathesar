@@ -52,36 +52,36 @@
     }
 
     &.processing {
-      background: var(--SYS-semantic-info-bg);
-      color: var(--SYS-semantic-info-text);
-      border-color: var(--SYS-semantic-info-border);
+      background: var(--semantic-info-bg);
+      color: var(--semantic-info-text);
+      border-color: var(--semantic-info-border);
     }
     &.processing .icon {
-      color: var(--SYS-semantic-info-text);
+      color: var(--semantic-info-text);
     }
     &.warning {
-      background: var(--SYS-semantic-warning-bg);
-      color: var(--SYS-semantic-warning-text);
-      border-color: var(--SYS-semantic-warning-border);
+      background: var(--semantic-warning-bg);
+      color: var(--semantic-warning-text);
+      border-color: var(--semantic-warning-border);
     }
     &.warning .icon {
-      color: var(--SYS-semantic-warning-text);
+      color: var(--semantic-warning-text);
     }
     &.success {
-      background: var(--SYS-semantic-success-bg);
-      color: var(--SYS-semantic-success-text);
-      border-color: var(--SYS-semantic-success-border);
+      background: var(--semantic-success-bg);
+      color: var(--semantic-success-text);
+      border-color: var(--semantic-success-border);
     }
     &.success .icon {
-      color: var(--SYS-semantic-success-text);
+      color: var(--semantic-success-text);
     }
     &.failure {
-      background: var(--SYS-semantic-danger-bg);
-      color: var(--SYS-semantic-danger-text);
-      border-color: var(--SYS-semantic-danger-border);
+      background: var(--semantic-danger-bg);
+      color: var(--semantic-danger-text);
+      border-color: var(--semantic-danger-border);
     }
     &.failure .icon {
-      color: var(--SYS-semantic-danger-text);
+      color: var(--semantic-danger-text);
     }
   }
 </style>

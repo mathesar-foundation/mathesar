@@ -40,7 +40,11 @@
       <Help>
         <RichText text={$_('related_records_help')} let:slotName>
           {#if slotName === 'recordSummary'}
-            <NameWithIcon icon={iconRecord} --icon-color='var(--SYS-color-record)' truncate={false}>
+            <NameWithIcon
+              icon={iconRecord}
+              --icon-color="var(--color-record)"
+              truncate={false}
+            >
               <strong>{recordSummary}</strong>
             </NameWithIcon>
           {/if}
@@ -63,18 +67,18 @@
   .widgets-area {
     background: linear-gradient(
       135deg,
-      var(--SYS-surface-base) 10%,
-      var(--SYS-color-record-5) 40%,
-      var(--SYS-surface-base) 100%
+      var(--surface-base) 10%,
+      var(--color-record-5) 40%,
+      var(--surface-base) 100%
     );
-    border-top: 2px solid var(--SYS-border-container);
+    border-top: 2px solid var(--border-container);
   }
   .no-widgets {
-    background: var(--SYS-surface-base);
+    background: var(--surface-base);
   }
   h2 {
     padding: var(--sm1);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
   .widgets {
     padding: var(--sm1);

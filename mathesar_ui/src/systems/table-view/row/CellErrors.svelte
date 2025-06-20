@@ -80,25 +80,23 @@
   }
 
   path {
-    fill: var(--SYS-semantic-danger-icon);
+    fill: var(--semantic-danger-icon);
     stroke: none;
   }
 
   .required {
-    color: var(--SYS-semantic-danger-icon);
+    color: var(--semantic-danger-icon);
     font-size: var(--lg2);
   }
 
   .errors {
-    background: var(--SYS-surface-inset);
-    border: solid 2px var(--SYS-semantic-danger-border);
+    background: var(--surface-inset);
+    border: solid 2px var(--semantic-danger-border);
     box-shadow:
       #000 0 0 0 0,
-      color-mix(in srgb, var(--SYS-border-shadow), transparent 5%) 0px 0px 0px
-        1px,
-      color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) 0px 10px
-        15px -3px,
-      color-mix(in srgb, var(--SYS-border-shadow), transparent 5%) 0px 4px 6px -2px;
+      color-mix(in srgb, var(--border-shadow), transparent 5%) 0px 0px 0px 1px,
+      color-mix(in srgb, var(--border-shadow), transparent 10%) 0px 10px 15px -3px,
+      color-mix(in srgb, var(--border-shadow), transparent 5%) 0px 4px 6px -2px;
     border-radius: 0.4em;
     max-width: 20em;
     padding: 0.5em;

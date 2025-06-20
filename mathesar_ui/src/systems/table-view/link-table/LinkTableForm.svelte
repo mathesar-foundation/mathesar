@@ -272,14 +272,20 @@
           {#if $linkType === 'oneToMany'}
             <NewColumn
               base={target}
-              baseWhich='base'
+              baseWhich="base"
               target={base}
-              targetWhich='target'
+              targetWhich="target"
               field={columnNameInTarget}
               {targetColumnsAreLoading}
             />
           {:else if $linkType === 'manyToOne'}
-            <NewColumn {base} {target} baseWhich='target' targetWhich='base' field={columnNameInBase} />
+            <NewColumn
+              {base}
+              {target}
+              baseWhich="target"
+              targetWhich="base"
+              field={columnNameInBase}
+            />
           {:else if $linkType === 'manyToMany'}
             {#if isSelfReferential}
               <Collapsible
@@ -407,12 +413,12 @@
 
 <style>
   .form {
-    --base-fill: var(--SYS-color-highlight-salmon-40);
-    --base-stroke: var(--SYS-color-highlight-salmon);
-    --target-fill: var(--SYS-color-highlight-glacier-60);
-    --target-stroke: var(--SYS-color-highlight-glacier);
-    --mapping-fill: var(--SYS-color-highlight-asparagus-60);
-    --mapping-stroke: var(--SYS-color-highlight-asparagus);
+    --base-fill: var(--color-highlight-salmon-40);
+    --base-stroke: var(--color-highlight-salmon);
+    --target-fill: var(--color-highlight-glacier-60);
+    --target-stroke: var(--color-highlight-glacier);
+    --mapping-fill: var(--color-highlight-asparagus-60);
+    --mapping-stroke: var(--color-highlight-asparagus);
     line-height: 1.6;
   }
   .form.self-referential {

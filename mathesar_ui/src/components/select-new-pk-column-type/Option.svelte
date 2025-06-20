@@ -19,7 +19,7 @@
     gap: 0.5rem;
   }
   .label {
-    color: var(--SYS-text-muted);
+    color: var(--text-muted);
   }
   .default-value {
     font-size: var(--sm1);

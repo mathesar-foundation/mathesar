@@ -245,25 +245,25 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--SYS-text-muted);
+    color: var(--text-muted);
     z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
   .content-loading.prevent-user-entry {
     pointer-events: all;
-    background: color-mix(in srgb, var(--SYS-surface-light), transparent 50%);
+    background: color-mix(in srgb, var(--surface-light), transparent 50%);
   }
   .results-loading {
     padding: 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--SYS-text-muted);
+    color: var(--text-muted);
   }
   .no-results {
     padding: 1.5rem;
     text-align: center;
-    color: var(--SYS-text-tertiary);
+    color: var(--text-tertiary);
   }
 
   .loading .stats {
@@ -289,7 +289,7 @@
       order: 3;
       text-align: center;
       font-size: var(--sm1);
-      color: var(--SYS-text-muted);
+      color: var(--text-muted);
     }
     .add-button {
       order: 2;

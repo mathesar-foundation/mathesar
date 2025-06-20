@@ -96,7 +96,7 @@
   }
   .store-status {
     font-size: var(--sm1);
-    color: var(--SYS-text-muted);
+    color: var(--text-muted);
     text-align: right;
   }
   .check-button {

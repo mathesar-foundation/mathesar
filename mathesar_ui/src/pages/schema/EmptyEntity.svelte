@@ -28,7 +28,7 @@
     justify-content: center;
     text-align: center;
     padding: 1.5rem;
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
 
     > :global(* + *) {
       margin-top: 0.5rem;

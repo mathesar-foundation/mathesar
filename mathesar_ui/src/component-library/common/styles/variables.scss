@@ -4,14 +4,14 @@
 
 body {
   // Background Colors
-  --hover-background: var(--SYS-color-navigation-hover-20);
-  --active-background: var(--SYS-color-navigation-active-20);
-  --modal-overlay: color-mix(in srgb, var(--SYS-surface-base), transparent 10%);
+  --hover-background: var(--color-navigation-hover-20);
+  --active-background: var(--color-navigation-active-20);
+  --modal-overlay: color-mix(in srgb, var(--surface-base), transparent 10%);
 
   // Progress Colors
   --progress-foreground: color-mix(
     in srgb,
-    var(--SYS-surface-elevated-low),
+    var(--surface-elevated-low),
     transparent 80%
   );
   --ToastItem__progress-color: var(--progress-foreground);

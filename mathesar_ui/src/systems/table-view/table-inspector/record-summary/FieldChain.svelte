@@ -63,7 +63,7 @@
   }
   .deleted-column {
     margin-top: 0.8rem;
-    color: var(--SYS-text-disabled);
+    color: var(--text-disabled);
     font-size: var(--sm1);
     font-style: italic;
   }

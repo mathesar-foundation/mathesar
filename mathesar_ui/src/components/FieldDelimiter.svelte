@@ -14,6 +14,6 @@
 
 <style>
   .field-delimiter {
-    color: var(--SYS-text-disabled);
+    color: var(--text-disabled);
   }
 </style>

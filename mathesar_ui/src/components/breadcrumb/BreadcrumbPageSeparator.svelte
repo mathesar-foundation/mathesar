@@ -8,6 +8,6 @@
 <style lang="scss">
   .page-separator {
     transform: rotate(70deg);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
 </style>

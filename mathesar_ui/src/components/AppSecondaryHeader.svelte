@@ -29,7 +29,7 @@
     width: 100%;
     padding: 0;
     margin-bottom: var(--bottom-margin, var(--lg4));
-    background: var(--header-color, var(--SYS-surface-supporting));
+    background: var(--header-color, var(--surface-supporting));
   }
   .content {
     padding: var(--lg4) var(--page-padding-x);

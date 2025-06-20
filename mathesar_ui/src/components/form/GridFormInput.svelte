@@ -65,7 +65,7 @@
   }
 
   .help {
-    color: var(--SYS-semantic-help-text);
+    color: var(--semantic-help-text);
     margin-top: var(--sm6);
     font-size: var(--sm1);
   }

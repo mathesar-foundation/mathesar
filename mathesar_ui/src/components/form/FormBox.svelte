@@ -5,8 +5,8 @@
 <style>
   .form-box {
     margin-bottom: 1rem;
-    border: solid 1px var(--SYS-border-section);
-    background-color: var(--SYS-surface-inset);
+    border: solid 1px var(--border-section);
+    background-color: var(--surface-inset);
     padding: 1rem;
     border-radius: var(--border-radius-m);
   }

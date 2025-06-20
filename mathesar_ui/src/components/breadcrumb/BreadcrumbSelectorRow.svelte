@@ -23,27 +23,27 @@
     {#if 'table' in entry}
       <TableName
         table={entry.table}
-        --name-color="var(--SYS-text-navigation)"
+        --name-color="var(--text-navigation)"
         let:tableName
       >
         <MatchHighlighter text={tableName} substring={filterString} />
       </TableName>
     {:else if entry.type === 'exploration'}
-      <QueryName query={label} --name-color="var(--SYS-text-navigation)">
+      <QueryName query={label} --name-color="var(--text-navigation)">
         <MatchHighlighter text={label} substring={filterString} />
       </QueryName>
     {:else if entry.type === 'database'}
       <DatabaseDisplayNameWithIcon
         database={label}
-        --name-color="var(--SYS-text-navigation)"
+        --name-color="var(--text-navigation)"
       >
         <MatchHighlighter text={label.displayName} substring={filterString} />
       </DatabaseDisplayNameWithIcon>
     {:else if entry.type === 'schema'}
       <NameWithIcon
         {icon}
-        --name-color="var(--SYS-text-navigation)"
-        --icon-color="var(--SYS-color-schema)"
+        --name-color="var(--text-navigation)"
+        --icon-color="var(--color-schema)"
       >
         <MatchHighlighter text={label} substring={filterString} />
       </NameWithIcon>
@@ -73,7 +73,7 @@
     flex: 1 1 auto;
     display: block;
     padding: var(--sm6) var(--sm3);
-    color: var(--SYS-text-navigation);
+    color: var(--text-navigation);
     text-decoration: none;
     position: relative;
   }

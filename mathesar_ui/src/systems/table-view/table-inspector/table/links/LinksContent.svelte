@@ -134,7 +134,7 @@
     margin-top: 1rem;
   }
   .null-text {
-    color: var(--SYS-text-muted);
+    color: var(--text-muted);
   }
   .header {
     margin-bottom: 0.5rem;

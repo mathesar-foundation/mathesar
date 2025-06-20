@@ -104,30 +104,30 @@
     --z-index-hyperlink-overlay: 1;
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--SYS-border-card);
-    background-color: var(--SYS-surface-card);
+    border: 1px solid var(--border-card);
+    background-color: var(--surface-card);
     padding: var(--lg1);
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
-    box-shadow: inset 0 0 0 1px var(--SYS-surface-card-muted);
+    box-shadow: inset 0 0 0 1px var(--surface-card-muted);
   }
 
   .schema-row.hover {
-    border: 1px solid var(--SYS-color-schema-10);
-    box-shadow: 0 1px 2px 0 var(--SYS-color-schema-hover-10);
-    background: var(--SYS-color-schema-active-5);
+    border: 1px solid var(--color-schema-10);
+    box-shadow: 0 1px 2px 0 var(--color-schema-hover-10);
+    background: var(--color-schema-active-5);
   }
 
   .schema-row:active {
-    border: 1px solid var(--SYS-color-schema-20);
-    box-shadow: 0 1px 2px 0 var(--SYS-color-schema-active-20);
-    background: var(--SYS-color-schema-active-10);
+    border: 1px solid var(--color-schema-20);
+    box-shadow: 0 1px 2px 0 var(--color-schema-active-20);
+    background: var(--color-schema-active-10);
   }
 
   .schema-row.focus {
-    outline: 1px solid var(--SYS-color-schema-active-20);
+    outline: 1px solid var(--color-schema-active-20);
     outline-offset: 1px;
   }
 
@@ -145,7 +145,7 @@
   }
 
   .icon-container {
-    background: var(--SYS-color-schema-80);
+    background: var(--color-schema-80);
     border-radius: 50%;
     width: 2rem;
     height: 2rem;
@@ -154,7 +154,7 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: var(--z-index-menu-trigger);
-    color: var(--SYS-surface-light);
+    color: var(--surface-light);
   }
 
   .hyperlink-overlay {
@@ -173,7 +173,7 @@
   .description {
     font-weight: 400;
     font-size: 1rem;
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -190,7 +190,7 @@
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    color: var(--SYS-text-tertiary);
+    color: var(--text-tertiary);
     font-size: var(--sm1);
     margin-left: auto;
     margin-right: var(--sm3);
@@ -199,7 +199,7 @@
   .name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
     flex: 1;
     word-break: break-word;
     hyphens: auto;

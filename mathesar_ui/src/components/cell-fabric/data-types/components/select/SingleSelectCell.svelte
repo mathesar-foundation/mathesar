@@ -150,7 +150,7 @@
   // This needs to be global since we do not have actual dom
   // elements in this component
   :global(.dropdown.content.single-select-cell-dropdown) {
-    border: 1px solid var(--SYS-border-grid);
+    border: 1px solid var(--border-grid);
     max-width: 250px;
   }
   .cell {

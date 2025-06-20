@@ -128,7 +128,7 @@
       padding: 0.35rem 0.6rem;
       display: flex;
       align-items: center;
-      border-bottom: 1px solid var(--SYS-border-header);
+      border-bottom: 1px solid var(--border-header);
 
       :global(.checkbox) {
         flex-grow: 0;
@@ -149,7 +149,7 @@
   }
 
   .pk-indicator {
-    color: var(--SYS-text-code);
+    color: var(--text-code);
     display: flex;
     align-items: center;
     justify-content: center;

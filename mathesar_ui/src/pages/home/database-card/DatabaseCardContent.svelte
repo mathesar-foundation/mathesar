@@ -43,7 +43,7 @@
   }
 
   .icon-container {
-    background: var(--SYS-color-database-40);
+    background: var(--color-database-40);
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -61,18 +61,18 @@
   .display-name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
 
   .db-name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-normal);
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
   }
 
   .detail {
     font-size: 1rem;
-    color: var(--SYS-text-disabled);
+    color: var(--text-disabled);
   }
 
   .caret-container {

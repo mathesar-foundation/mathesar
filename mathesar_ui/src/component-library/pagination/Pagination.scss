@@ -18,11 +18,11 @@ ul.pagination {
       cursor: pointer;
 
       &:hover {
-        background-color: var(--SYS-color-selection-hover-25);
+        background-color: var(--color-selection-hover-25);
       }
 
       &:disabled {
-        color: var(--SYS-text-disabled);
+        color: var(--text-disabled);
         background-color: inherit;
         cursor: not-allowed;
       }
@@ -30,7 +30,7 @@ ul.pagination {
 
     button {
       .ellipsis {
-        color: var(--SYS-text-muted);
+        color: var(--text-muted);
       }
 
       &:hover {
@@ -47,17 +47,17 @@ ul.pagination {
 
     &.active {
       .page {
-        background-color: var(--SYS-color-selection-20);
-        color: var(--SYS-text-control);
-        border: 2px solid var(--SYS-color-selection-25);
+        background-color: var(--color-selection-20);
+        color: var(--text-control);
+        border: 2px solid var(--color-selection-25);
       }
     }
 
     &:hover {
       .page {
-        background-color: var(--SYS-color-selection-hover-20);
-        color: var(--SYS-text-control-hover);
-        border-color: var(--SYS-color-selection-hover-25);
+        background-color: var(--color-selection-hover-20);
+        color: var(--text-control-hover);
+        border-color: var(--color-selection-hover-25);
       }
     }
   }

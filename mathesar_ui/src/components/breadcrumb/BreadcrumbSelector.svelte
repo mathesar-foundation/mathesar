@@ -120,10 +120,10 @@
     margin-top: var(--sm5);
     padding-left: 0;
     padding-top: var(--sm5);
-    border-top: 1px solid var(--SYS-border-section);
+    border-top: 1px solid var(--border-section);
   }
   .entity-switcher .trigger {
-    color: var(--SYS-text-navigation);
+    color: var(--text-navigation);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
@@ -131,9 +131,9 @@
 
     &:hover,
     &:active {
-      background-color: var(--SYS-surface-elevated-low-active);
-      color: var(--SYS-text-navigation-hover);
-      border-color: var(--SYS-border-elevated-low);
+      background-color: var(--surface-elevated-low-active);
+      color: var(--text-navigation-hover);
+      border-color: var(--border-elevated-low);
     }
   }
 </style>

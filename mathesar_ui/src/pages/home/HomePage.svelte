@@ -37,10 +37,10 @@
     icon={CommunityResource}
     --header-color="linear-gradient(
       135deg in hsl,
-      var(--SYS-color-brand-15),
-      var(--SYS-color-database-15),
-      var(--SYS-color-schema-15),
-      var(--SYS-color-table-15)
+      var(--color-brand-15),
+      var(--color-database-15),
+      var(--color-schema-15),
+      var(--color-table-15)
     )"
   />
   <div class="content">

@@ -42,7 +42,7 @@
   .tag {
     .name {
       font-size: var(--sm1);
-      color: var(--SYS-text-muted);
+      color: var(--text-muted);
       display: flex;
       align-items: center;
       gap: 0.14rem;
@@ -50,7 +50,7 @@
 
       .preproc {
         font-size: var(--sm3);
-        border: 1px solid var(--SYS-text-muted);
+        border: 1px solid var(--text-muted);
         padding: 0rem 0.3rem;
         border-radius: 5rem;
       }

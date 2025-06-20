@@ -98,12 +98,12 @@
     entityTypeName={$_('database')}
     --header-color="linear-gradient(
       135deg,
-      var(--SYS-surface-elevated-low) 10%,
-      var(--SYS-surface-supporting) 30%,
-      var(--SYS-color-database-20) 50%,
-      var(--SYS-color-database-10) 100%
+      var(--surface-elevated-low) 10%,
+      var(--surface-supporting) 30%,
+      var(--color-database-20) 50%,
+      var(--color-database-10) 100%
     )"
-    --entity-name-color="var(--SYS-color-database)"
+    --entity-name-color="var(--color-database)"
   >
     <div slot="subText" class="database-info">
       <div class="connection-details">
@@ -210,7 +210,7 @@
   .database-info {
     font-size: 1rem;
     font-weight: var(--font-weight-bold);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
     margin-top: var(--sm5);
   }
   .connection-details {
@@ -220,7 +220,7 @@
     flex-wrap: wrap;
   }
   .database-info .label {
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
     margin-right: var(--sm5);
   }
   .actions-container {

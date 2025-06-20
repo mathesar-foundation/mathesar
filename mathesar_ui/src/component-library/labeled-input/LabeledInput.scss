@@ -4,7 +4,7 @@
 
   .label {
     display: inline-block;
-    color: var(--SYS-text-label);
+    color: var(--text-label);
   }
   .input {
     display: block;
@@ -19,7 +19,7 @@
   .label-content > .help {
     display: block;
     font-size: var(--sm1);
-    color: var(--SYS-text-muted);
+    color: var(--text-muted);
     margin-top: var(--spacing-y, var(--spacing-y-default));
     &:empty {
       display: none;
@@ -29,7 +29,7 @@
   .description {
     display: block;
     font-size: var(--sm1);
-    color: var(--SYS-text-muted);
+    color: var(--text-muted);
     margin-top: var(--spacing-y, var(--spacing-y-default));
     margin-left: 1.5rem;
     &:empty {

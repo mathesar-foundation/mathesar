@@ -56,7 +56,7 @@
 <style lang="scss">
   .group-header {
     padding: var(--sm4) var(--lg1);
-    background-color: var(--SYS-surface-elevated-low);
+    background-color: var(--surface-elevated-low);
 
     .groups-data {
       align-items: start;
@@ -66,8 +66,8 @@
 
     .count-container {
       --badge-font-size: var(--sm1);
-      --badge-text-color: var(--SYS-text-secondary);
-      --badge-background-color: var(--SYS-surface-card);
+      --badge-text-color: var(--text-secondary);
+      --badge-background-color: var(--surface-card);
       height: 100%;
     }
   }

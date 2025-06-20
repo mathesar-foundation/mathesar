@@ -21,15 +21,15 @@
 
 <style>
   .link {
-    color: var(--SYS-text-link);
+    color: var(--text-link);
   }
   .link:hover {
-    color: var(--SYS-text-link-hover);
+    color: var(--text-link-hover);
   }
   .link:visited {
-    color: var(--SYS-text-visited-link);
+    color: var(--text-visited-link);
   }
   .link:visited:hover {
-    color: var(--SYS-text-visited-link-hover);
+    color: var(--text-visited-link-hover);
   }
 </style>

@@ -65,7 +65,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--entity-name-color, var(--SYS-text-tertiary));
+    color: var(--entity-name-color, var(--text-tertiary));
     margin-right: var(--sm5);
   }
 
@@ -85,7 +85,7 @@
     font-size: var(--lg1);
     font-weight: 600;
     line-height: 1;
-    color: var(--entity-name-color, var(--SYS-text-tertiary));
+    color: var(--entity-name-color, var(--text-tertiary));
   }
 
   .entity-name {
@@ -93,6 +93,6 @@
     font-size: var(--lg3);
     line-height: 1;
     margin-bottom: var(--sm6);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
 </style>

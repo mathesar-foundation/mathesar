@@ -156,7 +156,7 @@
 
     .null {
       font-style: italic;
-      color: var(--SYS-text-muted);
+      color: var(--text-muted);
     }
   }
 </style>

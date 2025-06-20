@@ -74,7 +74,7 @@
 
   .entity-name-container {
     font-size: var(--sm1);
-    background-color: var(--SYS-surface-card);
+    background-color: var(--surface-card);
     border-radius: var(--border-radius-xl);
     padding: 0.285rem 0.428rem;
     font-weight: var(--font-weight-bold);

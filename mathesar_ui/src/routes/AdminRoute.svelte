@@ -43,9 +43,9 @@
     icon={iconSettingsMajor}
     --header-color="linear-gradient(
       135deg,
-      var(--SYS-color-navigation-40), 35%,
-      var(--SYS-surface-base) 50%,
-      var(--SYS-color-navigation-20) 100%
+      var(--color-navigation-40), 35%,
+      var(--surface-base) 50%,
+      var(--color-navigation-20) 100%
     )"
   />
   <PageLayoutWithSidebar>

@@ -141,20 +141,20 @@
     max-height: var(--input-height);
     left: var(--padding);
     width: calc(100% - 2 * var(--padding));
-    background: var(--SYS-surface-input);
+    background: var(--surface-input);
     border-radius: 0.2rem;
     border: none;
-    box-shadow: 0 0 0 0.1rem var(--SYS-border-shadow);
+    box-shadow: 0 0 0 0.1rem var(--border-shadow);
     outline: none;
     resize: none;
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
     scrollbar-width: none;
   }
   .column-header-cell :global(.record-selector-input::-webkit-scrollbar) {
     display: none;
   }
   .column-header-cell.has-nested-selector-open :global(.record-selector-input) {
-    box-shadow: 0 0 0 0.2rem var(--SYS-border-header);
+    box-shadow: 0 0 0 0.2rem var(--border-header);
     z-index: 2;
     pointer-events: none;
   }
@@ -162,7 +162,7 @@
   .column-header-cell :global(textarea) {
     line-height: 1;
     padding: 0.6rem 0.4rem;
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
   .column-header-cell :global(.linked-record-input) {
     position: relative;
@@ -185,7 +185,7 @@
     left: 0;
     right: calc(-1 * var(--border-width));
     bottom: calc(-1 * var(--separator-width));
-    background: var(--SYS-border-shadow);
+    background: var(--border-shadow);
     z-index: 1;
   }
 </style>

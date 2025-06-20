@@ -34,12 +34,12 @@
 <style>
   .td {
     --max-column-width: 30ch;
-    --outline-color: var(--SYS-semantic-help-border);
+    --outline-color: var(--semantic-help-border);
     --separator-width: 7px;
     display: table-cell;
     vertical-align: middle;
     border-style: solid;
-    border-color: var(--SYS-border-grid);
+    border-color: var(--border-grid);
     border-width: 0;
     /** Set from parent to so that first row gets border */
     border-top-width: var(--border-top-width, 0);
@@ -53,7 +53,7 @@
   }
 
   .column-header {
-    background: var(--SYS-surface-header);
+    background: var(--surface-header);
     border-bottom-width: var(--separator-width);
     position: sticky;
     top: 0;
@@ -67,7 +67,7 @@
     position: sticky;
     left: 0;
     z-index: var(--z-index__record_selector__row-header);
-    background: var(--SYS-surface-header);
+    background: var(--surface-header);
     min-width: 3ch;
   }
   .row-header.row-is-selected {
@@ -91,25 +91,25 @@
      */
     --overflow-shadow-spread: 0.5rem;
     --overflow-shadow: 0 0 var(--overflow-shadow-size)
-      var(--overflow-shadow-spread) var(--SYS-border-shadow);
+      var(--overflow-shadow-spread) var(--border-shadow);
     --clip-path-size: -1rem;
   }
   .table-overflow-left.row-header {
     box-shadow: calc(-1 * var(--overflow-shadow-spread)) 0
       var(--overflow-shadow-size) var(--overflow-shadow-spread)
-      var(--SYS-border-shadow);
+      var(--border-shadow);
     clip-path: inset(0 var(--clip-path-size) 0 0);
   }
   .table-overflow-top.column-header {
     box-shadow: 0 calc(-1 * var(--overflow-shadow-spread))
       var(--overflow-shadow-size) var(--overflow-shadow-spread)
-      var(--SYS-border-shadow);
+      var(--border-shadow);
     clip-path: inset(0 0 var(--clip-path-size) 0);
   }
   .table-overflow-top.table-overflow-left.row-header.column-header {
     box-shadow: calc(-1 * var(--overflow-shadow-spread))
       calc(-1 * var(--overflow-shadow-spread)) var(--overflow-shadow-size)
-      var(--overflow-shadow-spread) var(--SYS-border-shadow);
+      var(--overflow-shadow-spread) var(--border-shadow);
     clip-path: inset(0 var(--clip-path-size) var(--clip-path-size) 0);
   }
 </style>

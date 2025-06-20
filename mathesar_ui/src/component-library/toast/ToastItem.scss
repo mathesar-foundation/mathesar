@@ -4,11 +4,11 @@
   min-height: 2.5rem;
   margin: 0 0 0.5rem 0;
   padding: var(--sm1);
-  background-color: var(--SYS-semantic-info-bg);
-  color: var(--SYS-text-primary);
+  background-color: var(--semantic-info-bg);
+  color: var(--text-primary);
   box-shadow:
-    0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-    0 2px 4px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent 6%);
+    0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent 10%),
+    0 2px 4px -1px color-mix(in srgb, var(--border-shadow), transparent 6%);
   border: none;
   border-radius: var(--sm4);
   position: relative;

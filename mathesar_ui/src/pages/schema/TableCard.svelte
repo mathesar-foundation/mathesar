@@ -100,9 +100,7 @@
   >
     <div class="table-info">
       <div class="table-name">
-        <TableName
-          {table}
-        />
+        <TableName {table} />
       </div>
       {#if description}
         <div class="description">
@@ -201,8 +199,8 @@
     position: relative;
     display: flex;
     align-items: center;
-    border: 1px solid var(--SYS-border-card);
-    background-color: var(--SYS-surface-card);
+    border: 1px solid var(--border-card);
+    background-color: var(--surface-card);
     overflow: hidden;
     border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
       var(--corner-bl);
@@ -226,20 +224,20 @@
   }
 
   .table-row.focus:not(:hover) {
-    outline: 1px solid var(--SYS-border-card-focused);
+    outline: 1px solid var(--border-card-focused);
     outline-offset: -1px;
   }
 
   .table-row:hover {
-    border: 1px solid var(--SYS-color-table-15);
-    box-shadow: 0 1px 2px 0 var(--SYS-color-table-hover-15);
-    background: var(--SYS-color-table-hover-10);
+    border: 1px solid var(--color-table-15);
+    box-shadow: 0 1px 2px 0 var(--color-table-hover-15);
+    background: var(--color-table-hover-10);
     padding-left: 0;
     &::before {
       content: '';
       border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
         var(--corner-bl);
-      border-left: solid 3px var(--SYS-color-table-40);
+      border-left: solid 3px var(--color-table-40);
       position: absolute;
       height: 100%;
       width: 10px;
@@ -250,14 +248,14 @@
   }
 
   .table-row:active {
-    border: 1px solid var(--SYS-color-table-20);
-    box-shadow: 0 1px 2px 0 var(--SYS-color-table-active-20);
-    background: var(--SYS-color-table-active-15);
+    border: 1px solid var(--color-table-20);
+    box-shadow: 0 1px 2px 0 var(--color-table-active-20);
+    background: var(--color-table-active-15);
   }
 
   .table-row.unconfirmed-import {
-    color: var(--SYS-text-disabled);
-    background-color: var(--SYS-surface-card-disabled);
+    color: var(--text-disabled);
+    background-color: var(--surface-card-disabled);
   }
 
   .row-content {
@@ -282,12 +280,12 @@
   .table-name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
 
   .description {
     font-size: 1rem;
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
     font-weight: var(--font-weight-normal);
     overflow: hidden;
     line-height: 1.2;
@@ -300,8 +298,8 @@
 
   .import-status {
     font-size: var(--sm1);
-    color: var(--SYS-semantic-warning-text);
-    background: var(--SYS-semantic-warning-bg);
+    color: var(--semantic-warning-text);
+    background: var(--semantic-warning-bg);
     padding: 0.25rem 0.5rem;
     border-radius: var(--border-radius-m);
   }

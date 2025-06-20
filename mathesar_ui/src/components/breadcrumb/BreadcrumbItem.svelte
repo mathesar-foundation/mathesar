@@ -57,7 +57,9 @@
         item.record.pk,
       )}
     >
-      <NameWithIcon icon={iconRecord} --icon-color='var(--SYS-color-record)'>{item.record.summary}</NameWithIcon>
+      <NameWithIcon icon={iconRecord} --icon-color="var(--color-record)"
+        >{item.record.summary}</NameWithIcon
+      >
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'exploration'}
@@ -92,7 +94,7 @@
 <style lang="scss">
   .breadcrumb-item {
     --NameWithIcon__icon-opacity: 1;
-    --SchemaName__locked-schema-icon-color: var(--SYS-text-inverted);
+    --SchemaName__locked-schema-icon-color: var(--text-inverted);
 
     display: flex;
     flex-shrink: 0;
@@ -113,8 +115,8 @@
     }
 
     :global(.postgres-keyword) {
-      color: var(--SYS-text-muted);
-      background: var(--SYS-text-disabled);
+      color: var(--text-muted);
+      background: var(--text-disabled);
       padding: var(--sm3) var(--sm2);
       border-radius: var(--border-radius-s);
     }

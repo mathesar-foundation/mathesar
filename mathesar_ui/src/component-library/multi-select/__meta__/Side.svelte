@@ -17,10 +17,10 @@
 
 <style>
   .icon {
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
   }
   .price {
     font-style: italic;
-    color: var(--SYS-text-tertiary);
+    color: var(--text-tertiary);
   }
 </style>

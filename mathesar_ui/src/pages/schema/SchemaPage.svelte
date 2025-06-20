@@ -53,12 +53,12 @@
     entityTypeName={$_('schema')}
     --header-color="linear-gradient(
       135deg,
-      var(--SYS-color-schema-10) 10%,
-      var(--SYS-surface-supporting) 50%,
-      var(--SYS-color-schema-15) 90%,
-      var(--SYS-color-brand-10) 100%
+      var(--color-schema-10) 10%,
+      var(--surface-supporting) 50%,
+      var(--color-schema-15) 90%,
+      var(--color-brand-10) 100%
     )"
-    --entity-name-color="var(--SYS-color-schema)"
+    --entity-name-color="var(--color-schema)"
   >
     <div slot="action" class="action-buttons">
       <Button
@@ -104,7 +104,7 @@
 
 <style>
   .description {
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
   }
 
   .action-buttons {

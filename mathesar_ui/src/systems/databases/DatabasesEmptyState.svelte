@@ -49,7 +49,7 @@
     --tutorial_padding: 3.5rem 1.5rem;
 
     [data-identifier='connection-icon'] {
-      color: var(--SYS-text-secondary);
+      color: var(--text-secondary);
     }
     [data-identifier='no-connections-help'] {
       margin-top: var(--sm5);

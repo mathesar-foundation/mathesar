@@ -234,16 +234,16 @@
 <style>
   .import-file-view {
     padding: var(--lg3);
-    border: 1px solid var(--SYS-border-section);
+    border: 1px solid var(--border-section);
     border-radius: var(--border-radius-m);
-    background-color: var(--SYS-surface-elevated-low);
+    background-color: var(--surface-elevated-low);
     margin-bottom: 2rem;
   }
 
   .fieldset {
-    border: 1px solid var(--SYS-border-section);
+    border: 1px solid var(--border-section);
     border-radius: var(--border-radius-m);
-    background-color: var(--SYS-surface-elevated-high);
+    background-color: var(--surface-elevated-high);
   }
 
   .data-source-input {
@@ -252,13 +252,13 @@
 
   .upload-format-help {
     line-height: 1.2;
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
     text-align: right;
     font-size: var(--sm1);
   }
 
   .processing-spinner {
-    color: var(--SYS-text-icon);
+    color: var(--text-icon);
     font-size: 1.5rem;
     margin-bottom: 1rem;
   }

@@ -16,6 +16,6 @@
     fill: none;
   }
   .inner {
-    fill: var(--SYS-color-brand);
+    fill: var(--color-brand);
   }
 </style>

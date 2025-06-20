@@ -6,7 +6,7 @@
   min-width: var(--Menu__min-width, 0);
 
   .menu-heading {
-    color: var(--SYS-text-disabled);
+    color: var(--text-disabled);
     padding: 0 var(--sm3);
     margin-top: var(--sm3);
     font-weight: var(--font-weight-medium);
@@ -14,13 +14,12 @@
 
   .menu-divider {
     margin-top: var(--sm5);
-    border-top: 0.1em solid
-      var(--Menu__divider-color, var(--SYS-border-divider));
+    border-top: 0.1em solid var(--Menu__divider-color, var(--border-divider));
     height: 0;
   }
 
   .menu-item {
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
     display: flex;
     flex-grow: 1;
     align-items: center;
@@ -35,8 +34,8 @@
     }
     &.menu-item-link:not(.disabled):hover,
     &.menu-item-button:not(.disabled):hover {
-      background-color: var(--SYS-color-navigation-hover-20);
-      color: var(--SYS-text-navigation);
+      background-color: var(--color-navigation-hover-20);
+      color: var(--text-navigation);
     }
     &.menu-item-button {
       border: inherit;
@@ -46,19 +45,19 @@
       text-align: inherit;
     }
     &.danger {
-      color: var(--SYS-semantic-danger-text);
+      color: var(--semantic-danger-text);
 
       &:hover {
-        background-color: var(--SYS-semantic-danger-bg);
-        color: var(--SYS-semantic-danger-text);
+        background-color: var(--semantic-danger-bg);
+        color: var(--semantic-danger-text);
       }
       .icon {
-        color: var(--SYS-semantic-danger-icon);
+        color: var(--semantic-danger-icon);
       }
     }
 
     &.disabled {
-      color: var(--SYS-text-disabled);
+      color: var(--text-disabled);
       cursor: not-allowed;
       opacity: 0.6;
     }
@@ -75,18 +74,18 @@
       display: inline-flex;
       align-items: center;
       flex-grow: 0;
-      color: var(--icon-fill-color, var(--SYS-text-icon));
+      color: var(--icon-fill-color, var(--text-icon));
     }
     > .control {
       --checkbox-margin-bottom: 0;
     }
     &.active {
-      background-color: var(--SYS-color-navigation-active-20);
+      background-color: var(--color-navigation-active-20);
       font-weight: var(--font-weight-medium);
 
       &:hover {
-        background-color: var(--SYS-color-navigation-hover-20);
-        color: var(--SYS-text-inverted);
+        background-color: var(--color-navigation-hover-20);
+        color: var(--text-inverted);
       }
     }
   }

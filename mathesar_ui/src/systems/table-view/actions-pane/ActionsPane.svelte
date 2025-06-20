@@ -54,8 +54,8 @@
     description: table.description ?? undefined,
     icon: iconTable,
   }}
-  --icon-fill-color="linear-gradient(135deg, var(--SYS-color-table), var(--SYS-color-table-80))"
-  --icon-stroke-color="var(--SYS-text-inverted)"
+  --icon-fill-color="linear-gradient(135deg, var(--color-table), var(--color-table-80))"
+  --icon-stroke-color="var(--text-inverted)"
 >
   {#if isSelectable}
     <div class="quick-access">
@@ -136,7 +136,7 @@
   .no-pk-warning {
     display: flex;
     align-items: center;
-    color: var(--SYS-semantic-warning-icon);
+    color: var(--semantic-warning-icon);
   }
 
   .aux-actions {

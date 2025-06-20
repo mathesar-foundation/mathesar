@@ -123,7 +123,7 @@
 
 <style lang="scss">
   .error {
-    color: var(--SYS-semantic-danger-text);
+    color: var(--semantic-danger-text);
     font-size: 0.8rem;
   }
 

@@ -38,15 +38,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--SYS-color-database-80);
+    color: var(--color-database-80);
   }
   .header {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
   .description {
-    color: var(--SYS-text-tertiary);
+    color: var(--text-tertiary);
     margin-top: var(--sm4);
   }
 </style>

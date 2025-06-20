@@ -322,17 +322,17 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
   }
   .preview-header {
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
-    background-color: var(--SYS-surface-header);
-    border-top: 1px solid var(--SYS-border-card);
+    background-color: var(--surface-header);
+    border-top: 1px solid var(--border-card);
   }
   .preview-content {
     padding-bottom: 1rem;
-    background-color: var(--SYS-surface-canvas);
+    background-color: var(--surface-canvas);
   }
   .sheet-holder {
     overflow-x: auto;
@@ -343,6 +343,6 @@
   .truncation-alert {
     margin: 1rem auto 0 auto;
     max-width: max-content;
-    color: var(--SYS-text-muted);
+    color: var(--text-muted);
   }
 </style>

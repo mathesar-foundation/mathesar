@@ -31,42 +31,41 @@
 
   /* Appearances */
   &.btn-default {
-    --button-background: var(--SYS-surface-control);
-    --button-border-color: var(--SYS-border-control);
-    --button-shadow: var(--SYS-surface-base) 0 1px 2px 0,
-      var(--SYS-border-shadow) 0 1px 3px 0;
+    --button-background: var(--surface-control);
+    --button-border-color: var(--border-control);
+    --button-shadow: var(--surface-base) 0 1px 2px 0,
+      var(--border-shadow) 0 1px 3px 0;
 
     &:not(:disabled) {
       &:focus {
-        --button-background: var(--SYS-surface-control-focus);
-        --button-border-color: var(--SYS-border-control-focus);
+        --button-background: var(--surface-control-focus);
+        --button-border-color: var(--border-control-focus);
       }
     }
 
     &.dropdown {
-      background: var(--SYS-surface-input);
-      --button-border-color: var(--SYS-border-input);
+      background: var(--surface-input);
+      --button-border-color: var(--border-input);
     }
   }
 
   &.btn-primary {
     --button-background: linear-gradient(
       to bottom right,
-      var(--SYS-color-primary),
-      var(--SYS-color-primary-80)
+      var(--color-primary),
+      var(--color-primary-80)
     );
-    --button-border-color: var(--SYS-border-control);
-    --button-color: var(--SYS-text-light);
+    --button-border-color: var(--border-control);
+    --button-color: var(--text-light);
     box-shadow:
-      0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
-      0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
-      0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
-            80%);
+      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--SYS-color-primary-80);
+        --button-outline: 2px solid var(--color-primary-80);
         outline-offset: 1px;
       }
 
@@ -74,16 +73,16 @@
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-color-primary-hover-80),
-          var(--SYS-color-primary-hover-60)
+          var(--color-primary-hover-80),
+          var(--color-primary-hover-60)
         );
-        --button-border-color: var(--SYS-border-control-hover);
+        --button-border-color: var(--border-control-hover);
         box-shadow:
-          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
                 75%),
-          0 1px 3px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 1px 3px -2px color-mix(in srgb, var(--border-shadow), transparent
                 80%),
-          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
                 80%);
       }
 
@@ -91,98 +90,94 @@
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-color-primary-active-80),
-          var(--SYS-color-primary-active-60)
+          var(--color-primary-active-80),
+          var(--color-primary-active-60)
         );
-        --button-border-color: var(--SYS-border-control-hover);
-        --button-shadow: var(--SYS-border-shadow) 0 1px 2px 0;
+        --button-border-color: var(--border-control-hover);
+        --button-shadow: var(--border-shadow) 0 1px 2px 0;
       }
     }
   }
 
   &.btn-secondary {
-    background-color: var(--SYS-color-navigation-20);
-    --button-border: 0.5px var(--SYS-border-control);
-    --button-color: var(--SYS-text-control);
+    background-color: var(--color-navigation-20);
+    --button-border: 0.5px var(--border-control);
+    --button-color: var(--text-control);
     box-shadow:
-      0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
-      0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
-      0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
-            80%);
+      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
 
     &:not(:disabled):not(.page) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--SYS-border-control-active);
+        --button-outline: 2px solid var(--border-control-active);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        background-color: var(--SYS-color-navigation-hover-25);
-        --button-border-color: var(--SYS-border-control-hover);
+        background-color: var(--color-navigation-hover-25);
+        --button-border-color: var(--border-control-hover);
         box-shadow:
-          0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
-          0 2px 4px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
-          0 0 0 1px
-            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) inset;
+          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%)
+            inset;
       }
 
       &:active,
       &.active {
-        background-color: var(--SYS-color-navigation-active-25);
-        --button-border-color: var(--SYS-border-control-active);
+        background-color: var(--color-navigation-active-25);
+        --button-border-color: var(--border-control-active);
         box-shadow:
-          0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
-          0 1px 3px
-            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%);
       }
     }
   }
 
   &.btn-option-card {
-    background-color: var(--SYS-surface-elevated-high);
-    --button-border-color: var(--SYS-border-elevated-mid);
-    --button-color: var(--SYS-text-control);
+    background-color: var(--surface-elevated-high);
+    --button-border-color: var(--border-elevated-mid);
+    --button-color: var(--text-control);
     box-shadow:
-      0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
-      0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-      0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
-            10%);
+      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 10%);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--SYS-color-database-40);
+        --button-outline: 2px solid var(--color-database-40);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        background-color: var(--SYS-color-database-hover-10);
-        --button-border-color: var(--SYS-color-database-hover-20);
+        background-color: var(--color-database-hover-10);
+        --button-border-color: var(--color-database-hover-20);
         box-shadow:
-          0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
-          0 2px 4px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
-          0 0 0 1px
-            color-mix(in srgb, var(--SYS-border-shadow), transparent 5%) inset;
+          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 5%)
+            inset;
       }
 
       &:active,
       &.active {
-        background-color: var(--SYS-color-database-active-10);
-        --button-border-color:var(--SYS-color-database-active-20);
+        background-color: var(--color-database-active-10);
+        --button-border-color: var(--color-database-active-20);
         box-shadow:
-          0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
-          0 1px 3px
-            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%);
       }
     }
@@ -191,35 +186,34 @@
   &.btn-danger {
     --button-background: transparent;
     border: transparent;
-    --button-color: var(--SYS-semantic-danger-text);
+    --button-color: var(--semantic-danger-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
         --button-background: color-mix(
           in srgb,
-          var(--SYS-semantic-danger-inner-bg),
+          var(--semantic-danger-inner-bg),
           transparent 60%
         );
-        border: 2px solid var(--SYS-semantic-danger-inner-border-hover);
-        --button-color: var(--SYS-semantic-danger-text-hover);
+        border: 2px solid var(--semantic-danger-inner-border-hover);
+        --button-color: var(--semantic-danger-text-hover);
       }
 
       &:active,
       &.active {
         --button-background: color-mix(
           in srgb,
-          var(--SYS-semantic-danger-inner-bg),
+          var(--semantic-danger-inner-bg),
           transparent 50%
         );
-        --button-border-color: var(--SYS-semantic-danger-inner-border-active);
-        --button-color: var(--SYS-semantic-danger-text-active);
+        --button-border-color: var(--semantic-danger-inner-border-active);
+        --button-color: var(--semantic-danger-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid
-          var(--SYS-semantic-danger-inner-border-focused);
+        --button-outline: 2px solid var(--semantic-danger-inner-border-focused);
         outline-offset: 1px;
       }
     }
@@ -228,34 +222,34 @@
   &.btn-outcome {
     --button-background: transparent;
     border: transparent;
-    --button-color: var(--SYS-semantic-outcome-text);
+    --button-color: var(--semantic-outcome-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
         --button-background: color-mix(
           in srgb,
-          var(--SYS-semantic-outcome-inner-bg),
+          var(--semantic-outcome-inner-bg),
           transparent 60%
         );
-        border: 2px solid var(--SYS-semantic-outcome-inner-border-hover);
-        --button-color: var(--SYS-semantic-outcome-text-hover);
+        border: 2px solid var(--semantic-outcome-inner-border-hover);
+        --button-color: var(--semantic-outcome-text-hover);
       }
 
       &:active,
       &.active {
         --button-background: color-mix(
           in srgb,
-          var(--SYS-semantic-outcome-inner-bg),
+          var(--semantic-outcome-inner-bg),
           transparent 50%
         );
-        --button-border-color: var(--SYS-semantic-outcome-inner-border-active);
-        --button-color: var(--SYS-semantic-outcome-text-active);
+        --button-border-color: var(--semantic-outcome-inner-border-active);
+        --button-color: var(--semantic-outcome-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-semantic-outcome-border-focused);
+        --button-outline: 2px solid var(--semantic-outcome-border-focused);
         outline-offset: 1px;
       }
     }
@@ -267,8 +261,8 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--SYS-color-navigation-80);
-        --button-color: var(--SYS-text-primary);
+        --button-background: var(--color-navigation-80);
+        --button-color: var(--text-primary);
       }
     }
   }
@@ -295,42 +289,40 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--SYS-surface-control-hover);
+        --button-background: var(--surface-control-hover);
       }
 
       &:active,
       &.active {
-        --button-background: var(--SYS-surface-control-active);
-        box-shadow: 0 0 0 2px var(--SYS-surface-control-active) !important;
+        --button-background: var(--surface-control-active);
+        box-shadow: 0 0 0 2px var(--surface-control-active) !important;
       }
 
       &:focus,
       &.focus {
-        --button-background: var(--SYS-surface-control-focused);
-        border-color: var(--SYS-border-control-focused);
+        --button-background: var(--surface-control-focused);
+        border-color: var(--border-control-focused);
         box-shadow:
-          0 2px 4px
-            color-mix(in srgb, var(--SYS-border-shadow), transparent 15%),
-          0 1px 2px
-            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%);
+          0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%);
         outline: none;
       }
       &.close-button {
         --button-background: transparent;
         &:hover,
         &.hover {
-          color: var(--SYS-text-muted);
+          color: var(--text-muted);
         }
 
         &:active,
         &.active {
-          color: var(--SYS-text-muted);
+          color: var(--text-muted);
         }
 
         &:focus,
         &.focus {
           --button-background: transparent;
-          color: var(--SYS-semantic-danger-bg);
+          color: var(--semantic-danger-bg);
         }
       }
     }
@@ -339,22 +331,22 @@
   &.btn-danger-ghost {
     --button-background: transparent;
     border: transparent;
-    --button-color: var(--SYS-semantic-danger-text);
+    --button-color: var(--semantic-danger-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-color: var(--SYS-semantic-danger-text-hover);
+        --button-color: var(--semantic-danger-text-hover);
       }
 
       &:active,
       &.active {
-        --button-color: var(--SYS-semantic-danger-text-active);
+        --button-color: var(--semantic-danger-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-semantic-danger-border-focused);
+        --button-outline: 2px solid var(--semantic-danger-border-focused);
         outline-offset: 1px;
       }
     }
@@ -386,7 +378,7 @@
   }
 
   &.danger {
-    --button-color: var(--SYS-semantic-danger-text);
+    --button-color: var(--semantic-danger-text);
   }
 
   /* State */
@@ -396,8 +388,8 @@
   }
 
   &.btn-action {
-    --button-background: var(--SYS-color-navigation-10);
-    color: var(--SYS-text-navigation);
+    --button-background: var(--color-navigation-10);
+    color: var(--text-navigation);
     border: transparent;
 
     &:not(:disabled) {
@@ -405,101 +397,99 @@
       &.hover {
         --button-background: color-mix(
           in srgb,
-          var(--SYS-color-navigation-20),
+          var(--color-navigation-20),
           transparent 60%
         );
-        border: 2px solid var(--SYS-color-navigation-hover-20);
+        border: 2px solid var(--color-navigation-hover-20);
       }
 
       &:active,
       &.active {
-        --button-background: var(--SYS-color-navigation-active-20);
-        --button-border-color: var(--SYS-color-navigation-active-40);
+        --button-background: var(--color-navigation-active-20);
+        --button-border-color: var(--color-navigation-active-40);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--SYS-color-navigation-active-40);
+        --button-outline: 2px solid var(--color-navigation-active-40);
         outline-offset: 1px;
       }
     }
   }
 
   &.btn-tip {
-    background: var(--SYS-semantic-tip-inner-bg);
-    border: 1px solid var(--SYS-semantic-inner-tip-border);
-    color: var(--SYS-semantic-tip-inner-text);
+    background: var(--semantic-tip-inner-bg);
+    border: 1px solid var(--semantic-inner-tip-border);
+    color: var(--semantic-tip-inner-text);
 
     &:hover {
-      background: var(--SYS-semantic-tip-inner-bg-hover);
-      border: 1px solid var(--SYS-semantic-tip-inner-border-hover);
-      color: var(--SYS-semantic-tip-inner-text-hover);
+      background: var(--semantic-tip-inner-bg-hover);
+      border: 1px solid var(--semantic-tip-inner-border-hover);
+      color: var(--semantic-tip-inner-text-hover);
     }
 
     &:active {
-      background: var(--SYS-semantic-tip-inner-bg-active);
-      border: 1px solid var(--SYS-semantic-tip-inner-border-active);
-      color: var(--SYS-semantic-tip-inner-text-active);
+      background: var(--semantic-tip-inner-bg-active);
+      border: 1px solid var(--semantic-tip-inner-border-active);
+      color: var(--semantic-tip-inner-text-active);
     }
   }
 
   &.btn-refresh {
-    background: var(--SYS-color-highlight-asparagus-20);
-    border: 0.25px solid var(--SYS-color-highlight-asparagus-20);
-    color: var(--SYS-text-control);
+    background: var(--color-highlight-asparagus-20);
+    border: 0.25px solid var(--color-highlight-asparagus-20);
+    color: var(--text-control);
 
     &:hover {
-      background: var(--SYS-color-highlight-asparagus-hover-40);
-      border: 0.25px solid var(--SYS-color-highlight-asparagus-hover-40);
-      color: var(--SYS-text-control-hover);
+      background: var(--color-highlight-asparagus-hover-40);
+      border: 0.25px solid var(--color-highlight-asparagus-hover-40);
+      color: var(--text-control-hover);
     }
 
     &:active {
-      background: var(--SYS-color-highlight-asparagus-active-40);
-      border: 0.25px solid var(--SYS-color-highlight-asparagus-active-40);
-      color: var(--SYS-text-control-active);
+      background: var(--color-highlight-asparagus-active-40);
+      border: 0.25px solid var(--color-highlight-asparagus-active-40);
+      color: var(--text-control-active);
     }
   }
 
   &.btn-inspector {
-    background-color: var(--SYS-color-navigation-15);
-    border: 1px solid var(--SYS-color-navigation-20);
-    --button-color: var(--SYS-text-control);
+    background-color: var(--color-navigation-15);
+    border: 1px solid var(--color-navigation-20);
+    --button-color: var(--text-control);
     box-shadow:
-      0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
-      0 1px 3px color-mix(in srgb, var(--SYS-border-shadow), transparent 80%),
-      0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
-            80%);
+      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--SYS-color-navigation-active-40);
+        --button-outline: 2px solid var(--color-navigation-active-40);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        background-color: var(--SYS-color-navigation-20);
-        --button-border-color: var(--SYS-color-navigation-hover-40);
+        background-color: var(--color-navigation-20);
+        --button-border-color: var(--color-navigation-hover-40);
         box-shadow:
-          0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
-          0 2px 4px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
-          0 0 0 1px
-            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%) inset;
+          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%)
+            inset;
       }
 
       &:active,
       &.active {
-        background-color: var(--SYS-color-navigation-40);
-        --button-border-color: var(--SYS-color-navigation-60);
+        background-color: var(--color-navigation-40);
+        --button-border-color: var(--color-navigation-60);
         box-shadow:
-          0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
-          0 1px 3px
-            color-mix(in srgb, var(--SYS-border-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%);
       }
     }
@@ -510,7 +500,7 @@
     padding: 0.3em;
     height: auto;
     min-height: 0;
-    color: var(--SYS-color-database);
+    color: var(--color-database);
     background-color: transparent;
     border: transparent;
     border-radius: 4px;
@@ -518,19 +508,19 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        color: var(--SYS-color-database-hover);
+        color: var(--color-database-hover);
       }
 
       &:active,
       &.active {
-        color: var(--SYS-color-database-active);
+        color: var(--color-database-active);
       }
     }
   }
 
   &.btn-feedback {
     --button-background: transparent;
-    --button-color: var(--SYS-color-brand-muted);
+    --button-color: var(--color-brand-muted);
     border: 0px;
     padding: var(--sm4) var(--sm2);
     font-weight: var(--font-weight-bold);
@@ -538,16 +528,16 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-color: var(--SYS-color-brand);
+        --button-color: var(--color-brand);
       }
 
       &:active,
       &.active,
       &:focus,
       &.focus {
-        --button-color: var(--SYS-color-brand-active);
+        --button-color: var(--color-brand-active);
         --button-background: transparent;
-        border: 1px solid var(--SYS-color-brand-muted);
+        border: 1px solid var(--color-brand-muted);
       }
     }
   }

@@ -51,7 +51,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--SYS-text-icon);
+      color: var(--text-icon);
     }
 
     :global(.prefixed-input) {

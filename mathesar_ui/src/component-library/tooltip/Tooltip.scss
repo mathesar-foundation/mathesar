@@ -1,13 +1,13 @@
 .dropdown.content.tooltip {
   max-width: min(80vw, 25rem);
-  background: color-mix(in srgb, var(--SYS-semantic-help-inner-bg), transparent 2%);
+  background: color-mix(in srgb, var(--semantic-help-inner-bg), transparent 2%);
   border: solid 1px
-    color-mix(in srgb, var(--SYS-semantic-help-inner-border), transparent 2%);
+    color-mix(in srgb, var(--semantic-help-inner-border), transparent 2%);
   box-shadow:
-    var(--SYS-semantic-help-bg) 0 0 0 0,
-    var(--SYS-semantic-help-bg) 0px 0px 0px 1px,
-    var(--SYS-semantic-help-bg) 0px 4px 4px -3px,
-    var(--SYS-semantic-help-bg) 0px 4px 4px -2px;
-  color: var(--SYS-semantic-help-inner-text);
+    var(--semantic-help-bg) 0 0 0 0,
+    var(--semantic-help-bg) 0px 0px 0px 1px,
+    var(--semantic-help-bg) 0px 4px 4px -3px,
+    var(--semantic-help-bg) 0px 4px 4px -2px;
+  color: var(--semantic-help-inner-text);
   padding: var(--sm2);
 }

@@ -22,7 +22,7 @@ body > .new-item-highlighter {
     .effect {
       background: color-mix(
         in srgb,
-        var(--SYS-semantic-outcome-bg),
+        var(--semantic-outcome-bg),
         transparent 30%
       );
       border-radius: 0.5rem;
@@ -34,7 +34,7 @@ body > .new-item-highlighter {
 body > .new-item-highlighter__hint {
   position: absolute;
   z-index: var(--new-item-highlighter-z-index, 1000);
-  --background: color-mix(in srgb, var(--SYS-surface-base), transparent 70%);
+  --background: color-mix(in srgb, var(--surface-base), transparent 70%);
   inset: 0px auto auto 0px;
   display: flex;
   flex-direction: column;
@@ -47,7 +47,7 @@ body > .new-item-highlighter__hint {
 
   .message {
     background-color: var(--background);
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
     padding: 0.5rem;
     border-radius: 0.3rem;
     max-width: 15rem;

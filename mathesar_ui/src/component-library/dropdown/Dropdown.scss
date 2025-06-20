@@ -15,9 +15,9 @@ button.dropdown.trigger {
       margin-right: 0.25rem;
     }
   }
-  
+
   > .label .name {
-    color: var(--SYS-text-input);
+    color: var(--text-input);
   }
 
   > .arrow {
@@ -26,7 +26,7 @@ button.dropdown.trigger {
     padding: 0 0.1rem;
   }
   &:focus {
-    outline: 1px solid var(--SYS-border-dropdown-focused);
+    outline: 1px solid var(--border-dropdown-focused);
     outline-offset: 1px;
   }
 }
@@ -34,13 +34,13 @@ button.dropdown.trigger {
 .dropdown.content {
   box-shadow: var(
     --Dropdown__box-shadow,
-    var(--SYS-border-shadow) 0 0 0 0,
-    var(--SYS-border-shadow) 0px 0px 0px 1px,
-    var(--SYS-border-shadow) 0px 10px 15px -3px,
-    var(--SYS-border-shadow) 0px 4px 6px -2px
+    var(--border-shadow) 0 0 0 0,
+    var(--border-shadow) 0px 0px 0px 1px,
+    var(--border-shadow) 0px 10px 15px -3px,
+    var(--border-shadow) 0px 4px 6px -2px
   );
-  border: var(--SYS-border-dropdown, 2px solid);
-  background: var(--SYS-surface-elevated-high);
+  border: var(--border-dropdown, 2px solid);
+  background: var(--surface-elevated-high);
   border-radius: var(--border-radius-m);
   z-index: var(--dropdown-z-index, 100);
   max-height: calc(100vh - 0.5rem);
@@ -48,10 +48,10 @@ button.dropdown.trigger {
 
   &[data-popper-placement='top-start'] {
     box-shadow:
-      var(--SYS-border-shadow) 0px -10px 15px -3px,
-      var(--SYS-border-shadow) 0px -4px 2px -2px,
-      var(--SYS-border-shadow) 0px 0px 0px 1px,
-      var(--SYS-border-shadow) 0 0 0 0;
+      var(--border-shadow) 0px -10px 15px -3px,
+      var(--border-shadow) 0px -4px 2px -2px,
+      var(--border-shadow) 0px 0px 0px 1px,
+      var(--border-shadow) 0 0 0 0;
   }
 
   &.no-max-height {

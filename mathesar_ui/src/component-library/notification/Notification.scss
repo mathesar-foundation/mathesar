@@ -3,15 +3,15 @@
   flex-direction: column;
 
   &.danger {
-    background: var(--SYS-semantic-danger-bg);
-    border-left: 6px solid var(--SYS-semantic-danger-border);
-    color: var(--SYS-semantic-danger-text);
+    background: var(--semantic-danger-bg);
+    border-left: 6px solid var(--semantic-danger-border);
+    color: var(--semantic-danger-text);
     padding: 15px;
     border-radius: 3px;
     line-height: 1.4em;
 
     .header {
-      color: var(--SYS-semantic-danger-bg);
+      color: var(--semantic-danger-bg);
     }
   }
 
@@ -33,7 +33,7 @@
     button.btn.close {
       margin-left: 10px;
       padding: 0;
-      color: var(--SYS-text-icon);
+      color: var(--text-icon);
     }
   }
   > .description {

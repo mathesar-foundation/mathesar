@@ -40,19 +40,19 @@
   .role-with-children {
     .name {
       padding: var(--sm6) var(--sm2);
-      background: var(--SYS-color-database-20);
-      border: 1px solid var(--SYS-color-database);
+      background: var(--color-database-20);
+      border: 1px solid var(--color-database);
       border-radius: var(--border-radius-xl);
       font-weight: var(--font-weight-medium);
       display: inline-flex;
       align-items: center;
       gap: var(--sm4);
-      color: var(--SYS-text-primary);
+      color: var(--text-primary);
       font-size: 1rem;
     }
     .member-count {
       font-size: var(--sm1);
-      color: var(--SYS-text-disabled);
+      color: var(--text-disabled);
       margin-left: var(--sm4);
     }
     .members {
@@ -61,7 +61,7 @@
         display: flex;
         align-items: center;
         gap: var(--sm4);
-        color: var(--SYS-text-disabled);
+        color: var(--text-disabled);
         font-size: var(--sm1);
 
         &:last-child {

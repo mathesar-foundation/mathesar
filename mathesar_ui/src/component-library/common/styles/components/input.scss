@@ -1,9 +1,9 @@
 .input-element {
-  border: 1px solid var(--SYS-border-input);
+  border: 1px solid var(--border-input);
   align-items: center;
   border-radius: var(--border-radius-m);
-  background: var(--SYS-surface-input);
-  color: var(--SYS-text-input);
+  background: var(--surface-input);
+  color: var(--text-input);
   margin: 0;
   padding: var(--input-padding);
   line-height: var(--input-line-height);
@@ -15,27 +15,27 @@
   text-align: var(--input-element-text-align, 'left');
 
   &::placeholder {
-    color: var(--SYS-text-disabled);
+    color: var(--text-disabled);
   }
 
   &:focus {
-    border-color: var(--SYS-border-input-focused);
+    border-color: var(--border-input-focused);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--SYS-surface-input-focused);
+    box-shadow: 0 0 0 2px var(--surface-input-focused);
   }
 
   &:disabled {
-    background: var(--SYS-surface-input-disabled);
-    color: var(--SYS-text-disabled);
+    background: var(--surface-input-disabled);
+    color: var(--text-disabled);
   }
 
   &.read-only {
-    background: var(--SYS-surface-input-disabled);
+    background: var(--surface-input-disabled);
   }
 
   &.has-error {
-    border-color: var(--SYS-semantic-danger-text);
-    background: var(--SYS-semantic-danger-bg);
+    border-color: var(--semantic-danger-text);
+    background: var(--semantic-danger-bg);
   }
 
   &.text-area {

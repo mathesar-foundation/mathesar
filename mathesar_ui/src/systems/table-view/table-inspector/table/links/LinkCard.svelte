@@ -18,17 +18,17 @@
   .link-card {
     display: block;
     cursor: pointer;
-    background: var(--SYS-surface-elevated-mid);
-    border: 1px solid var(--SYS-border-card);
+    background: var(--surface-elevated-mid);
+    border: 1px solid var(--border-card);
     border-radius: var(--border-radius-m);
-    box-shadow: 0 1px 2px 0 var(--SYS-surface-elevated-mid-muted);
+    box-shadow: 0 1px 2px 0 var(--surface-elevated-mid-muted);
     transition: all 0.2s ease;
   }
 
   .link-card:hover {
-    border: 1px solid var(--SYS-border-card-hover);
-    box-shadow: 0 1px 2px 0 var(--SYS-surface-elevated-mid-muted);
-    background: var(--SYS-surface-elevated-mid-hover);
+    border: 1px solid var(--border-card-hover);
+    box-shadow: 0 1px 2px 0 var(--surface-elevated-mid-muted);
+    background: var(--surface-elevated-mid-hover);
   }
 
   .link-card.multiple {
@@ -36,9 +36,9 @@
   }
 
   .link-card.multiple:hover .container {
-    border: 1px solid var(--SYS-border-card-hover);
-    box-shadow: 0 1px 2px 0 var(--SYS-surface-elevated-mid-muted);
-    background: var(--SYS-surface-elevated-high-hover);
+    border: 1px solid var(--border-card-hover);
+    box-shadow: 0 1px 2px 0 var(--surface-elevated-mid-muted);
+    background: var(--surface-elevated-high-hover);
   }
 
   .container {
@@ -50,20 +50,20 @@
     position: relative;
     bottom: var(--sm3);
     left: var(--sm3);
-    background: var(--SYS-surface-elevated-high);
-    border: 1px solid var(--SYS-border-card);
+    background: var(--surface-elevated-high);
+    border: 1px solid var(--border-card);
     border-radius: var(--border-radius-m);
   }
 
   .table-name {
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
     font-weight: var(--font-weight-medium);
     padding: var(--sm4) var(--sm3);
-    border-bottom: 0.5px solid var(--SYS-border-divider);
+    border-bottom: 0.5px solid var(--border-divider);
   }
 
   .detail {
-    color: var(--SYS-text-tertiary);
+    color: var(--text-tertiary);
     font-size: var(--sm1);
     line-height: 1.4;
     padding: var(--sm3) var(--sm3);

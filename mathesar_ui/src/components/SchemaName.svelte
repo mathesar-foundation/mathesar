@@ -12,5 +12,5 @@
 <NameWithIcon
   icon={iconSchema}
   name={$name}
-  --icon-color="var(--SYS-color-schema)"
+  --icon-color="var(--color-schema)"
 />

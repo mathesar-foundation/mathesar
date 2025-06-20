@@ -102,12 +102,12 @@
     display: flex;
     align-items: center;
     padding: 0 var(--cell-padding);
-    color: var(--SYS-text-link);
+    color: var(--text-link);
   }
   .link:hover {
-    color: var(--SYS-text-link-hover);
+    color: var(--text-link-hover);
   }
   .link:active {
-    color: var(--SYS-text-link-active);
+    color: var(--text-link-active);
   }
 </style>

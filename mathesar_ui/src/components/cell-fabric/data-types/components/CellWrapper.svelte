@@ -126,11 +126,11 @@
     }
 
     &[data-active-cell] {
-      box-shadow: 0 0 0 2px var(--SYS-surface-supporting);
+      box-shadow: 0 0 0 2px var(--surface-supporting);
       border-radius: 2px;
 
       &:focus {
-        box-shadow: 0 0 0 3px var(--SYS-color-selection-80);
+        box-shadow: 0 0 0 3px var(--color-selection-80);
       }
     }
 
@@ -143,7 +143,7 @@
     &.is-edit-mode {
       padding: 0px;
       box-shadow:
-        0 0 0 3px var(--SYS-color-selection-80),
+        0 0 0 3px var(--color-selection-80),
         0 0 8px #000000 !important;
     }
 
@@ -160,10 +160,10 @@
   }
   .exact-match {
     --Match__highlight-color: transparent;
-    --cell-background-color: var(--SYS-text-highlight-elevated);
+    --cell-background-color: var(--text-highlight-elevated);
   }
   .substring-match {
-    --cell-background-color: var(--SYS-text-highlight);
+    --cell-background-color: var(--text-highlight);
   }
   .no-match {
     text-decoration: line-through;

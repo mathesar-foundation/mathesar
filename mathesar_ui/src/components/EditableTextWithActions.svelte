@@ -103,7 +103,7 @@
   }
 
   .error {
-    color: var(--SYS-semantic-danger-text);
+    color: var(--semantic-danger-text);
     font-size: var(--sm2);
   }
 </style>

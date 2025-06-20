@@ -11,7 +11,7 @@
 <NameWithIcon
   icon={iconDatabase}
   {iconHasBox}
-  --icon-color="var(--SYS-color-database)"
+  --icon-color="var(--color-database)"
 >
   {database.displayName}
 </NameWithIcon>

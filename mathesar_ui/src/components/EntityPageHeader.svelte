@@ -78,11 +78,11 @@
         margin: 0;
         font-weight: var(--font-weight-bold);
         overflow: hidden;
-        color: var(--SYS-text-primary);
+        color: var(--text-primary);
       }
       .description {
         font-size: var(--sm1);
-        color: var(--SYS-text-secondary);
+        color: var(--text-secondary);
         overflow: hidden;
       }
     }

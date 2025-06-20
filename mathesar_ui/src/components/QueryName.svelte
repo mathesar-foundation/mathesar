@@ -9,7 +9,6 @@
   $: ({ name } = query);
 </script>
 
-<NameWithIcon
-  icon={iconExploration}
-  --icon-color="var(--SYS-color-exploration)">{query}</NameWithIcon
+<NameWithIcon icon={iconExploration} --icon-color="var(--color-exploration)"
+  >{query}</NameWithIcon
 >

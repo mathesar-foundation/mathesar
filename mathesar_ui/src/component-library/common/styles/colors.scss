@@ -51,8 +51,16 @@ $color-roles: (
 );
 
 $color-states: (
-  'hover': ('h_delta': 0, 's_delta': 3%, 'l_delta':-3%),
-  'active': ('h_delta': 0, 's_delta': 0%, 'l_delta':-6%)
+  'hover': (
+    'h_delta': 0,
+    's_delta': 3%,
+    'l_delta': -3%,
+  ),
+  'active': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': -6%,
+  ),
 );
 
 //-----------------------------
@@ -61,7 +69,7 @@ $color-states: (
 
 // Surface colors
 @mixin generate-surface-tokens($prefix, $base-color, $states) {
-  --SYS-surface-#{$prefix}: #{$base-color};
+  --surface-#{$prefix}: #{$base-color};
   @each $state, $delta in $states {
     $dh: map-get($delta, 'h_delta');
     $ds: map-get($delta, 's_delta');
@@ -70,13 +78,13 @@ $color-states: (
     $s-new: max(0%, min(100%, saturation($base-color) + $ds));
     $l-new: max(0%, min(100%, lightness($base-color) + $dl));
     $variant: hsl($h-new, $s-new, $l-new);
-    --SYS-surface-#{$prefix}-#{$state}: #{$variant};
+    --surface-#{$prefix}-#{$state}: #{$variant};
   }
 }
 
 // Border colors
 @mixin generate-border-tokens($prefix, $base-color, $states) {
-  --SYS-border-#{$prefix}: #{$base-color};
+  --border-#{$prefix}: #{$base-color};
   @each $state, $delta in $states {
     $dh: map-get($delta, 'h_delta');
     $ds: map-get($delta, 's_delta');
@@ -85,13 +93,13 @@ $color-states: (
     $s-new: max(0%, min(100%, saturation($base-color) + $ds));
     $l-new: max(0%, min(100%, lightness($base-color) + $dl));
     $variant: hsl($h-new, $s-new, $l-new);
-    --SYS-border-#{$prefix}-#{$state}: #{$variant};
+    --border-#{$prefix}-#{$state}: #{$variant};
   }
 }
 
 // Text colors
 @mixin generate-text-tokens($prefix, $base-color, $states) {
-  --SYS-text-#{$prefix}: #{$base-color};
+  --text-#{$prefix}: #{$base-color};
   @each $state, $delta in $states {
     $dh: map-get($delta, 'h_delta');
     $ds: map-get($delta, 's_delta');
@@ -100,7 +108,7 @@ $color-states: (
     $s-new: max(0%, min(100%, saturation($base-color) + $ds));
     $l-new: max(0%, min(100%, lightness($base-color) + $dl));
     $variant: hsl($h-new, $s-new, $l-new);
-    --SYS-text-#{$prefix}-#{$state}: #{$variant};
+    --text-#{$prefix}-#{$state}: #{$variant};
   }
 }
 
@@ -114,7 +122,7 @@ $color-states: (
     $s-role-new: max(0%, min(100%, saturation($base-color) + $role-ds));
     $l-role-new: max(0%, min(100%, lightness($base-color) + $role-dl));
     $role-variant: hsl($h-role-new, $s-role-new, $l-role-new);
-    --SYS-semantic-#{$name}-#{$role}: #{$role-variant};
+    --semantic-#{$name}-#{$role}: #{$role-variant};
     @each $state, $state-delta in $semantic-states {
       $state-dh: map-get($state-delta, 'h_delta');
       $state-ds: map-get($state-delta, 's_delta');
@@ -123,14 +131,14 @@ $color-states: (
       $s-state-new: max(0%, min(100%, saturation($role-variant) + $state-ds));
       $l-state-new: max(0%, min(100%, lightness($role-variant) + $state-dl));
       $state-variant: hsl($h-state-new, $s-state-new, $l-state-new);
-      --SYS-semantic-#{$name}-#{$role}-#{$state}: #{$state-variant};
+      --semantic-#{$name}-#{$role}-#{$state}: #{$state-variant};
     }
   }
 }
 
 // Colors by usage
 @mixin generate-color-tokens($name, $base-color, $states) {
-  --SYS-color-#{$name}: #{$base-color};
+  --color-#{$name}: #{$base-color};
   @each $state, $delta in $states {
     $dh: map-get($delta, 'h_delta');
     $ds: map-get($delta, 's_delta');
@@ -139,12 +147,17 @@ $color-states: (
     $s-new: max(0%, min(100%, saturation($base-color) + $ds));
     $l-new: max(0%, min(100%, lightness($base-color) + $dl));
     $variant: hsl($h-new, $s-new, $l-new);
-    --SYS-color-#{$name}-#{$state}: #{$variant};
+    --color-#{$name}-#{$state}: #{$variant};
     @each $role, $delta in $color-roles {
-      $base-variant: hsla(hue($base-color), saturation($base-color), lightness($base-color), $delta);
+      $base-variant: hsla(
+        hue($base-color),
+        saturation($base-color),
+        lightness($base-color),
+        $delta
+      );
       $new-variant: hsla($h-new, $s-new, $l-new, $delta);
-      --SYS-color-#{$name}-#{$role}: #{$base-variant};
-      --SYS-color-#{$name}-#{$state}-#{$role}: #{$new-variant};
+      --color-#{$name}-#{$role}: #{$base-variant};
+      --color-#{$name}-#{$state}-#{$role}: #{$new-variant};
     }
   }
 }

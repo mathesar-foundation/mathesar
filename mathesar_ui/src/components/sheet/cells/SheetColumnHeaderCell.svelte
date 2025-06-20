@@ -25,12 +25,12 @@
     left: 0;
     top: 0;
     height: 100%;
-    border-top: 1px solid var(--SYS-border-header);
-    border-left: 1px solid var(--SYS-border-header);
+    border-top: 1px solid var(--border-header);
+    border-left: 1px solid var(--border-header);
     border-bottom: none;
     font-size: 1rem;
     font-weight: var(font-weight-bold);
     overflow: hidden;
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
 </style>

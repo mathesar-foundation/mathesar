@@ -170,7 +170,7 @@
     }
 
     .muted {
-      color: var(--SYS-text-disabled);
+      color: var(--text-disabled);
     }
   }
 </style>

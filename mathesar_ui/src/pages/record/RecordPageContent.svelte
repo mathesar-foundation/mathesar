@@ -82,12 +82,12 @@
     entityTypeName={$_('record')}
     --header-color="linear-gradient(
       135deg,
-      var(--SYS-surface-base), 15%,
-      var(--SYS-color-record-10) 40%,
-      var(--SYS-surface-base) 60%,
-      var(--SYS-color-record-20) 100%
+      var(--surface-base), 15%,
+      var(--color-record-10) 40%,
+      var(--surface-base) 60%,
+      var(--color-record-20) 100%
     )"
-    --entity-name-color="var(--SYS-color-record)"
+    --entity-name-color="var(--color-record)"
     --bottom-margin="var(--sm1)"
     --page-padding-x="6rem"
   >
@@ -162,12 +162,12 @@
     grid-column: 1;
     margin: 0;
     overflow: hidden;
-    color: var(--SYS-text-primary);
+    color: var(--text-primary);
   }
   .table-name {
     grid-row: 2;
     grid-column: 1;
-    color: var(--SYS-text-secondary);
+    color: var(--text-secondary);
   }
   .form-status {
     grid-row: 1 / span 2;
