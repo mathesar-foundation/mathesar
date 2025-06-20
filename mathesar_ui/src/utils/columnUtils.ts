@@ -1,6 +1,6 @@
 import type {
-  RawColumnWithMetadata,
   ColumnTypeOptions,
+  RawColumnWithMetadata,
 } from '@mathesar/api/rpc/columns';
 import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';

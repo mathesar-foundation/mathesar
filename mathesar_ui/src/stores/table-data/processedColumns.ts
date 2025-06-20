@@ -1,12 +1,12 @@
 import type { Readable } from 'svelte/store';
 
 import type {
-  RawColumnWithMetadata,
   ColumnPrivilege,
+  RawColumnWithMetadata,
 } from '@mathesar/api/rpc/columns';
 import type {
-  RawConstraint,
   FkConstraint,
+  RawConstraint,
 } from '@mathesar/api/rpc/constraints';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {

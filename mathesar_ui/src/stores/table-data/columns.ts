@@ -4,9 +4,9 @@ import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type {
-  RawColumnWithMetadata,
   ColumnCreationSpec,
   ColumnPatchSpec,
+  RawColumnWithMetadata,
 } from '@mathesar/api/rpc/columns';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';

@@ -5,8 +5,8 @@
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import { api } from '@mathesar/api/rpc';
   import type {
-    RawColumnWithMetadata,
     ColumnCastOptions,
+    RawColumnWithMetadata,
   } from '@mathesar/api/rpc/columns';
   import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
   import {

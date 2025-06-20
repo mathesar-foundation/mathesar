@@ -2,8 +2,8 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type {
-  RawConstraint,
   FkConstraint,
+  RawConstraint,
 } from '@mathesar/api/rpc/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 import {

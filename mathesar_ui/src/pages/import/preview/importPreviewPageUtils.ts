@@ -1,9 +1,9 @@
 import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
 import type {
-  RawColumnWithMetadata,
   ColumnCastOptions,
   ColumnPatchSpec,
+  RawColumnWithMetadata,
 } from '@mathesar/api/rpc/columns';
 import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';

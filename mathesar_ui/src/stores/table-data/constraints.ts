@@ -13,8 +13,8 @@ import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
-  RawConstraint,
   ConstraintRecipe,
+  RawConstraint,
 } from '@mathesar/api/rpc/constraints';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';

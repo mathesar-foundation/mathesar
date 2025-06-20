@@ -3,8 +3,8 @@
 
   import { States } from '@mathesar/api/rest/utils/requestUtils';
   import type {
-    RawConstraint,
     ConstraintType,
+    RawConstraint,
   } from '@mathesar/api/rpc/constraints';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { Icon, iconLoading } from '@mathesar-component-library';

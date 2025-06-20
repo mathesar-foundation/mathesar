@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type {
-    RawConstraint,
     ConstraintType,
+    RawConstraint,
   } from '@mathesar/api/rpc/constraints';
   import { Button, Collapsible, Help, Icon } from '@mathesar/component-library';
   import { iconDeleteMajor } from '@mathesar/icons';

@@ -1,7 +1,7 @@
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
-  RawConstraint,
   FkConstraint,
+  RawConstraint,
 } from '@mathesar/api/rpc/constraints';
 
 export function constraintIsFk(c: RawConstraint): c is FkConstraint {
