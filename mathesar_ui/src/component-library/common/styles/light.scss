@@ -8,6 +8,7 @@
 // ------------------------------------------
 
 $base: hsl(42, 10%, 95%);
+$text-base: hsl(0, 0%, 7%);
 
 // Special semantic colors
 $highlight: hsl(59, 84%, 90%);
@@ -58,7 +59,7 @@ $surface-states: (
 $border-colors: (
   'container': hsl(hue($base), saturation($base), 88%),
   'row': hsl(hue($base), saturation($base), 88%),
-  'grid': hsl(hue($base), saturation($base), 95%),
+  'grid': hsl(hue($base), saturation($base), 88%),
   'card': hsl(hue($base), saturation($base), 85%),
   'dropdown': hsl(hue($base), saturation($base), 85%),
   'shadow': hsl(hue($base), saturation($base), 82%),
@@ -85,27 +86,26 @@ $border-states: (
 // ------------------------------------------
 
 $text-colors: (
-  'code': hsl(hue($pumpkin), 80%, 4%),
-  'control': hsl(hue($base), 10%, 5%),
-  'disabled': hsl(hue($base), 35%, 2%),
+  'code': hsl(hue($text-base), 80%, 4%),
+  'control': hsl(hue($text-base), 5%, 30%),
+  'disabled': hsl(hue($base), 0%, 30%),
   'faint': hsl(hue($base), 15%, 85%),
-  'header': hsl(hue($base), 22%, 5%),
+  'header': hsl(hue($base), 0%, 20%),
   'highlight': $highlight,
   'highlight-elevated': $highlight-elevated,
-  'navigation': hsl(hue($wisteria), 15%, 8%),
+  'navigation': hsl(hue($wisteria), 10%, 20%),
   'icon': $icon,
-  'input': hsl(hue($pumpkin), 90%, 10%),
-  'label': hsl(hue($pumpkin), 20%, 4%),
+  'input': hsl(hue($text-base), 0%, 0%),
+  'label': hsl(hue($text-base), 0%, 30%),
   'inverted': hsl(hue($base), 10%, 96%),
-  'light': hsl(hue($pumpkin), 80%, 100%),
+  'light': hsl(hue($text-base), 0%, 100%),
   'link': $link,
   'visited-link': $visited-link,
-  'muted': hsl(hue($base), 15%, 60%),
-  'primary': hsl(hue($pumpkin), 80%, 4%),
-  'secondary': hsl(hue($pumpkin), 65%, 6%),
-  'tertiary': hsl(hue($base), 60%, 10%),
-  'token': hsl(hue($base), 85%, 7%),
-  'tooltip': hsl(hue($tip), 30%, 20%),
+  'muted': hsl(hue($text-base), 0%, 50%),
+  'primary': $text-base,
+  'secondary': hsl(hue($text-base), 0%, 18%),
+  'tertiary': hsl(hue($base), 0%, 40%),
+  'token': hsl(hue($base), 15%, 7%),
 );
 
 $text-states: (
