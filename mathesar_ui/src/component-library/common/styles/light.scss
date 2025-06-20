@@ -7,7 +7,7 @@
 // Base colors
 // ------------------------------------------
 
-$base: hsl(42, 5%, 97%);
+$base: hsl(42, 10%, 95%);
 
 // Special semantic colors
 $highlight: hsl(59, 84%, 90%);
@@ -22,19 +22,20 @@ $visited-link: hsl(hue($wisteria), 50%, 30%);
 
 // Colors, ordered by elevation / lightness
 $surface-colors: (
-  'inset': hsl(hue($base), saturation($base), 99%),
+  'inset': hsl(hue($base), saturation($base), 100%),
   'input': hsl(hue($base), saturation($base), 100%),
   'base': $base,
-  'card': hsl(hue($base), saturation($base), 98%),
-  'canvas': hsl(hue($base), saturation($base), 95%),
-  'supporting': hsl(hue($base), saturation($base), 98%),
-  'fieldset': hsl(hue($base), saturation($base), 93%),
+  'card': hsl(hue($base), 15%, 92%),
+  'canvas': hsl(hue($base), saturation($base), 96%),
+  'supporting': hsl(hue($base), saturation($base), 97%),
+  'fieldset': hsl(hue($base), saturation($base), 99%),
   'header': hsl(hue($base), saturation($base), 92%),
   'control': hsl(hue($base), saturation($base), 92%),
-  'elevated-low': hsl(hue($base), saturation($base), 92%),
-  'elevated-mid': hsl(hue($base), saturation($base), 90%),
-  'elevated-high': hsl(hue($base), saturation($base), 88%),
-  'elevated-top': hsl(hue($base), saturation($base), 85%),
+  'elevated-low': hsl(hue($base), saturation($base), 96%),
+  'elevated-mid': hsl(hue($base), saturation($base), 94%),
+  'elevated-header': hsl(hue($base), 20%, 90%),
+  'elevated-high': hsl(hue($base), saturation($base), 92%),
+  'elevated-top': hsl(hue($base), saturation($base), 90%),
   'token': hsl(hue($base), saturation($base), 75%),
   'input-fill': $input-fill,
   'light': hsl(hue($base), saturation($base), 100%),
@@ -117,24 +118,24 @@ $text-states: (
 // ------------------------------------------
 
 $semantic-colors: (
-  'success': $success,
-  'warning': $warning,
-  'danger': $danger,
-  'info': $info,
-  'help': $help,
-  'tip': $tip,
-  'outcome': $outcome,
+  'success': hsl(hue($success), 40%, 30%),
+  'warning': hsl(hue($warning), 70%, 40%),
+  'danger': hsl(hue($danger), 100%, 60%),
+  'info': hsl(hue($info), 55%, 45%),
+  'help': hsl(hue($help), 40%, 50%),
+  'tip': hsl(hue($tip), 40%, 40%),
+  'outcome': hsl(hue($outcome), 25%, 40%),
 );
 
 $semantic-roles: (
-  'bg': ('h_delta': 0, 's_delta': 10%, 'l_delta': 35%),
-  'text': ('h_delta': 10, 's_delta': 10%, 'l_delta': -20%),
-  'icon': ('h_delta': 0, 's_delta': 30%, 'l_delta': 0%),
-  'border': ('h_delta': 0, 's_delta': 0, 'l_delta': 10%),
-  'inner-bg': ('h_delta': 0, 's_delta': 0, 'l_delta': 60%),
-  'inner-text': ('h_delta': -10, 's_delta': -10%, 'l_delta': -20%),
-  'inner-icon': ('h_delta': 0, 's_delta': 30%, 'l_delta': 10%),
-  'inner-border': ('h_delta': 0, 's_delta': 0, 'l_delta': 40%),
+  'bg': ('h_delta': 0, 's_delta': 0%, 'l_delta': 50%),
+  'text': ('h_delta': 0, 's_delta': 0%, 'l_delta': -25%),
+  'icon': ('h_delta': 0, 's_delta': 0%, 'l_delta': 10%),
+  'border': ('h_delta': 0, 's_delta': 0%, 'l_delta': 20%),
+  'inner-bg': ('h_delta': 0, 's_delta': 0%, 'l_delta': 45%),
+  'inner-text': ('h_delta': 0, 's_delta': 0%, 'l_delta': -20%),
+  'inner-icon': ('h_delta': 0, 's_delta': 0%, 'l_delta': 0%),
+  'inner-border': ('h_delta': 0, 's_delta': 0%, 'l_delta': 25%),
 );
 
 $semantic-states: (

@@ -34,6 +34,7 @@ $surface-colors: (
   'control': hsl(hue($base), saturation($base), 5%),
   'elevated-low': hsl(hue($base), saturation($base), 5%),
   'elevated-mid': hsl(hue($base), saturation($base), 7%),
+  'elevated-header': hsl(hue($base), saturation($base), 7%),
   'elevated-high': hsl(hue($base), saturation($base), 10%),
   'elevated-top': hsl(hue($base), saturation($base), 13%),
   'token': hsl(hue($base), saturation($base), 20%),
@@ -116,15 +117,25 @@ $text-states: (
 // Utility boxes + buttons
 // ------------------------------------------
 
+$semantic-colors: (
+  'success': hsl(hue($success), 25%, 60%),
+  'warning': hsl(hue($warning), 40%, 60%),
+  'danger': hsl(hue($danger), 60%, 60%),
+  'info': hsl(hue($info), 35%, 60%),
+  'help': hsl(hue($help), 30%, 50%),
+  'tip': hsl(hue($tip), 20%, 60%),
+  'outcome': hsl(hue($outcome), 20%, 60%),
+);
+
 $semantic-roles: (
-  'bg': ('h_delta': 0, 's_delta': 0, 'l_delta': -30%),
-  'text': ('h_delta': -10, 's_delta': -10%, 'l_delta': 30%),
-  'icon': ('h_delta': 0, 's_delta': 30%, 'l_delta': 0%),
-  'border': ('h_delta': 0, 's_delta': 0, 'l_delta': -17%),
-  'inner-bg': ('h_delta': 0, 's_delta': 0, 'l_delta': -15%),
-  'inner-text': ('h_delta': -10, 's_delta': -10%, 'l_delta': 40%),
-  'inner-icon': ('h_delta': 0, 's_delta': 0, 'l_delta': 30%),
-  'inner-border': ('h_delta': 0, 's_delta': 0, 'l_delta': -10%),
+  'bg': ('h_delta': 0, 's_delta': 0%, 'l_delta': -50%),
+  'text': ('h_delta': 0, 's_delta': 0%, 'l_delta': 0%),
+  'icon': ('h_delta': 0, 's_delta': 0%, 'l_delta': -20%),
+  'border': ('h_delta': 0, 's_delta': 0%, 'l_delta': -40%),
+  'inner-bg': ('h_delta': 0, 's_delta': 0%, 'l_delta': -45%),
+  'inner-text': ('h_delta': 0, 's_delta': 0%, 'l_delta': 20%),
+  'inner-icon': ('h_delta': 0, 's_delta': 0%, 'l_delta': 0%),
+  'inner-border': ('h_delta': 0, 's_delta': -40%, 'l_delta': -40%),
 );
 
 $semantic-states: (

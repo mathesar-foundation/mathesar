@@ -10,12 +10,12 @@ $fjord: hsl(220, 60%, 60%);
 
 // Main semantic colors
 $success: hsl(145, 50%, 50%);
-$warning: hsl(50, 30%, 40%);
-$danger: hsl(12, 60%, 20%);
-$info: hsl(215, 30%, 50%);
-$help: hsl(185, 20%, 20%);
-$tip: hsl(150, 20%, 30%);
-$outcome: hsl(275, 15%, 35%);
+$warning: hsl(50, 50%, 50%);
+$danger: hsl(12, 50%, 50%);
+$info: hsl(215, 50%, 50%);
+$help: hsl(185, 50%, 50%);
+$tip: hsl(150, 50%, 50%);
+$outcome: hsl(275, 50%, 50%);
 
 // Special semantic colors
 $input-fill: hsl(212, 84%, 44.1%);
@@ -27,7 +27,7 @@ $utility-colors: (
   'schema': $salmon,
   'database': $amethyst,
   'table': $pumpkin,
-  'column': hsl(hue($pumpkin), 50%, 60%),
+  'column': hsl(hue($salmon), 40%, 60%),
   'record': $asparagus,
   'record-fk': hsl(hue($asparagus), 80%, 60%),
   'exploration': $fjord,
@@ -37,16 +37,6 @@ $utility-colors: (
   'highlight-glacier': hsl(hue($glacier), 90%, 60%),
   'highlight-asparagus': hsl(hue($asparagus), 50%, 60%),
   'primary': hsl(hue($asparagus), 60%, 25%),
-);
-
-$semantic-colors: (
-  'success': $success,
-  'warning': $warning,
-  'danger': $danger,
-  'info': $info,
-  'help': $help,
-  'tip': $tip,
-  'outcome': $outcome,
 );
 
 $color-roles: (

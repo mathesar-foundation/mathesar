@@ -221,6 +221,7 @@
     font-weight: bold;
   }
 
+  .input .null .postgres-keyword, 
   .cell-wrapper .postgres-keyword {
     color: var(--SYS-text-faint);
     font-weight: 300;
