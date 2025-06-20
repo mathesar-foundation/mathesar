@@ -101,12 +101,8 @@
   }
 
   &.btn-secondary {
-    background-color: color-mix(
-      in srgb,
-      var(--SYS-accent-glacier-dull),
-      transparent 80%
-    );
-    --button-border: 0.5px var(--SYS-accent-glacier-muted);
+    background-color: var(--SYS-color-navigation-20);
+    --button-border: 0.5px var(--SYS-border-control);
     --button-color: var(--SYS-text-control);
     box-shadow:
       0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
@@ -114,17 +110,17 @@
       0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
             80%);
 
-    &:not(:disabled) {
+    &:not(:disabled):not(.page) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--SYS-accent-glacier-dull-focused);
+        --button-outline: 2px solid var(--SYS-border-control-active);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        background-color: var(--SYS-accent-glacier-muted-hover);
-        --button-border-color: var(--SYS-accent-glacier-dull-hover);
+        background-color: var(--SYS-color-navigation-hover-25);
+        --button-border-color: var(--SYS-border-control-hover);
         box-shadow:
           0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
                 10%),
@@ -136,12 +132,8 @@
 
       &:active,
       &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--SYS-accent-glacier-muted),
-          var(--SYS-accent-glacier-faint)
-        );
-        --button-border-color: var(--SYS-accent-glacier-muted);
+        background-color: var(--SYS-color-navigation-active-25);
+        --button-border-color: var(--SYS-border-control-active);
         box-shadow:
           0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
           0 1px 3px
@@ -275,11 +267,7 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: color-mix(
-          in srgb,
-          var(--SYS-accent-glacier-dull),
-          transparent 20%
-        );
+        --button-background: var(--SYS-color-navigation-80);
         --button-color: var(--SYS-text-primary);
       }
     }

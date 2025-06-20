@@ -18,7 +18,7 @@ ul.pagination {
       cursor: pointer;
 
       &:hover {
-        background-color: var(--SYS-surface-control-hover);
+        background-color: var(--SYS-color-selection-hover-25);
       }
 
       &:disabled {
@@ -47,25 +47,17 @@ ul.pagination {
 
     &.active {
       .page {
-        background-color: color-mix(
-          in srgb,
-          var(--SYS-accent-glacier-base),
-          transparent 80%
-        );
-        color: var(--SYS-accent-glacier-bright-highlighted);
-        border: 2px solid var(--SYS-accent-glacier-dull);
+        background-color: var(--SYS-color-selection-20);
+        color: var(--SYS-text-control);
+        border: 2px solid var(--SYS-color-selection-25);
       }
     }
 
-    &.hover {
+    &:hover {
       .page {
-        background-color: color-mix(
-          in srgb,
-          var(--SYS-accent-glacier-base-hover),
-          transparent 80%
-        );
-        color: var(--SYS-accent-glacier-bright-hover);
-        border-color: var(--SYS-accent-glacier-dull-hover);
+        background-color: var(--SYS-color-selection-hover-20);
+        color: var(--SYS-text-control-hover);
+        border-color: var(--SYS-color-selection-hover-25);
       }
     }
   }

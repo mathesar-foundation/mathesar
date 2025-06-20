@@ -32,6 +32,7 @@ $utility-colors: (
   'record-fk': hsl(hue($asparagus), 80%, 60%),
   'exploration': $fjord,
   'navigation': hsl(hue($wisteria), 10%, 70%),
+  'selection': hsl(hue($glacier), 55%, 50%),
   'highlight-salmon': hsl(hue($salmon), 60%, 60%),
   'highlight-glacier': hsl(hue($glacier), 90%, 60%),
   'highlight-asparagus': hsl(hue($asparagus), 50%, 60%),
@@ -133,31 +134,6 @@ $color-states: (
       $l-state-new: max(0%, min(100%, lightness($role-variant) + $state-dl));
       $state-variant: hsl($h-state-new, $s-state-new, $l-state-new);
       --SYS-semantic-#{$name}-#{$role}-#{$state}: #{$state-variant};
-    }
-  }
-}
-
-
-// Accent colors
-@mixin generate-accent-tokens($name, $base-color, $roles) {
-  @each $role, $role-delta in $roles {
-    $role-dh: map-get($role-delta, 'h_delta');
-    $role-ds: map-get($role-delta, 's_delta');
-    $role-dl: map-get($role-delta, 'l_delta');
-    $h-role-new: (hue($base-color) + $role-dh) % 360deg;
-    $s-role-new: max(0%, min(100%, saturation($base-color) + $role-ds));
-    $l-role-new: max(0%, min(100%, lightness($base-color) + $role-dl));
-    $role-variant: hsl($h-role-new, $s-role-new, $l-role-new);
-    --SYS-accent-#{$name}-#{$role}: #{$role-variant};
-    @each $state, $state-delta in $accent-states {
-      $state-dh: map-get($state-delta, 'h_delta');
-      $state-ds: map-get($state-delta, 's_delta');
-      $state-dl: map-get($state-delta, 'l_delta');
-      $h-state-new: (hue($role-variant) + $state-dh) % 360deg;
-      $s-state-new: max(0%, min(100%, saturation($role-variant) + $state-ds));
-      $l-state-new: max(0%, min(100%, lightness($role-variant) + $state-dl));
-      $state-variant: hsl($h-state-new, $s-state-new, $l-state-new);
-      --SYS-accent-#{$name}-#{$role}-#{$state}: #{$state-variant};
     }
   }
 }

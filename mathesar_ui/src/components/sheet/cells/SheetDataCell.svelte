@@ -38,7 +38,7 @@
 >
   {#if hasSelectionBackground}
     <CellBackground
-      color="color-mix(in srgb, var(--SYS-accent-glacier-base), transparent 85%)"
+      color="var(--SYS-color-selection-15)"
       when={isSelected}
     />
   {/if}

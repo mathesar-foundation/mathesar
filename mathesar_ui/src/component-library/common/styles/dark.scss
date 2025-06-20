@@ -134,33 +134,6 @@ $semantic-states: (
 );
 
 // ------------------------------------------
-// Accents
-// ------------------------------------------
-
-$accent-colors: (
-  'glacier': $glacier,
-);
-
-$accent-roles: (
-  'base': ('h_delta': 0, 's_delta': 0, 'l_delta': 0),
-  'faint': ('h_delta': 0, 's_delta': -30, 'l_delta': -45),
-  'muted': ('h_delta': 0, 's_delta': -20, 'l_delta': -35),
-  'dull': ('h_delta': 0, 's_delta': -10, 'l_delta': -20),
-  'bright': ('h_delta': 0, 's_delta': 0, 'l_delta': 25),
-  'contrast': ('h_delta': 0, 's_delta': 0, 'l_delta': 35),
-  'inverted': ('h_delta': 0, 's_delta': 0, 'l_delta': 45),
-);
-
-
-$accent-states: (
-  'hover': ('h_delta': 0, 's_delta': 3%, 'l_delta':-3%),
-  'active': ('h_delta': 0, 's_delta': 0%, 'l_delta':-6%),
-  'focused': ('h_delta': 5, 's_delta': 5%, 'l_delta':-3%),
-  'muted': ('h_delta': 0, 's_delta': -20%, 'l_delta':10%),
-  'highlighted': ('h_delta': -10, 's_delta': -12%, 'l_delta':-4%),
-);
-
-// ------------------------------------------
 // GENERATE COLORS FOR THEME
 // ------------------------------------------
 body.theme-dark {
@@ -178,10 +151,6 @@ body.theme-dark {
 
   @each $name, $color in $semantic-colors {
     @include generate-semantic-tokens(#{$name}, $color, $semantic-roles);
-  }
-
-  @each $name, $color in $accent-colors {
-    @include generate-accent-tokens(#{$name}, $color, $accent-roles);
   }
   
   --SYS-mix-blend-mode: screen;

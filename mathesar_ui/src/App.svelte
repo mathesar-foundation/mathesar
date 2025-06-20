@@ -81,11 +81,7 @@
     --cell-bg-color-processing: var(--SYS-semantic-warning-bg);
     --cell-bg-color-disabled: var(--SYS-surface-inset-muted);
     --cell-bg-color-row-hover: var(--SYS-surface-inset-hover);
-    --cell-bg-color-row-selected: color-mix(
-      in srgb,
-      var(--SYS-accent-glacier-dull),
-      transparent 40%
-    );
+    --cell-bg-color-row-selected: var(--SYS-color-selection-40);
 
     --cell-text-color-processing: var(--SYS-text-muted);
 

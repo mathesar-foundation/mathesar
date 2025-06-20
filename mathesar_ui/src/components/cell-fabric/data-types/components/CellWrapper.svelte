@@ -130,7 +130,7 @@
       border-radius: 2px;
 
       &:focus {
-        box-shadow: 0 0 0 3px var(--SYS-accent-glacier-base-highlighted);
+        box-shadow: 0 0 0 3px var(--SYS-color-selection-80);
       }
     }
 
@@ -143,7 +143,7 @@
     &.is-edit-mode {
       padding: 0px;
       box-shadow:
-        0 0 0 3px var(--SYS-accent-glacier-base-focused),
+        0 0 0 3px var(--SYS-color-selection-80),
         0 0 8px #000000 !important;
     }
 

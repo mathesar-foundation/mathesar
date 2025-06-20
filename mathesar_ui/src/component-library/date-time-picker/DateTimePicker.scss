@@ -22,7 +22,7 @@
   box-sizing: border-box;
   -ms-touch-action: manipulation;
   touch-action: manipulation;
-  background: var(--accent-surface-base);
+  background: var(--SYS-surface-elevated-high);
   max-height: 40em;
   max-width: 19.6em;
 }
@@ -467,14 +467,14 @@ span.flatpickr-weekday {
   border-color: var(--SYS-border-section);
 }
 .flatpickr-day.today {
-  border-color: var(--SYS-color-highlight-salmon-40);
+  border-color: var(--SYS-color-highlight-salmon-25);
   background: var(--SYS-color-highlight-salmon-20);
   color: var(--SYS-text-control);
 }
 .flatpickr-day.today:hover,
 .flatpickr-day.today:focus {
-  border-color: var(--SYS-color-highlight-salmon-60);
-  background: var(--SYS-color-highlight-salmon-40);
+  border-color: var(--SYS-color-highlight-salmon-40);
+  background: var(--SYS-color-highlight-salmon-25);
   color: var(--SYS-text-control);
 }
 .flatpickr-day.selected,
@@ -496,11 +496,11 @@ span.flatpickr-weekday {
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
   font-weight: bold;
-  background: var(--SYS-accent-glacier-dull);
+  background: var(--SYS-color-highlight-glacier-20);
   -webkit-box-shadow: none;
   box-shadow: none;
   color: var(--SYS-text-control);
-  border-color: var(--SYS-accent-glacier-base);
+  border-color: var(--SYS-color-highlight-glacier-25);
 }
 .flatpickr-day.selected.startRange,
 .flatpickr-day.startRange.startRange,

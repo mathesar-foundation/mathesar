@@ -190,11 +190,7 @@
     }
 
     :global(.column-name-wrapper.selected) {
-      background: color-mix(
-        in srgb,
-        var(--SYS-accent-glacier-dull),
-        transparent 40%
-      );
+      background: var(--SYS-color-selection-40);
     }
     :global([data-sheet-element='data-cell'].selected) {
       background: var(--hover-background);
