@@ -409,10 +409,10 @@
   .form {
     --base-fill: var(--SYS-color-highlight-salmon-40);
     --base-stroke: var(--SYS-color-highlight-salmon);
-    --target-fill: var(--SYS-accent-glacier-muted);
-    --target-stroke: var(--SYS-accent-glacier-base-highlighted);
-    --mapping-fill: var(--SYS-accent-asparagus-muted);
-    --mapping-stroke: var(--SYS-accent-asparagus-base-highlighted);
+    --target-fill: var(--SYS-color-highlight-glacier-60);
+    --target-stroke: var(--SYS-color-highlight-glacier);
+    --mapping-fill: var(--SYS-color-highlight-asparagus-60);
+    --mapping-stroke: var(--SYS-color-highlight-asparagus);
     line-height: 1.6;
   }
   .form.self-referential {

@@ -64,8 +64,7 @@
     background: linear-gradient(
       135deg,
       var(--SYS-surface-base) 10%,
-      var(--SYS-accent-asparagus-faint) 30%,
-      var(--SYS-accent-asparagus-faint-focused) 40%,
+      var(--SYS-color-record-5) 40%,
       var(--SYS-surface-base) 100%
     );
     border-top: 2px solid var(--SYS-border-container);

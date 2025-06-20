@@ -82,13 +82,12 @@
     entityTypeName={$_('record')}
     --header-color="linear-gradient(
       135deg,
-      var(--SYS-accent-asparagus-faint) 20%,
-      var(--SYS-surface-base), 35%,
-      var(--SYS-accent-glacier-faint) 45%,
-      var(--SYS-surface-base) 50%,
-      var(--SYS-accent-asparagus-muted-focused) 100%
+      var(--SYS-surface-base), 15%,
+      var(--SYS-color-record-10) 40%,
+      var(--SYS-surface-base) 60%,
+      var(--SYS-color-record-20) 100%
     )"
-    --entity-name-color="var(--SYS-accent-asparagus-base-muted)"
+    --entity-name-color="var(--SYS-color-record)"
     --bottom-margin="var(--sm1)"
     --page-padding-x="6rem"
   >

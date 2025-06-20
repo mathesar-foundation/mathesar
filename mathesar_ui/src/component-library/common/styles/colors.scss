@@ -5,7 +5,7 @@ $amethyst: hsl(270, 40%, 55%);
 $salmon: hsl(12, 60%, 50%);
 $wisteria: hsl(250, 45%, 60%);
 $glacier: hsl(190, 60%, 50%);
-$asparagus: hsl(90, 45%, 50%);
+$asparagus: hsl(90, 45%, 30%);
 $fjord: hsl(220, 60%, 60%);
 
 // Main semantic colors
@@ -23,15 +23,19 @@ $input-fill: hsl(212, 84%, 44.1%);
 // Color definition by usage
 $utility-colors: (
   'brand': $tomato,
+  'brand-muted': hsl(hue($tomato), 40%, 60%),
   'schema': $salmon,
   'database': $amethyst,
   'table': $pumpkin,
   'column': $wisteria,
   'record': $asparagus,
+  'record-fk': hsl(hue($asparagus), 80%, 60%),
   'exploration': $fjord,
   'navigation': hsl(hue($wisteria), 10%, 70%),
   'highlight-salmon': hsl(hue($salmon), 60%, 60%),
-  'brand-muted': hsl(hue($tomato), 40%, 60%),
+  'highlight-glacier': hsl(hue($glacier), 90%, 60%),
+  'highlight-asparagus': hsl(hue($asparagus), 50%, 60%),
+  'primary': hsl(hue($asparagus), 70%, 40%),
 );
 
 $semantic-colors: (
@@ -49,6 +53,7 @@ $color-roles: (
   '10': 10%,
   '15': 15%,
   '20': 20%,
+  '25': 25%,
   '40': 40%,
   '60': 60%,
   '80': 80%,

@@ -14,7 +14,7 @@
     flex: 0 0 auto;
     display: block;
     font-size: 0.8em;
-    background: var(--SYS-accent-asparagus-base);
+    background: var(--SYS-color-highlight-asparagus-60);
     color: var(--SYS-text-primary);
     height: 1.8em;
     width: 1.8em;
@@ -22,7 +22,7 @@
     border-radius: 50%;
   }
   .yes :global(svg path) {
-    stroke: var(--SYS-accent-asparagus-muted);
+    stroke: var(--SYS-color-highlight-asparagus-5);
     stroke-width: 60;
   }
 </style>

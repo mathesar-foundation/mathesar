@@ -38,7 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--SYS-accent-asparagus-base);
+    color: var(--SYS-color-database-80);
   }
   .header {
     font-size: var(--lg1);

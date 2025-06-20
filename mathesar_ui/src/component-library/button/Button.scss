@@ -52,10 +52,10 @@
   &.btn-primary {
     --button-background: linear-gradient(
       to bottom right,
-      var(--SYS-accent-asparagus-dull),
-      var(--SYS-accent-asparagus-muted)
+      var(--SYS-color-primary),
+      var(--SYS-color-primary-60)
     );
-    --button-border-color: var(--SYS-accent-asparagus-muted);
+    --button-border-color: var(--SYS-color-primary);
     --button-color: var(--SYS-text-primary);
     box-shadow:
       0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 75%),
@@ -66,7 +66,7 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--SYS-accent-asparagus-bright-focused);
+        --button-outline: 2px solid var(--SYS-color-primary-60);
         outline-offset: 1px;
       }
 
@@ -74,10 +74,10 @@
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-accent-asparagus-dull-hover),
-          var(--SYS-accent-asparagus-muted-hover)
+          var(--SYS-color-primary-hover),
+          var(--SYS-color-primary-hover-60)
         );
-        --button-border-color: var(--SYS-accent-asparagus-muted-hover);
+        --button-border-color: var(--SYS-color-primary-hover-60);
         box-shadow:
           0 1px 2px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
                 75%),
@@ -91,10 +91,10 @@
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--SYS-accent-asparagus-dull-active),
-          var(--SYS-accent-asparagus-muted-active)
+          var(--SYS-color-primary-active),
+          var(--SYS-color-primary-active-60)
         );
-        --button-border-color: var(--SYS-accent-asparagus-muted-active);
+        --button-border-color: var(--SYS-color-primary-active-60);
         --button-shadow: var(--SYS-border-shadow) 0 1px 2px 0;
       }
     }
@@ -165,35 +165,27 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--SYS-accent-glacier-dull-focused);
+        --button-outline: 2px solid var(--SYS-color-database-40);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        background-color: color-mix(
-          in srgb,
-          var(--SYS-accent-asparagus-dull),
-          transparent 96%
-        );
-        --button-border-color: var(--SYS-accent-asparagus-muted-hover);
+        background-color: var(--SYS-color-database-hover-10);
+        --button-border-color: var(--SYS-color-database-hover-20);
         box-shadow:
           0 4px 6px -1px color-mix(in srgb, var(--SYS-border-shadow), transparent
                 10%),
           0 2px 4px -2px color-mix(in srgb, var(--SYS-border-shadow), transparent
                 10%),
           0 0 0 1px
-            color-mix(in srgb, var(--SYS-surface-light), transparent 10%) inset;
+            color-mix(in srgb, var(--SYS-border-shadow), transparent 5%) inset;
       }
 
       &:active,
       &.active {
-        background-color: color-mix(
-          in srgb,
-          var(--SYS-accent-asparagus-dull),
-          transparent 93%
-        );
-        --button-border-color: var(--SYS-accent-asparagus-muted);
+        background-color: var(--SYS-color-database-active-10);
+        --button-border-color:var(--SYS-color-database-active-20);
         box-shadow:
           0 1px 2px color-mix(in srgb, var(--SYS-border-shadow), transparent 5%),
           0 1px 3px
@@ -464,20 +456,20 @@
   }
 
   &.btn-refresh {
-    background: var(--SYS-accent-asparagus-faint);
-    border: 0.25px solid var(--SYS-accent-asparagus-muted);
-    color: var(--SYS-accent-asparagus-dull);
+    background: var(--SYS-color-highlight-asparagus-20);
+    border: 0.25px solid var(--SYS-color-highlight-asparagus-20);
+    color: var(--SYS-text-control);
 
     &:hover {
-      background: var(--SYS-accent-asparagus-faint-hover);
-      border: 0.25px solid var(--SYS-accent-asparagus-muted-hover);
-      color: var(--SYS-accent-asparagus-dull-hover);
+      background: var(--SYS-color-highlight-asparagus-hover-40);
+      border: 0.25px solid var(--SYS-color-highlight-asparagus-hover-40);
+      color: var(--SYS-text-control-hover);
     }
 
     &:active {
-      background: var(--SYS-accent-asparagus-faint-active);
-      border: 0.25px solid var(--SYS-accent-asparagus-muted-active);
-      color: var(--SYS-accent-asparagus-dull-active);
+      background: var(--SYS-color-highlight-asparagus-active-40);
+      border: 0.25px solid var(--SYS-color-highlight-asparagus-active-40);
+      color: var(--SYS-text-control-active);
     }
   }
 
