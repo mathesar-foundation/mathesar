@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { QuerySummarizationFunctionId } from '@mathesar/api/rpc/explorations';
 import type { DbType } from '@mathesar/AppTypes';
 import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
@@ -37,19 +37,21 @@ export interface AbstractTypeDbConfig {
     columnType: DbType,
   ) => {
     dbType: DbType;
-    typeOptions: Column['type_options'];
+    typeOptions: RawColumnWithMetadata['type_options'];
   };
   constructDbFormValuesFromTypeOptions: (
     columnType: DbType,
-    typeOptions: Column['type_options'],
+    typeOptions: RawColumnWithMetadata['type_options'],
   ) => FormValues;
 }
 
 export interface AbstractTypeDisplayConfig {
   form: AbstractTypeConfigForm;
-  determineDisplayOptions: (dbFormValues: FormValues) => Column['metadata'];
+  determineDisplayOptions: (
+    dbFormValues: FormValues,
+  ) => RawColumnWithMetadata['metadata'];
   constructDisplayFormValuesFromDisplayOptions: (
-    displayOptions: Column['metadata'],
+    displayOptions: RawColumnWithMetadata['metadata'],
   ) => FormValues;
 }
 
@@ -61,7 +63,7 @@ export interface CellInfo {
 
 export interface AbstractTypeIconArgs {
   dbType: DbType;
-  typeOptions: Column['type_options'];
+  typeOptions: RawColumnWithMetadata['type_options'];
 }
 
 export interface AbstractTypeConfiguration {

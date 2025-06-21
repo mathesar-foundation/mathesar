@@ -1,6 +1,6 @@
 import { readable } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import type {
   AbstractType,
@@ -13,7 +13,10 @@ import type { FormBuildConfiguration } from '@mathesar-component-library/types';
 import DurationConfiguration from './config-components/DurationConfiguration.svelte';
 
 export interface ColumnWithAbstractType
-  extends Pick<Column, 'id' | 'type' | 'type_options' | 'metadata'> {
+  extends Pick<
+    RawColumnWithMetadata,
+    'id' | 'type' | 'type_options' | 'metadata'
+  > {
   abstractType: AbstractType;
 }
 

@@ -1,7 +1,7 @@
 import { type Readable, derived } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
@@ -56,7 +56,9 @@ export class TableStructure {
     );
   }
 
-  refresh(): Promise<[Column[] | undefined, ConstraintsData | undefined]> {
+  refresh(): Promise<
+    [RawColumnWithMetadata[] | undefined, ConstraintsData | undefined]
+  > {
     // TODO batch these request via RPC batching
     return Promise.all([
       this.columnsDataStore.fetch(),

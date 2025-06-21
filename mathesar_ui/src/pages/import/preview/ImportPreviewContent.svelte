@@ -4,7 +4,10 @@
 
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import { api } from '@mathesar/api/rpc';
-  import type { Column, ColumnCastOptions } from '@mathesar/api/rpc/columns';
+  import type {
+    ColumnCastOptions,
+    RawColumnWithMetadata,
+  } from '@mathesar/api/rpc/columns';
   import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
   import {
     Field,
@@ -61,7 +64,7 @@
   export let renamedIdColumn: string | undefined;
   export let refreshTable: () => Promise<void>;
 
-  let columns: Column[] = [];
+  let columns: RawColumnWithMetadata[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([], {});
 
   $: otherTableNames = $currentTables
@@ -114,8 +117,10 @@
       return;
     }
     columns = fetchedColumns;
-    let castOptionsMap: Record<Column['id'], ColumnCastOptions | undefined> =
-      {};
+    let castOptionsMap: Record<
+      RawColumnWithMetadata['id'],
+      ColumnCastOptions | undefined
+    > = {};
     if (useColumnTypeInference) {
       const response = await typeSuggestionsRequest.run();
       if (response.settlement?.state === 'resolved') {
@@ -175,7 +180,7 @@
     });
   }
 
-  function updateTypeRelatedOptions(updatedColumn: Column) {
+  function updateTypeRelatedOptions(updatedColumn: RawColumnWithMetadata) {
     columns = columns.map((c) =>
       c.id === updatedColumn.id ? updatedColumn : c,
     );

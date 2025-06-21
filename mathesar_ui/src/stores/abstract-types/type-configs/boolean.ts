@@ -1,5 +1,8 @@
 import type { BooleanInputType } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeBoolean } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
@@ -81,8 +84,10 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
-  const displayOptions: Column['metadata'] = {
+function determineDisplayOptions(
+  formValues: FormValues,
+): RawColumnWithMetadata['metadata'] {
+  const displayOptions: RawColumnWithMetadata['metadata'] = {
     bool_input: formValues.displayAs as BooleanInputType,
   };
   if (formValues.displayAs === 'dropdown' && formValues.useCustomLabels) {
@@ -93,7 +98,7 @@ function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: Column['metadata'],
+  metadata: RawColumnWithMetadata['metadata'],
 ): FormValues {
   const column = { metadata };
   const formValues: FormValues = {

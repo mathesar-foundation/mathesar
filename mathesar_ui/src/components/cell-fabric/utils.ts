@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { Table } from '@mathesar/models/Table';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
@@ -97,7 +97,7 @@ export function getInitialInputValue(
 
 export function getDisplayFormatter(
   column: CellColumnLike,
-  columnId?: Column['id'],
+  columnId?: RawColumnWithMetadata['id'],
 ): (
   value: unknown,
   recordSummaries?: RecordSummariesForSheet,
