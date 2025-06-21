@@ -15,6 +15,7 @@ from mathesar.rpc import constraints
 from mathesar.rpc import data_modeling
 from mathesar.rpc import databases
 from mathesar.rpc import explorations
+from mathesar.rpc import forms
 from mathesar.rpc import records
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
@@ -250,6 +251,27 @@ METHODS = [
     (
         explorations.run_saved,
         "explorations.run_saved",
+        [user_is_authenticated]
+    ),
+
+    (
+        forms.add,
+        "forms.add",
+        [user_is_authenticated]
+    ),
+    (
+        forms.get,
+        "forms.get",
+        [user_is_authenticated]
+    ),
+    (
+        forms.list_,
+        "forms.list",
+        [user_is_authenticated]
+    ),
+    (
+        forms.delete,
+        "forms.delete",
         [user_is_authenticated]
     ),
 
