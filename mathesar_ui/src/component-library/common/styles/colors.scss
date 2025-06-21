@@ -139,6 +139,17 @@ $color-states: (
 // Colors by usage
 @mixin generate-color-tokens($name, $base-color, $states) {
   --color-#{$name}: #{$base-color};
+
+  @each $role, $delta in $color-roles {
+    $base-variant: hsla(
+      hue($base-color),
+      saturation($base-color),
+      lightness($base-color),
+      $delta
+    );
+    --color-#{$name}-#{$role}: #{$base-variant};
+  }
+
   @each $state, $delta in $states {
     $dh: map-get($delta, 'h_delta');
     $ds: map-get($delta, 's_delta');
@@ -149,14 +160,7 @@ $color-states: (
     $variant: hsl($h-new, $s-new, $l-new);
     --color-#{$name}-#{$state}: #{$variant};
     @each $role, $delta in $color-roles {
-      $base-variant: hsla(
-        hue($base-color),
-        saturation($base-color),
-        lightness($base-color),
-        $delta
-      );
       $new-variant: hsla($h-new, $s-new, $l-new, $delta);
-      --color-#{$name}-#{$role}: #{$base-variant};
       --color-#{$name}-#{$state}-#{$role}: #{$new-variant};
     }
   }
