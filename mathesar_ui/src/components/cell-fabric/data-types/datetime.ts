@@ -1,4 +1,7 @@
-import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import {
   DateTimeFormatter,
   DateTimeSpecification,
@@ -12,7 +15,7 @@ import type { DateTimeCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
 
 function getProps(
-  column: Column,
+  column: RawColumnWithMetadata,
   supportTimeZone: boolean,
 ): DateTimeCellExternalProps {
   const dateFormat = getColumnMetadataValue(column, 'date_format');
@@ -42,14 +45,14 @@ function getProps(
 
 const datetimeType: CellComponentFactory = {
   get: (
-    column: Column,
+    column: RawColumnWithMetadata,
     config?: { supportTimeZone?: boolean },
   ): ComponentAndProps<DateTimeCellExternalProps> => ({
     component: DateTimeCell,
     props: getProps(column, config?.supportTimeZone ?? false),
   }),
   getInput: (
-    column: Column,
+    column: RawColumnWithMetadata,
     config?: { supportTimeZone?: boolean },
   ): ComponentAndProps<
     Omit<DateTimeCellExternalProps, 'formatForDisplay'>
@@ -60,7 +63,10 @@ const datetimeType: CellComponentFactory = {
       allowRelativePresets: true,
     },
   }),
-  getDisplayFormatter(column: Column, config?: { supportTimeZone?: boolean }) {
+  getDisplayFormatter(
+    column: RawColumnWithMetadata,
+    config?: { supportTimeZone?: boolean },
+  ) {
     return (v) =>
       getProps(column, config?.supportTimeZone ?? false).formatForDisplay(
         String(v),

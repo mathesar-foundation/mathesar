@@ -31,14 +31,14 @@ export interface ExcludeConstraint extends BaseConstraint {
   type: 'exclude';
 }
 
-export type Constraint =
+export type RawConstraint =
   | PkConstraint
   | UniqueConstraint
   | FkConstraint
   | CheckConstraint
   | ExcludeConstraint;
 
-export type ConstraintType = Constraint['type'];
+export type ConstraintType = RawConstraint['type'];
 
 export interface UniqueConstraintRecipe {
   type: 'u';
@@ -63,7 +63,7 @@ export const constraints = {
       database_id: number;
       table_oid: number;
     },
-    Constraint[]
+    RawConstraint[]
   >(),
 
   add: rpcMethodTypeContainer<

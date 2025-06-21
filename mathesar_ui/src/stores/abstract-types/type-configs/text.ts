@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeText } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
@@ -71,7 +71,7 @@ function determineDbTypeAndOptions(
   columnType: DbType,
 ): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
   const dbType = determineDbType(dbFormValues, columnType);
-  const typeOptions: Column['type_options'] = {};
+  const typeOptions: RawColumnWithMetadata['type_options'] = {};
   if (dbType === DB_TYPES.CHARACTER || dbType === DB_TYPES.CHARACTER_VARYING) {
     typeOptions.length = Number(dbFormValues.length);
   }
@@ -83,7 +83,7 @@ function determineDbTypeAndOptions(
 
 function constructDbFormValuesFromTypeOptions(
   columnType: DbType,
-  typeOptions: Column['type_options'],
+  typeOptions: RawColumnWithMetadata['type_options'],
 ): FormValues {
   switch (columnType) {
     case DB_TYPES.CHARACTER:

@@ -8,7 +8,7 @@ import {
 } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SelectedCellData } from '@mathesar/components/sheet/selection';
 import Plane from '@mathesar/components/sheet/selection/Plane';
@@ -255,8 +255,8 @@ export class TabularData {
   }
 
   refreshAfterColumnExtraction(
-    extractedColumnIds: Column['id'][],
-    foreignKeyColumnId?: Column['id'],
+    extractedColumnIds: RawColumnWithMetadata['id'][],
+    foreignKeyColumnId?: RawColumnWithMetadata['id'],
   ) {
     this.meta.sorting.update((s) => {
       const firstExtractedColumnWithSort = extractedColumnIds.find((columnId) =>

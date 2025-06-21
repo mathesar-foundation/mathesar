@@ -1,4 +1,7 @@
-import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import {
   DateTimeFormatter,
   DateTimeSpecification,
@@ -11,7 +14,7 @@ import DateTimeInput from './components/date-time/DateTimeInput.svelte';
 import type { DateTimeCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
 
-function getProps(column: Column): DateTimeCellExternalProps {
+function getProps(column: RawColumnWithMetadata): DateTimeCellExternalProps {
   const format = getColumnMetadataValue(column, 'date_format');
   const specification = new DateTimeSpecification({
     type: 'date',
@@ -34,12 +37,14 @@ function getProps(column: Column): DateTimeCellExternalProps {
 }
 
 const stringType: CellComponentFactory = {
-  get: (column: Column): ComponentAndProps<DateTimeCellExternalProps> => ({
+  get: (
+    column: RawColumnWithMetadata,
+  ): ComponentAndProps<DateTimeCellExternalProps> => ({
     component: DateTimeCell,
     props: getProps(column),
   }),
   getInput: (
-    column: Column,
+    column: RawColumnWithMetadata,
   ): ComponentAndProps<
     Omit<DateTimeCellExternalProps, 'formatForDisplay'>
   > => ({
@@ -49,7 +54,7 @@ const stringType: CellComponentFactory = {
       allowRelativePresets: true,
     },
   }),
-  getDisplayFormatter(column: Column) {
+  getDisplayFormatter(column: RawColumnWithMetadata) {
     return (v) => getProps(column).formatForDisplay(String(v));
   },
 };

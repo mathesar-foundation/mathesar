@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import CollapsibleFieldset from '@mathesar/components/CollapsibleFieldset.svelte';
   import {
     FieldLayout,
@@ -35,7 +35,7 @@
   const identityCapableDbTypes = getDbTypesForAbstractType('number');
 
   export let table: Table;
-  export let columns: Column[];
+  export let columns: RawColumnWithMetadata[];
   export let onUpdated: () => Promise<void>;
 
   let isOpen = false;
@@ -61,7 +61,7 @@
 
   $: strategy = requiredField<Strategy>(initialStrategy);
   $: typeOfColumnToAdd = requiredField<ColumnType>(initialTypeOfColumnToAdd);
-  $: pickedColumn = requiredField<Column>(
+  $: pickedColumn = requiredField<RawColumnWithMetadata>(
     availableColumns.find((c) => c.primary_key) ?? availableColumns[0],
   );
   $: defaultValueOptions = ((): DefaultValue[] => {

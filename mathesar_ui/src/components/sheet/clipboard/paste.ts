@@ -2,7 +2,7 @@ import { arrayFrom, cycle, execPipe, first, map, take, zip } from 'iter-tools';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import {
   type RecordRow,
   type RecordsData,
@@ -27,7 +27,7 @@ import { deserializeTsv } from './tsv';
  * This is the stuff we need to have from the Sheet in order to paste into it
  */
 export interface PastingContext {
-  getSheetColumns: () => Column[];
+  getSheetColumns: () => RawColumnWithMetadata[];
   getRecordRows: () => RecordRow[];
   setSelection: (selection: SheetSelection) => void;
   confirm: (message: string) => Promise<boolean>;
@@ -74,8 +74,8 @@ function getPayload(clipboardData: DataTransfer): Payload {
 function getDestinationColumns(
   payloadColumnCount: number,
   selectedColumnIds: ImmutableSet<string>,
-  sheetColumns: Column[],
-): Column[] {
+  sheetColumns: RawColumnWithMetadata[],
+): RawColumnWithMetadata[] {
   const selectedColumnCount = selectedColumnIds.size;
 
   if (selectedColumnCount > payloadColumnCount) {
@@ -110,7 +110,10 @@ function insertViaPaste(
   throw new Error('Insert via paste is not yet implemented.');
 }
 
-function prepareStructuredCellValue(column: Column, cell: PayloadCell) {
+function prepareStructuredCellValue(
+  column: RawColumnWithMetadata,
+  cell: PayloadCell,
+) {
   if (cell.type === 'tsv') {
     // Since TSV doesn't have a mechanism to faithfully represent NULLs, we
     // assume that empty strings are NULLs.
@@ -134,7 +137,10 @@ function prepareStructuredCellValue(column: Column, cell: PayloadCell) {
   return assertExhaustive(cell);
 }
 
-function makeCellBlueprint([cell, column]: [PayloadCell, Column]) {
+function makeCellBlueprint([cell, column]: [
+  PayloadCell,
+  RawColumnWithMetadata,
+]) {
   return {
     columnId: String(column.id),
     value: prepareStructuredCellValue(column, cell),
