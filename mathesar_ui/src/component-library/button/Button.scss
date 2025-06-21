@@ -389,8 +389,9 @@
 
   &.btn-action {
     --button-background: var(--color-navigation-10);
-    color: var(--text-navigation);
-    border: transparent;
+    --button-color: var(--text-navigation);
+    --button-border: 2px solid;
+    --button-border-color: transparent;
 
     &:not(:disabled) {
       &:hover,
@@ -400,7 +401,7 @@
           var(--color-navigation-20),
           transparent 60%
         );
-        border: 2px solid var(--color-navigation-hover-20);
+        --button-border-color: var(--color-navigation-hover-20);
       }
 
       &:active,
