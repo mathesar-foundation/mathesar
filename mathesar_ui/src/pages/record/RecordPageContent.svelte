@@ -3,18 +3,17 @@
 
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {
     FormSubmit,
     makeForm,
     optionalField,
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
-  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import type { Table } from '@mathesar/models/Table';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
@@ -76,7 +75,6 @@
 
 <div class="record-page-content">
   <AppSecondaryHeader
-    slot="secondary-header"
     name={$summary}
     icon={iconRecord}
     entityTypeName={$_('record')}
@@ -145,24 +143,6 @@
     display: grid;
     grid-template: auto 1fr / auto;
     overflow-y: auto;
-  }
-  .record-page-content .app-secondary-header {
-    margin-bottom: 0px;
-  }
-  .header {
-    display: grid;
-    grid-template: auto auto / auto 1fr;
-    gap: 0.5rem 1.5rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-  }
-  .title {
-    grid-row: 1;
-    grid-column: 1;
-    margin: 0;
-    overflow: hidden;
-    color: var(--text-primary);
   }
   .table-name {
     grid-row: 2;
