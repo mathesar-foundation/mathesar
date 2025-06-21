@@ -1099,6 +1099,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.get_mathesar_money_array(text)', 'FUNCTION', NULL),
   ('msar', 'msar.get_numeric_array(text)', 'FUNCTION', NULL),
   ('msar', 'msar.get_object_counts()', 'FUNCTION', NULL),
+  ('msar', 'msar.get_oid_col_info_map(jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.get_other_column_ids(regclass,smallint[])', 'FUNCTION', NULL),
   ('msar', 'msar.get_pk_column(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_pk_column(text,text)', 'FUNCTION', NULL),
