@@ -3,28 +3,40 @@
  */
 body {
   // Background Colors
-  --background-color: #ffffff;
-  --header-background: var(--white);
-  --header-border: var(--sand-200);
-  --header-gradient-start: var(--white);
-  --header-gradient-end: var(--sand-100);
-  --footer-background-color: var(--sand-50);
-  --inset-background-color: var(--white);
-  --hover-background: var(--stormy-50);
-  --active-background: var(--stormy-200);
-  --disabled-background: var(--gray-100);
-  --elevated-background: var(--sand-100);
-  --sidebar-background: var(--white);
-  --modal-overlay: rgba(0, 0, 0, 0.5);
-  --icon-background: var(--stormy-100);
-  --layout-background-color: var(--sand-50);
+  --background-color: var(--white);
+  --header-background: linear-gradient(
+    var(--gradient-direction-default),
+    var(--header-gradient-start),
+    var(--header-gradient-end)
+  );
+  --header-border: var(--neutral-400);
+  --header-gradient-start: var(--neutral-200);
+  --header-gradient-end: var(--neutral-300);
+  --footer-background-color: var(--white);
+  --inset-background-color: var(--neutral-50);
+  --hover-background: var(--neutral-100);
+  --active-background: var(--salmon-100);
+  --disabled-background: var(--neutral-100);
+  --elevated-background: var(--neutral-100);
+  --sidebar-background: var(--neutral-200);
+  --sheet-background: var(--neutral-50);
+  --modal-overlay: rgba(0, 0, 0, 0.1);
+  --icon-background: var(--rosy-500);
+  --card-icon-color: var(--white);
+  --resource-icon-color: var(--pumpkin-800);
+  --resource-icon-background: var(--pumpkin-100);
+  --layout-background-color: var(--neutral-200);
+  --window-background-color: var(--white);
+  --progress-foreground: rgba(255, 255, 255, 0.8);
 
   // Border Colors
-  --border-color: var(--sand-300);
-  --card-border: var(--sand-300);
-  --card-row-border: var(--sand-200);
-  --card-hover-border: var(--stormy-300);
-  --input-border: var(--gray-300);
+  --border-color: var(--neutral-300);
+  --card-border: var(--neutral-400);
+  --card-row-border: var(--neutral-300);
+  --card-hover-border: var(--salmon-500);
+  --card-active-border: var(--salmon-600);
+  --card-focus-outline: var(--accent-500);
+  --input-border: var(--neutral-400);
 
   // Border Radius
   --border-radius-xs: 0.071rem; //1px
@@ -34,29 +46,36 @@ body {
   --border-radius-xl: 1.142rem; //16px
 
   // Card Styles
-  --card-background: #ffffff;
+  --card-background: var(--neutral-50);
+  --card-hover-background: linear-gradient(
+      rgba(255, 117, 76, 0.02),
+      rgba(255, 117, 76, 0.02)
+    ),
+    var(--card-background);
+  --card-active-background: linear-gradient(
+      rgba(255, 117, 76, 0.04),
+      rgba(255, 117, 76, 0.04)
+    ),
+    var(--card-background);
   --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
     0 2px 4px -2px var(--shadow-color),
     0 0 0 1px var(--shadow-color-inset) inset;
   --card-active-shadow: 0 1px 2px var(--shadow-color-light),
     0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-  --gradient-card-start: var(--white);
-  --gradient-card-end: var(--sand-50);
-  --gradient-card-hover-start: var(--sand-100);
-  --gradient-card-hover-end: var(--sand-200);
-  --gradient-card-active-start: var(--sand-100);
-  --gradient-card-active-end: var(--sand-200);
+
+  // Toast
+  --ToastItem__background-color: var(--info-background-color);
+  --ToastItem__background-color--success: var(--success-background-color);
+  --ToastItem__background-color--error: var(--danger-background-color);
+  --ToastItem__text-color: var(--text-color-primary);
+  --ToastItem__progress-color: var(--progress-foreground);
 
   // Collapsible Styles
-  --collapsible-background: var(--sand-200);
-  --collapsible-hover: var(--sand-300);
-  --collapsible-active: var(--sand-400);
-  --collapsible-button-background: var(--sand-200);
-  --collapsible-button-hover: var(--sand-300);
-  --collapsible-button-active: var(--sand-400);
-  --collapsible-button-border: var(--sand-500);
+  --collapsible-button-background: var(--neutral-300);
+  --collapsible-button-hover: var(--neutral-400);
+  --collapsible-button-active: var(--neutral-600);
   --collapsible-button-text: var(--text-color-primary);
-  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 
   // Font Weights
   --font-weight-light: 300;
@@ -67,12 +86,12 @@ body {
 
   // Gradients
   --gradient-direction-default: to bottom right;
-  --gradient-base-start: var(--stormy-100);
-  --gradient-base-end: var(--stormy-200);
-  --gradient-base-hover-start: var(--stormy-200);
-  --gradient-base-hover-end: var(--stormy-300);
-  --gradient-base-active-start: var(--stormy-300);
-  --gradient-base-active-end: var(--stormy-400);
+  --gradient-base-start: var(--stormy-200);
+  --gradient-base-end: var(--stormy-300);
+  --gradient-base-hover-start: var(--stormy-300);
+  --gradient-base-hover-end: var(--stormy-400);
+  --gradient-base-active-start: var(--stormy-400);
+  --gradient-base-active-end: var(--stormy-500);
   --gradient-light-start: var(--gradient-base-start);
   --gradient-light-end: var(--gradient-base-end);
   --gradient-dark-start: var(--stormy-800);
@@ -80,16 +99,17 @@ body {
 
   // Input Styles
   --input-background: #ffffff;
-  --input-disabled-background: var(--sand-50);
-  --input-focus-color: var(--stormy-500);
-  --input-focus-shadow: var(--stormy-100);
-  --input-padding: var(--sm2);
-  --input-line-height: 1;
+  --input-disabled-background: var(--neutral-50);
+  --input-focus-color: var(--neutral-400);
+  --input-focus-shadow: var(--neutral-300);
+  --input-padding: var(--sm4);
+  --input-line-height: 1.2;
   --input-text: var(--text-color);
 
   // Inspector Styles
-  --inspector-hover: var(--sand-300);
-  --inspector-active: var(--sand-400);
+  --inspector-background: var(--neutral-100);
+  --inspector-hover: var(--neutral-300);
+  --inspector-active: var(--neutral-400);
 
   // Modal
   --modal-z-index: 50;
@@ -116,43 +136,100 @@ body {
 
   // Text Colors
   --text-color: #171717;
-  --text-color-primary: var(--stormy-800);
-  --text-color-secondary: var(--stormy-700);
-  --text-color-tertiary: var(--stormy-400);
-  --text-color-muted: var(--gray-500);
+  --text-color-primary: var(--neutral-700);
+  --text-color-secondary: var(--neutral-600);
+  --text-color-tertiary: var(--pumpkin-800);
+  --text-color-muted: var(--neutral-600);
 
-  // Utility Colors
-  --danger-color: var(--rosy-700);
-  --danger-background-color: #fde9e9;
-  --danger-border-color: #f2aaaa;
+  // Status boxes
+  --info-color: var(--sky-900);
+  --info-background-color: var(--sky-200);
+  --info-border-color: var(--sky-600);
+  &.theme-dark {
+    --info-color: var(--sky-200);
+    --info-background-color: var(--sky-900);
+    --info-border-color: var(--sky-600);
+  }
 
-  --info-color: var(--sky-700);
-  --info-background-color: #eff6ff;
-  --info-border-color: #bfdbfe;
+  --warning-color: var(--yellow-900);
+  --warning-background-color: var(--yellow-200);
+  --warning-border-color: var(--yellow-500);
+  &.theme-dark {
+    --warning-color: var(--pumpkin-300);
+    --warning-background-color: var(--pumpkin-950);
+    --warning-border-color: var(--pumpkin-800);
+  }
 
-  --success-color: #0d8f6a;
-  --success-background-color: #ecfdf5;
-  --success-border-color: #a7f3d0;
+  --danger-color: var(--rosy-900);
+  --danger-background-color: var(--rosy-200);
+  --danger-border-color: var(--rosy-500);
+  &.theme-dark {
+    --danger-color: var(--rosy-100);
+    --danger-background-color: var(--rosy-950);
+    --danger-border-color: var(--rosy-800);
+  }
 
-  --warning-color: var(--pumpkin-700);
-  --warning-background-color: #fef3c7;
-  --warning-border-color: #fcd34d;
+  --success-color: var(--pistachio-950);
+  --success-background-color: var(--pistachio-200);
+  --success-border-color: var(--pistachio-600);
+  &.theme-dark {
+    --success-color: var(--pistachio-200);
+    --success-background-color: var(--pistachio-900);
+    --success-border-color: var(--pistachio-800);
+  }
+
+  --outcome-color: var(--stormy-800);
+  --outcome-background-color: var(--purple-100);
+  --outcome-border-color: var(--purple-300);
+  &.theme-dark {
+    --outcome-color: var(--purple-100);
+    --outcome-background-color: var(--stormy-800);
+    --outcome-border-color: var(--purple-400);
+  }
+
+  --neutral-25: var(--gray-25);
+  --neutral-50: var(--gray-50);
+  --neutral-100: var(--gray-100);
+  --neutral-200: var(--gray-200);
+  --neutral-300: var(--gray-300);
+  --neutral-400: var(--gray-400);
+  --neutral-500: var(--gray-500);
+  --neutral-600: var(--gray-600);
+  --neutral-700: var(--gray-700);
+  --neutral-800: var(--gray-800);
+  --neutral-850: var(--gray-800);
+  --neutral-900: var(--gray-900);
 
   // Color Palette
-  --gray-50: #fafafa;
-  --gray-100: #f5f5f5;
-  --gray-200: #eeeeee;
-  --gray-300: #e0e0e0;
-  --gray-400: #bdbdbd;
-  --gray-500: #757575;
-  --gray-600: #353535;
-  --gray-700: #303030;
-  --gray-800: #1f1f1f;
-  --gray-900: #131313;
-  --gray-800-rgb: 39, 43, 48;
-  --gray-50-tentative: #f6f9f9;
+  --gray-25: #ffffff;
+  --gray-50: #faf8f5;
+  --gray-100: #f2f0eb;
+  --gray-200: #e6e3db;
+  --gray-300: #d4d0c4;
+  --gray-400: #b8b3a3;
+  --gray-500: #938e7e;
+  --gray-600: #5d5850;
+  --gray-700: #3a342e;
+  --gray-800: #221e1a;
+  --gray-900: #171312;
+  --gray-950: #0c0a09;
 
-  --green-100: #e5fde6;
+  --pistachio-50: #f5f9f1;
+  --pistachio-100: #e0edd4;
+  --pistachio-200: #c3d8ab;
+  --pistachio-300: #b7d59a;
+  --pistachio-400: #a2c97e;
+  --pistachio-500: #8dbd61;
+  --pistachio-600: #79ad48;
+  --pistachio-700: #65903c;
+  --pistachio-800: #507330;
+  --pistachio-900: #32481e;
+  --pistachio-950: #141d0c;
+
+  --highlighter-100: #fbfad2;
+  --highlighter-300: #fdf90c;
+  --highlighter-500: #81570e;
+  --highlighter-800: #251904;
 
   --orange-red-50: #fff2ef;
   --orange-red-100: #ffe2dc;
@@ -172,17 +249,17 @@ body {
   --purple-400: #6b45dd;
   --purple-500: #4b2c9d;
 
-  --pumpkin-50: #fefbf3;
-  --pumpkin-100: #fef4de;
-  --pumpkin-200: #fce7bc;
-  --pumpkin-300: #f8d589;
-  --pumpkin-400: #f4b640;
-  --pumpkin-500: #eb9d20;
-  --pumpkin-600: #cc7d16;
-  --pumpkin-700: #a65f14;
-  --pumpkin-800: #874c15;
-  --pumpkin-900: #6f3f15;
-  --pumpkin-950: #422408;
+  --pumpkin-50: #fffbf5;
+  --pumpkin-100: #fef4e8;
+  --pumpkin-200: #fde6cc;
+  --pumpkin-300: #fbd199;
+  --pumpkin-400: #f8b866;
+  --pumpkin-500: #f5a142;
+  --pumpkin-600: #e6912a;
+  --pumpkin-700: #b8741f;
+  --pumpkin-800: #a0621a;
+  --pumpkin-900: #8a5216;
+  --pumpkin-950: #2d1b08;
 
   --red-100: #fdeeed;
   --red-200: #f9cdc8;
@@ -203,55 +280,79 @@ body {
   --rosy-900: #612323;
   --rosy-950: #411414;
 
-  --salmon-50: #fef4f1;
-  --salmon-100: #ffe6df;
-  --salmon-200: #ffd0bf;
-  --salmon-300: #ffa690;
-  --salmon-400: #ff8365;
-  --salmon-500: #f96b45;
-  --salmon-600: #e04e2a;
-  --salmon-700: #c03a1b;
-  --salmon-800: #a02e16;
-  --salmon-900: #832411;
-  --salmon-950: #441209;
+  --salmon-50: #fff5f0;
+  --salmon-100: #ffe8db;
+  --salmon-200: #ffd1b8;
+  --salmon-300: #ffb394;
+  --salmon-400: #ff9470;
+  --salmon-500: #ff754c;
+  --salmon-600: #e85d39;
+  --salmon-700: #d14526;
+  --salmon-800: #ba2d13;
+  --salmon-900: #a31500;
+  --salmon-950: #6b0e00;
 
-  --sand-50: #faf8f5;
-  --sand-100: #f5f2ec;
-  --sand-200: #e5e0d5;
-  --sand-300: #c9c1b0;
-  --sand-400: #a39b8a;
-  --sand-500: #8f8673;
-  --sand-600: #736b5c;
-  --sand-700: #524c41;
-  --sand-800: #38342d;
-  --sand-900: #272521;
-
+  --sky-50: #f0f9ff;
+  --sky-100: #e0f2fe;
   --sky-200: #daeefb;
   --sky-300: #99d4f9;
+  --sky-400: #38bdf8;
   --sky-500: #84caf5;
   --sky-600: #127ed6;
   --sky-700: #0f69c1;
   --sky-800: #3e5a80;
+  --sky-900: #141d29;
   --sky-600-tentative: #87bcf6;
 
-  --stormy-50: #f3f0f7;
-  --stormy-100: #e6dff0;
-  --stormy-200: #cdc0e2;
-  --stormy-300: #b097d0;
-  --stormy-400: #9475bc;
-  --stormy-500: #7a5ca6;
-  --stormy-600: #644687;
-  --stormy-700: #4d3468;
-  --stormy-800: #2e1f3e;
-  --stormy-900: #211531;
-  --stormy-950: #0f081b;
+  --stormy-25: #faf9fb;
+  --stormy-50: #f5f3f8;
+  --stormy-100: #ebe7f0;
+  --stormy-150: #e0d9e7;
+  --stormy-200: #d6cde3;
+  --stormy-300: #beb0d2;
+  --stormy-400: #a592c0;
+  --stormy-500: #8c74ae;
+  --stormy-600: #735a94;
+  --stormy-700: #5a4379;
+  --stormy-800: #3d2d52;
+  --stormy-900: #2a1f38;
+  --stormy-950: #1a1225;
 
   --white: white;
+  --yellow-50: #fefce8;
   --yellow-100: #fff6e0;
   --yellow-200: #fff0c0;
   --yellow-300: #f5cd8c;
   --yellow-400: #eeb159;
+  --yellow-500: #f59e0b;
+  --yellow-600: #d97706;
+  --yellow-700: #b45309;
   --yellow-800: #944f01;
+  --yellow-900: #78350f;
+  --yellow-950: #451a03;
+
+  --slate-50: #f1f3f6;
+  --slate-100: #e1e5ea;
+  --slate-200: #c4cdd6;
+  --slate-300: #9ba5b0;
+  --slate-400: #6b7684;
+  --slate-500: #4a5568;
+  --slate-600: #2b3340;
+  --slate-700: #202630;
+  --slate-800: #19222a;
+  --slate-850: #11181d;
+  --slate-900: #101215;
+
+  --mint-50: #f0fdfa;
+  --mint-100: #ccfbf1;
+  --mint-200: #99f6e4;
+  --mint-300: #5eead4;
+  --mint-400: #2dd4bf;
+  --mint-500: #14b8a6;
+  --mint-600: #0d9488;
+  --mint-700: #0f766e;
+  --mint-800: #115e59;
+  --mint-900: #134e4a;
 
   // Brand Colors
   --brand-100: var(--red-100);
@@ -271,58 +372,125 @@ body {
   --accent-800: var(--salmon-800);
 
   // Legacy Colors
-  --color-blue-dark: #1d4ed8;
-  --color-gray-light: var(--gray-100);
-  --color-gray-medium: var(--gray-300);
-  --color-gray-dark: var(--gray-400);
-  --color-gray-darker: var(--gray-800);
-  --color-contrast: var(--color-blue-medium);
-  --color-contrast-light: var(--color-blue-light);
-  --color-link: var(--color-blue-dark);
+  --color-blue-dark: var(--stormy-700);
+  --color-gray-light: var(--neutral-100);
+  --color-gray-medium: var(--neutral-300);
+  --color-gray-dark: var(--neutral-400);
+  --color-gray-darker: var(--neutral-800);
+  --color-contrast: var(--stormy-600);
+  --color-contrast-light: var(--stormy-300);
+  --color-link: var(--stormy-700);
   --color-text: #171717;
 }
 
 body.theme-dark {
-  --background-color: var(--gray-900);
-  --border-color: var(--gray-600);
-  --header-background: var(--gray-800);
-  --header-border: var(--gray-700);
-  --header-gradient-start: var(--gray-800);
-  --header-gradient-end: var(--gray-800);
-  --footer-background-color: var(--gray-800);
-  --inset-background-color: var(--gray-800);
-  --hover-background: var(--gray-700);
-  --active-background: var(--gray-700);
-  --disabled-background: var(--gray-700);
-  --elevated-background: var(--gray-800);
+  // These "DARK-MODE" variables are mess introduced in [4439][4439]. We need to
+  // refactor this code to follow better patterns. For now, the weird naming
+  // exists to cue devs that these variables only have definitions in dark mode
+  // — so they should only be applied in dark mode.
+  //
+  // [4439]: https://github.com/mathesar-foundation/mathesar/pull/4439
+  --DARK-MODE-surface-base: #0a070d;
+  --DARK-MODE-surface-primary: #040305;
+  --DARK-MODE-surface-secondary: #141414;
+  --DARK-MODE-surface-tertiary: #1e1e1f;
+  --DARK-MODE-surface-elevated: #1a161d;
+  --DARK-MODE-surface-inset: #0e0b11;
+  --DARK-MODE-surface-deep-inset: #08070a;
+  --DARK-MODE-surface-disabled: #131515;
+  --DARK-MODE-surface-primary-hover: #0f0e0e;
+  --DARK-MODE-surface-hover: linear-gradient(
+      rgba(255, 117, 76, 0.08),
+      rgba(255, 117, 76, 0.08)
+    )
+    var(--DARK-MODE-surface-inset);
+  --DARK-MODE-surface-active: linear-gradient(
+      rgba(255, 117, 76, 0.12),
+      rgba(255, 117, 76, 0.12)
+    ),
+    var(--DARK-MODE-surface-inset);
+  --DARK-MODE-border-base: #2b2b2b;
+  --DARK-MODE-border-subtle: #171a1a;
+  --DARK-MODE-border-strong: var(--slate-500);
+  --DARK-MODE-border-focus: #262130;
+
+  --DARK-MODE-accent-primary: var(--pumpkin-500);
+  --DARK-MODE-accent-primary-hover: var(--pumpkin-300);
+  --DARK-MODE-accent-primary-muted: var(--pumpkin-950);
+  --DARK-MODE-accent-muted: var(--slate-900);
+  --DARK-MODE-text-accent-primary: var(--pumpkin-600);
+  --DARK-MODE-text-accent-secondary: var(--salmon-400);
+  --DARK-MODE-text-accent-muted: var(--stormy-400);
+  --DARK-MODE-text-accent-light: var(--stormy-200);
+
+  --background-color: var(--DARK-MODE-surface-primary);
+  --border-color: var(--DARK-MODE-border-base);
+  --header-background: linear-gradient(
+    var(--gradient-direction-default),
+    var(--header-gradient-start),
+    var(--header-gradient-end)
+  );
+  --header-border: var(--DARK-MODE-surface-elevated);
+  --header-gradient-start: var(--DARK-MODE-surface-base);
+  --header-gradient-end: var(--DARK-MODE-surface-secondary);
+  --footer-background-color: var(--DARK-MODE-surface-elevated);
+  --inset-background-color: var(--neutral-850);
+  --hover-background: var(--DARK-MODE-surface-hover);
+  --active-background: var(--DARK-MODE-surface-active);
+  --disabled-background: var(--DARK-MODE-surface-disabled);
+  --elevated-background: var(--DARK-MODE-surface-inset);
   --shadow-color: var(--shadow-color-dark);
   --shadow-color-light: rgba(0, 0, 0, 0.2);
   --shadow-color-inset: var(--shadow-color-inset-dark);
-  --icon-background: var(--stormy-700);
-  --layout-background-color: var(--background-color);
-  --inspector-hover: var(--gray-700);
-  --inspector-active: var(--gray-600);
-  --collapsible-background: var(--gray-700);
-  --collapsible-hover: var(--gray-600);
-  --collapsible-active: var(--gray-500);
-  --card-row-border: var(--gray-700);
+  --icon-background: var(--rosy-600);
+  --card-icon-color: var(--rosy-50);
+  --resource-icon-color: var(--pumpkin-700);
+  --resource-icon-background: var(--DARK-MODE-accent-primary-muted);
+  --layout-background-color: var(--DARK-MODE-surface-base);
+  --inspector-background: var(--DARK-MODE-surface-inset);
+  --inspector-hover: var(--DARK-MODE-surface-tertiary);
+  --inspector-active: var(--DARK-MODE-surface-inset);
+  --secondary-header-background: var(--DARK-MODE-surface-secondary);
+  --collapsible-button-background: var(--DARK-MODE-surface-tertiary);
+  --collapsible-button-hover: var(--DARK-MODE-surface-hover);
+  --collapsible-button-active: var(--DARK-MODE-surface-active);
+  --collapsible-button-text: var(--text-color-primary);
+  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --card-border: var(--DARK-MODE-border-base);
+  --card-row-border: var(--DARK-MODE-border-strong);
+  --sheet-background: var(--DARK-MODE-surface-primary);
+  --window-background-color: var(--DARK-MODE-surface-elevated);
+  --progress-foreground: rgba(0, 0, 0, 0.6);
+
+  --neutral-25: var(--slate-50);
+  --neutral-50: var(--slate-50);
+  --neutral-100: var(--slate-100);
+  --neutral-200: var(--slate-200);
+  --neutral-300: var(--slate-300);
+  --neutral-400: var(--slate-400);
+  --neutral-500: var(--slate-500);
+  --neutral-600: var(--slate-600);
+  --neutral-700: var(--slate-700);
+  --neutral-800: var(--slate-800);
+  --neutral-850: var(--slate-850);
+  --neutral-900: var(--slate-900);
 
   // Text
-  --text-color: var(--white);
-  --text-color-primary: #ffffff;
-  --text-color-secondary: var(--stormy-200);
-  --text-color-tertiary: var(--stormy-400);
-  --text-color-muted: var(--gray-500);
+  --text-color: var(--slate-50);
+  --text-color-primary: var(--slate-100);
+  --text-color-secondary: var(--slate-300);
+  --text-color-tertiary: var(--salmon-200);
+  --text-color-muted: var(--slate-400);
 
   // Input
-  --input-background: var(--gray-800);
-  --input-border: var(--gray-700);
+  --input-background: var(--DARK-MODE-surface-deep-inset);
+  --input-border: var(--DARK-MODE-border-subtle);
   --input-text: var(--text-color);
-  --input-focus-color: var(--stormy-400);
-  --input-focus-shadow: var(--stormy-800);
-  --input-disabled-background: var(--gray-800);
-  --sidebar-background: var(--gray-800);
-  --modal-overlay: rgba(0, 0, 0, 0.7);
+  --input-focus-color: var(--slate-400);
+  --input-focus-shadow: var(--slate-800);
+  --input-disabled-background: var(--DARK-MODE-surface-disabled);
+  --sidebar-background: var(--inspector-background);
+  --modal-overlay: rgba(0, 0, 0, 0.6);
 
   // Gradients
   --gradient-base-start: var(--stormy-800);
@@ -333,46 +501,23 @@ body.theme-dark {
   --gradient-base-active-end: var(--stormy-700);
 
   // Card
-  --card-background: var(--gray-900);
-  --card-border: var(--gray-700);
-  --card-hover-border: var(--stormy-400);
+  --card-background: var(--DARK-MODE-surface-inset);
+  --card-hover-background: var(--hover-background);
+  --card-active-background: var(--active-background);
+  --card-hover-border: var(--salmon-400);
+  --card-active-border: var(--salmon-500);
   --card-hover-shadow: 0 4px 6px -1px var(--shadow-color),
     0 2px 4px -2px var(--shadow-color),
     0 0 0 1px var(--shadow-color-inset) inset;
   --card-active-shadow: 0 1px 2px var(--shadow-color-light),
     0 1px 3px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
-  --gradient-card-start: var(--gray-700);
-  --gradient-card-end: var(--gray-800);
-  --gradient-card-hover-start: var(--gray-800);
-  --gradient-card-hover-end: var(--gray-700);
-  --gradient-card-active-start: var(--gray-700);
-  --gradient-card-active-end: var(--gray-600);
 
-  // Utility
-  --danger-color: #ff6b6b;
-  --danger-background-color: rgba(255, 107, 107, 0.1);
-  --danger-border-color: rgba(255, 107, 107, 0.2);
-
-  --info-color: #60a5fa;
-  --info-background-color: rgba(59, 130, 246, 0.15);
-  --info-border-color: rgba(59, 130, 246, 0.3);
-
-  --warning-color: #fbbf24;
-  --warning-background-color: rgba(251, 191, 36, 0.15);
-  --warning-border-color: rgba(251, 191, 36, 0.3);
-
-  --success-color: #34d399;
-  --success-background-color: rgba(16, 185, 129, 0.15);
-  --success-border-color: rgba(16, 185, 129, 0.3);
-
-  --purple-100: rgba(139, 92, 246, 0.1);
-  --purple-300: rgba(139, 92, 246, 0.3);
-  --purple-400: rgba(139, 92, 246, 0.8);
-
-  --collapsible-button-background: var(--gray-700);
-  --collapsible-button-hover: var(--gray-600);
-  --collapsible-button-active: var(--gray-500);
-  --collapsible-button-border: var(--gray-500);
-  --collapsible-button-text: var(--text-color-primary);
-  --collapsible-button-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --accent-100: var(--salmon-800);
+  --accent-200: var(--salmon-700);
+  --accent-300: var(--salmon-600);
+  --accent-400: var(--salmon-500);
+  --accent-500: var(--salmon-400);
+  --accent-600: var(--salmon-300);
+  --accent-700: var(--salmon-200);
+  --accent-800: var(--salmon-100);
 }

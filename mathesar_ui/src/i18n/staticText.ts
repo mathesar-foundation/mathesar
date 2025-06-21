@@ -8,4 +8,5 @@
 export const staticText = {
   LOGIN: 'LOGIN',
   COLON: ':',
+  EN_DASH: '–',
 } as const;

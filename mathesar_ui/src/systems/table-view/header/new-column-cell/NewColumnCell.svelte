@@ -34,7 +34,8 @@
 
 <Dropdown
   closeOnInnerClick={false}
-  triggerAppearance="plain"
+  triggerAppearance="secondary"
+  triggerClass="btn-borderless"
   showArrow={false}
   ariaLabel={$_('new_column')}
   on:close={form.reset}

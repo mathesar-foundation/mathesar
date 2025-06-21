@@ -42,10 +42,6 @@
     align-items: center;
     justify-content: space-between;
 
-    :global(svg) {
-      color: var(--sand-800);
-    }
-
     > :global(* + *) {
       margin-left: var(--sm4);
     }

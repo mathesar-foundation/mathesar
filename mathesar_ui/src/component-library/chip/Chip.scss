@@ -42,7 +42,7 @@
   }
 }
 
-:global(body.theme-dark) {
+body.theme-dark {
   .chip {
     background-color: var(--stormy-700);
     color: var(--text-color-primary);

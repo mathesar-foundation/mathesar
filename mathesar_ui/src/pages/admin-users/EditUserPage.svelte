@@ -66,10 +66,10 @@
         prependSeparator: true,
       }}
     />
-    <h1>
+    <h2>
       <Icon {...iconEditUser} />
       {$_('edit_user')}: <strong>{userModel.username}</strong>
-    </h1>
+    </h2>
     <FormBox>
       <UserDetailsForm user={userModel.getUser()} on:update={onUserUpdate} />
     </FormBox>

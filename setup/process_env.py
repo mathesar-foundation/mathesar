@@ -77,43 +77,23 @@ def generate_secret_key(length=50):
     return ''.join(secrets.choice(allowed_chars) for _ in range(length))
 
 
-def construct_pg_conn_str(env_vars):
-    """
-    Construct a PostgreSQL connection string from the given env_vars.
-    Required keys: POSTGRES_USER, POSTGRES_HOST, POSTGRES_DB.
-    Optionally includes POSTGRES_PASSWORD and POSTGRES_PORT.
-    """
-    user = env_vars.get("POSTGRES_USER")
-    password = env_vars.get("POSTGRES_PASSWORD", "")
-    host = env_vars.get("POSTGRES_HOST")
-    port = env_vars.get("POSTGRES_PORT", "")
-    dbname = env_vars.get("POSTGRES_DB")
+def validate_pg_env_variables(env_vars):
+    try:
+        with psycopg.connect(
+            host=env_vars["POSTGRES_HOST"],
+            port=env_vars.get("POSTGRES_PORT", ""),
+            dbname=env_vars["POSTGRES_DB"],
+            user=env_vars["POSTGRES_USER"],
+            password=env_vars.get("POSTGRES_PASSWORD", "")
+        ):
+            pass
 
-    if password:
-        user_part = f"{user}:{password}"
-    else:
-        user_part = f"{user}"
-    if port:
-        host_part = f"{host}:{port}"
-    else:
-        host_part = host
-
-    return f"postgres://{user_part}@{host_part}/{dbname}"
+        return True
+    except Exception as e:
+        sys.exit(f"Unable to connect to the database. {e}")
 
 
-def validate_pg_connection_string(connection_string):
-    """
-    Validate the provided PostgreSQL connection string.
-
-    On success, return a dictionary containing the following keys:
-      - POSTGRES_HOST
-      - POSTGRES_PORT (empty string if not provided)
-      - POSTGRES_DB
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD (empty string if not provided)
-
-    Exits with an error message if the string is invalid or a connection cannot be made.
-    """
+def construct_env_vars_from_connection_string(connection_string):
     try:
         parsed_url = urlparse(connection_string)
 
@@ -139,21 +119,9 @@ def validate_pg_connection_string(connection_string):
             "POSTGRES_PASSWORD": conninfo_dict.get("password", "")
         }
 
-        # Attempt to connect to validate the connection.
-        with psycopg.connect(
-            host=env_vars['POSTGRES_HOST'],
-            port=env_vars['POSTGRES_PORT'],
-            dbname=env_vars['POSTGRES_DB'],
-            user=env_vars['POSTGRES_USER'],
-            password=env_vars['POSTGRES_PASSWORD']
-        ):
-            pass
-
         return env_vars
     except psycopg.ProgrammingError as e:
         sys.exit(f"Invalid: Unable to parse the PostgreSQL connection string. {e}")
-    except psycopg.OperationalError as e:
-        sys.exit(f"Invalid: Unable to connect to the database. {e}")
     except Exception as e:
         sys.exit(f"Invalid: Unable to process connection string. {e}")
 
@@ -169,24 +137,30 @@ def main():
     if "SECRET_KEY" not in env_vars or not env_vars["SECRET_KEY"]:
         updates["SECRET_KEY"] = generate_secret_key()
 
-    if len(sys.argv) > 1 and sys.argv[1].strip():
-        connection_string = sys.argv[1].strip()
+    connection_string = sys.argv[1].strip() if (len(sys.argv) > 1 and sys.argv[1].strip()) else None
+
+    if connection_string:
+        pg_env_vars = construct_env_vars_from_connection_string(connection_string)
+
     else:
         required_pg_keys = ["POSTGRES_HOST", "POSTGRES_DB", "POSTGRES_USER"]
-        pg_missing = any(key not in env_vars or not env_vars[key] for key in required_pg_keys)
+        is_required_pg_env_vars_missing = any(key not in env_vars or not env_vars[key] for key in required_pg_keys)
 
-        if not pg_missing:
-            # Build a connection string from existing env variables.
-            connection_string = construct_pg_conn_str(env_vars)
-        else:
-            # If any required PG key is missing, ensure we got a connection string as a parameter.
+        if is_required_pg_env_vars_missing:
             sys.exit("Required PostgreSQL connection parameters are missing in the .env file and no connection string was provided.")
 
-    pg_updates = validate_pg_connection_string(connection_string)
-    updates.update(pg_updates)
+        pg_env_vars = {
+            "POSTGRES_HOST": env_vars["POSTGRES_HOST"],
+            "POSTGRES_PORT": env_vars.get("POSTGRES_PORT", ""),
+            "POSTGRES_DB": env_vars["POSTGRES_DB"],
+            "POSTGRES_USER": env_vars["POSTGRES_USER"],
+            "POSTGRES_PASSWORD": env_vars.get("POSTGRES_PASSWORD", "")
+        }
 
-    updated_content = update_env_lines(lines, updates)
-    sys.stdout.write(updated_content)
+    if validate_pg_env_variables(pg_env_vars):
+        updates.update(pg_env_vars)
+        updated_content = update_env_lines(lines, updates)
+        sys.stdout.write(updated_content)
 
 
 if __name__ == "__main__":

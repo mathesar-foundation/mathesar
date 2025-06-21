@@ -5,8 +5,6 @@
 
 <style>
   .inspector-tab-content {
-    padding: var(--sm5);
     display: grid;
-    gap: var(--sm5);
   }
 </style>

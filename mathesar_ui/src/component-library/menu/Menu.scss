@@ -4,20 +4,16 @@
   display: inline-flex;
   flex-direction: column;
   min-width: var(--Menu__min-width, 0);
-  padding: var(--sm3) 0;
 
   .menu-heading {
     color: var(--text-color-muted);
     padding: 0 var(--sm3);
     margin-top: var(--sm3);
     font-weight: var(--font-weight-medium);
-
-    &:first-child {
-      margin-top: 0;
-    }
   }
 
   .menu-divider {
+    border-top: 0.1em solid var(--Menu__divider-color, var(--border-color));
     height: 0;
   }
 
@@ -27,9 +23,8 @@
     flex-grow: 1;
     align-items: center;
     background-color: transparent;
-    padding: var(--sm6) var(--Menu__padding-x, $padding-x-default);
+    padding: 0 var(--Menu__padding-x, $padding-x-default);
     border-radius: var(--border-radius-m);
-    margin: 0 var(--sm3);
 
     &.menu-item-link,
     &.menu-item-button {
@@ -38,7 +33,8 @@
     }
     &.menu-item-link:not(.disabled):hover,
     &.menu-item-button:not(.disabled):hover {
-      background-color: var(--hover-background);
+      background-color: var(--salmon-100);
+      color: var(--salmon-800);
     }
     &.menu-item-button {
       border: inherit;
@@ -49,11 +45,17 @@
     }
     &.danger {
       color: var(--danger-color);
+
+      &:hover {
+        background-color: var(--danger-background-color);
+        color: var(--danger-color);
+      }
     }
 
     &.disabled {
       color: var(--text-color-muted);
       cursor: not-allowed;
+      opacity: 0.6;
     }
     > .label {
       flex-grow: 1;
@@ -73,10 +75,13 @@
       --checkbox-margin-bottom: 0;
     }
     &.active {
-      background-color: var(--active-background);
-      color: var(--text-color);
+      background-color: var(--salmon-200);
+      color: var(--salmon-900);
+      font-weight: var(--font-weight-medium);
+
       &:hover {
-        background-color: var(--active-background);
+        background-color: var(--salmon-300);
+        color: var(--salmon-900);
       }
     }
   }
@@ -93,6 +98,33 @@
       width: calc(
         var(--Menu__control-width) + var(--Menu__padding-x, $padding-x-default)
       );
+    }
+  }
+}
+
+body.theme-dark .menu {
+  .menu-item {
+    &.menu-item-link:not(.disabled):hover,
+    &.menu-item-button:not(.disabled):hover {
+      background-color: rgba(255, 148, 112, 0.15);
+      color: var(--salmon-50);
+    }
+
+    &.danger {
+      &:hover {
+        background-color: rgba(239, 68, 68, 0.12);
+        color: #ff6b6b;
+      }
+    }
+
+    &.active {
+      background-color: rgba(255, 148, 112, 0.25);
+      color: var(--salmon-50);
+
+      &:hover {
+        background-color: rgba(255, 148, 112, 0.35);
+        color: var(--salmon-50);
+      }
     }
   }
 }

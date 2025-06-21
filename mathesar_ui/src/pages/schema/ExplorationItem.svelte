@@ -47,8 +47,7 @@
     position: relative;
     text-decoration: none;
     color: inherit;
-    padding: 0.5rem 0.75rem;
-    margin: 0 -0.75rem;
+    padding: var(--sm1) var(--sm2);
     display: flex;
     align-items: center;
     border-radius: var(--border-radius-m);

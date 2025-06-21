@@ -196,8 +196,8 @@
 <style lang="scss">
   .sheet {
     border: 1px solid var(--border-color);
+    background-color: var(--sheet-background);
     margin: 0;
-    background-color: var(--elevated-background);
     border-radius: 0.5rem;
     overflow: hidden;
     display: flex;

@@ -43,16 +43,11 @@
 
   .column-name-container {
     font-size: var(--sm1);
-    background-color: var(--gray-200);
+    background-color: var(--card-background);
+    border: 1px solid var(--card-border);
     border-radius: var(--border-radius-xl);
     padding: 0.25rem 0.75rem;
     margin-bottom: var(--sm5);
     font-weight: var(--font-weight-bold);
-
-    :global(body.theme-dark) & {
-      background-color: var(--stormy-800);
-      border: 1px solid var(--stormy-600);
-      color: var(--text-color-secondary);
-    }
   }
 </style>
