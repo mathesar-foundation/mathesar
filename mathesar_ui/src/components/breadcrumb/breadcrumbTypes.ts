@@ -1,11 +1,11 @@
 import type { SavedExploration } from '@mathesar/api/rpc/explorations';
-import type {
-  ComponentAndProps,
-  IconProps,
-} from '@mathesar/component-library/types';
 import type { Database } from '@mathesar/models/Database';
 import type { Schema } from '@mathesar/models/Schema';
 import type { Table } from '@mathesar/models/Table';
+import type {
+  ComponentAndProps,
+  IconProps,
+} from '@mathesar-component-library/types';
 
 export interface BreadcrumbItemDatabase {
   type: 'database';
@@ -61,14 +61,15 @@ export type BreadcrumbItem =
 
 export interface BaseBreadcrumbSelectorEntry {
   href: string;
-  label: string;
-  icon: IconProps;
+  getFilterableText(): string;
   isActive(): boolean;
 }
 
 export interface SimpleBreadcrumbSelectorEntry
   extends BaseBreadcrumbSelectorEntry {
   type: 'simple';
+  label: string;
+  icon: IconProps;
 }
 
 export interface BreadcrumbSelectorEntryForTable
@@ -77,9 +78,30 @@ export interface BreadcrumbSelectorEntryForTable
   table: Table;
 }
 
+export interface BreadcrumbSelectorEntryForExploration
+  extends BaseBreadcrumbSelectorEntry {
+  type: 'exploration';
+  exploration: SavedExploration;
+}
+
+export interface BreadcrumbSelectorEntryForSchema
+  extends BaseBreadcrumbSelectorEntry {
+  type: 'schema';
+  schema: Schema;
+}
+
+export interface BreadcrumbSelectorEntryForDatabase
+  extends BaseBreadcrumbSelectorEntry {
+  type: 'database';
+  database: Database;
+}
+
 export type BreadcrumbSelectorEntry =
   | SimpleBreadcrumbSelectorEntry
-  | BreadcrumbSelectorEntryForTable;
+  | BreadcrumbSelectorEntryForTable
+  | BreadcrumbSelectorEntryForExploration
+  | BreadcrumbSelectorEntryForSchema
+  | BreadcrumbSelectorEntryForDatabase;
 
 export interface BreadcrumbSelectorSectionData {
   label: string;

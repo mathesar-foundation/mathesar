@@ -108,7 +108,7 @@
     <div slot="subText" class="database-info">
       <div class="connection-details">
         <div>
-          <span class="label">{$_('db_server')}{staticText.COLON}</span>
+          <span class="label">{$_('postgres_database')}{staticText.COLON}</span>
           <code>{database.name} @ {database.server.getConnectionString()}</code>
         </div>
       </div>

@@ -1,3 +1,4 @@
+/* TODO: Remove/rename product specific items: inspector, feedback, refresh from this list */
 export type Appearance =
   | 'default'
   | 'primary'
@@ -11,7 +12,10 @@ export type Appearance =
   | 'inspector'
   | 'feedback'
   | 'custom'
-  | 'link';
+  | 'link'
+  | 'option-card'
+  | 'danger-ghost'
+  | 'refresh';
 
 export type Size = 'small' | 'medium' | 'large';
 

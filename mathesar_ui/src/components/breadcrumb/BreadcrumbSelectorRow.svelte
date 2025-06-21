@@ -1,51 +1,44 @@
 <script lang="ts">
   import { MatchHighlighter } from '@mathesar/component-library';
+  import DatabaseDisplayNameWithIcon from '@mathesar/components/DatabaseDisplayNameWithIcon.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
-
-  import TableName from '../TableName.svelte';
   import QueryName from '@mathesar/components/QueryName.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
-  import DatabaseDisplayNameWithIcon from '@mathesar/components/DatabaseDisplayNameWithIcon.svelte';
+  import TableName from '@mathesar/components/TableName.svelte';
+  import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
 
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
   export let entry: BreadcrumbSelectorEntry;
   export let filterString = '';
   export let closeSelector: () => void;
-
-  $: ({ href, icon, label } = entry);
 </script>
 
 <li class="breadcrumb-selector-row" class:active={entry.isActive()}>
   <div class="hover-indicator" />
-  <a {href} on:click={closeSelector}>
-    {#if 'table' in entry}
-      <TableName
-        table={entry.table}
-        --name-color="var(--text-navigation)"
-        let:tableName
-      >
+  <a href={entry.href} on:click={closeSelector}>
+    {#if entry.type === 'table'}
+      <TableName table={entry.table} let:tableName>
         <MatchHighlighter text={tableName} substring={filterString} />
       </TableName>
     {:else if entry.type === 'exploration'}
-      <QueryName query={label} --name-color="var(--text-navigation)">
-        <MatchHighlighter text={label} substring={filterString} />
+      <QueryName query={entry.exploration} let:queryName>
+        <MatchHighlighter text={queryName} substring={filterString} />
       </QueryName>
     {:else if entry.type === 'database'}
       <DatabaseDisplayNameWithIcon
-        database={label}
-        --name-color="var(--text-navigation)"
+        database={entry.database}
+        let:databaseDisplayName
       >
-        <MatchHighlighter text={label.displayName} substring={filterString} />
+        <MatchHighlighter text={databaseDisplayName} substring={filterString} />
       </DatabaseDisplayNameWithIcon>
     {:else if entry.type === 'schema'}
-      <NameWithIcon
-        {icon}
-        --name-color="var(--text-navigation)"
-        --icon-color="var(--color-schema)"
-      >
-        <MatchHighlighter text={label} substring={filterString} />
+      <SchemaName schema={entry.schema} let:schemaName>
+        <MatchHighlighter text={schemaName} substring={filterString} />
+      </SchemaName>
+    {:else}
+      <NameWithIcon icon={entry.icon}>
+        <MatchHighlighter text={entry.label} substring={filterString} />
       </NameWithIcon>
     {/if}
   </a>
@@ -76,6 +69,7 @@
     color: var(--text-navigation);
     text-decoration: none;
     position: relative;
+    --name-color: var(--text-navigation);
   }
 
   .hover-indicator {

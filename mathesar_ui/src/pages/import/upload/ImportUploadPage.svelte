@@ -238,12 +238,7 @@
     border-radius: var(--border-radius-m);
     background-color: var(--surface-elevated-low);
     margin-bottom: 2rem;
-  }
-
-  .fieldset {
-    border: 1px solid var(--border-section);
-    border-radius: var(--border-radius-m);
-    background-color: var(--surface-elevated-high);
+    --fieldset-boxed-background-color: var(--surface-elevated-high);
   }
 
   .data-source-input {

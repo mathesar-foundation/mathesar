@@ -153,14 +153,14 @@
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid var(--color-database-40);
+        --button-outline: 2px solid var(--color-navigation-auxiliary-40);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        background-color: var(--color-database-hover-10);
-        --button-border-color: var(--color-database-hover-20);
+        background-color: var(--color-navigation-auxiliary-hover-10);
+        --button-border-color: var(--color-navigation-auxiliary-hover-20);
         box-shadow:
           0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
@@ -172,8 +172,8 @@
 
       &:active,
       &.active {
-        background-color: var(--color-database-active-10);
-        --button-border-color: var(--color-database-active-20);
+        background-color: var(--color-navigation-auxiliary-active-10);
+        --button-border-color: var(--color-navigation-auxiliary-active-20);
         box-shadow:
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
           0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
@@ -389,8 +389,9 @@
 
   &.btn-action {
     --button-background: var(--color-navigation-10);
-    color: var(--text-navigation);
-    border: transparent;
+    --button-color: var(--text-navigation);
+    --button-border: 2px solid;
+    --button-border-color: transparent;
 
     &:not(:disabled) {
       &:hover,
@@ -400,7 +401,7 @@
           var(--color-navigation-20),
           transparent 60%
         );
-        border: 2px solid var(--color-navigation-hover-20);
+        --button-border-color: var(--color-navigation-hover-20);
       }
 
       &:active,
@@ -419,7 +420,7 @@
 
   &.btn-tip {
     background: var(--semantic-tip-inner-bg);
-    border: 1px solid var(--semantic-inner-tip-border);
+    border: 1px solid var(--semantic-tip-inner-border);
     color: var(--semantic-tip-inner-text);
 
     &:hover {
@@ -500,7 +501,7 @@
     padding: 0.3em;
     height: auto;
     min-height: 0;
-    color: var(--color-database);
+    color: var(--color-navigation-auxiliary);
     background-color: transparent;
     border: transparent;
     border-radius: 4px;
@@ -508,12 +509,12 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        color: var(--color-database-hover);
+        color: var(--color-navigation-auxiliary-hover);
       }
 
       &:active,
       &.active {
-        color: var(--color-database-active);
+        color: var(--color-navigation-auxiliary-active);
       }
     }
   }

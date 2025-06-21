@@ -24,14 +24,8 @@ $input-fill: hsl(212, 84%, 44.1%);
 $utility-colors: (
   'brand': $tomato,
   'brand-muted': hsl(hue($tomato), 40%, 50%),
-  'schema': $salmon,
-  'database': $amethyst,
-  'table': $pumpkin,
-  'column': hsl(hue($salmon), 40%, 60%),
-  'record': $asparagus,
-  'record-fk': hsl(hue($asparagus), 80%, 60%),
-  'exploration': $fjord,
   'navigation': hsl(hue($wisteria), 10%, 70%),
+  'navigation-auxiliary': $amethyst,
   'selection': hsl(hue($glacier), 55%, 50%),
   'highlight-salmon': hsl(hue($salmon), 60%, 60%),
   'highlight-glacier': hsl(hue($glacier), 90%, 60%),
@@ -139,6 +133,17 @@ $color-states: (
 // Colors by usage
 @mixin generate-color-tokens($name, $base-color, $states) {
   --color-#{$name}: #{$base-color};
+
+  @each $role, $delta in $color-roles {
+    $base-variant: hsla(
+      hue($base-color),
+      saturation($base-color),
+      lightness($base-color),
+      $delta
+    );
+    --color-#{$name}-#{$role}: #{$base-variant};
+  }
+
   @each $state, $delta in $states {
     $dh: map-get($delta, 'h_delta');
     $ds: map-get($delta, 's_delta');
@@ -149,14 +154,7 @@ $color-states: (
     $variant: hsl($h-new, $s-new, $l-new);
     --color-#{$name}-#{$state}: #{$variant};
     @each $role, $delta in $color-roles {
-      $base-variant: hsla(
-        hue($base-color),
-        saturation($base-color),
-        lightness($base-color),
-        $delta
-      );
       $new-variant: hsla($h-new, $s-new, $l-new, $delta);
-      --color-#{$name}-#{$role}: #{$base-variant};
       --color-#{$name}-#{$state}-#{$role}: #{$new-variant};
     }
   }

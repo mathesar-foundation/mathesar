@@ -1,24 +1,23 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { iconDatabase } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
-  import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
+  import type { BreadcrumbSelectorEntryForDatabase } from './breadcrumbTypes';
 
   const { databases, currentDatabase } = databasesStore;
 
   function makeBreadcrumbSelectorEntry(
     database: Database,
-  ): BreadcrumbSelectorEntry {
+  ): BreadcrumbSelectorEntryForDatabase {
     return {
       type: 'database',
-      label: database,
+      database,
+      getFilterableText: () => database.displayName,
       href: getDatabasePageUrl(database.id),
-      icon: iconDatabase,
       isActive: () => database.id === $currentDatabase?.id,
     };
   }

@@ -211,7 +211,7 @@
   }
 
   .table-row + :global(.table-row) {
-    border-top: none;
+    border-top: 1px solid transparent;
   }
 
   .table-row:first-child {

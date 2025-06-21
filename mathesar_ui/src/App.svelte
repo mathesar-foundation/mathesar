@@ -38,7 +38,21 @@
   @import 'component-library/styles.scss';
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
+  $product-utility-colors: (
+    'schema': $salmon,
+    'database': $amethyst,
+    'table': $pumpkin,
+    'column': hsl(hue($salmon), 40%, 60%),
+    'record': $asparagus,
+    'record-fk': hsl(hue($asparagus), 80%, 60%),
+    'exploration': $fjord,
+  );
+
   body {
+    @each $name, $color in $product-utility-colors {
+      @include generate-color-tokens(#{$name}, $color, $color-states);
+    }
+
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
