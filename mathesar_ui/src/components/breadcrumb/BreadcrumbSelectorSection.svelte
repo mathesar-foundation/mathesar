@@ -13,7 +13,7 @@
 
   $: ({ label, entries, emptyMessage } = section);
   $: filteredEntries = [
-    ...filterViaTextQuery(entries, filterString, (e) => e.label),
+    ...filterViaTextQuery(entries, filterString, (e) => e.getFilterableText()),
   ];
 </script>
 

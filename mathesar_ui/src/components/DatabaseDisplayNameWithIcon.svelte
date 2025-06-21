@@ -13,5 +13,7 @@
   {iconHasBox}
   --icon-color="var(--color-database)"
 >
-  {database.displayName}
+  <slot databaseDisplayName={database.displayName}>
+    {database.displayName}
+  </slot>
 </NameWithIcon>

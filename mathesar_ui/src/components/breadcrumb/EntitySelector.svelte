@@ -3,7 +3,6 @@
   import { meta } from 'tinro';
 
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
-  import { iconTable, iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
@@ -14,8 +13,8 @@
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
+    BreadcrumbSelectorEntryForExploration,
     BreadcrumbSelectorEntryForTable,
-    SimpleBreadcrumbSelectorEntry,
   } from './breadcrumbTypes';
 
   export let database: Database;
@@ -27,9 +26,8 @@
     return {
       type: 'table',
       table,
-      label: table.name,
+      getFilterableText: () => table.name,
       href: getLinkForTableItem(database.id, schema.oid, table),
-      icon: iconTable,
       isActive() {
         return table.oid === $currentTableId;
       },
@@ -39,19 +37,19 @@
   const currentRoute = meta();
 
   function makeQueryBreadcrumbSelectorItem(
-    queryInstance: SavedExploration,
-  ): SimpleBreadcrumbSelectorEntry {
+    exploration: SavedExploration,
+  ): BreadcrumbSelectorEntryForExploration {
     return {
       type: 'exploration',
-      label: queryInstance.name,
-      href: getExplorationPageUrl(database.id, schema.oid, queryInstance.id),
-      icon: iconExploration,
+      exploration,
+      getFilterableText: () => exploration.name,
+      href: getExplorationPageUrl(database.id, schema.oid, exploration.id),
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
         const entryhref = getExplorationPageUrl(
           database.id,
           schema.oid,
-          queryInstance.id,
+          exploration.id,
         );
         const currentHref = $currentRoute.url;
         return currentHref.startsWith(entryhref);

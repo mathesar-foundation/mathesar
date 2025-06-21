@@ -2,9 +2,9 @@
   import { StringOrComponent } from '@mathesar/component-library';
   import DatabaseDisplayNameWithIcon from '@mathesar/components/DatabaseDisplayNameWithIcon.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import QueryName from '@mathesar/components/QueryName.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import QueryName from '@mathesar/components/QueryName.svelte';
   import { iconRecord } from '@mathesar/icons';
   import {
     getDatabasePageUrl,
@@ -57,9 +57,9 @@
         item.record.pk,
       )}
     >
-      <NameWithIcon icon={iconRecord} --icon-color="var(--color-record)"
-        >{item.record.summary}</NameWithIcon
-      >
+      <NameWithIcon icon={iconRecord} --icon-color="var(--color-record)">
+        {item.record.summary}
+      </NameWithIcon>
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'exploration'}
@@ -71,7 +71,7 @@
         item.query.id,
       )}
     >
-      <QueryName query={item.query.name} />
+      <QueryName query={item.query} />
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'simple'}
