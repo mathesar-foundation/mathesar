@@ -1,13 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {
     CommunityResource,
     DocumentationResource,
     DonateResource,
     MailingListResource,
   } from '@mathesar/components/resources';
-  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -34,7 +34,6 @@
   <AppSecondaryHeader
     slot="secondary-header"
     name={$_(welcomeMessage)}
-    icon={CommunityResource}
     --header-color="linear-gradient(
       135deg in hsl,
       var(--color-brand-15),

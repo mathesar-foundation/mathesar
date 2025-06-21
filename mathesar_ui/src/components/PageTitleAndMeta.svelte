@@ -2,7 +2,7 @@
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
-  export let icon: IconProps;
+  export let icon: IconProps | undefined = undefined;
   export let name: string;
   export let entityTypeName: string | undefined = undefined;
 </script>
@@ -13,9 +13,11 @@
       <div class="left-meta-container">
         {#if entityTypeName}
           <div class="entity-type-container">
-            <div class="entity-icon">
-              <Icon {...icon} size="1.2em" />
-            </div>
+            {#if icon}
+              <div class="entity-icon">
+                <Icon {...icon} size="1.2em" />
+              </div>
+            {/if}
             <span class="entity-type-name">{entityTypeName}</span>
           </div>
         {/if}

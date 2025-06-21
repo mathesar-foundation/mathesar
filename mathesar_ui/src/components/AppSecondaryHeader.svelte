@@ -9,7 +9,7 @@
     restrictWidth?: boolean;
   }
 
-  export let icon: IconProps;
+  export let icon: IconProps | undefined = undefined;
   export let name: string;
   export let restrictWidth = true;
 </script>
