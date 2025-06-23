@@ -45,6 +45,10 @@ def create_engine(conn_url, *args, **kwargs):
     across all engines. This is important for testing: without this intervention, fixtures become
     randomly corrupted.
     """
+    kwargs.update(
+        connect_args={"application_name": "db.deprecated.engine.create_future_engine"},
+        pool_size=2,
+    )
     engine = sa_create_engine(conn_url, *args, **kwargs)
     _make_ischema_names_unique(engine)
     return engine
