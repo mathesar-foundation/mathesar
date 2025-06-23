@@ -305,7 +305,7 @@ class Form(BaseModel):
 
     @property
     def connection(self):
-        return psycopg.connect(
+        return mathesar_connection(
             host=self.database.server.host,
             port=self.database.server.port,
             dbname=self.database.name,
