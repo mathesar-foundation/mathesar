@@ -70,6 +70,7 @@ def create_form(form_def, user):
         description=form_def.get("description"),
         version=form_def["version"],
         database_id=database_id,
+        server_id=form_def["server_id"],
         schema_oid=form_def["schema_oid"],
         base_table_oid=form_def["base_table_oid"],
         is_public=form_def.get("is_public", False),
