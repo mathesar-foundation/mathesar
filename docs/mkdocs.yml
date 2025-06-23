@@ -80,6 +80,7 @@ plugins:
         "user-guide/stored-role-passwords.md": "user-guide/stored-roles.md"
   - macros
   - placeholder
+  - autorefs
   - mkdocstrings:
       handlers:
         python:
