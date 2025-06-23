@@ -3,7 +3,6 @@ import os
 from django.conf import settings
 from django.db import models
 from encrypted_fields.fields import EncryptedCharField
-import psycopg
 
 from db.sql.install import uninstall, install
 from db.analytics import get_object_counts

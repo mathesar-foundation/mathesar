@@ -1,5 +1,4 @@
 from django.db import transaction
-import psycopg
 from psycopg.errors import DuplicateSchema
 
 from config.database_config import get_internal_database_config
