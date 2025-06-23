@@ -119,7 +119,7 @@ if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
         password=POSTGRES_PASSWORD,
     ).to_django_dict()
     DATABASES['default']['OPTIONS'] = {
-        "application_name": f"Mathesar Django"
+        "application_name": "Mathesar Django"
     }
 
 for db_key, db_dict in DATABASES.items():
