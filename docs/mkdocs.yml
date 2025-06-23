@@ -138,6 +138,7 @@ markdown_extensions:
   - attr_list
   - def_list
   - codehilite
+  - pymdownx.blocks.caption
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
