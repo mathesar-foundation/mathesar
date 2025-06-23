@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte';
 
   import { States } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type RecordRow,
@@ -36,7 +36,7 @@
 
   const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
-  let columnWithFocus: Column | undefined = undefined;
+  let columnWithFocus: RawColumnWithMetadata | undefined = undefined;
   /** It will be undefined if we're loading data, for example. */
   let selectionIndex: number | undefined = undefined;
   let tableElement: HTMLElement;
@@ -89,7 +89,7 @@
 
   $: effectiveSelectionIndex = isHoveringCreate ? undefined : selectionIndex;
 
-  function handleInputFocus(column: Column) {
+  function handleInputFocus(column: RawColumnWithMetadata) {
     nestedController.cancel();
     columnWithFocus = column;
   }

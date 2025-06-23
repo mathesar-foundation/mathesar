@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { Constraint } from '@mathesar/api/rpc/constraints';
+  import type { RawConstraint } from '@mathesar/api/rpc/constraints';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
-  export let constraint: Constraint;
+  export let constraint: RawConstraint;
 
   const tabularData = getTabularDataStoreFromContext();
 

@@ -3,8 +3,8 @@
 
   import { States } from '@mathesar/api/rest/utils/requestUtils';
   import type {
-    Constraint,
     ConstraintType,
+    RawConstraint,
   } from '@mathesar/api/rpc/constraints';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { Icon, iconLoading } from '@mathesar-component-library';
@@ -33,7 +33,7 @@
       groupedConstraints.set(constraint.type, [constraint]);
       return groupedConstraints;
     },
-    new Map<ConstraintType, Constraint[]>(),
+    new Map<ConstraintType, RawConstraint[]>(),
   );
 
   $: isEmpty = constraints.length === 0;

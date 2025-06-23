@@ -285,6 +285,67 @@ class Explorations(BaseModel):
     description = models.CharField(null=True)
 
 
+class Form(BaseModel):
+    token = models.UUIDField(unique=True)
+    name = models.CharField()
+    description = models.CharField(null=True)
+    version = models.IntegerField()
+    database = models.ForeignKey('Database', on_delete=models.CASCADE)
+    schema_oid = models.PositiveBigIntegerField()
+    base_table_oid = models.PositiveBigIntegerField()
+    is_public = models.BooleanField(default=False)
+    # Header related settings
+    header_title = models.JSONField()
+    header_subtitle = models.JSONField(null=True)
+    # Submission related settings
+    submit_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
+    submit_message = models.JSONField(null=True)
+    redirect_url = models.URLField(null=True)
+    submit_label = models.CharField(null=True)
+
+    @property
+    def connection(self):
+        return psycopg.connect(
+            host=self.database.server.host,
+            port=self.database.server.port,
+            dbname=self.database.name,
+            user=self.submit_role.name,
+            password=self.submit_role.password,
+        )
+
+
+class FormField(BaseModel):
+    key = models.CharField()
+    attnum = models.SmallIntegerField()
+    form = models.ForeignKey('Form', on_delete=models.CASCADE, related_name='fields')
+    index = models.IntegerField()
+    kind = models.CharField(
+        choices=[
+            ("scalar_column", "scalar_column"),
+            ("foreign_key", "foreign_key"),
+            ("reverse_foreign_key", "reverse_foreign_key")
+        ],
+    )
+    label = models.CharField(null=True)
+    help = models.CharField(null=True)
+    readonly = models.BooleanField(default=False)
+    styling = models.JSONField(null=True)
+    is_required = models.BooleanField(default=False)
+    # foreign_key/reverse_foreign_key related settings
+    parent_field = models.ForeignKey('self', on_delete=models.CASCADE, related_name='child_fields', null=True)
+    target_table_oid = models.PositiveBigIntegerField(null=True)
+    allow_create = models.BooleanField(default=False)
+    create_label = models.CharField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["key", "form"],
+                name="unique_key_per_form"
+            )
+        ]
+
+
 class DataFile(BaseModel):
     def _user_directory_path(instance, filename):
         user_identifier = instance.user.username if instance.user else 'anonymous'

@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import {
   DurationFormatter,
   DurationSpecification,
@@ -16,7 +16,9 @@ import FormattedInputCell from './components/formatted-input/FormattedInputCell.
 import type { FormattedInputCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
 
-function getProps(column: Column): FormattedInputCellExternalProps {
+function getProps(
+  column: RawColumnWithMetadata,
+): FormattedInputCellExternalProps {
   const defaults = DurationSpecification.getDefaults();
   const max = column.metadata?.duration_max ?? defaults.max;
   const min = column.metadata?.duration_min ?? defaults.min;
@@ -39,18 +41,18 @@ function getProps(column: Column): FormattedInputCellExternalProps {
 
 const durationType: CellComponentFactory = {
   get: (
-    column: Column,
+    column: RawColumnWithMetadata,
   ): ComponentAndProps<FormattedInputCellExternalProps> => ({
     component: FormattedInputCell,
     props: getProps(column),
   }),
   getInput: (
-    column: Column,
+    column: RawColumnWithMetadata,
   ): ComponentAndProps<FormattedInputProps<string>> => ({
     component: FormattedInput,
     props: getProps(column),
   }),
-  getDisplayFormatter(column: Column) {
+  getDisplayFormatter(column: RawColumnWithMetadata) {
     return (v) => getProps(column).formatForDisplay(String(v));
   },
 };

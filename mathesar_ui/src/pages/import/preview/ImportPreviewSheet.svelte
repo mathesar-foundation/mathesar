@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
     Sheet,
@@ -19,7 +19,9 @@
 
   export let columns: ProcessedPreviewColumn[];
   export let isLoading: boolean;
-  export let updateTypeRelatedOptions: (options: Column) => Promise<unknown>;
+  export let updateTypeRelatedOptions: (
+    options: RawColumnWithMetadata,
+  ) => Promise<unknown>;
   export let columnPropertiesMap: Record<number, ColumnProperties>;
   export let records: Record<string, unknown>[];
   /**

@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   MaybeSavedExploration,
   QueryInstanceSummarizationTransformation,
@@ -8,7 +8,7 @@ import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { TerseGrouping } from '@mathesar/stores/table-data';
 import Url64 from '@mathesar/utils/Url64';
 
-type TerseSummarizedColumn = Pick<Column, 'id' | 'name'>;
+type TerseSummarizedColumn = Pick<RawColumnWithMetadata, 'id' | 'name'>;
 type BaseTable = Pick<Table, 'oid' | 'name'>;
 
 interface TerseSummarization {

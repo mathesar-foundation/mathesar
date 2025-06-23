@@ -136,6 +136,17 @@
       - ExplorationDef
       - ExplorationResult
 
+## Forms
+
+::: forms
+    options:
+      members:
+      - add
+      - FormInfo
+      - FormDef
+      - FieldInfo
+      - FieldDef
+
 ## Records
 
 :::records

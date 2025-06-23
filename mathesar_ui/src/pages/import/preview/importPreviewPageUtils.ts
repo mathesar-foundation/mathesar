@@ -1,9 +1,9 @@
 import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
 import type {
-  Column,
   ColumnCastOptions,
   ColumnPatchSpec,
+  RawColumnWithMetadata,
 } from '@mathesar/api/rpc/columns';
 import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
@@ -26,12 +26,14 @@ export const RESERVED_ID_COLUMN_NAME = 'id';
 
 export interface ProcessedPreviewColumn {
   id: number;
-  column: Column;
+  column: RawColumnWithMetadata;
   abstractType: AbstractType;
   cellComponentAndProps: ReturnType<typeof getCellCap>;
 }
 
-export function processColumns(columns: Column[]): ProcessedPreviewColumn[] {
+export function processColumns(
+  columns: RawColumnWithMetadata[],
+): ProcessedPreviewColumn[] {
   return columns.map((column) => {
     const abstractType = getAbstractTypeForDbType(column.type);
     return {
@@ -84,25 +86,31 @@ export interface ColumnProperties {
 }
 
 function makeColumnProperties(
-  column: Column,
+  column: RawColumnWithMetadata,
   castOptions?: ColumnCastOptions,
 ): ColumnProperties {
   return { selected: true, displayName: column.name, castOptions };
 }
 
-type ColumnPropertiesMap = Record<Column['id'], ColumnProperties>;
+type ColumnPropertiesMap = Record<
+  RawColumnWithMetadata['id'],
+  ColumnProperties
+>;
 
 export function buildColumnPropertiesMap(
-  columns: Column[],
-  castOptionsMap: Record<Column['id'], ColumnCastOptions | undefined>,
-): Record<Column['id'], ColumnProperties> {
+  columns: RawColumnWithMetadata[],
+  castOptionsMap: Record<
+    RawColumnWithMetadata['id'],
+    ColumnCastOptions | undefined
+  >,
+): Record<RawColumnWithMetadata['id'], ColumnProperties> {
   return Object.fromEntries(
     columns.map((c) => [c.id, makeColumnProperties(c, castOptionsMap?.[c.id])]),
   );
 }
 
 export function buildColumnPreviewSpec(
-  columns: Column[],
+  columns: RawColumnWithMetadata[],
   columnPropertiesMap: ColumnPropertiesMap,
 ): ColumnPreviewSpec[] {
   return columns.map((c) => ({
@@ -112,7 +120,7 @@ export function buildColumnPreviewSpec(
 }
 
 function finalizeColumn(
-  { id, type, primary_key, type_options }: Column,
+  { id, type, primary_key, type_options }: RawColumnWithMetadata,
   name: string | undefined,
   cast_options?: ColumnCastOptions,
 ): ColumnPatchSpec {
@@ -137,7 +145,7 @@ function finalizeColumn(
 }
 
 export function finalizeColumns(
-  columns: Column[],
+  columns: RawColumnWithMetadata[],
   columnPropertiesMap: ColumnPropertiesMap,
 ) {
   return columns

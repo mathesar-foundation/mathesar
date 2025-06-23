@@ -10,7 +10,7 @@ import {
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   Result as ApiRecord,
   RecordsListParams,
@@ -538,7 +538,7 @@ export class RecordsData {
   // `bulkUpdate` function (which actually updates the store values too).
   async updateCell(
     row: PersistedRecordRow,
-    column: Column,
+    column: RawColumnWithMetadata,
   ): Promise<PersistedRecordRow> {
     // TODO compute and validate client side errors before saving
     const { record } = row;
@@ -664,7 +664,7 @@ export class RecordsData {
 
   async createOrUpdateRecord(
     row: RecordRow,
-    column: Column,
+    column: RawColumnWithMetadata,
   ): Promise<PersistedRecordRow | DraftRecordRow> {
     const rowToCreateOrUpdate = isPlaceholderRecordRow(row)
       ? DraftRecordRow.fromPlaceholder(row)
