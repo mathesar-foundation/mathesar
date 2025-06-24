@@ -3,10 +3,10 @@ import os
 from django.conf import settings
 from django.db import models
 from encrypted_fields.fields import EncryptedCharField
-import psycopg
 
 from db.sql.install import uninstall, install
 from db.analytics import get_object_counts
+from db.connection import mathesar_connection
 from mathesar import __version__
 from mathesar.models import exceptions
 
@@ -121,12 +121,13 @@ class Database(BaseModel):
 
     def connect_manually(self, role, password):
         """Return a connection to the Database using the role and password."""
-        return psycopg.connect(
+        return mathesar_connection(
             host=self.server.host,
             port=self.server.port,
             dbname=self.name,
             user=role,
             password=password,
+            application_name='mathesar.models.base.Database.connect_manually',
         )
 
     def connect_admin(self):
@@ -196,12 +197,13 @@ class UserDatabaseRoleMap(BaseModel):
 
     @property
     def connection(self):
-        return psycopg.connect(
+        return mathesar_connection(
             host=self.server.host,
             port=self.server.port,
             dbname=self.database.name,
             user=self.configured_role.name,
             password=self.configured_role.password,
+            application_name='mathesar.models.base.UserDatabaseRoleMap.connection',
         )
 
 
@@ -303,12 +305,13 @@ class Form(BaseModel):
 
     @property
     def connection(self):
-        return psycopg.connect(
+        return mathesar_connection(
             host=self.database.server.host,
             port=self.database.server.port,
             dbname=self.database.name,
             user=self.submit_role.name,
             password=self.submit_role.password,
+            application_name='mathesar.models.base.Form.connection',
         )
 
 
