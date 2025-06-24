@@ -70,10 +70,10 @@
 
   function getAsyncStoresForPermissions() {
     void AsyncRpcApiStore.runBatchConservatively([
-      databasePrivileges.batchRunner({ database_id: database.id }),
-      roles.batchRunner({ database_id: database.id }),
-      underlyingDatabase.batchRunner({ database_id: database.id }),
-      currentRole.batchRunner({ database_id: database.id }),
+      databasePrivileges.batchRunner(),
+      roles.batchRunner(),
+      underlyingDatabase.batchRunner(),
+      currentRole.batchRunner(),
     ]);
     return {
       roles,
