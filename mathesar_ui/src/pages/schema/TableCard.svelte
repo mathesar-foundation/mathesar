@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
     iconDeleteMajor,
@@ -25,9 +24,12 @@
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import {
+    Button,
     ButtonMenuItem,
     DropdownMenu,
     Icon,
+    LinkMenuItem,
+    Tooltip,
     Truncate,
   } from '@mathesar-component-library';
 
@@ -38,11 +40,11 @@
   export let schema: Schema;
   export let openEditTableModal: (_table: Table) => void;
   export let openTablePermissionsModal: (_table: Table) => void;
+  export let condensed = false;
 
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
 
   let isHoveringMenuTrigger = false;
-  let isHoveringBottomButton = false;
   let isTableCardFocused = false;
 
   $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
@@ -79,15 +81,14 @@
 </script>
 
 <div
-  class="table-card"
+  class="table-row"
   class:focus={isTableCardFocused}
   class:no-select={!$currentRolePrivileges.has('SELECT')}
   class:hovering-menu-trigger={isHoveringMenuTrigger}
-  class:hovering-bottom-button={isHoveringBottomButton}
   class:unconfirmed-import={requiresImportConfirmation}
 >
   <a
-    class="link passthrough"
+    class="row-content passthrough"
     href={tablePageUrl}
     aria-label={table.name}
     on:focusin={() => {
@@ -97,218 +98,219 @@
       isTableCardFocused = false;
     }}
   >
-    <div class="top">
-      <div class="top-content"><TableName {table} /></div>
-    </div>
-    <div class="description">
+    <div class="table-info">
+      <div class="table-name">
+        <TableName {table} />
+      </div>
       {#if description}
-        <Truncate
-          lines={2}
-          popoverPlacements={['bottom', 'left', 'top', 'right']}
-        >
-          {description}
-        </Truncate>
+        <div class="description">
+          <Truncate
+            lines={1}
+            popoverPlacements={['bottom', 'left', 'top', 'right']}
+          >
+            {description}
+          </Truncate>
+        </div>
       {/if}
     </div>
-    <div class="bottom">
+    <div class="status">
       {#if requiresImportConfirmation}
-        {$_('needs_import_confirmation')}
+        <span class="import-status">{$_('needs_import_confirmation')}</span>
       {/if}
     </div>
   </a>
-  <div
-    class="menu-container"
-    on:mouseenter={() => {
-      isHoveringMenuTrigger = true;
-    }}
-    on:mouseleave={() => {
-      isHoveringMenuTrigger = false;
-    }}
-  >
-    <DropdownMenu
-      showArrow={false}
-      triggerAppearance="ghost"
-      triggerClass="dropdown-menu-button"
-      closeOnInnerClick={true}
-      placements={['bottom-end', 'right-start', 'left-start']}
-      label=""
-      icon={iconMoreActions}
-      size="small"
-    >
-      {#if !requiresImportConfirmation}
-        <LinkMenuItem
-          href={explorationPageUrl}
-          icon={iconExploration}
+
+  <div class="actions">
+    {#if !requiresImportConfirmation}
+      <Tooltip enabled={condensed}>
+        <Button
+          slot="trigger"
+          on:click={handleFindRecord}
+          appearance="secondary"
+          size="small"
           disabled={!$currentRolePrivileges.has('SELECT')}
+          class="action-button"
         >
-          {$_('explore_table')}
-        </LinkMenuItem>
-        <ButtonMenuItem
-          on:click={() => openEditTableModal(table)}
-          icon={iconEdit}
-          disabled={!$currentRoleOwns}
-        >
-          {$_('edit_table')}
-        </ButtonMenuItem>
-        <ButtonMenuItem
-          on:click={() => openTablePermissionsModal(table)}
-          icon={iconPermissions}
-        >
-          {$_('table_permissions')}
-        </ButtonMenuItem>
-      {/if}
-      <ButtonMenuItem
-        on:click={handleDeleteTable}
-        danger
-        icon={iconDeleteMajor}
-        disabled={!$currentRoleOwns}
-      >
-        {$_('delete_table')}
-      </ButtonMenuItem>
-    </DropdownMenu>
-  </div>
-  {#if !requiresImportConfirmation}
-    <button
-      class="bottom-button passthrough"
+          <Icon {...iconSelectRecord} />
+          {#if !condensed}
+            <span>{$_('find_record')}</span>
+          {/if}
+        </Button>
+        <span slot="content">{$_('find_record')}</span>
+      </Tooltip>
+    {/if}
+
+    <div
+      class="menu-container"
       on:mouseenter={() => {
-        isHoveringBottomButton = true;
+        isHoveringMenuTrigger = true;
       }}
       on:mouseleave={() => {
-        isHoveringBottomButton = false;
+        isHoveringMenuTrigger = false;
       }}
-      on:click={handleFindRecord}
-      disabled={!$currentRolePrivileges.has('SELECT')}
     >
-      <Icon {...iconSelectRecord} />
-      <span class="label">{$_('find_record')}</span>
-    </button>
-  {/if}
+      <DropdownMenu
+        showArrow={false}
+        triggerAppearance="plain"
+        triggerClass="dropdown-menu-button"
+        closeOnInnerClick={true}
+        placements={['bottom-end', 'right-start', 'left-start']}
+        label=""
+        icon={iconMoreActions}
+        size="small"
+      >
+        {#if !requiresImportConfirmation}
+          <LinkMenuItem
+            href={explorationPageUrl}
+            icon={iconExploration}
+            disabled={!$currentRolePrivileges.has('SELECT')}
+          >
+            {$_('explore_table')}
+          </LinkMenuItem>
+          <ButtonMenuItem
+            on:click={() => openEditTableModal(table)}
+            icon={iconEdit}
+            disabled={!$currentRoleOwns}
+          >
+            {$_('edit_table')}
+          </ButtonMenuItem>
+          <ButtonMenuItem
+            on:click={() => openTablePermissionsModal(table)}
+            icon={iconPermissions}
+          >
+            {$_('table_permissions')}
+          </ButtonMenuItem>
+        {/if}
+        <ButtonMenuItem
+          on:click={handleDeleteTable}
+          danger
+          icon={iconDeleteMajor}
+          disabled={!$currentRoleOwns}
+        >
+          {$_('delete_table')}
+        </ButtonMenuItem>
+      </DropdownMenu>
+    </div>
+  </div>
 </div>
 
-<style>
-  .table-card {
+<style lang="scss">
+  .table-row {
     position: relative;
-    isolation: isolate;
-    --menu-trigger-size: 3rem;
-    --padding: 1rem;
-    --bottom-height: 2.5rem;
-  }
-  .table-card.focus {
-    outline: 2px solid var(--slate-300);
-    outline-offset: 1px;
-    border-radius: var(--border-radius-l);
-  }
-  .table-card.unconfirmed-import {
-    color: var(--color-text-muted);
-  }
-  .link {
-    display: grid;
-    grid-template: auto 1fr auto / 1fr;
-    border: 1px solid var(--slate-200);
-    border-radius: var(--border-radius-l);
-    cursor: pointer;
-    overflow: hidden;
-    height: 100%;
-    background-color: var(--white);
-    font-weight: var(--font-weight-medium);
-  }
-  .link:hover {
-    border-color: var(--slate-300);
-    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
-  }
-  .top {
-    display: flex;
-    overflow: hidden;
-  }
-  .top-content {
-    flex: 1 1 auto;
-    overflow: hidden;
-    font-size: var(--text-size-large);
-    height: var(--menu-trigger-size);
     display: flex;
     align-items: center;
-    padding: 0 var(--padding);
-  }
-  .description:not(:empty) {
-    padding: 0 var(--padding) var(--padding) var(--padding);
-    font-size: var(--text-size-base);
-    color: var(--slate-500);
-    font-weight: var(--font-weight-normal);
-  }
-
-  /** Menu button =========================================================== */
-  .menu-container {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: var(--size-ultra-small);
-    z-index: 1;
-  }
-  .menu-container :global(.dropdown-menu-button) {
-    width: 100%;
-    height: 100%;
-    font-size: var(--text-size-large);
-    color: var(--slate-500);
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-  }
-  .menu-container :global(.dropdown-menu-button:hover) {
-    color: var(--slate-800);
-    background: var(--slate-100);
+    border: 1px solid var(--card-border);
+    background-color: var(--card-background);
+    overflow: hidden;
+    border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
+      var(--corner-bl);
+    --corner-tl: 0;
+    --corner-tr: 0;
+    --corner-br: 0;
+    --corner-bl: 0;
   }
 
-  /** Bottom button========================================================== */
-  .table-card .bottom {
-    background: var(--white);
-    border-top: solid 1px var(--slate-100);
-  }
-  .table-card.unconfirmed-import .bottom {
-    background: none;
+  .table-row + :global(.table-row) {
     border-top: none;
   }
-  .table-card.unconfirmed-import .bottom {
-    color: var(--color-text);
+
+  .table-row:first-child {
+    --corner-tl: var(--border-radius-l);
+    --corner-tr: var(--border-radius-l);
   }
-  .bottom-button {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    z-index: 1;
-    cursor: pointer;
-  }
-  .bottom-button:disabled {
-    cursor: not-allowed;
-  }
-  .bottom-button:not(:disabled):focus {
-    outline: 2px solid var(--slate-300);
-    outline-offset: 1px;
-    border-bottom-left-radius: var(--border-radius-l);
-    border-bottom-right-radius: var(--border-radius-l);
+  .table-row:last-child {
+    --corner-br: var(--border-radius-l);
+    --corner-bl: var(--border-radius-l);
   }
 
-  .hovering-bottom-button .bottom-button:not(:disabled) {
-    color: inherit;
+  .table-row.focus:not(:hover) {
+    outline: 1px solid var(--card-focus-outline);
+    outline-offset: -1px;
   }
-  .hovering-bottom-button:not(.no-select) .bottom {
-    color: inherit;
-    background: var(--slate-50);
+
+  .table-row:hover {
+    box-shadow: var(--shadow-color) 0 2px 4px 0;
+    background: var(--card-hover-background);
+    padding-left: 0;
+    &::before {
+      content: '';
+      border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
+        var(--corner-bl);
+      border-left: solid 3px var(--salmon-400);
+      position: absolute;
+      height: 100%;
+      width: 10px;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
   }
-  .bottom-button,
-  .bottom {
-    height: var(--bottom-height);
+
+  .table-row:active {
+    border-color: var(--stormy-400);
+    box-shadow: var(--shadow-color) 0 1px 2px 0;
+    background: var(--card-active-background);
+  }
+
+  .table-row.unconfirmed-import {
+    color: var(--text-color-muted);
+    background-color: var(--disabled-background);
+  }
+
+  .row-content {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: var(--text-size-small);
-    color: var(--color-text-muted);
+    flex: 1;
+    gap: 1.5rem;
+    cursor: pointer;
+    overflow: hidden;
+    padding: var(--sm2) var(--lg1);
   }
-  .no-select .bottom-button,
-  .no-select .bottom {
-    color: var(--slate-300);
+
+  .table-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 200px;
+    max-width: 300px;
+    flex: 0 0 auto;
   }
-  .bottom-button .label {
-    margin-left: 0.25rem;
+
+  .table-name {
+    font-size: var(--lg1);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-color-primary);
+  }
+
+  .description {
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+    font-weight: var(--font-weight-normal);
+    overflow: hidden;
+    line-height: 1.2;
+  }
+
+  .status {
+    margin-left: auto;
+    padding-right: 1rem;
+  }
+
+  .import-status {
+    font-size: var(--sm1);
+    color: var(--color-warning);
+    background: var(--color-warning-bg);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-m);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .menu-container {
+    display: flex;
   }
 </style>

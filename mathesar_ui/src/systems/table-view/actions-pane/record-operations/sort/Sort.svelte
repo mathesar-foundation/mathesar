@@ -97,7 +97,7 @@
         />
       </div>
     {:else}
-      <span>{$_('no_sorting_condition_added')}</span>
+      <span class="muted">{$_('no_sorting_condition_added')}</span>
     {/each}
   </div>
   {#if availableColumnIds.length > 0}
@@ -149,6 +149,10 @@
 
     .header {
       font-weight: bolder;
+    }
+
+    .muted {
+      color: var(--text-color-muted);
     }
   }
 </style>

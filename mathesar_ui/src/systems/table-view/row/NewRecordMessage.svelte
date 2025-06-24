@@ -17,12 +17,12 @@
 
 <style>
   .new-record-message {
-    background: var(--sky-200);
+    background: var(--info-background-color);
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     padding: 0 0.5rem;
     min-width: max-content;
   }

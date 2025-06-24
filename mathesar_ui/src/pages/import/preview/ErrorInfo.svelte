@@ -30,15 +30,15 @@
 
 <style lang="scss">
   .title {
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
   }
   .buttons {
-    margin-top: var(--size-xx-small);
+    margin-top: var(--sm3);
     display: flex;
     align-items: center;
 
     > span {
-      margin: 0 var(--size-ultra-small);
+      margin: 0 var(--sm4);
     }
   }
 </style>

@@ -14,6 +14,10 @@
   import DatabasesList from './DatabasesList.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
+
+  $: welcomeMessage = $_('welcome_to_mathesar_user', {
+    values: { user: $userProfileStore?.getDisplayName() },
+  });
 </script>
 
 <svelte:head>
@@ -23,21 +27,19 @@
 <LayoutWithHeader
   restrictWidth
   cssVariables={{
-    '--page-padding': 'var(--inset-page-padding)',
-    '--layout-background-color': 'var(--sand-100)',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
-  <h1>
-    {$_('welcome_to_mathesar_user', {
-      values: { user: $userProfileStore?.getDisplayName() },
-    })}
-  </h1>
+  <div slot="secondary-header" class="home-page-header-title">
+    <div class="home-page-header-title-inner">
+      {welcomeMessage}
+    </div>
+  </div>
   <div class="content">
     <div class="databases-section">
       <DatabasesList />
     </div>
-    <div class="resources">
+    <div class="resources-sidebar">
       <h2>{$_('resources')}</h2>
       <div class="cards">
         <DocumentationResource />
@@ -50,25 +52,50 @@
 </LayoutWithHeader>
 
 <style lang="scss">
+  $breakpoint: 50rem;
+
+  .home-page-header-title {
+    max-width: var(--max-layout-width);
+    width: 100%;
+    margin: var(--lg1) auto;
+    padding: 0 var(--page-padding-x);
+  }
+
   .content {
     display: grid;
-    gap: 2rem;
-    @media screen and (min-width: 50rem) {
-      grid-template: auto / 1fr 20rem;
+    gap: 3.5rem;
+    grid-template-columns: 1fr;
+    @media screen and (min-width: $breakpoint) {
+      grid-template-columns: 1fr 20rem;
     }
   }
   .databases-section {
+    grid-row: 1;
     display: flex;
     flex-direction: column;
     gap: 2.5rem;
+    @media screen and (min-width: $breakpoint) {
+      grid-row: auto;
+      grid-column: 1;
+    }
+  }
+  .resources-sidebar {
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    @media screen and (min-width: $breakpoint) {
+      grid-row: auto;
+      grid-column: 2;
+    }
   }
   .cards {
     display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
+    flex-direction: column;
+    gap: 1.5rem;
 
     & > :global(*) {
-      flex: 1 0 15rem;
+      width: 100%;
     }
   }
 </style>

@@ -62,9 +62,9 @@
     margin: var(--column-select-margin) 0;
   }
   .deleted-column {
-    margin-top: 0.7rem;
-    color: var(--sand-600);
-    font-size: var(--text-size-small);
+    margin-top: 0.8rem;
+    color: var(--text-color-muted);
+    font-size: var(--sm1);
     font-style: italic;
   }
   .delimiter {

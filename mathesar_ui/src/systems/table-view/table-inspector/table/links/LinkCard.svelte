@@ -18,36 +18,54 @@
   .link-card {
     display: block;
     cursor: pointer;
-    --background: var(--white);
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --border-left: 3px solid var(--yellow-300);
-    --border-radius: 0.375rem;
+    background: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-m);
+    box-shadow: var(--card-hover-shadow);
+    transition: all 0.2s ease;
   }
-  .link-card,
-  .link-card.multiple .container {
-    background-color: var(--background);
-    box-shadow: var(--shadow);
-    border-left: var(--border-left);
-    border-radius: var(--border-radius);
-  }
+
   .link-card:hover {
-    --background: var(--slate-50);
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
+    background: var(--card-hover-background);
   }
-  .container {
-    padding: 0.5rem 0.625rem;
-  }
+
   .link-card.multiple {
     margin-top: 1rem;
   }
+
+  .link-card.multiple:hover .container {
+    border: 1px solid var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
+    background: var(--card-hover-background);
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+
   .link-card.multiple .container {
     position: relative;
-    bottom: 0.5rem;
-    left: 0.5rem;
+    bottom: var(--sm3);
+    left: var(--sm3);
+    background: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-m);
   }
+
+  .table-name {
+    color: var(--text-color-primary);
+    font-weight: var(--font-weight-medium);
+    padding: var(--sm4) var(--sm3);
+    border-bottom: 1px solid var(--card-border);
+  }
+
   .detail {
-    margin-top: 0.5rem;
-    font-size: var(--text-size-small);
-    color: var(--color-text-muted);
+    color: var(--text-color-tertiary);
+    font-size: var(--sm1);
+    line-height: 1.4;
+    padding: var(--sm3) var(--sm3);
   }
 </style>

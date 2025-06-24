@@ -34,7 +34,7 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 You can self-host Mathesar by following one of the guides below:
 
 - [Install using Docker compose](./administration/install-via-docker-compose.md) — a production setup with separate reverse-proxy and database containers.
-- [Install from scratch](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
+- [Install directly on Linux, macOS, or WSL](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
 
 
 ## Help out

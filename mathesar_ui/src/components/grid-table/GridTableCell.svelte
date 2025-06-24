@@ -12,34 +12,38 @@
     position: relative;
     align-items: center;
     min-height: 100%;
-    padding: var(--size-x-small) var(--size-base);
+    padding: var(--sm2) 1rem;
+    color: var(--text-color-primary);
 
     &::before,
     &::after {
       content: '';
       position: absolute;
-      background-color: var(--Grid-table__cell-border-color-internal);
+      background-color: var(--card-row-border);
       z-index: 1;
     }
-    // row
-    &::after {
-      inline-size: 100vw;
-      block-size: var(--Grid-table__border-size-internal);
-      inset-inline-start: 0;
-      inset-block-end: calc(var(--Grid-table__border-size-internal) * -1);
-    }
-    // column
+
     &::before {
-      inline-size: var(--Grid-table__border-size-internal);
-      block-size: 100vh;
-      inset-inline-start: calc(var(--Grid-table__border-size-internal) * -1);
+      block-size: 100%;
+      inline-size: 1px;
+      inset-block-start: 0;
+      inset-inline-end: 0;
+    }
+
+    &::after {
+      inline-size: 100%;
+      block-size: 1px;
+      inset-inline-start: 0;
+      inset-block-end: 0;
     }
 
     &.gt-header {
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
+      color: var(--text-color-primary);
+      background: var(--elevated-background);
 
       &::after {
-        background-color: var(--Grid-table__border-color-internal);
+        background-color: var(--card-row-border);
       }
     }
   }

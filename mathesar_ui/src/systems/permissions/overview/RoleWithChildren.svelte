@@ -39,26 +39,42 @@
 <style lang="scss">
   .role-with-children {
     .name {
-      padding: var(--size-extreme-small) var(--size-xx-small);
-      background: var(--slate-100);
+      padding: var(--sm6) var(--sm2);
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-300);
       border-radius: var(--border-radius-xl);
-      font-weight: 500;
-      display: inline-block;
+      font-weight: var(--font-weight-bold);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sm4);
+      color: var(--text-color-primary);
+      font-size: 1rem;
     }
     .member-count {
-      font-size: var(--text-size-small);
+      font-size: var(--sm1);
+      color: var(--text-color-muted);
+      margin-left: var(--sm4);
     }
     .members {
       .member {
-        margin: var(--size-xx-small) var(--size-large);
+        margin: var(--sm3) var(--lg1);
         display: flex;
-        align-items: flex-start;
-        gap: var(--size-ultra-small);
+        align-items: center;
+        gap: var(--sm4);
+        color: var(--text-color-muted);
+        font-size: var(--sm1);
 
         &:last-child {
           margin-bottom: 0;
         }
       }
+    }
+  }
+
+  :global(body.theme-dark) .role-with-children {
+    .name {
+      background: var(--slate-800);
+      border-color: var(--slate-600);
     }
   }
 </style>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { iconPermissions } from '@mathesar/icons';
   import {
@@ -12,9 +13,8 @@
   } from '@mathesar/stores/localStorage';
   import { modal } from '@mathesar/stores/modal';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { Button, Collapsible, Help, Icon } from '@mathesar-component-library';
+  import { Button, Help, Icon } from '@mathesar-component-library';
 
-  import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import TableRecordSummaryConfig from '../record-summary/TableRecordSummaryConfig.svelte';
 
   import AdvancedActions from './AdvancedActions.svelte';
@@ -30,100 +30,59 @@
   $: ({ currentRoleOwns } = table.currentAccess);
 </script>
 
-<div class="table-mode-container">
-  <Collapsible
-    bind:isOpen={$tableInspectorTablePropertiesVisible}
-    triggerAppearance="inspector"
-  >
-    <CollapsibleHeader
-      slot="header"
-      title={$_('table_properties')}
-      isDbLevelConfiguration
-    />
-    <div slot="content" class="content-container">
-      <TableName disabled={!$currentRoleOwns} />
-      <TableDescription disabled={!$currentRoleOwns} />
-      <div>
-        <Button
-          appearance="secondary"
-          on:click={() => permissionModal.open()}
-          size="small"
-          class="permissions-button"
-        >
-          <Icon {...iconPermissions} />
-          <span>{$_('table_permissions')}</span>
-        </Button>
-      </div>
-    </div>
-  </Collapsible>
+<InspectorSection
+  title={$_('table_properties')}
+  bind:isOpen={$tableInspectorTablePropertiesVisible}
+  isDbLevelConfiguration
+>
+  <TableName disabled={!$currentRoleOwns} />
+  <TableDescription disabled={!$currentRoleOwns} />
+  <div>
+    <Button
+      appearance="secondary"
+      on:click={() => permissionModal.open()}
+      size="small"
+      class="permissions-button"
+    >
+      <Icon {...iconPermissions} />
+      <span>{$_('table_permissions')}</span>
+    </Button>
+  </div>
+</InspectorSection>
 
-  <Collapsible
-    bind:isOpen={$tableInspectorTableLinksVisible}
-    triggerAppearance="inspector"
-  >
-    <CollapsibleHeader slot="header" isDbLevelConfiguration>
-      <div slot="title">
-        {$_('relationships')}
-        <Help>
-          <p>{$_('references_help')}</p>
-          <p><SeeDocsToLearnMore page="relationships" /></p>
-        </Help>
-      </div>
-    </CollapsibleHeader>
-    <div slot="content" class="content-container">
-      <TableLinks />
-    </div>
-  </Collapsible>
+<InspectorSection
+  bind:isOpen={$tableInspectorTableLinksVisible}
+  isDbLevelConfiguration
+>
+  <div slot="title">
+    {$_('relationships')}
+    <Help>
+      <p>{$_('references_help')}</p>
+      <p><SeeDocsToLearnMore page="relationships" /></p>
+    </Help>
+  </div>
+  <TableLinks />
+</InspectorSection>
 
-  <Collapsible
-    bind:isOpen={$tableInspectorTableRecordSummaryVisible}
-    triggerAppearance="inspector"
-  >
-    <CollapsibleHeader slot="header" title={$_('record_summary')} />
-    <div slot="content" class="content-container">
-      <TableRecordSummaryConfig tabularData={$tabularData} />
-    </div>
-  </Collapsible>
+<InspectorSection
+  title={$_('record_summary')}
+  bind:isOpen={$tableInspectorTableRecordSummaryVisible}
+>
+  <TableRecordSummaryConfig tabularData={$tabularData} />
+</InspectorSection>
 
-  <Collapsible
-    bind:isOpen={$tableInspectorTableActionsVisible}
-    triggerAppearance="inspector"
-  >
-    <CollapsibleHeader slot="header" title={$_('actions')} />
-    <div slot="content" class="content-container">
-      <TableActions />
-    </div>
-  </Collapsible>
+<InspectorSection
+  title={$_('actions')}
+  bind:isOpen={$tableInspectorTableActionsVisible}
+>
+  <TableActions />
+</InspectorSection>
 
-  <Collapsible
-    bind:isOpen={$tableInspectorTableAdvancedVisible}
-    triggerAppearance="inspector"
-  >
-    <CollapsibleHeader slot="header" title={$_('advanced')} />
-    <div slot="content" class="content-container">
-      <AdvancedActions />
-    </div>
-  </Collapsible>
-</div>
+<InspectorSection
+  title={$_('advanced')}
+  bind:isOpen={$tableInspectorTableAdvancedVisible}
+>
+  <AdvancedActions />
+</InspectorSection>
 
 <TablePermissionsModal {table} controller={permissionModal} />
-
-<style lang="scss">
-  .table-mode-container {
-    padding-bottom: var(--size-small);
-
-    > :global(* + *) {
-      margin-top: var(--size-super-ultra-small);
-    }
-  }
-
-  .content-container {
-    padding: var(--size-small);
-    display: flex;
-    flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 1rem;
-    }
-  }
-</style>

@@ -48,20 +48,19 @@
 
 <style>
   .cell-inspector {
-    padding: var(--size-small);
+    padding: var(--sm1);
   }
   .header {
     font-weight: 500;
   }
   .content {
     white-space: pre-wrap;
-    border: 1px solid var(--slate-300);
-    padding: var(--size-xx-small);
+    border: 1px solid var(--border-color);
+    padding: var(--sm3);
     border-radius: var(--border-radius-m);
-    margin-top: var(--size-x-small);
+    margin-top: var(--sm2);
   }
   .no-cell-selected {
-    color: var(--slate-500);
-    padding: var(--size-large);
+    padding: var(--lg1);
   }
 </style>

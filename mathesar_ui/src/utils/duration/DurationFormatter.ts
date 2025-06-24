@@ -1,6 +1,6 @@
 import type { Duration, DurationUnitType } from 'dayjs/plugin/duration';
 
-import type { DurationUnit } from '@mathesar/api/rpc/columns';
+import type { DurationUnit } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import { dayjs } from '@mathesar-component-library';
 import type {
   InputFormatter,

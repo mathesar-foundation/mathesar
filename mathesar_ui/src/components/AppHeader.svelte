@@ -33,6 +33,7 @@
 
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
   import { getBreadcrumbItemsFromContext } from './breadcrumb/breadcrumbUtils';
+  import UiThemeSelect from './UiThemeSelect.svelte';
 
   const commonData = preloadCommonData();
   const userProfile = getUserProfileStoreFromContext();
@@ -74,13 +75,17 @@
 
       {#if $userProfile}
         <DropdownMenu
-          triggerAppearance="ghost"
+          triggerAppearance="secondary"
+          triggerClass="padding-compact"
           size="small"
-          closeOnInnerClick={true}
-          menuStyle="--Menu__padding-x: 0.3em;"
+          closeOnInnerClick={false}
         >
           <div class="user-switcher" slot="trigger">
-            <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
+            <Icon
+              {...iconSettingsMajor}
+              hasNotificationDot={upgradable}
+              size="1.2rem"
+            />
           </div>
           {#if database}
             <MenuHeading>{$_('database')}</MenuHeading>
@@ -92,12 +97,11 @@
             </LinkMenuItem>
             <MenuDivider />
           {/if}
+
           <MenuHeading>{$_('signed_in_as')}</MenuHeading>
           <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
-
-          <MenuDivider />
 
           {#if $userProfile.isMathesarAdmin}
             <LinkMenuItem
@@ -107,8 +111,14 @@
             >
               {$_('administration')}
             </LinkMenuItem>
-            <MenuDivider />
           {/if}
+          <MenuDivider />
+
+          <MenuHeading>{$_('theme')}</MenuHeading>
+          <div class="theme-switcher">
+            <UiThemeSelect />
+          </div>
+          <MenuDivider />
 
           <MenuHeading>{$_('resources')}</MenuHeading>
           <LinkMenuItem
@@ -150,12 +160,16 @@
 <style lang="scss">
   .app-header {
     display: flex;
+    gap: var(--sm4);
     justify-content: space-between;
-    padding: 0.25rem 1rem;
-    height: var(--header-height, 60px);
-    background-color: var(--slate-800);
+    padding: 0 0.5rem;
+    height: var(--header-height);
+    background: var(--header-background);
+    border-bottom: 1px solid var(--header-border);
+    box-shadow: var(--shadow-color) 0 1px 3px 0;
     overflow: hidden;
-    color: var(--white);
+    color: var(--text-color);
+    font-size: 1rem;
   }
 
   .left {
@@ -167,15 +181,17 @@
   .right {
     display: flex;
     align-items: center;
-    font-size: var(--text-size-large);
-    gap: var(--size-x-small);
+    gap: var(--sm3);
+  }
+
+  .theme-switcher {
+    padding: 0.5rem;
+    margin-top: -0.5rem;
   }
 
   .user-switcher {
-    background-color: var(--slate-200);
-    color: var(--slate-800);
+    color: var(--text-color);
     border-radius: var(--border-radius-m);
-    padding: 0.5rem;
     display: flex;
     align-items: center;
   }

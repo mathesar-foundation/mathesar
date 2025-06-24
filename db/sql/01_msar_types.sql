@@ -7,7 +7,7 @@ EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
--- mathesar_types.money
+-- mathesar_types.mathesar_money
 DO $$
 BEGIN
   CREATE DOMAIN mathesar_types.mathesar_money AS NUMERIC;

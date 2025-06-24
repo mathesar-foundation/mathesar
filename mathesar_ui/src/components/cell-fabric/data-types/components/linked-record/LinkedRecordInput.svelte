@@ -193,40 +193,37 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--slate-100);
+    border: 1px solid var(--border-color);
     border-radius: 0.25rem;
-    background: var(--white);
-    min-height: 2.25em;
-    padding: 0;
-    --padding: 0.5rem;
+    background: var(--input-background);
+    padding: var(--sm4);
     cursor: default;
   }
   .disabled {
-    background: var(--slate-100);
-    border: solid 1px var(--slate-200);
+    background: var(--disabled-background);
+    border: solid 1px var(--input-border);
   }
 
   .linked-record-input:focus {
-    border-color: var(--sky-700);
+    border-color: var(--input-focus-color);
     outline: 0;
-    box-shadow: 0 0 0 2px #2087e633;
+    box-shadow: 0 0 0 2px var(--input-focus-shadow);
   }
 
   .content {
     position: relative;
     display: block;
-    padding: var(--padding);
-    padding-right: 0;
+    padding: 0;
     z-index: 2;
   }
   .dropdown-button {
     cursor: pointer;
     display: flex;
     align-items: center;
-    color: var(--color-gray-dark);
+    color: var(--text-color-primary);
     padding: var(--padding);
   }
   .dropdown-button:hover {
-    color: var(--color-text);
+    color: var(--text-color);
   }
 </style>

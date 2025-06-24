@@ -38,50 +38,46 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--size-x-small);
+    padding: var(--sm1);
     cursor: pointer;
     min-height: 4.2rem;
 
     &:hover {
-      background: var(--slate-50);
+      background: var(--hover-background);
     }
     &:focus {
-      background: var(--slate-100);
+      background: var(--active-background);
     }
   }
 
   .user-info {
     display: flex;
     flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 0.25rem;
-    }
   }
 
   .user-detailed-info {
     display: flex;
     align-items: center;
-
-    font-weight: 300;
-
-    > :global(* + *) {
-      margin-left: 0.5rem;
-    }
+    font-weight: var(--font-weight-light);
+    color: var(--text-color-secondary);
+    gap: var(--sm1);
   }
 
   .divider {
     display: inline-block;
     width: 0.25rem;
     height: 0.25rem;
-    background-color: var(--slate-500);
+    background-color: var(--neutral-500);
     border-radius: 50%;
   }
 
   .user-type {
-    background-color: var(--slate-200);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--sm1);
+    color: var(--text-color-secondary);
     padding: 0.25rem 0.5rem;
-    border-radius: 1.17rem;
-    font-size: var(--text-size-small);
+    border-radius: var(--border-radius-s);
   }
 </style>

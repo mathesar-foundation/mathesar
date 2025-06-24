@@ -5,26 +5,8 @@
   import NameWithIcon from './NameWithIcon.svelte';
 
   export let schema: Schema;
-  export let iconHasBox = false;
 
-  $: ({ name, isPublicSchema } = schema);
-  $: isLocked = $isPublicSchema;
+  $: ({ name } = schema);
 </script>
 
-<span class="schema-name" class:is-locked={isLocked}>
-  <NameWithIcon icon={iconSchema} {iconHasBox}>
-    {$name}
-  </NameWithIcon>
-</span>
-
-<style>
-  .schema-name {
-    --NameWithIcon__icon-opacity: 1;
-  }
-  .schema-name.is-locked {
-    --icon-color: var(
-      var(--SchemaName__locked-schema-icon-color),
-      var(--slate-500)
-    );
-  }
-</style>
+<NameWithIcon icon={iconSchema} name={$name} />

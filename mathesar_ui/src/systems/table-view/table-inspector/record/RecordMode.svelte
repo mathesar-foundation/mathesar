@@ -1,10 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { Collapsible } from '@mathesar-component-library';
-
-  import CollapsibleHeader from '../CollapsibleHeader.svelte';
 
   import RowActions from './RowActions.svelte';
 
@@ -24,12 +22,10 @@
         })}
       </span>
     {/if}
-    <Collapsible isOpen triggerAppearance="inspector">
-      <CollapsibleHeader slot="header" title={$_('actions')} />
-      <div slot="content" class="content-container">
-        <RowActions />
-      </div>
-    </Collapsible>
+
+    <InspectorSection title={$_('actions')}>
+      <RowActions />
+    </InspectorSection>
   {:else}
     <span class="no-records-selected">
       {$_('select_cells_view_record_props')}
@@ -39,7 +35,7 @@
 
 <style lang="scss">
   .column-mode-container {
-    padding-bottom: var(--size-small);
+    padding-bottom: var(--sm1);
     display: flex;
     flex-direction: column;
   }
@@ -49,16 +45,6 @@
   }
 
   .records-selected-count {
-    padding: var(--size-large);
-  }
-
-  .content-container {
-    padding: var(--size-small);
-    display: flex;
-    flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 0.5rem;
-    }
+    padding: var(--lg1);
   }
 </style>

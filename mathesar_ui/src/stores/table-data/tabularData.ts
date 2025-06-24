@@ -311,6 +311,7 @@ export class TabularData {
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
     this.selection.destroy();
+    this.meta.destroy();
   }
 }
 

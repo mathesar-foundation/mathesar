@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import { iconWarning } from '@mathesar-component-library';
+  import { iconError } from '@mathesar-component-library';
 
   import MessageBox from './MessageBox.svelte';
 
@@ -9,13 +9,14 @@
 </script>
 
 <div class="warning-box">
-  <MessageBox {...$$restProps} icon={iconWarning}><slot /></MessageBox>
+  <MessageBox {...$$restProps} icon={iconError}><slot /></MessageBox>
 </div>
 
 <style>
   .warning-box {
-    --MessageBox__background: var(--yellow-100);
-    --MessageBox__border: solid 4px var(--yellow-300);
-    --MessageBox__icon-color: var(--yellow-300);
+    --MessageBox__background: var(--warning-background-color);
+    --MessageBox__border: 4px solid var(--warning-border-color);
+    --MessageBox__icon-color: var(--warning-color);
+    --MessageBox__text-color: var(--warning-color);
   }
 </style>

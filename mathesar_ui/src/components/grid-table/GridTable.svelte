@@ -6,21 +6,15 @@
 
 <style>
   .grid-table {
-    --Grid-table__border-size-internal: var(--Grid-table__border-size, 1px);
-    --Grid-table__border-color-internal: var(
-      --Grid-table__border-color,
-      var(--slate-300)
-    );
-    --Grid-table__cell-border-color-internal: var(
-      --Grid-table__cell-border-color,
-      var(--slate-200)
-    );
     display: grid;
-    border: var(--Grid-table__border-size-internal) solid
-      var(--Grid-table__border-color-internal);
+    border: 1px solid var(--card-border);
     border-radius: var(--border-radius-l);
     overflow: hidden;
     grid-template-columns: var(--Grid-table__template-columns);
     grid-template-rows: var(--Grid-table__template-rows);
+    background: var(--card-background);
+    box-shadow:
+      0 1px 2px var(--shadow-color-light),
+      0 1px 3px var(--shadow-color);
   }
 </style>

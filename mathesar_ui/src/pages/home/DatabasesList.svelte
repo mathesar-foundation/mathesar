@@ -212,14 +212,22 @@
 
   .databases-container {
     display: flex;
-    margin-top: var(--size-x-large);
+    margin-top: var(--lg2);
     flex-direction: column;
     align-items: stretch;
-    gap: var(--size-x-small);
+    gap: var(--sm2);
   }
 
   .databases-list-grid {
     display: grid;
     gap: 1rem;
+  }
+
+  .databases-list {
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
   }
 </style>

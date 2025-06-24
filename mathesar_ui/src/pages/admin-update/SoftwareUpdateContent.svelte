@@ -76,7 +76,7 @@
   <div class="check-button">
     <SpinnerButton
       label={$_('check_for_updates')}
-      appearance="default"
+      appearance="link"
       icon={iconRefresh}
       onClick={refresh}
     />
@@ -95,7 +95,7 @@
     margin-bottom: 1rem;
   }
   .store-status {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     color: var(--color-text-muted);
     text-align: right;
   }

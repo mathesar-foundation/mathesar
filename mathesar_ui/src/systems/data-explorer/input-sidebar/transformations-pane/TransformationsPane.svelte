@@ -205,10 +205,10 @@
 
 <style lang="scss">
   .transformations {
-    margin-bottom: var(--size-large);
+    margin-bottom: var(--lg1);
 
     :global(.collapsible .collapsible-header) {
-      padding: var(--size-ultra-small) var(--size-large);
+      padding: var(--sm4) var(--lg1);
     }
 
     .header {
@@ -219,7 +219,7 @@
       .number {
         border: 1px solid var(--color-gray-medium);
         border-radius: 100%;
-        font-size: var(--text-size-x-small);
+        font-size: var(--sm2);
         font-variant-numeric: tabular-nums;
         padding: 0.125em 0.4em;
         font-weight: 500;
@@ -232,12 +232,11 @@
     }
 
     .content {
-      padding: var(--size-small) var(--size-large) var(--size-large)
-        var(--size-super-ultra-large);
+      padding: var(--sm1) var(--lg1) var(--lg1) var(--lg5);
     }
 
     .add-transform-control {
-      padding: var(--size-small) var(--size-large);
+      padding: var(--sm1) var(--lg1);
 
       :global(.dropdown.trigger) {
         width: 100%;

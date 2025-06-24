@@ -1605,15 +1605,16 @@ CREATE TABLE "Types Test" (
   "Date" text,
   "Numeric" text,
   "Interval" text,
-  "Text" text
+  "Text" text,
+  "Money" text
 );
 INSERT INTO "Types Test"
-  ("Boolean", "Date", "Numeric", "Interval", "Text")
+  ("Boolean", "Date", "Numeric", "Interval", "Text", "Money")
 VALUES
-  ('0', '2000-01-01', '0', '3 days', 'cat'),
-  ('1', '6/23/2004', '3.14', '3 hours', 'bat'),
-  ('t', 'May-2007-29', '-234.22', '3 minutes', 'rat'),
-  ('false', '20200909', '1', '3 seconds', 'mat');
+  ('0', '2000-01-01', '0', '3 days', 'cat', '$9,850,000.00'),
+  ('1', '6/23/2004', '3.14', '3 hours', 'bat', '-$320'),
+  ('t', 'May-2007-29', '-234.22', '3 minutes', 'rat', '$(123.12)'),
+  ('false', '20200909', '1', '3 seconds', 'mat', '$11.00');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1630,7 +1631,8 @@ BEGIN
       4, jsonb_build_object('type', 'date', 'details', jsonb_build_object('mathesar_casting', true)),
       5, jsonb_build_object('type', 'numeric', 'details', jsonb_build_object('mathesar_casting', true, 'decimal_p', '.')),
       6, jsonb_build_object('type', 'interval', 'details', jsonb_build_object('mathesar_casting', true)),
-      7, jsonb_build_object('type', 'text')
+      7, jsonb_build_object('type', 'text'),
+      8, jsonb_build_object('type', 'mathesar_types.mathesar_money', 'details', jsonb_build_object('curr_pref', '$', 'curr_suff', '', 'decimal_p', '.', 'group_sep', ',', 'mathesar_casting', true))
     )
   );
 END;
@@ -1920,7 +1922,8 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION __setup_column_alter() RETURNS SETOF TEXT AS $$
 BEGIN
-  CREATE TABLE col_alters (
+  CREATE SCHEMA test_schema;
+  CREATE TABLE test_schema.col_alters (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     col1 text NOT NULL,
     col2 numeric DEFAULT 5,
@@ -1945,7 +1948,7 @@ DECLARE
   tab_id oid;
 BEGIN
   PERFORM __setup_column_alter();
-  tab_id := 'col_alters'::regclass::oid;
+  tab_id := 'test_schema.col_alters'::regclass::oid;
   RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2}]'), null);
   RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2, "name": "blah"}]'), null);
   RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[]'), null);
@@ -1958,8 +1961,9 @@ DECLARE
   col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
   RETURN NEXT columns_are(
+    'test_schema',
     'col_alters',
     ARRAY['id', 'blah', 'col2', 'Col sp', 'col_opts', 'coltim']
   );
@@ -1975,8 +1979,9 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
   RETURN NEXT columns_are(
+    'test_schema',
     'col_alters',
     ARRAY['id', 'new space', 'col2', 'nospace', 'col_opts', 'coltim']
   );
@@ -1993,11 +1998,11 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4]);
-  RETURN NEXT col_type_is('col_alters', 'col1', 'character varying(48)');
-  RETURN NEXT col_type_is('col_alters', 'col2', 'integer');
-  RETURN NEXT col_default_is('col_alters', 'col2', 5);
-  RETURN NEXT col_type_is('col_alters', 'Col sp', 'integer');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4]);
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'col1', 'character varying(48)', 'type should be varchar');
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'col2', 'integer', 'type should be integer');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col2', 5, 'default should be 5');
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'Col sp', 'integer', 'type should be integer');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2009,8 +2014,8 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[5]);
-  RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(4,0)');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[5]);
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'col_opts', 'numeric(4,0)', 'type should be numeric');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2023,8 +2028,8 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
-  RETURN NEXT columns_are('col_alters', ARRAY['id', 'col2', 'Col sp', 'coltim']);
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT columns_are('test_schema', 'col_alters', ARRAY['id', 'col2', 'Col sp', 'coltim']);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2037,9 +2042,9 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
-  RETURN NEXT col_is_null('col_alters', 'col1');
-  RETURN NEXT col_not_null('col_alters', 'col_opts');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT col_is_null('test_schema', 'col_alters', 'col1', 'should allow null');
+  RETURN NEXT col_not_null('test_schema', 'col_alters', 'col_opts', 'should not allow null');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2052,9 +2057,9 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
-  RETURN NEXT col_default_is('col_alters', 'col2', '5');
-  RETURN NEXT col_default_is('col_alters', 'coltim', '(now())::date');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col2', '5', 'default should be 5');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'coltim', '(now())::date', 'default should be now()');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2067,9 +2072,9 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
-  RETURN NEXT col_hasnt_default('col_alters', 'col2');
-  RETURN NEXT col_hasnt_default('col_alters', 'coltim');
+  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT col_hasnt_default('test_schema', 'col_alters', 'col2', 'should have no default');
+  RETURN NEXT col_hasnt_default('test_schema', 'col_alters', 'coltim', 'should have no default');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2085,13 +2090,13 @@ DECLARE
 BEGIN
   PERFORM __setup_column_alter();
   RETURN NEXT is(
-    msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb),
+    msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb),
     ARRAY[2, 3, 5, 6]
   );
-  RETURN NEXT col_default_is('col_alters', 'col1', 'test34');
-  RETURN NEXT col_default_is('col_alters', 'col2', '8');
-  RETURN NEXT col_default_is('col_alters', 'col_opts', '7');
-  RETURN NEXT col_default_is('col_alters', 'coltim', 'test12');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col1', 'test34', 'default should be test34');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col2', '8', 'default should be 8');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'col_opts', '7', 'default should be 7');
+  RETURN NEXT col_default_is('test_schema', 'col_alters', 'coltim', 'test12', 'default should be test12');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2114,19 +2119,19 @@ DECLARE
 BEGIN
   PERFORM __setup_column_alter();
   RETURN NEXT is(
-    msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4, 5, 6]
+    msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4, 5, 6]
   );
   RETURN NEXT columns_are(
-    'col_alters', ARRAY['id', 'nullab numeric', 'newcol2', 'col_opts', 'timecol']
+    'test_schema', 'col_alters', ARRAY['id', 'nullab numeric', 'newcol2', 'col_opts', 'timecol']
   );
-  RETURN NEXT col_is_null('col_alters', 'nullab numeric');
-  RETURN NEXT col_type_is('col_alters', 'nullab numeric', 'numeric(8,4)');
+  RETURN NEXT col_is_null('test_schema', 'col_alters', 'nullab numeric', 'should be null');
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'nullab numeric', 'numeric(8,4)', 'type should be numeric(8,4)');
   -- This test checks that nothing funny happened when dropping column 4
-  RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(5,3)');
-  RETURN NEXT col_not_null('col_alters', 'col_opts');
-  RETURN NEXT col_not_null('col_alters', 'timecol');
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!');
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), NULL);
+  RETURN NEXT col_type_is('test_schema', 'col_alters', 'col_opts', 'numeric(5,3)', 'type should be numeric(5,3)');
+  RETURN NEXT col_not_null('test_schema', 'col_alters', 'col_opts', 'should not allow null');
+  RETURN NEXT col_not_null('test_schema', 'col_alters', 'timecol', 'should not allow null');
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!');
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), NULL);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2177,17 +2182,17 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), NULL);
-  PERFORM msar.alter_columns('col_alters'::regclass::oid, change1);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change1col2description');
-  PERFORM msar.alter_columns('col_alters'::regclass::oid, change2);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change2col2description');
-  PERFORM msar.alter_columns('col_alters'::regclass::oid, change3);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change2col2description');
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), 'change2col3description');
-  PERFORM msar.alter_columns('col_alters'::regclass::oid, change4);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), NULL);
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), 'change2col3description');
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), NULL);
+  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change1);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change1col2description');
+  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change2);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change2col2description');
+  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change3);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change2col2description');
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), 'change2col3description');
+  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change4);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), NULL);
+  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), 'change2col3description');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -4485,6 +4490,23 @@ BEGIN
     )
   );
   RETURN NEXT is((search_result -> 'count')::integer, 3);
+
+  -- Test that LIMIT and OFFSET work
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'bc')
+    ),
+    1, -- LIMIT
+    1  -- OFFSET
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 2);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -6598,5 +6620,153 @@ BEGIN
   RETURN NEXT is(msar.cast_to_numeric('1,00,000.5', ',', '.'), 100000.5::numeric);
   RETURN NEXT is(msar.cast_to_numeric('555,234', '.', ','), 555.234::numeric);
   RETURN NEXT is(msar.cast_to_numeric('2 345', ' ', ','), 2345::numeric);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_mathesar_money_inference() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE moneyinfer (
+    us_loc text, de_loc text, us_loc_verbose text, in_loc text, no_curr text, many_group_seps text, many_decimal_ps text, many_curr_prefs text, many_curr_suffs text
+  );
+  INSERT INTO moneyinfer VALUES
+    ('$1,000', '€1.000', 'USD 1,000', '₹1,000', '1,000', '1 000 000.0', '1.0', '₹1,000.0', '1,000.0₹'),
+    ('$1,000.00', '€1.000,0', 'USD 1,000.00', '₹1,00,000.00', '1,000.00', '1.000.000,0', '999,0', '$1,000.0', '1,000.0$'),
+    ('-$1,000.00', '-€1.000,0', '-USD 1,000.00', '-₹1,00,000.00', '-10,000.00', '1.000.000,0', '10.0', '$1,000.0', '1,000.0$'),
+    ('$-1,000.00', '€-1.000,0', 'USD -1,000.00', '₹-1,00,000.00', '-1,000.00', '1.000.000,0', '5.0', '₹1,000.0', '1,000.0₹'),
+    ('$(1,000.00)', '€(1.000,0)', 'USD (1,000.00)', '₹(1,00,000.00)', '(1,000.00)', '1.000.000,0', '100,0', '₹1,000.0', '1,000.0₹');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_find_mathesar_money_attrs() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id regclass;
+  test_perc numeric := 100;
+BEGIN
+  PERFORM __setup_mathesar_money_inference();
+  tab_id = 'moneyinfer'::regclass;
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 1::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '$', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 2::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', '.', 'decimal_p', ',', 'curr_pref', '€', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 3::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', 'USD ', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 4::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '₹', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT is(
+    msar.find_mathesar_money_attrs(tab_id, 5::smallint, test_perc),
+    jsonb_populate_record(
+      null::msar.type_compat_details,
+      jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '', 'curr_suff', '')
+    )
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_mathesar_money_attrs(
+        tab_id => 'moneyinfer'::regclass, col_id => '6'::smallint, test_perc => 100
+    );$s$,
+    'Too many grouping separators found!'
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_mathesar_money_attrs(
+        tab_id => 'moneyinfer'::regclass, col_id => '7'::smallint, test_perc => 100
+    );$s$,
+    'Too many decimal separators found!'
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_mathesar_money_attrs(
+        tab_id => 'moneyinfer'::regclass, col_id => '8'::smallint, test_perc => 100
+    );$s$,
+    'Too many currency prefixes found!'
+  );
+  RETURN NEXT throws_ok(
+    $s$SELECT msar.find_mathesar_money_attrs(
+        tab_id => 'moneyinfer'::regclass, col_id => '9'::smallint, test_perc => 100
+    );$s$,
+    'Too many currency suffixes found!'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_cast_to_mathesar_money()
+RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_mathesar_money_inference();
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(us_loc, ',', '.', '$', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '1000.00', '-1000.00', '-1000.00', '-1000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(de_loc, '.', ',', '€', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '1000.00', '-1000.00', '-1000.00', '-1000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(us_loc_verbose, ',', '.', 'USD ', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '1000.00', '-1000.00', '-1000.00', '-1000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(in_loc, ',', '.', '₹', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '100000.00' , '-100000.00', '-100000.00', '-100000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
+  RETURN NEXT results_eq(
+    $q$
+      SELECT array_agg(msar.cast_to_mathesar_money(no_curr, ',', '.', '', ''))
+      FROM moneyinfer
+    $q$,
+    $v$
+      SELECT ARRAY(SELECT unnest(
+        ARRAY['1000', '1000.00', '-10000.00', '-1000.00', '-1000.00'])::mathesar_types.mathesar_money
+      )
+    $v$
+  );
 END;
 $$ LANGUAGE plpgsql;

@@ -61,27 +61,22 @@
 
 <style lang="scss">
   .widgets-area {
-    background: var(--slate-50);
-    border-top: 1px solid var(--slate-300);
+    background: var(--elevated-background);
+    border-top: 1px solid var(--border-color);
   }
   .no-widgets {
-    background: var(--sand-200);
+    background: var(--layout-background-color);
   }
   h2 {
-    padding: var(--size-small);
-    border-bottom: 1px solid var(--slate-200);
-    background: var(--white);
+    padding: var(--sm1);
+    color: var(--text-color-primary);
   }
   .widgets {
-    padding: var(--size-small);
-
-    :global(.sheet) {
-      background: var(--white);
-    }
+    padding: var(--sm1);
   }
 
   .table-widget-positioner {
-    margin: 4rem 0;
+    margin: 2rem 0;
     &:first-child {
       margin-top: 0;
     }

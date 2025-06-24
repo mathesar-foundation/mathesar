@@ -46,7 +46,7 @@
 
 <svelte:head><title>{makeSimplePageTitle($_('users'))}</title></svelte:head>
 
-<h1>{$_('users')} {userCountText}</h1>
+<h2>{$_('users')} {userCountText}</h2>
 
 <section class="users-list-container">
   {#if $requestStatus?.state === 'processing'}
@@ -101,18 +101,26 @@
   .users-list-container {
     display: flex;
     flex-direction: column;
-
-    > :global(* + *) {
-      margin-top: 1rem;
-    }
+    gap: var(--lg1);
   }
 
   .users-list {
-    border: 1px solid var(--slate-200);
+    border: 1px solid var(--border-color);
+    background-color: var(--inset-background-color);
     border-radius: var(--border-radius-m);
+    overflow: hidden;
 
     hr {
-      margin: 0 var(--size-xx-small);
+      margin: 0;
+      border: none;
+      border-top: 1px solid var(--border-color);
     }
+  }
+
+  .no-users-found-text {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-color-secondary);
+    font-style: italic;
   }
 </style>

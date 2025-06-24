@@ -26,7 +26,8 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: var(--layout-background-color, transparent);
+    background-color: var(--layout-background-color);
+    color: var(--text-color-primary);
 
     .app-layout-header {
       position: sticky;

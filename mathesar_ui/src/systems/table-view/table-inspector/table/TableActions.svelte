@@ -93,7 +93,7 @@
   {/if}
 
   <Button
-    appearance="outline-primary"
+    appearance="outline-danger"
     on:click={handleDeleteTable}
     disabled={!$currentRoleOwns}
   >

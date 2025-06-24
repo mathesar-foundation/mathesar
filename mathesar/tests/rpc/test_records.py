@@ -261,5 +261,6 @@ def test_records_search(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[2] == table_oid
     assert call_args[3] == json.dumps([])  # search query
     assert call_args[4] == 10  # limit
-    assert call_args[5] is True  # return_record_summaries
-    assert call_args[6] == json.dumps({})  # table_record_summary_templates
+    assert call_args[5] == 0   # offset
+    assert call_args[6] is True  # return_record_summaries
+    assert call_args[7] == json.dumps({})  # table_record_summary_templates

@@ -168,10 +168,8 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-
-      .schema-list-item + .schema-list-item {
-        margin-top: var(--size-base);
-      }
+      gap: 1rem;
+      margin-top: 0.5rem;
     }
   }
 </style>

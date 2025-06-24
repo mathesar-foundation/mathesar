@@ -39,7 +39,7 @@
 
 <style>
   .submit {
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     font-weight: bold;
     white-space: nowrap;
   }

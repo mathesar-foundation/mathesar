@@ -9,14 +9,14 @@
   } from '@mathesar/api/rpc/explorations';
   import type { CancellablePromise } from '@mathesar/component-library';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconEdit, iconExploration } from '@mathesar/icons';
+  import { iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import {
     getDataExplorerPageUrl,
-    getExplorationEditorPageUrl,
+    getExplorationPageUrl,
   } from '@mathesar/routes/urls';
   import { getExploration } from '@mathesar/stores/queries';
   import {
@@ -41,7 +41,7 @@
       query: new QueryModel(queryInstance),
       onSave: async (instance) => {
         try {
-          const url = getExplorationEditorPageUrl(
+          const url = getExplorationPageUrl(
             database.id,
             schema.oid,
             instance.id,
@@ -136,20 +136,11 @@
         },
       }}
     />
-    <AppendBreadcrumb
-      item={{
-        type: 'simple',
-        href: getExplorationEditorPageUrl(database.id, schema.oid, $query.id),
-        label: $_('edit'),
-        icon: iconEdit,
-        prependSeparator: true,
-      }}
-    />
   {:else}
     <AppendBreadcrumb
       item={{
         type: 'simple',
-        href: getExplorationEditorPageUrl(database.id, schema.oid, $query.id),
+        href: getExplorationPageUrl(database.id, schema.oid, $query.id),
         label: $_('data_explorer'),
         icon: iconExploration,
       }}

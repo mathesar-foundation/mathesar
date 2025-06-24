@@ -5,6 +5,9 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   box-sizing: content-box;
+  background-color: var(--stormy-100);
+  color: var(--text-color-primary);
+  border: 1px solid var(--stormy-200);
 
   &.display-block {
     display: block;
@@ -36,5 +39,13 @@
     > * + * {
       margin-left: 0.2rem;
     }
+  }
+}
+
+body.theme-dark {
+  .chip {
+    background-color: var(--stormy-700);
+    color: var(--text-color-primary);
+    border-color: var(--stormy-600);
   }
 }

@@ -130,8 +130,9 @@
     {#if $currentRoleOwns}
       <DropdownMenu
         label={$_('add_roles')}
+        triggerAppearance="secondary"
         icon={iconAddNew}
-        triggerAppearance="plain-primary"
+        triggerClass="padding-compact"
       >
         {#each [...roles.values()] as role (role.oid)}
           <ButtonMenuItem
@@ -166,7 +167,7 @@
       </div>
     {:else}
       <div class="no-access">
-        <WarningBox>
+        <WarningBox fullWidth>
           {$_('access_not_granted_for_any_role')}
         </WarningBox>
       </div>
@@ -192,14 +193,14 @@
 
 <style lang="scss">
   .access-control-rows:not(.empty) {
-    margin-block: calc(-1 * var(--size-base));
+    margin-block: calc(-1 * 1rem);
   }
 
   .access-control-row {
-    padding: var(--size-base) 0;
+    padding: 1rem 0;
 
     & + .access-control-row {
-      border-top: 1px solid var(--slate-100);
+      border-top: 1px solid var(--neutral-100);
     }
   }
 </style>

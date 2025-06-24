@@ -4,7 +4,7 @@
 
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import { api } from '@mathesar/api/rpc';
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { Column, ColumnCastOptions } from '@mathesar/api/rpc/columns';
   import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
   import {
     Field,
@@ -41,6 +41,7 @@
   import ErrorInfo from './ErrorInfo.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
   import {
+    buildColumnPreviewSpec,
     buildColumnPropertiesMap,
     finalizeColumns,
     getSkeletonRecords,
@@ -61,7 +62,7 @@
   export let refreshTable: () => Promise<void>;
 
   let columns: Column[] = [];
-  let columnPropertiesMap = buildColumnPropertiesMap([]);
+  let columnPropertiesMap = buildColumnPropertiesMap([], {});
 
   $: otherTableNames = $currentTables
     .filter((t) => t.oid !== table.oid)
@@ -113,7 +114,8 @@
       return;
     }
     columns = fetchedColumns;
-    columnPropertiesMap = buildColumnPropertiesMap(columns);
+    let castOptionsMap: Record<Column['id'], ColumnCastOptions | undefined> =
+      {};
     if (useColumnTypeInference) {
       const response = await typeSuggestionsRequest.run();
       if (response.settlement?.state === 'resolved') {
@@ -122,9 +124,16 @@
           ...column,
           type: typeSuggestions[column.id]?.type ?? column.type,
         }));
+        castOptionsMap = columns.reduce((acc, c) => {
+          acc[c.id] = typeSuggestions[c.id]?.details;
+          return acc;
+        }, castOptionsMap);
       }
     }
-    await previewRequest.run(columns);
+    columnPropertiesMap = buildColumnPropertiesMap(columns, castOptionsMap);
+    await previewRequest.run(
+      buildColumnPreviewSpec(columns, columnPropertiesMap),
+    );
   }
   $: table, useColumnTypeInference, void init();
 
@@ -170,7 +179,9 @@
     columns = columns.map((c) =>
       c.id === updatedColumn.id ? updatedColumn : c,
     );
-    return previewRequest.run(columns);
+    return previewRequest.run(
+      buildColumnPreviewSpec(columns, columnPropertiesMap),
+    );
   }
 
   async function onPkConfigUpdated() {
@@ -244,7 +255,7 @@
   </FieldLayout>
 
   <svelte:fragment slot="preview">
-    <h2 class="preview-header">{$_('table_preview')}</h2>
+    <h3 class="preview-header">{$_('table_preview')}</h3>
     <div class="preview-content">
       {#if $columnsFetch.error}
         <ErrorInfo
@@ -311,28 +322,35 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--slate-500);
+    color: var(--neutral-500);
   }
   .preview-header {
     margin: 0;
-    padding: var(--size-small) var(--inset-page-section-padding);
-    border-bottom: 1px solid var(--slate-200);
-    border-top: solid 1px var(--slate-300);
-    background: var(--white);
+    padding: var(--sm1) var(--inset-page-section-padding);
+    background-color: var(--neutral-300);
+    border-top: 1px solid var(--card-border);
   }
   .preview-content {
-    padding: var(--inset-page-section-padding);
+    padding-bottom: 1rem;
+    background-color: var(--neutral-100);
   }
   .sheet-holder {
-    max-width: fit-content;
     overflow-x: auto;
     overflow-y: hidden;
     margin: 0 auto;
-    border: 1px solid var(--slate-200);
+    padding: var(--inset-page-section-padding);
   }
   .truncation-alert {
     margin: 1rem auto 0 auto;
     max-width: max-content;
     color: var(--color-text-muted);
+  }
+
+  :global(body.theme-dark) .preview-header {
+    background-color: var(--neutral-800);
+  }
+
+  :global(body.theme-dark) .preview-content {
+    background-color: var(--neutral-900);
   }
 </style>

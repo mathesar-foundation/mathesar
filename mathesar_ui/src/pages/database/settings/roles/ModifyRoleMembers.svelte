@@ -141,23 +141,23 @@
 
     .changes-warning {
       margin-left: auto;
-      font-size: var(--text-size-small);
+      font-size: var(--sm1);
     }
   }
   .member-list {
-    margin-top: var(--size-x-small);
+    margin-top: var(--sm2);
 
     .member {
       display: flex;
       align-items: center;
-      padding: var(--size-x-small) 0;
+      padding: var(--sm2) 0;
 
       .remove {
         margin-left: auto;
       }
 
       &:not(:last-child) {
-        border-bottom: 1px solid var(--slate-200);
+        border-bottom: 1px solid var(--neutral-200);
       }
     }
   }

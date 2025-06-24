@@ -142,11 +142,11 @@
     }
 
     :global(.collapsible-content) {
-      padding-left: var(--size-x-large);
+      padding-left: var(--lg2);
     }
 
     .null {
-      font-size: var(--text-size-small);
+      font-size: var(--sm1);
     }
   }
   .title {
@@ -154,16 +154,16 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    font-size: var(--text-size-large);
+    font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    border-bottom: 1px solid var(--slate-200);
+    border-bottom: 1px solid var(--border-color);
     min-height: 2.5rem;
-    margin-bottom: var(--size-xx-small);
+    margin-bottom: var(--sm3);
   }
 
   .add-constraint {
-    padding: var(--size-base);
-    border: 1px solid var(--slate-300);
+    padding: 1rem;
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-m);
   }
 </style>

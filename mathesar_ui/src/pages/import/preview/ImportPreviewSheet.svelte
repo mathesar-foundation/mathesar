@@ -90,4 +90,10 @@
       border-bottom: none;
     }
   }
+
+  :global(body.theme-dark) .import-preview {
+    :global([data-sheet-element='data-cell']) {
+      background: var(--neutral-900);
+    }
+  }
 </style>

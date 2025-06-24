@@ -29,6 +29,7 @@ services:
       - "5432:5432"
     volumes:
       - dev_postgres_data:/var/lib/postgresql/data
+      - dev_postgres_socket:/var/run/postgresql
       - ./db/sql:/sql/
   # A Django development webserver + Svelte development server used when developing Mathesar.
   #  The code changes are hot reloaded and debug flags are enabled to aid developers working on Mathesar.
@@ -36,6 +37,7 @@ services:
   dev-service:
     container_name: mathesar_service_dev
     image: mathesar/mathesar-dev:latest
+    pull_policy: never
     build:
       context: .
       target: development
@@ -52,15 +54,15 @@ services:
       - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
       - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
       - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL-https://example.com/feedback}
-      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
       - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
-      - POSTGRES_HOST=mathesar_dev_db
+      - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
       - POSTGRES_PORT=5432
     volumes:
       - .:/code/
+      - dev_postgres_socket:/var/dev_postgres_socket
       - ui_node_modules:/code/mathesar_ui/node_modules/
     depends_on:
       dev-db:
@@ -74,18 +76,20 @@ services:
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
     environment:
-      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
-      - POSTGRES_HOST=mathesar_dev_db
+      - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db}
       - POSTGRES_PORT=5432
+    pull_policy: never
     build:
       context: .
       target: ${TARGET-testing}
       dockerfile: Dockerfile
       args:
         PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
+    volumes:
+      - dev_postgres_socket:/var/dev_postgres_socket
     depends_on:
       - dev-db
     ports:
@@ -93,3 +97,4 @@ services:
 volumes:
   ui_node_modules:
   dev_postgres_data:
+  dev_postgres_socket:

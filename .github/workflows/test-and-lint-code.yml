@@ -100,57 +100,6 @@ jobs:
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
-  cache-images:
-    runs-on: ubuntu-latest
-    needs: [python_tests_required, all_be_tests_required]
-    if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - id: docker-cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/docker-images
-          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-      - name: Verify image SHAs
-        id: verifysha
-        if: steps.docker-cache.outputs.cache-hit == 'true'
-        run: |
-          touch /tmp/live-images-sha.txt
-
-          for version in 3.9 3.10 3.11 3.12 3.13; do
-            echo "$(skopeo inspect docker://python:$version-bookworm | jq -r '.Digest') python:$version-bookworm" >> /tmp/live-images-sha.txt
-          done
-
-          for version in 13 14 15 16 17; do
-            echo "$(skopeo inspect docker://postgres:$version | jq -r '.Digest') postgres:$version" >> /tmp/live-images-sha.txt
-          done
-
-          if diff <(sort -k2 /tmp/live-images-sha.txt) <(sort -k2 /tmp/docker-images/cached-images-sha.txt); then
-            echo "needs-update=false" >> $GITHUB_OUTPUT;
-            echo "exit code $?";
-          else
-            echo "needs-update=true" >> $GITHUB_OUTPUT;
-            echo "exit code $?";
-          fi
-      - name: echo
-        run: echo "${{ steps.verifysha.outputs.needs-update }}"
-      - name: Pull and save python images on cache misses
-        if: steps.docker-cache.outputs.cache-hit != 'true' || steps.verifysha.outputs.needs-update == 'true'
-        run: |
-          mkdir -p /tmp/docker-images && cd /tmp/docker-images
-          for version in 3.9 3.10 3.11 3.12 3.13; do
-            docker pull python:$version-bookworm && docker save python:$version-bookworm -o python-$version-bookworm.tar
-          done
-
-          for version in 13 14 15 16 17; do
-            docker pull postgres:$version && docker save postgres:$version -o postgres-$version.tar
-          done
-
-          docker images --digests --format '{{.Digest}} {{.Repository}}:{{.Tag}}' > cached-images-sha.txt
-
-          cat cached-images-sha.txt
-
 ################################################################################
 ##                         BACK END TEST/LINT RUNNERS                         ##
 ##                                                                            ##
@@ -174,6 +123,7 @@ jobs:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
         pg-version: [13, 14, 15, 16, 17]
+        connection-type: ['mathesar_dev_db', '/var/dev_postgres_socket']
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
@@ -182,20 +132,16 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - id: docker-cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/docker-images
-          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-      - name: Load docker image
+      - name: Pull images
         run: |
-          docker load -i /tmp/docker-images/python-${{ matrix.py-version }}.tar
-          docker load -i /tmp/docker-images/postgres-${{ matrix.pg-version }}.tar
+          docker pull python:${{ matrix.py-version }}
+          docker pull postgres:${{ matrix.pg-version }}
       - name: Build the stack
-        run: docker compose -f docker-compose.dev.yml up --build -d test-service
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service dev-db
         env:
           PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
+          POSTGRES_HOST: ${{ matrix.connection-type }}
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
 
@@ -216,13 +162,9 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - id: docker-cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/docker-images
-          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-      - name: Load docker image
-        run: docker load -i /tmp/docker-images/postgres-${{ matrix.pg-version }}.tar
+      - name: Pull image
+        run: |
+          docker pull postgres:${{ matrix.pg-version }}
       - name: Build the test DB
         run: docker compose -f docker-compose.dev.yml up --build -d dev-db
         env:
@@ -249,15 +191,10 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - id: docker-cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/docker-images
-          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-      - name: Load docker image
+      - name: Pull images
         run: |
-          docker load -i /tmp/docker-images/python-${{ matrix.py-version }}.tar
-          docker load -i /tmp/docker-images/postgres-${{ matrix.pg-version }}.tar
+          docker pull python:${{ matrix.py-version }}
+          docker pull postgres:${{ matrix.pg-version }}
       - name: Run tests
         run: sh run_api_tests.sh
         env:
@@ -469,17 +406,8 @@ jobs:
       # container to run tests successfully
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
-      - id: docker-cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/docker-images
-          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/api_tests/Dockerfile', '**/Dockerfile.caddy', '**/Dockerfile.devdb') }}
-      - name: Load docker image
-        run: | # load default versions for building mathesar in prod and dev mode
-          docker load -i /tmp/docker-images/python-3.13-bookworm.tar
-          docker load -i /tmp/docker-images/postgres-17.tar
       - name: Build the stack
-        run: docker compose -f docker-compose.dev.yml up --build -d test-service
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service dev-db
         env:
           TARGET: ${{ matrix.target }}
 
@@ -537,13 +465,13 @@ jobs:
               exit 1
             fi
           fi
-          
+
           # Check "python_lint_required" conditions
           if [[ "${{ needs.python_lint_required.outputs.lint_should_run }}" == "true" ]]; then
             if [[ "${{ needs.python_lint.result }}" != "success" ]]; then
               echo "python linter failed."
               exit 1
-            fi  
+            fi
           fi
 
           # Check "sql_tests_required" conditions

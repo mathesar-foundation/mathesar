@@ -86,12 +86,12 @@
 
   .required {
     color: var(--red-800);
-    font-size: var(--text-size-x-large);
+    font-size: var(--lg2);
   }
 
   .errors {
-    background: var(--red-100);
-    border: solid 0.1em var(--red-200);
+    background: var(--background-color);
+    border: solid 2px var(--danger-border-color);
     box-shadow:
       #000 0 0 0 0,
       rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
@@ -101,7 +101,7 @@
     max-width: 20em;
     padding: 0.5em;
     z-index: var(--cell-errors-z-index);
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
     word-wrap: break-word;
   }
 </style>

@@ -2,7 +2,7 @@ import {
   type DurationUnit,
   allDurationUnits,
   defaultColumnMetadata,
-} from '@mathesar/api/rpc/columns';
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
 
 export interface DurationConfig {
   max: DurationUnit;

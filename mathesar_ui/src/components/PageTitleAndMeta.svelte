@@ -10,12 +10,14 @@
 <div class="page-title-and-meta">
   <div class="top">
     <div class="entity-container">
-      <div class="entity-icon">
-        <Icon {...icon} size="1.5em" />
-      </div>
       <div class="left-meta-container">
         {#if entityTypeName}
-          <span class="entity-type-name">{entityTypeName}</span>
+          <div class="entity-type-container">
+            <div class="entity-icon">
+              <Icon {...icon} size="1em" />
+            </div>
+            <span class="entity-type-name">{entityTypeName}</span>
+          </div>
         {/if}
         <span class="entity-name">{name}</span>
         <slot name="subText" />
@@ -42,7 +44,7 @@
     flex-wrap: wrap;
     gap: 1rem;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
   }
 
@@ -59,35 +61,37 @@
   }
 
   .entity-icon {
-    width: 3.4rem;
-    height: 3.4rem;
-    background-color: var(--brand-500);
     flex: 0 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 50%;
-    color: var(--white);
+    color: var(--text-color-tertiary);
+    margin-right: var(--sm2);
+  }
+
+  .entity-type-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
   }
 
   .left-meta-container {
     display: flex;
     flex-direction: column;
-    margin-left: 0.75rem;
-    gap: var(--size-super-ultra-small);
+    gap: var(--sm3);
   }
 
   .entity-type-name {
-    font-size: var(--text-size-x-small);
+    font-size: var(--lg1);
     font-weight: 500;
     line-height: 1;
-    color: var(--sand-700);
-    text-transform: uppercase;
+    color: var(--text-color-tertiary);
   }
 
   .entity-name {
-    font-weight: 500;
-    font-size: var(--text-size-xx-large);
+    font-weight: var(--font-weight-extra-bold);
+    font-size: var(--lg4);
     line-height: 1;
+    color: var(--text-color-primary);
   }
 </style>

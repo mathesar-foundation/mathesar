@@ -405,23 +405,33 @@
 
 <style>
   .form {
-    --base-fill: #f8dbf7;
-    --base-stroke: #ff6cf0;
-    --target-fill: #e9f9e8;
-    --target-stroke: #4df223;
-    --mapping-fill: #cdfafa;
-    --mapping-stroke: #06e5e5;
+    --base-fill: var(--stormy-100);
+    --base-stroke: var(--stormy-300);
+    --target-fill: var(--pumpkin-200);
+    --target-stroke: var(--pumpkin-300);
+    --mapping-fill: var(--salmon-100);
+    --mapping-stroke: var(--salmon-300);
     line-height: 1.6;
   }
+
+  :global(body.theme-dark) .form {
+    --base-fill: var(--stormy-800);
+    --base-stroke: var(--stormy-600);
+    --target-fill: var(--pumpkin-800);
+    --target-stroke: var(--pumpkin-600);
+    --mapping-fill: var(--salmon-800);
+    --mapping-stroke: var(--salmon-600);
+  }
+
   .form.self-referential {
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);
   }
   .collapsible-detail {
-    padding: var(--size-xx-small);
+    padding: var(--sm3);
     margin-top: 0.25em;
   }
   .collapsible-sections > :global(* + *) {
-    margin-top: var(--size-xx-small);
+    margin-top: var(--sm3);
   }
 </style>

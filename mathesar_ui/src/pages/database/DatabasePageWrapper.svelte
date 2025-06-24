@@ -26,7 +26,6 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
-  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     Button,
     ButtonMenuItem,
@@ -43,13 +42,13 @@
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
   $: void underlyingDatabase.runConservatively({ database_id: database.id });
 
-  const commonData = preloadCommonData();
-
-  $: currentRoleOwnsDatabase =
-    $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
-  $: isDatabaseInInternalServer =
-    database.server.host === commonData.internal_db.host &&
-    database.server.port === commonData.internal_db.port;
+  // // TODO Allow dropping databases
+  // const commonData = preloadCommonData();
+  // $: currentRoleOwnsDatabase =
+  //   $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
+  // $: isDatabaseInInternalServer =
+  //   database.server.host === commonData.internal_db.host &&
+  //   database.server.port === commonData.internal_db.port;
 
   const permissionsModal = modal.spawnModalController();
   const disconnectModal = modal.spawnModalController<Database>();
@@ -88,8 +87,8 @@
 <LayoutWithHeader
   restrictWidth
   cssVariables={{
+    '--page-padding': '0 var(--page-padding-x)',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
-    '--layout-background-color': 'var(--sand-50)',
   }}
 >
   <AppSecondaryHeader
@@ -98,64 +97,72 @@
     entityTypeName={$_('database')}
     icon={iconDatabase}
   >
-    <div slot="subText" class="details">
-      <div>
-        <span class="label">{$_('db_server')}{staticText.COLON}</span>
-        {database.server.getConnectionString()}
+    <div slot="subText" class="database-info">
+      <div class="connection-details">
+        <div>
+          <span class="label">{$_('db_server')}{staticText.COLON}</span>
+          {database.server.getConnectionString()}
+        </div>
+        <div>
+          <span class="label">{$_('db_name')}{staticText.COLON}</span>
+          {database.name}
+        </div>
       </div>
-      <div>
-        <span class="label">{$_('db_name')}{staticText.COLON}</span>
-        {database.name}
-      </div>
+
+      {#if isMathesarAdmin}
+        <div class="edit-connection">
+          <Button on:click={() => editModal.open()} appearance="link">
+            <Icon {...iconEdit} />
+            <span>{$_('edit_connection')}</span>
+          </Button>
+        </div>
+      {/if}
     </div>
     <div slot="action">
-      {#if isMathesarAdmin}
-        <Button on:click={() => editModal.open()} appearance="secondary">
-          <Icon {...iconEdit} />
-          <span>{$_('edit_connection')}</span>
+      <div class="actions-container">
+        <Button appearance="secondary" on:click={() => permissionsModal.open()}>
+          <Icon {...iconPermissions} />
+          <span>{$_('database_permissions')}</span>
         </Button>
-      {/if}
 
-      <Button appearance="secondary" on:click={() => permissionsModal.open()}>
-        <Icon {...iconPermissions} />
-        <span>{$_('database_permissions')}</span>
-      </Button>
-
-      {#if isMathesarAdmin}
-        <DropdownMenu
-          showArrow={false}
-          triggerAppearance="plain"
-          closeOnInnerClick={false}
-          icon={iconMoreActions}
-          preferredPlacement="bottom-end"
-        >
-          <ButtonMenuItem
-            icon={iconDeleteMajor}
-            on:click={() => disconnectModal.open(database)}
-          >
-            {$_('disconnect_database')}
-          </ButtonMenuItem>
-          <ButtonMenuItem
-            icon={iconReinstall}
-            on:click={() => reinstallModal.open(database)}
-          >
-            {$_('reinstall_mathesar_schemas')}
-          </ButtonMenuItem>
-          <!--
-            TODO: Allow dropping databases
-            https://github.com/mathesar-foundation/mathesar/issues/3862
-          -->
-          <!-- {#if isDatabaseInInternalServer}
-            <ButtonMenuItem
-              icon={iconDeleteMajor}
-              danger
-              disabled={!$currentRoleOwnsDatabase}
+        {#if isMathesarAdmin}
+          <div class="dropdown-container">
+            <DropdownMenu
+              showArrow={false}
+              triggerAppearance="secondary"
+              closeOnInnerClick={false}
+              icon={iconMoreActions}
+              preferredPlacement="bottom-end"
             >
-              {$_('delete_database')}
-            </ButtonMenuItem>
-          {/if} -->
-        </DropdownMenu>
-      {/if}
+              <ButtonMenuItem
+                icon={iconDeleteMajor}
+                on:click={() => disconnectModal.open(database)}
+              >
+                {$_('disconnect_database')}
+              </ButtonMenuItem>
+              <ButtonMenuItem
+                icon={iconReinstall}
+                on:click={() => reinstallModal.open(database)}
+              >
+                {$_('reinstall_mathesar_schemas')}
+              </ButtonMenuItem>
+              <!--
+                TODO: Allow dropping databases
+                https://github.com/mathesar-foundation/mathesar/issues/3862
+              -->
+              <!-- {#if isDatabaseInInternalServer}
+                <ButtonMenuItem
+                  icon={iconDeleteMajor}
+                  danger
+                  disabled={!$currentRoleOwnsDatabase}
+                >
+                  {$_('delete_database')}
+                </ButtonMenuItem>
+              {/if} -->
+            </DropdownMenu>
+          </div>
+        {/if}
+      </div>
     </div>
   </AppSecondaryHeader>
 
@@ -201,12 +208,33 @@
 
 <style>
   .tab-container {
-    padding: var(--size-xx-large) 0;
+    padding: var(--lg3) 0;
   }
-  .details {
-    font-size: var(--text-size-small);
+  .database-info {
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+    margin-top: var(--sm5);
   }
-  .details .label {
-    color: var(--sand-700);
+  .connection-details {
+    display: flex;
+    align-items: center;
+    gap: var(--lg1);
+    flex-wrap: wrap;
+  }
+  .database-info .label {
+    color: var(--text-color-primary);
+    font-weight: var(--font-weight-bold);
+  }
+  .edit-connection {
+    margin-top: var(--sm1);
+    display: inline-flex;
+  }
+  .actions-container {
+    display: flex;
+    align-items: center;
+    gap: var(--sm1);
+  }
+  .dropdown-container {
+    margin-left: auto;
   }
 </style>

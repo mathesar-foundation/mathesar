@@ -61,7 +61,7 @@
 
 {#if aggregationColumn}
   <div data-identifier="aggregation-source">
-    <h1>{$_('aggregated_from')}</h1>
+    <div>{$_('aggregated_from')}</div>
     <div class="column-info">
       <span class="tag">
         <ColumnName
@@ -78,7 +78,7 @@
 
 {#if source}
   <div data-identifier="column-source">
-    <h1>{$_('source_column')}</h1>
+    <div>{$_('source_column')}</div>
     <div class="column-info">
       <RichText text={$_('column_from_table')} let:slotName let:translatedArg>
         {#if slotName === 'columnName'}
@@ -109,17 +109,18 @@
 <style lang="scss">
   [data-identifier='aggregation-source'],
   [data-identifier='column-source'] {
-    margin-top: var(--size-large);
+    margin-top: var(--sm4);
 
     .column-info {
-      margin-top: var(--spacing-y);
       max-width: 100%;
 
       .tag {
-        padding: var(--size-extreme-small) var(--size-ultra-small);
-        background: var(--slate-200);
-        border-radius: var(--size-large);
-        font-weight: 510;
+        padding: var(--sm6) var(--sm2);
+        background: var(--card-background);
+        color: var(--text-color-secondary);
+        border: 1px solid var(--card-border);
+        border-radius: var(--lg1);
+        font-weight: var(--font-weight-medium);
         overflow: hidden;
         max-width: 100%;
       }
@@ -127,7 +128,6 @@
       span {
         display: inline-block;
         vertical-align: middle;
-        margin-bottom: var(--size-super-ultra-small);
       }
     }
   }

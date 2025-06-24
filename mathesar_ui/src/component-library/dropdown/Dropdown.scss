@@ -22,33 +22,37 @@ button.dropdown.trigger {
     padding: 0 0.1rem;
   }
   &:focus {
-    outline: 2px solid var(--slate-300);
+    outline: 2px solid rgba(255, 117, 76, 0.2);
     outline-offset: 1px;
-    border-radius: var(--border-radius-s);
   }
 }
 
 .dropdown.content {
   box-shadow: var(
     --Dropdown__box-shadow,
-    #000 0 0 0 0,
-    rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
-    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
-    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px
+    var(--shadow-color) 0 0 0 0,
+    var(--shadow-color) 0px 0px 0px 1px,
+    var(--shadow-color) 0px 10px 15px -3px,
+    var(--shadow-color) 0px 4px 6px -2px
   );
   border: var(--Dropdown__border, none);
   border-radius: var(--border-radius-m);
-  background: var(--Dropdown__background, var(--white));
+  background: var(--Dropdown__background, var(--neutral-50));
   z-index: var(--dropdown-z-index, 100);
   max-height: calc(100vh - 0.5rem);
   overflow: auto;
 
+  body.theme-dark & {
+    border: var(--Dropdown__border, 1px solid var(--DARK-MODE-border-base));
+    background: var(--Dropdown__background, var(--DARK-MODE-surface-elevated));
+  }
+
   &[data-popper-placement='top-start'] {
     box-shadow:
-      rgba(0, 0, 0, 0.1) 0px -10px 15px -3px,
-      rgba(0, 0, 0, 0.05) 0px -4px 2px -2px,
-      rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
-      #000 0 0 0 0;
+      var(--shadow-color) 0px -10px 15px -3px,
+      var(--shadow-color) 0px -4px 2px -2px,
+      var(--shadow-color) 0px 0px 0px 1px,
+      var(--shadow-color) 0 0 0 0;
   }
 
   &.no-max-height {

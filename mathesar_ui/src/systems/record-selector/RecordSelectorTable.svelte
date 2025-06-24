@@ -32,6 +32,7 @@
   export let nestedController: RecordSelectorController;
   export let submitResult: (result: RecordSelectorResult) => void;
   export let isHoveringCreate = false;
+  export let handleKeyboardNavigation = false;
 
   const tabularDataStore = setTabularDataStoreInContext(tabularData);
 
@@ -149,9 +150,8 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if ($nestedSelectorIsOpen) {
-      return;
-    }
+    if (!handleKeyboardNavigation) return;
+    if ($nestedSelectorIsOpen) return;
     let handled = true;
     switch (e.key) {
       case 'ArrowUp':
@@ -308,7 +308,7 @@
     overflow: hidden;
     position: relative;
     --overflow-shadow-size: 0.75rem;
-    --overflow-shadow-color: rgba(0, 0, 0, 0.5);
+    --overflow-shadow-color: var(--shadow-color);
     --focus-highlight-width: 0.2rem;
   }
   .scroll-container {
@@ -324,7 +324,7 @@
     position: relative;
     border-spacing: 0;
     --border-width: 1px;
-    --border-color: var(--slate-200);
+    --border-color: var(--border-color);
     --row-height: 2.25rem;
   }
   .thead {

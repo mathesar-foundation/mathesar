@@ -33,8 +33,9 @@
     position: relative;
     border-radius: var(--border-radius-m);
     margin: var(--MessageBox__margin);
-    background: var(--MessageBox__background);
-    border-left: var(--MessageBox__border);
+    background: var(--MessageBox__background, var(--background-color));
+    border-left: var(--MessageBox__border, 4px solid var(--border-color));
+    color: var(--MessageBox__text-color, var(--text-color));
   }
   .message-box:not(.full-width) {
     max-width: max-content;
@@ -49,8 +50,8 @@
     color: var(--MessageBox__icon-color, currentcolor);
   }
   .title {
-    font-size: var(--size-large);
+    font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    margin-bottom: var(--size-ultra-small);
+    margin-bottom: var(--sm4);
   }
 </style>

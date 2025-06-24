@@ -29,7 +29,7 @@ Mathesar is built using:
 1. From the repository's root directory, run:
 
     ```
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
+    docker compose -f docker-compose.dev.yml up dev-service
     ```
 
     > **Note:** You may need to run docker `sudo` depending on how you have it installed.
@@ -145,7 +145,7 @@ If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASE
 Sometimes you may need to rebuild your Docker images after pulling new code changes or switching branches. Do so via:
 
 ```
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service --force-recreate --build dev-service
+docker compose -f docker-compose.dev.yml up dev-service --force-recreate --build dev-service
 ```
 
 ## Internationalization

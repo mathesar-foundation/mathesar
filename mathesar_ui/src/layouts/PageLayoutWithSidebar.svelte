@@ -37,6 +37,7 @@
       flex-grow: 999;
       min-inline-size: 65%;
       margin-left: var(--PageLayoutWithSidebar__gap, $default-gap);
+      margin-bottom: var(--PageLayoutWithSidebar__gap, $default-gap);
     }
   }
 </style>

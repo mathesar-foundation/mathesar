@@ -65,7 +65,7 @@
     display: flex;
     flex-direction: column;
 
-    font-size: var(--text-size-small);
+    font-size: var(--sm1);
 
     > :global(* + *) {
       margin-top: 0.5rem;
@@ -73,10 +73,17 @@
   }
 
   .entity-name-container {
-    font-size: var(--text-size-small);
-    background-color: var(--slate-200);
+    font-size: var(--sm1);
+    background-color: var(--neutral-200);
     border-radius: var(--border-radius-xl);
     padding: 0.285rem 0.428rem;
+    font-weight: var(--font-weight-bold);
+
+    :global(body.theme-dark) & {
+      background-color: var(--stormy-800);
+      border: 1px solid var(--stormy-600);
+      color: var(--text-color-secondary);
+    }
   }
 
   .target {

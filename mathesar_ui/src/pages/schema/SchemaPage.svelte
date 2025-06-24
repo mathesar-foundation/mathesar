@@ -44,7 +44,6 @@
   restrictWidth
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
-    '--layout-background-color': 'var(--sand-50)',
   }}
 >
   <AppSecondaryHeader
@@ -53,7 +52,7 @@
     icon={iconSchema}
     entityTypeName={$_('schema')}
   >
-    <div slot="action">
+    <div slot="action" class="action-buttons">
       <Button
         on:click={handleEditSchema}
         appearance="secondary"
@@ -94,3 +93,15 @@
   existingTableNames={new Set(map((t) => t.name, tablesMap.values()))}
 />
 <SchemaPermissionsModal controller={permissionsModal} {schema} />
+
+<style>
+  .description {
+    color: var(--text-color-secondary);
+  }
+
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+</style>

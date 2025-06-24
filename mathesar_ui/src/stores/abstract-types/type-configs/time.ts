@@ -1,8 +1,5 @@
-import {
-  type Column,
-  type TimeFormat,
-  getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+import type { TimeFormat } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import { iconUiTypeTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 

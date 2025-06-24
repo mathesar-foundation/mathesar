@@ -45,12 +45,10 @@
 
 <style lang="scss">
   .entity-page-header {
-    border-bottom: 1px solid var(--slate-300);
-    background-color: var(--white);
     position: relative;
     display: flex;
     align-items: center;
-    min-height: 4.18214rem;
+    min-height: var(--lg4);
     overflow: hidden;
 
     .heading {
@@ -62,50 +60,56 @@
       flex-grow: 0;
       flex-shrink: 1;
       min-height: 100%;
-      border-right: 1px solid var(--slate-200);
-      padding: var(--size-small) var(--size-large);
+      padding: var(--sm2);
 
       .icon {
-        font-size: 1.5rem;
-        padding: var(--size-ultra-small);
-        background: var(--EntityPageHeader__icon-background, var(--yellow-200));
-        border-radius: var(--size-super-ultra-small);
-        margin-right: var(--size-xx-small);
+        font-size: var(--lg2);
+        padding: var(--sm4);
+        background: linear-gradient(
+          135deg,
+          var(--pumpkin-700),
+          var(--pumpkin-900)
+        );
+        border-radius: var(--border-radius-l);
+        margin-right: var(--sm2);
+        color: var(--white);
       }
       .text {
         overflow: hidden;
       }
       .name {
-        font-size: var(--text-size-large);
+        font-size: var(--lg3);
         margin: 0;
-        font-weight: 500;
+        font-weight: var(--font-weight-bold);
         overflow: hidden;
+        color: var(--text-color-primary);
       }
       .description {
-        font-size: var(--text-size-small);
-        color: var(--color-text-muted);
+        font-size: var(--sm1);
+        color: var(--text-color-secondary);
         overflow: hidden;
       }
     }
 
     .actions {
-      padding: 0 var(--size-large);
+      padding: var(--sm3);
       display: flex;
       align-items: center;
       flex-grow: 1;
+      margin-left: 0.5rem;
 
       .actions-left {
         display: flex;
         flex-shrink: 0;
 
         > :global(* + *) {
-          margin-left: var(--size-xx-small);
+          margin-left: var(--sm3);
         }
       }
 
       &.has-right-actions {
         .actions-left {
-          margin-right: var(--size-x-large);
+          margin-right: var(--lg2);
         }
       }
 
@@ -120,7 +124,7 @@
         display: grid;
         grid-auto-flow: column;
         align-items: center;
-        gap: var(--size-xx-small);
+        gap: var(--sm3);
       }
     }
 

@@ -9,8 +9,7 @@
   fitViewport
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-data-pages)',
-    '--layout-background-color': 'var(--slate-50)',
-    '--inset-page-section-padding': 'var(--size-xx-large)',
+    '--inset-page-section-padding': 'var(--lg3)',
     '--page-padding': 'var(--outer-page-padding-for-inset-page)',
   }}
 >
@@ -35,17 +34,17 @@
     display: grid;
     grid-template: 1fr auto / 1fr;
     height: 100%;
-    --sheet-header-height: 6.5rem;
+    --sheet-header-height: 8rem;
   }
   .page-content {
     overflow: auto;
   }
   .page-content:not(.has-preview) {
-    background: var(--sand-200);
+    background: var(--layout-background-color);
   }
   .footer:not(:empty) {
-    border-top: 1px solid var(--slate-200);
+    border-top: 1px solid var(--border-color);
     padding: 1rem 1rem 1rem 1rem;
-    background: var(--white);
+    background: var(--footer-background-color);
   }
 </style>

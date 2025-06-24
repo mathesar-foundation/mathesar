@@ -128,7 +128,6 @@
       padding: 0.35rem 0.6rem;
       display: flex;
       align-items: center;
-      border-bottom: 1px solid var(--slate-200);
 
       :global(.checkbox) {
         flex-grow: 0;
@@ -139,13 +138,13 @@
   }
 
   .id-rename {
-    font-size: var(--size-small);
+    font-size: var(--sm1);
   }
 
   .type-options-content {
     min-width: 18rem;
     max-width: 22rem;
-    padding: var(--size-small);
+    padding: var(--sm1);
   }
 
   .pk-indicator {

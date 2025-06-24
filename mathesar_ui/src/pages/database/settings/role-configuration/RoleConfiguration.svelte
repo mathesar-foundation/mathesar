@@ -110,7 +110,7 @@
                       <Icon {...iconEdit} size="0.8em" />
                     </Button>
                     <SpinnerButton
-                      appearance="outline-primary"
+                      appearance="outline-danger"
                       disabled={!isMathesarAdmin}
                       confirm={() =>
                         confirm({
@@ -172,17 +172,18 @@
 
 <style lang="scss">
   .role-configuration-table {
-    background: var(--white);
     --Grid-table__template-columns: auto auto;
-
-    .role-name {
-      font-weight: 500;
-    }
   }
   .password-saved-cell {
     width: 100%;
-    display: grid;
-    grid-template-columns: auto auto;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
   }
 </style>

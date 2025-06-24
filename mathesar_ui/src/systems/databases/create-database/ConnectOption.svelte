@@ -9,7 +9,7 @@
   export let description: string;
 </script>
 
-<Button on:click={changeView}>
+<Button on:click={changeView} appearance="secondary">
   <div class="content">
     <div class="icon-circle">
       <Icon {...icon} size="2rem" />
@@ -30,25 +30,23 @@
     display: grid;
     align-items: center;
     grid-template-columns: auto 1fr;
-    gap: var(--size-large);
+    gap: var(--lg1);
     text-align: left;
-    padding: var(--size-large);
+    padding: var(--sm4);
   }
   .icon-circle {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #e1cfb5;
-    height: 3.6rem;
-    width: 3.6rem;
-    border-radius: 3.6rem;
+    color: var(--stormy-500);
   }
   .header {
-    font-size: var(--text-size-large);
-    font-weight: 500;
+    font-size: var(--lg1);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-color-primary);
   }
   .description {
-    color: var(--slate-500);
-    margin-top: var(--size-ultra-small);
+    color: var(--text-color-muted);
+    margin-top: var(--sm4);
   }
 </style>

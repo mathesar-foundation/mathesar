@@ -22,6 +22,7 @@
 
   let tableForEditing: Table | undefined;
   let tableForPermissions: Table | undefined;
+  let containerWidth: number;
 
   function openEditTableModal(table: Table) {
     tableForEditing = table;
@@ -34,10 +35,10 @@
   }
 </script>
 
-<div class="tables-list">
+<div class="tables-list" bind:clientWidth={containerWidth}>
   {#if tables.length > 0}
     <div
-      class="container"
+      class="tables-container"
       use:highlightNewItems={{
         scrollHint: $_('table_new_items_scroll_hint'),
       }}
@@ -49,6 +50,7 @@
           {schema}
           {openEditTableModal}
           {openTablePermissionsModal}
+          condensed={containerWidth < 400}
         />
       {/each}
     </div>
@@ -69,20 +71,3 @@
     table={tableForPermissions}
   />
 {/if}
-
-<style lang="scss">
-  .container {
-    display: grid;
-    grid-gap: 1rem;
-    --minimum-item-width: 18rem;
-    // align all child items to the left
-  }
-  @supports (width: min(var(--minimum-item-width), 100%)) {
-    .container {
-      grid-template-columns: repeat(
-        auto-fill,
-        minmax(var(--minimum-item-width), 1fr)
-      );
-    }
-  }
-</style>

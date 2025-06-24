@@ -61,11 +61,11 @@
       overflow: hidden;
     }
     .add {
-      --badge-background-color: var(--slate-200);
-      --badge-text-color: var(--slate-800);
+      --badge-background-color: var(--neutral-200);
+      --badge-text-color: var(--neutral-800);
       --badge-padding: 0 0.45rem;
       --badge-border-radius: var(--border-radius-l);
-      --badge-font-size: var(--text-size-small);
+      --badge-font-size: var(--sm1);
       flex-shrink: 0;
     }
 
@@ -76,11 +76,11 @@
     }
 
     + :global(.selectable-column) {
-      margin-top: var(--size-super-ultra-small);
+      margin-top: var(--sm5);
     }
 
     + :global(.table-group) {
-      margin-top: var(--size-small);
+      margin-top: var(--sm1);
     }
   }
 </style>

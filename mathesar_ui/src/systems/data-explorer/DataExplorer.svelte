@@ -4,7 +4,7 @@
   import { queries } from '@mathesar/stores/queries';
   import { Tutorial } from '@mathesar-component-library';
 
-  import ActionsPane from './ActionsPane.svelte';
+  import ActionsPane from './action-pane/ActionsPane.svelte';
   import { WithExplorationInspector } from './exploration-inspector';
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
   import type QueryManager from './QueryManager';
@@ -22,12 +22,11 @@
   let isInspectorOpen = true;
 </script>
 
-<div class="data-explorer">
+<div class="data-explorer" class:inspector-open={isInspectorOpen}>
   <ActionsPane
     {queryManager}
     bind:linkCollapsibleOpenState
     bind:isInspectorOpen
-    on:close
   />
   {#if !$query.base_table_oid}
     <div class="initial-content">
@@ -55,13 +54,15 @@
             {$_('get_started_by_adding_columns_from_left')}
           </div>
         {:else}
-          <WithExplorationInspector
-            {isInspectorOpen}
-            queryHandler={queryManager}
-            on:delete
-          >
-            <ExplorationResults queryHandler={queryManager} />
-          </WithExplorationInspector>
+          <div class="results-wrapper">
+            <WithExplorationInspector
+              {isInspectorOpen}
+              queryHandler={queryManager}
+              on:delete
+            >
+              <ExplorationResults queryHandler={queryManager} />
+            </WithExplorationInspector>
+          </div>
         {/if}
       </WithInputSidebar>
       {#if hasColumns}
@@ -80,8 +81,8 @@
     .help-text {
       padding: 0 1rem;
       text-align: center;
-      font-size: var(--text-size-x-large);
-      color: var(--slate-500);
+      font-size: var(--lg2);
+      color: var(--neutral-500);
     }
 
     .initial-content {
@@ -92,7 +93,7 @@
 
       .tutorial-holder {
         margin-top: 4rem;
-        max-width: 70%;
+        max-width: 40%;
       }
 
       .help-text {
@@ -107,9 +108,9 @@
       display: grid;
       grid-template: 1fr auto / 1fr;
       overflow: hidden;
-      overflow-x: auto;
-      .help-text {
-        margin-top: 10rem;
+      padding: 0 var(--sm3);
+      .results-wrapper {
+        height: 100%;
       }
     }
   }

@@ -21,16 +21,31 @@
 <style lang="scss">
   .db-card {
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--slate-200);
-    background-color: var(--white);
+    border: 1px solid var(--card-border);
+    background-color: var(--card-background);
     overflow: hidden;
+    box-shadow: var(--card-active-shadow);
+    transition: background-color 0.2s ease-in-out;
   }
+
   .db-card.hoverable {
     cursor: pointer;
   }
+
   .db-card.hoverable:hover {
-    border-color: var(--slate-500);
-    background-color: var(--slate-50);
-    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--card-hover-border);
+    box-shadow: var(--card-hover-shadow);
+    background: var(--card-hover-background);
+  }
+
+  .db-card.hoverable:focus {
+    outline: 2px solid var(--salmon-600);
+    outline-offset: 1px;
+  }
+
+  .db-card.hoverable:active {
+    border-color: var(--card-active-border);
+    box-shadow: var(--card-active-shadow);
+    background: var(--card-active-background);
   }
 </style>

@@ -1,5 +1,6 @@
 .window {
-  background-color: var(--slate-50);
+  background-color: var(--window-background-color);
+  border: 1px solid var(--border-color);
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
   width: var(--window-width, 100%);
@@ -16,7 +17,7 @@
     justify-content: flex-end;
     align-items: flex-start;
     padding: 1rem;
-    border-bottom: 1px solid var(--slate-200);
+    border-bottom: 1px solid var(--border-color);
     .title {
       &:empty {
         display: none;
@@ -24,7 +25,7 @@
       flex: 1 1 100%;
       margin: auto;
       font-weight: 500;
-      font-size: var(--text-size-x-large);
+      font-size: var(--lg2);
     }
   }
 
@@ -34,8 +35,8 @@
 
   > .footer {
     grid-row: 3;
-    border-top: 1px solid var(--slate-200);
-    background: var(--slate-100);
+    border-top: 1px solid var(--border-color);
+    background: var(--footer-background-color);
   }
 
   &.has-body-padding > .body {

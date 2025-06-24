@@ -14,15 +14,14 @@
 
 <Button on:click={handleClick} appearance="ghost" class="padding-zero">
   <span class="trigger">
-    <Icon {...iconSearch} />
+    <span class="icon"><Icon {...iconSearch} /></span>
     <Icon {...iconExpandRight} class="expand-right-icon" />
   </span>
 </Button>
 
 <style lang="scss">
   .trigger {
-    border: 1px solid var(--slate-400);
-    color: var(--slate-300);
+    color: var(--text-color-secondary);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
@@ -30,15 +29,19 @@
     display: flex;
     align-items: center;
 
+    .icon {
+      font-size: 90%;
+    }
+
     :global(.expand-right-icon) {
-      color: var(--slate-500);
+      color: var(--text-color-secondary);
     }
 
     &:hover,
     &:active {
-      background-color: var(--slate-100);
-      color: var(--slate-500);
-      border-color: var(--slate-300);
+      background-color: var(--neutral-100);
+      color: var(--neutral-500);
+      border-color: var(--neutral-300);
     }
   }
 </style>

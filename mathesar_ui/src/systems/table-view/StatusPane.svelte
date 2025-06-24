@@ -122,15 +122,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid var(--color-gray-medium);
     position: relative;
     flex-shrink: 0;
     flex-basis: 32px;
-
-    &.context-page,
-    &.context-shared-consumer-page {
-      background-color: var(--slate-100);
-    }
 
     &.context-widget {
       font-size: 80%;
@@ -139,15 +133,15 @@
     .record-count {
       display: inline-flex;
       align-items: center;
-      gap: var(--size-super-ultra-small);
+      gap: var(--sm5);
     }
 
     .pill {
-      font-size: var(--size-x-small);
+      font-size: var(--sm2);
       display: inline-block;
-      border: 1px solid var(--slate-400);
+      border: 1px solid var(--gray-400);
       border-radius: var(--border-radius-m);
-      padding: var(--size-extreme-small);
+      padding: var(--sm6);
     }
   }
 

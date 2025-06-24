@@ -139,11 +139,12 @@
     justify-content: space-between;
   }
   .value {
-    padding-left: var(--cell-padding);
+    padding: var(--cell-padding);
     align-self: center;
     overflow: hidden;
     width: max-content;
     max-width: 100%;
+    color: var(--text-color);
   }
   .disabled .value {
     padding-right: var(--cell-padding);
@@ -153,9 +154,9 @@
     padding: 0 var(--cell-padding);
     display: flex;
     align-items: center;
-    color: var(--color-gray-dark);
+    color: var(--text-color-muted);
   }
   .dropdown-button:hover {
-    color: var(--color-text);
+    color: var(--text-color);
   }
 </style>

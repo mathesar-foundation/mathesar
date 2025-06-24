@@ -158,6 +158,8 @@ export class Meta {
    */
   recordsRequestParamsData: Readable<RecordsRequestParamsData>;
 
+  private cleanupFunctions: (() => void)[] = [];
+
   constructor(p?: Partial<MetaProps>) {
     const props = getFullMetaProps(p);
     this.pagination = writable(props.pagination);
@@ -240,6 +242,20 @@ export class Meta {
         searchFuzzy,
       }),
     );
+
+    const { pagination } = this;
+    function goToFirstPage() {
+      pagination.update(($p) => new Pagination({ size: $p.size, page: 1 }));
+    }
+
+    this.cleanupFunctions.push(
+      // When the user modifies the filter params or fuzzy search params (in the
+      // record  selector), we reset the pagination to go to the first page.
+      // This is to avoid confusion. If we don't do this, the user can end up
+      // beyond the last page after paginating and then applying a filter.
+      this.filtering.subscribe(goToFirstPage),
+      this.searchFuzzy.subscribe(goToFirstPage),
+    );
   }
 
   clearAllStatusesAndErrorsForRows(rowKeys: RowKey[]): void {
@@ -271,5 +287,9 @@ export class Meta {
     } catch (e) {
       return undefined;
     }
+  }
+
+  destroy(): void {
+    this.cleanupFunctions.forEach((fn) => fn());
   }
 }

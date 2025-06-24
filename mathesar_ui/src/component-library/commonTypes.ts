@@ -8,8 +8,11 @@ export type Appearance =
   | 'action'
   | 'outcome'
   | 'outline-primary'
+  | 'outline-danger'
   | 'inspector'
-  | 'custom';
+  | 'feedback'
+  | 'custom'
+  | 'link';
 
 export type Size = 'small' | 'medium' | 'large';
 

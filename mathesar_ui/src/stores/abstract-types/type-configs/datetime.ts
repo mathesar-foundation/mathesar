@@ -1,9 +1,11 @@
-import {
-  type Column,
-  type DateFormat,
-  type TimeFormat,
-  getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
+import type {
+  DateFormat,
+  TimeFormat,
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import { iconUiTypeDateTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
@@ -16,7 +18,7 @@ import type {
 
 import { getDateFormatOptions, getTimeFormatOptions } from './utils';
 
-const dbForm: AbstractTypeConfigForm = {
+const getDbForm: () => AbstractTypeConfigForm = () => ({
   variables: {
     supportTimeZones: {
       type: 'boolean',
@@ -29,11 +31,14 @@ const dbForm: AbstractTypeConfigForm = {
       {
         type: 'input',
         variable: 'supportTimeZones',
-        label: 'Support Time Zones',
+        label: get(_)('support_time_zones'),
+        text: {
+          help: get(_)('support_time_zone_helper'),
+        },
       },
     ],
   },
-};
+});
 
 function determineDbTypeAndOptions(
   dbFormValues: FormValues,
@@ -123,7 +128,7 @@ const dateTimeType: AbstractTypeConfiguration = {
     },
   },
   getDbConfig: () => ({
-    form: dbForm,
+    form: getDbForm(),
     determineDbTypeAndOptions,
     constructDbFormValuesFromTypeOptions,
   }),

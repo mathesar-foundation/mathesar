@@ -195,6 +195,11 @@
 
 <style lang="scss">
   .sheet {
+    border: 1px solid var(--border-color);
+    background-color: var(--sheet-background);
+    margin: 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     isolation: isolate;
@@ -215,7 +220,7 @@
     );
 
     &.has-border {
-      border: 1px solid var(--color-gray-medium);
+      border: 1px solid var(--border-color);
     }
 
     &.uses-virtual-list {
@@ -229,10 +234,6 @@
 
     &.set-to-row-width {
       min-width: 100%;
-    }
-
-    :global([data-sheet-element='data-row']) {
-      transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
     }
 
     &.selection-in-progress :global(*) {

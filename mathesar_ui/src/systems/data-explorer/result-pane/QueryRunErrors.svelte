@@ -4,7 +4,7 @@
   import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/rest/utils/errorCodes';
   import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
+  import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { Button, hasProperty } from '@mathesar-component-library';
@@ -89,7 +89,7 @@
                 <p>
                   <a
                     class="btn btn-secondary"
-                    href={getExplorationEditorPageUrl(
+                    href={getExplorationPageUrl(
                       $currentDatabase.id,
                       $currentSchema.oid,
                       $query.id,
@@ -119,14 +119,14 @@
 
 <style lang="scss">
   .query-run-errors {
-    --ErrorBox__font-size: var(--text-size-large);
+    --ErrorBox__font-size: var(--lg1);
 
     .error-header,
     .strong {
       font-weight: 500;
     }
     .error-header {
-      font-size: var(--text-size-large);
+      font-size: var(--lg1);
     }
 
     p {
@@ -135,13 +135,13 @@
     p + p,
     p + ul,
     ul + p {
-      margin-top: var(--size-xx-small);
+      margin-top: var(--sm3);
     }
 
     ul {
       list-style: disc outside none;
       padding-left: 1.3rem;
-      font-size: var(--text-size-base);
+      font-size: 1rem;
     }
   }
 </style>
