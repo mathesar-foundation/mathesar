@@ -291,6 +291,7 @@ class Form(BaseModel):
     description = models.CharField(null=True)
     version = models.IntegerField()
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
+    server = models.ForeignKey('Server', on_delete=models.CASCADE)
     schema_oid = models.PositiveBigIntegerField()
     base_table_oid = models.PositiveBigIntegerField()
     is_public = models.BooleanField(default=False)
