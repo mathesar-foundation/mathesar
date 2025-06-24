@@ -46,7 +46,7 @@ def create_engine(conn_url, *args, **kwargs):
     randomly corrupted.
     """
     kwargs.update(
-        connect_args={"application_name": "db.deprecated.engine.create_future_engine"},
+        connect_args={"application_name": "Mathesar db.deprecated.engine.create_future_engine"},
         pool_size=2,
     )
     engine = sa_create_engine(conn_url, *args, **kwargs)

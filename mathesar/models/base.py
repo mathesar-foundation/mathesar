@@ -311,6 +311,7 @@ class Form(BaseModel):
             dbname=self.database.name,
             user=self.submit_role.name,
             password=self.submit_role.password,
+            application_name='mathesar.models.base.Form.connection',
         )
 
 
