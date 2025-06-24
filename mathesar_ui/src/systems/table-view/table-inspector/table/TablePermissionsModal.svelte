@@ -94,8 +94,8 @@
         database_id: table.schema.database.id,
         table_oid: table.oid,
       }),
-      roles.batchRunner({ database_id: table.schema.database.id }),
-      currentRole.batchRunner({ database_id: table.schema.database.id }),
+      roles.batchRunner(),
+      currentRole.batchRunner(),
     ]);
     return {
       roles,

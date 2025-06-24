@@ -44,8 +44,8 @@
   } = $routeContext);
 
   $: void AsyncRpcApiStore.runBatchConservatively([
-    collaborators.batchRunner({ database_id: database.id }),
-    configuredRoles.batchRunner({ server_id: database.server.id }),
+    collaborators.batchRunner(),
+    configuredRoles.batchRunner(),
   ]);
   $: void users.runConservatively();
   $: isLoading =
@@ -68,10 +68,8 @@
   function checkAndHandleSideEffects(collaborator: Collaborator) {
     if (collaborator.userId === $userProfileStore.id) {
       void AsyncRpcApiStore.runBatch([
-        databaseRouteContext.underlyingDatabase.batchRunner({
-          database_id: database.id,
-        }),
-        databaseRouteContext.roles.batchRunner({ database_id: database.id }),
+        databaseRouteContext.underlyingDatabase.batchRunner(),
+        databaseRouteContext.roles.batchRunner(),
       ]);
       void fetchSchemasForCurrentDatabase();
     }

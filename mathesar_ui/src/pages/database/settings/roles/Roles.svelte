@@ -26,10 +26,9 @@
   const modifyRoleMembersModalController = modal.spawnModalController();
 
   $: ({ databaseRouteContext, configuredRoles, collaborators } = $routeContext);
-  $: ({ database, roles, underlyingDatabase, currentRole } =
-    databaseRouteContext);
+  $: ({ roles, underlyingDatabase, currentRole } = databaseRouteContext);
 
-  $: void roles.runConservatively({ database_id: database.id });
+  $: void roles.runConservatively();
   $: roleList = [...($roles.resolvedValue?.values() ?? [])];
 
   let targetRole: Role | undefined = undefined;
@@ -51,8 +50,8 @@
 
     if (currentRoleInheritsOrIsEditedRole) {
       void AsyncRpcApiStore.runBatch([
-        currentRole.batchRunner({ database_id: database.id }),
-        underlyingDatabase.batchRunner({ database_id: database.id }),
+        currentRole.batchRunner(),
+        underlyingDatabase.batchRunner(),
       ]);
       void fetchSchemasForCurrentDatabase();
     }
