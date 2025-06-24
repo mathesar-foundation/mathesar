@@ -6,6 +6,7 @@ import { analytics } from './analytics';
 import { collaborators } from './collaborators';
 import { columns } from './columns';
 import { constraints } from './constraints';
+import { data_forms } from './data_forms';
 import { data_modeling } from './data_modeling';
 import { databases } from './databases';
 import { explorations } from './explorations';
@@ -25,6 +26,7 @@ export const api = buildRpcApi({
     collaborators,
     columns,
     constraints,
+    data_forms,
     data_modeling,
     databases,
     explorations,

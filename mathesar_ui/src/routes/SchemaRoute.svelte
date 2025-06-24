@@ -12,6 +12,7 @@
 
   import DataExplorerRedirect from './DataExplorerRedirect.svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
+  import DataFormsRoute from './DataFormsRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
   import TableRoute from './TableRoute.svelte';
 
@@ -67,6 +68,10 @@
         : undefined}
     />
   </MultiPathRoute>
+
+  <Route path="/forms/*" firstmatch>
+    <DataFormsRoute {schema} />
+  </Route>
 
   <Route path="/">
     <SchemaPage {database} {schema} />

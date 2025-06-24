@@ -126,6 +126,13 @@ export function getRecordPageUrl(
   return `${getTablePageUrl(databaseId, schemaId, tableId)}${String(recordId)}`;
 }
 
+export function getDataFormMakerPageUrl(
+  databaseId: number,
+  schemaId: number,
+): string {
+  return `${getSchemaPageUrl(databaseId, schemaId)}forms/new/`;
+}
+
 export const USER_PROFILE_URL = '/profile/';
 export const ADMIN_URL = '/administration/';
 export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
