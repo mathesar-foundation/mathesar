@@ -80,7 +80,6 @@ class FormInfo(TypedDict):
         description: The description of the form.
         version: The version of the form.
         database_id: The Django id of the database containing the Form.
-        server_id: The Django id of the server cantaining the database.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
         is_public: Specifies whether the form is publicly accessible.
@@ -101,7 +100,6 @@ class FormInfo(TypedDict):
     description: Optional[str]
     version: int
     database_id: int
-    server_id: int
     schema_oid: int
     base_table_oid: int
     is_public: bool
@@ -125,7 +123,6 @@ class FormInfo(TypedDict):
             description=form_model.description,
             version=form_model.version,
             database_id=form_model.database_id,
-            server_id=form_model.server_id,
             schema_oid=form_model.schema_oid,
             base_table_oid=form_model.base_table_oid,
             is_public=form_model.is_public,
@@ -184,7 +181,6 @@ class FormDef(TypedDict):
         description: The description of the form.
         version: The version of the form.
         database_id: The Django id of the database containing the Form.
-        server_id: The Django id of the server cantaining the database.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
         is_public: Specifies whether the form is publicly accessible.
@@ -201,7 +197,6 @@ class FormDef(TypedDict):
     description: Optional[str]
     version: int
     database_id: int
-    server_id: int
     schema_oid: int
     base_table_oid: int
     is_public: Optional[bool]

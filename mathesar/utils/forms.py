@@ -6,7 +6,7 @@ from django.db import transaction
 from db.forms import get_oid_col_info_map
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
-    Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
+    Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 
@@ -62,15 +62,15 @@ def get_field_col_info_map(form_model):
 
 @transaction.atomic
 def create_form(form_def, user):
-    database_id = form_def["database_id"]
-    submit_role = get_submit_role(user, database_id, submit_role_id=form_def.get("submit_role_id"))
+    database = Database.objects.get(id=form_def["database_id"])
+    submit_role = get_submit_role(user, database.id, submit_role_id=form_def.get("submit_role_id"))
     form_model = Form.objects.create(
         token=form_def.get("token", uuid4()),
         name=form_def["name"],
         description=form_def.get("description"),
         version=form_def["version"],
-        database_id=database_id,
-        server_id=form_def["server_id"],
+        database=database,
+        server=database.server,
         schema_oid=form_def["schema_oid"],
         base_table_oid=form_def["base_table_oid"],
         is_public=form_def.get("is_public", False),
