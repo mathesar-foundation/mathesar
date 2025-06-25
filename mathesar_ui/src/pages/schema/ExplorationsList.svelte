@@ -6,7 +6,7 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
 
-  import EmptyEntity from './EmptyEntity.svelte';
+  import EmptyEntityList from './EmptyEntityList.svelte';
   import ExplorationItem from './ExplorationItem.svelte';
 
   export let explorations: SavedExploration[];
@@ -14,20 +14,10 @@
   export let schema: Schema;
 </script>
 
-<div class="container">
+<div class="exploration-list">
   {#each explorations as exploration (exploration.id)}
     <ExplorationItem {exploration} {database} {schema} />
   {:else}
-    <EmptyEntity icon={iconExploration}>
-      <p>{$_('no_explorations')}</p>
-    </EmptyEntity>
+    <EmptyEntityList icon={iconExploration} text={$_('no_explorations')} />
   {/each}
 </div>
-
-<style lang="scss">
-  .container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-</style>

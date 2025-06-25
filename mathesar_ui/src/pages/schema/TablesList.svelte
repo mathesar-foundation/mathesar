@@ -10,7 +10,7 @@
   import TablePermissionsModal from '@mathesar/systems/table-view/table-inspector/table/TablePermissionsModal.svelte';
 
   import EditTableModal from './EditTableModal.svelte';
-  import EmptyEntity from './EmptyEntity.svelte';
+  import EmptyEntityList from './EmptyEntityList.svelte';
   import TableCard from './TableCard.svelte';
 
   const editTableModal = modal.spawnModalController();
@@ -54,9 +54,7 @@
       {/each}
     </div>
   {:else}
-    <EmptyEntity icon={iconTable}>
-      <p>{$_('no_tables')}</p>
-    </EmptyEntity>
+    <EmptyEntityList icon={iconTable} text={$_('no_tables')} />
   {/if}
 </div>
 
