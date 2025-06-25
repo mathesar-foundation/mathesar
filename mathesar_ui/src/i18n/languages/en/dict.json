@@ -225,6 +225,7 @@
   "edit_connection": "Edit Connection",
   "edit_exploration": "Edit Exploration",
   "edit_exploration_attempt_recovery": "You can edit the exploration in the Data Explorer to attempt recovering it.",
+  "edit_exploration_with_name": "Edit Exploration [explorationName]",
   "edit_in_data_explorer": "Edit in Data Explorer",
   "edit_named_database_connection": "Edit [name] Database Connection",
   "edit_role_for_collaborator_value": "Change Role for [userName]",
