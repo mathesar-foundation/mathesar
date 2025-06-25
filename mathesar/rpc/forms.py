@@ -139,7 +139,7 @@ class FormInfo(TypedDict):
 
 class PublicFormInfo(TypedDict):
     """
-    Information about a form.
+    Information about a public form.
 
     Attributes:
         id: The Django id of the Form on the database.
