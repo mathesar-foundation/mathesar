@@ -141,6 +141,7 @@
 
     .sidebar {
       display: grid;
+      align-content: start;
       gap: var(--lg5);
     }
 
