@@ -23,6 +23,7 @@
   import CreateTableTutorial from './CreateTableTutorial.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
+  import FormsList from './FormsList.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
 
@@ -72,7 +73,7 @@
   </div>
 
   <div class="sidebar">
-    <section class="sidebar-section">
+    <section>
       <header>
         <h2>
           {$_('explorations')}
@@ -116,13 +117,32 @@
         />
       {/if}
     </section>
+
+    <section>
+      <header>
+        <h2>{$_('forms')}</h2>
+        <div>
+          <AnchorButton href="#TODO" appearance="primary">
+            <Icon {...iconAddNew} />
+            <span>{$_('new_form')}</span>
+          </AnchorButton>
+        </div>
+      </header>
+      <!-- TODO: handle loading and error states -->
+      <FormsList {database} {schema} />
+    </section>
   </div>
 </div>
 
 <style lang="scss">
   .schema-overview {
-    gap: 3rem;
+    gap: var(--lg5);
     display: grid;
+
+    .sidebar {
+      display: grid;
+      gap: var(--lg5);
+    }
 
     header {
       display: flex;

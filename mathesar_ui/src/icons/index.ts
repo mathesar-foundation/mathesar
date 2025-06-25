@@ -13,6 +13,7 @@ import {
   faChevronRight,
   faCircleExclamation,
   faCircleInfo,
+  faClipboardList,
   faClock,
   faClone,
   faCogs,
@@ -50,6 +51,7 @@ import {
   faPaperPlane,
   faPaste,
   faPencilAlt,
+  faPlay,
   faPlug,
   faPlus,
   faProjectDiagram,
@@ -174,6 +176,7 @@ export const iconDuplicateRecord: IconProps = {
   data: faClone,
   flip: 'vertical',
 };
+export const iconFillOutForm: IconProps = { data: faPlay };
 
 // THINGS
 //
@@ -230,6 +233,7 @@ export const iconPrivacy: IconProps = { data: faUserSecret };
 export const iconPrimaryKey: IconProps = { data: faKey };
 export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
 export const iconDescription: IconProps = { data: faCommentAlt };
+export const iconForm: IconProps = { data: faClipboardList };
 
 // STATUSES
 
