@@ -1,7 +1,9 @@
 import { type Readable, derived } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
+import type { RawConstraint } from '@mathesar/api/rpc/constraints';
 import {
+  type TableLink,
   getLinksInThisTable,
   getLinksToThisTable,
 } from '@mathesar/api/rpc/tables';
@@ -9,7 +11,7 @@ import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Schema } from '@mathesar/models/Schema';
 import { Table } from '@mathesar/models/Table';
 import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
-import AsyncStore from '@mathesar/stores/AsyncStore';
+import AsyncStore, { type AsyncStoreValue } from '@mathesar/stores/AsyncStore';
 
 import {
   ProcessedColumn,
@@ -20,6 +22,14 @@ import {
 export interface TableStructureProps {
   schema: Schema;
   oid: Table['oid'];
+}
+
+export interface TableStructureSubstance {
+  table: Table;
+  processedColumns: ProcessedColumns;
+  constraints: RawConstraint[];
+  linksInTable: TableLink[];
+  linksToTable: TableLink[];
 }
 
 export function getTableStructureAsyncStore(tableProps: TableStructureProps) {
@@ -36,7 +46,12 @@ export function getTableStructureAsyncStore(tableProps: TableStructureProps) {
         max_depth: 1,
       }),
     ]).transformResolved(
-      ([rawTableWithMetadata, columns, constraints, joinableTableResult]) => {
+      ([
+        rawTableWithMetadata,
+        columns,
+        constraints,
+        joinableTableResult,
+      ]): TableStructureSubstance => {
         const processedColumns: ProcessedColumns = new Map(
           columns.map((c, index) => [
             c.id,

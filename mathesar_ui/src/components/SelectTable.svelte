@@ -14,6 +14,7 @@
   /** TODO: Discuss, do we need prependBlank? */
   export let prependBlank = false;
   export let autoSelect: SelectProps<Table | undefined>['autoSelect'] = 'first';
+  export let disabled = false;
 
   $: tableList = prependBlank ? [undefined, ...tables] : tables;
 </script>
@@ -22,6 +23,7 @@
   options={tableList}
   valuesAreEqual={(a, b) => a?.oid === b?.oid}
   {autoSelect}
+  {disabled}
   bind:value
   on:change
   let:option

@@ -9,7 +9,10 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import {
+    getDataExplorerPageUrl,
+    getDataFormMakerPageUrl,
+  } from '@mathesar/routes/urls';
   import { fetchExplorationsForCurrentSchema } from '@mathesar/stores/queries';
   import { fetchTablesForCurrentSchema } from '@mathesar/stores/tables';
   import { AnchorButton, Button } from '@mathesar-component-library';
@@ -79,6 +82,13 @@
   </div>
 
   <div class="vertical-container sidebar">
+    <div class="tutorial">
+      <AnchorButton
+        href={getDataFormMakerPageUrl(schema.database.id, schema.oid)}
+      >
+        {$_('build_form')}
+      </AnchorButton>
+    </div>
     {#if showExplorationTutorial}
       <CreateExplorationTutorial {database} {schema} />
     {:else}
