@@ -40,7 +40,7 @@
 
   const databaseRouteContext = DatabaseRouteContext.get();
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
-  $: void underlyingDatabase.runConservatively({ database_id: database.id });
+  $: void underlyingDatabase.runConservatively();
 
   // // TODO Allow dropping databases
   // const commonData = preloadCommonData();

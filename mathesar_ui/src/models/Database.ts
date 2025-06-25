@@ -43,6 +43,7 @@ export class Database {
 
   constructConfiguredRolesStore() {
     return new AsyncRpcApiStore(api.roles.configured.list, {
+      staticProps: { server_id: this.server.id },
       postProcess: (rawConfiguredRoles) =>
         new SortedImmutableMap(
           (v) => [...v].sort(([, a], [, b]) => a.name.localeCompare(b.name)),
@@ -56,6 +57,7 @@ export class Database {
 
   constructRolesStore() {
     return new AsyncRpcApiStore(api.roles.list, {
+      staticProps: { database_id: this.id },
       postProcess: (rawRoles) =>
         new SortedImmutableMap(
           (v) => [...v].sort(([, a], [, b]) => a.name.localeCompare(b.name)),
@@ -69,6 +71,7 @@ export class Database {
 
   constructCollaboratorsStore() {
     return new AsyncRpcApiStore(api.collaborators.list, {
+      staticProps: { database_id: this.id },
       postProcess: (rawCollaborators) =>
         new ImmutableMap(
           rawCollaborators.map((rawCollaborator) => [
@@ -81,6 +84,7 @@ export class Database {
 
   constructDatabasePrivilegesStore() {
     return new AsyncRpcApiStore(api.databases.privileges.list_direct, {
+      staticProps: { database_id: this.id },
       postProcess: (rawDbPrivilegesForRoles) =>
         new ImmutableMap(
           rawDbPrivilegesForRoles.map((rawDatabasePrivilegesForRole) => [
@@ -93,6 +97,7 @@ export class Database {
 
   constructUnderlyingDatabaseStore() {
     return new AsyncRpcApiStore(api.databases.get, {
+      staticProps: { database_id: this.id },
       postProcess: (rawUnderlyingDatabase) =>
         new UnderlyingDatabase({
           database: this,
@@ -103,6 +108,7 @@ export class Database {
 
   constructCurrentRoleStore() {
     return new AsyncRpcApiStore(api.roles.get_current_role, {
+      staticProps: { database_id: this.id },
       postProcess: (currentRole) => ({
         currentRoleOid: currentRole.current_role.oid,
         parentRoleOids: new Set(currentRole.parent_roles.map((pr) => pr.oid)),
