@@ -38,7 +38,6 @@
 <div class="tables-list" bind:clientWidth={containerWidth}>
   {#if tables.length > 0}
     <div
-      class="tables-container"
       use:highlightNewItems={{
         scrollHint: $_('table_new_items_scroll_hint'),
       }}

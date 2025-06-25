@@ -229,6 +229,7 @@ export const iconPermissions: IconProps = { data: permissionsIcon };
 export const iconPrivacy: IconProps = { data: faUserSecret };
 export const iconPrimaryKey: IconProps = { data: faKey };
 export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
+export const iconDescription: IconProps = { data: faCommentAlt };
 
 // STATUSES
 
