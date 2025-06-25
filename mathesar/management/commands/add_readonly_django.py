@@ -1,7 +1,8 @@
 from getpass import getpass
 from django.core.management.base import BaseCommand
-import psycopg
+from psycopg import sql
 from config.database_config import get_internal_database_config
+from db.connection import mathesar_connection
 
 
 class Command(BaseCommand):
@@ -20,16 +21,16 @@ class Command(BaseCommand):
         assert password == confpass
         conn_info = get_internal_database_config()
 
-        # TODO use mathesar_connection once merged.
-        with psycopg.connect(
+        with mathesar_connection(
                 host=conn_info.host,
                 port=conn_info.port,
                 dbname=conn_info.dbname,
                 user=conn_info.role,
                 password=conn_info.password,
+                application_name="mathesar.management.commands.add_readonly_django"
         ) as conn:
             conn.execute(
-                psycopg.sql.SQL(
+                sql.SQL(
                     """
                     CREATE USER {rolename} WITH PASSWORD {password};
                     GRANT USAGE ON SCHEMA public TO {rolename};
@@ -38,7 +39,7 @@ class Command(BaseCommand):
                     GRANT ALL (last_login) ON TABLE mathesar_user TO {rolename};
                     """
                 ).format(
-                    rolename=psycopg.sql.Identifier(rolename),
-                    password=psycopg.sql.Literal(password),
+                    rolename=sql.Identifier(rolename),
+                    password=sql.Literal(password),
                 )
             )
