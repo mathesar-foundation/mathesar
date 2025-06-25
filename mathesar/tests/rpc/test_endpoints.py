@@ -7,6 +7,7 @@ Fixtures:
 """
 import pytest
 from modernrpc.auth import user_is_authenticated, user_is_superuser
+from mathesar.rpc.decorators import user_is_anon_or_authenticated
 
 from mathesar.rpc import analytics
 from mathesar.rpc import collaborators
@@ -263,6 +264,11 @@ METHODS = [
         forms.get,
         "forms.get",
         [user_is_authenticated]
+    ),
+    (
+        forms.get_public,
+        "forms.get_public",
+        [user_is_anon_or_authenticated]
     ),
     (
         forms.list_,

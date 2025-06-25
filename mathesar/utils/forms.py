@@ -117,6 +117,12 @@ def get_form(form_id):
     return form_model, field_col_info_map
 
 
+def get_public_form(form_id):
+    form_model = Form.objects.get(id=form_id, is_public=True)
+    field_col_info_map = get_field_col_info_map(form_model)
+    return form_model, field_col_info_map
+
+
 def list_forms(database_id, schema_oid):
     return Form.objects.filter(database__id=database_id, schema_oid=schema_oid)
 
