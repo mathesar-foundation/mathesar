@@ -19,23 +19,25 @@
   }
 </script>
 
-<SelectableElement elementId="title" {dataFormManager}>
-  <input
-    class="form-title"
-    type="text"
-    placeholder={$_('add_form_title')}
-    value={$name}
-    on:input={onTitleInput}
-  />
-</SelectableElement>
+<div class="header">
+  <SelectableElement elementId="title" {dataFormManager}>
+    <input
+      class="form-title"
+      type="text"
+      placeholder={$_('add_form_title')}
+      value={$name}
+      on:input={onTitleInput}
+    />
+  </SelectableElement>
 
-<SelectableElement elementId="description" {dataFormManager}>
-  <textarea
-    placeholder={$_('add_form_description')}
-    class="form-description"
-    type="text"
-  />
-</SelectableElement>
+  <SelectableElement elementId="description" {dataFormManager}>
+    <textarea
+      placeholder={$_('add_form_description')}
+      class="form-description"
+      type="text"
+    />
+  </SelectableElement>
+</div>
 
 <style lang="scss">
   input,
@@ -51,7 +53,7 @@
   .form-title {
     border: none;
     padding: var(--sm1);
-    font-size: var(--lg2);
+    font-size: var(--lg3);
     font-weight: var(--font-weight-medium);
   }
   .form-description {

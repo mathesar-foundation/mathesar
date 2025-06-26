@@ -1,8 +1,9 @@
 <script lang="ts">
+  import LogoAndNameWithLink from '@mathesar/components/LogoAndNameWithLink.svelte';
+
   import BreadcrumbItemUi from './BreadcrumbItem.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
   import DatabaseSelector from './DatabaseSelector.svelte';
-  import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
 
   export let items: BreadcrumbItem[];
   export let compactLayout = false;

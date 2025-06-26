@@ -1,13 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import Logo from '../Logo.svelte';
+  import Logo from './Logo.svelte';
 
   export let href: string;
   export let compactLayout = false;
 </script>
 
-<a {href} class="home-link" class:compact={compactLayout}>
+<a {...$$restProps} {href} class="home-link" class:compact={compactLayout}>
   <Logo />
   <div class="mathesar">{$_('mathesar')}</div>
 </a>
