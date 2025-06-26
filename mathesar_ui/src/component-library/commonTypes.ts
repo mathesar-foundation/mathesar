@@ -1,18 +1,21 @@
+/* TODO: Remove/rename product specific items: inspector, feedback, refresh from this list */
 export type Appearance =
   | 'default'
   | 'primary'
   | 'secondary'
   | 'plain'
   | 'ghost'
-  | 'plain-primary'
   | 'action'
   | 'outcome'
-  | 'outline-primary'
-  | 'outline-danger'
+  | 'tip'
+  | 'danger'
   | 'inspector'
   | 'feedback'
   | 'custom'
-  | 'link';
+  | 'link'
+  | 'option-card'
+  | 'danger-ghost'
+  | 'refresh';
 
 export type Size = 'small' | 'medium' | 'large';
 

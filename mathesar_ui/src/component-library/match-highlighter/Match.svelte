@@ -4,7 +4,7 @@
 
 <style>
   .match {
-    background-color: var(--Match__highlight-color, rgba(236, 216, 0, 0.697));
+    background-color: var(--Match__highlight-color);
     border-radius: 0.3em;
   }
 </style>

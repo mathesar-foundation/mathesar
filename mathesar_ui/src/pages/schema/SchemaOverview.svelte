@@ -122,6 +122,7 @@
               <AnchorButton
                 href={getDataExplorerPageUrl(database.id, schema.oid)}
                 size="small"
+                appearance="tip"
               >
                 {$_('open_data_explorer')}
               </AnchorButton>
@@ -157,14 +158,12 @@
   }
 
   .explore-cta {
-    padding: var(--lg3);
-    background: linear-gradient(
-      135deg,
-      var(--pumpkin-200) 0%,
-      var(--pumpkin-300) 100%
-    );
-    border: 1px solid var(--pumpkin-400);
-    border-radius: var(--sm2);
+    padding: var(--lg1);
+    background: color-mix(in srgb, var(--semantic-tip-bg), transparent 60%);
+    box-shadow: 0 4px 8px
+      color-mix(in srgb, var(--border-shadow), transparent 8%);
+    border: 1px solid var(--semantic-tip-border);
+    border-radius: var(--sm1);
     position: relative;
     overflow: hidden;
 
@@ -175,24 +174,19 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: radial-gradient(
-        circle at top right,
-        rgba(255, 255, 255, 0.15) 0%,
-        transparent 60%
-      );
       pointer-events: none;
     }
 
     .explore-title {
       font-size: var(--lg1);
       font-weight: var(--font-weight-bold);
-      color: var(--pumpkin-900);
+      color: var(--semantic-tip-text);
       margin: 0 0 0.75rem 0;
       position: relative;
     }
 
     .explore-description {
-      color: var(--pumpkin-800);
+      color: var(--semantic-tip-inner-text);
       font-size: 1rem;
       margin: 0 0 1.5rem 0;
       position: relative;
@@ -201,31 +195,6 @@
 
     > div {
       position: relative;
-    }
-  }
-
-  :global(body.theme-dark) .explore-cta {
-    background: linear-gradient(
-      135deg,
-      var(--pumpkin-900) 0%,
-      var(--pumpkin-950) 100%
-    );
-    border: 1px solid var(--pumpkin-800);
-
-    &::before {
-      background: radial-gradient(
-        circle at top right,
-        rgba(255, 255, 255, 0.05) 0%,
-        transparent 60%
-      );
-    }
-
-    .explore-title {
-      color: var(--pumpkin-100);
-    }
-
-    .explore-description {
-      color: var(--pumpkin-200);
     }
   }
 

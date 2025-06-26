@@ -5,8 +5,8 @@
 <style>
   .keyboard-key {
     padding: 0 0.2em;
-    border: solid var(--color-gray-medium) 1px;
+    border: solid var(--border-token) 1px;
     border-radius: 0.2em;
-    background: var(--color-gray-light);
+    background: var(--surface-control);
   }
 </style>

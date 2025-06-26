@@ -51,6 +51,14 @@
     name={$name}
     icon={iconSchema}
     entityTypeName={$_('schema')}
+    --header-color="linear-gradient(
+      135deg,
+      var(--color-schema-10) 10%,
+      var(--surface-supporting) 50%,
+      var(--color-schema-15) 90%,
+      var(--color-brand-10) 100%
+    )"
+    --entity-name-color="var(--color-schema)"
   >
     <div slot="action" class="action-buttons">
       <Button
@@ -96,7 +104,7 @@
 
 <style>
   .description {
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
   }
 
   .action-buttons {

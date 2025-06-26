@@ -54,6 +54,8 @@
     description: table.description ?? undefined,
     icon: iconTable,
   }}
+  --icon-fill-color="linear-gradient(135deg, var(--color-table), var(--color-table-80))"
+  --icon-stroke-color="var(--text-inverted)"
 >
   {#if isSelectable}
     <div class="quick-access">
@@ -106,7 +108,7 @@
       </Tooltip>
 
       <Button
-        appearance="secondary"
+        appearance="inspector"
         size="medium"
         disabled={$isLoading}
         on:click={toggleTableInspector}
@@ -134,7 +136,7 @@
   .no-pk-warning {
     display: flex;
     align-items: center;
-    color: var(--yellow-400);
+    color: var(--semantic-warning-icon);
   }
 
   .aux-actions {

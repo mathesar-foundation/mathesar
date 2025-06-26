@@ -2,9 +2,10 @@
   import { StringOrComponent } from '@mathesar/component-library';
   import DatabaseDisplayNameWithIcon from '@mathesar/components/DatabaseDisplayNameWithIcon.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import QueryName from '@mathesar/components/QueryName.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconExploration, iconRecord } from '@mathesar/icons';
+  import { iconRecord } from '@mathesar/icons';
   import {
     getDatabasePageUrl,
     getExplorationPageUrl,
@@ -56,7 +57,9 @@
         item.record.pk,
       )}
     >
-      <NameWithIcon icon={iconRecord}>{item.record.summary}</NameWithIcon>
+      <NameWithIcon icon={iconRecord} --icon-color="var(--color-record)">
+        {item.record.summary}
+      </NameWithIcon>
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'exploration'}
@@ -68,7 +71,7 @@
         item.query.id,
       )}
     >
-      <NameWithIcon icon={iconExploration}>{item.query.name}</NameWithIcon>
+      <QueryName query={item.query} />
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'simple'}
@@ -91,7 +94,7 @@
 <style lang="scss">
   .breadcrumb-item {
     --NameWithIcon__icon-opacity: 1;
-    --SchemaName__locked-schema-icon-color: var(--white);
+    --SchemaName__locked-schema-icon-color: var(--text-inverted);
 
     display: flex;
     flex-shrink: 0;
@@ -112,8 +115,8 @@
     }
 
     :global(.postgres-keyword) {
-      color: var(--white);
-      background: var(--text-color-muted);
+      color: var(--text-muted);
+      background: var(--text-disabled);
       padding: var(--sm3) var(--sm2);
       border-radius: var(--border-radius-s);
     }

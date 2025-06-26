@@ -9,7 +9,7 @@
     restrictWidth?: boolean;
   }
 
-  export let icon: IconProps;
+  export let icon: IconProps | undefined = undefined;
   export let name: string;
   export let restrictWidth = true;
 </script>
@@ -28,13 +28,8 @@
   .app-secondary-header {
     width: 100%;
     padding: 0;
-    margin-bottom: var(--lg4);
-    background: linear-gradient(
-      135deg,
-      var(--neutral-200) 0%,
-      var(--neutral-300) 50%,
-      var(--neutral-400) 100%
-    );
+    margin-bottom: var(--bottom-margin, var(--lg4));
+    background: var(--header-color, var(--surface-supporting));
   }
   .content {
     padding: var(--lg4) var(--page-padding-x);
@@ -42,14 +37,6 @@
     max-width: var(--max-layout-width-console-pages);
     margin-left: auto;
     margin-right: auto;
-  }
-  :global(body.theme-dark) .app-secondary-header {
-    background: linear-gradient(
-      135deg,
-      var(--DARK-MODE-accent-primary-muted) 0%,
-      var(--DARK-MODE-surface-base) 50%,
-      var(--DARK-MODE-accent-muted) 100%
-    );
   }
   .content.restrict-width {
     margin-left: auto;

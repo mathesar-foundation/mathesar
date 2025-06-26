@@ -31,33 +31,41 @@
 
   /* Appearances */
   &.btn-default {
-    --button-background: var(--background-color);
-    --button-border-color: var(--border-color);
-    --button-shadow: var(--shadow-color) 0 1px 2px 0,
-      var(--shadow-color) 0 1px 3px 0;
+    --button-background: var(--surface-control);
+    --button-border-color: var(--border-control);
+    --button-shadow: var(--surface-base) 0 1px 2px 0,
+      var(--border-shadow) 0 1px 3px 0;
 
     &:not(:disabled) {
       &:focus {
-        --button-border-color: var(--text-color-muted);
+        --button-background: var(--surface-control-focus);
+        --button-border-color: var(--border-control-focus);
       }
+    }
+
+    &.dropdown {
+      background: var(--surface-input);
+      --button-border-color: var(--border-input);
     }
   }
 
   &.btn-primary {
     --button-background: linear-gradient(
       to bottom right,
-      var(--stormy-600),
-      var(--stormy-700)
+      var(--color-primary),
+      var(--color-primary-80)
     );
-    --button-border-color: var(--stormy-700);
-    --button-color: #ffffff;
-    --button-shadow: var(--shadow-color) 0 1px 2px 0,
-      var(--shadow-color) 0 1px 3px 0;
+    --button-border-color: var(--border-control);
+    --button-color: var(--text-light);
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(var(--stormy-700-rgb), 0.25);
+        --button-outline: 2px solid var(--color-primary-80);
         outline-offset: 1px;
       }
 
@@ -65,121 +73,183 @@
       &.hover {
         --button-background: linear-gradient(
           to bottom right,
-          var(--stormy-700),
-          var(--stormy-800)
+          var(--color-primary-hover-80),
+          var(--color-primary-hover-60)
         );
-        --button-border-color: var(--stormy-800);
-        --button-shadow: var(--shadow-color) 0 2px 4px 0;
+        --button-border-color: var(--border-control-hover);
+        box-shadow:
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                75%),
+          0 1px 3px -2px color-mix(in srgb, var(--border-shadow), transparent
+                80%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                80%);
       }
 
       &:active,
       &.active {
         --button-background: linear-gradient(
           to bottom right,
-          var(--stormy-800),
-          var(--stormy-900)
+          var(--color-primary-active-80),
+          var(--color-primary-active-60)
         );
-        --button-border-color: var(--stormy-900);
-        --button-shadow: var(--shadow-color) 0 1px 2px 0;
+        --button-border-color: var(--border-control-hover);
+        --button-shadow: var(--border-shadow) 0 1px 2px 0;
       }
     }
   }
 
   &.btn-secondary {
-    --button-background: linear-gradient(
-      to bottom right,
-      var(--neutral-50),
-      var(--neutral-100)
-    );
-    --button-border-color: var(--neutral-400);
-    --button-color: var(--text-color-primary);
+    background-color: var(--color-navigation-20);
+    --button-border: 0.5px var(--border-control);
+    --button-color: var(--text-control);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.05),
-      0 1px 3px rgba(0, 0, 0, 0.1),
-      0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
 
-    &:not(:disabled) {
+    &:not(:disabled):not(.page) {
       &.focus,
       &:focus {
-        --button-outline: 2px solid rgba(189, 193, 198, 0.3);
+        --button-outline: 2px solid var(--border-control-active);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--neutral-200),
-          var(--neutral-300)
-        );
-        --button-border-color: var(--neutral-500);
+        background-color: var(--color-navigation-hover-25);
+        --button-border-color: var(--border-control-hover);
         box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -2px rgba(0, 0, 0, 0.1),
-          0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%)
+            inset;
       }
 
       &:active,
       &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--neutral-300),
-          var(--neutral-400)
-        );
-        --button-border-color: var(--neutral-600);
+        background-color: var(--color-navigation-active-25);
+        --button-border-color: var(--border-control-active);
         box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.05),
-          0 1px 3px rgba(0, 0, 0, 0.1),
-          0 1px 2px -1px rgba(0, 0, 0, 0.1);
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%);
       }
     }
   }
 
-  &.btn-outline-primary {
-    --button-background: transparent;
-    --button-border-color: var(--neutral-400);
-    --button-color: var(--neutral-600);
+  &.btn-option-card {
+    background-color: var(--surface-elevated-high);
+    --button-border-color: var(--border-elevated-mid);
+    --button-color: var(--text-control);
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 10%);
 
     &:not(:disabled) {
+      &.focus,
+      &:focus {
+        --button-outline: 2px solid var(--color-navigation-auxiliary-40);
+        outline-offset: 1px;
+      }
+
       &:hover,
       &.hover {
-        --button-background: var(--neutral-800);
-        --button-border-color: var(--neutral-500);
-        --button-color: var(--neutral-200);
+        background-color: var(--color-navigation-auxiliary-hover-10);
+        --button-border-color: var(--color-navigation-auxiliary-hover-20);
+        box-shadow:
+          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 5%)
+            inset;
       }
 
       &:active,
       &.active {
-        --button-background: var(--neutral-700);
-        --button-border-color: var(--neutral-400);
-        --button-color: var(--neutral-100);
+        background-color: var(--color-navigation-auxiliary-active-10);
+        --button-border-color: var(--color-navigation-auxiliary-active-20);
+        box-shadow:
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%);
       }
     }
   }
 
-  &.btn-outline-danger {
+  &.btn-danger {
     --button-background: transparent;
-    --button-border-color: var(--danger-border-color);
-    --button-color: var(--danger-color);
+    border: transparent;
+    --button-color: var(--semantic-danger-text);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--danger-background-color);
-        --button-border-color: var(--danger-border-color);
-        --button-color: var(--danger-color);
+        --button-background: color-mix(
+          in srgb,
+          var(--semantic-danger-inner-bg),
+          transparent 60%
+        );
+        border: 2px solid var(--semantic-danger-inner-border-hover);
+        --button-color: var(--semantic-danger-text-hover);
       }
 
       &:active,
       &.active {
-        --button-background: var(--danger-background-color);
-        --button-border-color: var(--danger-color);
-        --button-color: var(--danger-color);
+        --button-background: color-mix(
+          in srgb,
+          var(--semantic-danger-inner-bg),
+          transparent 50%
+        );
+        --button-border-color: var(--semantic-danger-inner-border-active);
+        --button-color: var(--semantic-danger-text-active);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--danger-border-color);
+        --button-outline: 2px solid var(--semantic-danger-inner-border-focused);
+        outline-offset: 1px;
+      }
+    }
+  }
+
+  &.btn-outcome {
+    --button-background: transparent;
+    border: transparent;
+    --button-color: var(--semantic-outcome-text);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-background: color-mix(
+          in srgb,
+          var(--semantic-outcome-inner-bg),
+          transparent 60%
+        );
+        border: 2px solid var(--semantic-outcome-inner-border-hover);
+        --button-color: var(--semantic-outcome-text-hover);
+      }
+
+      &:active,
+      &.active {
+        --button-background: color-mix(
+          in srgb,
+          var(--semantic-outcome-inner-bg),
+          transparent 50%
+        );
+        --button-border-color: var(--semantic-outcome-inner-border-active);
+        --button-color: var(--semantic-outcome-text-active);
+      }
+
+      &:focus,
+      &.focus {
+        --button-outline: 2px solid var(--semantic-outcome-border-focused);
         outline-offset: 1px;
       }
     }
@@ -191,14 +261,10 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--hover-background);
-        --button-color: var(--text-color-primary);
+        --button-background: var(--color-navigation-80);
+        --button-color: var(--text-primary);
       }
     }
-  }
-
-  &.btn-plain-primary {
-    --button-color: var(--accent-500, var(--brand-500));
   }
 
   &.btn-ghost {
@@ -206,8 +272,7 @@
   }
 
   &.btn-plain,
-  &.btn-ghost,
-  &.btn-plain-primary {
+  &.btn-ghost {
     --button-border-color: transparent;
     border-radius: var(--border-radius-m);
     box-shadow: none !important;
@@ -220,29 +285,69 @@
   }
 
   &.btn-default,
-  &.btn-plain,
-  &.btn-plain-primary {
+  &.btn-plain {
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: var(--hover-background);
+        --button-background: var(--surface-control-hover);
       }
 
       &:active,
       &.active {
-        --button-background: var(--active-background);
-        box-shadow: 0 0 0 2px var(--active-background) !important;
+        --button-background: var(--surface-control-active);
+        box-shadow: 0 0 0 2px var(--surface-control-active) !important;
       }
 
       &:focus,
       &.focus {
-        --button-background: var(--hover-background);
-        border-color: var(--accent-700);
-        --button-color: var(--accent-800);
+        --button-background: var(--surface-control-focused);
+        border-color: var(--border-control-focused);
         box-shadow:
-          0 2px 4px rgba(0, 0, 0, 0.15),
-          0 1px 2px rgba(0, 0, 0, 0.1);
+          0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%);
         outline: none;
+      }
+      &.close-button {
+        --button-background: transparent;
+        &:hover,
+        &.hover {
+          color: var(--text-muted);
+        }
+
+        &:active,
+        &.active {
+          color: var(--text-muted);
+        }
+
+        &:focus,
+        &.focus {
+          --button-background: transparent;
+          color: var(--semantic-danger-bg);
+        }
+      }
+    }
+  }
+
+  &.btn-danger-ghost {
+    --button-background: transparent;
+    border: transparent;
+    --button-color: var(--semantic-danger-text);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        --button-color: var(--semantic-danger-text-hover);
+      }
+
+      &:active,
+      &.active {
+        --button-color: var(--semantic-danger-text-active);
+      }
+
+      &:focus,
+      &.focus {
+        --button-outline: 2px solid var(--semantic-danger-border-focused);
+        outline-offset: 1px;
       }
     }
   }
@@ -273,7 +378,7 @@
   }
 
   &.danger {
-    --button-color: var(--danger-color);
+    --button-color: var(--semantic-danger-text);
   }
 
   /* State */
@@ -283,357 +388,157 @@
   }
 
   &.btn-action {
-    --button-background: var(--background-color);
-    --button-border-color: var(--border-color);
+    --button-background: var(--color-navigation-10);
+    --button-color: var(--text-navigation);
+    --button-border: 2px solid;
+    --button-border-color: transparent;
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-border-color: var(--text-color-muted);
+        --button-background: color-mix(
+          in srgb,
+          var(--color-navigation-20),
+          transparent 60%
+        );
+        --button-border-color: var(--color-navigation-hover-20);
       }
 
       &:active,
       &.active {
-        --button-background: var(--active-background);
-        --button-border-color: var(--text-color-muted);
+        --button-background: var(--color-navigation-active-20);
+        --button-border-color: var(--color-navigation-active-40);
       }
 
       &:focus,
       &.focus {
-        --button-outline: 2px solid var(--border-color);
+        --button-outline: 2px solid var(--color-navigation-active-40);
         outline-offset: 1px;
       }
     }
   }
 
-  &.btn-outcome {
-    --button-background: var(--outcome-background-color);
-    border: 1px solid var(--outcome-border-color);
+  &.btn-tip {
+    background: var(--semantic-tip-inner-bg);
+    border: 1px solid var(--semantic-tip-inner-border);
+    color: var(--semantic-tip-inner-text);
 
     &:hover {
-      border: 1px solid var(--outcome-color);
+      background: var(--semantic-tip-inner-bg-hover);
+      border: 1px solid var(--semantic-tip-inner-border-hover);
+      color: var(--semantic-tip-inner-text-hover);
     }
 
     &:active {
-      border: 1px solid var(--outcome-color);
+      background: var(--semantic-tip-inner-bg-active);
+      border: 1px solid var(--semantic-tip-inner-border-active);
+      color: var(--semantic-tip-inner-text-active);
+    }
+  }
+
+  &.btn-refresh {
+    background: var(--color-highlight-asparagus-20);
+    border: 0.25px solid var(--color-highlight-asparagus-20);
+    color: var(--text-control);
+
+    &:hover {
+      background: var(--color-highlight-asparagus-hover-40);
+      border: 0.25px solid var(--color-highlight-asparagus-hover-40);
+      color: var(--text-control-hover);
+    }
+
+    &:active {
+      background: var(--color-highlight-asparagus-active-40);
+      border: 0.25px solid var(--color-highlight-asparagus-active-40);
+      color: var(--text-control-active);
     }
   }
 
   &.btn-inspector {
-    --button-background: var(--collapsible-button-background);
-    --button-color: var(--collapsible-button-text);
-    border: none;
-    border-radius: 0;
-    box-shadow: var(--collapsible-button-shadow);
+    background-color: var(--color-navigation-15);
+    border: 1px solid var(--color-navigation-20);
+    --button-color: var(--text-control);
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
 
-    &:hover {
-      --button-background: var(--collapsible-button-hover);
-    }
+    &:not(:disabled) {
+      &.focus,
+      &:focus {
+        --button-outline: 2px solid var(--color-navigation-active-40);
+        outline-offset: 1px;
+      }
 
-    &:active {
-      --button-background: var(--collapsible-button-active);
+      &:hover,
+      &.hover {
+        background-color: var(--color-navigation-20);
+        --button-border-color: var(--color-navigation-hover-40);
+        box-shadow:
+          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%)
+            inset;
+      }
+
+      &:active,
+      &.active {
+        background-color: var(--color-navigation-40);
+        --button-border-color: var(--color-navigation-60);
+        box-shadow:
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%);
+      }
     }
   }
 
   &.btn-link {
-    --button-background: transparent;
-    --button-border-color: transparent;
-    --button-color: var(--salmon-700);
     box-shadow: none;
-    padding: 0;
+    padding: 0.3em;
     height: auto;
     min-height: 0;
+    color: var(--color-navigation-auxiliary);
     background-color: transparent;
+    border: transparent;
     border-radius: 4px;
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        background-color: transparent;
-        --button-color: var(--salmon-800);
+        color: var(--color-navigation-auxiliary-hover);
       }
 
       &:active,
       &.active {
-        background-color: transparent;
-        --button-color: var(--salmon-900);
+        color: var(--color-navigation-auxiliary-active);
       }
     }
   }
 
   &.btn-feedback {
-    --button-background: linear-gradient(
-      to bottom right,
-      var(--salmon-400),
-      var(--salmon-600)
-    );
-    --button-color: var(--white);
-    --button-border-color: var(--salmon-500);
-    border: 1px solid var(--button-border-color);
-    border-radius: var(--border-radius-m);
+    --button-background: transparent;
+    --button-color: var(--color-brand-muted);
+    border: 0px;
     padding: var(--sm4) var(--sm2);
-    font-weight: var(--font-weight-medium);
-    --button-shadow: var(--shadow-color) 0 1px 2px 0,
-      var(--shadow-color) 0 1px 3px 0;
-    box-shadow: var(--button-shadow);
+    font-weight: var(--font-weight-bold);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--salmon-300),
-          var(--salmon-500)
-        );
-        --button-border-color: var(--salmon-400);
-        --button-color: var(--white);
-        --button-shadow: var(--shadow-color) 0 2px 4px 0,
-          var(--shadow-color) 0 1px 3px 0;
-        box-shadow: var(--button-shadow);
+        --button-color: var(--color-brand);
       }
 
       &:active,
-      &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--salmon-500),
-          var(--salmon-700)
-        );
-        --button-border-color: var(--salmon-600);
-        --button-color: var(--white);
-        --button-shadow: var(--shadow-color) 0 1px 2px 0;
-        box-shadow: var(--button-shadow);
-      }
-
+      &.active,
       &:focus,
       &.focus {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--salmon-300),
-          var(--salmon-500)
-        );
-        --button-border-color: var(--salmon-400);
-        --button-color: var(--white);
-        --button-shadow: var(--shadow-color) 0 2px 4px 0,
-          var(--shadow-color) 0 1px 3px 0;
-        box-shadow: var(--button-shadow);
-        outline: none;
-      }
-    }
-  }
-}
-
-body.theme-dark .btn {
-  &.btn-primary {
-    --button-background: linear-gradient(
-      to bottom right,
-      var(--rosy-800),
-      var(--rosy-900)
-    );
-    --button-border-color: var(--pumpkin-950);
-    --button-color: var(--white);
-    box-shadow:
-      0 2px 6px rgba(208, 72, 72, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-
-    &:not(:disabled) {
-      &.focus,
-      &:focus {
-        --button-outline: 2px solid rgba(208, 72, 72, 0.7);
-      }
-
-      &:hover,
-      &.hover {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--rosy-700),
-          var(--rosy-900)
-        );
-        --button-border-color: var(--rosy-900);
-        box-shadow:
-          0 3px 8px rgba(1208, 72, 72, 0.5),
-          inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      }
-
-      &:active,
-      &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--rosy-900),
-          var(--rosy-950)
-        );
-        --button-border-color: var(--rosy-900);
-        box-shadow:
-          0 1px 3px rgba(208, 72, 72, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.15);
-      }
-    }
-  }
-
-  &.btn-secondary {
-    --button-background: linear-gradient(
-      to bottom right,
-      var(--slate-700),
-      var(--DARK-MODE-surface-elevated)
-    );
-    --button-border-color: var(--DARK-MODE-border-strong);
-
-    &:not(:disabled) {
-      &.focus,
-      &:focus {
-        --button-outline: 2px solid rgba(95, 99, 104, 0.3);
-      }
-
-      &:hover,
-      &.hover {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--neutral-600),
-          var(--neutral-700)
-        );
-        box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.2),
-          0 2px 4px -2px rgba(0, 0, 0, 0.2),
-          0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-      }
-
-      &:active,
-      &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--neutral-500),
-          var(--neutral-600)
-        );
-        --button-border-color: var(--neutral-400);
-        box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.2),
-          0 1px 3px rgba(0, 0, 0, 0.2),
-          0 1px 2px -1px rgba(0, 0, 0, 0.2);
-      }
-    }
-  }
-
-  &.btn-outline-primary {
-    --button-background: transparent;
-    --button-border-color: var(--neutral-600);
-    --button-color: var(--neutral-300);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: var(--neutral-800);
-        --button-border-color: var(--neutral-500);
-        --button-color: var(--neutral-200);
-      }
-
-      &:active,
-      &.active {
-        --button-background: var(--neutral-700);
-        --button-border-color: var(--neutral-400);
-        --button-color: var(--neutral-100);
-      }
-    }
-  }
-
-  &.btn-outline-danger {
-    --button-background: transparent;
-    --button-border-color: var(--danger-border-color);
-    --button-color: var(--danger-color);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: var(--danger-background-color);
-        --button-border-color: var(--danger-border-color);
-        --button-color: var(--danger-color);
-      }
-
-      &:active,
-      &.active {
-        --button-background: var(--danger-background-color);
-        --button-border-color: var(--danger-color);
-        --button-color: var(--danger-color);
-      }
-
-      &:focus,
-      &.focus {
-        --button-outline: 2px solid var(--danger-border-color);
-        outline-offset: 1px;
-      }
-    }
-  }
-
-  &.btn-inspector {
-    --button-background: var(--collapsible-button-background);
-    --button-color: var(--collapsible-button-text);
-    box-shadow: var(--collapsible-button-shadow);
-
-    &:hover {
-      --button-background: var(--collapsible-button-hover);
-    }
-
-    &:active {
-      --button-background: var(--collapsible-button-active);
-    }
-  }
-
-  &.btn-feedback {
-    --button-background: linear-gradient(
-      to bottom right,
-      var(--yellow-950),
-      var(--pumpkin-950)
-    );
-    --button-color: var(--white);
-    --button-border-color: var(--stormy-900);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--yellow-900),
-          var(--pumpkin-900)
-        );
-        --button-border-color: var(--pumpkin-900);
-        --button-color: var(--white);
-      }
-
-      &:active,
-      &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--yellow-900),
-          var(--pumpkin-800)
-        );
-        --button-border-color: var(--pumpkin-800);
-        --button-color: var(--white);
-      }
-
-      &:focus,
-      &.focus {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--yellow-800),
-          var(--pumpkin-800)
-        );
-        --button-border-color: var(--pumpkin-800);
-        --button-color: var(--white);
-      }
-    }
-  }
-
-  &.btn-link {
-    --button-color: var(--salmon-600);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-color: var(--salmon-400);
-      }
-
-      &:active,
-      &.active {
-        --button-color: var(--salmon-300);
+        --button-color: var(--color-brand-active);
+        --button-background: transparent;
+        border: 1px solid var(--color-brand-muted);
       }
     }
   }

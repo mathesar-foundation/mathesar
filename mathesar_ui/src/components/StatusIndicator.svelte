@@ -52,36 +52,36 @@
     }
 
     &.processing {
-      background: var(--info-background-color);
-      color: var(--info-color);
-      border-color: var(--info-border-color);
+      background: var(--semantic-info-bg);
+      color: var(--semantic-info-text);
+      border-color: var(--semantic-info-border);
     }
     &.processing .icon {
-      color: var(--info-color);
+      color: var(--semantic-info-text);
     }
     &.warning {
-      background: var(--warning-background-color);
-      color: var(--warning-color);
-      border-color: var(--warning-border-color);
+      background: var(--semantic-warning-bg);
+      color: var(--semantic-warning-text);
+      border-color: var(--semantic-warning-border);
     }
     &.warning .icon {
-      color: var(--warning-color);
+      color: var(--semantic-warning-text);
     }
     &.success {
-      background: var(--success-background-color);
-      color: var(--success-color);
-      border-color: var(--success-border-color);
+      background: var(--semantic-success-bg);
+      color: var(--semantic-success-text);
+      border-color: var(--semantic-success-border);
     }
     &.success .icon {
-      color: var(--success-color);
+      color: var(--semantic-success-text);
     }
     &.failure {
-      background: var(--danger-background-color);
-      color: var(--danger-color);
-      border-color: var(--danger-border-color);
+      background: var(--semantic-danger-bg);
+      color: var(--semantic-danger-text);
+      border-color: var(--semantic-danger-border);
     }
     &.failure .icon {
-      color: var(--danger-color);
+      color: var(--semantic-danger-text);
     }
   }
 </style>

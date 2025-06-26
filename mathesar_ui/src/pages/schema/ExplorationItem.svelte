@@ -53,7 +53,9 @@
     border-radius: var(--border-radius-m);
 
     &:hover {
-      background-color: var(--hover-background);
+      border: 1px solid var(--color-exploration-20);
+      box-shadow: 0 1px 2px 0 var(--color-exploration-20);
+      background: var(--color-exploration-active-10);
 
       .caret-container {
         opacity: 1;
@@ -61,14 +63,16 @@
     }
 
     &:focus {
-      outline: none;
-      background-color: var(--active-background);
+      border: 1px solid var(--color-exploration-40);
+      box-shadow: 0 1px 2px 0 var(--color-exploration-40);
+      background: var(--color-exploration-active-20);
     }
   }
 
   .icon-container {
-    background-color: var(--icon-background);
-    border-radius: 50%;
+    background: transparent;
+    color: var(--color-exploration);
+    border-radius: var(--border-radius-m);
     width: 1.25rem;
     height: 1.25rem;
     display: flex;
@@ -102,14 +106,14 @@
   .name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
+    color: var(--text-primary);
     line-height: 1.2;
     transition: color 0.2s ease;
   }
 
   .detail {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
     display: flex;
     gap: 0.5rem;
     align-items: center;

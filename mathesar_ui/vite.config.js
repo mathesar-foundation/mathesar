@@ -56,4 +56,11 @@ export default defineConfig({
     testTimeout: 30000,
     setupFiles: ['vitest-setup.config.ts'],
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern', // Or 'modern'
+      },
+    },
+  },
 });

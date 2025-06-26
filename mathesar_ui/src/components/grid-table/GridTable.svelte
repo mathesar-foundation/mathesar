@@ -7,14 +7,14 @@
 <style>
   .grid-table {
     display: grid;
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius-l);
+    border: 0.5px solid var(--border-elevated-low);
+    border-radius: var(--border-radius-m);
     overflow: hidden;
     grid-template-columns: var(--Grid-table__template-columns);
-    grid-template-rows: var(--Grid-table__template-rows);
-    background: var(--card-background);
+    grid-template-rows: 1fr auto;
+    background: var(--surface-card);
     box-shadow:
-      0 1px 2px var(--shadow-color-light),
-      0 1px 3px var(--shadow-color);
+      0 1px 2px var(--border-shadow),
+      0 1px 3px var(--border-shadow);
   }
 </style>
