@@ -184,11 +184,15 @@ def _get_exploration_column_metadata(
             "type_options": sa_col.type_options,
             "metadata": ColumnMetaDataRecord.from_model(column_metadata) if column_metadata else None,
             "is_initial_column": True if initial_column else False,
+            "is_joined_column": not initial_column.is_base_column if initial_column else None,
             "input_column_name": input_column_name,
             "input_table_name": input_table_name,
             "input_table_id": initial_column.reloid if initial_column else None,
             "input_alias": db_query.get_input_alias_for_output_alias(alias)
         }
+    for alias, metadata in exploration_column_metadata.items():
+        input_alias = metadata["input_alias"] or alias
+        metadata["is_joined_column"] = exploration_column_metadata[input_alias]["is_joined_column"]
     return exploration_column_metadata
 
 
