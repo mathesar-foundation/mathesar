@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import { type Writable, writable } from 'svelte/store';
+import { type Writable, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
@@ -82,7 +82,7 @@ abstract class EphemeralField {
         ...baseProps,
         label: referenceTableName ?? baseProps.label,
         processedColumn: pc,
-        allowCreate: false,
+        rule: 'only_select',
         linkedTableStructure: tableStructureCache.get(
           referentTableOid,
           () =>
@@ -120,6 +120,14 @@ export class EphermeralScalarField extends EphemeralField {
   }
 }
 
+export const fkFieldInteractionRules = [
+  'only_select',
+  'select_or_create',
+  'must_create',
+] as const;
+
+export type FkFieldInteractionRule = (typeof fkFieldInteractionRules)[number];
+
 export class EphermeralFkField extends EphemeralField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
 
@@ -129,7 +137,7 @@ export class EphermeralFkField extends EphemeralField {
 
   readonly fieldStore: FieldStore;
 
-  readonly allowCreate: Writable<boolean>;
+  readonly rule: Writable<FkFieldInteractionRule>;
 
   readonly nestedFields: WritableMap<string, EphemeralDataFormField>;
 
@@ -137,7 +145,7 @@ export class EphermeralFkField extends EphemeralField {
     parentPath: string[],
     data: EphemeralFieldProps & {
       processedColumn: ProcessedColumn;
-      allowCreate: boolean;
+      rule: FkFieldInteractionRule;
       nestedFields?: WritableMap<
         EphemeralDataFormField['key'],
         EphemeralDataFormField
@@ -151,16 +159,16 @@ export class EphermeralFkField extends EphemeralField {
     if (!fkLink) {
       throw Error('The passed column is not a foreign key');
     }
-    this.allowCreate = writable(data.allowCreate);
+    this.rule = writable(data.rule);
     this.nestedFields = data.nestedFields ?? new WritableMap();
     this.fieldStore = optionalField(null);
     this.linkedTableStructure = data.linkedTableStructure;
   }
 
-  async setAllowCreate(allowCreate: boolean) {
-    this.allowCreate.set(allowCreate);
-    if (allowCreate) {
-      const res = await this.linkedTableStructure.asyncStore.tick();
+  async setInteractionRule(rule: FkFieldInteractionRule) {
+    this.rule.set(rule);
+    const res = await this.linkedTableStructure.asyncStore.tick();
+    if (get(this.nestedFields).size === 0) {
       const tableStructureSubstance = res.resolvedValue;
       if (tableStructureSubstance) {
         this.nestedFields.reconstruct(
@@ -178,8 +186,6 @@ export class EphermeralFkField extends EphemeralField {
             }),
         );
       }
-    } else {
-      this.nestedFields.clear();
     }
   }
 }

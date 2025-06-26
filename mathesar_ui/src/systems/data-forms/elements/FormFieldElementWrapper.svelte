@@ -40,8 +40,10 @@
     </div>
   </svelte:fragment>
 
-  <div class="form-field-content">
-    <slot {isSelected} />
+  <div>
+    <div class="form-field-content">
+      <slot {isSelected} />
+    </div>
   </div>
 </SelectableElement>
 
