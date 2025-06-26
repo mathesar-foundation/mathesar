@@ -14,7 +14,7 @@ Clicking the button will create a new, running Mathesar instance costing ~$12/mo
 - Small to medium-sized teams looking for reliable hosting with minimal overhead.
 - Developers who prefer easy scaling, clear pricing, and stability without needing to SSH into servers or manually manage configuration.
 
-## After succesfully installing Mathesar
+## After successfully installing Mathesar
 
 ### Secure your installation with a `SECRET_KEY` (Strongly Recommended)
 
