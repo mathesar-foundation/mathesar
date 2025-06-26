@@ -1,0 +1,11 @@
+[project]
+name = "mcp-server"
+version = "0.1.0"
+description = "Mathesar MCP Server - Bridge to Mathesar API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mcp[cli]>=1.9.1",
+    "httpx>=0.27.0",
+    "pydantic>=2.5.0",
+]
