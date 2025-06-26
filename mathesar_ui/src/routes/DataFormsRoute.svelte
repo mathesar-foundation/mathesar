@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconExploration } from '@mathesar/icons';
+  import { iconForms } from '@mathesar/icons';
   import type { Schema } from '@mathesar/models/Schema';
   import DataFormsPage from '@mathesar/pages/data-forms/DataFormsPage.svelte';
   import { getDataFormMakerPageUrl } from '@mathesar/routes/urls';
@@ -15,7 +15,7 @@
     type: 'simple',
     href: getDataFormMakerPageUrl(schema.database.id, schema.oid),
     label: $_('data_forms'),
-    icon: iconExploration,
+    icon: iconForms,
   }}
 />
 

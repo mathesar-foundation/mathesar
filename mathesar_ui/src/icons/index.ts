@@ -13,6 +13,7 @@ import {
   faChevronRight,
   faCircleExclamation,
   faCircleInfo,
+  faClipboardList,
   faClock,
   faClone,
   faCogs,
@@ -192,6 +193,7 @@ export const iconExploration: IconProps = { data: explorationIcon };
 export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
 export const iconFeedback: IconProps = { data: faCommentAlt };
 export const iconFiltering: IconProps = { data: faFilter };
+export const iconForms: IconProps = { data: faClipboardList };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };

@@ -14,7 +14,7 @@
   $: icons = Array.isArray(icon) ? icon : [icon];
 </script>
 
-<Truncate passthrough={!truncate}>
+<Truncate {...$$restProps} passthrough={!truncate}>
   <span class="name-with-icon" on:click class:boxed={iconHasBox} class:bold>
     <span class="icon" style="white-space: nowrap">
       {#if isLoading}

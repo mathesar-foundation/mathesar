@@ -31,7 +31,11 @@
     : ensureReadable(undefined);
   $: dataFormManager = $tableStructureStore?.resolvedValue
     ? new DataFormManager(
-        EphemeralDataForm.fromTable($tableStructureStore.resolvedValue),
+        EphemeralDataForm.fromTable(
+          $tableStructureStore.resolvedValue,
+          tableStructureCache,
+        ),
+        tableStructureCache,
       )
     : undefined;
 </script>

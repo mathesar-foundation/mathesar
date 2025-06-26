@@ -2,20 +2,20 @@
   import { _ } from 'svelte-i18n';
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
-  import { iconExploration, iconShare } from '@mathesar/icons';
+  import { iconForms, iconShare } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
 
   import type { DataFormManager } from './DataFormManager';
 
   export let dataFormManager: DataFormManager;
-  $: ({ ephemeralDataForm } = dataFormManager);
+  $: ({ name } = dataFormManager.ephemeralDataForm);
 </script>
 
 <div class="actions-pane">
   <EntityPageHeader
     title={{
-      name: $ephemeralDataForm.name ?? $_('forms'),
-      icon: iconExploration,
+      name: $name || $_('untitled'),
+      icon: iconForms,
     }}
   >
     <svelte:fragment slot="actions-right">

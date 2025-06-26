@@ -14,7 +14,6 @@ export interface RawDataFormBaseField {
   label: string | null;
   help: string | null;
   placeholder: string | null;
-  styling: Record<string, unknown>;
   index: number;
 }
 

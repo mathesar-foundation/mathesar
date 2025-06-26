@@ -7,6 +7,7 @@
   import { WithPanel } from '@mathesar-component-library';
 
   import ActionsPane from './ActionsPane.svelte';
+  import DataFormBuildArea from './DataFormBuildArea.svelte';
   import { type DataFormManager } from './DataFormManager';
 
   export let dataFormManager: DataFormManager;
@@ -20,7 +21,9 @@
       minSizePx={200}
       maxSizePx={600}
     >
-      <div></div>
+      <div class="workarea">
+        <DataFormBuildArea {dataFormManager} />
+      </div>
       <div class="data-form-inspector" slot="panel">
         <InspectorTabContent>
           <InspectorSection title={$_('actions')}></InspectorSection>
@@ -41,7 +44,13 @@
       grid-template-rows: 1fr auto;
       overflow: hidden;
       padding: var(--sm3);
-      padding-top: none;
+    }
+
+    .workarea {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: grid;
     }
 
     .data-form-inspector {

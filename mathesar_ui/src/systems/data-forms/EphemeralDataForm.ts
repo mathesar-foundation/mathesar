@@ -1,124 +1,259 @@
 /* eslint-disable max-classes-per-file */
 
+import { type Writable, writable } from 'svelte/store';
+
 import type {
   RawDataForm,
   RawDataFormBaseField,
-  RawDataFormField,
   RawForeignKeyDataFormField,
   RawReverseForeignKeyDataFormField,
   RawScalarDataFormField,
 } from '@mathesar/api/rpc/data_forms';
+import { WritableMap, getGloballyUniqueId } from '@mathesar/component-library';
+import { type FieldStore, optionalField } from '@mathesar/components/form';
+import type { Table } from '@mathesar/models/Table';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
+import {
+  TableStructure,
+  type TableStructureSubstance,
+} from '@mathesar/stores/table-data/TableStructure';
+import type CacheManager from '@mathesar/utils/CacheManager';
 
 export interface EdfUpdateDiff {
-  data: EphemeralDataForm;
   change: keyof EphemeralDataForm;
 }
 
-export abstract class EphemeralField {
-  readonly id: string;
+export interface EphemeralFieldProps {
+  table: Table;
+  tableStructureCache: CacheManager<Table['oid'], TableStructure>;
+  key: RawDataFormBaseField['key'];
+  label: RawDataFormBaseField['label'];
+  help: RawDataFormBaseField['help'];
+  index: RawDataFormBaseField['index'];
+}
 
-  readonly path: string[];
+abstract class EphemeralField {
+  readonly table;
 
-  readonly parent: EphemeralField | EphemeralDataForm;
+  readonly tableStructureCache;
 
-  readonly form: EphemeralDataForm;
+  readonly key;
 
-  readonly key: RawDataFormBaseField['key'];
+  readonly path;
 
-  readonly label: RawDataFormBaseField['label'];
+  readonly index;
 
-  readonly help: RawDataFormBaseField['help'];
+  readonly label;
 
-  readonly index: RawDataFormBaseField['index'];
+  readonly help;
 
-  constructor(
-    parent: EphemeralDataFormField | EphemeralDataForm,
-    data: EphemeralDataFormField | RawDataFormField,
-  ) {
-    this.id = String(data.id);
-    this.parent = parent;
-    this.index = data.index;
+  constructor(parentPath: string[], data: EphemeralFieldProps) {
+    this.table = data.table;
+    this.tableStructureCache = data.tableStructureCache;
     this.key = data.key;
-    this.label = data.label;
-    this.help = data.help;
-    if ('path' in parent) {
-      this.path = [...parent.path, this.id];
-      this.form = parent.form;
-    } else {
-      this.path = [this.id];
-      this.form = parent;
+    this.path = [...parentPath, this.key];
+    this.index = writable(data.index);
+    this.label = writable(data.label);
+    this.help = writable(data.help);
+  }
+
+  static fromColumn(
+    tableStructureSubstance: TableStructureSubstance,
+    pc: ProcessedColumn,
+    parentPath: string[],
+    index: number,
+    tableStructureCache: CacheManager<Table['oid'], TableStructure>,
+  ) {
+    const baseProps = {
+      key: getGloballyUniqueId(),
+      label: pc.column.name,
+      help: null,
+      placeholder: null,
+      index,
+      table: tableStructureSubstance.table,
+    };
+    if (pc.linkFk) {
+      const referentTableOid = pc.linkFk.referent_table_oid;
+      const referenceTableName = tableStructureSubstance.linksInTable.find(
+        (lnk) => lnk.table.oid === referentTableOid,
+      )?.table.name;
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      return new EphermeralFkField(parentPath, {
+        ...baseProps,
+        label: referenceTableName ?? baseProps.label,
+        processedColumn: pc,
+        allowCreate: false,
+        linkedTableStructure: tableStructureCache.get(
+          referentTableOid,
+          () =>
+            new TableStructure({
+              schema: tableStructureSubstance.table.schema,
+              oid: referentTableOid,
+            }),
+        ),
+        tableStructureCache,
+      });
     }
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    return new EphermeralScalarField(parentPath, {
+      ...baseProps,
+      processedColumn: pc,
+      tableStructureCache,
+    });
   }
 }
 
 export class EphermeralScalarField extends EphemeralField {
   readonly kind: RawScalarDataFormField['kind'] = 'scalar_column';
+
+  readonly processedColumn;
+
+  readonly fieldStore: FieldStore;
+
+  constructor(
+    parentPath: string[],
+    data: EphemeralFieldProps & { processedColumn: ProcessedColumn },
+  ) {
+    super(parentPath, data);
+    this.processedColumn = data.processedColumn;
+    this.fieldStore = optionalField(null);
+  }
 }
 
 export class EphermeralFkField extends EphemeralField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
 
-  readonly nested_fields: EphemeralDataFormField[] = [];
+  readonly processedColumn;
+
+  readonly linkedTableStructure: TableStructure;
+
+  readonly fieldStore: FieldStore;
+
+  readonly allowCreate: Writable<boolean>;
+
+  readonly nestedFields: WritableMap<string, EphemeralDataFormField>;
+
+  constructor(
+    parentPath: string[],
+    data: EphemeralFieldProps & {
+      processedColumn: ProcessedColumn;
+      allowCreate: boolean;
+      nestedFields?: WritableMap<
+        EphemeralDataFormField['key'],
+        EphemeralDataFormField
+      >;
+      linkedTableStructure: TableStructure;
+    },
+  ) {
+    super(parentPath, data);
+    this.processedColumn = data.processedColumn;
+    const fkLink = this.processedColumn.linkFk;
+    if (!fkLink) {
+      throw Error('The passed column is not a foreign key');
+    }
+    this.allowCreate = writable(data.allowCreate);
+    this.nestedFields = data.nestedFields ?? new WritableMap();
+    this.fieldStore = optionalField(null);
+    this.linkedTableStructure = data.linkedTableStructure;
+  }
+
+  async setAllowCreate(allowCreate: boolean) {
+    this.allowCreate.set(allowCreate);
+    if (allowCreate) {
+      const res = await this.linkedTableStructure.asyncStore.tick();
+      const tableStructureSubstance = res.resolvedValue;
+      if (tableStructureSubstance) {
+        this.nestedFields.reconstruct(
+          [...tableStructureSubstance.processedColumns.values()]
+            .filter((pc) => !pc.column.default?.is_dynamic)
+            .map((c, index) => {
+              const ef = EphemeralField.fromColumn(
+                tableStructureSubstance,
+                c,
+                [],
+                index,
+                this.tableStructureCache,
+              );
+              return [ef.key, ef];
+            }),
+        );
+      }
+    } else {
+      this.nestedFields.clear();
+    }
+  }
 }
 
 export class EphemeralReverseFkField extends EphemeralField {
   readonly kind: RawReverseForeignKeyDataFormField['kind'] =
     'reverse_foreign_key';
 
-  readonly nested_fields: EphemeralDataFormField[] = [];
+  readonly nestedFields: Map<
+    EphemeralDataFormField['key'],
+    EphemeralDataFormField
+  > = new Map();
 }
 
-type EphemeralDataFormField =
+export type EphemeralDataFormField =
   | EphermeralScalarField
   | EphermeralFkField
   | EphemeralReverseFkField;
 
 export class EphemeralDataForm {
-  readonly base_table_oid: RawDataForm['base_table_oid'];
+  readonly baseTable;
 
-  readonly name: RawDataForm['name'];
+  readonly name;
 
-  readonly description: RawDataForm['description'];
+  readonly description;
 
-  readonly associated_role: RawDataForm['associated_role'];
+  readonly associated_role;
 
-  readonly fields: EphemeralDataFormField[];
+  readonly fields;
 
   constructor(edf: {
-    base_table_oid: RawDataForm['base_table_oid'];
-    name: RawDataForm['name'];
-    description: RawDataForm['description'];
-    associated_role: RawDataForm['associated_role'];
-    fields: EphemeralDataFormField[];
+    baseTable: Table;
+    name: Writable<RawDataForm['name']>;
+    description: Writable<RawDataForm['description']>;
+    associated_role: Writable<RawDataForm['associated_role']>;
+    fields: WritableMap<EphemeralDataFormField['key'], EphemeralDataFormField>;
   }) {
-    this.base_table_oid = edf.base_table_oid;
+    this.baseTable = edf.baseTable;
     this.name = edf.name;
     this.description = edf.description;
     this.associated_role = edf.associated_role;
     this.fields = edf.fields;
   }
 
-  withFields(fields: (EphemeralDataFormField | RawDataFormField)[]) {
-    //
+  setName(name: string): EdfUpdateDiff {
+    this.name.set(name);
+    return {
+      change: 'name',
+    };
   }
 
-  addColumnAsFiled(column: ProcessedColumn) {
-    //
-  }
-
-  persist() {
-    // should save and return DataForm
-  }
-
-  static fromTable(tableStructureSubstance: TableStructureSubstance) {
+  static fromTable(
+    tableStructureSubstance: TableStructureSubstance,
+    tableStructureCache: CacheManager<Table['oid'], TableStructure>,
+  ) {
     return new EphemeralDataForm({
-      base_table_oid: tableStructureSubstance.table.oid,
-      name: tableStructureSubstance.table.name,
-      description: null,
-      associated_role: null,
-      fields: [],
+      baseTable: tableStructureSubstance.table,
+      name: writable(tableStructureSubstance.table.name),
+      description: writable(null),
+      associated_role: writable(null),
+      fields: new WritableMap(
+        [...tableStructureSubstance.processedColumns.values()]
+          .filter((pc) => !pc.column.default?.is_dynamic)
+          .map((c, index) => {
+            const ef = EphemeralField.fromColumn(
+              tableStructureSubstance,
+              c,
+              [],
+              index,
+              tableStructureCache,
+            );
+            return [ef.key, ef];
+          }),
+      ),
     });
   }
 }
