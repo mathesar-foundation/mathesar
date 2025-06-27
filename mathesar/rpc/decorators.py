@@ -36,6 +36,7 @@ def mathesar_rpc_method(*, name, auth="superuser"):
         auth: the authorization wrapper for the function.
             - "superuser" (default): only superusers can call it.
             - "login": any logged in user can call it.
+            - "anonymous": any user can call it, no login required.
     """
     if auth == "login":
         auth_wrap = http_basic_auth_login_required

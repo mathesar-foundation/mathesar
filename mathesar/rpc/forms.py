@@ -289,8 +289,8 @@ def add(*, form_def: FormDef, **kwargs) -> FormInfo:
     return FormInfo.from_model(form_model, field_col_info_map)
 
 
-@mathesar_rpc_method(name="forms.get", auth="login")
-def get(*, form_id: int, **kwargs) -> FormInfo:
+@mathesar_rpc_method(name="forms.get", auth="anonymous")
+def get(*, form_id: int, **kwargs) -> FormInfo | PublicFormInfo:
     """
     List information about a form.
 
@@ -300,23 +300,12 @@ def get(*, form_id: int, **kwargs) -> FormInfo:
     Returns:
         Form details for a given form_id.
     """
+    user = kwargs.get(REQUEST_KEY).user
+    if user.is_anonymous:
+        form_model, field_col_info_map = get_public_form(form_id)
+        return PublicFormInfo.from_model(form_model, field_col_info_map)
     form_model, field_col_info_map = get_form(form_id)
     return FormInfo.from_model(form_model, field_col_info_map)
-
-
-@mathesar_rpc_method(name="forms.get_public", auth="anonymous")
-def get_public(*, form_id: int, **kwargs) -> PublicFormInfo:
-    """
-    List information about a public form.
-
-    Args:
-        form_id: The Django id of the public form.
-
-    Returns:
-        Public form details for a given form_id.
-    """
-    form_model, field_col_info_map = get_public_form(form_id)
-    return PublicFormInfo.from_model(form_model, field_col_info_map)
 
 
 @mathesar_rpc_method(name="forms.list", auth="login")

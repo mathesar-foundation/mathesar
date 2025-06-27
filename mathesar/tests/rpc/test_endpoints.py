@@ -263,11 +263,6 @@ METHODS = [
     (
         forms.get,
         "forms.get",
-        [user_is_authenticated]
-    ),
-    (
-        forms.get_public,
-        "forms.get_public",
         [user_is_anon_or_authenticated]
     ),
     (
