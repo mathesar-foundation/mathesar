@@ -262,7 +262,7 @@ METHODS = [
     (
         forms.get,
         "forms.get",
-        []  # using empty indicates that this method is available to anonymous callers.
+        []  # using empty list here indicates that this method is available to anonymous callers.
     ),
     (
         forms.list_,
