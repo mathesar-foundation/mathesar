@@ -6,7 +6,7 @@ from typing import Optional, TypedDict, Literal, Union
 from modernrpc.core import REQUEST_KEY
 
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form, get_form, list_forms, delete_form
+from mathesar.utils.forms import create_form, get_form, list_forms, delete_form, replace_form
 
 
 class FieldInfo(TypedDict):
@@ -237,7 +237,7 @@ class FieldDef(TypedDict):
 
 class FormDef(TypedDict):
     """
-    Definition needed to add/modify a form.
+    Definition needed to add a form.
 
     Attributes:
         token: A UUIDv4 object used to identify a form uniquely.
@@ -271,6 +271,31 @@ class FormDef(TypedDict):
     redirect_url: Optional[str]
     submit_label: Optional[str]
     fields: Optional[list[FieldDef]]
+
+
+class ReplaceableFormDef(FormDef):
+    """
+    Definition needed to replace a form.
+
+    Attributes:
+        id: The Django id of the Form on the database.
+        token: A UUIDv4 object used to identify a form uniquely.
+        name: The name of the form.
+        description: The description of the form.
+        version: The version of the form.
+        database_id: The Django id of the database containing the Form.
+        schema_oid: The OID of the schema where within which form exists.
+        base_table_oid: The table OID based on which a form will be created.
+        is_public: Specifies whether the form is publicly accessible.
+        header_title: The title of the rendered form.
+        header_subtitle: The subtitle of the rendered form.
+        submit_role_id: The Django id of the configured role to be used while submitting a form.
+        submit_message: Message to be displayed upon submission.
+        redirect_url: Redirect path after submission.
+        submit_label: Text to be displayed on the submit button.
+        fields: Definition of Fields within the form.
+    """
+    id: int
 
 
 @mathesar_rpc_method(name="forms.add", auth="login")
@@ -330,3 +355,19 @@ def delete(*, form_id: int, **kwargs) -> None:
         form_id: The Django id of the form to delete.
     """
     delete_form(form_id)
+
+
+@mathesar_rpc_method(name="forms.replace", auth="login")
+def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
+    """
+    Replace a form.
+
+    Args:
+        new_form: A dict describing the form to replace, including the updated fields.
+
+    Returns:
+        The form info for the replaced form.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    form_model, field_col_info_map = replace_form(new_form, user)
+    return FormInfo.from_model(form_model, field_col_info_map)
