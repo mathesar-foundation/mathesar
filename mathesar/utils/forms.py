@@ -112,14 +112,8 @@ def create_form(form_def, user):
     return form_model, field_col_info_map
 
 
-def get_form(form_id):
-    form_model = Form.objects.get(id=form_id)
-    field_col_info_map = get_field_col_info_map(form_model)
-    return form_model, field_col_info_map
-
-
-def get_public_form(form_id):
-    form_model = Form.objects.get(id=form_id, is_public=True)
+def get_form(form_id, is_public=False):
+    form_model = Form.objects.get(id=form_id, is_public=True) if is_public else Form.objects.get(id=form_id)
     field_col_info_map = get_field_col_info_map(form_model)
     return form_model, field_col_info_map
 

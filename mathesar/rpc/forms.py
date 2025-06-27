@@ -6,7 +6,7 @@ from typing import Optional, TypedDict, Literal
 from modernrpc.core import REQUEST_KEY
 
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form, get_form, get_public_form, list_forms, delete_form
+from mathesar.utils.forms import create_form, get_form, list_forms, delete_form
 
 
 class FieldInfo(TypedDict):
@@ -301,11 +301,8 @@ def get(*, form_id: int, **kwargs) -> FormInfo | PublicFormInfo:
         Form details for a given form_id.
     """
     user = kwargs.get(REQUEST_KEY).user
-    if user.is_anonymous:
-        form_model, field_col_info_map = get_public_form(form_id)
-        return PublicFormInfo.from_model(form_model, field_col_info_map)
-    form_model, field_col_info_map = get_form(form_id)
-    return FormInfo.from_model(form_model, field_col_info_map)
+    form_model, field_col_info_map = get_form(form_id, is_public=user.is_anonymous)
+    return (PublicFormInfo if user.is_anonymous else FormInfo).from_model(form_model, field_col_info_map)
 
 
 @mathesar_rpc_method(name="forms.list", auth="login")
