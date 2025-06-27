@@ -12,14 +12,17 @@ import {
   ProcessedColumn,
   type ProcessedColumnsStore,
 } from './processedColumns';
+import { orderProcessedColumns } from '@mathesar/utils/tables';
 
 export interface TableStructureProps {
   database: Pick<Database, 'id'>;
-  table: Pick<Table, 'oid'>;
+  table: Pick<Table, 'oid' | 'metadata'>;
 }
 
 export class TableStructure {
   oid: DBObjectEntry['id'];
+
+  metadata;
 
   columnsDataStore: ColumnsDataStore;
 
@@ -31,23 +34,26 @@ export class TableStructure {
 
   constructor(props: TableStructureProps) {
     this.oid = props.table.oid;
+    this.metadata = props.table.metadata;
     this.columnsDataStore = new ColumnsDataStore(props);
     this.constraintsDataStore = new ConstraintsDataStore(props);
     this.processedColumns = derived(
       [this.columnsDataStore.columns, this.constraintsDataStore],
       ([columns, constraintsData]) =>
-        new Map(
-          columns.map((column, columnIndex) => [
-            column.id,
-            new ProcessedColumn({
-              tableOid: this.oid,
-              column,
-              columnIndex,
-              constraints: constraintsData.constraints,
-            }),
-          ]),
-        ),
-    );
+        orderProcessedColumns(
+          new Map(
+            columns.map((column, columnIndex) => [
+              column.id,
+              new ProcessedColumn({
+                tableOid: this.oid,
+                column,
+                columnIndex,
+                constraints: constraintsData.constraints,
+              }),
+            ]),
+          ), {metadata: this.metadata}
+        )
+    )
     this.isLoading = derived(
       [this.columnsDataStore.fetchStatus, this.constraintsDataStore],
       ([columnsFetchStatus, constraintsData]) =>
