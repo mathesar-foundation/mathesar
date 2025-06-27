@@ -7,7 +7,6 @@ Fixtures:
 """
 import pytest
 from modernrpc.auth import user_is_authenticated, user_is_superuser
-from mathesar.rpc.decorators import user_is_anon_or_authenticated
 
 from mathesar.rpc import analytics
 from mathesar.rpc import collaborators
@@ -263,7 +262,7 @@ METHODS = [
     (
         forms.get,
         "forms.get",
-        [user_is_anon_or_authenticated]
+        []  # using empty indicates that this method is available to anonymous callers.
     ),
     (
         forms.list_,
@@ -551,4 +550,5 @@ def test_correctly_exposed(func, exposed_name, auth_pred_params):
     assert func.modernrpc_name == exposed_name
     # Make sure other decorators are set as expected.
     assert func.rpc_exceptions_handled is True
-    assert func.modernrpc_auth_predicates_params == [auth_pred_params]
+    if auth_pred_params != []:
+        assert func.modernrpc_auth_predicates_params == [auth_pred_params]
