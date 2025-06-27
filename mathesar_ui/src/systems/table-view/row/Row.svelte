@@ -91,7 +91,6 @@
           {row}
           {rowDescriptor}
           {meta}
-          {recordsData}
           {isSelected}
           hasErrors={hasAnyErrors}
         />

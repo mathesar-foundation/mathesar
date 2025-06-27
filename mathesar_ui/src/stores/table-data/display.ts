@@ -6,7 +6,7 @@ import type { RecordsData } from './records';
 import {
   type DraftRecordRow,
   GroupHeaderRow,
-  HelpTextRow,
+  type HelpTextRow,
   type PersistedRecordRow,
   PlaceholderRecordRow,
 } from './Row';
@@ -137,18 +137,13 @@ export class Display {
             grouping: $grouping,
           });
         if ($newRecords.length > 0) {
-          displayRowDescriptors = displayRowDescriptors
-            .concat({
-              row: new HelpTextRow(),
-              rowOrigin: RowOrigin.StaticUiElement,
-            })
-            .concat(
-              $newRecords.map((row, index) => ({
-                row,
-                rowNumber: index,
-                rowOrigin: RowOrigin.NewlyCreatedViaUi,
-              })),
-            );
+          displayRowDescriptors = displayRowDescriptors.concat(
+            $newRecords.map((row, index) => ({
+              row,
+              rowNumber: index,
+              rowOrigin: RowOrigin.NewlyCreatedViaUi,
+            })),
+          );
         }
         const placeholderRow = new PlaceholderRecordRow({
           record: this.recordsData.getEmptyApiRecord(),
