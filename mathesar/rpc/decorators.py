@@ -8,10 +8,8 @@ from modernrpc.auth.basic import (
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.analytics import wire_analytics
 
-
-def user_is_anon_or_authenticated(user):
-    # No need to check auth.user_is_anonymous(user) or auth.user_is_authenticated(user) just return True.
-    return True
+# No need to check auth.user_is_anonymous(user) or auth.user_is_authenticated(user) just return True.
+user_is_anon_or_authenticated = lambda x: True # noqa
 
 
 # Decorator
