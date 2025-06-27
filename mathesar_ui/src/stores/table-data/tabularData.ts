@@ -1,11 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import {
-  type Readable,
-  type Writable,
-  derived,
-  get,
-  writable,
-} from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
@@ -291,19 +285,6 @@ export class TabularData {
       return g.withoutColumns(extractedColumnIds);
     });
     return this.refresh();
-  }
-
-  addEmptyRecord() {
-    void this.recordsData.addEmptyRecord();
-    const firstEditableColumnInDraftRow = [
-      ...get(this.processedColumns).values(),
-    ]
-      .map((pc) => pc.withoutEnhancedPkCell())
-      .find((pc) => pc.isEditable);
-    const columnId = firstEditableColumnInDraftRow
-      ? String(firstEditableColumnInDraftRow.id)
-      : undefined;
-    this.selection.update((s) => s.ofNewRecordDataEntryCell(columnId));
   }
 
   destroy(): void {

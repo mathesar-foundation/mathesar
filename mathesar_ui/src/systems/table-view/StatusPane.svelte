@@ -6,9 +6,9 @@
   import RefreshButton from '@mathesar/components/RefreshButton.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { getFirstEditableColumn } from '@mathesar/stores/table-data/processedColumns';
   import {
-    Button,
-    Icon,
+    SpinnerButton,
     getPaginationPageCount,
   } from '@mathesar-component-library';
 
@@ -23,6 +23,8 @@
     columnsDataStore,
     constraintsDataStore,
     canInsertRecords,
+    processedColumns,
+    selection,
   } = $tabularData);
   $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
@@ -50,6 +52,18 @@
   function refresh() {
     void $tabularData.refresh();
   }
+
+  async function addRecord() {
+    await recordsData.addEmptyRecord();
+
+    // Select and focus the first editable cell in the new record row so that
+    // the user can start editing immediately.
+    selection.update((s) =>
+      s.ofNewRecordDataEntryCell(
+        getFirstEditableColumn($processedColumns.values())?.id.toString(),
+      ),
+    );
+  }
 </script>
 
 <div
@@ -60,15 +74,14 @@
 >
   <div class="status-pane-items-section">
     {#if hasNewRecordButton}
-      <Button
+      <SpinnerButton
         disabled={$isLoading}
         size="medium"
         appearance="primary"
-        on:click={() => $tabularData.addEmptyRecord()}
-      >
-        <Icon {...iconAddNew} />
-        <span>{$_('new_record')}</span>
-      </Button>
+        onClick={addRecord}
+        icon={iconAddNew}
+        label={$_('new_record')}
+      />
     {/if}
     <div class="record-count">
       {#if pageCount > 0 && $totalCount}
