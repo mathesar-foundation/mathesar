@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing forms.
 """
-from typing import Optional, TypedDict, Literal
+from typing import Optional, TypedDict, Literal, Union
 
 from modernrpc.core import REQUEST_KEY
 
@@ -290,7 +290,7 @@ def add(*, form_def: FormDef, **kwargs) -> FormInfo:
 
 
 @mathesar_rpc_method(name="forms.get", auth="anonymous")
-def get(*, form_id: int, **kwargs) -> FormInfo | PublicFormInfo:
+def get(*, form_id: int, **kwargs) -> Union[FormInfo, PublicFormInfo]:
     """
     List information about a form.
 
