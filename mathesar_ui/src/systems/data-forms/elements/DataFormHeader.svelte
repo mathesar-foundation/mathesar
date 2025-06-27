@@ -40,6 +40,10 @@
 </div>
 
 <style lang="scss">
+  .header {
+    --data_forms__selectable-element-padding: 0;
+  }
+
   input,
   textarea {
     border: none;

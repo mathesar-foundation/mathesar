@@ -10,7 +10,11 @@
   export let dataFormManager: DataFormManager;
 </script>
 
-<SelectableElement elementId="footer" {dataFormManager}>
+<SelectableElement
+  elementId="footer"
+  {dataFormManager}
+  --data_forms__selectable-element-padding={0}
+>
   <div class="submit-buttons">
     <CancelOrProceedButtonPair
       cancelButton={{ label: $_('clear_form') }}

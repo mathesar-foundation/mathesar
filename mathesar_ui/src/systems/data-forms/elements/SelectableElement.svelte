@@ -49,15 +49,13 @@
     </div>
   {/if}
   <div class="content">
-    <div>
-      <slot {isSelected} />
-    </div>
-    {#if isSelected && $$slots.footer}
-      <div class="footer">
-        <slot name="footer" />
-      </div>
-    {/if}
+    <slot {isSelected} />
   </div>
+  {#if isSelected && $$slots.footer}
+    <div class="footer">
+      <slot name="footer" />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -65,10 +63,10 @@
     position: relative;
 
     > .content {
-      transition: background 0.3s;
       border: 2px solid transparent;
       border-radius: var(--sm4);
       overflow: hidden;
+      padding: var(--data_forms__selectable-element-padding);
     }
 
     &.selected > .content {
@@ -80,18 +78,24 @@
     }
   }
 
+  .header,
   .footer {
-    border-top: 1px solid var(--accent-300);
-    display: flex;
-    padding: var(--sm4) var(--sm2);
-  }
-  .header {
     position: absolute;
     display: flex;
-    width: 100%;
     padding: 0 var(--sm2);
-    z-index: var(--dropdown-z-index);
+    z-index: var(--z-index__data_forms__field-header);
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .header {
     top: 0;
-    transform: translate(0, -50%);
+    transform: translate(0, -75%);
+    right: 0;
+  }
+  .footer {
+    bottom: 0;
+    transform: translate(-50%, 50%);
+    left: 50%;
   }
 </style>

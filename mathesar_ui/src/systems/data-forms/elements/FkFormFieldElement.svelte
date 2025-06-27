@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { RichText } from '@mathesar/components/rich-text';
+  import TableName from '@mathesar/components/TableName.svelte';
   import { Select, Spinner } from '@mathesar-component-library';
 
   import type { DataFormManager } from '../DataFormManager';
@@ -9,16 +11,17 @@
     fkFieldInteractionRules,
   } from '../EphemeralDataForm';
 
-  import DataFormFieldElement from './DataFormFieldElement.svelte';
+  import DataFormFieldsContainer from './DataFormFieldsContainer.svelte';
   import DataFormInput from './DataFormInput.svelte';
   import DataFormLabel from './DataFormLabel.svelte';
-  import FormFieldElementWrapper from './FormFieldElementWrapper.svelte';
 
+  export let isSelected: boolean;
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphermeralFkField;
 
   $: ({ rule, linkedTableStructure, nestedFields } = dataFormField);
-  $: isLinkedTableStructureLoading = linkedTableStructure.isLoading;
+  $: linkedTableStructureStore = linkedTableStructure.asyncStore;
+  $: linkedTable = $linkedTableStructureStore.resolvedValue?.table;
 
   const interactionRuleText = {
     must_create: {
@@ -36,19 +39,11 @@
   };
 </script>
 
-<FormFieldElementWrapper {dataFormField} {dataFormManager} let:isSelected>
-  {#if isSelected || $rule !== 'only_select'}
-    <div class="allow-create">
-      {#if $isLinkedTableStructureLoading}
-        <Spinner />
-      {/if}
-    </div>
-  {/if}
-
-  <div class="fk-field">
+<div class="fk-field">
+  <div class="label-controls-container">
     <DataFormLabel {dataFormField} {isSelected}>
       <Select
-        triggerAppearance="secondary"
+        triggerAppearance="outcome"
         options={fkFieldInteractionRules}
         value={$rule}
         on:change={(e) =>
@@ -69,28 +64,59 @@
         </svelte:fragment>
       </Select>
     </DataFormLabel>
-    {#if $rule !== 'must_create'}
-      <DataFormInput {dataFormField} {isSelected} />
-    {/if}
-
-    {#if $rule !== 'only_select'}
-      {#each [...$nestedFields.values()] as nestedField (nestedField.key)}
-        <DataFormFieldElement {dataFormManager} dataFormField={nestedField} />
-      {/each}
-    {/if}
   </div>
-</FormFieldElementWrapper>
+
+  {#if $rule !== 'must_create'}
+    <div class="fk-input" class:has-margin={$rule !== 'only_select'}>
+      <DataFormInput {dataFormField} {isSelected} />
+    </div>
+  {/if}
+
+  {#if $rule === 'select_or_create'}
+    <div class="sub-form-help">
+      <RichText text={$_('form_fk_sub_form_help')} let:slotName>
+        {#if slotName === 'tableName'}
+          <span>
+            {#if $linkedTableStructureStore.isLoading}
+              <Spinner />
+            {:else if linkedTable}
+              <TableName table={linkedTable} />
+            {/if}
+          </span>
+        {/if}
+      </RichText>
+    </div>
+  {/if}
+
+  {#if $rule !== 'only_select'}
+    <!-- Show spinner when linked table structure hasn't loaded yet -->
+    <DataFormFieldsContainer fields={nestedFields} {dataFormManager} />
+  {/if}
+</div>
 
 <style lang="scss">
   .fk-field {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: contents;
+    --data-forms__field-padding-left: var(--lg2);
+
+    .label-controls-container {
+      margin-bottom: var(--data_forms__label-input-gap);
+    }
+    .fk-input.has-margin {
+      margin-bottom: var(--data_forms__selectable-element-padding);
+    }
   }
-  .allow-create {
-    --labeled-input-label-color: var(--accent-800);
-    padding-bottom: 0.5rem;
+
+  .sub-form-help {
+    display: block;
+    margin-bottom: var(--data_forms__selectable-element-padding);
+    color: var(--stormy-600);
+
+    span {
+      display: inline-flex;
+    }
   }
+
   .option-help {
     max-width: 25rem;
     white-space: normal;

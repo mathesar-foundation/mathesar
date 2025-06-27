@@ -3,18 +3,23 @@
   import type { EphemeralDataFormField } from '../EphemeralDataForm';
 
   import FkFormFieldElement from './FkFormFieldElement.svelte';
+  import FormFieldElementWrapper from './FormFieldElementWrapper.svelte';
   import ScalarFormFieldElement from './ScalarFormFieldElement.svelte';
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphemeralDataFormField;
 </script>
 
-<div>
+<FormFieldElementWrapper
+  {dataFormField}
+  {dataFormManager}
+  let:isSelected
+>
   {#if dataFormField.kind === 'scalar_column'}
-    <ScalarFormFieldElement {dataFormManager} {dataFormField} />
+    <ScalarFormFieldElement {isSelected} {dataFormField} />
   {:else if dataFormField.kind === 'foreign_key'}
-    <FkFormFieldElement {dataFormManager} {dataFormField} />
+    <FkFormFieldElement {isSelected} {dataFormManager} {dataFormField} />
   {:else}
     <div></div>
   {/if}
-</div>
+</FormFieldElementWrapper>

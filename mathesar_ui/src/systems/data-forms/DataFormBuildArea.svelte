@@ -1,12 +1,12 @@
 <script lang="ts">
   import DataFormBranding from './DataFormBranding.svelte';
   import { type DataFormManager } from './DataFormManager';
-  import DataFormFieldElement from './elements/DataFormFieldElement.svelte';
+  import DataFormFieldsContainer from './elements/DataFormFieldsContainer.svelte';
   import DataFormHeader from './elements/DataFormHeader.svelte';
   import DataFormSubmitButtons from './elements/DataFormSubmitButtons.svelte';
 
   export let dataFormManager: DataFormManager;
-  $: ({ fields } = dataFormManager.ephemeralDataForm);
+  $: ({ fields, baseTable } = dataFormManager.ephemeralDataForm);
 
   function handleFormSelection(e: MouseEvent) {
     const { target } = e;
@@ -21,11 +21,7 @@
 <div class="build-area" on:click={handleFormSelection}>
   <div class="form">
     <DataFormHeader {dataFormManager} />
-    <div class="fields">
-      {#each [...$fields.values()] as ephField (ephField.key)}
-        <DataFormFieldElement {dataFormManager} dataFormField={ephField} />
-      {/each}
-    </div>
+    <DataFormFieldsContainer {fields} {dataFormManager} />
     <DataFormSubmitButtons {dataFormManager} />
     <div class="branding">
       <DataFormBranding />
@@ -45,19 +41,16 @@
     max-height: fit-content;
     max-width: 60rem;
     background: var(--elevated-background);
+    --z-index__data_forms__field-header: 1;
+    --z-index__data_forms__field-add-dropdown-trigger: 2;
+    --data_forms__label-input-gap: 0.5rem;
+    --data_forms__selectable-element-padding: 1rem;
 
     .form {
       min-width: 30rem;
       padding: var(--lg4) var(--lg5);
       display: flex;
       flex-direction: column;
-      gap: var(--sm2);
-
-      .fields {
-        display: flex;
-        flex-direction: column;
-        gap: var(--sm2);
-      }
 
       .branding {
         border-top: 1px solid var(--border-color);

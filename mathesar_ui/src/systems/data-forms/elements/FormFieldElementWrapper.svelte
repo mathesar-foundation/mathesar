@@ -1,12 +1,11 @@
 <script lang="ts">
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconDeleteMajor } from '@mathesar/icons';
-  import { Button, Icon } from '@mathesar-component-library';
 
   import type { DataFormManager } from '../DataFormManager';
   import type { EphemeralDataFormField } from '../EphemeralDataForm';
 
+  import AddFormFieldElementDropdown from './AddFormFieldElementDropdown.svelte';
   import SelectableElement from './SelectableElement.svelte';
 
   export let dataFormManager: DataFormManager;
@@ -34,17 +33,17 @@
           </div>
         {/if}
       </div>
-      <Button>
-        <Icon {...iconDeleteMajor} />
-      </Button>
     </div>
   </svelte:fragment>
 
-  <div>
-    <div class="form-field-content">
-      <slot {isSelected} />
-    </div>
-  </div>
+  <slot {isSelected} />
+
+  <svelte:fragment slot="footer">
+    <AddFormFieldElementDropdown
+      table={dataFormField.table}
+      {dataFormManager}
+    />
+  </svelte:fragment>
 </SelectableElement>
 
 <style lang="scss">
@@ -64,8 +63,5 @@
   .actions {
     margin-left: auto;
     --button-border-radius: var(--lg1);
-  }
-  .form-field-content {
-    padding: var(--sm2);
   }
 </style>

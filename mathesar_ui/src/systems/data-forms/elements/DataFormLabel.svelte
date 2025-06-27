@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import { Button, Icon } from '@mathesar-component-library';
+
   import type { EphemeralDataFormField } from '../EphemeralDataForm';
 
   export let dataFormField: EphemeralDataFormField;
@@ -10,9 +13,12 @@
 <div class="label" class:selected={isSelected}>
   <input type="text" bind:value={$label} />
 
-  {#if isSelected && $$slots.default}
+  {#if isSelected}
     <div class="controls">
       <slot />
+      <Button appearance="outcome">
+        <Icon {...iconDeleteMajor} />
+      </Button>
     </div>
   {/if}
 </div>
@@ -39,6 +45,8 @@
 
     .controls {
       margin-left: auto;
+      display: flex;
+      gap: var(--sm4);
     }
   }
 </style>
