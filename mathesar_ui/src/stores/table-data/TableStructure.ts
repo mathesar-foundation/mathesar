@@ -5,6 +5,7 @@ import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
+import { orderProcessedColumns } from '@mathesar/utils/tables';
 
 import { ColumnsDataStore } from './columns';
 import { type ConstraintsData, ConstraintsDataStore } from './constraints';
@@ -12,7 +13,6 @@ import {
   ProcessedColumn,
   type ProcessedColumnsStore,
 } from './processedColumns';
-import { orderProcessedColumns } from '@mathesar/utils/tables';
 
 export interface TableStructureProps {
   database: Pick<Database, 'id'>;
@@ -51,9 +51,10 @@ export class TableStructure {
                 constraints: constraintsData.constraints,
               }),
             ]),
-          ), {metadata: this.metadata}
-        )
-    )
+          ),
+          { metadata: this.metadata },
+        ),
+    );
     this.isLoading = derived(
       [this.columnsDataStore.fetchStatus, this.constraintsDataStore],
       ([columnsFetchStatus, constraintsData]) =>
