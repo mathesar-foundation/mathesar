@@ -16,7 +16,7 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 
     ??? tip "Tips when trying Mathesar locally"
         - To open a [psql](https://www.postgresql.org/docs/current/app-psql.html) shell within the container, run:
-        
+
             ```
             docker exec -it mathesar sudo -u postgres psql
             ```
@@ -33,12 +33,16 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 
 You can self-host Mathesar by following one of the guides below:
 
+### Fully self-hosted
+
 - [Install using Docker compose](./administration/install-via-docker-compose.md) — a production setup with separate reverse-proxy and database containers.
 - [Install directly on Linux, macOS, or WSL](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
 
+### One-click, managed solutions
+
+- [One-click install to Digital Ocean App Platform](./administration/install-one-click-digital-ocean.md) — Quick and simple management of Mathesar costing as little as $12/month.
 
 ## Help out
 
-- [Make a donation](https://mathesar.org/donate) - We're a non-profit organization and your donations help sustain our core team. 
+- [Make a donation](https://mathesar.org/donate) - We're a non-profit organization and your donations help sustain our core team.
 - [Help build Mathesar](https://github.com/mathesar-foundation/mathesar/blob/develop/CONTRIBUTING.md) - As an open source project, we actively encourage contribution!
-
