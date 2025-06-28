@@ -1,6 +1,6 @@
 ---
-name: [MAINTAINERS ONLY] Roadmap item
-about: This issue template is for the convenience of Mathesar maintainers. Please do not use it if you are not a maintainer.
+name: "[MAINTAINERS ONLY] Roadmap item"
+about: "This issue template is for the convenience of Mathesar maintainers. Please do not use it if you are not a maintainer."
 labels: "type: meta, needs: product approval"
 ---
 
