@@ -338,6 +338,7 @@ class FormField(BaseModel):
 
     # Needed for foreign_key & reverse_foreign_key
     constraint_oid = models.PositiveBigIntegerField(null=True)
+    related_table_oid = models.PositiveBigIntegerField(null=True)
 
     # For children of FK & reverse FK fields
     parent_field = models.ForeignKey('self', on_delete=models.CASCADE, related_name='child_fields', null=True)
@@ -366,7 +367,8 @@ class FormField(BaseModel):
                 check=(
                     ~models.Q(kind="foreign_key") | models.Q(
                         column_attnum__isnull=False,
-                        constraint_oid__isnull=False
+                        constraint_oid__isnull=False,
+                        related_table_oid__isnull=False
                     )
                 ),
             ),
@@ -376,7 +378,8 @@ class FormField(BaseModel):
                 name="form_field_reverse_foreign_key_requirements",
                 check=(
                     ~models.Q(kind="reverse_foreign_key") | models.Q(
-                        constraint_oid__isnull=False
+                        constraint_oid__isnull=False,
+                        related_table_oid__isnull=False
                     )
                 ),
             )

@@ -80,8 +80,9 @@ def construct_form_field_model_from_defn(field_def, form_model, parent_field=Non
         label=field_def.get("label"),
         help=field_def.get("help"),
         kind=field_def["kind"],
-        column_attnum=field_def["column_attnum"],
-        constraint_oid=field_def["constraint_oid"],
+        column_attnum=field_def.get("column_attnum"),
+        constraint_oid=field_def.get("constraint_oid"),
+        related_table_oid=field_def.get("related_table_oid"),
         parent_field=parent_field,
         styling=field_def.get("styling"),
         is_required=field_def.get("is_required", False),
@@ -113,7 +114,7 @@ def create_form(form_def, user):
             field_def,
             form_model,
             None
-        ) for field_def in iterate_field_defs(form_def["fields"])
+        ) for field_def, _parent in iterate_field_defs(form_def["fields"])
     ]
     created_fields = FormField.objects.bulk_create(field_instances)
     created_fields_map = {field.key: field for field in created_fields}

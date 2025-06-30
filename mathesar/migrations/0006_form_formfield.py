@@ -50,6 +50,7 @@ class Migration(migrations.Migration):
                 ('kind', models.CharField(choices=[('scalar_column', 'Scalar column'), ('foreign_key', 'Foreign key'), ('reverse_foreign_key', 'Reverse foreign key')])),
                 ('column_attnum', models.SmallIntegerField(null=True)),
                 ('constraint_oid', models.PositiveBigIntegerField(null=True)),
+                ('related_table_oid', models.PositiveBigIntegerField(null=True)),
                 ('styling', models.JSONField(null=True)),
                 ('is_required', models.BooleanField(default=False)),
                 ('form', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fields', to='mathesar.form')),
@@ -66,11 +67,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='formfield',
-            constraint=models.CheckConstraint(check=models.Q(models.Q(('kind', 'foreign_key'), _negated=True), models.Q(('column_attnum__isnull', False), ('constraint_oid__isnull', False)), _connector='OR'), name='form_field_foreign_key_requirements'),
+            constraint=models.CheckConstraint(check=models.Q(models.Q(('kind', 'foreign_key'), _negated=True), models.Q(('column_attnum__isnull', False), ('constraint_oid__isnull', False), ('related_table_oid__isnull', False)), _connector='OR'), name='form_field_foreign_key_requirements'),
         ),
         migrations.AddConstraint(
             model_name='formfield',
-            constraint=models.CheckConstraint(check=models.Q(models.Q(('kind', 'reverse_foreign_key'), _negated=True), ('constraint_oid__isnull', False), _connector='OR'), name='form_field_reverse_foreign_key_requirements'),
+            constraint=models.CheckConstraint(check=models.Q(models.Q(('kind', 'reverse_foreign_key'), _negated=True), models.Q(('constraint_oid__isnull', False), ('related_table_oid__isnull', False)), _connector='OR'), name='form_field_reverse_foreign_key_requirements'),
         ),
         migrations.RunSQL(
             sql="""

@@ -22,7 +22,8 @@ class FieldInfo(TypedDict):
         help: The help text to be displayed for the field input.
         kind: Type of the selected column (scalar_column, foreign_key, reverse_foreign_key).
         column_attnum: The attnum of column to be selected as a field. Applicable for scalar_column and foreign_key fields.
-        constraint_oid: The oid of constraint to be selected as a field. Applicable for foreign_key and reverse_foreign_key fields.
+        constraint_oid: The oid of constraint that is part of the field. Applicable for foreign_key and reverse_foreign_key fields.
+        related_table_oid: The oid of the related table. Applicable for foreign_key and reverse_foreign_key fields.
         parent_field_id: The Django id of the Field set as parent for related fields.
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
@@ -36,6 +37,7 @@ class FieldInfo(TypedDict):
     kind: Literal["scalar_column", "foreign_key", "reverse_foreign_key"]
     column_attnum: Optional[int]
     constraint_oid: Optional[int]
+    related_table_oid: Optional[int]
     styling: Optional[dict]
     is_required: bool
     child_fields: Optional[list["FieldInfo"]]
@@ -52,6 +54,7 @@ class FieldInfo(TypedDict):
             kind=model.kind,
             column_attnum=model.column_attnum,
             constraint_oid=model.constraint_oid,
+            related_table_oid=model.related_table_oid,
             styling=model.styling,
             is_required=model.is_required,
             child_fields=[FieldInfo.from_model(field) for field in model.child_fields.all()] if model.child_fields else None,
@@ -139,7 +142,8 @@ class AddOrReplaceFieldDef(TypedDict):
         help: The help text to be displayed for the field input.
         kind: Type of the selected column (scalar_column, foreign_key, reverse_foreign_key).
         column_attnum: The attnum of column to be selected as a field. Applicable for scalar_column and foreign_key fields.
-        constraint_oid: The oid of constraint to be selected as a field. Applicable for foreign_key and reverse_foreign_key fields.
+        constraint_oid: The oid of constraint that is part of the field. Applicable for foreign_key and reverse_foreign_key fields.
+        related_table_oid: The oid of the related table. Applicable for foreign_key and reverse_foreign_key fields.
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
     """
@@ -150,6 +154,7 @@ class AddOrReplaceFieldDef(TypedDict):
     kind: Literal["scalar_column", "foreign_key", "reverse_foreign_key"]
     column_attnum: Optional[int]
     constraint_oid: Optional[int]
+    related_table_oid: Optional[int]
     styling: Optional[dict]
     is_required: Optional[bool]
     child_fields: Optional[list["AddOrReplaceFieldDef"]]
