@@ -65,6 +65,7 @@ def create_form(form_def, user):
     database = Database.objects.get(id=form_def["database_id"])
     submit_role = get_submit_role(user, database.id, submit_role_id=form_def.get("submit_role_id"))
     form_model = Form.objects.create(
+        **({"id": form_def["id"]} if form_def.get("id") else {}),  # we get an id during replace
         token=form_def.get("token", uuid4()),
         name=form_def["name"],
         description=form_def.get("description"),
@@ -127,80 +128,7 @@ def delete_form(form_id):
 
 
 @transaction.atomic
-def replace_form(form_def, user):
-    form_model = Form.objects.get(id=form_def["id"])
-    database = (
-        Database.objects.get(id=form_def["database_id"])
-        if form_model.database.id != form_def["database_id"]
-        else form_model.database
-    )
-    submit_role = (
-        get_submit_role(user, database.id, submit_role_id=form_def.get("submit_role_id"))
-        if form_model.submit_role.id != form_def.get("submit_role_id")
-        else form_model.submit_role
-    )
-    Form.objects.filter(id=form_def["id"]).update(
-        token=form_def.get("token", uuid4()),
-        name=form_def["name"],
-        description=form_def.get("description"),
-        version=form_def["version"],
-        database=database,
-        server=database.server,
-        schema_oid=form_def["schema_oid"],
-        base_table_oid=form_def["base_table_oid"],
-        is_public=form_def.get("is_public", False),
-        header_title=form_def["header_title"],
-        header_subtitle=form_def.get("header_subtitle"),
-        submit_role=submit_role,
-        submit_message=form_def.get("submit_message"),
-        redirect_url=form_def.get("redirect_url"),
-        submit_label=form_def.get("submit_label")
-    )
-    k0 = {field.key: field for field in form_model.fields.all()}
-    k1 = {field["key"]: field for field in form_def["fields"]}
-    fields_to_create = [k1[k] for k in set(k1.keys()) - set(k0.keys())]
-    fields_to_delete = set(k0.keys()) - set(k1.keys())
-    FormField.objects.filter(key__in=fields_to_delete).delete()
-    field_instances = [
-        FormField(
-            key=field["key"],
-            attnum=field["attnum"],
-            form=form_model,
-            index=field["index"],
-            kind=field["kind"],
-            label=field.get("label"),
-            help=field.get("help"),
-            readonly=field.get("readonly", False),
-            styling=field.get("styling"),
-            is_required=field.get("is_required", False),
-            parent_field=None,
-            target_table_oid=field.get("target_table_oid"),
-            allow_create=field.get("allow_create", False),
-            create_label=field.get("create_label")
-        ) for field in fields_to_create
-    ]
-    created_fields = FormField.objects.bulk_create(field_instances)
-    created_fields_map = {field.key: field for field in created_fields}
-    fields_map = created_fields_map | k0
-    fields_to_update = []
-    for key, field in k1.items():
-        field_model = fields_map[key]
-        field_model.parent_field = fields_map[field["parent_field_key"]] if field.get("parent_field_key") else None
-        if created_fields_map.get(key) is not None:
-            fields_to_update.append(field_model)
-            continue
-        field_model.attnum = field["attnum"]
-        field_model.kind = field["kind"]
-        field_model.label = field.get("label")
-        field_model.help = field.get("help")
-        field_model.readonly = field.get("readonly", False)
-        field_model.styling = field.get("styling")
-        field_model.is_required = field.get("is_required", False)
-        field_model.target_table_oid = field.get("target_table_oid")
-        field_model.allow_create = field.get("allow_create", False)
-        field_model.create_label = field.get("create_label")
-        fields_to_update.append(field_model)
-    if fields_to_update:
-        FormField.objects.bulk_update(fields_to_update, ["parent_field", "attnum", "kind", "label", "help", "readonly", "styling", "is_required", "target_table_oid", "allow_create", "create_label"])
-    field_col_info_map = get_field_col_info_map(form_model)
+def replace_form(form_def_with_id, user):
+    Form.objects.get(id=form_def_with_id["id"]).delete()
+    form_model, field_col_info_map = create_form(form_def_with_id, user)
     return form_model, field_col_info_map
