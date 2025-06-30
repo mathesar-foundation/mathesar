@@ -356,8 +356,7 @@ class FormField(BaseModel):
             models.CheckConstraint(
                 name="form_field_scalar_requirements",
                 check=(
-                    ~models.Q(kind="scalar_column") |
-                    models.Q(column_attnum__isnull=False)
+                    ~models.Q(kind="scalar_column") | models.Q(column_attnum__isnull=False)
                 ),
             ),
 
@@ -365,8 +364,7 @@ class FormField(BaseModel):
             models.CheckConstraint(
                 name="form_field_foreign_key_requirements",
                 check=(
-                    ~models.Q(kind="foreign_key") |
-                    models.Q(
+                    ~models.Q(kind="foreign_key") | models.Q(
                         column_attnum__isnull=False,
                         constraint_oid__isnull=False
                     )
@@ -377,8 +375,7 @@ class FormField(BaseModel):
             models.CheckConstraint(
                 name="form_field_reverse_foreign_key_requirements",
                 check=(
-                    ~models.Q(kind="reverse_foreign_key") |
-                    models.Q(
+                    ~models.Q(kind="reverse_foreign_key") | models.Q(
                         constraint_oid__isnull=False
                     )
                 ),
