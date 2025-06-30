@@ -289,20 +289,21 @@ class Form(BaseModel):
     token = models.UUIDField(unique=True)
     name = models.CharField()
     description = models.CharField(null=True)
-    version = models.IntegerField()
+    version = models.PositiveSmallIntegerField()
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
     server = models.ForeignKey('Server', on_delete=models.CASCADE)
     schema_oid = models.PositiveBigIntegerField()
     base_table_oid = models.PositiveBigIntegerField()
-    is_public = models.BooleanField(default=False)
+    associated_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
     # Header related settings
     header_title = models.JSONField()
     header_subtitle = models.JSONField(null=True)
+    # Sharing settings
+    share_public = models.BooleanField(default=False)
     # Submission related settings
-    submit_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
     submit_message = models.JSONField(null=True)
-    redirect_url = models.URLField(null=True)
-    submit_label = models.CharField(null=True)
+    submit_redirect_url = models.URLField(null=True)
+    submit_button_label = models.CharField(null=True)
 
     @property
     def connection(self):
@@ -310,40 +311,77 @@ class Form(BaseModel):
             host=self.database.server.host,
             port=self.database.server.port,
             dbname=self.database.name,
-            user=self.submit_role.name,
-            password=self.submit_role.password,
+            user=self.associated_role.name,
+            password=self.associated_role.password,
             application_name='mathesar.models.base.Form.connection',
         )
 
 
 class FormField(BaseModel):
-    key = models.CharField()
-    attnum = models.SmallIntegerField()
+    key = models.CharField(max_length=128)
     form = models.ForeignKey('Form', on_delete=models.CASCADE, related_name='fields')
-    index = models.IntegerField()
-    kind = models.CharField(
-        choices=[
-            ("scalar_column", "scalar_column"),
-            ("foreign_key", "foreign_key"),
-            ("reverse_foreign_key", "reverse_foreign_key")
-        ],
-    )
+
+    index = models.PositiveIntegerField()
     label = models.CharField(null=True)
     help = models.CharField(null=True)
-    readonly = models.BooleanField(default=False)
+
+    kind = models.CharField(
+        choices=[
+            ('scalar_column', "Scalar column"),
+            ('foreign_key', "Foreign key"),
+            ('reverse_foreign_key', "Reverse foreign key")
+        ],
+    )
+
+    # Needed for scalar_column & foreign_key
+    column_attnum = models.SmallIntegerField(null=True)
+
+    # Needed for foreign_key & reverse_foreign_key
+    constraint_oid = models.PositiveBigIntegerField(null=True)
+
+    # For children of FK & reverse FK fields
+    parent_field = models.ForeignKey('self', on_delete=models.CASCADE, related_name='child_fields', null=True)
+
     styling = models.JSONField(null=True)
     is_required = models.BooleanField(default=False)
-    # foreign_key/reverse_foreign_key related settings
-    parent_field = models.ForeignKey('self', on_delete=models.CASCADE, related_name='child_fields', null=True)
-    target_table_oid = models.PositiveBigIntegerField(null=True)
-    allow_create = models.BooleanField(default=False)
-    create_label = models.CharField(null=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=["key", "form"],
-                name="unique_key_per_form"
+                name="form_field_unique_key_per_form"
+            ),
+
+            # Constriants for scalar fields
+            models.CheckConstraint(
+                name="form_field_scalar_requirements",
+                check=(
+                    ~models.Q(kind="scalar_column") |
+                    models.Q(column_attnum__isnull=False)
+                ),
+            ),
+
+            # Constriants for foreign_key fields
+            models.CheckConstraint(
+                name="form_field_foreign_key_requirements",
+                check=(
+                    ~models.Q(kind="foreign_key") |
+                    models.Q(
+                        column_attnum__isnull=False,
+                        constraint_oid__isnull=False
+                    )
+                ),
+            ),
+
+            # Constriants for reverse_foreign_key fields
+            models.CheckConstraint(
+                name="form_field_reverse_foreign_key_requirements",
+                check=(
+                    ~models.Q(kind="reverse_foreign_key") |
+                    models.Q(
+                        constraint_oid__isnull=False
+                    )
+                ),
             )
         ]
 
