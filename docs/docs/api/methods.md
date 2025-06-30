@@ -146,6 +146,7 @@
       - FormDef
       - FieldInfo
       - FieldDef
+      - PublicFormInfo
 
 ## Records
 
