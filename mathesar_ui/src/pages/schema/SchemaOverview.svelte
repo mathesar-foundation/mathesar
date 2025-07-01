@@ -82,7 +82,7 @@
         <div>
           <AnchorButton
             href={getDataExplorerPageUrl(database.id, schema.oid)}
-            appearance="primary"
+            appearance="secondary"
           >
             <Icon {...iconAddNew} />
             <span>{$_('new_exploration')}</span>
@@ -122,7 +122,7 @@
       <header>
         <h2>{$_('forms')}</h2>
         <div>
-          <AnchorButton href="#TODO" appearance="primary">
+          <AnchorButton href="#TODO" appearance="secondary">
             <Icon {...iconAddNew} />
             <span>{$_('new_form')}</span>
           </AnchorButton>
