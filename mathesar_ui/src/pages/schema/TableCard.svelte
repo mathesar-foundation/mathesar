@@ -82,7 +82,7 @@
   description={table.description ?? undefined}
   icon={iconTable}
   {pendingMessage}
-  largeName
+  primary
 >
   <svelte:fragment slot="action-buttons">
     {#if !requiresImportConfirmation}
