@@ -104,6 +104,7 @@ def create_form(form_def, user):
     database = Database.objects.get(id=form_def["database_id"])
     associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
     form_model = Form.objects.create(
+        **({"id": form_def["id"]} if form_def.get("id") else {}),  # we get an id during replace
         token=form_def.get("token", uuid4()),
         name=form_def["name"],
         description=form_def.get("description"),
@@ -152,3 +153,10 @@ def list_forms(database_id, schema_oid):
 
 def delete_form(form_id):
     Form.objects.get(id=form_id).delete()
+
+
+@transaction.atomic
+def replace_form(form_def_with_id, user):
+    Form.objects.get(id=form_def_with_id["id"]).delete()
+    form_model, field_col_info_map = create_form(form_def_with_id, user)
+    return form_model, field_col_info_map
