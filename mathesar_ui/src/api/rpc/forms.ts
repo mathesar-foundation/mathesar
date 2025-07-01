@@ -96,9 +96,12 @@ export interface RawDataForm extends RawEphemeralDataForm {
   token: string;
   fields: RawDataFormField[];
   share_public: boolean;
-  submit_message: RichTextJson | null;
-  submit_redirect_url: string | null;
-  submit_button_label: string | null;
+  submit_message?: RichTextJson | null;
+  submit_redirect_url?: string | null;
+  submit_button_label?: string | null;
+}
+
+export interface RawDataFormGetResponse extends RawDataForm {
   created_at: string;
   updated_at: string;
 }
@@ -109,19 +112,19 @@ export const forms = {
       database_id: RawDatabase['id'];
       form_id: RawDataForm['id'];
     },
-    RawDataForm
+    RawDataFormGetResponse
   >(),
   list: rpcMethodTypeContainer<
     {
       database_id: RawDatabase['id'];
       schema_oid: RawDataForm['schema_oid'];
     },
-    RawDataForm[]
+    RawDataFormGetResponse[]
   >(),
   add: rpcMethodTypeContainer<
     {
       form_def: RawEphemeralDataForm;
     },
-    RawDataForm
+    RawDataFormGetResponse
   >(),
 };

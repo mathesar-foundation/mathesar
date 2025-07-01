@@ -126,7 +126,23 @@ export function getRecordPageUrl(
   return `${getTablePageUrl(databaseId, schemaId, tableId)}${String(recordId)}`;
 }
 
-export function getDataFormMakerPageUrl(
+export function getDataFormPageUrl(
+  databaseId: number,
+  schemaId: number,
+  formId: number,
+): string {
+  return `${getSchemaPageUrl(databaseId, schemaId)}forms/${formId}/`;
+}
+
+export function getDataFormFillPageUrl(
+  databaseId: number,
+  schemaId: number,
+  formId: number,
+): string {
+  return `${getSchemaPageUrl(databaseId, schemaId)}forms/${formId}/fillout/`;
+}
+
+export function getNewDataFormPageUrl(
   databaseId: number,
   schemaId: number,
 ): string {

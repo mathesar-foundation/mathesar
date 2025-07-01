@@ -5,13 +5,12 @@
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconAddNew, iconRefresh } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import {
     getDataExplorerPageUrl,
-    getDataFormMakerPageUrl,
+    getNewDataFormPageUrl,
   } from '@mathesar/routes/urls';
   import { fetchExplorationsForCurrentSchema } from '@mathesar/stores/queries';
   import { fetchTablesForCurrentSchema } from '@mathesar/stores/tables';
@@ -30,13 +29,16 @@
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
 
+  const schemaRouteContext = SchemaRouteContext.get();
+
   export let tablesMap: Map<Table['oid'], Table>;
   export let explorationsMap: Map<number, SavedExploration>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
-  export let database: Database;
-  export let schema: Schema;
   export let onCreateEmptyTable: () => void;
+
+  $: ({ schema, dataForms } = $schemaRouteContext);
+  $: void dataForms.runConservatively();
 
   $: hasTables = tablesMap.size > 0;
   $: ({ currentRolePrivileges } = schema.currentAccess);
@@ -51,7 +53,11 @@
     <header>
       <h2>{$_('tables')}</h2>
       <div>
-        <CreateTableButton {database} {schema} {onCreateEmptyTable} />
+        <CreateTableButton
+          database={schema.database}
+          {schema}
+          {onCreateEmptyTable}
+        />
       </div>
     </header>
     {#if tablesRequestStatus.state === 'processing'}
@@ -69,9 +75,17 @@
         </div>
       </ErrorBox>
     {:else if showTableCreationTutorial}
-      <CreateTableTutorial {database} {schema} {onCreateEmptyTable} />
+      <CreateTableTutorial
+        database={schema.database}
+        {schema}
+        {onCreateEmptyTable}
+      />
     {:else}
-      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
+      <TablesList
+        tables={[...tablesMap.values()]}
+        {schema}
+        database={schema.database}
+      />
     {/if}
   </div>
 
@@ -84,7 +98,7 @@
         </h2>
         <div>
           <AnchorButton
-            href={getDataExplorerPageUrl(database.id, schema.oid)}
+            href={getDataExplorerPageUrl(schema.database.id, schema.oid)}
             appearance="primary"
           >
             <Icon {...iconAddNew} />
@@ -115,7 +129,7 @@
       {:else}
         <ExplorationsList
           explorations={[...explorationsMap.values()]}
-          {database}
+          database={schema.database}
           {schema}
         />
       {/if}
@@ -126,7 +140,7 @@
         <h2>{$_('forms')}</h2>
         <div>
           <AnchorButton
-            href={getDataFormMakerPageUrl(database.id, schema.oid)}
+            href={getNewDataFormPageUrl(schema.database.id, schema.oid)}
             appearance="primary"
           >
             <Icon {...iconAddNew} />
@@ -134,8 +148,30 @@
           </AnchorButton>
         </div>
       </header>
-      <!-- TODO: handle loading and error states -->
-      <FormsList {database} {schema} />
+      {#if $dataForms.isLoading}
+        <!-- TODO: Use a common skeleton -->
+        <ExplorationSkeleton />
+      {:else if $dataForms.error}
+        <ErrorBox>
+          <p>{$dataForms.error.message}</p>
+          <div>
+            <SpinnerButton
+              onClick={async () => {
+                await dataForms.run();
+              }}
+              label={$_('retry')}
+              icon={iconRefresh}
+            />
+            <a href="../">
+              <Button>
+                <span>{$_('go_to_database')}</span>
+              </Button>
+            </a>
+          </div>
+        </ErrorBox>
+      {:else if $dataForms.resolvedValue}
+        <FormsList dataForms={$dataForms.resolvedValue} />
+      {/if}
     </section>
   </div>
 </div>

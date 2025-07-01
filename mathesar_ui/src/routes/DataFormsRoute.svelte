@@ -2,18 +2,20 @@
   import { _ } from 'svelte-i18n';
 
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconForms } from '@mathesar/icons';
-  import type { Schema } from '@mathesar/models/Schema';
   import DataFormsPage from '@mathesar/pages/data-forms/DataFormsPage.svelte';
-  import { getDataFormMakerPageUrl } from '@mathesar/routes/urls';
+  import { getNewDataFormPageUrl } from '@mathesar/routes/urls';
 
-  export let schema: Schema;
+  const schemaRouteContext = SchemaRouteContext.get();
+
+  $: ({ schema } = $schemaRouteContext);
 </script>
 
 <AppendBreadcrumb
   item={{
     type: 'simple',
-    href: getDataFormMakerPageUrl(schema.database.id, schema.oid),
+    href: getNewDataFormPageUrl(schema.database.id, schema.oid),
     label: $_('data_forms'),
     icon: iconForms,
   }}

@@ -6,6 +6,7 @@ import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 
 import type { Database } from './Database';
+import { DataForm } from './DataForm';
 import { ObjectCurrentAccess } from './internal/ObjectCurrentAccess';
 import type { Role } from './Role';
 
@@ -115,6 +116,19 @@ export class Schema {
           rawSchemaPrivilegesForRoles.map((rawSchemaPrivilegesForRole) => [
             rawSchemaPrivilegesForRole.role_oid,
             rawSchemaPrivilegesForRole,
+          ]),
+        ),
+    });
+  }
+
+  constructDataFormsStore() {
+    return new AsyncRpcApiStore(api.forms.list, {
+      staticProps: { database_id: this.database.id, schema_oid: this.oid },
+      postProcess: (rawDataForms) =>
+        new ImmutableMap(
+          rawDataForms.map((rawDataForm) => [
+            rawDataForm.id,
+            new DataForm({ schema: this, rawDataForm }),
           ]),
         ),
     });
