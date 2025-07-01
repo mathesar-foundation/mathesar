@@ -1,6 +1,11 @@
 <script lang="ts">
   import { iconDescription, iconMoreActions } from '@mathesar/icons';
-  import { DropdownMenu, Icon, Tooltip } from '@mathesar-component-library';
+  import {
+    DropdownMenu,
+    Icon,
+    Tooltip,
+    Truncate,
+  } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
 
   export let href: string;
@@ -22,7 +27,7 @@
         <Icon {...icon} />
         <span>{name}</span>
       </div>
-      {#if description}
+      {#if description && !primary}
         <Tooltip>
           <div class="description-icon" slot="trigger">
             <Icon {...iconDescription} />
@@ -36,6 +41,11 @@
         </div>
       {/if}
     </div>
+    {#if description && primary}
+      <div class="description">
+        <Truncate>{description}</Truncate>
+      </div>
+    {/if}
     {#if $$slots.detail}
       <div class="detail">
         <slot name="detail" />
@@ -127,6 +137,7 @@
   }
 
   .link {
+    overflow: hidden;
     display: grid;
     cursor: pointer;
     padding: var(--sm2) var(--sm2);
@@ -155,6 +166,9 @@
     font-size: var(--lg1);
   }
 
+  .description {
+    overflow: hidden;
+  }
   .description-icon {
     color: var(--text-color-muted);
     font-size: var(--sm1);
