@@ -46,6 +46,7 @@ ENV MATHESAR_DOCKER_IMAGE='true'
 
 VOLUME /etc/postgresql/
 VOLUME /var/lib/postgresql/
+VOLUME /code/config/settings/secrets/
 
 EXPOSE 5432
 
@@ -95,6 +96,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     nodejs \
     && rm -rf /var/lib/apt/lists/*
+
+RUN echo -n "secret_key = None" > /code/config/settings/secrets/secret_key.py
 
 
 #=========== STAGE: DEVELOPMENT ==============================================#

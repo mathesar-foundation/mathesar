@@ -13,7 +13,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.management.utils import get_random_secret_key
+
 from config.database_config import PostgresConfig, parse_port
+from config.settings.secrets import secret_key
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -133,8 +136,13 @@ for db_key, db_dict in DATABASES.items():
 # TODO: We use this variable for analytics, consider removing/renaming it.
 TEST = bool(os.environ.get('TEST', default=False))
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")
+SECRET_KEY = os.environ.get("SECRET_KEY") or secret_key.secret_key
+if SECRET_KEY is None:
+    SECRET_KEY = get_random_secret_key()
+    with open(os.path.abspath(secret_key.__file__), 'w') as f:
+        f.write('secret_key = ' + f"'{SECRET_KEY}'")
+
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG') in ['t', 'true', 'True']
