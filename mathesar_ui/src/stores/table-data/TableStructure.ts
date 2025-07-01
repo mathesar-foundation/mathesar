@@ -11,7 +11,7 @@ import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Schema } from '@mathesar/models/Schema';
 import { Table } from '@mathesar/models/Table';
 import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
-import AsyncStore, { type AsyncStoreValue } from '@mathesar/stores/AsyncStore';
+import AsyncStore from '@mathesar/stores/AsyncStore';
 
 import {
   ProcessedColumn,

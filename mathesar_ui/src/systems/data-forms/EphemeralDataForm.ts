@@ -5,10 +5,15 @@ import { type Writable, get, writable } from 'svelte/store';
 import type {
   RawDataForm,
   RawDataFormBaseField,
+  RawEphemeralDataForm,
+  RawEphemeralDataFormField,
+  RawEphemeralForeignKeyDataFormField,
+  RawEphemeralReverseForeignKeyDataFormField,
+  RawEphemeralScalarDataFormField,
   RawForeignKeyDataFormField,
   RawReverseForeignKeyDataFormField,
   RawScalarDataFormField,
-} from '@mathesar/api/rpc/data_forms';
+} from '@mathesar/api/rpc/forms';
 import { WritableMap, getGloballyUniqueId } from '@mathesar/component-library';
 import { type FieldStore, optionalField } from '@mathesar/components/form';
 import type { Table } from '@mathesar/models/Table';
@@ -57,6 +62,19 @@ abstract class EphemeralField {
     this.help = writable(data.help);
   }
 
+  abstract toRawEphemeralField(): RawEphemeralDataFormField;
+
+  protected getBaseFieldRawJson() {
+    return {
+      key: this.key,
+      index: get(this.index),
+      label: get(this.label),
+      help: get(this.help),
+      styling: {},
+      is_required: false,
+    };
+  }
+
   static fromColumn(
     tableStructureSubstance: TableStructureSubstance,
     pc: ProcessedColumn,
@@ -73,6 +91,7 @@ abstract class EphemeralField {
       table: tableStructureSubstance.table,
     };
     if (pc.linkFk) {
+      const fkConstraintOid = pc.linkFk.oid;
       const referentTableOid = pc.linkFk.referent_table_oid;
       const referenceTableName = tableStructureSubstance.linksInTable.find(
         (lnk) => lnk.table.oid === referentTableOid,
@@ -83,6 +102,7 @@ abstract class EphemeralField {
         label: referenceTableName ?? baseProps.label,
         processedColumn: pc,
         rule: 'only_select',
+        fkConstraintOid,
         linkedTableStructure: tableStructureCache.get(
           referentTableOid,
           () =>
@@ -118,6 +138,14 @@ export class EphermeralScalarField extends EphemeralField {
     this.processedColumn = data.processedColumn;
     this.fieldStore = optionalField(null);
   }
+
+  toRawEphemeralField(): RawEphemeralScalarDataFormField {
+    return {
+      ...this.getBaseFieldRawJson(),
+      kind: 'scalar_column',
+      column_attnum: this.processedColumn.id,
+    };
+  }
 }
 
 export const fkFieldInteractionRules = [
@@ -132,6 +160,8 @@ export class EphermeralFkField extends EphemeralField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
 
   readonly processedColumn;
+
+  readonly fkConstraintOid;
 
   readonly linkedTableStructure: TableStructure;
 
@@ -150,6 +180,7 @@ export class EphermeralFkField extends EphemeralField {
         EphemeralDataFormField['key'],
         EphemeralDataFormField
       >;
+      fkConstraintOid: number;
       linkedTableStructure: TableStructure;
     },
   ) {
@@ -162,6 +193,7 @@ export class EphermeralFkField extends EphemeralField {
     this.rule = writable(data.rule);
     this.nestedFields = data.nestedFields ?? new WritableMap();
     this.fieldStore = optionalField(null);
+    this.fkConstraintOid = data.fkConstraintOid;
     this.linkedTableStructure = data.linkedTableStructure;
   }
 
@@ -188,16 +220,62 @@ export class EphermeralFkField extends EphemeralField {
       }
     }
   }
+
+  toRawEphemeralField(): RawEphemeralForeignKeyDataFormField {
+    return {
+      ...this.getBaseFieldRawJson(),
+      kind: 'foreign_key',
+      column_attnum: this.processedColumn.id,
+      constraint_oid: this.fkConstraintOid,
+      related_table_oid: this.linkedTableStructure.oid,
+      child_fields: [...get(this.nestedFields).values()].map((nested_field) =>
+        nested_field.toRawEphemeralField(),
+      ),
+    };
+  }
 }
 
 export class EphemeralReverseFkField extends EphemeralField {
   readonly kind: RawReverseForeignKeyDataFormField['kind'] =
     'reverse_foreign_key';
 
-  readonly nestedFields: Map<
+  readonly reverseFkConstraintOid;
+
+  readonly linkedTableStructure: TableStructure;
+
+  readonly nestedFields: WritableMap<
     EphemeralDataFormField['key'],
     EphemeralDataFormField
-  > = new Map();
+  > = new WritableMap();
+
+  constructor(
+    parentPath: string[],
+    data: EphemeralFieldProps & {
+      nestedFields: WritableMap<
+        EphemeralDataFormField['key'],
+        EphemeralDataFormField
+      >;
+      reverseFkConstraintOid: number;
+      linkedTableStructure: TableStructure;
+    },
+  ) {
+    super(parentPath, data);
+    this.nestedFields = data.nestedFields;
+    this.reverseFkConstraintOid = data.reverseFkConstraintOid;
+    this.linkedTableStructure = data.linkedTableStructure;
+  }
+
+  toRawEphemeralField(): RawEphemeralReverseForeignKeyDataFormField {
+    return {
+      ...this.getBaseFieldRawJson(),
+      kind: 'reverse_foreign_key',
+      constraint_oid: this.reverseFkConstraintOid,
+      related_table_oid: this.linkedTableStructure.oid,
+      child_fields: [...get(this.nestedFields).values()].map((nested_field) =>
+        nested_field.toRawEphemeralField(),
+      ),
+    };
+  }
 }
 
 export type EphemeralDataFormField =
@@ -220,7 +298,7 @@ export class EphemeralDataForm {
     baseTable: Table;
     name: Writable<RawDataForm['name']>;
     description: Writable<RawDataForm['description']>;
-    associated_role: Writable<RawDataForm['associated_role']>;
+    associated_role: Writable<RawDataForm['associated_role_id']>;
     fields: WritableMap<EphemeralDataFormField['key'], EphemeralDataFormField>;
   }) {
     this.baseTable = edf.baseTable;
@@ -261,6 +339,27 @@ export class EphemeralDataForm {
           }),
       ),
     });
+  }
+
+  toRawEphemeralDataForm(): RawEphemeralDataForm {
+    return {
+      database_id: this.baseTable.schema.database.id,
+      base_table_oid: this.baseTable.oid,
+      schema_oid: this.baseTable.schema.oid,
+      name: get(this.name),
+      description: get(this.description),
+      version: 1,
+      associated_role_id: get(this.associated_role),
+      header_title: {
+        text: get(this.name),
+      },
+      header_subtitle: {
+        text: get(this.description) ?? '',
+      },
+      fields: [...get(this.fields).values()].map((field) =>
+        field.toRawEphemeralField(),
+      ),
+    };
   }
 }
 
