@@ -3,7 +3,7 @@
 </script>
 
 <div class="logo">
-  <LogoAndNameWithLink href="mathesar.org" target="_blank" />
+  <LogoAndNameWithLink href="https://mathesar.org" target="_blank" />
 </div>
 
 <style lang="scss">
