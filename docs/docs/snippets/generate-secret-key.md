@@ -1,11 +1,14 @@
 <!-- Styles for this component are located in the extra.css file.  -->
 <span class="generate-section">
-<button class="button primary-button generate-key-button">Generate Secret Key</button>
-<span class="key-container">
-  <span class="secret-key"></span>
-  <button class="button copy-btn">Copy</button>
-  <button class="button regenerate-btn">Regenerate</button>
-</span>
+  <button class="button primary-button generate-key-button">Generate Secret Key</button>
+  <noscript>
+    <div class="no-js-message">Generating a secret key requires JavaScript to work. Please enable JavaScript in your browser.</div>
+  </noscript>
+  <span class="key-container" style="display: none;">
+    <span class="secret-key"></span>
+    <button class="button copy-btn">Copy</button>
+    <button class="button regenerate-btn">Regenerate</button>
+  </span>
 </span>
 
 <script>

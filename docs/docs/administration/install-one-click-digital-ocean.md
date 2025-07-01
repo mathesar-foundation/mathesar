@@ -15,7 +15,7 @@ Install Mathesar to DigitalOcean in minutes using the simple instructions below.
 1. Use the DigitalOcean one-click install button to initialize a new Mathesar installation in DigitalOcean:
     [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/mathesar-foundation/mathesar-digital-ocean/tree/main)
 1. Create a Digital Ocean account and as payment information, if you do not have an existing account.
-1. Secure your installation with a `SECRET_KEY` . Press the button below to generate a key, and automatically copy it.
+1. **Important.** Secure your installation with a `SECRET_KEY` . Press the button below to generate a key, and automatically copy it. **Be sure to keep this key secret.**
     {% include 'snippets/generate-secret-key.md' %}
 1. Add a `SECRET_KEY` environmemt variable. Click the "Edit" button next to the "Environment Variables" heading, then the "Add environment variable" button. When completed Digital Ocean should look something like this:
   ![A screenshot of DigitalOcean's UI to configure environment variables](../assets/images/digital-ocean-app-platform-config.png)
@@ -36,3 +36,17 @@ See our [instructions for connecting Databases to Mathesar](../user-guide/databa
 By default, Digital Ocean will give your Mathesar installation its own secured domain name, like `https://mathesar-*.ondigitalocean.app/`.
 
 You can easily add a custom domain name by following Digital Ocean's guide on [Adding a custom domain using their control panel](https://docs.digitalocean.com/products/app-platform/how-to/manage-domains/#custom-domain).
+
+### Enable backups on the Mathesar Internal DB
+
+By default, your Mathesar instance will use a Digital Ocean "Dev DB". If you'd like automatable daily snapshots of your database and other features, you'll want to switch to using one of Digital Ocean's "Managed DBs". This will cost a few additional dollars per month.
+
+See DigitalOcean's [instructions for converting](https://docs.digitalocean.com/products/app-platform/how-to/manage-databases/#upgrade-dev-database-to-managed-database) to get started, or [learn more about Managed Databases on the DigitalOcean platform](https://www.digitalocean.com/products/managed-databases).
+
+### Pin a specific version of Mathesar
+
+By default your Mathesar instance will automatically update to the latest version if you redeploy your app and a new version of Mathesar is avaliable.
+
+If you wish to stick to a specific version of Mathesar, find your desired version number on our [releases page](https://github.com/mathesar-foundation/mathesar/releases) and edit the "Source" of the `mathesar-web` component, changing "latest" to your desired version:
+
+![A screenshot of the Digital Ocean UI for changing the tag of a docker image](../assets/images/digital-ocean-app-plattform-tag.png)
