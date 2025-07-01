@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.db import transaction
 
-from db.forms import get_oid_col_info_map
+from db.forms import get_info_for_table_col_cons_map
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
@@ -28,36 +28,46 @@ def validate_and_get_associated_role(user, database_id, associated_role_id=None)
     return associated_role
 
 
-def get_oid_attnums_map(form_model):
-    oam = defaultdict(list)
+def get_table_oid_attnums_cons_map(form_model):
+    table_oid_attnums_map = defaultdict(list)
+    constraints_oids = []
+
     fields = {field.key: field for field in form_model.fields.all()}
     for field in fields.values():
-        table_oid = field.parent_field.target_table_oid if field.parent_field else form_model.base_table_oid
-        oam[table_oid].append(field.attnum)
-    return oam
+        if field.column_attnum:
+            table_oid = field.parent_field.related_table_oid if field.parent_field else form_model.base_table_oid
+            table_oid_attnums_map[table_oid].append(field.column_attnum)
+
+        if field.related_table_oid:
+            # Ensure that the table is present even if columns are empty
+            table_oid_attnums_map[field.related_table_oid]
+
+        if field.constraint_oid:
+            constraints_oids.append(field.constraint_oid)
+
+    return {
+        "tables": table_oid_attnums_map,
+        "constraints": constraints_oids
+    }
 
 
-def get_field_col_info_map(form_model):
-    oam = get_oid_attnums_map(form_model)
-    fields_map = {field.key: field for field in form_model.fields.all()}
+def get_field_table_col_cons_info_map(form_model):
+    table_oid_attnums_cons_map = get_table_oid_attnums_cons_map(form_model)
 
     with form_model.connection as conn:
-        oid_col_info_map = get_oid_col_info_map(oam, conn)
+        table_oid_attnums_cons_info_map = get_info_for_table_col_cons_map(table_oid_attnums_cons_map, conn)
 
-    metadata_map = {}
-    for oid, attnums in oam.items():
-        metadata_map[oid] = {
-            meta.attnum: ColumnMetaDataBlob.from_model(meta) for meta in ColumnMetaData.objects.filter(attnum__in=attnums, table_oid=oid, database=form_model.database)
-        }
+    for oid, table_data in table_oid_attnums_cons_info_map["tables"].items():
+        column_attnums = table_data["columns"].keys()
+        metadata_list = (
+            ColumnMetaData.objects.filter(attnum__in=column_attnums, table_oid=oid, database=form_model.database)
+        )
+        for meta in metadata_list:
+            col_info = table_data["columns"].get(meta.attnum)
+            if col_info:
+                col_info["metadata"] = ColumnMetaDataBlob.from_model(meta)
 
-    fcim = defaultdict(lambda: {"column": None, "error": None})
-    for key, field in fields_map.items():
-        try:
-            table_oid = field.parent_field.target_table_oid if field.parent_field else form_model.base_table_oid
-            fcim[key]["column"] = oid_col_info_map[str(table_oid)][str(field.attnum)] | {'metadata': metadata_map[table_oid].get(field.attnum)}
-        except KeyError as e:
-            fcim[key]["error"] = {"code": -31025, "message": f"Column {e} not found for field {key}"}
-    return fcim
+    return table_oid_attnums_cons_info_map
 
 
 def iterate_field_defs(field_defs, parent_field_defn=None):
@@ -126,13 +136,13 @@ def create_form(form_def, user):
             update_field_instances.append(created_field)
     if update_field_instances:
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
-    field_col_info_map = get_field_col_info_map(form_model)
+    field_col_info_map = get_field_table_col_cons_info_map(form_model)
     return form_model, field_col_info_map
 
 
 def get_form(form_id):
     form_model = Form.objects.get(id=form_id)
-    field_col_info_map = get_field_col_info_map(form_model)
+    field_col_info_map = get_field_table_col_cons_info_map(form_model)
     return form_model, field_col_info_map
 
 
