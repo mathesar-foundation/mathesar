@@ -325,9 +325,9 @@ class FormField(BaseModel):
     help = models.CharField(null=True)
     kind = models.CharField(
         choices=[
-            ('scalar_column', "Scalar column"),
-            ('foreign_key', "Foreign key"),
-            ('reverse_foreign_key', "Reverse foreign key")
+            ("scalar_column", "Scalar column"),
+            ("foreign_key", "Foreign key"),
+            ("reverse_foreign_key", "Reverse foreign key")
         ],
     )
     column_attnum = models.SmallIntegerField(null=True)
