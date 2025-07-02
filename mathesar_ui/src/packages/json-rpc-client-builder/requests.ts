@@ -12,6 +12,13 @@ export interface RpcResult<T> {
 
 export type RpcResponse<T> = RpcResult<T> | RpcError;
 
+interface RpcRequestBody<T> {
+  id: number;
+  jsonrpc: typeof jsonrpc;
+  method: RpcRequest<T>['method'];
+  params: RpcRequest<T>['params'];
+}
+
 function cancellableFetch(
   input: Parameters<typeof fetch>[0],
   init: Parameters<typeof fetch>[1] = {},
@@ -26,7 +33,10 @@ function cancellableFetch(
   );
 }
 
-function getRpcRequestBody(request: RpcRequest<unknown>, id = 0) {
+function getRpcRequestBody<T = unknown>(
+  request: RpcRequest<T>,
+  id = 0,
+): RpcRequestBody<T> {
   return {
     jsonrpc,
     id,
@@ -73,13 +83,30 @@ function send<T>(request: RpcRequest<T>): CancellablePromise<RpcResponse<T>> {
 
 function makeRpcBatchResponse<T extends RpcRequest<unknown>[]>(
   values: unknown,
+  requestBodies: RpcRequestBody<unknown>[],
 ): RpcBatchSendResponse<T> {
   if (!Array.isArray(values)) {
     throw new Error('Response is not an array');
   }
-  return values.map((value) =>
-    makeRpcResponse(value),
-  ) as RpcBatchSendResponse<T>;
+  const idToRpcResponseMap = new Map(
+    values.map((value) => {
+      if (!hasProperty(value, 'id')) {
+        throw new Error(
+          'Response array does not conform to RPC spec: "id" missing in values',
+        );
+      }
+      return [value.id, makeRpcResponse(value)];
+    }),
+  );
+  return requestBodies.map((r) => {
+    const response = idToRpcResponseMap.get(r.id);
+    if (response === undefined) {
+      throw new Error(
+        `Response array does not contain the response for the request with id: ${r.id}`,
+      );
+    }
+    return response;
+  }) as RpcBatchSendResponse<T>;
 }
 
 function sendBatchRequest<T extends RpcRequest<unknown>[]>(
@@ -87,15 +114,16 @@ function sendBatchRequest<T extends RpcRequest<unknown>[]>(
   headers: Record<string, string | undefined>,
   requests: T,
 ): CancellablePromise<RpcBatchSendResponse<T>> {
+  const rpcRequestBody = requests.map((request, index) =>
+    getRpcRequestBody(request, index),
+  );
   const fetch = cancellableFetch(endpoint, {
     method: 'POST',
     headers: {
       ...headers,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(
-      requests.map((request, index) => getRpcRequestBody(request, index)),
-    ),
+    body: JSON.stringify(rpcRequestBody),
   });
   return new CancellablePromise(
     (resolve) =>
@@ -109,7 +137,7 @@ function sendBatchRequest<T extends RpcRequest<unknown>[]>(
               ) as RpcBatchSendResponse<T>,
             ),
         )
-        .then((json) => resolve(makeRpcBatchResponse(json))),
+        .then((json) => resolve(makeRpcBatchResponse(json, rpcRequestBody))),
     () => fetch.cancel(),
   );
 }

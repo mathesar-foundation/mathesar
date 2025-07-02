@@ -5,6 +5,7 @@ import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
+import { orderProcessedColumns } from '@mathesar/utils/tables';
 
 import { ColumnsDataStore } from './columns';
 import { type ConstraintsData, ConstraintsDataStore } from './constraints';
@@ -15,11 +16,16 @@ import {
 
 export interface TableStructureProps {
   database: Pick<Database, 'id'>;
-  table: Pick<Table, 'oid'>;
+  table: {
+    oid: Table['oid'];
+    metadata?: Table['metadata'];
+  };
 }
 
 export class TableStructure {
   oid: DBObjectEntry['id'];
+
+  metadata;
 
   columnsDataStore: ColumnsDataStore;
 
@@ -31,21 +37,25 @@ export class TableStructure {
 
   constructor(props: TableStructureProps) {
     this.oid = props.table.oid;
+    this.metadata = props.table.metadata;
     this.columnsDataStore = new ColumnsDataStore(props);
     this.constraintsDataStore = new ConstraintsDataStore(props);
     this.processedColumns = derived(
       [this.columnsDataStore.columns, this.constraintsDataStore],
       ([columns, constraintsData]) =>
-        new Map(
-          columns.map((column, columnIndex) => [
-            column.id,
-            new ProcessedColumn({
-              tableOid: this.oid,
-              column,
-              columnIndex,
-              constraints: constraintsData.constraints,
-            }),
-          ]),
+        orderProcessedColumns(
+          new Map(
+            columns.map((column, columnIndex) => [
+              column.id,
+              new ProcessedColumn({
+                tableOid: this.oid,
+                column,
+                columnIndex,
+                constraints: constraintsData.constraints,
+              }),
+            ]),
+          ),
+          { metadata: this.metadata },
         ),
     );
     this.isLoading = derived(

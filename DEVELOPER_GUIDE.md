@@ -49,28 +49,9 @@ Before getting started with your code changes, read our [Contributor guide](./CO
 
 ## Loading sample data
 
-- Using a CSV File (limited visibility of features):
+Mathesar comes with several built-in sample datasets to help you get started quickly with local development or feature evaluation. You can install these directly from the "Create" and "Connect Database" dialogs in the UI. Each dataset is designed to showcase different relationships (many-to-many, many-to-one) in commonplace example scenarios. The **Library Management** dataset is the largest, and is especially useful for performance-related testing.
 
-    For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`.
-
-- Using Mathesar Data Playground (recommended):
-
-    1. Clone the `mathesar-data-playground` repo:
-        ```
-        git clone https://github.com/mathesar-foundation/mathesar-data-playground.git
-        ```
-
-    2. Load the data from sql by running:
-        ```
-        sudo docker exec -i mathesar_dev_db bash -c 'psql -U mathesar' < /path/to/your/cloned/repo/mathesar-data-playground/realistic_library_simulation/simulation_runs/simulation_run_20230106_00.sql
-        ```
-        ```
-        sudo docker exec -i mathesar_dev_db bash -c 'psql -U mathesar' < /path/to/your/cloned/repo/mathesar-data-playground/realistic_library_simulation/simulation_runs/simulation_run_20230106_00_checkouts.sql
-        ```
-    3. [Sync]( https://docs.mathesar.org/user-guide/syncing-db/) these changes from the UI.
-
-
-<!-- TODO add more content about sample data -->
+For more example datasets, see the [mathesar-data-playground](https://github.com/mathesar-foundation/mathesar-data-playground) repository. It includes both the preinstalled datasets and additional ones, like a large, high-quality **Movies** dataset. [Installation instructions for the Movies dataset are available here](https://github.com/mathesar-foundation/mathesar-data-playground/tree/master/movie_rentals#how-to-load-this-data-into-mathesar).
 
 ## API
 

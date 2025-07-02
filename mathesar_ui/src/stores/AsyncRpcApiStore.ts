@@ -1,6 +1,10 @@
 import { get } from 'svelte/store';
 
-import { CancellablePromise, hasProperty } from '@mathesar/component-library';
+import {
+  CancellablePromise,
+  hasProperty,
+  isDefinedNonNullable,
+} from '@mathesar/component-library';
 import {
   RpcError,
   type RpcRequest,
@@ -21,20 +25,28 @@ type BatchRunner<T = any, U = any> = {
   getValue: () => AsyncStoreValue<U, RpcError>;
 };
 
-export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
+type OmitOrVoid<T, K extends keyof T> = keyof Omit<T, K> extends never
+  ? void
+  : Omit<T, K>;
+
+export default class AsyncRpcApiStore<
   Props,
-  U,
-  RpcError
-> {
+  T,
+  U = T,
+  StaticPropKeys extends keyof Props = never,
+> extends AsyncStore<OmitOrVoid<Props, StaticPropKeys>, U, RpcError> {
   apiRpcFn: (props: Props) => RpcRequest<T>;
 
   postProcess: (response: T) => U;
+
+  staticProps?: Pick<Props, StaticPropKeys>;
 
   constructor(
     rpcFn: (props: Props) => RpcRequest<T>,
     options?: Partial<{
       initialValue: U;
       postProcess: (response: T) => U;
+      staticProps: Pick<Props, StaticPropKeys>;
     }>,
   ) {
     const postProcess =
@@ -45,10 +57,11 @@ export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
     if (hasProperty(options, 'initialValue')) {
       asyncStoreOptions.initialValue = options.initialValue;
     }
+    const staticProps = options?.staticProps ?? undefined;
     super(
-      (props: Props) =>
+      (dynamicProps: OmitOrVoid<Props, StaticPropKeys>) =>
         new CancellablePromise((resolve, reject) => {
-          rpcFn(props)
+          rpcFn(this.getProps(dynamicProps))
             .run()
             .then(
               (value) => resolve(postProcess(value)),
@@ -60,9 +73,28 @@ export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
     );
     this.apiRpcFn = rpcFn;
     this.postProcess = postProcess;
+    this.staticProps = staticProps;
   }
 
-  batchRunner(props: Props): BatchRunner<T, U> {
+  getProps(dynamicProps: OmitOrVoid<Props, StaticPropKeys>): Props {
+    if (
+      isDefinedNonNullable(this.staticProps) &&
+      isDefinedNonNullable(dynamicProps)
+    ) {
+      return {
+        ...this.staticProps,
+        ...dynamicProps,
+      } as Props;
+    }
+    if (isDefinedNonNullable(this.staticProps)) {
+      return this.staticProps as Props;
+    }
+    return dynamicProps as Props;
+  }
+
+  batchRunner(
+    dynamicProps: OmitOrVoid<Props, StaticPropKeys>,
+  ): BatchRunner<T, U> {
     const onResponse = (response: RpcResponse<T>) => {
       if (response.status === 'ok') {
         this.setResolvedValue(this.postProcess(response.value));
@@ -74,7 +106,7 @@ export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
       this.beforeRun();
     };
     return {
-      send: this.apiRpcFn(props),
+      send: this.apiRpcFn(this.getProps(dynamicProps)),
       beforeRequest,
       onResponse,
       getValue: () => get(this.value),
