@@ -1,7 +1,10 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
+import type { RawColumnWithMetadata } from './columns';
+import type { RawConstraint } from './constraints';
 import type { RawDatabase } from './databases';
 import type { RawConfiguredRole } from './roles';
+import type { RawTable } from './tables';
 
 export interface RichTextJson {
   text: string;
@@ -101,9 +104,23 @@ export interface RawDataForm extends RawEphemeralDataForm {
   submit_button_label?: string | null;
 }
 
-export interface RawDataFormGetResponse extends RawDataForm {
+export interface RawDataFormResponse extends RawDataForm {
   created_at: string;
   updated_at: string;
+}
+
+// TODO: Move this to another RPC method
+export interface RawDataFormGetResponse extends RawDataFormResponse {
+  field_col_info_map: {
+    tables: Record<
+      string,
+      {
+        table_info: RawTable;
+        columns: Record<string, RawColumnWithMetadata>;
+      }
+    >;
+    constraints: Record<string, RawConstraint>;
+  };
 }
 
 export const forms = {
@@ -119,7 +136,7 @@ export const forms = {
       database_id: RawDatabase['id'];
       schema_oid: RawDataForm['schema_oid'];
     },
-    RawDataFormGetResponse[]
+    RawDataFormResponse[]
   >(),
   add: rpcMethodTypeContainer<
     {
