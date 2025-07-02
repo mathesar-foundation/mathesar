@@ -6,17 +6,20 @@ import { ProcessedColumn } from '@mathesar/stores/table-data';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
-import type { ParentEphemeralField } from './AbstractEphemeralField';
+import type {
+  EphemeralDataFormField,
+  ParentEphemeralField,
+} from './AbstractEphemeralField';
 import { EphermeralFkField } from './EphemeralFkField';
 import { EphemeralReverseFkField } from './EphemeralReverseFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
 
-export function columnToEphemeralField(
+function columnToEphemeralField(
   pc: ProcessedColumn,
   tableStructureSubstance: TableStructureSubstance,
   parentField: ParentEphemeralField,
   index: number,
-) {
+): EphermeralFkField | EphermeralScalarField {
   const baseProps = {
     key: getGloballyUniqueId(),
     label: pc.column.name,
@@ -45,6 +48,23 @@ export function columnToEphemeralField(
     ...baseProps,
     processedColumn: pc,
   });
+}
+
+export function tableStructureSubstanceToEphemeralFields(
+  tableStructureSubstance: TableStructureSubstance,
+  parentField: ParentEphemeralField | null,
+): (EphermeralFkField | EphermeralScalarField)[] {
+  return [...tableStructureSubstance.processedColumns.values()]
+    .filter((pc) => !pc.column.default?.is_dynamic)
+    .map((c, index) => {
+      const ef = columnToEphemeralField(
+        c,
+        tableStructureSubstance,
+        parentField,
+        index,
+      );
+      return ef;
+    });
 }
 
 function getColumnDetailFromFormSource(
@@ -89,7 +109,7 @@ export function rawEphemeralFieldToEphemeralField(
   parentField: ParentEphemeralField | null,
   baseTableOid: number,
   formSource: RawDataFormGetResponse['field_col_info_map'],
-) {
+): EphemeralDataFormField {
   const baseProps = {
     key: rawEphemeralField.key,
     label: rawEphemeralField.label,
@@ -146,14 +166,15 @@ export function rawEphemeralFieldToEphemeralField(
       relatedTableOid: rawEphemeralField.related_table_oid,
     });
 
-    const nestedFields = rawEphemeralField.child_fields?.map((field) =>
-      rawEphemeralFieldToEphemeralField(
-        field,
-        fkField,
-        baseTableOid,
-        formSource,
-      ),
-    ) ?? [];
+    const nestedFields =
+      rawEphemeralField.child_fields?.map((field) =>
+        rawEphemeralFieldToEphemeralField(
+          field,
+          fkField,
+          baseTableOid,
+          formSource,
+        ),
+      ) ?? [];
     fkField.setNestedFields(nestedFields);
 
     return fkField;
@@ -168,17 +189,18 @@ export function rawEphemeralFieldToEphemeralField(
     ...baseProps,
     reverseFkConstraintOid: constraintDetails.oid,
     relatedTableOid: rawEphemeralField.related_table_oid,
-    nestedFields: []
+    nestedFields: [],
   });
 
-  const nestedFields = rawEphemeralField.child_fields?.map((field) =>
-    rawEphemeralFieldToEphemeralField(
-      field,
-      revFkField,
-      baseTableOid,
-      formSource,
-    ),
-  ) ?? [];
+  const nestedFields =
+    rawEphemeralField.child_fields.map((field) =>
+      rawEphemeralFieldToEphemeralField(
+        field,
+        revFkField,
+        baseTableOid,
+        formSource,
+      ),
+    ) ?? [];
   revFkField.setNestedFields(nestedFields);
 
   return revFkField;

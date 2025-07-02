@@ -38,8 +38,6 @@ export class EphermeralFkField extends AbstractEphemeralField {
 
   readonly nestedFields: WritableMap<string, EphemeralDataFormField>;
 
-  readonly getDefaultNestedFields;
-
   constructor(
     parentField: ParentEphemeralField,
     props: EphemeralFieldProps & {
@@ -48,7 +46,6 @@ export class EphermeralFkField extends AbstractEphemeralField {
       nestedFields?: Iterable<EphemeralDataFormField>;
       fkConstraintOid: number;
       relatedTableOid: number;
-      getDefaultNestedFields?: () => Iterable<EphemeralDataFormField>;
     },
   ) {
     super(parentField, props);
@@ -65,14 +62,17 @@ export class EphermeralFkField extends AbstractEphemeralField {
     this.fieldStore = optionalField(null);
     this.fkConstraintOid = props.fkConstraintOid;
     this.relatedTableOid = props.relatedTableOid;
-    this.getDefaultNestedFields = props.getDefaultNestedFields ?? (() => []);
   }
 
-  setInteractionRule(rule: FkFieldInteractionRule) {
+  async setInteractionRule(
+    rule: FkFieldInteractionRule,
+    getDefaultNestedFields: () => Promise<Iterable<EphemeralDataFormField>>,
+  ) {
     this.rule.set(rule);
     if (get(this.nestedFields).size === 0) {
+      const defaultNestedFields = await getDefaultNestedFields();
       this.nestedFields.reconstruct(
-        [...this.getDefaultNestedFields()].map((f) => [f.key, f]),
+        [...defaultNestedFields].map((f) => [f.key, f]),
       );
     }
   }

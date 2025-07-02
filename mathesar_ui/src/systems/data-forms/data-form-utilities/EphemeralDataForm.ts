@@ -10,8 +10,8 @@ import { WritableMap } from '@mathesar-component-library';
 
 import type { EphemeralDataFormField } from './AbstractEphemeralField';
 import {
-  columnToEphemeralField,
   rawEphemeralFieldToEphemeralField,
+  tableStructureSubstanceToEphemeralFields,
 } from './transformers';
 
 export interface EdfUpdateDiff {
@@ -113,17 +113,10 @@ export class EphemeralDataForm {
       description: writable(null),
       associatedRoleId: writable(null),
       fields: new WritableMap(
-        [...tableStructureSubstance.processedColumns.values()]
-          .filter((pc) => !pc.column.default?.is_dynamic)
-          .map((c, index) => {
-            const ef = columnToEphemeralField(
-              c,
-              tableStructureSubstance,
-              null,
-              index,
-            );
-            return [ef.key, ef];
-          }),
+        tableStructureSubstanceToEphemeralFields(
+          tableStructureSubstance,
+          null,
+        ).map((ef) => [ef.key, ef]),
       ),
     });
   }

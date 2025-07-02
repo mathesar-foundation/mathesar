@@ -16,9 +16,9 @@
 
   export let dataFormManager: EditableDataFormManager;
 
-  export let table: Table;
+  export let tableOid: Table['oid'];
 
-  $: tableStructure = dataFormManager.getTableStructure(table);
+  $: tableStructure = dataFormManager.getTableStructure(tableOid);
   $: ({ processedColumns } = tableStructure);
   $: nonFkProcessedColumns = [...$processedColumns.values()].filter(
     (pc) => !pc.linkFk,
@@ -28,6 +28,7 @@
   );
   $: tableStructureAsyncStore = tableStructure.asyncStore;
   $: tableStructureSubstance = $tableStructureAsyncStore.resolvedValue;
+  $: table = tableStructureSubstance?.table;
 </script>
 
 <div class="add-field">
@@ -40,7 +41,9 @@
     let:close
   >
     <MenuHeading>
-      <TableName {table} />
+      {#if table}
+        <TableName {table} />
+      {/if}
     </MenuHeading>
     <MenuDivider />
     {#each nonFkProcessedColumns as processedColumn (processedColumn.id)}
