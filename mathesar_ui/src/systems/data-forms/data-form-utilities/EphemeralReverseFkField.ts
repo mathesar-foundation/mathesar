@@ -1,10 +1,10 @@
-import { get } from 'svelte/store';
+import { type Readable, get } from 'svelte/store';
 
 import type {
   RawEphemeralReverseForeignKeyDataFormField,
   RawReverseForeignKeyDataFormField,
 } from '@mathesar/api/rpc/forms';
-import { WritableMap } from '@mathesar-component-library';
+import { type ImmutableMap, WritableMap } from '@mathesar-component-library';
 
 import {
   AbstractEphemeralField,
@@ -21,10 +21,13 @@ export class EphemeralReverseFkField extends AbstractEphemeralField {
 
   readonly relatedTableOid;
 
-  readonly nestedFields: WritableMap<
-    EphemeralDataFormField['key'],
-    EphemeralDataFormField
-  > = new WritableMap();
+  private _nestedFields;
+
+  get nestedFields(): Readable<
+    ImmutableMap<EphemeralDataFormField['key'], EphemeralDataFormField>
+  > {
+    return this._nestedFields;
+  }
 
   constructor(
     parentField: ParentEphemeralField,
@@ -35,7 +38,7 @@ export class EphemeralReverseFkField extends AbstractEphemeralField {
     },
   ) {
     super(parentField, data);
-    this.nestedFields = new WritableMap(
+    this._nestedFields = new WritableMap(
       [...data.nestedFields].map((f) => [f.key, f]),
     );
     this.reverseFkConstraintOid = data.reverseFkConstraintOid;
@@ -43,7 +46,7 @@ export class EphemeralReverseFkField extends AbstractEphemeralField {
   }
 
   setNestedFields(nestedFields: Iterable<EphemeralDataFormField>) {
-    this.nestedFields.reconstruct([...nestedFields].map((f) => [f.key, f]));
+    this._nestedFields.reconstruct([...nestedFields].map((f) => [f.key, f]));
   }
 
   toRawEphemeralField(): RawEphemeralReverseForeignKeyDataFormField {

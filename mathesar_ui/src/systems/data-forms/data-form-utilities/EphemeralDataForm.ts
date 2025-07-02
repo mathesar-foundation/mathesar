@@ -1,4 +1,4 @@
-import { type Writable, get, writable } from 'svelte/store';
+import { type Readable, type Writable, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
@@ -6,7 +6,7 @@ import type {
   RawEphemeralDataForm,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
-import { WritableMap } from '@mathesar-component-library';
+import { type ImmutableMap, WritableMap } from '@mathesar-component-library';
 
 import type { EphemeralDataFormField } from './AbstractEphemeralField';
 import {
@@ -25,13 +25,31 @@ export class EphemeralDataForm {
 
   readonly databaseId;
 
-  readonly name;
+  private _name;
 
-  readonly description;
+  get name(): Readable<RawDataForm['name']> {
+    return this._name;
+  }
 
-  readonly associatedRoleId;
+  private _description;
 
-  readonly fields;
+  get description(): Readable<RawDataForm['description']> {
+    return this._description;
+  }
+
+  private _associatedRoleId;
+
+  get associatedRoleId(): Readable<RawDataForm['associated_role_id']> {
+    return this._associatedRoleId;
+  }
+
+  private _fields;
+
+  get fields(): Readable<
+    ImmutableMap<EphemeralDataFormField['key'], EphemeralDataFormField>
+  > {
+    return this._fields;
+  }
 
   constructor(edf: {
     baseTableOid: number;
@@ -45,14 +63,14 @@ export class EphemeralDataForm {
     this.baseTableOid = edf.baseTableOid;
     this.schemaOid = edf.schemaOid;
     this.databaseId = edf.databaseId;
-    this.name = edf.name;
-    this.description = edf.description;
-    this.associatedRoleId = edf.associatedRoleId;
-    this.fields = edf.fields;
+    this._name = edf.name;
+    this._description = edf.description;
+    this._associatedRoleId = edf.associatedRoleId;
+    this._fields = edf.fields;
   }
 
   setName(name: string): EdfUpdateDiff {
-    this.name.set(name);
+    this._name.set(name);
     return {
       change: 'name',
     };

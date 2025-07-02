@@ -1,4 +1,4 @@
-import { type Writable, get, writable } from 'svelte/store';
+import { type Readable, type Writable, get, writable } from 'svelte/store';
 
 import type {
   RawEphemeralForeignKeyDataFormField,
@@ -6,7 +6,7 @@ import type {
 } from '@mathesar/api/rpc/forms';
 import { type FieldStore, optionalField } from '@mathesar/components/form';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import { WritableMap } from '@mathesar-component-library';
+import { type ImmutableMap, WritableMap } from '@mathesar-component-library';
 
 import {
   AbstractEphemeralField,
@@ -34,9 +34,19 @@ export class EphermeralFkField extends AbstractEphemeralField {
 
   readonly fieldStore: FieldStore;
 
-  readonly rule: Writable<FkFieldInteractionRule>;
+  private _rule: Writable<FkFieldInteractionRule>;
 
-  readonly nestedFields: WritableMap<string, EphemeralDataFormField>;
+  get rule(): Readable<FkFieldInteractionRule> {
+    return this._rule;
+  }
+
+  private _nestedFields;
+
+  get nestedFields(): Readable<
+    ImmutableMap<EphemeralDataFormField['key'], EphemeralDataFormField>
+  > {
+    return this._nestedFields;
+  }
 
   constructor(
     parentField: ParentEphemeralField,
@@ -54,9 +64,9 @@ export class EphermeralFkField extends AbstractEphemeralField {
     if (!fkLink) {
       throw Error('The passed column is not a foreign key');
     }
-    this.rule = writable(props.rule);
+    this._rule = writable(props.rule);
     const nestedFieldIterable = props.nestedFields ?? [];
-    this.nestedFields = new WritableMap(
+    this._nestedFields = new WritableMap(
       [...nestedFieldIterable].map((f) => [f.key, f]),
     );
     this.fieldStore = optionalField(null);
@@ -68,17 +78,17 @@ export class EphermeralFkField extends AbstractEphemeralField {
     rule: FkFieldInteractionRule,
     getDefaultNestedFields: () => Promise<Iterable<EphemeralDataFormField>>,
   ) {
-    this.rule.set(rule);
+    this._rule.set(rule);
     if (get(this.nestedFields).size === 0) {
       const defaultNestedFields = await getDefaultNestedFields();
-      this.nestedFields.reconstruct(
+      this._nestedFields.reconstruct(
         [...defaultNestedFields].map((f) => [f.key, f]),
       );
     }
   }
 
   setNestedFields(nestedFields: Iterable<EphemeralDataFormField>) {
-    this.nestedFields.reconstruct([...nestedFields].map((f) => [f.key, f]));
+    this._nestedFields.reconstruct([...nestedFields].map((f) => [f.key, f]));
   }
 
   toRawEphemeralField(): RawEphemeralForeignKeyDataFormField {

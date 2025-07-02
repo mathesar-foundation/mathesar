@@ -1,4 +1,4 @@
-import { get, writable } from 'svelte/store';
+import { type Readable, get, writable } from 'svelte/store';
 
 import type {
   RawDataFormBaseField,
@@ -33,21 +33,37 @@ export abstract class AbstractEphemeralField {
 
   readonly key;
 
-  readonly index;
+  private _index;
 
-  readonly label;
+  get index(): Readable<EphemeralFieldProps['index']> {
+    return this._index;
+  }
 
-  readonly help;
+  private _label;
 
-  readonly isRequired;
+  get label(): Readable<EphemeralFieldProps['label']> {
+    return this._label;
+  }
+
+  private _help;
+
+  get help(): Readable<EphemeralFieldProps['help']> {
+    return this._help;
+  }
+
+  private _isRequired;
+
+  get isRequired(): Readable<EphemeralFieldProps['isRequired']> {
+    return this._isRequired;
+  }
 
   constructor(parentField: ParentEphemeralField, data: EphemeralFieldProps) {
     this.key = data.key;
     this.parentField = parentField;
-    this.index = writable(data.index);
-    this.label = writable(data.label);
-    this.help = writable(data.help);
-    this.isRequired = writable(data.isRequired);
+    this._index = writable(data.index);
+    this._label = writable(data.label);
+    this._help = writable(data.help);
+    this._isRequired = writable(data.isRequired);
   }
 
   abstract toRawEphemeralField(): RawEphemeralDataFormField;

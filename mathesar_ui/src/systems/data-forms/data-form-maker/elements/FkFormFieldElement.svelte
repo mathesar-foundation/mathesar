@@ -5,7 +5,7 @@
     type DataFormManager,
     EditableDataFormManager,
   } from '../../data-form-utilities/DataFormManager';
-  import { type EphermeralFkField } from '../../data-form-utilities/EphemeralFkField';
+  import type { EphermeralFkField } from '../../data-form-utilities/EphemeralFkField';
 
   import DataFormFieldsContainer from './DataFormFieldsContainer.svelte';
   import DataFormInput from './DataFormInput.svelte';
