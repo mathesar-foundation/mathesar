@@ -16,7 +16,10 @@ import {
 
 export interface TableStructureProps {
   database: Pick<Database, 'id'>;
-  table: Pick<Table, 'oid' | 'metadata'>;
+  table: {
+    oid: Table['oid'];
+    metadata?: Table['metadata'];
+  };
 }
 
 export class TableStructure {
