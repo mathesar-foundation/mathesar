@@ -52,7 +52,7 @@
       getColumns: () => get(processedColumns),
       getRecordSummaries: () => new ImmutableMap(),
     },
-    getSelection: () => get(selection),
+    selection,
     showToastInfo: toast.info,
     showToastError: toast.error,
   });

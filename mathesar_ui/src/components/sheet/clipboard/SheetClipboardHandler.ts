@@ -1,4 +1,4 @@
-import { get } from 'svelte/store';
+import { type Writable, get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { ClipboardHandler } from '@mathesar/stores/clipboard';
@@ -11,7 +11,7 @@ import { type CopyingContext, getCopyContent } from './copy';
 import { type PastingContext, paste } from './paste';
 
 interface Dependencies {
-  getSelection: () => SheetSelection;
+  selection: Writable<SheetSelection>;
   copyingContext: CopyingContext;
   pastingContext?: PastingContext;
   showToastInfo: (msg: string) => void;
@@ -42,7 +42,7 @@ export class SheetClipboardHandler implements ClipboardHandler {
   handleCopy(event: ClipboardEvent): void {
     if (event.clipboardData == null) return;
     try {
-      const selection = this.deps.getSelection();
+      const selection = get(this.deps.selection);
       const content = getCopyContent(selection, this.deps.copyingContext);
       this.deps.showToastInfo(
         get(_)('copied_cells', { values: { count: content.cellCount } }),
@@ -60,10 +60,9 @@ export class SheetClipboardHandler implements ClipboardHandler {
   async handlePaste({ clipboardData }: ClipboardEvent) {
     const context = this.deps.pastingContext;
     if (!context) return;
-    const selection = this.deps.getSelection();
     if (!clipboardData) return;
     try {
-      await paste(clipboardData, selection, context);
+      await paste(clipboardData, this.deps.selection, context);
     } catch (e) {
       this.deps.showToastError(getErrorMessage(e));
     }

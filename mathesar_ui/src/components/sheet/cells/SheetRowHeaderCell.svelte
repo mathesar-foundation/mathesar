@@ -5,14 +5,18 @@
 
   export let rowSelectionId: string;
   export let columnIdentifierKey: ColumnIdentifierKey;
+  export let isWithinPlaceholderRow = false;
+  export let onMouseDown: ((e: MouseEvent) => void) | undefined = undefined;
 
   $: style = getSheetCellStyle(columnIdentifierKey);
 </script>
 
 <div
   data-sheet-element="row-header-cell"
+  data-sheet-row-type={isWithinPlaceholderRow ? 'placeholder' : 'data'}
   data-row-selection-id={rowSelectionId}
   style={$style}
+  on:mousedown={onMouseDown}
 >
   <slot />
 </div>
@@ -32,6 +36,9 @@
     font-size: var(--sm2);
     padding: 0 1.5rem;
     color: var(--color-text-muted);
-    cursor: default;
+
+    &[data-sheet-row-type='placeholder'] {
+      cursor: pointer;
+    }
   }
 </style>

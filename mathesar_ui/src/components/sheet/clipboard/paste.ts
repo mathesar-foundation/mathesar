@@ -1,13 +1,13 @@
 import { arrayFrom, cycle, execPipe, first, map, take, zip } from 'iter-tools';
-import { get } from 'svelte/store';
+import { type Writable, get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import {
-  type RecordRow,
-  type RecordsData,
-  getRowSelectionId,
-} from '@mathesar/stores/table-data';
+import { type RecordRow, getRowSelectionId } from '@mathesar/stores/table-data';
+import type {
+  RowAdditionRecipe,
+  RowModificationRecipe,
+} from '@mathesar/stores/table-data/records';
 import { startingFrom } from '@mathesar/utils/iterUtils';
 import {
   type ImmutableSet,
@@ -29,11 +29,11 @@ import { deserializeTsv } from './tsv';
 export interface PastingContext {
   getSheetColumns: () => RawColumnWithMetadata[];
   getRecordRows: () => RecordRow[];
-  setSelection: (selection: SheetSelection) => void;
   confirm: (message: string) => Promise<boolean>;
-  updateRecords: (
-    rowBlueprints: Parameters<RecordsData['bulkUpdate']>[0],
-  ) => Promise<void>;
+  bulkDml: (
+    modificationRecipes: RowModificationRecipe[],
+    additionRecipes?: RowAdditionRecipe[],
+  ) => Promise<{ rowIds: string[]; columnIds: string[] }>;
 }
 
 interface TsvCell {
@@ -99,17 +99,6 @@ function getDestinationColumns(
   return sheetColumns.slice(firstIndex, lastIndex + 1);
 }
 
-function insertViaPaste(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  payload: Payload,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  selection: SheetSelection,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  context: PastingContext,
-) {
-  throw new Error('Insert via paste is not yet implemented.');
-}
-
 function prepareStructuredCellValue(
   column: RawColumnWithMetadata,
   cell: PayloadCell,
@@ -147,12 +136,20 @@ function makeCellBlueprint([cell, column]: [
   };
 }
 
-async function updateViaPaste(
-  payload: Payload,
-  selection: SheetSelection,
-  context: PastingContext,
-) {
-  const targetRowCount = Math.max(selection.rowIds.size, payload.length);
+async function updateViaPaste({
+  payload,
+  selectionStore,
+  context,
+  confirm,
+}: {
+  payload: Payload;
+  selectionStore: Writable<SheetSelection>;
+  context: PastingContext;
+  confirm: boolean;
+}) {
+  const initialSelection = get(selectionStore);
+
+  const targetRowCount = Math.max(initialSelection.rowIds.size, payload.length);
   const sourceRows = [...take(targetRowCount, cycle(payload))];
   const firstSourceRow = first(sourceRows);
   if (!firstSourceRow) throw new Error(get(_)('paste_error_no_rows'));
@@ -162,23 +159,32 @@ async function updateViaPaste(
 
   const destinationRows = execPipe(
     context.getRecordRows(),
-    (i) => startingFrom(i, (r) => selection.rowIds.has(getRowSelectionId(r))),
+    (i) =>
+      startingFrom(i, (r) => initialSelection.rowIds.has(getRowSelectionId(r))),
     take(sourceRows.length),
     arrayFrom,
   );
 
-  if (destinationRows.length < sourceRows.length) {
-    throw new Error(get(_)('paste_error_too_few_destination_rows'));
-  }
+  /**
+   * Rows from the source data which align with existing rows in the sheet (to
+   * be modified).
+   */
+  const sourceModificationRows = sourceRows.slice(0, destinationRows.length);
+
+  /**
+   * Rows from the source data which extend beyond the sheet (and thus will be
+   * inserted).
+   */
+  const sourceAdditionRows = sourceRows.slice(destinationRows.length);
 
   const destinationColumns = getDestinationColumns(
     sourceColumnCount,
-    selection.columnIds,
+    initialSelection.columnIds,
     sheetColumns,
   );
 
-  const rowBlueprints = execPipe(
-    zip(sourceRows, destinationRows),
+  const modificationRecipes = execPipe(
+    zip(sourceModificationRows, destinationRows),
     map(([sourceRow, destinationRow]) => ({
       row: destinationRow,
       cells: [...map(makeCellBlueprint, zip(sourceRow, destinationColumns))],
@@ -186,37 +192,54 @@ async function updateViaPaste(
     arrayFrom,
   );
 
-  const totalCellCount = destinationRows.length * destinationColumns.length;
-  const confirmed = await context.confirm(
-    get(_)('paste_confirmation', { values: { count: totalCellCount } }),
+  const additionRecipes = execPipe(
+    sourceAdditionRows,
+    map((sourceRow) => ({
+      cells: [...map(makeCellBlueprint, zip(sourceRow, destinationColumns))],
+    })),
+    arrayFrom,
   );
-  if (!confirmed) return;
 
-  await context.updateRecords(rowBlueprints);
+  const rowCount = Math.max(sourceRows.length, destinationRows.length);
+  const columnCount = destinationColumns.length;
+  const totalCellCount = rowCount * columnCount;
+  if (confirm) {
+    const confirmed = await context.confirm(
+      get(_)('paste_confirmation', { values: { count: totalCellCount } }),
+    );
+    if (!confirmed) return;
+  }
 
-  context.setSelection(
-    selection.ofRowColumnIntersection(
-      destinationRows.map((row) => getRowSelectionId(row)),
-      destinationColumns.map((column) => String(column.id)),
-    ),
+  const { rowIds, columnIds } = await context.bulkDml(
+    modificationRecipes,
+    additionRecipes,
+  );
+
+  // Note: When we call `context.bulkDml` the selection store might end up
+  // getting updated. This happens if rows are inserted (because a new Plane
+  // will be derived, hence updating the selection store). We update it again
+  // here, and it's important to keep in mind that the `selection` value below
+  // could be different from the `initialSelection` value above.
+  selectionStore.update((selection) =>
+    selection.ofRowColumnIntersection(rowIds, columnIds),
   );
 }
 
 export async function paste(
   clipboardData: DataTransfer,
-  selection: SheetSelection,
+  selectionStore: Writable<SheetSelection>,
   context: PastingContext,
 ): Promise<void> {
   const payload = getPayload(clipboardData);
 
-  const operation = selection.pasteOperation;
+  const operation = get(selectionStore).pasteOperation;
   if (operation === 'none') return;
   if (operation === 'insert') {
-    insertViaPaste(payload, selection, context);
+    await updateViaPaste({ payload, selectionStore, context, confirm: false });
     return;
   }
   if (operation === 'update') {
-    await updateViaPaste(payload, selection, context);
+    await updateViaPaste({ payload, selectionStore, context, confirm: true });
     return;
   }
   assertExhaustive(operation);

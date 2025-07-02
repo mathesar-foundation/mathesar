@@ -233,7 +233,8 @@ export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
 // STATUSES
 
 export const iconNotEditable: IconProps = { data: faLock };
-export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
+export const iconUnsavedChanges: IconProps = { data: faTriangleExclamation };
+export const iconNewlyAdded: IconProps = { data: faStar };
 export const iconYes: IconProps = { data: faCheck };
 export const iconRequiresUpgrade: IconProps = { data: faTriangleExclamation };
 export const iconRequiresAttention: IconProps = { data: faCircleExclamation };

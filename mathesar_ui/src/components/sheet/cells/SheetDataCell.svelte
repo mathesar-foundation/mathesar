@@ -10,6 +10,7 @@
   export let columnIdentifierKey: SheetColumnIdentifierKey;
   export let cellSelectionId: string | undefined = undefined;
   export let selection: SheetSelection | undefined = undefined;
+  export let isWithinPlaceholderRow = false;
 
   $: style = getSheetCellStyle(columnIdentifierKey);
   $: ({ isActive, isSelected, hasSelectionBackground } = (() => {
@@ -31,6 +32,7 @@
 
 <div
   data-sheet-element="data-cell"
+  data-sheet-row-type={isWithinPlaceholderRow ? 'placeholder' : 'data'}
   data-cell-selection-id={cellSelectionId}
   data-cell-active={isActive ? '' : undefined}
   data-cell-selected={isSelected ? '' : undefined}

@@ -10,7 +10,9 @@ import type SheetSelection from './SheetSelection';
 export type SheetCellDetails =
   | { type: 'data-cell'; cellId: string }
   | { type: 'column-header-cell'; columnId: string }
-  | { type: 'row-header-cell'; rowId: string };
+  | { type: 'row-header-cell'; rowId: string }
+  | { type: 'placeholder-row-header-cell'; rowId: string }
+  | { type: 'placeholder-data-cell'; cellId: string };
 
 export function findContainingSheetCell(
   element: HTMLElement,
@@ -22,9 +24,13 @@ export function findContainingSheetCell(
   if (!elementType) return undefined;
 
   if (elementType === 'data-cell') {
+    const rowType = containingElement.getAttribute('data-sheet-row-type');
     const cellId = containingElement.getAttribute('data-cell-selection-id');
     if (!cellId) return undefined;
-    return { type: 'data-cell', cellId };
+    return {
+      type: rowType === 'placeholder' ? 'placeholder-data-cell' : 'data-cell',
+      cellId,
+    };
   }
 
   if (elementType === 'column-header-cell') {
@@ -34,9 +40,16 @@ export function findContainingSheetCell(
   }
 
   if (elementType === 'row-header-cell') {
+    const rowType = containingElement.getAttribute('data-sheet-row-type');
     const rowId = containingElement.getAttribute('data-row-selection-id');
     if (!rowId) return undefined;
-    return { type: 'row-header-cell', rowId };
+    return {
+      type:
+        rowType === 'placeholder'
+          ? 'placeholder-row-header-cell'
+          : 'row-header-cell',
+      rowId,
+    };
   }
 
   return undefined;
