@@ -1,6 +1,8 @@
 <script lang="ts">
+  import type { Readable } from 'svelte/store';
+
   import type { Table } from '@mathesar/models/Table';
-  import type { WritableMap } from '@mathesar-component-library';
+  import type { ImmutableMap } from '@mathesar-component-library';
 
   import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
   import {
@@ -13,9 +15,8 @@
 
   export let dataFormManager: DataFormManager;
   export let tableOid: Table['oid'];
-  export let fields: WritableMap<
-    EphemeralDataFormField['key'],
-    EphemeralDataFormField
+  export let fields: Readable<
+    ImmutableMap<EphemeralDataFormField['key'], EphemeralDataFormField>
   >;
 </script>
 
@@ -26,7 +27,11 @@
   {:else}
     {#if dataFormManager instanceof EditableDataFormManager}
       <div class="empty-fields-state">
-        <AddFormFieldElementDropdown {tableOid} {dataFormManager} />
+        <AddFormFieldElementDropdown
+          display="full"
+          {tableOid}
+          {dataFormManager}
+        />
       </div>
     {/if}
   {/each}
@@ -39,6 +44,12 @@
     .divider {
       height: var(--sm2);
       position: relative;
+    }
+
+    .empty-fields-state {
+      padding: var(--lg1);
+      margin-bottom: var(--sm4);
+      border: 1px dashed var(--border-color);
     }
   }
 </style>

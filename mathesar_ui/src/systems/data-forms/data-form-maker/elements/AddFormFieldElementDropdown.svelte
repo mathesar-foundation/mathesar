@@ -15,8 +15,8 @@
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
 
   export let dataFormManager: EditableDataFormManager;
-
   export let tableOid: Table['oid'];
+  export let display: 'tiny' | 'full' = 'tiny';
 
   $: tableStructure = dataFormManager.getTableStructure(tableOid);
   $: ({ processedColumns } = tableStructure);
@@ -34,8 +34,9 @@
 <div class="add-field">
   <DropdownMenu
     showArrow={false}
-    triggerAppearance="outcome"
+    triggerAppearance={display === 'tiny' ? 'outcome' : 'secondary'}
     icon={iconAddNew}
+    label={display === 'full' ? $_('add_fields') : ''}
     preferredPlacement="bottom-end"
     closeOnInnerClick={false}
     let:close
