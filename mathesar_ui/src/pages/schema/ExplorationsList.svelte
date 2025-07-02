@@ -1,33 +1,40 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
-  import { iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
+  import { modal } from '@mathesar/stores/modal';
 
-  import EmptyEntity from './EmptyEntity.svelte';
+  import EditExplorationModal from './EditExplorationModal.svelte';
   import ExplorationItem from './ExplorationItem.svelte';
+
+  const editExplorationModal = modal.spawnModalController();
 
   export let explorations: SavedExploration[];
   export let database: Database;
   export let schema: Schema;
+
+  let explorationForEditing: SavedExploration | undefined;
+
+  function openEditExplorationModal(exploration: SavedExploration) {
+    explorationForEditing = exploration;
+    editExplorationModal.open();
+  }
 </script>
 
-<div class="container">
+<div class="exploration-list">
   {#each explorations as exploration (exploration.id)}
-    <ExplorationItem {exploration} {database} {schema} />
-  {:else}
-    <EmptyEntity icon={iconExploration}>
-      <p>{$_('no_explorations')}</p>
-    </EmptyEntity>
+    <ExplorationItem
+      {exploration}
+      {database}
+      {schema}
+      {openEditExplorationModal}
+    />
   {/each}
 </div>
 
-<style lang="scss">
-  .container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-</style>
+{#if explorationForEditing}
+  <EditExplorationModal
+    controller={editExplorationModal}
+    exploration={explorationForEditing}
+  />
+{/if}
