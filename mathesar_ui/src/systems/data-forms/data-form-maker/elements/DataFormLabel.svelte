@@ -2,7 +2,7 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import type { EphemeralDataFormField } from '../EphemeralDataForm';
+  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
 
   export let dataFormField: EphemeralDataFormField;
   export let isSelected: boolean;

@@ -6,9 +6,10 @@
   import { dataFormInspectorWidth } from '@mathesar/stores/localStorage';
   import { WithPanel } from '@mathesar-component-library';
 
+  import type { DataFormManager } from '../data-form-utilities/DataFormManager';
+
   import ActionsPane from './ActionsPane.svelte';
   import DataFormBuildArea from './DataFormBuildArea.svelte';
-  import { type DataFormManager } from './DataFormManager';
 
   export let dataFormManager: DataFormManager;
 </script>

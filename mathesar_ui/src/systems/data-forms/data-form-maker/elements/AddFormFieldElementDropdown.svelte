@@ -5,7 +5,6 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
-  import { TableStructure } from '@mathesar/stores/table-data';
   import {
     ButtonMenuItem,
     DropdownMenu,
@@ -13,15 +12,13 @@
     MenuHeading,
   } from '@mathesar-component-library';
 
-  import { type DataFormManager } from '../DataFormManager';
+  import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
 
-  export let dataFormManager: DataFormManager;
+  export let dataFormManager: EditableDataFormManager;
 
   export let table: Table;
-  $: tableStructure = dataFormManager.tableStructureCache.get(
-    table.oid,
-    () => new TableStructure(table),
-  );
+
+  $: tableStructure = dataFormManager.getTableStructure(table);
   $: ({ processedColumns } = tableStructure);
   $: nonFkProcessedColumns = [...$processedColumns.values()].filter(
     (pc) => !pc.linkFk,

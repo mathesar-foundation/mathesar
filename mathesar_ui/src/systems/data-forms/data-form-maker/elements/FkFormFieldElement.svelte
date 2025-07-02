@@ -3,13 +3,16 @@
 
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { Select, Spinner } from '@mathesar-component-library';
+  import { Select, Spinner, ensureReadable } from '@mathesar-component-library';
 
-  import type { DataFormManager } from '../DataFormManager';
+  import {
+    type DataFormManager,
+    EditableDataFormManager,
+  } from '../../data-form-utilities/DataFormManager';
   import {
     type EphermeralFkField,
     fkFieldInteractionRules,
-  } from '../EphemeralDataForm';
+  } from '../../data-form-utilities/EphemeralFkField';
 
   import DataFormFieldsContainer from './DataFormFieldsContainer.svelte';
   import DataFormInput from './DataFormInput.svelte';
@@ -19,9 +22,16 @@
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphermeralFkField;
 
-  $: ({ rule, linkedTableStructure, nestedFields } = dataFormField);
-  $: linkedTableStructureStore = linkedTableStructure.asyncStore;
-  $: linkedTable = $linkedTableStructureStore.resolvedValue?.table;
+  $: ({ rule, relatedTableOid, nestedFields } = dataFormField);
+
+  $: linkedTableStructure =
+    dataFormManager instanceof EditableDataFormManager
+      ? dataFormManager.getTableStructure(relatedTableOid)
+      : undefined;
+  $: linkedTableStructureStore = ensureReadable(
+    linkedTableStructure?.asyncStore,
+  );
+  $: linkedTable = $linkedTableStructureStore?.resolvedValue?.table;
 
   const interactionRuleText = {
     must_create: {
@@ -72,12 +82,12 @@
     </div>
   {/if}
 
-  {#if $rule === 'select_or_create'}
+  {#if $rule === 'select_or_create' && $nestedFields.size}
     <div class="sub-form-help">
       <RichText text={$_('form_fk_sub_form_help')} let:slotName>
         {#if slotName === 'tableName'}
           <span>
-            {#if $linkedTableStructureStore.isLoading}
+            {#if $linkedTableStructureStore?.isLoading}
               <Spinner />
             {:else if linkedTable}
               <TableName table={linkedTable} />

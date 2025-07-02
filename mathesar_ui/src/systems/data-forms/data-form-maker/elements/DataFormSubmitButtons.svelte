@@ -3,7 +3,7 @@
 
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
 
-  import type { DataFormManager } from '../DataFormManager';
+  import type { DataFormManager } from '../../data-form-utilities/DataFormManager';
 
   import SelectableElement from './SelectableElement.svelte';
 

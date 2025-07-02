@@ -1,18 +1,24 @@
 <script lang="ts">
+  import {
+    type DataFormManager,
+    EditableDataFormManager,
+  } from '../data-form-utilities/DataFormManager';
+
   import DataFormBranding from './DataFormBranding.svelte';
-  import { type DataFormManager } from './DataFormManager';
   import DataFormFieldsContainer from './elements/DataFormFieldsContainer.svelte';
   import DataFormHeader from './elements/DataFormHeader.svelte';
   import DataFormSubmitButtons from './elements/DataFormSubmitButtons.svelte';
 
   export let dataFormManager: DataFormManager;
-  $: ({ fields, baseTable } = dataFormManager.ephemeralDataForm);
+  $: ({ fields } = dataFormManager.ephemeralDataForm);
 
   function handleFormSelection(e: MouseEvent) {
-    const { target } = e;
-    if (target instanceof HTMLElement) {
-      if (!target.closest('[data-form-selectable]')) {
-        dataFormManager.selectElement('form');
+    if (dataFormManager instanceof EditableDataFormManager) {
+      const { target } = e;
+      if (target instanceof HTMLElement) {
+        if (!target.closest('[data-form-selectable]')) {
+          dataFormManager.selectElement('form');
+        }
       }
     }
   }

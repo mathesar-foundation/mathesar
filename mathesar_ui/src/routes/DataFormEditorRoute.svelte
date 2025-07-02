@@ -3,14 +3,14 @@
 
   import { api } from '@mathesar/api/rpc';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import Errors from '@mathesar/components/errors/Errors.svelte';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconForms } from '@mathesar/icons';
   import DataFormEditorPage from '@mathesar/pages/data-forms/DataFormEditorPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import LoadingPage from '@mathesar/pages/LoadingPage.svelte';
   import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-  import { Spinner, ensureReadable } from '@mathesar-component-library';
+  import { ensureReadable } from '@mathesar-component-library';
 
   export let formId: number;
 
@@ -33,24 +33,20 @@
   $: formName = form?.name ?? ensureReadable(undefined);
 </script>
 
-{#if isLoading}
-  <Spinner />
-{:else if form}
+{#if form || isLoading}
   <AppendBreadcrumb
     item={{
       type: 'simple',
-      href: getDataFormPageUrl(schema.database.id, schema.oid, form.id),
+      href: getDataFormPageUrl(schema.database.id, schema.oid, formId),
       label: $formName ?? $_('data_forms'),
       icon: iconForms,
     }}
   />
 
-  {#if $formSourceInfo.resolvedValue}
-    <DataFormEditorPage dataForm={form} />
-  {:else}
-    <Errors
-      errors={[$formSourceInfo.error ?? $_('error_fetching_form_source_info')]}
-    />
+  {#if isLoading}
+    <LoadingPage />
+  {:else if form}
+    <DataFormEditorPage dataForm={form} formSourceInfo={$formSourceInfo} />
   {/if}
 {:else}
   <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>

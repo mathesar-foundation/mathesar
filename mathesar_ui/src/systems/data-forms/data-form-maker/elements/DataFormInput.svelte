@@ -3,10 +3,8 @@
 
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
 
-  import type {
-    EphermeralFkField,
-    EphermeralScalarField,
-  } from '../EphemeralDataForm';
+  import type { EphermeralFkField } from '../../data-form-utilities/EphemeralFkField';
+  import type { EphermeralScalarField } from '../../data-form-utilities/EphemeralScalarField';
 
   export let dataFormField: EphermeralScalarField | EphermeralFkField;
   export let isSelected: boolean;

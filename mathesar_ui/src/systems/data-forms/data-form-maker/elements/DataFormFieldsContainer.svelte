@@ -1,10 +1,9 @@
 <script lang="ts">
   import type { WritableMap } from '@mathesar-component-library';
 
-  import type { DataFormManager } from '../DataFormManager';
-  import type { EphemeralDataFormField } from '../EphemeralDataForm';
+  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
+  import type { DataFormManager } from '../../data-form-utilities/DataFormManager';
 
-  import DataFormFieldDivider from './DataFormFieldDivider.svelte';
   import DataFormFieldElement from './DataFormFieldElement.svelte';
 
   export let dataFormManager: DataFormManager;
@@ -17,12 +16,17 @@
 <div class="fields-container">
   {#each [...$fields.values()] as ephField (ephField.key)}
     <DataFormFieldElement {dataFormManager} dataFormField={ephField} />
-    <DataFormFieldDivider {dataFormManager} table={ephField.table} />
+    <div class="divider" />
   {/each}
 </div>
 
 <style lang="scss">
   .fields-container {
     display: contents;
+
+    .divider {
+      height: var(--sm2);
+      position: relative;
+    }
   }
 </style>

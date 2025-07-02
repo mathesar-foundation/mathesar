@@ -1,7 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { DataFormManager } from '../DataFormManager';
+  import DataFormTitle from '../../data-form-components/DataFormTitle.svelte';
+  import {
+    type DataFormManager,
+    EditableDataFormManager,
+  } from '../../data-form-utilities/DataFormManager';
 
   import SelectableElement from './SelectableElement.svelte';
 
@@ -9,25 +13,16 @@
 
   $: ({ name } = dataFormManager.ephemeralDataForm);
 
-  function getInputValue(e: Event) {
-    const element = e.target as HTMLInputElement;
-    return element.value;
-  }
-
-  async function onTitleInput(e: Event) {
-    await dataFormManager.update((edf) => edf.setName(getInputValue(e)));
+  async function onTitleInput(_name: string) {
+    if (dataFormManager instanceof EditableDataFormManager) {
+      await dataFormManager.update((edf) => edf.setName(_name));
+    }
   }
 </script>
 
 <div class="header">
-  <SelectableElement elementId="title" {dataFormManager}>
-    <input
-      class="form-title"
-      type="text"
-      placeholder={$_('add_form_title')}
-      value={$name}
-      on:input={onTitleInput}
-    />
+  <SelectableElement elementId="title" {dataFormManager} let:isSelected>
+    <DataFormTitle isEditable {isSelected} title={$name} {onTitleInput} />
   </SelectableElement>
 
   <SelectableElement elementId="description" {dataFormManager}>
@@ -44,7 +39,6 @@
     --data_forms__selectable-element-padding: 0;
   }
 
-  input,
   textarea {
     border: none;
     background: transparent;
@@ -54,12 +48,7 @@
       cursor: pointer;
     }
   }
-  .form-title {
-    border: none;
-    padding: var(--sm1);
-    font-size: var(--lg3);
-    font-weight: var(--font-weight-medium);
-  }
+
   .form-description {
     padding: var(--sm3) var(--sm1);
     resize: vertical;

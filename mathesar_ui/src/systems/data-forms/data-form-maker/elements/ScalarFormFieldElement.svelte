@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EphermeralScalarField } from '../EphemeralDataForm';
+  import type { EphermeralScalarField } from '../../data-form-utilities/EphemeralScalarField';
 
   import DataFormInput from './DataFormInput.svelte';
   import DataFormLabel from './DataFormLabel.svelte';

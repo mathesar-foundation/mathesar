@@ -1,10 +1,20 @@
 <script lang="ts">
-  import type { DataFormManager } from '../DataFormManager';
+  import { ensureReadable } from '@mathesar-component-library';
+
+  import {
+    type DataFormManager,
+    EditableDataFormManager,
+  } from '../../data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
   export let elementId: string;
 
-  $: ({ selectedElement } = dataFormManager);
+  $: selectedElement = ensureReadable(
+    dataFormManager instanceof EditableDataFormManager
+      ? dataFormManager.selectedElement
+      : undefined,
+  );
+
   $: isSelected = elementId === $selectedElement;
 
   let isHovered = false;
@@ -26,8 +36,10 @@
   }
 
   function onClick(e: Event) {
-    e.stopPropagation();
-    dataFormManager.selectElement(elementId);
+    if (dataFormManager instanceof EditableDataFormManager) {
+      e.stopPropagation();
+      dataFormManager.selectElement(elementId);
+    }
   }
 </script>
 
