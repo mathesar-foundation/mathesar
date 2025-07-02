@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('submit_message', models.JSONField(null=True)),
                 ('submit_redirect_url', models.URLField(null=True)),
                 ('submit_button_label', models.CharField(null=True)),
-                ('associated_role', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='mathesar.configuredrole')),
+                ('access_role', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='mathesar.configuredrole')),
                 ('database', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mathesar.database')),
                 ('server', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mathesar.server')),
             ],
@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
             sql="""
             ALTER TABLE mathesar_form
             ADD CONSTRAINT form_role_server_integrity
-              FOREIGN KEY (associated_role_id, server_id)
+              FOREIGN KEY (access_role_id, server_id)
               REFERENCES mathesar_configuredrole(id, server_id);
             """,
             reverse_sql="""

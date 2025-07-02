@@ -294,7 +294,7 @@ class Form(BaseModel):
     server = models.ForeignKey('Server', on_delete=models.CASCADE)
     schema_oid = models.PositiveBigIntegerField()
     base_table_oid = models.PositiveBigIntegerField()
-    associated_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
+    access_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
     # Header related settings
     header_title = models.JSONField()
     header_subtitle = models.JSONField(null=True)
@@ -311,8 +311,8 @@ class Form(BaseModel):
             host=self.database.server.host,
             port=self.database.server.port,
             dbname=self.database.name,
-            user=self.associated_role.name,
-            password=self.associated_role.password,
+            user=self.access_role.name,
+            password=self.access_role.password,
             application_name='mathesar.models.base.Form.connection',
         )
 
