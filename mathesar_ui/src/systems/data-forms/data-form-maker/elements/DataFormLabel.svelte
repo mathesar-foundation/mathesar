@@ -32,7 +32,7 @@
       border: 1px solid transparent;
       background-color: transparent;
       font-weight: var(--font-weight-medium);
-      padding: 0;
+      padding: var(--sm5) 0;
       margin: 0;
     }
 

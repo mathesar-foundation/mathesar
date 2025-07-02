@@ -76,6 +76,13 @@ export class EphemeralDataForm {
     };
   }
 
+  setDescription(description: string): EdfUpdateDiff {
+    this._description.set(description);
+    return {
+      change: 'description',
+    };
+  }
+
   toRawEphemeralDataForm(): RawEphemeralDataForm {
     return {
       database_id: this.databaseId,
