@@ -1,8 +1,6 @@
 <script lang="ts">
   import { ContextMenu } from '@mathesar/component-library';
   import { SheetRow, SheetRowHeaderCell } from '@mathesar/components/sheet';
-  import { parseCellId } from '@mathesar/components/sheet/cellIds';
-  import { findContainingSheetCell } from '@mathesar/components/sheet/selection';
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
   import {
     type DisplayRowDescriptor,
@@ -17,7 +15,6 @@
     isRecordRow,
   } from '@mathesar/stores/table-data';
   import { getFirstEditableColumn } from '@mathesar/stores/table-data/processedColumns';
-  import { match } from '@mathesar/utils/patternMatching';
 
   import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';
@@ -55,7 +52,7 @@
     primaryKeyColumnId && isRecordRow(row)
       ? row.record[primaryKeyColumnId]
       : undefined;
-
+  $: isPlaceholderRow = isPlaceholderRecordRow(row);
   $: rowSelectionId = getRowSelectionId(row);
   $: creationStatus = $rowCreationStatus.get(row.identifier)?.state;
   $: status = $rowStatus.get(row.identifier);
@@ -65,31 +62,16 @@
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
-  async function handleMouseDown(e: MouseEvent) {
+  async function handleRowHeaderMouseDown(e: MouseEvent) {
     if (!isPlaceholderRecordRow(row)) return;
 
     e.stopPropagation(); // Prevents cell selection from starting
 
     await recordsData.addEmptyRecord();
 
-    const target = e.target as HTMLElement;
-    const targetCell = findContainingSheetCell(target);
-    if (!targetCell) return;
-
-    // Select an appropriate cell for the user to begin data entry
-    const columnId = match(targetCell, 'type', {
-      // When clicking on a data cell, select the cell that the user clicked on
-      'data-cell': (c) => parseCellId(c.cellId).columnId,
-
-      // When clicking on the row header "+" icon, select the first editable
-      // cell in the newly-added row.
-      'row-header-cell': () =>
-        getFirstEditableColumn($processedColumns.values())?.id.toString(),
-
-      // This should never happen, but it's here to keep type-checking
-      // exhaustive.
-      'column-header-cell': () => undefined,
-    });
+    // Select the first editable cell in the newly added row.
+    const columns = $processedColumns.values();
+    const columnId = getFirstEditableColumn(columns)?.id.toString();
     if (!columnId) return;
     selection.update((s) => s.ofNewRecordDataEntryCell(columnId));
   }
@@ -106,12 +88,13 @@
     class:is-add-placeholder={isPlaceholderRecordRow(row)}
     {...htmlAttributes}
     style="--cell-height:{ROW_HEIGHT_PX - 1}px;{styleString}"
-    on:mousedown={handleMouseDown}
   >
     {#if isRecordRow(row)}
       <SheetRowHeaderCell
         {rowSelectionId}
         columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+        isWithinPlaceholderRow={isPlaceholderRow}
+        onMouseDown={handleRowHeaderMouseDown}
       >
         <RowControl
           {row}
@@ -178,8 +161,9 @@
     }
 
     &.is-add-placeholder {
-      cursor: pointer;
-
+      // Hide the display of cell values like `NULL` and `DEFAULT` in the
+      // placeholder row. (There is probably a cleaner way to do this via props
+      // instead of global CSS, but oh well).
       :global(
           [data-sheet-element='data-cell']
             .cell-fabric
