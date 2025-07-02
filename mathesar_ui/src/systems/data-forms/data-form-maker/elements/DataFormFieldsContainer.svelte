@@ -23,7 +23,6 @@
 <div class="fields-container">
   {#each [...$fields.values()] as ephField (ephField.key)}
     <DataFormFieldElement {dataFormManager} dataFormField={ephField} />
-    <div class="divider" />
   {:else}
     {#if dataFormManager instanceof EditableDataFormManager}
       <div class="empty-fields-state">
@@ -40,11 +39,6 @@
 <style lang="scss">
   .fields-container {
     display: contents;
-
-    .divider {
-      height: var(--sm2);
-      position: relative;
-    }
 
     .empty-fields-state {
       padding: var(--lg1);

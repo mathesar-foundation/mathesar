@@ -22,7 +22,7 @@
 
 <div class="fk-field">
   <div class="label-controls-container">
-    <DataFormLabel {dataFormField} {isSelected}>
+    <DataFormLabel {dataFormManager} {dataFormField} {isSelected}>
       {#if dataFormManager instanceof EditableDataFormManager}
         <FkFormFieldRuleSelector {dataFormManager} {dataFormField} />
       {/if}

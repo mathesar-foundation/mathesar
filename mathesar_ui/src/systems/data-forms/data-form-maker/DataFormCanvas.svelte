@@ -1,15 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import InspectorSection from '@mathesar/components/InspectorSection.svelte';
-  import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
   import { dataFormInspectorWidth } from '@mathesar/stores/localStorage';
   import { WithPanel } from '@mathesar-component-library';
 
-  import type { DataFormManager } from '../data-form-utilities/DataFormManager';
+  import {
+    type DataFormManager,
+    EditableDataFormManager,
+  } from '../data-form-utilities/DataFormManager';
 
   import ActionsPane from './ActionsPane.svelte';
   import DataFormBuildArea from './DataFormBuildArea.svelte';
+  import DataFormInspector from './DataFormInspector.svelte';
 
   export let dataFormManager: DataFormManager;
 </script>
@@ -21,14 +23,15 @@
       bind:sizePx={$dataFormInspectorWidth}
       minSizePx={200}
       maxSizePx={600}
+      showPanel={dataFormManager instanceof EditableDataFormManager}
     >
       <div class="workarea">
         <DataFormBuildArea {dataFormManager} />
       </div>
-      <div class="data-form-inspector" slot="panel">
-        <InspectorTabContent>
-          <InspectorSection title={$_('actions')}></InspectorSection>
-        </InspectorTabContent>
+      <div class="data-form-inspector-panel" slot="panel">
+        {#if dataFormManager instanceof EditableDataFormManager}
+          <DataFormInspector {dataFormManager} />
+        {/if}
       </div>
     </WithPanel>
   </div>
@@ -54,7 +57,7 @@
       display: grid;
     }
 
-    .data-form-inspector {
+    .data-form-inspector-panel {
       border: 1px solid var(--border-color);
       border-radius: var(--border-radius-l);
       background: var(--elevated-background);

@@ -66,6 +66,10 @@ export abstract class AbstractEphemeralField {
     this._isRequired = writable(data.isRequired);
   }
 
+  setLabel(label: string) {
+    this._label.set(label);
+  }
+
   abstract toRawEphemeralField(): RawEphemeralDataFormField;
 
   protected getBaseFieldRawJson() {

@@ -58,7 +58,7 @@
         value={$description}
         on:input={onSubtitleInput}
       />
-    {:else}
+    {:else if $description}
       <div class="form-description">
         {$description}
       </div>

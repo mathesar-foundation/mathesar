@@ -5,20 +5,39 @@
     EditableDataFormManager,
   } from '../../data-form-utilities/DataFormManager';
 
-  import EditableFormFieldElementWrapper from './EditableFormFieldElementWrapper.svelte';
+  import AddFormFieldElementDropdown from './AddFormFieldElementDropdown.svelte';
+  import FormFieldActions from './FormFieldActions.svelte';
+  import SelectableElement from './SelectableElement.svelte';
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphemeralDataFormField;
+
+  $: ({ ephemeralDataForm } = dataFormManager);
+
+  $: tableOidOfField = dataFormField.parentField
+    ? dataFormField.parentField.relatedTableOid
+    : ephemeralDataForm.baseTableOid;
 </script>
 
-{#if dataFormManager instanceof EditableDataFormManager}
-  <EditableFormFieldElementWrapper
-    {dataFormManager}
-    {dataFormField}
-    let:isSelected
-  >
-    <slot {isSelected} />
-  </EditableFormFieldElementWrapper>
-{:else}
-  <slot isSelected={false} />
-{/if}
+<SelectableElement
+  elementId={dataFormField.key}
+  {dataFormManager}
+  let:isSelected
+>
+  <svelte:fragment slot="header">
+    {#if dataFormManager instanceof EditableDataFormManager}
+      <FormFieldActions {dataFormManager} {dataFormField} {tableOidOfField} />
+    {/if}
+  </svelte:fragment>
+
+  <slot {isSelected} />
+
+  <svelte:fragment slot="footer">
+    {#if dataFormManager instanceof EditableDataFormManager}
+      <AddFormFieldElementDropdown
+        tableOid={tableOidOfField}
+        {dataFormManager}
+      />
+    {/if}
+  </svelte:fragment>
+</SelectableElement>

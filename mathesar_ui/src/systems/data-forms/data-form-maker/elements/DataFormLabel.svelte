@@ -3,15 +3,31 @@
   import { Button, Icon } from '@mathesar-component-library';
 
   import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
+  import {
+    type DataFormManager,
+    EditableDataFormManager,
+  } from '../../data-form-utilities/DataFormManager';
 
+  export let dataFormManager: DataFormManager;
   export let dataFormField: EphemeralDataFormField;
   export let isSelected: boolean;
 
   $: ({ label } = dataFormField);
+
+  function onLabelInput(e: Event) {
+    const element = e.target as HTMLInputElement;
+    dataFormField.setLabel(element.value);
+  }
 </script>
 
 <div class="label" class:selected={isSelected}>
-  <input type="text" bind:value={$label} />
+  {#if dataFormManager instanceof EditableDataFormManager}
+    <input type="text" value={$label} on:input={onLabelInput} />
+  {:else}
+    <span>
+      {$label}
+    </span>
+  {/if}
 
   {#if isSelected}
     <div class="controls">

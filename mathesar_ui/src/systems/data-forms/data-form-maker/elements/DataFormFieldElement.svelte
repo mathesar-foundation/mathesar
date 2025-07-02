@@ -10,9 +10,9 @@
   export let dataFormField: EphemeralDataFormField;
 </script>
 
-<FormFieldElementWrapper {dataFormField} {dataFormManager} let:isSelected>
+<FormFieldElementWrapper {dataFormManager} {dataFormField} let:isSelected>
   {#if dataFormField.kind === 'scalar_column'}
-    <ScalarFormFieldElement {isSelected} {dataFormField} />
+    <ScalarFormFieldElement {isSelected} {dataFormManager} {dataFormField} />
   {:else if dataFormField.kind === 'foreign_key'}
     <FkFormFieldElement {isSelected} {dataFormManager} {dataFormField} />
   {:else}
