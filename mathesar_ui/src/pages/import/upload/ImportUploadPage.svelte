@@ -234,10 +234,11 @@
 <style>
   .import-file-view {
     padding: var(--lg3);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-section);
     border-radius: var(--border-radius-m);
-    background-color: var(--inset-background-color);
+    background-color: var(--surface-elevated-low);
     margin-bottom: 2rem;
+    --fieldset-boxed-background-color: var(--surface-elevated-high);
   }
 
   .data-source-input {
@@ -246,13 +247,13 @@
 
   .upload-format-help {
     line-height: 1.2;
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
     text-align: right;
     font-size: var(--sm1);
   }
 
   .processing-spinner {
-    color: var(--icon-color);
+    color: var(--text-icon);
     font-size: 1.5rem;
     margin-bottom: 1rem;
   }

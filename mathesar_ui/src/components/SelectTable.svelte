@@ -38,7 +38,7 @@
 <style lang="scss">
   .placeholder {
     display: inherit;
-    --icon-color: var(--neutral-500);
-    --name-color: var(--neutral-500);
+    --icon-color: var(--text-token);
+    --name-color: var(--text-token);
   }
 </style>

@@ -4,11 +4,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: solid 0.02em var(--input-border);
+  border: solid 0.02em var(--border-input);
   border-radius: var(--border-radius-m);
   padding: var(--spacing);
   min-height: 2.37em;
-  background: var(--input-background);
+  background: var(--surface-input);
   gap: var(--spacing);
 
   &.disabled {
@@ -28,21 +28,21 @@
     display: flex;
     padding: 0.285rem 0.428rem;
     background: var(--hover-background);
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--border-input);
     border-radius: var(--border-radius-m);
-    color: var(--text-color);
+    color: var(--text-primary);
     align-items: center;
   }
 
   .icon-button {
-    color: var(--text-color-tertiary);
+    color: var(--text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .icon-button:hover {
-    color: var(--text-color);
+    color: var(--text-primary);
   }
 
   .remove-button {

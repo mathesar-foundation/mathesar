@@ -65,14 +65,10 @@
       .icon {
         font-size: var(--lg2);
         padding: var(--sm4);
-        background: linear-gradient(
-          135deg,
-          var(--pumpkin-700),
-          var(--pumpkin-900)
-        );
+        background: var(--icon-fill-color);
         border-radius: var(--border-radius-l);
         margin-right: var(--sm2);
-        color: var(--white);
+        color: var(--icon-stroke-color);
       }
       .text {
         overflow: hidden;
@@ -82,11 +78,11 @@
         margin: 0;
         font-weight: var(--font-weight-bold);
         overflow: hidden;
-        color: var(--text-color-primary);
+        color: var(--text-primary);
       }
       .description {
         font-size: var(--sm1);
-        color: var(--text-color-secondary);
+        color: var(--text-secondary);
         overflow: hidden;
       }
     }

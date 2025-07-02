@@ -8,16 +8,12 @@
 
     .file {
       padding: var(--sm3);
-      border: 1px solid var(--neutral-300);
+      border: 1px solid var(--border-fieldset);
       border-radius: var(--border-radius-l);
       display: flex;
 
       & + .file {
         margin-top: var(--sm3);
-      }
-
-      > svg {
-        color: #c4c7ca;
       }
 
       > .file-info {
@@ -42,7 +38,7 @@
         > .upload-info {
           display: flex;
           justify-content: space-between;
-          color: var(--neutral-500);
+          color: var(--text-secondary);
         }
       }
     }
@@ -50,8 +46,8 @@
 
   .file-upload-trigger {
     display: block;
-    background: var(--card-background);
-    border: 1px dashed var(--border-color);
+    background: var(--surface-inset);
+    border: 1px dashed var(--border-fieldset);
     border-radius: 3px;
     color: inherit;
     font-family: inherit;
@@ -81,21 +77,21 @@
           font-size: var(--lg1);
         }
         .desc {
-          color: var(--neutral-500);
+          color: var(--text-secondary);
           margin-top: var(--sm6);
         }
       }
     }
 
     &:focus {
-      border-color: var(--sky-600);
+      border-color: var(--border-fieldset-focused);
       border-width: 2px;
     }
     &:hover {
       background: var(--hover-background);
     }
     &.dragging-over {
-      background: var(--info-background-color);
+      background: var(--semantic-info-bg);
     }
   }
 

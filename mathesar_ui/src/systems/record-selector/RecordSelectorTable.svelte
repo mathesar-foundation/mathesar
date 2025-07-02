@@ -308,7 +308,7 @@
     overflow: hidden;
     position: relative;
     --overflow-shadow-size: 0.75rem;
-    --overflow-shadow-color: var(--shadow-color);
+    --overflow-shadow-color: var(--border-shadow);
     --focus-highlight-width: 0.2rem;
   }
   .scroll-container {
@@ -323,8 +323,9 @@
     overflow: auto;
     position: relative;
     border-spacing: 0;
+    background: var(--surface-inset);
     --border-width: 1px;
-    --border-color: var(--border-color);
+    --border-color: var(--border-header);
     --row-height: 2.25rem;
   }
   .thead {

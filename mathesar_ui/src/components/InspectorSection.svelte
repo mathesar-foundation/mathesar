@@ -10,7 +10,7 @@
 </script>
 
 <div class="inspector-section">
-  <Collapsible bind:isOpen triggerAppearance="inspector">
+  <Collapsible bind:isOpen triggerAppearance="default">
     <div slot="header" class="header">
       <div>
         <slot name="title">{title}</slot>

@@ -13,7 +13,7 @@
 
   $: ({ label, entries, emptyMessage } = section);
   $: filteredEntries = [
-    ...filterViaTextQuery(entries, filterString, (e) => e.label),
+    ...filterViaTextQuery(entries, filterString, (e) => e.getFilterableText()),
   ];
 </script>
 
@@ -61,7 +61,7 @@
     grid-gap: var(--sm4);
   }
   .detail {
-    color: var(--text-color-secondary);
+    color: var(--text-tertiary);
     font-size: var(--sm1);
   }
   .detail:empty {

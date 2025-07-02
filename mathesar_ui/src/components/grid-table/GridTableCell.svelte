@@ -13,13 +13,14 @@
     align-items: center;
     min-height: 100%;
     padding: var(--sm2) 1rem;
-    color: var(--text-color-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-row);
 
     &::before,
     &::after {
       content: '';
       position: absolute;
-      background-color: var(--card-row-border);
+      background-color: var(--surface-card);
       z-index: 1;
     }
 
@@ -39,11 +40,11 @@
 
     &.gt-header {
       font-weight: var(--font-weight-medium);
-      color: var(--text-color-primary);
-      background: var(--elevated-background);
+      color: var(--text-primary);
+      background: var(--surface-elevated-header);
 
       &::after {
-        background-color: var(--card-row-border);
+        background-color: var(--surface-elevated-header);
       }
     }
   }

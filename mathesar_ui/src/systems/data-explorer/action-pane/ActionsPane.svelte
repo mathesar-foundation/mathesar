@@ -93,6 +93,8 @@
           icon: iconExploration,
         }
       : undefined}
+    --icon-fill-color="linear-gradient(135deg, var(--color-exploration), var(--color-exploration-40))"
+    --icon-stroke-color="var(--surface-inverted)"
   >
     <div class="detail-wrapper">
       <div class="detail">
@@ -130,7 +132,7 @@
         <SaveButton {canSave} onSave={saveExistingOrCreateNew} />
 
         <Button
-          appearance="secondary"
+          appearance="inspector"
           disabled={!hasColumns}
           on:click={() => {
             isInspectorOpen = !isInspectorOpen;

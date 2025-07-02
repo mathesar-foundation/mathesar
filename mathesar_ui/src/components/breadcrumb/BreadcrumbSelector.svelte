@@ -120,31 +120,20 @@
     margin-top: var(--sm5);
     padding-left: 0;
     padding-top: var(--sm5);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-section);
   }
   .entity-switcher .trigger {
-    color: var(--text-color-primary);
+    color: var(--text-navigation);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
     padding: var(--sm4);
 
-    &:hover {
-      background-color: rgba(255, 117, 76, 0.15);
-      color: var(--salmon-800);
-    }
-
+    &:hover,
     &:active {
-      background-color: rgba(255, 117, 76, 0.25);
-      color: var(--salmon-800);
-    }
-
-    :global(body.theme-dark) &:hover {
-      color: var(--salmon-200);
-    }
-
-    :global(body.theme-dark) &:active {
-      color: var(--salmon-200);
+      background-color: var(--surface-elevated-low-active);
+      color: var(--text-navigation-hover);
+      border-color: var(--border-elevated-low);
     }
   }
 </style>
