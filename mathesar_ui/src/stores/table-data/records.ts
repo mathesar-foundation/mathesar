@@ -647,7 +647,6 @@ export class RecordsData {
           return entry;
         }),
       );
-      this.totalCount.update((count) => (count ?? 0) + 1);
       return newRow;
     } catch (err) {
       this.meta.rowCreationStatus.set(row.identifier, {

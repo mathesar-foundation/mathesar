@@ -96,7 +96,7 @@
         </span>
         {#if $persistedNewRecords.length > 0}
           <span class="pill">
-            {$_('count_new_records', {
+            +{$_('count_new_records', {
               values: {
                 count: $persistedNewRecords.length,
               },
@@ -105,7 +105,7 @@
         {/if}
         {#if $newRecords.length - $persistedNewRecords.length > 0}
           <span class="pill">
-            {$_('count_unsaved_records', {
+            +{$_('count_unsaved_records', {
               values: {
                 count: $newRecords.length - $persistedNewRecords.length,
               },
