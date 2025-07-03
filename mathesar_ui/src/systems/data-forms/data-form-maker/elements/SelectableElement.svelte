@@ -4,10 +4,11 @@
   import {
     type DataFormManager,
     EditableDataFormManager,
+    type SelectedElement,
   } from '../../data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
-  export let elementId: string;
+  export let element: SelectedElement;
 
   $: selectedElement = ensureReadable(
     dataFormManager instanceof EditableDataFormManager
@@ -15,7 +16,7 @@
       : undefined,
   );
 
-  $: isSelected = elementId === $selectedElement;
+  $: isSelected = element === $selectedElement;
 
   let isHovered = false;
   let thisDomElement: HTMLElement;
@@ -38,7 +39,7 @@
   function onClick(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       e.stopPropagation();
-      dataFormManager.selectElement(elementId);
+      dataFormManager.selectElement(element);
     }
   }
 </script>
@@ -47,7 +48,7 @@
   tabindex="0"
   bind:this={thisDomElement}
   data-form-selectable
-  class:selected={$selectedElement === elementId}
+  class:selected={isSelected}
   class:hover={isHovered}
   class:is-header-present={$$slots.header}
   on:click={onClick}

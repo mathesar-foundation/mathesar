@@ -6,8 +6,8 @@
 
   import DataFormBranding from './DataFormBranding.svelte';
   import DataFormFieldsContainer from './elements/DataFormFieldsContainer.svelte';
+  import DataFormFooter from './elements/DataFormFooter.svelte';
   import DataFormHeader from './elements/DataFormHeader.svelte';
-  import DataFormSubmitButtons from './elements/DataFormSubmitButtons.svelte';
 
   export let dataFormManager: DataFormManager;
   $: ({ fields, baseTableOid } = dataFormManager.ephemeralDataForm);
@@ -17,7 +17,7 @@
       const { target } = e;
       if (target instanceof HTMLElement) {
         if (!target.closest('[data-form-selectable]')) {
-          dataFormManager.selectElement('form');
+          dataFormManager.resetSelectedElement();
         }
       }
     }
@@ -32,7 +32,7 @@
       {fields}
       {dataFormManager}
     />
-    <DataFormSubmitButtons {dataFormManager} />
+    <DataFormFooter />
     <div class="branding">
       <DataFormBranding />
     </div>

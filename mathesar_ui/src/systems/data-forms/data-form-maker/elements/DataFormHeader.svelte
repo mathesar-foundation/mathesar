@@ -33,7 +33,12 @@
 </script>
 
 <div class="header">
-  <SelectableElement elementId="title" {dataFormManager}>
+  <SelectableElement
+    element={{
+      type: 'title',
+    }}
+    {dataFormManager}
+  >
     {#if dataFormManager instanceof EditableDataFormManager}
       <input
         class="form-title"
@@ -49,7 +54,7 @@
     {/if}
   </SelectableElement>
 
-  <SelectableElement elementId="description" {dataFormManager}>
+  <SelectableElement element={{ type: 'subtitle' }} {dataFormManager}>
     {#if dataFormManager instanceof EditableDataFormManager}
       <textarea
         placeholder={$_('add_form_description')}

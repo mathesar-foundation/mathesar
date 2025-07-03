@@ -62,6 +62,7 @@
       border-radius: var(--border-radius-l);
       background: var(--elevated-background);
       height: 100%;
+      overflow: hidden;
     }
   }
 </style>

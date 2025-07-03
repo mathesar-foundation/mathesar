@@ -20,7 +20,10 @@
 </script>
 
 <SelectableElement
-  elementId={dataFormField.key}
+  element={{
+    type: 'field',
+    field: dataFormField,
+  }}
   {dataFormManager}
   let:isSelected
 >

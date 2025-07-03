@@ -7,6 +7,7 @@ import { Table } from '@mathesar/models/Table';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
+import type { EphemeralDataFormField } from './AbstractEphemeralField';
 import type { EdfUpdateDiff, EphemeralDataForm } from './EphemeralDataForm';
 
 export interface DataFormManager {
@@ -21,8 +22,19 @@ export class ReadonlyDataFormManager implements DataFormManager {
   }
 }
 
+interface SelectedStaticElement {
+  type: 'title' | 'subtitle';
+}
+
+interface SelectedFieldElement {
+  type: 'field';
+  field: EphemeralDataFormField;
+}
+
+export type SelectedElement = SelectedStaticElement | SelectedFieldElement;
+
 export class EditableDataFormManager extends ReadonlyDataFormManager {
-  selectedElement: Writable<string | undefined> = writable();
+  selectedElement: Writable<SelectedElement | undefined> = writable();
 
   private schema: Schema;
 
@@ -38,8 +50,12 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
     this.tableStructureCache = tableStructureCache;
   }
 
-  selectElement(elementId: string) {
-    this.selectedElement.set(elementId);
+  selectElement(element: SelectedElement) {
+    this.selectedElement.set(element);
+  }
+
+  resetSelectedElement() {
+    this.selectedElement.set(undefined);
   }
 
   getTableStructure(tableOrOid: Table | number) {
