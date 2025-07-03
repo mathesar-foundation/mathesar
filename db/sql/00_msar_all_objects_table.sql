@@ -1020,7 +1020,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.col_description(oid,integer)', 'FUNCTION', NULL),
   ('msar', 'msar.collect_all_objects(text[])', 'FUNCTION', NULL),
   ('msar', 'msar.column_exists(oid,text)', 'FUNCTION', NULL),
-  ('msar', 'msar.column_info_table(regclass)', 'FUNCTION', NULL)
+  ('msar', 'msar.column_info_table(regclass)', 'FUNCTION', NULL),
   ('msar', 'msar.comment_on_column(oid,integer,text)', 'FUNCTION', NULL),
   ('msar', 'msar.comment_on_column(text,text,text,text)', 'FUNCTION', NULL),
   ('msar', 'msar.comment_on_schema(oid,text)', 'FUNCTION', NULL),
