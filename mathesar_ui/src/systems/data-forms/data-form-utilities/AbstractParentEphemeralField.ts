@@ -34,6 +34,10 @@ export abstract class AbstractParentEphemeralField extends AbstractEphemeralFiel
     this._nestedFields.reconstruct([...nestedFields].map((f) => [f.key, f]));
   }
 
+  removeNestedField(dataFormField: EphemeralDataFormField) {
+    this._nestedFields.delete(dataFormField.key);
+  }
+
   protected getBaseFieldRawJson() {
     const base = super.getBaseFieldRawJson();
     return {

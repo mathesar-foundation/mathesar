@@ -83,6 +83,10 @@ export class EphemeralDataForm {
     };
   }
 
+  removeField(dataFormField: EphemeralDataFormField) {
+    this._fields.delete(dataFormField.key);
+  }
+
   toRawEphemeralDataForm(): RawEphemeralDataForm {
     return {
       database_id: this.databaseId,

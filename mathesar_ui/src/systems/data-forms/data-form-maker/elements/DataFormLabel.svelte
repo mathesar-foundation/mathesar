@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { iconDeleteMajor } from '@mathesar/icons';
-  import { Button, Icon } from '@mathesar-component-library';
-
   import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
   import {
     type DataFormManager,
     EditableDataFormManager,
   } from '../../data-form-utilities/DataFormManager';
+
+  import FormFieldCommonControls from './FormFieldCommonControls.svelte';
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphemeralDataFormField;
@@ -29,12 +28,11 @@
     </span>
   {/if}
 
-  {#if isSelected}
-    <div class="controls">
-      <slot />
-      <Button appearance="outcome">
-        <Icon {...iconDeleteMajor} />
-      </Button>
+  {#if isSelected && dataFormManager instanceof EditableDataFormManager}
+    <div class="control-panel">
+      <FormFieldCommonControls {dataFormManager} {dataFormField}>
+        <slot />
+      </FormFieldCommonControls>
     </div>
   {/if}
 </div>
@@ -59,10 +57,9 @@
       }
     }
 
-    .controls {
+    .control-panel {
       margin-left: auto;
       display: flex;
-      gap: var(--sm4);
     }
   }
 </style>
