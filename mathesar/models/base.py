@@ -333,6 +333,14 @@ class FormField(BaseModel):
     column_attnum = models.SmallIntegerField(null=True)
     constraint_oid = models.PositiveBigIntegerField(null=True)
     related_table_oid = models.PositiveBigIntegerField(null=True)
+    fk_interaction_rule = models.CharField(
+        choices=[
+            ("must_pick", "Must pick an existing record from the related table"),
+            ("can_pick_or_create", "Can pick an existing record from the related table or create a new record"),
+            ("must_create", "Must create a new record in the related table")
+        ],
+        null=True
+    )
 
     # For children of FK & reverse FK fields
     parent_field = models.ForeignKey('self', on_delete=models.CASCADE, related_name='child_fields', null=True)
@@ -347,10 +355,24 @@ class FormField(BaseModel):
             ),
             # column_attnum is required for scalar_column and foreign_key fields.
             # constraint and related_table oids are required for foreign_key and reverse_foreign_key fields.
+            # fk_interaction_rule is required for foreign_key field.
             models.CheckConstraint(
                 check=(
-                    (models.Q(kind="reverse_foreign_key") | models.Q(column_attnum__isnull=False))
-                    & (models.Q(kind="scalar_column") | models.Q(constraint_oid__isnull=False, related_table_oid__isnull=False))
+                    models.Q(kind='scalar_column', column_attnum__isnull=False)
+                    |
+                    models.Q(
+                        kind='foreign_key',
+                        column_attnum__isnull=False,
+                        constraint_oid__isnull=False,
+                        related_table_oid__isnull=False,
+                        fk_interaction_rule__isnull=False
+                    )
+                    |
+                    models.Q(
+                        kind='reverse_foreign_key',
+                        constraint_oid__isnull=False,
+                        related_table_oid__isnull=False
+                    )
                 ),
                 name="form_field_kind_integrity"
             )

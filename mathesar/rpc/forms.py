@@ -24,6 +24,7 @@ class FieldInfo(TypedDict):
         column_attnum: The attnum of column to be selected as a field. Applicable for scalar_column and foreign_key fields.
         constraint_oid: The oid of constraint that is part of the field. Applicable for foreign_key and reverse_foreign_key fields.
         related_table_oid: The oid of the related table. Applicable for foreign_key and reverse_foreign_key fields.
+        fk_interaction_rule: Determines user interaction with a foreign_key field's related record (must_pick, can_pick_or_create, must_create).
         parent_field_id: The Django id of the Field set as parent for related fields.
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
@@ -38,6 +39,7 @@ class FieldInfo(TypedDict):
     column_attnum: Optional[int]
     constraint_oid: Optional[int]
     related_table_oid: Optional[int]
+    fk_interaction_rule: Literal["must_pick", "can_pick_or_create", "must_create"]
     styling: Optional[dict]
     is_required: bool
     child_fields: Optional[list["FieldInfo"]]
@@ -55,6 +57,7 @@ class FieldInfo(TypedDict):
             column_attnum=model.column_attnum,
             constraint_oid=model.constraint_oid,
             related_table_oid=model.related_table_oid,
+            fk_interaction_rule=model.fk_interaction_rule,
             styling=model.styling,
             is_required=model.is_required,
             child_fields=[FieldInfo.from_model(field) for field in model.child_fields.all()] if model.child_fields else None,
@@ -144,6 +147,7 @@ class AddOrReplaceFieldDef(TypedDict):
         column_attnum: The attnum of column to be selected as a field. Applicable for scalar_column and foreign_key fields.
         constraint_oid: The oid of constraint that is part of the field. Applicable for foreign_key and reverse_foreign_key fields.
         related_table_oid: The oid of the related table. Applicable for foreign_key and reverse_foreign_key fields.
+        fk_interaction_rule: Determines user interaction with a foreign_key field's related record (must_pick, can_pick_or_create, must_create).
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
     """
@@ -155,6 +159,7 @@ class AddOrReplaceFieldDef(TypedDict):
     column_attnum: Optional[int]
     constraint_oid: Optional[int]
     related_table_oid: Optional[int]
+    fk_interaction_rule: Literal["must_pick", "can_pick_or_create", "must_create"]
     styling: Optional[dict]
     is_required: Optional[bool]
     child_fields: Optional[list["AddOrReplaceFieldDef"]]
