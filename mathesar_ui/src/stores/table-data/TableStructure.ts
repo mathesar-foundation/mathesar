@@ -12,6 +12,7 @@ import type { Schema } from '@mathesar/models/Schema';
 import { Table } from '@mathesar/models/Table';
 import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
 import AsyncStore from '@mathesar/stores/AsyncStore';
+import { orderProcessedColumns } from '@mathesar/utils/tables';
 
 import {
   ProcessedColumn,
@@ -52,16 +53,19 @@ export function getTableStructureAsyncStore(tableProps: TableStructureProps) {
         constraints,
         joinableTableResult,
       ]): TableStructureSubstance => {
-        const processedColumns: ProcessedColumns = new Map(
-          columns.map((c, index) => [
-            c.id,
-            new ProcessedColumn({
-              tableOid,
-              column: c,
-              columnIndex: index,
-              constraints,
-            }),
-          ]),
+        const processedColumns: ProcessedColumns = orderProcessedColumns(
+          new Map(
+            columns.map((c, index) => [
+              c.id,
+              new ProcessedColumn({
+                tableOid,
+                column: c,
+                columnIndex: index,
+                constraints,
+              }),
+            ]),
+          ),
+          { metadata: rawTableWithMetadata.metadata },
         );
 
         return {

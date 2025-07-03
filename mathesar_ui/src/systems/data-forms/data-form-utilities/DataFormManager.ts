@@ -60,16 +60,16 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
 
   getTableStructure(tableOrOid: Table | number) {
     const isTableInstance = tableOrOid instanceof Table;
-    const tableOid = isTableInstance ? tableOrOid.oid : tableOrOid;
-    const schema = isTableInstance ? tableOrOid.schema : this.schema;
+    const tableStructureProps = isTableInstance
+      ? tableOrOid
+      : {
+          oid: tableOrOid,
+          schema: this.schema,
+        };
 
     return this.tableStructureCache.get(
-      tableOid,
-      () =>
-        new TableStructure({
-          oid: tableOid,
-          schema,
-        }),
+      tableStructureProps.oid,
+      () => new TableStructure(tableStructureProps),
     );
   }
 
