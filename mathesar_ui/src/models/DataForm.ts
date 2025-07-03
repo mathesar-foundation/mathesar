@@ -23,10 +23,10 @@ export class DataForm {
     return this._description;
   }
 
-  private _associatedRoleId;
+  private _accessRoleId;
 
-  get associatedRoleId(): Readable<RawDataForm['associated_role_id']> {
-    return this._associatedRoleId;
+  get accessRoleId(): Readable<RawDataForm['access_role_id']> {
+    return this._accessRoleId;
   }
 
   private _token;
@@ -65,7 +65,7 @@ export class DataForm {
     this.baseTableOId = props.rawDataForm.base_table_oid;
     this._name = writable(props.rawDataForm.name);
     this._description = writable(props.rawDataForm.description);
-    this._associatedRoleId = writable(props.rawDataForm.associated_role_id);
+    this._accessRoleId = writable(props.rawDataForm.access_role_id);
     this._token = writable(props.rawDataForm.token);
     this._shareSettings = writable({
       isSharedPublicly: props.rawDataForm.share_public,
@@ -98,7 +98,7 @@ export class DataForm {
       header_title: formDefinition.headerTitle,
       header_subtitle: formDefinition.headerSubtitle,
       fields: formDefinition.fields,
-      associated_role_id: get(this.associatedRoleId),
+      access_role_id: get(this.accessRoleId),
       submit_message: formDefinition.submissionSettings.message,
       submit_redirect_url: formDefinition.submissionSettings.redirectUrl,
       submit_button_label: formDefinition.submissionSettings.buttonLabel,

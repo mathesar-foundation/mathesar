@@ -58,7 +58,7 @@ export interface RawEphemeralDataForm {
   name: string;
   description: string | null;
   version: number;
-  associated_role_id: RawConfiguredRole['id'] | null;
+  access_role_id: RawConfiguredRole['id'] | null;
   header_title: RichTextJson;
   header_subtitle: RichTextJson | null;
   fields: RawEphemeralDataFormField[];
