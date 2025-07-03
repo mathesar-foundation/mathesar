@@ -358,21 +358,9 @@ class FormField(BaseModel):
             # fk_interaction_rule is required for foreign_key field.
             models.CheckConstraint(
                 check=(
-                    models.Q(kind='scalar_column', column_attnum__isnull=False)
-                    |
-                    models.Q(
-                        kind='foreign_key',
-                        column_attnum__isnull=False,
-                        constraint_oid__isnull=False,
-                        related_table_oid__isnull=False,
-                        fk_interaction_rule__isnull=False
-                    )
-                    |
-                    models.Q(
-                        kind='reverse_foreign_key',
-                        constraint_oid__isnull=False,
-                        related_table_oid__isnull=False
-                    )
+                    (models.Q(kind="reverse_foreign_key") | models.Q(column_attnum__isnull=False))
+                    & (models.Q(kind="scalar_column") | models.Q(constraint_oid__isnull=False, related_table_oid__isnull=False))
+                    & (~models.Q(kind="foreign_key") | models.Q(fk_interaction_rule__isnull=False))
                 ),
                 name="form_field_kind_integrity"
             )
