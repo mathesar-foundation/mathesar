@@ -126,7 +126,7 @@ class FormInfo(TypedDict):
             submit_message=form_model.submit_message,
             submit_redirect_url=form_model.submit_redirect_url,
             submit_button_label=form_model.submit_button_label,
-            fields=[FieldInfo.from_model(field) for field in form_model.fields.all()],
+            fields=[FieldInfo.from_model(field) for field in form_model.fields.filter(parent_field__isnull=True)],
             field_col_info_map=field_col_info_map
         )
 
