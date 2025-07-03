@@ -147,9 +147,9 @@
       - delete
       - replace
       - FormInfo
-      - FormDef
+      - AddFormDef
       - FieldInfo
-      - FieldDef
+      - AddOrReplaceFieldDef
       - PublicFormInfo
       - ReplaceableFormDef
 
