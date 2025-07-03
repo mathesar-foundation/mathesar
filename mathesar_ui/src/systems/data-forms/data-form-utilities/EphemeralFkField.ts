@@ -1,4 +1,4 @@
-import { type Readable, type Writable, get, writable } from 'svelte/store';
+import { type Readable, get, writable } from 'svelte/store';
 
 import type {
   RawEphemeralForeignKeyDataFormField,
@@ -15,14 +15,6 @@ import {
   type ParentEphemeralField,
 } from './AbstractEphemeralField';
 
-export const fkFieldInteractionRules = [
-  'only_select',
-  'select_or_create',
-  'must_create',
-] as const;
-
-export type FkFieldInteractionRule = (typeof fkFieldInteractionRules)[number];
-
 export class EphermeralFkField extends AbstractEphemeralField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
 
@@ -34,10 +26,12 @@ export class EphermeralFkField extends AbstractEphemeralField {
 
   readonly fieldStore: FieldStore;
 
-  private _rule: Writable<FkFieldInteractionRule>;
+  private _interactionRule;
 
-  get rule(): Readable<FkFieldInteractionRule> {
-    return this._rule;
+  get interactionRule(): Readable<
+    RawForeignKeyDataFormField['fk_interaction_rule']
+  > {
+    return this._interactionRule;
   }
 
   private _nestedFields;
@@ -52,7 +46,7 @@ export class EphermeralFkField extends AbstractEphemeralField {
     parentField: ParentEphemeralField,
     props: EphemeralFieldProps & {
       processedColumn: ProcessedColumn;
-      rule: FkFieldInteractionRule;
+      interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
       nestedFields?: Iterable<EphemeralDataFormField>;
       fkConstraintOid: number;
       relatedTableOid: number;
@@ -64,7 +58,7 @@ export class EphermeralFkField extends AbstractEphemeralField {
     if (!fkLink) {
       throw Error('The passed column is not a foreign key');
     }
-    this._rule = writable(props.rule);
+    this._interactionRule = writable(props.interactionRule);
     const nestedFieldIterable = props.nestedFields ?? [];
     this._nestedFields = new WritableMap(
       [...nestedFieldIterable].map((f) => [f.key, f]),
@@ -75,10 +69,10 @@ export class EphermeralFkField extends AbstractEphemeralField {
   }
 
   async setInteractionRule(
-    rule: FkFieldInteractionRule,
+    rule: RawForeignKeyDataFormField['fk_interaction_rule'],
     getDefaultNestedFields: () => Promise<Iterable<EphemeralDataFormField>>,
   ) {
-    this._rule.set(rule);
+    this._interactionRule.set(rule);
     if (get(this.nestedFields).size === 0) {
       const defaultNestedFields = await getDefaultNestedFields();
       this._nestedFields.reconstruct(
@@ -98,6 +92,7 @@ export class EphermeralFkField extends AbstractEphemeralField {
       column_attnum: this.processedColumn.id,
       constraint_oid: this.fkConstraintOid,
       related_table_oid: this.relatedTableOid,
+      fk_interaction_rule: get(this.interactionRule),
       child_fields: [...get(this.nestedFields).values()].map((nested_field) =>
         nested_field.toRawEphemeralField(),
       ),

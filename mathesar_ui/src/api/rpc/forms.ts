@@ -29,12 +29,19 @@ export interface RawEphemeralScalarDataFormField
   column_attnum: number;
 }
 
+export const fkFieldInteractionRules = [
+  'must_pick',
+  'can_pick_or_create',
+  'must_create',
+] as const;
+
 export interface RawEphemeralForeignKeyDataFormField
   extends RawEphemeralDataFormBaseField {
   kind: 'foreign_key';
   column_attnum: number;
   constraint_oid: number;
   related_table_oid: number;
+  fk_interaction_rule: (typeof fkFieldInteractionRules)[number];
   child_fields: RawEphemeralDataFormField[] | null;
 }
 

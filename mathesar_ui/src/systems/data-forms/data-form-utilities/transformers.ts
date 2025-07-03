@@ -39,7 +39,7 @@ function columnToEphemeralField(
       ...baseProps,
       label: referenceTableName ?? baseProps.label,
       processedColumn: pc,
-      rule: 'only_select',
+      interactionRule: 'must_pick',
       fkConstraintOid,
       relatedTableOid: referentTableOid,
     });
@@ -161,7 +161,7 @@ export function rawEphemeralFieldToEphemeralField(
         columnIndex: 0,
         constraints: [constraintDetails],
       }),
-      rule: 'select_or_create',
+      interactionRule: rawEphemeralField.fk_interaction_rule,
       fkConstraintOid: constraintDetails.oid,
       relatedTableOid: rawEphemeralField.related_table_oid,
     });

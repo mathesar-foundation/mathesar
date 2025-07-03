@@ -17,7 +17,7 @@
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphermeralFkField;
 
-  $: ({ rule, relatedTableOid, nestedFields } = dataFormField);
+  $: ({ interactionRule, relatedTableOid, nestedFields } = dataFormField);
 </script>
 
 <div class="fk-field">
@@ -29,17 +29,17 @@
     </DataFormLabel>
   </div>
 
-  {#if $rule !== 'must_create'}
-    <div class="fk-input" class:has-margin={$rule !== 'only_select'}>
+  {#if $interactionRule !== 'must_create'}
+    <div class="fk-input" class:has-margin={$interactionRule !== 'must_pick'}>
       <DataFormInput {dataFormField} {isSelected} />
     </div>
   {/if}
 
-  {#if $rule === 'select_or_create' && dataFormManager instanceof EditableDataFormManager}
+  {#if $interactionRule === 'can_pick_or_create' && dataFormManager instanceof EditableDataFormManager}
     <FkFormFieldNestedFieldsHelp {dataFormField} {dataFormManager} />
   {/if}
 
-  {#if $rule !== 'only_select'}
+  {#if $interactionRule !== 'must_pick'}
     <DataFormFieldsContainer
       tableOid={relatedTableOid}
       fields={nestedFields}
