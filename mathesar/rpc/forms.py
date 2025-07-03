@@ -6,7 +6,7 @@ from typing import Optional, TypedDict, Literal
 from modernrpc.core import REQUEST_KEY
 
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form, get_form, list_forms, delete_form
+from mathesar.utils.forms import create_form, get_form, list_forms, delete_form, replace_form
 
 
 class FieldInfo(TypedDict):
@@ -76,7 +76,7 @@ class FormInfo(TypedDict):
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        associated_role_id: The Django id of the configured role to be used while submitting a form.
+        access_role_id: The Django id of the configured role to be used while submitting a form.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
         share_public: Specifies whether the form is publicly accessible.
@@ -96,7 +96,7 @@ class FormInfo(TypedDict):
     database_id: int
     schema_oid: int
     base_table_oid: int
-    associated_role_id: Optional[int]
+    access_role_id: Optional[int]
     header_title: dict
     header_subtitle: Optional[dict]
     share_public: bool
@@ -119,7 +119,7 @@ class FormInfo(TypedDict):
             database_id=form_model.database_id,
             schema_oid=form_model.schema_oid,
             base_table_oid=form_model.base_table_oid,
-            associated_role_id=form_model.associated_role_id,
+            access_role_id=form_model.access_role_id,
             header_title=form_model.header_title,
             header_subtitle=form_model.header_subtitle,
             share_public=form_model.share_public,
@@ -160,9 +160,9 @@ class AddOrReplaceFieldDef(TypedDict):
     child_fields: Optional[list["AddOrReplaceFieldDef"]]
 
 
-class AddOrReplaceFormDef(TypedDict):
+class AddFormDef(TypedDict):
     """
-    Form definition needed to add or replace a form.
+    Definition needed to add a form.
 
     Attributes:
         token: A UUIDv4 object used to identify a form uniquely.
@@ -172,7 +172,7 @@ class AddOrReplaceFormDef(TypedDict):
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        associated_role_id: The Django id of the configured role to be used while submitting a form.
+        access_role_id: The Django id of the configured role to be used while submitting a form.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
         submit_message: Message to be displayed upon submission.
@@ -187,7 +187,7 @@ class AddOrReplaceFormDef(TypedDict):
     database_id: int
     schema_oid: int
     base_table_oid: int
-    associated_role_id: Optional[int]
+    access_role_id: Optional[int]
     header_title: dict
     header_subtitle: Optional[dict]
     submit_message: Optional[dict]
@@ -196,8 +196,33 @@ class AddOrReplaceFormDef(TypedDict):
     fields: list[AddOrReplaceFieldDef]
 
 
+class ReplaceableFormDef(AddFormDef):
+    """
+    Definition needed to replace a form.
+
+    Attributes:
+        id: The Django id of the Form on the database.
+        token: A UUIDv4 object used to identify a form uniquely.
+        name: The name of the form.
+        description: The description of the form.
+        version: The version of the form.
+        database_id: The Django id of the database containing the Form.
+        schema_oid: The OID of the schema where within which form exists.
+        base_table_oid: The table OID based on which a form will be created.
+        is_public: Specifies whether the form is publicly accessible.
+        header_title: The title of the rendered form.
+        header_subtitle: The subtitle of the rendered form.
+        submit_role_id: The Django id of the configured role to be used while submitting a form.
+        submit_message: Message to be displayed upon submission.
+        redirect_url: Redirect path after submission.
+        submit_label: Text to be displayed on the submit button.
+        fields: Definition of Fields within the form.
+    """
+    id: int
+
+
 @mathesar_rpc_method(name="forms.add", auth="login")
-def add(*, form_def: AddOrReplaceFormDef, **kwargs) -> FormInfo:
+def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
     """
     Add a new form.
 
@@ -252,3 +277,19 @@ def delete(*, form_id: int, **kwargs) -> None:
         form_id: The Django id of the form to delete.
     """
     delete_form(form_id)
+
+
+@mathesar_rpc_method(name="forms.replace", auth="login")
+def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
+    """
+    Replace a form.
+
+    Args:
+        new_form: A dict describing the form to replace, including the updated fields.
+
+    Returns:
+        The form info for the replaced form.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    form_model, field_col_info_map = replace_form(new_form, user)
+    return FormInfo.from_model(form_model, field_col_info_map)

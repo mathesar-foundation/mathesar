@@ -11,21 +11,21 @@ from mathesar.models.base import (
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 
 
-def validate_and_get_associated_role(user, database_id, associated_role_id=None):
+def validate_and_get_access_role(user, database_id, access_role_id=None):
     user_dbrm = UserDatabaseRoleMap.objects.get(user=user, database__id=database_id)
     with user_dbrm.connection as conn:
-        associated_role = (
-            ConfiguredRole.objects.get(id=associated_role_id) if associated_role_id else None
+        access_role = (
+            ConfiguredRole.objects.get(id=access_role_id) if access_role_id else None
             or user_dbrm.configured_role
         )
         current_role = get_current_role_from_db(conn)
         parent_names = {pr["name"] for pr in current_role["parent_roles"]}
         assert (
-            user_dbrm.configured_role == associated_role
+            user_dbrm.configured_role == access_role
             or user_dbrm.user.is_superuser
-            or associated_role.name in parent_names
-        ), "Insufficient privileges for selected associated_role"
-    return associated_role
+            or access_role.name in parent_names
+        ), "Insufficient privileges for selected access_role"
+    return access_role
 
 
 def get_table_oid_attnums_cons_map(form_model):
@@ -102,8 +102,9 @@ def construct_form_field_model_from_defn(field_def, form_model, parent_field=Non
 @transaction.atomic
 def create_form(form_def, user):
     database = Database.objects.get(id=form_def["database_id"])
-    associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
+    access_role = validate_and_get_access_role(user, database.id, access_role_id=form_def.get("access_role_id"))
     form_model = Form.objects.create(
+        **({"id": form_def["id"]} if form_def.get("id") else {}),  # we get an id during replace
         token=form_def.get("token", uuid4()),
         name=form_def["name"],
         description=form_def.get("description"),
@@ -112,7 +113,7 @@ def create_form(form_def, user):
         server=database.server,
         schema_oid=form_def["schema_oid"],
         base_table_oid=form_def["base_table_oid"],
-        associated_role=associated_role,
+        access_role=access_role,
         header_title=form_def["header_title"],
         header_subtitle=form_def.get("header_subtitle"),
         submit_message=form_def.get("submit_message"),
@@ -152,3 +153,10 @@ def list_forms(database_id, schema_oid):
 
 def delete_form(form_id):
     Form.objects.get(id=form_id).delete()
+
+
+@transaction.atomic
+def replace_form(form_def_with_id, user):
+    Form.objects.get(id=form_def_with_id["id"]).delete()
+    form_model, field_col_info_map = create_form(form_def_with_id, user)
+    return form_model, field_col_info_map
