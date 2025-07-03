@@ -160,7 +160,7 @@ class AddOrReplaceFieldDef(TypedDict):
     child_fields: Optional[list["AddOrReplaceFieldDef"]]
 
 
-class AddOrReplaceFormDef(TypedDict):
+class AddFormDef(TypedDict):
     """
     Definition needed to add a form.
 
@@ -196,7 +196,7 @@ class AddOrReplaceFormDef(TypedDict):
     fields: list[AddOrReplaceFieldDef]
 
 
-class ReplaceableFormDef(FormDef):
+class ReplaceableFormDef(AddFormDef):
     """
     Definition needed to replace a form.
 
@@ -222,7 +222,7 @@ class ReplaceableFormDef(FormDef):
 
 
 @mathesar_rpc_method(name="forms.add", auth="login")
-def add(*, form_def: AddOrReplaceFormDef, **kwargs) -> FormInfo:
+def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
     """
     Add a new form.
 
