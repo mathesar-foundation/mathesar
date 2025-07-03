@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.db import transaction
 
-from db.forms import get_info_for_table_col_cons_map
+from db.forms import get_tab_col_con_info_map
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
@@ -55,7 +55,7 @@ def get_field_table_col_cons_info_map(form_model):
     table_oid_attnums_cons_map = get_table_oid_attnums_cons_map(form_model)
 
     with form_model.connection as conn:
-        table_oid_attnums_cons_info_map = get_info_for_table_col_cons_map(table_oid_attnums_cons_map, conn)
+        table_oid_attnums_cons_info_map = get_tab_col_con_info_map(table_oid_attnums_cons_map, conn)
 
     for oid, table_data in table_oid_attnums_cons_info_map["tables"].items():
         column_attnums = table_data["columns"].keys()

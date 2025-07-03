@@ -2,7 +2,7 @@ import json
 from db import connection as db_conn
 
 
-def get_info_for_table_col_cons_map(table_col_cons_map, conn):
+def get_tab_col_con_info_map(tab_col_con_map, conn):
     """
       Returns table_info, column_info, and constraints_info for a given tab_col_con_map.
 
@@ -31,4 +31,4 @@ def get_info_for_table_col_cons_map(table_col_cons_map, conn):
         "constraints": {"cons_oid1": cons_info(), "cons_oid2": cons_info()}
       }
     """
-    return db_conn.exec_msar_func(conn, 'get_info_for_table_col_cons_map', json.dumps(table_col_cons_map)).fetchone()[0]
+    return db_conn.exec_msar_func(conn, 'get_tab_col_con_info_map', json.dumps(tab_col_con_map)).fetchone()[0]

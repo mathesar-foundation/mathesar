@@ -1123,7 +1123,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.get_selectable_columns(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_selectable_pkey_attnum(regclass)', 'FUNCTION', NULL),
   ('msar', 'msar.get_table(regclass)', 'FUNCTION', NULL),
-  ('msar', 'msar.get_table_col_con_info_map(jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.get_tab_col_con_info_map(jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.get_table_columns_and_records(oid,integer,integer,jsonb,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.get_table_info(regnamespace)', 'FUNCTION', NULL),
   ('msar', 'msar.get_total_order(oid)', 'FUNCTION', NULL),
