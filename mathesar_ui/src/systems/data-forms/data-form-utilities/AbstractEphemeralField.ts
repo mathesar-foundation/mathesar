@@ -79,7 +79,7 @@ export abstract class AbstractEphemeralField {
       label: get(this.label),
       help: get(this.help),
       styling: {},
-      is_required: false,
+      is_required: get(this.isRequired),
     };
   }
 }
