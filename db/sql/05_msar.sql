@@ -5617,11 +5617,11 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_table_col_con_info_map(table_col_con_map jsonb)
+msar.get_table_col_con_info_map(tab_col_con_map jsonb)
 RETURNS jsonb AS $$/*
-Returns table_info, column_info, and constraints_info for a given table_col_con_map.
+Returns table_info, column_info, and constraints_info for a given tab_col_con_map.
 
-table_col_con_map should have the following form:
+tab_col_con_map should have the following form:
 {
   "tables": {
     "table_oid_1": [col_attnum_1, col_attnum_2, col_attnum_3],
@@ -5650,7 +5650,7 @@ Returns:
     SELECT
       tab_id::oid,
       ARRAY(SELECT jsonb_array_elements_text(attnums))::int[] AS attnums
-    FROM jsonb_each(COALESCE(table_col_con_map -> 'tables', '{}'::jsonb)) AS x(tab_id, attnums)
+    FROM jsonb_each(COALESCE(tab_col_con_map -> 'tables', '{}'::jsonb)) AS x(tab_id, attnums)
   ),
   tab_info_cte AS (
     SELECT tab_id, jsonb_agg(tab_info) AS tab_info_json FROM cte
@@ -5658,23 +5658,41 @@ Returns:
     GROUP BY tab_id
   ),
   col_info_cte AS (
-    SELECT cte.tab_id AS tab_id, jsonb_agg(jsonb_build_object(column_info.id, column_info)) AS col_info_json FROM cte
+    SELECT cte.tab_id AS tab_id, jsonb_agg(
+      jsonb_build_object(
+        column_info.id, column_info
+      )
+    ) AS col_info_json FROM cte
     LEFT JOIN pg_catalog.pg_attribute pga ON cte.tab_id = pga.attrelid
     LEFT JOIN msar.column_info_table(cte.tab_id) AS column_info ON pga.attnum = column_info.id
     WHERE column_info.id = ANY(cte.attnums)
     GROUP BY cte.tab_id
   ),
   tc_res_cte AS (
-    SELECT jsonb_agg(jsonb_build_object(tic.tab_id, jsonb_build_object('table_info', tic.tab_info_json, 'columns', cic.col_info_json)))
+    SELECT jsonb_agg(
+      jsonb_build_object(
+        tic.tab_id, jsonb_build_object(
+        'table_info', tic.tab_info_json,
+        'columns', cic.col_info_json
+        )
+      )
+    )
     FROM tab_info_cte AS tic
     LEFT JOIN col_info_cte AS cic ON tic.tab_id = cic.tab_id
   ),
   con_cte AS (
-    SELECT (jsonb_array_elements_text(COALESCE(table_col_con_map -> 'constraints','[]'::jsonb)))::oid AS con_oid
+    SELECT (jsonb_array_elements_text(COALESCE(tab_col_con_map -> 'constraints','[]'::jsonb)))::oid AS con_oid
   ),
   con_info_cte AS (
-    SELECT jsonb_agg(jsonb_build_object(cit.oid, cit)) FROM con_cte
+    SELECT jsonb_agg(
+      jsonb_build_object(
+        cit.oid, cit
+      )
+    ) FROM con_cte
     LEFT JOIN msar.constraint_info_table() AS cit ON con_cte.con_oid = cit.oid
   )
-  SELECT jsonb_build_object('tables', (SELECT * FROM tc_res_cte), 'constraints', (SELECT * FROM con_info_cte));
+  SELECT jsonb_build_object(
+    'tables', (SELECT * FROM tc_res_cte),
+    'constraints', (SELECT * FROM con_info_cte)
+  );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
