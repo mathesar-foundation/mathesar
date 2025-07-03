@@ -15,27 +15,26 @@
   $: table = $tableStructureStore.resolvedValue?.table;
 </script>
 
-<div class="actions">
-  <div class="source">
-    <div class="tag">
-      {#if table}
-        <TableName {table} alwaysShowTooltip={true} />
-      {/if}
-    </div>
-    {#if dataFormField.kind !== 'reverse_foreign_key'}
-      <span>.</span>
-      <div class="tag">
-        <ProcessedColumnName
-          processedColumn={dataFormField.processedColumn}
-          alwaysShowTooltip={true}
-        />
-      </div>
+<div class="source">
+  <div class="tag">
+    {#if table}
+      <TableName {table} alwaysShowTooltip={true} />
     {/if}
   </div>
+  {#if dataFormField.kind !== 'reverse_foreign_key'}
+    <span>.</span>
+    <div class="tag">
+      <ProcessedColumnName
+        processedColumn={dataFormField.processedColumn}
+        alwaysShowTooltip={true}
+      />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
   .source {
+    margin-left: auto;
     display: inline-flex;
     align-items: center;
 
@@ -46,10 +45,5 @@
       font-size: var(--sm2);
       max-width: 8rem;
     }
-  }
-
-  .actions {
-    margin-left: auto;
-    --button-border-radius: var(--lg1);
   }
 </style>

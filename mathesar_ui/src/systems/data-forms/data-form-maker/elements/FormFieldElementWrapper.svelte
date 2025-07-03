@@ -6,7 +6,7 @@
   } from '../../data-form-utilities/DataFormManager';
 
   import AddFormFieldElementDropdown from './AddFormFieldElementDropdown.svelte';
-  import FormFieldActions from './FormFieldActions.svelte';
+  import FormFieldSource from './FormFieldSource.svelte';
   import SelectableElement from './SelectableElement.svelte';
 
   export let dataFormManager: DataFormManager;
@@ -29,7 +29,7 @@
 >
   <svelte:fragment slot="header">
     {#if dataFormManager instanceof EditableDataFormManager}
-      <FormFieldActions {dataFormManager} {dataFormField} {tableOidOfField} />
+      <FormFieldSource {dataFormManager} {dataFormField} {tableOidOfField} />
     {/if}
   </svelte:fragment>
 

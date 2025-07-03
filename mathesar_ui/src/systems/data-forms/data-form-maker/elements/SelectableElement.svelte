@@ -103,7 +103,7 @@
 
   .header {
     top: 0;
-    transform: translate(0, -75%);
+    transform: translate(0, -60%);
     right: 0;
   }
   .footer {
