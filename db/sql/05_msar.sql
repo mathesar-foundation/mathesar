@@ -5719,11 +5719,11 @@ Returns:
       SELECT
         co.con_oid::text AS con_key,
         jsonb_build_object(
-          'oid', c.oid,
+          'oid', c.oid::bigint,
           'name', c.conname,
           'type', msar.get_constraint_type_api_code(c.contype::char),
           'columns', c.conkey,
-          'referent_table_oid', c.confrelid,
+          'referent_table_oid', c.confrelid::bigint,
           'referent_columns', c.confkey
         ) AS con_json
       FROM constraint_oids co
