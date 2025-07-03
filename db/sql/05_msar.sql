@@ -674,7 +674,7 @@ SELECT *
 FROM constraints
 -- Only return constraints with types that we're able to classify
 WHERE type IS NOT NULL
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
