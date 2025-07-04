@@ -51,13 +51,12 @@ def get_table_oid_attnums_cons_map(form_model):
     }
 
 
-def get_field_table_col_cons_info_map(form_model):
+def get_field_tab_col_con_info_map(form_model):
     table_oid_attnums_cons_map = get_table_oid_attnums_cons_map(form_model)
 
     with form_model.connection as conn:
-        table_oid_attnums_cons_info_map = get_tab_col_con_info_map(table_oid_attnums_cons_map, conn)
-
-    for oid, table_data in table_oid_attnums_cons_info_map["tables"].items():
+        tab_col_con_info_map = get_tab_col_con_info_map(table_oid_attnums_cons_map, conn)
+    for oid, table_data in tab_col_con_info_map["tables"].items():
         column_attnums = table_data["columns"].keys()
         metadata_list = (
             ColumnMetaData.objects.filter(attnum__in=column_attnums, table_oid=oid, database=form_model.database)
@@ -67,7 +66,7 @@ def get_field_table_col_cons_info_map(form_model):
             if col_info:
                 col_info["metadata"] = ColumnMetaDataBlob.from_model(meta)
 
-    return table_oid_attnums_cons_info_map
+    return tab_col_con_info_map
 
 
 def iterate_field_defs(field_defs, parent_field_defn=None):
@@ -80,24 +79,6 @@ def iterate_field_defs(field_defs, parent_field_defn=None):
             fdef.get("child_fields", []),
             fdef
         )
-
-
-def construct_form_field_model_from_defn(field_def, form_model, parent_field=None):
-    return FormField(
-        key=field_def["key"],
-        form=form_model,
-        index=field_def["index"],
-        label=field_def.get("label"),
-        help=field_def.get("help"),
-        kind=field_def["kind"],
-        column_attnum=field_def.get("column_attnum"),
-        constraint_oid=field_def.get("constraint_oid"),
-        related_table_oid=field_def.get("related_table_oid"),
-        fk_interaction_rule=field_def.get("fk_interaction_rule"),
-        parent_field=parent_field,
-        styling=field_def.get("styling"),
-        is_required=field_def.get("is_required", False),
-    )
 
 
 @transaction.atomic
@@ -122,10 +103,20 @@ def create_form(form_def, user):
         submit_button_label=form_def.get("submit_button_label")
     )
     field_instances = [
-        construct_form_field_model_from_defn(
-            field_def,
-            form_model,
-            None
+        FormField(
+            key=field_def["key"],
+            form=form_model,
+            index=field_def["index"],
+            label=field_def.get("label"),
+            help=field_def.get("help"),
+            kind=field_def["kind"],
+            column_attnum=field_def.get("column_attnum"),
+            constraint_oid=field_def.get("constraint_oid"),
+            related_table_oid=field_def.get("related_table_oid"),
+            fk_interaction_rule=field_def.get("fk_interaction_rule"),
+            parent_field=None,
+            styling=field_def.get("styling"),
+            is_required=field_def.get("is_required", False),
         ) for field_def, _parent in iterate_field_defs(form_def["fields"])
     ]
     created_fields = FormField.objects.bulk_create(field_instances)
@@ -138,13 +129,13 @@ def create_form(form_def, user):
             update_field_instances.append(created_field)
     if update_field_instances:
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
-    field_col_info_map = get_field_table_col_cons_info_map(form_model)
+    field_col_info_map = get_field_tab_col_con_info_map(form_model)
     return form_model, field_col_info_map
 
 
 def get_form(form_id):
     form_model = Form.objects.get(id=form_id)
-    field_col_info_map = get_field_table_col_cons_info_map(form_model)
+    field_col_info_map = get_field_tab_col_con_info_map(form_model)
     return form_model, field_col_info_map
 
 
