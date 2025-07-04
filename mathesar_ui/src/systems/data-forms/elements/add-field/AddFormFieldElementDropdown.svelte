@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
@@ -75,11 +76,11 @@
     {#if $isLoading}
       <Spinner />
     {:else}
-      <MenuHeading>
+      <div class="add-field-table">
         {#if table}
-          <TableName {table} />
+          <TableName {table} truncate={false} />
         {/if}
-      </MenuHeading>
+      </div>
       <MenuDivider />
       {#each scalarColumns as processedColumn (processedColumn.id)}
         <AddFormColumnFieldItem
@@ -89,7 +90,17 @@
         />
       {/each}
       {#if fkProcessedColumns.length > 0}
-        <MenuHeading>{$_('links_from_table')}</MenuHeading>
+        <MenuHeading>
+          <RichText
+            text={$_('references_in_this_table')}
+            let:slotName
+            let:translatedArg
+          >
+            {#if slotName === 'bold'}
+              <strong>{translatedArg}</strong>
+            {/if}
+          </RichText>
+        </MenuHeading>
         {#each fkProcessedColumns as processedColumn (processedColumn.id)}
           <AddFormColumnFieldItem
             {processedColumn}
@@ -99,7 +110,17 @@
         {/each}
       {/if}
       {#if reverseForeignKeyEnabled && linksToTable && linksToTable.length}
-        <MenuHeading>{$_('links_to_table')}</MenuHeading>
+        <MenuHeading>
+          <RichText
+            text={$_('references_to_this_table')}
+            let:slotName
+            let:translatedArg
+          >
+            {#if slotName === 'bold'}
+              <strong>{translatedArg}</strong>
+            {/if}
+          </RichText>
+        </MenuHeading>
         {#each linksToTable as linkToTable (linkToTable)}
           <ButtonMenuItem on:click={() => close()}>
             <TableName table={linkToTable.table} />
@@ -115,5 +136,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .add-field-table {
+    font-weight: 500;
+    padding: var(--sm4) var(--sm2);
+    min-width: 16rem;
   }
 </style>
