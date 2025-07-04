@@ -6,12 +6,11 @@
   import type { DataForm } from '@mathesar/models/DataForm';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { toast } from '@mathesar/stores/toast';
+  import type { EditableDataFormManager } from '@mathesar/systems/data-forms';
   import { Button, Icon, SpinnerButton } from '@mathesar-component-library';
 
-  import type { DataFormManager } from '../../systems/data-forms/data-form-utilities/DataFormManager';
-
   export let dataForm: DataForm;
-  export let dataFormManager: DataFormManager;
+  export let dataFormManager: EditableDataFormManager;
   $: ({ name } = dataFormManager.ephemeralDataForm);
 
   async function saveForm() {

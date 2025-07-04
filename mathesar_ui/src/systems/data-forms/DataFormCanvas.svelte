@@ -34,10 +34,8 @@
 
 <style lang="scss">
   .data-form-canvas {
-    display: grid;
-    grid-template-rows: 1fr auto;
     overflow: hidden;
-    padding: var(--sm3);
+    padding: var(--sm1);
     height: 100%;
   }
 

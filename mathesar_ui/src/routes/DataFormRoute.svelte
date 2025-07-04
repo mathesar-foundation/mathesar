@@ -1,11 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { Route } from 'tinro';
 
   import { api } from '@mathesar/api/rpc';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconForms } from '@mathesar/icons';
   import DataFormEditorPage from '@mathesar/pages/data-forms/DataFormEditorPage.svelte';
+  import DataFormFilloutPage from '@mathesar/pages/data-forms/DataFormFilloutPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import LoadingPage from '@mathesar/pages/LoadingPage.svelte';
   import { getDataFormPageUrl } from '@mathesar/routes/urls';
@@ -45,9 +47,21 @@
 
   {#if isLoading}
     <LoadingPage />
-  {:else if form}
-    <DataFormEditorPage dataForm={form} formSourceInfo={$formSourceInfo} />
   {/if}
-{:else}
+{/if}
+
+{#if !form && !isLoading}
   <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
 {/if}
+
+<Route path="/">
+  {#if !isLoading && form}
+    <DataFormEditorPage dataForm={form} formSourceInfo={$formSourceInfo} />
+  {/if}
+</Route>
+
+<Route path="/fillout/">
+  {#if !isLoading && form}
+    <DataFormFilloutPage dataForm={form} formSourceInfo={$formSourceInfo} />
+  {/if}
+</Route>

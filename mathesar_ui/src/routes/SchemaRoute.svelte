@@ -13,7 +13,7 @@
 
   import DataExplorerRedirect from './DataExplorerRedirect.svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
-  import DataFormEditorRoute from './DataFormEditorRoute.svelte';
+  import DataFormRoute from './DataFormRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
   import TableRoute from './TableRoute.svelte';
 
@@ -75,7 +75,7 @@
   </MultiPathRoute>
 
   <Route path="/forms/:formId/*" firstmatch let:meta>
-    <DataFormEditorRoute formId={parseInt(meta.params.formId, 10)} />
+    <DataFormRoute formId={parseInt(meta.params.formId, 10)} />
   </Route>
 
   <Route path="/">

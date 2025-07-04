@@ -26,18 +26,22 @@
   let thisDomElement: HTMLElement;
 
   function onHover(e: MouseEvent) {
-    const { target } = e;
-    if (target instanceof HTMLElement) {
-      if (target.closest('[data-form-selectable]') === thisDomElement) {
-        isHovered = true;
-        return;
+    if (dataFormManager instanceof EditableDataFormManager) {
+      const { target } = e;
+      if (target instanceof HTMLElement) {
+        if (target.closest('[data-form-selectable]') === thisDomElement) {
+          isHovered = true;
+          return;
+        }
       }
+      isHovered = false;
     }
-    isHovered = false;
   }
 
-  function onHoverAway(e: MouseEvent) {
-    isHovered = false;
+  function onHoverAway() {
+    if (dataFormManager instanceof EditableDataFormManager) {
+      isHovered = false;
+    }
   }
 
   function onClick(e: Event) {
