@@ -656,6 +656,7 @@
   "sort": "Sort",
   "sort_type": "Sort {sortingType}",
   "source_column": "Source Column",
+  "source_table_for_form": "Source table for form",
   "specify_a_role": "Specify a PostgreSQL Role",
   "start_over": "Start Over",
   "static_record_summary_template_error": "Record summary cannot be static. Add at least one column field in order to save.",

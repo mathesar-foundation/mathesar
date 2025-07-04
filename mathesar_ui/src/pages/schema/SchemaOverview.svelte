@@ -8,10 +8,7 @@
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconAddNew, iconRefresh } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
-  import {
-    getDataExplorerPageUrl,
-    getNewDataFormPageUrl,
-  } from '@mathesar/routes/urls';
+  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { fetchExplorationsForCurrentSchema } from '@mathesar/stores/queries';
   import { fetchTablesForCurrentSchema } from '@mathesar/stores/tables';
   import {
@@ -25,7 +22,7 @@
   import CreateTableTutorial from './CreateTableTutorial.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
-  import FormsList from './FormsList.svelte';
+  import FormsSection from './FormsSection.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
 
@@ -135,44 +132,7 @@
       {/if}
     </section>
 
-    <section>
-      <header>
-        <h2>{$_('forms')}</h2>
-        <div>
-          <AnchorButton
-            href={getNewDataFormPageUrl(schema.database.id, schema.oid)}
-            appearance="primary"
-          >
-            <Icon {...iconAddNew} />
-            <span>{$_('new_form')}</span>
-          </AnchorButton>
-        </div>
-      </header>
-      {#if $dataForms.isLoading}
-        <!-- TODO: Use a common skeleton -->
-        <ExplorationSkeleton />
-      {:else if $dataForms.error}
-        <ErrorBox>
-          <p>{$dataForms.error.message}</p>
-          <div>
-            <SpinnerButton
-              onClick={async () => {
-                await dataForms.run();
-              }}
-              label={$_('retry')}
-              icon={iconRefresh}
-            />
-            <a href="../">
-              <Button>
-                <span>{$_('go_to_database')}</span>
-              </Button>
-            </a>
-          </div>
-        </ErrorBox>
-      {:else if $dataForms.resolvedValue}
-        <FormsList dataForms={$dataForms.resolvedValue} />
-      {/if}
-    </section>
+    <FormsSection />
   </div>
 </div>
 

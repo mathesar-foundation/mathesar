@@ -130,6 +130,10 @@ export class DataForm {
     );
   }
 
+  delete(): CancellablePromise<void> {
+    return api.forms.delete({ form_id: this.id }).run();
+  }
+
   toRawDataForm(): RawDataForm {
     const formDefinition = get(this.formDefinition);
 

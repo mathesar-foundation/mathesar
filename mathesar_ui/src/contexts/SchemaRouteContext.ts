@@ -1,4 +1,5 @@
 import type { RawEphemeralDataForm } from '@mathesar/api/rpc/forms';
+import type { DataForm } from '@mathesar/models/DataForm';
 import type { Schema } from '@mathesar/models/Schema';
 
 import { getRouteContext, setRouteContext } from './utils';
@@ -15,12 +16,17 @@ export class SchemaRouteContext {
     this.dataForms = schema.constructDataFormsStore();
   }
 
-  async insertDataFrom(dataFormDef: RawEphemeralDataForm) {
+  async insertDataForm(dataFormDef: RawEphemeralDataForm) {
     const newDataForm = await this.schema.addDataForm(dataFormDef);
     this.dataForms.updateResolvedValue((dataForms) =>
       dataForms.with(newDataForm.id, newDataForm),
     );
     return newDataForm;
+  }
+
+  async removeDataForm(dataForm: DataForm) {
+    await dataForm.delete();
+    this.dataForms.updateResolvedValue((df) => df.without(dataForm.id));
   }
 
   static construct(schema: Schema) {

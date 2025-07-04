@@ -19,6 +19,9 @@
   import { ButtonMenuItem, Icon } from '@mathesar-component-library';
 
   export let dataForm: DataForm;
+  export let editDataForm: () => void;
+  export let deleteDataForm: () => void;
+
   $: ({ id, name, description, schema } = dataForm);
 
   // TODO: Get base table
@@ -36,13 +39,9 @@
       identifierType: $_('form'),
       identifierName: $name,
       onProceed: async () => {
-        // TODO
+        deleteDataForm();
       },
     });
-  }
-
-  function handleEdit() {
-    // TODO
   }
 </script>
 
@@ -68,7 +67,7 @@
     </a>
   </div>
   <svelte:fragment slot="menu">
-    <ButtonMenuItem on:click={handleEdit} icon={iconEdit}>
+    <ButtonMenuItem on:click={editDataForm} icon={iconEdit}>
       {$_('edit_form')}
     </ButtonMenuItem>
     <ButtonMenuItem on:click={handleDelete} danger icon={iconDeleteMajor}>

@@ -158,4 +158,10 @@ export const forms = {
     },
     RawDataFormGetResponse
   >(),
+  delete: rpcMethodTypeContainer<
+    {
+      form_id: RawDataForm['id'];
+    },
+    void
+  >(),
 };
