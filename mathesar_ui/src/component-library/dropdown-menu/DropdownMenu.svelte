@@ -36,8 +36,12 @@
       {/if}
     </span>
   </slot>
-  <Menu slot="content" style="--Menu__min-width: 100%;{menuStyle}">
-    <slot />
+  <Menu
+    slot="content"
+    style="--Menu__min-width: 100%;{menuStyle}"
+    let:close={menuClose}
+  >
+    <slot close={menuClose} />
   </Menu>
 </Dropdown>
 

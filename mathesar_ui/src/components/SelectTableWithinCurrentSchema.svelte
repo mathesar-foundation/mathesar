@@ -8,8 +8,16 @@
   export let value: Table | undefined = undefined;
   export let prependBlank = false;
   export let autoSelect: SelectProps<Table | undefined>['autoSelect'] = 'first';
+  export let disabled = false;
 
   $: tables = [...$importVerifiedTables.values()];
 </script>
 
-<SelectTable {tables} bind:value {prependBlank} {autoSelect} on:change />
+<SelectTable
+  {tables}
+  bind:value
+  {prependBlank}
+  {autoSelect}
+  {disabled}
+  on:change
+/>
