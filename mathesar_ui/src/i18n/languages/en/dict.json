@@ -339,6 +339,8 @@
   "linked_table": "Linked Table",
   "linked_to": "Linked To",
   "linked_via_foreign_key_column": "It is linked via a foreign key column",
+  "links_from_table": "Links from table",
+  "links_to_table": "Links to table",
   "loading": "Loading",
   "loading_release_data": "Loading release data",
   "log_out": "Log Out",

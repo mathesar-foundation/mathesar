@@ -3,25 +3,18 @@
   import { Button, Icon } from '@mathesar-component-library';
 
   import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
-  import { type EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
+  import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: EphemeralDataFormField;
-
-  $: ({ ephemeralDataForm } = dataFormManager);
-
-  function removeField() {
-    if (dataFormField.parentField) {
-      dataFormField.parentField.removeNestedField(dataFormField);
-    } else {
-      ephemeralDataForm.removeField(dataFormField);
-    }
-  }
 </script>
 
 <div class="controls">
   <slot />
-  <Button appearance="outcome" on:click={removeField}>
+  <Button
+    appearance="outcome"
+    on:click={() => dataFormManager.removeField(dataFormField)}
+  >
     <Icon {...iconDeleteMajor} />
   </Button>
 </div>

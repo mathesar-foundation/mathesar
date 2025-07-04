@@ -1,35 +1,30 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-
-  import type { Table } from '@mathesar/models/Table';
-  import type { ImmutableMap } from '@mathesar-component-library';
-
-  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
+  import type { ParentEphemeralField } from '../../data-form-utilities/AbstractEphemeralField';
   import {
     type DataFormManager,
     EditableDataFormManager,
   } from '../../data-form-utilities/DataFormManager';
+  import type { FormFields } from '../../data-form-utilities/FormFields';
 
-  import AddFormFieldElementDropdown from './AddFormFieldElementDropdown.svelte';
+  import { AddField } from './add-field';
   import DataFormFieldElement from './DataFormFieldElement.svelte';
 
   export let dataFormManager: DataFormManager;
-  export let tableOid: Table['oid'];
-  export let fields: Readable<
-    ImmutableMap<EphemeralDataFormField['key'], EphemeralDataFormField>
-  >;
+  export let parentField: ParentEphemeralField;
+  export let fields: FormFields;
 </script>
 
 <div class="fields-container">
-  {#each [...$fields.values()] as ephField (ephField.key)}
+  {#each $fields as ephField (ephField.key)}
     <DataFormFieldElement {dataFormManager} dataFormField={ephField} />
   {:else}
     {#if dataFormManager instanceof EditableDataFormManager}
       <div class="empty-fields-state">
-        <AddFormFieldElementDropdown
+        <AddField
           display="full"
-          {tableOid}
           {dataFormManager}
+          {parentField}
+          insertionIndex={$fields.length}
         />
       </div>
     {/if}

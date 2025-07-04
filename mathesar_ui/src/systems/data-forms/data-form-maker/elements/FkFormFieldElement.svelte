@@ -17,7 +17,7 @@
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphermeralFkField;
 
-  $: ({ interactionRule, relatedTableOid, nestedFields } = dataFormField);
+  $: ({ interactionRule, nestedFields } = dataFormField);
 </script>
 
 <div class="fk-field">
@@ -41,8 +41,8 @@
 
   {#if $interactionRule !== 'must_pick'}
     <DataFormFieldsContainer
-      tableOid={relatedTableOid}
       fields={nestedFields}
+      parentField={dataFormField}
       {dataFormManager}
     />
   {/if}

@@ -3,10 +3,10 @@ import type {
   RawReverseForeignKeyDataFormField,
 } from '@mathesar/api/rpc/forms';
 
-import {
-  type EphemeralDataFormField,
-  type EphemeralFieldProps,
-  type ParentEphemeralField,
+import type {
+  EphemeralDataFormField,
+  EphemeralFieldProps,
+  ParentEphemeralField,
 } from './AbstractEphemeralField';
 import { AbstractParentEphemeralField } from './AbstractParentEphemeralField';
 
@@ -29,6 +29,23 @@ export class EphemeralReverseFkField extends AbstractParentEphemeralField {
     super(parentField, data);
     this.reverseFkConstraintOid = data.reverseFkConstraintOid;
     this.relatedTableOid = data.relatedTableOid;
+  }
+
+  hasSource(reverseFkConstraintOid: number, relatedTableOid: number) {
+    return (
+      this.reverseFkConstraintOid === reverseFkConstraintOid &&
+      this.relatedTableOid === relatedTableOid
+    );
+  }
+
+  isConceptuallyEqual(dataFormField: EphemeralDataFormField) {
+    return (
+      dataFormField.kind === this.kind &&
+      this.hasSource(
+        dataFormField.reverseFkConstraintOid,
+        dataFormField.relatedTableOid,
+      )
+    );
   }
 
   toRawEphemeralField(): RawEphemeralReverseForeignKeyDataFormField {

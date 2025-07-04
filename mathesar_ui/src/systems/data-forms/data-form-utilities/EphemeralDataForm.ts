@@ -6,9 +6,9 @@ import type {
   RawEphemeralDataForm,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
-import { type ImmutableMap, WritableMap } from '@mathesar-component-library';
 
 import type { EphemeralDataFormField } from './AbstractEphemeralField';
+import { FormFields } from './FormFields';
 import {
   rawEphemeralFieldToEphemeralField,
   tableStructureSubstanceToEphemeralFields,
@@ -43,13 +43,7 @@ export class EphemeralDataForm {
     return this._accessRoleId;
   }
 
-  private _fields;
-
-  get fields(): Readable<
-    ImmutableMap<EphemeralDataFormField['key'], EphemeralDataFormField>
-  > {
-    return this._fields;
-  }
+  fields: FormFields;
 
   constructor(edf: {
     baseTableOid: number;
@@ -58,7 +52,7 @@ export class EphemeralDataForm {
     name: Writable<RawDataForm['name']>;
     description: Writable<RawDataForm['description']>;
     accessRoleId: Writable<RawDataForm['access_role_id']>;
-    fields: WritableMap<EphemeralDataFormField['key'], EphemeralDataFormField>;
+    fields: Iterable<EphemeralDataFormField>;
   }) {
     this.baseTableOid = edf.baseTableOid;
     this.schemaOid = edf.schemaOid;
@@ -66,7 +60,7 @@ export class EphemeralDataForm {
     this._name = edf.name;
     this._description = edf.description;
     this._accessRoleId = edf.accessRoleId;
-    this._fields = edf.fields;
+    this.fields = new FormFields(edf.fields);
   }
 
   setName(name: string): EdfUpdateDiff {
@@ -81,10 +75,6 @@ export class EphemeralDataForm {
     return {
       change: 'description',
     };
-  }
-
-  removeField(dataFormField: EphemeralDataFormField) {
-    this._fields.delete(dataFormField.key);
   }
 
   toRawEphemeralDataForm(): RawEphemeralDataForm {
@@ -119,16 +109,13 @@ export class EphemeralDataForm {
       name: writable(rawEphemeralDataForm.name),
       description: writable(rawEphemeralDataForm.description),
       accessRoleId: writable(rawEphemeralDataForm.access_role_id),
-      fields: new WritableMap(
-        rawEphemeralDataForm.fields.map((field) => {
-          const ef = rawEphemeralFieldToEphemeralField(
-            field,
-            null,
-            rawEphemeralDataForm.base_table_oid,
-            formSource,
-          );
-          return [ef.key, ef];
-        }),
+      fields: rawEphemeralDataForm.fields.map((field) =>
+        rawEphemeralFieldToEphemeralField(
+          field,
+          null,
+          rawEphemeralDataForm.base_table_oid,
+          formSource,
+        ),
       ),
     });
   }
@@ -141,11 +128,9 @@ export class EphemeralDataForm {
       name: writable(tableStructureSubstance.table.name),
       description: writable(null),
       accessRoleId: writable(null),
-      fields: new WritableMap(
-        tableStructureSubstanceToEphemeralFields(
-          tableStructureSubstance,
-          null,
-        ).map((ef) => [ef.key, ef]),
+      fields: tableStructureSubstanceToEphemeralFields(
+        tableStructureSubstance,
+        null,
       ),
     });
   }

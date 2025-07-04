@@ -1,4 +1,4 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, type Updater, get, writable } from 'svelte/store';
 
 import type {
   RawDataFormBaseField,
@@ -69,6 +69,12 @@ export abstract class AbstractEphemeralField {
   setLabel(label: string) {
     this._label.set(label);
   }
+
+  updateIndex(updator: Updater<number>) {
+    this._index.update(updator);
+  }
+
+  abstract isConceptuallyEqual(dataFormField: EphemeralDataFormField): boolean;
 
   abstract toRawEphemeralField(): RawEphemeralDataFormField;
 

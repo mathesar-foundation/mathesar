@@ -1,6 +1,4 @@
-import { type Readable, get } from 'svelte/store';
-
-import { type ImmutableMap, WritableMap } from '@mathesar-component-library';
+import { get } from 'svelte/store';
 
 import {
   AbstractEphemeralField,
@@ -8,15 +6,10 @@ import {
   type EphemeralFieldProps,
   type ParentEphemeralField,
 } from './AbstractEphemeralField';
+import { FormFields } from './FormFields';
 
 export abstract class AbstractParentEphemeralField extends AbstractEphemeralField {
-  protected _nestedFields;
-
-  get nestedFields(): Readable<
-    ImmutableMap<EphemeralDataFormField['key'], EphemeralDataFormField>
-  > {
-    return this._nestedFields;
-  }
+  nestedFields: FormFields;
 
   constructor(
     parentField: ParentEphemeralField,
@@ -25,24 +18,14 @@ export abstract class AbstractParentEphemeralField extends AbstractEphemeralFiel
     },
   ) {
     super(parentField, data);
-    this._nestedFields = new WritableMap(
-      [...data.nestedFields].map((f) => [f.key, f]),
-    );
-  }
-
-  setNestedFields(nestedFields: Iterable<EphemeralDataFormField>) {
-    this._nestedFields.reconstruct([...nestedFields].map((f) => [f.key, f]));
-  }
-
-  removeNestedField(dataFormField: EphemeralDataFormField) {
-    this._nestedFields.delete(dataFormField.key);
+    this.nestedFields = new FormFields(data.nestedFields);
   }
 
   protected getBaseFieldRawJson() {
     const base = super.getBaseFieldRawJson();
     return {
       ...base,
-      child_fields: [...get(this.nestedFields).values()].map((nested_field) =>
+      child_fields: get(this.nestedFields).map((nested_field) =>
         nested_field.toRawEphemeralField(),
       ),
     };

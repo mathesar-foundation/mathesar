@@ -1,14 +1,17 @@
 <script lang="ts">
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import type { Table } from '@mathesar/models/Table';
 
   import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: EphemeralDataFormField;
-  export let tableOidOfField: Table['oid'];
+
+  $: ({ ephemeralDataForm } = dataFormManager);
+  $: tableOidOfField = dataFormField.parentField
+    ? dataFormField.parentField.relatedTableOid
+    : ephemeralDataForm.baseTableOid;
 
   $: tableStructure = dataFormManager.getTableStructure(tableOidOfField);
   $: tableStructureStore = tableStructure.asyncStore;

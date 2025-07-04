@@ -9,7 +9,7 @@
 
   import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
-  import { type EphermeralFkField } from '../../data-form-utilities/EphemeralFkField';
+  import type { EphermeralFkField } from '../../data-form-utilities/EphemeralFkField';
   import { tableStructureSubstanceToEphemeralFields } from '../../data-form-utilities/transformers';
 
   export let dataFormManager: EditableDataFormManager;

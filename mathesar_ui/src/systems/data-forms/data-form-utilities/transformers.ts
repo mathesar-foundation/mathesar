@@ -14,7 +14,7 @@ import { EphermeralFkField } from './EphemeralFkField';
 import { EphemeralReverseFkField } from './EphemeralReverseFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
 
-function columnToEphemeralField(
+export function columnToEphemeralField(
   pc: ProcessedColumn,
   tableStructureSubstance: TableStructureSubstance,
   parentField: ParentEphemeralField,
@@ -175,7 +175,7 @@ export function rawEphemeralFieldToEphemeralField(
           formSource,
         ),
       ) ?? [];
-    fkField.setNestedFields(nestedFields);
+    fkField.nestedFields.reconstruct(nestedFields);
 
     return fkField;
   }
@@ -201,7 +201,7 @@ export function rawEphemeralFieldToEphemeralField(
         formSource,
       ),
     ) ?? [];
-  revFkField.setNestedFields(nestedFields);
+  revFkField.nestedFields.reconstruct(nestedFields);
 
   return revFkField;
 }

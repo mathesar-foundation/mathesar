@@ -7,10 +7,10 @@ import type {
 import { type FieldStore, optionalField } from '@mathesar/components/form';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
-import {
-  type EphemeralDataFormField,
-  type EphemeralFieldProps,
-  type ParentEphemeralField,
+import type {
+  EphemeralDataFormField,
+  EphemeralFieldProps,
+  ParentEphemeralField,
 } from './AbstractEphemeralField';
 import { AbstractParentEphemeralField } from './AbstractParentEphemeralField';
 
@@ -63,12 +63,26 @@ export class EphermeralFkField extends AbstractParentEphemeralField {
     getDefaultNestedFields: () => Promise<Iterable<EphemeralDataFormField>>,
   ) {
     this._interactionRule.set(rule);
-    if (get(this.nestedFields).size === 0) {
+    if (get(this.nestedFields).length === 0) {
       const defaultNestedFields = await getDefaultNestedFields();
-      this._nestedFields.reconstruct(
-        [...defaultNestedFields].map((f) => [f.key, f]),
-      );
+      this.nestedFields.reconstruct(defaultNestedFields);
     }
+  }
+
+  hasSource(processedColumn: ProcessedColumn) {
+    return (
+      this.processedColumn.tableOid === processedColumn.tableOid &&
+      this.processedColumn.id === processedColumn.id &&
+      this.fkConstraintOid === processedColumn.linkFk?.oid &&
+      this.relatedTableOid === processedColumn.linkFk?.referent_table_oid
+    );
+  }
+
+  isConceptuallyEqual(dataFormField: EphemeralDataFormField) {
+    return (
+      dataFormField.kind === this.kind &&
+      this.hasSource(dataFormField.processedColumn)
+    );
   }
 
   toRawEphemeralField(): RawEphemeralForeignKeyDataFormField {

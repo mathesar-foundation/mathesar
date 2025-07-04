@@ -5,18 +5,14 @@
     EditableDataFormManager,
   } from '../../data-form-utilities/DataFormManager';
 
-  import AddFormFieldElementDropdown from './AddFormFieldElementDropdown.svelte';
+  import { AddField } from './add-field';
   import FormFieldSource from './FormFieldSource.svelte';
   import SelectableElement from './SelectableElement.svelte';
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphemeralDataFormField;
 
-  $: ({ ephemeralDataForm } = dataFormManager);
-
-  $: tableOidOfField = dataFormField.parentField
-    ? dataFormField.parentField.relatedTableOid
-    : ephemeralDataForm.baseTableOid;
+  $: ({ index } = dataFormField);
 </script>
 
 <SelectableElement
@@ -29,7 +25,7 @@
 >
   <svelte:fragment slot="header">
     {#if dataFormManager instanceof EditableDataFormManager}
-      <FormFieldSource {dataFormManager} {dataFormField} {tableOidOfField} />
+      <FormFieldSource {dataFormManager} {dataFormField} />
     {/if}
   </svelte:fragment>
 
@@ -37,9 +33,10 @@
 
   <svelte:fragment slot="footer">
     {#if dataFormManager instanceof EditableDataFormManager}
-      <AddFormFieldElementDropdown
-        tableOid={tableOidOfField}
+      <AddField
         {dataFormManager}
+        parentField={dataFormField.parentField}
+        insertionIndex={$index + 1}
       />
     {/if}
   </svelte:fragment>

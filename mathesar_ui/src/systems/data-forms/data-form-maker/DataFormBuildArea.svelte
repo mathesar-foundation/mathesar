@@ -10,7 +10,7 @@
   import DataFormHeader from './elements/DataFormHeader.svelte';
 
   export let dataFormManager: DataFormManager;
-  $: ({ fields, baseTableOid } = dataFormManager.ephemeralDataForm);
+  $: ({ fields } = dataFormManager.ephemeralDataForm);
 
   function handleFormSelection(e: MouseEvent) {
     if (dataFormManager instanceof EditableDataFormManager) {
@@ -27,11 +27,7 @@
 <div class="build-area" on:click={handleFormSelection}>
   <div class="form">
     <DataFormHeader {dataFormManager} />
-    <DataFormFieldsContainer
-      tableOid={baseTableOid}
-      {fields}
-      {dataFormManager}
-    />
+    <DataFormFieldsContainer {fields} parentField={null} {dataFormManager} />
     <DataFormFooter />
     <div class="branding">
       <DataFormBranding />
