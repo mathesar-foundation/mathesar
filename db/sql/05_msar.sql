@@ -5650,7 +5650,7 @@ Returns:
     SELECT
       tab_id::oid,
       ARRAY(SELECT jsonb_array_elements_text(attnums))::int[] AS attnums
-    FROM jsonb_each(COALESCE(tab_col_con_map -> 'tables', '{}'::jsonb)) AS x(tab_id, attnums)
+    FROM jsonb_each(coalesce(tab_col_con_map -> 'tables', '{}'::jsonb)) AS x(tab_id, attnums)
   ),
   tab_info_cte AS (
     SELECT tab_id, jsonb_agg(tab_info) AS tab_info_json FROM cte
@@ -5658,10 +5658,9 @@ Returns:
     GROUP BY tab_id
   ),
   col_info_cte AS (
-    SELECT cte.tab_id AS tab_id, jsonb_agg(
-      jsonb_build_object(
-        column_info.id, column_info
-      )
+    SELECT cte.tab_id AS tab_id,
+    jsonb_object_agg(
+      column_info.id, column_info
     ) AS col_info_json FROM cte
     LEFT JOIN pg_catalog.pg_attribute pga ON cte.tab_id = pga.attrelid
     LEFT JOIN msar.column_info_table(cte.tab_id) AS column_info ON pga.attnum = column_info.id
@@ -5669,30 +5668,29 @@ Returns:
     GROUP BY cte.tab_id
   ),
   tc_res_cte AS (
-    SELECT jsonb_agg(
-      jsonb_build_object(
+    SELECT coalesce(
+      jsonb_object_agg(
         tic.tab_id, jsonb_build_object(
-        'table_info', tic.tab_info_json,
-        'columns', cic.col_info_json
-        )
+        'table_info', coalesce(tic.tab_info_json,'{}'::jsonb),
+        'columns', coalesce(cic.col_info_json, '{}'::jsonb)
       )
-    )
+    ), '{}'::jsonb) AS tab_info
     FROM tab_info_cte AS tic
     LEFT JOIN col_info_cte AS cic ON tic.tab_id = cic.tab_id
   ),
   con_cte AS (
-    SELECT (jsonb_array_elements_text(COALESCE(tab_col_con_map -> 'constraints','[]'::jsonb)))::oid AS con_oid
+    SELECT (jsonb_array_elements_text(coalesce(tab_col_con_map -> 'constraints','[]'::jsonb)))::oid AS con_oid
   ),
   con_info_cte AS (
-    SELECT jsonb_agg(
-      jsonb_build_object(
+    SELECT coalesce(
+      jsonb_object_agg(
         cit.oid, cit
-      )
-    ) FROM con_cte
+    ), '{}'::jsonb) AS con_info
+    FROM con_cte
     LEFT JOIN msar.constraint_info_table() AS cit ON con_cte.con_oid = cit.oid
   )
   SELECT jsonb_build_object(
-    'tables', (SELECT * FROM tc_res_cte),
-    'constraints', (SELECT * FROM con_info_cte)
+    'tables', (SELECT tab_info FROM tc_res_cte),
+    'constraints', (SELECT con_info FROM con_info_cte)
   );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
