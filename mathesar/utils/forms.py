@@ -31,20 +31,16 @@ def validate_and_get_access_role(user, database_id, access_role_id=None):
 def get_table_oid_attnums_cons_map(form_model):
     table_oid_attnums_map = defaultdict(list)
     constraints_oids = []
-
     fields = {field.key: field for field in form_model.fields.all()}
     for field in fields.values():
         if field.column_attnum:
             table_oid = field.parent_field.related_table_oid if field.parent_field else form_model.base_table_oid
             table_oid_attnums_map[table_oid].append(field.column_attnum)
-
         if field.related_table_oid:
             # Ensure that the table is present even if columns are empty
             table_oid_attnums_map[field.related_table_oid]
-
         if field.constraint_oid:
             constraints_oids.append(field.constraint_oid)
-
     return {
         "tables": table_oid_attnums_map,
         "constraints": constraints_oids
@@ -53,7 +49,6 @@ def get_table_oid_attnums_cons_map(form_model):
 
 def get_field_tab_col_con_info_map(form_model):
     table_oid_attnums_cons_map = get_table_oid_attnums_cons_map(form_model)
-
     with form_model.connection as conn:
         tab_col_con_info_map = get_tab_col_con_info_map(table_oid_attnums_cons_map, conn)
     for oid, table_data in tab_col_con_info_map["tables"].items():
@@ -65,7 +60,6 @@ def get_field_tab_col_con_info_map(form_model):
             col_info = table_data["columns"].get(meta.attnum)
             if col_info:
                 col_info["metadata"] = ColumnMetaDataBlob.from_model(meta)
-
     return tab_col_con_info_map
 
 
