@@ -2,8 +2,7 @@
   import {
     type DataFormManager,
     EditableDataFormManager,
-  } from '../data-form-utilities/DataFormManager';
-
+  } from './data-form-utilities/DataFormManager';
   import DataFormBranding from './DataFormBranding.svelte';
   import DataFormFieldsContainer from './elements/DataFormFieldsContainer.svelte';
   import DataFormFooter from './elements/DataFormFooter.svelte';

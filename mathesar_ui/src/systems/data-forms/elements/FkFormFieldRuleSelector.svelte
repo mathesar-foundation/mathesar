@@ -7,10 +7,10 @@
   } from '@mathesar/api/rpc/forms';
   import { Select } from '@mathesar-component-library';
 
-  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
-  import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
-  import type { EphermeralFkField } from '../../data-form-utilities/EphemeralFkField';
-  import { tableStructureSubstanceToEphemeralFields } from '../../data-form-utilities/transformers';
+  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
+  import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
+  import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
+  import { tableStructureSubstanceToEphemeralFields } from '../data-form-utilities/transformers';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: EphermeralFkField;

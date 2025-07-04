@@ -5,8 +5,8 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { Spinner } from '@mathesar-component-library';
 
-  import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
-  import type { EphermeralFkField } from '../../data-form-utilities/EphemeralFkField';
+  import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
+  import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: EphermeralFkField;

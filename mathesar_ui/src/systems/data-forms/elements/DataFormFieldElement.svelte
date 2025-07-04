@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
-  import type { DataFormManager } from '../../data-form-utilities/DataFormManager';
+  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
+  import type { DataFormManager } from '../data-form-utilities/DataFormManager';
 
   import FkFormFieldElement from './FkFormFieldElement.svelte';
   import FormFieldElementWrapper from './FormFieldElementWrapper.svelte';

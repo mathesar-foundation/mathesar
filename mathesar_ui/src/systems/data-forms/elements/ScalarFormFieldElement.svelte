@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { DataFormManager } from '../../data-form-utilities/DataFormManager';
-  import type { EphermeralScalarField } from '../../data-form-utilities/EphemeralScalarField';
+  import type { DataFormManager } from '../data-form-utilities/DataFormManager';
+  import type { EphermeralScalarField } from '../data-form-utilities/EphemeralScalarField';
 
   import DataFormInput from './DataFormInput.svelte';
   import DataFormLabel from './DataFormLabel.svelte';

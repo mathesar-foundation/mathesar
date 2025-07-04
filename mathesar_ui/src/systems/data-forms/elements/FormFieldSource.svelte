@@ -2,8 +2,8 @@
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
 
-  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
-  import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
+  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
+  import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: EphemeralDataFormField;

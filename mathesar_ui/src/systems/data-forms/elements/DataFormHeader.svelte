@@ -4,7 +4,7 @@
   import {
     type DataFormManager,
     EditableDataFormManager,
-  } from '../../data-form-utilities/DataFormManager';
+  } from '../data-form-utilities/DataFormManager';
 
   import SelectableElement from './SelectableElement.svelte';
 

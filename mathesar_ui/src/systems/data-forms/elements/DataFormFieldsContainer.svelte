@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { ParentEphemeralField } from '../../data-form-utilities/AbstractEphemeralField';
+  import type { ParentEphemeralField } from '../data-form-utilities/AbstractEphemeralField';
   import {
     type DataFormManager,
     EditableDataFormManager,
-  } from '../../data-form-utilities/DataFormManager';
-  import type { FormFields } from '../../data-form-utilities/FormFields';
+  } from '../data-form-utilities/DataFormManager';
+  import type { FormFields } from '../data-form-utilities/FormFields';
 
   import { AddField } from './add-field';
   import DataFormFieldElement from './DataFormFieldElement.svelte';

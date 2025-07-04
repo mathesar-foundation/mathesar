@@ -6,7 +6,7 @@
   import { iconExpandRight } from '@mathesar/icons';
   import { Icon } from '@mathesar-component-library';
 
-  import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
+  import type { EditableDataFormManager } from './data-form-utilities/DataFormManager';
 
   export let dataFormManager: EditableDataFormManager;
 

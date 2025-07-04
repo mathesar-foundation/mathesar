@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
+  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import {
     type DataFormManager,
     EditableDataFormManager,
-  } from '../../data-form-utilities/DataFormManager';
+  } from '../data-form-utilities/DataFormManager';
 
   import { AddField } from './add-field';
   import FormFieldSource from './FormFieldSource.svelte';

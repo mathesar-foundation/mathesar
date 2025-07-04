@@ -12,9 +12,9 @@
     Spinner,
   } from '@mathesar-component-library';
 
-  import type { ParentEphemeralField } from '../../../data-form-utilities/AbstractEphemeralField';
-  import type { EditableDataFormManager } from '../../../data-form-utilities/DataFormManager';
-  import { columnToEphemeralField } from '../../../data-form-utilities/transformers';
+  import type { ParentEphemeralField } from '../../data-form-utilities/AbstractEphemeralField';
+  import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
+  import { columnToEphemeralField } from '../../data-form-utilities/transformers';
 
   import AddFormColumnFieldItem from './AddFormColumnFieldItem.svelte';
 

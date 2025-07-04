@@ -5,7 +5,7 @@
     type DataFormManager,
     EditableDataFormManager,
     type SelectedElement,
-  } from '../../data-form-utilities/DataFormManager';
+  } from '../data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
   export let element: SelectedElement;

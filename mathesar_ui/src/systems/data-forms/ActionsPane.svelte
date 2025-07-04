@@ -6,7 +6,7 @@
   import { iconForms, iconSave, iconShare } from '@mathesar/icons';
   import { Button, Icon, SpinnerButton } from '@mathesar-component-library';
 
-  import type { DataFormManager } from '../data-form-utilities/DataFormManager';
+  import type { DataFormManager } from './data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
   $: ({ name } = dataFormManager.ephemeralDataForm);

@@ -4,12 +4,11 @@
   import { dataFormInspectorWidth } from '@mathesar/stores/localStorage';
   import { WithPanel } from '@mathesar-component-library';
 
+  import ActionsPane from './ActionsPane.svelte';
   import {
     type DataFormManager,
     EditableDataFormManager,
-  } from '../data-form-utilities/DataFormManager';
-
-  import ActionsPane from './ActionsPane.svelte';
+  } from './data-form-utilities/DataFormManager';
   import DataFormBuildArea from './DataFormBuildArea.svelte';
   import DataFormInspector from './DataFormInspector.svelte';
 
