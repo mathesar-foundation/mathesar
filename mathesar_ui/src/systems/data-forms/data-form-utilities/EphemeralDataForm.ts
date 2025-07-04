@@ -14,10 +14,6 @@ import {
   tableStructureSubstanceToEphemeralFields,
 } from './transformers';
 
-export interface EdfUpdateDiff {
-  change: keyof EphemeralDataForm;
-}
-
 export class EphemeralDataForm {
   readonly baseTableOid;
 
@@ -63,18 +59,12 @@ export class EphemeralDataForm {
     this.fields = new FormFields(edf.fields);
   }
 
-  setName(name: string): EdfUpdateDiff {
+  setName(name: string) {
     this._name.set(name);
-    return {
-      change: 'name',
-    };
   }
 
-  setDescription(description: string): EdfUpdateDiff {
+  setDescription(description: string) {
     this._description.set(description);
-    return {
-      change: 'description',
-    };
   }
 
   toRawEphemeralDataForm(): RawEphemeralDataForm {

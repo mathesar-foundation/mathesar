@@ -10,24 +10,25 @@
 
   export let dataFormManager: DataFormManager;
 
-  $: ({ name, description } = dataFormManager.ephemeralDataForm);
+  $: ({ ephemeralDataForm } = dataFormManager);
+  $: ({ name, description } = ephemeralDataForm);
 
   function getInputValue(e: Event) {
     const element = e.target as HTMLInputElement;
     return element.value;
   }
 
-  async function onTitleInput(e: Event) {
+  function onTitleInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       const updatedName = getInputValue(e);
-      await dataFormManager.update((edf) => edf.setName(updatedName));
+      ephemeralDataForm.setName(updatedName);
     }
   }
 
-  async function onSubtitleInput(e: Event) {
+  function onSubtitleInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       const updatedDesc = getInputValue(e);
-      await dataFormManager.update((edf) => edf.setDescription(updatedDesc));
+      ephemeralDataForm.setDescription(updatedDesc);
     }
   }
 </script>

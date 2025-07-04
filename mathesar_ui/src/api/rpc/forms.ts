@@ -96,6 +96,10 @@ export interface RawReverseForeignKeyDataFormField
   child_fields: RawDataFormField[];
 }
 
+export interface ReplacableRawDataForm extends RawEphemeralDataForm {
+  id: number;
+}
+
 export type RawDataFormField =
   | RawScalarDataFormField
   | RawForeignKeyDataFormField
@@ -106,9 +110,6 @@ export interface RawDataForm extends RawEphemeralDataForm {
   token: string;
   fields: RawDataFormField[];
   share_public: boolean;
-  submit_message?: RichTextJson | null;
-  submit_redirect_url?: string | null;
-  submit_button_label?: string | null;
 }
 
 export interface RawDataFormResponse extends RawDataForm {
@@ -148,6 +149,12 @@ export const forms = {
   add: rpcMethodTypeContainer<
     {
       form_def: RawEphemeralDataForm;
+    },
+    RawDataFormGetResponse
+  >(),
+  replace: rpcMethodTypeContainer<
+    {
+      new_form: ReplacableRawDataForm;
     },
     RawDataFormGetResponse
   >(),

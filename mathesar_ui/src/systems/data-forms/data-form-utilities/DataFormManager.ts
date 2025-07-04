@@ -8,7 +8,7 @@ import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
 import type { EphemeralDataFormField } from './AbstractEphemeralField';
-import type { EdfUpdateDiff, EphemeralDataForm } from './EphemeralDataForm';
+import type { EphemeralDataForm } from './EphemeralDataForm';
 
 export interface DataFormManager {
   ephemeralDataForm: EphemeralDataForm;
@@ -94,13 +94,6 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
     } else {
       this.ephemeralDataForm.fields.delete(ef);
     }
-  }
-
-  async update(
-    callback: (edf: EphemeralDataForm) => EdfUpdateDiff,
-  ): Promise<void> {
-    const { change } = callback(this.ephemeralDataForm);
-    // Run side-effects based on the change
   }
 }
 

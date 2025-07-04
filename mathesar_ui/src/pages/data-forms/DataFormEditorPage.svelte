@@ -16,6 +16,8 @@
   } from '@mathesar/systems/data-forms';
   import CacheManager from '@mathesar/utils/CacheManager';
 
+  import ActionsPane from './ActionsPane.svelte';
+
   export let dataForm: DataForm;
   export let formSourceInfo: AsyncStoreValue<
     RawDataFormGetResponse['field_col_info_map'],
@@ -45,8 +47,30 @@
 
 <LayoutWithHeader fitViewport>
   {#if dataFormManager}
-    <DataFormCanvas {dataFormManager} />
+    <div class="data-form-editor">
+      <div class="actions-pane">
+        <ActionsPane {dataForm} {dataFormManager} />
+      </div>
+      <div class="builder">
+        <DataFormCanvas {dataFormManager} />
+      </div>
+    </div>
   {:else if formSourceInfo.error}
     <Errors errors={[formSourceInfo.error]} />
   {/if}
 </LayoutWithHeader>
+
+<style lang="scss">
+  .data-form-editor {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+
+    .builder {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      overflow: hidden;
+      padding: var(--sm3);
+    }
+  }
+</style>

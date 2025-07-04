@@ -1,6 +1,7 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
+import type { RawEphemeralDataForm } from '@mathesar/api/rpc/forms';
 import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
@@ -132,5 +133,31 @@ export class Schema {
           ]),
         ),
     });
+  }
+
+  addDataForm(dataFormDef: RawEphemeralDataForm): CancellablePromise<DataForm> {
+    const promise = api.forms
+      .add({
+        form_def: dataFormDef,
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then(
+            (rawDataForm) =>
+              resolve(
+                new DataForm({
+                  schema: this,
+                  rawDataForm,
+                }),
+              ),
+            reject,
+          )
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
   }
 }

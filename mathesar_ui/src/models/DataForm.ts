@@ -1,6 +1,11 @@
 import { type Readable, get, writable } from 'svelte/store';
 
-import type { RawDataForm } from '@mathesar/api/rpc/forms';
+import { api } from '@mathesar/api/rpc';
+import type {
+  RawDataForm,
+  RawEphemeralDataForm,
+} from '@mathesar/api/rpc/forms';
+import { CancellablePromise } from '@mathesar-component-library';
 
 import type { Schema } from './Schema';
 
@@ -81,6 +86,48 @@ export class DataForm {
         buttonLabel: props.rawDataForm.submit_button_label,
       },
     });
+  }
+
+  replaceDataForm(
+    dataFormDef: RawEphemeralDataForm,
+  ): CancellablePromise<DataForm> {
+    const promise = api.forms
+      .replace({
+        new_form: {
+          ...dataFormDef,
+          id: this.id,
+        },
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then((rawDataForm) => {
+            this._name.set(rawDataForm.name);
+            this._description.set(rawDataForm.description);
+            this._accessRoleId.set(rawDataForm.access_role_id);
+            this._token.set(rawDataForm.token);
+            this._shareSettings.set({
+              isSharedPublicly: rawDataForm.share_public,
+            });
+            this._formDefinition.set({
+              version: rawDataForm.version,
+              headerTitle: rawDataForm.header_title,
+              headerSubtitle: rawDataForm.header_subtitle,
+              fields: rawDataForm.fields,
+              submissionSettings: {
+                message: rawDataForm.submit_message,
+                redirectUrl: rawDataForm.submit_redirect_url,
+                buttonLabel: rawDataForm.submit_button_label,
+              },
+            });
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
   }
 
   toRawDataForm(): RawDataForm {
