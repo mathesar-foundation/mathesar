@@ -15,8 +15,12 @@
       ? dataFormManager.selectedElement
       : undefined,
   );
-
-  $: isSelected = element === $selectedElement;
+  $: isSelected = (() => {
+    if ($selectedElement?.type === 'field' && element.type === 'field') {
+      return $selectedElement.field === element.field;
+    }
+    return $selectedElement?.type === element.type;
+  })();
 
   let isHovered = false;
   let thisDomElement: HTMLElement;
