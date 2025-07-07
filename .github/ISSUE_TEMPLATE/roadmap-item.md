@@ -1,7 +1,7 @@
 ---
 name: "[MAINTAINERS ONLY] Roadmap item"
 about: "This issue template is for the convenience of Mathesar maintainers. Please do not use it if you are not a maintainer."
-labels: "type: project, needs: product approval"
+labels: "type: project, needs: requirements"
 ---
 
 >  _This is a meta issue tracking the implementation of this project._
@@ -10,8 +10,8 @@ labels: "type: project, needs: product approval"
 <!-- A clear and concise description of the outcome -->
 
 More detail:
-- [Requirements]()
-- [Project proposal]()
+- Requirements TBD
+- Project proposal TBD
 
 ## Tasks
 *Issues to be created soon.*
