@@ -52,12 +52,16 @@ def get_field_tab_col_con_info_map(form_model):
     with form_model.connection as conn:
         tab_col_con_info_map = get_tab_col_con_info_map(table_oid_attnums_cons_map, conn)
     for oid, table_data in tab_col_con_info_map["tables"].items():
+        expected_attnums = table_oid_attnums_cons_map["tables"][int(oid)]
         column_attnums = table_data["columns"].keys()
+        for attn in expected_attnums:
+            if str(attn) not in column_attnums:
+                table_data["columns"][str(attn)] = {"error": {"code": -31025, "message": f"Column {attn} not found"}}
         metadata_list = (
             ColumnMetaData.objects.filter(attnum__in=column_attnums, table_oid=oid, database=form_model.database)
         )
         for meta in metadata_list:
-            col_info = table_data["columns"].get(meta.attnum)
+            col_info = table_data["columns"].get(str(meta.attnum))
             if col_info:
                 col_info["metadata"] = ColumnMetaDataBlob.from_model(meta)
     return tab_col_con_info_map
