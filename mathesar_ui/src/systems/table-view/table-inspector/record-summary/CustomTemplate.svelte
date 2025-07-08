@@ -5,7 +5,7 @@
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { sortableContainer } from '@mathesar/components/sortable/sortable';
   import { iconAddNew, iconField, iconText } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
+  import type { Table } from '@mathesar/models/Table';
   import type {
     ProcessedColumn,
     ProcessedColumns,
@@ -20,7 +20,7 @@
   import { TemplateConfig } from './TemplateConfig';
   import TextPart from './TextPart.svelte';
 
-  export let database: Pick<Database, 'id'>;
+  export let table: Table;
   export let templateConfig: TemplateConfig;
   export let columns: ProcessedColumns;
   export let errorsDisplayed: string[] = [];
@@ -64,7 +64,7 @@
         <FieldPart
           columnIds={part}
           {columns}
-          {database}
+          {table}
           onDelete={() => deletePart(key)}
           onUpdate={(columnIds) => replacePart(key, columnIds)}
         />

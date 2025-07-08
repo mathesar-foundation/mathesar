@@ -192,6 +192,22 @@ export default class AsyncStore<Props = void, T = unknown, E = string>
     }
   }
 
+  tick(): Promise<AsyncStoreValue<T, E>> {
+    const current = get(this.value);
+    if (!current.isLoading) {
+      return Promise.resolve(current);
+    }
+
+    return new Promise<AsyncStoreValue<T, E>>((resolve) => {
+      const unsubscribe = this.subscribe((value) => {
+        if (!value.isLoading) {
+          unsubscribe();
+          resolve(value);
+        }
+      });
+    });
+  }
+
   protected beforeRun() {
     this.cancel();
     this.value.update((v) => new AsyncStoreValue({ ...v, isLoading: true }));

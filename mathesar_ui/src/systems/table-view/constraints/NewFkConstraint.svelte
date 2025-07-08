@@ -76,10 +76,7 @@
   $: baseTableColumns = [...$processedColumns.values()];
 
   $: targetTableStructure = $targetTable
-    ? new TableStructure({
-        database: $targetTable.schema.database,
-        table: $targetTable,
-      })
+    ? new TableStructure($targetTable)
     : undefined;
   $: targetTableStructureIsLoading = ensureReadable(
     targetTableStructure?.isLoading,

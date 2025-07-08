@@ -2,13 +2,13 @@
   import { _ } from 'svelte-i18n';
 
   import { RadioGroup } from '@mathesar/component-library';
-  import type { Database } from '@mathesar/models/Database';
+  import type { Table } from '@mathesar/models/Table';
   import type { ProcessedColumns } from '@mathesar/stores/table-data';
 
   import CustomTemplate from './CustomTemplate.svelte';
   import { TemplateConfig } from './TemplateConfig';
 
-  export let database: Pick<Database, 'id'>;
+  export let table: Table;
   export let templateConfig: TemplateConfig | undefined;
   export let columns: ProcessedColumns;
   export let errorsDisplayed: string[] = [];
@@ -28,12 +28,7 @@
 
 {#if templateConfig}
   <div class="custom-template">
-    <CustomTemplate
-      bind:templateConfig
-      {columns}
-      {database}
-      {errorsDisplayed}
-    />
+    <CustomTemplate bind:templateConfig {columns} {table} {errorsDisplayed} />
   </div>
 {/if}
 

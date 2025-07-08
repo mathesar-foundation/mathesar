@@ -8,13 +8,11 @@
   export let previewRecordId: ResultValue | undefined;
   export let onSave: (() => void) | undefined = undefined;
 
-  $: ({ database } = linkedTable.schema);
-  $: structure = new TableStructure({ database, table: linkedTable });
+  $: structure = new TableStructure(linkedTable);
   $: ({ processedColumns, isLoading } = structure);
 </script>
 
 <RecordSummaryConfig
-  {database}
   table={linkedTable}
   processedColumns={$processedColumns}
   isLoading={$isLoading}
