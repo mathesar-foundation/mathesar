@@ -42,7 +42,7 @@
           {#if slotName === 'recordSummary'}
             <NameWithIcon
               icon={iconRecord}
-              --icon-color="var(--color-record)"
+              cssVariables={{ '--icon-color': 'var(--color-record)' }}
               truncate={false}
             >
               <strong>{recordSummary}</strong>

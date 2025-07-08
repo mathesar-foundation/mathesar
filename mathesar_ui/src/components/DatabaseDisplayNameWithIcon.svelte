@@ -11,7 +11,7 @@
 <NameWithIcon
   icon={iconDatabase}
   {iconHasBox}
-  --icon-color="var(--color-database)"
+  cssVariables={{ '--icon-color': 'var(--color-database)' }}
 >
   <slot databaseDisplayName={database.displayName}>
     {database.displayName}

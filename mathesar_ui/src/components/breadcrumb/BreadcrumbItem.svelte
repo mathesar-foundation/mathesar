@@ -57,7 +57,10 @@
         item.record.pk,
       )}
     >
-      <NameWithIcon icon={iconRecord} --icon-color="var(--color-record)">
+      <NameWithIcon
+        icon={iconRecord}
+        cssVariables={{ '--icon-color': 'var(--color-record)' }}
+      >
         {item.record.summary}
       </NameWithIcon>
     </BreadcrumbLink>

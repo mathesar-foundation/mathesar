@@ -9,7 +9,10 @@
   $: ({ name } = query);
 </script>
 
-<NameWithIcon icon={iconExploration} --icon-color="var(--color-exploration)">
+<NameWithIcon
+  icon={iconExploration}
+  cssVariables={{ '--icon-color': 'var(--color-exploration)' }}
+>
   <slot queryName={name}>
     {name}
   </slot>

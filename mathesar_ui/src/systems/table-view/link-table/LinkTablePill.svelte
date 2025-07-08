@@ -12,7 +12,7 @@
   class:target={which === 'target'}
   class:mapping={which === 'mapping'}
 >
-  <TableName {table} --table-icon-color="var(--text-primary)" />
+  <TableName {table} cssVariables={{ '--icon-color': 'var(--text-primary)' }} />
 </span>
 
 <style>
