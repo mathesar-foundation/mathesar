@@ -11,7 +11,7 @@
     border-radius: var(--border-radius-m);
     overflow: hidden;
     grid-template-columns: var(--Grid-table__template-columns);
-    grid-template-rows: 1fr auto;
+    grid-template-rows: var(--Grid-table__template-rows, auto);
     background: var(--surface-card);
     box-shadow:
       0 1px 2px var(--border-shadow),
