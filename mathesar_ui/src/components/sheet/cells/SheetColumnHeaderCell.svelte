@@ -28,7 +28,7 @@
     border-top: 1px solid var(--border-header);
     border-left: 1px solid var(--border-header);
     border-bottom: none;
-    font-size: 1rem;
+    font-size: var(--sm1);
     overflow: hidden;
     color: var(--text-primary);
   }
