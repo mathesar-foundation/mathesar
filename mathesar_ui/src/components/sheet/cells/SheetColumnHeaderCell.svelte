@@ -29,7 +29,6 @@
     border-left: 1px solid var(--border-header);
     border-bottom: none;
     font-size: 1rem;
-    font-weight: var(font-weight-bold);
     overflow: hidden;
     color: var(--text-primary);
   }
