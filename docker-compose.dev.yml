@@ -64,6 +64,7 @@ services:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
       - ui_node_modules:/code/mathesar_ui/node_modules/
+      - secrets_conf:/code/config/settings/secrets/
     depends_on:
       dev-db:
         condition: service_healthy
@@ -98,3 +99,4 @@ volumes:
   ui_node_modules:
   dev_postgres_data:
   dev_postgres_socket:
+  secrets_conf:
