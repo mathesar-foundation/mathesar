@@ -108,7 +108,7 @@
       0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
       0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
 
-    &:not(:disabled):not(.page) {
+    &:not(:disabled) {
       &.focus,
       &:focus {
         --button-outline: 2px solid var(--border-control-active);
