@@ -29,11 +29,7 @@
         {title ?? ''}
       </div>
       {#if hasCloseButton}
-        <Button
-          appearance="plain"
-          class="close-button"
-          on:click={handleCloseButtonClick}
-        >
+        <Button appearance="plain" on:click={handleCloseButtonClick}>
           <Icon {...iconClose} />
         </Button>
       {/if}

@@ -307,24 +307,6 @@
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%);
         outline: none;
       }
-      &.close-button {
-        --button-background: transparent;
-        &:hover,
-        &.hover {
-          color: var(--text-muted);
-        }
-
-        &:active,
-        &.active {
-          color: var(--text-muted);
-        }
-
-        &:focus,
-        &.focus {
-          --button-background: transparent;
-          color: var(--semantic-danger-bg);
-        }
-      }
     }
   }
 
