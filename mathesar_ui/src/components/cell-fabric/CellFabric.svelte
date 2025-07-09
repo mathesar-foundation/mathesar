@@ -84,7 +84,7 @@
     right: 1px;
     bottom: 1px;
     position: absolute;
-    background: var(--background-color);
+    background: var(--surface-base);
     z-index: 1;
   }
   .bg {
@@ -93,7 +93,7 @@
     right: var(--cell-padding);
     bottom: var(--cell-padding);
     position: absolute;
-    background: var(--disabled-background);
+    background: var(--surface-inset-disabled);
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;

@@ -3,13 +3,13 @@
 
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {
     FormSubmit,
     makeForm,
     optionalField,
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
@@ -74,20 +74,33 @@
 </script>
 
 <div class="record-page-content">
-  <InsetPageLayout>
-    <div slot="header" class="header">
-      <h1 class="title">
-        <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
-      </h1>
-      <div class="table-name">
-        <RichText text={$_('record_in_table')} let:slotName>
-          {#if slotName === 'tableName'}
-            <TableName {table} truncate={false} />
-          {/if}
-        </RichText>
-      </div>
+  <AppSecondaryHeader
+    name={$summary}
+    icon={iconRecord}
+    entityTypeName={$_('record')}
+    --header-color="linear-gradient(
+      135deg,
+      var(--surface-base), 15%,
+      var(--color-record-10) 40%,
+      var(--surface-base) 60%,
+      var(--color-record-20) 100%
+    )"
+    --entity-name-color="var(--color-record)"
+    --bottom-margin="var(--sm1)"
+    --page-padding-x="6rem"
+  >
+    <div slot="subText" class="table-name">
+      <RichText text={$_('record_in_table')} let:slotName>
+        {#if slotName === 'tableName'}
+          <TableName {table} truncate={false} />
+        {/if}
+      </RichText>
+    </div>
+    <div slot="action">
       <div class="form-status"><FormStatus {form} /></div>
     </div>
+  </AppSecondaryHeader>
+  <InsetPageLayout --inset-page-padding="0rem 0rem 2rem 0rem">
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
         <DirectField
@@ -131,25 +144,10 @@
     grid-template: auto 1fr / auto;
     overflow-y: auto;
   }
-  .header {
-    display: grid;
-    grid-template: auto auto / auto 1fr;
-    gap: 0.5rem 1.5rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-  }
-  .title {
-    grid-row: 1;
-    grid-column: 1;
-    margin: 0;
-    overflow: hidden;
-    color: var(--text-color-primary);
-  }
   .table-name {
     grid-row: 2;
     grid-column: 1;
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
   }
   .form-status {
     grid-row: 1 / span 2;

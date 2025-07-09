@@ -24,7 +24,7 @@
   let isOpen = false;
 </script>
 
-<Collapsible bind:isOpen triggerAppearance="outcome">
+<Collapsible bind:isOpen triggerAppearance="ghost">
   <svelte:fragment slot="header">
     <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
       {#if slotName === 'baseTable'}

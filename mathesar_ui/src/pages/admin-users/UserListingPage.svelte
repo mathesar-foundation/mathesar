@@ -105,22 +105,22 @@
   }
 
   .users-list {
-    border: 1px solid var(--border-color);
-    background-color: var(--inset-background-color);
+    border: 1px solid var(--border-section);
+    background-color: var(--surface-card);
     border-radius: var(--border-radius-m);
     overflow: hidden;
 
     hr {
       margin: 0;
       border: none;
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid var(--border-section);
     }
   }
 
   .no-users-found-text {
     text-align: center;
     padding: 2rem;
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
     font-style: italic;
   }
 </style>

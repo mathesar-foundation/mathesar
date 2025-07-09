@@ -2,7 +2,6 @@
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import { iconSchema } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
@@ -12,17 +11,18 @@
   } from '@mathesar/stores/schemas';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
-  import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
+  import type { BreadcrumbSelectorEntryForSchema } from './breadcrumbTypes';
 
   export let database: Database;
 
-  function makeBreadcrumbSelectorItem(schema: Schema): BreadcrumbSelectorEntry {
+  function makeBreadcrumbSelectorItem(
+    schema: Schema,
+  ): BreadcrumbSelectorEntryForSchema {
     return {
-      type: 'simple',
-      // TODO: Make label a store
-      label: get(schema.name),
+      type: 'schema',
+      schema,
+      getFilterableText: () => get(schema.name),
       href: getSchemaPageUrl(database.id, schema.oid),
-      icon: iconSchema,
       isActive() {
         return schema.oid === $currentSchemaId;
       },

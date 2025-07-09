@@ -27,11 +27,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: var(--cell-border-horizontal);
-    border-right: var(--cell-border-vertical);
+    border-bottom: 1px solid var(--border-header);
+    border-right: 1px solid var(--border-header);
     font-size: var(--sm2);
     padding: 0 1.5rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     cursor: default;
   }
 </style>

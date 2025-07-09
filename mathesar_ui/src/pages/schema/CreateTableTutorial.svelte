@@ -19,12 +19,12 @@
   <div class="new-table-tutorial-footer" slot="footer">
     <span>{$_('how_do_you_want_to_create_table')}</span>
     <div class="new-table-tutorial-actions">
-      <Button on:click={onCreateEmptyTable} appearance="secondary">
+      <Button on:click={onCreateEmptyTable} appearance="tip">
         {$_('from_scratch')}
       </Button>
       <AnchorButton
         href={getImportPageUrl(database.id, schema.oid)}
-        appearance="secondary"
+        appearance="tip"
       >
         {$_('import_from_file')}
       </AnchorButton>

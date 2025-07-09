@@ -9,4 +9,11 @@
   $: ({ name } = schema);
 </script>
 
-<NameWithIcon icon={iconSchema} name={$name} />
+<NameWithIcon
+  icon={iconSchema}
+  cssVariables={{ '--icon-color': 'var(--color-schema)' }}
+>
+  <slot schemaName={$name}>
+    {$name}
+  </slot>
+</NameWithIcon>

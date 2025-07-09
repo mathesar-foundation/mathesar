@@ -40,11 +40,11 @@
     overflow: auto;
   }
   .page-content:not(.has-preview) {
-    background: var(--layout-background-color);
+    background: var(--surface-base);
   }
   .footer:not(:empty) {
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-section);
     padding: 1rem 1rem 1rem 1rem;
-    background: var(--footer-background-color);
+    background: var(--surface-header);
   }
 </style>

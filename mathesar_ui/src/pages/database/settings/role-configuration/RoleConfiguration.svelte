@@ -110,7 +110,7 @@
                       <Icon {...iconEdit} size="0.8em" />
                     </Button>
                     <SpinnerButton
-                      appearance="outline-danger"
+                      appearance="danger"
                       disabled={!isMathesarAdmin}
                       confirm={() =>
                         confirm({

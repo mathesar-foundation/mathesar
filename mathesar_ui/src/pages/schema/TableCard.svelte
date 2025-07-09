@@ -199,8 +199,8 @@
     position: relative;
     display: flex;
     align-items: center;
-    border: 1px solid var(--card-border);
-    background-color: var(--card-background);
+    border: 1px solid var(--border-card);
+    background-color: var(--surface-card);
     overflow: hidden;
     border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
       var(--corner-bl);
@@ -211,7 +211,7 @@
   }
 
   .table-row + :global(.table-row) {
-    border-top: none;
+    border-top: 1px solid transparent;
   }
 
   .table-row:first-child {
@@ -224,19 +224,20 @@
   }
 
   .table-row.focus:not(:hover) {
-    outline: 1px solid var(--card-focus-outline);
+    outline: 1px solid var(--border-card-focused);
     outline-offset: -1px;
   }
 
   .table-row:hover {
-    box-shadow: var(--shadow-color) 0 2px 4px 0;
-    background: var(--card-hover-background);
+    border: 1px solid var(--color-table-15);
+    box-shadow: 0 1px 2px 0 var(--color-table-hover-15);
+    background: var(--color-table-hover-10);
     padding-left: 0;
     &::before {
       content: '';
       border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
         var(--corner-bl);
-      border-left: solid 3px var(--salmon-400);
+      border-left: solid 3px var(--color-table-40);
       position: absolute;
       height: 100%;
       width: 10px;
@@ -247,14 +248,14 @@
   }
 
   .table-row:active {
-    border-color: var(--stormy-400);
-    box-shadow: var(--shadow-color) 0 1px 2px 0;
-    background: var(--card-active-background);
+    border: 1px solid var(--color-table-20);
+    box-shadow: 0 1px 2px 0 var(--color-table-active-20);
+    background: var(--color-table-active-15);
   }
 
   .table-row.unconfirmed-import {
-    color: var(--text-color-muted);
-    background-color: var(--disabled-background);
+    color: var(--text-disabled);
+    background-color: var(--surface-card-disabled);
   }
 
   .row-content {
@@ -279,12 +280,12 @@
   .table-name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
+    color: var(--text-primary);
   }
 
   .description {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
     font-weight: var(--font-weight-normal);
     overflow: hidden;
     line-height: 1.2;
@@ -297,8 +298,8 @@
 
   .import-status {
     font-size: var(--sm1);
-    color: var(--color-warning);
-    background: var(--color-warning-bg);
+    color: var(--semantic-warning-text);
+    background: var(--semantic-warning-bg);
     padding: 0.25rem 0.5rem;
     border-radius: var(--border-radius-m);
   }

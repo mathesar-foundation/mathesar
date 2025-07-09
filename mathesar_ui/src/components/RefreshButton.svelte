@@ -10,13 +10,7 @@
   $: isError = state === 'error';
 </script>
 
-<Button
-  class="refresh-button"
-  appearance="secondary"
-  size="medium"
-  disabled={isLoading}
-  on:click
->
+<Button appearance="refresh" size="medium" disabled={isLoading} on:click>
   <Icon {...isError && !isLoading ? iconError : iconRefresh} spin={isLoading} />
   <span>
     {#if isLoading}

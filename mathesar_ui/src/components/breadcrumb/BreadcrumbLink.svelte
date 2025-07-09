@@ -15,14 +15,10 @@
     display: block;
     overflow: hidden;
     text-decoration: none;
-    color: inherit;
+    color: var(--text-navigation);
     font-weight: var(--font-weight-medium);
   }
   .breadcrumb-link:hover a {
-    color: var(--salmon-800);
-  }
-
-  :global(body.theme-dark) .breadcrumb-link:hover a {
-    color: var(--salmon-200);
+    color: var(--text-navigation-active);
   }
 </style>

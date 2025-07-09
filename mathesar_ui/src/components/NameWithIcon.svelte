@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { Icon, Spinner, Truncate } from '@mathesar-component-library';
+  import {
+    Icon,
+    Spinner,
+    Truncate,
+    makeStyleStringFromCssVariables,
+  } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
 
   /** TODO: Update component and prop names */
@@ -10,12 +15,22 @@
   export let iconHasBox = false;
   export let truncate = true;
   export let bold = false;
+  export let cssVariables: Record<string, string> | undefined = undefined;
 
+  $: style = cssVariables
+    ? makeStyleStringFromCssVariables(cssVariables)
+    : undefined;
   $: icons = Array.isArray(icon) ? icon : [icon];
 </script>
 
 <Truncate passthrough={!truncate}>
-  <span class="name-with-icon" on:click class:boxed={iconHasBox} class:bold>
+  <span
+    class="name-with-icon"
+    on:click
+    class:boxed={iconHasBox}
+    class:bold
+    {style}
+  >
     <span class="icon" style="white-space: nowrap">
       {#if isLoading}
         <Spinner />
@@ -42,7 +57,7 @@
     font-weight: var(--font-weight-medium);
   }
   .icon {
-    color: var(--icon-color, currentcolor);
+    color: var(--icon-color, var(--text-icon, currentcolor));
     opacity: var(--NameWithIcon__icon-opacity, 0.75);
     vertical-align: bottom;
   }
@@ -53,11 +68,11 @@
     display: inline-flex;
     border-radius: 0.25em;
     padding: 0.2em;
-    background: var(--icon-color, currentcolor);
+    background: var(--icon-color, var(--text-icon, currentcolor));
     vertical-align: -10%;
   }
   .name-with-icon.boxed .icon > :global(svg) {
-    color: var(--white);
+    color: var(--text-inverted);
   }
   .name {
     color: var(--name-color, currentcolor);

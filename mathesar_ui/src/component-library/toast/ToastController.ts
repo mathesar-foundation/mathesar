@@ -200,6 +200,7 @@ export function makeToast(
     return controller.show(
       makeToastProps({
         icon: iconInfo,
+        backgroundColor: 'var(--semantic-info-bg)',
         ...makeToastProps(detail),
       }),
     );
@@ -208,7 +209,7 @@ export function makeToast(
   function success(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconSuccess,
-      backgroundColor: 'var(--ToastItem__background-color--success)',
+      backgroundColor: 'var(--semantic-success-bg)',
       ...makeToastProps(detail),
     });
   }
@@ -216,7 +217,7 @@ export function makeToast(
   function error(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconError,
-      backgroundColor: 'var(--ToastItem__background-color--error)',
+      backgroundColor: 'var(--semantic-danger-bg)',
       ...makeToastProps(detail),
     });
   }
