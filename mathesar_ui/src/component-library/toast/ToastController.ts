@@ -200,6 +200,7 @@ export function makeToast(
     return controller.show(
       makeToastProps({
         icon: iconInfo,
+        backgroundColor: 'var(--semantic-info-bg)',
         ...makeToastProps(detail),
       }),
     );
