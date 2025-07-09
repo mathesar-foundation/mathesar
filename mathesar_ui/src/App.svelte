@@ -74,12 +74,9 @@
    * us an easier time keeping all our UI colors in sync. With blending, we
    * supply the exact same color value as we'd use for another places in the UI
    * where we expect the color to be opaque.
-   *
-   * If/when we implement dark mode, we'll need to toggle this property to
-   * something like `screen` or `lighten` so that as more backgrounds are
-   * applied, the resulting blended background gets lighter instead of darker.
    */
     --cell-bg-mix-blend-mode: var(--mix-blend-mode);
+
     /**
    * This establishes a base background color for the cell when no additional
    * background colors are applied. We need this in case there is a background
