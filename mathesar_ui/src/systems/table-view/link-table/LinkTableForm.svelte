@@ -290,7 +290,7 @@
             {#if isSelfReferential}
               <Collapsible
                 bind:isOpen={isNewTableOpen}
-                triggerAppearance="outcome"
+                triggerAppearance="ghost"
               >
                 <svelte:fragment slot="header">
                   <RichText
@@ -314,7 +314,7 @@
               {#if $mappingTableName}
                 <Collapsible
                   bind:isOpen={isNewColumnsOpen}
-                  triggerAppearance="outcome"
+                  triggerAppearance="ghost"
                 >
                   <svelte:fragment slot="header">
                     <RichText
@@ -353,7 +353,7 @@
             {:else}
               <Collapsible
                 bind:isOpen={isNewTableOpen}
-                triggerAppearance="outcome"
+                triggerAppearance="ghost"
               >
                 <svelte:fragment slot="header">
                   <RichText
