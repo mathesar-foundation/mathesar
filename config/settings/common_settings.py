@@ -34,6 +34,10 @@ INSTALLED_APPS = [
     "django_property_filter",
     "modernrpc",
     "mathesar",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
 ]
 
 MIDDLEWARE = [
@@ -48,7 +52,38 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
     "mathesar.middleware.PasswordChangeNeededMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
+
+SOCIALACCOUNT_PROVIDERS = {
+    "openid_connect": {
+        "APPS": [
+            {
+                "provider_id": "google",
+                "name": "google",
+                "client_id": "your_client_id",
+                "secret": "your_secret",
+                "settings": {
+                    "server_url": "https://accounts.google.com",
+                    # Optional token endpoint authentication method.
+                    # May be one of "client_secret_basic", "client_secret_post"
+                    # If omitted, a method from the the server's
+                    # token auth methods list is used
+                    "token_auth_method": "client_secret_basic",
+                },
+            },
+            {
+                "provider_id": "twitter",
+                "name": "twitter",
+                "client_id": "your.other.service.id",
+                "secret": "your.other.service.secret",
+                "settings": {
+                    "server_url": "https://other.server.example.com",
+                },
+            },
+        ]
+    }
+}
 
 ROOT_URLCONF = "config.urls"
 
@@ -93,6 +128,14 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
