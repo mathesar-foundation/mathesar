@@ -413,7 +413,6 @@
   "paste_error_no_primary_key": "プライマリキー列無しではテーブルへ貼り付けできません。",
   "paste_error_no_rows": "貼り付ける行がありません",
   "paste_error_too_few_destination_columns": "このテーブルには、コピーしたデータを選択範囲へ貼り付けるのに十分な列がありません。",
-  "paste_error_too_few_destination_rows": "このシートには、貼り付けようとしているデータに十分な行がありません。",
   "paste_error_too_many_destination_columns": "コピーしたデータより多くの列がある選択範囲には貼り付けられません。",
   "paste_error_unsupported_mime_type": "コピーしたデータの形式はサポートされていません。Mathesarは、プレーンテキスト（タブで区切られた値と共に）形式でコピーしたデータ、またはMathesarから直接コピーしたデータのみ貼り付けることができます。",
   "permissions_for_named_database": "[databaseName] データベースのパーミッション",

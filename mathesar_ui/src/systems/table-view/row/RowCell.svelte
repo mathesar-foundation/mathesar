@@ -27,6 +27,7 @@
     type RecordRow,
     type RecordsData,
     getRowSelectionId,
+    isPlaceholderRecordRow,
     isProvisionalRecordRow,
   } from '@mathesar/stores/table-data';
   import {
@@ -76,6 +77,7 @@
   $: ({ linkedRecordSummaries } = recordsData);
   $: ({ column, linkFk } = effectiveProcessedColumn);
   $: columnId = column.id;
+  $: isWithinPlaceholderRow = isPlaceholderRecordRow(row);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -118,6 +120,7 @@
   columnIdentifierKey={column.id}
   cellSelectionId={cellId}
   selection={$selection}
+  {isWithinPlaceholderRow}
   let:isActive
 >
   <CellBackground
