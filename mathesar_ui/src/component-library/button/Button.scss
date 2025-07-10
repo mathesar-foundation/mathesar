@@ -504,7 +504,7 @@
   &.btn-feedback {
     --button-background: transparent;
     --button-color: var(--color-brand-muted);
-    border: 0px;
+    border: 1px solid transparent;
     padding: var(--sm4) var(--sm2);
     font-weight: var(--font-weight-bold);
 
