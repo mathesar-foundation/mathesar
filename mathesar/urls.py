@@ -18,8 +18,8 @@ urlpatterns = [
     path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),
     path('auth/password_reset_confirm/', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('auth/login/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
-    # path('auth/', include('django.contrib.auth.urls')),
-    path('auth/', include('allauth.urls')),
+    path('auth/', include('django.contrib.auth.urls')),  # default
+    path('auth/', include('allauth.urls')),  # catch any urls that are not available in default
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
     path('administration/', views.admin_home, name='admin_home'),
