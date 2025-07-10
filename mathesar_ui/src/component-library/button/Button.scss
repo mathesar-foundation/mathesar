@@ -185,7 +185,7 @@
 
   &.btn-danger {
     --button-background: transparent;
-    border: transparent;
+    border: 2px solid transparent;
     --button-color: var(--semantic-danger-text);
 
     &:not(:disabled) {

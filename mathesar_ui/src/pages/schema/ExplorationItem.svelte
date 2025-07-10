@@ -50,6 +50,7 @@
     padding: var(--sm1) var(--sm2);
     display: flex;
     align-items: center;
+    border: 1px solid transparent;
     border-radius: var(--border-radius-m);
 
     &:hover {
