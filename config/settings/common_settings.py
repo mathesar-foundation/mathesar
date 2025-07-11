@@ -55,32 +55,28 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
+# TODO: Make this better
+y = []
+for i in range(5):
+    x = [f"OIDC_{i}_PROVIDER", f"OIDC_{i}_CLIENT_ID", f"OIDC_{i}_SECRET", f"OIDC_{i}_SERVER_URL"]
+    z = {j.split(f'{i}_')[-1].lower(): os.getenv(j) for j in x if os.getenv(j) is not None}
+    if z != {}:
+        y.append(z)
+# ========================
+
+
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
         "APPS": [
             {
-                "provider_id": "google",
-                "name": "google",
-                "client_id": "your_client_id",
-                "secret": "your_secret",
+                "provider_id": oidc_conf["provider"].lower(),
+                "name": oidc_conf["provider"].lower(),
+                "client_id": oidc_conf["client_id"],
+                "secret": oidc_conf["secret"],
                 "settings": {
-                    "server_url": "https://accounts.google.com",
-                    # Optional token endpoint authentication method.
-                    # May be one of "client_secret_basic", "client_secret_post"
-                    # If omitted, a method from the the server's
-                    # token auth methods list is used
-                    "token_auth_method": "client_secret_basic",
-                },
-            },
-            {
-                "provider_id": "twitter",
-                "name": "twitter",
-                "client_id": "your.other.service.id",
-                "secret": "your.other.service.secret",
-                "settings": {
-                    "server_url": "https://other.server.example.com",
-                },
-            },
+                    "server_url": oidc_conf["server_url"]
+                }
+            } for oidc_conf in y
         ]
     }
 }

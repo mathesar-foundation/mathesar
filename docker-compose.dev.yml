@@ -60,6 +60,10 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
       - POSTGRES_PORT=5432
+      - OIDC_0_PROVIDER=${OIDC_0_PROVIDER}
+      - OIDC_0_CLIENT_ID=${OIDC_0_CLIENT_ID}
+      - OIDC_0_SECRET=${OIDC_0_SECRET}
+      - OIDC_0_SERVER_URL=${OIDC_0_SERVER_URL}
     volumes:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
