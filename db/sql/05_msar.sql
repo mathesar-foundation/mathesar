@@ -642,16 +642,16 @@ SELECT CASE contype
   WHEN 'u' THEN 'unique'
   WHEN 'x' THEN 'exclude'
 END;
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TABLE
+CREATE OR REPLACE FUNCTION msar.constraint_info_table() RETURNS TABLE
 (
-  oid oid,
+  oid bigint,
   name text,
   type text,
   columns smallint[],
-  referent_table_oid oid,
+  referent_table_oid bigint,
   referent_columns smallint[]
 )
 AS $$/*
@@ -662,14 +662,13 @@ Args:
 */
 WITH constraints AS (
   SELECT
-    oid,
+    oid::bigint AS oid,
     conname AS name,
     msar.get_constraint_type_api_code(contype::char) AS type,
     conkey AS columns,
-    confrelid AS referent_table_oid,
+    confrelid::bigint AS referent_table_oid,
     confkey AS referent_columns
   FROM pg_catalog.pg_constraint
-  WHERE conrelid = tab_id
 )
 SELECT *
 FROM constraints
@@ -947,6 +946,36 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
+(
+  id smallint, -- The OID of the column.
+  name name, -- Name of the column.
+  type text, -- The type of the column for the table.
+  type_options jsonb, -- type_options for the column(if any).
+  nullable boolean, -- is the column nullable.
+  primary_key boolean, -- whether the column has primary key constraint. 
+  "default" jsonb, -- the default for the column(if any).
+  has_dependents boolean, -- is the column referenced by others.
+  description text, -- The description of the column on the database.
+  current_role_priv jsonb -- Privileges of the current role on the column.
+) AS $$
+SELECT
+  attnum AS id,
+  attname AS name,
+  CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END AS type,
+  msar.get_type_options(atttypid, atttypmod, attndims) AS type_options,
+  NOT attnotnull AS nullable,
+  COALESCE(pgi.indisprimary, false) AS primary_key,
+  msar.describe_column_default(tab_id, attnum) AS default,
+  msar.has_dependents(tab_id, attnum) AS has_dependents,
+  msar.col_description(tab_id, attnum) AS description,
+  msar.list_column_privileges_for_current_role(tab_id, attnum) AS current_role_priv
+FROM pg_catalog.pg_attribute pga
+  LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
+WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return an array of objects describing the columns of the table.
 
@@ -969,24 +998,8 @@ object has the keys:
   value: A string giving the value (as an SQL expression) of the default.
   is_dynamic: A boolean giving whether the default is (likely to be) dynamic.
 */
-SELECT jsonb_agg(
-  jsonb_build_object(
-    'id', attnum,
-    'name', attname,
-    'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END,
-    'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
-    'nullable', NOT attnotnull,
-    'primary_key', COALESCE(pgi.indisprimary, false),
-    'default', msar.describe_column_default(tab_id, attnum),
-    'has_dependents', msar.has_dependents(tab_id, attnum),
-    'description', msar.col_description(tab_id, attnum),
-    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum)
-  )
-)
-FROM pg_attribute pga
-  LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
-  LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
-WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
+SELECT coalesce(jsonb_agg(column_data), '[]'::jsonb)
+FROM msar.column_info_table(tab_id) AS column_data;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1002,6 +1015,29 @@ FROM
   pg_catalog.has_table_privilege(tab_id, privilege) as has_privilege
 WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.table_info_table() RETURNS TABLE
+(
+  oid bigint, -- The OID of the table.
+  name name, -- Name of the table.
+  schema bigint, -- The OID of the schema for the table.
+  description text, -- The description of the table on the database.
+  owner_oid bigint, -- The owner of the table.
+  current_role_priv jsonb, -- Privileges of the current role on the table.
+  current_role_owns boolean -- Whether the current role owns the table.
+) AS $$
+SELECT
+  oid::bigint AS oid,
+  relname AS name,
+  relnamespace::bigint AS schema,
+  msar.obj_description(oid, 'pg_class') AS description,
+  relowner::bigint AS owner_oid,
+  msar.list_table_privileges_for_current_role(oid) AS current_role_priv,
+  pg_catalog.pg_has_role(relowner, 'USAGE') AS current_role_owns
+FROM pg_catalog.pg_class
+WHERE relkind = 'r';
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION msar.get_table(tab_id regclass) RETURNS jsonb AS $$/*
@@ -1021,15 +1057,9 @@ Each returned JSON object will have the form:
 Args:
   tab_id: The OID or name of the table.
 */
-SELECT jsonb_build_object(
-  'oid', oid::bigint,
-  'name', relname,
-  'schema', relnamespace::bigint,
-  'description', msar.obj_description(oid, 'pg_class'),
-  'owner_oid', relowner::bigint,
-  'current_role_priv', msar.list_table_privileges_for_current_role(tab_id),
-  'current_role_owns', pg_catalog.pg_has_role(relowner, 'USAGE')
-) FROM pg_catalog.pg_class WHERE oid = tab_id;
+SELECT to_jsonb(table_data)
+FROM msar.table_info_table() AS table_data
+WHERE table_data.oid = tab_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1050,23 +1080,9 @@ Each returned JSON object in the array will have the form:
 Args:
   sch_id: The OID or name of the schema.
 */
-SELECT coalesce(
-  jsonb_agg(
-    jsonb_build_object(
-      'oid', pgc.oid::bigint,
-      'name', pgc.relname,
-      'schema', pgc.relnamespace::bigint,
-      'description', msar.obj_description(pgc.oid, 'pg_class'),
-      'owner_oid', pgc.relowner::bigint,
-      'current_role_priv', msar.list_table_privileges_for_current_role(pgc.oid),
-      'current_role_owns', pg_catalog.pg_has_role(pgc.relowner, 'USAGE')
-    )
-  ),
-  '[]'::jsonb
-)
-FROM pg_catalog.pg_class AS pgc
-  LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
-WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
+SELECT coalesce(jsonb_agg(table_data),'[]'::jsonb)
+FROM msar.table_info_table() AS table_data
+WHERE table_data.schema = sch_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -5601,51 +5617,80 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_oid_col_info_map(oid_attn_map jsonb)
+msar.get_tab_col_con_info_map(tab_col_con_map jsonb)
 RETURNS jsonb AS $$/*
-Returns column_info for a given oid_attn_map.
+Returns table_info, column_info, and constraints_info for a given tab_col_con_map.
 
-oid_attn_map should have the following form:
+tab_col_con_map should have the following form:
 {
-  "table_oid_1": [col_att1,col_att2,col_att3],
-  "table_oid_2": [col_att1, col_att5]
+  "tables": {
+    "table_oid_1": [col_attnum_1, col_attnum_2, col_attnum_3],
+    "table_oid_2": [col_attnum_4, col_attnum_5]
+  },
+  "constraints": [cons_oid_1, cons_oid_2]
 }
 
 Returns:
 {
-  "table_oid_1": {"col_att1": col_info(), "col_att2": col_info(), "col_att3": col_info()},
-  "table_oid_2": {"col_att1": col_info(), "col_att5": col_info()}
+  "tables": {
+    "table_oid_1": {
+      "table_info": table_info(),
+      "columns": {"col_attnum_1": col_info(), "col_attnum_2": col_info(), "col_attnum_3": col_info()
+      }
+    },
+    "table_oid2": {
+      "table_info": table_info(),
+      "columns": {"col_attnum_4": col_info(), "col_attnum_5": col_info()}
+    }
+  },
+  "constraints": {"cons_oid1": cons_info(), "cons_oid2": cons_info()}
 }
 */
   WITH cte AS (
     SELECT
       tab_id::oid,
       ARRAY(SELECT jsonb_array_elements_text(attnums))::int[] AS attnums
-    FROM jsonb_each(oid_attn_map) AS x(tab_id, attnums)
-  ), col_info_cte AS (
-    SELECT
-      cte.tab_id AS tab_oid,
-      jsonb_object_agg(
-        attnum,
-        jsonb_build_object(
-          'id', attnum,
-          'name', attname,
-          'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END,
-          'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
-          'nullable', NOT attnotnull,
-          'primary_key', COALESCE(pgi.indisprimary, false),
-          'default', msar.describe_column_default(tab_id, attnum),
-          'has_dependents', msar.has_dependents(tab_id, attnum),
-          'description', msar.col_description(tab_id, attnum),
-          'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum)
-        )
-      ) AS col_info_arr
-    FROM cte
-      LEFT JOIN pg_attribute pga ON cte.tab_id=pga.attrelid
-      LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
-      LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
-    WHERE pga.attrelid=tab_id AND pga.attnum = ANY(cte.attnums) AND NOT attisdropped
+    FROM jsonb_each(coalesce(tab_col_con_map -> 'tables', '{}'::jsonb)) AS x(tab_id, attnums)
+  ),
+  tab_info_cte AS (
+    SELECT tab_id, jsonb_agg(tab_info) AS tab_info_json FROM cte
+    LEFT JOIN msar.table_info_table() AS tab_info ON tab_info.oid=cte.tab_id
+    GROUP BY tab_id
+  ),
+  col_info_cte AS (
+    SELECT cte.tab_id AS tab_id,
+    jsonb_object_agg(
+      column_info.id, column_info
+    ) AS col_info_json FROM cte
+    LEFT JOIN pg_catalog.pg_attribute pga ON cte.tab_id = pga.attrelid
+    LEFT JOIN msar.column_info_table(cte.tab_id) AS column_info ON pga.attnum = column_info.id
+    WHERE column_info.id = ANY(cte.attnums)
     GROUP BY cte.tab_id
+  ),
+  tc_res_cte AS (
+    SELECT coalesce(
+      jsonb_object_agg(
+        tic.tab_id, jsonb_build_object(
+        'table_info', coalesce(tic.tab_info_json,'{}'::jsonb),
+        'columns', coalesce(cic.col_info_json, '{}'::jsonb)
+      )
+    ), '{}'::jsonb) AS tab_info
+    FROM tab_info_cte AS tic
+    LEFT JOIN col_info_cte AS cic ON tic.tab_id = cic.tab_id
+  ),
+  con_cte AS (
+    SELECT (jsonb_array_elements_text(coalesce(tab_col_con_map -> 'constraints','[]'::jsonb)))::oid AS con_oid
+  ),
+  con_info_cte AS (
+    SELECT coalesce(
+      jsonb_object_agg(
+        cit.oid, cit
+    ), '{}'::jsonb) AS con_info
+    FROM con_cte
+    LEFT JOIN msar.constraint_info_table() AS cit ON con_cte.con_oid = cit.oid
   )
-  SELECT jsonb_object_agg(tab_oid, col_info_arr) FROM col_info_cte;
+  SELECT jsonb_build_object(
+    'tables', (SELECT tab_info FROM tc_res_cte),
+    'constraints', (SELECT con_info FROM con_info_cte)
+  );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
