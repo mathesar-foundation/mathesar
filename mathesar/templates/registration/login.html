@@ -64,6 +64,18 @@
       <button class="btn btn-primary submit-button" type="submit">
         {% translate "Log In" %}
       </button>
+
+
+      {% load socialaccount %}
+      {% get_providers as socialaccount_providers %}
+      {% for i in socialaccount_providers %}
+        <a class="btn btn-outline-primary" href="{% provider_login_url i process='login'%}">
+          <img src="https://developers.google.com/identity/images/g-logo.png"
+       style="height:1em; vertical-align:middle; margin-right:0.5em">
+       Login with {{i|capfirst}}</a>
+      {% endfor %}
+
+
     </div>
   </form>
 {% endblock %}

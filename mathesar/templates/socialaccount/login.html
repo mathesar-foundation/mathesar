@@ -1,0 +1,13 @@
+{% load allauth %}
+{% element form method="post" no_visible_fields=True %}
+    {% slot actions %}
+        {% csrf_token %}
+    {% endslot %}
+{% endelement %}
+<script>
+  // As soon as the form is in the DOM, submit it:
+  document.addEventListener("DOMContentLoaded", function(){
+    var f = document.querySelector("form");
+    if(f){ f.submit(); }
+  });
+</script>
