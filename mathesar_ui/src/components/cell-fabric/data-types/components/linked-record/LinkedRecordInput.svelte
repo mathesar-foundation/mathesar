@@ -200,7 +200,7 @@
     cursor: default;
   }
   .disabled {
-    background: var(--surface-inset-disabled);
+    background: var(--surface-input-disabled);
     border: solid 1px var(--border-input);
   }
 
