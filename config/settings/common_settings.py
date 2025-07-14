@@ -56,9 +56,11 @@ MIDDLEWARE = [
 ]
 
 OIDC_CONFIG_DICT = {}
-with open("sso.yml", "rb") as f:
+
+with open(BASE_DIR.joinpath('sso.yml'), "rb") as f:
     OIDC_CONFIG_DICT = yaml.full_load(f)
 
+# print(OIDC_CONFIG_DICT)
 OIDC_CONFIG = []
 OIDC_ALLOWED_EMAIL_DOMAINS = {}
 OIDC_DEFAULT_PG_ROLE_MAP = {}
