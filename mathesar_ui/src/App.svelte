@@ -140,7 +140,7 @@
 
     /** Panel theming */
     --WithPanel__gap: var(--sm3);
-    --WithPanel__resizer-color: var(--semantic-help-bg);
+    --WithPanel__resizer-color: var(--semantic-help-icon);
     --WithPanel__resizer-size: var(--sm4);
   }
 
