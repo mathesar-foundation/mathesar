@@ -37,7 +37,7 @@ $surface-colors: (
   'elevated-header': hsl(hue($base), 20%, 90%),
   'elevated-high': hsl(hue($base), saturation($base), 92%),
   'elevated-top': hsl(hue($base), saturation($base), 90%),
-  'token': hsl(hue($base), saturation($base), 75%),
+  'token': hsl(hue($base), saturation($base), 90%),
   'input-fill': $input-fill,
   'light': hsl(hue($base), saturation($base), 100%),
 );
@@ -92,7 +92,7 @@ $border-colors: (
   'elevated-high': hsl(hue($base), saturation($base), 70%),
   'section': hsl(hue($base), saturation($base), 70%),
   'input': hsl(hue($base), saturation($base), 60%),
-  'token': hsl(hue($base), saturation($base), 60%),
+  'token': hsl(hue($base), saturation($base), 70%),
 );
 
 $border-states: (
