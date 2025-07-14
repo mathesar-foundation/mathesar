@@ -61,7 +61,7 @@ $surface-states: (
   'disabled': (
     'h_delta': 0,
     's_delta': 0,
-    'l_delta': -20,
+    'l_delta': -10,
   ),
   'muted': (
     'h_delta': 0,
@@ -79,7 +79,7 @@ $surface-states: (
 $border-colors: (
   'container': hsl(hue($base), saturation($base), 88%),
   'row': hsl(hue($base), saturation($base), 88%),
-  'grid': hsl(hue($base), saturation($base), 88%),
+  'grid': hsl(hue($base), saturation($base), 80%),
   'card': hsl(hue($base), saturation($base), 85%),
   'dropdown': hsl(hue($base), saturation($base), 85%),
   'shadow': hsl(hue($base), saturation($base), 82%),

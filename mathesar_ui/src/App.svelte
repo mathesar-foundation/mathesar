@@ -90,7 +90,7 @@
     --cell-bg-color-error: var(--semantic-danger-bg);
     --cell-bg-color-header: var(--surface-header);
     --cell-bg-color-processing: var(--semantic-warning-bg);
-    --cell-bg-color-disabled: var(--surface-inset-muted);
+    --cell-bg-color-disabled: var(--surface-inset-disabled);
     --cell-bg-color-row-hover: var(--surface-inset-hover);
     --cell-bg-color-row-selected: var(--color-selection-40);
 
