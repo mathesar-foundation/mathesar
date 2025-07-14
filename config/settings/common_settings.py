@@ -100,6 +100,20 @@ SOCIALACCOUNT_PROVIDERS = {
 
 SOCIALACCOUNT_ADAPTER = "mathesar.oidc.SocialAccountAdapter"
 
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Allows us to merge existing users with OIDC logins.
+# More context: https://docs.allauth.org/en/dev/socialaccount/configuration.html
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+
 ROOT_URLCONF = "config.urls"
 
 MODERNRPC_METHODS_MODULES = [
@@ -144,19 +158,6 @@ TEMPLATES = [
         },
     },
 ]
-
-AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
-
-    # `allauth` specific authentication methods, such as login by email
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
-# Allows us to merge existing users with OIDC logins.
-# More context: https://docs.allauth.org/en/dev/socialaccount/configuration.html
-SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
-SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 WSGI_APPLICATION = "config.wsgi.application"
 
