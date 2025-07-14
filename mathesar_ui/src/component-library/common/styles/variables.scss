@@ -8,12 +8,11 @@ body {
   --active-background: var(--color-navigation-active-20);
 
   // Progress Colors
-  --progress-foreground: color-mix(
+  --ToastItem__progress-color: color-mix(
     in srgb,
-    var(--surface-elevated-low),
+    var(--text-primary),
     transparent 80%
   );
-  --ToastItem__progress-color: var(--progress-foreground);
 
   // Border Radius
   --border-radius-xs: 0.071rem; //1px
