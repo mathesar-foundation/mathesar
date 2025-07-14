@@ -74,7 +74,18 @@
        style="height:1em; vertical-align:middle; margin-right:0.5em">
        Login with {{i|capfirst}}</a>
       {% endfor %}
-
+      {% if messages %}
+        {% for message in messages %}
+          {% if 'error' in message.tags %}
+            <div class="message-box error-message">
+              <div class="icon">&#9888;</div>
+              <div>
+                  {{ message }}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
 
     </div>
   </form>

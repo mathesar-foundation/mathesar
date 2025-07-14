@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import yaml
 import os
 from pathlib import Path
 
@@ -55,31 +55,50 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
-# TODO: Make this better
-y = []
-for i in range(5):
-    x = [f"OIDC_{i}_PROVIDER", f"OIDC_{i}_CLIENT_ID", f"OIDC_{i}_SECRET", f"OIDC_{i}_SERVER_URL"]
-    z = {j.split(f'{i}_')[-1].lower(): os.getenv(j) for j in x if os.getenv(j) is not None}
-    if z != {}:
-        y.append(z)
-# ========================
+OIDC_CONFIG_DICT = {}
+with open("sso.yml", "rb") as f:
+    OIDC_CONFIG_DICT = yaml.full_load(f)
 
+OIDC_CONFIG = []
+OIDC_ALLOWED_EMAIL_DOMAINS = {}
+OIDC_DEFAULT_PG_ROLE_MAP = {}
+if isinstance(OIDC_CONFIG_DICT.get('oidc_providers'), dict):
+    for providers, config in OIDC_CONFIG_DICT['oidc_providers'].items():
+        if isinstance(config, dict):
+            provider_name = config.get("provider_name")
+            client_id = config.get("client_id")
+            secret = config.get("secret")
+            server_url = config.get("server_url")
+            allowed_email_domains = config.get("allowed_email_domains", [])  # Here [] means allow all domains.
+            if (
+                provider_name is not None
+                and client_id is not None
+                and secret is not None
+                and server_url is not None
+            ):
+                OIDC_CONFIG.append(
+                    {
+                        "provider_id": provider_name.lower(),
+                        "name": provider_name.lower(),
+                        "client_id": client_id,
+                        "secret": secret,
+                        "settings": {
+                            "server_url": server_url
+                        }
+                    }
+                )
+                if isinstance(allowed_email_domains, list):
+                    OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = allowed_email_domains
+                elif isinstance(allowed_email_domains, str):
+                    OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = [allowed_email_domains]
 
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
-        "APPS": [
-            {
-                "provider_id": oidc_conf["provider"].lower(),
-                "name": oidc_conf["provider"].lower(),
-                "client_id": oidc_conf["client_id"],
-                "secret": oidc_conf["secret"],
-                "settings": {
-                    "server_url": oidc_conf["server_url"]
-                }
-            } for oidc_conf in y
-        ]
+        "APPS": OIDC_CONFIG
     }
 }
+
+SOCIALACCOUNT_ADAPTER = "mathesar.oidc.SocialAccountAdapter"
 
 ROOT_URLCONF = "config.urls"
 
