@@ -232,8 +232,10 @@
     font-weight: bold;
   }
 
-  .input .null .postgres-keyword,
-  .cell-wrapper .postgres-keyword {
+  // TODO: remove this block when implementing
+  // https://github.com/mathesar-foundation/mathesar/issues/4558
+  .input:not(:has(.chip)) .null .postgres-keyword,
+  .cell-wrapper:not(:has(.chip)) .postgres-keyword {
     color: var(--text-faint);
     font-weight: 300;
     background: transparent;
