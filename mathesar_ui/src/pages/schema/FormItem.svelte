@@ -10,42 +10,45 @@
     iconFillOutForm,
     iconForm,
   } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
+  import type { DataForm } from '@mathesar/models/DataForm';
+  import {
+    getDataFormFillPageUrl,
+    getDataFormPageUrl,
+  } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { ButtonMenuItem, Icon } from '@mathesar-component-library';
 
-  export let form: { id: number; name: string; description?: string | null };
-  export let database: Database;
-  export let schema: Schema;
+  export let dataForm: DataForm;
+  export let editDataForm: () => void;
+  export let deleteDataForm: () => void;
 
+  $: ({ id, name, description, schema } = dataForm);
+
+  // TODO: Get base table
   $: baseTable = { name: 'My Table' };
 
-  $: builderPageUrl = '#TODO'; // TODO
-  $: formPageUrl = '#TODO'; // TODO
+  $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
+  $: formFilloutPageUrl = getDataFormFillPageUrl(
+    schema.database.id,
+    schema.oid,
+    id,
+  );
 
   function handleDelete() {
     void confirmDelete({
       identifierType: $_('form'),
-      identifierName: form.name,
+      identifierName: $name,
       onProceed: async () => {
-        // TODO
+        deleteDataForm();
       },
     });
-  }
-
-  function handleEdit() {
-    // TODO
-
-    // eslint-disable-next-line no-console
-    console.log({ database, schema, form });
   }
 </script>
 
 <EntityListItem
   href={builderPageUrl}
-  name={form.name}
-  description={form.description ?? undefined}
+  name={$name}
+  description={$description ?? undefined}
   icon={iconForm}
 >
   <svelte:fragment slot="detail">
@@ -58,13 +61,13 @@
     {/if}
   </svelte:fragment>
   <div slot="action-buttons">
-    <a href={formPageUrl} class="btn btn-secondary fill-out-button">
+    <a href={formFilloutPageUrl} class="btn btn-secondary fill-out-button">
       <Icon {...iconFillOutForm} />
       <span>{$_('fill_out')}</span>
     </a>
   </div>
   <svelte:fragment slot="menu">
-    <ButtonMenuItem on:click={handleEdit} icon={iconEdit}>
+    <ButtonMenuItem on:click={editDataForm} icon={iconEdit}>
       {$_('edit_form')}
     </ButtonMenuItem>
     <ButtonMenuItem on:click={handleDelete} danger icon={iconDeleteMajor}>

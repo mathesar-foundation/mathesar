@@ -18,7 +18,14 @@ export default class CacheManager<Key, Value> {
     }
   }
 
-  get(key: Key): Value | undefined {
-    return this.cache.get(key);
+  get(key: Key, coalesce: () => Value): Value;
+  get(key: Key): Value | undefined;
+  get(key: Key, coalesce?: () => Value) {
+    let val = this.cache.get(key);
+    if (typeof val === 'undefined' && coalesce) {
+      val = coalesce();
+      this.set(key, val);
+    }
+    return val;
   }
 }

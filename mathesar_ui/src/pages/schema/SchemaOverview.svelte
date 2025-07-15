@@ -6,9 +6,8 @@
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import Tutorial from '@mathesar/component-library/tutorial/Tutorial.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconAddNew, iconRefresh } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { fetchExplorationsForCurrentSchema } from '@mathesar/stores/queries';
@@ -25,17 +24,20 @@
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
   import ExploreYourData from './ExploreYourData.svelte';
-  import FormsList from './FormsList.svelte';
+  import FormsSection from './FormsSection.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
+
+  const schemaRouteContext = SchemaRouteContext.get();
 
   export let tablesMap: Map<Table['oid'], Table>;
   export let explorationsMap: Map<number, SavedExploration>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
-  export let database: Database;
-  export let schema: Schema;
   export let onCreateEmptyTable: () => void;
+
+  $: ({ schema, dataForms } = $schemaRouteContext);
+  $: void dataForms.runConservatively();
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
@@ -44,7 +46,10 @@
     !hasTables && $currentRolePrivileges.has('CREATE');
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
   $: ({ tableCount } = schema);
-  $: dataExplorerPageUrl = getDataExplorerPageUrl(database.id, schema.oid);
+  $: dataExplorerPageUrl = getDataExplorerPageUrl(
+    schema.database.id,
+    schema.oid,
+  );
 </script>
 
 <div class="schema-overview" class:has-tables={hasTables}>
@@ -52,7 +57,11 @@
     <header>
       <h2>{$_('tables')}</h2>
       <div>
-        <CreateTableButton {database} {schema} {onCreateEmptyTable} />
+        <CreateTableButton
+          database={schema.database}
+          {schema}
+          {onCreateEmptyTable}
+        />
       </div>
     </header>
     {#if tablesRequestStatus.state === 'processing'}
@@ -70,9 +79,17 @@
         </div>
       </ErrorBox>
     {:else if showTableCreationTutorial}
-      <CreateTableTutorial {database} {schema} {onCreateEmptyTable} />
+      <CreateTableTutorial
+        database={schema.database}
+        {schema}
+        {onCreateEmptyTable}
+      />
     {:else}
-      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
+      <TablesList
+        tables={[...tablesMap.values()]}
+        {schema}
+        database={schema.database}
+      />
     {/if}
   </div>
 
@@ -115,7 +132,7 @@
           <div class="explorations-list">
             <ExplorationsList
               explorations={[...explorationsMap.values()]}
-              {database}
+              database={schema.database}
               {schema}
             />
           </div>
@@ -140,19 +157,7 @@
       {/if}
     </section>
 
-    <section>
-      <header>
-        <h2>{$_('forms')}</h2>
-        <div>
-          <AnchorButton href="#TODO" appearance="secondary">
-            <Icon {...iconAddNew} />
-            <span>{$_('new_form')}</span>
-          </AnchorButton>
-        </div>
-      </header>
-      <!-- TODO: handle loading and error states -->
-      <FormsList {database} {schema} />
-    </section>
+    <FormsSection />
   </div>
 </div>
 

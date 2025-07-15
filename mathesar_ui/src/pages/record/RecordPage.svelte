@@ -17,10 +17,7 @@
   $: table = $currentTable as Table;
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canViewTable = $currentRolePrivileges.has('SELECT');
-  $: tableStructure = new TableStructure({
-    database: table.schema.database,
-    table,
-  });
+  $: tableStructure = new TableStructure(table);
   $: tableStructureIsLoading = tableStructure.isLoading;
   $: recordStoreFetchRequest = record.fetchRequest;
   $: ({ summary } = record);
