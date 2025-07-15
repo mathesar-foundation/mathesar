@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme-top" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Contributor Wiki</a>
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme-top" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Contributor Wiki</a> • <a href="https://github.com/orgs/mathesar-foundation/projects/2" target="_blank">Roadmap</a>
 </p>
 
 
@@ -78,37 +78,37 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 
 ## Screenshots
 ### Connecting a database
-![connect-db](https://github.com/user-attachments/assets/c115ad21-e501-4992-bf84-54758a321f41)
+![connect-db](https://github.com/user-attachments/assets/d7188c8d-a040-4bc4-8350-28b2a6fd1661)
 
 ### Adding collaborators
-![add-collaborator](https://github.com/user-attachments/assets/90c65f3f-3edb-4bf3-b00c-586019c78765)
+![add-collaborator](https://github.com/user-attachments/assets/9bac7016-4a15-4a76-9abb-427dd6369305)
 
 ### Viewing a Postgres schema
-![schema-page](https://github.com/user-attachments/assets/305d0d79-fba8-4044-954d-bc511c935321)
+![schema-page](https://github.com/user-attachments/assets/59c89bed-d240-4de4-ad33-91625ebe20ab)
 
 ### Working with tables
-![table-inspector](https://github.com/user-attachments/assets/bb3bbcd7-ef12-4304-9d5c-8220b188d2f5)
+![table-inspector](https://github.com/user-attachments/assets/89212249-2fd6-4ef6-a4ef-3e4df32bfb89)
 
 ### Finding a nested record
-![record-selector](https://github.com/user-attachments/assets/b3d12cb4-e90b-458b-8e19-8371c1332557)
+![record-selector](https://github.com/user-attachments/assets/d88f4787-9994-4b56-a92f-322205abc6a1)
 
 ### Linking two tables together
-![relationship-creation](https://github.com/user-attachments/assets/faf8e82c-d165-495a-a9eb-bf76ec9a9283)
+![relationship-creation](https://github.com/user-attachments/assets/4240955e-3bc5-4f9c-ad4e-eac79cf42e63)
 
 ### Managing table permissions
-![table-permissions](https://github.com/user-attachments/assets/094d3c98-8c4c-4cfa-aad5-6fd3faa30473)
+![table-permissions](https://github.com/user-attachments/assets/74357082-3bf1-47c0-bf85-6c5eab77ef0f)
 
 ### Viewing a single record with related records
-![record-page](https://github.com/user-attachments/assets/00774552-2acb-4a01-87d6-1813f579e757)
+![record-page](https://github.com/user-attachments/assets/d2e621e3-5597-44ef-ae87-482bec0b9bcc)
 
 ### Viewing an Exploration (query result)
-![viewing-exploration](https://github.com/user-attachments/assets/0df680d3-621d-466a-9915-d560001a3931)
+![viewing-exploration](https://github.com/user-attachments/assets/410cb99f-a583-411b-9706-7967bff673e6)
 
 ### Building an Exploration (query)
-![building-exploration](https://github.com/user-attachments/assets/7ff100fe-cd26-4229-af3b-a5a5bb70b0b7)
+![building-exploration](https://github.com/user-attachments/assets/de662d3c-1efa-42e6-a960-17e00432c8db)
 
 ### Disconnecting a database
-![disconnect-db](https://github.com/user-attachments/assets/48905983-a632-4632-b2c1-b0f25c3b6e75)
+![disconnect-db](https://github.com/user-attachments/assets/f22e9c78-3c92-40c8-8ef9-dcb4cf8e8aea)
 
 ## Mathesar in action
 https://github.com/user-attachments/assets/6bdfb178-17b4-4abf-aac4-9781e1d841ab

@@ -341,7 +341,7 @@ def test_forms_get(rf, monkeypatch):
     request = rf.post('/api/rpc/v0', data={})
     request.user = User(username='alice', password='pass1234')
 
-    def mock_forms_get(form_id):
+    def mock_forms_get(form_id, is_public):
         form = Form(
             id=42,
             created_at="2025-06-13T23:18:05.108Z",

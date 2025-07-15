@@ -6,7 +6,7 @@ from django.db import transaction
 from db.forms import get_oid_col_info_map
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
-    Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
+    Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 
@@ -62,14 +62,16 @@ def get_field_col_info_map(form_model):
 
 @transaction.atomic
 def create_form(form_def, user):
-    database_id = form_def["database_id"]
-    submit_role = get_submit_role(user, database_id, submit_role_id=form_def.get("submit_role_id"))
+    database = Database.objects.get(id=form_def["database_id"])
+    submit_role = get_submit_role(user, database.id, submit_role_id=form_def.get("submit_role_id"))
     form_model = Form.objects.create(
+        **({"id": form_def["id"]} if form_def.get("id") else {}),  # we get an id during replace
         token=form_def.get("token", uuid4()),
         name=form_def["name"],
         description=form_def.get("description"),
         version=form_def["version"],
-        database_id=database_id,
+        database=database,
+        server=database.server,
         schema_oid=form_def["schema_oid"],
         base_table_oid=form_def["base_table_oid"],
         is_public=form_def.get("is_public", False),
@@ -111,8 +113,8 @@ def create_form(form_def, user):
     return form_model, field_col_info_map
 
 
-def get_form(form_id):
-    form_model = Form.objects.get(id=form_id)
+def get_form(form_id, is_public=False):
+    form_model = Form.objects.get(id=form_id, is_public=True) if is_public else Form.objects.get(id=form_id)
     field_col_info_map = get_field_col_info_map(form_model)
     return form_model, field_col_info_map
 
@@ -123,3 +125,10 @@ def list_forms(database_id, schema_oid):
 
 def delete_form(form_id):
     Form.objects.get(id=form_id).delete()
+
+
+@transaction.atomic
+def replace_form(form_def_with_id, user):
+    Form.objects.get(id=form_def_with_id["id"]).delete()
+    form_model, field_col_info_map = create_form(form_def_with_id, user)
+    return form_model, field_col_info_map
