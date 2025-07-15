@@ -25,7 +25,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def save_user(self, request, sociallogin, form=None):
         saved_user = super().save_user(request, sociallogin, form)
         try:
-            role_config_list = settings.OIDC_DEFAULT_PG_ROLE_MAP.get(str(sociallogin.provider))
+            role_config_list = settings.OIDC_DEFAULT_PG_ROLE_MAP.get(str(sociallogin.provider), [])
             if role_config_list != []:
                 for role_config in role_config_list:
                     database_name = role_config["db_name"]
@@ -46,7 +46,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                         configured_role=configured_role,
                         server=server
                     )
-        except Exception:
+        except Exception as e:
+            if settings.DEBUG:
+                print(f"OIDC failure: {e}")
             messages.error(request, "Failed to automatically provision default postgres roles.")
             raise ImmediateHttpResponse(redirect("account_login"))
         return saved_user
