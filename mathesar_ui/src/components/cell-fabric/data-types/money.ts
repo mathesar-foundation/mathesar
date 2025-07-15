@@ -1,5 +1,8 @@
 import type { NumberFormat } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import {
   StringifiedNumberFormatter,
   isDefinedNonNullable,
@@ -21,12 +24,12 @@ const localeMap = new Map<NumberFormat, string>([
   ['swiss'   , 'de-CH' ],
 ]);
 
-function ColumnIsInteger(column: Column): boolean {
+function ColumnIsInteger(column: RawColumnWithMetadata): boolean {
   return (column.type_options?.scale ?? Infinity) === 0;
 }
 
 function getFormatterOptions(
-  column: Column,
+  column: RawColumnWithMetadata,
 ): MoneyCellExternalProps['formatterOptions'] {
   const format = getColumnMetadataValue(column, 'num_format');
   return {
@@ -50,7 +53,7 @@ function getFormatterOptions(
   };
 }
 
-function getProps(column: Column): MoneyCellExternalProps {
+function getProps(column: RawColumnWithMetadata): MoneyCellExternalProps {
   const formatterOptions = getFormatterOptions(column);
   const displayFormatter = new StringifiedNumberFormatter(formatterOptions);
   const insertCurrencySymbol = (() => {
@@ -78,7 +81,9 @@ function getProps(column: Column): MoneyCellExternalProps {
 }
 
 const moneyType: CellComponentFactory = {
-  get(column: Column): ComponentAndProps<MoneyCellExternalProps> {
+  get(
+    column: RawColumnWithMetadata,
+  ): ComponentAndProps<MoneyCellExternalProps> {
     return {
       component: MoneyCell,
       props: getProps(column),
@@ -86,7 +91,7 @@ const moneyType: CellComponentFactory = {
   },
 
   getInput(
-    column: Column,
+    column: RawColumnWithMetadata,
   ): ComponentAndProps<MoneyCellExternalProps['formatterOptions']> {
     return {
       component: MoneyCellInput,
@@ -97,7 +102,7 @@ const moneyType: CellComponentFactory = {
     };
   },
 
-  getDisplayFormatter(column: Column) {
+  getDisplayFormatter(column: RawColumnWithMetadata) {
     return (v) => getProps(column).formatForDisplay(String(v));
   },
 };

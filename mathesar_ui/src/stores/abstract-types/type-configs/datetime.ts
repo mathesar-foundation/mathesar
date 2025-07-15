@@ -5,7 +5,10 @@ import type {
   DateFormat,
   TimeFormat,
 } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeDateTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
@@ -53,7 +56,7 @@ function determineDbTypeAndOptions(
 }
 
 function constructDbFormValuesFromTypeOptions(
-  columnType: Column['type'],
+  columnType: RawColumnWithMetadata['type'],
 ): FormValues {
   return {
     supportTimeZones: columnType === DB_TYPES.TIMESTAMP_WITH_TZ,
@@ -94,8 +97,8 @@ const displayForm: AbstractTypeConfigForm = {
 
 function determineDisplayOptions(
   dispFormValues: FormValues,
-): Column['metadata'] {
-  const displayOptions: Column['metadata'] = {
+): RawColumnWithMetadata['metadata'] {
+  const displayOptions: RawColumnWithMetadata['metadata'] = {
     date_format: dispFormValues.dateFormat as DateFormat,
     time_format: dispFormValues.timeFormat as TimeFormat,
   };
@@ -103,7 +106,7 @@ function determineDisplayOptions(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: Column['metadata'],
+  metadata: RawColumnWithMetadata['metadata'],
 ): FormValues {
   const column = { metadata };
   const formValues: FormValues = {

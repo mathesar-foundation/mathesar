@@ -1,7 +1,10 @@
-import type { Column } from '@mathesar/api/rpc/columns';
-import type { Constraint, FkConstraint } from '@mathesar/api/rpc/constraints';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import type {
+  FkConstraint,
+  RawConstraint,
+} from '@mathesar/api/rpc/constraints';
 
-export function constraintIsFk(c: Constraint): c is FkConstraint {
+export function constraintIsFk(c: RawConstraint): c is FkConstraint {
   return c.type === 'foreignkey';
 }
 
@@ -14,8 +17,8 @@ export function constraintIsFk(c: Constraint): c is FkConstraint {
  * it's up to the caller of this function to decide what to do in that case.
  */
 export function findFkConstraintsForColumn(
-  constraints: Constraint[],
-  columnId: Column['id'],
+  constraints: RawConstraint[],
+  columnId: RawColumnWithMetadata['id'],
 ): FkConstraint[] {
   return constraints.filter(constraintIsFk).filter(
     (constraint) =>

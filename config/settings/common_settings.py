@@ -64,6 +64,7 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.databases.privileges',
     'mathesar.rpc.databases.setup',
     'mathesar.rpc.explorations',
+    'mathesar.rpc.forms',
     'mathesar.rpc.records',
     'mathesar.rpc.roles',
     'mathesar.rpc.roles.configured',
@@ -117,6 +118,9 @@ if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
         role=POSTGRES_USER,
         password=POSTGRES_PASSWORD,
     ).to_django_dict()
+    DATABASES['default']['OPTIONS'] = {
+        "application_name": "Mathesar Django"
+    }
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s)

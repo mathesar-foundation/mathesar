@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Table } from '@mathesar/models/Table';
@@ -25,7 +25,7 @@
 
   export let recordPk: string;
   export let table: Table;
-  export let fkColumn: Pick<Column, 'id' | 'name'>;
+  export let fkColumn: Pick<RawColumnWithMetadata, 'id' | 'name'>;
 
   $: tabularData = new TabularData({
     database: table.schema.database,

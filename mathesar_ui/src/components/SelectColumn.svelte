@@ -1,13 +1,14 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import { Select } from '@mathesar-component-library';
 
   import ColumnName from './column/ColumnName.svelte';
 
-  export let columns: Column[];
-  export let value: Column | undefined = undefined;
-  export let onUpdate: ((v: Column | undefined) => void) | undefined =
-    undefined;
+  export let columns: RawColumnWithMetadata[];
+  export let value: RawColumnWithMetadata | undefined = undefined;
+  export let onUpdate:
+    | ((v: RawColumnWithMetadata | undefined) => void)
+    | undefined = undefined;
 </script>
 
 <Select

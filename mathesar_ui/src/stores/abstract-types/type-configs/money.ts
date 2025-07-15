@@ -3,7 +3,10 @@ import type {
   NumberFormat,
   NumberGrouping,
 } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeMoney } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
@@ -98,9 +101,11 @@ interface MoneyFormValues extends Record<string, unknown> {
   useGrouping: NumberGrouping;
 }
 
-function determineDisplayOptions(form: FormValues): Column['metadata'] {
+function determineDisplayOptions(
+  form: FormValues,
+): RawColumnWithMetadata['metadata'] {
   const f = form as MoneyFormValues;
-  const opts: Partial<Column['metadata']> = {
+  const opts: Partial<RawColumnWithMetadata['metadata']> = {
     mon_currency_symbol: f.currencySymbol,
     mon_currency_location: f.currencySymbolLocation,
     num_format: f.numberFormat === 'none' ? null : f.numberFormat,
@@ -112,7 +117,7 @@ function determineDisplayOptions(form: FormValues): Column['metadata'] {
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: Column['metadata'],
+  metadata: RawColumnWithMetadata['metadata'],
 ): MoneyFormValues {
   const column = { metadata };
   const decimalPlaces = getDecimalPlaces(

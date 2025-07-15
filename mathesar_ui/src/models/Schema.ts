@@ -109,6 +109,7 @@ export class Schema {
 
   constructSchemaPrivilegesStore() {
     return new AsyncRpcApiStore(api.schemas.privileges.list_direct, {
+      staticProps: { database_id: this.database.id, schema_oid: this.oid },
       postProcess: (rawSchemaPrivilegesForRoles) =>
         new ImmutableMap(
           rawSchemaPrivilegesForRoles.map((rawSchemaPrivilegesForRole) => [
