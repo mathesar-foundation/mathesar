@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import type { ResultValue } from '@mathesar/api/rpc/records';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import { Truncate } from '@mathesar-component-library';
@@ -9,7 +9,7 @@
   export let controller: RowSeekerController;
   export let columnDisplayInfo: {
     id: number;
-    column: Column;
+    column: RawColumnWithMetadata;
     value: ResultValue;
     summary?: string;
   };

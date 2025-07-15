@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import type {
     RecordSummaryColumnData,
     SqlColumn,
@@ -10,7 +10,7 @@
   import type RowSeekerController from './RowSeekerController';
 
   export let controller: RowSeekerController;
-  export let columnMap: Map<Column['id'], Column>;
+  export let columnMap: Map<RawColumnWithMetadata['id'], RawColumnWithMetadata>;
   export let filter: [SqlColumn['value'], Set<SqlLiteral['value']>];
   export let linkedRecordSummaries: Record<
     string,

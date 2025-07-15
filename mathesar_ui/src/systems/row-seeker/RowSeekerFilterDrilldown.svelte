@@ -2,7 +2,7 @@
   import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconAddFilter } from '@mathesar/icons';
   import {
@@ -14,7 +14,7 @@
 
   import type RowSeekerController from './RowSeekerController';
 
-  export let columnsArray: Column[];
+  export let columnsArray: RawColumnWithMetadata[];
   export let controller: RowSeekerController;
 
   let filterSearch: HTMLElement;
@@ -28,7 +28,7 @@
     await controller.focusSearch();
   }
 
-  async function addFilter(column: Column) {
+  async function addFilter(column: RawColumnWithMetadata) {
     controller.newUnappliedFilter(column);
     await tick();
     filterSearch?.focus();

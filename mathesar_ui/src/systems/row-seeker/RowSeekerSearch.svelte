@@ -2,13 +2,13 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import type { RecordSummaryColumnData } from '@mathesar/api/rpc/records';
 
   import type RowSeekerController from './RowSeekerController';
   import RowSeekerFilterTag from './RowSeekerFilterTag.svelte';
 
-  export let columnsArray: Column[];
+  export let columnsArray: RawColumnWithMetadata[];
   export let controller: RowSeekerController;
   export let linkedRecordSummaries: Record<
     string,

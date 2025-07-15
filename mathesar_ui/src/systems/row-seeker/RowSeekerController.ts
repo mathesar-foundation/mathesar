@@ -2,7 +2,7 @@ import { tick } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   Result as ApiRecord,
   ResultValue,
@@ -55,7 +55,8 @@ export default class RowSeekerController {
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
 
-  unappliedFilterColumn: Writable<Column | undefined> = writable();
+  unappliedFilterColumn: Writable<RawColumnWithMetadata | undefined> =
+    writable();
 
   mode: Writable<'basic' | 'complete'>;
 
@@ -197,7 +198,7 @@ export default class RowSeekerController {
     await Promise.all([this.getStructure(), this.getRecords()]);
   }
 
-  newUnappliedFilter(column: Column) {
+  newUnappliedFilter(column: RawColumnWithMetadata) {
     this.unappliedFilterColumn.set(column);
   }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import type {
     RecordSummaryColumnData,
     RecordSummaryListResult,
@@ -13,7 +13,7 @@
   export let controller: RowSeekerController;
   export let isSelected: boolean;
   export let inFocus: boolean;
-  export let columns: Column[];
+  export let columns: RawColumnWithMetadata[];
   export let result: RecordSummaryListResult;
   export let linkedRecordSummaries: Record<
     string,
@@ -24,7 +24,7 @@
 
   let isExpanded = false;
 
-  function getLinkedRecordSummary(column: Column) {
+  function getLinkedRecordSummary(column: RawColumnWithMetadata) {
     const value = result.values[column.id];
     const linkedSummary = linkedRecordSummaries[column.id];
     return linkedSummary?.[String(value)] ?? undefined;
