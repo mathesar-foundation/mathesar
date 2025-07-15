@@ -1,14 +1,10 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
-  import { iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { modal } from '@mathesar/stores/modal';
 
   import EditExplorationModal from './EditExplorationModal.svelte';
-  import EmptyEntityList from './EmptyEntityList.svelte';
   import ExplorationItem from './ExplorationItem.svelte';
 
   const editExplorationModal = modal.spawnModalController();
@@ -33,8 +29,6 @@
       {schema}
       {openEditExplorationModal}
     />
-  {:else}
-    <EmptyEntityList icon={iconExploration} text={$_('no_explorations')} />
   {/each}
 </div>
 

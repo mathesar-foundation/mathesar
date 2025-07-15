@@ -25,7 +25,10 @@
   <header>
     <h2>{$_('forms')}</h2>
     <div>
-      <Button appearance="primary" on:click={() => dataFormAddEditModal.open()}>
+      <Button
+        appearance="secondary"
+        on:click={() => dataFormAddEditModal.open()}
+      >
         <Icon {...iconAddNew} />
         <span>{$_('new_form')}</span>
       </Button>

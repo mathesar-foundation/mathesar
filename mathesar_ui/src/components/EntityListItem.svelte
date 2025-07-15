@@ -1,6 +1,11 @@
 <script lang="ts">
   import { iconDescription, iconMoreActions } from '@mathesar/icons';
-  import { DropdownMenu, Icon, Tooltip } from '@mathesar-component-library';
+  import {
+    DropdownMenu,
+    Icon,
+    Tooltip,
+    Truncate,
+  } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
 
   export let href: string;
@@ -12,17 +17,17 @@
    * (e.g. an unconfirmed table import).
    */
   export let pendingMessage: string | undefined = undefined;
-  export let largeName = false;
+  export let primary = false;
 </script>
 
-<div class="entity-list-item" class:pending={!!pendingMessage}>
+<div class="entity-list-item" class:pending={!!pendingMessage} class:primary>
   <a class="link passthrough" {href} aria-label={name}>
     <div class="top">
-      <div class="name" class:large={largeName}>
+      <div class="name">
         <Icon {...icon} />
         <span>{name}</span>
       </div>
-      {#if description}
+      {#if description && !primary}
         <Tooltip>
           <div class="description-icon" slot="trigger">
             <Icon {...iconDescription} />
@@ -36,6 +41,11 @@
         </div>
       {/if}
     </div>
+    {#if description && primary}
+      <div class="description">
+        <Truncate>{description}</Truncate>
+      </div>
+    {/if}
     {#if $$slots.detail}
       <div class="detail">
         <slot name="detail" />
@@ -68,8 +78,6 @@
     display: grid;
     grid-template: auto / 1fr auto;
     align-items: center;
-    border: 1px solid var(--card-border);
-    background-color: var(--card-background);
     overflow: hidden;
     border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
       var(--corner-bl);
@@ -79,15 +87,20 @@
     --corner-bl: 0;
   }
 
-  .entity-list-item + :global(.entity-list-item) {
+  .entity-list-item.primary {
+    border: 1px solid var(--card-border);
+    background-color: var(--card-background);
+  }
+
+  .entity-list-item.primary + :global(.entity-list-item.primary) {
     border-top: none;
   }
 
-  .entity-list-item:first-child {
+  .entity-list-item.primary:first-child {
     --corner-tl: var(--border-radius-l);
     --corner-tr: var(--border-radius-l);
   }
-  .entity-list-item:last-child {
+  .entity-list-item.primary:last-child {
     --corner-br: var(--border-radius-l);
     --corner-bl: var(--border-radius-l);
   }
@@ -98,7 +111,10 @@
   }
 
   .entity-list-item:has(.link:hover) {
-    box-shadow: var(--shadow-color) 0 2px 4px 0;
+    background: var(--card-hover-background);
+  }
+
+  .entity-list-item.primary:has(.link:hover) {
     background: var(--card-hover-background);
     padding-left: 0;
     &::before {
@@ -121,9 +137,10 @@
   }
 
   .link {
+    overflow: hidden;
     display: grid;
     cursor: pointer;
-    padding: var(--sm2) var(--lg1);
+    padding: var(--sm2) var(--sm2);
 
     .top {
       display: flex;
@@ -138,14 +155,20 @@
       color: var(--text-color-muted);
     }
   }
+  .entity-list-item.primary .link {
+    padding: var(--sm2) var(--lg1);
+  }
 
   .name {
     font-weight: var(--font-weight-medium);
-    &.large {
-      font-size: var(--lg1);
-    }
+  }
+  .entity-list-item.primary .name {
+    font-size: var(--lg1);
   }
 
+  .description {
+    overflow: hidden;
+  }
   .description-icon {
     color: var(--text-color-muted);
     font-size: var(--sm1);

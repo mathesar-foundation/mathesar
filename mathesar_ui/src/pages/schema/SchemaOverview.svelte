@@ -4,6 +4,7 @@
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
+  import Tutorial from '@mathesar/component-library/tutorial/Tutorial.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconAddNew, iconRefresh } from '@mathesar/icons';
@@ -22,6 +23,7 @@
   import CreateTableTutorial from './CreateTableTutorial.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
+  import ExploreYourData from './ExploreYourData.svelte';
   import FormsSection from './FormsSection.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
@@ -38,11 +40,16 @@
   $: void dataForms.runConservatively();
 
   $: hasTables = tablesMap.size > 0;
+  $: hasExplorations = explorationsMap.size > 0;
   $: ({ currentRolePrivileges } = schema.currentAccess);
   $: showTableCreationTutorial =
     !hasTables && $currentRolePrivileges.has('CREATE');
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
   $: ({ tableCount } = schema);
+  $: dataExplorerPageUrl = getDataExplorerPageUrl(
+    schema.database.id,
+    schema.oid,
+  );
 </script>
 
 <div class="schema-overview" class:has-tables={hasTables}>
@@ -94,10 +101,7 @@
           <Help>{$_('what_is_an_exploration')}</Help>
         </h2>
         <div>
-          <AnchorButton
-            href={getDataExplorerPageUrl(schema.database.id, schema.oid)}
-            appearance="primary"
-          >
+          <AnchorButton href={dataExplorerPageUrl} appearance="secondary">
             <Icon {...iconAddNew} />
             <span>{$_('new_exploration')}</span>
           </AnchorButton>
@@ -124,11 +128,32 @@
           </div>
         </ErrorBox>
       {:else}
-        <ExplorationsList
-          explorations={[...explorationsMap.values()]}
-          database={schema.database}
-          {schema}
-        />
+        {#if hasExplorations}
+          <div class="explorations-list">
+            <ExplorationsList
+              explorations={[...explorationsMap.values()]}
+              database={schema.database}
+              {schema}
+            />
+          </div>
+        {/if}
+        {#if hasExplorations}
+          <ExploreYourData href={dataExplorerPageUrl} />
+        {:else}
+          <Tutorial>
+            <div slot="title">
+              {$_('time_to_create_exploration')}
+            </div>
+            <div slot="body">
+              {$_('what_is_an_exploration')}
+            </div>
+            <div slot="footer">
+              <AnchorButton href={dataExplorerPageUrl} size="small">
+                {$_('open_data_explorer')}
+              </AnchorButton>
+            </div>
+          </Tutorial>
+        {/if}
       {/if}
     </section>
 
@@ -163,6 +188,10 @@
         flex-grow: 1;
         text-align: right;
       }
+    }
+
+    .explorations-list {
+      margin-bottom: 1rem;
     }
 
     &:not(.has-tables) .sidebar {
