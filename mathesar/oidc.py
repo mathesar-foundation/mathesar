@@ -25,6 +25,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
     @transaction.atomic
     def save_user(self, request, sociallogin, form=None):
+        # When a role is provisioned to a mathesar user by an admin before SSO login,
+        # this code isn't executed as we don't create & save a new User instead we connect their SSO account
+        # to the existing User account. So, the User retains the role set by an admin instead of getting default roles.
         saved_user = super().save_user(request, sociallogin, form)
         try:
             role_config_list = settings.OIDC_DEFAULT_PG_ROLE_MAP.get(str(sociallogin.provider), [])
