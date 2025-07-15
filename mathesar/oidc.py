@@ -1,3 +1,5 @@
+import traceback
+
 from django.contrib import messages
 from django.conf import settings
 from django.db import transaction
@@ -26,7 +28,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         saved_user = super().save_user(request, sociallogin, form)
         try:
             role_config_list = settings.OIDC_DEFAULT_PG_ROLE_MAP.get(str(sociallogin.provider), [])
-            if role_config_list != []:
+            if role_config_list not in [None, []]:
                 for role_config in role_config_list:
                     database_name = role_config["db_name"]
                     host = role_config["host"]
@@ -47,8 +49,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                         server=server
                     )
         except Exception as e:
-            if settings.DEBUG:
-                print(f"OIDC failure: {e}")
+            traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
             messages.error(request, "Failed to automatically provision default postgres roles.")
             raise ImmediateHttpResponse(redirect("account_login"))
         return saved_user
