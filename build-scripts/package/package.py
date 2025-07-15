@@ -36,6 +36,7 @@ SOURCE_CONTENTS_TO_COPY = [
     "README.md",
     "requirements.txt",
     "setup",
+    "sso.yml",
     "THIRDPARTY",
     "translations",
 ]
