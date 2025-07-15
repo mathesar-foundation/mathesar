@@ -5,11 +5,11 @@ import RowSeekerController, {
 } from './RowSeekerController';
 
 export default class AttachableRowSeekerController {
+  private readonly onClose?: () => unknown;
+
   readonly node: HTMLElement | undefined;
 
   readonly isOpen = writable(false);
-
-  readonly onClose?: () => unknown;
 
   rowSeeker: RowSeekerController;
 
@@ -22,7 +22,7 @@ export default class AttachableRowSeekerController {
     this.onClose = props.onClose;
   }
 
-  async open() {
+  private async open() {
     this.isOpen.set(true);
     await this.rowSeeker.getReady();
   }
