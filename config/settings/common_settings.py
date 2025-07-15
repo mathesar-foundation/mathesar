@@ -55,12 +55,12 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
+OIDC_CONFIG_FILE = BASE_DIR.joinpath('sso.yml')
+if OIDC_CONFIG_FILE.exists():
+    with open(OIDC_CONFIG_FILE, "rb") as f:
+        OIDC_CONFIG_DICT = yaml.full_load(f)
+
 OIDC_CONFIG_DICT = {}
-
-with open(BASE_DIR.joinpath('sso.yml'), "rb") as f:
-    OIDC_CONFIG_DICT = yaml.full_load(f)
-
-# print(OIDC_CONFIG_DICT)
 OIDC_CONFIG = []
 OIDC_ALLOWED_EMAIL_DOMAINS = {}
 OIDC_DEFAULT_PG_ROLE_MAP = {}
