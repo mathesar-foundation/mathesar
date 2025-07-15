@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
+import traceback
 from pathlib import Path
 
 import yaml
@@ -65,59 +66,54 @@ OIDC_CONFIG = []
 OIDC_ALLOWED_EMAIL_DOMAINS = {}
 OIDC_DEFAULT_PG_ROLE_MAP = defaultdict(list)
 
-if isinstance(OIDC_CONFIG_DICT.get('oidc_providers'), dict):
+try:
     for providers, config in OIDC_CONFIG_DICT['oidc_providers'].items():
-        if isinstance(config, dict):
-            provider_name = config.get("provider_name")
-            client_id = config.get("client_id")
-            secret = config.get("secret")
-            server_url = config.get("server_url")
-            allowed_email_domains = config.get("allowed_email_domains", [])  # Here [] means allow all domains.
-            default_pg_role = config.get("default_pg_role", {})
-            if (
-                provider_name is not None
-                and client_id is not None
-                and secret is not None
-                and server_url is not None
-            ):
-                OIDC_CONFIG.append(
+        if not config:
+            continue
+        provider_name = config.get("provider_name")
+        client_id = config.get("client_id")
+        secret = config.get("secret")
+        server_url = config.get("server_url")
+        allowed_email_domains = config.get("allowed_email_domains", [])  # Here [] means allow all domains.
+        default_pg_role = config.get("default_pg_role", {})
+        if all([provider_name, client_id, secret, server_url]):
+            OIDC_CONFIG.append(
+                {
+                    "provider_id": provider_name.lower(),
+                    "name": provider_name.lower(),
+                    "client_id": client_id,
+                    "secret": secret,
+                    "settings": {
+                        "server_url": server_url
+                    }
+                }
+            )
+
+        if isinstance(allowed_email_domains, list):
+            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = allowed_email_domains
+        elif isinstance(allowed_email_domains, str):
+            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = [allowed_email_domains]
+
+        for role_info in default_pg_role.values():
+            if not role_info:
+                continue
+            db_name = role_info.get("name")
+            host = role_info.get("host")
+            port = role_info.get("port")
+            role_name = role_info.get("role")
+            if all([db_name, host, port, role_name]):
+                OIDC_DEFAULT_PG_ROLE_MAP[provider_name].append(
                     {
-                        "provider_id": provider_name.lower(),
-                        "name": provider_name.lower(),
-                        "client_id": client_id,
-                        "secret": secret,
-                        "settings": {
-                            "server_url": server_url
-                        }
+                        "db_name": db_name,
+                        "host": host,
+                        "port": port,
+                        "role_name": role_name
                     }
                 )
+except Exception as e:
+    # We swallow any exceptions when SSO is misconfigured in sso.yml so that the django server doesn't fail to start.
+    traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
 
-                if isinstance(allowed_email_domains, list):
-                    OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = allowed_email_domains
-                elif isinstance(allowed_email_domains, str):
-                    OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = [allowed_email_domains]
-
-                if isinstance(default_pg_role, dict):
-                    for _, role_info in default_pg_role.items():
-                        if isinstance(role_info, dict):
-                            db_name = role_info.get("name")
-                            host = role_info.get("host")
-                            port = role_info.get("port")
-                            role_name = role_info.get("role")
-                            if (
-                                db_name is not None
-                                and host is not None
-                                and port is not None
-                                and role_name is not None
-                            ):
-                                OIDC_DEFAULT_PG_ROLE_MAP[provider_name].append(
-                                    {
-                                        "db_name": db_name,
-                                        "host": host,
-                                        "port": port,
-                                        "role_name": role_name
-                                    }
-                                )
 
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
