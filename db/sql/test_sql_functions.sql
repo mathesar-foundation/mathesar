@@ -3559,9 +3559,9 @@ BEGIN
     $j${
       "count": 3,
       "results": [
-        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
-        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
-        {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"},
+        {"1": 3, "2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}
       ],
       "grouping": null,
       "linked_record_summaries": null,
@@ -3580,8 +3580,8 @@ BEGIN
     $j${
       "count": 3,
       "results": [
-        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
-        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"},
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}
       ],
       "grouping": null,
       "linked_record_summaries": null,
@@ -3600,8 +3600,8 @@ BEGIN
     $j${
       "count": 3,
       "results": [
-        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
-        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"},
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}
       ],
       "grouping": null,
       "linked_record_summaries": null,
@@ -3857,9 +3857,9 @@ BEGIN
     ),
     ARRAY[
       '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
-      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB,
-      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
-      '{"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}'::JSONB
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}'::JSONB,
+      '{"1": 3, "2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}'::JSONB
     ]
   );
   RETURN NEXT results_eq(
@@ -3881,8 +3881,8 @@ BEGIN
     ),
     ARRAY[
       '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
-      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
-      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}'::JSONB
     ]
   );
   RETURN NEXT results_eq(
@@ -3904,8 +3904,8 @@ BEGIN
     ),
     ARRAY[
       '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
-      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
-      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}'::JSONB
     ]
   );
   RETURN NEXT results_eq(
@@ -3931,8 +3931,8 @@ BEGIN
     ),
     ARRAY[
       '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
-      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB,
-      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}'::JSONB
     ]
   );
 END;
@@ -4588,7 +4588,7 @@ DECLARE
       "2": 34,
       "3": "sdflfflsk",
       "4": null,
-      "5": [1, 2, 3, 4]
+      "5": "[1, 2, 3, 4]"
     }
   ]'::jsonb;
 BEGIN
@@ -4748,7 +4748,7 @@ BEGIN
       '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
     $a${
-      "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "results": [{"1": 4, "2": 234, "3": "ab234", "4": "{\"key\": \"val\"}", "5": "{\"key2\": \"val2\"}"}],
       "linked_record_summaries": null,
       "record_summaries": null
     }$a$
@@ -4791,7 +4791,7 @@ BEGIN
       '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": "{\"key2\": \"val2\"}"}'
     ),
     $a${
-      "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "results": [{"1": 4, "2": 234, "3": "ab234", "4": "{\"key\": \"val\"}", "5": "{\"key2\": \"val2\"}"}],
       "linked_record_summaries": null,
       "record_summaries": null
     }$a$
@@ -4812,7 +4812,7 @@ BEGIN
       '{"3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
     $a${
-      "results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "results": [{"1": 4, "2": 200, "3": "ab234", "4": "{\"key\": \"val\"}", "5": "{\"key2\": \"val2\"}"}],
       "linked_record_summaries": null,
       "record_summaries": null
     }$a$
@@ -4833,7 +4833,7 @@ BEGIN
       '{"2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
     $a${
-      "results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "results": [{"1": 4, "2": null, "3": "ab234", "4": "{\"key\": \"val\"}", "5": "{\"key2\": \"val2\"}"}],
       "linked_record_summaries": null,
       "record_summaries": null
     }$a$
@@ -4854,7 +4854,7 @@ BEGIN
       '{"2": null, "3": "ab234", "4": 3, "5": "\"234\""}'
     ),
     $a${
-      "results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}],
+      "results": [{"1": 4, "2": null, "3": "ab234", "4": "3", "5": "\"234\""}],
       "linked_record_summaries": null,
       "record_summaries": null
     }$a$
@@ -4872,7 +4872,7 @@ BEGIN
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
     $p${
-      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}],
+      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}],
       "linked_record_summaries": null,
       "record_summaries": null
     }$p$
@@ -4890,7 +4890,7 @@ BEGIN
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, '2', '{"2": 10}'),
     $p${
-      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}],
+      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}],
       "linked_record_summaries": null,
       "record_summaries": null
     }$p$
@@ -4908,7 +4908,7 @@ BEGIN
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
     $p${
-      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}],
+      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": "{\"a\": \"json\"}", "5": "[1, 2, 3, 4]"}],
       "linked_record_summaries": null,
       "record_summaries": null
     }$p$
@@ -6278,9 +6278,9 @@ BEGIN
         group_ => null
     ) -> 'results',
     $j$[
-        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true},
-        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
-        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
+        {"2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"},
+        {"2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
     ]$j$,
     'Results should not have column 1, and should be ordered by remaining columns'
   );
@@ -6294,9 +6294,9 @@ BEGIN
       group_ => null
     ) -> 'results',
     $j$[
-        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
-        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
-        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+        {"2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"},
+        {"2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}
     ]$j$,
     'Results should not have a column 1, and ordering spec should work'
   );
@@ -6310,9 +6310,9 @@ BEGIN
       group_ => null
     ) -> 'results',
     $j$[
-        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true},
-        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
-        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
+        {"2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"},
+        {"2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
     ]$j$,
     'specifying that you want to order by a column without permissions is ignored'
   );
@@ -6326,9 +6326,9 @@ BEGIN
       group_ => null
     ) -> 'results',
     $j$[
-        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
-        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
-        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+        {"2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"},
+        {"2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}
     ]$j$,
     'ignore order by column without permissions, use one with permissions'
   );
@@ -6347,7 +6347,7 @@ BEGIN
       group_ => null
     ) -> 'results',
     $j$[
-        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+        {"2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}
     ]$j$,
     'filtering without specifying column without permissions works'
   );
