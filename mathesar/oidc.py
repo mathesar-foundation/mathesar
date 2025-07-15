@@ -1,9 +1,12 @@
-from django.shortcuts import redirect
 from django.contrib import messages
+from django.conf import settings
+from django.db import transaction
+from django.shortcuts import redirect
 
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.core.exceptions import ImmediateHttpResponse
-from django.conf import settings
+
+from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -17,3 +20,29 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             messages.error(request, f"Only {allowed_email_domains_str} emails are allowed.")
             raise ImmediateHttpResponse(redirect("account_login"))
         return super().pre_social_login(request, sociallogin)
+
+    @transaction.atomic
+    def save_user(self, request, sociallogin, form=None):
+        role_config_list = settings.OIDC_DEFAULT_PG_ROLE_MAP.get(str(sociallogin.provider))
+        saved_user = super().save_user(request, sociallogin, form)
+        if role_config_list != []:
+            for role_config in role_config_list:
+                database_name = role_config["db_name"]
+                host = role_config["host"]
+                port = role_config["port"]
+                role_name = role_config["role_name"]
+                server = Server.objects.get(host=host, port=port)
+                database = Database.objects.get(
+                    name=database_name, server=server
+                )
+                configured_role = ConfiguredRole.objects.get(
+                    name=role_name,
+                    server=server
+                )
+                UserDatabaseRoleMap.objects.get_or_create(
+                    user=saved_user,
+                    database=database,
+                    configured_role=configured_role,
+                    server=server
+                )
+        return saved_user
