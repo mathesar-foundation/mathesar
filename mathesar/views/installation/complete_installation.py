@@ -53,5 +53,9 @@ class CompleteInstallationFormView(CreateView):
     def form_valid(self, form):
         success = super().form_valid(form)
         # Fetch the user object and login
-        login(self.request, self.object)
+        login(
+            self.request,
+            self.object,
+            backend='django.contrib.auth.backends.ModelBackend'
+        )
         return success
