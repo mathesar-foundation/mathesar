@@ -114,17 +114,15 @@
       {/if}
     </div>
 
-    <div class="footer">
-      {#if hasPagination}
-        <div class="pagination">
-          <MiniPagination
-            bind:pagination={$pagination}
-            on:change={() => controller.getRecords()}
-            recordCount={recordsCount}
-          />
-        </div>
-      {/if}
-    </div>
+    {#if hasPagination}
+      <div class="pagination">
+        <MiniPagination
+          bind:pagination={$pagination}
+          on:change={() => controller.getRecords()}
+          recordCount={recordsCount}
+        />
+      </div>
+    {/if}
   </ListBox>
 </div>
 
@@ -180,14 +178,12 @@
     }
   }
 
-  .footer {
+  .pagination {
     border-top: 1px solid var(--border-color);
     padding: var(--sm6);
     display: flex;
     align-items: center;
-
-    .pagination {
-      font-size: var(--sm2);
-    }
+    justify-content: end;
+    font-size: var(--sm2);
   }
 </style>
