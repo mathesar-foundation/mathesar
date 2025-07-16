@@ -2,124 +2,59 @@
   import { _ } from 'svelte-i18n';
 
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
+  import EntityListItem from '@mathesar/components/EntityListItem.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconExpandRight, iconExploration } from '@mathesar/icons';
+  import { iconDeleteMajor, iconEdit, iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { deleteExploration } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
-  import { Icon } from '@mathesar-component-library';
+  import { ButtonMenuItem } from '@mathesar-component-library';
 
   export let exploration: SavedExploration;
   export let database: Database;
   export let schema: Schema;
+  export let openEditExplorationModal: (e: SavedExploration) => void;
 
   $: baseTable = $tablesStore.tablesMap.get(exploration.base_table_oid);
+  $: href = getExplorationPageUrl(database.id, schema.oid, exploration.id);
+
+  function handleDelete() {
+    void confirmDelete({
+      identifierType: 'Exploration',
+      identifierName: exploration.name,
+      onProceed: () => deleteExploration(exploration.id),
+    });
+  }
 </script>
 
-<a
-  class="link-container"
-  href={getExplorationPageUrl(database.id, schema.oid, exploration.id)}
+<EntityListItem
+  {href}
+  name={exploration.name}
+  description={exploration.description ?? undefined}
+  icon={iconExploration}
 >
-  <div class="content">
-    <div class="title-and-meta">
-      <div class="title-container">
-        <div class="icon-container">
-          <Icon {...iconExploration} size="0.875rem" />
-        </div>
-        <span class="name">{exploration.name}</span>
-      </div>
-    </div>
+  <svelte:fragment slot="detail">
     {#if baseTable}
-      <div class="detail">
-        <span>{$_('based_on')}</span>
-        <TableName table={baseTable} />
-      </div>
+      <RichText text={$_('based_on_base')} let:slotName>
+        {#if slotName === 'base'}
+          <TableName table={baseTable} truncate={false} />
+        {/if}
+      </RichText>
     {/if}
-  </div>
-  <div class="caret-container">
-    <Icon {...iconExpandRight} size="0.875rem" />
-  </div>
-</a>
-
-<style lang="scss">
-  .link-container {
-    position: relative;
-    text-decoration: none;
-    color: inherit;
-    padding: var(--sm1) var(--sm2);
-    display: flex;
-    align-items: center;
-    border-radius: var(--border-radius-m);
-
-    &:hover {
-      background-color: var(--hover-background);
-
-      .caret-container {
-        opacity: 1;
-      }
-    }
-
-    &:focus {
-      outline: none;
-      background-color: var(--active-background);
-    }
-  }
-
-  .icon-container {
-    background-color: var(--icon-background);
-    border-radius: 50%;
-    width: 1.25rem;
-    height: 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    flex-grow: 1;
-    min-width: 0;
-  }
-
-  .title-and-meta {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-
-  .title-container {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-  }
-
-  .name {
-    font-size: var(--lg1);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
-    line-height: 1.2;
-    transition: color 0.2s ease;
-  }
-
-  .detail {
-    font-size: 1rem;
-    color: var(--text-color-secondary);
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
-  .caret-container {
-    margin-left: auto;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    display: flex;
-    align-items: center;
-  }
-</style>
+  </svelte:fragment>
+  <svelte:fragment slot="menu">
+    <ButtonMenuItem
+      on:click={() => openEditExplorationModal(exploration)}
+      icon={iconEdit}
+    >
+      {$_('edit_exploration')}
+    </ButtonMenuItem>
+    <ButtonMenuItem on:click={handleDelete} danger icon={iconDeleteMajor}>
+      {$_('delete_exploration')}
+    </ButtonMenuItem>
+  </svelte:fragment>
+</EntityListItem>
