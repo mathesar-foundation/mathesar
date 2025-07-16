@@ -130,8 +130,7 @@
 
 <style lang="scss">
   div[data-row-seeker] {
-    min-width: 20rem;
-    max-width: 45rem;
+    max-width: min(30rem, 90vw);
     overflow: hidden;
     position: relative;
   }
