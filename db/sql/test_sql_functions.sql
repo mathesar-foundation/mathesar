@@ -3290,6 +3290,11 @@ BEGIN
     msar.format_data('{"true": true, "1": 1, "arr": [1, "2", false]}'::jsonb)::jsonb,
     '{"true": true, "1": 1, "arr": [1, "2", false]}'::jsonb
   );
+  -- double-check that other json types (other than jsonb) cast properly to text.
+  RETURN NEXT is(pg_typeof(msar.format_data('[]'::mathesar_types.mathesar_json_array)), 'text');
+  RETURN NEXT is(pg_typeof(msar.format_data('{}'::mathesar_types.mathesar_json_object)), 'text');
+  RETURN NEXT is(pg_typeof(msar.format_data('true'::json)), 'text');
+
 END;
 $$ LANGUAGE plpgsql;
 
