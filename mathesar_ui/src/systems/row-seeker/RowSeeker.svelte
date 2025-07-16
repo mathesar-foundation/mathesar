@@ -79,13 +79,6 @@
   >
     <div data-row-seeker-controls>
       <RowSeekerSearch {controller} onKeyDown={(e) => handleKeyDown(api, e)} />
-      <div class="actions">
-        {#if isLoading}
-          <div class="spinner">
-            <Spinner />
-          </div>
-        {/if}
-      </div>
     </div>
 
     <div class="option-container">
@@ -102,7 +95,7 @@
       {:else}
         <div class="empty-states">
           {#if isLoading}
-            {$_('loading')}
+            <div class="loading"><Spinner /></div>
           {:else if $records.error}
             <ErrorBox>
               {$records.error.message}
@@ -143,23 +136,6 @@
       0 1px 3px rgba(0, 0, 0, 0.1),
       0 1px 2px -1px rgba(0, 0, 0, 0.1);
     background: var(--input-background);
-
-    .actions {
-      margin-left: auto;
-      display: flex;
-      align-items: flex-start;
-      padding: var(--sm2) 0;
-      padding-bottom: var(--sm4);
-      flex-shrink: 0;
-    }
-
-    .spinner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 1.2rem;
-    }
   }
 
   .empty-states {
@@ -176,6 +152,13 @@
       max-height: 25rem;
       overflow-y: auto;
     }
+  }
+
+  .loading {
+    padding: var(--sm5);
+    display: grid;
+    align-items: center;
+    justify-content: center;
   }
 
   .pagination {
