@@ -7,10 +7,7 @@
   import { iconAddNew } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { getFirstEditableColumn } from '@mathesar/stores/table-data/processedColumns';
-  import {
-    SpinnerButton,
-    getPaginationPageCount,
-  } from '@mathesar-component-library';
+  import { SpinnerButton } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -27,11 +24,10 @@
     selection,
   } = $tabularData);
   $: ({ pagination } = meta);
-  $: ({ size: pageSize, leftBound, rightBound } = $pagination);
+  $: ({ leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords, persistedNewRecords } = recordsData);
   $: recordState = $state;
   $: columnsFetchStatus = columnsDataStore.fetchStatus;
-  $: pageCount = getPaginationPageCount($totalCount ?? 0, pageSize);
   $: max = Math.min($totalCount ?? 0, rightBound);
   $: isError =
     $columnsFetchStatus?.state === 'failure' ||
@@ -84,7 +80,7 @@
       />
     {/if}
     <div class="record-count">
-      {#if pageCount > 0 && $totalCount}
+      {#if $totalCount}
         <span>
           {$_('showing_n_to_m_of_total_records', {
             values: {
@@ -94,26 +90,28 @@
             },
           })}
         </span>
-        {#if $persistedNewRecords.length > 0}
-          <span class="pill">
-            +{$_('count_new_records', {
-              values: {
-                count: $persistedNewRecords.length,
-              },
-            })}
-          </span>
-        {/if}
-        {#if $newRecords.length - $persistedNewRecords.length > 0}
-          <span class="pill">
-            +{$_('count_unsaved_records', {
-              values: {
-                count: $newRecords.length - $persistedNewRecords.length,
-              },
-            })}
-          </span>
-        {/if}
       {:else if recordState !== States.Loading}
         {$_('no_records_found')}
+      {/if}
+
+      {#if $persistedNewRecords.length > 0}
+        <span class="pill">
+          +{$_('count_new_records', {
+            values: {
+              count: $persistedNewRecords.length,
+            },
+          })}
+        </span>
+      {/if}
+
+      {#if $newRecords.length - $persistedNewRecords.length > 0}
+        <span class="pill">
+          +{$_('count_unsaved_records', {
+            values: {
+              count: $newRecords.length - $persistedNewRecords.length,
+            },
+          })}
+        </span>
       {/if}
     </div>
   </div>
