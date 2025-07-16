@@ -11,6 +11,11 @@ import type { ActionReturn } from 'svelte/action';
 interface Parameters {
   reference?: VirtualElement;
   options?: Partial<Options>;
+  /**
+   * When true, the content element will automatically reposition when it
+   * resizes.
+   */
+  autoReposition?: boolean;
 }
 
 /**
@@ -76,6 +81,8 @@ export default function popper(
 ): ActionReturn<Parameters> {
   let popperInstance: Instance;
   let prevReference: VirtualElement | undefined;
+  let observer: ResizeObserver | undefined;
+  const autoReposition = actionOpts.autoReposition ?? false;
 
   function create(reference?: VirtualElement, options?: Partial<Options>) {
     if (!reference) {
@@ -86,9 +93,17 @@ export default function popper(
       placement: options?.placement || 'bottom-start',
       modifiers: buildModifiers(options?.modifiers ?? []),
     }) as Instance;
+
+    if (autoReposition) {
+      observer = new ResizeObserver(() => {
+        void popperInstance.update();
+      });
+      observer.observe(node);
+    }
   }
 
   function destroy() {
+    observer?.disconnect();
     popperInstance?.destroy();
     prevReference = undefined;
   }

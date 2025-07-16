@@ -40,6 +40,11 @@
   export let content: string | string[] | ComponentAndProps | undefined =
     undefined;
   export let portalTarget: HTMLElement | undefined = undefined;
+  /**
+   * When true, the content element will automatically reposition when it
+   * resizes.
+   */
+  export let autoReposition = false;
 
   let contentElement: HTMLElement | undefined;
 
@@ -116,6 +121,7 @@
     use:portal={portalTarget}
     use:popper={{
       reference: trigger,
+      autoReposition,
       options: {
         placement,
         modifiers: [

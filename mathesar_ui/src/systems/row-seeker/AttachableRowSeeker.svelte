@@ -14,6 +14,7 @@
 <AttachableDropdown
   trigger={node}
   isOpen={$isOpen}
+  autoReposition
   on:close={() => controller.close()}
 >
   <RowSeeker
