@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mathesar', '0006_form_formfield_formfield_unique_key_per_form'),
+        ('mathesar', '0005_make_server_port_nullable'),
     ]
 
     operations = [
