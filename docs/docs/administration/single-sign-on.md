@@ -1,4 +1,4 @@
-# Single Sign-on (SSO)
+*# Single Sign-on (SSO)
 
 ![A screenshot of Mathesar's login screen with multiple SSO options enabled](image.png)
 
@@ -53,23 +53,71 @@ Although all supported IdPs adhere to the same OIDC specification, each provider
 
     See broken links or something wrong? Please [file an issue](https://github.com/mathesar-foundation/mathesar/issues/new?template=bug_report.md).
 
- After creating an application or client per your IdP's documentation, configure the Callback URL (sometimes called the Login URL or Redirect URL) with the following value:
+After registering your application (or client) in your IdP, per their documentation, you'll need to configure the Callback URL—also referred to as the Redirect URI or Login URL, depending on the provider.
+
+Set the Callback URL to:
 
 ```
 https://mathesar.example/auth/oidc/<provider-name>/login/callback/
 ```
 
-!!!tip "Configuring the callback URL"
+!!!info "Configuring the callback URL"
     Replace `<mathesar-domain>` with the domain name of your Mathesar installation.<br>
     Examples: `https://mathesar.myorg.com`, `localhost:8000`
 
     Replace `<provider-name>` with the name of your IdP provider.<br>
     Examples: `auth0`, `okta`, `google`
 
-After configuring your IdP, retrieve the OIDC "client_id" and "secret" (sometimes called "client secret", "secret key", or "token") from your IdP, and add them to your `sso.yml` config file:
+Your identity provider will redirect users to this URL after authentication, so it's essential that it matches exactly between your IdP configuration and your Mathesar setup.
+
+Once your IdP is fully configured, you're ready to move on to the next step: populating your `sso.yml` file with the necessary values from your identity provider.
+
+### Configuring the identity provider in Mathesar
+
+Once your identity provider (IdP) is configured and you've created a client or application within it, the next step is to connect that provider to Mathesar via the `sso.yml` configuration file.
+
+We'll use **Okta** as the example provider, but the same structure applies to others like Auth0, Google, or Azure AD.
+
+#### Naming Your Provider
+
+Each provider is defined under a unique key (e.g., `provider1`). Inside that block, you must specify the `provider_name`, which is a lowercase, alphanumeric identifier for the IdP. It should match the value you used in the callback URL.
+
+Examples: `okta`, `auth0`, or `google`.
+
+You must also specify the `server_url`: the issuer URL or OIDC discovery URL provided by your IdP. This is the base URL that Mathesar uses to fetch OIDC metadata (including token endpoints, authorization endpoints, and keys).
+
+- In Okta, it looks like:
+`https://your-org.okta.com`
+- In Auth0, it might be:
+`https://your-tenant.auth0.com`
+- In Google, it’s typically a fixed value:
+`https://accounts.google.com`
+
+Refer to your IdP’s documentation for the correct issuer or discovery URL.
+
+Now, we should have all the information necessary to add our first provider to `sso.yml`:
 
 ```diff
+# This config file allows you to configure OpenID Connect(OIDC)
+# based Single Sign-On(SSO) for logging into Mathesar with your preferred
+# Identity Provider(IdP).
+version: 1
 oidc_providers:
++  provider1:
++    provider_name: okta
++    server_url: https://your-org.okta.com
+```
+
+Next, retrieve the following values from your IdP’s admin interface:
+
+- `client_id`
+- `secret` (sometimes called `client secret`, `token`, or `client key`)
+
+These credentials authenticate Mathesar with your IdP.
+
+Add them to the provider block like so:
+
+```diff
   provider1:
     provider_name: okta
     server_url: https://trial-example-admin.okta.com
@@ -77,10 +125,94 @@ oidc_providers:
 +   secret: 8xvA3s6pzl9cx7fit7LZ3RIZhAGgG9Rst509dijCVBXwKL3ijpjHbmPDPa0WXln1
 ```
 
-### For existing Mathesar instances
+You've now completed all the minimum requirements to enable Single Sign-On (SSO) in Mathesar. Next, you can:
 
-If you'd like to enable SSO on an existing Mathesar instance, simply create and configure the `sso.yml` file using the instructions below. Existing users will now have the option to log in with SSO. If their existing email address matches a configured provider, they will be able to log into their existing account.
+- Add additional providers, if needed, by repeating this process
+- Explore optional but **recommended** settings like [restricting access to particular email domains](#restrict-access-to-specific-email-domains) and [setting default database roles](#set-default-user-roles-for-your-databases)
 
-## Disabling SSO
+Finally, you'll need to restart Mathesar so it can read the `sso.yml` file and enable your changes. Be sure to  use the correct method for your installation:
 
-To disable Single Sign On, you can remove the `sso.yml` file and restart Mathesar. It is _highly likely_ you will want to have an administrator user reset all user passwords.
+=== "For Docker Compose installations"
+
+    ```bash
+    docker compose down
+    docker compose up -d
+    ```
+
+=== "For Linux, macOS, or WSL installations"
+
+    ```bash
+    sudo systemctl restart mathesar.service
+    ```
+
+These options can help you tailor authentication and access control to better fit your organization's needs.
+
+## Additional configuration options
+
+You can extend the providers in your `sso.yml` file with additional settings to restrict access and define default roles for users. These fields are optional, but **highly recommended** for tightening security and streamlining user provisioning.
+
+### Restrict access to specific email domains
+
+Use the `allowed_email_domains` setting to restrict SSO logins to specific email domains. This is useful if your identity provider manages multiple domains or if you want to prevent unauthorized domains from accessing your Mathesar instance.
+
+- **Default:** No restriction (i.e., users from any domain can log in).
+- **Expected format:** A list of domain names (e.g., `['example.com', 'mathesar.org']`).
+
+**Example:**
+
+```diff
+oidc_providers:
+  provider1:
+    provider_name: okta
+    server_url: https://trial-example-admin.okta.com
+    client_id: YOUR_CLIENT_ID
+    secret: YOUR_SECRET
++   allowed_email_domains: ['example.com', 'mathesar.org']
+```
+
+With this configuration, only users whose email ends in `@example.com` or `@mathesar.org` will be allowed to log in.
+
+---
+
+### Set default user roles for your databases
+
+The `default_pg_role` block allows you to **automatically assign PostgreSQL roles** to users the first time they log in via SSO. You can configure this for one or more databases.
+
+Each database block must include the following:
+
+- `name`: The **PostgreSQL database name**
+- `host`: The **hostname** or IP address of the database
+- `port`: The **port** on which the database is running
+- `role`: The **PostgreSQL role** to assign to users
+
+**Example:**
+
+```diff
+default_pg_role:
++ db1:
++   name: my_database
++   host: db.internal.example.com
++   port: 5432
++   role: readonly_user
++ db2:
++   name: analytics_db
++   host: analytics-db.example.net
++   port: 5432
++   role: analyst
+```
+
+On first login, users will be granted the specified roles on each listed database. This simplifies onboarding and ensures consistent access control across your environment.
+
+## Disabling Single Sign-On
+
+To disable SSO in Mathesar, delete the `sso.yml` file from your installation directory and restart the application. This will revert Mathesar to using only email and password-based authentication.
+
+!!!warning "Resetting user passwords"
+    Users who were originally created via SSO do not have a known password—they are automatically assigned a random, system-generated one during account creation. As a result, these users will not be able to log in after SSO is disabled unless their passwords are reset.
+
+    To restore access for these users:
+
+    1. Have an administrator reset each user’s password through the Mathesar user interface.
+    2. When the user logs in with the administrator-supplied password, they will be prompted to create a new personal password.
+
+    We recommend completing all necessary password resets before disabling SSO to ensure a smooth transition and avoid user lockouts.

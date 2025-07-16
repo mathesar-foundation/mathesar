@@ -112,6 +112,7 @@ theme:
   logo: assets/images/logo.svg
   favicon: assets/images/favicon.ico
   features:
+    - content.tabs.link
     - content.code.copy
     - navigation.sections
     - navigation.expand
