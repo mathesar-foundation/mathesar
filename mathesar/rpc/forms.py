@@ -298,3 +298,17 @@ def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
     user = kwargs.get(REQUEST_KEY).user
     form_model, field_col_info_map = replace_form(new_form, user)
     return FormInfo.from_model(form_model, field_col_info_map)
+
+
+@mathesar_rpc_method(name="forms.list_related_records", auth="anonymous")
+def list_related_records(*, form_id: int, **kwargs) -> FormInfo:
+    """
+    List records for selection via the row seeker
+
+    Args:
+        TODO
+
+    Returns:
+        TODO
+    """
+    return 9
