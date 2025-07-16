@@ -101,7 +101,7 @@
               {$records.error.message}
             </ErrorBox>
           {:else}
-            {$_('no_records_found')}
+            <div class="no-results">{$_('no_records_found')}</div>
           {/if}
         </div>
       {/if}
@@ -152,6 +152,10 @@
       max-height: 25rem;
       overflow-y: auto;
     }
+  }
+
+  .no-results {
+    color: var(--text-color-muted);
   }
 
   .loading {
