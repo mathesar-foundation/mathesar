@@ -410,3 +410,12 @@ p:has(a[href^="https://github.com/mathesar-foundation/mathesar/pull/"])
   position: relative;
   z-index: 20;
 }
+
+
+.tabbed-labels a {
+  text-decoration: none;
+}
+
+.md-typeset .tabbed-labels > label {
+  color: var(--stormy-light);
+}

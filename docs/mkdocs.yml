@@ -7,11 +7,13 @@ edit_uri: edit/develop/docs/docs/
 nav:
   - Introduction: index.md
   - Administrator Guide:
-      - Install using Docker Compose: administration/install-via-docker-compose.md
-      - Install on Linux · macOS · WSL: administration/install-from-scratch.md
-      - Environment variables: administration/environment-variables.md
-      - Upgrade Mathesar: administration/upgrade.md
-      - Uninstall Mathesar: administration/uninstall.md
+      - Installing Mathesar:
+        - With Docker Compose: administration/install-via-docker-compose.md
+        - On Linux · macOS · WSL: administration/install-from-scratch.md
+        - Upgrade Mathesar: administration/upgrade.md
+        - Uninstall Mathesar: administration/uninstall.md
+        - Environment variables: administration/environment-variables.md
+      - Single Sign-on (SSO): administration/single-sign-on.md
       - Debugging Mathesar: administration/debug.md
       - Postgres & Python versions: administration/version-support.md
 

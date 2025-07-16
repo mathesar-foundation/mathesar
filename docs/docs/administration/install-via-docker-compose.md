@@ -21,7 +21,7 @@
 
 1. Open the downloaded docker-compose file using your text editor.
 
-1. Set the required environment variables in the **x-config** section of the docker compose file.
+1. Set the required environment variables in the **x-config** section of the docker compose file:
 
     !!! Config
         ```yaml
