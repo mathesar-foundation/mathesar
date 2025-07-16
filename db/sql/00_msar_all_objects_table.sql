@@ -1066,6 +1066,8 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.format_data(anyelement)', 'FUNCTION', NULL),
   ('msar', 'msar.format_data(date)', 'FUNCTION', NULL),
   ('msar', 'msar.format_data(interval)', 'FUNCTION', NULL),
+  ('msar', 'msar.format_data(json)', 'FUNCTION', NULL),
+  ('msar', 'msar.format_data(jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.format_data(time with time zone)', 'FUNCTION', NULL),
   ('msar', 'msar.format_data(time without time zone)', 'FUNCTION', NULL),
   ('msar', 'msar.format_data(timestamp with time zone)', 'FUNCTION', NULL),
