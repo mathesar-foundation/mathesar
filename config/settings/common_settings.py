@@ -14,6 +14,7 @@ import os
 import traceback
 from pathlib import Path
 
+import json
 import yaml
 from collections import defaultdict
 from config.database_config import PostgresConfig, parse_port
@@ -60,9 +61,17 @@ MIDDLEWARE = [
 
 OIDC_CONFIG_FILE = BASE_DIR.joinpath('sso.yml')
 OIDC_CONFIG_DICT = {}
-if OIDC_CONFIG_FILE.exists():
-    with open(OIDC_CONFIG_FILE, "rb") as f:
-        OIDC_CONFIG_DICT = yaml.full_load(f)
+# Try loading OIDC_CONFIG_DICT from env, iff it doesn't exist, try loading from sso.yml
+try:
+    OIDC_CONFIG_DICT = json.loads(os.getenv('OIDC_CONFIG_DICT', "{}"))
+except Exception as e:
+    traceback.print_exception(type(e), e, e.__traceback__)
+try:
+    if OIDC_CONFIG_DICT in [None, {}] and OIDC_CONFIG_FILE.exists():
+        with open(OIDC_CONFIG_FILE, "rb") as f:
+            OIDC_CONFIG_DICT = yaml.full_load(f)
+except Exception as e:
+    traceback.print_exception(type(e), e, e.__traceback__)
 OIDC_CONFIG = []
 OIDC_ALLOWED_EMAIL_DOMAINS = {}
 OIDC_DEFAULT_PG_ROLE_MAP = defaultdict(list)
