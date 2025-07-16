@@ -90,7 +90,13 @@
           let:inFocus
         >
           {@const result = getTypeCastedOption(option)}
-          <RowSeekerOption {controller} {isSelected} {inFocus} {result} />
+          <RowSeekerOption
+            showSelection={!!selectedRecord}
+            {controller}
+            {isSelected}
+            {inFocus}
+            {result}
+          />
         </ListBoxOptions>
       {:else}
         <div class="empty-states">
