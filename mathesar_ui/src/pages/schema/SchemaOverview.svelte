@@ -25,7 +25,6 @@
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
   import ExploreYourData from './ExploreYourData.svelte';
-  import FormsList from './FormsList.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
 
@@ -140,7 +139,7 @@
       {/if}
     </section>
 
-    <section>
+    <!-- <section>
       <header>
         <h2>{$_('forms')}</h2>
         <div>
@@ -150,9 +149,8 @@
           </AnchorButton>
         </div>
       </header>
-      <!-- TODO: handle loading and error states -->
       <FormsList {database} {schema} />
-    </section>
+    </section> -->
   </div>
 </div>
 
