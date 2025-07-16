@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { RecordSummaryListResult } from '@mathesar/api/rpc/records';
-  import { MatchHighlighter } from '@mathesar-component-library';
+  import { MatchHighlighter, Truncate } from '@mathesar-component-library';
 
   import type RowSeekerController from './RowSeekerController';
 
@@ -13,7 +13,9 @@
 </script>
 
 <div class="record" class:selected={isSelected} class:in-focus={inFocus}>
-  <MatchHighlighter text={result.summary} substring={$searchValue} />
+  <Truncate>
+    <MatchHighlighter text={result.summary} substring={$searchValue} />
+  </Truncate>
 </div>
 
 <style>
