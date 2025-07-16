@@ -3277,6 +3277,19 @@ BEGIN
     msar.format_data('17654-03-02 01:00:00'::timestamp without time zone),
     '17654-03-02T01:00:00.0 AD'
   );
+  RETURN NEXT is(msar.format_data(null::jsonb), null);
+  RETURN NEXT is(msar.format_data('null'::jsonb), 'null');
+  RETURN NEXT is(msar.format_data('"null"'::jsonb), '"null"');
+  RETURN NEXT is(msar.format_data('"a"'::jsonb), '"a"');
+  RETURN NEXT is(msar.format_data('3'::jsonb), '3');
+  RETURN NEXT is(msar.format_data('"3"'::jsonb), '"3"');
+  RETURN NEXT is(msar.format_data('true'::jsonb), 'true');
+  RETURN NEXT is(msar.format_data('"true"'::jsonb), '"true"');
+  -- It suffices to check that the resulting string casts to the same json as the input.
+  RETURN NEXT is(
+    msar.format_data('{"true": true, "1": 1, "arr": [1, "2", false]}'::jsonb)::jsonb,
+    '{"true": true, "1": 1, "arr": [1, "2", false]}'::jsonb
+  );
 END;
 $$ LANGUAGE plpgsql;
 
