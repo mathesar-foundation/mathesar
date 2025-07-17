@@ -12,7 +12,6 @@ from mathesar.utils.forms import create_form, get_form, list_forms, delete_form,
 class FieldInfo(TypedDict):
     """
     Information about a form field.
-
     Attributes:
         id: The Django id of the Field on the database.
         key: A unique string identifier for the field within a form.
@@ -20,10 +19,9 @@ class FieldInfo(TypedDict):
         index: The order in which the field should be displayed.
         label: The text to be displayed for the field input.
         help: The help text to be displayed for the field input.
-        kind: Type of the selected column (scalar_column, foreign_key, reverse_foreign_key).
+        kind: Type of the selected column (scalar_column, foreign_key).
         column_attnum: The attnum of column to be selected as a field. Applicable for scalar_column and foreign_key fields.
-        constraint_oid: The oid of constraint that is part of the field. Applicable for foreign_key and reverse_foreign_key fields.
-        related_table_oid: The oid of the related table. Applicable for foreign_key and reverse_foreign_key fields.
+        related_table_oid: The oid of the related table. Applicable for foreign_key fields.
         fk_interaction_rule: Determines user interaction with a foreign_key field's related record (must_pick, can_pick_or_create, must_create).
         parent_field_id: The Django id of the Field set as parent for related fields.
         styling: Information about the visual appearance of the field.
@@ -35,9 +33,8 @@ class FieldInfo(TypedDict):
     index: int
     label: Optional[str]
     help: Optional[str]
-    kind: Literal["scalar_column", "foreign_key", "reverse_foreign_key"]
+    kind: Literal["scalar_column", "foreign_key"]
     column_attnum: Optional[int]
-    constraint_oid: Optional[int]
     related_table_oid: Optional[int]
     fk_interaction_rule: Literal["must_pick", "can_pick_or_create", "must_create"]
     styling: Optional[dict]
@@ -55,7 +52,6 @@ class FieldInfo(TypedDict):
             help=model.help,
             kind=model.kind,
             column_attnum=model.column_attnum,
-            constraint_oid=model.constraint_oid,
             related_table_oid=model.related_table_oid,
             fk_interaction_rule=model.fk_interaction_rule,
             styling=model.styling,
@@ -67,7 +63,6 @@ class FieldInfo(TypedDict):
 class FormInfo(TypedDict):
     """
     Information about a form.
-
     Attributes:
         id: The Django id of the Form on the database.
         created_at: The time at which the form model got created.
@@ -87,7 +82,6 @@ class FormInfo(TypedDict):
         submit_redirect_url: Redirect path after submission.
         submit_button_label: Text to be displayed on the submit button.
         fields: Definition of Fields within the form.
-        field_col_info_map: A map between field_keys and column info with metadata.
     """
     id: int
     created_at: str
@@ -107,10 +101,9 @@ class FormInfo(TypedDict):
     submit_redirect_url: Optional[str]
     submit_button_label: Optional[str]
     fields: Optional[list[FieldInfo]]
-    field_col_info_map: Optional[dict]
 
     @classmethod
-    def from_model(cls, form_model, field_col_info_map=None):
+    def from_model(cls, form_model):
         return cls(
             id=form_model.id,
             created_at=form_model.created_at,
@@ -130,23 +123,20 @@ class FormInfo(TypedDict):
             submit_redirect_url=form_model.submit_redirect_url,
             submit_button_label=form_model.submit_button_label,
             fields=[FieldInfo.from_model(field) for field in form_model.fields.filter(parent_field__isnull=True)],
-            field_col_info_map=field_col_info_map
         )
 
 
 class AddOrReplaceFieldDef(TypedDict):
     """
     FormField definition needed while adding or replacing a form.
-
     Attributes:
         key: A unique string identifier for the field within a form.
         index: The order in which the field should be displayed.
         label: The text to be displayed for the field input.
         help: The help text to be displayed for the field input.
-        kind: Type of the selected column (scalar_column, foreign_key, reverse_foreign_key).
+        kind: Type of the selected column (scalar_column, foreign_key).
         column_attnum: The attnum of column to be selected as a field. Applicable for scalar_column and foreign_key fields.
-        constraint_oid: The oid of constraint that is part of the field. Applicable for foreign_key and reverse_foreign_key fields.
-        related_table_oid: The oid of the related table. Applicable for foreign_key and reverse_foreign_key fields.
+        related_table_oid: The oid of the related table. Applicable for foreign_key fields.
         fk_interaction_rule: Determines user interaction with a foreign_key field's related record (must_pick, can_pick_or_create, must_create).
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
@@ -155,9 +145,8 @@ class AddOrReplaceFieldDef(TypedDict):
     index: int
     label: Optional[str]
     help: Optional[str]
-    kind: Literal["scalar_column", "foreign_key", "reverse_foreign_key"]
+    kind: Literal["scalar_column", "foreign_key"]
     column_attnum: Optional[int]
-    constraint_oid: Optional[int]
     related_table_oid: Optional[int]
     fk_interaction_rule: Literal["must_pick", "can_pick_or_create", "must_create"]
     styling: Optional[dict]
@@ -168,7 +157,6 @@ class AddOrReplaceFieldDef(TypedDict):
 class AddFormDef(TypedDict):
     """
     Definition needed to add a form.
-
     Attributes:
         token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
@@ -204,7 +192,6 @@ class AddFormDef(TypedDict):
 class ReplaceableFormDef(AddFormDef):
     """
     Definition needed to replace a form.
-
     Attributes:
         id: The Django id of the Form on the database.
         token: A UUIDv4 object used to identify a form uniquely.
@@ -238,34 +225,30 @@ def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
         The details for the newly created form.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model, field_col_info_map = create_form(form_def, user)
-    return FormInfo.from_model(form_model, field_col_info_map)
+    form_model = create_form(form_def, user)
+    return FormInfo.from_model(form_model)
 
 
 @mathesar_rpc_method(name="forms.get", auth="anonymous")
 def get(*, form_id: int, **kwargs) -> FormInfo:
     """
     List information about a form.
-
     Args:
         form_id: The Django id of the form.
-
     Returns:
         Form details for a given form_id.
     """
-    form_model, field_col_info_map = get_form(form_id)
-    return FormInfo.from_model(form_model, field_col_info_map)
+    form_model = get_form(form_id)
+    return FormInfo.from_model(form_model)
 
 
 @mathesar_rpc_method(name="forms.list", auth="login")
 def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
     """
     List information about forms for a database. Exposed as `list`.
-
     Args:
         database_id: The Django id of the database containing the form.
         schema_oid: The OID of the schema containing the base table(s) of the forms(s).
-
     Returns:
         A list of form info.
     """
@@ -277,7 +260,6 @@ def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
 def delete(*, form_id: int, **kwargs) -> None:
     """
     Delete a form.
-
     Args:
         form_id: The Django id of the form to delete.
     """
@@ -288,13 +270,11 @@ def delete(*, form_id: int, **kwargs) -> None:
 def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
     """
     Replace a form.
-
     Args:
         new_form: A dict describing the form to replace, including the updated fields.
-
     Returns:
         The form info for the replaced form.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model, field_col_info_map = replace_form(new_form, user)
-    return FormInfo.from_model(form_model, field_col_info_map)
+    form_model = replace_form(new_form, user)
+    return FormInfo.from_model(form_model)

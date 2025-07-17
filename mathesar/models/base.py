@@ -326,12 +326,10 @@ class FormField(BaseModel):
     kind = models.CharField(
         choices=[
             ("scalar_column", "Scalar column"),
-            ("foreign_key", "Foreign key"),
-            ("reverse_foreign_key", "Reverse foreign key")
+            ("foreign_key", "Foreign key")
         ],
     )
-    column_attnum = models.SmallIntegerField(null=True)
-    constraint_oid = models.PositiveBigIntegerField(null=True)
+    column_attnum = models.SmallIntegerField()
     related_table_oid = models.PositiveBigIntegerField(null=True)
     fk_interaction_rule = models.CharField(
         choices=[
@@ -353,14 +351,14 @@ class FormField(BaseModel):
                 fields=["key", "form"],
                 name="form_field_unique_key_per_form"
             ),
-            # column_attnum is required for scalar_column and foreign_key fields.
-            # constraint and related_table oids are required for foreign_key and reverse_foreign_key fields.
-            # fk_interaction_rule is required for foreign_key field.
             models.CheckConstraint(
                 check=(
-                    (models.Q(kind="reverse_foreign_key") | models.Q(column_attnum__isnull=False))
-                    & (models.Q(kind="scalar_column") | models.Q(constraint_oid__isnull=False, related_table_oid__isnull=False))
-                    & (~models.Q(kind="foreign_key") | models.Q(fk_interaction_rule__isnull=False))
+                    models.Q(kind='scalar_column')
+                    | models.Q(
+                        kind='foreign_key',
+                        related_table_oid__isnull=False,
+                        fk_interaction_rule__isnull=False
+                    )
                 ),
                 name="form_field_kind_integrity"
             )
