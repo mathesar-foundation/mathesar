@@ -81,19 +81,6 @@ export class FormFields {
     );
   }
 
-  hasReverseFkTable(constraintOid: number, relatedTableOid: number) {
-    return derived(this.fieldSet, ($fieldSet) =>
-      execPipe(
-        $fieldSet.values(),
-        some(
-          (f) =>
-            f.kind === 'reverse_foreign_key' &&
-            f.hasSource(constraintOid, relatedTableOid),
-        ),
-      ),
-    );
-  }
-
   reconstruct(dataFormField: Iterable<EphemeralDataFormField>) {
     this.fieldSet.reconstruct(dataFormField);
   }

@@ -6,7 +6,6 @@
   import { iconAddNew } from '@mathesar/icons';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import {
-    ButtonMenuItem,
     DropdownMenu,
     MenuDivider,
     MenuHeading,
@@ -24,7 +23,7 @@
   export let insertionIndex: number;
   export let display: 'tiny' | 'full' = 'tiny';
 
-  $: ({ ephemeralDataForm, reverseForeignKeyEnabled } = dataFormManager);
+  $: ({ ephemeralDataForm } = dataFormManager);
 
   $: tableOidOfField = parentField
     ? parentField.relatedTableOid
@@ -107,24 +106,6 @@
             parentHasColumn={parentFieldsList.hasFkColumn(processedColumn)}
             on:click={() => addColumnAsField(processedColumn, close)}
           />
-        {/each}
-      {/if}
-      {#if reverseForeignKeyEnabled && linksToTable && linksToTable.length}
-        <MenuHeading>
-          <RichText
-            text={$_('references_to_this_table')}
-            let:slotName
-            let:translatedArg
-          >
-            {#if slotName === 'bold'}
-              <strong>{translatedArg}</strong>
-            {/if}
-          </RichText>
-        </MenuHeading>
-        {#each linksToTable as linkToTable (linkToTable)}
-          <ButtonMenuItem on:click={() => close()}>
-            <TableName table={linkToTable.table} />
-          </ButtonMenuItem>
         {/each}
       {/if}
     {/if}

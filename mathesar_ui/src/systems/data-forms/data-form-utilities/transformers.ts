@@ -11,7 +11,6 @@ import type {
   ParentEphemeralField,
 } from './AbstractEphemeralField';
 import { EphermeralFkField } from './EphemeralFkField';
-import { EphemeralReverseFkField } from './EphemeralReverseFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
 
 export function columnToEphemeralField(
@@ -141,67 +140,40 @@ export function rawEphemeralFieldToEphemeralField(
     });
   }
 
-  if (rawEphemeralField.kind === 'foreign_key') {
-    const columnDetails = getColumnDetailFromFormSource(
-      formSource,
-      parentTableOid,
-      rawEphemeralField.column_attnum,
-    );
-
-    const constraintDetails = getConstraintDetailFromFormSource(
-      formSource,
-      rawEphemeralField.constraint_oid,
-    );
-
-    const fkField = new EphermeralFkField(parentField, {
-      ...baseProps,
-      processedColumn: new ProcessedColumn({
-        tableOid: parentTableOid,
-        column: columnDetails,
-        columnIndex: 0,
-        constraints: [constraintDetails],
-      }),
-      interactionRule: rawEphemeralField.fk_interaction_rule,
-      fkConstraintOid: constraintDetails.oid,
-      relatedTableOid: rawEphemeralField.related_table_oid,
-    });
-
-    const nestedFields =
-      rawEphemeralField.child_fields?.map((field) =>
-        rawEphemeralFieldToEphemeralField(
-          field,
-          fkField,
-          baseTableOid,
-          formSource,
-        ),
-      ) ?? [];
-    fkField.nestedFields.reconstruct(nestedFields);
-
-    return fkField;
-  }
+  const columnDetails = getColumnDetailFromFormSource(
+    formSource,
+    parentTableOid,
+    rawEphemeralField.column_attnum,
+  );
 
   const constraintDetails = getConstraintDetailFromFormSource(
     formSource,
     rawEphemeralField.constraint_oid,
   );
 
-  const revFkField = new EphemeralReverseFkField(parentField, {
+  const fkField = new EphermeralFkField(parentField, {
     ...baseProps,
-    reverseFkConstraintOid: constraintDetails.oid,
+    processedColumn: new ProcessedColumn({
+      tableOid: parentTableOid,
+      column: columnDetails,
+      columnIndex: 0,
+      constraints: [constraintDetails],
+    }),
+    interactionRule: rawEphemeralField.fk_interaction_rule,
+    fkConstraintOid: constraintDetails.oid,
     relatedTableOid: rawEphemeralField.related_table_oid,
-    nestedFields: [],
   });
 
   const nestedFields =
-    rawEphemeralField.child_fields.map((field) =>
+    rawEphemeralField.child_fields?.map((field) =>
       rawEphemeralFieldToEphemeralField(
         field,
-        revFkField,
+        fkField,
         baseTableOid,
         formSource,
       ),
     ) ?? [];
-  revFkField.nestedFields.reconstruct(nestedFields);
+  fkField.nestedFields.reconstruct(nestedFields);
 
-  return revFkField;
+  return fkField;
 }

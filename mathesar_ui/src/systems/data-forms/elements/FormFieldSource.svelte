@@ -24,15 +24,13 @@
       <TableName {table} alwaysShowTooltip={true} />
     {/if}
   </div>
-  {#if dataFormField.kind !== 'reverse_foreign_key'}
-    <span>.</span>
-    <div class="tag">
-      <ProcessedColumnName
-        processedColumn={dataFormField.processedColumn}
-        alwaysShowTooltip={true}
-      />
-    </div>
-  {/if}
+  <span>.</span>
+  <div class="tag">
+    <ProcessedColumnName
+      processedColumn={dataFormField.processedColumn}
+      alwaysShowTooltip={true}
+    />
+  </div>
 </div>
 
 <style lang="scss">

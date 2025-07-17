@@ -23,11 +23,6 @@
           <div>{$_('form')}</div>
         {/if}
         <Icon {...iconExpandRight} />
-        {#if $selectedElement.field.kind === 'reverse_foreign_key'}
-          <div></div>
-        {:else}
-          <div></div>
-        {/if}
       </div>
     {:else}
       <div>

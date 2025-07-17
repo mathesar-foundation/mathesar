@@ -6,17 +6,14 @@ import type {
 } from '@mathesar/api/rpc/forms';
 
 import type { EphermeralFkField } from './EphemeralFkField';
-import type { EphemeralReverseFkField } from './EphemeralReverseFkField';
 import type { EphermeralScalarField } from './EphemeralScalarField';
 
 export type EphemeralDataFormField =
   | EphermeralScalarField
-  | EphermeralFkField
-  | EphemeralReverseFkField;
+  | EphermeralFkField;
 
 export type ParentEphemeralField =
   | EphermeralFkField
-  | EphemeralReverseFkField
   | null;
 
 export interface EphemeralFieldProps {

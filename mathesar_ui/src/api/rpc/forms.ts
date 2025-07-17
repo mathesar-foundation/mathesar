@@ -45,18 +45,9 @@ export interface RawEphemeralForeignKeyDataFormField
   child_fields: RawEphemeralDataFormField[] | null;
 }
 
-export interface RawEphemeralReverseForeignKeyDataFormField
-  extends RawEphemeralDataFormBaseField {
-  kind: 'reverse_foreign_key';
-  constraint_oid: number;
-  related_table_oid: number;
-  child_fields: RawEphemeralDataFormField[];
-}
-
 export type RawEphemeralDataFormField =
   | RawEphemeralScalarDataFormField
-  | RawEphemeralForeignKeyDataFormField
-  | RawEphemeralReverseForeignKeyDataFormField;
+  | RawEphemeralForeignKeyDataFormField;
 
 export interface RawEphemeralDataForm {
   database_id: number;
@@ -91,19 +82,13 @@ export interface RawForeignKeyDataFormField
   child_fields: RawDataFormField[] | null;
 }
 
-export interface RawReverseForeignKeyDataFormField
-  extends RawEphemeralReverseForeignKeyDataFormField {
-  child_fields: RawDataFormField[];
-}
-
 export interface ReplacableRawDataForm extends RawEphemeralDataForm {
   id: number;
 }
 
 export type RawDataFormField =
   | RawScalarDataFormField
-  | RawForeignKeyDataFormField
-  | RawReverseForeignKeyDataFormField;
+  | RawForeignKeyDataFormField;
 
 export interface RawDataForm extends RawEphemeralDataForm {
   id: number;

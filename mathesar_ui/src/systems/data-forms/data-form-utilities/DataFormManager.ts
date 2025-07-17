@@ -36,9 +36,6 @@ export type SelectedElement = SelectedStaticElement | SelectedFieldElement;
 export class EditableDataFormManager extends ReadonlyDataFormManager {
   selectedElement: Writable<SelectedElement | undefined> = writable();
 
-  // TODO: Remove this after Reverse FK is enabled
-  reverseForeignKeyEnabled = false;
-
   private schema: Schema;
 
   private tableStructureCache;
