@@ -15,6 +15,7 @@ from mathesar.rpc import constraints
 from mathesar.rpc import data_modeling
 from mathesar.rpc import databases
 from mathesar.rpc import explorations
+from mathesar.rpc import forms
 from mathesar.rpc import records
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
@@ -252,33 +253,31 @@ METHODS = [
         "explorations.run_saved",
         [user_is_authenticated]
     ),
-
-    # (
-    #     forms.add,
-    #     "forms.add",
-    #     [user_is_authenticated]
-    # ),
-    # (
-    #     forms.get,
-    #     "forms.get",
-    #     []  # using empty list here indicates that this method is available to anonymous callers.
-    # ),
-    # (
-    #     forms.list_,
-    #     "forms.list",
-    #     [user_is_authenticated]
-    # ),
-    # (
-    #     forms.delete,
-    #     "forms.delete",
-    #     [user_is_authenticated]
-    # ),
-    # (
-    #     forms.replace,
-    #     "forms.replace",
-    #     [user_is_authenticated]
-    # ),
-
+    (
+        forms.add,
+        "forms.add",
+        [user_is_authenticated]
+    ),
+    (
+        forms.get,
+        "forms.get",
+        []  # using empty list here indicates that this method is available to anonymous callers.
+    ),
+    (
+        forms.list_,
+        "forms.list",
+        [user_is_authenticated]
+    ),
+    (
+        forms.delete,
+        "forms.delete",
+        [user_is_authenticated]
+    ),
+    (
+        forms.replace,
+        "forms.replace",
+        [user_is_authenticated]
+    ),
     (
         records.add,
         "records.add",

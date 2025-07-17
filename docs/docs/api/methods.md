@@ -136,6 +136,23 @@
       - ExplorationDef
       - ExplorationResult
 
+## Forms
+
+::: forms
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - replace
+      - FormInfo
+      - FormDef
+      - FieldInfo
+      - FieldDef
+      - PublicFormInfo
+      - ReplaceableFormDef
+
 ## Records
 
 :::records
