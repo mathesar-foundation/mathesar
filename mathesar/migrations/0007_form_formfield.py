@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mathesar', '0005_make_server_port_nullable'),
+        ('mathesar', '0006_analyticsreport_sso_connected_user_count'),
     ]
 
     operations = [
