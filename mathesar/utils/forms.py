@@ -1,11 +1,14 @@
 from uuid import uuid4
+from collections import defaultdict
 
 from django.db import transaction
 
+from db.forms import get_tab_col_info_map
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
-    Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap
+    Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
+from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 
 
 def validate_and_get_access_role(user, database_id, access_role_id=None):
@@ -23,6 +26,39 @@ def validate_and_get_access_role(user, database_id, access_role_id=None):
             or access_role.name in parent_names
         ), "Insufficient privileges for selected access_role"
     return access_role
+
+
+def get_table_oid_attnums_map(form_model):
+    table_oid_attnums_map = defaultdict(list)
+    fields = {field.key: field for field in form_model.fields.all()}
+    for field in fields.values():
+        if field.column_attnum:
+            table_oid = field.parent_field.related_table_oid if field.parent_field else form_model.base_table_oid
+            table_oid_attnums_map[table_oid].append(field.column_attnum)
+        if field.related_table_oid:
+            # Ensure that the table is present even if columns are empty
+            table_oid_attnums_map[field.related_table_oid]
+    return table_oid_attnums_map
+
+
+def get_field_tab_col_info_map(form_model):
+    table_oid_attnums_map = get_table_oid_attnums_map(form_model)
+    with form_model.connection as conn:
+        tab_col_con_info_map = get_tab_col_info_map(table_oid_attnums_map, conn)
+    for oid, table_data in tab_col_con_info_map.items():
+        expected_attnums = table_oid_attnums_map[int(oid)]
+        column_attnums = table_data["columns"].keys()
+        for attn in expected_attnums:
+            if str(attn) not in column_attnums:
+                table_data["columns"][str(attn)] = {"error": {"code": -31025, "message": f"Column {attn} not found"}}
+        metadata_list = (
+            ColumnMetaData.objects.filter(attnum__in=column_attnums, table_oid=oid, database=form_model.database)
+        )
+        for meta in metadata_list:
+            col_info = table_data["columns"].get(str(meta.attnum))
+            if col_info:
+                col_info["metadata"] = ColumnMetaDataBlob.from_model(meta)
+    return tab_col_con_info_map
 
 
 def iterate_field_defs(field_defs, parent_field_defn=None):
@@ -90,6 +126,12 @@ def create_form(form_def, user):
 def get_form(form_id):
     form_model = Form.objects.get(id=form_id)
     return form_model
+
+
+def get_form_source_info(form_token):
+    form_model = Form.objects.get(token=form_token)
+    if form_model:
+        return get_field_tab_col_info_map(form_model)
 
 
 def list_forms(database_id, schema_oid):

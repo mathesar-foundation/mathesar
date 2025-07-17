@@ -642,16 +642,16 @@ SELECT CASE contype
   WHEN 'u' THEN 'unique'
   WHEN 'x' THEN 'exclude'
 END;
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION msar.constraint_info_table() RETURNS TABLE
+CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TABLE
 (
-  oid bigint,
+  oid oid,
   name text,
   type text,
   columns smallint[],
-  referent_table_oid bigint,
+  referent_table_oid oid,
   referent_columns smallint[]
 )
 AS $$/*
@@ -662,13 +662,14 @@ Args:
 */
 WITH constraints AS (
   SELECT
-    oid::bigint AS oid,
+    oid,
     conname AS name,
     msar.get_constraint_type_api_code(contype::char) AS type,
     conkey AS columns,
-    confrelid::bigint AS referent_table_oid,
+    confrelid AS referent_table_oid,
     confkey AS referent_columns
   FROM pg_catalog.pg_constraint
+  WHERE conrelid = tab_id
 )
 SELECT *
 FROM constraints
@@ -5627,40 +5628,33 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_tab_col_con_info_map(tab_col_con_map jsonb)
+msar.get_tab_col_info_map(tab_col_map jsonb)
 RETURNS jsonb AS $$/*
-Returns table_info, column_info, and constraints_info for a given tab_col_con_map.
+Returns table_info, column_info, and constraints_info for a given tab_col_map.
 
-tab_col_con_map should have the following form:
+tab_col_map should have the following form:
 {
-  "tables": {
-    "table_oid_1": [col_attnum_1, col_attnum_2, col_attnum_3],
-    "table_oid_2": [col_attnum_4, col_attnum_5]
-  },
-  "constraints": [cons_oid_1, cons_oid_2]
+  "table_oid_1": [col_attnum_1, col_attnum_2, col_attnum_3],
+  "table_oid_2": [col_attnum_4, col_attnum_5]
 }
 
 Returns:
 {
-  "tables": {
-    "table_oid_1": {
-      "table_info": table_info(),
-      "columns": {"col_attnum_1": col_info(), "col_attnum_2": col_info(), "col_attnum_3": col_info()
-      }
-    },
-    "table_oid2": {
-      "table_info": table_info(),
-      "columns": {"col_attnum_4": col_info(), "col_attnum_5": col_info()}
-    }
+  "table_oid_1": {
+    "table_info": table_info(),
+    "columns": {"col_attnum_1": col_info(), "col_attnum_2": col_info(), "col_attnum_3": col_info()
   },
-  "constraints": {"cons_oid1": cons_info(), "cons_oid2": cons_info()}
+  "table_oid2": {
+    "table_info": table_info(),
+    "columns": {"col_attnum_4": col_info(), "col_attnum_5": col_info()}
+  }
 }
 */
   WITH cte AS (
     SELECT
       tab_id::oid,
       ARRAY(SELECT jsonb_array_elements_text(attnums))::int[] AS attnums
-    FROM jsonb_each(coalesce(tab_col_con_map -> 'tables', '{}'::jsonb)) AS x(tab_id, attnums)
+    FROM jsonb_each(coalesce(tab_col_map, '{}'::jsonb)) AS x(tab_id, attnums)
   ),
   tab_info_cte AS (
     SELECT tab_id, jsonb_agg(tab_info) AS tab_info_json FROM cte
@@ -5677,30 +5671,13 @@ Returns:
     WHERE column_info.id = ANY(cte.attnums)
     GROUP BY cte.tab_id
   ),
-  tc_res_cte AS (
-    SELECT coalesce(
-      jsonb_object_agg(
-        tic.tab_id, jsonb_build_object(
-        'table_info', coalesce(tic.tab_info_json,'{}'::jsonb),
-        'columns', coalesce(cic.col_info_json, '{}'::jsonb)
-      )
-    ), '{}'::jsonb) AS tab_info
-    FROM tab_info_cte AS tic
-    LEFT JOIN col_info_cte AS cic ON tic.tab_id = cic.tab_id
-  ),
-  con_cte AS (
-    SELECT (jsonb_array_elements_text(coalesce(tab_col_con_map -> 'constraints','[]'::jsonb)))::oid AS con_oid
-  ),
-  con_info_cte AS (
-    SELECT coalesce(
-      jsonb_object_agg(
-        cit.oid, cit
-    ), '{}'::jsonb) AS con_info
-    FROM con_cte
-    LEFT JOIN msar.constraint_info_table() AS cit ON con_cte.con_oid = cit.oid
-  )
-  SELECT jsonb_build_object(
-    'tables', (SELECT tab_info FROM tc_res_cte),
-    'constraints', (SELECT con_info FROM con_info_cte)
-  );
+  SELECT coalesce(
+    jsonb_object_agg(
+      tic.tab_id, jsonb_build_object(
+      'table_info', coalesce(tic.tab_info_json,'{}'::jsonb),
+      'columns', coalesce(cic.col_info_json, '{}'::jsonb)
+    )
+  ), '{}'::jsonb)
+  FROM tab_info_cte AS tic
+  LEFT JOIN col_info_cte AS cic ON tic.tab_id = cic.tab_id
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;

@@ -6,7 +6,7 @@ from typing import Optional, TypedDict, Literal
 from modernrpc.core import REQUEST_KEY
 
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form, get_form, list_forms, delete_form, replace_form
+from mathesar.utils.forms import create_form, get_form, list_forms, delete_form, replace_form, get_form_source_info
 
 
 class FieldInfo(TypedDict):
@@ -249,6 +249,23 @@ def get(*, form_id: int, **kwargs) -> FormInfo:
     """
     form_model = get_form(form_id)
     return FormInfo.from_model(form_model)
+
+
+@mathesar_rpc_method(name="forms.get_source_info", auth="anonymous")
+def get_source_info(*, form_token: str, **kwargs) -> FormInfo:
+    """
+    Retrieve the sources of a form.
+
+    Args:
+        form_token: The unique token of the form.
+
+    Returns:
+        The source tables & columns of the form:
+            - Tables associated with the form.
+            - Columns of the fields associated with the form.
+    """
+    form_source_info = get_form_source_info(form_token)
+    return form_source_info
 
 
 @mathesar_rpc_method(name="forms.list", auth="login")
