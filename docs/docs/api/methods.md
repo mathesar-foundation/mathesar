@@ -147,10 +147,9 @@
       - delete
       - replace
       - FormInfo
-      - AddFormDef
       - FieldInfo
+      - AddFormDef
       - AddOrReplaceFieldDef
-      - PublicFormInfo
       - ReplaceableFormDef
 
 ## Records

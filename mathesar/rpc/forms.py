@@ -12,6 +12,7 @@ from mathesar.utils.forms import create_form, get_form, list_forms, delete_form,
 class FieldInfo(TypedDict):
     """
     Information about a form field.
+
     Attributes:
         id: The Django id of the Field on the database.
         key: A unique string identifier for the field within a form.
@@ -26,6 +27,7 @@ class FieldInfo(TypedDict):
         parent_field_id: The Django id of the Field set as parent for related fields.
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
+        child_fields: List of definitions of child fields. Applicable for foreign_key fields.
     """
     id: int
     key: str
@@ -63,6 +65,7 @@ class FieldInfo(TypedDict):
 class FormInfo(TypedDict):
     """
     Information about a form.
+
     Attributes:
         id: The Django id of the Form on the database.
         created_at: The time at which the form model got created.
@@ -100,7 +103,7 @@ class FormInfo(TypedDict):
     submit_message: Optional[dict]
     submit_redirect_url: Optional[str]
     submit_button_label: Optional[str]
-    fields: Optional[list[FieldInfo]]
+    fields: list[FieldInfo]
 
     @classmethod
     def from_model(cls, form_model):
@@ -129,6 +132,7 @@ class FormInfo(TypedDict):
 class AddOrReplaceFieldDef(TypedDict):
     """
     FormField definition needed while adding or replacing a form.
+
     Attributes:
         key: A unique string identifier for the field within a form.
         index: The order in which the field should be displayed.
@@ -140,6 +144,7 @@ class AddOrReplaceFieldDef(TypedDict):
         fk_interaction_rule: Determines user interaction with a foreign_key field's related record (must_pick, can_pick_or_create, must_create).
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
+        child_fields: List of definitions of child fields. Applicable for foreign_key fields.
     """
     key: str
     index: int
@@ -157,6 +162,7 @@ class AddOrReplaceFieldDef(TypedDict):
 class AddFormDef(TypedDict):
     """
     Definition needed to add a form.
+
     Attributes:
         token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
@@ -192,6 +198,7 @@ class AddFormDef(TypedDict):
 class ReplaceableFormDef(AddFormDef):
     """
     Definition needed to replace a form.
+
     Attributes:
         id: The Django id of the Form on the database.
         token: A UUIDv4 object used to identify a form uniquely.
@@ -233,8 +240,10 @@ def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
 def get(*, form_id: int, **kwargs) -> FormInfo:
     """
     List information about a form.
+
     Args:
         form_id: The Django id of the form.
+
     Returns:
         Form details for a given form_id.
     """
@@ -246,9 +255,11 @@ def get(*, form_id: int, **kwargs) -> FormInfo:
 def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
     """
     List information about forms for a database. Exposed as `list`.
+
     Args:
         database_id: The Django id of the database containing the form.
         schema_oid: The OID of the schema containing the base table(s) of the forms(s).
+
     Returns:
         A list of form info.
     """
@@ -260,6 +271,7 @@ def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
 def delete(*, form_id: int, **kwargs) -> None:
     """
     Delete a form.
+
     Args:
         form_id: The Django id of the form to delete.
     """
@@ -270,8 +282,10 @@ def delete(*, form_id: int, **kwargs) -> None:
 def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
     """
     Replace a form.
+
     Args:
         new_form: A dict describing the form to replace, including the updated fields.
+
     Returns:
         The form info for the replaced form.
     """
