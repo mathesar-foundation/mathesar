@@ -5670,7 +5670,7 @@ Returns:
     LEFT JOIN msar.column_info_table(cte.tab_id) AS column_info ON pga.attnum = column_info.id
     WHERE column_info.id = ANY(cte.attnums)
     GROUP BY cte.tab_id
-  ),
+  )
   SELECT coalesce(
     jsonb_object_agg(
       tic.tab_id, jsonb_build_object(
