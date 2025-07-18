@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
             sql="""
             ALTER TABLE mathesar_form
             ADD CONSTRAINT form_role_server_integrity
-              FOREIGN KEY (access_role_id, server_id)
+              FOREIGN KEY (associated_role_id, server_id)
               REFERENCES mathesar_configuredrole(id, server_id);
             """,
             reverse_sql="""
