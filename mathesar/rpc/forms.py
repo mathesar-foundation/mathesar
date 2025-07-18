@@ -77,10 +77,10 @@ class FormInfo(TypedDict):
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        access_role_id: The Django id of the configured role to be used while submitting a form.
+        associated_role_id: The Django id of the configured role to be used while submitting a form.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
-        share_public: Specifies whether the form is publicly accessible.
+        publish_public: Specifies whether the form is publicly accessible.
         submit_message: Message to be displayed upon submission.
         submit_redirect_url: Redirect path after submission.
         submit_button_label: Text to be displayed on the submit button.
@@ -96,10 +96,10 @@ class FormInfo(TypedDict):
     database_id: int
     schema_oid: int
     base_table_oid: int
-    access_role_id: Optional[int]
+    associated_role_id: Optional[int]
     header_title: dict
     header_subtitle: Optional[dict]
-    share_public: bool
+    publish_public: bool
     submit_message: Optional[dict]
     submit_redirect_url: Optional[str]
     submit_button_label: Optional[str]
@@ -118,10 +118,10 @@ class FormInfo(TypedDict):
             database_id=form_model.database_id,
             schema_oid=form_model.schema_oid,
             base_table_oid=form_model.base_table_oid,
-            access_role_id=form_model.access_role_id,
+            associated_role_id=form_model.associated_role_id,
             header_title=form_model.header_title,
             header_subtitle=form_model.header_subtitle,
-            share_public=form_model.share_public,
+            publish_public=form_model.publish_public,
             submit_message=form_model.submit_message,
             submit_redirect_url=form_model.submit_redirect_url,
             submit_button_label=form_model.submit_button_label,
@@ -171,7 +171,7 @@ class AddFormDef(TypedDict):
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        access_role_id: The Django id of the configured role to be used while submitting a form.
+        associated_role_id: The Django id of the configured role to be used while submitting a form.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
         submit_message: Message to be displayed upon submission.
@@ -186,7 +186,7 @@ class AddFormDef(TypedDict):
     database_id: int
     schema_oid: int
     base_table_oid: int
-    access_role_id: Optional[int]
+    associated_role_id: Optional[int]
     header_title: dict
     header_subtitle: Optional[dict]
     submit_message: Optional[dict]
