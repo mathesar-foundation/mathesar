@@ -9,8 +9,7 @@ nav:
   - Install Mathesar:
       - Using Docker Compose: administration/install-via-docker-compose.md
       - On Linux · macOS · WSL: administration/install-from-scratch.md
-      - One-click installations:
-          - Digital Ocean App Platform: administration/install-one-click-digital-ocean.md
+      - DigitalOcean: administration/install-digitalocean.md
   - Administrator Guide:
       - Environment variables: administration/environment-variables.md
       - Upgrade Mathesar: administration/upgrade.md

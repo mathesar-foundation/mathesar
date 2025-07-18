@@ -33,14 +33,9 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 
 You can self-host Mathesar by following one of the guides below:
 
-### Fully self-hosted
-
-- [Install using Docker compose](./administration/install-via-docker-compose.md) — a production setup with separate reverse-proxy and database containers.
-- [Install directly on Linux, macOS, or WSL](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
-
-### One-click, managed solutions
-
-- [One-click install to Digital Ocean App Platform](./administration/install-one-click-digital-ocean.md) — Quick and simple management of Mathesar costing as little as $12/month.
+- [Using Docker Compose](./administration/install-via-docker-compose.md) — a production setup with separate reverse-proxy and database containers.
+- [Directly on Linux, macOS, or WSL](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
+- [On DigitalOcean](./administration/install-one-click-digital-ocean.md) — one-click GUI-only installation.
 
 ## Help out
 
