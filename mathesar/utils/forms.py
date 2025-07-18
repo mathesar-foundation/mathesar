@@ -72,7 +72,7 @@ def create_form(form_def, user):
             parent_field=None,
             styling=field_def.get("styling"),
             is_required=field_def.get("is_required", False),
-        ) for field_def, _parent in iterate_field_defs(form_def["fields"])
+        ) for field_def, _ in iterate_field_defs(form_def["fields"])
     ]
     created_fields = FormField.objects.bulk_create(field_instances)
     created_fields_map = {field.key: field for field in created_fields}
