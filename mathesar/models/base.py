@@ -298,8 +298,8 @@ class Form(BaseModel):
     # Header related settings
     header_title = models.JSONField()
     header_subtitle = models.JSONField(null=True)
-    # Sharing settings
-    share_public = models.BooleanField(default=False)
+    # Publishing settings
+    publish_public = models.BooleanField(default=False)
     # Submission related settings
     submit_message = models.JSONField(null=True)
     submit_redirect_url = models.URLField(null=True)
