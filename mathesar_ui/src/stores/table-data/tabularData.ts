@@ -139,7 +139,10 @@ export class TabularData {
       contextualFilters,
       loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
-    this.display = new Display(this.recordsData);
+    this.display = new Display({
+      meta: this.meta,
+      recordsData: this.recordsData,
+    });
 
     this.table = props.table;
 
