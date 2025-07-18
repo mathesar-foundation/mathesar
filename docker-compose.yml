@@ -164,6 +164,7 @@ services:
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
+      - ./sso.yml:/code/sso.yml
     depends_on:
       db:
         condition: service_healthy
