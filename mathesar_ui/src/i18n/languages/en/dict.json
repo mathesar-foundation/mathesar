@@ -364,7 +364,6 @@
   "new_owner": "New Owner",
   "new_password": "New Password",
   "new_record": "New Record",
-  "new_record_indicator_help_text": "This manually-added record displays at the bottom of the sheet, but its position may change after refresh based the sorting and filtering applied.",
   "new_records_reposition_refresh": "New records will be repositioned on refresh",
   "new_table": "New Table",
   "new_table_created_with_extracted_column": "{count, plural, one {A new table {newTableName} has been created with the extracted column} other {A new table {newTableName} has been created with the extracted columns}}",
