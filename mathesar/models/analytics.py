@@ -15,6 +15,7 @@ class AnalyticsReport(BaseModel):
     mathesar_version = models.CharField()
     user_count = models.PositiveIntegerField(null=True, blank=True)
     active_user_count = models.PositiveIntegerField(null=True, blank=True)
+    sso_connected_user_count = models.PositiveIntegerField(null=True, blank=True)
     configured_role_count = models.PositiveIntegerField(null=True, blank=True)
     connected_database_count = models.PositiveIntegerField(null=True, blank=True)
     connected_database_schema_count = models.PositiveIntegerField(null=True, blank=True)

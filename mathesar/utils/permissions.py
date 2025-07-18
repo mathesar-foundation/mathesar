@@ -1,9 +1,9 @@
 from django.db import transaction
-import psycopg
 from psycopg.errors import DuplicateSchema
 
 from config.database_config import get_internal_database_config
 from db.databases import create_database
+from db.connection import mathesar_connection
 from mathesar.examples.bike_shop_dataset import load_bike_shop_dataset
 from mathesar.examples.hardware_store_dataset import load_hardware_store_dataset
 from mathesar.examples.ice_cream_employees_dataset import load_ice_cream_employees_dataset
@@ -42,12 +42,13 @@ def set_up_new_database_for_user_on_internal_server(
         conn_info.password,
         user
     )
-    with psycopg.connect(
+    with mathesar_connection(
             host=conn_info.host,
             port=conn_info.port,
             dbname=conn_info.dbname,
             user=conn_info.role,
             password=conn_info.password,
+            application_name='mathesar.utils.permissions.set_up_new_database_for_user_on_internal_server',
     ) as root_conn:
         create_database(database_name, root_conn)
     user_database_role.database.install_sql(

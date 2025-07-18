@@ -1,5 +1,6 @@
 clevercsv==0.8.2
-Django==4.2.21
+Django==4.2.22
+django-allauth[socialaccount]==65.9.0
 django-filter==24.3
 django-modern-rpc==1.0.3
 django-property-filter==1.2.0
@@ -10,6 +11,7 @@ frozendict==2.4.6
 gunicorn==23.0.0
 psycopg[binary]==3.2.6
 psycopg2-binary==2.9.10
-requests==2.32.3
+pyyaml==6.0.2
+requests==2.32.4
 SQLAlchemy==1.4.54
 whitenoise==6.7.0

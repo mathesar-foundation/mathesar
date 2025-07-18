@@ -30,13 +30,14 @@
   }
   .dot {
     position: absolute;
-    --size: 0.7rem;
-    --inset: 0.3rem;
+    --size: 0.8rem;
+    --inset: -0.15rem;
     top: var(--inset);
     right: var(--inset);
     height: var(--size);
     width: var(--size);
     border-radius: 50%;
     background: var(--red-500);
+    pointer-events: none;
   }
 </style>

@@ -35,7 +35,7 @@
   let highlightingEnabled = true;
 
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
-  $: void underlyingDatabase.runConservatively({ database_id: database.id });
+  $: void underlyingDatabase.runConservatively();
   $: schemasMap = $schemasStore.data;
   $: schemasRequestStatus = $schemasStore.requestStatus;
   $: isLoading =

@@ -54,11 +54,11 @@
 <style>
   .breadcrumb-selector-section {
     display: grid;
-    grid-gap: 0.5rem;
+    grid-gap: var(--sm4);
   }
   .content {
     display: grid;
-    grid-gap: 0.5rem;
+    grid-gap: var(--sm4);
   }
   .detail {
     color: var(--text-color-secondary);

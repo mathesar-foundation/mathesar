@@ -124,12 +124,18 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
       -c "postgres://mathesar:strong‑pw‑here@localhost:5432/mathesar_django"
     ```
 
-    - Any valid [PostgreSQL connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS) can be used as the argument for `-c`.
-
-    - If your PostgreSQL installation runs over the unix socket, you could use the following format:
-
+    - Any valid [PostgreSQL connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS) can be used as the argument for `-c`. Here are some examples:
         ```
-        postgres://mathesar:strong‑pw‑here/mathesar_django?host=/var/run/postgresql
+        postgres://mathesar:strong‑pw‑here@localhost:5432/mathesar_django
+
+        # As parameters
+        postgres:///mathesar_django/?host=localhost&port=5432&user=mathesar&password=strong‑pw‑here
+
+        # Over Unix domain sockets
+        postgres://mathesar:strong‑pw‑here@/mathesar_django?host=/var/run/postgresql
+
+        # Non-standard port over Unix domain sockets
+        postgres://mathesar:strong‑pw‑here@%2Fvar%2Flib%2Fpostgresql:5455/mathesar_django
         ```
 
     ??? info "Additional install script options"

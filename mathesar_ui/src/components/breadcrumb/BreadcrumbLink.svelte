@@ -19,6 +19,10 @@
     font-weight: var(--font-weight-medium);
   }
   .breadcrumb-link:hover a {
-    color: var(--accent-600);
+    color: var(--salmon-800);
+  }
+
+  :global(body.theme-dark) .breadcrumb-link:hover a {
+    color: var(--salmon-200);
   }
 </style>

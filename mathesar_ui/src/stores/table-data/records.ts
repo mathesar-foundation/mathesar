@@ -10,7 +10,7 @@ import {
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   Result as ApiRecord,
   RecordsListParams,
@@ -31,6 +31,7 @@ import {
   type CancellablePromise,
   ImmutableMap,
   WritableMap,
+  defined,
 } from '@mathesar-component-library';
 
 import type { ColumnsDataStore } from './columns';
@@ -77,6 +78,50 @@ export interface TableRecordsData {
   rows: Row[];
   totalCount: number;
   grouping?: RecordGrouping;
+}
+
+/**
+ * A recipe to set the value of one cell
+ */
+interface NewCellValueRecipe {
+  columnId: string;
+  value: unknown;
+}
+
+function buildRecordFromRecipe(
+  recipe: NewCellValueRecipe[],
+): Record<string, ResultValue> {
+  return Object.fromEntries(
+    recipe.map((cell) => [cell.columnId, cell.value as ResultValue]),
+  );
+}
+
+/**
+ * A recipe to modify one existing row in the sheet.
+ *
+ * Note that this might not be an existing row _in PostgreSQL_ (because in the
+ * case of draft record rows, a row can exist in the sheet without yet existing
+ * in PostgreSQL.)
+ */
+export interface RowModificationRecipe {
+  row: RecordRow;
+  cells: NewCellValueRecipe[];
+}
+
+/** A recipe to add one row to the sheet */
+export interface RowAdditionRecipe {
+  cells: NewCellValueRecipe[];
+}
+
+function makeRowModificationRecipe(
+  rowAdditionRecipe: RowAdditionRecipe,
+): RowModificationRecipe {
+  const record = buildRecordFromRecipe(rowAdditionRecipe.cells);
+  const row = new DraftRecordRow({ record });
+  return {
+    row,
+    cells: rowAdditionRecipe.cells,
+  };
 }
 
 export class RecordsData {
@@ -229,7 +274,9 @@ export class RecordsData {
       const fuzzySearchParams = params.searchFuzzy.getSearchParams();
       const recordSearchParams: RecordsSearchParams = {
         ...this.apiContext,
+        ...params.pagination.recordsRequestParams(),
         search_params: fuzzySearchParams,
+        return_record_summaries: this.loadIntrinsicRecordSummaries,
       };
 
       this.promise = fuzzySearchParams.length
@@ -388,17 +435,31 @@ export class RecordsData {
     return draftRowsToDelete.size + persistedRowsToDelete.size;
   }
 
-  async bulkUpdate(
-    rowBlueprints: {
-      row: RecordRow;
-      cells: { columnId: string; value: unknown }[];
-    }[],
-  ): Promise<void> {
+  async bulkDml(
+    modificationRecipes: RowModificationRecipe[],
+    additionRecipes: RowAdditionRecipe[] = [],
+  ): Promise<{ rowIds: string[]; columnIds: string[] }> {
+    const convertedRecipes = additionRecipes.map(makeRowModificationRecipe);
+    const additionalRows = convertedRecipes
+      .map(({ row }) => row)
+      .filter(isDraftRecordRow);
+    this.newRecords.update((rows) => [...rows, ...additionalRows]);
+    const unifiedRecipes = [...modificationRecipes, ...convertedRecipes];
+    await this.bulkUpdate(unifiedRecipes);
+    return {
+      rowIds: unifiedRecipes.map((recipe) => recipe.row.identifier),
+      columnIds:
+        defined(unifiedRecipes.at(0), (r) => r.cells.map((c) => c.columnId)) ??
+        [],
+    };
+  }
+
+  async bulkUpdate(recipes: RowModificationRecipe[]): Promise<void> {
     const cellStatus = this.meta.cellModificationStatus;
     const { cellClientSideErrors, rowCreationStatus } = this.meta;
 
-    function forEachRow(fn: (b: (typeof rowBlueprints)[number]) => void) {
-      rowBlueprints.forEach(fn);
+    function forEachRow(fn: (r: RowModificationRecipe) => void) {
+      recipes.forEach(fn);
     }
 
     function forEachCell(fn: (cellKey: string) => void) {
@@ -432,11 +493,9 @@ export class RecordsData {
       this.updatePromises?.get(row.identifier)?.cancel();
     });
 
-    const requests = rowBlueprints.map((blueprint) => {
-      const recordDef = Object.fromEntries(
-        blueprint.cells.map((cell) => [cell.columnId, cell.value]),
-      );
-      if (isDraftRecordRow(blueprint.row)) {
+    const requests = recipes.map(({ row, cells }) => {
+      const recordDef = buildRecordFromRecipe(cells);
+      if (isDraftRecordRow(row)) {
         return api.records.add({
           ...this.apiContext,
           record_def: recordDef,
@@ -444,7 +503,7 @@ export class RecordsData {
       }
       return api.records.patch({
         ...this.apiContext,
-        record_id: blueprint.row.record[pkColumn.id],
+        record_id: row.record[pkColumn.id],
         record_def: recordDef,
       });
     });
@@ -452,7 +511,7 @@ export class RecordsData {
     const responses = await batchSend(requests);
     const responseMap = new Map(
       execPipe(
-        zip(rowBlueprints, responses),
+        zip(recipes, responses),
         map(([blueprint, response]) => [
           blueprint.row.identifier,
           { blueprint, response },
@@ -461,25 +520,25 @@ export class RecordsData {
     );
 
     /**
+     * This runs against **every row in the sheet** in order to do
+     * post-processing, error handling, and UI updates based on the API
+     * responses.
+     *
      * @returns the `RecordRow` we want to persist on the front end going
      * forward
      */
-    function followUp<R extends RecordRow>(row: R): R {
-      if (isDraftRecordRow(row)) {
-        rowCreationStatus.delete(row.identifier);
-      }
+    function postProcessRecordRow<R extends RecordRow>(row: R): R {
       const responseMapValue = responseMap.get(row.identifier);
       if (!responseMapValue) return row;
       const { blueprint, response } = responseMapValue;
 
+      if (isDraftRecordRow(row)) {
+        rowCreationStatus.delete(row.identifier);
+      }
+
       /** Generate a row using the blueprint instead of the API return value */
       function makeFallbackRow() {
-        const updatedValues = Object.fromEntries(
-          blueprint.cells.map(({ columnId, value }) => [
-            columnId,
-            value as ResultValue,
-          ]),
-        );
+        const updatedValues = buildRecordFromRecipe(blueprint.cells);
         return row.withRecord({ ...row.record, ...updatedValues }) as R;
       }
 
@@ -516,8 +575,8 @@ export class RecordsData {
       return row.withRecord(result) as R;
     }
 
-    this.fetchedRecordRows.update((rows) => rows.map(followUp));
-    this.newRecords.update((rows) => rows.map(followUp));
+    this.fetchedRecordRows.update((rows) => rows.map(postProcessRecordRow));
+    this.newRecords.update((rows) => rows.map(postProcessRecordRow));
 
     let newRecordSummaries: RecordSummariesForSheet = new ImmutableMap();
     for (const response of responses) {
@@ -533,10 +592,10 @@ export class RecordsData {
   }
 
   // TODO: it would be nice to refactor this function to utilize the
-  // `bulkUpdate` function (which actually updates the store values too).
+  // `bulkDml` function (which actually updates the store values too).
   async updateCell(
     row: PersistedRecordRow,
-    column: Column,
+    column: RawColumnWithMetadata,
   ): Promise<PersistedRecordRow> {
     // TODO compute and validate client side errors before saving
     const { record } = row;
@@ -645,7 +704,6 @@ export class RecordsData {
           return entry;
         }),
       );
-      this.totalCount.update((count) => (count ?? 0) + 1);
       return newRow;
     } catch (err) {
       this.meta.rowCreationStatus.set(row.identifier, {
@@ -662,7 +720,7 @@ export class RecordsData {
 
   async createOrUpdateRecord(
     row: RecordRow,
-    column: Column,
+    column: RawColumnWithMetadata,
   ): Promise<PersistedRecordRow | DraftRecordRow> {
     const rowToCreateOrUpdate = isPlaceholderRecordRow(row)
       ? DraftRecordRow.fromPlaceholder(row)

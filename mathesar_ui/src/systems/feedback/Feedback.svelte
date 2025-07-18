@@ -16,7 +16,7 @@
   import { getMarketingLink } from '@mathesar/routes/urls';
   import {
     AnchorButton,
-    DropdownMenu,
+    Dropdown,
     Icon,
     TextArea,
   } from '@mathesar-component-library';
@@ -61,11 +61,11 @@
 </script>
 
 <div class="feedback-button">
-  <DropdownMenu
-    triggerAppearance="custom"
+  <Dropdown
+    triggerAppearance="feedback"
+    triggerClass="padding-compact"
     closeOnInnerClick={false}
     showArrow={false}
-    menuStyle="--Menu__padding-x: 0.3em;"
     on:close={onDropdownClose}
   >
     <div class="trigger" slot="trigger">
@@ -74,7 +74,7 @@
         {$_('feedback')}
       {/if}
     </div>
-    <div class="feedback-content">
+    <div class="feedback-content" slot="content">
       {#if !isSuccessfullySubmitted}
         <div class="feedback-form">
           {#if compactLayout}
@@ -128,25 +128,24 @@
         </div>
       {/if}
     </div>
-  </DropdownMenu>
+  </Dropdown>
 </div>
 
 <style lang="scss">
   .feedback-button {
     --button-border: none;
   }
+
   .trigger {
     display: flex;
     align-items: center;
     gap: var(--sm4);
-    color: var(--text-color-primary);
   }
+
   .feedback-content {
-    padding: var(--sm1);
     max-width: 28rem;
-    background-color: var(--card-background);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius-m);
+    padding: var(--sm3);
+    color: var(--text-color-primary);
   }
   .feedback-form {
     display: flex;
@@ -154,9 +153,14 @@
     gap: var(--sm3);
     --text-area-min-height: 6rem;
 
+    .title {
+      font-weight: var(--font-weight-medium);
+      color: var(--text-color-primary);
+    }
+
     .help {
       font-size: var(--sm1);
-      color: var(--text-color-secondary);
+      color: var(--text-color-primary);
       margin-top: var(--sm6);
     }
   }
@@ -164,6 +168,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--sm3);
+    color: var(--text-color-primary);
 
     .title {
       font-weight: var(--font-weight-medium);

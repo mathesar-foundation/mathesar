@@ -73,10 +73,6 @@
   }
   .widgets {
     padding: var(--sm1);
-
-    :global(.sheet) {
-      background: var(--background-color);
-    }
   }
 
   .table-widget-positioner {

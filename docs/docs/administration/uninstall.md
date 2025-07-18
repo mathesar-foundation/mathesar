@@ -45,35 +45,37 @@ The uninstall instructions vary depending on the [installation method](../index.
     rm -rf xMATHESAR_INSTALLATION_DIRx  # may need sudo, depending on location
     ```
 
-## Uninstall a source installation of Mathesar
+
+## Uninstall a direct installation of Mathesar on Linux, macOS, or WSL
 
 {% include 'snippets/uninstall-schemas.md' %}
 
-1. Stop Caddy service
+1. Stop Mathesar if it's running. If you've deployed Mathesar as a service and are using Caddy as a reverse proxy, follow these steps:
 
-    ```
-    systemctl disable caddy.service && systemctl stop caddy.service
-    ```
+    1. Stop Caddy Service
+        ```
+        systemctl disable caddy.service && systemctl stop caddy.service
+        ```
 
-1. Remove Caddy service file and Caddyfile (requires `sudo`)
+    1. Remove Caddy service file and Caddyfile
 
-    ```
-    sudo rm /lib/systemd/system/caddy.service
-    sudo rm /etc/caddy/Caddyfile
-    ```
+        ```
+        sudo rm /lib/systemd/system/caddy.service
+        sudo rm /etc/caddy/Caddyfile
+        ```
 
-1. Stop Gunicorn
+    1. Stop the Mathesar service
 
-    ```
-    systemctl disable gunicorn.service
-    systemctl stop gunicorn.service
-    ```
+        ```
+        systemctl disable mathesar.service
+        systemctl stop mathesar.service
+        ```
 
-1. Remove Gunicorn service file
+    1. Remove Mathesar service file
 
-    ```
-    sudo rm /lib/systemd/system/gunicorn.service
-    ```
+        ```
+        sudo rm /etc/systemd/system/mathesar.service
+        ```
 
 1. Remove your Mathesar installation directory
 

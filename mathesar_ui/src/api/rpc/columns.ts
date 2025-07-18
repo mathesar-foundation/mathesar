@@ -63,7 +63,7 @@ interface RawColumn {
 /**
  * The raw column data from the user database combined with Mathesar's metadata
  */
-export interface Column extends RawColumn {
+export interface RawColumnWithMetadata extends RawColumn {
   metadata: ColumnMetadata | null;
 }
 
@@ -73,7 +73,7 @@ export interface Column extends RawColumn {
  */
 export function getColumnMetadataValue<
   Key extends keyof RequiredColumnMetadata,
->(column: Pick<Column, 'metadata'>, k: Key) {
+>(column: Pick<RawColumnWithMetadata, 'metadata'>, k: Key) {
   return getMetadataValue(column.metadata ?? {}, k);
 }
 
@@ -121,7 +121,7 @@ export const columns = {
       database_id: number;
       table_oid: number;
     },
-    Column[]
+    RawColumnWithMetadata[]
   >(),
 
   /** Returns an array of the attnums of the newly-added columns */

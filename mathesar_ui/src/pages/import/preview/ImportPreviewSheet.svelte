@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
     Sheet,
@@ -19,7 +19,9 @@
 
   export let columns: ProcessedPreviewColumn[];
   export let isLoading: boolean;
-  export let updateTypeRelatedOptions: (options: Column) => Promise<unknown>;
+  export let updateTypeRelatedOptions: (
+    options: RawColumnWithMetadata,
+  ) => Promise<unknown>;
   export let columnPropertiesMap: Record<number, ColumnProperties>;
   export let records: Record<string, unknown>[];
   /**
@@ -77,7 +79,7 @@
 <style lang="scss">
   .import-preview {
     :global([data-sheet-element='data-cell']) {
-      background: var(--inset-background-color);
+      background: var(--white);
     }
     :global([data-sheet-element='data-cell']:last-child),
     :global([data-sheet-element='column-header-cell']:last-child) {
@@ -88,6 +90,12 @@
           [data-sheet-element='data-cell']
       ) {
       border-bottom: none;
+    }
+  }
+
+  :global(body.theme-dark) .import-preview {
+    :global([data-sheet-element='data-cell']) {
+      background: var(--neutral-900);
     }
   }
 </style>

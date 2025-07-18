@@ -71,8 +71,8 @@ FLAGS:
             The install script prompts for environment variables like the connection
             string when it's missing or invalid. This flag disables that behaviour.
 
-            This flag needs to be used in conjunction with --connection-string, without
-            which it'll throw an error.
+            For new installations, this flag needs to be used in conjunction with
+            --connection-string, without which it'll throw an error.
 
     -f, --force-download-python
             Always download Python.
@@ -147,11 +147,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# If --no-prompt is enabled, a connection string is mandatory.
-if [[ "${NO_PROMPT}" = true ]] && [[ -z "${CONNECTION_STRING}" ]]; then
-  usage_err "When --no-prompt(or -n) is specified, you must provide a connection string via --connection-string(or -c)."
-fi
-
 if [[ -z "${INSTALL_DIR}" ]]; then
   usage_err "<install_dir> is required."
 fi
@@ -194,8 +189,66 @@ check_required_commands() {
   require_command tee
 }
 
-preflight_version_checks() {
+confirm() {
+  while true; do
+    read -rp "$1 [y/N] " reply
+    case "$reply" in
+      [Yy]*) break ;;
+      [Nn]*) err "Installation aborted by user." ;;
+      *) echo 'Please specify y or n' ;;
+    esac
+  done
+}
+
+check_connection_string_env_file_overwrite() {
+  # .env file would be present while upgrading or re-install.
+  # The user may have also chosen to write the env file first and then run the install script.
+
+  local env_file="${INSTALL_DIR}"/"${ENV_FILE_NAME}"
+  local env_file_is_present_and_has_postgres_vars=false
+
+  if [[ -f "${env_file}" ]]; then
+    if [[ ! -r "${env_file}" ]]; then
+      err "You do not have read permission on the existing environment file: ${env_file}"
+    fi
+
+    if grep -qE '^POSTGRES_[A-Za-z]*=' "${env_file}"; then
+      env_file_is_present_and_has_postgres_vars=true
+    fi
+  fi
+
+  # 1. connection_string: provided     , env file: does not have pg vars => proceed & use connection_string
+  # 2. connection_string: provided     , env file: has pg vars           => ask confirmation & use connection_string
+  # 3. connection_string: not provided , env file: has pg vars           => proceed & use env file
+  # 4. connection_string: not provided , env file: does not have pg vars => proceed & prompt for connection string (further down in code: setup_env_vars)
+  #                                                                         (If prompting is not allowed i.e. NO_PROMPT == true, throw error)
+
+  # When NO_PROMPT is true, proceed without confirmation in all cases above, except 4.
+  if [[ "${NO_PROMPT}" == true ]]; then
+    if [[ "${env_file_is_present_and_has_postgres_vars}" != true ]] && [[ -z "${CONNECTION_STRING}" ]]; then
+      usage_err "For new installations, when --no-prompt|-n is specified, you must provide a connection string via --connection-string|-c."
+    fi
+
+    return
+  fi
+
+  if [[ "${env_file_is_present_and_has_postgres_vars}" == true ]] && [[ -n "${CONNECTION_STRING}" ]]; then
+    cat <<EOF
+
+You've provided a connection string via -c|--connection-string.
+The installation directory already contains an environment file (.env) with existing variables for PostgreSQL connection settings.
+If you continue, the existing variables will be replaced with the values from the connection string you provided.
+
+EOF
+    confirm "Would you like to proceed?"
+  fi
+}
+
+preflight_checks() {
+  check_connection_string_env_file_overwrite
+
   # Check if Mathesar is already installed in the <install_dir>
+  # This check is based on the mathesar executable script, which would not be present in versions prior to 0.3.0
   if [[ -x "${INSTALL_DIR}/bin/mathesar" ]]; then
     local existing_bin="${INSTALL_DIR}/bin/mathesar"
     local installed_ver
@@ -224,7 +277,7 @@ preflight_version_checks() {
     return
   fi
 
-  # 2. Mathesar NOT present in <install_dir>; look for one in PATH
+  # Mathesar NOT present in <install_dir>, look for one in PATH
   if command_exists mathesar; then
     local other_bin
     other_bin=$(command -v mathesar)
@@ -238,13 +291,7 @@ preflight_version_checks() {
       err "Refusing to continue because --no-prompt is set. Run without --no-prompt or remove the existing Mathesar first."
     fi
 
-    while true; do
-      read -rp "Continue and install Mathesar ${MATHESAR_VERSION} to ${INSTALL_DIR}? [y/N] " reply
-      case "$reply" in
-        [Yy]*) break ;;
-        [Nn]*|"") err "Installation aborted by user." ;;
-      esac
-    done
+    confirm "Continue and install Mathesar ${MATHESAR_VERSION} to ${INSTALL_DIR}?"
   fi
 }
 
@@ -369,7 +416,7 @@ setup_env_vars() {
     fi
 
     if [[ $process_env_status -ne 0 ]]; then
-      if [[ "${NO_PROMPT}" = true ]]; then
+      if [[ "${NO_PROMPT}" == true ]]; then
         err "Invalid connection string or unable to connect."
       fi
 
@@ -420,7 +467,7 @@ make_mathesar_script_executable() {
 #=======INSTALLATION===========================================================
 
 check_required_commands
-preflight_version_checks
+preflight_checks
 create_directories
 download_and_extract_package
 install_uv

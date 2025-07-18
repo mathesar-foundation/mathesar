@@ -10,6 +10,7 @@
   export let columnIdentifierKey: SheetColumnIdentifierKey;
   export let cellSelectionId: string | undefined = undefined;
   export let selection: SheetSelection | undefined = undefined;
+  export let isWithinPlaceholderRow = false;
 
   $: style = getSheetCellStyle(columnIdentifierKey);
   $: ({ isActive, isSelected, hasSelectionBackground } = (() => {
@@ -31,6 +32,7 @@
 
 <div
   data-sheet-element="data-cell"
+  data-sheet-row-type={isWithinPlaceholderRow ? 'placeholder' : 'data'}
   data-cell-selection-id={cellSelectionId}
   data-cell-active={isActive ? '' : undefined}
   data-cell-selected={isSelected ? '' : undefined}
@@ -55,12 +57,12 @@
     user-select: none;
     -webkit-user-select: none; /* Safari */
     background: var(--cell-bg-color-base);
-    --sheet-cell-selection-bg: rgba(205, 192, 226, 0.3);
+    --sheet-cell-selection-bg: rgba(218, 238, 251, 0.5);
     line-height: 1.2;
   }
 
   :global(body.theme-dark) [data-sheet-element='data-cell'] {
-    --sheet-cell-selection-bg: rgba(84, 46, 145, 0.2);
+    --sheet-cell-selection-bg: rgba(15, 105, 193, 0.15);
   }
 
   [data-cell-active] {

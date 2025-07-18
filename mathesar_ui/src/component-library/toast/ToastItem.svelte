@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { derived } from 'svelte/store';
+
   import { iconClose } from '@mathesar-component-library-dir/common/icons';
   import { ensureReadable } from '@mathesar-component-library-dir/common/utils/storeUtils';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
@@ -8,9 +10,7 @@
   export let entry: ToastEntry;
 
   $: ({ props, controller } = entry);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   $: ({ progress, dismiss } = controller);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   $: ({ pause, resume } = progress);
 
   $: readableTitle = ensureReadable(props.title);
@@ -20,17 +20,33 @@
   );
   $: readableIcon = ensureReadable(props.icon);
   $: icon = $readableIcon;
-  $: readableBackgroundColor = ensureReadable(props.backgroundColor);
-  $: readableTextColor = ensureReadable(props.textColor);
-  $: readableProgressColor = ensureReadable(props.progressColor);
-  $: style = `
-    --toast-item-background-color: ${$readableBackgroundColor};
-    --toast-item-text-color: ${$readableTextColor};
-    --toast-item-progress-color: ${$readableProgressColor};
-  `;
+
+  $: style = derived(
+    [
+      ensureReadable(props.backgroundColor),
+      ensureReadable(props.textColor),
+      ensureReadable(props.progressColor),
+    ],
+    ([backgroundColor, textColor, progressColor]) => {
+      const styles: string[] = [];
+      function add(propertyName: string, value: string | undefined) {
+        if (!value) return;
+        styles.push(`${propertyName}: ${value};`);
+      }
+      add('--ToastItem__background-color', backgroundColor);
+      add('--ToastItem__text-color', textColor);
+      add('--ToastItem__progress-color', progressColor);
+      return styles.join(' ');
+    },
+  );
 </script>
 
-<div class="toast-item" on:mouseenter={pause} on:mouseleave={resume} {style}>
+<div
+  class="toast-item"
+  on:mouseenter={pause}
+  on:mouseleave={resume}
+  style={$style}
+>
   <div class="header">
     {#if icon}
       <div class="icon"><Icon {...icon} /></div>

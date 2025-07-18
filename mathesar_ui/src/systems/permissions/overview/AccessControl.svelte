@@ -130,8 +130,9 @@
     {#if $currentRoleOwns}
       <DropdownMenu
         label={$_('add_roles')}
+        triggerAppearance="secondary"
         icon={iconAddNew}
-        triggerAppearance="plain-primary"
+        triggerClass="padding-compact"
       >
         {#each [...roles.values()] as role (role.oid)}
           <ButtonMenuItem
@@ -199,7 +200,7 @@
     padding: 1rem 0;
 
     & + .access-control-row {
-      border-top: 1px solid var(--gray-100);
+      border-top: 1px solid var(--neutral-100);
     }
   }
 </style>

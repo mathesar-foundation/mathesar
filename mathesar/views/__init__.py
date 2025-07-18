@@ -2,7 +2,6 @@ from functools import wraps
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
@@ -120,7 +119,7 @@ def get_common_data(request, database_id=None, schema_oid=None):
     }
 
 
-class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
+class MathesarRPCEntryPoint(RPCEntryPoint):
     pass
 
 
