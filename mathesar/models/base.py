@@ -294,12 +294,12 @@ class Form(BaseModel):
     server = models.ForeignKey('Server', on_delete=models.CASCADE)
     schema_oid = models.PositiveBigIntegerField()
     base_table_oid = models.PositiveBigIntegerField()
-    access_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
+    associated_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
     # Header related settings
     header_title = models.JSONField()
     header_subtitle = models.JSONField(null=True)
-    # Sharing settings
-    share_public = models.BooleanField(default=False)
+    # Publishing settings
+    publish_public = models.BooleanField(default=False)
     # Submission related settings
     submit_message = models.JSONField(null=True)
     submit_redirect_url = models.URLField(null=True)
@@ -307,15 +307,15 @@ class Form(BaseModel):
 
     @property
     def connection(self):
-        if not self.access_role:
+        if not self.associated_role:
             raise exceptions.NoConnectionAvailable
 
         return mathesar_connection(
             host=self.database.server.host,
             port=self.database.server.port,
             dbname=self.database.name,
-            user=self.access_role.name,
-            password=self.access_role.password,
+            user=self.associated_role.name,
+            password=self.associated_role.password,
             application_name='mathesar.models.base.Form.connection',
         )
 

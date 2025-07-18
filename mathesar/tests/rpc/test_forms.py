@@ -25,10 +25,10 @@ test_data_form1 = {
         server_id=1,
         schema_oid=18145,
         base_table_oid=18152,
-        access_role_id=121,
+        associated_role_id=121,
         header_title={"title": "text"},
         header_subtitle=None,
-        share_public=False,
+        publish_public=False,
         submit_message=None,
         submit_redirect_url=None,
         submit_button_label=None,
@@ -91,12 +91,12 @@ test_data_form1 = {
         "database_id": 1,
         "schema_oid": 18145,
         "base_table_oid": 18152,
-        "access_role_id": 121,
+        "associated_role_id": 121,
         "header_title": {
             "title": "text"
         },
         "header_subtitle": None,
-        "share_public": False,
+        "publish_public": False,
         "submit_message": None,
         "submit_redirect_url": None,
         "submit_button_label": None,
@@ -190,7 +190,7 @@ def test_forms_add(rf, monkeypatch):
         "database_id": 1,
         "schema_oid": 18145,
         "base_table_oid": 18152,
-        "access_role_id": 121,
+        "associated_role_id": 121,
         "header_title": {"title": "text"},
         "fields": [
             {
