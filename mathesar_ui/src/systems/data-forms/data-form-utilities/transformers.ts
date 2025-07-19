@@ -1,8 +1,8 @@
 import type {
-  RawDataFormGetResponse,
+  RawDataFormSource,
   RawEphemeralDataFormField,
 } from '@mathesar/api/rpc/forms';
-import { ProcessedColumn } from '@mathesar/stores/table-data';
+import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
@@ -12,8 +12,9 @@ import type {
 } from './AbstractEphemeralField';
 import { EphermeralFkField } from './EphemeralFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
+import { FieldColumn } from './FieldColumn';
 
-export function columnToEphemeralField(
+export function processedColumnToEphemeralField(
   pc: ProcessedColumn,
   tableStructureSubstance: TableStructureSubstance,
   parentField: ParentEphemeralField,
@@ -29,7 +30,6 @@ export function columnToEphemeralField(
     styling: {},
   };
   if (pc.linkFk) {
-    const fkConstraintOid = pc.linkFk.oid;
     const referentTableOid = pc.linkFk.referent_table_oid;
     const referenceTableName = tableStructureSubstance.linksInTable.find(
       (lnk) => lnk.table.oid === referentTableOid,
@@ -37,15 +37,14 @@ export function columnToEphemeralField(
     return new EphermeralFkField(parentField, {
       ...baseProps,
       label: referenceTableName ?? baseProps.label,
-      processedColumn: pc,
+      fieldColumn: FieldColumn.fromProcessedColumn(pc),
       interactionRule: 'must_pick',
-      fkConstraintOid,
       relatedTableOid: referentTableOid,
     });
   }
   return new EphermeralScalarField(parentField, {
     ...baseProps,
-    processedColumn: pc,
+    fieldColumn: FieldColumn.fromProcessedColumn(pc),
   });
 }
 
@@ -56,7 +55,7 @@ export function tableStructureSubstanceToEphemeralFields(
   return [...tableStructureSubstance.processedColumns.values()]
     .filter((pc) => !pc.column.default?.is_dynamic)
     .map((c, index) => {
-      const ef = columnToEphemeralField(
+      const ef = processedColumnToEphemeralField(
         c,
         tableStructureSubstance,
         parentField,
@@ -67,11 +66,13 @@ export function tableStructureSubstanceToEphemeralFields(
 }
 
 function getColumnDetailFromFormSource(
-  formSource: RawDataFormGetResponse['field_col_info_map'],
+  formSource: RawDataFormSource,
   tableOid: number,
   columnAttnum: number,
 ) {
-  const tableContainer = formSource.tables[tableOid];
+  // TODO_FORMS: Do not let these errors break UI.
+
+  const tableContainer = formSource[tableOid];
   if (!tableContainer) {
     throw new Error(
       `Form source does not include table information for oid: ${tableOid}`,
@@ -88,26 +89,11 @@ function getColumnDetailFromFormSource(
   return columnInfo;
 }
 
-function getConstraintDetailFromFormSource(
-  formSource: RawDataFormGetResponse['field_col_info_map'],
-  constraintOid: number,
-) {
-  const constraintInfo = formSource.constraints[constraintOid];
-
-  if (!constraintInfo) {
-    throw new Error(
-      `Form source does not include constraint information oid: ${constraintOid}`,
-    );
-  }
-
-  return constraintInfo;
-}
-
 export function rawEphemeralFieldToEphemeralField(
   rawEphemeralField: RawEphemeralDataFormField,
   parentField: ParentEphemeralField | null,
   baseTableOid: number,
-  formSource: RawDataFormGetResponse['field_col_info_map'],
+  formSource: RawDataFormSource,
 ): EphemeralDataFormField {
   const baseProps = {
     key: rawEphemeralField.key,
@@ -131,11 +117,9 @@ export function rawEphemeralFieldToEphemeralField(
 
     return new EphermeralScalarField(parentField, {
       ...baseProps,
-      processedColumn: new ProcessedColumn({
+      fieldColumn: new FieldColumn({
         tableOid: parentTableOid,
         column: columnDetails,
-        columnIndex: 0,
-        constraints: [],
       }),
     });
   }
@@ -146,21 +130,16 @@ export function rawEphemeralFieldToEphemeralField(
     rawEphemeralField.column_attnum,
   );
 
-  const constraintDetails = getConstraintDetailFromFormSource(
-    formSource,
-    rawEphemeralField.constraint_oid,
-  );
-
   const fkField = new EphermeralFkField(parentField, {
     ...baseProps,
-    processedColumn: new ProcessedColumn({
+    fieldColumn: new FieldColumn({
       tableOid: parentTableOid,
       column: columnDetails,
-      columnIndex: 0,
-      constraints: [constraintDetails],
+      foreignKeyLink: {
+        relatedTableOid: rawEphemeralField.related_table_oid,
+      },
     }),
     interactionRule: rawEphemeralField.fk_interaction_rule,
-    fkConstraintOid: constraintDetails.oid,
     relatedTableOid: rawEphemeralField.related_table_oid,
   });
 

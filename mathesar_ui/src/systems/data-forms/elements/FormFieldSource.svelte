@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
 
   import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
@@ -26,8 +26,12 @@
   </div>
   <span>.</span>
   <div class="tag">
-    <ProcessedColumnName
-      processedColumn={dataFormField.processedColumn}
+    <ColumnName
+      column={{
+        ...dataFormField.fieldColumn.column,
+        constraintsType:
+          dataFormField.kind === 'foreign_key' ? ['foreignkey'] : [],
+      }}
       alwaysShowTooltip={true}
     />
   </div>

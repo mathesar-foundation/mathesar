@@ -14,7 +14,7 @@
 
   import type { ParentEphemeralField } from '../../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
-  import { columnToEphemeralField } from '../../data-form-utilities/transformers';
+  import { processedColumnToEphemeralField } from '../../data-form-utilities/transformers';
 
   import AddFormColumnFieldItem from './AddFormColumnFieldItem.svelte';
 
@@ -50,7 +50,7 @@
   ) {
     const result = await tableStructureAsyncStore.tick();
     if (result.resolvedValue) {
-      const epf = columnToEphemeralField(
+      const epf = processedColumnToEphemeralField(
         processedColumn,
         result.resolvedValue,
         parentField,

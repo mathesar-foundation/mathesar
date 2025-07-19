@@ -2,7 +2,7 @@ import { type Readable, type Writable, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
-  RawDataFormGetResponse,
+  RawDataFormSource,
   RawEphemeralDataForm,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
@@ -90,7 +90,7 @@ export class EphemeralDataForm {
 
   static fromRawEphemeralDataForm(
     rawEphemeralDataForm: RawEphemeralDataForm,
-    formSource: RawDataFormGetResponse['field_col_info_map'],
+    formSource: RawDataFormSource,
   ) {
     return new EphemeralDataForm({
       baseTableOid: rawEphemeralDataForm.base_table_oid,
