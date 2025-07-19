@@ -33,10 +33,10 @@ export class EphemeralDataForm {
     return this._description;
   }
 
-  private _accessRoleId;
+  private _associatedRoleId;
 
-  get accessRoleId(): Readable<RawDataForm['access_role_id']> {
-    return this._accessRoleId;
+  get associatedRoleId(): Readable<RawDataForm['associated_role_id']> {
+    return this._associatedRoleId;
   }
 
   fields: FormFields;
@@ -47,7 +47,7 @@ export class EphemeralDataForm {
     databaseId: number;
     name: Writable<RawDataForm['name']>;
     description: Writable<RawDataForm['description']>;
-    accessRoleId: Writable<RawDataForm['access_role_id']>;
+    associatedRoleId: Writable<RawDataForm['associated_role_id']>;
     fields: Iterable<EphemeralDataFormField>;
   }) {
     this.baseTableOid = edf.baseTableOid;
@@ -55,7 +55,7 @@ export class EphemeralDataForm {
     this.databaseId = edf.databaseId;
     this._name = edf.name;
     this._description = edf.description;
-    this._accessRoleId = edf.accessRoleId;
+    this._associatedRoleId = edf.associatedRoleId;
     this.fields = new FormFields(edf.fields);
   }
 
@@ -75,7 +75,7 @@ export class EphemeralDataForm {
       name: get(this.name),
       description: get(this.description),
       version: 1,
-      access_role_id: get(this.accessRoleId),
+      associated_role_id: get(this.associatedRoleId),
       header_title: {
         text: get(this.name),
       },
@@ -98,7 +98,7 @@ export class EphemeralDataForm {
       databaseId: rawEphemeralDataForm.database_id,
       name: writable(rawEphemeralDataForm.name),
       description: writable(rawEphemeralDataForm.description),
-      accessRoleId: writable(rawEphemeralDataForm.access_role_id),
+      associatedRoleId: writable(rawEphemeralDataForm.associated_role_id),
       fields: rawEphemeralDataForm.fields.map((field) =>
         rawEphemeralFieldToEphemeralField(
           field,
@@ -117,7 +117,7 @@ export class EphemeralDataForm {
       databaseId: tableStructureSubstance.table.schema.database.id,
       name: writable(tableStructureSubstance.table.name),
       description: writable(null),
-      accessRoleId: writable(null),
+      associatedRoleId: writable(null),
       fields: tableStructureSubstanceToEphemeralFields(
         tableStructureSubstance,
         null,

@@ -44,7 +44,7 @@
     <InspectorTabContent>
       <InspectorSection title={$_('header')}></InspectorSection>
       <InspectorSection title={$_('source')}></InspectorSection>
-      <InspectorSection title={$_('access_role')}></InspectorSection>
+      <InspectorSection title={$_('associated_role')}></InspectorSection>
       <InspectorSection title={$_('submission_settings')}></InspectorSection>
       <InspectorSection title={$_('sharing_settings')}></InspectorSection>
     </InspectorTabContent>

@@ -28,10 +28,10 @@ export class DataForm {
     return this._description;
   }
 
-  private _accessRoleId;
+  private _associatedRoleId;
 
-  get accessRoleId(): Readable<RawDataForm['access_role_id']> {
-    return this._accessRoleId;
+  get associatedRoleId(): Readable<RawDataForm['associated_role_id']> {
+    return this._associatedRoleId;
   }
 
   private _token;
@@ -40,12 +40,12 @@ export class DataForm {
     return this._token;
   }
 
-  readonly _shareSettings;
+  readonly _publishingSettings;
 
-  get shareSettings(): Readable<{
-    isSharedPublicly: RawDataForm['share_public'];
+  get publishingSettings(): Readable<{
+    isPublishedPublicly: RawDataForm['publish_public'];
   }> {
-    return this._shareSettings;
+    return this._publishingSettings;
   }
 
   private _formDefinition;
@@ -70,10 +70,10 @@ export class DataForm {
     this.baseTableOId = props.rawDataForm.base_table_oid;
     this._name = writable(props.rawDataForm.name);
     this._description = writable(props.rawDataForm.description);
-    this._accessRoleId = writable(props.rawDataForm.access_role_id);
+    this._associatedRoleId = writable(props.rawDataForm.associated_role_id);
     this._token = writable(props.rawDataForm.token);
-    this._shareSettings = writable({
-      isSharedPublicly: props.rawDataForm.share_public,
+    this._publishingSettings = writable({
+      isPublishedPublicly: props.rawDataForm.publish_public,
     });
     this._formDefinition = writable({
       version: props.rawDataForm.version,
@@ -106,10 +106,10 @@ export class DataForm {
           .then((rawDataForm) => {
             this._name.set(rawDataForm.name);
             this._description.set(rawDataForm.description);
-            this._accessRoleId.set(rawDataForm.access_role_id);
+            this._associatedRoleId.set(rawDataForm.associated_role_id);
             this._token.set(rawDataForm.token);
-            this._shareSettings.set({
-              isSharedPublicly: rawDataForm.share_public,
+            this._publishingSettings.set({
+              isPublishedPublicly: rawDataForm.publish_public,
             });
             this._formDefinition.set({
               version: rawDataForm.version,
@@ -149,11 +149,11 @@ export class DataForm {
       header_title: formDefinition.headerTitle,
       header_subtitle: formDefinition.headerSubtitle,
       fields: formDefinition.fields,
-      access_role_id: get(this.accessRoleId),
+      associated_role_id: get(this.associatedRoleId),
       submit_message: formDefinition.submissionSettings.message,
       submit_redirect_url: formDefinition.submissionSettings.redirectUrl,
       submit_button_label: formDefinition.submissionSettings.buttonLabel,
-      share_public: get(this.shareSettings).isSharedPublicly,
+      publish_public: get(this.publishingSettings).isPublishedPublicly,
     };
   }
 }

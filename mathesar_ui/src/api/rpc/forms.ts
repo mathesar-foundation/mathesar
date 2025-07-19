@@ -54,7 +54,7 @@ export interface RawEphemeralDataForm {
   name: string;
   description: string | null;
   version: number;
-  access_role_id: RawConfiguredRole['id'] | null;
+  associated_role_id: RawConfiguredRole['id'] | null;
   header_title: RichTextJson;
   header_subtitle: RichTextJson | null;
   fields: RawEphemeralDataFormField[];
@@ -92,7 +92,7 @@ export interface RawDataForm extends RawEphemeralDataForm {
   id: number;
   token: string;
   fields: RawDataFormField[];
-  share_public: boolean;
+  publish_public: boolean;
 }
 
 export interface RawDataFormResponse extends RawDataForm {
