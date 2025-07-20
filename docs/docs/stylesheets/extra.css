@@ -410,3 +410,47 @@ p:has(a[href^="https://github.com/mathesar-foundation/mathesar/pull/"])
   position: relative;
   z-index: 20;
 }
+
+/* Hacky style to add padding to the top of the digital ocean one-click-deployment button: */
+a[href^="https://cloud.digitalocean.com/apps"] {
+  margin-top: .5rem;
+  display: inline-block;
+}
+
+
+/* Styles for the generate-secret-key.md snippet: */
+.generate-section {
+  margin-top: .5rem;
+  display: block;
+}
+
+.key-container {
+  gap: .5rem;
+  display: none;
+  flex-wrap: wrap;
+}
+
+.button {
+  border: 2px solid rgb(80 41 68);
+  padding: .5rem 1rem;
+  display: inline-block;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: .5rem;
+}
+
+.primary-button {
+  background-color: var(--salmon-dark);
+  border: 2px solid var(--salmon-dark);
+  color: white;
+}
+
+.secret-key {
+  font-family: monospace;
+  padding: 0.5rem;
+  flex-grow: 1;
+  width: 100%;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  word-break: break-all;
+}
