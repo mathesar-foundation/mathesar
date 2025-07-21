@@ -40,7 +40,7 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
     return this._selectedElement;
   }
 
-  private schema: Schema;
+  readonly schema: Schema;
 
   private tableStructureCache;
 

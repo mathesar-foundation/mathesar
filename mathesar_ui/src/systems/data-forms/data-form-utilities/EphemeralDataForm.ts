@@ -51,6 +51,16 @@ export class EphemeralDataForm {
     return this._associatedRoleId;
   }
 
+  private _submissionSettings;
+
+  get submissionSettings(): Readable<{
+    message?: RawDataForm['submit_message'];
+    redirectUrl?: RawDataForm['submit_redirect_url'];
+    buttonLabel?: RawDataForm['submit_button_label'];
+  }> {
+    return this._submissionSettings;
+  }
+
   fields: FormFields;
 
   constructor(edf: {
@@ -62,6 +72,11 @@ export class EphemeralDataForm {
     headerTitle: Writable<RawDataForm['header_title']>;
     headerSubTitle: Writable<RawDataForm['header_subtitle']>;
     associatedRoleId: Writable<RawDataForm['associated_role_id']>;
+    submissionSettings: Writable<{
+      message?: RawDataForm['submit_message'];
+      redirectUrl?: RawDataForm['submit_redirect_url'];
+      buttonLabel?: RawDataForm['submit_button_label'];
+    }>;
     fields: Iterable<EphemeralDataFormField>;
   }) {
     this.baseTableOid = edf.baseTableOid;
@@ -72,6 +87,7 @@ export class EphemeralDataForm {
     this._headerTitle = edf.headerTitle;
     this._headerSubTitle = edf.headerSubTitle;
     this._associatedRoleId = edf.associatedRoleId;
+    this._submissionSettings = edf.submissionSettings;
     this.fields = new FormFields(edf.fields);
   }
 
@@ -93,6 +109,35 @@ export class EphemeralDataForm {
     this._headerSubTitle.set({
       text: subTitle,
     });
+  }
+
+  setAssociatedRoleId(configuredRoleId: number | null) {
+    this._associatedRoleId.set(configuredRoleId);
+  }
+
+  setSubmissionMessage(message: string | null) {
+    this._submissionSettings.update((settings) => ({
+      ...settings,
+      message: message
+        ? {
+            text: message,
+          }
+        : null,
+    }));
+  }
+
+  setSubmissionRedirectUrl(url: string | null) {
+    this._submissionSettings.update((settings) => ({
+      ...settings,
+      redirectUrl: url,
+    }));
+  }
+
+  setSubmissionButtonLabel(label: string | null) {
+    this._submissionSettings.update((settings) => ({
+      ...settings,
+      buttonLabel: label,
+    }));
   }
 
   toRawEphemeralDataForm(): RawEphemeralDataForm {
@@ -127,6 +172,11 @@ export class EphemeralDataForm {
       headerTitle: writable(rawEphemeralDataForm.header_title),
       headerSubTitle: writable(rawEphemeralDataForm.header_subtitle),
       associatedRoleId: writable(rawEphemeralDataForm.associated_role_id),
+      submissionSettings: writable({
+        message: rawEphemeralDataForm.submit_message,
+        redirectUrl: rawEphemeralDataForm.submit_redirect_url,
+        buttonLabel: rawEphemeralDataForm.submit_button_label,
+      }),
       fields: rawEphemeralDataForm.fields.map((field) =>
         rawEphemeralFieldToEphemeralField(
           field,
@@ -150,6 +200,7 @@ export class EphemeralDataForm {
       }),
       headerSubTitle: writable(null),
       associatedRoleId: writable(null),
+      submissionSettings: writable({}),
       fields: tableStructureSubstanceToEphemeralFields(
         tableStructureSubstance,
         null,
