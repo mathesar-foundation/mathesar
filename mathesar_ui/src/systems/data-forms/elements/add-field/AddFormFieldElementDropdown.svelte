@@ -1,20 +1,18 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import {
     DropdownMenu,
     MenuDivider,
-    MenuHeading,
     Spinner,
   } from '@mathesar-component-library';
 
   import type { ParentEphemeralField } from '../../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
-  import { processedColumnToEphemeralField } from '../../data-form-utilities/transformers';
+  import { FieldColumn } from '../../data-form-utilities/FieldColumn';
+  import { fieldColumnToEphemeralField } from '../../data-form-utilities/transformers';
 
   import AddFormColumnFieldItem from './AddFormColumnFieldItem.svelte';
 
@@ -31,27 +29,22 @@
 
   $: tableStructure = dataFormManager.getTableStructure(tableOidOfField);
   $: ({ processedColumns, isLoading } = tableStructure);
-  $: scalarColumns = [...$processedColumns.values()].filter((pc) => !pc.linkFk);
-  $: fkProcessedColumns = [...$processedColumns.values()].filter(
-    (pc) => pc.linkFk,
+  $: fieldColumns = [...$processedColumns.values()].map((pc) =>
+    FieldColumn.fromProcessedColumn(pc),
   );
   $: tableStructureAsyncStore = tableStructure.asyncStore;
   $: tableStructureSubstance = $tableStructureAsyncStore.resolvedValue;
   $: table = tableStructureSubstance?.table;
-  $: linksToTable = tableStructureSubstance?.linksToTable;
 
   $: parentFieldsList = parentField
     ? parentField.nestedFields
     : ephemeralDataForm.fields;
 
-  async function addColumnAsField(
-    processedColumn: ProcessedColumn,
-    close: () => void,
-  ) {
+  async function addColumnAsField(fc: FieldColumn, close: () => void) {
     const result = await tableStructureAsyncStore.tick();
     if (result.resolvedValue) {
-      const epf = processedColumnToEphemeralField(
-        processedColumn,
+      const epf = fieldColumnToEphemeralField(
+        fc,
         result.resolvedValue,
         parentField,
         insertionIndex,
@@ -81,33 +74,13 @@
         {/if}
       </div>
       <MenuDivider />
-      {#each scalarColumns as processedColumn (processedColumn.id)}
+      {#each fieldColumns as fieldColumn (fieldColumn.column.id)}
         <AddFormColumnFieldItem
-          {processedColumn}
-          parentHasColumn={parentFieldsList.hasScalarColumn(processedColumn)}
-          on:click={() => addColumnAsField(processedColumn, close)}
+          {fieldColumn}
+          parentHasColumn={parentFieldsList.hasColumn(fieldColumn)}
+          on:click={() => addColumnAsField(fieldColumn, close)}
         />
       {/each}
-      {#if fkProcessedColumns.length > 0}
-        <MenuHeading>
-          <RichText
-            text={$_('references_in_this_table')}
-            let:slotName
-            let:translatedArg
-          >
-            {#if slotName === 'bold'}
-              <strong>{translatedArg}</strong>
-            {/if}
-          </RichText>
-        </MenuHeading>
-        {#each fkProcessedColumns as processedColumn (processedColumn.id)}
-          <AddFormColumnFieldItem
-            {processedColumn}
-            parentHasColumn={parentFieldsList.hasFkColumn(processedColumn)}
-            on:click={() => addColumnAsField(processedColumn, close)}
-          />
-        {/each}
-      {/if}
     {/if}
   </DropdownMenu>
 </div>

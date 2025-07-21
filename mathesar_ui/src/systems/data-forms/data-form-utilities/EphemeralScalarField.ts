@@ -28,7 +28,7 @@ export class EphermeralScalarField extends AbstractEphemeralField {
     this.fieldStore = optionalField(null);
   }
 
-  hasSource(fieldColumn: FieldColumn) {
+  hasColumn(fieldColumn: FieldColumn) {
     return (
       this.fieldColumn.tableOid === fieldColumn.tableOid &&
       this.fieldColumn.column.id === fieldColumn.column.id
@@ -38,7 +38,7 @@ export class EphermeralScalarField extends AbstractEphemeralField {
   isConceptuallyEqual(dataFormField: EphemeralDataFormField) {
     return (
       dataFormField.kind === this.kind &&
-      this.hasSource(dataFormField.fieldColumn)
+      this.hasColumn(dataFormField.fieldColumn)
     );
   }
 

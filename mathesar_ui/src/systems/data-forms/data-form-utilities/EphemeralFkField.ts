@@ -65,7 +65,7 @@ export class EphermeralFkField extends AbstractParentEphemeralField {
     }
   }
 
-  hasSource(fieldColumn: FieldColumn) {
+  hasColumn(fieldColumn: FieldColumn) {
     return (
       this.fieldColumn.tableOid === fieldColumn.tableOid &&
       this.fieldColumn.column.id === fieldColumn.column.id &&
@@ -76,7 +76,7 @@ export class EphermeralFkField extends AbstractParentEphemeralField {
   isConceptuallyEqual(dataFormField: EphemeralDataFormField) {
     return (
       dataFormField.kind === this.kind &&
-      this.hasSource(dataFormField.fieldColumn)
+      this.hasColumn(dataFormField.fieldColumn)
     );
   }
 

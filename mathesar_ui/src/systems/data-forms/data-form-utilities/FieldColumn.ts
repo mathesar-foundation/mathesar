@@ -21,9 +21,9 @@ export class FieldColumn {
 
   readonly abstractType: AbstractType;
 
-  readonly foreignKeyLink?: {
+  readonly foreignKeyLink: {
     relatedTableOid: number;
-  };
+  } | null;
 
   readonly inputComponentAndProps: ComponentAndProps;
 
@@ -36,7 +36,7 @@ export class FieldColumn {
   }) {
     this.tableOid = props.tableOid;
     this.column = props.column;
-    this.foreignKeyLink = props.foreignKeyLink;
+    this.foreignKeyLink = props.foreignKeyLink ?? null;
     this.abstractType = getAbstractTypeForDbType(this.column.type);
     this.inputComponentAndProps = getDbTypeBasedInputCap(
       this.column,

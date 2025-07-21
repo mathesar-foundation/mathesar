@@ -2,7 +2,6 @@ import type {
   RawDataFormSource,
   RawEphemeralDataFormField,
 } from '@mathesar/api/rpc/forms';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
@@ -14,37 +13,37 @@ import { EphermeralFkField } from './EphemeralFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
 import { FieldColumn } from './FieldColumn';
 
-export function processedColumnToEphemeralField(
-  pc: ProcessedColumn,
+export function fieldColumnToEphemeralField(
+  fc: FieldColumn,
   tableStructureSubstance: TableStructureSubstance,
   parentField: ParentEphemeralField,
   index: number,
 ): EphermeralFkField | EphermeralScalarField {
   const baseProps = {
     key: getGloballyUniqueId(),
-    label: pc.column.name,
+    label: fc.column.name,
     help: null,
     placeholder: null,
     index,
     isRequired: false,
     styling: {},
   };
-  if (pc.linkFk) {
-    const referentTableOid = pc.linkFk.referent_table_oid;
+  if (fc.foreignKeyLink) {
+    const referentTableOid = fc.foreignKeyLink.relatedTableOid;
     const referenceTableName = tableStructureSubstance.linksInTable.find(
       (lnk) => lnk.table.oid === referentTableOid,
     )?.table.name;
     return new EphermeralFkField(parentField, {
       ...baseProps,
       label: referenceTableName ?? baseProps.label,
-      fieldColumn: FieldColumn.fromProcessedColumn(pc),
+      fieldColumn: fc,
       interactionRule: 'must_pick',
       relatedTableOid: referentTableOid,
     });
   }
   return new EphermeralScalarField(parentField, {
     ...baseProps,
-    fieldColumn: FieldColumn.fromProcessedColumn(pc),
+    fieldColumn: fc,
   });
 }
 
@@ -55,8 +54,8 @@ export function tableStructureSubstanceToEphemeralFields(
   return [...tableStructureSubstance.processedColumns.values()]
     .filter((pc) => !pc.column.default?.is_dynamic)
     .map((c, index) => {
-      const ef = processedColumnToEphemeralField(
-        c,
+      const ef = fieldColumnToEphemeralField(
+        FieldColumn.fromProcessedColumn(c),
         tableStructureSubstance,
         parentField,
         index,

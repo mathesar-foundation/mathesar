@@ -7,10 +7,10 @@ import {
   get,
 } from 'svelte/store';
 
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import { WritableSet } from '@mathesar-component-library';
 
 import type { EphemeralDataFormField } from './AbstractEphemeralField';
+import type { FieldColumn } from './FieldColumn';
 
 export class FormFields {
   private fieldSet: WritableSet<EphemeralDataFormField>;
@@ -63,20 +63,11 @@ export class FormFields {
     );
   }
 
-  hasScalarColumn(pc: ProcessedColumn) {
+  hasColumn(fc: FieldColumn) {
     return derived(this.fieldSet, ($fieldSet) =>
       execPipe(
         $fieldSet.values(),
-        some((f) => f.kind === 'scalar_column' && f.hasSource(pc)),
-      ),
-    );
-  }
-
-  hasFkColumn(pc: ProcessedColumn) {
-    return derived(this.fieldSet, ($fieldSet) =>
-      execPipe(
-        $fieldSet.values(),
-        some((f) => f.kind === 'foreign_key' && f.hasSource(pc)),
+        some((f) => f.hasColumn(fc)),
       ),
     );
   }
