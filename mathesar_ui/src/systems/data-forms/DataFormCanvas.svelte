@@ -4,18 +4,19 @@
   import { dataFormInspectorWidth } from '@mathesar/stores/localStorage';
   import { WithPanel } from '@mathesar-component-library';
 
+  import DataFormConfigPanel from './config-panel/DataFormConfigPanel.svelte';
   import {
     type DataFormManager,
     EditableDataFormManager,
   } from './data-form-utilities/DataFormManager';
   import DataFormBuildArea from './DataFormBuildArea.svelte';
-  import DataFormInspector from './DataFormInspector.svelte';
 
   export let dataFormManager: DataFormManager;
 </script>
 
 <div class="data-form-canvas">
   <WithPanel
+    placement="left"
     bind:sizePx={$dataFormInspectorWidth}
     minSizePx={200}
     maxSizePx={600}
@@ -26,7 +27,7 @@
     </div>
     <div class="data-form-inspector-panel" slot="panel">
       {#if dataFormManager instanceof EditableDataFormManager}
-        <DataFormInspector {dataFormManager} />
+        <DataFormConfigPanel {dataFormManager} />
       {/if}
     </div>
   </WithPanel>

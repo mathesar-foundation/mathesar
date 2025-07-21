@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import { type Writable, writable } from 'svelte/store';
+import { type Readable, type Writable, writable } from 'svelte/store';
 
 import type { Schema } from '@mathesar/models/Schema';
 import { Table } from '@mathesar/models/Table';
@@ -34,7 +34,11 @@ interface SelectedFieldElement {
 export type SelectedElement = SelectedStaticElement | SelectedFieldElement;
 
 export class EditableDataFormManager extends ReadonlyDataFormManager {
-  selectedElement: Writable<SelectedElement | undefined> = writable();
+  private _selectedElement: Writable<SelectedElement | undefined> = writable();
+
+  get selectedElement(): Readable<SelectedElement | undefined> {
+    return this._selectedElement;
+  }
 
   private schema: Schema;
 
@@ -51,11 +55,11 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
   }
 
   selectElement(element: SelectedElement) {
-    this.selectedElement.set(element);
+    this._selectedElement.set(element);
   }
 
   resetSelectedElement() {
-    this.selectedElement.set(undefined);
+    this._selectedElement.set(undefined);
   }
 
   getTableStructure(tableOrOid: Table | number) {
