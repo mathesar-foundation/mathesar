@@ -33,6 +33,18 @@ export class EphemeralDataForm {
     return this._description;
   }
 
+  private _headerTitle;
+
+  get headerTitle(): Readable<RawDataForm['header_title']> {
+    return this._headerTitle;
+  }
+
+  private _headerSubTitle;
+
+  get headerSubTitle(): Readable<RawDataForm['header_subtitle']> {
+    return this._headerSubTitle;
+  }
+
   private _associatedRoleId;
 
   get associatedRoleId(): Readable<RawDataForm['associated_role_id']> {
@@ -47,6 +59,8 @@ export class EphemeralDataForm {
     databaseId: number;
     name: Writable<RawDataForm['name']>;
     description: Writable<RawDataForm['description']>;
+    headerTitle: Writable<RawDataForm['header_title']>;
+    headerSubTitle: Writable<RawDataForm['header_subtitle']>;
     associatedRoleId: Writable<RawDataForm['associated_role_id']>;
     fields: Iterable<EphemeralDataFormField>;
   }) {
@@ -55,6 +69,8 @@ export class EphemeralDataForm {
     this.databaseId = edf.databaseId;
     this._name = edf.name;
     this._description = edf.description;
+    this._headerTitle = edf.headerTitle;
+    this._headerSubTitle = edf.headerSubTitle;
     this._associatedRoleId = edf.associatedRoleId;
     this.fields = new FormFields(edf.fields);
   }
@@ -65,6 +81,18 @@ export class EphemeralDataForm {
 
   setDescription(description: string) {
     this._description.set(description);
+  }
+
+  setHeaderTitle(title: string) {
+    this._headerTitle.set({
+      text: title,
+    });
+  }
+
+  setHeaderSubTitle(subTitle: string) {
+    this._headerSubTitle.set({
+      text: subTitle,
+    });
   }
 
   toRawEphemeralDataForm(): RawEphemeralDataForm {
@@ -79,9 +107,7 @@ export class EphemeralDataForm {
       header_title: {
         text: get(this.name),
       },
-      header_subtitle: {
-        text: get(this.description) ?? '',
-      },
+      header_subtitle: get(this.headerSubTitle),
       fields: [...get(this.fields).values()].map((field) =>
         field.toRawEphemeralField(),
       ),
@@ -98,6 +124,8 @@ export class EphemeralDataForm {
       databaseId: rawEphemeralDataForm.database_id,
       name: writable(rawEphemeralDataForm.name),
       description: writable(rawEphemeralDataForm.description),
+      headerTitle: writable(rawEphemeralDataForm.header_title),
+      headerSubTitle: writable(rawEphemeralDataForm.header_subtitle),
       associatedRoleId: writable(rawEphemeralDataForm.associated_role_id),
       fields: rawEphemeralDataForm.fields.map((field) =>
         rawEphemeralFieldToEphemeralField(
@@ -117,6 +145,10 @@ export class EphemeralDataForm {
       databaseId: tableStructureSubstance.table.schema.database.id,
       name: writable(tableStructureSubstance.table.name),
       description: writable(null),
+      headerTitle: writable({
+        text: tableStructureSubstance.table.name,
+      }),
+      headerSubTitle: writable(null),
       associatedRoleId: writable(null),
       fields: tableStructureSubstanceToEphemeralFields(
         tableStructureSubstance,

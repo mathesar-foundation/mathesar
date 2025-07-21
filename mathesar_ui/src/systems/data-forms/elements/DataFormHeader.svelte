@@ -11,7 +11,7 @@
   export let dataFormManager: DataFormManager;
 
   $: ({ ephemeralDataForm } = dataFormManager);
-  $: ({ name, description } = ephemeralDataForm);
+  $: ({ headerTitle, headerSubTitle } = ephemeralDataForm);
 
   function getInputValue(e: Event) {
     const element = e.target as HTMLInputElement;
@@ -21,14 +21,14 @@
   function onTitleInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       const updatedName = getInputValue(e);
-      ephemeralDataForm.setName(updatedName);
+      ephemeralDataForm.setHeaderTitle(updatedName);
     }
   }
 
   function onSubtitleInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       const updatedDesc = getInputValue(e);
-      ephemeralDataForm.setDescription(updatedDesc);
+      ephemeralDataForm.setHeaderSubTitle(updatedDesc);
     }
   }
 </script>
@@ -45,12 +45,12 @@
         class="form-title"
         type="text"
         placeholder={$_('add_form_title')}
-        value={$name}
+        value={$headerTitle.text}
         on:input={onTitleInput}
       />
     {:else}
       <h1 class="form-title">
-        {$name}
+        {$headerTitle.text}
       </h1>
     {/if}
   </SelectableElement>
@@ -58,15 +58,15 @@
   <SelectableElement element={{ type: 'subtitle' }} {dataFormManager}>
     {#if dataFormManager instanceof EditableDataFormManager}
       <textarea
-        placeholder={$_('add_form_description')}
+        placeholder={$_('add_form_subtitle')}
         class="form-description"
         type="text"
-        value={$description}
+        value={$headerSubTitle?.text}
         on:input={onSubtitleInput}
       />
-    {:else if $description}
+    {:else if $headerSubTitle?.text}
       <div class="form-description">
-        {$description}
+        {$headerSubTitle.text}
       </div>
     {/if}
   </SelectableElement>
