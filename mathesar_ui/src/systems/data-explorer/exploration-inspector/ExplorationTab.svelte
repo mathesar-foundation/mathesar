@@ -93,7 +93,7 @@
     if ($query.id !== undefined) {
       const queryId = $query.id;
       void confirmDelete({
-        identifierType: 'Exploration',
+        identifierType: $_('exploration'),
         onProceed: async () => {
           await deleteExploration(queryId);
           dispatch('delete');

@@ -17,6 +17,7 @@ from django.db.models import Q
 from django.utils import timezone
 import requests
 
+from allauth.socialaccount.models import SocialAccount
 from mathesar import __version__
 from mathesar.models import (
     AnalyticsReport,
@@ -101,6 +102,7 @@ def prepare_analytics_report():
             last_login__gte=timezone.now()
             - timezone.timedelta(days=ACTIVE_USER_DAYS)
         ).count(),
+        sso_connected_user_count=SocialAccount.objects.filter(user__is_active=True).count(),
         configured_role_count=ConfiguredRole.objects.count(),
         connected_database_count=connected_database_count,
         connected_database_schema_count=connected_database_schema_count,
@@ -120,6 +122,7 @@ def upload_analytics_reports():
             "mathesar_version": report.mathesar_version,
             "user_count": report.user_count,
             "active_user_count": report.active_user_count,
+            "sso_connected_user_count": report.sso_connected_user_count,
             "configured_role_count": report.configured_role_count,
             "connected_database_count": report.connected_database_count,
             "connected_database_schema_count": report.connected_database_schema_count,

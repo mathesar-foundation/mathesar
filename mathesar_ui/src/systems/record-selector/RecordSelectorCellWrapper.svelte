@@ -39,7 +39,7 @@
     display: table-cell;
     vertical-align: middle;
     border-style: solid;
-    border-color: var(--gray-200);
+    border-color: var(--neutral-300);
     border-width: 0;
     /** Set from parent to so that first row gets border */
     border-top-width: var(--border-top-width, 0);
@@ -71,7 +71,7 @@
     min-width: 3ch;
   }
   .row-header.row-is-selected {
-    background: var(--active-background);
+    background: var(--cell-bg-color-row-selected);
   }
 
   .column-header.row-header {
@@ -114,6 +114,6 @@
   }
 
   :global(body.theme-dark) .td {
-    border-color: var(--gray-700);
+    border-color: var(--slate-600);
   }
 </style>

@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { Table } from '@mathesar/models/Table';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
@@ -76,7 +76,7 @@ export function getDbTypeBasedFilterCap(
 ): ComponentAndProps {
   const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
   const factory = DataTypes[cellInfo?.type ?? 'string'];
-  if (factory.getFilterInput) {
+  if (fkTargetTableId === undefined && factory.getFilterInput) {
     const config = getCellConfiguration(column.type, cellInfo);
     return factory.getFilterInput(column, config);
   }
@@ -97,7 +97,7 @@ export function getInitialInputValue(
 
 export function getDisplayFormatter(
   column: CellColumnLike,
-  columnId?: Column['id'],
+  columnId?: RawColumnWithMetadata['id'],
 ): (
   value: unknown,
   recordSummaries?: RecordSummariesForSheet,

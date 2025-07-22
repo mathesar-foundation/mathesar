@@ -2,11 +2,11 @@ from functools import wraps
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
 
+from config.database_config import get_internal_database_config
 from mathesar.rpc.databases.configured import list_ as databases_list
 from mathesar.rpc.explorations import list_ as explorations_list
 from mathesar.rpc.schemas import list_ as schemas_list
@@ -80,13 +80,13 @@ def get_user_data(request):
 
 
 def _get_internal_db_meta():
-    internal_db = settings.DATABASES['default']
+    internal_db = get_internal_database_config()
     if internal_db is not None:
         return {
             'type': 'postgres',
-            'host': internal_db['HOST'],
-            'port': internal_db['PORT'],
-            'database_name': internal_db['NAME']
+            'host': internal_db.host,
+            'port': internal_db.port,
+            'database_name': internal_db.dbname,
         }
 
 
@@ -119,7 +119,7 @@ def get_common_data(request, database_id=None, schema_oid=None):
     }
 
 
-class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
+class MathesarRPCEntryPoint(RPCEntryPoint):
     pass
 
 

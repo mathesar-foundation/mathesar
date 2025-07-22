@@ -2,21 +2,21 @@
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
-  import type { Constraint } from '@mathesar/api/rpc/constraints';
+  import type { RawConstraint } from '@mathesar/api/rpc/constraints';
   import { Icon, Spinner, iconError } from '@mathesar/component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentTablesData } from '@mathesar/stores/tables';
 
-  export let constraint: Constraint;
+  export let constraint: RawConstraint;
 
   $: referentTable =
     constraint.type === 'foreignkey'
       ? $currentTablesData.tablesMap.get(constraint.referent_table_oid)
       : undefined;
 
-  async function getReferentColumns(_constraint: Constraint) {
+  async function getReferentColumns(_constraint: RawConstraint) {
     if (_constraint.type !== 'foreignkey') {
       return [];
     }
@@ -74,7 +74,7 @@
 
   .entity-name-container {
     font-size: var(--sm1);
-    background-color: var(--gray-200);
+    background-color: var(--neutral-200);
     border-radius: var(--border-radius-xl);
     padding: 0.285rem 0.428rem;
     font-weight: var(--font-weight-bold);

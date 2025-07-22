@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import type { ColumnMetadata } from '@mathesar/api/rpc/columns';
+  import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
   import { createValidationContext } from '@mathesar/component-library';
   import CancelOrProceedButtonPair from '@mathesar/component-library/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
   import AbstractTypeDisplayOptions from '@mathesar/components/abstract-type-control/AbstractTypeDisplayOptions.svelte';

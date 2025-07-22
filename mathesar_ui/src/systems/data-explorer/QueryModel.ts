@@ -7,6 +7,11 @@ import type {
 } from '@mathesar/api/rpc/explorations';
 import { assertExhaustive } from '@mathesar-component-library';
 
+import {
+  type ColumnDisplayOptionsEntry,
+  type ExplorationDisplayOptions,
+  validateDisplayOptions,
+} from './displayOptions';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
 import QuerySortTransformationModel from './QuerySortTransformationModel';
@@ -18,12 +23,12 @@ export interface QueryModelUpdateDiff {
   type:
     | 'id'
     | 'name'
+    | 'displayOptions'
     | 'baseTable'
     | 'initialColumnsArray'
     | 'initialColumnName'
     | 'transformations'
     | 'initialColumnsAndTransformations';
-  diff: Partial<MaybeSavedExploration>;
 }
 
 export type QueryTransformationModel =
@@ -32,7 +37,7 @@ export type QueryTransformationModel =
   | QueryHideTransformationModel
   | QuerySortTransformationModel;
 
-function getTransformationModel(
+export function getTransformationModel(
   transformation: QueryInstanceTransformation,
 ): QueryTransformationModel {
   switch (transformation.type) {
@@ -61,7 +66,7 @@ function validate(
   return { isValid, isRunnable: true };
 }
 
-export default class QueryModel {
+export class QueryModel {
   readonly database_id: MaybeSavedExploration['database_id'];
 
   readonly schema_oid: MaybeSavedExploration['schema_oid'];
@@ -79,6 +84,8 @@ export default class QueryModel {
   readonly transformationModels: QueryTransformationModel[];
 
   readonly display_names: NonNullable<SavedExploration['display_names']>;
+
+  readonly display_options: ExplorationDisplayOptions;
 
   readonly isValid: boolean;
 
@@ -101,6 +108,7 @@ export default class QueryModel {
     }
     this.transformationModels = transformationModels;
     this.display_names = model.display_names ?? {};
+    this.display_options = validateDisplayOptions(model.display_options);
     const validationResult = validate({
       base_table_oid: model.base_table_oid,
       transformationModels,
@@ -120,9 +128,6 @@ export default class QueryModel {
     return {
       model,
       type: 'baseTable',
-      diff: {
-        base_table_oid: base_table,
-      },
     };
   }
 
@@ -134,9 +139,6 @@ export default class QueryModel {
     return {
       model,
       type: 'id',
-      diff: {
-        id,
-      },
     };
   }
 
@@ -148,9 +150,6 @@ export default class QueryModel {
     return {
       model,
       type: 'name',
-      diff: {
-        name,
-      },
     };
   }
 
@@ -162,9 +161,6 @@ export default class QueryModel {
     return {
       model,
       type: 'name',
-      diff: {
-        description,
-      },
     };
   }
 
@@ -181,9 +177,6 @@ export default class QueryModel {
     return {
       model,
       type: 'initialColumnsArray',
-      diff: {
-        initial_columns: initialColumns,
-      },
     };
   }
 
@@ -198,9 +191,6 @@ export default class QueryModel {
     return {
       model,
       type: 'initialColumnsArray',
-      diff: {
-        initial_columns: initialColumns,
-      },
     };
   }
 
@@ -223,9 +213,43 @@ export default class QueryModel {
     return {
       model,
       type: 'initialColumnName',
-      diff: {
-        display_names: displayNames,
+    };
+  }
+
+  withColumnDisplayOptionsEntry(
+    entry: ColumnDisplayOptionsEntry,
+  ): QueryModelUpdateDiff {
+    const displayOptions = {
+      ...this.display_options,
+      columnDisplayOptions: {
+        ...(this.display_options.columnDisplayOptions ?? {}),
+        [entry.column.index]: {
+          column: entry.column,
+          displayOptions: entry.displayOptions,
+        },
       },
+    };
+
+    const model = new QueryModel({
+      ...this,
+      display_options: displayOptions,
+    });
+    return {
+      model,
+      type: 'displayOptions',
+    };
+  }
+
+  withAllDisplayOptionsReplaced(
+    displayOptions: ExplorationDisplayOptions,
+  ): QueryModelUpdateDiff {
+    const model = new QueryModel({
+      ...this,
+      display_options: displayOptions,
+    });
+    return {
+      model,
+      type: 'displayOptions',
     };
   }
 
@@ -239,9 +263,6 @@ export default class QueryModel {
     return {
       model,
       type: 'transformations',
-      diff: {
-        transformations: model.toMaybeSavedExploration().transformations,
-      },
     };
   }
 
@@ -283,9 +304,6 @@ export default class QueryModel {
     return {
       model,
       type: 'transformations',
-      diff: {
-        transformations: model.toMaybeSavedExploration().transformations,
-      },
     };
   }
 
@@ -302,9 +320,6 @@ export default class QueryModel {
     return {
       model,
       type: 'transformations',
-      diff: {
-        transformations: model.toMaybeSavedExploration().transformations,
-      },
     };
   }
 
@@ -385,10 +400,6 @@ export default class QueryModel {
     return {
       model,
       type: 'initialColumnsAndTransformations',
-      diff: {
-        initial_columns: initialColumns,
-        transformations: model.toMaybeSavedExploration().transformations,
-      },
     };
   }
 
@@ -457,6 +468,7 @@ export default class QueryModel {
       initial_columns: this.initial_columns,
       transformations: transformations.map((entry) => entry.toJson()),
       display_names: this.display_names,
+      display_options: this.display_options,
     };
   }
 
@@ -470,15 +482,10 @@ export default class QueryModel {
 
   toMaybeSavedExploration(): MaybeSavedExploration {
     return {
-      database_id: this.database_id,
-      schema_oid: this.schema_oid,
+      ...this.toAnonymousExploration(),
       id: this.id,
       name: this.name,
       description: this.description,
-      base_table_oid: this.base_table_oid,
-      initial_columns: this.initial_columns,
-      transformations: this.transformationModels.map((entry) => entry.toJson()),
-      display_names: this.display_names,
     };
   }
 

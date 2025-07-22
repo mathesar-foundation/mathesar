@@ -123,6 +123,7 @@ jobs:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
         pg-version: [13, 14, 15, 16, 17]
+        connection-type: ['mathesar_dev_db', '/var/dev_postgres_socket']
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
@@ -136,10 +137,11 @@ jobs:
           docker pull python:${{ matrix.py-version }}
           docker pull postgres:${{ matrix.pg-version }}
       - name: Build the stack
-        run: docker compose -f docker-compose.dev.yml up --build -d test-service
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service dev-db
         env:
           PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
+          POSTGRES_HOST: ${{ matrix.connection-type }}
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
 
@@ -405,7 +407,7 @@ jobs:
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
       - name: Build the stack
-        run: docker compose -f docker-compose.dev.yml up --build -d test-service
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service dev-db
         env:
           TARGET: ${{ matrix.target }}
 
@@ -463,13 +465,13 @@ jobs:
               exit 1
             fi
           fi
-          
+
           # Check "python_lint_required" conditions
           if [[ "${{ needs.python_lint_required.outputs.lint_should_run }}" == "true" ]]; then
             if [[ "${{ needs.python_lint.result }}" != "success" ]]; then
               echo "python linter failed."
               exit 1
-            fi  
+            fi
           fi
 
           # Check "sql_tests_required" conditions

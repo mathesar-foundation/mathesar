@@ -253,6 +253,32 @@ METHODS = [
         [user_is_authenticated]
     ),
 
+    # (
+    #     forms.add,
+    #     "forms.add",
+    #     [user_is_authenticated]
+    # ),
+    # (
+    #     forms.get,
+    #     "forms.get",
+    #     []  # using empty list here indicates that this method is available to anonymous callers.
+    # ),
+    # (
+    #     forms.list_,
+    #     "forms.list",
+    #     [user_is_authenticated]
+    # ),
+    # (
+    #     forms.delete,
+    #     "forms.delete",
+    #     [user_is_authenticated]
+    # ),
+    # (
+    #     forms.replace,
+    #     "forms.replace",
+    #     [user_is_authenticated]
+    # ),
+
     (
         records.add,
         "records.add",
@@ -528,4 +554,5 @@ def test_correctly_exposed(func, exposed_name, auth_pred_params):
     assert func.modernrpc_name == exposed_name
     # Make sure other decorators are set as expected.
     assert func.rpc_exceptions_handled is True
-    assert func.modernrpc_auth_predicates_params == [auth_pred_params]
+    if auth_pred_params != []:
+        assert func.modernrpc_auth_predicates_params == [auth_pred_params]

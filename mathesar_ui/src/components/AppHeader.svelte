@@ -75,10 +75,10 @@
 
       {#if $userProfile}
         <DropdownMenu
-          triggerAppearance="ghost"
+          triggerAppearance="secondary"
+          triggerClass="padding-compact"
           size="small"
           closeOnInnerClick={false}
-          menuStyle="--Menu__padding-x: 0.3em;"
         >
           <div class="user-switcher" slot="trigger">
             <Icon
@@ -97,12 +97,11 @@
             </LinkMenuItem>
             <MenuDivider />
           {/if}
+
           <MenuHeading>{$_('signed_in_as')}</MenuHeading>
           <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
-
-          <MenuDivider />
 
           {#if $userProfile.isMathesarAdmin}
             <LinkMenuItem
@@ -112,10 +111,9 @@
             >
               {$_('administration')}
             </LinkMenuItem>
-            <MenuDivider />
           {/if}
-
           <MenuDivider />
+
           <MenuHeading>{$_('theme')}</MenuHeading>
           <div class="theme-switcher">
             <UiThemeSelect />
@@ -162,16 +160,13 @@
 <style lang="scss">
   .app-header {
     display: flex;
+    gap: var(--sm4);
     justify-content: space-between;
     padding: 0 0.5rem;
     height: var(--header-height);
+    background: var(--header-background);
     border-bottom: 1px solid var(--header-border);
-    background: linear-gradient(
-      to bottom,
-      var(--header-gradient-start),
-      var(--header-gradient-end)
-    );
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-color) 0 1px 3px 0;
     overflow: hidden;
     color: var(--text-color);
     font-size: 1rem;
@@ -186,7 +181,7 @@
   .right {
     display: flex;
     align-items: center;
-    gap: var(--sm2);
+    gap: var(--sm3);
   }
 
   .theme-switcher {

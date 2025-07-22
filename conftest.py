@@ -2,7 +2,6 @@ import pytest
 import random
 import string
 import os
-import psycopg
 
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
 from django.db import connection as dj_connection
@@ -11,9 +10,9 @@ from sqlalchemy import MetaData, text, Table, select, or_
 from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
-from db.deprecated.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
+from db.deprecated.engine import add_custom_types_to_ischema_names, create_future_engine as sa_create_engine
 from db.sql import install as sql_install
-from db.deprecated.utils import get_pg_catalog_table
+from db.deprecated.utils import get_pg_catalog_table, engine_to_psycopg_conn
 from db.deprecated.metadata import get_empty_metadata
 
 
@@ -70,7 +69,7 @@ def create_db(request, engine_cache):
         create_database(engine.url)
         created_dbs.add(db_name)
         # Our default testing database has our types and functions preinstalled.
-        with psycopg.connect(str(engine.url)) as conn:
+        with engine_to_psycopg_conn(engine) as conn:
             sql_install.install(conn)
         engine.dispose()
         return db_name
@@ -232,13 +231,11 @@ def _reflect_schema(engine, name=None, oid=None, metadata=None):
 def _create_engine(db_name):
     dj_connection_settings = dj_connection.settings_dict
     engine = sa_create_engine(
-        _get_connection_string(
-            username=dj_connection_settings["USER"],
-            password=dj_connection_settings["PASSWORD"],
-            hostname=dj_connection_settings["HOST"],
-            database=db_name,
-        ),
-        future=True,
+        username=dj_connection_settings["USER"],
+        password=dj_connection_settings["PASSWORD"],
+        hostname=dj_connection_settings["HOST"],
+        database=db_name,
+        port=dj_connection_settings["PORT"],
         # Setting a fixed timezone makes the timezone aware test cases predictable.
         connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
     )

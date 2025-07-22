@@ -39,17 +39,12 @@
 
     &.gt-header {
       font-weight: var(--font-weight-medium);
-      color: var(--text-color-secondary);
+      color: var(--text-color-primary);
+      background: var(--elevated-background);
 
       &::after {
         background-color: var(--card-row-border);
       }
-
-      background: linear-gradient(
-        to bottom,
-        var(--header-gradient-start),
-        var(--header-gradient-end)
-      );
     }
   }
 </style>

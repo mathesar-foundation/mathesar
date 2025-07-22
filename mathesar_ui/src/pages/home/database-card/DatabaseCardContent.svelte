@@ -6,8 +6,8 @@
   export let database: Database;
   export let upgradeRequired = false;
 
-  $: server = `${database.server.host}:${database.server.port}`;
   $: showDbName = database.name !== database.displayName;
+  $: server = database.server.getConnectionString();
 </script>
 
 <div class="db-card-content" class:upgrade-required={upgradeRequired}>
@@ -43,7 +43,7 @@
   }
 
   .icon-container {
-    background-color: var(--icon-background);
+    background: linear-gradient(135deg, var(--salmon-400), var(--salmon-600));
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -51,6 +51,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    color: var(--white);
   }
 
   .content {
@@ -72,7 +73,7 @@
 
   .detail {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--text-color-muted);
   }
 
   .caret-container {

@@ -21,6 +21,10 @@ def create_future_engine_with_custom_types(
 def create_future_engine(
         username, password, hostname, database, port, *args, **kwargs
 ):
+    query = {}
+    if hostname.startswith("/"):
+        query = {"host": hostname}
+        hostname = None
     conn_url = URL.create(
         "postgresql",
         username=username,
@@ -28,6 +32,7 @@ def create_future_engine(
         host=hostname,
         database=database,
         port=port,
+        query=query,
     )
     kwargs.update(future=True)
     return create_engine(conn_url, *args, **kwargs)
@@ -40,6 +45,10 @@ def create_engine(conn_url, *args, **kwargs):
     across all engines. This is important for testing: without this intervention, fixtures become
     randomly corrupted.
     """
+    kwargs.update(
+        connect_args={"application_name": "Mathesar db.deprecated.engine.create_future_engine"},
+        pool_size=2,
+    )
     engine = sa_create_engine(conn_url, *args, **kwargs)
     _make_ischema_names_unique(engine)
     return engine

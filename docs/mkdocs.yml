@@ -8,7 +8,7 @@ nav:
   - Introduction: index.md
   - Administrator Guide:
       - Install using Docker Compose: administration/install-via-docker-compose.md
-      - Install from scratch: administration/install-from-scratch.md
+      - Install on Linux · macOS · WSL: administration/install-from-scratch.md
       - Environment variables: administration/environment-variables.md
       - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
@@ -41,8 +41,11 @@ nav:
       - Overview: api/index.md
       - Methods: api/methods.md
   - Releases:
-      - '0.2.3': releases/0.2.3.md
+      - '0.3.0': releases/0.3.0.md
       - Previous releases:
+          - '0.2.5': releases/0.2.5.md
+          - '0.2.4': releases/0.2.4.md
+          - '0.2.3': releases/0.2.3.md
           - '0.2.2': releases/0.2.2.md
           - '0.2.1': releases/0.2.1.md
           - '0.2.0': releases/0.2.0.md
@@ -77,6 +80,7 @@ plugins:
         "user-guide/stored-role-passwords.md": "user-guide/stored-roles.md"
   - macros
   - placeholder
+  - autorefs
   - mkdocstrings:
       handlers:
         python:
@@ -135,6 +139,7 @@ markdown_extensions:
   - attr_list
   - def_list
   - codehilite
+  - pymdownx.blocks.caption
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -152,7 +157,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.2.3
+  mathesar_version: 0.3.0
   version:
     provider: mike
     alias: true

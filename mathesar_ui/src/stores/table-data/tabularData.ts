@@ -1,14 +1,8 @@
 import { getContext, setContext } from 'svelte';
-import {
-  type Readable,
-  type Writable,
-  derived,
-  get,
-  writable,
-} from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SelectedCellData } from '@mathesar/components/sheet/selection';
 import Plane from '@mathesar/components/sheet/selection/Plane';
@@ -145,7 +139,10 @@ export class TabularData {
       contextualFilters,
       loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
-    this.display = new Display(this.recordsData);
+    this.display = new Display({
+      meta: this.meta,
+      recordsData: this.recordsData,
+    });
 
     this.table = props.table;
 
@@ -255,8 +252,8 @@ export class TabularData {
   }
 
   refreshAfterColumnExtraction(
-    extractedColumnIds: Column['id'][],
-    foreignKeyColumnId?: Column['id'],
+    extractedColumnIds: RawColumnWithMetadata['id'][],
+    foreignKeyColumnId?: RawColumnWithMetadata['id'],
   ) {
     this.meta.sorting.update((s) => {
       const firstExtractedColumnWithSort = extractedColumnIds.find((columnId) =>
@@ -293,24 +290,12 @@ export class TabularData {
     return this.refresh();
   }
 
-  addEmptyRecord() {
-    void this.recordsData.addEmptyRecord();
-    const firstEditableColumnInDraftRow = [
-      ...get(this.processedColumns).values(),
-    ]
-      .map((pc) => pc.withoutEnhancedPkCell())
-      .find((pc) => pc.isEditable);
-    const columnId = firstEditableColumnInDraftRow
-      ? String(firstEditableColumnInDraftRow.id)
-      : undefined;
-    this.selection.update((s) => s.ofNewRecordDataEntryCell(columnId));
-  }
-
   destroy(): void {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
     this.selection.destroy();
+    this.meta.destroy();
   }
 }
 

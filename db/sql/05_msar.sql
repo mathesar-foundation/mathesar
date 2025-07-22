@@ -2986,8 +2986,8 @@ BEGIN
     PERFORM msar.copy_constraint(oid, col_id, created_col_id)
     FROM pg_constraint
     WHERE conrelid=tab_id AND ARRAY[col_id] <@ conkey;
-    PERFORM __msar.set_not_nulls(
-      tab_name, ARRAY[(col_defs[1].name_, attnotnull)::__msar.not_null_def]
+    PERFORM msar.set_not_null(
+      tab_id, created_col_id, attnotnull
     )
     FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
   END IF;
@@ -3683,7 +3683,6 @@ SELECT string_agg(
       __msar.build_col_drop_default_expr(tab_id, col_id, new_type, new_default),
       __msar.build_col_retype_expr(tab_id, col_id, new_type),
       __msar.build_col_default_expr(tab_id, col_id, old_default, new_default, new_type),
-      __msar.build_col_not_null_expr(tab_id, col_id, not_null),
       __msar.build_col_drop_text(tab_id, col_id, delete_)
     ),
     ''
@@ -3691,6 +3690,25 @@ SELECT string_agg(
   ', '
 )
 FROM prepped_alters;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.set_not_null(tab_id regclass, col_id smallint, not_null boolean) RETURNS text AS $$/*
+Alter a column's NOT NULL setting, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table containing the column whose nullability we'll alter.
+  col_id: The attnum of the column whose nullability we'll alter.
+  not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
+*/
+  SELECT __msar.exec_ddl(
+    'ALTER TABLE %I.%I ALTER COLUMN %I %s NOT NULL',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    CASE WHEN not_null THEN 'SET' ELSE 'DROP' END
+  );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -3704,18 +3722,17 @@ Args:
 
 For the specification of the col_alters JSONB, see the msar.process_col_alter_jsonb function.
 
-Note that all alterations except renaming are done in bulk, and then all name changes are done one
-at a time afterwards. This is because the SQL design specifies at most one name-changing clause per
-query.
+Note that all alterations except renaming, commenting & setting/unsetting not-null are done in bulk,
+and then all name changes are done one at a time afterwards. This is because the SQL design
+specifies at most one name-changing clause per query.
 */
 DECLARE
-  r RECORD;
-  col_alter_str TEXT;
-  description_alter RECORD;
+  col RECORD;
+  col_alter_str text := msar.process_col_alter_jsonb(tab_id, col_alters);
+  return_attnum_arr integer[];
 BEGIN
-  -- Get the string specifying all non-name-change alterations to perform.
-  col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
-  -- Perform the non-name-change alterations
+  -- TODO: This section for bulk alter is to be removed entirely.
+  --*************************************************
   IF col_alter_str IS NOT NULL THEN
     PERFORM __msar.exec_ddl(
       'ALTER TABLE %s %s',
@@ -3723,26 +3740,27 @@ BEGIN
       msar.process_col_alter_jsonb(tab_id, col_alters)
     );
   END IF;
-  -- Here, we perform all description-changing alterations.
-  FOR description_alter IN
+  --**************************************************
+  FOR col IN
     SELECT
-      (col_alter->>'attnum')::integer AS col_id,
-      col_alter->>'description' AS comment_
-    FROM jsonb_array_elements(col_alters) AS col_alter
-    WHERE __msar.jsonb_key_exists(col_alter, 'description')
+      (col_alter_obj ->> 'attnum')::smallint AS attnum,
+      (col_alter_obj -> 'not_null')::boolean AS not_null,
+      (col_alter_obj ->> 'name')::text AS new_name,
+
+      col_alter_obj->>'description' AS comment_,
+      __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment
+
+    FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
   LOOP
-    PERFORM msar.comment_on_column(
-      tab_id := tab_id,
-      col_id := description_alter.col_id,
-      comment_ := description_alter.comment_
-    );
+    PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
+    PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
+    IF col.has_comment THEN
+      PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
+    END IF;
+    -- PG13 doesn't allow concat b/w integer[] and smallint need to typecast
+    return_attnum_arr := return_attnum_arr || col.attnum::integer; 
   END LOOP;
-  -- Here, we perform all name-changing alterations.
-  FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
-  LOOP
-    PERFORM msar.rename_column(tab_id, r.attnum, r.name);
-  END LOOP;
-  RETURN array_agg(x.attnum) FROM jsonb_to_recordset(col_alters) AS x(attnum integer);
+  RETURN return_attnum_arr; -- do we really need this??
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -4277,6 +4295,16 @@ CREATE OR REPLACE FUNCTION msar.format_data(val interval) returns text AS $$
 SELECT concat(
   to_char(val, 'PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'), date_part('seconds', val), 'S'
 );
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val jsonb) returns text AS $$
+SELECT val::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val json) returns text AS $$
+SELECT val::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
@@ -5280,6 +5308,7 @@ msar.search_records_from_table(
   tab_id oid,
   search_ jsonb,
   limit_ integer,
+  offset_ integer DEFAULT 0,
   return_record_summaries boolean DEFAULT false,
   table_record_summary_templates jsonb DEFAULT NULL
 ) RETURNS jsonb AS $$/*
@@ -5291,6 +5320,7 @@ Args:
   tab_id: The OID of the table whose records we'll get
   search_: An array of search definition objects.
   limit_: The maximum number of rows we'll return.
+  offset_: The number of rows to skip before returning records from following rows
 
 The search definition objects should have the form
   {"attnum": <int>, "literal": <any>}
@@ -5305,11 +5335,11 @@ BEGIN
       SELECT count(1) AS count FROM %2$I.%3$I %4$s
     ),
     results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L
+      SELECT %1$s FROM %2$I.%3$I %4$s %7$s LIMIT %5$L OFFSET %6$L
     ),
-    summary_cte_self AS (%7$s)
-    %8$s,
-    summary_cte AS ( SELECT %10$s FROM results_cte %9$s ),
+    summary_cte_self AS (%8$s)
+    %9$s,
+    summary_cte AS ( SELECT %11$s FROM results_cte %10$s ),
     summaries_json_cte AS (
       SELECT
         jsonb_build_object(
@@ -5342,21 +5372,22 @@ BEGIN
     /* %3 */ msar.get_relation_name(tab_id),
     /* %4 */ 'WHERE ' || msar.get_score_expr(tab_id, search_) || ' > 0',
     /* %5 */ limit_,
-    /* %6 */ 'ORDER BY ' || NULLIF(
+    /* %6 */ offset_,
+    /* %7 */ 'ORDER BY ' || NULLIF(
       concat(
         msar.get_score_expr(tab_id, search_) || ' DESC, ',
         msar.build_total_order_expr(tab_id, null)
       ),
       ''
     ),
-    /* %7 */ msar.build_record_summary_query_for_table(
+    /* %8 */ msar.build_record_summary_query_for_table(
       tab_id,
       msar.get_selectable_pkey_attnum(tab_id),
       table_record_summary_templates
     ),
-    /* %8 */ msar.build_linked_record_summaries_ctes(tab_id),
-    /* %9 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
-    /* %10 */ COALESCE(
+    /* %9 */ msar.build_linked_record_summaries_ctes(tab_id),
+    /* %10 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
+    /* %11 */ COALESCE(
       NULLIF(
         concat_ws(', ',
           msar.build_summary_json_expr_for_table(tab_id),

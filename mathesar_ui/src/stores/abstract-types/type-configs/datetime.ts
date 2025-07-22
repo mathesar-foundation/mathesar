@@ -1,7 +1,12 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
+import type {
+  DateFormat,
+  TimeFormat,
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import {
-  type Column,
-  type DateFormat,
-  type TimeFormat,
+  type RawColumnWithMetadata,
   getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import { iconUiTypeDateTime } from '@mathesar/icons';
@@ -16,7 +21,7 @@ import type {
 
 import { getDateFormatOptions, getTimeFormatOptions } from './utils';
 
-const dbForm: AbstractTypeConfigForm = {
+const getDbForm: () => AbstractTypeConfigForm = () => ({
   variables: {
     supportTimeZones: {
       type: 'boolean',
@@ -29,11 +34,14 @@ const dbForm: AbstractTypeConfigForm = {
       {
         type: 'input',
         variable: 'supportTimeZones',
-        label: 'Support Time Zones',
+        label: get(_)('support_time_zones'),
+        text: {
+          help: get(_)('support_time_zone_helper'),
+        },
       },
     ],
   },
-};
+});
 
 function determineDbTypeAndOptions(
   dbFormValues: FormValues,
@@ -48,7 +56,7 @@ function determineDbTypeAndOptions(
 }
 
 function constructDbFormValuesFromTypeOptions(
-  columnType: Column['type'],
+  columnType: RawColumnWithMetadata['type'],
 ): FormValues {
   return {
     supportTimeZones: columnType === DB_TYPES.TIMESTAMP_WITH_TZ,
@@ -89,8 +97,8 @@ const displayForm: AbstractTypeConfigForm = {
 
 function determineDisplayOptions(
   dispFormValues: FormValues,
-): Column['metadata'] {
-  const displayOptions: Column['metadata'] = {
+): RawColumnWithMetadata['metadata'] {
+  const displayOptions: RawColumnWithMetadata['metadata'] = {
     date_format: dispFormValues.dateFormat as DateFormat,
     time_format: dispFormValues.timeFormat as TimeFormat,
   };
@@ -98,7 +106,7 @@ function determineDisplayOptions(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: Column['metadata'],
+  metadata: RawColumnWithMetadata['metadata'],
 ): FormValues {
   const column = { metadata };
   const formValues: FormValues = {
@@ -123,7 +131,7 @@ const dateTimeType: AbstractTypeConfiguration = {
     },
   },
   getDbConfig: () => ({
-    form: dbForm,
+    form: getDbForm(),
     determineDbTypeAndOptions,
     constructDbFormValuesFromTypeOptions,
   }),

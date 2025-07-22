@@ -17,7 +17,7 @@
     --MessageBox__background: var(--danger-background-color);
     --MessageBox__border: 4px solid var(--danger-border-color);
     --MessageBox__icon-color: var(--danger-color);
-    --MessageBox__text-color: var(--text-color);
+    --MessageBox__text-color: var(--danger-color);
     font-size: var(--ErrorBox__font-size, var(--sm1));
   }
 </style>

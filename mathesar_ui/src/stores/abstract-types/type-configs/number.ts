@@ -1,7 +1,9 @@
+import type {
+  NumberFormat,
+  NumberGrouping,
+} from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import {
-  type Column,
-  type NumberFormat,
-  type NumberGrouping,
+  type RawColumnWithMetadata,
   getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
@@ -136,7 +138,7 @@ function determineDbTypeAndOptions(
   columnType: DbType,
 ): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
   const dbType = determineDbType(dbFormValues, columnType);
-  const typeOptions: Column['type_options'] = {};
+  const typeOptions: RawColumnWithMetadata['type_options'] = {};
 
   if (dbType === DB_TYPES.DECIMAL || dbType === DB_TYPES.NUMERIC) {
     if (dbFormValues.maxDigits !== null) {
@@ -155,7 +157,7 @@ function determineDbTypeAndOptions(
 
 function constructDbFormValuesFromTypeOptions(
   columnType: DbType,
-  typeOptions: Column['type_options'],
+  typeOptions: RawColumnWithMetadata['type_options'],
 ): FormValues {
   switch (columnType) {
     case DB_TYPES.SMALLINT:
@@ -246,9 +248,11 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
+function determineDisplayOptions(
+  formValues: FormValues,
+): RawColumnWithMetadata['metadata'] {
   const decimalPlaces = formValues.decimalPlaces as number | null;
-  const opts: Partial<Column['metadata']> = {
+  const opts: Partial<RawColumnWithMetadata['metadata']> = {
     num_format:
       formValues.numberFormat === 'none'
         ? undefined
@@ -278,7 +282,7 @@ export function getDecimalPlaces(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: Column['metadata'],
+  metadata: RawColumnWithMetadata['metadata'],
 ): FormValues {
   const column = { metadata };
   const decimalPlaces = getDecimalPlaces(

@@ -6,7 +6,7 @@ import {
   type RequestStatus,
   getMostImportantRequestStatusState,
 } from '@mathesar/api/rest/utils/requestUtils';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   Group as ApiGroup,
   GroupingResponse as ApiGroupingResponse,
@@ -28,7 +28,7 @@ export type RowKey = Row['identifier'];
 export interface ClientSideCellError {
   code: number;
   message: string;
-  column: Column;
+  column: RawColumnWithMetadata;
 }
 
 export const ID_ROW_CONTROL_COLUMN = -1;
@@ -54,9 +54,9 @@ export function extractRowKeyFromCellKey(cellKey: CellKey): RowKey {
 
 export const CLIENT_VALIDATION_CANNOT_BE_NULL = 101;
 
-export function getClientSideCellErrors(
+function getClientSideCellErrors(
   cellValue: unknown,
-  column: Column,
+  column: RawColumnWithMetadata,
 ): ClientSideCellError[] {
   const errors = [];
   if (cellValue === null && !column.nullable) {
@@ -203,14 +203,14 @@ export function getSheetState(props: {
   return getMostImportantRequestStatusState(allStatuses);
 }
 
-export function validateCell({
+function validateCell({
   cellValue,
   column,
   cellKey,
   cellClientSideErrors,
 }: {
   cellValue: unknown;
-  column: Column;
+  column: RawColumnWithMetadata;
   cellKey: CellKey;
   cellClientSideErrors: WritableMap<CellKey, ClientSideCellError[]>;
 }): void {
@@ -228,7 +228,7 @@ export function validateRow({
   cellClientSideErrors,
 }: {
   row: RecordRow;
-  columns: Column[];
+  columns: RawColumnWithMetadata[];
   cellClientSideErrors: WritableMap<CellKey, ClientSideCellError[]>;
 }): void {
   columns.forEach((column) => {
@@ -283,7 +283,7 @@ export function buildGrouping(
  */
 export function extractPrimaryKeyValue(
   record: ApiRecord,
-  columns: Column[],
+  columns: RawColumnWithMetadata[],
 ): string | number {
   const pkColumn = columns.find((c) => c.primary_key);
   if (!pkColumn) {

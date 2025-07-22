@@ -2,6 +2,7 @@
   import { isLoading as isTranslationLoading, locale } from 'svelte-i18n';
 
   import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import '@mathesar/utils/polyfills';
   import { Spinner } from '@mathesar-component-library';
 
   import AppContext from './AppContext.svelte';
@@ -37,9 +38,9 @@
   @import 'component-library/styles.scss';
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
-  :root {
-    --color-substring-match: rgb(254, 221, 72);
-    --color-substring-match-light: rgba(254, 221, 72, 0.2);
+  body {
+    --color-substring-match: var(--highlighter-300);
+    --color-substring-match-light: var(--highlighter-100);
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
@@ -53,9 +54,7 @@
       'Liberation Mono', 'Courier New', monospace;
     --line-height-base: 1.5;
     --letter-spacing-base: -0.011em;
-  }
 
-  body {
     /**
    * This sets the `mix-blend-mode` property for cell backgrounds.
    *
@@ -74,22 +73,22 @@
    * background colors are applied. We need this in case there is a background
    * color applied underneath the cell, e.g. on the table or page.
    */
-    --cell-bg-color-base: var(--background-color);
-    --cell-bg-color-error: var(--danger-background-color);
-    --cell-bg-color-header: var(--gray-100);
+    --cell-bg-color-base: var(--white);
+    --cell-bg-color-error: var(--red-100);
+    --cell-bg-color-header: transparent;
     --cell-bg-color-processing: var(--yellow-100);
     --cell-bg-color-disabled: var(--gray-100);
     --cell-bg-color-row-hover: var(--gray-100);
-    --cell-bg-color-row-selected: var(--stormy-200);
+    --cell-bg-color-row-selected: var(--sky-200);
 
-    --color-fk: var(--yellow-300);
-    --color-error: var(--danger-color);
+    --color-fk: var(--stormy-200);
+    --color-error: var(--red-600);
     --cell-text-color-processing: var(--text-color-muted);
     --color-array-element: var(--sky-300);
-    --color-fk-border: var(--yellow-400);
+    --color-fk-border: var(--stormy-300);
 
-    --cell-border-horizontal: 1px solid var(--gray-300);
-    --cell-border-vertical: 1px solid var(--gray-300);
+    --cell-border-horizontal: 1px solid var(--neutral-300);
+    --cell-border-vertical: 1px solid var(--neutral-300);
 
     --page-padding-x: var(--lg1);
     --page-padding-y: var(--lg1);
@@ -130,7 +129,7 @@
     line-height: var(--line-height-base);
     letter-spacing: var(--letter-spacing-base);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -moz-osx-font-smoothing: neutralscale;
     text-rendering: optimizeLegibility;
 
     /** Panel theming */
@@ -141,26 +140,26 @@
 
   body.theme-dark {
     --cell-bg-mix-blend-mode: screen;
-    --cell-bg-color-base: var(--background-color);
-    --cell-bg-color-error: rgba(255, 107, 107, 0.15);
-    --cell-bg-color-header: rgba(39, 43, 48, 0.5);
-    --cell-bg-color-processing: rgba(251, 191, 36, 0.15);
-    --cell-bg-color-disabled: rgba(39, 43, 48, 0.3);
-    --cell-bg-color-row-hover: rgba(39, 43, 48, 0.2);
-    --cell-bg-color-row-selected: rgba(122, 92, 166, 0.4);
+    --cell-bg-color-base: var(--DARK-MODE-surface-primary);
+    --cell-bg-color-error: var(--rosy-950);
+    --cell-bg-color-header: var(--DARK-MODE-surface-secondary);
+    --cell-bg-color-processing: var(--yellow-900);
+    --cell-bg-color-disabled: var(--DARK-MODE-surface-disabled);
+    --cell-bg-color-row-hover: var(--DARK-MODE-surface-primary-hover);
+    --cell-bg-color-row-selected: var(--slate-600);
 
-    --color-substring-match: var(--pumpkin-700);
-    --color-substring-match-light: rgba(166, 95, 20, 0.2);
+    --color-substring-match: var(--highlighter-500);
+    --color-substring-match-light: var(--highlighter-800);
 
     --Match__highlight-color: var(--color-substring-match);
 
-    --cell-border-horizontal: 1px solid var(--gray-700);
-    --cell-border-vertical: 1px solid var(--gray-700);
+    --cell-border-horizontal: 1px solid var(--DARK-MODE-border-subtle);
+    --cell-border-vertical: 1px solid var(--DARK-MODE-border-subtle);
 
-    --color-fk: rgba(235, 157, 32, 0.15);
-    --color-fk-border: var(--pumpkin-600);
-    --color-error: #ff6b6b;
-    --cell-text-color-processing: var(--gray-300);
+    --color-fk: var(--stormy-800);
+    --color-fk-border: var(--stormy-700);
+    --color-error: var(--red-400);
+    --cell-text-color-processing: var(--neutral-300);
     --color-array-element: var(--sky-400);
   }
 
@@ -214,14 +213,14 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: var(--gray-100);
+    background: var(--neutral-100);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
     color: var(--text-color);
 
     body.theme-dark & {
-      background: var(--gray-900);
-      border: 1px solid var(--gray-700);
+      background: var(--neutral-900);
+      border: 1px solid var(--neutral-700);
     }
   }
 
@@ -251,14 +250,14 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--gray-100);
+    background: var(--neutral-100);
     border-radius: 3px;
     color: var(--text-color-muted);
     font-weight: bold;
 
     body.theme-dark & {
-      background: var(--gray-900);
-      border: 1px solid var(--gray-700);
+      background: var(--neutral-900);
+      border: 1px solid var(--neutral-700);
     }
   }
 
@@ -272,6 +271,6 @@
     align-items: center;
     justify-content: center;
     display: flex;
-    background-color: var(--background-color);
+    background-color: var(--neutral-100);
   }
 </style>

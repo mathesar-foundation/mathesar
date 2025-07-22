@@ -2,7 +2,7 @@
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type { DurationUnit } from '@mathesar/api/rpc/columns';
+  import type { DurationUnit } from '@mathesar/api/rpc/_common/columnDisplayOptions';
   import { RichText } from '@mathesar/components/rich-text';
   import { DurationSpecification } from '@mathesar/utils/duration';
   import type { DurationConfig } from '@mathesar/utils/duration/types';
@@ -89,7 +89,7 @@
       padding: 0.3rem 0.5rem;
       border-radius: 0.2rem;
       font-weight: 500;
-      background: var(--gray-100);
+      background: var(--neutral-100);
     }
   }
 </style>

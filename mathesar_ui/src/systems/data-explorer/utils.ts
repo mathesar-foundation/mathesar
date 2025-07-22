@@ -1,5 +1,5 @@
 import { api } from '@mathesar/api/rpc';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   ExplorationResult,
   QueryColumnMetaData,
@@ -36,7 +36,7 @@ import type {
   ComponentAndProps,
 } from '@mathesar-component-library/types';
 
-import type QueryModel from './QueryModel';
+import type { QueryModel } from './QueryModel';
 
 type ProcessedQueryResultColumnSource =
   | (Pick<QueryInitialColumnSource, 'is_initial_column'> &
@@ -72,16 +72,16 @@ export type ProcessedQueryOutputColumnMap = ImmutableMap<
 >;
 
 export interface InputColumn {
-  id: Column['id'];
-  name: Column['name'];
+  id: RawColumnWithMetadata['id'];
+  name: RawColumnWithMetadata['name'];
   tableName: Table['name'];
   jpPath?: JoinPath;
-  type: Column['type'];
+  type: RawColumnWithMetadata['type'];
   tableId: Table['oid'];
 }
 
 export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
-  type: Column['type'];
+  type: RawColumnWithMetadata['type'];
   linksTo?: LinkedTable;
   producesMultipleResults: boolean;
 }
@@ -90,17 +90,17 @@ export interface LinkedTable {
   id: Table['oid'];
   name: Table['name'];
   linkedToColumn: {
-    id: Column['id'];
-    name: Column['name'];
+    id: RawColumnWithMetadata['id'];
+    name: RawColumnWithMetadata['name'];
   };
   columns: Map<ColumnWithLink['id'], ColumnWithLink>;
 }
 
 export interface ReferencedByTable extends LinkedTable {
   referencedViaColumn: {
-    id: Column['id'];
-    name: Column['name'];
-    type: Column['type'];
+    id: RawColumnWithMetadata['id'];
+    name: RawColumnWithMetadata['name'];
+    type: RawColumnWithMetadata['type'];
   };
 }
 
@@ -126,7 +126,7 @@ const compareColumnByLinks = (
 
 export function getLinkFromColumn(
   result: JoinableTablesResult,
-  columnId: Column['id'],
+  columnId: RawColumnWithMetadata['id'],
   depth: number,
   parentPath = '',
 ): LinkedTable | undefined {
@@ -186,7 +186,7 @@ export function getLinkFromColumn(
 export interface QueryTableStructure {
   joinableTables: JoinableTablesResult;
   baseTable: Pick<Table, 'oid' | 'name'>;
-  columns: Pick<Column, 'id' | 'name' | 'type'>[];
+  columns: Pick<RawColumnWithMetadata, 'id' | 'name' | 'type'>[];
 }
 
 export function getQueryTableStructure(p: {
@@ -342,7 +342,6 @@ function processColumn(
     display_name: columnInfo.display_name ?? columnInfo.alias,
     type: columnInfo.type ?? 'unknown',
     type_options: columnInfo.type_options ?? null,
-    metadata: columnInfo.metadata ?? null,
   };
 
   const abstractType = getAbstractTypeForDbType(column.type);
@@ -469,7 +468,6 @@ export function speculateColumnMetaData({
               display_name: null,
               type: inputColumn?.type ?? 'unknown',
               type_options: inputColumn?.type_options ?? null,
-              metadata: inputColumn?.metadata ?? null,
               is_initial_column: false,
               input_alias: group.inputAlias,
             }),
@@ -494,7 +492,6 @@ export function speculateColumnMetaData({
                           ?.column.type ?? 'unknown',
                     }
                   : null,
-              metadata: null,
               is_initial_column: false,
               input_alias: aggregation.inputAlias,
             }),

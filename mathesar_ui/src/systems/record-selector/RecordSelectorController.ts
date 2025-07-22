@@ -1,7 +1,7 @@
 import { getContext, setContext } from 'svelte';
 import { writable } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 
@@ -39,7 +39,9 @@ export class RecordSelectorController {
 
   tableId = writable<DBObjectEntry['id'] | undefined>(undefined);
 
-  columnWithNestedSelectorOpen = writable<Column | undefined>(undefined);
+  columnWithNestedSelectorOpen = writable<RawColumnWithMetadata | undefined>(
+    undefined,
+  );
 
   constructor(props: RecordSelectorControllerProps) {
     this.onOpen = props.onOpen ?? (() => {});

@@ -36,12 +36,12 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
 
-  $: ({ database, databaseRouteContext, configuredRoles, combinedLoginRoles } =
+  $: ({ databaseRouteContext, configuredRoles, combinedLoginRoles } =
     $routeContext);
   $: ({ roles } = databaseRouteContext);
   $: void AsyncRpcApiStore.runBatchConservatively([
-    configuredRoles.batchRunner({ server_id: database.server.id }),
-    roles.batchRunner({ database_id: database.id }),
+    configuredRoles.batchRunner(),
+    roles.batchRunner(),
   ]);
   $: isLoading = $configuredRoles.isLoading || $roles.isLoading;
   $: errors = [$configuredRoles.error, $roles.error].filter(
@@ -110,7 +110,7 @@
                       <Icon {...iconEdit} size="0.8em" />
                     </Button>
                     <SpinnerButton
-                      appearance="outline-primary"
+                      appearance="outline-danger"
                       disabled={!isMathesarAdmin}
                       confirm={() =>
                         confirm({

@@ -3,7 +3,6 @@
   import { _ } from 'svelte-i18n';
 
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
-  import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
   import {
     iconDeleteMajor,
     iconEdit,
@@ -49,7 +48,6 @@
           triggerAppearance="plain"
           preferredPlacement="bottom-end"
           icon={iconMoreActions}
-          menuStyle="--Menu__padding-x:0.8em;"
         >
           <ButtonMenuItem
             on:click={() => dispatch('edit')}
@@ -58,7 +56,6 @@
           >
             {$_('edit_schema')}
           </ButtonMenuItem>
-          <MenuDivider />
           <ButtonMenuItem
             danger
             on:click={() => dispatch('delete')}
@@ -108,32 +105,23 @@
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
     border: 1px solid var(--card-border);
-    background: linear-gradient(
-      var(--gradient-direction-default),
-      var(--gradient-card-start),
-      var(--gradient-card-end)
-    );
+    background-color: var(--card-background);
     padding: var(--lg1);
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
     box-shadow: var(--card-active-shadow);
-    transition: background 0.2s ease-in-out;
   }
 
   .schema-row.hover {
-    border: 1px solid var(--card-hover-border);
+    border: 1px solid var(--salmon-400);
     box-shadow: var(--card-hover-shadow);
-    background: linear-gradient(
-      var(--gradient-direction-hover),
-      var(--gradient-card-hover-start),
-      var(--gradient-card-hover-end)
-    );
+    background: var(--card-hover-background);
   }
 
   .schema-row.focus {
-    outline: 2px solid var(--sand-400);
+    outline: 2px solid var(--salmon-500);
     outline-offset: 1px;
   }
 
@@ -151,7 +139,7 @@
   }
 
   .icon-container {
-    background-color: var(--icon-background);
+    background: linear-gradient(135deg, var(--salmon-600), var(--salmon-700));
     border-radius: 50%;
     width: 2rem;
     height: 2rem;
@@ -160,6 +148,7 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: var(--z-index-menu-trigger);
+    color: var(--white);
   }
 
   .hyperlink-overlay {

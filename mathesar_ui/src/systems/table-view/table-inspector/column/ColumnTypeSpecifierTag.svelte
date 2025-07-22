@@ -62,16 +62,10 @@
   }
   .specifier-tag {
     border-radius: var(--border-radius-xl);
-    background-color: var(--stormy-100);
+    background-color: var(--card-background);
     padding: 0.228rem 0.571rem;
     font-size: var(--sm1);
     color: var(--text-color-primary);
     font-weight: var(--font-weight-bold);
-
-    :global(body.theme-dark) & {
-      background-color: var(--stormy-800);
-      border: 1px solid var(--stormy-600);
-      color: var(--text-color-secondary);
-    }
   }
 </style>

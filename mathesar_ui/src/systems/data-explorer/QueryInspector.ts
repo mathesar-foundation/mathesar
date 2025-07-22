@@ -9,7 +9,7 @@ import { _ } from 'svelte-i18n';
 
 import type { Tab } from '@mathesar-component-library/types';
 
-import type QueryModel from './QueryModel';
+import type { QueryModel } from './QueryModel';
 
 /**
  * This is a function instead of a const because we can't run `get(_)` at the

@@ -14,7 +14,7 @@
   <title>{makeSimplePageTitle($_('software_update'))}</title>
 </svelte:head>
 
-<h1>{$_('software_update')}</h1>
+<h2>{$_('software_update')}</h2>
 
 {#if releaseDataStore}
   <SoftwareUpdateContent {releaseDataStore} />

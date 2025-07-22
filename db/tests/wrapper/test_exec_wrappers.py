@@ -1,9 +1,10 @@
 import ast
 import os
 
-import psycopg
 from psycopg import sql
 import pytest
+
+from db.deprecated.utils import engine_to_psycopg_conn
 
 
 @pytest.fixture(scope="session")
@@ -11,7 +12,7 @@ def psycopg_connection(engine):
     """
     Returns a psycopg connection that can be used for during testing.
     """
-    return psycopg.connect(str(engine.url))
+    return engine_to_psycopg_conn(engine)
 
 
 @pytest.fixture(scope="session")

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
@@ -24,12 +24,14 @@
   export let renamedIdColumn: string | undefined = undefined;
 
   export let processedColumn: {
-    column: Column;
+    column: RawColumnWithMetadata;
     abstractType: AbstractType;
   };
   export let selected: boolean;
   export let displayName: string;
-  export let updateTypeRelatedOptions: (options: Column) => Promise<unknown>;
+  export let updateTypeRelatedOptions: (
+    options: RawColumnWithMetadata,
+  ) => Promise<unknown>;
   /**
    * True when Mathesar automatically added this column as part of the import
    * process

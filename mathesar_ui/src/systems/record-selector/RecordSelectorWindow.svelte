@@ -36,7 +36,7 @@
     $tableId && table
       ? new TabularData({
           database: table.schema.database,
-          meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
+          meta: new Meta({ pagination: new Pagination({ size: 100 }) }),
           hasEnhancedPrimaryKeyCell: false,
           table,
           loadIntrinsicRecordSummaries: true,
@@ -79,15 +79,27 @@
 
   function onWindowClick(event: MouseEvent) {
     if ($nestedSelectorIsOpen) return;
+    if (!controllerCanCancel) return;
 
     const currentModal = windowPositionerElement.lastChild as HTMLElement;
     const currentWindow = currentModal.firstChild?.firstChild as HTMLElement;
-    const isElementInside = isElementInsideParent(
-      event.target as HTMLElement | null,
+    const clickTarget = event.target as HTMLElement | null;
+    const clickIsInsideCurrentWindow = isElementInsideParent(
+      clickTarget,
       currentWindow,
     );
+    if (clickIsInsideCurrentWindow) return;
 
-    if (!isElementInside && controllerCanCancel) controller.cancel();
+    const clickIsInsideADropdown = !!clickTarget?.closest(
+      '[data-attachable-dropdown]',
+    );
+    // The record selector has a dropdown in the MiniPagination component. We
+    // don't want to close the window if the user clicks on UI inside that
+    // dropdown. The logic isn't perfect here, but we ignore all clicks from
+    // inside dropdowns, which should do the trick.
+    if (clickIsInsideADropdown) return;
+
+    controller.cancel();
   }
 </script>
 
@@ -151,7 +163,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--modal-overlay);
     z-index: var(--z-index__record_selector__overlay);
   }
 </style>

@@ -30,7 +30,7 @@
   $: name = requiredField(database.name);
   $: nickname = optionalField(database.nickname ?? undefined);
   $: host = requiredField(database.server.host);
-  $: port = requiredField(database.server.port);
+  $: port = optionalField(database.server.port);
   $: form = makeForm({ name, nickname, host, port });
 
   $: hasHostChanges = host.hasChanges;

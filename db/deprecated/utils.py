@@ -2,9 +2,10 @@ import inspect
 import warnings
 
 from psycopg2 import errors as p_errors
-
 import sqlalchemy
 from sqlalchemy.exc import ProgrammingError
+
+from db.connection import mathesar_connection
 
 
 class UndefinedFunction(Exception):
@@ -71,3 +72,14 @@ def get_pg_catalog_table(table_name, engine, metadata):
     if len(table.c) < 1:
         table = sqlalchemy.Table(table_name, metadata, autoload_with=engine, schema='pg_catalog', extend_existing=True)
     return table
+
+
+def engine_to_psycopg_conn(engine):
+    return mathesar_connection(
+        host=engine.url.host or engine.url.query["host"],
+        port=engine.url.port,
+        dbname=engine.url.database,
+        user=engine.url.username,
+        password=engine.url.password,
+        application_name='mathesar.db.deprecated.utils.engine_to_psycopg_conn',
+    )

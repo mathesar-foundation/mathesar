@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store';
 
-  import type { ColumnMetadata } from '@mathesar/api/rpc/columns';
+  import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
   import type { AbstractTypeDisplayConfig } from '@mathesar/stores/abstract-types/types';
   import {
     FormBuilder,

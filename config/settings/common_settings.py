@@ -11,18 +11,13 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
+import traceback
 from pathlib import Path
 
-from dj_database_url import parse as db_url
-
-
-# We use a 'tuple' with pipes as delimiters as decople naively splits the global
-# variables on commas when casting to Csv()
-def pipe_delim(pipe_string):
-    # Remove opening and closing brackets
-    pipe_string = pipe_string[1:-1]
-    # Split on pipe delim
-    return pipe_string.split("|")
+import json
+import yaml
+from collections import defaultdict
+from config.database_config import PostgresConfig, parse_port
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,6 +38,10 @@ INSTALLED_APPS = [
     "django_property_filter",
     "modernrpc",
     "mathesar",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
 ]
 
 MIDDLEWARE = [
@@ -57,7 +56,96 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
     "mathesar.middleware.PasswordChangeNeededMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
+
+OIDC_CONFIG_FILE = BASE_DIR.joinpath('sso.yml')
+OIDC_CONFIG_DICT = {}
+# Try loading OIDC_CONFIG_DICT from env, iff it doesn't exist, try loading from sso.yml
+try:
+    OIDC_CONFIG_DICT = json.loads(os.getenv('OIDC_CONFIG_DICT', "{}"))
+except Exception as e:
+    traceback.print_exception(type(e), e, e.__traceback__)
+try:
+    if OIDC_CONFIG_DICT in [None, {}] and OIDC_CONFIG_FILE.exists():
+        with open(OIDC_CONFIG_FILE, "rb") as f:
+            OIDC_CONFIG_DICT = yaml.full_load(f)
+except Exception as e:
+    traceback.print_exception(type(e), e, e.__traceback__)
+OIDC_CONFIG = []
+OIDC_ALLOWED_EMAIL_DOMAINS = {}
+OIDC_DEFAULT_PG_ROLE_MAP = defaultdict(list)
+
+try:
+    for providers, config in OIDC_CONFIG_DICT['oidc_providers'].items():
+        if not config:
+            continue
+        provider_name = config.get("provider_name")
+        client_id = config.get("client_id")
+        secret = config.get("secret")
+        server_url = config.get("server_url")
+        allowed_email_domains = config.get("allowed_email_domains", [])  # Here [] means allow all domains.
+        default_pg_role = config.get("default_pg_role", {})
+        if all([provider_name, client_id, secret, server_url]):
+            OIDC_CONFIG.append(
+                {
+                    "provider_id": provider_name.lower(),
+                    "name": provider_name.lower(),
+                    "client_id": client_id,
+                    "secret": secret,
+                    "settings": {
+                        "server_url": server_url
+                    }
+                }
+            )
+
+        if isinstance(allowed_email_domains, list):
+            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = allowed_email_domains
+        elif isinstance(allowed_email_domains, str):
+            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = [allowed_email_domains]
+
+        for role_info in default_pg_role.values():
+            if not role_info:
+                continue
+            db_name = role_info.get("name")
+            host = role_info.get("host")
+            port = role_info.get("port")
+            role_name = role_info.get("role")
+            if all([db_name, host, port, role_name]):
+                OIDC_DEFAULT_PG_ROLE_MAP[provider_name].append(
+                    {
+                        "db_name": db_name,
+                        "host": host,
+                        "port": port,
+                        "role_name": role_name
+                    }
+                )
+except Exception as e:
+    # We swallow any exceptions when SSO is misconfigured in sso.yml so that the django server doesn't fail to start.
+    traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    "openid_connect": {
+        "APPS": OIDC_CONFIG
+    }
+}
+
+SOCIALACCOUNT_ADAPTER = "mathesar.oidc.SocialAccountAdapter"
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Allows us to merge existing users with OIDC logins.
+# More context: https://docs.allauth.org/en/dev/socialaccount/configuration.html
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
 
 ROOT_URLCONF = "config.urls"
 
@@ -110,13 +198,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # TODO: Add to documentation that database keys should not be than 128 characters.
 
-# MATHESAR_DATABASES should be of the form '({db_name}|{db_url}), ({db_name}|{db_url})'
-# See pipe_delim above for why we use pipes as delimiters
-DATABASES = {
-    db_key: db_url(url_string)
-    for db_key, url_string in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']
-}
-
+DATABASES = {}
 POSTGRES_DB = os.environ.get('POSTGRES_DB', default=None)
 POSTGRES_USER = os.environ.get('POSTGRES_USER', default=None)
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default=None)
@@ -124,15 +206,17 @@ POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default=None)
 POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default=None)
 
 # POSTGRES_DB, POSTGRES_USER, and POSTGRES_HOST are required env variables for forming a pg connection string for the django database
-# We expect the environment variables to be url-encoded, we do not do additional encoding here
 if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
-    DATABASES['default'] = db_url(
-        f"postgres://{POSTGRES_USER}"
-        f"{':' + POSTGRES_PASSWORD if POSTGRES_PASSWORD else ''}"
-        f"@{POSTGRES_HOST}"
-        f"{':' + POSTGRES_PORT if POSTGRES_PORT else ''}"
-        f"/{POSTGRES_DB}"
-    )
+    DATABASES['default'] = PostgresConfig(
+        dbname=POSTGRES_DB,
+        host=POSTGRES_HOST,
+        port=parse_port(POSTGRES_PORT),
+        role=POSTGRES_USER,
+        password=POSTGRES_PASSWORD,
+    ).to_django_dict()
+    DATABASES['default']['OPTIONS'] = {
+        "application_name": "Mathesar Django"
+    }
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s)
@@ -142,13 +226,8 @@ for db_key, db_dict in DATABASES.items():
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
         )
 
-# pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
-# and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
+# TODO: We use this variable for analytics, consider removing/renaming it.
 TEST = bool(os.environ.get('TEST', default=False))
-if TEST:
-    for db_key, _ in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']:
-        DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
-
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")

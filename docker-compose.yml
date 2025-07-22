@@ -76,7 +76,7 @@ x-config: &config
 # DOMAIN_NAME:
 #     Default: http://localhost
 #     Info: Specifies the domains that can access Mathesar over http(port 80)
-#           or https(port 443), also automatically creating SSL certificates 
+#           or https(port 443), also automatically creating SSL certificates
 #           for the same. If you want to host an instance of Mathesar over the
 #           internet or over your local network, add those domains here.
 #     Example: yourdomain.com, *.subdomain.com, 127.0.0.1
@@ -89,7 +89,7 @@ x-config: &config
 #
 # POSTGRES_USER:
 #     Default: mathesar
-#     Info: Specifies creation of a user with superuser privileges 
+#     Info: Specifies creation of a user with superuser privileges
 #           and a database with the same name.
 #     Example: athena
 #
@@ -102,7 +102,9 @@ x-config: &config
 # POSTGRES_HOST:
 #     Default: mathesar_db (name of the db service provided below)
 #     Info: Specifies the host name on which portgres listen for connections
-#           from client applications.
+#           from client applications. Can be a docker compose service name,
+#           a A TCP host address (e.g., host.docker.internal), or a Unix
+#           socket path (e.g., /var/run/postgresql).
 #     Example: kratos
 #
 # POSTGRES_PORT:
@@ -118,7 +120,7 @@ x-config: &config
 #
 # Running this compose file will automatically create a subdirectory named
 # "msar" with the following file structure:
-# 
+#
 # msar
 # ├── caddy/  (stores certificates, keys, and other information for Caddy)
 # ├── media/  (stores user uploaded datafiles(.csv/.tsv) to Mathesar)
@@ -144,7 +146,7 @@ services:
   service:
     container_name: mathesar_service
     image: mathesar/mathesar:latest
-    environment: 
+    environment:
       # First we load the variables configured above.
       <<: *config
 
@@ -157,14 +159,12 @@ services:
       # domains.
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
 
-      # WARNING: MATHESAR_DATABASES is deprecated, and will be removed in a future release.
-      MATHESAR_DATABASES: ${MATHESAR_DATABASES:-}
-
       # SECURITY WARNING: don't run with DEBUG=true in production!
       DEBUG: ${DEBUG:-false}
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
+      - ./sso.yml:/code/sso.yml
     depends_on:
       db:
         condition: service_healthy
@@ -197,7 +197,7 @@ services:
     container_name: mathesar_db
     # This service needs the config variables defined above.
     environment: *config
-    # Expose the internal port 5432 only to other containers and not 
+    # Expose the internal port 5432 only to other containers and not
     # the underlying host.
     expose:
       - "5432"

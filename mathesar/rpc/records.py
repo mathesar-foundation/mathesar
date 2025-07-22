@@ -404,6 +404,7 @@ def search(
         database_id: int,
         search_params: list[SearchParam] = [],
         limit: int = 10,
+        offset: int = 0,
         return_record_summaries: bool = False,
         **kwargs
 ) -> RecordList:
@@ -434,6 +435,7 @@ def search(
             table_oid,
             search=search_params,
             limit=limit,
+            offset=offset,
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )

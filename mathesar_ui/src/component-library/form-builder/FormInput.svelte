@@ -11,6 +11,7 @@
   } from './types';
 
   export let type: DataTypeBasedInputType;
+  export let text: FormInputElement['text'] = undefined;
   export let label: FormInputElement['label'] = undefined;
   export let store: FormValueStore;
   export let validationErrors: FormValidationCheck[];
@@ -20,6 +21,8 @@
   <LabeledInput
     {label}
     layout={type === 'boolean' ? 'inline-input-first' : 'stacked'}
+    help={text?.help}
+    helpType="tooltip"
   >
     <DataTypeBasedInput
       {...$$restProps}

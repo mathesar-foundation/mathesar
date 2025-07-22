@@ -199,6 +199,9 @@ export default class SheetSelection {
           'data-cell': (b) => b.cellId,
           'column-header-cell': (b) => makeCellId(firstRow(), b.columnId),
           'row-header-cell': (b) => makeCellId(b.rowId, firstColumn()),
+          'placeholder-row-header-cell': (b) =>
+            makeCellId(b.rowId, firstColumn()),
+          'placeholder-data-cell': (b) => b.cellId,
         });
         return this.ofDataCellRange(startingCellId, endingCellId);
       },
@@ -208,6 +211,8 @@ export default class SheetSelection {
           'data-cell': (b) => parseCellId(b.cellId).columnId,
           'column-header-cell': (b) => b.columnId,
           'row-header-cell': () => firstColumn(),
+          'placeholder-row-header-cell': () => firstColumn(),
+          'placeholder-data-cell': (b) => parseCellId(b.cellId).columnId,
         });
         return this.ofColumnRange(startingColumnId, endingColumnId);
       },
@@ -217,9 +222,24 @@ export default class SheetSelection {
           'data-cell': (b) => parseCellId(b.cellId).rowId,
           'column-header-cell': () => firstRow(),
           'row-header-cell': (b) => b.rowId,
+          'placeholder-row-header-cell': (b) => b.rowId,
+          'placeholder-data-cell': (b) => parseCellId(b.cellId).rowId,
         });
         return this.ofRowRange(startingRowId, endingRowId);
       },
+
+      'placeholder-row-header-cell': ({ rowId }) =>
+        this.ofRowRange(rowId, rowId),
+
+      'placeholder-data-cell': ({ cellId: startingCellId }) =>
+        match(endingCell, 'type', {
+          'data-cell': () => this.ofOneCell(startingCellId),
+          'column-header-cell': () => this.ofOneCell(startingCellId),
+          'row-header-cell': () => this.ofOneCell(startingCellId),
+          'placeholder-row-header-cell': () => this.ofOneCell(startingCellId),
+          'placeholder-data-cell': ({ cellId: endingCellId }) =>
+            this.ofOneCell(endingCellId),
+        }),
     });
   }
 

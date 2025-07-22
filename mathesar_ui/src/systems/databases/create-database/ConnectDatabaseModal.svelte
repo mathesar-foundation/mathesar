@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { iconConnectDatabase, iconCreateDatabase } from '@mathesar/icons';
+  import { iconAddNew, iconConnection } from '@mathesar/icons';
   import {
     ControlledModal,
     type ModalController,
@@ -50,13 +50,13 @@
   {#if view === 'base'}
     <div class="connect-db-options">
       <ConnectOption
-        icon={iconCreateDatabase}
+        icon={iconAddNew}
         header={$_('create_new_database')}
         description={$_('create_database_mathesar_internal_server')}
         changeView={() => setView('create')}
       />
       <ConnectOption
-        icon={iconConnectDatabase}
+        icon={iconConnection}
         header={$_('connect_existing_database')}
         description={$_('provide_details_connect_existing_database')}
         changeView={() => setView('connect')}

@@ -1,6 +1,6 @@
+import type { NumberFormat } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import {
-  type Column,
-  type NumberFormat,
+  type RawColumnWithMetadata,
   getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import {
@@ -35,7 +35,7 @@ interface Config extends Record<string, unknown> {
 }
 
 function getAllowFloat(
-  column: Column,
+  column: RawColumnWithMetadata,
   floatAllowanceStrategy?: FloatAllowanceStrategy,
 ): boolean {
   if (floatAllowanceStrategy === 'scale-based') {
@@ -48,7 +48,7 @@ function getAllowFloat(
 }
 
 export function getUseGrouping(
-  column: Column,
+  column: RawColumnWithMetadata,
 ): NumberCellExternalProps['formatterOptions']['useGrouping'] {
   const grouping = getColumnMetadataValue(column, 'num_grouping');
   switch (grouping) {
@@ -64,7 +64,7 @@ export function getUseGrouping(
 }
 
 function getFormatterOptions(
-  column: Column,
+  column: RawColumnWithMetadata,
   config?: Config,
 ): NumberCellExternalProps['formatterOptions'] {
   const displayOptions = column.metadata;
@@ -84,7 +84,10 @@ function getFormatterOptions(
   };
 }
 
-function getProps(column: Column, config?: Config): NumberCellExternalProps {
+function getProps(
+  column: RawColumnWithMetadata,
+  config?: Config,
+): NumberCellExternalProps {
   const basicFormatterOptions = getFormatterOptions(column, config);
   const displayOptions = column.metadata;
   const maximumFractionDigits =
@@ -111,7 +114,7 @@ function getProps(column: Column, config?: Config): NumberCellExternalProps {
 
 const numberType: CellComponentFactory = {
   get(
-    column: Column,
+    column: RawColumnWithMetadata,
     config?: Config,
   ): ComponentAndProps<NumberCellExternalProps> {
     return {
@@ -121,7 +124,7 @@ const numberType: CellComponentFactory = {
   },
 
   getInput(
-    column: Column,
+    column: RawColumnWithMetadata,
     config?: Config,
   ): ComponentAndProps<NumberCellExternalProps['formatterOptions']> {
     return {
@@ -130,7 +133,7 @@ const numberType: CellComponentFactory = {
     };
   },
 
-  getDisplayFormatter(column: Column, config?: Config) {
+  getDisplayFormatter(column: RawColumnWithMetadata, config?: Config) {
     return (v) => getProps(column, config).formatForDisplay(String(v));
   },
 };
