@@ -49,20 +49,22 @@
   </div>
 
   {#if isDefinedNonNullable($help)}
-    <div class="help">
-      {#if dataFormManager instanceof EditableDataFormManager}
+    {#if dataFormManager instanceof EditableDataFormManager}
+      <div class="help">
         <input
           type="text"
           value={$help}
           on:input={onHelpTextInput}
           placeholder={$_('field_add_help_text')}
         />
-      {:else}
+      </div>
+    {:else if $help.trim().length}
+      <div class="help">
         <span>
           {$help}
         </span>
-      {/if}
-    </div>
+      </div>
+    {/if}
   {/if}
 </div>
 
