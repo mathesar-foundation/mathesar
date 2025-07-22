@@ -3,13 +3,81 @@
 
   import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import {
+    Checkbox,
+    LabeledInput,
+    TextInput,
+    getValueFromEvent,
+    isDefinedNonNullable,
+  } from '@mathesar-component-library';
+
+  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
+
+  import FieldAppearance from './FieldAppearance.svelte';
+
+  export let field: EphemeralDataFormField;
+  $: ({ label, help, fieldColumn, isRequired } = field);
+  $: isRequiredOnDb = !fieldColumn.column.nullable;
+  $: isFieldRequired = isRequiredOnDb || $isRequired;
 </script>
 
 <InspectorTabContent>
-  <InspectorSection title={$_('field_text')}></InspectorSection>
-  <InspectorSection title={$_('field_source')}></InspectorSection>
-  <InspectorSection title={$_('field_validation')}></InspectorSection>
-  <InspectorSection title={$_('field_appearance')}></InspectorSection>
-  <InspectorSection title={$_('field_fk_rule')}></InspectorSection>
-  <InspectorSection title={$_('field_fk_record_summary')}></InspectorSection>
+  <InspectorSection title={$_('field_text')}>
+    <LabeledInput layout="stacked" label={$_('field_label')}>
+      <TextInput
+        value={$label}
+        on:input={(e) => field.setLabel(String(getValueFromEvent(e)))}
+      />
+    </LabeledInput>
+    <LabeledInput
+      layout="inline-input-first"
+      label={$_('field_provide_help_text')}
+    >
+      <Checkbox
+        checked={isDefinedNonNullable($help)}
+        on:change={(e) => field.setHelpText(e.detail ? '' : null)}
+      />
+    </LabeledInput>
+    {#if isDefinedNonNullable($help)}
+      <TextInput
+        value={$help}
+        on:input={(e) => {
+          field.setHelpText(String(getValueFromEvent(e)));
+        }}
+      />
+    {/if}
+  </InspectorSection>
+  <InspectorSection title={$_('field_validation')}>
+    <LabeledInput
+      layout="inline-input-first"
+      label={$_('field_validation_is_required')}
+    >
+      <Checkbox
+        checked={isFieldRequired}
+        disabled={isRequiredOnDb}
+        on:change={(e) => field.setIsRequired(e.detail)}
+      />
+    </LabeledInput>
+    {#if isRequiredOnDb}
+      <div class="not-null-info">
+        <InfoBox>
+          {$_('field_marked_required_column_disallows_null')}
+        </InfoBox>
+      </div>
+    {/if}
+  </InspectorSection>
+
+  <FieldAppearance {field} />
+
+  {#if field.kind === 'foreign_key'}
+    <InspectorSection title={$_('field_fk_rule')}></InspectorSection>
+    <InspectorSection title={$_('field_fk_record_summary')}></InspectorSection>
+  {/if}
 </InspectorTabContent>
+
+<style lang="scss">
+  .not-null-info {
+    font-size: var(--sm1);
+  }
+</style>

@@ -1,4 +1,4 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
 import type {
   RawEphemeralForeignKeyDataFormField,
@@ -17,11 +17,13 @@ import type { FieldColumn } from './FieldColumn';
 export class EphermeralFkField extends AbstractParentEphemeralField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
 
-  readonly fieldColumn;
-
   readonly relatedTableOid;
 
+  readonly fieldColumn;
+
   readonly fieldStore: FieldStore;
+
+  readonly inputComponentAndProps;
 
   private _interactionRule;
 
@@ -50,8 +52,11 @@ export class EphermeralFkField extends AbstractParentEphemeralField {
       throw Error('The passed column is not a foreign key');
     }
     this._interactionRule = writable(props.interactionRule);
-    this.fieldStore = optionalField(null);
     this.relatedTableOid = props.relatedTableOid;
+    this.fieldStore = optionalField(null);
+    this.inputComponentAndProps = derived(this.styling, (styling) =>
+      this.fieldColumn.getInputComponentAndProps(styling),
+    );
   }
 
   async setInteractionRule(

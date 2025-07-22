@@ -23,7 +23,7 @@
   </div>
   <div class="content">
     {#if $selectedElement?.type === 'field'}
-      <FieldConfig />
+      <FieldConfig field={$selectedElement.field} />
     {:else}
       <FormConfig {dataFormManager} />
     {/if}

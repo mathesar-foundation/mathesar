@@ -1,10 +1,10 @@
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import type { RawEphemeralDataFormBaseField } from '@mathesar/api/rpc/forms';
 import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 /**
  * We'd ideally like use ProcessedColumn here, however we do not have access to
@@ -25,8 +25,6 @@ export class FieldColumn {
     relatedTableOid: number;
   } | null;
 
-  readonly inputComponentAndProps: ComponentAndProps;
-
   constructor(props: {
     tableOid: Table['oid'];
     column: RawColumnWithMetadata;
@@ -38,10 +36,24 @@ export class FieldColumn {
     this.column = props.column;
     this.foreignKeyLink = props.foreignKeyLink ?? null;
     this.abstractType = getAbstractTypeForDbType(this.column.type);
-    this.inputComponentAndProps = getDbTypeBasedInputCap(
+  }
+
+  getInputComponentAndProps(
+    styling?: RawEphemeralDataFormBaseField['styling'],
+  ) {
+    let { cellInfo } = this.abstractType;
+    if (cellInfo.type === 'string') {
+      cellInfo = {
+        type: 'string',
+        config: {
+          multiLine: styling?.size === 'large',
+        },
+      };
+    }
+    return getDbTypeBasedInputCap(
       this.column,
-      props.foreignKeyLink?.relatedTableOid,
-      this.abstractType.cellInfo,
+      this.foreignKeyLink?.relatedTableOid,
+      cellInfo,
     );
   }
 

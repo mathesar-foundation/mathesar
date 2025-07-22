@@ -1,3 +1,5 @@
+import { derived } from 'svelte/store';
+
 import type {
   RawEphemeralScalarDataFormField,
   RawScalarDataFormField,
@@ -19,6 +21,8 @@ export class EphermeralScalarField extends AbstractEphemeralField {
 
   readonly fieldStore: FieldStore;
 
+  readonly inputComponentAndProps;
+
   constructor(
     parentField: ParentEphemeralField,
     data: EphemeralFieldProps & { fieldColumn: FieldColumn },
@@ -26,6 +30,9 @@ export class EphermeralScalarField extends AbstractEphemeralField {
     super(parentField, data);
     this.fieldColumn = data.fieldColumn;
     this.fieldStore = optionalField(null);
+    this.inputComponentAndProps = derived(this.styling, (styling) =>
+      this.fieldColumn.getInputComponentAndProps(styling),
+    );
   }
 
   hasColumn(fieldColumn: FieldColumn) {

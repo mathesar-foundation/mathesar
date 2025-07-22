@@ -18,7 +18,9 @@ export interface RawEphemeralDataFormBaseField {
   index: number;
   label?: string | null;
   help?: string | null;
-  styling: unknown;
+  styling?: {
+    size?: 'regular' | 'large';
+  } | null;
   is_required: boolean;
 }
 

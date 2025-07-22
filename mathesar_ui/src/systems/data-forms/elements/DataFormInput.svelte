@@ -9,13 +9,13 @@
   export let dataFormField: EphermeralScalarField | EphermeralFkField;
   export let isSelected: boolean;
 
-  $: ({ fieldStore, fieldColumn } = dataFormField);
+  $: ({ fieldStore, inputComponentAndProps } = dataFormField);
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
   <DynamicInput
     bind:value={$fieldStore}
-    componentAndProps={fieldColumn.inputComponentAndProps}
+    componentAndProps={$inputComponentAndProps}
   />
 </div>
 
