@@ -164,7 +164,8 @@ services:
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
-      - ./sso.yml:/code/sso.yml
+      # Uncomment the following to mount sso.yml and enable Single Sign-On(SSO).
+      # - ./sso.yml:/code/sso.yml
     depends_on:
       db:
         condition: service_healthy
