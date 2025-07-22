@@ -58,12 +58,13 @@
           POSTGRES_PORT: ${POSTGRES_PORT:-5432}
         ```
 
-1. Run the docker compose file using:
+2. If you wish to enable Single Sign On (SSO) support, now would be a good time to do so. See our [guide on configuring SSO](./single-sign-on.md) to learn more.
+3. Run the docker compose file using:
         ```
         docker compose -f docker-compose.yml up
         ```
 
-1. Set up your user account
+4. Set up your user account
 
     Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up. You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
 

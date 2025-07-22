@@ -6,17 +6,17 @@ edit_uri: edit/develop/docs/docs/
 
 nav:
   - Introduction: index.md
+  - Install Mathesar:
+      - Using Docker Compose: administration/install-via-docker-compose.md
+      - On Linux · macOS · WSL: administration/install-from-scratch.md
+      - DigitalOcean: administration/install-digitalocean.md
   - Administrator Guide:
-      - Installing Mathesar:
-        - With Docker Compose: administration/install-via-docker-compose.md
-        - On Linux · macOS · WSL: administration/install-from-scratch.md
-        - Upgrade Mathesar: administration/upgrade.md
-        - Uninstall Mathesar: administration/uninstall.md
-        - Environment variables: administration/environment-variables.md
+      - Environment variables: administration/environment-variables.md
+      - Upgrade Mathesar: administration/upgrade.md
+      - Uninstall Mathesar: administration/uninstall.md
       - Single Sign-on (SSO): administration/single-sign-on.md
       - Debugging Mathesar: administration/debug.md
       - Postgres & Python versions: administration/version-support.md
-
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
@@ -160,7 +160,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.3.0
+  mathesar_version: 0.4.0
   version:
     provider: mike
     alias: true

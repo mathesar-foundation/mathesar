@@ -1,69 +1,48 @@
-*# Single Sign-on (SSO)
+# Single Sign-on (SSO)
 
-![A screenshot of Mathesar's login screen with multiple SSO options enabled](image.png)
+This guide walks you through how to configure Single Sign On (SSO) for Mathesar.
 
-Single Sign-on (SSO) allows users to log into Mathesar with their existing company credentials, enabling seamless and secure access without the need to create or manage a separate account.
+Single Sign-on (SSO) allows users to log into your Mathesar instance without the need to create or manage separate accounts.
 
-Mathesar supports any identity provider that implements the [OpenID Connect (OIDC) standard](https://openid.net/developers/how-connect-works/), such as Okta, Azure Active Directory, Google Workspace, and others.
 
-This guide is intended for IT admins or developers who are configuring secure access to Mathesar. SSO in Mathesar is configured outside of the application interface, using a straightforward configuration file.
+This guide is intended for IT admins or developers who are configuring secure access to Mathesar.
 
-The following sections will walk you through how to configure your identity provider and enable SSO for your organization.
+### 1. Setting up your identity provider
 
-## Enabling and configuring SSO
+First, configure your identity provider (IdP) to work with Mathesar.
 
-To enable Single Sign-On (SSO) in Mathesar, begin by creating a file named `sso.yml`. This file serves as the configuration point for all identity provider (IdP) integrations using OIDC.
+???+ tip "How SSO support in Mathesar works"
+    Mathesar supports any identity provider that implements the [OpenID Connect (OIDC) standard](https://openid.net/developers/how-connect-works/), such as Okta, Azure Active Directory, Google Workspace, and others.
 
-Without this configuration file, Mathesar will default to supporting only traditional email and password-based authentication.
+Although all supported IdPs follow the same specification, they each have a different user interfaces and process for setting up an application.
 
-Instructions for where to save the file vary slightly, depending on which installation method you've used:
+Here are several popular identity providers that should work with Mathesar's OIDC SSO implementation. Where possible, we've linked to relevant documentation about configuring each provider.
 
-=== "For Docker Compose installations"
+| Provider      | Key           |
+|---------------|---------------|
+| [Apple](https://support.apple.com/guide/apple-business-manager/federated-authentication-identity-provider-axmfcab66783/web)         | `apple`       |
+| [Auth0](https://auth0.com/docs/get-started/auth0-overview/create-applications)         | `auth0`       |
+| [GitLab](https://docs.gitlab.com/integration/openid_connect_provider/)        | `gitlab`      |
+| [Google](https://support.google.com/a/answer/12032922#OIDC_setup)        | `google`      |
+| [Kakao](https://developers.kakao.com/docs/latest/en/kakaologin/utilize#oidc)         | `kakao`       |
+| [Keycloak](https://www.keycloak.org/securing-apps/oidc-layers)      | `keycloak`    |
+| [LinkedIn](https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin-v2)      | `linkedin`    |
+| [Microsoft](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc)     | `microsoft`   |
+| [Okta](https://developer.okta.com/docs/guides/sign-into-web-app-redirect/asp-net-core-3/main/#create-an-app-integration-in-the-admin-console)          | `okta`        |
 
-    For [docker compose](./install-via-docker-compose.md) installations, create a `sso.yml` file next to your `docker-compose.yml` file and the `msar` directory.
+Whichever provider you're using, you'll begin by creating an application.
 
-    This file is automatically mounted to the container in our [default `docker-compose.yml` file](https://github.com/mathesar-foundation/mathesar/raw/0.3.0/docker-compose.yml).
-
-    If you've modified your docker compose file in any way, make sure that you're mounting a `sso.yml` file to `/code/sso.yml` within the container before continuing.
-
-=== "For Linux, macOS, or WSL installations"
-
-    For [non-Docker installations](./install-from-scratch.md), you'll need to create the `sso.yml` file in the installation directory you [defined while installing](./install-from-scratch.md#set-up-your-installation-directory) Mathesar.
-
-### Setting up your identity provider
-
-Once you've created the `sso.yml` file, the next step is to configure your identity provider (IdP) to work with Mathesar.
-
-Although all supported IdPs adhere to the same OIDC specification, each provider has a different interface and process for registering and managing applications.
-
-???tip "Example Identity Providers"
-     Here are several popular identity providers that should work with Mathesar's OIDC SSO implementation. Where possible, we've linked to relevant documentation about configuring each provider.
-
-    | Provider      | Key           |
-    |---------------|---------------|
-    | [Apple](https://support.apple.com/guide/apple-business-manager/federated-authentication-identity-provider-axmfcab66783/web)         | `apple`       |
-    | [Auth0](https://auth0.com/docs/get-started/auth0-overview/create-applications)         | `auth0`       |
-    | [GitLab](https://docs.gitlab.com/integration/openid_connect_provider/)        | `gitlab`      |
-    | [Google](https://support.google.com/a/answer/12032922#OIDC_setup)        | `google`      |
-    | [Kakao](https://developers.kakao.com/docs/latest/en/kakaologin/utilize#oidc)         | `kakao`       |
-    | [Keycloak](https://www.keycloak.org/securing-apps/oidc-layers)      | `keycloak`    |
-    | [LinkedIn](https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin-v2)      | `linkedin`    |
-    | [Microsoft](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc)     | `microsoft`   |
-    | [Okta](https://developer.okta.com/docs/guides/sign-into-web-app-redirect/asp-net-core-3/main/#create-an-app-integration-in-the-admin-console)          | `okta`        |
-
-    See broken links or something wrong? Please [file an issue](https://github.com/mathesar-foundation/mathesar/issues/new?template=bug_report.md).
-
-After registering your application (or client) in your IdP, per their documentation, you'll need to configure the Callback URL—also referred to as the Redirect URI or Login URL, depending on the provider.
-
-Set the Callback URL to:
-
-```
-https://mathesar.example/auth/oidc/<provider-name>/login/callback/
-```
+During creation, you'll need to provide the "Callback URL"—also referred to as the Redirect URI or Login URL, depending on the provider. The callback URL tells your identity provider where to send users after they’ve successfully logged in, so they can be redirected back to Mathesar.
 
 !!!info "Configuring the callback URL"
+    In your provider's settings, set the Callback URL to:
+
+    ```
+    https://<mathesar-domain>/auth/oidc/<provider-name>/login/callback/
+    ```
+
     Replace `<mathesar-domain>` with the domain name of your Mathesar installation.<br>
-    Examples: `https://mathesar.myorg.com`, `localhost:8000`
+    Examples: `mathesar.myorg.com`, `localhost:8000`
 
     Replace `<provider-name>` with the name of your IdP provider.<br>
     Examples: `auth0`, `okta`, `google`
@@ -72,9 +51,36 @@ Your identity provider will redirect users to this URL after authentication, so 
 
 Once your IdP is fully configured, you're ready to move on to the next step: populating your `sso.yml` file with the necessary values from your identity provider.
 
-### Configuring the identity provider in Mathesar
+### 2. Enabling SSO in Mathesar
 
-Once your identity provider (IdP) is configured and you've created a client or application within it, the next step is to connect that provider to Mathesar via the `sso.yml` configuration file.
+SSO in Mathesar is configured outside of the application interface, using a straightforward configuration file. To enable Single Sign-On (SSO) in Mathesar, begin by creating this file, named `sso.yml`.
+
+Instructions for where to save the file vary slightly, depending on which installation method you've used:
+
+=== "For Docker Compose installations"
+
+    For [docker compose](./install-via-docker-compose.md) installations, create a `sso.yml` file next to your `docker-compose.yml` file:
+
+    ```diff
+    mathesar
+    ├── docker-compose.yml
+    ├── msar/
+    +└── sso.yml
+    ```
+
+    This file is automatically mounted to the container in our [default `docker-compose.yml` file](https://github.com/mathesar-foundation/mathesar/blob/d3746914ff966dcc20a3ca9b776c7e97e64a162d/docker-compose.yml#L167).
+
+    If you've modified your docker compose file in any way, make sure that you're mounting a `sso.yml` file to `/code/sso.yml` within the container before continuing.
+
+=== "For Linux, macOS, or WSL installations"
+
+    For [non-Docker installations](./install-from-scratch.md), you'll need to create the `sso.yml` file in the installation directory you [defined while installing](./install-from-scratch.md#set-up-your-installation-directory) Mathesar.
+
+Once the file is created, you can add information about your specific provider. You may also wish to paste in our [example configuration](https://github.com/mathesar-foundation/mathesar/blob/develop/sso.yml.example) and edit it in the following steps.
+
+### 3. Configuring the identity provider in Mathesar
+
+Now that your identity provider (IdP) is configured and you've created the `sso.yml` file, the next step is to tell Mathesar about your provider by adding it to the `sso.yml` file.
 
 We'll use **Okta** as the example provider, but the same structure applies to others like Auth0, Google, or Azure AD.
 
@@ -135,8 +141,8 @@ Finally, you'll need to restart Mathesar so it can read the `sso.yml` file and e
 === "For Docker Compose installations"
 
     ```bash
-    docker compose down
-    docker compose up -d
+    docker compose -f docker-compose.yml down
+    docker compose -f docker-compose.yml up -d
     ```
 
 === "For Linux, macOS, or WSL installations"
@@ -188,17 +194,23 @@ Each database block must include the following:
 **Example:**
 
 ```diff
-default_pg_role:
-+ db1:
-+   name: my_database
-+   host: db.internal.example.com
-+   port: 5432
-+   role: readonly_user
-+ db2:
-+   name: analytics_db
-+   host: analytics-db.example.net
-+   port: 5432
-+   role: analyst
+oidc_providers:
+  provider1:
+    provider_name: okta
+    server_url: https://trial-example-admin.okta.com
+    client_id: YOUR_CLIENT_ID
+    secret: YOUR_SECRET
++   default_pg_role:
++     db1:
++       name: my_database
++       host: db.internal.example.com
++       port: 5432
++       role: readonly_user
++     db2:
++       name: analytics_db
++       host: analytics-db.example.net
++       port: 5432
++       role: analyst
 ```
 
 On first login, users will be granted the specified roles on each listed database. This simplifies onboarding and ensures consistent access control across your environment.
