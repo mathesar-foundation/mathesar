@@ -1,0 +1,40 @@
+# Install Mathesar on Railway
+
+This guide walks you through how to deploy Mathesar on Railway.
+
+??? tip "Railway vs. other deployment methods"
+	Deploying using Railway works really well for:
+
+	- Users who are new to self-hosting but want a long-term, low-maintenance deployment.
+	- Users who want to integrate Mathesar into a broader stack using Railway’s Canvas UI, Git-based workflow, and plugin ecosystem.
+	- Users who need dynamic scaling, rich observability, or automated infrastructure management.
+
+	If you need more flexibility or configurability, we recommend using our [Docker Compose](./install-via-docker-compose.md) or [direct](./install-from-scratch.md) installation methods instead.
+
+
+## Installation
+
+### Step 1: Run the one-click deployer
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/mathesar-official?referralCode=piCyQa)
+
+### Step 2: Create the application
+
+**Press the "Deploy" button.**
+
+It will take a minute or two for Railway to set up your installation. Once ready, you will see your domain name and a link to visit your new Mathesar site.
+
+### Step 3: Set up an admin user account
+
+Navigate to your Mathesar installation using the link that Railway shows you.
+
+You’ll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
+
+### Step 4: Additional setup (optional)
+
+Congratulations on your new Mathesar install!
+
+Here are some other things you can do to complete your Mathesar setup, depending on your needs:
+
+- [Connect your existing database(s) to Mathesar](../user-guide/databases.md#connection) or create a new database in the Mathesar UI to begin working with your data.
+- [Set up a custom domain name in Railway](https://docs.railway.com/guides/public-networking#custom-domains) if you don't want to use their default domain e.g. `https://mathesar-*.up.railway.app`.
