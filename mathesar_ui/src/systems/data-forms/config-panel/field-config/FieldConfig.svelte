@@ -70,16 +70,17 @@
         </InfoBox>
       </div>
     {/if}
-    {#if field.kind === 'foreign_key'}
-      <LabeledInput layout="stacked" label={$_('field_fk_rule_label')}>
-        <FkFormFieldRuleSelector
-          apperance="default"
-          {dataFormManager}
-          dataFormField={field}
-        />
-      </LabeledInput>
-    {/if}
   </InspectorSection>
+
+  {#if field.kind === 'foreign_key'}
+    <InspectorSection title={$_('field_fk_rule_label')}>
+      <FkFormFieldRuleSelector
+        apperance="default"
+        {dataFormManager}
+        dataFormField={field}
+      />
+    </InspectorSection>
+  {/if}
 
   <FieldAppearance {field} />
 </InspectorTabContent>
