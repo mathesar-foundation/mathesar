@@ -2,7 +2,7 @@ import { type Readable, type Writable, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
-  RawDataFormGetResponse,
+  RawDataFormSource,
   RawEphemeralDataForm,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
@@ -33,10 +33,32 @@ export class EphemeralDataForm {
     return this._description;
   }
 
-  private _accessRoleId;
+  private _headerTitle;
 
-  get accessRoleId(): Readable<RawDataForm['access_role_id']> {
-    return this._accessRoleId;
+  get headerTitle(): Readable<RawDataForm['header_title']> {
+    return this._headerTitle;
+  }
+
+  private _headerSubTitle;
+
+  get headerSubTitle(): Readable<RawDataForm['header_subtitle']> {
+    return this._headerSubTitle;
+  }
+
+  private _associatedRoleId;
+
+  get associatedRoleId(): Readable<RawDataForm['associated_role_id']> {
+    return this._associatedRoleId;
+  }
+
+  private _submissionSettings;
+
+  get submissionSettings(): Readable<{
+    message?: RawDataForm['submit_message'];
+    redirectUrl?: RawDataForm['submit_redirect_url'];
+    buttonLabel?: RawDataForm['submit_button_label'];
+  }> {
+    return this._submissionSettings;
   }
 
   fields: FormFields;
@@ -47,7 +69,14 @@ export class EphemeralDataForm {
     databaseId: number;
     name: Writable<RawDataForm['name']>;
     description: Writable<RawDataForm['description']>;
-    accessRoleId: Writable<RawDataForm['access_role_id']>;
+    headerTitle: Writable<RawDataForm['header_title']>;
+    headerSubTitle: Writable<RawDataForm['header_subtitle']>;
+    associatedRoleId: Writable<RawDataForm['associated_role_id']>;
+    submissionSettings: Writable<{
+      message?: RawDataForm['submit_message'];
+      redirectUrl?: RawDataForm['submit_redirect_url'];
+      buttonLabel?: RawDataForm['submit_button_label'];
+    }>;
     fields: Iterable<EphemeralDataFormField>;
   }) {
     this.baseTableOid = edf.baseTableOid;
@@ -55,7 +84,10 @@ export class EphemeralDataForm {
     this.databaseId = edf.databaseId;
     this._name = edf.name;
     this._description = edf.description;
-    this._accessRoleId = edf.accessRoleId;
+    this._headerTitle = edf.headerTitle;
+    this._headerSubTitle = edf.headerSubTitle;
+    this._associatedRoleId = edf.associatedRoleId;
+    this._submissionSettings = edf.submissionSettings;
     this.fields = new FormFields(edf.fields);
   }
 
@@ -67,6 +99,47 @@ export class EphemeralDataForm {
     this._description.set(description);
   }
 
+  setHeaderTitle(title: string) {
+    this._headerTitle.set({
+      text: title,
+    });
+  }
+
+  setHeaderSubTitle(subTitle: string) {
+    this._headerSubTitle.set({
+      text: subTitle,
+    });
+  }
+
+  setAssociatedRoleId(configuredRoleId: number | null) {
+    this._associatedRoleId.set(configuredRoleId);
+  }
+
+  setSubmissionMessage(message: string | null) {
+    this._submissionSettings.update((settings) => ({
+      ...settings,
+      message: message
+        ? {
+            text: message,
+          }
+        : null,
+    }));
+  }
+
+  setSubmissionRedirectUrl(url: string | null) {
+    this._submissionSettings.update((settings) => ({
+      ...settings,
+      redirectUrl: url,
+    }));
+  }
+
+  setSubmissionButtonLabel(label: string | null) {
+    this._submissionSettings.update((settings) => ({
+      ...settings,
+      buttonLabel: label,
+    }));
+  }
+
   toRawEphemeralDataForm(): RawEphemeralDataForm {
     return {
       database_id: this.databaseId,
@@ -75,13 +148,11 @@ export class EphemeralDataForm {
       name: get(this.name),
       description: get(this.description),
       version: 1,
-      access_role_id: get(this.accessRoleId),
+      associated_role_id: get(this.associatedRoleId),
       header_title: {
         text: get(this.name),
       },
-      header_subtitle: {
-        text: get(this.description) ?? '',
-      },
+      header_subtitle: get(this.headerSubTitle),
       fields: [...get(this.fields).values()].map((field) =>
         field.toRawEphemeralField(),
       ),
@@ -90,7 +161,7 @@ export class EphemeralDataForm {
 
   static fromRawEphemeralDataForm(
     rawEphemeralDataForm: RawEphemeralDataForm,
-    formSource: RawDataFormGetResponse['field_col_info_map'],
+    formSource: RawDataFormSource,
   ) {
     return new EphemeralDataForm({
       baseTableOid: rawEphemeralDataForm.base_table_oid,
@@ -98,7 +169,14 @@ export class EphemeralDataForm {
       databaseId: rawEphemeralDataForm.database_id,
       name: writable(rawEphemeralDataForm.name),
       description: writable(rawEphemeralDataForm.description),
-      accessRoleId: writable(rawEphemeralDataForm.access_role_id),
+      headerTitle: writable(rawEphemeralDataForm.header_title),
+      headerSubTitle: writable(rawEphemeralDataForm.header_subtitle),
+      associatedRoleId: writable(rawEphemeralDataForm.associated_role_id),
+      submissionSettings: writable({
+        message: rawEphemeralDataForm.submit_message,
+        redirectUrl: rawEphemeralDataForm.submit_redirect_url,
+        buttonLabel: rawEphemeralDataForm.submit_button_label,
+      }),
       fields: rawEphemeralDataForm.fields.map((field) =>
         rawEphemeralFieldToEphemeralField(
           field,
@@ -117,7 +195,12 @@ export class EphemeralDataForm {
       databaseId: tableStructureSubstance.table.schema.database.id,
       name: writable(tableStructureSubstance.table.name),
       description: writable(null),
-      accessRoleId: writable(null),
+      headerTitle: writable({
+        text: tableStructureSubstance.table.name,
+      }),
+      headerSubTitle: writable(null),
+      associatedRoleId: writable(null),
+      submissionSettings: writable({}),
       fields: tableStructureSubstanceToEphemeralFields(
         tableStructureSubstance,
         null,

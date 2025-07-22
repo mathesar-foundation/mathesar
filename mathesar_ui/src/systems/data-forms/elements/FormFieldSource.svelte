@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
 
   import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
@@ -24,15 +24,17 @@
       <TableName {table} alwaysShowTooltip={true} />
     {/if}
   </div>
-  {#if dataFormField.kind !== 'reverse_foreign_key'}
-    <span>.</span>
-    <div class="tag">
-      <ProcessedColumnName
-        processedColumn={dataFormField.processedColumn}
-        alwaysShowTooltip={true}
-      />
-    </div>
-  {/if}
+  <span>.</span>
+  <div class="tag">
+    <ColumnName
+      column={{
+        ...dataFormField.fieldColumn.column,
+        constraintsType:
+          dataFormField.kind === 'foreign_key' ? ['foreignkey'] : [],
+      }}
+      alwaysShowTooltip={true}
+    />
+  </div>
 </div>
 
 <style lang="scss">

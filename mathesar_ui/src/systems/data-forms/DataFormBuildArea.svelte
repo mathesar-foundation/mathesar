@@ -27,7 +27,7 @@
   <div class="form">
     <DataFormHeader {dataFormManager} />
     <DataFormFieldsContainer {fields} parentField={null} {dataFormManager} />
-    <DataFormFooter />
+    <DataFormFooter {dataFormManager} />
     <div class="branding">
       <DataFormBranding />
     </div>

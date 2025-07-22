@@ -14,25 +14,28 @@
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { ensureReadable } from '@mathesar-component-library';
 
+  // TODO_FORMS: Replace this with form token
   export let formId: number;
 
   const schemaRouteContext = SchemaRouteContext.get();
   $: ({ schema, dataForms } = $schemaRouteContext);
+
+  $: void dataForms.runConservatively();
+  $: form = $dataForms.resolvedValue?.get(formId) ?? undefined;
+
   $: formSourceInfo = (() => {
-    const aysncStore = new AsyncRpcApiStore(api.forms.get, {
-      staticProps: { database_id: schema.database.id, form_id: formId },
-      postProcess: (rawFormResponse) => rawFormResponse.field_col_info_map,
+    const aysncStore = new AsyncRpcApiStore(api.forms.get_source_info, {
+      postProcess: (rawFormResponse) => rawFormResponse,
     });
     return aysncStore;
   })();
+  $: formToken = ensureReadable(form?.token);
+  $: if ($formToken) {
+    void formSourceInfo.run({ form_token: $formToken });
+  }
 
-  $: void AsyncRpcApiStore.runBatchConservatively([
-    dataForms.batchRunner(),
-    formSourceInfo.batchRunner(),
-  ]);
   $: isLoading = $dataForms.isLoading || $formSourceInfo.isLoading;
-  $: form = $dataForms.resolvedValue?.get(formId) ?? undefined;
-  $: formName = form?.name ?? ensureReadable(undefined);
+  $: formName = ensureReadable(form?.name);
 </script>
 
 {#if form || isLoading}

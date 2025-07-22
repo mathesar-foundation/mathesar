@@ -1,7 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { RawColumnWithMetadata } from './columns';
-import type { RawConstraint } from './constraints';
 import type { RawDatabase } from './databases';
 import type { RawConfiguredRole } from './roles';
 import type { RawTable } from './tables';
@@ -19,7 +18,9 @@ export interface RawEphemeralDataFormBaseField {
   index: number;
   label?: string | null;
   help?: string | null;
-  styling: unknown;
+  styling?: {
+    size?: 'regular' | 'large';
+  } | null;
   is_required: boolean;
 }
 
@@ -39,24 +40,14 @@ export interface RawEphemeralForeignKeyDataFormField
   extends RawEphemeralDataFormBaseField {
   kind: 'foreign_key';
   column_attnum: number;
-  constraint_oid: number;
   related_table_oid: number;
   fk_interaction_rule: (typeof fkFieldInteractionRules)[number];
   child_fields: RawEphemeralDataFormField[] | null;
 }
 
-export interface RawEphemeralReverseForeignKeyDataFormField
-  extends RawEphemeralDataFormBaseField {
-  kind: 'reverse_foreign_key';
-  constraint_oid: number;
-  related_table_oid: number;
-  child_fields: RawEphemeralDataFormField[];
-}
-
 export type RawEphemeralDataFormField =
   | RawEphemeralScalarDataFormField
-  | RawEphemeralForeignKeyDataFormField
-  | RawEphemeralReverseForeignKeyDataFormField;
+  | RawEphemeralForeignKeyDataFormField;
 
 export interface RawEphemeralDataForm {
   database_id: number;
@@ -65,7 +56,7 @@ export interface RawEphemeralDataForm {
   name: string;
   description: string | null;
   version: number;
-  access_role_id: RawConfiguredRole['id'] | null;
+  associated_role_id: RawConfiguredRole['id'] | null;
   header_title: RichTextJson;
   header_subtitle: RichTextJson | null;
   fields: RawEphemeralDataFormField[];
@@ -91,25 +82,19 @@ export interface RawForeignKeyDataFormField
   child_fields: RawDataFormField[] | null;
 }
 
-export interface RawReverseForeignKeyDataFormField
-  extends RawEphemeralReverseForeignKeyDataFormField {
-  child_fields: RawDataFormField[];
-}
-
 export interface ReplacableRawDataForm extends RawEphemeralDataForm {
   id: number;
 }
 
 export type RawDataFormField =
   | RawScalarDataFormField
-  | RawForeignKeyDataFormField
-  | RawReverseForeignKeyDataFormField;
+  | RawForeignKeyDataFormField;
 
 export interface RawDataForm extends RawEphemeralDataForm {
   id: number;
   token: string;
   fields: RawDataFormField[];
-  share_public: boolean;
+  publish_public: boolean;
 }
 
 export interface RawDataFormResponse extends RawDataForm {
@@ -117,19 +102,13 @@ export interface RawDataFormResponse extends RawDataForm {
   updated_at: string;
 }
 
-// TODO: Move this to another RPC method
-export interface RawDataFormGetResponse extends RawDataFormResponse {
-  field_col_info_map: {
-    tables: Record<
-      string,
-      {
-        table_info: RawTable;
-        columns: Record<string, RawColumnWithMetadata>;
-      }
-    >;
-    constraints: Record<string, RawConstraint>;
-  };
-}
+export type RawDataFormSource = Record<
+  string,
+  {
+    table_info: RawTable;
+    columns: Record<string, RawColumnWithMetadata>;
+  }
+>;
 
 export const forms = {
   get: rpcMethodTypeContainer<
@@ -137,7 +116,13 @@ export const forms = {
       database_id: RawDatabase['id'];
       form_id: RawDataForm['id'];
     },
-    RawDataFormGetResponse
+    RawDataFormResponse
+  >(),
+  get_source_info: rpcMethodTypeContainer<
+    {
+      form_token: RawDataForm['token'];
+    },
+    RawDataFormSource
   >(),
   list: rpcMethodTypeContainer<
     {
@@ -150,13 +135,13 @@ export const forms = {
     {
       form_def: RawEphemeralDataForm;
     },
-    RawDataFormGetResponse
+    RawDataFormResponse
   >(),
   replace: rpcMethodTypeContainer<
     {
       new_form: ReplacableRawDataForm;
     },
-    RawDataFormGetResponse
+    RawDataFormResponse
   >(),
   delete: rpcMethodTypeContainer<
     {

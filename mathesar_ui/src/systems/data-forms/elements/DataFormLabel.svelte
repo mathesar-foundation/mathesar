@@ -1,4 +1,11 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
+  import {
+    getValueFromEvent,
+    isDefinedNonNullable,
+  } from '@mathesar/component-library';
+
   import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import {
     type DataFormManager,
@@ -11,36 +18,62 @@
   export let dataFormField: EphemeralDataFormField;
   export let isSelected: boolean;
 
-  $: ({ label } = dataFormField);
+  $: ({ label, help } = dataFormField);
 
   function onLabelInput(e: Event) {
-    const element = e.target as HTMLInputElement;
-    dataFormField.setLabel(element.value);
+    dataFormField.setLabel(String(getValueFromEvent(e)));
+  }
+
+  function onHelpTextInput(e: Event) {
+    dataFormField.setHelpText(String(getValueFromEvent(e)));
   }
 </script>
 
-<div class="label" class:selected={isSelected}>
-  {#if dataFormManager instanceof EditableDataFormManager}
-    <input type="text" value={$label} on:input={onLabelInput} />
-  {:else}
-    <span>
-      {$label}
-    </span>
-  {/if}
+<div class="label-container" class:selected={isSelected}>
+  <div class="label">
+    {#if dataFormManager instanceof EditableDataFormManager}
+      <input type="text" value={$label} on:input={onLabelInput} />
+    {:else}
+      <span>
+        {$label}
+      </span>
+    {/if}
 
-  {#if isSelected && dataFormManager instanceof EditableDataFormManager}
-    <div class="control-panel">
-      <FormFieldCommonControls {dataFormManager} {dataFormField}>
-        <slot />
-      </FormFieldCommonControls>
-    </div>
+    {#if isSelected && dataFormManager instanceof EditableDataFormManager}
+      <div class="control-panel">
+        <FormFieldCommonControls {dataFormManager} {dataFormField}>
+          <slot />
+        </FormFieldCommonControls>
+      </div>
+    {/if}
+  </div>
+
+  {#if isDefinedNonNullable($help)}
+    {#if dataFormManager instanceof EditableDataFormManager}
+      <div class="help">
+        <input
+          type="text"
+          value={$help}
+          on:input={onHelpTextInput}
+          placeholder={$_('field_add_help_text')}
+        />
+      </div>
+    {:else if $help.trim().length}
+      <div class="help">
+        <span>
+          {$help}
+        </span>
+      </div>
+    {/if}
   {/if}
 </div>
 
 <style lang="scss">
-  .label {
+  .label-container {
     width: 100%;
     display: flex;
+    flex-direction: column;
+    gap: var(--sm4);
 
     input {
       border: 1px solid transparent;
@@ -56,10 +89,23 @@
         border-bottom: 1px solid var(--input-border);
       }
     }
+  }
+
+  .label {
+    width: 100%;
+    display: flex;
 
     .control-panel {
       margin-left: auto;
       display: flex;
+    }
+  }
+
+  .help {
+    font-size: var(--sm1);
+
+    input {
+      width: 100%;
     }
   }
 </style>

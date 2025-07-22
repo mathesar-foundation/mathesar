@@ -6,18 +6,11 @@ import type {
 } from '@mathesar/api/rpc/forms';
 
 import type { EphermeralFkField } from './EphemeralFkField';
-import type { EphemeralReverseFkField } from './EphemeralReverseFkField';
 import type { EphermeralScalarField } from './EphemeralScalarField';
 
-export type EphemeralDataFormField =
-  | EphermeralScalarField
-  | EphermeralFkField
-  | EphemeralReverseFkField;
+export type EphemeralDataFormField = EphermeralScalarField | EphermeralFkField;
 
-export type ParentEphemeralField =
-  | EphermeralFkField
-  | EphemeralReverseFkField
-  | null;
+export type ParentEphemeralField = EphermeralFkField | null;
 
 export interface EphemeralFieldProps {
   key: RawDataFormBaseField['key'];
@@ -57,6 +50,12 @@ export abstract class AbstractEphemeralField {
     return this._isRequired;
   }
 
+  private _styling;
+
+  get styling(): Readable<EphemeralFieldProps['styling']> {
+    return this._styling;
+  }
+
   constructor(parentField: ParentEphemeralField, data: EphemeralFieldProps) {
     this.key = data.key;
     this.parentField = parentField;
@@ -64,14 +63,35 @@ export abstract class AbstractEphemeralField {
     this._label = writable(data.label);
     this._help = writable(data.help);
     this._isRequired = writable(data.isRequired);
+    this._styling = writable(data.styling);
   }
 
   setLabel(label: string) {
     this._label.set(label);
   }
 
+  setHelpText(help: string | null) {
+    this._help.set(help);
+  }
+
   updateIndex(updator: Updater<number>) {
     this._index.update(updator);
+  }
+
+  setIsRequired(isRequired: boolean) {
+    this._isRequired.set(isRequired);
+  }
+
+  updateStyling(styling: Partial<EphemeralFieldProps['styling']>) {
+    this._styling.update((s) => {
+      if (styling === null) {
+        return styling;
+      }
+      return {
+        ...(s || {}),
+        ...styling,
+      };
+    });
   }
 
   abstract isConceptuallyEqual(dataFormField: EphemeralDataFormField): boolean;

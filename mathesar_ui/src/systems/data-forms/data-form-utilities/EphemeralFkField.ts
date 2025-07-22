@@ -1,11 +1,10 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
 import type {
   RawEphemeralForeignKeyDataFormField,
   RawForeignKeyDataFormField,
 } from '@mathesar/api/rpc/forms';
 import { type FieldStore, optionalField } from '@mathesar/components/form';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 import type {
   EphemeralDataFormField,
@@ -13,17 +12,18 @@ import type {
   ParentEphemeralField,
 } from './AbstractEphemeralField';
 import { AbstractParentEphemeralField } from './AbstractParentEphemeralField';
+import type { FieldColumn } from './FieldColumn';
 
 export class EphermeralFkField extends AbstractParentEphemeralField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
 
-  readonly processedColumn;
-
-  readonly fkConstraintOid;
-
   readonly relatedTableOid;
 
+  readonly fieldColumn;
+
   readonly fieldStore: FieldStore;
+
+  readonly inputComponentAndProps;
 
   private _interactionRule;
 
@@ -36,10 +36,9 @@ export class EphermeralFkField extends AbstractParentEphemeralField {
   constructor(
     parentField: ParentEphemeralField,
     props: EphemeralFieldProps & {
-      processedColumn: ProcessedColumn;
+      fieldColumn: FieldColumn;
       interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
       nestedFields?: Iterable<EphemeralDataFormField>;
-      fkConstraintOid: number;
       relatedTableOid: number;
     },
   ) {
@@ -47,15 +46,17 @@ export class EphermeralFkField extends AbstractParentEphemeralField {
       ...props,
       nestedFields: props.nestedFields ?? [],
     });
-    this.processedColumn = props.processedColumn;
-    const fkLink = this.processedColumn.linkFk;
+    this.fieldColumn = props.fieldColumn;
+    const fkLink = this.fieldColumn.foreignKeyLink;
     if (!fkLink) {
       throw Error('The passed column is not a foreign key');
     }
     this._interactionRule = writable(props.interactionRule);
-    this.fieldStore = optionalField(null);
-    this.fkConstraintOid = props.fkConstraintOid;
     this.relatedTableOid = props.relatedTableOid;
+    this.fieldStore = optionalField(null);
+    this.inputComponentAndProps = derived(this.styling, (styling) =>
+      this.fieldColumn.getInputComponentAndProps(styling),
+    );
   }
 
   async setInteractionRule(
@@ -69,19 +70,18 @@ export class EphermeralFkField extends AbstractParentEphemeralField {
     }
   }
 
-  hasSource(processedColumn: ProcessedColumn) {
+  hasColumn(fieldColumn: FieldColumn) {
     return (
-      this.processedColumn.tableOid === processedColumn.tableOid &&
-      this.processedColumn.id === processedColumn.id &&
-      this.fkConstraintOid === processedColumn.linkFk?.oid &&
-      this.relatedTableOid === processedColumn.linkFk?.referent_table_oid
+      this.fieldColumn.tableOid === fieldColumn.tableOid &&
+      this.fieldColumn.column.id === fieldColumn.column.id &&
+      this.relatedTableOid === fieldColumn.foreignKeyLink?.relatedTableOid
     );
   }
 
   isConceptuallyEqual(dataFormField: EphemeralDataFormField) {
     return (
       dataFormField.kind === this.kind &&
-      this.hasSource(dataFormField.processedColumn)
+      this.hasColumn(dataFormField.fieldColumn)
     );
   }
 
@@ -89,8 +89,7 @@ export class EphermeralFkField extends AbstractParentEphemeralField {
     return {
       ...this.getBaseFieldRawJson(),
       kind: 'foreign_key',
-      column_attnum: this.processedColumn.id,
-      constraint_oid: this.fkConstraintOid,
+      column_attnum: this.fieldColumn.column.id,
       related_table_oid: this.relatedTableOid,
       fk_interaction_rule: get(this.interactionRule),
     };

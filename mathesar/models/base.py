@@ -294,12 +294,12 @@ class Form(BaseModel):
     server = models.ForeignKey('Server', on_delete=models.CASCADE)
     schema_oid = models.PositiveBigIntegerField()
     base_table_oid = models.PositiveBigIntegerField()
-    access_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
+    associated_role = models.ForeignKey('ConfiguredRole', on_delete=models.SET_NULL, null=True)
     # Header related settings
     header_title = models.JSONField()
     header_subtitle = models.JSONField(null=True)
-    # Sharing settings
-    share_public = models.BooleanField(default=False)
+    # Publishing settings
+    publish_public = models.BooleanField(default=False)
     # Submission related settings
     submit_message = models.JSONField(null=True)
     submit_redirect_url = models.URLField(null=True)
@@ -307,12 +307,15 @@ class Form(BaseModel):
 
     @property
     def connection(self):
+        if not self.associated_role:
+            raise exceptions.NoConnectionAvailable
+
         return mathesar_connection(
             host=self.database.server.host,
             port=self.database.server.port,
             dbname=self.database.name,
-            user=self.access_role.name,
-            password=self.access_role.password,
+            user=self.associated_role.name,
+            password=self.associated_role.password,
             application_name='mathesar.models.base.Form.connection',
         )
 
@@ -326,12 +329,10 @@ class FormField(BaseModel):
     kind = models.CharField(
         choices=[
             ("scalar_column", "Scalar column"),
-            ("foreign_key", "Foreign key"),
-            ("reverse_foreign_key", "Reverse foreign key")
+            ("foreign_key", "Foreign key")
         ],
     )
-    column_attnum = models.SmallIntegerField(null=True)
-    constraint_oid = models.PositiveBigIntegerField(null=True)
+    column_attnum = models.SmallIntegerField()
     related_table_oid = models.PositiveBigIntegerField(null=True)
     fk_interaction_rule = models.CharField(
         choices=[
@@ -353,25 +354,13 @@ class FormField(BaseModel):
                 fields=["key", "form"],
                 name="form_field_unique_key_per_form"
             ),
-            # column_attnum is required for scalar_column and foreign_key fields.
-            # constraint and related_table oids are required for foreign_key and reverse_foreign_key fields.
-            # fk_interaction_rule is required for foreign_key field.
             models.CheckConstraint(
                 check=(
-                    models.Q(kind='scalar_column', column_attnum__isnull=False)
-                    |
-                    models.Q(
+                    models.Q(kind='scalar_column')
+                    | models.Q(
                         kind='foreign_key',
-                        column_attnum__isnull=False,
-                        constraint_oid__isnull=False,
                         related_table_oid__isnull=False,
                         fk_interaction_rule__isnull=False
-                    )
-                    |
-                    models.Q(
-                        kind='reverse_foreign_key',
-                        constraint_oid__isnull=False,
-                        related_table_oid__isnull=False
                     )
                 ),
                 name="form_field_kind_integrity"

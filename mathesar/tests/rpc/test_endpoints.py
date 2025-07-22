@@ -253,7 +253,6 @@ METHODS = [
         "explorations.run_saved",
         [user_is_authenticated]
     ),
-
     (
         forms.add,
         "forms.add",
@@ -263,6 +262,11 @@ METHODS = [
         forms.get,
         "forms.get",
         []  # using empty list here indicates that this method is available to anonymous callers.
+    ),
+    (
+        forms.get_source_info,
+        "forms.get_source_info",
+        []
     ),
     (
         forms.list_,
@@ -279,7 +283,6 @@ METHODS = [
         "forms.replace",
         [user_is_authenticated]
     ),
-
     (
         records.add,
         "records.add",

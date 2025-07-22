@@ -2,14 +2,15 @@
   import type { Readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { ButtonMenuItem, Tooltip } from '@mathesar-component-library';
 
-  export let processedColumn: ProcessedColumn;
+  import type { FieldColumn } from '../../data-form-utilities/FieldColumn';
+
+  export let fieldColumn: FieldColumn;
   export let parentHasColumn: Readable<boolean>;
 
-  $: isDynamic = processedColumn.column.default?.is_dynamic;
+  $: isDynamic = fieldColumn.column.default?.is_dynamic;
   $: columnAlreadyAdded = $parentHasColumn;
   $: disabled = columnAlreadyAdded || isDynamic;
 </script>
@@ -18,7 +19,13 @@
   {#if disabled}
     <Tooltip placements={['right', 'left']}>
       <div slot="trigger">
-        <ProcessedColumnName {processedColumn} truncate={false} />
+        <ColumnName
+          column={{
+            ...fieldColumn.column,
+            constraintsType: fieldColumn.foreignKeyLink ? ['foreignkey'] : [],
+          }}
+          truncate={false}
+        />
       </div>
 
       <div slot="content">
@@ -30,6 +37,12 @@
       </div>
     </Tooltip>
   {:else}
-    <ProcessedColumnName {processedColumn} truncate={false} />
+    <ColumnName
+      column={{
+        ...fieldColumn.column,
+        constraintsType: fieldColumn.foreignKeyLink ? ['foreignkey'] : [],
+      }}
+      truncate={false}
+    />
   {/if}
 </ButtonMenuItem>

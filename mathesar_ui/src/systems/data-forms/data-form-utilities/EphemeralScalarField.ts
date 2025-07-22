@@ -1,9 +1,10 @@
+import { derived } from 'svelte/store';
+
 import type {
   RawEphemeralScalarDataFormField,
   RawScalarDataFormField,
 } from '@mathesar/api/rpc/forms';
 import { type FieldStore, optionalField } from '@mathesar/components/form';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 import {
   AbstractEphemeralField,
@@ -11,34 +12,40 @@ import {
   type EphemeralFieldProps,
   type ParentEphemeralField,
 } from './AbstractEphemeralField';
+import type { FieldColumn } from './FieldColumn';
 
 export class EphermeralScalarField extends AbstractEphemeralField {
   readonly kind: RawScalarDataFormField['kind'] = 'scalar_column';
 
-  readonly processedColumn;
+  readonly fieldColumn;
 
   readonly fieldStore: FieldStore;
 
+  readonly inputComponentAndProps;
+
   constructor(
     parentField: ParentEphemeralField,
-    data: EphemeralFieldProps & { processedColumn: ProcessedColumn },
+    data: EphemeralFieldProps & { fieldColumn: FieldColumn },
   ) {
     super(parentField, data);
-    this.processedColumn = data.processedColumn;
+    this.fieldColumn = data.fieldColumn;
     this.fieldStore = optionalField(null);
+    this.inputComponentAndProps = derived(this.styling, (styling) =>
+      this.fieldColumn.getInputComponentAndProps(styling),
+    );
   }
 
-  hasSource(processedColumn: ProcessedColumn) {
+  hasColumn(fieldColumn: FieldColumn) {
     return (
-      this.processedColumn.tableOid === processedColumn.tableOid &&
-      this.processedColumn.id === processedColumn.id
+      this.fieldColumn.tableOid === fieldColumn.tableOid &&
+      this.fieldColumn.column.id === fieldColumn.column.id
     );
   }
 
   isConceptuallyEqual(dataFormField: EphemeralDataFormField) {
     return (
       dataFormField.kind === this.kind &&
-      this.hasSource(dataFormField.processedColumn)
+      this.hasColumn(dataFormField.fieldColumn)
     );
   }
 
@@ -46,7 +53,7 @@ export class EphermeralScalarField extends AbstractEphemeralField {
     return {
       ...this.getBaseFieldRawJson(),
       kind: 'scalar_column',
-      column_attnum: this.processedColumn.id,
+      column_attnum: this.fieldColumn.column.id,
     };
   }
 }
