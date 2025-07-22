@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { RawDataFormGetResponse } from '@mathesar/api/rpc/forms';
+  import type { RawDataFormSource } from '@mathesar/api/rpc/forms';
   import Errors from '@mathesar/components/errors/Errors.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { DataForm } from '@mathesar/models/DataForm';
@@ -15,10 +15,7 @@
   } from '@mathesar/systems/data-forms';
 
   export let dataForm: DataForm;
-  export let formSourceInfo: AsyncStoreValue<
-    RawDataFormGetResponse['field_col_info_map'],
-    RpcError
-  >;
+  export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;
 
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(

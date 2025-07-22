@@ -9,14 +9,17 @@
 
   export let dataFormManager: EditableDataFormManager;
   export let field: EphemeralDataFormField | undefined = undefined;
+
+  function selectField() {
+    if (field) {
+      dataFormManager.selectElement({ type: 'field', field });
+    }
+  }
 </script>
 
 <div>
   {#if field}
-    <Button
-      appearance="ghost"
-      on:click={() => dataFormManager.selectElement({ type: 'field', field })}
-    >
+    <Button appearance="ghost" on:click={selectField}>
       <ColumnName
         column={{
           ...field.fieldColumn.column,
