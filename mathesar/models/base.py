@@ -307,6 +307,9 @@ class Form(BaseModel):
 
     @property
     def connection(self):
+        if not self.associated_role:
+            raise exceptions.NoConnectionAvailable
+
         return mathesar_connection(
             host=self.database.server.host,
             port=self.database.server.port,
