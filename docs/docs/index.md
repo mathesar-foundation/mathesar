@@ -35,7 +35,7 @@ You can self-host Mathesar by following one of the guides below:
 
 - [Using Docker Compose](./administration/install-via-docker-compose.md) — a production setup with separate reverse-proxy and database containers.
 - [Directly on Linux, macOS, or WSL](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
-- [On DigitalOcean](./administration/install-one-click-digital-ocean.md) — one-click GUI-only installation.
+- [On DigitalOcean](./administration/install-digitalocean.md) — one-click GUI-only installation.
 
 ## Help out
 
