@@ -13,9 +13,12 @@
   } from '@mathesar-component-library';
 
   import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
+  import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
+  import FkFormFieldRuleSelector from '../../elements/FkFormFieldRuleSelector.svelte';
 
   import FieldAppearance from './FieldAppearance.svelte';
 
+  export let dataFormManager: EditableDataFormManager;
   export let field: EphemeralDataFormField;
   $: ({ label, help, fieldColumn, isRequired } = field);
   $: isRequiredOnDb = !fieldColumn.column.nullable;
@@ -48,6 +51,7 @@
       />
     {/if}
   </InspectorSection>
+
   <InspectorSection title={$_('field_validation')}>
     <LabeledInput
       layout="inline-input-first"
@@ -66,14 +70,18 @@
         </InfoBox>
       </div>
     {/if}
+    {#if field.kind === 'foreign_key'}
+      <LabeledInput layout="stacked" label={$_('field_fk_rule_label')}>
+        <FkFormFieldRuleSelector
+          apperance="default"
+          {dataFormManager}
+          dataFormField={field}
+        />
+      </LabeledInput>
+    {/if}
   </InspectorSection>
 
   <FieldAppearance {field} />
-
-  {#if field.kind === 'foreign_key'}
-    <InspectorSection title={$_('field_fk_rule')}></InspectorSection>
-    <InspectorSection title={$_('field_fk_record_summary')}></InspectorSection>
-  {/if}
 </InspectorTabContent>
 
 <style lang="scss">

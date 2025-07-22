@@ -6,6 +6,7 @@
     fkFieldInteractionRules,
   } from '@mathesar/api/rpc/forms';
   import { Select } from '@mathesar-component-library';
+  import type { Appearance } from '@mathesar-component-library/types';
 
   import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
@@ -14,6 +15,7 @@
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: EphermeralFkField;
+  export let apperance: Appearance = 'outcome';
 
   $: ({ interactionRule, relatedTableOid } = dataFormField);
   $: linkedTableStructure = dataFormManager.getTableStructure(relatedTableOid);
@@ -50,7 +52,7 @@
 </script>
 
 <Select
-  triggerAppearance="outcome"
+  triggerAppearance={apperance}
   options={fkFieldInteractionRules}
   value={$interactionRule}
   on:change={(e) =>
