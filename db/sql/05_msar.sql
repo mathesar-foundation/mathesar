@@ -5630,7 +5630,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION
 msar.get_tab_col_info_map(tab_col_map jsonb)
 RETURNS jsonb AS $$/*
-Returns table_info, column_info, and constraints_info for a given tab_col_map.
+Returns table_info and column_info for a given tab_col_map.
 
 tab_col_map should have the following form:
 {
