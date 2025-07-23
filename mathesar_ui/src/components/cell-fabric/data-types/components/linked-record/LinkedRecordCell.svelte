@@ -1,17 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import Default from '@mathesar/components/Default.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  // TODO: Get Table here instead of tableId and remove need for the currentDatabase store
-  import type { Database } from '@mathesar/models/Database';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
-  import AttachableRowSeekerController from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   // eslint-disable-next-line import/no-cycle
+  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import {
     Icon,
     compareWholeValues,
@@ -24,6 +19,7 @@
   type $$Props = LinkedRecordCellProps;
 
   const dispatch = createEventDispatcher();
+  const recordSelector = getRecordSelectorFromContext();
 
   export let isActive: $$Props['isActive'];
   export let columnFabric: $$Props['columnFabric'];
@@ -41,64 +37,33 @@
   $: hasValue = value !== undefined && value !== null;
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
-  function getController(
-    _wrapper: HTMLElement,
-    _tableId: number,
-    _db: Database,
-  ) {
-    return new AttachableRowSeekerController(_wrapper, {
-      onClose: () => {
-        _wrapper?.focus();
-      },
-      rowSeekerProps: {
-        targetTable: {
-          databaseId: _db.id,
-          tableOid: _tableId,
-        },
-      },
-    });
-  }
-
-  $: attachableRowSeekerController = getController(
-    cellWrapperElement,
-    tableId,
-    $currentDatabase,
-  );
-
   async function launchRecordSelector(event?: MouseEvent) {
     if (disabled) {
       return;
     }
+    event?.stopPropagation();
+    const result = await recordSelector.acquireUserInput({ tableId });
     const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
-    if (!linkedFkColumnId) {
-      throw Error('Linked fk column not present. This should never occur');
+    if (result) {
+      if (linkedFkColumnId) {
+        value = result.record[linkedFkColumnId];
+      } else {
+        value = result.recordId;
+      }
+      setRecordSummary(String(result.recordId), result.recordSummary);
+      dispatch('update', { value });
     }
 
-    const result = await attachableRowSeekerController.acquireUserSelection();
-
-    value = result.record[linkedFkColumnId];
-
-    setRecordSummary(String(value), result.recordSummary);
-    dispatch('update', { value });
-  }
-
-  function closeRecordSelector() {
-    attachableRowSeekerController.close();
-  }
-
-  async function toggleRecordSelector(event?: MouseEvent) {
-    if (get(attachableRowSeekerController.isOpen)) {
-      closeRecordSelector();
-    } else {
-      await launchRecordSelector(event);
-    }
+    // Re-focus the cell element so that the user can yes the keyboard to move
+    // the active cell.
+    cellWrapperElement.focus();
   }
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
         if (isActive) {
-          void toggleRecordSelector();
+          void launchRecordSelector();
         }
         break;
       case 'Tab':
@@ -110,10 +75,6 @@
           originalEvent: e,
           key: e.key,
         });
-        closeRecordSelector();
-        break;
-      case 'Escape':
-        closeRecordSelector();
         break;
       default:
         break;
@@ -127,7 +88,7 @@
 
   function handleClick() {
     if (wasActiveBeforeClick) {
-      void toggleRecordSelector();
+      void launchRecordSelector();
     }
   }
 </script>
@@ -161,6 +122,7 @@
     {#if !disabled}
       <button
         class="dropdown-button passthrough"
+        on:click={launchRecordSelector}
         aria-label={$_('pick_record')}
         title={$_('pick_record')}
       >
@@ -169,16 +131,6 @@
     {/if}
   </div>
 </CellWrapper>
-
-<AttachableRowSeeker
-  selectedRecord={value
-    ? {
-        summary: recordSummary ?? '',
-        pk: value,
-      }
-    : undefined}
-  controller={attachableRowSeekerController}
-/>
 
 <style>
   .linked-record-cell {
@@ -198,6 +150,7 @@
     padding-right: var(--cell-padding);
   }
   .dropdown-button {
+    cursor: pointer;
     padding: 0 var(--cell-padding);
     display: flex;
     align-items: center;
