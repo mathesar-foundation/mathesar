@@ -9,7 +9,11 @@ import { type FieldStore, optionalField } from '@mathesar/components/form';
 import { AbstractEphemeralField } from './AbstractEphemeralField';
 import type { FieldColumn } from './FieldColumn';
 import type { FormFields } from './FormFields';
-import type { EphemeralScalarFieldProps } from './types';
+import type {
+  EdfBaseFieldProps,
+  EdfScalarFieldPropChange,
+  EphemeralScalarFieldProps,
+} from './types';
 
 export class EphermeralScalarField extends AbstractEphemeralField {
   readonly kind: RawScalarDataFormField['kind'] = 'scalar_column';
@@ -20,13 +24,27 @@ export class EphermeralScalarField extends AbstractEphemeralField {
 
   readonly inputComponentAndProps;
 
-  constructor(holder: FormFields, props: EphemeralScalarFieldProps) {
+  private onChange: (e: EdfScalarFieldPropChange) => unknown;
+
+  constructor(
+    holder: FormFields,
+    props: EphemeralScalarFieldProps,
+    onChange: (e: EdfScalarFieldPropChange) => unknown,
+  ) {
     super(holder, props);
+    this.onChange = onChange;
     this.fieldColumn = props.fieldColumn;
     this.fieldStore = optionalField(null);
     this.inputComponentAndProps = derived(this.styling, (styling) =>
       this.fieldColumn.getInputComponentAndProps(styling),
     );
+  }
+
+  protected bubblePropChange(prop: EdfBaseFieldProps) {
+    this.onChange({
+      target: this,
+      prop,
+    });
   }
 
   hasColumn(fieldColumn: FieldColumn) {

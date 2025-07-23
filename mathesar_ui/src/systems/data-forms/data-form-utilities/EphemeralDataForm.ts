@@ -2,17 +2,18 @@ import { type Readable, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
-  RawDataFormSource,
   RawEphemeralDataForm,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 
 import { FormFields } from './FormFields';
-import {
-  rawEphemeralFieldToEphemeralFieldProps,
-  tableStructureSubstanceToEphemeralFieldProps,
-} from './transformers';
-import type { EphemeralDataFormFieldProps } from './types';
+import { tableStructureSubstanceToEphemeralFieldProps } from './transformers';
+import type {
+  EdfChange,
+  EdfDirectProps,
+  EdfNestedFieldChanges,
+  EphemeralDataFormProps,
+} from './types';
 
 export class EphemeralDataForm {
   readonly baseTableOid;
@@ -69,22 +70,14 @@ export class EphemeralDataForm {
     return this._submitButtonLabel;
   }
 
-  fields: FormFields;
+  readonly fields: FormFields;
 
-  constructor(edf: {
-    baseTableOid: number;
-    schemaOid: number;
-    databaseId: number;
-    name: RawDataForm['name'];
-    description: RawDataForm['description'];
-    headerTitle: RawDataForm['header_title'];
-    headerSubTitle: RawDataForm['header_subtitle'];
-    associatedRoleId: RawDataForm['associated_role_id'];
-    submitMessage: RawDataForm['submit_message'];
-    submitRedirectUrl: RawDataForm['submit_redirect_url'];
-    submitButtonLabel: RawDataForm['submit_button_label'];
-    fields: Iterable<EphemeralDataFormFieldProps>;
-  }) {
+  private onChange?: (e: EdfChange | EdfNestedFieldChanges) => unknown;
+
+  constructor(
+    edf: EphemeralDataFormProps,
+    onChange?: (e: EdfChange | EdfNestedFieldChanges) => unknown,
+  ) {
     this.baseTableOid = edf.baseTableOid;
     this.schemaOid = edf.schemaOid;
     this.databaseId = edf.databaseId;
@@ -96,49 +89,76 @@ export class EphemeralDataForm {
     this._submitMessage = writable(edf.submitMessage);
     this._submitRedirectUrl = writable(edf.submitRedirectUrl);
     this._submitButtonLabel = writable(edf.submitButtonLabel);
-    this.fields = new FormFields(this, edf.fields);
+    this.onChange = onChange;
+    this.fields = new FormFields(this, edf.fields, (e) => {
+      if ('target' in e) {
+        this.onChange?.(e);
+        return;
+      }
+      this.onChange?.({
+        target: this,
+        prop: 'fields',
+        detail: e,
+      });
+    });
+  }
+
+  private bubblePropChange(prop: EdfDirectProps) {
+    const change: EdfChange = {
+      prop,
+      target: this,
+    };
+    this.onChange?.(change);
   }
 
   setName(name: string) {
     this._name.set(name);
+    this.bubblePropChange('name');
   }
 
   setDescription(description: string) {
     this._description.set(description);
+    this.bubblePropChange('description');
   }
 
   setHeaderTitle(title: string) {
     this._headerTitle.set({
       text: title,
     });
+    this.bubblePropChange('headerTitle');
   }
 
   setHeaderSubTitle(subTitle: string) {
     this._headerSubTitle.set({
       text: subTitle,
     });
+    this.bubblePropChange('headerSubtitle');
   }
 
   setAssociatedRoleId(configuredRoleId: number | null) {
     this._associatedRoleId.set(configuredRoleId);
+    this.bubblePropChange('associatedRoleId');
   }
 
   setSubmissionMessage(message: string | null) {
-    this._submitMessage.update((settings) =>
+    this._submitMessage.set(
       message
         ? {
             text: message,
           }
         : null,
     );
+    this.bubblePropChange('submitMessage');
   }
 
   setSubmissionRedirectUrl(url: string | null) {
     this._submitRedirectUrl.set(url);
+    this.bubblePropChange('submitRedirectUrl');
   }
 
   setSubmissionButtonLabel(label: string | null) {
     this._submitButtonLabel.set(label);
+    this.bubblePropChange('submitButtonLabel');
   }
 
   toRawEphemeralDataForm(): RawEphemeralDataForm {
@@ -158,52 +178,5 @@ export class EphemeralDataForm {
         field.toRawEphemeralField(),
       ),
     };
-  }
-
-  static fromRawEphemeralDataForm(
-    rawEphemeralDataForm: RawEphemeralDataForm,
-    formSource: RawDataFormSource,
-  ) {
-    return new EphemeralDataForm({
-      baseTableOid: rawEphemeralDataForm.base_table_oid,
-      schemaOid: rawEphemeralDataForm.schema_oid,
-      databaseId: rawEphemeralDataForm.database_id,
-      name: rawEphemeralDataForm.name,
-      description: rawEphemeralDataForm.description,
-      headerTitle: rawEphemeralDataForm.header_title,
-      headerSubTitle: rawEphemeralDataForm.header_subtitle,
-      associatedRoleId: rawEphemeralDataForm.associated_role_id,
-      submitMessage: rawEphemeralDataForm.submit_message,
-      submitRedirectUrl: rawEphemeralDataForm.submit_redirect_url,
-      submitButtonLabel: rawEphemeralDataForm.submit_button_label,
-      fields: rawEphemeralDataForm.fields.map((f) =>
-        rawEphemeralFieldToEphemeralFieldProps(
-          f,
-          rawEphemeralDataForm.base_table_oid,
-          formSource,
-        ),
-      ),
-    });
-  }
-
-  static fromTable(tableStructureSubstance: TableStructureSubstance) {
-    return new EphemeralDataForm({
-      baseTableOid: tableStructureSubstance.table.oid,
-      schemaOid: tableStructureSubstance.table.schema.oid,
-      databaseId: tableStructureSubstance.table.schema.database.id,
-      name: tableStructureSubstance.table.name,
-      description: null,
-      headerTitle: {
-        text: tableStructureSubstance.table.name,
-      },
-      headerSubTitle: null,
-      associatedRoleId: null,
-      submitMessage: null,
-      submitRedirectUrl: null,
-      submitButtonLabel: null,
-      fields: tableStructureSubstanceToEphemeralFieldProps(
-        tableStructureSubstance,
-      ),
-    });
   }
 }

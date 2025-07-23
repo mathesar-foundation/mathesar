@@ -11,6 +11,9 @@ import type { FieldColumn } from './FieldColumn';
 // eslint-disable-next-line import/no-cycle
 import { FormFields } from './FormFields';
 import type {
+  EdfBaseFieldProps,
+  EdfFkFieldPropChange,
+  EdfNestedFieldChanges,
   EphemeralDataFormFieldProps,
   EphemeralFkFieldProps,
 } from './types';
@@ -36,11 +39,28 @@ export class EphermeralFkField extends AbstractEphemeralField {
     return this._interactionRule;
   }
 
-  constructor(holder: FormFields, props: EphemeralFkFieldProps) {
+  protected onChange;
+
+  constructor(
+    holder: FormFields,
+    props: EphemeralFkFieldProps,
+    onChange: (e: EdfFkFieldPropChange | EdfNestedFieldChanges) => unknown,
+  ) {
     super(holder, props);
+    this.onChange = onChange;
     this.fieldColumn = props.fieldColumn;
     this.relatedTableOid = props.relatedTableOid;
-    this.nestedFields = new FormFields(this, props.nestedFields);
+    this.nestedFields = new FormFields(this, props.nestedFields, (e) => {
+      if ('target' in e) {
+        this.onChange(e);
+        return;
+      }
+      this.onChange({
+        target: this,
+        prop: 'nestedFields',
+        detail: e,
+      });
+    });
     const fkLink = this.fieldColumn.foreignKeyLink;
     if (!fkLink) {
       throw Error('The passed column is not a foreign key');
@@ -59,10 +79,19 @@ export class EphermeralFkField extends AbstractEphemeralField {
     >,
   ) {
     this._interactionRule.set(rule);
+    this.bubblePropChange('interactionRule');
+
     if (get(this.nestedFields).length === 0) {
       const defaultNestedFields = await getDefaultNestedFields();
       this.nestedFields.reconstruct(defaultNestedFields);
     }
+  }
+
+  protected bubblePropChange(prop: EdfBaseFieldProps | 'interactionRule') {
+    this.onChange({
+      target: this,
+      prop,
+    });
   }
 
   hasColumn(fieldColumn: FieldColumn) {

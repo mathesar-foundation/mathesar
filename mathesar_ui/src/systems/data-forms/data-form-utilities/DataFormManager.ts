@@ -7,8 +7,8 @@ import { Table } from '@mathesar/models/Table';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
-import type { EphemeralDataForm } from './EphemeralDataForm';
-import type { EphemeralDataFormField } from './types';
+import { EphemeralDataForm } from './EphemeralDataForm';
+import type { EphemeralDataFormField, EphemeralDataFormProps } from './types';
 
 export interface DataFormManager {
   ephemeralDataForm: EphemeralDataForm;
@@ -17,8 +17,8 @@ export interface DataFormManager {
 export class ReadonlyDataFormManager implements DataFormManager {
   ephemeralDataForm;
 
-  constructor(ephemeralDataForm: EphemeralDataForm) {
-    this.ephemeralDataForm = ephemeralDataForm;
+  constructor(ephemeralDataFormProps: EphemeralDataFormProps) {
+    this.ephemeralDataForm = new EphemeralDataForm(ephemeralDataFormProps);
   }
 }
 
@@ -33,7 +33,9 @@ interface SelectedFieldElement {
 
 export type SelectedElement = SelectedStaticElement | SelectedFieldElement;
 
-export class EditableDataFormManager extends ReadonlyDataFormManager {
+export class EditableDataFormManager implements DataFormManager {
+  ephemeralDataForm;
+
   private _selectedElement: Writable<SelectedElement | undefined> = writable();
 
   get selectedElement(): Readable<SelectedElement | undefined> {
@@ -44,12 +46,23 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
 
   private tableStructureCache;
 
+  private _hasChanges = writable(false);
+
+  get hasChanges(): Readable<boolean> {
+    return this._hasChanges;
+  }
+
   constructor(
-    ephemeralDataForm: EphemeralDataForm,
+    ephemeralDataFormProps: EphemeralDataFormProps,
     schema: Schema,
     tableStructureCache: CacheManager<Table['oid'], TableStructure>,
   ) {
-    super(ephemeralDataForm);
+    this.ephemeralDataForm = new EphemeralDataForm(
+      ephemeralDataFormProps,
+      (e) => {
+        this._hasChanges.set(true);
+      },
+    );
     this.schema = schema;
     this.tableStructureCache = tableStructureCache;
   }

@@ -3,10 +3,7 @@ import { type Readable, type Updater, get, writable } from 'svelte/store';
 import type { RawEphemeralDataFormField } from '@mathesar/api/rpc/forms';
 
 import type { FormFields } from './FormFields';
-import type {
-  AbstractEphemeralFieldProps,
-  EphemeralDataFormField,
-} from './types';
+import type { AbstractEphemeralFieldProps, EdfBaseFieldProps } from './types';
 
 export abstract class AbstractEphemeralField {
   readonly holder;
@@ -55,18 +52,22 @@ export abstract class AbstractEphemeralField {
 
   setLabel(label: string) {
     this._label.set(label);
+    this.bubblePropChange('label');
   }
 
   setHelpText(help: string | null) {
     this._help.set(help);
+    this.bubblePropChange('help');
   }
 
   updateIndex(updator: Updater<number>) {
     this._index.update(updator);
+    this.bubblePropChange('index');
   }
 
   setIsRequired(isRequired: boolean) {
     this._isRequired.set(isRequired);
+    this.bubblePropChange('isRequired');
   }
 
   updateStyling(styling: Partial<AbstractEphemeralFieldProps['styling']>) {
@@ -79,7 +80,10 @@ export abstract class AbstractEphemeralField {
         ...styling,
       };
     });
+    this.bubblePropChange('styling');
   }
+
+  protected abstract bubblePropChange(e: EdfBaseFieldProps): unknown;
 
   abstract toRawEphemeralField(): RawEphemeralDataFormField;
 

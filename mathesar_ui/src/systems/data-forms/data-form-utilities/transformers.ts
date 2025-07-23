@@ -1,12 +1,16 @@
 import type {
   RawDataFormSource,
+  RawEphemeralDataForm,
   RawEphemeralDataFormField,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
 import { FieldColumn } from './FieldColumn';
-import type { EphemeralDataFormFieldProps } from './types';
+import type {
+  EphemeralDataFormFieldProps,
+  EphemeralDataFormProps,
+} from './types';
 
 export function fieldColumnToEphemeralFieldProps(
   fc: FieldColumn,
@@ -135,5 +139,54 @@ export function rawEphemeralFieldToEphemeralFieldProps(
       ),
     ),
     interactionRule: 'must_pick',
+  };
+}
+
+export function rawEphemeralFormToEphemeralFormProps(
+  rawEphemeralDataForm: RawEphemeralDataForm,
+  formSource: RawDataFormSource,
+): EphemeralDataFormProps {
+  return {
+    baseTableOid: rawEphemeralDataForm.base_table_oid,
+    schemaOid: rawEphemeralDataForm.schema_oid,
+    databaseId: rawEphemeralDataForm.database_id,
+    name: rawEphemeralDataForm.name,
+    description: rawEphemeralDataForm.description,
+    headerTitle: rawEphemeralDataForm.header_title,
+    headerSubTitle: rawEphemeralDataForm.header_subtitle,
+    associatedRoleId: rawEphemeralDataForm.associated_role_id,
+    submitMessage: rawEphemeralDataForm.submit_message,
+    submitRedirectUrl: rawEphemeralDataForm.submit_redirect_url,
+    submitButtonLabel: rawEphemeralDataForm.submit_button_label,
+    fields: rawEphemeralDataForm.fields.map((f) =>
+      rawEphemeralFieldToEphemeralFieldProps(
+        f,
+        rawEphemeralDataForm.base_table_oid,
+        formSource,
+      ),
+    ),
+  };
+}
+
+export function tableStructureSubstanceToEphemeralFormProps(
+  tableStructureSubstance: TableStructureSubstance,
+): EphemeralDataFormProps {
+  return {
+    baseTableOid: tableStructureSubstance.table.oid,
+    schemaOid: tableStructureSubstance.table.schema.oid,
+    databaseId: tableStructureSubstance.table.schema.database.id,
+    name: tableStructureSubstance.table.name,
+    description: null,
+    headerTitle: {
+      text: tableStructureSubstance.table.name,
+    },
+    headerSubTitle: null,
+    associatedRoleId: null,
+    submitMessage: null,
+    submitRedirectUrl: null,
+    submitButtonLabel: null,
+    fields: tableStructureSubstanceToEphemeralFieldProps(
+      tableStructureSubstance,
+    ),
   };
 }

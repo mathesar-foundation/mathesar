@@ -10,8 +10,8 @@
   import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
   import {
     DataFormCanvas,
-    EphemeralDataForm,
     ReadonlyDataFormManager,
+    rawEphemeralFormToEphemeralFormProps,
   } from '@mathesar/systems/data-forms';
 
   export let dataForm: DataForm;
@@ -19,7 +19,7 @@
 
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
-        EphemeralDataForm.fromRawEphemeralDataForm(
+        rawEphemeralFormToEphemeralFormProps(
           dataForm.toRawDataForm(),
           formSourceInfo.resolvedValue,
         ),
