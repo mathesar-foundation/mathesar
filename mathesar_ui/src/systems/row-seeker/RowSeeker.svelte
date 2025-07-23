@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { RecordSummaryListResult } from '@mathesar/api/rpc/records';
+  import type { SummarizedRecordReference } from '@mathesar/api/rpc/forms';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import {
@@ -14,44 +14,26 @@
   import type RowSeekerController from './RowSeekerController';
   import RowSeekerOption from './RowSeekerOption.svelte';
   import RowSeekerSearch from './RowSeekerSearch.svelte';
-  import { type RowSeekerRecord, recordsAreEqual } from './rowSeekerUtils';
 
-  export let selectedRecord: RowSeekerRecord | undefined = undefined;
+  export let selectedRecord: SummarizedRecordReference | undefined = undefined;
   export let controller: RowSeekerController;
   export let close: () => void = () => {};
 
-  $: ({ elementId, records, columns, pagination } = controller);
-  $: isLoading = $records.isLoading || $columns.isLoading;
+  $: ({ elementId, records, pagination } = controller);
+  $: isLoading = $records.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
-  $: columnsArray = $columns.resolvedValue ?? [];
-  $: primaryKeyColumn = columnsArray.find((c) => c.primary_key);
-  $: selectedValue =
-    selectedRecord && primaryKeyColumn
-      ? {
-          summary: selectedRecord.summary,
-          values: {
-            [primaryKeyColumn.id]: selectedRecord.pk,
-          },
-        }
-      : undefined;
   $: hasPagination = recordsCount > $pagination.size;
 
-  function selectRecord(val: RecordSummaryListResult[]) {
+  function selectRecord(val: SummarizedRecordReference[]) {
     const result = val.at(0);
     if (!result) return;
-    controller.select({
-      recordSummary: result.summary,
-      record: result.values,
-      recordPk: primaryKeyColumn
-        ? String(result.values[primaryKeyColumn.id])
-        : undefined,
-    });
+    controller.select(result);
   }
 
   function handleKeyDown(
-    api: ListBoxApi<RecordSummaryListResult>,
+    api: ListBoxApi<SummarizedRecordReference>,
     e: KeyboardEvent,
   ) {
     if (e.key === 'Escape') {
@@ -61,8 +43,8 @@
     api.handleKeyDown(e);
   }
 
-  function getTypeCastedOption(opt: unknown): RecordSummaryListResult {
-    return opt as RecordSummaryListResult;
+  function getTypeCastedOption(opt: unknown): SummarizedRecordReference {
+    return opt as SummarizedRecordReference;
   }
 </script>
 
@@ -70,11 +52,11 @@
   <ListBox
     selectionType="single"
     mode="static"
-    value={selectedValue ? [selectedValue] : undefined}
+    value={selectedRecord ? [selectedRecord] : undefined}
     options={recordsArray}
     on:change={(e) => selectRecord(e.detail)}
     on:pick={close}
-    checkEquality={(a, b) => recordsAreEqual(a, b, primaryKeyColumn)}
+    checkEquality={(a, b) => a?.key === b?.key}
     let:api
   >
     <div data-row-seeker-controls>
@@ -82,7 +64,7 @@
     </div>
 
     <div class="option-container">
-      {#if recordsArray.length > 0 && columnsArray.length > 0}
+      {#if recordsArray.length > 0}
         <ListBoxOptions
           class="option-list-box"
           let:option
@@ -95,7 +77,7 @@
             {controller}
             {isSelected}
             {inFocus}
-            {result}
+            summary={result.summary}
           />
         </ListBoxOptions>
       {:else}

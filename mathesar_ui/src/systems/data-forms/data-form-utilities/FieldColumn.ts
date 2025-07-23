@@ -52,7 +52,7 @@ export class FieldColumn {
     }
     return getDbTypeBasedInputCap(
       this.column,
-      this.foreignKeyLink?.relatedTableOid,
+      this.foreignKeyLink?.relatedTableOid, // TODO_4637: change this
       cellInfo,
     );
   }

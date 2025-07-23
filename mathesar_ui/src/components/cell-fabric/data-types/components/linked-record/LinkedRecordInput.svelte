@@ -9,8 +9,6 @@
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
-  import type { Database } from '@mathesar/models/Database';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
   import AttachableRowSeekerController from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
@@ -54,29 +52,19 @@
   let isAcquiringInput = false;
   let element: HTMLSpanElement;
 
-  function getController(
-    _wrapper: HTMLElement,
-    _tableId: number,
-    _db: Database,
-  ) {
+  function getController(_wrapper: HTMLElement, _tableId: number) {
     return new AttachableRowSeekerController(_wrapper, {
       onClose: () => {
         _wrapper?.focus();
       },
       rowSeekerProps: {
-        targetTable: {
-          databaseId: _db.id,
-          tableOid: _tableId,
-        },
+        form_token: '02424ad2-3622-4bac-a80e-551a070f6e10', // TODO_4637
+        field_key: '_id-28992a59-f57e-47b0-bf61-17052c489527', // TODO_4637
       },
     });
   }
 
-  $: attachableRowSeekerController = getController(
-    element,
-    tableId,
-    $currentDatabase,
-  );
+  $: attachableRowSeekerController = getController(element, tableId);
 
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
@@ -117,18 +105,16 @@
     }
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
-    const recordSelectorPromise =
-      attachableRowSeekerController.acquireUserSelection();
+    const userSelection = attachableRowSeekerController.acquireUserSelection();
     await tick();
     const cleanupDropdown = setRecordSelectorToAccompanyDropdown();
-    const result = await recordSelectorPromise;
+    const record = await userSelection;
     cleanupDropdown();
     isAcquiringInput = false;
-    if (result === undefined) {
+    if (record === undefined) {
       dispatch('recordSelectorCancel');
     } else {
-      value = result.recordPk;
-      setRecordSummary(String(result.recordPk), result.recordSummary);
+      setRecordSummary(String(record.key), record.summary);
       dispatch('recordSelectorSubmit');
       dispatch('artificialChange', value);
       dispatch('artificialInput', value);
@@ -230,10 +216,7 @@
 
 <AttachableRowSeeker
   selectedRecord={value
-    ? {
-        summary: recordSummary ?? '',
-        pk: value,
-      }
+    ? { summary: recordSummary ?? '', key: value }
     : undefined}
   controller={attachableRowSeekerController}
 />

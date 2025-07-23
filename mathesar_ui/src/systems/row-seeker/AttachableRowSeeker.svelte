@@ -3,9 +3,9 @@
 
   import type AttachableRowSeekerController from './AttachableRowSeekerController';
   import RowSeeker from './RowSeeker.svelte';
-  import type { RowSeekerRecord } from './rowSeekerUtils';
+  import type { SummarizedRecordReference } from '@mathesar/api/rpc/forms';
 
-  export let selectedRecord: RowSeekerRecord | undefined = undefined;
+  export let selectedRecord: SummarizedRecordReference | undefined = undefined;
   export let controller: AttachableRowSeekerController;
 
   $: ({ isOpen, node, rowSeeker } = controller);

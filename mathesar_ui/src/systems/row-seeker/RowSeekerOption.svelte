@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { RecordSummaryListResult } from '@mathesar/api/rpc/records';
   import {
     MatchHighlighter,
     Radio,
@@ -12,7 +11,7 @@
   export let showSelection = false;
   export let isSelected: boolean;
   export let inFocus: boolean;
-  export let result: RecordSummaryListResult;
+  export let summary: string;
 
   $: ({ searchValue } = controller);
 </script>
@@ -28,7 +27,7 @@
     </div>
   {/if}
   <Truncate>
-    <MatchHighlighter text={result.summary} substring={$searchValue} />
+    <MatchHighlighter text={summary} substring={$searchValue} />
   </Truncate>
 </div>
 
