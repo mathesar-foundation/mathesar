@@ -128,6 +128,10 @@ def get_form(form_id):
     return form_model
 
 
+def get_form_by_token(form_token):
+    return Form.objects.get(token=form_token)
+
+
 def get_form_source_info(form_token):
     form_model = Form.objects.get(token=form_token)
     if form_model:

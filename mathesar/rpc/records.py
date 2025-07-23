@@ -9,7 +9,6 @@ from db.records import (
     list_records_from_table,
     get_record_from_table,
     search_records_from_table,
-    list_by_record_summaries,
     delete_records_from_table,
     add_record_to_table,
     patch_record_in_table,
@@ -163,25 +162,6 @@ class RecordList(TypedDict):
             grouping=d.get("grouping"),
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
-        )
-
-
-class RecordSummaryListResponse(TypedDict):
-    values: dict
-    summary: str
-
-
-class RecordSummaryList(TypedDict):
-    count: int
-    results: list[RecordSummaryListResponse]
-    linked_record_summaries: dict[str, dict[str, str]]
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(
-            count=d["count"],
-            results=d["results"],
-            linked_record_summaries=d.get("linked_record_summaries"),
         )
 
 
@@ -460,30 +440,3 @@ def search(
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)
-
-
-@mathesar_rpc_method(name="records.list_by_summaries", auth="login")
-def list_by_summaries(
-        *,
-        table_oid: int,
-        database_id: int,
-        limit: int = None,
-        offset: int = None,
-        search: str = None,
-        filter: Filter = None,
-        return_linked_record_summaries: bool = False,
-        **kwargs
-) -> RecordList:
-    user = kwargs.get(REQUEST_KEY).user
-    with connect(database_id, user) as conn:
-        record_info = list_by_record_summaries(
-            conn,
-            table_oid,
-            limit=limit,
-            offset=offset,
-            filter=filter,
-            search=search,
-            return_linked_record_summaries=return_linked_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
-        )
-    return RecordSummaryList.from_dict(record_info)

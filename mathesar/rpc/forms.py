@@ -1,12 +1,23 @@
 """
 Classes and functions exposed to the RPC endpoint for managing forms.
 """
-from typing import Optional, TypedDict, Literal
+from typing import Optional, TypedDict, Literal, Any
 
 from modernrpc.core import REQUEST_KEY
 
+from db.records import list_by_record_summaries
+
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form, get_form, list_forms, delete_form, replace_form, get_form_source_info
+from mathesar.utils.forms import (
+    create_form,
+    delete_form,
+    get_form_by_token,
+    get_form_source_info,
+    get_form,
+    list_forms,
+    replace_form,
+)
+from mathesar.utils.tables import get_table_record_summary_templates
 
 
 class FieldInfo(TypedDict):
@@ -220,6 +231,23 @@ class ReplaceableFormDef(AddFormDef):
     id: int
 
 
+class RecordSummaryListResponse(TypedDict):
+    key: Any
+    summary: str
+
+
+class RecordSummaryList(TypedDict):
+    count: int
+    results: list[RecordSummaryListResponse]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            count=d["count"],
+            results=d["results"],
+        )
+
+
 @mathesar_rpc_method(name="forms.add", auth="login")
 def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
     """
@@ -312,7 +340,15 @@ def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
 
 
 @mathesar_rpc_method(name="forms.list_related_records", auth="anonymous")
-def list_related_records(*, form_id: int, **kwargs) -> FormInfo:
+def list_related_records(
+        *,
+        form_token: str,
+        field_key: str,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        search: Optional[str] = None,
+        **kwargs,
+) -> FormInfo:
     """
     List records for selection via the row seeker
 
@@ -322,4 +358,22 @@ def list_related_records(*, form_id: int, **kwargs) -> FormInfo:
     Returns:
         TODO
     """
-    return 9
+
+    form = get_form_by_token(form_token)
+    database_id = form.database.id
+    form_field = form.fields.get(key=field_key)
+    if form_field.kind != "foreign_key":
+        raise ValueError(f"Field {field_key} is not a foreign key field.")
+
+    table_oid = form_field.related_table_oid
+
+    with form.connection as conn:
+        record_info = list_by_record_summaries(
+            conn,
+            table_oid,
+            limit=limit,
+            offset=offset,
+            search=search,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+        )
+    return RecordSummaryList.from_dict(record_info)
