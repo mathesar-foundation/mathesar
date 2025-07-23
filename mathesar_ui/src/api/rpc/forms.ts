@@ -110,6 +110,16 @@ export type RawDataFormSource = Record<
   }
 >;
 
+export interface SummarizedRecordReference {
+  summary: string;
+  key: string | number | boolean | null;
+}
+
+export interface RecordsSummaryListResponse {
+  count: number;
+  results: SummarizedRecordReference[];
+}
+
 export const forms = {
   get: rpcMethodTypeContainer<
     {
@@ -148,5 +158,15 @@ export const forms = {
       form_id: RawDataForm['id'];
     },
     void
+  >(),
+  list_related_records: rpcMethodTypeContainer<
+    {
+      form_token: string;
+      field_key: string;
+      limit?: number | null;
+      offset?: number | null;
+      search?: string | null;
+    },
+    RecordsSummaryListResponse
   >(),
 };

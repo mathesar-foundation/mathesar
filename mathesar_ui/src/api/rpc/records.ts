@@ -79,16 +79,6 @@ export interface RecordsListParams {
   return_record_summaries?: boolean;
 }
 
-export interface RecordsSummaryListParams {
-  database_id: number;
-  table_oid: number;
-  limit?: number;
-  offset?: number;
-  search?: string | null;
-  filter?: SqlExpr;
-  return_linked_record_summaries?: boolean;
-}
-
 export interface RecordsSearchParams {
   database_id: number;
   table_oid: number;
@@ -110,18 +100,6 @@ export interface RecordsResponse {
   /** Keys are attnums. */
   linked_record_summaries: Record<string, RecordSummaryColumnData> | null;
   record_summaries: Record<string, string> | null;
-}
-
-export interface RecordSummaryListResult {
-  summary: string;
-  values: Result;
-}
-
-export interface RecordsSummaryListResponse {
-  count: number;
-  results: RecordSummaryListResult[];
-  /** Keys are attnums. */
-  linked_record_summaries: Record<string, RecordSummaryColumnData> | null;
 }
 
 export const records = {
@@ -171,11 +149,6 @@ export const records = {
   list: rpcMethodTypeContainer<RecordsListParams, RecordsResponse>(),
 
   search: rpcMethodTypeContainer<RecordsSearchParams, RecordsResponse>(),
-
-  list_by_summaries: rpcMethodTypeContainer<
-    RecordsSummaryListParams,
-    RecordsSummaryListResponse
-  >(),
 
   delete: rpcMethodTypeContainer<
     {
