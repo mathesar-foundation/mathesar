@@ -28,13 +28,13 @@ export class FieldColumn {
   constructor(props: {
     tableOid: Table['oid'];
     column: RawColumnWithMetadata;
-    foreignKeyLink?: {
+    foreignKeyLink: {
       relatedTableOid: number;
-    };
+    } | null;
   }) {
     this.tableOid = props.tableOid;
     this.column = props.column;
-    this.foreignKeyLink = props.foreignKeyLink ?? null;
+    this.foreignKeyLink = props.foreignKeyLink;
     this.abstractType = getAbstractTypeForDbType(this.column.type);
   }
 
@@ -65,7 +65,7 @@ export class FieldColumn {
         ? {
             relatedTableOid: pc.linkFk.referent_table_oid,
           }
-        : undefined,
+        : null,
     });
   }
 }

@@ -1,4 +1,4 @@
-import { type Readable, type Writable, get, writable } from 'svelte/store';
+import { type Readable, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
@@ -7,12 +7,12 @@ import type {
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 
-import type { EphemeralDataFormField } from './AbstractEphemeralField';
 import { FormFields } from './FormFields';
 import {
-  rawEphemeralFieldToEphemeralField,
-  tableStructureSubstanceToEphemeralFields,
+  rawEphemeralFieldToEphemeralFieldProps,
+  tableStructureSubstanceToEphemeralFieldProps,
 } from './transformers';
+import type { EphemeralDataFormFieldProps } from './types';
 
 export class EphemeralDataForm {
   readonly baseTableOid;
@@ -83,7 +83,7 @@ export class EphemeralDataForm {
     submitMessage: RawDataForm['submit_message'];
     submitRedirectUrl: RawDataForm['submit_redirect_url'];
     submitButtonLabel: RawDataForm['submit_button_label'];
-    fields: Iterable<EphemeralDataFormField>;
+    fields: Iterable<EphemeralDataFormFieldProps>;
   }) {
     this.baseTableOid = edf.baseTableOid;
     this.schemaOid = edf.schemaOid;
@@ -96,7 +96,7 @@ export class EphemeralDataForm {
     this._submitMessage = writable(edf.submitMessage);
     this._submitRedirectUrl = writable(edf.submitRedirectUrl);
     this._submitButtonLabel = writable(edf.submitButtonLabel);
-    this.fields = new FormFields(edf.fields);
+    this.fields = new FormFields(this, edf.fields);
   }
 
   setName(name: string) {
@@ -176,10 +176,9 @@ export class EphemeralDataForm {
       submitMessage: rawEphemeralDataForm.submit_message,
       submitRedirectUrl: rawEphemeralDataForm.submit_redirect_url,
       submitButtonLabel: rawEphemeralDataForm.submit_button_label,
-      fields: rawEphemeralDataForm.fields.map((field) =>
-        rawEphemeralFieldToEphemeralField(
-          field,
-          null,
+      fields: rawEphemeralDataForm.fields.map((f) =>
+        rawEphemeralFieldToEphemeralFieldProps(
+          f,
           rawEphemeralDataForm.base_table_oid,
           formSource,
         ),
@@ -202,9 +201,8 @@ export class EphemeralDataForm {
       submitMessage: null,
       submitRedirectUrl: null,
       submitButtonLabel: null,
-      fields: tableStructureSubstanceToEphemeralFields(
+      fields: tableStructureSubstanceToEphemeralFieldProps(
         tableStructureSubstance,
-        null,
       ),
     });
   }

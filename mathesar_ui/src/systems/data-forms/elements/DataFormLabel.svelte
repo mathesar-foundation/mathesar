@@ -6,11 +6,11 @@
     isDefinedNonNullable,
   } from '@mathesar/component-library';
 
-  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import {
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
+  import type { EphemeralDataFormField } from '../data-form-utilities/types';
 
   import FormFieldCommonControls from './FormFieldCommonControls.svelte';
 
@@ -41,7 +41,7 @@
 
     {#if isSelected && dataFormManager instanceof EditableDataFormManager}
       <div class="control-panel">
-        <FormFieldCommonControls {dataFormManager} {dataFormField}>
+        <FormFieldCommonControls {dataFormField}>
           <slot />
         </FormFieldCommonControls>
       </div>

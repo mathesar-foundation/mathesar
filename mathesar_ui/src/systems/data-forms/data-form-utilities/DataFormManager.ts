@@ -7,8 +7,8 @@ import { Table } from '@mathesar/models/Table';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
-import type { EphemeralDataFormField } from './AbstractEphemeralField';
 import type { EphemeralDataForm } from './EphemeralDataForm';
+import type { EphemeralDataFormField } from './types';
 
 export interface DataFormManager {
   ephemeralDataForm: EphemeralDataForm;
@@ -75,26 +75,6 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
       tableStructureProps.oid,
       () => new TableStructure(tableStructureProps),
     );
-  }
-
-  insertField(ef: EphemeralDataFormField) {
-    if (ef.parentField) {
-      ef.parentField.nestedFields.add(ef);
-    } else {
-      this.ephemeralDataForm.fields.add(ef);
-    }
-    this.selectElement({
-      type: 'field',
-      field: ef,
-    });
-  }
-
-  removeField(ef: EphemeralDataFormField) {
-    if (ef.parentField) {
-      ef.parentField.nestedFields.delete(ef);
-    } else {
-      this.ephemeralDataForm.fields.delete(ef);
-    }
   }
 }
 

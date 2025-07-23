@@ -12,8 +12,8 @@
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
-  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
+  import type { EphemeralDataFormField } from '../../data-form-utilities/types';
   import FkFormFieldRuleSelector from '../../elements/FkFormFieldRuleSelector.svelte';
 
   import FieldAppearance from './FieldAppearance.svelte';

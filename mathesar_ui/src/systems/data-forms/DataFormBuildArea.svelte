@@ -26,7 +26,7 @@
 <div class="build-area" on:click={handleFormSelection}>
   <div class="form">
     <DataFormHeader {dataFormManager} />
-    <DataFormFieldsContainer {fields} parentField={null} {dataFormManager} />
+    <DataFormFieldsContainer {fields} {dataFormManager} />
     <DataFormFooter {dataFormManager} />
     <div class="branding">
       <DataFormBranding />

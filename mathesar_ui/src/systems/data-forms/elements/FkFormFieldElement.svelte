@@ -40,11 +40,7 @@
   {/if}
 
   {#if $interactionRule !== 'must_pick'}
-    <DataFormFieldsContainer
-      fields={nestedFields}
-      parentField={dataFormField}
-      {dataFormManager}
-    />
+    <DataFormFieldsContainer fields={nestedFields} {dataFormManager} />
   {/if}
 </div>
 

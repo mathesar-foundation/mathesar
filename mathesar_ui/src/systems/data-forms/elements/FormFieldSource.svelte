@@ -2,17 +2,13 @@
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
 
-  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
+  import type { EphemeralDataFormField } from '../data-form-utilities/types';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: EphemeralDataFormField;
 
-  $: ({ ephemeralDataForm } = dataFormManager);
-  $: tableOidOfField = dataFormField.parentField
-    ? dataFormField.parentField.relatedTableOid
-    : ephemeralDataForm.baseTableOid;
-
+  $: tableOidOfField = dataFormField.holder.getTableOid();
   $: tableStructure = dataFormManager.getTableStructure(tableOidOfField);
   $: tableStructureStore = tableStructure.asyncStore;
   $: table = $tableStructureStore.resolvedValue?.table;

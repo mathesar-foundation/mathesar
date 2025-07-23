@@ -1,69 +1,56 @@
 import { type Readable, type Updater, get, writable } from 'svelte/store';
 
+import type { RawEphemeralDataFormField } from '@mathesar/api/rpc/forms';
+
+import type { FormFields } from './FormFields';
 import type {
-  RawDataFormBaseField,
-  RawEphemeralDataFormField,
-} from '@mathesar/api/rpc/forms';
-
-import type { EphermeralFkField } from './EphemeralFkField';
-import type { EphermeralScalarField } from './EphemeralScalarField';
-
-export type EphemeralDataFormField = EphermeralScalarField | EphermeralFkField;
-
-export type ParentEphemeralField = EphermeralFkField | null;
-
-export interface EphemeralFieldProps {
-  key: RawDataFormBaseField['key'];
-  label: RawDataFormBaseField['label'];
-  help: RawDataFormBaseField['help'];
-  index: RawDataFormBaseField['index'];
-  isRequired: RawDataFormBaseField['is_required'];
-  styling: RawDataFormBaseField['styling'];
-}
+  AbstractEphemeralFieldProps,
+  EphemeralDataFormField,
+} from './types';
 
 export abstract class AbstractEphemeralField {
-  readonly parentField;
+  readonly holder;
 
   readonly key;
 
   private _index;
 
-  get index(): Readable<EphemeralFieldProps['index']> {
+  get index(): Readable<AbstractEphemeralFieldProps['index']> {
     return this._index;
   }
 
   private _label;
 
-  get label(): Readable<EphemeralFieldProps['label']> {
+  get label(): Readable<AbstractEphemeralFieldProps['label']> {
     return this._label;
   }
 
   private _help;
 
-  get help(): Readable<EphemeralFieldProps['help']> {
+  get help(): Readable<AbstractEphemeralFieldProps['help']> {
     return this._help;
   }
 
   private _isRequired;
 
-  get isRequired(): Readable<EphemeralFieldProps['isRequired']> {
+  get isRequired(): Readable<AbstractEphemeralFieldProps['isRequired']> {
     return this._isRequired;
   }
 
   private _styling;
 
-  get styling(): Readable<EphemeralFieldProps['styling']> {
+  get styling(): Readable<AbstractEphemeralFieldProps['styling']> {
     return this._styling;
   }
 
-  constructor(parentField: ParentEphemeralField, data: EphemeralFieldProps) {
-    this.key = data.key;
-    this.parentField = parentField;
-    this._index = writable(data.index);
-    this._label = writable(data.label);
-    this._help = writable(data.help);
-    this._isRequired = writable(data.isRequired);
-    this._styling = writable(data.styling);
+  constructor(holder: FormFields, props: AbstractEphemeralFieldProps) {
+    this.holder = holder;
+    this.key = props.key;
+    this._index = writable(props.index);
+    this._label = writable(props.label);
+    this._help = writable(props.help);
+    this._isRequired = writable(props.isRequired);
+    this._styling = writable(props.styling);
   }
 
   setLabel(label: string) {
@@ -82,7 +69,7 @@ export abstract class AbstractEphemeralField {
     this._isRequired.set(isRequired);
   }
 
-  updateStyling(styling: Partial<EphemeralFieldProps['styling']>) {
+  updateStyling(styling: Partial<AbstractEphemeralFieldProps['styling']>) {
     this._styling.update((s) => {
       if (styling === null) {
         return styling;
@@ -93,8 +80,6 @@ export abstract class AbstractEphemeralField {
       };
     });
   }
-
-  abstract isConceptuallyEqual(dataFormField: EphemeralDataFormField): boolean;
 
   abstract toRawEphemeralField(): RawEphemeralDataFormField;
 

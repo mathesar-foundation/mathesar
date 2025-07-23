@@ -8,10 +8,10 @@
   import { Select } from '@mathesar-component-library';
   import type { Appearance } from '@mathesar-component-library/types';
 
-  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
   import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
-  import { tableStructureSubstanceToEphemeralFields } from '../data-form-utilities/transformers';
+  import { tableStructureSubstanceToEphemeralFieldProps } from '../data-form-utilities/transformers';
+  import type { EphemeralDataFormFieldProps } from '../data-form-utilities/types';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: EphermeralFkField;
@@ -38,13 +38,14 @@
     },
   };
 
-  async function getDefaultNestedFields(): Promise<EphemeralDataFormField[]> {
+  async function getDefaultNestedFields(): Promise<
+    EphemeralDataFormFieldProps[]
+  > {
     const res = await linkedTableStructure.asyncStore.tick();
     const tableStructureSubstance = res.resolvedValue;
     if (tableStructureSubstance) {
-      return tableStructureSubstanceToEphemeralFields(
+      return tableStructureSubstanceToEphemeralFieldProps(
         tableStructureSubstance,
-        dataFormField,
       );
     }
     return [];
