@@ -74,6 +74,7 @@
   "clear_form": "Clear form",
   "clear_value": "Clear value",
   "click_save_button_to_save_changes": "Click Save button to save changes.",
+  "click_to_save": "Click to save",
   "collaborator_added_successfully": "Collaborator added successfully",
   "collaborator_removed_successfully": "Collaborator removed successfully",
   "collaborator_role_help": "Mathesar will use this PostgreSQL role for all database interactions by this user. The role will determine the access that the user has to data.",

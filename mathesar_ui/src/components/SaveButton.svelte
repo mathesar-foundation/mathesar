@@ -6,6 +6,7 @@
 
   export let canSave: boolean;
   export let onSave: () => Promise<void>;
+  export let unsavedChangesText: string = $_('click_to_save');
 </script>
 
 <Tooltip enabled={canSave}>
@@ -21,7 +22,7 @@
       <div class="dot" />
     {/if}
   </div>
-  <span slot="content">{$_('exploration_has_unsaved_changes')}</span>
+  <span slot="content">{unsavedChangesText}</span>
 </Tooltip>
 
 <style>
