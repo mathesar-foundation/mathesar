@@ -1,10 +1,14 @@
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { RawEphemeralDataFormBaseField } from '@mathesar/api/rpc/forms';
-import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+import {
+  getDbTypeBasedInputCap,
+  getLinkedRecordInputCap,
+} from '@mathesar/components/cell-fabric/utils';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import { makeRowSeekerOrchestrator } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
 
 /**
  * We'd ideally like use ProcessedColumn here, however we do not have access to
@@ -50,11 +54,15 @@ export class FieldColumn {
         },
       };
     }
-    return getDbTypeBasedInputCap(
-      this.column,
-      this.foreignKeyLink?.relatedTableOid, // TODO_4637: change this
-      cellInfo,
-    );
+    if (this.foreignKeyLink) {
+      return getLinkedRecordInputCap(
+        makeRowSeekerOrchestrator({
+          fieldKey: 'TODO', // TODO_4637
+          formToken: 'TODO', // TODO_4637
+        }),
+      );
+    }
+    return getDbTypeBasedInputCap(this.column, cellInfo);
   }
 
   static fromProcessedColumn(pc: ProcessedColumn) {

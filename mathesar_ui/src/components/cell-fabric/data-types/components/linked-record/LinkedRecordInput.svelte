@@ -1,17 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher, getContext, onMount, tick } from 'svelte';
-  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   // TODO remove dependency cycle
   // eslint-disable-next-line import/no-cycle
 
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
-  import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
+  import type { LinkedRecordInputProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
-  import AttachableRowSeekerController from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   import {
     type AccompanyingElements,
     Icon,
@@ -22,10 +19,11 @@
   } from '@mathesar-component-library';
 
   import type { LinkedRecordInputElement } from './LinkedRecordUtils';
+  import type { RecordSelectionOrchestrator } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
 
   interface $$Props
     extends Omit<
-      LinkedRecordCellProps,
+      LinkedRecordInputProps,
       'isActive' | 'isSelected' | 'isProcessing' | 'isIndependentOfSheet'
     > {
     class?: string;
@@ -41,9 +39,10 @@
 
   export let id = getGloballyUniqueId();
   export let value: $$Props['value'] = undefined;
+  export let recordSelectionOrchestrator: RecordSelectionOrchestrator;
   export let recordSummary: $$Props['recordSummary'] = undefined;
   export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
-  export let tableId: $$Props['tableId'];
+  export let targetTableId: $$Props['targetTableId'] | undefined = undefined;
   let classes: $$Props['class'] = '';
   export { classes as class };
   export let allowsHyperlinks = true;
@@ -52,25 +51,11 @@
   let isAcquiringInput = false;
   let element: HTMLSpanElement;
 
-  function getController(_wrapper: HTMLElement, _tableId: number) {
-    return new AttachableRowSeekerController(_wrapper, {
-      onClose: () => {
-        _wrapper?.focus();
-      },
-      rowSeekerProps: {
-        form_token: '02424ad2-3622-4bac-a80e-551a070f6e10', // TODO_4637
-        field_key: '_id-28992a59-f57e-47b0-bf61-17052c489527', // TODO_4637
-      },
-    });
-  }
-
-  $: attachableRowSeekerController = getController(element, tableId);
-
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
   $: recordPageHref =
-    hasValue && allowsHyperlinks
-      ? $storeToGetRecordPageUrl({ tableId, recordId: value })
+    hasValue && allowsHyperlinks && targetTableId
+      ? $storeToGetRecordPageUrl({ tableId: targetTableId, recordId: value })
       : undefined;
 
   function clear() {
@@ -105,7 +90,14 @@
     }
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
-    const userSelection = attachableRowSeekerController.acquireUserSelection();
+    const previousValue = {
+      summary: recordSummary ?? '',
+      key: value ?? null,
+    };
+    const userSelection = recordSelectionOrchestrator.launch({
+      triggerElement: element,
+      previousValue,
+    });
     await tick();
     const cleanupDropdown = setRecordSelectorToAccompanyDropdown();
     const record = await userSelection;
@@ -123,13 +115,9 @@
     element.focus();
   }
 
-  function closeRecordSelector() {
-    attachableRowSeekerController.close();
-  }
-
   async function toggleRecordSelector() {
-    if (get(attachableRowSeekerController.isOpen)) {
-      closeRecordSelector();
+    if (recordSelectionOrchestrator.isOpen()) {
+      recordSelectionOrchestrator.close();
     } else {
       await launchRecordSelector();
     }
@@ -144,7 +132,7 @@
         break;
       case 'Delete':
         clear();
-        closeRecordSelector();
+        recordSelectionOrchestrator.close();
         break;
       default:
         break;
@@ -213,13 +201,6 @@
     </span>
   {/if}
 </span>
-
-<AttachableRowSeeker
-  selectedRecord={value
-    ? { summary: recordSummary ?? '', key: value }
-    : undefined}
-  controller={attachableRowSeekerController}
-/>
 
 <style>
   /* TODO resolve some code duplication with `.input-element` */

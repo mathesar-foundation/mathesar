@@ -22,3 +22,11 @@ export function getRouteContext<T>(contextKey: unknown): Readable<T> {
   }
   return store;
 }
+
+export function makeContext<T>() {
+  const key = {};
+  return {
+    set: (value: T) => setContext(key, value),
+    get: () => getContext<T | undefined>(key),
+  };
+}

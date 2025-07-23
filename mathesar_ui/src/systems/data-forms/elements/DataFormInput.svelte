@@ -10,12 +10,19 @@
   export let isSelected: boolean;
 
   $: ({ fieldStore, inputComponentAndProps } = dataFormField);
+  $: recordSummary = undefined; // TODO_4637
+
+  function setRecordSummary(recordId: string, _recordSummary: string) {
+    // TODO_4637
+  }
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
   <DynamicInput
     bind:value={$fieldStore}
     componentAndProps={$inputComponentAndProps}
+    {recordSummary}
+    {setRecordSummary}
   />
 </div>
 

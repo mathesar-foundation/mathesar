@@ -6,7 +6,7 @@
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
   // eslint-disable-next-line import/no-cycle
-  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import { recordSelectorContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import {
     Icon,
     compareWholeValues,
@@ -19,7 +19,7 @@
   type $$Props = LinkedRecordCellProps;
 
   const dispatch = createEventDispatcher();
-  const recordSelector = getRecordSelectorFromContext();
+  const recordSelector = recordSelectorContext.get();
 
   export let isActive: $$Props['isActive'];
   export let columnFabric: $$Props['columnFabric'];
@@ -38,11 +38,10 @@
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
   async function launchRecordSelector(event?: MouseEvent) {
-    if (disabled) {
-      return;
-    }
+    if (!recordSelector) return;
+    if (disabled) return;
     event?.stopPropagation();
-    const result = await recordSelector.acquireUserInput({ tableId });
+    const result = await recordSelector.acquireUserInput({ tableOid: tableId });
     const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
     if (result) {
       if (linkedFkColumnId) {

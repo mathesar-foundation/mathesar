@@ -11,13 +11,17 @@
   import { AnonymousViewerUserModel } from '@mathesar/stores/users';
   import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
   import {
+    recordSelectorContext,
     RecordSelectorController,
-    setRecordSelectorControllerInContext,
   } from '@mathesar/systems/record-selector/RecordSelectorController';
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
   import { initUiTheme } from './utils/uiThemePreference';
+  import AttachableRowSeekerController, {
+    rowSeekerContext,
+  } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
+  import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
 
   export let commonData: CommonData;
 
@@ -47,7 +51,10 @@
     onClose: () => recordSelectorModal.close(),
     nestingLevel: 0,
   });
-  setRecordSelectorControllerInContext(recordSelectorController);
+  recordSelectorContext.set(recordSelectorController);
+
+  const rowSeekerController = new AttachableRowSeekerController();
+  rowSeekerContext.set(rowSeekerController);
 
   const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
   $: clipboardHandler = $clipboardHandlerStore;
@@ -91,5 +98,6 @@
   {recordSelectorController}
   modalController={recordSelectorModal}
 />
+<AttachableRowSeeker controller={rowSeekerController} />
 
 <slot />

@@ -2,6 +2,7 @@ import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOpti
 import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
 import type { FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { RecordSelectionOrchestrator } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 import type {
   ComponentAndProps,
@@ -67,6 +68,19 @@ export interface LinkedRecordCellExternalProps {
 export interface LinkedRecordCellProps
   extends CellTypeProps<ForeignKeyCellValue>,
     LinkedRecordCellExternalProps {
+  columnFabric: CellColumnFabric;
+  recordSummary?: string;
+  setRecordSummary?: (recordId: string, recordSummary: string) => void;
+}
+
+export interface LinkedRecordInputExternalProps {
+  targetTableId?: number;
+  recordSelectionOrchestrator: RecordSelectionOrchestrator;
+}
+
+export interface LinkedRecordInputProps
+  extends CellTypeProps<ForeignKeyCellValue>,
+    LinkedRecordInputExternalProps {
   columnFabric: CellColumnFabric;
   recordSummary?: string;
   setRecordSummary?: (recordId: string, recordSummary: string) => void;

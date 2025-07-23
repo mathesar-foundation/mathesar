@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { SummarizedRecordReference } from '@mathesar/api/rpc/forms';
+  import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import {

@@ -15,6 +15,7 @@ import {
   getDbTypeBasedInputCap,
   getDisplayFormatter,
   getInitialInputValue,
+  getLinkedRecordInputCap,
 } from '@mathesar/components/cell-fabric/utils';
 import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
 import type { Table } from '@mathesar/models/Table';
@@ -27,6 +28,7 @@ import type {
   AbstractType,
   AbstractTypePreprocFunctionDefinition,
 } from '@mathesar/stores/abstract-types/types';
+import { makeRecordSelectorOrchestrator } from '@mathesar/systems/record-selector/recordSelectorOrchestrator';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 import { findFkConstraintsForColumn } from './constraintsUtils';
@@ -134,17 +136,16 @@ export class ProcessedColumn implements CellColumnFabric {
       pkTargetTableId: displayEnhancedPkCell ? this.tableOid : undefined,
     });
 
-    this.inputComponentAndProps = getDbTypeBasedInputCap(
-      this.column,
-      fkTargetTableId,
-      this.abstractType.cellInfo,
-    );
+    this.inputComponentAndProps = fkTargetTableId
+      ? getLinkedRecordInputCap(
+          makeRecordSelectorOrchestrator({ tableOid: fkTargetTableId }),
+          fkTargetTableId,
+        )
+      : getDbTypeBasedInputCap(this.column, this.abstractType.cellInfo);
 
-    this.filterComponentAndProps = getDbTypeBasedFilterCap(
-      this.column,
-      fkTargetTableId,
-      this.abstractType.cellInfo,
-    );
+    this.filterComponentAndProps =
+      getDbTypeBasedFilterCap(this.column, this.abstractType.cellInfo) ??
+      this.inputComponentAndProps;
 
     this.allowedFiltersMap = retrieveFilters(
       this.abstractType.identifier,

@@ -1,34 +1,29 @@
 import { writable } from 'svelte/store';
 
-import RowSeekerController, {
-  type RowSeekerProps,
-} from './RowSeekerController';
+import { makeContext } from '@mathesar/contexts/utils';
+
+import RowSeekerController from './RowSeekerController';
 
 export default class AttachableRowSeekerController {
-  private readonly onClose?: () => unknown;
-
-  readonly node: HTMLElement | undefined;
-
   readonly isOpen = writable(false);
 
-  rowSeeker: RowSeekerController;
+  triggerElement?: HTMLElement;
 
-  constructor(
-    node: HTMLElement,
-    props: { onClose?: () => unknown; rowSeekerProps: RowSeekerProps },
-  ) {
-    this.node = node;
-    this.rowSeeker = new RowSeekerController(props.rowSeekerProps);
-    this.onClose = props.onClose;
-  }
+  rowSeeker?: RowSeekerController;
 
-  private async open() {
+  async acquireUserSelection({
+    triggerElement,
+    formToken,
+    fieldKey,
+  }: {
+    triggerElement: HTMLElement;
+    formToken: string;
+    fieldKey: string;
+  }) {
+    this.triggerElement = triggerElement;
+    this.rowSeeker = new RowSeekerController({ formToken, fieldKey });
     this.isOpen.set(true);
     await this.rowSeeker.getReady();
-  }
-
-  async acquireUserSelection() {
-    await this.open();
     const selection = await this.rowSeeker.acquireUserSelection();
     this.close();
     return selection;
@@ -36,7 +31,8 @@ export default class AttachableRowSeekerController {
 
   close() {
     this.isOpen.set(false);
-    this.rowSeeker.clearRecords();
-    this.onClose?.();
+    this.rowSeeker?.clearRecords();
   }
 }
+
+export const rowSeekerContext = makeContext<AttachableRowSeekerController>();

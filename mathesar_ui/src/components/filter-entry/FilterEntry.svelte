@@ -1,10 +1,18 @@
 <script lang="ts">
+  import type { CellColumnLike } from '../cell-fabric/data-types/typeDefinitions';
+
+  import { makeRecordSelectorOrchestrator } from '@mathesar/systems/record-selector/recordSelectorOrchestrator';
+
   import { createEventDispatcher, onDestroy } from 'svelte';
   import { readable } from 'svelte/store';
 
   import type { ConstraintType } from '@mathesar/api/rpc/constraints';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import { getDbTypeBasedFilterCap } from '@mathesar/components/cell-fabric/utils';
+  import {
+    getDbTypeBasedFilterCap,
+    getDbTypeBasedInputCap,
+    getLinkedRecordInputCap,
+  } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type {
@@ -154,11 +162,12 @@
     if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
       return selectedColumnInputCap;
     }
-    return getDbTypeBasedFilterCap({
+    const c: CellColumnLike = {
       type: parameterTypeId,
       type_options: {},
       metadata: {},
-    });
+    };
+    return getDbTypeBasedFilterCap(c) ?? getDbTypeBasedInputCap(c);
   }
 
   $: inputCap = calculateInputCap(selectedCondition, selectedColumn);

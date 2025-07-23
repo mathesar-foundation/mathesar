@@ -2,14 +2,14 @@ import { tick } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type { SummarizedRecordReference } from '@mathesar/api/rpc/forms';
+import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import Pagination from '@mathesar/utils/Pagination';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
 export interface RowSeekerProps {
-  form_token: string;
-  field_key: string;
+  formToken: string;
+  fieldKey: string;
 }
 
 export default class RowSeekerController {
@@ -28,8 +28,8 @@ export default class RowSeekerController {
   select: (v: SummarizedRecordReference) => void = () => {};
 
   constructor(props: RowSeekerProps) {
-    this.form_token = props.form_token;
-    this.field_key = props.field_key;
+    this.form_token = props.formToken;
+    this.field_key = props.fieldKey;
   }
 
   private async focusSearch() {
