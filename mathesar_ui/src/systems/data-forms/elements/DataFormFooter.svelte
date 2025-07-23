@@ -7,15 +7,15 @@
 
   export let dataFormManager: DataFormManager;
 
-  $: ({ submissionSettings } = dataFormManager.ephemeralDataForm);
-  $: submitButtonLabel = $submissionSettings.buttonLabel?.trim();
+  $: ({ submitButtonLabel } = dataFormManager.ephemeralDataForm);
+  $: label = $submitButtonLabel?.trim() || $_('submit');
 </script>
 
 <div class="submit-buttons">
   <CancelOrProceedButtonPair
     cancelButton={{ label: $_('clear_form') }}
     proceedButton={{
-      label: submitButtonLabel || $_('submit'),
+      label,
       icon: undefined,
     }}
   />
