@@ -11,7 +11,7 @@ This guide is intended for IT admins or developers who are configuring secure ac
 
 First, configure your identity provider (IdP) to work with Mathesar.
 
-???+ tip "How SSO support in Mathesar works"
+???+ tip "How providers work in Mathesar"
     Mathesar supports any identity provider that implements the [OpenID Connect (OIDC) standard](https://openid.net/developers/how-connect-works/), such as Okta, Azure Active Directory, Google Workspace, and others.
 
 Although all supported IdPs follow the same specification, they each have a different user interfaces and process for setting up an application.
@@ -131,6 +131,8 @@ oidc_providers:
 +    provider_name: okta
 +    server_url: https://your-org.okta.com
 ```
+
+#### Configuring your provider
 
 Next, retrieve the following values from your IdP’s admin interface:
 

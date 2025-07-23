@@ -89,7 +89,7 @@ Note: The default values specified here refer to those in Mathesar's [docker-com
 !!!note
     This is an optional variable used as an alternative method for [configuring Single Sign-on (SSO) in Mathesar](./single-sign-on.md), instead of the default `sso.yml` file.
 
-### `OIDC_CONFIG_DICT`
+### `OIDC_CONFIG_DICT` (optional)
 
 - **Description**: The configuration for enabling SSO and configuring providers in Mathesar.
 - **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example).
