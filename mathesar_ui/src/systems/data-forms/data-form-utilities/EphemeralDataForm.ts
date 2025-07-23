@@ -4,10 +4,8 @@ import type {
   RawDataForm,
   RawEphemeralDataForm,
 } from '@mathesar/api/rpc/forms';
-import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 
 import { FormFields } from './FormFields';
-import { tableStructureSubstanceToEphemeralFieldProps } from './transformers';
 import type {
   EdfChange,
   EdfDirectProps,

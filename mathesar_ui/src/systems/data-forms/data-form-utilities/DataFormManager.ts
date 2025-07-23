@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import { type Readable, type Writable, writable } from 'svelte/store';
+import { type Readable, type Writable, get, writable } from 'svelte/store';
 
 import type { Schema } from '@mathesar/models/Schema';
 import { Table } from '@mathesar/models/Table';
@@ -60,6 +60,22 @@ export class EditableDataFormManager implements DataFormManager {
     this.ephemeralDataForm = new EphemeralDataForm(
       ephemeralDataFormProps,
       (e) => {
+        if (e.prop === 'fields' || e.prop === 'nestedFields') {
+          if (e.detail.type === 'add') {
+            this.selectElement({
+              type: 'field',
+              field: e.detail.field,
+            });
+          } else if (e.detail.type === 'delete') {
+            const currentSelectedElement = get(this.selectedElement);
+            if (
+              currentSelectedElement?.type === 'field' &&
+              currentSelectedElement.field === e.detail.field
+            ) {
+              this.resetSelectedElement();
+            }
+          }
+        }
         this._hasChanges.set(true);
       },
     );
