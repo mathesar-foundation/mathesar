@@ -1,8 +1,8 @@
 # Single Sign-on (SSO)
 
-This guide walks you through how to configure Single Sign On (SSO) for Mathesar.
+This guide walks you through how to configure Single Sign-On (SSO) for Mathesar.
 
-Single Sign-on (SSO) allows users to log into your Mathesar instance without the need to create or manage separate accounts.
+SSO allows users to log into your Mathesar instance without the need to create or manage separate accounts.
 
 
 This guide is intended for IT admins or developers who are configuring secure access to Mathesar.
@@ -53,30 +53,48 @@ Once your IdP is fully configured, you're ready to move on to the next step: pop
 
 ### 2. Enabling SSO in Mathesar
 
-SSO in Mathesar is configured outside of the application interface, using a straightforward configuration file. To enable Single Sign-On (SSO) in Mathesar, begin by creating this file, named `sso.yml`.
+SSO in Mathesar is configured outside of the application interface, using a straightforward configuration file. To enable SSO in Mathesar, start by creating a configuration file called `sso.yml`.
+
+!!!info "Using the OIDC_CONFIG_DICT environment variable instead of sso.yml"
+    If you're unable to write to the local filesystem, like when using a cloud provider with an ephemeral filesystem or for other purposes, you can also configure SSO in Mathesar by creating a `OIDC_CONFIG_DICT` environment variable which is a stringified JSON object.
+
+    You'll want to convert the YAML configuration in sso.yml, then stringify the JSON. Here's an example of the final result:
+
+    ```env
+    OIDC_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
+    ```
+
+    For docker installations, you'll also need to add the `OIDC_CONFIG_DICT` variable to the
 
 Instructions for where to save the file vary slightly, depending on which installation method you've used:
 
 === "For Docker Compose installations"
 
-    For [docker compose](./install-via-docker-compose.md) installations, create a `sso.yml` file next to your `docker-compose.yml` file:
+    For [docker compose](./install-via-docker-compose.md) installations, create a `sso.yml` file next to your [`docker-compose.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml).:
 
     ```diff
     mathesar
-    ├── docker-compose.yml
-    ├── msar/
+     ├── docker-compose.yml
+     ├── msar/
     +└── sso.yml
     ```
 
-    This file is automatically mounted to the container in our [default `docker-compose.yml` file](https://github.com/mathesar-foundation/mathesar/blob/d3746914ff966dcc20a3ca9b776c7e97e64a162d/docker-compose.yml#L167).
+    Then, uncomment the following lines in your docker compose file:
 
-    If you've modified your docker compose file in any way, make sure that you're mounting a `sso.yml` file to `/code/sso.yml` within the container before continuing.
+    ```diff
+     volumes:
+       - ./msar/static:/code/static
+       - ./msar/media:/code/media
+     # Uncomment the following to mount sso.yml and enable Single Sign-On (SSO).
+    -# - ./sso.yml:/code/sso.yml
+    +  - ./sso.yml:/code/sso.yml
+    ```
 
 === "For Linux, macOS, or WSL installations"
 
     For [non-Docker installations](./install-from-scratch.md), you'll need to create the `sso.yml` file in the installation directory you [defined while installing](./install-from-scratch.md#set-up-your-installation-directory) Mathesar.
 
-Once the file is created, you can add information about your specific provider. You may also wish to paste in our [example configuration](https://github.com/mathesar-foundation/mathesar/blob/develop/sso.yml.example) and edit it in the following steps.
+Once the file is created, you paste in our [example configuration](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example). You'll edit this configuration in the following steps to work with your provider.
 
 ### 3. Configuring the identity provider in Mathesar
 
@@ -127,8 +145,8 @@ Add them to the provider block like so:
   provider1:
     provider_name: okta
     server_url: https://trial-example-admin.okta.com
-+   client_id: 0oatafg35rDG2KVQD697
-+   secret: 8xvA3s6pzl9cx7fit7LZ3RIZhAGgG9Rst509dijCVBXwKL3ijpjHbmPDPa0WXln1
++   client_id: client-id
++   secret: client-secret
 ```
 
 You've now completed all the minimum requirements to enable Single Sign-On (SSO) in Mathesar. Next, you can:
@@ -152,6 +170,8 @@ Finally, you'll need to restart Mathesar so it can read the `sso.yml` file and e
     ```
 
 These options can help you tailor authentication and access control to better fit your organization's needs.
+
+![Sign into Mathesar with Okta](../assets/images/sso-login-page-okta.png)
 
 ## Additional configuration options
 

@@ -62,6 +62,12 @@ x-config: &config
   # (Optional) Replace '5432' with the port on which postgres is running
   POSTGRES_PORT: ${POSTGRES_PORT:-5432}
 
+  # (Optional) Can be used to configure single-sign on (sso) instead of an sso.yml
+  # file.
+  # See https://docs.mathesar.org/administration/single-sign-on/ for details on
+  # how to configure this variable.
+  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-}
+
 #-------------------------------------------------------------------------------
 # ADDITIONAL INFO ABOUT CONFIG VARIABLES
 #

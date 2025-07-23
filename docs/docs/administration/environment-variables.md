@@ -83,3 +83,23 @@ Note: The default values specified here refer to those in Mathesar's [docker-com
     !!! tip "Tip"
         - Set this to `localhost` if you'd like Mathesar to be available only on localhost
         - Set the protocol to `http` if you don't want Caddy to automatically handle setting up SSL, e.g. `http://example.com`
+
+## Single Sign-on (SSO) {: #sso}
+
+!!!note
+    This is an optional variable used as an alternative method for [configuring Single Sign-on (SSO) in Mathesar](./single-sign-on.md), instead of the default `sso.yml` file.
+
+### `OIDC_CONFIG_DICT`
+
+- **Description**: The configuration for enabling SSO and configuring providers in Mathesar.
+- **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example).
+
+    !!! info "Example value"
+        ```env
+         OIDC_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
+        ```
+
+
+- **Additional information**: The following tools might help you convert the YAML syntax from `sso.yml` into the proper format:
+    - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
+    - [JSON stringify online](https://jsonformatter.org/json-stringify-online)

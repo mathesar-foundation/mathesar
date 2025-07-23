@@ -419,12 +419,6 @@ p:has(a[href^="https://github.com/mathesar-foundation/mathesar/pull/"])
   color: var(--stormy-light);
 }
 
-/* Hacky style to add padding to the top of the digital ocean one-click-deployment button: */
-a[href^="https://cloud.digitalocean.com/apps"] {
-  margin-top: .5rem;
-  display: inline-block;
-}
-
 /* Styles for the generate-secret-key.md snippet: */
 .generate-section {
   margin-top: .5rem;
