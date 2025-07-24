@@ -6,10 +6,10 @@ This guide walks you through how to deploy Mathesar on Railway.
 	Deploying using Railway works really well for:
 
 	- Users who are new to self-hosting but want a long-term, low-maintenance deployment.
-	- Users who want to integrate Mathesar into a broader stack using Railway’s Canvas UI, Git-based workflow, and plugin ecosystem.
-	- Users who need dynamic scaling, rich observability, or automated infrastructure management.
+	- Users who do not have the capacity or interest in manually managing server infrastructure, scaling, or observability.
+	- Users who want to integrate Mathesar into a broader application stack using GUI tooling.
 
-	If you need more flexibility or configurability, we recommend using our [Docker Compose](./install-via-docker-compose.md) or [direct](./install-from-scratch.md) installation methods instead.
+	[DigitalOcean](./install-digitalocean.md) also works well for this use case. If you need more flexibility or configurability, we recommend using our [Docker Compose](./install-via-docker-compose.md) or [direct](./install-from-scratch.md) installation methods instead.
 
 
 ## Installation
