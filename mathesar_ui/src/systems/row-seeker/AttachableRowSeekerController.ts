@@ -5,11 +5,9 @@ import { makeContext } from '@mathesar/contexts/utils';
 import RowSeekerController from './RowSeekerController';
 
 export class AttachableRowSeekerController {
-  readonly isOpen = writable(false);
+  triggerElement = writable<HTMLElement | undefined>(undefined);
 
-  triggerElement?: HTMLElement;
-
-  rowSeeker?: RowSeekerController;
+  rowSeeker = writable<RowSeekerController | undefined>(undefined);
 
   async acquireUserSelection({
     triggerElement,
@@ -20,18 +18,17 @@ export class AttachableRowSeekerController {
     formToken: string;
     fieldKey: string;
   }) {
-    this.triggerElement = triggerElement;
-    this.rowSeeker = new RowSeekerController({ formToken, fieldKey });
-    this.isOpen.set(true);
-    await this.rowSeeker.getReady();
-    const selection = await this.rowSeeker.acquireUserSelection();
+    this.triggerElement.set(triggerElement);
+    const rowSeeker = new RowSeekerController({ formToken, fieldKey });
+    this.rowSeeker.set(rowSeeker);
+    await rowSeeker.getReady();
+    const selection = await rowSeeker.acquireUserSelection();
     this.close();
     return selection;
   }
 
   close() {
-    this.isOpen.set(false);
-    this.rowSeeker?.clearRecords();
+    this.rowSeeker.set(undefined);
   }
 }
 

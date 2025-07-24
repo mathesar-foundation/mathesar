@@ -32,7 +32,7 @@ function makeRowSeekerOrchestrator({
         triggerElement: triggerElement ?? document.body,
       }),
     close: () => rowSeeker.close(),
-    isOpen: () => get(rowSeeker.isOpen),
+    isOpen: () => !!get(rowSeeker.rowSeeker),
   };
 }
 

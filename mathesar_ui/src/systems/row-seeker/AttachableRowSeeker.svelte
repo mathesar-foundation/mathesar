@@ -8,20 +8,20 @@
   export let selectedRecord: SummarizedRecordReference | undefined = undefined;
   export let controller: AttachableRowSeekerController;
 
-  $: ({ isOpen, triggerElement, rowSeeker } = controller);
+  $: ({ triggerElement, rowSeeker } = controller);
 </script>
 
-<AttachableDropdown
-  trigger={triggerElement}
-  isOpen={$isOpen}
-  autoReposition
-  on:close={() => controller.close()}
->
-  {#if rowSeeker}
+{#if $rowSeeker}
+  <AttachableDropdown
+    trigger={$triggerElement}
+    isOpen
+    autoReposition
+    on:close={() => controller.close()}
+  >
     <RowSeeker
-      controller={rowSeeker}
+      controller={$rowSeeker}
       {selectedRecord}
       close={() => controller.close()}
     />
-  {/if}
-</AttachableDropdown>
+  </AttachableDropdown>
+{/if}
