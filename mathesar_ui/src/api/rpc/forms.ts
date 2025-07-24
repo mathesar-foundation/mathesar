@@ -113,7 +113,6 @@ export type RawDataFormSource = Record<
 export const forms = {
   get: rpcMethodTypeContainer<
     {
-      database_id: RawDatabase['id'];
       form_id: RawDataForm['id'];
     },
     RawDataFormResponse

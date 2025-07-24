@@ -22,16 +22,13 @@
 
   $: void dataForms.runConservatively();
   $: form = $dataForms.resolvedValue?.get(formId) ?? undefined;
-
-  $: formSourceInfo = (() => {
-    const aysncStore = new AsyncRpcApiStore(api.forms.get_source_info, {
-      postProcess: (rawFormResponse) => rawFormResponse,
-    });
-    return aysncStore;
-  })();
   $: formToken = ensureReadable(form?.token);
+
+  const formSourceInfo = new AsyncRpcApiStore(api.forms.get_source_info);
   $: if ($formToken) {
     void formSourceInfo.run({ form_token: $formToken });
+  } else {
+    formSourceInfo.reset();
   }
 
   $: isLoading = $dataForms.isLoading || $formSourceInfo.isLoading;
