@@ -15,16 +15,22 @@
   import RowSeekerOption from './RowSeekerOption.svelte';
   import RowSeekerSearch from './RowSeekerSearch.svelte';
 
-  export let selectedRecord: SummarizedRecordReference | undefined = undefined;
   export let controller: RowSeekerController;
   export let close: () => void = () => {};
 
-  $: ({ elementId, records, pagination } = controller);
+  $: ({ elementId, records, pagination, previousValue } = controller);
   $: isLoading = $records.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
   $: hasPagination = recordsCount > $pagination.size;
+  $: showSelection = (() => {
+    if (!previousValue) return false;
+    const { key } = previousValue;
+    if (key === undefined) return false;
+    if (key === null) return false;
+    return true;
+  })();
 
   function selectRecord(val: SummarizedRecordReference[]) {
     const result = val.at(0);
@@ -52,7 +58,7 @@
   <ListBox
     selectionType="single"
     mode="static"
-    value={selectedRecord ? [selectedRecord] : undefined}
+    value={previousValue ? [previousValue] : undefined}
     options={recordsArray}
     on:change={(e) => selectRecord(e.detail)}
     on:pick={close}
@@ -73,7 +79,7 @@
         >
           {@const result = getTypeCastedOption(option)}
           <RowSeekerOption
-            showSelection={!!selectedRecord}
+            {showSelection}
             {controller}
             {isSelected}
             {inFocus}

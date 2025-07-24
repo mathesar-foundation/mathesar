@@ -24,9 +24,9 @@ function makeRowSeekerOrchestrator({
   rowSeeker: AttachableRowSeekerController;
 }): RecordSelectionOrchestrator {
   return {
-    // TODO_4637: utilize previousValue
-    launch: async ({ previousValue, triggerElement }) =>
+    launch: ({ previousValue, triggerElement }) =>
       rowSeeker.acquireUserSelection({
+        previousValue,
         formToken,
         fieldKey,
         triggerElement: triggerElement ?? document.body,

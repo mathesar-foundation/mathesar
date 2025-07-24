@@ -10,6 +10,7 @@ import { getGloballyUniqueId } from '@mathesar-component-library';
 export interface RowSeekerProps {
   formToken: string;
   fieldKey: string;
+  previousValue?: SummarizedRecordReference;
 }
 
 export default class RowSeekerController {
@@ -18,6 +19,8 @@ export default class RowSeekerController {
   private readonly field_key: string;
 
   readonly elementId = getGloballyUniqueId();
+
+  readonly previousValue?: SummarizedRecordReference;
 
   records = new AsyncRpcApiStore(api.forms.list_related_records);
 
@@ -30,6 +33,7 @@ export default class RowSeekerController {
   constructor(props: RowSeekerProps) {
     this.form_token = props.formToken;
     this.field_key = props.fieldKey;
+    this.previousValue = props.previousValue;
   }
 
   private async focusSearch() {
