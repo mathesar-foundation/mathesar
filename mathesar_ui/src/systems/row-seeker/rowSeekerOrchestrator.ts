@@ -1,35 +1,54 @@
 import { get } from 'svelte/store';
 
-import type { RecordSelectionOrchestrator } from '../record-selection-orchestrator/RecordSelectionOrchestrator';
+import type {
+  RecordSelectionOrchestrator,
+  RecordSelectionOrchestratorFactory,
+} from '../record-selection-orchestrator/RecordSelectionOrchestrator';
 
-import { rowSeekerContext } from './AttachableRowSeekerController';
+import {
+  type AttachableRowSeekerController,
+  rowSeekerContext,
+} from './AttachableRowSeekerController';
 
 /**
  * An adapter to make an AttachableRowSeekerController work as a
  * RecordSelectionOrchestrator
  */
-export function makeRowSeekerOrchestrator({
+function makeRowSeekerOrchestrator({
+  formToken,
+  fieldKey,
+  rowSeeker,
+}: {
+  formToken: string;
+  fieldKey: string;
+  rowSeeker: AttachableRowSeekerController;
+}): RecordSelectionOrchestrator {
+  return {
+    // TODO_4637: utilize previousValue
+    launch: async ({ previousValue, triggerElement }) =>
+      rowSeeker.acquireUserSelection({
+        formToken,
+        fieldKey,
+        triggerElement: triggerElement ?? document.body,
+      }),
+    close: () => rowSeeker.close(),
+    isOpen: () => get(rowSeeker.isOpen),
+  };
+}
+
+/**
+ * @see RecordSelectionOrchestratorFactory to learn why this factory is
+ * necessary
+ */
+export function makeRowSeekerOrchestratorFactory({
   formToken,
   fieldKey,
 }: {
   formToken: string;
   fieldKey: string;
-}): RecordSelectionOrchestrator {
-  function getRowSeeker() {
-    const rowSeeker = rowSeekerContext.get();
-    if (!rowSeeker) throw new Error('Row seeker not found in context');
-    return rowSeeker;
-  }
-
-  return {
-    // TODO_4637: utilize previousValue
-    launch: async ({ previousValue, triggerElement }) =>
-      getRowSeeker().acquireUserSelection({
-        formToken,
-        fieldKey,
-        triggerElement: triggerElement ?? document.body,
-      }),
-    close: () => getRowSeeker().close(),
-    isOpen: () => get(getRowSeeker().isOpen),
+}): RecordSelectionOrchestratorFactory {
+  return () => {
+    const rowSeeker = rowSeekerContext.getOrError();
+    return makeRowSeekerOrchestrator({ formToken, fieldKey, rowSeeker });
   };
 }

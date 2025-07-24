@@ -2,7 +2,7 @@ import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOpti
 import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
 import type { FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { RecordSelectionOrchestrator } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
+import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 import type {
   ComponentAndProps,
@@ -75,7 +75,7 @@ export interface LinkedRecordCellProps
 
 export interface LinkedRecordInputExternalProps {
   targetTableId?: number;
-  recordSelectionOrchestrator: RecordSelectionOrchestrator;
+  recordSelectionOrchestratorFactory: RecordSelectionOrchestratorFactory;
 }
 
 export interface LinkedRecordInputProps

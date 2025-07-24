@@ -28,7 +28,7 @@ import type {
   AbstractType,
   AbstractTypePreprocFunctionDefinition,
 } from '@mathesar/stores/abstract-types/types';
-import { makeRecordSelectorOrchestrator } from '@mathesar/systems/record-selector/recordSelectorOrchestrator';
+import { makeRecordSelectorOrchestratorFactory } from '@mathesar/systems/record-selector/recordSelectorOrchestrator';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 import { findFkConstraintsForColumn } from './constraintsUtils';
@@ -137,10 +137,13 @@ export class ProcessedColumn implements CellColumnFabric {
     });
 
     this.inputComponentAndProps = fkTargetTableId
-      ? getLinkedRecordInputCap(
-          makeRecordSelectorOrchestrator({ tableOid: fkTargetTableId }),
-          fkTargetTableId,
-        )
+      ? getLinkedRecordInputCap({
+          recordSelectionOrchestratorFactory:
+            makeRecordSelectorOrchestratorFactory({
+              tableOid: fkTargetTableId,
+            }),
+          targetTableId: fkTargetTableId,
+        })
       : getDbTypeBasedInputCap(this.column, this.abstractType.cellInfo);
 
     this.filterComponentAndProps =

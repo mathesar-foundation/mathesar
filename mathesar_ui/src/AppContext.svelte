@@ -18,7 +18,8 @@
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
   import { initUiTheme } from './utils/uiThemePreference';
-  import AttachableRowSeekerController, {
+  import {
+    AttachableRowSeekerController,
     rowSeekerContext,
   } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';

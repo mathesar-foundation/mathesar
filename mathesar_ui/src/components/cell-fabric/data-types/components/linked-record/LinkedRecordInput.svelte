@@ -19,7 +19,7 @@
   } from '@mathesar-component-library';
 
   import type { LinkedRecordInputElement } from './LinkedRecordUtils';
-  import type { RecordSelectionOrchestrator } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
+  import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
 
   interface $$Props
     extends Omit<
@@ -39,7 +39,7 @@
 
   export let id = getGloballyUniqueId();
   export let value: $$Props['value'] = undefined;
-  export let recordSelectionOrchestrator: RecordSelectionOrchestrator;
+  export let recordSelectionOrchestratorFactory: RecordSelectionOrchestratorFactory;
   export let recordSummary: $$Props['recordSummary'] = undefined;
   export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
   export let targetTableId: $$Props['targetTableId'] | undefined = undefined;
@@ -51,6 +51,7 @@
   let isAcquiringInput = false;
   let element: HTMLSpanElement;
 
+  $: recordSelectionOrchestrator = recordSelectionOrchestratorFactory();
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
   $: recordPageHref =

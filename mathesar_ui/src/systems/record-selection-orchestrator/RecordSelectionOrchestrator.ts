@@ -16,3 +16,9 @@ export interface RecordSelectionOrchestrator {
   close: () => void;
   isOpen: () => boolean;
 }
+
+/**
+ * TODO_4637: document this type and explain why it's necessary.
+ */
+export type RecordSelectionOrchestratorFactory =
+  () => RecordSelectionOrchestrator;

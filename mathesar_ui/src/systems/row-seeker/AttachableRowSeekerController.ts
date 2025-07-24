@@ -4,7 +4,7 @@ import { makeContext } from '@mathesar/contexts/utils';
 
 import RowSeekerController from './RowSeekerController';
 
-export default class AttachableRowSeekerController {
+export class AttachableRowSeekerController {
   readonly isOpen = writable(false);
 
   triggerElement?: HTMLElement;

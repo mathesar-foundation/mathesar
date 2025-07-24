@@ -1,7 +1,7 @@
 <script lang="ts">
   import { AttachableDropdown } from '@mathesar-component-library';
 
-  import type AttachableRowSeekerController from './AttachableRowSeekerController';
+  import type { AttachableRowSeekerController } from './AttachableRowSeekerController';
   import RowSeeker from './RowSeeker.svelte';
   import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
 

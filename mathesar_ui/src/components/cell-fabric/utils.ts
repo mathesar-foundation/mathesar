@@ -75,13 +75,8 @@ export function getDbTypeBasedFilterCap(
 }
 
 export function getLinkedRecordInputCap(
-  recordSelectionOrchestrator: RecordSelectionOrchestrator,
-  targetTableId?: number,
+  props: LinkedRecordInputExternalProps,
 ): ComponentAndProps {
-  const props: LinkedRecordInputExternalProps = {
-    targetTableId,
-    recordSelectionOrchestrator,
-  };
   return { component: LinkedRecordInput, props };
 }
 

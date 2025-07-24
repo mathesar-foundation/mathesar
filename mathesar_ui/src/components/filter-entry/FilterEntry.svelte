@@ -1,8 +1,6 @@
 <script lang="ts">
   import type { CellColumnLike } from '../cell-fabric/data-types/typeDefinitions';
 
-  import { makeRecordSelectorOrchestrator } from '@mathesar/systems/record-selector/recordSelectorOrchestrator';
-
   import { createEventDispatcher, onDestroy } from 'svelte';
   import { readable } from 'svelte/store';
 
@@ -11,7 +9,6 @@
   import {
     getDbTypeBasedFilterCap,
     getDbTypeBasedInputCap,
-    getLinkedRecordInputCap,
   } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';

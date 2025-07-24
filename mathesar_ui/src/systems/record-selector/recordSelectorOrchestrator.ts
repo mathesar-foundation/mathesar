@@ -1,36 +1,51 @@
 import { get } from 'svelte/store';
 
-import type { RecordSelectionOrchestrator } from '../record-selection-orchestrator/RecordSelectionOrchestrator';
+import type {
+  RecordSelectionOrchestrator,
+  RecordSelectionOrchestratorFactory,
+} from '../record-selection-orchestrator/RecordSelectionOrchestrator';
 
-import { recordSelectorContext } from './RecordSelectorController';
+import {
+  type RecordSelectorController,
+  recordSelectorContext,
+} from './RecordSelectorController';
 
 /**
  * An adapter to make a RecordSelectorController work as a
  * RecordSelectorOrchestrator
  */
-export function makeRecordSelectorOrchestrator({
+function makeRecordSelectorOrchestrator({
   tableOid,
+  recordSelector,
 }: {
   tableOid: number;
+  recordSelector: RecordSelectorController;
 }): RecordSelectionOrchestrator {
-  function getRecordSelector() {
-    const recordSelector = recordSelectorContext.get();
-    if (!recordSelector) {
-      throw new Error('Record selector not found in context');
-    }
-    return recordSelector;
-  }
-
   return {
     launch: async () => {
-      const result = await getRecordSelector().acquireUserInput({ tableOid });
+      const result = await recordSelector.acquireUserInput({ tableOid });
       if (!result) return undefined;
       return {
         key: result.recordId,
         summary: result.recordSummary,
       };
     },
-    close: () => getRecordSelector().cancel(),
-    isOpen: () => get(getRecordSelector().isOpen),
+    close: () => recordSelector.cancel(),
+    isOpen: () => get(recordSelector.isOpen),
+  };
+}
+
+/**
+ * @see RecordSelectionOrchestratorFactory to learn why this factory is
+ * necessary
+ */
+export function makeRecordSelectorOrchestratorFactory({
+  tableOid,
+}: {
+  tableOid: number;
+}): RecordSelectionOrchestratorFactory {
+  return () => {
+    const recordSelector = recordSelectorContext.getOrError();
+    return makeRecordSelectorOrchestrator({ recordSelector, tableOid });
   };
 }
