@@ -142,6 +142,33 @@ def delete_form(form_id):
     Form.objects.get(id=form_id).delete()
 
 
+def iterate_form_fields(fields, parent_field=None, depth=0):
+    """
+    Depth-first generator that iterates through the form fields
+    """
+    for field in fields:
+        yield field, parent_field, depth
+        yield from iterate_form_fields(
+            field.child_fields.all(),
+            field,
+            depth + 1
+        )
+
+
+def submit_form(form_token, values):
+    form_model = Form.objects.get(id=form_token)  # TODO: change id to token.
+    field_info = [
+        {
+            "key": field.key,
+            "kind": field.kind,
+            "column_attnum": field.column_attnum,
+            "table_oid": parent_field.related_table_oid if parent_field else form_model.base_table_oid,
+            "depth": depth
+        } for field, parent_field, depth in iterate_form_fields(form_model.fields.filter(parent_field__isnull=True))
+    ]
+    ...
+
+
 @transaction.atomic
 def replace_form(form_def_with_id, user):
     Form.objects.get(id=form_def_with_id["id"]).delete()
