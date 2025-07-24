@@ -4889,11 +4889,11 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
-    $p${
+    '{
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4907,11 +4907,11 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, '2', '{"2": 10}'),
-    $p${
+    '{
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4925,11 +4925,11 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
-    $p${
+    '{
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": "{\"a\": \"json\"}", "5": "[1, 2, 3, 4]"}],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
