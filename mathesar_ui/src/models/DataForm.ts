@@ -56,9 +56,9 @@ export class DataForm {
     headerSubtitle: RawDataForm['header_subtitle'];
     fields: RawDataForm['fields'];
     submissionSettings: {
-      message?: RawDataForm['submit_message'];
-      redirectUrl?: RawDataForm['submit_redirect_url'];
-      buttonLabel?: RawDataForm['submit_button_label'];
+      message: RawDataForm['submit_message'];
+      redirectUrl: RawDataForm['submit_redirect_url'];
+      buttonLabel: RawDataForm['submit_button_label'];
     };
   }> {
     return this._formDefinition;

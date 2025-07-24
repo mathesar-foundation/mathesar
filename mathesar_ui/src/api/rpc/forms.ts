@@ -60,9 +60,9 @@ export interface RawEphemeralDataForm {
   header_title: RichTextJson;
   header_subtitle: RichTextJson | null;
   fields: RawEphemeralDataFormField[];
-  submit_message?: RichTextJson | null;
-  submit_redirect_url?: string | null;
-  submit_button_label?: string | null;
+  submit_message: RichTextJson | null;
+  submit_redirect_url: string | null;
+  submit_button_label: string | null;
 }
 
 /**

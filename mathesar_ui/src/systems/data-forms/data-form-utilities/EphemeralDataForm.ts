@@ -175,6 +175,9 @@ export class EphemeralDataForm {
       fields: [...get(this.fields).values()].map((field) =>
         field.toRawEphemeralField(),
       ),
+      submit_message: get(this.submitMessage),
+      submit_redirect_url: get(this.submitRedirectUrl),
+      submit_button_label: get(this.submitButtonLabel),
     };
   }
 }
