@@ -2,9 +2,6 @@
   import { createEventDispatcher, getContext, onMount, tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  // TODO remove dependency cycle
-  // eslint-disable-next-line import/no-cycle
-
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import type { LinkedRecordInputProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';

@@ -2,7 +2,6 @@ import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { Table } from '@mathesar/models/Table';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-import type { RecordSelectionOrchestrator } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 import DataTypes from './data-types';

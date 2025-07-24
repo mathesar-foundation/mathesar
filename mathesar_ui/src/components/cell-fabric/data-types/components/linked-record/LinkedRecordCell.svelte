@@ -5,7 +5,6 @@
   import Default from '@mathesar/components/Default.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  // eslint-disable-next-line import/no-cycle
   import { recordSelectorContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import {
     Icon,
