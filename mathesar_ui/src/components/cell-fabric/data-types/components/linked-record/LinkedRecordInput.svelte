@@ -56,21 +56,6 @@
       ? $storeToGetRecordPageUrl({ tableId: targetTableId, recordId: value })
       : undefined;
 
-  function clear() {
-    value = null;
-    dispatch('artificialChange', undefined);
-    dispatch('artificialInput', undefined);
-    if (recordSelectionOrchestrator.isOpen()) {
-      recordSelectionOrchestrator.close();
-      launchRecordSelector();
-    } else {
-      // If the value is cleared via a button, the focus may shift to that button.
-      // We'd like to shift it back to the input element to that the user can
-      // press `Enter` to launch the record selector.
-      element.focus();
-    }
-  }
-
   /**
    * If this LinkedRecordInput in placed inside an AttachableDropdown, we want
    * to tell the dropdown not to close when the user clicks within the Record
@@ -117,6 +102,21 @@
     }
     await tick();
     element.focus();
+  }
+
+  function clear() {
+    value = null;
+    dispatch('artificialChange', undefined);
+    dispatch('artificialInput', undefined);
+    if (recordSelectionOrchestrator.isOpen()) {
+      recordSelectionOrchestrator.close();
+      void launchRecordSelector();
+    } else {
+      // If the value is cleared via a button, the focus may shift to that button.
+      // We'd like to shift it back to the input element to that the user can
+      // press `Enter` to launch the record selector.
+      element.focus();
+    }
   }
 
   async function toggleRecordSelector() {

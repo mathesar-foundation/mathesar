@@ -1,10 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { WritableMap } from '@mathesar-component-library';
 
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { FieldErrors } from '@mathesar/components/form';
+  import { WritableMap } from '@mathesar-component-library';
 
   import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
   import type { EphermeralScalarField } from '../data-form-utilities/EphemeralScalarField';
