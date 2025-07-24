@@ -1,4 +1,5 @@
 import type {
+  RawDataForm,
   RawDataFormSource,
   RawEphemeralDataForm,
   RawEphemeralDataFormField,
@@ -142,51 +143,100 @@ export function rawEphemeralFieldToEphemeralFieldProps(
   };
 }
 
-export function rawEphemeralFormToEphemeralFormProps(
-  rawEphemeralDataForm: RawEphemeralDataForm,
+export function rawDataFormToEphemeralFormProps(
+  rawDataForm: RawDataForm,
   formSource: RawDataFormSource,
 ): EphemeralDataFormProps {
   return {
-    baseTableOid: rawEphemeralDataForm.base_table_oid,
-    schemaOid: rawEphemeralDataForm.schema_oid,
-    databaseId: rawEphemeralDataForm.database_id,
-    name: rawEphemeralDataForm.name,
-    description: rawEphemeralDataForm.description,
-    headerTitle: rawEphemeralDataForm.header_title,
-    headerSubTitle: rawEphemeralDataForm.header_subtitle,
-    associatedRoleId: rawEphemeralDataForm.associated_role_id,
-    submitMessage: rawEphemeralDataForm.submit_message,
-    submitRedirectUrl: rawEphemeralDataForm.submit_redirect_url,
-    submitButtonLabel: rawEphemeralDataForm.submit_button_label,
-    fields: rawEphemeralDataForm.fields.map((f) =>
+    baseTableOid: rawDataForm.base_table_oid,
+    schemaOid: rawDataForm.schema_oid,
+    databaseId: rawDataForm.database_id,
+    token: rawDataForm.token,
+    name: rawDataForm.name,
+    description: rawDataForm.description,
+    headerTitle: rawDataForm.header_title,
+    headerSubTitle: rawDataForm.header_subtitle,
+    associatedRoleId: rawDataForm.associated_role_id,
+    submitMessage: rawDataForm.submit_message,
+    submitRedirectUrl: rawDataForm.submit_redirect_url,
+    submitButtonLabel: rawDataForm.submit_button_label,
+    fields: rawDataForm.fields.map((f) =>
       rawEphemeralFieldToEphemeralFieldProps(
         f,
-        rawEphemeralDataForm.base_table_oid,
+        rawDataForm.base_table_oid,
         formSource,
       ),
     ),
   };
 }
 
-export function tableStructureSubstanceToEphemeralFormProps(
+function fieldColumnToRawDataFormField(
+  fc: FieldColumn,
   tableStructureSubstance: TableStructureSubstance,
-): EphemeralDataFormProps {
+  index: number,
+): RawEphemeralDataFormField {
+  const baseProps = {
+    key: getGloballyUniqueId(),
+    label: fc.column.name,
+    help: null,
+    index,
+    is_required: false,
+    column_attnum: fc.column.id,
+    styling: {},
+  };
+  if (fc.foreignKeyLink) {
+    const referentTableOid = fc.foreignKeyLink.relatedTableOid;
+    const referenceTableName = tableStructureSubstance.linksInTable.find(
+      (lnk) => lnk.table.oid === referentTableOid,
+    )?.table.name;
+    return {
+      ...baseProps,
+      kind: 'foreign_key',
+      label: referenceTableName ?? baseProps.label,
+      related_table_oid: referentTableOid,
+      fk_interaction_rule: 'must_pick',
+      child_fields: [],
+    };
+  }
   return {
-    baseTableOid: tableStructureSubstance.table.oid,
-    schemaOid: tableStructureSubstance.table.schema.oid,
-    databaseId: tableStructureSubstance.table.schema.database.id,
+    ...baseProps,
+    kind: 'scalar_column',
+  };
+}
+
+function tableStructureSubstanceToRawEphemeralField(
+  tableStructureSubstance: TableStructureSubstance,
+): RawEphemeralDataFormField[] {
+  return [...tableStructureSubstance.processedColumns.values()]
+    .filter((pc) => !pc.column.default?.is_dynamic)
+    .map((c, index) => {
+      const ef = fieldColumnToRawDataFormField(
+        FieldColumn.fromProcessedColumn(c),
+        tableStructureSubstance,
+        index,
+      );
+      return ef;
+    });
+}
+
+export function tableStructureSubstanceRawEphemeralForm(
+  tableStructureSubstance: TableStructureSubstance,
+): RawEphemeralDataForm {
+  return {
+    base_table_oid: tableStructureSubstance.table.oid,
+    schema_oid: tableStructureSubstance.table.schema.oid,
+    database_id: tableStructureSubstance.table.schema.database.id,
+    version: 1,
     name: tableStructureSubstance.table.name,
     description: null,
-    headerTitle: {
+    header_title: {
       text: tableStructureSubstance.table.name,
     },
-    headerSubTitle: null,
-    associatedRoleId: null,
-    submitMessage: null,
-    submitRedirectUrl: null,
-    submitButtonLabel: null,
-    fields: tableStructureSubstanceToEphemeralFieldProps(
-      tableStructureSubstance,
-    ),
+    header_subtitle: null,
+    associated_role_id: null,
+    submit_message: null,
+    submit_redirect_url: null,
+    submit_button_label: null,
+    fields: tableStructureSubstanceToRawEphemeralField(tableStructureSubstance),
   };
 }

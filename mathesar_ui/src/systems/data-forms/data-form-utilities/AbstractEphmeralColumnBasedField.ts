@@ -42,6 +42,8 @@ export abstract class AbstractEphermeralColumnBasedField extends AbstractEphemer
     this.inputComponentAndProps = derived(this.styling, (styling) =>
       this.fieldColumn.getInputComponentAndProps(styling),
     );
+    // Form token and key are accessible here
+    // console.log(this.getFormToken(), this.key);
   }
 
   setIsRequired(isRequired: boolean) {

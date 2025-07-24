@@ -6,6 +6,6 @@ export {
   EditableDataFormManager,
 } from './data-form-utilities/DataFormManager';
 export {
-  rawEphemeralFormToEphemeralFormProps,
-  tableStructureSubstanceToEphemeralFormProps,
+  rawDataFormToEphemeralFormProps,
+  tableStructureSubstanceRawEphemeralForm,
 } from './data-form-utilities/transformers';
