@@ -40,12 +40,12 @@ export class DataForm {
     return this._token;
   }
 
-  readonly _publishingSettings;
+  private _sharePreferences;
 
-  get publishingSettings(): Readable<{
+  get sharePreferences(): Readable<{
     isPublishedPublicly: RawDataForm['publish_public'];
   }> {
-    return this._publishingSettings;
+    return this._sharePreferences;
   }
 
   private _formDefinition;
@@ -72,7 +72,7 @@ export class DataForm {
     this._description = writable(props.rawDataForm.description);
     this._associatedRoleId = writable(props.rawDataForm.associated_role_id);
     this._token = writable(props.rawDataForm.token);
-    this._publishingSettings = writable({
+    this._sharePreferences = writable({
       isPublishedPublicly: props.rawDataForm.publish_public,
     });
     this._formDefinition = writable({
@@ -108,7 +108,7 @@ export class DataForm {
             this._description.set(rawDataForm.description);
             this._associatedRoleId.set(rawDataForm.associated_role_id);
             this._token.set(rawDataForm.token);
-            this._publishingSettings.set({
+            this._sharePreferences.set({
               isPublishedPublicly: rawDataForm.publish_public,
             });
             this._formDefinition.set({
@@ -128,6 +128,22 @@ export class DataForm {
       },
       () => promise.cancel(),
     );
+  }
+
+  updateSharingPreferences(sharePublicly: boolean) {
+    // TODO_FORMS: Update this after we have a sharing RPC method
+    const promise = Promise.resolve();
+
+    return new CancellablePromise((resolve, reject) => {
+      promise
+        .then(() => {
+          this._sharePreferences.set({
+            isPublishedPublicly: sharePublicly,
+          });
+          return resolve(this);
+        }, reject)
+        .catch(reject);
+    });
   }
 
   delete(): CancellablePromise<void> {
@@ -153,7 +169,7 @@ export class DataForm {
       submit_message: formDefinition.submissionSettings.message,
       submit_redirect_url: formDefinition.submissionSettings.redirectUrl,
       submit_button_label: formDefinition.submissionSettings.buttonLabel,
-      publish_public: get(this.publishingSettings).isPublishedPublicly,
+      publish_public: get(this.sharePreferences).isPublishedPublicly,
     };
   }
 }

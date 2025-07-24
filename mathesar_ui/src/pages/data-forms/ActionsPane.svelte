@@ -8,7 +8,9 @@
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { toast } from '@mathesar/stores/toast';
   import type { EditableDataFormManager } from '@mathesar/systems/data-forms';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Dropdown, Icon } from '@mathesar-component-library';
+
+  import ShareForm from './ShareForm.svelte';
 
   export let dataForm: DataForm;
   export let dataFormManager: EditableDataFormManager;
@@ -33,10 +35,19 @@
   }}
 >
   <svelte:fragment>
-    <Button appearance="secondary">
-      <Icon {...iconShare} size="0.8rem" />
-      <span>{$_('share')}</span>
-    </Button>
     <SaveButton onSave={saveForm} canSave={$hasChanges} />
+    <Dropdown
+      showArrow={false}
+      triggerAppearance="secondary"
+      ariaLabel={$_('share')}
+    >
+      <svelte:fragment slot="trigger">
+        <Icon {...iconShare} />
+        <span class="responsive-button-label"> {$_('share')} </span>
+      </svelte:fragment>
+      <svelte:fragment slot="content">
+        <ShareForm {dataForm} {dataFormManager} />
+      </svelte:fragment>
+    </Dropdown>
   </svelte:fragment>
 </EntityPageHeader>
