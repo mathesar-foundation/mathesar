@@ -60,10 +60,15 @@
     value = null;
     dispatch('artificialChange', undefined);
     dispatch('artificialInput', undefined);
-    // If the value is cleared via a button, the focus may shift to that button.
-    // We'd like to shift it back to the input element to that the user can
-    // press `Enter` to launch the record selector.
-    element.focus();
+    if (recordSelectionOrchestrator.isOpen()) {
+      recordSelectionOrchestrator.close();
+      launchRecordSelector();
+    } else {
+      // If the value is cleared via a button, the focus may shift to that button.
+      // We'd like to shift it back to the input element to that the user can
+      // press `Enter` to launch the record selector.
+      element.focus();
+    }
   }
 
   /**
