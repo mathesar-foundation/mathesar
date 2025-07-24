@@ -48,7 +48,7 @@
         value={$headerTitle.text}
         on:input={onTitleInput}
       />
-    {:else}
+    {:else if $headerTitle.text.trim()}
       <h1 class="form-title">
         {$headerTitle.text}
       </h1>
@@ -64,7 +64,7 @@
         value={$headerSubTitle?.text}
         on:input={onSubtitleInput}
       />
-    {:else if $headerSubTitle?.text}
+    {:else if $headerSubTitle?.text.trim()}
       <div class="form-description">
         {$headerSubTitle.text}
       </div>

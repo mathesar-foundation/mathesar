@@ -168,9 +168,7 @@ export class EphemeralDataForm {
       description: get(this.description),
       version: 1,
       associated_role_id: get(this.associatedRoleId),
-      header_title: {
-        text: get(this.name),
-      },
+      header_title: get(this.headerTitle),
       header_subtitle: get(this.headerSubTitle),
       fields: [...get(this.fields).values()].map((field) =>
         field.toRawEphemeralField(),
