@@ -18,7 +18,13 @@ type WithStatus<D> =
       };
     };
 
-export interface CommonData {
+export interface BaseCommonData {
+  current_release_tag_name: string;
+  supported_languages: Record<string, string>;
+  is_authenticated: boolean;
+}
+
+export interface AuthenticatedCommonData extends BaseCommonData {
   databases: RawDatabase[];
   servers: RawServer[];
   schemas: WithStatus<RawSchema[]>;
@@ -33,11 +39,14 @@ export interface CommonData {
   };
   current_schema: number | null;
   user: User;
-  current_release_tag_name: string;
-  supported_languages: Record<string, string>;
-  is_authenticated: boolean;
-  routing_context: 'normal' | 'anonymous';
+  routing_context: 'normal';
 }
+
+export interface AnonymousCommonData extends BaseCommonData {
+  routing_context: 'anonymous';
+}
+
+export type CommonData = AuthenticatedCommonData | AnonymousCommonData;
 
 function getData<T>(selector: string): T | undefined {
   const preloadedData = document.querySelector<Element>(selector);
@@ -61,6 +70,16 @@ export function preloadCommonData(): CommonData {
   const commonData = getData<CommonData>('#common-data');
   if (!commonData) {
     throw new Error('commonData is undefined. This state should never occur');
+  }
+  return commonData;
+}
+
+export function getAuthenticatedCommonData(): AuthenticatedCommonData {
+  const commonData = preloadCommonData();
+  if (commonData.routing_context === 'anonymous') {
+    throw new Error(
+      'Authenticated commonData is requested within an anonymous routing context',
+    );
   }
   return commonData;
 }
