@@ -1,14 +1,8 @@
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { RawEphemeralDataFormBaseField } from '@mathesar/api/rpc/forms';
-import {
-  getDbTypeBasedInputCap,
-  getLinkedRecordInputCap,
-} from '@mathesar/components/cell-fabric/utils';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
 
 /**
  * We'd ideally like use ProcessedColumn here, however we do not have access to
@@ -40,29 +34,6 @@ export class FieldColumn {
     this.column = props.column;
     this.foreignKeyLink = props.foreignKeyLink;
     this.abstractType = getAbstractTypeForDbType(this.column.type);
-  }
-
-  getInputComponentAndProps(
-    styling?: RawEphemeralDataFormBaseField['styling'],
-  ) {
-    let { cellInfo } = this.abstractType;
-    if (cellInfo.type === 'string') {
-      cellInfo = {
-        type: 'string',
-        config: {
-          multiLine: styling?.size === 'large',
-        },
-      };
-    }
-    if (this.foreignKeyLink) {
-      return getLinkedRecordInputCap({
-        recordSelectionOrchestratorFactory: makeRowSeekerOrchestratorFactory({
-          fieldKey: 'TODO', // TODO_4637
-          formToken: 'TODO', // TODO_4637
-        }),
-      });
-    }
-    return getDbTypeBasedInputCap(this.column, cellInfo);
   }
 
   static fromProcessedColumn(pc: ProcessedColumn) {

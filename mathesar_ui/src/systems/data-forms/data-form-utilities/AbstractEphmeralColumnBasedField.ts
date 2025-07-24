@@ -2,10 +2,15 @@ import { type Readable, derived, get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import {
+  getDbTypeBasedInputCap,
+  getLinkedRecordInputCap,
+} from '@mathesar/components/cell-fabric/utils';
+import {
   type FieldStore,
   optionalField,
   requiredField,
 } from '@mathesar/components/form';
+import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
 
 import { AbstractEphemeralField } from './AbstractEphemeralField';
 import type { FieldColumn } from './FieldColumn';
@@ -39,11 +44,24 @@ export abstract class AbstractEphermeralColumnBasedField extends AbstractEphemer
     this.fieldStore = derived(this.isRequired, ($isRequired) =>
       $isRequired ? requiredField(undefined) : optionalField(undefined),
     );
-    this.inputComponentAndProps = derived(this.styling, (styling) =>
-      this.fieldColumn.getInputComponentAndProps(styling),
-    );
-    // Form token and key are accessible here
-    // console.log(this.getFormToken(), this.key);
+    this.inputComponentAndProps = derived(this.styling, (styling) => {
+      if (this.fieldColumn.foreignKeyLink) {
+        return getLinkedRecordInputCap({
+          recordSelectionOrchestratorFactory: makeRowSeekerOrchestratorFactory({
+            formToken: this.getFormToken(),
+            fieldKey: this.key,
+          }),
+        });
+      }
+      let { cellInfo } = this.fieldColumn.abstractType;
+      if (cellInfo.type === 'string') {
+        cellInfo = {
+          type: 'string',
+          config: { multiLine: styling?.size === 'large' },
+        };
+      }
+      return getDbTypeBasedInputCap(this.fieldColumn.column, cellInfo);
+    });
   }
 
   setIsRequired(isRequired: boolean) {
