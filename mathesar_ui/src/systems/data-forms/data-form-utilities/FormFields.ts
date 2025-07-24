@@ -115,8 +115,8 @@ export class FormFields {
         function resubscribe() {
           unsubFieldValueStores.forEach((u) => u());
           unsubFieldValueStores = [...$fieldSet.values()]
-            .filter((f) => f.kind !== 'scalar_column')
-            .map((item: EphermeralFkField) =>
+            .filter((f): f is EphermeralFkField => f.kind !== 'scalar_column')
+            .map((item) =>
               item.nestedFields.fieldValueStores.subscribe(update),
             );
         }
