@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
+  import { FieldErrors } from '@mathesar/components/form';
 
   import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
   import type { EphermeralScalarField } from '../data-form-utilities/EphemeralScalarField';
@@ -10,13 +11,18 @@
   export let isSelected: boolean;
 
   $: ({ fieldStore, inputComponentAndProps } = dataFormField);
+  $: fieldValueStore = $fieldStore;
+  $: ({ showsError, disabled } = fieldValueStore);
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
   <DynamicInput
-    bind:value={$fieldStore}
+    bind:value={$fieldValueStore}
     componentAndProps={$inputComponentAndProps}
+    hasError={$showsError}
+    disabled={$disabled}
   />
+  <FieldErrors field={fieldValueStore} />
 </div>
 
 <style lang="scss">

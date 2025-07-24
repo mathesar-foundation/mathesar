@@ -16,18 +16,23 @@ export interface AbstractEphemeralFieldProps {
   label: RawDataFormBaseField['label'];
   help: RawDataFormBaseField['help'];
   index: RawDataFormBaseField['index'];
-  isRequired: RawDataFormBaseField['is_required'];
   styling: RawDataFormBaseField['styling'];
 }
 
-export interface EphemeralScalarFieldProps extends AbstractEphemeralFieldProps {
-  kind: RawEphemeralScalarDataFormField['kind'];
+export interface AbstractEphemeralColumnBasedFieldProps
+  extends AbstractEphemeralFieldProps {
+  isRequired: RawDataFormBaseField['is_required'];
   fieldColumn: FieldColumn;
 }
 
-export interface EphemeralFkFieldProps extends AbstractEphemeralFieldProps {
+export interface EphemeralScalarFieldProps
+  extends AbstractEphemeralColumnBasedFieldProps {
+  kind: RawEphemeralScalarDataFormField['kind'];
+}
+
+export interface EphemeralFkFieldProps
+  extends AbstractEphemeralColumnBasedFieldProps {
   kind: RawEphemeralForeignKeyDataFormField['kind'];
-  fieldColumn: FieldColumn;
   interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
   relatedTableOid: number;
   nestedFields: Iterable<EphemeralDataFormFieldProps>;

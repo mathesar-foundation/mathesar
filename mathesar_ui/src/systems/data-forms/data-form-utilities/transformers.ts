@@ -138,7 +138,7 @@ export function rawEphemeralFieldToEphemeralFieldProps(
         formSource,
       ),
     ),
-    interactionRule: 'must_pick',
+    interactionRule: rawEphemeralField.fk_interaction_rule,
   };
 }
 
