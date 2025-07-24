@@ -5655,7 +5655,7 @@ BEGIN
     SELECT
       json_build_object(
         'count', (SELECT count(*) FROM filtered),
-        'results', json_agg(sorted)
+        'results', coalesce(json_agg(sorted), '[]')
       )
     FROM sorted
     $q$,
