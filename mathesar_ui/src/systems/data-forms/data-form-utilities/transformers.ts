@@ -1,31 +1,31 @@
 import type {
   RawDataFormSource,
+  RawEphemeralDataForm,
   RawEphemeralDataFormField,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
-import type {
-  EphemeralDataFormField,
-  ParentEphemeralField,
-} from './AbstractEphemeralField';
-import { EphermeralFkField } from './EphemeralFkField';
-import { EphermeralScalarField } from './EphemeralScalarField';
 import { FieldColumn } from './FieldColumn';
+import type {
+  EphemeralDataFormFieldProps,
+  EphemeralDataFormProps,
+} from './types';
 
-export function fieldColumnToEphemeralField(
+export function fieldColumnToEphemeralFieldProps(
   fc: FieldColumn,
   tableStructureSubstance: TableStructureSubstance,
-  parentField: ParentEphemeralField,
   index: number,
-): EphermeralFkField | EphermeralScalarField {
+): EphemeralDataFormFieldProps {
   const baseProps = {
+    fieldColumn: fc,
     key: getGloballyUniqueId(),
     label: fc.column.name,
     help: null,
     placeholder: null,
     index,
     isRequired: false,
+    columnAttnum: fc.column.id,
     styling: {},
   };
   if (fc.foreignKeyLink) {
@@ -33,31 +33,30 @@ export function fieldColumnToEphemeralField(
     const referenceTableName = tableStructureSubstance.linksInTable.find(
       (lnk) => lnk.table.oid === referentTableOid,
     )?.table.name;
-    return new EphermeralFkField(parentField, {
+    return {
       ...baseProps,
+      kind: 'foreign_key',
       label: referenceTableName ?? baseProps.label,
-      fieldColumn: fc,
-      interactionRule: 'must_pick',
       relatedTableOid: referentTableOid,
-    });
+      interactionRule: 'must_pick',
+      nestedFields: [],
+    };
   }
-  return new EphermeralScalarField(parentField, {
+  return {
     ...baseProps,
-    fieldColumn: fc,
-  });
+    kind: 'scalar_column',
+  };
 }
 
-export function tableStructureSubstanceToEphemeralFields(
+export function tableStructureSubstanceToEphemeralFieldProps(
   tableStructureSubstance: TableStructureSubstance,
-  parentField: ParentEphemeralField | null,
-): (EphermeralFkField | EphermeralScalarField)[] {
+): EphemeralDataFormFieldProps[] {
   return [...tableStructureSubstance.processedColumns.values()]
     .filter((pc) => !pc.column.default?.is_dynamic)
     .map((c, index) => {
-      const ef = fieldColumnToEphemeralField(
+      const ef = fieldColumnToEphemeralFieldProps(
         FieldColumn.fromProcessedColumn(c),
         tableStructureSubstance,
-        parentField,
         index,
       );
       return ef;
@@ -88,12 +87,11 @@ function getColumnDetailFromFormSource(
   return columnInfo;
 }
 
-export function rawEphemeralFieldToEphemeralField(
+export function rawEphemeralFieldToEphemeralFieldProps(
   rawEphemeralField: RawEphemeralDataFormField,
-  parentField: ParentEphemeralField | null,
-  baseTableOid: number,
+  parentTableOid: number,
   formSource: RawDataFormSource,
-): EphemeralDataFormField {
+): EphemeralDataFormFieldProps {
   const baseProps = {
     key: rawEphemeralField.key,
     label: rawEphemeralField.label,
@@ -104,33 +102,28 @@ export function rawEphemeralFieldToEphemeralField(
     styling: rawEphemeralField.styling,
   };
 
-  const parentTableOid =
-    parentField === null ? baseTableOid : parentField.relatedTableOid;
-
-  if (rawEphemeralField.kind === 'scalar_column') {
-    const columnDetails = getColumnDetailFromFormSource(
-      formSource,
-      parentTableOid,
-      rawEphemeralField.column_attnum,
-    );
-
-    return new EphermeralScalarField(parentField, {
-      ...baseProps,
-      fieldColumn: new FieldColumn({
-        tableOid: parentTableOid,
-        column: columnDetails,
-      }),
-    });
-  }
-
   const columnDetails = getColumnDetailFromFormSource(
     formSource,
     parentTableOid,
     rawEphemeralField.column_attnum,
   );
 
-  const fkField = new EphermeralFkField(parentField, {
+  if (rawEphemeralField.kind === 'scalar_column') {
+    return {
+      ...baseProps,
+      kind: rawEphemeralField.kind,
+      fieldColumn: new FieldColumn({
+        tableOid: parentTableOid,
+        column: columnDetails,
+        foreignKeyLink: null,
+      }),
+    };
+  }
+
+  return {
     ...baseProps,
+    kind: rawEphemeralField.kind,
+    relatedTableOid: rawEphemeralField.related_table_oid,
     fieldColumn: new FieldColumn({
       tableOid: parentTableOid,
       column: columnDetails,
@@ -138,20 +131,62 @@ export function rawEphemeralFieldToEphemeralField(
         relatedTableOid: rawEphemeralField.related_table_oid,
       },
     }),
-    interactionRule: rawEphemeralField.fk_interaction_rule,
-    relatedTableOid: rawEphemeralField.related_table_oid,
-  });
-
-  const nestedFields =
-    rawEphemeralField.child_fields?.map((field) =>
-      rawEphemeralFieldToEphemeralField(
-        field,
-        fkField,
-        baseTableOid,
+    nestedFields: (rawEphemeralField.child_fields ?? []).map((rf) =>
+      rawEphemeralFieldToEphemeralFieldProps(
+        rf,
+        rawEphemeralField.related_table_oid,
         formSource,
       ),
-    ) ?? [];
-  fkField.nestedFields.reconstruct(nestedFields);
+    ),
+    interactionRule: 'must_pick',
+  };
+}
 
-  return fkField;
+export function rawEphemeralFormToEphemeralFormProps(
+  rawEphemeralDataForm: RawEphemeralDataForm,
+  formSource: RawDataFormSource,
+): EphemeralDataFormProps {
+  return {
+    baseTableOid: rawEphemeralDataForm.base_table_oid,
+    schemaOid: rawEphemeralDataForm.schema_oid,
+    databaseId: rawEphemeralDataForm.database_id,
+    name: rawEphemeralDataForm.name,
+    description: rawEphemeralDataForm.description,
+    headerTitle: rawEphemeralDataForm.header_title,
+    headerSubTitle: rawEphemeralDataForm.header_subtitle,
+    associatedRoleId: rawEphemeralDataForm.associated_role_id,
+    submitMessage: rawEphemeralDataForm.submit_message,
+    submitRedirectUrl: rawEphemeralDataForm.submit_redirect_url,
+    submitButtonLabel: rawEphemeralDataForm.submit_button_label,
+    fields: rawEphemeralDataForm.fields.map((f) =>
+      rawEphemeralFieldToEphemeralFieldProps(
+        f,
+        rawEphemeralDataForm.base_table_oid,
+        formSource,
+      ),
+    ),
+  };
+}
+
+export function tableStructureSubstanceToEphemeralFormProps(
+  tableStructureSubstance: TableStructureSubstance,
+): EphemeralDataFormProps {
+  return {
+    baseTableOid: tableStructureSubstance.table.oid,
+    schemaOid: tableStructureSubstance.table.schema.oid,
+    databaseId: tableStructureSubstance.table.schema.database.id,
+    name: tableStructureSubstance.table.name,
+    description: null,
+    headerTitle: {
+      text: tableStructureSubstance.table.name,
+    },
+    headerSubTitle: null,
+    associatedRoleId: null,
+    submitMessage: null,
+    submitRedirectUrl: null,
+    submitButtonLabel: null,
+    fields: tableStructureSubstanceToEphemeralFieldProps(
+      tableStructureSubstance,
+    ),
+  };
 }

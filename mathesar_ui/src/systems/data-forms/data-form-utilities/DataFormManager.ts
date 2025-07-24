@@ -1,14 +1,14 @@
 /* eslint-disable max-classes-per-file */
 
-import { type Readable, type Writable, writable } from 'svelte/store';
+import { type Readable, type Writable, get, writable } from 'svelte/store';
 
 import type { Schema } from '@mathesar/models/Schema';
 import { Table } from '@mathesar/models/Table';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
-import type { EphemeralDataFormField } from './AbstractEphemeralField';
-import type { EphemeralDataForm } from './EphemeralDataForm';
+import { EphemeralDataForm } from './EphemeralDataForm';
+import type { EphemeralDataFormField, EphemeralDataFormProps } from './types';
 
 export interface DataFormManager {
   ephemeralDataForm: EphemeralDataForm;
@@ -17,8 +17,8 @@ export interface DataFormManager {
 export class ReadonlyDataFormManager implements DataFormManager {
   ephemeralDataForm;
 
-  constructor(ephemeralDataForm: EphemeralDataForm) {
-    this.ephemeralDataForm = ephemeralDataForm;
+  constructor(ephemeralDataFormProps: EphemeralDataFormProps) {
+    this.ephemeralDataForm = new EphemeralDataForm(ephemeralDataFormProps);
   }
 }
 
@@ -33,7 +33,9 @@ interface SelectedFieldElement {
 
 export type SelectedElement = SelectedStaticElement | SelectedFieldElement;
 
-export class EditableDataFormManager extends ReadonlyDataFormManager {
+export class EditableDataFormManager implements DataFormManager {
+  ephemeralDataForm;
+
   private _selectedElement: Writable<SelectedElement | undefined> = writable();
 
   get selectedElement(): Readable<SelectedElement | undefined> {
@@ -44,12 +46,39 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
 
   private tableStructureCache;
 
+  private _hasChanges = writable(false);
+
+  get hasChanges(): Readable<boolean> {
+    return this._hasChanges;
+  }
+
   constructor(
-    ephemeralDataForm: EphemeralDataForm,
+    ephemeralDataFormProps: EphemeralDataFormProps,
     schema: Schema,
     tableStructureCache: CacheManager<Table['oid'], TableStructure>,
   ) {
-    super(ephemeralDataForm);
+    this.ephemeralDataForm = new EphemeralDataForm(
+      ephemeralDataFormProps,
+      (e) => {
+        if (e.prop === 'fields' || e.prop === 'nestedFields') {
+          if (e.detail.type === 'add') {
+            this.selectElement({
+              type: 'field',
+              field: e.detail.field,
+            });
+          } else if (e.detail.type === 'delete') {
+            const currentSelectedElement = get(this.selectedElement);
+            if (
+              currentSelectedElement?.type === 'field' &&
+              currentSelectedElement.field === e.detail.field
+            ) {
+              this.resetSelectedElement();
+            }
+          }
+        }
+        this._hasChanges.set(true);
+      },
+    );
     this.schema = schema;
     this.tableStructureCache = tableStructureCache;
   }
@@ -75,26 +104,6 @@ export class EditableDataFormManager extends ReadonlyDataFormManager {
       tableStructureProps.oid,
       () => new TableStructure(tableStructureProps),
     );
-  }
-
-  insertField(ef: EphemeralDataFormField) {
-    if (ef.parentField) {
-      ef.parentField.nestedFields.add(ef);
-    } else {
-      this.ephemeralDataForm.fields.add(ef);
-    }
-    this.selectElement({
-      type: 'field',
-      field: ef,
-    });
-  }
-
-  removeField(ef: EphemeralDataFormField) {
-    if (ef.parentField) {
-      ef.parentField.nestedFields.delete(ef);
-    } else {
-      this.ephemeralDataForm.fields.delete(ef);
-    }
   }
 }
 

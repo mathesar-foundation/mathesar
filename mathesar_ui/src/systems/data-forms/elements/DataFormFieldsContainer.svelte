@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { ParentEphemeralField } from '../data-form-utilities/AbstractEphemeralField';
   import {
     type DataFormManager,
     EditableDataFormManager,
@@ -10,7 +9,6 @@
   import DataFormFieldElement from './DataFormFieldElement.svelte';
 
   export let dataFormManager: DataFormManager;
-  export let parentField: ParentEphemeralField;
   export let fields: FormFields;
 </script>
 
@@ -23,7 +21,7 @@
         <AddField
           display="full"
           {dataFormManager}
-          {parentField}
+          fieldHolder={fields}
           insertionIndex={$fields.length}
         />
       </div>

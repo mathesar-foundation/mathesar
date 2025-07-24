@@ -44,8 +44,8 @@ def get_table_oid_attnums_map(form_model):
 def get_field_tab_col_info_map(form_model):
     table_oid_attnums_map = get_table_oid_attnums_map(form_model)
     with form_model.connection as conn:
-        tab_col_con_info_map = get_tab_col_info_map(table_oid_attnums_map, conn)
-    for oid, table_data in tab_col_con_info_map.items():
+        tab_col_info_map = get_tab_col_info_map(table_oid_attnums_map, conn)
+    for oid, table_data in tab_col_info_map.items():
         expected_attnums = table_oid_attnums_map[int(oid)]
         column_attnums = table_data["columns"].keys()
         for attn in expected_attnums:
@@ -58,7 +58,7 @@ def get_field_tab_col_info_map(form_model):
             col_info = table_data["columns"].get(str(meta.attnum))
             if col_info:
                 col_info["metadata"] = ColumnMetaDataBlob.from_model(meta)
-    return tab_col_con_info_map
+    return tab_col_info_map
 
 
 def iterate_field_defs(field_defs, parent_field_defn=None):

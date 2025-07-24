@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import type { DataFormManager } from '../data-form-utilities/DataFormManager';
+  import type { EphemeralDataFormField } from '../data-form-utilities/types';
 
   import FkFormFieldElement from './FkFormFieldElement.svelte';
   import FormFieldElementWrapper from './FormFieldElementWrapper.svelte';
@@ -15,7 +15,5 @@
     <ScalarFormFieldElement {isSelected} {dataFormManager} {dataFormField} />
   {:else if dataFormField.kind === 'foreign_key'}
     <FkFormFieldElement {isSelected} {dataFormManager} {dataFormField} />
-  {:else}
-    <div></div>
   {/if}
 </FormFieldElementWrapper>

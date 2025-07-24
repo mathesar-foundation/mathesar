@@ -1,10 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { RawDataFormSource } from '@mathesar/api/rpc/forms';
+  import type { RawDataForm, RawDataFormSource } from '@mathesar/api/rpc/forms';
   import Errors from '@mathesar/components/errors/Errors.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import type { DataForm } from '@mathesar/models/DataForm';
   import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
@@ -14,13 +13,14 @@
     rawEphemeralFormToEphemeralFormProps,
   } from '@mathesar/systems/data-forms';
 
-  export let dataForm: DataForm;
+  export let rawDataForm: RawDataForm;
   export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;
 
+  $: pageTitle = rawDataForm.header_title.text.trim() || rawDataForm.name;
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
         rawEphemeralFormToEphemeralFormProps(
-          dataForm.toRawDataForm(),
+          rawDataForm,
           formSourceInfo.resolvedValue,
         ),
       )
@@ -28,10 +28,10 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($_('fill_form'))}</title>
+  <title>{makeSimplePageTitle(pageTitle)}</title>
 </svelte:head>
 
-<LayoutWithHeader fitViewport>
+<LayoutWithHeader fitViewport showHeader={false}>
   {#if dataFormManager}
     <div class="data-form-filler">
       <DataFormCanvas {dataFormManager} />

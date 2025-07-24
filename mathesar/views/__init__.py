@@ -119,6 +119,15 @@ def get_common_data(request, database_id=None, schema_oid=None):
     }
 
 
+def get_anonymous_common_data(request):
+    return {
+        'current_release_tag_name': __version__,
+        'is_authenticated': not request.user.is_anonymous,
+        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
+        'routing_context': 'anonymous',
+    }
+
+
 class MathesarRPCEntryPoint(RPCEntryPoint):
     pass
 
@@ -155,6 +164,12 @@ def database_route(request, database_id, **kwargs):
 def schema_route(request, database_id, schema_id, **kwargs):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database_id, schema_id)
+    })
+
+
+def anonymous_route_home(request, **kwargs):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_anonymous_common_data(request)
     })
 
 

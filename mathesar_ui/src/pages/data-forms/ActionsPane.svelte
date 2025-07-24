@@ -2,16 +2,20 @@
   import { _ } from 'svelte-i18n';
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
-  import { iconForms, iconSave, iconShare } from '@mathesar/icons';
+  import SaveButton from '@mathesar/components/SaveButton.svelte';
+  import { iconForms, iconShare } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { toast } from '@mathesar/stores/toast';
   import type { EditableDataFormManager } from '@mathesar/systems/data-forms';
-  import { Button, Icon, SpinnerButton } from '@mathesar-component-library';
+  import { Dropdown, Icon } from '@mathesar-component-library';
+
+  import ShareForm from './ShareForm.svelte';
 
   export let dataForm: DataForm;
   export let dataFormManager: EditableDataFormManager;
-  $: ({ name } = dataFormManager.ephemeralDataForm);
+  $: ({ ephemeralDataForm, hasChanges } = dataFormManager);
+  $: ({ name } = ephemeralDataForm);
 
   async function saveForm() {
     try {
@@ -31,15 +35,19 @@
   }}
 >
   <svelte:fragment>
-    <Button appearance="secondary">
-      <Icon {...iconShare} size="0.8rem" />
-      <span>{$_('share')}</span>
-    </Button>
-    <SpinnerButton
-      onClick={saveForm}
-      icon={{ ...iconSave, size: '0.8em' }}
-      label={$_('save')}
-      tooltip={$_('save_form')}
-    />
+    <SaveButton onSave={saveForm} canSave={$hasChanges} />
+    <Dropdown
+      showArrow={false}
+      triggerAppearance="secondary"
+      ariaLabel={$_('share')}
+    >
+      <svelte:fragment slot="trigger">
+        <Icon {...iconShare} />
+        <span class="responsive-button-label"> {$_('share')} </span>
+      </svelte:fragment>
+      <svelte:fragment slot="content">
+        <ShareForm {dataForm} {dataFormManager} />
+      </svelte:fragment>
+    </Dropdown>
   </svelte:fragment>
 </EntityPageHeader>

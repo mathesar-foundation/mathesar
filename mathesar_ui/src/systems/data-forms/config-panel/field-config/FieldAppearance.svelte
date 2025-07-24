@@ -8,7 +8,7 @@
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
-  import type { EphemeralDataFormField } from '../../data-form-utilities/AbstractEphemeralField';
+  import type { EphemeralDataFormField } from '../../data-form-utilities/types';
 
   export let field: EphemeralDataFormField;
 

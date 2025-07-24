@@ -4,8 +4,8 @@
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { Button } from '@mathesar-component-library';
 
-  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
+  import type { EphemeralDataFormField } from '../data-form-utilities/types';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: EphemeralDataFormField | undefined = undefined;

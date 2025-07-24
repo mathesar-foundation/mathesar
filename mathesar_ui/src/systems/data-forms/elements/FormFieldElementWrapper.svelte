@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import {
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
+  import type { EphemeralDataFormField } from '../data-form-utilities/types';
 
   import { AddField } from './add-field';
   import FormFieldSource from './FormFieldSource.svelte';
@@ -35,7 +35,7 @@
     {#if dataFormManager instanceof EditableDataFormManager}
       <AddField
         {dataFormManager}
-        parentField={dataFormField.parentField}
+        fieldHolder={dataFormField.holder}
         insertionIndex={$index + 1}
       />
     {/if}

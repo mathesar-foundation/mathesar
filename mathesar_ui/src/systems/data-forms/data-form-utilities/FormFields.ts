@@ -9,16 +9,55 @@ import {
 
 import { WritableSet } from '@mathesar-component-library';
 
-import type { EphemeralDataFormField } from './AbstractEphemeralField';
+import type { EphemeralDataForm } from './EphemeralDataForm';
+// eslint-disable-next-line import/no-cycle
+import { EphermeralFkField } from './EphemeralFkField';
+import { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
+import type {
+  EdfFieldListDetail,
+  EdfNestedFieldChanges,
+  EphemeralDataFormField,
+  EphemeralDataFormFieldProps,
+  ParentEphemeralDataFormField,
+} from './types';
+
+function fieldPropToEphemeralField(
+  fieldProps: EphemeralDataFormFieldProps,
+  holder: FormFields,
+  onChange: (e: EdfNestedFieldChanges) => unknown,
+): EphemeralDataFormField {
+  if (fieldProps.kind === 'scalar_column') {
+    return new EphermeralScalarField(holder, fieldProps, (detail) => {
+      onChange(detail);
+    });
+  }
+
+  return new EphermeralFkField(holder, fieldProps, (detail) => {
+    onChange(detail);
+  });
+}
 
 export class FormFields {
+  readonly parent;
+
   private fieldSet: WritableSet<EphemeralDataFormField>;
 
   private sortedFields: Readable<EphemeralDataFormField[]>;
 
-  constructor(i: Iterable<EphemeralDataFormField> = []) {
-    this.fieldSet = new WritableSet(i);
+  private onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown;
+
+  constructor(
+    parent: EphemeralDataForm | ParentEphemeralDataFormField,
+    fieldProps: Iterable<EphemeralDataFormFieldProps>,
+    onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown,
+  ) {
+    this.parent = parent;
+    this.onChange = onChange;
+    const ephemeralFormFields = [...fieldProps].map((fieldProp) =>
+      fieldPropToEphemeralField(fieldProp, this, onChange),
+    );
+    this.fieldSet = new WritableSet(ephemeralFormFields);
     this.sortedFields = derived<
       WritableSet<EphemeralDataFormField>,
       EphemeralDataFormField[]
@@ -54,15 +93,6 @@ export class FormFields {
     return this.sortedFields.subscribe(run);
   }
 
-  hasField(dataFormField: EphemeralDataFormField) {
-    return derived(this.fieldSet, ($fieldSet) =>
-      execPipe(
-        $fieldSet.values(),
-        some((f) => f.isConceptuallyEqual(dataFormField)),
-      ),
-    );
-  }
-
   hasColumn(fc: FieldColumn) {
     return derived(this.fieldSet, ($fieldSet) =>
       execPipe(
@@ -72,8 +102,42 @@ export class FormFields {
     );
   }
 
-  reconstruct(dataFormField: Iterable<EphemeralDataFormField>) {
-    this.fieldSet.reconstruct(dataFormField);
+  getTableOid() {
+    return 'relatedTableOid' in this.parent
+      ? this.parent.relatedTableOid
+      : this.parent.baseTableOid;
+  }
+
+  reconstruct(dataFormFieldProps: Iterable<EphemeralDataFormFieldProps>) {
+    this.fieldSet.reconstruct(
+      [...dataFormFieldProps].map((fieldProp) =>
+        fieldPropToEphemeralField(fieldProp, this, this.onChange),
+      ),
+    );
+    this.onChange({
+      type: 'reconstruct',
+    });
+  }
+
+  add(dataFormFieldProps: EphemeralDataFormFieldProps) {
+    if (!get(this.hasColumn(dataFormFieldProps.fieldColumn))) {
+      const dataFormField = fieldPropToEphemeralField(
+        dataFormFieldProps,
+        this,
+        this.onChange,
+      );
+      const fieldIndex = get(dataFormField.index);
+      for (const field of get(this.fieldSet)) {
+        if (get(field.index) >= fieldIndex) {
+          field.updateIndex((index) => index + 1);
+        }
+      }
+      this.fieldSet.add(dataFormField);
+      this.onChange({
+        type: 'add',
+        field: dataFormField,
+      });
+    }
   }
 
   delete(dataFormField: EphemeralDataFormField) {
@@ -84,17 +148,9 @@ export class FormFields {
       }
     }
     this.fieldSet.delete(dataFormField);
-  }
-
-  add(dataFormField: EphemeralDataFormField) {
-    if (!get(this.hasField(dataFormField))) {
-      const fieldIndex = get(dataFormField.index);
-      for (const field of get(this.fieldSet)) {
-        if (get(field.index) >= fieldIndex) {
-          field.updateIndex((index) => index + 1);
-        }
-      }
-      this.fieldSet.add(dataFormField);
-    }
+    this.onChange({
+      type: 'delete',
+      field: dataFormField,
+    });
   }
 }

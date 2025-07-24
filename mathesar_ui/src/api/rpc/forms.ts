@@ -61,9 +61,9 @@ export interface RawEphemeralDataForm {
   header_title: RichTextJson;
   header_subtitle: RichTextJson | null;
   fields: RawEphemeralDataFormField[];
-  submit_message?: RichTextJson | null;
-  submit_redirect_url?: string | null;
-  submit_button_label?: string | null;
+  submit_message: RichTextJson | null;
+  submit_redirect_url: string | null;
+  submit_button_label: string | null;
 }
 
 /**
@@ -119,7 +119,6 @@ export interface RecordsSummaryListResponse {
 export const forms = {
   get: rpcMethodTypeContainer<
     {
-      database_id: RawDatabase['id'];
       form_id: RawDataForm['id'];
     },
     RawDataFormResponse

@@ -4,19 +4,28 @@
   import { iconExpandRight } from '@mathesar/icons';
   import { Button, Icon, iconShowMore } from '@mathesar-component-library';
 
-  import type { EphemeralDataFormField } from '../data-form-utilities/AbstractEphemeralField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
+  import { EphemeralDataForm } from '../data-form-utilities/EphemeralDataForm';
+  import type { EphemeralDataFormField } from '../data-form-utilities/types';
 
   import FieldNavigationElement from './FieldNavigationElement.svelte';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: EphemeralDataFormField | undefined = undefined;
 
+  $: parent = field?.holder.parent;
+  $: parentField = parent instanceof EphemeralDataForm ? undefined : parent;
+  $: parentOfParentField = parentField?.holder.parent;
+  $: parentFieldOfParentField =
+    parentOfParentField instanceof EphemeralDataForm
+      ? undefined
+      : parentOfParentField;
+
   function selectHiddenParent() {
-    if (field?.parentField?.parentField) {
+    if (parentFieldOfParentField) {
       dataFormManager.selectElement({
         type: 'field',
-        field: field.parentField.parentField,
+        field: parentFieldOfParentField,
       });
     } else {
       dataFormManager.resetSelectedElement();
@@ -26,7 +35,7 @@
 
 <div class="form-nav">
   {#if field}
-    {#if field.parentField}
+    {#if parentFieldOfParentField}
       <Button appearance="ghost" on:click={selectHiddenParent}>
         <Icon {...iconShowMore} />
       </Button>
@@ -35,10 +44,7 @@
       </div>
     {/if}
 
-    <FieldNavigationElement
-      {dataFormManager}
-      field={field.parentField ?? undefined}
-    />
+    <FieldNavigationElement {dataFormManager} field={parentField} />
     <div class="icon-holder">
       <Icon {...iconExpandRight} />
     </div>

@@ -14,23 +14,23 @@
 
   export let dataFormManager: EditableDataFormManager;
   $: ({ ephemeralDataForm } = dataFormManager);
-  $: ({ submissionSettings } = ephemeralDataForm);
-  $: ({ message, redirectUrl, buttonLabel } = $submissionSettings);
+  $: ({ submitMessage, submitRedirectUrl, submitButtonLabel } =
+    ephemeralDataForm);
 </script>
 
 <div>
   <div>
     <LabeledInput layout="inline-input-first" label={$_('redirect_to_url')}>
       <Checkbox
-        checked={isDefinedNonNullable(redirectUrl)}
+        checked={isDefinedNonNullable($submitRedirectUrl)}
         on:change={(e) =>
           ephemeralDataForm.setSubmissionRedirectUrl(e.detail ? '' : null)}
       />
     </LabeledInput>
-    {#if isDefinedNonNullable(redirectUrl)}
+    {#if isDefinedNonNullable($submitRedirectUrl)}
       <div>
         <TextInput
-          value={redirectUrl}
+          value={$submitRedirectUrl}
           on:input={(e) => {
             ephemeralDataForm.setSubmissionRedirectUrl(
               String(getValueFromEvent(e)),
@@ -43,7 +43,7 @@
   <div>
     <LabeledInput layout="stacked" label={$_('post_submission_message')}>
       <TextArea
-        value={message?.text}
+        value={$submitMessage?.text}
         on:input={(e) =>
           ephemeralDataForm.setSubmissionMessage(String(getValueFromEvent(e)))}
       />
@@ -52,7 +52,7 @@
   <div>
     <LabeledInput layout="stacked" label={$_('submit_button_label')}>
       <TextInput
-        value={buttonLabel}
+        value={$submitButtonLabel}
         on:input={(e) =>
           ephemeralDataForm.setSubmissionButtonLabel(
             String(getValueFromEvent(e)),

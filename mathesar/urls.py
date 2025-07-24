@@ -31,6 +31,8 @@ urlpatterns = [
     path('administration/settings/', views.admin_home, name='admin_settings'),
     path('i18n/', include('django.conf.urls.i18n')),
     path('info/analytics_sample_report/', views.analytics_sample_report, name='analytics_sample_report'),
+    # TODO_FORMS: Replace form_id with form_token
+    path('shares/forms/<int:form_id>/', views.anonymous_route_home, name='shared_form'),
     re_path(
         r'^db/(?P<database_id>\d+)/schemas/(?P<schema_id>\d+)/',
         views.schema_route,
