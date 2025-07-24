@@ -117,6 +117,11 @@
   }
 
   async function toggleRecordSelector() {
+    // I added `tick` because I was observing a race condition when opening a
+    // nested record selector. It would open correctly about 80% of the time.
+    // But 20% of the time it would not open because it would cancel.
+    await tick();
+
     if (recordSelectionOrchestrator.isOpen()) {
       recordSelectionOrchestrator.close();
     } else {
