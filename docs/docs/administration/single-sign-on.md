@@ -1,24 +1,16 @@
 # Single Sign-on (SSO)
 
-This guide walks you through how to configure Single Sign-On (SSO) for Mathesar.
+Single sign-on (SSO) allows users to log into your Mathesar instance without the need to create or manage separate accounts.
 
-SSO allows users to log into your Mathesar instance without the need to create or manage separate accounts.
+This guide explains how to configure SSO for Mathesar. It is intended for IT and system administrators familiar with setting up identity providers and managing a Mathesar instance.
 
+## 1. Setting up your identity provider
 
-This guide is intended for IT admins or developers who are configuring secure access to Mathesar.
+First, you'll need to configure your identity provider (IdP) to work with Mathesar. Mathesar supports any identity provider that implements the [OpenID Connect (OIDC) standard](https://openid.net/developers/how-connect-works/), such as Okta, Azure Active Directory, Google Workspace, and others.
 
-### 1. Setting up your identity provider
+Below is a list of commonly used identity providers compatible with Mathesar’s OIDC-based SSO. Where possible, we’ve included links to their setup documentation:
 
-First, configure your identity provider (IdP) to work with Mathesar.
-
-???+ tip "How providers work in Mathesar"
-    Mathesar supports any identity provider that implements the [OpenID Connect (OIDC) standard](https://openid.net/developers/how-connect-works/), such as Okta, Azure Active Directory, Google Workspace, and others.
-
-Although all supported IdPs follow the same specification, they each have a different user interfaces and process for setting up an application.
-
-Here are several popular identity providers that should work with Mathesar's OIDC SSO implementation. Where possible, we've linked to relevant documentation about configuring each provider.
-
-| Provider      | Key           |
+| Provider      | Key         |
 |---------------|---------------|
 | [Apple](https://support.apple.com/guide/apple-business-manager/federated-authentication-identity-provider-axmfcab66783/web)         | `apple`       |
 | [Auth0](https://auth0.com/docs/get-started/auth0-overview/create-applications)         | `auth0`       |
@@ -30,9 +22,9 @@ Here are several popular identity providers that should work with Mathesar's OID
 | [Microsoft](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc)     | `microsoft`   |
 | [Okta](https://developer.okta.com/docs/guides/sign-into-web-app-redirect/asp-net-core-3/main/#create-an-app-integration-in-the-admin-console)          | `okta`        |
 
-Whichever provider you're using, you'll begin by creating an application.
+To get started, create an application within your chosen provider.
 
-During creation, you'll need to provide the "Callback URL"—also referred to as the Redirect URI or Login URL, depending on the provider. The callback URL tells your identity provider where to send users after they’ve successfully logged in, so they can be redirected back to Mathesar.
+During this process, you'll be asked to specify a "Callback URL" (also called a Redirect URI or Login URL, depending on the provider). This is the URL your identity provider uses to return users to Mathesar after a successful login.
 
 !!!info "Configuring the callback URL"
     In your provider's settings, set the Callback URL to:
@@ -44,33 +36,35 @@ During creation, you'll need to provide the "Callback URL"—also referred to as
     Replace `<mathesar-domain>` with the domain name of your Mathesar installation.<br>
     Examples: `mathesar.myorg.com`, `localhost:8000`
 
-    Replace `<provider-name>` with the name of your IdP provider.<br>
+    Replace `<provider-name>` with the key of your IdP provider.<br>
     Examples: `auth0`, `okta`, `google`
 
-Your identity provider will redirect users to this URL after authentication, so it's essential that it matches exactly between your IdP configuration and your Mathesar setup.
+Your identity provider will redirect users to this URL after authentication, so it’s important that the value matches exactly in both your IdP configuration and your Mathesar setup.
 
-Once your IdP is fully configured, you're ready to move on to the next step: populating your `sso.yml` file with the necessary values from your identity provider.
+Once your IdP is configured, you can move on to the next steps: enabling SSO in Mathesar and configuring it  with the required values from your provider.
 
-### 2. Enabling SSO in Mathesar
+## 2. Enabling SSO in Mathesar
 
-SSO in Mathesar is configured outside of the application interface, using a straightforward configuration file. To enable SSO in Mathesar, start by creating a configuration file called `sso.yml`.
+To enable SSO in Mathesar, you'll configure it outside the app's user interface using a simple configuration file named `sso.yml`.
 
-!!!info "Using the OIDC_CONFIG_DICT environment variable instead of sso.yml"
-    If you're unable to write to the local filesystem, like when using a cloud provider with an ephemeral filesystem or for other purposes, you can also configure SSO in Mathesar by creating a `OIDC_CONFIG_DICT` environment variable which is a stringified JSON object.
+This file contains all the necessary settings for your identity provider (IdP) and tells Mathesar how to handle authentication.
 
-    You'll want to convert the YAML configuration in sso.yml, then stringify the JSON. Here's an example of the final result:
+???+info "Using the OIDC_CONFIG_DICT environment variable instead of sso.yml"
+    If Mathesar deployed in an environment where writing to the local filesystem isn't possible (e.g., a cloud platform with an ephemeral filesystem), you can use the `OIDC_CONFIG_DICT` environment variable instead of a sso.yml file.
+
+    This variable must contain the same configuration data as `sso.yml`, but converted to JSON and then stringified. Here's an example of the final result:
 
     ```env
     OIDC_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
     ```
 
-    For docker installations, you'll also need to add the `OIDC_CONFIG_DICT` variable to the
+    To create this, convert your `sso.yml` contents to JSON, then wrap the result in quotes and escape any internal quotation marks. Get additional help in our [environment variables guide](./environment-variables.md#oidc_config_dict-optional).
 
-Instructions for where to save the file vary slightly, depending on which installation method you've used:
+Instructions for where to save the `sso.yml` file vary slightly, depending on which installation method you've used:
 
 === "For Docker Compose installations"
 
-    For [docker compose](./install-via-docker-compose.md) installations, create a `sso.yml` file next to your [`docker-compose.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml).:
+    For [docker compose](./install-via-docker-compose.md) installations, create a `sso.yml` file next to your [`docker-compose.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml):
 
     ```diff
     mathesar
@@ -94,32 +88,30 @@ Instructions for where to save the file vary slightly, depending on which instal
 
     For [non-Docker installations](./install-from-scratch.md), you'll need to create the `sso.yml` file in the installation directory you [defined while installing](./install-from-scratch.md#set-up-your-installation-directory) Mathesar.
 
-Once the file is created, you paste in our [example configuration](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example). You'll edit this configuration in the following steps to work with your provider.
+Once the file is created, paste in our [example configuration](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example). You'll edit this configuration in the following steps to work with your provider.
 
-### 3. Configuring the identity provider in Mathesar
+## 3. Configuring the identity provider in Mathesar
 
-Now that your identity provider (IdP) is configured and you've created the `sso.yml` file, the next step is to tell Mathesar about your provider by adding it to the `sso.yml` file.
+With your identity provider (IdP) set up and the `sso.yml` file created, you're ready to configure Mathesar to use your provider.
 
-We'll use **Okta** as the example provider, but the same structure applies to others like Auth0, Google, or Azure AD.
+We'll use Okta as the example, but the same format applies to other providers like Auth0 or Google.
 
-#### Naming Your Provider
+### Naming Your Provider
 
-Each provider is defined under a unique key (e.g., `provider1`). Inside that block, you must specify the `provider_name`, which is a lowercase, alphanumeric identifier for the IdP. It should match the value you used in the callback URL.
+Each provider is defined under a unique key (e.g., provider1). Inside that block, you must specify the following:
 
-Examples: `okta`, `auth0`, or `google`.
+- `provider_name`: A lowercase, alphanumeric identifier that matches the value used in your callback URL.
+- `server_url`: The OIDC issuer or discovery URL provided by your IdP. Mathesar uses this to fetch OIDC metadata, including authorization and token endpoints.
 
-You must also specify the `server_url`: the issuer URL or OIDC discovery URL provided by your IdP. This is the base URL that Mathesar uses to fetch OIDC metadata (including token endpoints, authorization endpoints, and keys).
+Examples of `server_url` values:
 
-- In Okta, it looks like:
-`https://your-org.okta.com`
-- In Auth0, it might be:
-`https://your-tenant.auth0.com`
-- In Google, it’s typically a fixed value:
-`https://accounts.google.com`
+- Okta: `https://your-org.okta.com`
+- Auth0: `https://your-tenant.auth0.com`
+- Google: `https://accounts.google.com` (typically a fixed value)
 
-Refer to your IdP’s documentation for the correct issuer or discovery URL.
+Refer to your IdP's documentation for the exact value.
 
-Now, we should have all the information necessary to add our first provider to `sso.yml`:
+Here’s how to start defining your first provider in `sso.yml`:
 
 ```diff
 # This config file allows you to configure OpenID Connect(OIDC)
@@ -132,16 +124,16 @@ oidc_providers:
 +    server_url: https://your-org.okta.com
 ```
 
-#### Configuring your provider
+### Configuring your provider
 
-Next, retrieve the following values from your IdP’s admin interface:
+Next, retrieve the following credentials from your IdP’s admin interface:
 
 - `client_id`
-- `secret` (sometimes called `client secret`, `token`, or `client key`)
+- `secret` (also referred to as client secret, token, or client key)
 
-These credentials authenticate Mathesar with your IdP.
+These allow Mathesar to securely authenticate with your identity provider.
 
-Add them to the provider block like so:
+Add them to the same provider block:
 
 ```diff
   provider1:
@@ -151,12 +143,18 @@ Add them to the provider block like so:
 +   secret: client-secret
 ```
 
-You've now completed all the minimum requirements to enable Single Sign-On (SSO) in Mathesar. Next, you can:
+You've now completed the **minimum required configuration** to enable SSO in Mathesar.
 
-- Add additional providers, if needed, by repeating this process
-- Explore optional but **recommended** settings like [restricting access to particular email domains](#restrict-access-to-specific-email-domains) and [setting default database roles](#set-default-user-roles-for-your-databases)
+Next, you can explore optional (but **recommended**) features like:
 
-Finally, you'll need to restart Mathesar so it can read the `sso.yml` file and enable your changes. Be sure to  use the correct method for your installation:
+- [Restricting access to particular email domains](#restrict-access-to-specific-email-domains)
+- [Setting default database roles](#set-default-user-roles-for-your-databases)
+
+You can also repeat this process for any additional providers.
+
+## 4. Activating SSO
+
+To activate Single sign-on, restart Mathesar so it can load the updated `sso.yml` file.
 
 === "For Docker Compose installations"
 
@@ -171,9 +169,12 @@ Finally, you'll need to restart Mathesar so it can read the `sso.yml` file and e
     sudo systemctl restart mathesar.service
     ```
 
-These options can help you tailor authentication and access control to better fit your organization's needs.
+Visit your Mathesar installation and you should see your provider on the login screen:
 
 ![Sign into Mathesar with Okta](../assets/images/sso-login-page-okta.png)
+/// caption
+Mathesar's login screen with Okta SSO enabled.
+///
 
 ## Additional configuration options
 
@@ -237,11 +238,41 @@ oidc_providers:
 
 On first login, users will be granted the specified roles on each listed database. This simplifies onboarding and ensures consistent access control across your environment.
 
-## Disabling Single Sign-On
+#### Overriding automatic role provisioning
 
-To disable SSO in Mathesar, delete the `sso.yml` file from your installation directory and restart the application. This will revert Mathesar to using only email and password-based authentication.
+If you wish to _override_ default role provisioning for specific users, you can manually create their user accounts in the Mathesar UI and assign DB roles directly. When those users log in via SSO for the first time, Mathesar will preserve the roles you set, instead of applying the default roles defined in the SSO provider configuration.
 
-!!!warning "Resetting user passwords"
+!!!info "Example scenario"
+    **Company A** wants all employees to have read-only access by default, but account managers should have write access.
+
+    In their `sso.yml`, they set the default role to `readonly`. Then, before enabling SSO, they manually create Mathesar accounts for each account manager and assign them the `writeaccess` role in the appropriate database.
+
+    When account managers log in via SSO, Mathesar recognizes their email addresses and preserves the `writeaccess` roles, instead of applying the default `readonly` role.
+
+## Transitioning Existing Users to SSO
+
+If you already have users in Mathesar and want them to start using SSO, you can do so without disrupting their accounts, **as long as the email address used for SSO matches their existing Mathesar account email exactly**.
+
+When a user logs in via SSO, Mathesar checks for a matching email address. If a match is found, the user will be logged into their existing Mathesar account. Their roles and access will remain intact.
+
+#### Steps to prepare:
+
+- **Verify email addresses**: Make sure the email for each existing user in Mathesar exactly matches the email returned by your identity provider.
+- **Update emails if needed**: If necessary, update existing Mathesar user emails before enabling SSO.
+
+#### Admin caveats:
+
+* **SSO for the default admin account**: If you're using a fresh Mathesar install and want to link the default admin account to an SSO identity, make sure the SSO user has the **same email address** as the admin account created during setup.
+  Once SSO is enabled, logging in via SSO with that email will connect the SSO identity to the existing admin account.
+* **No admin account creation via SSO (yet)**: At this time, Mathesar does not support creating admin accounts through SSO. Admins must be created manually in the Mathesar UI before SSO is enabled.
+
+This approach allows you to adopt SSO gradually while keeping access and roles intact.
+
+## Disabling Single Sign-on
+
+To disable SSO in Mathesar, delete the `sso.yml` file from your installation directory (or remove the value of the `OIDC_CONFIG_DICT` variable) and restart Mathesar. This will revert Mathesar to using only email and password-based authentication.
+
+!!!danger "Resetting user passwords"
     Users who were originally created via SSO do not have a known password—they are automatically assigned a random, system-generated one during account creation. As a result, these users will not be able to log in after SSO is disabled unless their passwords are reset.
 
     To restore access for these users:
