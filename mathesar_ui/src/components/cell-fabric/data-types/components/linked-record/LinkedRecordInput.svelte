@@ -104,6 +104,7 @@
     if (record === undefined) {
       dispatch('recordSelectorCancel');
     } else {
+      value = record.key;
       setRecordSummary(String(record.key), record.summary);
       dispatch('recordSelectorSubmit');
       dispatch('artificialChange', value);
