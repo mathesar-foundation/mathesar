@@ -16,6 +16,11 @@ This guide walks you through how to deploy Mathesar on Railway.
 
 ### Step 1: Run the one-click deployer
 
+!!! info "Railway trial accounts"
+	If you sign up with GitHub and your account meets Railway's [requirements](https://docs.railway.com/reference/pricing/free-trial#full-vs-limited-trial), you'll receive a "full" free trial and be able to install Mathesar immediately.
+
+	Otherwise, you'll be placed on a "limited" trial, which doesn't support code deployment. Instead, Railway will prompt you to upgrade to one of their "Hobby"-tier monthly plans in order to deploy Mathesar.
+
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/mathesar-official?referralCode=piCyQa)
 
 ### Step 2: Create the application
