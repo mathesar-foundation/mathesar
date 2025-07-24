@@ -28,12 +28,6 @@ export abstract class AbstractEphemeralField {
     return this._help;
   }
 
-  private _isRequired;
-
-  get isRequired(): Readable<AbstractEphemeralFieldProps['isRequired']> {
-    return this._isRequired;
-  }
-
   private _styling;
 
   get styling(): Readable<AbstractEphemeralFieldProps['styling']> {
@@ -46,7 +40,6 @@ export abstract class AbstractEphemeralField {
     this._index = writable(props.index);
     this._label = writable(props.label);
     this._help = writable(props.help);
-    this._isRequired = writable(props.isRequired);
     this._styling = writable(props.styling);
   }
 
@@ -63,11 +56,6 @@ export abstract class AbstractEphemeralField {
   updateIndex(updator: Updater<number>) {
     this._index.update(updator);
     this.bubblePropChange('index');
-  }
-
-  setIsRequired(isRequired: boolean) {
-    this._isRequired.set(isRequired);
-    this.bubblePropChange('isRequired');
   }
 
   updateStyling(styling: Partial<AbstractEphemeralFieldProps['styling']>) {
@@ -94,7 +82,6 @@ export abstract class AbstractEphemeralField {
       label: get(this.label),
       help: get(this.help),
       styling: {},
-      is_required: get(this.isRequired),
     };
   }
 }

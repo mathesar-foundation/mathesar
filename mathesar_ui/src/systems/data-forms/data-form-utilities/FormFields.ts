@@ -1,4 +1,4 @@
-import { execPipe, some } from 'iter-tools';
+import { execPipe, flatMap, some, toArray } from 'iter-tools';
 import {
   type Readable,
   type Subscriber,
@@ -7,6 +7,7 @@ import {
   get,
 } from 'svelte/store';
 
+import type { FieldStore } from '@mathesar/components/form';
 import { WritableSet } from '@mathesar-component-library';
 
 import type { EphemeralDataForm } from './EphemeralDataForm';
@@ -47,6 +48,8 @@ export class FormFields {
 
   private onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown;
 
+  readonly fieldValueStores: Readable<Readable<FieldStore>[]>;
+
   constructor(
     parent: EphemeralDataForm | ParentEphemeralDataFormField,
     fieldProps: Iterable<EphemeralDataFormFieldProps>,
@@ -74,8 +77,6 @@ export class FormFields {
 
         function resubscribe() {
           unsubIndexStores.forEach((u) => u());
-          unsubIndexStores = [];
-
           unsubIndexStores = [...$fieldSet.values()].map((item) =>
             item.index.subscribe(updateSorted),
           );
@@ -84,6 +85,45 @@ export class FormFields {
         resubscribe();
         updateSorted();
         return () => unsubIndexStores.forEach((u) => u());
+      },
+      [],
+    );
+
+    this.fieldValueStores = derived<
+      WritableSet<EphemeralDataFormField>,
+      Readable<FieldStore>[]
+    >(
+      this.fieldSet,
+      ($fieldSet, set) => {
+        let unsubFieldValueStores: (() => void)[] = [];
+
+        function update() {
+          set(
+            execPipe(
+              $fieldSet.values(),
+              flatMap((f) => [
+                f.fieldStore,
+                ...(f.kind === 'scalar_column'
+                  ? []
+                  : get(f.nestedFields.fieldValueStores)),
+              ]),
+              toArray,
+            ),
+          );
+        }
+
+        function resubscribe() {
+          unsubFieldValueStores.forEach((u) => u());
+          unsubFieldValueStores = [...$fieldSet.values()]
+            .filter((f) => f.kind !== 'scalar_column')
+            .map((item: EphermeralFkField) =>
+              item.nestedFields.fieldValueStores.subscribe(update),
+            );
+        }
+
+        resubscribe();
+        update();
+        return () => unsubFieldValueStores.forEach((u) => u());
       },
       [],
     );

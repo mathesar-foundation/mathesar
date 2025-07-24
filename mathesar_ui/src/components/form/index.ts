@@ -2,6 +2,7 @@ export * from './validators';
 export { default as Field } from './Field.svelte';
 export { default as FormSubmit } from './FormSubmit.svelte';
 export { default as FieldLayout } from './FieldLayout.svelte';
+export { default as FieldErrors } from './FieldErrors.svelte';
 export {
   field,
   requiredField,
