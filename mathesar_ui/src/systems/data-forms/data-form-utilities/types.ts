@@ -51,6 +51,7 @@ export interface EphemeralDataFormProps {
   baseTableOid: number;
   schemaOid: number;
   databaseId: number;
+  token: RawDataForm['token'];
   name: RawDataForm['name'];
   description: RawDataForm['description'];
   headerTitle: RawDataForm['header_title'];

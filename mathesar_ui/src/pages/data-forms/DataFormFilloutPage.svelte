@@ -11,7 +11,7 @@
   import {
     DataFormCanvas,
     ReadonlyDataFormManager,
-    rawEphemeralFormToEphemeralFormProps,
+    rawDataFormToEphemeralFormProps,
   } from '@mathesar/systems/data-forms';
 
   export let dataForm: DataForm;
@@ -19,7 +19,7 @@
 
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
-        rawEphemeralFormToEphemeralFormProps(
+        rawDataFormToEphemeralFormProps(
           dataForm.toRawDataForm(),
           formSourceInfo.resolvedValue,
         ),

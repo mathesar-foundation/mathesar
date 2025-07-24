@@ -12,7 +12,7 @@
   import {
     DataFormCanvas,
     EditableDataFormManager,
-    rawEphemeralFormToEphemeralFormProps,
+    rawDataFormToEphemeralFormProps,
   } from '@mathesar/systems/data-forms';
   import CacheManager from '@mathesar/utils/CacheManager';
 
@@ -28,7 +28,7 @@
 
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new EditableDataFormManager(
-        rawEphemeralFormToEphemeralFormProps(
+        rawDataFormToEphemeralFormProps(
           dataForm.toRawDataForm(),
           formSourceInfo.resolvedValue,
         ),

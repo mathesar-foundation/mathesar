@@ -18,10 +18,7 @@
   import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
-  import {
-    EphemeralDataForm,
-    tableStructureSubstanceToEphemeralFormProps,
-  } from '@mathesar/systems/data-forms';
+  import { tableStructureSubstanceRawEphemeralForm } from '@mathesar/systems/data-forms';
   import {
     ControlledModal,
     LabeledInput,
@@ -64,11 +61,9 @@
       const tableStructure = new TableStructure(values.sourceTable);
       const tableStructureSubstance = await tableStructure.asyncStore.tick();
       if (tableStructureSubstance.resolvedValue) {
-        const rawEpf = new EphemeralDataForm(
-          tableStructureSubstanceToEphemeralFormProps(
-            tableStructureSubstance.resolvedValue,
-          ),
-        ).toRawEphemeralDataForm();
+        const rawEpf = tableStructureSubstanceRawEphemeralForm(
+          tableStructureSubstance.resolvedValue,
+        );
         savedDataForm = await $schemaRouteContext.insertDataForm({
           ...rawEpf,
           name: values.name,

@@ -84,4 +84,17 @@ export abstract class AbstractEphemeralField {
       styling: {},
     };
   }
+
+  getFormToken() {
+    let form = this.holder.parent;
+    while (!('token' in form) && form.holder.parent) {
+      form = form.holder.parent;
+    }
+    if (!('token' in form)) {
+      throw new Error(
+        'Field is not present within a form. This should never happen.',
+      );
+    }
+    return form.token;
+  }
 }

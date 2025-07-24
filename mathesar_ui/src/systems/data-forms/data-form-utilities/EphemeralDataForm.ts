@@ -20,6 +20,8 @@ export class EphemeralDataForm {
 
   readonly databaseId;
 
+  readonly token;
+
   private _name;
 
   get name(): Readable<RawDataForm['name']> {
@@ -79,6 +81,7 @@ export class EphemeralDataForm {
     this.baseTableOid = edf.baseTableOid;
     this.schemaOid = edf.schemaOid;
     this.databaseId = edf.databaseId;
+    this.token = edf.token;
     this._name = writable(edf.name);
     this._description = writable(edf.description);
     this._headerTitle = writable(edf.headerTitle);
