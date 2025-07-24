@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type { CellColumnLike } from '../cell-fabric/data-types/typeDefinitions';
-
   import { createEventDispatcher, onDestroy } from 'svelte';
   import { readable } from 'svelte/store';
 
@@ -29,6 +27,8 @@
     type ComponentAndProps,
     ImmutableMap,
   } from '@mathesar-component-library/types';
+
+  import type { CellColumnLike } from '../cell-fabric/data-types/typeDefinitions';
 
   import type { FilterEntryColumnLike } from './types';
   import { FILTER_INPUT_CLASS, validateFilterEntry } from './utils';

@@ -11,18 +11,18 @@
   import { AnonymousViewerUserModel } from '@mathesar/stores/users';
   import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
   import {
-    recordSelectorContext,
     RecordSelectorController,
+    recordSelectorContext,
   } from '@mathesar/systems/record-selector/RecordSelectorController';
-  import type { CommonData } from '@mathesar/utils/preloadData';
-  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
-
-  import { initUiTheme } from './utils/uiThemePreference';
+  import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
   import {
     AttachableRowSeekerController,
     rowSeekerContext,
   } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
-  import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
+  import type { CommonData } from '@mathesar/utils/preloadData';
+  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
+
+  import { initUiTheme } from './utils/uiThemePreference';
 
   export let commonData: CommonData;
 

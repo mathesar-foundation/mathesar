@@ -9,6 +9,7 @@
   import type { LinkedRecordInputProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
   import {
     type AccompanyingElements,
     Icon,
@@ -19,7 +20,6 @@
   } from '@mathesar-component-library';
 
   import type { LinkedRecordInputElement } from './LinkedRecordUtils';
-  import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
 
   interface $$Props
     extends Omit<
