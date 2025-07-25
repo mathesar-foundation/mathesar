@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { getStringValueFromEvent } from '@mathesar-component-library';
+
   import {
     type DataFormManager,
     EditableDataFormManager,
@@ -13,21 +15,16 @@
   $: ({ ephemeralDataForm } = dataFormManager);
   $: ({ headerTitle, headerSubTitle } = ephemeralDataForm);
 
-  function getInputValue(e: Event) {
-    const element = e.target as HTMLInputElement;
-    return element.value;
-  }
-
   function onTitleInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
-      const updatedName = getInputValue(e);
+      const updatedName = getStringValueFromEvent(e);
       ephemeralDataForm.setHeaderTitle(updatedName);
     }
   }
 
   function onSubtitleInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
-      const updatedDesc = getInputValue(e);
+      const updatedDesc = getStringValueFromEvent(e);
       ephemeralDataForm.setHeaderSubTitle(updatedDesc);
     }
   }
@@ -61,7 +58,7 @@
         placeholder={$_('add_form_subtitle')}
         class="form-description"
         type="text"
-        value={$headerSubTitle?.text}
+        value={$headerSubTitle?.text ?? ''}
         on:input={onSubtitleInput}
       />
     {:else if $headerSubTitle?.text.trim()}

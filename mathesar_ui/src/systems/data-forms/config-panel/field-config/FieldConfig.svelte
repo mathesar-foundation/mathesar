@@ -8,7 +8,7 @@
     Checkbox,
     LabeledInput,
     TextInput,
-    getValueFromEvent,
+    getStringValueFromEvent,
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
@@ -30,7 +30,7 @@
     <LabeledInput layout="stacked" label={$_('field_label')}>
       <TextInput
         value={$label}
-        on:input={(e) => field.setLabel(String(getValueFromEvent(e)))}
+        on:input={(e) => field.setLabel(getStringValueFromEvent(e))}
       />
     </LabeledInput>
     <LabeledInput
@@ -46,7 +46,7 @@
       <TextInput
         value={$help}
         on:input={(e) => {
-          field.setHelpText(String(getValueFromEvent(e)));
+          field.setHelpText(getStringValueFromEvent(e));
         }}
       />
     {/if}

@@ -6,7 +6,7 @@
     LabeledInput,
     TextArea,
     TextInput,
-    getValueFromEvent,
+    getStringValueFromEvent,
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
@@ -33,7 +33,7 @@
           value={$submitRedirectUrl}
           on:input={(e) => {
             ephemeralDataForm.setSubmissionRedirectUrl(
-              String(getValueFromEvent(e)),
+              getStringValueFromEvent(e),
             );
           }}
         />
@@ -45,7 +45,7 @@
       <TextArea
         value={$submitMessage?.text}
         on:input={(e) =>
-          ephemeralDataForm.setSubmissionMessage(String(getValueFromEvent(e)))}
+          ephemeralDataForm.setSubmissionMessage(getStringValueFromEvent(e))}
       />
     </LabeledInput>
   </div>
@@ -55,7 +55,7 @@
         value={$submitButtonLabel}
         on:input={(e) =>
           ephemeralDataForm.setSubmissionButtonLabel(
-            String(getValueFromEvent(e)),
+            getStringValueFromEvent(e),
           )}
       />
     </LabeledInput>

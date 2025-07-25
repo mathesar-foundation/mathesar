@@ -2,9 +2,9 @@
   import { _ } from 'svelte-i18n';
 
   import {
-    getValueFromEvent,
+    getStringValueFromEvent,
     isDefinedNonNullable,
-  } from '@mathesar/component-library';
+  } from '@mathesar-component-library';
 
   import {
     type DataFormManager,
@@ -21,11 +21,11 @@
   $: ({ label, help } = dataFormField);
 
   function onLabelInput(e: Event) {
-    dataFormField.setLabel(String(getValueFromEvent(e)));
+    dataFormField.setLabel(getStringValueFromEvent(e));
   }
 
   function onHelpTextInput(e: Event) {
-    dataFormField.setHelpText(String(getValueFromEvent(e)));
+    dataFormField.setHelpText(getStringValueFromEvent(e));
   }
 </script>
 
