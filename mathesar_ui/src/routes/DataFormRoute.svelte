@@ -44,10 +44,6 @@
       icon: iconForms,
     }}
   />
-
-  {#if isLoading}
-    <LoadingPage />
-  {/if}
 {/if}
 
 {#if !form && !isLoading}
@@ -55,13 +51,17 @@
 {/if}
 
 <Route path="/">
-  {#if !isLoading && form}
+  {#if form && $formSourceInfo.hasSettled}
     <DataFormEditorPage dataForm={form} formSourceInfo={$formSourceInfo} />
+  {:else if isLoading}
+    <LoadingPage />
   {/if}
 </Route>
 
 <Route path="/fillout/">
-  {#if !isLoading && form}
+  {#if form && $formSourceInfo.hasSettled}
     <DataFormFilloutPage dataForm={form} formSourceInfo={$formSourceInfo} />
+  {:else if isLoading}
+    <LoadingPage />
   {/if}
 </Route>

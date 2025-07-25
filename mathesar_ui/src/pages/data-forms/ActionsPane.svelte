@@ -21,8 +21,8 @@
   export let dataForm: DataForm;
   export let dataFormManager: EditableDataFormManager;
 
-  $: ({ ephemeralDataForm, hasChanges } = dataFormManager);
-  $: ({ name, description } = ephemeralDataForm);
+  $: ({ hasChanges } = dataFormManager);
+  $: ({ name, description } = dataForm);
 
   async function saveForm() {
     try {
