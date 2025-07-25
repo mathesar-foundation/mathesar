@@ -90,7 +90,7 @@ def find_exec_calls_in_project(directory):
 def test_db_wrapper(get_msar_func_names, _, exec_sql_func_name, exec_sql_arg_count):
     """
     Tests to make sure every SQL function is correctly wired up.
-    
+
     If this test is failing, compare the number of arguments in your function
     definitions across the following code locations:
 
