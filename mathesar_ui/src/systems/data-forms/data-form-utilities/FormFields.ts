@@ -7,7 +7,6 @@ import {
   get,
 } from 'svelte/store';
 
-import type { FieldStore } from '@mathesar/components/form';
 import { WritableSet } from '@mathesar-component-library';
 
 import type { EphemeralDataForm } from './EphemeralDataForm';
@@ -15,6 +14,7 @@ import type { EphemeralDataForm } from './EphemeralDataForm';
 import { EphermeralFkField } from './EphemeralFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
+import type { DataFormFieldInputValueHolder } from './FieldValueHolder';
 import type {
   EdfFieldListDetail,
   EdfNestedFieldChanges,
@@ -48,7 +48,7 @@ export class FormFields {
 
   private onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown;
 
-  readonly fieldValueStores: Readable<Readable<FieldStore>[]>;
+  readonly fieldValueStores: Readable<DataFormFieldInputValueHolder[]>;
 
   constructor(
     parent: EphemeralDataForm | ParentEphemeralDataFormField,
@@ -91,7 +91,7 @@ export class FormFields {
 
     this.fieldValueStores = derived<
       WritableSet<EphemeralDataFormField>,
-      Readable<FieldStore>[]
+      DataFormFieldInputValueHolder[]
     >(
       this.fieldSet,
       ($fieldSet, set) => {
@@ -101,12 +101,13 @@ export class FormFields {
           set(
             execPipe(
               $fieldSet.values(),
-              flatMap((f) => [
-                f.fieldStore,
-                ...(f.kind === 'scalar_column'
-                  ? []
-                  : get(f.nestedFields.fieldValueStores)),
-              ]),
+              flatMap((f) => {
+                const stores = [f.fieldValueHolder];
+                if (f.kind !== 'scalar_column') {
+                  stores.push(...get(f.nestedFields.fieldValueStores));
+                }
+                return stores;
+              }),
               toArray,
             ),
           );
@@ -114,11 +115,12 @@ export class FormFields {
 
         function resubscribe() {
           unsubFieldValueStores.forEach((u) => u());
-          unsubFieldValueStores = [...$fieldSet.values()]
-            .filter((f): f is EphermeralFkField => f.kind !== 'scalar_column')
-            .map((item) =>
-              item.nestedFields.fieldValueStores.subscribe(update),
-            );
+          const fkFields = [...$fieldSet.values()].filter(
+            (f): f is EphermeralFkField => f.kind !== 'scalar_column',
+          );
+          unsubFieldValueStores = fkFields.map((item) =>
+            item.nestedFields.fieldValueStores.subscribe(update),
+          );
         }
 
         resubscribe();

@@ -10,19 +10,20 @@
   export let dataFormField: EphermeralScalarField | EphermeralFkField;
   export let isSelected: boolean;
 
-  $: ({ fieldStore, inputComponentAndProps } = dataFormField);
-  $: fieldValueStore = $fieldStore;
-  $: ({ showsError, disabled } = fieldValueStore);
+  $: ({ fieldValueHolder, inputComponentAndProps } = dataFormField);
+  $: ({ inputFieldStore } = fieldValueHolder);
+  $: inputField = $inputFieldStore;
+  $: ({ showsError, disabled } = inputField);
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
   <DynamicInput
-    bind:value={$fieldValueStore}
+    bind:value={$inputField}
     componentAndProps={$inputComponentAndProps}
     hasError={$showsError}
     disabled={$disabled}
   />
-  <FieldErrors field={fieldValueStore} />
+  <FieldErrors field={inputField} />
 </div>
 
 <style lang="scss">
