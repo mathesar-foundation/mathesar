@@ -35,7 +35,7 @@
 
 <div class="form-nav">
   {#if field}
-    {#if parentFieldOfParentField}
+    {#if parentOfParentField}
       <Button appearance="ghost" on:click={selectHiddenParent}>
         <Icon {...iconShowMore} />
       </Button>
