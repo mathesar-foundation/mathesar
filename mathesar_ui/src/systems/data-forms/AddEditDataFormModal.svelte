@@ -11,6 +11,8 @@
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import type { DataForm } from '@mathesar/models/DataForm';
@@ -18,7 +20,6 @@
   import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
-  import { tableStructureSubstanceRawEphemeralForm } from '@mathesar/systems/data-forms';
   import {
     ControlledModal,
     LabeledInput,
@@ -26,10 +27,13 @@
     ensureReadable,
   } from '@mathesar-component-library';
 
+  import { tableStructureSubstanceRawEphemeralForm } from './data-form-utilities/transformers';
+
   const schemaRouteContext = SchemaRouteContext.get();
 
   export let controller: ModalController;
   export let dataForm: DataForm | undefined = undefined;
+  export let onClose: (() => void) | undefined = undefined;
 
   $: savedName = ensureReadable(dataForm?.name ?? '');
   $: savedDescription = ensureReadable(dataForm?.description ?? '');
@@ -41,6 +45,7 @@
   $: description = optionalField($savedDescription ?? '');
   $: sourceTable = requiredField<Table | undefined>(savedBaseTable);
   $: form = makeForm({ name, description, sourceTable });
+  $: modalTitle = dataForm ? $_('edit_form_with_name') : $_('create_new_form');
 
   $: tableStructureStore = $sourceTable
     ? (() => {
@@ -50,9 +55,9 @@
     : ensureReadable(undefined);
 
   async function save(values: FilledFormValues<typeof form>) {
-    let savedDataForm: DataForm | undefined;
+    let newDataForm: DataForm | undefined;
     if (dataForm) {
-      savedDataForm = await dataForm.replaceDataForm({
+      await dataForm.replaceDataForm({
         ...dataForm.toRawDataForm(),
         name: values.name,
         description: values.description,
@@ -64,7 +69,7 @@
         const rawEpf = tableStructureSubstanceRawEphemeralForm(
           tableStructureSubstance.resolvedValue,
         );
-        savedDataForm = await $schemaRouteContext.insertDataForm({
+        newDataForm = await $schemaRouteContext.insertDataForm({
           ...rawEpf,
           name: values.name,
           description: values.description,
@@ -72,20 +77,32 @@
       }
     }
     controller.close();
-    if (savedDataForm) {
+    if (newDataForm) {
       router.goto(
         getDataFormPageUrl(
-          savedDataForm.schema.database.id,
-          savedDataForm.schema.oid,
-          savedDataForm.id,
+          newDataForm.schema.database.id,
+          newDataForm.schema.oid,
+          newDataForm.id,
         ),
       );
     }
   }
 </script>
 
-<ControlledModal {controller} on:close={form.reset}>
-  <span slot="title">{$_('create_new_table')}</span>
+<ControlledModal
+  {controller}
+  on:close={() => {
+    form.reset();
+    onClose?.();
+  }}
+>
+  <span slot="title">
+    <RichText text={modalTitle} let:slotName>
+      {#if slotName === 'formName'}
+        <Identifier>{$savedName}</Identifier>
+      {/if}
+    </RichText>
+  </span>
   <Field field={name} label={$_('name')} layout="stacked" />
   <Field field={description} label={$_('description')} layout="stacked" />
   <FieldLayout>
@@ -99,6 +116,11 @@
     </LabeledInput>
   </FieldLayout>
   <div slot="footer">
-    <FormSubmit {form} onProceed={save} onCancel={() => controller.close()} />
+    <FormSubmit
+      {form}
+      proceedButton={{ label: $_('save') }}
+      onProceed={save}
+      onCancel={() => controller.close()}
+    />
   </div>
 </ControlledModal>

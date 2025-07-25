@@ -6,9 +6,9 @@
   import { iconAddNew, iconForm, iconRefresh } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
   import { modal } from '@mathesar/stores/modal';
+  import { AddEditDataFormModal } from '@mathesar/systems/data-forms';
   import { Button, Icon, SpinnerButton } from '@mathesar-component-library';
 
-  import AddEditDataFormModal from './AddEditDataFormModal.svelte';
   import EmptyEntityList from './EmptyEntityList.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import FormItem from './FormItem.svelte';
@@ -74,8 +74,11 @@
 </section>
 
 <AddEditDataFormModal
-  dataForm={selectedDataForm}
   controller={dataFormAddEditModal}
+  dataForm={selectedDataForm}
+  onClose={() => {
+    selectedDataForm = undefined;
+  }}
 />
 
 <style lang="scss">
