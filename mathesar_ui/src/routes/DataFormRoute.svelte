@@ -25,10 +25,9 @@
   $: formToken = ensureReadable(form?.token);
 
   const formSourceInfo = new AsyncRpcApiStore(api.forms.get_source_info);
+  $: form, formSourceInfo.reset();
   $: if ($formToken) {
     void formSourceInfo.run({ form_token: $formToken });
-  } else {
-    formSourceInfo.reset();
   }
 
   $: isLoading = $dataForms.isLoading || $formSourceInfo.isLoading;
