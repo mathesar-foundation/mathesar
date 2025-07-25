@@ -88,7 +88,15 @@ def find_exec_calls_in_project(directory):
 
 @pytest.mark.parametrize("_,exec_sql_func_name,exec_sql_arg_count", find_exec_calls_in_project("db/"))
 def test_db_wrapper(get_msar_func_names, _, exec_sql_func_name, exec_sql_arg_count):
-    """Tests to make sure every SQL function is correctly wired up."""
+    """
+    Tests to make sure every SQL function is correctly wired up.
+    
+    If this test is failing, compare the number of arguments in your function
+    definitions across the following code locations:
+
+    - The source code of the function, as defined in the DB layer
+    - The python wrapper function that calls that DB layer function
+    """
     if exec_sql_func_name != 'drop_all_msar_objects':
         assert exec_sql_func_name in get_msar_func_names.keys()
         assert exec_sql_arg_count in get_msar_func_names[exec_sql_func_name]

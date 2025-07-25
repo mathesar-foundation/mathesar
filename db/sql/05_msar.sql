@@ -5632,8 +5632,7 @@ CREATE OR REPLACE FUNCTION msar.list_by_record_summaries(
   limit_ integer,
   offset_ integer,
   search_ text DEFAULT NULL,
-  table_record_summary_templates jsonb DEFAULT NULL,
-  debug boolean DEFAULT FALSE
+  table_record_summary_templates jsonb DEFAULT NULL
 ) RETURNS jsonb
 LANGUAGE plpgsql STABLE
 AS $$
@@ -5664,10 +5663,6 @@ BEGIN
     /* 3 */ limit_,
     /* 4 */ offset_
   );
-
-  IF debug THEN
-    RAISE NOTICE E'\nFINAL SQL:\n%s', final_sql;
-  END IF;
 
   EXECUTE final_sql INTO result_json;
   RETURN result_json;
