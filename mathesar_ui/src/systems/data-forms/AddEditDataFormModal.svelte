@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
@@ -58,7 +59,7 @@
     let newDataForm: DataForm | undefined;
     if (dataForm) {
       await dataForm.replaceDataForm({
-        ...dataForm.toRawDataForm(),
+        ...get(dataForm.toRawDataFormStore()),
         name: values.name,
         description: values.description,
       });

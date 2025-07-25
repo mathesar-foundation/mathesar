@@ -26,10 +26,11 @@
     TableStructure
   >(10);
 
+  $: rawDataFormStore = dataForm.toRawDataFormStore();
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new EditableDataFormManager(
         rawDataFormToEphemeralFormProps(
-          dataForm.toRawDataForm(),
+          $rawDataFormStore,
           formSourceInfo.resolvedValue,
         ),
         dataForm.schema,
