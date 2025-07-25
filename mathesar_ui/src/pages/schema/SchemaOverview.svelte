@@ -21,10 +21,10 @@
 
   import CreateTableButton from './CreateTableButton.svelte';
   import CreateTableTutorial from './CreateTableTutorial.svelte';
-  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
   import ExploreYourData from './ExploreYourData.svelte';
   import FormsSection from './FormsSection.svelte';
+  import SchemaOverviewSideSection from './SchemaOverviewSideSection.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
 
@@ -94,23 +94,22 @@
   </div>
 
   <div class="sidebar">
-    <section>
-      <header>
-        <h2>
-          {$_('explorations')}
-          <Help>{$_('what_is_an_exploration')}</Help>
-        </h2>
-        <div>
-          <AnchorButton href={dataExplorerPageUrl} appearance="secondary">
-            <Icon {...iconAddNew} />
-            <span>{$_('new_exploration')}</span>
-          </AnchorButton>
-        </div>
-      </header>
-      {#if isExplorationsLoading}
-        <ExplorationSkeleton />
-      {:else if explorationsRequestStatus.state === 'failure'}
-        <ErrorBox>
+    <SchemaOverviewSideSection
+      isLoading={isExplorationsLoading}
+      hasError={explorationsRequestStatus.state === 'failure'}
+    >
+      <svelte:fragment slot="header">
+        {$_('explorations')}
+        <Help>{$_('what_is_an_exploration')}</Help>
+      </svelte:fragment>
+      <svelte:fragment slot="actions">
+        <AnchorButton href={dataExplorerPageUrl} appearance="secondary">
+          <Icon {...iconAddNew} />
+          <span>{$_('new_exploration')}</span>
+        </AnchorButton>
+      </svelte:fragment>
+      <svelte:fragment slot="errors">
+        {#if explorationsRequestStatus.state === 'failure'}
           <p>{explorationsRequestStatus.errors[0]}</p>
           <div>
             <SpinnerButton
@@ -126,8 +125,9 @@
               </Button>
             </a>
           </div>
-        </ErrorBox>
-      {:else}
+        {/if}
+      </svelte:fragment>
+      <svelte:fragment slot="content">
         {#if hasExplorations}
           <div class="explorations-list">
             <ExplorationsList
@@ -154,8 +154,8 @@
             </div>
           </Tutorial>
         {/if}
-      {/if}
-    </section>
+      </svelte:fragment>
+    </SchemaOverviewSideSection>
 
     <FormsSection />
   </div>
