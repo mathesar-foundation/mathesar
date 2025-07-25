@@ -231,14 +231,28 @@ class ReplaceableFormDef(AddFormDef):
     id: int
 
 
-class RecordSummaryListResponse(TypedDict):
+class SummarizedRecordReference(TypedDict):
+    """
+    A summarized reference to a record, typically used in foreign key fields.
+
+    Attributes:
+        key: A unique identifier for the record.
+        summary: The record summary
+    """
     key: Any
     summary: str
 
 
-class RecordSummaryList(TypedDict):
+class ListRelatedRecordsResponse(TypedDict):
+    """
+    Response for listing related records for a foreign key field.
+
+    Attributes:
+        count: The total number of records matching the criteria.
+        results: A list of summarized record references, each containing a key and a summary.
+    """
     count: int
-    results: list[RecordSummaryListResponse]
+    results: list[SummarizedRecordReference]
 
     @classmethod
     def from_dict(cls, d):
@@ -348,15 +362,19 @@ def list_related_records(
         offset: Optional[int] = None,
         search: Optional[str] = None,
         **kwargs,
-) -> FormInfo:
+) -> ListRelatedRecordsResponse:
     """
     List records for selection via the row seeker
 
     Args:
-        TODO
+        form_token: The unique token of the form.
+        field_key: The key of the foreign key field for which to list related records.
+        limit: Optional limit on the number of records to return.
+        offset: Optional offset for pagination.
+        search: Optional search term to filter records.
 
     Returns:
-        TODO
+        The requested records, along with some metadata.
     """
 
     form = get_form_by_token(form_token)
@@ -376,4 +394,4 @@ def list_related_records(
             search=search,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
-    return RecordSummaryList.from_dict(record_info)
+    return ListRelatedRecordsResponse.from_dict(record_info)

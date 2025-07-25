@@ -146,11 +146,14 @@
       - add
       - delete
       - replace
+      - list_related_records
       - FormInfo
       - FieldInfo
       - AddFormDef
       - AddOrReplaceFieldDef
       - ReplaceableFormDef
+      - ListRelatedRecordsResponse
+      - SummarizedRecordReference
 
 ## Records
 
