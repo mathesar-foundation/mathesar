@@ -3,8 +3,8 @@
 
   import OverviewItemSkeleton from './OverviewItemSkeleton.svelte';
 
-  export let isLoading;
-  export let hasError;
+  export let isLoading: boolean;
+  export let hasError: boolean;
 </script>
 
 <section>
