@@ -5,6 +5,7 @@ import {
   type Writable,
   derived,
   get,
+  readable,
   writable,
 } from 'svelte/store';
 
@@ -22,12 +23,15 @@ export class DataFormFieldInputValueHolder {
 
   readonly inputFieldStore: Readable<FieldStore>;
 
+  readonly includeFieldStoreInForm: Readable<boolean>;
+
   constructor(key: string, isRequired: Readable<boolean>) {
     this.key = key;
     this.isRequired = isRequired;
     this.inputFieldStore = derived(this.isRequired, ($isRequired) =>
       $isRequired ? requiredField(undefined) : optionalField(undefined),
     );
+    this.includeFieldStoreInForm = readable(true);
   }
 }
 
@@ -35,6 +39,8 @@ export class DataFormFieldFkInputValueHolder extends DataFormFieldInputValueHold
   private _userAction: Writable<'pick' | 'create'>;
 
   private fkInteractionRule;
+
+  readonly includeFieldStoreInForm;
 
   constructor(
     key: string,
@@ -47,6 +53,10 @@ export class DataFormFieldFkInputValueHolder extends DataFormFieldInputValueHold
     this.fkInteractionRule = fkInteractionRule;
     const rule = get(this.fkInteractionRule);
     this._userAction = writable(rule === 'must_create' ? 'create' : 'pick');
+    this.includeFieldStoreInForm = derived(
+      this.userAction,
+      ($userAction) => $userAction === 'pick',
+    );
   }
 
   get userAction(): Readable<'pick' | 'create'> {

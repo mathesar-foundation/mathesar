@@ -14,7 +14,10 @@ import type { EphemeralDataForm } from './EphemeralDataForm';
 import { EphermeralFkField } from './EphemeralFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
-import type { DataFormFieldInputValueHolder } from './FieldValueHolder';
+import type {
+  DataFormFieldFkInputValueHolder,
+  DataFormFieldInputValueHolder,
+} from './FieldValueHolder';
 import type {
   EdfFieldListDetail,
   EdfNestedFieldChanges,
@@ -48,7 +51,9 @@ export class FormFields {
 
   private onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown;
 
-  readonly fieldValueStores: Readable<DataFormFieldInputValueHolder[]>;
+  readonly fieldValueStores: Readable<
+    (DataFormFieldInputValueHolder | DataFormFieldFkInputValueHolder)[]
+  >;
 
   constructor(
     parent: EphemeralDataForm | ParentEphemeralDataFormField,
@@ -66,18 +71,21 @@ export class FormFields {
       EphemeralDataFormField[]
     >(
       this.fieldSet,
-      ($fieldSet, set) => {
+      (_, set) => {
         let unsubIndexStores: (() => void)[] = [];
+        const { fieldSet } = this;
 
         function updateSorted() {
           set(
-            [...$fieldSet.values()].sort((a, b) => get(a.index) - get(b.index)),
+            [...get(fieldSet).values()].sort(
+              (a, b) => get(a.index) - get(b.index),
+            ),
           );
         }
 
         function resubscribe() {
           unsubIndexStores.forEach((u) => u());
-          unsubIndexStores = [...$fieldSet.values()].map((item) =>
+          unsubIndexStores = [...get(fieldSet).values()].map((item) =>
             item.index.subscribe(updateSorted),
           );
         }
@@ -94,13 +102,14 @@ export class FormFields {
       DataFormFieldInputValueHolder[]
     >(
       this.fieldSet,
-      ($fieldSet, set) => {
+      (_, set) => {
         let unsubFieldValueStores: (() => void)[] = [];
+        const { fieldSet } = this;
 
         function update() {
           set(
             execPipe(
-              $fieldSet.values(),
+              get(fieldSet).values(),
               flatMap((f) => {
                 const stores = [f.fieldValueHolder];
                 if (
@@ -118,7 +127,7 @@ export class FormFields {
 
         function resubscribe() {
           unsubFieldValueStores.forEach((u) => u());
-          const fkFields = [...$fieldSet.values()].filter(
+          const fkFields = [...get(fieldSet).values()].filter(
             (f): f is EphermeralFkField => f.kind !== 'scalar_column',
           );
           const unsubUserActions = fkFields.map((item) =>

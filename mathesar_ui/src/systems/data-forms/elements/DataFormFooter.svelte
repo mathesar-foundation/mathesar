@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { CancelOrProceedButtonPair } from '@mathesar-component-library';
+  import { FormSubmit } from '@mathesar/components/form';
 
   import type { DataFormManager } from '../data-form-utilities/DataFormManager';
 
@@ -10,17 +10,23 @@
   $: ({ submitButtonLabel, formHolder } = dataFormManager.ephemeralDataForm);
   $: label = $submitButtonLabel?.trim() || $_('submit');
   $: form = $formHolder;
-  $: ({ canSubmit } = $form);
+
+  async function submit() {
+    // TODO_FORMS: Implement form submit after backend work is complete
+    // console.log(dataFormManager.ephemeralDataForm.getFormSubmitRequest());
+  }
 </script>
 
 <div class="submit-buttons">
-  <CancelOrProceedButtonPair
-    cancelButton={{ label: $_('clear_form') }}
-    canProceed={canSubmit}
+  <FormSubmit
+    {form}
+    catchErrors
+    onProceed={submit}
     proceedButton={{
       label,
       icon: undefined,
     }}
+    cancelButton={{ label: $_('clear_form') }}
   />
 </div>
 
