@@ -43,7 +43,7 @@
   {#if $interactionRule !== 'must_create'}
     <div class="fk-input" class:has-margin={$interactionRule !== 'must_pick'}>
       {#if editableDataFormManager || $interactionRule === 'must_pick' || $userAction === 'pick'}
-        <DataFormInput {dataFormField} {isSelected} />
+        <DataFormInput {dataFormManager} {dataFormField} {isSelected} />
       {/if}
 
       {#if $interactionRule === 'can_pick_or_create'}

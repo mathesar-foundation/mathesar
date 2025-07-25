@@ -12,7 +12,7 @@
 
 <div class="scalar-field">
   <DataFormLabel {dataFormManager} {dataFormField} {isSelected} />
-  <DataFormInput {dataFormField} {isSelected} />
+  <DataFormInput {dataFormManager} {dataFormField} {isSelected} />
 </div>
 
 <style lang="scss">
