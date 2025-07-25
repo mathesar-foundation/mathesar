@@ -3,8 +3,8 @@
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
+  import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import { iconEdit, iconForms, iconShare } from '@mathesar/icons';
-  import type { DataForm } from '@mathesar/models/DataForm';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
@@ -17,8 +17,9 @@
   import ShareForm from './ShareForm.svelte';
 
   const dataFormAddEditModal = modal.spawnModalController();
+  const dataFormRouteContext = DataFormRouteContext.get();
+  $: ({ dataForm } = $dataFormRouteContext);
 
-  export let dataForm: DataForm;
   export let dataFormManager: EditableDataFormManager;
 
   $: ({ hasChanges } = dataFormManager);
@@ -26,7 +27,7 @@
 
   async function saveForm() {
     try {
-      await dataForm.replaceDataForm(
+      await $dataFormRouteContext.replaceDataForm(
         dataFormManager.ephemeralDataForm.toRawEphemeralDataForm(),
       );
     } catch (err) {

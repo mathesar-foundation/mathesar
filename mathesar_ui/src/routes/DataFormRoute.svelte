@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import { api } from '@mathesar/api/rpc';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconForms } from '@mathesar/icons';
   import DataFormEditorPage from '@mathesar/pages/data-forms/DataFormEditorPage.svelte';
@@ -11,7 +11,6 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import LoadingPage from '@mathesar/pages/LoadingPage.svelte';
   import { getDataFormPageUrl } from '@mathesar/routes/urls';
-  import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { ensureReadable } from '@mathesar-component-library';
 
   // TODO_FORMS: Replace this with form token
@@ -22,45 +21,37 @@
 
   $: void dataForms.runConservatively();
   $: form = $dataForms.resolvedValue?.get(formId) ?? undefined;
-  $: formToken = ensureReadable(form?.token);
 
-  const formSourceInfo = new AsyncRpcApiStore(api.forms.get_source_info);
-  $: form, formSourceInfo.reset();
-  $: if ($formToken) {
-    void formSourceInfo.run({ form_token: $formToken });
+  $: if (form) {
+    DataFormRouteContext.construct($schemaRouteContext, form);
   }
 
-  $: isLoading = $dataForms.isLoading || $formSourceInfo.isLoading;
   $: formName = ensureReadable(form?.name);
 </script>
 
-{#if form || isLoading}
-  <AppendBreadcrumb
-    item={{
-      type: 'simple',
-      href: getDataFormPageUrl(schema.database.id, schema.oid, formId),
-      label: $formName ?? $_('data_forms'),
-      icon: iconForms,
-    }}
-  />
+<AppendBreadcrumb
+  item={{
+    type: 'simple',
+    href: getDataFormPageUrl(schema.database.id, schema.oid, formId),
+    label: $formName ?? $_('data_forms'),
+    icon: iconForms,
+  }}
+/>
+
+{#if $dataForms.isLoading}
+  <LoadingPage />
 {/if}
 
-{#if !form && !isLoading}
+{#if !form && $dataForms.hasSettled}
   <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
 {/if}
 
-<Route path="/">
-  {#if form && $formSourceInfo.hasSettled}
-    <DataFormEditorPage dataForm={form} formSourceInfo={$formSourceInfo} />
-  {:else if isLoading}
-    <LoadingPage />
-  {/if}
-</Route>
+{#if form}
+  <Route path="/">
+    <DataFormEditorPage />
+  </Route>
 
-<Route path="/fillout/">
-  {#if form && $formSourceInfo.hasSettled}
-    <DataFormFilloutPage dataForm={form} formSourceInfo={$formSourceInfo} />
-  {:else if isLoading}
-    <LoadingPage />
-  {/if}
-</Route>
+  <Route path="/fillout/">
+    <DataFormFilloutPage />
+  </Route>
+{/if}
