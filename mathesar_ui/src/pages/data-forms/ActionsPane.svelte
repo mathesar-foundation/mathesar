@@ -3,19 +3,26 @@
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
-  import { iconForms, iconShare } from '@mathesar/icons';
+  import { iconEdit, iconForms, iconShare } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+  import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
-  import type { EditableDataFormManager } from '@mathesar/systems/data-forms';
-  import { Dropdown, Icon } from '@mathesar-component-library';
+  import {
+    AddEditDataFormModal,
+    type EditableDataFormManager,
+  } from '@mathesar/systems/data-forms';
+  import { Button, Dropdown, Icon } from '@mathesar-component-library';
 
   import ShareForm from './ShareForm.svelte';
 
+  const dataFormAddEditModal = modal.spawnModalController();
+
   export let dataForm: DataForm;
   export let dataFormManager: EditableDataFormManager;
-  $: ({ ephemeralDataForm, hasChanges } = dataFormManager);
-  $: ({ name } = ephemeralDataForm);
+
+  $: ({ hasChanges } = dataFormManager);
+  $: ({ name, description } = dataForm);
 
   async function saveForm() {
     try {
@@ -31,10 +38,16 @@
 <EntityPageHeader
   title={{
     name: $name || $_('untitled'),
+    description: $description ?? undefined,
     icon: iconForms,
   }}
 >
   <svelte:fragment>
+    <Button appearance="plain" on:click={() => dataFormAddEditModal.open()}>
+      <Icon {...iconEdit} />
+    </Button>
+  </svelte:fragment>
+  <svelte:fragment slot="actions-right">
     <SaveButton onSave={saveForm} canSave={$hasChanges} />
     <Dropdown
       showArrow={false}
@@ -51,3 +64,5 @@
     </Dropdown>
   </svelte:fragment>
 </EntityPageHeader>
+
+<AddEditDataFormModal {dataForm} controller={dataFormAddEditModal} />

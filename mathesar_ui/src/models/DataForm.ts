@@ -1,4 +1,4 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
 import type {
@@ -150,26 +150,41 @@ export class DataForm {
     return api.forms.delete({ form_id: this.id }).run();
   }
 
-  toRawDataForm(): RawDataForm {
-    const formDefinition = get(this.formDefinition);
-
-    return {
-      id: this.id,
-      token: get(this.token),
-      version: 1,
-      database_id: this.schema.database.id,
-      base_table_oid: this.baseTableOId,
-      schema_oid: this.schema.oid,
-      name: get(this.name),
-      description: get(this.description),
-      header_title: formDefinition.headerTitle,
-      header_subtitle: formDefinition.headerSubtitle,
-      fields: formDefinition.fields,
-      associated_role_id: get(this.associatedRoleId),
-      submit_message: formDefinition.submissionSettings.message,
-      submit_redirect_url: formDefinition.submissionSettings.redirectUrl,
-      submit_button_label: formDefinition.submissionSettings.buttonLabel,
-      publish_public: get(this.sharePreferences).isPublishedPublicly,
-    };
+  toRawDataFormStore(): Readable<RawDataForm> {
+    return derived(
+      [
+        this.formDefinition,
+        this.token,
+        this.name,
+        this.description,
+        this.associatedRoleId,
+        this.sharePreferences,
+      ],
+      ([
+        $formDefn,
+        $token,
+        $name,
+        $description,
+        $associatedRoleId,
+        $sharePreferences,
+      ]) => ({
+        id: this.id,
+        token: $token,
+        version: 1,
+        database_id: this.schema.database.id,
+        base_table_oid: this.baseTableOId,
+        schema_oid: this.schema.oid,
+        name: $name,
+        description: $description,
+        associated_role_id: $associatedRoleId,
+        header_title: $formDefn.headerTitle,
+        header_subtitle: $formDefn.headerSubtitle,
+        fields: $formDefn.fields,
+        submit_message: $formDefn.submissionSettings.message,
+        submit_redirect_url: $formDefn.submissionSettings.redirectUrl,
+        submit_button_label: $formDefn.submissionSettings.buttonLabel,
+        publish_public: $sharePreferences.isPublishedPublicly,
+      }),
+    );
   }
 }

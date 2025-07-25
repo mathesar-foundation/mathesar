@@ -5,30 +5,45 @@
   import { FieldErrors } from '@mathesar/components/form';
   import { WritableMap } from '@mathesar-component-library';
 
+  import {
+    type DataFormManager,
+    EditableDataFormManager,
+  } from '../data-form-utilities/DataFormManager';
   import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
   import type { EphermeralScalarField } from '../data-form-utilities/EphemeralScalarField';
 
   const recordSummaries = new WritableMap<string, string>();
 
+  export let dataFormManager: DataFormManager;
   export let dataFormField: EphermeralScalarField | EphermeralFkField;
   export let isSelected: boolean;
 
-  $: ({ fieldStore, inputComponentAndProps } = dataFormField);
-  $: fieldValueStore = $fieldStore;
-  $: ({ showsError, disabled } = fieldValueStore);
-  $: recordSummary = recordSummaries.derivedValue(String($fieldValueStore));
+  $: editableDataFormManager =
+    dataFormManager instanceof EditableDataFormManager
+      ? dataFormManager
+      : undefined;
+
+  $: ({ fieldValueHolder, inputComponentAndProps } = dataFormField);
+  $: ({ inputFieldStore } = fieldValueHolder);
+  $: inputField = $inputFieldStore;
+  $: ({ showsError, disabled } = inputField);
+
+  $: displayError = !editableDataFormManager && $showsError;
+  $: recordSummary = recordSummaries.derivedValue(String($inputField));
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
   <DynamicInput
-    bind:value={$fieldValueStore}
+    bind:value={$inputField}
     componentAndProps={$inputComponentAndProps}
-    hasError={$showsError}
+    hasError={displayError}
     disabled={$disabled}
     recordSummary={$recordSummary}
     setRecordSummary={(key, summary) => recordSummaries.set(key, summary)}
   />
-  <FieldErrors field={fieldValueStore} />
+  {#if displayError}
+    <FieldErrors field={inputField} />
+  {/if}
 </div>
 
 <style lang="scss">

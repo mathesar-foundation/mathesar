@@ -1,10 +1,13 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
   RawEphemeralDataForm,
 } from '@mathesar/api/rpc/forms';
+import { type FieldStore, makeForm } from '@mathesar/components/form';
+import { collapse } from '@mathesar-component-library';
 
+import type { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 import { FormFields } from './FormFields';
 import type {
   EdfChange,
@@ -74,6 +77,8 @@ export class EphemeralDataForm {
 
   private onChange?: (e: EdfChange | EdfNestedFieldChanges) => unknown;
 
+  readonly formHolder;
+
   constructor(
     edf: EphemeralDataFormProps,
     onChange?: (e: EdfChange | EdfNestedFieldChanges) => unknown,
@@ -102,6 +107,45 @@ export class EphemeralDataForm {
         detail: e,
       });
     });
+    this.formHolder = derived(
+      this.fields.fieldValueStores,
+      (_, set) => {
+        let unsubValueStores: (() => void)[] = [];
+        const { fieldValueStores } = this.fields;
+
+        function update() {
+          // Always get most recent data to avoid race conditions
+          const fieldStores = get(fieldValueStores);
+          const fieldObjs = [...fieldStores].reduce(
+            (acc, curr) => {
+              if (get(curr.includeFieldStoreInForm)) {
+                acc[curr.key] = get(curr.inputFieldStore);
+              }
+              return acc;
+            },
+            {} as Record<string, FieldStore>,
+          );
+          set(makeForm(fieldObjs));
+        }
+
+        function resubscribe() {
+          unsubValueStores.forEach((u) => u());
+          unsubValueStores = [];
+          const fieldStores = get(fieldValueStores);
+          [...fieldStores.values()].forEach((item) => {
+            unsubValueStores.push(item.inputFieldStore.subscribe(update));
+            unsubValueStores.push(
+              item.includeFieldStoreInForm.subscribe(update),
+            );
+          });
+        }
+
+        resubscribe();
+        update();
+        return () => unsubValueStores.forEach((u) => u());
+      },
+      makeForm({} as Record<string, FieldStore>),
+    );
   }
 
   private bubblePropChange(prop: EdfDirectProps) {
@@ -160,6 +204,34 @@ export class EphemeralDataForm {
   setSubmissionButtonLabel(label: string | null) {
     this._submitButtonLabel.set(label);
     this.bubblePropChange('submitButtonLabel');
+  }
+
+  getFormSubmitRequest() {
+    const form = get(collapse(this.formHolder));
+    let request = {
+      ...form.values,
+    };
+    const fieldValueStores = get(this.fields.fieldValueStores);
+    const fkFieldValueStores = fieldValueStores.filter(
+      (s): s is DataFormFieldFkInputValueHolder => 'userAction' in s,
+    );
+    fkFieldValueStores.forEach((s) => {
+      const ua = get(s.userAction);
+      const value = request[s.key];
+      request = {
+        ...request,
+        [s.key]:
+          ua === 'create'
+            ? {
+                type: ua,
+              }
+            : {
+                type: ua,
+                value: value ?? null,
+              },
+      };
+    });
+    return request;
   }
 
   toRawEphemeralDataForm(): RawEphemeralDataForm {

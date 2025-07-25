@@ -7,7 +7,6 @@ import {
   get,
 } from 'svelte/store';
 
-import type { FieldStore } from '@mathesar/components/form';
 import { WritableSet } from '@mathesar-component-library';
 
 import type { EphemeralDataForm } from './EphemeralDataForm';
@@ -15,6 +14,10 @@ import type { EphemeralDataForm } from './EphemeralDataForm';
 import { EphermeralFkField } from './EphemeralFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
+import type {
+  DataFormFieldFkInputValueHolder,
+  DataFormFieldInputValueHolder,
+} from './FieldValueHolder';
 import type {
   EdfFieldListDetail,
   EdfNestedFieldChanges,
@@ -48,7 +51,9 @@ export class FormFields {
 
   private onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown;
 
-  readonly fieldValueStores: Readable<Readable<FieldStore>[]>;
+  readonly fieldValueStores: Readable<
+    (DataFormFieldInputValueHolder | DataFormFieldFkInputValueHolder)[]
+  >;
 
   constructor(
     parent: EphemeralDataForm | ParentEphemeralDataFormField,
@@ -66,18 +71,21 @@ export class FormFields {
       EphemeralDataFormField[]
     >(
       this.fieldSet,
-      ($fieldSet, set) => {
+      (_, set) => {
         let unsubIndexStores: (() => void)[] = [];
+        const { fieldSet } = this;
 
         function updateSorted() {
           set(
-            [...$fieldSet.values()].sort((a, b) => get(a.index) - get(b.index)),
+            [...get(fieldSet).values()].sort(
+              (a, b) => get(a.index) - get(b.index),
+            ),
           );
         }
 
         function resubscribe() {
           unsubIndexStores.forEach((u) => u());
-          unsubIndexStores = [...$fieldSet.values()].map((item) =>
+          unsubIndexStores = [...get(fieldSet).values()].map((item) =>
             item.index.subscribe(updateSorted),
           );
         }
@@ -91,22 +99,27 @@ export class FormFields {
 
     this.fieldValueStores = derived<
       WritableSet<EphemeralDataFormField>,
-      Readable<FieldStore>[]
+      DataFormFieldInputValueHolder[]
     >(
       this.fieldSet,
-      ($fieldSet, set) => {
+      (_, set) => {
         let unsubFieldValueStores: (() => void)[] = [];
+        const { fieldSet } = this;
 
         function update() {
           set(
             execPipe(
-              $fieldSet.values(),
-              flatMap((f) => [
-                f.fieldStore,
-                ...(f.kind === 'scalar_column'
-                  ? []
-                  : get(f.nestedFields.fieldValueStores)),
-              ]),
+              get(fieldSet).values(),
+              flatMap((f) => {
+                const stores = [f.fieldValueHolder];
+                if (
+                  f.kind === 'foreign_key' &&
+                  get(f.fieldValueHolder.userAction) === 'create'
+                ) {
+                  stores.push(...get(f.nestedFields.fieldValueStores));
+                }
+                return stores;
+              }),
               toArray,
             ),
           );
@@ -114,11 +127,19 @@ export class FormFields {
 
         function resubscribe() {
           unsubFieldValueStores.forEach((u) => u());
-          unsubFieldValueStores = [...$fieldSet.values()]
-            .filter((f): f is EphermeralFkField => f.kind !== 'scalar_column')
-            .map((item) =>
-              item.nestedFields.fieldValueStores.subscribe(update),
-            );
+          const fkFields = [...get(fieldSet).values()].filter(
+            (f): f is EphermeralFkField => f.kind !== 'scalar_column',
+          );
+          const unsubUserActions = fkFields.map((item) =>
+            item.fieldValueHolder.userAction.subscribe(update),
+          );
+          const unsubNestedFieldValueStores = fkFields.map((item) =>
+            item.nestedFields.fieldValueStores.subscribe(update),
+          );
+          unsubFieldValueStores = [
+            ...unsubUserActions,
+            ...unsubNestedFieldValueStores,
+          ];
         }
 
         resubscribe();

@@ -5,22 +5,18 @@ import {
   getDbTypeBasedInputCap,
   getLinkedRecordInputCap,
 } from '@mathesar/components/cell-fabric/utils';
-import {
-  type FieldStore,
-  optionalField,
-  requiredField,
-} from '@mathesar/components/form';
 import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
 
 import { AbstractEphemeralField } from './AbstractEphemeralField';
 import type { FieldColumn } from './FieldColumn';
+import { DataFormFieldInputValueHolder } from './FieldValueHolder';
 import type { FormFields } from './FormFields';
 import type { AbstractEphemeralColumnBasedFieldProps } from './types';
 
 export abstract class AbstractEphermeralColumnBasedField extends AbstractEphemeralField {
   readonly fieldColumn;
 
-  readonly fieldStore: Readable<FieldStore>;
+  readonly fieldValueHolder: DataFormFieldInputValueHolder;
 
   readonly inputComponentAndProps;
 
@@ -41,8 +37,9 @@ export abstract class AbstractEphermeralColumnBasedField extends AbstractEphemer
     this._isRequired = writable(
       this.fieldColumn.column.nullable ? props.isRequired : true,
     );
-    this.fieldStore = derived(this.isRequired, ($isRequired) =>
-      $isRequired ? requiredField(undefined) : optionalField(undefined),
+    this.fieldValueHolder = new DataFormFieldInputValueHolder(
+      this.key,
+      this.isRequired,
     );
     this.inputComponentAndProps = derived(this.styling, (styling) => {
       if (this.fieldColumn.foreignKeyLink) {

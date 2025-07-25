@@ -17,10 +17,11 @@
   export let dataForm: DataForm;
   export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;
 
+  $: rawDataFormStore = dataForm.toRawDataFormStore();
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
         rawDataFormToEphemeralFormProps(
-          dataForm.toRawDataForm(),
+          $rawDataFormStore,
           formSourceInfo.resolvedValue,
         ),
       )

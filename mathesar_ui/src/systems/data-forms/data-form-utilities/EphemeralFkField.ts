@@ -7,6 +7,7 @@ import type {
 } from '@mathesar/api/rpc/forms';
 
 import { AbstractEphermeralColumnBasedField } from './AbstractEphmeralColumnBasedField';
+import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 // eslint-disable-next-line import/no-cycle
 import { FormFields } from './FormFields';
 import type {
@@ -19,6 +20,8 @@ import type {
 
 export class EphermeralFkField extends AbstractEphermeralColumnBasedField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
+
+  readonly fieldValueHolder: DataFormFieldFkInputValueHolder;
 
   readonly relatedTableOid;
 
@@ -58,6 +61,11 @@ export class EphermeralFkField extends AbstractEphermeralColumnBasedField {
       throw Error('The passed column is not a foreign key');
     }
     this._interactionRule = writable(props.interactionRule);
+    this.fieldValueHolder = new DataFormFieldFkInputValueHolder(
+      this.key,
+      this.isRequired,
+      this.interactionRule,
+    );
   }
 
   async setInteractionRule(

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { Button } from '@mathesar-component-library';
+
   import {
     type DataFormManager,
     EditableDataFormManager,
@@ -17,29 +19,58 @@
   export let dataFormManager: DataFormManager;
   export let dataFormField: EphermeralFkField;
 
-  $: ({ interactionRule, nestedFields } = dataFormField);
+  $: editableDataFormManager =
+    dataFormManager instanceof EditableDataFormManager
+      ? dataFormManager
+      : undefined;
+
+  $: ({ interactionRule, nestedFields, fieldValueHolder } = dataFormField);
+  $: ({ userAction } = fieldValueHolder);
 </script>
 
 <div class="fk-field">
   <div class="label-controls-container">
     <DataFormLabel {dataFormManager} {dataFormField} {isSelected}>
-      {#if dataFormManager instanceof EditableDataFormManager}
-        <FkFormFieldRuleSelector {dataFormManager} {dataFormField} />
+      {#if editableDataFormManager}
+        <FkFormFieldRuleSelector
+          dataFormManager={editableDataFormManager}
+          {dataFormField}
+        />
       {/if}
     </DataFormLabel>
   </div>
 
   {#if $interactionRule !== 'must_create'}
     <div class="fk-input" class:has-margin={$interactionRule !== 'must_pick'}>
-      <DataFormInput {dataFormField} {isSelected} />
+      {#if editableDataFormManager || $interactionRule === 'must_pick' || $userAction === 'pick'}
+        <DataFormInput {dataFormManager} {dataFormField} {isSelected} />
+      {/if}
+
+      {#if !editableDataFormManager && $interactionRule === 'can_pick_or_create'}
+        {#if $userAction === 'pick'}
+          <!-- TODO_FORMS: Place this within Row Seeker -->
+          <Button on:click={() => fieldValueHolder.setUserAction('create')}>
+            {$_('create_record_TODO_place_within_row_seeker')}
+          </Button>
+        {:else}
+          <Button on:click={() => fieldValueHolder.setUserAction('pick')}>
+            {$_(
+              'enter_values_below_or_click_here_to_pick_record_TODO_place_within_row_seeker',
+            )}
+          </Button>
+        {/if}
+      {/if}
     </div>
   {/if}
 
-  {#if $interactionRule === 'can_pick_or_create' && dataFormManager instanceof EditableDataFormManager}
-    <FkFormFieldNestedFieldsHelp {dataFormField} {dataFormManager} />
+  {#if $interactionRule === 'can_pick_or_create' && editableDataFormManager}
+    <FkFormFieldNestedFieldsHelp
+      {dataFormField}
+      dataFormManager={editableDataFormManager}
+    />
   {/if}
 
-  {#if $interactionRule !== 'must_pick'}
+  {#if $interactionRule !== 'must_pick' && (editableDataFormManager || $userAction === 'create')}
     <DataFormFieldsContainer fields={nestedFields} {dataFormManager} />
   {/if}
 </div>

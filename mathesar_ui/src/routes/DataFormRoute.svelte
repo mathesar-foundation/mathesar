@@ -25,10 +25,9 @@
   $: formToken = ensureReadable(form?.token);
 
   const formSourceInfo = new AsyncRpcApiStore(api.forms.get_source_info);
+  $: form, formSourceInfo.reset();
   $: if ($formToken) {
     void formSourceInfo.run({ form_token: $formToken });
-  } else {
-    formSourceInfo.reset();
   }
 
   $: isLoading = $dataForms.isLoading || $formSourceInfo.isLoading;
@@ -44,10 +43,6 @@
       icon: iconForms,
     }}
   />
-
-  {#if isLoading}
-    <LoadingPage />
-  {/if}
 {/if}
 
 {#if !form && !isLoading}
@@ -55,13 +50,17 @@
 {/if}
 
 <Route path="/">
-  {#if !isLoading && form}
+  {#if form && $formSourceInfo.hasSettled}
     <DataFormEditorPage dataForm={form} formSourceInfo={$formSourceInfo} />
+  {:else if isLoading}
+    <LoadingPage />
   {/if}
 </Route>
 
 <Route path="/fillout/">
-  {#if !isLoading && form}
+  {#if form && $formSourceInfo.hasSettled}
     <DataFormFilloutPage dataForm={form} formSourceInfo={$formSourceInfo} />
+  {:else if isLoading}
+    <LoadingPage />
   {/if}
 </Route>
