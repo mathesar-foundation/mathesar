@@ -46,7 +46,7 @@
         <DataFormInput {dataFormManager} {dataFormField} {isSelected} />
       {/if}
 
-      {#if $interactionRule === 'can_pick_or_create'}
+      {#if !editableDataFormManager && $interactionRule === 'can_pick_or_create'}
         {#if $userAction === 'pick'}
           <!-- TODO_FORMS: Place this within Row Seeker -->
           <Button on:click={() => fieldValueHolder.setUserAction('create')}>
