@@ -1,9 +1,10 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
   RawEphemeralDataForm,
 } from '@mathesar/api/rpc/forms';
+import { type FieldStore, makeForm } from '@mathesar/components/form';
 
 import { FormFields } from './FormFields';
 import type {
@@ -74,6 +75,8 @@ export class EphemeralDataForm {
 
   private onChange?: (e: EdfChange | EdfNestedFieldChanges) => unknown;
 
+  readonly formHolder;
+
   constructor(
     edf: EphemeralDataFormProps,
     onChange?: (e: EdfChange | EdfNestedFieldChanges) => unknown,
@@ -102,6 +105,38 @@ export class EphemeralDataForm {
         detail: e,
       });
     });
+    this.formHolder = derived(
+      this.fields.fieldValueStores,
+      ($fieldValueStores, set) => {
+        let unsubValueStores: (() => void)[] = [];
+
+        function update() {
+          set(
+            makeForm(
+              [...$fieldValueStores.values()].reduce(
+                (acc, curr) => {
+                  acc[curr.key] = get(curr.inputFieldStore);
+                  return acc;
+                },
+                {} as Record<string, FieldStore>,
+              ),
+            ),
+          );
+        }
+
+        function resubscribe() {
+          unsubValueStores.forEach((u) => u());
+          unsubValueStores = [...$fieldValueStores.values()].map((item) =>
+            item.inputFieldStore.subscribe(update),
+          );
+        }
+
+        resubscribe();
+        update();
+        return () => unsubValueStores.forEach((u) => u());
+      },
+      makeForm({} as Record<string, FieldStore>),
+    );
   }
 
   private bubblePropChange(prop: EdfDirectProps) {

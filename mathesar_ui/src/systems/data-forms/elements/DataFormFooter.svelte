@@ -7,13 +7,16 @@
 
   export let dataFormManager: DataFormManager;
 
-  $: ({ submitButtonLabel } = dataFormManager.ephemeralDataForm);
+  $: ({ submitButtonLabel, formHolder } = dataFormManager.ephemeralDataForm);
   $: label = $submitButtonLabel?.trim() || $_('submit');
+  $: form = $formHolder;
+  $: ({ canSubmit } = $form);
 </script>
 
 <div class="submit-buttons">
   <CancelOrProceedButtonPair
     cancelButton={{ label: $_('clear_form') }}
+    canProceed={canSubmit}
     proceedButton={{
       label,
       icon: undefined,

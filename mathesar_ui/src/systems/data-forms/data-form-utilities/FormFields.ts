@@ -103,7 +103,10 @@ export class FormFields {
               $fieldSet.values(),
               flatMap((f) => {
                 const stores = [f.fieldValueHolder];
-                if (f.kind !== 'scalar_column') {
+                if (
+                  f.kind === 'foreign_key' &&
+                  get(f.fieldValueHolder.userAction) === 'create'
+                ) {
                   stores.push(...get(f.nestedFields.fieldValueStores));
                 }
                 return stores;
@@ -118,9 +121,16 @@ export class FormFields {
           const fkFields = [...$fieldSet.values()].filter(
             (f): f is EphermeralFkField => f.kind !== 'scalar_column',
           );
-          unsubFieldValueStores = fkFields.map((item) =>
+          const unsubUserActions = fkFields.map((item) =>
+            item.fieldValueHolder.userAction.subscribe(update),
+          );
+          const unsubNestedFieldValueStores = fkFields.map((item) =>
             item.nestedFields.fieldValueStores.subscribe(update),
           );
+          unsubFieldValueStores = [
+            ...unsubUserActions,
+            ...unsubNestedFieldValueStores,
+          ];
         }
 
         resubscribe();

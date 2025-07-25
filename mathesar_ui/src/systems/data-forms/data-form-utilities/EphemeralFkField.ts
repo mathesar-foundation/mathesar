@@ -64,6 +64,7 @@ export class EphermeralFkField extends AbstractEphermeralColumnBasedField {
     this.fieldValueHolder = new DataFormFieldFkInputValueHolder(
       this.key,
       this.isRequired,
+      this.interactionRule,
     );
   }
 
