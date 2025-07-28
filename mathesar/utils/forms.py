@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.db import transaction
 
-from db.forms import get_tab_col_info_map
+from db.forms import get_tab_col_info_map, form_insert
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
@@ -157,7 +157,7 @@ def iterate_form_fields(fields, parent_field=None, depth=0):
 
 def submit_form(form_token, values):
     form_model = Form.objects.get(id=form_token)  # TODO: change id to token.
-    field_info = [
+    field_info_list = [
         {
             "key": field.key,
             "kind": field.kind,
@@ -166,7 +166,8 @@ def submit_form(form_token, values):
             "depth": depth
         } for field, parent_field, depth in iterate_form_fields(form_model.fields.filter(parent_field__isnull=True))
     ]
-    ...
+    with form_model.associated_role.connection as conn:
+        form_insert(field_info_list, values, conn)
 
 
 @transaction.atomic

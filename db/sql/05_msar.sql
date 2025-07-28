@@ -5681,3 +5681,33 @@ Returns:
   FROM tab_info_cte AS tic
   LEFT JOIN col_info_cte AS cic ON tic.tab_id = cic.tab_id
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
+(
+  key text,
+  kind text,
+  column_attnum smallint,
+  column_name name,
+  table_oid bigint,
+  depth integer,
+  value jsonb
+) AS $$
+  SELECT
+    fields.key::text AS key,
+    fields.kind::text AS kind,
+    fields.column_attnum::smallint AS column_attnum,
+    pga.attname::name AS column_name,
+    fields.table_oid::bigint AS table_oid,
+    fields.depth::integer AS depth,
+    vals.value::jsonb AS value
+  FROM jsonb_to_recordset(field_info_list) AS fields
+  RIGHT JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
+  LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
+  ORDER BY fields.depth DESC
+$$ LANGUAGE SQL STABLE;
+
+
+-- CREATE OR REPLACE FUNCTION
+-- msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$
+-- $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

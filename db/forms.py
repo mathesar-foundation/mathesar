@@ -25,3 +25,7 @@ def get_tab_col_info_map(tab_col_map, conn):
     }
     """
     return db_conn.exec_msar_func(conn, 'get_tab_col_info_map', json.dumps(tab_col_map)).fetchone()[0]
+
+
+def form_insert(field_info_list, values, conn):
+    return db_conn.exec_msar_func(conn, 'form_insert', json.dumps(field_info_list), json.dumps(values)).fetchone()[0]
