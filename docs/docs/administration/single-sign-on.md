@@ -147,7 +147,7 @@ Now, only users whose email ends in `@example.com` or `@mathesar.org` will be al
 
 ### 5. (Optional) Automatically provision new users with a specific role
 
-By default, administrators need to [manually assign](,,/user-guide/collaborators.md) [PostgreSQL roles](../user-guide/stored-roles.md) for each individual user, per database. 
+By default, administrators need to [manually assign](../user-guide/collaborators.md) [PostgreSQL roles](../user-guide/stored-roles.md) for each individual user, per database. 
 
 The `default_pg_role` block simplifies this process by allowing you to configure a specific PostgreSQL role to automatically assign the user the first time they log in via SSO. This must be configured per-database, as follows:
 
