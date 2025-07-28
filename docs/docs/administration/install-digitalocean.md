@@ -9,7 +9,7 @@ This guide walks you through how to deploy Mathesar on DigitalOcean via their Ap
 	- Users who do not have the capacity or interest in manually managing server infrastructure.
 	- Users who would prefer configuring Mathesar primarily through GUI tools rather than CLI tools.
 
-	If you need more flexibility or configurability, we recommend using our [Docker Compose](./install-via-docker-compose.md) or [direct](./install-from-scratch.md) installation methods instead.
+	[Railway](./install-railway.md) also works well for this use case. If you need more flexibility or configurability, we recommend using our [Docker Compose](./install-via-docker-compose.md) or [direct](./install-from-scratch.md) installation methods instead.
 
 
 ## Installation

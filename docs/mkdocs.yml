@@ -10,6 +10,7 @@ nav:
       - Using Docker Compose: administration/install-via-docker-compose.md
       - On Linux · macOS · WSL: administration/install-from-scratch.md
       - DigitalOcean: administration/install-digitalocean.md
+      - Railway: administration/install-railway.md
   - Administrator Guide:
       - Environment variables: administration/environment-variables.md
       - Upgrade Mathesar: administration/upgrade.md
