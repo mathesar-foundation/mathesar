@@ -58,7 +58,7 @@
           POSTGRES_PORT: ${POSTGRES_PORT:-5432}
         ```
 
-2. If you wish to enable Single Sign On (SSO) support, now would be a good time to do so. See our [guide on configuring SSO](./single-sign-on.md) to learn more.
+2. This is a good time to [set up single sign-on (SSO)](./single-sign-on.md) if that's of interest to you.
 3. Run the docker compose file using:
         ```
         docker compose -f docker-compose.yml up

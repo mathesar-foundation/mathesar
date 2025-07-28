@@ -201,7 +201,7 @@ Turn your local Mathesar installation into a public-facing production service.
 !!! note "Optional - Server hosting only"
     - Follow this section if you want Mathesar to run continuously on a server and be reachable by other users (with or without a public domain).
     - For personal use, evaluation, or on‑prem workstations, you can simply start Mathesar on demand with `mathesar run` and skip ahead to setting up your user account.
-    - You may wish to configure Single Sign On (SSO) for your users. See our [guide on configuring SSO](./single-sign-on.md) to learn more.
+    - See our [guide to setting up single sign-on (SSO)](./single-sign-on.md) if that's of interest to you.
 
 !!! note "Linux-only"
     - The steps below **only target Linux servers** that use **systemd**.
