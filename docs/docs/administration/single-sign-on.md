@@ -125,7 +125,7 @@ oidc_providers:
 +	 secret: [YOUR CLIENT SECRET]
 ```
 
-!!! tip "Skip straight to [Step 7](#activate-sso) if you don't need to configure restricted email domains, default Postgres roles, or additional providers."
+!!! tip "Skip straight to [Step 7](#7-activate-sso) if you don't need to configure restricted email domains, default Postgres roles, or additional providers."
 
 ### 4. (Optional) Restrict to specific email domains
 
