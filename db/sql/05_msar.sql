@@ -5701,7 +5701,7 @@ CREATE OR REPLACE FUNCTION msar.insert_lookup_table(field_info_list jsonb, value
     fields.table_oid::bigint AS table_oid,
     fields.depth::integer AS depth,
     vals.value::jsonb AS value
-  FROM jsonb_to_recordset(field_info_list) AS fields
+  FROM jsonb_to_recordset(field_info_list) AS fields(key text, kind text, column_attnum smallint, table_oid bigint, depth integer)
   RIGHT JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
   LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
   ORDER BY fields.depth DESC
