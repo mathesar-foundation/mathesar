@@ -82,7 +82,7 @@ The database specified in this section is used to store Mathesar's internal data
         - Set this to `localhost` if you'd like Mathesar to be available only on localhost
         - Set the protocol to `http` if you don't want Caddy to automatically handle setting up SSL, e.g. `http://example.com`
 
-## Single sign-on (SSO) configuration{: #sso}
+## Single sign-on (SSO) configuration {: #sso}
 
 !!! info "**OPTIONAL**"
     Only used if [using SSO](./single-sign-on.md) in installations where the local filesystem is inaccessible.

@@ -46,7 +46,7 @@ https://[YOUR MATHESAR DOMAIN]/auth/oidc/[IDP KEY FROM 1a]/login/callback/
 
 ### 2. Enable SSO in Mathesar
 
-Enabling SSO in Mathesar requires setting up a new configuration file or environment variable to hold the necessary IdP-related settings. 
+Enabling SSO in Mathesar requires setting up a new configuration file or environment variable to hold the necessary IdP-related settings.
 
 #### 2a. Create configuration file.
 
@@ -83,7 +83,7 @@ You'll either create a file named `sso.yml` or set up the `OIDC_CONFIG_DICT` env
 	If you deployed to an environment where you can't use the local filesystem (e.g. [DigitalOcean](./install-digitalocean.md), [Railway](./install-railway.md)), you can use the `OIDC_CONFIG_DICT` environment variable instead of an `sso.yml` file.
 
 	This variable must contain a JSON representation of the same data that `sso.yml` contains, wrapped in quotes and with quotes escaped. Here's an example:
-	
+
     ```env
     OIDC_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
     ```
@@ -147,7 +147,7 @@ Now, only users whose email ends in `@example.com` or `@mathesar.org` will be al
 
 ### 5. (Optional) Automatically provision new users with a specific role
 
-By default, administrators need to [manually assign](../user-guide/collaborators.md) [PostgreSQL roles](../user-guide/stored-roles.md) for each individual user, per database. 
+By default, administrators need to [manually assign](../user-guide/collaborators.md) [PostgreSQL roles](../user-guide/stored-roles.md) for each individual user, per database.
 
 The `default_pg_role` block simplifies this process by allowing you to configure a specific PostgreSQL role to automatically assign the user the first time they log in via SSO. This must be configured per-database, as follows:
 
@@ -182,17 +182,17 @@ On first login, users will be granted the specified roles on each listed databas
 
 !!! tip "Overriding automatic provisioning"
 	Since Mathesar preserves roles associated with existing users, administrators can take advantage of this and pre-create user accounts that they want to assign a different role to, and assign roles via the Mathesar UI. Then, when the user logs in for the first time, they'll have the custom role that was assigned to them.
-	
+
 	??? example "Example scenario"
 		Acme, Inc. is setting up SSO and wants employees to have read-only access by default, except for the CTO and support engineers.
-		
+
 		During the process of setting up Mathesar, they:
-		
-		1. create 'read_only` and `read_write` roles in their PostgreSQL database
+
+		1. create `read_only` and `read_write` roles in their PostgreSQL database
 		2. set `default_pg_role` to all databases to `read_only` in their SSO configuration
 		3. create user accounts for the CTO and the support engineers and assign them the `read_write` role
 		4. activate SSO and launch Mathesar internally
-		
+
 		The CTO will now have write access when logging in for the first time, but the customer success manager will only have read access.
 
 ### 6. (Optional) Set up additional IdPs
