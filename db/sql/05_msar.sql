@@ -5685,14 +5685,13 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
 (
-  key text,
-  kind text,
-  column_attnum smallint,
-  column_name name,
-  table_oid bigint,
-  depth integer,
-  value jsonb
+  table_name text,
+  column_names text,
+  values_ text,
+  cte_name text,
+  from_cte_name text
 ) AS $$
+WITH cte AS (
   SELECT
     fields.key::text AS key,
     fields.kind::text AS kind,
@@ -5700,14 +5699,42 @@ CREATE OR REPLACE FUNCTION msar.insert_lookup_table(field_info_list jsonb, value
     pga.attname::name AS column_name,
     fields.table_oid::bigint AS table_oid,
     fields.depth::integer AS depth,
-    vals.value::jsonb AS value
-  FROM jsonb_to_recordset(field_info_list) AS fields(key text, kind text, column_attnum smallint, table_oid bigint, depth integer)
+    CASE
+      WHEN vals.value::jsonb->>'type' = 'create' THEN concat(fields.key::text, '_cte', '.', quote_ident(ref_attr.attname))
+      WHEN vals.value::jsonb->>'type' = 'pick' THEN vals.value::jsonb->>'value'
+      ELSE vals.value::text
+    END AS value,
+    CASE
+      WHEN fields.parent_key IS NOT NULL THEN concat(fields.parent_key::text, '_cte')
+      ELSE NULL
+    END AS cte_name,
+    CASE
+      WHEN vals.value::jsonb->>'type' = 'create' THEN concat(fields.key::text, '_cte')
+      ELSE NULL
+    END AS from_cte_name
+  FROM jsonb_to_recordset(field_info_list) AS fields(key text, parent_key text, kind text, column_attnum smallint, table_oid bigint, depth integer)
   RIGHT JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
   LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
-  ORDER BY fields.depth DESC
+
+  LEFT JOIN pg_constraint pgc
+    ON fields.column_attnum = ANY(pgc.conkey)
+    AND pgc.conrelid = fields.table_oid
+    AND pgc.contype = 'f'
+  LEFT JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
+  LEFT JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
+  LEFT JOIN pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
+)
+SELECT 
+  __msar.get_qualified_relation_name(table_oid) AS table_name,
+  string_agg(quote_ident(column_name), ', ') AS column_names,
+  string_agg(value, ', ') AS values_,
+  cte_name,
+  string_agg(from_cte_name, ', ') AS from_cte_name
+FROM cte GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
 $$ LANGUAGE SQL STABLE;
 
 
+-- WITH ins AS ( INSERT INTO x(name) values ('a') RETURNING *) INSERT INTO y(book, name_ref) SELECT 'd', ins.id FROM ins;
 -- CREATE OR REPLACE FUNCTION
 -- msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$
 -- $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

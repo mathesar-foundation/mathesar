@@ -160,6 +160,7 @@ def submit_form(form_token, values):
     field_info_list = [
         {
             "key": field.key,
+            "parent_key": parent_field.key,
             "kind": field.kind,
             "column_attnum": field.column_attnum,
             "table_oid": parent_field.related_table_oid if parent_field else form_model.base_table_oid,
