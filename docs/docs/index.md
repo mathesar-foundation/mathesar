@@ -9,14 +9,14 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 1. With [Docker](https://docs.docker.com/get-docker/) installed, run:
 
     ```
-    docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
+    docker run -it --name mathesar -p 8000:8000 -e SECRET_KEY=change-this-later mathesar/mathesar:latest
     ```
 
-1. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
+2. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
 
     ??? tip "Tips when trying Mathesar locally"
         - To open a [psql](https://www.postgresql.org/docs/current/app-psql.html) shell within the container, run:
-        
+
             ```
             docker exec -it mathesar sudo -u postgres psql
             ```
@@ -33,12 +33,13 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 
 You can self-host Mathesar by following one of the guides below:
 
-- [Install using Docker compose](./administration/install-via-docker-compose.md) — a production setup with separate reverse-proxy and database containers.
-- [Install directly on Linux, macOS, or WSL](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
-
+- [Using Docker Compose](./administration/install-via-docker-compose.md) — a production setup with separate reverse-proxy and database containers.
+- [Directly on Linux, macOS, or WSL](./administration/install-from-scratch.md) — an advanced setup that doesn't rely on Docker.
+- Via one-click, GUI-only installation:
+    - [DigitalOcean](./administration/install-digitalocean.md)
+    - [Railway](./administration/install-railway.md)
 
 ## Help out
 
-- [Make a donation](https://mathesar.org/donate) - We're a non-profit organization and your donations help sustain our core team. 
+- [Make a donation](https://mathesar.org/donate) - We're a non-profit organization and your donations help sustain our core team.
 - [Help build Mathesar](https://github.com/mathesar-foundation/mathesar/blob/develop/CONTRIBUTING.md) - As an open source project, we actively encourage contribution!
-
