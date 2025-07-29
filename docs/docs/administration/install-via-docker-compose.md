@@ -21,7 +21,7 @@
 
 1. Open the downloaded docker-compose file using your text editor.
 
-1. Set the required environment variables in the **x-config** section of the docker compose file.
+1. Set the required environment variables in the **x-config** section of the docker compose file:
 
     !!! Config
         ```yaml
@@ -58,12 +58,13 @@
           POSTGRES_PORT: ${POSTGRES_PORT:-5432}
         ```
 
-1. Run the docker compose file using:
+2. This is a good time to [set up single sign-on (SSO)](./single-sign-on.md) if that's of interest to you.
+3. Run the docker compose file using:
         ```
         docker compose -f docker-compose.yml up
         ```
 
-1. Set up your user account
+4. Set up your user account
 
     Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up. You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
 
