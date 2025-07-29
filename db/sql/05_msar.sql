@@ -5734,7 +5734,28 @@ FROM cte GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
 $$ LANGUAGE SQL STABLE;
 
 
--- WITH ins AS ( INSERT INTO x(name) values ('a') RETURNING *) INSERT INTO y(book, name_ref) SELECT 'd', ins.id FROM ins;
--- CREATE OR REPLACE FUNCTION
--- msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$
--- $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+-- WITH ins AS ( INSERT INTO x(name) SELECT 'a' RETURNING *) INSERT INTO y(book, name_ref) SELECT 'd', ins.id FROM ins RETURNING *;
+CREATE OR REPLACE FUNCTION
+msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$
+DECLARE
+  ins RECORD;
+  insert_str text;
+  insert_stub text;
+  insert_count integer;
+BEGIN
+  SELECT COUNT(*) INTO insert_count FROM msar.insert_lookup_table(field_info_list jsonb, values_ jsonb);
+  FOR ins IN SELECT * FROM msar.insert_lookup_table(field_info_list jsonb, values_ jsonb) LOOP
+    insert_stub := 'INSERT INTO ' || ins.table_name ||
+                    '(' || ins.column_names || ') SELECT ' || ins.values_ ||
+                    CASE WHEN from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name) ELSE '' ||
+                    ' RETURNING *';
+    CASE
+      WHEN insert_count > 1 AND cte_name IS NOT NULL THEN
+        insert_str := CONCAT_WS(',', insert_str, ins.cte_name || ' AS (' || insert_stub || ')');
+      WHEN cte_name IS NULL THEN
+        insert_str := insert_str || insert_stub;
+    END;
+  END LOOP;
+  EXECUTE 'WITH ' || insert_str;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
