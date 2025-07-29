@@ -1,3 +1,5 @@
+import { hasMethod, hasProperty } from './typeUtils';
+
 const ID_PREFIX = '_id';
 
 export function getGloballyUniqueId(customPrefix?: string): string {
@@ -20,13 +22,7 @@ export function focusAndSelectAll(element: HTMLInputElement): void {
 }
 
 export function focusElement(element: unknown): void {
-  if (
-    typeof element === 'object' &&
-    element !== null &&
-    'focus' in element &&
-    typeof element.focus === 'function'
-  ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  if (hasMethod(element, 'focus')) {
     element.focus();
   }
 }
@@ -55,12 +51,15 @@ export function* getFocusableElements(container: Element): Generator<Element> {
 
   /** Narrow the net by checking additional properties of each element */
   function canFocus(element: Element): boolean {
-    if ('tabIndex' in element && typeof element.tabIndex === 'number') {
+    if (
+      hasProperty(element, 'tabIndex') &&
+      typeof element.tabIndex === 'number'
+    ) {
       if (element.tabIndex < 0) {
         // Filter out elements with negative tabIndex, e.g. div
         return false;
       }
-      if ('disabled' in element && element.disabled) {
+      if (hasProperty(element, 'disabled') && element.disabled) {
         // Filter out disabled elements
         return false;
       }
@@ -69,7 +68,7 @@ export function* getFocusableElements(container: Element): Generator<Element> {
         // Filter out elements that are not visible
         return false;
       }
-      if ('type' in element && element.type === 'hidden') {
+      if (hasProperty(element, 'type') && element.type === 'hidden') {
         // Filter out hidden input elements
         return false;
       }
