@@ -21,9 +21,10 @@
   class="window"
   class:can-scroll-body={canScrollBody}
   class:has-body-padding={hasBodyPadding}
+  data-window-area="window"
 >
   {#if $$slots.title || title || hasCloseButton}
-    <div class="title-bar">
+    <div class="title-bar" data-window-area="title-bar">
       <div class="title">
         <slot name="title" />
         {title ?? ''}
@@ -39,6 +40,10 @@
       {/if}
     </div>
   {/if}
-  <div class="body"><slot /></div>
-  <div class="footer"><slot name="footer" /></div>
+  <div class="body" data-window-area="body">
+    <slot />
+  </div>
+  <div class="footer" data-window-area="footer">
+    <slot name="footer" />
+  </div>
 </div>
