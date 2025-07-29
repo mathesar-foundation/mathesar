@@ -12,11 +12,14 @@ nav:
       - DigitalOcean: administration/install-digitalocean.md
       - Railway: administration/install-railway.md
   - Administrator Guide:
-      - Environment variables: administration/environment-variables.md
-      - Upgrade Mathesar: administration/upgrade.md
-      - Uninstall Mathesar: administration/uninstall.md
+      - Configuration:
+        - Environment variables: administration/environment-variables.md
+        - Single sign-on (SSO): administration/single-sign-on.md
+      - Maintenance:
+        - Upgrade Mathesar: administration/upgrade.md
+        - Uninstall Mathesar: administration/uninstall.md
+        - Postgres & Python versions: administration/version-support.md
       - Debugging Mathesar: administration/debug.md
-      - Postgres & Python versions: administration/version-support.md
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
@@ -112,6 +115,7 @@ theme:
   logo: assets/images/logo.svg
   favicon: assets/images/favicon.ico
   features:
+    - content.tabs.link
     - content.code.copy
     - navigation.sections
     - navigation.expand
