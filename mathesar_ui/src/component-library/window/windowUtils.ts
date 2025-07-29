@@ -34,6 +34,7 @@ export function focusFirstElementInWindow(container: Element): void {
   const focusableElements = concat(
     getFocusableElementsInArea('[data-window-area="body"]'),
     getFocusableElementsInArea('[data-window-area="footer"]'),
+    getFocusableElementsInArea('[data-window-area="title-bar"]'),
   );
 
   const firstFocusableElement = first(focusableElements);
