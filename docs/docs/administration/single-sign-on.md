@@ -52,7 +52,7 @@ Enabling SSO in Mathesar requires setting up a new configuration file or environ
 
 You'll either create a file named `sso.yml` or set up the `OIDC_CONFIG_DICT` environmental variable. Which you create, and where you save it depends on how you installed Mathesar:
 
-=== "Docker Compose"
+=== "For Docker Compose installations"
 
     If you used [Docker Compose](./install-via-docker-compose.md), create the `sso.yml` file next to your [`docker-compose.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml):
 
@@ -74,11 +74,11 @@ You'll either create a file named `sso.yml` or set up the `OIDC_CONFIG_DICT` env
     +  - ./sso.yml:/code/sso.yml
     ```
 
-=== "Directly on Linux, macOS, or WSL"
+=== "For Linux, macOS, or WSL installations"
 
     For [direct installations](./install-from-scratch.md), create `sso.yml` in the installation directory you [defined while installing](./install-from-scratch.md#set-up-your-installation-directory) Mathesar.
 
-=== "Other install methods"
+=== "For DigitalOcean or Railway"
 
 	If you deployed to an environment where you can't use the local filesystem (e.g. [DigitalOcean](./install-digitalocean.md), [Railway](./install-railway.md)), you can use the `OIDC_CONFIG_DICT` environment variable instead of an `sso.yml` file.
 
@@ -218,7 +218,7 @@ Once you've finished configuring SSO, restart Mathesar so it can load the update
 
 === "For DigitalOcean or Railway"
 
-	Use their web interface.
+	Use their web interface to restart (often framed as a "redeploy") Mathesar.
 
 Visit your Mathesar installation and you should see your IdP as a log in option:
 
