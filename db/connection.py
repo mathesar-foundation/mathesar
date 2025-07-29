@@ -1,3 +1,4 @@
+import psycopg
 from psycopg.rows import dict_row
 from uuid import uuid4
 
@@ -58,3 +59,14 @@ def select_from_msar_func(conn, func_name, *args):
 def load_file_with_conn(conn, file_handle):
     """Run an SQL script from a file, using psycopg."""
     conn.execute(file_handle.read())
+
+
+def mathesar_connection(*args, **kwargs):
+    """
+    All Mathesar psycopg connections should use this function. It adds an
+    application_name to each connection (prepending any previously-set
+    application name). This is visible in the `pg_stat_activity` table,
+    useful for debugging (and perhaps required by some DBAs).
+    """
+    kwargs.update(application_name="Mathesar " + kwargs.get("application_name", ""))
+    return psycopg.connect(*args, **kwargs)
