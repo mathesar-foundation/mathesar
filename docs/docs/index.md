@@ -9,10 +9,10 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 1. With [Docker](https://docs.docker.com/get-docker/) installed, run:
 
     ```
-    docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
+    docker run -it --name mathesar -p 8000:8000 -e SECRET_KEY=change-this-later mathesar/mathesar:latest
     ```
 
-1. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
+2. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
 
     ??? tip "Tips when trying Mathesar locally"
         - To open a [psql](https://www.postgresql.org/docs/current/app-psql.html) shell within the container, run:
