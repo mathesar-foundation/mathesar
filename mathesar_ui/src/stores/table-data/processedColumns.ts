@@ -1,3 +1,4 @@
+import { execPipe, find, map } from 'iter-tools';
 import type { Readable } from 'svelte/store';
 
 import type {
@@ -183,6 +184,16 @@ export class ProcessedColumn implements CellColumnFabric {
       hasEnhancedPrimaryKeyCell: false,
     });
   }
+}
+
+export function getFirstEditableColumn(
+  columns: Iterable<ProcessedColumn>,
+): ProcessedColumn | undefined {
+  return execPipe(
+    columns,
+    map((c) => c.withoutEnhancedPkCell()),
+    find((c) => c.isEditable),
+  );
 }
 
 /** Maps column ids to processed columns */
