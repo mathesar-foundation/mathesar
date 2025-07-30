@@ -5727,7 +5727,7 @@ WITH cte AS (
 SELECT 
   __msar.get_qualified_relation_name(table_oid) AS table_name,
   string_agg(quote_ident(column_name), ', ') AS column_names,
-  string_agg(value, ', ') AS values_,
+  string_agg(format('%L', value), ', ') AS values_,
   cte_name,
   string_agg(from_cte_name, ', ') AS from_cte_name
 FROM cte GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
@@ -5743,19 +5743,20 @@ DECLARE
   insert_stub text;
   insert_count integer;
 BEGIN
-  SELECT COUNT(*) INTO insert_count FROM msar.insert_lookup_table(field_info_list jsonb, values_ jsonb);
-  FOR ins IN SELECT * FROM msar.insert_lookup_table(field_info_list jsonb, values_ jsonb) LOOP
+  SELECT COUNT(*) INTO insert_count FROM msar.insert_lookup_table(field_info_list, values_);
+  FOR ins IN SELECT * FROM msar.insert_lookup_table(field_info_list, values_) LOOP
     insert_stub := 'INSERT INTO ' || ins.table_name ||
                     '(' || ins.column_names || ') SELECT ' || ins.values_ ||
-                    CASE WHEN from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name) ELSE '' ||
+                    CASE WHEN ins.from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name) ELSE '' END ||
                     ' RETURNING *';
     CASE
-      WHEN insert_count > 1 AND cte_name IS NOT NULL THEN
+      WHEN insert_count > 1 AND ins.cte_name IS NOT NULL THEN
         insert_str := CONCAT_WS(',', insert_str, ins.cte_name || ' AS (' || insert_stub || ')');
-      WHEN cte_name IS NULL THEN
+      WHEN ins.cte_name IS NULL THEN
         insert_str := insert_str || insert_stub;
-    END;
+    END CASE;
   END LOOP;
+  RAISE NOTICE '%', 'WITH '|| insert_str;
   EXECUTE 'WITH ' || insert_str;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
