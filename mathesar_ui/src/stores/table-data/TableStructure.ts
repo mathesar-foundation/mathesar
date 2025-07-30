@@ -33,7 +33,7 @@ export interface TableStructureSubstance {
   linksToTable: TableLink[];
 }
 
-export function getTableStructureAsyncStore(tableProps: TableStructureProps) {
+function getTableStructureAsyncStore(tableProps: TableStructureProps) {
   const databaseId = tableProps.schema.database.id;
   const tableOid = tableProps.oid;
   const apiRequest = { database_id: databaseId, table_oid: tableOid };
@@ -90,9 +90,11 @@ export class TableStructure {
 
   processedColumns: ProcessedColumnsStore;
 
+  table: Readable<Table | undefined>;
+
   isLoading: Readable<boolean>;
 
-  asyncStore: ReturnType<typeof getTableStructureAsyncStore>;
+  private asyncStore: ReturnType<typeof getTableStructureAsyncStore>;
 
   constructor(props: TableStructureProps) {
     this.oid = props.oid;
@@ -109,5 +111,15 @@ export class TableStructure {
       this.asyncStore,
       (tableStructureStoreValue) => tableStructureStoreValue.isLoading,
     );
+    this.table = derived(
+      this.asyncStore,
+      (tableStructureStoreValue) =>
+        tableStructureStoreValue.resolvedValue?.table,
+    );
+  }
+
+  async tick(): Promise<TableStructureSubstance | undefined> {
+    const result = await this.asyncStore.tick();
+    return result.resolvedValue;
   }
 }

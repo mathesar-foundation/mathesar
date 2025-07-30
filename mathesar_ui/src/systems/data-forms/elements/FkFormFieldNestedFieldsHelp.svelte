@@ -13,18 +13,17 @@
 
   $: ({ relatedTableOid } = dataFormField);
   $: linkedTableStructure = dataFormManager.getTableStructure(relatedTableOid);
-  $: linkedTableStructureStore = linkedTableStructure.asyncStore;
-  $: linkedTable = $linkedTableStructureStore.resolvedValue?.table;
+  $: ({ isLoading, table } = linkedTableStructure);
 </script>
 
 <div class="sub-form-help">
   <RichText text={$_('form_fk_sub_form_help')} let:slotName>
     {#if slotName === 'tableName'}
       <span>
-        {#if $linkedTableStructureStore?.isLoading}
+        {#if $isLoading}
           <Spinner />
-        {:else if linkedTable}
-          <TableName table={linkedTable} />
+        {:else if $table}
+          <TableName table={$table} />
         {/if}
       </span>
     {/if}

@@ -21,8 +21,7 @@
   $: ({ ephemeralDataForm } = dataFormManager);
   $: ({ headerTitle, headerSubTitle, baseTableOid } = ephemeralDataForm);
   $: tableStructure = dataFormManager.getTableStructure(baseTableOid);
-  $: tableStructureStore = tableStructure.asyncStore;
-  $: table = $tableStructureStore.resolvedValue?.table;
+  $: ({ table } = tableStructure);
 </script>
 
 <InspectorTabContent>
@@ -45,8 +44,8 @@
   <InspectorSection title={$_('source')}>
     <div>
       <div>{$_('source_table')}</div>
-      {#if table}
-        <TableName {table} />
+      {#if $table}
+        <TableName table={$table} />
       {/if}
     </div>
   </InspectorSection>
