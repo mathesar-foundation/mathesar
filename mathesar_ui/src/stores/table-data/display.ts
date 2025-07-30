@@ -1,7 +1,10 @@
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
+import type Pagination from '@mathesar/utils/Pagination';
+import { assertExhaustive } from '@mathesar-component-library';
 
+import type { Meta } from './meta';
 import type { RecordsData } from './records';
 import {
   type DraftRecordRow,
@@ -53,15 +56,34 @@ export type DisplayRowDescriptor =
   | DisplayRecordRowDescriptor
   | DisplayUiRowDescriptor;
 
-export function combineRecordRowsWithGroupHeaders({
+export function getRowNumber(rowDescriptor: DisplayRowDescriptor): number {
+  if (rowDescriptor.rowOrigin === RowOrigin.FetchedFromDb) {
+    return rowDescriptor.rowNumber;
+  }
+  if (rowDescriptor.rowOrigin === RowOrigin.NewlyCreatedViaUi) {
+    return rowDescriptor.rowNumber;
+  }
+  if (rowDescriptor.rowOrigin === RowOrigin.StaticUiElement) {
+    return 0;
+  }
+  return assertExhaustive(rowDescriptor.rowOrigin);
+}
+
+function combineRecordRowsWithGroupHeaders({
   recordRows,
   grouping,
+  pagination,
 }: {
   recordRows: PersistedRecordRow[];
   grouping?: RecordGrouping;
+  pagination: Pagination;
 }): DisplayRowDescriptor[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
+
+  function makeRowNumber(index: number) {
+    return index + pagination.offset + 1;
+  }
 
   if (isResultGrouped && grouping) {
     const combinedRows: DisplayRowDescriptor[] = [];
@@ -93,7 +115,7 @@ export function combineRecordRowsWithGroupHeaders({
         combinedRows.push({
           row: recordRow,
           rowOrigin: RowOrigin.FetchedFromDb,
-          rowNumber: persistedRecordRowIndex,
+          rowNumber: makeRowNumber(persistedRecordRowIndex),
         });
         persistedRecordRowIndex += 1;
       });
@@ -104,13 +126,11 @@ export function combineRecordRowsWithGroupHeaders({
   return recordRows.map((row, index) => ({
     row,
     rowOrigin: RowOrigin.FetchedFromDb,
-    rowNumber: index,
+    rowNumber: makeRowNumber(index),
   }));
 }
 
 export class Display {
-  private recordsData: RecordsData;
-
   scrollOffset: Writable<number>;
 
   horizontalScrollOffset: Writable<number>;
@@ -119,39 +139,46 @@ export class Display {
 
   placeholderRowId: Readable<string>;
 
-  constructor(recordsData: RecordsData) {
-    this.recordsData = recordsData;
+  constructor({ meta, recordsData }: { meta: Meta; recordsData: RecordsData }) {
     this.horizontalScrollOffset = writable(0);
     this.scrollOffset = writable(0);
 
     const placeholderRowId = writable('');
     this.placeholderRowId = placeholderRowId;
 
-    const { fetchedRecordRows, newRecords, grouping } = this.recordsData;
     this.displayRowDescriptors = derived(
-      [fetchedRecordRows, newRecords, grouping],
-      ([$fetchedRecordRows, $newRecords, $grouping]) => {
+      [
+        recordsData.fetchedRecordRows,
+        recordsData.newRecords,
+        recordsData.totalCount,
+        recordsData.grouping,
+        meta.pagination,
+      ],
+      ([fetchedRecordRows, newRecords, totalCount, grouping, pagination]) => {
         let displayRowDescriptors: DisplayRowDescriptor[] =
           combineRecordRowsWithGroupHeaders({
-            recordRows: $fetchedRecordRows,
-            grouping: $grouping,
+            recordRows: fetchedRecordRows,
+            grouping,
+            pagination,
           });
-        if ($newRecords.length > 0) {
+
+        if (newRecords.length > 0) {
           displayRowDescriptors = displayRowDescriptors
             .concat({
               row: new HelpTextRow(),
               rowOrigin: RowOrigin.StaticUiElement,
             })
             .concat(
-              $newRecords.map((row, index) => ({
+              newRecords.map((row, index) => ({
                 row,
-                rowNumber: index,
+                rowNumber: pagination.offset + (totalCount ?? 0) + index + 1,
                 rowOrigin: RowOrigin.NewlyCreatedViaUi,
               })),
             );
         }
+
         const placeholderRow = new PlaceholderRecordRow({
-          record: this.recordsData.getEmptyApiRecord(),
+          record: recordsData.getEmptyApiRecord(),
         });
 
         // This is really hacky! We have a side effect (mutating state) within a
@@ -164,6 +191,7 @@ export class Display {
         // didn't want to lump any of that refactoring into an already-large
         // refactor.
         placeholderRowId.set(placeholderRow.identifier);
+
         displayRowDescriptors = displayRowDescriptors.concat({
           row: placeholderRow,
           rowOrigin: RowOrigin.StaticUiElement,
