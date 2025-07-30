@@ -90,6 +90,14 @@ def _get_internal_db_meta():
         }
 
 
+def get_base_common_data(request):
+    return {
+        'current_release_tag_name': __version__,
+        'is_authenticated': not request.user.is_anonymous,
+        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
+    }
+
+
 def get_common_data(request, database_id=None, schema_oid=None):
     databases = get_database_list(request)
     database_id_int = int(database_id) if database_id else None
@@ -103,15 +111,13 @@ def get_common_data(request, database_id=None, schema_oid=None):
     current_schema_oid = current_schema['oid'] if current_schema else None
 
     return {
+        **get_base_common_data(request),
         'current_database': current_database_id,
         'current_schema': current_schema_oid,
-        'current_release_tag_name': __version__,
         'databases': databases,
         'internal_db': _get_internal_db_meta(),
-        'is_authenticated': not request.user.is_anonymous,
         'servers': get_servers_list(),
         'schemas': schemas,
-        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
         'tables': get_table_list(request, current_database_id, current_schema_oid),
         'user': get_user_data(request),
         'queries': get_queries_list(request, current_database_id, current_schema_oid),
@@ -121,9 +127,7 @@ def get_common_data(request, database_id=None, schema_oid=None):
 
 def get_anonymous_common_data(request):
     return {
-        'current_release_tag_name': __version__,
-        'is_authenticated': not request.user.is_anonymous,
-        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
+        **get_base_common_data(request),
         'routing_context': 'anonymous',
     }
 
