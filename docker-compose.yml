@@ -120,7 +120,7 @@ x-config: &config
 #     Example: 5555
 #
 # OIDC_CONFIG_DICT:
-#   Default: N/A
+#   Default: {}
 #   Info: Specifies the settings necessary to configure Single Sign-on (SS0)
 #   identity providers for Mathesar login. This is an optional, alternative
 #   approach to configuring SSO via a configuration file.
