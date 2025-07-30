@@ -31,7 +31,7 @@
   <title>{makeSimplePageTitle(pageTitle)}</title>
 </svelte:head>
 
-<LayoutWithHeader fitViewport showHeader={false}>
+<LayoutWithHeader fitViewport>
   {#if dataFormManager}
     <div class="data-form-filler">
       <DataFormCanvas {dataFormManager} />
