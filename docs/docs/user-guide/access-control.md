@@ -6,6 +6,8 @@ Here's how it works:
 
 1. **[Mathesar Users](./users.md):** Everyone using Mathesar gets their own personal user account and has control over their password and username. [Admin](./users.md#admin) users have some additional privileges, but only for high-level Mathesar-specific operations like connecting databases and managing other users.
 
+  	Users use a separate password to log into Mathesar by default, but some Mathesar deployments use [single sign-on (SSO)](../administration/single-sign-on.md) for login.
+
 1. **[PostgreSQL roles](./roles.md):** Within PostgreSQL, privileges on data can be granted to different roles at a granular level. Mathesar respects these privileges and also exposes functionality for you to see and modify them.
 
 1. **[Stored Roles](./stored-roles.md):** Mathesar stores the passwords for any roles that you would like to use to authenticate with PostgreSQL.

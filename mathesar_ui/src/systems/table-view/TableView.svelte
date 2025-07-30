@@ -59,8 +59,7 @@
       getSheetColumns: () => [
         ...map(({ column }) => column, get(processedColumns).values()),
       ],
-      updateRecords: (r) => recordsData.bulkUpdate(r),
-      setSelection: (s) => selection.set(s),
+      bulkDml: (...args) => recordsData.bulkDml(...args),
       confirm: (title) =>
         confirm({
           title,
@@ -68,7 +67,7 @@
           proceedButton: { label: $_('paste'), icon: iconPaste },
         }),
     },
-    getSelection: () => get(selection),
+    selection,
     showToastInfo: toast.info,
     showToastError: toast.error,
   });
