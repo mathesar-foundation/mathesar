@@ -138,18 +138,16 @@ class DatabasesStore {
 export type DatabaseDisconnectFn = typeof databasesStore.disconnectDatabase;
 
 export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
-  new DatabasesStore(
-    generateDatabaseEntries(commonData.servers, commonData.databases),
-    commonData.current_database,
-  );
+  (() => {
+    const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
+    const servers = isInAuthenticatedContext ? commonData.servers : [];
+    const databases = isInAuthenticatedContext ? commonData.databases : [];
+    const currentDatabase = isInAuthenticatedContext
+      ? commonData.current_database
+      : null;
 
-/** ⚠️ This readable store contains a type assertion designed to sacrifice type
- * safety for the benefit of convenience.
- *
- * We need to access `currentDatabase` like EVERYWHERE throughout the app, and
- * we'd like to avoid checking if it's defined every time. So we assert that it
- * is defined, and we'll just have to be careful to **never use the value from
- * this store within a context where no database is set.**
- */
-export const currentDatabase =
-  databasesStore.currentDatabase as Readable<Database>;
+    return new DatabasesStore(
+      generateDatabaseEntries(servers, databases),
+      currentDatabase,
+    );
+  })();
