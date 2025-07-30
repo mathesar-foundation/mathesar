@@ -15,7 +15,6 @@
   } from '@mathesar/stores/table-data';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
-  import type { ShareConsumer } from '@mathesar/utils/shares';
 
   import { setNewImperativeFilterControllerInContext } from './ImperativeFilterController';
 
@@ -29,7 +28,6 @@
   setNewImperativeFilterControllerInContext();
 
   export let table: Table;
-  export let shareConsumer: ShareConsumer | undefined = undefined;
 
   let sheetElement: HTMLElement;
 
@@ -40,12 +38,9 @@
     database: table.schema.database,
     table,
     meta,
-    shareConsumer,
   });
   $: ({ isLoading, selection } = tabularData);
   $: tabularDataStore.set(tabularData);
-  let context: 'shared-consumer-page' | 'page' = 'page';
-  $: context = shareConsumer ? 'shared-consumer-page' : 'page';
 
   async function activateFirstDataCell() {
     selection.updateWithoutFocus((s) => s.ofFirstDataCell());
@@ -73,9 +68,9 @@
 
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
-    <ActionsPane {context} />
+    <ActionsPane />
     {#if $currentRolePrivileges.has('SELECT')}
-      <TableView {table} {context} bind:sheetElement />
+      <TableView {table} bind:sheetElement />
     {:else}
       <div class="warning">
         <WarningBox fullWidth>
