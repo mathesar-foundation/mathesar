@@ -26,7 +26,7 @@
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
   import { getCustomizedColumnWidths } from './tableViewUtils';
 
-  type Context = 'page' | 'widget' | 'shared-consumer-page';
+  type Context = 'page' | 'widget';
 
   const tabularData = getTabularDataStoreFromContext();
 
