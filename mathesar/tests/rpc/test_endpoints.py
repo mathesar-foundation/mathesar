@@ -253,6 +253,7 @@ METHODS = [
         "explorations.run_saved",
         [user_is_authenticated]
     ),
+
     (
         forms.add,
         "forms.add",
@@ -283,6 +284,12 @@ METHODS = [
         "forms.replace",
         [user_is_authenticated]
     ),
+    (
+        forms.submit,
+        "forms.submit",
+        []
+    ),
+
     (
         records.add,
         "records.add",
