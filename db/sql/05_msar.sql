@@ -5696,7 +5696,7 @@ Returns a lookup table for given field_info_list and values_
 Example: Inserting into Items while creating a new book entry, adding a new Title, creating a new entry for Author, picking a Publisher.
            table_name           |                  column_names                   |                values_                 | cte_name | from_cte_name 
 --------------------------------+-------------------------------------------------+----------------------------------------+----------+---------------
- "Library Management"."Authors" | "First Name", "Last Name"                       | 'f_name', 'l_name'                     | k1_cte   | 
+ "Library Management"."Authors" | "First Name", "Last Name"                       | 'Jerome K.', 'Jerome                   | k1_cte   | 
  "Library Management"."Books"   | "Title", "Author", "Publisher"                  | 'Three men in a Boat', k1_cte.id, '12' | k0_cte   | k1_cte
  "Library Management"."Items"   | "Acquisition Date", "Acquisition Price", "Book" | '2025-10-09', '69.69', k0_cte.id       |          | k0_cte
 
