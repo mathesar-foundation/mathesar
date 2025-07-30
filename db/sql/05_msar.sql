@@ -5702,7 +5702,7 @@ WITH cte AS (
     CASE
       WHEN vals.value::jsonb->>'type' = 'create' THEN concat(fields.key::text, '_cte', '.', quote_ident(ref_attr.attname))
       WHEN vals.value::jsonb->>'type' = 'pick' THEN vals.value::jsonb->>'value'
-      ELSE vals.value::text
+      ELSE quote_nullable(vals.value::jsonb #>> '{}')
     END AS value,
     CASE
       WHEN fields.parent_key IS NOT NULL THEN concat(fields.parent_key::text, '_cte')
@@ -5727,7 +5727,7 @@ WITH cte AS (
 SELECT 
   __msar.get_qualified_relation_name(table_oid) AS table_name,
   string_agg(quote_ident(column_name), ', ') AS column_names,
-  string_agg(format('%L', value), ', ') AS values_,
+  string_agg(value, ', ') AS values_,
   cte_name,
   string_agg(from_cte_name, ', ') AS from_cte_name
 FROM cte GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
