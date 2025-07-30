@@ -5690,18 +5690,33 @@ CREATE OR REPLACE FUNCTION msar.insert_lookup_table(field_info_list jsonb, value
   values_ text,
   cte_name text,
   from_cte_name text
-) AS $$
+) AS $$/*
+Returns a lookup table for given field_info_list and values_
+
+Example: Inserting into Items while creating a new book entry, adding a new Title, creating a new entry for Author, picking a Publisher.
+           table_name           |                  column_names                   |                values_                 | cte_name | from_cte_name 
+--------------------------------+-------------------------------------------------+----------------------------------------+----------+---------------
+ "Library Management"."Authors" | "First Name", "Last Name"                       | 'f_name', 'l_name'                     | k1_cte   | 
+ "Library Management"."Books"   | "Title", "Author", "Publisher"                  | 'Three men in a Boat', k1_cte.id, '12' | k0_cte   | k1_cte
+ "Library Management"."Items"   | "Acquisition Date", "Acquisition Price", "Book" | '2025-10-09', '69.69', k0_cte.id       |          | k0_cte
+
+Calling msar.form_insert() on this table would generate the following SQL:
+
+WITH k1_cte AS (INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'f_name', 'l_name' RETURNING *),
+k0_cte AS (INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *)
+INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
+*/
 WITH cte AS (
   SELECT
     fields.key::text AS key,
-    fields.kind::text AS kind,
+    fields.kind::text AS kind, -- TODO: delete, we don't need this.
     fields.column_attnum::smallint AS column_attnum,
     pga.attname::name AS column_name,
     fields.table_oid::bigint AS table_oid,
     fields.depth::integer AS depth,
     CASE
       WHEN vals.value::jsonb->>'type' = 'create' THEN concat(fields.key::text, '_cte', '.', quote_ident(ref_attr.attname))
-      WHEN vals.value::jsonb->>'type' = 'pick' THEN vals.value::jsonb->>'value'
+      WHEN vals.value::jsonb->>'type' = 'pick' THEN quote_literal(vals.value::jsonb->>'value')
       ELSE quote_nullable(vals.value::jsonb #>> '{}')
     END AS value,
     CASE
@@ -5712,7 +5727,13 @@ WITH cte AS (
       WHEN vals.value::jsonb->>'type' = 'create' THEN concat(fields.key::text, '_cte')
       ELSE NULL
     END AS from_cte_name
-  FROM jsonb_to_recordset(field_info_list) AS fields(key text, parent_key text, kind text, column_attnum smallint, table_oid bigint, depth integer)
+  FROM jsonb_to_recordset(field_info_list) AS fields(
+    key text,
+    parent_key text,
+    kind text,
+    column_attnum smallint,
+    table_oid bigint,
+    depth integer)
   RIGHT JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
   LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
 
@@ -5734,29 +5755,38 @@ FROM cte GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
 $$ LANGUAGE SQL STABLE;
 
 
--- WITH ins AS ( INSERT INTO x(name) SELECT 'a' RETURNING *) INSERT INTO y(book, name_ref) SELECT 'd', ins.id FROM ins RETURNING *;
 CREATE OR REPLACE FUNCTION
 msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$
 DECLARE
   ins RECORD;
-  insert_str text;
+  insert_str text := '';
   insert_stub text;
   insert_count integer;
 BEGIN
   SELECT COUNT(*) INTO insert_count FROM msar.insert_lookup_table(field_info_list, values_);
+
   FOR ins IN SELECT * FROM msar.insert_lookup_table(field_info_list, values_) LOOP
-    insert_stub := 'INSERT INTO ' || ins.table_name ||
-                    '(' || ins.column_names || ') SELECT ' || ins.values_ ||
-                    CASE WHEN ins.from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name) ELSE '' END ||
-                    ' RETURNING *';
+    insert_stub := 'INSERT INTO ' ||
+      ins.table_name || '(' || ins.column_names || ') SELECT ' || ins.values_ ||
+      CASE 
+        WHEN ins.from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name)
+        ELSE '' END || ' RETURNING *';
     CASE
       WHEN insert_count > 1 AND ins.cte_name IS NOT NULL THEN
-        insert_str := CONCAT_WS(',', insert_str, ins.cte_name || ' AS (' || insert_stub || ')');
+        insert_str := CONCAT_WS(',', NULLIF(insert_str, ''), ins.cte_name || ' AS (' || insert_stub || ')');
       WHEN ins.cte_name IS NULL THEN
-        insert_str := insert_str || insert_stub;
+        insert_str :=  insert_str || insert_stub;
     END CASE;
   END LOOP;
-  RAISE NOTICE '%', 'WITH '|| insert_str;
-  EXECUTE 'WITH ' || insert_str;
+
+  CASE
+    WHEN insert_count > 1 THEN
+      insert_str := 'WITH ' || insert_str;
+    ELSE NULL;
+  END CASE;
+
+  RAISE NOTICE '%', insert_str;
+
+  EXECUTE insert_str;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
