@@ -42,9 +42,9 @@
     EphemeralDataFormFieldProps[]
   > {
     const tableStructureSubstance = await linkedTableStructure.tick();
-    if (tableStructureSubstance) {
+    if (tableStructureSubstance.resolvedValue) {
       return tableStructureSubstanceToEphemeralFieldProps(
-        tableStructureSubstance,
+        tableStructureSubstance.resolvedValue,
       );
     }
     return [];

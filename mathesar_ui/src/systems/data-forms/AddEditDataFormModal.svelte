@@ -66,9 +66,9 @@
     } else {
       const tableStructure = new TableStructure(values.sourceTable);
       const tableStructureSubstance = await tableStructure.tick();
-      if (tableStructureSubstance) {
+      if (tableStructureSubstance.resolvedValue) {
         const rawEpf = tableStructureSubstanceRawEphemeralForm(
-          tableStructureSubstance,
+          tableStructureSubstance.resolvedValue,
         );
         newDataForm = await $schemaRouteContext.insertDataForm({
           ...rawEpf,

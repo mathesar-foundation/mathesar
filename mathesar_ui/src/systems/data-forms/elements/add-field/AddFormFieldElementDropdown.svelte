@@ -31,10 +31,10 @@
 
   async function addColumnAsField(fc: FieldColumn, close: () => void) {
     const tableStructureSubstance = await tableStructure.tick();
-    if (tableStructureSubstance) {
+    if (tableStructureSubstance.resolvedValue) {
       const props = fieldColumnToEphemeralFieldProps(
         fc,
-        tableStructureSubstance,
+        tableStructureSubstance.resolvedValue,
         insertionIndex,
       );
       fieldHolder.add(props);
