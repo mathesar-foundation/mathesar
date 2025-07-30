@@ -26,7 +26,6 @@ import {
 } from '@mathesar/packages/json-rpc-client-builder';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
-import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
   type CancellablePromise,
   ImmutableMap,
@@ -170,8 +169,6 @@ export class RecordsData {
    * for the cells within hidden columns when creating new records.
    */
   private contextualFilters: Map<number, number | string>;
-
-  readonly shareConsumer?: ShareConsumer;
 
   private loadIntrinsicRecordSummaries?: boolean;
 

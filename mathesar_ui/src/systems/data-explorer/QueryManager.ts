@@ -9,7 +9,7 @@ import {
   explorationIsAddable,
   explorationIsSaved,
 } from '@mathesar/api/rpc/explorations';
-import { currentDatabase } from '@mathesar/stores/databases';
+import { databasesStore } from '@mathesar/stores/databases';
 import { addExploration, replaceExploration } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
@@ -108,7 +108,10 @@ export default class QueryManager extends QueryRunner {
     }
 
     try {
-      const database = get(currentDatabase);
+      const database = get(databasesStore.currentDatabase);
+      if (!database) {
+        throw new Error('Current database not set');
+      }
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'processing' },

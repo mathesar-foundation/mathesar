@@ -22,9 +22,13 @@ import {
 import { databasesStore } from './databases';
 
 const commonData = preloadCommonData();
+const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
+const currentSchemaFromCommonData = isInAuthenticatedContext
+  ? commonData.current_schema
+  : null;
 
 export const currentSchemaId: Writable<Schema['oid'] | undefined> = writable(
-  commonData.current_schema ?? undefined,
+  currentSchemaFromCommonData ?? undefined,
 );
 
 export interface SchemaStoreData {
@@ -161,7 +165,11 @@ export const schemas = collapse(
   derived(databasesStore.currentDatabase, ($currentDatabase) => {
     const $schemasStore = get(schemasStore);
     if ($schemasStore.databaseId !== $currentDatabase?.id) {
-      if (preload && commonData.current_database === $currentDatabase?.id) {
+      if (
+        preload &&
+        isInAuthenticatedContext &&
+        commonData.current_database === $currentDatabase?.id
+      ) {
         if (commonData.schemas.state === 'success') {
           setSchemasInStore($currentDatabase, commonData.schemas.data);
         } else {

@@ -1,6 +1,11 @@
 <script lang="ts">
+  // TODO: Rename this component to something that represents layout for top-level page
   import AppHeader from '@mathesar/components/AppHeader.svelte';
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
+
+  const commonData = preloadCommonData();
+  const showHeader = commonData.routing_context !== 'anonymous';
 
   export let fitViewport = false;
   export let restrictWidth = false;
@@ -12,10 +17,12 @@
 </script>
 
 <div class="app-layout" class:fit-viewport={fitViewport} {style}>
-  <div class="app-layout-header">
-    <AppHeader />
-  </div>
-  <slot name="secondary-header" />
+  {#if showHeader}
+    <div class="app-layout-header">
+      <AppHeader />
+    </div>
+    <slot name="secondary-header" />
+  {/if}
   <main class="app-layout-content" class:restrict-width={restrictWidth}>
     <slot />
   </main>

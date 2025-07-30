@@ -23,11 +23,7 @@
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
 
-  type TableActionsContext = 'page' | 'shared-consumer-page';
-
   const tabularData = getTabularDataStoreFromContext();
-
-  export let context: TableActionsContext = 'page';
 
   $: ({ table, meta, isLoading, hasPrimaryKey } = $tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
@@ -63,9 +59,7 @@
     </div>
   {/if}
 
-  {#if context === 'page'}
-    <ModificationStatus requestState={$sheetState} />
-  {/if}
+  <ModificationStatus requestState={$sheetState} />
 
   {#if !$isLoading && !$hasPrimaryKey}
     <div class="no-pk-warning">
@@ -81,10 +75,7 @@
   {/if}
 
   <div class="aux-actions" slot="actions-right">
-    {#if context === 'page' && isSelectable}
-      <!-- TODO: Display Share option when we re-implement it with the new permissions structure -->
-      <!-- <ShareTableDropdown id={table.oid} /> -->
-
+    {#if isSelectable}
       <Tooltip allowHover>
         <AnchorButton
           slot="trigger"

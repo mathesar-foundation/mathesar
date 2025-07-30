@@ -50,6 +50,7 @@ import { type CancellablePromise, collapse } from '@mathesar-component-library';
 import { currentSchema } from './schemas';
 
 const commonData = preloadCommonData();
+const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
 
 export interface QueriesStoreSubstance {
   databaseId?: Database['id'];
@@ -249,6 +250,7 @@ export const queries = collapse(
     ) {
       if (
         preload &&
+        isInAuthenticatedContext &&
         commonData.current_schema === $currentSchema?.oid &&
         commonData.current_database === $currentSchema?.database.id
       ) {
