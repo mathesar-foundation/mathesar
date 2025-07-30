@@ -25,8 +25,8 @@
    * We need to fetch the schema of the referent tables when fetching its
    * TableStructure.
    *
-   * This assumption is already baked into several part of the codebase, so
-   * schema is passed here as a prop until we have refactor the core assumption out.
+   * This assumption is already baked into several parts of the codebase, so
+   * schema is passed here as a prop until we refactor the core assumption out.
    */
   $: referentTable = defined(
     column?.linkFk?.referent_table_oid,
