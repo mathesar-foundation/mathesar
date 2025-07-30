@@ -466,7 +466,6 @@
   "paste_error_no_primary_key": "Unable to paste into a table without a primary key column.",
   "paste_error_no_rows": "No rows to paste",
   "paste_error_too_few_destination_columns": "The table does not contain enough columns to paste the copied data at your selection.",
-  "paste_error_too_few_destination_rows": "The sheet does not contain enough rows to hold the data you are pasting.",
   "paste_error_too_many_destination_columns": "Cannot paste into a selection which has more columns than the copied data.",
   "paste_error_unsupported_mime_type": "Your copied data is not in a supported format. Mathesar can only paste data when copied as plain text (with tab separated values), or when copied directly from Mathesar.",
   "permissions_for_named_database": "Permissions for [databaseName] database",

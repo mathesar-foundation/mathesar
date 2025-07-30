@@ -73,13 +73,3 @@ export function preloadCommonData(): CommonData {
   }
   return commonData;
 }
-
-export function getAuthenticatedCommonData(): AuthenticatedCommonData {
-  const commonData = preloadCommonData();
-  if (commonData.routing_context === 'anonymous') {
-    throw new Error(
-      'Authenticated commonData is requested within an anonymous routing context',
-    );
-  }
-  return commonData;
-}

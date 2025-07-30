@@ -1,13 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { RawDataFormSource } from '@mathesar/api/rpc/forms';
   import Errors from '@mathesar/components/errors/Errors.svelte';
+  import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import type { DataForm } from '@mathesar/models/DataForm';
-  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import {
     DataFormCanvas,
@@ -18,8 +15,8 @@
 
   import ActionsPane from './ActionsPane.svelte';
 
-  export let dataForm: DataForm;
-  export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;
+  const dataFormRouteContext = DataFormRouteContext.get();
+  $: ({ dataForm, formSourceInfo } = $dataFormRouteContext);
 
   const tableStructureCache = new CacheManager<
     TableStructure['oid'],
@@ -27,11 +24,11 @@
   >(10);
 
   $: rawDataFormStore = dataForm.toRawDataFormStore();
-  $: dataFormManager = formSourceInfo.resolvedValue
+  $: dataFormManager = $formSourceInfo.resolvedValue
     ? new EditableDataFormManager(
         rawDataFormToEphemeralFormProps(
           $rawDataFormStore,
-          formSourceInfo.resolvedValue,
+          $formSourceInfo.resolvedValue,
         ),
         dataForm.schema,
         tableStructureCache,
@@ -47,12 +44,12 @@
   {#if dataFormManager}
     <div class="data-form-editor">
       <div class="actions-pane">
-        <ActionsPane {dataForm} {dataFormManager} />
+        <ActionsPane {dataFormManager} />
       </div>
       <DataFormCanvas {dataFormManager} />
     </div>
-  {:else if formSourceInfo.error}
-    <Errors errors={[formSourceInfo.error]} />
+  {:else if $formSourceInfo.error}
+    <Errors errors={[$formSourceInfo.error]} />
   {/if}
 </LayoutWithHeader>
 

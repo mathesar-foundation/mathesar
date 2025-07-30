@@ -45,7 +45,7 @@ export {
   type TabularDataProps,
 } from './tabularData';
 export {
-  ProcessedColumn,
+  type ProcessedColumn,
   type ProcessedColumns,
   type ProcessedColumnsStore,
 } from './processedColumns';

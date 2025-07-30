@@ -48,12 +48,12 @@
   $: form = makeForm({ name, description, sourceTable });
   $: modalTitle = dataForm ? $_('edit_form_with_name') : $_('create_new_form');
 
-  $: tableStructureStore = $sourceTable
-    ? (() => {
-        const table = $sourceTable;
-        return new TableStructure(table).asyncStore;
-      })()
-    : ensureReadable(undefined);
+  $: sourceTableStructure = $sourceTable
+    ? new TableStructure($sourceTable)
+    : undefined;
+  $: isSourceTableStructureLoading = sourceTableStructure
+    ? sourceTableStructure.isLoading
+    : ensureReadable(false);
 
   async function save(values: FilledFormValues<typeof form>) {
     let newDataForm: DataForm | undefined;
@@ -65,7 +65,7 @@
       });
     } else {
       const tableStructure = new TableStructure(values.sourceTable);
-      const tableStructureSubstance = await tableStructure.asyncStore.tick();
+      const tableStructureSubstance = await tableStructure.tick();
       if (tableStructureSubstance.resolvedValue) {
         const rawEpf = tableStructureSubstanceRawEphemeralForm(
           tableStructureSubstance.resolvedValue,
@@ -110,7 +110,7 @@
     <LabeledInput layout="stacked">
       <span slot="label">{$_('source_table_for_form')}</span>
       <SelectTableWithinCurrentSchema
-        disabled={$tableStructureStore?.isLoading || !!dataForm}
+        disabled={$isSourceTableStructureLoading || !!dataForm}
         autoSelect="none"
         bind:value={$sourceTable}
       />

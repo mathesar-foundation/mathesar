@@ -10,14 +10,13 @@
 
   $: tableOidOfField = dataFormField.holder.getTableOid();
   $: tableStructure = dataFormManager.getTableStructure(tableOidOfField);
-  $: tableStructureStore = tableStructure.asyncStore;
-  $: table = $tableStructureStore.resolvedValue?.table;
+  $: ({ table } = tableStructure);
 </script>
 
 <div class="source">
   <div class="tag">
-    {#if table}
-      <TableName {table} alwaysShowTooltip={true} />
+    {#if $table}
+      <TableName table={$table} alwaysShowTooltip={true} />
     {/if}
   </div>
   <span>.</span>

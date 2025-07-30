@@ -2,9 +2,9 @@
   import { _ } from 'svelte-i18n';
 
   import {
-    getValueFromEvent,
+    getStringValueFromEvent,
     isDefinedNonNullable,
-  } from '@mathesar/component-library';
+  } from '@mathesar-component-library';
 
   import {
     type DataFormManager,
@@ -18,26 +18,31 @@
   export let dataFormField: EphemeralDataFormField;
   export let isSelected: boolean;
 
-  $: ({ label, help } = dataFormField);
+  $: ({ label, help, isRequired } = dataFormField);
 
   function onLabelInput(e: Event) {
-    dataFormField.setLabel(String(getValueFromEvent(e)));
+    dataFormField.setLabel(getStringValueFromEvent(e));
   }
 
   function onHelpTextInput(e: Event) {
-    dataFormField.setHelpText(String(getValueFromEvent(e)));
+    dataFormField.setHelpText(getStringValueFromEvent(e));
   }
 </script>
 
 <div class="label-container" class:selected={isSelected}>
   <div class="label">
-    {#if dataFormManager instanceof EditableDataFormManager}
-      <input type="text" value={$label} on:input={onLabelInput} />
-    {:else}
-      <span>
-        {$label}
-      </span>
-    {/if}
+    <div>
+      {#if $isRequired}
+        <span class="req-indicator">*</span>
+      {/if}
+      {#if dataFormManager instanceof EditableDataFormManager}
+        <input type="text" value={$label} on:input={onLabelInput} />
+      {:else}
+        <span>
+          {$label}
+        </span>
+      {/if}
+    </div>
 
     {#if isSelected && dataFormManager instanceof EditableDataFormManager}
       <div class="control-panel">
@@ -74,6 +79,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--sm4);
+
+    .req-indicator {
+      color: var(--rosy-600);
+      font-size: var(--lg2);
+    }
 
     input {
       border: 1px solid transparent;

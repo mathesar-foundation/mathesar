@@ -1,3 +1,5 @@
+import { isDefinedNonNullable } from './typeUtils';
+
 /**
  * This is actually only a partial list. See
  * https://www.w3.org/TR/input-events-1/#interface-InputEvent-Attributes
@@ -92,6 +94,17 @@ export function getValueFromEvent(e: Event): unknown {
   }
   const target = e.target as { value?: unknown };
   return target.value;
+}
+
+export function getStringValueFromEvent(e: Event): string {
+  const value = getValueFromEvent(e);
+  if (!isDefinedNonNullable(value)) {
+    return '';
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  return String(value);
 }
 
 export function getValueFromArtificialEvent(

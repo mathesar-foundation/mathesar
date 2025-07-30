@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconAddNew, iconForm, iconRefresh } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
@@ -10,8 +9,8 @@
   import { Button, Icon, SpinnerButton } from '@mathesar-component-library';
 
   import EmptyEntityList from './EmptyEntityList.svelte';
-  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import FormItem from './FormItem.svelte';
+  import SchemaOverviewSideSection from './SchemaOverviewSideSection.svelte';
 
   const dataFormAddEditModal = modal.spawnModalController();
   const schemaRouteContext = SchemaRouteContext.get();
@@ -21,24 +20,21 @@
   let selectedDataForm: DataForm | undefined = undefined;
 </script>
 
-<section>
-  <header>
-    <h2>{$_('forms')}</h2>
-    <div>
-      <Button
-        appearance="secondary"
-        on:click={() => dataFormAddEditModal.open()}
-      >
-        <Icon {...iconAddNew} />
-        <span>{$_('new_form')}</span>
-      </Button>
-    </div>
-  </header>
-  {#if $dataForms.isLoading}
-    <!-- TODO: Use a common skeleton -->
-    <ExplorationSkeleton />
-  {:else if $dataForms.error}
-    <ErrorBox>
+<SchemaOverviewSideSection
+  isLoading={$dataForms.isLoading}
+  hasError={!!$dataForms.error}
+>
+  <svelte:fragment slot="header">
+    {$_('forms')}
+  </svelte:fragment>
+  <svelte:fragment slot="actions">
+    <Button appearance="secondary" on:click={() => dataFormAddEditModal.open()}>
+      <Icon {...iconAddNew} />
+      <span>{$_('new_form')}</span>
+    </Button>
+  </svelte:fragment>
+  <svelte:fragment slot="errors">
+    {#if $dataForms.error}
       <p>{$dataForms.error.message}</p>
       <div>
         <SpinnerButton
@@ -54,24 +50,27 @@
           </Button>
         </a>
       </div>
-    </ErrorBox>
-  {:else if $dataForms.resolvedValue}
-    <div class="forms-list">
-      {#each [...$dataForms.resolvedValue.values()] as dataForm (dataForm.id)}
-        <FormItem
-          {dataForm}
-          deleteDataForm={() => $schemaRouteContext.removeDataForm(dataForm)}
-          editDataForm={() => {
-            selectedDataForm = dataForm;
-            dataFormAddEditModal.open();
-          }}
-        />
-      {:else}
-        <EmptyEntityList icon={iconForm} text={$_('no_forms')} />
-      {/each}
-    </div>
-  {/if}
-</section>
+    {/if}
+  </svelte:fragment>
+  <svelte:fragment slot="content">
+    {#if $dataForms.resolvedValue}
+      <div class="forms-list">
+        {#each [...$dataForms.resolvedValue.values()] as dataForm (dataForm.id)}
+          <FormItem
+            {dataForm}
+            deleteDataForm={() => $schemaRouteContext.removeDataForm(dataForm)}
+            editDataForm={() => {
+              selectedDataForm = dataForm;
+              dataFormAddEditModal.open();
+            }}
+          />
+        {:else}
+          <EmptyEntityList icon={iconForm} text={$_('no_forms')} />
+        {/each}
+      </div>
+    {/if}
+  </svelte:fragment>
+</SchemaOverviewSideSection>
 
 <AddEditDataFormModal
   controller={dataFormAddEditModal}
@@ -80,23 +79,3 @@
     selectedDataForm = undefined;
   }}
 />
-
-<style lang="scss">
-  header {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--lg1);
-
-    h2 {
-      margin: 0;
-    }
-
-    & > :global(:last-child) {
-      flex-grow: 1;
-      text-align: right;
-    }
-  }
-</style>

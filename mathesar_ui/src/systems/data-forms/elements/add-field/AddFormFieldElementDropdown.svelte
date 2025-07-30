@@ -27,16 +27,14 @@
   $: fieldColumns = [...$processedColumns.values()].map((pc) =>
     FieldColumn.fromProcessedColumn(pc),
   );
-  $: tableStructureAsyncStore = tableStructure.asyncStore;
-  $: tableStructureSubstance = $tableStructureAsyncStore.resolvedValue;
-  $: table = tableStructureSubstance?.table;
+  $: ({ table } = tableStructure);
 
   async function addColumnAsField(fc: FieldColumn, close: () => void) {
-    const result = await tableStructureAsyncStore.tick();
-    if (result.resolvedValue) {
+    const tableStructureSubstance = await tableStructure.tick();
+    if (tableStructureSubstance.resolvedValue) {
       const props = fieldColumnToEphemeralFieldProps(
         fc,
-        result.resolvedValue,
+        tableStructureSubstance.resolvedValue,
         insertionIndex,
       );
       fieldHolder.add(props);
@@ -59,8 +57,8 @@
       <Spinner />
     {:else}
       <div class="add-field-table">
-        {#if table}
-          <TableName {table} truncate={false} />
+        {#if $table}
+          <TableName table={$table} truncate={false} />
         {/if}
       </div>
       <MenuDivider />

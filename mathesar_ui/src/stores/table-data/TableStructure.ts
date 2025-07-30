@@ -1,3 +1,4 @@
+import { tick as svelteTick } from 'svelte';
 import { type Readable, derived } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
@@ -10,8 +11,11 @@ import {
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Schema } from '@mathesar/models/Schema';
 import { Table } from '@mathesar/models/Table';
-import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
-import AsyncStore from '@mathesar/stores/AsyncStore';
+import {
+  type RpcError,
+  batchRun,
+} from '@mathesar/packages/json-rpc-client-builder';
+import AsyncStore, { type AsyncStoreValue } from '@mathesar/stores/AsyncStore';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 
 import {
@@ -33,11 +37,11 @@ export interface TableStructureSubstance {
   linksToTable: TableLink[];
 }
 
-export function getTableStructureAsyncStore(tableProps: TableStructureProps) {
+function getTableStructureAsyncStore(tableProps: TableStructureProps) {
   const databaseId = tableProps.schema.database.id;
   const tableOid = tableProps.oid;
   const apiRequest = { database_id: databaseId, table_oid: tableOid };
-  return new AsyncStore(() =>
+  return new AsyncStore<void, TableStructureSubstance, RpcError>(() =>
     batchRun([
       api.tables.get_with_metadata(apiRequest),
       api.columns.list_with_metadata(apiRequest),
@@ -90,9 +94,19 @@ export class TableStructure {
 
   processedColumns: ProcessedColumnsStore;
 
+  table: Readable<Table | undefined>;
+
+  constraints: Readable<RawConstraint[]>;
+
+  linksInTable: Readable<TableLink[]>;
+
+  linksToTable: Readable<TableLink[]>;
+
   isLoading: Readable<boolean>;
 
-  asyncStore: ReturnType<typeof getTableStructureAsyncStore>;
+  errors: Readable<RpcError[]>;
+
+  private asyncStore: ReturnType<typeof getTableStructureAsyncStore>;
 
   constructor(props: TableStructureProps) {
     this.oid = props.oid;
@@ -109,5 +123,34 @@ export class TableStructure {
       this.asyncStore,
       (tableStructureStoreValue) => tableStructureStoreValue.isLoading,
     );
+    this.table = derived(
+      this.asyncStore,
+      (tableStructureStoreValue) =>
+        tableStructureStoreValue.resolvedValue?.table,
+    );
+    this.constraints = derived(
+      this.asyncStore,
+      (tableStructureStoreValue) =>
+        tableStructureStoreValue.resolvedValue?.constraints ?? [],
+    );
+    this.linksInTable = derived(
+      this.asyncStore,
+      (tableStructureStoreValue) =>
+        tableStructureStoreValue.resolvedValue?.linksInTable ?? [],
+    );
+    this.linksToTable = derived(
+      this.asyncStore,
+      (tableStructureStoreValue) =>
+        tableStructureStoreValue.resolvedValue?.linksToTable ?? [],
+    );
+    this.errors = derived(this.asyncStore, (tableStructureStoreValue) =>
+      tableStructureStoreValue.error ? [tableStructureStoreValue.error] : [],
+    );
+  }
+
+  async tick(): Promise<AsyncStoreValue<TableStructureSubstance, RpcError>> {
+    const result = await this.asyncStore.tick();
+    await svelteTick();
+    return result;
   }
 }

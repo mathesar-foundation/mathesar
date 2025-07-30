@@ -9,5 +9,5 @@ mkdocs-spellcheck[codespell]==1.1.0
 mkdocstrings==0.29.1
 mkdocstrings-python==1.16.12
 pymdown-extensions==10.16
-setuptools==75.5.0
+setuptools==78.1.1
 black==24.3.0

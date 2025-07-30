@@ -16,16 +16,15 @@
     getDataFormPageUrl,
   } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import { ButtonMenuItem, Icon } from '@mathesar-component-library';
 
   export let dataForm: DataForm;
   export let editDataForm: () => void;
   export let deleteDataForm: () => void;
 
-  $: ({ id, name, description, schema } = dataForm);
-
-  // TODO: Get base table
-  $: baseTable = { name: 'My Table' };
+  $: ({ id, name, description, schema, baseTableOId } = dataForm);
+  $: baseTable = $tablesStore.tablesMap.get(baseTableOId);
 
   $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
   $: formFilloutPageUrl = getDataFormFillPageUrl(
