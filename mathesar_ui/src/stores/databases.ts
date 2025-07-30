@@ -138,10 +138,19 @@ class DatabasesStore {
 export type DatabaseDisconnectFn = typeof databasesStore.disconnectDatabase;
 
 export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
-  new DatabasesStore(
-    generateDatabaseEntries(commonData.servers, commonData.databases),
-    commonData.current_database,
-  );
+  (() => {
+    const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
+    const servers = isInAuthenticatedContext ? commonData.servers : [];
+    const databases = isInAuthenticatedContext ? commonData.databases : [];
+    const currentDatabase = isInAuthenticatedContext
+      ? commonData.current_database
+      : null;
+
+    return new DatabasesStore(
+      generateDatabaseEntries(servers, databases),
+      currentDatabase,
+    );
+  })();
 
 /** ⚠️ This readable store contains a type assertion designed to sacrifice type
  * safety for the benefit of convenience.
