@@ -192,7 +192,7 @@ export default class AsyncStore<Props = void, T = unknown, E = string>
     }
   }
 
-  tick(): Promise<AsyncStoreValue<T, E>> {
+  getValueOnceResolved(): Promise<AsyncStoreValue<T, E>> {
     const current = get(this.value);
     if (!current.isLoading) {
       return Promise.resolve(current);
