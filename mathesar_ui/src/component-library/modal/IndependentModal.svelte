@@ -2,11 +2,10 @@
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
 
+  import focusTrap from '@mathesar-component-library-dir/common/actions/focusTrap';
   import portal from '@mathesar-component-library-dir/common/actions/portal';
   import { focusElement } from '@mathesar-component-library-dir/common/utils/domUtils';
   import Window from '@mathesar-component-library-dir/window/Window.svelte';
-
-  import { focusFirstElementInWindow } from '../window';
 
   import type { ModalCloseAction, ModalWidth } from './modalTypes';
 
@@ -21,7 +20,6 @@
   export let closeOn: ModalCloseAction[] = ['button'];
   export let canScrollBody = true;
 
-  let windowPositioner: HTMLDivElement | undefined = undefined;
   let previouslyFocusedElement: Element | undefined = undefined;
 
   $: closeOnButton = allowClose && closeOn.includes('button');
@@ -46,9 +44,6 @@
 
   function handleOpen() {
     previouslyFocusedElement = document.activeElement ?? undefined;
-    if (windowPositioner) {
-      focusFirstElementInWindow(windowPositioner);
-    }
     dispatch('open');
   }
 
@@ -89,7 +84,7 @@
       class:width-large={size === 'large'}
       in:fly={{ y: 20, duration: 150 }}
       out:fly={{ y: 20, duration: 150 }}
-      bind:this={windowPositioner}
+      use:focusTrap
     >
       <Window {canScrollBody} hasCloseButton={closeOnButton} on:close={close}>
         <div slot="title"><slot name="title" />{title ?? ''}</div>
