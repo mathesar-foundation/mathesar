@@ -7,6 +7,18 @@
 
   const dispatch = createEventDispatcher();
 
+  /**
+   * Hurl the close button way past any focusable elements that might appear
+   * within the window.
+   *
+   * When a window is opened via a modal, we auto-focus the first focusable
+   * element within the modal. We'd like that to be the first input within the
+   * window's body, not the window close button. This customized tabIndex
+   * rearranges the tab index flow such that the close button is last. Hopefully
+   * this is more intuitive to users than it being first.
+   */
+  const closeButtonTabIndex = 9999;
+
   export let title: string | undefined = undefined;
   export let hasCloseButton = true;
   export let canScrollBody = true;
@@ -34,6 +46,7 @@
           appearance="plain"
           class="close-button"
           on:click={handleCloseButtonClick}
+          tabIndex={closeButtonTabIndex}
         >
           <Icon {...iconClose} />
         </Button>
