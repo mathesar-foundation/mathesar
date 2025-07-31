@@ -28,4 +28,22 @@ def get_tab_col_info_map(tab_col_map, conn):
 
 
 def form_insert(field_info_list, values, conn):
+    """
+    Given valid field_info_list and values, inserts values into the specified fields.
+    Returns None.
+
+    field_info_list should have the folowing form:
+    [
+      {"key": "k1", "parent_key":null, "column_attnum":5, "table_oid":1234, "depth":0},
+      {"key": "k3", "parent_key":"k1", "column_attnum":3, "table_oid":4321, "depth":1},
+      {"key": "k2", "parent_key":"k1", "column_attnum":2, "table_oid":4321, "depth":1},
+    ]
+
+    values should be in the form:
+    {
+      "k1": {"type": "create"},
+      "k2": "Jane",
+      "k3": "Doe"
+    }
+    """
     return db_conn.exec_msar_func(conn, 'form_insert', json.dumps(field_info_list), json.dumps(values)).fetchone()[0]

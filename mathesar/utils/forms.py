@@ -156,12 +156,11 @@ def iterate_form_fields(fields, parent_field=None, depth=0):
 
 
 def submit_form(form_token, values):
-    form_model = Form.objects.get(id=form_token)  # TODO: change id to token.
+    form_model = Form.objects.get(token=form_token)
     field_info_list = [
         {
             "key": field.key,
             "parent_key": parent_field.key if parent_field else None,
-            "kind": field.kind,
             "column_attnum": field.column_attnum,
             "table_oid": parent_field.related_table_oid if parent_field else form_model.base_table_oid,
             "depth": depth

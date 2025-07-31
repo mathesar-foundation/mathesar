@@ -312,7 +312,7 @@ def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
 
 
 @mathesar_rpc_method(name="forms.submit", auth="anonymous")
-def submit(*, form_token: str, values: dict, **kwargs):
+def submit(*, form_token: str, values: dict, **kwargs) -> None:
     """
     Submit a form.
 

@@ -5693,7 +5693,8 @@ CREATE OR REPLACE FUNCTION msar.insert_lookup_table(field_info_list jsonb, value
 ) AS $$/*
 Returns a lookup table for given field_info_list and values_
 
-Example: Inserting into Items while creating a new book entry, adding a new Title, creating a new entry for Author, picking a Publisher.
+Example: Inserting into Items while creating a new book entry, adding a new Title,
+creating a new entry for Author, picking a Publisher.
            table_name           |                  column_names                   |                values_                 | cte_name | from_cte_name 
 --------------------------------+-------------------------------------------------+----------------------------------------+----------+---------------
  "Library Management"."Authors" | "First Name", "Last Name"                       | 'Jerome K.', 'Jerome                   | k1_cte   | 
@@ -5702,14 +5703,15 @@ Example: Inserting into Items while creating a new book entry, adding a new Titl
 
 Calling msar.form_insert() on this table would generate the following SQL:
 
-WITH k1_cte AS (INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'f_name', 'l_name' RETURNING *),
-k0_cte AS (INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *)
-INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
+WITH k1_cte AS (
+  INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'Jerome K.', 'Jerome' RETURNING *
+), k0_cte AS (
+  INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *
+) INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
 */
 WITH cte AS (
   SELECT
     fields.key::text AS key,
-    fields.kind::text AS kind, -- TODO: delete, we don't need this.
     fields.column_attnum::smallint AS column_attnum,
     pga.attname::name AS column_name,
     fields.table_oid::bigint AS table_oid,
@@ -5730,7 +5732,6 @@ WITH cte AS (
   FROM jsonb_to_recordset(field_info_list) AS fields(
     key text,
     parent_key text,
-    kind text,
     column_attnum smallint,
     table_oid bigint,
     depth integer)
@@ -5741,8 +5742,8 @@ WITH cte AS (
     ON fields.column_attnum = ANY(pgc.conkey)
     AND pgc.conrelid = fields.table_oid
     AND pgc.contype = 'f'
-  LEFT JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
-  LEFT JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
+  INNER JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
+  INNER JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
   LEFT JOIN pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
 )
 SELECT 
@@ -5756,7 +5757,32 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$
+msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$/*
+Given field_info_list and values_, generates an insert_lookup_table, builds and executes an insert statement.
+
+field_info_list should have the folowing form:
+[
+  {"key": "k1", "parent_key":null, "column_attnum":5, "table_oid":1234, "depth":0},
+  {"key": "k3", "parent_key":"k1", "column_attnum":3, "table_oid":4321, "depth":1},
+  {"key": "k2", "parent_key":"k1", "column_attnum":2, "table_oid":4321, "depth":1},
+]
+
+values_ should be in the form:
+{
+  "k1": {"type": "create"},
+  "k2": "Jane",
+  "k3": "Doe"
+}
+
+Example of the SQL generated while Inserting into Items table while creating
+a new book entry, adding a new Title, creating a new entry for Author, picking a Publisher.
+
+WITH k1_cte AS (
+  INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'Jerome K.', 'Jerome' RETURNING *
+), k0_cte AS (
+  INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *
+) INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
+*/
 DECLARE
   ins RECORD;
   insert_str text := '';
@@ -5784,9 +5810,6 @@ BEGIN
       insert_str := 'WITH ' || insert_str;
     ELSE NULL;
   END CASE;
-
-  RAISE NOTICE '%', insert_str;
-
   EXECUTE insert_str;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
