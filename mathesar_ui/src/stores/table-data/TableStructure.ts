@@ -1,4 +1,3 @@
-import { tick as svelteTick } from 'svelte';
 import { type Readable, derived } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
@@ -150,7 +149,6 @@ export class TableStructure {
 
   async tick(): Promise<AsyncStoreValue<TableStructureSubstance, RpcError>> {
     const result = await this.asyncStore.tick();
-    await svelteTick();
     return result;
   }
 }
