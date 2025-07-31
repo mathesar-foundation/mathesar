@@ -147,8 +147,10 @@ export class TableStructure {
     );
   }
 
-  async tick(): Promise<AsyncStoreValue<TableStructureSubstance, RpcError>> {
-    const result = await this.asyncStore.tick();
+  async getSubstanceOnceResolved(): Promise<
+    AsyncStoreValue<TableStructureSubstance, RpcError>
+  > {
+    const result = await this.asyncStore.getValueOnceResolved();
     return result;
   }
 }
