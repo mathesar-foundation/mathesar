@@ -1,7 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { JoinableTablesResult } from '@mathesar/api/rpc/tables';
+  import {
+    type JoinableTablesResult,
+    getLinksInThisTable,
+    getLinksToThisTable,
+  } from '@mathesar/api/rpc/tables';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
@@ -17,7 +21,6 @@
 
   import ForwardLinkCard from './ForwardLinkCard.svelte';
   import ReverseLinkCard from './ReverseLinkCard.svelte';
-  import { getLinksInThisTable, getLinksToThisTable } from './utils';
 
   const linkTableModal = modal.spawnModalController();
 
@@ -26,7 +29,12 @@
   export let currentTableColumns: Map<number, ProcessedColumn>;
 
   $: linksInThisTable = [
-    ...getLinksInThisTable(joinableTablesResult, currentTableColumns),
+    ...getLinksInThisTable(
+      joinableTablesResult,
+      new Map(
+        [...currentTableColumns.entries()].map(([id, pc]) => [id, pc.column]),
+      ),
+    ),
   ];
   $: linksFromOtherTables = [...getLinksToThisTable(joinableTablesResult)];
   $: showNullState = !linksInThisTable.length && !linksFromOtherTables.length;

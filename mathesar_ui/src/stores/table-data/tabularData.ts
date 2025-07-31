@@ -16,7 +16,6 @@ import type {
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
-import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
@@ -65,7 +64,6 @@ export interface TabularDataProps {
   database: Pick<Database, 'id'>;
   table: Table;
   meta?: Meta;
-  shareConsumer?: ShareConsumer;
   /**
    * Keys are columns ids. Values are cell values.
    *

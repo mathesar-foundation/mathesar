@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
@@ -6,7 +7,7 @@
   import { Icon, Spinner, iconError } from '@mathesar/component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { currentTablesData } from '@mathesar/stores/tables';
 
   export let constraint: RawConstraint;
@@ -20,9 +21,13 @@
     if (_constraint.type !== 'foreignkey') {
       return [];
     }
+    const database = get(databasesStore.currentDatabase);
+    if (!database) {
+      throw new Error('Current database not set');
+    }
     const referentTableColumns = await api.columns
       .list({
-        database_id: $currentDatabase.id,
+        database_id: database.id,
         table_oid: _constraint.referent_table_oid,
       })
       .run();

@@ -4,7 +4,8 @@
 
 TODO
 
-_This page provides a comprehensive list of all changes in the release._
+!!! info ""
+	This page provides a comprehensive list of all changes in the release.
 
 ## Upgrading to __VERSION__
 
@@ -32,4 +33,3 @@ TODO
 
 
 <!-- ## Maintenance -->
-
