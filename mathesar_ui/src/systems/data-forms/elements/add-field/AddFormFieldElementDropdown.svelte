@@ -30,7 +30,8 @@
   $: ({ table } = tableStructure);
 
   async function addColumnAsField(fc: FieldColumn, close: () => void) {
-    const tableStructureSubstance = await tableStructure.tick();
+    const tableStructureSubstance =
+      await tableStructure.getSubstanceOnceResolved();
     if (tableStructureSubstance.resolvedValue) {
       const props = fieldColumnToEphemeralFieldProps(
         fc,

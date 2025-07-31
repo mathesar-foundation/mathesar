@@ -41,7 +41,8 @@
   async function getDefaultNestedFields(): Promise<
     EphemeralDataFormFieldProps[]
   > {
-    const tableStructureSubstance = await linkedTableStructure.tick();
+    const tableStructureSubstance =
+      await linkedTableStructure.getSubstanceOnceResolved();
     if (tableStructureSubstance.resolvedValue) {
       return tableStructureSubstanceToEphemeralFieldProps(
         tableStructureSubstance.resolvedValue,

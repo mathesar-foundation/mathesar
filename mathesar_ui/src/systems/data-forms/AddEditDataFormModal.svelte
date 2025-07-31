@@ -65,7 +65,8 @@
       });
     } else {
       const tableStructure = new TableStructure(values.sourceTable);
-      const tableStructureSubstance = await tableStructure.tick();
+      const tableStructureSubstance =
+        await tableStructure.getSubstanceOnceResolved();
       if (tableStructureSubstance.resolvedValue) {
         const rawEpf = tableStructureSubstanceRawEphemeralForm(
           tableStructureSubstance.resolvedValue,
