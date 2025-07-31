@@ -1,11 +1,11 @@
 <script lang="ts">
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
-  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import type { TableStructure } from '@mathesar/stores/table-data';
 
   import FieldChain from './FieldChain.svelte';
 
-  export let database: Pick<Database, 'id'>;
+  export let schema: Schema;
   export let columnIds: number[];
   export let referentTable: TableStructure;
   export let onUpdate: (columnIds: number[]) => void;
@@ -18,7 +18,7 @@
     <Spinner />
   </div>
 {:else}
-  <FieldChain {database} {columnIds} columns={$processedColumns} {onUpdate} />
+  <FieldChain {schema} {columnIds} columns={$processedColumns} {onUpdate} />
 {/if}
 
 <style>
