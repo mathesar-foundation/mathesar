@@ -41,6 +41,7 @@ import {
 import { currentSchema } from './schemas';
 
 const commonData = preloadCommonData();
+const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
 
 type TablesMap = Map<Table['oid'], Table>;
 
@@ -417,6 +418,7 @@ export const currentTablesData = collapse(
     ) {
       if (
         preload &&
+        isInAuthenticatedContext &&
         commonData.current_schema === $currentSchema?.oid &&
         commonData.current_database === $currentSchema?.database.id
       ) {

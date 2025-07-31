@@ -10,7 +10,11 @@
   import RootRoute from './routes/RootRoute.svelte';
 
   const commonData = preloadCommonData();
-  void initI18n(commonData.user.display_language ?? 'en');
+  const userDisplayLanguage =
+    commonData.routing_context !== 'anonymous'
+      ? commonData.user.display_language
+      : null;
+  void initI18n(userDisplayLanguage ?? 'en');
 </script>
 
 <AppContext {commonData}>
