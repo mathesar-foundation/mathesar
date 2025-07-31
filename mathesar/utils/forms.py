@@ -160,14 +160,14 @@ def submit_form(form_token, values):
     field_info_list = [
         {
             "key": field.key,
-            "parent_key": parent_field.key,
+            "parent_key": parent_field.key if parent_field else None,
             "kind": field.kind,
             "column_attnum": field.column_attnum,
             "table_oid": parent_field.related_table_oid if parent_field else form_model.base_table_oid,
             "depth": depth
         } for field, parent_field, depth in iterate_form_fields(form_model.fields.filter(parent_field__isnull=True))
     ]
-    with form_model.associated_role.connection as conn:
+    with form_model.connection as conn:
         form_insert(field_info_list, values, conn)
 
 
