@@ -9,12 +9,12 @@
   import type { Appearance } from '@mathesar-component-library/types';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
+  import type { FkField } from '../data-form-utilities/FkField';
   import { tableStructureSubstanceToEphemeralFieldProps } from '../data-form-utilities/transformers';
   import type { EphemeralDataFormFieldProps } from '../data-form-utilities/types';
 
   export let dataFormManager: EditableDataFormManager;
-  export let dataFormField: EphermeralFkField;
+  export let dataFormField: FkField;
   export let apperance: Appearance = 'outcome';
 
   $: ({ interactionRule, relatedTableOid } = dataFormField);

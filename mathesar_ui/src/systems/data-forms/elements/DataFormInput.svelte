@@ -8,11 +8,11 @@
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
-  import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
+  import type { FkField } from '../data-form-utilities/FkField';
   import type { ScalarField } from '../data-form-utilities/ScalarField';
 
   export let dataFormManager: DataFormManager;
-  export let dataFormField: ScalarField | EphermeralFkField;
+  export let dataFormField: ScalarField | FkField;
   export let isSelected: boolean;
 
   $: editableDataFormManager =

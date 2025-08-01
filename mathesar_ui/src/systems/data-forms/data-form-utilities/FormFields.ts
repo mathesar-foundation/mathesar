@@ -10,13 +10,13 @@ import {
 import { WritableSet } from '@mathesar-component-library';
 
 import type { DataFormStructure } from './DataFormStructure';
-// eslint-disable-next-line import/no-cycle
-import { EphermeralFkField } from './EphemeralFkField';
 import type { FieldColumn } from './FieldColumn';
 import type {
   DataFormFieldFkInputValueHolder,
   DataFormFieldInputValueHolder,
 } from './FieldValueHolder';
+// eslint-disable-next-line import/no-cycle
+import { FkField } from './FkField';
 import { ScalarField } from './ScalarField';
 import type {
   EdfFieldListDetail,
@@ -37,7 +37,7 @@ function fieldPropToEphemeralField(
     });
   }
 
-  return new EphermeralFkField(holder, fieldProps, (detail) => {
+  return new FkField(holder, fieldProps, (detail) => {
     onChange(detail);
   });
 }
@@ -128,7 +128,7 @@ export class FormFields {
         function resubscribe() {
           unsubFieldValueStores.forEach((u) => u());
           const fkFields = [...get(fieldSet).values()].filter(
-            (f): f is EphermeralFkField => f.kind !== 'scalar_column',
+            (f): f is FkField => f.kind !== 'scalar_column',
           );
           const unsubUserActions = fkFields.map((item) =>
             item.fieldValueHolder.userAction.subscribe(update),

@@ -1,12 +1,8 @@
-import type {
-  RawDataForm,
-  RawDataFormField,
-  RawForeignKeyDataFormField,
-} from '@mathesar/api/rpc/forms';
+import type { RawDataForm, RawDataFormField } from '@mathesar/api/rpc/forms';
 
 import type { DataFormStructure } from './DataFormStructure';
-import type { EphermeralFkField } from './EphemeralFkField';
 import type { FieldColumn } from './FieldColumn';
+import type { FkField, FkFieldProps } from './FkField';
 import type { ScalarField, ScalarFieldProps } from './ScalarField';
 
 export interface AbstractEphemeralFieldProps {
@@ -23,22 +19,11 @@ export interface AbstractEphemeralColumnBasedFieldProps
   fieldColumn: FieldColumn;
 }
 
-export interface EphemeralFkFieldProps
-  extends AbstractEphemeralColumnBasedFieldProps {
-  kind: RawForeignKeyDataFormField['kind'];
-  interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
-  relatedTableOid: number;
-  nestedFields: Iterable<EphemeralDataFormFieldProps>;
-}
-
-export type EphemeralDataFormFieldProps =
-  | ScalarFieldProps
-  | EphemeralFkFieldProps;
-
-export type EphemeralDataFormField = ScalarField | EphermeralFkField;
+export type EphemeralDataFormFieldProps = ScalarFieldProps | FkFieldProps;
+export type EphemeralDataFormField = ScalarField | FkField;
 
 // This may contain more types in the future, such as ReverseFkField
-export type ParentEphemeralDataFormField = EphermeralFkField;
+export type ParentEphemeralDataFormField = FkField;
 
 export interface DataFormStructureProps {
   baseTableOid: number;
@@ -100,11 +85,11 @@ export interface EdfScalarFieldPropChange {
 
 export type EdfFkFieldPropChange =
   | {
-      target: EphermeralFkField;
+      target: FkField;
       prop: EdfBaseFieldProps | 'interactionRule';
     }
   | {
-      target: EphermeralFkField;
+      target: FkField;
       prop: 'nestedFields';
       detail: EdfFieldListDetail;
     };

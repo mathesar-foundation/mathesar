@@ -6,10 +6,10 @@
   import { Spinner } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
+  import type { FkField } from '../data-form-utilities/FkField';
 
   export let dataFormManager: EditableDataFormManager;
-  export let dataFormField: EphermeralFkField;
+  export let dataFormField: FkField;
 
   $: ({ relatedTableOid } = dataFormField);
   $: linkedTableStructure = dataFormManager.getTableStructure(relatedTableOid);

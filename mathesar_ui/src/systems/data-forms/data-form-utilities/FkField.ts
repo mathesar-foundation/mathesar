@@ -8,14 +8,21 @@ import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 // eslint-disable-next-line import/no-cycle
 import { FormFields } from './FormFields';
 import type {
+  AbstractEphemeralColumnBasedFieldProps,
   EdfBaseFieldProps,
   EdfFkFieldPropChange,
   EdfNestedFieldChanges,
   EphemeralDataFormFieldProps,
-  EphemeralFkFieldProps,
 } from './types';
 
-export class EphermeralFkField extends AbstractEphermeralColumnBasedField {
+export interface FkFieldProps extends AbstractEphemeralColumnBasedFieldProps {
+  kind: RawForeignKeyDataFormField['kind'];
+  interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
+  relatedTableOid: number;
+  nestedFields: Iterable<EphemeralDataFormFieldProps>;
+}
+
+export class FkField extends AbstractEphermeralColumnBasedField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
 
   readonly fieldValueHolder: DataFormFieldFkInputValueHolder;
@@ -36,7 +43,7 @@ export class EphermeralFkField extends AbstractEphermeralColumnBasedField {
 
   constructor(
     holder: FormFields,
-    props: EphemeralFkFieldProps,
+    props: FkFieldProps,
     onChange: (e: EdfFkFieldPropChange | EdfNestedFieldChanges) => unknown,
   ) {
     super(holder, props);

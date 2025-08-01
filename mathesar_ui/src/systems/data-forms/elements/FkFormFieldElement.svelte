@@ -7,7 +7,7 @@
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
-  import type { EphermeralFkField } from '../data-form-utilities/EphemeralFkField';
+  import type { FkField } from '../data-form-utilities/FkField';
 
   import DataFormFieldsContainer from './DataFormFieldsContainer.svelte';
   import DataFormInput from './DataFormInput.svelte';
@@ -17,7 +17,7 @@
 
   export let isSelected: boolean;
   export let dataFormManager: DataFormManager;
-  export let dataFormField: EphermeralFkField;
+  export let dataFormField: FkField;
 
   $: editableDataFormManager =
     dataFormManager instanceof EditableDataFormManager
