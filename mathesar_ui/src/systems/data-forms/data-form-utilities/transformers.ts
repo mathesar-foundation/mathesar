@@ -1,8 +1,8 @@
 import type {
   RawDataForm,
+  RawDataFormField,
   RawDataFormSource,
   RawEphemeralDataForm,
-  RawEphemeralDataFormField,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
@@ -89,7 +89,7 @@ function getColumnDetailFromFormSource(
 }
 
 export function rawEphemeralFieldToEphemeralFieldProps(
-  rawEphemeralField: RawEphemeralDataFormField,
+  rawEphemeralField: RawDataFormField,
   parentTableOid: number,
   formSource: RawDataFormSource,
 ): EphemeralDataFormFieldProps {
@@ -174,7 +174,7 @@ function fieldColumnToRawDataFormField(
   fc: FieldColumn,
   tableStructureSubstance: TableStructureSubstance,
   index: number,
-): RawEphemeralDataFormField {
+): RawDataFormField {
   const baseProps = {
     key: getGloballyUniqueId(),
     label: fc.column.name,
@@ -206,7 +206,7 @@ function fieldColumnToRawDataFormField(
 
 function tableStructureSubstanceToRawEphemeralField(
   tableStructureSubstance: TableStructureSubstance,
-): RawEphemeralDataFormField[] {
+): RawDataFormField[] {
   return [...tableStructureSubstance.processedColumns.values()]
     .filter((pc) => !pc.column.default?.is_dynamic)
     .map((c, index) => {

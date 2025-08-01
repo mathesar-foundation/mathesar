@@ -1,6 +1,6 @@
 import { type Readable, type Updater, get, writable } from 'svelte/store';
 
-import type { RawEphemeralDataFormField } from '@mathesar/api/rpc/forms';
+import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 
 import type { FormFields } from './FormFields';
 import type { AbstractEphemeralFieldProps, EdfBaseFieldProps } from './types';
@@ -73,7 +73,7 @@ export abstract class AbstractEphemeralField {
 
   protected abstract bubblePropChange(e: EdfBaseFieldProps): unknown;
 
-  abstract toRawEphemeralField(): RawEphemeralDataFormField;
+  abstract toRawEphemeralField(): RawDataFormField;
 
   protected getBaseFieldRawJson() {
     return {

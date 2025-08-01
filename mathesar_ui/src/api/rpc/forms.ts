@@ -9,11 +9,7 @@ export interface RichTextJson {
   text: string;
 }
 
-/**
- * Ephemeral raw types
- */
-
-export interface RawEphemeralDataFormBaseField {
+interface RawDataFormBaseField {
   key: string;
   index: number;
   label?: string | null;
@@ -24,8 +20,7 @@ export interface RawEphemeralDataFormBaseField {
   is_required: boolean;
 }
 
-export interface RawEphemeralScalarDataFormField
-  extends RawEphemeralDataFormBaseField {
+export interface RawScalarDataFormField extends RawDataFormBaseField {
   kind: 'scalar_column';
   column_attnum: number;
 }
@@ -36,23 +31,22 @@ export const fkFieldInteractionRules = [
   'must_create',
 ] as const;
 
-export interface RawEphemeralForeignKeyDataFormField
-  extends RawEphemeralDataFormBaseField {
+export interface RawForeignKeyDataFormField extends RawDataFormBaseField {
   kind: 'foreign_key';
   column_attnum: number;
   related_table_oid: number;
   fk_interaction_rule: (typeof fkFieldInteractionRules)[number];
-  child_fields: RawEphemeralDataFormField[] | null;
+  child_fields: RawDataFormField[] | null;
 }
 
-export type RawEphemeralDataFormField =
-  | RawEphemeralScalarDataFormField
-  | RawEphemeralForeignKeyDataFormField;
+export type RawDataFormField =
+  | RawScalarDataFormField
+  | RawForeignKeyDataFormField;
 
 export interface RawDataFormStructure {
   header_title: RichTextJson;
   header_subtitle: RichTextJson | null;
-  fields: RawEphemeralDataFormField[];
+  fields: RawDataFormField[];
   submit_message: RichTextJson | null;
   submit_redirect_url: string | null;
   submit_button_label: string | null;
@@ -68,20 +62,9 @@ export interface RawEphemeralDataForm extends RawDataFormStructure {
   version: number;
 }
 
-/**
- * Persisted raw types
- */
-
-export type RawScalarDataFormField = RawEphemeralScalarDataFormField;
-export type RawForeignKeyDataFormField = RawEphemeralForeignKeyDataFormField;
-
 export interface ReplacableRawDataForm extends RawEphemeralDataForm {
   id: number;
 }
-
-export type RawDataFormField =
-  | RawScalarDataFormField
-  | RawForeignKeyDataFormField;
 
 export interface RawDataForm extends RawEphemeralDataForm {
   id: number;

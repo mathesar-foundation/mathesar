@@ -1,9 +1,8 @@
 import type {
   RawDataForm,
-  RawEphemeralDataFormField,
-  RawEphemeralForeignKeyDataFormField,
-  RawEphemeralScalarDataFormField,
+  RawDataFormField,
   RawForeignKeyDataFormField,
+  RawScalarDataFormField,
 } from '@mathesar/api/rpc/forms';
 
 import type { EphemeralDataForm } from './EphemeralDataForm';
@@ -12,27 +11,27 @@ import type { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
 
 export interface AbstractEphemeralFieldProps {
-  key: RawEphemeralDataFormField['key'];
-  label: RawEphemeralDataFormField['label'];
-  help: RawEphemeralDataFormField['help'];
-  index: RawEphemeralDataFormField['index'];
-  styling: RawEphemeralDataFormField['styling'];
+  key: RawDataFormField['key'];
+  label: RawDataFormField['label'];
+  help: RawDataFormField['help'];
+  index: RawDataFormField['index'];
+  styling: RawDataFormField['styling'];
 }
 
 export interface AbstractEphemeralColumnBasedFieldProps
   extends AbstractEphemeralFieldProps {
-  isRequired: RawEphemeralDataFormField['is_required'];
+  isRequired: RawDataFormField['is_required'];
   fieldColumn: FieldColumn;
 }
 
 export interface EphemeralScalarFieldProps
   extends AbstractEphemeralColumnBasedFieldProps {
-  kind: RawEphemeralScalarDataFormField['kind'];
+  kind: RawScalarDataFormField['kind'];
 }
 
 export interface EphemeralFkFieldProps
   extends AbstractEphemeralColumnBasedFieldProps {
-  kind: RawEphemeralForeignKeyDataFormField['kind'];
+  kind: RawForeignKeyDataFormField['kind'];
   interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
   relatedTableOid: number;
   nestedFields: Iterable<EphemeralDataFormFieldProps>;

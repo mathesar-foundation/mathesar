@@ -1,5 +1,5 @@
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { RawEphemeralDataFormBaseField } from '@mathesar/api/rpc/forms';
+import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
@@ -38,9 +38,7 @@ export class FieldColumn {
     this.abstractType = getAbstractTypeForDbType(this.column.type);
   }
 
-  getInputComponentAndProps(
-    styling?: RawEphemeralDataFormBaseField['styling'],
-  ) {
+  getInputComponentAndProps(styling?: RawDataFormField['styling']) {
     let { cellInfo } = this.abstractType;
     if (cellInfo.type === 'string') {
       cellInfo = {

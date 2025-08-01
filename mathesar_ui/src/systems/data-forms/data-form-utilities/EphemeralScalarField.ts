@@ -1,9 +1,6 @@
 import { _ } from 'svelte-i18n';
 
-import type {
-  RawEphemeralScalarDataFormField,
-  RawScalarDataFormField,
-} from '@mathesar/api/rpc/forms';
+import type { RawScalarDataFormField } from '@mathesar/api/rpc/forms';
 
 import { AbstractEphermeralColumnBasedField } from './AbstractEphmeralColumnBasedField';
 import type { FormFields } from './FormFields';
@@ -34,7 +31,7 @@ export class EphermeralScalarField extends AbstractEphermeralColumnBasedField {
     });
   }
 
-  toRawEphemeralField(): RawEphemeralScalarDataFormField {
+  toRawEphemeralField(): RawScalarDataFormField {
     return {
       ...this.getBaseFieldRawJson(),
       kind: 'scalar_column',

@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import {
-    type RawEphemeralForeignKeyDataFormField,
+    type RawForeignKeyDataFormField,
     fkFieldInteractionRules,
   } from '@mathesar/api/rpc/forms';
   import { Select } from '@mathesar-component-library';
@@ -21,7 +21,7 @@
   $: linkedTableStructure = dataFormManager.getTableStructure(relatedTableOid);
 
   const interactionRuleText: Record<
-    RawEphemeralForeignKeyDataFormField['fk_interaction_rule'],
+    RawForeignKeyDataFormField['fk_interaction_rule'],
     { short: string; help: string }
   > = {
     must_create: {

@@ -1,10 +1,7 @@
 import { type Readable, get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type {
-  RawEphemeralForeignKeyDataFormField,
-  RawForeignKeyDataFormField,
-} from '@mathesar/api/rpc/forms';
+import type { RawForeignKeyDataFormField } from '@mathesar/api/rpc/forms';
 
 import { AbstractEphermeralColumnBasedField } from './AbstractEphmeralColumnBasedField';
 import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
@@ -90,7 +87,7 @@ export class EphermeralFkField extends AbstractEphermeralColumnBasedField {
     });
   }
 
-  toRawEphemeralField(): RawEphemeralForeignKeyDataFormField {
+  toRawEphemeralField(): RawForeignKeyDataFormField {
     return {
       ...this.getBaseFieldRawJson(),
       kind: 'foreign_key',
