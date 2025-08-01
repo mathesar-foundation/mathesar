@@ -4,7 +4,6 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import type RecordStore from '@mathesar/stores/RecordStore';
 
-  import RecordViewContent from './RecordViewContent.svelte';
   import RecordViewLoadingSpinner from './RecordViewLoadingSpinner.svelte';
 
   export let record: RecordStore;
@@ -21,7 +20,7 @@
 {#if isLoading}
   <RecordViewLoadingSpinner />
 {:else if canViewTable}
-  <RecordViewContent {record} />
+  <slot />
 {:else}
   <div class="no-access">
     <WarningBox fullWidth>

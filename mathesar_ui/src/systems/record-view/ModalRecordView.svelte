@@ -5,12 +5,15 @@
     type ModalController,
   } from '@mathesar-component-library';
 
-  import RecordView from './RecordView.svelte';
+  import RecordViewContent from './RecordViewContent.svelte';
+  import RecordViewGatekeeper from './RecordViewGatekeeper.svelte';
 
   export let controller: ModalController<RecordStore>;
 </script>
 
 <ControlledModal {controller} let:options={record}>
   <span slot="title"> FOO </span>
-  <RecordView {record} />
+  <RecordViewGatekeeper {record}>
+    <RecordViewContent {record} />
+  </RecordViewGatekeeper>
 </ControlledModal>
