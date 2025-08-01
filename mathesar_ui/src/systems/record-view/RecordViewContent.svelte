@@ -18,9 +18,10 @@
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
 
+  import type RecordStore from '../../stores/RecordStore';
+
   import DirectField from './DirectField.svelte';
   import RecordPageLoadingSpinner from './RecordViewLoadingSpinner.svelte';
-  import type RecordStore from './RecordStore';
   import Widgets from './Widgets.svelte';
 
   export let record: RecordStore;

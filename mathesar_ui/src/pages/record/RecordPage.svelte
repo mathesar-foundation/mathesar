@@ -3,8 +3,8 @@
 
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import type RecordStore from './RecordStore';
-  import RecordView from './RecordView.svelte';
+  import type RecordStore from '@mathesar/stores/RecordStore';
+  import RecordView from '@mathesar/systems/record-view/RecordView.svelte';
 
   export let record: RecordStore;
 

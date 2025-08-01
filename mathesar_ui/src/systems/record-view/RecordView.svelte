@@ -3,12 +3,12 @@
 
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import type { Table } from '@mathesar/models/Table';
+  import type RecordStore from '@mathesar/stores/RecordStore';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
 
   import RecordViewContent from './RecordViewContent.svelte';
   import RecordViewLoadingSpinner from './RecordViewLoadingSpinner.svelte';
-  import type RecordStore from './RecordStore';
 
   export let record: RecordStore;
 

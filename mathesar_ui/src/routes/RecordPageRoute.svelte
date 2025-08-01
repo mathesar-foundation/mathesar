@@ -2,7 +2,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { Table } from '@mathesar/models/Table';
   import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
-  import RecordStore from '@mathesar/pages/record/RecordStore';
+  import RecordStore from '@mathesar/stores/RecordStore';
 
   export let table: Table;
   export let recordPk: string;
