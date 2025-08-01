@@ -79,7 +79,7 @@ def create_form(form_def, user):
     associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
     form_model = Form.objects.create(
         **({"id": form_def["id"]} if form_def.get("id") else {}),  # we get an id during replace
-        token=form_def.get("token", uuid4()),
+        token=uuid4(),
         name=form_def["name"],
         description=form_def.get("description"),
         version=form_def["version"],
@@ -123,8 +123,8 @@ def create_form(form_def, user):
     return form_model
 
 
-def get_form(form_id):
-    form_model = Form.objects.get(id=form_id)
+def get_form(form_token):
+    form_model = Form.objects.get(token=form_token)
     return form_model
 
 
@@ -136,6 +136,20 @@ def get_form_source_info(form_token):
 
 def list_forms(database_id, schema_oid):
     return Form.objects.filter(database__id=database_id, schema_oid=schema_oid)
+
+
+def regen_form_token(form_id):
+    form_model = Form.objects.get(id=form_id)
+    form_model.token = uuid4()
+    form_model.save()
+    return form_model.token
+
+
+def set_form_public_setting(form_id, publish_public):
+    form_model = Form.objects.get(id=form_id)
+    form_model.publish_public = publish_public
+    form_model.save()
+    return form_model
 
 
 def delete_form(form_id):
