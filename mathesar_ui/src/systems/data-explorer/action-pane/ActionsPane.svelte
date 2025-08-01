@@ -3,6 +3,7 @@
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
+  import SaveButton from '@mathesar/components/SaveButton.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
@@ -15,8 +16,6 @@
 
   import type QueryManager from '../QueryManager';
   import type { ColumnWithLink } from '../utils';
-
-  import SaveButton from './SaveButton.svelte';
 
   const saveModalController = modal.spawnModalController();
 
@@ -127,7 +126,11 @@
 
     <svelte:fragment slot="actions-right">
       {#if currentTable}
-        <SaveButton {canSave} onSave={saveExistingOrCreateNew} />
+        <SaveButton
+          {canSave}
+          unsavedChangesText={$_('exploration_has_unsaved_changes')}
+          onSave={saveExistingOrCreateNew}
+        />
 
         <Button
           appearance="secondary"

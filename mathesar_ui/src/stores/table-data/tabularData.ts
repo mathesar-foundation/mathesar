@@ -1,11 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import {
-  type Readable,
-  type Writable,
-  derived,
-  get,
-  writable,
-} from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
@@ -22,7 +16,6 @@ import type {
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
-import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
@@ -71,7 +64,6 @@ export interface TabularDataProps {
   database: Pick<Database, 'id'>;
   table: Table;
   meta?: Meta;
-  shareConsumer?: ShareConsumer;
   /**
    * Keys are columns ids. Values are cell values.
    *
@@ -145,7 +137,10 @@ export class TabularData {
       contextualFilters,
       loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
-    this.display = new Display(this.recordsData);
+    this.display = new Display({
+      meta: this.meta,
+      recordsData: this.recordsData,
+    });
 
     this.table = props.table;
 
@@ -291,19 +286,6 @@ export class TabularData {
       return g.withoutColumns(extractedColumnIds);
     });
     return this.refresh();
-  }
-
-  addEmptyRecord() {
-    void this.recordsData.addEmptyRecord();
-    const firstEditableColumnInDraftRow = [
-      ...get(this.processedColumns).values(),
-    ]
-      .map((pc) => pc.withoutEnhancedPkCell())
-      .find((pc) => pc.isEditable);
-    const columnId = firstEditableColumnInDraftRow
-      ? String(firstEditableColumnInDraftRow.id)
-      : undefined;
-    this.selection.update((s) => s.ofNewRecordDataEntryCell(columnId));
   }
 
   destroy(): void {
