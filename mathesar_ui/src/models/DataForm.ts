@@ -1,4 +1,4 @@
-import { type Readable, derived, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
 import type {
@@ -86,6 +86,36 @@ export class DataForm {
         buttonLabel: props.rawDataForm.submit_button_label,
       },
     });
+  }
+
+  // TODO_FORMS: Have a separate RPC method for this
+  // Updating name & desc should not validate the entire form w.r.t associated_role
+  // & shouldn't replace fields
+  updateNameAndDesc(name: string, description: string | null) {
+    const dataFormDef = get(this.toRawDataFormStore());
+    const promise = api.forms
+      .replace({
+        new_form: {
+          ...dataFormDef,
+          id: this.id,
+          name,
+          description,
+        },
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then((rawDataForm) => {
+            this._name.set(rawDataForm.name);
+            this._description.set(rawDataForm.description);
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
   }
 
   replaceDataForm(

@@ -58,11 +58,7 @@
   async function save(values: FilledFormValues<typeof form>) {
     let newDataForm: DataForm | undefined;
     if (dataForm) {
-      await dataForm.replaceDataForm({
-        ...get(dataForm.toRawDataFormStore()),
-        name: values.name,
-        description: values.description,
-      });
+      await dataForm.updateNameAndDesc(values.name, values.description);
     } else {
       const tableStructure = new TableStructure(values.sourceTable);
       const tableStructureSubstance =
