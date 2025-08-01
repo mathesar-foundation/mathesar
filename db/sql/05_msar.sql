@@ -5635,7 +5635,19 @@ CREATE OR REPLACE FUNCTION msar.list_by_record_summaries(
   table_record_summary_templates jsonb DEFAULT NULL
 ) RETURNS jsonb
 LANGUAGE plpgsql STABLE
-AS $$
+AS $$/*
+Get record summaries from a table, optionally filtering by a search term. Results are sorted by
+the summary text.
+
+Args:
+  tab_id: The OID of the table whose record summaries we'll get.
+  limit_: The maximum number of record summaries to return.
+  offset_: The number of record summaries to skip before returning results.
+  search_: A search term to filter the summaries by. If provided, only summaries containing this
+    term (case insensitive) in their text will be returned.
+  table_record_summary_templates: (optional) A JSON object that maps table OIDs to record summary
+    templates.
+*/
 DECLARE
   search_where_clause text := '';
   final_sql text;
