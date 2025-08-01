@@ -90,21 +90,18 @@ export default function focusTrap(container: HTMLElement): ActionReturn {
     // "disabled" being toggled).
     const elements = getFocusableElements(container);
 
-    const firstElement = elements.at(0);
-    const lastElement = elements.at(-1);
-    if (!firstElement || !lastElement) return;
-
-    // Wrapping around from last to first
-    if (!event.shiftKey && event.target === lastElement) {
-      event.preventDefault();
-      focusElement(firstElement);
+    function wrap(index: number): number {
+      return ((index % elements.length) + elements.length) % elements.length;
     }
 
-    // Wrapping around from first to last
-    if (event.shiftKey && event.target === firstElement) {
-      event.preventDefault();
-      focusElement(lastElement);
-    }
+    const currentIndex = elements.findIndex((e) => e === event.target);
+    const increment = event.shiftKey ? -1 : 1;
+    const targetIndex = wrap(currentIndex + increment);
+    const targetElement = elements.at(targetIndex);
+    if (!targetElement) return;
+
+    event.preventDefault();
+    focusElement(targetElement);
   }
 
   async function autoFocusFirstElement() {
