@@ -149,7 +149,7 @@ def set_form_public_setting(form_id, publish_public):
     form_model = Form.objects.get(id=form_id)
     form_model.publish_public = publish_public
     form_model.save()
-    return form_model
+    return form_model.publish_public
 
 
 def delete_form(form_id):

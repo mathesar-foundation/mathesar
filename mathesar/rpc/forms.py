@@ -305,7 +305,7 @@ def regenerate_token(*, form_id: int, **kwargs) -> str:
 
 
 @mathesar_rpc_method(name="forms.set_publish_public", auth="login")
-def set_publish_public(*, form_id: int, publish_public: bool, **kwargs) -> FormInfo:
+def set_publish_public(*, form_id: int, publish_public: bool, **kwargs) -> bool:
     """
     Set/Unset the form to be publicly shareable.
 
@@ -314,10 +314,10 @@ def set_publish_public(*, form_id: int, publish_public: bool, **kwargs) -> FormI
         publish_public: Specify whether to share the form publicly.
 
     Returns:
-        Form details for a given form_id.
+        The updated state of public sharing for the form.
     """
-    form_model = set_form_public_setting(form_id, publish_public)
-    return FormInfo.from_model(form_model)
+    updated_publish_public = set_form_public_setting(form_id, publish_public)
+    return updated_publish_public
 
 
 @mathesar_rpc_method(name="forms.delete", auth="login")
