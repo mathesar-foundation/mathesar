@@ -1,3 +1,8 @@
+<!--
+@component
+
+TODO: Resolve code duplication between this file and RecordViewContent.svelte.
+-->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
@@ -14,12 +19,10 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
-
-  import type RecordStore from '../../stores/RecordStore';
-
-  import DirectField from './DirectField.svelte';
-  import RecordPageLoadingSpinner from './RecordViewLoadingSpinner.svelte';
-  import Widgets from './Widgets.svelte';
+  import type RecordStore from '@mathesar/stores/RecordStore';
+  import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
+  import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
+  import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
 
   export let record: RecordStore;
 
@@ -115,7 +118,7 @@
   </InsetPageLayout>
 
   {#await getJoinableTablesResult(table.oid)}
-    <RecordPageLoadingSpinner />
+    <RecordViewLoadingSpinner />
   {:then joinableTablesResult}
     <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
   {/await}
