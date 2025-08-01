@@ -9,7 +9,11 @@ import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/Rec
 import { buildRecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 
+import { TableStructure } from './table-data';
+
 export default class RecordStore {
+  tableStructure: TableStructure;
+
   fetchRequest = writable<RequestStatus | undefined>(undefined);
 
   /** Keys are column ids */
@@ -24,6 +28,8 @@ export default class RecordStore {
   recordPk: string;
 
   constructor({ table, recordPk }: { table: Table; recordPk: string }) {
+    const { schema } = table;
+    this.tableStructure = new TableStructure({ schema, oid: table.oid });
     this.table = table;
     this.recordPk = recordPk;
     this.summary = writable('');

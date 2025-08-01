@@ -4,6 +4,7 @@
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
+
   import RecordView from './RecordView.svelte';
 
   export let controller: ModalController<RecordStore>;
