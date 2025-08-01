@@ -1,17 +1,15 @@
 <script lang="ts">
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
   import RecordStore from '@mathesar/pages/record/RecordStore';
 
-  export let database: Database;
-  export let schema: Schema;
   export let table: Table;
   export let recordPk: string;
 
-  $: record = new RecordStore({ database, table, recordPk });
+  $: record = new RecordStore({ table, recordPk });
+  $: schema = table.schema;
+  $: database = schema.database;
   $: ({ summary, fetchRequest } = record);
 </script>
 
