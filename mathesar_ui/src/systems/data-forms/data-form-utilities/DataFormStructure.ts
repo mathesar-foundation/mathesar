@@ -16,7 +16,7 @@ import type {
   EphemeralDataFormProps,
 } from './types';
 
-export class EphemeralDataForm {
+export class DataFormStructure {
   readonly baseTableOid;
 
   readonly schemaOid;

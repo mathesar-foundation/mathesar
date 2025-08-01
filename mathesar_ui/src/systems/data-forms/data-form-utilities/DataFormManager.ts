@@ -7,18 +7,18 @@ import { Table } from '@mathesar/models/Table';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
-import { EphemeralDataForm } from './EphemeralDataForm';
+import { DataFormStructure } from './DataFormStructure';
 import type { EphemeralDataFormField, EphemeralDataFormProps } from './types';
 
 export interface DataFormManager {
-  ephemeralDataForm: EphemeralDataForm;
+  ephemeralDataForm: DataFormStructure;
 }
 
 export class ReadonlyDataFormManager implements DataFormManager {
   ephemeralDataForm;
 
   constructor(ephemeralDataFormProps: EphemeralDataFormProps) {
-    this.ephemeralDataForm = new EphemeralDataForm(ephemeralDataFormProps);
+    this.ephemeralDataForm = new DataFormStructure(ephemeralDataFormProps);
   }
 }
 
@@ -57,7 +57,7 @@ export class EditableDataFormManager implements DataFormManager {
     schema: Schema,
     tableStructureCache: CacheManager<Table['oid'], TableStructure>,
   ) {
-    this.ephemeralDataForm = new EphemeralDataForm(
+    this.ephemeralDataForm = new DataFormStructure(
       ephemeralDataFormProps,
       (e) => {
         if (e.prop === 'fields' || e.prop === 'nestedFields') {

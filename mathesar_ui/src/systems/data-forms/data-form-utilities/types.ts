@@ -5,7 +5,7 @@ import type {
   RawScalarDataFormField,
 } from '@mathesar/api/rpc/forms';
 
-import type { EphemeralDataForm } from './EphemeralDataForm';
+import type { DataFormStructure } from './DataFormStructure';
 import type { EphermeralFkField } from './EphemeralFkField';
 import type { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
@@ -83,11 +83,11 @@ export type EdfDirectProps =
 
 export type EdfChange =
   | {
-      target: EphemeralDataForm;
+      target: DataFormStructure;
       prop: EdfDirectProps;
     }
   | {
-      target: EphemeralDataForm;
+      target: DataFormStructure;
       prop: 'fields';
       detail: EdfFieldListDetail;
     };

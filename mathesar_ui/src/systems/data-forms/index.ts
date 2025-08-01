@@ -1,4 +1,4 @@
-export { EphemeralDataForm } from './data-form-utilities/EphemeralDataForm';
+export { DataFormStructure } from './data-form-utilities/DataFormStructure';
 export { default as DataFormCanvas } from './DataFormCanvas.svelte';
 export {
   type DataFormManager,

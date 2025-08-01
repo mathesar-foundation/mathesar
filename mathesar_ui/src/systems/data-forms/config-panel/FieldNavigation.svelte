@@ -5,7 +5,7 @@
   import { Button, Icon, iconShowMore } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
-  import { EphemeralDataForm } from '../data-form-utilities/EphemeralDataForm';
+  import { DataFormStructure } from '../data-form-utilities/DataFormStructure';
   import type { EphemeralDataFormField } from '../data-form-utilities/types';
 
   import FieldNavigationElement from './FieldNavigationElement.svelte';
@@ -14,10 +14,10 @@
   export let field: EphemeralDataFormField | undefined = undefined;
 
   $: parent = field?.holder.parent;
-  $: parentField = parent instanceof EphemeralDataForm ? undefined : parent;
+  $: parentField = parent instanceof DataFormStructure ? undefined : parent;
   $: parentOfParentField = parentField?.holder.parent;
   $: parentFieldOfParentField =
-    parentOfParentField instanceof EphemeralDataForm
+    parentOfParentField instanceof DataFormStructure
       ? undefined
       : parentOfParentField;
 

@@ -9,7 +9,7 @@ import {
 
 import { WritableSet } from '@mathesar-component-library';
 
-import type { EphemeralDataForm } from './EphemeralDataForm';
+import type { DataFormStructure } from './DataFormStructure';
 // eslint-disable-next-line import/no-cycle
 import { EphermeralFkField } from './EphemeralFkField';
 import { EphermeralScalarField } from './EphemeralScalarField';
@@ -56,7 +56,7 @@ export class FormFields {
   >;
 
   constructor(
-    parent: EphemeralDataForm | ParentEphemeralDataFormField,
+    parent: DataFormStructure | ParentEphemeralDataFormField,
     fieldProps: Iterable<EphemeralDataFormFieldProps>,
     onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown,
   ) {
