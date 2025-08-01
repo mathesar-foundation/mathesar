@@ -7,21 +7,24 @@ import {
   type AbstractColumnBasedFieldProps,
 } from './AbstractColumnBasedField';
 import type { FormFields } from './FormFields';
+import type { FormSource } from './FormSource';
 import type { EdfBaseFieldProps, EdfScalarFieldPropChange } from './types';
 
-export interface ScalarFieldProps extends AbstractColumnBasedFieldProps {
+interface ScalarFieldProps extends AbstractColumnBasedFieldProps {
   kind: RawScalarDataFormField['kind'];
 }
+
+export type ScalarFieldOnChange = (e: EdfScalarFieldPropChange) => unknown;
 
 export class ScalarField extends AbstractColumnBasedField {
   readonly kind: RawScalarDataFormField['kind'] = 'scalar_column';
 
-  private onChange: (e: EdfScalarFieldPropChange) => unknown;
+  private onChange: ScalarFieldOnChange;
 
   constructor(
     holder: FormFields,
     props: ScalarFieldProps,
-    onChange: (e: EdfScalarFieldPropChange) => unknown,
+    onChange: ScalarFieldOnChange,
   ) {
     super(holder, props);
     this.onChange = onChange;
@@ -39,5 +42,26 @@ export class ScalarField extends AbstractColumnBasedField {
       ...this.getBaseFieldRawJson(),
       kind: 'scalar_column',
     };
+  }
+
+  static factoryFromRawInfo(
+    props: {
+      parentTableOid: number;
+      rawField: RawScalarDataFormField;
+    },
+    formSource: FormSource,
+  ) {
+    const { rawField } = props;
+    const baseProps = super.getBasePropsFromRawDataFormField(props, formSource);
+
+    return (holder: FormFields, onChange: ScalarFieldOnChange) =>
+      new ScalarField(
+        holder,
+        {
+          ...baseProps,
+          kind: rawField.kind,
+        },
+        onChange,
+      );
   }
 }

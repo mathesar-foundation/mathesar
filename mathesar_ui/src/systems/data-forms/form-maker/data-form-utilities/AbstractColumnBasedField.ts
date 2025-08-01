@@ -4,9 +4,10 @@ import { _ } from 'svelte-i18n';
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 
 import { AbstractField, type AbstractFieldProps } from './AbstractField';
-import type { FieldColumn } from './FieldColumn';
+import { FieldColumn } from './FieldColumn';
 import { DataFormFieldInputValueHolder } from './FieldValueHolder';
 import type { FormFields } from './FormFields';
+import type { FormSource } from './FormSource';
 
 export interface AbstractColumnBasedFieldProps extends AbstractFieldProps {
   isRequired: RawDataFormField['is_required'];
@@ -66,6 +67,45 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       ...super.getBaseFieldRawJson(),
       column_attnum: this.fieldColumn.column.id,
       is_required: get(this.isRequired),
+    };
+  }
+
+  static getBasePropsFromRawDataFormField(
+    props: {
+      parentTableOid: number;
+      rawField: RawDataFormField;
+    },
+    formSource: FormSource,
+  ): AbstractColumnBasedFieldProps {
+    const { rawField, parentTableOid } = props;
+
+    const baseProps = {
+      key: rawField.key,
+      label: rawField.label,
+      help: rawField.help,
+      placeholder: null,
+      index: rawField.index,
+      isRequired: rawField.is_required,
+      styling: rawField.styling,
+    };
+
+    const columnDetails = formSource.getColumnInfo(
+      parentTableOid,
+      rawField.column_attnum,
+    );
+
+    return {
+      ...baseProps,
+      fieldColumn: new FieldColumn({
+        tableOid: parentTableOid,
+        column: columnDetails,
+        foreignKeyLink:
+          'related_table_oid' in rawField
+            ? {
+                relatedTableOid: rawField.related_table_oid,
+              }
+            : null,
+      }),
     };
   }
 }

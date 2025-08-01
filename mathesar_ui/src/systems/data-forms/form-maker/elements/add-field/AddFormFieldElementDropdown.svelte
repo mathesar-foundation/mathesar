@@ -12,7 +12,6 @@
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
   import { FieldColumn } from '../../data-form-utilities/FieldColumn';
   import type { FormFields } from '../../data-form-utilities/FormFields';
-  import { fieldColumnToEphemeralFieldProps } from '../../data-form-utilities/transformers';
 
   import AddFormColumnFieldItem from './AddFormColumnFieldItem.svelte';
 
@@ -33,12 +32,11 @@
     const tableStructureSubstance =
       await tableStructure.getSubstanceOnceResolved();
     if (tableStructureSubstance.resolvedValue) {
-      const props = fieldColumnToEphemeralFieldProps(
+      fieldHolder.addFromFieldColumn(
         fc,
-        tableStructureSubstance.resolvedValue,
         insertionIndex,
+        tableStructureSubstance.resolvedValue,
       );
-      fieldHolder.add(props);
     }
     close();
   }

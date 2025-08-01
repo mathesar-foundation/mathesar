@@ -7,8 +7,9 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     DataFormCanvas,
+    DataFormStructure,
+    FormSource,
     ReadonlyDataFormManager,
-    rawDataFormToDataFormStructureProps,
   } from '@mathesar/systems/data-forms/form-maker';
 
   const dataFormRouteContext = DataFormRouteContext.get();
@@ -17,9 +18,9 @@
   $: rawDataFormStore = dataForm.toRawDataFormStore();
   $: dataFormManager = $formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
-        rawDataFormToDataFormStructureProps(
+        DataFormStructure.factoryFromRawInfo(
           $rawDataFormStore,
-          $formSourceInfo.resolvedValue,
+          new FormSource($formSourceInfo.resolvedValue),
         ),
       )
     : undefined;

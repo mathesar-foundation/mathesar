@@ -8,10 +8,12 @@
   import { Select } from '@mathesar-component-library';
   import type { Appearance } from '@mathesar-component-library/types';
 
+  import DataFormField, {
+    type DataFormFieldFactory,
+  } from '../data-form-utilities/DataFormField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
+  import { FieldColumn } from '../data-form-utilities/FieldColumn';
   import type { FkField } from '../data-form-utilities/FkField';
-  import type { DataFormFieldProps } from '../data-form-utilities/FormFields';
-  import { tableStructureSubstanceToEphemeralFieldProps } from '../data-form-utilities/transformers';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: FkField;
@@ -38,13 +40,22 @@
     },
   };
 
-  async function getDefaultNestedFields(): Promise<DataFormFieldProps[]> {
-    const tableStructureSubstance =
-      await linkedTableStructure.getSubstanceOnceResolved();
-    if (tableStructureSubstance.resolvedValue) {
-      return tableStructureSubstanceToEphemeralFieldProps(
-        tableStructureSubstance.resolvedValue,
-      );
+  async function getDefaultNestedFields(): Promise<DataFormFieldFactory[]> {
+    const result = await linkedTableStructure.getSubstanceOnceResolved();
+    if (result.resolvedValue) {
+      const tableStructureSubstance = result.resolvedValue;
+
+      const { processedColumns } = tableStructureSubstance;
+      return [...processedColumns.values()]
+        .filter((pc) => !pc.column.default?.is_dynamic)
+        .map((c, index) => {
+          const fc = FieldColumn.fromProcessedColumn(c);
+          return DataFormField.factoryFromFieldColumn(
+            fc,
+            index,
+            tableStructureSubstance,
+          );
+        });
     }
     return [];
   }

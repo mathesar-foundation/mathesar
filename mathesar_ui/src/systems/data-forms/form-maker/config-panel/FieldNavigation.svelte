@@ -4,9 +4,9 @@
   import { iconExpandRight } from '@mathesar/icons';
   import { Button, Icon, iconShowMore } from '@mathesar-component-library';
 
+  import type { DataFormField } from '../data-form-utilities/DataFormField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
   import { DataFormStructure } from '../data-form-utilities/DataFormStructure';
-  import type { DataFormField } from '../data-form-utilities/FormFields';
 
   import FieldNavigationElement from './FieldNavigationElement.svelte';
 

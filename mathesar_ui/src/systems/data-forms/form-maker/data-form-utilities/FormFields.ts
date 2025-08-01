@@ -7,8 +7,15 @@ import {
   get,
 } from 'svelte/store';
 
-import { WritableSet } from '@mathesar-component-library';
+import type { RawDataFormField } from '@mathesar/api/rpc/forms';
+import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
+import { WritableSet, getGloballyUniqueId } from '@mathesar-component-library';
 
+import type {
+  DataFormField,
+  DataFormFieldFactory,
+  ParentDataFormField,
+} from './DataFormField';
 import type { DataFormStructure } from './DataFormStructure';
 import type { FieldColumn } from './FieldColumn';
 import type {
@@ -16,31 +23,20 @@ import type {
   DataFormFieldInputValueHolder,
 } from './FieldValueHolder';
 // eslint-disable-next-line import/no-cycle
-import { FkField, type FkFieldProps } from './FkField';
-import { ScalarField, type ScalarFieldProps } from './ScalarField';
+import { FkField } from './FkField';
+import type { FormSource } from './FormSource';
+import { ScalarField } from './ScalarField';
 import type { EdfFieldListDetail, EdfNestedFieldChanges } from './types';
 
-export type DataFormFieldProps = ScalarFieldProps | FkFieldProps;
-export type DataFormField = ScalarField | FkField;
+export type DataFormFieldsOnChange = (
+  e: EdfFieldListDetail | EdfNestedFieldChanges,
+) => unknown;
 
-// This may contain more types in the future, such as ReverseFkField
-export type ParentDataFormField = FkField;
+export type DataFormFieldContainerFactory = (
+  parent: DataFormStructure | ParentDataFormField,
+  onChange: DataFormFieldsOnChange,
+) => FormFields;
 
-function fieldPropToEphemeralField(
-  fieldProps: DataFormFieldProps,
-  holder: FormFields,
-  onChange: (e: EdfNestedFieldChanges) => unknown,
-): DataFormField {
-  if (fieldProps.kind === 'scalar_column') {
-    return new ScalarField(holder, fieldProps, (detail) => {
-      onChange(detail);
-    });
-  }
-
-  return new FkField(holder, fieldProps, (detail) => {
-    onChange(detail);
-  });
-}
 export class FormFields {
   readonly parent;
 
@@ -48,7 +44,7 @@ export class FormFields {
 
   private sortedFields: Readable<DataFormField[]>;
 
-  private onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown;
+  private onChange: DataFormFieldsOnChange;
 
   readonly fieldValueStores: Readable<
     (DataFormFieldInputValueHolder | DataFormFieldFkInputValueHolder)[]
@@ -56,13 +52,13 @@ export class FormFields {
 
   constructor(
     parent: DataFormStructure | ParentDataFormField,
-    fieldProps: Iterable<DataFormFieldProps>,
-    onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown,
+    fieldsFactories: Iterable<DataFormFieldFactory>,
+    onChange: DataFormFieldsOnChange,
   ) {
     this.parent = parent;
     this.onChange = onChange;
-    const ephemeralFormFields = [...fieldProps].map((fieldProp) =>
-      fieldPropToEphemeralField(fieldProp, this, onChange),
+    const ephemeralFormFields = [...fieldsFactories].map((fieldFactory) =>
+      fieldFactory(this, (detail: EdfNestedFieldChanges) => onChange(detail)),
     );
     this.fieldSet = new WritableSet(ephemeralFormFields);
     this.sortedFields = derived<WritableSet<DataFormField>, DataFormField[]>(
@@ -165,24 +161,19 @@ export class FormFields {
       : this.parent.baseTableOid;
   }
 
-  reconstruct(dataFormFieldProps: Iterable<DataFormFieldProps>) {
+  reconstruct(fieldFactories: Iterable<DataFormFieldFactory>) {
     this.fieldSet.reconstruct(
-      [...dataFormFieldProps].map((fieldProp) =>
-        fieldPropToEphemeralField(fieldProp, this, this.onChange),
-      ),
+      [...fieldFactories].map((factory) => factory(this, this.onChange)),
     );
     this.onChange({
       type: 'reconstruct',
     });
   }
 
-  add(dataFormFieldProps: DataFormFieldProps) {
-    if (!get(this.hasColumn(dataFormFieldProps.fieldColumn))) {
-      const dataFormField = fieldPropToEphemeralField(
-        dataFormFieldProps,
-        this,
-        this.onChange,
-      );
+  add(factory: DataFormFieldFactory) {
+    const dataFormField = factory(this, (e) => this.onChange(e));
+
+    if (!get(this.hasColumn(dataFormField.fieldColumn))) {
       const fieldIndex = get(dataFormField.index);
       for (const field of get(this.fieldSet)) {
         if (get(field.index) >= fieldIndex) {
@@ -197,6 +188,59 @@ export class FormFields {
     }
   }
 
+  addFromFieldColumn(
+    fieldColumn: FieldColumn,
+    index: number,
+    tableStructureSubstance: TableStructureSubstance,
+  ) {
+    const baseProps = {
+      fieldColumn,
+      key: getGloballyUniqueId(),
+      label: fieldColumn.column.name,
+      help: null,
+      placeholder: null,
+      index,
+      isRequired: false,
+      columnAttnum: fieldColumn.column.id,
+      styling: {},
+    };
+
+    if (fieldColumn.foreignKeyLink) {
+      const referentTableOid = fieldColumn.foreignKeyLink.relatedTableOid;
+      const referenceTableName = tableStructureSubstance.linksInTable.find(
+        (lnk) => lnk.table.oid === referentTableOid,
+      )?.table.name;
+
+      return this.add(
+        (holder, onChange) =>
+          new FkField(
+            holder,
+            {
+              ...baseProps,
+              kind: 'foreign_key',
+              label: referenceTableName ?? baseProps.label,
+              relatedTableOid: referentTableOid,
+              interactionRule: 'must_pick',
+              fieldContainerFactory: (parent, onContainerChange) =>
+                new FormFields(parent, [], onContainerChange),
+            },
+            onChange,
+          ),
+      );
+    }
+    return this.add(
+      (holder, onChange) =>
+        new ScalarField(
+          holder,
+          {
+            ...baseProps,
+            kind: 'scalar_column',
+          },
+          onChange,
+        ),
+    );
+  }
+
   delete(dataFormField: DataFormField) {
     const fieldIndex = get(dataFormField.index);
     for (const field of get(this.fieldSet)) {
@@ -209,5 +253,40 @@ export class FormFields {
       type: 'delete',
       field: dataFormField,
     });
+  }
+
+  static factoryFromRawInfo(
+    props: {
+      parentTableOid: number;
+      rawDataFormFields: RawDataFormField[];
+    },
+    formSource: FormSource,
+  ): DataFormFieldContainerFactory {
+    return (
+      parent: DataFormStructure | ParentDataFormField,
+      onChange: DataFormFieldsOnChange,
+    ) =>
+      new FormFields(
+        parent,
+        props.rawDataFormFields.map((f) => {
+          if (f.kind === 'scalar_column') {
+            return ScalarField.factoryFromRawInfo(
+              {
+                parentTableOid: props.parentTableOid,
+                rawField: f,
+              },
+              formSource,
+            );
+          }
+          return FkField.factoryFromRawInfo(
+            {
+              parentTableOid: props.parentTableOid,
+              rawField: f,
+            },
+            formSource,
+          );
+        }),
+        onChange,
+      );
   }
 }

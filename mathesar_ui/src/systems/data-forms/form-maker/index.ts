@@ -5,4 +5,4 @@ export {
   ReadonlyDataFormManager,
   EditableDataFormManager,
 } from './data-form-utilities/DataFormManager';
-export { rawDataFormToDataFormStructureProps } from './data-form-utilities/transformers';
+export { FormSource } from './data-form-utilities/FormSource';

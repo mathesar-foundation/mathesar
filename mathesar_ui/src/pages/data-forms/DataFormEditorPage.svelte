@@ -8,8 +8,9 @@
   import type { TableStructure } from '@mathesar/stores/table-data';
   import {
     DataFormCanvas,
+    DataFormStructure,
     EditableDataFormManager,
-    rawDataFormToDataFormStructureProps,
+    FormSource,
   } from '@mathesar/systems/data-forms/form-maker';
   import CacheManager from '@mathesar/utils/CacheManager';
 
@@ -26,9 +27,9 @@
   $: rawDataFormStore = dataForm.toRawDataFormStore();
   $: dataFormManager = $formSourceInfo.resolvedValue
     ? new EditableDataFormManager(
-        rawDataFormToDataFormStructureProps(
+        DataFormStructure.factoryFromRawInfo(
           $rawDataFormStore,
-          $formSourceInfo.resolvedValue,
+          new FormSource($formSourceInfo.resolvedValue),
         ),
         dataForm.schema,
         tableStructureCache,

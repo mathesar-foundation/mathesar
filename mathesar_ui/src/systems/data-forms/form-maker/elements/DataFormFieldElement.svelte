@@ -1,6 +1,6 @@
 <script lang="ts">
+  import type { DataFormField } from '../data-form-utilities/DataFormField';
   import type { DataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { DataFormField } from '../data-form-utilities/FormFields';
 
   import FkFormFieldElement from './FkFormFieldElement.svelte';
   import FormFieldElementWrapper from './FormFieldElementWrapper.svelte';

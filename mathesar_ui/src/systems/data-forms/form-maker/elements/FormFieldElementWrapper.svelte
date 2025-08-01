@@ -1,9 +1,9 @@
 <script lang="ts">
+  import type { DataFormField } from '../data-form-utilities/DataFormField';
   import {
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
-  import type { DataFormField } from '../data-form-utilities/FormFields';
 
   import { AddField } from './add-field';
   import FormFieldSource from './FormFieldSource.svelte';

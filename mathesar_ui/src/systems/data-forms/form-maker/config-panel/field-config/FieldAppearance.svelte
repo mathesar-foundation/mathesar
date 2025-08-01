@@ -8,7 +8,7 @@
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
-  import type { DataFormField } from '../../data-form-utilities/FormFields';
+  import type { DataFormField } from '../../data-form-utilities/DataFormField';
 
   export let field: DataFormField;
 

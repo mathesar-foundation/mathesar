@@ -3,15 +3,15 @@
 import { type Readable, type Writable, get, writable } from 'svelte/store';
 
 import type { Schema } from '@mathesar/models/Schema';
-import { Table } from '@mathesar/models/Table';
+import type { Table } from '@mathesar/models/Table';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
-import {
+import type { DataFormField } from './DataFormField';
+import type {
   DataFormStructure,
-  type DataFormStructureProps,
+  DataFormStructureFactory,
 } from './DataFormStructure';
-import type { DataFormField } from './FormFields';
 
 export interface DataFormManager {
   dataFormStructure: DataFormStructure;
@@ -20,8 +20,8 @@ export interface DataFormManager {
 export class ReadonlyDataFormManager implements DataFormManager {
   dataFormStructure;
 
-  constructor(props: DataFormStructureProps) {
-    this.dataFormStructure = new DataFormStructure(props);
+  constructor(dfsFactory: DataFormStructureFactory) {
+    this.dataFormStructure = dfsFactory();
   }
 }
 
@@ -56,11 +56,11 @@ export class EditableDataFormManager implements DataFormManager {
   }
 
   constructor(
-    structureProps: DataFormStructureProps,
+    dfsFactory: DataFormStructureFactory,
     schema: Schema,
     tableStructureCache: CacheManager<Table['oid'], TableStructure>,
   ) {
-    this.dataFormStructure = new DataFormStructure(structureProps, (e) => {
+    this.dataFormStructure = dfsFactory((e) => {
       if (e.prop === 'fields' || e.prop === 'nestedFields') {
         if (e.detail.type === 'add') {
           this.selectElement({
@@ -91,14 +91,11 @@ export class EditableDataFormManager implements DataFormManager {
     this._selectedElement.set(undefined);
   }
 
-  getTableStructure(tableOrOid: Table | number) {
-    const isTableInstance = tableOrOid instanceof Table;
-    const tableStructureProps = isTableInstance
-      ? tableOrOid
-      : {
-          oid: tableOrOid,
-          schema: this.schema,
-        };
+  getTableStructure(tableOid: number) {
+    const tableStructureProps = {
+      oid: tableOid,
+      schema: this.schema,
+    };
 
     return this.tableStructureCache.get(
       tableStructureProps.oid,

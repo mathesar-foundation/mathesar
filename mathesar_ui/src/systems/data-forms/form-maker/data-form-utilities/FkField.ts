@@ -7,21 +7,27 @@ import {
   AbstractColumnBasedField,
   type AbstractColumnBasedFieldProps,
 } from './AbstractColumnBasedField';
+import type { DataFormFieldFactory } from './DataFormField';
 import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 // eslint-disable-next-line import/no-cycle
-import { type DataFormFieldProps, FormFields } from './FormFields';
+import { type DataFormFieldContainerFactory, FormFields } from './FormFields';
+import type { FormSource } from './FormSource';
 import type {
   EdfBaseFieldProps,
   EdfFkFieldPropChange,
   EdfNestedFieldChanges,
 } from './types';
 
-export interface FkFieldProps extends AbstractColumnBasedFieldProps {
+interface FkFieldProps extends AbstractColumnBasedFieldProps {
   kind: RawForeignKeyDataFormField['kind'];
   interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
   relatedTableOid: number;
-  nestedFields: Iterable<DataFormFieldProps>;
+  fieldContainerFactory: DataFormFieldContainerFactory;
 }
+
+export type FkFieldOnChange = (
+  e: EdfFkFieldPropChange | EdfNestedFieldChanges,
+) => unknown;
 
 export class FkField extends AbstractColumnBasedField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
@@ -45,12 +51,12 @@ export class FkField extends AbstractColumnBasedField {
   constructor(
     holder: FormFields,
     props: FkFieldProps,
-    onChange: (e: EdfFkFieldPropChange | EdfNestedFieldChanges) => unknown,
+    onChange: FkFieldOnChange,
   ) {
     super(holder, props);
     this.onChange = onChange;
     this.relatedTableOid = props.relatedTableOid;
-    this.nestedFields = new FormFields(this, props.nestedFields, (e) => {
+    this.nestedFields = props.fieldContainerFactory(this, (e) => {
       if ('target' in e) {
         this.onChange(e);
         return;
@@ -75,14 +81,14 @@ export class FkField extends AbstractColumnBasedField {
 
   async setInteractionRule(
     rule: RawForeignKeyDataFormField['fk_interaction_rule'],
-    getDefaultNestedFields: () => Promise<Iterable<DataFormFieldProps>>,
+    getDefaultNestedFields: () => Promise<Iterable<DataFormFieldFactory>>,
   ) {
     this._interactionRule.set(rule);
     this.bubblePropChange('interactionRule');
 
     if (get(this.nestedFields).length === 0) {
-      const defaultNestedFields = await getDefaultNestedFields();
-      this.nestedFields.reconstruct(defaultNestedFields);
+      const defaultNestedFieldsFactories = await getDefaultNestedFields();
+      this.nestedFields.reconstruct(defaultNestedFieldsFactories);
     }
   }
 
@@ -103,5 +109,35 @@ export class FkField extends AbstractColumnBasedField {
         nested_field.toRawEphemeralField(),
       ),
     };
+  }
+
+  static factoryFromRawInfo(
+    props: {
+      parentTableOid: number;
+      rawField: RawForeignKeyDataFormField;
+    },
+    formSource: FormSource,
+  ) {
+    const { rawField } = props;
+    const baseProps = super.getBasePropsFromRawDataFormField(props, formSource);
+
+    return (holder: FormFields, onChange: FkFieldOnChange) =>
+      new FkField(
+        holder,
+        {
+          ...baseProps,
+          kind: rawField.kind,
+          relatedTableOid: rawField.related_table_oid,
+          fieldContainerFactory: FormFields.factoryFromRawInfo(
+            {
+              parentTableOid: rawField.related_table_oid,
+              rawDataFormFields: rawField.child_fields ?? [],
+            },
+            formSource,
+          ),
+          interactionRule: rawField.fk_interaction_rule,
+        },
+        onChange,
+      );
   }
 }

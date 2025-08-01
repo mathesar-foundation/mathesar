@@ -1,6 +1,6 @@
+import type { DataFormField } from './DataFormField';
 import type { DataFormStructure } from './DataFormStructure';
 import type { FkField } from './FkField';
-import type { DataFormField } from './FormFields';
 import type { ScalarField } from './ScalarField';
 
 /** Types for change detection */

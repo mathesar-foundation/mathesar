@@ -67,7 +67,6 @@ export interface RawEphemeralDataForm extends RawDataFormStructure {
 export interface RawDataForm extends RawEphemeralDataForm {
   id: number;
   token: string;
-  fields: RawDataFormField[];
   publish_public: boolean;
 }
 

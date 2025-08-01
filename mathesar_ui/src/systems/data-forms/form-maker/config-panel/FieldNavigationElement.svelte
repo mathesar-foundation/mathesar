@@ -4,8 +4,8 @@
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { Button } from '@mathesar-component-library';
 
+  import type { DataFormField } from '../data-form-utilities/DataFormField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { DataFormField } from '../data-form-utilities/FormFields';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: DataFormField | undefined = undefined;
