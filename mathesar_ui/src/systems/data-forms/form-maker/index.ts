@@ -9,4 +9,3 @@ export {
   rawDataFormToDataFormStructureProps,
   tableStructureSubstanceRawEphemeralForm,
 } from './data-form-utilities/transformers';
-export { default as AddEditDataFormModal } from './AddEditDataFormModal.svelte';

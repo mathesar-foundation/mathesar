@@ -8,10 +8,8 @@
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
-  import {
-    AddEditDataFormModal,
-    type EditableDataFormManager,
-  } from '@mathesar/systems/data-forms';
+  import { AddEditDataFormModal } from '@mathesar/systems/data-forms/add-edit-modal';
+  import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
   import { Button, Dropdown, Icon } from '@mathesar-component-library';
 
   import ShareForm from './ShareForm.svelte';

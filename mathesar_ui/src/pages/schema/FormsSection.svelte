@@ -5,7 +5,7 @@
   import { iconAddNew, iconForm, iconRefresh } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
   import { modal } from '@mathesar/stores/modal';
-  import { AddEditDataFormModal } from '@mathesar/systems/data-forms';
+  import { AddEditDataFormModal } from '@mathesar/systems/data-forms/add-edit-modal';
   import { Button, Icon, SpinnerButton } from '@mathesar-component-library';
 
   import EmptyEntityList from './EmptyEntityList.svelte';

@@ -9,7 +9,7 @@
     DataFormCanvas,
     ReadonlyDataFormManager,
     rawDataFormToDataFormStructureProps,
-  } from '@mathesar/systems/data-forms';
+  } from '@mathesar/systems/data-forms/form-maker';
 
   const dataFormRouteContext = DataFormRouteContext.get();
   $: ({ dataForm, formSourceInfo } = $dataFormRouteContext);

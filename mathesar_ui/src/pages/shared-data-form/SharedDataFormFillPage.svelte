@@ -11,7 +11,7 @@
     DataFormCanvas,
     ReadonlyDataFormManager,
     rawDataFormToDataFormStructureProps,
-  } from '@mathesar/systems/data-forms';
+  } from '@mathesar/systems/data-forms/form-maker';
 
   export let rawDataForm: RawDataForm;
   export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;

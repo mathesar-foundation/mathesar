@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
@@ -28,7 +27,7 @@
     ensureReadable,
   } from '@mathesar-component-library';
 
-  import { tableStructureSubstanceRawEphemeralForm } from './data-form-utilities/transformers';
+  import { tableStructureSubstanceRawEphemeralForm } from '../form-maker/data-form-utilities/transformers';
 
   const schemaRouteContext = SchemaRouteContext.get();
 

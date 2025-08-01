@@ -10,7 +10,7 @@
     confirmationController,
   } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
-  import type { EditableDataFormManager } from '@mathesar/systems/data-forms';
+  import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
   import {
     type AccompanyingElements,
     Button,

@@ -10,7 +10,7 @@
     DataFormCanvas,
     EditableDataFormManager,
     rawDataFormToDataFormStructureProps,
-  } from '@mathesar/systems/data-forms';
+  } from '@mathesar/systems/data-forms/form-maker';
   import CacheManager from '@mathesar/utils/CacheManager';
 
   import ActionsPane from './ActionsPane.svelte';
