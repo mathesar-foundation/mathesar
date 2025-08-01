@@ -27,7 +27,7 @@
     ensureReadable,
   } from '@mathesar-component-library';
 
-  import { tableStructureSubstanceRawEphemeralForm } from '../form-maker/data-form-utilities/transformers';
+  import { tableStructureSubstanceToRawEphemeralForm } from './utils';
 
   const schemaRouteContext = SchemaRouteContext.get();
 
@@ -63,7 +63,7 @@
       const tableStructureSubstance =
         await tableStructure.getSubstanceOnceResolved();
       if (tableStructureSubstance.resolvedValue) {
-        const rawEpf = tableStructureSubstanceRawEphemeralForm(
+        const rawEpf = tableStructureSubstanceToRawEphemeralForm(
           tableStructureSubstance.resolvedValue,
         );
         newDataForm = await $schemaRouteContext.insertDataForm({

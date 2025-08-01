@@ -5,7 +5,4 @@ export {
   ReadonlyDataFormManager,
   EditableDataFormManager,
 } from './data-form-utilities/DataFormManager';
-export {
-  rawDataFormToDataFormStructureProps,
-  tableStructureSubstanceRawEphemeralForm,
-} from './data-form-utilities/transformers';
+export { rawDataFormToDataFormStructureProps } from './data-form-utilities/transformers';
