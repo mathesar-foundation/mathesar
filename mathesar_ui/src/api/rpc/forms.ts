@@ -9,6 +9,14 @@ export interface RichTextJson {
   text: string;
 }
 
+export const fkFieldInteractionRules = [
+  'must_pick',
+  'can_pick_or_create',
+  'must_create',
+] as const;
+
+export const dataFormStructureVersion = 1;
+
 interface RawDataFormBaseField {
   key: string;
   index: number;
@@ -24,12 +32,6 @@ export interface RawScalarDataFormField extends RawDataFormBaseField {
   kind: 'scalar_column';
   column_attnum: number;
 }
-
-export const fkFieldInteractionRules = [
-  'must_pick',
-  'can_pick_or_create',
-  'must_create',
-] as const;
 
 export interface RawForeignKeyDataFormField extends RawDataFormBaseField {
   kind: 'foreign_key';
@@ -62,15 +64,15 @@ export interface RawEphemeralDataForm extends RawDataFormStructure {
   version: number;
 }
 
-export interface ReplacableRawDataForm extends RawEphemeralDataForm {
-  id: number;
-}
-
 export interface RawDataForm extends RawEphemeralDataForm {
   id: number;
   token: string;
   fields: RawDataFormField[];
   publish_public: boolean;
+}
+
+interface ReplaceRawDataFormRequest extends RawEphemeralDataForm {
+  id: number;
 }
 
 interface RawDataFormResponse extends RawDataForm {
@@ -114,7 +116,7 @@ export const forms = {
   >(),
   replace: rpcMethodTypeContainer<
     {
-      new_form: ReplacableRawDataForm;
+      new_form: ReplaceRawDataFormRequest;
     },
     RawDataFormResponse
   >(),

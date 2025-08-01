@@ -1,9 +1,10 @@
 import { type Readable, derived, get, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type {
-  RawDataForm,
-  RawDataFormStructure,
+import {
+  type RawDataForm,
+  type RawDataFormStructure,
+  dataFormStructureVersion,
 } from '@mathesar/api/rpc/forms';
 import { CancellablePromise } from '@mathesar-component-library';
 
@@ -173,7 +174,7 @@ export class DataForm {
       ([$token, $name, $description, $structure, $sharePreferences]) => ({
         id: this.id,
         token: $token,
-        version: 1,
+        version: dataFormStructureVersion,
         database_id: this.schema.database.id,
         base_table_oid: this.baseTableOId,
         schema_oid: this.schema.oid,

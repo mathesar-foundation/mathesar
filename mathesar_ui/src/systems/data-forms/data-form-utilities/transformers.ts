@@ -1,8 +1,9 @@
-import type {
-  RawDataForm,
-  RawDataFormField,
-  RawDataFormSource,
-  RawEphemeralDataForm,
+import {
+  type RawDataForm,
+  type RawDataFormField,
+  type RawDataFormSource,
+  type RawEphemeralDataForm,
+  dataFormStructureVersion,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
@@ -226,7 +227,7 @@ export function tableStructureSubstanceRawEphemeralForm(
     base_table_oid: tableStructureSubstance.table.oid,
     schema_oid: tableStructureSubstance.table.schema.oid,
     database_id: tableStructureSubstance.table.schema.database.id,
-    version: 1,
+    version: dataFormStructureVersion,
     name: tableStructureSubstance.table.name,
     description: null,
     header_title: {
