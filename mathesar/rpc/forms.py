@@ -273,6 +273,22 @@ def get_source_info(*, form_token: str, **kwargs) -> FormInfo:
     return form_source_info
 
 
+@mathesar_rpc_method(name="forms.list", auth="login")
+def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
+    """
+    List information about forms for a database. Exposed as `list`.
+
+    Args:
+        database_id: The Django id of the database containing the form.
+        schema_oid: The OID of the schema containing the base table(s) of the forms(s).
+
+    Returns:
+        A list of form info.
+    """
+    forms = list_forms(database_id, schema_oid)
+    return [FormInfo.from_model(form) for form in forms]
+
+
 @mathesar_rpc_method(name="forms.regenerate_token", auth="login")
 def regenerate_token(*, form_id: int, **kwargs) -> str:
     """
@@ -302,22 +318,6 @@ def set_publish_public(*, form_id: int, publish_public: bool, **kwargs) -> FormI
     """
     form_model = set_form_public_setting(form_id, publish_public)
     return FormInfo.from_model(form_model)
-
-
-@mathesar_rpc_method(name="forms.list", auth="login")
-def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
-    """
-    List information about forms for a database. Exposed as `list`.
-
-    Args:
-        database_id: The Django id of the database containing the form.
-        schema_oid: The OID of the schema containing the base table(s) of the forms(s).
-
-    Returns:
-        A list of form info.
-    """
-    forms = list_forms(database_id, schema_oid)
-    return [FormInfo.from_model(form) for form in forms]
 
 
 @mathesar_rpc_method(name="forms.delete", auth="login")

@@ -274,6 +274,16 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        forms.regenerate_token,
+        "forms.regenerate_token",
+        [user_is_authenticated]
+    ),
+    (
+        forms.set_publish_public,
+        "forms.set_publish_public",
+        [user_is_authenticated]
+    ),
+    (
         forms.delete,
         "forms.delete",
         [user_is_authenticated]
