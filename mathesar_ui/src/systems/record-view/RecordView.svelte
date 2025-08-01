@@ -2,17 +2,14 @@
   import { _ } from 'svelte-i18n';
 
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import type { Table } from '@mathesar/models/Table';
   import type RecordStore from '@mathesar/stores/RecordStore';
   import { TableStructure } from '@mathesar/stores/table-data';
-  import { currentTable } from '@mathesar/stores/tables';
-
   import RecordViewContent from './RecordViewContent.svelte';
   import RecordViewLoadingSpinner from './RecordViewLoadingSpinner.svelte';
 
   export let record: RecordStore;
 
-  $: table = $currentTable as Table;
+  $: ({ table } = record);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canViewTable = $currentRolePrivileges.has('SELECT');
   $: tableStructure = new TableStructure(table);

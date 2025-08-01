@@ -14,9 +14,7 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
-  import type { Table } from '@mathesar/models/Table';
   import type { TableStructure } from '@mathesar/stores/table-data';
-  import { currentTable } from '@mathesar/stores/tables';
 
   import type RecordStore from '../../stores/RecordStore';
 
@@ -27,7 +25,7 @@
   export let record: RecordStore;
   export let tableStructure: TableStructure;
 
-  $: table = $currentTable as Table;
+  $: ({ table } = record);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canUpdateTableRecords = $currentRolePrivileges.has('UPDATE');
   $: ({ processedColumns } = tableStructure);
