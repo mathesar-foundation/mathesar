@@ -13,9 +13,9 @@
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
 
   export let dataFormManager: EditableDataFormManager;
-  $: ({ ephemeralDataForm } = dataFormManager);
+  $: ({ dataFormStructure } = dataFormManager);
   $: ({ submitMessage, submitRedirectUrl, submitButtonLabel } =
-    ephemeralDataForm);
+    dataFormStructure);
 </script>
 
 <div>
@@ -24,7 +24,7 @@
       <Checkbox
         checked={isDefinedNonNullable($submitRedirectUrl)}
         on:change={(e) =>
-          ephemeralDataForm.setSubmissionRedirectUrl(e.detail ? '' : null)}
+          dataFormStructure.setSubmissionRedirectUrl(e.detail ? '' : null)}
       />
     </LabeledInput>
     {#if isDefinedNonNullable($submitRedirectUrl)}
@@ -32,7 +32,7 @@
         <TextInput
           value={$submitRedirectUrl}
           on:input={(e) => {
-            ephemeralDataForm.setSubmissionRedirectUrl(
+            dataFormStructure.setSubmissionRedirectUrl(
               getStringValueFromEvent(e),
             );
           }}
@@ -45,7 +45,7 @@
       <TextArea
         value={$submitMessage?.text}
         on:input={(e) =>
-          ephemeralDataForm.setSubmissionMessage(getStringValueFromEvent(e))}
+          dataFormStructure.setSubmissionMessage(getStringValueFromEvent(e))}
       />
     </LabeledInput>
   </div>
@@ -54,7 +54,7 @@
       <TextInput
         value={$submitButtonLabel}
         on:input={(e) =>
-          ephemeralDataForm.setSubmissionButtonLabel(
+          dataFormStructure.setSubmissionButtonLabel(
             getStringValueFromEvent(e),
           )}
       />

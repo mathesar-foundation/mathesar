@@ -7,7 +7,7 @@
 
   export let dataFormManager: DataFormManager;
 
-  $: ({ submitButtonLabel, formHolder } = dataFormManager.ephemeralDataForm);
+  $: ({ submitButtonLabel, formHolder } = dataFormManager.dataFormStructure);
   $: label = $submitButtonLabel?.trim() || $_('submit');
   $: form = $formHolder;
 

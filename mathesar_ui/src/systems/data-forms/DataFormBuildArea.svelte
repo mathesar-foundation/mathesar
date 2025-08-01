@@ -9,7 +9,7 @@
   import DataFormHeader from './elements/DataFormHeader.svelte';
 
   export let dataFormManager: DataFormManager;
-  $: ({ fields } = dataFormManager.ephemeralDataForm);
+  $: ({ fields } = dataFormManager.dataFormStructure);
 
   function handleFormSelection(e: MouseEvent) {
     if (dataFormManager instanceof EditableDataFormManager) {

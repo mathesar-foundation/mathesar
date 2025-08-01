@@ -28,7 +28,7 @@
   async function saveForm() {
     try {
       await $dataFormRouteContext.updateStructure(
-        dataFormManager.ephemeralDataForm.toRawStructure(),
+        dataFormManager.dataFormStructure.toRawStructure(),
       );
     } catch (err) {
       toast.error(RpcError.fromAnything(err).message);

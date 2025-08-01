@@ -18,8 +18,8 @@
 
   export let dataFormManager: EditableDataFormManager;
 
-  $: ({ ephemeralDataForm } = dataFormManager);
-  $: ({ headerTitle, headerSubTitle, baseTableOid } = ephemeralDataForm);
+  $: ({ dataFormStructure } = dataFormManager);
+  $: ({ headerTitle, headerSubTitle, baseTableOid } = dataFormStructure);
   $: tableStructure = dataFormManager.getTableStructure(baseTableOid);
   $: ({ table } = tableStructure);
 </script>
@@ -30,14 +30,14 @@
       <TextInput
         value={$headerTitle.text}
         on:input={(e) =>
-          ephemeralDataForm.setHeaderTitle(getStringValueFromEvent(e))}
+          dataFormStructure.setHeaderTitle(getStringValueFromEvent(e))}
       />
     </LabeledInput>
     <LabeledInput layout="stacked" label={$_('form_subtitle')}>
       <TextArea
         value={$headerSubTitle?.text}
         on:input={(e) =>
-          ephemeralDataForm.setHeaderSubTitle(getStringValueFromEvent(e))}
+          dataFormStructure.setHeaderSubTitle(getStringValueFromEvent(e))}
       />
     </LabeledInput>
   </InspectorSection>

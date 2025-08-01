@@ -11,14 +11,14 @@ import { DataFormStructure } from './DataFormStructure';
 import type { EphemeralDataFormField, EphemeralDataFormProps } from './types';
 
 export interface DataFormManager {
-  ephemeralDataForm: DataFormStructure;
+  dataFormStructure: DataFormStructure;
 }
 
 export class ReadonlyDataFormManager implements DataFormManager {
-  ephemeralDataForm;
+  dataFormStructure;
 
   constructor(ephemeralDataFormProps: EphemeralDataFormProps) {
-    this.ephemeralDataForm = new DataFormStructure(ephemeralDataFormProps);
+    this.dataFormStructure = new DataFormStructure(ephemeralDataFormProps);
   }
 }
 
@@ -34,7 +34,7 @@ interface SelectedFieldElement {
 export type SelectedElement = SelectedStaticElement | SelectedFieldElement;
 
 export class EditableDataFormManager implements DataFormManager {
-  ephemeralDataForm;
+  dataFormStructure;
 
   private _selectedElement: Writable<SelectedElement | undefined> = writable();
 
@@ -57,7 +57,7 @@ export class EditableDataFormManager implements DataFormManager {
     schema: Schema,
     tableStructureCache: CacheManager<Table['oid'], TableStructure>,
   ) {
-    this.ephemeralDataForm = new DataFormStructure(
+    this.dataFormStructure = new DataFormStructure(
       ephemeralDataFormProps,
       (e) => {
         if (e.prop === 'fields' || e.prop === 'nestedFields') {

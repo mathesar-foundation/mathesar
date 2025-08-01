@@ -33,7 +33,7 @@
     ? configuredRolesValue.get(currentRoleValue.currentRoleOid)
     : undefined;
 
-  $: ({ associatedRoleId } = dataFormManager.ephemeralDataForm);
+  $: ({ associatedRoleId } = dataFormManager.dataFormStructure);
 </script>
 
 <div>
@@ -53,7 +53,7 @@
           return '';
         }}
         on:change={(e) =>
-          dataFormManager.ephemeralDataForm.setAssociatedRoleId(
+          dataFormManager.dataFormStructure.setAssociatedRoleId(
             e.detail ?? null,
           )}
       />

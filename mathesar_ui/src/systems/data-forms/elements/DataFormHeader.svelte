@@ -12,20 +12,20 @@
 
   export let dataFormManager: DataFormManager;
 
-  $: ({ ephemeralDataForm } = dataFormManager);
-  $: ({ headerTitle, headerSubTitle } = ephemeralDataForm);
+  $: ({ dataFormStructure } = dataFormManager);
+  $: ({ headerTitle, headerSubTitle } = dataFormStructure);
 
   function onTitleInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       const updatedName = getStringValueFromEvent(e);
-      ephemeralDataForm.setHeaderTitle(updatedName);
+      dataFormStructure.setHeaderTitle(updatedName);
     }
   }
 
   function onSubtitleInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       const updatedDesc = getStringValueFromEvent(e);
-      ephemeralDataForm.setHeaderSubTitle(updatedDesc);
+      dataFormStructure.setHeaderSubTitle(updatedDesc);
     }
   }
 </script>
