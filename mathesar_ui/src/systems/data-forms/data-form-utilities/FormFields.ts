@@ -12,12 +12,12 @@ import { WritableSet } from '@mathesar-component-library';
 import type { DataFormStructure } from './DataFormStructure';
 // eslint-disable-next-line import/no-cycle
 import { EphermeralFkField } from './EphemeralFkField';
-import { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
 import type {
   DataFormFieldFkInputValueHolder,
   DataFormFieldInputValueHolder,
 } from './FieldValueHolder';
+import { ScalarField } from './ScalarField';
 import type {
   EdfFieldListDetail,
   EdfNestedFieldChanges,
@@ -32,7 +32,7 @@ function fieldPropToEphemeralField(
   onChange: (e: EdfNestedFieldChanges) => unknown,
 ): EphemeralDataFormField {
   if (fieldProps.kind === 'scalar_column') {
-    return new EphermeralScalarField(holder, fieldProps, (detail) => {
+    return new ScalarField(holder, fieldProps, (detail) => {
       onChange(detail);
     });
   }

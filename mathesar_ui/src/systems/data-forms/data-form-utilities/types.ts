@@ -2,13 +2,12 @@ import type {
   RawDataForm,
   RawDataFormField,
   RawForeignKeyDataFormField,
-  RawScalarDataFormField,
 } from '@mathesar/api/rpc/forms';
 
 import type { DataFormStructure } from './DataFormStructure';
 import type { EphermeralFkField } from './EphemeralFkField';
-import type { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
+import type { ScalarField, ScalarFieldProps } from './ScalarField';
 
 export interface AbstractEphemeralFieldProps {
   key: RawDataFormField['key'];
@@ -24,11 +23,6 @@ export interface AbstractEphemeralColumnBasedFieldProps
   fieldColumn: FieldColumn;
 }
 
-export interface EphemeralScalarFieldProps
-  extends AbstractEphemeralColumnBasedFieldProps {
-  kind: RawScalarDataFormField['kind'];
-}
-
 export interface EphemeralFkFieldProps
   extends AbstractEphemeralColumnBasedFieldProps {
   kind: RawForeignKeyDataFormField['kind'];
@@ -38,10 +32,10 @@ export interface EphemeralFkFieldProps
 }
 
 export type EphemeralDataFormFieldProps =
-  | EphemeralScalarFieldProps
+  | ScalarFieldProps
   | EphemeralFkFieldProps;
 
-export type EphemeralDataFormField = EphermeralScalarField | EphermeralFkField;
+export type EphemeralDataFormField = ScalarField | EphermeralFkField;
 
 // This may contain more types in the future, such as ReverseFkField
 export type ParentEphemeralDataFormField = EphermeralFkField;
@@ -100,7 +94,7 @@ export type EdfBaseFieldProps =
   | 'styling';
 
 export interface EdfScalarFieldPropChange {
-  target: EphermeralScalarField;
+  target: ScalarField;
   prop: EdfBaseFieldProps;
 }
 

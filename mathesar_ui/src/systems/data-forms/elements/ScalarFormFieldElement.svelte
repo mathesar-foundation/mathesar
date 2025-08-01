@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { DataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { EphermeralScalarField } from '../data-form-utilities/EphemeralScalarField';
+  import type { ScalarField } from '../data-form-utilities/ScalarField';
 
   import DataFormInput from './DataFormInput.svelte';
   import DataFormLabel from './DataFormLabel.svelte';
 
   export let isSelected: boolean;
   export let dataFormManager: DataFormManager;
-  export let dataFormField: EphermeralScalarField;
+  export let dataFormField: ScalarField;
 </script>
 
 <div class="scalar-field">

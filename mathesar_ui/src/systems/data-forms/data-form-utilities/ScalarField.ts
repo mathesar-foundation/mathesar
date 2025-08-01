@@ -5,19 +5,24 @@ import type { RawScalarDataFormField } from '@mathesar/api/rpc/forms';
 import { AbstractEphermeralColumnBasedField } from './AbstractEphmeralColumnBasedField';
 import type { FormFields } from './FormFields';
 import type {
+  AbstractEphemeralColumnBasedFieldProps,
   EdfBaseFieldProps,
   EdfScalarFieldPropChange,
-  EphemeralScalarFieldProps,
 } from './types';
 
-export class EphermeralScalarField extends AbstractEphermeralColumnBasedField {
+export interface ScalarFieldProps
+  extends AbstractEphemeralColumnBasedFieldProps {
+  kind: RawScalarDataFormField['kind'];
+}
+
+export class ScalarField extends AbstractEphermeralColumnBasedField {
   readonly kind: RawScalarDataFormField['kind'] = 'scalar_column';
 
   private onChange: (e: EdfScalarFieldPropChange) => unknown;
 
   constructor(
     holder: FormFields,
-    props: EphemeralScalarFieldProps,
+    props: ScalarFieldProps,
     onChange: (e: EdfScalarFieldPropChange) => unknown,
   ) {
     super(holder, props);
