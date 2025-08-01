@@ -1,16 +1,6 @@
-import type { RawDataFormField } from '@mathesar/api/rpc/forms';
-
-import type { AbstractFieldProps } from './AbstractField';
 import type { DataFormStructure } from './DataFormStructure';
-import type { FieldColumn } from './FieldColumn';
 import type { FkField, FkFieldProps } from './FkField';
 import type { ScalarField, ScalarFieldProps } from './ScalarField';
-
-export interface AbstractEphemeralColumnBasedFieldProps
-  extends AbstractFieldProps {
-  isRequired: RawDataFormField['is_required'];
-  fieldColumn: FieldColumn;
-}
 
 export type DataFormFieldProps = ScalarFieldProps | FkFieldProps;
 export type DataFormField = ScalarField | FkField;

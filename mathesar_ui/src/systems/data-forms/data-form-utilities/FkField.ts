@@ -3,26 +3,28 @@ import { _ } from 'svelte-i18n';
 
 import type { RawForeignKeyDataFormField } from '@mathesar/api/rpc/forms';
 
-import { AbstractEphermeralColumnBasedField } from './AbstractEphmeralColumnBasedField';
+import {
+  AbstractColumnBasedField,
+  type AbstractColumnBasedFieldProps,
+} from './AbstractColumnBasedField';
 import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 // eslint-disable-next-line import/no-cycle
 import { FormFields } from './FormFields';
 import type {
-  AbstractEphemeralColumnBasedFieldProps,
   DataFormFieldProps,
   EdfBaseFieldProps,
   EdfFkFieldPropChange,
   EdfNestedFieldChanges,
 } from './types';
 
-export interface FkFieldProps extends AbstractEphemeralColumnBasedFieldProps {
+export interface FkFieldProps extends AbstractColumnBasedFieldProps {
   kind: RawForeignKeyDataFormField['kind'];
   interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
   relatedTableOid: number;
   nestedFields: Iterable<DataFormFieldProps>;
 }
 
-export class FkField extends AbstractEphermeralColumnBasedField {
+export class FkField extends AbstractColumnBasedField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
 
   readonly fieldValueHolder: DataFormFieldFkInputValueHolder;

@@ -1,13 +1,19 @@
 import { type Readable, derived, get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import { AbstractField } from './AbstractField';
+import type { RawDataFormField } from '@mathesar/api/rpc/forms';
+
+import { AbstractField, type AbstractFieldProps } from './AbstractField';
 import type { FieldColumn } from './FieldColumn';
 import { DataFormFieldInputValueHolder } from './FieldValueHolder';
 import type { FormFields } from './FormFields';
-import type { AbstractEphemeralColumnBasedFieldProps } from './types';
 
-export abstract class AbstractEphermeralColumnBasedField extends AbstractField {
+export interface AbstractColumnBasedFieldProps extends AbstractFieldProps {
+  isRequired: RawDataFormField['is_required'];
+  fieldColumn: FieldColumn;
+}
+
+export abstract class AbstractColumnBasedField extends AbstractField {
   readonly fieldColumn;
 
   readonly fieldValueHolder: DataFormFieldInputValueHolder;
@@ -16,16 +22,11 @@ export abstract class AbstractEphermeralColumnBasedField extends AbstractField {
 
   private _isRequired;
 
-  get isRequired(): Readable<
-    AbstractEphemeralColumnBasedFieldProps['isRequired']
-  > {
+  get isRequired(): Readable<AbstractColumnBasedFieldProps['isRequired']> {
     return this._isRequired;
   }
 
-  constructor(
-    holder: FormFields,
-    props: AbstractEphemeralColumnBasedFieldProps,
-  ) {
+  constructor(holder: FormFields, props: AbstractColumnBasedFieldProps) {
     super(holder, props);
     this.fieldColumn = props.fieldColumn;
     this._isRequired = writable(

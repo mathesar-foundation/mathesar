@@ -2,20 +2,18 @@ import { _ } from 'svelte-i18n';
 
 import type { RawScalarDataFormField } from '@mathesar/api/rpc/forms';
 
-import { AbstractEphermeralColumnBasedField } from './AbstractEphmeralColumnBasedField';
+import {
+  AbstractColumnBasedField,
+  type AbstractColumnBasedFieldProps,
+} from './AbstractColumnBasedField';
 import type { FormFields } from './FormFields';
-import type {
-  AbstractEphemeralColumnBasedFieldProps,
-  EdfBaseFieldProps,
-  EdfScalarFieldPropChange,
-} from './types';
+import type { EdfBaseFieldProps, EdfScalarFieldPropChange } from './types';
 
-export interface ScalarFieldProps
-  extends AbstractEphemeralColumnBasedFieldProps {
+export interface ScalarFieldProps extends AbstractColumnBasedFieldProps {
   kind: RawScalarDataFormField['kind'];
 }
 
-export class ScalarField extends AbstractEphermeralColumnBasedField {
+export class ScalarField extends AbstractColumnBasedField {
   readonly kind: RawScalarDataFormField['kind'] = 'scalar_column';
 
   private onChange: (e: EdfScalarFieldPropChange) => unknown;
