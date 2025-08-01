@@ -7,11 +7,14 @@
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
+  import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
   import { ROW_HEADER_WIDTH_PX } from '@mathesar/geometry';
   import { iconPaste } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
   import { confirm } from '@mathesar/stores/confirmation';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
+  import { modal } from '@mathesar/stores/modal';
+  import type RecordStore from '@mathesar/stores/RecordStore';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
@@ -19,6 +22,8 @@
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
+
+  import ModalRecordView from '../record-view/ModalRecordView.svelte';
 
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
@@ -29,6 +34,8 @@
   type Context = 'page' | 'widget';
 
   const tabularData = getTabularDataStoreFromContext();
+  const modalRecordView = modal.spawnModalController<RecordStore>();
+  modalRecordViewContext.set(modalRecordView);
 
   export let context: Context = 'page';
   export let table: Table;
@@ -141,6 +148,8 @@
   </WithTableInspector>
 </div>
 <StatusPane {context} />
+
+<ModalRecordView controller={modalRecordView} />
 
 <style>
   .table-view {

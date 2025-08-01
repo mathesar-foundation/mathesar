@@ -5,13 +5,17 @@
   import CellWrapper from '@mathesar/components/cell-fabric/data-types/components/CellWrapper.svelte';
   import type { PrimaryKeyCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import Default from '@mathesar/components/Default.svelte';
+  import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
   import { iconLinkToRecordPage } from '@mathesar/icons';
+  import RecordStore from '@mathesar/stores/RecordStore';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { currentTablesMap } from '@mathesar/stores/tables';
   import { Icon } from '@mathesar-component-library';
 
   type $$Props = PrimaryKeyCellProps;
 
   const dispatch = createEventDispatcher();
+  const modalRecordView = modalRecordViewContext.get();
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'] = undefined;
@@ -22,7 +26,18 @@
 
   $: href = $storeToGetRecordPageUrl({ tableId, recordId: value });
 
-  function handleContextMenu(e: MouseEvent) {
+  function handleLinkClick(e: MouseEvent) {
+    if (!modalRecordView) return;
+    if (value === undefined) return;
+    const table = $currentTablesMap.get(tableId);
+    if (!table) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const recordStore = new RecordStore({ table, recordPk: String(value) });
+    modalRecordView.open(recordStore);
+  }
+
+  function handleLinkContextMenu(e: MouseEvent) {
     // This is so users can right-click on the link without triggering the
     // Mathesar context menu or cell selection.
     e.stopPropagation();
@@ -70,7 +85,8 @@
         {href}
         class="link"
         title={$_('go_to_record_with_value', { values: { value } })}
-        on:contextmenu={handleContextMenu}
+        on:contextmenu={handleLinkContextMenu}
+        on:click={handleLinkClick}
       >
         <Icon {...iconLinkToRecordPage} />
       </a>
