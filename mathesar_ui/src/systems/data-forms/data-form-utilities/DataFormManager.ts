@@ -8,7 +8,7 @@ import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
 import { DataFormStructure } from './DataFormStructure';
-import type { DataFormStructureProps, EphemeralDataFormField } from './types';
+import type { DataFormField, DataFormStructureProps } from './types';
 
 export interface DataFormManager {
   dataFormStructure: DataFormStructure;
@@ -28,7 +28,7 @@ interface SelectedStaticElement {
 
 interface SelectedFieldElement {
   type: 'field';
-  field: EphemeralDataFormField;
+  field: DataFormField;
 }
 
 export type SelectedElement = SelectedStaticElement | SelectedFieldElement;

@@ -11,7 +11,7 @@
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
   import type { FkField } from '../data-form-utilities/FkField';
   import { tableStructureSubstanceToEphemeralFieldProps } from '../data-form-utilities/transformers';
-  import type { EphemeralDataFormFieldProps } from '../data-form-utilities/types';
+  import type { DataFormFieldProps } from '../data-form-utilities/types';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: FkField;
@@ -38,9 +38,7 @@
     },
   };
 
-  async function getDefaultNestedFields(): Promise<
-    EphemeralDataFormFieldProps[]
-  > {
+  async function getDefaultNestedFields(): Promise<DataFormFieldProps[]> {
     const tableStructureSubstance =
       await linkedTableStructure.getSubstanceOnceResolved();
     if (tableStructureSubstance.resolvedValue) {

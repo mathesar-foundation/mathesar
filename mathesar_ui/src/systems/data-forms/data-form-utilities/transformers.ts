@@ -9,16 +9,13 @@ import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableS
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
 import { FieldColumn } from './FieldColumn';
-import type {
-  DataFormStructureProps,
-  EphemeralDataFormFieldProps,
-} from './types';
+import type { DataFormFieldProps, DataFormStructureProps } from './types';
 
 export function fieldColumnToEphemeralFieldProps(
   fc: FieldColumn,
   tableStructureSubstance: TableStructureSubstance,
   index: number,
-): EphemeralDataFormFieldProps {
+): DataFormFieldProps {
   const baseProps = {
     fieldColumn: fc,
     key: getGloballyUniqueId(),
@@ -52,7 +49,7 @@ export function fieldColumnToEphemeralFieldProps(
 
 export function tableStructureSubstanceToEphemeralFieldProps(
   tableStructureSubstance: TableStructureSubstance,
-): EphemeralDataFormFieldProps[] {
+): DataFormFieldProps[] {
   return [...tableStructureSubstance.processedColumns.values()]
     .filter((pc) => !pc.column.default?.is_dynamic)
     .map((c, index) => {
@@ -93,7 +90,7 @@ export function rawEphemeralFieldToEphemeralFieldProps(
   rawEphemeralField: RawDataFormField,
   parentTableOid: number,
   formSource: RawDataFormSource,
-): EphemeralDataFormFieldProps {
+): DataFormFieldProps {
   const baseProps = {
     key: rawEphemeralField.key,
     label: rawEphemeralField.label,

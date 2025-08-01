@@ -13,13 +13,13 @@
   } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
-  import type { EphemeralDataFormField } from '../../data-form-utilities/types';
+  import type { DataFormField } from '../../data-form-utilities/types';
   import FkFormFieldRuleSelector from '../../elements/FkFormFieldRuleSelector.svelte';
 
   import FieldAppearance from './FieldAppearance.svelte';
 
   export let dataFormManager: EditableDataFormManager;
-  export let field: EphemeralDataFormField;
+  export let field: DataFormField;
   $: ({ label, help, fieldColumn, isRequired } = field);
   $: isRequiredOnDb = !fieldColumn.column.nullable;
   $: isFieldRequired = isRequiredOnDb || $isRequired;

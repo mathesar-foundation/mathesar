@@ -8,9 +8,9 @@
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
-  import type { EphemeralDataFormField } from '../../data-form-utilities/types';
+  import type { DataFormField } from '../../data-form-utilities/types';
 
-  export let field: EphemeralDataFormField;
+  export let field: DataFormField;
 
   $: ({ styling, kind, fieldColumn } = field);
   $: showSection =

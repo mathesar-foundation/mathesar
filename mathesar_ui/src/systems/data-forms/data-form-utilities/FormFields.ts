@@ -19,18 +19,18 @@ import type {
 import { FkField } from './FkField';
 import { ScalarField } from './ScalarField';
 import type {
+  DataFormField,
+  DataFormFieldProps,
   EdfFieldListDetail,
   EdfNestedFieldChanges,
-  EphemeralDataFormField,
-  EphemeralDataFormFieldProps,
   ParentEphemeralDataFormField,
 } from './types';
 
 function fieldPropToEphemeralField(
-  fieldProps: EphemeralDataFormFieldProps,
+  fieldProps: DataFormFieldProps,
   holder: FormFields,
   onChange: (e: EdfNestedFieldChanges) => unknown,
-): EphemeralDataFormField {
+): DataFormField {
   if (fieldProps.kind === 'scalar_column') {
     return new ScalarField(holder, fieldProps, (detail) => {
       onChange(detail);
@@ -45,9 +45,9 @@ function fieldPropToEphemeralField(
 export class FormFields {
   readonly parent;
 
-  private fieldSet: WritableSet<EphemeralDataFormField>;
+  private fieldSet: WritableSet<DataFormField>;
 
-  private sortedFields: Readable<EphemeralDataFormField[]>;
+  private sortedFields: Readable<DataFormField[]>;
 
   private onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown;
 
@@ -57,7 +57,7 @@ export class FormFields {
 
   constructor(
     parent: DataFormStructure | ParentEphemeralDataFormField,
-    fieldProps: Iterable<EphemeralDataFormFieldProps>,
+    fieldProps: Iterable<DataFormFieldProps>,
     onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown,
   ) {
     this.parent = parent;
@@ -66,10 +66,7 @@ export class FormFields {
       fieldPropToEphemeralField(fieldProp, this, onChange),
     );
     this.fieldSet = new WritableSet(ephemeralFormFields);
-    this.sortedFields = derived<
-      WritableSet<EphemeralDataFormField>,
-      EphemeralDataFormField[]
-    >(
+    this.sortedFields = derived<WritableSet<DataFormField>, DataFormField[]>(
       this.fieldSet,
       (_, set) => {
         let unsubIndexStores: (() => void)[] = [];
@@ -98,7 +95,7 @@ export class FormFields {
     );
 
     this.fieldValueStores = derived<
-      WritableSet<EphemeralDataFormField>,
+      WritableSet<DataFormField>,
       DataFormFieldInputValueHolder[]
     >(
       this.fieldSet,
@@ -150,7 +147,7 @@ export class FormFields {
     );
   }
 
-  subscribe(run: Subscriber<EphemeralDataFormField[]>): Unsubscriber {
+  subscribe(run: Subscriber<DataFormField[]>): Unsubscriber {
     return this.sortedFields.subscribe(run);
   }
 
@@ -169,7 +166,7 @@ export class FormFields {
       : this.parent.baseTableOid;
   }
 
-  reconstruct(dataFormFieldProps: Iterable<EphemeralDataFormFieldProps>) {
+  reconstruct(dataFormFieldProps: Iterable<DataFormFieldProps>) {
     this.fieldSet.reconstruct(
       [...dataFormFieldProps].map((fieldProp) =>
         fieldPropToEphemeralField(fieldProp, this, this.onChange),
@@ -180,7 +177,7 @@ export class FormFields {
     });
   }
 
-  add(dataFormFieldProps: EphemeralDataFormFieldProps) {
+  add(dataFormFieldProps: DataFormFieldProps) {
     if (!get(this.hasColumn(dataFormFieldProps.fieldColumn))) {
       const dataFormField = fieldPropToEphemeralField(
         dataFormFieldProps,
@@ -201,7 +198,7 @@ export class FormFields {
     }
   }
 
-  delete(dataFormField: EphemeralDataFormField) {
+  delete(dataFormField: DataFormField) {
     const fieldIndex = get(dataFormField.index);
     for (const field of get(this.fieldSet)) {
       if (get(field.index) > fieldIndex) {

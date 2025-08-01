@@ -6,12 +6,12 @@
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
   import { DataFormStructure } from '../data-form-utilities/DataFormStructure';
-  import type { EphemeralDataFormField } from '../data-form-utilities/types';
+  import type { DataFormField } from '../data-form-utilities/types';
 
   import FieldNavigationElement from './FieldNavigationElement.svelte';
 
   export let dataFormManager: EditableDataFormManager;
-  export let field: EphemeralDataFormField | undefined = undefined;
+  export let field: DataFormField | undefined = undefined;
 
   $: parent = field?.holder.parent;
   $: parentField = parent instanceof DataFormStructure ? undefined : parent;

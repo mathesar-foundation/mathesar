@@ -3,10 +3,10 @@
   import TableName from '@mathesar/components/TableName.svelte';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { EphemeralDataFormField } from '../data-form-utilities/types';
+  import type { DataFormField } from '../data-form-utilities/types';
 
   export let dataFormManager: EditableDataFormManager;
-  export let dataFormField: EphemeralDataFormField;
+  export let dataFormField: DataFormField;
 
   $: tableOidOfField = dataFormField.holder.getTableOid();
   $: tableStructure = dataFormManager.getTableStructure(tableOidOfField);

@@ -10,12 +10,12 @@
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
-  import type { EphemeralDataFormField } from '../data-form-utilities/types';
+  import type { DataFormField } from '../data-form-utilities/types';
 
   import FormFieldCommonControls from './FormFieldCommonControls.svelte';
 
   export let dataFormManager: DataFormManager;
-  export let dataFormField: EphemeralDataFormField;
+  export let dataFormField: DataFormField;
   export let isSelected: boolean;
 
   $: ({ label, help, isRequired } = dataFormField);

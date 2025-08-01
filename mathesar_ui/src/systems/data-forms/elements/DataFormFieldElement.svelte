@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { DataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { EphemeralDataFormField } from '../data-form-utilities/types';
+  import type { DataFormField } from '../data-form-utilities/types';
 
   import FkFormFieldElement from './FkFormFieldElement.svelte';
   import FormFieldElementWrapper from './FormFieldElementWrapper.svelte';
   import ScalarFormFieldElement from './ScalarFormFieldElement.svelte';
 
   export let dataFormManager: DataFormManager;
-  export let dataFormField: EphemeralDataFormField;
+  export let dataFormField: DataFormField;
 </script>
 
 <FormFieldElementWrapper {dataFormManager} {dataFormField} let:isSelected>

@@ -9,17 +9,17 @@ import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 import { FormFields } from './FormFields';
 import type {
   AbstractEphemeralColumnBasedFieldProps,
+  DataFormFieldProps,
   EdfBaseFieldProps,
   EdfFkFieldPropChange,
   EdfNestedFieldChanges,
-  EphemeralDataFormFieldProps,
 } from './types';
 
 export interface FkFieldProps extends AbstractEphemeralColumnBasedFieldProps {
   kind: RawForeignKeyDataFormField['kind'];
   interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
   relatedTableOid: number;
-  nestedFields: Iterable<EphemeralDataFormFieldProps>;
+  nestedFields: Iterable<DataFormFieldProps>;
 }
 
 export class FkField extends AbstractEphermeralColumnBasedField {
@@ -74,9 +74,7 @@ export class FkField extends AbstractEphermeralColumnBasedField {
 
   async setInteractionRule(
     rule: RawForeignKeyDataFormField['fk_interaction_rule'],
-    getDefaultNestedFields: () => Promise<
-      Iterable<EphemeralDataFormFieldProps>
-    >,
+    getDefaultNestedFields: () => Promise<Iterable<DataFormFieldProps>>,
   ) {
     this._interactionRule.set(rule);
     this.bubblePropChange('interactionRule');

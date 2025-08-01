@@ -3,14 +3,14 @@
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
-  import type { EphemeralDataFormField } from '../data-form-utilities/types';
+  import type { DataFormField } from '../data-form-utilities/types';
 
   import { AddField } from './add-field';
   import FormFieldSource from './FormFieldSource.svelte';
   import SelectableElement from './SelectableElement.svelte';
 
   export let dataFormManager: DataFormManager;
-  export let dataFormField: EphemeralDataFormField;
+  export let dataFormField: DataFormField;
 
   $: ({ index } = dataFormField);
 </script>

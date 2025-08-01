@@ -2,9 +2,9 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import type { EphemeralDataFormField } from '../data-form-utilities/types';
+  import type { DataFormField } from '../data-form-utilities/types';
 
-  export let dataFormField: EphemeralDataFormField;
+  export let dataFormField: DataFormField;
 </script>
 
 <div class="controls">
