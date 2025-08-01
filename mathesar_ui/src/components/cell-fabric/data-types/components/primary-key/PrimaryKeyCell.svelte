@@ -7,6 +7,7 @@
   import Default from '@mathesar/components/Default.svelte';
   import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
   import { iconLinkToRecordPage } from '@mathesar/icons';
+  // eslint-disable-next-line import/no-cycle
   import RecordStore from '@mathesar/stores/RecordStore';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import { currentTablesMap } from '@mathesar/stores/tables';
