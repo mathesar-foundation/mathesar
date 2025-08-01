@@ -1,13 +1,13 @@
 import { type Readable, derived, get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import { AbstractEphemeralField } from './AbstractEphemeralField';
+import { AbstractField } from './AbstractField';
 import type { FieldColumn } from './FieldColumn';
 import { DataFormFieldInputValueHolder } from './FieldValueHolder';
 import type { FormFields } from './FormFields';
 import type { AbstractEphemeralColumnBasedFieldProps } from './types';
 
-export abstract class AbstractEphermeralColumnBasedField extends AbstractEphemeralField {
+export abstract class AbstractEphermeralColumnBasedField extends AbstractField {
   readonly fieldColumn;
 
   readonly fieldValueHolder: DataFormFieldInputValueHolder;

@@ -3,38 +3,46 @@ import { type Readable, type Updater, get, writable } from 'svelte/store';
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 
 import type { FormFields } from './FormFields';
-import type { AbstractEphemeralFieldProps, EdfBaseFieldProps } from './types';
+import type { EdfBaseFieldProps } from './types';
 
-export abstract class AbstractEphemeralField {
+export interface AbstractFieldProps {
+  key: RawDataFormField['key'];
+  label: RawDataFormField['label'];
+  help: RawDataFormField['help'];
+  index: RawDataFormField['index'];
+  styling: RawDataFormField['styling'];
+}
+
+export abstract class AbstractField {
   readonly holder;
 
   readonly key;
 
   private _index;
 
-  get index(): Readable<AbstractEphemeralFieldProps['index']> {
+  get index(): Readable<AbstractFieldProps['index']> {
     return this._index;
   }
 
   private _label;
 
-  get label(): Readable<AbstractEphemeralFieldProps['label']> {
+  get label(): Readable<AbstractFieldProps['label']> {
     return this._label;
   }
 
   private _help;
 
-  get help(): Readable<AbstractEphemeralFieldProps['help']> {
+  get help(): Readable<AbstractFieldProps['help']> {
     return this._help;
   }
 
   private _styling;
 
-  get styling(): Readable<AbstractEphemeralFieldProps['styling']> {
+  get styling(): Readable<AbstractFieldProps['styling']> {
     return this._styling;
   }
 
-  constructor(holder: FormFields, props: AbstractEphemeralFieldProps) {
+  constructor(holder: FormFields, props: AbstractFieldProps) {
     this.holder = holder;
     this.key = props.key;
     this._index = writable(props.index);
@@ -58,7 +66,7 @@ export abstract class AbstractEphemeralField {
     this.bubblePropChange('index');
   }
 
-  updateStyling(styling: Partial<AbstractEphemeralFieldProps['styling']>) {
+  updateStyling(styling: Partial<AbstractFieldProps['styling']>) {
     this._styling.update((s) => {
       if (styling === null) {
         return styling;
