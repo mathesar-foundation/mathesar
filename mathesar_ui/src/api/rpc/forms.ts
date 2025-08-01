@@ -49,38 +49,31 @@ export type RawEphemeralDataFormField =
   | RawEphemeralScalarDataFormField
   | RawEphemeralForeignKeyDataFormField;
 
-export interface RawEphemeralDataForm {
-  database_id: number;
-  base_table_oid: number;
-  schema_oid: number;
-  name: string;
-  description: string | null;
-  version: number;
-  associated_role_id: RawConfiguredRole['id'] | null;
+export interface RawDataFormStructure {
   header_title: RichTextJson;
   header_subtitle: RichTextJson | null;
   fields: RawEphemeralDataFormField[];
   submit_message: RichTextJson | null;
   submit_redirect_url: string | null;
   submit_button_label: string | null;
+  associated_role_id: RawConfiguredRole['id'] | null;
+}
+
+export interface RawEphemeralDataForm extends RawDataFormStructure {
+  database_id: number;
+  base_table_oid: number;
+  schema_oid: number;
+  name: string;
+  description: string | null;
+  version: number;
 }
 
 /**
  * Persisted raw types
  */
 
-export interface RawDataFormBaseField extends RawEphemeralDataFormBaseField {
-  id: number;
-}
-export interface RawScalarDataFormField
-  extends RawDataFormBaseField,
-    RawEphemeralScalarDataFormField {}
-
-export interface RawForeignKeyDataFormField
-  extends RawDataFormBaseField,
-    RawEphemeralForeignKeyDataFormField {
-  child_fields: RawDataFormField[] | null;
-}
+export type RawScalarDataFormField = RawEphemeralScalarDataFormField;
+export type RawForeignKeyDataFormField = RawEphemeralForeignKeyDataFormField;
 
 export interface ReplacableRawDataForm extends RawEphemeralDataForm {
   id: number;
@@ -97,7 +90,7 @@ export interface RawDataForm extends RawEphemeralDataForm {
   publish_public: boolean;
 }
 
-export interface RawDataFormResponse extends RawDataForm {
+interface RawDataFormResponse extends RawDataForm {
   created_at: string;
   updated_at: string;
 }

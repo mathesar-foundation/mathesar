@@ -2,7 +2,7 @@ import { type Readable, derived, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
-  RawEphemeralDataForm,
+  RawDataFormStructure,
 } from '@mathesar/api/rpc/forms';
 import { type FieldStore, makeForm } from '@mathesar/components/form';
 import { collapse } from '@mathesar-component-library';
@@ -24,18 +24,6 @@ export class EphemeralDataForm {
   readonly databaseId;
 
   readonly token;
-
-  private _name;
-
-  get name(): Readable<RawDataForm['name']> {
-    return this._name;
-  }
-
-  private _description;
-
-  get description(): Readable<RawDataForm['description']> {
-    return this._description;
-  }
 
   private _headerTitle;
 
@@ -87,8 +75,6 @@ export class EphemeralDataForm {
     this.schemaOid = edf.schemaOid;
     this.databaseId = edf.databaseId;
     this.token = edf.token;
-    this._name = writable(edf.name);
-    this._description = writable(edf.description);
     this._headerTitle = writable(edf.headerTitle);
     this._headerSubTitle = writable(edf.headerSubTitle);
     this._associatedRoleId = writable(edf.associatedRoleId);
@@ -154,16 +140,6 @@ export class EphemeralDataForm {
       target: this,
     };
     this.onChange?.(change);
-  }
-
-  setName(name: string) {
-    this._name.set(name);
-    this.bubblePropChange('name');
-  }
-
-  setDescription(description: string) {
-    this._description.set(description);
-    this.bubblePropChange('description');
   }
 
   setHeaderTitle(title: string) {
@@ -234,14 +210,8 @@ export class EphemeralDataForm {
     return request;
   }
 
-  toRawEphemeralDataForm(): RawEphemeralDataForm {
+  toRawStructure(): RawDataFormStructure {
     return {
-      database_id: this.databaseId,
-      base_table_oid: this.baseTableOid,
-      schema_oid: this.schemaOid,
-      name: get(this.name),
-      description: get(this.description),
-      version: 1,
       associated_role_id: get(this.associatedRoleId),
       header_title: get(this.headerTitle),
       header_subtitle: get(this.headerSubTitle),

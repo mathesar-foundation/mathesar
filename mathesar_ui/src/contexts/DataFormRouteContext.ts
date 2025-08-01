@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type { RawEphemeralDataForm } from '@mathesar/api/rpc/forms';
+import type { RawDataFormStructure } from '@mathesar/api/rpc/forms';
 import type { DataForm } from '@mathesar/models/DataForm';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 
@@ -24,9 +24,9 @@ export class DataFormRouteContext {
     void this.formSourceInfo.run({ form_token: get(this.dataForm.token) });
   }
 
-  async replaceDataForm(dataFormDef: RawEphemeralDataForm) {
+  async updateStructure(dataFormStructure: RawDataFormStructure) {
     this.formSourceInfo.reset();
-    await this.dataForm.replaceDataForm(dataFormDef);
+    await this.dataForm.updateStructure(dataFormStructure);
     void this.formSourceInfo.run({ form_token: get(this.dataForm.token) });
   }
 

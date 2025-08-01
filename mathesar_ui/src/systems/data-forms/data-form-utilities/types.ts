@@ -1,6 +1,6 @@
 import type {
   RawDataForm,
-  RawDataFormBaseField,
+  RawEphemeralDataFormField,
   RawEphemeralForeignKeyDataFormField,
   RawEphemeralScalarDataFormField,
   RawForeignKeyDataFormField,
@@ -12,16 +12,16 @@ import type { EphermeralScalarField } from './EphemeralScalarField';
 import type { FieldColumn } from './FieldColumn';
 
 export interface AbstractEphemeralFieldProps {
-  key: RawDataFormBaseField['key'];
-  label: RawDataFormBaseField['label'];
-  help: RawDataFormBaseField['help'];
-  index: RawDataFormBaseField['index'];
-  styling: RawDataFormBaseField['styling'];
+  key: RawEphemeralDataFormField['key'];
+  label: RawEphemeralDataFormField['label'];
+  help: RawEphemeralDataFormField['help'];
+  index: RawEphemeralDataFormField['index'];
+  styling: RawEphemeralDataFormField['styling'];
 }
 
 export interface AbstractEphemeralColumnBasedFieldProps
   extends AbstractEphemeralFieldProps {
-  isRequired: RawDataFormBaseField['is_required'];
+  isRequired: RawEphemeralDataFormField['is_required'];
   fieldColumn: FieldColumn;
 }
 
