@@ -1143,8 +1143,6 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.list_column_privileges_for_current_role(regclass,smallint)', 'FUNCTION', NULL),
   ('msar', 'msar.list_database_privileges_for_current_role(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.list_db_priv()', 'FUNCTION', NULL),
-  ('msar', 'msar.list_by_record_summaries(oid,integer,integer,jsonb,text,jsonb,boolean,boolean)', 'FUNCTION', NULL),
-  ('msar', 'msar.list_by_record_summaries(oid,integer,integer,text,jsonb,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.list_by_record_summaries(oid,integer,integer,text,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.list_records_from_table(oid,integer,integer,jsonb,jsonb,jsonb,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.list_records_from_table(oid,integer,integer,jsonb,jsonb,jsonb,boolean,jsonb)', 'FUNCTION', NULL),
