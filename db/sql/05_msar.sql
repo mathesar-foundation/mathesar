@@ -5662,13 +5662,15 @@ BEGIN
     WITH
       all_record_summaries AS ( %1$s ),
       filtered AS ( SELECT * FROM all_record_summaries %2$s ),
-      sorted AS ( SELECT * FROM filtered ORDER BY summary LIMIT %3$s OFFSET %4$s )
+      sorted AS ( SELECT * FROM filtered ORDER BY summary LIMIT %3$s OFFSET %4$s ),
+      results AS ( SELECT coalesce(json_agg(sorted), '[]') AS results FROM sorted ),
+      count_all_results AS ( SELECT count(*) AS num FROM filtered )
     SELECT
       json_build_object(
-        'count', (SELECT count(*) FROM filtered),
-        'results', coalesce(json_agg(sorted), '[]')
+        'count', count_all_results.num,
+        'results', results.results
       )
-    FROM sorted
+    FROM count_all_results, results
     $q$,
     /* 1 */ msar.build_record_summary_query_for_table(tab_id, NULL, table_record_summary_templates),
     /* 2 */ search_where_clause,
