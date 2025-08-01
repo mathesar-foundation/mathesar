@@ -8,8 +8,9 @@ import {
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
+import type { DataFormStructureProps } from './DataFormStructure';
 import { FieldColumn } from './FieldColumn';
-import type { DataFormFieldProps, DataFormStructureProps } from './types';
+import type { DataFormFieldProps } from './types';
 
 export function fieldColumnToEphemeralFieldProps(
   fc: FieldColumn,

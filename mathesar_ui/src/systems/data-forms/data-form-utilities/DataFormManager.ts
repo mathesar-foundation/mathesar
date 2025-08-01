@@ -7,8 +7,11 @@ import { Table } from '@mathesar/models/Table';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
-import { DataFormStructure } from './DataFormStructure';
-import type { DataFormField, DataFormStructureProps } from './types';
+import {
+  DataFormStructure,
+  type DataFormStructureProps,
+} from './DataFormStructure';
+import type { DataFormField } from './types';
 
 export interface DataFormManager {
   dataFormStructure: DataFormStructure;

@@ -10,11 +10,27 @@ import { collapse } from '@mathesar-component-library';
 import type { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 import { FormFields } from './FormFields';
 import type {
-  DataFormStructureProps,
+  DataFormFieldProps,
   EdfChange,
   EdfDirectProps,
   EdfNestedFieldChanges,
 } from './types';
+
+export interface DataFormStructureProps {
+  baseTableOid: number;
+  schemaOid: number;
+  databaseId: number;
+  token: RawDataForm['token'];
+  name: RawDataForm['name'];
+  description: RawDataForm['description'];
+  headerTitle: RawDataForm['header_title'];
+  headerSubTitle: RawDataForm['header_subtitle'];
+  associatedRoleId: RawDataForm['associated_role_id'];
+  submitMessage: RawDataForm['submit_message'];
+  submitRedirectUrl: RawDataForm['submit_redirect_url'];
+  submitButtonLabel: RawDataForm['submit_button_label'];
+  fields: Iterable<DataFormFieldProps>;
+}
 
 export class DataFormStructure {
   readonly baseTableOid;

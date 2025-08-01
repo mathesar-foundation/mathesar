@@ -1,4 +1,4 @@
-import type { RawDataForm, RawDataFormField } from '@mathesar/api/rpc/forms';
+import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 
 import type { DataFormStructure } from './DataFormStructure';
 import type { FieldColumn } from './FieldColumn';
@@ -24,22 +24,6 @@ export type DataFormField = ScalarField | FkField;
 
 // This may contain more types in the future, such as ReverseFkField
 export type ParentEphemeralDataFormField = FkField;
-
-export interface DataFormStructureProps {
-  baseTableOid: number;
-  schemaOid: number;
-  databaseId: number;
-  token: RawDataForm['token'];
-  name: RawDataForm['name'];
-  description: RawDataForm['description'];
-  headerTitle: RawDataForm['header_title'];
-  headerSubTitle: RawDataForm['header_subtitle'];
-  associatedRoleId: RawDataForm['associated_role_id'];
-  submitMessage: RawDataForm['submit_message'];
-  submitRedirectUrl: RawDataForm['submit_redirect_url'];
-  submitButtonLabel: RawDataForm['submit_button_label'];
-  fields: Iterable<DataFormFieldProps>;
-}
 
 /** Types for change detection */
 
