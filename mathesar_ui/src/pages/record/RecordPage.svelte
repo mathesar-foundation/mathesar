@@ -8,8 +8,8 @@
   import { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
 
-  import RecordPageContent from './RecordPageContent.svelte';
-  import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
+  import RecordViewContent from './RecordViewContent.svelte';
+  import RecordViewLoadingSpinner from './RecordViewLoadingSpinner.svelte';
   import type RecordStore from './RecordStore';
 
   export let record: RecordStore;
@@ -30,9 +30,9 @@
 
 <LayoutWithHeader cssVariables={{ '--page-padding': '0' }} fitViewport>
   {#if isLoading}
-    <RecordPageLoadingSpinner />
+    <RecordViewLoadingSpinner />
   {:else if canViewTable}
-    <RecordPageContent {tableStructure} {record} />
+    <RecordViewContent {tableStructure} {record} />
   {:else}
     <div class="no-access">
       <WarningBox fullWidth>

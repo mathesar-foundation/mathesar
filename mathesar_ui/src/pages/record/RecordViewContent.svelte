@@ -19,7 +19,7 @@
   import { currentTable } from '@mathesar/stores/tables';
 
   import DirectField from './DirectField.svelte';
-  import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
+  import RecordPageLoadingSpinner from './RecordViewLoadingSpinner.svelte';
   import type RecordStore from './RecordStore';
   import Widgets from './Widgets.svelte';
 
