@@ -5,7 +5,7 @@
   import { Button } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { DataFormField } from '../data-form-utilities/types';
+  import type { DataFormField } from '../data-form-utilities/FormFields';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: DataFormField | undefined = undefined;

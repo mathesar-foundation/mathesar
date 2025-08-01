@@ -10,8 +10,8 @@
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
   import type { FkField } from '../data-form-utilities/FkField';
+  import type { DataFormFieldProps } from '../data-form-utilities/FormFields';
   import { tableStructureSubstanceToEphemeralFieldProps } from '../data-form-utilities/transformers';
-  import type { DataFormFieldProps } from '../data-form-utilities/types';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: FkField;

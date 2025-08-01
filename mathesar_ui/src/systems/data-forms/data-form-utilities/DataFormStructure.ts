@@ -8,13 +8,8 @@ import { type FieldStore, makeForm } from '@mathesar/components/form';
 import { collapse } from '@mathesar-component-library';
 
 import type { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
-import { FormFields } from './FormFields';
-import type {
-  DataFormFieldProps,
-  EdfChange,
-  EdfDirectProps,
-  EdfNestedFieldChanges,
-} from './types';
+import { type DataFormFieldProps, FormFields } from './FormFields';
+import type { EdfChange, EdfDirectProps, EdfNestedFieldChanges } from './types';
 
 export interface DataFormStructureProps {
   baseTableOid: number;

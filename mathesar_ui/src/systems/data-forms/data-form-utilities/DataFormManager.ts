@@ -11,7 +11,7 @@ import {
   DataFormStructure,
   type DataFormStructureProps,
 } from './DataFormStructure';
-import type { DataFormField } from './types';
+import type { DataFormField } from './FormFields';
 
 export interface DataFormManager {
   dataFormStructure: DataFormStructure;

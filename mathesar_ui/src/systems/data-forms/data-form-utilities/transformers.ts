@@ -10,7 +10,7 @@ import { getGloballyUniqueId } from '@mathesar-component-library';
 
 import type { DataFormStructureProps } from './DataFormStructure';
 import { FieldColumn } from './FieldColumn';
-import type { DataFormFieldProps } from './types';
+import type { DataFormFieldProps } from './FormFields';
 
 export function fieldColumnToEphemeralFieldProps(
   fc: FieldColumn,

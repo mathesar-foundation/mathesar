@@ -13,7 +13,7 @@
   } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
-  import type { DataFormField } from '../../data-form-utilities/types';
+  import type { DataFormField } from '../../data-form-utilities/FormFields';
   import FkFormFieldRuleSelector from '../../elements/FkFormFieldRuleSelector.svelte';
 
   import FieldAppearance from './FieldAppearance.svelte';

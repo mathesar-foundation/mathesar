@@ -6,7 +6,7 @@
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
   import { DataFormStructure } from '../data-form-utilities/DataFormStructure';
-  import type { DataFormField } from '../data-form-utilities/types';
+  import type { DataFormField } from '../data-form-utilities/FormFields';
 
   import FieldNavigationElement from './FieldNavigationElement.svelte';
 

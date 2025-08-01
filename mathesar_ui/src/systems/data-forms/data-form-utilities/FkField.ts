@@ -9,9 +9,8 @@ import {
 } from './AbstractColumnBasedField';
 import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 // eslint-disable-next-line import/no-cycle
-import { FormFields } from './FormFields';
+import { type DataFormFieldProps, FormFields } from './FormFields';
 import type {
-  DataFormFieldProps,
   EdfBaseFieldProps,
   EdfFkFieldPropChange,
   EdfNestedFieldChanges,

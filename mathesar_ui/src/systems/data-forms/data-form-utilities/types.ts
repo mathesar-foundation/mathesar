@@ -1,12 +1,7 @@
 import type { DataFormStructure } from './DataFormStructure';
-import type { FkField, FkFieldProps } from './FkField';
-import type { ScalarField, ScalarFieldProps } from './ScalarField';
-
-export type DataFormFieldProps = ScalarFieldProps | FkFieldProps;
-export type DataFormField = ScalarField | FkField;
-
-// This may contain more types in the future, such as ReverseFkField
-export type ParentEphemeralDataFormField = FkField;
+import type { FkField } from './FkField';
+import type { DataFormField } from './FormFields';
+import type { ScalarField } from './ScalarField';
 
 /** Types for change detection */
 

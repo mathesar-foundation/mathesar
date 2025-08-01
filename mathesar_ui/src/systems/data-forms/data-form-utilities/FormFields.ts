@@ -16,15 +16,15 @@ import type {
   DataFormFieldInputValueHolder,
 } from './FieldValueHolder';
 // eslint-disable-next-line import/no-cycle
-import { FkField } from './FkField';
-import { ScalarField } from './ScalarField';
-import type {
-  DataFormField,
-  DataFormFieldProps,
-  EdfFieldListDetail,
-  EdfNestedFieldChanges,
-  ParentEphemeralDataFormField,
-} from './types';
+import { FkField, type FkFieldProps } from './FkField';
+import { ScalarField, type ScalarFieldProps } from './ScalarField';
+import type { EdfFieldListDetail, EdfNestedFieldChanges } from './types';
+
+export type DataFormFieldProps = ScalarFieldProps | FkFieldProps;
+export type DataFormField = ScalarField | FkField;
+
+// This may contain more types in the future, such as ReverseFkField
+export type ParentDataFormField = FkField;
 
 function fieldPropToEphemeralField(
   fieldProps: DataFormFieldProps,
@@ -41,7 +41,6 @@ function fieldPropToEphemeralField(
     onChange(detail);
   });
 }
-
 export class FormFields {
   readonly parent;
 
@@ -56,7 +55,7 @@ export class FormFields {
   >;
 
   constructor(
-    parent: DataFormStructure | ParentEphemeralDataFormField,
+    parent: DataFormStructure | ParentDataFormField,
     fieldProps: Iterable<DataFormFieldProps>,
     onChange: (e: EdfFieldListDetail | EdfNestedFieldChanges) => unknown,
   ) {
