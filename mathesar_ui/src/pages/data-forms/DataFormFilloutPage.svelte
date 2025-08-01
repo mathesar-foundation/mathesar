@@ -8,7 +8,7 @@
   import {
     DataFormCanvas,
     ReadonlyDataFormManager,
-    rawDataFormToEphemeralFormProps,
+    rawDataFormToDataFormStructureProps,
   } from '@mathesar/systems/data-forms';
 
   const dataFormRouteContext = DataFormRouteContext.get();
@@ -17,7 +17,7 @@
   $: rawDataFormStore = dataForm.toRawDataFormStore();
   $: dataFormManager = $formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
-        rawDataFormToEphemeralFormProps(
+        rawDataFormToDataFormStructureProps(
           $rawDataFormStore,
           $formSourceInfo.resolvedValue,
         ),

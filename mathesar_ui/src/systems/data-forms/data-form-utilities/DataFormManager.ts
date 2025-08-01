@@ -8,7 +8,7 @@ import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
 import { DataFormStructure } from './DataFormStructure';
-import type { EphemeralDataFormField, EphemeralDataFormProps } from './types';
+import type { DataFormStructureProps, EphemeralDataFormField } from './types';
 
 export interface DataFormManager {
   dataFormStructure: DataFormStructure;
@@ -17,8 +17,8 @@ export interface DataFormManager {
 export class ReadonlyDataFormManager implements DataFormManager {
   dataFormStructure;
 
-  constructor(ephemeralDataFormProps: EphemeralDataFormProps) {
-    this.dataFormStructure = new DataFormStructure(ephemeralDataFormProps);
+  constructor(props: DataFormStructureProps) {
+    this.dataFormStructure = new DataFormStructure(props);
   }
 }
 
@@ -53,32 +53,29 @@ export class EditableDataFormManager implements DataFormManager {
   }
 
   constructor(
-    ephemeralDataFormProps: EphemeralDataFormProps,
+    structureProps: DataFormStructureProps,
     schema: Schema,
     tableStructureCache: CacheManager<Table['oid'], TableStructure>,
   ) {
-    this.dataFormStructure = new DataFormStructure(
-      ephemeralDataFormProps,
-      (e) => {
-        if (e.prop === 'fields' || e.prop === 'nestedFields') {
-          if (e.detail.type === 'add') {
-            this.selectElement({
-              type: 'field',
-              field: e.detail.field,
-            });
-          } else if (e.detail.type === 'delete') {
-            const currentSelectedElement = get(this.selectedElement);
-            if (
-              currentSelectedElement?.type === 'field' &&
-              currentSelectedElement.field === e.detail.field
-            ) {
-              this.resetSelectedElement();
-            }
+    this.dataFormStructure = new DataFormStructure(structureProps, (e) => {
+      if (e.prop === 'fields' || e.prop === 'nestedFields') {
+        if (e.detail.type === 'add') {
+          this.selectElement({
+            type: 'field',
+            field: e.detail.field,
+          });
+        } else if (e.detail.type === 'delete') {
+          const currentSelectedElement = get(this.selectedElement);
+          if (
+            currentSelectedElement?.type === 'field' &&
+            currentSelectedElement.field === e.detail.field
+          ) {
+            this.resetSelectedElement();
           }
         }
-        this._hasChanges.set(true);
-      },
-    );
+      }
+      this._hasChanges.set(true);
+    });
     this.schema = schema;
     this.tableStructureCache = tableStructureCache;
   }

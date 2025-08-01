@@ -10,7 +10,7 @@
   import {
     DataFormCanvas,
     ReadonlyDataFormManager,
-    rawDataFormToEphemeralFormProps,
+    rawDataFormToDataFormStructureProps,
   } from '@mathesar/systems/data-forms';
 
   export let rawDataForm: RawDataForm;
@@ -19,7 +19,7 @@
   $: pageTitle = rawDataForm.header_title.text.trim() || rawDataForm.name;
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
-        rawDataFormToEphemeralFormProps(
+        rawDataFormToDataFormStructureProps(
           rawDataForm,
           formSourceInfo.resolvedValue,
         ),

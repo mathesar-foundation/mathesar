@@ -10,10 +10,10 @@ import { collapse } from '@mathesar-component-library';
 import type { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 import { FormFields } from './FormFields';
 import type {
+  DataFormStructureProps,
   EdfChange,
   EdfDirectProps,
   EdfNestedFieldChanges,
-  EphemeralDataFormProps,
 } from './types';
 
 export class DataFormStructure {
@@ -68,21 +68,21 @@ export class DataFormStructure {
   readonly formHolder;
 
   constructor(
-    edf: EphemeralDataFormProps,
+    props: DataFormStructureProps,
     onChange?: (e: EdfChange | EdfNestedFieldChanges) => unknown,
   ) {
-    this.baseTableOid = edf.baseTableOid;
-    this.schemaOid = edf.schemaOid;
-    this.databaseId = edf.databaseId;
-    this.token = edf.token;
-    this._headerTitle = writable(edf.headerTitle);
-    this._headerSubTitle = writable(edf.headerSubTitle);
-    this._associatedRoleId = writable(edf.associatedRoleId);
-    this._submitMessage = writable(edf.submitMessage);
-    this._submitRedirectUrl = writable(edf.submitRedirectUrl);
-    this._submitButtonLabel = writable(edf.submitButtonLabel);
+    this.baseTableOid = props.baseTableOid;
+    this.schemaOid = props.schemaOid;
+    this.databaseId = props.databaseId;
+    this.token = props.token;
+    this._headerTitle = writable(props.headerTitle);
+    this._headerSubTitle = writable(props.headerSubTitle);
+    this._associatedRoleId = writable(props.associatedRoleId);
+    this._submitMessage = writable(props.submitMessage);
+    this._submitRedirectUrl = writable(props.submitRedirectUrl);
+    this._submitButtonLabel = writable(props.submitButtonLabel);
     this.onChange = onChange;
-    this.fields = new FormFields(this, edf.fields, (e) => {
+    this.fields = new FormFields(this, props.fields, (e) => {
       if ('target' in e) {
         this.onChange?.(e);
         return;

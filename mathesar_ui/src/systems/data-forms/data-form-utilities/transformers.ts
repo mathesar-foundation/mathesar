@@ -10,8 +10,8 @@ import { getGloballyUniqueId } from '@mathesar-component-library';
 
 import { FieldColumn } from './FieldColumn';
 import type {
+  DataFormStructureProps,
   EphemeralDataFormFieldProps,
-  EphemeralDataFormProps,
 } from './types';
 
 export function fieldColumnToEphemeralFieldProps(
@@ -144,10 +144,10 @@ export function rawEphemeralFieldToEphemeralFieldProps(
   };
 }
 
-export function rawDataFormToEphemeralFormProps(
+export function rawDataFormToDataFormStructureProps(
   rawDataForm: RawDataForm,
   formSource: RawDataFormSource,
-): EphemeralDataFormProps {
+): DataFormStructureProps {
   return {
     baseTableOid: rawDataForm.base_table_oid,
     schemaOid: rawDataForm.schema_oid,

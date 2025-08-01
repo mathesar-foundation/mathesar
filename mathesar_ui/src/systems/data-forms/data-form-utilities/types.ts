@@ -46,7 +46,7 @@ export type EphemeralDataFormField = EphermeralScalarField | EphermeralFkField;
 // This may contain more types in the future, such as ReverseFkField
 export type ParentEphemeralDataFormField = EphermeralFkField;
 
-export interface EphemeralDataFormProps {
+export interface DataFormStructureProps {
   baseTableOid: number;
   schemaOid: number;
   databaseId: number;
