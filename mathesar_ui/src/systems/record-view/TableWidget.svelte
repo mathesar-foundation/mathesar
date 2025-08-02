@@ -58,11 +58,6 @@
 </div>
 
 <style lang="scss">
-  .table-widget {
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-m);
-    padding: var(--sm1);
-  }
   .top {
     display: grid;
     grid-template: auto / 1fr auto;

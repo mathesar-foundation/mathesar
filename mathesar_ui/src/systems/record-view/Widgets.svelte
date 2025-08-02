@@ -60,10 +60,6 @@
 {/if}
 
 <style lang="scss">
-  .widgets-area {
-    background: var(--elevated-background);
-    border-top: 1px solid var(--border-color);
-  }
   .no-widgets {
     background: var(--layout-background-color);
   }
