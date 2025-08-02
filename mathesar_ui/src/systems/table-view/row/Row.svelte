@@ -25,6 +25,7 @@
   export let row: Row;
   export let rowDescriptor: DisplayRowDescriptor;
   export let style: { [key: string]: string | number };
+  export let quickViewRecord: (tableOid: number, recordId: unknown) => void;
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -37,6 +38,7 @@
     canUpdateRecords,
     canDeleteRecords,
     canInsertRecords,
+    table,
   } = $tabularData);
   $: ({
     rowStatus,
@@ -110,6 +112,7 @@
             {row}
             canInsertRecords={$canInsertRecords}
             canDeleteRecords={$canDeleteRecords}
+            quickViewThisRecord={() => quickViewRecord(table.oid, recordPk)}
           />
         </ContextMenu>
       </SheetRowHeaderCell>
@@ -126,6 +129,7 @@
     {:else if isRecordRow(row)}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
+          tableOid={table.oid}
           {selection}
           {row}
           rowHasErrors={hasWholeRowErrors}
@@ -139,6 +143,7 @@
           canInsertRecords={$canInsertRecords}
           canUpdateRecords={$canUpdateRecords}
           canDeleteRecords={$canDeleteRecords}
+          {quickViewRecord}
         />
       {/each}
     {:else if isHelpTextRow(row)}

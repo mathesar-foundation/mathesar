@@ -9,15 +9,18 @@
   import type { ResultValue } from '@mathesar/api/rpc/records';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
-  import Identifier from '@mathesar/components/Identifier.svelte';
+  import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { SheetDataCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
-  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import {
+    iconLinkToRecordPage,
+    iconModalRecordPage,
+    iconSetToNull,
+  } from '@mathesar/icons';
   import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -44,6 +47,7 @@
   import CellErrors from './CellErrors.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
 
+  export let tableOid: number;
   export let recordsData: RecordsData;
   export let selection: Writable<SheetSelection>;
   export let row: RecordRow;
@@ -60,6 +64,7 @@
   export let canInsertRecords: boolean;
   export let canUpdateRecords: boolean;
   export let canDeleteRecords: boolean;
+  export let quickViewRecord: (tableOid: number, recordId: unknown) => void;
 
   $: effectiveProcessedColumn = isProvisionalRecordRow(row)
     ? processedColumn.withoutEnhancedPkCell()
@@ -91,11 +96,7 @@
   // i.e. row is a placeholder row and record isn't saved yet
   $: isEditable = canUpdateRecords && effectiveProcessedColumn.isEditable;
   $: canSetNull = isEditable && column.nullable && value !== null;
-  $: getRecordPageUrl = $storeToGetRecordPageUrl;
-  $: linkedRecordHref = linkFk
-    ? getRecordPageUrl({ tableId: linkFk.referent_table_oid, recordId: value })
-    : undefined;
-  $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
+  $: getRecordUrl = $storeToGetRecordPageUrl;
   $: recordSummary = $linkedRecordSummaries
     .get(String(column.id))
     ?.get(String(value));
@@ -168,15 +169,32 @@
       {$_('set_to')}
       <Null />
     </ButtonMenuItem>
-    {#if showLinkedRecordHyperLink && linkedRecordHref}
-      <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-        <RichText text={$_('open_named_record')} let:slotName>
-          {#if slotName === 'recordName'}
-            <Identifier>{recordSummary}</Identifier>
-          {/if}
-        </RichText>
-      </LinkMenuItem>
+
+    {#if linkFk && canViewLinkedEntities}
+      {@const linkedTableOid = linkFk.referent_table_oid}
+      <MenuDivider />
+      <MenuHeading>
+        <div class="linked-record-menu-heading">
+          <div class="title">{$_('linked_record')}</div>
+          <div class="record-summary">
+            <LinkedRecord {recordSummary} />
+          </div>
+        </div>
+      </MenuHeading>
+      <ButtonMenuItem
+        icon={iconModalRecordPage}
+        on:click={() => quickViewRecord(linkedTableOid, value)}
+      >
+        {$_('quick_view_linked_record')}
+      </ButtonMenuItem>
+      {@const href = getRecordUrl({ tableId: linkedTableOid, recordId: value })}
+      {#if href}
+        <LinkMenuItem icon={iconLinkToRecordPage} {href}>
+          {$_('open_linked_record')}
+        </LinkMenuItem>
+      {/if}
     {/if}
+
     <MenuDivider />
 
     <!-- Column Attributes -->
@@ -192,9 +210,21 @@
       {row}
       {canDeleteRecords}
       {canInsertRecords}
+      quickViewThisRecord={() => quickViewRecord(tableOid, recordPk)}
     />
   </ContextMenu>
   {#if errors.length}
     <CellErrors {serverErrors} {clientErrors} forceShowErrors={isActive} />
   {/if}
 </SheetDataCell>
+
+<style lang="scss">
+  .linked-record-menu-heading {
+    display: grid;
+    grid-template: auto / auto 1fr;
+    gap: var(--sm3);
+    .record-summary {
+      font-size: var(--sm1);
+    }
+  }
+</style>

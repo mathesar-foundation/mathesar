@@ -2,7 +2,11 @@
   import { _ } from 'svelte-i18n';
 
   import type { ResultValue } from '@mathesar/api/rpc/records';
-  import { iconDeleteMajor, iconDuplicateRecord } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconDuplicateRecord,
+    iconModalRecordPage,
+  } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
@@ -23,6 +27,7 @@
   export let recordsData: RecordsData;
   export let canDeleteRecords: boolean;
   export let canInsertRecords: boolean;
+  export let quickViewThisRecord: () => void;
 
   // To be used in case of publicly shared links where user should not be able
   // to view linked tables & explorations
@@ -54,11 +59,14 @@
 </script>
 
 {#if hasPk && canViewLinkedEntities}
+  <ButtonMenuItem icon={iconModalRecordPage} on:click={quickViewThisRecord}>
+    {$_('quick_view_record')}
+  </ButtonMenuItem>
   <LinkMenuItem
     href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
     icon={iconExternalLink}
   >
-    {$_('go_to_record_page')}
+    {$_('open_record')}
   </LinkMenuItem>
 {/if}
 
