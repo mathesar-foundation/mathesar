@@ -8,6 +8,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
 
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
+  import { portalToWindowTitle } from '@mathesar/component-library';
   import {
     FormSubmit,
     makeForm,
@@ -17,6 +18,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   import type RecordStore from '@mathesar/stores/RecordStore';
 
   import DirectField from './DirectField.svelte';
+  import RecordTitle from './RecordTitle.svelte';
   import Widgets from './Widgets.svelte';
 
   export let record: RecordStore;
@@ -69,6 +71,10 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
 </script>
 
 <div class="modal-record-view-content">
+  <div use:portalToWindowTitle>
+    <RecordTitle {record} />
+  </div>
+
   <div class="fields">
     {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
       <DirectField {record} {processedColumn} {field} {canUpdateTableRecords} />
