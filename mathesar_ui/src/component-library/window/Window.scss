@@ -18,6 +18,7 @@
     align-items: flex-start;
     padding: 1rem;
     border-bottom: 1px solid var(--border-color);
+    overflow: hidden;
     .title {
       &:empty {
         display: none;
@@ -26,6 +27,7 @@
       margin: auto;
       font-weight: 500;
       font-size: var(--lg2);
+      overflow: hidden;
     }
   }
 
