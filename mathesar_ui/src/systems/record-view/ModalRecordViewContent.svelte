@@ -14,6 +14,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
     makeForm,
     optionalField,
   } from '@mathesar/components/form';
+  import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import type RecordStore from '@mathesar/stores/RecordStore';
 
@@ -71,8 +72,11 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
 </script>
 
 <div class="modal-record-view-content">
-  <div use:portalToWindowTitle>
-    <RecordTitle {record} />
+  <div use:portalToWindowTitle class="title-bar">
+    <div class="record-title">
+      <RecordTitle {record} />
+    </div>
+    <FormStatus {form} />
   </div>
 
   <div class="fields">
@@ -105,6 +109,17 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
 </div>
 
 <style lang="scss">
+  .title-bar {
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm3);
+    > .record-title {
+      overflow: hidden;
+    }
+
+    display: grid;
+    grid-template: auto / 1fr auto;
+  }
   .fields {
     display: grid;
     grid-template-columns: auto 1fr;
