@@ -6853,21 +6853,99 @@ BEGIN
   authors_table_oid := '"Authors"'::regclass::oid;
 
   field_info_list := jsonb_build_array(
-    jsonb_build_object('key', '_id-51bbd9d2-fb45-4c84-b8f0-4a8422186b08', 'parent_key', null, 'column_attnum', 2, 'table_oid', items_table_oid, 'depth', 0),
-    jsonb_build_object('key', '_id-bbe76760-f136-48e4-bc54-92ade2eb1984', 'parent_key', null, 'column_attnum', 3, 'table_oid', items_table_oid, 'depth', 0),
-    jsonb_build_object('key', '_id-58670595-6726-454a-a10c-9ba30985b8b1', 'parent_key', null, 'column_attnum', 4, 'table_oid', items_table_oid, 'depth', 0),
-    jsonb_build_object('key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0', 'parent_key', null, 'column_attnum', 5, 'table_oid', items_table_oid, 'depth', 0),
+    jsonb_build_object(
+      'key', '_id-51bbd9d2-fb45-4c84-b8f0-4a8422186b08',
+      'parent_key', null,
+      'column_attnum', 2,
+      'table_oid', items_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-bbe76760-f136-48e4-bc54-92ade2eb1984',
+      'parent_key', null,
+      'column_attnum', 3,
+      'table_oid', items_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-58670595-6726-454a-a10c-9ba30985b8b1',
+      'parent_key', null,
+      'column_attnum', 4,
+      'table_oid', items_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'parent_key', null,
+      'column_attnum', 5,
+      'table_oid', items_table_oid,
+      'depth', 0
+    ),
 
-    jsonb_build_object('key', '_id-c5eb5c89-cfc6-4d92-923a-4fbbd1674a85', 'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0', 'column_attnum', 2, 'table_oid', books_table_oid, 'depth', 1),
-    jsonb_build_object('key', '_id-200d2e3b-7128-4e61-b970-20826f95bf2f', 'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0', 'column_attnum', 3, 'table_oid', books_table_oid, 'depth', 1),
-    jsonb_build_object('key', '_id-2625e6be-07d8-47d2-a1ba-e9c543105b2e', 'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0', 'column_attnum', 4, 'table_oid', books_table_oid, 'depth', 1),
-    jsonb_build_object('key', '_id-fdb0f3a9-1c42-4178-b3e4-14e7cbf4fc71', 'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0', 'column_attnum', 5, 'table_oid', books_table_oid, 'depth', 1),
-    jsonb_build_object('key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e', 'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0', 'column_attnum', 6, 'table_oid', books_table_oid, 'depth', 1),
-    jsonb_build_object('key', '_id-9dafdd73-11d8-4a75-87e8-4d66b1b0c9bd', 'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0', 'column_attnum', 7, 'table_oid', books_table_oid, 'depth', 1),
+    jsonb_build_object(
+      'key', '_id-c5eb5c89-cfc6-4d92-923a-4fbbd1674a85',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 2,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-200d2e3b-7128-4e61-b970-20826f95bf2f',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 3,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-2625e6be-07d8-47d2-a1ba-e9c543105b2e',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 4,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-fdb0f3a9-1c42-4178-b3e4-14e7cbf4fc71',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 5,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 6,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-9dafdd73-11d8-4a75-87e8-4d66b1b0c9bd',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 7,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
 
-    jsonb_build_object('key', '_id-609eefde-cfcc-4ebf-97a4-62992c210312', 'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e', 'column_attnum', 2, 'table_oid', authors_table_oid, 'depth', 2),
-    jsonb_build_object('key', '_id-4bb46271-aeee-4305-85b8-c436564c1e00', 'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e', 'column_attnum', 3, 'table_oid', authors_table_oid, 'depth', 2),
-    jsonb_build_object('key', '_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482', 'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e', 'column_attnum', 4, 'table_oid', authors_table_oid, 'depth', 2)
+    jsonb_build_object(
+      'key', '_id-609eefde-cfcc-4ebf-97a4-62992c210312',
+      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
+      'column_attnum', 2,
+      'table_oid', authors_table_oid,
+      'depth', 2
+    ),
+    jsonb_build_object(
+      'key', '_id-4bb46271-aeee-4305-85b8-c436564c1e00',
+      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
+      'column_attnum', 3,
+      'table_oid', authors_table_oid,
+      'depth', 2
+    ),
+    jsonb_build_object(
+      'key', '_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482',
+      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
+      'column_attnum', 4,
+      'table_oid', authors_table_oid,
+      'depth', 2
+    )
   );
 
   values_ := $j${
@@ -6900,19 +6978,38 @@ BEGIN
   RETURN NEXT is(
     authors_table_record, 
     $j$[
-      {"id": 1, "Website": "https://johndoebooks.com", "Last Name": "Doe", "First Name": "John"}
+      {
+        "id": 1,
+        "Website": "https://johndoebooks.com",
+        "Last Name": "Doe",
+        "First Name": "John"
+      }
     ]$j$
   );
   RETURN NEXT is(
     books_table_record, 
     $j$[
-      {"id": 1, "Title": "The book of wonders", "Publication Year": null, "ISBN": null, "Page Count": 365, "Author": 1, "Publisher": 4}
+      {
+        "id": 1,
+        "Title": "The book of wonders",
+        "Publication Year": null,
+        "ISBN": null,
+        "Page Count": 365,
+        "Author": 1,
+        "Publisher": 4
+      }
     ]$j$
   );
   RETURN NEXT is(
     items_table_record, 
     $j$[
-      {"id": 1, "Book": 1, "Barcode": "454Z-D2A5-36AB-2EA6", "Acquisition Date": "2025-08-05", "Acquisition Price": 15.99}
+      {
+        "id": 1,
+        "Book": 1,
+        "Barcode": "454Z-D2A5-36AB-2EA6",
+        "Acquisition Date": "2025-08-05",
+        "Acquisition Price": 15.99
+      }
     ]$j$
   );
 
@@ -6932,9 +7029,27 @@ BEGIN
   authors_table_oid := '"Authors"'::regclass::oid;
   
   field_info_list := jsonb_build_array(
-    jsonb_build_object('key', '_id-609eefde-cfcc-4ebf-97a4-62992c210312', 'parent_key', null, 'column_attnum', 2, 'table_oid', authors_table_oid, 'depth', 0),
-    jsonb_build_object('key', '_id-4bb46271-aeee-4305-85b8-c436564c1e00', 'parent_key', null, 'column_attnum', 3, 'table_oid', authors_table_oid, 'depth', 0),
-    jsonb_build_object('key', '_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482', 'parent_key', null, 'column_attnum', 4, 'table_oid', authors_table_oid, 'depth', 0)
+    jsonb_build_object(
+      'key', '_id-609eefde-cfcc-4ebf-97a4-62992c210312',
+      'parent_key', null,
+      'column_attnum', 2,
+      'table_oid', authors_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-4bb46271-aeee-4305-85b8-c436564c1e00',
+      'parent_key', null,
+      'column_attnum', 3,
+      'table_oid', authors_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482',
+      'parent_key', null,
+      'column_attnum', 4,
+      'table_oid', authors_table_oid,
+      'depth', 0
+    )
   );
 
   values_ := $j${
@@ -6950,7 +7065,12 @@ BEGIN
   RETURN NEXT is(
     authors_table_record, 
     $j$[
-      {"id": 1, "Website": "https://johndoebooks.com", "Last Name": "Doe", "First Name": "John"}
+      {
+        "id": 1,
+        "Website": "https://johndoebooks.com",
+        "Last Name": "Doe",
+        "First Name": "John"
+      }
     ]$j$
   );
 END;
