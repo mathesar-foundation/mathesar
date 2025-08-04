@@ -5718,7 +5718,7 @@ WITH cte AS (
     fields.depth::integer AS depth,
     CASE
       WHEN vals.value::jsonb->>'type' = 'create' THEN concat(quote_ident(concat(fields.key::text, '_cte')), '.', quote_ident(ref_attr.attname))
-      WHEN vals.value::jsonb->>'type' = 'pick' THEN quote_literal(vals.value::jsonb->>'value')
+      WHEN vals.value::jsonb->>'type' = 'pick' THEN quote_nullable(vals.value::jsonb->>'value')
       ELSE quote_nullable(vals.value::jsonb #>> '{}')
     END AS value,
     CASE
