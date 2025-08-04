@@ -16,6 +16,7 @@
     iconHasBox?: boolean;
     truncate?: boolean;
     bold?: boolean;
+    cssVariables?: Record<string, string>;
   }
 
   /** TODO: Update component and prop names */
@@ -26,7 +27,7 @@
   export let iconHasBox = false;
   export let truncate = true;
   export let bold = false;
-  export let cssVariables: Record<string, string> | undefined = undefined;
+  export let cssVariables: $$Props['cssVariables'] = undefined;
 
   $: style = cssVariables
     ? makeStyleStringFromCssVariables(cssVariables)
