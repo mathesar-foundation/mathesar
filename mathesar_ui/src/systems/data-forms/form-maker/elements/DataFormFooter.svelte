@@ -1,19 +1,33 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { api } from '@mathesar/api/rpc';
   import { FormSubmit } from '@mathesar/components/form';
+  import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+  import { toast } from '@mathesar/stores/toast';
 
   import type { DataFormManager } from '../data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
 
-  $: ({ submitButtonLabel, formHolder } = dataFormManager.dataFormStructure);
+  $: ({ submitButtonLabel, formHolder, token } =
+    dataFormManager.dataFormStructure);
   $: label = $submitButtonLabel?.trim() || $_('submit');
   $: form = $formHolder;
 
   async function submit() {
-    // TODO_FORMS: Implement form submit after backend work is complete
-    // console.log(dataFormManager.ephemeralDataForm.getFormSubmitRequest());
+    // TODO_FORMS: Implement showing submission status info & redirection
+    try {
+      await api.forms
+        .submit({
+          form_token: token,
+          values: dataFormManager.dataFormStructure.getFormSubmitRequest(),
+        })
+        .run();
+      toast.success($_('form_submitted_successfully'));
+    } catch (err) {
+      toast.error(RpcError.fromAnything(err));
+    }
   }
 </script>
 

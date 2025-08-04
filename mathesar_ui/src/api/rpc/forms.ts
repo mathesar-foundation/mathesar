@@ -125,4 +125,11 @@ export const forms = {
     },
     void
   >(),
+  submit: rpcMethodTypeContainer<
+    {
+      form_token: RawDataForm['token'];
+      values: Record<string, unknown>;
+    },
+    void
+  >(),
 };
