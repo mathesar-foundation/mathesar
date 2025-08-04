@@ -5683,7 +5683,7 @@ Returns:
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
+CREATE OR REPLACE FUNCTION msar.build_insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
 (
   table_name text,
   column_names text,
@@ -5742,8 +5742,8 @@ WITH cte AS (
     ON fields.column_attnum = ANY(pgc.conkey)
     AND pgc.conrelid = fields.table_oid
     AND pgc.contype = 'f'
-  INNER JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
-  INNER JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
+  LEFT JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
+  LEFT JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
   LEFT JOIN pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
 )
 SELECT 
@@ -5758,7 +5758,7 @@ $$ LANGUAGE SQL STABLE;
 
 CREATE OR REPLACE FUNCTION
 msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$/*
-Given field_info_list and values_, generates an insert_lookup_table, builds and executes an insert statement.
+Given field_info_list and values_, generates a lookup table for insert, builds and executes an insert statement.
 
 field_info_list should have the folowing form:
 [
@@ -5789,9 +5789,9 @@ DECLARE
   insert_stub text;
   insert_count integer;
 BEGIN
-  SELECT COUNT(*) INTO insert_count FROM msar.insert_lookup_table(field_info_list, values_);
+  SELECT COUNT(*) INTO insert_count FROM msar.build_insert_lookup_table(field_info_list, values_);
 
-  FOR ins IN SELECT * FROM msar.insert_lookup_table(field_info_list, values_) LOOP
+  FOR ins IN SELECT * FROM msar.build_insert_lookup_table(field_info_list, values_) LOOP
     insert_stub := 'INSERT INTO ' ||
       ins.table_name || '(' || ins.column_names || ') SELECT ' || ins.values_ ||
       CASE 
