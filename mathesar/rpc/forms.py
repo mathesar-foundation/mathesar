@@ -6,7 +6,7 @@ from typing import Optional, TypedDict, Literal
 from modernrpc.core import REQUEST_KEY
 
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form, get_form, list_forms, delete_form, replace_form, get_form_source_info
+from mathesar.utils.forms import create_form, get_form, list_forms, delete_form, replace_form, get_form_source_info, submit_form
 
 
 class FieldInfo(TypedDict):
@@ -309,3 +309,15 @@ def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
     user = kwargs.get(REQUEST_KEY).user
     form_model = replace_form(new_form, user)
     return FormInfo.from_model(form_model)
+
+
+@mathesar_rpc_method(name="forms.submit", auth="anonymous")
+def submit(*, form_token: str, values: dict, **kwargs) -> None:
+    """
+    Submit a form.
+
+    Args:
+        form_token: The unique token of the form.
+        values: A dict describing the values to insert.
+    """
+    return submit_form(form_token, values)
