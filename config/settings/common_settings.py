@@ -11,8 +11,12 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
+import traceback
 from pathlib import Path
 
+import json
+import yaml
+from collections import defaultdict
 from config.database_config import PostgresConfig, parse_port
 
 
@@ -34,6 +38,10 @@ INSTALLED_APPS = [
     "django_property_filter",
     "modernrpc",
     "mathesar",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.openid_connect",
 ]
 
 MIDDLEWARE = [
@@ -48,7 +56,97 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
     "mathesar.middleware.PasswordChangeNeededMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
+
+OIDC_CONFIG_FILE = BASE_DIR.joinpath('sso.yml')
+OIDC_CONFIG_DICT = {}
+# Try loading OIDC_CONFIG_DICT from env, iff it doesn't exist, try loading from sso.yml
+try:
+    OIDC_CONFIG_DICT = json.loads(os.getenv('OIDC_CONFIG_DICT', "{}"))
+except Exception as e:
+    traceback.print_exception(type(e), e, e.__traceback__)
+try:
+    if OIDC_CONFIG_DICT in [None, {}] and OIDC_CONFIG_FILE.exists():
+        with open(OIDC_CONFIG_FILE, "rb") as f:
+            OIDC_CONFIG_DICT = yaml.full_load(f)
+except Exception as e:
+    traceback.print_exception(type(e), e, e.__traceback__)
+OIDC_CONFIG = []
+OIDC_ALLOWED_EMAIL_DOMAINS = {}
+OIDC_DEFAULT_PG_ROLE_MAP = defaultdict(list)
+
+try:
+    for providers, config in OIDC_CONFIG_DICT['oidc_providers'].items():
+        if not config:
+            continue
+        provider_name = config.get("provider_name")
+        client_id = config.get("client_id")
+        secret = config.get("secret")
+        server_url = config.get("server_url")
+        allowed_email_domains = config.get("allowed_email_domains", [])  # Here [] means allow all domains.
+        default_pg_role = config.get("default_pg_role", {})
+        if all([provider_name, client_id, secret, server_url]):
+            OIDC_CONFIG.append(
+                {
+                    "provider_id": provider_name.lower(),
+                    "name": provider_name.lower(),
+                    "client_id": client_id,
+                    "secret": secret,
+                    "settings": {
+                        "server_url": server_url
+                    }
+                }
+            )
+
+        if isinstance(allowed_email_domains, list):
+            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = allowed_email_domains
+        elif isinstance(allowed_email_domains, str):
+            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = [allowed_email_domains]
+
+        for role_info in default_pg_role.values():
+            if not role_info:
+                continue
+            db_name = role_info.get("name")
+            host = role_info.get("host")
+            port = role_info.get("port")
+            role_name = role_info.get("role")
+            if all([db_name, host, port, role_name]):
+                OIDC_DEFAULT_PG_ROLE_MAP[provider_name].append(
+                    {
+                        "db_name": db_name,
+                        "host": host,
+                        "port": port,
+                        "role_name": role_name
+                    }
+                )
+except Exception as e:
+    # We swallow any exceptions when SSO is misconfigured in sso.yml so that the django server doesn't fail to start.
+    if OIDC_CONFIG_DICT not in [None, {}]:
+        traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    "openid_connect": {
+        "APPS": OIDC_CONFIG
+    }
+}
+
+SOCIALACCOUNT_ADAPTER = "mathesar.oidc.SocialAccountAdapter"
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Allows us to merge existing users with OIDC logins.
+# More context: https://docs.allauth.org/en/dev/socialaccount/configuration.html
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
 
 ROOT_URLCONF = "config.urls"
 
@@ -64,7 +162,6 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.databases.privileges',
     'mathesar.rpc.databases.setup',
     'mathesar.rpc.explorations',
-    'mathesar.rpc.forms',
     'mathesar.rpc.records',
     'mathesar.rpc.roles',
     'mathesar.rpc.roles.configured',

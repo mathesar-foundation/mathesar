@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
+
   import {
     Icon,
     Spinner,
@@ -7,9 +9,18 @@
   } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
 
+  interface $$Props extends ComponentProps<Truncate> {
+    icon: IconProps | IconProps[];
+    name?: string;
+    isLoading?: boolean;
+    iconHasBox?: boolean;
+    truncate?: boolean;
+    bold?: boolean;
+  }
+
   /** TODO: Update component and prop names */
-  export let icon: IconProps | IconProps[];
-  export let name: string | undefined = undefined;
+  export let icon: $$Props['icon'];
+  export let name: $$Props['name'] = undefined;
   export let isLoading = false;
   /** When true, the icon will be rendered within a box */
   export let iconHasBox = false;
@@ -23,7 +34,7 @@
   $: icons = Array.isArray(icon) ? icon : [icon];
 </script>
 
-<Truncate passthrough={!truncate}>
+<Truncate {...$$restProps} passthrough={!truncate}>
   <span
     class="name-with-icon"
     on:click

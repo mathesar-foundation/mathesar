@@ -4,7 +4,7 @@
   import { defined } from '@mathesar/component-library';
   import FieldDelimiter from '@mathesar/components/FieldDelimiter.svelte';
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
-  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import {
     type ProcessedColumns,
     TableStructure,
@@ -12,15 +12,25 @@
 
   import FieldChainTail from './FieldChainTail.svelte';
 
-  export let database: Pick<Database, 'id'>;
+  export let schema: Schema;
   export let columnIds: number[];
   export let columns: ProcessedColumns;
   export let onUpdate: (columnIds: number[]) => void;
 
   $: column = defined(columnIds[0], (c) => columns.get(c));
+  /**
+   * Note: This currently assumes both the base table & referent table
+   * belong to the same schema.
+   *
+   * We need to fetch the schema of the referent tables when fetching its
+   * TableStructure.
+   *
+   * This assumption is already baked into several parts of the codebase, so
+   * schema is passed here as a prop until we refactor the core assumption out.
+   */
   $: referentTable = defined(
     column?.linkFk?.referent_table_oid,
-    (oid) => new TableStructure({ database, table: { oid } }),
+    (oid) => new TableStructure({ schema, oid }),
   );
 </script>
 
@@ -44,7 +54,7 @@
 
 {#if referentTable}
   <FieldChainTail
-    {database}
+    {schema}
     columnIds={columnIds.slice(1)}
     {referentTable}
     onUpdate={(ids) =>
