@@ -18,7 +18,6 @@ import type {
 } from '@mathesar/api/rpc/constraints';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
-import type { ShareConsumer } from '@mathesar/utils/shares';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 export interface ConstraintsData {
@@ -72,8 +71,6 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
   private store: Writable<ConstraintsData>;
 
   private promise: CancellablePromise<RawConstraint[]> | undefined;
-
-  readonly shareConsumer?: ShareConsumer;
 
   /**
    * A set of column ids representing columns which have single-column unique
