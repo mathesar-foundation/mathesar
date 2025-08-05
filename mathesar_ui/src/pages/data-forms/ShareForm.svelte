@@ -5,6 +5,7 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconCopyMajor, iconOpenLinkInNewTab } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
+  import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import {
     confirm,
     confirmationController,
@@ -81,8 +82,12 @@
     const isConfirmed = await confirmationPromise;
     cleanupDropdown();
     if (isConfirmed) {
-      toast.error('Not implemented yet');
-      // toast.success($_('link_successfully_regenerated'));
+      try {
+        await dataForm.regenerateToken();
+        toast.success($_('link_successfully_regenerated'));
+      } catch (err) {
+        toast.error(RpcError.fromAnything(err));
+      }
     }
   }
 

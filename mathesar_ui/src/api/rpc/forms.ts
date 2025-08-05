@@ -132,4 +132,10 @@ export const forms = {
     },
     void
   >(),
+  regenerate_token: rpcMethodTypeContainer<
+    {
+      form_id: RawDataForm['id'];
+    },
+    string
+  >(),
 };

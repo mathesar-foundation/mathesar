@@ -158,6 +158,21 @@ export class DataForm {
     });
   }
 
+  regenerateToken() {
+    const promise = api.forms.regenerate_token({ form_id: this.id }).run();
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then((token) => {
+            this._token.set(token);
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
+  }
+
   delete(): CancellablePromise<void> {
     return api.forms.delete({ form_id: this.id }).run();
   }
