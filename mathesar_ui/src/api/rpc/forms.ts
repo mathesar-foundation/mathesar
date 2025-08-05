@@ -138,4 +138,11 @@ export const forms = {
     },
     string
   >(),
+  set_publish_public: rpcMethodTypeContainer<
+    {
+      form_id: RawDataForm['id'];
+      publish_public: boolean;
+    },
+    boolean
+  >(),
 };

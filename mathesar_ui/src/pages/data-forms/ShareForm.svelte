@@ -51,8 +51,11 @@
   }
 
   async function shareForm() {
-    toast.error('Not implemented yet');
-    await dataForm.updateSharingPreferences(true);
+    try {
+      await dataForm.updateSharingPreferences(true);
+    } catch (err) {
+      toast.error(RpcError.fromAnything(err));
+    }
   }
 
   function setConfirmModalToAccompanyDropdown(): () => void {
@@ -105,8 +108,11 @@
     const isConfirmed = await confirmationPromise;
     cleanupDropdown();
     if (isConfirmed) {
-      toast.error('Not implemented yet');
-      await dataForm.updateSharingPreferences(false);
+      try {
+        await dataForm.updateSharingPreferences(false);
+      } catch (err) {
+        toast.error(RpcError.fromAnything(err));
+      }
     }
   }
 </script>

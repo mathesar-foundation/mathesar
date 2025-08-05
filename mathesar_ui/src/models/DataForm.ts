@@ -143,19 +143,23 @@ export class DataForm {
   }
 
   updateSharingPreferences(sharePublicly: boolean) {
-    // TODO_FORMS: Update this after we have a sharing RPC method
-    const promise = Promise.resolve();
+    const promise = api.forms
+      .set_publish_public({ form_id: this.id, publish_public: sharePublicly })
+      .run();
 
-    return new CancellablePromise((resolve, reject) => {
-      promise
-        .then(() => {
-          this._sharePreferences.set({
-            isPublishedPublicly: sharePublicly,
-          });
-          return resolve(this);
-        }, reject)
-        .catch(reject);
-    });
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then((res) => {
+            this._sharePreferences.set({
+              isPublishedPublicly: res,
+            });
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
   }
 
   regenerateToken() {
