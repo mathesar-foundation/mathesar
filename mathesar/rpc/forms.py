@@ -15,6 +15,7 @@ from mathesar.utils.forms import (
     delete_form,
     replace_form,
     get_form_source_info,
+    submit_form,
 )
 
 
@@ -345,3 +346,15 @@ def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
     user = kwargs.get(REQUEST_KEY).user
     form_model = replace_form(new_form, user)
     return FormInfo.from_model(form_model)
+
+
+@mathesar_rpc_method(name="forms.submit", auth="anonymous")
+def submit(*, form_token: str, values: dict, **kwargs) -> None:
+    """
+    Submit a form.
+
+    Args:
+        form_token: The unique token of the form.
+        values: A dict describing the values to insert.
+    """
+    return submit_form(form_token, values)

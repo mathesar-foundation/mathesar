@@ -5681,3 +5681,135 @@ Returns:
   FROM tab_info_cte AS tic
   LEFT JOIN col_info_cte AS cic ON tic.tab_id = cic.tab_id
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
+(
+  table_name text,
+  column_names text,
+  values_ text,
+  cte_name text,
+  from_cte_name text
+) AS $$/*
+Returns a lookup table for given field_info_list and values_
+
+Example: Inserting into Items while creating a new book entry, adding a new Title,
+creating a new entry for Author, picking a Publisher.
+           table_name           |                  column_names                   |                values_                 | cte_name | from_cte_name 
+--------------------------------+-------------------------------------------------+----------------------------------------+----------+---------------
+ "Library Management"."Authors" | "First Name", "Last Name"                       | 'Jerome K.', 'Jerome                   | k1_cte   | 
+ "Library Management"."Books"   | "Title", "Author", "Publisher"                  | 'Three men in a Boat', k1_cte.id, '12' | k0_cte   | k1_cte
+ "Library Management"."Items"   | "Acquisition Date", "Acquisition Price", "Book" | '2025-10-09', '69.69', k0_cte.id       |          | k0_cte
+
+Calling msar.form_insert() on this table would generate the following SQL:
+
+WITH k1_cte AS (
+  INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'Jerome K.', 'Jerome' RETURNING *
+), k0_cte AS (
+  INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *
+) INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
+*/
+WITH cte AS (
+  SELECT
+    fields.key::text AS key,
+    fields.column_attnum::smallint AS column_attnum,
+    pga.attname::name AS column_name,
+    fields.table_oid::bigint AS table_oid,
+    fields.depth::integer AS depth,
+    CASE
+      WHEN vals.value::jsonb->>'type' = 'create' THEN concat(quote_ident(concat(fields.key::text, '_cte')), '.', quote_ident(ref_attr.attname))
+      WHEN vals.value::jsonb->>'type' = 'pick' THEN quote_nullable(vals.value::jsonb->>'value')
+      ELSE quote_nullable(vals.value::jsonb #>> '{}')
+    END AS value,
+    CASE
+      WHEN fields.parent_key IS NOT NULL THEN quote_ident(concat(fields.parent_key::text, '_cte'))
+      ELSE NULL
+    END AS cte_name,
+    CASE
+      WHEN vals.value::jsonb->>'type' = 'create' THEN quote_ident(concat(fields.key::text, '_cte'))
+      ELSE NULL
+    END AS from_cte_name
+  FROM jsonb_to_recordset(field_info_list) AS fields(
+    key text,
+    parent_key text,
+    column_attnum smallint,
+    table_oid bigint,
+    depth integer)
+  RIGHT JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
+  LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
+
+  LEFT JOIN pg_constraint pgc
+    ON fields.column_attnum = ANY(pgc.conkey)
+    AND pgc.conrelid = fields.table_oid
+    AND pgc.contype = 'f'
+  LEFT JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
+  LEFT JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
+  LEFT JOIN pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
+)
+SELECT 
+  __msar.get_qualified_relation_name(table_oid) AS table_name,
+  string_agg(quote_ident(column_name), ', ') AS column_names,
+  string_agg(value, ', ') AS values_,
+  cte_name,
+  string_agg(from_cte_name, ', ') AS from_cte_name
+FROM cte GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$/*
+Given field_info_list and values_, generates a lookup table for insert, builds and executes an insert statement.
+
+field_info_list should have the folowing form:
+[
+  {"key": "k1", "parent_key":null, "column_attnum":5, "table_oid":1234, "depth":0},
+  {"key": "k3", "parent_key":"k1", "column_attnum":3, "table_oid":4321, "depth":1},
+  {"key": "k2", "parent_key":"k1", "column_attnum":2, "table_oid":4321, "depth":1},
+]
+
+values_ should be in the form:
+{
+  "k1": {"type": "create"},
+  "k2": "Jane",
+  "k3": "Doe"
+}
+
+Example of the SQL generated while Inserting into Items table while creating
+a new book entry, adding a new Title, creating a new entry for Author, picking a Publisher.
+
+WITH k1_cte AS (
+  INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'Jerome K.', 'Jerome' RETURNING *
+), k0_cte AS (
+  INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *
+) INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
+*/
+DECLARE
+  ins RECORD;
+  insert_str text := '';
+  insert_stub text;
+  insert_count integer;
+BEGIN
+  SELECT COUNT(*) INTO insert_count FROM msar.build_insert_lookup_table(field_info_list, values_);
+
+  FOR ins IN SELECT * FROM msar.build_insert_lookup_table(field_info_list, values_) LOOP
+    insert_stub := 'INSERT INTO ' ||
+      ins.table_name || '(' || ins.column_names || ') SELECT ' || ins.values_ ||
+      CASE 
+        WHEN ins.from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name)
+        ELSE '' END || ' RETURNING *';
+    CASE
+      WHEN insert_count > 1 AND ins.cte_name IS NOT NULL THEN
+        insert_str := CONCAT_WS(',', NULLIF(insert_str, ''), ins.cte_name || ' AS (' || insert_stub || ')');
+      WHEN ins.cte_name IS NULL THEN
+        insert_str :=  insert_str || insert_stub;
+    END CASE;
+  END LOOP;
+
+  CASE
+    WHEN insert_count > 1 THEN
+      insert_str := 'WITH ' || insert_str;
+    ELSE NULL;
+  END CASE;
+  EXECUTE insert_str;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
