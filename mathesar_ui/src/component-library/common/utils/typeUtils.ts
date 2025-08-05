@@ -22,6 +22,13 @@ export function hasStringProperty<PropertyName extends string>(
   return hasProperty(object, property) && typeof object[property] === 'string';
 }
 
+export function hasMethod<MethodName extends string>(
+  object: unknown,
+  method: MethodName,
+): object is { [k in MethodName]: () => unknown } {
+  return hasProperty(object, method) && typeof object[method] === 'function';
+}
+
 export function isDefinedNonNullable<T>(x: T): x is NonNullable<T> {
   return x !== null && x !== undefined;
 }
