@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.db import transaction
 
-from db.forms import get_tab_col_info_map
+from db.forms import get_tab_col_info_map, form_insert
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
@@ -140,6 +140,34 @@ def list_forms(database_id, schema_oid):
 
 def delete_form(form_id):
     Form.objects.get(id=form_id).delete()
+
+
+def iterate_form_fields(fields, parent_field=None, depth=0):
+    """
+    Depth-first generator that iterates through the form fields
+    """
+    for field in fields:
+        yield field, parent_field, depth
+        yield from iterate_form_fields(
+            field.child_fields.all(),
+            field,
+            depth + 1
+        )
+
+
+def submit_form(form_token, values):
+    form_model = Form.objects.get(token=form_token)
+    field_info_list = [
+        {
+            "key": field.key,
+            "parent_key": parent_field.key if parent_field else None,
+            "column_attnum": field.column_attnum,
+            "table_oid": parent_field.related_table_oid if parent_field else form_model.base_table_oid,
+            "depth": depth
+        } for field, parent_field, depth in iterate_form_fields(form_model.fields.filter(parent_field__isnull=True))
+    ]
+    with form_model.connection as conn:
+        form_insert(field_info_list, values, conn)
 
 
 @transaction.atomic
