@@ -145,7 +145,9 @@
       - get
       - add
       - delete
+      - regenerate_token
       - replace
+      - set_publish_public
       - submit
       - FormInfo
       - FieldInfo

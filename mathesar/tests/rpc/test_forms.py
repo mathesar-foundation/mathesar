@@ -228,10 +228,11 @@ def test_forms_get(rf, monkeypatch):
     request = rf.post('/api/rpc/v0', data={})
     request.user = User(username='alice', password='pass1234')
 
-    def mock_forms_get(form_id):
+    def mock_forms_get(form_token):
         return mock_forms_info()
 
+    form_token = "db1bbb54-58df-4d5b-9909-a8b856f5a804"
     monkeypatch.setattr(forms, 'get_form', mock_forms_get)
     expect_form_info = test_data_form1['expected_form_info']
-    actual_form_info = forms.get(form_id=42, request=request)
+    actual_form_info = forms.get(form_token=form_token, request=request)
     assert actual_form_info == expect_form_info

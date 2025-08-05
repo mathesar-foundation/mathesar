@@ -6,7 +6,17 @@ from typing import Optional, TypedDict, Literal
 from modernrpc.core import REQUEST_KEY
 
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form, get_form, list_forms, delete_form, replace_form, get_form_source_info, submit_form
+from mathesar.utils.forms import (
+    create_form,
+    get_form,
+    list_forms,
+    regen_form_token,
+    set_form_public_setting,
+    delete_form,
+    replace_form,
+    get_form_source_info,
+    submit_form,
+)
 
 
 class FieldInfo(TypedDict):
@@ -164,7 +174,6 @@ class AddFormDef(TypedDict):
     Definition needed to add a form.
 
     Attributes:
-        token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
         description: The description of the form.
         version: The version of the form for reconciliation of json fields.
@@ -179,7 +188,6 @@ class AddFormDef(TypedDict):
         submit_button_label: Text to be displayed on the submit button.
         fields: Definition of Fields within the form.
     """
-    token: Optional[str]
     name: str
     description: Optional[str]
     version: int
@@ -201,14 +209,12 @@ class ReplaceableFormDef(AddFormDef):
 
     Attributes:
         id: The Django id of the Form on the database.
-        token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
         description: The description of the form.
         version: The version of the form.
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        is_public: Specifies whether the form is publicly accessible.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
         submit_role_id: The Django id of the configured role to be used while submitting a form.
@@ -237,17 +243,17 @@ def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
 
 
 @mathesar_rpc_method(name="forms.get", auth="anonymous")
-def get(*, form_id: int, **kwargs) -> FormInfo:
+def get(*, form_token: str, **kwargs) -> FormInfo:
     """
     List information about a form.
 
     Args:
-        form_id: The Django id of the form.
+        form_token: The unique token of the form.
 
     Returns:
-        Form details for a given form_id.
+        Form details for a given form_token.
     """
-    form_model = get_form(form_id)
+    form_model = get_form(form_token)
     return FormInfo.from_model(form_model)
 
 
@@ -282,6 +288,37 @@ def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
     """
     forms = list_forms(database_id, schema_oid)
     return [FormInfo.from_model(form) for form in forms]
+
+
+@mathesar_rpc_method(name="forms.regenerate_token", auth="login")
+def regenerate_token(*, form_id: int, **kwargs) -> str:
+    """
+    Regenerate the unique token for a form.
+
+    Args:
+        form_id: The Django id of the form.
+
+    Returns:
+        The new token for the form.
+    """
+    token = regen_form_token(form_id)
+    return token
+
+
+@mathesar_rpc_method(name="forms.set_publish_public", auth="login")
+def set_publish_public(*, form_id: int, publish_public: bool, **kwargs) -> bool:
+    """
+    Set/Unset the form to be publicly shareable.
+
+    Args:
+        form_id: The Django id of the form.
+        publish_public: Specify whether to share the form publicly.
+
+    Returns:
+        The updated state of public sharing for the form.
+    """
+    updated_publish_public = set_form_public_setting(form_id, publish_public)
+    return updated_publish_public
 
 
 @mathesar_rpc_method(name="forms.delete", auth="login")
