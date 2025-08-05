@@ -5717,16 +5717,16 @@ WITH cte AS (
     fields.table_oid::bigint AS table_oid,
     fields.depth::integer AS depth,
     CASE
-      WHEN vals.value::jsonb->>'type' = 'create' THEN concat(fields.key::text, '_cte', '.', quote_ident(ref_attr.attname))
-      WHEN vals.value::jsonb->>'type' = 'pick' THEN quote_literal(vals.value::jsonb->>'value')
+      WHEN vals.value::jsonb->>'type' = 'create' THEN concat(quote_ident(concat(fields.key::text, '_cte')), '.', quote_ident(ref_attr.attname))
+      WHEN vals.value::jsonb->>'type' = 'pick' THEN quote_nullable(vals.value::jsonb->>'value')
       ELSE quote_nullable(vals.value::jsonb #>> '{}')
     END AS value,
     CASE
-      WHEN fields.parent_key IS NOT NULL THEN concat(fields.parent_key::text, '_cte')
+      WHEN fields.parent_key IS NOT NULL THEN quote_ident(concat(fields.parent_key::text, '_cte'))
       ELSE NULL
     END AS cte_name,
     CASE
-      WHEN vals.value::jsonb->>'type' = 'create' THEN concat(fields.key::text, '_cte')
+      WHEN vals.value::jsonb->>'type' = 'create' THEN quote_ident(concat(fields.key::text, '_cte'))
       ELSE NULL
     END AS from_cte_name
   FROM jsonb_to_recordset(field_info_list) AS fields(
