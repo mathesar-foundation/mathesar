@@ -6,7 +6,7 @@
   import type { PrimaryKeyCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import Default from '@mathesar/components/Default.svelte';
   import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
-  import { iconModalRecordPage } from '@mathesar/icons';
+  import { iconModalRecordView } from '@mathesar/icons';
   // eslint-disable-next-line import/no-cycle
   import RecordStore from '@mathesar/stores/RecordStore';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -89,7 +89,7 @@
         on:contextmenu={handleLinkContextMenu}
         on:click={handleLinkClick}
       >
-        <Icon {...iconModalRecordPage} />
+        <Icon {...iconModalRecordView} />
       </a>
     {/if}
   </div>

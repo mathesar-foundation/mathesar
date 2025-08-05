@@ -18,7 +18,7 @@
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
   import {
     iconLinkToRecordPage,
-    iconModalRecordPage,
+    iconModalRecordView,
     iconSetToNull,
   } from '@mathesar/icons';
   import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
@@ -182,7 +182,7 @@
         </div>
       </MenuHeading>
       <ButtonMenuItem
-        icon={iconModalRecordPage}
+        icon={iconModalRecordView}
         on:click={() => quickViewRecord(linkedTableOid, value)}
       >
         {$_('quick_view_linked_record')}

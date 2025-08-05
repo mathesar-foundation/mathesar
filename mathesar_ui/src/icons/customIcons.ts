@@ -156,7 +156,7 @@ export const databaseLineIcon: IconProps['data'] = {
   ],
 };
 
-export const modalRecordPageIcon: IconProps['data'] = {
+export const modalRecordViewIcon: IconProps['data'] = {
   icon: [
     100,
     100,

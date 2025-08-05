@@ -5,7 +5,7 @@
   import {
     iconDeleteMajor,
     iconDuplicateRecord,
-    iconModalRecordPage,
+    iconModalRecordView,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -59,7 +59,7 @@
 </script>
 
 {#if hasPk && canViewLinkedEntities}
-  <ButtonMenuItem icon={iconModalRecordPage} on:click={quickViewThisRecord}>
+  <ButtonMenuItem icon={iconModalRecordView} on:click={quickViewThisRecord}>
     {$_('quick_view_record')}
   </ButtonMenuItem>
   <LinkMenuItem
