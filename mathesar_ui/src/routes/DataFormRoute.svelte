@@ -13,7 +13,6 @@
   import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import { ensureReadable } from '@mathesar-component-library';
 
-  // TODO_FORMS: Replace this with form token
   export let formId: number;
 
   const schemaRouteContext = SchemaRouteContext.get();

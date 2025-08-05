@@ -27,10 +27,9 @@
   export let dataForm: DataForm;
   export let dataFormManager: EditableDataFormManager;
 
-  $: ({ sharePreferences } = dataForm);
+  $: ({ sharePreferences, token } = dataForm);
   $: ({ hasChanges } = dataFormManager);
-  // TODO_FORMS: Replace id with token
-  $: shareLink = `${window.location.origin}/shares/forms/${dataForm.id}`;
+  $: shareLink = `${window.location.origin}/shares/forms/${$token}`;
 
   let linkInput: HTMLInputElement;
 

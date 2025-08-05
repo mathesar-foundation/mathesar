@@ -5,5 +5,5 @@
 </script>
 
 <Route path="/forms/:token/*" let:meta>
-  <SharedFormRoute formId={parseInt(meta.params.token, 10)} />
+  <SharedFormRoute formToken={meta.params.token} />
 </Route>
