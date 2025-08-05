@@ -107,6 +107,43 @@ export interface RowModificationRecipe {
   cells: NewCellValueRecipe[];
 }
 
+/**
+ * @throws Error if the recipe has problems
+ */
+function validateRowModificationRecipe(
+  { row, cells }: RowModificationRecipe,
+  pkColumn: RawColumnWithMetadata,
+): void {
+  // Validate that PK value exists if we're updating a saved row
+  const primaryKeyValue = row.record[pkColumn.id];
+  if (isPersistedRecordRow(row) && primaryKeyValue === undefined) {
+    throw new Error(
+      'Unable to update record for a row with a missing primary key value',
+    );
+  }
+
+  // Validate against problems with directly editing PK values
+  const isEditingPk = cells.some((c) => c.columnId === String(pkColumn.id));
+  if (isEditingPk) {
+    if (!isDraftRecordRow(row)) {
+      // If modifying a PK cell in a saved record, then block editing.
+      throw new Error('Unable to modify primary key cells of saved rows');
+    }
+    if (pkColumn.default && pkColumn.default.is_dynamic) {
+      // If modifying a PK cell in a _draft_ row, and when the PK column has a
+      // dynamic default value set, then block editing. This is because we
+      // want the user to stick with the default PK value when creating new
+      // records.
+      throw new Error(
+        'Unable to modify cells in a primary key column with a dynamic default',
+      );
+    }
+    // Otherwise, (if we're modifying a PK cell in a draft row, and the PK
+    // column does not have a dynamic default) then we allow editing. This
+    // is so that the user can set their own PK values when inserting rows.
+  }
+}
+
 /** A recipe to add one row to the sheet */
 export interface RowAdditionRecipe {
   cells: NewCellValueRecipe[];
@@ -432,6 +469,15 @@ export class RecordsData {
     return draftRowsToDelete.size + persistedRowsToDelete.size;
   }
 
+  /**
+   * @throws Error if PK column does not exist
+   */
+  private getPkColumOrError() {
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    if (!pkColumn) throw new Error('Unable to update without primary key');
+    return pkColumn;
+  }
+
   async bulkDml(
     modificationRecipes: RowModificationRecipe[],
     additionRecipes: RowAdditionRecipe[] = [],
@@ -440,9 +486,14 @@ export class RecordsData {
     const additionalRows = convertedRecipes
       .map(({ row }) => row)
       .filter(isDraftRecordRow);
-    this.newRecords.update((rows) => [...rows, ...additionalRows]);
+
+    const pkColumn = this.getPkColumOrError();
     const unifiedRecipes = [...modificationRecipes, ...convertedRecipes];
-    await this.bulkUpdate(unifiedRecipes);
+    unifiedRecipes.forEach((r) => validateRowModificationRecipe(r, pkColumn));
+
+    this.newRecords.update((rows) => [...rows, ...additionalRows]);
+
+    await this.bulkUpdate(unifiedRecipes, { validateRecipes: false });
     return {
       rowIds: unifiedRecipes.map((recipe) => recipe.row.identifier),
       columnIds:
@@ -451,9 +502,21 @@ export class RecordsData {
     };
   }
 
-  async bulkUpdate(recipes: RowModificationRecipe[]): Promise<void> {
+  async bulkUpdate(
+    recipes: RowModificationRecipe[],
+    options: {
+      /**
+       * When true, the recipes will be checked for errors. True by default.
+       */
+      validateRecipes?: boolean;
+    } = {},
+  ): Promise<void> {
+    const defaultOptions = { validateRecipes: true };
+    const { validateRecipes } = { ...defaultOptions, ...options };
+
     const cellStatus = this.meta.cellModificationStatus;
     const { cellClientSideErrors, rowCreationStatus } = this.meta;
+    const pkColumn = this.getPkColumOrError();
 
     function forEachRow(fn: (r: RowModificationRecipe) => void) {
       recipes.forEach(fn);
@@ -467,17 +530,9 @@ export class RecordsData {
       );
     }
 
-    const pkColumn = get(this.columnsDataStore.pkColumn);
-    if (!pkColumn) throw new Error('Unable to update without primary key');
-
-    forEachRow(({ row }) => {
-      const primaryKeyValue = row.record[pkColumn.id];
-      if (isPersistedRecordRow(row) && primaryKeyValue === undefined) {
-        throw new Error(
-          'Unable to update record for a row with a missing primary key value',
-        );
-      }
-    });
+    if (validateRecipes) {
+      forEachRow((r) => validateRowModificationRecipe(r, pkColumn));
+    }
 
     forEachCell((cellKey) => {
       cellStatus.set(cellKey, { state: 'processing' });
