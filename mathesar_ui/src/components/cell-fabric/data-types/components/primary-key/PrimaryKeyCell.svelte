@@ -1,22 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { _ } from 'svelte-i18n';
 
   import CellWrapper from '@mathesar/components/cell-fabric/data-types/components/CellWrapper.svelte';
   import type { PrimaryKeyCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import Default from '@mathesar/components/Default.svelte';
-  import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
+  import RecordHyperlink from '@mathesar/components/RecordHyperlink.svelte';
   import { iconModalRecordView } from '@mathesar/icons';
-  // eslint-disable-next-line import/no-cycle
-  import RecordStore from '@mathesar/stores/RecordStore';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { currentTablesMap } from '@mathesar/stores/tables';
   import { Icon } from '@mathesar-component-library';
 
   type $$Props = PrimaryKeyCellProps;
 
   const dispatch = createEventDispatcher();
-  const modalRecordView = modalRecordViewContext.get();
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'] = undefined;
@@ -24,19 +18,6 @@
   export let tableId: $$Props['tableId'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let canViewLinkedEntities: $$Props['canViewLinkedEntities'];
-
-  $: href = $storeToGetRecordPageUrl({ tableId, recordId: value });
-
-  function handleLinkClick(e: MouseEvent) {
-    if (!modalRecordView) return;
-    if (value === undefined) return;
-    const table = $currentTablesMap.get(tableId);
-    if (!table) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const recordStore = new RecordStore({ table, recordPk: String(value) });
-    modalRecordView.open(recordStore);
-  }
 
   function handleLinkContextMenu(e: MouseEvent) {
     // This is so users can right-click on the link without triggering the
@@ -82,15 +63,15 @@
       {/if}
     </span>
     {#if canViewLinkedEntities}
-      <a
-        {href}
-        class="link"
-        title={$_('go_to_record_with_value', { values: { value } })}
+      <RecordHyperlink
+        {tableId}
+        recordId={value}
         on:contextmenu={handleLinkContextMenu}
-        on:click={handleLinkClick}
       >
-        <Icon {...iconModalRecordView} />
-      </a>
+        <span class="link-icon">
+          <Icon {...iconModalRecordView} />
+        </span>
+      </RecordHyperlink>
     {/if}
   </div>
 </CellWrapper>
@@ -115,13 +96,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .link {
-    display: flex;
-    align-items: center;
+  .link-icon {
     padding: 0 var(--cell-padding);
     color: var(--color-gray-dark);
   }
-  .link:hover {
+  .link-icon:hover {
     color: var(--color-text);
   }
 </style>

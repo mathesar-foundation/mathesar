@@ -1,0 +1,36 @@
+<script lang="ts">
+  import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
+  import RecordStore from '@mathesar/stores/RecordStore';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { currentTablesMap } from '@mathesar/stores/tables';
+
+  const modalRecordView = modalRecordViewContext.get();
+
+  export let tableId: number;
+  export let recordId: unknown;
+
+  $: href = $storeToGetRecordPageUrl({ tableId, recordId });
+
+  function handleLinkClick(e: MouseEvent) {
+    if (!modalRecordView) return;
+    if (recordId === undefined) return;
+    const table = $currentTablesMap.get(tableId);
+    if (!table) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const recordStore = new RecordStore({ table, recordPk: String(recordId) });
+    modalRecordView.open(recordStore);
+  }
+</script>
+
+<a {href} class="record-hyperlink" on:contextmenu on:click={handleLinkClick}>
+  <slot />
+</a>
+
+<style>
+  .record-hyperlink {
+    display: inline-grid;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
