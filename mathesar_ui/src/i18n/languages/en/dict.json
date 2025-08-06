@@ -504,7 +504,7 @@
   "reinstall_mathesar_schemas": "Reinstall Mathesar Schemas",
   "reinstall_mathesar_schemas_on_db": "Reinstall Mathesar Schemas on [name] Database",
   "related_records": "Related Records",
-  "related_records_help": "Each of the following records links to [recordSummary] from another table.",
+  "related_records_help": "These [tableName] records link to [recordSummary] via the [columnName] column.",
   "relationship_type_description_many_to_many": "Multiple [baseTable] and [targetTable] records can reference each other through a new [mappingTable]",
   "relationship_type_description_many_to_many_self_referential": "Multiple [baseTable] records can reference each other through a new [mappingTable].",
   "relationship_type_description_many_to_one": "Multiple [baseTable] records can reference the same [targetTable] record.",

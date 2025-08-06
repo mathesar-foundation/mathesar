@@ -1,15 +1,10 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type {
     JoinableTable,
     JoinableTablesResult,
   } from '@mathesar/api/rpc/tables';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
-  import { iconRecord } from '@mathesar/icons';
   import { currentTablesData } from '@mathesar/stores/tables';
-  import { Help, isDefinedNonNullable } from '@mathesar-component-library';
+  import { isDefinedNonNullable } from '@mathesar-component-library';
 
   import TableWidget from './TableWidget.svelte';
 
@@ -34,26 +29,12 @@
 </script>
 
 {#if tableWidgetInputs.length}
-  <div class="widgets-area">
-    <h2>
-      {$_('related_records')}
-      <Help>
-        <RichText text={$_('related_records_help')} let:slotName>
-          {#if slotName === 'recordSummary'}
-            <NameWithIcon icon={iconRecord} truncate={false}>
-              <strong>{recordSummary}</strong>
-            </NameWithIcon>
-          {/if}
-        </RichText>
-      </Help>
-    </h2>
-    <div class="widgets">
-      {#each tableWidgetInputs as { table, fkColumn } (`${table.oid}-${fkColumn.id}`)}
-        <section class="table-widget-positioner">
-          <TableWidget {recordPk} {table} {fkColumn} />
-        </section>
-      {/each}
-    </div>
+  <div class="widgets">
+    {#each tableWidgetInputs as { table, fkColumn } (`${table.oid}-${fkColumn.id}`)}
+      <section class="table-widget-positioner">
+        <TableWidget {recordPk} {recordSummary} {table} {fkColumn} />
+      </section>
+    {/each}
   </div>
 {:else}
   <div class="no-widgets" />
@@ -62,10 +43,6 @@
 <style lang="scss">
   .no-widgets {
     background: var(--layout-background-color);
-  }
-  h2 {
-    padding: var(--sm1);
-    color: var(--text-color-primary);
   }
   .widgets {
     padding: var(--sm1);

@@ -2,8 +2,13 @@
   import { _ } from 'svelte-i18n';
 
   import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+  import { Help } from '@mathesar/component-library';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { iconRecord } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
   import {
     Meta,
@@ -24,6 +29,7 @@
   });
 
   export let recordPk: string;
+  export let recordSummary: string;
   export let table: Table;
   export let fkColumn: Pick<RawColumnWithMetadata, 'id' | 'name'>;
 
@@ -40,7 +46,34 @@
 
 <div class="table-widget">
   <div class="top">
-    <h3 class="bold-header"><TableName {table} /></h3>
+    <h3 class="bold-header">
+      <TableName {table} truncate={false} />
+      <Help>
+        <RichText text={$_('related_records_help')} let:slotName>
+          {#if slotName === 'tableName'}
+            <TableName {table} truncate={false} />
+          {/if}
+          {#if slotName === 'recordSummary'}
+            <NameWithIcon icon={iconRecord} truncate={false} bold>
+              {recordSummary}
+            </NameWithIcon>
+          {/if}
+          {#if slotName === 'columnName'}
+            <ColumnName
+              column={{
+                name: fkColumn.name,
+                type: 'unknown',
+                type_options: null,
+                constraintsType: ['foreignkey'],
+              }}
+              truncate={false}
+              bold
+            />
+          {/if}
+        </RichText>
+      </Help>
+    </h3>
+
     {#if canViewTable}
       <MiniActionsPane />
     {/if}
@@ -73,8 +106,6 @@
   }
   .bold-header {
     margin: 0;
-    display: flex;
-    align-items: center;
   }
   .results {
     margin-top: var(--sm1);
