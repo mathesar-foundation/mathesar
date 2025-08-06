@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
-  import { iconAddNew, iconForm, iconRefresh } from '@mathesar/icons';
+  import { iconAddNew, iconForms, iconRefresh } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
   import { modal } from '@mathesar/stores/modal';
   import { AddEditDataFormModal } from '@mathesar/systems/data-forms/add-edit-modal';
@@ -65,7 +65,7 @@
             }}
           />
         {:else}
-          <EmptyEntityList icon={iconForm} text={$_('no_forms')} />
+          <EmptyEntityList icon={iconForms} text={$_('no_forms')} />
         {/each}
       </div>
     {/if}
