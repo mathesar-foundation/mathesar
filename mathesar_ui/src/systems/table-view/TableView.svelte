@@ -12,16 +12,12 @@
   import type { Table } from '@mathesar/models/Table';
   import { confirm } from '@mathesar/stores/confirmation';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
-  import { modal } from '@mathesar/stores/modal';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
-  import type RecordStore from '@mathesar/systems/record-view/RecordStore';
-  import ModalRecordView from '@mathesar/systems/record-view-modal/ModalRecordView.svelte';
-  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
 
   import Body from './Body.svelte';
@@ -33,8 +29,6 @@
   type Context = 'page' | 'widget';
 
   const tabularData = getTabularDataStoreFromContext();
-  const modalRecordView = modal.spawnModalController<RecordStore>();
-  modalRecordViewContext.set(modalRecordView);
 
   export let context: Context = 'page';
   export let table: Table;
@@ -147,8 +141,6 @@
   </WithTableInspector>
 </div>
 <StatusPane {context} />
-
-<ModalRecordView controller={modalRecordView} />
 
 <style>
   .table-view {

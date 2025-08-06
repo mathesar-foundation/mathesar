@@ -3,6 +3,7 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewGatekeeper from '@mathesar/systems/record-view/RecordViewGatekeeper.svelte';
+  import WithModalRecordView from '@mathesar/systems/record-view-modal/WithModalRecordView.svelte';
 
   import RecordPageContent from './RecordPageContent.svelte';
 
@@ -18,6 +19,8 @@
 
 <LayoutWithHeader cssVariables={{ '--page-padding': '0' }} fitViewport>
   <RecordViewGatekeeper {record}>
-    <RecordPageContent {record} />
+    <WithModalRecordView>
+      <RecordPageContent {record} />
+    </WithModalRecordView>
   </RecordViewGatekeeper>
 </LayoutWithHeader>

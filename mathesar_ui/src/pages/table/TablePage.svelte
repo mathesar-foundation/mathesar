@@ -13,6 +13,7 @@
     TabularData,
     setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
+  import WithModalRecordView from '@mathesar/systems/record-view-modal/WithModalRecordView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
 
@@ -70,7 +71,9 @@
   <div class="table-page">
     <ActionsPane />
     {#if $currentRolePrivileges.has('SELECT')}
-      <TableView {table} bind:sheetElement />
+      <WithModalRecordView>
+        <TableView {table} bind:sheetElement />
+      </WithModalRecordView>
     {:else}
       <div class="warning">
         <WarningBox fullWidth>

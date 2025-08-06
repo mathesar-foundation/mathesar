@@ -7,12 +7,15 @@
   } from '@mathesar-component-library';
 
   import ModalRecordViewContent from './ModalRecordViewContent.svelte';
+  import WithModalRecordView from './WithModalRecordView.svelte';
 
   export let controller: ModalController<RecordStore>;
 </script>
 
 <ControlledModal {controller} let:options={record} size="large">
   <RecordViewGatekeeper {record}>
-    <ModalRecordViewContent {record} />
+    <WithModalRecordView>
+      <ModalRecordViewContent {record} />
+    </WithModalRecordView>
   </RecordViewGatekeeper>
 </ControlledModal>
