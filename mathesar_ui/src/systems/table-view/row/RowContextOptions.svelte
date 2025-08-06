@@ -5,6 +5,7 @@
   import {
     iconDeleteMajor,
     iconDuplicateRecord,
+    iconLinkToRecordPage,
     iconModalRecordView,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
@@ -16,11 +17,7 @@
     isRecordRow,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
-  import {
-    ButtonMenuItem,
-    LinkMenuItem,
-    iconExternalLink,
-  } from '@mathesar-component-library';
+  import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
 
   export let row: RecordRow;
   export let recordPk: ResultValue | undefined = undefined;
@@ -64,7 +61,7 @@
   </ButtonMenuItem>
   <LinkMenuItem
     href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
-    icon={iconExternalLink}
+    icon={iconLinkToRecordPage}
   >
     {$_('open_record')}
   </LinkMenuItem>
