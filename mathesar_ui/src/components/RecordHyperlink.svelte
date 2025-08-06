@@ -27,8 +27,6 @@
   {href}
   class="record-hyperlink"
   on:contextmenu
-  on:mouseenter
-  on:mouseleave
   on:click={handleLinkClick}
   {...$$restProps}
 >

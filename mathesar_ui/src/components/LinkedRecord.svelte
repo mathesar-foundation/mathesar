@@ -20,7 +20,6 @@
   export let allowsHyperlinks = false;
 
   let isHoveringDelete = false;
-  let isHoveringRecordPageLink = false;
 
   $: label = (() => {
     if (recordSummary && recordSummary.trim() !== '') {
@@ -40,7 +39,6 @@
 <span
   class="linked-record"
   class:is-hovering-delete={isHoveringDelete}
-  class:is-hovering-record-page-link={isHoveringRecordPageLink}
   class:exact-match={valueComparisonOutcome === 'exactMatch'}
   class:no-match={valueComparisonOutcome === 'noMatch'}
   class:disabled
@@ -48,17 +46,7 @@
 >
   {#if allowsHyperlinks && tableId}
     <span class="record-summary record-page-link">
-      <RecordHyperlink
-        {tableId}
-        {recordId}
-        tabindex="-1"
-        on:mouseenter={() => {
-          isHoveringRecordPageLink = true;
-        }}
-        on:mouseleave={() => {
-          isHoveringRecordPageLink = false;
-        }}
-      >
+      <RecordHyperlink {tableId} {recordId} tabindex="-1">
         {label}
       </RecordHyperlink>
     </span>
@@ -131,7 +119,7 @@
   .record-page-link:hover {
     text-decoration: none;
   }
-  .linked-record.is-hovering-record-page-link .background {
+  .linked-record:has(.record-page-link:hover) .background {
     --border-width: 0.2rem;
     left: calc(-1 * var(--border-width));
     top: calc(-1 * var(--border-width));
