@@ -70,9 +70,6 @@ export class DataForm {
     });
   }
 
-  // TODO_FORMS: Have a separate RPC method for this
-  // Updating name & desc should not validate the entire form w.r.t associated_role
-  // & shouldn't replace fields
   updateNameAndDesc(name: string, description: string | null) {
     const dataFormDef = get(this.toRawDataFormStore());
     const promise = api.forms
@@ -119,12 +116,6 @@ export class DataForm {
       (resolve, reject) => {
         promise
           .then((rawDataForm) => {
-            this._name.set(rawDataForm.name);
-            this._description.set(rawDataForm.description);
-            this._token.set(rawDataForm.token);
-            this._sharePreferences.set({
-              isPublishedPublicly: rawDataForm.publish_public,
-            });
             this._structure.set({
               associated_role_id: rawDataForm.associated_role_id,
               header_title: rawDataForm.header_title,
