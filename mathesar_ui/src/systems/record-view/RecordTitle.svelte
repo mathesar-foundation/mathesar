@@ -10,7 +10,7 @@
 
   export let record: RecordStore;
 
-  $: ({ table, summary } = record);
+  $: ({ table, summary, recordPageUrl } = record);
 </script>
 
 <div class="record-title">
@@ -18,7 +18,7 @@
     <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
     <div class="link">
       <Tooltip>
-        <a href="TODO_4670" slot="trigger" class="btn btn-ghost">
+        <a href={recordPageUrl} slot="trigger" class="btn btn-ghost">
           <Icon {...iconLinkToRecordPage} />
         </a>
         <span slot="content">{$_('open_in_full_page')}</span>

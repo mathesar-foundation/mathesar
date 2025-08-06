@@ -5,6 +5,7 @@ import { api } from '@mathesar/api/rpc';
 import type { RecordsResponse } from '@mathesar/api/rpc/records';
 import { WritableMap } from '@mathesar/component-library';
 import type { Table } from '@mathesar/models/Table';
+import { getRecordPageUrl } from '@mathesar/routes/urls';
 import { TableStructure } from '@mathesar/stores/table-data';
 import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 import { buildRecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
@@ -26,12 +27,20 @@ export default class RecordStore {
 
   recordPk: string;
 
+  recordPageUrl: string;
+
   constructor({ table, recordPk }: { table: Table; recordPk: string }) {
     const { schema } = table;
     this.tableStructure = new TableStructure({ schema, oid: table.oid });
     this.table = table;
     this.recordPk = recordPk;
     this.summary = writable('');
+    this.recordPageUrl = getRecordPageUrl(
+      table.schema.database.id,
+      table.schema.oid,
+      table.oid,
+      recordPk,
+    );
     void this.fetch();
   }
 
