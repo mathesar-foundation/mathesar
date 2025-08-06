@@ -85,23 +85,25 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
     {/each}
   </div>
 
-  <div class="submit">
-    <FormSubmit
-      {form}
-      catchErrors
-      proceedButton={{ label: $_('save'), icon: iconSave }}
-      cancelButton={{ label: $_('discard_changes'), icon: iconUndo }}
-      onProceed={save}
-      getErrorMessages={(e) => {
-        const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);
-        for (const [columnId, errors] of columnErrors) {
-          formFields[columnId]?.serverErrors.set(errors);
-        }
-        return recordErrors;
-      }}
-      initiallyHidden
-    />
-  </div>
+  {#if $form.hasChanges}
+    <div class="submit">
+      <FormSubmit
+        {form}
+        catchErrors
+        proceedButton={{ label: $_('save'), icon: iconSave }}
+        cancelButton={{ label: $_('discard_changes'), icon: iconUndo }}
+        onProceed={save}
+        getErrorMessages={(e) => {
+          const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);
+          for (const [columnId, errors] of columnErrors) {
+            formFields[columnId]?.serverErrors.set(errors);
+          }
+          return recordErrors;
+        }}
+        initiallyHidden
+      />
+    </div>
+  {/if}
 
   {#await getJoinableTablesResult(table.oid) then joinableTablesResult}
     <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
@@ -125,6 +127,6 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
     grid-template-columns: auto 1fr;
   }
   .submit {
-    --form-submit-margin: 2rem 0 0 0;
+    margin-top: 2rem;
   }
 </style>

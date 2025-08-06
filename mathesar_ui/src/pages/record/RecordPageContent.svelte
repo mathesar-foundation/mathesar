@@ -120,7 +120,9 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   {#await getJoinableTablesResult(table.oid)}
     <RecordViewLoadingSpinner />
   {:then joinableTablesResult}
-    <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
+    <div class="widgets-container">
+      <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
+    </div>
   {/await}
 </div>
 
@@ -162,5 +164,8 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
   .submit {
     --form-submit-margin: 2rem 0 0 0;
+  }
+  .widgets-container {
+    margin: 0 var(--sm1) var(--lg1) var(--sm1);
   }
 </style>

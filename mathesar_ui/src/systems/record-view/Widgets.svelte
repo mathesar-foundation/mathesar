@@ -44,17 +44,9 @@
   .no-widgets {
     background: var(--layout-background-color);
   }
-  .widgets {
-    padding: var(--sm1);
-  }
-
   .table-widget-positioner {
-    margin: 2rem 0;
-    &:first-child {
-      margin-top: 0;
-    }
-    &:last-child {
-      margin-bottom: 0;
-    }
+    margin-top: 2rem;
+    border-top: solid 1px var(--border-color);
+    padding-top: 1rem;
   }
 </style>

@@ -72,7 +72,9 @@
     <ActionsPane />
     {#if $currentRolePrivileges.has('SELECT')}
       <WithModalRecordView>
-        <TableView {table} bind:sheetElement />
+        <div class="table-view-area">
+          <TableView {table} bind:sheetElement />
+        </div>
       </WithModalRecordView>
     {:else}
       <div class="warning">
@@ -92,5 +94,10 @@
   }
   .warning {
     padding: 1rem;
+  }
+  .table-view-area {
+    padding: 0 var(--sm3) var(--sm3) var(--sm3);
+    height: 100%;
+    display: grid;
   }
 </style>
