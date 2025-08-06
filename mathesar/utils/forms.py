@@ -123,14 +123,33 @@ def create_form(form_def, user):
     return form_model
 
 
-def get_form(form_token):
+def has_permission_for_form(user, form_model):
+    if form_model.publish_public:
+        return True
+    elif user.is_authenticated:
+        try:
+            # validate_and_get_associated_role allows us to verify if a given user has access to the role associated with the form
+            validate_and_get_associated_role(
+                user=user,
+                database_id=form_model.database.id,
+                associated_role_id=form_model.associated_role.id
+            )
+            return True
+        except AssertionError:
+            return False
+    return False
+
+
+def get_form(form_token, user):
     form_model = Form.objects.get(token=form_token)
+    assert has_permission_for_form(user, form_model), 'Insufficient permission to get the form'
     return form_model
 
 
-def get_form_source_info(form_token):
+def get_form_source_info(form_token, user):
     form_model = Form.objects.get(token=form_token)
     if form_model:
+        assert has_permission_for_form(user, form_model), 'Insufficient permission to get form source info'
         return get_field_tab_col_info_map(form_model)
 
 
@@ -169,8 +188,9 @@ def iterate_form_fields(fields, parent_field=None, depth=0):
         )
 
 
-def submit_form(form_token, values):
+def submit_form(form_token, values, user):
     form_model = Form.objects.get(token=form_token)
+    assert has_permission_for_form(user, form_model), 'Insufficient permission to submit the form'
     field_info_list = [
         {
             "key": field.key,
