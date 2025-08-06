@@ -21,7 +21,7 @@
         <a href="TODO_4670" slot="trigger" class="btn btn-ghost">
           <Icon {...iconLinkToRecordPage} />
         </a>
-        <span slot="content">Open In Full Page</span>
+        <span slot="content">{$_('open_in_full_page')}</span>
       </Tooltip>
     </div>
   </div>

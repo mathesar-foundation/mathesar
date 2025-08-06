@@ -412,6 +412,7 @@
   "one_to_many": "One to Many",
   "open": "Open",
   "open_data_explorer": "Open Data Explorer",
+  "open_in_full_page": "Open In Full Page",
   "open_linked_record": "Open Linked Record",
   "open_named_record": "Open [recordName]",
   "open_named_table": "Open [tableName] table",
