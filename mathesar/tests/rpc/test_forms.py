@@ -228,7 +228,7 @@ def test_forms_get(rf, monkeypatch):
     request = rf.post('/api/rpc/v0', data={})
     request.user = User(username='alice', password='pass1234')
 
-    def mock_forms_get(form_token):
+    def mock_forms_get(form_token, user):
         return mock_forms_info()
 
     form_token = "db1bbb54-58df-4d5b-9909-a8b856f5a804"
