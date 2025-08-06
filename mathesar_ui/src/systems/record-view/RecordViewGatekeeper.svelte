@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import type RecordStore from '@mathesar/stores/RecordStore';
+  import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 
   import RecordViewLoadingSpinner from './RecordViewLoadingSpinner.svelte';
 

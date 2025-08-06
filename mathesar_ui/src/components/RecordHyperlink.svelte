@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
-  import RecordStore from '@mathesar/stores/RecordStore';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import { currentTablesMap } from '@mathesar/stores/tables';
+  import RecordStore from '@mathesar/systems/record-view/RecordStore';
+  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
 
   const modalRecordView = modalRecordViewContext.get();
 

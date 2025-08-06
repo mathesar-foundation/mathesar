@@ -1,14 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
   import {
     iconDeleteMajor,
     iconLinkToRecordPage,
     iconModalRecordView,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import RecordStore from '@mathesar/stores/RecordStore';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     extractPrimaryKeyValue,
@@ -16,6 +14,8 @@
   } from '@mathesar/stores/table-data';
   import { currentTablesMap } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
+  import RecordStore from '@mathesar/systems/record-view/RecordStore';
+  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
   import { AnchorButton, Button, Icon } from '@mathesar-component-library';
 

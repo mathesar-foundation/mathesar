@@ -17,7 +17,7 @@
     iconExpandDown,
   } from '@mathesar-component-library';
 
-  import type RecordStore from '../../stores/RecordStore';
+  import type RecordStore from './RecordStore';
 
   /**
    * This is used to determine whether to display a `NULL` overlay indicator.

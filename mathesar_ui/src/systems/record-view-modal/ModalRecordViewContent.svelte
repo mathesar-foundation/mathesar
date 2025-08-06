@@ -16,11 +16,11 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { iconSave, iconUndo } from '@mathesar/icons';
-  import type RecordStore from '@mathesar/stores/RecordStore';
+  import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 
-  import DirectField from './DirectField.svelte';
-  import RecordTitle from './RecordTitle.svelte';
-  import Widgets from './Widgets.svelte';
+  import DirectField from '../record-view/DirectField.svelte';
+  import RecordTitle from '../record-view/RecordTitle.svelte';
+  import Widgets from '../record-view/Widgets.svelte';
 
   export let record: RecordStore;
 

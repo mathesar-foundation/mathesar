@@ -1,12 +1,10 @@
 <script lang="ts">
   import { SheetVirtualRows } from '@mathesar/components/sheet';
-  import { modalRecordViewContext } from '@mathesar/contexts/modalRecordViewContext';
   import {
     GROUP_HEADER_ROW_HEIGHT_PX,
     HELP_TEXT_ROW_HEIGHT_PX,
     ROW_HEIGHT_PX,
   } from '@mathesar/geometry';
-  import RecordStore from '@mathesar/stores/RecordStore';
   import {
     type DisplayRowDescriptor,
     type Row as RowType,
@@ -16,6 +14,8 @@
     isPlaceholderRecordRow,
   } from '@mathesar/stores/table-data';
   import { currentTablesMap } from '@mathesar/stores/tables';
+  import RecordStore from '@mathesar/systems/record-view/RecordStore';
+  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
 
   import Row from './row/Row.svelte';
   import ScrollAndRowHeightHandler from './ScrollAndRowHeightHandler.svelte';

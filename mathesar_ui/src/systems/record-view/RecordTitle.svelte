@@ -6,7 +6,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconLinkToRecordPage, iconRecord } from '@mathesar/icons';
-  import type RecordStore from '@mathesar/stores/RecordStore';
+  import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 
   export let record: RecordStore;
 
