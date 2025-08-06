@@ -108,7 +108,6 @@ def create_form(form_def, user):
     database = Database.objects.get(id=form_def["database_id"])
     associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
     form_model = Form.objects.create(
-        **({"id": form_def["id"]} if form_def.get("id") else {}),  # we get an id during replace
         token=uuid4(),
         name=form_def["name"],
         description=form_def.get("description"),
