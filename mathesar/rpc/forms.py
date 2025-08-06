@@ -13,7 +13,7 @@ from mathesar.utils.forms import (
     regen_form_token,
     set_form_public_setting,
     delete_form,
-    replace_form,
+    patch_form,
     get_form_source_info,
     submit_form,
 )
@@ -203,27 +203,34 @@ class AddFormDef(TypedDict):
     fields: list[AddOrReplaceFieldDef]
 
 
-class ReplaceableFormDef(AddFormDef):
+class SettableFormDef(AddFormDef):
     """
-    Definition needed to replace a form.
+    Definition needed to update a form.
 
     Attributes:
         id: The Django id of the Form on the database.
         name: The name of the form.
         description: The description of the form.
         version: The version of the form.
-        database_id: The Django id of the database containing the Form.
-        schema_oid: The OID of the schema where within which form exists.
-        base_table_oid: The table OID based on which a form will be created.
+        associated_role_id: The Django id of the configured role to be used while submitting a form.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
-        submit_role_id: The Django id of the configured role to be used while submitting a form.
         submit_message: Message to be displayed upon submission.
-        redirect_url: Redirect path after submission.
-        submit_label: Text to be displayed on the submit button.
+        submit_redirect_url: Redirect path after submission.
+        submit_button_label: Text to be displayed on the submit button.
         fields: Definition of Fields within the form.
     """
     id: int
+    name: str
+    description: Optional[str]
+    version: int
+    associated_role_id: int
+    header_title: dict
+    header_subtitle: Optional[dict]
+    submit_message: Optional[dict]
+    submit_redirect_url: Optional[str]
+    submit_button_label: Optional[str]
+    fields: list[AddOrReplaceFieldDef]
 
 
 @mathesar_rpc_method(name="forms.add", auth="login")
@@ -334,19 +341,19 @@ def delete(*, form_id: int, **kwargs) -> None:
     delete_form(form_id)
 
 
-@mathesar_rpc_method(name="forms.replace", auth="login")
-def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
+@mathesar_rpc_method(name="forms.patch", auth="login")
+def patch(*, update_form_def: SettableFormDef, **kwargs) -> FormInfo:
     """
-    Replace a form.
+    Update a form.
 
     Args:
-        new_form: A dict describing the form to replace, including the updated fields.
+        update_form_def: A dict describing the form to update, including the updated fields.
 
     Returns:
-        The form info for the replaced form.
+        The form info for the updated form.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model = replace_form(new_form, user)
+    form_model = patch_form(update_form_def, user)
     return FormInfo.from_model(form_model)
 
 
