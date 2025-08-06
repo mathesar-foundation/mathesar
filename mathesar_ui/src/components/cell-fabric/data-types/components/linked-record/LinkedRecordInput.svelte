@@ -8,7 +8,6 @@
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import {
     type AccompanyingElements,
@@ -28,7 +27,6 @@
     > {
     class?: string;
     id?: string;
-    allowsHyperlinks?: boolean;
   }
 
   const labelController = getLabelControllerFromContainingLabel();
@@ -45,7 +43,6 @@
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
   export { classes as class };
-  export let allowsHyperlinks = true;
   export let disabled = false;
 
   let isAcquiringInput = false;
@@ -53,10 +50,6 @@
 
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
-  $: recordPageHref =
-    hasValue && allowsHyperlinks
-      ? $storeToGetRecordPageUrl({ tableId, recordId: value })
-      : undefined;
 
   function clear() {
     value = null;
@@ -160,8 +153,9 @@
         {recordSummary}
         hasDeleteButton={!disabled}
         on:delete={clear}
-        {recordPageHref}
         {disabled}
+        {tableId}
+        allowsHyperlinks
       />
     {/if}
   </span>
