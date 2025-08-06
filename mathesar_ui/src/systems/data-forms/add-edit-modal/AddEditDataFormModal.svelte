@@ -104,7 +104,7 @@
   <Field field={description} label={$_('description')} layout="stacked" />
   <FieldLayout>
     <LabeledInput layout="stacked">
-      <span slot="label">{$_('source_table_for_form')}</span>
+      <span slot="label">{$_('base_table_for_form')}</span>
       <SelectTableWithinCurrentSchema
         disabled={$isSourceTableStructureLoading || !!dataForm}
         autoSelect="none"
