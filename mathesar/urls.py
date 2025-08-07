@@ -29,6 +29,8 @@ urlpatterns = [
     path('administration/users/<int:user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
     path('administration/settings/', views.admin_home, name='admin_settings'),
+    path('files/<slug:download_link_id>/download/', views.download_link.download_file),
+    path('files/<slug:download_link_id>/', views.download_link.load_file),
     path('i18n/', include('django.conf.urls.i18n')),
     path('info/analytics_sample_report/', views.analytics_sample_report, name='analytics_sample_report'),
     re_path(
