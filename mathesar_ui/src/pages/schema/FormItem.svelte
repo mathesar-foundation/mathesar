@@ -8,7 +8,7 @@
     iconDeleteMajor,
     iconEdit,
     iconFillOutForm,
-    iconForms,
+    iconForm,
   } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
   import {
@@ -48,7 +48,7 @@
   href={builderPageUrl}
   name={$name}
   description={$description ?? undefined}
-  icon={iconForms}
+  icon={iconForm}
 >
   <svelte:fragment slot="detail">
     {#if baseTable}
