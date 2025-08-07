@@ -23,8 +23,8 @@
   export let editDataForm: () => void;
   export let deleteDataForm: () => void;
 
-  $: ({ id, name, description, schema, baseTableOId } = dataForm);
-  $: baseTable = $tablesStore.tablesMap.get(baseTableOId);
+  $: ({ id, name, description, schema, baseTableOid } = dataForm);
+  $: baseTable = $tablesStore.tablesMap.get(baseTableOid);
 
   $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
   $: formFilloutPageUrl = getDataFormFillPageUrl(

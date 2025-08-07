@@ -38,7 +38,7 @@
   $: savedName = ensureReadable(dataForm?.name ?? '');
   $: savedDescription = ensureReadable(dataForm?.description ?? '');
   $: savedBaseTable = dataForm
-    ? $importVerifiedTables.get(dataForm.baseTableOId)
+    ? $importVerifiedTables.get(dataForm.baseTableOid)
     : undefined;
 
   $: name = requiredField($savedName ?? '');
