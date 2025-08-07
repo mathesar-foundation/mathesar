@@ -1,7 +1,9 @@
 import os
+import uuid
 
 from django.conf import settings
 from django.db import models
+from django.contrib.sessions.models import Session
 from encrypted_fields.fields import EncryptedCharField
 
 from db.sql.install import uninstall, install
@@ -368,3 +370,9 @@ class DataFile(BaseModel):
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
+
+
+class DownloadLink(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    uri = models.CharField(max_length=1024)

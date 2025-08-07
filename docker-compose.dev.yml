@@ -61,6 +61,9 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
       - POSTGRES_PORT=5432
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     volumes:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
