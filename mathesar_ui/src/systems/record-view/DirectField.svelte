@@ -155,6 +155,7 @@
           recordSummary,
         })}
       hasError={$showsError}
+      allowsHyperlinks
     />
     <FieldErrors {field} />
   </div>

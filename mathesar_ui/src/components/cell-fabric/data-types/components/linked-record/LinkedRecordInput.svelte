@@ -27,6 +27,7 @@
     > {
     class?: string;
     id?: string;
+    allowsHyperlinks?: boolean;
   }
 
   const labelController = getLabelControllerFromContainingLabel();
@@ -43,6 +44,7 @@
   export let tableId: $$Props['tableId'];
   let classes: $$Props['class'] = '';
   export { classes as class };
+  export let allowsHyperlinks = false;
   export let disabled = false;
 
   let isAcquiringInput = false;
@@ -155,7 +157,7 @@
         on:delete={clear}
         {disabled}
         {tableId}
-        allowsHyperlinks
+        {allowsHyperlinks}
       />
     {/if}
   </span>
