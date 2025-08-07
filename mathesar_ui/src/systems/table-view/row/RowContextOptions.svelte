@@ -19,6 +19,7 @@
   import { toast } from '@mathesar/stores/toast';
   import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
 
+  export let tableOid: number;
   export let row: RecordRow;
   export let recordPk: ResultValue | undefined = undefined;
   export let recordsData: RecordsData;
@@ -31,6 +32,10 @@
   const canViewLinkedEntities = true;
 
   $: hasPk = recordPk !== undefined;
+  $: recordPageUrl = $storeToGetRecordPageUrl({
+    tableId: tableOid,
+    recordId: recordPk,
+  });
 
   async function handleDeleteRecords() {
     if (isRecordRow(row)) {
@@ -59,12 +64,11 @@
   <ButtonMenuItem icon={iconModalRecordView} on:click={quickViewThisRecord}>
     {$_('quick_view_record')}
   </ButtonMenuItem>
-  <LinkMenuItem
-    href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
-    icon={iconLinkToRecordPage}
-  >
-    {$_('open_record')}
-  </LinkMenuItem>
+  {#if recordPageUrl}
+    <LinkMenuItem href={recordPageUrl} icon={iconLinkToRecordPage}>
+      {$_('open_record')}
+    </LinkMenuItem>
+  {/if}
 {/if}
 
 <ButtonMenuItem

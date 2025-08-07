@@ -39,7 +39,10 @@
       return undefined;
     }
   })();
-  $: recordPageLink = $storeToGetRecordPageUrl({ recordId });
+  $: recordPageLink = $storeToGetRecordPageUrl({
+    tableId: table.oid,
+    recordId,
+  });
 
   function quickViewRecord() {
     if (!modalRecordView) return;

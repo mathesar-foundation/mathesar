@@ -205,6 +205,7 @@
     <MenuDivider />
     <MenuHeading>{$_('row')}</MenuHeading>
     <RowContextOptions
+      {tableOid}
       {recordPk}
       {recordsData}
       {row}

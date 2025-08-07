@@ -107,6 +107,7 @@
         />
         <ContextMenu>
           <RowContextOptions
+            tableOid={table.oid}
             {recordPk}
             {recordsData}
             {row}
