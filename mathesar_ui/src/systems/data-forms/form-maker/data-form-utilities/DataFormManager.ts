@@ -97,7 +97,7 @@ export class EditableDataFormManager implements DataFormManager {
       schema: this.schema,
     };
 
-    return this.tableStructureCache.get(
+    return this.tableStructureCache.getOrCreate(
       tableStructureProps.oid,
       () => new TableStructure(tableStructureProps),
     );
