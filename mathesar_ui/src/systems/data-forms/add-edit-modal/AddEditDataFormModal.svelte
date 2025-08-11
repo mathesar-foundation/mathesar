@@ -1,6 +1,5 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { router } from 'tinro';
 
   import {
     FieldLayout,
@@ -17,7 +16,6 @@
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import type { DataForm } from '@mathesar/models/DataForm';
   import type { Table } from '@mathesar/models/Table';
-  import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
   import {
@@ -55,7 +53,6 @@
     : ensureReadable(false);
 
   async function save(values: FilledFormValues<typeof form>) {
-    let newDataForm: DataForm | undefined;
     if (dataForm) {
       await dataForm.updateNameAndDesc(values.name, values.description);
     } else {
@@ -66,7 +63,7 @@
         const rawEpf = tableStructureSubstanceToRawEphemeralForm(
           tableStructureSubstance.resolvedValue,
         );
-        newDataForm = await $schemaRouteContext.insertDataForm({
+        await $schemaRouteContext.insertDataForm({
           ...rawEpf,
           name: values.name,
           description: values.description,
@@ -74,15 +71,6 @@
       }
     }
     controller.close();
-    if (newDataForm) {
-      router.goto(
-        getDataFormPageUrl(
-          newDataForm.schema.database.id,
-          newDataForm.schema.oid,
-          newDataForm.id,
-        ),
-      );
-    }
   }
 </script>
 
