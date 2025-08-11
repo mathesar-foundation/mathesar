@@ -74,7 +74,7 @@ def iterate_field_defs(field_defs, parent_field_defn=None):
 
 
 @transaction.atomic
-def create_form_fields(form_model, fields_dict):
+def create_form_fields(form_model, fields_def_list):
     field_instances = [
         FormField(
             key=field_def["key"],
@@ -89,12 +89,12 @@ def create_form_fields(form_model, fields_dict):
             parent_field=None,
             styling=field_def.get("styling"),
             is_required=field_def.get("is_required", False),
-        ) for field_def, _ in iterate_field_defs(fields_dict)
+        ) for field_def, _ in iterate_field_defs(fields_def_list)
     ]
     created_fields = FormField.objects.bulk_create(field_instances)
     created_fields_map = {field.key: field for field in created_fields}
     update_field_instances = []
-    for field_def, parent_field_def in iterate_field_defs(fields_dict):
+    for field_def, parent_field_def in iterate_field_defs(fields_def_list):
         if parent_field_def:
             created_field = created_fields_map[field_def["key"]]
             created_field.parent_field = created_fields_map[parent_field_def["key"]]
@@ -123,7 +123,7 @@ def create_form(form_def, user):
         submit_redirect_url=form_def.get("submit_redirect_url"),
         submit_button_label=form_def.get("submit_button_label")
     )
-    create_form_fields(form_model, fields_dict=form_def["fields"])
+    create_form_fields(form_model, fields_def_list=form_def["fields"])
     return form_model
 
 
@@ -216,9 +216,10 @@ def patch_form(update_form_def, user):
         database_id=form_model.database.id,
         associated_role_id=update_form_def.get("associated_role_id")
     )
-    if fields_dict := update_form_def.get("fields"):
+    fields_def_list = update_form_def["fields"]
+    if fields_def_list or fields_def_list == []:
         form_model.fields.all().delete()
-        create_form_fields(form_model, fields_dict)
+        create_form_fields(form_model, fields_def_list)
     Form.objects.filter(id=update_form_def["id"]).update(
         name=update_form_def["name"],
         description=update_form_def.get("description"),
