@@ -224,7 +224,7 @@ class SettableFormDef(AddFormDef):
     name: str
     description: Optional[str]
     version: int
-    associated_role_id: int
+    associated_role_id: Optional[int]
     header_title: dict
     header_subtitle: Optional[dict]
     submit_message: Optional[dict]

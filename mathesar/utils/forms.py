@@ -211,13 +211,11 @@ def submit_form(form_token, values, user):
 @transaction.atomic
 def patch_form(update_form_def, user):
     form_model = Form.objects.get(id=update_form_def["id"])
-    associated_role = form_model.associated_role
-    if associated_role.id != update_form_def["associated_role_id"]:
-        associated_role = validate_and_get_associated_role(
-            user,
-            database_id=form_model.database.id,
-            associated_role_id=update_form_def["associated_role_id"]
-        )
+    associated_role = validate_and_get_associated_role(
+        user,
+        database_id=form_model.database.id,
+        associated_role_id=update_form_def.get("associated_role_id")
+    )
     if fields_dict := update_form_def.get("fields"):
         form_model.fields.all().delete()
         create_form_fields(form_model, fields_dict)
