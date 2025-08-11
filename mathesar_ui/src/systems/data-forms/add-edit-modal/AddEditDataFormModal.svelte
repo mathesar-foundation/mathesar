@@ -45,13 +45,6 @@
   $: form = makeForm({ name, description, sourceTable });
   $: modalTitle = dataForm ? $_('edit_form_with_name') : $_('create_new_form');
 
-  $: sourceTableStructure = $sourceTable
-    ? new TableStructure($sourceTable)
-    : undefined;
-  $: isSourceTableStructureLoading = sourceTableStructure
-    ? sourceTableStructure.isLoading
-    : ensureReadable(false);
-
   async function save(values: FilledFormValues<typeof form>) {
     if (dataForm) {
       await dataForm.updateNameAndDesc(values.name, values.description);
@@ -88,18 +81,18 @@
       {/if}
     </RichText>
   </span>
-  <Field field={name} label={$_('name')} layout="stacked" />
-  <Field field={description} label={$_('description')} layout="stacked" />
   <FieldLayout>
     <LabeledInput layout="stacked">
-      <span slot="label">{$_('base_table_for_form')}</span>
+      <span slot="label">{$_('base_table')}</span>
       <SelectTableWithinCurrentSchema
-        disabled={$isSourceTableStructureLoading || !!dataForm}
+        disabled={!!dataForm}
         autoSelect="none"
         bind:value={$sourceTable}
       />
     </LabeledInput>
   </FieldLayout>
+  <Field field={name} label={$_('name')} layout="stacked" />
+  <Field field={description} label={$_('description')} layout="stacked" />
   <div slot="footer">
     <FormSubmit
       {form}
