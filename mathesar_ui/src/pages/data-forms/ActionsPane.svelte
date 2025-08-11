@@ -21,7 +21,7 @@
   export let dataFormManager: EditableDataFormManager;
 
   $: ({ hasChanges } = dataFormManager);
-  $: ({ name, description } = dataForm);
+  $: ({ structure } = dataForm);
 
   async function saveForm() {
     try {
@@ -36,8 +36,8 @@
 
 <EntityPageHeader
   title={{
-    name: $name || $_('untitled'),
-    description: $description ?? undefined,
+    name: $structure.name || $_('untitled'),
+    description: $structure.description ?? undefined,
     icon: iconForm,
   }}
 >

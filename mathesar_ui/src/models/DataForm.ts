@@ -4,6 +4,7 @@ import { api } from '@mathesar/api/rpc';
 import {
   type RawDataForm,
   type RawDataFormStructure,
+  constructRequestToUpdateForm,
   dataFormStructureVersion,
 } from '@mathesar/api/rpc/forms';
 import { CancellablePromise } from '@mathesar-component-library';
@@ -16,18 +17,6 @@ export class DataForm {
   readonly id: number;
 
   readonly baseTableOid: number;
-
-  private _name;
-
-  get name(): Readable<RawDataForm['name']> {
-    return this._name;
-  }
-
-  private _description;
-
-  get description(): Readable<RawDataForm['description']> {
-    return this._description;
-  }
 
   private _token;
 
@@ -53,16 +42,14 @@ export class DataForm {
     this.schema = props.schema;
     this.id = props.rawDataForm.id;
     this.baseTableOid = props.rawDataForm.base_table_oid;
-    this._name = writable(props.rawDataForm.name);
-    this._description = writable(props.rawDataForm.description);
     this._token = writable(props.rawDataForm.token);
     this._sharePreferences = writable({
       isPublishedPublicly: props.rawDataForm.publish_public,
     });
     this._structure = writable({
+      name: props.rawDataForm.name,
+      description: props.rawDataForm.description,
       associated_role_id: props.rawDataForm.associated_role_id,
-      header_title: props.rawDataForm.header_title,
-      header_subtitle: props.rawDataForm.header_subtitle,
       fields: props.rawDataForm.fields,
       submit_message: props.rawDataForm.submit_message,
       submit_redirect_url: props.rawDataForm.submit_redirect_url,
@@ -70,47 +57,16 @@ export class DataForm {
     });
   }
 
-  updateNameAndDesc(name: string, description: string | null) {
-    const structure = get(this.structure);
-    const promise = api.forms
-      .patch({
-        update_form_def: {
-          ...structure,
-          id: this.id,
-          name,
-          description,
-          version: dataFormStructureVersion,
-        },
-      })
-      .run();
-
-    return new CancellablePromise(
-      (resolve, reject) => {
-        promise
-          .then((rawDataForm) => {
-            this._name.set(rawDataForm.name);
-            this._description.set(rawDataForm.description);
-            return resolve(this);
-          }, reject)
-          .catch(reject);
-      },
-      () => promise.cancel(),
-    );
-  }
-
   updateStructure(
     dataFormStructure: RawDataFormStructure,
   ): CancellablePromise<DataForm> {
     const promise = api.forms
-      .patch({
-        update_form_def: {
+      .patch(
+        constructRequestToUpdateForm({
           ...dataFormStructure,
           id: this.id,
-          name: get(this.name),
-          description: get(this.description),
-          version: dataFormStructureVersion,
-        },
-      })
+        }),
+      )
       .run();
 
     return new CancellablePromise(
@@ -118,9 +74,9 @@ export class DataForm {
         promise
           .then((rawDataForm) => {
             this._structure.set({
+              name: rawDataForm.name,
+              description: rawDataForm.description,
               associated_role_id: rawDataForm.associated_role_id,
-              header_title: rawDataForm.header_title,
-              header_subtitle: rawDataForm.header_subtitle,
               fields: rawDataForm.fields,
               submit_message: rawDataForm.submit_message,
               submit_redirect_url: rawDataForm.submit_redirect_url,
@@ -132,6 +88,15 @@ export class DataForm {
       },
       () => promise.cancel(),
     );
+  }
+
+  updateNameAndDesc(name: string, description: string | null) {
+    const structure = get(this.structure);
+    return this.updateStructure({
+      ...structure,
+      name,
+      description,
+    });
   }
 
   updateSharingPreferences(sharePublicly: boolean) {
@@ -175,22 +140,14 @@ export class DataForm {
 
   toRawDataFormStore(): Readable<RawDataForm> {
     return derived(
-      [
-        this.token,
-        this.name,
-        this.description,
-        this.structure,
-        this.sharePreferences,
-      ],
-      ([$token, $name, $description, $structure, $sharePreferences]) => ({
+      [this.token, this.structure, this.sharePreferences],
+      ([$token, $structure, $sharePreferences]) => ({
         id: this.id,
         token: $token,
         version: dataFormStructureVersion,
         database_id: this.schema.database.id,
         base_table_oid: this.baseTableOid,
         schema_oid: this.schema.oid,
-        name: $name,
-        description: $description,
         ...$structure,
         publish_public: $sharePreferences.isPublishedPublicly,
       }),

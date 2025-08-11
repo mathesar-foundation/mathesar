@@ -17,8 +17,8 @@ interface DataFormStructureProps {
   schemaOid: number;
   databaseId: number;
   token: RawDataForm['token'];
-  headerTitle: RawDataForm['header_title'];
-  headerSubTitle: RawDataForm['header_subtitle'];
+  name: RawDataForm['name'];
+  description: RawDataForm['description'];
   associatedRoleId: RawDataForm['associated_role_id'];
   submitMessage: RawDataForm['submit_message'];
   submitRedirectUrl: RawDataForm['submit_redirect_url'];
@@ -43,16 +43,16 @@ export class DataFormStructure {
 
   readonly token;
 
-  private _headerTitle;
+  private _name;
 
-  get headerTitle(): Readable<RawDataForm['header_title']> {
-    return this._headerTitle;
+  get name(): Readable<RawDataForm['name']> {
+    return this._name;
   }
 
-  private _headerSubTitle;
+  private _description;
 
-  get headerSubTitle(): Readable<RawDataForm['header_subtitle']> {
-    return this._headerSubTitle;
+  get description(): Readable<RawDataForm['description']> {
+    return this._description;
   }
 
   private _associatedRoleId;
@@ -90,8 +90,8 @@ export class DataFormStructure {
     this.schemaOid = props.schemaOid;
     this.databaseId = props.databaseId;
     this.token = props.token;
-    this._headerTitle = writable(props.headerTitle);
-    this._headerSubTitle = writable(props.headerSubTitle);
+    this._name = writable(props.name);
+    this._description = writable(props.description);
     this._associatedRoleId = writable(props.associatedRoleId);
     this._submitMessage = writable(props.submitMessage);
     this._submitRedirectUrl = writable(props.submitRedirectUrl);
@@ -157,18 +157,14 @@ export class DataFormStructure {
     this.onChange?.(change);
   }
 
-  setHeaderTitle(title: string) {
-    this._headerTitle.set({
-      text: title,
-    });
-    this.bubblePropChange('headerTitle');
+  setName(name: string) {
+    this._name.set(name);
+    this.bubblePropChange('name');
   }
 
-  setHeaderSubTitle(subTitle: string) {
-    this._headerSubTitle.set({
-      text: subTitle,
-    });
-    this.bubblePropChange('headerSubtitle');
+  setDescription(desc: string) {
+    this._description.set(desc);
+    this.bubblePropChange('description');
   }
 
   setAssociatedRoleId(configuredRoleId: number | null) {
@@ -228,8 +224,8 @@ export class DataFormStructure {
   toRawStructure(): RawDataFormStructure {
     return {
       associated_role_id: get(this.associatedRoleId),
-      header_title: get(this.headerTitle),
-      header_subtitle: get(this.headerSubTitle),
+      name: get(this.name),
+      description: get(this.description),
       fields: [...get(this.fields).values()].map((field) =>
         field.toRawEphemeralField(),
       ),
@@ -255,8 +251,8 @@ export class DataFormStructure {
           schemaOid: props.schema_oid,
           databaseId: props.database_id,
           token: props.token,
-          headerTitle: props.header_title,
-          headerSubTitle: props.header_subtitle,
+          name: props.name,
+          description: props.description,
           associatedRoleId: props.associated_role_id,
           submitMessage: props.submit_message,
           submitRedirectUrl: props.submit_redirect_url,

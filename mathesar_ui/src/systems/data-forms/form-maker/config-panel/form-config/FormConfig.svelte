@@ -19,25 +19,24 @@
   export let dataFormManager: EditableDataFormManager;
 
   $: ({ dataFormStructure } = dataFormManager);
-  $: ({ headerTitle, headerSubTitle, baseTableOid } = dataFormStructure);
+  $: ({ name, description, baseTableOid } = dataFormStructure);
   $: tableStructure = dataFormManager.getTableStructure(baseTableOid);
   $: ({ table } = tableStructure);
 </script>
 
 <InspectorTabContent>
   <InspectorSection title={$_('header')}>
-    <LabeledInput layout="stacked" label={$_('form_title')}>
+    <LabeledInput layout="stacked" label={$_('name')}>
       <TextInput
-        value={$headerTitle.text}
-        on:input={(e) =>
-          dataFormStructure.setHeaderTitle(getStringValueFromEvent(e))}
+        value={$name}
+        on:input={(e) => dataFormStructure.setName(getStringValueFromEvent(e))}
       />
     </LabeledInput>
-    <LabeledInput layout="stacked" label={$_('form_subtitle')}>
+    <LabeledInput layout="stacked" label={$_('description')}>
       <TextArea
-        value={$headerSubTitle?.text}
+        value={$description}
         on:input={(e) =>
-          dataFormStructure.setHeaderSubTitle(getStringValueFromEvent(e))}
+          dataFormStructure.setDescription(getStringValueFromEvent(e))}
       />
     </LabeledInput>
   </InspectorSection>

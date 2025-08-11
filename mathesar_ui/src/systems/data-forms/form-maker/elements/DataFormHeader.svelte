@@ -13,19 +13,19 @@
   export let dataFormManager: DataFormManager;
 
   $: ({ dataFormStructure } = dataFormManager);
-  $: ({ headerTitle, headerSubTitle } = dataFormStructure);
+  $: ({ name, description } = dataFormStructure);
 
-  function onTitleInput(e: Event) {
+  function onNameInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       const updatedName = getStringValueFromEvent(e);
-      dataFormStructure.setHeaderTitle(updatedName);
+      dataFormStructure.setName(updatedName);
     }
   }
 
-  function onSubtitleInput(e: Event) {
+  function onDescriptionInput(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       const updatedDesc = getStringValueFromEvent(e);
-      dataFormStructure.setHeaderSubTitle(updatedDesc);
+      dataFormStructure.setDescription(updatedDesc);
     }
   }
 </script>
@@ -33,7 +33,7 @@
 <div class="header">
   <SelectableElement
     element={{
-      type: 'title',
+      type: 'name',
     }}
     {dataFormManager}
   >
@@ -41,29 +41,29 @@
       <input
         class="form-title"
         type="text"
-        placeholder={$_('add_form_title')}
-        value={$headerTitle.text}
-        on:input={onTitleInput}
+        placeholder={$_('name')}
+        value={$name}
+        on:input={onNameInput}
       />
-    {:else if $headerTitle.text.trim()}
+    {:else if $name.trim()}
       <h1 class="form-title">
-        {$headerTitle.text}
+        {$name}
       </h1>
     {/if}
   </SelectableElement>
 
-  <SelectableElement element={{ type: 'subtitle' }} {dataFormManager}>
+  <SelectableElement element={{ type: 'description' }} {dataFormManager}>
     {#if dataFormManager instanceof EditableDataFormManager}
       <textarea
-        placeholder={$_('add_form_subtitle')}
+        placeholder={$_('description')}
         class="form-description"
         type="text"
-        value={$headerSubTitle?.text ?? ''}
-        on:input={onSubtitleInput}
+        value={$description ?? ''}
+        on:input={onDescriptionInput}
       />
-    {:else if $headerSubTitle?.text.trim()}
+    {:else if $description?.trim()}
       <div class="form-description">
-        {$headerSubTitle.text}
+        {$description}
       </div>
     {/if}
   </SelectableElement>

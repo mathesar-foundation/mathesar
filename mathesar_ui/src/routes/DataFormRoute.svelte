@@ -24,14 +24,14 @@
     ? DataFormRouteContext.construct($schemaRouteContext, form)
     : ensureReadable(undefined);
 
-  $: formName = ensureReadable(form?.name);
+  $: formStructure = ensureReadable(form?.structure);
 </script>
 
 <AppendBreadcrumb
   item={{
     type: 'simple',
     href: getDataFormPageUrl(schema.database.id, schema.oid, formId),
-    label: $formName ?? $_('data_forms'),
+    label: $formStructure?.name ?? $_('data_forms'),
     icon: iconForm,
   }}
 />

@@ -26,7 +26,7 @@ export class ReadonlyDataFormManager implements DataFormManager {
 }
 
 interface SelectedStaticElement {
-  type: 'title' | 'subtitle';
+  type: 'name' | 'description';
 }
 
 interface SelectedFieldElement {

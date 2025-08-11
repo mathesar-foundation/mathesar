@@ -17,7 +17,7 @@
   export let rawDataForm: RawDataForm;
   export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;
 
-  $: pageTitle = rawDataForm.header_title.text.trim() || rawDataForm.name;
+  $: pageTitle = rawDataForm.name.trim();
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
         DataFormStructure.factoryFromRawInfo(

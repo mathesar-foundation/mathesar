@@ -75,7 +75,7 @@
   ): SimpleBreadcrumbSelectorEntry {
     return {
       type: 'simple',
-      label: get(dataForm.name),
+      label: get(dataForm.structure).name,
       href: getDataFormPageUrl(database.id, schema.oid, dataForm.id),
       icon: iconForm,
       isActive() {

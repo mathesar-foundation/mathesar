@@ -15,8 +15,6 @@ export type EdfFieldListDetail =
 export type EdfDirectProps =
   | 'name'
   | 'description'
-  | 'headerTitle'
-  | 'headerSubtitle'
   | 'associatedRoleId'
   | 'submitMessage'
   | 'submitRedirectUrl'
