@@ -4,7 +4,7 @@
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
-  import { iconEdit, iconForms, iconShare } from '@mathesar/icons';
+  import { iconEdit, iconForm, iconShare } from '@mathesar/icons';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
@@ -38,7 +38,7 @@
   title={{
     name: $name || $_('untitled'),
     description: $description ?? undefined,
-    icon: iconForms,
+    icon: iconForm,
   }}
 >
   <svelte:fragment>

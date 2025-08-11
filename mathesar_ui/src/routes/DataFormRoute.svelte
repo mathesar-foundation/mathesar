@@ -5,7 +5,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
-  import { iconForms } from '@mathesar/icons';
+  import { iconForm } from '@mathesar/icons';
   import DataFormEditorPage from '@mathesar/pages/data-forms/DataFormEditorPage.svelte';
   import DataFormFilloutPage from '@mathesar/pages/data-forms/DataFormFilloutPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
@@ -33,7 +33,7 @@
     type: 'simple',
     href: getDataFormPageUrl(schema.database.id, schema.oid, formId),
     label: $formName ?? $_('data_forms'),
-    icon: iconForms,
+    icon: iconForm,
   }}
 />
 
