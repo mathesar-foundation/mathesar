@@ -5,6 +5,7 @@
 
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
+  import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import type { Database } from '@mathesar/models/Database';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
@@ -20,6 +21,10 @@
 
   $: $currentSchemaId = schemaId;
   $: schema = $schemas.data.get(schemaId);
+
+  $: if (schema) {
+    SchemaRouteContext.construct(schema);
+  }
 
   function handleUnmount() {
     $currentSchemaId = undefined;
@@ -68,8 +73,12 @@
     />
   </MultiPathRoute>
 
+  <Route path="/forms/:formId/*" firstmatch>
+    <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
+  </Route>
+
   <Route path="/">
-    <SchemaPage {database} {schema} />
+    <SchemaPage />
   </Route>
 {:else}
   <ErrorPage>{$_('schema_not_found')}</ErrorPage>
