@@ -5,7 +5,7 @@
 
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
-  import { iconForms, iconTable } from '@mathesar/icons';
+  import { iconForm, iconTable } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { DataForm } from '@mathesar/models/DataForm';
   import type { Schema } from '@mathesar/models/Schema';
@@ -77,7 +77,7 @@
       type: 'simple',
       label: get(dataForm.name),
       href: getDataFormPageUrl(database.id, schema.oid, dataForm.id),
-      icon: iconForms,
+      icon: iconForm,
       isActive() {
         const entryhref = getDataFormPageUrl(
           database.id,

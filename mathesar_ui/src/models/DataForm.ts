@@ -15,7 +15,7 @@ export class DataForm {
 
   readonly id: number;
 
-  readonly baseTableOId: number;
+  readonly baseTableOid: number;
 
   private _name;
 
@@ -52,7 +52,7 @@ export class DataForm {
   constructor(props: { schema: Schema; rawDataForm: RawDataForm }) {
     this.schema = props.schema;
     this.id = props.rawDataForm.id;
-    this.baseTableOId = props.rawDataForm.base_table_oid;
+    this.baseTableOid = props.rawDataForm.base_table_oid;
     this._name = writable(props.rawDataForm.name);
     this._description = writable(props.rawDataForm.description);
     this._token = writable(props.rawDataForm.token);
@@ -186,7 +186,7 @@ export class DataForm {
         token: $token,
         version: dataFormStructureVersion,
         database_id: this.schema.database.id,
-        base_table_oid: this.baseTableOId,
+        base_table_oid: this.baseTableOid,
         schema_oid: this.schema.oid,
         name: $name,
         description: $description,

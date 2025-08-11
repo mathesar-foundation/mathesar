@@ -253,7 +253,8 @@ def get(*, form_token: str, **kwargs) -> FormInfo:
     Returns:
         Form details for a given form_token.
     """
-    form_model = get_form(form_token)
+    user = kwargs.get(REQUEST_KEY).user
+    form_model = get_form(form_token, user)
     return FormInfo.from_model(form_model)
 
 
@@ -270,7 +271,8 @@ def get_source_info(*, form_token: str, **kwargs) -> FormInfo:
             - Tables associated with the form.
             - Columns of the fields associated with the form.
     """
-    form_source_info = get_form_source_info(form_token)
+    user = kwargs.get(REQUEST_KEY).user
+    form_source_info = get_form_source_info(form_token, user)
     return form_source_info
 
 
@@ -357,4 +359,5 @@ def submit(*, form_token: str, values: dict, **kwargs) -> None:
         form_token: The unique token of the form.
         values: A dict describing the values to insert.
     """
-    return submit_form(form_token, values)
+    user = kwargs.get(REQUEST_KEY).user
+    return submit_form(form_token, values, user)
