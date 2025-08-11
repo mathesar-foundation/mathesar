@@ -74,11 +74,40 @@ def iterate_field_defs(field_defs, parent_field_defn=None):
 
 
 @transaction.atomic
+def create_form_fields(form_model, fields_def_list):
+    field_instances = [
+        FormField(
+            key=field_def["key"],
+            form=form_model,
+            index=field_def["index"],
+            label=field_def.get("label"),
+            help=field_def.get("help"),
+            kind=field_def["kind"],
+            column_attnum=field_def.get("column_attnum"),
+            related_table_oid=field_def.get("related_table_oid"),
+            fk_interaction_rule=field_def.get("fk_interaction_rule"),
+            parent_field=None,
+            styling=field_def.get("styling"),
+            is_required=field_def.get("is_required", False),
+        ) for field_def, _ in iterate_field_defs(fields_def_list)
+    ]
+    created_fields = FormField.objects.bulk_create(field_instances)
+    created_fields_map = {field.key: field for field in created_fields}
+    update_field_instances = []
+    for field_def, parent_field_def in iterate_field_defs(fields_def_list):
+        if parent_field_def:
+            created_field = created_fields_map[field_def["key"]]
+            created_field.parent_field = created_fields_map[parent_field_def["key"]]
+            update_field_instances.append(created_field)
+    if update_field_instances:
+        FormField.objects.bulk_update(update_field_instances, ["parent_field"])
+
+
+@transaction.atomic
 def create_form(form_def, user):
     database = Database.objects.get(id=form_def["database_id"])
     associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
     form_model = Form.objects.create(
-        **({"id": form_def["id"]} if form_def.get("id") else {}),  # we get an id during replace
         token=uuid4(),
         name=form_def["name"],
         description=form_def.get("description"),
@@ -94,32 +123,7 @@ def create_form(form_def, user):
         submit_redirect_url=form_def.get("submit_redirect_url"),
         submit_button_label=form_def.get("submit_button_label")
     )
-    field_instances = [
-        FormField(
-            key=field_def["key"],
-            form=form_model,
-            index=field_def["index"],
-            label=field_def.get("label"),
-            help=field_def.get("help"),
-            kind=field_def["kind"],
-            column_attnum=field_def.get("column_attnum"),
-            related_table_oid=field_def.get("related_table_oid"),
-            fk_interaction_rule=field_def.get("fk_interaction_rule"),
-            parent_field=None,
-            styling=field_def.get("styling"),
-            is_required=field_def.get("is_required", False),
-        ) for field_def, _ in iterate_field_defs(form_def["fields"])
-    ]
-    created_fields = FormField.objects.bulk_create(field_instances)
-    created_fields_map = {field.key: field for field in created_fields}
-    update_field_instances = []
-    for field_def, parent_field_def in iterate_field_defs(form_def["fields"]):
-        if parent_field_def:
-            created_field = created_fields_map[field_def["key"]]
-            created_field.parent_field = created_fields_map[parent_field_def["key"]]
-            update_field_instances.append(created_field)
-    if update_field_instances:
-        FormField.objects.bulk_update(update_field_instances, ["parent_field"])
+    create_form_fields(form_model, fields_def_list=form_def["fields"])
     return form_model
 
 
@@ -205,7 +209,26 @@ def submit_form(form_token, values, user):
 
 
 @transaction.atomic
-def replace_form(form_def_with_id, user):
-    Form.objects.get(id=form_def_with_id["id"]).delete()
-    form_model = create_form(form_def_with_id, user)
-    return form_model
+def patch_form(update_form_def, user):
+    form_model = Form.objects.get(id=update_form_def["id"])
+    associated_role = validate_and_get_associated_role(
+        user,
+        database_id=form_model.database.id,
+        associated_role_id=update_form_def.get("associated_role_id")
+    )
+    fields_def_list = update_form_def["fields"]
+    if fields_def_list or fields_def_list == []:
+        form_model.fields.all().delete()
+        create_form_fields(form_model, fields_def_list)
+    Form.objects.filter(id=update_form_def["id"]).update(
+        name=update_form_def["name"],
+        description=update_form_def.get("description"),
+        version=update_form_def["version"],
+        associated_role=associated_role,
+        header_title=update_form_def["header_title"],
+        header_subtitle=update_form_def.get("header_subtitle"),
+        submit_message=update_form_def.get("submit_message"),
+        submit_redirect_url=update_form_def.get("submit_redirect_url"),
+        submit_button_label=update_form_def.get("submit_button_label")
+    )
+    return Form.objects.get(id=update_form_def["id"])

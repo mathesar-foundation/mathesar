@@ -290,8 +290,8 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        forms.replace,
-        "forms.replace",
+        forms.patch,
+        "forms.patch",
         [user_is_authenticated]
     ),
     (

@@ -146,14 +146,14 @@
       - add
       - delete
       - regenerate_token
-      - replace
+      - patch
       - set_publish_public
       - submit
       - FormInfo
       - FieldInfo
       - AddFormDef
       - AddOrReplaceFieldDef
-      - ReplaceableFormDef
+      - SettableFormDef
 
 ## Records
 
