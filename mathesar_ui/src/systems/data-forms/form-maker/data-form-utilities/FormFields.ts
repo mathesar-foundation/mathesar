@@ -8,8 +8,7 @@ import {
 } from 'svelte/store';
 
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
-import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
-import { WritableSet, getGloballyUniqueId } from '@mathesar-component-library';
+import { WritableSet } from '@mathesar-component-library';
 
 import type {
   DataFormField,
@@ -186,59 +185,6 @@ export class FormFields {
         field: dataFormField,
       });
     }
-  }
-
-  addFromFieldColumn(
-    fieldColumn: FieldColumn,
-    index: number,
-    tableStructureSubstance: TableStructureSubstance,
-  ) {
-    const baseProps = {
-      fieldColumn,
-      key: getGloballyUniqueId(),
-      label: fieldColumn.column.name,
-      help: null,
-      placeholder: null,
-      index,
-      isRequired: false,
-      columnAttnum: fieldColumn.column.id,
-      styling: {},
-    };
-
-    if (fieldColumn.foreignKeyLink) {
-      const referentTableOid = fieldColumn.foreignKeyLink.relatedTableOid;
-      const referenceTableName = tableStructureSubstance.linksInTable.find(
-        (lnk) => lnk.table.oid === referentTableOid,
-      )?.table.name;
-
-      return this.add(
-        (holder, onChange) =>
-          new FkField(
-            holder,
-            {
-              ...baseProps,
-              kind: 'foreign_key',
-              label: referenceTableName ?? baseProps.label,
-              relatedTableOid: referentTableOid,
-              interactionRule: 'must_pick',
-              fieldContainerFactory: (parent, onContainerChange) =>
-                new FormFields(parent, [], onContainerChange),
-            },
-            onChange,
-          ),
-      );
-    }
-    return this.add(
-      (holder, onChange) =>
-        new ScalarField(
-          holder,
-          {
-            ...baseProps,
-            kind: 'scalar_column',
-          },
-          onChange,
-        ),
-    );
   }
 
   delete(dataFormField: DataFormField) {

@@ -9,6 +9,7 @@
     Spinner,
   } from '@mathesar-component-library';
 
+  import DataFormField from '../../data-form-utilities/DataFormField';
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
   import { FieldColumn } from '../../data-form-utilities/FieldColumn';
   import type { FormFields } from '../../data-form-utilities/FormFields';
@@ -32,10 +33,12 @@
     const tableStructureSubstance =
       await tableStructure.getSubstanceOnceResolved();
     if (tableStructureSubstance.resolvedValue) {
-      fieldHolder.addFromFieldColumn(
-        fc,
-        insertionIndex,
-        tableStructureSubstance.resolvedValue,
+      fieldHolder.add(
+        DataFormField.factoryFromFieldColumn(
+          fc,
+          insertionIndex,
+          tableStructureSubstance.resolvedValue,
+        ),
       );
     }
     close();
