@@ -12,7 +12,7 @@
   $: ({ selectedElement } = dataFormManager);
 </script>
 
-<div class="data-form-config">
+<div class="data-form-inspector">
   <div class="nav">
     <FieldNavigation
       field={$selectedElement && 'field' in $selectedElement
@@ -31,7 +31,7 @@
 </div>
 
 <style lang="scss">
-  .data-form-config {
+  .data-form-inspector {
     overflow: hidden;
     height: 100%;
     display: flex;
