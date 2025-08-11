@@ -70,8 +70,11 @@ export interface RawDataForm extends RawEphemeralDataForm {
   publish_public: boolean;
 }
 
-interface ReplaceRawDataFormRequest extends RawEphemeralDataForm {
+interface UpdateRawDataFormDefinitionRequest extends RawDataFormStructure {
   id: number;
+  name: string;
+  description: string | null;
+  version: number;
 }
 
 interface RawDataFormResponse extends RawDataForm {
@@ -113,9 +116,9 @@ export const forms = {
     },
     RawDataFormResponse
   >(),
-  replace: rpcMethodTypeContainer<
+  patch: rpcMethodTypeContainer<
     {
-      new_form: ReplaceRawDataFormRequest;
+      update_form_def: UpdateRawDataFormDefinitionRequest;
     },
     RawDataFormResponse
   >(),
