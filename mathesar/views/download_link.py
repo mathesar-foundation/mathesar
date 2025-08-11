@@ -29,7 +29,6 @@ def _get_link_contents(request, download_link_id):
         DownloadLink,
         id=download_link_id,
         session=request.session.session_key,
-        user=request.user
     )
     content_type = mimetypes.guess_type(link.uri)[0]
     of = fsspec.open(link.uri, "rb")
