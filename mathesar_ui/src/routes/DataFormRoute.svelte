@@ -20,10 +20,9 @@
 
   $: void dataForms.runConservatively();
   $: form = $dataForms.resolvedValue?.get(formId) ?? undefined;
-
-  $: if (form) {
-    DataFormRouteContext.construct($schemaRouteContext, form);
-  }
+  $: dataFormRouteContext = form
+    ? DataFormRouteContext.construct($schemaRouteContext, form)
+    : ensureReadable(undefined);
 
   $: formName = ensureReadable(form?.name);
 </script>
@@ -45,7 +44,7 @@
   <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
 {/if}
 
-{#if form}
+{#if $dataFormRouteContext}
   <Route path="/">
     <DataFormEditorPage />
   </Route>
