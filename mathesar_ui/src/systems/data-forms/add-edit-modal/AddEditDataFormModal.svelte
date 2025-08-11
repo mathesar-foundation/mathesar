@@ -1,6 +1,5 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { router } from 'tinro';
 
   import {
     FieldLayout,
@@ -17,7 +16,6 @@
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import type { DataForm } from '@mathesar/models/DataForm';
   import type { Table } from '@mathesar/models/Table';
-  import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
   import {
@@ -47,15 +45,7 @@
   $: form = makeForm({ name, description, sourceTable });
   $: modalTitle = dataForm ? $_('edit_form_with_name') : $_('create_new_form');
 
-  $: sourceTableStructure = $sourceTable
-    ? new TableStructure($sourceTable)
-    : undefined;
-  $: isSourceTableStructureLoading = sourceTableStructure
-    ? sourceTableStructure.isLoading
-    : ensureReadable(false);
-
   async function save(values: FilledFormValues<typeof form>) {
-    let newDataForm: DataForm | undefined;
     if (dataForm) {
       await dataForm.updateNameAndDesc(values.name, values.description);
     } else {
@@ -66,7 +56,7 @@
         const rawEpf = tableStructureSubstanceToRawEphemeralForm(
           tableStructureSubstance.resolvedValue,
         );
-        newDataForm = await $schemaRouteContext.insertDataForm({
+        await $schemaRouteContext.insertDataForm({
           ...rawEpf,
           name: values.name,
           description: values.description,
@@ -74,15 +64,6 @@
       }
     }
     controller.close();
-    if (newDataForm) {
-      router.goto(
-        getDataFormPageUrl(
-          newDataForm.schema.database.id,
-          newDataForm.schema.oid,
-          newDataForm.id,
-        ),
-      );
-    }
   }
 </script>
 
@@ -100,18 +81,18 @@
       {/if}
     </RichText>
   </span>
-  <Field field={name} label={$_('name')} layout="stacked" />
-  <Field field={description} label={$_('description')} layout="stacked" />
   <FieldLayout>
     <LabeledInput layout="stacked">
-      <span slot="label">{$_('base_table_for_form')}</span>
+      <span slot="label">{$_('base_table')}</span>
       <SelectTableWithinCurrentSchema
-        disabled={$isSourceTableStructureLoading || !!dataForm}
+        disabled={!!dataForm}
         autoSelect="none"
         bind:value={$sourceTable}
       />
     </LabeledInput>
   </FieldLayout>
+  <Field field={name} label={$_('name')} layout="stacked" />
+  <Field field={description} label={$_('description')} layout="stacked" />
   <div slot="footer">
     <FormSubmit
       {form}
