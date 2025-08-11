@@ -3,7 +3,10 @@ import type { ActionReturn } from 'svelte/action';
 
 async function moveNodeToFooter(node: Element): Promise<void> {
   await tick();
-  node.closest('.window')?.querySelector(':scope > .footer')?.appendChild(node);
+  node
+    .closest('[data-window-area="window"]')
+    ?.querySelector(':scope > [data-window-area="footer"]')
+    ?.appendChild(node);
 }
 
 export function portalToWindowFooter(node: Element): ActionReturn {

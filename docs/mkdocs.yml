@@ -6,15 +6,20 @@ edit_uri: edit/develop/docs/docs/
 
 nav:
   - Introduction: index.md
+  - Install Mathesar:
+      - Using Docker Compose: administration/install-via-docker-compose.md
+      - On Linux · macOS · WSL: administration/install-from-scratch.md
+      - DigitalOcean: administration/install-digitalocean.md
+      - Railway: administration/install-railway.md
   - Administrator Guide:
-      - Install using Docker Compose: administration/install-via-docker-compose.md
-      - Install on Linux · macOS · WSL: administration/install-from-scratch.md
-      - Environment variables: administration/environment-variables.md
-      - Upgrade Mathesar: administration/upgrade.md
-      - Uninstall Mathesar: administration/uninstall.md
+      - Configuration:
+        - Environment variables: administration/environment-variables.md
+        - Single sign-on (SSO): administration/single-sign-on.md
+      - Maintenance:
+        - Upgrade Mathesar: administration/upgrade.md
+        - Uninstall Mathesar: administration/uninstall.md
+        - Postgres & Python versions: administration/version-support.md
       - Debugging Mathesar: administration/debug.md
-      - Postgres & Python versions: administration/version-support.md
-
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
@@ -41,8 +46,9 @@ nav:
       - Overview: api/index.md
       - Methods: api/methods.md
   - Releases:
-      - '0.3.0': releases/0.3.0.md
+      - '0.4.0': releases/0.4.0.md
       - Previous releases:
+          - '0.3.0': releases/0.3.0.md
           - '0.2.5': releases/0.2.5.md
           - '0.2.4': releases/0.2.4.md
           - '0.2.3': releases/0.2.3.md
@@ -110,6 +116,7 @@ theme:
   logo: assets/images/logo.svg
   favicon: assets/images/favicon.ico
   features:
+    - content.tabs.link
     - content.code.copy
     - navigation.sections
     - navigation.expand
@@ -157,7 +164,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.3.0
+  mathesar_version: 0.4.0
   version:
     provider: mike
     alias: true

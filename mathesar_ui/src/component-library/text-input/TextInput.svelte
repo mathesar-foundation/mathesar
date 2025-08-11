@@ -13,7 +13,7 @@
    * Value of the input. Use bind tag for two-way binding.
    * Refer Svelte docs for more info on binding form input values.
    */
-  export let value: $$Props['value'] = '';
+  export let value: $$Props['value'] = undefined;
 
   // Additional classes
   let classes: $$Props['class'] = '';

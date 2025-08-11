@@ -122,7 +122,8 @@ try:
                 )
 except Exception as e:
     # We swallow any exceptions when SSO is misconfigured in sso.yml so that the django server doesn't fail to start.
-    traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
+    if OIDC_CONFIG_DICT not in [None, {}]:
+        traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
 
 
 SOCIALACCOUNT_PROVIDERS = {

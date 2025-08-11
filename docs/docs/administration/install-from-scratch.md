@@ -201,6 +201,7 @@ Turn your local Mathesar installation into a public-facing production service.
 !!! note "Optional - Server hosting only"
     - Follow this section if you want Mathesar to run continuously on a server and be reachable by other users (with or without a public domain).
     - For personal use, evaluation, or on‑prem workstations, you can simply start Mathesar on demand with `mathesar run` and skip ahead to setting up your user account.
+    - See our [guide to setting up single sign-on (SSO)](./single-sign-on.md) if that's of interest to you.
 
 !!! note "Linux-only"
     - The steps below **only target Linux servers** that use **systemd**.
@@ -237,7 +238,7 @@ Before proceeding, stop Mathesar if it's currently running.
     Description=mathesar daemon
     After=network.target network-online.target
     Requires=network-online.target
-    
+
     [Service]
     Type=notify
     User=mathesar
@@ -248,7 +249,7 @@ Before proceeding, stop Mathesar if it's currently running.
     EnvironmentFile=xMATHESAR_INSTALL_DIRx/.env
     Restart=on-failure
     RestartSec=5s
-    
+
     [Install]
     WantedBy=multi-user.target
     EOF
@@ -263,7 +264,7 @@ Before proceeding, stop Mathesar if it's currently running.
     ```
 
 1. Check the logs to verify if Mathesar is running without any errors.
-    
+
     ```
     journalctl --unit=mathesar.service
     ```
@@ -361,7 +362,7 @@ If you prefer nginx or another proxy, please refer to their documentation.
     ```
 
 1. Check the logs to verify if Caddy is running without any errors
-    
+
     ```
     journalctl --unit=caddy.service
     ```
@@ -413,7 +414,7 @@ If you're unable to resolve the problem, feel free to reach out through our [com
     - Mathesar is not running or has crashed.
 
     _Resolution_:
-    
+
     - Ensure that the Caddy service user has read permissions on the `static` folder and its contents within your installation directory.
     - If Mathesar has crashed, check the logs to investigate the error.
 
@@ -434,7 +435,7 @@ If you're unable to resolve the problem, feel free to reach out through our [com
     - Using an IP address instead of a domain name in Caddyfile.
 
     _Resolution_:
-    
+
     - Serve Mathesar over HTTPS using Caddy.
     - Make sure that you mention a valid domain name in the Caddyfile, and not an IP address.
     - Ensure that your A/AAAA records are configured correctly so that your domain name resolves to your server's IP address.
