@@ -31,6 +31,19 @@ services:
       - dev_postgres_data:/var/lib/postgresql/data
       - dev_postgres_socket:/var/run/postgresql
       - ./db/sql:/sql/
+  # An S3-compatible object store for local development. Don't use in prod.
+  obj-store:
+    container_name: mathesar-dev-store
+    image: quay.io/minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID}
+      - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY}
+    command: server --console-address ":9001" /data
+    volumes:
+      - dev_obj_store_data:/data
   # A Django development webserver + Svelte development server used when developing Mathesar.
   #  The code changes are hot reloaded and debug flags are enabled to aid developers working on Mathesar.
   #  It is not recommended to use this service in production environment.
@@ -64,6 +77,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_ENDPOINT_URL_S3=${AWS_ENDPOINT_URL_S3}
     volumes:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
@@ -102,3 +116,4 @@ volumes:
   ui_node_modules:
   dev_postgres_data:
   dev_postgres_socket:
+  dev_obj_store_data:
