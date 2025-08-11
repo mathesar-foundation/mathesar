@@ -4,7 +4,11 @@
   import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import {
+    Button,
+    Icon,
     LabeledInput,
     TextArea,
     TextInput,
@@ -18,14 +22,24 @@
 
   export let dataFormManager: EditableDataFormManager;
 
-  $: ({ dataFormStructure } = dataFormManager);
+  $: ({ dataFormStructure, deleteDataForm } = dataFormManager);
   $: ({ name, description, baseTableOid } = dataFormStructure);
   $: tableStructure = dataFormManager.getTableStructure(baseTableOid);
   $: ({ table } = tableStructure);
+
+  function handleDelete() {
+    void confirmDelete({
+      identifierType: $_('form'),
+      identifierName: $name,
+      onProceed: async () => {
+        await deleteDataForm();
+      },
+    });
+  }
 </script>
 
 <InspectorTabContent>
-  <InspectorSection title={$_('header')}>
+  <InspectorSection title={$_('properties')}>
     <LabeledInput layout="stacked" label={$_('name')}>
       <TextInput
         value={$name}
@@ -39,10 +53,8 @@
           dataFormStructure.setDescription(getStringValueFromEvent(e))}
       />
     </LabeledInput>
-  </InspectorSection>
-  <InspectorSection title={$_('source')}>
     <div>
-      <div>{$_('source_table')}</div>
+      <div>{$_('base_table')}</div>
       {#if $table}
         <TableName table={$table} />
       {/if}
@@ -53,5 +65,11 @@
   </InspectorSection>
   <InspectorSection title={$_('submission_settings')}>
     <SubmissionSettings {dataFormManager} />
+  </InspectorSection>
+  <InspectorSection title={$_('actions')}>
+    <Button appearance="outline-danger" on:click={handleDelete}>
+      <Icon {...iconDeleteMajor} />
+      <span>{$_('delete_form')}</span>
+    </Button>
   </InspectorSection>
 </InspectorTabContent>

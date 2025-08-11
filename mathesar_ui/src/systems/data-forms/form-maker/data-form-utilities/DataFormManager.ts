@@ -37,7 +37,7 @@ interface SelectedFieldElement {
 export type SelectedElement = SelectedStaticElement | SelectedFieldElement;
 
 export class EditableDataFormManager implements DataFormManager {
-  dataFormStructure;
+  readonly dataFormStructure;
 
   private _selectedElement: Writable<SelectedElement | undefined> = writable();
 
@@ -55,12 +55,15 @@ export class EditableDataFormManager implements DataFormManager {
     return this._hasChanges;
   }
 
-  constructor(
-    dfsFactory: DataFormStructureFactory,
-    schema: Schema,
-    tableStructureCache: CacheManager<Table['oid'], TableStructure>,
-  ) {
-    this.dataFormStructure = dfsFactory((e) => {
+  readonly deleteDataForm;
+
+  constructor(props: {
+    createDataFormStructure: DataFormStructureFactory;
+    schema: Schema;
+    tableStructureCache: CacheManager<Table['oid'], TableStructure>;
+    deleteDataForm: () => Promise<unknown>;
+  }) {
+    this.dataFormStructure = props.createDataFormStructure((e) => {
       if (e.prop === 'fields' || e.prop === 'nestedFields') {
         if (e.detail.type === 'add') {
           this.selectElement({
@@ -79,8 +82,9 @@ export class EditableDataFormManager implements DataFormManager {
       }
       this._hasChanges.set(true);
     });
-    this.schema = schema;
-    this.tableStructureCache = tableStructureCache;
+    this.schema = props.schema;
+    this.tableStructureCache = props.tableStructureCache;
+    this.deleteDataForm = props.deleteDataForm;
   }
 
   selectElement(element: SelectedElement) {

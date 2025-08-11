@@ -1,10 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { router } from 'tinro';
 
   import Errors from '@mathesar/components/errors/Errors.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import {
     DataFormCanvas,
@@ -17,7 +19,7 @@
   import ActionsPane from './ActionsPane.svelte';
 
   const dataFormRouteContext = DataFormRouteContext.get();
-  $: ({ dataForm, formSourceInfo } = $dataFormRouteContext);
+  $: ({ dataForm, formSourceInfo, schemaRouteContext } = $dataFormRouteContext);
 
   const tableStructureCache = new CacheManager<
     TableStructure['oid'],
@@ -26,14 +28,19 @@
 
   $: rawDataFormStore = dataForm.toRawDataFormStore();
   $: dataFormManager = $formSourceInfo.resolvedValue
-    ? new EditableDataFormManager(
-        DataFormStructure.factoryFromRawInfo(
+    ? new EditableDataFormManager({
+        createDataFormStructure: DataFormStructure.factoryFromRawInfo(
           $rawDataFormStore,
           new FormSource($formSourceInfo.resolvedValue),
         ),
-        dataForm.schema,
+        schema: dataForm.schema,
         tableStructureCache,
-      )
+        deleteDataForm: async () => {
+          const { schema } = dataForm;
+          await schemaRouteContext.removeDataForm(dataForm);
+          router.goto(getSchemaPageUrl(schema.database.id, schema.oid));
+        },
+      })
     : undefined;
 </script>
 
