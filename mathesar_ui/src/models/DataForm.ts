@@ -71,14 +71,15 @@ export class DataForm {
   }
 
   updateNameAndDesc(name: string, description: string | null) {
-    const dataFormDef = get(this.toRawDataFormStore());
+    const structure = get(this.structure);
     const promise = api.forms
-      .replace({
-        new_form: {
-          ...dataFormDef,
+      .patch({
+        update_form_def: {
+          ...structure,
           id: this.id,
           name,
           description,
+          version: dataFormStructureVersion,
         },
       })
       .run();
@@ -100,14 +101,14 @@ export class DataForm {
   updateStructure(
     dataFormStructure: RawDataFormStructure,
   ): CancellablePromise<DataForm> {
-    const dataFormDef = get(this.toRawDataFormStore());
-
     const promise = api.forms
-      .replace({
-        new_form: {
-          ...dataFormDef,
+      .patch({
+        update_form_def: {
           ...dataFormStructure,
           id: this.id,
+          name: get(this.name),
+          description: get(this.description),
+          version: dataFormStructureVersion,
         },
       })
       .run();
