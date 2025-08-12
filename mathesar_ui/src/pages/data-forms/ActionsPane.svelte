@@ -4,17 +4,14 @@
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
-  import { iconEdit, iconForm, iconShare } from '@mathesar/icons';
+  import { iconForm, iconShare } from '@mathesar/icons';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-  import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
-  import { AddEditDataFormModal } from '@mathesar/systems/data-forms/add-edit-modal';
   import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
-  import { Button, Dropdown, Icon } from '@mathesar-component-library';
+  import { Dropdown, Icon } from '@mathesar-component-library';
 
   import ShareForm from './ShareForm.svelte';
 
-  const dataFormAddEditModal = modal.spawnModalController();
   const dataFormRouteContext = DataFormRouteContext.get();
   $: ({ dataForm } = $dataFormRouteContext);
 
@@ -41,11 +38,6 @@
     icon: iconForm,
   }}
 >
-  <svelte:fragment>
-    <Button appearance="plain" on:click={() => dataFormAddEditModal.open()}>
-      <Icon {...iconEdit} />
-    </Button>
-  </svelte:fragment>
   <svelte:fragment slot="actions-right">
     <SaveButton onSave={saveForm} canSave={$hasChanges} />
     <Dropdown
@@ -63,5 +55,3 @@
     </Dropdown>
   </svelte:fragment>
 </EntityPageHeader>
-
-<AddEditDataFormModal {dataForm} controller={dataFormAddEditModal} />
