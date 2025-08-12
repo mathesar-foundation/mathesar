@@ -75,7 +75,7 @@
     undefined,
     ...(columns.get(columnIdentifier)?.preprocFunctions.map((fn) => fn.id) ??
       []),
-  ] ?? [undefined];
+  ];
 
   async function update() {
     await tick();
@@ -97,10 +97,10 @@
     return (preprocId: string) =>
       preprocId === undefined
         ? $_('value')
-        : _columns
+        : (_columns
             .get(_columnIdentifier)
             ?.preprocFunctions.find((entry) => entry.id === preprocId)?.name ??
-          preprocId;
+          preprocId);
   }
   $: getPreprocLabel = functionToGetPreprocLabel(columns, columnIdentifier);
 </script>
