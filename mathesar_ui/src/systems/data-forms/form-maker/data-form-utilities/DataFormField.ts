@@ -47,7 +47,7 @@ function factoryFromFieldColumn(
           label: referenceTableName ?? baseProps.label,
           relatedTableOid: referentTableOid,
           interactionRule: 'must_pick',
-          fieldContainerFactory: (parent, onContainerChange) =>
+          createFields: (parent, onContainerChange) =>
             new FormFields(parent, [], onContainerChange),
         },
         onChange,

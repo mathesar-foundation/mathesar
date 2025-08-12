@@ -23,7 +23,7 @@ interface DataFormStructureProps {
   submitMessage: RawDataForm['submit_message'];
   submitRedirectUrl: RawDataForm['submit_redirect_url'];
   submitButtonLabel: RawDataForm['submit_button_label'];
-  fieldContainerFactory: DataFormFieldContainerFactory;
+  createFields: DataFormFieldContainerFactory;
 }
 
 export type DataFormOnChange = (
@@ -97,7 +97,7 @@ export class DataFormStructure {
     this._submitRedirectUrl = writable(props.submitRedirectUrl);
     this._submitButtonLabel = writable(props.submitButtonLabel);
     this.onChange = onChange;
-    this.fields = props.fieldContainerFactory(this, (e) => {
+    this.fields = props.createFields(this, (e) => {
       if ('target' in e) {
         this.onChange?.(e);
         return;
@@ -257,7 +257,7 @@ export class DataFormStructure {
           submitMessage: props.submit_message,
           submitRedirectUrl: props.submit_redirect_url,
           submitButtonLabel: props.submit_button_label,
-          fieldContainerFactory: FormFields.factoryFromRawInfo(
+          createFields: FormFields.factoryFromRawInfo(
             {
               parentTableOid: props.base_table_oid,
               rawDataFormFields: props.fields,

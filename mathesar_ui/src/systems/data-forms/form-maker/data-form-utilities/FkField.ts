@@ -22,7 +22,7 @@ interface FkFieldProps extends AbstractColumnBasedFieldProps {
   kind: RawForeignKeyDataFormField['kind'];
   interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
   relatedTableOid: number;
-  fieldContainerFactory: DataFormFieldContainerFactory;
+  createFields: DataFormFieldContainerFactory;
 }
 
 export type FkFieldOnChange = (
@@ -56,7 +56,7 @@ export class FkField extends AbstractColumnBasedField {
     super(holder, props);
     this.onChange = onChange;
     this.relatedTableOid = props.relatedTableOid;
-    this.nestedFields = props.fieldContainerFactory(this, (e) => {
+    this.nestedFields = props.createFields(this, (e) => {
       if ('target' in e) {
         this.onChange(e);
         return;
@@ -128,7 +128,7 @@ export class FkField extends AbstractColumnBasedField {
           ...baseProps,
           kind: rawField.kind,
           relatedTableOid: rawField.related_table_oid,
-          fieldContainerFactory: FormFields.factoryFromRawInfo(
+          createFields: FormFields.factoryFromRawInfo(
             {
               parentTableOid: rawField.related_table_oid,
               rawDataFormFields: rawField.child_fields ?? [],
