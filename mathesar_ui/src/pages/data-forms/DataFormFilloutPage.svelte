@@ -13,14 +13,17 @@
   } from '@mathesar/systems/data-forms/form-maker';
 
   const dataFormRouteContext = DataFormRouteContext.get();
-  $: ({ dataForm, formSourceInfo } = $dataFormRouteContext);
+  $: ({ dataForm, rawDataFormWithSource } = $dataFormRouteContext);
 
   $: rawDataFormStore = dataForm.toRawDataFormStore();
-  $: dataFormManager = $formSourceInfo.resolvedValue
+  $: void rawDataFormWithSource.run($rawDataFormStore);
+  $: rawDataFormWithSourceValue = $rawDataFormWithSource.resolvedValue;
+
+  $: dataFormManager = rawDataFormWithSourceValue
     ? new ReadonlyDataFormManager(
         DataFormStructure.factoryFromRawInfo(
-          $rawDataFormStore,
-          new FormSource($formSourceInfo.resolvedValue),
+          rawDataFormWithSourceValue.rawDataForm,
+          new FormSource(rawDataFormWithSourceValue.rawFormSource),
         ),
       )
     : undefined;
@@ -35,8 +38,8 @@
     <div class="data-form-filler">
       <DataFormCanvas {dataFormManager} />
     </div>
-  {:else if $formSourceInfo.error}
-    <Errors errors={[$formSourceInfo.error]} />
+  {:else if $rawDataFormWithSource.error}
+    <Errors errors={[$rawDataFormWithSource.error]} />
   {/if}
 </LayoutWithHeader>
 

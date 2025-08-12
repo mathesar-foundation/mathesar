@@ -19,7 +19,8 @@
   import ActionsPane from './ActionsPane.svelte';
 
   const dataFormRouteContext = DataFormRouteContext.get();
-  $: ({ dataForm, formSourceInfo, schemaRouteContext } = $dataFormRouteContext);
+  $: ({ dataForm, rawDataFormWithSource, schemaRouteContext } =
+    $dataFormRouteContext);
 
   const tableStructureCache = new CacheManager<
     TableStructure['oid'],
@@ -27,11 +28,14 @@
   >(10);
 
   $: rawDataFormStore = dataForm.toRawDataFormStore();
-  $: dataFormManager = $formSourceInfo.resolvedValue
+  $: void rawDataFormWithSource.run($rawDataFormStore);
+  $: rawDataFormWithSourceValue = $rawDataFormWithSource.resolvedValue;
+
+  $: dataFormManager = rawDataFormWithSourceValue
     ? new EditableDataFormManager({
         buildDataFormStructure: DataFormStructure.factoryFromRawInfo(
-          $rawDataFormStore,
-          new FormSource($formSourceInfo.resolvedValue),
+          rawDataFormWithSourceValue.rawDataForm,
+          new FormSource(rawDataFormWithSourceValue.rawFormSource),
         ),
         schema: dataForm.schema,
         tableStructureCache,
@@ -56,8 +60,8 @@
       </div>
       <DataFormCanvas {dataFormManager} />
     </div>
-  {:else if $formSourceInfo.error}
-    <Errors errors={[$formSourceInfo.error]} />
+  {:else if $rawDataFormWithSource.error}
+    <Errors errors={[$rawDataFormWithSource.error]} />
   {/if}
 </LayoutWithHeader>
 

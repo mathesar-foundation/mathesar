@@ -25,7 +25,7 @@
 
   async function saveForm() {
     try {
-      await $dataFormRouteContext.updateStructure(
+      await dataForm.updateStructure(
         dataFormManager.dataFormStructure.toRawStructure(),
       );
     } catch (err) {

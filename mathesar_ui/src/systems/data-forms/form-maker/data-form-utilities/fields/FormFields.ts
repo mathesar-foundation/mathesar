@@ -60,12 +60,12 @@ export class FormFields {
 
   constructor(
     parent: DataFormStructure | ParentDataFormField,
-    fieldsFactories: Iterable<DataFormFieldFactory>,
+    fieldFactories: Iterable<DataFormFieldFactory>,
     changeEventHandler: DataFormStructureChangeEventHandler,
   ) {
     this.parent = parent;
     this.changeEventHandler = changeEventHandler;
-    const ephemeralFormFields = [...fieldsFactories].map((buildField) =>
+    const ephemeralFormFields = [...fieldFactories].map((buildField) =>
       buildField(this, this.changeEventHandler),
     );
     this.fieldSet = new WritableSet(ephemeralFormFields);
@@ -181,8 +181,8 @@ export class FormFields {
     });
   }
 
-  add(factory: DataFormFieldFactory) {
-    const dataFormField = factory(this, this.changeEventHandler);
+  add(createDataFormField: DataFormFieldFactory) {
+    const dataFormField = createDataFormField(this, this.changeEventHandler);
 
     if (!get(this.hasColumn(dataFormField.fieldColumn))) {
       const fieldIndex = get(dataFormField.index);
