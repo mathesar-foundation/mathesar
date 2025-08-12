@@ -1,18 +1,18 @@
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
+import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
 import type { FieldColumn } from './FieldColumn';
 import { FkField } from './FkField';
 import { FormFields } from './FormFields';
 import { ScalarField } from './ScalarField';
-import type { EdfNestedFieldChanges } from './types';
 
 export type DataFormField = ScalarField | FkField;
 export type ParentDataFormField = FkField; // May contain more types in the future eg., ReverseFkField
 
 export type DataFormFieldFactory = (
-  holder: FormFields,
-  onChange: (e: EdfNestedFieldChanges) => unknown,
+  container: FormFields,
+  changeEventHandler: DataFormStructureChangeEventHandler,
 ) => DataFormField;
 
 function factoryFromFieldColumn(
@@ -38,7 +38,7 @@ function factoryFromFieldColumn(
       (lnk) => lnk.table.oid === referentTableOid,
     )?.table.name;
 
-    return (holder, onChange) =>
+    return (holder, changeEventHandler) =>
       new FkField(
         holder,
         {
@@ -50,17 +50,17 @@ function factoryFromFieldColumn(
           createFields: (parent, onContainerChange) =>
             new FormFields(parent, [], onContainerChange),
         },
-        onChange,
+        changeEventHandler,
       );
   }
-  return (holder, onChange) =>
+  return (holder, changeEventHandler) =>
     new ScalarField(
       holder,
       {
         ...baseProps,
         kind: 'scalar_column',
       },
-      onChange,
+      changeEventHandler,
     );
 }
 

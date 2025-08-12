@@ -13,9 +13,9 @@
   export let dataFormManager: EditableDataFormManager;
   export let field: DataFormField | undefined = undefined;
 
-  $: parent = field?.holder.parent;
+  $: parent = field?.container.parent;
   $: parentField = parent instanceof DataFormStructure ? undefined : parent;
-  $: parentOfParentField = parentField?.holder.parent;
+  $: parentOfParentField = parentField?.container.parent;
   $: parentFieldOfParentField =
     parentOfParentField instanceof DataFormStructure
       ? undefined

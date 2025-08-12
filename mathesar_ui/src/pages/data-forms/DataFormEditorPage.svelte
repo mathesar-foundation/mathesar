@@ -29,7 +29,7 @@
   $: rawDataFormStore = dataForm.toRawDataFormStore();
   $: dataFormManager = $formSourceInfo.resolvedValue
     ? new EditableDataFormManager({
-        createDataFormStructure: DataFormStructure.factoryFromRawInfo(
+        buildDataFormStructure: DataFormStructure.factoryFromRawInfo(
           $rawDataFormStore,
           new FormSource($formSourceInfo.resolvedValue),
         ),

@@ -35,7 +35,7 @@
     {#if dataFormManager instanceof EditableDataFormManager}
       <AddField
         {dataFormManager}
-        fieldHolder={dataFormField.holder}
+        fieldHolder={dataFormField.container}
         insertionIndex={$index + 1}
       />
     {/if}

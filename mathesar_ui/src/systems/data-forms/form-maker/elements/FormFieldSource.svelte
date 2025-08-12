@@ -8,7 +8,7 @@
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: DataFormField;
 
-  $: tableOidOfField = dataFormField.holder.getTableOid();
+  $: tableOidOfField = dataFormField.container.getTableOid();
   $: tableStructure = dataFormManager.getTableStructure(tableOidOfField);
   $: ({ table } = tableStructure);
 </script>

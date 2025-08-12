@@ -16,6 +16,7 @@ import type {
   ParentDataFormField,
 } from './DataFormField';
 import type { DataFormStructure } from './DataFormStructure';
+import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
 import type { FieldColumn } from './FieldColumn';
 import type {
   DataFormFieldFkInputValueHolder,
@@ -25,16 +26,27 @@ import type {
 import { FkField } from './FkField';
 import type { FormSource } from './FormSource';
 import { ScalarField } from './ScalarField';
-import type { EdfFieldListDetail, EdfNestedFieldChanges } from './types';
-
-export type DataFormFieldsOnChange = (
-  e: EdfFieldListDetail | EdfNestedFieldChanges,
-) => unknown;
 
 export type DataFormFieldContainerFactory = (
   parent: DataFormStructure | ParentDataFormField,
-  onChange: DataFormFieldsOnChange,
+  changeEventHandler: DataFormStructureChangeEventHandler,
 ) => FormFields;
+
+export type FormFieldContainerChangeEvent =
+  | {
+      type: 'fields/add';
+      target: DataFormStructure | ParentDataFormField;
+      field: DataFormField;
+    }
+  | {
+      type: 'fields/delete';
+      target: DataFormStructure | ParentDataFormField;
+      field: DataFormField;
+    }
+  | {
+      type: 'fields/reconstruct';
+      target: DataFormStructure | ParentDataFormField;
+    };
 
 export class FormFields {
   readonly parent;
@@ -43,7 +55,7 @@ export class FormFields {
 
   private sortedFields: Readable<DataFormField[]>;
 
-  private onChange: DataFormFieldsOnChange;
+  private changeEventHandler: DataFormStructureChangeEventHandler;
 
   readonly fieldValueStores: Readable<
     (DataFormFieldInputValueHolder | DataFormFieldFkInputValueHolder)[]
@@ -52,12 +64,12 @@ export class FormFields {
   constructor(
     parent: DataFormStructure | ParentDataFormField,
     fieldsFactories: Iterable<DataFormFieldFactory>,
-    onChange: DataFormFieldsOnChange,
+    changeEventHandler: DataFormStructureChangeEventHandler,
   ) {
     this.parent = parent;
-    this.onChange = onChange;
-    const ephemeralFormFields = [...fieldsFactories].map((fieldFactory) =>
-      fieldFactory(this, (detail: EdfNestedFieldChanges) => onChange(detail)),
+    this.changeEventHandler = changeEventHandler;
+    const ephemeralFormFields = [...fieldsFactories].map((buildField) =>
+      buildField(this, this.changeEventHandler),
     );
     this.fieldSet = new WritableSet(ephemeralFormFields);
     this.sortedFields = derived<WritableSet<DataFormField>, DataFormField[]>(
@@ -162,15 +174,18 @@ export class FormFields {
 
   reconstruct(fieldFactories: Iterable<DataFormFieldFactory>) {
     this.fieldSet.reconstruct(
-      [...fieldFactories].map((factory) => factory(this, this.onChange)),
+      [...fieldFactories].map((factory) =>
+        factory(this, this.changeEventHandler),
+      ),
     );
-    this.onChange({
-      type: 'reconstruct',
+    this.changeEventHandler.trigger({
+      type: 'fields/reconstruct',
+      target: this.parent,
     });
   }
 
   add(factory: DataFormFieldFactory) {
-    const dataFormField = factory(this, (e) => this.onChange(e));
+    const dataFormField = factory(this, this.changeEventHandler);
 
     if (!get(this.hasColumn(dataFormField.fieldColumn))) {
       const fieldIndex = get(dataFormField.index);
@@ -180,8 +195,9 @@ export class FormFields {
         }
       }
       this.fieldSet.add(dataFormField);
-      this.onChange({
-        type: 'add',
+      this.changeEventHandler.trigger({
+        type: 'fields/add',
+        target: this.parent,
         field: dataFormField,
       });
     }
@@ -195,8 +211,9 @@ export class FormFields {
       }
     }
     this.fieldSet.delete(dataFormField);
-    this.onChange({
-      type: 'delete',
+    this.changeEventHandler.trigger({
+      type: 'fields/delete',
+      target: this.parent,
       field: dataFormField,
     });
   }
@@ -210,7 +227,7 @@ export class FormFields {
   ): DataFormFieldContainerFactory {
     return (
       parent: DataFormStructure | ParentDataFormField,
-      onChange: DataFormFieldsOnChange,
+      changeEventHandler: DataFormStructureChangeEventHandler,
     ) =>
       new FormFields(
         parent,
@@ -232,7 +249,7 @@ export class FormFields {
             formSource,
           );
         }),
-        onChange,
+        changeEventHandler,
       );
   }
 }

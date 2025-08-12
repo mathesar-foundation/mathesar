@@ -12,6 +12,7 @@ import type {
   DataFormStructure,
   DataFormStructureFactory,
 } from './DataFormStructure';
+import { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
 
 export interface DataFormManager {
   dataFormStructure: DataFormStructure;
@@ -25,23 +26,26 @@ export class ReadonlyDataFormManager implements DataFormManager {
   }
 }
 
-interface SelectedStaticElement {
+interface SelectableStaticElement {
   type: 'name' | 'description';
 }
 
-interface SelectedFieldElement {
+interface SelectableFieldElement {
   type: 'field';
   field: DataFormField;
 }
 
-export type SelectedElement = SelectedStaticElement | SelectedFieldElement;
+export type SelectableElement =
+  | SelectableStaticElement
+  | SelectableFieldElement;
 
 export class EditableDataFormManager implements DataFormManager {
   readonly dataFormStructure;
 
-  private _selectedElement: Writable<SelectedElement | undefined> = writable();
+  private _selectedElement: Writable<SelectableElement | undefined> =
+    writable();
 
-  get selectedElement(): Readable<SelectedElement | undefined> {
+  get selectedElement(): Readable<SelectableElement | undefined> {
     return this._selectedElement;
   }
 
@@ -58,37 +62,59 @@ export class EditableDataFormManager implements DataFormManager {
   readonly deleteDataForm;
 
   constructor(props: {
-    createDataFormStructure: DataFormStructureFactory;
+    buildDataFormStructure: DataFormStructureFactory;
     schema: Schema;
     tableStructureCache: CacheManager<Table['oid'], TableStructure>;
     deleteDataForm: () => Promise<unknown>;
   }) {
-    this.dataFormStructure = props.createDataFormStructure((e) => {
-      if (e.prop === 'fields' || e.prop === 'nestedFields') {
-        if (e.detail.type === 'add') {
-          this.selectElement({
-            type: 'field',
-            field: e.detail.field,
-          });
-        } else if (e.detail.type === 'delete') {
-          const currentSelectedElement = get(this.selectedElement);
-          if (
-            currentSelectedElement?.type === 'field' &&
-            currentSelectedElement.field === e.detail.field
-          ) {
-            this.resetSelectedElement();
+    this.dataFormStructure = props.buildDataFormStructure({
+      changeEventHandler: new DataFormStructureChangeEventHandler({
+        fieldAdded: (field) => this.selectField(field),
+        fieldDeleted: (field) => {
+          if (this.isFieldSelected(field)) {
+            this.selectParentOfSelectedElement();
           }
-        }
-      }
-      this._hasChanges.set(true);
+        },
+        allChanges: () => this._hasChanges.set(true),
+      }),
     });
     this.schema = props.schema;
     this.tableStructureCache = props.tableStructureCache;
     this.deleteDataForm = props.deleteDataForm;
   }
 
-  selectElement(element: SelectedElement) {
+  selectElement(element: SelectableElement) {
     this._selectedElement.set(element);
+  }
+
+  private selectField(field: DataFormField) {
+    this.selectElement({
+      type: 'field',
+      field,
+    });
+  }
+
+  private isFieldSelected(field: DataFormField) {
+    const currentSelectedElement = get(this.selectedElement);
+    return (
+      currentSelectedElement?.type === 'field' &&
+      currentSelectedElement.field === field
+    );
+  }
+
+  private selectParentOfSelectedElement() {
+    const currentSelectedElement = get(this.selectedElement);
+    if (currentSelectedElement?.type === 'field') {
+      const { parent } = currentSelectedElement.field.container;
+      if ('kind' in parent) {
+        this.selectElement({
+          type: 'field',
+          field: parent,
+        });
+        return;
+      }
+    }
+    this.resetSelectedElement();
   }
 
   resetSelectedElement() {

@@ -3,7 +3,6 @@ import { type Readable, type Updater, get, writable } from 'svelte/store';
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 
 import type { FormFields } from './FormFields';
-import type { EdfBaseFieldProps } from './types';
 
 export interface AbstractFieldProps {
   key: RawDataFormField['key'];
@@ -13,8 +12,13 @@ export interface AbstractFieldProps {
   styling: RawDataFormField['styling'];
 }
 
+export type AbstractFieldModifiableProps = keyof Pick<
+  AbstractFieldProps,
+  'index' | 'label' | 'help' | 'styling'
+>;
+
 export abstract class AbstractField {
-  readonly holder;
+  readonly container;
 
   readonly key;
 
@@ -42,8 +46,8 @@ export abstract class AbstractField {
     return this._styling;
   }
 
-  constructor(holder: FormFields, props: AbstractFieldProps) {
-    this.holder = holder;
+  constructor(container: FormFields, props: AbstractFieldProps) {
+    this.container = container;
     this.key = props.key;
     this._index = writable(props.index);
     this._label = writable(props.label);
@@ -53,17 +57,17 @@ export abstract class AbstractField {
 
   setLabel(label: string) {
     this._label.set(label);
-    this.bubblePropChange('label');
+    this.triggerChangeEvent('label');
   }
 
   setHelpText(help: string | null) {
     this._help.set(help);
-    this.bubblePropChange('help');
+    this.triggerChangeEvent('help');
   }
 
   updateIndex(updator: Updater<number>) {
     this._index.update(updator);
-    this.bubblePropChange('index');
+    this.triggerChangeEvent('index');
   }
 
   updateStyling(styling: Partial<AbstractFieldProps['styling']>) {
@@ -76,10 +80,12 @@ export abstract class AbstractField {
         ...styling,
       };
     });
-    this.bubblePropChange('styling');
+    this.triggerChangeEvent('styling');
   }
 
-  protected abstract bubblePropChange(e: EdfBaseFieldProps): unknown;
+  protected abstract triggerChangeEvent<T extends AbstractFieldModifiableProps>(
+    e: T,
+  ): unknown;
 
   abstract toRawEphemeralField(): RawDataFormField;
 
@@ -94,9 +100,9 @@ export abstract class AbstractField {
   }
 
   getFormToken() {
-    let form = this.holder.parent;
-    while (!('token' in form) && form.holder.parent) {
-      form = form.holder.parent;
+    let form = this.container.parent;
+    while (!('token' in form) && form.container.parent) {
+      form = form.container.parent;
     }
     if (!('token' in form)) {
       throw new Error(

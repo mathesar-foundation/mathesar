@@ -3,7 +3,11 @@ import { _ } from 'svelte-i18n';
 
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 
-import { AbstractField, type AbstractFieldProps } from './AbstractField';
+import {
+  AbstractField,
+  type AbstractFieldModifiableProps,
+  type AbstractFieldProps,
+} from './AbstractField';
 import { FieldColumn } from './FieldColumn';
 import { DataFormFieldInputValueHolder } from './FieldValueHolder';
 import type { FormFields } from './FormFields';
@@ -13,6 +17,10 @@ export interface AbstractColumnBasedFieldProps extends AbstractFieldProps {
   isRequired: RawDataFormField['is_required'];
   fieldColumn: FieldColumn;
 }
+
+export type AbstractColumnBasedFieldModifiableProps =
+  | AbstractFieldModifiableProps
+  | keyof Pick<AbstractColumnBasedFieldProps, 'isRequired'>;
 
 export abstract class AbstractColumnBasedField extends AbstractField {
   readonly fieldColumn;
@@ -52,7 +60,7 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       );
     }
     this._isRequired.set(isRequired);
-    this.bubblePropChange('isRequired');
+    this.triggerChangeEvent('isRequired');
   }
 
   hasColumn(fieldColumn: FieldColumn) {
@@ -61,6 +69,13 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       this.fieldColumn.column.id === fieldColumn.column.id
     );
   }
+
+  protected abstract triggerChangeEvent<
+    T extends keyof Pick<
+      AbstractColumnBasedFieldProps,
+      'index' | 'label' | 'help' | 'styling' | 'isRequired'
+    >,
+  >(e: T): unknown;
 
   protected getBaseFieldRawJson() {
     return {

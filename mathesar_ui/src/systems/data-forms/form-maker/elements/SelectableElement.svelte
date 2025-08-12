@@ -4,11 +4,11 @@
   import {
     type DataFormManager,
     EditableDataFormManager,
-    type SelectedElement,
+    type SelectableElement,
   } from '../data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
-  export let element: SelectedElement;
+  export let element: SelectableElement;
 
   $: selectedElement = ensureReadable(
     dataFormManager instanceof EditableDataFormManager

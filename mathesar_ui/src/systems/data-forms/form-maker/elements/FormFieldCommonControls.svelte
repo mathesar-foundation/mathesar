@@ -11,7 +11,7 @@
   <slot />
   <Button
     appearance="outcome"
-    on:click={() => dataFormField.holder.delete(dataFormField)}
+    on:click={() => dataFormField.container.delete(dataFormField)}
   >
     <Icon {...iconDeleteMajor} />
   </Button>

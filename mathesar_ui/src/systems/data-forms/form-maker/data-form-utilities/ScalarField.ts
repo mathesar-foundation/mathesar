@@ -4,34 +4,40 @@ import type { RawScalarDataFormField } from '@mathesar/api/rpc/forms';
 
 import {
   AbstractColumnBasedField,
+  type AbstractColumnBasedFieldModifiableProps,
   type AbstractColumnBasedFieldProps,
 } from './AbstractColumnBasedField';
+import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
 import type { FormFields } from './FormFields';
 import type { FormSource } from './FormSource';
-import type { EdfBaseFieldProps, EdfScalarFieldPropChange } from './types';
 
 interface ScalarFieldProps extends AbstractColumnBasedFieldProps {
   kind: RawScalarDataFormField['kind'];
 }
 
-export type ScalarFieldOnChange = (e: EdfScalarFieldPropChange) => unknown;
+export type ScalarFieldPropChangeEvent = {
+  type: 'scalar-field/prop';
+  target: ScalarField;
+  prop: AbstractColumnBasedFieldModifiableProps;
+};
 
 export class ScalarField extends AbstractColumnBasedField {
   readonly kind: RawScalarDataFormField['kind'] = 'scalar_column';
 
-  private onChange: ScalarFieldOnChange;
+  private changeEventHandler: DataFormStructureChangeEventHandler;
 
   constructor(
-    holder: FormFields,
+    container: FormFields,
     props: ScalarFieldProps,
-    onChange: ScalarFieldOnChange,
+    changeEventHandler: DataFormStructureChangeEventHandler,
   ) {
-    super(holder, props);
-    this.onChange = onChange;
+    super(container, props);
+    this.changeEventHandler = changeEventHandler;
   }
 
-  protected bubblePropChange(prop: EdfBaseFieldProps) {
-    this.onChange({
+  protected triggerChangeEvent(prop: ScalarFieldPropChangeEvent['prop']) {
+    this.changeEventHandler.trigger({
+      type: 'scalar-field/prop',
       target: this,
       prop,
     });
@@ -54,14 +60,17 @@ export class ScalarField extends AbstractColumnBasedField {
     const { rawField } = props;
     const baseProps = super.getBasePropsFromRawDataFormField(props, formSource);
 
-    return (holder: FormFields, onChange: ScalarFieldOnChange) =>
+    return (
+      container: FormFields,
+      changeEventHandler: DataFormStructureChangeEventHandler,
+    ) =>
       new ScalarField(
-        holder,
+        container,
         {
           ...baseProps,
           kind: rawField.kind,
         },
-        onChange,
+        changeEventHandler,
       );
   }
 }

@@ -5,18 +5,15 @@ import type { RawForeignKeyDataFormField } from '@mathesar/api/rpc/forms';
 
 import {
   AbstractColumnBasedField,
+  type AbstractColumnBasedFieldModifiableProps,
   type AbstractColumnBasedFieldProps,
 } from './AbstractColumnBasedField';
 import type { DataFormFieldFactory } from './DataFormField';
+import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
 import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 // eslint-disable-next-line import/no-cycle
 import { type DataFormFieldContainerFactory, FormFields } from './FormFields';
 import type { FormSource } from './FormSource';
-import type {
-  EdfBaseFieldProps,
-  EdfFkFieldPropChange,
-  EdfNestedFieldChanges,
-} from './types';
 
 interface FkFieldProps extends AbstractColumnBasedFieldProps {
   kind: RawForeignKeyDataFormField['kind'];
@@ -25,9 +22,13 @@ interface FkFieldProps extends AbstractColumnBasedFieldProps {
   createFields: DataFormFieldContainerFactory;
 }
 
-export type FkFieldOnChange = (
-  e: EdfFkFieldPropChange | EdfNestedFieldChanges,
-) => unknown;
+export type FkFieldPropChangeEvent = {
+  type: 'fk-field/prop';
+  target: FkField;
+  prop:
+    | AbstractColumnBasedFieldModifiableProps
+    | keyof Pick<FkFieldProps, 'interactionRule'>;
+};
 
 export class FkField extends AbstractColumnBasedField {
   readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
@@ -46,27 +47,17 @@ export class FkField extends AbstractColumnBasedField {
     return this._interactionRule;
   }
 
-  protected onChange;
+  protected changeEventHandler;
 
   constructor(
     holder: FormFields,
     props: FkFieldProps,
-    onChange: FkFieldOnChange,
+    changeEventHandler: DataFormStructureChangeEventHandler,
   ) {
     super(holder, props);
-    this.onChange = onChange;
+    this.changeEventHandler = changeEventHandler;
     this.relatedTableOid = props.relatedTableOid;
-    this.nestedFields = props.createFields(this, (e) => {
-      if ('target' in e) {
-        this.onChange(e);
-        return;
-      }
-      this.onChange({
-        target: this,
-        prop: 'nestedFields',
-        detail: e,
-      });
-    });
+    this.nestedFields = props.createFields(this, this.changeEventHandler);
     const fkLink = this.fieldColumn.foreignKeyLink;
     if (!fkLink) {
       throw Error('The passed column is not a foreign key');
@@ -84,7 +75,7 @@ export class FkField extends AbstractColumnBasedField {
     getDefaultNestedFields: () => Promise<Iterable<DataFormFieldFactory>>,
   ) {
     this._interactionRule.set(rule);
-    this.bubblePropChange('interactionRule');
+    this.triggerChangeEvent('interactionRule');
 
     if (get(this.nestedFields).length === 0) {
       const defaultNestedFieldsFactories = await getDefaultNestedFields();
@@ -92,8 +83,9 @@ export class FkField extends AbstractColumnBasedField {
     }
   }
 
-  protected bubblePropChange(prop: EdfBaseFieldProps | 'interactionRule') {
-    this.onChange({
+  protected triggerChangeEvent(prop: FkFieldPropChangeEvent['prop']) {
+    this.changeEventHandler.trigger({
+      type: 'fk-field/prop',
       target: this,
       prop,
     });
@@ -121,7 +113,10 @@ export class FkField extends AbstractColumnBasedField {
     const { rawField } = props;
     const baseProps = super.getBasePropsFromRawDataFormField(props, formSource);
 
-    return (holder: FormFields, onChange: FkFieldOnChange) =>
+    return (
+      holder: FormFields,
+      changeEventHandler: DataFormStructureChangeEventHandler,
+    ) =>
       new FkField(
         holder,
         {
@@ -137,7 +132,7 @@ export class FkField extends AbstractColumnBasedField {
           ),
           interactionRule: rawField.fk_interaction_rule,
         },
-        onChange,
+        changeEventHandler,
       );
   }
 }

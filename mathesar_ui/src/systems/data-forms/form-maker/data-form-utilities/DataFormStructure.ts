@@ -7,10 +7,10 @@ import type {
 import { type FieldStore, makeForm } from '@mathesar/components/form';
 import { collapse } from '@mathesar-component-library';
 
+import { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
 import type { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 import { type DataFormFieldContainerFactory, FormFields } from './FormFields';
 import type { FormSource } from './FormSource';
-import type { EdfChange, EdfDirectProps, EdfNestedFieldChanges } from './types';
 
 interface DataFormStructureProps {
   baseTableOid: number;
@@ -24,15 +24,26 @@ interface DataFormStructureProps {
   submitRedirectUrl: RawDataForm['submit_redirect_url'];
   submitButtonLabel: RawDataForm['submit_button_label'];
   createFields: DataFormFieldContainerFactory;
+  changeEventHandler?: DataFormStructureChangeEventHandler;
 }
 
-export type DataFormOnChange = (
-  e: EdfChange | EdfNestedFieldChanges,
-) => unknown;
+export type DataFormPropChangeEvent = {
+  type: 'form/prop';
+  target: DataFormStructure;
+  prop: keyof Pick<
+    DataFormStructureProps,
+    | 'name'
+    | 'description'
+    | 'associatedRoleId'
+    | 'submitMessage'
+    | 'submitRedirectUrl'
+    | 'submitButtonLabel'
+  >;
+};
 
-export type DataFormStructureFactory = (
-  c?: DataFormOnChange,
-) => DataFormStructure;
+export type DataFormStructureFactory = (props?: {
+  changeEventHandler?: DataFormStructureChangeEventHandler;
+}) => DataFormStructure;
 
 export class DataFormStructure {
   readonly baseTableOid;
@@ -81,11 +92,11 @@ export class DataFormStructure {
 
   readonly fields: FormFields;
 
-  private onChange?: DataFormOnChange;
+  private changeEventHandler: DataFormStructureChangeEventHandler;
 
   readonly formHolder;
 
-  constructor(props: DataFormStructureProps, onChange?: DataFormOnChange) {
+  constructor(props: DataFormStructureProps) {
     this.baseTableOid = props.baseTableOid;
     this.schemaOid = props.schemaOid;
     this.databaseId = props.databaseId;
@@ -96,18 +107,9 @@ export class DataFormStructure {
     this._submitMessage = writable(props.submitMessage);
     this._submitRedirectUrl = writable(props.submitRedirectUrl);
     this._submitButtonLabel = writable(props.submitButtonLabel);
-    this.onChange = onChange;
-    this.fields = props.createFields(this, (e) => {
-      if ('target' in e) {
-        this.onChange?.(e);
-        return;
-      }
-      this.onChange?.({
-        target: this,
-        prop: 'fields',
-        detail: e,
-      });
-    });
+    this.changeEventHandler =
+      props.changeEventHandler ?? new DataFormStructureChangeEventHandler();
+    this.fields = props.createFields(this, this.changeEventHandler);
     this.formHolder = derived(
       this.fields.fieldValueStores,
       (_, set) => {
@@ -149,27 +151,27 @@ export class DataFormStructure {
     );
   }
 
-  private bubblePropChange(prop: EdfDirectProps) {
-    const change: EdfChange = {
-      prop,
+  private triggerChangeEvent(prop: DataFormPropChangeEvent['prop']) {
+    this.changeEventHandler.trigger({
+      type: 'form/prop',
       target: this,
-    };
-    this.onChange?.(change);
+      prop,
+    });
   }
 
   setName(name: string) {
     this._name.set(name);
-    this.bubblePropChange('name');
+    this.triggerChangeEvent('name');
   }
 
   setDescription(desc: string) {
     this._description.set(desc);
-    this.bubblePropChange('description');
+    this.triggerChangeEvent('description');
   }
 
   setAssociatedRoleId(configuredRoleId: number | null) {
     this._associatedRoleId.set(configuredRoleId);
-    this.bubblePropChange('associatedRoleId');
+    this.triggerChangeEvent('associatedRoleId');
   }
 
   setSubmissionMessage(message: string | null) {
@@ -180,17 +182,17 @@ export class DataFormStructure {
           }
         : null,
     );
-    this.bubblePropChange('submitMessage');
+    this.triggerChangeEvent('submitMessage');
   }
 
   setSubmissionRedirectUrl(url: string | null) {
     this._submitRedirectUrl.set(url);
-    this.bubblePropChange('submitRedirectUrl');
+    this.triggerChangeEvent('submitRedirectUrl');
   }
 
   setSubmissionButtonLabel(label: string | null) {
     this._submitButtonLabel.set(label);
-    this.bubblePropChange('submitButtonLabel');
+    this.triggerChangeEvent('submitButtonLabel');
   }
 
   getFormSubmitRequest() {
@@ -244,28 +246,26 @@ export class DataFormStructure {
     },
     formSource: FormSource,
   ): DataFormStructureFactory {
-    return (onChange) =>
-      new DataFormStructure(
-        {
-          baseTableOid: props.base_table_oid,
-          schemaOid: props.schema_oid,
-          databaseId: props.database_id,
-          token: props.token,
-          name: props.name,
-          description: props.description,
-          associatedRoleId: props.associated_role_id,
-          submitMessage: props.submit_message,
-          submitRedirectUrl: props.submit_redirect_url,
-          submitButtonLabel: props.submit_button_label,
-          createFields: FormFields.factoryFromRawInfo(
-            {
-              parentTableOid: props.base_table_oid,
-              rawDataFormFields: props.fields,
-            },
-            formSource,
-          ),
-        },
-        onChange,
-      );
+    return (factoryProps) =>
+      new DataFormStructure({
+        baseTableOid: props.base_table_oid,
+        schemaOid: props.schema_oid,
+        databaseId: props.database_id,
+        token: props.token,
+        name: props.name,
+        description: props.description,
+        associatedRoleId: props.associated_role_id,
+        submitMessage: props.submit_message,
+        submitRedirectUrl: props.submit_redirect_url,
+        submitButtonLabel: props.submit_button_label,
+        createFields: FormFields.factoryFromRawInfo(
+          {
+            parentTableOid: props.base_table_oid,
+            rawDataFormFields: props.fields,
+          },
+          formSource,
+        ),
+        changeEventHandler: factoryProps?.changeEventHandler,
+      });
   }
 }
