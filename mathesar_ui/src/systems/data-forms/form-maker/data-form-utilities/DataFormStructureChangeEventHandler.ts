@@ -26,6 +26,7 @@ export class DataFormStructureChangeEventHandler {
   }
 
   trigger(e: DataFormStructureChangeEvent) {
+    this.callbacks?.allChanges?.();
     switch (e.type) {
       case 'fields/add':
         this.callbacks?.fieldAdded?.(e.field);
@@ -34,7 +35,6 @@ export class DataFormStructureChangeEventHandler {
         this.callbacks?.fieldDeleted?.(e.field);
         break;
       default:
-        this.callbacks?.allChanges?.();
         break;
     }
   }
