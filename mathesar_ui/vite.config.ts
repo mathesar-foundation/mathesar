@@ -1,20 +1,23 @@
-import path from 'path';
-
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
 
-import * as data from './tsconfig.json';
+import tsconfig from './tsconfig.json';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function getAlias() {
-  const alias = [];
-  const { paths } = data.compilerOptions;
+  const alias: Array<{ find: string; replacement: string }> = [];
+  const paths: Record<string, string[]> = tsconfig.compilerOptions.paths;
   Object.keys(paths).forEach((key) => {
-    const find = (__dirname, key.replace('/*', ''));
-    const replacement = path.resolve(paths[key][0].replace('/*', ''));
-    alias.push({
-      find,
-      replacement,
-    });
+    const find = key.replace('/*', '');
+    const replacement = path.resolve(
+      __dirname,
+      paths[key][0].replace('/*', ''),
+    );
+    alias.push({ find, replacement });
   });
   return alias;
 }
