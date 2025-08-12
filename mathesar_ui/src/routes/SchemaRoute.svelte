@@ -10,6 +10,7 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
+  import { ensureReadable } from '@mathesar-component-library';
 
   import DataExplorerRedirect from './DataExplorerRedirect.svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
@@ -23,9 +24,9 @@
   $: $currentSchemaId = schemaId;
   $: schema = $schemas.data.get(schemaId);
 
-  $: if (schema) {
-    SchemaRouteContext.construct(schema);
-  }
+  $: schemaRouteContext = schema
+    ? SchemaRouteContext.construct(schema)
+    : ensureReadable(undefined);
 
   function handleUnmount() {
     $currentSchemaId = undefined;
@@ -34,7 +35,7 @@
   onMount(() => handleUnmount);
 </script>
 
-{#if schema}
+{#if $schemaRouteContext && schema}
   <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
 
   <Route path="/import/*" firstmatch>

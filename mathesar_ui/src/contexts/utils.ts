@@ -1,6 +1,8 @@
 import { getContext, setContext } from 'svelte';
 import { type Readable, type Writable, writable } from 'svelte/store';
 
+import { ensureReadable } from '@mathesar-component-library';
+
 export function setRouteContext<T>(
   contextKey: unknown,
   object: T,
@@ -21,4 +23,10 @@ export function getRouteContext<T>(contextKey: unknown): Readable<T> {
     throw new Error('Route context has not been set');
   }
   return store;
+}
+
+export function getSafeRouteContext<T>(
+  contextKey: unknown,
+): Readable<T | undefined> {
+  return ensureReadable(getContext<Writable<T | undefined>>(contextKey));
 }

@@ -17,6 +17,7 @@
   import { queries as queriesStore } from '@mathesar/stores/queries';
   import { currentTableId, currentTables } from '@mathesar/stores/tables';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
+  import { ensureReadable } from '@mathesar-component-library';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
@@ -27,8 +28,9 @@
   export let database: Database;
   export let schema: Schema;
 
-  const schemaRouteContext = SchemaRouteContext.get();
-  $: ({ dataForms } = $schemaRouteContext);
+  const schemaRouteContext = SchemaRouteContext.getSafe();
+  $: dataFormsStore = ensureReadable($schemaRouteContext?.dataForms);
+  $: dataFormsList = [...($dataFormsStore?.resolvedValue ?? []).values()];
 
   function makeTableBreadcrumbSelectorItem(
     table: Table,
@@ -89,8 +91,6 @@
       },
     };
   }
-
-  $: dataFormList = [...($dataForms.resolvedValue ?? []).values()];
 </script>
 
 <BreadcrumbSelector
@@ -107,7 +107,7 @@
     },
     {
       label: $_('forms'),
-      entries: dataFormList.map(makeDataFormBreadcrumbSelectorItem),
+      entries: dataFormsList.map(makeDataFormBreadcrumbSelectorItem),
       emptyMessage: $_('no_forms'),
     },
   ]}
