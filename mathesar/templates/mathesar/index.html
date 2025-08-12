@@ -58,42 +58,5 @@
     </script>
 
     <script type="module" src="{% static manifest_data.module_js %}"></script>
-    <script
-      nomodule
-      src="{% static manifest_data.legacy_polyfill_js %}"
-    ></script>
-
-    <script
-      nomodule
-      id="vite-legacy-display-lang-slot"
-      data-src="{{ prod_display_language_urls.legacy }}"
-    >
-      System.import(
-        document.getElementById("vite-legacy-display-lang-slot").getAttribute("data-src")
-      );
-    </script>
-
-    {% if include_i18n_fallback %}
-      <script
-        nomodule
-        id="vite-legacy-fallback-lang-slot"
-        data-src="{{ prod_fallback_language_urls.legacy }}"
-      >
-        System.import(
-          document.getElementById("vite-legacy-fallback-lang-slot").getAttribute("data-src")
-        );
-      </script>
-    {% endif %}
-
-    <script
-      nomodule
-      id="vite-legacy-js-slot"
-      data-src="{% static manifest_data.legacy_js %}"
-    >
-      System.import(
-        document.getElementById("vite-legacy-js-slot").getAttribute("data-src")
-      );
-    </script>
-    
   {% endif %}
 {% endblock %}
