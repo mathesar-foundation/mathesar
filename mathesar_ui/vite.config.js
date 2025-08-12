@@ -1,7 +1,6 @@
 import path from 'path';
 
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import legacy from '@vitejs/plugin-legacy';
 import { defineConfig } from 'vite';
 
 import * as data from './tsconfig.json';
@@ -24,12 +23,7 @@ export default defineConfig({
   resolve: {
     alias: getAlias(),
   },
-  plugins: [
-    svelte(),
-    legacy({
-      targets: ['defaults', 'not IE 11'],
-    }),
-  ],
+  plugins: [svelte()],
   optimizeDeps: {
     exclude: ['tinro'],
   },
