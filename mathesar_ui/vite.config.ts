@@ -35,7 +35,7 @@ export default defineConfig({
     host: true,
   },
   build: {
-    manifest: true,
+    manifest: 'manifest.json',
     rollupOptions: {
       input: {
         main: './src/main.ts',
