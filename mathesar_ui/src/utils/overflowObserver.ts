@@ -25,7 +25,7 @@ export function makeOverflowDetails(): OverflowDetails {
 export default function overflowObserver(
   node: HTMLElement,
   overflowDetails: OverflowDetails,
-): ActionReturn {
+): ActionReturn<any> {
   const {
     hasOverflowTop,
     hasOverflowLeft,

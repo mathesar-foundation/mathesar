@@ -102,5 +102,5 @@ export interface FormBuildConfiguration extends FormConfiguration {
   values: Readable<FormValues>;
   validationStore: Readable<FormValidationResult>;
   getValidationResult: () => FormValidationResult;
-  customComponents?: Record<string, typeof SvelteComponent>;
+  customComponents?: Record<string, typeof SvelteComponent<any>>;
 }

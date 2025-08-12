@@ -10,7 +10,7 @@ interface Options {
 export default function clickOffBounds(
   node: Element,
   options: Options,
-): ActionReturn {
+): ActionReturn<any> {
   let { callback, references } = options;
 
   function outOfBoundsListener(event: Event) {

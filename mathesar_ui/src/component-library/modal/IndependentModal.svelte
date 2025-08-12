@@ -73,8 +73,8 @@
       <div
         class="overlay"
         on:click={handleOverlayClick}
-        in:fade={{ duration: 150 }}
-        out:fade={{ duration: 150 }}
+        in:fade|global={{ duration: 150 }}
+        out:fade|global={{ duration: 150 }}
       />
     {/if}
     <div
@@ -82,8 +82,8 @@
       class:width-regular={size === 'regular'}
       class:width-medium={size === 'medium'}
       class:width-large={size === 'large'}
-      in:fly={{ y: 20, duration: 150 }}
-      out:fly={{ y: 20, duration: 150 }}
+      in:fly|global={{ y: 20, duration: 150 }}
+      out:fly|global={{ y: 20, duration: 150 }}
       use:focusTrap
     >
       <Window {canScrollBody} hasCloseButton={closeOnButton} on:close={close}>

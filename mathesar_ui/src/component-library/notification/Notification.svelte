@@ -22,7 +22,7 @@
 </script>
 
 {#if show}
-  <div class="notification {type}" transition:fade={{ duration: 120 }}>
+  <div class="notification {type}" transition:fade|global={{ duration: 120 }}>
     <div class="header">
       <div class="icon">
         <Icon {...iconError} />

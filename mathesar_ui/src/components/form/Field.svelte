@@ -20,7 +20,7 @@
   export let layout: Layout | undefined = undefined;
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  $: inputComponent = input?.component ?? (TextInput as typeof SvelteComponent);
+  $: inputComponent = input?.component ?? (TextInput as typeof SvelteComponent<any>);
   $: inputComponentProps = input?.props ?? {};
   $: ({ showsError, disabled } = field);
   $: isStacked = layout === 'stacked';

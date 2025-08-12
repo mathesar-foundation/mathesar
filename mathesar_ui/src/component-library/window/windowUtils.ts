@@ -9,7 +9,7 @@ async function moveNodeToFooter(node: Element): Promise<void> {
     ?.appendChild(node);
 }
 
-export function portalToWindowFooter(node: Element): ActionReturn {
+export function portalToWindowFooter(node: Element): ActionReturn<any> {
   void moveNodeToFooter(node);
   return {
     destroy: () => node.parentElement?.removeChild(node),

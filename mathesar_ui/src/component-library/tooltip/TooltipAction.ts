@@ -8,7 +8,7 @@ type Content = string | string[] | ComponentAndProps;
 export default function tooltip(
   node: HTMLElement,
   content: Content,
-): ActionReturn {
+): ActionReturn<any> {
   const tooltipComponent = new AttachableDropdown({
     props: {
       trigger: node,
