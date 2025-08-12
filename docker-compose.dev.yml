@@ -39,8 +39,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID}
-      - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY}
+      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID-mathesar}
+      - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY-mathesar}
     command: server --console-address ":9001" /data
     volumes:
       - dev_obj_store_data:/data

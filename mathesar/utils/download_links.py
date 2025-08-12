@@ -14,7 +14,7 @@ def get_link_contents(request, download_link_id):
         sessions=request.session.session_key,
     )
     content_type = mimetypes.guess_type(link.uri)[0]
-    of = fsspec.open(link.uri, "rb")
+    of = fsspec.open(link.uri, "rb", **link.fsspec_kwargs)
     filename = of.path
 
     def stream_file():
@@ -36,7 +36,7 @@ def get_link_thumbnail(request, download_link_id):
     key = f"{size[0]}x{size[1]}"
 
     if (thumb_64 := link.thumbnail.get(key)) is None:
-        of = fsspec.open(link.uri, "rb")
+        of = fsspec.open(link.uri, "rb", **link.fsspec_kwargs)
         img_byte_arr = io.BytesIO()
         with of as f:
             img = Image.open(f)

@@ -4,7 +4,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from django.contrib.sessions.models import Session
-from encrypted_fields.fields import EncryptedCharField
+from encrypted_fields.fields import EncryptedCharField, EncryptedJSONField
 
 from db.sql.install import uninstall, install
 from db.analytics import get_object_counts
@@ -375,5 +375,14 @@ class DataFile(BaseModel):
 class DownloadLink(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sessions = models.ManyToManyField(Session)
-    uri = models.CharField(unique=True)
+    uri = models.CharField()
     thumbnail = models.JSONField(blank=True, default=dict)
+    fsspec_kwargs = EncryptedJSONField(blank=True, default=dict)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["uri", "fsspec_kwargs"],
+                name="one_uri_copy_per_backend"
+            )
+        ]
