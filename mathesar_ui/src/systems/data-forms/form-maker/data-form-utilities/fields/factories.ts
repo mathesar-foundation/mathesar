@@ -4,7 +4,10 @@ import type {
   RawScalarDataFormField,
 } from '@mathesar/api/rpc/forms';
 import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
-import { getGloballyUniqueId } from '@mathesar-component-library';
+import {
+  getGloballyUniqueId,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
 
 import type { DataFormStructure } from '../DataFormStructure';
 import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
@@ -103,7 +106,8 @@ function getBaseFieldsPropsFromRawDataFormField(props: {
       tableOid: parentTableOid,
       column: columnDetails,
       foreignKeyLink:
-        'related_table_oid' in rawField
+        'related_table_oid' in rawField &&
+        isDefinedNonNullable(rawField.related_table_oid)
           ? {
               relatedTableOid: rawField.related_table_oid,
             }
