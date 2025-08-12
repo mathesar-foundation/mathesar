@@ -11,7 +11,7 @@ def get_link_contents(request, download_link_id):
     link = get_object_or_404(
         DownloadLink,
         id=download_link_id,
-        session=request.session.session_key,
+        sessions=request.session.session_key,
     )
     content_type = mimetypes.guess_type(link.uri)[0]
     of = fsspec.open(link.uri, "rb")
@@ -29,7 +29,7 @@ def get_link_thumbnail(request, download_link_id):
     link = get_object_or_404(
         DownloadLink,
         id=download_link_id,
-        session=request.session.session_key,
+        sessions=request.session.session_key,
     )
     content_type = "image/jpeg"
     size = int(request.GET.get("width", 500)), int(request.GET.get("height", 500))
