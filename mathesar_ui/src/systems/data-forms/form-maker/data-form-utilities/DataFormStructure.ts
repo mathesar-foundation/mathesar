@@ -8,8 +8,12 @@ import { type FieldStore, makeForm } from '@mathesar/components/form';
 import { collapse } from '@mathesar-component-library';
 
 import { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
-import type { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
-import { type DataFormFieldContainerFactory, FormFields } from './FormFields';
+import {
+  type DataFormFieldContainerFactory,
+  type DataFormFieldFkInputValueHolder,
+  type FormFields,
+  buildFormFieldContainerFactory,
+} from './fields';
 import type { FormSource } from './FormSource';
 
 interface DataFormStructureProps {
@@ -258,13 +262,11 @@ export class DataFormStructure {
         submitMessage: props.submit_message,
         submitRedirectUrl: props.submit_redirect_url,
         submitButtonLabel: props.submit_button_label,
-        createFields: FormFields.factoryFromRawInfo(
-          {
-            parentTableOid: props.base_table_oid,
-            rawDataFormFields: props.fields,
-          },
+        createFields: buildFormFieldContainerFactory({
+          parentTableOid: props.base_table_oid,
+          rawDataFormFields: props.fields,
           formSource,
-        ),
+        }),
         changeEventHandler: factoryProps?.changeEventHandler,
       });
   }

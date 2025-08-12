@@ -9,10 +9,12 @@
     Spinner,
   } from '@mathesar-component-library';
 
-  import DataFormField from '../../data-form-utilities/DataFormField';
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
-  import { FieldColumn } from '../../data-form-utilities/FieldColumn';
-  import type { FormFields } from '../../data-form-utilities/FormFields';
+  import {
+    FieldColumn,
+    type FormFields,
+    buildDataFormFieldFactory,
+  } from '../../data-form-utilities/fields';
 
   import AddFormColumnFieldItem from './AddFormColumnFieldItem.svelte';
 
@@ -34,11 +36,11 @@
       await tableStructure.getSubstanceOnceResolved();
     if (tableStructureSubstance.resolvedValue) {
       fieldHolder.add(
-        DataFormField.factoryFromFieldColumn(
-          fc,
-          insertionIndex,
-          tableStructureSubstance.resolvedValue,
-        ),
+        buildDataFormFieldFactory({
+          fieldColumn: fc,
+          index: insertionIndex,
+          tableStructureSubstance: tableStructureSubstance.resolvedValue,
+        }),
       );
     }
     close();

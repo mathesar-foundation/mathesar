@@ -6,11 +6,11 @@
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
-  import type { DataFormField } from '../data-form-utilities/DataFormField';
   import {
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
+  import type { DataFormField } from '../data-form-utilities/fields';
 
   import FormFieldCommonControls from './FormFieldCommonControls.svelte';
 

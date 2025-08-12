@@ -3,7 +3,7 @@
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
-  import type { FormFields } from '../data-form-utilities/FormFields';
+  import type { FormFields } from '../data-form-utilities/fields';
 
   import { AddField } from './add-field';
   import DataFormFieldElement from './DataFormFieldElement.svelte';

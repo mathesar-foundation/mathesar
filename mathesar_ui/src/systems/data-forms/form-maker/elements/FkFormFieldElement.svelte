@@ -7,7 +7,7 @@
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
-  import type { FkField } from '../data-form-utilities/FkField';
+  import type { FkField } from '../data-form-utilities/fields';
 
   import DataFormFieldsContainer from './DataFormFieldsContainer.svelte';
   import DataFormInput from './DataFormInput.svelte';

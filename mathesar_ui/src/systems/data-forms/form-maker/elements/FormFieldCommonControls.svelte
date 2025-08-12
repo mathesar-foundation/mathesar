@@ -2,7 +2,7 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import type { DataFormField } from '../data-form-utilities/DataFormField';
+  import type { DataFormField } from '../data-form-utilities/fields';
 
   export let dataFormField: DataFormField;
 </script>

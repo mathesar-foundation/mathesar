@@ -6,7 +6,7 @@
   import { Spinner } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { FkField } from '../data-form-utilities/FkField';
+  import type { FkField } from '../data-form-utilities/fields';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: FkField;

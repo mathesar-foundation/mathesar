@@ -7,12 +7,12 @@ import type { Table } from '@mathesar/models/Table';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
-import type { DataFormField } from './DataFormField';
 import type {
   DataFormStructure,
   DataFormStructureFactory,
 } from './DataFormStructure';
 import { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
+import type { DataFormField } from './fields';
 
 export interface DataFormManager {
   dataFormStructure: DataFormStructure;

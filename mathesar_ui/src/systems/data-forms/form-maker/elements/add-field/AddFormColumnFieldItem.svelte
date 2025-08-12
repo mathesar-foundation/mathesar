@@ -5,7 +5,7 @@
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { ButtonMenuItem, Tooltip } from '@mathesar-component-library';
 
-  import type { FieldColumn } from '../../data-form-utilities/FieldColumn';
+  import type { FieldColumn } from '../../data-form-utilities/fields';
 
   export let fieldColumn: FieldColumn;
   export let parentHasColumn: Readable<boolean>;

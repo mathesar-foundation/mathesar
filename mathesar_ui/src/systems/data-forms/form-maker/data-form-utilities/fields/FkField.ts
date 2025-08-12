@@ -3,17 +3,16 @@ import { _ } from 'svelte-i18n';
 
 import type { RawForeignKeyDataFormField } from '@mathesar/api/rpc/forms';
 
+import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
+
 import {
   AbstractColumnBasedField,
   type AbstractColumnBasedFieldModifiableProps,
   type AbstractColumnBasedFieldProps,
 } from './AbstractColumnBasedField';
-import type { DataFormFieldFactory } from './DataFormField';
-import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
+import type { DataFormFieldFactory } from './factories';
 import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
-// eslint-disable-next-line import/no-cycle
-import { type DataFormFieldContainerFactory, FormFields } from './FormFields';
-import type { FormSource } from './FormSource';
+import type { DataFormFieldContainerFactory, FormFields } from './FormFields';
 
 interface FkFieldProps extends AbstractColumnBasedFieldProps {
   kind: RawForeignKeyDataFormField['kind'];
@@ -101,38 +100,5 @@ export class FkField extends AbstractColumnBasedField {
         nested_field.toRawEphemeralField(),
       ),
     };
-  }
-
-  static factoryFromRawInfo(
-    props: {
-      parentTableOid: number;
-      rawField: RawForeignKeyDataFormField;
-    },
-    formSource: FormSource,
-  ) {
-    const { rawField } = props;
-    const baseProps = super.getBasePropsFromRawDataFormField(props, formSource);
-
-    return (
-      holder: FormFields,
-      changeEventHandler: DataFormStructureChangeEventHandler,
-    ) =>
-      new FkField(
-        holder,
-        {
-          ...baseProps,
-          kind: rawField.kind,
-          relatedTableOid: rawField.related_table_oid,
-          createFields: FormFields.factoryFromRawInfo(
-            {
-              parentTableOid: rawField.related_table_oid,
-              rawDataFormFields: rawField.child_fields ?? [],
-            },
-            formSource,
-          ),
-          interactionRule: rawField.fk_interaction_rule,
-        },
-        changeEventHandler,
-      );
   }
 }

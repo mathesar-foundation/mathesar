@@ -8,12 +8,13 @@
   import { Select } from '@mathesar-component-library';
   import type { Appearance } from '@mathesar-component-library/types';
 
-  import DataFormField, {
-    type DataFormFieldFactory,
-  } from '../data-form-utilities/DataFormField';
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
-  import { FieldColumn } from '../data-form-utilities/FieldColumn';
-  import type { FkField } from '../data-form-utilities/FkField';
+  import {
+    type DataFormFieldFactory,
+    FieldColumn,
+    type FkField,
+    buildDataFormFieldFactory,
+  } from '../data-form-utilities/fields';
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: FkField;
@@ -50,11 +51,11 @@
         .filter((pc) => !pc.column.default?.is_dynamic)
         .map((c, index) => {
           const fc = FieldColumn.fromProcessedColumn(c);
-          return DataFormField.factoryFromFieldColumn(
-            fc,
+          return buildDataFormFieldFactory({
+            fieldColumn: fc,
             index,
             tableStructureSubstance,
-          );
+          });
         });
     }
     return [];

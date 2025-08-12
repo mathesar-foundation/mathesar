@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DataFormManager } from '../data-form-utilities/DataFormManager';
-  import type { ScalarField } from '../data-form-utilities/ScalarField';
+  import type { ScalarField } from '../data-form-utilities/fields';
 
   import DataFormInput from './DataFormInput.svelte';
   import DataFormLabel from './DataFormLabel.svelte';

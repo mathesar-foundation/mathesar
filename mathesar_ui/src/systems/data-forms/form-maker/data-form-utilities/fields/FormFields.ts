@@ -7,25 +7,22 @@ import {
   get,
 } from 'svelte/store';
 
-import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 import { WritableSet } from '@mathesar-component-library';
+
+import type { DataFormStructure } from '../DataFormStructure';
+import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
 
 import type {
   DataFormField,
   DataFormFieldFactory,
   ParentDataFormField,
-} from './DataFormField';
-import type { DataFormStructure } from './DataFormStructure';
-import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
+} from './factories';
 import type { FieldColumn } from './FieldColumn';
 import type {
   DataFormFieldFkInputValueHolder,
   DataFormFieldInputValueHolder,
 } from './FieldValueHolder';
-// eslint-disable-next-line import/no-cycle
-import { FkField } from './FkField';
-import type { FormSource } from './FormSource';
-import { ScalarField } from './ScalarField';
+import type { FkField } from './FkField';
 
 export type DataFormFieldContainerFactory = (
   parent: DataFormStructure | ParentDataFormField,
@@ -216,40 +213,5 @@ export class FormFields {
       target: this.parent,
       field: dataFormField,
     });
-  }
-
-  static factoryFromRawInfo(
-    props: {
-      parentTableOid: number;
-      rawDataFormFields: RawDataFormField[];
-    },
-    formSource: FormSource,
-  ): DataFormFieldContainerFactory {
-    return (
-      parent: DataFormStructure | ParentDataFormField,
-      changeEventHandler: DataFormStructureChangeEventHandler,
-    ) =>
-      new FormFields(
-        parent,
-        props.rawDataFormFields.map((f) => {
-          if (f.kind === 'scalar_column') {
-            return ScalarField.factoryFromRawInfo(
-              {
-                parentTableOid: props.parentTableOid,
-                rawField: f,
-              },
-              formSource,
-            );
-          }
-          return FkField.factoryFromRawInfo(
-            {
-              parentTableOid: props.parentTableOid,
-              rawField: f,
-            },
-            formSource,
-          );
-        }),
-        changeEventHandler,
-      );
   }
 }

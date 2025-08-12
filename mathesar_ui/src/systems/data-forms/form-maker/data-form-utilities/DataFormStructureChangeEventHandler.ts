@@ -1,8 +1,10 @@
-import type { DataFormField } from './DataFormField';
 import type { DataFormPropChangeEvent } from './DataFormStructure';
-import type { FkFieldPropChangeEvent } from './FkField';
-import type { FormFieldContainerChangeEvent } from './FormFields';
-import type { ScalarFieldPropChangeEvent } from './ScalarField';
+import type {
+  DataFormField,
+  FkFieldPropChangeEvent,
+  FormFieldContainerChangeEvent,
+  ScalarFieldPropChangeEvent,
+} from './fields';
 
 type DataFormStructureChangeEvent =
   | DataFormPropChangeEvent
