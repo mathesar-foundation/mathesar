@@ -376,3 +376,4 @@ class DownloadLink(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     uri = models.CharField()
+    thumbnail = models.JSONField(blank=True, default=dict)
