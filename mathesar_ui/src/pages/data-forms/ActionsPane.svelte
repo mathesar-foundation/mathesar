@@ -4,31 +4,26 @@
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
-  import { iconEdit, iconForms, iconShare } from '@mathesar/icons';
+  import { iconForm, iconShare } from '@mathesar/icons';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-  import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
-  import {
-    AddEditDataFormModal,
-    type EditableDataFormManager,
-  } from '@mathesar/systems/data-forms';
-  import { Button, Dropdown, Icon } from '@mathesar-component-library';
+  import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
+  import { Dropdown, Icon } from '@mathesar-component-library';
 
   import ShareForm from './ShareForm.svelte';
 
-  const dataFormAddEditModal = modal.spawnModalController();
   const dataFormRouteContext = DataFormRouteContext.get();
   $: ({ dataForm } = $dataFormRouteContext);
 
   export let dataFormManager: EditableDataFormManager;
 
   $: ({ hasChanges } = dataFormManager);
-  $: ({ name, description } = dataForm);
+  $: ({ structure } = dataForm);
 
   async function saveForm() {
     try {
-      await $dataFormRouteContext.replaceDataForm(
-        dataFormManager.ephemeralDataForm.toRawEphemeralDataForm(),
+      await dataForm.updateStructure(
+        dataFormManager.dataFormStructure.toRawStructure(),
       );
     } catch (err) {
       toast.error(RpcError.fromAnything(err).message);
@@ -38,16 +33,11 @@
 
 <EntityPageHeader
   title={{
-    name: $name || $_('untitled'),
-    description: $description ?? undefined,
-    icon: iconForms,
+    name: $structure.name || $_('untitled'),
+    description: $structure.description ?? undefined,
+    icon: iconForm,
   }}
 >
-  <svelte:fragment>
-    <Button appearance="plain" on:click={() => dataFormAddEditModal.open()}>
-      <Icon {...iconEdit} />
-    </Button>
-  </svelte:fragment>
   <svelte:fragment slot="actions-right">
     <SaveButton onSave={saveForm} canSave={$hasChanges} />
     <Dropdown
@@ -65,5 +55,3 @@
     </Dropdown>
   </svelte:fragment>
 </EntityPageHeader>
-
-<AddEditDataFormModal {dataForm} controller={dataFormAddEditModal} />

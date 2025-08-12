@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.db import transaction
 
-from db.forms import get_tab_col_info_map
+from db.forms import get_tab_col_info_map, form_insert
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
@@ -74,26 +74,7 @@ def iterate_field_defs(field_defs, parent_field_defn=None):
 
 
 @transaction.atomic
-def create_form(form_def, user):
-    database = Database.objects.get(id=form_def["database_id"])
-    associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
-    form_model = Form.objects.create(
-        **({"id": form_def["id"]} if form_def.get("id") else {}),  # we get an id during replace
-        token=form_def.get("token", uuid4()),
-        name=form_def["name"],
-        description=form_def.get("description"),
-        version=form_def["version"],
-        database=database,
-        server=database.server,
-        schema_oid=form_def["schema_oid"],
-        base_table_oid=form_def["base_table_oid"],
-        associated_role=associated_role,
-        header_title=form_def["header_title"],
-        header_subtitle=form_def.get("header_subtitle"),
-        submit_message=form_def.get("submit_message"),
-        submit_redirect_url=form_def.get("submit_redirect_url"),
-        submit_button_label=form_def.get("submit_button_label")
-    )
+def create_form_fields(form_model, fields_def_list):
     field_instances = [
         FormField(
             key=field_def["key"],
@@ -108,33 +89,71 @@ def create_form(form_def, user):
             parent_field=None,
             styling=field_def.get("styling"),
             is_required=field_def.get("is_required", False),
-        ) for field_def, _ in iterate_field_defs(form_def["fields"])
+        ) for field_def, _ in iterate_field_defs(fields_def_list)
     ]
     created_fields = FormField.objects.bulk_create(field_instances)
     created_fields_map = {field.key: field for field in created_fields}
     update_field_instances = []
-    for field_def, parent_field_def in iterate_field_defs(form_def["fields"]):
+    for field_def, parent_field_def in iterate_field_defs(fields_def_list):
         if parent_field_def:
             created_field = created_fields_map[field_def["key"]]
             created_field.parent_field = created_fields_map[parent_field_def["key"]]
             update_field_instances.append(created_field)
     if update_field_instances:
         FormField.objects.bulk_update(update_field_instances, ["parent_field"])
+
+
+@transaction.atomic
+def create_form(form_def, user):
+    database = Database.objects.get(id=form_def["database_id"])
+    associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
+    form_model = Form.objects.create(
+        token=uuid4(),
+        name=form_def["name"],
+        description=form_def.get("description"),
+        version=form_def["version"],
+        database=database,
+        server=database.server,
+        schema_oid=form_def["schema_oid"],
+        base_table_oid=form_def["base_table_oid"],
+        associated_role=associated_role,
+        header_title=form_def["header_title"],
+        header_subtitle=form_def.get("header_subtitle"),
+        submit_message=form_def.get("submit_message"),
+        submit_redirect_url=form_def.get("submit_redirect_url"),
+        submit_button_label=form_def.get("submit_button_label")
+    )
+    create_form_fields(form_model, fields_def_list=form_def["fields"])
     return form_model
 
 
-def get_form(form_id):
-    form_model = Form.objects.get(id=form_id)
+def has_permission_for_form(user, form_model):
+    if form_model.publish_public:
+        return True
+    elif user.is_authenticated:
+        try:
+            # validate_and_get_associated_role allows us to verify if a given user has access to the role associated with the form
+            validate_and_get_associated_role(
+                user=user,
+                database_id=form_model.database.id,
+                associated_role_id=form_model.associated_role.id
+            )
+            return True
+        except AssertionError:
+            return False
+    return False
+
+
+def get_form(form_token, user):
+    form_model = Form.objects.get(token=form_token)
+    assert has_permission_for_form(user, form_model), 'Insufficient permission to get the form'
     return form_model
 
 
-def get_form_by_token(form_token):
-    return Form.objects.get(token=form_token)
-
-
-def get_form_source_info(form_token):
+def get_form_source_info(form_token, user):
     form_model = Form.objects.get(token=form_token)
     if form_model:
+        assert has_permission_for_form(user, form_model), 'Insufficient permission to get form source info'
         return get_field_tab_col_info_map(form_model)
 
 
@@ -142,12 +161,74 @@ def list_forms(database_id, schema_oid):
     return Form.objects.filter(database__id=database_id, schema_oid=schema_oid)
 
 
+def regen_form_token(form_id):
+    form_model = Form.objects.get(id=form_id)
+    form_model.token = uuid4()
+    form_model.save()
+    return form_model.token
+
+
+def set_form_public_setting(form_id, publish_public):
+    form_model = Form.objects.get(id=form_id)
+    form_model.publish_public = publish_public
+    form_model.save()
+    return form_model.publish_public
+
+
 def delete_form(form_id):
     Form.objects.get(id=form_id).delete()
 
 
+def iterate_form_fields(fields, parent_field=None, depth=0):
+    """
+    Depth-first generator that iterates through the form fields
+    """
+    for field in fields:
+        yield field, parent_field, depth
+        yield from iterate_form_fields(
+            field.child_fields.all(),
+            field,
+            depth + 1
+        )
+
+
+def submit_form(form_token, values, user):
+    form_model = Form.objects.get(token=form_token)
+    assert has_permission_for_form(user, form_model), 'Insufficient permission to submit the form'
+    field_info_list = [
+        {
+            "key": field.key,
+            "parent_key": parent_field.key if parent_field else None,
+            "column_attnum": field.column_attnum,
+            "table_oid": parent_field.related_table_oid if parent_field else form_model.base_table_oid,
+            "depth": depth
+        } for field, parent_field, depth in iterate_form_fields(form_model.fields.filter(parent_field__isnull=True))
+    ]
+    with form_model.connection as conn:
+        form_insert(field_info_list, values, conn)
+
+
 @transaction.atomic
-def replace_form(form_def_with_id, user):
-    Form.objects.get(id=form_def_with_id["id"]).delete()
-    form_model = create_form(form_def_with_id, user)
-    return form_model
+def patch_form(update_form_def, user):
+    form_model = Form.objects.get(id=update_form_def["id"])
+    associated_role = validate_and_get_associated_role(
+        user,
+        database_id=form_model.database.id,
+        associated_role_id=update_form_def.get("associated_role_id")
+    )
+    fields_def_list = update_form_def["fields"]
+    if fields_def_list or fields_def_list == []:
+        form_model.fields.all().delete()
+        create_form_fields(form_model, fields_def_list)
+    Form.objects.filter(id=update_form_def["id"]).update(
+        name=update_form_def["name"],
+        description=update_form_def.get("description"),
+        version=update_form_def["version"],
+        associated_role=associated_role,
+        header_title=update_form_def["header_title"],
+        header_subtitle=update_form_def.get("header_subtitle"),
+        submit_message=update_form_def.get("submit_message"),
+        submit_redirect_url=update_form_def.get("submit_redirect_url"),
+        submit_button_label=update_form_def.get("submit_button_label")
+    )
+    return Form.objects.get(id=update_form_def["id"])

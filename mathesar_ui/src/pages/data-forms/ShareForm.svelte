@@ -5,12 +5,13 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconCopyMajor, iconOpenLinkInNewTab } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
+  import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import {
     confirm,
     confirmationController,
   } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
-  import type { EditableDataFormManager } from '@mathesar/systems/data-forms';
+  import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
   import {
     type AccompanyingElements,
     Button,
@@ -27,10 +28,9 @@
   export let dataForm: DataForm;
   export let dataFormManager: EditableDataFormManager;
 
-  $: ({ sharePreferences } = dataForm);
+  $: ({ sharePreferences, token } = dataForm);
   $: ({ hasChanges } = dataFormManager);
-  // TODO_FORMS: Replace id with token
-  $: shareLink = `${window.location.origin}/shares/forms/${dataForm.id}`;
+  $: shareLink = `${window.location.origin}/shares/forms/${$token}`;
 
   let linkInput: HTMLInputElement;
 
@@ -51,8 +51,11 @@
   }
 
   async function shareForm() {
-    toast.error('Not implemented yet');
-    await dataForm.updateSharingPreferences(true);
+    try {
+      await dataForm.updateSharingPreferences(true);
+    } catch (err) {
+      toast.error(RpcError.fromAnything(err));
+    }
   }
 
   function setConfirmModalToAccompanyDropdown(): () => void {
@@ -82,8 +85,12 @@
     const isConfirmed = await confirmationPromise;
     cleanupDropdown();
     if (isConfirmed) {
-      toast.error('Not implemented yet');
-      // toast.success($_('link_successfully_regenerated'));
+      try {
+        await dataForm.regenerateToken();
+        toast.success($_('link_successfully_regenerated'));
+      } catch (err) {
+        toast.error(RpcError.fromAnything(err));
+      }
     }
   }
 
@@ -101,8 +108,11 @@
     const isConfirmed = await confirmationPromise;
     cleanupDropdown();
     if (isConfirmed) {
-      toast.error('Not implemented yet');
-      await dataForm.updateSharingPreferences(false);
+      try {
+        await dataForm.updateSharingPreferences(false);
+      } catch (err) {
+        toast.error(RpcError.fromAnything(err));
+      }
     }
   }
 </script>

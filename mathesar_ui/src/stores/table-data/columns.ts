@@ -11,7 +11,6 @@ import type {
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
 import { getErrorMessage } from '@mathesar/utils/errors';
-import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
   type CancellablePromise,
   EventHandler,
@@ -42,23 +41,18 @@ export class ColumnsDataStore extends EventHandler<{
 
   pkColumn: Readable<RawColumnWithMetadata | undefined>;
 
-  readonly shareConsumer?: ShareConsumer;
-
   constructor({
     database,
     table,
     hiddenColumns,
-    shareConsumer,
   }: {
     database: Pick<Database, 'id'>;
     table: Pick<Table, 'oid'>;
     /** Values are column ids */
     hiddenColumns?: Iterable<number>;
-    shareConsumer?: ShareConsumer;
   }) {
     super();
     this.apiContext = { database_id: database.id, table_oid: table.oid };
-    this.shareConsumer = shareConsumer;
     this.hiddenColumns = new WritableSet(hiddenColumns);
     this.columns = derived(
       [this.fetchedColumns, this.hiddenColumns],

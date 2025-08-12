@@ -1,22 +1,26 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { router } from 'tinro';
 
   import Errors from '@mathesar/components/errors/Errors.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import {
     DataFormCanvas,
+    DataFormStructure,
     EditableDataFormManager,
-    rawDataFormToEphemeralFormProps,
-  } from '@mathesar/systems/data-forms';
+    FormSource,
+  } from '@mathesar/systems/data-forms/form-maker';
   import CacheManager from '@mathesar/utils/CacheManager';
 
   import ActionsPane from './ActionsPane.svelte';
 
   const dataFormRouteContext = DataFormRouteContext.get();
-  $: ({ dataForm, formSourceInfo } = $dataFormRouteContext);
+  $: ({ dataForm, rawDataFormWithSource, schemaRouteContext } =
+    $dataFormRouteContext);
 
   const tableStructureCache = new CacheManager<
     TableStructure['oid'],
@@ -24,15 +28,23 @@
   >(10);
 
   $: rawDataFormStore = dataForm.toRawDataFormStore();
-  $: dataFormManager = $formSourceInfo.resolvedValue
-    ? new EditableDataFormManager(
-        rawDataFormToEphemeralFormProps(
-          $rawDataFormStore,
-          $formSourceInfo.resolvedValue,
+  $: void rawDataFormWithSource.run($rawDataFormStore);
+  $: rawDataFormWithSourceValue = $rawDataFormWithSource.resolvedValue;
+
+  $: dataFormManager = rawDataFormWithSourceValue
+    ? new EditableDataFormManager({
+        buildDataFormStructure: DataFormStructure.factoryFromRawInfo(
+          rawDataFormWithSourceValue.rawDataForm,
+          new FormSource(rawDataFormWithSourceValue.rawFormSource),
         ),
-        dataForm.schema,
+        schema: dataForm.schema,
         tableStructureCache,
-      )
+        deleteDataForm: async () => {
+          const { schema } = dataForm;
+          await schemaRouteContext.removeDataForm(dataForm);
+          router.goto(getSchemaPageUrl(schema.database.id, schema.oid));
+        },
+      })
     : undefined;
 </script>
 
@@ -48,8 +60,8 @@
       </div>
       <DataFormCanvas {dataFormManager} />
     </div>
-  {:else if $formSourceInfo.error}
-    <Errors errors={[$formSourceInfo.error]} />
+  {:else if $rawDataFormWithSource.error}
+    <Errors errors={[$rawDataFormWithSource.error]} />
   {/if}
 </LayoutWithHeader>
 

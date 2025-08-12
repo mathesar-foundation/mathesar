@@ -1,9 +1,12 @@
 <script lang="ts">
   // TODO: Rename this component to something that represents layout for top-level page
   import AppHeader from '@mathesar/components/AppHeader.svelte';
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
 
-  export let showHeader = true;
+  const commonData = preloadCommonData();
+  const showHeader = commonData.routing_context !== 'anonymous';
+
   export let fitViewport = false;
   export let restrictWidth = false;
   export let cssVariables: Record<string, string> | undefined = undefined;

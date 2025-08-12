@@ -145,13 +145,16 @@
       - get
       - add
       - delete
-      - replace
+      - regenerate_token
+      - patch
+      - set_publish_public
+      - submit
       - list_related_records
       - FormInfo
       - FieldInfo
       - AddFormDef
       - AddOrReplaceFieldDef
-      - ReplaceableFormDef
+      - SettableFormDef
       - ListRelatedRecordsResponse
       - SummarizedRecordReference
 

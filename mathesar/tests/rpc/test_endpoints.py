@@ -253,6 +253,7 @@ METHODS = [
         "explorations.run_saved",
         [user_is_authenticated]
     ),
+
     (
         forms.add,
         "forms.add",
@@ -274,18 +275,33 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        forms.regenerate_token,
+        "forms.regenerate_token",
+        [user_is_authenticated]
+    ),
+    (
+        forms.set_publish_public,
+        "forms.set_publish_public",
+        [user_is_authenticated]
+    ),
+    (
         forms.delete,
         "forms.delete",
         [user_is_authenticated]
     ),
     (
-        forms.replace,
-        "forms.replace",
+        forms.patch,
+        "forms.patch",
         [user_is_authenticated]
     ),
     (
         forms.list_related_records,
         "forms.list_related_records",
+        []
+    ),
+    (
+        forms.submit,
+        "forms.submit",
         []
     ),
     (

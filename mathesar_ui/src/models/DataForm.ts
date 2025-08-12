@@ -1,9 +1,11 @@
-import { type Readable, derived, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type {
-  RawDataForm,
-  RawEphemeralDataForm,
+import {
+  type RawDataForm,
+  type RawDataFormStructure,
+  constructRequestToUpdateForm,
+  dataFormStructureVersion,
 } from '@mathesar/api/rpc/forms';
 import { CancellablePromise } from '@mathesar-component-library';
 
@@ -14,25 +16,7 @@ export class DataForm {
 
   readonly id: number;
 
-  readonly baseTableOId: number;
-
-  private _name;
-
-  get name(): Readable<RawDataForm['name']> {
-    return this._name;
-  }
-
-  private _description;
-
-  get description(): Readable<RawDataForm['description']> {
-    return this._description;
-  }
-
-  private _associatedRoleId;
-
-  get associatedRoleId(): Readable<RawDataForm['associated_role_id']> {
-    return this._associatedRoleId;
-  }
+  readonly baseTableOid: number;
 
   private _token;
 
@@ -48,79 +32,55 @@ export class DataForm {
     return this._sharePreferences;
   }
 
-  private _formDefinition;
+  private _structure;
 
-  get formDefinition(): Readable<{
-    version: number;
-    headerTitle: RawDataForm['header_title'];
-    headerSubtitle: RawDataForm['header_subtitle'];
-    fields: RawDataForm['fields'];
-    submissionSettings: {
-      message: RawDataForm['submit_message'];
-      redirectUrl: RawDataForm['submit_redirect_url'];
-      buttonLabel: RawDataForm['submit_button_label'];
-    };
-  }> {
-    return this._formDefinition;
+  get structure(): Readable<RawDataFormStructure> {
+    return this._structure;
   }
 
   constructor(props: { schema: Schema; rawDataForm: RawDataForm }) {
     this.schema = props.schema;
     this.id = props.rawDataForm.id;
-    this.baseTableOId = props.rawDataForm.base_table_oid;
-    this._name = writable(props.rawDataForm.name);
-    this._description = writable(props.rawDataForm.description);
-    this._associatedRoleId = writable(props.rawDataForm.associated_role_id);
+    this.baseTableOid = props.rawDataForm.base_table_oid;
     this._token = writable(props.rawDataForm.token);
     this._sharePreferences = writable({
       isPublishedPublicly: props.rawDataForm.publish_public,
     });
-    this._formDefinition = writable({
-      version: props.rawDataForm.version,
-      headerTitle: props.rawDataForm.header_title,
-      headerSubtitle: props.rawDataForm.header_subtitle,
+    this._structure = writable({
+      name: props.rawDataForm.name,
+      description: props.rawDataForm.description,
+      associated_role_id: props.rawDataForm.associated_role_id,
       fields: props.rawDataForm.fields,
-      submissionSettings: {
-        message: props.rawDataForm.submit_message,
-        redirectUrl: props.rawDataForm.submit_redirect_url,
-        buttonLabel: props.rawDataForm.submit_button_label,
-      },
+      submit_message: props.rawDataForm.submit_message,
+      submit_redirect_url: props.rawDataForm.submit_redirect_url,
+      submit_button_label: props.rawDataForm.submit_button_label,
     });
   }
 
-  replaceDataForm(
-    dataFormDef: RawEphemeralDataForm,
+  updateStructure(
+    dataFormStructure: RawDataFormStructure,
   ): CancellablePromise<DataForm> {
     const promise = api.forms
-      .replace({
-        new_form: {
-          ...dataFormDef,
+      .patch(
+        constructRequestToUpdateForm({
+          ...dataFormStructure,
           id: this.id,
-        },
-      })
+        }),
+      )
       .run();
 
     return new CancellablePromise(
       (resolve, reject) => {
         promise
           .then((rawDataForm) => {
-            this._name.set(rawDataForm.name);
-            this._description.set(rawDataForm.description);
-            this._associatedRoleId.set(rawDataForm.associated_role_id);
-            this._token.set(rawDataForm.token);
-            this._sharePreferences.set({
-              isPublishedPublicly: rawDataForm.publish_public,
-            });
-            this._formDefinition.set({
-              version: rawDataForm.version,
-              headerTitle: rawDataForm.header_title,
-              headerSubtitle: rawDataForm.header_subtitle,
+            this._structure.set({
+              name: rawDataForm.name,
+              description: rawDataForm.description,
+              associated_role_id: rawDataForm.associated_role_id,
               fields: rawDataForm.fields,
-              submissionSettings: {
-                message: rawDataForm.submit_message,
-                redirectUrl: rawDataForm.submit_redirect_url,
-                buttonLabel: rawDataForm.submit_button_label,
-              },
+              submit_message: rawDataForm.submit_message,
+              submit_redirect_url: rawDataForm.submit_redirect_url,
+              submit_button_label: rawDataForm.submit_button_label,
             });
             return resolve(this);
           }, reject)
@@ -130,20 +90,48 @@ export class DataForm {
     );
   }
 
-  updateSharingPreferences(sharePublicly: boolean) {
-    // TODO_FORMS: Update this after we have a sharing RPC method
-    const promise = Promise.resolve();
-
-    return new CancellablePromise((resolve, reject) => {
-      promise
-        .then(() => {
-          this._sharePreferences.set({
-            isPublishedPublicly: sharePublicly,
-          });
-          return resolve(this);
-        }, reject)
-        .catch(reject);
+  updateNameAndDesc(name: string, description: string | null) {
+    const structure = get(this.structure);
+    return this.updateStructure({
+      ...structure,
+      name,
+      description,
     });
+  }
+
+  updateSharingPreferences(sharePublicly: boolean) {
+    const promise = api.forms
+      .set_publish_public({ form_id: this.id, publish_public: sharePublicly })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then((res) => {
+            this._sharePreferences.set({
+              isPublishedPublicly: res,
+            });
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
+  }
+
+  regenerateToken() {
+    const promise = api.forms.regenerate_token({ form_id: this.id }).run();
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then((token) => {
+            this._token.set(token);
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
   }
 
   delete(): CancellablePromise<void> {
@@ -152,37 +140,15 @@ export class DataForm {
 
   toRawDataFormStore(): Readable<RawDataForm> {
     return derived(
-      [
-        this.formDefinition,
-        this.token,
-        this.name,
-        this.description,
-        this.associatedRoleId,
-        this.sharePreferences,
-      ],
-      ([
-        $formDefn,
-        $token,
-        $name,
-        $description,
-        $associatedRoleId,
-        $sharePreferences,
-      ]) => ({
+      [this.token, this.structure, this.sharePreferences],
+      ([$token, $structure, $sharePreferences]) => ({
         id: this.id,
         token: $token,
-        version: 1,
+        version: dataFormStructureVersion,
         database_id: this.schema.database.id,
-        base_table_oid: this.baseTableOId,
+        base_table_oid: this.baseTableOid,
         schema_oid: this.schema.oid,
-        name: $name,
-        description: $description,
-        associated_role_id: $associatedRoleId,
-        header_title: $formDefn.headerTitle,
-        header_subtitle: $formDefn.headerSubtitle,
-        fields: $formDefn.fields,
-        submit_message: $formDefn.submissionSettings.message,
-        submit_redirect_url: $formDefn.submissionSettings.redirectUrl,
-        submit_button_label: $formDefn.submissionSettings.buttonLabel,
+        ...$structure,
         publish_public: $sharePreferences.isPublishedPublicly,
       }),
     );

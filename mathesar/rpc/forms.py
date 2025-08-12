@@ -10,12 +10,14 @@ from db.records import list_by_record_summaries
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.utils.forms import (
     create_form,
-    delete_form,
-    get_form_by_token,
-    get_form_source_info,
     get_form,
     list_forms,
-    replace_form,
+    regen_form_token,
+    set_form_public_setting,
+    delete_form,
+    patch_form,
+    get_form_source_info,
+    submit_form,
 )
 from mathesar.utils.tables import get_table_record_summary_templates
 
@@ -175,7 +177,6 @@ class AddFormDef(TypedDict):
     Definition needed to add a form.
 
     Attributes:
-        token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
         description: The description of the form.
         version: The version of the form for reconciliation of json fields.
@@ -190,7 +191,6 @@ class AddFormDef(TypedDict):
         submit_button_label: Text to be displayed on the submit button.
         fields: Definition of Fields within the form.
     """
-    token: Optional[str]
     name: str
     description: Optional[str]
     version: int
@@ -206,29 +206,34 @@ class AddFormDef(TypedDict):
     fields: list[AddOrReplaceFieldDef]
 
 
-class ReplaceableFormDef(AddFormDef):
+class SettableFormDef(AddFormDef):
     """
-    Definition needed to replace a form.
+    Definition needed to update a form.
 
     Attributes:
         id: The Django id of the Form on the database.
-        token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
         description: The description of the form.
         version: The version of the form.
-        database_id: The Django id of the database containing the Form.
-        schema_oid: The OID of the schema where within which form exists.
-        base_table_oid: The table OID based on which a form will be created.
-        is_public: Specifies whether the form is publicly accessible.
+        associated_role_id: The Django id of the configured role to be used while submitting a form.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
-        submit_role_id: The Django id of the configured role to be used while submitting a form.
         submit_message: Message to be displayed upon submission.
-        redirect_url: Redirect path after submission.
-        submit_label: Text to be displayed on the submit button.
+        submit_redirect_url: Redirect path after submission.
+        submit_button_label: Text to be displayed on the submit button.
         fields: Definition of Fields within the form.
     """
     id: int
+    name: str
+    description: Optional[str]
+    version: int
+    associated_role_id: Optional[int]
+    header_title: dict
+    header_subtitle: Optional[dict]
+    submit_message: Optional[dict]
+    submit_redirect_url: Optional[str]
+    submit_button_label: Optional[str]
+    fields: list[AddOrReplaceFieldDef]
 
 
 class SummarizedRecordReference(TypedDict):
@@ -279,17 +284,18 @@ def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
 
 
 @mathesar_rpc_method(name="forms.get", auth="anonymous")
-def get(*, form_id: int, **kwargs) -> FormInfo:
+def get(*, form_token: str, **kwargs) -> FormInfo:
     """
     List information about a form.
 
     Args:
-        form_id: The Django id of the form.
+        form_token: The unique token of the form.
 
     Returns:
-        Form details for a given form_id.
+        Form details for a given form_token.
     """
-    form_model = get_form(form_id)
+    user = kwargs.get(REQUEST_KEY).user
+    form_model = get_form(form_token, user)
     return FormInfo.from_model(form_model)
 
 
@@ -306,7 +312,8 @@ def get_source_info(*, form_token: str, **kwargs) -> FormInfo:
             - Tables associated with the form.
             - Columns of the fields associated with the form.
     """
-    form_source_info = get_form_source_info(form_token)
+    user = kwargs.get(REQUEST_KEY).user
+    form_source_info = get_form_source_info(form_token, user)
     return form_source_info
 
 
@@ -326,6 +333,37 @@ def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
     return [FormInfo.from_model(form) for form in forms]
 
 
+@mathesar_rpc_method(name="forms.regenerate_token", auth="login")
+def regenerate_token(*, form_id: int, **kwargs) -> str:
+    """
+    Regenerate the unique token for a form.
+
+    Args:
+        form_id: The Django id of the form.
+
+    Returns:
+        The new token for the form.
+    """
+    token = regen_form_token(form_id)
+    return token
+
+
+@mathesar_rpc_method(name="forms.set_publish_public", auth="login")
+def set_publish_public(*, form_id: int, publish_public: bool, **kwargs) -> bool:
+    """
+    Set/Unset the form to be publicly shareable.
+
+    Args:
+        form_id: The Django id of the form.
+        publish_public: Specify whether to share the form publicly.
+
+    Returns:
+        The updated state of public sharing for the form.
+    """
+    updated_publish_public = set_form_public_setting(form_id, publish_public)
+    return updated_publish_public
+
+
 @mathesar_rpc_method(name="forms.delete", auth="login")
 def delete(*, form_id: int, **kwargs) -> None:
     """
@@ -337,19 +375,19 @@ def delete(*, form_id: int, **kwargs) -> None:
     delete_form(form_id)
 
 
-@mathesar_rpc_method(name="forms.replace", auth="login")
-def replace(*, new_form: ReplaceableFormDef, **kwargs) -> FormInfo:
+@mathesar_rpc_method(name="forms.patch", auth="login")
+def patch(*, update_form_def: SettableFormDef, **kwargs) -> FormInfo:
     """
-    Replace a form.
+    Update a form.
 
     Args:
-        new_form: A dict describing the form to replace, including the updated fields.
+        update_form_def: A dict describing the form to update, including the updated fields.
 
     Returns:
-        The form info for the replaced form.
+        The form info for the updated form.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model = replace_form(new_form, user)
+    form_model = patch_form(update_form_def, user)
     return FormInfo.from_model(form_model)
 
 
@@ -376,8 +414,8 @@ def list_related_records(
     Returns:
         The requested records, along with some metadata.
     """
-
-    form = get_form_by_token(form_token)
+    user = kwargs.get(REQUEST_KEY).user
+    form = get_form(form_token, user)
     database_id = form.database.id
     form_field = form.fields.get(key=field_key)
     if form_field.kind != "foreign_key":
@@ -395,3 +433,16 @@ def list_related_records(
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return ListRelatedRecordsResponse.from_dict(record_info)
+
+
+@mathesar_rpc_method(name="forms.submit", auth="anonymous")
+def submit(*, form_token: str, values: dict, **kwargs) -> None:
+    """
+    Submit a form.
+
+    Args:
+        form_token: The unique token of the form.
+        values: A dict describing the values to insert.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    return submit_form(form_token, values, user)

@@ -23,8 +23,8 @@
   export let editDataForm: () => void;
   export let deleteDataForm: () => void;
 
-  $: ({ id, name, description, schema, baseTableOId } = dataForm);
-  $: baseTable = $tablesStore.tablesMap.get(baseTableOId);
+  $: ({ id, structure, schema, baseTableOid } = dataForm);
+  $: baseTable = $tablesStore.tablesMap.get(baseTableOid);
 
   $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
   $: formFilloutPageUrl = getDataFormFillPageUrl(
@@ -36,7 +36,7 @@
   function handleDelete() {
     void confirmDelete({
       identifierType: $_('form'),
-      identifierName: $name,
+      identifierName: $structure.name,
       onProceed: async () => {
         deleteDataForm();
       },
@@ -46,8 +46,8 @@
 
 <EntityListItem
   href={builderPageUrl}
-  name={$name}
-  description={$description ?? undefined}
+  name={$structure.name}
+  description={$structure.description ?? undefined}
   icon={iconForm}
 >
   <svelte:fragment slot="detail">

@@ -9,19 +9,20 @@
   import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
   import {
     DataFormCanvas,
+    DataFormStructure,
+    FormSource,
     ReadonlyDataFormManager,
-    rawDataFormToEphemeralFormProps,
-  } from '@mathesar/systems/data-forms';
+  } from '@mathesar/systems/data-forms/form-maker';
 
   export let rawDataForm: RawDataForm;
   export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;
 
-  $: pageTitle = rawDataForm.header_title.text.trim() || rawDataForm.name;
+  $: pageTitle = rawDataForm.name.trim();
   $: dataFormManager = formSourceInfo.resolvedValue
     ? new ReadonlyDataFormManager(
-        rawDataFormToEphemeralFormProps(
+        DataFormStructure.factoryFromRawInfo(
           rawDataForm,
-          formSourceInfo.resolvedValue,
+          new FormSource(formSourceInfo.resolvedValue),
         ),
       )
     : undefined;
@@ -31,7 +32,7 @@
   <title>{makeSimplePageTitle(pageTitle)}</title>
 </svelte:head>
 
-<LayoutWithHeader fitViewport showHeader={false}>
+<LayoutWithHeader fitViewport>
   {#if dataFormManager}
     <div class="data-form-filler">
       <DataFormCanvas {dataFormManager} />

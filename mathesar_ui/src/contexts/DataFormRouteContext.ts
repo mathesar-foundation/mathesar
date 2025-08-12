@@ -1,33 +1,36 @@
-import { get } from 'svelte/store';
-
 import { api } from '@mathesar/api/rpc';
-import type { RawEphemeralDataForm } from '@mathesar/api/rpc/forms';
+import type { RawDataForm } from '@mathesar/api/rpc/forms';
 import type { DataForm } from '@mathesar/models/DataForm';
-import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+import AsyncStore from '@mathesar/stores/AsyncStore';
 
 import type { SchemaRouteContext } from './SchemaRouteContext';
 import { getRouteContext, setRouteContext } from './utils';
 
 const contextKey = Symbol('dataform route store');
 
+function getCombinedAsyncStore() {
+  return new AsyncStore((_rawDataForm: RawDataForm) =>
+    api.forms
+      .get_source_info({ form_token: _rawDataForm.token })
+      .run()
+      .transformResolved((rawFormSource) => ({
+        rawDataForm: _rawDataForm,
+        rawFormSource,
+      })),
+  );
+}
+
 export class DataFormRouteContext {
   schemaRouteContext;
 
   dataForm;
 
-  formSourceInfo;
+  rawDataFormWithSource;
 
   constructor(schemaRouteContext: SchemaRouteContext, dataForm: DataForm) {
     this.schemaRouteContext = schemaRouteContext;
     this.dataForm = dataForm;
-    this.formSourceInfo = new AsyncRpcApiStore(api.forms.get_source_info);
-    void this.formSourceInfo.run({ form_token: get(this.dataForm.token) });
-  }
-
-  async replaceDataForm(dataFormDef: RawEphemeralDataForm) {
-    this.formSourceInfo.reset();
-    await this.dataForm.replaceDataForm(dataFormDef);
-    void this.formSourceInfo.run({ form_token: get(this.dataForm.token) });
+    this.rawDataFormWithSource = getCombinedAsyncStore();
   }
 
   static construct(schemaRouteContext: SchemaRouteContext, dataForm: DataForm) {

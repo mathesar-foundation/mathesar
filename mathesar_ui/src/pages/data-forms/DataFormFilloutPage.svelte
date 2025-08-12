@@ -7,19 +7,23 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     DataFormCanvas,
+    DataFormStructure,
+    FormSource,
     ReadonlyDataFormManager,
-    rawDataFormToEphemeralFormProps,
-  } from '@mathesar/systems/data-forms';
+  } from '@mathesar/systems/data-forms/form-maker';
 
   const dataFormRouteContext = DataFormRouteContext.get();
-  $: ({ dataForm, formSourceInfo } = $dataFormRouteContext);
+  $: ({ dataForm, rawDataFormWithSource } = $dataFormRouteContext);
 
   $: rawDataFormStore = dataForm.toRawDataFormStore();
-  $: dataFormManager = $formSourceInfo.resolvedValue
+  $: void rawDataFormWithSource.run($rawDataFormStore);
+  $: rawDataFormWithSourceValue = $rawDataFormWithSource.resolvedValue;
+
+  $: dataFormManager = rawDataFormWithSourceValue
     ? new ReadonlyDataFormManager(
-        rawDataFormToEphemeralFormProps(
-          $rawDataFormStore,
-          $formSourceInfo.resolvedValue,
+        DataFormStructure.factoryFromRawInfo(
+          rawDataFormWithSourceValue.rawDataForm,
+          new FormSource(rawDataFormWithSourceValue.rawFormSource),
         ),
       )
     : undefined;
@@ -34,8 +38,8 @@
     <div class="data-form-filler">
       <DataFormCanvas {dataFormManager} />
     </div>
-  {:else if $formSourceInfo.error}
-    <Errors errors={[$formSourceInfo.error]} />
+  {:else if $rawDataFormWithSource.error}
+    <Errors errors={[$rawDataFormWithSource.error]} />
   {/if}
 </LayoutWithHeader>
 
