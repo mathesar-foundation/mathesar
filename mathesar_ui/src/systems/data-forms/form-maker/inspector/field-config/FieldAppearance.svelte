@@ -29,7 +29,7 @@
         options={sizeOptions}
         getLabel={(option) => {
           if (isDefinedNonNullable(option)) {
-            return option === 'regular' ? $_('size_regular') : $_('size_large');
+            return option === 'regular' ? $_('regular') : $_('large');
           }
           return '';
         }}
