@@ -18,7 +18,7 @@
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: FkField;
-  export let apperance: Appearance = 'outcome';
+  export let appearance: Appearance = 'outcome';
 
   $: ({ interactionRule, relatedTableOid } = dataFormField);
   $: linkedTableStructure = dataFormManager.getTableStructure(relatedTableOid);
@@ -63,7 +63,7 @@
 </script>
 
 <Select
-  triggerAppearance={apperance}
+  triggerAppearance={appearance}
   options={fkFieldInteractionRules}
   value={$interactionRule}
   on:change={(e) =>

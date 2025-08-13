@@ -75,7 +75,7 @@
   {#if field.kind === 'foreign_key'}
     <InspectorSection title={$_('field_fk_rule_label')}>
       <FkFormFieldRuleSelector
-        apperance="default"
+        appearance="default"
         {dataFormManager}
         dataFormField={field}
       />
