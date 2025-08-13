@@ -2,6 +2,10 @@
   import { _ } from 'svelte-i18n';
 
   import {
+    type RawEphemeralDataForm,
+    dataFormStructureVersion,
+  } from '@mathesar/api/rpc/forms';
+  import {
     FieldLayout,
     type FilledFormValues,
     FormSubmit,
@@ -25,7 +29,7 @@
     ensureReadable,
   } from '@mathesar-component-library';
 
-  import { tableStructureSubstanceToRawEphemeralForm } from './utils';
+  import { processedColumnToRawDataFormField } from './utils';
 
   const schemaRouteContext = SchemaRouteContext.get();
 
@@ -33,14 +37,13 @@
   export let dataForm: DataForm | undefined = undefined;
   export let onClose: (() => void) | undefined = undefined;
 
-  $: savedName = ensureReadable(dataForm?.name ?? '');
-  $: savedDescription = ensureReadable(dataForm?.description ?? '');
+  $: savedStructure = ensureReadable(dataForm?.structure);
   $: savedBaseTable = dataForm
     ? $importVerifiedTables.get(dataForm.baseTableOid)
     : undefined;
 
-  $: name = requiredField($savedName ?? '');
-  $: description = optionalField($savedDescription ?? '');
+  $: name = requiredField($savedStructure?.name ?? '');
+  $: description = optionalField($savedStructure?.description ?? '');
   $: sourceTable = requiredField<Table | undefined>(savedBaseTable);
   $: form = makeForm({ name, description, sourceTable });
   $: modalTitle = dataForm ? $_('edit_form_with_name') : $_('create_new_form');
@@ -50,17 +53,26 @@
       await dataForm.updateNameAndDesc(values.name, values.description);
     } else {
       const tableStructure = new TableStructure(values.sourceTable);
-      const tableStructureSubstance =
+      const tableStructureStore =
         await tableStructure.getSubstanceOnceResolved();
-      if (tableStructureSubstance.resolvedValue) {
-        const rawEpf = tableStructureSubstanceToRawEphemeralForm(
-          tableStructureSubstance.resolvedValue,
-        );
-        await $schemaRouteContext.insertDataForm({
-          ...rawEpf,
+      const tableStructureSubstance = tableStructureStore.resolvedValue;
+      if (tableStructureSubstance) {
+        const rawEpf: RawEphemeralDataForm = {
           name: values.name,
           description: values.description,
-        });
+          base_table_oid: tableStructureSubstance.table.oid,
+          schema_oid: tableStructureSubstance.table.schema.oid,
+          database_id: tableStructureSubstance.table.schema.database.id,
+          version: dataFormStructureVersion,
+          associated_role_id: null,
+          submit_message: null,
+          submit_redirect_url: null,
+          submit_button_label: null,
+          fields: [...tableStructureSubstance.processedColumns.values()]
+            .filter((pc) => !pc.column.default?.is_dynamic)
+            .map((c, index) => processedColumnToRawDataFormField(c, index)),
+        };
+        await $schemaRouteContext.insertDataForm(rawEpf);
       }
     }
     controller.close();
@@ -77,7 +89,7 @@
   <span slot="title">
     <RichText text={modalTitle} let:slotName>
       {#if slotName === 'formName'}
-        <Identifier>{$savedName}</Identifier>
+        <Identifier>{$savedStructure?.name}</Identifier>
       {/if}
     </RichText>
   </span>

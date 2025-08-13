@@ -1,0 +1,69 @@
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import type { RawDataFormField } from '@mathesar/api/rpc/forms';
+import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+import type { Table } from '@mathesar/models/Table';
+import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
+import type { AbstractType } from '@mathesar/stores/abstract-types/types';
+import type { ProcessedColumn } from '@mathesar/stores/table-data';
+
+/**
+ * We'd ideally like use ProcessedColumn here, however we do not have access to
+ * constraints in the context of forms, especially when its anonymous.
+ *
+ * We would also like to phase out exposing and working with constraints directly on the
+ * frontend, except where it is essential to do so. When we remove the dependency on
+ * Constraints in ProcessedColumn, we could use it instead of FieldColumn.
+ */
+export class FieldColumn {
+  readonly tableOid: number;
+
+  readonly column: RawColumnWithMetadata;
+
+  readonly abstractType: AbstractType;
+
+  readonly foreignKeyLink: {
+    relatedTableOid: number;
+  } | null;
+
+  constructor(props: {
+    tableOid: Table['oid'];
+    column: RawColumnWithMetadata;
+    foreignKeyLink: {
+      relatedTableOid: number;
+    } | null;
+  }) {
+    this.tableOid = props.tableOid;
+    this.column = props.column;
+    this.foreignKeyLink = props.foreignKeyLink;
+    this.abstractType = getAbstractTypeForDbType(this.column.type);
+  }
+
+  getInputComponentAndProps(styling?: RawDataFormField['styling']) {
+    let { cellInfo } = this.abstractType;
+    if (cellInfo.type === 'string') {
+      cellInfo = {
+        type: 'string',
+        config: {
+          multiLine: styling?.size === 'large',
+        },
+      };
+    }
+    return getDbTypeBasedInputCap(
+      this.column,
+      this.foreignKeyLink?.relatedTableOid,
+      cellInfo,
+    );
+  }
+
+  static fromProcessedColumn(pc: ProcessedColumn) {
+    return new FieldColumn({
+      tableOid: pc.tableOid,
+      column: pc.column,
+      foreignKeyLink: pc.linkFk
+        ? {
+            relatedTableOid: pc.linkFk.referent_table_oid,
+          }
+        : null,
+    });
+  }
+}
