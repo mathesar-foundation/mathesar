@@ -104,7 +104,7 @@
     position: absolute;
     display: flex;
     padding: 0 var(--sm2);
-    z-index: var(--z-index__data_forms__field-header);
+    z-index: var(--data_forms__z-index__field-header);
     width: fit-content;
     max-width: 100%;
   }

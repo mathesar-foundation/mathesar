@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
 
   import FieldConfig from './field-config/FieldConfig.svelte';

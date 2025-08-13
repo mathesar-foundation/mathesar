@@ -1,5 +1,4 @@
 import { type Readable, get, writable } from 'svelte/store';
-import { _ } from 'svelte-i18n';
 
 import type { RawForeignKeyDataFormField } from '@mathesar/api/rpc/forms';
 

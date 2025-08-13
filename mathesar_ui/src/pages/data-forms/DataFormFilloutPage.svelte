@@ -30,7 +30,13 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($_('fill_form'))}</title>
+  <title>
+    {makeSimplePageTitle(
+      $_('fillout_form_with_name', {
+        values: { formName: $rawDataFormStore.name },
+      }),
+    )}
+  </title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { Spinner } from '@mathesar-component-library';
 </script>
