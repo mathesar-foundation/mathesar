@@ -7,7 +7,7 @@ import {
   get,
 } from 'svelte/store';
 
-import { WritableSet } from '@mathesar-component-library';
+import { WritableSet, reactiveSort } from '@mathesar-component-library';
 
 import type { DataFormStructure } from '../DataFormStructure';
 import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
@@ -69,32 +69,10 @@ export class FormFields {
       buildField(this, this.changeEventHandler),
     );
     this.fieldSet = new WritableSet(ephemeralFormFields);
-    this.sortedFields = derived<WritableSet<DataFormField>, DataFormField[]>(
-      this.fieldSet,
-      (_, set) => {
-        let unsubIndexStores: (() => void)[] = [];
-        const { fieldSet } = this;
-
-        function updateSorted() {
-          set(
-            [...get(fieldSet).values()].sort(
-              (a, b) => get(a.index) - get(b.index),
-            ),
-          );
-        }
-
-        function resubscribe() {
-          unsubIndexStores.forEach((u) => u());
-          unsubIndexStores = [...get(fieldSet).values()].map((item) =>
-            item.index.subscribe(updateSorted),
-          );
-        }
-
-        resubscribe();
-        updateSorted();
-        return () => unsubIndexStores.forEach((u) => u());
-      },
-      [],
+    this.sortedFields = reactiveSort(
+      this.fieldSet.derivedValues(),
+      (field) => field.index,
+      (a, b) => a - b,
     );
 
     this.fieldValueStores = derived<
