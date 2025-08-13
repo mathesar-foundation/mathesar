@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import { iconExpandRight } from '@mathesar/icons';
   import { Button, Icon, iconShowMore } from '@mathesar-component-library';
 

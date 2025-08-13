@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type { RawDataForm, RawDataFormSource } from '@mathesar/api/rpc/forms';
   import Errors from '@mathesar/components/errors/Errors.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';

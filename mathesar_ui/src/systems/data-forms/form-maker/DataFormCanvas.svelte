@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import { dataFormInspectorWidth } from '@mathesar/stores/localStorage';
   import { WithPanel } from '@mathesar-component-library';
 

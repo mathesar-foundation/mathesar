@@ -27,15 +27,6 @@
   $: formStructure = ensureReadable(form?.structure);
 </script>
 
-<AppendBreadcrumb
-  item={{
-    type: 'simple',
-    href: getDataFormPageUrl(schema.database.id, schema.oid, formId),
-    label: $formStructure?.name ?? $_('data_forms'),
-    icon: iconForm,
-  }}
-/>
-
 {#if $dataForms.isLoading}
   <LoadingPage />
 {/if}
@@ -44,7 +35,16 @@
   <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
 {/if}
 
-{#if $dataFormRouteContext}
+{#if $dataFormRouteContext && $formStructure}
+  <AppendBreadcrumb
+    item={{
+      type: 'simple',
+      href: getDataFormPageUrl(schema.database.id, schema.oid, formId),
+      label: $formStructure?.name ?? $_('form'),
+      icon: iconForm,
+    }}
+  />
+
   <Route path="/">
     <DataFormEditorPage />
   </Route>

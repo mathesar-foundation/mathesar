@@ -27,11 +27,7 @@
   );
 
   $: configuredRolesValue = new ImmutableMap($configuredRoles.resolvedValue);
-  $: currentRoleValue = $currentRole.resolvedValue;
   $: configuredRoleIds = [...configuredRolesValue.values()].map((r) => r.id);
-  $: currentRoleInfo = currentRoleValue
-    ? configuredRolesValue.get(currentRoleValue.currentRoleOid)
-    : undefined;
 
   $: ({ associatedRoleId } = dataFormManager.dataFormStructure);
 </script>
