@@ -6,6 +6,7 @@
   import { iconCopyMajor, iconOpenLinkInNewTab } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+  import { getFormShareUrl } from '@mathesar/routes/urls';
   import {
     confirm,
     confirmationController,
@@ -30,7 +31,7 @@
 
   $: ({ sharePreferences, token } = dataForm);
   $: ({ hasChanges } = dataFormManager);
-  $: shareLink = `${window.location.origin}/shares/forms/${$token}`;
+  $: shareLink = `${window.location.origin}${getFormShareUrl($token)}`;
 
   let linkInput: HTMLInputElement;
 
