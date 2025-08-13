@@ -46,8 +46,8 @@
     max-height: fit-content;
     max-width: 60rem;
     background: var(--elevated-background);
-    --z-index__data_forms__field-header: 1;
-    --z-index__data_forms__field-add-dropdown-trigger: 2;
+    --data_forms__z-index__field-header: 1;
+    --data_forms__z-index__field-add-dropdown-trigger: 2;
     --data_forms__label-input-gap: 0.5rem;
     --data_forms__selectable-element-padding: 1rem;
 

@@ -49,7 +49,7 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($_('form_maker'))}</title>
+  <title>{makeSimplePageTitle($rawDataFormStore.name)}</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>

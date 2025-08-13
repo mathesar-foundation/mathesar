@@ -1,5 +1,4 @@
 import { type Readable, derived, get, writable } from 'svelte/store';
-import { _ } from 'svelte-i18n';
 
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 

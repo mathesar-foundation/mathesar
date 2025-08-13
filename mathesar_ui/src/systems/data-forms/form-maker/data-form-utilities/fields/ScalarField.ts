@@ -1,5 +1,3 @@
-import { _ } from 'svelte-i18n';
-
 import type { RawScalarDataFormField } from '@mathesar/api/rpc/forms';
 
 import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
