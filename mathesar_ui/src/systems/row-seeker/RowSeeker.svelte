@@ -4,6 +4,7 @@
   import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
+  import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import {
     ListBox,
     ListBoxOptions,
@@ -92,7 +93,7 @@
             <div class="loading"><Spinner /></div>
           {:else if $records.error}
             <ErrorBox>
-              {$records.error.message}
+              {RpcError.fromAnything($records.error).message}
             </ErrorBox>
           {:else}
             <div class="no-results">{$_('no_records_found')}</div>

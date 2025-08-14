@@ -9,26 +9,24 @@ import {
   type AttachableRowSeekerController,
   rowSeekerContext,
 } from './AttachableRowSeekerController';
+import type { RowSeekerProps } from './RowSeekerController';
 
 /**
  * An adapter to make an AttachableRowSeekerController work as a
  * RecordSelectionOrchestrator
  */
 function makeRowSeekerOrchestrator({
-  formToken,
-  fieldKey,
+  constructRecordStore,
   rowSeeker,
 }: {
-  formToken: string;
-  fieldKey: string;
+  constructRecordStore: RowSeekerProps['constructRecordStore'];
   rowSeeker: AttachableRowSeekerController;
 }): RecordSelectionOrchestrator {
   return {
     launch: ({ previousValue, triggerElement }) =>
       rowSeeker.acquireUserSelection({
         previousValue,
-        formToken,
-        fieldKey,
+        constructRecordStore,
         triggerElement: triggerElement ?? document.body,
       }),
     close: () => rowSeeker.close(),
@@ -41,14 +39,12 @@ function makeRowSeekerOrchestrator({
  * necessary
  */
 export function makeRowSeekerOrchestratorFactory({
-  formToken,
-  fieldKey,
+  constructRecordStore,
 }: {
-  formToken: string;
-  fieldKey: string;
+  constructRecordStore: RowSeekerProps['constructRecordStore'];
 }): RecordSelectionOrchestratorFactory {
   return () => {
     const rowSeeker = rowSeekerContext.getOrError();
-    return makeRowSeekerOrchestrator({ formToken, fieldKey, rowSeeker });
+    return makeRowSeekerOrchestrator({ constructRecordStore, rowSeeker });
   };
 }

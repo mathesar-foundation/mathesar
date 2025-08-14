@@ -1,10 +1,12 @@
 import { type Readable, derived, get, writable } from 'svelte/store';
 
+import { api } from '@mathesar/api/rpc';
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 import {
   getDbTypeBasedInputCap,
   getLinkedRecordInputCap,
 } from '@mathesar/components/cell-fabric/utils';
+import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
 
 import {
@@ -52,8 +54,13 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       if (this.fieldColumn.foreignKeyLink) {
         return getLinkedRecordInputCap({
           recordSelectionOrchestratorFactory: makeRowSeekerOrchestratorFactory({
-            formToken: this.getFormToken(),
-            fieldKey: this.key,
+            constructRecordStore: () =>
+              new AsyncRpcApiStore(api.forms.list_related_records, {
+                staticProps: {
+                  form_token: this.getFormToken(),
+                  field_key: this.key,
+                },
+              }),
           }),
         });
       }

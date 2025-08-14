@@ -3,7 +3,9 @@ import { writable } from 'svelte/store';
 import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
 import { makeContext } from '@mathesar/contexts/utils';
 
-import RowSeekerController from './RowSeekerController';
+import RowSeekerController, {
+  type RowSeekerProps,
+} from './RowSeekerController';
 
 export class AttachableRowSeekerController {
   triggerElement = writable<HTMLElement | undefined>(undefined);
@@ -12,20 +14,17 @@ export class AttachableRowSeekerController {
 
   async acquireUserSelection({
     triggerElement,
-    formToken,
-    fieldKey,
+    constructRecordStore,
     previousValue,
   }: {
     triggerElement: HTMLElement;
-    formToken: string;
-    fieldKey: string;
+    constructRecordStore: RowSeekerProps['constructRecordStore'];
     previousValue?: SummarizedRecordReference;
   }) {
     this.triggerElement.set(triggerElement);
     const rowSeeker = new RowSeekerController({
       previousValue,
-      formToken,
-      fieldKey,
+      constructRecordStore,
     });
     this.rowSeeker.set(rowSeeker);
     await rowSeeker.getReady();
