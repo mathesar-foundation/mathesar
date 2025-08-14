@@ -142,6 +142,10 @@ export function getDataFormFillPageUrl(
   return `${getSchemaPageUrl(databaseId, schemaId)}forms/${formId}/fillout/`;
 }
 
+export function getFormShareUrl(formToken: string) {
+  return `/shares/forms/${formToken}`;
+}
+
 export const USER_PROFILE_URL = '/profile/';
 export const ADMIN_URL = '/administration/';
 export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;

@@ -108,9 +108,12 @@ function combineRecordRowsWithGroupHeaders({
       group.resultIndices.forEach((resultIndex) => {
         const recordRow = recordRows[resultIndex];
         if (!recordRow) {
-          throw new Error(
-            'Record from group result index is not found. This should never happen',
-          );
+          // ⚠️ This is a weird case. It _does_ actually occur. Returning is a
+          // bit of a hack. Fixing this properly will require some refactoring
+          // of stores. See comments in:
+          // https://github.com/mathesar-foundation/mathesar/issues/4594 and/or
+          // the related PR
+          return;
         }
         combinedRows.push({
           row: recordRow,
