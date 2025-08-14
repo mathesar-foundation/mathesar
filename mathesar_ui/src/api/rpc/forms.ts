@@ -1,5 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
+import type { SummarizedRecordReference } from './_common/commonTypes';
 import type { RawColumnWithMetadata } from './columns';
 import type { RawDatabase } from './databases';
 import type { RawConfiguredRole } from './roles';
@@ -46,8 +47,8 @@ export type RawDataFormField =
   | RawForeignKeyDataFormField;
 
 export interface RawDataFormStructure {
-  header_title: RichTextJson;
-  header_subtitle: RichTextJson | null;
+  name: string;
+  description: string | null;
   fields: RawDataFormField[];
   submit_message: RichTextJson | null;
   submit_redirect_url: string | null;
@@ -59,8 +60,6 @@ export interface RawEphemeralDataForm extends RawDataFormStructure {
   database_id: number;
   base_table_oid: number;
   schema_oid: number;
-  name: string;
-  description: string | null;
   version: number;
 }
 
@@ -70,11 +69,16 @@ export interface RawDataForm extends RawEphemeralDataForm {
   publish_public: boolean;
 }
 
-interface UpdateRawDataFormDefinitionRequest extends RawDataFormStructure {
+interface AddRawDataFormRequest extends RawEphemeralDataForm {
+  header_title: RichTextJson;
+  header_subtitle: RichTextJson | null;
+}
+
+interface UpdateRawDataFormRequest extends RawDataFormStructure {
   id: number;
-  name: string;
-  description: string | null;
   version: number;
+  header_title: RichTextJson;
+  header_subtitle: RichTextJson | null;
 }
 
 interface RawDataFormResponse extends RawDataForm {
@@ -89,6 +93,50 @@ export type RawDataFormSource = Record<
     columns: Record<string, RawColumnWithMetadata>;
   }
 >;
+
+export interface RecordsSummaryListResponse {
+  count: number;
+  results: SummarizedRecordReference[];
+}
+
+/**
+ * We have these constructRequest methods to add `header_title` & `header_subtitle` to requests.
+ *
+ * These properties are stored on the Form model on the backend. However, the frontend does not use them,
+ * and instead uses the name & description directly.
+ * See this comment: https://github.com/mathesar-foundation/mathesar/pull/4609#pullrequestreview-3079427817
+ *
+ * We have not removed them from the backend since we might want to separate them on the frontend in the future.
+ */
+
+export function constructRequestToAddForm(dataFormDef: RawEphemeralDataForm): {
+  form_def: AddRawDataFormRequest;
+} {
+  return {
+    form_def: {
+      ...dataFormDef,
+      header_title: { text: dataFormDef.name },
+      header_subtitle: dataFormDef.description
+        ? { text: dataFormDef.description }
+        : null,
+    },
+  };
+}
+
+export function constructRequestToUpdateForm(
+  updateFormDef: RawDataFormStructure & { id: number },
+): { update_form_def: UpdateRawDataFormRequest } {
+  return {
+    update_form_def: {
+      ...updateFormDef,
+      version: dataFormStructureVersion,
+      header_title: { text: updateFormDef.name },
+      header_subtitle: updateFormDef.description
+        ? { text: updateFormDef.description }
+        : null,
+    },
+  };
+}
 
 export const forms = {
   get: rpcMethodTypeContainer<
@@ -112,13 +160,13 @@ export const forms = {
   >(),
   add: rpcMethodTypeContainer<
     {
-      form_def: RawEphemeralDataForm;
+      form_def: AddRawDataFormRequest;
     },
     RawDataFormResponse
   >(),
   patch: rpcMethodTypeContainer<
     {
-      update_form_def: UpdateRawDataFormDefinitionRequest;
+      update_form_def: UpdateRawDataFormRequest;
     },
     RawDataFormResponse
   >(),
@@ -127,6 +175,16 @@ export const forms = {
       form_id: RawDataForm['id'];
     },
     void
+  >(),
+  list_related_records: rpcMethodTypeContainer<
+    {
+      form_token: string;
+      field_key: string;
+      limit?: number | null;
+      offset?: number | null;
+      search?: string | null;
+    },
+    RecordsSummaryListResponse
   >(),
   submit: rpcMethodTypeContainer<
     {

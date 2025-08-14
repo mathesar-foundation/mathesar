@@ -1,9 +1,11 @@
 """
 Classes and functions exposed to the RPC endpoint for managing forms.
 """
-from typing import Optional, TypedDict, Literal
+from typing import Optional, TypedDict, Literal, Any
 
 from modernrpc.core import REQUEST_KEY
+
+from db.records import list_by_record_summaries
 
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.utils.forms import (
@@ -17,6 +19,7 @@ from mathesar.utils.forms import (
     get_form_source_info,
     submit_form,
 )
+from mathesar.utils.tables import get_table_record_summary_templates
 
 
 class FieldInfo(TypedDict):
@@ -233,6 +236,37 @@ class SettableFormDef(AddFormDef):
     fields: list[AddOrReplaceFieldDef]
 
 
+class SummarizedRecordReference(TypedDict):
+    """
+    A summarized reference to a record, typically used in foreign key fields.
+
+    Attributes:
+        key: A unique identifier for the record.
+        summary: The record summary
+    """
+    key: Any
+    summary: str
+
+
+class ListRelatedRecordsResponse(TypedDict):
+    """
+    Response for listing related records for a foreign key field.
+
+    Attributes:
+        count: The total number of records matching the criteria.
+        results: A list of summarized record references, each containing a key and a summary.
+    """
+    count: int
+    results: list[SummarizedRecordReference]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            count=d["count"],
+            results=d["results"],
+        )
+
+
 @mathesar_rpc_method(name="forms.add", auth="login")
 def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
     """
@@ -355,6 +389,50 @@ def patch(*, update_form_def: SettableFormDef, **kwargs) -> FormInfo:
     user = kwargs.get(REQUEST_KEY).user
     form_model = patch_form(update_form_def, user)
     return FormInfo.from_model(form_model)
+
+
+@mathesar_rpc_method(name="forms.list_related_records", auth="anonymous")
+def list_related_records(
+        *,
+        form_token: str,
+        field_key: str,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        search: Optional[str] = None,
+        **kwargs,
+) -> ListRelatedRecordsResponse:
+    """
+    List records for selection via the row seeker
+
+    Args:
+        form_token: The unique token of the form.
+        field_key: The key of the foreign key field for which to list related records.
+        limit: Optional limit on the number of records to return.
+        offset: Optional offset for pagination.
+        search: Optional search term to filter records.
+
+    Returns:
+        The requested records, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    form = get_form(form_token, user)
+    database_id = form.database.id
+    form_field = form.fields.get(key=field_key)
+    if form_field.kind != "foreign_key":
+        raise ValueError(f"Field {field_key} is not a foreign key field.")
+
+    table_oid = form_field.related_table_oid
+
+    with form.connection as conn:
+        record_info = list_by_record_summaries(
+            conn,
+            table_oid,
+            limit=limit,
+            offset=offset,
+            search=search,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+        )
+    return ListRelatedRecordsResponse.from_dict(record_info)
 
 
 @mathesar_rpc_method(name="forms.submit", auth="anonymous")

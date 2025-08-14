@@ -2,7 +2,7 @@ import type { RawEphemeralDataForm } from '@mathesar/api/rpc/forms';
 import type { DataForm } from '@mathesar/models/DataForm';
 import type { Schema } from '@mathesar/models/Schema';
 
-import { getRouteContext, setRouteContext } from './utils';
+import { getRouteContext, getSafeRouteContext, setRouteContext } from './utils';
 
 const contextKey = Symbol('schema route store');
 
@@ -35,5 +35,9 @@ export class SchemaRouteContext {
 
   static get() {
     return getRouteContext<SchemaRouteContext>(contextKey);
+  }
+
+  static getSafe() {
+    return getSafeRouteContext<SchemaRouteContext>(contextKey);
   }
 }

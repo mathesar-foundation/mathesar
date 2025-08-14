@@ -295,11 +295,15 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        forms.list_related_records,
+        "forms.list_related_records",
+        []
+    ),
+    (
         forms.submit,
         "forms.submit",
         []
     ),
-
     (
         records.add,
         "records.add",
