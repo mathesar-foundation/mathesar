@@ -20,6 +20,7 @@ export interface DataFormManager {
   dataFormStructure: DataFormStructure;
 }
 
+// TODO_FORMS: Rename this class to DataFormFillOutManager
 export class ReadonlyDataFormManager implements DataFormManager {
   token: Readable<string>;
 
@@ -55,6 +56,7 @@ export type SelectableElement =
   | SelectableStaticElement
   | SelectableFieldElement;
 
+// TODO_FORMS: Rename this class to DataFormBuildManager
 export class EditableDataFormManager implements DataFormManager {
   readonly dataFormStructure;
 
