@@ -179,22 +179,39 @@ def delete_form(form_id):
     Form.objects.get(id=form_id).delete()
 
 
-def iterate_form_fields(fields, parent_field=None, depth=0):
+def iterate_form_fields(fields, parent_field=None, depth=0, fields_to_pick=[]):
     """
     Depth-first generator that iterates through the form fields
     """
     for field in fields:
         yield field, parent_field, depth
+        if field.key in fields_to_pick:
+            # We prune the tree early if the fk interaction for a field is "pick" instead of "create"
+            #
+            #              A
+            #            /   \
+            # ("create")B     C("pick")
+            #          / \   / \
+            #         D   E F   G
+            #
+            # We don't traverse fields F and G since we know we're going to "pick" a value for C.
+            # This has 2 main advantages:
+            # - Even if values for F and G are provided by the frontend during submit,
+            #   we won't "pick" for C _and_ "create" for F and G, we'll only "pick" for C.
+            # - We only send the fields that are required for insert to the db.
+            continue
         yield from iterate_form_fields(
             field.child_fields.all(),
             field,
-            depth + 1
+            depth + 1,
+            fields_to_pick
         )
 
 
 def submit_form(form_token, values, user):
     form_model = Form.objects.get(token=form_token)
     assert has_permission_for_form(user, form_model), 'Insufficient permission to submit the form'
+    fields_to_pick = [i for i in values.keys() if isinstance(values[i], dict) and values[i].get('type') == 'pick']
     field_info_list = [
         {
             "key": field.key,
@@ -202,7 +219,10 @@ def submit_form(form_token, values, user):
             "column_attnum": field.column_attnum,
             "table_oid": parent_field.related_table_oid if parent_field else form_model.base_table_oid,
             "depth": depth
-        } for field, parent_field, depth in iterate_form_fields(form_model.fields.filter(parent_field__isnull=True))
+        } for field, parent_field, depth in iterate_form_fields(
+            form_model.fields.filter(parent_field__isnull=True),
+            fields_to_pick=fields_to_pick
+        )
     ]
     with form_model.connection as conn:
         form_insert(field_info_list, values, conn)
