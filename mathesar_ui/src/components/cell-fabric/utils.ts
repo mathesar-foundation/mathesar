@@ -8,7 +8,10 @@ import DataTypes from './data-types';
 import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
 import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';
 import PrimaryKeyCell from './data-types/components/primary-key/PrimaryKeyCell.svelte';
-import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';
+import type {
+  LinkedRecordCellExternalProps,
+  LinkedRecordInputExternalProps,
+} from './data-types/components/typeDefinitions';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import { getCellConfiguration, getCellInfo } from './data-types/utils';
 
@@ -52,18 +55,8 @@ export function getCellCap({
 
 export function getDbTypeBasedInputCap(
   column: CellColumnLike,
-  fkTargetTableId?: Table['oid'],
   optionalCellInfo?: CellInfo,
 ): ComponentAndProps {
-  if (fkTargetTableId) {
-    const props: LinkedRecordCellExternalProps = {
-      tableId: fkTargetTableId,
-    };
-    return {
-      component: LinkedRecordInput,
-      props,
-    };
-  }
   const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
@@ -71,16 +64,19 @@ export function getDbTypeBasedInputCap(
 
 export function getDbTypeBasedFilterCap(
   column: CellColumnLike,
-  fkTargetTableId?: Table['oid'],
   optionalCellInfo?: CellInfo,
-): ComponentAndProps {
+): ComponentAndProps | undefined {
   const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
   const factory = DataTypes[cellInfo?.type ?? 'string'];
-  if (fkTargetTableId === undefined && factory.getFilterInput) {
-    const config = getCellConfiguration(column.type, cellInfo);
-    return factory.getFilterInput(column, config);
-  }
-  return getDbTypeBasedInputCap(column, fkTargetTableId, cellInfo);
+  if (!factory.getFilterInput) return undefined;
+  const config = getCellConfiguration(column.type, cellInfo);
+  return factory.getFilterInput(column, config);
+}
+
+export function getLinkedRecordInputCap(
+  props: LinkedRecordInputExternalProps,
+): ComponentAndProps {
+  return { component: LinkedRecordInput, props };
 }
 
 export function getInitialInputValue(

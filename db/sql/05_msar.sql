@@ -947,6 +947,36 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
+(
+  id smallint, -- The OID of the column.
+  name name, -- Name of the column.
+  type text, -- The type of the column for the table.
+  type_options jsonb, -- type_options for the column(if any).
+  nullable boolean, -- is the column nullable.
+  primary_key boolean, -- whether the column has primary key constraint. 
+  "default" jsonb, -- the default for the column(if any).
+  has_dependents boolean, -- is the column referenced by others.
+  description text, -- The description of the column on the database.
+  current_role_priv jsonb -- Privileges of the current role on the column.
+) AS $$
+SELECT
+  attnum AS id,
+  attname AS name,
+  CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END AS type,
+  msar.get_type_options(atttypid, atttypmod, attndims) AS type_options,
+  NOT attnotnull AS nullable,
+  COALESCE(pgi.indisprimary, false) AS primary_key,
+  msar.describe_column_default(tab_id, attnum) AS default,
+  msar.has_dependents(tab_id, attnum) AS has_dependents,
+  msar.col_description(tab_id, attnum) AS description,
+  msar.list_column_privileges_for_current_role(tab_id, attnum) AS current_role_priv
+FROM pg_catalog.pg_attribute pga
+  LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
+WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return an array of objects describing the columns of the table.
 
@@ -969,24 +999,8 @@ object has the keys:
   value: A string giving the value (as an SQL expression) of the default.
   is_dynamic: A boolean giving whether the default is (likely to be) dynamic.
 */
-SELECT jsonb_agg(
-  jsonb_build_object(
-    'id', attnum,
-    'name', attname,
-    'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END,
-    'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
-    'nullable', NOT attnotnull,
-    'primary_key', COALESCE(pgi.indisprimary, false),
-    'default', msar.describe_column_default(tab_id, attnum),
-    'has_dependents', msar.has_dependents(tab_id, attnum),
-    'description', msar.col_description(tab_id, attnum),
-    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum)
-  )
-)
-FROM pg_attribute pga
-  LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
-  LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
-WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
+SELECT coalesce(jsonb_agg(column_data), '[]'::jsonb)
+FROM msar.column_info_table(tab_id) AS column_data;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1002,6 +1016,29 @@ FROM
   pg_catalog.has_table_privilege(tab_id, privilege) as has_privilege
 WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.table_info_table() RETURNS TABLE
+(
+  oid bigint, -- The OID of the table.
+  name name, -- Name of the table.
+  schema bigint, -- The OID of the schema for the table.
+  description text, -- The description of the table on the database.
+  owner_oid bigint, -- The owner of the table.
+  current_role_priv jsonb, -- Privileges of the current role on the table.
+  current_role_owns boolean -- Whether the current role owns the table.
+) AS $$
+SELECT
+  oid::bigint AS oid,
+  relname AS name,
+  relnamespace::bigint AS schema,
+  msar.obj_description(oid, 'pg_class') AS description,
+  relowner::bigint AS owner_oid,
+  msar.list_table_privileges_for_current_role(oid) AS current_role_priv,
+  pg_catalog.pg_has_role(relowner, 'USAGE') AS current_role_owns
+FROM pg_catalog.pg_class
+WHERE relkind = 'r';
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION msar.get_table(tab_id regclass) RETURNS jsonb AS $$/*
@@ -1021,15 +1058,9 @@ Each returned JSON object will have the form:
 Args:
   tab_id: The OID or name of the table.
 */
-SELECT jsonb_build_object(
-  'oid', oid::bigint,
-  'name', relname,
-  'schema', relnamespace::bigint,
-  'description', msar.obj_description(oid, 'pg_class'),
-  'owner_oid', relowner::bigint,
-  'current_role_priv', msar.list_table_privileges_for_current_role(tab_id),
-  'current_role_owns', pg_catalog.pg_has_role(relowner, 'USAGE')
-) FROM pg_catalog.pg_class WHERE oid = tab_id;
+SELECT to_jsonb(table_data)
+FROM msar.table_info_table() AS table_data
+WHERE table_data.oid = tab_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1050,23 +1081,9 @@ Each returned JSON object in the array will have the form:
 Args:
   sch_id: The OID or name of the schema.
 */
-SELECT coalesce(
-  jsonb_agg(
-    jsonb_build_object(
-      'oid', pgc.oid::bigint,
-      'name', pgc.relname,
-      'schema', pgc.relnamespace::bigint,
-      'description', msar.obj_description(pgc.oid, 'pg_class'),
-      'owner_oid', pgc.relowner::bigint,
-      'current_role_priv', msar.list_table_privileges_for_current_role(pgc.oid),
-      'current_role_owns', pg_catalog.pg_has_role(pgc.relowner, 'USAGE')
-    )
-  ),
-  '[]'::jsonb
-)
-FROM pg_catalog.pg_class AS pgc
-  LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
-WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
+SELECT coalesce(jsonb_agg(table_data),'[]'::jsonb)
+FROM msar.table_info_table() AS table_data
+WHERE table_data.schema = sch_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -5608,3 +5625,248 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION msar.list_by_record_summaries(
+  tab_id oid,
+  limit_ integer,
+  offset_ integer,
+  search_ text DEFAULT NULL,
+  table_record_summary_templates jsonb DEFAULT NULL
+) RETURNS jsonb
+LANGUAGE plpgsql STABLE
+AS $$/*
+Get record summaries from a table, optionally filtering by a search term. Results are sorted by
+the summary text.
+
+Args:
+  tab_id: The OID of the table whose record summaries we'll get.
+  limit_: The maximum number of record summaries to return.
+  offset_: The number of record summaries to skip before returning results.
+  search_: A search term to filter the summaries by. If provided, only summaries containing this
+    term (case insensitive) in their text will be returned.
+  table_record_summary_templates: (optional) A JSON object that maps table OIDs to record summary
+    templates.
+*/
+DECLARE
+  search_where_clause text := '';
+  final_sql text;
+  result_json jsonb;
+BEGIN
+  IF search_ IS NOT NULL AND search_ <> '' THEN
+    search_where_clause := format(' WHERE summary ILIKE %L', '%'||search_||'%');
+  END IF;
+
+  final_sql := format(
+    $q$
+    WITH
+      all_record_summaries AS ( %1$s ),
+      filtered AS ( SELECT * FROM all_record_summaries %2$s ),
+      sorted AS ( SELECT * FROM filtered ORDER BY summary LIMIT %3$s OFFSET %4$s ),
+      results AS ( SELECT coalesce(json_agg(sorted), '[]') AS results FROM sorted ),
+      count_all_results AS ( SELECT count(*) AS num FROM filtered )
+    SELECT
+      json_build_object(
+        'count', count_all_results.num,
+        'results', results.results
+      )
+    FROM count_all_results, results
+    $q$,
+    /* 1 */ msar.build_record_summary_query_for_table(tab_id, NULL, table_record_summary_templates),
+    /* 2 */ search_where_clause,
+    /* 3 */ limit_,
+    /* 4 */ offset_
+  );
+
+  EXECUTE final_sql INTO result_json;
+  RETURN result_json;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_tab_col_info_map(tab_col_map jsonb)
+RETURNS jsonb AS $$/*
+Returns table_info and column_info for a given tab_col_map.
+
+tab_col_map should have the following form:
+{
+  "table_oid_1": [col_attnum_1, col_attnum_2, col_attnum_3],
+  "table_oid_2": [col_attnum_4, col_attnum_5]
+}
+
+Returns:
+{
+  "table_oid_1": {
+    "table_info": table_info(),
+    "columns": {"col_attnum_1": col_info(), "col_attnum_2": col_info(), "col_attnum_3": col_info()
+  },
+  "table_oid2": {
+    "table_info": table_info(),
+    "columns": {"col_attnum_4": col_info(), "col_attnum_5": col_info()}
+  }
+}
+*/
+  WITH cte AS (
+    SELECT
+      tab_id::oid,
+      ARRAY(SELECT jsonb_array_elements_text(attnums))::int[] AS attnums
+    FROM jsonb_each(coalesce(tab_col_map, '{}'::jsonb)) AS x(tab_id, attnums)
+  ),
+  tab_info_cte AS (
+    SELECT tab_id, jsonb_agg(tab_info) AS tab_info_json FROM cte
+    LEFT JOIN msar.table_info_table() AS tab_info ON tab_info.oid=cte.tab_id
+    GROUP BY tab_id
+  ),
+  col_info_cte AS (
+    SELECT cte.tab_id AS tab_id,
+    jsonb_object_agg(
+      column_info.id, column_info
+    ) AS col_info_json FROM cte
+    LEFT JOIN pg_catalog.pg_attribute pga ON cte.tab_id = pga.attrelid
+    LEFT JOIN msar.column_info_table(cte.tab_id) AS column_info ON pga.attnum = column_info.id
+    WHERE column_info.id = ANY(cte.attnums)
+    GROUP BY cte.tab_id
+  )
+  SELECT coalesce(
+    jsonb_object_agg(
+      tic.tab_id, jsonb_build_object(
+      'table_info', coalesce(tic.tab_info_json,'{}'::jsonb),
+      'columns', coalesce(cic.col_info_json, '{}'::jsonb)
+    )
+  ), '{}'::jsonb)
+  FROM tab_info_cte AS tic
+  LEFT JOIN col_info_cte AS cic ON tic.tab_id = cic.tab_id
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
+(
+  table_name text,
+  column_names text,
+  values_ text,
+  cte_name text,
+  from_cte_name text
+) AS $$/*
+Returns a lookup table for given field_info_list and values_
+
+Example: Inserting into Items while creating a new book entry, adding a new Title,
+creating a new entry for Author, picking a Publisher.
+           table_name           |                  column_names                   |                values_                 | cte_name | from_cte_name 
+--------------------------------+-------------------------------------------------+----------------------------------------+----------+---------------
+ "Library Management"."Authors" | "First Name", "Last Name"                       | 'Jerome K.', 'Jerome                   | k1_cte   | 
+ "Library Management"."Books"   | "Title", "Author", "Publisher"                  | 'Three men in a Boat', k1_cte.id, '12' | k0_cte   | k1_cte
+ "Library Management"."Items"   | "Acquisition Date", "Acquisition Price", "Book" | '2025-10-09', '69.69', k0_cte.id       |          | k0_cte
+
+Calling msar.form_insert() on this table would generate the following SQL:
+
+WITH k1_cte AS (
+  INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'Jerome K.', 'Jerome' RETURNING *
+), k0_cte AS (
+  INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *
+) INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
+*/
+WITH cte AS (
+  SELECT
+    fields.key::text AS key,
+    fields.column_attnum::smallint AS column_attnum,
+    pga.attname::name AS column_name,
+    fields.table_oid::bigint AS table_oid,
+    fields.depth::integer AS depth,
+    CASE
+      WHEN vals.value::jsonb->>'type' = 'create' THEN concat(quote_ident(concat(fields.key::text, '_cte')), '.', quote_ident(ref_attr.attname))
+      WHEN vals.value::jsonb->>'type' = 'pick' THEN quote_nullable(vals.value::jsonb->>'value')
+      ELSE quote_nullable(vals.value::jsonb #>> '{}')
+    END AS value,
+    CASE
+      WHEN fields.parent_key IS NOT NULL THEN quote_ident(concat(fields.parent_key::text, '_cte'))
+      ELSE NULL
+    END AS cte_name,
+    CASE
+      WHEN vals.value::jsonb->>'type' = 'create' THEN quote_ident(concat(fields.key::text, '_cte'))
+      ELSE NULL
+    END AS from_cte_name
+  FROM jsonb_to_recordset(field_info_list) AS fields(
+    key text,
+    parent_key text,
+    column_attnum smallint,
+    table_oid bigint,
+    depth integer)
+  RIGHT JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
+  LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
+
+  LEFT JOIN pg_constraint pgc
+    ON fields.column_attnum = ANY(pgc.conkey)
+    AND pgc.conrelid = fields.table_oid
+    AND pgc.contype = 'f'
+  LEFT JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
+  LEFT JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
+  LEFT JOIN pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
+)
+SELECT 
+  __msar.get_qualified_relation_name(table_oid) AS table_name,
+  string_agg(quote_ident(column_name), ', ') AS column_names,
+  string_agg(value, ', ') AS values_,
+  cte_name,
+  string_agg(from_cte_name, ', ') AS from_cte_name
+FROM cte GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$/*
+Given field_info_list and values_, generates a lookup table for insert, builds and executes an insert statement.
+
+field_info_list should have the folowing form:
+[
+  {"key": "k1", "parent_key":null, "column_attnum":5, "table_oid":1234, "depth":0},
+  {"key": "k3", "parent_key":"k1", "column_attnum":3, "table_oid":4321, "depth":1},
+  {"key": "k2", "parent_key":"k1", "column_attnum":2, "table_oid":4321, "depth":1},
+]
+
+values_ should be in the form:
+{
+  "k1": {"type": "create"},
+  "k2": "Jane",
+  "k3": "Doe"
+}
+
+Example of the SQL generated while Inserting into Items table while creating
+a new book entry, adding a new Title, creating a new entry for Author, picking a Publisher.
+
+WITH k1_cte AS (
+  INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'Jerome K.', 'Jerome' RETURNING *
+), k0_cte AS (
+  INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *
+) INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
+*/
+DECLARE
+  ins RECORD;
+  insert_str text := '';
+  insert_stub text;
+  insert_count integer;
+BEGIN
+  SELECT COUNT(*) INTO insert_count FROM msar.build_insert_lookup_table(field_info_list, values_);
+
+  FOR ins IN SELECT * FROM msar.build_insert_lookup_table(field_info_list, values_) LOOP
+    insert_stub := 'INSERT INTO ' ||
+      ins.table_name || '(' || ins.column_names || ') SELECT ' || ins.values_ ||
+      CASE 
+        WHEN ins.from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name)
+        ELSE '' END || ' RETURNING *';
+    CASE
+      WHEN insert_count > 1 AND ins.cte_name IS NOT NULL THEN
+        insert_str := CONCAT_WS(',', NULLIF(insert_str, ''), ins.cte_name || ' AS (' || insert_stub || ')');
+      WHEN ins.cte_name IS NULL THEN
+        insert_str :=  insert_str || insert_stub;
+    END CASE;
+  END LOOP;
+
+  CASE
+    WHEN insert_count > 1 THEN
+      insert_str := 'WITH ' || insert_str;
+    ELSE NULL;
+  END CASE;
+  EXECUTE insert_str;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

@@ -4889,11 +4889,13 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
-    $p${
-      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}],
+    '{
+      "results": [
+        {"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
+      ],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4907,11 +4909,13 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, '2', '{"2": 10}'),
-    $p${
-      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}],
+    '{
+      "results": [
+        {"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
+      ],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4925,11 +4929,13 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
-    $p${
-      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": "{\"a\": \"json\"}", "5": "[1, 2, 3, 4]"}],
+    '{
+      "results": [
+        {"1": 2, "2": 10, "3": "sdflfflsk", "4": "{\"a\": \"json\"}", "5": "[1, 2, 3, 4]"}
+      ],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -6788,3 +6794,367 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+-- msar.list_by_record_summaries --------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_list_by_record_summaries()
+RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE vehicles (
+    id int primary key,
+    name text,
+    wheel_count int
+  );
+
+  -- Empty table behavior
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 10, 0),
+    '{"count": 0, "results": []}'
+  );
+
+  INSERT INTO vehicles VALUES
+    (1, 'Car', 4),
+    (2, 'Truck', 4),
+    (3, 'Unicycle', 1),
+    (4, 'Bicycle', 2),
+    (5, 'Tricycle', 3),
+    (6, 'Boat', 0),
+    (7, 'Semi', 18),
+    (8, 'Airplane', 10);
+  
+  -- Basic test
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 2, 0),
+    '{
+      "count": 8,
+      "results": [
+        {"key": 8, "summary": "Airplane"},
+        {"key": 4, "summary": "Bicycle"}
+      ]
+    }'
+  );
+
+  -- Pagination
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 3, 3),
+    '{
+      "count": 8,
+      "results": [
+        {"key": 1, "summary": "Car"},
+        {"key": 7, "summary": "Semi"},
+        {"key": 5, "summary": "Tricycle"}
+      ]
+    }'
+  );
+
+  -- Search query
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 2, 0, 'cycle'),
+    '{
+      "count": 3,
+      "results": [
+        {"key": 4, "summary": "Bicycle"},
+        {"key": 5, "summary": "Tricycle"}
+      ]
+    }'
+  );
+
+  -- Empty search query
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 2, 0, 'NOPE'),
+    '{"count": 0, "results": []}'
+  );
+
+  -- Search in custom record summary template
+  RETURN NEXT is(
+    msar.list_by_record_summaries(
+      'vehicles'::regclass,
+      2,
+      0,
+      '18 wheels',
+      format('{ "%s": [ [2], " with ", [3], " wheels" ] }', 'vehicles'::regclass::oid)::jsonb
+    ),
+    '{"count": 1, "results": [{"key": 7, "summary": "Semi with 18 wheels"}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+-- msar.form_insert -------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_items_books_authors_insert() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE "Authors" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
+    "First Name" text, -- attnum: 2, field_key: _id-609eefde-cfcc-4ebf-97a4-62992c210312
+    "Last Name" text, -- attnum: 3, field_key: _id-4bb46271-aeee-4305-85b8-c436564c1e00
+    "Website" text -- attnum: 4, field_key: _id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482
+  );
+
+  CREATE TABLE "Publishers" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
+    "Name" text -- attnum: 2, field_key: NA
+  );
+
+  CREATE TABLE "Books" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
+    "Title" text, -- attnum: 2, field_key: _id-c5eb5c89-cfc6-4d92-923a-4fbbd1674a85
+    "Publication Year" date, -- attnum: 3, field_key: _id-200d2e3b-7128-4e61-b970-20826f95bf2f
+    "ISBN" text, -- attnum: 4, field_key: _id-2625e6be-07d8-47d2-a1ba-e9c543105b2e
+    "Page Count" integer, -- attnum:5, field_key: _id-fdb0f3a9-1c42-4178-b3e4-14e7cbf4fc71
+    "Author" integer REFERENCES "Authors"(id), -- attnum: 6, field_key: _id-e1b04f11-ace0-4419-be8a-8464bdba4e4e
+    "Publisher" integer REFERENCES "Publishers"(id) -- attnum: 7, field_key: _id-9dafdd73-11d8-4a75-87e8-4d66b1b0c9bd
+  );
+
+  CREATE TABLE "Items" (
+    id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY, -- attnum: 1, field_key: NA
+    "Barcode" text, -- attnum: 2 , field_key: _id-51bbd9d2-fb45-4c84-b8f0-4a8422186b08
+    "Acquisition Date" date, -- attnum: 3, field_key: _id-bbe76760-f136-48e4-bc54-92ade2eb1984
+    "Acquisition Price" mathesar_types.mathesar_money, -- attnum: 4, field_key: _id-58670595-6726-454a-a10c-9ba30985b8b1
+    "Book" integer REFERENCES "Books"(id) -- attnum: 5, field_key: _id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0
+  );
+
+  INSERT INTO "Publishers"("Name") VALUES ('37signals'), ('A Book Apart'), ('Ace Books'), ('Adams Media');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_form_insert_fk() RETURNS SETOF TEXT AS $$
+DECLARE
+  items_table_oid oid;
+  books_table_oid oid;
+  authors_table_oid oid;
+  field_info_list jsonb;
+  values_ jsonb;
+  authors_table_record jsonb;
+  books_table_record jsonb;
+  items_table_record jsonb;
+BEGIN
+  PERFORM __setup_items_books_authors_insert();
+
+  items_table_oid := '"Items"'::regclass::oid;
+  books_table_oid := '"Books"'::regclass::oid;
+  authors_table_oid := '"Authors"'::regclass::oid;
+
+  field_info_list := jsonb_build_array(
+    jsonb_build_object(
+      'key', '_id-51bbd9d2-fb45-4c84-b8f0-4a8422186b08',
+      'parent_key', null,
+      'column_attnum', 2,
+      'table_oid', items_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-bbe76760-f136-48e4-bc54-92ade2eb1984',
+      'parent_key', null,
+      'column_attnum', 3,
+      'table_oid', items_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-58670595-6726-454a-a10c-9ba30985b8b1',
+      'parent_key', null,
+      'column_attnum', 4,
+      'table_oid', items_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'parent_key', null,
+      'column_attnum', 5,
+      'table_oid', items_table_oid,
+      'depth', 0
+    ),
+
+    jsonb_build_object(
+      'key', '_id-c5eb5c89-cfc6-4d92-923a-4fbbd1674a85',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 2,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-200d2e3b-7128-4e61-b970-20826f95bf2f',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 3,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-2625e6be-07d8-47d2-a1ba-e9c543105b2e',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 4,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-fdb0f3a9-1c42-4178-b3e4-14e7cbf4fc71',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 5,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 6,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+    jsonb_build_object(
+      'key', '_id-9dafdd73-11d8-4a75-87e8-4d66b1b0c9bd',
+      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
+      'column_attnum', 7,
+      'table_oid', books_table_oid,
+      'depth', 1
+    ),
+
+    jsonb_build_object(
+      'key', '_id-609eefde-cfcc-4ebf-97a4-62992c210312',
+      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
+      'column_attnum', 2,
+      'table_oid', authors_table_oid,
+      'depth', 2
+    ),
+    jsonb_build_object(
+      'key', '_id-4bb46271-aeee-4305-85b8-c436564c1e00',
+      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
+      'column_attnum', 3,
+      'table_oid', authors_table_oid,
+      'depth', 2
+    ),
+    jsonb_build_object(
+      'key', '_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482',
+      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
+      'column_attnum', 4,
+      'table_oid', authors_table_oid,
+      'depth', 2
+    )
+  );
+
+  values_ := $j${
+    "_id-51bbd9d2-fb45-4c84-b8f0-4a8422186b08": "454Z-D2A5-36AB-2EA6",
+    "_id-bbe76760-f136-48e4-bc54-92ade2eb1984": "2025-08-05",
+    "_id-58670595-6726-454a-a10c-9ba30985b8b1": "15.99",
+    "_id-c5eb5c89-cfc6-4d92-923a-4fbbd1674a85": "The book of wonders",
+    "_id-fdb0f3a9-1c42-4178-b3e4-14e7cbf4fc71": "365",
+    "_id-609eefde-cfcc-4ebf-97a4-62992c210312": "John",
+    "_id-4bb46271-aeee-4305-85b8-c436564c1e00": "Doe",
+    "_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482": "https://johndoebooks.com",
+    "_id-9dafdd73-11d8-4a75-87e8-4d66b1b0c9bd": {
+      "type": "pick",
+      "value": 4
+    },
+    "_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0": {
+      "type": "create"
+    },
+    "_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e": {
+      "type": "create"
+    }
+  }$j$;
+
+  PERFORM msar.form_insert(field_info_list, values_); -- INSERT function call
+
+  SELECT jsonb_agg(to_jsonb(a)) FROM "Authors" a INTO authors_table_record;
+  SELECT jsonb_agg(to_jsonb(b)) FROM "Books" b INTO books_table_record;
+  SELECT jsonb_agg(to_jsonb(i)) FROM "Items" i INTO items_table_record;
+
+  RETURN NEXT is(
+    authors_table_record, 
+    $j$[
+      {
+        "id": 1,
+        "Website": "https://johndoebooks.com",
+        "Last Name": "Doe",
+        "First Name": "John"
+      }
+    ]$j$
+  );
+  RETURN NEXT is(
+    books_table_record, 
+    $j$[
+      {
+        "id": 1,
+        "Title": "The book of wonders",
+        "Publication Year": null,
+        "ISBN": null,
+        "Page Count": 365,
+        "Author": 1,
+        "Publisher": 4
+      }
+    ]$j$
+  );
+  RETURN NEXT is(
+    items_table_record, 
+    $j$[
+      {
+        "id": 1,
+        "Book": 1,
+        "Barcode": "454Z-D2A5-36AB-2EA6",
+        "Acquisition Date": "2025-08-05",
+        "Acquisition Price": 15.99
+      }
+    ]$j$
+  );
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_form_insert_scalar() RETURNS SETOF TEXT AS $$
+DECLARE
+  authors_table_oid oid;
+  field_info_list jsonb;
+  values_ jsonb;
+  authors_table_record jsonb;
+BEGIN
+  PERFORM __setup_items_books_authors_insert();
+
+  authors_table_oid := '"Authors"'::regclass::oid;
+  
+  field_info_list := jsonb_build_array(
+    jsonb_build_object(
+      'key', '_id-609eefde-cfcc-4ebf-97a4-62992c210312',
+      'parent_key', null,
+      'column_attnum', 2,
+      'table_oid', authors_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-4bb46271-aeee-4305-85b8-c436564c1e00',
+      'parent_key', null,
+      'column_attnum', 3,
+      'table_oid', authors_table_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482',
+      'parent_key', null,
+      'column_attnum', 4,
+      'table_oid', authors_table_oid,
+      'depth', 0
+    )
+  );
+
+  values_ := $j${
+    "_id-609eefde-cfcc-4ebf-97a4-62992c210312": "John",
+    "_id-4bb46271-aeee-4305-85b8-c436564c1e00": "Doe",
+    "_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482": "https://johndoebooks.com"
+  }$j$;
+
+  PERFORM msar.form_insert(field_info_list, values_);
+
+  SELECT jsonb_agg(to_jsonb(a)) FROM "Authors" a INTO authors_table_record;
+
+  RETURN NEXT is(
+    authors_table_record, 
+    $j$[
+      {
+        "id": 1,
+        "Website": "https://johndoebooks.com",
+        "Last Name": "Doe",
+        "First Name": "John"
+      }
+    ]$j$
+  );
+END;
+$$ LANGUAGE plpgsql
