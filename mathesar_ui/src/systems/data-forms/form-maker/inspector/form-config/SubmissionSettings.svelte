@@ -50,7 +50,7 @@
     </LabeledInput>
   </div>
   <div>
-    <LabeledInput layout="stacked" label={$_('submit_button_label')}>
+    <LabeledInput layout="stacked" label={$_('button_label')}>
       <TextInput
         value={$submitButtonLabel}
         on:input={(e) =>

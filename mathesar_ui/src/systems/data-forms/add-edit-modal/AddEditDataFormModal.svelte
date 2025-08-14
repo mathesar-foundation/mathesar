@@ -1,7 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { dataFormStructureVersion } from '@mathesar/api/rpc/forms';
+  import {
+    type RawEphemeralDataForm,
+    dataFormStructureVersion,
+  } from '@mathesar/api/rpc/forms';
   import {
     FieldLayout,
     type FilledFormValues,
@@ -54,7 +57,7 @@
         await tableStructure.getSubstanceOnceResolved();
       const tableStructureSubstance = tableStructureStore.resolvedValue;
       if (tableStructureSubstance) {
-        const rawEpf = {
+        const rawEpf: RawEphemeralDataForm = {
           name: values.name,
           description: values.description,
           base_table_oid: tableStructureSubstance.table.oid,

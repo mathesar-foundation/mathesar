@@ -32,7 +32,7 @@
 <svelte:head>
   <title>
     {makeSimplePageTitle(
-      $_('fillout_form_with_name', {
+      $_('fill_out_form_with_name', {
         values: { formName: $rawDataFormStore.name },
       }),
     )}
