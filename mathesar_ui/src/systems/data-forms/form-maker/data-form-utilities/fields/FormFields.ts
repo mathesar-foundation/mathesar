@@ -45,7 +45,7 @@ export type FormFieldContainerChangeEvent =
       target: DataFormStructure | ParentDataFormField;
     };
 
-export class FormFields {
+export class FormFields implements Readable<DataFormField[]> {
   readonly parent;
 
   private fieldSet: WritableSet<DataFormField>;
