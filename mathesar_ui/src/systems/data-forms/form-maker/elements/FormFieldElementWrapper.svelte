@@ -1,4 +1,8 @@
 <script lang="ts">
+  import { sortableTrigger } from '@mathesar/components/sortable/sortable';
+  import { iconGrip } from '@mathesar/icons';
+  import { Icon } from '@mathesar-component-library';
+
   import {
     type DataFormManager,
     EditableDataFormManager,
@@ -40,4 +44,20 @@
       />
     {/if}
   </svelte:fragment>
+
+  <svelte:fragment slot="left">
+    {#if dataFormManager instanceof EditableDataFormManager}
+      <div class="grip" use:sortableTrigger>
+        <Icon {...iconGrip} />
+      </div>
+    {/if}
+  </svelte:fragment>
 </SelectableElement>
+
+<style>
+  .grip {
+    background: var(--elevated-background);
+    padding-inline: var(--sm5);
+    border-radius: var(--border-radius-m);
+  }
+</style>
