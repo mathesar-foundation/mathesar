@@ -5627,6 +5627,63 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION msar.list_by_record_summaries(
+  tab_id oid,
+  limit_ integer,
+  offset_ integer,
+  search_ text DEFAULT NULL,
+  table_record_summary_templates jsonb DEFAULT NULL
+) RETURNS jsonb
+LANGUAGE plpgsql STABLE
+AS $$/*
+Get record summaries from a table, optionally filtering by a search term. Results are sorted by
+the summary text.
+
+Args:
+  tab_id: The OID of the table whose record summaries we'll get.
+  limit_: The maximum number of record summaries to return.
+  offset_: The number of record summaries to skip before returning results.
+  search_: A search term to filter the summaries by. If provided, only summaries containing this
+    term (case insensitive) in their text will be returned.
+  table_record_summary_templates: (optional) A JSON object that maps table OIDs to record summary
+    templates.
+*/
+DECLARE
+  search_where_clause text := '';
+  final_sql text;
+  result_json jsonb;
+BEGIN
+  IF search_ IS NOT NULL AND search_ <> '' THEN
+    search_where_clause := format(' WHERE summary ILIKE %L', '%'||search_||'%');
+  END IF;
+
+  final_sql := format(
+    $q$
+    WITH
+      all_record_summaries AS ( %1$s ),
+      filtered AS ( SELECT * FROM all_record_summaries %2$s ),
+      sorted AS ( SELECT * FROM filtered ORDER BY summary LIMIT %3$s OFFSET %4$s ),
+      results AS ( SELECT coalesce(json_agg(sorted), '[]') AS results FROM sorted ),
+      count_all_results AS ( SELECT count(*) AS num FROM filtered )
+    SELECT
+      json_build_object(
+        'count', count_all_results.num,
+        'results', results.results
+      )
+    FROM count_all_results, results
+    $q$,
+    /* 1 */ msar.build_record_summary_query_for_table(tab_id, NULL, table_record_summary_templates),
+    /* 2 */ search_where_clause,
+    /* 3 */ limit_,
+    /* 4 */ offset_
+  );
+
+  EXECUTE final_sql INTO result_json;
+  RETURN result_json;
+END;
+$$;
+
+
 CREATE OR REPLACE FUNCTION
 msar.get_tab_col_info_map(tab_col_map jsonb)
 RETURNS jsonb AS $$/*

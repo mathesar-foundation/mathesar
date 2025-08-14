@@ -1,6 +1,11 @@
 import { type Readable, derived, get, writable } from 'svelte/store';
 
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
+import {
+  getDbTypeBasedInputCap,
+  getLinkedRecordInputCap,
+} from '@mathesar/components/cell-fabric/utils';
+import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
 
 import {
   AbstractField,
@@ -43,11 +48,24 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       this.key,
       this.isRequired,
     );
-    this.inputComponentAndProps = derived(this.styling, (styling) =>
-      this.fieldColumn.getInputComponentAndProps(styling),
-    );
-    // Form token and key are accessible here
-    // console.log(this.getFormToken(), this.key);
+    this.inputComponentAndProps = derived(this.styling, (styling) => {
+      if (this.fieldColumn.foreignKeyLink) {
+        return getLinkedRecordInputCap({
+          recordSelectionOrchestratorFactory: makeRowSeekerOrchestratorFactory({
+            formToken: this.getFormToken(),
+            fieldKey: this.key,
+          }),
+        });
+      }
+      let { cellInfo } = this.fieldColumn.abstractType;
+      if (cellInfo.type === 'string') {
+        cellInfo = {
+          type: 'string',
+          config: { multiLine: styling?.size === 'large' },
+        };
+      }
+      return getDbTypeBasedInputCap(this.fieldColumn.column, cellInfo);
+    });
   }
 
   setIsRequired(isRequired: boolean) {

@@ -149,11 +149,14 @@
       - patch
       - set_publish_public
       - submit
+      - list_related_records
       - FormInfo
       - FieldInfo
       - AddFormDef
       - AddOrReplaceFieldDef
       - SettableFormDef
+      - ListRelatedRecordsResponse
+      - SummarizedRecordReference
 
 ## Records
 

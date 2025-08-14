@@ -4889,13 +4889,13 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
-    $p${
+    '{
       "results": [
         {"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
       ],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4909,13 +4909,13 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, '2', '{"2": 10}'),
-    $p${
+    '{
       "results": [
         {"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
       ],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4929,13 +4929,13 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
-    $p${
+    '{
       "results": [
         {"1": 2, "2": 10, "3": "sdflfflsk", "4": "{\"a\": \"json\"}", "5": "[1, 2, 3, 4]"}
       ],
       "linked_record_summaries": null,
       "record_summaries": null
-    }$p$
+    }'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -6795,6 +6795,89 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- msar.list_by_record_summaries --------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_list_by_record_summaries()
+RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE vehicles (
+    id int primary key,
+    name text,
+    wheel_count int
+  );
+
+  -- Empty table behavior
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 10, 0),
+    '{"count": 0, "results": []}'
+  );
+
+  INSERT INTO vehicles VALUES
+    (1, 'Car', 4),
+    (2, 'Truck', 4),
+    (3, 'Unicycle', 1),
+    (4, 'Bicycle', 2),
+    (5, 'Tricycle', 3),
+    (6, 'Boat', 0),
+    (7, 'Semi', 18),
+    (8, 'Airplane', 10);
+  
+  -- Basic test
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 2, 0),
+    '{
+      "count": 8,
+      "results": [
+        {"key": 8, "summary": "Airplane"},
+        {"key": 4, "summary": "Bicycle"}
+      ]
+    }'
+  );
+
+  -- Pagination
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 3, 3),
+    '{
+      "count": 8,
+      "results": [
+        {"key": 1, "summary": "Car"},
+        {"key": 7, "summary": "Semi"},
+        {"key": 5, "summary": "Tricycle"}
+      ]
+    }'
+  );
+
+  -- Search query
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 2, 0, 'cycle'),
+    '{
+      "count": 3,
+      "results": [
+        {"key": 4, "summary": "Bicycle"},
+        {"key": 5, "summary": "Tricycle"}
+      ]
+    }'
+  );
+
+  -- Empty search query
+  RETURN NEXT is(
+    msar.list_by_record_summaries('vehicles'::regclass, 2, 0, 'NOPE'),
+    '{"count": 0, "results": []}'
+  );
+
+  -- Search in custom record summary template
+  RETURN NEXT is(
+    msar.list_by_record_summaries(
+      'vehicles'::regclass,
+      2,
+      0,
+      '18 wheels',
+      format('{ "%s": [ [2], " with ", [3], " wheels" ] }', 'vehicles'::regclass::oid)::jsonb
+    ),
+    '{"count": 1, "results": [{"key": 7, "summary": "Semi with 18 wheels"}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
 
 -- msar.form_insert -------------------------------------------------------------------------------
 

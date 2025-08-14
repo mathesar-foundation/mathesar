@@ -1,6 +1,4 @@
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { RawDataFormField } from '@mathesar/api/rpc/forms';
-import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { AbstractType } from '@mathesar/stores/abstract-types/types';
@@ -36,23 +34,6 @@ export class FieldColumn {
     this.column = props.column;
     this.foreignKeyLink = props.foreignKeyLink;
     this.abstractType = getAbstractTypeForDbType(this.column.type);
-  }
-
-  getInputComponentAndProps(styling?: RawDataFormField['styling']) {
-    let { cellInfo } = this.abstractType;
-    if (cellInfo.type === 'string') {
-      cellInfo = {
-        type: 'string',
-        config: {
-          multiLine: styling?.size === 'large',
-        },
-      };
-    }
-    return getDbTypeBasedInputCap(
-      this.column,
-      this.foreignKeyLink?.relatedTableOid,
-      cellInfo,
-    );
   }
 
   static fromProcessedColumn(pc: ProcessedColumn) {

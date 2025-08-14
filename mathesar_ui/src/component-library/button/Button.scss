@@ -10,7 +10,7 @@
   border-radius: var(--button-border-radius, var(--sm4));
   box-shadow: var(--button-shadow, none);
   position: relative;
-  padding: var(--input-padding) var(--sm3);
+  padding: var(--button-padding, var(--input-padding) var(--sm3));
   box-sizing: border-box;
   background: var(--button-background);
   color: var(--button-color, inherit);

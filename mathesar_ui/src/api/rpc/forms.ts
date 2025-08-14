@@ -1,5 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
+import type { SummarizedRecordReference } from './_common/commonTypes';
 import type { RawColumnWithMetadata } from './columns';
 import type { RawDatabase } from './databases';
 import type { RawConfiguredRole } from './roles';
@@ -93,6 +94,11 @@ export type RawDataFormSource = Record<
   }
 >;
 
+export interface RecordsSummaryListResponse {
+  count: number;
+  results: SummarizedRecordReference[];
+}
+
 /**
  * We have these constructRequest methods to add `header_title` & `header_subtitle` to requests.
  *
@@ -169,6 +175,16 @@ export const forms = {
       form_id: RawDataForm['id'];
     },
     void
+  >(),
+  list_related_records: rpcMethodTypeContainer<
+    {
+      form_token: string;
+      field_key: string;
+      limit?: number | null;
+      offset?: number | null;
+      search?: string | null;
+    },
+    RecordsSummaryListResponse
   >(),
   submit: rpcMethodTypeContainer<
     {

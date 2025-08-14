@@ -1,12 +1,15 @@
 <script lang="ts">
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { FieldErrors } from '@mathesar/components/form';
+  import { WritableMap } from '@mathesar-component-library';
 
   import {
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
   import type { DataFormField } from '../data-form-utilities/fields';
+
+  const recordSummaries = new WritableMap<string, string>();
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: DataFormField;
@@ -23,6 +26,7 @@
   $: ({ showsError, disabled } = inputField);
 
   $: displayError = !editableDataFormManager && $showsError;
+  $: recordSummary = recordSummaries.derivedValue(String($inputField));
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
@@ -31,6 +35,8 @@
     componentAndProps={$inputComponentAndProps}
     hasError={displayError}
     disabled={$disabled}
+    recordSummary={$recordSummary}
+    setRecordSummary={(key, summary) => recordSummaries.set(key, summary)}
   />
   {#if displayError}
     <FieldErrors field={inputField} />

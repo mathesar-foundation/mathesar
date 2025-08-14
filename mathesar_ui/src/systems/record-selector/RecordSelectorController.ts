@@ -1,9 +1,8 @@
-import { getContext, setContext } from 'svelte';
 import { writable } from 'svelte/store';
 
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
+import { makeContext } from '@mathesar/contexts/utils';
 
 import type { RecordSelectorPurpose } from './recordSelectorUtils';
 
@@ -37,7 +36,7 @@ export class RecordSelectorController {
 
   cancel: () => void = () => {};
 
-  tableId = writable<DBObjectEntry['id'] | undefined>(undefined);
+  tableOid = writable<number | undefined>(undefined);
 
   columnWithNestedSelectorOpen = writable<RawColumnWithMetadata | undefined>(
     undefined,
@@ -62,11 +61,11 @@ export class RecordSelectorController {
   }
 
   acquireUserInput({
-    tableId,
+    tableOid,
   }: {
-    tableId: DBObjectEntry['id'];
+    tableOid: number;
   }): Promise<RecordSelectorResult | undefined> {
-    this.tableId.set(tableId);
+    this.tableOid.set(tableOid);
     this.purpose.set('dataEntry');
     this.open();
     return new Promise((resolve) => {
@@ -81,8 +80,8 @@ export class RecordSelectorController {
     });
   }
 
-  navigateToRecordPage({ tableId }: { tableId: DBObjectEntry['id'] }): void {
-    this.tableId.set(tableId);
+  navigateToRecordPage({ tableOid }: { tableOid: number }): void {
+    this.tableOid.set(tableOid);
     this.purpose.set('navigation');
     this.open();
     this.cancel = () => {
@@ -91,14 +90,4 @@ export class RecordSelectorController {
   }
 }
 
-const contextKey = {};
-
-export function setRecordSelectorControllerInContext(
-  c: RecordSelectorController,
-): void {
-  setContext(contextKey, c);
-}
-
-export function getRecordSelectorFromContext(): RecordSelectorController {
-  return getContext(contextKey);
-}
+export const recordSelectorContext = makeContext<RecordSelectorController>();
