@@ -42,8 +42,11 @@ function midpoint(rect: DOMRect) {
 }
 
 function setTransform(element: HTMLElement, value: number) {
-  if (value === 0) element.style.removeProperty('transform');
-  element.style.setProperty('transform', `translateY(${value}px)`);
+  if (value === 0) {
+    element.style.removeProperty('transform');
+  } else {
+    element.style.setProperty('transform', `translateY(${value}px)`);
+  }
 }
 
 function analyze(container: HTMLElement, draggingItem: HTMLElement) {
