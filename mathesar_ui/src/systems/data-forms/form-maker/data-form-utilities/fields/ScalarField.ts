@@ -1,6 +1,9 @@
-import type { RawScalarDataFormField } from '@mathesar/api/rpc/forms';
+import { derived } from 'svelte/store';
 
-import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
+import type { RawScalarDataFormField } from '@mathesar/api/rpc/forms';
+import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+
+import type { DataFormStructureCtx } from '../DataFormStructure';
 
 import {
   AbstractColumnBasedField,
@@ -22,19 +25,29 @@ export type ScalarFieldPropChangeEvent = {
 export class ScalarField extends AbstractColumnBasedField {
   readonly kind: RawScalarDataFormField['kind'] = 'scalar_column';
 
-  private changeEventHandler: DataFormStructureChangeEventHandler;
+  readonly inputComponentAndProps: AbstractColumnBasedField['inputComponentAndProps'];
 
   constructor(
     container: FormFields,
     props: ScalarFieldProps,
-    changeEventHandler: DataFormStructureChangeEventHandler,
+    structureCtx: DataFormStructureCtx,
   ) {
-    super(container, props);
-    this.changeEventHandler = changeEventHandler;
+    super(container, props, structureCtx);
+    this.structureCtx = structureCtx;
+    this.inputComponentAndProps = derived(this.styling, (styling) => {
+      let { cellInfo } = this.fieldColumn.abstractType;
+      if (cellInfo.type === 'string') {
+        cellInfo = {
+          type: 'string',
+          config: { multiLine: styling?.size === 'large' },
+        };
+      }
+      return getDbTypeBasedInputCap(this.fieldColumn.column, cellInfo);
+    });
   }
 
   protected triggerChangeEvent(prop: ScalarFieldPropChangeEvent['prop']) {
-    this.changeEventHandler.trigger({
+    this.structureCtx.changeEventHandler?.trigger({
       type: 'scalar-field/prop',
       target: this,
       prop,

@@ -14,3 +14,4 @@ export type {
   FormFieldContainerChangeEvent,
 } from './FormFields';
 export type { ScalarField, ScalarFieldPropChangeEvent } from './ScalarField';
+export type { AbstractColumnBasedField } from './AbstractColumnBasedField';

@@ -1,13 +1,9 @@
-import { type Readable, derived, get, writable } from 'svelte/store';
+import { type Readable, get, writable } from 'svelte/store';
 
-import { api } from '@mathesar/api/rpc';
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
-import {
-  getDbTypeBasedInputCap,
-  getLinkedRecordInputCap,
-} from '@mathesar/components/cell-fabric/utils';
-import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
+import type { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+
+import type { DataFormStructureCtx } from '../DataFormStructure';
 
 import {
   AbstractField,
@@ -32,7 +28,9 @@ export abstract class AbstractColumnBasedField extends AbstractField {
 
   readonly fieldValueHolder: DataFormFieldInputValueHolder;
 
-  readonly inputComponentAndProps;
+  abstract readonly inputComponentAndProps: Readable<
+    ReturnType<typeof getDbTypeBasedInputCap>
+  >;
 
   private _isRequired;
 
@@ -40,8 +38,12 @@ export abstract class AbstractColumnBasedField extends AbstractField {
     return this._isRequired;
   }
 
-  constructor(holder: FormFields, props: AbstractColumnBasedFieldProps) {
-    super(holder, props);
+  constructor(
+    holder: FormFields,
+    props: AbstractColumnBasedFieldProps,
+    structureCtx: DataFormStructureCtx,
+  ) {
+    super(holder, props, structureCtx);
     this.fieldColumn = props.fieldColumn;
     this._isRequired = writable(
       this.fieldColumn.column.nullable ? props.isRequired : true,
@@ -50,29 +52,6 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       this.key,
       this.isRequired,
     );
-    this.inputComponentAndProps = derived(this.styling, (styling) => {
-      if (this.fieldColumn.foreignKeyLink) {
-        return getLinkedRecordInputCap({
-          recordSelectionOrchestratorFactory: makeRowSeekerOrchestratorFactory({
-            constructRecordStore: () =>
-              new AsyncRpcApiStore(api.forms.list_related_records, {
-                staticProps: {
-                  form_token: this.getFormToken(),
-                  field_key: this.key,
-                },
-              }),
-          }),
-        });
-      }
-      let { cellInfo } = this.fieldColumn.abstractType;
-      if (cellInfo.type === 'string') {
-        cellInfo = {
-          type: 'string',
-          config: { multiLine: styling?.size === 'large' },
-        };
-      }
-      return getDbTypeBasedInputCap(this.fieldColumn.column, cellInfo);
-    });
   }
 
   setIsRequired(isRequired: boolean) {

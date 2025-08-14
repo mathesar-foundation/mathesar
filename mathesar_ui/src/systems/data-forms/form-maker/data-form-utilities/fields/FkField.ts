@@ -1,8 +1,10 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, get, readable, writable } from 'svelte/store';
 
 import type { RawForeignKeyDataFormField } from '@mathesar/api/rpc/forms';
+import { getLinkedRecordInputCap } from '@mathesar/components/cell-fabric/utils';
+import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
 
-import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
+import type { DataFormStructureCtx } from '../DataFormStructure';
 
 import {
   AbstractColumnBasedField,
@@ -37,6 +39,8 @@ export class FkField extends AbstractColumnBasedField {
 
   readonly nestedFields;
 
+  readonly inputComponentAndProps: AbstractColumnBasedField['inputComponentAndProps'];
+
   private _interactionRule;
 
   get interactionRule(): Readable<
@@ -45,19 +49,17 @@ export class FkField extends AbstractColumnBasedField {
     return this._interactionRule;
   }
 
-  protected changeEventHandler;
-
   constructor(
     holder: FormFields,
     props: FkFieldProps,
-    changeEventHandler: DataFormStructureChangeEventHandler,
+    structureCtx: DataFormStructureCtx,
   ) {
-    super(holder, props);
-    this.changeEventHandler = changeEventHandler;
+    super(holder, props, structureCtx);
     this.relatedTableOid = props.relatedTableOid;
-    this.nestedFields = props.createFields(this, this.changeEventHandler);
+    this.nestedFields = props.createFields(this, this.structureCtx);
     const fkLink = this.fieldColumn.foreignKeyLink;
     if (!fkLink) {
+      // TODO_FORMS: Gracefully handle error scenario where foreign key constraint is removed later
       throw Error('The passed column is not a foreign key');
     }
     this._interactionRule = writable(props.interactionRule);
@@ -65,6 +67,18 @@ export class FkField extends AbstractColumnBasedField {
       this.key,
       this.isRequired,
       this.interactionRule,
+    );
+    this.inputComponentAndProps = readable(
+      getLinkedRecordInputCap({
+        recordSelectionOrchestratorFactory: makeRowSeekerOrchestratorFactory({
+          constructRecordStore: structureCtx.rowSeekerRecordStoreConstructor({
+            key: this.key,
+            tableOid: this.fieldColumn.tableOid,
+            columnAttnum: this.fieldColumn.column.id,
+            relatedTableOid: fkLink.relatedTableOid,
+          }),
+        }),
+      }),
     );
   }
 
@@ -82,7 +96,7 @@ export class FkField extends AbstractColumnBasedField {
   }
 
   protected triggerChangeEvent(prop: FkFieldPropChangeEvent['prop']) {
-    this.changeEventHandler.trigger({
+    this.structureCtx.changeEventHandler?.trigger({
       type: 'fk-field/prop',
       target: this,
       prop,

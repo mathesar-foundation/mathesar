@@ -1,8 +1,10 @@
 import { tick } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
-import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
-import type { RecordsSummaryListResponse } from '@mathesar/api/rpc/forms';
+import type {
+  RecordsSummaryListResponse,
+  SummarizedRecordReference,
+} from '@mathesar/api/rpc/_common/commonTypes';
 import type AsyncStore from '@mathesar/stores/AsyncStore';
 import Pagination from '@mathesar/utils/Pagination';
 import { getGloballyUniqueId } from '@mathesar-component-library';
