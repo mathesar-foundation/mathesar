@@ -11,22 +11,24 @@ import {
 } from './AttachableRowSeekerController';
 import type { RowSeekerProps } from './RowSeekerController';
 
+interface RowSeekerOrchestratorProps
+  extends Omit<RowSeekerProps, 'previousValue'> {
+  rowSeeker: AttachableRowSeekerController;
+}
+
 /**
  * An adapter to make an AttachableRowSeekerController work as a
  * RecordSelectionOrchestrator
  */
-function makeRowSeekerOrchestrator({
-  constructRecordStore,
-  rowSeeker,
-}: {
-  constructRecordStore: RowSeekerProps['constructRecordStore'];
-  rowSeeker: AttachableRowSeekerController;
-}): RecordSelectionOrchestrator {
+function makeRowSeekerOrchestrator(
+  props: RowSeekerOrchestratorProps,
+): RecordSelectionOrchestrator {
+  const { rowSeeker, ...rowSeekerProps } = props;
   return {
     launch: ({ previousValue, triggerElement }) =>
       rowSeeker.acquireUserSelection({
+        ...rowSeekerProps,
         previousValue,
-        constructRecordStore,
         triggerElement: triggerElement ?? document.body,
       }),
     close: () => rowSeeker.close(),
@@ -38,13 +40,14 @@ function makeRowSeekerOrchestrator({
  * @see RecordSelectionOrchestratorFactory to learn why this factory is
  * necessary
  */
-export function makeRowSeekerOrchestratorFactory({
-  constructRecordStore,
-}: {
-  constructRecordStore: RowSeekerProps['constructRecordStore'];
-}): RecordSelectionOrchestratorFactory {
+export function makeRowSeekerOrchestratorFactory(
+  props: Omit<RowSeekerProps, 'previousValue'>,
+): RecordSelectionOrchestratorFactory {
   return () => {
     const rowSeeker = rowSeekerContext.getOrError();
-    return makeRowSeekerOrchestrator({ constructRecordStore, rowSeeker });
+    return makeRowSeekerOrchestrator({
+      ...props,
+      rowSeeker,
+    });
   };
 }

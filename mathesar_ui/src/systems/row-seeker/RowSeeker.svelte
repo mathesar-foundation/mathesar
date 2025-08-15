@@ -6,6 +6,7 @@
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import {
+    Button,
     ListBox,
     ListBoxOptions,
     Spinner,
@@ -19,7 +20,8 @@
   export let controller: RowSeekerController;
   export let close: () => void = () => {};
 
-  $: ({ elementId, records, pagination, previousValue } = controller);
+  $: ({ elementId, records, pagination, previousValue, canAddNewRecord } =
+    controller);
   $: isLoading = $records.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
@@ -102,13 +104,27 @@
       {/if}
     </div>
 
-    {#if hasPagination}
-      <div class="pagination">
-        <MiniPagination
-          bind:pagination={$pagination}
-          on:change={() => controller.getRecords()}
-          recordCount={recordsCount}
-        />
+    {#if hasPagination || canAddNewRecord}
+      <div class="footer">
+        {#if canAddNewRecord}
+          <div class="add-record">
+            <Button
+              appearance="secondary"
+              on:click={() => controller.addNewRecord()}
+            >
+              {$_('add_new_record')}
+            </Button>
+          </div>
+        {/if}
+        {#if hasPagination}
+          <div class="pagination">
+            <MiniPagination
+              bind:pagination={$pagination}
+              on:change={() => controller.getRecords()}
+              recordCount={recordsCount}
+            />
+          </div>
+        {/if}
       </div>
     {/if}
   </ListBox>
@@ -134,7 +150,7 @@
   }
 
   .empty-states {
-    padding: var(--sm4) var(--sm2);
+    padding: var(--sm1) var(--sm2);
     max-height: 20rem;
   }
 
@@ -160,12 +176,15 @@
     justify-content: center;
   }
 
-  .pagination {
+  .footer {
     border-top: 1px solid var(--border-color);
     padding: var(--sm6);
     display: flex;
     align-items: center;
-    justify-content: end;
     font-size: var(--sm2);
+
+    .pagination {
+      margin-left: auto;
+    }
   }
 </style>

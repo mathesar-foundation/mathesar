@@ -20,8 +20,15 @@ export type RowSeekerRecordStore = AsyncStore<
 >;
 
 export type RowSeekerProps = {
-  constructRecordStore: () => RowSeekerRecordStore;
   previousValue?: SummarizedRecordReference;
+  constructRecordStore: () => RowSeekerRecordStore;
+  addRecordOptions?: {
+    text?: string;
+    create: (
+      searchString?: string,
+    ) => Promise<SummarizedRecordReference | undefined>;
+  };
+  onSelect?: (v?: SummarizedRecordReference) => unknown;
 };
 
 export default class RowSeekerController {
@@ -35,11 +42,20 @@ export default class RowSeekerController {
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
 
-  select: (v: SummarizedRecordReference) => void = () => {};
+  select: (v?: SummarizedRecordReference) => void = () => {};
+
+  canAddNewRecord: boolean;
+
+  private addRecordOptions?: RowSeekerProps['addRecordOptions'];
+
+  private onSelect: RowSeekerProps['onSelect'];
 
   constructor(props: RowSeekerProps) {
     this.records = props.constructRecordStore();
+    this.addRecordOptions = props.addRecordOptions;
+    this.onSelect = props.onSelect;
     this.previousValue = props.previousValue;
+    this.canAddNewRecord = !!props.addRecordOptions;
   }
 
   private async focusSearch() {
@@ -75,10 +91,18 @@ export default class RowSeekerController {
     this.searchValue.set('');
   }
 
+  async addNewRecord() {
+    if (this.addRecordOptions) {
+      const value = await this.addRecordOptions.create(get(this.searchValue));
+      this.select(value);
+    }
+  }
+
   async acquireUserSelection(): Promise<SummarizedRecordReference | undefined> {
     return new Promise((resolve) => {
       this.select = (v) => {
         resolve(v);
+        this.onSelect?.(v);
       };
     });
   }
