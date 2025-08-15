@@ -14,9 +14,9 @@
 
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
   import type { DataFormField } from '../../data-form-utilities/fields';
-  import FkFormFieldRuleSelector from '../../elements/FkFormFieldRuleSelector.svelte';
 
   import FieldAppearance from './FieldAppearance.svelte';
+  import FkFieldConfig from './FkFieldConfig.svelte';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: DataFormField;
@@ -73,13 +73,7 @@
   </InspectorSection>
 
   {#if field.kind === 'foreign_key'}
-    <InspectorSection title={$_('field_fk_rule_label')}>
-      <FkFormFieldRuleSelector
-        appearance="default"
-        {dataFormManager}
-        dataFormField={field}
-      />
-    </InspectorSection>
+    <FkFieldConfig {dataFormManager} {field} />
   {/if}
 
   <FieldAppearance {field} />
