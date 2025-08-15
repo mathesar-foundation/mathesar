@@ -1,8 +1,9 @@
-import { type Readable, get, readable, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
 import type { RawForeignKeyDataFormField } from '@mathesar/api/rpc/forms';
 import { getLinkedRecordInputCap } from '@mathesar/components/cell-fabric/utils';
 import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
+import { isDefinedNonNullable } from '@mathesar-component-library';
 
 import type { DataFormStructureCtx } from '../DataFormStructure';
 
@@ -68,17 +69,33 @@ export class FkField extends AbstractColumnBasedField {
       this.isRequired,
       this.interactionRule,
     );
-    this.inputComponentAndProps = readable(
-      getLinkedRecordInputCap({
-        recordSelectionOrchestratorFactory: makeRowSeekerOrchestratorFactory({
-          constructRecordStore: structureCtx.rowSeekerRecordStoreConstructor({
-            key: this.key,
-            tableOid: this.fieldColumn.tableOid,
-            columnAttnum: this.fieldColumn.column.id,
-            relatedTableOid: fkLink.relatedTableOid,
+    this.inputComponentAndProps = derived(
+      this.interactionRule,
+      ($interactionRule) =>
+        getLinkedRecordInputCap({
+          recordSelectionOrchestratorFactory: makeRowSeekerOrchestratorFactory({
+            constructRecordStore: structureCtx.rowSeekerRecordStoreConstructor({
+              key: this.key,
+              tableOid: this.fieldColumn.tableOid,
+              columnAttnum: this.fieldColumn.column.id,
+              relatedTableOid: fkLink.relatedTableOid,
+            }),
+            onSelect: (v) => {
+              if (isDefinedNonNullable(v)) {
+                this.fieldValueHolder.setUserAction('pick');
+              }
+            },
+            addRecordOptions:
+              $interactionRule === 'must_pick'
+                ? undefined
+                : {
+                    create: async () => {
+                      this.fieldValueHolder.setUserAction('create');
+                      return undefined;
+                    },
+                  },
           }),
         }),
-      }),
     );
   }
 

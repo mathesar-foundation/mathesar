@@ -1,8 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { Button } from '@mathesar-component-library';
-
   import {
     type DataFormManager,
     EditableDataFormManager,
@@ -42,24 +40,14 @@
 
   {#if $interactionRule !== 'must_create'}
     <div class="fk-input" class:has-margin={$interactionRule !== 'must_pick'}>
-      {#if editableDataFormManager || $interactionRule === 'must_pick' || $userAction === 'pick'}
-        <DataFormInput {dataFormManager} {dataFormField} {isSelected} />
-      {/if}
-
-      {#if !editableDataFormManager && $interactionRule === 'can_pick_or_create'}
-        {#if $userAction === 'pick'}
-          <!-- TODO_FORMS: Place this within Row Seeker -->
-          <Button on:click={() => fieldValueHolder.setUserAction('create')}>
-            {$_('create_record_TODO_place_within_row_seeker')}
-          </Button>
-        {:else}
-          <Button on:click={() => fieldValueHolder.setUserAction('pick')}>
-            {$_(
-              'enter_values_below_or_click_here_to_pick_record_TODO_place_within_row_seeker',
-            )}
-          </Button>
-        {/if}
-      {/if}
+      <DataFormInput
+        {dataFormManager}
+        {dataFormField}
+        {isSelected}
+        placeholder={$userAction === 'create'
+          ? $_('adding_new_record')
+          : undefined}
+      />
     </div>
   {/if}
 
