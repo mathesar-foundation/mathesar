@@ -1,4 +1,8 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
+
+  import { sortableContainer } from '@mathesar/components/sortable/sortable';
+
   import {
     type DataFormManager,
     EditableDataFormManager,
@@ -12,7 +16,13 @@
   export let fields: FormFields;
 </script>
 
-<div class="fields-container">
+<div
+  class="fields-container"
+  use:sortableContainer={{
+    getItems: () => [...get(fields)],
+    onSort: (orderedFields) => fields.rearrange(orderedFields),
+  }}
+>
   {#each $fields as ephField (ephField.key)}
     <DataFormFieldElement {dataFormManager} dataFormField={ephField} />
   {:else}
@@ -30,13 +40,9 @@
 </div>
 
 <style lang="scss">
-  .fields-container {
-    display: contents;
-
-    .empty-fields-state {
-      padding: var(--lg1);
-      margin-bottom: var(--sm4);
-      border: 1px dashed var(--border-color);
-    }
+  .empty-fields-state {
+    padding: var(--lg1);
+    margin-bottom: var(--sm4);
+    border: 1px dashed var(--border-color);
   }
 </style>

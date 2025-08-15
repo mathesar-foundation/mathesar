@@ -132,14 +132,10 @@ def has_permission_for_form(user, form_model):
         return True
     elif user.is_authenticated:
         try:
-            # validate_and_get_associated_role allows us to verify if a given user has access to the role associated with the form
-            validate_and_get_associated_role(
-                user=user,
-                database_id=form_model.database.id,
-                associated_role_id=form_model.associated_role.id
-            )
+            # we check whether the user is a collaborator on the database associated with the form.
+            UserDatabaseRoleMap.objects.get(user=user, database__id=form_model.database.id)
             return True
-        except AssertionError:
+        except UserDatabaseRoleMap.DoesNotExist:
             return False
     return False
 
