@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import SharedFormRoute from './SharedFormRoute.svelte';
 </script>
 
-<Route path="/">
-  <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
+<Route path="/forms/:token/*" let:meta>
+  <SharedFormRoute formToken={meta.params.token} />
 </Route>

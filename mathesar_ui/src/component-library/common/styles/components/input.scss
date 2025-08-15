@@ -12,6 +12,7 @@
   display: block;
   width: 100%;
   box-sizing: border-box;
+  min-height: var(--input-min-height, unset);
   text-align: var(--input-element-text-align, 'left');
 
   &::placeholder {

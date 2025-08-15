@@ -47,7 +47,6 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   id: QueryColumnMetaData['alias'];
   column: QueryResultColumn;
   abstractType: AbstractType;
-  inputComponentAndProps: ComponentAndProps;
   filterComponentAndProps: ComponentAndProps;
   initialInputValue: unknown;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
@@ -364,16 +363,9 @@ function processColumn(
       cellInfo: abstractType.cellInfo,
       column,
     }),
-    inputComponentAndProps: getDbTypeBasedInputCap(
-      column,
-      undefined,
-      abstractType.cellInfo,
-    ),
-    filterComponentAndProps: getDbTypeBasedFilterCap(
-      column,
-      undefined,
-      abstractType.cellInfo,
-    ),
+    filterComponentAndProps:
+      getDbTypeBasedFilterCap(column, abstractType.cellInfo) ??
+      getDbTypeBasedInputCap(column, abstractType.cellInfo),
     initialInputValue: getInitialInputValue(
       column,
       undefined,

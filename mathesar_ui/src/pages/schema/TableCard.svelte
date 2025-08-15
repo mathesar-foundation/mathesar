@@ -20,7 +20,7 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { deleteTable } from '@mathesar/stores/tables';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
-  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import { recordSelectorContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import {
@@ -31,7 +31,7 @@
     Tooltip,
   } from '@mathesar-component-library';
 
-  const recordSelector = getRecordSelectorFromContext();
+  const recordSelector = recordSelectorContext.get();
 
   export let table: Table;
   export let database: Database;
@@ -72,7 +72,7 @@
   }
 
   function handleFindRecord() {
-    recordSelector.navigateToRecordPage({ tableId: table.oid });
+    recordSelector?.navigateToRecordPage({ tableOid: table.oid });
   }
 </script>
 

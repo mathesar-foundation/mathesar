@@ -7,6 +7,7 @@
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import {
+    iconDescription,
     iconFiltering,
     iconGrouping,
     iconSortAscending,
@@ -16,22 +17,20 @@
     type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { Icon } from '@mathesar-component-library';
+  import { Icon, Tooltip } from '@mathesar-component-library';
+
+  const tabularData = getTabularDataStoreFromContext();
 
   export let processedColumn: ProcessedColumn;
   export let isSelected = false;
 
-  const tabularData = getTabularDataStoreFromContext();
+  $: ({ column } = processedColumn);
+  $: ({ id, description } = column);
   $: ({ meta } = $tabularData);
   $: ({ filtering, sorting, grouping } = meta);
-
-  $: hasFilter = $filtering.entries.some(
-    (entry) => entry.columnId === processedColumn.id,
-  );
-  $: sorter = $sorting.get(processedColumn.id);
-  $: grouped = $grouping.entries.some(
-    (entry) => entry.columnId === processedColumn.id,
-  );
+  $: hasFilter = $filtering.entries.some((entry) => entry.columnId === id);
+  $: sorter = $sorting.get(id);
+  $: grouped = $grouping.entries.some((entry) => entry.columnId === id);
 </script>
 
 <div class="header-cell-root">
@@ -44,7 +43,7 @@
     on:mouseenter
   >
     <ProcessedColumnName {processedColumn} />
-    {#if sorter || hasFilter || grouped}
+    {#if sorter || hasFilter || grouped || description}
       <div class="indicator-icons">
         {#if sorter}
           <Icon
@@ -56,6 +55,12 @@
         {/if}
         {#if grouped}
           <Icon {...iconGrouping} />
+        {/if}
+        {#if description}
+          <Tooltip>
+            <Icon slot="trigger" {...iconDescription} />
+            <div slot="content">{description}</div>
+          </Tooltip>
         {/if}
       </div>
     {/if}
