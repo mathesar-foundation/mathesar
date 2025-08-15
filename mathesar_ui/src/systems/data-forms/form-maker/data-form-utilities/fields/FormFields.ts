@@ -1,4 +1,4 @@
-import { execPipe, flatMap, some, toArray } from 'iter-tools';
+import { enumerate, execPipe, flatMap, some, toArray } from 'iter-tools';
 import {
   type Readable,
   type Subscriber,
@@ -47,7 +47,7 @@ export type FormFieldContainerChangeEvent =
       target: DataFormStructure | ParentDataFormField;
     };
 
-export class FormFields {
+export class FormFields implements Readable<DataFormField[]> {
   readonly parent;
 
   private fieldSet: WritableSet<DataFormField>;
@@ -157,6 +157,17 @@ export class FormFields {
       type: 'fields/reconstruct',
       target: this.parent,
     });
+  }
+
+  /**
+   * Update each field's `index` store to match the index of the field within
+   * the supplied array.
+   */
+  rearrange(orderedFields: DataFormField[]): void {
+    for (const [index, field] of enumerate(orderedFields)) {
+      if (get(field.index) === index) continue;
+      field.updateIndex(() => index);
+    }
   }
 
   add(createDataFormField: DataFormFieldFactory) {

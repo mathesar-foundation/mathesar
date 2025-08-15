@@ -88,7 +88,7 @@ export function reactiveSort<Value, Key>(
         derived(getSortingKey(value), (key) => ({ value, key })),
       );
       return derived(unite(pieces), ($pieces) =>
-        $pieces
+        [...$pieces]
           .sort((a, b) => compareSortingKeys(a.key, b.key))
           .map((s) => s.value),
       );
