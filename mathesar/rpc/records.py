@@ -474,7 +474,7 @@ def search(
     return RecordList.from_dict(record_info)
 
 
-@mathesar_rpc_method(name="records.list_summaries")
+@mathesar_rpc_method(name="records.list_summaries", auth="login")
 def list_summaries(
         *,
         table_oid: int,
