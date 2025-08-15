@@ -179,6 +179,7 @@
       - GroupingResponse
       - SearchParam
       - RecordSummaryList
+      - SummarizedRecordReference
 
 ## Roles
 
