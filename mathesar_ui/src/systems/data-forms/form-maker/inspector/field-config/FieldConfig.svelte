@@ -73,7 +73,7 @@
 
   <InspectorSection title={$_('actions')}>
     <Button
-      appearance="outline-danger"
+      appearance="outline-primary"
       on:click={() => field.container.delete(field)}
     >
       <Icon {...iconDeleteMajor} />
