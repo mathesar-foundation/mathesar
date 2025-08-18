@@ -5814,7 +5814,7 @@ WITH cte AS (
   SELECT msar.raise_exception(
     'Inserting into a column with foreign key constraints referencing multiple columns is currently unsupported.'
   )
-  FROM cte GROUP BY cte.column_name, cte.from_cte_name HAVING count(*) > 1
+  FROM cte GROUP BY column_name, from_cte_name HAVING count(*) > 1
 )
 SELECT
   __msar.get_qualified_relation_name(table_oid) AS table_name,
