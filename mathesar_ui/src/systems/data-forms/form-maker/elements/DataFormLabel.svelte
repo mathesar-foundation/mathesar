@@ -37,12 +37,23 @@
 
 <div class="label-container" class:selected={isSelected}>
   <div class="header">
-    <div class="label" class:disabled>
+    <div class="label">
       {#if $isRequired}
         <span class="req-indicator">*</span>
       {/if}
       {#if dataFormManager instanceof EditableDataFormManager}
-        <input type="text" {disabled} value={$label} on:input={onLabelInput} />
+        <!--
+          Why `readonly` instead of `disabled`?
+          Disabled inputs do not trigger event handlers like click. In this case, it will prevent
+          the form field from getting selected when user clicks on the input.
+        -->
+        <input
+          type="text"
+          readonly={disabled}
+          class:disabled
+          value={$label}
+          on:input={onLabelInput}
+        />
       {:else}
         <span>
           {$label}
@@ -103,6 +114,11 @@
       input {
         background-color: var(--input-background);
         border-bottom: 1px solid var(--input-border);
+
+        &.disabled {
+          background-color: var(--input-disabled-background);
+          cursor: not-allowed;
+        }
       }
     }
   }
