@@ -9,8 +9,10 @@ import {
 
 import { WritableSet, reactiveSort } from '@mathesar-component-library';
 
-import type { DataFormStructure } from '../DataFormStructure';
-import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
+import type {
+  DataFormStructure,
+  DataFormStructureCtx,
+} from '../DataFormStructure';
 
 import type {
   DataFormField,
@@ -26,7 +28,7 @@ import type { FkField } from './FkField';
 
 export type DataFormFieldContainerFactory = (
   parent: DataFormStructure | ParentDataFormField,
-  changeEventHandler: DataFormStructureChangeEventHandler,
+  structureCtx: DataFormStructureCtx,
 ) => FormFields;
 
 export type FormFieldContainerChangeEvent =
@@ -52,7 +54,7 @@ export class FormFields implements Readable<DataFormField[]> {
 
   private sortedFields: Readable<DataFormField[]>;
 
-  private changeEventHandler: DataFormStructureChangeEventHandler;
+  private structureCtx: DataFormStructureCtx;
 
   readonly fieldValueStores: Readable<
     (DataFormFieldInputValueHolder | DataFormFieldFkInputValueHolder)[]
@@ -61,12 +63,12 @@ export class FormFields implements Readable<DataFormField[]> {
   constructor(
     parent: DataFormStructure | ParentDataFormField,
     fieldFactories: Iterable<DataFormFieldFactory>,
-    changeEventHandler: DataFormStructureChangeEventHandler,
+    structureCtx: DataFormStructureCtx,
   ) {
     this.parent = parent;
-    this.changeEventHandler = changeEventHandler;
+    this.structureCtx = structureCtx;
     const ephemeralFormFields = [...fieldFactories].map((buildField) =>
-      buildField(this, this.changeEventHandler),
+      buildField(this, this.structureCtx),
     );
     this.fieldSet = new WritableSet(ephemeralFormFields);
     this.sortedFields = reactiveSort(
@@ -149,11 +151,9 @@ export class FormFields implements Readable<DataFormField[]> {
 
   reconstruct(fieldFactories: Iterable<DataFormFieldFactory>) {
     this.fieldSet.reconstruct(
-      [...fieldFactories].map((factory) =>
-        factory(this, this.changeEventHandler),
-      ),
+      [...fieldFactories].map((factory) => factory(this, this.structureCtx)),
     );
-    this.changeEventHandler.trigger({
+    this.structureCtx.changeEventHandler?.trigger({
       type: 'fields/reconstruct',
       target: this.parent,
     });
@@ -171,7 +171,7 @@ export class FormFields implements Readable<DataFormField[]> {
   }
 
   add(createDataFormField: DataFormFieldFactory) {
-    const dataFormField = createDataFormField(this, this.changeEventHandler);
+    const dataFormField = createDataFormField(this, this.structureCtx);
 
     if (!get(this.hasColumn(dataFormField.fieldColumn))) {
       const fieldIndex = get(dataFormField.index);
@@ -181,7 +181,7 @@ export class FormFields implements Readable<DataFormField[]> {
         }
       }
       this.fieldSet.add(dataFormField);
-      this.changeEventHandler.trigger({
+      this.structureCtx.changeEventHandler?.trigger({
         type: 'fields/add',
         target: this.parent,
         field: dataFormField,
@@ -197,7 +197,7 @@ export class FormFields implements Readable<DataFormField[]> {
       }
     }
     this.fieldSet.delete(dataFormField);
-    this.changeEventHandler.trigger({
+    this.structureCtx.changeEventHandler?.trigger({
       type: 'fields/delete',
       target: this.parent,
       field: dataFormField,
