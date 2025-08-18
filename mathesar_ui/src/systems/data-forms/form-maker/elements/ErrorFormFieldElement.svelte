@@ -9,6 +9,7 @@
   import {
     type DataFormManager,
     EditableDataFormManager,
+    ReadonlyDataFormManager,
   } from '../data-form-utilities/DataFormManager';
   import type { ErrorField } from '../data-form-utilities/fields';
 
@@ -19,6 +20,10 @@
   export let dataFormField: ErrorField;
 
   $: ({ error } = dataFormField);
+  $: errorMessage =
+    dataFormManager instanceof ReadonlyDataFormManager
+      ? `${$_('error')}: ${error.message}`
+      : error.message;
 </script>
 
 <div class="error-field">
@@ -26,8 +31,13 @@
   <div>
     <ErrorBox fullWidth>
       <div class="error-message">
+        {#if dataFormManager instanceof ReadonlyDataFormManager}
+          <div>
+            {$_('form_has_errors_contact_admin')}
+          </div>
+        {/if}
         <div>
-          {error.message}
+          {errorMessage}
         </div>
         {#if dataFormManager instanceof EditableDataFormManager}
           <div>
