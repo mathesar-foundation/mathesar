@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
@@ -6,27 +7,33 @@
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { toast } from '@mathesar/stores/toast';
 
-  import type { DataFormManager } from '../data-form-utilities/DataFormManager';
+  import {
+    type DataFormManager,
+    ReadonlyDataFormManager,
+  } from '../data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
 
-  $: ({ submitButtonLabel, formHolder, token } =
-    dataFormManager.dataFormStructure);
+  $: ({ submitButtonLabel, formHolder } = dataFormManager.dataFormStructure);
   $: label = $submitButtonLabel?.trim() || $_('submit');
   $: form = $formHolder;
 
   async function submit() {
-    // TODO_FORMS: Implement showing submission status info & redirection
-    try {
-      await api.forms
-        .submit({
-          form_token: token,
-          values: dataFormManager.dataFormStructure.getFormSubmitRequest(),
-        })
-        .run();
-      toast.success($_('form_submitted_successfully'));
-    } catch (err) {
-      toast.error(RpcError.fromAnything(err));
+    if (dataFormManager instanceof ReadonlyDataFormManager) {
+      const { token } = dataFormManager;
+
+      // TODO_FORMS: Implement showing submission status info & redirection
+      try {
+        await api.forms
+          .submit({
+            form_token: get(token),
+            values: dataFormManager.dataFormStructure.getFormSubmitRequest(),
+          })
+          .run();
+        toast.success($_('form_submitted_successfully'));
+      } catch (err) {
+        toast.error(RpcError.fromAnything(err));
+      }
     }
   }
 </script>

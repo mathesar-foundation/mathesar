@@ -155,8 +155,6 @@
       - AddFormDef
       - AddOrReplaceFieldDef
       - SettableFormDef
-      - ListRelatedRecordsResponse
-      - SummarizedRecordReference
 
 ## Records
 
@@ -169,6 +167,7 @@
       - patch
       - delete
       - search
+      - list_summaries
       - RecordList
       - RecordAdded
       - OrderBy
@@ -179,6 +178,8 @@
       - Group
       - GroupingResponse
       - SearchParam
+      - RecordSummaryList
+      - SummarizedRecordReference
 
 ## Roles
 

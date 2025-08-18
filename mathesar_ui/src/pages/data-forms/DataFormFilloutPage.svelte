@@ -20,12 +20,13 @@
   $: rawDataFormWithSourceValue = $rawDataFormWithSource.resolvedValue;
 
   $: dataFormManager = rawDataFormWithSourceValue
-    ? new ReadonlyDataFormManager(
-        DataFormStructure.factoryFromRawInfo(
+    ? new ReadonlyDataFormManager({
+        buildDataFormStructure: DataFormStructure.factoryFromRawInfo(
           rawDataFormWithSourceValue.rawDataForm,
           new FormSource(rawDataFormWithSourceValue.rawFormSource),
         ),
-      )
+        token: dataForm.token,
+      })
     : undefined;
 </script>
 

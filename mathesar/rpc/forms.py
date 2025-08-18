@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing forms.
 """
-from typing import Optional, TypedDict, Literal, Any
+from typing import Optional, TypedDict, Literal
 
 from modernrpc.core import REQUEST_KEY
 
@@ -20,6 +20,7 @@ from mathesar.utils.forms import (
     submit_form,
 )
 from mathesar.utils.tables import get_table_record_summary_templates
+from mathesar.rpc.records import RecordSummaryList
 
 
 class FieldInfo(TypedDict):
@@ -236,37 +237,6 @@ class SettableFormDef(AddFormDef):
     fields: list[AddOrReplaceFieldDef]
 
 
-class SummarizedRecordReference(TypedDict):
-    """
-    A summarized reference to a record, typically used in foreign key fields.
-
-    Attributes:
-        key: A unique identifier for the record.
-        summary: The record summary
-    """
-    key: Any
-    summary: str
-
-
-class ListRelatedRecordsResponse(TypedDict):
-    """
-    Response for listing related records for a foreign key field.
-
-    Attributes:
-        count: The total number of records matching the criteria.
-        results: A list of summarized record references, each containing a key and a summary.
-    """
-    count: int
-    results: list[SummarizedRecordReference]
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(
-            count=d["count"],
-            results=d["results"],
-        )
-
-
 @mathesar_rpc_method(name="forms.add", auth="login")
 def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
     """
@@ -400,7 +370,7 @@ def list_related_records(
         offset: Optional[int] = None,
         search: Optional[str] = None,
         **kwargs,
-) -> ListRelatedRecordsResponse:
+) -> RecordSummaryList:
     """
     List records for selection via the row seeker
 
@@ -432,7 +402,7 @@ def list_related_records(
             search=search,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
-    return ListRelatedRecordsResponse.from_dict(record_info)
+    return RecordSummaryList.from_dict(record_info)
 
 
 @mathesar_rpc_method(name="forms.submit", auth="anonymous")

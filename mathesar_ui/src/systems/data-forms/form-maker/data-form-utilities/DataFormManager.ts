@@ -2,8 +2,10 @@
 
 import { type Readable, type Writable, get, writable } from 'svelte/store';
 
+import { api } from '@mathesar/api/rpc';
 import type { Schema } from '@mathesar/models/Schema';
 import type { Table } from '@mathesar/models/Table';
+import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
@@ -18,11 +20,26 @@ export interface DataFormManager {
   dataFormStructure: DataFormStructure;
 }
 
+// TODO_FORMS: Rename this class to DataFormFillOutManager
 export class ReadonlyDataFormManager implements DataFormManager {
+  token: Readable<string>;
+
   dataFormStructure;
 
-  constructor(dfsFactory: DataFormStructureFactory) {
-    this.dataFormStructure = dfsFactory();
+  constructor(props: {
+    buildDataFormStructure: DataFormStructureFactory;
+    token: Readable<string>;
+  }) {
+    this.token = props.token;
+    this.dataFormStructure = props.buildDataFormStructure({
+      rowSeekerRecordStoreConstructor: (fieldDetails) => () =>
+        new AsyncRpcApiStore(api.forms.list_related_records, {
+          staticProps: {
+            form_token: get(this.token),
+            field_key: fieldDetails.key,
+          },
+        }),
+    });
   }
 }
 
@@ -39,6 +56,7 @@ export type SelectableElement =
   | SelectableStaticElement
   | SelectableFieldElement;
 
+// TODO_FORMS: Rename this class to DataFormBuildManager
 export class EditableDataFormManager implements DataFormManager {
   readonly dataFormStructure;
 
@@ -77,6 +95,13 @@ export class EditableDataFormManager implements DataFormManager {
         },
         allChanges: () => this._hasChanges.set(true),
       }),
+      rowSeekerRecordStoreConstructor: (fieldDetails) => () =>
+        new AsyncRpcApiStore(api.records.list_summaries, {
+          staticProps: {
+            database_id: this.schema.database.id,
+            table_oid: fieldDetails.relatedTableOid,
+          },
+        }),
     });
     this.schema = props.schema;
     this.tableStructureCache = props.tableStructureCache;

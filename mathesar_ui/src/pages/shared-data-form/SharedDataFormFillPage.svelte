@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { readable } from 'svelte/store';
+
   import type { RawDataForm, RawDataFormSource } from '@mathesar/api/rpc/forms';
   import Errors from '@mathesar/components/errors/Errors.svelte';
   import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
@@ -19,12 +21,13 @@
 
   $: pageTitle = rawDataForm.name.trim();
   $: dataFormManager = formSourceInfo.resolvedValue
-    ? new ReadonlyDataFormManager(
-        DataFormStructure.factoryFromRawInfo(
+    ? new ReadonlyDataFormManager({
+        buildDataFormStructure: DataFormStructure.factoryFromRawInfo(
           rawDataForm,
           new FormSource(formSourceInfo.resolvedValue),
         ),
-      )
+        token: readable(rawDataForm.token),
+      })
     : undefined;
 </script>
 

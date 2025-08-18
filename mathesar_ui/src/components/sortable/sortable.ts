@@ -33,6 +33,24 @@ function getContainerFromTrigger<Item>(
     | undefined;
 }
 
+function* getItemsFromContainer(
+  container: HTMLElement,
+): Generator<HTMLElement> {
+  for (const child of container.children) {
+    if (!(child instanceof HTMLElement)) continue;
+    if (child.hasAttribute(CONTAINER_ATTR)) {
+      // Don't descend into nested containers
+      continue;
+    }
+    if (child.hasAttribute(ITEM_ATTR)) {
+      yield child;
+      continue;
+    }
+    // Recurse into children
+    yield* getItemsFromContainer(child);
+  }
+}
+
 function preventDefault(e: Event) {
   e.preventDefault();
 }
@@ -42,16 +60,19 @@ function midpoint(rect: DOMRect) {
 }
 
 function setTransform(element: HTMLElement, value: number) {
-  if (value === 0) element.style.removeProperty('transform');
-  element.style.setProperty('transform', `translateY(${value}px)`);
+  if (value === 0) {
+    element.style.removeProperty('transform');
+  } else {
+    element.style.setProperty('transform', `translateY(${value}px)`);
+  }
 }
 
 function analyze(container: HTMLElement, draggingItem: HTMLElement) {
   const containerRect = container.getBoundingClientRect();
-  const items = container.querySelectorAll<HTMLElement>(`[${ITEM_ATTR}]`);
+  const items = [...getItemsFromContainer(container)];
   const itemIndexes = [...Array(items.length).keys()];
-  const rects = [...items].map((i) => i.getBoundingClientRect());
-  const draggingItemIndex = [...items].indexOf(draggingItem);
+  const rects = items.map((i) => i.getBoundingClientRect());
+  const draggingItemIndex = items.indexOf(draggingItem);
   const draggingItemRect = rects[draggingItemIndex];
   return {
     items,

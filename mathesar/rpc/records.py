@@ -12,6 +12,7 @@ from db.records import (
     delete_records_from_table,
     add_record_to_table,
     patch_record_in_table,
+    list_by_record_summaries,
 )
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
@@ -190,6 +191,37 @@ class RecordAdded(TypedDict):
             results=d["results"],
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
+        )
+
+
+class SummarizedRecordReference(TypedDict):
+    """
+    A summarized reference to a record, typically used in foreign key fields.
+
+    Attributes:
+        key: A unique identifier for the record.
+        summary: The record summary
+    """
+    key: Any
+    summary: str
+
+
+class RecordSummaryList(TypedDict):
+    """
+    Response for listing record summaries.
+
+    Attributes:
+        count: The total number of records matching the criteria.
+        results: A list of summarized record references, each containing a key and a summary.
+    """
+    count: int
+    results: list[SummarizedRecordReference]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            count=d["count"],
+            results=d["results"],
         )
 
 
@@ -440,3 +472,39 @@ def search(
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)
+
+
+@mathesar_rpc_method(name="records.list_summaries", auth="login")
+def list_summaries(
+        *,
+        table_oid: int,
+        database_id: int,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        search: Optional[str] = None,
+        **kwargs,
+) -> RecordSummaryList:
+    """
+    List record summaries and keys for each record. Primarily used for selection via the Row seeker.
+
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        limit: Optional limit on the number of records to return.
+        offset: Optional offset for pagination.
+        search: Optional search term to filter records.
+
+    Returns:
+        A list of objects, each containing a record summary and key pertaining to a record.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = list_by_record_summaries(
+            conn,
+            table_oid,
+            limit=limit,
+            offset=offset,
+            search=search,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+        )
+    return RecordSummaryList.from_dict(record_info)

@@ -334,7 +334,11 @@ METHODS = [
         "records.search",
         [user_is_authenticated]
     ),
-
+    (
+        records.list_summaries,
+        "records.list_summaries",
+        [user_is_authenticated]
+    ),
     (
         roles.list_,
         "roles.list",

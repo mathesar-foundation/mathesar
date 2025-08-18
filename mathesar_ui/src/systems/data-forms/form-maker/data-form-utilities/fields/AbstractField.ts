@@ -2,6 +2,8 @@ import { type Readable, type Updater, get, writable } from 'svelte/store';
 
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 
+import type { DataFormStructureCtx } from '../DataFormStructure';
+
 import type { FormFields } from './FormFields';
 
 export interface AbstractFieldProps {
@@ -21,6 +23,8 @@ export abstract class AbstractField {
   readonly container;
 
   readonly key;
+
+  protected structureCtx: DataFormStructureCtx;
 
   private _index;
 
@@ -46,8 +50,13 @@ export abstract class AbstractField {
     return this._styling;
   }
 
-  constructor(container: FormFields, props: AbstractFieldProps) {
+  constructor(
+    container: FormFields,
+    props: AbstractFieldProps,
+    structureCtx: DataFormStructureCtx,
+  ) {
     this.container = container;
+    this.structureCtx = structureCtx;
     this.key = props.key;
     this._index = writable(props.index);
     this._label = writable(props.label);
@@ -97,18 +106,5 @@ export abstract class AbstractField {
       help: get(this.help),
       styling: {},
     };
-  }
-
-  getFormToken() {
-    let form = this.container.parent;
-    while (!('token' in form) && form.container.parent) {
-      form = form.container.parent;
-    }
-    if (!('token' in form)) {
-      throw new Error(
-        'Field is not present within a form. This should never happen.',
-      );
-    }
-    return form.token;
   }
 }

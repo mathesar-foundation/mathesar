@@ -1,39 +1,61 @@
 import { tick } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
-import { api } from '@mathesar/api/rpc';
-import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
-import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+import type {
+  RecordsSummaryListResponse,
+  SummarizedRecordReference,
+} from '@mathesar/api/rpc/_common/commonTypes';
+import type AsyncStore from '@mathesar/stores/AsyncStore';
 import Pagination from '@mathesar/utils/Pagination';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
-export interface RowSeekerProps {
-  formToken: string;
-  fieldKey: string;
+export type RowSeekerRecordStore = AsyncStore<
+  {
+    limit?: number | null;
+    offset?: number | null;
+    search?: string | null;
+  },
+  RecordsSummaryListResponse,
+  unknown
+>;
+
+export type RowSeekerProps = {
   previousValue?: SummarizedRecordReference;
-}
+  constructRecordStore: () => RowSeekerRecordStore;
+  addRecordOptions?: {
+    text?: string;
+    create: (
+      searchString?: string,
+    ) => Promise<SummarizedRecordReference | undefined>;
+  };
+  onSelect?: (v?: SummarizedRecordReference) => unknown;
+};
 
 export default class RowSeekerController {
-  private readonly form_token: string;
-
-  private readonly field_key: string;
-
   readonly elementId = getGloballyUniqueId();
 
   readonly previousValue?: SummarizedRecordReference;
 
-  records = new AsyncRpcApiStore(api.forms.list_related_records);
+  records: RowSeekerRecordStore;
 
   searchValue: Writable<string> = writable('');
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
 
-  select: (v: SummarizedRecordReference) => void = () => {};
+  select: (v?: SummarizedRecordReference) => void = () => {};
+
+  canAddNewRecord: boolean;
+
+  private addRecordOptions?: RowSeekerProps['addRecordOptions'];
+
+  private onSelect: RowSeekerProps['onSelect'];
 
   constructor(props: RowSeekerProps) {
-    this.form_token = props.formToken;
-    this.field_key = props.fieldKey;
+    this.records = props.constructRecordStore();
+    this.addRecordOptions = props.addRecordOptions;
+    this.onSelect = props.onSelect;
     this.previousValue = props.previousValue;
+    this.canAddNewRecord = !!props.addRecordOptions;
   }
 
   private async focusSearch() {
@@ -48,8 +70,6 @@ export default class RowSeekerController {
   async getRecords() {
     const pagination = get(this.pagination);
     await this.records.run({
-      form_token: this.form_token,
-      field_key: this.field_key,
       ...pagination.recordsRequestParams(),
       search: get(this.searchValue) || null,
     });
@@ -71,10 +91,18 @@ export default class RowSeekerController {
     this.searchValue.set('');
   }
 
+  async addNewRecord() {
+    if (this.addRecordOptions) {
+      const value = await this.addRecordOptions.create(get(this.searchValue));
+      this.select(value);
+    }
+  }
+
   async acquireUserSelection(): Promise<SummarizedRecordReference | undefined> {
     return new Promise((resolve) => {
       this.select = (v) => {
         resolve(v);
+        this.onSelect?.(v);
       };
     });
   }

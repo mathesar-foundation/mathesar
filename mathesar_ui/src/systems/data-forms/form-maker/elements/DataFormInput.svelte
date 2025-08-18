@@ -14,6 +14,7 @@
   export let dataFormManager: DataFormManager;
   export let dataFormField: DataFormField;
   export let isSelected: boolean;
+  export let placeholder: string | undefined = undefined;
 
   $: editableDataFormManager =
     dataFormManager instanceof EditableDataFormManager
@@ -37,6 +38,7 @@
     disabled={$disabled}
     recordSummary={$recordSummary}
     setRecordSummary={(key, summary) => recordSummaries.set(key, summary)}
+    {placeholder}
   />
   {#if displayError}
     <FieldErrors field={inputField} />

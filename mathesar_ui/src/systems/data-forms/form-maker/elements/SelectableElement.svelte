@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { sortableItem } from '@mathesar/components/sortable/sortable';
   import { ensureReadable } from '@mathesar-component-library';
 
   import {
@@ -63,6 +64,7 @@
   on:mouseenter={onHover}
   on:mousemove={onHover}
   on:mouseleave={onHoverAway}
+  use:sortableItem
 >
   {#if isSelected && $$slots.header}
     <div class="header">
@@ -75,6 +77,11 @@
   {#if isSelected && $$slots.footer}
     <div class="footer">
       <slot name="footer" />
+    </div>
+  {/if}
+  {#if isSelected && $$slots.left}
+    <div class="left">
+      <slot name="left" />
     </div>
   {/if}
 </div>
@@ -100,7 +107,8 @@
   }
 
   .header,
-  .footer {
+  .footer,
+  .left {
     position: absolute;
     display: flex;
     padding: 0 var(--sm2);
@@ -118,5 +126,10 @@
     bottom: 0;
     transform: translate(-50%, 50%);
     left: 50%;
+  }
+  .left {
+    bottom: 50%;
+    transform: translate(-50%, 50%);
+    left: 0;
   }
 </style>
