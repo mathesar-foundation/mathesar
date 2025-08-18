@@ -3,7 +3,6 @@
 
   import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
-  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import {
     Checkbox,
     LabeledInput,
@@ -16,13 +15,12 @@
   import type { DataFormField } from '../../data-form-utilities/fields';
 
   import FieldAppearance from './FieldAppearance.svelte';
+  import FieldValidation from './FieldValidation.svelte';
   import FkFieldConfig from './FkFieldConfig.svelte';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: DataFormField;
-  $: ({ label, help, fieldColumn, isRequired } = field);
-  $: isRequiredOnDb = !fieldColumn.column.nullable;
-  $: isFieldRequired = isRequiredOnDb || $isRequired;
+  $: ({ label, help } = field);
 </script>
 
 <InspectorTabContent>
@@ -52,25 +50,9 @@
     {/if}
   </InspectorSection>
 
-  <InspectorSection title={$_('field_validation')}>
-    <LabeledInput
-      layout="inline-input-first"
-      label={$_('field_validation_is_required')}
-    >
-      <Checkbox
-        checked={isFieldRequired}
-        disabled={isRequiredOnDb}
-        on:change={(e) => field.setIsRequired(e.detail)}
-      />
-    </LabeledInput>
-    {#if isRequiredOnDb}
-      <div class="not-null-info">
-        <InfoBox>
-          {$_('field_marked_required_column_disallows_null')}
-        </InfoBox>
-      </div>
-    {/if}
-  </InspectorSection>
+  {#if 'fieldColumn' in field}
+    <FieldValidation {field} />
+  {/if}
 
   {#if field.kind === 'foreign_key'}
     <FkFieldConfig {dataFormManager} {field} />
@@ -78,9 +60,3 @@
 
   <FieldAppearance {field} />
 </InspectorTabContent>
-
-<style lang="scss">
-  .not-null-info {
-    font-size: var(--sm1);
-  }
-</style>

@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import {
+    ensureReadable,
     getStringValueFromEvent,
     isDefinedNonNullable,
   } from '@mathesar-component-library';
@@ -17,8 +18,13 @@
   export let dataFormManager: DataFormManager;
   export let dataFormField: DataFormField;
   export let isSelected: boolean;
+  export let disabled = false;
 
-  $: ({ label, help, isRequired } = dataFormField);
+  $: ({ label, help } = dataFormField);
+  $: isRequired =
+    'isRequired' in dataFormField
+      ? dataFormField.isRequired
+      : ensureReadable(false);
 
   function onLabelInput(e: Event) {
     dataFormField.setLabel(getStringValueFromEvent(e));
@@ -30,13 +36,13 @@
 </script>
 
 <div class="label-container" class:selected={isSelected}>
-  <div class="label">
-    <div>
+  <div class="header">
+    <div class="label" class:disabled>
       {#if $isRequired}
         <span class="req-indicator">*</span>
       {/if}
       {#if dataFormManager instanceof EditableDataFormManager}
-        <input type="text" value={$label} on:input={onLabelInput} />
+        <input type="text" {disabled} value={$label} on:input={onLabelInput} />
       {:else}
         <span>
           {$label}
@@ -101,7 +107,7 @@
     }
   }
 
-  .label {
+  .header {
     width: 100%;
     display: flex;
 

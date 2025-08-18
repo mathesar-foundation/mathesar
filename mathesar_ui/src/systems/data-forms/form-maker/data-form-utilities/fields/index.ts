@@ -1,9 +1,11 @@
 export type { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 export {
   type DataFormField,
+  type ColumnBasedDataFormField,
   type ParentDataFormField,
   type DataFormFieldFactory,
-  buildDataFormFieldFactory,
+  buildFieldFactoryFromRaw,
+  buildFieldFactoryFromColumn,
   buildFormFieldContainerFactory,
 } from './factories';
 export type { FkField, FkFieldPropChangeEvent } from './FkField';
@@ -15,3 +17,4 @@ export type {
 } from './FormFields';
 export type { ScalarField, ScalarFieldPropChangeEvent } from './ScalarField';
 export type { AbstractColumnBasedField } from './AbstractColumnBasedField';
+export type { ErrorField } from './ErrorField';
