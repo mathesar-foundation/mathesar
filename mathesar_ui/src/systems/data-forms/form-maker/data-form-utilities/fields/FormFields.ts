@@ -25,6 +25,7 @@ import type {
   DataFormFieldInputValueHolder,
 } from './FieldValueHolder';
 import type { FkField } from './FkField';
+import { getValidFormFields } from './utils';
 
 export type DataFormFieldContainerFactory = (
   parent: DataFormStructure | ParentDataFormField,
@@ -206,5 +207,13 @@ export class FormFields implements Readable<DataFormField[]> {
       target: this.parent,
       field: dataFormField,
     });
+  }
+
+  toRawFields(options?: { withoutErrorFields: boolean }) {
+    const fields = get(this);
+    const fieldsToReturn = options?.withoutErrorFields
+      ? getValidFormFields(fields)
+      : fields;
+    return fieldsToReturn.map((field) => field.toRawEphemeralField(options));
   }
 }

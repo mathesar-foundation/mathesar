@@ -27,6 +27,7 @@ import { ScalarField } from './ScalarField';
 
 export type DataFormField = ScalarField | FkField | ErrorField;
 export type ColumnBasedDataFormField = ScalarField | FkField;
+export type ValidDataFormField = ColumnBasedDataFormField; // May contain non-column fields in the future.
 export type ParentDataFormField = FkField; // May contain more types in the future eg., ReverseFkField
 
 export type DataFormFieldFactory = (

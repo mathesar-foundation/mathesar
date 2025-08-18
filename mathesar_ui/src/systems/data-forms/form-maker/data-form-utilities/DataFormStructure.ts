@@ -12,8 +12,10 @@ import type { DataFormStructureChangeEventHandler } from './DataFormStructureCha
 import {
   type DataFormFieldContainerFactory,
   type DataFormFieldFkInputValueHolder,
+  ErrorField,
   type FormFields,
   buildFormFieldContainerFactory,
+  walkFormFields,
 } from './fields';
 import type { FormSource } from './FormSource';
 
@@ -235,14 +237,23 @@ export class DataFormStructure {
     return request;
   }
 
-  toRawStructure(): RawDataFormStructure {
+  hasErrorFields(): boolean {
+    for (const field of walkFormFields(this.fields)) {
+      if (field instanceof ErrorField) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  toRawStructure(options?: {
+    withoutErrorFields: boolean;
+  }): RawDataFormStructure {
     return {
       associated_role_id: get(this.associatedRoleId),
       name: get(this.name),
       description: get(this.description),
-      fields: [...get(this.fields).values()].map((field) =>
-        field.toRawEphemeralField(),
-      ),
+      fields: this.fields.toRawFields(options),
       submit_message: get(this.submitMessage),
       submit_redirect_url: get(this.submitRedirectUrl),
       submit_button_label: get(this.submitButtonLabel),

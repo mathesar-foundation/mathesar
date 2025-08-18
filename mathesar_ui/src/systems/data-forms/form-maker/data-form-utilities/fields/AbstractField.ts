@@ -24,7 +24,7 @@ export abstract class AbstractField {
 
   readonly key;
 
-  protected structureCtx: DataFormStructureCtx;
+  readonly structureCtx: DataFormStructureCtx;
 
   private _index;
 
@@ -96,7 +96,7 @@ export abstract class AbstractField {
     e: T,
   ): unknown;
 
-  abstract toRawEphemeralField(): RawDataFormField;
+  abstract toRawEphemeralField(options?: unknown): RawDataFormField;
 
   protected getBaseFieldRawJson() {
     return {
