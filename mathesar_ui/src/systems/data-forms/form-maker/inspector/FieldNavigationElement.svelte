@@ -3,8 +3,11 @@
 
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import { iconField } from '@mathesar/icons';
-  import { Button, ensureReadable } from '@mathesar-component-library';
+  import {
+    Button,
+    ensureReadable,
+    iconError,
+  } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
   import type { DataFormField } from '../data-form-utilities/fields';
@@ -32,8 +35,12 @@
               : [],
           }}
         />
+      {:else if 'error' in field}
+        <div class="error">
+          <NameWithIcon name={$label ?? 'Field'} icon={iconError} />
+        </div>
       {:else}
-        <NameWithIcon name={$label ?? 'Field'} icon={iconField} />
+        <span>{$label ?? 'Field'}</span>
       {/if}
     </Button>
   {:else}
@@ -45,3 +52,9 @@
     </Button>
   {/if}
 </div>
+
+<style lang="scss">
+  .error {
+    color: var(--danger-color);
+  }
+</style>

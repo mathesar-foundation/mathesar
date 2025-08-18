@@ -17,8 +17,4 @@ export type {
 } from './FormFields';
 export type { ScalarField, ScalarFieldPropChangeEvent } from './ScalarField';
 export type { AbstractColumnBasedField } from './AbstractColumnBasedField';
-export {
-  type ErrorField,
-  dataFormErrorCodes,
-  dataFormErrors,
-} from './ErrorField';
+export { ErrorField, dataFormErrorCodes, dataFormErrors } from './ErrorField';
