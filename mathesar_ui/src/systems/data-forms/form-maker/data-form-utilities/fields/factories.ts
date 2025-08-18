@@ -4,6 +4,10 @@ import type {
   RawScalarDataFormField,
 } from '@mathesar/api/rpc/forms';
 import {
+  ClientSideError,
+  type GeneralizedError,
+} from '@mathesar/components/errors/errorUtils';
+import {
   getGloballyUniqueId,
   isDefinedNonNullable,
 } from '@mathesar-component-library';
@@ -31,13 +35,11 @@ export type DataFormFieldFactory = (
 ) => DataFormField;
 
 function makeErrorFieldFactory({
-  message,
-  code,
   originalField,
+  error,
 }: {
   originalField: RawDataFormField;
-  message: string;
-  code: number;
+  error: GeneralizedError;
 }): DataFormFieldFactory {
   return (holder, structureCtx) =>
     new ErrorField(
@@ -48,8 +50,7 @@ function makeErrorFieldFactory({
         help: originalField.help,
         index: originalField.index,
         styling: originalField.styling,
-        message,
-        code,
+        error,
         originalField,
       },
       structureCtx,
@@ -189,10 +190,6 @@ export function buildFieldFactoryFromRaw({
       rawField.column_attnum,
     );
 
-    if (!columnDetails) {
-      throw new Error('Column details not present');
-    }
-
     const foreignKeyLink =
       'related_table_oid' in rawField &&
       isDefinedNonNullable(rawField.related_table_oid)
@@ -229,8 +226,7 @@ export function buildFieldFactoryFromRaw({
   } catch (err) {
     return makeErrorFieldFactory({
       originalField: rawField,
-      message: 'TODO',
-      code: 123,
+      error: ClientSideError.fromAnything(err),
     });
   }
 }
@@ -262,8 +258,7 @@ export function buildFieldFactoryFromColumn({
   } catch (err) {
     return makeErrorFieldFactory({
       originalField: rawField,
-      message: 'TODO',
-      code: 123,
+      error: ClientSideError.fromAnything(err),
     });
   }
 }
