@@ -8,7 +8,7 @@
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { confirm } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
-  import { type EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
+  import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
   import { Dropdown, Icon } from '@mathesar-component-library';
 
   import ShareForm from './ShareForm.svelte';
