@@ -5817,14 +5817,14 @@ WITH cte AS (
   FROM cte GROUP BY cte.column_name, cte.from_cte_name HAVING count(*) > 1
 )
 SELECT
-  __msar.get_qualified_relation_name(cte.table_oid) AS table_name,
-  string_agg(quote_ident(cte.column_name), ', ') AS column_names,
-  string_agg(cte.value, ', ') AS values_,
-  cte.cte_name,
-  string_agg(cte.from_cte_name, ', ') AS from_cte_name
+  __msar.get_qualified_relation_name(table_oid) AS table_name,
+  string_agg(quote_ident(column_name), ', ') AS column_names,
+  string_agg(value, ', ') AS values_,
+  cte_name,
+  string_agg(from_cte_name, ', ') AS from_cte_name
 FROM cte
 CROSS JOIN (SELECT COUNT(*) FROM multi_fks_cte) AS force_multi_fks_cte_execution
-GROUP BY cte.table_oid, cte.cte_name, cte.depth ORDER BY cte.depth DESC;
+GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
