@@ -7157,4 +7157,73 @@ BEGIN
     ]$j$
   );
 END;
-$$ LANGUAGE plpgsql
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_single_col_multi_fk_insert() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE a (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
+    fkey_field integer -- attnum: 2, field_key: _id-b3384ea8-d937-4bdc-b0d3-60cca1279e01
+  );
+
+  CREATE TABLE b (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
+    fk_0 INTEGER UNIQUE -- attnum: 2, field_key: _id-50855cd2-2e5d-4c4f-bb64-527f410d5087
+  );
+
+  CREATE TABLE c (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
+    fk_1 integer UNIQUE, -- attnum: 2, field_key: NA
+    fk_2 integer UNIQUE -- attnum: 3, field_key: NA
+  );
+
+  ALTER TABLE a ADD CONSTRAINT fk0 FOREIGN KEY (fkey_field) REFERENCES b(fk_0);
+  ALTER TABLE a ADD CONSTRAINT fk1 FOREIGN KEY (fkey_field) REFERENCES c(fk_1);
+  ALTER TABLE a ADD CONSTRAINT fk2 FOREIGN KEY (fkey_field) REFERENCES c(fk_2);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_single_col_multi_fk_insert() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_a_oid oid;
+  tab_b_oid oid;
+  field_info_list jsonb;
+  values_ jsonb;
+BEGIN
+  PERFORM __setup_single_col_multi_fk_insert();
+
+  tab_a_oid := 'a'::regclass::oid;
+  tab_b_oid := 'b'::regclass::oid;
+
+  field_info_list := jsonb_build_array(
+    jsonb_build_object(
+      'key', '_id-b3384ea8-d937-4bdc-b0d3-60cca1279e01',
+      'parent_key', null,
+      'column_attnum', 2,
+      'table_oid', tab_a_oid,
+      'depth', 0
+    ),
+    jsonb_build_object(
+      'key', '_id-50855cd2-2e5d-4c4f-bb64-527f410d5087',
+      'parent_key', '_id-b3384ea8-d937-4bdc-b0d3-60cca1279e01',
+      'column_attnum', 2,
+      'table_oid', tab_b_oid,
+      'depth', 1
+    )
+  );
+
+  values_ := $j${
+    "_id-50855cd2-2e5d-4c4f-bb64-527f410d5087": "9",
+    "_id-b3384ea8-d937-4bdc-b0d3-60cca1279e01": {
+      "type": "create"
+    }
+  }$j$;
+
+  RETURN NEXT throws_ok(
+    format('SELECT msar.form_insert(%L, %L)', field_info_list, values_),
+    'Inserting into a column with foreign key constraints referencing multiple columns is currently unsupported.'
+  );
+END;
+$$ LANGUAGE plpgsql;
