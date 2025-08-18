@@ -5792,7 +5792,7 @@ WITH cte AS (
     column_attnum smallint,
     table_oid bigint,
     depth integer)
-  RIGHT JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
+  INNER JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
   LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
 
   LEFT JOIN pg_constraint pgc
