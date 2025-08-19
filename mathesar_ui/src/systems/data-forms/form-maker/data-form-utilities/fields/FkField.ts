@@ -12,7 +12,7 @@ import {
   type AbstractColumnBasedFieldModifiableProps,
   type AbstractColumnBasedFieldProps,
 } from './AbstractColumnBasedField';
-import type { DataFormFieldFactory } from './factories';
+import type { DataFormField, DataFormFieldFactory } from './factories';
 import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
 import type { DataFormFieldContainerFactory, FormFields } from './FormFields';
 
@@ -40,6 +40,8 @@ export class FkField extends AbstractColumnBasedField {
 
   readonly nestedFields;
 
+  private cachedNestedFieldsBeforeMustPick: DataFormField[] | undefined;
+
   readonly inputComponentAndProps: AbstractColumnBasedField['inputComponentAndProps'];
 
   private _interactionRule;
@@ -60,8 +62,9 @@ export class FkField extends AbstractColumnBasedField {
     this.nestedFields = props.createFields(this, this.structureCtx);
     const fkLink = this.fieldColumn.foreignKeyLink;
     if (!fkLink) {
-      // TODO_FORMS: Gracefully handle error scenario where foreign key constraint is removed later
-      throw Error('The passed column is not a foreign key');
+      throw Error(
+        'The passed column is not a foreign key. This should never occur',
+      );
     }
     this._interactionRule = writable(props.interactionRule);
     this.fieldValueHolder = new DataFormFieldFkInputValueHolder(
@@ -100,15 +103,41 @@ export class FkField extends AbstractColumnBasedField {
   }
 
   async setInteractionRule(
-    rule: RawForeignKeyDataFormField['fk_interaction_rule'],
+    nextRule: RawForeignKeyDataFormField['fk_interaction_rule'],
     getDefaultNestedFields: () => Promise<Iterable<DataFormFieldFactory>>,
   ) {
-    this._interactionRule.set(rule);
+    const prevRule = get(this._interactionRule);
+    if (nextRule === prevRule) {
+      return;
+    }
+    this._interactionRule.set(nextRule);
     this.triggerChangeEvent('interactionRule');
 
-    if (get(this.nestedFields).length === 0) {
-      const defaultNestedFieldsFactories = await getDefaultNestedFields();
-      this.nestedFields.reconstruct(defaultNestedFieldsFactories);
+    if (prevRule !== 'must_pick') {
+      /* We're caching this for UX convenience when users are building the form.
+       *
+       * We'd like to preseve the changes to the nested fields when users change
+       * `interactionRule` while building the form, so that when they change the
+       * rule back, their changes are not lost.
+       */
+      this.cachedNestedFieldsBeforeMustPick = get(this.nestedFields);
+    }
+
+    if (nextRule === 'must_pick') {
+      this.nestedFields.reconstruct([]);
+      return;
+    }
+
+    if (prevRule === 'must_pick') {
+      if (this.cachedNestedFieldsBeforeMustPick === undefined) {
+        const defaultNestedFieldsFactories = await getDefaultNestedFields();
+        this.nestedFields.reconstruct(defaultNestedFieldsFactories);
+        return;
+      }
+
+      this.nestedFields.reconstructWithFields(
+        this.cachedNestedFieldsBeforeMustPick,
+      );
     }
   }
 

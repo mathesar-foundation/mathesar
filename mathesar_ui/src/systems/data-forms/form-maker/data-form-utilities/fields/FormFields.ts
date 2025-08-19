@@ -151,6 +151,25 @@ export class FormFields implements Readable<DataFormField[]> {
       : this.parent.baseTableOid;
   }
 
+  reconstructWithFields(dataFormFields: DataFormField[]) {
+    if (
+      dataFormFields.some(
+        (field) =>
+          field.container !== this || field.structureCtx !== this.structureCtx,
+      )
+    ) {
+      throw new Error(
+        'The provided form fields do not reference this container. This should never occur.',
+      );
+    }
+
+    this.fieldSet.reconstruct(dataFormFields);
+    this.structureCtx.changeEventHandler?.trigger({
+      type: 'fields/reconstruct',
+      target: this.parent,
+    });
+  }
+
   reconstruct(fieldFactories: Iterable<DataFormFieldFactory>) {
     this.fieldSet.reconstruct(
       [...fieldFactories].map((factory) => factory(this, this.structureCtx)),
