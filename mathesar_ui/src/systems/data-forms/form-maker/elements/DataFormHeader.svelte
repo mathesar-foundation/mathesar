@@ -97,7 +97,7 @@
     margin: 0;
   }
   div.form-description {
-    white-space: pre;
+    white-space: pre-line;
   }
   textarea.form-description {
     resize: vertical;
