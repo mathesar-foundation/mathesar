@@ -13,7 +13,7 @@
     type DataFormFieldFactory,
     FieldColumn,
     type FkField,
-    buildDataFormFieldFactory,
+    buildFieldFactoryFromColumn,
   } from '../data-form-utilities/fields';
 
   export let dataFormManager: EditableDataFormManager;
@@ -51,10 +51,9 @@
         .filter((pc) => !pc.column.default?.is_dynamic)
         .map((c, index) => {
           const fc = FieldColumn.fromProcessedColumn(c);
-          return buildDataFormFieldFactory({
+          return buildFieldFactoryFromColumn({
             fieldColumn: fc,
             index,
-            tableStructureSubstance,
           });
         });
     }
