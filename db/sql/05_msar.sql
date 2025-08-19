@@ -5743,6 +5743,9 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION msar.raise_exception(err_msg text)
 RETURNS void AS $$/* 
 Utility function to raise an exceptions with an error message.
+
+Having this utility function allows us to raise exceptions within SQL functions
+where raising exceptions isn't otherwise possible.
 */
 BEGIN
   RAISE EXCEPTION '%', err_msg;
