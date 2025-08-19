@@ -9,8 +9,10 @@ import {
   isDefinedNonNullable,
 } from '@mathesar-component-library';
 
-import type { DataFormStructure } from '../DataFormStructure';
-import type { DataFormStructureChangeEventHandler } from '../DataFormStructureChangeEventHandler';
+import type {
+  DataFormStructure,
+  DataFormStructureCtx,
+} from '../DataFormStructure';
 import type { FormSource } from '../FormSource';
 
 import type { AbstractColumnBasedFieldProps } from './AbstractColumnBasedField';
@@ -24,7 +26,7 @@ export type ParentDataFormField = FkField; // May contain more types in the futu
 
 export type DataFormFieldFactory = (
   container: FormFields,
-  changeEventHandler: DataFormStructureChangeEventHandler,
+  structureCtx: DataFormStructureCtx,
 ) => DataFormField;
 
 export function buildDataFormFieldFactory(props: {
@@ -52,7 +54,7 @@ export function buildDataFormFieldFactory(props: {
       (lnk) => lnk.table.oid === referentTableOid,
     )?.table.name;
 
-    return (holder, changeEventHandler) =>
+    return (holder, structureCtx) =>
       new FkField(
         holder,
         {
@@ -64,17 +66,17 @@ export function buildDataFormFieldFactory(props: {
           createFields: (parent, onContainerChange) =>
             new FormFields(parent, [], onContainerChange),
         },
-        changeEventHandler,
+        structureCtx,
       );
   }
-  return (holder, changeEventHandler) =>
+  return (holder, structureCtx) =>
     new ScalarField(
       holder,
       {
         ...baseProps,
         kind: 'scalar_column',
       },
-      changeEventHandler,
+      structureCtx,
     );
 }
 
@@ -124,10 +126,7 @@ export function buildFkFieldFactory(props: {
   const { rawField } = props;
   const baseProps = getBaseFieldsPropsFromRawDataFormField(props);
 
-  return (
-    holder: FormFields,
-    changeEventHandler: DataFormStructureChangeEventHandler,
-  ) =>
+  return (holder: FormFields, structureCtx: DataFormStructureCtx) =>
     new FkField(
       holder,
       {
@@ -142,7 +141,7 @@ export function buildFkFieldFactory(props: {
         }),
         interactionRule: rawField.fk_interaction_rule,
       },
-      changeEventHandler,
+      structureCtx,
     );
 }
 
@@ -154,23 +153,20 @@ export function buildScalarFieldFactory(props: {
   const { rawField } = props;
   const baseProps = getBaseFieldsPropsFromRawDataFormField(props);
 
-  return (
-    container: FormFields,
-    changeEventHandler: DataFormStructureChangeEventHandler,
-  ) =>
+  return (container: FormFields, structureCtx: DataFormStructureCtx) =>
     new ScalarField(
       container,
       {
         ...baseProps,
         kind: rawField.kind,
       },
-      changeEventHandler,
+      structureCtx,
     );
 }
 
 export type DataFormFieldContainerFactory = (
   parent: DataFormStructure | ParentDataFormField,
-  changeEventHandler: DataFormStructureChangeEventHandler,
+  structureCtx: DataFormStructureCtx,
 ) => FormFields;
 
 export function buildFormFieldContainerFactory(props: {
@@ -180,7 +176,7 @@ export function buildFormFieldContainerFactory(props: {
 }): DataFormFieldContainerFactory {
   return (
     parent: DataFormStructure | ParentDataFormField,
-    changeEventHandler: DataFormStructureChangeEventHandler,
+    structureCtx: DataFormStructureCtx,
   ) =>
     new FormFields(
       parent,
@@ -198,6 +194,6 @@ export function buildFormFieldContainerFactory(props: {
           formSource: props.formSource,
         });
       }),
-      changeEventHandler,
+      structureCtx,
     );
 }

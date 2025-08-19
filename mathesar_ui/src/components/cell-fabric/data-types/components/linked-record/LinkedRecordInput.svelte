@@ -25,6 +25,7 @@
     class?: string;
     id?: string;
     allowsHyperlinks?: boolean;
+    placeholder?: string;
   }
 
   const labelController = getLabelControllerFromContainingLabel();
@@ -43,6 +44,7 @@
   export { classes as class };
   export let allowsHyperlinks = false;
   export let disabled = false;
+  export let placeholder: string | undefined = undefined;
 
   let isAcquiringInput = false;
   let element: HTMLSpanElement;
@@ -185,6 +187,10 @@
         tableId={targetTableId}
         {allowsHyperlinks}
       />
+    {:else if placeholder}
+      <span class="placeholder">
+        {placeholder}
+      </span>
     {/if}
   </span>
   {#if !disabled}
@@ -238,6 +244,12 @@
     padding: 0;
     z-index: 2;
   }
+
+  .placeholder {
+    color: var(--text-color-muted);
+    font-style: italic;
+  }
+
   .dropdown-button {
     cursor: pointer;
     display: flex;

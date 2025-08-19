@@ -1,6 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-import type { SummarizedRecordReference } from './_common/commonTypes';
+import type { RecordsSummaryListResponse } from './_common/commonTypes';
 import type { RawColumnWithMetadata } from './columns';
 import type { RawDatabase } from './databases';
 import type { RawConfiguredRole } from './roles';
@@ -93,11 +93,6 @@ export type RawDataFormSource = Record<
     columns: Record<string, RawColumnWithMetadata>;
   }
 >;
-
-export interface RecordsSummaryListResponse {
-  count: number;
-  results: SummarizedRecordReference[];
-}
 
 /**
  * We have these constructRequest methods to add `header_title` & `header_subtitle` to requests.

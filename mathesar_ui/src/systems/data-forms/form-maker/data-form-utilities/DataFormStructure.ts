@@ -5,9 +5,10 @@ import type {
   RawDataFormStructure,
 } from '@mathesar/api/rpc/forms';
 import { type FieldStore, makeForm } from '@mathesar/components/form';
+import type { RowSeekerProps } from '@mathesar/systems/row-seeker/RowSeekerController';
 import { collapse } from '@mathesar-component-library';
 
-import { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
+import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
 import {
   type DataFormFieldContainerFactory,
   type DataFormFieldFkInputValueHolder,
@@ -20,7 +21,6 @@ interface DataFormStructureProps {
   baseTableOid: number;
   schemaOid: number;
   databaseId: number;
-  token: RawDataForm['token'];
   name: RawDataForm['name'];
   description: RawDataForm['description'];
   associatedRoleId: RawDataForm['associated_role_id'];
@@ -28,7 +28,6 @@ interface DataFormStructureProps {
   submitRedirectUrl: RawDataForm['submit_redirect_url'];
   submitButtonLabel: RawDataForm['submit_button_label'];
   createFields: DataFormFieldContainerFactory;
-  changeEventHandler?: DataFormStructureChangeEventHandler;
 }
 
 export type DataFormPropChangeEvent = {
@@ -45,9 +44,19 @@ export type DataFormPropChangeEvent = {
   >;
 };
 
-export type DataFormStructureFactory = (props?: {
+export interface DataFormStructureCtx {
+  rowSeekerRecordStoreConstructor: (props: {
+    key: string;
+    relatedTableOid: number;
+    tableOid: number;
+    columnAttnum: number;
+  }) => RowSeekerProps['constructRecordStore'];
   changeEventHandler?: DataFormStructureChangeEventHandler;
-}) => DataFormStructure;
+}
+
+export type DataFormStructureFactory = (
+  props: DataFormStructureCtx,
+) => DataFormStructure;
 
 export class DataFormStructure {
   readonly baseTableOid;
@@ -55,8 +64,6 @@ export class DataFormStructure {
   readonly schemaOid;
 
   readonly databaseId;
-
-  readonly token;
 
   private _name;
 
@@ -96,24 +103,25 @@ export class DataFormStructure {
 
   readonly fields: FormFields;
 
-  private changeEventHandler: DataFormStructureChangeEventHandler;
+  private structureCtx: DataFormStructureCtx;
 
   readonly formHolder;
 
-  constructor(props: DataFormStructureProps) {
+  constructor(
+    props: DataFormStructureProps,
+    structureCtx: DataFormStructureCtx,
+  ) {
     this.baseTableOid = props.baseTableOid;
     this.schemaOid = props.schemaOid;
     this.databaseId = props.databaseId;
-    this.token = props.token;
     this._name = writable(props.name);
     this._description = writable(props.description);
     this._associatedRoleId = writable(props.associatedRoleId);
     this._submitMessage = writable(props.submitMessage);
     this._submitRedirectUrl = writable(props.submitRedirectUrl);
     this._submitButtonLabel = writable(props.submitButtonLabel);
-    this.changeEventHandler =
-      props.changeEventHandler ?? new DataFormStructureChangeEventHandler();
-    this.fields = props.createFields(this, this.changeEventHandler);
+    this.structureCtx = structureCtx;
+    this.fields = props.createFields(this, this.structureCtx);
     this.formHolder = derived(
       this.fields.fieldValueStores,
       (_, set) => {
@@ -156,7 +164,7 @@ export class DataFormStructure {
   }
 
   private triggerChangeEvent(prop: DataFormPropChangeEvent['prop']) {
-    this.changeEventHandler.trigger({
+    this.structureCtx.changeEventHandler?.trigger({
       type: 'form/prop',
       target: this,
       prop,
@@ -246,28 +254,28 @@ export class DataFormStructure {
       database_id: RawDataForm['database_id'];
       schema_oid: RawDataForm['schema_oid'];
       base_table_oid: RawDataForm['base_table_oid'];
-      token: RawDataForm['token'];
     },
     formSource: FormSource,
   ): DataFormStructureFactory {
-    return (factoryProps) =>
-      new DataFormStructure({
-        baseTableOid: props.base_table_oid,
-        schemaOid: props.schema_oid,
-        databaseId: props.database_id,
-        token: props.token,
-        name: props.name,
-        description: props.description,
-        associatedRoleId: props.associated_role_id,
-        submitMessage: props.submit_message,
-        submitRedirectUrl: props.submit_redirect_url,
-        submitButtonLabel: props.submit_button_label,
-        createFields: buildFormFieldContainerFactory({
-          parentTableOid: props.base_table_oid,
-          rawDataFormFields: props.fields,
-          formSource,
-        }),
-        changeEventHandler: factoryProps?.changeEventHandler,
-      });
+    return (structureCtx) =>
+      new DataFormStructure(
+        {
+          baseTableOid: props.base_table_oid,
+          schemaOid: props.schema_oid,
+          databaseId: props.database_id,
+          name: props.name,
+          description: props.description,
+          associatedRoleId: props.associated_role_id,
+          submitMessage: props.submit_message,
+          submitRedirectUrl: props.submit_redirect_url,
+          submitButtonLabel: props.submit_button_label,
+          createFields: buildFormFieldContainerFactory({
+            parentTableOid: props.base_table_oid,
+            rawDataFormFields: props.fields,
+            formSource,
+          }),
+        },
+        structureCtx,
+      );
   }
 }
