@@ -12,10 +12,14 @@
 
   export let field: DataFormField;
 
-  $: ({ styling, kind, fieldColumn } = field);
-  $: showSection =
+  $: ({ styling, kind } = field);
+  $: columnBasedField = 'fieldColumn' in field ? field : undefined;
+
+  $: showSizeConfig =
     kind === 'scalar_column' &&
-    fieldColumn.abstractType.cellInfo.type === 'string';
+    columnBasedField?.fieldColumn.abstractType.cellInfo.type === 'string';
+
+  $: showSection = showSizeConfig;
 
   $: size = $styling?.size ?? 'regular';
   const sizeOptions = ['regular', 'large'] as const;

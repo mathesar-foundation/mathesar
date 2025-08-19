@@ -19,17 +19,19 @@
       <TableName table={$table} alwaysShowTooltip={true} />
     {/if}
   </div>
-  <span>.</span>
-  <div class="tag">
-    <ColumnName
-      column={{
-        ...dataFormField.fieldColumn.column,
-        constraintsType:
-          dataFormField.kind === 'foreign_key' ? ['foreignkey'] : [],
-      }}
-      alwaysShowTooltip={true}
-    />
-  </div>
+  {#if 'fieldColumn' in dataFormField}
+    <span>.</span>
+    <div class="tag">
+      <ColumnName
+        column={{
+          ...dataFormField.fieldColumn.column,
+          constraintsType:
+            dataFormField.kind === 'foreign_key' ? ['foreignkey'] : [],
+        }}
+        alwaysShowTooltip={true}
+      />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">

@@ -2,13 +2,20 @@
   import { _ } from 'svelte-i18n';
 
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { Button } from '@mathesar-component-library';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import {
+    Button,
+    ensureReadable,
+    iconError,
+  } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
   import type { DataFormField } from '../data-form-utilities/fields';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: DataFormField | undefined = undefined;
+  $: label = field ? field.label : ensureReadable(null);
+  $: fieldDisplayLabel = $label ?? $_('field');
 
   function selectField() {
     if (field) {
@@ -20,14 +27,22 @@
 <div>
   {#if field}
     <Button appearance="ghost" on:click={selectField}>
-      <ColumnName
-        column={{
-          ...field.fieldColumn.column,
-          constraintsType: field.fieldColumn.foreignKeyLink
-            ? ['foreignkey']
-            : [],
-        }}
-      />
+      {#if 'fieldColumn' in field}
+        <ColumnName
+          column={{
+            ...field.fieldColumn.column,
+            constraintsType: field.fieldColumn.foreignKeyLink
+              ? ['foreignkey']
+              : [],
+          }}
+        />
+      {:else if 'error' in field}
+        <div class="error">
+          <NameWithIcon name={fieldDisplayLabel} icon={iconError} />
+        </div>
+      {:else}
+        <span>{fieldDisplayLabel}</span>
+      {/if}
     </Button>
   {:else}
     <Button
@@ -38,3 +53,9 @@
     </Button>
   {/if}
 </div>
+
+<style lang="scss">
+  .error {
+    color: var(--danger-color);
+  }
+</style>

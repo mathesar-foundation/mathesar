@@ -120,15 +120,15 @@ export class FkField extends AbstractColumnBasedField {
     });
   }
 
-  toRawEphemeralField(): RawForeignKeyDataFormField {
+  toRawEphemeralField(options?: {
+    withoutErrorFields: boolean;
+  }): RawForeignKeyDataFormField {
     return {
       ...this.getBaseFieldRawJson(),
       kind: 'foreign_key',
       related_table_oid: this.relatedTableOid,
       fk_interaction_rule: get(this.interactionRule),
-      child_fields: get(this.nestedFields).map((nested_field) =>
-        nested_field.toRawEphemeralField(),
-      ),
+      child_fields: this.nestedFields.toRawFields(options),
     };
   }
 }

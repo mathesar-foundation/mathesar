@@ -3,7 +3,10 @@ import type {
   RawForeignKeyDataFormField,
   RawScalarDataFormField,
 } from '@mathesar/api/rpc/forms';
-import type { TableStructureSubstance } from '@mathesar/stores/table-data/TableStructure';
+import {
+  ClientSideError,
+  type GeneralizedError,
+} from '@mathesar/components/errors/errorUtils';
 import {
   getGloballyUniqueId,
   isDefinedNonNullable,
@@ -16,12 +19,15 @@ import type {
 import type { FormSource } from '../FormSource';
 
 import type { AbstractColumnBasedFieldProps } from './AbstractColumnBasedField';
+import { ErrorField } from './ErrorField';
 import { FieldColumn } from './FieldColumn';
 import { FkField } from './FkField';
 import { FormFields } from './FormFields';
 import { ScalarField } from './ScalarField';
 
-export type DataFormField = ScalarField | FkField;
+export type DataFormField = ScalarField | FkField | ErrorField;
+export type ColumnBasedDataFormField = ScalarField | FkField;
+export type ValidDataFormField = ColumnBasedDataFormField; // May contain non-column fields in the future.
 export type ParentDataFormField = FkField; // May contain more types in the future eg., ReverseFkField
 
 export type DataFormFieldFactory = (
@@ -29,139 +35,233 @@ export type DataFormFieldFactory = (
   structureCtx: DataFormStructureCtx,
 ) => DataFormField;
 
-export function buildDataFormFieldFactory(props: {
+function makeErrorFieldFactory({
+  originalField,
+  error,
+}: {
+  originalField: RawDataFormField;
+  error: GeneralizedError;
+}): DataFormFieldFactory {
+  return (holder, structureCtx) =>
+    new ErrorField(
+      holder,
+      {
+        key: originalField.key,
+        label: originalField.label ?? 'Error',
+        help: originalField.help,
+        index: originalField.index,
+        styling: originalField.styling,
+        error,
+        originalField,
+      },
+      structureCtx,
+    );
+}
+
+function columnToRawField({
+  fieldColumn,
+  index,
+}: {
   fieldColumn: FieldColumn;
   index: number;
-  tableStructureSubstance: TableStructureSubstance;
-}): DataFormFieldFactory {
-  const { fieldColumn, index, tableStructureSubstance } = props;
-
-  const baseProps = {
-    fieldColumn,
+}): RawDataFormField {
+  const base = {
     key: getGloballyUniqueId(),
     label: fieldColumn.column.name,
     help: null,
-    placeholder: null,
     index,
-    isRequired: false,
-    columnAttnum: fieldColumn.column.id,
+    is_required: !fieldColumn.column.nullable,
     styling: {},
+    column_attnum: fieldColumn.column.id,
   };
+  if (isDefinedNonNullable(fieldColumn.foreignKeyLink)) {
+    return {
+      ...base,
+      kind: 'foreign_key',
+      related_table_oid: fieldColumn.foreignKeyLink.relatedTableOid,
+      fk_interaction_rule: 'must_pick',
+      child_fields: [],
+    };
+  }
+  return {
+    ...base,
+    kind: 'scalar_column',
+  };
+}
 
-  if (fieldColumn.foreignKeyLink) {
-    const referentTableOid = fieldColumn.foreignKeyLink.relatedTableOid;
-    const referenceTableName = tableStructureSubstance.linksInTable.find(
-      (lnk) => lnk.table.oid === referentTableOid,
-    )?.table.name;
+function toResolvedBaseProps({
+  rawField,
+  fieldColumn,
+}: {
+  rawField: RawDataFormField;
+  fieldColumn: FieldColumn;
+}): AbstractColumnBasedFieldProps {
+  if (rawField.column_attnum !== fieldColumn.column.id) {
+    throw new Error('Incorrect fieldColumn passed. This should never happen.');
+  }
+  return {
+    key: rawField.key,
+    label: rawField.label,
+    help: rawField.help,
+    index: rawField.index,
+    isRequired: rawField.is_required,
+    styling: rawField.styling,
+    fieldColumn,
+  };
+}
+
+type FieldKind = RawDataFormField['kind'];
+
+type FromResolvedRawArgsMap = {
+  scalar_column: {
+    rawField: RawScalarDataFormField;
+    fieldColumn: FieldColumn;
+  };
+  foreign_key: {
+    rawField: RawForeignKeyDataFormField;
+    fieldColumn: FieldColumn;
+    createChildFields: DataFormFieldContainerFactory;
+  };
+};
+
+type FieldFactoryImpl<K extends FieldKind> = (
+  args: FromResolvedRawArgsMap[K],
+) => DataFormFieldFactory;
+
+const FIELD_FACTORY_REGISTRY: {
+  [K in FieldKind]: FieldFactoryImpl<K>;
+} = {
+  scalar_column: ({
+    rawField,
+    fieldColumn,
+  }: FromResolvedRawArgsMap['scalar_column']) => {
+    const base = toResolvedBaseProps({ rawField, fieldColumn });
+    return (container, structureCtx) =>
+      new ScalarField(
+        container,
+        {
+          ...base,
+          kind: 'scalar_column',
+        },
+        structureCtx,
+      );
+  },
+
+  foreign_key: ({
+    rawField,
+    fieldColumn,
+    createChildFields,
+  }: FromResolvedRawArgsMap['foreign_key']) => {
+    const base = toResolvedBaseProps({ rawField, fieldColumn });
+    if (
+      rawField.related_table_oid !== fieldColumn.foreignKeyLink?.relatedTableOid
+    ) {
+      throw new Error(
+        'Incorrect fk config in fieldColumn. This should never happen.',
+      );
+    }
 
     return (holder, structureCtx) =>
       new FkField(
         holder,
         {
-          ...baseProps,
+          ...base,
           kind: 'foreign_key',
-          label: referenceTableName ?? baseProps.label,
-          relatedTableOid: referentTableOid,
-          interactionRule: 'must_pick',
-          createFields: (parent, onContainerChange) =>
-            new FormFields(parent, [], onContainerChange),
+          relatedTableOid: rawField.related_table_oid,
+          interactionRule: rawField.fk_interaction_rule,
+          createFields: createChildFields,
         },
         structureCtx,
       );
-  }
-  return (holder, structureCtx) =>
-    new ScalarField(
-      holder,
-      {
-        ...baseProps,
-        kind: 'scalar_column',
-      },
-      structureCtx,
-    );
-}
+  },
+};
 
-function getBaseFieldsPropsFromRawDataFormField(props: {
+export function buildFieldFactoryFromRaw({
+  parentTableOid,
+  rawField,
+  formSource,
+}: {
   parentTableOid: number;
   rawField: RawDataFormField;
   formSource: FormSource;
-}): AbstractColumnBasedFieldProps {
-  const { rawField, parentTableOid } = props;
+}): DataFormFieldFactory {
+  try {
+    const columnDetails = formSource.getColumnInfo(
+      parentTableOid,
+      rawField.column_attnum,
+    );
 
-  const baseProps = {
-    key: rawField.key,
-    label: rawField.label,
-    help: rawField.help,
-    placeholder: null,
-    index: rawField.index,
-    isRequired: rawField.is_required,
-    styling: rawField.styling,
-  };
+    const foreignKeyLink =
+      'related_table_oid' in rawField &&
+      isDefinedNonNullable(rawField.related_table_oid)
+        ? {
+            relatedTableOid: rawField.related_table_oid,
+          }
+        : null;
 
-  const columnDetails = props.formSource.getColumnInfo(
-    parentTableOid,
-    rawField.column_attnum,
-  );
-
-  return {
-    ...baseProps,
-    fieldColumn: new FieldColumn({
+    const fieldColumn = new FieldColumn({
       tableOid: parentTableOid,
       column: columnDetails,
-      foreignKeyLink:
-        'related_table_oid' in rawField &&
-        isDefinedNonNullable(rawField.related_table_oid)
-          ? {
-              relatedTableOid: rawField.related_table_oid,
-            }
-          : null,
-    }),
-  };
+      foreignKeyLink,
+    });
+
+    const { kind } = rawField;
+
+    if (kind === 'scalar_column') {
+      return FIELD_FACTORY_REGISTRY.scalar_column({
+        rawField,
+        fieldColumn,
+      });
+    }
+
+    return FIELD_FACTORY_REGISTRY.foreign_key({
+      rawField,
+      fieldColumn,
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      createChildFields: buildFormFieldContainerFactory({
+        parentTableOid: rawField.related_table_oid,
+        rawDataFormFields: rawField.child_fields ?? [],
+        formSource,
+      }),
+    });
+  } catch (err) {
+    return makeErrorFieldFactory({
+      originalField: rawField,
+      error: ClientSideError.fromAnything(err),
+    });
+  }
 }
 
-export function buildFkFieldFactory(props: {
-  parentTableOid: number;
-  rawField: RawForeignKeyDataFormField;
-  formSource: FormSource;
-}) {
-  const { rawField } = props;
-  const baseProps = getBaseFieldsPropsFromRawDataFormField(props);
+export function buildFieldFactoryFromColumn({
+  fieldColumn,
+  index,
+}: {
+  fieldColumn: FieldColumn;
+  index: number;
+}): DataFormFieldFactory {
+  const rawField = columnToRawField({ fieldColumn, index });
+  try {
+    const { kind } = rawField;
 
-  return (holder: FormFields, structureCtx: DataFormStructureCtx) =>
-    new FkField(
-      holder,
-      {
-        ...baseProps,
-        kind: rawField.kind,
-        relatedTableOid: rawField.related_table_oid,
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        createFields: buildFormFieldContainerFactory({
-          parentTableOid: rawField.related_table_oid,
-          rawDataFormFields: rawField.child_fields ?? [],
-          formSource: props.formSource,
-        }),
-        interactionRule: rawField.fk_interaction_rule,
-      },
-      structureCtx,
-    );
-}
+    if (kind === 'scalar_column') {
+      return FIELD_FACTORY_REGISTRY.scalar_column({
+        rawField,
+        fieldColumn,
+      });
+    }
 
-export function buildScalarFieldFactory(props: {
-  parentTableOid: number;
-  rawField: RawScalarDataFormField;
-  formSource: FormSource;
-}) {
-  const { rawField } = props;
-  const baseProps = getBaseFieldsPropsFromRawDataFormField(props);
-
-  return (container: FormFields, structureCtx: DataFormStructureCtx) =>
-    new ScalarField(
-      container,
-      {
-        ...baseProps,
-        kind: rawField.kind,
-      },
-      structureCtx,
-    );
+    return FIELD_FACTORY_REGISTRY.foreign_key({
+      rawField,
+      fieldColumn,
+      createChildFields: (container, structureCtx) =>
+        new FormFields(container, [], structureCtx),
+    });
+  } catch (err) {
+    return makeErrorFieldFactory({
+      originalField: rawField,
+      error: ClientSideError.fromAnything(err),
+    });
+  }
 }
 
 export type DataFormFieldContainerFactory = (
@@ -180,20 +280,13 @@ export function buildFormFieldContainerFactory(props: {
   ) =>
     new FormFields(
       parent,
-      props.rawDataFormFields.map((f) => {
-        if (f.kind === 'scalar_column') {
-          return buildScalarFieldFactory({
-            parentTableOid: props.parentTableOid,
-            rawField: f,
-            formSource: props.formSource,
-          });
-        }
-        return buildFkFieldFactory({
+      props.rawDataFormFields.map((rawField) =>
+        buildFieldFactoryFromRaw({
           parentTableOid: props.parentTableOid,
-          rawField: f,
+          rawField,
           formSource: props.formSource,
-        });
-      }),
+        }),
+      ),
       structureCtx,
     );
 }

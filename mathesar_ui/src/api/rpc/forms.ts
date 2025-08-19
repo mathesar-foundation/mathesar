@@ -90,7 +90,10 @@ export type RawDataFormSource = Record<
   string,
   {
     table_info: RawTable;
-    columns: Record<string, RawColumnWithMetadata>;
+    columns: Record<
+      string,
+      RawColumnWithMetadata | { error: { code: number; message: string } }
+    >;
   }
 >;
 
