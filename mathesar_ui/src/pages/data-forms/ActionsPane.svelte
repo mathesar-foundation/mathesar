@@ -6,6 +6,7 @@
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import { iconForm, iconShare } from '@mathesar/icons';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+  import { confirm } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
   import { Dropdown, Icon } from '@mathesar-component-library';
@@ -17,16 +18,36 @@
 
   export let dataFormManager: EditableDataFormManager;
 
-  $: ({ hasChanges } = dataFormManager);
+  $: ({ hasChanges, dataFormStructure } = dataFormManager);
   $: ({ structure } = dataForm);
 
   async function saveForm() {
-    try {
-      await dataForm.updateStructure(
-        dataFormManager.dataFormStructure.toRawStructure(),
-      );
-    } catch (err) {
-      toast.error(RpcError.fromAnything(err).message);
+    let confirmationPromise = Promise.resolve(true);
+
+    if (dataFormStructure.hasErrorFields()) {
+      confirmationPromise = confirm({
+        title: $_('saving_will_remove_fields_with_errors'),
+        body: [
+          $_('form_contains_fields_with_errors'),
+          $_('are_you_sure_to_proceed'),
+        ],
+        proceedButton: {
+          label: $_('save'),
+          icon: undefined,
+        },
+      });
+    }
+    const isConfirmed = await confirmationPromise;
+    if (isConfirmed) {
+      try {
+        await dataForm.updateStructure(
+          dataFormManager.dataFormStructure.toRawStructure({
+            withoutErrorFields: true,
+          }),
+        );
+      } catch (err) {
+        toast.error(RpcError.fromAnything(err).message);
+      }
     }
   }
 </script>

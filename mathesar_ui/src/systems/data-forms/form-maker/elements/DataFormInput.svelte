@@ -7,12 +7,12 @@
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
-  import type { DataFormField } from '../data-form-utilities/fields';
+  import type { ColumnBasedDataFormField } from '../data-form-utilities/fields';
 
   const recordSummaries = new WritableMap<string, string>();
 
   export let dataFormManager: DataFormManager;
-  export let dataFormField: DataFormField;
+  export let dataFormField: ColumnBasedDataFormField;
   export let isSelected: boolean;
   export let placeholder: string | undefined = undefined;
 

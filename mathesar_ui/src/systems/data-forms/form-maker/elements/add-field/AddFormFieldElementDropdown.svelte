@@ -13,7 +13,7 @@
   import {
     FieldColumn,
     type FormFields,
-    buildDataFormFieldFactory,
+    buildFieldFactoryFromColumn,
   } from '../../data-form-utilities/fields';
 
   import AddFormColumnFieldItem from './AddFormColumnFieldItem.svelte';
@@ -32,17 +32,12 @@
   $: ({ table } = tableStructure);
 
   async function addColumnAsField(fc: FieldColumn, close: () => void) {
-    const tableStructureSubstance =
-      await tableStructure.getSubstanceOnceResolved();
-    if (tableStructureSubstance.resolvedValue) {
-      fieldHolder.add(
-        buildDataFormFieldFactory({
-          fieldColumn: fc,
-          index: insertionIndex,
-          tableStructureSubstance: tableStructureSubstance.resolvedValue,
-        }),
-      );
-    }
+    fieldHolder.add(
+      buildFieldFactoryFromColumn({
+        fieldColumn: fc,
+        index: insertionIndex,
+      }),
+    );
     close();
   }
 </script>

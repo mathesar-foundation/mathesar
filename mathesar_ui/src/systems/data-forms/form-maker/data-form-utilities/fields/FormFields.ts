@@ -25,6 +25,7 @@ import type {
   DataFormFieldInputValueHolder,
 } from './FieldValueHolder';
 import type { FkField } from './FkField';
+import { getValidFormFields } from './utils';
 
 export type DataFormFieldContainerFactory = (
   parent: DataFormStructure | ParentDataFormField,
@@ -91,7 +92,8 @@ export class FormFields implements Readable<DataFormField[]> {
             execPipe(
               get(fieldSet).values(),
               flatMap((f) => {
-                const stores = [f.fieldValueHolder];
+                const stores =
+                  'fieldValueHolder' in f ? [f.fieldValueHolder] : [];
                 if (
                   f.kind === 'foreign_key' &&
                   get(f.fieldValueHolder.userAction) === 'create'
@@ -108,7 +110,7 @@ export class FormFields implements Readable<DataFormField[]> {
         function resubscribe() {
           unsubFieldValueStores.forEach((u) => u());
           const fkFields = [...get(fieldSet).values()].filter(
-            (f): f is FkField => f.kind !== 'scalar_column',
+            (f): f is FkField => f.kind === 'foreign_key',
           );
           const unsubUserActions = fkFields.map((item) =>
             item.fieldValueHolder.userAction.subscribe(update),
@@ -138,7 +140,7 @@ export class FormFields implements Readable<DataFormField[]> {
     return derived(this.fieldSet, ($fieldSet) =>
       execPipe(
         $fieldSet.values(),
-        some((f) => f.hasColumn(fc)),
+        some((f) => 'hasColumn' in f && f.hasColumn(fc)),
       ),
     );
   }
@@ -172,8 +174,11 @@ export class FormFields implements Readable<DataFormField[]> {
 
   add(createDataFormField: DataFormFieldFactory) {
     const dataFormField = createDataFormField(this, this.structureCtx);
+    const isFieldColumnBased = 'fieldColumn' in dataFormField;
+    const canAddField =
+      !isFieldColumnBased || !get(this.hasColumn(dataFormField.fieldColumn));
 
-    if (!get(this.hasColumn(dataFormField.fieldColumn))) {
+    if (canAddField) {
       const fieldIndex = get(dataFormField.index);
       for (const field of get(this.fieldSet)) {
         if (get(field.index) >= fieldIndex) {
@@ -202,5 +207,13 @@ export class FormFields implements Readable<DataFormField[]> {
       target: this.parent,
       field: dataFormField,
     });
+  }
+
+  toRawFields(options?: { withoutErrorFields: boolean }) {
+    const fields = get(this);
+    const fieldsToReturn = options?.withoutErrorFields
+      ? getValidFormFields(fields)
+      : fields;
+    return fieldsToReturn.map((field) => field.toRawEphemeralField(options));
   }
 }

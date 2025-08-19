@@ -33,7 +33,6 @@ export class ScalarField extends AbstractColumnBasedField {
     structureCtx: DataFormStructureCtx,
   ) {
     super(container, props, structureCtx);
-    this.structureCtx = structureCtx;
     this.inputComponentAndProps = derived(this.styling, (styling) => {
       let { cellInfo } = this.fieldColumn.abstractType;
       if (cellInfo.type === 'string') {
