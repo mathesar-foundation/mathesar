@@ -83,8 +83,8 @@ export class FormFields implements Readable<DataFormField[]> {
     >(
       this.fieldSet,
       (fieldSetValues) => {
-        const fkFields: FkField[] = [...fieldSetValues].filter(
-          (f) => f.kind === 'foreign_key',
+        const fkFields = [...fieldSetValues].filter(
+          (f): f is FkField => f.kind === 'foreign_key',
         );
 
         return fkFields.flatMap((item) => [
