@@ -39,12 +39,9 @@
     overflow: auto;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-l);
-    width: calc(100% - 3rem);
-    position: relative;
-    margin: 0 auto;
+    width: 100%;
     height: 100%;
-    max-height: fit-content;
-    max-width: 60rem;
+    position: relative;
     background: var(--elevated-background);
     --data_forms__z-index__field-header: 1;
     --data_forms__z-index__field-add-dropdown-trigger: 2;
@@ -52,8 +49,10 @@
     --data_forms__selectable-element-padding: 1rem;
 
     .form {
-      min-width: 30rem;
-      padding: var(--lg4) var(--lg5);
+      min-width: 25rem;
+      max-width: calc(40rem + var(--lg1));
+      margin: var(--lg2) auto;
+      padding: 0 var(--lg1);
       display: flex;
       flex-direction: column;
 
