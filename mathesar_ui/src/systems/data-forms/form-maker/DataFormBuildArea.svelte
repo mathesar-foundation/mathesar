@@ -3,7 +3,6 @@
     type DataFormManager,
     EditableDataFormManager,
   } from './data-form-utilities/DataFormManager';
-  import DataFormBranding from './DataFormBranding.svelte';
   import DataFormFieldsContainer from './elements/DataFormFieldsContainer.svelte';
   import DataFormFooter from './elements/DataFormFooter.svelte';
   import DataFormHeader from './elements/DataFormHeader.svelte';
@@ -28,9 +27,6 @@
     <DataFormHeader {dataFormManager} />
     <DataFormFieldsContainer {fields} {dataFormManager} />
     <DataFormFooter {dataFormManager} />
-    <div class="branding">
-      <DataFormBranding />
-    </div>
   </div>
 </div>
 
@@ -55,11 +51,6 @@
       padding: 0 var(--lg1);
       display: flex;
       flex-direction: column;
-
-      .branding {
-        border-top: 1px solid var(--border-color);
-        margin-top: var(--lg2);
-      }
     }
   }
 </style>
