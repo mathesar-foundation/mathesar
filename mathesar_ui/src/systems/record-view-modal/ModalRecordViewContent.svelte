@@ -1,28 +1,26 @@
 <!--
 @component
 
-TODO: Resolve code duplication between this file and RecordViewContent.svelte.
+TODO: Resolve code duplication between this file and RecordPageContent.svelte.
 -->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
+  import { portalToWindowTitle } from '@mathesar/component-library';
   import {
     FormSubmit,
     makeForm,
     optionalField,
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
-  import TableName from '@mathesar/components/TableName.svelte';
-  import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
-  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
-  import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
+  import { iconSave, iconUndo } from '@mathesar/icons';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
-  import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
-  import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
+
+  import DirectField from '../record-view/DirectField.svelte';
+  import RecordTitle from '../record-view/RecordTitle.svelte';
+  import Widgets from '../record-view/Widgets.svelte';
 
   export let record: RecordStore;
 
@@ -73,31 +71,21 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
 </script>
 
-<div class="record-page-content">
-  <InsetPageLayout>
-    <div slot="header" class="header">
-      <h1 class="title">
-        <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
-      </h1>
-      <div class="table-name">
-        <RichText text={$_('record_in_table')} let:slotName>
-          {#if slotName === 'tableName'}
-            <TableName {table} truncate={false} />
-          {/if}
-        </RichText>
-      </div>
-      <div class="form-status"><FormStatus {form} /></div>
+<div class="modal-record-view-content">
+  <div use:portalToWindowTitle class="title-bar">
+    <div class="record-title">
+      <RecordTitle {record} />
     </div>
-    <div class="fields">
-      {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-        <DirectField
-          {record}
-          {processedColumn}
-          {field}
-          {canUpdateTableRecords}
-        />
-      {/each}
-    </div>
+    <FormStatus {form} />
+  </div>
+
+  <div class="fields">
+    {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
+      <DirectField {record} {processedColumn} {field} {canUpdateTableRecords} />
+    {/each}
+  </div>
+
+  {#if $form.hasChanges}
     <div class="submit">
       <FormSubmit
         {form}
@@ -115,57 +103,30 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
         initiallyHidden
       />
     </div>
-  </InsetPageLayout>
+  {/if}
 
-  {#await getJoinableTablesResult(table.oid)}
-    <RecordViewLoadingSpinner />
-  {:then joinableTablesResult}
-    <div class="widgets-container">
-      <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
-    </div>
+  {#await getJoinableTablesResult(table.oid) then joinableTablesResult}
+    <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
   {/await}
 </div>
 
-<style>
-  .record-page-content {
-    height: 100%;
-    display: grid;
-    grid-template: auto 1fr / auto;
-    overflow-y: auto;
-  }
-  .header {
-    display: grid;
-    grid-template: auto auto / auto 1fr;
-    gap: 0.5rem 1.5rem;
+<style lang="scss">
+  .title-bar {
     align-items: center;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-  }
-  .title {
-    grid-row: 1;
-    grid-column: 1;
-    margin: 0;
-    overflow: hidden;
-    color: var(--text-color-primary);
-  }
-  .table-name {
-    grid-row: 2;
-    grid-column: 1;
-    color: var(--text-color-secondary);
-  }
-  .form-status {
-    grid-row: 1 / span 2;
-    grid-column: 2;
-  }
+    justify-content: space-between;
+    gap: var(--sm3);
+    > .record-title {
+      overflow: hidden;
+    }
 
+    display: grid;
+    grid-template: auto / 1fr auto;
+  }
   .fields {
     display: grid;
     grid-template-columns: auto 1fr;
   }
   .submit {
-    --form-submit-margin: 2rem 0 0 0;
-  }
-  .widgets-container {
-    margin: 0 var(--sm1) var(--lg1) var(--sm1);
+    margin-top: 2rem;
   }
 </style>

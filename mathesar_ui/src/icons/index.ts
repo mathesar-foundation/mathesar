@@ -98,6 +98,7 @@ import {
   createDatabaseIcon,
   databaseLineIcon,
   explorationIcon,
+  modalRecordViewIcon,
   outcomeIcon,
   permissionsIcon,
   tableIcon,
@@ -235,6 +236,7 @@ export const iconPrivacy: IconProps = { data: faUserSecret };
 export const iconPrimaryKey: IconProps = { data: faKey };
 export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
 export const iconDescription: IconProps = { data: circleLowercaseIIcon };
+export const iconModalRecordView: IconProps = { data: modalRecordViewIcon };
 
 // STATUSES
 

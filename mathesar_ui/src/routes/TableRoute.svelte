@@ -34,12 +34,7 @@
   </Route>
 
   <Route path="/:recordPk" let:meta>
-    <RecordPageRoute
-      {database}
-      {schema}
-      {table}
-      recordPk={String(meta.params.recordPk)}
-    />
+    <RecordPageRoute {table} recordPk={String(meta.params.recordPk)} />
   </Route>
 {:else}
   <ErrorPage>{$_('table_not_found')}</ErrorPage>

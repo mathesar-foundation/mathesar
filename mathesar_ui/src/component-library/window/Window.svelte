@@ -37,7 +37,7 @@
 >
   {#if $$slots.title || title || hasCloseButton}
     <div class="title-bar" data-window-area="title-bar">
-      <div class="title">
+      <div class="title" data-window-area="title">
         <slot name="title" />
         {title ?? ''}
       </div>
