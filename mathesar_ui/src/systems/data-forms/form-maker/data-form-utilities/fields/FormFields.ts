@@ -7,7 +7,11 @@ import {
   get,
 } from 'svelte/store';
 
-import { WritableSet, reactiveSort } from '@mathesar-component-library';
+import {
+  WritableSet,
+  asyncDynamicDerived,
+  reactiveSort,
+} from '@mathesar-component-library';
 
 import type {
   DataFormStructure,
@@ -20,10 +24,7 @@ import type {
   ParentDataFormField,
 } from './factories';
 import type { FieldColumn } from './FieldColumn';
-import type {
-  DataFormFieldFkInputValueHolder,
-  DataFormFieldInputValueHolder,
-} from './FieldValueHolder';
+import type { DataFormFieldInputValueHolder } from './FieldValueHolder';
 import type { FkField } from './FkField';
 import { getValidFormFields } from './utils';
 
@@ -57,9 +58,7 @@ export class FormFields implements Readable<DataFormField[]> {
 
   private structureCtx: DataFormStructureCtx;
 
-  readonly fieldValueStores: Readable<
-    (DataFormFieldInputValueHolder | DataFormFieldFkInputValueHolder)[]
-  >;
+  readonly fieldValueStores: Readable<DataFormFieldInputValueHolder[]>;
 
   constructor(
     parent: DataFormStructure | ParentDataFormField,
@@ -78,56 +77,36 @@ export class FormFields implements Readable<DataFormField[]> {
       (a, b) => a - b,
     );
 
-    this.fieldValueStores = derived<
-      WritableSet<DataFormField>,
+    this.fieldValueStores = asyncDynamicDerived<
+      Iterable<DataFormField>,
       DataFormFieldInputValueHolder[]
     >(
       this.fieldSet,
-      (_, set) => {
-        let unsubFieldValueStores: (() => void)[] = [];
-        const { fieldSet } = this;
+      (fieldSetValues) => {
+        const fkFields: FkField[] = [...fieldSetValues].filter(
+          (f) => f.kind === 'foreign_key',
+        );
 
-        function update() {
-          set(
-            execPipe(
-              get(fieldSet).values(),
-              flatMap((f) => {
-                const stores =
-                  'fieldValueHolder' in f ? [f.fieldValueHolder] : [];
-                if (
-                  f.kind === 'foreign_key' &&
-                  get(f.fieldValueHolder.userAction) === 'create'
-                ) {
-                  stores.push(...get(f.nestedFields.fieldValueStores));
-                }
-                return stores;
-              }),
-              toArray,
-            ),
-          );
-        }
-
-        function resubscribe() {
-          unsubFieldValueStores.forEach((u) => u());
-          const fkFields = [...get(fieldSet).values()].filter(
-            (f): f is FkField => f.kind === 'foreign_key',
-          );
-          const unsubUserActions = fkFields.map((item) =>
-            item.fieldValueHolder.userAction.subscribe(update),
-          );
-          const unsubNestedFieldValueStores = fkFields.map((item) =>
-            item.nestedFields.fieldValueStores.subscribe(update),
-          );
-          unsubFieldValueStores = [
-            ...unsubUserActions,
-            ...unsubNestedFieldValueStores,
-          ];
-        }
-
-        resubscribe();
-        update();
-        return () => unsubFieldValueStores.forEach((u) => u());
+        return fkFields.flatMap((item) => [
+          item.nestedFields.fieldValueStores,
+          item.fieldValueHolder.userAction,
+        ]);
       },
+      (fieldSetValues, _get) =>
+        execPipe(
+          [...fieldSetValues],
+          flatMap((f) => {
+            const stores = 'fieldValueHolder' in f ? [f.fieldValueHolder] : [];
+            if (
+              f.kind === 'foreign_key' &&
+              _get(f.fieldValueHolder.userAction) === 'create'
+            ) {
+              stores.push(..._get(f.nestedFields.fieldValueStores));
+            }
+            return stores;
+          }),
+          toArray,
+        ),
       [],
     );
   }

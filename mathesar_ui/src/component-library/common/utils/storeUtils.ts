@@ -3,6 +3,7 @@ import {
   type Subscriber,
   type Unsubscriber,
   derived,
+  get,
   readable,
 } from 'svelte/store';
 
@@ -138,5 +139,126 @@ export function withSideChannelSubscriptions<Store extends Readable<unknown>>(
   return {
     ...store,
     subscribe,
+  };
+}
+
+/**
+ * This store utility allows listening on a store and any of it's nested stores
+ * and derive a value from them.
+ *
+ * The returned store updates itself synchronously when the source store is modified.
+ * However, when the inner stores are modified, the store only updates during the
+ * microtask queue execution of the current eventloop.
+ *  - This prevents inner stores from firing a bunch of updates when they are updated
+ *    together, or immediately after the source is updated.
+ *  - This utility also returns a tick function to wait for the store update to finish.
+ *
+ * When using this store in a ts file within a synchronous block, it should be treated
+ * like an async store.
+ */
+export function asyncDynamicDerived<SourceSubstance, T>(
+  source: Readable<SourceSubstance>,
+  collectDeps: (sourceSubstance: SourceSubstance) => Iterable<Readable<any>>,
+  compute: (sourceSubstance: SourceSubstance, getValue: typeof get) => T,
+  initial: T,
+): Readable<T> & { tick(): Promise<void> } {
+  let flushScheduled = false;
+  let pendingRuns = 0;
+  const waiters: Array<() => void> = [];
+
+  const resolveIfIdle = () => {
+    if (!flushScheduled && pendingRuns === 0) {
+      const toResolve = waiters.splice(0, waiters.length);
+      toResolve.forEach((r) => r());
+    }
+  };
+
+  const scheduleFlush = (fn: () => void): void => {
+    if (flushScheduled) {
+      return;
+    }
+    flushScheduled = true;
+    pendingRuns += 1;
+
+    const run = () => {
+      flushScheduled = false;
+      fn();
+      pendingRuns -= 1;
+      resolveIfIdle();
+    };
+
+    // Place the call as a microtask in the event loop
+    if (typeof queueMicrotask === 'function') {
+      queueMicrotask(run);
+    } else {
+      void Promise.resolve().then(run);
+    }
+  };
+
+  const base = readable(initial, (set) => {
+    let reSubscribing = false;
+    let sourceChangeId = 0;
+
+    let deps: Readable<unknown>[] = [];
+    let dynamicUnsubs: Unsubscriber[] = [];
+
+    const update = (_sourceChangeId: number) => {
+      if (sourceChangeId !== _sourceChangeId) {
+        return;
+      }
+      const sourceSubtance = get(source);
+      set(compute(sourceSubtance, get));
+    };
+
+    const resubscribeDynamics = (
+      nextDeps: Set<Readable<any>>,
+      _sourceChangeId: number,
+    ) => {
+      reSubscribing = true;
+      const newDeps = [...nextDeps.values()];
+      dynamicUnsubs.forEach((unsub) => unsub());
+      dynamicUnsubs = newDeps.map((dep) =>
+        dep.subscribe(() => {
+          if (sourceChangeId !== _sourceChangeId || reSubscribing) {
+            return;
+          }
+          scheduleFlush(() => update(_sourceChangeId));
+        }),
+      );
+      deps = newDeps;
+      reSubscribing = false;
+    };
+
+    const baseUnsub = source.subscribe(() => {
+      sourceChangeId += 1;
+
+      const sourceSubtance = get(source);
+      const collectedDeps = collectDeps(sourceSubtance);
+      const nextDeps = new Set<Readable<any>>(collectedDeps);
+
+      resubscribeDynamics(nextDeps, sourceChangeId);
+      update(sourceChangeId);
+    });
+
+    return () => {
+      sourceChangeId = 0;
+      baseUnsub();
+      dynamicUnsubs.forEach((unsub) => unsub());
+      dynamicUnsubs = [];
+    };
+  });
+
+  const tick = (): Promise<void> => {
+    if (!flushScheduled && pendingRuns === 0) {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      waiters.push(resolve);
+    });
+  };
+
+  return {
+    subscribe: base.subscribe,
+    tick,
   };
 }

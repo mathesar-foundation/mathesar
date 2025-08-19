@@ -1,12 +1,16 @@
-import { type Readable, derived, get, writable } from 'svelte/store';
+import { type Readable, get, writable } from 'svelte/store';
 
 import type {
   RawDataForm,
   RawDataFormStructure,
 } from '@mathesar/api/rpc/forms';
-import { type FieldStore, makeForm } from '@mathesar/components/form';
+import {
+  type FieldStore,
+  type Form,
+  makeForm,
+} from '@mathesar/components/form';
 import type { RowSeekerProps } from '@mathesar/systems/row-seeker/RowSeekerController';
-import { collapse } from '@mathesar-component-library';
+import { asyncDynamicDerived, collapse } from '@mathesar-component-library';
 
 import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
 import {
@@ -107,7 +111,7 @@ export class DataFormStructure {
 
   private structureCtx: DataFormStructureCtx;
 
-  readonly formHolder;
+  readonly formHolder: Readable<Form>;
 
   constructor(
     props: DataFormStructureProps,
@@ -124,42 +128,25 @@ export class DataFormStructure {
     this._submitButtonLabel = writable(props.submitButtonLabel);
     this.structureCtx = structureCtx;
     this.fields = props.createFields(this, this.structureCtx);
-    this.formHolder = derived(
+
+    this.formHolder = asyncDynamicDerived(
       this.fields.fieldValueStores,
-      (_, set) => {
-        let unsubValueStores: (() => void)[] = [];
-        const { fieldValueStores } = this.fields;
-
-        function update() {
-          // Always get most recent data to avoid race conditions
-          const fieldStores = get(fieldValueStores);
-          const fieldObjs = [...fieldStores].reduce(
-            (acc, curr) => {
-              if (get(curr.includeFieldStoreInForm)) {
-                acc[curr.key] = get(curr.inputFieldStore);
-              }
-              return acc;
-            },
-            {} as Record<string, FieldStore>,
-          );
-          set(makeForm(fieldObjs));
-        }
-
-        function resubscribe() {
-          unsubValueStores.forEach((u) => u());
-          unsubValueStores = [];
-          const fieldStores = get(fieldValueStores);
-          [...fieldStores.values()].forEach((item) => {
-            unsubValueStores.push(item.inputFieldStore.subscribe(update));
-            unsubValueStores.push(
-              item.includeFieldStoreInForm.subscribe(update),
-            );
-          });
-        }
-
-        resubscribe();
-        update();
-        return () => unsubValueStores.forEach((u) => u());
+      (fieldValueStoreSubtances) =>
+        fieldValueStoreSubtances.flatMap((item) => [
+          item.inputFieldStore,
+          item.includeFieldStoreInForm,
+        ]),
+      (fieldValueStoreSubtances, _get) => {
+        const fieldObjs = fieldValueStoreSubtances.reduce(
+          (acc, curr) => {
+            if (_get(curr.includeFieldStoreInForm)) {
+              acc[curr.key] = _get(curr.inputFieldStore);
+            }
+            return acc;
+          },
+          {} as Record<string, FieldStore>,
+        );
+        return makeForm(fieldObjs);
       },
       makeForm({} as Record<string, FieldStore>),
     );
