@@ -5740,6 +5740,19 @@ Returns:
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.raise_exception(err_msg text)
+RETURNS void AS $$/* 
+Utility function to raise an exceptions with an error message.
+
+Having this utility function allows us to raise exceptions within SQL functions
+where raising exceptions isn't otherwise possible.
+*/
+BEGIN
+  RAISE EXCEPTION '%', err_msg;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.build_insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
 (
   table_name text,
@@ -5768,8 +5781,6 @@ WITH k1_cte AS (
 */
 WITH cte AS (
   SELECT
-    fields.key::text AS key,
-    fields.column_attnum::smallint AS column_attnum,
     pga.attname::name AS column_name,
     fields.table_oid::bigint AS table_oid,
     fields.depth::integer AS depth,
@@ -5802,15 +5813,22 @@ WITH cte AS (
   LEFT JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
   LEFT JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
   LEFT JOIN pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
+), multi_fks_cte AS (
+  SELECT msar.raise_exception(
+    'Inserting into a column with foreign key constraints referencing multiple columns is currently unsupported.'
+  )
+  FROM cte GROUP BY column_name, from_cte_name HAVING count(*) > 1
 )
-SELECT 
+SELECT
   __msar.get_qualified_relation_name(table_oid) AS table_name,
   string_agg(quote_ident(column_name), ', ') AS column_names,
   string_agg(value, ', ') AS values_,
   cte_name,
   string_agg(from_cte_name, ', ') AS from_cte_name
-FROM cte GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
-$$ LANGUAGE SQL STABLE;
+FROM cte
+CROSS JOIN (SELECT COUNT(*) FROM multi_fks_cte) AS force_multi_fks_cte_execution
+GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
