@@ -23,28 +23,6 @@
     return $selectedElement?.type === element.type;
   })();
 
-  let isHovered = false;
-  let thisDomElement: HTMLElement;
-
-  function onHover(e: MouseEvent) {
-    if (dataFormManager instanceof EditableDataFormManager) {
-      const { target } = e;
-      if (target instanceof HTMLElement) {
-        if (target.closest('[data-form-selectable]') === thisDomElement) {
-          isHovered = true;
-          return;
-        }
-      }
-      isHovered = false;
-    }
-  }
-
-  function onHoverAway() {
-    if (dataFormManager instanceof EditableDataFormManager) {
-      isHovered = false;
-    }
-  }
-
   function onClick(e: Event) {
     if (dataFormManager instanceof EditableDataFormManager) {
       e.stopPropagation();
@@ -55,15 +33,11 @@
 
 <div
   tabindex="0"
-  bind:this={thisDomElement}
   data-form-selectable
+  class:can-select={dataFormManager instanceof EditableDataFormManager}
   class:selected={isSelected}
-  class:hover={isHovered}
   class:is-header-present={$$slots.header}
   on:click={onClick}
-  on:mouseenter={onHover}
-  on:mousemove={onHover}
-  on:mouseleave={onHoverAway}
   use:sortableItem
 >
   {#if isSelected && $$slots.header}
@@ -100,10 +74,15 @@
     &.selected > .content {
       border: 2px solid var(--accent-500);
     }
+  }
 
-    &.hover > .content {
-      background-color: var(--accent-100);
-    }
+  :global(
+      [data-form-selectable].can-select:hover:not(
+          :has([data-form-selectable]:hover)
+        )
+        > .content
+    ) {
+    background-color: var(--accent-100);
   }
 
   .header,
