@@ -15,6 +15,7 @@
   export let dataFormManager: EditableDataFormManager;
   export let field: DataFormField | undefined = undefined;
   $: label = field ? field.label : ensureReadable(null);
+  $: fieldDisplayLabel = $label ?? $_('field');
 
   function selectField() {
     if (field) {
@@ -37,10 +38,10 @@
         />
       {:else if 'error' in field}
         <div class="error">
-          <NameWithIcon name={$label ?? 'Field'} icon={iconError} />
+          <NameWithIcon name={fieldDisplayLabel} icon={iconError} />
         </div>
       {:else}
-        <span>{$label ?? 'Field'}</span>
+        <span>{fieldDisplayLabel}</span>
       {/if}
     </Button>
   {:else}
