@@ -14,6 +14,7 @@
     isPlaceholderRecordRow,
     isRecordRow,
   } from '@mathesar/stores/table-data';
+  import { getFirstEditableColumn } from '@mathesar/stores/table-data/processedColumns';
 
   import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';
@@ -24,6 +25,7 @@
   export let row: Row;
   export let rowDescriptor: DisplayRowDescriptor;
   export let style: { [key: string]: string | number };
+  export let quickViewRecord: (tableOid: number, recordId: unknown) => void;
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -36,6 +38,7 @@
     canUpdateRecords,
     canDeleteRecords,
     canInsertRecords,
+    table,
   } = $tabularData);
   $: ({
     rowStatus,
@@ -51,7 +54,7 @@
     primaryKeyColumnId && isRecordRow(row)
       ? row.record[primaryKeyColumnId]
       : undefined;
-
+  $: isPlaceholderRow = isPlaceholderRecordRow(row);
   $: rowSelectionId = getRowSelectionId(row);
   $: creationStatus = $rowCreationStatus.get(row.identifier)?.state;
   $: status = $rowStatus.get(row.identifier);
@@ -61,11 +64,18 @@
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
-  function handleMouseDown(e: MouseEvent) {
-    if (isPlaceholderRecordRow(row)) {
-      $tabularData.addEmptyRecord();
-      e.stopPropagation(); // Prevents cell selection from starting
-    }
+  async function handleRowHeaderMouseDown(e: MouseEvent) {
+    if (!isPlaceholderRecordRow(row)) return;
+
+    e.stopPropagation(); // Prevents cell selection from starting
+
+    await recordsData.addEmptyRecord();
+
+    // Select the first editable cell in the newly added row.
+    const columns = $processedColumns.values();
+    const columnId = getFirstEditableColumn(columns)?.id.toString();
+    if (!columnId) return;
+    selection.update((s) => s.ofNewRecordDataEntryCell(columnId));
   }
 </script>
 
@@ -80,28 +90,30 @@
     class:is-add-placeholder={isPlaceholderRecordRow(row)}
     {...htmlAttributes}
     style="--cell-height:{ROW_HEIGHT_PX - 1}px;{styleString}"
-    on:mousedown={handleMouseDown}
   >
     {#if isRecordRow(row)}
       <SheetRowHeaderCell
         {rowSelectionId}
         columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+        isWithinPlaceholderRow={isPlaceholderRow}
+        onMouseDown={handleRowHeaderMouseDown}
       >
         <RowControl
           {row}
           {rowDescriptor}
           {meta}
-          {recordsData}
           {isSelected}
           hasErrors={hasAnyErrors}
         />
         <ContextMenu>
           <RowContextOptions
+            tableOid={table.oid}
             {recordPk}
             {recordsData}
             {row}
             canInsertRecords={$canInsertRecords}
             canDeleteRecords={$canDeleteRecords}
+            quickViewThisRecord={() => quickViewRecord(table.oid, recordPk)}
           />
         </ContextMenu>
       </SheetRowHeaderCell>
@@ -118,6 +130,7 @@
     {:else if isRecordRow(row)}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
+          tableOid={table.oid}
           {selection}
           {row}
           rowHasErrors={hasWholeRowErrors}
@@ -131,6 +144,7 @@
           canInsertRecords={$canInsertRecords}
           canUpdateRecords={$canUpdateRecords}
           canDeleteRecords={$canDeleteRecords}
+          {quickViewRecord}
         />
       {/each}
     {:else if isHelpTextRow(row)}
@@ -153,8 +167,9 @@
     }
 
     &.is-add-placeholder {
-      cursor: pointer;
-
+      // Hide the display of cell values like `NULL` and `DEFAULT` in the
+      // placeholder row. (There is probably a cleaner way to do this via props
+      // instead of global CSS, but oh well).
       :global(
           [data-sheet-element='data-cell']
             .cell-fabric

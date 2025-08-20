@@ -39,6 +39,12 @@
   export let closeOnInnerClick = false;
   export let content: string | string[] | ComponentAndProps | undefined =
     undefined;
+  export let portalTarget: HTMLElement | undefined = undefined;
+  /**
+   * When true, the content element will automatically reposition when it
+   * resizes.
+   */
+  export let autoReposition = false;
 
   let contentElement: HTMLElement | undefined;
 
@@ -112,9 +118,10 @@
   <div
     class={['dropdown content', classes].join(' ')}
     bind:this={contentElement}
-    use:portal
+    use:portal={portalTarget}
     use:popper={{
       reference: trigger,
+      autoReposition,
       options: {
         placement,
         modifiers: [

@@ -23,7 +23,10 @@
     };
   }
 
-  const dispatch = createEventDispatcher<{ change: DefinedProps['value'] }>();
+  const dispatch = createEventDispatcher<{
+    change: DefinedProps['value'];
+    pick: Option;
+  }>();
 
   export let selectionType: DefinedProps['selectionType'] = 'multiple';
   export let options: DefinedProps['options'];
@@ -59,6 +62,7 @@
       checkEquality(lastSelectedOption, opt),
     );
   }
+  $: value, $displayedOptions, focusSelected();
 
   onMount(() => {
     if (mode === 'static') {
@@ -156,13 +160,12 @@
   function pick(option: Option): void {
     if (selectionType === 'single') {
       select(option);
-      return;
-    }
-    if (isOptionSelected(option)) {
+    } else if (isOptionSelected(option)) {
       deselect(option);
     } else {
       select(option);
     }
+    dispatch('pick', option);
   }
 
   function pickFocused(): void {

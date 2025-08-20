@@ -3,10 +3,9 @@
   import { _ } from 'svelte-i18n';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconEdit, iconPermissions, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
@@ -18,13 +17,12 @@
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaPermissionsModal from './SchemaPermissionsModal.svelte';
 
-  export let database: Database;
-  export let schema: Schema;
-
+  const schemaRouteContext = SchemaRouteContext.get();
   const editSchemaModal = modal.spawnModalController();
   const createTableModal = modal.spawnModalController();
   const permissionsModal = modal.spawnModalController();
 
+  $: ({ schema } = $schemaRouteContext);
   $: tablesMap = $tablesStore.tablesMap;
   $: explorationsMap = $queries.data;
   $: tablesRequestStatus = $tablesStore.requestStatus;
@@ -79,14 +77,16 @@
     {tablesRequestStatus}
     {tablesMap}
     {explorationsMap}
-    {database}
-    {schema}
     {explorationsRequestStatus}
     onCreateEmptyTable={() => createTableModal.open()}
   />
 </LayoutWithHeader>
 
-<AddEditSchemaModal controller={editSchemaModal} {database} {schema} />
+<AddEditSchemaModal
+  controller={editSchemaModal}
+  database={schema.database}
+  {schema}
+/>
 <CreateTableModal
   controller={createTableModal}
   {schema}

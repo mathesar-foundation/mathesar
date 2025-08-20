@@ -119,6 +119,26 @@ def search_records_from_table(
     return result
 
 
+def list_by_record_summaries(
+    conn,
+    table_oid,
+    limit=500,
+    offset=0,
+    search=None,
+    table_record_summary_templates=None,
+):
+    result = db_conn.exec_msar_func(
+        conn,
+        'list_by_record_summaries',
+        table_oid,
+        limit,
+        offset,
+        search,
+        _json_or_none(table_record_summary_templates),
+    ).fetchone()[0]
+    return result
+
+
 def delete_records_from_table(conn, record_ids, table_oid):
     """
     Delete records from table by id.

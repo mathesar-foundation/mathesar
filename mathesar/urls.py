@@ -18,7 +18,9 @@ urlpatterns = [
     path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),
     path('auth/password_reset_confirm/', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('auth/login/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
-    path('auth/', include('django.contrib.auth.urls')),
+    path('auth/3rdparty/<path:rest>/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='oidc'),  # hack to redirect "/login/cancelled", "login/error/" "signup/" and "" to login page
+    path('auth/', include('django.contrib.auth.urls')),  # default auth/
+    path('auth/', include('allauth.urls')),  # catch any urls that are not available in default auth/
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
     path('administration/', views.admin_home, name='admin_home'),
@@ -29,6 +31,7 @@ urlpatterns = [
     path('administration/settings/', views.admin_home, name='admin_settings'),
     path('i18n/', include('django.conf.urls.i18n')),
     path('info/analytics_sample_report/', views.analytics_sample_report, name='analytics_sample_report'),
+    path('shares/forms/<str:form_token>/', views.anonymous_route_home, name='shared_form'),
     re_path(
         r'^db/(?P<database_id>\d+)/schemas/(?P<schema_id>\d+)/',
         views.schema_route,

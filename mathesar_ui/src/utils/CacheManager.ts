@@ -21,4 +21,13 @@ export default class CacheManager<Key, Value> {
   get(key: Key): Value | undefined {
     return this.cache.get(key);
   }
+
+  getOrCreate(key: Key, create: () => Value): Value {
+    let val = this.cache.get(key);
+    if (val === undefined) {
+      val = create();
+      this.set(key, val);
+    }
+    return val;
+  }
 }

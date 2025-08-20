@@ -265,8 +265,23 @@ METHODS = [
         []  # using empty list here indicates that this method is available to anonymous callers.
     ),
     (
+        forms.get_source_info,
+        "forms.get_source_info",
+        []
+    ),
+    (
         forms.list_,
         "forms.list",
+        [user_is_authenticated]
+    ),
+    (
+        forms.regenerate_token,
+        "forms.regenerate_token",
+        [user_is_authenticated]
+    ),
+    (
+        forms.set_publish_public,
+        "forms.set_publish_public",
         [user_is_authenticated]
     ),
     (
@@ -274,7 +289,21 @@ METHODS = [
         "forms.delete",
         [user_is_authenticated]
     ),
-
+    (
+        forms.patch,
+        "forms.patch",
+        [user_is_authenticated]
+    ),
+    (
+        forms.list_related_records,
+        "forms.list_related_records",
+        []
+    ),
+    (
+        forms.submit,
+        "forms.submit",
+        []
+    ),
     (
         records.add,
         "records.add",
@@ -305,7 +334,11 @@ METHODS = [
         "records.search",
         [user_is_authenticated]
     ),
-
+    (
+        records.list_summaries,
+        "records.list_summaries",
+        [user_is_authenticated]
+    ),
     (
         roles.list_,
         "roles.list",

@@ -2,14 +2,10 @@
   import { createEventDispatcher, getContext, onMount, tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  // TODO remove dependency cycle
-  // eslint-disable-next-line import/no-cycle
-
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
-  import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
+  import type { LinkedRecordInputProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
   import {
     type AccompanyingElements,
     Icon,
@@ -23,16 +19,16 @@
 
   interface $$Props
     extends Omit<
-      LinkedRecordCellProps,
+      LinkedRecordInputProps,
       'isActive' | 'isSelected' | 'isProcessing' | 'isIndependentOfSheet'
     > {
     class?: string;
     id?: string;
     allowsHyperlinks?: boolean;
+    placeholder?: string;
   }
 
   const labelController = getLabelControllerFromContainingLabel();
-  const recordSelector = getRecordSelectorFromContext();
   const dropdownAccompanyingElements = getContext<
     AccompanyingElements | undefined
   >('dropdownAccompanyingElements');
@@ -40,33 +36,22 @@
 
   export let id = getGloballyUniqueId();
   export let value: $$Props['value'] = undefined;
+  export let recordSelectionOrchestratorFactory: RecordSelectionOrchestratorFactory;
   export let recordSummary: $$Props['recordSummary'] = undefined;
   export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
-  export let tableId: $$Props['tableId'];
+  export let targetTableId: $$Props['targetTableId'] | undefined = undefined;
   let classes: $$Props['class'] = '';
   export { classes as class };
-  export let allowsHyperlinks = true;
+  export let allowsHyperlinks = false;
   export let disabled = false;
+  export let placeholder: string | undefined = undefined;
 
   let isAcquiringInput = false;
   let element: HTMLSpanElement;
 
+  $: recordSelectionOrchestrator = recordSelectionOrchestratorFactory();
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
-  $: recordPageHref =
-    hasValue && allowsHyperlinks
-      ? $storeToGetRecordPageUrl({ tableId, recordId: value })
-      : undefined;
-
-  function clear() {
-    value = null;
-    dispatch('artificialChange', undefined);
-    dispatch('artificialInput', undefined);
-    // If the value is cleared via a button, the focus may shift to that button.
-    // We'd like to shift it back to the input element to that the user can
-    // press `Enter` to launch the record selector.
-    element.focus();
-  }
 
   /**
    * If this LinkedRecordInput in placed inside an AttachableDropdown, we want
@@ -90,17 +75,24 @@
     }
     dispatch('recordSelectorOpen');
     isAcquiringInput = true;
-    const recordSelectorPromise = recordSelector.acquireUserInput({ tableId });
+    const previousValue = {
+      summary: recordSummary ?? '',
+      key: value ?? null,
+    };
+    const userSelection = recordSelectionOrchestrator.launch({
+      triggerElement: element,
+      previousValue,
+    });
     await tick();
     const cleanupDropdown = setRecordSelectorToAccompanyDropdown();
-    const result = await recordSelectorPromise;
+    const record = await userSelection;
     cleanupDropdown();
     isAcquiringInput = false;
-    if (result === undefined) {
+    if (record === undefined) {
       dispatch('recordSelectorCancel');
     } else {
-      value = result.recordId;
-      setRecordSummary(String(result.recordId), result.recordSummary);
+      value = record.key;
+      setRecordSummary(String(record.key), record.summary);
       dispatch('recordSelectorSubmit');
       dispatch('artificialChange', value);
       dispatch('artificialInput', value);
@@ -109,13 +101,44 @@
     element.focus();
   }
 
+  function clear() {
+    value = null;
+    dispatch('artificialChange', undefined);
+    dispatch('artificialInput', undefined);
+    if (recordSelectionOrchestrator.isOpen()) {
+      recordSelectionOrchestrator.close();
+      void launchRecordSelector();
+    } else {
+      // If the value is cleared via a button, the focus may shift to that button.
+      // We'd like to shift it back to the input element to that the user can
+      // press `Enter` to launch the record selector.
+      element.focus();
+    }
+  }
+
+  async function toggleRecordSelector() {
+    // I added `tick` because I was observing a race condition when opening a
+    // nested record selector. It would open correctly about 80% of the time.
+    // But 20% of the time it would not open because it would cancel.
+    await tick();
+
+    if (recordSelectionOrchestrator.isOpen()) {
+      recordSelectionOrchestrator.close();
+    } else {
+      await launchRecordSelector();
+    }
+  }
+
   function handleKeydown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
-        void launchRecordSelector();
+        if (e.target === element) {
+          void toggleRecordSelector();
+        }
         break;
       case 'Delete':
         clear();
+        recordSelectionOrchestrator.close();
         break;
       default:
         break;
@@ -145,7 +168,7 @@
   class:is-acquiring-input={isAcquiringInput}
   tabindex={isAcquiringInput || disabled ? undefined : 0}
   bind:this={element}
-  on:click={launchRecordSelector}
+  on:click={toggleRecordSelector}
   on:focus={handleFocus}
   on:focus
   on:blur={handleBlur}
@@ -160,9 +183,14 @@
         {recordSummary}
         hasDeleteButton={!disabled}
         on:delete={clear}
-        {recordPageHref}
         {disabled}
+        tableId={targetTableId}
+        {allowsHyperlinks}
       />
+    {:else if placeholder}
+      <span class="placeholder">
+        {placeholder}
+      </span>
     {/if}
   </span>
   {#if !disabled}
@@ -216,6 +244,12 @@
     padding: 0;
     z-index: 2;
   }
+
+  .placeholder {
+    color: var(--text-color-muted);
+    font-style: italic;
+  }
+
   .dropdown-button {
     cursor: pointer;
     display: flex;

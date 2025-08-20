@@ -62,6 +62,12 @@ x-config: &config
   # (Optional) Replace '5432' with the port on which postgres is running
   POSTGRES_PORT: ${POSTGRES_PORT:-5432}
 
+  # (Optional) Can be used to configure single-sign on (sso) instead of an
+  # sso.yml configuration file.
+  # See https://docs.mathesar.org/administration/single-sign-on/ for additional
+  # details on how to configure this variable.
+  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}}
+
 #-------------------------------------------------------------------------------
 # ADDITIONAL INFO ABOUT CONFIG VARIABLES
 #
@@ -112,6 +118,12 @@ x-config: &config
 #     Info: Specifies the port on which portgres listen for connections from
 #           client applications.
 #     Example: 5555
+#
+# OIDC_CONFIG_DICT:
+#   Default: {}
+#   Info: Specifies the settings necessary to configure Single Sign-on (SS0)
+#   identity providers for Mathesar login. This is an optional, alternative
+#   approach to configuring SSO via a configuration file.
 #
 #-------------------------------------------------------------------------------
 # INFO ABOUT VOLUMES
@@ -164,6 +176,8 @@ services:
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
+      # Uncomment the following to mount sso.yml and enable Single Sign-On (SSO).
+      # - ./sso.yml:/code/sso.yml
     depends_on:
       db:
         condition: service_healthy

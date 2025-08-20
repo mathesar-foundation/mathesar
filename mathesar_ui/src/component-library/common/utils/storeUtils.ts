@@ -43,7 +43,7 @@ function arrayWithValueSetAtIndex<T>(array: T[], index: number, item: T): T[] {
 }
 
 /**
- * Unite an array of stores into a store of arrays.
+ * Unite an array of stores into a store of an array.
  */
 export function unite<T>(stores: Readable<T>[]): Readable<T[]> {
   let results: T[] = [];
@@ -59,6 +59,41 @@ export function unite<T>(stores: Readable<T>[]): Readable<T[]> {
     // unsubscribing from all the inner stores.
     return () => unsubscribers.forEach((unsubscriber) => unsubscriber());
   });
+}
+
+/**
+ * Derive a sorted array of objects from a readable iterable of objects where
+ * each object contains a nested readable property on which to sort.
+ *
+ * @example
+ *
+ * ```ts
+ * const people = writable<Person[]>([]);
+ * // Sort people from youngest to oldest
+ * const sortedPeople = reactiveSort(
+ *   people,
+ *   (person) => person.age, // where `age` is `Readable<number>`
+ *   (a, b) => a - b,
+ * );
+ * ```
+ */
+export function reactiveSort<Value, Key>(
+  readableValues: Readable<IterableIterator<Value>>,
+  getSortingKey: (outerValue: Value) => Readable<Key>,
+  compareSortingKeys: (a: Key, b: Key) => number,
+): Readable<Value[]> {
+  return collapse(
+    derived(readableValues, (values) => {
+      const pieces = [...values].map((value) =>
+        derived(getSortingKey(value), (key) => ({ value, key })),
+      );
+      return derived(unite(pieces), ($pieces) =>
+        [...$pieces]
+          .sort((a, b) => compareSortingKeys(a.key, b.key))
+          .map((s) => s.value),
+      );
+    }),
+  );
 }
 
 type StoreValue<S> = S extends Readable<infer T> ? T : never;

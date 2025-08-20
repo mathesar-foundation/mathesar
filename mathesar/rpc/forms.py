@@ -1,12 +1,26 @@
 """
 Classes and functions exposed to the RPC endpoint for managing forms.
 """
-from typing import Optional, TypedDict, Literal, Union
+from typing import Optional, TypedDict, Literal
 
 from modernrpc.core import REQUEST_KEY
 
+from db.records import list_by_record_summaries
+
 from mathesar.rpc.decorators import mathesar_rpc_method
-from mathesar.utils.forms import create_form, get_form, list_forms, delete_form
+from mathesar.utils.forms import (
+    create_form,
+    get_form,
+    list_forms,
+    regen_form_token,
+    set_form_public_setting,
+    delete_form,
+    patch_form,
+    get_form_source_info,
+    submit_form,
+)
+from mathesar.utils.tables import get_table_record_summary_templates
+from mathesar.rpc.records import RecordSummaryList
 
 
 class FieldInfo(TypedDict):
@@ -16,54 +30,49 @@ class FieldInfo(TypedDict):
     Attributes:
         id: The Django id of the Field on the database.
         key: A unique string identifier for the field within a form.
-        attnum: The attnum of column to be selected as a field.
         form_id: The Django id of the Form on the database.
         index: The order in which the field should be displayed.
-        kind: Type of the selected column(scalar_column, foreign_key, reverse_foreign_key)
-        label: The text to be displayed within the field.
-        help: The help text to be displayed for a field.
-        readonly: Specifies whether the selected field is readonly.
+        label: The text to be displayed for the field input.
+        help: The help text to be displayed for the field input.
+        kind: Type of the selected column (scalar_column, foreign_key).
+        column_attnum: The attnum of column to be selected as a field. Applicable for scalar_column and foreign_key fields.
+        related_table_oid: The oid of the related table. Applicable for foreign_key fields.
+        fk_interaction_rule: Determines user interaction with a foreign_key field's related record (must_pick, can_pick_or_create, must_create).
+        parent_field_id: The Django id of the Field set as parent for related fields.
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
-        parent_field_id: The Django id of the Field set as parent for related fields.
-        target_table_oid: The OID of the related table.
-        allow_create: Specifies whether adding new records is allowed within related fields.
-        create_label: The label to be shown while inserting a new related record.
+        child_fields: List of definitions of child fields. Applicable for foreign_key fields.
     """
     id: int
     key: str
-    attnum: int
     form_id: int
     index: int
-    kind: Literal["scalar_column", "foreign_key", "reverse_foreign_key"]
     label: Optional[str]
     help: Optional[str]
-    readonly: bool
+    kind: Literal["scalar_column", "foreign_key"]
+    column_attnum: Optional[int]
+    related_table_oid: Optional[int]
+    fk_interaction_rule: Literal["must_pick", "can_pick_or_create", "must_create"]
     styling: Optional[dict]
     is_required: bool
-    parent_field_id: Optional[int]
-    target_table_oid: Optional[int]
-    allow_create: bool
-    create_label: Optional[str]
+    child_fields: Optional[list["FieldInfo"]]
 
     @classmethod
     def from_model(cls, model):
         return cls(
             id=model.id,
             key=model.key,
-            attnum=model.attnum,
             form_id=model.form_id,
             index=model.index,
-            kind=model.kind,
             label=model.label,
             help=model.help,
-            readonly=model.readonly,
+            kind=model.kind,
+            column_attnum=model.column_attnum,
+            related_table_oid=model.related_table_oid,
+            fk_interaction_rule=model.fk_interaction_rule,
             styling=model.styling,
             is_required=model.is_required,
-            parent_field_id=model.parent_field_id,
-            target_table_oid=model.target_table_oid,
-            allow_create=model.allow_create,
-            create_label=model.create_label
+            child_fields=[FieldInfo.from_model(field) for field in model.child_fields.all()] if model.child_fields else None,
         )
 
 
@@ -78,19 +87,18 @@ class FormInfo(TypedDict):
         token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
         description: The description of the form.
-        version: The version of the form.
+        version: The version of the form for reconciliation of json fields.
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        is_public: Specifies whether the form is publicly accessible.
+        associated_role_id: The Django id of the configured role to be used while submitting a form.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
-        submit_role_id: The Django id of the configured role to be used while submitting a form.
+        publish_public: Specifies whether the form is publicly accessible.
         submit_message: Message to be displayed upon submission.
-        redirect_url: Redirect path after submission.
-        submit_label: Text to be displayed on the submit button.
+        submit_redirect_url: Redirect path after submission.
+        submit_button_label: Text to be displayed on the submit button.
         fields: Definition of Fields within the form.
-        field_col_info_map: A map between field_keys and column info with metadata.
     """
     id: int
     created_at: str
@@ -102,18 +110,17 @@ class FormInfo(TypedDict):
     database_id: int
     schema_oid: int
     base_table_oid: int
-    is_public: bool
+    associated_role_id: Optional[int]
     header_title: dict
     header_subtitle: Optional[dict]
-    submit_role_id: Optional[int]
+    publish_public: bool
     submit_message: Optional[dict]
-    redirect_url: Optional[str]
-    submit_label: Optional[str]
-    fields: Optional[list[FieldInfo]]
-    field_col_info_map: Optional[dict]
+    submit_redirect_url: Optional[str]
+    submit_button_label: Optional[str]
+    fields: list[FieldInfo]
 
     @classmethod
-    def from_model(cls, form_model, field_col_info_map=None):
+    def from_model(cls, form_model):
         return cls(
             id=form_model.id,
             created_at=form_model.created_at,
@@ -125,156 +132,113 @@ class FormInfo(TypedDict):
             database_id=form_model.database_id,
             schema_oid=form_model.schema_oid,
             base_table_oid=form_model.base_table_oid,
-            is_public=form_model.is_public,
+            associated_role_id=form_model.associated_role_id,
             header_title=form_model.header_title,
             header_subtitle=form_model.header_subtitle,
-            submit_role_id=form_model.submit_role_id,
+            publish_public=form_model.publish_public,
             submit_message=form_model.submit_message,
-            redirect_url=form_model.redirect_url,
-            submit_label=form_model.submit_label,
-            fields=[FieldInfo.from_model(field) for field in form_model.fields.all()],
-            field_col_info_map=field_col_info_map
+            submit_redirect_url=form_model.submit_redirect_url,
+            submit_button_label=form_model.submit_button_label,
+            fields=[FieldInfo.from_model(field) for field in form_model.fields.filter(parent_field__isnull=True)],
         )
 
 
-class PublicFormInfo(TypedDict):
+class AddOrReplaceFieldDef(TypedDict):
     """
-    Information about a public form.
-
-    Attributes:
-        id: The Django id of the Form on the database.
-        created_at: The time at which the form model got created.
-        updated_at: The time at which the form model was last updated.
-        token: A UUIDv4 object used to identify a form uniquely.
-        name: The name of the form.
-        description: The description of the form.
-        version: The version of the form.
-        database_id: The Django id of the database containing the Form.
-        schema_oid: The OID of the schema where within which form exists.
-        base_table_oid: The table OID based on which a form will be created.
-        header_title: The title of the rendered form.
-        header_subtitle: The subtitle of the rendered form.
-        submit_message: Message to be displayed upon submission.
-        redirect_url: Redirect path after submission.
-        submit_label: Text to be displayed on the submit button.
-        fields: Definition of Fields within the form.
-        field_col_info_map: A map between field_keys and column info with metadata.
-    """
-    id: int
-    created_at: str
-    updated_at: str
-    token: str
-    name: str
-    description: Optional[str]
-    version: int
-    database_id: int
-    schema_oid: int
-    base_table_oid: int
-    header_title: dict
-    header_subtitle: Optional[dict]
-    submit_message: Optional[dict]
-    redirect_url: Optional[str]
-    submit_label: Optional[str]
-    fields: Optional[list[FieldInfo]]
-    field_col_info_map: Optional[dict]
-
-    @classmethod
-    def from_model(cls, form_model, field_col_info_map=None):
-        return cls(
-            id=form_model.id,
-            created_at=form_model.created_at,
-            updated_at=form_model.updated_at,
-            token=form_model.token,
-            name=form_model.name,
-            description=form_model.description,
-            version=form_model.version,
-            database_id=form_model.database_id,
-            schema_oid=form_model.schema_oid,
-            base_table_oid=form_model.base_table_oid,
-            header_title=form_model.header_title,
-            header_subtitle=form_model.header_subtitle,
-            submit_message=form_model.submit_message,
-            redirect_url=form_model.redirect_url,
-            submit_label=form_model.submit_label,
-            fields=[FieldInfo.from_model(field) for field in form_model.fields.all()],
-            field_col_info_map=field_col_info_map
-        )
-
-
-class FieldDef(TypedDict):
-    """
-    Definition needed to add/modify a form field.
+    FormField definition needed while adding or replacing a form.
 
     Attributes:
         key: A unique string identifier for the field within a form.
-        attnum: The attnum of column to be selected as a field.
         index: The order in which the field should be displayed.
-        kind: Type of the selected column(scalar_column, foreign_key, reverse_foreign_key)
-        label: The text to be displayed within the field.
-        help: The help text to be displayed for a field.
-        readonly: Specifies whether the selected field is readonly.
+        label: The text to be displayed for the field input.
+        help: The help text to be displayed for the field input.
+        kind: Type of the selected column (scalar_column, foreign_key).
+        column_attnum: The attnum of column to be selected as a field. Applicable for scalar_column and foreign_key fields.
+        related_table_oid: The oid of the related table. Applicable for foreign_key fields.
+        fk_interaction_rule: Determines user interaction with a foreign_key field's related record (must_pick, can_pick_or_create, must_create).
         styling: Information about the visual appearance of the field.
         is_required: Specifies whether a value for the field is mandatory.
-        parent_field_key: Field key to specify parent field for foreign_key or reverse_foreign_key.
-        target_table_oid: The OID of the related table.
-        allow_create: Specifies whether adding new records is allowed within related fields.
-        create_label: The label to be shown while inserting a new related record.
+        child_fields: List of definitions of child fields. Applicable for foreign_key fields.
     """
     key: str
-    attnum: int
     index: int
-    kind: Literal["scalar_column", "foreign_key", "reverse_foreign_key"]
     label: Optional[str]
     help: Optional[str]
-    readonly: Optional[bool]
+    kind: Literal["scalar_column", "foreign_key"]
+    column_attnum: Optional[int]
+    related_table_oid: Optional[int]
+    fk_interaction_rule: Literal["must_pick", "can_pick_or_create", "must_create"]
     styling: Optional[dict]
     is_required: Optional[bool]
-    parent_field_key: Optional[str]
-    target_table_oid: Optional[int]
-    allow_create: Optional[bool]
-    create_label: Optional[str]
+    child_fields: Optional[list["AddOrReplaceFieldDef"]]
 
 
-class FormDef(TypedDict):
+class AddFormDef(TypedDict):
     """
-    Definition needed to add/modify a form.
+    Definition needed to add a form.
 
     Attributes:
-        token: A UUIDv4 object used to identify a form uniquely.
         name: The name of the form.
         description: The description of the form.
-        version: The version of the form.
+        version: The version of the form for reconciliation of json fields.
         database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
-        is_public: Specifies whether the form is publicly accessible.
+        associated_role_id: The Django id of the configured role to be used while submitting a form.
         header_title: The title of the rendered form.
         header_subtitle: The subtitle of the rendered form.
-        submit_role_id: The Django id of the configured role to be used while submitting a form.
         submit_message: Message to be displayed upon submission.
-        redirect_url: Redirect path after submission.
-        submit_label: Text to be displayed on the submit button.
+        submit_redirect_url: Redirect path after submission.
+        submit_button_label: Text to be displayed on the submit button.
         fields: Definition of Fields within the form.
     """
-    token: Optional[str]
     name: str
     description: Optional[str]
     version: int
     database_id: int
     schema_oid: int
     base_table_oid: int
-    is_public: Optional[bool]
+    associated_role_id: Optional[int]
     header_title: dict
     header_subtitle: Optional[dict]
-    submit_role_id: Optional[int]
     submit_message: Optional[dict]
-    redirect_url: Optional[str]
-    submit_label: Optional[str]
-    fields: Optional[list[FieldDef]]
+    submit_redirect_url: Optional[str]
+    submit_button_label: Optional[str]
+    fields: list[AddOrReplaceFieldDef]
+
+
+class SettableFormDef(AddFormDef):
+    """
+    Definition needed to update a form.
+
+    Attributes:
+        id: The Django id of the Form on the database.
+        name: The name of the form.
+        description: The description of the form.
+        version: The version of the form.
+        associated_role_id: The Django id of the configured role to be used while submitting a form.
+        header_title: The title of the rendered form.
+        header_subtitle: The subtitle of the rendered form.
+        submit_message: Message to be displayed upon submission.
+        submit_redirect_url: Redirect path after submission.
+        submit_button_label: Text to be displayed on the submit button.
+        fields: Definition of Fields within the form.
+    """
+    id: int
+    name: str
+    description: Optional[str]
+    version: int
+    associated_role_id: Optional[int]
+    header_title: dict
+    header_subtitle: Optional[dict]
+    submit_message: Optional[dict]
+    submit_redirect_url: Optional[str]
+    submit_button_label: Optional[str]
+    fields: list[AddOrReplaceFieldDef]
 
 
 @mathesar_rpc_method(name="forms.add", auth="login")
-def add(*, form_def: FormDef, **kwargs) -> FormInfo:
+def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
     """
     Add a new form.
 
@@ -285,24 +249,42 @@ def add(*, form_def: FormDef, **kwargs) -> FormInfo:
         The details for the newly created form.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model, field_col_info_map = create_form(form_def, user)
-    return FormInfo.from_model(form_model, field_col_info_map)
+    form_model = create_form(form_def, user)
+    return FormInfo.from_model(form_model)
 
 
 @mathesar_rpc_method(name="forms.get", auth="anonymous")
-def get(*, form_id: int, **kwargs) -> Union[FormInfo, PublicFormInfo]:
+def get(*, form_token: str, **kwargs) -> FormInfo:
     """
     List information about a form.
 
     Args:
-        form_id: The Django id of the form.
+        form_token: The unique token of the form.
 
     Returns:
-        Form details for a given form_id.
+        Form details for a given form_token.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model, field_col_info_map = get_form(form_id, is_public=user.is_anonymous)
-    return (PublicFormInfo if user.is_anonymous else FormInfo).from_model(form_model, field_col_info_map)
+    form_model = get_form(form_token, user)
+    return FormInfo.from_model(form_model)
+
+
+@mathesar_rpc_method(name="forms.get_source_info", auth="anonymous")
+def get_source_info(*, form_token: str, **kwargs) -> FormInfo:
+    """
+    Retrieve the sources of a form.
+
+    Args:
+        form_token: The unique token of the form.
+
+    Returns:
+        The source tables & columns of the form:
+            - Tables associated with the form.
+            - Columns of the fields associated with the form.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    form_source_info = get_form_source_info(form_token, user)
+    return form_source_info
 
 
 @mathesar_rpc_method(name="forms.list", auth="login")
@@ -321,6 +303,37 @@ def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
     return [FormInfo.from_model(form) for form in forms]
 
 
+@mathesar_rpc_method(name="forms.regenerate_token", auth="login")
+def regenerate_token(*, form_id: int, **kwargs) -> str:
+    """
+    Regenerate the unique token for a form.
+
+    Args:
+        form_id: The Django id of the form.
+
+    Returns:
+        The new token for the form.
+    """
+    token = regen_form_token(form_id)
+    return token
+
+
+@mathesar_rpc_method(name="forms.set_publish_public", auth="login")
+def set_publish_public(*, form_id: int, publish_public: bool, **kwargs) -> bool:
+    """
+    Set/Unset the form to be publicly shareable.
+
+    Args:
+        form_id: The Django id of the form.
+        publish_public: Specify whether to share the form publicly.
+
+    Returns:
+        The updated state of public sharing for the form.
+    """
+    updated_publish_public = set_form_public_setting(form_id, publish_public)
+    return updated_publish_public
+
+
 @mathesar_rpc_method(name="forms.delete", auth="login")
 def delete(*, form_id: int, **kwargs) -> None:
     """
@@ -330,3 +343,76 @@ def delete(*, form_id: int, **kwargs) -> None:
         form_id: The Django id of the form to delete.
     """
     delete_form(form_id)
+
+
+@mathesar_rpc_method(name="forms.patch", auth="login")
+def patch(*, update_form_def: SettableFormDef, **kwargs) -> FormInfo:
+    """
+    Update a form.
+
+    Args:
+        update_form_def: A dict describing the form to update, including the updated fields.
+
+    Returns:
+        The form info for the updated form.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    form_model = patch_form(update_form_def, user)
+    return FormInfo.from_model(form_model)
+
+
+@mathesar_rpc_method(name="forms.list_related_records", auth="anonymous")
+def list_related_records(
+        *,
+        form_token: str,
+        field_key: str,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        search: Optional[str] = None,
+        **kwargs,
+) -> RecordSummaryList:
+    """
+    List records for selection via the row seeker
+
+    Args:
+        form_token: The unique token of the form.
+        field_key: The key of the foreign key field for which to list related records.
+        limit: Optional limit on the number of records to return.
+        offset: Optional offset for pagination.
+        search: Optional search term to filter records.
+
+    Returns:
+        The requested records, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    form = get_form(form_token, user)
+    database_id = form.database.id
+    form_field = form.fields.get(key=field_key)
+    if form_field.kind != "foreign_key":
+        raise ValueError(f"Field {field_key} is not a foreign key field.")
+
+    table_oid = form_field.related_table_oid
+
+    with form.connection as conn:
+        record_info = list_by_record_summaries(
+            conn,
+            table_oid,
+            limit=limit,
+            offset=offset,
+            search=search,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+        )
+    return RecordSummaryList.from_dict(record_info)
+
+
+@mathesar_rpc_method(name="forms.submit", auth="anonymous")
+def submit(*, form_token: str, values: dict, **kwargs) -> None:
+    """
+    Submit a form.
+
+    Args:
+        form_token: The unique token of the form.
+        values: A dict describing the values to insert.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    return submit_form(form_token, values, user)

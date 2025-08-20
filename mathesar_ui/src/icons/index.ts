@@ -13,6 +13,7 @@ import {
   faChevronRight,
   faCircleExclamation,
   faCircleInfo,
+  faClipboardList,
   faClock,
   faClone,
   faCogs,
@@ -50,6 +51,7 @@ import {
   faPaperPlane,
   faPaste,
   faPencilAlt,
+  faPlay,
   faPlug,
   faPlus,
   faProjectDiagram,
@@ -91,10 +93,12 @@ import type { IconProps } from '@mathesar-component-library/types';
 
 import {
   arrayIcon,
+  circleLowercaseIIcon,
   connectDatabaseIcon,
   createDatabaseIcon,
   databaseLineIcon,
   explorationIcon,
+  modalRecordViewIcon,
   outcomeIcon,
   permissionsIcon,
   tableIcon,
@@ -174,6 +178,7 @@ export const iconDuplicateRecord: IconProps = {
   data: faClone,
   flip: 'vertical',
 };
+export const iconFillOutForm: IconProps = { data: faPlay };
 
 // THINGS
 //
@@ -192,6 +197,7 @@ export const iconExploration: IconProps = { data: explorationIcon };
 export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
 export const iconFeedback: IconProps = { data: faCommentAlt };
 export const iconFiltering: IconProps = { data: faFilter };
+export const iconForm: IconProps = { data: faClipboardList };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
@@ -229,6 +235,8 @@ export const iconPermissions: IconProps = { data: permissionsIcon };
 export const iconPrivacy: IconProps = { data: faUserSecret };
 export const iconPrimaryKey: IconProps = { data: faKey };
 export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
+export const iconDescription: IconProps = { data: circleLowercaseIIcon };
+export const iconModalRecordView: IconProps = { data: modalRecordViewIcon };
 
 // STATUSES
 

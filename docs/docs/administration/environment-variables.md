@@ -1,7 +1,5 @@
-# Environment Variables for Configuration
-
+# Environment Variables
 This page contains all available environment variables supported by Mathesar. See the specific installation guides for the applicable environment variables and instructions on how to set them.
-
 
 ## Backend configuration {: #backend}
 
@@ -24,12 +22,12 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Default value**: `.localhost,127.0.0.1,[::1]`
 
 
-## Internal Database configuration {: #db}
+## Internal database configuration {: #db}
 
-!!!info
-    The database specified in this section will be used to store Mathesar's internal data. Additionally, it can be optionally repurposed via Mathesar's UI to store user data.
+!!! note "Default values below are from our [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file, used if installing via [Docker Compose](./install-via-docker-compose.md)."
 
-Note: The default values specified here refer to those in Mathesar's [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file, as part of our recommended [docker compose installation method](./install-via-docker-compose.md).
+The database specified in this section is used to store Mathesar's internal data. If desired, it can also be [connected to Mathesar's UI](http://localhost:9000/user-guide/databases/#connection) to store user data.
+
 
 ### `POSTGRES_DB`
 
@@ -63,15 +61,15 @@ Note: The default values specified here refer to those in Mathesar's [docker-com
 
 ## Caddy reverse proxy configuration {: #caddy}
 
-!!!note
-    These variables are only needed if you're using the Caddy configuration in our [default Docker Compose](install-via-docker-compose.md#steps) file.
+!!! info "**OPTIONAL**"
+	Only needed if you're using the Caddy configuration in our [default Docker Compose](install-via-docker-compose.md#steps) file.
 
 ### `DOMAIN_NAME`
 
 - **Description**: The public URL that will be used to access Mathesar ([see Caddy docs](https://caddyserver.com/docs/caddyfile/concepts#addresses)).
 - **Format**: A URL or hostname
 
-    !!! info "Example values"
+    !!! example "Example values"
         - `https://example.com`
         - `localhost`
         - `http://localhost`
@@ -83,3 +81,23 @@ Note: The default values specified here refer to those in Mathesar's [docker-com
     !!! tip "Tip"
         - Set this to `localhost` if you'd like Mathesar to be available only on localhost
         - Set the protocol to `http` if you don't want Caddy to automatically handle setting up SSL, e.g. `http://example.com`
+
+## Single sign-on (SSO) configuration {: #sso}
+
+!!! info "**OPTIONAL**"
+    Only used if [using SSO](./single-sign-on.md) in installations where the local filesystem is inaccessible.
+
+### `OIDC_CONFIG_DICT` (optional)
+
+- **Description**: The configuration for enabling SSO and configuring providers in Mathesar.
+- **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example).
+
+    !!! example
+        ```env
+         OIDC_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
+        ```
+
+
+- **Additional information**: The following tools might help you convert the YAML syntax from `sso.yml` into the proper format:
+    - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
+    - [JSON stringify online](https://jsonformatter.org/json-stringify-online)

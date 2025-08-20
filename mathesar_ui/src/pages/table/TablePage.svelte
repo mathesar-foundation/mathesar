@@ -13,9 +13,9 @@
     TabularData,
     setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
+  import WithModalRecordView from '@mathesar/systems/record-view-modal/WithModalRecordView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
-  import type { ShareConsumer } from '@mathesar/utils/shares';
 
   import { setNewImperativeFilterControllerInContext } from './ImperativeFilterController';
 
@@ -29,7 +29,6 @@
   setNewImperativeFilterControllerInContext();
 
   export let table: Table;
-  export let shareConsumer: ShareConsumer | undefined = undefined;
 
   let sheetElement: HTMLElement;
 
@@ -40,12 +39,9 @@
     database: table.schema.database,
     table,
     meta,
-    shareConsumer,
   });
   $: ({ isLoading, selection } = tabularData);
   $: tabularDataStore.set(tabularData);
-  let context: 'shared-consumer-page' | 'page' = 'page';
-  $: context = shareConsumer ? 'shared-consumer-page' : 'page';
 
   async function activateFirstDataCell() {
     selection.updateWithoutFocus((s) => s.ofFirstDataCell());
@@ -73,9 +69,13 @@
 
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
-    <ActionsPane {context} />
+    <ActionsPane />
     {#if $currentRolePrivileges.has('SELECT')}
-      <TableView {table} {context} bind:sheetElement />
+      <WithModalRecordView>
+        <div class="table-view-area">
+          <TableView {table} bind:sheetElement />
+        </div>
+      </WithModalRecordView>
     {:else}
       <div class="warning">
         <WarningBox fullWidth>
@@ -94,5 +94,10 @@
   }
   .warning {
     padding: 1rem;
+  }
+  .table-view-area {
+    padding: 0 var(--sm3) var(--sm3) var(--sm3);
+    height: 100%;
+    display: grid;
   }
 </style>

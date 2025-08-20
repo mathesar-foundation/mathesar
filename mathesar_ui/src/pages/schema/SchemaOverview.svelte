@@ -4,53 +4,66 @@
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
+  import Tutorial from '@mathesar/component-library/tutorial/Tutorial.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { iconRefresh } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
+  import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
+  import { iconAddNew, iconRefresh } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { fetchExplorationsForCurrentSchema } from '@mathesar/stores/queries';
   import { fetchTablesForCurrentSchema } from '@mathesar/stores/tables';
-  import { AnchorButton, Button } from '@mathesar-component-library';
+  import {
+    AnchorButton,
+    Button,
+    Help,
+    Icon,
+  } from '@mathesar-component-library';
 
-  import CreateExplorationTutorial from './CreateExplorationTutorial.svelte';
   import CreateTableButton from './CreateTableButton.svelte';
   import CreateTableTutorial from './CreateTableTutorial.svelte';
-  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
-  import OverviewHeader from './OverviewHeader.svelte';
+  import ExploreYourData from './ExploreYourData.svelte';
+  import FormsSection from './FormsSection.svelte';
+  import SchemaOverviewSideSection from './SchemaOverviewSideSection.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
+
+  const schemaRouteContext = SchemaRouteContext.get();
 
   export let tablesMap: Map<Table['oid'], Table>;
   export let explorationsMap: Map<number, SavedExploration>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
-  export let database: Database;
-  export let schema: Schema;
   export let onCreateEmptyTable: () => void;
+
+  $: ({ schema, dataForms } = $schemaRouteContext);
+  $: void dataForms.runConservatively();
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
   $: ({ currentRolePrivileges } = schema.currentAccess);
   $: showTableCreationTutorial =
     !hasTables && $currentRolePrivileges.has('CREATE');
-  $: showExplorationTutorial = hasTables && !hasExplorations;
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
   $: ({ tableCount } = schema);
-
-  // Viewers can explore, they cannot save explorations
-  $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
+  $: dataExplorerPageUrl = getDataExplorerPageUrl(
+    schema.database.id,
+    schema.oid,
+  );
 </script>
 
-<div class="container">
-  <div class="vertical-container tables">
-    <OverviewHeader title={$_('tables')}>
-      <svelte:fragment slot="action">
-        <CreateTableButton {database} {schema} {onCreateEmptyTable} />
-      </svelte:fragment>
-    </OverviewHeader>
+<div class="schema-overview" class:has-tables={hasTables}>
+  <div class="tables">
+    <header>
+      <h2>{$_('tables')}</h2>
+      <div>
+        <CreateTableButton
+          database={schema.database}
+          {schema}
+          {onCreateEmptyTable}
+        />
+      </div>
+    </header>
     {#if tablesRequestStatus.state === 'processing'}
       <TableSkeleton numTables={$tableCount} />
     {:else if tablesRequestStatus.state === 'failure'}
@@ -58,195 +71,137 @@
         <p>{tablesRequestStatus.errors[0]}</p>
         <div>
           <SpinnerButton
-            onClick={async () => {
-              await fetchTablesForCurrentSchema();
-            }}
+            onClick={() => fetchTablesForCurrentSchema()}
             label={$_('retry')}
             icon={iconRefresh}
           />
-          <a href="../">
-            <Button>
-              <span>{$_('go_to_database')}</span>
-            </Button>
-          </a>
+          <a class="btn" href="../">{$_('go_to_database')}</a>
         </div>
       </ErrorBox>
     {:else if showTableCreationTutorial}
-      <CreateTableTutorial {database} {schema} {onCreateEmptyTable} />
+      <CreateTableTutorial
+        database={schema.database}
+        {schema}
+        {onCreateEmptyTable}
+      />
     {:else}
-      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
+      <TablesList
+        tables={[...tablesMap.values()]}
+        {schema}
+        database={schema.database}
+      />
     {/if}
   </div>
 
-  <div class="vertical-container sidebar">
-    {#if showExplorationTutorial}
-      <CreateExplorationTutorial {database} {schema} />
-    {:else}
-      <section class="sidebar-section">
-        <OverviewHeader title={$_('saved_explorations')} />
-        {#if isExplorationsLoading}
-          <ExplorationSkeleton />
-        {:else if explorationsRequestStatus.state === 'failure'}
-          <ErrorBox>
-            <p>{explorationsRequestStatus.errors[0]}</p>
-            <div>
-              <SpinnerButton
-                onClick={async () => {
-                  await fetchExplorationsForCurrentSchema();
-                }}
-                label={$_('retry')}
-                icon={iconRefresh}
-              />
-              <a href="../">
-                <Button>
-                  <span>{$_('go_to_database')}</span>
-                </Button>
-              </a>
-            </div>
-          </ErrorBox>
-        {:else}
-          <ExplorationsList
-            explorations={[...explorationsMap.values()]}
-            {database}
-            {schema}
-          />
+  <div class="sidebar">
+    <SchemaOverviewSideSection
+      isLoading={isExplorationsLoading}
+      hasError={explorationsRequestStatus.state === 'failure'}
+    >
+      <svelte:fragment slot="header">
+        {$_('explorations')}
+        <Help>{$_('what_is_an_exploration')}</Help>
+      </svelte:fragment>
+      <svelte:fragment slot="actions">
+        <AnchorButton href={dataExplorerPageUrl} appearance="secondary">
+          <Icon {...iconAddNew} />
+          <span>{$_('new_exploration')}</span>
+        </AnchorButton>
+      </svelte:fragment>
+      <svelte:fragment slot="errors">
+        {#if explorationsRequestStatus.state === 'failure'}
+          <p>{explorationsRequestStatus.errors[0]}</p>
+          <div>
+            <SpinnerButton
+              onClick={async () => {
+                await fetchExplorationsForCurrentSchema();
+              }}
+              label={$_('retry')}
+              icon={iconRefresh}
+            />
+            <a href="../">
+              <Button>
+                <span>{$_('go_to_database')}</span>
+              </Button>
+            </a>
+          </div>
         {/if}
-
-        {#if canExplore}
-          <div class="explore-cta">
-            <h3 class="explore-title">{$_('explore_your_data')}</h3>
-            <p class="explore-description">
-              {$_('what_is_an_exploration_mini')}
-            </p>
-            <div>
-              <AnchorButton
-                href={getDataExplorerPageUrl(database.id, schema.oid)}
-                size="small"
-              >
+      </svelte:fragment>
+      <svelte:fragment slot="content">
+        {#if hasExplorations}
+          <div class="explorations-list">
+            <ExplorationsList
+              explorations={[...explorationsMap.values()]}
+              database={schema.database}
+              {schema}
+            />
+          </div>
+        {/if}
+        {#if hasExplorations}
+          <ExploreYourData href={dataExplorerPageUrl} />
+        {:else}
+          <Tutorial>
+            <div slot="title">
+              {$_('time_to_create_exploration')}
+            </div>
+            <div slot="body">
+              {$_('what_is_an_exploration')}
+            </div>
+            <div slot="footer">
+              <AnchorButton href={dataExplorerPageUrl} size="small">
                 {$_('open_data_explorer')}
               </AnchorButton>
             </div>
-          </div>
+          </Tutorial>
         {/if}
-      </section>
-    {/if}
+      </svelte:fragment>
+    </SchemaOverviewSideSection>
+
+    <FormsSection />
   </div>
 </div>
 
 <style lang="scss">
-  .container {
-    --container-gap: 3rem;
-    display: flex;
-    flex-direction: column;
+  .schema-overview {
+    gap: var(--lg5);
+    display: grid;
 
-    > :global(* + *) {
-      margin-top: var(--container-gap);
-    }
-  }
-
-  .vertical-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .sidebar-section {
-    > :global(* + *) {
-      margin-top: var(--sm2);
-    }
-  }
-
-  .explore-cta {
-    padding: var(--lg3);
-    background: linear-gradient(
-      135deg,
-      var(--pumpkin-200) 0%,
-      var(--pumpkin-300) 100%
-    );
-    border: 1px solid var(--pumpkin-400);
-    border-radius: var(--sm2);
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(
-        circle at top right,
-        rgba(255, 255, 255, 0.15) 0%,
-        transparent 60%
-      );
-      pointer-events: none;
+    .sidebar {
+      display: grid;
+      align-content: start;
+      gap: var(--lg5);
     }
 
-    .explore-title {
-      font-size: var(--lg1);
-      font-weight: var(--font-weight-bold);
-      color: var(--pumpkin-900);
-      margin: 0 0 0.75rem 0;
-      position: relative;
-    }
+    header {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--lg1);
 
-    .explore-description {
-      color: var(--pumpkin-800);
-      font-size: 1rem;
-      margin: 0 0 1.5rem 0;
-      position: relative;
-      line-height: 1.5;
-    }
+      h2 {
+        margin: 0;
+      }
 
-    > div {
-      position: relative;
-    }
-  }
-
-  :global(body.theme-dark) .explore-cta {
-    background: linear-gradient(
-      135deg,
-      var(--pumpkin-900) 0%,
-      var(--pumpkin-950) 100%
-    );
-    border: 1px solid var(--pumpkin-800);
-
-    &::before {
-      background: radial-gradient(
-        circle at top right,
-        rgba(255, 255, 255, 0.05) 0%,
-        transparent 60%
-      );
-    }
-
-    .explore-title {
-      color: var(--pumpkin-100);
-    }
-
-    .explore-description {
-      color: var(--pumpkin-200);
-    }
-  }
-
-  @media screen and (min-width: 64rem) {
-    .container {
-      flex-direction: row;
-
-      > :global(* + *) {
-        margin-left: var(--container-gap);
-        margin-top: 0;
+      & > :global(:last-child) {
+        flex-grow: 1;
+        text-align: right;
       }
     }
 
-    .tables {
-      flex: 1;
-      min-width: 0;
+    .explorations-list {
+      margin-bottom: 1rem;
     }
 
-    .sidebar {
-      width: 24rem;
-      flex-shrink: 0;
+    &:not(.has-tables) .sidebar {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 55rem) {
+    .schema-overview.has-tables {
+      grid-template: auto / 1fr 25rem;
     }
   }
 </style>
