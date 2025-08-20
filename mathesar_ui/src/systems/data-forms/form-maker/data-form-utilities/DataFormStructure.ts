@@ -131,13 +131,13 @@ export class DataFormStructure {
 
     this.formHolder = asyncDynamicDerived(
       this.fields.fieldValueStores,
-      (fieldValueStoreSubtances) =>
-        fieldValueStoreSubtances.flatMap((item) => [
+      (fieldValueStoreSubstances) =>
+        fieldValueStoreSubstances.flatMap((item) => [
           item.inputFieldStore,
           item.includeFieldStoreInForm,
         ]),
-      (fieldValueStoreSubtances, _get) => {
-        const fieldObjs = fieldValueStoreSubtances.reduce(
+      (fieldValueStoreSubstances, _get) => {
+        const fieldObjs = fieldValueStoreSubstances.reduce(
           (acc, curr) => {
             if (_get(curr.includeFieldStoreInForm)) {
               acc[curr.key] = _get(curr.inputFieldStore);

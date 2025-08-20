@@ -146,15 +146,16 @@ export function withSideChannelSubscriptions<Store extends Readable<unknown>>(
  * This store utility allows listening on a store and any of it's nested stores
  * and derive a value from them.
  *
- * The returned store updates itself synchronously when the source store is modified.
- * However, when the inner stores are modified, the store only updates during the
- * microtask queue execution of the current eventloop.
- *  - This prevents inner stores from firing a bunch of updates when they are updated
- *    together, or immediately after the source is updated.
- *  - This utility also returns a tick function to wait for the store update to finish.
+ * The returned store updates itself synchronously when the source store is
+ * modified. However, when the inner stores are modified, the store only updates
+ * during the microtask queue execution of the current event loop.
+ *  - This prevents inner stores from firing a bunch of updates when they are
+ *    updated together, or immediately after the source is updated.
+ *  - This utility also returns a tick function to wait for the store update to
+ *    finish.
  *
- * When using this store in a ts file within a synchronous block, it should be treated
- * like an async store.
+ * When using this store in a ts file within a synchronous block, it should be
+ * treated like an async store.
  */
 export function asyncDynamicDerived<SourceSubstance, T>(
   source: Readable<SourceSubstance>,
@@ -206,8 +207,8 @@ export function asyncDynamicDerived<SourceSubstance, T>(
       if (sourceChangeId !== _sourceChangeId) {
         return;
       }
-      const sourceSubtance = get(source);
-      set(compute(sourceSubtance, get));
+      const sourceSubstance = get(source);
+      set(compute(sourceSubstance, get));
     };
 
     const resubscribeDynamics = (
@@ -232,8 +233,8 @@ export function asyncDynamicDerived<SourceSubstance, T>(
     const baseUnsub = source.subscribe(() => {
       sourceChangeId += 1;
 
-      const sourceSubtance = get(source);
-      const collectedDeps = collectDeps(sourceSubtance);
+      const sourceSubstance = get(source);
+      const collectedDeps = collectDeps(sourceSubstance);
       const nextDeps = new Set<Readable<any>>(collectedDeps);
 
       resubscribeDynamics(nextDeps, sourceChangeId);

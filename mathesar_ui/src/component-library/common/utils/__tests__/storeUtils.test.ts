@@ -52,12 +52,12 @@ describe('asyncDynamicDerived', () => {
       sourceSubstance.innerB,
       sourceSubstance.innerC.nestedInner,
     ],
-    (sourceSubtance, getInner) => {
+    (sourceSubstance, getInner) => {
       computed += 1;
       return (
-        getInner(sourceSubtance.innerA) +
-        getInner(sourceSubtance.innerB) +
-        getInner(sourceSubtance.innerC.nestedInner)
+        getInner(sourceSubstance.innerA) +
+        getInner(sourceSubstance.innerB) +
+        getInner(sourceSubstance.innerC.nestedInner)
       );
     },
     0,
@@ -150,7 +150,7 @@ describe('asyncDynamicDerived', () => {
     unsub();
   });
 
-  test('inner stores should not trigger re-compute immeditately after source changes', async () => {
+  test('inner stores should not trigger re-compute immediately after source changes', async () => {
     const { values, unsub } = track(result);
 
     const firstValue = 1 + 2 + 3;

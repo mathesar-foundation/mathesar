@@ -116,9 +116,9 @@ export class FkField extends AbstractColumnBasedField {
     if (prevRule !== 'must_pick') {
       /* We're caching this for UX convenience when users are building the form.
        *
-       * We'd like to preseve the changes to the nested fields when users change
-       * `interactionRule` while building the form, so that when they change the
-       * rule back, their changes are not lost.
+       * We'd like to preserve the changes to the nested fields when users
+       * change `interactionRule` while building the form, so that when they
+       * change the rule back, their changes are not lost.
        */
       this.cachedNestedFieldsBeforeMustPick = get(this.nestedFields);
     }
