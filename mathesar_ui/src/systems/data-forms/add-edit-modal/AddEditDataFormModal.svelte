@@ -48,6 +48,14 @@
   $: form = makeForm({ name, description, baseTable });
   $: modalTitle = dataForm ? $_('edit_form_with_name') : $_('create_new_form');
 
+  function autoGenerateName(newBaseTable: Table | undefined) {
+    if (!newBaseTable) return;
+    if ($name) return;
+    $name = newBaseTable.name;
+  }
+
+  $: autoGenerateName($baseTable);
+
   async function save(values: FilledFormValues<typeof form>) {
     if (dataForm) {
       await dataForm.updateNameAndDesc(values.name, values.description);
