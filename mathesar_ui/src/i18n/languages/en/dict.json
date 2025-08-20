@@ -41,6 +41,7 @@
   "ascending": "Ascending",
   "ascending_id": "Ascending ID",
   "associated_role": "Associated Role",
+  "associated_role_help": "This PostgreSQL role will be used to insert the form data into the base table.",
   "attempt_exploration_recovery": "Attempt Exploration recovery",
   "auto_added_indicator_help_text": "This column was automatically added by Mathesar.",
   "auto_incrementing_identity": "Auto-incrementing Identity",
