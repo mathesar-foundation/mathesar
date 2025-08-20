@@ -77,7 +77,7 @@
   }
 
   :global(
-      [data-form-selectable].can-select:hover:not(
+      [data-form-selectable].can-select:not(.selected):hover:not(
           :has([data-form-selectable]:hover)
         )
         > .content
