@@ -20,7 +20,6 @@ import yaml
 from django.core.management.utils import get_random_secret_key
 
 from config.database_config import PostgresConfig, parse_port
-from config.settings.secrets import secret_key
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -234,12 +233,20 @@ for db_key, db_dict in DATABASES.items():
 # TODO: We use this variable for analytics, consider removing/renaming it.
 TEST = bool(os.environ.get('TEST', default=False))
 
-SECRET_KEY = os.environ.get("SECRET_KEY") or secret_key.secret_key
-if SECRET_KEY is None:
-    SECRET_KEY = get_random_secret_key()
-    with open(os.path.abspath(secret_key.__file__), 'w') as f:
-        f.write('secret_key = ' + f"'{SECRET_KEY}'")
+SECRETS_ROOT = os.path.join(BASE_DIR, '.secrets')
+SECRET_KEY = os.environ.get("SECRET_KEY")
+# We don't want to persist envvar SECRET_KEY
+if not SECRET_KEY:
+    os.makedirs(SECRETS_ROOT, exist_ok=True)
+    SECRET_KEY_FILE = os.path.join(SECRETS_ROOT, 'secret_key.txt')
+    try:
+        with open(SECRET_KEY_FILE, 'x') as f:
+            f.write(get_random_secret_key())
+    except FileExistsError:
+        pass  # We'll just use a preexisting key in this case.
 
+    with open(SECRET_KEY_FILE, 'r') as f:
+        SECRET_KEY = f.read()
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
