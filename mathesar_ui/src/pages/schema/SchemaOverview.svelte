@@ -36,8 +36,8 @@
   export let explorationsRequestStatus: RequestStatus;
   export let onCreateEmptyTable: () => void;
 
-  $: ({ schema, dataForms } = $schemaRouteContext);
-  $: void dataForms.runConservatively();
+  $: ({ schema, dataFormsFetch } = $schemaRouteContext);
+  $: void dataFormsFetch.runConservatively();
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
