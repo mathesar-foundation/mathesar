@@ -46,7 +46,6 @@ ENV MATHESAR_DOCKER_IMAGE='true'
 
 VOLUME /etc/postgresql/
 VOLUME /var/lib/postgresql/
-VOLUME /code/config/settings/secrets/
 
 EXPOSE 5432
 
@@ -83,7 +82,8 @@ ENV NODE_MAJOR=18
 RUN pip install --no-cache-dir -r requirements-dev.txt
 
 # Compile translation files
-RUN python manage.py compilemessages
+# We set a temporary secret key to avoid mounting a volume during buildtime.
+RUN SECRET_KEY=temporary python manage.py compilemessages
 
 # Add NodeJS signing key and source
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
@@ -96,8 +96,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     nodejs \
     && rm -rf /var/lib/apt/lists/*
-
-RUN echo -n "secret_key = None" > /code/config/settings/secrets/secret_key.py
 
 
 #=========== STAGE: DEVELOPMENT ==============================================#
