@@ -159,6 +159,7 @@ export function withSideChannelSubscriptions<Store extends Readable<unknown>>(
  */
 export function asyncDynamicDerived<SourceSubstance, T>(
   source: Readable<SourceSubstance>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   collectDeps: (sourceSubstance: SourceSubstance) => Iterable<Readable<any>>,
   compute: (sourceSubstance: SourceSubstance, getValue: typeof get) => T,
   initial: T,
@@ -211,6 +212,7 @@ export function asyncDynamicDerived<SourceSubstance, T>(
     };
 
     const resubscribeDynamics = (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       nextDeps: Set<Readable<any>>,
       _sourceChangeId: number,
     ) => {
@@ -233,6 +235,7 @@ export function asyncDynamicDerived<SourceSubstance, T>(
 
       const sourceSubstance = get(source);
       const collectedDeps = collectDeps(sourceSubstance);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const nextDeps = new Set<Readable<any>>(collectedDeps);
 
       resubscribeDynamics(nextDeps, sourceChangeId);
