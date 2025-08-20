@@ -11,7 +11,7 @@ import {
   type AbstractFieldProps,
 } from './AbstractField';
 import type { FieldColumn } from './FieldColumn';
-import { DataFormFieldInputValueHolder } from './FieldValueHolder';
+import { DataFormFieldScalarInputValueHolder } from './FieldValueHolder';
 import type { FormFields } from './FormFields';
 
 export interface AbstractColumnBasedFieldProps extends AbstractFieldProps {
@@ -26,7 +26,7 @@ export type AbstractColumnBasedFieldModifiableProps =
 export abstract class AbstractColumnBasedField extends AbstractField {
   readonly fieldColumn;
 
-  readonly fieldValueHolder: DataFormFieldInputValueHolder;
+  readonly fieldValueHolder: DataFormFieldScalarInputValueHolder;
 
   abstract readonly inputComponentAndProps: Readable<
     ReturnType<typeof getDbTypeBasedInputCap>
@@ -48,7 +48,7 @@ export abstract class AbstractColumnBasedField extends AbstractField {
     this._isRequired = writable(
       this.fieldColumn.column.nullable ? props.isRequired : true,
     );
-    this.fieldValueHolder = new DataFormFieldInputValueHolder(
+    this.fieldValueHolder = new DataFormFieldScalarInputValueHolder(
       this.key,
       this.isRequired,
     );

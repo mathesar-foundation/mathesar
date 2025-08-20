@@ -99,7 +99,7 @@
   $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
 </script>
 
-<div class="table-view" class:inspector-open={showTableInspector}>
+<div class="table-view">
   <WithTableInspector
     {context}
     {showTableInspector}
@@ -139,16 +139,17 @@
       {/if}
     </div>
   </WithTableInspector>
+  <StatusPane {context} />
 </div>
-<StatusPane {context} />
 
 <style>
   .table-view {
+    --status-bar-padding: 0;
+    height: 100%;
     display: grid;
     grid-template: 1fr auto / 1fr;
-    height: 100%;
+    gap: var(--sm3);
     overflow: hidden;
-    padding: 0 var(--sm3);
   }
   .sheet-area {
     position: relative;

@@ -1,17 +1,30 @@
 import { tick } from 'svelte';
 import type { ActionReturn } from 'svelte/action';
 
-async function moveNodeToFooter(node: Element): Promise<void> {
+async function moveNodeToWindowArea(
+  node: Element,
+  relativeSelector: string,
+): Promise<void> {
   await tick();
   node
     .closest('[data-window-area="window"]')
-    ?.querySelector(':scope > [data-window-area="footer"]')
+    ?.querySelector(relativeSelector)
     ?.appendChild(node);
 }
 
-export function portalToWindowFooter(node: Element): ActionReturn {
-  void moveNodeToFooter(node);
-  return {
-    destroy: () => node.parentElement?.removeChild(node),
+function makeWindowAreaPortal(
+  relativeSelector: string,
+): (node: Element) => ActionReturn {
+  return (node: Element) => {
+    void moveNodeToWindowArea(node, relativeSelector);
+    return { destroy: () => node.parentElement?.removeChild(node) };
   };
 }
+
+export const portalToWindowTitle = makeWindowAreaPortal(
+  ':scope > [data-window-area="title-bar"] > [data-window-area="title"]',
+);
+
+export const portalToWindowFooter = makeWindowAreaPortal(
+  ':scope > [data-window-area="footer"]',
+);

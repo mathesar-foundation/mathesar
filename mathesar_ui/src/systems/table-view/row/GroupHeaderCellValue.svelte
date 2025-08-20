@@ -2,7 +2,6 @@
   import type { ResultValue } from '@mathesar/api/rpc/records';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 
@@ -16,10 +15,8 @@
   $: recordSummary = recordSummariesForSheet
     .get(String(columnId))
     ?.get(recordId);
-  $: recordPageHref = $storeToGetRecordPageUrl({
-    tableId: processedColumnsMap?.get(columnId)?.linkFk?.referent_table_oid,
-    recordId,
-  });
+  $: linkedTableId =
+    processedColumnsMap?.get(columnId)?.linkFk?.referent_table_oid;
 </script>
 
 <span class="tag">
@@ -31,7 +28,12 @@
   </span>
   <span class="value">
     {#if recordSummary}
-      <LinkedRecord {recordSummary} {recordId} {recordPageHref} />
+      <LinkedRecord
+        {recordSummary}
+        {recordId}
+        tableId={linkedTableId}
+        allowsHyperlinks
+      />
     {:else}
       <CellValue value={cellValue} />
     {/if}

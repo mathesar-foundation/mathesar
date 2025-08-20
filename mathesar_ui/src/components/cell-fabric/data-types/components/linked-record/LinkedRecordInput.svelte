@@ -5,7 +5,6 @@
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import type { LinkedRecordInputProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
   import {
     type AccompanyingElements,
@@ -43,7 +42,7 @@
   export let targetTableId: $$Props['targetTableId'] | undefined = undefined;
   let classes: $$Props['class'] = '';
   export { classes as class };
-  export let allowsHyperlinks = true;
+  export let allowsHyperlinks = false;
   export let disabled = false;
   export let placeholder: string | undefined = undefined;
 
@@ -53,10 +52,6 @@
   $: recordSelectionOrchestrator = recordSelectionOrchestratorFactory();
   $: hasValue = value !== undefined && value !== null;
   $: labelController?.inputId.set(id);
-  $: recordPageHref =
-    hasValue && allowsHyperlinks && targetTableId
-      ? $storeToGetRecordPageUrl({ tableId: targetTableId, recordId: value })
-      : undefined;
 
   /**
    * If this LinkedRecordInput in placed inside an AttachableDropdown, we want
@@ -188,8 +183,9 @@
         {recordSummary}
         hasDeleteButton={!disabled}
         on:delete={clear}
-        {recordPageHref}
         {disabled}
+        tableId={targetTableId}
+        {allowsHyperlinks}
       />
     {:else if placeholder}
       <span class="placeholder">

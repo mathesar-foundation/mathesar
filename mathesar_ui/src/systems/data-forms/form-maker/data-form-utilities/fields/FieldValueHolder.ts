@@ -16,7 +16,11 @@ import {
   requiredField,
 } from '@mathesar/components/form';
 
-export class DataFormFieldInputValueHolder {
+export type DataFormFieldInputValueHolder =
+  | DataFormFieldScalarInputValueHolder
+  | DataFormFieldFkInputValueHolder;
+
+export class DataFormFieldScalarInputValueHolder {
   private readonly isRequired;
 
   readonly key: string;
@@ -35,7 +39,7 @@ export class DataFormFieldInputValueHolder {
   }
 }
 
-export class DataFormFieldFkInputValueHolder extends DataFormFieldInputValueHolder {
+export class DataFormFieldFkInputValueHolder extends DataFormFieldScalarInputValueHolder {
   private _userAction: Writable<'pick' | 'create'>;
 
   private fkInteractionRule;
