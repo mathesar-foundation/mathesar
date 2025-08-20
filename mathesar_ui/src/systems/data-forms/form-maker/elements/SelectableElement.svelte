@@ -85,6 +85,12 @@
     background-color: var(--accent-100);
   }
 
+  // background is set because fields can overlap when dragging to rearrange,
+  // and it looks awkward without a background.
+  :global([data-form-selectable].is-dragging) {
+    background: var(--elevated-background);
+  }
+
   .header,
   .footer,
   .left {
