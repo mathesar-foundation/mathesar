@@ -200,7 +200,6 @@ export function asyncDynamicDerived<SourceSubstance, T>(
     let reSubscribing = false;
     let sourceChangeId = 0;
 
-    let deps: Readable<unknown>[] = [];
     let dynamicUnsubs: Unsubscriber[] = [];
 
     const update = (_sourceChangeId: number) => {
@@ -226,7 +225,6 @@ export function asyncDynamicDerived<SourceSubstance, T>(
           scheduleFlush(() => update(_sourceChangeId));
         }),
       );
-      deps = newDeps;
       reSubscribing = false;
     };
 
