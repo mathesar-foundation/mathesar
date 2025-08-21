@@ -1,5 +1,3 @@
-import { type HTMLInputAttributes } from 'svelte/elements';
-
 export type Appearance =
   | 'default'
   | 'primary'
@@ -18,6 +16,4 @@ export type Appearance =
 
 export type Size = 'small' | 'medium' | 'large';
 
-type InputProps = HTMLInputAttributes;
-export type SimplifiedInputProps = Omit<InputProps, 'disabled' | 'id'>;
 export type CssVariablesObj = Record<string, string>;

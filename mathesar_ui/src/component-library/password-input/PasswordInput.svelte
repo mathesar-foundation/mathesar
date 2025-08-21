@@ -1,30 +1,30 @@
 <script lang="ts">
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+  import type { LabelController } from '@mathesar-component-library-dir/label';
 
   import type { PasswordInputProps } from './PasswordInputTypes';
 
   type $$Props = PasswordInputProps;
 
-  /**
-   * Value of the input. Use bind tag for two-way binding.
-   * Refer Svelte docs for more info on binding form input values.
-   */
   export let value: $$Props['value'] = '';
 
-  // Additional classes
   let classes: string | null = '';
   export { classes as class };
 
-  // Underlying DOM element for direct access
   export let element: $$Props['element'] = undefined;
 
   export let hasError = false;
 
-  // Id for the input
   export let id: $$Props['id'] = undefined;
+
+  export let disabled = false;
+
+  export let labelController: LabelController | undefined = undefined;
+
+  export let focusOnMount: boolean | undefined = undefined;
 </script>
 
-<BaseInput {...$$restProps} bind:id />
+<BaseInput bind:id {labelController} {disabled} {focusOnMount} />
 
 <input
   bind:this={element}

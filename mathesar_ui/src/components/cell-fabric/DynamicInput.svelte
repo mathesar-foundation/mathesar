@@ -10,13 +10,13 @@ during Sheet component creation.
   import type {
     BaseInputProps,
     ComponentAndProps,
-    SimplifiedInputProps,
   } from '@mathesar-component-library/types';
+  import type { HTMLInputAttributes } from 'svelte/elements';
 
   // TODO: Provide this as a discriminated union of all input types
   interface $$Props
     extends BaseInputProps,
-      Omit<SimplifiedInputProps, 'value'> {
+      Omit<HTMLInputAttributes, 'disabled' | 'id' | 'value'> {
     value: unknown;
     hasError?: boolean;
     componentAndProps: ComponentAndProps;

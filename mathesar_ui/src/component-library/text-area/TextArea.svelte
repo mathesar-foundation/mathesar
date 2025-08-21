@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
 
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+  import type { LabelController } from '@mathesar-component-library-dir/label';
   import type {
     TextAreaProcessedKeyDown,
     TextAreaProps,
@@ -13,10 +14,8 @@
 
   type $$Props = TextAreaProps;
 
-  // Id for the input
   export let id: string | undefined = undefined;
 
-  // Disable input
   export let disabled = false;
 
   let classes: string | null = '';
@@ -24,15 +23,15 @@
 
   export let addNewLineOnEnterKeyCombinations = false;
 
-  /**
-   * Value of the input. Use bind tag for two-way binding.
-   * Refer Svelte docs for more info on binding form input values.
-   */
   export let value: string | undefined | null = undefined;
 
   export let element: $$Props['element'] = undefined;
 
   export let hasError = false;
+
+  export let labelController: LabelController | undefined = undefined;
+
+  export let focusOnMount: boolean | undefined = undefined;
 
   function handleKeyDown(e: KeyboardEvent) {
     let type: TextAreaProcessedKeyDown['type'] = 'normal';
@@ -60,7 +59,7 @@
   }
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled} />
+<BaseInput bind:id {labelController} {disabled} {focusOnMount} />
 
 <textarea
   bind:this={element}
