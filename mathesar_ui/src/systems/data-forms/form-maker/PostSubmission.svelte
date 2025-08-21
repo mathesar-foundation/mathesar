@@ -24,13 +24,12 @@
   })();
 
   onMount(() => {
-    if (redirectUrl) {
-      const timeOutId = setTimeout(() => {
+    const timeOutId = setTimeout(() => {
+      if (redirectUrl) {
         window.location.href = redirectUrl;
-      }, 3000);
-      return () => clearTimeout(timeOutId);
-    }
-    return () => {};
+      }
+    }, 3000);
+    return () => clearTimeout(timeOutId);
   });
 </script>
 
