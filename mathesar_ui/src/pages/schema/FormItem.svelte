@@ -67,7 +67,7 @@
   </div>
   <svelte:fragment slot="menu">
     <ButtonMenuItem on:click={editDataForm} icon={iconEdit}>
-      {$_('edit_form')}
+      {$_('rename_form')}
     </ButtonMenuItem>
     <ButtonMenuItem on:click={handleDelete} danger icon={iconDeleteMajor}>
       {$_('delete_form')}

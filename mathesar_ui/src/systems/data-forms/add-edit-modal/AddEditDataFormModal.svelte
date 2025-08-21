@@ -46,7 +46,9 @@
   $: description = optionalField($savedStructure?.description ?? '');
   $: sourceTable = requiredField<Table | undefined>(savedBaseTable);
   $: form = makeForm({ name, description, sourceTable });
-  $: modalTitle = dataForm ? $_('edit_form_with_name') : $_('create_new_form');
+  $: modalTitle = dataForm
+    ? $_('rename_form_with_name')
+    : $_('create_new_form');
 
   async function save(values: FilledFormValues<typeof form>) {
     if (dataForm) {

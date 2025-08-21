@@ -36,7 +36,7 @@
   getInitialDescription={() => table.description ?? ''}
 >
   <span slot="title" let:initialName>
-    <RichText text={$_('edit_table_with_name')} let:slotName>
+    <RichText text={$_('rename_table_with_name')} let:slotName>
       {#if slotName === 'tableName'}
         <Identifier>{initialName}</Identifier>
       {/if}
