@@ -76,7 +76,7 @@
   "clear": "Clear",
   "clear_form": "Clear form",
   "clear_value": "Clear value",
-  "click_on_link_if_not_redirected": "Click on the link above if you're not re-directed automatically.",
+  "click_on_link_if_not_redirected": "Click on the link above if you're not redirected automatically.",
   "click_save_button_to_save_changes": "Click Save button to save changes.",
   "click_to_save": "Click to save",
   "collaborator_added_successfully": "Collaborator added successfully",
@@ -851,5 +851,5 @@
   "yes": "Yes",
   "yes_summarize_as_list": "Yes, summarize as a list",
   "yesterday": "Yesterday",
-  "you_will_be_redirected_to_link": "You'll now be re-directed to [redirectUrl]."
+  "you_will_be_redirected_to_link": "You'll now be redirected to [redirectUrl]."
 }
