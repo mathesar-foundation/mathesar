@@ -26,10 +26,6 @@
     !!! Config
         ```yaml
         x-config: &config
-          # (Not recommended) To use a custom secret key, use an .env file, or add a
-          # sufficiently random 50 character string after '-'.
-          SECRET_KEY: ${SECRET_KEY-}
-
           # (Optional) Replace 'http://localhost' with custom domain(s) e.g.
           # 'yourdomain.com, 127.0.0.1' to manage the host(s) at which you want to
           # access Mathesar over http or https
