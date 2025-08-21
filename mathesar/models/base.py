@@ -375,7 +375,7 @@ class DataFile(BaseModel):
 class DownloadLink(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sessions = models.ManyToManyField(Session)
-    uri = models.CharField()
+    uri = models.CharField()  # should not contain sensitive info
     thumbnail = models.JSONField(blank=True, default=dict)
     fsspec_kwargs = EncryptedJSONField(blank=True, default=dict)
 
