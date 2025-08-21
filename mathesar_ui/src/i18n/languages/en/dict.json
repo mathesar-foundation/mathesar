@@ -76,6 +76,7 @@
   "clear": "Clear",
   "clear_form": "Clear form",
   "clear_value": "Clear value",
+  "click_on_link_if_not_redirected": "Click on the link above if you're not re-directed automatically.",
   "click_save_button_to_save_changes": "Click Save button to save changes.",
   "click_to_save": "Click to save",
   "collaborator_added_successfully": "Collaborator added successfully",
@@ -706,6 +707,7 @@
   "strategy": "Strategy",
   "submission_settings": "Submission Settings",
   "submit": "Submit",
+  "submit_another_response": "Submit another response",
   "summarization": "Summarization",
   "summarize": "Summarize",
   "summarize_column_configure": "You can manually configure a summarization later via the \"Transform Results\" pane.",
@@ -750,6 +752,7 @@
   "target_column_in_table": "Table Column in [tableName] Table",
   "target_table": "Target Table",
   "text": "Text",
+  "thank_you_for_submitting_form": "Thank you for submitting the form!",
   "thanks_for_feedback": "Thank you for your feedback!",
   "the_errors_are_shown_below_for_each_database": "The errors are shown below for each database.",
   "the_following_databases_will_be_upgraded": "The following databases will be upgraded:",
@@ -845,5 +848,6 @@
   "write": "Write",
   "yes": "Yes",
   "yes_summarize_as_list": "Yes, summarize as a list",
-  "yesterday": "Yesterday"
+  "yesterday": "Yesterday",
+  "you_will_be_redirected_to_link": "You'll now be re-directed to [redirectUrl]."
 }

@@ -47,6 +47,10 @@ export class DataFormFillOutManager implements DataFormManager {
     });
   }
 
+  submitAnother() {
+    this._isSuccessullySubmitted.set(false);
+  }
+
   async submit() {
     await api.forms
       .submit({
