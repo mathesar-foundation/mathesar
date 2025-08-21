@@ -1,0 +1,40 @@
+{
+  "name": "tinro",
+  "version": "0.6.12",
+  "description": "tinro is a tiny declarative router for Svelte",
+  "main": "dist/tinro.js",
+  "module": "dist/tinro.es.js",
+  "svelte": "cmp/index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "node esbuild",
+    "dev": "node tests/esbuild.dev --dev",
+    "compare": "npm run test:build && node tests/esbuild.compare",
+    "pretest": "node tests/esbuild.dev",
+    "test": "node tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexxNB/tinro.git"
+  },
+  "keywords": [
+    "svelte-router",
+    "router",
+    "svelte"
+  ],
+  "author": "Alexey Schebelev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AlexxNB/tinro/issues"
+  },
+  "homepage": "https://github.com/AlexxNB/tinro#readme",
+  "devDependencies": {
+    "derver": "^0.5.3",
+    "esbuild": "^0.14.18",
+    "esbuild-svelte": "^0.6.2",
+    "port-authority": "^1.1.2",
+    "puppeteer": "^13.1.3",
+    "svelte": "^3.46.4",
+    "uvu": "^0.5.3"
+  }
+}

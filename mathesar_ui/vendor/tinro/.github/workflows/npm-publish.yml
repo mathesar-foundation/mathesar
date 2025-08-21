@@ -1,0 +1,42 @@
+name: Publish on NPM
+
+on:
+  push:
+    paths:
+      - '.github/workflows/npm-publish.yml'
+      - 'package.json'
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 15
+      - name: Installing NPM deps
+        run: npm install
+      - name: Testing
+        run: npm run test
+
+  publish-npm:
+    needs: test
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 15
+          registry-url: https://registry.npmjs.org/
+      - name: Installing NPM deps
+        run: npm install
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 1
+      - name: Build modules
+        run: npm run build
+      - name: Publishing on NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

@@ -1,0 +1,28 @@
+name: Generate Changelog
+
+on:
+  push:
+    branches: [ main, master]
+
+jobs:
+  changelog:
+    name: Update Changelog
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Update Changelog
+        uses: AlexxNB/chalogen@master
+        with:
+          title: Tinro Changelog 
+          list: feat,fix,perf,docs,other,chore,refactor,test
+          
+      - name: Commit Changelog to repository
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+           commit_message: 'docs(Changelog): Update Changelog'
+           file_pattern: CHANGELOG.md
