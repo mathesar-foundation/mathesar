@@ -30,7 +30,7 @@
 
   const schemaRouteContext = SchemaRouteContext.getSafe();
   $: dataFormsStore = ensureReadable($schemaRouteContext?.dataForms);
-  $: dataFormsList = [...($dataFormsStore?.resolvedValue ?? []).values()];
+  $: dataFormsList = [...($dataFormsStore?.values() ?? [])];
 
   function makeTableBreadcrumbSelectorItem(
     table: Table,

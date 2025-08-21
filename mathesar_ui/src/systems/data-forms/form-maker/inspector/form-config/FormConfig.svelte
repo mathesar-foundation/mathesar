@@ -8,6 +8,7 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import {
     Button,
+    Help,
     Icon,
     LabeledInput,
     TextArea,
@@ -60,7 +61,11 @@
       {/if}
     </div>
   </InspectorSection>
-  <InspectorSection title={$_('associated_role')}>
+  <InspectorSection>
+    <div slot="title">
+      {$_('associated_role')}
+      <Help>{$_('associated_role_help')}</Help>
+    </div>
     <AssociatedRoleSelector {dataFormManager} />
   </InspectorSection>
   <InspectorSection title={$_('submission_settings')}>
