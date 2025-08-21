@@ -26,6 +26,12 @@ export class ReadonlyDataFormManager implements DataFormManager {
 
   dataFormStructure;
 
+  private _isSuccessullySubmitted = writable(false);
+
+  get isSuccessullySubmitted(): Readable<boolean> {
+    return this._isSuccessullySubmitted;
+  }
+
   constructor(props: {
     buildDataFormStructure: DataFormStructureFactory;
     token: Readable<string>;
@@ -40,6 +46,16 @@ export class ReadonlyDataFormManager implements DataFormManager {
           },
         }),
     });
+  }
+
+  async submit() {
+    await api.forms
+      .submit({
+        form_token: get(this.token),
+        values: this.dataFormStructure.getFormSubmitRequest(),
+      })
+      .run();
+    this._isSuccessullySubmitted.set(true);
   }
 }
 

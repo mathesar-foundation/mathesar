@@ -20,20 +20,7 @@
 
   async function submit() {
     if (dataFormManager instanceof ReadonlyDataFormManager) {
-      const { token } = dataFormManager;
-
-      // TODO_FORMS: Implement showing submission status info & redirection
-      try {
-        await api.forms
-          .submit({
-            form_token: get(token),
-            values: dataFormManager.dataFormStructure.getFormSubmitRequest(),
-          })
-          .run();
-        toast.success($_('form_submitted_successfully'));
-      } catch (err) {
-        toast.error(RpcError.fromAnything(err));
-      }
+      await dataFormManager.submit();
     }
   }
 </script>
