@@ -33,7 +33,7 @@
 <style lang="scss">
   .data-form-canvas {
     overflow: hidden;
-    padding: var(--sm1);
+    padding: 0 var(--sm3) var(--sm3) var(--sm3);
     height: 100%;
   }
 

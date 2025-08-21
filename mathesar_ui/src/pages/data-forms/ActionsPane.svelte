@@ -55,7 +55,6 @@
 <EntityPageHeader
   title={{
     name: $structure.name || $_('untitled'),
-    description: $structure.description ?? undefined,
     icon: iconForm,
   }}
 >
