@@ -18,6 +18,7 @@
     dataFormManager instanceof EditableDataFormManager
       ? dataFormManager
       : undefined;
+  $: showInspector = !!editableDataFormManager && $dataFormInspectorVisible;
 
   function handleFormSelection(e: MouseEvent) {
     if (editableDataFormManager) {
@@ -36,7 +37,7 @@
     bind:sizePx={$dataFormInspectorWidth}
     minSizePx={200}
     maxSizePx={600}
-    showPanel={editableDataFormManager && $dataFormInspectorVisible}
+    showPanel={showInspector}
   >
     <div class="workarea">
       <div class="form-holder" on:click={handleFormSelection}>
