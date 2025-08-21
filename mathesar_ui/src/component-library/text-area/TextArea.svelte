@@ -19,7 +19,7 @@
   // Disable input
   export let disabled = false;
 
-  let classes = '';
+  let classes: string | null = '';
   export { classes as class };
 
   export let addNewLineOnEnterKeyCombinations = false;
@@ -65,7 +65,7 @@
 <textarea
   bind:this={element}
   {...$$restProps}
-  class="input-element text-area {classes}"
+  class="input-element text-area {classes ?? ''}"
   class:has-error={hasError}
   {id}
   {disabled}

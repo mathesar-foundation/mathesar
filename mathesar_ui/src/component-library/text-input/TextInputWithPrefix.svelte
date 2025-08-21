@@ -13,7 +13,7 @@
   export let value: $$Props['value'] = '';
 
   // Additional classes
-  let classes = '';
+  let classes: string | null = '';
   export { classes as class };
 
   export let prefixIcon: $$Props['prefixIcon'];
@@ -24,7 +24,7 @@
     <Icon {...prefixIcon} />
   </div>
   <TextInput
-    class={['prefixed-input', classes].join(' ')}
+    class="prefixed-input {classes ?? ''}"
     {...$$restProps}
     bind:value
     on:input

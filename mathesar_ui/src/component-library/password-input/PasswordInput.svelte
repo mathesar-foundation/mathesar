@@ -12,7 +12,7 @@
   export let value: $$Props['value'] = '';
 
   // Additional classes
-  let classes = '';
+  let classes: string | null = '';
   export { classes as class };
 
   // Underlying DOM element for direct access
@@ -30,7 +30,7 @@
   bind:this={element}
   {...$$restProps}
   type="password"
-  class={['input-element', 'password-input', ...classes.split(' ')].join(' ')}
+  class="input-element password-input {classes ?? ''}"
   class:has-error={hasError}
   bind:value
   {id}
