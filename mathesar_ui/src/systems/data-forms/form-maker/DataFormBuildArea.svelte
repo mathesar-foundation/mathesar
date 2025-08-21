@@ -46,7 +46,7 @@
 
     .form {
       min-width: 25rem;
-      max-width: calc(40rem + var(--lg1));
+      max-width: calc(60rem + var(--lg1));
       margin: var(--lg2) auto;
       padding: 0 var(--lg1);
       display: flex;
