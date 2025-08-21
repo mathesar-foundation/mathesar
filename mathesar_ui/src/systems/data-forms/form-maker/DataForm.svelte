@@ -31,11 +31,11 @@
     <DataFormHeader {dataFormManager} />
     <DataFormFieldsContainer {fields} {dataFormManager} />
     <DataFormFooter {dataFormManager} />
-    {#if showBranding}
-      <div class="branding">
-        <DataFormBranding />
-      </div>
-    {/if}
+  {/if}
+  {#if showBranding}
+    <div class="branding">
+      <DataFormBranding />
+    </div>
   {/if}
 </form>
 
