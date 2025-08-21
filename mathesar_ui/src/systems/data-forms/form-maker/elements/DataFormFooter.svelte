@@ -1,15 +1,14 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import { api } from '@mathesar/api/rpc';
+  import ErrorList from '@mathesar/components/errors/ErrorList.svelte';
   import { FormSubmit } from '@mathesar/components/form';
-  import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-  import { toast } from '@mathesar/stores/toast';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { Collapsible } from '@mathesar-component-library';
 
   import {
+    DataFormFillOutManager,
     type DataFormManager,
-    ReadonlyDataFormManager,
   } from '../data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
@@ -19,21 +18,8 @@
   $: form = $formHolder;
 
   async function submit() {
-    if (dataFormManager instanceof ReadonlyDataFormManager) {
-      const { token } = dataFormManager;
-
-      // TODO_FORMS: Implement showing submission status info & redirection
-      try {
-        await api.forms
-          .submit({
-            form_token: get(token),
-            values: dataFormManager.dataFormStructure.getFormSubmitRequest(),
-          })
-          .run();
-        toast.success($_('form_submitted_successfully'));
-      } catch (err) {
-        toast.error(RpcError.fromAnything(err));
-      }
+    if (dataFormManager instanceof DataFormFillOutManager) {
+      await dataFormManager.submit();
     }
   }
 </script>
@@ -48,7 +34,25 @@
       icon: undefined,
     }}
     cancelButton={{ label: $_('clear_form') }}
-  />
+  >
+    <div class="error-container" slot="errors" let:errors>
+      <ErrorBox fullWidth>
+        <div>
+          {$_('error_submitting_form')}
+        </div>
+        <div class="error-detail">
+          <Collapsible triggerAppearance="ghost">
+            <span slot="header">
+              {$_('view_details')}
+            </span>
+            <div slot="content">
+              <ErrorList errorStrings={errors} />
+            </div>
+          </Collapsible>
+        </div>
+      </ErrorBox>
+    </div>
+  </FormSubmit>
 </div>
 
 <style lang="scss">
@@ -57,5 +61,9 @@
       var(--df__internal_element-right-padding)
       var(--df__internal__element-spacing)
       var(--df__internal_element-left-padding);
+  }
+  .error-detail {
+    --Collapsible_trigger-padding: 0;
+    margin-top: var(--sm5);
   }
 </style>

@@ -1,26 +1,43 @@
 <script lang="ts">
-  import type { DataFormManager } from './data-form-utilities/DataFormManager';
+  import { ensureReadable } from '@mathesar/component-library';
+
+  import {
+    DataFormFillOutManager,
+    type DataFormManager,
+  } from './data-form-utilities/DataFormManager';
   import DataFormBranding from './DataFormBranding.svelte';
   import DataFormFieldsContainer from './elements/DataFormFieldsContainer.svelte';
   import DataFormFooter from './elements/DataFormFooter.svelte';
   import DataFormHeader from './elements/DataFormHeader.svelte';
+  import PostSubmission from './PostSubmission.svelte';
 
   export let dataFormManager: DataFormManager;
   export let showBranding = true;
 
   $: ({ fields } = dataFormManager.dataFormStructure);
+  $: dataFormFillOutManager =
+    dataFormManager instanceof DataFormFillOutManager
+      ? dataFormManager
+      : undefined;
+  $: isSubmitted = ensureReadable(
+    dataFormFillOutManager?.isSuccessfullySubmitted,
+  );
 </script>
 
-<div class="form">
-  <DataFormHeader {dataFormManager} />
-  <DataFormFieldsContainer {fields} {dataFormManager} />
-  <DataFormFooter {dataFormManager} />
+<form class="form">
+  {#if dataFormFillOutManager && $isSubmitted}
+    <PostSubmission dataFormManager={dataFormFillOutManager} />
+  {:else}
+    <DataFormHeader {dataFormManager} />
+    <DataFormFieldsContainer {fields} {dataFormManager} />
+    <DataFormFooter {dataFormManager} />
+  {/if}
   {#if showBranding}
     <div class="branding">
       <DataFormBranding />
     </div>
   {/if}
-</div>
+</form>
 
 <style lang="scss">
   .form {
