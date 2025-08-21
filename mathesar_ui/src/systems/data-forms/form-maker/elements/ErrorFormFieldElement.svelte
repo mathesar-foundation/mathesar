@@ -60,6 +60,6 @@
   .error-message {
     display: flex;
     flex-direction: column;
-    gap: var(--data_forms__label-input-gap);
+    gap: var(--df__internal__label-input-gap);
   }
 </style>

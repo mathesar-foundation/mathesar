@@ -8,7 +8,7 @@
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import {
-    DataFormCanvas,
+    DataFormMaker,
     DataFormStructure,
     EditableDataFormManager,
     FormSource,
@@ -57,7 +57,7 @@
       <div class="actions-pane">
         <ActionsPane {dataFormManager} />
       </div>
-      <DataFormCanvas {dataFormManager} />
+      <DataFormMaker {dataFormManager} />
     </div>
   {:else if $rawDataFormWithSource.error}
     <Errors errors={[$rawDataFormWithSource.error]} />

@@ -11,9 +11,13 @@
   export let dataFormManager: DataFormManager;
   export let element: SelectableElement;
 
-  $: selectedElement = ensureReadable(
+  $: editableDataFormManager =
     dataFormManager instanceof EditableDataFormManager
-      ? dataFormManager.selectedElement
+      ? dataFormManager
+      : undefined;
+  $: selectedElement = ensureReadable(
+    editableDataFormManager
+      ? editableDataFormManager.selectedElement
       : undefined,
   );
   $: isSelected = (() => {
@@ -24,9 +28,9 @@
   })();
 
   function onClick(e: Event) {
-    if (dataFormManager instanceof EditableDataFormManager) {
+    if (editableDataFormManager) {
       e.stopPropagation();
-      dataFormManager.selectElement(element);
+      editableDataFormManager.selectElement(element);
     }
   }
 </script>
@@ -34,7 +38,7 @@
 <div
   tabindex="0"
   data-form-selectable
-  class:can-select={dataFormManager instanceof EditableDataFormManager}
+  class:can-select={!!editableDataFormManager}
   class:selected={isSelected}
   class:is-header-present={$$slots.header}
   on:click={onClick}
@@ -65,14 +69,20 @@
     position: relative;
 
     > .content {
-      border: 2px solid transparent;
+      border-color: transparent;
+      border-style: solid;
+      border-width: 0;
       border-radius: var(--sm4);
       overflow: hidden;
-      padding: var(--data_forms__selectable-element-padding);
+      padding: var(--df__internal__selectable-elem-padding);
+    }
+
+    &.can-select > .content {
+      border-width: 2px;
     }
 
     &.selected > .content {
-      border: 2px solid var(--accent-500);
+      border-color: var(--accent-500);
     }
   }
 
@@ -97,7 +107,7 @@
     position: absolute;
     display: flex;
     padding: 0 var(--sm2);
-    z-index: var(--data_forms__z-index__field-header);
+    z-index: var(--df__internal__z-index__field-header);
     width: fit-content;
     max-width: 100%;
   }
