@@ -46,7 +46,7 @@
     position: relative;
     height: 100%;
     background: var(--elevated-background);
-    padding: 0 1rem;
+    padding: 0 0.5rem;
     --df__element-spacing: var(--sm3);
     --df__element-right-padding: 0;
   }

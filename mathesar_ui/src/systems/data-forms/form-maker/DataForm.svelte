@@ -57,7 +57,7 @@
     );
     --df__internal__z-index__field-header: 1;
 
-    min-width: 25rem;
+    min-width: 15rem;
     max-width: var(--df__max-width, 40rem);
     margin: var(--df__margin, 0 auto);
 
