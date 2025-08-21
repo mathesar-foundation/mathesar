@@ -20,11 +20,16 @@ export interface DataFormManager {
   dataFormStructure: DataFormStructure;
 }
 
-// TODO_FORMS: Rename this class to DataFormFillOutManager
-export class ReadonlyDataFormManager implements DataFormManager {
+export class DataFormFillOutManager implements DataFormManager {
   token: Readable<string>;
 
   dataFormStructure;
+
+  private _isSuccessfullySubmitted = writable(false);
+
+  get isSuccessfullySubmitted(): Readable<boolean> {
+    return this._isSuccessfullySubmitted;
+  }
 
   constructor(props: {
     buildDataFormStructure: DataFormStructureFactory;
@@ -40,6 +45,20 @@ export class ReadonlyDataFormManager implements DataFormManager {
           },
         }),
     });
+  }
+
+  submitAnother() {
+    this._isSuccessfullySubmitted.set(false);
+  }
+
+  async submit() {
+    await api.forms
+      .submit({
+        form_token: get(this.token),
+        values: this.dataFormStructure.getFormSubmitRequest(),
+      })
+      .run();
+    this._isSuccessfullySubmitted.set(true);
   }
 }
 

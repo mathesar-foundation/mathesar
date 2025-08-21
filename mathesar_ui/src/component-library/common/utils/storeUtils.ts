@@ -79,7 +79,7 @@ export function unite<T>(stores: Readable<T>[]): Readable<T[]> {
  * ```
  */
 export function reactiveSort<Value, Key>(
-  readableValues: Readable<IterableIterator<Value>>,
+  readableValues: Readable<Iterable<Value>>,
   getSortingKey: (outerValue: Value) => Readable<Key>,
   compareSortingKeys: (a: Key, b: Key) => number,
 ): Readable<Value[]> {

@@ -126,6 +126,8 @@
   .header {
     width: 100%;
     display: flex;
+    gap: var(--sm2);
+    flex-wrap: wrap;
 
     .control-panel {
       margin-left: auto;

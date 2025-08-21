@@ -4,12 +4,13 @@
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
-  import { iconForm, iconShare } from '@mathesar/icons';
+  import { iconForm, iconInspector, iconShare } from '@mathesar/icons';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { confirm } from '@mathesar/stores/confirmation';
+  import { dataFormInspectorVisible } from '@mathesar/stores/localStorage';
   import { toast } from '@mathesar/stores/toast';
   import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
-  import { Dropdown, Icon } from '@mathesar-component-library';
+  import { Button, Dropdown, Icon } from '@mathesar-component-library';
 
   import ShareForm from './ShareForm.svelte';
 
@@ -50,12 +51,15 @@
       }
     }
   }
+
+  function toggleInspector() {
+    dataFormInspectorVisible.update((v) => !v);
+  }
 </script>
 
 <EntityPageHeader
   title={{
     name: $structure.name || $_('untitled'),
-    description: $structure.description ?? undefined,
     icon: iconForm,
   }}
 >
@@ -74,5 +78,15 @@
         <ShareForm {dataForm} {dataFormManager} />
       </svelte:fragment>
     </Dropdown>
+    <Button
+      appearance="secondary"
+      size="medium"
+      on:click={toggleInspector}
+      active={$dataFormInspectorVisible}
+      aria-label={$_('inspector')}
+    >
+      <Icon {...iconInspector} />
+      <span class="responsive-button-label">{$_('inspector')}</span>
+    </Button>
   </svelte:fragment>
 </EntityPageHeader>

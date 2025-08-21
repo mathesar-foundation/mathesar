@@ -16,10 +16,10 @@
   export let formId: number;
 
   const schemaRouteContext = SchemaRouteContext.get();
-  $: ({ schema, dataForms } = $schemaRouteContext);
+  $: ({ schema, dataForms, dataFormsFetch } = $schemaRouteContext);
 
-  $: void dataForms.runConservatively();
-  $: form = $dataForms.resolvedValue?.get(formId) ?? undefined;
+  $: void dataFormsFetch.runConservatively();
+  $: form = $dataForms.get(formId);
   $: dataFormRouteContext = form
     ? DataFormRouteContext.construct($schemaRouteContext, form)
     : ensureReadable(undefined);
@@ -27,11 +27,11 @@
   $: formStructure = ensureReadable(form?.structure);
 </script>
 
-{#if $dataForms.isLoading}
+{#if $dataFormsFetch.isLoading}
   <LoadingPage />
 {/if}
 
-{#if !form && $dataForms.hasSettled}
+{#if !form && $dataFormsFetch.hasSettled}
   <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
 {/if}
 

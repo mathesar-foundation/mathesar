@@ -44,17 +44,25 @@
 
   $: name = requiredField($savedStructure?.name ?? '');
   $: description = optionalField($savedStructure?.description ?? '');
-  $: sourceTable = requiredField<Table | undefined>(savedBaseTable);
-  $: form = makeForm({ name, description, sourceTable });
+  $: baseTable = requiredField<Table | undefined>(savedBaseTable);
+  $: form = makeForm({ name, description, baseTable });
   $: modalTitle = dataForm
     ? $_('rename_form_with_name')
     : $_('create_new_form');
+
+  function autoGenerateName(newBaseTable: Table | undefined) {
+    if (!newBaseTable) return;
+    if ($name) return;
+    $name = newBaseTable.name;
+  }
+
+  $: autoGenerateName($baseTable);
 
   async function save(values: FilledFormValues<typeof form>) {
     if (dataForm) {
       await dataForm.updateNameAndDesc(values.name, values.description);
     } else {
-      const tableStructure = new TableStructure(values.sourceTable);
+      const tableStructure = new TableStructure(values.baseTable);
       const tableStructureStore =
         await tableStructure.getSubstanceOnceResolved();
       const tableStructureSubstance = tableStructureStore.resolvedValue;
@@ -101,7 +109,7 @@
       <SelectTableWithinCurrentSchema
         disabled={!!dataForm}
         autoSelect="none"
-        bind:value={$sourceTable}
+        bind:value={$baseTable}
       />
     </LabeledInput>
   </FieldLayout>

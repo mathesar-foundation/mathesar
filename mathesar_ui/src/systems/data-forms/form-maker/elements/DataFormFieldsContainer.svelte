@@ -40,6 +40,14 @@
 </div>
 
 <style lang="scss">
+  .fields-container {
+    --df__internal__selectable-elem-padding: var(
+        --df__internal__element-spacing
+      )
+      var(--df__internal_element-right-padding)
+      var(--df__internal__element-spacing)
+      var(--df__internal_element-left-padding);
+  }
   .empty-fields-state {
     padding: var(--lg1);
     margin-bottom: var(--sm4);
