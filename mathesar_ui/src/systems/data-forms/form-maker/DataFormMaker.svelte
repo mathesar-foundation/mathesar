@@ -9,7 +9,7 @@
     type DataFormManager,
     EditableDataFormManager,
   } from './data-form-utilities/DataFormManager';
-  import DataFormBuildArea from './DataFormBuildArea.svelte';
+  import DataForm from './DataForm.svelte';
   import DataFormInspector from './inspector/DataFormInspector.svelte';
 
   export let dataFormManager: DataFormManager;
@@ -41,7 +41,7 @@
   >
     <div class="workarea">
       <div class="form-holder" on:click={handleFormSelection}>
-        <DataFormBuildArea {dataFormManager} />
+        <DataForm {dataFormManager} showBranding={false} />
       </div>
     </div>
     <div class="data-form-inspector-panel" slot="panel">
@@ -67,10 +67,9 @@
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-l);
     background: var(--elevated-background);
-    --data_forms__z-index__field-header: 1;
-    --data_forms__z-index__field-add-dropdown-trigger: 2;
-    --data_forms__label-input-gap: 0.5rem;
-    --data_forms__selectable-element-padding: 1rem;
+    --df__max-width: calc(60rem + var(--lg1));
+    --df__margin: var(--lg2) auto;
+    --df__element-spacing: 1rem;
 
     .form-holder {
       overflow: auto;

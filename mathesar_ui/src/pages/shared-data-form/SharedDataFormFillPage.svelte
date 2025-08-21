@@ -7,14 +7,11 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
   import {
+    DataForm,
     DataFormStructure,
     FormSource,
     ReadonlyDataFormManager,
   } from '@mathesar/systems/data-forms/form-maker';
-  import DataFormBranding from '@mathesar/systems/data-forms/form-maker/DataFormBranding.svelte';
-  import DataFormFieldsContainer from '@mathesar/systems/data-forms/form-maker/elements/DataFormFieldsContainer.svelte';
-  import DataFormFooter from '@mathesar/systems/data-forms/form-maker/elements/DataFormFooter.svelte';
-  import DataFormHeader from '@mathesar/systems/data-forms/form-maker/elements/DataFormHeader.svelte';
 
   export let rawDataForm: RawDataForm;
   export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;
@@ -36,16 +33,8 @@
 </svelte:head>
 
 {#if dataFormManager}
-  {@const { fields } = dataFormManager.dataFormStructure}
   <div class="data-form-filler">
-    <div class="form">
-      <DataFormHeader {dataFormManager} />
-      <DataFormFieldsContainer {fields} {dataFormManager} />
-      <DataFormFooter {dataFormManager} />
-      <div class="branding">
-        <DataFormBranding />
-      </div>
-    </div>
+    <DataForm {dataFormManager} />
   </div>
 {:else if formSourceInfo.error}
   <Errors errors={[formSourceInfo.error]} />
@@ -57,18 +46,8 @@
     position: relative;
     height: 100%;
     background: var(--elevated-background);
-    --data_forms__label-input-gap: var(--sm5);
-    --data_forms__selectable-element-padding: var(--sm5) 0 var(--sm5) 1rem;
-
-    .form {
-      margin: 0 auto;
-      max-width: 40rem;
-      padding-right: 1rem;
-
-      .branding {
-        border-top: 1px solid var(--border-color);
-        margin-top: var(--lg2);
-      }
-    }
+    padding: 0 1rem;
+    --df__element-spacing: var(--sm3);
+    --df__element-right-padding: 0;
   }
 </style>

@@ -6,7 +6,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
-    DataFormCanvas,
+    DataForm,
     DataFormStructure,
     FormSource,
     ReadonlyDataFormManager,
@@ -43,7 +43,7 @@
 <LayoutWithHeader fitViewport>
   {#if dataFormManager}
     <div class="data-form-filler">
-      <DataFormCanvas {dataFormManager} />
+      <DataForm {dataFormManager} />
     </div>
   {:else if $rawDataFormWithSource.error}
     <Errors errors={[$rawDataFormWithSource.error]} />
@@ -53,6 +53,7 @@
 <style lang="scss">
   .data-form-filler {
     height: 100%;
-    overflow: hidden;
+    overflow: auto;
+    background: var(--elevated-background);
   }
 </style>

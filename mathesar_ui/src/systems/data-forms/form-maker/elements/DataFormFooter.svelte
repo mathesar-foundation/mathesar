@@ -53,6 +53,9 @@
 
 <style lang="scss">
   .submit-buttons {
-    padding: var(--lg1);
+    padding: var(--df__internal__element-spacing)
+      var(--df__internal_element-right-padding)
+      var(--df__internal__element-spacing)
+      var(--df__internal_element-left-padding);
   }
 </style>
