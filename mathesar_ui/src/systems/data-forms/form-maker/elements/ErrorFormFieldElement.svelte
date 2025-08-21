@@ -7,9 +7,9 @@
   import { Icon } from '@mathesar-component-library';
 
   import {
+    DataFormFillOutManager,
     type DataFormManager,
     EditableDataFormManager,
-    ReadonlyDataFormManager,
   } from '../data-form-utilities/DataFormManager';
   import type { ErrorField } from '../data-form-utilities/fields';
 
@@ -21,7 +21,7 @@
 
   $: ({ error } = dataFormField);
   $: errorMessage =
-    dataFormManager instanceof ReadonlyDataFormManager
+    dataFormManager instanceof DataFormFillOutManager
       ? `${$_('error')}: ${error.message}`
       : error.message;
 </script>
@@ -31,7 +31,7 @@
   <div>
     <ErrorBox fullWidth>
       <div class="error-message">
-        {#if dataFormManager instanceof ReadonlyDataFormManager}
+        {#if dataFormManager instanceof DataFormFillOutManager}
           <div>
             {$_('form_has_errors_contact_admin')}
           </div>

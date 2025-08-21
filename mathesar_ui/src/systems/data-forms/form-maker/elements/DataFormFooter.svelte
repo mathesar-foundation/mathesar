@@ -1,15 +1,11 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import { api } from '@mathesar/api/rpc';
   import { FormSubmit } from '@mathesar/components/form';
-  import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-  import { toast } from '@mathesar/stores/toast';
 
   import {
+    DataFormFillOutManager,
     type DataFormManager,
-    ReadonlyDataFormManager,
   } from '../data-form-utilities/DataFormManager';
 
   export let dataFormManager: DataFormManager;
@@ -19,7 +15,7 @@
   $: form = $formHolder;
 
   async function submit() {
-    if (dataFormManager instanceof ReadonlyDataFormManager) {
+    if (dataFormManager instanceof DataFormFillOutManager) {
       await dataFormManager.submit();
     }
   }

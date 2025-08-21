@@ -8,9 +8,9 @@
   import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
   import {
     DataForm,
+    DataFormFillOutManager,
     DataFormStructure,
     FormSource,
-    ReadonlyDataFormManager,
   } from '@mathesar/systems/data-forms/form-maker';
 
   export let rawDataForm: RawDataForm;
@@ -18,7 +18,7 @@
 
   $: pageTitle = rawDataForm.name.trim();
   $: dataFormManager = formSourceInfo.resolvedValue
-    ? new ReadonlyDataFormManager({
+    ? new DataFormFillOutManager({
         buildDataFormStructure: DataFormStructure.factoryFromRawInfo(
           rawDataForm,
           new FormSource(formSourceInfo.resolvedValue),

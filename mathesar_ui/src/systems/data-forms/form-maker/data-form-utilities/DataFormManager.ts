@@ -20,8 +20,7 @@ export interface DataFormManager {
   dataFormStructure: DataFormStructure;
 }
 
-// TODO_FORMS: Rename this class to DataFormFillOutManager
-export class ReadonlyDataFormManager implements DataFormManager {
+export class DataFormFillOutManager implements DataFormManager {
   token: Readable<string>;
 
   dataFormStructure;
