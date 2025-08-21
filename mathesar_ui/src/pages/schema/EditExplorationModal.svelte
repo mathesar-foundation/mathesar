@@ -32,7 +32,7 @@
   getInitialDescription={() => exploration.description ?? ''}
 >
   <span slot="title" let:initialName>
-    <RichText text={$_('edit_exploration_with_name')} let:slotName>
+    <RichText text={$_('rename_exploration_with_name')} let:slotName>
       {#if slotName === 'explorationName'}
         <Identifier>{initialName}</Identifier>
       {/if}

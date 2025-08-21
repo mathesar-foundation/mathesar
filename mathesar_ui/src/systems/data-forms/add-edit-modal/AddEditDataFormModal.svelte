@@ -46,7 +46,9 @@
   $: description = optionalField($savedStructure?.description ?? '');
   $: baseTable = requiredField<Table | undefined>(savedBaseTable);
   $: form = makeForm({ name, description, baseTable });
-  $: modalTitle = dataForm ? $_('edit_form_with_name') : $_('create_new_form');
+  $: modalTitle = dataForm
+    ? $_('rename_form_with_name')
+    : $_('create_new_form');
 
   function autoGenerateName(newBaseTable: Table | undefined) {
     if (!newBaseTable) return;
