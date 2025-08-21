@@ -78,7 +78,11 @@
             </DocsLink>
           {/if}
           {#if slotName === 'privacyPolicyLink'}
-            <a href={getMarketingLink('privacy')} tinro-ignore target="_blank">
+            <a
+              href={getMarketingLink('privacy')}
+              data-tinro-ignore
+              target="_blank"
+            >
               {translatedArg}
               <Icon {...iconExternalHyperlink} />
             </a>
