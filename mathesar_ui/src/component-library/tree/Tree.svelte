@@ -64,9 +64,7 @@
     </InputGroup>
 
     {#if searchText && displayData.length === 0}
-      <div class="empty">
-        <slot name="empty">No data found</slot>
-      </div>
+      <div class="empty">No data found</div>
     {/if}
   {/if}
 
