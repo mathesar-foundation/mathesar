@@ -53,6 +53,22 @@
     api.handleKeyDown(e);
   }
 
+  async function handleAddNewButtonKeyDown(
+    api: ListBoxApi<SummarizedRecordReference>,
+    e: KeyboardEvent,
+  ) {
+    if (e.key === 'Escape') {
+      controller.cancel();
+      close();
+      return;
+    }
+    if (e.key === 'Enter') {
+      return;
+    }
+    await controller.focusSearch();
+    api.handleKeyDown(e);
+  }
+
   function getTypeCastedOption(opt: unknown): SummarizedRecordReference {
     return opt as SummarizedRecordReference;
   }
@@ -112,6 +128,7 @@
             <Button
               appearance="secondary"
               on:click={() => controller.addNewRecord()}
+              on:keydown={(e) => handleAddNewButtonKeyDown(api, e)}
             >
               {$_('add_new_record')}
             </Button>

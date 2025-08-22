@@ -23,7 +23,7 @@
 >
   {#if showSelection}
     <div class="selection">
-      <Radio checked={isSelected} />
+      <Radio tabindex="-1" checked={isSelected} />
     </div>
   {/if}
   <Truncate>

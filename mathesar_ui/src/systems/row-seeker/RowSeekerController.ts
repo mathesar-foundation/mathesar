@@ -60,7 +60,7 @@ export default class RowSeekerController {
     this.canAddNewRecord = !!props.addRecordOptions;
   }
 
-  private async focusSearch() {
+  async focusSearch() {
     await tick();
     const rowSeekerComponentElement = document.getElementById(this.elementId);
     const searchBox = rowSeekerComponentElement?.querySelector<HTMLElement>(
