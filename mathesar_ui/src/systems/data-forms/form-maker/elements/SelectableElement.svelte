@@ -110,6 +110,10 @@
       border-color: var(--df__internal__selected-element-border-color);
     }
 
+    &.some-child-selected {
+      z-index: var(--df__internal__z-index__field-with-some-selected-child);
+    }
+
     &.some-child-selected:not(.immediate-child-selected) > .content {
       outline: 1px dotted
         var(--df__internal__some-child-selected-border-color, transparent);
@@ -133,8 +137,9 @@
 
   // background is set because fields can overlap when dragging to rearrange,
   // and it looks awkward without a background.
-  :global([data-form-selectable].is-dragging) {
+  :global([data-form-selectable][data-sortable-item].is-dragging) {
     background: var(--elevated-background);
+    z-index: var(--df__internal__z-index__field-being-dragged);
   }
 
   .header,
@@ -143,7 +148,7 @@
     position: absolute;
     display: flex;
     padding: 0 var(--sm2);
-    z-index: var(--df__internal__z-index__field-header);
+    z-index: var(--df__internal__z-index__field-outer-controls);
     width: fit-content;
     max-width: 100%;
   }

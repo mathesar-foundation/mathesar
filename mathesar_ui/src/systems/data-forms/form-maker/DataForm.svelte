@@ -55,7 +55,9 @@
     --df__internal__label-input-gap: calc(
       var(--df__internal__element-spacing) / 2
     );
-    --df__internal__z-index__field-header: 1;
+    --df__internal__z-index__field-with-some-selected-child: 1;
+    --df__internal__z-index__field-outer-controls: 2;
+    --df__internal__z-index__field-being-dragged: 3;
     --df__internal__selected-element-bg: var(
       --df__selected-element-bg,
       var(--accent-100)
