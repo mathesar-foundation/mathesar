@@ -44,8 +44,8 @@
 
     const currentRoleValue = get(currentRole).resolvedValue;
     const currentRoleInheritsOrIsEditedRole = Boolean(
-      currentRoleValue?.currentRoleOid === role.oid ||
-        currentRoleValue?.parentRoleOids.has(role.oid),
+      currentRoleValue?.oid === role.oid ||
+        currentRoleValue?.parentRoles.has(role.oid),
     );
 
     if (currentRoleInheritsOrIsEditedRole) {

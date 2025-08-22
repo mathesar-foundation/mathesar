@@ -852,5 +852,6 @@
   "yes": "Yes",
   "yes_summarize_as_list": "Yes, summarize as a list",
   "yesterday": "Yesterday",
+  "you_do_not_have_access_to_role": "You do not have access to this role",
   "you_will_be_redirected_to_link": "You'll now be redirected to [redirectUrl]."
 }
