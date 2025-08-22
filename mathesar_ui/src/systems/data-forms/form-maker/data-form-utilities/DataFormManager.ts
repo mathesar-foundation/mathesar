@@ -25,10 +25,10 @@ export class DataFormFillOutManager implements DataFormManager {
 
   dataFormStructure;
 
-  private _isSuccessullySubmitted = writable(false);
+  private _isSuccessfullySubmitted = writable(false);
 
-  get isSuccessullySubmitted(): Readable<boolean> {
-    return this._isSuccessullySubmitted;
+  get isSuccessfullySubmitted(): Readable<boolean> {
+    return this._isSuccessfullySubmitted;
   }
 
   constructor(props: {
@@ -48,7 +48,7 @@ export class DataFormFillOutManager implements DataFormManager {
   }
 
   submitAnother() {
-    this._isSuccessullySubmitted.set(false);
+    this._isSuccessfullySubmitted.set(false);
   }
 
   async submit() {
@@ -58,7 +58,7 @@ export class DataFormFillOutManager implements DataFormManager {
         values: this.dataFormStructure.getFormSubmitRequest(),
       })
       .run();
-    this._isSuccessullySubmitted.set(true);
+    this._isSuccessfullySubmitted.set(true);
   }
 }
 

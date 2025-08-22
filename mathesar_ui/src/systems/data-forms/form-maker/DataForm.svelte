@@ -20,7 +20,7 @@
       ? dataFormManager
       : undefined;
   $: isSubmitted = ensureReadable(
-    dataFormFillOutManager?.isSuccessullySubmitted,
+    dataFormFillOutManager?.isSuccessfullySubmitted,
   );
 </script>
 
