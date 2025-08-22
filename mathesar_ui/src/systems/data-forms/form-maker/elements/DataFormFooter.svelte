@@ -32,6 +32,7 @@
     proceedButton={{
       label,
       icon: undefined,
+      type: 'submit',
     }}
     cancelButton={{ label: $_('clear_form') }}
   >
