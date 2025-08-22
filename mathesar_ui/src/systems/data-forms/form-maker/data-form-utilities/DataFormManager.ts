@@ -185,7 +185,11 @@ export class EditableDataFormManager implements DataFormManager {
         this.dataFormStructure.baseTableOid,
       );
       const result = await tableStructure.getSubstanceOnceResolved();
-      if (result.resolvedValue) {
+      // Checking again since name could have changed manually
+      if (
+        result.resolvedValue &&
+        get(this.dataFormStructure.name).trim() === ''
+      ) {
         this.dataFormStructure.setName(
           getDefaultFormName(result.resolvedValue.table),
         );
