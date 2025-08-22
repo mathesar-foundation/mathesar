@@ -22,7 +22,7 @@ function getAlias() {
   return alias;
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   resolve: {
     alias: getAlias(),
   },
@@ -46,11 +46,11 @@ export default defineConfig({
     outDir: '../mathesar/static/mathesar/',
     emptyOutDir: true,
   },
-  base: '/static/',
+  base: mode === 'production' ? '/static/' : '/',
   test: {
     environment: 'jsdom',
     globals: true,
     testTimeout: 30000,
     setupFiles: ['vitest-setup.config.ts'],
   },
-});
+}));
