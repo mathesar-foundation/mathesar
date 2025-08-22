@@ -2,6 +2,7 @@
   import { api } from '@mathesar/api/rpc';
   import { isDefinedNonNullable } from '@mathesar/component-library';
   import Errors from '@mathesar/components/errors/Errors.svelte';
+  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import LoadingPage from '@mathesar/pages/LoadingPage.svelte';
   import SharedDataFormFillPage from '@mathesar/pages/shared-data-form/SharedDataFormFillPage.svelte';
@@ -18,8 +19,8 @@
   ]);
 
   $: isLoading = $rawFormStore.isLoading || $formSourceInfo.isLoading;
-  $: errors = [$rawFormStore.error, $formSourceInfo.error].filter((e) =>
-    isDefinedNonNullable(e),
+  $: errors = [$rawFormStore.error, $formSourceInfo.error].filter(
+    (e): e is RpcError => isDefinedNonNullable(e),
   );
 </script>
 
