@@ -34,6 +34,12 @@
       dataFormStructure.setDescription(updatedDesc);
     }
   }
+
+  async function checkAndSetDefaultFormName() {
+    if (editableDataFormManager) {
+      await editableDataFormManager.checkAndSetDefaultFormName();
+    }
+  }
 </script>
 
 <div class="header">
@@ -52,7 +58,7 @@
             placeholder={$_('name')}
             value={$name}
             on:input={onNameInput}
-            on:blur={() => editableDataFormManager.checkAndSetDefaultFormName()}
+            on:blur={checkAndSetDefaultFormName}
           />
         {:else if $name.trim()}
           <h1 class="form-title">

@@ -38,12 +38,12 @@
   $: configuredRoleIds = new Set(
     [...configuredRolesValue.values()].map((r) => r.id),
   );
-  $: disabledRoleIds = (() => {
+  $: allowedRoleIds = (() => {
     if ($user.isMathesarAdmin || $currentRole.resolvedValue?.super) {
-      return new Set();
+      return configuredRoleIds;
     }
     if (!$currentRole.resolvedValue) {
-      return configuredRoleIds;
+      return new Set();
     }
     const allowedRoles = new Set([
       $currentRole.resolvedValue.name,
@@ -51,12 +51,11 @@
         (pr) => pr.name,
       ),
     ]);
-    const allowedConfiguredRoleIds = new Set(
+    return new Set(
       [...configuredRolesValue.values()]
         .filter((cr) => allowedRoles.has(cr.name))
         .map((cr) => cr.id),
     );
-    return configuredRoleIds.difference(allowedConfiguredRoleIds);
   })();
 
   $: ({ associatedRoleId } = dataFormManager.dataFormStructure);
@@ -78,7 +77,7 @@
           }
           return '';
         }}
-        isOptionDisabled={(option) => disabledRoleIds.has(option)}
+        isOptionDisabled={(option) => !allowedRoleIds.has(option)}
         on:change={(e) =>
           dataFormManager.dataFormStructure.setAssociatedRoleId(
             e.detail ?? null,
@@ -88,7 +87,7 @@
       >
         <div>
           {label}
-          {#if disabledRoleIds.has(option)}
+          {#if !allowedRoleIds.has(option)}
             <Tooltip>
               <Icon slot="trigger" {...iconWarning} />
               <span slot="content">{$_('you_do_not_have_access_to_role')}</span>
