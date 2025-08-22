@@ -11,7 +11,6 @@ from setup import process_env
 EMPTY_ENV = "\n"
 
 ENV_WITH_GOOD_PG_AND_KEY = """
-SECRET_KEY="already-set"
 POSTGRES_HOST=localhost
 POSTGRES_USER=me
 POSTGRES_DB=mydb
@@ -64,14 +63,6 @@ def test_update_env_lines():
     assert "NEW=\"2\"" in updated
     assert "EXISTING=1\n" in updated
     assert "\n\n" not in updated
-
-
-def test_generate_secret_key():
-    secret = process_env.generate_secret_key()
-
-    allowed = set(process_env.string.ascii_letters + process_env.string.digits)
-    assert len(secret) == 50
-    assert set(secret) <= allowed
 
 
 @pytest.mark.parametrize(
@@ -196,7 +187,7 @@ def _run_main(stdin_text, argv, monkeypatch, connect_stub):
 
 
 def test_main_existing_no_conn_string_provided_existing_env_is_good(monkeypatch):
-    out, _err, code = _run_main(
+    out, _, code = _run_main(
         ENV_WITH_GOOD_PG_AND_KEY,
         argv=[],
         monkeypatch=monkeypatch,
@@ -204,7 +195,6 @@ def test_main_existing_no_conn_string_provided_existing_env_is_good(monkeypatch)
     )
     assert code == 0
     # env vars should be unchanged
-    assert 'already-set' in out
     assert 'POSTGRES_USER="me"\n' in out
     assert 'POSTGRES_HOST="localhost"\n' in out
     assert 'POSTGRES_PORT=""\n' in out
@@ -213,7 +203,7 @@ def test_main_existing_no_conn_string_provided_existing_env_is_good(monkeypatch)
 
 
 def test_main_existing_no_conn_string_provided_existing_env_is_bad(monkeypatch):
-    out, _err, code = _run_main(
+    out, _, code = _run_main(
         EMPTY_ENV,
         argv=[],
         monkeypatch=monkeypatch,
@@ -223,7 +213,7 @@ def test_main_existing_no_conn_string_provided_existing_env_is_bad(monkeypatch):
 
 
 def test_main_generates_env_vars(monkeypatch):
-    out, _err, code = _run_main(
+    out, _, code = _run_main(
         EMPTY_ENV,
         argv=["postgres://user:pass@localhost:5411/db"],
         monkeypatch=monkeypatch,
@@ -231,8 +221,7 @@ def test_main_generates_env_vars(monkeypatch):
     )
     assert code == 0
     parsed = dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
-    assert len(parsed["SECRET_KEY"].strip('"')) == 50
-    assert len(parsed) == 6
+    assert len(parsed) == 5
     assert 'POSTGRES_USER="user"\n' in out
     assert 'POSTGRES_HOST="localhost"\n' in out
     assert 'POSTGRES_PORT="5411"\n' in out
@@ -241,7 +230,7 @@ def test_main_generates_env_vars(monkeypatch):
 
 
 def test_main_generates_replaces_existing_pg_env_vars(monkeypatch):
-    out, _err, code = _run_main(
+    out, _, code = _run_main(
         ENV_WITH_GOOD_PG_AND_KEY,
         argv=["postgres://newuser:newpass@someserver:5444/newdb"],
         monkeypatch=monkeypatch,
@@ -249,8 +238,7 @@ def test_main_generates_replaces_existing_pg_env_vars(monkeypatch):
     )
     assert code == 0
     parsed = dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
-    assert len(parsed) == 6
-    assert 'already-set' in out
+    assert len(parsed) == 5
     assert 'POSTGRES_USER="newuser"\n' in out
     assert 'POSTGRES_HOST="someserver"\n' in out
     assert 'POSTGRES_PORT="5444"\n' in out
@@ -259,10 +247,11 @@ def test_main_generates_replaces_existing_pg_env_vars(monkeypatch):
 
 
 def test_main_error_conn_fail(monkeypatch):
-    out, _err, code = _run_main(
+    out, _, code = _run_main(
         EMPTY_ENV,
         argv=["postgres://bad@host/db"],
         monkeypatch=monkeypatch,
         connect_stub=_stub_connect_error,
     )
-    assert code != 0 and out == "Invalid: Unable to connect to the database. runtime error\n"
+    assert code != 0
+    assert out == "Unable to connect to the database. runtime error\n"
