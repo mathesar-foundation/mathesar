@@ -26,11 +26,6 @@
     !!! Config
         ```yaml
         x-config: &config
-          # (REQUIRED) Replace '?' with '-' followed by a 50 character random string.
-          # You can generate one at https://djecrety.ir/ or by running:
-          #   echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
-          SECRET_KEY: ${SECRET_KEY:?}
-
           # (Optional) Replace 'http://localhost' with custom domain(s) e.g.
           # 'yourdomain.com, 127.0.0.1' to manage the host(s) at which you want to
           # access Mathesar over http or https
