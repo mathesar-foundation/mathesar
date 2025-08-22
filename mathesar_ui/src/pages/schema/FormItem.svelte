@@ -4,20 +4,12 @@
   import EntityListItem from '@mathesar/components/EntityListItem.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
-  import {
-    iconDeleteMajor,
-    iconEdit,
-    iconFillOutForm,
-    iconForm,
-  } from '@mathesar/icons';
+  import { iconDeleteMajor, iconEdit, iconForm } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
-  import {
-    getDataFormFillPageUrl,
-    getDataFormPageUrl,
-  } from '@mathesar/routes/urls';
+  import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
-  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
+  import { ButtonMenuItem } from '@mathesar-component-library';
 
   export let dataForm: DataForm;
   export let editDataForm: () => void;
@@ -25,13 +17,7 @@
 
   $: ({ id, structure, schema, baseTableOid } = dataForm);
   $: baseTable = $tablesStore.tablesMap.get(baseTableOid);
-
   $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
-  $: formFilloutPageUrl = getDataFormFillPageUrl(
-    schema.database.id,
-    schema.oid,
-    id,
-  );
 
   function handleDelete() {
     void confirmDelete({
@@ -59,12 +45,6 @@
       </RichText>
     {/if}
   </svelte:fragment>
-  <div slot="action-buttons">
-    <a href={formFilloutPageUrl} class="btn btn-secondary fill-out-button">
-      <Icon {...iconFillOutForm} />
-      <span>{$_('fill_out')}</span>
-    </a>
-  </div>
   <svelte:fragment slot="menu">
     <ButtonMenuItem on:click={editDataForm} icon={iconEdit}>
       {$_('rename_form')}
@@ -74,9 +54,3 @@
     </ButtonMenuItem>
   </svelte:fragment>
 </EntityListItem>
-
-<style>
-  .fill-out-button {
-    font-size: var(--sm1);
-  }
-</style>

@@ -134,14 +134,6 @@ export function getDataFormPageUrl(
   return `${getSchemaPageUrl(databaseId, schemaId)}forms/${formId}/`;
 }
 
-export function getDataFormFillPageUrl(
-  databaseId: number,
-  schemaId: number,
-  formId: number,
-): string {
-  return `${getSchemaPageUrl(databaseId, schemaId)}forms/${formId}/fillout/`;
-}
-
 export function getFormShareUrl(formToken: string) {
   return `/shares/forms/${formToken}`;
 }
