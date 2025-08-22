@@ -68,6 +68,14 @@
       --df__help-text-color,
       var(--stormy-700)
     );
+    --df__internal__some-child-selected-border-color: var(
+      --df-some-child-selected-border-color,
+      var(--accent-300)
+    );
+    --df__internal__immediate-child-selected-border-color: var(
+      --df-immediate-child-selected-border-color,
+      var(--accent-500)
+    );
 
     min-width: 15rem;
     max-width: var(--df__max-width, 40rem);
@@ -91,6 +99,8 @@
   :global(body.theme-dark) .data-form {
     --df__selected-element-bg: rgba(239, 68, 68, 0.12);
     --df__selected-element-border-color: var(--salmon-300);
+    --df-immediate-child-selected-border-color: rgba(255, 179, 148, 0.45);
+    --df-some-child-selected-border-color: rgba(255, 179, 148, 0.3);
     --df__help-text-color: var(--rosy-100);
   }
 </style>
