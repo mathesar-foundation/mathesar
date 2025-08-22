@@ -22,12 +22,16 @@
   import type { Table } from '@mathesar/models/Table';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
+  import { toast } from '@mathesar/stores/toast';
   import {
     ControlledModal,
     LabeledInput,
     type ModalController,
+    TextInput,
     ensureReadable,
   } from '@mathesar-component-library';
+
+  import { getDefaultFormName } from '../utils';
 
   import { processedColumnToRawDataFormField } from './utils';
 
@@ -42,7 +46,7 @@
     ? $importVerifiedTables.get(dataForm.baseTableOid)
     : undefined;
 
-  $: name = requiredField($savedStructure?.name ?? '');
+  $: name = optionalField($savedStructure?.name ?? '');
   $: description = optionalField($savedStructure?.description ?? '');
   $: baseTable = requiredField<Table | undefined>(savedBaseTable);
   $: form = makeForm({ name, description, baseTable });
@@ -50,13 +54,7 @@
     ? $_('rename_form_with_name')
     : $_('create_new_form');
 
-  function autoGenerateName(newBaseTable: Table | undefined) {
-    if (!newBaseTable) return;
-    if ($name) return;
-    $name = newBaseTable.name;
-  }
-
-  $: autoGenerateName($baseTable);
+  $: namePlaceHolder = $baseTable ? getDefaultFormName($baseTable) : '';
 
   async function save(values: FilledFormValues<typeof form>) {
     if (dataForm) {
@@ -68,7 +66,9 @@
       const tableStructureSubstance = tableStructureStore.resolvedValue;
       if (tableStructureSubstance) {
         const rawEpf: RawEphemeralDataForm = {
-          name: values.name,
+          name:
+            values.name.trim() ||
+            getDefaultFormName(tableStructureSubstance.table),
           description: values.description,
           base_table_oid: tableStructureSubstance.table.oid,
           schema_oid: tableStructureSubstance.table.schema.oid,
@@ -83,6 +83,8 @@
             .map((c, index) => processedColumnToRawDataFormField(c, index)),
         };
         await $schemaRouteContext.insertDataForm(rawEpf);
+      } else if (tableStructureStore.error) {
+        toast.error(tableStructureStore.error.message);
       }
     }
     controller.close();
@@ -113,7 +115,12 @@
       />
     </LabeledInput>
   </FieldLayout>
-  <Field field={name} label={$_('name')} layout="stacked" />
+  <Field
+    field={name}
+    input={{ component: TextInput, props: { placeholder: namePlaceHolder } }}
+    label={$_('name')}
+    layout="stacked"
+  />
   <Field field={description} label={$_('description')} layout="stacked" />
   <div slot="footer">
     <FormSubmit

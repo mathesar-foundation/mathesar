@@ -306,6 +306,7 @@
   "form_fk_select_or_create_help": "Users can select records and are allowed to create a new record if the record they're searching for is not present in the related table.",
   "form_fk_select_or_create_label": "Can choose or create new",
   "form_fk_sub_form_help": "The following fields from [tableName] appear only when the user can't find a matching record and chooses to add a new one.",
+  "form_for_table": "{tableName} Form",
   "form_has_errors_contact_admin": "This form is misconfigured and may not work as expected. Please contact your admin or the site owner.",
   "form_has_unsaved_changes": "Form has unsaved changes.",
   "format_displayer": "Format: [format]",
