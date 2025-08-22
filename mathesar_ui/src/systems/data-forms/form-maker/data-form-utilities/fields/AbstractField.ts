@@ -50,6 +50,8 @@ export abstract class AbstractField {
     return this._styling;
   }
 
+  readonly canDelete: boolean = true;
+
   constructor(
     container: FormFields,
     props: AbstractFieldProps,

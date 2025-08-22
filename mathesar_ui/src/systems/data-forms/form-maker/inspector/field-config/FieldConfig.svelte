@@ -10,6 +10,7 @@
     Icon,
     LabeledInput,
     TextInput,
+    Tooltip,
     getStringValueFromEvent,
     isDefinedNonNullable,
   } from '@mathesar-component-library';
@@ -72,12 +73,25 @@
   <FieldAppearance {field} />
 
   <InspectorSection title={$_('actions')}>
-    <Button
-      appearance="outline-primary"
-      on:click={() => field.container.delete(field)}
-    >
-      <Icon {...iconDeleteMajor} />
-      <span>{$_('remove_field')}</span>
-    </Button>
+    <Tooltip enabled={!field.canDelete}>
+      <div slot="trigger" class="remove-button">
+        <Button
+          disabled={!field.canDelete}
+          appearance="outline-primary"
+          on:click={() => field.container.delete(field)}
+        >
+          <Icon {...iconDeleteMajor} />
+          <span>{$_('remove_field')}</span>
+        </Button>
+      </div>
+      <span slot="content">{$_('field_cannot_be_removed_required_in_db')}</span>
+    </Tooltip>
   </InspectorSection>
 </InspectorTabContent>
+
+<style lang="scss">
+  .remove-button {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

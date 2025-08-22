@@ -275,6 +275,7 @@
   "fetching_user_details": "Fetching user details",
   "field_add_help_text": "Add help text",
   "field_appearance": "Appearance",
+  "field_cannot_be_removed_required_in_db": "This field cannot be removed since the underlying column is required and does not allow NULL values.",
   "field_fk_rule_label": "Related record selection",
   "field_label": "Label",
   "field_marked_required_column_disallows_null": "This setting cannot be modified since the underlying column does not allow NULL values",

@@ -1,4 +1,4 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 import type { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
@@ -38,6 +38,8 @@ export abstract class AbstractColumnBasedField extends AbstractField {
     return this._isRequired;
   }
 
+  readonly canDelete: boolean;
+
   constructor(
     holder: FormFields,
     props: AbstractColumnBasedFieldProps,
@@ -52,6 +54,7 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       this.key,
       this.isRequired,
     );
+    this.canDelete = !!this.fieldColumn.column.nullable;
   }
 
   setIsRequired(isRequired: boolean) {
