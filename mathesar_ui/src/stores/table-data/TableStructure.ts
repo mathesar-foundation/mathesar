@@ -147,6 +147,11 @@ export class TableStructure {
     );
   }
 
+  async refetch() {
+    const result = await this.asyncStore.run();
+    return result;
+  }
+
   async getSubstanceOnceResolved(): Promise<
     AsyncStoreValue<TableStructureSubstance, RpcError>
   > {

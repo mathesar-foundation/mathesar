@@ -136,6 +136,26 @@
       - ExplorationDef
       - ExplorationResult
 
+## Forms
+
+::: forms
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - regenerate_token
+      - patch
+      - set_publish_public
+      - submit
+      - list_related_records
+      - FormInfo
+      - FieldInfo
+      - AddFormDef
+      - AddOrReplaceFieldDef
+      - SettableFormDef
+
 ## Records
 
 :::records
@@ -147,6 +167,7 @@
       - patch
       - delete
       - search
+      - list_summaries
       - RecordList
       - RecordAdded
       - OrderBy
@@ -157,6 +178,8 @@
       - Group
       - GroupingResponse
       - SearchParam
+      - RecordSummaryList
+      - SummarizedRecordReference
 
 ## Roles
 

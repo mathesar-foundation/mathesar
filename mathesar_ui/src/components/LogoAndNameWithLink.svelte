@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import Logo from './Logo.svelte';
+  import MathesarName from './MathesarName.svelte';
 
   export let href: string;
   export let compactLayout = false;
@@ -9,7 +8,7 @@
 
 <a {...$$restProps} {href} class="home-link" class:compact={compactLayout}>
   <Logo />
-  <div class="mathesar">{$_('mathesar')}</div>
+  <div class="mathesar"><MathesarName /></div>
 </a>
 
 <style>
@@ -29,7 +28,7 @@
   .mathesar {
     font-size: var(--lg2);
     font-weight: var(--font-weight-extra-bold);
-    margin-left: 0.25rem;
+    margin-left: 0.3rem;
   }
   .home-link.compact .mathesar {
     display: none;

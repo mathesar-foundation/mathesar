@@ -1,5 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
+import type { RecordsSummaryListResponse } from './_common/commonTypes';
 import type { RecordSummaryTemplate } from './tables';
 
 export type ResultValue = string | number | boolean | null;
@@ -157,5 +158,16 @@ export const records = {
       record_ids: ResultValue[];
     },
     void
+  >(),
+
+  list_summaries: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      limit?: number | null;
+      offset?: number | null;
+      search?: string | null;
+    },
+    RecordsSummaryListResponse
   >(),
 };
