@@ -1,3 +1,6 @@
 package-lock.json
 tsconfig.json
 **/*.md
+
+# Vendored dependencies - preserve original formatting
+vendor/
