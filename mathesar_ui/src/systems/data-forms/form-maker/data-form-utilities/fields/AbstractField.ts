@@ -98,6 +98,8 @@ export abstract class AbstractField {
     e: T,
   ): unknown;
 
+  abstract checkAndSetDefaultLabel(): void;
+
   abstract toRawEphemeralField(options?: unknown): RawDataFormField;
 
   protected getBaseFieldRawJson() {

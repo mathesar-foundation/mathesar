@@ -49,6 +49,10 @@ export class ErrorField extends AbstractField {
 
   protected triggerChangeEvent() {}
 
+  checkAndSetDefaultLabel() {
+    this.setLabel(this.originalField.label ?? '');
+  }
+
   toRawEphemeralField(): RawDataFormField {
     return this.originalField;
   }

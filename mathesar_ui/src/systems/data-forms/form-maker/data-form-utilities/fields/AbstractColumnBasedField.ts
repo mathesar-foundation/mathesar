@@ -75,6 +75,13 @@ export abstract class AbstractColumnBasedField extends AbstractField {
     );
   }
 
+  checkAndSetDefaultLabel() {
+    const label = get(this.label);
+    if (!label || label.trim() === '') {
+      this.setLabel(this.fieldColumn.column.name);
+    }
+  }
+
   protected abstract triggerChangeEvent<
     T extends keyof Pick<
       AbstractColumnBasedFieldProps,

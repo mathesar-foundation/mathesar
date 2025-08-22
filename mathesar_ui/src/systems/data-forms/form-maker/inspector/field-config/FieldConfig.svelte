@@ -39,6 +39,7 @@
         value={$label}
         disabled={isErrorField}
         on:input={(e) => field.setLabel(getStringValueFromEvent(e))}
+        on:blur={() => field.checkAndSetDefaultLabel()}
       />
     </LabeledInput>
     <LabeledInput

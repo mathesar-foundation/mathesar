@@ -56,6 +56,7 @@
           class:disabled
           value={$label}
           on:input={onLabelInput}
+          on:blur={() => dataFormField.checkAndSetDefaultLabel()}
         />
       {:else}
         <Label controller={labelController}>
