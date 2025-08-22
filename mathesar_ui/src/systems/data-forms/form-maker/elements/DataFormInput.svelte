@@ -38,6 +38,7 @@
   <DynamicInput
     bind:value={$inputField}
     {labelController}
+    id={dataFormField.key}
     componentAndProps={$inputComponentAndProps}
     hasError={displayError}
     disabled={$disabled}
