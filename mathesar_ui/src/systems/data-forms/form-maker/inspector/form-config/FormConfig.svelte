@@ -45,6 +45,7 @@
       <TextInput
         value={$name}
         on:input={(e) => dataFormStructure.setName(getStringValueFromEvent(e))}
+        on:blur={() => dataFormManager.checkAndSetDefaultFormName()}
       />
     </LabeledInput>
     <LabeledInput layout="stacked" label={$_('description')}>

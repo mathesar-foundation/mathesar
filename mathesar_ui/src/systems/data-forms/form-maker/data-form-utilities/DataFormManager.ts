@@ -9,6 +9,8 @@ import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import { TableStructure } from '@mathesar/stores/table-data';
 import type CacheManager from '@mathesar/utils/CacheManager';
 
+import { getDefaultFormName } from '../../utils';
+
 import type {
   DataFormStructure,
   DataFormStructureFactory,
@@ -175,6 +177,20 @@ export class EditableDataFormManager implements DataFormManager {
       tableStructureProps.oid,
       () => new TableStructure(tableStructureProps),
     );
+  }
+
+  async checkAndSetDefaultFormName() {
+    if (get(this.dataFormStructure.name).trim() === '') {
+      const tableStructure = this.getTableStructure(
+        this.dataFormStructure.baseTableOid,
+      );
+      const result = await tableStructure.getSubstanceOnceResolved();
+      if (result.resolvedValue) {
+        this.dataFormStructure.setName(
+          getDefaultFormName(result.resolvedValue.table),
+        );
+      }
+    }
   }
 }
 

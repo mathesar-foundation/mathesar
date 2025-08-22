@@ -52,6 +52,7 @@
             placeholder={$_('name')}
             value={$name}
             on:input={onNameInput}
+            on:blur={() => editableDataFormManager.checkAndSetDefaultFormName()}
           />
         {:else if $name.trim()}
           <h1 class="form-title">
