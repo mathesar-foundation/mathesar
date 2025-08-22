@@ -1,9 +1,17 @@
 {
   "name": "tinro",
-  "version": "0.6.12-mathesar.1",
+  "version": "0.6.12-mathesar.2",
   "description": "tinro is a tiny declarative router for Svelte",
   "main": "dist/tinro.js",
   "module": "dist/tinro.es.js",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "svelte": "./cmp/index.js",
+      "import": "./dist/tinro.es.js",
+      "require": "./dist/tinro.js"
+    }
+  },
   "svelte": "cmp/index.js",
   "types": "index.d.ts",
   "scripts": {
