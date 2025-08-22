@@ -33,7 +33,7 @@
 <style lang="scss">
   .sub-form-help {
     display: block;
-    margin-bottom: var(--data_forms__selectable-element-padding);
+    margin-bottom: var(--df__internal__element-spacing);
     color: var(--stormy-600);
 
     span {

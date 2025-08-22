@@ -16,14 +16,14 @@
   const dataFormAddEditModal = modal.spawnModalController();
   const schemaRouteContext = SchemaRouteContext.get();
 
-  $: ({ dataForms } = $schemaRouteContext);
+  $: ({ dataForms, dataFormsFetch } = $schemaRouteContext);
 
   let selectedDataForm: DataForm | undefined = undefined;
 </script>
 
 <SchemaOverviewSideSection
-  isLoading={$dataForms.isLoading}
-  hasError={!!$dataForms.error}
+  isLoading={$dataFormsFetch.isLoading}
+  hasError={!!$dataFormsFetch.error}
 >
   <svelte:fragment slot="header">
     {$_('forms')}
@@ -35,12 +35,12 @@
     </Button>
   </svelte:fragment>
   <svelte:fragment slot="errors">
-    {#if $dataForms.error}
-      <p>{$dataForms.error.message}</p>
+    {#if $dataFormsFetch.error}
+      <p>{$dataFormsFetch.error.message}</p>
       <div>
         <SpinnerButton
           onClick={async () => {
-            await dataForms.run();
+            await dataFormsFetch.run();
           }}
           label={$_('retry')}
           icon={iconRefresh}
@@ -54,14 +54,14 @@
     {/if}
   </svelte:fragment>
   <svelte:fragment slot="content">
-    {#if $dataForms.resolvedValue}
+    {#if $dataFormsFetch.resolvedValue}
       <div
         class="forms-list"
         use:highlightNewItems={{
           scrollHint: $_('schema_new_items_scroll_hint'),
         }}
       >
-        {#each [...$dataForms.resolvedValue.values()] as dataForm (dataForm.id)}
+        {#each [...$dataForms.values()] as dataForm (dataForm.id)}
           <FormItem
             {dataForm}
             deleteDataForm={() => $schemaRouteContext.removeDataForm(dataForm)}

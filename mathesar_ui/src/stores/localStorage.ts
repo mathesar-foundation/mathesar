@@ -29,6 +29,7 @@ export const LOCAL_STORAGE_KEYS = {
   dataExplorerRightSidebarWidth: 'data-explorer-right-sidebar-width',
 
   // Data forms
+  dataFormInspectorVisible: 'data-form-inspector-visible',
   dataFormInspectorWidth: 'data-form-inspector-width',
 } as const;
 
@@ -110,6 +111,11 @@ export const dataExplorerLeftSidebarWidth = new LocalStorageStore({
 export const dataExplorerRightSidebarWidth = new LocalStorageStore({
   key: LOCAL_STORAGE_KEYS.dataExplorerRightSidebarWidth,
   defaultValue: 350,
+});
+
+export const dataFormInspectorVisible = new LocalStorageStore({
+  key: LOCAL_STORAGE_KEYS.dataFormInspectorVisible,
+  defaultValue: true,
 });
 
 export const dataFormInspectorWidth = new LocalStorageStore({

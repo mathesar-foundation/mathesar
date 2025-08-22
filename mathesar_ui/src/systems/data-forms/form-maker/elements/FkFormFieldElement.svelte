@@ -24,6 +24,9 @@
 
   $: ({ interactionRule, nestedFields, fieldValueHolder } = dataFormField);
   $: ({ userAction } = fieldValueHolder);
+  $: inputHasMargin = editableDataFormManager
+    ? $interactionRule !== 'must_pick'
+    : $userAction === 'create';
 </script>
 
 <div class="fk-field">
@@ -39,7 +42,7 @@
   </div>
 
   {#if $interactionRule !== 'must_create'}
-    <div class="fk-input" class:has-margin={$interactionRule !== 'must_pick'}>
+    <div class="fk-input" class:has-margin={inputHasMargin}>
       <DataFormInput
         {dataFormManager}
         {dataFormField}
@@ -69,10 +72,10 @@
     --data-forms__field-padding-left: var(--lg2);
 
     .label-controls-container {
-      margin-bottom: var(--data_forms__label-input-gap);
+      margin-bottom: var(--df__internal__label-input-gap);
     }
     .fk-input.has-margin {
-      margin-bottom: var(--data_forms__selectable-element-padding);
+      margin-bottom: var(--df__internal__element-spacing);
     }
   }
 </style>

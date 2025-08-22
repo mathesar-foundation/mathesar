@@ -118,7 +118,7 @@
         icon={iconEdit}
         disabled={!$currentRoleOwns}
       >
-        {$_('edit_table')}
+        {$_('rename_table')}
       </ButtonMenuItem>
       <ButtonMenuItem
         on:click={() => openTablePermissionsModal(table)}

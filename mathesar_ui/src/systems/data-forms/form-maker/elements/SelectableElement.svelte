@@ -11,9 +11,13 @@
   export let dataFormManager: DataFormManager;
   export let element: SelectableElement;
 
-  $: selectedElement = ensureReadable(
+  $: editableDataFormManager =
     dataFormManager instanceof EditableDataFormManager
-      ? dataFormManager.selectedElement
+      ? dataFormManager
+      : undefined;
+  $: selectedElement = ensureReadable(
+    editableDataFormManager
+      ? editableDataFormManager.selectedElement
       : undefined,
   );
   $: isSelected = (() => {
@@ -23,47 +27,21 @@
     return $selectedElement?.type === element.type;
   })();
 
-  let isHovered = false;
-  let thisDomElement: HTMLElement;
-
-  function onHover(e: MouseEvent) {
-    if (dataFormManager instanceof EditableDataFormManager) {
-      const { target } = e;
-      if (target instanceof HTMLElement) {
-        if (target.closest('[data-form-selectable]') === thisDomElement) {
-          isHovered = true;
-          return;
-        }
-      }
-      isHovered = false;
-    }
-  }
-
-  function onHoverAway() {
-    if (dataFormManager instanceof EditableDataFormManager) {
-      isHovered = false;
-    }
-  }
-
   function onClick(e: Event) {
-    if (dataFormManager instanceof EditableDataFormManager) {
+    if (editableDataFormManager) {
       e.stopPropagation();
-      dataFormManager.selectElement(element);
+      editableDataFormManager.selectElement(element);
     }
   }
 </script>
 
 <div
   tabindex="0"
-  bind:this={thisDomElement}
   data-form-selectable
+  class:can-select={!!editableDataFormManager}
   class:selected={isSelected}
-  class:hover={isHovered}
   class:is-header-present={$$slots.header}
   on:click={onClick}
-  on:mouseenter={onHover}
-  on:mousemove={onHover}
-  on:mouseleave={onHoverAway}
   use:sortableItem
 >
   {#if isSelected && $$slots.header}
@@ -91,19 +69,36 @@
     position: relative;
 
     > .content {
-      border: 2px solid transparent;
+      border-color: transparent;
+      border-style: solid;
+      border-width: 0;
       border-radius: var(--sm4);
       overflow: hidden;
-      padding: var(--data_forms__selectable-element-padding);
+      padding: var(--df__internal__selectable-elem-padding);
+    }
+
+    &.can-select > .content {
+      border-width: 2px;
     }
 
     &.selected > .content {
-      border: 2px solid var(--accent-500);
+      border-color: var(--accent-500);
     }
+  }
 
-    &.hover > .content {
-      background-color: var(--accent-100);
-    }
+  :global(
+      [data-form-selectable].can-select:not(.selected):hover:not(
+          :has([data-form-selectable]:hover)
+        )
+        > .content
+    ) {
+    background-color: var(--accent-100);
+  }
+
+  // background is set because fields can overlap when dragging to rearrange,
+  // and it looks awkward without a background.
+  :global([data-form-selectable].is-dragging) {
+    background: var(--elevated-background);
   }
 
   .header,
@@ -112,7 +107,7 @@
     position: absolute;
     display: flex;
     padding: 0 var(--sm2);
-    z-index: var(--data_forms__z-index__field-header);
+    z-index: var(--df__internal__z-index__field-header);
     width: fit-content;
     max-width: 100%;
   }

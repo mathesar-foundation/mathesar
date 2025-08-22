@@ -63,9 +63,11 @@
       {...$$restProps}
     />
   {/if}
-  {#if catchErrors}
+  {#if catchErrors && errors.length > 0}
     <div class="errors">
-      <Errors {errors} />
+      <slot name="errors" {errors}>
+        <Errors {errors} />
+      </slot>
     </div>
   {/if}
 </div>

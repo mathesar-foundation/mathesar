@@ -57,7 +57,7 @@
         disabled={!$currentRoleOwns}
       >
         <Icon {...iconEdit} />
-        <span>{$_('edit_schema')}</span>
+        <span>{$_('rename_schema')}</span>
       </Button>
       <Button appearance="secondary" on:click={() => permissionsModal.open()}>
         <Icon {...iconPermissions} />
