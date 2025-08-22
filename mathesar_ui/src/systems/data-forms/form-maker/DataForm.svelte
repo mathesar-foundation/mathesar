@@ -24,7 +24,7 @@
   );
 </script>
 
-<form class="form">
+<form class="data-form">
   {#if dataFormFillOutManager && $isSubmitted}
     <PostSubmission dataFormManager={dataFormFillOutManager} />
   {:else}
@@ -40,7 +40,7 @@
 </form>
 
 <style lang="scss">
-  .form {
+  .data-form {
     --df__internal__element-spacing: var(--df__element-spacing, var(--sm3));
 
     --df__internal_element-left-padding: var(
@@ -56,6 +56,18 @@
       var(--df__internal__element-spacing) / 2
     );
     --df__internal__z-index__field-header: 1;
+    --df__internal__selected-element-bg: var(
+      --df__selected-element-bg,
+      var(--accent-100)
+    );
+    --df__internal__selected-element-border-color: var(
+      --df__selected-element-border-color,
+      var(--accent-500)
+    );
+    --df__internal__help-text-color: var(
+      --df__help-text-color,
+      var(--stormy-700)
+    );
 
     min-width: 15rem;
     max-width: var(--df__max-width, 40rem);
@@ -74,5 +86,11 @@
       border-top: 1px solid var(--border-color);
       margin-top: var(--lg2);
     }
+  }
+
+  :global(body.theme-dark) .data-form {
+    --df__selected-element-bg: rgba(239, 68, 68, 0.12);
+    --df__selected-element-border-color: var(--salmon-300);
+    --df__help-text-color: var(--rosy-100);
   }
 </style>

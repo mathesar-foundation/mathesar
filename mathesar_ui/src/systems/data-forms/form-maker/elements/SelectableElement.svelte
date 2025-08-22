@@ -82,7 +82,7 @@
     }
 
     &.selected > .content {
-      border-color: var(--accent-500);
+      border-color: var(--df__internal__selected-element-border-color);
     }
   }
 
@@ -92,7 +92,7 @@
         )
         > .content
     ) {
-    background-color: var(--accent-100);
+    background-color: var(--df__internal__selected-element-bg);
   }
 
   // background is set because fields can overlap when dragging to rearrange,
