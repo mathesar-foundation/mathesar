@@ -1,5 +1,5 @@
 .input-element {
-  border: 1px solid var(--border-color);
+  border: var(--input-element-border, 1px solid var(--border-color));
   align-items: center;
   border-radius: var(--border-radius-m);
   background: var(--input-background);
@@ -22,7 +22,10 @@
   &:focus {
     border-color: var(--input-focus-color);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--input-focus-shadow);
+    box-shadow: var(
+      --input-element-focus-box-shadow,
+      0 0 0 2px var(--input-focus-shadow)
+    );
   }
 
   &:disabled {
