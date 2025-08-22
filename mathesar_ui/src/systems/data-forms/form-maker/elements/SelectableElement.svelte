@@ -36,7 +36,7 @@
 </script>
 
 <div
-  tabindex="0"
+  tabindex={editableDataFormManager ? 0 : undefined}
   data-form-selectable
   class:can-select={!!editableDataFormManager}
   class:selected={isSelected}

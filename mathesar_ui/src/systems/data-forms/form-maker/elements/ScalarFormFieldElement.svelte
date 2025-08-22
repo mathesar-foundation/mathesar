@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { LabelController } from '@mathesar-component-library';
+
   import type { DataFormManager } from '../data-form-utilities/DataFormManager';
   import type { ScalarField } from '../data-form-utilities/fields';
 
@@ -8,11 +10,19 @@
   export let isSelected: boolean;
   export let dataFormManager: DataFormManager;
   export let dataFormField: ScalarField;
+  export let labelController: LabelController;
+
+  $: inputProps = {
+    dataFormManager,
+    dataFormField,
+    labelController,
+    isSelected,
+  };
 </script>
 
 <div class="scalar-field">
-  <DataFormLabel {dataFormManager} {dataFormField} {isSelected} />
-  <DataFormInput {dataFormManager} {dataFormField} {isSelected} />
+  <DataFormLabel {...inputProps} />
+  <DataFormInput {...inputProps} />
 </div>
 
 <style lang="scss">

@@ -4,7 +4,7 @@
   import Button from '@mathesar/component-library/button/Button.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import { Icon } from '@mathesar-component-library';
+  import { Icon, type LabelController } from '@mathesar-component-library';
 
   import {
     DataFormFillOutManager,
@@ -18,7 +18,9 @@
   export let isSelected: boolean;
   export let dataFormManager: DataFormManager;
   export let dataFormField: ErrorField;
+  export let labelController: LabelController;
 
+  $: labelController.disabled.set(true);
   $: ({ error } = dataFormField);
   $: errorMessage =
     dataFormManager instanceof DataFormFillOutManager
@@ -27,7 +29,13 @@
 </script>
 
 <div class="error-field">
-  <DataFormLabel disabled {dataFormManager} {dataFormField} {isSelected} />
+  <DataFormLabel
+    disabled
+    {dataFormManager}
+    {dataFormField}
+    {isSelected}
+    {labelController}
+  />
   <div>
     <ErrorBox fullWidth>
       <div class="error-message">

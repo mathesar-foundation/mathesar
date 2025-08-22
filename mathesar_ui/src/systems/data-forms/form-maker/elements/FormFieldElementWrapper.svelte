@@ -1,7 +1,7 @@
 <script lang="ts">
   import { sortableTrigger } from '@mathesar/components/sortable/sortable';
   import { iconGrip } from '@mathesar/icons';
-  import { Icon } from '@mathesar-component-library';
+  import { Icon, LabelController } from '@mathesar-component-library';
 
   import {
     type DataFormManager,
@@ -16,6 +16,7 @@
   export let dataFormManager: DataFormManager;
   export let dataFormField: DataFormField;
 
+  $: labelController = new LabelController(dataFormField.key);
   $: ({ index } = dataFormField);
 </script>
 
@@ -33,7 +34,12 @@
     {/if}
   </svelte:fragment>
 
-  <slot {isSelected} />
+  <slot
+    fieldElementProps={{
+      isSelected,
+      labelController,
+    }}
+  />
 
   <svelte:fragment slot="footer">
     {#if dataFormManager instanceof EditableDataFormManager}

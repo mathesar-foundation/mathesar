@@ -2,6 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import {
+    Label,
+    type LabelController,
     ensureReadable,
     getStringValueFromEvent,
     isDefinedNonNullable,
@@ -17,6 +19,7 @@
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: DataFormField;
+  export let labelController: LabelController;
   export let isSelected: boolean;
   export let disabled = false;
 
@@ -55,9 +58,9 @@
           on:input={onLabelInput}
         />
       {:else}
-        <span>
+        <Label controller={labelController}>
           {$label}
-        </span>
+        </Label>
       {/if}
     </div>
 

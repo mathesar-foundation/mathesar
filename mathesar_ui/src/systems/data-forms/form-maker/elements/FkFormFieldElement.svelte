@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import type { LabelController } from '@mathesar-component-library';
+
   import {
     type DataFormManager,
     EditableDataFormManager,
@@ -16,6 +18,7 @@
   export let isSelected: boolean;
   export let dataFormManager: DataFormManager;
   export let dataFormField: FkField;
+  export let labelController: LabelController;
 
   $: editableDataFormManager =
     dataFormManager instanceof EditableDataFormManager
@@ -27,11 +30,17 @@
   $: inputHasMargin = editableDataFormManager
     ? $interactionRule !== 'must_pick'
     : $userAction === 'create';
+  $: inputProps = {
+    dataFormManager,
+    dataFormField,
+    isSelected,
+    labelController,
+  };
 </script>
 
 <div class="fk-field">
   <div class="label-controls-container">
-    <DataFormLabel {dataFormManager} {dataFormField} {isSelected}>
+    <DataFormLabel {...inputProps}>
       {#if editableDataFormManager}
         <FkFormFieldRuleSelector
           dataFormManager={editableDataFormManager}
@@ -44,9 +53,7 @@
   {#if $interactionRule !== 'must_create'}
     <div class="fk-input" class:has-margin={inputHasMargin}>
       <DataFormInput
-        {dataFormManager}
-        {dataFormField}
-        {isSelected}
+        {...inputProps}
         placeholder={$userAction === 'create'
           ? $_('adding_new_record')
           : undefined}
