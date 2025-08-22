@@ -140,6 +140,7 @@
         }
         break;
       case 'Delete':
+      case 'Backspace':
         clear();
         recordSelectionOrchestrator.close();
         break;
