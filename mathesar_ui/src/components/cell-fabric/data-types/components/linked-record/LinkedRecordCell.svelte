@@ -40,21 +40,28 @@
     if (!recordSelector) return;
     if (disabled) return;
     event?.stopPropagation();
-    const result = await recordSelector.acquireUserInput({ tableOid: tableId });
-    const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
-    if (result) {
-      if (linkedFkColumnId) {
-        value = result.record[linkedFkColumnId];
+    try {
+      const result = await recordSelector.acquireUserInput({
+        tableOid: tableId,
+      });
+      if (result) {
+        const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
+        if (linkedFkColumnId) {
+          value = result.record[linkedFkColumnId];
+        } else {
+          value = result.recordId;
+        }
+        setRecordSummary(String(result.recordId), result.recordSummary);
       } else {
-        value = result.recordId;
+        value = null;
       }
-      setRecordSummary(String(result.recordId), result.recordSummary);
       dispatch('update', { value });
+    } catch {
+      // do nothing - record selector was closed
     }
-
     // Re-focus the cell element so that the user can yes the keyboard to move
     // the active cell.
-    cellWrapperElement.focus();
+    cellWrapperElement?.focus();
   }
 
   function handleWrapperKeyDown(e: KeyboardEvent) {

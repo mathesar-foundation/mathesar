@@ -46,6 +46,7 @@
     e: KeyboardEvent,
   ) {
     if (e.key === 'Escape') {
+      controller.cancel();
       close();
       return;
     }
