@@ -79,6 +79,8 @@
       <div class="help">
         <input
           type="text"
+          readonly={disabled}
+          class:disabled
           value={$help}
           on:input={onHelpTextInput}
           placeholder={$_('field_add_help_text')}
