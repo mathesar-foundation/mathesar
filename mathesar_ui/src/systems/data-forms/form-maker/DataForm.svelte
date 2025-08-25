@@ -24,7 +24,11 @@
   );
 </script>
 
-<form class="data-form">
+<svelte:element
+  this={dataFormFillOutManager ? 'form' : 'div'}
+  class="data-form"
+  on:submit|preventDefault
+>
   {#if dataFormFillOutManager && $isSubmitted}
     <PostSubmission dataFormManager={dataFormFillOutManager} />
   {:else}
@@ -37,7 +41,7 @@
       <DataFormBranding />
     </div>
   {/if}
-</form>
+</svelte:element>
 
 <style lang="scss">
   .data-form {
