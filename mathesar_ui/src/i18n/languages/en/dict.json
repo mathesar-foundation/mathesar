@@ -490,6 +490,7 @@
   "postgres_server_changes_warning_2": "Modifying these settings here is appropriate if your PostgreSQL configuration has changed.",
   "postgres_server_changes_warning_3": "However, if you have moved your database to another server, you should instead disconnect this database within Mathesar and re-connect it. That will ensure that Mathesar can still connect to the other databases on this server.",
   "postgresql_server": "PostgreSQL Server",
+  "presentation": "Presentation",
   "preview": "Preview",
   "preview_truncated_at_limit": "Preview is truncated at {limit} rows",
   "previous_page": "Previous Page",

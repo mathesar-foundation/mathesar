@@ -30,7 +30,7 @@
   const sizeOptions = ['regular', 'large'] as const;
 </script>
 
-<InspectorSection title={$_('appearance')}>
+<InspectorSection title={$_('presentation')}>
   <section class="appearance">
     {#if showSizeConfig}
       <LabeledInput layout="stacked" label={$_('size')}>
