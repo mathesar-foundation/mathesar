@@ -1,4 +1,4 @@
-import { type Readable, derived, get, writable } from 'svelte/store';
+import { type Readable, get, writable } from 'svelte/store';
 
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 import type { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
