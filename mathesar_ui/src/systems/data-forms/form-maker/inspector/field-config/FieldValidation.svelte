@@ -1,9 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import InspectorSection from '@mathesar/components/InspectorSection.svelte';
-  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
-  import { Checkbox, LabeledInput } from '@mathesar-component-library';
+  import { Checkbox, Help, LabeledInput } from '@mathesar-component-library';
 
   import type { ColumnBasedDataFormField } from '../../data-form-utilities/fields';
 
@@ -13,28 +11,20 @@
   $: isFieldRequired = isRequiredOnDb || $isRequired;
 </script>
 
-<InspectorSection title={$_('field_validation')}>
-  <LabeledInput
-    layout="inline-input-first"
-    label={$_('field_validation_is_required')}
-  >
-    <Checkbox
-      checked={isFieldRequired}
-      disabled={isRequiredOnDb}
-      on:change={(e) => field.setIsRequired(e.detail)}
-    />
-  </LabeledInput>
-  {#if isRequiredOnDb}
-    <div class="not-null-info">
-      <InfoBox>
-        {$_('field_marked_required_column_disallows_null')}
-      </InfoBox>
-    </div>
-  {/if}
-</InspectorSection>
+<LabeledInput layout="inline-input-first">
+  <span slot="label">
+    {$_('field_validation_mark_as_required')}
 
-<style lang="scss">
-  .not-null-info {
-    font-size: var(--sm1);
-  }
-</style>
+    {#if isRequiredOnDb}
+      <Help>
+        {$_('field_marked_required_column_disallows_null')}
+      </Help>
+    {/if}
+  </span>
+
+  <Checkbox
+    checked={isFieldRequired}
+    disabled={isRequiredOnDb}
+    on:change={(e) => field.setIsRequired(e.detail)}
+  />
+</LabeledInput>

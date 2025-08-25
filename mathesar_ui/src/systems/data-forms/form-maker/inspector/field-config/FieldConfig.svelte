@@ -6,13 +6,11 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import {
     Button,
-    Checkbox,
     Icon,
     LabeledInput,
     TextInput,
     Tooltip,
     getStringValueFromEvent,
-    isDefinedNonNullable,
   } from '@mathesar-component-library';
 
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
@@ -20,15 +18,16 @@
     type DataFormField,
     ErrorField,
   } from '../../data-form-utilities/fields';
+  import FkFormFieldRuleSelector from '../../elements/FkFormFieldRuleSelector.svelte';
   import FormFieldSource from '../../elements/FormFieldSource.svelte';
 
   import FieldAppearance from './FieldAppearance.svelte';
   import FieldValidation from './FieldValidation.svelte';
-  import FkFieldConfig from './FkFieldConfig.svelte';
+  import FkRecordSummaryConfig from './FkRecordSummaryConfig.svelte';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: DataFormField;
-  $: ({ label, help } = field);
+  $: ({ label } = field);
 
   $: isErrorField = field instanceof ErrorField;
 </script>
@@ -43,40 +42,41 @@
         on:blur={() => field.checkAndSetDefaultLabel()}
       />
     </LabeledInput>
-    <LabeledInput
-      layout="inline-input-first"
-      label={$_('field_provide_help_text')}
-    >
-      <Checkbox
-        checked={isDefinedNonNullable($help)}
-        disabled={isErrorField}
-        on:change={(e) => field.setHelpText(e.detail ? '' : null)}
-      />
-    </LabeledInput>
-    {#if isDefinedNonNullable($help)}
-      <TextInput
-        value={$help}
-        disabled={isErrorField}
-        on:input={(e) => {
-          field.setHelpText(getStringValueFromEvent(e));
-        }}
-      />
+    {#if 'fieldColumn' in field}
+      <div class="source-info">
+        <span>{$_('column')}:</span>
+        <FormFieldSource
+          {dataFormManager}
+          dataFormField={field}
+          link
+          separator
+        />
+      </div>
     {/if}
-    <div class="source-info">
-      <span>{$_('column')}:</span>
-      <FormFieldSource {dataFormManager} dataFormField={field} link separator />
-    </div>
   </InspectorSection>
 
   {#if 'fieldColumn' in field}
-    <FieldValidation {field} />
-  {/if}
-
-  {#if field.kind === 'foreign_key'}
-    <FkFieldConfig {dataFormManager} {field} />
+    <InspectorSection title={$_('rules')}>
+      <section class="rules">
+        <FieldValidation {field} />
+        {#if field.kind === 'foreign_key'}
+          <LabeledInput layout="stacked" label={$_('field_fk_rule_label')}>
+            <FkFormFieldRuleSelector
+              appearance="default"
+              {dataFormManager}
+              dataFormField={field}
+            />
+          </LabeledInput>
+        {/if}
+      </section>
+    </InspectorSection>
   {/if}
 
   <FieldAppearance {field} />
+
+  {#if field.kind === 'foreign_key'}
+    <FkRecordSummaryConfig {dataFormManager} {field} />
+  {/if}
 
   <InspectorSection title={$_('actions')}>
     <Tooltip enabled={!field.canDelete}>
@@ -99,5 +99,10 @@
   .remove-button {
     display: flex;
     flex-direction: column;
+  }
+  section.rules {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sm2);
   }
 </style>
