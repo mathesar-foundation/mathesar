@@ -4,7 +4,12 @@
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
-  import { iconForm, iconInspector, iconShare } from '@mathesar/icons';
+  import {
+    iconForm,
+    iconInspector,
+    iconPubliclyShared,
+    iconShare,
+  } from '@mathesar/icons';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { confirm } from '@mathesar/stores/confirmation';
   import { dataFormInspectorVisible } from '@mathesar/stores/localStorage';
@@ -20,7 +25,7 @@
   export let dataFormManager: EditableDataFormManager;
 
   $: ({ hasChanges, dataFormStructure } = dataFormManager);
-  $: ({ structure } = dataForm);
+  $: ({ structure, sharePreferences } = dataForm);
 
   async function saveForm() {
     let confirmationPromise = Promise.resolve(true);
@@ -71,8 +76,13 @@
       ariaLabel={$_('share')}
     >
       <svelte:fragment slot="trigger">
-        <Icon {...iconShare} />
-        <span class="responsive-button-label"> {$_('share')} </span>
+        {#if $sharePreferences.isPublishedPublicly}
+          <Icon {...iconPubliclyShared} />
+          <span class="responsive-button-label"> {$_('shared_publicly')} </span>
+        {:else}
+          <Icon {...iconShare} />
+          <span class="responsive-button-label"> {$_('share')} </span>
+        {/if}
       </svelte:fragment>
       <svelte:fragment slot="content">
         <ShareForm {dataForm} {dataFormManager} />

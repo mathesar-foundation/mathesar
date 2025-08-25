@@ -4,18 +4,23 @@
   import EntityListItem from '@mathesar/components/EntityListItem.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconDeleteMajor, iconEdit, iconForm } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconEdit,
+    iconForm,
+    iconPubliclyShared,
+  } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
   import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
-  import { ButtonMenuItem } from '@mathesar-component-library';
+  import { ButtonMenuItem, Icon, Tooltip } from '@mathesar-component-library';
 
   export let dataForm: DataForm;
   export let editDataForm: () => void;
   export let deleteDataForm: () => void;
 
-  $: ({ id, structure, schema, baseTableOid } = dataForm);
+  $: ({ id, structure, schema, baseTableOid, sharePreferences } = dataForm);
   $: baseTable = $tablesStore.tablesMap.get(baseTableOid);
   $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
 
@@ -43,6 +48,16 @@
           <TableName table={baseTable} truncate={false} />
         {/if}
       </RichText>
+    {/if}
+  </svelte:fragment>
+  <svelte:fragment slot="action-buttons">
+    {#if $sharePreferences.isPublishedPublicly}
+      <Tooltip>
+        <Icon slot="trigger" {...iconPubliclyShared} />
+        <span slot="content">
+          {$_('form_is_shared_publicly')}
+        </span>
+      </Tooltip>
     {/if}
   </svelte:fragment>
   <svelte:fragment slot="menu">

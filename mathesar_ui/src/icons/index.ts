@@ -247,6 +247,7 @@ export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
 export const iconYes: IconProps = { data: faCheck };
 export const iconRequiresUpgrade: IconProps = { data: faTriangleExclamation };
 export const iconRequiresAttention: IconProps = { data: faCircleExclamation };
+export const iconPubliclyShared: IconProps = { data: faGlobe };
 
 // UI TYPES
 

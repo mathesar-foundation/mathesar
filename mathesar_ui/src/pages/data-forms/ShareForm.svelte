@@ -120,7 +120,11 @@
 
 <div class="share-container">
   <div class="description">
-    {$_('share_form_help')}
+    {#if $sharePreferences.isPublishedPublicly}
+      {$_('form_is_shared_publicly')}
+    {:else}
+      {$_('share_form_help')}
+    {/if}
   </div>
   <div class="content">
     {#if $hasChanges}
