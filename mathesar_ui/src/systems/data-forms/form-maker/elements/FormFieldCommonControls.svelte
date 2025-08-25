@@ -13,15 +13,16 @@
   <slot />
 
   <Tooltip enabled={!dataFormField.canDelete}>
-    <div slot="trigger">
-      <Button
-        appearance="outcome"
-        disabled={!dataFormField.canDelete}
-        on:click={() => dataFormField.container.delete(dataFormField)}
-      >
+    <Button
+      slot="trigger"
+      appearance="outcome"
+      disabled={!dataFormField.canDelete}
+      on:click={() => dataFormField.container.delete(dataFormField)}
+    >
+      <div class="icon">
         <Icon {...iconDeleteMajor} />
-      </Button>
-    </div>
+      </div>
+    </Button>
     <span slot="content">{$_('field_cannot_be_removed_required_in_db')}</span>
   </Tooltip>
 </div>
