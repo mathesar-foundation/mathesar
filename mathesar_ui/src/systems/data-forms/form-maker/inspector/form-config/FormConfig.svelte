@@ -3,7 +3,7 @@
 
   import InspectorSection from '@mathesar/components/InspectorSection.svelte';
   import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
-  import TableName from '@mathesar/components/TableName.svelte';
+  import TableLink from '@mathesar/components/TableLink.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import {
@@ -55,12 +55,12 @@
           dataFormStructure.setDescription(getStringValueFromEvent(e))}
       />
     </LabeledInput>
-    <div>
-      <div>{$_('base_table')}</div>
-      {#if $table}
-        <TableName table={$table} />
-      {/if}
-    </div>
+    {#if $table}
+      <div class="source-info">
+        <span>{$_('base_table')}:</span>
+        <TableLink table={$table} boxed />
+      </div>
+    {/if}
   </InspectorSection>
   <InspectorSection>
     <div slot="title">
@@ -79,3 +79,11 @@
     </Button>
   </InspectorSection>
 </InspectorTabContent>
+
+<style lang="scss">
+  .source-info {
+    display: flex;
+    gap: var(--sm4);
+    align-items: center;
+  }
+</style>

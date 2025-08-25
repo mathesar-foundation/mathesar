@@ -20,6 +20,7 @@
     type DataFormField,
     ErrorField,
   } from '../../data-form-utilities/fields';
+  import FormFieldSource from '../../elements/FormFieldSource.svelte';
 
   import FieldAppearance from './FieldAppearance.svelte';
   import FieldValidation from './FieldValidation.svelte';
@@ -33,7 +34,7 @@
 </script>
 
 <InspectorTabContent>
-  <InspectorSection title={$_('field_text')}>
+  <InspectorSection title={$_('field_properties')}>
     <LabeledInput layout="stacked" label={$_('field_label')}>
       <TextInput
         value={$label}
@@ -61,6 +62,10 @@
         }}
       />
     {/if}
+    <div class="source-info">
+      <span>{$_('column')}:</span>
+      <FormFieldSource {dataFormManager} dataFormField={field} link separator />
+    </div>
   </InspectorSection>
 
   {#if 'fieldColumn' in field}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import TableLink from '@mathesar/components/TableLink.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
 
   import type { EditableDataFormManager } from '../data-form-utilities/DataFormManager';
@@ -7,20 +8,28 @@
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: DataFormField;
+  export let link = false;
+  export let separator = false;
 
   $: tableOidOfField = dataFormField.container.getTableOid();
   $: tableStructure = dataFormManager.getTableStructure(tableOidOfField);
   $: ({ table } = tableStructure);
 </script>
 
-<div class="source">
-  <div class="tag">
-    {#if $table}
-      <TableName table={$table} alwaysShowTooltip={true} />
-    {/if}
-  </div>
+<div class="field-source" class:separator>
+  {#if $table}
+    <div class="tag">
+      {#if link}
+        <TableLink table={$table} alwaysShowTooltip={true} />
+      {:else}
+        <TableName table={$table} alwaysShowTooltip={true} />
+      {/if}
+    </div>
+  {/if}
   {#if 'fieldColumn' in dataFormField}
-    <span>.</span>
+    {#if separator}
+      <span class="separator">.</span>
+    {/if}
     <div class="tag">
       <ColumnName
         column={{
@@ -35,17 +44,26 @@
 </div>
 
 <style lang="scss">
-  .source {
-    margin-left: auto;
+  .field-source {
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
+    font-size: var(--df__internal__field-source-font-size, var(--sm1));
+
+    &:not(.separator) {
+      gap: var(--sm6);
+    }
 
     .tag {
       border-radius: var(--border-radius-xl);
       background-color: var(--card-background);
       padding: var(--sm6) var(--sm3);
-      font-size: var(--sm2);
-      max-width: 8rem;
+      max-width: var(--df__internal__field-source-max-width, none);
+      font-weight: var(--font-weight-medium);
+      overflow: hidden;
+    }
+    .separator {
+      font-weight: var(--font-weight-bold);
+      font-size: var(--lg1);
     }
   }
 </style>

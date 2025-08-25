@@ -30,7 +30,9 @@
 >
   <svelte:fragment slot="header">
     {#if dataFormManager instanceof EditableDataFormManager}
-      <FormFieldSource {dataFormManager} {dataFormField} />
+      <div class="source-info">
+        <FormFieldSource {dataFormManager} {dataFormField} />
+      </div>
     {/if}
   </svelte:fragment>
 
@@ -65,5 +67,9 @@
     background: var(--elevated-background);
     padding-inline: var(--sm5);
     border-radius: var(--border-radius-m);
+  }
+  .source-info {
+    --df__internal__field-source-font-size: var(--sm2);
+    --df__internal__field-source-max-width: 8rem;
   }
 </style>
