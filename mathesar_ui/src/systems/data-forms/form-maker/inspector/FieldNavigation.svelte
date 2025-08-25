@@ -32,8 +32,14 @@
 </script>
 
 <div class="form-nav">
+  <FieldNavigationElement {dataFormManager} />
+
   {#if field}
-    {#if parentOfParentField}
+    <div class="icon-holder">
+      <Icon {...iconExpandRight} />
+    </div>
+
+    {#if parentFieldOfParentField}
       <Button appearance="ghost" on:click={selectHiddenParent}>
         <Icon {...iconShowMore} />
       </Button>
@@ -42,19 +48,20 @@
       </div>
     {/if}
 
-    <FieldNavigationElement {dataFormManager} field={parentField} />
-    <div class="icon-holder">
-      <Icon {...iconExpandRight} />
-    </div>
-  {/if}
+    {#if parentField}
+      <FieldNavigationElement {dataFormManager} field={parentField} />
+      <div class="icon-holder">
+        <Icon {...iconExpandRight} />
+      </div>
+    {/if}
 
-  <FieldNavigationElement {dataFormManager} {field} />
+    <FieldNavigationElement {dataFormManager} {field} />
+  {/if}
 </div>
 
 <style lang="scss">
   .form-nav {
     border-bottom: 1px solid var(--border-color);
-    padding: var(--sm6);
     display: flex;
     flex-direction: row;
     align-items: center;

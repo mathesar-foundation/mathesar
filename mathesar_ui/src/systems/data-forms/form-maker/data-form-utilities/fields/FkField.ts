@@ -94,7 +94,7 @@ export class FkField extends AbstractColumnBasedField {
                 : {
                     create: async () => {
                       this.fieldValueHolder.setUserAction('create');
-                      return undefined;
+                      return null;
                     },
                   },
           }),

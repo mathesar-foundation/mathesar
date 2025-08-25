@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import RenderComponentWithProps from '@mathesar/component-library/render/RenderComponentWithProps.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
 
@@ -11,6 +13,7 @@
 
   export let errors: GeneralizedError[];
   export let fullWidth = false;
+  export let showFallbackError = false;
 
   $: ({ stringErrors, richErrors } = groupErrors(getDistinctErrors(errors)));
 </script>
@@ -25,6 +28,12 @@
   {#if stringErrors.length}
     <ErrorBox {fullWidth}>
       <ErrorList errorStrings={stringErrors} />
+    </ErrorBox>
+  {/if}
+
+  {#if !errors.length && showFallbackError}
+    <ErrorBox {fullWidth}>
+      {$_('unknown_error')}
     </ErrorBox>
   {/if}
 </div>

@@ -64,17 +64,17 @@ export class RecordSelectorController {
     tableOid,
   }: {
     tableOid: number;
-  }): Promise<RecordSelectorResult | undefined> {
+  }): Promise<RecordSelectorResult> {
     this.tableOid.set(tableOid);
     this.purpose.set('dataEntry');
     this.open();
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.submit = (v) => {
         resolve(v);
         this.close();
       };
       this.cancel = () => {
-        resolve(undefined);
+        reject();
         this.close();
       };
     });

@@ -21,6 +21,7 @@
 <input
   class="radio"
   type="radio"
+  {...$$restProps}
   {checked}
   {id}
   {disabled}

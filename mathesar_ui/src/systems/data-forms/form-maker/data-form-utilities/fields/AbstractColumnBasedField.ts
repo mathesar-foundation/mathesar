@@ -38,6 +38,8 @@ export abstract class AbstractColumnBasedField extends AbstractField {
     return this._isRequired;
   }
 
+  readonly canDelete: boolean;
+
   constructor(
     holder: FormFields,
     props: AbstractColumnBasedFieldProps,
@@ -52,6 +54,7 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       this.key,
       this.isRequired,
     );
+    this.canDelete = !!this.fieldColumn.column.nullable;
   }
 
   setIsRequired(isRequired: boolean) {
@@ -70,6 +73,13 @@ export abstract class AbstractColumnBasedField extends AbstractField {
       this.fieldColumn.tableOid === fieldColumn.tableOid &&
       this.fieldColumn.column.id === fieldColumn.column.id
     );
+  }
+
+  checkAndSetDefaultLabel() {
+    const label = get(this.label);
+    if (!label || label.trim() === '') {
+      this.setLabel(this.fieldColumn.column.name);
+    }
   }
 
   protected abstract triggerChangeEvent<

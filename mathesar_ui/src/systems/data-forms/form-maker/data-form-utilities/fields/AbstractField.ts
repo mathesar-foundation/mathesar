@@ -50,6 +50,8 @@ export abstract class AbstractField {
     return this._styling;
   }
 
+  readonly canDelete: boolean = true;
+
   constructor(
     container: FormFields,
     props: AbstractFieldProps,
@@ -96,6 +98,8 @@ export abstract class AbstractField {
     e: T,
   ): unknown;
 
+  abstract checkAndSetDefaultLabel(): void;
+
   abstract toRawEphemeralField(options?: unknown): RawDataFormField;
 
   protected getBaseFieldRawJson() {
@@ -104,7 +108,7 @@ export abstract class AbstractField {
       index: get(this.index),
       label: get(this.label),
       help: get(this.help),
-      styling: {},
+      styling: get(this.styling),
     };
   }
 }

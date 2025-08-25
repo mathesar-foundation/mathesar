@@ -2,6 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import {
+    Label,
+    type LabelController,
     ensureReadable,
     getStringValueFromEvent,
     isDefinedNonNullable,
@@ -17,6 +19,7 @@
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: DataFormField;
+  export let labelController: LabelController;
   export let isSelected: boolean;
   export let disabled = false;
 
@@ -53,11 +56,12 @@
           class:disabled
           value={$label}
           on:input={onLabelInput}
+          on:blur={() => dataFormField.checkAndSetDefaultLabel()}
         />
       {:else}
-        <span>
+        <Label controller={labelController}>
           {$label}
-        </span>
+        </Label>
       {/if}
     </div>
 
@@ -75,6 +79,8 @@
       <div class="help">
         <input
           type="text"
+          readonly={disabled}
+          class:disabled
           value={$help}
           on:input={onHelpTextInput}
           placeholder={$_('field_add_help_text')}

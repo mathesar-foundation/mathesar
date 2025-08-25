@@ -13,6 +13,7 @@
     getLabelControllerFromContainingLabel,
     getLabelIdFromInputId,
     iconExpandDown,
+    isDefinedNonNullable,
   } from '@mathesar-component-library';
 
   import type { LinkedRecordInputElement } from './LinkedRecordUtils';
@@ -46,7 +47,6 @@
   export let disabled = false;
   export let placeholder: string | undefined = undefined;
 
-  let isAcquiringInput = false;
   let element: HTMLSpanElement;
 
   $: recordSelectionOrchestrator = recordSelectionOrchestratorFactory();
@@ -74,7 +74,6 @@
       return;
     }
     dispatch('recordSelectorOpen');
-    isAcquiringInput = true;
     const previousValue = {
       summary: recordSummary ?? '',
       key: value ?? null,
@@ -85,17 +84,21 @@
     });
     await tick();
     const cleanupDropdown = setRecordSelectorToAccompanyDropdown();
-    const record = await userSelection;
-    cleanupDropdown();
-    isAcquiringInput = false;
-    if (record === undefined) {
-      dispatch('recordSelectorCancel');
-    } else {
-      value = record.key;
-      setRecordSummary(String(record.key), record.summary);
+    try {
+      const record = await userSelection;
+      cleanupDropdown();
+      if (isDefinedNonNullable(record)) {
+        value = record.key;
+        setRecordSummary(String(record.key), record.summary);
+      } else {
+        value = null;
+      }
       dispatch('recordSelectorSubmit');
       dispatch('artificialChange', value);
       dispatch('artificialInput', value);
+    } catch {
+      cleanupDropdown();
+      dispatch('recordSelectorCancel');
     }
     await tick();
     element.focus();
@@ -103,8 +106,8 @@
 
   function clear() {
     value = null;
-    dispatch('artificialChange', undefined);
-    dispatch('artificialInput', undefined);
+    dispatch('artificialChange', value);
+    dispatch('artificialInput', value);
     if (recordSelectionOrchestrator.isOpen()) {
       recordSelectionOrchestrator.close();
       void launchRecordSelector();
@@ -137,6 +140,7 @@
         }
         break;
       case 'Delete':
+      case 'Backspace':
         clear();
         recordSelectionOrchestrator.close();
         break;
@@ -165,8 +169,7 @@
   class="input-element linked-record-input {classes}"
   class:has-value={hasValue}
   class:disabled
-  class:is-acquiring-input={isAcquiringInput}
-  tabindex={isAcquiringInput || disabled ? undefined : 0}
+  tabindex={disabled ? undefined : 0}
   bind:this={element}
   on:click={toggleRecordSelector}
   on:focus={handleFocus}

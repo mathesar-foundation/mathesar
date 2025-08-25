@@ -7,7 +7,6 @@
 
   import type { EditableDataFormManager } from '../../data-form-utilities/DataFormManager';
   import type { FkField } from '../../data-form-utilities/fields';
-  import FkFormFieldRuleSelector from '../../elements/FkFormFieldRuleSelector.svelte';
 
   export let dataFormManager: EditableDataFormManager;
   export let field: FkField;
@@ -24,16 +23,8 @@
   } = linkedTableStructure);
 </script>
 
-<InspectorSection title={$_('field_fk_rule_label')}>
-  <FkFormFieldRuleSelector
-    appearance="default"
-    {dataFormManager}
-    dataFormField={field}
-  />
-</InspectorSection>
-
 {#if $interactionRule !== 'must_create'}
-  <InspectorSection title={$_('linked_record_summary')}>
+  <InspectorSection title={$_('linked_record_summary')} isOpen={false}>
     {#if $isLoading}
       <Spinner />
     {:else if $linkedTable}

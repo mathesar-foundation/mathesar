@@ -24,7 +24,6 @@ function makeRecordSelectorOrchestrator({
   return {
     launch: async () => {
       const result = await recordSelector.acquireUserInput({ tableOid });
-      if (!result) return undefined;
       return {
         key: result.recordId,
         summary: result.recordSummary,

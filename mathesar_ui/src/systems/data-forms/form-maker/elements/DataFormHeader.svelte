@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import GrowableTextArea from '@mathesar/components/GrowableTextArea.svelte';
   import { getStringValueFromEvent } from '@mathesar-component-library';
 
   import {
@@ -34,6 +35,12 @@
       dataFormStructure.setDescription(updatedDesc);
     }
   }
+
+  async function checkAndSetDefaultFormName() {
+    if (editableDataFormManager) {
+      await editableDataFormManager.checkAndSetDefaultFormName();
+    }
+  }
 </script>
 
 <div class="header">
@@ -52,6 +59,7 @@
             placeholder={$_('name')}
             value={$name}
             on:input={onNameInput}
+            on:blur={checkAndSetDefaultFormName}
           />
         {:else if $name.trim()}
           <h1 class="form-title">
@@ -66,15 +74,16 @@
     <div class="desc-container">
       <SelectableElement element={{ type: 'description' }} {dataFormManager}>
         {#if editableDataFormManager}
-          <textarea
-            placeholder={$_('description')}
-            class="form-description"
-            type="text"
-            value={$description ?? ''}
-            on:input={onDescriptionInput}
-          />
-        {:else if $description?.trim()}
           <div class="form-description">
+            <GrowableTextArea
+              placeholder={$_('description')}
+              type="text"
+              value={$description ?? ''}
+              on:input={onDescriptionInput}
+            />
+          </div>
+        {:else if $description?.trim()}
+          <div class="form-description-static">
             {$description}
           </div>
         {/if}
@@ -85,16 +94,16 @@
 
 <style lang="scss">
   .header {
+    --df__internal__selectable-elem-padding: 0;
+
     .title-container {
-      --df__internal_header-v-spacing: calc(
+      --df__internal_title-v-spacing: calc(
         var(--df__internal__element-spacing) * 0.8
       );
 
-      --df__internal__selectable-elem-padding: var(
-          --df__internal_header-v-spacing
-        )
+      --df__internal_title-padding: var(--df__internal_title-v-spacing)
         var(--df__internal_element-right-padding)
-        var(--df__internal_header-v-spacing)
+        var(--df__internal_title-v-spacing)
         var(--df__internal_element-left-padding);
     }
     .desc-container {
@@ -102,9 +111,7 @@
         var(--df__internal__element-spacing) * 0.5
       );
 
-      --df__internal__selectable-elem-padding: var(
-          --df__internal_desc-v-spacing
-        )
+      --df__internal_desc-padding: var(--df__internal_desc-v-spacing)
         var(--df__internal_element-right-padding)
         var(--df__internal_desc-v-spacing)
         var(--df__internal_element-left-padding);
@@ -113,7 +120,7 @@
 
   .form-title {
     border: none;
-    padding: 0;
+    padding: var(--df__internal_title-padding);
     font-size: var(--lg3);
     font-weight: var(--font-weight-medium);
     background: transparent;
@@ -129,19 +136,19 @@
     }
   }
 
-  .form-description {
-    padding: 0;
-    margin: 0;
-  }
-  div.form-description {
+  div.form-description-static {
     white-space: pre-wrap;
     margin-bottom: var(--sm4);
+    padding: var(--df__internal_desc-padding);
   }
-  textarea.form-description {
+  div.form-description {
     resize: vertical;
-    min-height: 1.5rem;
-    height: 1.5rem;
-    border: none;
+    --text-area-min-height: 2.2rem;
+    --input-element-border: none;
+    --input-focus-color: none;
+    --input-element-focus-box-shadow: none;
+    --input-background: none;
+    --input-padding: var(--df__internal_desc-padding);
     background: transparent;
     width: 100%;
 

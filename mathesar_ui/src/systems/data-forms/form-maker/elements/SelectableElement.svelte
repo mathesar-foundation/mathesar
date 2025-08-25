@@ -20,12 +20,36 @@
       ? editableDataFormManager.selectedElement
       : undefined,
   );
-  $: isSelected = (() => {
+
+  $: selectionOpts = (() => {
     if ($selectedElement?.type === 'field' && element.type === 'field') {
-      return $selectedElement.field === element.field;
+      const isImmediateChildSelected =
+        $selectedElement.field.container.parent === element.field;
+      const isAnyChildSelected = (() => {
+        let current = $selectedElement.field.container.parent;
+        while ('container' in current) {
+          if (current === element.field) {
+            return true;
+          }
+          current = current.container.parent;
+        }
+        return false;
+      })();
+      return {
+        isSelected: $selectedElement.field === element.field,
+        isImmediateChildSelected,
+        isAnyChildSelected,
+      };
     }
-    return $selectedElement?.type === element.type;
+    return {
+      isSelected: $selectedElement?.type === element.type,
+      isImmediateChildSelected: false,
+      isAnyChildSelected: false,
+    };
   })();
+
+  $: ({ isSelected, isImmediateChildSelected, isAnyChildSelected } =
+    selectionOpts);
 
   function onClick(e: Event) {
     if (editableDataFormManager) {
@@ -36,11 +60,12 @@
 </script>
 
 <div
-  tabindex="0"
+  tabindex={editableDataFormManager ? 0 : undefined}
   data-form-selectable
   class:can-select={!!editableDataFormManager}
   class:selected={isSelected}
-  class:is-header-present={$$slots.header}
+  class:immediate-child-selected={isImmediateChildSelected}
+  class:some-child-selected={isAnyChildSelected}
   on:click={onClick}
   use:sortableItem
 >
@@ -82,7 +107,22 @@
     }
 
     &.selected > .content {
-      border-color: var(--accent-500);
+      border-color: var(--df__internal__selected-element-border-color);
+    }
+
+    &.some-child-selected {
+      z-index: var(--df__internal__z-index__field-with-some-selected-child);
+    }
+
+    &.some-child-selected:not(.immediate-child-selected) > .content {
+      outline: 1px dotted
+        var(--df__internal__some-child-selected-border-color, transparent);
+    }
+
+    &.some-child-selected.immediate-child-selected > .content {
+      border-style: dashed;
+      outline: 1px dashed
+        var(--df__internal__immediate-child-selected-border-color, transparent);
     }
   }
 
@@ -92,13 +132,14 @@
         )
         > .content
     ) {
-    background-color: var(--accent-100);
+    background-color: var(--df__internal__selected-element-bg);
   }
 
   // background is set because fields can overlap when dragging to rearrange,
   // and it looks awkward without a background.
-  :global([data-form-selectable].is-dragging) {
+  :global([data-form-selectable][data-sortable-item].is-dragging) {
     background: var(--elevated-background);
+    z-index: var(--df__internal__z-index__field-being-dragged);
   }
 
   .header,
@@ -107,7 +148,7 @@
     position: absolute;
     display: flex;
     padding: 0 var(--sm2);
-    z-index: var(--df__internal__z-index__field-header);
+    z-index: var(--df__internal__z-index__field-outer-controls);
     width: fit-content;
     max-width: 100%;
   }

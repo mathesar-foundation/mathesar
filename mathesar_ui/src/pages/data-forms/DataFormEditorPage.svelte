@@ -14,6 +14,7 @@
     FormSource,
   } from '@mathesar/systems/data-forms/form-maker';
   import CacheManager from '@mathesar/utils/CacheManager';
+  import { Spinner } from '@mathesar-component-library';
 
   import ActionsPane from './ActionsPane.svelte';
 
@@ -52,16 +53,25 @@
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
-  {#if dataFormManager}
-    <div class="data-form-editor">
+  <div class="data-form-editor">
+    {#if dataFormManager}
       <div class="actions-pane">
         <ActionsPane {dataFormManager} />
       </div>
       <DataFormMaker {dataFormManager} />
-    </div>
-  {:else if $rawDataFormWithSource.error}
-    <Errors errors={[$rawDataFormWithSource.error]} />
-  {/if}
+    {:else if $rawDataFormWithSource.isLoading}
+      <div class="loader">
+        <Spinner />
+      </div>
+    {:else}
+      <Errors
+        errors={$rawDataFormWithSource.error
+          ? [$rawDataFormWithSource.error]
+          : []}
+        showFallbackError
+      />
+    {/if}
+  </div>
 </LayoutWithHeader>
 
 <style lang="scss">
@@ -69,5 +79,13 @@
     display: grid;
     grid-template-rows: auto 1fr;
     height: 100%;
+
+    .loader {
+      margin-top: var(--lg2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
   }
 </style>

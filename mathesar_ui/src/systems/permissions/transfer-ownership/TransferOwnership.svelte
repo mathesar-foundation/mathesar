@@ -26,7 +26,7 @@
 
   $: roleOids = [...roles.values()].map((r) => r.oid);
   $: ownerOid = permissionsMetaData.currentAccess.ownerOid;
-  $: currentRoleInfo = roles.get(currentRole.currentRoleOid);
+  $: currentRoleInfo = roles.get(currentRole.oid);
 
   /**
    * The current role might directly or indirectly own the object.
@@ -40,7 +40,7 @@
    */
   $: possibleNewOwners = currentRoleInfo?.super
     ? roleOids
-    : [...currentRole.parentRoleOids.values(), currentRole.currentRoleOid];
+    : [...currentRole.parentRoles.keys(), currentRole.oid];
   $: possibleNewOwnersWithoutCurrentOwner = new Set(
     possibleNewOwners.filter((oid) => oid !== $ownerOid),
   );

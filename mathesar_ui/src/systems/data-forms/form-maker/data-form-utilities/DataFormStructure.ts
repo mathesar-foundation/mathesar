@@ -1,4 +1,5 @@
 import { type Readable, get, writable } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import type {
   RawDataForm,
@@ -236,9 +237,10 @@ export class DataFormStructure {
   toRawStructure(options?: {
     withoutErrorFields: boolean;
   }): RawDataFormStructure {
+    const name = get(this.name);
     return {
       associated_role_id: get(this.associatedRoleId),
-      name: get(this.name),
+      name: name.trim() || get(_)('untitled'),
       description: get(this.description),
       fields: this.fields.toRawFields(options),
       submit_message: get(this.submitMessage),

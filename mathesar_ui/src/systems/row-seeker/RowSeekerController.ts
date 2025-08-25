@@ -26,9 +26,9 @@ export type RowSeekerProps = {
     text?: string;
     create: (
       searchString?: string,
-    ) => Promise<SummarizedRecordReference | undefined>;
+    ) => Promise<SummarizedRecordReference | null>;
   };
-  onSelect?: (v?: SummarizedRecordReference) => unknown;
+  onSelect?: (v: SummarizedRecordReference | null) => unknown;
 };
 
 export default class RowSeekerController {
@@ -42,7 +42,9 @@ export default class RowSeekerController {
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
 
-  select: (v?: SummarizedRecordReference) => void = () => {};
+  select: (v: SummarizedRecordReference | null) => void = () => {};
+
+  cancel: () => void = () => {};
 
   canAddNewRecord: boolean;
 
@@ -58,7 +60,7 @@ export default class RowSeekerController {
     this.canAddNewRecord = !!props.addRecordOptions;
   }
 
-  private async focusSearch() {
+  async focusSearch() {
     await tick();
     const rowSeekerComponentElement = document.getElementById(this.elementId);
     const searchBox = rowSeekerComponentElement?.querySelector<HTMLElement>(
@@ -98,11 +100,14 @@ export default class RowSeekerController {
     }
   }
 
-  async acquireUserSelection(): Promise<SummarizedRecordReference | undefined> {
-    return new Promise((resolve) => {
+  async acquireUserSelection(): Promise<SummarizedRecordReference | null> {
+    return new Promise((resolve, reject) => {
       this.select = (v) => {
         resolve(v);
         this.onSelect?.(v);
+      };
+      this.cancel = () => {
+        reject();
       };
     });
   }

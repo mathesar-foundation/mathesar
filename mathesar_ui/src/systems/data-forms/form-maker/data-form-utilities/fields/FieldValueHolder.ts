@@ -21,7 +21,7 @@ export type DataFormFieldInputValueHolder =
   | DataFormFieldFkInputValueHolder;
 
 export class DataFormFieldScalarInputValueHolder {
-  private readonly isRequired;
+  readonly isRequired;
 
   readonly key: string;
 
@@ -44,6 +44,8 @@ export class DataFormFieldFkInputValueHolder extends DataFormFieldScalarInputVal
 
   private fkInteractionRule;
 
+  readonly inputFieldStore: Readable<FieldStore>;
+
   readonly includeFieldStoreInForm;
 
   constructor(
@@ -60,6 +62,13 @@ export class DataFormFieldFkInputValueHolder extends DataFormFieldScalarInputVal
     this.includeFieldStoreInForm = derived(
       this.userAction,
       ($userAction) => $userAction === 'pick',
+    );
+    this.inputFieldStore = derived(
+      [this.isRequired, this.userAction],
+      ([$isRequired, $userAction]) =>
+        $isRequired && $userAction === 'pick'
+          ? requiredField(undefined)
+          : optionalField(undefined),
     );
   }
 

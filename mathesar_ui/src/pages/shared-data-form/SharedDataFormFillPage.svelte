@@ -2,10 +2,7 @@
   import { readable } from 'svelte/store';
 
   import type { RawDataForm, RawDataFormSource } from '@mathesar/api/rpc/forms';
-  import Errors from '@mathesar/components/errors/Errors.svelte';
-  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
   import {
     DataForm,
     DataFormFillOutManager,
@@ -14,31 +11,25 @@
   } from '@mathesar/systems/data-forms/form-maker';
 
   export let rawDataForm: RawDataForm;
-  export let formSourceInfo: AsyncStoreValue<RawDataFormSource, RpcError>;
+  export let formSource: RawDataFormSource;
 
   $: pageTitle = rawDataForm.name.trim();
-  $: dataFormManager = formSourceInfo.resolvedValue
-    ? new DataFormFillOutManager({
-        buildDataFormStructure: DataFormStructure.factoryFromRawInfo(
-          rawDataForm,
-          new FormSource(formSourceInfo.resolvedValue),
-        ),
-        token: readable(rawDataForm.token),
-      })
-    : undefined;
+  $: dataFormManager = new DataFormFillOutManager({
+    buildDataFormStructure: DataFormStructure.factoryFromRawInfo(
+      rawDataForm,
+      new FormSource(formSource),
+    ),
+    token: readable(rawDataForm.token),
+  });
 </script>
 
 <svelte:head>
   <title>{makeSimplePageTitle(pageTitle)}</title>
 </svelte:head>
 
-{#if dataFormManager}
-  <div class="data-form-filler">
-    <DataForm {dataFormManager} />
-  </div>
-{:else if formSourceInfo.error}
-  <Errors errors={[formSourceInfo.error]} />
-{/if}
+<div class="data-form-filler">
+  <DataForm {dataFormManager} />
+</div>
 
 <style lang="scss">
   .data-form-filler {

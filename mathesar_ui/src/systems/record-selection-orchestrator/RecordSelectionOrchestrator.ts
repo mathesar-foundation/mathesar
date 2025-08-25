@@ -18,7 +18,7 @@ export interface RecordSelectionOrchestrator {
   }: {
     previousValue?: SummarizedRecordReference;
     triggerElement?: HTMLElement;
-  }) => Promise<SummarizedRecordReference | undefined>;
+  }) => Promise<SummarizedRecordReference | null>;
   close: () => void;
   isOpen: () => boolean;
 }

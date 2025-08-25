@@ -1,7 +1,10 @@
 <script lang="ts">
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { FieldErrors } from '@mathesar/components/form';
-  import { WritableMap } from '@mathesar-component-library';
+  import {
+    type LabelController,
+    WritableMap,
+  } from '@mathesar-component-library';
 
   import {
     type DataFormManager,
@@ -13,6 +16,7 @@
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: ColumnBasedDataFormField;
+  export let labelController: LabelController;
   export let isSelected: boolean;
   export let placeholder: string | undefined = undefined;
 
@@ -33,6 +37,8 @@
 <div class="data-form-input" class:selected={isSelected}>
   <DynamicInput
     bind:value={$inputField}
+    {labelController}
+    id={dataFormField.key}
     componentAndProps={$inputComponentAndProps}
     hasError={displayError}
     disabled={$disabled}

@@ -5,4 +5,5 @@ export interface ButtonDetails {
   label: string;
   icon?: IconProps;
   appearance?: Appearance;
+  type?: 'button' | 'submit';
 }

@@ -34,7 +34,7 @@
   .sub-form-help {
     display: block;
     margin-bottom: var(--df__internal__element-spacing);
-    color: var(--stormy-600);
+    color: var(--df__internal__help-text-color);
 
     span {
       display: inline-flex;

@@ -11,12 +11,28 @@
   export let dataFormField: DataFormField;
 </script>
 
-<FormFieldElementWrapper {dataFormManager} {dataFormField} let:isSelected>
+<FormFieldElementWrapper
+  {dataFormManager}
+  {dataFormField}
+  let:fieldElementProps
+>
   {#if dataFormField.kind === 'scalar_column'}
-    <ScalarFormFieldElement {isSelected} {dataFormManager} {dataFormField} />
+    <ScalarFormFieldElement
+      {...fieldElementProps}
+      {dataFormManager}
+      {dataFormField}
+    />
   {:else if dataFormField.kind === 'foreign_key'}
-    <FkFormFieldElement {isSelected} {dataFormManager} {dataFormField} />
+    <FkFormFieldElement
+      {...fieldElementProps}
+      {dataFormManager}
+      {dataFormField}
+    />
   {:else}
-    <ErrorFormFieldElement {isSelected} {dataFormManager} {dataFormField} />
+    <ErrorFormFieldElement
+      {...fieldElementProps}
+      {dataFormManager}
+      {dataFormField}
+    />
   {/if}
 </FormFieldElementWrapper>

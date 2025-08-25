@@ -17,6 +17,7 @@
    * an option.
    */
   export let offsetOnFocus = 0;
+  export let userFocusable = false;
 
   const { api, state } = getContext<ListBoxContext<Option>>('LIST_BOX_CONTEXT');
   const { displayedOptions, value, focusedOptionIndex, staticProps } = state;
@@ -61,7 +62,7 @@
 
 <ul
   bind:this={listBoxElement}
-  tabindex="0"
+  tabindex={userFocusable ? 0 : -1}
   {id}
   role="listbox"
   aria-expanded="true"

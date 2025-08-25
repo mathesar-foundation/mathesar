@@ -193,18 +193,20 @@ export class FormFields implements Readable<DataFormField[]> {
   }
 
   delete(dataFormField: DataFormField) {
-    const fieldIndex = get(dataFormField.index);
-    for (const field of get(this.fieldSet)) {
-      if (get(field.index) > fieldIndex) {
-        field.updateIndex((index) => index - 1);
+    if (dataFormField.canDelete) {
+      const fieldIndex = get(dataFormField.index);
+      for (const field of get(this.fieldSet)) {
+        if (get(field.index) > fieldIndex) {
+          field.updateIndex((index) => index - 1);
+        }
       }
+      this.fieldSet.delete(dataFormField);
+      this.structureCtx.changeEventHandler?.trigger({
+        type: 'fields/delete',
+        target: this.parent,
+        field: dataFormField,
+      });
     }
-    this.fieldSet.delete(dataFormField);
-    this.structureCtx.changeEventHandler?.trigger({
-      type: 'fields/delete',
-      target: this.parent,
-      field: dataFormField,
-    });
   }
 
   toRawFields(options?: { withoutErrorFields: boolean }) {

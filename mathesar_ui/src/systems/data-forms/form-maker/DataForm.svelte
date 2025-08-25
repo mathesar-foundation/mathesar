@@ -24,7 +24,11 @@
   );
 </script>
 
-<form class="form">
+<svelte:element
+  this={dataFormFillOutManager ? 'form' : 'div'}
+  class="data-form"
+  on:submit|preventDefault
+>
   {#if dataFormFillOutManager && $isSubmitted}
     <PostSubmission dataFormManager={dataFormFillOutManager} />
   {:else}
@@ -37,10 +41,10 @@
       <DataFormBranding />
     </div>
   {/if}
-</form>
+</svelte:element>
 
 <style lang="scss">
-  .form {
+  .data-form {
     --df__internal__element-spacing: var(--df__element-spacing, var(--sm3));
 
     --df__internal_element-left-padding: var(
@@ -55,7 +59,29 @@
     --df__internal__label-input-gap: calc(
       var(--df__internal__element-spacing) / 2
     );
-    --df__internal__z-index__field-header: 1;
+    --df__internal__z-index__field-with-some-selected-child: 1;
+    --df__internal__z-index__field-outer-controls: 2;
+    --df__internal__z-index__field-being-dragged: 3;
+    --df__internal__selected-element-bg: var(
+      --df__selected-element-bg,
+      var(--accent-100)
+    );
+    --df__internal__selected-element-border-color: var(
+      --df__selected-element-border-color,
+      var(--accent-500)
+    );
+    --df__internal__help-text-color: var(
+      --df__help-text-color,
+      var(--stormy-700)
+    );
+    --df__internal__some-child-selected-border-color: var(
+      --df-some-child-selected-border-color,
+      var(--accent-300)
+    );
+    --df__internal__immediate-child-selected-border-color: var(
+      --df-immediate-child-selected-border-color,
+      var(--accent-500)
+    );
 
     min-width: 15rem;
     max-width: var(--df__max-width, 40rem);
@@ -74,5 +100,13 @@
       border-top: 1px solid var(--border-color);
       margin-top: var(--lg2);
     }
+  }
+
+  :global(body.theme-dark) .data-form {
+    --df__selected-element-bg: rgba(239, 68, 68, 0.12);
+    --df__selected-element-border-color: var(--salmon-300);
+    --df-immediate-child-selected-border-color: rgba(255, 179, 148, 0.45);
+    --df-some-child-selected-border-color: rgba(255, 179, 148, 0.3);
+    --df__help-text-color: var(--rosy-100);
   }
 </style>
