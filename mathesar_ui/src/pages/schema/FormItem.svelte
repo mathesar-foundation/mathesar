@@ -11,16 +11,22 @@
     iconPubliclyShared,
   } from '@mathesar/icons';
   import type { DataForm } from '@mathesar/models/DataForm';
-  import { getDataFormPageUrl } from '@mathesar/routes/urls';
+  import { getDataFormPageUrl, getFormShareUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
-  import { ButtonMenuItem, Icon, Tooltip } from '@mathesar-component-library';
+  import {
+    AnchorButton,
+    ButtonMenuItem,
+    Icon,
+    Tooltip,
+  } from '@mathesar-component-library';
 
   export let dataForm: DataForm;
   export let editDataForm: () => void;
   export let deleteDataForm: () => void;
 
-  $: ({ id, structure, schema, baseTableOid, sharePreferences } = dataForm);
+  $: ({ id, structure, schema, baseTableOid, sharePreferences, token } =
+    dataForm);
   $: baseTable = $tablesStore.tablesMap.get(baseTableOid);
   $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
 
@@ -53,7 +59,13 @@
   <svelte:fragment slot="action-buttons">
     {#if $sharePreferences.isPublishedPublicly}
       <Tooltip>
-        <Icon slot="trigger" {...iconPubliclyShared} />
+        <AnchorButton
+          slot="trigger"
+          appearance="plain"
+          href={`${window.location.origin}${getFormShareUrl($token)}`}
+        >
+          <Icon {...iconPubliclyShared} size="0.9rem" />
+        </AnchorButton>
         <span slot="content">
           {$_('form_is_shared_publicly')}
         </span>
