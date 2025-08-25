@@ -108,7 +108,7 @@ export abstract class AbstractField {
       index: get(this.index),
       label: get(this.label),
       help: get(this.help),
-      styling: {},
+      styling: get(this.styling),
     };
   }
 }
