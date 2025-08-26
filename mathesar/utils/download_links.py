@@ -6,6 +6,8 @@ import json
 import mimetypes
 import posixpath
 from django.conf import settings
+from django.contrib.sessions.models import Session
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 import fsspec
 from PIL import Image
@@ -13,6 +15,8 @@ import yaml
 from mathesar.models import DownloadLink
 
 BACKEND_CONF_YAML = settings.BASE_DIR.joinpath('file_storage.yml')
+URI = "uri"
+MASH = "mash"
 
 def get_link_contents(request, download_link_id):
     link = get_object_or_404(
@@ -66,7 +70,35 @@ def create_mash_for_uri(uri, backend_key):
     ).hexdigest()
 
 
-def build_links_from_json(jsons):
+def create_json_for_uri(uri, backend_key):
+    return json.dumps({URI: uri, MASH: create_mash_for_uri(uri, backend_key)})
+
+
+def sync_links_from_json_strings(request, json_strs):
+    """
+    Given an iterable of json strings:
+      - determine which key Mathesar can use for access
+      - build missing DownloadLinks
+      - gather preexisting DownloadLinks
+      - Add user's session to all
+    """
+    temp_links = build_links_from_json(json_strs)
+    DownloadLink.objects.bulk_create(temp_links, ignore_conflicts=True)
+    links = DownloadLink.objects.filter(
+        Q(
+            *(
+                Q(uri=link.uri, fsspec_kwargs=link.fsspec_kwargs)
+                for link in temp_links
+            ),
+            _connector=Q.OR
+        )
+    )
+    session = Session.objects.get(session_key=request.session.session_key)
+    session.downloadlink_set.add(*links)
+    return links
+
+
+def build_links_from_json(json_strs):
     """
     Takes an iterable of JSON strings having "uri" and "mash" keys, and creates
     DownloadLinks from them.
@@ -79,5 +111,5 @@ def build_links_from_json(jsons):
     return [
         DownloadLink(uri=v.get("uri"), fsspec_kwargs=backends[b]["kwargs"])
         for v, b in itertools.product((json.loads(p) for p in json_strs), backends)
-        if v["mash"] == create_mash_for_uri(v.get("uri", ""), b)
+        if v[MASH] == create_mash_for_uri(v.get("uri", ""), b)
     ]
