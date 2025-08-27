@@ -27,7 +27,7 @@
   export let table: Table;
   export let processedColumns: ProcessedColumns;
   export let isLoading: boolean;
-  export let previewRecordId: ResultValue | undefined;
+  export let previewRecordId: ResultValue | undefined = undefined;
   export let onSave: (() => void) | undefined = undefined;
 
   $: template = table?.metadata?.record_summary_template ?? undefined;

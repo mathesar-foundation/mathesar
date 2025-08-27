@@ -4,7 +4,10 @@
 
   import type { ConstraintType } from '@mathesar/api/rpc/constraints';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import { getDbTypeBasedFilterCap } from '@mathesar/components/cell-fabric/utils';
+  import {
+    getDbTypeBasedFilterCap,
+    getDbTypeBasedInputCap,
+  } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type {
@@ -24,6 +27,8 @@
     type ComponentAndProps,
     ImmutableMap,
   } from '@mathesar-component-library/types';
+
+  import type { CellColumnLike } from '../cell-fabric/data-types/typeDefinitions';
 
   import type { FilterEntryColumnLike } from './types';
   import { FILTER_INPUT_CLASS, validateFilterEntry } from './utils';
@@ -154,11 +159,12 @@
     if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
       return selectedColumnInputCap;
     }
-    return getDbTypeBasedFilterCap({
+    const c: CellColumnLike = {
       type: parameterTypeId,
       type_options: {},
       metadata: {},
-    });
+    };
+    return getDbTypeBasedFilterCap(c) ?? getDbTypeBasedInputCap(c);
   }
 
   $: inputCap = calculateInputCap(selectedCondition, selectedColumn);

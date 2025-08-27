@@ -7,45 +7,44 @@
   import {
     iconDeleteMajor,
     iconEdit,
-    iconFillOutForm,
     iconForm,
+    iconPubliclyShared,
   } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
+  import type { DataForm } from '@mathesar/models/DataForm';
+  import { getDataFormPageUrl, getFormShareUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
+  import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
+  import {
+    AnchorButton,
+    ButtonMenuItem,
+    Icon,
+    Tooltip,
+  } from '@mathesar-component-library';
 
-  export let form: { id: number; name: string; description?: string | null };
-  export let database: Database;
-  export let schema: Schema;
+  export let dataForm: DataForm;
+  export let editDataForm: () => void;
+  export let deleteDataForm: () => void;
 
-  $: baseTable = { name: 'My Table' };
-
-  $: builderPageUrl = '#TODO'; // TODO
-  $: formPageUrl = '#TODO'; // TODO
+  $: ({ id, structure, schema, baseTableOid, sharePreferences, token } =
+    dataForm);
+  $: baseTable = $tablesStore.tablesMap.get(baseTableOid);
+  $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
 
   function handleDelete() {
     void confirmDelete({
       identifierType: $_('form'),
-      identifierName: form.name,
+      identifierName: $structure.name,
       onProceed: async () => {
-        // TODO
+        deleteDataForm();
       },
     });
-  }
-
-  function handleEdit() {
-    // TODO
-
-    // eslint-disable-next-line no-console
-    console.log({ database, schema, form });
   }
 </script>
 
 <EntityListItem
   href={builderPageUrl}
-  name={form.name}
-  description={form.description ?? undefined}
+  name={$structure.name}
+  description={$structure.description ?? undefined}
   icon={iconForm}
 >
   <svelte:fragment slot="detail">
@@ -57,24 +56,28 @@
       </RichText>
     {/if}
   </svelte:fragment>
-  <div slot="action-buttons">
-    <a href={formPageUrl} class="btn btn-secondary fill-out-button">
-      <Icon {...iconFillOutForm} />
-      <span>{$_('fill_out')}</span>
-    </a>
-  </div>
+  <svelte:fragment slot="action-buttons">
+    {#if $sharePreferences.isPublishedPublicly}
+      <Tooltip>
+        <AnchorButton
+          slot="trigger"
+          appearance="plain"
+          href={`${window.location.origin}${getFormShareUrl($token)}`}
+        >
+          <Icon {...iconPubliclyShared} size="0.9rem" />
+        </AnchorButton>
+        <span slot="content">
+          {$_('form_is_shared_publicly')}
+        </span>
+      </Tooltip>
+    {/if}
+  </svelte:fragment>
   <svelte:fragment slot="menu">
-    <ButtonMenuItem on:click={handleEdit} icon={iconEdit}>
-      {$_('edit_form')}
+    <ButtonMenuItem on:click={editDataForm} icon={iconEdit}>
+      {$_('rename_form')}
     </ButtonMenuItem>
     <ButtonMenuItem on:click={handleDelete} danger icon={iconDeleteMajor}>
       {$_('delete_form')}
     </ButtonMenuItem>
   </svelte:fragment>
 </EntityListItem>
-
-<style>
-  .fill-out-button {
-    font-size: var(--sm1);
-  }
-</style>

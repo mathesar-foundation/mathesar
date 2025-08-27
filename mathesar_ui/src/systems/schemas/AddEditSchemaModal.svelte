@@ -66,7 +66,7 @@
 >
   <span slot="title" let:initialName>
     {#if schema}
-      <RichText text={$_('edit_schema_with_name')} let:slotName>
+      <RichText text={$_('rename_schema_with_name')} let:slotName>
         {#if slotName === 'schemaName'}
           <Identifier>{initialName}</Identifier>
         {/if}

@@ -36,6 +36,7 @@ services:
       - POSTGRES_PORT=5432
       - DEBUG=true
       - SKIP_STATIC_COLLECTION=true
+      - SECRET_KEY=test12345
     volumes:
       - .:/code/
     depends_on:

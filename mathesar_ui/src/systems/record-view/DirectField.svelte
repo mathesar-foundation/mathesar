@@ -7,17 +7,25 @@
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  import { iconSetToNull } from '@mathesar/icons';
+  import {
+    iconLinkToRecordPage,
+    iconModalRecordView,
+    iconSetToNull,
+  } from '@mathesar/icons';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import { currentTablesMap } from '@mathesar/stores/tables';
+  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import {
     ButtonMenuItem,
     DropdownMenu,
     Label,
     LabelController,
+    LinkMenuItem,
     iconExpandDown,
   } from '@mathesar-component-library';
 
-  import type RecordStore from './RecordStore';
+  import RecordStore from './RecordStore';
 
   /**
    * This is used to determine whether to display a `NULL` overlay indicator.
@@ -40,6 +48,7 @@
     'time',
   ]);
   const labelController = new LabelController();
+  const modalRecordView = modalRecordViewContext.get();
 
   export let record: RecordStore;
   export let processedColumn: ProcessedColumn;
@@ -47,7 +56,7 @@
   export let canUpdateTableRecords = true;
 
   $: ({ recordSummaries } = record);
-  $: ({ column, abstractType } = processedColumn);
+  $: ({ column, abstractType, linkFk } = processedColumn);
   $: canUpdateColumn = processedColumn.currentRolePrivileges.has('UPDATE');
   $: value = $field;
   $: fieldIsDisabled = field.disabled;
@@ -60,6 +69,21 @@
   $: shouldDisplayNullOverlay = !cellDataTypesThatUsePlaceholderText.has(
     abstractType.cellInfo.type,
   );
+  $: getRecordUrl = $storeToGetRecordPageUrl;
+
+  function quickViewRecord() {
+    if (!modalRecordView) return;
+    if (value === undefined) return;
+    const tableOid = linkFk?.referent_table_oid;
+    if (!tableOid) return;
+    const containingTable = $currentTablesMap.get(tableOid);
+    if (!containingTable) return;
+    const recordStore = new RecordStore({
+      table: containingTable,
+      recordPk: String(value),
+    });
+    modalRecordView.open(recordStore);
+  }
 </script>
 
 <div class="direct-field">
@@ -80,6 +104,23 @@
           })}
           icon={iconExpandDown}
         >
+          {#if linkFk}
+            <ButtonMenuItem
+              icon={iconModalRecordView}
+              on:click={quickViewRecord}
+            >
+              {$_('quick_view_linked_record')}
+            </ButtonMenuItem>
+            {@const linkedRecordUrl = getRecordUrl({
+              tableId: linkFk.referent_table_oid,
+              recordId: value,
+            })}
+            {#if linkedRecordUrl}
+              <LinkMenuItem href={linkedRecordUrl} icon={iconLinkToRecordPage}>
+                {$_('open_linked_record')}
+              </LinkMenuItem>
+            {/if}
+          {/if}
           <ButtonMenuItem
             icon={iconSetToNull}
             on:click={() => field.set(null)}
@@ -114,6 +155,7 @@
           recordSummary,
         })}
       hasError={$showsError}
+      allowsHyperlinks
     />
     <FieldErrors {field} />
   </div>

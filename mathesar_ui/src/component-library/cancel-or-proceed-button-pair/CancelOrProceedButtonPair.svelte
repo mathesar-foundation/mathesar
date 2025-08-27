@@ -16,6 +16,7 @@
     label: 'Proceed',
     icon: iconProceed,
     appearance: 'primary',
+    type: 'button',
   };
 
   export let cancelButton: Partial<ButtonDetails> = {};
@@ -67,6 +68,7 @@
     icon={fullProceedButton.icon}
     label={fullProceedButton.label}
     disabled={isProcessing || !canProceed}
+    type={fullProceedButton.type}
     {size}
   />
 </div>

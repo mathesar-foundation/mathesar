@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import Logo from '@mathesar/components/Logo.svelte';
+  import MathesarName from '@mathesar/components/MathesarName.svelte';
   import {
     iconCurrentlyInstalledVersion,
     iconExternalHyperlink,
@@ -47,7 +48,7 @@
   <div class="details">
     <div class="left">
       <div class="logo"><Logo /></div>
-      <div class="name">{$_('mathesar')}</div>
+      <div class="name"><MathesarName /></div>
       <div class="version">{release.tagName}</div>
     </div>
     <div class="right">

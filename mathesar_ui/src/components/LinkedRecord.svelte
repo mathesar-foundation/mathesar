@@ -6,18 +6,20 @@
   import { Icon } from '@mathesar-component-library';
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
 
+  import RecordHyperlink from './RecordHyperlink.svelte';
+
   const dispatch = createEventDispatcher();
 
+  export let tableId: number | undefined = undefined;
   export let recordId: unknown | undefined = undefined;
   export let recordSummary: string | undefined = undefined;
   export let hasDeleteButton = false;
-  export let recordPageHref: string | undefined = undefined;
   export let valueComparisonOutcome: ValueComparisonOutcome | undefined =
     undefined;
   export let disabled = false;
+  export let allowsHyperlinks = false;
 
   let isHoveringDelete = false;
-  let isHoveringRecordPageLink = false;
 
   $: label = (() => {
     if (recordSummary && recordSummary.trim() !== '') {
@@ -37,28 +39,17 @@
 <span
   class="linked-record"
   class:is-hovering-delete={isHoveringDelete}
-  class:is-hovering-record-page-link={isHoveringRecordPageLink}
   class:exact-match={valueComparisonOutcome === 'exactMatch'}
   class:no-match={valueComparisonOutcome === 'noMatch'}
   class:disabled
   on:click
 >
-  {#if recordPageHref}
-    <a
-      class="record-summary record-page-link"
-      title={$_('go_to_record')}
-      href={recordPageHref}
-      tabindex="-1"
-      on:mouseenter={() => {
-        isHoveringRecordPageLink = true;
-      }}
-      on:mouseleave={() => {
-        isHoveringRecordPageLink = false;
-      }}
-      on:click={(e) => e.stopPropagation()}
-    >
-      {label}
-    </a>
+  {#if allowsHyperlinks && tableId}
+    <span class="record-summary record-page-link">
+      <RecordHyperlink {tableId} {recordId} tabindex="-1">
+        {label}
+      </RecordHyperlink>
+    </span>
   {:else}
     <span class="record-summary">{label}</span>
   {/if}
@@ -128,7 +119,7 @@
   .record-page-link:hover {
     text-decoration: none;
   }
-  .linked-record.is-hovering-record-page-link .background {
+  .linked-record:has(.record-page-link:hover) .background {
     --border-width: 0.2rem;
     left: calc(-1 * var(--border-width));
     top: calc(-1 * var(--border-width));

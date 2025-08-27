@@ -56,7 +56,12 @@
   }
 </script>
 
-<ControlledModal controller={modal} {allowClose} on:close={onClose}>
+<ControlledModal
+  controller={modal}
+  {allowClose}
+  closeOn={['button', 'esc', 'overlay']}
+  on:close={onClose}
+>
   <svelte:fragment slot="title">
     {#if title}
       <StringOrComponent arg={title} />

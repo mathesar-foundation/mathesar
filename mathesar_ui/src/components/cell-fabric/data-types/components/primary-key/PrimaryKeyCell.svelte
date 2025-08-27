@@ -1,12 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { _ } from 'svelte-i18n';
 
   import CellWrapper from '@mathesar/components/cell-fabric/data-types/components/CellWrapper.svelte';
   import type { PrimaryKeyCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import Default from '@mathesar/components/Default.svelte';
-  import { iconLinkToRecordPage } from '@mathesar/icons';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import RecordHyperlink from '@mathesar/components/RecordHyperlink.svelte';
+  import { iconModalRecordView } from '@mathesar/icons';
   import { Icon } from '@mathesar-component-library';
 
   type $$Props = PrimaryKeyCellProps;
@@ -20,9 +19,7 @@
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let canViewLinkedEntities: $$Props['canViewLinkedEntities'];
 
-  $: href = $storeToGetRecordPageUrl({ tableId, recordId: value });
-
-  function handleContextMenu(e: MouseEvent) {
+  function handleLinkContextMenu(e: MouseEvent) {
     // This is so users can right-click on the link without triggering the
     // Mathesar context menu or cell selection.
     e.stopPropagation();
@@ -66,14 +63,15 @@
       {/if}
     </span>
     {#if canViewLinkedEntities}
-      <a
-        {href}
-        class="link"
-        title={$_('go_to_record_with_value', { values: { value } })}
-        on:contextmenu={handleContextMenu}
+      <RecordHyperlink
+        {tableId}
+        recordId={value}
+        on:contextmenu={handleLinkContextMenu}
       >
-        <Icon {...iconLinkToRecordPage} />
-      </a>
+        <span class="link-icon">
+          <Icon {...iconModalRecordView} />
+        </span>
+      </RecordHyperlink>
     {/if}
   </div>
 </CellWrapper>
@@ -98,16 +96,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .link {
-    display: flex;
-    align-items: center;
+  .link-icon {
     padding: 0 var(--cell-padding);
     color: var(--text-link);
   }
-  .link:hover {
+  .link-icon:hover {
     color: var(--text-link-hover);
-  }
-  .link:active {
-    color: var(--text-link-active);
   }
 </style>

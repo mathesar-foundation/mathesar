@@ -1,43 +1,60 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconLinkToRecordPage,
+    iconModalRecordView,
+  } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     extractPrimaryKeyValue,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
+  import { currentTablesMap } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
+  import RecordStore from '@mathesar/systems/record-view/RecordStore';
+  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
-  import {
-    AnchorButton,
-    Button,
-    Icon,
-    iconExternalLink,
-  } from '@mathesar-component-library';
+  import { AnchorButton, Button, Icon } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
+  const modalRecordView = modalRecordViewContext.get();
 
-  $: ({ selection, recordsData, columnsDataStore, canDeleteRecords } =
+  $: ({ table, selection, recordsData, columnsDataStore, canDeleteRecords } =
     $tabularData);
   $: selectedRowIds = $selection.rowIds;
   $: selectedRowCount = selectedRowIds.size;
-
   $: ({ columns } = columnsDataStore);
   $: ({ selectableRowsMap } = recordsData);
-  $: recordPageLink = (() => {
+  $: recordId = (() => {
     const id = takeFirstAndOnly(selectedRowIds);
     if (!id) return undefined;
     const row = $selectableRowsMap.get(id);
     if (!row) return undefined;
     try {
-      const recordId = extractPrimaryKeyValue(row.record, $columns);
-      return $storeToGetRecordPageUrl({ recordId });
+      return extractPrimaryKeyValue(row.record, $columns);
     } catch (e) {
       return undefined;
     }
   })();
+  $: recordPageLink = $storeToGetRecordPageUrl({
+    tableId: table.oid,
+    recordId,
+  });
+
+  function quickViewRecord() {
+    if (!modalRecordView) return;
+    if (recordId === undefined) return;
+    const containingTable = $currentTablesMap.get(table.oid);
+    if (!containingTable) return;
+    const recordStore = new RecordStore({
+      table: containingTable,
+      recordPk: String(recordId),
+    });
+    modalRecordView.open(recordStore);
+  }
 
   async function handleDeleteRecords() {
     void confirmDelete({
@@ -65,16 +82,17 @@
 
 <div class="actions-container">
   {#if recordPageLink}
+    <Button on:click={quickViewRecord} appearance="action">
+      <Icon {...iconModalRecordView} />
+      <span>{$_('quick_view_record')}</span>
+    </Button>
+
     <AnchorButton href={recordPageLink} appearance="action">
-      <div class="action-item">
-        <div>
-          <Icon {...iconRecord} />
-          <span>{$_('open_record')}</span>
-        </div>
-        <Icon {...iconExternalLink} />
-      </div>
+      <Icon {...iconLinkToRecordPage} />
+      <span>{$_('open_record')}</span>
     </AnchorButton>
   {/if}
+
   <Button
     on:click={handleDeleteRecords}
     disabled={!$canDeleteRecords}
@@ -95,12 +113,5 @@
     > :global(* + *) {
       margin-top: 0.5rem;
     }
-  }
-
-  .action-item {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
   }
 </style>

@@ -21,7 +21,7 @@
   import {
     type RecordSelectorController,
     type RecordSelectorResult,
-    setRecordSelectorControllerInContext,
+    recordSelectorContext,
   } from './RecordSelectorController';
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
   import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
@@ -41,7 +41,7 @@
   let selectionIndex: number | undefined = undefined;
   let tableElement: HTMLElement;
 
-  $: setRecordSelectorControllerInContext(nestedController);
+  $: recordSelectorContext.set(nestedController);
   $: ({ columnWithNestedSelectorOpen, purpose } = controller);
   $: tabularDataStore.set(tabularData);
   $: ({

@@ -1,8 +1,6 @@
 """
 This script reads .env file content from standard input.
-It makes sure that:
-  - A SECRET_KEY is generated if missing.
-  - The PostgreSQL connection is verified even if PG values are present.
+It makes sure that the PostgreSQL connection is verified even if PG values are present.
 
 If the required PostgreSQL variables are missing or if the connection fails, a connection string must be
 provided as the first command-line argument.
@@ -11,8 +9,6 @@ After verification and possible updating of PG values, the updated content is pr
 """
 
 import sys
-import secrets
-import string
 import psycopg
 from urllib.parse import urlparse
 
@@ -71,12 +67,6 @@ def update_env_lines(lines, updates):
     return ''.join(new_lines)
 
 
-def generate_secret_key(length=50):
-    """Generate a random secret key for Django."""
-    allowed_chars = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(allowed_chars) for _ in range(length))
-
-
 def validate_pg_env_variables(env_vars):
     try:
         with psycopg.connect(
@@ -132,10 +122,6 @@ def main():
     lines, env_vars = parse_env(env_content)
 
     updates = {}
-
-    # Generate a SECRET_KEY if missing or empty.
-    if "SECRET_KEY" not in env_vars or not env_vars["SECRET_KEY"]:
-        updates["SECRET_KEY"] = generate_secret_key()
 
     connection_string = sys.argv[1].strip() if (len(sys.argv) > 1 and sys.argv[1].strip()) else None
 

@@ -30,10 +30,10 @@
   $: nestedController = new RecordSelectorController({
     nestingLevel: controller.nestingLevel + 1,
   });
-  $: ({ tableId, purpose } = controller);
-  $: table = defined($tableId, (id) => $currentTablesMap.get(id));
+  $: ({ tableOid, purpose } = controller);
+  $: table = defined($tableOid, (oid) => $currentTablesMap.get(oid));
   $: tabularData =
-    $tableId && table
+    $tableOid && table
       ? new TabularData({
           database: table.schema.database,
           meta: new Meta({ pagination: new Pagination({ size: 100 }) }),

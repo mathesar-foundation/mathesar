@@ -4,6 +4,7 @@
   display: inline-flex;
   flex-direction: column;
   min-width: var(--Menu__min-width, 0);
+  max-width: var(--Menu__max-width, 30rem);
 
   .menu-heading {
     color: var(--text-disabled);

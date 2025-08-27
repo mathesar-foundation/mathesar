@@ -5,13 +5,16 @@
 
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
+  import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import type { Database } from '@mathesar/models/Database';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
+  import { ensureReadable } from '@mathesar-component-library';
 
   import DataExplorerRedirect from './DataExplorerRedirect.svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
+  import DataFormRoute from './DataFormRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
   import TableRoute from './TableRoute.svelte';
 
@@ -21,6 +24,10 @@
   $: $currentSchemaId = schemaId;
   $: schema = $schemas.data.get(schemaId);
 
+  $: schemaRouteContext = schema
+    ? SchemaRouteContext.construct(schema)
+    : ensureReadable(undefined);
+
   function handleUnmount() {
     $currentSchemaId = undefined;
   }
@@ -28,7 +35,7 @@
   onMount(() => handleUnmount);
 </script>
 
-{#if schema}
+{#if $schemaRouteContext && schema}
   <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
 
   <Route path="/import/*" firstmatch>
@@ -68,8 +75,12 @@
     />
   </MultiPathRoute>
 
+  <Route path="/forms/:formId/*" firstmatch let:meta>
+    <DataFormRoute formId={parseInt(meta.params.formId, 10)} />
+  </Route>
+
   <Route path="/">
-    <SchemaPage {database} {schema} />
+    <SchemaPage />
   </Route>
 {:else}
   <ErrorPage>{$_('schema_not_found')}</ErrorPage>

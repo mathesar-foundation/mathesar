@@ -6,9 +6,9 @@
   import { iconSelectRecord } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
 
-  import { getRecordSelectorFromContext } from './RecordSelectorController';
+  import { recordSelectorContext } from './RecordSelectorController';
 
-  const recordSelector = getRecordSelectorFromContext();
+  const recordSelector = recordSelectorContext.get();
   const dispatch = createEventDispatcher();
 
   export let table: { oid: Table['oid']; name?: Table['name'] };
@@ -19,7 +19,7 @@
     : $_('navigate_to_record');
 
   function handleClick() {
-    recordSelector.navigateToRecordPage({ tableId: oid });
+    recordSelector?.navigateToRecordPage({ tableOid: oid });
     dispatch('click');
   }
 </script>

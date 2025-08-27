@@ -93,10 +93,13 @@ import type { IconProps } from '@mathesar-component-library/types';
 
 import {
   arrayIcon,
+  circleLowercaseIIcon,
   connectDatabaseIcon,
   createDatabaseIcon,
   databaseLineIcon,
   explorationIcon,
+  mathesarNameIcon,
+  modalRecordViewIcon,
   outcomeIcon,
   permissionsIcon,
   tableIcon,
@@ -195,6 +198,7 @@ export const iconExploration: IconProps = { data: explorationIcon };
 export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
 export const iconFeedback: IconProps = { data: faCommentAlt };
 export const iconFiltering: IconProps = { data: faFilter };
+export const iconForm: IconProps = { data: faClipboardList };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
@@ -232,8 +236,9 @@ export const iconPermissions: IconProps = { data: permissionsIcon };
 export const iconPrivacy: IconProps = { data: faUserSecret };
 export const iconPrimaryKey: IconProps = { data: faKey };
 export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
-export const iconDescription: IconProps = { data: faCommentAlt };
-export const iconForm: IconProps = { data: faClipboardList };
+export const iconDescription: IconProps = { data: circleLowercaseIIcon };
+export const iconMathesarName: IconProps = { data: mathesarNameIcon };
+export const iconModalRecordView: IconProps = { data: modalRecordViewIcon };
 
 // STATUSES
 
@@ -242,6 +247,7 @@ export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
 export const iconYes: IconProps = { data: faCheck };
 export const iconRequiresUpgrade: IconProps = { data: faTriangleExclamation };
 export const iconRequiresAttention: IconProps = { data: faCircleExclamation };
+export const iconPubliclyShared: IconProps = { data: faGlobe };
 
 // UI TYPES
 
