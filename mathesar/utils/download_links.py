@@ -18,11 +18,11 @@ BACKEND_CONF_YAML = settings.BASE_DIR.joinpath('file_storage.yml')
 URI = "uri"
 MASH = "mash"
 
-def get_link_contents(request, download_link_id):
+def get_link_contents(session_key, download_link_mash):
     link = get_object_or_404(
         DownloadLink,
-        id=download_link_id,
-        sessions=request.session.session_key,
+        mash=download_link_mash,
+        sessions=session_key,
     )
     content_type = mimetypes.guess_type(link.uri)[0]
     of = fsspec.open(link.uri, "rb", **link.fsspec_kwargs)
@@ -36,14 +36,14 @@ def get_link_contents(request, download_link_id):
     return stream_file, filename, content_type
 
 
-def get_link_thumbnail(request, download_link_id):
+def get_link_thumbnail(session_key, download_link_mash, width=500, height=500):
     link = get_object_or_404(
         DownloadLink,
-        id=download_link_id,
-        sessions=request.session.session_key,
+        id=download_link_mash,
+        sessions=session_key,
     )
     content_type = "image/jpeg"
-    size = int(request.GET.get("width", 500)), int(request.GET.get("height", 500))
+    size = width, height
     key = f"{size[0]}x{size[1]}"
 
     if (thumb_64 := link.thumbnail.get(key)) is None:
@@ -74,7 +74,7 @@ def create_json_for_uri(uri, backend_key):
     return json.dumps({URI: uri, MASH: create_mash_for_uri(uri, backend_key)})
 
 
-def sync_links_from_json_strings(request, json_strs):
+def sync_links_from_json_strings(session_key, json_strs):
     """
     Given an iterable of json strings:
       - determine which key Mathesar can use for access
@@ -82,18 +82,10 @@ def sync_links_from_json_strings(request, json_strs):
       - gather preexisting DownloadLinks
       - Add user's session to all
     """
-    temp_links = build_links_from_json(json_strs)
-    DownloadLink.objects.bulk_create(temp_links, ignore_conflicts=True)
-    links = DownloadLink.objects.filter(
-        Q(
-            *(
-                Q(uri=link.uri, fsspec_kwargs=link.fsspec_kwargs)
-                for link in temp_links
-            ),
-            _connector=Q.OR
-        )
+    links = DownloadLink.objects.bulk_create(
+        build_links_from_json(json_strs), ignore_conflicts=True
     )
-    session = Session.objects.get(session_key=request.session.session_key)
+    session = Session.objects.get(session_key=session_key)
     session.downloadlink_set.add(*links)
     return links
 
@@ -109,7 +101,11 @@ def build_links_from_json(json_strs):
     with open(BACKEND_CONF_YAML, 'r') as f:
         backends = yaml.full_load(f)
     return [
-        DownloadLink(uri=v.get("uri"), fsspec_kwargs=backends[b]["kwargs"])
+        DownloadLink(
+            mash=v.get(MASH),
+            uri=v.get(URI),
+            fsspec_kwargs=backends[b]["kwargs"]
+        )
         for v, b in itertools.product((json.loads(p) for p in json_strs), backends)
-        if v[MASH] == create_mash_for_uri(v.get("uri", ""), b)
+        if v[MASH] == create_mash_for_uri(v.get(URI, ""), b)
     ]
