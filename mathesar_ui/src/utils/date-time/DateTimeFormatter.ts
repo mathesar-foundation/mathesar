@@ -92,7 +92,7 @@ export default class DateTimeFormatter implements InputFormatter<string> {
     // Do not do any formatting as the user types
     const intermediateDisplay = input;
 
-    return { value, intermediateDisplay };
+    return { value: value.trim() ? value : null, intermediateDisplay };
   }
 
   format(canonicalDateStringOrUserInput: string): string {

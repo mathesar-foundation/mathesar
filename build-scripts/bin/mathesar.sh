@@ -132,12 +132,6 @@ set_env_vars_from_file() {
   fi
 }
 
-check_required_core_env_vars() {
-  if [[ -z "${SECRET_KEY}" ]]; then
-    err "Required environment variable SECRET_KEY is not set."
-  fi
-}
-
 # Check that required PostgreSQL environment variables are present.
 check_required_postgres_env_vars() {
   local missing=0
@@ -193,7 +187,6 @@ select_gunicorn() {
 run_mathesar() {
   info "Starting Mathesar..."
   set_env_vars_from_file
-  check_required_core_env_vars
 
   if ! check_required_postgres_env_vars; then
     if [[ "${FALLBACK_TO_INBUILT_DOCKER_DB}" = true ]]; then

@@ -20,6 +20,7 @@
 
   export let danger = false;
   export let active = false;
+  export let type: 'button' | 'submit' = 'button';
 
   // Additional classes
   let classes = '';
@@ -40,7 +41,7 @@
     <button
       slot="trigger"
       bind:this={element}
-      type="button"
+      {type}
       class={allClasses}
       class:danger
       class:active
@@ -60,7 +61,7 @@
 {:else}
   <button
     bind:this={element}
-    type="button"
+    {type}
     class={allClasses}
     class:danger
     class:active

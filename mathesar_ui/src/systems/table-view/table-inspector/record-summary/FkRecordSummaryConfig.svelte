@@ -5,7 +5,7 @@
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
 
   export let linkedTable: Table;
-  export let previewRecordId: ResultValue | undefined;
+  export let previewRecordId: ResultValue | undefined = undefined;
   export let onSave: (() => void) | undefined = undefined;
 
   $: structure = new TableStructure(linkedTable);

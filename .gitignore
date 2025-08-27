@@ -179,6 +179,7 @@ Temporary Items
 .env
 .volumes/
 .media/
+.secrets/
 docs/_build/
 
 ## yaml config files ##

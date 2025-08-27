@@ -54,7 +54,7 @@
             icon={iconEdit}
             disabled={!$currentRoleOwns}
           >
-            {$_('edit_schema')}
+            {$_('rename_schema')}
           </ButtonMenuItem>
           <ButtonMenuItem
             danger

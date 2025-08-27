@@ -2,12 +2,12 @@
   import { Skeleton } from '@mathesar/component-library';
 </script>
 
-<div class="exploration-skeleton-container">
+<div class="overview-item-skeleton-container">
   <Skeleton loading={true} />
 </div>
 
 <style lang="scss">
-  .exploration-skeleton-container {
+  .overview-item-skeleton-container {
     border-radius: var(--border-radius-l);
     overflow: hidden;
     position: relative;

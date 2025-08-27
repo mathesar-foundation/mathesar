@@ -21,8 +21,14 @@ export interface PermissionsStoreValues<Privilege> {
   privilegesForRoles: ImmutableMap<number, RolePrivileges<Privilege>>;
   permissionsMetaData: PermissionsMetaData<Privilege>;
   currentRole: {
-    currentRoleOid: Role['oid'];
-    parentRoleOids: Set<Role['oid']>;
+    oid: Role['oid'];
+    parentRoles: Map<
+      Role['oid'],
+      {
+        oid: number;
+        name: string;
+      }
+    >;
   };
 }
 

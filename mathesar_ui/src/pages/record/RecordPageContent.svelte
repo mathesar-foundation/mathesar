@@ -1,3 +1,8 @@
+<!--
+@component
+
+TODO: Resolve code duplication between this file and RecordViewContent.svelte.
+-->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
@@ -14,19 +19,14 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
-  import type { Table } from '@mathesar/models/Table';
-  import type { TableStructure } from '@mathesar/stores/table-data';
-  import { currentTable } from '@mathesar/stores/tables';
-
-  import DirectField from './DirectField.svelte';
-  import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
-  import type RecordStore from './RecordStore';
-  import Widgets from './Widgets.svelte';
+  import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
+  import type RecordStore from '@mathesar/systems/record-view/RecordStore';
+  import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
+  import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
 
   export let record: RecordStore;
-  export let tableStructure: TableStructure;
 
-  $: table = $currentTable as Table;
+  $: ({ table, tableStructure } = record);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canUpdateTableRecords = $currentRolePrivileges.has('UPDATE');
   $: ({ processedColumns } = tableStructure);
@@ -118,9 +118,11 @@
   </InsetPageLayout>
 
   {#await getJoinableTablesResult(table.oid)}
-    <RecordPageLoadingSpinner />
+    <RecordViewLoadingSpinner />
   {:then joinableTablesResult}
-    <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
+    <div class="widgets-container">
+      <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
+    </div>
   {/await}
 </div>
 
@@ -162,5 +164,8 @@
   }
   .submit {
     --form-submit-margin: 2rem 0 0 0;
+  }
+  .widgets-container {
+    margin: 0 var(--sm1) var(--lg1) var(--sm1);
   }
 </style>

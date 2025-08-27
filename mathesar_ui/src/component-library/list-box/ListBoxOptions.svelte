@@ -7,7 +7,7 @@
 
   type Option = $$Generic;
 
-  export let id: string;
+  export let id: string | undefined = undefined;
   let classes = '';
   export { classes as class };
   export let truncateOnOverflow = true;
@@ -17,6 +17,7 @@
    * an option.
    */
   export let offsetOnFocus = 0;
+  export let userFocusable = false;
 
   const { api, state } = getContext<ListBoxContext<Option>>('LIST_BOX_CONTEXT');
   const { displayedOptions, value, focusedOptionIndex, staticProps } = state;
@@ -61,7 +62,7 @@
 
 <ul
   bind:this={listBoxElement}
-  tabindex="0"
+  tabindex={userFocusable ? 0 : -1}
   {id}
   role="listbox"
   aria-expanded="true"
@@ -77,15 +78,22 @@
       $staticProps.checkEquality(opt, option),
     )}
     {@const isDisabled = $staticProps.checkIfOptionIsDisabled(option)}
+    {@const inFocus = index === $focusedOptionIndex}
     <li
       role="option"
       class:selected={isSelected}
       class:disabled={isDisabled}
-      class:in-focus={index === $focusedOptionIndex}
+      class:in-focus={inFocus}
       aria-selected={isSelected ? true : undefined}
+      on:mousedown={() => api.focusOption(option)}
       on:click={() => api.pick(option)}
     >
-      <slot {option} label={$staticProps.getLabel(option)}>
+      <slot
+        {option}
+        {isSelected}
+        {inFocus}
+        label={$staticProps.getLabel(option)}
+      >
         <StringOrComponent arg={$staticProps.getLabel(option)} />
       </slot>
     </li>

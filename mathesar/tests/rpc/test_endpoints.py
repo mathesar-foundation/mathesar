@@ -15,6 +15,7 @@ from mathesar.rpc import constraints
 from mathesar.rpc import data_modeling
 from mathesar.rpc import databases
 from mathesar.rpc import explorations
+from mathesar.rpc import forms
 from mathesar.rpc import records
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
@@ -253,32 +254,56 @@ METHODS = [
         [user_is_authenticated]
     ),
 
-    # (
-    #     forms.add,
-    #     "forms.add",
-    #     [user_is_authenticated]
-    # ),
-    # (
-    #     forms.get,
-    #     "forms.get",
-    #     []  # using empty list here indicates that this method is available to anonymous callers.
-    # ),
-    # (
-    #     forms.list_,
-    #     "forms.list",
-    #     [user_is_authenticated]
-    # ),
-    # (
-    #     forms.delete,
-    #     "forms.delete",
-    #     [user_is_authenticated]
-    # ),
-    # (
-    #     forms.replace,
-    #     "forms.replace",
-    #     [user_is_authenticated]
-    # ),
-
+    (
+        forms.add,
+        "forms.add",
+        [user_is_authenticated]
+    ),
+    (
+        forms.get,
+        "forms.get",
+        []  # using empty list here indicates that this method is available to anonymous callers.
+    ),
+    (
+        forms.get_source_info,
+        "forms.get_source_info",
+        []
+    ),
+    (
+        forms.list_,
+        "forms.list",
+        [user_is_authenticated]
+    ),
+    (
+        forms.regenerate_token,
+        "forms.regenerate_token",
+        [user_is_authenticated]
+    ),
+    (
+        forms.set_publish_public,
+        "forms.set_publish_public",
+        [user_is_authenticated]
+    ),
+    (
+        forms.delete,
+        "forms.delete",
+        [user_is_authenticated]
+    ),
+    (
+        forms.patch,
+        "forms.patch",
+        [user_is_authenticated]
+    ),
+    (
+        forms.list_related_records,
+        "forms.list_related_records",
+        []
+    ),
+    (
+        forms.submit,
+        "forms.submit",
+        []
+    ),
     (
         records.add,
         "records.add",
@@ -309,7 +334,11 @@ METHODS = [
         "records.search",
         [user_is_authenticated]
     ),
-
+    (
+        records.list_summaries,
+        "records.list_summaries",
+        [user_is_authenticated]
+    ),
     (
         roles.list_,
         "roles.list",

@@ -6,9 +6,8 @@
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import Tutorial from '@mathesar/component-library/tutorial/Tutorial.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconAddNew, iconRefresh } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { fetchExplorationsForCurrentSchema } from '@mathesar/stores/queries';
@@ -22,19 +21,23 @@
 
   import CreateTableButton from './CreateTableButton.svelte';
   import CreateTableTutorial from './CreateTableTutorial.svelte';
-  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
   import ExploreYourData from './ExploreYourData.svelte';
+  import FormsSection from './FormsSection.svelte';
+  import SchemaOverviewSideSection from './SchemaOverviewSideSection.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
+
+  const schemaRouteContext = SchemaRouteContext.get();
 
   export let tablesMap: Map<Table['oid'], Table>;
   export let explorationsMap: Map<number, SavedExploration>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
-  export let database: Database;
-  export let schema: Schema;
   export let onCreateEmptyTable: () => void;
+
+  $: ({ schema, dataFormsFetch } = $schemaRouteContext);
+  $: void dataFormsFetch.runConservatively();
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
@@ -43,7 +46,10 @@
     !hasTables && $currentRolePrivileges.has('CREATE');
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
   $: ({ tableCount } = schema);
-  $: dataExplorerPageUrl = getDataExplorerPageUrl(database.id, schema.oid);
+  $: dataExplorerPageUrl = getDataExplorerPageUrl(
+    schema.database.id,
+    schema.oid,
+  );
 </script>
 
 <div class="schema-overview" class:has-tables={hasTables}>
@@ -51,7 +57,11 @@
     <header>
       <h2>{$_('tables')}</h2>
       <div>
-        <CreateTableButton {database} {schema} {onCreateEmptyTable} />
+        <CreateTableButton
+          database={schema.database}
+          {schema}
+          {onCreateEmptyTable}
+        />
       </div>
     </header>
     {#if tablesRequestStatus.state === 'processing'}
@@ -69,30 +79,37 @@
         </div>
       </ErrorBox>
     {:else if showTableCreationTutorial}
-      <CreateTableTutorial {database} {schema} {onCreateEmptyTable} />
+      <CreateTableTutorial
+        database={schema.database}
+        {schema}
+        {onCreateEmptyTable}
+      />
     {:else}
-      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
+      <TablesList
+        tables={[...tablesMap.values()]}
+        {schema}
+        database={schema.database}
+      />
     {/if}
   </div>
 
   <div class="sidebar">
-    <section>
-      <header>
-        <h2>
-          {$_('explorations')}
-          <Help>{$_('what_is_an_exploration')}</Help>
-        </h2>
-        <div>
-          <AnchorButton href={dataExplorerPageUrl} appearance="secondary">
-            <Icon {...iconAddNew} />
-            <span>{$_('new_exploration')}</span>
-          </AnchorButton>
-        </div>
-      </header>
-      {#if isExplorationsLoading}
-        <ExplorationSkeleton />
-      {:else if explorationsRequestStatus.state === 'failure'}
-        <ErrorBox>
+    <SchemaOverviewSideSection
+      isLoading={isExplorationsLoading}
+      hasError={explorationsRequestStatus.state === 'failure'}
+    >
+      <svelte:fragment slot="header">
+        {$_('explorations')}
+        <Help>{$_('what_is_an_exploration')}</Help>
+      </svelte:fragment>
+      <svelte:fragment slot="actions">
+        <AnchorButton href={dataExplorerPageUrl} appearance="secondary">
+          <Icon {...iconAddNew} />
+          <span>{$_('new_exploration')}</span>
+        </AnchorButton>
+      </svelte:fragment>
+      <svelte:fragment slot="errors">
+        {#if explorationsRequestStatus.state === 'failure'}
           <p>{explorationsRequestStatus.errors[0]}</p>
           <div>
             <SpinnerButton
@@ -108,13 +125,14 @@
               </Button>
             </a>
           </div>
-        </ErrorBox>
-      {:else}
+        {/if}
+      </svelte:fragment>
+      <svelte:fragment slot="content">
         {#if hasExplorations}
           <div class="explorations-list">
             <ExplorationsList
               explorations={[...explorationsMap.values()]}
-              {database}
+              database={schema.database}
               {schema}
             />
           </div>
@@ -136,21 +154,10 @@
             </div>
           </Tutorial>
         {/if}
-      {/if}
-    </section>
+      </svelte:fragment>
+    </SchemaOverviewSideSection>
 
-    <!-- <section>
-      <header>
-        <h2>{$_('forms')}</h2>
-        <div>
-          <AnchorButton href="#TODO" appearance="secondary">
-            <Icon {...iconAddNew} />
-            <span>{$_('new_form')}</span>
-          </AnchorButton>
-        </div>
-      </header>
-      <FormsList {database} {schema} />
-    </section> -->
+    <FormsSection />
   </div>
 </div>
 

@@ -1,11 +1,10 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { staticText } from '@mathesar/i18n/staticText';
 
 const SEPARATOR = ' | ';
 
 function makePageTitle(parts: string[]): string {
   const allParts = [...parts];
-  allParts.push(get(_)('mathesar'));
+  allParts.push(staticText.MATHESAR);
   return allParts.join(SEPARATOR);
 }
 
