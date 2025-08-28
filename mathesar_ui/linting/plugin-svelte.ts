@@ -1,20 +1,15 @@
 import svelte from 'eslint-plugin-svelte';
-import tseslint from 'typescript-eslint';
-import globals from 'globals';
+import tseslint, { type InfiniteDepthConfigWithExtends } from 'typescript-eslint';
+
+
+/**
+ * @file This file stores our configuration for the "svelte" eslint plugin and
+ * its rules.
+ */
 
 export default [
   ...svelte.configs.recommended,
   ...svelte.configs.prettier,
-
-  // I added this block as recommended when configuring eslint-plugin-svelte,
-  // but I'm not actually sure if it's necessary.
-  {
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-      }
-    }
-  },
 
   // This block is here in order to follow the installation steps from
   // eslint-plugin-svelte
@@ -30,4 +25,29 @@ export default [
       }
     }
   },
-];
+
+  {
+    name: 'Turn off some of the rules that Svelte recommends',
+    rules: {
+      // This is off because we have quite a bit of it across our codebase. We
+      // could potentially refactor this out.
+      "svelte/no-immutable-reactive-statements": 'off',
+
+      // This is off because we have a lot of it across our codebase. I'm not
+      // sure this would be easy to refactor out, and I'm a bit confused about
+      // why eslint-plugin-svelte complains about some of these cases (e.g.
+      // binding to a store obtained via reactive destructuring).
+      "svelte/no-reactive-reassign": "off",
+
+      // This is off because we have some of it across our codebase. It might be
+      // a good idea to ignore the failures individually and then turn on this
+      // rule.
+      "svelte/require-each-key": "off",
+
+      // Ideally we'd have this on. But we have quite a bit of this code across
+      // our codebase. It might be a good idea to ignore the failures
+      // individually and then turn on this rule.
+      "svelte/require-event-dispatcher-types": "off",
+    },
+  }
+] satisfies InfiniteDepthConfigWithExtends;

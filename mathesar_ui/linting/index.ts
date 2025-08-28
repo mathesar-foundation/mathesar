@@ -1,12 +1,13 @@
 import { globalIgnores } from "eslint/config";
-import eslintPluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
+import tseslint from 'typescript-eslint';
 
-import pluginImportX from './plugin-import-x';
-import pluginSvelte from './plugin-svelte';
-import pluginEslintComments from './plugin-eslint-comments';
-import pluginPromise from './plugin-promise';
+import eslintConfig from './eslint';
+import typescriptEslintConfig from './typescript-eslint';
+import pluginImportXConfig from './plugin-import-x';
+import pluginSvelteConfig from './plugin-svelte';
+import pluginEslintCommentsConfig from './plugin-eslint-comments';
+import pluginPromiseConfig from './plugin-promise';
 
 export default tseslint.config(
   // This block disables linting on these code paths, relative to the directory
@@ -19,11 +20,12 @@ export default tseslint.config(
     '*.cjs',
   ]),
 
-  eslintPluginJs.configs.recommended,
-  tseslint.configs.recommended,
-  pluginImportX,
-  pluginSvelte,
-  pluginEslintComments,
-  pluginPromise,
+  eslintConfig,
+  typescriptEslintConfig,
+  pluginImportXConfig,
+  pluginSvelteConfig,
+  pluginEslintCommentsConfig,
+  pluginPromiseConfig,
+
   prettier, // This needs to come last because its purpose is to DISABLE rules
 );

@@ -1,6 +1,11 @@
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import { importX, type PluginFlatConfig } from 'eslint-plugin-import-x'
 
+/**
+ * @file This file stores our configuration for the "import-x" eslint plugin and
+ * its rules.
+ */
+
 export default [
   {
     settings: {
