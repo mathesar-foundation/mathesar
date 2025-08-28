@@ -221,7 +221,7 @@ export function uploadFile<T>(
           try {
             const response = JSON.parse(String(request.response)) as T;
             resolve(response);
-          } catch (exp) {
+          } catch {
             resolve(request.response as T);
           }
         } else {

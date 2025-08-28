@@ -12,6 +12,19 @@ export default [
     rules: {
       // This if off because we have quite a bit of it across our codebase
       "@typescript-eslint/ban-ts-comment": 'off',
+
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "args": "all",
+          "argsIgnorePattern": "^_",
+          "caughtErrors": "all",
+          "caughtErrorsIgnorePattern": "^_",
+          "destructuredArrayIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "ignoreRestSiblings": true
+        }
+      ]
     }
   },
   {

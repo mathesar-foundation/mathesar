@@ -406,7 +406,7 @@ export class RecordsData {
         persistedRowsToDelete.forEach((row) =>
           rowsSuccessfullyDeleted.add(row.identifier),
         );
-      } catch (error) {
+      } catch {
         persistedRowsToDelete.forEach((row) =>
           rowsFailedToDelete.set(
             row.identifier,

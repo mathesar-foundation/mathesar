@@ -7,7 +7,7 @@ test('CancellablePromise cancelled', () => {
   const fakePromise = new CancellablePromise((resolve, reject) => {
     try {
       resolve(202);
-    } catch (e) {
+    } catch {
       reject('Rejected: error');
     }
   }, dummyOnCancel);
@@ -24,7 +24,7 @@ test('CancellablePromise not cancelled gets resolved', async () => {
   const fakePromise = new CancellablePromise((resolve, reject) => {
     try {
       resolve(202);
-    } catch (e) {
+    } catch {
       reject('Rejected: error');
     }
   }, dummyOnCancel);

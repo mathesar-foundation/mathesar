@@ -3,7 +3,7 @@ import { type Readable, type Writable, writable } from 'svelte/store';
 function deserialize<T>(s: string): T | undefined {
   try {
     return JSON.parse(s) as T;
-  } catch (e) {
+  } catch {
     return undefined;
   }
 }
@@ -119,7 +119,7 @@ export class CachedFetchStore<T>
         return undefined;
       }
       return { inputHash, timestamp, value: deserializedValue };
-    } catch (e) {
+    } catch {
       return undefined;
     }
   }
@@ -173,7 +173,7 @@ export class CachedFetchStore<T>
     }
     try {
       await this.forceFetch();
-    } catch (e) {
+    } catch {
       // Ignore errors. We only care about catching them when force-fetching.
     }
   }
