@@ -31,7 +31,7 @@ class AnalyticsReport(TypedDict):
             all connected databasees (approximated)
         exploration_count: The number of explorations.
         form_count: The number of forms.
-        publicform_count: The number of published forms.
+        public_form_count: The number of published forms.
     """
     installation_id: Optional[str]
     mathesar_version: str
