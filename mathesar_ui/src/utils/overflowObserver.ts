@@ -25,6 +25,7 @@ export function makeOverflowDetails(): OverflowDetails {
 export default function overflowObserver(
   node: HTMLElement,
   overflowDetails: OverflowDetails,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ActionReturn<any> {
   const {
     hasOverflowTop,

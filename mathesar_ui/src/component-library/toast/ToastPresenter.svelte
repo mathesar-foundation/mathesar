@@ -8,6 +8,7 @@
   import ToastItem from './ToastItem.svelte';
 
   export let entries: Readable<ToastEntry[]>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export let toastItemComponent: typeof SvelteComponent<any> = ToastItem;
 </script>
 

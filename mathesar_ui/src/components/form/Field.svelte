@@ -20,6 +20,7 @@
   export let layout: Layout | undefined = undefined;
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   $: inputComponent = input?.component ?? (TextInput as typeof SvelteComponent<any>);
   $: inputComponentProps = input?.props ?? {};
   $: ({ showsError, disabled } = field);

@@ -14,6 +14,7 @@ async function moveNodeToWindowArea(
 
 function makeWindowAreaPortal(
   relativeSelector: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): (node: Element) => ActionReturn<any> {
   return (node: Element) => {
     void moveNodeToWindowArea(node, relativeSelector);

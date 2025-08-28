@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { SvelteComponent } from 'svelte';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export let component: typeof SvelteComponent<any>;
 </script>
 
