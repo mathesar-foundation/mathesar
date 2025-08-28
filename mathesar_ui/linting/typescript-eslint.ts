@@ -24,6 +24,13 @@ export default [
       // override (i.e. turning the rule back on as recommended) after we
       // migrate to Svelte 5.
       "@typescript-eslint/no-unused-expressions": 'off',
+
+      // This is customized to account for the way we sometimes need to define
+      // unused types like $$Props inside svelte components.
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { varsIgnorePattern: '^\\$\\$(Props|Events|Slots)$' },
+      ],
     }
   },
 ] satisfies InfiniteDepthConfigWithExtends;
