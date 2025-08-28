@@ -11,7 +11,7 @@
 
 <div class="custom-toast-item">
   <div class="decoration">TOAST</div>
-  <div class="message">{message}</div>
+  <div class="message">{$message}</div>
   <div><button on:click={controller.dismiss}>bye</button></div>
 </div>
 
