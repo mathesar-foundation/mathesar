@@ -16,7 +16,7 @@ export default [
   },
   {
     name: "Turn off recommended typescript-eslint rules that we don't want to follow in Svelte files",
-    files: ['*.svelte'],
+    files: ['**/*.svelte'],
     rules: {
       // This is off because we have seemingly-unused expressions in reactive
       // statements. But Svelte relies on these expressions as dependencies to
