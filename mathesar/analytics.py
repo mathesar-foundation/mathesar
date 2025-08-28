@@ -110,8 +110,8 @@ def prepare_analytics_report():
         connected_database_table_count=connected_database_table_count,
         connected_database_record_count=connected_database_record_count,
         exploration_count=Explorations.objects.count(),
-        form_count = Form.objects.count(),
-        public_form_count = Form.objects.filter(publish_public=True).count()
+        form_count=Form.objects.count(),
+        public_form_count=Form.objects.filter(publish_public=True).count()
     )
 
 
