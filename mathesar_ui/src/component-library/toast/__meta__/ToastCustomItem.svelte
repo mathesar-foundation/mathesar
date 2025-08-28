@@ -1,14 +1,17 @@
 <script lang="ts">
+	import { ensureReadable } from '@mathesar-component-library';
+  
   import type { ToastEntry } from '../ToastController';
 
   export let entry: ToastEntry;
 
   $: ({ props, controller } = entry);
+  $: message = ensureReadable(props.message);
 </script>
 
 <div class="custom-toast-item">
   <div class="decoration">TOAST</div>
-  <div class="message">{props.message}</div>
+  <div class="message">{message}</div>
   <div><button on:click={controller.dismiss}>bye</button></div>
 </div>
 
