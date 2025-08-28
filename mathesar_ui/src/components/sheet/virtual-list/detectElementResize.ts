@@ -1,13 +1,5 @@
-/* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-this-alias */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable prefer-template */
-/* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @eslint-community/eslint-comments/no-unlimited-disable */
+/* eslint-disable */
 
 /**
  * Detect Element Resize.
@@ -264,3 +256,6 @@ export function createDetectElementResize(): ElementResizeDetector {
     removeResizeListener,
   };
 }
+
+/* eslint-enable @eslint-community/eslint-comments/no-unlimited-disable */
+/* eslint-enable */
