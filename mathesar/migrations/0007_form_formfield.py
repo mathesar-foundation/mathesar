@@ -89,4 +89,14 @@ class Migration(migrations.Migration):
             DROP CONSTRAINT form_role_server_integrity;
             """
         ),
+        migrations.AddField(
+            model_name='analyticsreport',
+            name='form_count',
+            field=models.PositiveIntegerField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name='analyticsreport',
+            name='public_form_count',
+            field=models.PositiveIntegerField(blank=True, null=True),
+        ),
     ]

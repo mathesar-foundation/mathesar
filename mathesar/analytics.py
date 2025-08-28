@@ -24,6 +24,7 @@ from mathesar.models import (
     ConfiguredRole,
     Database,
     Explorations,
+    Form,
     InstallationID,
     User,
 )
@@ -109,6 +110,8 @@ def prepare_analytics_report():
         connected_database_table_count=connected_database_table_count,
         connected_database_record_count=connected_database_record_count,
         exploration_count=Explorations.objects.count(),
+        form_count = Form.objects.count(),
+        public_form_count = Form.objects.filter(publish_public=True).count()
     )
 
 
@@ -129,6 +132,8 @@ def upload_analytics_reports():
             "connected_database_table_count": report.connected_database_table_count,
             "connected_database_record_count": report.connected_database_record_count,
             "exploration_count": report.exploration_count,
+            "form_count": report.form_count,
+            "public_form_count": report.public_form_count,
         }
         for report in reports
     ]

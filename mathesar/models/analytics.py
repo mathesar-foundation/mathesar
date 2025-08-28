@@ -22,4 +22,6 @@ class AnalyticsReport(BaseModel):
     connected_database_table_count = models.PositiveIntegerField(null=True, blank=True)
     connected_database_record_count = models.PositiveBigIntegerField(null=True, blank=True)
     exploration_count = models.PositiveIntegerField(null=True, blank=True)
+    form_count = models.PositiveIntegerField(null=True, blank=True)
+    public_form_count = models.PositiveIntegerField(null=True, blank=True)
     uploaded = models.BooleanField(default=False)
