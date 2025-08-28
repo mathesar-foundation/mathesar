@@ -1,4 +1,5 @@
 from frozendict import frozendict
+from hashlib import md5
 from sqlalchemy import select
 from sqlalchemy.sql.functions import count
 
@@ -248,7 +249,7 @@ class DBQuery:
                         right, onclause=left_col == right_col, isouter=True,
                     )
             initial_col_name = initial_col.get_name(self.engine, metadata)
-            return right.columns[initial_col_name].label(initial_col.alias)
+            return right.columns[initial_col_name].label(md5(initial_col.alias.encode()).hexdigest())
 
         processed_initial_columns = [
             _process_initial_column(initial_col)

@@ -1,3 +1,5 @@
+from hashlib import md5
+
 from db.deprecated.engine import create_future_engine_with_custom_types
 from db.deprecated.metadata import get_empty_metadata
 from db.deprecated.queries.base import DBQuery, InitialColumn, JoinParameter
@@ -78,6 +80,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
     base_table_oid = exploration_def["base_table_oid"]
     initial_columns = exploration_def['initial_columns']
     processed_initial_columns = []
+    alias_hash_map = {}
     for column in initial_columns:
         jp_path = column.get("join_path")
         if jp_path is not None:
@@ -97,6 +100,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
                 jp_path=join_path if jp_path else None
             )
         )
+        alias_hash_map[md5(column["alias"].encode()).hexdigest()] = column["alias"]
     transformations = tuple(
         deserialize_transformation(i)
         for i in exploration_def.get("transformations", [])
@@ -128,15 +132,19 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         db_query,
         conn,
         engine,
-        metadata
+        metadata,
+        alias_hash_map
     )
     return {
         "query": exploration_def,
         "records": {
-            "count": db_query.count,
-            "results": [r._asdict() for r in query_results],
+            "count": len(query_results),
+            "results": [
+                {alias_hash_map[k]: v for k, v in r._asdict().items()}
+                for r in query_results
+            ],
         },
-        "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
+        "output_columns": tuple(alias_hash_map[sa_col.name] for sa_col in db_query.sa_output_columns),
         "column_metadata": column_metadata,
         "limit": limit,
         "offset": offset
@@ -160,7 +168,8 @@ def _get_exploration_column_metadata(
     db_query,
     conn,
     engine,
-    metadata
+    metadata,
+    alias_hash_map
 ):
     exploration_column_metadata = {}
     for alias, sa_col in db_query.all_sa_columns_map.items():
@@ -176,9 +185,9 @@ def _get_exploration_column_metadata(
         input_table_name = get_table(initial_column.reloid, conn)["name"] if initial_column else None
         input_column_name = initial_column.get_name(engine, metadata) if initial_column else None
         display_names = exploration_def.get("display_names", None)
-        exploration_column_metadata[alias] = {
-            "alias": alias,
-            "display_name": display_names.get(alias) if display_names is not None else None,
+        exploration_column_metadata[alias_hash_map[alias]] = {
+            "alias": alias_hash_map[alias],
+            "display_name": display_names.get(alias_hash_map[alias]) if display_names is not None else None,
             "type": sa_col.db_type.id,
             "primary_key": sa_col.primary_key,
             "type_options": sa_col.type_options,
@@ -187,7 +196,7 @@ def _get_exploration_column_metadata(
             "input_column_name": input_column_name,
             "input_table_name": input_table_name,
             "input_table_id": initial_column.reloid if initial_column else None,
-            "input_alias": db_query.get_input_alias_for_output_alias(alias)
+            "input_alias": db_query.get_input_alias_for_output_alias(alias_hash_map[alias])
         }
     return exploration_column_metadata
 
