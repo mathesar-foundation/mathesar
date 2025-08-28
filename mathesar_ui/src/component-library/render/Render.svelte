@@ -13,11 +13,13 @@
 </script>
 
 {#if arg === undefined}
+  <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
   {''}
 {:else if typeof arg === 'string'}
   {arg}
 {:else if Array.isArray(arg)}
   {#if arg.length === 0}
+    <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
     {''}
   {:else if arg.length === 1}
     {arg[0]}
