@@ -50,7 +50,7 @@
         </RichText>
       </ErrorBox>
       {#if latest}
-        <ReleaseBox release={latest} type={'latest'} />
+        <ReleaseBox release={latest} type="latest" />
       {/if}
     {:else if upgradeStatus === 'up-to-date'}
       <ReleaseBox release={current} type="currently-installed-and-latest" />
@@ -58,11 +58,11 @@
       <ReleaseBox release={current} type="current" />
       <ErrorBox>{$_('unable_to_load_data_latest_release')}</ErrorBox>
     {:else if upgradeStatus === 'upgradable'}
-      <ReleaseBox release={latest} type={'available-upgrade'} />
-      <ReleaseBox release={current} type={'current'} />
+      <ReleaseBox release={latest} type="available-upgrade" />
+      <ReleaseBox release={current} type="current" />
     {:else if upgradeStatus === undefined}
-      <ReleaseBox release={current} type={'current'} />
-      <ReleaseBox release={latest} type={'latest'} />
+      <ReleaseBox release={current} type="current" />
+      <ReleaseBox release={latest} type="latest" />
     {:else}
       {assertExhaustive(upgradeStatus)}
     {/if}
