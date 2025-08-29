@@ -1,4 +1,4 @@
-import tseslint, { type InfiniteDepthConfigWithExtends } from 'typescript-eslint';
+import { type InfiniteDepthConfigWithExtends, configs } from 'typescript-eslint';
 
 /**
  * @file This file stores configuration for the typescript-eslint plugin and its
@@ -6,7 +6,7 @@ import tseslint, { type InfiniteDepthConfigWithExtends } from 'typescript-eslint
  */
 
 export default [
-  tseslint.configs.recommended,
+  configs.recommended,
   {
     name: "Turn off recommended typescript-eslint rules that we don't want to follow globally",
     rules: {

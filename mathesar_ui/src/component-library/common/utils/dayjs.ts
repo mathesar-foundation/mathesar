@@ -1,8 +1,8 @@
-import dayjs from 'dayjs';
+import dayjs, { extend } from 'dayjs';
 import customParsePlugin from 'dayjs/plugin/customParseFormat';
 import durationPlugin from 'dayjs/plugin/duration';
 
-dayjs.extend(customParsePlugin);
-dayjs.extend(durationPlugin);
+extend(customParsePlugin);
+extend(durationPlugin);
 
 export default dayjs;

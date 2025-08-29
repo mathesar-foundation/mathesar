@@ -1,5 +1,5 @@
 import svelte from 'eslint-plugin-svelte';
-import tseslint, { type InfiniteDepthConfigWithExtends } from 'typescript-eslint';
+import { type InfiniteDepthConfigWithExtends, parser } from 'typescript-eslint';
 
 
 /**
@@ -21,7 +21,7 @@ export default [
       parserOptions: {
         projectService: true,
         extraFileExtensions: ['.svelte'],
-        parser: tseslint.parser,
+        parser,
       }
     }
   },
