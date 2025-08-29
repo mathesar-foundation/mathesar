@@ -44,6 +44,16 @@ export default [
             'sibling',
             'index',
           ],
+          pathGroups: [
+            {
+              pattern: 'tinro',
+              group: 'external',
+            },
+          ],
+          named: {
+            enabled: true,
+            types: 'types-first',
+          }
         },
       ],
       'import-x/extensions': [
