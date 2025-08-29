@@ -7,8 +7,9 @@ import mimetypes
 import posixpath
 from django.conf import settings
 from django.contrib.sessions.models import Session
-from django.db.models import Q
+from django.core import serializers
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 import fsspec
 from PIL import Image
 import yaml
@@ -72,6 +73,35 @@ def create_mash_for_uri(uri, backend_key):
 
 def create_json_for_uri(uri, backend_key):
     return json.dumps({URI: uri, MASH: create_mash_for_uri(uri, backend_key)})
+
+
+def get_download_links(request, results, keys):
+    return {
+        key: get_links_details(
+            request,
+            sync_links_from_json_strings(request.session.session_key, [r[key] for r in results])
+        )
+        for key in (str(k) for k in keys)
+    }
+
+
+def get_links_details(request, links):
+    return {
+        link.mash: {
+            "filename": posixpath.split(link.uri)[-1],
+            "mimetype": mimetypes.guess_type(link.uri)[0],
+            "thumbnail": request.build_absolute_uri(
+                reverse("files_thumbnail", kwargs={"download_link_mash": link.mash})
+            ) if mimetypes.guess_type(link.uri)[0].split("/")[0] == 'image' else None,
+            "attachment": request.build_absolute_uri(
+                reverse("files_download", kwargs={"download_link_mash": link.mash})
+            ),
+            "direct": request.build_absolute_uri(
+                reverse("files_direct", kwargs={"download_link_mash": link.mash})
+            )
+        }
+        for link in links
+    }
 
 
 def sync_links_from_json_strings(session_key, json_strs):

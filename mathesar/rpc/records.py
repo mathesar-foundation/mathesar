@@ -17,6 +17,7 @@ from db.records import (
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.tables import get_table_record_summary_templates
+from mathesar.utils.download_links import get_download_links
 
 
 class OrderBy(TypedDict):
@@ -154,6 +155,7 @@ class RecordList(TypedDict):
     grouping: GroupingResponse
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
+    download_links: Optional[dict]
 
     @classmethod
     def from_dict(cls, d):
@@ -163,6 +165,7 @@ class RecordList(TypedDict):
             grouping=d.get("grouping"),
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
+            download_links=d.get("download_links") or None
         )
 
 
@@ -236,6 +239,7 @@ def list_(
         filter: Filter = None,
         grouping: Grouping = None,
         return_record_summaries: bool = False,
+        download_link_columns: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -252,6 +256,9 @@ def list_(
         grouping: An array of group definition objects.
         return_record_summaries: Whether to return summaries of retrieved
             records.
+        get_download_links_for_columns: If non-empty, the backend will
+            construct DownloadLinks for each value in the passed column
+            attnums if possible, and return relevant info.
 
     Returns:
         The requested records, along with some metadata.
@@ -269,6 +276,13 @@ def list_(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
+    print(record_info["results"])
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns
+    )
+
     return RecordList.from_dict(record_info)
 
 
