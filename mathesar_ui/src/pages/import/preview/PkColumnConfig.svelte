@@ -28,8 +28,7 @@
   const columnTypes = ['integer', 'uuid'] as const;
   type ColumnType = (typeof columnTypes)[number];
 
-  const defaultOptions = ['identity', 'uuid4', 'none'] as const;
-  type DefaultValue = (typeof defaultOptions)[number];
+  type DefaultValue = 'identity' | 'uuid4' | 'none';
 
   /** The DB types that can potentially support an identity default. */
   const identityCapableDbTypes = getDbTypesForAbstractType('number');

@@ -33,7 +33,7 @@ test('CancellablePromise not cancelled gets resolved', async () => {
 });
 
 test('CancellablePromise not cancelled gets rejected', async () => {
-  const fakePromise = new CancellablePromise((resolve, reject) => {
+  const fakePromise = new CancellablePromise((_resolve, reject) => {
     reject('Rejected: error');
   }, dummyOnCancel);
   expect(fakePromise.isCancelled).toBeFalsy();

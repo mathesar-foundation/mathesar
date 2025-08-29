@@ -35,7 +35,7 @@
     if (!row) return undefined;
     try {
       return extractPrimaryKeyValue(row.record, $columns);
-    } catch (e) {
+    } catch {
       return undefined;
     }
   })();
