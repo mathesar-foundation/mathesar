@@ -29,6 +29,7 @@
     "eslint-plugin-import-x": "^4.16.1",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-svelte": "^3.11.0",
+    "globals": "^16.3.0",
     "jiti": "^2.5.1",
     "jsdom": "^26.1.0",
     "postcss": "^8.5.6",
