@@ -280,7 +280,7 @@ def list_(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
         download_link_columns
-    )
+    ) or None
 
     return RecordList.from_dict(record_info)
 
@@ -331,7 +331,7 @@ def get(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
         download_link_columns
-    )
+    ) or None
     return RecordList.from_dict(record_info)
 
 
@@ -495,7 +495,7 @@ def search(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
         download_link_columns
-    )
+    ) or None
     return RecordList.from_dict(record_info)
 
 
