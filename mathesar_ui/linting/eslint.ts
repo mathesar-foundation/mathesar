@@ -29,4 +29,13 @@ export default [
     },
   },
 
+  {
+    name: 'Add more core eslint rules',
+    rules: {
+      // We've added this because the import-x/no-duplicates rule didn't work
+      // well for us. See comments there for more detail.
+      'no-duplicate-imports': 'error',
+    },
+  },
+
 ] satisfies InfiniteDepthConfigWithExtends;
