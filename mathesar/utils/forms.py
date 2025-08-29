@@ -204,9 +204,9 @@ def iterate_form_fields(fields, parent_field=None, depth=0, fields_to_pick=[]):
         )
 
 
-def submit_form(form_token, values, user):
+def submit_form(form_token, values):
     form_model = Form.objects.get(token=form_token)
-    assert has_permission_for_form(user, form_model), 'Insufficient permission to submit the form'
+    assert form_model.publish_public, 'This form does not accept submissions'
     fields_to_pick = [i for i in values.keys() if isinstance(values[i], dict) and values[i].get('type') == 'pick']
     field_info_list = [
         {
