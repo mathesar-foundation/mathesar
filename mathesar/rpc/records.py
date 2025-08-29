@@ -276,7 +276,6 @@ def list_(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
-    print(record_info["results"])
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
@@ -294,6 +293,7 @@ def get(
         database_id: int,
         return_record_summaries: bool = False,
         table_record_summary_templates: dict[str, Any] = None,
+        download_link_columns: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -327,6 +327,11 @@ def get(
                 **(table_record_summary_templates or {}),
             },
         )
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns
+    )
     return RecordList.from_dict(record_info)
 
 
@@ -452,6 +457,7 @@ def search(
         limit: int = 10,
         offset: int = 0,
         return_record_summaries: bool = False,
+        download_link_columns: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -485,6 +491,11 @@ def search(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns
+    )
     return RecordList.from_dict(record_info)
 
 
