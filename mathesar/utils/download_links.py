@@ -7,7 +7,6 @@ import mimetypes
 import posixpath
 from django.conf import settings
 from django.contrib.sessions.models import Session
-from django.core import serializers
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 import fsspec
@@ -18,6 +17,7 @@ from mathesar.models import DownloadLink
 BACKEND_CONF_YAML = settings.BASE_DIR.joinpath('file_storage.yml')
 URI = "uri"
 MASH = "mash"
+
 
 def get_link_contents(session_key, download_link_mash):
     link = get_object_or_404(
