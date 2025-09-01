@@ -18,7 +18,10 @@ import type {
 } from '@mathesar/api/rpc/constraints';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
-import type { CancellablePromise } from '@mathesar-component-library';
+import {
+  type CancellablePromise,
+  EventHandler,
+} from '@mathesar-component-library';
 
 export interface ConstraintsData {
   state: States;
@@ -62,7 +65,13 @@ function uniqueColumns(
   );
 }
 
-export class ConstraintsDataStore implements Writable<ConstraintsData> {
+export class ConstraintsDataStore
+  extends EventHandler<{
+    constraintAdded: void;
+    constraintRemoved: void;
+  }>
+  implements Writable<ConstraintsData>
+{
   private apiContext: {
     database_id: number;
     table_oid: Table['oid'];
@@ -88,6 +97,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     database: Pick<Database, 'id'>;
     table: Pick<Table, 'oid'>;
   }) {
+    super();
     this.apiContext = { database_id: database.id, table_oid: table.oid };
     this.store = writable({
       state: States.Loading,
@@ -142,6 +152,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     await api.constraints
       .add({ ...this.apiContext, constraint_def_list: [recipe] })
       .run();
+    await this.dispatch('constraintAdded');
     await this.fetch();
   }
 
@@ -149,6 +160,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     await api.constraints
       .delete({ ...this.apiContext, constraint_oid: constraintId })
       .run();
+    await this.dispatch('constraintRemoved');
     await this.fetch();
   }
 
