@@ -1,5 +1,6 @@
 import type { SavedExploration } from '@mathesar/api/rpc/explorations';
 import type { Database } from '@mathesar/models/Database';
+import type { DataForm } from '@mathesar/models/DataForm';
 import type { Schema } from '@mathesar/models/Schema';
 import type { Table } from '@mathesar/models/Table';
 import type {
@@ -51,11 +52,17 @@ export interface BreadcrumbItemExploration {
   query: Pick<SavedExploration, 'id' | 'name'>;
 }
 
+export interface BreadcrumbItemDataForm {
+  type: 'dataForm';
+  dataForm: DataForm;
+}
+
 export type BreadcrumbItem =
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
   | BreadcrumbItemTable
   | BreadcrumbItemExploration
+  | BreadcrumbItemDataForm
   | BreadcrumbItemRecord
   | BreadcrumbItemSimple;
 
@@ -84,6 +91,12 @@ export interface BreadcrumbSelectorEntryForExploration
   exploration: SavedExploration;
 }
 
+export interface BreadcrumbSelectorEntryForDataForm
+  extends BaseBreadcrumbSelectorEntry {
+  type: 'dataForm';
+  dataForm: DataForm;
+}
+
 export interface BreadcrumbSelectorEntryForSchema
   extends BaseBreadcrumbSelectorEntry {
   type: 'schema';
@@ -100,6 +113,7 @@ export type BreadcrumbSelectorEntry =
   | SimpleBreadcrumbSelectorEntry
   | BreadcrumbSelectorEntryForTable
   | BreadcrumbSelectorEntryForExploration
+  | BreadcrumbSelectorEntryForDataForm
   | BreadcrumbSelectorEntryForSchema
   | BreadcrumbSelectorEntryForDatabase;
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { MatchHighlighter } from '@mathesar/component-library';
   import DatabaseDisplayNameWithIcon from '@mathesar/components/DatabaseDisplayNameWithIcon.svelte';
+  import DataFormName from '@mathesar/components/DataFormName.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import QueryName from '@mathesar/components/QueryName.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
@@ -36,6 +37,10 @@
       <SchemaName schema={entry.schema} let:schemaName>
         <MatchHighlighter text={schemaName} substring={filterString} />
       </SchemaName>
+    {:else if entry.type === 'dataForm'}
+      <DataFormName dataForm={entry.dataForm} let:dataFormName>
+        <MatchHighlighter text={dataFormName} substring={filterString} />
+      </DataFormName>
     {:else}
       <NameWithIcon icon={entry.icon}>
         <MatchHighlighter text={entry.label} substring={filterString} />

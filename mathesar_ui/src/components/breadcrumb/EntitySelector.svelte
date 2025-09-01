@@ -5,7 +5,6 @@
 
   import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
-  import { iconForm } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { DataForm } from '@mathesar/models/DataForm';
   import type { Schema } from '@mathesar/models/Schema';
@@ -21,6 +20,7 @@
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
+    BreadcrumbSelectorEntryForDataForm,
     BreadcrumbSelectorEntryForExploration,
     BreadcrumbSelectorEntryForTable,
   } from './breadcrumbTypes';
@@ -73,20 +73,20 @@
 
   function makeDataFormBreadcrumbSelectorItem(
     dataForm: DataForm,
-  ): SimpleBreadcrumbSelectorEntry {
+  ): BreadcrumbSelectorEntryForDataForm {
     return {
-      type: 'simple',
-      label: get(dataForm.structure).name,
+      type: 'dataForm',
+      dataForm,
+      getFilterableText: () => get(dataForm.structure).name,
       href: getDataFormPageUrl(database.id, schema.oid, dataForm.id),
-      icon: iconForm,
       isActive() {
-        const entryhref = getDataFormPageUrl(
+        const entryHref = getDataFormPageUrl(
           database.id,
           schema.oid,
           dataForm.id,
         );
         const currentHref = $currentRoute.url;
-        return currentHref.startsWith(entryhref);
+        return currentHref.startsWith(entryHref);
       },
     };
   }

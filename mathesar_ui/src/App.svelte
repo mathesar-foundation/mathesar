@@ -50,6 +50,7 @@
     'record': $asparagus,
     'record-fk': hsl(hue($asparagus), 80%, 60%),
     'exploration': $fjord,
+    'data-form': $teal,
   );
 
   body {

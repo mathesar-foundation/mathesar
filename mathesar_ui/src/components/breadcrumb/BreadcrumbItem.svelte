@@ -1,12 +1,14 @@
 <script lang="ts">
   import { StringOrComponent } from '@mathesar/component-library';
   import DatabaseDisplayNameWithIcon from '@mathesar/components/DatabaseDisplayNameWithIcon.svelte';
+  import DataFormName from '@mathesar/components/DataFormName.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import QueryName from '@mathesar/components/QueryName.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord } from '@mathesar/icons';
   import {
+    getDataFormPageUrl,
     getDatabasePageUrl,
     getExplorationPageUrl,
     getRecordPageUrl,
@@ -75,6 +77,18 @@
       )}
     >
       <QueryName query={item.query} />
+    </BreadcrumbLink>
+  </div>
+{:else if item.type === 'dataForm'}
+  <div class="breadcrumb-item truncate">
+    <BreadcrumbLink
+      href={getDataFormPageUrl(
+        item.dataForm.schema.database.id,
+        item.dataForm.schema.oid,
+        item.dataForm.id,
+      )}
+    >
+      <DataFormName dataForm={item.dataForm} />
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'simple'}
