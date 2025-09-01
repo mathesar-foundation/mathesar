@@ -64,7 +64,7 @@ def get_link_thumbnail(session_key, download_link_mash, width=500, height=500):
 
 
 def create_mash_for_uri(uri, backend_key):
-    return hashlib.md5(
+    return hashlib.sha256(
         settings.SECRET_KEY.encode('utf-8')
         + backend_key.encode('utf-8')
         + uri.encode('utf-8')
