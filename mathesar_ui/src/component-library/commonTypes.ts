@@ -11,8 +11,7 @@ export type Appearance =
   | 'link'
   | 'custom'
   | 'tip'
-  | 'option-card'
-  | 'refresh';
+  | 'option-card';
 
 export type Size = 'small' | 'medium' | 'large';
 

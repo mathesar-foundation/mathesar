@@ -315,24 +315,6 @@
       ),
     ),
 
-    refresh: (
-      normal: (
-        background: var(--color-highlight-asparagus-20),
-        border-color: var(--color-highlight-asparagus-20),
-        color: var(--text-control),
-      ),
-      hover: (
-        background: var(--color-highlight-asparagus-hover-40),
-        border-color: var(--color-highlight-asparagus-hover-40),
-        color: var(--text-control-hover),
-      ),
-      active: (
-        background: var(--color-highlight-asparagus-active-40),
-        border-color: var(--color-highlight-asparagus-active-40),
-        color: var(--text-control-active),
-      ),
-    ),
-
     link: (
       normal: (
         color: var(--color-navigation-auxiliary),

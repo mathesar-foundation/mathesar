@@ -10,15 +10,36 @@
   $: isError = state === 'error';
 </script>
 
-<Button appearance="refresh" size="medium" disabled={isLoading} on:click>
-  <Icon {...isError && !isLoading ? iconError : iconRefresh} spin={isLoading} />
-  <span>
-    {#if isLoading}
-      {$_('loading')}
-    {:else if isError}
-      {$_('retry')}
-    {:else}
-      {$_('refresh')}
-    {/if}
-  </span>
-</Button>
+<div class="refresh-button">
+  <Button appearance="custom" size="medium" disabled={isLoading} on:click>
+    <Icon
+      {...isError && !isLoading ? iconError : iconRefresh}
+      spin={isLoading}
+    />
+    <span>
+      {#if isLoading}
+        {$_('loading')}
+      {:else if isError}
+        {$_('retry')}
+      {:else}
+        {$_('refresh')}
+      {/if}
+    </span>
+  </Button>
+</div>
+
+<style lang="scss">
+  .refresh-button {
+    --button-background: var(--color-highlight-asparagus-20);
+    --button-border-color: var(--color-highlight-asparagus-20);
+    --button-color: var(--text-control);
+
+    --button-hover-background: var(--color-highlight-asparagus-hover-40);
+    --button-hover-border-color: var(--color-highlight-asparagus-hover-40);
+    --button-hover-color: var(--text-control-hover);
+
+    --button-active-background: var(--color-highlight-asparagus-active-40);
+    --button-active-border-color: var(--color-highlight-asparagus-active-40);
+    --button-active-color: var(--text-control-active);
+  }
+</style>
