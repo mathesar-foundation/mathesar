@@ -386,25 +386,6 @@
         color: var(--color-navigation-auxiliary-active),
       ),
     ),
-
-    feedback: (
-      normal: (
-        background: transparent,
-        color: var(--color-brand-muted),
-        border-color: transparent,
-      ),
-      hover: (
-        color: var(--color-brand),
-      ),
-      focus: (
-        color: var(--color-brand-active),
-        border-color: var(--color-brand-muted),
-      ),
-      active: (
-        color: var(--color-brand-active),
-        border-color: var(--color-brand-muted),
-      ),
-    ),
   );
 
   &.btn-default {
@@ -412,11 +393,6 @@
       --button-background: var(--surface-input);
       --button-border-color: var(--border-input);
     }
-  }
-
-  &.btn-feedback {
-    --button-padding: var(--sm4) var(--sm2);
-    --button-font-weight: var(--font-weight-bold);
   }
 
   // Utilities

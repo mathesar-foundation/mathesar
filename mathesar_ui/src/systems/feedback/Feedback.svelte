@@ -60,10 +60,10 @@
   }
 </script>
 
-<div class="feedback-button">
+<div class="feedback-section">
   <Dropdown
-    triggerAppearance="feedback"
-    triggerClass="padding-compact"
+    triggerAppearance="custom"
+    triggerClass="feedback-button"
     closeOnInnerClick={false}
     showArrow={false}
     on:close={onDropdownClose}
@@ -132,8 +132,17 @@
 </div>
 
 <style lang="scss">
-  .feedback-button {
-    --button-border: none;
+  .feedback-section {
+    :global(.feedback-button) {
+      --button-padding: var(--sm4) var(--sm2);
+      --button-font-weight: var(--font-weight-bold);
+      --button-color: var(--color-brand-muted);
+      --button-hover-color: var(--color-brand);
+      --button-focus-color: var(--color-brand-active);
+      --button-focus-border-color: var(--color-brand-muted);
+      --button-active-color: var(--color-brand-active);
+      --button-active-border-color: var(--color-brand-muted);
+    }
   }
 
   .trigger {

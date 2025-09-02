@@ -12,7 +12,6 @@ export type Appearance =
   | 'custom'
   | 'tip'
   | 'inspector'
-  | 'feedback'
   | 'option-card'
   | 'refresh';
 
