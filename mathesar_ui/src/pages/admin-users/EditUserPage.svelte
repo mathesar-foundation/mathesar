@@ -86,9 +86,8 @@
             })}
           onClick={() => deleteUser(userModel)}
           icon={iconDeleteMajor}
-          danger
           label={$_('delete_user')}
-          appearance="default"
+          appearance="danger"
         />
       </FormBox>
     {/if}
