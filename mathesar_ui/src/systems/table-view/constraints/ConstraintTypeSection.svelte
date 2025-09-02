@@ -105,7 +105,7 @@
       <span slot="trigger-aside">
         {#if canDrop}
           <Button
-            appearance="danger-ghost"
+            appearance="danger"
             size="small"
             on:click={() => handleDrop(constraint)}
           >

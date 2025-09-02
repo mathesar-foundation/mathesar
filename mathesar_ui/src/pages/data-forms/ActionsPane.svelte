@@ -89,7 +89,7 @@
       </svelte:fragment>
     </Dropdown>
     <Button
-      appearance="secondary"
+      appearance="inspector"
       size="medium"
       on:click={toggleInspector}
       active={$dataFormInspectorVisible}

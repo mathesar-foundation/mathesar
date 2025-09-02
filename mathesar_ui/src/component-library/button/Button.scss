@@ -1,340 +1,425 @@
 .btn {
   display: inline-flex;
   align-items: center;
-  vertical-align: middle;
-  border: var(--button-border, 1px solid);
-  font-family: inherit;
-  font-size: inherit;
-  line-height: var(--input-line-height);
-  cursor: pointer;
-  border-radius: var(--button-border-radius, var(--sm4));
-  box-shadow: var(--button-shadow, none);
-  position: relative;
-  padding: var(--button-padding, var(--input-padding) var(--sm3));
   box-sizing: border-box;
-  background: var(--button-background);
-  color: var(--button-color, inherit);
-  border-color: var(--button-border-color);
-  outline: var(--button-outline, none);
+  position: relative;
+
+  vertical-align: middle;
+  gap: 0.5em;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 1em;
+  line-height: var(--input-line-height);
+
+  outline-offset: 1px;
   transition: background-color 0.15s ease;
-  font-weight: var(--font-weight-medium);
 
-  > * + * {
-    margin-left: 0.5em;
+  padding: var(--button-padding, var(--input-padding) var(--sm3));
+  font-weight: var(--button-font-weight, var(--font-weight-medium));
+  border-radius: var(--button-border-radius, var(--sm4));
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
-  &:active,
-  &.active,
-  &:focus {
-    outline: 0;
-  }
+  /**
+   * Css properties that are altered for each variant.
+   */
+  $btn-configurable-props: (
+    background: transparent,
+    color: inherit,
+    border: 1px solid,
+    border-color: transparent,
+    outline: none,
+    outline-color: transparent,
+    box-shadow: none,
+  );
 
-  /* Appearances */
-  &.btn-default {
-    --button-background: var(--surface-control);
-    --button-border-color: var(--border-control);
-    --button-shadow: var(--surface-base) 0 1px 2px 0,
-      var(--border-shadow) 0 1px 3px 0;
+  $btn-states: (hover, focus, active);
 
-    &:not(:disabled) {
-      &:focus {
-        --button-background: var(--surface-control-focus);
-        --button-border-color: var(--border-control-focus);
-      }
-    }
+  $btn-variants: (
+    default: (
+      normal: (
+        background: var(--surface-control),
+        border-color: var(--border-control),
+        box-shadow: (
+          var(--surface-base) 0 1px 2px 0,
+          var(--border-shadow) 0 1px 3px 0,
+        ),
+      ),
+      hover: (
+        background: var(--surface-control-hover),
+        border-color: var(--border-control-hover),
+      ),
+      focus: (
+        background: var(--surface-control-focused),
+        border-color: var(--border-control-focused),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%),
+        ),
+      ),
+      active: (
+        background: var(--surface-control-active),
+        border-color: var(--border-control-active),
+        box-shadow: 0 0 0 2px var(--surface-control-active),
+      ),
+    ),
 
-    &.dropdown {
-      background: var(--surface-input);
-      --button-border-color: var(--border-input);
-    }
-  }
-
-  &.btn-primary {
-    --button-background: linear-gradient(
-      to bottom right,
-      var(--color-primary),
-      var(--color-primary-80)
-    );
-    --button-border-color: var(--border-control);
-    --button-color: var(--text-light);
-    box-shadow:
-      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
-      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
-      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
-
-    &:not(:disabled) {
-      &.focus,
-      &:focus {
-        --button-outline: 2px solid var(--color-primary-80);
-        outline-offset: 1px;
-      }
-
-      &:hover,
-      &.hover {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--color-primary-hover-80),
-          var(--color-primary-hover-60)
-        );
-        --button-border-color: var(--border-control-hover);
-        box-shadow:
+    primary: (
+      normal: (
+        background:
+          linear-gradient(
+            to bottom right,
+            var(--color-primary),
+            var(--color-primary-80)
+          ),
+        color: var(--text-light),
+        border-color: var(--border-control),
+        box-shadow: (
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                80%),
+        ),
+      ),
+      hover: (
+        background:
+          linear-gradient(
+            to bottom right,
+            var(--color-primary-hover-80),
+            var(--color-primary-hover-60)
+          ),
+        border-color: var(--border-control-hover),
+        box-shadow: (
           0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
                 75%),
           0 1px 3px -2px color-mix(in srgb, var(--border-shadow), transparent
                 80%),
           0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
-                80%);
-      }
+                80%),
+        ),
+      ),
+      focus: (
+        outline: 2px solid,
+        outline-color: var(--color-primary-80),
+      ),
+      active: (
+        background:
+          linear-gradient(
+            to bottom right,
+            var(--color-primary-active-80),
+            var(--color-primary-active-60)
+          ),
+        border-color: var(--border-control-hover),
+        box-shadow: var(--border-shadow) 0 1px 2px 0,
+      ),
+    ),
 
-      &:active,
-      &.active {
-        --button-background: linear-gradient(
-          to bottom right,
-          var(--color-primary-active-80),
-          var(--color-primary-active-60)
-        );
-        --button-border-color: var(--border-control-hover);
-        --button-shadow: var(--border-shadow) 0 1px 2px 0;
-      }
-    }
-  }
-
-  &.btn-secondary {
-    background-color: var(--color-navigation-20);
-    --button-border: 0.5px var(--border-control);
-    --button-color: var(--text-control);
-    box-shadow:
-      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
-      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
-      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
-
-    &:not(:disabled) {
-      &.focus,
-      &:focus {
-        --button-outline: 2px solid var(--border-control-active);
-        outline-offset: 1px;
-      }
-
-      &:hover,
-      &.hover {
-        background-color: var(--color-navigation-hover-25);
-        --button-border-color: var(--border-control-hover);
-        box-shadow:
+    secondary: (
+      normal: (
+        background: var(--color-navigation-20),
+        color: var(--text-control),
+        border-color: var(--border-control),
+      ),
+      hover: (
+        background: var(--color-navigation-hover-25),
+        border-color: var(--border-control-hover),
+        box-shadow: (
           0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
           0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
           0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%)
-            inset;
-      }
-
-      &:active,
-      &.active {
-        background-color: var(--color-navigation-active-25);
-        --button-border-color: var(--border-control-active);
-        box-shadow:
+            inset,
+        ),
+      ),
+      focus: (
+        outline: 2px solid,
+        outline-color: var(--border-control-active),
+      ),
+      active: (
+        background: var(--color-navigation-active-25),
+        border-color: var(--border-control-active),
+        box-shadow: (
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
           0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
           0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
-                10%);
-      }
-    }
-  }
+                10%),
+        ),
+      ),
+    ),
 
-  &.btn-option-card {
-    background-color: var(--surface-elevated-high);
-    --button-border-color: var(--border-elevated-mid);
-    --button-color: var(--text-control);
-    box-shadow:
-      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
-      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
-      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 10%);
+    outcome: (
+      normal: (
+        background: transparent,
+        border: 2px solid,
+        border-color: transparent,
+        color: var(--semantic-outcome-text),
+      ),
+      hover: (
+        background:
+          color-mix(in srgb, var(--semantic-outcome-inner-bg), transparent 60%),
+        outline: 2px solid,
+        outline-color: var(--semantic-outcome-inner-border-hover),
+        color: var(--semantic-outcome-text-hover),
+      ),
+      focus: (
+        outline: 2px solid,
+        outline-color: var(--semantic-outcome-border-focused),
+      ),
+      active: (
+        background:
+          color-mix(in srgb, var(--semantic-outcome-inner-bg), transparent 50%),
+        border-color: var(--semantic-outcome-inner-border-active),
+        color: var(--semantic-outcome-text-active),
+      ),
+    ),
 
-    &:not(:disabled) {
-      &.focus,
-      &:focus {
-        --button-outline: 2px solid var(--color-navigation-auxiliary-40);
-        outline-offset: 1px;
-      }
+    plain: (
+      normal: (
+        background: transparent,
+        border-color: transparent,
+        box-shadow: none,
+      ),
+      hover: (
+        background: var(--surface-control-hover),
+        color: var(--text-primary),
+      ),
+      focus: (
+        background: var(--surface-control-focused),
+        border-color: var(--border-control-focused),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%),
+        ),
+        outline: none,
+      ),
+      active: (
+        background: var(--surface-control-active),
+        box-shadow: 0 0 0 2px var(--surface-control-active),
+      ),
+    ),
 
-      &:hover,
-      &.hover {
-        background-color: var(--color-navigation-auxiliary-hover-10);
-        --button-border-color: var(--color-navigation-auxiliary-hover-20);
-        box-shadow:
+    ghost: (
+      normal: (
+        background: transparent,
+        border-color: transparent,
+        box-shadow: none,
+      ),
+    ),
+
+    option-card: (
+      normal: (
+        background: var(--surface-elevated-high),
+        color: var(--text-control),
+        border-color: var(--border-elevated-mid),
+        box-shadow: (
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+        ),
+      ),
+      hover: (
+        background: var(--color-navigation-auxiliary-hover-10),
+        border-color: var(--color-navigation-auxiliary-hover-20),
+        box-shadow: (
           0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
           0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
           0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 5%)
-            inset;
-      }
-
-      &:active,
-      &.active {
-        background-color: var(--color-navigation-auxiliary-active-10);
-        --button-border-color: var(--color-navigation-auxiliary-active-20);
-        box-shadow:
+            inset,
+        ),
+      ),
+      focus: (
+        outline: 2px solid,
+        outline-color: var(--color-navigation-auxiliary-40),
+      ),
+      active: (
+        background: var(--color-navigation-auxiliary-active-10),
+        border-color: var(--color-navigation-auxiliary-active-20),
+        box-shadow: (
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
           0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
           0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
-                10%);
-      }
+                10%),
+        ),
+      ),
+    ),
+
+    danger: (
+      normal: (
+        background: transparent,
+        border-color: transparent,
+        color: var(--semantic-danger-text),
+      ),
+      hover: (
+        background:
+          color-mix(in srgb, var(--semantic-danger-inner-bg), transparent 60%),
+        border-color: var(--semantic-danger-inner-border-hover),
+        color: var(--semantic-danger-text-hover),
+      ),
+      focus: (
+        outline: 2px solid,
+        outline-color: var(--semantic-danger-inner-border-focused),
+      ),
+      active: (
+        background:
+          color-mix(in srgb, var(--semantic-danger-inner-bg), transparent 50%),
+        border-color: var(--semantic-danger-inner-border-active),
+        color: var(--semantic-danger-text-active),
+      ),
+    ),
+
+    action: (
+      normal: (
+        background: var(--color-navigation-10),
+        color: var(--text-navigation),
+        border: 2px solid,
+        border-color: transparent,
+      ),
+      hover: (
+        background:
+          color-mix(in srgb, var(--color-navigation-20), transparent 60%),
+        border-color: var(--color-navigation-hover-20),
+      ),
+      focus: (
+        outline: 2px solid,
+        outline-color: var(--color-navigation-active-40),
+      ),
+      active: (
+        background: var(--color-navigation-active-20),
+        border-color: var(--color-navigation-active-40),
+      ),
+    ),
+
+    tip: (
+      normal: (
+        background: var(--semantic-tip-inner-bg),
+        border-color: var(--semantic-tip-inner-border),
+        color: var(--semantic-tip-inner-text),
+      ),
+      hover: (
+        background: var(--semantic-tip-inner-bg-hover),
+        border-color: var(--semantic-tip-inner-border-hover),
+        color: var(--semantic-tip-inner-text-hover),
+      ),
+      active: (
+        background: var(--semantic-tip-inner-bg-active),
+        border-color: var(--semantic-tip-inner-border-active),
+        color: var(--semantic-tip-inner-text-active),
+      ),
+    ),
+
+    refresh: (
+      normal: (
+        background: var(--color-highlight-asparagus-20),
+        border-color: var(--color-highlight-asparagus-20),
+        color: var(--text-control),
+      ),
+      hover: (
+        background: var(--color-highlight-asparagus-hover-40),
+        border-color: var(--color-highlight-asparagus-hover-40),
+        color: var(--text-control-hover),
+      ),
+      active: (
+        background: var(--color-highlight-asparagus-active-40),
+        border-color: var(--color-highlight-asparagus-active-40),
+        color: var(--text-control-active),
+      ),
+    ),
+
+    inspector: (
+      normal: (
+        background: var(--color-navigation-15),
+        border-color: var(--color-navigation-20),
+        color: var(--text-control),
+        box-shadow: (
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                80%),
+        ),
+      ),
+      hover: (
+        background: var(--color-navigation-20),
+        border-color: var(--color-navigation-hover-40),
+        box-shadow: (
+          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%)
+            inset,
+        ),
+      ),
+      focus: (
+        outline: 2px solid,
+        outline-color: var(--color-navigation-active-40),
+      ),
+      active: (
+        background: var(--color-navigation-40),
+        border-color: var(--color-navigation-60),
+        box-shadow: (
+          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+                10%),
+        ),
+      ),
+    ),
+
+    link: (
+      normal: (
+        color: var(--color-navigation-auxiliary),
+        background: transparent,
+        border-color: transparent,
+      ),
+      hover: (
+        color: var(--color-navigation-auxiliary-hover),
+      ),
+      active: (
+        color: var(--color-navigation-auxiliary-active),
+      ),
+    ),
+
+    feedback: (
+      normal: (
+        background: transparent,
+        color: var(--color-brand-muted),
+        border-color: transparent,
+      ),
+      hover: (
+        color: var(--color-brand),
+      ),
+      focus: (
+        color: var(--color-brand-active),
+        border-color: var(--color-brand-muted),
+      ),
+      active: (
+        color: var(--color-brand-active),
+        border-color: var(--color-brand-muted),
+      ),
+    ),
+  );
+
+  &.btn-default {
+    &.dropdown {
+      --button-background: var(--surface-input);
+      --button-border-color: var(--border-input);
     }
   }
 
-  &.btn-danger {
-    --button-background: transparent;
-    border: 2px solid transparent;
-    --button-color: var(--semantic-danger-text);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: color-mix(
-          in srgb,
-          var(--semantic-danger-inner-bg),
-          transparent 60%
-        );
-        border: 2px solid var(--semantic-danger-inner-border-hover);
-        --button-color: var(--semantic-danger-text-hover);
-      }
-
-      &:active,
-      &.active {
-        --button-background: color-mix(
-          in srgb,
-          var(--semantic-danger-inner-bg),
-          transparent 50%
-        );
-        --button-border-color: var(--semantic-danger-inner-border-active);
-        --button-color: var(--semantic-danger-text-active);
-      }
-
-      &:focus,
-      &.focus {
-        --button-outline: 2px solid var(--semantic-danger-inner-border-focused);
-        outline-offset: 1px;
-      }
-    }
+  &.btn-feedback {
+    --button-padding: var(--sm4) var(--sm2);
+    --button-font-weight: var(--font-weight-bold);
   }
 
-  &.btn-outcome {
-    --button-background: transparent;
-    border: transparent;
-    --button-color: var(--semantic-outcome-text);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: color-mix(
-          in srgb,
-          var(--semantic-outcome-inner-bg),
-          transparent 60%
-        );
-        border: 2px solid var(--semantic-outcome-inner-border-hover);
-        --button-color: var(--semantic-outcome-text-hover);
-      }
-
-      &:active,
-      &.active {
-        --button-background: color-mix(
-          in srgb,
-          var(--semantic-outcome-inner-bg),
-          transparent 50%
-        );
-        --button-border-color: var(--semantic-outcome-inner-border-active);
-        --button-color: var(--semantic-outcome-text-active);
-      }
-
-      &:focus,
-      &.focus {
-        --button-outline: 2px solid var(--semantic-outcome-border-focused);
-        outline-offset: 1px;
-      }
-    }
-  }
-
-  &.btn-plain {
-    --button-background: transparent;
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: var(--color-navigation-80);
-        --button-color: var(--text-primary);
-      }
-    }
-  }
-
-  &.btn-ghost {
-    --button-background: transparent;
-  }
-
-  &.btn-plain,
-  &.btn-ghost {
-    --button-border-color: transparent;
-    border-radius: var(--border-radius-m);
-    box-shadow: none !important;
-  }
-
-  &.btn-borderless {
-    --button-border-color: transparent !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-  }
-
-  &.btn-default,
-  &.btn-plain {
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: var(--surface-control-hover);
-      }
-
-      &:active,
-      &.active {
-        --button-background: var(--surface-control-active);
-        box-shadow: 0 0 0 2px var(--surface-control-active) !important;
-      }
-
-      &:focus,
-      &.focus {
-        --button-background: var(--surface-control-focused);
-        border-color: var(--border-control-focused);
-        box-shadow:
-          0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
-          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%);
-        outline: none;
-      }
-    }
-  }
-
-  &.btn-danger-ghost {
-    --button-background: transparent;
-    border: transparent;
-    --button-color: var(--semantic-danger-text);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-color: var(--semantic-danger-text-hover);
-      }
-
-      &:active,
-      &.active {
-        --button-color: var(--semantic-danger-text-active);
-      }
-
-      &:focus,
-      &.focus {
-        --button-outline: 2px solid var(--semantic-danger-border-focused);
-        outline-offset: 1px;
-      }
-    }
-  }
-
-  /* Sizes */
+  // Utilities
   &.size-medium {
     font-size: 1em;
   }
@@ -359,168 +444,99 @@
     width: 100%;
   }
 
-  &.danger {
-    --button-color: var(--semantic-danger-text);
+  // Mixins & scss functions
+
+  /**
+   * Produce external configurable css vars.
+   * Examples:
+   *  background: var(--button-background, var(--button-internal-background));
+   *  color: var(--button-color, var(--button-internal-color));
+   */
+  @each $prop-name, $def-value in $btn-configurable-props {
+    #{$prop-name}: var(
+      --button-#{$prop-name},
+      var(--button-internal-#{$prop-name})
+    );
   }
 
-  /* State */
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  /**
+   * Produce internal css vars, with their defaults.
+   * Examples:
+   *  --button-internal-background: transparent;
+   *  --button-internal-color: inherit;
+   */
+  @each $prop-name, $def-value in $btn-configurable-props {
+    --button-internal-#{$prop-name}: #{$def-value};
   }
 
-  &.btn-action {
-    --button-background: var(--color-navigation-10);
-    --button-color: var(--text-navigation);
-    --button-border: 2px solid;
-    --button-border-color: transparent;
+  /**
+   * Produce internal css vars for different states with their defaults.
+   * Examples:
+   *  --button-internal-hover-background: var(--button-internal-background);
+   *  --button-internal-hover-color: var(--button-internal-color);
+   */
+  @each $state in $btn-states {
+    @each $prop-name, $def-value in $btn-configurable-props {
+      --button-internal-#{$state}-#{$prop-name}: var(
+        --button-internal-#{$prop-name}
+      );
+    }
+  }
 
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-background: color-mix(
-          in srgb,
-          var(--color-navigation-20),
-          transparent 60%
-        );
-        --button-border-color: var(--color-navigation-hover-20);
-      }
-
-      &:active,
-      &.active {
-        --button-background: var(--color-navigation-active-20);
-        --button-border-color: var(--color-navigation-active-40);
-      }
-
-      &:focus,
-      &.focus {
-        --button-outline: 2px solid var(--color-navigation-active-40);
-        outline-offset: 1px;
+  &:not(:disabled) {
+    /**
+     * Produces external css vars for states.
+     * Example:
+     *   &:hover,
+     *   &.hover {
+     *     background: var(
+     *       --button-hover-background,
+     *       var(--button-background, var(--button-internal-hover-background))
+     *     );
+     *     border-color: var(
+     *       --button-hover-border-color,
+     *       var(--button-border-color, var(--button-internal-hover-border-color))
+     *     );
+     *   }
+     */
+    @each $state in $btn-states {
+      &:#{$state},
+      &.#{$state} {
+        @each $prop-name, $def-value in $btn-configurable-props {
+          #{$prop-name}: var(
+            --button-#{$state}-#{$prop-name},
+            var(
+              --button-#{$prop-name},
+              var(--button-internal-#{$state}-#{$prop-name})
+            )
+          );
+        }
       }
     }
   }
 
-  &.btn-tip {
-    background: var(--semantic-tip-inner-bg);
-    border: 1px solid var(--semantic-tip-inner-border);
-    color: var(--semantic-tip-inner-text);
+  /**
+   * The following calls produce the css variables for each variant.
+   */
 
-    &:hover {
-      background: var(--semantic-tip-inner-bg-hover);
-      border: 1px solid var(--semantic-tip-inner-border-hover);
-      color: var(--semantic-tip-inner-text-hover);
-    }
-
-    &:active {
-      background: var(--semantic-tip-inner-bg-active);
-      border: 1px solid var(--semantic-tip-inner-border-active);
-      color: var(--semantic-tip-inner-text-active);
-    }
+  @function _variant-state-suffix($state-name) {
+    @return if($state-name == 'normal', '', '-#{$state-name}');
   }
 
-  &.btn-refresh {
-    background: var(--color-highlight-asparagus-20);
-    border: 0.25px solid var(--color-highlight-asparagus-20);
-    color: var(--text-control);
+  @mixin btn-variant-state($state-name, $cfg) {
+    $seg: _variant-state-suffix($state-name);
 
-    &:hover {
-      background: var(--color-highlight-asparagus-hover-40);
-      border: 0.25px solid var(--color-highlight-asparagus-hover-40);
-      color: var(--text-control-hover);
-    }
-
-    &:active {
-      background: var(--color-highlight-asparagus-active-40);
-      border: 0.25px solid var(--color-highlight-asparagus-active-40);
-      color: var(--text-control-active);
-    }
-  }
-
-  &.btn-inspector {
-    background-color: var(--color-navigation-15);
-    border: 1px solid var(--color-navigation-20);
-    --button-color: var(--text-control);
-    box-shadow:
-      0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
-      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
-      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
-
-    &:not(:disabled) {
-      &.focus,
-      &:focus {
-        --button-outline: 2px solid var(--color-navigation-active-40);
-        outline-offset: 1px;
-      }
-
-      &:hover,
-      &.hover {
-        background-color: var(--color-navigation-20);
-        --button-border-color: var(--color-navigation-hover-40);
-        box-shadow:
-          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
-                10%),
-          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
-                10%),
-          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%)
-            inset;
-      }
-
-      &:active,
-      &.active {
-        background-color: var(--color-navigation-40);
-        --button-border-color: var(--color-navigation-60);
-        box-shadow:
-          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
-          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
-                10%);
+    @each $prop-name, $def-value in $btn-configurable-props {
+      @if map-has-key($cfg, $prop-name) {
+        --button-internal#{$seg}-#{$prop-name}: #{map-get($cfg, $prop-name)};
       }
     }
   }
 
-  &.btn-link {
-    box-shadow: none;
-    padding: 0.3em;
-    height: auto;
-    min-height: 0;
-    color: var(--color-navigation-auxiliary);
-    background-color: transparent;
-    border: transparent;
-    border-radius: 4px;
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        color: var(--color-navigation-auxiliary-hover);
-      }
-
-      &:active,
-      &.active {
-        color: var(--color-navigation-auxiliary-active);
-      }
-    }
-  }
-
-  &.btn-feedback {
-    --button-background: transparent;
-    --button-color: var(--color-brand-muted);
-    border: 1px solid transparent;
-    padding: var(--sm4) var(--sm2);
-    font-weight: var(--font-weight-bold);
-
-    &:not(:disabled) {
-      &:hover,
-      &.hover {
-        --button-color: var(--color-brand);
-      }
-
-      &:active,
-      &.active,
-      &:focus,
-      &.focus {
-        --button-color: var(--color-brand-active);
-        --button-background: transparent;
-        border: 1px solid var(--color-brand-muted);
+  @each $name, $states in $btn-variants {
+    &.btn-#{$name} {
+      @each $state-name, $state in $states {
+        @include btn-variant-state($state-name, $state);
       }
     }
   }

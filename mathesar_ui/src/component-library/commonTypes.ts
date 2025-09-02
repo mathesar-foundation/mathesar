@@ -7,14 +7,13 @@ export type Appearance =
   | 'ghost'
   | 'action'
   | 'outcome'
-  | 'tip'
   | 'danger'
+  | 'link'
+  | 'custom'
+  | 'tip'
   | 'inspector'
   | 'feedback'
-  | 'custom'
-  | 'link'
   | 'option-card'
-  | 'danger-ghost'
   | 'refresh';
 
 export type Size = 'small' | 'medium' | 'large';
