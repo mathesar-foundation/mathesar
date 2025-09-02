@@ -11,7 +11,6 @@ export type Appearance =
   | 'link'
   | 'custom'
   | 'tip'
-  | 'inspector'
   | 'option-card'
   | 'refresh';
 
