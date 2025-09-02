@@ -239,7 +239,7 @@ def list_(
         filter: Filter = None,
         grouping: Grouping = None,
         return_record_summaries: bool = False,
-        download_link_columns: list[int] = [],
+        return_download_links: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -256,9 +256,9 @@ def list_(
         grouping: An array of group definition objects.
         return_record_summaries: Whether to return summaries of retrieved
             records.
-        get_download_links_for_columns: If non-empty, the backend will
-            construct DownloadLinks for each value in the passed column
-            attnums if possible, and return relevant info.
+        return_download_links: If non-empty, the backend will construct
+            DownloadLinks for each value in the passed column attnums if
+            possible, and return relevant info.
 
     Returns:
         The requested records, along with some metadata.
@@ -279,7 +279,7 @@ def list_(
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns
+        return_download_links,
     ) or None
 
     return RecordList.from_dict(record_info)

@@ -79,7 +79,9 @@ def get_download_links(request, results, keys):
     return {
         key: get_links_details(
             request,
-            sync_links_from_json_strings(request.session.session_key, [r[key] for r in results])
+            sync_links_from_json_strings(
+                request.session.session_key, [r[key] for r in results]
+            )
         )
         for key in (str(k) for k in keys)
     }
@@ -87,30 +89,9 @@ def get_download_links(request, results, keys):
 
 def get_links_details(request, links):
     return {
-        link.mash: {
-            "uri": link.uri,
-            "mimetype": _mimetype(link.uri),
-            "thumbnail": request.build_absolute_uri(
-                reverse("files_thumbnail", kwargs={"download_link_mash": link.mash})
-            ) if _is_image(link.uri) else None,
-            "attachment": request.build_absolute_uri(
-                reverse("files_download", kwargs={"download_link_mash": link.mash})
-            ),
-            "direct": request.build_absolute_uri(
-                reverse("files_direct", kwargs={"download_link_mash": link.mash})
-            )
-        }
+        link.mash: _get_single_link_details(request, link)
         for link in links
     }
-
-
-def _is_image(path):
-    mimetype_str = _mimetype(path) or ""
-    return mimetype_str.split("/")[0] == "image"
-
-
-def _mimetype(path):
-    return mimetypes.guess_type(path or "", strict=False)[0]
 
 
 def sync_links_from_json_strings(session_key, json_strs):
@@ -148,3 +129,31 @@ def build_links_from_json(json_strs):
         for v, b in itertools.product((json.loads(p) for p in json_strs), backends)
         if v[MASH] == create_mash_for_uri(v.get(URI, ""), b)
     ]
+
+
+def _get_single_link_details(request, link):
+
+    def _link(url_name):
+        return _build_file_link(request, url_name, link.mash)
+
+    return {
+        "uri": link.uri,
+        "mimetype": _mimetype(link.uri),
+        "thumbnail": _link("files_thumbnail") if _is_image(link.uri) else None,
+        "attachment": _link("files_download"),
+        "direct": _link("files_direct"),
+    }
+
+
+def _mimetype(path):
+    return mimetypes.guess_type(path or "", strict=False)[0]
+
+
+def _build_file_link(request, url_name, mash):
+    link_kwargs = {"download_link_mash": mash}
+    return request.build_absolute_uri(reverse(url_name, kwargs=link_kwargs))
+
+
+def _is_image(path):
+    mimetype_str = _mimetype(path) or ""
+    return mimetype_str.split("/")[0] == "image"
