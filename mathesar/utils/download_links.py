@@ -72,7 +72,10 @@ def create_mash_for_uri(uri, backend_key):
 
 
 def create_json_for_uri(uri, backend_key):
-    return json.dumps({URI: uri, MASH: create_mash_for_uri(uri, backend_key)})
+    return json.dumps(
+        {URI: uri, MASH: create_mash_for_uri(uri, backend_key)},
+        sort_keys=True
+    )
 
 
 def get_download_links(request, results, keys):
