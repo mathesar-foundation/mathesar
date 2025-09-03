@@ -19,9 +19,11 @@ def test_get_download_links(monkeypatch):
 
     monkeypatch.setattr(dl, "_build_file_link", mock_file_link)
 
+    BACKEND_KEY = "test_backend"
+
     def mock_backends():
         return {
-            "test_backend": {
+            BACKEND_KEY: {
                 "protocol": "s3",
                 "nickname": "for testing",
                 "kwargs": {"bleh": "blah"},
@@ -35,31 +37,39 @@ def test_get_download_links(monkeypatch):
 
     monkeypatch.setattr(dl, "_get_backends", mock_backends)
 
-    uri_pic = dl.create_json_for_uri("s3://bleh/pic.jpeg", "test_backend")
-    uri_pdf = dl.create_json_for_uri("s3://bleh/document.pdf", "test_backend")
-
     # We use `create_json_for_uri`, since the main goal is to verify
     # that the output of that function matches up with assumptions of
     # other functions.
+    uri_pic = "s3://bleh/pic.jpeg"
+    uri_pdf = "s3://bleh/document.pdf"
+
     results = [
-        {"1": "abcde", "strcolname": 23423, "files": uri_pic},
-        {"1": "defgh", "strcolname": 23412, "files": uri_pdf},
+        {"1": "abcde", "strcolname": 23423, "files": dl.create_json_for_uri(uri_pic, BACKEND_KEY)},
+        {"1": "defgh", "strcolname": 23412, "files": dl.create_json_for_uri(uri_pdf, BACKEND_KEY)},
     ]
 
-    assert dl.get_download_links(request, results, ["files"]) == {
+    expect_pic_mash = dl.create_mash_for_uri(uri_pic, BACKEND_KEY)
+    expect_pdf_mash = dl.create_mash_for_uri(uri_pdf, BACKEND_KEY)
+
+
+    # Since this is the first call, this should also create DownloadLinks under
+    # the hood.
+
+    actual_output = dl.get_download_links(request, results, ["files"])
+    assert actual_output == {
         "files": {
-            "6fd854e72cd5397e8fc621d769239f9d1179b6d58a160a60381f166df5f554bb": {
-                "attachment": "http://a-link-here/?url_name=files_download&mash=6fd854e72cd5397e8fc621d769239f9d1179b6d58a160a60381f166df5f554bb",
-                "direct": "http://a-link-here/?url_name=files_direct&mash=6fd854e72cd5397e8fc621d769239f9d1179b6d58a160a60381f166df5f554bb",
+            expect_pdf_mash: {
+                "attachment": mock_file_link(None, "files_download", expect_pdf_mash),
+                "direct": mock_file_link(None, "files_direct", expect_pdf_mash),
                 "mimetype": "application/pdf",
                 "thumbnail": None,
                 "uri": "s3://bleh/document.pdf",
             },
-            "d41bb2858a5a03810771fac0154d3dbd28a3b3542ad0c97ab2baf67eeaef7299": {
-                "attachment": "http://a-link-here/?url_name=files_download&mash=d41bb2858a5a03810771fac0154d3dbd28a3b3542ad0c97ab2baf67eeaef7299",
-                "direct": "http://a-link-here/?url_name=files_direct&mash=d41bb2858a5a03810771fac0154d3dbd28a3b3542ad0c97ab2baf67eeaef7299",
+            expect_pic_mash: {
+                "attachment": mock_file_link(None, "files_download", expect_pic_mash),
+                "direct": mock_file_link(None, "files_direct", expect_pic_mash),
                 "mimetype": "image/jpeg",
-                "thumbnail": "http://a-link-here/?url_name=files_thumbnail&mash=d41bb2858a5a03810771fac0154d3dbd28a3b3542ad0c97ab2baf67eeaef7299",
+                "thumbnail": mock_file_link(None, "files_thumbnail", expect_pic_mash),
                 "uri": "s3://bleh/pic.jpeg",
             },
         },
