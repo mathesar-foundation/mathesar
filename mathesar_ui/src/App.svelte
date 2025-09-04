@@ -55,7 +55,7 @@
 
   body {
     @each $name, $color in $product-utility-colors {
-      @include generate-color-tokens(#{$name}, $color, $color-states);
+      @include generate-color-tokens(#{$name}, $color);
     }
 
     --modal-record-selector-z-index: 50;
