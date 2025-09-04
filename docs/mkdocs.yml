@@ -46,8 +46,9 @@ nav:
       - Overview: api/index.md
       - Methods: api/methods.md
   - Releases:
-      - '0.4.0': releases/0.4.0.md
+      - '0.5.0': releases/0.5.0.md
       - Previous releases:
+          - '0.4.0': releases/0.4.0.md
           - '0.3.0': releases/0.3.0.md
           - '0.2.5': releases/0.2.5.md
           - '0.2.4': releases/0.2.4.md
