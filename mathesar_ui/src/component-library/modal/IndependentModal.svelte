@@ -2,7 +2,9 @@
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
 
+  import focusTrap from '@mathesar-component-library-dir/common/actions/focusTrap';
   import portal from '@mathesar-component-library-dir/common/actions/portal';
+  import { focusElement } from '@mathesar-component-library-dir/common/utils/domUtils';
   import Window from '@mathesar-component-library-dir/window/Window.svelte';
 
   import type { ModalCloseAction, ModalWidth } from './modalTypes';
@@ -17,6 +19,8 @@
   export let hasOverlay = true;
   export let closeOn: ModalCloseAction[] = ['button'];
   export let canScrollBody = true;
+
+  let previouslyFocusedElement: Element | undefined = undefined;
 
   $: closeOnButton = allowClose && closeOn.includes('button');
   $: closeOnEsc = allowClose && closeOn.includes('esc');
@@ -38,12 +42,27 @@
     }
   }
 
-  async function dispatchOpenOrClose(_isOpen: boolean) {
-    await tick();
-    dispatch(_isOpen ? 'open' : 'close');
+  function handleOpen() {
+    previouslyFocusedElement = document.activeElement ?? undefined;
+    dispatch('open');
   }
 
-  $: void dispatchOpenOrClose(isOpen);
+  function handleClose() {
+    focusElement(previouslyFocusedElement);
+    previouslyFocusedElement = undefined;
+    dispatch('close');
+  }
+
+  async function handleOpenStateChange(_isOpen: boolean) {
+    await tick();
+    if (_isOpen) {
+      handleOpen();
+    } else {
+      handleClose();
+    }
+  }
+
+  $: void handleOpenStateChange(isOpen);
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -65,6 +84,7 @@
       class:width-large={size === 'large'}
       in:fly={{ y: 20, duration: 150 }}
       out:fly={{ y: 20, duration: 150 }}
+      use:focusTrap
     >
       <Window {canScrollBody} hasCloseButton={closeOnButton} on:close={close}>
         <div slot="title"><slot name="title" />{title ?? ''}</div>

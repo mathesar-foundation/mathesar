@@ -17,6 +17,8 @@
     'bottom',
   ];
 
+  export let alwaysShowTooltip = false;
+
   let element: HTMLSpanElement;
   let dropdownIsOpen = false;
 
@@ -33,6 +35,7 @@
      */
     const marginOfError = 3;
     return (
+      alwaysShowTooltip ||
       el.scrollHeight - el.clientHeight > marginOfError ||
       el.scrollWidth - el.clientWidth > 0
     );

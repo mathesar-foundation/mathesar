@@ -110,8 +110,15 @@ export class Database {
     return new AsyncRpcApiStore(api.roles.get_current_role, {
       staticProps: { database_id: this.id },
       postProcess: (currentRole) => ({
-        currentRoleOid: currentRole.current_role.oid,
-        parentRoleOids: new Set(currentRole.parent_roles.map((pr) => pr.oid)),
+        oid: currentRole.current_role.oid,
+        name: currentRole.current_role.name,
+        super: currentRole.current_role.super,
+        parentRoles: new Map(
+          currentRole.parent_roles.map((pr) => [
+            pr.oid,
+            { oid: pr.oid, name: pr.name },
+          ]),
+        ),
       }),
     });
   }

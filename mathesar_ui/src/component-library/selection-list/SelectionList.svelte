@@ -128,6 +128,7 @@
     {id}
     class="input-element selection-list {classes}"
     {offsetOnFocus}
+    userFocusable
     let:option
     let:label
     on:keydown={(e) => api.handleKeyDown(e)}

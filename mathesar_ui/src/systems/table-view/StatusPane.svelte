@@ -11,7 +11,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let context: 'page' | 'widget' | 'shared-consumer-page' = 'page';
+  export let context: 'page' | 'widget' = 'page';
 
   $: ({
     recordsData,
@@ -66,7 +66,6 @@
   class="status-pane"
   class:context-widget={context === 'widget'}
   class:context-page={context === 'page'}
-  class:context-shared-consumer-page={context === 'shared-consumer-page'}
 >
   <div class="status-pane-items-section">
     {#if hasNewRecordButton}

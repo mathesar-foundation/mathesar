@@ -16,8 +16,7 @@
 #-------------------------------------------------------------------------------
 # HOW TO USE THIS FILE
 #
-# First, make sure you meet the prerequisites, add a secret key below, and then
-# run:
+# First, make sure you meet the prerequisites, and then run:
 #
 # $ docker compose -f docker-compose.yml up
 #
@@ -31,11 +30,6 @@
 # See https://docs.mathesar.org/configuration/env-variables/ for more info.
 #
 x-config: &config
-  # (REQUIRED) Replace '?' with '-' followed by a 50 character random string.
-  # You can generate one at https://djecrety.ir/ or by running:
-  #   echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
-  SECRET_KEY: ${SECRET_KEY:?}
-
   # (Optional) Replace 'http://localhost' with custom domain(s) e.g.
   # 'yourdomain.com, 127.0.0.1' to manage the host(s) at which you want to
   # access Mathesar over http or https
@@ -66,18 +60,10 @@ x-config: &config
   # sso.yml configuration file.
   # See https://docs.mathesar.org/administration/single-sign-on/ for additional
   # details on how to configure this variable.
-  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-}
+  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}}
 
 #-------------------------------------------------------------------------------
 # ADDITIONAL INFO ABOUT CONFIG VARIABLES
-#
-# SECRET_KEY:
-#     Default: N/A
-#     Info: A unique secret key required to be set by the user for Django's
-#           security protection features. It should be 50 random characters. You
-#           can read more about it here:
-#           https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
-#     Example: a_very_insecure_secret_key1*zobb123)k(_d1%wubkv6#
 #
 # DOMAIN_NAME:
 #     Default: http://localhost
@@ -120,7 +106,7 @@ x-config: &config
 #     Example: 5555
 #
 # OIDC_CONFIG_DICT:
-#   Default: N/A
+#   Default: {}
 #   Info: Specifies the settings necessary to configure Single Sign-on (SS0)
 #   identity providers for Mathesar login. This is an optional, alternative
 #   approach to configuring SSO via a configuration file.
@@ -137,7 +123,9 @@ x-config: &config
 # ├── caddy/  (stores certificates, keys, and other information for Caddy)
 # ├── media/  (stores user uploaded datafiles(.csv/.tsv) to Mathesar)
 # ├── pgdata/ (stores PostgreSQL data)
+# ├── secrets/ (stores the SECRET_KEY, eventually other secret info)
 # └── static/ (stores static files for Mathesar)
+#
 #
 #-------------------------------------------------------------------------------
 # MATHESAR SERVICES
@@ -173,9 +161,17 @@ services:
 
       # SECURITY WARNING: don't run with DEBUG=true in production!
       DEBUG: ${DEBUG:-false}
+
+      # To use a custom secret key, use an .env file, or add a sufficiently
+      # random 50 character string after '-'. Otherwise a random value will be
+      # generated when you start Mathesar. If you aren't sure, it's safe to
+      # leave this as-is.
+      SECRET_KEY: ${SECRET_KEY-}
+
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
+      - ./msar/secrets:/code/.secrets
       # Uncomment the following to mount sso.yml and enable Single Sign-On (SSO).
       # - ./sso.yml:/code/sso.yml
     depends_on:

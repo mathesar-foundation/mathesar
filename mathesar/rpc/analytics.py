@@ -30,6 +30,8 @@ class AnalyticsReport(TypedDict):
         connected_database_record_count: The total number of records in
             all connected databasees (approximated)
         exploration_count: The number of explorations.
+        form_count: The number of forms.
+        public_form_count: The number of published forms.
     """
     installation_id: Optional[str]
     mathesar_version: str
@@ -41,6 +43,8 @@ class AnalyticsReport(TypedDict):
     connected_database_table_count: int
     connected_database_record_count: int
     exploration_count: int
+    form_count: int
+    public_form_count: int
 
     @classmethod
     def from_dict(cls, d):

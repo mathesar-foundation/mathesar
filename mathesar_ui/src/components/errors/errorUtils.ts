@@ -2,7 +2,7 @@ import { distinct } from 'iter-tools';
 import type { ComponentProps, ComponentType, SvelteComponent } from 'svelte';
 
 import type { ComponentWithProps } from '@mathesar/component-library/types';
-import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
 
 import NoConnection from './customized/NoConnection.svelte';
 import UnableToConnect from './customized/UnableToConnect.svelte';
@@ -10,7 +10,15 @@ import UnableToConnect from './customized/UnableToConnect.svelte';
 const NO_CONNECTION_AVAILABLE = -28030;
 const PSYCOPG_OPERATIONAL_ERROR = -30193;
 
-export type GeneralizedError = string | RpcError;
+// This class is a stub, to be used for all client-side errors.
+export class ClientSideError extends RpcError {
+  static fromAnything(value: unknown): ClientSideError {
+    const rpcError = super.fromAnything(value);
+    return new ClientSideError(rpcError);
+  }
+}
+
+export type GeneralizedError = string | RpcError | ClientSideError;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ReturnableComponent = ComponentWithProps<any>;

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { Route } from 'tinro';
 
-  import SharedTableRoute from '@mathesar/routes/SharedTableRoute.svelte';
+  import SharedFormRoute from './SharedFormRoute.svelte';
 </script>
 
-<Route path="/tables/:slug/*" let:meta>
-  <SharedTableRoute slug={String(meta.params.slug)} />
+<Route path="/forms/:token/*" let:meta>
+  <SharedFormRoute formToken={meta.params.token} />
 </Route>

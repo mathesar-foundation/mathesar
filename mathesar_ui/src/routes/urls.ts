@@ -126,6 +126,18 @@ export function getRecordPageUrl(
   return `${getTablePageUrl(databaseId, schemaId, tableId)}${String(recordId)}`;
 }
 
+export function getDataFormPageUrl(
+  databaseId: number,
+  schemaId: number,
+  formId: number,
+): string {
+  return `${getSchemaPageUrl(databaseId, schemaId)}forms/${formId}/`;
+}
+
+export function getFormShareUrl(formToken: string) {
+  return `/shares/forms/${formToken}/`;
+}
+
 export const USER_PROFILE_URL = '/profile/';
 export const ADMIN_URL = '/administration/';
 export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
@@ -136,14 +148,6 @@ export const LOGOUT_URL = '/auth/logout/';
 
 export function getEditUsersPageUrl(userId: number) {
   return `${ADMIN_USERS_PAGE_URL}${userId}/`;
-}
-
-export function getSharedTablePageUrl(slug: string): string {
-  return `/shares/tables/${slug}/`;
-}
-
-export function getSharedExplorationPageUrl(slug: string): string {
-  return `/shares/explorations/${slug}/`;
 }
 
 const docsPages = {

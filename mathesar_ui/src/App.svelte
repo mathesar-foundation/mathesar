@@ -10,7 +10,11 @@
   import RootRoute from './routes/RootRoute.svelte';
 
   const commonData = preloadCommonData();
-  void initI18n(commonData.user.display_language ?? 'en');
+  const userDisplayLanguage =
+    commonData.routing_context !== 'anonymous'
+      ? commonData.user.display_language
+      : null;
+  void initI18n(userDisplayLanguage ?? 'en');
 </script>
 
 <AppContext {commonData}>
@@ -95,7 +99,7 @@
     --page-padding: var(--page-padding-x) var(--page-padding-y);
 
     --outer-page-padding-for-inset-page: 0;
-    --inset-page-padding: var(--lg5) var(--lg1);
+    --inset-page-padding: var(--lg3) var(--sm1);
 
     --max-layout-width: 54rem;
     // For database page, schema page, and admin pages

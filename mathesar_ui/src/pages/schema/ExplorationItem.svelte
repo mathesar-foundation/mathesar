@@ -51,7 +51,7 @@
       on:click={() => openEditExplorationModal(exploration)}
       icon={iconEdit}
     >
-      {$_('edit_exploration')}
+      {$_('rename_exploration')}
     </ButtonMenuItem>
     <ButtonMenuItem on:click={handleDelete} danger icon={iconDeleteMajor}>
       {$_('delete_exploration')}

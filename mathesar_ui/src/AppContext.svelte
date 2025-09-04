@@ -12,8 +12,13 @@
   import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
   import {
     RecordSelectorController,
-    setRecordSelectorControllerInContext,
+    recordSelectorContext,
   } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
+  import {
+    AttachableRowSeekerController,
+    rowSeekerContext,
+  } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
@@ -47,7 +52,10 @@
     onClose: () => recordSelectorModal.close(),
     nestingLevel: 0,
   });
-  setRecordSelectorControllerInContext(recordSelectorController);
+  recordSelectorContext.set(recordSelectorController);
+
+  const rowSeekerController = new AttachableRowSeekerController();
+  rowSeekerContext.set(rowSeekerController);
 
   const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
   $: clipboardHandler = $clipboardHandlerStore;
@@ -91,5 +99,6 @@
   {recordSelectorController}
   modalController={recordSelectorModal}
 />
+<AttachableRowSeeker controller={rowSeekerController} />
 
 <slot />

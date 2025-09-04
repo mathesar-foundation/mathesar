@@ -9,20 +9,18 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import type { Database } from '@mathesar/models/Database';
   import type { Table } from '@mathesar/models/Table';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { Fieldset } from '@mathesar-component-library';
 
   const preview = new AsyncRpcApiStore(api.records.get);
 
-  export let database: Pick<Database, 'id'>;
   export let template: RecordSummaryTemplate | null;
   export let table: Table;
   export let recordId: ResultValue;
 
   $: void preview.run({
-    database_id: database.id,
+    database_id: table.schema.database.id,
     table_oid: table.oid,
     return_record_summaries: true,
     record_id: recordId,

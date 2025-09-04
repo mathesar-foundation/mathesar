@@ -13,7 +13,6 @@
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconUndo } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
   import type { Table } from '@mathesar/models/Table';
   import type { ProcessedColumns } from '@mathesar/stores/table-data';
   import { updateTable } from '@mathesar/stores/tables';
@@ -25,11 +24,10 @@
   import Template from './Template.svelte';
   import { TemplateConfig } from './TemplateConfig';
 
-  export let database: Pick<Database, 'id'>;
   export let table: Table;
   export let processedColumns: ProcessedColumns;
   export let isLoading: boolean;
-  export let previewRecordId: ResultValue | undefined;
+  export let previewRecordId: ResultValue | undefined = undefined;
   export let onSave: (() => void) | undefined = undefined;
 
   $: template = table?.metadata?.record_summary_template ?? undefined;
@@ -99,13 +97,12 @@
     <Template
       bind:templateConfig={$templateConfig}
       columns={processedColumns}
-      {database}
+      {table}
       errorsDisplayed={$form.hasChanges ? $templateErrors : []}
     />
 
     {#if previewRecordId !== undefined}
       <Preview
-        {database}
         {table}
         recordId={previewRecordId}
         template={$templateConfig?.template ?? null}
