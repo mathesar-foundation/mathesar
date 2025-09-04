@@ -2,8 +2,8 @@
   border: var(--input-element-border, 1px solid var(--border-input));
   align-items: center;
   border-radius: var(--border-radius-m);
-  background: var(--surface-input);
-  color: var(--text-input);
+  background: var(--input-element-background, var(--surface-input));
+  color: var(--input-element-color, var(--text-input));
   margin: 0;
   padding: var(--input-padding);
   line-height: var(--input-line-height);
