@@ -32,7 +32,7 @@
     color: inherit,
     border: 1px solid,
     border-color: transparent,
-    outline: none,
+    outline: 2px solid,
     outline-color: transparent,
     box-shadow: none,
   );
@@ -51,11 +51,10 @@
       ),
       hover: (
         background: var(--surface-control-hover),
-        border-color: var(--border-control-hover),
       ),
       focus: (
         background: var(--surface-control-focused),
-        border-color: var(--border-control-focused),
+        outline-color: var(--border-control-focused),
         box-shadow: (
           0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%),
@@ -64,6 +63,7 @@
       active: (
         background: var(--surface-control-active),
         border-color: var(--border-control-active),
+        outline-color: var(--border-control-active),
         box-shadow: 0 0 0 2px var(--surface-control-active),
       ),
     ),
@@ -77,7 +77,7 @@
             var(--color-action-primary-80)
           ),
         color: var(--text-light),
-        border-color: var(--border-control),
+        border-color: var(--color-action-primary-80),
         box-shadow: (
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
           0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
@@ -92,7 +92,7 @@
             var(--color-action-primary-80-hover),
             var(--color-action-primary-60-hover)
           ),
-        border-color: var(--border-control-hover),
+        border-color: var(--color-action-primary-80-hover),
         box-shadow: (
           0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
                 75%),
@@ -103,8 +103,8 @@
         ),
       ),
       focus: (
-        outline: 2px solid,
-        outline-color: var(--color-action-primary-80),
+        border-color: var(--color-action-primary-80-hover),
+        outline-color: var(--color-action-primary-60),
       ),
       active: (
         background:
@@ -113,7 +113,8 @@
             var(--color-action-primary-80-active),
             var(--color-action-primary-60-active)
           ),
-        border-color: var(--border-control-hover),
+        border-color: var(--color-action-primary-60-hover),
+        outline-color: var(--color-action-primary-40),
         box-shadow: var(--border-shadow) 0 1px 2px 0,
       ),
     ),
@@ -122,11 +123,11 @@
       normal: (
         background: var(--color-action-secondary-20),
         color: var(--text-control),
-        border-color: var(--border-control),
+        border-color: var(--color-action-secondary-25),
       ),
       hover: (
         background: var(--color-action-secondary-25-hover),
-        border-color: var(--border-control-hover),
+        border-color: var(--color-action-secondary-40),
         box-shadow: (
           0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
                 10%),
@@ -137,12 +138,13 @@
         ),
       ),
       focus: (
-        outline: 2px solid,
-        outline-color: var(--border-control-active),
+        outline-color: var(--color-action-secondary-40),
+        border-color: var(--color-action-secondary-40),
       ),
       active: (
         background: var(--color-action-secondary-25-active),
-        border-color: var(--border-control-active),
+        border-color: var(--color-action-secondary-40),
+        outline-color: var(--color-action-secondary-40),
         box-shadow: (
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
           0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
@@ -162,12 +164,10 @@
       hover: (
         background:
           color-mix(in srgb, var(--semantic-outcome-inner-bg), transparent 60%),
-        outline: 2px solid,
         outline-color: var(--semantic-outcome-inner-border-hover),
         color: var(--semantic-outcome-text-hover),
       ),
       focus: (
-        outline: 2px solid,
         outline-color: var(--semantic-outcome-border-focused),
       ),
       active: (
@@ -195,7 +195,6 @@
           0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%),
         ),
-        outline: none,
       ),
       active: (
         background: var(--surface-control-active),
@@ -224,13 +223,14 @@
         color: var(--semantic-danger-text-hover),
       ),
       focus: (
-        outline: 2px solid,
-        outline-color: var(--semantic-danger-inner-border-focused),
+        border-color: var(--semantic-danger-inner-border),
+        outline-color: var(--semantic-danger-inner-border-active),
       ),
       active: (
         background:
           color-mix(in srgb, var(--semantic-danger-inner-bg), transparent 50%),
-        border-color: var(--semantic-danger-inner-border-active),
+        border-color: var(--semantic-danger-inner-border),
+        outline-color: var(--semantic-danger-inner-border-active),
         color: var(--semantic-danger-text-active),
       ),
     ),
@@ -239,7 +239,6 @@
       normal: (
         background: var(--color-action-secondary-10),
         color: var(--text-navigation),
-        border: 2px solid,
         border-color: transparent,
       ),
       hover: (
@@ -248,12 +247,13 @@
         border-color: var(--color-action-secondary-20-hover),
       ),
       focus: (
-        outline: 2px solid,
+        border-color: var(--color-action-secondary-40-active),
         outline-color: var(--color-action-secondary-40-active),
       ),
       active: (
         background: var(--color-action-secondary-20-active),
         border-color: var(--color-action-secondary-40-active),
+        outline-color: var(--color-action-secondary-40-active),
       ),
     ),
 
@@ -268,9 +268,14 @@
         border-color: var(--semantic-tip-inner-border-hover),
         color: var(--semantic-tip-inner-text-hover),
       ),
+      focus: (
+        border-color: var(--semantic-tip-inner-border-hover),
+        outline-color: var(--semantic-tip-inner-border),
+      ),
       active: (
         background: var(--semantic-tip-inner-bg-active),
         border-color: var(--semantic-tip-inner-border-active),
+        outline-color: var(--semantic-tip-inner-border),
         color: var(--semantic-tip-inner-text-active),
       ),
     ),
