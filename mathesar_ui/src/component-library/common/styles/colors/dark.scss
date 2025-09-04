@@ -1,21 +1,21 @@
-@import './colors.scss';
+@import './base.scss';
 // ********************************************
-// LIGHT MODE
+// DARK MODE
 // ********************************************
 
 // ------------------------------------------
 // Base colors
 // ------------------------------------------
 
-$base: hsl(42, 10%, 95%);
-$text-base: hsl(0, 0%, 7%);
+$base: hsl(230, 4%, 2%);
+$text-base: hsl(0, 0%, 88%);
 
 // Special semantic colors
-$highlight: hsl(59, 84%, 90%);
-$highlight-elevated: hsl(59, 98%, 52%);
-$icon: hsl(hue($wisteria), 45%, 10%);
-$link: hsl(hue($fjord), 40%, 55%);
-$visited-link: hsl(hue($wisteria), 50%, 30%);
+$highlight: hsl(38, 80%, 8%);
+$highlight-elevated: hsl(38, 80%, 30%);
+$icon: hsl(hue($wisteria), 10%, 75%);
+$link: hsl(hue($fjord), 50%, 80%);
+$visited-link: hsl(hue($wisteria), 90%, 70%);
 
 // ------------------------------------------
 // Surfaces
@@ -23,21 +23,21 @@ $visited-link: hsl(hue($wisteria), 50%, 30%);
 
 // Colors, ordered by elevation / lightness
 $surface-colors: (
-  'inset': hsl(hue($base), saturation($base), 100%),
-  'input': hsl(hue($base), saturation($base), 100%),
+  'inset': hsl(hue($base), saturation($base), 0%),
+  'input': hsl(hue($base), saturation($base), 0%),
   'base': $base,
-  'card': hsl(hue($base), 15%, 92%),
-  'canvas': hsl(hue($base), saturation($base), 96%),
-  'supporting': hsl(hue($base), saturation($base), 97%),
-  'fieldset': hsl(hue($base), saturation($base), 99%),
-  'header': hsl(hue($base), saturation($base), 92%),
-  'control': hsl(hue($base), saturation($base), 92%),
-  'elevated-low': hsl(hue($base), saturation($base), 96%),
-  'elevated-mid': hsl(hue($base), saturation($base), 94%),
-  'elevated-header': hsl(hue($base), 20%, 90%),
-  'elevated-high': hsl(hue($base), saturation($base), 92%),
-  'elevated-top': hsl(hue($base), saturation($base), 90%),
-  'token': hsl(hue($base), saturation($base), 90%),
+  'fieldset': hsl(hue($base), saturation($base), 2%),
+  'card': hsl(hue($base), saturation($base), 4%),
+  'canvas': hsl(hue($base), saturation($base), 3%),
+  'supporting': hsl(hue($base), saturation($base), 5%),
+  'header': hsl(hue($base), saturation($base), 5%),
+  'control': hsl(hue($base), saturation($base), 5%),
+  'elevated-low': hsl(hue($base), saturation($base), 5%),
+  'elevated-mid': hsl(hue($base), saturation($base), 7%),
+  'elevated-header': hsl(hue($base), saturation($base), 7%),
+  'elevated-high': hsl(hue($base), saturation($base), 10%),
+  'elevated-top': hsl(hue($base), saturation($base), 13%),
+  'token': hsl(hue($base), saturation($base), 20%),
   'input-fill': $input-fill,
   'light': hsl(hue($base), saturation($base), 100%),
 );
@@ -45,23 +45,23 @@ $surface-colors: (
 $surface-states: (
   'hover': (
     'h_delta': 0,
-    's_delta': 0,
-    'l_delta': -7,
+    's_delta': 8%,
+    'l_delta': 4%,
   ),
   'active': (
     'h_delta': 0,
     's_delta': 0,
-    'l_delta': -9,
+    'l_delta': 9,
   ),
   'focused': (
     'h_delta': 0,
     's_delta': 0,
-    'l_delta': -2,
+    'l_delta': 2,
   ),
   'disabled': (
     'h_delta': 0,
     's_delta': 0,
-    'l_delta': -10,
+    'l_delta': 10,
   ),
   'muted': (
     'h_delta': 0,
@@ -77,22 +77,22 @@ $surface-states: (
 // Ordered by lightnesss.
 // Although some tokens have the same values, they're defined separately for modularity.
 $border-colors: (
-  'container': hsl(hue($base), saturation($base), 88%),
-  'row': hsl(hue($base), saturation($base), 88%),
-  'grid': hsl(hue($base), saturation($base), 80%),
-  'card': hsl(hue($base), saturation($base), 85%),
-  'dropdown': hsl(hue($base), saturation($base), 85%),
-  'shadow': hsl(hue($base), saturation($base), 82%),
-  'divider': hsl(hue($base), saturation($base), 80%),
-  'elevated-low': hsl(hue($base), saturation($base), 80%),
-  'header': hsl(hue($base), saturation($base), 80%),
-  'control': hsl(hue($base), saturation($base), 80%),
-  'elevated-mid': hsl(hue($base), saturation($base), 75%),
-  'fieldset': hsl(hue($base), saturation($base), 75%),
-  'elevated-high': hsl(hue($base), saturation($base), 70%),
-  'section': hsl(hue($base), saturation($base), 70%),
-  'input': hsl(hue($base), saturation($base), 60%),
-  'token': hsl(hue($base), saturation($base), 70%),
+  'container': hsl(hue($base), saturation($base), 12%),
+  'row': hsl(hue($base), saturation($base), 12%),
+  'grid': hsl(hue($base), saturation($base), 15%),
+  'card': hsl(hue($base), saturation($base), 15%),
+  'dropdown': hsl(hue($base), saturation($base), 15%),
+  'shadow': hsl(hue($base), saturation($base), 18%),
+  'divider': hsl(hue($base), saturation($base), 20%),
+  'elevated-low': hsl(hue($base), saturation($base), 20%),
+  'header': hsl(hue($base), saturation($base), 20%),
+  'control': hsl(hue($base), saturation($base), 10%),
+  'elevated-mid': hsl(hue($base), saturation($base), 25%),
+  'fieldset': hsl(hue($base), saturation($base), 25%),
+  'input': hsl(hue($base), saturation($base), 40%),
+  'elevated-high': hsl(hue($base), saturation($base), 30%),
+  'section': hsl(hue($base), saturation($base), 30%),
+  'token': hsl(hue($base), saturation($base), 40%),
 );
 
 $border-states: (
@@ -118,26 +118,26 @@ $border-states: (
 // ------------------------------------------
 
 $text-colors: (
-  'code': hsl(hue($text-base), 80%, 4%),
-  'control': hsl(hue($text-base), 5%, 30%),
+  'code': hsl(hue($text-base), 80%, 96%),
+  'control': hsl(hue($text-base), 5%, 70%),
   'disabled': hsl(hue($base), 0%, 30%),
-  'faint': hsl(hue($base), 15%, 85%),
-  'header': hsl(hue($base), 0%, 20%),
+  'faint': hsl(hue($base), 15%, 15%),
+  'header': hsl(hue($text-base), 0%, 80%),
   'highlight': $highlight,
   'highlight-elevated': $highlight-elevated,
-  'navigation': hsl(hue($wisteria), 10%, 20%),
+  'navigation': hsl(hue($wisteria), 10%, 60%),
   'icon': $icon,
-  'input': hsl(hue($text-base), 0%, 0%),
-  'label': hsl(hue($text-base), 0%, 30%),
-  'inverted': hsl(hue($base), 10%, 96%),
-  'light': hsl(hue($text-base), 0%, 100%),
+  'input': hsl(hue($text-base), 0%, 100%),
+  'label': hsl(hue($text-base), 0%, 70%),
+  'inverted': hsl(hue($base), 10%, 4%),
+  'light': hsl(hue($text-base), 10%, 95%),
   'link': $link,
   'visited-link': $visited-link,
-  'muted': hsl(hue($text-base), 0%, 50%),
+  'muted': hsl(hue($base), 0%, 60%),
   'primary': $text-base,
-  'secondary': hsl(hue($text-base), 0%, 18%),
-  'tertiary': hsl(hue($base), 0%, 40%),
-  'token': hsl(hue($base), 15%, 7%),
+  'secondary': hsl(hue($text-base), 0%, 82%),
+  'tertiary': hsl(hue($text-base), 0%, 60%),
+  'token': hsl(hue($base), 85%, 93%),
 );
 
 $text-states: (
@@ -158,45 +158,45 @@ $text-states: (
 // ------------------------------------------
 
 $semantic-colors: (
-  'success': hsl(hue($success), 40%, 30%),
-  'warning': hsl(hue($warning), 70%, 40%),
-  'danger': hsl(hue($danger), 100%, 60%),
-  'info': hsl(hue($info), 55%, 45%),
-  'help': hsl(hue($help), 40%, 50%),
-  'tip': hsl(hue($tip), 40%, 40%),
-  'outcome': hsl(hue($outcome), 25%, 40%),
+  'success': hsl(hue($success), 25%, 60%),
+  'warning': hsl(hue($warning), 40%, 60%),
+  'danger': hsl(hue($danger), 60%, 60%),
+  'info': hsl(hue($info), 35%, 60%),
+  'help': hsl(hue($help), 30%, 50%),
+  'tip': hsl(hue($tip), 20%, 60%),
+  'outcome': hsl(hue($outcome), 20%, 60%),
 );
 
 $semantic-roles: (
   'bg': (
     'h_delta': 0,
     's_delta': 0%,
-    'l_delta': 50%,
+    'l_delta': -50%,
   ),
   'text': (
     'h_delta': 0,
     's_delta': 0%,
-    'l_delta': -25%,
+    'l_delta': 0%,
   ),
   'icon': (
     'h_delta': 0,
     's_delta': 0%,
-    'l_delta': 10%,
+    'l_delta': -20%,
   ),
   'border': (
     'h_delta': 0,
     's_delta': 0%,
-    'l_delta': 20%,
+    'l_delta': -40%,
   ),
   'inner-bg': (
     'h_delta': 0,
     's_delta': 0%,
-    'l_delta': 45%,
+    'l_delta': -45%,
   ),
   'inner-text': (
     'h_delta': 0,
     's_delta': 0%,
-    'l_delta': -20%,
+    'l_delta': 20%,
   ),
   'inner-icon': (
     'h_delta': 0,
@@ -205,8 +205,8 @@ $semantic-roles: (
   ),
   'inner-border': (
     'h_delta': 0,
-    's_delta': 0%,
-    'l_delta': 25%,
+    's_delta': -40%,
+    'l_delta': -40%,
   ),
 );
 
@@ -231,7 +231,7 @@ $semantic-states: (
 // ------------------------------------------
 // GENERATE COLORS FOR THEME
 // ------------------------------------------
-body {
+body.theme-dark {
   @each $name, $color in $surface-colors {
     @include generate-surface-tokens(#{$name}, $color, $surface-states);
   }
@@ -248,6 +248,6 @@ body {
     @include generate-semantic-tokens(#{$name}, $color, $semantic-roles);
   }
 
-  --mix-blend-mode: multiply;
-  --modal-overlay: rgba(0, 0, 0, 0.2);
+  --mix-blend-mode: screen;
+  --modal-overlay: rgba(0, 0, 0, 0.6);
 }

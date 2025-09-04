@@ -1,0 +1,53 @@
+// These colors are common for all themes - light & dark
+@import './base.scss';
+
+$utility-colors: (
+  // brand
+  'brand': $tomato,
+  'brand-muted': hsl(hue($tomato), 40%, 50%),
+  // interaction
+  'selection': hsl(hue($glacier), 55%, 50%),
+  'navigation': hsl(hue($wisteria), 10%, 70%),
+  // actions
+  'action-primary': hsl(hue($asparagus), 60%, 25%),
+  'action-secondary': hsl(hue($wisteria), 10%, 70%),
+  //highlights
+  'highlight-a': hsl(hue($salmon), 60%, 60%),
+  'highlight-b': hsl(hue($glacier), 90%, 60%),
+  'highlight-c': hsl(hue($asparagus), 50%, 60%)
+);
+
+$color-intensities: (
+  '5': 5%,
+  '10': 10%,
+  '15': 15%,
+  '20': 20%,
+  '25': 25%,
+  '40': 40%,
+  '60': 60%,
+  '80': 80%,
+);
+
+$color-states: (
+  'hover': (
+    'h_delta': 0,
+    's_delta': 3%,
+    'l_delta': -3%,
+  ),
+  'active': (
+    'h_delta': 0,
+    's_delta': 0%,
+    'l_delta': -6%,
+  ),
+);
+
+body {
+  @each $name, $color in $utility-colors {
+    @include generate-color-tokens(
+      #{$name},
+      $color,
+      $color-intensities,
+      $color-states
+    );
+  }
+}
