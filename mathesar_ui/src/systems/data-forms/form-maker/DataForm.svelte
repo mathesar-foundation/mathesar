@@ -62,25 +62,12 @@
     --df__internal__z-index__field-with-some-selected-child: 1;
     --df__internal__z-index__field-outer-controls: 2;
     --df__internal__z-index__field-being-dragged: 3;
-    --df__internal__selected-element-bg: var(
-      --df__selected-element-bg,
-      var(--accent-100)
-    );
-    --df__internal__selected-element-border-color: var(
-      --df__selected-element-border-color,
-      var(--accent-500)
-    );
-    --df__internal__help-text-color: var(
-      --df__help-text-color,
-      var(--stormy-700)
-    );
-    --df__internal__some-child-selected-border-color: var(
-      --df-some-child-selected-border-color,
-      var(--accent-300)
-    );
+    --df__internal__selected-element-bg: var(--color-selection-hover-20);
+    --df__internal__selected-element-border-color: var(--color-selection-80);
+    --df__internal__help-text-color: var(--semantic-tip-inner-text);
+    --df__internal__some-child-selected-border-color: var(--color-selection-40);
     --df__internal__immediate-child-selected-border-color: var(
-      --df-immediate-child-selected-border-color,
-      var(--accent-500)
+      --color-selection-60
     );
 
     min-width: 15rem;
@@ -97,16 +84,8 @@
     flex-direction: column;
 
     .branding {
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid var(--border-divider);
       margin-top: var(--lg2);
     }
-  }
-
-  :global(body.theme-dark) .data-form {
-    --df__selected-element-bg: rgba(239, 68, 68, 0.12);
-    --df__selected-element-border-color: var(--salmon-300);
-    --df-immediate-child-selected-border-color: rgba(255, 179, 148, 0.45);
-    --df-some-child-selected-border-color: rgba(255, 179, 148, 0.3);
-    --df__help-text-color: var(--rosy-100);
   }
 </style>

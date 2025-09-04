@@ -51,6 +51,6 @@
   .empty-fields-state {
     padding: var(--lg1);
     margin-bottom: var(--sm4);
-    border: 1px dashed var(--border-color);
+    border: 1px dashed var(--border-section);
   }
 </style>

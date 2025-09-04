@@ -55,7 +55,7 @@
 
     .tag {
       border-radius: var(--border-radius-xl);
-      background-color: var(--card-background);
+      background-color: var(--surface-elevated-top);
       padding: var(--sm6) var(--sm3);
       max-width: var(--df__internal__field-source-max-width, none);
       font-weight: var(--font-weight-medium);

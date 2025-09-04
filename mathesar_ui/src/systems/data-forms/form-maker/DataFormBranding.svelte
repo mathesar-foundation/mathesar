@@ -20,12 +20,12 @@
 <style lang="scss">
   .form-branding {
     padding: var(--sm1);
-    color: var(--text-color-muted);
+    color: var(--text-muted);
     a {
       text-decoration: none;
       &:hover {
-        color: var(--text-color);
-        border-bottom: solid 2px var(--brand-500);
+        color: var(--text-primary);
+        border-bottom: solid 2px var(--color-brand);
       }
     }
   }

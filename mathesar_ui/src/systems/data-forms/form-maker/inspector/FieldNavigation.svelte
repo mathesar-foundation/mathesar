@@ -61,7 +61,7 @@
 
 <style lang="scss">
   .form-nav {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-container);
     display: flex;
     flex-direction: row;
     align-items: center;

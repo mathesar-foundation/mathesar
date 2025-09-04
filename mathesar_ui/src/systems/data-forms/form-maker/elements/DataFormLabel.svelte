@@ -104,12 +104,14 @@
     gap: var(--sm4);
 
     .req-indicator {
-      color: var(--rosy-600);
+      color: var(--semantic-danger-text);
       font-size: var(--lg2);
     }
 
     input {
-      border: 1px solid transparent;
+      border: none;
+      border-bottom: 1px solid;
+      border-color: transparent;
       background-color: transparent;
       font-weight: var(--font-weight-medium);
       padding: var(--sm5) 0;
@@ -118,11 +120,11 @@
 
     &.selected {
       input {
-        background-color: var(--input-background);
-        border-bottom: 1px solid var(--input-border);
+        background-color: var(--surface-input);
+        border-color: var(--border-input);
 
         &.disabled {
-          background-color: var(--input-disabled-background);
+          background-color: var(--surface-input-disabled);
           cursor: not-allowed;
         }
       }
