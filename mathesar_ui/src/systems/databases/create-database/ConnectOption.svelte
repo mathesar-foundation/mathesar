@@ -9,23 +9,52 @@
   export let description: string;
 </script>
 
-<Button on:click={changeView} appearance="option-card">
-  <div class="content">
-    <div class="icon-circle">
-      <Icon {...icon} size="2rem" />
-    </div>
-    <div>
-      <div class="header">
-        {header}
+<div class="connect-option">
+  <Button on:click={changeView} appearance="custom">
+    <div class="content">
+      <div class="icon-circle">
+        <Icon {...icon} size="2rem" />
       </div>
-      <div class="description">
-        {description}
+      <div>
+        <div class="header">
+          {header}
+        </div>
+        <div class="description">
+          {description}
+        </div>
       </div>
     </div>
-  </div>
-</Button>
+  </Button>
+</div>
 
-<style>
+<style lang="scss">
+  .connect-option {
+    display: grid;
+    --button-background: var(--surface-elevated-high);
+    --button-color: var(--text-control);
+    --button-border-color: var(--border-elevated-mid);
+    --button-box-shadow: 0 1px 2px
+        color-mix(in srgb, var(--border-shadow), transparent 5%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 10%);
+
+    --button-hover-background: var(--color-database-hover-10);
+    --button-hover-border-color: var(--color-database-hover-20);
+    --button-hover-box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
+            10%),
+      0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent 10%),
+      0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 5%) inset;
+
+    --button-focus-outline: 2px solid;
+    --button-focus-outline-color: var(--color-database-40);
+
+    --button-active-background: var(--color-database-active-10);
+    --button-active-border-color: var(--color-database-active-20);
+    --button-active-box-shadow: 0 1px 2px
+        color-mix(in srgb, var(--border-shadow), transparent 5%),
+      0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
+      0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 10%);
+  }
   .content {
     display: grid;
     align-items: center;

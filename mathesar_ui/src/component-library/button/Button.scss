@@ -211,46 +211,6 @@
       ),
     ),
 
-    option-card: (
-      normal: (
-        background: var(--surface-elevated-high),
-        color: var(--text-control),
-        border-color: var(--border-elevated-mid),
-        box-shadow: (
-          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
-          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
-                10%),
-        ),
-      ),
-      hover: (
-        background: var(--color-navigation-auxiliary-hover-10),
-        border-color: var(--color-navigation-auxiliary-hover-20),
-        box-shadow: (
-          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
-                10%),
-          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
-                10%),
-          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 5%)
-            inset,
-        ),
-      ),
-      focus: (
-        outline: 2px solid,
-        outline-color: var(--color-navigation-auxiliary-40),
-      ),
-      active: (
-        background: var(--color-navigation-auxiliary-active-10),
-        border-color: var(--color-navigation-auxiliary-active-20),
-        box-shadow: (
-          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
-          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
-                10%),
-        ),
-      ),
-    ),
-
     danger: (
       normal: (
         background: transparent,

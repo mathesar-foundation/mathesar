@@ -10,8 +10,7 @@ export type Appearance =
   | 'danger'
   | 'link'
   | 'custom'
-  | 'tip'
-  | 'option-card';
+  | 'tip';
 
 export type Size = 'small' | 'medium' | 'large';
 
