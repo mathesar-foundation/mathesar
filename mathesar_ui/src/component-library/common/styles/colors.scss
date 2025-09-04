@@ -33,9 +33,9 @@ $utility-colors: (
   'action-primary': hsl(hue($asparagus), 60%, 25%),
   'action-secondary': hsl(hue($wisteria), 10%, 70%),
   //highlights
-  'highlight-salmon': hsl(hue($salmon), 60%, 60%),
-  'highlight-glacier': hsl(hue($glacier), 90%, 60%),
-  'highlight-asparagus': hsl(hue($asparagus), 50%, 60%)
+  'highlight-a': hsl(hue($salmon), 60%, 60%),
+  'highlight-b': hsl(hue($glacier), 90%, 60%),
+  'highlight-c': hsl(hue($asparagus), 50%, 60%)
 );
 
 $color-roles: (

@@ -413,12 +413,12 @@
 
 <style>
   .form {
-    --base-fill: var(--color-highlight-salmon-40);
-    --base-stroke: var(--color-highlight-salmon);
-    --target-fill: var(--color-highlight-glacier-60);
-    --target-stroke: var(--color-highlight-glacier);
-    --mapping-fill: var(--color-highlight-asparagus-60);
-    --mapping-stroke: var(--color-highlight-asparagus);
+    --base-fill: var(--color-highlight-a-40);
+    --base-stroke: var(--color-highlight-a);
+    --target-fill: var(--color-highlight-b-60);
+    --target-stroke: var(--color-highlight-b);
+    --mapping-fill: var(--color-highlight-c-60);
+    --mapping-stroke: var(--color-highlight-c);
     line-height: 1.6;
   }
   .form.self-referential {
