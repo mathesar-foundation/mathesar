@@ -116,18 +116,18 @@
 
   .schema-row.hover {
     border: 1px solid var(--color-schema-10);
-    box-shadow: 0 1px 2px 0 var(--color-schema-hover-10);
-    background: var(--color-schema-active-5);
+    box-shadow: 0 1px 2px 0 var(--color-schema-10-hover);
+    background: var(--color-schema-5-active);
   }
 
   .schema-row:active {
     border: 1px solid var(--color-schema-20);
-    box-shadow: 0 1px 2px 0 var(--color-schema-active-20);
-    background: var(--color-schema-active-10);
+    box-shadow: 0 1px 2px 0 var(--color-schema-20-active);
+    background: var(--color-schema-10-active);
   }
 
   .schema-row.focus {
-    outline: 1px solid var(--color-schema-active-20);
+    outline: 1px solid var(--color-schema-20-active);
     outline-offset: 1px;
   }
 

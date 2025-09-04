@@ -34,14 +34,14 @@
       0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent 80%);
 
     --button-hover-background: var(--color-navigation-20);
-    --button-hover-border-color: var(--color-navigation-hover-40);
+    --button-hover-border-color: var(--color-navigation-40-hover);
     --button-hover-box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
             10%),
       0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent 10%),
       0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%) inset;
 
     --button-focus-outline: 2px solid;
-    --button-focus-outline-color: var(--color-navigation-active-40);
+    --button-focus-outline-color: var(--color-navigation-40-active);
 
     --button-active-background: var(--color-navigation-40);
     --button-active-border-color: var(--color-navigation-60);

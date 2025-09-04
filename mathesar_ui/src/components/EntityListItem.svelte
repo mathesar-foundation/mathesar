@@ -111,11 +111,11 @@
   }
 
   .entity-list-item:has(.link:hover) {
-    background: var(--color-table-hover-10);
+    background: var(--color-table-10-hover);
   }
 
   .entity-list-item.primary:has(.link:hover) {
-    background: var(--color-table-hover-10);
+    background: var(--color-table-10-hover);
     padding-left: 0;
     &::before {
       content: '';

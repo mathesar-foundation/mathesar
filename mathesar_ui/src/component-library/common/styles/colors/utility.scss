@@ -41,13 +41,17 @@ $color-states: (
   ),
 );
 
+@mixin generate-utility-color-tokens($name, $color) {
+  @include generate-color-tokens(
+    $name,
+    $color,
+    $color-intensities,
+    $color-states
+  );
+}
+
 body {
   @each $name, $color in $utility-colors {
-    @include generate-color-tokens(
-      #{$name},
-      $color,
-      $color-intensities,
-      $color-states
-    );
+    @include generate-utility-color-tokens($name, $color);
   }
 }

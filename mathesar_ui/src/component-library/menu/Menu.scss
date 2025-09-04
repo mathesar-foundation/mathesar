@@ -34,7 +34,7 @@
     }
     &.menu-item-link:not(.disabled):hover,
     &.menu-item-button:not(.disabled):hover {
-      background-color: var(--color-navigation-hover-20);
+      background-color: var(--color-navigation-20-hover);
       color: var(--text-navigation);
     }
     &.menu-item-button {
@@ -80,11 +80,11 @@
       --checkbox-margin-bottom: 0;
     }
     &.active {
-      background-color: var(--color-navigation-active-20);
+      background-color: var(--color-navigation-20-active);
       font-weight: var(--font-weight-medium);
 
       &:hover {
-        background-color: var(--color-navigation-hover-20);
+        background-color: var(--color-navigation-20-hover);
         color: var(--text-inverted);
       }
     }

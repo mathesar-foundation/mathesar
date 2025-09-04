@@ -89,8 +89,8 @@
         background:
           linear-gradient(
             to bottom right,
-            var(--color-action-primary-hover-80),
-            var(--color-action-primary-hover-60)
+            var(--color-action-primary-80-hover),
+            var(--color-action-primary-60-hover)
           ),
         border-color: var(--border-control-hover),
         box-shadow: (
@@ -110,8 +110,8 @@
         background:
           linear-gradient(
             to bottom right,
-            var(--color-action-primary-active-80),
-            var(--color-action-primary-active-60)
+            var(--color-action-primary-80-active),
+            var(--color-action-primary-60-active)
           ),
         border-color: var(--border-control-hover),
         box-shadow: var(--border-shadow) 0 1px 2px 0,
@@ -125,7 +125,7 @@
         border-color: var(--border-control),
       ),
       hover: (
-        background: var(--color-action-secondary-hover-25),
+        background: var(--color-action-secondary-25-hover),
         border-color: var(--border-control-hover),
         box-shadow: (
           0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
@@ -141,7 +141,7 @@
         outline-color: var(--border-control-active),
       ),
       active: (
-        background: var(--color-action-secondary-active-25),
+        background: var(--color-action-secondary-25-active),
         border-color: var(--border-control-active),
         box-shadow: (
           0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
@@ -245,15 +245,15 @@
       hover: (
         background:
           color-mix(in srgb, var(--color-action-secondary-20), transparent 60%),
-        border-color: var(--color-action-secondary-hover-20),
+        border-color: var(--color-action-secondary-20-hover),
       ),
       focus: (
         outline: 2px solid,
-        outline-color: var(--color-action-secondary-active-40),
+        outline-color: var(--color-action-secondary-40-active),
       ),
       active: (
-        background: var(--color-action-secondary-active-20),
-        border-color: var(--color-action-secondary-active-40),
+        background: var(--color-action-secondary-20-active),
+        border-color: var(--color-action-secondary-40-active),
       ),
     ),
 

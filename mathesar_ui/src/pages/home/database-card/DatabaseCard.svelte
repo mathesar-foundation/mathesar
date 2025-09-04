@@ -37,8 +37,8 @@
 
   .db-card.hoverable:hover {
     border: 1px solid var(--color-database-15);
-    box-shadow: 0 1px 2px 0 var(--color-database-hover-15);
-    background: var(--color-database-active-10);
+    box-shadow: 0 1px 2px 0 var(--color-database-15-hover);
+    background: var(--color-database-10-active);
   }
 
   .db-card.hoverable:focus {
@@ -48,7 +48,7 @@
 
   .db-card.hoverable:active {
     border: 1px solid var(--color-database-20);
-    box-shadow: 0 1px 2px 0 var(--color-database-active-20);
-    background: var(--color-database-active-15);
+    box-shadow: 0 1px 2px 0 var(--color-database-20-active);
+    background: var(--color-database-15-active);
   }
 </style>

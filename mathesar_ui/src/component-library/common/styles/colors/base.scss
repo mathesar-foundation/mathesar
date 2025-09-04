@@ -102,14 +102,14 @@ $input-fill: hsl(212, 84%, 44.1%);
 ) {
   --color-#{$name}: #{$base-color};
 
-  @each $role, $delta in $color-intensities {
+  @each $intensity, $delta in $color-intensities {
     $base-variant: hsla(
       hue($base-color),
       saturation($base-color),
       lightness($base-color),
       $delta
     );
-    --color-#{$name}-#{$role}: #{$base-variant};
+    --color-#{$name}-#{$intensity}: #{$base-variant};
   }
 
   @each $state, $delta in $color-states {
@@ -121,9 +121,10 @@ $input-fill: hsl(212, 84%, 44.1%);
     $l-new: max(0%, min(100%, lightness($base-color) + $dl));
     $variant: hsl($h-new, $s-new, $l-new);
     --color-#{$name}-#{$state}: #{$variant};
-    @each $role, $delta in $color-intensities {
+
+    @each $intensity, $delta in $color-intensities {
       $new-variant: hsla($h-new, $s-new, $l-new, $delta);
-      --color-#{$name}-#{$state}-#{$role}: #{$new-variant};
+      --color-#{$name}-#{$intensity}-#{$state}: #{$new-variant};
     }
   }
 }

@@ -18,7 +18,7 @@ ul.pagination {
       cursor: pointer;
 
       &:hover {
-        background-color: var(--color-selection-hover-25);
+        background-color: var(--color-selection-25-hover);
       }
 
       &:disabled {
@@ -73,9 +73,9 @@ ul.pagination {
 
       &:hover {
         .page {
-          background-color: var(--color-selection-hover-20);
+          background-color: var(--color-selection-20-hover);
           color: var(--text-control-hover);
-          border-color: var(--color-selection-hover-25);
+          border-color: var(--color-selection-25-hover);
         }
       }
     }

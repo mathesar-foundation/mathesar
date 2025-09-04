@@ -34,12 +34,12 @@
     --button-border-color: var(--color-highlight-c-20);
     --button-color: var(--text-control);
 
-    --button-hover-background: var(--color-highlight-c-hover-40);
-    --button-hover-border-color: var(--color-highlight-c-hover-40);
+    --button-hover-background: var(--color-highlight-c-40-hover);
+    --button-hover-border-color: var(--color-highlight-c-40-hover);
     --button-hover-color: var(--text-control-hover);
 
-    --button-active-background: var(--color-highlight-c-active-40);
-    --button-active-border-color: var(--color-highlight-c-active-40);
+    --button-active-background: var(--color-highlight-c-40-active);
+    --button-active-border-color: var(--color-highlight-c-40-active);
     --button-active-color: var(--text-control-active);
   }
 </style>
