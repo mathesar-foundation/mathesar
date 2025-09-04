@@ -9,25 +9,6 @@ ul.pagination {
   li {
     margin: 0 0.25rem;
 
-    a {
-      padding: 0.25rem;
-
-      min-width: 1.5rem;
-      display: inline-block;
-      text-align: center;
-      cursor: pointer;
-
-      &:hover {
-        background-color: var(--color-selection-25-hover);
-      }
-
-      &:disabled {
-        color: var(--text-disabled);
-        background-color: inherit;
-        cursor: not-allowed;
-      }
-    }
-
     button {
       .ellipsis {
         color: var(--text-muted);
@@ -45,38 +26,19 @@ ul.pagination {
       }
     }
 
-    // Why is this `&:not(.disabled)` selector here (when we don't have any
-    // disabled buttons in the Pagination component)?
-    //
-    // This is a bit of a hack and could potentially be cleaned up. Without this
-    // additional selector, some of the CSS below does not take effect because
-    // it ends up having lower specificity than the `&.btn-secondary` CSS in
-    // `Button.scss`. Adding `&:not(.disabled)` increases the specificity,
-    // allowing all the CSS below to win out over the CSS in `Button.scss`.
-    //
-    // Better ways to do this could be:
-    //
-    // - Add a new `Appearance` option for the Button component. Use it in
-    //   `Pagination.svelte`. Then move the CSS below into `Button.scss`.
-    //
-    // - Refactor the Button component, removing _all_ `Appearance` options and
-    //   using global CSS classes instead. This would be a big change, but it's
-    //   what I (Sean) would ultimately like to do.
-    &:not(.disabled) {
-      &.active {
-        .page {
-          background-color: var(--color-selection-20);
-          color: var(--text-control);
-          border: 2px solid var(--color-selection-25);
-        }
+    &.active {
+      .page {
+        --button-background: var(--color-selection-20);
+        --button-color: var(--text-control);
+        --button-border-color: var(--color-selection-80);
       }
+    }
 
-      &:hover {
-        .page {
-          background-color: var(--color-selection-20-hover);
-          color: var(--text-control-hover);
-          border-color: var(--color-selection-25-hover);
-        }
+    &:hover {
+      .page {
+        --button-background: var(--color-selection-20-hover);
+        --button-color: var(--text-control-hover);
+        --button-border-color: var(--color-selection-25-hover);
       }
     }
   }

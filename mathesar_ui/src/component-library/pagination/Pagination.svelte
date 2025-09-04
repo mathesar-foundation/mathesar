@@ -27,10 +27,6 @@
    */
   export let total = 0;
 
-  // Can be used to specify a path.
-  export let getLink: ((page: number, pageSize: number) => string) | undefined =
-    undefined;
-
   // ARIA Label for component
   export let ariaLabel = 'Pagination';
 
@@ -70,29 +66,16 @@
 
     {#if pageInfo.start > 1}
       <li>
-        {#if getLink}
-          <a
-            tabindex="0"
-            aria-label="Goto Page 1"
-            class="page"
-            href={getLink(1, pageSize)}
-            on:click={(e) => setPage(e, 1)}
-            data-tinro-ignore
-          >
-            1
-          </a>
-        {:else}
-          <Button
-            tabindex="0"
-            appearance="secondary"
-            role="link"
-            aria-label="Goto Page 1"
-            class="page"
-            on:click={(e) => setPage(e, 1)}
-          >
-            1
-          </Button>
-        {/if}
+        <Button
+          tabindex="0"
+          appearance="secondary"
+          role="link"
+          aria-label="Goto Page 1"
+          class="page"
+          on:click={(e) => setPage(e, 1)}
+        >
+          1
+        </Button>
       </li>
       {#if pageInfo.start > 2}
         <li>
@@ -114,37 +97,20 @@
 
     {#each pageInfo.currentWindow as _page (_page)}
       <li class:active={currentPage === _page}>
-        {#if getLink}
-          <a
-            tabindex="0"
-            class="page"
-            href={getLink(_page, pageSize)}
-            aria-label={currentPage === _page
-              ? `Current Page, Page ${currentPage}`
-              : `Goto Page ${_page}`}
-            aria-selected={currentPage === _page}
-            on:click={(e) => setPage(e, _page)}
-            data-page={_page}
-            data-tinro-ignore
-          >
-            {_page}
-          </a>
-        {:else}
-          <Button
-            tabindex="0"
-            appearance="secondary"
-            role="link"
-            aria-label={currentPage === _page
-              ? `Current Page, Page ${currentPage}`
-              : `Goto Page ${_page}`}
-            class="page"
-            on:click={(e) => setPage(e, _page)}
-            data-page={_page}
-            aria-selected={currentPage === _page}
-          >
-            {_page}
-          </Button>
-        {/if}
+        <Button
+          tabindex="0"
+          appearance="secondary"
+          role="link"
+          aria-label={currentPage === _page
+            ? `Current Page, Page ${currentPage}`
+            : `Goto Page ${_page}`}
+          class="page"
+          on:click={(e) => setPage(e, _page)}
+          data-page={_page}
+          aria-selected={currentPage === _page}
+        >
+          {_page}
+        </Button>
       </li>
     {/each}
 
@@ -166,29 +132,16 @@
         </li>
       {/if}
       <li>
-        {#if getLink}
-          <a
-            tabindex="0"
-            class="page"
-            aria-label="Goto Page {pageCount}"
-            href={getLink(pageCount, pageSize)}
-            on:click={(e) => setPage(e, pageCount)}
-            data-tinro-ignore
-          >
-            {pageCount}
-          </a>
-        {:else}
-          <Button
-            tabindex="0"
-            appearance="secondary"
-            class="page"
-            role="link"
-            aria-label="Goto Page {pageCount}"
-            on:click={(e) => setPage(e, pageCount)}
-          >
-            {pageCount}
-          </Button>
-        {/if}
+        <Button
+          tabindex="0"
+          appearance="secondary"
+          class="page"
+          role="link"
+          aria-label="Goto Page {pageCount}"
+          on:click={(e) => setPage(e, pageCount)}
+        >
+          {pageCount}
+        </Button>
       </li>
     {/if}
 
