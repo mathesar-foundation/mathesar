@@ -5,7 +5,14 @@
   import EntityListItem from '@mathesar/components/EntityListItem.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconDeleteMajor, iconEdit, iconExploration } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconEdit,
+    iconExploration,
+    iconRemoveFromFavorites,
+    iconAddToFavorites,
+  } from '@mathesar/icons';
+  import { favorites, favoritesStore } from '@mathesar/stores/favorites';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
@@ -21,6 +28,12 @@
 
   $: baseTable = $tablesStore.tablesMap.get(exploration.base_table_oid);
   $: href = getExplorationPageUrl(database.id, schema.oid, exploration.id);
+  $: isFavorited = $favorites.some(
+    (fav) =>
+      fav.entityType === 'exploration' &&
+      fav.entityId === exploration.id &&
+      fav.databaseId === database.id,
+  );
 
   function handleDelete() {
     void confirmDelete({
@@ -28,6 +41,23 @@
       identifierName: exploration.name,
       onProceed: () => deleteExploration(exploration.id),
     });
+  }
+
+  async function handleToggleFavorite() {
+    if (isFavorited) {
+      await favoritesStore.removeFavoriteByEntity(
+        'exploration',
+        exploration.id,
+        database.id,
+      );
+    } else {
+      await favoritesStore.addFavorite({
+        entityType: 'exploration',
+        entityId: exploration.id,
+        databaseId: database.id,
+        schemaOid: schema.oid,
+      });
+    }
   }
 </script>
 
@@ -52,6 +82,12 @@
       icon={iconEdit}
     >
       {$_('rename_exploration')}
+    </ButtonMenuItem>
+    <ButtonMenuItem
+      on:click={handleToggleFavorite}
+      icon={isFavorited ? iconRemoveFromFavorites : iconAddToFavorites}
+    >
+      {isFavorited ? $_('remove_from_favorites') : $_('add_to_favorites')}
     </ButtonMenuItem>
     <ButtonMenuItem on:click={handleDelete} danger icon={iconDeleteMajor}>
       {$_('delete_exploration')}

@@ -8,8 +8,11 @@
     iconDeleteMajor,
     iconEdit,
     iconForm,
+    iconRemoveFromFavorites,
+    iconAddToFavorites,
     iconPubliclyShared,
   } from '@mathesar/icons';
+  import { favorites, favoritesStore } from '@mathesar/stores/favorites';
   import type { DataForm } from '@mathesar/models/DataForm';
   import { getDataFormPageUrl, getFormShareUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
@@ -29,6 +32,12 @@
     dataForm);
   $: baseTable = $tablesStore.tablesMap.get(baseTableOid);
   $: builderPageUrl = getDataFormPageUrl(schema.database.id, schema.oid, id);
+  $: isFavorited = $favorites.some(
+    (fav) =>
+      fav.entityType === 'form' &&
+      fav.entityId === id &&
+      fav.databaseId === schema.database.id,
+  );
 
   function handleDelete() {
     void confirmDelete({
@@ -38,6 +47,23 @@
         deleteDataForm();
       },
     });
+  }
+
+  async function handleToggleFavorite() {
+    if (isFavorited) {
+      await favoritesStore.removeFavoriteByEntity(
+        'form',
+        id,
+        schema.database.id,
+      );
+    } else {
+      await favoritesStore.addFavorite({
+        entityType: 'form',
+        entityId: id,
+        databaseId: schema.database.id,
+        schemaOid: schema.oid,
+      });
+    }
   }
 </script>
 
@@ -75,6 +101,12 @@
   <svelte:fragment slot="menu">
     <ButtonMenuItem on:click={editDataForm} icon={iconEdit}>
       {$_('rename_form')}
+    </ButtonMenuItem>
+    <ButtonMenuItem
+      on:click={handleToggleFavorite}
+      icon={isFavorited ? iconRemoveFromFavorites : iconAddToFavorites}
+    >
+      {isFavorited ? $_('remove_from_favorites') : $_('add_to_favorites')}
     </ButtonMenuItem>
     <ButtonMenuItem on:click={handleDelete} danger icon={iconDeleteMajor}>
       {$_('delete_form')}

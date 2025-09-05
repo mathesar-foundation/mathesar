@@ -180,6 +180,8 @@ export const iconDuplicateRecord: IconProps = {
   flip: 'vertical',
 };
 export const iconFillOutForm: IconProps = { data: faPlay };
+export const iconAddToFavorites: IconProps = { data: faPlus };
+export const iconRemoveFromFavorites: IconProps = { data: faHeart };
 
 // THINGS
 //
@@ -194,6 +196,7 @@ export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
 export const iconDocumentation: IconProps = { data: faBook };
 export const iconDonation: IconProps = { data: faHeart };
+export const iconClock: IconProps = { data: faClock };
 export const iconExploration: IconProps = { data: explorationIcon };
 export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
 export const iconFeedback: IconProps = { data: faCommentAlt };

@@ -7,6 +7,7 @@
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
+  import { trackRecent } from '@mathesar/utils/recentTracker';
   import type { Table } from '@mathesar/models/Table';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
@@ -84,68 +85,81 @@
 </script>
 
 <div class="actions-pane">
-  <EntityPageHeader
-    title={isSaved
+  <div
+    use:trackRecent={isSaved && $query.id
       ? {
-          name: $query.name ?? '',
-          description: $query.description,
-          icon: iconExploration,
+          entityType: 'exploration',
+          entityId: $query.id,
+          databaseId: $query.database_id,
+          schemaOid: $query.schema_oid,
+          entityName: $query.name ?? '',
+          entityDescription: $query.description,
         }
       : undefined}
   >
-    <div class="detail-wrapper">
-      <div class="detail">
-        {isSaved ? $_('based_on') : $_('exploring_from')}
-      </div>
-      <div class="base-table-holder" class:table-selected={currentTable}>
-        {#if currentTable}
-          <TableName table={currentTable} />
-        {:else}
-          <span class="select-table">
-            <SelectTableWithinCurrentSchema
-              autoSelect="none"
-              value={currentTable}
-              on:change={(e) => updateBaseTable(e.detail)}
-            />
-          </span>
+    <EntityPageHeader
+      title={isSaved
+        ? {
+            name: $query.name ?? '',
+            description: $query.description,
+            icon: iconExploration,
+          }
+        : undefined}
+    >
+      <div class="detail-wrapper">
+        <div class="detail">
+          {isSaved ? $_('based_on') : $_('exploring_from')}
+        </div>
+        <div class="base-table-holder" class:table-selected={currentTable}>
+          {#if currentTable}
+            <TableName table={currentTable} />
+          {:else}
+            <span class="select-table">
+              <SelectTableWithinCurrentSchema
+                autoSelect="none"
+                value={currentTable}
+                on:change={(e) => updateBaseTable(e.detail)}
+              />
+            </span>
+          {/if}
+          <Help>
+            {$_('base_table_exploration_help')}
+          </Help>
+        </div>
+
+        {#if !isSaved && currentTable}
+          <Button
+            appearance="secondary"
+            on:click={() => updateBaseTable(undefined)}
+          >
+            {$_('start_over')}
+          </Button>
         {/if}
-        <Help>
-          {$_('base_table_exploration_help')}
-        </Help>
       </div>
 
-      {#if !isSaved && currentTable}
-        <Button
-          appearance="secondary"
-          on:click={() => updateBaseTable(undefined)}
-        >
-          {$_('start_over')}
-        </Button>
-      {/if}
-    </div>
+      <svelte:fragment slot="actions-right">
+        {#if currentTable}
+          <SaveButton
+            {canSave}
+            unsavedChangesText={$_('exploration_has_unsaved_changes')}
+            onSave={saveExistingOrCreateNew}
+          />
 
-    <svelte:fragment slot="actions-right">
-      {#if currentTable}
-        <SaveButton
-          {canSave}
-          unsavedChangesText={$_('exploration_has_unsaved_changes')}
-          onSave={saveExistingOrCreateNew}
-        />
-
-        <Button
-          appearance="secondary"
-          disabled={!hasColumns}
-          on:click={() => {
-            isInspectorOpen = !isInspectorOpen;
-          }}
-          active={isInspectorOpen}
-        >
-          <Icon {...iconInspector} size="0.8rem" />
-          <span>{$_('inspector')}</span>
-        </Button>
-      {/if}
-    </svelte:fragment>
-  </EntityPageHeader>
+          <Button
+            appearance="secondary"
+            disabled={!hasColumns}
+            on:click={() => {
+              isInspectorOpen = !isInspectorOpen;
+            }}
+            active={isInspectorOpen}
+          >
+            <Icon {...iconInspector} size="0.8rem" />
+            <span>{$_('inspector')}</span>
+          </Button>
+        {/if}
+      </svelte:fragment>
+    </EntityPageHeader>
+  </div>
 </div>
 
 <NameAndDescInputModalForm

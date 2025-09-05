@@ -10,6 +10,7 @@
     iconPubliclyShared,
     iconShare,
   } from '@mathesar/icons';
+  import { trackRecent } from '@mathesar/utils/recentTracker';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { confirm } from '@mathesar/stores/confirmation';
   import { dataFormInspectorVisible } from '@mathesar/stores/localStorage';
@@ -62,41 +63,54 @@
   }
 </script>
 
-<EntityPageHeader
-  title={{
-    name: $structure.name || $_('untitled'),
-    icon: iconForm,
+<div
+  use:trackRecent={{
+    entityType: 'form',
+    entityId: dataForm.id,
+    databaseId: dataForm.schema.database.id,
+    schemaOid: dataForm.schema.oid,
+    entityName: $structure.name || $_('untitled'),
+    entityDescription: $structure.description ?? undefined,
   }}
 >
-  <svelte:fragment slot="actions-right">
-    <SaveButton onSave={saveForm} canSave={$hasChanges} />
-    <Dropdown
-      showArrow={false}
-      triggerAppearance="secondary"
-      ariaLabel={$_('share')}
-    >
-      <svelte:fragment slot="trigger">
-        {#if $sharePreferences.isPublishedPublicly}
-          <Icon {...iconPubliclyShared} />
-          <span class="responsive-button-label"> {$_('shared_publicly')} </span>
-        {:else}
-          <Icon {...iconShare} />
-          <span class="responsive-button-label"> {$_('share')} </span>
-        {/if}
-      </svelte:fragment>
-      <svelte:fragment slot="content">
-        <ShareForm {dataForm} {dataFormManager} />
-      </svelte:fragment>
-    </Dropdown>
-    <Button
-      appearance="secondary"
-      size="medium"
-      on:click={toggleInspector}
-      active={$dataFormInspectorVisible}
-      aria-label={$_('inspector')}
-    >
-      <Icon {...iconInspector} />
-      <span class="responsive-button-label">{$_('inspector')}</span>
-    </Button>
-  </svelte:fragment>
-</EntityPageHeader>
+  <EntityPageHeader
+    title={{
+      name: $structure.name || $_('untitled'),
+      icon: iconForm,
+    }}
+  >
+    <svelte:fragment slot="actions-right">
+      <SaveButton onSave={saveForm} canSave={$hasChanges} />
+      <Dropdown
+        showArrow={false}
+        triggerAppearance="secondary"
+        ariaLabel={$_('share')}
+      >
+        <svelte:fragment slot="trigger">
+          {#if $sharePreferences.isPublishedPublicly}
+            <Icon {...iconPubliclyShared} />
+            <span class="responsive-button-label">
+              {$_('shared_publicly')}
+            </span>
+          {:else}
+            <Icon {...iconShare} />
+            <span class="responsive-button-label"> {$_('share')} </span>
+          {/if}
+        </svelte:fragment>
+        <svelte:fragment slot="content">
+          <ShareForm {dataForm} {dataFormManager} />
+        </svelte:fragment>
+      </Dropdown>
+      <Button
+        appearance="secondary"
+        size="medium"
+        on:click={toggleInspector}
+        active={$dataFormInspectorVisible}
+        aria-label={$_('inspector')}
+      >
+        <Icon {...iconInspector} />
+        <span class="responsive-button-label">{$_('inspector')}</span>
+      </Button>
+    </svelte:fragment>
+  </EntityPageHeader>
+</div>

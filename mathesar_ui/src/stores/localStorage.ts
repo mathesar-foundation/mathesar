@@ -28,6 +28,10 @@ export const LOCAL_STORAGE_KEYS = {
   dataExplorerLeftSidebarWidth: 'data-explorer-left-sidebar-width',
   dataExplorerRightSidebarWidth: 'data-explorer-right-sidebar-width',
 
+  // Favorites and recents
+  favorites: 'mathesar-favorites',
+  recents: 'mathesar-recents',
+
   // Data forms
   dataFormInspectorVisible: 'data-form-inspector-visible',
   dataFormInspectorWidth: 'data-form-inspector-width',

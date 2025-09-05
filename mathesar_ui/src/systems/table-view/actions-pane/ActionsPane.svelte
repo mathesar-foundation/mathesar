@@ -10,6 +10,7 @@
     iconRequiresAttention,
     iconTable,
   } from '@mathesar/icons';
+  import { trackRecent } from '@mathesar/utils/recentTracker';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
@@ -44,72 +45,83 @@
   }
 </script>
 
-<EntityPageHeader
-  title={{
-    name: table.name,
-    description: table.description ?? undefined,
-    icon: iconTable,
+<div
+  use:trackRecent={{
+    entityType: 'table',
+    entityId: table.oid,
+    databaseId: table.schema.database.id,
+    schemaOid: table.schema.oid,
+    entityName: table.name,
+    entityDescription: table.description ?? undefined,
   }}
 >
-  {#if isSelectable}
-    <div class="quick-access">
-      <FilterDropdown {filtering} {canViewLinkedEntities} />
-      <SortDropdown {sorting} />
-      <GroupDropdown {grouping} />
-    </div>
-  {/if}
-
-  <ModificationStatus requestState={$sheetState} />
-
-  {#if !$isLoading && !$hasPrimaryKey}
-    <div class="no-pk-warning">
-      <Tooltip allowHover>
-        <div slot="trigger">
-          <Icon size="1.3em" {...iconRequiresAttention} />
-        </div>
-        <span slot="content">
-          {$_('no_row_op_support_table_without_pk')}
-        </span>
-      </Tooltip>
-    </div>
-  {/if}
-
-  <div class="aux-actions" slot="actions-right">
+  <EntityPageHeader
+    title={{
+      name: table.name,
+      description: table.description ?? undefined,
+      icon: iconTable,
+    }}
+  >
     {#if isSelectable}
-      <Tooltip allowHover>
-        <AnchorButton
-          slot="trigger"
-          href="/api/export/v0/tables/?{exportLinkParams}"
-          data-tinro-ignore
+      <div class="quick-access">
+        <FilterDropdown {filtering} {canViewLinkedEntities} />
+        <SortDropdown {sorting} />
+        <GroupDropdown {grouping} />
+      </div>
+    {/if}
+
+    <ModificationStatus requestState={$sheetState} />
+
+    {#if !$isLoading && !$hasPrimaryKey}
+      <div class="no-pk-warning">
+        <Tooltip allowHover>
+          <div slot="trigger">
+            <Icon size="1.3em" {...iconRequiresAttention} />
+          </div>
+          <span slot="content">
+            {$_('no_row_op_support_table_without_pk')}
+          </span>
+        </Tooltip>
+      </div>
+    {/if}
+
+    <div class="aux-actions" slot="actions-right">
+      {#if isSelectable}
+        <Tooltip allowHover>
+          <AnchorButton
+            slot="trigger"
+            href="/api/export/v0/tables/?{exportLinkParams}"
+            data-tinro-ignore
+            appearance="secondary"
+            size="medium"
+            aria-label={$_('export')}
+            download="{table.name}.csv"
+          >
+            <Icon {...iconExport} />
+            <span class="responsive-button-label">{$_('export')}</span>
+          </AnchorButton>
+          <span slot="content">
+            {$_('export_csv_help', {
+              values: { tableName: table.name },
+            })}
+          </span>
+        </Tooltip>
+
+        <Button
           appearance="secondary"
           size="medium"
-          aria-label={$_('export')}
-          download="{table.name}.csv"
+          disabled={$isLoading}
+          on:click={toggleTableInspector}
+          active={$tableInspectorVisible}
+          aria-label={$_('inspector')}
         >
-          <Icon {...iconExport} />
-          <span class="responsive-button-label">{$_('export')}</span>
-        </AnchorButton>
-        <span slot="content">
-          {$_('export_csv_help', {
-            values: { tableName: table.name },
-          })}
-        </span>
-      </Tooltip>
-
-      <Button
-        appearance="secondary"
-        size="medium"
-        disabled={$isLoading}
-        on:click={toggleTableInspector}
-        active={$tableInspectorVisible}
-        aria-label={$_('inspector')}
-      >
-        <Icon {...iconInspector} />
-        <span class="responsive-button-label">{$_('inspector')}</span>
-      </Button>
-    {/if}
-  </div>
-</EntityPageHeader>
+          <Icon {...iconInspector} />
+          <span class="responsive-button-label">{$_('inspector')}</span>
+        </Button>
+      {/if}
+    </div>
+  </EntityPageHeader>
+</div>
 
 <style lang="scss">
   .quick-access {
