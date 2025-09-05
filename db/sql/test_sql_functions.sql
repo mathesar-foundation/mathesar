@@ -3285,6 +3285,14 @@ BEGIN
   RETURN NEXT is(msar.format_data('"3"'::jsonb), '"3"');
   RETURN NEXT is(msar.format_data('true'::jsonb), 'true');
   RETURN NEXT is(msar.format_data('"true"'::jsonb), '"true"');
+  RETURN NEXT is(msar.format_data(
+    ARRAY[
+      '{"nested":{"k":"v"}}'::jsonb,
+      '{"list":[1,2,3]}'::jsonb,
+      '[2,3,4]'::jsonb
+    ]),
+    '["{\"nested\": {\"k\": \"v\"}}", "{\"list\": [1, 2, 3]}", "[2, 3, 4]"]'::jsonb
+  );
   -- It suffices to check that the resulting string casts to the same json as the input.
   RETURN NEXT is(
     msar.format_data('{"true": true, "1": 1, "arr": [1, "2", false]}'::jsonb)::jsonb,
