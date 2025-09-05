@@ -4,6 +4,7 @@ import warnings
 from psycopg2 import errors as p_errors
 import sqlalchemy
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.dialects.postgresql import JSON, JSONB, ARRAY, TEXT
 
 from db.connection import mathesar_connection
 
@@ -27,11 +28,26 @@ def execute_statement(engine, statement, connection_to_use=None):
             raise e
 
 
+def stringify_json_cols(query):
+    col_list = []
+    for col in query.c:
+        if isinstance(col.type, (JSONB, JSON)):
+            col_list.append(sqlalchemy.cast(col, TEXT))
+        elif isinstance(col.type, ARRAY) and isinstance(col.type.item_type, (JSONB, JSON)):
+            new_col = sqlalchemy.literal_column(
+                f"(SELECT jsonb_agg(x::text) FROM unnest({str(col)}) AS x)"
+            ).label(col.name)
+            col_list.append(new_col)
+        else:
+            col_list.append(col)
+    return col_list
+
+
 def execute_pg_query(engine, query, connection_to_use=None):
-    if isinstance(query, sqlalchemy.sql.expression.Executable):
-        executable = query
-    else:
-        executable = sqlalchemy.select(query)
+    # Before executing the query we check if there are any JSON like columns within the exploration and
+    # stringify them so that they are rendered by the frontend properly.
+    col_list = stringify_json_cols(query)
+    executable = sqlalchemy.select(col_list)
     return execute_statement(engine, executable, connection_to_use=connection_to_use).fetchall()
 
 
