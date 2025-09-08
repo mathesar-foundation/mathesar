@@ -135,7 +135,7 @@ export function getDataFormPageUrl(
 }
 
 export function getFormShareUrl(formToken: string) {
-  return `/shares/forms/${formToken}`;
+  return `/shares/forms/${formToken}/`;
 }
 
 export const USER_PROFILE_URL = '/profile/';
