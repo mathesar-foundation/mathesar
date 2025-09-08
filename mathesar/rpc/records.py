@@ -293,7 +293,7 @@ def get(
         database_id: int,
         return_record_summaries: bool = False,
         table_record_summary_templates: dict[str, Any] = None,
-        download_link_columns: list[int] = [],
+        return_download_links: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -311,6 +311,9 @@ def get(
             per-table basis over the stored metadata templates. The purpose of
             this function parameter is to allow clients to generate record
             summary previews without persisting any metadata.
+        return_download_links: If non-empty, the backend will construct
+            DownloadLinks for each value in the passed column attnums if
+            possible, and return relevant info.
     Returns:
         The requested record, along with some metadata.
     """
@@ -330,7 +333,7 @@ def get(
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns
+        return_download_links,
     ) or None
     return RecordList.from_dict(record_info)
 
@@ -457,7 +460,7 @@ def search(
         limit: int = 10,
         offset: int = 0,
         return_record_summaries: bool = False,
-        download_link_columns: list[int] = [],
+        return_download_links: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -476,6 +479,13 @@ def search(
         search_params: Results are ranked and filtered according to the
                        objects passed here.
         limit: The maximum number of rows we'll return.
+        offset: The number of rows to skip before returning records from
+            following rows.
+        return_record_summaries: Whether to return summaries of retrieved
+            records.
+        return_download_links: If non-empty, the backend will construct
+            DownloadLinks for each value in the passed column attnums if
+            possible, and return relevant info.
 
     Returns:
         The requested records, along with some metadata.
@@ -494,7 +504,7 @@ def search(
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns
+        return_download_links,
     ) or None
     return RecordList.from_dict(record_info)
 
