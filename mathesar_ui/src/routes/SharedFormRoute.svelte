@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import { api } from '@mathesar/api/rpc';
   import { isDefinedNonNullable } from '@mathesar/component-library';
   import Errors from '@mathesar/components/errors/Errors.svelte';
@@ -27,10 +29,17 @@
 {#if isLoading}
   <LoadingPage />
 {:else if $rawFormStore.resolvedValue && $formSourceInfo.resolvedValue}
-  <SharedDataFormFillPage
-    rawDataForm={$rawFormStore.resolvedValue}
-    formSource={$formSourceInfo.resolvedValue}
-  />
+  {#if $rawFormStore.resolvedValue.publish_public}
+    <SharedDataFormFillPage
+      rawDataForm={$rawFormStore.resolvedValue}
+      formSource={$formSourceInfo.resolvedValue}
+    />
+  {:else}
+    <!-- For authenticated users accessing the un-shared form -->
+    <ErrorPage showGoToRoot={false}>
+      {$_('this_form_is_not_publicly_shared')}
+    </ErrorPage>
+  {/if}
 {:else}
   <ErrorPage showGoToRoot={false}>
     <Errors {errors} showFallbackError />
