@@ -72,7 +72,7 @@
     border: solid 1px var(--border-card);
     padding: var(--lg1);
     border-radius: var(--border-radius-l);
-    background-color: var(--surface-raised-2-background);
+    background-color: var(--color-surface-raised-2);
   }
 
   .release.available-upgrade {

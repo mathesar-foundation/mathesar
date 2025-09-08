@@ -40,7 +40,7 @@
     overflow: auto;
   }
   .page-content:not(.has-preview) {
-    background: var(--surface-base-background);
+    background: var(--color-surface-base);
   }
   .footer:not(:empty) {
     border-top: 1px solid var(--border-section);

@@ -55,8 +55,8 @@
 
     .tag {
       border-radius: var(--border-radius-xl);
-      background-color: var(--surface-raised-2-background);
-      border: 1px solid var(--surface-raised-2-border-color);
+      background-color: var(--color-surface-raised-2);
+      border: 1px solid var(--color-surface-raised-2-border);
       padding: var(--sm6) var(--sm3);
       max-width: var(--df__internal__field-source-max-width, none);
       font-weight: var(--font-weight-medium);

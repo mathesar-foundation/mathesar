@@ -30,9 +30,9 @@
 <style lang="scss">
   .connect-option {
     display: grid;
-    --button-background: var(--surface-raised-3-background);
+    --button-background: var(--color-surface-raised-3);
     --button-color: var(--text-control);
-    --button-border-color: var(--surface-raised-3-border-color);
+    --button-border-color: var(--color-surface-raised-3-border);
     --button-box-shadow: 0 1px 2px
         color-mix(in srgb, var(--border-shadow), transparent 5%),
       0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),

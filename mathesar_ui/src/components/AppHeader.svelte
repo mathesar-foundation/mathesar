@@ -167,8 +167,8 @@
     height: var(--header-height);
     background: linear-gradient(
       to bottom right,
-      var(--surface-base-background),
-      var(--surface-raised-2-background)
+      var(--color-surface-base),
+      var(--color-surface-raised-2)
     );
     border-bottom: 1px solid var(--border-container);
     box-shadow: var(--border-shadow) 0 1px 3px 0;

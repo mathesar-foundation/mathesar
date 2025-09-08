@@ -44,7 +44,7 @@
     --header-color="linear-gradient(
       135deg,
       var(--color-navigation-40), 35%,
-      var(--surface-base-background) 50%,
+      var(--color-surface-base) 50%,
       var(--color-navigation-20) 100%
     )"
   />

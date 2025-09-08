@@ -29,87 +29,87 @@ $shadow-color: hsl($base-hue, $base-saturation, 18%);
 
 $elevations: (
   'sunken-2': (
-    'background': hsl($base-hue, $base-saturation, 0%),
-    'border-color': hsl($base-hue, $base-saturation, 40%),
+    '': hsl($base-hue, $base-saturation, 0%),
+    'border': hsl($base-hue, $base-saturation, 40%),
   ),
   'sunken-1': (
-    'background': hsl($base-hue, $base-saturation, 1%),
-    'border-color': hsl($base-hue, $base-saturation, 25%),
+    '': hsl($base-hue, $base-saturation, 1%),
+    'border': hsl($base-hue, $base-saturation, 25%),
   ),
   'base': (
-    'background': hsl($base-hue, $base-saturation, 2%),
-    'border-color': hsl($base-hue, $base-saturation, 15%),
+    '': hsl($base-hue, $base-saturation, 2%),
+    'border': hsl($base-hue, $base-saturation, 15%),
   ),
   'raised-1': (
-    'background': hsl($base-hue, $base-saturation, 5%),
-    'border-color': hsl($base-hue, $base-saturation, 20%),
+    '': hsl($base-hue, $base-saturation, 5%),
+    'border': hsl($base-hue, $base-saturation, 20%),
   ),
   'raised-2': (
-    'background': hsl($base-hue, $base-saturation, 7%),
-    'border-color': hsl($base-hue, $base-saturation, 25%),
+    '': hsl($base-hue, $base-saturation, 7%),
+    'border': hsl($base-hue, $base-saturation, 25%),
   ),
   'raised-3': (
-    'background': hsl($base-hue, $base-saturation, 10%),
-    'border-color': hsl($base-hue, $base-saturation, 30%),
+    '': hsl($base-hue, $base-saturation, 10%),
+    'border': hsl($base-hue, $base-saturation, 30%),
   ),
 );
 
 $elevation-states: (
   'hover': (
-    'background': (
+    '': (
       'h_delta': 0,
       's_delta': 8%,
       'l_delta': 4%,
     ),
-    'border-color': (
+    'border': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 6,
     ),
   ),
   'active': (
-    'background': (
+    '': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 9,
     ),
-    'border-color': (
+    'border': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 14,
     ),
   ),
   'focused': (
-    'background': (
+    '': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 2,
     ),
-    'border-color': (
+    'border': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 10,
     ),
   ),
   'disabled': (
-    'background': (
+    '': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 10,
     ),
-    'border-color': (
+    'border': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 6,
     ),
   ),
   'muted': (
-    'background': (
+    '': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 10,
     ),
-    'border-color': (
+    'border': (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 6,

@@ -18,17 +18,17 @@
   .link-card {
     display: block;
     cursor: pointer;
-    background: var(--surface-raised-2-background);
-    border: 1px solid var(--surface-raised-2-border-color);
-    box-shadow: 0 1px 2px 0 var(--surface-raised-2-muted-background);
+    background: var(--color-surface-raised-2);
+    border: 1px solid var(--color-surface-raised-2-border);
+    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
     border-radius: var(--border-radius-m);
     transition: all 0.2s ease;
   }
 
   .link-card:hover {
-    background: var(--surface-raised-2-hover-background);
-    border: 1px solid var(--surface-raised-2-hover-border-color);
-    box-shadow: 0 1px 2px 0 var(--surface-raised-2-muted-background);
+    background: var(--color-surface-raised-2-hover);
+    border: 1px solid var(--color-surface-raised-2-hover-border);
+    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
   }
 
   .link-card.multiple {
@@ -36,9 +36,9 @@
   }
 
   .link-card.multiple:hover .container {
-    background: var(--surface-raised-3-hover-background);
-    border: 1px solid var(--surface-raised-3-hover-border-color);
-    box-shadow: 0 1px 2px 0 var(--surface-raised-2-muted-background);
+    background: var(--color-surface-raised-3-hover);
+    border: 1px solid var(--color-surface-raised-3-hover-border);
+    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
   }
 
   .container {
@@ -50,8 +50,8 @@
     position: relative;
     bottom: var(--sm3);
     left: var(--sm3);
-    background: var(--surface-raised-3-background);
-    border: 1px solid var(--surface-raised-3-border-color);
+    background: var(--color-surface-raised-3);
+    border: 1px solid var(--color-surface-raised-3-border);
     border-radius: var(--border-radius-m);
   }
 

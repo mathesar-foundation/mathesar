@@ -22,7 +22,7 @@
   box-sizing: border-box;
   -ms-touch-action: manipulation;
   touch-action: manipulation;
-  background: var(--surface-raised-3-background);
+  background: var(--color-surface-raised-3);
   max-height: 40em;
   max-width: 19.6em;
 }
@@ -51,7 +51,7 @@
   isolation: isolate;
 }
 .flatpickr-months .flatpickr-month {
-  background: var(--surface-raised-3-background);
+  background: var(--color-surface-raised-3);
   color: var(--text-primary);
   fill: var(--text-control);
   height: 34px;
@@ -171,14 +171,14 @@
 .numInputWrapper span:hover {
   background: color-mix(
     in srgb,
-    var(--surface-base-hover-background),
+    var(--color-surface-base-hover),
     transparent 50%
   );
 }
 .numInputWrapper span:active {
   background: color-mix(
     in srgb,
-    var(--surface-base-active-background),
+    var(--color-surface-base-active),
     transparent 50%
   );
 }
@@ -217,7 +217,7 @@
 .numInputWrapper:hover {
   background: color-mix(
     in srgb,
-    var(--surface-raised-1-hover-background),
+    var(--color-surface-raised-1-hover),
     transparent 60%
   );
 }
@@ -321,11 +321,7 @@
   outline: none;
 }
 .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
-  background: color-mix(
-    in srgb,
-    var(--surface-base-background),
-    transparent 90%
-  );
+  background: color-mix(in srgb, var(--color-surface-base), transparent 90%);
 }
 .flatpickr-current-month
   .flatpickr-monthDropdown-months
@@ -459,7 +455,7 @@ span.flatpickr-weekday {
   outline: 0;
   background: color-mix(
     in srgb,
-    var(--surface-raised-1-hover-background),
+    var(--color-surface-raised-1-hover),
     transparent 50%
   );
   border-color: var(--border-section);
@@ -700,7 +696,7 @@ span.flatpickr-weekday {
 .flatpickr-time .flatpickr-am-pm:hover,
 .flatpickr-time input:focus,
 .flatpickr-time .flatpickr-am-pm:focus {
-  background: var(--surface-raised-3-background);
+  background: var(--color-surface-raised-3);
 }
 .flatpickr-input {
   display: none;
