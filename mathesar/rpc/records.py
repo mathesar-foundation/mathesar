@@ -149,6 +149,8 @@ class RecordList(TypedDict):
         linked_record_smmaries: Information for previewing foreign key
             values, provides a map of foreign key to a text summary.
         record_summaries: Information for previewing returned records.
+        download_links: Information for viewing or downloading file
+            attachments.
     """
     count: int
     results: list[dict]
