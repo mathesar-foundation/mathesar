@@ -239,6 +239,9 @@ export class TabularData {
     this.columnsDataStore.on('columnPatched', async () => {
       await this.recordsData.fetch();
     });
+    this.constraintsDataStore.on('constraintAdded', async () => {
+      await this.recordsData.fetch();
+    });
   }
 
   refresh(): Promise<unknown> {
