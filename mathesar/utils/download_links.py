@@ -43,7 +43,7 @@ def get_link_thumbnail(session_key, download_link_mash, width=500, height=500):
         mash=download_link_mash,
         sessions=session_key,
     )
-    content_type = "image/jpeg"
+    content_type = "image/avif"
     size = width, height
     key = f"{size[0]}x{size[1]}"
 
@@ -53,7 +53,7 @@ def get_link_thumbnail(session_key, download_link_mash, width=500, height=500):
         with of as f:
             img = Image.open(f)
             img.thumbnail(size)
-            img.save(img_byte_arr, format="JPEG")
+            img.save(img_byte_arr, format="AVIF", quality=50)
         thumbnail = img_byte_arr.getvalue()
         link.thumbnail[key] = base64.b64encode(thumbnail).decode("utf-8")
         link.save()
