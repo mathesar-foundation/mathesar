@@ -143,7 +143,7 @@
     background: var(--surface-input);
     border-radius: 0.2rem;
     border: none;
-    box-shadow: 0 0 0 0.1rem var(--border-shadow);
+    box-shadow: 0 0 0 0.1rem var(--color-shadow);
     outline: none;
     resize: none;
     color: var(--text-primary);

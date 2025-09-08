@@ -111,19 +111,18 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    box-shadow: inset 0 0 0 1px var(--surface-card-muted);
   }
 
   .schema-row.hover {
     border: 1px solid var(--color-schema-10);
-    box-shadow: 0 1px 2px 0 var(--color-schema-10-hover);
     background: var(--color-schema-5-active);
+    box-shadow: 0 1px 2px 0 var(--color-shadow);
   }
 
-  .schema-row:active {
+  .schema-row:active, .schema-row.focus {
     border: 1px solid var(--color-schema-20);
-    box-shadow: 0 1px 2px 0 var(--color-schema-20-active);
     background: var(--color-schema-10-active);
+    box-shadow: 0 2px 4px 0 var(--color-shadow);
   }
 
   .schema-row.focus {

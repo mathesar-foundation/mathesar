@@ -13,6 +13,6 @@
     overflow: hidden;
     grid-template-columns: var(--Grid-table__template-columns);
     grid-template-rows: var(--Grid-table__template-rows, auto);
-    box-shadow: 0 1px 4px var(--border-shadow);
+    box-shadow: 0 1px 4px var(--color-shadow);
   }
 </style>

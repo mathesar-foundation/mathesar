@@ -91,25 +91,25 @@
      */
     --overflow-shadow-spread: 0.5rem;
     --overflow-shadow: 0 0 var(--overflow-shadow-size)
-      var(--overflow-shadow-spread) var(--border-shadow);
+      var(--overflow-shadow-spread) var(--color-shadow);
     --clip-path-size: -1rem;
   }
   .table-overflow-left.row-header {
     box-shadow: calc(-1 * var(--overflow-shadow-spread)) 0
       var(--overflow-shadow-size) var(--overflow-shadow-spread)
-      var(--border-shadow);
+      var(--color-shadow);
     clip-path: inset(0 var(--clip-path-size) 0 0);
   }
   .table-overflow-top.column-header {
     box-shadow: 0 calc(-1 * var(--overflow-shadow-spread))
       var(--overflow-shadow-size) var(--overflow-shadow-spread)
-      var(--border-shadow);
+      var(--color-shadow);
     clip-path: inset(0 0 var(--clip-path-size) 0);
   }
   .table-overflow-top.table-overflow-left.row-header.column-header {
     box-shadow: calc(-1 * var(--overflow-shadow-spread))
       calc(-1 * var(--overflow-shadow-spread)) var(--overflow-shadow-size)
-      var(--overflow-shadow-spread) var(--border-shadow);
+      var(--overflow-shadow-spread) var(--color-shadow);
     clip-path: inset(0 var(--clip-path-size) var(--clip-path-size) 0);
   }
 </style>

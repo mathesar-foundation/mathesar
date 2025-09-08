@@ -58,7 +58,7 @@
     flex-shrink: 0;
     background-color: var(--surface-header);
     border-bottom: 1px solid var(--border-header);
-    box-shadow: 0 2px 4px var(--border-shadow);
+    box-shadow: 0 2px 4px var(--color-shadow);
     user-select: none;
     -webkit-user-select: none; /* Safari */
     overflow: hidden;

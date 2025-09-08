@@ -25,7 +25,7 @@
     background-color: var(--surface-card);
     overflow: hidden;
     box-shadow: 0 1px 2px 0
-      color-mix(in srgb, var(--border-shadow), transparent 80%);
+      color-mix(in srgb, var(--color-shadow), transparent 80%);
     transition:
       background 120ms ease,
       box-shadow 120ms ease;

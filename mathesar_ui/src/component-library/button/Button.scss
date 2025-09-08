@@ -46,7 +46,7 @@
         border-color: var(--border-control),
         box-shadow: (
           var(--color-surface-base) 0 1px 2px 0,
-          var(--border-shadow) 0 1px 3px 0,
+          var(--color-shadow) 0 1px 3px 0,
         ),
       ),
       hover: (
@@ -56,8 +56,8 @@
         background: var(--surface-control-focused),
         outline-color: var(--border-control-focused),
         box-shadow: (
-          0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
-          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
         ),
       ),
       active: (
@@ -79,9 +79,9 @@
         color: var(--text-light),
         border-color: var(--color-action-primary-80),
         box-shadow: (
-          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 75%),
-          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 80%),
-          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 75%),
+          0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 80%),
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent
                 80%),
         ),
       ),
@@ -94,11 +94,11 @@
           ),
         border-color: var(--color-action-primary-80-hover),
         box-shadow: (
-          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent
                 75%),
-          0 1px 3px -2px color-mix(in srgb, var(--border-shadow), transparent
+          0 1px 3px -2px color-mix(in srgb, var(--color-shadow), transparent
                 80%),
-          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent
                 80%),
         ),
       ),
@@ -115,7 +115,7 @@
           ),
         border-color: var(--color-action-primary-60-hover),
         outline-color: var(--color-action-primary-40),
-        box-shadow: var(--border-shadow) 0 1px 2px 0,
+        box-shadow: var(--color-shadow) 0 1px 2px 0,
       ),
     ),
 
@@ -129,11 +129,11 @@
         background: var(--color-action-secondary-25-hover),
         border-color: var(--color-action-secondary-40),
         box-shadow: (
-          0 4px 6px -1px color-mix(in srgb, var(--border-shadow), transparent
+          0 4px 6px -1px color-mix(in srgb, var(--color-shadow), transparent
                 10%),
-          0 2px 4px -2px color-mix(in srgb, var(--border-shadow), transparent
+          0 2px 4px -2px color-mix(in srgb, var(--color-shadow), transparent
                 10%),
-          0 0 0 1px color-mix(in srgb, var(--border-shadow), transparent 10%)
+          0 0 0 1px color-mix(in srgb, var(--color-shadow), transparent 10%)
             inset,
         ),
       ),
@@ -146,9 +146,9 @@
         border-color: var(--color-action-secondary-40),
         outline-color: var(--color-action-secondary-40),
         box-shadow: (
-          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 5%),
-          0 1px 3px color-mix(in srgb, var(--border-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--border-shadow), transparent
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent
                 10%),
         ),
       ),
@@ -192,8 +192,8 @@
         background: var(--surface-control-focused),
         border-color: var(--border-control-focused),
         box-shadow: (
-          0 2px 4px color-mix(in srgb, var(--border-shadow), transparent 15%),
-          0 1px 2px color-mix(in srgb, var(--border-shadow), transparent 10%),
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
         ),
       ),
       active: (

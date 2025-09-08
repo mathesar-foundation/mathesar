@@ -509,8 +509,8 @@ span.flatpickr-weekday {
 .flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
-  -webkit-box-shadow: -10px 0 0 var(--border-shadow);
-  box-shadow: -10px 0 0 var(--border-shadow);
+  -webkit-box-shadow: -10px 0 0 var(--color-shadow);
+  box-shadow: -10px 0 0 var(--color-shadow);
 }
 .flatpickr-day.selected.startRange.endRange,
 .flatpickr-day.startRange.startRange.endRange,
@@ -546,11 +546,11 @@ span.flatpickr-weekday {
 .flatpickr-day.week.selected {
   border-radius: 0;
   -webkit-box-shadow:
-    -5px 0 0 var(--border-shadow),
-    5px 0 0 var(--border-shadow);
+    -5px 0 0 var(--color-shadow),
+    5px 0 0 var(--color-shadow);
   box-shadow:
-    -5px 0 0 var(--border-shadow),
-    5px 0 0 var(--border-shadow);
+    -5px 0 0 var(--color-shadow),
+    5px 0 0 var(--color-shadow);
 }
 .flatpickr-day.hidden {
   visibility: hidden;
@@ -563,8 +563,8 @@ span.flatpickr-weekday {
 }
 .flatpickr-weekwrapper .flatpickr-weeks {
   padding: 0 12px;
-  -webkit-box-shadow: 1px 0 0 var(--border-shadow);
-  box-shadow: 1px 0 0 var(--border-shadow);
+  -webkit-box-shadow: 1px 0 0 var(--color-shadow);
+  box-shadow: 1px 0 0 var(--color-shadow);
 }
 .flatpickr-weekwrapper .flatpickr-weekday {
   float: none;

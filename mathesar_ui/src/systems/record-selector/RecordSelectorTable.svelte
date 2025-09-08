@@ -308,7 +308,7 @@
     overflow: hidden;
     position: relative;
     --overflow-shadow-size: 0.75rem;
-    --overflow-shadow-color: var(--border-shadow);
+    --overflow-shadow-color: var(--color-shadow);
     --focus-highlight-width: 0.2rem;
   }
   .scroll-container {

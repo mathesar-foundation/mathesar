@@ -9,7 +9,7 @@
   line-height: 1.6;
   overflow: hidden;
   background: color-mix(in srgb, var(--semantic-tip-bg), transparent 60%);
-  box-shadow: 0 4px 8px color-mix(in srgb, var(--border-shadow), transparent 8%);
+  box-shadow: 0 4px 8px color-mix(in srgb, var(--color-shadow), transparent 8%);
 
   &::before {
     content: '';

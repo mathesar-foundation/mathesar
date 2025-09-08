@@ -25,7 +25,7 @@ $visited-link: hsl(hue($wisteria), 50%, 30%);
 $base-hue: 42;
 $base-saturation: 10%;
 
-$shadow-color: hsl($base-hue, $base-saturation, 82%);
+$color-shadow: hsl($base-hue, $base-saturation, 82%);
 
 $elevations: (
   'sunken-2': (
@@ -170,7 +170,6 @@ $border-colors: (
   'grid': hsl(hue($base), saturation($base), 80%),
   'card': hsl(hue($base), saturation($base), 85%),
   'dropdown': hsl(hue($base), saturation($base), 85%),
-  'shadow': hsl(hue($base), saturation($base), 82%),
   'divider': hsl(hue($base), saturation($base), 80%),
   'header': hsl(hue($base), saturation($base), 80%),
   'control': hsl(hue($base), saturation($base), 80%),
@@ -337,4 +336,6 @@ body {
 
   --mix-blend-mode: multiply;
   --modal-overlay: rgba(0, 0, 0, 0.2);
+
+  --color-shadow: $color-shadow;
 }

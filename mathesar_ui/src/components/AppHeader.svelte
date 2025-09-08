@@ -171,7 +171,7 @@
       var(--color-surface-raised-2)
     );
     border-bottom: 1px solid var(--border-container);
-    box-shadow: var(--border-shadow) 0 1px 3px 0;
+    box-shadow: var(--color-shadow) 0 1px 3px 0;
     overflow: hidden;
     color: var(--text-primary);
     font-size: 1rem;

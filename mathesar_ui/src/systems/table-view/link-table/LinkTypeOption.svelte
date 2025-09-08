@@ -130,7 +130,7 @@
   .link-type-option.checked,
   .link-type-option:hover {
     box-shadow: 0 0 0.5em
-      color-mix(in srgb, var(--border-shadow), transparent 30%);
+      color-mix(in srgb, var(--color-shadow), transparent 30%);
   }
   .top {
     align-self: start;
