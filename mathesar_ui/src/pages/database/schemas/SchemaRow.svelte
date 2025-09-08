@@ -119,7 +119,8 @@
     box-shadow: 0 1px 2px 0 var(--color-shadow);
   }
 
-  .schema-row:active, .schema-row.focus {
+  .schema-row:active,
+  .schema-row.focus {
     border: 1px solid var(--color-schema-20);
     background: var(--color-schema-10-active);
     box-shadow: 0 2px 4px 0 var(--color-shadow);
