@@ -3291,7 +3291,7 @@ BEGIN
       '{"list":[1,2,3]}'::jsonb,
       '[2,3,4]'::jsonb
     ]),
-    '["{\"nested\": {\"k\": \"v\"}}", "{\"list\": [1, 2, 3]}", "[2, 3, 4]"]'::jsonb
+    '{"{\"nested\": {\"k\": \"v\"}}","{\"list\": [1, 2, 3]}","[2, 3, 4]"}'::text[]
   );
   -- It suffices to check that the resulting string casts to the same json as the input.
   RETURN NEXT is(

@@ -4320,8 +4320,8 @@ SELECT val::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
-CREATE OR REPLACE FUNCTION msar.format_data(val jsonb[]) returns jsonb AS $$
-SELECT jsonb_agg(x::text) FROM unnest(val) AS x;
+CREATE OR REPLACE FUNCTION msar.format_data(val jsonb[]) returns text[] AS $$
+SELECT cast(val as text[]);
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
@@ -4330,8 +4330,8 @@ SELECT val::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
-CREATE OR REPLACE FUNCTION msar.format_data(val json[]) returns json AS $$
-SELECT json_agg(x::text) FROM unnest(val) AS x;
+CREATE OR REPLACE FUNCTION msar.format_data(val json[]) returns text[] AS $$
+SELECT cast(val as text[]);
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
