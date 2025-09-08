@@ -39,8 +39,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID-mathesar}
-      - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY-mathesar}
+      - MINIO_ROOT_USER=mathesar
+      - MINIO_ROOT_PASSWORD=mathesar
     command: server --console-address ":9001" /data
     volumes:
       - dev_obj_store_data:/data
@@ -74,10 +74,6 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
       - POSTGRES_PORT=5432
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - AWS_ENDPOINT_URL_S3=${AWS_ENDPOINT_URL_S3}
     volumes:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
