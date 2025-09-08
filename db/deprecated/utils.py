@@ -34,10 +34,7 @@ def stringify_json_cols(query):
         if isinstance(col.type, (JSONB, JSON)):
             col_list.append(sqlalchemy.cast(col, TEXT))
         elif isinstance(col.type, ARRAY) and isinstance(col.type.item_type, (JSONB, JSON)):
-            new_col = sqlalchemy.literal_column(
-                f"(SELECT jsonb_agg(x::text) FROM unnest({str(col)}) AS x)"
-            ).label(col.name)
-            col_list.append(new_col)
+            col_list.append(sqlalchemy.cast(col, ARRAY(TEXT)))
         else:
             col_list.append(col)
     return col_list
