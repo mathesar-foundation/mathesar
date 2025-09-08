@@ -79,7 +79,7 @@
 <style lang="scss">
   .import-preview {
     :global([data-sheet-element='data-cell']) {
-      background: var(--color-surface-sunken-2);
+      background: var(--surface-sunken-2-background);
     }
     :global([data-sheet-element='data-cell']:last-child),
     :global([data-sheet-element='column-header-cell']:last-child) {

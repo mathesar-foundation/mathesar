@@ -108,7 +108,7 @@
 @mixin generate-surface-color-tokens($elevations, $states) {
   @each $elevation, $cfg in $elevations {
     @each $role, $color in $cfg {
-      --color-surface-#{$elevation}#{_suffix($role)}: #{$color};
+      --surface-#{$elevation}#{_suffix($role)}: #{$color};
     }
 
     @each $state, $state-cfg in $states {
@@ -126,7 +126,7 @@
         $variant: hsl($h-new, $s-new, $l-new);
 
         $role-seg: _suffix($role);
-        --color-surface-#{$elevation}-#{$state}#{_suffix($role)}: #{$variant};
+        --surface-#{$elevation}-#{$state}#{_suffix($role)}: #{$variant};
       }
     }
   }

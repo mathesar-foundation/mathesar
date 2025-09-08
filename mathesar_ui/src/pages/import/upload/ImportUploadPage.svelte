@@ -236,9 +236,9 @@
     padding: var(--lg3);
     border: 1px solid var(--border-section);
     border-radius: var(--border-radius-m);
-    background-color: var(--color-surface-raised-1);
+    background-color: var(--surface-raised-1-background);
     margin-bottom: 2rem;
-    --fieldset-boxed-background-color: var(--color-surface-raised-3);
+    --fieldset-boxed-background-color: var(--surface-raised-3-background);
   }
 
   .data-source-input {

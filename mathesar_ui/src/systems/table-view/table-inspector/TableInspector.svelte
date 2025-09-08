@@ -51,7 +51,7 @@
     height: 100%;
     position: relative;
     background-color: var(--surface-supporting);
-    border-top: 1px solid var(--color-surface-raised-2-border);
+    border-top: 1px solid var(--surface-raised-2-border-color);
     border-left: 1px solid var(--border-section);
     border-bottom: 1px solid var(--border-card);
     border-right: 1px solid var(--border-grid);

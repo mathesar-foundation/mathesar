@@ -90,7 +90,7 @@
   }
 
   .errors {
-    background: var(--color-surface-sunken-2);
+    background: var(--surface-sunken-2-background);
     border: solid 2px var(--semantic-danger-border);
     box-shadow:
       #000 0 0 0 0,

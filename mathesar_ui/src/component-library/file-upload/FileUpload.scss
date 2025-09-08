@@ -46,7 +46,7 @@
 
   .file-upload-trigger {
     display: block;
-    background: var(--color-surface-sunken-2);
+    background: var(--surface-sunken-2-background);
     border: 1px dashed var(--border-fieldset);
     border-radius: 3px;
     color: inherit;
@@ -88,7 +88,7 @@
       border-width: 2px;
     }
     &:hover {
-      background: var(--color-surface-sunken-2-hover);
+      background: var(--surface-sunken-2-hover-background);
     }
     &.dragging-over {
       background: var(--semantic-info-bg);

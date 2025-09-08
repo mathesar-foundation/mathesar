@@ -33,7 +33,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: var(--color-surface-base);
+    background-color: var(--surface-base-background);
     color: var(--text-primary);
 
     .app-layout-header {

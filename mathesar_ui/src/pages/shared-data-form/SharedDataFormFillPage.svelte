@@ -36,7 +36,7 @@
     overflow: auto;
     position: relative;
     height: 100%;
-    background: var(--color-surface-raised-1);
+    background: var(--surface-raised-1-background);
     padding: 0 0.5rem;
     --df__element-spacing: var(--sm3);
     --df__element-right-padding: 0;

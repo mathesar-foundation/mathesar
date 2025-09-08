@@ -7,8 +7,8 @@
 <style>
   .grid-table {
     display: grid;
-    background: var(--color-surface-raised-1);
-    border: 0.5px solid var(--color-surface-raised-1-border);
+    background: var(--surface-raised-1-background);
+    border: 0.5px solid var(--surface-raised-1-border-color);
     border-radius: var(--border-radius-m);
     overflow: hidden;
     grid-template-columns: var(--Grid-table__template-columns);

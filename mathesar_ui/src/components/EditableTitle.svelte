@@ -34,7 +34,7 @@
     :global(input) {
       position: absolute;
       top: 0;
-      background: var(--color-surface-base);
+      background: var(--surface-base-background);
       font-weight: 500;
     }
     :global(input.text-input:not(:hover):not(:focus)) {

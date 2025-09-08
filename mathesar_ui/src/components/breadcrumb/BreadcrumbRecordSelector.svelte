@@ -39,9 +39,9 @@
 
     &:hover,
     &:active {
-      background-color: var(--color-surface-raised-1-active);
+      background-color: var(--surface-raised-1-active-background);
       color: var(--text-navigation-active);
-      border-color: var(--color-surface-raised-1-active-border);
+      border-color: var(--surface-raised-1-active-border-color);
     }
   }
 </style>
