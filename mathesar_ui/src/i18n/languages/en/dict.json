@@ -768,6 +768,7 @@
   "theme_light": "Light",
   "theme_system": "System",
   "this_behavior_is_not_configurable": "This behavior is not configurable.",
+  "this_form_is_not_publicly_shared": "This form is not publicly shared.",
   "this_will_remove_following_columns": "This will remove the following column(s):",
   "this_will_remove_following_transformations": "This will remove the following transformation(s):",
   "time_to_create_exploration": "It's time to use your tables. Create your first exploration.",

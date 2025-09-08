@@ -11,12 +11,15 @@ When you've opted-in to usage data collection, the following information is sent
 - **mathesar_version**: This is a string giving your Mathesar version, e.g., '0.2.0'.
 - **user_count**: The number of user accounts on your Mathesar installation.
 - **active_user_count**: The number of users who have logged into your Mathesar installation within the last 14 days.
+- **sso_connected_user_count**: The number of users who have SSO configured on your Mathesar installation.
 - **configured_role_count**: The number of PostgreSQL roles you've configured in your Mathesar installation.
 - **connected_database_count**: The number of Databases you've connected to your Mathesar installation.
 - **connected_database_schema_count**: The total number of schemas connected to your Mathesar installation.
 - **connected_database_table_count**: The total number of tables connected to your Mathesar installation.
 - **connected_database_record_count**: The approximate number of records in all tables connected to your Mathesar installation.
 - **exploration_count**: The number of Explorations you've created in Mathesar.
+- **form_count**: The number of Forms you've created in Mathesar.
+- **public_form_count**: The number of Forms you've published publicly in Mathesar.
 
 ## Viewing Actual Reports
 
