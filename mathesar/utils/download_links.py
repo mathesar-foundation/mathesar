@@ -1,4 +1,5 @@
 import base64
+import cairosvg
 import hashlib
 import io
 import itertools
@@ -10,7 +11,7 @@ from django.contrib.sessions.models import Session
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 import fsspec
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import yaml
 from mathesar.models import DownloadLink
 
@@ -49,18 +50,28 @@ def get_link_thumbnail(session_key, download_link_mash, width=500, height=500):
 
     if (thumb_64 := link.thumbnail.get(key)) is None:
         of = fsspec.open(link.uri, "rb", **link.fsspec_kwargs)
-        img_byte_arr = io.BytesIO()
-        with of as f:
-            img = Image.open(f)
-            img.thumbnail(size)
-            img.save(img_byte_arr, format="AVIF", quality=50)
-        thumbnail = img_byte_arr.getvalue()
+        thumbnail = _build_thumbnail_bytes(of, size)
         link.thumbnail[key] = base64.b64encode(thumbnail).decode("utf-8")
         link.save()
     else:
         thumbnail = base64.b64decode(bytes(thumb_64, "utf-8"))
 
     return thumbnail, content_type
+
+
+def _build_thumbnail_bytes(of, size, format="AVIF", quality=50):
+    img_byte_arr = io.BytesIO()
+    with of as f:
+        try:
+            img = Image.open(f)
+        except UnidentifiedImageError:
+            f.seek(0)
+            interm_bytes = io.BytesIO()
+            cairosvg.svg2png(file_obj=f, write_to=interm_bytes)
+            img = Image.open(interm_bytes)
+        img.thumbnail(size)
+        img.save(img_byte_arr, format=format, quality=quality)
+    return img_byte_arr.getvalue()
 
 
 def create_mash_for_uri(uri, backend_key):
