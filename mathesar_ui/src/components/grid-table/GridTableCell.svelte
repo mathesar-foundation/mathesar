@@ -20,7 +20,6 @@
     &::after {
       content: '';
       position: absolute;
-      background-color: var(--surface-card);
       z-index: 1;
     }
 
@@ -41,10 +40,10 @@
     &.gt-header {
       font-weight: var(--font-weight-medium);
       color: var(--text-primary);
-      background: var(--surface-elevated-header);
+      background: var(--color-surface-raised-3);
 
       &::after {
-        background-color: var(--surface-elevated-header);
+        background-color: var(--color-surface-raised-3);
       }
     }
   }

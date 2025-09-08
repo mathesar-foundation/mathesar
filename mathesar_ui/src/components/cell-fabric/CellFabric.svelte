@@ -84,7 +84,7 @@
     right: 1px;
     bottom: 1px;
     position: absolute;
-    background: var(--surface-base);
+    background: var(--color-surface-sunken-2);
     z-index: 1;
   }
   .bg {
@@ -93,7 +93,7 @@
     right: var(--cell-padding);
     bottom: var(--cell-padding);
     position: absolute;
-    background: var(--surface-inset-disabled);
+    background: var(--color-surface-sunken-2-disabled);
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;

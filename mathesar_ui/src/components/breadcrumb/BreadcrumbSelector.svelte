@@ -131,9 +131,9 @@
 
     &:hover,
     &:active {
-      background-color: var(--surface-elevated-low-active);
+      background-color: var(--color-surface-raised-1-active);
       color: var(--text-navigation-hover);
-      border-color: var(--border-elevated-low);
+      border-color: var(--color-surface-raised-1-active-border);
     }
   }
 </style>

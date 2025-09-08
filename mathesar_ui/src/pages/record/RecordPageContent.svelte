@@ -80,9 +80,9 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     entityTypeName={$_('record')}
     --header-color="linear-gradient(
       135deg,
-      var(--surface-base), 15%,
+      var(--color-surface-base), 15%,
       var(--color-record-10) 40%,
-      var(--surface-base) 60%,
+      var(--color-surface-base) 60%,
       var(--color-record-20) 100%
     )"
     --entity-name-color="var(--color-record)"

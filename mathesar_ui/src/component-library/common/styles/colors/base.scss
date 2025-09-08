@@ -94,6 +94,10 @@ $input-fill: hsl(212, 84%, 44.1%);
   }
 }
 
+@function _suffix($token) {
+  @return if($token == '', '', '-#{$token}');
+}
+
 @mixin generate-color-tokens(
   $name,
   $base-color,
@@ -125,6 +129,33 @@ $input-fill: hsl(212, 84%, 44.1%);
     @each $intensity, $delta in $color-intensities {
       $new-variant: hsla($h-new, $s-new, $l-new, $delta);
       --color-#{$name}-#{$intensity}-#{$state}: #{$new-variant};
+    }
+  }
+}
+
+@mixin generate-surface-color-tokens($elevations, $states) {
+  @each $elevation, $cfg in $elevations {
+    @each $role, $color in $cfg {
+      --color-surface-#{$elevation}#{_suffix($role)}: #{$color};
+    }
+
+    @each $state, $state-cfg in $states {
+      @each $role, $delta in $state-cfg {
+        $base-color: map-get($cfg, $role);
+
+        $dh: map-get($delta, 'h_delta');
+        $ds: map-get($delta, 's_delta');
+        $dl: map-get($delta, 'l_delta');
+
+        $h-new: (hue($base-color) + $dh) % 360deg;
+        $s-new: max(0%, min(100%, saturation($base-color) + $ds));
+        $l-new: max(0%, min(100%, lightness($base-color) + $dl));
+
+        $variant: hsl($h-new, $s-new, $l-new);
+
+        $role-seg: _suffix($role);
+        --color-surface-#{$elevation}-#{$state}#{_suffix($role)}: #{$variant};
+      }
     }
   }
 }

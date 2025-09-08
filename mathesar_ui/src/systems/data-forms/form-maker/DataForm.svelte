@@ -62,7 +62,7 @@
     --df__internal__z-index__field-with-some-selected-child: 1;
     --df__internal__z-index__field-outer-controls: 2;
     --df__internal__z-index__field-being-dragged: 3;
-    --df__internal__selected-element-bg: var(--color-selection-20-hover);
+    --df__internal__selected-element-bg: var(--color-selection-15);
     --df__internal__selected-element-border-color: var(--color-selection-80);
     --df__internal__help-text-color: var(--semantic-tip-inner-text);
     --df__internal__some-child-selected-border-color: var(--color-selection-40);

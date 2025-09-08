@@ -1,5 +1,5 @@
 .window {
-  background-color: var(--surface-elevated-mid);
+  background-color: var(--color-surface-raised-2);
   border: 1px solid var(--border-dropdown);
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
@@ -39,7 +39,7 @@
   > .footer {
     grid-row: 3;
     border-top: 1px solid var(--border-section);
-    background: var(--surface-elevated-mid);
+    background: var(--color-surface-raised-2);
   }
 
   &.has-body-padding > .body {

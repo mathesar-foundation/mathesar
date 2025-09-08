@@ -89,7 +89,7 @@
       padding: 0.3rem 0.5rem;
       border-radius: 0.2rem;
       font-weight: 500;
-      background: var(--surface-elevated-mid);
+      background: var(--color-surface-raised-2);
     }
   }
 </style>

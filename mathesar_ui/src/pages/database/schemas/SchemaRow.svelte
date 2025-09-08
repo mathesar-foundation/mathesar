@@ -154,7 +154,7 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: var(--z-index-menu-trigger);
-    color: var(--surface-light);
+    color: var(--text-light);
   }
 
   .hyperlink-overlay {

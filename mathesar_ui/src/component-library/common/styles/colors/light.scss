@@ -21,25 +21,112 @@ $visited-link: hsl(hue($wisteria), 50%, 30%);
 // Surfaces
 // ------------------------------------------
 
+$base-hue: 42;
+$base-saturation: 10%;
+
+$shadow-color: hsl($base-hue, $base-saturation, 82%);
+
+$elevations: (
+  'sunken-2': (
+    '': hsl($base-hue, $base-saturation, 100%),
+    'border': hsl($base-hue, $base-saturation, 60%),
+  ),
+  'sunken-1': (
+    '': hsl($base-hue, $base-saturation, 98%),
+    'border': hsl($base-hue, $base-saturation, 75%),
+  ),
+  'base': (
+    '': hsl($base-hue, $base-saturation, 96%),
+    'border': hsl($base-hue, $base-saturation, 88%),
+  ),
+  'raised-1': (
+    '': hsl($base-hue, $base-saturation, 94%),
+    'border': hsl($base-hue, $base-saturation, 80%),
+  ),
+  'raised-2': (
+    '': hsl($base-hue, $base-saturation, 92%),
+    'border': hsl($base-hue, $base-saturation, 75%),
+  ),
+  'raised-3': (
+    '': hsl($base-hue, $base-saturation, 90%),
+    'border': hsl($base-hue, $base-saturation, 70%),
+  ),
+);
+
+$elevation-states: (
+  'hover': (
+    '': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': -3,
+    ),
+    'border': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': 6,
+    ),
+  ),
+  'active': (
+    '': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': -9,
+    ),
+    'border': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': 14,
+    ),
+  ),
+  'focused': (
+    '': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': -2,
+    ),
+    'border': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': 10,
+    ),
+  ),
+  'disabled': (
+    '': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': -10,
+    ),
+    'border': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': 6,
+    ),
+  ),
+  'muted': (
+    '': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': 10,
+    ),
+    'border': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': 6,
+    ),
+  ),
+);
+
 // Colors, ordered by elevation / lightness
 $surface-colors: (
-  'inset': hsl(hue($base), saturation($base), 100%),
   'input': hsl(hue($base), saturation($base), 100%),
-  'base': $base,
   'card': hsl(hue($base), 15%, 92%),
   'canvas': hsl(hue($base), saturation($base), 96%),
   'supporting': hsl(hue($base), saturation($base), 97%),
   'fieldset': hsl(hue($base), saturation($base), 99%),
   'header': hsl(hue($base), saturation($base), 92%),
   'control': hsl(hue($base), saturation($base), 92%),
-  'elevated-low': hsl(hue($base), saturation($base), 96%),
-  'elevated-mid': hsl(hue($base), saturation($base), 94%),
-  'elevated-header': hsl(hue($base), 20%, 90%),
-  'elevated-high': hsl(hue($base), saturation($base), 92%),
-  'elevated-top': hsl(hue($base), saturation($base), 90%),
   'token': hsl(hue($base), saturation($base), 90%),
   'input-fill': $input-fill,
-  'light': hsl(hue($base), saturation($base), 100%),
 );
 
 $surface-states: (
@@ -84,12 +171,9 @@ $border-colors: (
   'dropdown': hsl(hue($base), saturation($base), 85%),
   'shadow': hsl(hue($base), saturation($base), 82%),
   'divider': hsl(hue($base), saturation($base), 80%),
-  'elevated-low': hsl(hue($base), saturation($base), 80%),
   'header': hsl(hue($base), saturation($base), 80%),
   'control': hsl(hue($base), saturation($base), 80%),
-  'elevated-mid': hsl(hue($base), saturation($base), 75%),
   'fieldset': hsl(hue($base), saturation($base), 75%),
-  'elevated-high': hsl(hue($base), saturation($base), 70%),
   'section': hsl(hue($base), saturation($base), 70%),
   'input': hsl(hue($base), saturation($base), 60%),
   'token': hsl(hue($base), saturation($base), 70%),
@@ -232,6 +316,8 @@ $semantic-states: (
 // GENERATE COLORS FOR THEME
 // ------------------------------------------
 body {
+  @include generate-surface-color-tokens($elevations, $elevation-states);
+
   @each $name, $color in $surface-colors {
     @include generate-surface-tokens(#{$name}, $color, $surface-states);
   }

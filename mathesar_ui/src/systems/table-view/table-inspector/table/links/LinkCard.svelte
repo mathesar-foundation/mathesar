@@ -18,17 +18,17 @@
   .link-card {
     display: block;
     cursor: pointer;
-    background: var(--surface-elevated-mid);
-    border: 1px solid var(--border-card);
+    background: var(--color-surface-raised-2);
+    border: 1px solid var(--color-surface-raised-2-border);
+    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
     border-radius: var(--border-radius-m);
-    box-shadow: 0 1px 2px 0 var(--surface-elevated-mid-muted);
     transition: all 0.2s ease;
   }
 
   .link-card:hover {
-    border: 1px solid var(--border-card-hover);
-    box-shadow: 0 1px 2px 0 var(--surface-elevated-mid-muted);
-    background: var(--surface-elevated-mid-hover);
+    background: var(--color-surface-raised-2-hover);
+    border: 1px solid var(--color-surface-raised-2-hover-border);
+    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
   }
 
   .link-card.multiple {
@@ -36,9 +36,9 @@
   }
 
   .link-card.multiple:hover .container {
-    border: 1px solid var(--border-card-hover);
-    box-shadow: 0 1px 2px 0 var(--surface-elevated-mid-muted);
-    background: var(--surface-elevated-high-hover);
+    background: var(--color-surface-raised-3-hover);
+    border: 1px solid var(--color-surface-raised-3-hover-border);
+    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
   }
 
   .container {
@@ -50,8 +50,8 @@
     position: relative;
     bottom: var(--sm3);
     left: var(--sm3);
-    background: var(--surface-elevated-high);
-    border: 1px solid var(--border-card);
+    background: var(--color-surface-raised-3);
+    border: 1px solid var(--color-surface-raised-3-border);
     border-radius: var(--border-radius-m);
   }
 

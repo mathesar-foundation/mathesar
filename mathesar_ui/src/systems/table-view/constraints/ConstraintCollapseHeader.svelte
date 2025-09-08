@@ -43,8 +43,8 @@
 
   .column-name-container {
     font-size: var(--sm1);
-    background-color: var(--surface-elevated-top);
-    border: 1px solid var(--border-elevated-high);
+    background-color: var(--color-surface-raised-3);
+    border: 1px solid var(--color-surface-raised-3-border);
     border-radius: var(--border-radius-l);
     padding: 0.25rem 0.75rem;
     margin-bottom: var(--sm5);

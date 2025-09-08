@@ -7,14 +7,12 @@
 <style>
   .grid-table {
     display: grid;
-    border: 0.5px solid var(--border-elevated-low);
+    background: var(--color-surface-raised-1);
+    border: 0.5px solid var(--color-surface-raised-1-border);
     border-radius: var(--border-radius-m);
     overflow: hidden;
     grid-template-columns: var(--Grid-table__template-columns);
     grid-template-rows: var(--Grid-table__template-rows, auto);
-    background: var(--surface-card);
-    box-shadow:
-      0 1px 2px var(--border-shadow),
-      0 1px 3px var(--border-shadow);
+    box-shadow: 0 1px 4px var(--border-shadow);
   }
 </style>

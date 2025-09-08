@@ -91,12 +91,12 @@
     --cell-border-horizontal: 1px solid var(--border-grid);
     --cell-border-vertical: 1px solid var(--border-grid);
 
-    --cell-bg-color-base: var(--surface-inset);
+    --cell-bg-color-base: var(--color-surface-sunken-2);
     --cell-bg-color-error: var(--semantic-danger-bg);
     --cell-bg-color-header: var(--surface-header);
     --cell-bg-color-processing: var(--semantic-warning-bg);
-    --cell-bg-color-disabled: var(--surface-inset-disabled);
-    --cell-bg-color-row-hover: var(--surface-inset-hover);
+    --cell-bg-color-disabled: var(--color-surface-sunken-2-disabled);
+    --cell-bg-color-row-hover: var(--color-surface-sunken-2-hover);
     --cell-bg-color-row-selected: var(--color-selection-40);
 
     --cell-text-color-processing: var(--text-muted);
@@ -199,7 +199,7 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: var(--surface-inset);
+    background: var(--color-surface-sunken-2);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
     color: var(--text-primary);
@@ -231,7 +231,7 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--surface-inset-muted);
+    background: var(--color-surface-sunken-2-muted);
     border-radius: 3px;
     color: var(--text-tertiary);
     font-weight: bold;
@@ -256,6 +256,6 @@
     align-items: center;
     justify-content: center;
     display: flex;
-    background-color: var(--surface-base);
+    background-color: var(--color-surface-base);
   }
 </style>

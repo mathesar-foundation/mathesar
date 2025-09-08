@@ -34,7 +34,7 @@ body > .new-item-highlighter {
 body > .new-item-highlighter__hint {
   position: absolute;
   z-index: var(--new-item-highlighter-z-index, 1000);
-  --background: color-mix(in srgb, var(--surface-base), transparent 70%);
+  --background: color-mix(in srgb, var(--color-surface-base), transparent 70%);
   inset: 0px auto auto 0px;
   display: flex;
   flex-direction: column;

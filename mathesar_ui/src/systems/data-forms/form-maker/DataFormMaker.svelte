@@ -66,7 +66,7 @@
     display: grid;
     border: 1px solid var(--border-container);
     border-radius: var(--border-radius-l);
-    background: var(--surface-elevated-low);
+    background: var(--color-surface-raised-1);
     --df__max-width: calc(60rem + var(--lg1));
     --df__margin: var(--lg2) auto;
     --df__element-spacing: 1rem;
@@ -77,7 +77,7 @@
   }
 
   .data-form-inspector-panel {
-    border: 1px solid var(--border-elevated-mid);
+    border: 1px solid var(--color-surface-raised-2-border);
     border-radius: var(--border-radius-l);
     background: var(--surface-supporting);
     height: 100%;
