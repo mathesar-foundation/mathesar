@@ -164,7 +164,8 @@
   line-height: 50%;
   opacity: 0;
   cursor: pointer;
-  border: 1px solid color-mix(in srgb, var(--color-surface-control-border), transparent 75%);
+  border: 1px solid
+    color-mix(in srgb, var(--color-surface-control-border), transparent 75%);
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -260,7 +261,11 @@
   );
 }
 .flatpickr-current-month .numInputWrapper span.arrowDown:after {
-  border-top-color: color-mix(in srgb, var(--color-surface-control-border), transparent 60%);
+  border-top-color: color-mix(
+    in srgb,
+    var(--color-surface-control-border),
+    transparent 60%
+  );
 }
 .flatpickr-current-month input.cur-year {
   background: transparent;
