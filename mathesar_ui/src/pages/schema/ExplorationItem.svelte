@@ -36,6 +36,9 @@
   name={exploration.name}
   description={exploration.description ?? undefined}
   icon={iconExploration}
+  cssVariables={{
+    '--EntityListItem__accent-color': 'var(--color-exploration-80)',
+  }}
 >
   <svelte:fragment slot="detail">
     {#if baseTable}
