@@ -51,7 +51,7 @@
   $: ({ isSelected, isImmediateChildSelected, isAnyChildSelected } =
     selectionOpts);
 
-  function onClick(e: Event) {
+  function activate(e: Event) {
     if (editableDataFormManager) {
       e.stopPropagation();
       editableDataFormManager.selectElement(element);
@@ -60,13 +60,14 @@
 </script>
 
 <div
-  tabindex={editableDataFormManager ? 0 : undefined}
   data-form-selectable
   class:can-select={!!editableDataFormManager}
   class:selected={isSelected}
   class:immediate-child-selected={isImmediateChildSelected}
   class:some-child-selected={isAnyChildSelected}
-  on:click={onClick}
+  on:click={activate}
+  on:focus={activate}
+  on:focusin={activate}
   use:sortableItem
 >
   {#if isSelected && $$slots.header}
