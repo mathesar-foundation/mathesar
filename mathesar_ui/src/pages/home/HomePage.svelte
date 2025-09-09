@@ -31,17 +31,9 @@
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
-  <AppSecondaryHeader
-    slot="secondary-header"
-    name={$_(welcomeMessage)}
-    --header-color="linear-gradient(
-      135deg in hsl,
-      var(--color-brand-15),
-      var(--color-database-15),
-      var(--color-schema-15),
-      var(--color-table-15)
-    )"
-  />
+  <div class="home-page-header" slot="secondary-header">
+    <AppSecondaryHeader name={$_(welcomeMessage)} />
+  </div>
   <div class="content">
     <div class="databases-section">
       <DatabasesList />
@@ -60,6 +52,16 @@
 
 <style lang="scss">
   $breakpoint: 50rem;
+
+  .home-page-header {
+    --AppSecondaryHeader__background: linear-gradient(
+      135deg in hsl,
+      var(--color-brand-15),
+      var(--color-database-15),
+      var(--color-schema-15),
+      var(--color-table-15)
+    );
+  }
 
   .content {
     display: grid;

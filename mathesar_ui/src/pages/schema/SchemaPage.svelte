@@ -44,43 +44,36 @@
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
-  <AppSecondaryHeader
-    slot="secondary-header"
-    name={$name}
-    icon={iconSchema}
-    entityTypeName={$_('schema')}
-    --header-color="linear-gradient(
-      135deg,
-      var(--color-schema-10) 10%,
-      var(--surface-supporting) 50%,
-      var(--color-schema-15) 90%,
-      var(--color-brand-10) 100%
-    )"
-    --entity-name-color="var(--color-schema)"
-  >
-    <div slot="action" class="action-buttons">
-      <Button
-        on:click={handleEditSchema}
-        appearance="secondary"
-        disabled={!$currentRoleOwns}
-      >
-        <Icon {...iconEdit} />
-        <span>{$_('rename_schema')}</span>
-      </Button>
-      <Button appearance="secondary" on:click={() => permissionsModal.open()}>
-        <Icon {...iconPermissions} />
-        <span>{$_('schema_permissions')}</span>
-      </Button>
-    </div>
+  <div slot="secondary-header" class="schema-page-header">
+    <AppSecondaryHeader
+      name={$name}
+      icon={iconSchema}
+      entityTypeName={$_('schema')}
+    >
+      <div slot="action" class="action-buttons">
+        <Button
+          on:click={handleEditSchema}
+          appearance="secondary"
+          disabled={!$currentRoleOwns}
+        >
+          <Icon {...iconEdit} />
+          <span>{$_('rename_schema')}</span>
+        </Button>
+        <Button appearance="secondary" on:click={() => permissionsModal.open()}>
+          <Icon {...iconPermissions} />
+          <span>{$_('schema_permissions')}</span>
+        </Button>
+      </div>
 
-    <svelte:fragment slot="bottom">
-      {#if $description}
-        <span class="description">
-          {$description}
-        </span>
-      {/if}
-    </svelte:fragment>
-  </AppSecondaryHeader>
+      <svelte:fragment slot="bottom">
+        {#if $description}
+          <span class="description">
+            {$description}
+          </span>
+        {/if}
+      </svelte:fragment>
+    </AppSecondaryHeader>
+  </div>
   <SchemaOverview
     {tablesRequestStatus}
     {tablesMap}
@@ -103,6 +96,17 @@
 <SchemaPermissionsModal controller={permissionsModal} {schema} />
 
 <style>
+  .schema-page-header {
+    --AppSecondaryHeader__background: linear-gradient(
+      135deg,
+      var(--color-schema-10) 10%,
+      var(--surface-supporting) 50%,
+      var(--color-schema-15) 90%,
+      var(--color-brand-10) 100%
+    );
+    --entity-name-color: var(--color-schema);
+  }
+
   .description {
     color: var(--text-secondary);
   }

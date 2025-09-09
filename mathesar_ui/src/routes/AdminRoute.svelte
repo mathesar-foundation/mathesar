@@ -37,17 +37,9 @@
   }}
   restrictWidth
 >
-  <AppSecondaryHeader
-    slot="secondary-header"
-    name={$_('administration')}
-    icon={iconSettingsMajor}
-    --header-color="linear-gradient(
-      135deg,
-      var(--color-navigation-40), 35%,
-      var(--color-surface-base) 50%,
-      var(--color-navigation-20) 100%
-    )"
-  />
+  <div slot="secondary-header" class="admin-page-header">
+    <AppSecondaryHeader name={$_('administration')} icon={iconSettingsMajor} />
+  </div>
   <PageLayoutWithSidebar>
     <AdminNavigation slot="sidebar" />
 
@@ -81,3 +73,15 @@
     </Route>
   </PageLayoutWithSidebar>
 </LayoutWithHeader>
+
+<style lang="scss">
+  .admin-page-header {
+    --AppSecondaryHeader__background: linear-gradient(
+      135deg,
+      var(--color-navigation-40),
+      35%,
+      var(--color-surface-base) 50%,
+      var(--color-navigation-20) 100%
+    );
+  }
+</style>

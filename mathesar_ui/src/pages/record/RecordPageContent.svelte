@@ -74,33 +74,25 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
 </script>
 
 <div class="record-page-content">
-  <AppSecondaryHeader
-    name={$summary}
-    icon={iconRecord}
-    entityTypeName={$_('record')}
-    --header-color="linear-gradient(
-      135deg,
-      var(--color-surface-base), 15%,
-      var(--color-record-10) 40%,
-      var(--color-surface-base) 60%,
-      var(--color-record-20) 100%
-    )"
-    --entity-name-color="var(--color-record)"
-    --bottom-margin="var(--sm1)"
-    --page-padding-x="6rem"
-  >
-    <div slot="subText" class="table-name">
-      <RichText text={$_('record_in_table')} let:slotName>
-        {#if slotName === 'tableName'}
-          <TableName {table} truncate={false} />
-        {/if}
-      </RichText>
-    </div>
-    <div slot="action">
-      <div class="form-status"><FormStatus {form} /></div>
-    </div>
-  </AppSecondaryHeader>
-  <InsetPageLayout --inset-page-padding="0rem 0rem 2rem 0rem">
+  <div class="record-page-header">
+    <AppSecondaryHeader
+      name={$summary}
+      icon={iconRecord}
+      entityTypeName={$_('record')}
+    >
+      <div slot="subText" class="table-name">
+        <RichText text={$_('record_in_table')} let:slotName>
+          {#if slotName === 'tableName'}
+            <TableName {table} truncate={false} />
+          {/if}
+        </RichText>
+      </div>
+      <div slot="action">
+        <div class="form-status"><FormStatus {form} /></div>
+      </div>
+    </AppSecondaryHeader>
+  </div>
+  <InsetPageLayout>
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
         <DirectField
@@ -139,12 +131,25 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   {/await}
 </div>
 
-<style>
+<style lang="scss">
   .record-page-content {
     height: 100%;
     display: grid;
     grid-template: auto 1fr / auto;
     overflow-y: auto;
+  }
+  .record-page-header {
+    --AppSecondaryHeader__background: linear-gradient(
+      135deg,
+      var(--color-surface-base),
+      15%,
+      var(--color-record-10) 40%,
+      var(--color-surface-base) 60%,
+      var(--color-record-20) 100%
+    );
+    --AppSecondaryHeader__margin-bottom: var(--sm1);
+    --page-padding-x: 6rem;
+    --entity-name-color: var(--color-record);
   }
   .table-name {
     grid-row: 2;
