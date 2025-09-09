@@ -16,6 +16,7 @@ from db.records import (
 )
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
+from mathesar.utils.columns import get_download_link_columns
 from mathesar.utils.tables import get_table_record_summary_templates
 from mathesar.utils.download_links import get_download_links
 
@@ -241,7 +242,6 @@ def list_(
         filter: Filter = None,
         grouping: Grouping = None,
         return_record_summaries: bool = False,
-        return_download_links: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -258,9 +258,6 @@ def list_(
         grouping: An array of group definition objects.
         return_record_summaries: Whether to return summaries of retrieved
             records.
-        return_download_links: If non-empty, the backend will construct
-            DownloadLinks for each value in the passed column attnums if
-            possible, and return relevant info.
 
     Returns:
         The requested records, along with some metadata.
@@ -278,10 +275,11 @@ def list_(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        return_download_links,
+        download_link_columns,
     ) or None
 
     return RecordList.from_dict(record_info)
@@ -295,7 +293,6 @@ def get(
         database_id: int,
         return_record_summaries: bool = False,
         table_record_summary_templates: dict[str, Any] = None,
-        return_download_links: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -313,9 +310,6 @@ def get(
             per-table basis over the stored metadata templates. The purpose of
             this function parameter is to allow clients to generate record
             summary previews without persisting any metadata.
-        return_download_links: If non-empty, the backend will construct
-            DownloadLinks for each value in the passed column attnums if
-            possible, and return relevant info.
     Returns:
         The requested record, along with some metadata.
     """
@@ -332,10 +326,11 @@ def get(
                 **(table_record_summary_templates or {}),
             },
         )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        return_download_links,
+        download_link_columns,
     ) or None
     return RecordList.from_dict(record_info)
 
@@ -462,7 +457,6 @@ def search(
         limit: int = 10,
         offset: int = 0,
         return_record_summaries: bool = False,
-        return_download_links: list[int] = [],
         **kwargs
 ) -> RecordList:
     """
@@ -485,9 +479,6 @@ def search(
             following rows.
         return_record_summaries: Whether to return summaries of retrieved
             records.
-        return_download_links: If non-empty, the backend will construct
-            DownloadLinks for each value in the passed column attnums if
-            possible, and return relevant info.
 
     Returns:
         The requested records, along with some metadata.
@@ -503,10 +494,11 @@ def search(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        return_download_links,
+        download_link_columns,
     ) or None
     return RecordList.from_dict(record_info)
 
