@@ -111,24 +111,24 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
+    outline-offset: 1px;
   }
 
   .schema-row.hover {
-    border: 1px solid var(--color-schema-10);
+    border: 1px solid var(--color-schema-40);
     background: var(--color-schema-5-active);
-    box-shadow: 0 1px 2px 0 var(--color-shadow);
+    box-shadow: var(--card-hover-box-shadow);
   }
 
   .schema-row:active,
   .schema-row.focus {
-    border: 1px solid var(--color-schema-20);
-    background: var(--color-schema-10-active);
-    box-shadow: 0 2px 4px 0 var(--color-shadow);
+    outline: 2px solid var(--color-schema-15);
+    border: 1px solid var(--color-schema-40);
+    box-shadow: var(--card-focus-box-shadow);
   }
 
-  .schema-row.focus {
-    outline: 1px solid var(--color-schema-20-active);
-    outline-offset: 1px;
+  .schema-row:active {
+    background: var(--color-schema-10-active);
   }
 
   .content {
