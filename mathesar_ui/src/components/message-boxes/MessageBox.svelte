@@ -33,8 +33,11 @@
     position: relative;
     border-radius: var(--border-radius-m);
     margin: var(--MessageBox__margin);
-    background: var(--MessageBox__background, var(--surface-card));
-    border-left: var(--MessageBox__border, 4px solid var(--border-card));
+    background: var(--MessageBox__background, var(--surface-raised-1));
+    border-left: var(
+      --MessageBox__border,
+      4px solid var(--surface-raised-1-border)
+    );
     color: var(--MessageBox__text-color, var(--text-primary));
   }
   .message-box:not(.full-width) {

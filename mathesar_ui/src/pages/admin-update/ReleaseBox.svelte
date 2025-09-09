@@ -69,10 +69,9 @@
 
 <style>
   .release {
-    border: solid 1px var(--border-card);
     padding: var(--lg1);
     border-radius: var(--border-radius-l);
-    background-color: var(--color-surface-raised-2);
+    border: solid 1px var(--color-surface-base-border);
   }
 
   .release.available-upgrade {
@@ -106,7 +105,6 @@
   }
 
   .logo {
-    background: var(--surface-card);
     font-size: 1rem;
     color: var(--text-primary);
     padding: 0.5rem;

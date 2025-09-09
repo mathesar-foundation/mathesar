@@ -33,7 +33,6 @@
 
 <SheetPositionableCell index={0} columnSpan={processedColumnsMap.size + 1}>
   <div class="group-header">
-    <CellBackground color="var(--hover-background)" />
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
         <GroupHeaderCellValue
@@ -56,7 +55,9 @@
 <style lang="scss">
   .group-header {
     padding: var(--sm4) var(--lg1);
-    background-color: var(--color-surface-raised-1);
+    background-color: var(--color-surface-raised-2);
+    height: 100%;
+    border-bottom: 1px solid var(--border-grid);
 
     .groups-data {
       align-items: start;
@@ -67,7 +68,7 @@
     .count-container {
       --badge-font-size: var(--sm1);
       --badge-text-color: var(--text-secondary);
-      --badge-background-color: var(--surface-card);
+      --badge-background-color: var(--color-surface-raised-3);
       height: 100%;
     }
   }

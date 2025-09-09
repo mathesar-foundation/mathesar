@@ -116,9 +116,9 @@
 
       .tag {
         padding: var(--sm6) var(--sm2);
-        background: var(--surface-card);
+        background: var(--color-surface-raised-2);
         color: var(--text-secondary);
-        border: 1px solid var(--border-card);
+        border: 1px solid var(--color-surface-raised-2-border);
         border-radius: var(--lg1);
         font-weight: var(--font-weight-medium);
         overflow: hidden;
