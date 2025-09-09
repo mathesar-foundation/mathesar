@@ -11,7 +11,7 @@
   export let href: string;
   export let icon: IconProps;
   export let name: string;
-  export let description: string | undefined;
+  export let description: string | undefined = undefined;
   /**
    * If this entity is in a pending state, the given message will explain why
    * (e.g. an unconfirmed table import).
@@ -53,23 +53,27 @@
     {/if}
   </a>
 
-  <div class="actions">
-    <slot name="action-buttons" />
-    <div class="menu-container">
-      <DropdownMenu
-        showArrow={false}
-        triggerAppearance="plain"
-        triggerClass="dropdown-menu-button"
-        closeOnInnerClick={true}
-        placements={['bottom-end', 'right-start', 'left-start']}
-        label=""
-        icon={iconMoreActions}
-        size="small"
-      >
-        <slot name="menu" />
-      </DropdownMenu>
+  {#if $$slots['action-buttons'] || $$slots.menu}
+    <div class="actions">
+      <slot name="action-buttons" />
+      {#if $$slots.menu}
+        <div class="menu-container">
+          <DropdownMenu
+            showArrow={false}
+            triggerAppearance="plain"
+            triggerClass="dropdown-menu-button"
+            closeOnInnerClick={true}
+            placements={['bottom-end', 'right-start', 'left-start']}
+            label=""
+            icon={iconMoreActions}
+            size="small"
+          >
+            <slot name="menu" />
+          </DropdownMenu>
+        </div>
+      {/if}
     </div>
-  </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -88,12 +92,12 @@
   }
 
   .entity-list-item.primary {
-    border: 1px solid var(--border-card);
-    background-color: var(--surface-card);
+    border: 1px solid var(--card-border-color);
+    background-color: var(--card-background);
   }
 
   .entity-list-item.primary + :global(.entity-list-item.primary) {
-    border-top: none;
+    border-top: 1px solid transparent;
   }
 
   .entity-list-item.primary:first-child {
@@ -105,9 +109,10 @@
     --corner-bl: var(--border-radius-l);
   }
 
-  .entity-list-item:has(.link:focus):not(:hover) {
-    outline: 1px solid var(--border-card-focused);
-    outline-offset: -1px;
+  .entity-list-item:has(.link:focus) {
+    outline: 2px solid var(--card-focus-outline-color);
+    outline-offset: 2px;
+    z-index: 1;
   }
 
   .entity-list-item:has(.link:hover) {
@@ -133,7 +138,7 @@
 
   .entity-list-item.pending {
     color: var(--text-disabled);
-    background-color: var(--surface-card-disabled);
+    background-color: var(--card-background-disabled);
   }
 
   .link {

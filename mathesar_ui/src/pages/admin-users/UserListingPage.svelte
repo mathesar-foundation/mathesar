@@ -81,9 +81,6 @@
         {#if filteredUsers.length}
           <div class="users-list">
             {#each filteredUsers as user, index (user.id)}
-              {#if index !== 0}
-                <hr />
-              {/if}
               <UserRow {user} />
             {/each}
           </div>
@@ -102,19 +99,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--lg1);
-  }
-
-  .users-list {
-    border: 1px solid var(--border-section);
-    background-color: var(--surface-card);
-    border-radius: var(--border-radius-m);
-    overflow: hidden;
-
-    hr {
-      margin: 0;
-      border: none;
-      border-top: 1px solid var(--border-section);
-    }
   }
 
   .no-users-found-text {
