@@ -332,7 +332,7 @@
   .preview-header {
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
-    background-color: var(--surface-header);
+    background-color: var(--color-surface-header);
     border-top: 1px solid var(--border-card);
   }
   .preview-content {

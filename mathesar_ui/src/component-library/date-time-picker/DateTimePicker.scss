@@ -410,8 +410,8 @@ span.flatpickr-weekday {
   opacity: 1;
 }
 .dayContainer + .dayContainer {
-  -webkit-box-shadow: -1px 0 0 var(--surface-supporting);
-  box-shadow: -1px 0 0 var(--surface-supporting);
+  -webkit-box-shadow: -1px 0 0 var(--color-surface-supporting);
+  box-shadow: -1px 0 0 var(--color-surface-supporting);
 }
 .flatpickr-day {
   background: none;
@@ -520,11 +520,11 @@ span.flatpickr-weekday {
 .flatpickr-day.inRange {
   border-radius: 0;
   -webkit-box-shadow:
-    -5px 0 0 var(--surface-supporting),
-    5px 0 0 var(--surface-supporting);
+    -5px 0 0 var(--color-surface-supporting),
+    5px 0 0 var(--color-surface-supporting);
   box-shadow:
-    -5px 0 0 var(--surface-supporting),
-    5px 0 0 var(--surface-supporting);
+    -5px 0 0 var(--color-surface-supporting),
+    5px 0 0 var(--color-surface-supporting);
 }
 .flatpickr-day.flatpickr-disabled,
 .flatpickr-day.flatpickr-disabled:hover,

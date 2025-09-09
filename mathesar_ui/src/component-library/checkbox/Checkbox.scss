@@ -14,25 +14,25 @@
   appearance: none;
   border: solid var(--border-input) 0.15em;
   border-radius: 0.15em;
-  background: var(--surface-input);
+  background: var(--color-surface-input);
   position: relative;
 
   &:not(:disabled):not(:checked):not(:indeterminate):hover {
-    background-color: var(--surface-input-hover);
+    background-color: var(--color-surface-input-hover);
   }
   &:not(:disabled):hover {
-    background-color: var(--surface-input-fill-hover);
+    background-color: var(--color-surface-input-fill-hover);
   }
   &:checked,
   &:indeterminate {
     border: 0.05em solid var(--border-input);
-    background: var(--surface-input-fill);
+    background: var(--color-surface-input-fill);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 0.75em auto;
   }
   &:disabled {
-    background-color: var(--surface-input-disabled);
+    background-color: var(--color-surface-input-disabled);
     border-color: var(--border-input);
   }
 

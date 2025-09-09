@@ -140,7 +140,7 @@
     max-height: var(--input-height);
     left: var(--padding);
     width: calc(100% - 2 * var(--padding));
-    background: var(--surface-input);
+    background: var(--color-surface-input);
     border-radius: 0.2rem;
     border: none;
     box-shadow: 0 0 0 0.1rem var(--color-shadow);

@@ -40,10 +40,10 @@
     &.gt-header {
       font-weight: var(--font-weight-medium);
       color: var(--text-primary);
-      background: var(--color-surface-raised-3);
+      background: var(--color-surface-header);
 
       &::after {
-        background-color: var(--color-surface-raised-3);
+        background-color: var(--color-surface-header);
       }
     }
   }

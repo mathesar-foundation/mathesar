@@ -226,19 +226,19 @@
     isolation: isolate;
     border: 1px solid var(--border-section);
     border-radius: 0.25rem;
-    background: var(--surface-input);
+    background: var(--color-surface-input);
     padding: var(--sm4);
     cursor: default;
   }
   .disabled {
-    background: var(--surface-input-disabled);
+    background: var(--color-surface-input-disabled);
     border: solid 1px var(--border-input);
   }
 
   .linked-record-input:focus {
     border-color: var(--border-input-focused);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--surface-input-focused);
+    box-shadow: 0 0 0 2px var(--color-surface-input-focused);
   }
 
   .content {

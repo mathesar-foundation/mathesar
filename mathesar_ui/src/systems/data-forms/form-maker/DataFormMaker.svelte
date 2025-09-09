@@ -64,7 +64,7 @@
     height: 100%;
     overflow: hidden;
     display: grid;
-    border: 1px solid var(--border-container);
+    border: 1px solid var(--color-surface-raised-1-border);
     border-radius: var(--border-radius-l);
     background: var(--color-surface-raised-1);
     --df__max-width: calc(60rem + var(--lg1));
@@ -79,7 +79,7 @@
   .data-form-inspector-panel {
     border: 1px solid var(--color-surface-raised-2-border);
     border-radius: var(--border-radius-l);
-    background: var(--surface-supporting);
+    background: var(--color-surface-supporting);
     height: 100%;
     overflow: hidden;
   }

@@ -27,7 +27,7 @@ $base-saturation: 10%;
 
 $color-shadow: hsl($base-hue, $base-saturation, 82%);
 
-$elevations: (
+$surface-elevations: (
   'sunken-2': (
     '': hsl($base-hue, $base-saturation, 100%),
     'border': hsl($base-hue, $base-saturation, 60%),
@@ -54,7 +54,27 @@ $elevations: (
   ),
 );
 
-$elevation-states: (
+$surface-visual-components: (
+  'input': (
+    '': hsl($base-hue, $base-saturation, 100%),
+    'border': hsl($base-hue, $base-saturation, 60%),
+    'fill': $input-fill,
+  ),
+  'control': (
+    '': hsl($base-hue, $base-saturation, 92%),
+    'border': hsl($base-hue, $base-saturation, 80%),
+  ),
+  'header': (
+    '': hsl($base-hue, $base-saturation, 92%),
+    'border': hsl($base-hue, $base-saturation, 80%),
+  ),
+  'supporting': (
+    '': hsl($base-hue, $base-saturation, 97%),
+    'border': hsl($base-hue, $base-saturation, 70%),
+  ),
+);
+
+$surface-states: (
   'hover': (
     '': (
       'h_delta': 0,
@@ -65,6 +85,11 @@ $elevation-states: (
       'h_delta': 0,
       's_delta': 0,
       'l_delta': 6,
+    ),
+    'fill': (
+      'h_delta': 0,
+      's_delta': 0,
+      'l_delta': -3,
     ),
   ),
   'active': (
@@ -119,17 +144,12 @@ $elevation-states: (
 
 // Colors, ordered by elevation / lightness
 $surface-colors: (
-  'input': hsl(hue($base), saturation($base), 100%),
   'canvas': hsl(hue($base), saturation($base), 96%),
-  'supporting': hsla(hue($base), saturation($base), 96%, 0.8),
   'fieldset': hsl(hue($base), saturation($base), 99%),
-  'header': hsl(hue($base), saturation($base), 92%),
-  'control': hsl(hue($base), saturation($base), 92%),
   'token': hsl(hue($base), saturation($base), 90%),
-  'input-fill': $input-fill,
 );
 
-$surface-states: (
+$surface-states-old: (
   'hover': (
     'h_delta': 0,
     's_delta': 0,
@@ -174,7 +194,7 @@ $border-colors: (
   'control': hsl(hue($base), saturation($base), 80%),
   'fieldset': hsl(hue($base), saturation($base), 75%),
   'section': hsl(hue($base), saturation($base), 70%),
-  'input': hsl(hue($base), saturation($base), 60%),
+  'input': hsl(hue($base), saturation($base), 70%),
   'token': hsl(hue($base), saturation($base), 70%),
 );
 
@@ -315,10 +335,14 @@ $semantic-states: (
 // GENERATE COLORS FOR THEME
 // ------------------------------------------
 body {
-  @include generate-surface-color-tokens($elevations, $elevation-states);
+  @include generate-surface-color-tokens($surface-elevations, $surface-states);
+  @include generate-surface-color-tokens(
+    $surface-visual-components,
+    $surface-states
+  );
 
   @each $name, $color in $surface-colors {
-    @include generate-surface-tokens(#{$name}, $color, $surface-states);
+    @include generate-surface-tokens(#{$name}, $color, $surface-states-old);
   }
 
   @each $name, $color in $border-colors {
@@ -334,7 +358,7 @@ body {
   }
 
   --mix-blend-mode: multiply;
-  --modal-overlay: rgba(0, 0, 0, 0.2);
+  --modal-overlay: rgba(0, 0, 0, 0.3);
 
   --color-shadow: #{$color-shadow};
 }

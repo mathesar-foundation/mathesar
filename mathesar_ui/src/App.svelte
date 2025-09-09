@@ -93,7 +93,7 @@
 
     --cell-bg-color-base: var(--color-surface-sunken-2);
     --cell-bg-color-error: var(--semantic-danger-bg);
-    --cell-bg-color-header: var(--surface-header);
+    --cell-bg-color-header: var(--color-surface-header);
     --cell-bg-color-processing: var(--semantic-warning-bg);
     --cell-bg-color-disabled: var(--color-surface-sunken-2-disabled);
     --cell-bg-color-row-hover: var(--color-surface-sunken-2-hover);

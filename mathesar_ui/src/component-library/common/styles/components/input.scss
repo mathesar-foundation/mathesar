@@ -2,7 +2,7 @@
   border: var(--input-element-border, 1px solid var(--border-input));
   align-items: center;
   border-radius: var(--border-radius-m);
-  background: var(--input-element-background, var(--surface-input));
+  background: var(--input-element-background, var(--color-surface-input));
   color: var(--input-element-color, var(--text-input));
   margin: 0;
   padding: var(--input-padding);
@@ -24,17 +24,17 @@
     outline: 0;
     box-shadow: var(
       --input-element-focus-box-shadow,
-      0 0 0 2px var(--surface-input-focused)
+      0 0 2px 1px var(--color-shadow)
     );
   }
 
   &:disabled {
-    background: var(--surface-input-disabled);
+    background: var(--color-surface-input-disabled);
     color: var(--text-disabled);
   }
 
   &.read-only {
-    background: var(--surface-input-disabled);
+    background: var(--color-surface-input-disabled);
   }
 
   &.has-error {

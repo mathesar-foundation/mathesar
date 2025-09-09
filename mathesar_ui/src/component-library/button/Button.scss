@@ -42,7 +42,7 @@
   $btn-variants: (
     default: (
       normal: (
-        background: var(--surface-control),
+        background: var(--color-surface-control),
         border-color: var(--border-control),
         box-shadow: (
           var(--color-surface-base) 0 1px 2px 0,
@@ -50,10 +50,10 @@
         ),
       ),
       hover: (
-        background: var(--surface-control-hover),
+        background: var(--color-surface-control-hover),
       ),
       focus: (
-        background: var(--surface-control-focused),
+        background: var(--color-surface-control-focused),
         outline-color: var(--border-control-focused),
         box-shadow: (
           0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
@@ -61,10 +61,10 @@
         ),
       ),
       active: (
-        background: var(--surface-control-active),
+        background: var(--color-surface-control-active),
         border-color: var(--border-control-active),
         outline-color: var(--border-control-active),
-        box-shadow: 0 0 0 2px var(--surface-control-active),
+        box-shadow: 0 0 0 2px var(--color-surface-control-active),
       ),
     ),
 
@@ -178,11 +178,11 @@
         box-shadow: none,
       ),
       hover: (
-        background: var(--surface-control-hover),
+        background: var(--color-surface-control-hover),
         color: var(--text-primary),
       ),
       focus: (
-        background: var(--surface-control-focused),
+        background: var(--color-surface-control-focused),
         border-color: var(--border-control-focused),
         box-shadow: (
           0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
@@ -190,8 +190,8 @@
         ),
       ),
       active: (
-        background: var(--surface-control-active),
-        box-shadow: 0 0 0 2px var(--surface-control-active),
+        background: var(--color-surface-control-active),
+        box-shadow: 0 0 0 2px var(--color-surface-control-active),
       ),
     ),
 
@@ -290,7 +290,7 @@
 
   &.btn-default {
     &.dropdown {
-      --button-background: var(--surface-input);
+      --button-background: var(--color-surface-input);
       --button-border-color: var(--border-input);
     }
   }

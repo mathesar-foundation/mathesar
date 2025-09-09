@@ -211,7 +211,7 @@
     --AppSecondaryHeader__background: linear-gradient(
       135deg,
       var(--color-surface-raised-1) 10%,
-      var(--surface-supporting) 30%,
+      var(--color-surface-supporting) 30%,
       var(--color-database-20) 50%,
       var(--color-database-10) 100%
     );

@@ -7,6 +7,6 @@
     padding: 0 0.2em;
     border: solid var(--border-token) 1px;
     border-radius: 0.2em;
-    background: var(--surface-control);
+    background: var(--color-surface-control);
   }
 </style>

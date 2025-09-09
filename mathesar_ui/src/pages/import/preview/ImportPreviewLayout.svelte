@@ -45,6 +45,6 @@
   .footer:not(:empty) {
     border-top: 1px solid var(--border-section);
     padding: 1rem 1rem 1rem 1rem;
-    background: var(--surface-header);
+    background: var(--color-surface-header);
   }
 </style>

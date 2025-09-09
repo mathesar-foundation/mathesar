@@ -53,7 +53,7 @@
     height: 100%;
     border: 1px solid var(--border-container);
     border-radius: var(--border-radius-l);
-    background: var(--surface-supporting);
+    background: var(--color-surface-supporting);
     display: flex;
     flex-direction: column;
     overflow: hidden;

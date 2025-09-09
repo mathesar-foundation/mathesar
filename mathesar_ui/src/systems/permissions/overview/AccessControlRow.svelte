@@ -161,7 +161,7 @@
       padding: var(--sm2);
       border: 1px solid var(--border-row);
       border-radius: var(--border-radius-l);
-      background: var(--surface-supporting);
+      background: var(--color-surface-supporting);
     }
   }
 </style>

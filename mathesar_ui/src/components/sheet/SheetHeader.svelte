@@ -56,7 +56,7 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: var(--surface-header);
+    background-color: var(--color-surface-header);
     border-bottom: 1px solid var(--border-header);
     box-shadow: 0 2px 4px var(--color-shadow);
     user-select: none;

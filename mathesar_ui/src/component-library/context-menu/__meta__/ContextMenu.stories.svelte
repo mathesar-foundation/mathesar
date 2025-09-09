@@ -57,7 +57,7 @@
 <style>
   .box {
     padding: 0 1em;
-    border: solid 0.1em var(--surface-supporting);
+    border: solid 0.1em var(--color-surface-supporting);
     border-radius: 0.5em;
     margin: 1em 0;
   }
