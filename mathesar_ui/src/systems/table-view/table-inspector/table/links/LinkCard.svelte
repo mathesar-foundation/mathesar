@@ -20,7 +20,7 @@
     cursor: pointer;
     background: var(--color-surface-raised-2);
     border: 1px solid var(--color-surface-raised-2-border);
-    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
+    box-shadow: 0 1px 2px 0 var(--color-shadow);
     border-radius: var(--border-radius-m);
     transition: all 0.2s ease;
   }
@@ -28,7 +28,7 @@
   .link-card:hover {
     background: var(--color-surface-raised-2-hover);
     border: 1px solid var(--color-surface-raised-2-hover-border);
-    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
+    box-shadow: 0 1px 2px 0 var(--color-shadow);
   }
 
   .link-card.multiple {
@@ -38,7 +38,7 @@
   .link-card.multiple:hover .container {
     background: var(--color-surface-raised-3-hover);
     border: 1px solid var(--color-surface-raised-3-hover-border);
-    box-shadow: 0 1px 2px 0 var(--color-surface-raised-2-muted);
+    box-shadow: 0 1px 2px 0 var(--color-shadow);
   }
 
   .container {

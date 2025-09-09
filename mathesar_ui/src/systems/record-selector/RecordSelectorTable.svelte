@@ -323,7 +323,7 @@
     overflow: auto;
     position: relative;
     border-spacing: 0;
-    background: var(--color-surface-sunken-2);
+    background: var(--color-surface-input);
     --border-width: 1px;
     --border-color: var(--color-surface-header-border);
     --row-height: 2.25rem;

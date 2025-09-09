@@ -28,14 +28,6 @@ $base-saturation: 4%;
 $color-shadow: hsl($base-hue, $base-saturation, 18%);
 
 $surface-elevations: (
-  'sunken-2': (
-    '': hsl($base-hue, $base-saturation, 0%),
-    'border': hsl($base-hue, $base-saturation, 40%),
-  ),
-  'sunken-1': (
-    '': hsl($base-hue, $base-saturation, 1%),
-    'border': hsl($base-hue, $base-saturation, 25%),
-  ),
   'base': (
     '': hsl($base-hue, $base-saturation, 2%),
     'border': hsl($base-hue, $base-saturation, 15%),
@@ -145,7 +137,6 @@ $surface-states: (
 // Colors, ordered by elevation / lightness
 $surface-colors: (
   'fieldset': hsl(hue($base), saturation($base), 2%),
-  'canvas': hsl(hue($base), saturation($base), 3%),
   'token': hsl(hue($base), saturation($base), 20%),
 );
 

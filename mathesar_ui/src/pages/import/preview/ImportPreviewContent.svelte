@@ -337,7 +337,7 @@
   }
   .preview-content {
     padding-bottom: 1rem;
-    background-color: var(--surface-canvas);
+    background-color: var(--canvas-background);
   }
   .sheet-holder {
     overflow-x: auto;

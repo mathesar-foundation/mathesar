@@ -196,7 +196,7 @@
 <style lang="scss">
   .sheet {
     border: 1px solid var(--color-surface-base-border);
-    background-color: var(--surface-canvas);
+    background-color: var(--canvas-background);
     margin: 0;
     border-radius: 0.5rem;
     overflow: hidden;

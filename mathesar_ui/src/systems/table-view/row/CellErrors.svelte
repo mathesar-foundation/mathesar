@@ -90,8 +90,8 @@
   }
 
   .errors {
-    background: var(--color-surface-sunken-2);
-    border: solid 2px var(--semantic-danger-border);
+    background: var(--color-surface-raised-2);
+    border: solid 1px var(--semantic-danger-border);
     box-shadow:
       #000 0 0 0 0,
       color-mix(in srgb, var(--color-shadow), transparent 5%) 0px 0px 0px 1px,

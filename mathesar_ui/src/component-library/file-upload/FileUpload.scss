@@ -46,8 +46,8 @@
 
   .file-upload-trigger {
     display: block;
-    background: var(--color-surface-sunken-2);
-    border: 1px dashed var(--border-fieldset);
+    background: var(--color-surface-input);
+    border: 1px dashed var(--color-surface-input-border);
     border-radius: 3px;
     color: inherit;
     font-family: inherit;
@@ -88,7 +88,7 @@
       border-width: 2px;
     }
     &:hover {
-      background: var(--color-surface-sunken-2-hover);
+      background: var(--color-surface-input-hover);
     }
     &.dragging-over {
       background: var(--semantic-info-bg);
