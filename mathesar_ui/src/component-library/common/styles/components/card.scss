@@ -1,0 +1,11 @@
+body {
+  --card-background: var(--color-surface-raised-1);
+  --card-border-color: var(--color-surface-raised-1-border);
+  --card-hover-background: var(--color-surface-raised-1-hover);
+  --card-hover-border-color: var(--color-surface-raised-1-hover-border);
+  --card-focus-background: var(--color-surface-raised-1-focused);
+  --card-focus-border-color: var(--color-surface-raised-1-focused-border);
+  --card-focus-outline-color: var(--color-surface-raised-1-focused-border);
+  --card-disabled-background: var(--color-surface-raised-1-disabled);
+  --card-disabled-border-color: var(--color-surface-raised-1-disabled-border);
+}

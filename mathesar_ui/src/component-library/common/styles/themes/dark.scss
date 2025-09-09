@@ -121,7 +121,6 @@ $elevation-states: (
 $surface-colors: (
   'input': hsl(hue($base), saturation($base), 0%),
   'fieldset': hsl(hue($base), saturation($base), 2%),
-  'card': hsl(hue($base), saturation($base), 4%),
   'canvas': hsl(hue($base), saturation($base), 3%),
   'supporting': hsl(hue($base), saturation($base), 5%),
   'header': hsl(hue($base), saturation($base), 5%),
@@ -337,5 +336,5 @@ body.theme-dark {
   --mix-blend-mode: screen;
   --modal-overlay: rgba(0, 0, 0, 0.6);
 
-  --color-shadow: $color-shadow;
+  --color-shadow: #{$color-shadow};
 }

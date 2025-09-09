@@ -120,7 +120,6 @@ $elevation-states: (
 // Colors, ordered by elevation / lightness
 $surface-colors: (
   'input': hsl(hue($base), saturation($base), 100%),
-  'card': hsl(hue($base), 15%, 92%),
   'canvas': hsl(hue($base), saturation($base), 96%),
   'supporting': hsl(hue($base), saturation($base), 97%),
   'fieldset': hsl(hue($base), saturation($base), 99%),
@@ -337,5 +336,5 @@ body {
   --mix-blend-mode: multiply;
   --modal-overlay: rgba(0, 0, 0, 0.2);
 
-  --color-shadow: $color-shadow;
+  --color-shadow: #{$color-shadow};
 }
