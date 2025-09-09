@@ -205,6 +205,10 @@
     color: var(--text-primary);
   }
 
+  ul {
+    margin: 0;
+  }
+
   .block {
     display: block;
   }

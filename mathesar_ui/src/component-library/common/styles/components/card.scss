@@ -4,7 +4,9 @@ body {
   --card-box-shadow: none;
   --card-hover-background: var(--color-surface-raised-1-hover);
   --card-hover-border-color: var(--color-surface-raised-1-hover-border);
-  --card-hover-box-shadow: none;
+  --card-hover-box-shadow: 0 2px 2px
+      color-mix(in srgb, var(--color-shadow), transparent 15%),
+    0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%);
   --card-focus-background: var(--color-surface-raised-1-focused);
   --card-focus-border-color: var(--color-surface-raised-1-focused-border);
   --card-focus-box-shadow: 0 2px 4px
