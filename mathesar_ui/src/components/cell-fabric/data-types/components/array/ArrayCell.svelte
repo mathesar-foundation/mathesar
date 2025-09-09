@@ -80,21 +80,22 @@
     padding: 0 var(--sm3);
     border-radius: var(--border-radius-l);
     white-space: nowrap;
-    background-color: var(--surface-token);
     color: var(--text-primary);
-    border: 1px solid var(--border-token);
-    min-width: 4rem;
+    background-color: var(--color-surface-token);
+    border: 1px solid var(--color-surface-token-border);
   }
 
   .values {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--sm4);
     flex-direction: row;
-  }
-
-  .values:not(.independent) {
+    gap: var(--sm4);
     overflow: hidden;
-    flex-wrap: nowrap;
+
+    &.independent {
+      flex-wrap: wrap;
+    }
+    &:not(.independent) {
+      flex-wrap: nowrap;
+    }
   }
 </style>

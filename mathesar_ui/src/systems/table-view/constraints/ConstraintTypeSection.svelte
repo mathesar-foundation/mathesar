@@ -162,7 +162,7 @@
   }
 
   .add-constraint {
-    background-color: var(--surface-fieldset);
+    background-color: var(--color-surface-group);
     padding: 1rem;
     border: 1px solid var(--border-fieldset);
     border-radius: var(--border-radius-m);

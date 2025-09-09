@@ -17,7 +17,7 @@
   &.boxed {
     background-color: var(
       --fieldset-boxed-background-color,
-      color-mix(in srgb, var(--surface-fieldset), transparent 85%)
+      color-mix(in srgb, var(--color-surface-group), transparent 85%)
     );
     border: 1px solid var(--border-fieldset);
     border-radius: var(--border-radius-m);

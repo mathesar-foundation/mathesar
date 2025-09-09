@@ -47,11 +47,6 @@ $surface-elevations: (
 );
 
 $surface-visual-components: (
-  'input': (
-    '': hsl($base-hue, $base-saturation, 0%),
-    'border': hsl($base-hue, $base-saturation, 40%),
-    'fill': $input-fill,
-  ),
   'control': (
     '': hsl($base-hue, $base-saturation, 5%),
     'border': hsl($base-hue, $base-saturation, 10%),
@@ -62,7 +57,20 @@ $surface-visual-components: (
   ),
   'supporting': (
     '': hsl($base-hue, $base-saturation, 5%),
-    'border': hsl($base-hue, $base-saturation, 30%),
+    'border': hsl($base-hue, $base-saturation, 25%),
+  ),
+  'group': (
+    '': hsl($base-hue, $base-saturation, 2%),
+    'border': hsl($base-hue, $base-saturation, 25%),
+  ),
+  'input': (
+    '': hsl($base-hue, $base-saturation, 0%),
+    'border': hsl($base-hue, $base-saturation, 40%),
+    'fill': $input-fill,
+  ),
+  'token': (
+    '': hsl($base-hue, $base-saturation, 20%),
+    'border': hsl($base-hue, $base-saturation, 40%),
   ),
 );
 
@@ -131,40 +139,6 @@ $surface-states: (
       's_delta': 0,
       'l_delta': 6,
     ),
-  ),
-);
-
-// Colors, ordered by elevation / lightness
-$surface-colors: (
-  'fieldset': hsl(hue($base), saturation($base), 2%),
-  'token': hsl(hue($base), saturation($base), 20%),
-);
-
-$surface-states-old: (
-  'hover': (
-    'h_delta': 0,
-    's_delta': 8%,
-    'l_delta': 4%,
-  ),
-  'active': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': 9,
-  ),
-  'focused': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': 2,
-  ),
-  'disabled': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': 10,
-  ),
-  'muted': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': 10,
   ),
 );
 
@@ -325,10 +299,6 @@ body.theme-dark {
     $surface-visual-components,
     $surface-states
   );
-
-  @each $name, $color in $surface-colors {
-    @include generate-surface-tokens(#{$name}, $color, $surface-states-old);
-  }
 
   @each $name, $color in $border-colors {
     @include generate-border-tokens(#{$name}, $color, $border-states);

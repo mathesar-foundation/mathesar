@@ -1,17 +1,3 @@
-@mixin generate-surface-tokens($prefix, $base-color, $states) {
-  --surface-#{$prefix}: #{$base-color};
-  @each $state, $delta in $states {
-    $dh: map-get($delta, 'h_delta');
-    $ds: map-get($delta, 's_delta');
-    $dl: map-get($delta, 'l_delta');
-    $h-new: (hue($base-color) + $dh) % 360deg;
-    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
-    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
-    $variant: hsl($h-new, $s-new, $l-new);
-    --surface-#{$prefix}-#{$state}: #{$variant};
-  }
-}
-
 // Border colors
 @mixin generate-border-tokens($prefix, $base-color, $states) {
   --border-#{$prefix}: #{$base-color};

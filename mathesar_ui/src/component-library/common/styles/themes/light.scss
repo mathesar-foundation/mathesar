@@ -47,11 +47,6 @@ $surface-elevations: (
 );
 
 $surface-visual-components: (
-  'input': (
-    '': hsl($base-hue, $base-saturation, 100%),
-    'border': hsl($base-hue, $base-saturation, 60%),
-    'fill': $input-fill,
-  ),
   'control': (
     '': hsl($base-hue, $base-saturation, 92%),
     'border': hsl($base-hue, $base-saturation, 80%),
@@ -60,9 +55,22 @@ $surface-visual-components: (
     '': hsl($base-hue, $base-saturation, 92%),
     'border': hsl($base-hue, $base-saturation, 80%),
   ),
+  'token': (
+    '': hsl($base-hue, $base-saturation, 95%),
+    'border': hsl($base-hue, $base-saturation, 80%),
+  ),
   'supporting': (
     '': hsl($base-hue, $base-saturation, 97%),
     'border': hsl($base-hue, $base-saturation, 70%),
+  ),
+  'group': (
+    '': hsl($base-hue, $base-saturation, 99%),
+    'border': hsl($base-hue, $base-saturation, 75%),
+  ),
+  'input': (
+    '': hsl($base-hue, $base-saturation, 100%),
+    'border': hsl($base-hue, $base-saturation, 60%),
+    'fill': $input-fill,
   ),
 );
 
@@ -131,40 +139,6 @@ $surface-states: (
       's_delta': 0,
       'l_delta': 6,
     ),
-  ),
-);
-
-// Colors, ordered by elevation / lightness
-$surface-colors: (
-  'fieldset': hsl(hue($base), saturation($base), 99%),
-  'token': hsl(hue($base), saturation($base), 90%),
-);
-
-$surface-states-old: (
-  'hover': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': -7,
-  ),
-  'active': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': -9,
-  ),
-  'focused': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': -2,
-  ),
-  'disabled': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': -10,
-  ),
-  'muted': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': 10,
   ),
 );
 
@@ -325,10 +299,6 @@ body {
     $surface-visual-components,
     $surface-states
   );
-
-  @each $name, $color in $surface-colors {
-    @include generate-surface-tokens(#{$name}, $color, $surface-states-old);
-  }
 
   @each $name, $color in $border-colors {
     @include generate-border-tokens(#{$name}, $color, $border-states);
