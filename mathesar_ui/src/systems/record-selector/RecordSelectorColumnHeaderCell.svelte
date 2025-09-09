@@ -153,7 +153,7 @@
     display: none;
   }
   .column-header-cell.has-nested-selector-open :global(.record-selector-input) {
-    box-shadow: 0 0 0 0.2rem var(--border-header);
+    box-shadow: 0 0 0 0.2rem var(--color-surface-header-border);
     z-index: 2;
     pointer-events: none;
   }

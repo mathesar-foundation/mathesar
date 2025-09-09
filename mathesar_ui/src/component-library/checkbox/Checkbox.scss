@@ -12,7 +12,7 @@
   width: var(--size);
   height: var(--size);
   appearance: none;
-  border: solid var(--border-input) 0.15em;
+  border: solid var(--color-surface-input-border) 0.15em;
   border-radius: 0.15em;
   background: var(--color-surface-input);
   position: relative;
@@ -25,7 +25,7 @@
   }
   &:checked,
   &:indeterminate {
-    border: 0.05em solid var(--border-input);
+    border: 0.05em solid var(--color-surface-input-border);
     background: var(--color-surface-input-fill);
     background-position: center;
     background-repeat: no-repeat;
@@ -33,7 +33,7 @@
   }
   &:disabled {
     background-color: var(--color-surface-input-disabled);
-    border-color: var(--border-input);
+    border-color: var(--color-surface-input-border);
   }
 
   &:checked::before,
@@ -71,6 +71,6 @@
   }
 
   &:not(:disabled):focus {
-    outline: 1px solid var(--border-input-focused);
+    outline: 1px solid var(--color-surface-input-focused-border);
   }
 }

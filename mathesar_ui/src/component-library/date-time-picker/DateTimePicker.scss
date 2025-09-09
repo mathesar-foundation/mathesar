@@ -37,7 +37,7 @@
 }
 .flatpickr-calendar.hasTime .flatpickr-time {
   height: 40px;
-  border-top: 1px solid var(--border-control);
+  border-top: 1px solid var(--color-surface-control-border);
 }
 .flatpickr-calendar.noCalendar.hasTime .flatpickr-time {
   height: auto;
@@ -164,7 +164,7 @@
   line-height: 50%;
   opacity: 0;
   cursor: pointer;
-  border: 1px solid color-mix(in srgb, var(--border-control), transparent 75%);
+  border: 1px solid color-mix(in srgb, var(--color-surface-control-border), transparent 75%);
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -255,12 +255,12 @@
 .flatpickr-current-month .numInputWrapper span.arrowUp:after {
   border-bottom-color: color-mix(
     in srgb,
-    var(--border-control),
+    var(--color-surface-control-border),
     transparent 60%
   );
 }
 .flatpickr-current-month .numInputWrapper span.arrowDown:after {
-  border-top-color: color-mix(in srgb, var(--border-control), transparent 60%);
+  border-top-color: color-mix(in srgb, var(--color-surface-control-border), transparent 60%);
 }
 .flatpickr-current-month input.cur-year {
   background: transparent;

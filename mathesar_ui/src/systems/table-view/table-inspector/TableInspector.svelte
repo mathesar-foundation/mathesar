@@ -53,7 +53,7 @@
     background-color: var(--color-surface-supporting);
     border-top: 1px solid var(--color-surface-raised-2-border);
     border-left: 1px solid var(--border-section);
-    border-bottom: 1px solid var(--border-card);
+    border-bottom: 1px solid var(--color-surface-raised-1-border);
     border-right: 1px solid var(--border-grid);
     border-radius: var(--border-radius-l);
     isolation: isolate;

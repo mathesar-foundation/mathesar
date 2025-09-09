@@ -63,7 +63,7 @@
 
 <style lang="scss">
   .presets {
-    border-top: 1px solid var(--border-control);
+    border-top: 1px solid var(--color-surface-control-border);
     padding: 0.4rem 0.6rem;
     display: flex;
     align-items: center;
@@ -74,7 +74,7 @@
     }
 
     :global(button.btn) {
-      border: 1px solid var(--border-control);
+      border: 1px solid var(--color-surface-control-border);
       border-radius: 1rem;
       padding: 0.3rem 0.6rem;
     }

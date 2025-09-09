@@ -184,16 +184,10 @@ $surface-states-old: (
 // Ordered by lightnesss.
 // Although some tokens have the same values, they're defined separately for modularity.
 $border-colors: (
-  'container': hsl(hue($base), saturation($base), 12%),
   'row': hsl(hue($base), saturation($base), 12%),
   'grid': hsl(hue($base), saturation($base), 15%),
-  'card': hsl(hue($base), saturation($base), 15%),
-  'dropdown': hsl(hue($base), saturation($base), 15%),
   'divider': hsl(hue($base), saturation($base), 20%),
-  'header': hsl(hue($base), saturation($base), 20%),
-  'control': hsl(hue($base), saturation($base), 10%),
   'fieldset': hsl(hue($base), saturation($base), 25%),
-  'input': hsl(hue($base), saturation($base), 40%),
   'section': hsl(hue($base), saturation($base), 30%),
   'token': hsl(hue($base), saturation($base), 40%),
 );

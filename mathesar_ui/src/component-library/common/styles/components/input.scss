@@ -1,5 +1,8 @@
 .input-element {
-  border: var(--input-element-border, 1px solid var(--border-input));
+  border: var(
+    --input-element-border,
+    1px solid var(--color-surface-input-border)
+  );
   align-items: center;
   border-radius: var(--border-radius-m);
   background: var(--input-element-background, var(--color-surface-input));
@@ -20,7 +23,7 @@
   }
 
   &:focus {
-    border-color: var(--border-input-focused);
+    border-color: var(--color-surface-input-focused-border);
     outline: 0;
     box-shadow: var(
       --input-element-focus-box-shadow,

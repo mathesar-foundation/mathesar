@@ -51,7 +51,7 @@
 <style lang="scss">
   .exploration-inspector {
     height: 100%;
-    border: 1px solid var(--border-container);
+    border: 1px solid var(--color-surface-base-border);
     border-radius: var(--border-radius-l);
     background: var(--color-surface-supporting);
     display: flex;

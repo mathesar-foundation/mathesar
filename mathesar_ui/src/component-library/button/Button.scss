@@ -43,7 +43,7 @@
     default: (
       normal: (
         background: var(--color-surface-control),
-        border-color: var(--border-control),
+        border-color: var(--color-surface-control-border),
         box-shadow: (
           var(--color-surface-base) 0 1px 2px 0,
           var(--color-shadow) 0 1px 3px 0,
@@ -54,7 +54,7 @@
       ),
       focus: (
         background: var(--color-surface-control-focused),
-        outline-color: var(--border-control-focused),
+        outline-color: var(--color-surface-control-focused-border),
         box-shadow: (
           0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
           0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
@@ -62,8 +62,8 @@
       ),
       active: (
         background: var(--color-surface-control-active),
-        border-color: var(--border-control-active),
-        outline-color: var(--border-control-active),
+        border-color: var(--color-surface-control-active-border),
+        outline-color: var(--color-surface-control-active-border),
         box-shadow: 0 0 0 2px var(--color-surface-control-active),
       ),
     ),
@@ -183,7 +183,7 @@
       ),
       focus: (
         background: var(--color-surface-control-focused),
-        border-color: var(--border-control-focused),
+        border-color: var(--color-surface-control-focused-border),
         box-shadow: (
           0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
           0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
@@ -291,7 +291,7 @@
   &.btn-default {
     &.dropdown {
       --button-background: var(--color-surface-input);
-      --button-border-color: var(--border-input);
+      --button-border-color: var(--color-surface-input-border);
     }
   }
 

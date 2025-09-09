@@ -38,7 +38,7 @@ $surface-elevations: (
   ),
   'base': (
     '': hsl($base-hue, $base-saturation, 94%),
-    'border': hsl($base-hue, $base-saturation, 88%),
+    'border': hsl($base-hue, $base-saturation, 85%),
   ),
   'raised-1': (
     '': hsl($base-hue, $base-saturation, 97%),
@@ -184,17 +184,11 @@ $surface-states-old: (
 // Ordered by lightnesss.
 // Although some tokens have the same values, they're defined separately for modularity.
 $border-colors: (
-  'container': hsl(hue($base), saturation($base), 88%),
   'row': hsl(hue($base), saturation($base), 88%),
   'grid': hsl(hue($base), saturation($base), 80%),
-  'card': hsl(hue($base), saturation($base), 85%),
-  'dropdown': hsl(hue($base), saturation($base), 85%),
   'divider': hsl(hue($base), saturation($base), 80%),
-  'header': hsl(hue($base), saturation($base), 80%),
-  'control': hsl(hue($base), saturation($base), 80%),
   'fieldset': hsl(hue($base), saturation($base), 75%),
   'section': hsl(hue($base), saturation($base), 70%),
-  'input': hsl(hue($base), saturation($base), 70%),
   'token': hsl(hue($base), saturation($base), 70%),
 );
 

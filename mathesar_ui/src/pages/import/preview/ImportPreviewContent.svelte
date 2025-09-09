@@ -333,7 +333,7 @@
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
     background-color: var(--color-surface-header);
-    border-top: 1px solid var(--border-card);
+    border-top: 1px solid var(--color-surface-header-border);
   }
   .preview-content {
     padding-bottom: 1rem;

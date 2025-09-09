@@ -232,11 +232,11 @@
   }
   .disabled {
     background: var(--color-surface-input-disabled);
-    border: solid 1px var(--border-input);
+    border: solid 1px var(--color-surface-input-border);
   }
 
   .linked-record-input:focus {
-    border-color: var(--border-input-focused);
+    border-color: var(--color-surface-input-focused-border);
     outline: 0;
     box-shadow: 0 0 0 2px var(--color-surface-input-focused);
   }

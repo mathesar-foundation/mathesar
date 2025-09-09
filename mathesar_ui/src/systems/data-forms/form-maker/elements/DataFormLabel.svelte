@@ -121,7 +121,7 @@
     &.selected {
       input {
         background-color: var(--color-surface-input);
-        border-color: var(--border-input);
+        border-color: var(--color-surface-input-border);
 
         &.disabled {
           background-color: var(--color-surface-input-disabled);

@@ -57,7 +57,7 @@
     flex-grow: 0;
     flex-shrink: 0;
     background-color: var(--color-surface-header);
-    border-bottom: 1px solid var(--border-header);
+    border-bottom: 1px solid var(--color-surface-header-border);
     box-shadow: 0 2px 4px var(--color-shadow);
     user-select: none;
     -webkit-user-select: none; /* Safari */
