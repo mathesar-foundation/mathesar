@@ -37,19 +37,19 @@ $elevations: (
     'border': hsl($base-hue, $base-saturation, 75%),
   ),
   'base': (
-    '': hsl($base-hue, $base-saturation, 96%),
+    '': hsl($base-hue, $base-saturation, 94%),
     'border': hsl($base-hue, $base-saturation, 88%),
   ),
   'raised-1': (
-    '': hsl($base-hue, $base-saturation, 94%),
+    '': hsl($base-hue, $base-saturation, 97%),
     'border': hsl($base-hue, $base-saturation, 80%),
   ),
   'raised-2': (
-    '': hsl($base-hue, $base-saturation, 92%),
+    '': hsl($base-hue, $base-saturation, 98%),
     'border': hsl($base-hue, $base-saturation, 75%),
   ),
   'raised-3': (
-    '': hsl($base-hue, $base-saturation, 90%),
+    '': hsl($base-hue, $base-saturation, 99%),
     'border': hsl($base-hue, $base-saturation, 70%),
   ),
 );
@@ -121,7 +121,7 @@ $elevation-states: (
 $surface-colors: (
   'input': hsl(hue($base), saturation($base), 100%),
   'canvas': hsl(hue($base), saturation($base), 96%),
-  'supporting': hsl(hue($base), saturation($base), 97%),
+  'supporting': hsla(hue($base), saturation($base), 96%, 0.8),
   'fieldset': hsl(hue($base), saturation($base), 99%),
   'header': hsl(hue($base), saturation($base), 92%),
   'control': hsl(hue($base), saturation($base), 92%),
