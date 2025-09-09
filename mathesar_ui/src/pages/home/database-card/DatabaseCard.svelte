@@ -21,8 +21,8 @@
 <style lang="scss">
   .db-card {
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--border-card);
-    background-color: var(--surface-card);
+    border: 1px solid var(--card-border-color);
+    background-color: var(--card-background);
     overflow: hidden;
     box-shadow: 0 1px 2px 0
       color-mix(in srgb, var(--color-shadow), transparent 80%);

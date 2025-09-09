@@ -119,9 +119,9 @@
     grid-template: auto auto auto / 1fr;
     gap: 0.5rem;
     border-radius: 0.5rem;
-    border: solid 0.15rem var(--border-card);
     padding: 0.7rem 1rem;
-    background: var(--surface-card);
+    background: var(--card-background);
+    border: solid 0.15rem var(--card-border-color);
   }
   .link-type-option.checked {
     border-color: var(--color-checked);

@@ -104,8 +104,8 @@
     --z-index-hyperlink-overlay: 1;
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--border-card);
-    background-color: var(--surface-card);
+    border: 1px solid var(--card-border-color);
+    background-color: var(--card-background);
     padding: var(--lg1);
     display: flex;
     flex-direction: column;
