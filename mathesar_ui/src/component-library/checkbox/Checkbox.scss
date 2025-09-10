@@ -21,7 +21,7 @@
     background-color: var(--color-surface-input-hover);
   }
   &:not(:disabled):hover {
-    background-color: var(--color-surface-input-fill-hover);
+    background-color: var(--color-surface-input-hover-fill);
   }
   &:checked,
   &:indeterminate {

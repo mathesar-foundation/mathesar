@@ -5,7 +5,7 @@
 <style>
   .keyboard-key {
     padding: 0 0.2em;
-    border: solid var(--border-token) 1px;
+    border: solid var(--color-surface-control-border) 1px;
     border-radius: 0.2em;
     background: var(--color-surface-control);
   }

@@ -14,7 +14,7 @@
     min-height: 100%;
     padding: var(--sm2) 1rem;
     color: var(--text-primary);
-    border: 1px solid var(--border-row);
+    border-bottom: 1px solid var(--border-row);
 
     &::before,
     &::after {

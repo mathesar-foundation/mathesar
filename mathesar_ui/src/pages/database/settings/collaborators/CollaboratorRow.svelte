@@ -95,7 +95,7 @@
         },
       })}
     onClick={deleteCollaborator}
-    icon={{ ...iconDeleteMajor, size: '0.8em' }}
+    icon={iconDeleteMajor}
     label=""
     tooltip={$_('remove_collaborator')}
     disabled={!isMathesarAdmin}

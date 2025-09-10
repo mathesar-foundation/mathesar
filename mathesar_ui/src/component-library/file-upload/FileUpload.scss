@@ -8,8 +8,6 @@
 
     .file {
       padding: var(--sm3);
-      border: 1px solid var(--border-fieldset);
-      border-radius: var(--border-radius-l);
       display: flex;
 
       & + .file {
@@ -84,7 +82,7 @@
     }
 
     &:focus {
-      border-color: var(--border-fieldset-focused);
+      border-color: var(--color-surface-input-border-focused);
       border-width: 2px;
     }
     &:hover {

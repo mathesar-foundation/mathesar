@@ -146,15 +146,13 @@ $surface-states: (
 // Borders
 // ------------------------------------------
 
-// Ordered by lightnesss.
+// Ordered by lightness.
 // Although some tokens have the same values, they're defined separately for modularity.
 $border-colors: (
   'row': hsl(hue($base), saturation($base), 12%),
   'grid': hsl(hue($base), saturation($base), 15%),
   'divider': hsl(hue($base), saturation($base), 20%),
-  'fieldset': hsl(hue($base), saturation($base), 25%),
   'section': hsl(hue($base), saturation($base), 30%),
-  'token': hsl(hue($base), saturation($base), 40%),
 );
 
 $border-states: (

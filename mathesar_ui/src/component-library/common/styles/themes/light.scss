@@ -152,9 +152,7 @@ $border-colors: (
   'row': hsl(hue($base), saturation($base), 88%),
   'grid': hsl(hue($base), saturation($base), 80%),
   'divider': hsl(hue($base), saturation($base), 80%),
-  'fieldset': hsl(hue($base), saturation($base), 75%),
   'section': hsl(hue($base), saturation($base), 70%),
-  'token': hsl(hue($base), saturation($base), 70%),
 );
 
 $border-states: (
