@@ -146,10 +146,10 @@
     {canViewLinkedEntities}
     {recordSummary}
     setRecordSummary={(recordId, rs) =>
-      linkedRecordSummaries.addBespokeRecordSummary({
+      linkedRecordSummaries.addBespokeValue({
         columnId: String(columnId),
-        recordId,
-        recordSummary: rs,
+        key: recordId,
+        value: rs,
       })}
     showAsSkeleton={$recordsDataState === States.Loading}
     disabled={!isEditable}

@@ -79,10 +79,10 @@
 
   function setRecordSummary(recordId: string, _recordSummary: string) {
     if (linkedRecordSummaries) {
-      linkedRecordSummaries.addBespokeRecordSummary({
+      linkedRecordSummaries.addBespokeValue({
         columnId: String(column.id),
-        recordId,
-        recordSummary: _recordSummary,
+        key: recordId,
+        value: _recordSummary,
       });
     }
   }

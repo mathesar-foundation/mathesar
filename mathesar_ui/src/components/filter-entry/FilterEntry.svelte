@@ -14,8 +14,7 @@
     AbstractTypeFilterDefinition,
     FilterId,
   } from '@mathesar/stores/abstract-types/types';
-  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
-  import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
   import {
     Button,
@@ -52,7 +51,8 @@
   export let disableColumnChange = false;
   export let allowDelete = true;
   export let numberOfFilters = 0;
-  export let recordSummaryStore: RecordSummaryStore | undefined = undefined;
+  export let recordSummaryStore: AssociatedCellData<string> | undefined =
+    undefined;
 
   /**
    * Eslint recognizes an unnecessary type assertion that typecheck fails to
@@ -192,15 +192,15 @@
 
   $: readableRecordSummaryStore =
     recordSummaryStore ??
-    readable(new ImmutableMap<string, RecordSummariesForColumn>());
+    readable(new ImmutableMap<string, ImmutableMap<string, string>>());
   $: recordSummaries = $readableRecordSummaryStore;
 
   function setRecordSummary(recordId: string, recordSummary: string) {
     if (recordSummaryStore) {
-      recordSummaryStore.addBespokeRecordSummary({
+      recordSummaryStore.addBespokeValue({
         columnId: String(columnIdentifier),
-        recordId,
-        recordSummary,
+        key: recordId,
+        value: recordSummary,
       });
     }
   }

@@ -3,6 +3,7 @@
   import { _ } from 'svelte-i18n';
 
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
+  import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import {
     type FilterEntry,
     type ProcessedColumns,
@@ -10,7 +11,6 @@
     filterCombinations,
   } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/stores/table-data/filtering';
-  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
   import { InputGroupText, Select } from '@mathesar-component-library';
 
@@ -21,7 +21,7 @@
   }>();
 
   export let processedColumns: ProcessedColumns;
-  export let recordSummaries: RecordSummaryStore;
+  export let recordSummaries: AssociatedCellData<string>;
   export let entries: FilterEntry[];
   export let filterCombination: FilterCombination = defaultFilterCombination;
 </script>
