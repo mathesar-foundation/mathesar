@@ -51,9 +51,9 @@
 <style lang="scss">
   .exploration-inspector {
     height: 100%;
-    border: 1px solid var(--color-surface-base-border);
+    border: 1px solid var(--color-border-base);
     border-radius: var(--border-radius-l);
-    background: var(--color-surface-supporting);
+    background: var(--color-bg-supporting);
     display: flex;
     flex-direction: column;
     overflow: hidden;

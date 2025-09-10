@@ -224,21 +224,21 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--border-section);
+    border: 1px solid var(--color-border-section);
     border-radius: 0.25rem;
-    background: var(--color-surface-input);
+    background: var(--color-bg-input);
     padding: var(--sm4);
     cursor: default;
   }
   .disabled {
-    background: var(--color-surface-input-disabled);
-    border: solid 1px var(--color-surface-input-border);
+    background: var(--color-bg-input-disabled);
+    border: solid 1px var(--color-border-input);
   }
 
   .linked-record-input:focus {
-    border-color: var(--color-surface-input-focused-border);
+    border-color: var(--color-border-input-focused);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--color-surface-input-focused);
+    box-shadow: 0 0 0 2px var(--color-bg-input-focused);
   }
 
   .content {

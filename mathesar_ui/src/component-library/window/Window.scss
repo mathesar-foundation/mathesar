@@ -1,5 +1,5 @@
 .window {
-  background-color: var(--color-surface-raised-2);
+  background-color: var(--color-bg-raised-2);
   border: 1px solid var(--border-surface-raised-2-border);
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
@@ -17,7 +17,7 @@
     justify-content: flex-end;
     align-items: flex-start;
     padding: 1rem;
-    border-bottom: 1px solid var(--border-section);
+    border-bottom: 1px solid var(--color-border-section);
     overflow: hidden;
     > .title {
       &:empty {
@@ -37,8 +37,8 @@
 
   > .footer {
     grid-row: 3;
-    border-top: 1px solid var(--border-section);
-    background: var(--color-surface-raised-2);
+    border-top: 1px solid var(--color-border-section);
+    background: var(--color-bg-raised-2);
   }
 
   &.has-body-padding > .body {

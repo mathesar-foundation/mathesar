@@ -167,10 +167,10 @@
     height: var(--header-height);
     background: linear-gradient(
       to bottom right,
-      var(--color-surface-base),
-      var(--color-surface-raised-2)
+      var(--color-bg-base),
+      var(--color-bg-raised-2)
     );
-    border-bottom: 1px solid var(--color-surface-base-border);
+    border-bottom: 1px solid var(--color-border-base);
     box-shadow: var(--color-shadow) 0 1px 3px 0;
     overflow: hidden;
     color: var(--text-primary);

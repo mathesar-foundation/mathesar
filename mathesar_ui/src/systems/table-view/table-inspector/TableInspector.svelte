@@ -50,11 +50,11 @@
   .table-inspector {
     height: 100%;
     position: relative;
-    background-color: var(--color-surface-supporting);
-    border-top: 1px solid var(--color-surface-raised-2-border);
-    border-left: 1px solid var(--border-section);
-    border-bottom: 1px solid var(--color-surface-raised-1-border);
-    border-right: 1px solid var(--border-grid);
+    background-color: var(--color-bg-supporting);
+    border-top: 1px solid var(--color-border-raised-2);
+    border-left: 1px solid var(--color-border-section);
+    border-bottom: 1px solid var(--color-border-raised-1);
+    border-right: 1px solid var(--color-border-grid);
     border-radius: var(--border-radius-l);
     isolation: isolate;
   }

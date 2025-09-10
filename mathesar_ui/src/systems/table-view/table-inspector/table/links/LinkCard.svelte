@@ -18,16 +18,16 @@
   .link-card {
     display: block;
     cursor: pointer;
-    background: var(--color-surface-raised-2);
-    border: 1px solid var(--color-surface-raised-2-border);
+    background: var(--color-bg-raised-2);
+    border: 1px solid var(--color-border-raised-2);
     box-shadow: 0 1px 2px 0 var(--color-shadow);
     border-radius: var(--border-radius-m);
     transition: all 0.2s ease;
   }
 
   .link-card:hover {
-    background: var(--color-surface-raised-2-hover);
-    border: 1px solid var(--color-surface-raised-2-hover-border);
+    background: var(--color-bg-raised-2-hover);
+    border: 1px solid var(--color-border-raised-2-hover);
     box-shadow: 0 1px 2px 0 var(--color-shadow);
   }
 
@@ -36,8 +36,8 @@
   }
 
   .link-card.multiple:hover .container {
-    background: var(--color-surface-raised-3-hover);
-    border: 1px solid var(--color-surface-raised-3-hover-border);
+    background: var(--color-bg-raised-3-hover);
+    border: 1px solid var(--color-border-raised-3-hover);
     box-shadow: 0 1px 2px 0 var(--color-shadow);
   }
 
@@ -50,8 +50,8 @@
     position: relative;
     bottom: var(--sm3);
     left: var(--sm3);
-    background: var(--color-surface-raised-3);
-    border: 1px solid var(--color-surface-raised-3-border);
+    background: var(--color-bg-raised-3);
+    border: 1px solid var(--color-border-raised-3);
     border-radius: var(--border-radius-m);
   }
 
@@ -59,7 +59,7 @@
     color: var(--text-primary);
     font-weight: var(--font-weight-medium);
     padding: var(--sm4) var(--sm3);
-    border-bottom: 0.5px solid var(--border-divider);
+    border-bottom: 0.5px solid var(--color-border-divider);
   }
 
   .detail {

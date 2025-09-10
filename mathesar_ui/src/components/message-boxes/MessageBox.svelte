@@ -33,10 +33,10 @@
     position: relative;
     border-radius: var(--border-radius-m);
     margin: var(--MessageBox__margin);
-    background: var(--MessageBox__background, var(--color-surface-raised-1));
+    background: var(--MessageBox__background, var(--color-bg-raised-1));
     border-left: var(
       --MessageBox__border,
-      4px solid var(--color-surface-raised-1-border)
+      4px solid var(--color-border-raised-1)
     );
     color: var(--MessageBox__text-color, var(--text-primary));
   }

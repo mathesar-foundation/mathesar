@@ -140,7 +140,7 @@
     max-height: var(--input-height);
     left: var(--padding);
     width: calc(100% - 2 * var(--padding));
-    background: var(--color-surface-input);
+    background: var(--color-bg-input);
     border-radius: 0.2rem;
     border: none;
     box-shadow: 0 0 0 0.1rem var(--color-shadow);
@@ -153,7 +153,7 @@
     display: none;
   }
   .column-header-cell.has-nested-selector-open :global(.record-selector-input) {
-    box-shadow: 0 0 0 0.2rem var(--color-surface-header-border);
+    box-shadow: 0 0 0 0.2rem var(--color-border-header);
     z-index: 2;
     pointer-events: none;
   }

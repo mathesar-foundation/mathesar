@@ -20,7 +20,7 @@
 
 <style lang="scss">
   .section {
-    border: 1px solid var(--border-section);
+    border: 1px solid var(--color-border-section);
     border-radius: 4px;
     padding: var(--sm2);
 

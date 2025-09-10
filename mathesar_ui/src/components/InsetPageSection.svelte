@@ -7,9 +7,9 @@
 
 <style>
   .section {
-    background: var(--color-surface-raised-1);
+    background: var(--color-bg-raised-1);
     padding: var(--inset-page-section-padding, 2rem 1.5rem);
-    border: solid 1px var(--color-surface-raised-1-border);
+    border: solid 1px var(--color-border-raised-1);
     border-radius: 0.3rem;
   }
 </style>

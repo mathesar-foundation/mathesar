@@ -41,7 +41,7 @@
     margin-bottom: var(--AppSecondaryHeader__margin-bottom, var(--lg4));
     background: var(
       --AppSecondaryHeader__background,
-      var(--color-surface-supporting)
+      var(--color-bg-supporting)
     );
   }
   .content {

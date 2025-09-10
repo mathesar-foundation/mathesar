@@ -1,11 +1,8 @@
 .input-element {
-  border: var(
-    --input-element-border,
-    1px solid var(--color-surface-input-border)
-  );
+  border: var(--input-element-border, 1px solid var(--color-border-input));
   align-items: center;
   border-radius: var(--border-radius-m);
-  background: var(--input-element-background, var(--color-surface-input));
+  background: var(--input-element-background, var(--color-bg-input));
   color: var(--input-element-color, var(--text-input));
   margin: 0;
   padding: var(--input-padding);
@@ -23,7 +20,7 @@
   }
 
   &:focus {
-    border-color: var(--color-surface-input-focused-border);
+    border-color: var(--color-border-input-focused);
     outline: 0;
     box-shadow: var(
       --input-element-focus-box-shadow,
@@ -32,12 +29,12 @@
   }
 
   &:disabled {
-    background: var(--color-surface-input-disabled);
+    background: var(--color-bg-input-disabled);
     color: var(--text-disabled);
   }
 
   &.read-only {
-    background: var(--color-surface-input-disabled);
+    background: var(--color-bg-input-disabled);
   }
 
   &.has-error {

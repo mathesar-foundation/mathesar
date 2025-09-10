@@ -43,7 +43,7 @@
     display: inline-block;
     width: 0.25rem;
     height: 0.25rem;
-    background-color: var(--border-row);
+    background-color: var(--color-border-row);
     border-radius: 50%;
   }
 </style>

@@ -55,7 +55,7 @@
   }
   .content {
     white-space: pre-wrap;
-    border: 1px solid var(--border-section);
+    border: 1px solid var(--color-border-section);
     padding: var(--sm3);
     border-radius: var(--border-radius-m);
     margin-top: var(--sm2);

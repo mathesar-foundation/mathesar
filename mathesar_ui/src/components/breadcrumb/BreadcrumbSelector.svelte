@@ -120,7 +120,7 @@
     margin-top: var(--sm5);
     padding-left: 0;
     padding-top: var(--sm5);
-    border-top: 1px solid var(--border-section);
+    border-top: 1px solid var(--color-border-section);
   }
   .entity-switcher .trigger {
     color: var(--text-navigation);
@@ -131,9 +131,9 @@
 
     &:hover,
     &:active {
-      background-color: var(--color-surface-raised-1-active);
+      background-color: var(--color-bg-raised-1-active);
       color: var(--text-navigation-hover);
-      border-color: var(--color-surface-raised-1-active-border);
+      border-color: var(--color-border-raised-1-active);
     }
   }
 </style>

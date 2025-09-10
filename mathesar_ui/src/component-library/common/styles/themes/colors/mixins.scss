@@ -1,3 +1,5 @@
+@use 'sass:list';
+
 // Border colors
 @mixin generate-border-tokens($prefix, $base-color, $states) {
   --border-#{$prefix}: #{$base-color};
@@ -116,6 +118,46 @@
           --color-surface-#{$name}-#{$state}#{_suffix($role)}: #{$variant};
         }
       }
+    }
+  }
+}
+
+@mixin generate-bg-color-tokens($backgrounds, $state-deltas) {
+  @each $name, $bg in $backgrounds {
+    --color-bg-#{$name}: #{$bg};
+
+    @each $state, $delta in $state-deltas {
+      $dh: list.nth($delta, 1);
+      $ds: list.nth($delta, 2);
+      $dl: list.nth($delta, 3);
+
+      $h-new: (hue($bg) + $dh) % 360deg;
+      $s-new: max(0%, min(100%, saturation($bg) + $ds));
+      $l-new: max(0%, min(100%, lightness($bg) + $dl));
+
+      $variant: hsl($h-new, $s-new, $l-new);
+
+      --color-bg-#{$name}-#{$state}: #{$variant};
+    }
+  }
+}
+
+@mixin generate-border-color-tokens($borders, $state-deltas) {
+  @each $name, $border in $borders {
+    --color-border-#{$name}: #{$border};
+
+    @each $state, $delta in $state-deltas {
+      $dh: list.nth($delta, 1);
+      $ds: list.nth($delta, 2);
+      $dl: list.nth($delta, 3);
+
+      $h-new: (hue($border) + $dh) % 360deg;
+      $s-new: max(0%, min(100%, saturation($border) + $ds));
+      $l-new: max(0%, min(100%, lightness($border) + $dl));
+
+      $variant: hsl($h-new, $s-new, $l-new);
+
+      --color-border-#{$name}-#{$state}: #{$variant};
     }
   }
 }

@@ -1,4 +1,65 @@
+@use './l/bg' as light-bg;
+@use './d/bg' as dark-bg;
+@use './l/border' as light-border;
+@use './d/border' as dark-border;
+
 @import './colors/base.scss';
 @import './colors/utility.scss';
 @import './light.scss';
 @import './dark.scss';
+
+body {
+  @include generate-bg-color-tokens(
+    light-bg.$elevations,
+    light-bg.$elevation-and-component-state-deltas
+  );
+  @include generate-bg-color-tokens(
+    light-bg.$components,
+    light-bg.$elevation-and-component-state-deltas
+  );
+  @include generate-bg-color-tokens(
+    light-bg.$contextual,
+    light-bg.$contextual-state-deltas
+  );
+
+  @include generate-border-color-tokens(
+    light-border.$elevations,
+    light-border.$common-state-deltas
+  );
+  @include generate-border-color-tokens(
+    light-border.$components,
+    light-border.$common-state-deltas
+  );
+  @include generate-border-color-tokens(
+    light-border.$contextual,
+    light-border.$contextual-state-deltas
+  );
+}
+
+body.theme-dark {
+  @include generate-bg-color-tokens(
+    dark-bg.$elevations,
+    dark-bg.$elevation-and-component-state-deltas
+  );
+  @include generate-bg-color-tokens(
+    dark-bg.$components,
+    dark-bg.$elevation-and-component-state-deltas
+  );
+  @include generate-bg-color-tokens(
+    dark-bg.$contextual,
+    dark-bg.$contextual-state-deltas
+  );
+
+  @include generate-border-color-tokens(
+    dark-border.$elevations,
+    dark-border.$common-state-deltas
+  );
+  @include generate-border-color-tokens(
+    dark-border.$components,
+    dark-border.$common-state-deltas
+  );
+  @include generate-border-color-tokens(
+    dark-border.$contextual,
+    dark-border.$contextual-state-deltas
+  );
+}

@@ -84,7 +84,7 @@
     right: 1px;
     bottom: 1px;
     position: absolute;
-    background: var(--color-surface-input);
+    background: var(--color-bg-input);
     z-index: 1;
   }
   .bg {
@@ -93,7 +93,7 @@
     right: var(--cell-padding);
     bottom: var(--cell-padding);
     position: absolute;
-    background: var(--color-surface-input-hover);
+    background: var(--color-bg-input-hover);
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;

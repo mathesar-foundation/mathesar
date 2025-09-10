@@ -63,7 +63,7 @@
 
 <style lang="scss">
   .presets {
-    border-top: 1px solid var(--color-surface-control-border);
+    border-top: 1px solid var(--color-border-control);
     padding: 0.4rem 0.6rem;
     display: flex;
     align-items: center;
@@ -74,13 +74,13 @@
     }
 
     :global(button.btn) {
-      border: 1px solid var(--color-surface-control-border);
+      border: 1px solid var(--color-border-control);
       border-radius: 1rem;
       padding: 0.3rem 0.6rem;
     }
 
     :global(button.btn.selected) {
-      background: var(--color-surface-input-fill);
+      background: var(--color-bg-input-fill);
       color: var(--text-inverted);
     }
 

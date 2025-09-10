@@ -12,28 +12,28 @@
   width: var(--size);
   height: var(--size);
   appearance: none;
-  border: solid var(--color-surface-input-border) 0.15em;
+  border: solid var(--color-border-input) 0.15em;
   border-radius: 0.15em;
-  background: var(--color-surface-input);
+  background: var(--color-bg-input);
   position: relative;
 
   &:not(:disabled):not(:checked):not(:indeterminate):hover {
-    background-color: var(--color-surface-input-hover);
+    background-color: var(--color-bg-input-hover);
   }
   &:not(:disabled):hover {
-    background-color: var(--color-surface-input-hover-fill);
+    background-color: var(--color-bg-input-hover-fill);
   }
   &:checked,
   &:indeterminate {
-    border: 0.05em solid var(--color-surface-input-border);
-    background: var(--color-surface-input-fill);
+    border: 0.05em solid var(--color-border-input);
+    background: var(--color-bg-input-fill);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 0.75em auto;
   }
   &:disabled {
-    background-color: var(--color-surface-input-disabled);
-    border-color: var(--color-surface-input-border);
+    background-color: var(--color-bg-input-disabled);
+    border-color: var(--color-border-input);
   }
 
   &:checked::before,
@@ -71,6 +71,6 @@
   }
 
   &:not(:disabled):focus {
-    outline: 1px solid var(--color-surface-input-focused-border);
+    outline: 1px solid var(--color-border-input-focused);
   }
 }

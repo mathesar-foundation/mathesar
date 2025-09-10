@@ -234,11 +234,11 @@
 <style>
   .import-file-view {
     padding: var(--lg3);
-    border: 1px solid var(--border-section);
+    border: 1px solid var(--color-border-section);
     border-radius: var(--border-radius-m);
-    background-color: var(--color-surface-raised-1);
+    background-color: var(--color-bg-raised-1);
     margin-bottom: 2rem;
-    --fieldset-boxed-background-color: var(--color-surface-raised-3);
+    --fieldset-boxed-background-color: var(--color-bg-raised-3);
   }
 
   .data-source-input {

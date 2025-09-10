@@ -1,0 +1,52 @@
+@import '../colors/base.scss';
+@import '../colors/mixins.scss';
+
+$base-hue: 42;
+$base-saturation: 10%;
+
+$elevations: (
+  'sunken-1': hsl($base-hue, $base-saturation, 90%),
+  'base': hsl($base-hue, $base-saturation, 85%),
+  'raised-1': hsl($base-hue, $base-saturation, 80%),
+  'raised-2': hsl($base-hue, $base-saturation, 75%),
+  'raised-3': hsl($base-hue, $base-saturation, 70%),
+);
+
+$components: (
+  'row': hsl($base-hue, $base-saturation, 88%),
+  'control': hsl($base-hue, $base-saturation, 80%),
+  'grid': hsl($base-hue, $base-saturation, 80%),
+  'divider': hsl($base-hue, $base-saturation, 80%),
+  'header': hsl($base-hue, $base-saturation, 80%),
+  'token': hsl($base-hue, $base-saturation, 80%),
+  'section': hsl($base-hue, $base-saturation, 70%),
+  'supporting': hsl($base-hue, $base-saturation, 70%),
+  'group': hsl($base-hue, $base-saturation, 75%),
+  'input': hsl($base-hue, $base-saturation, 60%),
+);
+
+$common-state-deltas: (
+  'hover': 0 0 6,
+  'active': 0 0 14,
+  'focused': 0 0 10,
+  'disabled': 0 0 6,
+  'muted': 0 0 6,
+);
+
+$contextual: (
+  'success': hsl(hue($success), 40%, 50%),
+  'warning': hsl(hue($warning), 70%, 60%),
+  'danger': hsl(hue($danger), 100%, 80%),
+  'info': hsl(hue($info), 55%, 65%),
+  'help': hsl(hue($help), 40%, 70%),
+  'tip': hsl(hue($tip), 40%, 60%),
+  'outcome': hsl(hue($outcome), 25%, 60%),
+);
+
+$contextual-state-deltas: (
+  'hover': 0 6 6,
+  'active': 0 2 10,
+  'focused': 5 5 3,
+  'disabled': 0 0 -20,
+  'muted': 0 0 -10,
+);

@@ -200,7 +200,7 @@
     padding: 1rem 0;
 
     & + .access-control-row {
-      border-top: 1px solid var(--border-grid);
+      border-top: 1px solid var(--color-border-grid);
     }
   }
 </style>

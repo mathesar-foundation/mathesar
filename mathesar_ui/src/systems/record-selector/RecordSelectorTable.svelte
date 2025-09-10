@@ -323,9 +323,9 @@
     overflow: auto;
     position: relative;
     border-spacing: 0;
-    background: var(--color-surface-input);
+    background: var(--color-bg-input);
     --border-width: 1px;
-    --border-color: var(--color-surface-header-border);
+    --border-color: var(--color-border-header);
     --row-height: 2.25rem;
   }
   .thead {

@@ -84,7 +84,7 @@
     flex-direction: column;
 
     .branding {
-      border-top: 1px solid var(--border-divider);
+      border-top: 1px solid var(--color-border-divider);
       margin-top: var(--lg2);
     }
   }

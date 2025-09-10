@@ -25,7 +25,7 @@
     left: 0;
     top: 0;
     height: 100%;
-    border-right: 1px solid var(--color-surface-header-border);
+    border-right: 1px solid var(--color-border-header);
     border-bottom: none;
     font-size: var(--sm1);
     overflow: hidden;

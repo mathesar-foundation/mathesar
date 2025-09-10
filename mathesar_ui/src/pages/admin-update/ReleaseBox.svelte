@@ -71,7 +71,7 @@
   .release {
     padding: var(--lg1);
     border-radius: var(--border-radius-l);
-    border: solid 1px var(--color-surface-base-border);
+    border: solid 1px var(--color-border-base);
   }
 
   .release.available-upgrade {
@@ -109,7 +109,7 @@
     color: var(--text-primary);
     padding: 0.5rem;
     display: flex;
-    border: solid 1px var(--border-section);
+    border: solid 1px var(--color-border-section);
     border-radius: 500px;
   }
 

@@ -44,7 +44,7 @@
   svg {
     height: 100%;
     width: 100%;
-    color: var(--color-surface-control-border);
+    color: var(--color-border-control);
   }
   svg.flip {
     transform: scaleY(-1);

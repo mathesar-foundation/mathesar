@@ -80,7 +80,7 @@
       135deg,
       var(--color-navigation-40),
       35%,
-      var(--color-surface-base) 50%,
+      var(--color-bg-base) 50%,
       var(--color-navigation-20) 100%
     );
   }

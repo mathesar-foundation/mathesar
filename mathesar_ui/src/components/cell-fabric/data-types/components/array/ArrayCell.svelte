@@ -81,8 +81,8 @@
     border-radius: var(--border-radius-l);
     white-space: nowrap;
     color: var(--text-primary);
-    background-color: var(--color-surface-token);
-    border: 1px solid var(--color-surface-token-border);
+    background-color: var(--color-bg-token);
+    border: 1px solid var(--color-border-token);
   }
 
   .values {

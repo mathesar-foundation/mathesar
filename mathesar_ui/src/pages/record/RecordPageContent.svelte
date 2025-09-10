@@ -141,10 +141,10 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   .record-page-header {
     --AppSecondaryHeader__background: linear-gradient(
       135deg,
-      var(--color-surface-base),
+      var(--color-bg-base),
       15%,
       var(--color-record-10) 40%,
-      var(--color-surface-base) 60%,
+      var(--color-bg-base) 60%,
       var(--color-record-20) 100%
     );
     --AppSecondaryHeader__margin-bottom: var(--sm1);

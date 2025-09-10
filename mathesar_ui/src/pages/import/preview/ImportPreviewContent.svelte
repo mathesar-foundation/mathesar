@@ -332,8 +332,8 @@
   .preview-header {
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
-    background-color: var(--color-surface-header);
-    border-top: 1px solid var(--color-surface-header-border);
+    background-color: var(--color-bg-header);
+    border-top: 1px solid var(--color-border-header);
   }
   .preview-content {
     padding-bottom: 1rem;

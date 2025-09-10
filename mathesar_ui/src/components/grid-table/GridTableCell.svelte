@@ -14,7 +14,7 @@
     min-height: 100%;
     padding: var(--sm2) 1rem;
     color: var(--text-primary);
-    border-bottom: 1px solid var(--border-row);
+    border-bottom: 1px solid var(--color-border-row);
 
     &::before,
     &::after {
@@ -40,10 +40,10 @@
     &.gt-header {
       font-weight: var(--font-weight-medium);
       color: var(--text-primary);
-      background: var(--color-surface-header);
+      background: var(--color-bg-header);
 
       &::after {
-        background-color: var(--color-surface-header);
+        background-color: var(--color-bg-header);
       }
     }
   }

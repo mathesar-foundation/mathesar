@@ -44,8 +44,8 @@
 
   .file-upload-trigger {
     display: block;
-    background: var(--color-surface-input);
-    border: 1px dashed var(--color-surface-input-border);
+    background: var(--color-bg-input);
+    border: 1px dashed var(--color-border-input);
     border-radius: 3px;
     color: inherit;
     font-family: inherit;
@@ -82,11 +82,11 @@
     }
 
     &:focus {
-      border-color: var(--color-surface-input-border-focused);
+      border-color: var(--color-border-input-focused);
       border-width: 2px;
     }
     &:hover {
-      background: var(--color-surface-input-hover);
+      background: var(--color-bg-input-hover);
     }
     &.dragging-over {
       background: var(--semantic-info-bg);

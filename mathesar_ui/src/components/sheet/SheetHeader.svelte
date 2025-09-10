@@ -56,8 +56,8 @@
     position: relative;
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: var(--color-surface-header);
-    border-bottom: 1px solid var(--color-surface-header-border);
+    background-color: var(--color-bg-header);
+    border-bottom: 1px solid var(--color-border-header);
     box-shadow: 0 2px 4px var(--color-shadow);
     user-select: none;
     -webkit-user-select: none; /* Safari */

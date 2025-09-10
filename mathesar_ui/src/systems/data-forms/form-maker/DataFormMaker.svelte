@@ -64,9 +64,9 @@
     height: 100%;
     overflow: hidden;
     display: grid;
-    border: 1px solid var(--color-surface-raised-1-border);
+    border: 1px solid var(--color-border-raised-1);
     border-radius: var(--border-radius-l);
-    background: var(--color-surface-raised-1);
+    background: var(--color-bg-raised-1);
     --df__max-width: calc(60rem + var(--lg1));
     --df__margin: var(--lg2) auto;
     --df__element-spacing: 1rem;
@@ -77,9 +77,9 @@
   }
 
   .data-form-inspector-panel {
-    border: 1px solid var(--color-surface-raised-2-border);
+    border: 1px solid var(--color-border-raised-2);
     border-radius: var(--border-radius-l);
-    background: var(--color-surface-supporting);
+    background: var(--color-bg-supporting);
     height: 100%;
     overflow: hidden;
   }

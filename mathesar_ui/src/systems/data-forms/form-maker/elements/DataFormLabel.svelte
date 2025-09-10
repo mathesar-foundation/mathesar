@@ -120,11 +120,11 @@
 
     &.selected {
       input {
-        background-color: var(--color-surface-input);
-        border-color: var(--color-surface-input-border);
+        background-color: var(--color-bg-input);
+        border-color: var(--color-border-input);
 
         &.disabled {
-          background-color: var(--color-surface-input-disabled);
+          background-color: var(--color-bg-input-disabled);
           cursor: not-allowed;
         }
       }

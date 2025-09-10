@@ -31,8 +31,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid var(--color-surface-header-border);
-    border-right: 1px solid var(--color-surface-header-border);
+    border-bottom: 1px solid var(--color-border-header);
+    border-right: 1px solid var(--color-border-header);
     font-size: var(--sm2);
     padding: 0 1.5rem;
     color: var(--text-muted);

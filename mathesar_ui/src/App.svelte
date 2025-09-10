@@ -88,15 +88,15 @@
    * color applied underneath the cell, e.g. on the table or page.
    */
 
-    --cell-border-horizontal: 1px solid var(--border-grid);
-    --cell-border-vertical: 1px solid var(--border-grid);
+    --cell-border-horizontal: 1px solid var(--color-border-grid);
+    --cell-border-vertical: 1px solid var(--color-border-grid);
 
-    --cell-bg-color-base: var(--color-surface-input);
+    --cell-bg-color-base: var(--color-bg-input);
     --cell-bg-color-error: var(--semantic-danger-bg);
-    --cell-bg-color-header: var(--color-surface-header);
+    --cell-bg-color-header: var(--color-bg-header);
     --cell-bg-color-processing: var(--semantic-warning-bg);
-    --cell-bg-color-disabled: var(--color-surface-input-disabled);
-    --cell-bg-color-row-hover: var(--color-surface-input-hover);
+    --cell-bg-color-disabled: var(--color-bg-input-disabled);
+    --cell-bg-color-row-hover: var(--color-bg-input-hover);
     --cell-bg-color-row-selected: var(--color-selection-40);
 
     --cell-text-color-processing: var(--text-muted);
@@ -186,7 +186,7 @@
   hr {
     margin: 0;
     border: 0;
-    border-top: 1px solid var(--border-section);
+    border-top: 1px solid var(--color-border-section);
     display: block;
   }
 
@@ -199,7 +199,7 @@
   code {
     font-family: var(--font-family-mono);
     font-size: 85%;
-    background: var(--color-surface-input);
+    background: var(--color-bg-input);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
     color: var(--text-primary);
@@ -235,7 +235,7 @@
   .postgres-keyword {
     font-size: 80%;
     padding: 0.02em 0.3em;
-    background: var(--color-surface-base);
+    background: var(--color-bg-base);
     border-radius: 3px;
     color: var(--text-tertiary);
     font-weight: bold;
@@ -260,6 +260,6 @@
     align-items: center;
     justify-content: center;
     display: flex;
-    background-color: var(--color-surface-base);
+    background-color: var(--color-bg-base);
   }
 </style>
