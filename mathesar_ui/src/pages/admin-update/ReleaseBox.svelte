@@ -75,8 +75,8 @@
   }
 
   .release.available-upgrade {
-    border-color: var(--semantic-warning-border);
-    background-color: var(--semantic-warning-background);
+    border-color: var(--color-border-warning);
+    background-color: var(--color-bg-warning);
     border-width: 1px;
   }
 

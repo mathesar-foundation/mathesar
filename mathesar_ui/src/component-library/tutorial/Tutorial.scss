@@ -1,14 +1,14 @@
 .tutorial {
   position: relative;
   border-radius: var(--border-radius-xl);
-  border: 1px solid var(--semantic-tip-border);
+  border: 1px solid var(--color-border-tip);
   padding: var(--lg3);
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1.6;
   overflow: hidden;
-  background: color-mix(in srgb, var(--semantic-tip-bg), transparent 60%);
+  background: color-mix(in srgb, var(--color-bg-tip), transparent 60%);
   box-shadow: 0 4px 8px color-mix(in srgb, var(--color-shadow), transparent 8%);
 
   &::before {
@@ -18,7 +18,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: color-mix(in srgb, var-(--semantic-tip-bg), transparent 60%);
+    background: color-mix(in srgb, var-(--color-bg-tip), transparent 60%);
   }
 
   .content {
@@ -34,12 +34,12 @@
 
   .icon {
     margin-bottom: var(--lg1);
-    color: var(--semantic-tip-icon);
+    color: var(--color-fg-tip);
   }
 
   .title {
     font-size: var(--lg2);
-    color: var(--semantic-tip-text);
+    color: var(--color-fg-tip);
     font-weight: var(--font-weight-extra-bold);
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -48,7 +48,7 @@
   }
 
   .body {
-    color: var(--semantic-tip-inner-text);
+    color: var(--color-fg-tip);
   }
 
   .footer {

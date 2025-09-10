@@ -104,7 +104,7 @@
     gap: var(--sm4);
 
     .req-indicator {
-      color: var(--semantic-danger-text);
+      color: var(--color-fg-danger);
       font-size: var(--lg2);
     }
 

@@ -3,15 +3,15 @@
   flex-direction: column;
 
   &.danger {
-    background: var(--semantic-danger-bg);
-    border-left: 6px solid var(--semantic-danger-border);
-    color: var(--semantic-danger-text);
+    background: var(--color-bg-danger);
+    border-left: 6px solid var(--color-border-danger);
+    color: var(--color-fg-danger);
     padding: 15px;
     border-radius: 3px;
     line-height: 1.4em;
 
     .header {
-      color: var(--semantic-danger-bg);
+      color: var(--color-bg-danger);
     }
   }
 

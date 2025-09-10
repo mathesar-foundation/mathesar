@@ -92,9 +92,9 @@
     --cell-border-vertical: 1px solid var(--color-border-grid);
 
     --cell-bg-color-base: var(--color-bg-input);
-    --cell-bg-color-error: var(--semantic-danger-bg);
+    --cell-bg-color-error: var(--color-bg-danger);
     --cell-bg-color-header: var(--color-bg-header);
-    --cell-bg-color-processing: var(--semantic-warning-bg);
+    --cell-bg-color-processing: var(--color-bg-warning);
     --cell-bg-color-disabled: var(--color-bg-input-disabled);
     --cell-bg-color-row-hover: var(--color-bg-input-hover);
     --cell-bg-color-row-selected: var(--color-selection-40);
@@ -145,7 +145,7 @@
 
     /** Panel theming */
     --WithPanel__gap: var(--sm3);
-    --WithPanel__resizer-color: var(--semantic-help-icon);
+    --WithPanel__resizer-color: var(--color-fg-help);
     --WithPanel__resizer-size: var(--sm4);
   }
 

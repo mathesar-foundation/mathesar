@@ -34,7 +34,7 @@
 <style>
   .td {
     --max-column-width: 30ch;
-    --outline-color: var(--semantic-help-border);
+    --outline-color: var(--color-border-help);
     --separator-width: 7px;
     display: table-cell;
     vertical-align: middle;

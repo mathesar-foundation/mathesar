@@ -46,14 +46,14 @@
       text-align: inherit;
     }
     &.danger {
-      color: var(--semantic-danger-text);
+      color: var(--color-fg-danger);
 
       &:hover {
-        background-color: var(--semantic-danger-bg);
-        color: var(--semantic-danger-text);
+        background-color: var(--color-bg-danger);
+        color: var(--color-fg-danger);
       }
       .icon {
-        color: var(--semantic-danger-icon);
+        color: var(--color-fg-danger);
       }
     }
 

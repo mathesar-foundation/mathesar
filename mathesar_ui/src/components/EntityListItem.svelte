@@ -213,10 +213,10 @@
   .pending-message {
     font-size: var(--sm1);
     padding: 0.25rem 0.5rem;
-    border: 1px solid var(--semantic-warning-border);
+    border: 1px solid var(--color-border-warning);
     border-radius: var(--border-radius-l);
-    background: var(--semantic-warning-bg);
-    color: var(--semantic-warning-text);
+    background: var(--color-bg-warning);
+    color: var(--color-fg-warning);
   }
 
   .actions {

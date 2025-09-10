@@ -1,33 +1,5 @@
 @use 'sass:list';
 
-// Semantic colors
-@mixin generate-semantic-tokens($name, $base-color, $roles) {
-  @each $role, $role-delta in $roles {
-    $role-dh: map-get($role-delta, 'h_delta');
-    $role-ds: map-get($role-delta, 's_delta');
-    $role-dl: map-get($role-delta, 'l_delta');
-    $h-role-new: (hue($base-color) + $role-dh) % 360deg;
-    $s-role-new: max(0%, min(100%, saturation($base-color) + $role-ds));
-    $l-role-new: max(0%, min(100%, lightness($base-color) + $role-dl));
-    $role-variant: hsl($h-role-new, $s-role-new, $l-role-new);
-    --semantic-#{$name}-#{$role}: #{$role-variant};
-    @each $state, $state-delta in $semantic-states {
-      $state-dh: map-get($state-delta, 'h_delta');
-      $state-ds: map-get($state-delta, 's_delta');
-      $state-dl: map-get($state-delta, 'l_delta');
-      $h-state-new: (hue($role-variant) + $state-dh) % 360deg;
-      $s-state-new: max(0%, min(100%, saturation($role-variant) + $state-ds));
-      $l-state-new: max(0%, min(100%, lightness($role-variant) + $state-dl));
-      $state-variant: hsl($h-state-new, $s-state-new, $l-state-new);
-      --semantic-#{$name}-#{$role}-#{$state}: #{$state-variant};
-    }
-  }
-}
-
-@function _suffix($token) {
-  @return if($token == '', '', '-#{$token}');
-}
-
 @mixin generate-color-tokens(
   $name,
   $base-color,

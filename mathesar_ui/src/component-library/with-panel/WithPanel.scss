@@ -4,7 +4,7 @@
   width: 100%;
   --gap: var(--WithPanel__gap, 0);
   --resizer-size: var(--WithPanel__resizer-size, var(--WithPanel__gap, 0.3rem));
-  --resizer-color: var(--WithPanel__resizer-color, var(--semantic-help-icon));
+  --resizer-color: var(--WithPanel__resizer-color, var(--color-fg-help));
   --half-gap: calc(var(--gap) / 2);
   --resizer-half-size: calc(var(--resizer-size) / 2);
   --resizer-offset: calc(-1 * (var(--half-gap) + var(--resizer-half-size)));

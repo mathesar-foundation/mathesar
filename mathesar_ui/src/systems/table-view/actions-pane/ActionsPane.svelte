@@ -116,7 +116,7 @@
   .no-pk-warning {
     display: flex;
     align-items: center;
-    color: var(--semantic-warning-icon);
+    color: var(--color-fg-warning);
   }
 
   .aux-actions {

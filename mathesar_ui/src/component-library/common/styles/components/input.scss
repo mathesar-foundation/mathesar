@@ -38,8 +38,8 @@
   }
 
   &.has-error {
-    border-color: var(--semantic-danger-text);
-    background: var(--semantic-danger-bg);
+    border-color: var(--color-border-danger);
+    background: var(--color-bg-danger);
   }
 
   &.text-area {

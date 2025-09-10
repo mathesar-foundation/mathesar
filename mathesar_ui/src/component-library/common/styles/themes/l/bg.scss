@@ -37,20 +37,27 @@ $common-state-deltas: (
 
 $contextual: (
   'success': hsl(hue($success), 40%, 80%),
+  'success-strong': hsl(hue($success), 40%, 30%),
   'warning': hsl(hue($warning), 70%, 90%),
-  'danger': hsl(hue($danger), 100%, 40%),
-  'info': hsl(hue($info), 55%, 95%),
+  'warning-strong': hsl(hue($warning), 70%, 40%),
+  'danger': hsl(hue($danger), 80%, 92%),
+  'danger-strong': hsl(hue($danger), 80%, 55%),
+  'info': hsl(hue($info), 70%, 92%),
+  'info-strong': hsl(hue($info), 70%, 45%),
   'help': hsl(hue($help), 40%, 95%),
+  'help-strong': hsl(hue($help), 40%, 50%),
   'tip': hsl(hue($tip), 40%, 90%),
+  'tip-strong': hsl(hue($tip), 40%, 40%),
   'outcome': hsl(hue($outcome), 25%, 90%),
+  'outcome-strong': hsl(hue($outcome), 25%, 40%),
 );
 
 $contextual-state-deltas: (
-  'hover': 0 6 6,
-  'active': 0 2 10,
-  'focused': 5 5 3,
-  'disabled': 0 0 -20,
-  'muted': 0 0 -10,
+  'hover': 0 0 -3,
+  'active': 0 0 -8,
+  'focused': 0 0 -6,
+  'muted': 0 0 3,
+  'disabled': 0 0 6,
 );
 
 $exports: (

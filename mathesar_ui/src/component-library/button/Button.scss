@@ -149,25 +149,32 @@
 
     outcome: (
       normal: (
-        background: transparent,
-        border: 2px solid,
-        border-color: transparent,
-        color: var(--semantic-outcome-text),
+        background: color-mix(in srgb, var(--color-bg-outcome), transparent 60%),
+        border-color: var(--color-border-outcome),
+        color: var(--color-fg-outcome),
       ),
       hover: (
-        background:
-          color-mix(in srgb, var(--semantic-outcome-inner-bg), transparent 60%),
-        outline-color: var(--semantic-outcome-inner-border-hover),
-        color: var(--semantic-outcome-text-hover),
+        background: var(--color-bg-outcome-hover),
+        color: var(--color-fg-outcome-hover),
       ),
       focus: (
-        outline-color: var(--semantic-outcome-border-focused),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-outcome-focused),
+            transparent 60%
+          ),
       ),
       active: (
-        background:
-          color-mix(in srgb, var(--semantic-outcome-inner-bg), transparent 50%),
-        border-color: var(--semantic-outcome-inner-border-active),
-        color: var(--semantic-outcome-text-active),
+        background: color-mix(in srgb, var(--color-bg-outcome), transparent 50%),
+        border-color: var(--color-border-outcome-active),
+        color: var(--color-fg-outcome-active),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-outcome-focused),
+            transparent 60%
+          ),
       ),
     ),
 
@@ -207,24 +214,22 @@
       normal: (
         background: transparent,
         border-color: transparent,
-        color: var(--semantic-danger-text),
+        color: var(--color-fg-danger),
       ),
       hover: (
-        background:
-          color-mix(in srgb, var(--semantic-danger-inner-bg), transparent 60%),
-        border-color: var(--semantic-danger-inner-border-hover),
-        color: var(--semantic-danger-text-hover),
+        background: color-mix(in srgb, var(--color-bg-danger), transparent 60%),
+        border-color: var(--color-border-danger-hover),
+        color: var(--color-fg-danger-hover),
       ),
       focus: (
-        border-color: var(--semantic-danger-inner-border),
-        outline-color: var(--semantic-danger-inner-border-active),
+        border-color: var(--color-border-danger),
+        outline-color: var(--color-border-danger-active),
       ),
       active: (
-        background:
-          color-mix(in srgb, var(--semantic-danger-inner-bg), transparent 50%),
-        border-color: var(--semantic-danger-inner-border),
-        outline-color: var(--semantic-danger-inner-border-active),
-        color: var(--semantic-danger-text-active),
+        background: color-mix(in srgb, var(--color-bg-danger), transparent 50%),
+        border-color: var(--color-border-danger),
+        outline-color: var(--color-border-danger-active),
+        color: var(--color-fg-danger-active),
       ),
     ),
 
@@ -252,24 +257,24 @@
 
     tip: (
       normal: (
-        background: var(--semantic-tip-inner-bg),
-        border-color: var(--semantic-tip-inner-border),
-        color: var(--semantic-tip-inner-text),
+        background: var(--color-bg-tip),
+        border-color: var(--color-border-tip),
+        color: var(--color-fg-tip),
       ),
       hover: (
-        background: var(--semantic-tip-inner-bg-hover),
-        border-color: var(--semantic-tip-inner-border-hover),
-        color: var(--semantic-tip-inner-text-hover),
+        background: var(--color-bg-tip-hover),
+        border-color: var(--color-border-tip-hover),
+        color: var(--color-fg-tip-hover),
       ),
       focus: (
-        border-color: var(--semantic-tip-inner-border-hover),
-        outline-color: var(--semantic-tip-inner-border),
+        border-color: var(--color-border-tip-hover),
+        outline-color: var(--color-border-tip),
       ),
       active: (
-        background: var(--semantic-tip-inner-bg-active),
-        border-color: var(--semantic-tip-inner-border-active),
-        outline-color: var(--semantic-tip-inner-border),
-        color: var(--semantic-tip-inner-text-active),
+        background: var(--color-bg-tip-active),
+        border-color: var(--color-border-tip-active),
+        outline-color: var(--color-border-tip),
+        color: var(--color-fg-tip-active),
       ),
     ),
 

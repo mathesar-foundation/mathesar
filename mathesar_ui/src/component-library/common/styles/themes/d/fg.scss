@@ -59,6 +59,24 @@ $interactive-component-states: (
   'active': 0 0 18,
 );
 
+$contextual: (
+  'success': hsl(hue($success), 25%, 60%),
+  'warning': hsl(hue($warning), 40%, 60%),
+  'danger': hsl(hue($danger), 60%, 60%),
+  'info': hsl(hue($info), 35%, 60%),
+  'help': hsl(hue($help), 30%, 50%),
+  'tip': hsl(hue($tip), 20%, 60%),
+  'outcome': hsl(hue($outcome), 20%, 60%),
+);
+
+$contextual-state-deltas: (
+  'hover': 0 6 6,
+  'active': 0 2 10,
+  'focused': 5 5 3,
+  'disabled': 0 0 -20,
+  'muted': 0 0 -10,
+);
+
 $exports: (
   'stateless': (
     $static,
@@ -67,5 +85,6 @@ $exports: (
   'stateful': (
     ($levels, $level-state-delta),
     ($interactive-components, $interactive-component-states),
+    ($contextual, $contextual-state-deltas),
   ),
 );

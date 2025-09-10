@@ -22,7 +22,7 @@ body > .new-item-highlighter {
     .effect {
       background: color-mix(
         in srgb,
-        var(--semantic-outcome-bg),
+        var(--color-bg-outcome),
         transparent 30%
       );
       border-radius: 0.5rem;

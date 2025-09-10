@@ -46,7 +46,7 @@
     padding: 0.8rem;
   }
   .indicator {
-    color: var(--semantic-warning-text);
+    color: var(--color-fg-warning);
     padding: 0.2rem 0.5rem;
     border-radius: 500px;
     min-width: max-content;

@@ -1,7 +1,7 @@
 .progress {
   height: 10px;
   border-radius: 2px;
-  background: var(--semantic-info-bg);
+  background: var(--color-bg-info);
   position: relative;
   overflow: hidden;
 
@@ -10,6 +10,6 @@
     top: 0;
     left: 0;
     bottom: 0;
-    background: var(--semantic-info-icon);
+    background: var(--color-fg-info);
   }
 }

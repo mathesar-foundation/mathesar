@@ -78,7 +78,7 @@
     }
 
     .error {
-      color: var(--semantic-danger-text);
+      color: var(--color-fg-danger);
     }
   }
 </style>
