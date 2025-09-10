@@ -16,7 +16,9 @@ from db.records import (
 )
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
+from mathesar.utils.columns import get_download_link_columns
 from mathesar.utils.tables import get_table_record_summary_templates
+from mathesar.utils.download_links import get_download_links
 
 
 class OrderBy(TypedDict):
@@ -148,12 +150,15 @@ class RecordList(TypedDict):
         linked_record_smmaries: Information for previewing foreign key
             values, provides a map of foreign key to a text summary.
         record_summaries: Information for previewing returned records.
+        download_links: Information for viewing or downloading file
+            attachments.
     """
     count: int
     results: list[dict]
     grouping: GroupingResponse
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
+    download_links: Optional[dict]
 
     @classmethod
     def from_dict(cls, d):
@@ -163,6 +168,7 @@ class RecordList(TypedDict):
             grouping=d.get("grouping"),
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
+            download_links=d.get("download_links") or None
         )
 
 
@@ -269,6 +275,13 @@ def list_(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns,
+    ) or None
+
     return RecordList.from_dict(record_info)
 
 
@@ -313,6 +326,12 @@ def get(
                 **(table_record_summary_templates or {}),
             },
         )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns,
+    ) or None
     return RecordList.from_dict(record_info)
 
 
@@ -456,6 +475,10 @@ def search(
         search_params: Results are ranked and filtered according to the
                        objects passed here.
         limit: The maximum number of rows we'll return.
+        offset: The number of rows to skip before returning records from
+            following rows.
+        return_record_summaries: Whether to return summaries of retrieved
+            records.
 
     Returns:
         The requested records, along with some metadata.
@@ -471,6 +494,12 @@ def search(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns,
+    ) or None
     return RecordList.from_dict(record_info)
 
 

@@ -15,10 +15,10 @@ from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.rpc.users import get as get_user_info
 from mathesar import __version__
 
-from . import export, users
+from . import export, users, download_link
 
 
-__all__ = [export, users]
+__all__ = [export, users, download_link]
 
 
 def get_database_list(request):
