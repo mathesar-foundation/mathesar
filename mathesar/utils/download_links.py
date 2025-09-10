@@ -182,6 +182,10 @@ def _is_image(path):
     return mimetype_str.split("/")[0] == "image"
 
 
-def get_backends():
+def get_backends(public_info=False):
     with open(BACKEND_CONF_YAML, 'r') as f:
-        return yaml.full_load(f)
+        backend_dict = yaml.full_load(f)
+    if public_info is True:
+        return list(backend_dict.keys())
+    else:
+        return backend_dict
