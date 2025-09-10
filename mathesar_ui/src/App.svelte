@@ -61,7 +61,7 @@
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
-    --Match__highlight-color: var(--color-fg-highlight);
+    --Match__highlight-color: var(--color-bg-highlight);
 
     /* Typography variables */
     --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,

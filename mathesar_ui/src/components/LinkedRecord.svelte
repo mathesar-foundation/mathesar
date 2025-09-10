@@ -104,13 +104,13 @@
     border: 1px solid var(--color-record-fk-25);
   }
   .exact-match .background {
-    background: var(--color-fg-highlight);
+    background: var(--color-bg-highlight);
   }
   .no-match {
     text-decoration: line-through;
   }
   .no-match .background {
-    background: var(--color-fg-highlight-subtle);
+    background: var(--color-bg-highlight-subtle);
   }
   .record-page-link {
     color: inherit;
@@ -144,7 +144,7 @@
     padding: 0 0.3rem;
   }
   .linked-record.is-hovering-delete .background {
-    background: var(--color-fg-highlight-subtle);
+    background: var(--color-bg-highlight-subtle);
     opacity: 0.5;
   }
   .linked-record.is-hovering-delete .record-summary {

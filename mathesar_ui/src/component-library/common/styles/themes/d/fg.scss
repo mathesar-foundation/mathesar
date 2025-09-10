@@ -18,8 +18,6 @@ $static: (
   'dark': hsl(hue($fg-base), 0%, 0%),
   'light': hsl(hue($fg-base), 0%, 95%),
   'inverted': hsl(hue($base), 10%, 4%),
-  'highlight': hsl(38, 80%, 30%),
-  'highlight-subtle': hsl(38, 80%, 8%),
   'faint': hsl(hue($base), 15%, 15%),
 );
 

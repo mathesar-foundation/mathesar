@@ -10,6 +10,11 @@
 $base-hue: 42;
 $base-saturation: 10%;
 
+$static: (
+  'highlight': hsl(59, 98%, 52%),
+  'highlight-subtle': hsl(59, 84%, 90%),
+);
+
 $elevations: (
   'sunken-1': hsl($base-hue, $base-saturation, 92%),
   'base': hsl($base-hue, $base-saturation, 94%),
@@ -61,6 +66,9 @@ $contextual-state-deltas: (
 );
 
 $exports: (
+  'stateless': (
+    $static,
+  ),
   'stateful': (
     ($elevations, $common-state-deltas),
     ($components, $common-state-deltas),
