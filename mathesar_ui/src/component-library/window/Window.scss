@@ -7,7 +7,7 @@
   overflow: hidden;
   display: grid;
   grid-template: auto 1fr auto / auto;
-  box-shadow: 0 0 0.5em color-mix(in srgb, var(--color-shadow), transparent 30%);
+  box-shadow: 1px 3px 7px 1px var(--color-shadow-dark);
   position: relative;
   isolation: isolate;
 

@@ -2,11 +2,15 @@
 @import './colors/mixins.scss';
 
 $base: hsl(230, 4%, 2%);
-$color-shadow: hsl(hue($base), saturation($base), 18%);
+$color-shadow: hsla(hue($base), saturation($base), 18%, 0.5);
+$color-shadow-inverted: hsla(hue($base), 6%, 2%, 0.8);
 
 body.theme-dark {
   --mix-blend-mode: screen;
   --modal-overlay: rgba(0, 0, 0, 0.6);
 
   --color-shadow: #{$color-shadow};
+  --color-shadow-inverted: #{$color-shadow-inverted};
+  --color-shadow-light: #{$color-shadow};
+  --color-shadow-dark: hsl(0, 0%, 2%);
 }
