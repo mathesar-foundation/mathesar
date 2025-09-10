@@ -61,25 +61,6 @@
         border-color: var(--color-navigation-active);
         z-index: 1;
       }
-
-      > button.remove {
-        cursor: pointer;
-        padding: var(--sm3) var(--sm2);
-        border: none;
-        background: none;
-        margin: 0;
-        color: inherit;
-
-        &:hover {
-          background: var(--hover-background);
-        }
-      }
-
-      @media (hover: hover) {
-        &:not(:hover) > button.remove {
-          display: none;
-        }
-      }
     }
 
     &.fill-tab-width {

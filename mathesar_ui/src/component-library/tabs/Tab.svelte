@@ -3,13 +3,10 @@
 
   import type { Tab } from './TabContainerTypes';
 
-  const dispatch = createEventDispatcher();
-
   export let componentId: number;
   export let tab: Tab;
   export let totalTabs: number;
   export let isActive = false;
-  export let allowRemoval = false;
   export let uniformTabWidth = true;
   export let link: string | undefined = undefined;
 
@@ -41,15 +38,4 @@
   >
     <slot />
   </svelte:element>
-
-  {#if allowRemoval}
-    <button
-      type="button"
-      aria-label="remove"
-      class="remove"
-      on:click={(e) => dispatch('remove', e)}
-    >
-      &times;
-    </button>
-  {/if}
 </li>
