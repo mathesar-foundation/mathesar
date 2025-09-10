@@ -2,7 +2,6 @@ import base64
 import cairosvg
 import hashlib
 import io
-import itertools
 import json
 import mimetypes
 import posixpath
@@ -139,9 +138,20 @@ def build_links_from_json(json_strs):
             uri=v.get(URI),
             fsspec_kwargs=backends[b]["kwargs"]
         )
-        for v, b in itertools.product((json.loads(p) for p in json_strs), backends)
-        if v[MASH] == create_mash_for_uri(v.get(URI, ""), b)
+        for (v, b)
+        in (_build_valid_link_dict(p, backends) for p in json_strs)
+        if v is not None and b is not None
     ]
+
+
+def _build_valid_link_dict(result, backends):
+    try:
+        result_dict = json.loads(result)
+        for b in backends:
+            if result_dict[MASH] == create_mash_for_uri(result_dict[URI], b):
+                return result_dict, b
+    except Exception:  # We really don't want to stop execution here for anything
+        return None, None
 
 
 def _get_single_link_details(request, link):

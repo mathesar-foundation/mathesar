@@ -48,6 +48,8 @@ def test_get_download_links(monkeypatch):
     results = [
         {"1": "abcde", "strcolname": 23423, "files": dl.create_json_for_uri(uri_pic, BACKEND_KEY)},
         {"1": "defgh", "strcolname": 23412, "files": dl.create_json_for_uri(uri_pdf, BACKEND_KEY)},
+        {"1": "ghijk", "strcolname": 23451, "files": None},  # should not throw error; ignore
+        {"1": "ghijk", "strcolname": 23451, "files": '{"invalid": "blob"}'},  # should not throw error; ignore
     ]
 
     expect_pic_mash = dl.create_mash_for_uri(uri_pic, BACKEND_KEY)
