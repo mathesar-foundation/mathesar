@@ -1,5 +1,4 @@
-@import '../colors/base.scss';
-@import '../colors/mixins.scss';
+@use '../colors.scss' as colors;
 
 /**
  * These colors should only be used with the following properties:
@@ -41,20 +40,20 @@ $common-state-deltas: (
 );
 
 $contextual: (
-  'success': hsl(hue($success), 40%, 80%),
-  'success-strong': hsl(hue($success), 40%, 30%),
-  'warning': hsl(hue($warning), 70%, 90%),
-  'warning-strong': hsl(hue($warning), 70%, 40%),
-  'danger': hsl(hue($danger), 80%, 92%),
-  'danger-strong': hsl(hue($danger), 80%, 55%),
-  'info': hsl(hue($info), 70%, 92%),
-  'info-strong': hsl(hue($info), 70%, 45%),
-  'help': hsl(hue($help), 40%, 95%),
-  'help-strong': hsl(hue($help), 40%, 50%),
-  'tip': hsl(hue($tip), 40%, 90%),
-  'tip-strong': hsl(hue($tip), 40%, 40%),
-  'outcome': hsl(hue($outcome), 25%, 90%),
-  'outcome-strong': hsl(hue($outcome), 25%, 40%),
+  'success': hsl(hue(colors.$success), 40%, 80%),
+  'success-strong': hsl(hue(colors.$success), 40%, 30%),
+  'warning': hsl(hue(colors.$warning), 70%, 90%),
+  'warning-strong': hsl(hue(colors.$warning), 70%, 40%),
+  'danger': hsl(hue(colors.$danger), 80%, 92%),
+  'danger-strong': hsl(hue(colors.$danger), 80%, 55%),
+  'info': hsl(hue(colors.$info), 70%, 92%),
+  'info-strong': hsl(hue(colors.$info), 70%, 45%),
+  'help': hsl(hue(colors.$help), 40%, 95%),
+  'help-strong': hsl(hue(colors.$help), 40%, 50%),
+  'tip': hsl(hue(colors.$tip), 40%, 90%),
+  'tip-strong': hsl(hue(colors.$tip), 40%, 40%),
+  'outcome': hsl(hue(colors.$outcome), 25%, 90%),
+  'outcome-strong': hsl(hue(colors.$outcome), 25%, 40%),
 );
 
 $contextual-state-deltas: (

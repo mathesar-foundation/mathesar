@@ -136,12 +136,12 @@
     :global(.feedback-button) {
       --button-padding: var(--sm4) var(--sm2);
       --button-font-weight: var(--font-weight-bold);
-      --button-color: var(--color-brand-muted);
-      --button-hover-color: var(--color-brand);
-      --button-focus-color: var(--color-brand-active);
-      --button-focus-border-color: var(--color-brand-muted);
-      --button-active-color: var(--color-brand-active);
-      --button-active-border-color: var(--color-brand-muted);
+      --button-color: var(--color-brand-subtle);
+      --button-hover-color: var(--color-brand-subtle-hover);
+      --button-focus-color: var(--color-brand-subtle-focused);
+      --button-active-color: var(--color-brand-subtle-active);
+      --button-focus-border-color: var(--color-brand-subtle);
+      --button-active-border-color: var(--color-brand-subtle);
     }
   }
 

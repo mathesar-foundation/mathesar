@@ -184,7 +184,7 @@
     left: 0;
     right: calc(-1 * var(--border-width));
     bottom: calc(-1 * var(--separator-width));
-    background: var(--modal-overlay);
+    background: var(--color-modal-overlay);
     z-index: 1;
   }
 </style>

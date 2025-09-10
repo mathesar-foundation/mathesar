@@ -1,5 +1,4 @@
-@import '../colors/base.scss';
-@import '../colors/mixins.scss';
+@use '../colors.scss' as colors;
 
 /**
  * These colors should only be used with the following properties:
@@ -38,17 +37,17 @@ $level-state-delta: (
 $components: (
   'code': hsl(hue($fg-base), 80%, 4%),
   'header': hsl(hue($base), 0%, 20%),
-  'icon': hsl(hue($wisteria), 45%, 10%),
+  'icon': hsl(hue(colors.$wisteria), 45%, 10%),
   'label': hsl(hue($fg-base), 0%, 30%),
   'token': hsl(hue($base), 15%, 7%),
 );
 
 $interactive-components: (
   'control': hsl(hue($fg-base), 5%, 30%),
-  'navigation': hsl(hue($wisteria), 10%, 20%),
+  'navigation': hsl(hue(colors.$wisteria), 10%, 20%),
   'input': hsl(hue($fg-base), 0%, 0%),
-  'link': hsl(hue($fjord), 40%, 55%),
-  'visited-link': hsl(hue($wisteria), 50%, 30%),
+  'link': hsl(hue(colors.$fjord), 40%, 55%),
+  'visited-link': hsl(hue(colors.$wisteria), 50%, 30%),
 );
 
 $interactive-component-states: (
@@ -58,13 +57,13 @@ $interactive-component-states: (
 );
 
 $contextual: (
-  'success': hsl(hue($success), 40%, 5%),
-  'warning': hsl(hue($warning), 70%, 15%),
-  'danger': hsl(hue($danger), 100%, 35%),
-  'info': hsl(hue($info), 55%, 20%),
-  'help': hsl(hue($help), 40%, 25%),
-  'tip': hsl(hue($tip), 40%, 25%),
-  'outcome': hsl(hue($outcome), 25%, 25%),
+  'success': hsl(hue(colors.$success), 40%, 5%),
+  'warning': hsl(hue(colors.$warning), 70%, 15%),
+  'danger': hsl(hue(colors.$danger), 100%, 35%),
+  'info': hsl(hue(colors.$info), 55%, 20%),
+  'help': hsl(hue(colors.$help), 40%, 25%),
+  'tip': hsl(hue(colors.$tip), 40%, 25%),
+  'outcome': hsl(hue(colors.$outcome), 25%, 25%),
 );
 
 $contextual-state-deltas: (

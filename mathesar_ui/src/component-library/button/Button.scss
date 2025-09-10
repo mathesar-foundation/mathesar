@@ -99,7 +99,13 @@
         ),
       ),
       focus: (
-        border-color: var(--color-action-primary-80-hover),
+        background:
+          linear-gradient(
+            to bottom right,
+            var(--color-action-primary-80-focused),
+            var(--color-action-primary-60-focused)
+          ),
+        border-color: var(--color-action-primary-80-focused),
         outline-color: var(--color-action-primary-60),
       ),
       active: (
@@ -109,7 +115,7 @@
             var(--color-action-primary-80-active),
             var(--color-action-primary-60-active)
           ),
-        border-color: var(--color-action-primary-60-hover),
+        border-color: var(--color-action-primary-60-active),
         outline-color: var(--color-action-primary-40),
         box-shadow: var(--color-shadow) 0 1px 2px 0,
       ),
@@ -127,13 +133,17 @@
         box-shadow: (
           0 4px 6px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
           0 2px 4px -2px color-mix(in srgb, var(--color-shadow), transparent 10%),
-          0 0 0 1px color-mix(in srgb, var(--color-shadow), transparent 10%)
-            inset,
+          0 0 0 1px color-mix(in srgb, var(--color-shadow), transparent 70%),
         ),
       ),
       focus: (
         outline-color: var(--color-action-secondary-40),
         border-color: var(--color-action-secondary-40),
+        box-shadow: (
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
       ),
       active: (
         background: var(--color-action-secondary-25-active),

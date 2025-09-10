@@ -1,5 +1,4 @@
-@import '../colors/base.scss';
-@import '../colors/mixins.scss';
+@use '../colors.scss' as colors;
 
 $base-hue: 42;
 $base-saturation: 10%;
@@ -37,13 +36,13 @@ $components: (
 );
 
 $contextual: (
-  'success': hsl(hue($success), 25%, 20%),
-  'warning': hsl(hue($warning), 40%, 20%),
-  'danger': hsl(hue($danger), 60%, 20%),
-  'info': hsl(hue($info), 35%, 20%),
-  'help': hsl(hue($help), 30%, 10%),
-  'tip': hsl(hue($tip), 20%, 20%),
-  'outcome': hsl(hue($outcome), 20%, 20%),
+  'success': hsl(hue(colors.$success), 25%, 20%),
+  'warning': hsl(hue(colors.$warning), 40%, 20%),
+  'danger': hsl(hue(colors.$danger), 60%, 20%),
+  'info': hsl(hue(colors.$info), 35%, 20%),
+  'help': hsl(hue(colors.$help), 30%, 10%),
+  'tip': hsl(hue(colors.$tip), 20%, 20%),
+  'outcome': hsl(hue(colors.$outcome), 20%, 20%),
 );
 
 $contextual-state-deltas: (

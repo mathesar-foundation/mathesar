@@ -1,6 +1,10 @@
 @use 'sass:list';
 
-@mixin generate-color-tokens(
+@function _join_optional_token($token) {
+  @return if($token == '', '', '-#{$token}');
+}
+
+@mixin generate-intensity-based-color-tokens(
   $name,
   $base-color,
   $color-intensities,
@@ -19,12 +23,14 @@
   }
 
   @each $state, $delta in $color-states {
-    $dh: map-get($delta, 'h_delta');
-    $ds: map-get($delta, 's_delta');
-    $dl: map-get($delta, 'l_delta');
+    $dh: list.nth($delta, 1);
+    $ds: list.nth($delta, 2);
+    $dl: list.nth($delta, 3);
+
     $h-new: (hue($base-color) + $dh) % 360deg;
     $s-new: max(0%, min(100%, saturation($base-color) + $ds));
     $l-new: max(0%, min(100%, lightness($base-color) + $dl));
+
     $variant: hsl($h-new, $s-new, $l-new);
     --color-#{$name}-#{$state}: #{$variant};
 
@@ -35,14 +41,16 @@
   }
 }
 
-@mixin generate-new-color-tokens($prefix, $exports) {
+@mixin generate-color-tokens($category, $exports) {
   $stateless-color-group: map-get($exports, 'stateless');
   $stateful-color-group: map-get($exports, 'stateful');
+
+  $prefix: #{_join_optional_token($category)};
 
   @if $stateless-color-group {
     @each $stateless-colors in $stateless-color-group {
       @each $name, $color in $stateless-colors {
-        --color-#{$prefix}-#{$name}: #{$color};
+        --color#{$prefix}-#{$name}: #{$color};
       }
     }
   }
@@ -50,7 +58,7 @@
   @if $stateful-color-group {
     @each $stateful-colors, $state-deltas in $stateful-color-group {
       @each $name, $color in $stateful-colors {
-        --color-#{$prefix}-#{$name}: #{$color};
+        --color#{$prefix}-#{$name}: #{$color};
 
         @each $state, $delta in $state-deltas {
           $dh: list.nth($delta, 1);
@@ -62,8 +70,7 @@
           $l-new: max(0%, min(100%, lightness($color) + $dl));
 
           $variant: hsl($h-new, $s-new, $l-new);
-
-          --color-#{$prefix}-#{$name}-#{$state}: #{$variant};
+          --color#{$prefix}-#{$name}-#{$state}: #{$variant};
         }
       }
     }

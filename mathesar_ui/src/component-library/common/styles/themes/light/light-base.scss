@@ -1,0 +1,20 @@
+$base-hue: 42;
+$base-saturation: 10%;
+
+$shadows: (
+  'shadow': hsl($base-hue, $base-saturation, 82%),
+  'shadow-inverted': hsl(42, 20%, 98%),
+  'shadow-light': hsl(42, 20%, 98%),
+  'shadow-dark': hsl(0, 0%, 50%),
+);
+
+$static: (
+  'modal-overlay': rgba(0, 0, 0, 0.4),
+);
+
+$exports: (
+  'stateless': (
+    $shadows,
+    $static,
+  ),
+);
