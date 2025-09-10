@@ -83,7 +83,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--hover-background);
+    background: var(--color-navigation-20-hover);
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.2s ease;

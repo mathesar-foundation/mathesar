@@ -22,11 +22,11 @@
     user-select: none;
 
     &:hover {
-      background: var(--hover-background);
+      background: var(--color-navigation-5);
     }
 
     &.in-focus {
-      background: var(--hover-background);
+      background: var(--color-navigation-20);
     }
 
     &.disabled {
@@ -37,11 +37,12 @@
 
   &.multiple {
     li {
-      border: 1px solid transparent;
-
       &.selected {
-        border: 1px solid var(--active-background);
-        background: var(--active-background);
+        background: var(--color-navigation-20);
+
+        &:hover {
+          background: var(--color-navigation-25);
+        }
       }
     }
   }

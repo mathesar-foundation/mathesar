@@ -28,7 +28,7 @@
 
 <style>
   .db-card-needs-update {
-    background: var(--hover-background);
+    background: var(--color-navigation-20-hover);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
