@@ -1,10 +1,11 @@
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type {
   ColumnTypeOptions,
   RawColumnWithMetadata,
 } from '@mathesar/api/rpc/columns';
 import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
-import { iconConstraint, iconTableLink } from '@mathesar/icons';
+import { iconConstraint, iconFile, iconTableLink } from '@mathesar/icons';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
@@ -17,6 +18,7 @@ export function getColumnIconProps(column: {
   type: RawColumnWithMetadata['type'];
   type_options: RawColumnWithMetadata['type_options'];
   constraintsType?: ConstraintType[];
+  metadata?: ColumnMetadata | null;
 }): IconProps | IconProps[] {
   if (column.constraintsType?.includes('primary')) {
     return iconConstraint;
@@ -24,6 +26,10 @@ export function getColumnIconProps(column: {
 
   if (column.constraintsType?.includes('foreignkey')) {
     return iconTableLink;
+  }
+
+  if (column.metadata?.file_backend) {
+    return iconFile;
   }
 
   return getAbstractTypeForDbType(column.type).getIcon({

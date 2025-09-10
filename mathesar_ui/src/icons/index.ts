@@ -28,6 +28,7 @@ import {
   faEnvelope,
   faExternalLink,
   faExternalLinkAlt,
+  faFile,
   faFileAlt,
   faFilter,
   faFilterCircleXmark,
@@ -240,6 +241,7 @@ export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
 export const iconDescription: IconProps = { data: circleLowercaseIIcon };
 export const iconMathesarName: IconProps = { data: mathesarNameIcon };
 export const iconModalRecordView: IconProps = { data: modalRecordViewIcon };
+export const iconFile: IconProps = { data: faFile };
 
 // STATUSES
 
