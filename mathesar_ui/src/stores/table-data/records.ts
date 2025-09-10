@@ -13,6 +13,7 @@ import { api } from '@mathesar/api/rpc';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   Result as ApiRecord,
+  FileManifest,
   RecordsListParams,
   RecordsResponse,
   RecordsSearchParams,
@@ -181,6 +182,8 @@ export class RecordsData {
 
   linkedRecordSummaries = new AssociatedCellData<string>();
 
+  fileManifests = new AssociatedCellData<FileManifest>();
+
   grouping: Writable<RecordGrouping | undefined>;
 
   totalCount: Writable<number | undefined>;
@@ -329,6 +332,11 @@ export class RecordsData {
       if (response.record_summaries) {
         this.recordSummaries.reconstruct(
           Object.entries(response.record_summaries),
+        );
+      }
+      if (response.download_links) {
+        this.fileManifests.setFetchedValuesFromPrimitive(
+          response.download_links,
         );
       }
       this.fetchedRecordRows.set(

@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
+  import type { FileManifest } from '@mathesar/api/rpc/records';
   import Default from '@mathesar/components/Default.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import { Icon, iconExpandDown } from '@mathesar-component-library';
@@ -10,6 +11,7 @@
 
   const dispatch = createEventDispatcher();
 
+  export let fileManifest: FileManifest | undefined = undefined;
   export let isActive: boolean;
   export let value: unknown = undefined;
   export let disabled: boolean;
@@ -66,7 +68,7 @@
     <div class="value">
       {#if hasValue}
         <!-- TODO_FILES_UI -->
-        🙂
+        {fileManifest?.mimetype}
       {:else if value === undefined}
         <Default />
       {:else}
