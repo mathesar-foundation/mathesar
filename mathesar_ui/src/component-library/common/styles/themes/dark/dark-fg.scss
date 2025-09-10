@@ -54,6 +54,8 @@ $interactive-component-states: (
   'hover': 0 0 8,
   'focused': 0 0 12,
   'active': 0 0 18,
+  'muted': 0 0 -10,
+  'disabled': 0 0 -12,
 );
 
 $contextual: (
@@ -70,8 +72,8 @@ $contextual-state-deltas: (
   'hover': 0 6 6,
   'active': 0 2 10,
   'focused': 5 5 3,
-  'disabled': 0 0 -20,
   'muted': 0 0 -10,
+  'disabled': 0 0 -15,
 );
 
 $exports: (

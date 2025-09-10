@@ -30,7 +30,7 @@
 
   &:disabled {
     background: var(--color-bg-input-disabled);
-    color: var(--color-fg-base-disabled);
+    color: var(--color-fg-input-disabled);
   }
 
   &.read-only {
