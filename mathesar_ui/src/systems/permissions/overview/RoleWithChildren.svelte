@@ -47,12 +47,12 @@
       display: inline-flex;
       align-items: center;
       gap: var(--sm4);
-      color: var(--text-primary);
+      color: var(--color-fg-base);
       font-size: 1rem;
     }
     .member-count {
       font-size: var(--sm1);
-      color: var(--text-disabled);
+      color: var(--color-fg-base-disabled);
       margin-left: var(--sm4);
     }
     .members {
@@ -61,7 +61,7 @@
         display: flex;
         align-items: center;
         gap: var(--sm4);
-        color: var(--text-disabled);
+        color: var(--color-fg-base-disabled);
         font-size: var(--sm1);
 
         &:last-child {

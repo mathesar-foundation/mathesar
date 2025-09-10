@@ -9,56 +9,7 @@
 // ------------------------------------------
 
 $base: hsl(42, 10%, 95%);
-$text-base: hsl(0, 0%, 7%);
-
-// Special semantic colors
-$highlight: hsl(59, 84%, 90%);
-$highlight-elevated: hsl(59, 98%, 52%);
-$icon: hsl(hue($wisteria), 45%, 10%);
-$link: hsl(hue($fjord), 40%, 55%);
-$visited-link: hsl(hue($wisteria), 50%, 30%);
-
 $color-shadow: hsl(hue($base), saturation($base), 82%);
-
-// ------------------------------------------
-// Text
-// ------------------------------------------
-
-$text-colors: (
-  'code': hsl(hue($text-base), 80%, 4%),
-  'control': hsl(hue($text-base), 5%, 30%),
-  'disabled': hsl(hue($base), 0%, 30%),
-  'faint': hsl(hue($base), 15%, 85%),
-  'header': hsl(hue($base), 0%, 20%),
-  'highlight': $highlight,
-  'highlight-elevated': $highlight-elevated,
-  'navigation': hsl(hue($wisteria), 10%, 20%),
-  'icon': $icon,
-  'input': hsl(hue($text-base), 0%, 0%),
-  'label': hsl(hue($text-base), 0%, 30%),
-  'inverted': hsl(hue($base), 10%, 96%),
-  'light': hsl(hue($text-base), 0%, 100%),
-  'link': $link,
-  'visited-link': $visited-link,
-  'muted': hsl(hue($text-base), 0%, 50%),
-  'primary': $text-base,
-  'secondary': hsl(hue($text-base), 0%, 18%),
-  'tertiary': hsl(hue($base), 0%, 40%),
-  'token': hsl(hue($base), 15%, 7%),
-);
-
-$text-states: (
-  'hover': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': 12,
-  ),
-  'active': (
-    'h_delta': 0,
-    's_delta': 0,
-    'l_delta': 18,
-  ),
-);
 
 // ------------------------------------------
 // Utility boxes + buttons
@@ -139,10 +90,6 @@ $semantic-states: (
 // GENERATE COLORS FOR THEME
 // ------------------------------------------
 body {
-  @each $name, $color in $text-colors {
-    @include generate-text-tokens(#{$name}, $color, $text-states);
-  }
-
   @each $name, $color in $semantic-colors {
     @include generate-semantic-tokens(#{$name}, $color, $semantic-roles);
   }

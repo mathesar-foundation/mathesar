@@ -111,7 +111,7 @@
 <style lang="scss">
   .breadcrumb-item {
     --NameWithIcon__icon-opacity: 1;
-    --SchemaName__locked-schema-icon-color: var(--text-inverted);
+    --SchemaName__locked-schema-icon-color: var(--color-fg-inverted);
 
     display: flex;
     flex-shrink: 0;
@@ -132,8 +132,8 @@
     }
 
     :global(.postgres-keyword) {
-      color: var(--text-muted);
-      background: var(--text-disabled);
+      color: var(--color-fg-base-muted);
+      background: var(--color-fg-base-disabled);
       padding: var(--sm3) var(--sm2);
       border-radius: var(--border-radius-s);
     }

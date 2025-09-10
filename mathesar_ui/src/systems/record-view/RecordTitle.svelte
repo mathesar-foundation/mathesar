@@ -46,6 +46,6 @@
   }
   .table-name {
     font-size: var(--sm1);
-    color: var(--text-color-secondary);
+    color: var(--color-fg-subtle-1);
   }
 </style>

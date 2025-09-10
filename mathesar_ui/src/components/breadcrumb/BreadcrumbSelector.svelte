@@ -123,7 +123,7 @@
     border-top: 1px solid var(--color-border-section);
   }
   .entity-switcher .trigger {
-    color: var(--text-navigation);
+    color: var(--color-fg-navigation);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
@@ -132,7 +132,7 @@
     &:hover,
     &:active {
       background-color: var(--color-bg-raised-1-active);
-      color: var(--text-navigation-hover);
+      color: var(--color-fg-navigation-hover);
       border-color: var(--color-border-raised-1-active);
     }
   }

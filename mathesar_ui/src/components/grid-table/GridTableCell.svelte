@@ -13,7 +13,7 @@
     align-items: center;
     min-height: 100%;
     padding: var(--sm2) 1rem;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     border-bottom: 1px solid var(--color-border-row);
 
     &::before,
@@ -39,7 +39,7 @@
 
     &.gt-header {
       font-weight: var(--font-weight-medium);
-      color: var(--text-primary);
+      color: var(--color-fg-base);
       background: var(--color-bg-header);
 
       &::after {

@@ -71,10 +71,10 @@
     flex: 1 1 auto;
     display: block;
     padding: var(--sm6) var(--sm3);
-    color: var(--text-navigation);
+    color: var(--color-fg-navigation);
     text-decoration: none;
     position: relative;
-    --name-color: var(--text-navigation);
+    --name-color: var(--color-fg-navigation);
   }
 
   .hover-indicator {

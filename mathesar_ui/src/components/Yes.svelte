@@ -15,7 +15,7 @@
     display: block;
     font-size: 0.8em;
     background: var(--color-highlight-c-60);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     height: 1.8em;
     width: 1.8em;
     padding: 0.3em 0.4em;

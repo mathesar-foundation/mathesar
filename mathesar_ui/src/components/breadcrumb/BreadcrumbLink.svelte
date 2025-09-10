@@ -15,10 +15,10 @@
     display: block;
     overflow: hidden;
     text-decoration: none;
-    color: var(--text-navigation);
+    color: var(--color-fg-navigation);
     font-weight: var(--font-weight-medium);
   }
   .breadcrumb-link:hover a {
-    color: var(--text-navigation-active);
+    color: var(--color-fg-navigation-active);
   }
 </style>

@@ -61,7 +61,7 @@
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
-    --Match__highlight-color: var(--text-highlight-elevated);
+    --Match__highlight-color: var(--color-fg-highlight);
 
     /* Typography variables */
     --font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
@@ -99,7 +99,7 @@
     --cell-bg-color-row-hover: var(--color-bg-input-hover);
     --cell-bg-color-row-selected: var(--color-selection-40);
 
-    --cell-text-color-processing: var(--text-muted);
+    --cell-text-color-processing: var(--color-fg-base-muted);
 
     --page-padding-x: var(--lg1);
     --page-padding-y: var(--lg1);
@@ -123,7 +123,7 @@
     --table-title-header-height: 4.6428rem;
     --status-bar-padding: 0.5rem;
 
-    color: var(--text-primary);
+    color: var(--color-fg-base);
 
     --modal-z-index: 1;
     --dropdown-z-index: 1;
@@ -191,7 +191,7 @@
   }
 
   a {
-    color: var(--text-link);
+    color: var(--color-fg-link);
     text-decoration-thickness: 1px;
     text-underline-offset: 0.1em;
   }
@@ -202,7 +202,7 @@
     background: var(--color-bg-input);
     padding: 0.2em 0.3em;
     border-radius: 0.2em;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
   }
 
   ul {
@@ -237,7 +237,7 @@
     padding: 0.02em 0.3em;
     background: var(--color-bg-base);
     border-radius: 3px;
-    color: var(--text-tertiary);
+    color: var(--color-fg-subtle-2);
     font-weight: bold;
   }
 
@@ -245,7 +245,7 @@
   // https://github.com/mathesar-foundation/mathesar/issues/4558
   .input:not(:has(.token)) .null .postgres-keyword,
   .cell-wrapper:not(:has(.token)) .postgres-keyword {
-    color: var(--text-faint);
+    color: var(--color-fg-faint);
     font-weight: 300;
     background: transparent;
   }

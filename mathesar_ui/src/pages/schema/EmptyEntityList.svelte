@@ -32,7 +32,7 @@
     justify-content: center;
     text-align: center;
     padding: 1.5rem;
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
 
     > :global(* + *) {
       margin-top: 0.5rem;

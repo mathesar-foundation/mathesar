@@ -151,7 +151,7 @@
   }
 
   .pk-indicator {
-    color: var(--text-code);
+    color: var(--color-fg-code);
     display: flex;
     align-items: center;
     justify-content: center;

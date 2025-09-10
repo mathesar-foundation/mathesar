@@ -9,7 +9,7 @@
 
 <style>
   .type-icon {
-    color: var(--text-code);
+    color: var(--color-fg-code);
     display: inline-flex;
   }
 </style>

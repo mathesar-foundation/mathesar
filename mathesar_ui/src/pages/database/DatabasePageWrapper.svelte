@@ -224,7 +224,7 @@
   .database-info {
     font-size: 1rem;
     font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     margin-top: var(--sm5);
   }
   .connection-details {
@@ -234,7 +234,7 @@
     flex-wrap: wrap;
   }
   .database-info .label {
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
     margin-right: var(--sm5);
   }
   .actions-container {

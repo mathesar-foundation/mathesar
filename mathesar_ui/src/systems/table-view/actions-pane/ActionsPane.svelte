@@ -46,7 +46,7 @@
     icon: iconTable,
   }}
   --icon-fill-color="linear-gradient(135deg, var(--color-table), var(--color-table-80))"
-  --icon-stroke-color="var(--text-inverted)"
+  --icon-stroke-color="var(--color-fg-inverted)"
 >
   {#if isSelectable}
     <div class="quick-access">

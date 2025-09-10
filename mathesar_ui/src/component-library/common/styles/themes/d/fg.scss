@@ -1,0 +1,71 @@
+@import '../colors/base.scss';
+@import '../colors/mixins.scss';
+
+/**
+ * These colors should only be used with the following properties:
+ * - `color`
+ * - `fill`
+ * 
+ * In specific cases, they can be used as `background` for elements that
+ * can be considered as indications, or text-like.
+ *  - Such elements should not be containers with content within them.
+ */
+
+$base: hsl(230, 4%, 2%);
+$fg-base: hsl(0, 0%, 88%);
+
+$static: (
+  'dark': hsl(hue($fg-base), 0%, 0%),
+  'light': hsl(hue($fg-base), 0%, 95%),
+  'inverted': hsl(hue($base), 10%, 4%),
+  'highlight': hsl(38, 80%, 30%),
+  'highlight-subtle': hsl(38, 80%, 8%),
+  'faint': hsl(hue($base), 15%, 15%),
+);
+
+$levels: (
+  'base': $fg-base,
+  'subtle-1': hsl(hue($fg-base), 0%, 82%),
+  'subtle-2': hsl(hue($fg-base), 0%, 60%),
+);
+
+$level-state-delta: (
+  'hover': 0 0 10,
+  'focused': 0 0 15,
+  'active': 0 0 20,
+  'disabled': 0 0 -50,
+  'muted': 0 0 -30,
+);
+
+$components: (
+  'code': hsl(hue($fg-base), 80%, 96%),
+  'header': hsl(hue($fg-base), 0%, 80%),
+  'icon': hsl(hue($wisteria), 10%, 75%),
+  'label': hsl(hue($fg-base), 0%, 70%),
+  'token': hsl(hue($base), 85%, 93%),
+);
+
+$interactive-components: (
+  'control': hsl(hue($fg-base), 5%, 70%),
+  'navigation': hsl(hue($wisteria), 10%, 60%),
+  'input': hsl(hue($fg-base), 0%, 100%),
+  'link': hsl(hue($fjord), 50%, 80%),
+  'visited-link': hsl(hue($wisteria), 90%, 70%),
+);
+
+$interactive-component-states: (
+  'hover': 0 0 8,
+  'focused': 0 0 12,
+  'active': 0 0 18,
+);
+
+$exports: (
+  'stateless': (
+    $static,
+    $components,
+  ),
+  'stateful': (
+    ($levels, $level-state-delta),
+    ($interactive-components, $interactive-component-states),
+  ),
+);

@@ -14,6 +14,6 @@
 
 <style>
   .field-delimiter {
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
   }
 </style>

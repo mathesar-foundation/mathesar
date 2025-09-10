@@ -81,13 +81,13 @@
 
     :global(button.btn.selected) {
       background: var(--color-bg-input-fill);
-      color: var(--text-inverted);
+      color: var(--color-fg-inverted);
     }
 
     .tag-label {
       &.absolute-date {
         font-size: var(--sm2);
-        color: var(--text-muted);
+        color: var(--color-fg-base-muted);
       }
     }
   }

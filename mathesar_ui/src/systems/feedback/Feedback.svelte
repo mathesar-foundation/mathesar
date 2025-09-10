@@ -154,7 +154,7 @@
   .feedback-content {
     max-width: 28rem;
     padding: var(--sm3);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
   }
   .feedback-form {
     display: flex;
@@ -164,12 +164,12 @@
 
     .title {
       font-weight: var(--font-weight-medium);
-      color: var(--text-primary);
+      color: var(--color-fg-base);
     }
 
     .help {
       font-size: var(--sm1);
-      color: var(--text-primary);
+      color: var(--color-fg-base);
       margin-top: var(--sm6);
     }
   }
@@ -177,11 +177,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--sm3);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
 
     .title {
       font-weight: var(--font-weight-medium);
-      color: var(--text-primary);
+      color: var(--color-fg-base);
     }
   }
 </style>

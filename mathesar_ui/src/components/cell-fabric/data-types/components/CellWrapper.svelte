@@ -160,10 +160,10 @@
   }
   .exact-match {
     --Match__highlight-color: transparent;
-    --cell-background-color: var(--text-highlight-elevated);
+    --cell-background-color: var(--color-fg-highlight);
   }
   .substring-match {
-    --cell-background-color: var(--text-highlight);
+    --cell-background-color: var(--color-fg-highlight-subtle);
   }
   .no-match {
     text-decoration: line-through;

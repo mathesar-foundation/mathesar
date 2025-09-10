@@ -104,7 +104,7 @@
   .no-users-found-text {
     text-align: center;
     padding: 2rem;
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
     font-style: italic;
   }
 </style>

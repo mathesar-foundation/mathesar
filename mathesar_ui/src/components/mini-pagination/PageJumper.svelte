@@ -48,6 +48,6 @@
   }
   .help {
     font-size: var(--sm1);
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
   }
 </style>

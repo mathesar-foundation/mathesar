@@ -173,7 +173,7 @@
     border-bottom: 1px solid var(--color-border-base);
     box-shadow: var(--color-shadow) 0 1px 3px 0;
     overflow: hidden;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     font-size: 1rem;
   }
 
@@ -195,7 +195,7 @@
   }
 
   .user-switcher {
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;

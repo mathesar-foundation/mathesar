@@ -36,7 +36,7 @@
         > .upload-info {
           display: flex;
           justify-content: space-between;
-          color: var(--text-secondary);
+          color: var(--color-fg-subtle-1);
         }
       }
     }
@@ -75,7 +75,7 @@
           font-size: var(--lg1);
         }
         .desc {
-          color: var(--text-secondary);
+          color: var(--color-fg-subtle-1);
           margin-top: var(--sm6);
         }
       }

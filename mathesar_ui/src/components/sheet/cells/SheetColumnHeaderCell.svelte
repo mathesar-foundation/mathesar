@@ -29,6 +29,6 @@
     border-bottom: none;
     font-size: var(--sm1);
     overflow: hidden;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
   }
 </style>

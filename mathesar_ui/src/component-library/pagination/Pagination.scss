@@ -11,7 +11,7 @@ ul.pagination {
 
     button {
       .ellipsis {
-        color: var(--text-muted);
+        color: var(--color-fg-base-muted);
       }
 
       &:hover {
@@ -29,7 +29,7 @@ ul.pagination {
     &.active {
       .page {
         --button-background: var(--color-selection-20);
-        --button-color: var(--text-control);
+        --button-color: var(--color-fg-control);
         --button-border-color: var(--color-selection-80);
       }
     }
@@ -37,7 +37,7 @@ ul.pagination {
     &:hover {
       .page {
         --button-background: var(--color-selection-20-hover);
-        --button-color: var(--text-control-hover);
+        --button-color: var(--color-fg-control-hover);
         --button-border-color: var(--color-selection-25-hover);
       }
     }

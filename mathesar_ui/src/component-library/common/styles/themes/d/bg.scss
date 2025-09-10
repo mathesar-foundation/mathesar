@@ -27,7 +27,7 @@ $components: (
   'token': hsl($base-hue, $base-saturation, 20%),
 );
 
-$elevation-and-component-state-deltas: (
+$common-state-deltas: (
   'hover': 0 8 4,
   'active': 0 0 9,
   'focused': 0 0 2,
@@ -51,4 +51,12 @@ $contextual-state-deltas: (
   'focused': 5 5 3,
   'disabled': 0 0 -20,
   'muted': 0 0 -10,
+);
+
+$exports: (
+  'stateful': (
+    ($elevations, $common-state-deltas),
+    ($components, $common-state-deltas),
+    ($contextual, $contextual-state-deltas),
+  ),
 );

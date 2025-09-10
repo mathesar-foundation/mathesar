@@ -34,7 +34,7 @@
     align-items: center;
     justify-content: center;
     margin-right: var(--sm5);
-    color: var(--icon-fill-color, var(--text-icon));
+    color: var(--icon-fill-color, var(--color-fg-icon));
     background-color: var(--icon-bg-color, var(--color-navigation-40));
     border-radius: 50%;
     padding: var(--sm3);
@@ -47,20 +47,20 @@
     display: inline-flex;
     align-items: center;
     gap: var(--sm5);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
   }
 
   .title:hover {
     text-decoration: underline;
   }
   .description {
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
     flex: 1 0 auto;
   }
 
   .external-link-wrapper {
     margin-left: var(--sm3);
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
     display: inline-flex;
     align-items: center;
   }

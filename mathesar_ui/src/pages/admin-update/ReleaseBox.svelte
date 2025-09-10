@@ -82,7 +82,7 @@
 
   .type {
     margin-bottom: 1rem;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -106,7 +106,7 @@
 
   .logo {
     font-size: 1rem;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     padding: 0.5rem;
     display: flex;
     border: solid 1px var(--color-border-section);
@@ -115,19 +115,19 @@
 
   .name {
     font-size: var(--lg1);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     font-weight: var(--font-weight-medium);
   }
 
   .version {
     font-size: var(--lg2);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     font-weight: var(--font-weight-extra-bold);
   }
 
   .right {
     flex: 1 0 auto;
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
     display: flex;
     align-items: center;
     justify-content: flex-end;

@@ -108,7 +108,7 @@
 
     --EntityListItem__internal-accent-color: var(
       --EntityListItem__accent-color,
-      var(--text-icon)
+      var(--color-fg-icon)
     );
   }
 
@@ -184,7 +184,7 @@
     .detail {
       margin: var(--sm6) 0 0 var(--lg1);
       font-size: var(--sm1);
-      color: var(--text-disabled);
+      color: var(--color-fg-base-disabled);
     }
   }
   .entity-list-item.primary .link {
@@ -206,7 +206,7 @@
     overflow: hidden;
   }
   .description-icon {
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
     font-size: var(--sm1);
   }
 

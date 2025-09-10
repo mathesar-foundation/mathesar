@@ -98,9 +98,9 @@
   }
   .link-icon {
     padding: 0 var(--cell-padding);
-    color: var(--text-link);
+    color: var(--color-fg-link);
   }
   .link-icon:hover {
-    color: var(--text-link-hover);
+    color: var(--color-fg-link-hover);
   }
 </style>

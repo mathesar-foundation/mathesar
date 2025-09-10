@@ -191,7 +191,7 @@
 
 <style lang="scss">
   .page-header {
-    color: var(--text-header);
+    color: var(--color-fg-header);
   }
 
   .message-area {

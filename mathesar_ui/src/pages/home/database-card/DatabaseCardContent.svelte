@@ -61,18 +61,18 @@
   .display-name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
   }
 
   .db-name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-normal);
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
   }
 
   .detail {
     font-size: 1rem;
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
   }
 
   .caret-container {

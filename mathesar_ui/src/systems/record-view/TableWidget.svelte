@@ -98,7 +98,7 @@
     justify-content: space-between;
     align-items: center;
     overflow: hidden;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     margin-bottom: var(--sm1);
   }
   .top > :global(*) {

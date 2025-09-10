@@ -184,7 +184,7 @@
   }
 
   .no-results {
-    color: var(--text-color-muted);
+    color: var(--color-fg-base-muted);
   }
 
   .loading {

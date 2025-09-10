@@ -245,7 +245,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--text-muted);
+    color: var(--color-fg-base-muted);
     z-index: var(--z-index__record_selector__overlay);
     pointer-events: none;
   }
@@ -258,12 +258,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--text-muted);
+    color: var(--color-fg-base-muted);
   }
   .no-results {
     padding: 1.5rem;
     text-align: center;
-    color: var(--text-tertiary);
+    color: var(--color-fg-subtle-2);
   }
 
   .loading .stats {
@@ -289,7 +289,7 @@
       order: 3;
       text-align: center;
       font-size: var(--sm1);
-      color: var(--text-muted);
+      color: var(--color-fg-base-muted);
     }
     .add-button {
       order: 2;

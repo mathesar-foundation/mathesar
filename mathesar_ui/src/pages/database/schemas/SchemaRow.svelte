@@ -154,7 +154,7 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: var(--z-index-menu-trigger);
-    color: var(--text-light);
+    color: var(--color-fg-light);
   }
 
   .hyperlink-overlay {
@@ -173,7 +173,7 @@
   .description {
     font-weight: 400;
     font-size: 1rem;
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -190,7 +190,7 @@
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    color: var(--text-tertiary);
+    color: var(--color-fg-subtle-2);
     font-size: var(--sm1);
     margin-left: auto;
     margin-right: var(--sm3);
@@ -199,7 +199,7 @@
   .name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     flex: 1;
     word-break: break-word;
     hyphens: auto;

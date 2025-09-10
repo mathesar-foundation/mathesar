@@ -12,7 +12,10 @@
   class:target={which === 'target'}
   class:mapping={which === 'mapping'}
 >
-  <TableName {table} cssVariables={{ '--icon-color': 'var(--text-primary)' }} />
+  <TableName
+    {table}
+    cssVariables={{ '--icon-color': 'var(--color-fg-base)' }}
+  />
 </span>
 
 <style>
@@ -24,7 +27,7 @@
     align-items: center;
     font-size: 0.9em;
     line-height: 1.2;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     font-weight: var(--font-weight-semibold);
   }
 

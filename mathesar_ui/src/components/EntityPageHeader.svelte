@@ -78,11 +78,11 @@
         margin: 0;
         font-weight: var(--font-weight-bold);
         overflow: hidden;
-        color: var(--text-primary);
+        color: var(--color-fg-base);
       }
       .description {
         font-size: var(--sm1);
-        color: var(--text-secondary);
+        color: var(--color-fg-subtle-1);
         overflow: hidden;
       }
     }

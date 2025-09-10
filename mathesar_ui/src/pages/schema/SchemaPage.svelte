@@ -108,7 +108,7 @@
   }
 
   .description {
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
   }
 
   .action-buttons {

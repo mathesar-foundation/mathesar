@@ -69,7 +69,7 @@
     font-weight: var(--font-weight-medium);
   }
   .icon {
-    color: var(--icon-color, var(--text-icon, currentcolor));
+    color: var(--icon-color, var(--color-fg-icon, currentcolor));
     opacity: var(--NameWithIcon__icon-opacity, 0.75);
     vertical-align: bottom;
   }
@@ -80,11 +80,11 @@
     display: inline-flex;
     border-radius: 0.25em;
     padding: 0.2em;
-    background: var(--icon-color, var(--text-icon, currentcolor));
+    background: var(--icon-color, var(--color-fg-icon, currentcolor));
     vertical-align: -10%;
   }
   .name-with-icon.boxed .icon > :global(svg) {
-    color: var(--text-inverted);
+    color: var(--color-fg-inverted);
   }
   .name {
     color: var(--name-color, currentcolor);

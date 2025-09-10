@@ -17,7 +17,7 @@
 <style lang="scss">
   .table-count {
     font-size: 1rem;
-    color: var(--text-tertiary);
+    color: var(--color-fg-subtle-2);
     font-weight: var(--font-weight-medium);
     margin: 0;
   }

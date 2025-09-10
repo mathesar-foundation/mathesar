@@ -80,7 +80,7 @@
     padding: 0 var(--sm3);
     border-radius: var(--border-radius-l);
     white-space: nowrap;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     background-color: var(--color-bg-token);
     border: 1px solid var(--color-border-token);
   }

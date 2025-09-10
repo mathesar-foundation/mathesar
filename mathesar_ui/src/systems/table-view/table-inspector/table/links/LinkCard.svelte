@@ -56,14 +56,14 @@
   }
 
   .table-name {
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     font-weight: var(--font-weight-medium);
     padding: var(--sm4) var(--sm3);
     border-bottom: 0.5px solid var(--color-border-divider);
   }
 
   .detail {
-    color: var(--text-tertiary);
+    color: var(--color-fg-subtle-2);
     font-size: var(--sm1);
     line-height: 1.4;
     padding: var(--sm3) var(--sm3);

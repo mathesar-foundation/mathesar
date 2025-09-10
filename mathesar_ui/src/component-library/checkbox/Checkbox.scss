@@ -62,7 +62,7 @@
     -webkit-mask-image: var(--icon-minus);
   }
   &:disabled::before {
-    background-color: var(--text-primary);
+    background-color: var(--color-fg-base);
   }
 
   cursor: pointer;

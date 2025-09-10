@@ -20,11 +20,11 @@
 <style lang="scss">
   .form-branding {
     padding: var(--sm1);
-    color: var(--text-muted);
+    color: var(--color-fg-base-muted);
     a {
       text-decoration: none;
       &:hover {
-        color: var(--text-primary);
+        color: var(--color-fg-base);
         border-bottom: solid 2px var(--color-brand);
       }
     }

@@ -249,7 +249,7 @@
   }
 
   .placeholder {
-    color: var(--text-color-muted);
+    color: var(--color-fg-base-muted);
     font-style: italic;
   }
 
@@ -257,10 +257,10 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     padding: var(--padding);
   }
   .dropdown-button:hover {
-    color: var(--text-primary);
+    color: var(--color-fg-base);
   }
 </style>

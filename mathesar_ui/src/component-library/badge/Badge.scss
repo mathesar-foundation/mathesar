@@ -3,7 +3,7 @@
   border-radius: var(--badge-border-radius, var(--border-radius-m));
   background-color: var(--badge-background-color, var(--semantic-danger-bg));
   font-size: var(--badge-font-size, inherit);
-  color: var(--badge-text-color, var(--text-inverted));
+  color: var(--badge-text-color, var(--color-fg-inverted));
   padding: var(--badge-padding, 0.07rem 0.28rem);
   display: inline-block;
 }

@@ -66,7 +66,7 @@
     > div {
       position: relative;
       height: var(--sheet-header-height, 32px);
-      color: var(--text-primary);
+      color: var(--color-fg-base);
     }
 
     &.inherit-font-style {

@@ -102,6 +102,6 @@
     margin-top: 1rem;
   }
   .disabled {
-    color: var(--text-muted);
+    color: var(--color-fg-base-muted);
   }
 </style>

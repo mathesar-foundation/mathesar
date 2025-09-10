@@ -32,14 +32,14 @@
   .refresh-button {
     --button-background: var(--color-highlight-c-20);
     --button-border-color: var(--color-highlight-c-20);
-    --button-color: var(--text-control);
+    --button-color: var(--color-fg-control);
 
     --button-hover-background: var(--color-highlight-c-40-hover);
     --button-hover-border-color: var(--color-highlight-c-40-hover);
-    --button-hover-color: var(--text-control-hover);
+    --button-hover-color: var(--color-fg-control-hover);
 
     --button-active-background: var(--color-highlight-c-40-active);
     --button-active-border-color: var(--color-highlight-c-40-active);
-    --button-active-color: var(--text-control-active);
+    --button-active-color: var(--color-fg-control-active);
   }
 </style>

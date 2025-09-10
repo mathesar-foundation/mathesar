@@ -76,7 +76,7 @@
             var(--color-action-primary),
             var(--color-action-primary-80)
           ),
-        color: var(--text-light),
+        color: var(--color-fg-light),
         border-color: var(--color-action-primary-80),
         box-shadow: (
           0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 75%),
@@ -118,7 +118,7 @@
     secondary: (
       normal: (
         background: var(--color-action-secondary-20),
-        color: var(--text-control),
+        color: var(--color-fg-control),
         border-color: var(--color-action-secondary-25),
       ),
       hover: (
@@ -179,7 +179,7 @@
       ),
       hover: (
         background: var(--color-bg-control-hover),
-        color: var(--text-primary),
+        color: var(--color-fg-base),
       ),
       focus: (
         background: var(--color-bg-control-focused),
@@ -231,7 +231,7 @@
     action: (
       normal: (
         background: var(--color-action-secondary-10),
-        color: var(--text-navigation),
+        color: var(--color-fg-navigation),
         border-color: transparent,
       ),
       hover: (
@@ -275,15 +275,15 @@
 
     link: (
       normal: (
-        color: var(--text-link),
+        color: var(--color-fg-link),
         background: transparent,
         border-color: transparent,
       ),
       hover: (
-        color: var(--text-link-hover),
+        color: var(--color-fg-link-hover),
       ),
       active: (
-        color: var(--text-link-active),
+        color: var(--color-fg-link-active),
       ),
     ),
   );

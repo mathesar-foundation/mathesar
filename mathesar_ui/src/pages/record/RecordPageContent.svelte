@@ -154,7 +154,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   .table-name {
     grid-row: 2;
     grid-column: 1;
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
   }
   .form-status {
     grid-row: 1 / span 2;

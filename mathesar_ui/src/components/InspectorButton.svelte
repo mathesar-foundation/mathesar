@@ -27,7 +27,7 @@
   .inspector-button {
     --button-background: var(--color-navigation-15);
     --button-border-color: var(--color-navigation-20);
-    --button-color: var(--text-control);
+    --button-color: var(--color-fg-control);
     --button-box-shadow: 0 1px 2px
         color-mix(in srgb, var(--color-shadow), transparent 75%),
       0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 80%),

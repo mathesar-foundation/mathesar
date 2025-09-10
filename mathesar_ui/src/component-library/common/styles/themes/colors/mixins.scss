@@ -1,35 +1,5 @@
 @use 'sass:list';
 
-// Border colors
-@mixin generate-border-tokens($prefix, $base-color, $states) {
-  --border-#{$prefix}: #{$base-color};
-  @each $state, $delta in $states {
-    $dh: map-get($delta, 'h_delta');
-    $ds: map-get($delta, 's_delta');
-    $dl: map-get($delta, 'l_delta');
-    $h-new: (hue($base-color) + $dh) % 360deg;
-    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
-    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
-    $variant: hsl($h-new, $s-new, $l-new);
-    --border-#{$prefix}-#{$state}: #{$variant};
-  }
-}
-
-// Text colors
-@mixin generate-text-tokens($prefix, $base-color, $states) {
-  --text-#{$prefix}: #{$base-color};
-  @each $state, $delta in $states {
-    $dh: map-get($delta, 'h_delta');
-    $ds: map-get($delta, 's_delta');
-    $dl: map-get($delta, 'l_delta');
-    $h-new: (hue($base-color) + $dh) % 360deg;
-    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
-    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
-    $variant: hsl($h-new, $s-new, $l-new);
-    --text-#{$prefix}-#{$state}: #{$variant};
-  }
-}
-
 // Semantic colors
 @mixin generate-semantic-tokens($name, $base-color, $roles) {
   @each $role, $role-delta in $roles {
@@ -93,71 +63,37 @@
   }
 }
 
-@mixin generate-surface-color-tokens($surfaces, $states) {
-  @each $name, $cfg in $surfaces {
-    @each $role, $color in $cfg {
-      --color-surface-#{$name}#{_suffix($role)}: #{$color};
-    }
+@mixin generate-new-color-tokens($prefix, $exports) {
+  $stateless-color-group: map-get($exports, 'stateless');
+  $stateful-color-group: map-get($exports, 'stateful');
 
-    @each $state, $state-cfg in $states {
-      @each $role, $delta in $state-cfg {
-        $base-color: map-get($cfg, $role);
-
-        @if $base-color {
-          $dh: map-get($delta, 'h_delta');
-          $ds: map-get($delta, 's_delta');
-          $dl: map-get($delta, 'l_delta');
-
-          $h-new: (hue($base-color) + $dh) % 360deg;
-          $s-new: max(0%, min(100%, saturation($base-color) + $ds));
-          $l-new: max(0%, min(100%, lightness($base-color) + $dl));
-
-          $variant: hsl($h-new, $s-new, $l-new);
-
-          $role-seg: _suffix($role);
-          --color-surface-#{$name}-#{$state}#{_suffix($role)}: #{$variant};
-        }
+  @if $stateless-color-group {
+    @each $stateless-colors in $stateless-color-group {
+      @each $name, $color in $stateless-colors {
+        --color-#{$prefix}-#{$name}: #{$color};
       }
     }
   }
-}
 
-@mixin generate-bg-color-tokens($backgrounds, $state-deltas) {
-  @each $name, $bg in $backgrounds {
-    --color-bg-#{$name}: #{$bg};
+  @if $stateful-color-group {
+    @each $stateful-colors, $state-deltas in $stateful-color-group {
+      @each $name, $color in $stateful-colors {
+        --color-#{$prefix}-#{$name}: #{$color};
 
-    @each $state, $delta in $state-deltas {
-      $dh: list.nth($delta, 1);
-      $ds: list.nth($delta, 2);
-      $dl: list.nth($delta, 3);
+        @each $state, $delta in $state-deltas {
+          $dh: list.nth($delta, 1);
+          $ds: list.nth($delta, 2);
+          $dl: list.nth($delta, 3);
 
-      $h-new: (hue($bg) + $dh) % 360deg;
-      $s-new: max(0%, min(100%, saturation($bg) + $ds));
-      $l-new: max(0%, min(100%, lightness($bg) + $dl));
+          $h-new: (hue($color) + $dh) % 360deg;
+          $s-new: max(0%, min(100%, saturation($color) + $ds));
+          $l-new: max(0%, min(100%, lightness($color) + $dl));
 
-      $variant: hsl($h-new, $s-new, $l-new);
+          $variant: hsl($h-new, $s-new, $l-new);
 
-      --color-bg-#{$name}-#{$state}: #{$variant};
-    }
-  }
-}
-
-@mixin generate-border-color-tokens($borders, $state-deltas) {
-  @each $name, $border in $borders {
-    --color-border-#{$name}: #{$border};
-
-    @each $state, $delta in $state-deltas {
-      $dh: list.nth($delta, 1);
-      $ds: list.nth($delta, 2);
-      $dl: list.nth($delta, 3);
-
-      $h-new: (hue($border) + $dh) % 360deg;
-      $s-new: max(0%, min(100%, saturation($border) + $ds));
-      $l-new: max(0%, min(100%, lightness($border) + $dl));
-
-      $variant: hsl($h-new, $s-new, $l-new);
-
-      --color-border-#{$name}-#{$state}: #{$variant};
+          --color-#{$prefix}-#{$name}-#{$state}: #{$variant};
+        }
+      }
     }
   }
 }

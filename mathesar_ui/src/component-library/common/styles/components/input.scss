@@ -3,7 +3,7 @@
   align-items: center;
   border-radius: var(--border-radius-m);
   background: var(--input-element-background, var(--color-bg-input));
-  color: var(--input-element-color, var(--text-input));
+  color: var(--input-element-color, var(--color-fg-input));
   margin: 0;
   padding: var(--input-padding);
   line-height: var(--input-line-height);
@@ -16,7 +16,7 @@
   text-align: var(--input-element-text-align, 'left');
 
   &::placeholder {
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
   }
 
   &:focus {
@@ -30,7 +30,7 @@
 
   &:disabled {
     background: var(--color-bg-input-disabled);
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
   }
 
   &.read-only {

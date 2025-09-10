@@ -327,7 +327,7 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
   }
   .preview-header {
     margin: 0;
@@ -348,6 +348,6 @@
   .truncation-alert {
     margin: 1rem auto 0 auto;
     max-width: max-content;
-    color: var(--text-muted);
+    color: var(--color-fg-base-muted);
   }
 </style>

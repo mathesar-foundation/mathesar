@@ -35,7 +35,7 @@
     border-right: 1px solid var(--color-border-header);
     font-size: var(--sm2);
     padding: 0 1.5rem;
-    color: var(--text-muted);
+    color: var(--color-fg-base-muted);
 
     &[data-sheet-row-type='placeholder'] {
       cursor: pointer;

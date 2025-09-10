@@ -247,13 +247,13 @@
 
   .upload-format-help {
     line-height: 1.2;
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
     text-align: right;
     font-size: var(--sm1);
   }
 
   .processing-spinner {
-    color: var(--text-icon);
+    color: var(--color-fg-icon);
     font-size: 1.5rem;
     margin-bottom: 1rem;
   }

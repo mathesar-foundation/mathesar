@@ -31,7 +31,7 @@
   .connect-option {
     display: grid;
     --button-background: var(--color-bg-raised-3);
-    --button-color: var(--text-control);
+    --button-color: var(--color-fg-control);
     --button-border-color: var(--color-border-raised-3);
     --button-box-shadow: 0 1px 2px
         color-mix(in srgb, var(--color-shadow), transparent 5%),
@@ -72,10 +72,10 @@
   .header {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
+    color: var(--color-fg-base);
   }
   .description {
-    color: var(--text-tertiary);
+    color: var(--color-fg-subtle-2);
     margin-top: var(--sm4);
   }
 </style>

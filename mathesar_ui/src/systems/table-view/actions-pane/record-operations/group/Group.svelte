@@ -110,7 +110,7 @@
     }
 
     .muted {
-      color: var(--text-disabled);
+      color: var(--color-fg-base-disabled);
     }
   }
 </style>

@@ -38,7 +38,7 @@
       --MessageBox__border,
       4px solid var(--color-border-raised-1)
     );
-    color: var(--MessageBox__text-color, var(--text-primary));
+    color: var(--MessageBox__text-color, var(--color-fg-base));
   }
   .message-box:not(.full-width) {
     max-width: max-content;

@@ -146,7 +146,7 @@
     box-shadow: 0 0 0 0.1rem var(--color-shadow);
     outline: none;
     resize: none;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
     scrollbar-width: none;
   }
   .column-header-cell :global(.record-selector-input::-webkit-scrollbar) {
@@ -161,7 +161,7 @@
   .column-header-cell :global(textarea) {
     line-height: 1;
     padding: 0.6rem 0.4rem;
-    color: var(--text-primary);
+    color: var(--color-fg-base);
   }
   .column-header-cell :global(.linked-record-input) {
     position: relative;

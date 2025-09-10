@@ -82,7 +82,7 @@
       padding: 0 1rem;
       text-align: center;
       font-size: var(--lg2);
-      color: var(--text-muted);
+      color: var(--color-fg-base-muted);
     }
 
     .initial-content {

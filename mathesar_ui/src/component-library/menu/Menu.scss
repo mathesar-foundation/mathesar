@@ -7,7 +7,7 @@
   max-width: var(--Menu__max-width, 30rem);
 
   .menu-heading {
-    color: var(--text-disabled);
+    color: var(--color-fg-base-disabled);
     padding: 0 var(--sm3);
     margin-top: var(--sm3);
     font-weight: var(--font-weight-medium);
@@ -20,7 +20,7 @@
   }
 
   .menu-item {
-    color: var(--text-secondary);
+    color: var(--color-fg-subtle-1);
     display: flex;
     flex-grow: 1;
     align-items: center;
@@ -36,7 +36,7 @@
     &.menu-item-link:not(.disabled):hover,
     &.menu-item-button:not(.disabled):hover {
       background-color: var(--color-navigation-20-hover);
-      color: var(--text-navigation);
+      color: var(--color-fg-navigation);
     }
     &.menu-item-button {
       border: inherit;
@@ -58,7 +58,7 @@
     }
 
     &.disabled {
-      color: var(--text-disabled);
+      color: var(--color-fg-base-disabled);
       cursor: not-allowed;
       opacity: 0.6;
     }
@@ -75,7 +75,7 @@
       display: inline-flex;
       align-items: center;
       flex-grow: 0;
-      color: var(--icon-fill-color, var(--text-icon));
+      color: var(--icon-fill-color, var(--color-fg-icon));
     }
     > .control {
       --checkbox-margin-bottom: 0;
@@ -86,7 +86,7 @@
 
       &:hover {
         background-color: var(--color-navigation-20-hover);
-        color: var(--text-inverted);
+        color: var(--color-fg-inverted);
       }
     }
   }

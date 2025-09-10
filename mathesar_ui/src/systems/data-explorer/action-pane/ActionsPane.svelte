@@ -94,7 +94,7 @@
         }
       : undefined}
     --icon-fill-color="linear-gradient(135deg, var(--color-exploration), var(--color-exploration-40))"
-    --icon-stroke-color="var(--text-inverted)"
+    --icon-stroke-color="var(--color-fg-inverted)"
   >
     <div class="detail-wrapper">
       <div class="detail">
