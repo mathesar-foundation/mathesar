@@ -29,6 +29,7 @@ $components: (
   'supporting': hsl($base-hue, $base-saturation, 97%),
   'group': hsl($base-hue, $base-saturation, 99%),
   'input': hsl($base-hue, $base-saturation, 100%),
+  'filled-input': colors.$input-fill,
 );
 
 $common-state-deltas: (

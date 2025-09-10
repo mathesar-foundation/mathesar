@@ -80,7 +80,7 @@
     }
 
     :global(button.btn.selected) {
-      background: var(--color-bg-input-fill);
+      background: var(--color-bg-filled-input);
       color: var(--color-fg-inverted);
     }
 

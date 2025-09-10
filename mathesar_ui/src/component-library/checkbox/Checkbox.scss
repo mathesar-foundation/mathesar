@@ -21,12 +21,12 @@
     background-color: var(--color-bg-input-hover);
   }
   &:not(:disabled):hover {
-    background-color: var(--color-bg-input-hover-fill);
+    background-color: var(--color-bg-filled-input-hover);
   }
   &:checked,
   &:indeterminate {
     border: 0.05em solid var(--color-border-input);
-    background: var(--color-bg-input-fill);
+    background: var(--color-bg-filled-input);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 0.75em auto;

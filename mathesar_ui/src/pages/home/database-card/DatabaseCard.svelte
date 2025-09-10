@@ -46,13 +46,13 @@
     }
 
     &:has(.db-card-link:focus) {
-      outline: 2px solid var(--color-database-40);
+      outline: 2px solid var(--color-database-15);
       border: 1px solid var(--color-database-40);
       box-shadow: var(--card-focus-box-shadow);
     }
 
     &:has(.db-card-link:active) {
-      outline: 2px solid var(--color-database-40);
+      outline: 2px solid var(--color-database-15);
       border: 1px solid var(--color-database-40);
       background: var(--color-database-15-active);
       box-shadow: 0 1px 2px 0 var(--color-database-20-active);

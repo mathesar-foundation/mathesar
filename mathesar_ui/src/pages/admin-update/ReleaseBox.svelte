@@ -71,7 +71,8 @@
   .release {
     padding: var(--lg1);
     border-radius: var(--border-radius-l);
-    border: solid 1px var(--color-border-base);
+    border: solid 1px var(--color-border-raised-1);
+    background: var(--color-bg-raised-1);
   }
 
   .release.available-upgrade {

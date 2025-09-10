@@ -22,8 +22,8 @@ $static: (
 
 $levels: (
   'base': $fg-base,
-  'subtle-1': hsl(hue($fg-base), 0%, 20%),
-  'subtle-2': hsl(hue($fg-base), 0%, 30%),
+  'subtle-1': hsl(hue($fg-base), 0%, 25%),
+  'subtle-2': hsl(hue($fg-base), 0%, 35%),
 );
 
 $level-state-delta: (
@@ -38,7 +38,7 @@ $components: (
   'code': hsl(hue($fg-base), 80%, 4%),
   'header': hsl(hue($base), 0%, 20%),
   'icon': hsl(hue(colors.$wisteria), 45%, 10%),
-  'label': hsl(hue($fg-base), 0%, 30%),
+  'label': hsl(hue($fg-base), 0%, 25%),
   'token': hsl(hue($base), 15%, 7%),
 );
 
