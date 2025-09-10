@@ -13,6 +13,7 @@ import DateTime from './type-configs/datetime';
 import Duration from './type-configs/duration';
 import Email from './type-configs/email';
 import Fallback from './type-configs/fallback';
+import Json from './type-configs/json';
 import Money from './type-configs/money';
 import Number from './type-configs/number';
 import Text from './type-configs/text';
@@ -51,6 +52,7 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.Time]: Time,
   [abstractTypeCategory.DateTime]: DateTime,
   [abstractTypeCategory.Uuid]: Uuid,
+  [abstractTypeCategory.Json]: Json,
 };
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
@@ -238,6 +240,11 @@ const typesResponse: AbstractTypeResponse[] = [
     identifier: 'map',
     name: 'Map',
     db_types: [DB_TYPES.MSAR__MATHESAR_JSON_OBJECT],
+  },
+  {
+    identifier: 'json',
+    name: 'JSON',
+    db_types: [DB_TYPES.JSON, DB_TYPES.JSONB],
   },
   {
     identifier: 'array',

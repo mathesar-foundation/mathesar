@@ -98,6 +98,7 @@ import {
   createDatabaseIcon,
   databaseLineIcon,
   explorationIcon,
+  jsonIcon,
   mathesarNameIcon,
   modalRecordViewIcon,
   outcomeIcon,
@@ -256,6 +257,7 @@ export const iconUiTypeDate: IconProps = { data: faCalendarDay };
 export const iconUiTypeDateTime: IconProps = { data: faCalendarWeek };
 export const iconUiTypeDuration: IconProps = { data: faStopwatch };
 export const iconUiTypeEmail: IconProps = { data: faEnvelope };
+export const iconUiTypeJson: IconProps = { data: jsonIcon };
 export const iconUiTypeJsonArray: IconProps = { data: faClone };
 export const iconUiTypeJsonObject: IconProps = { data: faShapes };
 export const iconUiTypeMoney: IconProps = { data: faDollarSign };
