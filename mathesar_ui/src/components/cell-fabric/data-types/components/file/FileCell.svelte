@@ -9,6 +9,8 @@
 
   import CellWrapper from '../CellWrapper.svelte';
 
+  import AttachedFile from './AttachedFile.svelte';
+
   const dispatch = createEventDispatcher();
 
   export let fileManifest: FileManifest | undefined = undefined;
@@ -17,7 +19,6 @@
   export let disabled: boolean;
   export let isIndependentOfSheet: boolean;
 
-  let wasActiveBeforeClick = false;
   let cellWrapperElement: HTMLElement;
 
   $: hasValue = value !== undefined && value !== null;
@@ -45,7 +46,6 @@
   }
 
   function handleMouseDown() {
-    wasActiveBeforeClick = isActive;
     dispatch('activate');
   }
 
@@ -67,24 +67,17 @@
   <div class="file-cell" class:disabled>
     <div class="value">
       {#if hasValue}
-        <!-- TODO_FILES_UI -->
-        {fileManifest?.mimetype}
+        {#if fileManifest}
+          <AttachedFile manifest={fileManifest} />
+        {:else}
+          {value}
+        {/if}
       {:else if value === undefined}
         <Default />
       {:else}
         <Null />
       {/if}
     </div>
-    {#if !disabled}
-      <button
-        class="dropdown-button passthrough"
-        on:click={upload}
-        aria-label={$_('TODO_FILES_UI')}
-        title={$_('TODO_FILES_UI')}
-      >
-        <Icon {...iconExpandDown} />
-      </button>
-    {/if}
   </div>
 </CellWrapper>
 
