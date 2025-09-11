@@ -19,13 +19,25 @@
     color: var(--color-fg-base-disabled);
   }
 
-  &:focus {
-    border-color: var(--color-border-input-focused);
-    outline: 0;
-    box-shadow: var(
-      --input-element-focus-box-shadow,
-      0 0 2px 1px var(--color-shadow)
-    );
+  &:not(:disabled) {
+    &:focus {
+      border-color: var(--color-border-input-focused);
+    }
+
+    &:active {
+      border-color: var(--color-border-input-active);
+    }
+
+    &:focus,
+    &:active {
+      outline: 1px solid
+        color-mix(in srgb, var(--color-border-input-focused), transparent 70%);
+      outline-offset: 1px;
+      box-shadow: var(
+        --input-element-focus-box-shadow,
+        0 0 2px 1px var(--color-shadow)
+      );
+    }
   }
 
   &:disabled {

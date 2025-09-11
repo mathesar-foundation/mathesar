@@ -19,13 +19,9 @@
 
 <style lang="scss">
   .breadcrumb {
-    --breadcrumb-spacing: var(--sm5);
+    --breadcrumb-spacing: var(--sm6);
     display: flex;
     overflow: hidden;
     align-items: center;
-
-    > :global(* + *) {
-      margin-left: var(--breadcrumb-spacing);
-    }
   }
 </style>

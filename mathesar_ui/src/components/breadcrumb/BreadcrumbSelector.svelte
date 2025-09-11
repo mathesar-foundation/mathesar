@@ -129,11 +129,19 @@
     align-items: center;
     padding: var(--sm4);
 
-    &:hover,
-    &:active {
-      background-color: var(--color-bg-raised-1-active);
+    &:hover {
+      background-color: var(--color-bg-raised-1-hover);
       color: var(--color-fg-navigation-hover);
-      border-color: var(--color-border-raised-1-active);
+      border-color: var(--color-border-raised-1-hover);
+    }
+  }
+
+  .entity-switcher:has(button:focus) {
+    .trigger {
+      background-color: var(--color-bg-raised-1-focused);
+      color: var(--color-fg-navigation-focused);
+      border-color: var(--color-border-raised-1-focused);
+      box-shadow: inset 0 0 2px 1px var(--color-shadow);
     }
   }
 </style>

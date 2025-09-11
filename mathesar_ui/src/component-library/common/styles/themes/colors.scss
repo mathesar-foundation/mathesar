@@ -53,8 +53,8 @@ $color-intensities: (
 
 $utility-color-states: (
   'hover': 0 3 -3,
-  'focused': 0 0 -5,
-  'active': 0 0 -6,
+  'focused': 0 0 -4,
+  'active': 0 0 -7,
 );
 
 @mixin generate-utility-color-tokens($name, $color) {
