@@ -37,7 +37,7 @@ def test_get_download_links(monkeypatch):
             },
         }
 
-    monkeypatch.setattr(dl, "_get_backends", mock_backends)
+    monkeypatch.setattr(dl, "get_backends", mock_backends)
 
     # We use `create_json_for_uri`, since the main goal is to verify
     # that the output of that function matches up with assumptions of

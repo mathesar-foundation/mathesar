@@ -131,7 +131,7 @@ def build_links_from_json(json_strs):
       mash.
     - Creates download links for each.
     """
-    backends = _get_backends()
+    backends = get_backends()
     return [
         DownloadLink(
             mash=v.get(MASH),
@@ -182,6 +182,13 @@ def _is_image(path):
     return mimetype_str.split("/")[0] == "image"
 
 
-def _get_backends():
-    with open(BACKEND_CONF_YAML, 'r') as f:
-        return yaml.full_load(f)
+def get_backends(public_info=False):
+    try:
+        with open(BACKEND_CONF_YAML, 'r') as f:
+            backend_dict = yaml.full_load(f)
+    except FileNotFoundError:
+        backend_dict = {}
+    if public_info is True:
+        return list(backend_dict.keys())
+    else:
+        return backend_dict
