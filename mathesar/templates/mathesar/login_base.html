@@ -7,9 +7,9 @@
   <style type="text/css">
     body {
       padding: 4rem 2rem;
-      background: var(--layout-background-color);
+      background: var(--color-bg-base);
       --login-page-spacing: var(--lg5);
-      color: var(--text-color-primary);
+      color: var(--color-fg-base);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -36,23 +36,22 @@
       background-color: var(--card-background);
       padding: var(--login-page-spacing);
       border-radius: var(--border-radius-l);
-      border: 1px solid var(--card-border);
-      box-shadow: 0 4px 6px -1px var(--shadow-color),
-                 0 2px 4px -2px var(--shadow-color),
-                 0 0 0 1px var(--shadow-color-inset) inset;
+      box-shadow: 0 4px 6px -1px var(--color-shadow),
+                 0 2px 4px -2px var(--color-shadow),
+                 0 0 0 1px var(--color-shadow) inset;
     }
     .login-card h1 {
       font-weight: var(--font-weight-medium);
       font-size: var(--lg4);
       margin: 0 0 var(--lg3);
       text-align: center;
-      color: var(--text-color-primary);
+      color: var(--color-fg-base);
     }
     .login-card .labeled-input + .labeled-input {
       margin-top: var(--sm1);
     }
     .login-card .labeled-input .help.info {
-      color: var(--text-color-secondary);
+      color: var(--color-fg-subtle-2);
     }
     .login-card .labeled-input .help.error {
       color: var(--danger-color);
@@ -80,7 +79,7 @@
       font-weight: var(--font-weight-bold);
       font-size: var(--lg1);
       text-align: center;
-      color: var(--text-color-primary);
+      color: var(--color-fg-base);
     }
     .unsupported-device .warning-icon {
       margin-top: var(--sm3);
@@ -89,10 +88,10 @@
     }
     .login-card .language-selector {
       display: block;
-      background-color: var(--input-background);
-      border: 1px solid var(--input-border);
+      background-color: var(--color-bg-input);
+      border: 1px solid var(--color-border-input);
       border-radius: var(--border-radius-m);
-      color: var(--text-color-primary);
+      color: var(--color-fg-base);
       padding: var(--sm3);
       cursor: pointer;
     }
