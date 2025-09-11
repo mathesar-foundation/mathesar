@@ -28,17 +28,13 @@ ul.pagination {
 
     &.active {
       .page {
-        --button-background: var(--color-selection-20);
+        --button-background: var(--color-selection);
         --button-color: var(--color-fg-control);
-        --button-border-color: var(--color-selection-80);
+        --button-border-color: var(--color-selection);
       }
-    }
 
-    &:hover {
-      .page {
-        --button-background: var(--color-selection-20-hover);
-        --button-color: var(--color-fg-control-hover);
-        --button-border-color: var(--color-selection-25-hover);
+      &:hover {
+        --button-border-color: var(--color-selection-strong-1);
       }
     }
   }

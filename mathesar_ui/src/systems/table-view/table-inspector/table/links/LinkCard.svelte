@@ -28,7 +28,18 @@
   .link-card:hover {
     background: var(--color-bg-raised-2-hover);
     border: 1px solid var(--color-border-raised-2-hover);
-    box-shadow: 0 1px 2px 0 var(--color-shadow);
+  }
+
+  .link-card:focus {
+    background: var(--color-bg-raised-2-focused);
+    border: 1px solid var(--color-border-raised-2-focused);
+    box-shadow: 0 1px 4px 0 var(--color-shadow);
+  }
+
+  .link-card:active {
+    background: var(--color-bg-raised-2-active);
+    border: 1px solid var(--color-border-raised-2-active);
+    box-shadow: 0 1px 6px 0 var(--color-shadow);
   }
 
   .link-card.multiple {

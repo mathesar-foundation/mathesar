@@ -130,7 +130,7 @@
       border-radius: 2px;
 
       &:focus {
-        box-shadow: 0 0 0 3px var(--color-selection-80);
+        box-shadow: 0 0 0 3px var(--color-selection-strong-2);
       }
     }
 
@@ -146,7 +146,7 @@
     &.is-edit-mode {
       padding: 0px;
       box-shadow:
-        0 0 0 3px var(--color-selection-80),
+        0 0 0 3px var(--color-selection-strong-2),
         0 0 8px #000000 !important;
     }
 

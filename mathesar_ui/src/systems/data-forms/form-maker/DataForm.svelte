@@ -62,12 +62,14 @@
     --df__internal__z-index__field-with-some-selected-child: 1;
     --df__internal__z-index__field-outer-controls: 2;
     --df__internal__z-index__field-being-dragged: 3;
-    --df__internal__selected-element-bg: var(--color-selection-10);
-    --df__internal__selected-element-border-color: var(--color-selection-80);
+    --df__internal__selected-element-bg: var(--color-selection-subtle-2);
+    --df__internal__selected-element-border-color: var(
+      --color-selection-strong-2
+    );
     --df__internal__help-text-color: var(--color-fg-tip);
-    --df__internal__some-child-selected-border-color: var(--color-selection-40);
+    --df__internal__some-child-selected-border-color: var(--color-selection);
     --df__internal__immediate-child-selected-border-color: var(
-      --color-selection-60
+      --color-selection-strong-1
     );
 
     min-width: 15rem;

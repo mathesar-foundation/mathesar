@@ -97,7 +97,7 @@
     --cell-bg-color-processing: var(--color-bg-warning);
     --cell-bg-color-disabled: var(--color-bg-input-disabled);
     --cell-bg-color-row-hover: var(--color-bg-input-hover);
-    --cell-bg-color-row-selected: var(--color-selection-40);
+    --cell-bg-color-row-selected: var(--color-selection);
 
     --cell-text-color-processing: var(--color-fg-base-muted);
 
