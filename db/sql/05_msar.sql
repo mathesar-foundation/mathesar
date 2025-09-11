@@ -3628,19 +3628,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.build_col_drop_text(tab_id oid, col_id integer, col_delete boolean) RETURNS text AS $$/*
-Build an expression to drop a column from a table, returning the text of that expression.
-
-Args:
-  tab_id: The OID of the table containing the column whose nullability we'll alter.
-  col_id: The attnum of the column whose nullability we'll alter.
-  col_delete: If true, we drop the column. If false or null, we do nothing.
-*/
-SELECT CASE WHEN col_delete THEN 'DROP COLUMN ' || quote_ident(msar.get_column_name(tab_id, col_id)) END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.process_col_alter_jsonb(tab_id oid, col_alters jsonb) RETURNS text AS $$/*
 Turn a JSONB array representing a set of desired column alterations into a text expression.
 
@@ -3699,8 +3686,7 @@ SELECT string_agg(
       ', ',
       __msar.build_col_drop_default_expr(tab_id, col_id, new_type, new_default),
       __msar.build_col_retype_expr(tab_id, col_id, new_type),
-      __msar.build_col_default_expr(tab_id, col_id, old_default, new_default, new_type),
-      __msar.build_col_drop_text(tab_id, col_id, delete_)
+      __msar.build_col_default_expr(tab_id, col_id, old_default, new_default, new_type)
     ),
     ''
   ),
@@ -3763,6 +3749,7 @@ BEGIN
       (col_alter_obj ->> 'attnum')::smallint AS attnum,
       (col_alter_obj -> 'not_null')::boolean AS not_null,
       (col_alter_obj ->> 'name')::text AS new_name,
+      (col_alter_obj -> 'delete')::boolean AS delete_,
 
       col_alter_obj->>'description' AS comment_,
       __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment
@@ -3771,6 +3758,9 @@ BEGIN
   LOOP
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
+    IF col.delete_ THEN
+      PERFORM msar.drop_columns(tab_id, col.attnum);
+    END IF;
     IF col.has_comment THEN
       PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
     END IF;
