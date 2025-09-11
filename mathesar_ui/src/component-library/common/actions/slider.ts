@@ -95,7 +95,8 @@ function disableSelect(event: Event) {
 export default function slider(
   node: HTMLElement,
   options: Options,
-): ActionReturn {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): ActionReturn<any> {
   const opts = getFullDefaults(options);
   let startingValue = 0;
   let startingPosition = 0;

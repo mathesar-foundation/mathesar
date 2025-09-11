@@ -36,9 +36,9 @@ function getCustomizedRpcError({
 }: RpcError): string | ReturnableComponent {
   switch (code) {
     case NO_CONNECTION_AVAILABLE:
-      return component(NoConnection, {});
+      return component(NoConnection, {}) as ReturnableComponent;
     case PSYCOPG_OPERATIONAL_ERROR:
-      return component(UnableToConnect, { message });
+      return component(UnableToConnect, { message }) as ReturnableComponent;
     default:
       return message;
   }

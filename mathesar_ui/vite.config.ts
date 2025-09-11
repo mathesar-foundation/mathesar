@@ -1,35 +1,32 @@
-import path from 'path';
-
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import legacy from '@vitejs/plugin-legacy';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
 
-import * as data from './tsconfig.json';
+import tsconfig from './tsconfig.json';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function getAlias() {
-  const alias = [];
-  const { paths } = data.compilerOptions;
+  const alias: Array<{ find: string; replacement: string }> = [];
+  const paths: Record<string, string[]> = tsconfig.compilerOptions.paths;
   Object.keys(paths).forEach((key) => {
-    const find = (__dirname, key.replace('/*', ''));
-    const replacement = path.resolve(paths[key][0].replace('/*', ''));
-    alias.push({
-      find,
-      replacement,
-    });
+    const find = key.replace('/*', '');
+    const replacement = path.resolve(
+      __dirname,
+      paths[key][0].replace('/*', ''),
+    );
+    alias.push({ find, replacement });
   });
   return alias;
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   resolve: {
     alias: getAlias(),
   },
-  plugins: [
-    svelte(),
-    legacy({
-      targets: ['defaults', 'not IE 11'],
-    }),
-  ],
+  plugins: [svelte()],
   optimizeDeps: {
     exclude: ['tinro'],
   },
@@ -38,7 +35,7 @@ export default defineConfig({
     host: true,
   },
   build: {
-    manifest: true,
+    manifest: 'manifest.json',
     rollupOptions: {
       input: {
         main: './src/main.ts',
@@ -49,11 +46,11 @@ export default defineConfig({
     outDir: '../mathesar/static/mathesar/',
     emptyOutDir: true,
   },
-  base: '/static/',
+  base: mode === 'production' ? '/static/' : '/',
   test: {
     environment: 'jsdom',
     globals: true,
     testTimeout: 30000,
     setupFiles: ['vitest-setup.config.ts'],
   },
-});
+}));

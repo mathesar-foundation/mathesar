@@ -1,4 +1,4 @@
-import Diff from 'fast-diff';
+import fastDiff, { DELETE, INSERT } from 'fast-diff';
 
 /**
  * When text is modified, and that text contains a user's cursor, determine
@@ -20,13 +20,13 @@ export function getCursorPositionAfterReformat({
   oldCursorPosition: number;
   newText: string;
 }): number {
-  const diff = Diff(oldText, newText);
+  const diff = fastDiff(oldText, newText);
   let newCursorPosition = 0;
   diff.forEach((part) => {
     const [action] = part;
-    if (action === Diff.DELETE) {
+    if (action === DELETE) {
       newCursorPosition -= 1;
-    } else if (action === Diff.INSERT) {
+    } else if (action === INSERT) {
       newCursorPosition += 1;
     }
   });

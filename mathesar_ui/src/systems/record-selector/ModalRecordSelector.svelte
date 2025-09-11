@@ -44,8 +44,8 @@
       <div
         class="overlay"
         on:click={handleOverlayClick}
-        in:fade={{ duration: 150 }}
-        out:fade={{ duration: 150 }}
+        in:fade|global={{ duration: 150 }}
+        out:fade|global={{ duration: 150 }}
       />
     {/if}
     <div class="window-positioner" bind:this={windowPositionerElement}>

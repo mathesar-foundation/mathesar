@@ -78,7 +78,8 @@ function getFocusableElements(container: Element): Element[] {
   return elements.map(({ element }) => element);
 }
 
-export default function focusTrap(container: HTMLElement): ActionReturn {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function focusTrap(container: HTMLElement): ActionReturn<any> {
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key !== 'Tab') return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;

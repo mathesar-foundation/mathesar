@@ -34,7 +34,8 @@ interface Options {
 export function highlightNewItems(
   container: HTMLElement,
   options: Options = {},
-): ActionReturn {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): ActionReturn<any> {
   const wait = options.wait ?? 2000;
 
   const cleanupFns: (() => void)[] = [];

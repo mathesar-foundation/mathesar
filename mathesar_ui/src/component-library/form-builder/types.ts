@@ -102,5 +102,6 @@ export interface FormBuildConfiguration extends FormConfiguration {
   values: Readable<FormValues>;
   validationStore: Readable<FormValidationResult>;
   getValidationResult: () => FormValidationResult;
-  customComponents?: Record<string, typeof SvelteComponent>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  customComponents?: Record<string, typeof SvelteComponent<any>>;
 }

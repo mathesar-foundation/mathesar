@@ -14,7 +14,8 @@ import type { ComponentProps, ComponentType, SvelteComponent } from 'svelte';
  * [1]: https://github.com/microsoft/TypeScript/issues/37491
  */
 export interface ComponentAndProps<T = unknown> {
-  component: typeof SvelteComponent;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: typeof SvelteComponent<any>;
   props?: T;
 }
 

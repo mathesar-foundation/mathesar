@@ -12,7 +12,7 @@
 
   const dispatch = createEventDispatcher();
 
-  export let value: $$Props['value'];
+  export let value: $$Props['value'] = undefined;
 
   // The following are meant to be non-reactive
   export let type: DefinedProps['type'];

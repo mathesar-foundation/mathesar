@@ -1,0 +1,5 @@
+node_modules
+src
+tests
+esbuild.js
+COMPARE.md

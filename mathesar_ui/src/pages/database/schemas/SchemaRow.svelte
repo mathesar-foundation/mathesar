@@ -77,7 +77,6 @@
     {/if}
   </div>
 
-  <!-- svelte-ignore a11y-missing-content -->
   <a
     {href}
     class="hyperlink-overlay"

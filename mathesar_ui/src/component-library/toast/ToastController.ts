@@ -34,7 +34,8 @@ interface ToastEntryProps {
   /**
    * If provided, will be used in place of `title` and `message`.
    */
-  contentComponent?: typeof SvelteComponent;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  contentComponent?: typeof SvelteComponent<any>;
   contentComponentProps?:
     | Readable<Record<string, unknown>>
     | Record<string, unknown>;

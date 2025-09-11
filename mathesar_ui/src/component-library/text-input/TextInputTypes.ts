@@ -1,12 +1,13 @@
+import type { HTMLInputAttributes } from 'svelte/elements';
+
 import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInputTypes';
-import type {
-  CssVariablesObj,
-  SimplifiedInputProps,
-} from '@mathesar-component-library-dir/commonTypes';
+import type { CssVariablesObj } from '@mathesar-component-library-dir/commonTypes';
 
 import type { IconProps } from '../types';
 
-export interface TextInputProps extends SimplifiedInputProps, BaseInputProps {
+export interface TextInputProps
+  extends Omit<HTMLInputAttributes, 'id' | 'disabled'>,
+    BaseInputProps {
   value?: string | null;
   element?: HTMLInputElement;
   hasError?: boolean;

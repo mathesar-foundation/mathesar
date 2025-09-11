@@ -8,7 +8,6 @@
   export let selectionIndex: number | undefined = undefined;
   export let setSelectionIndex: (i: number) => void;
 
-  $: element = href ? 'a' : 'div';
   $: isSelected = selectionIndex === index;
 
   function handleClick(event: MouseEvent) {
@@ -27,17 +26,28 @@
   }
 </script>
 
-<svelte:element
-  this={element}
-  class="passthrough tr"
-  {href}
-  on:click={handleClick}
-  class:selected={isSelected}
-  on:mousemove={handleMouseMove}
-  tabindex="-1"
->
-  <slot />
-</svelte:element>
+{#if href}
+  <a
+    class="passthrough tr"
+    {href}
+    on:click={handleClick}
+    class:selected={isSelected}
+    on:mousemove={handleMouseMove}
+    tabindex="-1"
+  >
+    <slot />
+  </a>
+{:else}
+  <div
+    class="passthrough tr"
+    on:click={handleClick}
+    class:selected={isSelected}
+    on:mousemove={handleMouseMove}
+    tabindex="-1"
+  >
+    <slot />
+  </div>
+{/if}
 
 <style>
   .tr {

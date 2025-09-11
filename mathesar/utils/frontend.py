@@ -21,13 +21,9 @@ def get_manifest_data():
     module_data = raw_data['src/main.ts']
     manifest_data['module_css'] = [filename for filename in module_data['css']]
     manifest_data['module_js'] = module_data['file']
-    legacy_data = raw_data['src/main-legacy.ts']
-    manifest_data['legacy_polyfill_js'] = raw_data['vite/legacy-polyfills-legacy']['file']
-    manifest_data['legacy_js'] = legacy_data['file']
 
     for locale, _ in settings.LANGUAGES or []:
         manifest_data[f"language_{locale}"] = raw_data[f'src/i18n/languages/{locale}/index.ts']
-        manifest_data[f"language_{locale}_legacy"] = raw_data[f'src/i18n/languages/{locale}/index-legacy.ts']
 
     # Cache data for 1 hour
     cache.set('manifest_data', manifest_data, 60 * 60)

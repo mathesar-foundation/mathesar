@@ -10,7 +10,8 @@ interface Options {
 export default function clickOffBounds(
   node: Element,
   options: Options,
-): ActionReturn {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): ActionReturn<any> {
   let { callback, references } = options;
 
   function outOfBoundsListener(event: Event) {

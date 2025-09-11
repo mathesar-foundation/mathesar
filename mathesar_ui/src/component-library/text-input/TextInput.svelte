@@ -4,6 +4,7 @@
     makeStyleStringFromCssVariables,
     mergeStyleStrings,
   } from '@mathesar-component-library-dir/common/utils/styleUtils';
+  import type { LabelController } from '@mathesar-component-library-dir/label';
 
   import type { TextInputProps } from './TextInputTypes';
 
@@ -28,13 +29,20 @@
   export let id: $$Props['id'] = undefined;
 
   export let cssVariables: $$Props['cssVariables'] = undefined;
+
+  export let disabled = false;
+
+  export let labelController: LabelController | undefined = undefined;
+
+  export let focusOnMount: boolean | undefined = undefined;
+
   $: styleStringFromCssVariables = cssVariables
     ? makeStyleStringFromCssVariables(cssVariables)
     : '';
   $: style = mergeStyleStrings(styleStringFromCssVariables, $$restProps.style);
 </script>
 
-<BaseInput {...$$restProps} bind:id />
+<BaseInput bind:id {labelController} {disabled} {focusOnMount} />
 
 <input
   bind:this={element}

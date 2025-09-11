@@ -35,7 +35,7 @@
     onFinish([...getErrors(responses)]);
     try {
       await refreshDatabaseList();
-    } catch (e) {
+    } catch {
       // swallow errors here (I'm cutting corners)
     }
   }

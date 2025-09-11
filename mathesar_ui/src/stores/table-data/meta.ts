@@ -284,7 +284,7 @@ export class Meta {
   static fromSerialization(s: string): Meta | undefined {
     try {
       return new Meta(deserializeMetaProps(s));
-    } catch (e) {
+    } catch {
       return undefined;
     }
   }

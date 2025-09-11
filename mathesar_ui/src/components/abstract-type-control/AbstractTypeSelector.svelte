@@ -54,7 +54,7 @@
   }
 </script>
 
-<LabeledInput label={$_('data_type')} layout={'stacked'}>
+<LabeledInput label={$_('data_type')} layout="stacked">
   <Select
     options={allowedTypeConversions}
     value={selectedAbstractType}

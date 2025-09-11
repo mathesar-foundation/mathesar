@@ -77,7 +77,7 @@ export class ReleaseData {
       const deserialized = JSON.parse(serialized) as ReleaseData;
       const { current, latest } = deserialized;
       return new ReleaseData({ current, latest });
-    } catch (e) {
+    } catch {
       return undefined;
     }
   }

@@ -78,13 +78,11 @@
   }
 
   function setRecordSummary(recordId: string, _recordSummary: string) {
-    if (linkedRecordSummaries) {
-      linkedRecordSummaries.addBespokeRecordSummary({
-        columnId: String(column.id),
-        recordId,
-        recordSummary: _recordSummary,
-      });
-    }
+    linkedRecordSummaries.addBespokeRecordSummary({
+      columnId: String(column.id),
+      recordId,
+      recordSummary: _recordSummary,
+    });
   }
 
   $: disabled = typeChangeState?.state === 'processing' || !$currentRoleOwns;

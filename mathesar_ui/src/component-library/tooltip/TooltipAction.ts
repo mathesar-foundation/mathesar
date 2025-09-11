@@ -8,7 +8,8 @@ type Content = string | string[] | ComponentAndProps;
 export default function tooltip(
   node: HTMLElement,
   content: Content,
-): ActionReturn {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): ActionReturn<any> {
   const tooltipComponent = new AttachableDropdown({
     props: {
       trigger: node,

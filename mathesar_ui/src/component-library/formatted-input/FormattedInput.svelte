@@ -65,8 +65,9 @@
    */
   let lastCleanValue: T | null | undefined;
 
-  $: format = (v: T | null | undefined) =>
-    v === undefined || v === null ? '' : formatter.format(v);
+  function format(v: T | null | undefined) {
+    return v === undefined || v === null ? '' : formatter.format(v);
+  }
 
   function handleParentValueChange(newParentValue: T | null | undefined) {
     formattedValue = format(newParentValue);

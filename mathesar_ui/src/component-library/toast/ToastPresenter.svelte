@@ -8,12 +8,13 @@
   import ToastItem from './ToastItem.svelte';
 
   export let entries: Readable<ToastEntry[]>;
-  export let toastItemComponent: typeof SvelteComponent = ToastItem;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export let toastItemComponent: typeof SvelteComponent<any> = ToastItem;
 </script>
 
 <ul class="toast-presenter">
   {#each $entries as entry (entry.id)}
-    <li in:fly={{ x: 256 }} out:fade animate:flip={{ duration: 200 }}>
+    <li in:fly|global={{ x: 256 }} out:fade|global animate:flip={{ duration: 200 }}>
       <svelte:component this={toastItemComponent} {...$$restProps} {entry} />
     </li>
   {/each}
