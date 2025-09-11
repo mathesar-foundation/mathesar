@@ -93,7 +93,7 @@
       header {
         padding: var(--sm3);
         background: var(--color-bg-header);
-        font-weight: 590;
+        font-weight: var(--font-weight-bold);
       }
       .content {
         padding: var(--lg1);

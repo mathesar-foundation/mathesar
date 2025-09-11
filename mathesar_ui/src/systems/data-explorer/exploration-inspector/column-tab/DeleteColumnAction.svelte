@@ -59,7 +59,7 @@
   <Tooltip enabled={disallowColumnDeletion}>
     <Button
       slot="trigger"
-      appearance="danger"
+      appearance="action"
       disabled={disallowColumnDeletion}
       on:click={deleteSelectedColumn}
     >
