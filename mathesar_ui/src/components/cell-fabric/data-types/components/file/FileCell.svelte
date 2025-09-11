@@ -4,12 +4,13 @@
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import Default from '@mathesar/components/Default.svelte';
-  import Null from '@mathesar/components/Null.svelte';
-  import { Icon, iconExpandDown } from '@mathesar-component-library';
+  import { Button, Icon } from '@mathesar-component-library';
 
   import CellWrapper from '../CellWrapper.svelte';
 
   import AttachedFile from './AttachedFile.svelte';
+  import { ROW_HEIGHT_PX } from '@mathesar/geometry';
+  import { iconAddNew } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
 
@@ -64,48 +65,45 @@
   hasPadding={false}
   bind:element={cellWrapperElement}
 >
-  <div class="file-cell" class:disabled>
-    <div class="value">
-      {#if hasValue}
-        {#if fileManifest}
-          <AttachedFile manifest={fileManifest} />
-        {:else}
-          {value}
-        {/if}
-      {:else if value === undefined}
-        <Default />
+  <div class="file-cell" class:disabled style={`height: ${ROW_HEIGHT_PX}px;`}>
+    {#if hasValue}
+      {#if fileManifest}
+        <AttachedFile manifest={fileManifest} canOpen={isActive} />
       {:else}
-        <Null />
+        {value}
       {/if}
-    </div>
+    {:else if value === undefined}
+      <div class="centered">
+        <Default />
+      </div>
+    {:else}
+      <div class="add">
+        {#if isActive}
+          <Button on:click={upload}>
+            <Icon {...iconAddNew} />
+          </Button>
+        {/if}
+      </div>
+    {/if}
   </div>
 </CellWrapper>
 
 <style>
   .file-cell {
-    flex: 1 0 auto;
-    display: flex;
-    justify-content: space-between;
-  }
-  .value {
-    padding: var(--cell-padding);
-    align-self: center;
+    display: grid;
     overflow: hidden;
-    width: max-content;
-    max-width: 100%;
-    color: var(--text-color);
+    padding: 1px;
   }
-  .disabled .value {
-    padding-right: var(--cell-padding);
-  }
-  .dropdown-button {
-    cursor: pointer;
-    padding: 0 var(--cell-padding);
-    display: flex;
+  .centered {
+    display: grid;
     align-items: center;
-    color: var(--text-color-muted);
+    justify-content: start;
+    padding-inline: var(--cell-padding);
   }
-  .dropdown-button:hover {
-    color: var(--text-color);
+  .add {
+    display: grid;
+    align-items: center;
+    justify-content: end;
+    padding-inline: var(--cell-padding);
   }
 </style>
