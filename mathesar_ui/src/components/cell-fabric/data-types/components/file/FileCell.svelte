@@ -5,6 +5,7 @@
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import Default from '@mathesar/components/Default.svelte';
   import { Button, Icon } from '@mathesar-component-library';
+  import { fileViewerContext } from '@mathesar/components/file-viewer/FileViewerContext';
 
   import CellWrapper from '../CellWrapper.svelte';
 
@@ -13,6 +14,7 @@
   import { iconAddNew } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
+  const fileViewer = fileViewerContext.get();
 
   export let fileManifest: FileManifest | undefined = undefined;
   export let isActive: boolean;
@@ -23,6 +25,7 @@
   let cellWrapperElement: HTMLElement;
 
   $: hasValue = value !== undefined && value !== null;
+  $: canOpen = isActive;
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
@@ -50,6 +53,16 @@
     dispatch('activate');
   }
 
+  function openFileViewer() {
+    // TODO_FILES_UI: Fix click behavior. Clicking on the thumbnail of an
+    // inactive cell should _not_ open the file viewer.
+
+    if (!fileManifest) return;
+    if (!canOpen) return;
+    if (!fileViewer) return;
+    fileViewer.open(fileManifest);
+  }
+
   function upload() {
     // TODO_FILES_UI
   }
@@ -68,7 +81,7 @@
   <div class="file-cell" class:disabled style={`height: ${ROW_HEIGHT_PX}px;`}>
     {#if hasValue}
       {#if fileManifest}
-        <AttachedFile manifest={fileManifest} canOpen={isActive} />
+        <AttachedFile manifest={fileManifest} {canOpen} open={openFileViewer} />
       {:else}
         {value}
       {/if}

@@ -23,6 +23,9 @@
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
   import { initUiTheme } from './utils/uiThemePreference';
+  import { fileViewerContext } from './components/file-viewer/FileViewerContext';
+  import ControlledFileViewer from './components/file-viewer/ControlledFileViewer.svelte';
+  import FileViewerController from './components/file-viewer/FileViewerController';
 
   export let commonData: CommonData;
 
@@ -56,6 +59,9 @@
 
   const rowSeekerController = new AttachableRowSeekerController();
   rowSeekerContext.set(rowSeekerController);
+
+  const fileViewerController = new FileViewerController();
+  fileViewerContext.set(fileViewerController);
 
   const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
   $: clipboardHandler = $clipboardHandlerStore;
@@ -100,5 +106,6 @@
   modalController={recordSelectorModal}
 />
 <AttachableRowSeeker controller={rowSeekerController} />
+<ControlledFileViewer controller={fileViewerController} />
 
 <slot />
