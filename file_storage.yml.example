@@ -1,4 +1,4 @@
-local_minio:
+default:
   protocol: s3
   nickname: "Local object store"
   kwargs:

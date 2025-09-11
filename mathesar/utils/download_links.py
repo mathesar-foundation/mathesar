@@ -1,5 +1,6 @@
 import base64
 import cairosvg
+import datetime
 import hashlib
 import io
 import json
@@ -144,6 +145,23 @@ def build_links_from_json(json_strs):
     ]
 
 
+def save_file(f, request, backend_key='default'):
+    backend = get_backends()[backend_key]
+    now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S%f')
+    uri = f"{backend['protocol']}://{backend['prefix']}/{request.user}/{now}/{f.name}"
+    of = fsspec.open(uri, mode='xb', **backend["kwargs"])
+    with of as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+    result = create_json_for_uri(uri, backend_key)
+    link = sync_links_from_json_strings(request.session.session_key, [result])[0]
+    return {
+        "result": result,
+        "download_link": _get_single_link_details(request, link)
+    }
+
+
 def _build_valid_link_dict(result, backends):
     try:
         result_dict = json.loads(result)
@@ -187,7 +205,7 @@ def get_backends(public_info=False):
         with open(BACKEND_CONF_YAML, 'r') as f:
             backend_dict = yaml.full_load(f)
     except FileNotFoundError:
-        backend_dict={}
+        backend_dict = {}
     if public_info is True:
         return list(backend_dict.keys())
     else:
