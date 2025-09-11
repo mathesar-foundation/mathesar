@@ -78,10 +78,9 @@
   .admin-page-header {
     --AppSecondaryHeader__background: linear-gradient(
       135deg,
-      var(--color-navigation-40),
-      35%,
-      var(--color-bg-base) 50%,
-      var(--color-navigation-20) 100%
+      var(--color-navigation-10) 15%,
+      var(--color-bg-base) 45%,
+      var(--color-navigation-25) 100%
     );
   }
 </style>
