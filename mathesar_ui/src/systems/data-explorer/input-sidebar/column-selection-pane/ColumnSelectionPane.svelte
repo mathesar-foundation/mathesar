@@ -92,7 +92,7 @@
     section {
       header {
         padding: var(--sm3);
-        background: var(---color-bg-supporting);
+        background: var(--color-bg-header);
         font-weight: 590;
       }
       .content {

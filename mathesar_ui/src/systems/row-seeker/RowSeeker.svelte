@@ -159,12 +159,10 @@
     display: flex;
     overflow: hidden;
     gap: 0.1rem;
-    border-bottom: 1px solid var(--border-color);
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.05),
-      0 1px 3px rgba(0, 0, 0, 0.1),
-      0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    background: var(--input-background);
+    border-bottom: 1px solid var(--color-border-raised-2);
+    box-shadow: 0 1px 3px
+      color-mix(in srgb, var(--color-shadow), transparent 10%);
+    background: var(--color-bg-raised-2);
   }
 
   .empty-states {
@@ -195,7 +193,7 @@
   }
 
   .footer {
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--color-border-section);
     padding: var(--sm6);
     display: flex;
     align-items: center;

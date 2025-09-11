@@ -145,7 +145,11 @@
 
     /** Panel theming */
     --WithPanel__gap: var(--sm3);
-    --WithPanel__resizer-color: var(--color-fg-help);
+    --WithPanel__resizer-color: color-mix(
+      in srgb,
+      var(--color-bg-help-strong),
+      transparent 30%
+    );
     --WithPanel__resizer-size: var(--sm4);
   }
 

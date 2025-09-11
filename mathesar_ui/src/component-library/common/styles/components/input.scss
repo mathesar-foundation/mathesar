@@ -30,8 +30,11 @@
 
     &:focus,
     &:active {
-      outline: 1px solid
-        color-mix(in srgb, var(--color-border-input-focused), transparent 70%);
+      outline: var(
+        --input-element-focus-outline,
+        1px solid
+          color-mix(in srgb, var(--color-border-input-focused), transparent 70%)
+      );
       outline-offset: 1px;
       box-shadow: var(
         --input-element-focus-box-shadow,
@@ -46,7 +49,7 @@
   }
 
   &.read-only {
-    background: var(--color-bg-input-disabled);
+    background: var(--color-bg-input-muted);
   }
 
   &.has-error {

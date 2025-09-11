@@ -8,7 +8,7 @@ $elevations: (
   'base': hsl($base-hue, $base-saturation, 85%),
   'raised-1': hsl($base-hue, $base-saturation, 80%),
   'raised-2': hsl($base-hue, $base-saturation, 75%),
-  'raised-3': hsl($base-hue, $base-saturation, 70%),
+  'raised-3': hsl($base-hue, $base-saturation, 72%),
 );
 
 $interactive-components: (
@@ -30,9 +30,9 @@ $components: (
   'divider': hsl($base-hue, $base-saturation, 80%),
   'header': hsl($base-hue, $base-saturation, 80%),
   'token': hsl($base-hue, $base-saturation, 80%),
-  'section': hsl($base-hue, $base-saturation, 70%),
-  'supporting': hsl($base-hue, $base-saturation, 70%),
+  'supporting': hsl($base-hue, $base-saturation, 80%),
   'group': hsl($base-hue, $base-saturation, 75%),
+  'section': hsl($base-hue, $base-saturation, 70%),
 );
 
 $contextual: (

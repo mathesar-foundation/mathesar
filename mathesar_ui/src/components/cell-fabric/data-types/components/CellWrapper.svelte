@@ -135,8 +135,9 @@
     }
 
     :global(.input-element) {
-      box-shadow: none;
-      border: none;
+      --input-element-focus-box-shadow: none;
+      --input-element-border: none;
+      --input-element-focus-outline: none;
       padding: 0.42rem;
     }
 

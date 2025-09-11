@@ -33,11 +33,11 @@ $components: (
 );
 
 $common-state-deltas: (
+  'muted': 0 10 10,
   'hover': 0 8 4,
   'active': 0 0 9,
   'focused': 0 0 2,
   'disabled': 0 0 10,
-  'muted': 0 0 10,
 );
 
 $contextual: (

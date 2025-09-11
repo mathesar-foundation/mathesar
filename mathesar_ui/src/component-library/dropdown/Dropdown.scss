@@ -26,13 +26,11 @@ button.dropdown.trigger {
 .dropdown.content {
   box-shadow: var(
     --Dropdown__box-shadow,
-    var(--color-shadow) 0 0 0 0,
-    var(--color-shadow) 0px 0px 0px 1px,
     var(--color-shadow) 0px 10px 15px -3px,
     var(--color-shadow) 0px 4px 6px -2px
   );
   background: var(--color-bg-raised-3);
-  border: 1px solid var(--color-bg-raised-3);
+  border: 1px solid var(--color-border-raised-1);
   border-radius: var(--border-radius-m);
   z-index: var(--dropdown-z-index, 100);
   max-height: calc(100vh - 0.5rem);
@@ -41,9 +39,7 @@ button.dropdown.trigger {
   &[data-popper-placement='top-start'] {
     box-shadow:
       var(--color-shadow) 0px -10px 15px -3px,
-      var(--color-shadow) 0px -4px 2px -2px,
-      var(--color-shadow) 0px 0px 0px 1px,
-      var(--color-shadow) 0 0 0 0;
+      var(--color-shadow) 0px -4px 2px -2px;
   }
 
   &.no-max-height {

@@ -51,11 +51,21 @@
     height: 100%;
     position: relative;
     background-color: var(--color-bg-supporting);
-    border-top: 1px solid var(--color-border-raised-2);
-    border-left: 1px solid var(--color-border-section);
-    border-bottom: 1px solid var(--color-border-raised-1);
-    border-right: 1px solid var(--color-border-grid);
+    border: 1px solid;
+    border-top-color: var(--color-border-supporting);
+    border-left-color: var(--color-border-supporting);
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--color-border-supporting),
+      transparent 40%
+    );
+    border-right-color: color-mix(
+      in srgb,
+      var(--color-border-supporting),
+      transparent 20%
+    );
     border-radius: var(--border-radius-l);
     isolation: isolate;
+    overflow: hidden;
   }
 </style>

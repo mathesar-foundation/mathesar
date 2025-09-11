@@ -51,9 +51,21 @@
 <style lang="scss">
   .exploration-inspector {
     height: 100%;
-    border: 1px solid var(--color-border-base);
     border-radius: var(--border-radius-l);
     background: var(--color-bg-supporting);
+    border: 1px solid;
+    border-top-color: var(--color-border-supporting);
+    border-left-color: var(--color-border-supporting);
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--color-border-supporting),
+      transparent 40%
+    );
+    border-right-color: color-mix(
+      in srgb,
+      var(--color-border-supporting),
+      transparent 20%
+    );
     display: flex;
     flex-direction: column;
     overflow: hidden;

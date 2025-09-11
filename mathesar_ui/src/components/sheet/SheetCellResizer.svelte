@@ -72,7 +72,7 @@
     position: relative;
     height: 100%;
     width: 0.3rem;
-    background: var(--color-fg-help);
+    background: var(--color-bg-help-strong);
   }
   .column-resizer:not(:hover):not(.is-resizing) .indicator {
     display: none;
