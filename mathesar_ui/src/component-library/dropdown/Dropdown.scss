@@ -1,6 +1,14 @@
 button.dropdown.trigger {
   position: relative;
 
+  &.btn-default {
+    --button-background: var(--color-bg-input);
+    --button-border-color: var(--color-border-input);
+    --button-hover-background: var(--color-bg-input-hover);
+    --button-focus-background: var(--color-bg-input-focused);
+    --button-active-background: var(--color-bg-input-active);
+  }
+
   > .label {
     display: inline-flex;
     align-items: center;

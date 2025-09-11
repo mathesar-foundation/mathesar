@@ -55,7 +55,7 @@
 <style lang="scss">
   .group-header {
     padding: var(--sm4) var(--lg1);
-    background-color: var(--color-bg-sunken-1);
+    background-color: var(--color-bg-header);
     height: 100%;
     border-bottom: 1px solid var(--color-border-grid);
     border-right: 1px solid var(--color-border-grid);

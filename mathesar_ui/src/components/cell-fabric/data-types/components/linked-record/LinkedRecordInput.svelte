@@ -224,7 +224,7 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--color-border-section);
+    border: 1px solid var(--color-border-input);
     border-radius: 0.25rem;
     background: var(--color-bg-input);
     padding: var(--sm4);
@@ -232,10 +232,12 @@
   }
   .disabled {
     background: var(--color-bg-input-disabled);
-    border: solid 1px var(--color-border-input);
+    border: solid 1px var(--color-border-input-disabled);
+    --input-element-focus-outline: none;
+    --input-element-focus-box-shadow: none;
   }
 
-  .linked-record-input:focus {
+  .linked-record-input:not(.disabled):focus {
     border-color: var(--color-border-input-focused);
     outline: 0;
     box-shadow: 0 0 0 2px var(--color-bg-input-focused);

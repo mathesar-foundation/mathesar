@@ -20,7 +20,7 @@
   border-radius: var(--button-border-radius, var(--sm4));
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.7;
     cursor: not-allowed;
   }
 
@@ -318,16 +318,6 @@
       ),
     ),
   );
-
-  &.btn-default {
-    &.dropdown {
-      --button-background: var(--color-bg-input);
-      --button-border-color: var(--color-border-input);
-      --button-hover-background: var(--color-bg-input-hover);
-      --button-focus-background: var(--color-bg-input-focused);
-      --button-active-background: var(--color-bg-input-active);
-    }
-  }
 
   // Utilities
   &.size-medium {
