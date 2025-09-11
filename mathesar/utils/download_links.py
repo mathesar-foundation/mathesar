@@ -187,7 +187,7 @@ def get_backends(public_info=False):
         with open(BACKEND_CONF_YAML, 'r') as f:
             backend_dict = yaml.full_load(f)
     except FileNotFoundError:
-        backend_dict={}
+        backend_dict = {}
     if public_info is True:
         return list(backend_dict.keys())
     else:
