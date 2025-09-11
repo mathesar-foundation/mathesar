@@ -62,7 +62,11 @@
     --df__internal__z-index__field-with-some-selected-child: 1;
     --df__internal__z-index__field-outer-controls: 2;
     --df__internal__z-index__field-being-dragged: 3;
-    --df__internal__selected-element-bg: var(--color-selection-subtle-2);
+    --df__internal__selected-element-bg: color-mix(
+      in srgb,
+      var(--color-selection-subtle-1),
+      transparent 50%
+    );
     --df__internal__selected-element-border-color: var(
       --color-selection-strong-2
     );

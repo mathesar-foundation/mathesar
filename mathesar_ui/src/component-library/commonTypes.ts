@@ -1,4 +1,3 @@
-/* TODO: Remove/rename product specific items: inspector, feedback, refresh from this list */
 export type Appearance =
   | 'default'
   | 'primary'

@@ -14,16 +14,16 @@ $static: (
   'modal-overlay': rgba(0, 0, 0, 0.4),
 );
 
-$sl-hue: 200;
-$sl-saturation: 90%;
-$sl-lightness: 70%;
+$sl-hue: 201;
+$sl-saturation: 60%;
+$sl-lightness: 82%;
 
 $interactions: (
-  'selection-strong-2': hsla($sl-hue, $sl-saturation, $sl-lightness - 30, 0.8),
-  'selection-strong-1': hsla($sl-hue, $sl-saturation, $sl-lightness - 10, 0.6),
-  'selection': hsla($sl-hue, $sl-saturation, $sl-lightness, 0.4),
-  'selection-subtle-1': hsla($sl-hue, $sl-saturation, $sl-lightness + 8, 0.25),
-  'selection-subtle-2': hsla($sl-hue, $sl-saturation, $sl-lightness + 14, 0.15),
+  'selection-strong-2': hsl($sl-hue, $sl-saturation, $sl-lightness - 30),
+  'selection-strong-1': hsl($sl-hue, $sl-saturation, $sl-lightness - 10),
+  'selection': hsl($sl-hue, $sl-saturation, $sl-lightness),
+  'selection-subtle-1': hsl($sl-hue, $sl-saturation, $sl-lightness + 8),
+  'selection-subtle-2': hsl($sl-hue, $sl-saturation, $sl-lightness + 14),
 );
 
 $exports: (

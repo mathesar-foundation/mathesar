@@ -15,15 +15,15 @@ $static: (
 );
 
 $sl-hue: 190;
-$sl-saturation: 60%;
-$sl-lightness: 50%;
+$sl-saturation: 59%;
+$sl-lightness: 30%;
 
 $interactions: (
-  'selection-strong-2': hsla($sl-hue, $sl-saturation, $sl-lightness, 0.8),
-  'selection-strong-1': hsla($sl-hue, $sl-saturation, $sl-lightness, 0.6),
-  'selection': hsla($sl-hue, $sl-saturation, $sl-lightness, 0.4),
-  'selection-subtle-1': hsla($sl-hue, $sl-saturation, $sl-lightness, 0.25),
-  'selection-subtle-2': hsla($sl-hue, $sl-saturation, $sl-lightness, 0.15),
+  'selection-strong-2': hsl($sl-hue, $sl-saturation, $sl-lightness + 12),
+  'selection-strong-1': hsl($sl-hue, $sl-saturation, $sl-lightness + 8),
+  'selection': hsl($sl-hue, $sl-saturation, $sl-lightness),
+  'selection-subtle-1': hsl($sl-hue, $sl-saturation, $sl-lightness - 10),
+  'selection-subtle-2': hsl($sl-hue, $sl-saturation, $sl-lightness - 20),
 );
 
 $exports: (

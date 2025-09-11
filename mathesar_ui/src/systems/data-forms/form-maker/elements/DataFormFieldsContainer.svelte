@@ -49,8 +49,10 @@
       var(--df__internal_element-left-padding);
   }
   .empty-fields-state {
+    margin: 1rem;
     padding: var(--lg1);
     margin-bottom: var(--sm4);
     border: 1px dashed var(--color-border-section);
+    border-radius: var(--border-radius-l);
   }
 </style>

@@ -175,7 +175,7 @@
 
     outcome: (
       normal: (
-        background: color-mix(in srgb, var(--color-bg-outcome), transparent 60%),
+        background: var(--color-bg-outcome),
         border-color: var(--color-border-outcome),
         color: var(--color-fg-outcome),
       ),
@@ -192,7 +192,7 @@
           ),
       ),
       active: (
-        background: color-mix(in srgb, var(--color-bg-outcome), transparent 50%),
+        background: var(--color-bg-outcome-active),
         border-color: var(--color-border-outcome-active),
         color: var(--color-fg-outcome-active),
         outline-color:

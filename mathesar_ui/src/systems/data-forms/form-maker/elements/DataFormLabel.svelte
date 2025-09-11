@@ -116,6 +116,7 @@
       font-weight: var(--font-weight-medium);
       padding: var(--sm5) 0;
       margin: 0;
+      min-height: 2.2rem;
     }
 
     &.selected {
