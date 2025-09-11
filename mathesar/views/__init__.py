@@ -13,6 +13,7 @@ from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.rpc.users import get as get_user_info
+from mathesar.utils.download_links import get_backends as get_file_backends
 from mathesar import __version__
 
 from . import export, users, download_link
@@ -115,6 +116,7 @@ def get_common_data(request, database_id=None, schema_oid=None):
         'current_database': current_database_id,
         'current_schema': current_schema_oid,
         'databases': databases,
+        'file_backends': get_file_backends(public_info=True),
         'internal_db': _get_internal_db_meta(),
         'servers': get_servers_list(),
         'schemas': schemas,
