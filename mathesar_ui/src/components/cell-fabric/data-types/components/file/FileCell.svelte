@@ -30,9 +30,8 @@
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
-        if (isActive) {
-          // TODO_FILES_UI: open file viewer
-        }
+        openFileViewer();
+        // TODO_FILES_UI: why doesn't this work?
         break;
       case 'Tab':
       case 'ArrowLeft':
