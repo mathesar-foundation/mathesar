@@ -63,6 +63,11 @@
     name: $structure.name || $_('untitled'),
     icon: iconForm,
   }}
+  cssVariables={{
+    '--icon-fill-color':
+      'linear-gradient(135deg, var(--color-data-form), var(--color-data-form-60))',
+    '--icon-stroke-color': 'var(--color-fg-inverted)',
+  }}
 >
   <svelte:fragment slot="actions-right">
     <SaveButton onSave={saveForm} canSave={$hasChanges} />

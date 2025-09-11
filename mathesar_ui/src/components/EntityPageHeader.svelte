@@ -1,6 +1,13 @@
 <script lang="ts">
-  import { Icon, Truncate } from '@mathesar-component-library';
-  import type { IconProps } from '@mathesar-component-library/types';
+  import {
+    Icon,
+    Truncate,
+    makeStyleStringFromCssVariables,
+  } from '@mathesar-component-library';
+  import type {
+    CssVariablesObj,
+    IconProps,
+  } from '@mathesar-component-library/types';
 
   export let title:
     | {
@@ -9,9 +16,14 @@
         description?: string;
       }
     | undefined = undefined;
+  export let cssVariables: CssVariablesObj | undefined = undefined;
+
+  $: style = cssVariables
+    ? makeStyleStringFromCssVariables(cssVariables)
+    : undefined;
 </script>
 
-<div class="entity-page-header">
+<div class="entity-page-header" {style}>
   {#if title}
     <div class="heading">
       <div class="icon">

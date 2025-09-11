@@ -20,8 +20,8 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--border-radius-l);
-    background-color: var(--card-background);
-    border: 1px solid var(--card-border-color);
+    background-color: var(--color-bg-raised-1-muted);
+    border: 1px solid var(--color-border-raised-1-muted);
   }
 
   .content {
