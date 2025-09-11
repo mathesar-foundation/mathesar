@@ -60,7 +60,7 @@ $interactive-component-states: (
 );
 
 $contextual: (
-  'success': hsl(hue(colors.$success), 40%, 5%),
+  'success': hsl(hue(colors.$success), 40%, 20%),
   'warning': hsl(hue(colors.$warning), 70%, 15%),
   'danger': hsl(hue(colors.$danger), 100%, 35%),
   'info': hsl(hue(colors.$info), 55%, 20%),

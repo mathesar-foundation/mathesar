@@ -37,7 +37,7 @@ $components: (
 );
 
 $contextual: (
-  'success': hsl(hue(colors.$success), 40%, 50%),
+  'success': hsl(hue(colors.$success), 40%, 70%),
   'warning': hsl(hue(colors.$warning), 70%, 60%),
   'danger': hsl(hue(colors.$danger), 100%, 80%),
   'info': hsl(hue(colors.$info), 55%, 65%),

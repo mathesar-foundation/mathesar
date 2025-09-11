@@ -22,8 +22,8 @@ $interactions: (
   'selection-strong-2': hsl($sl-hue, $sl-saturation, $sl-lightness - 30),
   'selection-strong-1': hsl($sl-hue, $sl-saturation, $sl-lightness - 10),
   'selection': hsl($sl-hue, $sl-saturation, $sl-lightness),
-  'selection-subtle-1': hsl($sl-hue, $sl-saturation, $sl-lightness + 8),
-  'selection-subtle-2': hsl($sl-hue, $sl-saturation, $sl-lightness + 14),
+  'selection-subtle-1': hsl($sl-hue, $sl-saturation, $sl-lightness + 6),
+  'selection-subtle-2': hsl($sl-hue, $sl-saturation, $sl-lightness + 15),
 );
 
 $exports: (

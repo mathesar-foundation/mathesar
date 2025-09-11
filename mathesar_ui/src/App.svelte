@@ -47,8 +47,8 @@
     'database': $amethyst,
     'table': $pumpkin,
     'column': hsl(hue($salmon), 40%, 60%),
-    'record': $asparagus,
-    'record-fk': hsl(hue($asparagus), 80%, 60%),
+    'record': hsl(296, 35%, 45%),
+    'record-fk': hsl(296, 70%, 45%),
     'exploration': $fjord,
     'data-form': $teal,
   );
@@ -97,7 +97,7 @@
     --cell-bg-color-processing: var(--color-bg-warning);
     --cell-bg-color-disabled: var(--color-bg-input-disabled);
     --cell-bg-color-row-hover: var(--color-bg-input-hover);
-    --cell-bg-color-row-selected: var(--color-selection);
+    --cell-bg-color-row-selected: var(--color-selection-subtle-1);
 
     --cell-text-color-processing: var(--color-fg-base-muted);
 

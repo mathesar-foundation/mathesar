@@ -42,8 +42,8 @@ $common-state-deltas: (
 );
 
 $contextual: (
-  'success': hsl(hue(colors.$success), 40%, 80%),
-  'success-strong': hsl(hue(colors.$success), 40%, 30%),
+  'success': hsl(hue(colors.$success), 40%, 90%),
+  'success-strong': hsl(hue(colors.$success), 40%, 40%),
   'warning': hsl(hue(colors.$warning), 70%, 90%),
   'warning-strong': hsl(hue(colors.$warning), 70%, 40%),
   'danger': hsl(hue(colors.$danger), 80%, 92%),

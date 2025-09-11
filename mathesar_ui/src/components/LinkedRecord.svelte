@@ -144,11 +144,10 @@
     padding: 0 0.3rem;
   }
   .linked-record.is-hovering-delete .background {
-    background: var(--color-bg-highlight-subtle);
-    opacity: 0.5;
+    background: var(--color-record-fk-20);
   }
   .linked-record.is-hovering-delete .record-summary {
-    opacity: 0.5;
+    opacity: 0.8;
   }
   .linked-record.is-hovering-delete .record-page-link {
     text-decoration: none;

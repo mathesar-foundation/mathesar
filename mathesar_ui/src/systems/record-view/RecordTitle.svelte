@@ -15,7 +15,12 @@
 
 <div class="record-title">
   <div class="title">
-    <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
+    <NameWithIcon
+      icon={iconRecord}
+      cssVariables={{ '--icon-color': 'var(--color-record)' }}
+    >
+      {$summary}
+    </NameWithIcon>
     <div class="link">
       <Tooltip>
         <a href={recordPageUrl} slot="trigger" class="btn btn-ghost">
