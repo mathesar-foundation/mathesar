@@ -78,12 +78,10 @@
 
 <style lang="scss">
   .import-preview {
+    min-width: fit-content;
+
     :global([data-sheet-element='data-cell']) {
       background: var(--color-bg-input);
-    }
-    :global([data-sheet-element='data-cell']:last-child),
-    :global([data-sheet-element='column-header-cell']:last-child) {
-      border-right: none;
     }
     :global(
         [data-sheet-element='data-row']:last-child

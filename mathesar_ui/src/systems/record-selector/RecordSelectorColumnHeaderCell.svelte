@@ -148,6 +148,7 @@
     resize: none;
     color: var(--color-fg-base);
     scrollbar-width: none;
+    --text-area-min-height: var(--input-height);
   }
   .column-header-cell :global(.record-selector-input::-webkit-scrollbar) {
     display: none;
