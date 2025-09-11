@@ -1,4 +1,5 @@
 @use '../colors.scss' as colors;
+@use './light-base.scss' as light-base;
 
 /**
  * These colors should only be used with the following properties:
@@ -10,13 +11,13 @@
  *  - Such elements should not be containers with content within them.
  */
 
-$base: hsl(42, 10%, 95%);
+$base-hue: light-base.$base-hue;
 $fg-base: hsl(0, 0%, 7%);
 
 $static: (
   'dark': hsl(hue($fg-base), 0%, 1%),
   'light': hsl(hue($fg-base), 0%, 100%),
-  'inverted': hsl(42, 10%, 96%),
+  'inverted': hsl($base-hue, 10%, 96%),
   'faint': hsl(hue($fg-base), 0%, 60%),
 );
 
@@ -36,10 +37,10 @@ $level-state-delta: (
 
 $components: (
   'code': hsl(hue($fg-base), 80%, 4%),
-  'header': hsl(hue($base), 0%, 20%),
+  'header': hsl($base-hue, 0%, 20%),
   'icon': hsl(hue(colors.$wisteria), 45%, 10%),
   'label': hsl(hue($fg-base), 0%, 25%),
-  'token': hsl(hue($base), 15%, 7%),
+  'token': hsl($base-hue, 15%, 7%),
 );
 
 $interactive-components: (

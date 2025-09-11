@@ -1,4 +1,5 @@
 @use '../colors.scss' as colors;
+@use './dark-base.scss' as dark-base;
 
 /**
  * These colors should only be used with the following properties:
@@ -6,8 +7,8 @@
  * - `background-color`
  */
 
-$base-hue: 230;
-$base-saturation: 4%;
+$base-hue: dark-base.$base-hue;
+$base-saturation: dark-base.$base-saturation;
 
 $static: (
   'highlight': hsl(38, 80%, 30%),

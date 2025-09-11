@@ -1,7 +1,8 @@
 @use '../colors.scss' as colors;
+@use './light-base.scss' as light-base;
 
-$base-hue: 42;
-$base-saturation: 10%;
+$base-hue: light-base.$base-hue;
+$base-saturation: light-base.$base-saturation;
 
 $elevations: (
   'sunken-1': hsl($base-hue, $base-saturation, 90%),
