@@ -3685,7 +3685,7 @@ SELECT string_agg(
     concat_ws(
       ', ',
       __msar.build_col_drop_default_expr(tab_id, col_id, new_type, new_default),
-      __msar.build_col_retype_expr(tab_id, col_id, new_type),
+      -- __msar.build_col_retype_expr(tab_id, col_id, new_type),
       __msar.build_col_default_expr(tab_id, col_id, old_default, new_default, new_type)
     ),
     ''
@@ -3750,14 +3750,18 @@ BEGIN
       (col_alter_obj -> 'not_null')::boolean AS not_null,
       (col_alter_obj ->> 'name')::text AS new_name,
       (col_alter_obj -> 'delete')::boolean AS delete_,
+      msar.build_type_text_complete(col_alter_obj -> 'type', format_type(pga.atttypid, null)) AS new_type,
 
       col_alter_obj->>'description' AS comment_,
       __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment
 
     FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
+      INNER JOIN pg_attribute AS pga ON pga.attnum=(x.col_alter_obj ->> 'attnum')::smallint AND pga.attrelid=tab_id
+    WHERE NOT msar.is_mathesar_id_column(tab_id, (x.col_alter_obj ->> 'attnum')::integer)
   LOOP
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
+    PERFORM msar.retype_column(tab_id, col.attnum, col.new_type);
     IF col.delete_ THEN
       PERFORM msar.drop_columns(tab_id, col.attnum);
     END IF;
@@ -3770,6 +3774,26 @@ BEGIN
   RETURN return_attnum_arr; -- do we really need this??
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.retype_column(tab_id regclass, col_id smallint, new_type text) RETURNS text AS $$/*
+Alter a column's type, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table containing the column whose nullability we'll alter.
+  col_id: The attnum of the column whose nullability we'll alter.
+  not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
+*/
+  SELECT __msar.exec_ddl(
+    'ALTER TABLE %I.%I ALTER COLUMN %I TYPE %s USING %s',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    new_type,
+    __msar.build_cast_expr(quote_ident(msar.get_column_name(tab_id, col_id)), new_type)
+  );
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 -- Comment on column -------------------------------------------------------------------------------
