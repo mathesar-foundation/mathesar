@@ -44,17 +44,21 @@
       normal: (
         background: var(--color-bg-control),
         border-color: var(--color-border-control),
-        box-shadow: (
-          var(--color-bg-base) 0 1px 2px 0,
-          var(--color-shadow) 0 1px 3px 0,
-        ),
       ),
       hover: (
         background: var(--color-bg-control-hover),
+        box-shadow: (
+          var(--color-shadow) 0 1px 3px 0,
+        ),
       ),
       focus: (
         background: var(--color-bg-control-focused),
-        outline-color: var(--color-border-control-focused),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-control-focused),
+            transparent 70%
+          ),
         box-shadow: (
           0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
           0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
@@ -63,8 +67,16 @@
       active: (
         background: var(--color-bg-control-active),
         border-color: var(--color-border-control-active),
-        outline-color: var(--color-border-control-active),
-        box-shadow: 0 0 0 2px var(--color-bg-control-active),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-control-focused),
+            transparent 60%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
       ),
     ),
 
@@ -311,6 +323,9 @@
     &.dropdown {
       --button-background: var(--color-bg-input);
       --button-border-color: var(--color-border-input);
+      --button-hover-background: var(--color-bg-input-hover);
+      --button-focus-background: var(--color-bg-input-focused);
+      --button-active-background: var(--color-bg-input-active);
     }
   }
 

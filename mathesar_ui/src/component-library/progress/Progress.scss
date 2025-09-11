@@ -10,6 +10,10 @@
     top: 0;
     left: 0;
     bottom: 0;
-    background: var(--color-fg-info);
+    background: color-mix(
+      in srgb,
+      var(--color-bg-info-strong),
+      transparent 30%
+    );
   }
 }

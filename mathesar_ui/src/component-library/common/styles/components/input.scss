@@ -12,7 +12,7 @@
   display: block;
   width: 100%;
   box-sizing: border-box;
-  min-height: var(--input-min-height, unset);
+  min-height: var(--input-element-min-height, 2.2rem);
   text-align: var(--input-element-text-align, 'left');
 
   &::placeholder {
@@ -59,6 +59,6 @@
 
   &.text-area {
     resize: var(--text-area-resize, vertical);
-    min-height: var(--text-area-min-height, auto);
+    min-height: var(--text-area-min-height, 4rem);
   }
 }

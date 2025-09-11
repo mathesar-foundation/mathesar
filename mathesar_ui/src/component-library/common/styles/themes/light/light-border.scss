@@ -17,9 +17,9 @@ $interactive-components: (
 );
 
 $common-state-deltas: (
-  'hover': 0 0 6,
-  'active': 0 0 14,
-  'focused': 0 0 10,
+  'hover': 0 0 -3,
+  'focused': 0 0 -5,
+  'active': 0 0 -7,
   'disabled': 0 0 6,
   'muted': 0 0 6,
 );

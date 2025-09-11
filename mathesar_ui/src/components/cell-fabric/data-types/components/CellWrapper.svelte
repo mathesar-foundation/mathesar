@@ -135,6 +135,8 @@
     }
 
     :global(.input-element) {
+      --input-element-min-height: auto;
+      --text-area-min-height: 5em;
       --input-element-focus-box-shadow: none;
       --input-element-border: none;
       --input-element-focus-outline: none;
@@ -146,13 +148,6 @@
       box-shadow:
         0 0 0 3px var(--color-selection-80),
         0 0 8px #000000 !important;
-    }
-
-    &.truncate {
-      :global(textarea.input-element) {
-        resize: vertical;
-        min-height: 5em;
-      }
     }
 
     &.is-tabular-number {

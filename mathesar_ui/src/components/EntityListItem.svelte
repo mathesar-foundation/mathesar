@@ -184,7 +184,7 @@
     .detail {
       margin: var(--sm6) 0 0 var(--lg1);
       font-size: var(--sm1);
-      color: var(--color-fg-base-disabled);
+      color: var(--color-fg-subtle-2);
     }
   }
   .entity-list-item.primary .link {
@@ -204,9 +204,10 @@
 
   .description {
     overflow: hidden;
+    color: var(--color-fg-subtle-1);
   }
   .description-icon {
-    color: var(--color-fg-base-disabled);
+    color: var(--color-fg-subtle-2);
     font-size: var(--sm1);
   }
 
