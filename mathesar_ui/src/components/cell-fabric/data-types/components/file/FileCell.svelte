@@ -3,6 +3,7 @@
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
+  import { modalFileAttachmentUploadContext } from '@mathesar/components/file-attachments/file-uploader/modalFileAttachmentUploadContext';
   import { getFileViewerType } from '@mathesar/components/file-attachments/fileUtils';
   import { lightboxContext } from '@mathesar/components/file-attachments/lightbox/LightboxController';
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
@@ -14,6 +15,7 @@
   const thumbnailResolutionHeightPx = ROW_HEIGHT_PX * 2;
   const dispatch = createEventDispatcher();
   const lightbox = lightboxContext.get();
+  const modalFileAttachmentUploader = modalFileAttachmentUploadContext.get();
 
   export let fileManifest: FileManifest | undefined = undefined;
   export let isActive: boolean;
@@ -56,10 +58,6 @@
     }
   }
 
-  function upload() {
-    // TODO_FILES_UI
-  }
-
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
@@ -87,6 +85,16 @@
 
   function handleMouseDown() {
     dispatch('activate');
+  }
+
+  async function upload() {
+    if (!modalFileAttachmentUploader) return;
+    const result = await modalFileAttachmentUploader.acquireFileAttachment();
+    if (!result) return;
+    // TODO_FILES_UI:
+    //
+    // - set bespoke file manifest in records store
+    // - set file data in cell
   }
 </script>
 
