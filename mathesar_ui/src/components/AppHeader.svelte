@@ -142,6 +142,7 @@
             href={getMarketingLink('donate')}
             tinro-ignore
             target="_blank"
+            --icon-fill-color="var(--color-brand)"
           >
             {$_('donate_to_mathesar')}
           </LinkMenuItem>
@@ -164,11 +165,15 @@
     justify-content: space-between;
     padding: 0 0.5rem;
     height: var(--header-height);
-    background: var(--header-background);
-    border-bottom: 1px solid var(--header-border);
-    box-shadow: var(--shadow-color) 0 1px 3px 0;
+    background: linear-gradient(
+      to bottom right,
+      var(--color-bg-base),
+      var(--color-bg-raised-2)
+    );
+    border-bottom: 1px solid var(--color-border-base);
+    box-shadow: var(--color-shadow) 0 1px 3px 0;
     overflow: hidden;
-    color: var(--text-color);
+    color: var(--color-fg-base);
     font-size: 1rem;
   }
 
@@ -190,7 +195,7 @@
   }
 
   .user-switcher {
-    color: var(--text-color);
+    color: var(--color-fg-base);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;

@@ -126,32 +126,28 @@
     }
 
     &[data-active-cell] {
-      box-shadow: 0 0 0 2px var(--neutral-400);
+      box-shadow: 0 0 0 2px var(--color-border-raised-3);
       border-radius: 2px;
 
       &:focus {
-        box-shadow: 0 0 0 2px var(--sky-700);
+        box-shadow: 0 0 0 3px var(--color-selection-strong-2);
       }
     }
 
     :global(.input-element) {
-      box-shadow: none;
-      border: none;
+      --input-element-min-height: auto;
+      --text-area-min-height: 5em;
+      --input-element-focus-box-shadow: none;
+      --input-element-border: none;
+      --input-element-focus-outline: none;
       padding: 0.42rem;
     }
 
     &.is-edit-mode {
       padding: 0px;
       box-shadow:
-        0 0 0 3px var(--sky-700),
+        0 0 0 3px var(--color-selection-strong-2),
         0 0 8px #000000 !important;
-    }
-
-    &.truncate {
-      :global(textarea.input-element) {
-        resize: vertical;
-        min-height: 5em;
-      }
     }
 
     &.is-tabular-number {
@@ -160,10 +156,10 @@
   }
   .exact-match {
     --Match__highlight-color: transparent;
-    --cell-background-color: var(--color-substring-match);
+    --cell-background-color: var(--color-bg-highlight);
   }
   .substring-match {
-    --cell-background-color: var(--color-substring-match-light);
+    --cell-background-color: var(--color-bg-highlight-subtle);
   }
   .no-match {
     text-decoration: line-through;

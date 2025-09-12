@@ -104,25 +104,31 @@
     --z-index-hyperlink-overlay: 1;
     --z-index-menu-trigger: 2;
     border-radius: var(--border-radius-l);
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--card-border-color);
     background-color: var(--card-background);
     padding: var(--lg1);
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
-    box-shadow: var(--card-active-shadow);
+    outline-offset: 1px;
   }
 
   .schema-row.hover {
-    border: 1px solid var(--salmon-400);
-    box-shadow: var(--card-hover-shadow);
-    background: var(--card-hover-background);
+    border: 1px solid var(--color-schema-40);
+    background: var(--color-schema-5-active);
+    box-shadow: var(--card-hover-box-shadow);
   }
 
+  .schema-row:active,
   .schema-row.focus {
-    outline: 2px solid var(--salmon-500);
-    outline-offset: 1px;
+    outline: 2px solid var(--color-schema-15);
+    border: 1px solid var(--color-schema-40);
+    box-shadow: var(--card-focus-box-shadow);
+  }
+
+  .schema-row:active {
+    background: var(--color-schema-10-active);
   }
 
   .content {
@@ -139,7 +145,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--salmon-600), var(--salmon-700));
+    background: var(--color-schema-80);
     border-radius: 50%;
     width: 2rem;
     height: 2rem;
@@ -148,7 +154,7 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: var(--z-index-menu-trigger);
-    color: var(--white);
+    color: var(--color-fg-light);
   }
 
   .hyperlink-overlay {
@@ -167,7 +173,7 @@
   .description {
     font-weight: 400;
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    color: var(--color-fg-subtle-1);
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -184,7 +190,7 @@
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    color: var(--text-color-tertiary);
+    color: var(--color-fg-subtle-2);
     font-size: var(--sm1);
     margin-left: auto;
     margin-right: var(--sm3);
@@ -193,7 +199,7 @@
   .name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
     flex: 1;
     word-break: break-word;
     hyphens: auto;

@@ -195,8 +195,8 @@
 
 <style lang="scss">
   .sheet {
-    border: 1px solid var(--border-color);
-    background-color: var(--sheet-background);
+    border: 1px solid var(--canvas-border-color);
+    background-color: var(--canvas-background);
     margin: 0;
     border-radius: 0.5rem;
     overflow: hidden;
@@ -220,7 +220,7 @@
     );
 
     &.has-border {
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--color-border-header);
     }
 
     &.uses-virtual-list {

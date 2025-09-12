@@ -75,6 +75,10 @@
     display: flex;
     flex-direction: column;
 
+    .label {
+      color: var(--color-fg-label);
+    }
+
     > :global(* + *) {
       margin-top: 0.25rem;
     }

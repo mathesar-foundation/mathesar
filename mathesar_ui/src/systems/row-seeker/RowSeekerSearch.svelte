@@ -48,7 +48,7 @@
     flex-grow: 1;
 
     &::placeholder {
-      color: var(--text-color-tertiary);
+      color: var(--color-fg-subtle-2);
     }
 
     &:focus {

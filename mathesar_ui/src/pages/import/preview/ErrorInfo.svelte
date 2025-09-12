@@ -21,7 +21,7 @@
       {$_('retry')}
     </Button>
     <span>{$_('or')}</span>
-    <Button appearance="outline-primary" on:click={() => dispatch('delete')}>
+    <Button appearance="danger" on:click={() => dispatch('delete')}>
       <Icon {...iconDeleteMajor} />
       <span>{$_('delete_import')}</span>
     </Button>

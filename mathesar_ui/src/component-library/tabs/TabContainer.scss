@@ -11,7 +11,8 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border-bottom: 1px solid var(--border-color);
+    background: transparent;
+    border-bottom: 0.5px solid var(--color-border-base);
 
     > li.tab {
       align-items: stretch;
@@ -43,7 +44,7 @@
       }
 
       &:hover {
-        border-bottom-color: var(--salmon-300);
+        border-bottom-color: var(--color-navigation-40-hover);
         opacity: 1;
       }
 
@@ -52,32 +53,13 @@
       }
 
       &.active {
-        border-bottom-color: var(--salmon-600);
+        border-bottom-color: var(--color-navigation-active);
         opacity: 1;
       }
 
       &.focused {
-        border-color: var(--salmon-600);
+        border-color: var(--color-navigation-active);
         z-index: 1;
-      }
-
-      > button.remove {
-        cursor: pointer;
-        padding: var(--sm3) var(--sm2);
-        border: none;
-        background: none;
-        margin: 0;
-        color: inherit;
-
-        &:hover {
-          background: var(--hover-background);
-        }
-      }
-
-      @media (hover: hover) {
-        &:not(:hover) > button.remove {
-          display: none;
-        }
       }
     }
 
@@ -93,7 +75,7 @@
   }
 
   > ul.tabs:before {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-navigation);
   }
 
   .tab-content-holder {

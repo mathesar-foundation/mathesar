@@ -3,15 +3,15 @@
   flex-direction: column;
 
   &.danger {
-    background: #393939;
-    border-left: 6px solid #fa4d56;
-    color: #fff;
+    background: var(--color-bg-danger);
+    border-left: 6px solid var(--color-border-danger);
+    color: var(--color-fg-danger);
     padding: 15px;
     border-radius: 3px;
     line-height: 1.4em;
 
     .header {
-      color: #fa4d56;
+      color: var(--color-bg-danger);
     }
   }
 
@@ -33,7 +33,7 @@
     button.btn.close {
       margin-left: 10px;
       padding: 0;
-      color: #fff;
+      color: var(--color-fg-icon);
     }
   }
   > .description {
