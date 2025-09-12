@@ -108,7 +108,7 @@
   }
   .no-fields {
     text-align: center;
-    color: var(--color-text-muted);
+    color: var(--color-fg-base-muted);
     font-size: var(--sm1);
   }
   .add {

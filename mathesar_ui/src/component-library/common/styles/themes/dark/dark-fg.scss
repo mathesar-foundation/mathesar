@@ -1,0 +1,90 @@
+@use '../colors.scss' as colors;
+@use './dark-base.scss' as dark-base;
+
+/**
+ * These colors should only be used with the following properties:
+ * - `color`
+ * - `fill`
+ * 
+ * In specific cases, they can be used as `background` for elements that
+ * can be considered as indications, or text-like.
+ *  - Such elements should not be containers with content within them.
+ */
+
+$base-hue: dark-base.$base-hue;
+$fg-base: hsl(0, 0%, 88%);
+
+$static: (
+  'dark': hsl(hue($fg-base), 0%, 0%),
+  'light': hsl(hue($fg-base), 0%, 95%),
+  'inverted': hsl($base-hue, 10%, 4%),
+  'faint': hsl($base-hue, 15%, 15%),
+);
+
+$levels: (
+  'base': $fg-base,
+  'subtle-1': hsl(hue($fg-base), 0%, 82%),
+  'subtle-2': hsl(hue($fg-base), 0%, 60%),
+);
+
+$level-state-delta: (
+  'hover': 0 0 10,
+  'focused': 0 0 15,
+  'active': 0 0 20,
+  'disabled': 0 0 -50,
+  'muted': 0 0 -30,
+);
+
+$components: (
+  'code': hsl(hue($fg-base), 80%, 96%),
+  'header': hsl(hue($fg-base), 0%, 80%),
+  'icon': hsl(hue(colors.$wisteria), 10%, 75%),
+  'label': hsl(hue($fg-base), 0%, 70%),
+  'token': hsl($base-hue, 85%, 93%),
+);
+
+$interactive-components: (
+  'control': hsl(hue($fg-base), 5%, 70%),
+  'navigation': hsl(hue(colors.$wisteria), 10%, 60%),
+  'input': hsl(hue($fg-base), 0%, 100%),
+  'link': hsl(hue(colors.$fjord), 50%, 80%),
+  'visited-link': hsl(hue(colors.$wisteria), 90%, 70%),
+);
+
+$interactive-component-states: (
+  'hover': 0 0 8,
+  'focused': 0 0 12,
+  'active': 0 0 18,
+  'muted': 0 0 -10,
+  'disabled': 0 0 -12,
+);
+
+$contextual: (
+  'success': hsl(hue(colors.$success), 25%, 60%),
+  'warning': hsl(hue(colors.$warning), 40%, 60%),
+  'danger': hsl(hue(colors.$danger), 60%, 60%),
+  'info': hsl(hue(colors.$info), 35%, 60%),
+  'help': hsl(hue(colors.$help), 30%, 50%),
+  'tip': hsl(hue(colors.$tip), 20%, 60%),
+  'outcome': hsl(hue(colors.$outcome), 20%, 60%),
+);
+
+$contextual-state-deltas: (
+  'hover': 0 6 6,
+  'active': 0 2 10,
+  'focused': 5 5 3,
+  'muted': 0 0 -10,
+  'disabled': 0 0 -15,
+);
+
+$exports: (
+  'stateless': (
+    $static,
+    $components,
+  ),
+  'stateful': (
+    ($levels, $level-state-delta),
+    ($interactive-components, $interactive-component-states),
+    ($contextual, $contextual-state-deltas),
+  ),
+);

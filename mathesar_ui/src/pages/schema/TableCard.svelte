@@ -83,6 +83,9 @@
   icon={iconTable}
   {pendingMessage}
   primary
+  cssVariables={{
+    '--EntityListItem__accent-color': 'var(--color-table-80)',
+  }}
 >
   <svelte:fragment slot="action-buttons">
     {#if !requiresImportConfirmation}

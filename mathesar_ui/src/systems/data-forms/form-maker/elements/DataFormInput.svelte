@@ -53,7 +53,7 @@
 
 <style lang="scss">
   .data-form-input {
-    --input-min-height: 2.5rem;
+    --input-element-min-height: 2.5rem;
     --text-area-min-height: 5.5rem;
   }
 </style>

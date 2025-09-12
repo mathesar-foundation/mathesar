@@ -94,11 +94,14 @@
     {/if}
   </div>
 {:else}
-  <span>{$_('no_formatting_option_data_type')}</span>
+  <span class="disabled">{$_('no_formatting_option_data_type')}</span>
 {/if}
 
 <style lang="scss">
   .footer {
     margin-top: 1rem;
+  }
+  .disabled {
+    color: var(--color-fg-base-muted);
   }
 </style>

@@ -73,7 +73,7 @@
 </GridTableCell>
 <GridTableCell>
   <SpinnerButton
-    appearance="outline-danger"
+    appearance="danger"
     confirm={() =>
       confirm({
         title: {

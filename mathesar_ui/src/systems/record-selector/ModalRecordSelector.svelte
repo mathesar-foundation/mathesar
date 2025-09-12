@@ -87,7 +87,7 @@
     --nested-selector-extra-top-inset: 2rem;
   }
   .overlay {
-    background-color: var(--modal-overlay);
+    background-color: var(--color-modal-overlay);
     position: absolute;
     top: 0;
     right: 0;

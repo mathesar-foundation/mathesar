@@ -38,5 +38,6 @@
     display: inline-grid;
     align-items: center;
     justify-content: center;
+    color: var(--color-fg-base);
   }
 </style>

@@ -13,8 +13,8 @@
     <div class="labeled-input layout-stacked">
       <label for="id_username" class="label-component">
         <span class="label-content">
-          <span class="label">{% translate "Username" %}</span>
-          <span class="input">
+          <span class="labeled-input-label">{% translate "Username" %}</span>
+          <span class="labeled-input-slot input">
             <input type="text" name="username"
             class="input-element{% if form.username.errors %} has-error{% endif %}"
             value="{% if form.username.value %}{{form.username.value}}{% endif %}"
@@ -34,8 +34,8 @@
     <div class="labeled-input layout-stacked">
       <label for="id_password" class="label-component">
         <span class="label-content">
-          <span class="label">{% translate "Password" %}</span>
-          <span class="input">
+          <span class="labeled-input-label">{% translate "Password" %}</span>
+          <span class="labeled-input-slot input">
             <input type="password" name="password"
             class="input-element{% if form.password.errors %} has-error{% endif %}"
             autocomplete="current-password" required id="id_password">

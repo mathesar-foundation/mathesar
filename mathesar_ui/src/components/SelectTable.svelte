@@ -40,7 +40,7 @@
 <style lang="scss">
   .placeholder {
     display: inherit;
-    --icon-color: var(--neutral-500);
-    --name-color: var(--neutral-500);
+    --icon-color: var(--color-fg-token);
+    --name-color: var(--color-fg-token);
   }
 </style>

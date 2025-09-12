@@ -43,7 +43,7 @@
   }
 
   .icon-container {
-    background: linear-gradient(135deg, var(--salmon-400), var(--salmon-600));
+    background: var(--color-database-40);
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
@@ -51,7 +51,6 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--white);
   }
 
   .content {
@@ -62,18 +61,18 @@
   .display-name {
     font-size: var(--lg2);
     font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
   }
 
   .db-name {
     font-size: var(--lg1);
     font-weight: var(--font-weight-normal);
-    color: var(--text-color-secondary);
+    color: var(--color-fg-subtle-1);
   }
 
   .detail {
     font-size: 1rem;
-    color: var(--text-color-muted);
+    color: var(--color-fg-base-disabled);
   }
 
   .caret-container {

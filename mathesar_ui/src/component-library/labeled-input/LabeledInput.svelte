@@ -26,7 +26,7 @@
         CSS that uses the `:empty` pseudo-class which does not work if there is
         white space.
       -->
-      <span class="label">
+      <span class="labeled-input-label">
         {label ?? ''}
         <slot name="label" />
 
@@ -34,7 +34,7 @@
           <Help>{help ?? ''}<slot name="help" /></Help>
         {/if}
       </span>
-      <span class="input"><slot /></span>
+      <span class="labeled-input-slot"><slot /></span>
       {#if displayHelp && helpType === 'inline'}
         <span class="help">{help ?? ''}<slot name="help" /></span>
       {/if}

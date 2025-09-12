@@ -4,7 +4,16 @@
 
   import NameWithIcon from './NameWithIcon.svelte';
 
-  export let query: SavedExploration;
+  export let query: Pick<SavedExploration, 'id' | 'name'>;
+
+  $: ({ name } = query);
 </script>
 
-<NameWithIcon icon={iconExploration}>{query.name}</NameWithIcon>
+<NameWithIcon
+  icon={iconExploration}
+  cssVariables={{ '--icon-color': 'var(--color-exploration)' }}
+>
+  <slot queryName={name}>
+    {name}
+  </slot>
+</NameWithIcon>

@@ -272,17 +272,25 @@
           {#if $linkType === 'oneToMany'}
             <NewColumn
               base={target}
+              baseWhich="base"
               target={base}
+              targetWhich="target"
               field={columnNameInTarget}
               {targetColumnsAreLoading}
             />
           {:else if $linkType === 'manyToOne'}
-            <NewColumn {base} {target} field={columnNameInBase} />
+            <NewColumn
+              {base}
+              {target}
+              baseWhich="target"
+              targetWhich="base"
+              field={columnNameInBase}
+            />
           {:else if $linkType === 'manyToMany'}
             {#if isSelfReferential}
               <Collapsible
                 bind:isOpen={isNewTableOpen}
-                triggerAppearance="outcome"
+                triggerAppearance="ghost"
               >
                 <svelte:fragment slot="header">
                   <RichText
@@ -306,7 +314,7 @@
               {#if $mappingTableName}
                 <Collapsible
                   bind:isOpen={isNewColumnsOpen}
-                  triggerAppearance="outcome"
+                  triggerAppearance="ghost"
                 >
                   <svelte:fragment slot="header">
                     <RichText
@@ -345,7 +353,7 @@
             {:else}
               <Collapsible
                 bind:isOpen={isNewTableOpen}
-                triggerAppearance="outcome"
+                triggerAppearance="ghost"
               >
                 <svelte:fragment slot="header">
                   <RichText
@@ -405,24 +413,14 @@
 
 <style>
   .form {
-    --base-fill: var(--stormy-100);
-    --base-stroke: var(--stormy-300);
-    --target-fill: var(--pumpkin-200);
-    --target-stroke: var(--pumpkin-300);
-    --mapping-fill: var(--salmon-100);
-    --mapping-stroke: var(--salmon-300);
+    --base-fill: var(--color-highlight-a-40);
+    --base-stroke: var(--color-highlight-a);
+    --target-fill: var(--color-highlight-b-60);
+    --target-stroke: var(--color-highlight-b);
+    --mapping-fill: var(--color-highlight-c-60);
+    --mapping-stroke: var(--color-highlight-c);
     line-height: 1.6;
   }
-
-  :global(body.theme-dark) .form {
-    --base-fill: var(--stormy-800);
-    --base-stroke: var(--stormy-600);
-    --target-fill: var(--pumpkin-800);
-    --target-stroke: var(--pumpkin-600);
-    --mapping-fill: var(--salmon-800);
-    --mapping-stroke: var(--salmon-600);
-  }
-
   .form.self-referential {
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);

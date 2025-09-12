@@ -31,11 +31,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: var(--cell-border-horizontal);
-    border-right: var(--cell-border-vertical);
+    border-bottom: 1px solid var(--color-border-header);
+    border-right: 1px solid var(--color-border-header);
     font-size: var(--sm2);
     padding: 0 1.5rem;
-    color: var(--color-text-muted);
+    color: var(--color-fg-base-muted);
 
     &[data-sheet-row-type='placeholder'] {
       cursor: pointer;

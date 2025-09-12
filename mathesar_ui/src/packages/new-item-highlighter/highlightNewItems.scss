@@ -20,7 +20,11 @@ body > .new-item-highlighter {
 
   @starting-style {
     .effect {
-      background: rgba(254, 221, 72, 0.3);
+      background: color-mix(
+        in srgb,
+        var(--color-bg-highlight-subtle),
+        transparent 60%
+      );
       border-radius: 0.5rem;
       inset: 0;
     }
@@ -30,7 +34,7 @@ body > .new-item-highlighter {
 body > .new-item-highlighter__hint {
   position: absolute;
   z-index: var(--new-item-highlighter-z-index, 1000);
-  --background: rgba(0, 0, 0, 0.7);
+  --background: color-mix(in srgb, var(--color-bg-base), transparent 70%);
   inset: 0px auto auto 0px;
   display: flex;
   flex-direction: column;
@@ -43,7 +47,7 @@ body > .new-item-highlighter__hint {
 
   .message {
     background-color: var(--background);
-    color: white;
+    color: var(--color-fg-base);
     padding: 0.5rem;
     border-radius: 0.3rem;
     max-width: 15rem;

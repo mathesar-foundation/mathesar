@@ -42,7 +42,8 @@
 
     &.boxed {
       border-radius: var(--border-radius-xl);
-      background-color: var(--card-background);
+      border: 1px solid var(--color-border-token);
+      background-color: var(--color-bg-token);
       padding: var(--sm6) var(--sm3);
       font-size: var(--TableLink__boxed-font-size, var(--sm1));
       font-weight: var(--font-weight-bold);

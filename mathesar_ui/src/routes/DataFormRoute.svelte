@@ -5,25 +5,21 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
-  import { iconForm } from '@mathesar/icons';
   import DataFormEditorPage from '@mathesar/pages/data-forms/DataFormEditorPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import LoadingPage from '@mathesar/pages/LoadingPage.svelte';
-  import { getDataFormPageUrl } from '@mathesar/routes/urls';
   import { ensureReadable } from '@mathesar-component-library';
 
   export let formId: number;
 
   const schemaRouteContext = SchemaRouteContext.get();
-  $: ({ schema, dataForms, dataFormsFetch } = $schemaRouteContext);
+  $: ({ dataForms, dataFormsFetch } = $schemaRouteContext);
 
   $: void dataFormsFetch.runConservatively();
   $: form = $dataForms.get(formId);
   $: dataFormRouteContext = form
     ? DataFormRouteContext.construct($schemaRouteContext, form)
     : ensureReadable(undefined);
-
-  $: formStructure = ensureReadable(form?.structure);
 </script>
 
 {#if $dataFormsFetch.isLoading}
@@ -34,13 +30,11 @@
   <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
 {/if}
 
-{#if $dataFormRouteContext && $formStructure}
+{#if $dataFormRouteContext && form}
   <AppendBreadcrumb
     item={{
-      type: 'simple',
-      href: getDataFormPageUrl(schema.database.id, schema.oid, formId),
-      label: $formStructure?.name ?? $_('form'),
-      icon: iconForm,
+      type: 'dataForm',
+      dataForm: form,
     }}
   />
 
