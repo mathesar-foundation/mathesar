@@ -20,8 +20,12 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--border-radius-l);
-    background-color: var(--color-bg-raised-1-muted);
-    border: 1px solid var(--color-border-raised-1-muted);
+    --color: color-mix(in srgb, var(--color-fg-base), transparent 92%);
+    background: radial-gradient(
+      circle at bottom right,
+      var(--color) 0%,
+      transparent 60%
+    );
   }
 
   .content {
@@ -32,7 +36,7 @@
     justify-content: center;
     text-align: center;
     padding: 1.5rem;
-    color: var(--color-fg-subtle-1);
+    color: var(--color-fg-subtle-2);
 
     > :global(* + *) {
       margin-top: 0.5rem;
