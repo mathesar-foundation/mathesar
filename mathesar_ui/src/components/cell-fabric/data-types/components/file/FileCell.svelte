@@ -1,17 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import Default from '@mathesar/components/Default.svelte';
-  import { Button, Icon } from '@mathesar-component-library';
   import { fileViewerContext } from '@mathesar/components/file-viewer/FileViewerContext';
+  import { ROW_HEIGHT_PX } from '@mathesar/geometry';
+  import { iconAddNew } from '@mathesar/icons';
+  import { Button, Icon } from '@mathesar-component-library';
 
   import CellWrapper from '../CellWrapper.svelte';
 
   import AttachedFile from './AttachedFile.svelte';
-  import { ROW_HEIGHT_PX } from '@mathesar/geometry';
-  import { iconAddNew } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
   const fileViewer = fileViewerContext.get();
@@ -26,6 +25,16 @@
 
   $: hasValue = value !== undefined && value !== null;
   $: canOpen = isActive;
+
+  function openFileViewer() {
+    // TODO_FILES_UI: Fix click behavior. Clicking on the thumbnail of an
+    // inactive cell should _not_ open the file viewer.
+
+    if (!fileManifest) return;
+    if (!canOpen) return;
+    if (!fileViewer) return;
+    fileViewer.open(fileManifest, { removeFile: removeFileFromCell });
+  }
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
@@ -52,14 +61,8 @@
     dispatch('activate');
   }
 
-  function openFileViewer() {
-    // TODO_FILES_UI: Fix click behavior. Clicking on the thumbnail of an
-    // inactive cell should _not_ open the file viewer.
-
-    if (!fileManifest) return;
-    if (!canOpen) return;
-    if (!fileViewer) return;
-    fileViewer.open(fileManifest);
+  function removeFileFromCell() {
+    // TODO_FILES_UI: implement
   }
 
   function upload() {

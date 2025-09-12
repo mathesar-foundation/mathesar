@@ -16,6 +16,7 @@ import {
   faClipboardList,
   faClock,
   faClone,
+  faCloudDownloadAlt,
   faCogs,
   faCommentAlt,
   faComments,
@@ -182,6 +183,7 @@ export const iconDuplicateRecord: IconProps = {
   flip: 'vertical',
 };
 export const iconFillOutForm: IconProps = { data: faPlay };
+export const iconDownload: IconProps = { data: faCloudDownloadAlt };
 
 // THINGS
 //

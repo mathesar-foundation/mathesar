@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { FileManifest } from '@mathesar/api/rpc/records';
+
   import ImageFileViewer from './ImageFileViewer.svelte';
 
   export let file: FileManifest;
   export let close: () => void = () => {};
+  export let remove: () => void = () => {};
 
   $: mimeCategory = file.mimetype.split('/').at(0) ?? 'unknown';
 
@@ -11,5 +13,5 @@
 </script>
 
 {#if mimeCategory === 'image'}
-  <ImageFileViewer {file} {close} />
+  <ImageFileViewer {file} {close} {remove} />
 {/if}

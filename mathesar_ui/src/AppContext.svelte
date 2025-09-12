@@ -22,10 +22,10 @@
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
-  import { initUiTheme } from './utils/uiThemePreference';
-  import { fileViewerContext } from './components/file-viewer/FileViewerContext';
   import ControlledFileViewer from './components/file-viewer/ControlledFileViewer.svelte';
+  import { fileViewerContext } from './components/file-viewer/FileViewerContext';
   import FileViewerController from './components/file-viewer/FileViewerController';
+  import { initUiTheme } from './utils/uiThemePreference';
 
   export let commonData: CommonData;
 

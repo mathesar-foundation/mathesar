@@ -8,5 +8,9 @@
 </script>
 
 {#if file}
-  <FileViewer {file} close={() => controller.close()} />
+  <FileViewer
+    {file}
+    close={() => controller.close()}
+    remove={() => controller.removeFile()}
+  />
 {/if}

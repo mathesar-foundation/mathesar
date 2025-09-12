@@ -2,6 +2,7 @@ import {
   type Readable,
   type Subscriber,
   type Unsubscriber,
+  get,
   writable,
 } from 'svelte/store';
 
@@ -12,12 +13,20 @@ export default class FileViewerController
 {
   private file = writable<FileManifest | undefined>(undefined);
 
-  open(file: FileManifest) {
+  private fileRemover = writable<(() => void) | undefined>(undefined);
+
+  open(file: FileManifest, options: { removeFile?: () => void } = {}) {
     this.file.set(file);
+    this.fileRemover.set(options.removeFile);
   }
 
   close() {
     this.file.set(undefined);
+  }
+
+  removeFile() {
+    const remove = get(this.fileRemover);
+    remove?.();
   }
 
   subscribe(subscription: Subscriber<FileManifest | undefined>): Unsubscriber {
