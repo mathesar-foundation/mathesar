@@ -163,13 +163,15 @@ def save_file(f, request, backend_key='default'):
 
 
 def _build_valid_link_dict(result, backends):
+    output = None, None
     try:
         result_dict = json.loads(result)
         for b in backends:
             if result_dict[MASH] == create_mash_for_uri(result_dict[URI], b):
-                return result_dict, b
+                output = result_dict, b
     except Exception:  # We really don't want to stop execution here for anything
-        return None, None
+        pass
+    return output
 
 
 def _get_single_link_details(request, link):
