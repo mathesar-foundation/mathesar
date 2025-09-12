@@ -58,6 +58,8 @@
       @include generate-utility-color-tokens($name, $color);
     }
 
+    background-color: var(--color-bg-base);
+
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
