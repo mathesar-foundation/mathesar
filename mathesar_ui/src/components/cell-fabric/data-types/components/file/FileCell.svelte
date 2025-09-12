@@ -26,6 +26,10 @@
   $: hasValue = value !== undefined && value !== null;
   $: canOpen = isActive;
 
+  function removeFileFromCell() {
+    // TODO_FILES_UI: implement
+  }
+
   function openFileViewer() {
     // TODO_FILES_UI: Fix click behavior. Clicking on the thumbnail of an
     // inactive cell should _not_ open the file viewer.
@@ -59,10 +63,6 @@
 
   function handleMouseDown() {
     dispatch('activate');
-  }
-
-  function removeFileFromCell() {
-    // TODO_FILES_UI: implement
   }
 
   function upload() {
