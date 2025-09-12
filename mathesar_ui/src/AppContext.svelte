@@ -22,9 +22,9 @@
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
-  import ControlledFileViewer from './components/file-viewer/ControlledFileViewer.svelte';
-  import { fileViewerContext } from './components/file-viewer/FileViewerContext';
-  import FileViewerController from './components/file-viewer/FileViewerController';
+  import ControlledFileViewer from './components/file-attachments/file-viewer/ControlledFileViewer.svelte';
+  import { fileViewerContext } from './components/file-attachments/file-viewer/FileViewerContext';
+  import FileViewerController from './components/file-attachments/file-viewer/FileViewerController';
   import { initUiTheme } from './utils/uiThemePreference';
 
   export let commonData: CommonData;

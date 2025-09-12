@@ -3,7 +3,7 @@
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import Default from '@mathesar/components/Default.svelte';
-  import { fileViewerContext } from '@mathesar/components/file-viewer/FileViewerContext';
+  import { fileViewerContext } from '@mathesar/components/file-attachments/file-viewer/FileViewerContext';
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
   import { iconAddNew } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
