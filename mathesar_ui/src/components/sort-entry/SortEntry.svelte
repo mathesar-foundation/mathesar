@@ -91,36 +91,45 @@
   }
 </script>
 
-<InputGroup>
-  <Select
-    options={columnIdentifiers}
-    autoSelect="none"
-    bind:value={columnIdentifier}
-    disabled={disableColumnChange}
-    getLabel={(columnId) =>
-      columnId ? getColumnLabel(columns.get(columnId)) : ''}
-    on:change={update}
-    let:option
-  >
-    {@const columnInfo = columns.get(option)}
-    <ColumnName
-      column={{
-        name: getColumnLabel(columnInfo),
-        type: columnInfo?.column.type ?? 'unknown',
-        type_options: columnInfo?.column.type_options ?? null,
-        constraintsType: getColumnConstraintTypeByColumnId(option),
-      }}
+<div class="sort-entry">
+  <InputGroup>
+    <Select
+      options={columnIdentifiers}
+      autoSelect="none"
+      bind:value={columnIdentifier}
+      disabled={disableColumnChange}
+      getLabel={(columnId) =>
+        columnId ? getColumnLabel(columns.get(columnId)) : ''}
+      on:change={update}
+      let:option
+    >
+      {@const columnInfo = columns.get(option)}
+      <ColumnName
+        column={{
+          name: getColumnLabel(columnInfo),
+          type: columnInfo?.column.type ?? 'unknown',
+          type_options: columnInfo?.column.type_options ?? null,
+          constraintsType: getColumnConstraintTypeByColumnId(option),
+        }}
+      />
+    </Select>
+    <Select
+      options={allowedSortDirections}
+      getLabel={getSortDirectionLabel}
+      bind:value={sortDirection}
+      on:change={update}
     />
-  </Select>
-  <Select
-    options={allowedSortDirections}
-    getLabel={getSortDirectionLabel}
-    bind:value={sortDirection}
-    on:change={update}
-  />
+  </InputGroup>
   {#if allowDelete}
-    <Button size="small" appearance="secondary" on:click={removeSort}>
+    <Button size="small" appearance="ghost" on:click={removeSort}>
       <Icon {...iconDeleteMajor} />
     </Button>
   {/if}
-</InputGroup>
+</div>
+
+<style>
+  .sort-entry {
+    display: flex;
+    align-items: center;
+  }
+</style>

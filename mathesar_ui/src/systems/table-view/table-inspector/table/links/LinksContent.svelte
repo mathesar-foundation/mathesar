@@ -142,7 +142,7 @@
     margin-top: 1rem;
   }
   .null-text {
-    color: var(--color-text-muted);
+    color: var(--color-fg-base-muted);
   }
   .header {
     margin-bottom: 0.5rem;

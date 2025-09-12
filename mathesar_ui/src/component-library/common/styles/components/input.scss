@@ -1,9 +1,9 @@
 .input-element {
-  border: var(--input-element-border, 1px solid var(--border-color));
+  border: var(--input-element-border, 1px solid var(--color-border-input));
   align-items: center;
   border-radius: var(--border-radius-m);
-  background: var(--input-background);
-  color: var(--input-text);
+  background: var(--input-element-background, var(--color-bg-input));
+  color: var(--input-element-color, var(--color-fg-input));
   margin: 0;
   padding: var(--input-padding);
   line-height: var(--input-line-height);
@@ -12,38 +12,53 @@
   display: block;
   width: 100%;
   box-sizing: border-box;
-  min-height: var(--input-min-height, unset);
+  min-height: var(--input-element-min-height, 2.2rem);
   text-align: var(--input-element-text-align, 'left');
 
   &::placeholder {
-    color: var(--text-color-muted);
+    color: var(--color-fg-base-disabled);
   }
 
-  &:focus {
-    border-color: var(--input-focus-color);
-    outline: 0;
-    box-shadow: var(
-      --input-element-focus-box-shadow,
-      0 0 0 2px var(--input-focus-shadow)
-    );
+  &:not(:disabled) {
+    &:focus {
+      border-color: var(--color-border-input-focused);
+    }
+
+    &:active {
+      border-color: var(--color-border-input-active);
+    }
+
+    &:focus,
+    &:active {
+      outline: var(
+        --input-element-focus-outline,
+        1px solid
+          color-mix(in srgb, var(--color-border-input-focused), transparent 70%)
+      );
+      outline-offset: 1px;
+      box-shadow: var(
+        --input-element-focus-box-shadow,
+        0 0 2px 1px var(--color-shadow)
+      );
+    }
   }
 
   &:disabled {
-    background: var(--input-disabled-background);
-    color: var(--text-color-muted);
+    background: var(--color-bg-input-disabled);
+    color: var(--color-fg-input-disabled);
   }
 
   &.read-only {
-    background: var(--input-disabled-background);
+    background: var(--color-bg-input-muted);
   }
 
   &.has-error {
-    border-color: var(--danger-color);
-    background: var(--danger-background-color);
+    border-color: var(--color-border-danger);
+    background: var(--color-bg-danger);
   }
 
   &.text-area {
     resize: var(--text-area-resize, vertical);
-    min-height: var(--text-area-min-height, auto);
+    min-height: var(--text-area-min-height, 4rem);
   }
 }

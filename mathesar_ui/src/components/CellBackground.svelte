@@ -25,6 +25,6 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
-    mix-blend-mode: var(--cell-bg-mix-blend-mode, multiply);
+    mix-blend-mode: var(--cell-bg-mix-blend-mode);
   }
 </style>

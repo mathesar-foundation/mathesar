@@ -72,7 +72,7 @@
 </script>
 
 <div class="databases-list">
-  <h2>
+  <h2 class="page-header">
     {$_('databases')}
     <Help>
       <RichText text={$_('databases_list_help')} let:slotName let:translatedArg>
@@ -190,6 +190,10 @@
 />
 
 <style lang="scss">
+  .page-header {
+    color: var(--color-fg-header);
+  }
+
   .message-area {
     margin-bottom: 1rem;
   }

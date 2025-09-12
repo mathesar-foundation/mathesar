@@ -10,21 +10,20 @@
   $: isError = state === 'error';
 </script>
 
-<Button
-  class="refresh-button"
-  appearance="secondary"
-  size="medium"
-  disabled={isLoading}
-  on:click
->
-  <Icon {...isError && !isLoading ? iconError : iconRefresh} spin={isLoading} />
-  <span>
-    {#if isLoading}
-      {$_('loading')}
-    {:else if isError}
-      {$_('retry')}
-    {:else}
-      {$_('refresh')}
-    {/if}
-  </span>
-</Button>
+<div class="refresh-button">
+  <Button size="medium" disabled={isLoading} on:click>
+    <Icon
+      {...isError && !isLoading ? iconError : iconRefresh}
+      spin={isLoading}
+    />
+    <span>
+      {#if isLoading}
+        {$_('loading')}
+      {:else if isError}
+        {$_('retry')}
+      {:else}
+        {$_('refresh')}
+      {/if}
+    </span>
+  </Button>
+</div>

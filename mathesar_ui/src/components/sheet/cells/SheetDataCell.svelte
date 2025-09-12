@@ -39,7 +39,7 @@
   style={$style}
 >
   {#if hasSelectionBackground}
-    <CellBackground color="var(--sheet-cell-selection-bg)" when={isSelected} />
+    <CellBackground color="var(--color-selection-subtle-2)" when={isSelected} />
   {/if}
   <slot {isActive} {isSelected} />
 </div>
@@ -57,12 +57,7 @@
     user-select: none;
     -webkit-user-select: none; /* Safari */
     background: var(--cell-bg-color-base);
-    --sheet-cell-selection-bg: rgba(218, 238, 251, 0.5);
     line-height: 1.2;
-  }
-
-  :global(body.theme-dark) [data-sheet-element='data-cell'] {
-    --sheet-cell-selection-bg: rgba(15, 105, 193, 0.15);
   }
 
   [data-cell-active] {

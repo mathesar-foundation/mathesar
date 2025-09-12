@@ -69,21 +69,21 @@
 
 <style>
   .release {
-    border: solid 1px var(--border-color);
     padding: var(--lg1);
     border-radius: var(--border-radius-l);
-    background-color: var(--card-background);
+    border: solid 1px var(--color-border-raised-1);
+    background: var(--color-bg-raised-1);
   }
 
   .release.available-upgrade {
-    border-color: var(--warning-border-color);
-    background-color: var(--warning-background-color);
+    border-color: var(--color-border-warning);
+    background-color: var(--color-bg-warning);
     border-width: 1px;
   }
 
   .type {
     margin-bottom: 1rem;
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -106,30 +106,29 @@
   }
 
   .logo {
-    background: var(--card-background);
     font-size: 1rem;
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
     padding: 0.5rem;
     display: flex;
-    border: solid 1px var(--border-color);
+    border: solid 1px var(--color-border-section);
     border-radius: 500px;
   }
 
   .name {
     font-size: var(--lg1);
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
     font-weight: var(--font-weight-medium);
   }
 
   .version {
     font-size: var(--lg2);
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
     font-weight: var(--font-weight-extra-bold);
   }
 
   .right {
     flex: 1 0 auto;
-    color: var(--text-color-muted);
+    color: var(--color-fg-base-disabled);
     display: flex;
     align-items: center;
     justify-content: flex-end;

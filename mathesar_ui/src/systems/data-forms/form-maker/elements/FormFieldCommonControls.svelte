@@ -15,7 +15,7 @@
   <Tooltip enabled={!dataFormField.canDelete}>
     <Button
       slot="trigger"
-      appearance="outcome"
+      appearance="secondary"
       disabled={!dataFormField.canDelete}
       on:click={() => dataFormField.container.delete(dataFormField)}
     >

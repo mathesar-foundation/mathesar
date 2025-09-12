@@ -63,7 +63,7 @@
 
 <style lang="scss">
   .presets {
-    border-top: 1px solid var(--color-gray-light);
+    border-top: 1px solid var(--color-border-control);
     padding: 0.4rem 0.6rem;
     display: flex;
     align-items: center;
@@ -74,20 +74,20 @@
     }
 
     :global(button.btn) {
-      border: 1px solid var(--color-gray-light);
+      border: 1px solid var(--color-border-control);
       border-radius: 1rem;
       padding: 0.3rem 0.6rem;
     }
 
     :global(button.btn.selected) {
-      background: var(--color-contrast);
-      color: var(--white);
+      background: var(--color-bg-filled-input);
+      color: var(--color-fg-inverted);
     }
 
     .tag-label {
       &.absolute-date {
         font-size: var(--sm2);
-        color: var(--color-text-muted);
+        color: var(--color-fg-base-muted);
       }
     }
   }
