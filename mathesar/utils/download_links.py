@@ -28,7 +28,7 @@ def get_link_contents(session_key, download_link_mash):
     )
     content_type = _mimetype(link.uri)
     of = fsspec.open(link.uri, "rb", **link.fsspec_kwargs)
-    filename = posixpath.split(of.path)[-1]
+    filename = _get_filename_for_uri(link.uri)
 
     def stream_file():
         with of as f:
@@ -87,6 +87,10 @@ def create_json_for_uri(uri, backend_key):
         {URI: uri, MASH: create_mash_for_uri(uri, backend_key)},
         sort_keys=True
     )
+
+
+def _get_filename_for_uri(uri):
+    return posixpath.split(uri)[-1]
 
 
 def get_download_links(request, results, keys):
@@ -181,6 +185,7 @@ def _get_single_link_details(request, link):
 
     return {
         "uri": link.uri,
+        "name": _get_filename_for_uri(link.uri),
         "mimetype": _mimetype(link.uri),
         "thumbnail": _link("files_thumbnail") if _is_image(link.uri) else None,
         "attachment": _link("files_download"),
