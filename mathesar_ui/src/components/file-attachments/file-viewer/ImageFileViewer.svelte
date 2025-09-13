@@ -81,7 +81,6 @@
 
       <Dropdown
         showArrow={false}
-        triggerAppearance="secondary"
         {...$$restProps}
         ariaLabel={$_('filter')}
         placements={['bottom', 'top']}
@@ -123,7 +122,7 @@
     justify-content: center;
   }
   .overlay {
-    background-color: var(--modal-overlay);
+    background-color: var(--color-modal-overlay);
     position: absolute;
     inset: 0;
     z-index: 1;
