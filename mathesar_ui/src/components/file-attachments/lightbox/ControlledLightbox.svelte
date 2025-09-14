@@ -4,13 +4,9 @@
 
   export let controller: LightboxController;
 
-  $: file = $controller;
+  $: props = $controller;
 </script>
 
-{#if file}
-  <Lightbox
-    {file}
-    close={() => controller.close()}
-    remove={() => controller.removeFile()}
-  />
+{#if props}
+  <Lightbox close={() => controller.close()} {...props} />
 {/if}

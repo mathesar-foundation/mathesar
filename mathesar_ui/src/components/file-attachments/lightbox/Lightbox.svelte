@@ -15,11 +15,16 @@
 
   const imageDimensions = makeDimensionsStore();
 
-  export let file: FileManifest;
+  export let imageElement: HTMLImageElement;
+  export let thumbnailElement: HTMLImageElement | undefined = undefined;
+  export let fileManifest: FileManifest;
   export let close: () => void = () => {};
-  export let remove: () => void = () => {};
+  export let removeFile: () => void = () => {};
 
-  $: ({ uri, direct, attachment: downloadUrl, mimetype } = file);
+  let imageContainer: HTMLDivElement;
+
+  $: ({ uri, attachment: downloadUrl, mimetype } = fileManifest);
+  $: ({ naturalHeight, naturalWidth } = imageElement);
 
   /**
    * I implemented this layout using a resize observer to monitor the image
@@ -43,6 +48,7 @@
   }
 
   onMount(() => {
+    imageContainer.appendChild(imageElement);
     window.addEventListener('keydown', handleKeydown);
     return () => {
       window.removeEventListener('keydown', handleKeydown);
@@ -70,9 +76,12 @@
         <Icon {...iconClose} />
       </Button>
     </div>
-    <img alt={uri} src={direct} use:resizeObserver={imageDimensions} />
+    <!-- <img alt={uri} src={direct} use:resizeObserver={imageDimensions} /> -->
+
+    <div class="image" bind:this={imageContainer}></div>
+
     <div class="bottom">
-      <Button on:click={remove} aria-label={$_('remove')}>
+      <Button on:click={removeFile} aria-label={$_('remove')}>
         <Icon {...iconDeleteMajor} />
         {#if showButtonLabels}
           <span>{$_('remove')}</span>

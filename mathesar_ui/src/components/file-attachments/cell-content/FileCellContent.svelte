@@ -6,6 +6,9 @@
   import { Button, Icon } from '@mathesar-component-library';
 
   import { lightboxContext } from '../lightbox/LightboxController';
+  import { fetchImage } from '../fileUtils';
+  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import { onMount } from 'svelte';
 
   const lightbox = lightboxContext.get();
 
@@ -22,27 +25,46 @@
   export let thumbnailResolutionHeightPx: number;
   export let canUpload: boolean;
 
-  $: hasValue = value !== undefined && value !== null;
+  let thumbnailElement: HTMLImageElement;
+  let imageLoading = false;
+  let imageElement: HTMLImageElement | undefined;
 
-  $: ({ mimetype, uri, thumbnail } = manifest);
+  $: hasValue = value !== undefined && value !== null;
+  $: ({ mimetype, uri, thumbnail, direct } = manifest);
   $: mimeCategory = mimetype.split('/').at(0) ?? 'unknown';
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
 
-  function openFileViewer() {
+  async function openFileViewer() {
     // TODO_FILES_UI: Fix click behavior. Clicking on the thumbnail of an
     // inactive cell should _not_ open the file viewer.
 
     if (!manifest) return;
     if (!canOpenViewer) return;
     if (!lightbox) return;
-    lightbox.open(manifest, { removeFile: () => updateCell(null) });
+
+    if (!imageElement) {
+      imageLoading = true;
+      imageElement = await fetchImage(direct);
+      imageLoading = false;
+    }
+    if (!imageElement) return;
+
+    // TODO_FILES_UI consider click listener on window to stop lightbox from
+    // opening?
+
+    lightbox.open({
+      imageElement,
+      thumbnailElement,
+      fileManifest: manifest,
+      removeFile: () => updateCell(null),
+    });
   }
 
   function upload() {
     // TODO_FILES_UI
   }
 
-  onParentTriggersFileViewer(openFileViewer);
+  onMount(onParentTriggersFileViewer(openFileViewer));
 </script>
 
 <div class="file-cell-content">
@@ -51,7 +73,16 @@
       <div class="attached-file" class:can-open={canOpenViewer}>
         {#if mimeCategory === 'image'}
           <!-- TODO_FILES_UI: add a loading indicator -->
-          <img alt={uri} src={thumbnailUrl} on:click={openFileViewer} />
+          <img
+            alt={uri}
+            src={thumbnailUrl}
+            on:click={openFileViewer}
+            bind:this={thumbnailElement}
+          />
+          {#if imageLoading}
+            <!-- TODO_FILES_UI: Display spinner over thumbnail somehow -->
+            <Spinner />
+          {/if}
         {:else}
           <!-- TODO_FILES_UI: we probably want to display a generic icon here instead -->
           {uri}
@@ -97,6 +128,7 @@
   .attached-file {
     height: 100%;
     overflow: hidden;
+    display: flex;
   }
   img {
     display: block;

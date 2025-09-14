@@ -2,34 +2,35 @@ import {
   type Readable,
   type Subscriber,
   type Unsubscriber,
-  get,
   writable,
 } from 'svelte/store';
 
 import type { FileManifest } from '@mathesar/api/rpc/records';
 import { makeContext } from '@mathesar/contexts/utils';
 
-export class LightboxController implements Readable<FileManifest | undefined> {
-  private file = writable<FileManifest | undefined>(undefined);
+export interface LightboxProps {
+  /** The main image being displayed */
+  imageElement: HTMLImageElement;
+  /** The DOM node of the thumbnail from which the lightbox was opened */
+  thumbnailElement?: HTMLImageElement;
+  fileManifest: FileManifest;
+  /** Triggers removal of the file from where it is stored. No confirmation. */
+  removeFile: () => void;
+}
 
-  private fileRemover = writable<(() => void) | undefined>(undefined);
+export class LightboxController implements Readable<LightboxProps | undefined> {
+  private props = writable<LightboxProps | undefined>(undefined);
 
-  open(file: FileManifest, options: { removeFile?: () => void } = {}) {
-    this.file.set(file);
-    this.fileRemover.set(options.removeFile);
+  open(props: LightboxProps) {
+    this.props.set(props);
   }
 
   close() {
-    this.file.set(undefined);
+    this.props.set(undefined);
   }
 
-  removeFile() {
-    const remove = get(this.fileRemover);
-    remove?.();
-  }
-
-  subscribe(subscription: Subscriber<FileManifest | undefined>): Unsubscriber {
-    return this.file.subscribe(subscription);
+  subscribe(subscription: Subscriber<LightboxProps | undefined>): Unsubscriber {
+    return this.props.subscribe(subscription);
   }
 }
 
