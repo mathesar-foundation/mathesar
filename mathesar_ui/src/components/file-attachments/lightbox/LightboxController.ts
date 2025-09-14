@@ -7,10 +7,9 @@ import {
 } from 'svelte/store';
 
 import type { FileManifest } from '@mathesar/api/rpc/records';
+import { makeContext } from '@mathesar/contexts/utils';
 
-export default class FileViewerController
-  implements Readable<FileManifest | undefined>
-{
+export class LightboxController implements Readable<FileManifest | undefined> {
   private file = writable<FileManifest | undefined>(undefined);
 
   private fileRemover = writable<(() => void) | undefined>(undefined);
@@ -33,3 +32,5 @@ export default class FileViewerController
     return this.file.subscribe(subscription);
   }
 }
+
+export const lightboxContext = makeContext<LightboxController>();

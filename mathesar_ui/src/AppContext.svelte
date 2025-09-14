@@ -22,9 +22,11 @@
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
-  import ControlledFileViewer from './components/file-attachments/file-viewer/ControlledFileViewer.svelte';
-  import { fileViewerContext } from './components/file-attachments/file-viewer/FileViewerContext';
-  import FileViewerController from './components/file-attachments/file-viewer/FileViewerController';
+  import ControlledLightbox from './components/file-attachments/lightbox/ControlledLightbox.svelte';
+  import {
+    LightboxController,
+    lightboxContext,
+  } from './components/file-attachments/lightbox/LightboxController';
   import { initUiTheme } from './utils/uiThemePreference';
 
   export let commonData: CommonData;
@@ -60,8 +62,8 @@
   const rowSeekerController = new AttachableRowSeekerController();
   rowSeekerContext.set(rowSeekerController);
 
-  const fileViewerController = new FileViewerController();
-  fileViewerContext.set(fileViewerController);
+  const lightboxController = new LightboxController();
+  lightboxContext.set(lightboxController);
 
   const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
   $: clipboardHandler = $clipboardHandlerStore;
@@ -106,6 +108,6 @@
   modalController={recordSelectorModal}
 />
 <AttachableRowSeeker controller={rowSeekerController} />
-<ControlledFileViewer controller={fileViewerController} />
+<ControlledLightbox controller={lightboxController} />
 
 <slot />

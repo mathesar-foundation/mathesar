@@ -1,12 +1,13 @@
 <script lang="ts">
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import Default from '@mathesar/components/Default.svelte';
-  import { fileViewerContext } from '@mathesar/components/file-attachments/file-viewer/FileViewerContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { MessageReceiver } from '@mathesar/utils/OneWayMessageChannel';
   import { Button, Icon } from '@mathesar-component-library';
 
-  const fileViewer = fileViewerContext.get();
+  import { lightboxContext } from '../lightbox/LightboxController';
+
+  const lightbox = lightboxContext.get();
 
   export let value: unknown = undefined;
   export let manifest: FileManifest;
@@ -33,8 +34,8 @@
 
     if (!manifest) return;
     if (!canOpenViewer) return;
-    if (!fileViewer) return;
-    fileViewer.open(manifest, { removeFile: () => updateCell(null) });
+    if (!lightbox) return;
+    lightbox.open(manifest, { removeFile: () => updateCell(null) });
   }
 
   function upload() {
