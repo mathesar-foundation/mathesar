@@ -2,43 +2,22 @@
   import { createEventDispatcher } from 'svelte';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
-  import Default from '@mathesar/components/Default.svelte';
-  import { fileViewerContext } from '@mathesar/components/file-attachments/file-viewer/FileViewerContext';
+  import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
-  import { iconAddNew } from '@mathesar/icons';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { oneWayMessageChannel } from '@mathesar/utils/OneWayMessageChannel';
 
   import CellWrapper from '../CellWrapper.svelte';
 
-  import AttachedFile from './AttachedFile.svelte';
-
+  /** Using 2x to look good on high DPI displays */
+  const thumbnailResolutionHeightPx = ROW_HEIGHT_PX * 2;
   const dispatch = createEventDispatcher();
-  const fileViewer = fileViewerContext.get();
+  const [openFileViewer, onOpenFileViewer] = oneWayMessageChannel();
 
   export let fileManifest: FileManifest | undefined = undefined;
   export let isActive: boolean;
   export let value: unknown = undefined;
   export let disabled: boolean;
   export let isIndependentOfSheet: boolean;
-
-  let cellWrapperElement: HTMLElement;
-
-  $: hasValue = value !== undefined && value !== null;
-  $: canOpen = isActive;
-
-  function removeFileFromCell() {
-    // TODO_FILES_UI: implement
-  }
-
-  function openFileViewer() {
-    // TODO_FILES_UI: Fix click behavior. Clicking on the thumbnail of an
-    // inactive cell should _not_ open the file viewer.
-
-    if (!fileManifest) return;
-    if (!canOpen) return;
-    if (!fileViewer) return;
-    fileViewer.open(fileManifest, { removeFile: removeFileFromCell });
-  }
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
@@ -61,12 +40,12 @@
     }
   }
 
-  function handleMouseDown() {
-    dispatch('activate');
+  function updateCell() {
+    // TODO_FILES_UI: implement
   }
 
-  function upload() {
-    // TODO_FILES_UI
+  function handleMouseDown() {
+    dispatch('activate');
   }
 </script>
 
@@ -78,27 +57,20 @@
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
   hasPadding={false}
-  bind:element={cellWrapperElement}
 >
   <div class="file-cell" class:disabled style={`height: ${ROW_HEIGHT_PX}px;`}>
-    {#if hasValue}
-      {#if fileManifest}
-        <AttachedFile manifest={fileManifest} {canOpen} open={openFileViewer} />
-      {:else}
+    {#if fileManifest}
+      <FileCellContent
         {value}
-      {/if}
-    {:else if value === undefined}
-      <div class="centered">
-        <Default />
-      </div>
+        manifest={fileManifest}
+        {updateCell}
+        canOpenViewer={isActive}
+        onParentTriggersFileViewer={onOpenFileViewer}
+        {thumbnailResolutionHeightPx}
+        canUpload={isActive && !disabled}
+      />
     {:else}
-      <div class="add">
-        {#if isActive}
-          <Button on:click={upload}>
-            <Icon {...iconAddNew} />
-          </Button>
-        {/if}
-      </div>
+      <!-- TODO_FILES_UI: handle this failure scenario -->
     {/if}
   </div>
 </CellWrapper>
@@ -108,17 +80,5 @@
     display: grid;
     overflow: hidden;
     padding: 1px;
-  }
-  .centered {
-    display: grid;
-    align-items: center;
-    justify-content: start;
-    padding-inline: var(--cell-padding);
-  }
-  .add {
-    display: grid;
-    align-items: center;
-    justify-content: end;
-    padding-inline: var(--cell-padding);
   }
 </style>
