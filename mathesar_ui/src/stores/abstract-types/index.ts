@@ -1,7 +1,7 @@
 export {
   getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
   getAllowedAbstractTypesForNewColumn,
-  defaultDbType,
+  defaultAbstractType,
   getDefaultDbTypeOfAbstractType,
   getAbstractTypeForDbType,
 } from './abstractTypeCategories';

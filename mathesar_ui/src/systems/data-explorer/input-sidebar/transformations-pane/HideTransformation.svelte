@@ -35,6 +35,7 @@
         name: columnInfo?.display_name ?? '',
         type: columnInfo?.type ?? 'unknown',
         type_options: columnInfo?.type_options ?? null,
+        metadata: columnInfo?.metadata ?? null,
       }}
     />
   </MultiSelect>

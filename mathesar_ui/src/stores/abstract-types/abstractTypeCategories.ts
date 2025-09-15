@@ -1,3 +1,4 @@
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type { DbType } from '@mathesar/AppTypes';
 import {
   iconUiTypeArray,
@@ -61,7 +62,10 @@ export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
     const itemType = args?.typeOptions?.item_type ?? undefined;
     if (!itemType) return arrayIcon;
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const innerAbstractType = getAbstractTypeForDbType(itemType);
+    const innerAbstractType = getAbstractTypeForDbType(
+      itemType,
+      args?.metadata ?? null,
+    );
     const innerIcon = innerAbstractType.getIcon();
     const innerIcons = Array.isArray(innerIcon) ? innerIcon : [innerIcon];
     return [arrayIcon, ...innerIcons];
@@ -94,8 +98,6 @@ const comboAbstractTypeCategories: Partial<
   [abstractTypeCategory.JsonArray]: jsonArrayFactory,
   [abstractTypeCategory.JsonObject]: jsonObjectFactory,
 };
-
-export const defaultDbType = DB_TYPES.TEXT;
 
 function constructAbstractTypeMapFromResponse(
   abstractTypesResponse: AbstractTypeResponse[],
@@ -255,6 +257,14 @@ const typesResponse: AbstractTypeResponse[] = [
 
 const abstractTypesMap = constructAbstractTypeMapFromResponse(typesResponse);
 
+export const defaultAbstractType = (() => {
+  const textType = abstractTypesMap.get('text');
+  if (!textType) {
+    throw new Error('Text UI type not found. This should never happen');
+  }
+  return textType;
+})();
+
 function identifyAbstractTypeForDbType(
   dbType: DbType,
 ): AbstractType | undefined {
@@ -268,7 +278,11 @@ function identifyAbstractTypeForDbType(
   return abstractTypeOfDbType;
 }
 
-export function getAbstractTypeForDbType(dbType: DbType): AbstractType {
+
+export function getAbstractTypeForDbType(
+  dbType: DbType,
+  metadata: ColumnMetadata | null,
+): AbstractType {
   let abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType);
   if (!abstractTypeOfDbType) {
     abstractTypeOfDbType = unknownAbstractType;
@@ -278,7 +292,7 @@ export function getAbstractTypeForDbType(dbType: DbType): AbstractType {
 
 export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
   dbType: DbType,
-  targetDbTypes: DbType[],
+  metadata: ColumnMetadata | null,
 ): AbstractType[] {
   const abstractTypeSet: Set<AbstractType> = new Set();
 
@@ -318,7 +332,7 @@ export function getDefaultDbTypeOfAbstractType(
   if (abstractType.dbTypes.size > 0) {
     return [...abstractType.dbTypes][0];
   }
-  return defaultDbType;
+  return DB_TYPES.TEXT;
 }
 
 export function getDbTypesForAbstractType(

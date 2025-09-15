@@ -67,7 +67,8 @@ export function getDbTypeBasedInputCap(
   column: CellColumnLike,
   optionalCellInfo?: CellInfo,
 ): ComponentAndProps {
-  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  const cellInfo =
+    optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
@@ -76,7 +77,8 @@ export function getDbTypeBasedFilterCap(
   column: CellColumnLike,
   optionalCellInfo?: CellInfo,
 ): ComponentAndProps | undefined {
-  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  const cellInfo =
+    optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   const factory = DataTypes[cellInfo?.type ?? 'string'];
   if (!factory.getFilterInput) return undefined;
   const config = getCellConfiguration(column.type, cellInfo);
@@ -97,7 +99,8 @@ export function getInitialInputValue(
   if (fkTargetTableId) {
     return undefined;
   }
-  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  const cellInfo =
+    optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   return DataTypes[cellInfo?.type ?? 'string'].initialInputValue;
 }
 
@@ -108,7 +111,7 @@ export function getDisplayFormatter(
   value: unknown,
   recordSummaries?: RecordSummariesForSheet,
 ) => string | null | undefined {
-  const cellInfo = getCellInfo(column.type);
+  const cellInfo = getCellInfo(column.type, column.metadata);
   const config = getCellConfiguration(column.type, cellInfo);
   const dataType = cellInfo?.type ?? 'string';
   const format = DataTypes[dataType].getDisplayFormatter(column, config);
