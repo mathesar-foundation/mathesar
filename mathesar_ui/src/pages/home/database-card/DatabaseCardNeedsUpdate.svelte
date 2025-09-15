@@ -28,7 +28,7 @@
 
 <style>
   .db-card-needs-update {
-    background: var(--hover-background);
+    background: var(--color-navigation-20-hover);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -46,7 +46,7 @@
     padding: 0.8rem;
   }
   .indicator {
-    color: var(--yellow-800);
+    color: var(--color-fg-warning);
     padding: 0.2rem 0.5rem;
     border-radius: 500px;
     min-width: max-content;

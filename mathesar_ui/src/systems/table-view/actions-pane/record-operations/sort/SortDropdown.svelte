@@ -24,10 +24,18 @@
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconSorting} />
-    <span class="responsive-button-label">
+    <span class="responsive-button-label with-badge">
       {$_('sort')}
       <BadgeCount value={$sorting.size} />
     </span>
   </svelte:fragment>
   <Sort slot="content" {sorting} />
 </Dropdown>
+
+<style lang="scss">
+  .with-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sm5);
+  }
+</style>

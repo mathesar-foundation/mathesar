@@ -1,13 +1,13 @@
 .window {
-  background-color: var(--window-background-color);
-  border: 1px solid var(--border-color);
+  background-color: var(--color-bg-raised-2);
+  border: 1px solid var(--color-border-raised-2);
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
   width: var(--window-width, 100%);
   overflow: hidden;
   display: grid;
   grid-template: auto 1fr auto / auto;
-  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
+  box-shadow: 1px 3px 7px 1px var(--color-shadow-dark);
   position: relative;
   isolation: isolate;
 
@@ -17,7 +17,7 @@
     justify-content: flex-end;
     align-items: flex-start;
     padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-border-section);
     overflow: hidden;
     > .title {
       &:empty {
@@ -37,8 +37,8 @@
 
   > .footer {
     grid-row: 3;
-    border-top: 1px solid var(--border-color);
-    background: var(--footer-background-color);
+    border-top: 1px solid var(--color-border-section);
+    background: var(--color-bg-raised-2);
   }
 
   &.has-body-padding > .body {

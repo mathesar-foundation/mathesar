@@ -98,7 +98,7 @@
     justify-content: space-between;
     align-items: center;
     overflow: hidden;
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
     margin-bottom: var(--sm1);
   }
   .top > :global(*) {
@@ -109,5 +109,6 @@
   }
   .results {
     margin-top: var(--sm1);
+    border: transparent;
   }
 </style>

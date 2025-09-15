@@ -1,0 +1,35 @@
+@use '../colors.scss' as colors;
+
+$base-hue: 230;
+$base-saturation: 4%;
+
+$shadows: (
+  'shadow': hsla($base-hue, $base-saturation, 18%, 0.5),
+  'shadow-inverted': hsla($base-hue, 6%, 2%, 0.8),
+  'shadow-light': hsla($base-hue, $base-saturation, 18%, 0.5),
+  'shadow-dark': hsl(0, 0%, 2%),
+);
+
+$static: (
+  'modal-overlay': rgba(0, 0, 0, 0.6),
+);
+
+$sl-hue: 190;
+$sl-saturation: 59%;
+$sl-lightness: 30%;
+
+$interactions: (
+  'selection-strong-2': hsl($sl-hue, $sl-saturation, $sl-lightness + 12),
+  'selection-strong-1': hsl($sl-hue, $sl-saturation, $sl-lightness + 8),
+  'selection': hsl($sl-hue, $sl-saturation, $sl-lightness),
+  'selection-subtle-1': hsl($sl-hue, $sl-saturation, $sl-lightness - 15),
+  'selection-subtle-2': hsl($sl-hue, $sl-saturation, $sl-lightness - 23),
+);
+
+$exports: (
+  'stateless': (
+    $shadows,
+    $static,
+    $interactions,
+  ),
+);

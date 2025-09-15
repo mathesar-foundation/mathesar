@@ -1,0 +1,78 @@
+@use 'sass:list';
+
+@function _join_optional_token($token) {
+  @return if($token == '', '', '-#{$token}');
+}
+
+@mixin generate-intensity-based-color-tokens(
+  $name,
+  $base-color,
+  $color-intensities,
+  $color-states
+) {
+  --color-#{$name}: #{$base-color};
+
+  @each $intensity, $delta in $color-intensities {
+    $base-variant: hsla(
+      hue($base-color),
+      saturation($base-color),
+      lightness($base-color),
+      $delta
+    );
+    --color-#{$name}-#{$intensity}: #{$base-variant};
+  }
+
+  @each $state, $delta in $color-states {
+    $dh: list.nth($delta, 1);
+    $ds: list.nth($delta, 2);
+    $dl: list.nth($delta, 3);
+
+    $h-new: (hue($base-color) + $dh) % 360deg;
+    $s-new: max(0%, min(100%, saturation($base-color) + $ds));
+    $l-new: max(0%, min(100%, lightness($base-color) + $dl));
+
+    $variant: hsl($h-new, $s-new, $l-new);
+    --color-#{$name}-#{$state}: #{$variant};
+
+    @each $intensity, $delta in $color-intensities {
+      $new-variant: hsla($h-new, $s-new, $l-new, $delta);
+      --color-#{$name}-#{$intensity}-#{$state}: #{$new-variant};
+    }
+  }
+}
+
+@mixin generate-color-tokens($category, $exports) {
+  $stateless-color-group: map-get($exports, 'stateless');
+  $stateful-color-group: map-get($exports, 'stateful');
+
+  $prefix: #{_join_optional_token($category)};
+
+  @if $stateless-color-group {
+    @each $stateless-colors in $stateless-color-group {
+      @each $name, $color in $stateless-colors {
+        --color#{$prefix}-#{$name}: #{$color};
+      }
+    }
+  }
+
+  @if $stateful-color-group {
+    @each $stateful-colors, $state-deltas in $stateful-color-group {
+      @each $name, $color in $stateful-colors {
+        --color#{$prefix}-#{$name}: #{$color};
+
+        @each $state, $delta in $state-deltas {
+          $dh: list.nth($delta, 1);
+          $ds: list.nth($delta, 2);
+          $dl: list.nth($delta, 3);
+
+          $h-new: (hue($color) + $dh) % 360deg;
+          $s-new: max(0%, min(100%, saturation($color) + $ds));
+          $l-new: max(0%, min(100%, lightness($color) + $dl));
+
+          $variant: hsl($h-new, $s-new, $l-new);
+          --color#{$prefix}-#{$name}-#{$state}: #{$variant};
+        }
+      }
+    }
+  }
+}

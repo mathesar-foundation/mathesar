@@ -60,10 +60,10 @@
   }
 </script>
 
-<div class="feedback-button">
+<div class="feedback-section">
   <Dropdown
-    triggerAppearance="feedback"
-    triggerClass="padding-compact"
+    triggerAppearance="custom"
+    triggerClass="feedback-button"
     closeOnInnerClick={false}
     showArrow={false}
     on:close={onDropdownClose}
@@ -132,8 +132,17 @@
 </div>
 
 <style lang="scss">
-  .feedback-button {
-    --button-border: none;
+  .feedback-section {
+    :global(.feedback-button) {
+      --button-padding: var(--sm4) var(--sm2);
+      --button-font-weight: var(--font-weight-bold);
+      --button-color: var(--color-brand-subtle);
+      --button-hover-color: var(--color-brand-subtle-hover);
+      --button-focus-color: var(--color-brand-subtle-focused);
+      --button-active-color: var(--color-brand-subtle-active);
+      --button-focus-border-color: var(--color-brand-subtle);
+      --button-active-border-color: var(--color-brand-subtle);
+    }
   }
 
   .trigger {
@@ -145,7 +154,7 @@
   .feedback-content {
     max-width: 28rem;
     padding: var(--sm3);
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
   }
   .feedback-form {
     display: flex;
@@ -155,12 +164,12 @@
 
     .title {
       font-weight: var(--font-weight-medium);
-      color: var(--text-color-primary);
+      color: var(--color-fg-base);
     }
 
     .help {
       font-size: var(--sm1);
-      color: var(--text-color-primary);
+      color: var(--color-fg-base);
       margin-top: var(--sm6);
     }
   }
@@ -168,11 +177,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--sm3);
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
 
     .title {
       font-weight: var(--font-weight-medium);
-      color: var(--text-color-primary);
+      color: var(--color-fg-base);
     }
   }
 </style>

@@ -18,7 +18,7 @@
 
   export let dataFormManager: EditableDataFormManager;
   export let dataFormField: FkField;
-  export let appearance: Appearance = 'outcome';
+  export let appearance: Appearance = 'secondary';
 
   $: ({ interactionRule, relatedTableOid } = dataFormField);
   $: linkedTableStructure = dataFormManager.getTableStructure(relatedTableOid);

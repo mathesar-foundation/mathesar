@@ -3,13 +3,14 @@
   import AppHeader from '@mathesar/components/AppHeader.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
+  import type { CssVariablesObj } from '@mathesar-component-library/types';
 
   const commonData = preloadCommonData();
   const showHeader = commonData.routing_context !== 'anonymous';
 
   export let fitViewport = false;
   export let restrictWidth = false;
-  export let cssVariables: Record<string, string> | undefined = undefined;
+  export let cssVariables: CssVariablesObj | undefined = undefined;
 
   $: style = cssVariables
     ? makeStyleStringFromCssVariables(cssVariables)
@@ -33,8 +34,8 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: var(--layout-background-color);
-    color: var(--text-color-primary);
+    background-color: var(--color-bg-base);
+    color: var(--color-fg-base);
 
     .app-layout-header {
       position: sticky;

@@ -126,7 +126,19 @@
 <style lang="scss">
   aside.input-sidebar {
     height: 100%;
-    border: 1px solid var(--border-color);
+    border: 1px solid;
+    border-top-color: var(--color-border-supporting);
+    border-right-color: var(--color-border-supporting);
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--color-border-supporting),
+      transparent 40%
+    );
+    border-left-color: color-mix(
+      in srgb,
+      var(--color-border-supporting),
+      transparent 20%
+    );
     border-radius: var(--border-radius-l);
     flex-shrink: 0;
     flex-grow: 0;
@@ -138,7 +150,7 @@
       flex-grow: 1;
       overflow: hidden;
       position: relative;
-      background-color: var(--elevated-background);
+      background-color: var(--color-bg-supporting);
 
       .loading-state {
         padding: var(--lg1);

@@ -1,6 +1,14 @@
 button.dropdown.trigger {
   position: relative;
 
+  &.btn-default {
+    --button-background: var(--color-bg-input);
+    --button-border-color: var(--color-border-input);
+    --button-hover-background: var(--color-bg-input-hover);
+    --button-focus-background: var(--color-bg-input-focused);
+    --button-active-background: var(--color-bg-input-active);
+  }
+
   > .label {
     display: inline-flex;
     align-items: center;
@@ -21,38 +29,25 @@ button.dropdown.trigger {
     align-items: center;
     padding: 0 0.1rem;
   }
-  &:focus {
-    outline: 2px solid rgba(255, 117, 76, 0.2);
-    outline-offset: 1px;
-  }
 }
 
 .dropdown.content {
   box-shadow: var(
     --Dropdown__box-shadow,
-    var(--shadow-color) 0 0 0 0,
-    var(--shadow-color) 0px 0px 0px 1px,
-    var(--shadow-color) 0px 10px 15px -3px,
-    var(--shadow-color) 0px 4px 6px -2px
+    var(--color-shadow) 0px 10px 15px -3px,
+    var(--color-shadow) 0px 4px 6px -2px
   );
-  border: var(--Dropdown__border, none);
+  background: var(--color-bg-raised-3);
+  border: 1px solid var(--color-border-raised-1);
   border-radius: var(--border-radius-m);
-  background: var(--Dropdown__background, var(--neutral-50));
   z-index: var(--dropdown-z-index, 100);
   max-height: calc(100vh - 0.5rem);
   overflow: auto;
 
-  body.theme-dark & {
-    border: var(--Dropdown__border, 1px solid var(--DARK-MODE-border-base));
-    background: var(--Dropdown__background, var(--DARK-MODE-surface-elevated));
-  }
-
   &[data-popper-placement='top-start'] {
     box-shadow:
-      var(--shadow-color) 0px -10px 15px -3px,
-      var(--shadow-color) 0px -4px 2px -2px,
-      var(--shadow-color) 0px 0px 0px 1px,
-      var(--shadow-color) 0 0 0 0;
+      var(--color-shadow) 0px -10px 15px -3px,
+      var(--color-shadow) 0px -4px 2px -2px;
   }
 
   &.no-max-height {

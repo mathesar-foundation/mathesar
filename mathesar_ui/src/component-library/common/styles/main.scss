@@ -1,5 +1,6 @@
 @import './variables.scss';
-@import 'components/input.scss';
+@import './themes/main.scss';
+@import './components/main.scss';
 
 .trim-child-margins > :first-child {
   margin-top: 0;

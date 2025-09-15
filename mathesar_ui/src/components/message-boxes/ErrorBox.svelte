@@ -14,10 +14,10 @@
 
 <style>
   .error-box {
-    --MessageBox__background: var(--danger-background-color);
-    --MessageBox__border: 4px solid var(--danger-border-color);
-    --MessageBox__icon-color: var(--danger-color);
-    --MessageBox__text-color: var(--danger-color);
+    --MessageBox__background: var(--color-bg-danger);
+    --MessageBox__border: 4px solid var(--color-border-danger);
+    --MessageBox__icon-color: var(--color-fg-danger);
+    --MessageBox__text-color: var(--color-fg-danger);
     font-size: var(--ErrorBox__font-size, var(--sm1));
   }
 </style>

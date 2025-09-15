@@ -94,7 +94,7 @@
   {/if}
   {#if column}
     <Button
-      appearance="outline-primary"
+      appearance="danger"
       on:click={() => column && handleDeleteColumn(column)}
       disabled={!$currentRoleOwns}
     >

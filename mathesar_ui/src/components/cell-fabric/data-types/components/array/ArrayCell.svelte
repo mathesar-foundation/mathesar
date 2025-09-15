@@ -4,7 +4,7 @@
   import CellValue from '@mathesar/components/CellValue.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import { labeledCount } from '@mathesar/utils/languageUtils';
-  import { Chip, isDefinedNonNullable } from '@mathesar-component-library';
+  import { Truncate, isDefinedNonNullable } from '@mathesar-component-library';
 
   import CellWrapper from '../CellWrapper.svelte';
   import type { ArrayCellProps } from '../typeDefinitions';
@@ -49,15 +49,21 @@
       {#if isIndependentOfSheet}
         <div class="count">{labeledCount(value, 'values')}</div>
       {/if}
-      <div>
+      <div
+        class="values"
+        class:display-all={isActive || isIndependentOfSheet}
+        class:independent={isIndependentOfSheet}
+      >
         {#each value as entry}
-          <Chip display={isIndependentOfSheet ? 'inline-block' : 'inline'}>
+          <span class="token">
             {#if entry === null}
               <Null />
             {:else}
-              {formatElementForDisplay(entry)}
+              <Truncate>
+                {formatElementForDisplay(entry)}
+              </Truncate>
             {/if}
-          </Chip>
+          </span>
         {/each}
       </div>
     {/if}
@@ -68,5 +74,28 @@
   .count {
     font-weight: 500;
     margin-bottom: 0.8rem;
+  }
+
+  .token {
+    padding: 0 var(--sm3);
+    border-radius: var(--border-radius-l);
+    white-space: nowrap;
+    color: var(--color-fg-base);
+    background-color: var(--color-bg-token);
+    border: 1px solid var(--color-border-token);
+  }
+
+  .values {
+    display: flex;
+    flex-direction: row;
+    gap: var(--sm4);
+    overflow: hidden;
+
+    &.independent {
+      flex-wrap: wrap;
+    }
+    &:not(.independent) {
+      flex-wrap: nowrap;
+    }
   }
 </style>

@@ -10,19 +10,21 @@
   .breadcrumb-link {
     display: block;
     overflow: hidden;
+    padding: var(--sm5);
   }
   .breadcrumb-link a {
     display: block;
     overflow: hidden;
     text-decoration: none;
-    color: inherit;
+    color: var(--color-fg-navigation);
     font-weight: var(--font-weight-medium);
   }
   .breadcrumb-link:hover a {
-    color: var(--salmon-800);
+    color: var(--color-fg-navigation-hover);
   }
-
-  :global(body.theme-dark) .breadcrumb-link:hover a {
-    color: var(--salmon-200);
+  .breadcrumb-link:has(a:focus) {
+    color: var(--color-fg-navigation-focused);
+    box-shadow: inset 0 0 2px 1px var(--color-shadow);
+    border-radius: var(--border-radius-m);
   }
 </style>

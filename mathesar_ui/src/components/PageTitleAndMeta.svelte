@@ -2,7 +2,7 @@
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
-  export let icon: IconProps;
+  export let icon: IconProps | undefined = undefined;
   export let name: string;
   export let entityTypeName: string | undefined = undefined;
 </script>
@@ -13,9 +13,11 @@
       <div class="left-meta-container">
         {#if entityTypeName}
           <div class="entity-type-container">
-            <div class="entity-icon">
-              <Icon {...icon} size="1em" />
-            </div>
+            {#if icon}
+              <div class="entity-icon">
+                <Icon {...icon} size="1.2em" />
+              </div>
+            {/if}
             <span class="entity-type-name">{entityTypeName}</span>
           </div>
         {/if}
@@ -65,8 +67,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--text-color-tertiary);
-    margin-right: var(--sm2);
+    color: var(--entity-name-color, var(--color-fg-subtle-2));
+    margin-right: var(--sm5);
   }
 
   .entity-type-container {
@@ -83,15 +85,16 @@
 
   .entity-type-name {
     font-size: var(--lg1);
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1;
-    color: var(--text-color-tertiary);
+    color: var(--entity-name-color, var(--color-fg-subtle-2));
   }
 
   .entity-name {
-    font-weight: var(--font-weight-extra-bold);
-    font-size: var(--lg4);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--lg3);
     line-height: 1;
-    color: var(--text-color-primary);
+    margin-bottom: var(--sm6);
+    color: var(--color-fg-base);
   }
 </style>
