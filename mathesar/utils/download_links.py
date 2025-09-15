@@ -20,6 +20,10 @@ URI = "uri"
 MASH = "mash"
 
 
+def maintain_download_links():
+    DownloadLink.objects.filter(sessions__isnull=True).delete()
+
+
 def get_link_contents(session_key, download_link_mash):
     link = get_object_or_404(
         DownloadLink,
