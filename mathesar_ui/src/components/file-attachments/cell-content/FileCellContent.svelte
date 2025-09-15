@@ -1,14 +1,15 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+
   import type { FileManifest } from '@mathesar/api/rpc/records';
+  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import Default from '@mathesar/components/Default.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import type { MessageReceiver } from '@mathesar/utils/OneWayMessageChannel';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import { lightboxContext } from '../lightbox/LightboxController';
   import { fetchImage } from '../fileUtils';
-  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
-  import { onMount } from 'svelte';
+  import { lightboxContext } from '../lightbox/LightboxController';
 
   const lightbox = lightboxContext.get();
 
@@ -54,7 +55,7 @@
 
     lightbox.open({
       imageElement,
-      thumbnailElement,
+      zoomOrigin: thumbnailElement.getBoundingClientRect(),
       fileManifest: manifest,
       removeFile: () => updateCell(null),
     });
@@ -64,7 +65,11 @@
     // TODO_FILES_UI
   }
 
-  onMount(onParentTriggersFileViewer(openFileViewer));
+  onMount(
+    onParentTriggersFileViewer(() => {
+      void openFileViewer();
+    }),
+  );
 </script>
 
 <div class="file-cell-content">

@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { cubicInOut } from 'svelte/easing';
+  import { type TransitionConfig, fade } from 'svelte/transition';
   import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
@@ -14,7 +16,7 @@
   import { Dropdown, iconInfo, portal } from '@mathesar-component-library';
 
   export let imageElement: HTMLImageElement;
-  export let thumbnailElement: HTMLImageElement | undefined = undefined;
+  export let zoomOrigin: DOMRect | undefined = undefined;
   export let fileManifest: FileManifest;
   export let close: () => void = () => {};
   export let removeFile: () => void = () => {};
@@ -34,6 +36,47 @@
       default:
         break;
     }
+  }
+
+  function zoom(node: HTMLElement): TransitionConfig {
+    if (!zoomOrigin) return {};
+    const nodeRect = node.getBoundingClientRect();
+
+    function getRectCenter(rect: DOMRect) {
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+    }
+
+    const nodeCenter = getRectCenter(nodeRect);
+    const originCenter = getRectCenter(zoomOrigin);
+
+    function interpolate(start: number, end: number, unit?: string) {
+      return (t: number) => `${start + (end - start) * t}${unit ?? ''}`;
+    }
+
+    function buildTransform(props: Record<string, string>) {
+      const value = Object.entries(props)
+        .map(([fn, arg]) => `${fn}(${arg})`)
+        .join(' ');
+      return `transform: ${value};`;
+    }
+
+    const scale = interpolate(zoomOrigin.width / nodeRect.width, 1);
+    const translateX = interpolate(originCenter.x - nodeCenter.x, 0, 'px');
+    const translateY = interpolate(originCenter.y - nodeCenter.y, 0, 'px');
+
+    return {
+      duration: 300,
+      easing: cubicInOut,
+      css: (t) =>
+        buildTransform({
+          translateX: translateX(t),
+          translateY: translateY(t),
+          scale: scale(t),
+        }),
+    };
   }
 
   onMount(() => {
@@ -63,12 +106,13 @@
     '--img-natural-width-px': `${naturalWidth}px`,
   })}
 >
-  <div class="overlay"></div>
+  <div class="overlay" transition:fade|local={{ duration: 200 }}></div>
   <div class="img-viewport-boundary">
     <div
       class="img-area"
-      bind:clientWidth={imageDisplayWidth}
       class:show-button-labels={showButtonLabels}
+      bind:clientWidth={imageDisplayWidth}
+      transition:zoom|local
     >
       <div class="top">
         <Button on:click={close}>
@@ -147,7 +191,6 @@
   }
 
   .img-area {
-    min-width: 0;
     // Width is the smallest of:
     //
     // - The natural image width — to prevent upscaling

@@ -11,8 +11,8 @@ import { makeContext } from '@mathesar/contexts/utils';
 export interface LightboxProps {
   /** The main image being displayed */
   imageElement: HTMLImageElement;
-  /** The DOM node of the thumbnail from which the lightbox was opened */
-  thumbnailElement?: HTMLImageElement;
+  /** If provided, the lightbox will zoom in/out from this rect */
+  zoomOrigin?: DOMRect;
   fileManifest: FileManifest;
   /** Triggers removal of the file from where it is stored. No confirmation. */
   removeFile: () => void;
