@@ -14,6 +14,7 @@ import DateTime from './type-configs/datetime';
 import Duration from './type-configs/duration';
 import Email from './type-configs/email';
 import Fallback from './type-configs/fallback';
+import File from './type-configs/file';
 import Json from './type-configs/json';
 import Money from './type-configs/money';
 import Number from './type-configs/number';
@@ -21,6 +22,7 @@ import Text from './type-configs/text';
 import Time from './type-configs/time';
 import Uri from './type-configs/uri';
 import Uuid from './type-configs/uuid';
+import { typeCastMap } from './typeCastMap';
 import type {
   AbstractType,
   AbstractTypeCategoryIdentifier,
@@ -54,6 +56,7 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.DateTime]: DateTime,
   [abstractTypeCategory.Uuid]: Uuid,
   [abstractTypeCategory.Json]: Json,
+  [abstractTypeCategory.File]: File,
 };
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
@@ -253,6 +256,12 @@ const typesResponse: AbstractTypeResponse[] = [
     name: 'Array',
     db_types: [DB_TYPES.ARRAY],
   },
+  // TODO_FILES: Move this to a separate array
+  {
+    identifier: 'file',
+    name: 'File',
+    db_types: [DB_TYPES.JSONB],
+  },
 ];
 
 const abstractTypesMap = constructAbstractTypeMapFromResponse(typesResponse);
@@ -267,7 +276,14 @@ export const defaultAbstractType = (() => {
 
 function identifyAbstractTypeForDbType(
   dbType: DbType,
+  metadata: ColumnMetadata | null,
 ): AbstractType | undefined {
+  if (metadata?.file_backend && dbType === DB_TYPES.JSONB) {
+    const fileUiType = abstractTypesMap.get('file');
+    if (fileUiType) {
+      return fileUiType;
+    }
+  }
   let abstractTypeOfDbType;
   for (const [, abstractType] of abstractTypesMap) {
     if (abstractType.dbTypes.has(dbType)) {
@@ -278,12 +294,31 @@ function identifyAbstractTypeForDbType(
   return abstractTypeOfDbType;
 }
 
+// TODO_FILES: Rewrite this
+function identifyAllPossibleAbstractTypesForDbType(
+  dbType: DbType,
+  metadata: ColumnMetadata | null,
+): Set<AbstractType> {
+  const allPossibleAbstractTypes: Set<AbstractType> = new Set();
+  if (dbType === DB_TYPES.JSONB && metadata?.file_backend) {
+    const fileUiType = abstractTypesMap.get('file');
+    if (fileUiType) {
+      allPossibleAbstractTypes.add(fileUiType);
+    }
+  }
+  for (const [, abstractType] of abstractTypesMap) {
+    if (abstractType.dbTypes.has(dbType)) {
+      allPossibleAbstractTypes.add(abstractType);
+    }
+  }
+  return allPossibleAbstractTypes;
+}
 
 export function getAbstractTypeForDbType(
   dbType: DbType,
   metadata: ColumnMetadata | null,
 ): AbstractType {
-  let abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType);
+  let abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType, metadata);
   if (!abstractTypeOfDbType) {
     abstractTypeOfDbType = unknownAbstractType;
   }
@@ -296,16 +331,18 @@ export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
 ): AbstractType[] {
   const abstractTypeSet: Set<AbstractType> = new Set();
 
-  const abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType);
+  const abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType, metadata);
   if (abstractTypeOfDbType) {
     abstractTypeSet.add(abstractTypeOfDbType);
   }
 
+  const targetDbTypes = typeCastMap[dbType] ?? [];
   targetDbTypes.forEach((targetDbType) => {
-    const abstractType = identifyAbstractTypeForDbType(targetDbType);
-    if (abstractType) {
-      abstractTypeSet.add(abstractType);
-    }
+    const abstractTypes = identifyAllPossibleAbstractTypesForDbType(
+      targetDbType,
+      metadata,
+    );
+    [...abstractTypes].forEach((absType) => abstractTypeSet.add(absType));
   });
   const abstractTypeList = [...abstractTypeSet].sort((a, b) =>
     a.name.localeCompare(b.name),

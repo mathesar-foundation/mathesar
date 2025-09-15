@@ -5,7 +5,6 @@ import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 import DataTypes from './data-types';
-import FileCell from './data-types/components/file/FileCell.svelte';
 import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
 import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';
 import PrimaryKeyCell from './data-types/components/primary-key/PrimaryKeyCell.svelte';
@@ -49,13 +48,6 @@ export function getCellCap({
     return {
       component: PrimaryKeyCell,
       props: { tableId: pkTargetTableId },
-    };
-  }
-
-  if (column.metadata?.file_backend) {
-    return {
-      component: FileCell,
-      props: {},
     };
   }
 
