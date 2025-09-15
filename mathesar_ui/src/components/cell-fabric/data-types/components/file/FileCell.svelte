@@ -6,6 +6,7 @@
   import { getFileViewerType } from '@mathesar/components/file-attachments/fileUtils';
   import { lightboxContext } from '@mathesar/components/file-attachments/lightbox/LightboxController';
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
+  import { assertExhaustive } from '@mathesar-component-library';
 
   import CellWrapper from '../CellWrapper.svelte';
 
@@ -41,16 +42,32 @@
     });
   }
 
-  function openFileViewer() {
-    if (!fileManifest) return;
-    const viewerType = getFileViewerType(fileManifest);
-    // TODO_FILES_UI: finish
+  function openFileViewer(manifest: FileManifest) {
+    const viewerType = getFileViewerType(manifest);
+    if (viewerType === 'image') {
+      // TODO_FILES_UI: load image, find thumbnail in DOM. Also consider moving
+      // loaded image cache up to this component.
+      //
+      // openImageFileViewer();
+    } else if (viewerType === 'default') {
+      // TODO_FILES_UI
+    } else {
+      assertExhaustive(viewerType);
+    }
+  }
+
+  function upload() {
+    // TODO_FILES_UI
   }
 
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
-        openFileViewer();
+        if (fileManifest) {
+          openFileViewer(fileManifest);
+        } else {
+          upload();
+        }
         // TODO_FILES_UI: why doesn't this work?
         break;
       case 'Tab':
@@ -91,6 +108,7 @@
       {thumbnailResolutionHeightPx}
       canUpload={isActive && !disabled}
       {openImageFileViewer}
+      {upload}
     />
   </div>
 </CellWrapper>

@@ -12,16 +12,13 @@
   export let updateCell: (v: unknown) => void;
   export let thumbnailResolutionHeightPx: number;
   export let canUpload: boolean;
+  export let upload: () => void;
   export let openImageFileViewer: (p: {
     imageElement: HTMLImageElement;
     zoomOrigin?: DOMRect;
   }) => void;
 
   $: hasValue = value !== undefined && value !== null;
-
-  function upload() {
-    // TODO_FILES_UI
-  }
 </script>
 
 <div class="file-cell-content">
