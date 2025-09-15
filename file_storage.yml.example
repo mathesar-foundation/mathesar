@@ -1,6 +1,7 @@
 default:
   protocol: s3
   nickname: "Local object store"
+  prefix: mathesar-storages
   kwargs:
     client_kwargs:
       endpoint_url: http://mathesar-dev-store:9000
