@@ -1,8 +1,10 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
 
-from mathesar.utils.download_links import get_link_contents, get_link_thumbnail
+from mathesar.utils.download_links import (
+    get_link_contents, get_link_thumbnail, save_file
+)
 
 
 CACHE_HEADER = {"Cache-Control": "public, max-age=31536000, immutable"}
@@ -51,3 +53,9 @@ def load_file_thumbnail(request, download_link_mash):
     return HttpResponse(
         thumbnail, content_type=content_type, headers=CACHE_HEADER
     )
+
+
+@login_required
+@require_http_methods(["POST"])
+def upload_file(request):
+    return JsonResponse(save_file(request.FILES["file"], request))

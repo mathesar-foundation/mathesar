@@ -1,5 +1,6 @@
 import base64
 import cairosvg
+import datetime
 import hashlib
 import io
 import json
@@ -27,7 +28,7 @@ def get_link_contents(session_key, download_link_mash):
     )
     content_type = _mimetype(link.uri)
     of = fsspec.open(link.uri, "rb", **link.fsspec_kwargs)
-    filename = posixpath.split(of.path)[-1]
+    filename = _get_filename_for_uri(link.uri)
 
     def stream_file():
         with of as f:
@@ -88,6 +89,10 @@ def create_json_for_uri(uri, backend_key):
     )
 
 
+def _get_filename_for_uri(uri):
+    return posixpath.split(uri)[-1]
+
+
 def get_download_links(request, results, keys):
     return {
         key: get_links_details(
@@ -144,14 +149,33 @@ def build_links_from_json(json_strs):
     ]
 
 
+def save_file(f, request, backend_key='default'):
+    backend = get_backends()[backend_key]
+    now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S%f')
+    uri = f"{backend['protocol']}://{backend['prefix']}/{request.user}/{now}/{f.name}"
+    of = fsspec.open(uri, mode='xb', **backend["kwargs"])
+    with of as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+    result = create_json_for_uri(uri, backend_key)
+    link = sync_links_from_json_strings(request.session.session_key, [result])[0]
+    return {
+        "result": result,
+        "download_link": _get_single_link_details(request, link)
+    }
+
+
 def _build_valid_link_dict(result, backends):
+    output = None, None
     try:
         result_dict = json.loads(result)
         for b in backends:
             if result_dict[MASH] == create_mash_for_uri(result_dict[URI], b):
-                return result_dict, b
+                output = result_dict, b
     except Exception:  # We really don't want to stop execution here for anything
-        return None, None
+        pass
+    return output
 
 
 def _get_single_link_details(request, link):
@@ -161,6 +185,7 @@ def _get_single_link_details(request, link):
 
     return {
         "uri": link.uri,
+        "name": _get_filename_for_uri(link.uri),
         "mimetype": _mimetype(link.uri),
         "thumbnail": _link("files_thumbnail") if _is_image(link.uri) else None,
         "attachment": _link("files_download"),
