@@ -38,7 +38,10 @@
     }
   }
 
-  function zoom(node: HTMLElement): TransitionConfig {
+  function zoom(
+    node: HTMLElement,
+    options?: { duration?: number },
+  ): TransitionConfig {
     if (!zoomOrigin) return {};
     const nodeRect = node.getBoundingClientRect();
 
@@ -68,7 +71,7 @@
     const translateY = interpolate(originCenter.y - nodeCenter.y, 0, 'px');
 
     return {
-      duration: 300,
+      duration: options?.duration ?? 300,
       easing: cubicInOut,
       css: (t) =>
         buildTransform({
