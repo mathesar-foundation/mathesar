@@ -13,7 +13,12 @@
   import Button from '@mathesar/component-library/button/Button.svelte';
   import focusTrap from '@mathesar/component-library/common/actions/focusTrap';
   import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
-  import { Dropdown, iconInfo, portal } from '@mathesar-component-library';
+  import {
+    Dropdown,
+    iconInfo,
+    portal,
+    Tooltip,
+  } from '@mathesar-component-library';
 
   export let imageElement: HTMLImageElement;
   export let zoomOrigin: DOMRect | undefined = undefined;
@@ -126,32 +131,45 @@
       <div class="img-holder" bind:this={imageHolder} />
 
       <div class="bottom">
-        <Button on:click={removeFile} aria-label={$_('remove')}>
+        <Button
+          on:click={removeFile}
+          aria-label={$_('remove')}
+          tooltip={!showButtonLabels ? $_('remove') : undefined}
+        >
           <Icon {...iconDeleteMajor} />
           <span class="button-label">{$_('remove')}</span>
         </Button>
-        <Dropdown
-          showArrow={false}
-          {...$$restProps}
-          ariaLabel={$_('filter')}
-          placements={['bottom', 'top']}
-          contentClass="info-dropdown-content"
-        >
-          <svelte:fragment slot="trigger">
-            <Icon {...iconInfo} />
-            <span class="button-label">{$_('info')}</span>
-          </svelte:fragment>
-          <div class="info" slot="content">
-            <table>
-              <tr><th>{$_('storage_uri')}</th><td>{uri}</td></tr>
-              <tr><th>{$_('mime_type')}</th><td>{mimetype}</td></tr>
-            </table>
-          </div>
-        </Dropdown>
-        <a class="btn btn-default" href={downloadUrl}>
-          <Icon {...iconDownload} />
-          <span class="button-label">{$_('download')}</span>
-        </a>
+
+        <Tooltip enabled={!showButtonLabels}>
+          <Dropdown
+            slot="trigger"
+            showArrow={false}
+            {...$$restProps}
+            ariaLabel={$_('filter')}
+            placements={['bottom', 'top']}
+            contentClass="info-dropdown-content"
+          >
+            <svelte:fragment slot="trigger">
+              <Icon {...iconInfo} />
+              <span class="button-label">{$_('info')}</span>
+            </svelte:fragment>
+            <div class="info" slot="content">
+              <table>
+                <tr><th>{$_('storage_uri')}</th><td>{uri}</td></tr>
+                <tr><th>{$_('mime_type')}</th><td>{mimetype}</td></tr>
+              </table>
+            </div>
+          </Dropdown>
+          <div slot="content">{$_('info')}</div>
+        </Tooltip>
+
+        <Tooltip enabled={!showButtonLabels}>
+          <a slot="trigger" class="btn btn-default" href={downloadUrl}>
+            <Icon {...iconDownload} />
+            <span class="button-label">{$_('download')}</span>
+          </a>
+          <div slot="content">{$_('download')}</div>
+        </Tooltip>
       </div>
     </div>
   </div>
