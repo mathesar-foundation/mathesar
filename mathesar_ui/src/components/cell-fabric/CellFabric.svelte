@@ -13,6 +13,9 @@
   export let value: unknown;
   export let recordSummary: string | undefined = undefined;
   export let fileManifest: FileManifest | undefined = undefined;
+  export let setFileManifest:
+    | ((mash: string, manifest: FileManifest) => void)
+    | undefined = undefined;
   export let setRecordSummary:
     | ((recordId: string, recordSummary: string) => void)
     | undefined = undefined;
@@ -48,8 +51,9 @@
     {isIndependentOfSheet}
     {horizontalAlignment}
     {recordSummary}
-    {fileManifest}
     {setRecordSummary}
+    {fileManifest}
+    {setFileManifest}
     {searchValue}
     {isProcessing}
     {showTruncationPopover}
