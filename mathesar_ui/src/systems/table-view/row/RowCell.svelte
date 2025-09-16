@@ -102,21 +102,9 @@
     ?.get(String(value));
   $: fileManifest = (() => {
     if (!column.metadata?.file_backend) return undefined;
-    if (!(typeof value === 'string')) return undefined;
-    const structuredValue: unknown = (() => {
-      if (typeof value === 'object') return value;
-      try {
-        return JSON.parse(value);
-      } catch {
-        return undefined;
-      }
-    })();
-    if (typeof structuredValue !== 'object') return undefined;
-    if (structuredValue === null) return undefined;
-    if (!('mash' in structuredValue)) return undefined;
-    const { mash } = structuredValue as Record<'mash', unknown>;
-    if (!(typeof mash === 'string')) return undefined;
-    return $fileManifests.get(String(column.id))?.get(mash);
+    const fileReference = parseFileReference(value);
+    if (!fileReference) return undefined;
+    return $fileManifests.get(String(column.id))?.get(fileReference.mash);
   })();
 
   async function setValue(newValue: unknown) {

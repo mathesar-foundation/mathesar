@@ -17,3 +17,19 @@ export function getFileViewerType(manifest: FileManifest): 'image' | 'default' {
   }
   return 'default';
 }
+
+export function parseFileReference(value: unknown): FileReference | undefined {
+  const obj = (() => {
+    if (typeof value === 'object') return value;
+    try {
+      return JSON.parse(String(value)) as unknown;
+    } catch {
+      return undefined;
+    }
+  })();
+  if (typeof obj !== 'object') return undefined;
+  if (obj === null) return undefined;
+  if (!hasStringProperty(obj, 'mash')) return undefined;
+  if (!hasStringProperty(obj, 'uri')) return undefined;
+  return obj;
+}
