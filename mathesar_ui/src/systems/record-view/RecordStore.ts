@@ -2,7 +2,7 @@ import { type Writable, writable } from 'svelte/store';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { RecordsResponse } from '@mathesar/api/rpc/records';
+import type { FileManifest, RecordsResponse } from '@mathesar/api/rpc/records';
 import { WritableMap } from '@mathesar/component-library';
 import type { Table } from '@mathesar/models/Table';
 import { getRecordPageUrl } from '@mathesar/routes/urls';
@@ -19,6 +19,8 @@ export default class RecordStore {
   fieldValues = new WritableMap<number, unknown>();
 
   recordSummaries = new AssociatedCellData<string>();
+
+  fileManifests = new AssociatedCellData<FileManifest>();
 
   summary: Writable<string>;
 
@@ -53,6 +55,9 @@ export default class RecordStore {
       this.recordSummaries.setFetchedValuesFromPrimitive(
         response.linked_record_summaries,
       );
+    }
+    if (response.download_links) {
+      this.fileManifests.setFetchedValuesFromPrimitive(response.download_links);
     }
   }
 

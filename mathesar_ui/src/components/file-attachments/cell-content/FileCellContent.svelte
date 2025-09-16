@@ -37,7 +37,7 @@
   {:else}
     <div class="add">
       {#if canUpload}
-        <Button on:click={upload}>
+        <Button on:click={upload} tabindex="-1">
           <Icon {...iconAddNew} />
         </Button>
       {/if}
