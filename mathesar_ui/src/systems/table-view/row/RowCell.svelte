@@ -9,8 +9,8 @@
   import type { ResultValue } from '@mathesar/api/rpc/records';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
-  import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
+  import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { SheetDataCell } from '@mathesar/components/sheet';
@@ -152,11 +152,11 @@
     {isProcessing}
     {canViewLinkedEntities}
     {fileManifest}
-    setFileManifest={(mash, fileManifest) => {
+    setFileManifest={(mash, manifest) => {
       recordsData.fileManifests.addBespokeValue({
         columnId: String(columnId),
         key: mash,
-        value: fileManifest,
+        value: manifest,
       });
     }}
     {recordSummary}

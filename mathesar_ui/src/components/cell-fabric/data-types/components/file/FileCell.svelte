@@ -65,13 +65,24 @@
     }
   }
 
+  async function upload() {
+    if (!modalFileAttachmentUploader) return;
+    const attachment =
+      await modalFileAttachmentUploader.acquireFileAttachment();
+    if (!attachment) return;
+    const fileReference = parseFileReference(attachment.result);
+    if (!fileReference) return;
+    updateCell(attachment.result);
+    setFileManifest?.(fileReference.mash, attachment.download_link);
+  }
+
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
         if (fileManifest) {
           openFileViewer(fileManifest);
         } else {
-          upload();
+          void upload();
         }
         // TODO_FILES_UI: why doesn't this work?
         break;
@@ -93,17 +104,6 @@
   function handleMouseDown() {
     dispatch('activate');
   }
-
-  async function upload() {
-    if (!modalFileAttachmentUploader) return;
-    const attachment =
-      await modalFileAttachmentUploader.acquireFileAttachment();
-    if (!attachment) return;
-    const fileReference = parseFileReference(attachment.result);
-    if (!fileReference) return;
-    updateCell(attachment.result);
-    setFileManifest?.(fileReference.mash, attachment.download_link);
-  }
 </script>
 
 <CellWrapper
@@ -119,7 +119,6 @@
     <FileCellContent
       {value}
       manifest={fileManifest}
-      {updateCell}
       canOpenViewer={isActive}
       {thumbnailResolutionHeightPx}
       canUpload={isActive && !disabled}

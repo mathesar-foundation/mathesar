@@ -9,7 +9,6 @@
   export let value: unknown = undefined;
   export let manifest: FileManifest | undefined = undefined;
   export let canOpenViewer: boolean;
-  export let updateCell: (v: unknown) => void;
   export let thumbnailResolutionHeightPx: number;
   export let canUpload: boolean;
   export let upload: () => void;
