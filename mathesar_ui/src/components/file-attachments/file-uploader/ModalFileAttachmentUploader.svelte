@@ -57,8 +57,10 @@
   // TODO_FILES_UI: troubleshoot and fix this error
 
   function init() {
+    controller.cancel();
     fileUploads = undefined;
     percentCompleted = 0;
+    request?.cancel();
     request = undefined;
   }
 
@@ -94,14 +96,9 @@
       request = undefined;
     }
   }
-
-  function cancel() {
-    request?.cancel();
-    controller.cancel();
-  }
 </script>
 
-<IndependentModal isOpen={$isOpen} on:close={cancel} {title}>
+<IndependentModal isOpen={$isOpen} on:close={init} {title}>
   <FileUploadComponent bind:fileUploads {fileProgress} on:add={handleAdd} />
   {#if error}
     <ErrorBox --MessageBox__margin="1rem 0 0 0">
