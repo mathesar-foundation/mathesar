@@ -7235,3 +7235,71 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_files_table_with_bad_mash() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE a (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text,
+    files jsonb
+  );
+
+  INSERT INTO a(name, files) VALUES 
+  ('cat', '{"uri": "s3://msar/cat.png", "mash": "bad_mash"}'::jsonb),
+  ('dog', '{"uri": "s3://msar/dog.png", "mash": "outdated_mash_34b801f337ee016d21"}'::jsonb),
+  ('elephant', '{"uri": "s3://msar/elephant.png", "mash": ""}'::jsonb); -- empty mash
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_single_col_multi_fk_insert() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_a_oid oid;
+  uri_mash_map jsonb := '{
+    "s3://msar/cat.png": "1addf81f83dcbd34b801f337ee016d211bc16f5ba857f7ea02b2ccc53a6cf7c5",
+    "s3://msar/dog.png": "8afd86435513c54853512e912a7e8802e17fabb45efb5a3041f93f7f0819a2aa",
+    "s3://msar/elephant.png": "b0a15ad5117a008daf8671e0d3bc552161889f4beac01fb1ff10807f36fade69"
+  }'::jsonb;
+  results jsonb;
+BEGIN
+  PERFORM __setup_files_table_with_bad_mash();
+  tab_a_oid := 'a'::regclass::oid;
+  
+  PERFORM msar.reset_mash(tab_a_oid, 3::smallint, uri_mash_map);
+  
+  SELECT jsonb_agg(to_jsonb(a)) FROM a INTO results;
+
+  RETURN NEXT is(
+    $j$
+    [
+      {
+        "id": 1,
+        "name": "cat",
+        "files": {
+          "uri": "s3://msar/cat.png",
+          "mash": "1addf81f83dcbd34b801f337ee016d211bc16f5ba857f7ea02b2ccc53a6cf7c5"
+        }
+      },
+      {
+        "id": 2,
+        "name": "dog",
+        "files": {
+          "uri": "s3://msar/dog.png",
+          "mash": "8afd86435513c54853512e912a7e8802e17fabb45efb5a3041f93f7f0819a2aa"
+        }
+      },
+      {
+        "id": 3,
+        "name": "elephant",
+        "files": {
+          "uri": "s3://msar/elephant.png",
+          "mash": "b0a15ad5117a008daf8671e0d3bc552161889f4beac01fb1ff10807f36fade69"
+        }
+      }
+    ]
+    $j$,
+    results
+  );
+END;
+$$ LANGUAGE plpgsql;
