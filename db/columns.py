@@ -2,7 +2,9 @@ import json
 
 from db import connection as db_conn
 from db.deprecated.types.base import PostgresType
+from db.records import list_records_from_table
 
+from mathesar.utils.download_links import create_mash_for_uri
 
 DEFAULT = "default"
 DESCRIPTION = "description"
@@ -209,4 +211,43 @@ def drop_columns_from_table(table_oid, column_attnums, conn):
     """
     return db_conn.exec_msar_func(
         conn, 'drop_columns', table_oid, *column_attnums
+    ).fetchone()[0]
+
+
+def reset_file_column_mash(table_oid, column_attnum, conn):
+    """
+    Resets the outdated "mash" for a given json/jsonb file column.
+
+    A typical file column has records in the following form:
+    {
+      "uri": "s3://mathesar-storages/admin/20250915-181554471621/mathesar_logo.jpeg",
+      "mash": "b0a15ad5117a008daf8671e0d3bc552161889f4beac01fb1ff10807f36fade69"
+    }
+
+    uri_mash_map should have the following form:
+    {
+      <uri_1> : <mash_1>,
+      <uri_2> : <mash_2>
+      ...
+    }
+
+    Args:
+      tab_id: The OID of the target table.
+      col_id: The attnum of a file json(b) column.
+      uri_mash_map: A map of uri and the new mash.
+    """
+    records = list_records_from_table(conn, table_oid)['results']
+    updated_uri_mash_map = {}
+    for r in records:
+        try:
+            uri = json.loads(r[str(column_attnum)])['uri']
+            updated_uri_mash_map[uri] = create_mash_for_uri(uri)
+        except Exception:
+            continue
+    db_conn.exec_msar_func(
+        conn,
+        'reset_mash',
+        table_oid,
+        column_attnum,
+        json.dumps(updated_uri_mash_map)
     ).fetchone()[0]
