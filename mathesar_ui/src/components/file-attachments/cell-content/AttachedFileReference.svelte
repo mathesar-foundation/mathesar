@@ -8,7 +8,6 @@
 
   import { fetchImage, getFileViewerType } from '../fileUtils';
 
-
   export let manifest: FileManifest;
   export let canOpenViewer: boolean;
   export let openImageFileViewer: (p: {
