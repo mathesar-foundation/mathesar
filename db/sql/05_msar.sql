@@ -5763,6 +5763,50 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.reset_mash(tab_id regclass, col_id smallint, uri_mash_map jsonb)
+RETURNS VOID AS $$/*
+Resets the outdated "mash" for a given json/jsonb file column.
+
+A typical file column has records in the following form:
+{
+  "uri": "s3://mathesar-storages/admin/20250915-181554471621/mathesar_logo.jpeg",
+  "mash": "b0a15ad5117a008daf8671e0d3bc552161889f4beac01fb1ff10807f36fade69"
+}
+
+uri_mash_map should have the following form:
+{
+  <uri_1> : <mash_1>,
+  <uri_2> : <mash_2>
+  ...
+}
+
+Args:
+  tab_id: The OID of the target table.
+  col_id: The attnum of a file json(b) column.
+  uri_mash_map: A map of uri and the new mash.
+*/
+DECLARE
+  sch_name text := msar.get_relation_schema_name(tab_id);
+  tab_name text := msar.get_relation_name(tab_id);
+  col_name text := msar.get_column_name(tab_id, col_id);
+BEGIN
+  EXECUTE format(
+    $j$
+      UPDATE %1$I.%2$I
+      SET %3$I = jsonb_set(%2$I.%3$I::jsonb, '{mash}', mapping.mash, false)
+      -- Here, false means that we won't create a mash key if one doesn't already exist.
+      FROM jsonb_each(%4$L) AS mapping(uri, mash)
+      WHERE %2$I.%3$I ->> 'uri' = mapping.uri
+    $j$,
+    sch_name,
+    tab_name,
+    col_name,
+    uri_mash_map
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.build_insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
 (
   table_name text,
