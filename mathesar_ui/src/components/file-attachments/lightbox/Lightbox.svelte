@@ -15,9 +15,9 @@
   import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
   import {
     Dropdown,
+    Tooltip,
     iconInfo,
     portal,
-    Tooltip,
   } from '@mathesar-component-library';
 
   export let imageElement: HTMLImageElement;
