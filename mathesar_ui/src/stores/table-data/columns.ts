@@ -6,6 +6,7 @@ import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOpti
 import type {
   ColumnCreationSpec,
   ColumnPatchSpec,
+  ColumnTypeOptions,
   RawColumnWithMetadata,
 } from '@mathesar/api/rpc/columns';
 import type { Database } from '@mathesar/models/Database';
@@ -181,6 +182,30 @@ export class ColumnsDataStore extends EventHandler<{
           : c,
       ),
     );
+  }
+
+  async changeType(spec: {
+    id: RawColumnWithMetadata['id'];
+    type: ColumnCreationSpec['type'];
+    type_options: ColumnTypeOptions | null;
+    metadata: ColumnMetadata | null;
+  }): Promise<void> {
+    await api.columns
+      .patch({
+        ...this.apiContext,
+        column_data_list: [
+          { id: spec.id, type: spec.type, type_options: spec.type_options },
+        ],
+      })
+      .run();
+    await api.columns.metadata
+      .set({
+        ...this.apiContext,
+        column_meta_data_list: [{ attnum: spec.id, ...spec.metadata }],
+      })
+      .run();
+    await this.fetch();
+    await this.dispatch('columnPatched');
   }
 
   destroy(): void {

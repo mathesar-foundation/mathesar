@@ -23,7 +23,10 @@
 
   export let column: ColumnWithAbstractType;
   export let save: (
-    options: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
+    options: Pick<
+      ColumnTypeOptionsSaveArgs,
+      'type' | 'type_options' | 'metadata'
+    >,
   ) => Promise<unknown>;
   export let showWarnings = true;
   export let disabled = false;
@@ -35,6 +38,8 @@
   let typeOptions: ColumnWithAbstractType['type_options'] = {
     ...savedTypeOptions,
   };
+  let { metadata } = column;
+
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
@@ -54,6 +59,7 @@
     selectedDbType = _column.type;
     savedTypeOptions = _column.type_options ?? {};
     typeOptions = { ...savedTypeOptions };
+    metadata = _column.metadata;
   }
   $: resetAbstractType(column);
 
@@ -65,6 +71,17 @@
     selectedDbType = type;
     selectedAbstractType = abstractType;
     typeOptions = {};
+    if (abstractType.identifier === 'file') {
+      metadata = {
+        ...(metadata ?? {}),
+        file_backend: 'default',
+      };
+    } else if (metadata && metadata.file_backend) {
+      metadata = {
+        ...metadata,
+        file_backend: null,
+      };
+    }
   }
 
   function cancel() {
@@ -79,6 +96,7 @@
       await save({
         type: selectedDbType,
         type_options: { ...typeOptions },
+        metadata,
       });
       typeChangeState = { state: 'success' };
     } catch (err) {
