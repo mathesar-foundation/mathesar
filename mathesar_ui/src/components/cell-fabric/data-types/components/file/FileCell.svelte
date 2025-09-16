@@ -30,8 +30,8 @@
     | undefined = undefined;
 
   function updateCell(newValue: unknown) {
-    // TODO_FILES_UI: Call API to save new value
     value = newValue;
+    dispatch('update', { value });
   }
 
   function openImageFileViewer({
