@@ -33,6 +33,7 @@
       - add_primary_key_column
       - patch
       - delete
+      - reset_mash
       - list_with_metadata
       - ColumnInfo
       - ColumnListReturn
