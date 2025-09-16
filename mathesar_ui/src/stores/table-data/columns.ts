@@ -15,6 +15,7 @@ import {
   type CancellablePromise,
   EventHandler,
   WritableSet,
+  isDefinedNonNullable,
 } from '@mathesar-component-library';
 
 export class ColumnsDataStore extends EventHandler<{
@@ -87,6 +88,26 @@ export class ColumnsDataStore extends EventHandler<{
     await api.columns
       .add({ ...this.apiContext, column_data_list: [columnDetails] })
       .run();
+    await this.dispatch('columnAdded');
+    await this.fetch();
+  }
+
+  async addWithMetadata(
+    columnDetails: ColumnCreationSpec,
+    metadata: ColumnMetadata | null,
+  ): Promise<void> {
+    const result = await api.columns
+      .add({ ...this.apiContext, column_data_list: [columnDetails] })
+      .run();
+    const [columnId] = result;
+    if (columnId && isDefinedNonNullable(metadata)) {
+      await api.columns.metadata
+        .set({
+          ...this.apiContext,
+          column_meta_data_list: [{ attnum: columnId, ...metadata }],
+        })
+        .run();
+    }
     await this.dispatch('columnAdded');
     await this.fetch();
   }

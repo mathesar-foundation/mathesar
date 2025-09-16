@@ -2,7 +2,7 @@ export {
   getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
   getAllowedAbstractTypesForNewColumn,
   defaultAbstractType,
-  getDefaultDbTypeOfAbstractType,
+  abstractTypeToColumnSaveSpec,
   getAbstractTypeForDbType,
 } from './abstractTypeCategories';
 export {

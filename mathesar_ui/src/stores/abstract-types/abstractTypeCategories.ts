@@ -1,4 +1,5 @@
 import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import {
   iconUiTypeArray,
@@ -354,22 +355,44 @@ export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
   return abstractTypeList;
 }
 
+export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
+  dbOptions: {
+    type: DbType;
+    typeOptions: ColumnTypeOptions;
+  };
+  metadata: ColumnMetadata | null;
+} {
+  const type = (() => {
+    if (abstractType.defaultDbType) {
+      return abstractType.defaultDbType;
+    }
+    if (abstractType.dbTypes.size > 0) {
+      return [...abstractType.dbTypes][0];
+    }
+    return DB_TYPES.TEXT;
+  })();
+  const metadata: ColumnMetadata | null = (() => {
+    if (abstractType.identifier === 'file') {
+      return {
+        file_backend: 'default',
+      };
+    }
+    return null;
+  })();
+
+  return {
+    dbOptions: {
+      type,
+      typeOptions: {},
+    },
+    metadata,
+  };
+}
+
 export function getAllowedAbstractTypesForNewColumn() {
   return [...abstractTypesMap.values()]
     .filter((type) => !comboAbstractTypeCategories[type.identifier])
     .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-export function getDefaultDbTypeOfAbstractType(
-  abstractType: AbstractType,
-): DbType {
-  if (abstractType.defaultDbType) {
-    return abstractType.defaultDbType;
-  }
-  if (abstractType.dbTypes.size > 0) {
-    return [...abstractType.dbTypes][0];
-  }
-  return DB_TYPES.TEXT;
 }
 
 export function getDbTypesForAbstractType(

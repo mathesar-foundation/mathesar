@@ -9,8 +9,8 @@
   } from '@mathesar/components/form';
   import { iconAddNew } from '@mathesar/icons';
   import {
+    abstractTypeToColumnSaveSpec,
     defaultAbstractType,
-    getDefaultDbTypeOfAbstractType,
   } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
@@ -30,10 +30,14 @@
   $: ({ isSubmitting } = form);
 
   async function addColumn(closeDropdown: () => void) {
-    await columnsDataStore.add({
-      name: $columnName,
-      type: getDefaultDbTypeOfAbstractType($columnAbstractType),
-    });
+    const spec = abstractTypeToColumnSaveSpec($columnAbstractType);
+    await columnsDataStore.addWithMetadata(
+      {
+        name: $columnName,
+        ...spec.dbOptions,
+      },
+      spec.metadata,
+    );
     closeDropdown();
   }
 </script>
