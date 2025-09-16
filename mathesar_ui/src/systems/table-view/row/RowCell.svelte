@@ -10,6 +10,7 @@
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
+  import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { SheetDataCell } from '@mathesar/components/sheet';
@@ -150,8 +151,15 @@
     {value}
     {isProcessing}
     {canViewLinkedEntities}
-    {recordSummary}
     {fileManifest}
+    setFileManifest={(mash, fileManifest) => {
+      recordsData.fileManifests.addBespokeValue({
+        columnId: String(columnId),
+        key: mash,
+        value: fileManifest,
+      });
+    }}
+    {recordSummary}
     setRecordSummary={(recordId, rs) =>
       linkedRecordSummaries.addBespokeValue({
         columnId: String(columnId),

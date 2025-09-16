@@ -1,4 +1,10 @@
 import type { FileManifest } from '@mathesar/api/rpc/records';
+import { hasStringProperty } from '@mathesar-component-library';
+
+export interface FileReference {
+  uri: string;
+  mash: string;
+}
 
 export function fetchImage(src: string): Promise<HTMLImageElement | undefined> {
   return new Promise((resolve) => {

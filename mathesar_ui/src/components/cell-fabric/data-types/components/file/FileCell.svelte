@@ -4,7 +4,10 @@
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
   import { modalFileAttachmentUploadContext } from '@mathesar/components/file-attachments/file-uploader/modalFileAttachmentUploadContext';
-  import { getFileViewerType } from '@mathesar/components/file-attachments/fileUtils';
+  import {
+    getFileViewerType,
+    parseFileReference,
+  } from '@mathesar/components/file-attachments/fileUtils';
   import { lightboxContext } from '@mathesar/components/file-attachments/lightbox/LightboxController';
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
   import { assertExhaustive } from '@mathesar-component-library';
@@ -22,9 +25,13 @@
   export let value: unknown = undefined;
   export let disabled: boolean;
   export let isIndependentOfSheet: boolean;
+  export let setFileManifest:
+    | ((mash: string, manifest: FileManifest) => void)
+    | undefined = undefined;
 
   function updateCell(newValue: unknown) {
-    // TODO_FILES_UI: implement
+    // TODO_FILES_UI: Call API to save new value
+    value = newValue;
   }
 
   function openImageFileViewer({
@@ -89,12 +96,13 @@
 
   async function upload() {
     if (!modalFileAttachmentUploader) return;
-    const result = await modalFileAttachmentUploader.acquireFileAttachment();
-    if (!result) return;
-    // TODO_FILES_UI:
-    //
-    // - set bespoke file manifest in records store
-    // - set file data in cell
+    const attachment =
+      await modalFileAttachmentUploader.acquireFileAttachment();
+    if (!attachment) return;
+    const fileReference = parseFileReference(attachment.result);
+    if (!fileReference) return;
+    updateCell(attachment.result);
+    setFileManifest?.(fileReference.mash, attachment.download_link);
   }
 </script>
 
