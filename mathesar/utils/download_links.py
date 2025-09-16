@@ -74,7 +74,7 @@ def _build_thumbnail_bytes(of, size, format="AVIF", quality=50):
     return img_byte_arr.getvalue()
 
 
-def create_mash_for_uri(uri, backend_key):
+def create_mash_for_uri(uri, backend_key='default'):
     return hashlib.sha256(
         settings.SECRET_KEY.encode('utf-8')
         + backend_key.encode('utf-8')

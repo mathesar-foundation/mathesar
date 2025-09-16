@@ -11,6 +11,7 @@ from db.columns import (
     alter_columns_in_table,
     drop_columns_from_table,
     get_column_info_for_table,
+    reset_file_column_mash
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 from mathesar.rpc.decorators import mathesar_rpc_method
@@ -366,3 +367,18 @@ def list_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> list:
         c.attnum: ColumnMetaDataBlob.from_model(c) for c in column_metadata
     }
     return [col | {"metadata": metadata_map.get(col["id"])} for col in column_info]
+
+
+@mathesar_rpc_method(name="columns.reset_mash", auth="superuser")
+def reset_mash(*, column_attnum: int, table_oid: int, database_id: int, **kwargs) -> None:
+    """
+    Resets the outdated "mash" for a given file column.
+
+    Args:
+        column_attnum: attnum of the file column whose mashes need to be reset.
+        table_oid: Identity of the table containing the file column.
+        database_id: The Django id of the database containing the table.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        reset_file_column_mash(table_oid, column_attnum, conn)
