@@ -15,7 +15,7 @@ from PIL import Image, UnidentifiedImageError
 import yaml
 
 from db.records import list_records_from_table
-from db import connection as db_conn
+from db.columns import reset_mash
 
 from mathesar.models import DownloadLink
 
@@ -240,10 +240,4 @@ def reset_file_column_mash(table_oid, column_attnum, conn):
             updated_uri_mash_map[uri] = create_mash_for_uri(uri)
         except Exception:
             continue
-    db_conn.exec_msar_func(
-        conn,
-        'reset_mash',
-        table_oid,
-        column_attnum,
-        json.dumps(updated_uri_mash_map)
-    ).fetchone()[0]
+    reset_mash(conn, table_oid, column_attnum, updated_uri_mash_map)
