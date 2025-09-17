@@ -8,6 +8,9 @@ const jsonType: AbstractTypeConfiguration = {
   defaultDbType: DB_TYPES.JSONB,
   cellInfo: {
     type: 'string',
+    config: {
+      multiLine: true,
+    },
   },
 };
 

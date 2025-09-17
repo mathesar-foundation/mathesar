@@ -14,5 +14,6 @@ export const abstractTypeCategory = {
   JsonArray: 'jsonlist',
   JsonObject: 'map',
   Array: 'array',
+  File: 'file',
   Other: 'other',
 } as const;

@@ -64,6 +64,7 @@ export interface CellInfo {
 export interface AbstractTypeIconArgs {
   dbType: DbType;
   typeOptions: RawColumnWithMetadata['type_options'];
+  metadata: RawColumnWithMetadata['metadata'];
 }
 
 export interface AbstractTypeConfiguration {
