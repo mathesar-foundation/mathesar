@@ -4,6 +4,7 @@ export {
   defaultAbstractType,
   abstractTypeToColumnSaveSpec,
   getAbstractTypeForDbType,
+  mergeMetadataOnTypeChange,
 } from './abstractTypeCategories';
 export {
   filterDefinitionMap,

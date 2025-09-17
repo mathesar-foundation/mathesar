@@ -3,6 +3,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import { mergeMetadataOnTypeChange } from '@mathesar/stores/abstract-types';
   import { toast } from '@mathesar/stores/toast';
   import { columnTypeOptionsAreEqual } from '@mathesar/utils/columnUtils';
   import {
@@ -71,17 +72,7 @@
     selectedDbType = type;
     selectedAbstractType = abstractType;
     typeOptions = {};
-    if (abstractType.identifier === 'file') {
-      metadata = {
-        ...(metadata ?? {}),
-        file_backend: 'default',
-      };
-    } else if (metadata && metadata.file_backend) {
-      metadata = {
-        ...metadata,
-        file_backend: null,
-      };
-    }
+    metadata = mergeMetadataOnTypeChange(selectedAbstractType, metadata);
   }
 
   function cancel() {

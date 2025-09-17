@@ -295,7 +295,6 @@ function identifyAbstractTypeForDbType(
   return abstractTypeOfDbType;
 }
 
-// TODO_FILES: Rewrite this
 function identifyAllPossibleAbstractTypesForDbType(
   dbType: DbType,
   metadata: ColumnMetadata | null,
@@ -387,6 +386,25 @@ export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
     },
     metadata,
   };
+}
+
+export function mergeMetadataOnTypeChange(
+  newAbstractType: AbstractType,
+  metadata: ColumnMetadata | null,
+) {
+  if (newAbstractType.identifier === 'file') {
+    return {
+      ...(metadata ?? {}),
+      file_backend: 'default',
+    };
+  }
+  if (metadata && metadata.file_backend) {
+    return {
+      ...metadata,
+      file_backend: null,
+    };
+  }
+  return metadata;
 }
 
 export function getAllowedAbstractTypesForNewColumn() {
