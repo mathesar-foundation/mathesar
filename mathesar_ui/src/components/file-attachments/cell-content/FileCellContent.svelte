@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { FileManifest } from '@mathesar/api/rpc/records';
-  import Default from '@mathesar/components/Default.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
 
@@ -32,8 +31,6 @@
     {:else}
       <div class="centered">{value}</div>
     {/if}
-  {:else if value === undefined}
-    <div class="centered"><Default /></div>
   {:else}
     <div class="add">
       {#if canUpload}
