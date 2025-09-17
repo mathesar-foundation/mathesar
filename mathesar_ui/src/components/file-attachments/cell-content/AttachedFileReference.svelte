@@ -3,7 +3,7 @@
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import { assertExhaustive } from '@mathesar/component-library';
-  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import ContentLoading from '@mathesar/components/ContentLoading.svelte';
   import { toast } from '@mathesar/stores/toast';
 
   import { fetchImage, getFileViewerType } from '../fileUtils';
@@ -62,17 +62,16 @@
 <div class="file-cell-content">
   <div class="attached-file" class:can-open={canOpenViewer}>
     {#if fileViewerType === 'image'}
-      <!-- TODO_FILES_UI: add a loading indicator when thumbnail is loading -->
-      <img
-        alt={uri}
-        src={thumbnailUrl}
-        on:click={handleImgClick}
-        bind:this={thumbnailElement}
-      />
-      {#if imageLoading}
-        <!-- TODO_FILES_UI: Display spinner over thumbnail somehow -->
-        <Spinner />
-      {/if}
+      <div class="image">
+        <ContentLoading loading={imageLoading}>
+          <img
+            alt={uri}
+            src={thumbnailUrl}
+            on:click={handleImgClick}
+            bind:this={thumbnailElement}
+          />
+        </ContentLoading>
+      </div>
     {:else if fileViewerType === 'default'}
       <!-- TODO_FILES_UI: Improve this display. Use a generic icon + file name -->
       {uri}
@@ -82,7 +81,7 @@
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .file-cell-content {
     display: grid;
     overflow: hidden;
@@ -94,12 +93,17 @@
     overflow: hidden;
     display: flex;
   }
-  img {
-    display: block;
+
+  .image {
     height: 100%;
-    width: auto;
+    --ContentLoading__height: 100%;
+    img {
+      display: block;
+      height: 100%;
+    }
   }
-  .attached-file.can-open img {
+
+  .attached-file.can-open .image {
     cursor: pointer;
   }
 </style>
