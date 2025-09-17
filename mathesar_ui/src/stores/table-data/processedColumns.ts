@@ -12,8 +12,8 @@ import type {
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
-  getDbTypeBasedFilterCap,
   getDbTypeBasedInputCap,
+  getDbTypeBasedSimpleInputCap,
   getDisplayFormatter,
   getInitialInputValue,
   getLinkedRecordInputCap,
@@ -73,7 +73,7 @@ export class ProcessedColumn implements CellColumnFabric {
 
   readonly inputComponentAndProps: ComponentAndProps;
 
-  readonly filterComponentAndProps: ComponentAndProps;
+  readonly simpleInputComponentAndProps: ComponentAndProps;
 
   readonly allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
 
@@ -150,8 +150,8 @@ export class ProcessedColumn implements CellColumnFabric {
         })
       : getDbTypeBasedInputCap(this.column, this.abstractType.cellInfo);
 
-    this.filterComponentAndProps =
-      getDbTypeBasedFilterCap(this.column, this.abstractType.cellInfo) ??
+    this.simpleInputComponentAndProps =
+      getDbTypeBasedSimpleInputCap(this.column, this.abstractType.cellInfo) ??
       this.inputComponentAndProps;
 
     this.allowedFiltersMap = retrieveFilters(
