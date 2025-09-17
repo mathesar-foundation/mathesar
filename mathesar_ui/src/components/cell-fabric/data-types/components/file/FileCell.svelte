@@ -47,7 +47,7 @@
       imageElement,
       zoomOrigin,
       fileManifest,
-      removeFile: () => updateCell(null),
+      removeFile: () => remove(),
     });
   }
 
@@ -63,6 +63,10 @@
     } else {
       assertExhaustive(viewerType);
     }
+  }
+
+  function remove() {
+    updateCell(null);
   }
 
   async function upload() {
@@ -124,6 +128,7 @@
       canUpload={isActive && !disabled}
       {openImageFileViewer}
       {upload}
+      {remove}
     />
   </div>
 </CellWrapper>

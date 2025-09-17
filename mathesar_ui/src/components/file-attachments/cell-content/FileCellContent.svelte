@@ -12,6 +12,7 @@
   export let thumbnailResolutionHeightPx: number;
   export let canUpload: boolean;
   export let upload: () => void;
+  export let remove: () => void;
   export let openImageFileViewer: (p: {
     imageElement: HTMLImageElement;
     zoomOrigin?: DOMRect;
@@ -28,6 +29,7 @@
         {canOpenViewer}
         {thumbnailResolutionHeightPx}
         {openImageFileViewer}
+        {remove}
       />
     {:else}
       <div class="centered">{value}</div>
