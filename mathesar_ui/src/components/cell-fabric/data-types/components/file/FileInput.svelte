@@ -28,6 +28,7 @@
   let classes: string | undefined = '';
   export { classes as class };
   export let disabled = false;
+  export let canUploadFile = true;
   export let fileManifest: FileManifest | undefined = undefined;
   export let setFileManifest:
     | ((mash: string, manifest: FileManifest) => void)
@@ -150,7 +151,7 @@
       manifest={fileManifest}
       canOpenViewer={true}
       {thumbnailResolutionHeightPx}
-      canUpload={!disabled}
+      canUpload={canUploadFile && !disabled}
       {openImageFileViewer}
       {upload}
     />

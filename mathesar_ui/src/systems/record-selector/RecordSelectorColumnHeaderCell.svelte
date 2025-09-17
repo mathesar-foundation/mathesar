@@ -81,6 +81,7 @@
               key: recordId,
               value: _recordSummary,
             })}
+          canUploadFile={false}
           on:input={(e) => {
             void updateSearchValue();
             handleNewValue({ value: getValueFromEvent(e), debounce: true });

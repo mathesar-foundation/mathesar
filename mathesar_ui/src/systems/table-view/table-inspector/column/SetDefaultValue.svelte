@@ -106,6 +106,7 @@
       {disabled}
       {recordSummary}
       {setRecordSummary}
+      canUploadFile={false}
     />
   {/if}
   {#if actionButtonsVisible}
