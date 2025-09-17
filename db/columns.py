@@ -3,6 +3,7 @@ import json
 from db import connection as db_conn
 from db.deprecated.types.base import PostgresType
 
+
 DEFAULT = "default"
 DESCRIPTION = "description"
 NAME = "name"
