@@ -98,7 +98,7 @@ def get_download_links(request, results, keys):
         key: get_links_details(
             request,
             sync_links_from_json_strings(
-                request.session.session_key, [r[key] for r in results]
+                request.session.session_key, [r[key] for r in results if r.get(key) is not None]
             )
         )
         for key in (str(k) for k in keys)
