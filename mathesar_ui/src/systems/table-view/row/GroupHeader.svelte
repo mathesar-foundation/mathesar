@@ -1,5 +1,4 @@
 <script lang="ts">
-  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { SheetPositionableCell } from '@mathesar/components/sheet';
   import type {
     GroupHeaderRow,

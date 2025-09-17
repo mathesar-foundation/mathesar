@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-
   import type { Tab } from './TabContainerTypes';
 
   export let componentId: number;

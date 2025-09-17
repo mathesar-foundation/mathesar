@@ -6,9 +6,8 @@ import type { RecordsResponse } from '@mathesar/api/rpc/records';
 import { WritableMap } from '@mathesar/component-library';
 import type { Table } from '@mathesar/models/Table';
 import { getRecordPageUrl } from '@mathesar/routes/urls';
+import AssociatedCellData from '@mathesar/stores/AssociatedCellData';
 import { TableStructure } from '@mathesar/stores/table-data';
-import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
-import { buildRecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 
 export default class RecordStore {
@@ -19,7 +18,7 @@ export default class RecordStore {
   /** Keys are column ids */
   fieldValues = new WritableMap<number, unknown>();
 
-  recordSummaries = new RecordSummaryStore();
+  recordSummaries = new AssociatedCellData<string>();
 
   summary: Writable<string>;
 
@@ -51,8 +50,8 @@ export default class RecordStore {
     );
     this.summary.set(response.record_summaries?.[this.recordPk] ?? '');
     if (response.linked_record_summaries) {
-      this.recordSummaries.setFetchedSummaries(
-        buildRecordSummariesForSheet(response.linked_record_summaries),
+      this.recordSummaries.setFetchedValuesFromPrimitive(
+        response.linked_record_summaries,
       );
     }
   }
