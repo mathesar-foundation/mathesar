@@ -156,6 +156,7 @@ const docsPages = {
   databasePermissions: '/user-guide/databases/#permissions',
   databases: '/user-guide/databases/',
   dataTypes: '/user-guide/data-types/',
+  fileDataType: '/user-guide/data-types/#file',
   import: '/user-guide/importing-data/',
   internalSchemas: '/user-guide/schemas/#internal',
   metadata: '/user-guide/metadata/',

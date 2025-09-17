@@ -687,6 +687,7 @@
   "set_to": "Set to",
   "settings": "Settings",
   "setup_connections_help": "Seems you haven't set up any databases. To use Mathesar, you'll need to connect one.",
+  "setup_file_backend_help": "Please configure file storage settings in Mathesar to use the File type. See our [link](documentation) to learn more.",
   "share": "Share",
   "share_exploration": "Share Exploration",
   "share_exploration_help": "Give read-only access to this exploration to anyone via a link.",

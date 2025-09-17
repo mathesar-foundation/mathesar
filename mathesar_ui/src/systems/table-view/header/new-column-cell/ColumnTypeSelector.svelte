@@ -1,8 +1,9 @@
 <script lang="ts">
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { AbstractTypeName } from '@mathesar/components/abstract-type-control';
   import {
     defaultAbstractType,
     getAllowedAbstractTypesForNewColumn,
+    isAbstractTypeDisabled,
   } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import { SelectionList } from '@mathesar-component-library';
@@ -22,11 +23,9 @@
   }}
   valuesAreEqual={(a, b) => a?.identifier === b?.identifier}
   offsetOnFocus={2}
+  isOptionDisabled={(option) => isAbstractTypeDisabled(option)}
   {disabled}
   let:option
-  let:label
 >
-  <NameWithIcon icon={option.getIcon()}>
-    {label}
-  </NameWithIcon>
+  <AbstractTypeName abstractType={option} />
 </SelectionList>

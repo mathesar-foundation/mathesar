@@ -6,6 +6,8 @@ import {
   iconUiTypeJsonArray,
   iconUiTypeJsonObject,
 } from '@mathesar/icons';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
+import { isDefinedNonNullable } from '@mathesar-component-library';
 
 import { abstractTypeCategory } from './constants';
 import { DB_TYPES } from './dbTypes';
@@ -15,7 +17,8 @@ import DateTime from './type-configs/datetime';
 import Duration from './type-configs/duration';
 import Email from './type-configs/email';
 import Fallback from './type-configs/fallback';
-import File from './type-configs/file';
+// eslint-disable-next-line import/no-cycle
+import File from './type-configs/file/file';
 import Json from './type-configs/json';
 import Money from './type-configs/money';
 import Number from './type-configs/number';
@@ -257,13 +260,14 @@ const typesResponse: AbstractTypeResponse[] = [
     name: 'Array',
     db_types: [DB_TYPES.ARRAY],
   },
-  // TODO_FILES: Move this to a separate array
-  {
-    identifier: 'file',
-    name: 'File',
-    db_types: [DB_TYPES.JSONB],
-  },
 ];
+
+const fileAbstractType: AbstractType = {
+  identifier: 'file',
+  name: 'File',
+  dbTypes: new Set([DB_TYPES.JSONB]),
+  ...File,
+};
 
 const abstractTypesMap = constructAbstractTypeMapFromResponse(typesResponse);
 
@@ -275,15 +279,33 @@ export const defaultAbstractType = (() => {
   return textType;
 })();
 
+function getDefaultFileBackend() {
+  const commonData = preloadCommonData();
+  if (
+    commonData.routing_context === 'normal' &&
+    isDefinedNonNullable(commonData.file_backends)
+  ) {
+    return commonData.file_backends[0] ?? null;
+  }
+  return null;
+}
+
+export function isFileTypeSupported() {
+  return !!getDefaultFileBackend();
+}
+
+function isFileAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
+  return (
+    metadata?.file_backend && dbType === DB_TYPES.JSONB && isFileTypeSupported()
+  );
+}
+
 function identifyAbstractTypeForDbType(
   dbType: DbType,
   metadata: ColumnMetadata | null,
 ): AbstractType | undefined {
-  if (metadata?.file_backend && dbType === DB_TYPES.JSONB) {
-    const fileUiType = abstractTypesMap.get('file');
-    if (fileUiType) {
-      return fileUiType;
-    }
+  if (isFileAbstractType(dbType, metadata)) {
+    return fileAbstractType;
   }
   let abstractTypeOfDbType;
   for (const [, abstractType] of abstractTypesMap) {
@@ -297,14 +319,10 @@ function identifyAbstractTypeForDbType(
 
 function identifyAllPossibleAbstractTypesForDbType(
   dbType: DbType,
-  metadata: ColumnMetadata | null,
 ): Set<AbstractType> {
   const allPossibleAbstractTypes: Set<AbstractType> = new Set();
-  if (dbType === DB_TYPES.JSONB && metadata?.file_backend) {
-    const fileUiType = abstractTypesMap.get('file');
-    if (fileUiType) {
-      allPossibleAbstractTypes.add(fileUiType);
-    }
+  if (dbType === DB_TYPES.JSONB) {
+    allPossibleAbstractTypes.add(fileAbstractType);
   }
   for (const [, abstractType] of abstractTypesMap) {
     if (abstractType.dbTypes.has(dbType)) {
@@ -338,10 +356,8 @@ export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
 
   const targetDbTypes = typeCastMap[dbType] ?? [];
   targetDbTypes.forEach((targetDbType) => {
-    const abstractTypes = identifyAllPossibleAbstractTypesForDbType(
-      targetDbType,
-      metadata,
-    );
+    const abstractTypes =
+      identifyAllPossibleAbstractTypesForDbType(targetDbType);
     [...abstractTypes].forEach((absType) => abstractTypeSet.add(absType));
   });
   const abstractTypeList = [...abstractTypeSet].sort((a, b) =>
@@ -373,7 +389,7 @@ export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
   const metadata: ColumnMetadata | null = (() => {
     if (abstractType.identifier === 'file') {
       return {
-        file_backend: 'default',
+        file_backend: getDefaultFileBackend(),
       };
     }
     return null;
@@ -395,7 +411,7 @@ export function mergeMetadataOnTypeChange(
   if (newAbstractType.identifier === 'file') {
     return {
       ...(metadata ?? {}),
-      file_backend: 'default',
+      file_backend: getDefaultFileBackend(),
     };
   }
   if (metadata && metadata.file_backend) {
@@ -408,7 +424,7 @@ export function mergeMetadataOnTypeChange(
 }
 
 export function getAllowedAbstractTypesForNewColumn() {
-  return [...abstractTypesMap.values()]
+  return [...abstractTypesMap.values(), fileAbstractType]
     .filter((type) => !comboAbstractTypeCategories[type.identifier])
     .sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -416,5 +432,15 @@ export function getAllowedAbstractTypesForNewColumn() {
 export function getDbTypesForAbstractType(
   abstractTypeIdentifier: AbstractType['identifier'],
 ): Set<DbType> {
+  if (abstractTypeIdentifier === 'file') {
+    return fileAbstractType.dbTypes;
+  }
   return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();
+}
+
+export function isAbstractTypeDisabled(type: AbstractType) {
+  if (type.getEnabledState) {
+    return !type.getEnabledState().enabled;
+  }
+  return false;
 }
