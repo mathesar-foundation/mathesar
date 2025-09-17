@@ -13,6 +13,10 @@ from django.urls import reverse
 import fsspec
 from PIL import Image, UnidentifiedImageError
 import yaml
+
+from db.records import list_records_from_table
+from db import connection as db_conn
+
 from mathesar.models import DownloadLink
 
 BACKEND_CONF_YAML = settings.BASE_DIR.joinpath('file_storage.yml')
@@ -217,3 +221,29 @@ def get_backends(public_info=False):
         return list(backend_dict.keys())
     else:
         return backend_dict
+
+
+def reset_file_column_mash(table_oid, column_attnum, conn):
+    """
+    Resets the outdated "mash" for a given json/jsonb file column.
+
+    Args:
+      table_oid: The OID of the target table.
+      column_attnum: The attnum of a file json(b) column.
+      conn: A psycopg connection to the relevant database.
+    """
+    records = list_records_from_table(conn, table_oid)['results']
+    updated_uri_mash_map = {}
+    for r in records:
+        try:
+            uri = json.loads(r[str(column_attnum)])['uri']
+            updated_uri_mash_map[uri] = create_mash_for_uri(uri)
+        except Exception:
+            continue
+    db_conn.exec_msar_func(
+        conn,
+        'reset_mash',
+        table_oid,
+        column_attnum,
+        json.dumps(updated_uri_mash_map)
+    ).fetchone()[0]

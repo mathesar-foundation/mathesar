@@ -10,13 +10,13 @@ from db.columns import (
     add_pkey_column_to_table,
     alter_columns_in_table,
     drop_columns_from_table,
-    get_column_info_for_table,
-    reset_file_column_mash
+    get_column_info_for_table
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_columns_meta_data
+from mathesar.utils.download_links import reset_file_column_mash
 from mathesar.utils.tables import set_table_meta_data
 
 
