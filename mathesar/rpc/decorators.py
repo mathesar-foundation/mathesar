@@ -47,8 +47,7 @@ def mathesar_rpc_method(*, name, auth="superuser"):
 def maintain_models(f):
     @wraps(f)
     def wrapped(*args, **kwargs):
-        if settings.TEST is False and cache.get(MAINTENANCE_DONE) is None:
-            cache.set(MAINTENANCE_DONE, True, CACHE_TIMEOUT)
+        if settings.TEST is False and cache.add(MAINTENANCE_DONE, True, CACHE_TIMEOUT):
             threading.Thread(target=run_model_maintenance).start()
         return f(*args, **kwargs)
     return wrapped
