@@ -38,7 +38,7 @@ const stringType: CellComponentFactory = {
       },
     };
   },
-  getFilterInput: (
+  getSimpleInput: (
     column: RawColumnWithMetadata,
   ): ComponentAndProps<TextInputProps> => ({
     component: TextInput,
