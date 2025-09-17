@@ -5793,8 +5793,7 @@ BEGIN
   EXECUTE format(
     $j$
       UPDATE %1$I.%2$I
-      SET %3$I = jsonb_set(%2$I.%3$I::jsonb, '{mash}', mapping.mash, false)
-      -- Here, false means that we won't create a mash key if one doesn't already exist.
+      SET %3$I = jsonb_set(%2$I.%3$I::jsonb, '{mash}', mapping.mash)
       FROM jsonb_each(%4$L) AS mapping(uri, mash)
       WHERE %2$I.%3$I ->> 'uri' = mapping.uri
     $j$,

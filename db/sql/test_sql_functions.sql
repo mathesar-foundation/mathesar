@@ -7248,7 +7248,8 @@ BEGIN
   INSERT INTO a(name, files) VALUES 
   ('cat', '{"uri": "s3://msar/cat.png", "mash": "bad_mash"}'::jsonb),
   ('dog', '{"uri": "s3://msar/dog.png", "mash": "outdated_mash_34b801f337ee016d21"}'::jsonb),
-  ('elephant', '{"uri": "s3://msar/elephant.png", "mash": ""}'::jsonb); -- empty mash
+  ('elephant', '{"uri": "s3://msar/elephant.png", "mash": ""}'::jsonb), -- empty mash
+  ('deer', '{"uri": "s3://msar/deer.png"}'::jsonb); -- no mash key
 END;
 $$ LANGUAGE plpgsql;
 
@@ -7259,7 +7260,8 @@ DECLARE
   uri_mash_map jsonb := '{
     "s3://msar/cat.png": "1addf81f83dcbd34b801f337ee016d211bc16f5ba857f7ea02b2ccc53a6cf7c5",
     "s3://msar/dog.png": "8afd86435513c54853512e912a7e8802e17fabb45efb5a3041f93f7f0819a2aa",
-    "s3://msar/elephant.png": "b0a15ad5117a008daf8671e0d3bc552161889f4beac01fb1ff10807f36fade69"
+    "s3://msar/elephant.png": "b0a15ad5117a008daf8671e0d3bc552161889f4beac01fb1ff10807f36fade69",
+    "s3://msar/deer.png": "52161889f4beac01fb1ff10807f36fade698afd86435513c54853512e912a7e8"
   }'::jsonb;
   results jsonb;
 BEGIN
@@ -7295,6 +7297,14 @@ BEGIN
         "files": {
           "uri": "s3://msar/elephant.png",
           "mash": "b0a15ad5117a008daf8671e0d3bc552161889f4beac01fb1ff10807f36fade69"
+        }
+      },
+      {
+        "id": 4,
+        "name": "deer",
+        "files": {
+          "uri": "s3://msar/deer.png",
+          "mash": "52161889f4beac01fb1ff10807f36fade698afd86435513c54853512e912a7e8"
         }
       }
     ]
