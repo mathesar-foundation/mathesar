@@ -1,9 +1,10 @@
 export {
   getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
   getAllowedAbstractTypesForNewColumn,
-  defaultDbType,
-  getDefaultDbTypeOfAbstractType,
+  defaultAbstractType,
+  abstractTypeToColumnSaveSpec,
   getAbstractTypeForDbType,
+  mergeMetadataOnTypeChange,
 } from './abstractTypeCategories';
 export {
   filterDefinitionMap,

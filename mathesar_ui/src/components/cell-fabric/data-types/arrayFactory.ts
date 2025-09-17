@@ -25,7 +25,7 @@ function makeDisplayFormatter(
   column: ArrayLikeColumn,
 ) {
   const itemDbType = column.type_options?.item_type ?? 'string';
-  const cellInfo = getCellInfo(itemDbType);
+  const cellInfo = getCellInfo(itemDbType, column.metadata);
   const config = getCellConfiguration(itemDbType, cellInfo);
   const elementDataType =
     !cellInfo || cellInfo.type === 'array' ? 'string' : cellInfo.type;

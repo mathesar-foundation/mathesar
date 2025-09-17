@@ -23,6 +23,7 @@
           type_options: column.producesMultipleResults
             ? { item_type: column.type }
             : null,
+          metadata: column.metadata,
         }}
       />
     </div>

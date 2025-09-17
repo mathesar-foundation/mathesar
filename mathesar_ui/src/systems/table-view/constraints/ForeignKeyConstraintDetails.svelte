@@ -26,7 +26,7 @@
       throw new Error('Current database not set');
     }
     const referentTableColumns = await api.columns
-      .list({
+      .list_with_metadata({
         database_id: database.id,
         table_oid: _constraint.referent_table_oid,
       })

@@ -3,6 +3,7 @@ import boolean from './boolean';
 import date from './date';
 import datetime from './datetime';
 import duration from './duration';
+import file from './file';
 import money from './money';
 import number from './number';
 import string from './string';
@@ -28,6 +29,7 @@ const simpleDataTypeComponentFactories: Record<
   date,
   time,
   datetime,
+  file,
 };
 
 const compoundDataTypeComponentFactories: Record<

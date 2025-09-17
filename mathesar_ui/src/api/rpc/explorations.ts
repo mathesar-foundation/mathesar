@@ -142,6 +142,7 @@ export interface QueryResultColumn {
   display_name: string | null;
   type: RawColumnWithMetadata['type'];
   type_options: RawColumnWithMetadata['type_options'];
+  metadata: RawColumnWithMetadata['metadata'];
 }
 
 export interface QueryInitialColumnSource {

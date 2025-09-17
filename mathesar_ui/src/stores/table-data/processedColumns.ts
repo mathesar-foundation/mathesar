@@ -111,7 +111,10 @@ export class ProcessedColumn implements CellColumnFabric {
       (c) => c.columns.length !== 1,
     );
 
-    this.abstractType = getAbstractTypeForDbType(this.column.type);
+    this.abstractType = getAbstractTypeForDbType(
+      this.column.type,
+      this.column.metadata,
+    );
 
     this.initialInputValue = getInitialInputValue(
       this.column,
