@@ -2,19 +2,19 @@
   import type { Writable } from 'svelte/store';
 
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import {
     type ProcessedColumn,
     type RecordRow,
     type SearchFuzzy,
     isPersistedRecordRow,
   } from '@mathesar/stores/table-data';
-  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 
   import Cell from './RecordSelectorCellWrapper.svelte';
 
   export let row: RecordRow;
   export let processedColumn: ProcessedColumn;
-  export let linkedRecordSummaries: RecordSummaryStore;
+  export let linkedRecordSummaries: AssociatedCellData<string>;
   export let searchFuzzy: Writable<SearchFuzzy>;
   export let isLoading = false;
 

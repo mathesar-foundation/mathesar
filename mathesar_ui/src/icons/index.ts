@@ -16,6 +16,7 @@ import {
   faClipboardList,
   faClock,
   faClone,
+  faCloudDownloadAlt,
   faCogs,
   faCommentAlt,
   faComments,
@@ -28,6 +29,7 @@ import {
   faEnvelope,
   faExternalLink,
   faExternalLinkAlt,
+  faFile,
   faFileAlt,
   faFilter,
   faFilterCircleXmark,
@@ -98,6 +100,7 @@ import {
   createDatabaseIcon,
   databaseLineIcon,
   explorationIcon,
+  jsonIcon,
   mathesarNameIcon,
   modalRecordViewIcon,
   outcomeIcon,
@@ -180,6 +183,7 @@ export const iconDuplicateRecord: IconProps = {
   flip: 'vertical',
 };
 export const iconFillOutForm: IconProps = { data: faPlay };
+export const iconDownload: IconProps = { data: faCloudDownloadAlt };
 
 // THINGS
 //
@@ -239,6 +243,7 @@ export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
 export const iconDescription: IconProps = { data: circleLowercaseIIcon };
 export const iconMathesarName: IconProps = { data: mathesarNameIcon };
 export const iconModalRecordView: IconProps = { data: modalRecordViewIcon };
+export const iconFile: IconProps = { data: faFile };
 
 // STATUSES
 
@@ -256,6 +261,7 @@ export const iconUiTypeDate: IconProps = { data: faCalendarDay };
 export const iconUiTypeDateTime: IconProps = { data: faCalendarWeek };
 export const iconUiTypeDuration: IconProps = { data: faStopwatch };
 export const iconUiTypeEmail: IconProps = { data: faEnvelope };
+export const iconUiTypeJson: IconProps = { data: jsonIcon };
 export const iconUiTypeJsonArray: IconProps = { data: faClone };
 export const iconUiTypeJsonObject: IconProps = { data: faShapes };
 export const iconUiTypeMoney: IconProps = { data: faDollarSign };

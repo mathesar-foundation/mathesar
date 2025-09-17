@@ -149,10 +149,10 @@
         .get(String(column.id))
         ?.get(String(value))}
       setRecordSummary={(recordId, recordSummary) =>
-        recordSummaries.addBespokeRecordSummary({
+        recordSummaries.addBespokeValue({
           columnId: String(column.id),
-          recordId,
-          recordSummary,
+          key: recordId,
+          value: recordSummary,
         })}
       hasError={$showsError}
       allowsHyperlinks
