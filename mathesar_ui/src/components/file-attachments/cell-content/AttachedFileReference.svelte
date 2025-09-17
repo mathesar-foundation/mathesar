@@ -3,17 +3,17 @@
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import {
-    assertExhaustive,
     Icon,
+    assertExhaustive,
     iconFileAlt,
     iconPDF,
   } from '@mathesar/component-library';
+  import Button from '@mathesar/component-library/button/Button.svelte';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import { toast } from '@mathesar/stores/toast';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
-  import Button from '@mathesar/component-library/button/Button.svelte';
-  import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
 
   export let manifest: FileManifest;
   export let canOpenViewer: boolean;

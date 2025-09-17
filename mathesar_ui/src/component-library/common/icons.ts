@@ -22,6 +22,7 @@ import {
   faSpinner,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
+
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
 /**
