@@ -12,6 +12,8 @@ import {
   faEllipsisH,
   faExclamationTriangle,
   faFile,
+  faFileAlt,
+  faFilePdf,
   faFileUpload,
   faGears,
   faLightbulb,
@@ -20,7 +22,6 @@ import {
   faSpinner,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
 /**
@@ -54,6 +55,8 @@ export const iconUploadFile: IconProps = { data: faFileUpload };
 // (These names should all be nouns)
 
 export const iconFile: IconProps = { data: faFile };
+export const iconFileAlt: IconProps = { data: faFileAlt };
+export const iconPDF: IconProps = { data: faFilePdf };
 export const iconSettings: IconProps = { data: faGears };
 export const iconExternalLink: IconProps = { data: faArrowUpRightFromSquare };
 

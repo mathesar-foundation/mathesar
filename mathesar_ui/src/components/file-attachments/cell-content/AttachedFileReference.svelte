@@ -2,11 +2,18 @@
   import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
-  import { assertExhaustive } from '@mathesar/component-library';
+  import {
+    assertExhaustive,
+    Icon,
+    iconFileAlt,
+    iconPDF,
+  } from '@mathesar/component-library';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import { toast } from '@mathesar/stores/toast';
 
-  import { fetchImage, getFileViewerType } from '../fileUtils';
+  import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
+  import Button from '@mathesar/component-library/button/Button.svelte';
+  import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
 
   export let manifest: FileManifest;
   export let canOpenViewer: boolean;
@@ -26,9 +33,13 @@
   let imageLoading = false;
   let imageElement: HTMLImageElement | undefined;
 
-  $: ({ uri, thumbnail, direct } = manifest);
+  $: ({ uri, thumbnail, direct, mimetype } = manifest);
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
+  $: fileName = getFileName(manifest);
+  // TODO_FILES_UI: Support a wider range of filetype icons and use a
+  // more robust solution to map mime types to icons.
+  $: fileIcon = mimetype === 'application/pdf' ? iconPDF : iconFileAlt;
 
   async function loadImage() {
     imageLoading = true;
@@ -63,19 +74,26 @@
   <div class="attached-file" class:can-open={canOpenViewer}>
     {#if fileViewerType === 'image'}
       <!-- TODO_FILES_UI: add a loading indicator when thumbnail is loading -->
-      <img
-        alt={uri}
-        src={thumbnailUrl}
-        on:click={handleImgClick}
-        bind:this={thumbnailElement}
-      />
+      <!-- TODO_FILES_UI: Fix hover behavior. Hovering the thumbnail of an
+        inactive cell should _not_ open the tooltip. -->
+      <Tooltip>
+        <svelte:fragment slot="content">{fileName}</svelte:fragment>
+        <img
+          slot="trigger"
+          alt={uri}
+          src={thumbnailUrl}
+          on:click={handleImgClick}
+          bind:this={thumbnailElement}
+        />
+      </Tooltip>
       {#if imageLoading}
         <!-- TODO_FILES_UI: Display spinner over thumbnail somehow -->
         <Spinner />
       {/if}
     {:else if fileViewerType === 'default'}
-      <!-- TODO_FILES_UI: Improve this display. Use a generic icon + file name -->
-      {uri}
+      <Button aria-label={uri} appearance="secondary" tooltip={fileName}>
+        <Icon {...fileIcon} />
+      </Button>
     {:else}
       {assertExhaustive(fileViewerType)}
     {/if}
@@ -93,12 +111,17 @@
     height: 100%;
     overflow: hidden;
     display: flex;
+    padding: 0.1em;
   }
+
   img {
     display: block;
     height: 100%;
     width: auto;
+    border: solid 1px var(--color-border-input);
+    border-radius: var(--border-radius-m);
   }
+
   .attached-file.can-open img {
     cursor: pointer;
   }
