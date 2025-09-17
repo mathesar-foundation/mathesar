@@ -34,6 +34,10 @@
     dispatch('update', { value });
   }
 
+  function remove() {
+    updateCell(null);
+  }
+
   function openImageFileViewer({
     imageElement,
     zoomOrigin,
@@ -63,10 +67,6 @@
     } else {
       assertExhaustive(viewerType);
     }
-  }
-
-  function remove() {
-    updateCell(null);
   }
 
   async function upload() {
