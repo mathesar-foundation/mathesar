@@ -39,3 +39,7 @@ export function parseFileReference(value: unknown): FileReference | undefined {
   if (!hasStringProperty(obj, 'uri')) return undefined;
   return obj;
 }
+
+export function getFileName(manifest: FileManifest): string | undefined {
+  return manifest.uri.split('/').at(-1);
+}
