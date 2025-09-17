@@ -13,6 +13,7 @@
   import Button from '@mathesar/component-library/button/Button.svelte';
   import focusTrap from '@mathesar/component-library/common/actions/focusTrap';
   import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
+  import { confirm } from '@mathesar/stores/confirmation';
   import { Dropdown, iconInfo, portal } from '@mathesar-component-library';
 
   export let imageElement: HTMLImageElement;
@@ -82,6 +83,20 @@
     };
   }
 
+  async function handleClickRemove() {
+    const confirmed = await confirm({
+      title: $_('remove_file_question'),
+      body: $_('remove_file_confirmation_body'),
+      proceedButton: {
+        label: $_('remove'),
+        icon: iconDeleteMajor,
+      },
+    });
+    if (!confirmed) return;
+    removeFile();
+    close();
+  }
+
   onMount(() => {
     imageHolder.replaceChildren(imageElement);
     window.addEventListener('keydown', handleKeydown);
@@ -126,7 +141,7 @@
       <div class="img-holder" bind:this={imageHolder} />
 
       <div class="bottom">
-        <Button on:click={removeFile} aria-label={$_('remove')}>
+        <Button on:click={handleClickRemove} aria-label={$_('remove')}>
           <Icon {...iconDeleteMajor} />
           <span class="button-label">{$_('remove')}</span>
         </Button>
