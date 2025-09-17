@@ -101,12 +101,11 @@
   </LabeledInput>
   {#if !isDefaultNull}
     <DynamicInput
-      componentAndProps={column.inputComponentAndProps}
+      componentAndProps={column.simpleInputComponentAndProps}
       bind:value
       {disabled}
       {recordSummary}
       {setRecordSummary}
-      canUploadFile={false}
     />
   {/if}
   {#if actionButtonsVisible}

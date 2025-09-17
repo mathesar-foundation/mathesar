@@ -65,16 +65,16 @@ export function getDbTypeBasedInputCap(
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
 
-export function getDbTypeBasedFilterCap(
+export function getDbTypeBasedSimpleInputCap(
   column: CellColumnLike,
   optionalCellInfo?: CellInfo,
 ): ComponentAndProps | undefined {
   const cellInfo =
     optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   const factory = DataTypes[cellInfo?.type ?? 'string'];
-  if (!factory.getFilterInput) return undefined;
+  if (!factory.getSimpleInput) return undefined;
   const config = getCellConfiguration(column.type, cellInfo);
-  return factory.getFilterInput(column, config);
+  return factory.getSimpleInput(column, config);
 }
 
 export function getLinkedRecordInputCap(

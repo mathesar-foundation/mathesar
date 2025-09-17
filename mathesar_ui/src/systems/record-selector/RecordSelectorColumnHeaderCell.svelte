@@ -71,7 +71,7 @@
       <Debounce on:artificialChange={updateValue} let:handleNewValue>
         <DynamicInput
           class="record-selector-input column-{column.id}"
-          componentAndProps={processedColumn.inputComponentAndProps}
+          componentAndProps={processedColumn.simpleInputComponentAndProps}
           {value}
           {recordSummary}
           {labelController}
@@ -81,7 +81,7 @@
               key: recordId,
               value: _recordSummary,
             })}
-          canUploadFile={false}
+          disabled={processedColumn.abstractType.identifier === 'file'}
           on:input={(e) => {
             void updateSearchValue();
             handleNewValue({ value: getValueFromEvent(e), debounce: true });

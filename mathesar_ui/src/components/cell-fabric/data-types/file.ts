@@ -9,7 +9,7 @@ const fileType: CellComponentFactory = {
   initialInputValue: '',
   get: (): ComponentAndProps => ({ component: FileCell }),
   getInput: (): ComponentAndProps => ({ component: FileInput }),
-  getFilterInput: (): ComponentAndProps => ({ component: TextInput }),
+  getSimpleInput: (): ComponentAndProps => ({ component: TextInput }),
   getDisplayFormatter: () => String,
 };
 

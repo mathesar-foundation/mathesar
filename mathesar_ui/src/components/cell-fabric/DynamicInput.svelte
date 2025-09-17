@@ -25,7 +25,6 @@ during Sheet component creation.
     setRecordSummary?: (recordId: string, recordSummary: string) => void;
     fileManifest?: FileManifest;
     setFileManifest?: (mash: string, manifest: FileManifest) => void;
-    canUploadFile?: boolean;
     allowsHyperlinks?: boolean;
   }
 
