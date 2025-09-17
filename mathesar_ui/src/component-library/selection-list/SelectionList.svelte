@@ -64,6 +64,8 @@
 
   export let offsetOnFocus: DefinedProps['offsetOnFocus'] = 0;
 
+  export let isOptionDisabled: DefinedProps['isOptionDisabled'] = () => false;
+
   function setValueFromArray(values: (Option | undefined)[]) {
     [value] = values;
     dispatch('change', value);
@@ -122,6 +124,7 @@
   {disabled}
   mode="static"
   checkEquality={valuesAreEqual}
+  checkIfOptionIsDisabled={isOptionDisabled}
   let:api
 >
   <ListBoxOptions
