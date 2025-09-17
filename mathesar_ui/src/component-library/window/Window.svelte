@@ -44,7 +44,6 @@
       {#if hasCloseButton}
         <Button
           appearance="plain"
-          class="close-button"
           on:click={handleCloseButtonClick}
           tabIndex={closeButtonTabIndex}
         >

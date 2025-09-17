@@ -52,36 +52,36 @@
     }
 
     &.processing {
-      background: var(--info-background-color);
-      color: var(--info-color);
-      border-color: var(--info-border-color);
+      background: var(--color-bg-info);
+      color: var(--color-fg-info);
+      border-color: var(--color-border-info);
     }
     &.processing .icon {
-      color: var(--info-color);
+      color: var(--color-fg-info);
     }
     &.warning {
-      background: var(--warning-background-color);
-      color: var(--warning-color);
-      border-color: var(--warning-border-color);
+      background: var(--color-bg-warning);
+      color: var(--color-fg-warning);
+      border-color: var(--color-border-warning);
     }
     &.warning .icon {
-      color: var(--warning-color);
+      color: var(--color-fg-warning);
     }
     &.success {
-      background: var(--success-background-color);
-      color: var(--success-color);
-      border-color: var(--success-border-color);
+      background: var(--color-bg-success);
+      color: var(--color-fg-success);
+      border-color: var(--color-border-success);
     }
     &.success .icon {
-      color: var(--success-color);
+      color: var(--color-fg-success);
     }
     &.failure {
-      background: var(--danger-background-color);
-      color: var(--danger-color);
-      border-color: var(--danger-border-color);
+      background: var(--color-bg-danger);
+      color: var(--color-fg-danger);
+      border-color: var(--color-border-danger);
     }
     &.failure .icon {
-      color: var(--danger-color);
+      color: var(--color-fg-danger);
     }
   }
 </style>

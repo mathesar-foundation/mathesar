@@ -64,7 +64,7 @@
 
 <style>
   .grip {
-    background: var(--elevated-background);
+    background: var(--color-bg-raised-2);
     padding-inline: var(--sm5);
     border-radius: var(--border-radius-m);
   }

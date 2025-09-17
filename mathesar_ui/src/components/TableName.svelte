@@ -15,11 +15,21 @@
 
   export let table: $$Props['table'];
   export let isLoading = false;
+  export let cssVariables: Record<string, string> | undefined = undefined;
 
   $: isNotConfirmed = tableRequiresImportConfirmation(table);
 </script>
 
-<NameWithIcon icon={iconTable} {isLoading} {...$$restProps} bold>
+<NameWithIcon
+  icon={iconTable}
+  {isLoading}
+  {...$$restProps}
+  cssVariables={{
+    '--icon-color': 'var(--color-table)',
+    ...cssVariables,
+  }}
+  bold
+>
   <slot tableName={table.name}>
     {table.name}
   </slot>

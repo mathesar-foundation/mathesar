@@ -40,19 +40,19 @@
   .role-with-children {
     .name {
       padding: var(--sm6) var(--sm2);
-      background: var(--neutral-50);
-      border: 1px solid var(--neutral-300);
+      background: var(--color-database-20);
+      border: 1px solid var(--color-database);
       border-radius: var(--border-radius-xl);
-      font-weight: var(--font-weight-bold);
+      font-weight: var(--font-weight-medium);
       display: inline-flex;
       align-items: center;
       gap: var(--sm4);
-      color: var(--text-color-primary);
+      color: var(--color-fg-base);
       font-size: 1rem;
     }
     .member-count {
       font-size: var(--sm1);
-      color: var(--text-color-muted);
+      color: var(--color-fg-base-disabled);
       margin-left: var(--sm4);
     }
     .members {
@@ -61,20 +61,13 @@
         display: flex;
         align-items: center;
         gap: var(--sm4);
-        color: var(--text-color-muted);
+        color: var(--color-fg-base-disabled);
         font-size: var(--sm1);
 
         &:last-child {
           margin-bottom: 0;
         }
       }
-    }
-  }
-
-  :global(body.theme-dark) .role-with-children {
-    .name {
-      background: var(--slate-800);
-      border-color: var(--slate-600);
     }
   }
 </style>

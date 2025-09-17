@@ -92,8 +92,8 @@
     section {
       header {
         padding: var(--sm3);
-        background: var(--inspector-hover);
-        font-weight: 590;
+        background: var(--color-bg-header);
+        font-weight: var(--font-weight-bold);
       }
       .content {
         padding: var(--lg1);

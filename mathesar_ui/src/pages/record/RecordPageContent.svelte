@@ -8,13 +8,13 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
 
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {
     FormSubmit,
     makeForm,
     optionalField,
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
@@ -74,20 +74,25 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
 </script>
 
 <div class="record-page-content">
-  <InsetPageLayout>
-    <div slot="header" class="header">
-      <h1 class="title">
-        <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
-      </h1>
-      <div class="table-name">
+  <div class="record-page-header">
+    <AppSecondaryHeader
+      name={$summary}
+      icon={iconRecord}
+      entityTypeName={$_('record')}
+    >
+      <div slot="subText" class="table-name">
         <RichText text={$_('record_in_table')} let:slotName>
           {#if slotName === 'tableName'}
             <TableName {table} truncate={false} />
           {/if}
         </RichText>
       </div>
-      <div class="form-status"><FormStatus {form} /></div>
-    </div>
+      <div slot="action">
+        <div class="form-status"><FormStatus {form} /></div>
+      </div>
+    </AppSecondaryHeader>
+  </div>
+  <InsetPageLayout>
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
         <DirectField
@@ -126,32 +131,30 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   {/await}
 </div>
 
-<style>
+<style lang="scss">
   .record-page-content {
     height: 100%;
     display: grid;
     grid-template: auto 1fr / auto;
     overflow-y: auto;
   }
-  .header {
-    display: grid;
-    grid-template: auto auto / auto 1fr;
-    gap: 0.5rem 1.5rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-  }
-  .title {
-    grid-row: 1;
-    grid-column: 1;
-    margin: 0;
-    overflow: hidden;
-    color: var(--text-color-primary);
+  .record-page-header {
+    --AppSecondaryHeader__background: linear-gradient(
+      135deg,
+      var(--color-bg-base),
+      15%,
+      var(--color-record-10) 40%,
+      var(--color-bg-base) 60%,
+      var(--color-record-20) 100%
+    );
+    --AppSecondaryHeader__margin-bottom: var(--sm1);
+    --page-padding-x: 6rem;
+    --entity-name-color: var(--color-record);
   }
   .table-name {
     grid-row: 2;
     grid-column: 1;
-    color: var(--text-color-secondary);
+    color: var(--color-fg-subtle-1);
   }
   .form-status {
     grid-row: 1 / span 2;

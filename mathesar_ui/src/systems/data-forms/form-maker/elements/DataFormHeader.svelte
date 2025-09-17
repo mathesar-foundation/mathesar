@@ -147,7 +147,7 @@
     --input-element-border: none;
     --input-focus-color: none;
     --input-element-focus-box-shadow: none;
-    --input-background: none;
+    --input-element-background: none;
     --input-padding: var(--df__internal_desc-padding);
     background: transparent;
     width: 100%;

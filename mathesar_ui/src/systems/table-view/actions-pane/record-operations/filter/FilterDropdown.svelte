@@ -48,7 +48,7 @@
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconFiltering} size="0.8em" />
-    <span class="responsive-button-label">
+    <span class="responsive-button-label with-badge">
       {$_('filter')}
       <BadgeCount value={$filtering.entries.length} />
     </span>
@@ -60,3 +60,11 @@
     recordSummaries={recordsData.linkedRecordSummaries}
   />
 </Dropdown>
+
+<style lang="scss">
+  .with-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sm5);
+  }
+</style>

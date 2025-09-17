@@ -114,7 +114,7 @@
     padding: var(--sm5);
   }
   .button:hover {
-    background: var(--hover-background);
+    background: var(--color-navigation-20-hover);
   }
   .detail {
     padding: var(--sm1);

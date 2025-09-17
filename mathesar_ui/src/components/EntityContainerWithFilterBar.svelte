@@ -18,9 +18,6 @@
     display: flex;
     flex-direction: column;
     align-self: stretch;
-
-    > :global(* + *) {
-      margin-top: 1rem;
-    }
+    gap: var(--lg2);
   }
 </style>

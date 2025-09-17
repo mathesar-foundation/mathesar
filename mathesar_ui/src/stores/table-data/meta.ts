@@ -263,12 +263,12 @@ export class Meta {
     this.rowDeletionStatus.delete(rowKeys);
     const rowKeySet = new Set(rowKeys);
     this.cellClientSideErrors.delete(
-      [...this.cellClientSideErrors.getKeys()].filter(([cellkey]) =>
+      [...this.cellClientSideErrors.getKeys()].filter((cellkey) =>
         rowKeySet.has(extractRowKeyFromCellKey(cellkey)),
       ),
     );
     this.cellModificationStatus.delete(
-      [...this.cellModificationStatus.getKeys()].filter(([cellkey]) =>
+      [...this.cellModificationStatus.getKeys()].filter((cellkey) =>
         rowKeySet.has(extractRowKeyFromCellKey(cellkey)),
       ),
     );

@@ -2,20 +2,16 @@
   import { _ } from 'svelte-i18n';
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import InspectorButton from '@mathesar/components/InspectorButton.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
-  import {
-    iconForm,
-    iconInspector,
-    iconPubliclyShared,
-    iconShare,
-  } from '@mathesar/icons';
+  import { iconForm, iconPubliclyShared, iconShare } from '@mathesar/icons';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { confirm } from '@mathesar/stores/confirmation';
   import { dataFormInspectorVisible } from '@mathesar/stores/localStorage';
   import { toast } from '@mathesar/stores/toast';
   import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
-  import { Button, Dropdown, Icon } from '@mathesar-component-library';
+  import { Dropdown, Icon } from '@mathesar-component-library';
 
   import ShareForm from './ShareForm.svelte';
 
@@ -67,6 +63,11 @@
     name: $structure.name || $_('untitled'),
     icon: iconForm,
   }}
+  cssVariables={{
+    '--icon-fill-color':
+      'linear-gradient(135deg, var(--color-data-form), var(--color-data-form-60))',
+    '--icon-stroke-color': 'var(--color-fg-inverted)',
+  }}
 >
   <svelte:fragment slot="actions-right">
     <SaveButton onSave={saveForm} canSave={$hasChanges} />
@@ -88,15 +89,9 @@
         <ShareForm {dataForm} {dataFormManager} />
       </svelte:fragment>
     </Dropdown>
-    <Button
-      appearance="secondary"
-      size="medium"
-      on:click={toggleInspector}
+    <InspectorButton
       active={$dataFormInspectorVisible}
-      aria-label={$_('inspector')}
-    >
-      <Icon {...iconInspector} />
-      <span class="responsive-button-label">{$_('inspector')}</span>
-    </Button>
+      toggle={toggleInspector}
+    />
   </svelte:fragment>
 </EntityPageHeader>

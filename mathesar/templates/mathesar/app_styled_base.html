@@ -25,7 +25,7 @@
   <style type="text/css">
     .message-box.error-message,
     .message-box.warning-message {
-      border: 1px solid var(--red-200);
+      border: 1px solid;
       border-radius: var(--border-radius-m);
       padding: var(--sm3);
       display: flex;
@@ -37,12 +37,14 @@
       opacity: 0.7;
     } 
     .message-box.error-message {
-      background: var(--red-100);
-      border-color: var(--red-200);
+      background: var(--color-bg-danger);
+      border-color: var(--color-border-danger);
+      color: var(--color-fg-danger);
     }
     .message-box.warning-message {
-      background: var(--yellow-100);
-      border-color: var(--red-200);
+      background: var(--color-bg-warning);
+      border-color: var(--color-border-warning);
+      color: var(--color-fg-warning)
     }
   </style>
 

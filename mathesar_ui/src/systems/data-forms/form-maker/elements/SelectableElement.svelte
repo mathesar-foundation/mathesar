@@ -139,7 +139,7 @@
   // background is set because fields can overlap when dragging to rearrange,
   // and it looks awkward without a background.
   :global([data-form-selectable][data-sortable-item].is-dragging) {
-    background: var(--elevated-background);
+    background: var(--color-bg-raised-2);
     z-index: var(--df__internal__z-index__field-being-dragged);
   }
 
