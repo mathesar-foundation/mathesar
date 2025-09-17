@@ -94,6 +94,17 @@ export type Result = Record<string, ResultValue>;
 /** Keys are stringified FK cell values. Values are record summaries. */
 export type RecordSummaryColumnData = Record<string, string>;
 
+export interface FileManifest {
+  uri: string;
+  mimetype: string;
+  thumbnail: string;
+  attachment: string;
+  direct: string;
+}
+
+/** Keys are file "mash" values */
+export type FileManifestColumnData = Record<string, FileManifest>;
+
 export interface RecordsResponse {
   count: number;
   grouping: GroupingResponse | null;
@@ -101,6 +112,8 @@ export interface RecordsResponse {
   /** Keys are attnums. */
   linked_record_summaries: Record<string, RecordSummaryColumnData> | null;
   record_summaries: Record<string, string> | null;
+  /** Keys are attnums. */
+  download_links: Record<string, FileManifestColumnData>;
 }
 
 export const records = {

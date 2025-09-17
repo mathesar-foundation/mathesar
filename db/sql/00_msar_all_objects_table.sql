@@ -1183,6 +1183,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.replace_database_privileges_for_roles(jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.replace_schema_privileges_for_roles(regnamespace,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.replace_table_privileges_for_roles(regclass,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.reset_mash(regclass,smallint,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.role_info_table()', 'FUNCTION', NULL),
   ('msar', 'msar.sanitize_direction(text)', 'FUNCTION', NULL),
   ('msar', 'msar.schema_exists(text)', 'FUNCTION', NULL),

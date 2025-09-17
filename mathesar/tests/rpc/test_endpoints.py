@@ -100,6 +100,11 @@ METHODS = [
         "columns.patch",
         [user_is_authenticated]
     ),
+    (
+        columns.reset_mash,
+        "columns.reset_mash",
+        [user_is_superuser]
+    ),
 
     (
         columns.metadata.list_,
