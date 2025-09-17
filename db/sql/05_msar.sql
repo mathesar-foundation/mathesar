@@ -3776,16 +3776,6 @@ DECLARE
   col_alter_str text := msar.process_col_alter_jsonb(tab_id, col_alters);
   return_attnum_arr integer[];
 BEGIN
-  -- TODO: This section for bulk alter is to be removed entirely.
-  --*************************************************
-  IF col_alter_str IS NOT NULL THEN
-    PERFORM __msar.exec_ddl(
-      'ALTER TABLE %s %s',
-      __msar.get_qualified_relation_name(tab_id),
-      msar.process_col_alter_jsonb(tab_id, col_alters)
-    );
-  END IF;
-  --**************************************************
   FOR col IN
     SELECT
       (col_alter_obj ->> 'attnum')::smallint AS attnum,
@@ -3793,6 +3783,7 @@ BEGIN
       (col_alter_obj ->> 'name')::text AS new_name,
       (col_alter_obj -> 'delete')::boolean AS delete_,
       msar.build_type_text_complete(col_alter_obj -> 'type', format_type(pga.atttypid, null)) AS new_type,
+      col_alter_obj -> 'default' AS new_default,
 
       col_alter_obj->>'description' AS comment_,
       __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment
@@ -3803,7 +3794,7 @@ BEGIN
   LOOP
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
-    IF col.new_type IS NOT NULL OR jsonb_typeof(new_default)='null' THEN
+    IF col.new_type IS NOT NULL OR jsonb_typeof(col.new_default)='null' THEN
       PERFORM msar.drop_col_default(tab_id, col.attnum);
     END IF;
     PERFORM msar.retype_column(tab_id, col.attnum, col.new_type);
@@ -3816,6 +3807,16 @@ BEGIN
     -- PG13 doesn't allow concat b/w integer[] and smallint need to typecast
     return_attnum_arr := return_attnum_arr || col.attnum::integer; 
   END LOOP;
+  -- TODO: This section for bulk alter is to be removed entirely.
+  --*************************************************
+  IF col_alter_str IS NOT NULL THEN
+    PERFORM __msar.exec_ddl(
+      'ALTER TABLE %s %s',
+      __msar.get_qualified_relation_name(tab_id),
+      col_alter_str
+    );
+  END IF;
+  --**************************************************
   RETURN return_attnum_arr; -- do we really need this??
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
