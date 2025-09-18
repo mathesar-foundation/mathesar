@@ -31,6 +31,16 @@ import {
   faExternalLinkAlt,
   faFile,
   faFileAlt,
+  faFileArchive,
+  faFileAudio,
+  faFileCode,
+  faFileCsv,
+  faFileExcel,
+  faFileImage,
+  faFilePdf,
+  faFilePowerpoint,
+  faFileVideo,
+  faFileWord,
   faFilter,
   faFilterCircleXmark,
   faFingerprint,
@@ -243,7 +253,19 @@ export const iconAutomaticallyAdded: IconProps = { data: outcomeIcon };
 export const iconDescription: IconProps = { data: circleLowercaseIIcon };
 export const iconMathesarName: IconProps = { data: mathesarNameIcon };
 export const iconModalRecordView: IconProps = { data: modalRecordViewIcon };
+
 export const iconFile: IconProps = { data: faFile };
+export const iconFileAlt: IconProps = { data: faFileAlt };
+export const iconFileArchive: IconProps = { data: faFileArchive };
+export const iconFileAudio: IconProps = { data: faFileAudio };
+export const iconFileCode: IconProps = { data: faFileCode };
+export const iconFileCSV: IconProps = { data: faFileCsv };
+export const iconFileExcel: IconProps = { data: faFileExcel };
+export const iconFileImage: IconProps = { data: faFileImage };
+export const iconFilePDF: IconProps = { data: faFilePdf };
+export const iconFilePowerpoint: IconProps = { data: faFilePowerpoint };
+export const iconFileVideo: IconProps = { data: faFileVideo };
+export const iconFileWord: IconProps = { data: faFileWord };
 
 // STATUSES
 

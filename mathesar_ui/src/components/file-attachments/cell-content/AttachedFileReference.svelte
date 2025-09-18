@@ -6,8 +6,6 @@
     Dropdown,
     Icon,
     assertExhaustive,
-    iconFileAlt,
-    iconPDF,
   } from '@mathesar/component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
@@ -16,6 +14,7 @@
   import { toast } from '@mathesar/stores/toast';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
+  import FileIcon from './FileIcon.svelte';
 
   export let manifest: FileManifest;
   export let canOpenViewer: boolean;
@@ -40,9 +39,6 @@
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
   $: fileName = getFileName(manifest);
-  // TODO_FILES_UI: Support a wider range of filetype icons and use a
-  // more robust solution to map mime types to icons.
-  $: fileIcon = mimetype === 'application/pdf' ? iconPDF : iconFileAlt;
   // The non-image file dropdown state is managed here so the filename tooltip
   // can be hidden while the dropdown is open to reduce visual clutter.
   $: fileDropdownIsOpen = false;
@@ -110,7 +106,7 @@
         }}
         appearance="secondary"
       >
-        <Icon slot="trigger" {...fileIcon} />
+        <FileIcon slot="trigger" {mimetype} />
         <div slot="content" class="file-actions">
           <table class="info">
             <tr><th>{$_('storage_uri')}</th><td>{uri}</td></tr>
