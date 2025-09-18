@@ -46,7 +46,6 @@
 
   async function loadImage() {
     imageLoading = true;
-    await new Promise((f) => setTimeout(f, 3000));
     imageElement = await fetchImage(direct);
     imageLoading = false;
   }
