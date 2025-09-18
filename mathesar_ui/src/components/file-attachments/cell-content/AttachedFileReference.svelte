@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy, onMount, tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
@@ -12,6 +13,11 @@
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import ContentLoading from '@mathesar/components/ContentLoading.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import {
+    hadInteractionSince,
+    snapshotInteractions,
+    subscribeUIInteractions,
+  } from '@mathesar/utils/subscribeUiInteractions';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
 
@@ -33,6 +39,18 @@
   let imageLoading = false;
   let imageElement: HTMLImageElement | undefined;
 
+  // Subscribe to UI interactions to cancel the lightbox opening if the
+  // user interacts with anything _except_ a lightbox trigger.
+  // This also efectively  allows the user to "preload" images.
+  let unsubscribeInteractions: (() => void) | undefined;
+  onMount(() => {
+    unsubscribeInteractions = subscribeUIInteractions([
+      'pointerdown',
+      'keydown',
+    ]);
+  });
+  onDestroy(() => unsubscribeInteractions?.());
+
   $: ({ uri, thumbnail, direct, mimetype } = manifest);
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
@@ -52,10 +70,17 @@
     // inactive cell should _not_ open the file viewer.
     if (!canOpenViewer) return;
 
+    // Capture a snapshot of interactions after the image has been clicked,
+    // so we can block opening the lightbox if the user interacts elsewhere.
+    // The image will still be loaded.
+    const snapshot = snapshotInteractions();
+
     if (!imageElement) {
+      await tick();
       await loadImage();
-      // TODO_FILES_UI consider click listener on window to stop lightbox from
-      // opening while image is fetching?
+
+      // Stop without loading the lightbox if the user has interacted elsewhere.
+      if (hadInteractionSince(snapshot)) return;
     }
 
     if (!imageElement) {
