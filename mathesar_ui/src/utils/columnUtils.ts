@@ -18,7 +18,7 @@ export function getColumnIconProps(column: {
   type: RawColumnWithMetadata['type'];
   type_options: RawColumnWithMetadata['type_options'];
   constraintsType?: ConstraintType[];
-  metadata?: ColumnMetadata | null;
+  metadata: ColumnMetadata | null;
 }): IconProps | IconProps[] {
   if (column.constraintsType?.includes('primary')) {
     return iconConstraint;
@@ -28,13 +28,10 @@ export function getColumnIconProps(column: {
     return iconTableLink;
   }
 
-  if (column.metadata?.file_backend) {
-    return iconFile;
-  }
-
-  return getAbstractTypeForDbType(column.type).getIcon({
+  return getAbstractTypeForDbType(column.type, column.metadata).getIcon({
     dbType: column.type,
     typeOptions: column.type_options,
+    metadata: column.metadata,
   });
 }
 

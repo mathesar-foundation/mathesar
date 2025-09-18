@@ -3,6 +3,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import { mergeMetadataOnTypeChange } from '@mathesar/stores/abstract-types';
   import { toast } from '@mathesar/stores/toast';
   import { columnTypeOptionsAreEqual } from '@mathesar/utils/columnUtils';
   import {
@@ -23,7 +24,10 @@
 
   export let column: ColumnWithAbstractType;
   export let save: (
-    options: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
+    options: Pick<
+      ColumnTypeOptionsSaveArgs,
+      'type' | 'type_options' | 'metadata'
+    >,
   ) => Promise<unknown>;
   export let showWarnings = true;
   export let disabled = false;
@@ -35,6 +39,8 @@
   let typeOptions: ColumnWithAbstractType['type_options'] = {
     ...savedTypeOptions,
   };
+  let { metadata } = column;
+
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
@@ -54,6 +60,7 @@
     selectedDbType = _column.type;
     savedTypeOptions = _column.type_options ?? {};
     typeOptions = { ...savedTypeOptions };
+    metadata = _column.metadata;
   }
   $: resetAbstractType(column);
 
@@ -65,6 +72,7 @@
     selectedDbType = type;
     selectedAbstractType = abstractType;
     typeOptions = {};
+    metadata = mergeMetadataOnTypeChange(selectedAbstractType, metadata);
   }
 
   function cancel() {
@@ -79,6 +87,7 @@
       await save({
         type: selectedDbType,
         type_options: { ...typeOptions },
+        metadata,
       });
       typeChangeState = { state: 'success' };
     } catch (err) {
