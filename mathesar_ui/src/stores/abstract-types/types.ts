@@ -3,6 +3,7 @@ import type { QuerySummarizationFunctionId } from '@mathesar/api/rpc/exploration
 import type { DbType } from '@mathesar/AppTypes';
 import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 import type {
+  ComponentWithProps,
   FormConfiguration,
   FormConfigurationVariable,
   FormValues,
@@ -74,6 +75,9 @@ export interface AbstractTypeConfiguration {
   cellInfo: CellInfo;
   getDbConfig?: (selectedDbType?: DbType) => AbstractTypeDbConfig;
   getDisplayConfig?: () => AbstractTypeDisplayConfig;
+  getEnabledState?: () =>
+    | { enabled: false; cause: string | string[] | ComponentWithProps<any> }
+    | { enabled: true };
 }
 
 export type AbstractTypeConfigurationPartialMap = Partial<

@@ -2,11 +2,18 @@
   import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
-  import { assertExhaustive } from '@mathesar/component-library';
+  import {
+    Icon,
+    assertExhaustive,
+    iconFileAlt,
+    iconPDF,
+  } from '@mathesar/component-library';
+  import Button from '@mathesar/component-library/button/Button.svelte';
+  import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import ContentLoading from '@mathesar/components/ContentLoading.svelte';
   import { toast } from '@mathesar/stores/toast';
 
-  import { fetchImage, getFileViewerType } from '../fileUtils';
+  import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
 
   export let manifest: FileManifest;
   export let canOpenViewer: boolean;
@@ -26,9 +33,13 @@
   let imageLoading = false;
   let imageElement: HTMLImageElement | undefined;
 
-  $: ({ uri, thumbnail, direct } = manifest);
+  $: ({ uri, thumbnail, direct, mimetype } = manifest);
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
+  $: fileName = getFileName(manifest);
+  // TODO_FILES_UI: Support a wider range of filetype icons and use a
+  // more robust solution to map mime types to icons.
+  $: fileIcon = mimetype === 'application/pdf' ? iconPDF : iconFileAlt;
 
   async function loadImage() {
     imageLoading = true;
@@ -62,19 +73,26 @@
 <div class="file-cell-content">
   <div class="attached-file" class:can-open={canOpenViewer}>
     {#if fileViewerType === 'image'}
-      <div class="image">
-        <ContentLoading loading={imageLoading}>
-          <img
-            alt={uri}
-            src={thumbnailUrl}
-            on:click={handleImgClick}
-            bind:this={thumbnailElement}
-          />
-        </ContentLoading>
-      </div>
+      <!-- TODO_FILES_UI: add a loading indicator when thumbnail is loading -->
+      <!-- TODO_FILES_UI: Fix hover behavior. Hovering the thumbnail of an
+        inactive cell should _not_ open the tooltip. -->
+      <Tooltip>
+        <svelte:fragment slot="content">{fileName}</svelte:fragment>
+        <div slot="trigger" class="image">
+          <ContentLoading loading={imageLoading}>
+            <img
+              alt={uri}
+              src={thumbnailUrl}
+              on:click={handleImgClick}
+              bind:this={thumbnailElement}
+            />
+          </ContentLoading>
+        </div>
+      </Tooltip>
     {:else if fileViewerType === 'default'}
-      <!-- TODO_FILES_UI: Improve this display. Use a generic icon + file name -->
-      {uri}
+      <Button aria-label={uri} appearance="secondary" tooltip={fileName}>
+        <Icon {...fileIcon} />
+      </Button>
     {:else}
       {assertExhaustive(fileViewerType)}
     {/if}
@@ -92,6 +110,7 @@
     height: 100%;
     overflow: hidden;
     display: flex;
+    padding: 0.1em;
   }
 
   .image {
@@ -100,6 +119,8 @@
     img {
       display: block;
       height: 100%;
+      border: solid 1px var(--color-border-input);
+      border-radius: var(--border-radius-m);
     }
   }
 
