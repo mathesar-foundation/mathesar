@@ -22,6 +22,11 @@
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
+  import ControlledFileDetailDropdown from './components/file-attachments/file-detail-dropdown/ControlledFileDetailDropdown.svelte';
+  import {
+    FileDetailDropdownController,
+    fileDetailDropdownContext,
+  } from './components/file-attachments/file-detail-dropdown/FileDetailDropdownController';
   import { modalFileAttachmentUploadContext } from './components/file-attachments/file-uploader/modalFileAttachmentUploadContext';
   import ModalFileAttachmentUploadController from './components/file-attachments/file-uploader/ModalFileAttachmentUploadController';
   import ModalFileAttachmentUploader from './components/file-attachments/file-uploader/ModalFileAttachmentUploader.svelte';
@@ -65,6 +70,9 @@
 
   const lightboxController = new LightboxController();
   lightboxContext.set(lightboxController);
+
+  const fileDetailDropdownController = new FileDetailDropdownController();
+  fileDetailDropdownContext.set(fileDetailDropdownController);
 
   const modalFileAttachmentUploader = new ModalFileAttachmentUploadController();
   modalFileAttachmentUploadContext.set(modalFileAttachmentUploader);
@@ -113,6 +121,7 @@
 />
 <AttachableRowSeeker controller={rowSeekerController} />
 <ControlledLightbox controller={lightboxController} />
+<ControlledFileDetailDropdown controller={fileDetailDropdownController} />
 <ModalFileAttachmentUploader controller={modalFileAttachmentUploader} />
 
 <slot />

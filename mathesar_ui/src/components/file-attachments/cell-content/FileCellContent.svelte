@@ -3,7 +3,7 @@
   import { iconAddNew } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import FileCellValue from './AttachedFileReference.svelte';
+  import AttachedFileReference from './AttachedFileReference.svelte';
 
   export let value: unknown = undefined;
   export let manifest: FileManifest | undefined = undefined;
@@ -15,6 +15,7 @@
     imageElement: HTMLImageElement;
     zoomOrigin?: DOMRect;
   }) => void;
+  export let openFileDetailDropdown: (p: { trigger: HTMLElement }) => void;
 
   $: hasValue = value !== undefined && value !== null;
 </script>
@@ -22,11 +23,12 @@
 <div class="file-cell-content">
   {#if hasValue}
     {#if manifest}
-      <FileCellValue
+      <AttachedFileReference
         {manifest}
         {canOpenViewer}
         {thumbnailResolutionHeightPx}
         {openImageFileViewer}
+        {openFileDetailDropdown}
       />
     {:else}
       <div class="centered">{value}</div>

@@ -1,10 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
+  import { fileDetailDropdownContext } from '@mathesar/components/file-attachments/file-detail-dropdown/FileDetailDropdownController';
   import { modalFileAttachmentUploadContext } from '@mathesar/components/file-attachments/file-uploader/modalFileAttachmentUploadContext';
+  import FileDetail from '@mathesar/components/file-attachments/FileDetail.svelte';
   import {
     getFileViewerType,
     parseFileReference,
@@ -19,6 +20,7 @@
   const thumbnailResolutionHeightPx = ROW_HEIGHT_PX * 2;
   const dispatch = createEventDispatcher();
   const lightbox = lightboxContext.get();
+  const fileDetailDropdown = fileDetailDropdownContext.get();
   const modalFileAttachmentUploader = modalFileAttachmentUploadContext.get();
 
   export let fileManifest: FileManifest | undefined = undefined;
@@ -35,6 +37,10 @@
     dispatch('update', { value });
   }
 
+  function remove() {
+    updateCell(null);
+  }
+
   function openImageFileViewer({
     imageElement,
     zoomOrigin,
@@ -48,7 +54,17 @@
       imageElement,
       zoomOrigin,
       fileManifest,
-      removeFile: () => updateCell(null),
+      removeFile: () => remove(),
+    });
+  }
+
+  function openFileDetailDropdown({ trigger }: { trigger: HTMLElement }) {
+    if (!fileManifest) return;
+    if (!fileDetailDropdown) return;
+    fileDetailDropdown.open({
+      trigger,
+      fileManifest,
+      removeFile: () => remove(),
     });
   }
 
@@ -129,13 +145,11 @@
       {thumbnailResolutionHeightPx}
       canUpload={isActive && !disabled}
       {openImageFileViewer}
+      {openFileDetailDropdown}
       {upload}
     />
     {#if isIndependentOfSheet && fileManifest}
-      <table>
-        <tr><th>{$_('storage_uri')}</th><td>{fileManifest.uri}</td></tr>
-        <tr><th>{$_('mime_type')}</th><td>{fileManifest.mimetype}</td></tr>
-      </table>
+      <FileDetail {fileManifest} />
     {/if}
   </div>
 </CellWrapper>
@@ -145,21 +159,5 @@
     display: grid;
     overflow: hidden;
     padding: 1px;
-  }
-
-  table {
-    padding: var(--sm4);
-    max-width: max-content;
-
-    th {
-      text-align: left;
-      min-width: max-content;
-      white-space: nowrap;
-      vertical-align: top;
-    }
-    td {
-      line-height: 1.2;
-      padding: 0.2em 0.8em;
-    }
   }
 </style>
