@@ -2,18 +2,15 @@
   import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
-  import {
-    Dropdown,
-    Icon,
-    assertExhaustive,
-  } from '@mathesar/component-library';
+  import { assertExhaustive } from '@mathesar/component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
-  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
-  import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
+  import ContentLoading from '@mathesar/components/ContentLoading.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import { onAnyUiInteraction } from '@mathesar/utils/onAnyUiInteraction';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
+
   import FileIcon from './FileIcon.svelte';
 
   export let manifest: FileManifest;
@@ -22,6 +19,7 @@
     imageElement: HTMLImageElement;
     zoomOrigin?: DOMRect;
   }) => void;
+  export let openFileDetailDropdown: (p: { trigger: HTMLElement }) => void;
 
   /**
    * This controls the pixel dimensions of the fetched thumbnail size, as
@@ -29,19 +27,16 @@
    * thumbnail.
    */
   export let thumbnailResolutionHeightPx: number;
-  export let remove: () => void;
 
   let thumbnailElement: HTMLImageElement;
   let imageLoading = false;
   let imageElement: HTMLImageElement | undefined;
+  let defaultFileTrigger: HTMLElement;
 
-  $: ({ uri, thumbnail, direct, mimetype, attachment: downloadUrl } = manifest);
+  $: ({ uri, thumbnail, direct, mimetype } = manifest);
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
   $: fileName = getFileName(manifest);
-  // The non-image file dropdown state is managed here so the filename tooltip
-  // can be hidden while the dropdown is open to reduce visual clutter.
-  $: fileDropdownIsOpen = false;
 
   async function loadImage() {
     imageLoading = true;
@@ -55,9 +50,16 @@
     if (!canOpenViewer) return;
 
     if (!imageElement) {
+      let uiInteraction = false;
+      onAnyUiInteraction(() => {
+        uiInteraction = true;
+      }, ['pointerdown', 'keydown']);
+
       await loadImage();
-      // TODO_FILES_UI consider click listener on window to stop lightbox from
-      // opening while image is fetching?
+
+      // If the user has interacted before the lightbox
+      // opened, do not open the lightbox.
+      if (uiInteraction) return;
     }
 
     if (!imageElement) {
@@ -70,6 +72,10 @@
       zoomOrigin: thumbnailElement.getBoundingClientRect(),
     });
   }
+
+  function handleDefaultFileClick() {
+    openFileDetailDropdown({ trigger: defaultFileTrigger });
+  }
 </script>
 
 <div class="file-cell-content">
@@ -80,57 +86,34 @@
         inactive cell should _not_ open the tooltip. -->
       <Tooltip>
         <svelte:fragment slot="content">{fileName}</svelte:fragment>
-        <img
-          slot="trigger"
-          alt={uri}
-          src={thumbnailUrl}
-          on:click={handleImgClick}
-          bind:this={thumbnailElement}
-        />
+        <div slot="trigger" class="image">
+          <ContentLoading loading={imageLoading}>
+            <img
+              alt={uri}
+              src={thumbnailUrl}
+              on:click={handleImgClick}
+              bind:this={thumbnailElement}
+            />
+          </ContentLoading>
+        </div>
       </Tooltip>
-      {#if imageLoading}
-        <!-- TODO_FILES_UI: Display spinner over thumbnail somehow -->
-        <Spinner />
-      {/if}
     {:else if fileViewerType === 'default'}
-      <Dropdown
-        showArrow={false}
-        placements={['bottom', 'top']}
+      <Button
+        on:click={handleDefaultFileClick}
+        bind:element={defaultFileTrigger}
         aria-label={uri}
-        tooltip={fileDropdownIsOpen ? undefined : fileName}
-        on:open={() => {
-          fileDropdownIsOpen = true;
-        }}
-        on:close={() => {
-          fileDropdownIsOpen = false;
-        }}
+        tooltip={fileName}
         appearance="secondary"
       >
-        <FileIcon slot="trigger" {mimetype} />
-        <div slot="content" class="file-actions">
-          <table class="info">
-            <tr><th>{$_('storage_uri')}</th><td>{uri}</td></tr>
-            <tr><th>{$_('mime_type')}</th><td>{mimetype}</td></tr>
-          </table>
-          <div class="actions">
-            <Button on:click={remove} aria-label={$_('remove')}>
-              <Icon {...iconDeleteMajor} />
-              <span class="button-label">{$_('remove')}</span>
-            </Button>
-            <a class="btn btn-default" href={downloadUrl}>
-              <Icon {...iconDownload} />
-              <span class="button-label">{$_('download')}</span>
-            </a>
-          </div>
-        </div>
-      </Dropdown>
+        <FileIcon {mimetype} />
+      </Button>
     {:else}
       {assertExhaustive(fileViewerType)}
     {/if}
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .file-cell-content {
     display: grid;
     overflow: hidden;
@@ -144,38 +127,18 @@
     padding: 0.1em;
   }
 
-  img {
-    display: block;
+  .image {
     height: 100%;
-    width: auto;
-    border: solid 1px var(--color-border-input);
-    border-radius: var(--border-radius-m);
+    --ContentLoading__height: 100%;
+    img {
+      display: block;
+      height: 100%;
+      border: solid 1px var(--color-border-input);
+      border-radius: var(--border-radius-m);
+    }
   }
 
-  .attached-file.can-open img {
+  .attached-file.can-open .image {
     cursor: pointer;
-  }
-
-  .file-actions {
-    width: 24rem;
-    max-width: 100%;
-    padding: var(--sm1);
-  }
-
-  .actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: var(--lg1);
-  }
-
-  th {
-    vertical-align: top;
-    text-align: right;
-    min-width: max-content;
-    white-space: nowrap;
-  }
-  td {
-    line-height: 1.2;
-    padding: 0.2em;
   }
 </style>

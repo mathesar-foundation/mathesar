@@ -46,7 +46,7 @@
     cellModificationStatus,
     cellClientSideErrors,
   } = meta);
-  $: ({ grouping, linkedRecordSummaries } = recordsData);
+  $: ({ grouping, linkedRecordSummaries, fileManifests } = recordsData);
 
   $: ({ pkColumn } = columnsDataStore);
   $: primaryKeyColumnId = $pkColumn?.id;
@@ -126,6 +126,7 @@
         group={row.group}
         processedColumnsMap={$processedColumns}
         recordSummariesForSheet={$linkedRecordSummaries}
+        fileManifestsForSheet={$fileManifests}
       />
     {:else if isRecordRow(row)}
       {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}

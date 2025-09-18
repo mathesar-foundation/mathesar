@@ -3,7 +3,9 @@
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
+  import { fileDetailDropdownContext } from '@mathesar/components/file-attachments/file-detail-dropdown/FileDetailDropdownController';
   import { modalFileAttachmentUploadContext } from '@mathesar/components/file-attachments/file-uploader/modalFileAttachmentUploadContext';
+  import FileDetail from '@mathesar/components/file-attachments/FileDetail.svelte';
   import {
     getFileViewerType,
     parseFileReference,
@@ -18,6 +20,7 @@
   const thumbnailResolutionHeightPx = ROW_HEIGHT_PX * 2;
   const dispatch = createEventDispatcher();
   const lightbox = lightboxContext.get();
+  const fileDetailDropdown = fileDetailDropdownContext.get();
   const modalFileAttachmentUploader = modalFileAttachmentUploadContext.get();
 
   export let fileManifest: FileManifest | undefined = undefined;
@@ -50,6 +53,16 @@
     lightbox.open({
       imageElement,
       zoomOrigin,
+      fileManifest,
+      removeFile: () => remove(),
+    });
+  }
+
+  function openFileDetailDropdown({ trigger }: { trigger: HTMLElement }) {
+    if (!fileManifest) return;
+    if (!fileDetailDropdown) return;
+    fileDetailDropdown.open({
+      trigger,
       fileManifest,
       removeFile: () => remove(),
     });
@@ -119,7 +132,12 @@
   on:mousedown={handleMouseDown}
   hasPadding={false}
 >
-  <div class="file-cell" class:disabled style={`height: ${ROW_HEIGHT_PX}px;`}>
+  <div
+    class="file-cell"
+    class:disabled
+    class:independent={isIndependentOfSheet}
+    style={isIndependentOfSheet ? '' : `height: ${ROW_HEIGHT_PX}px;`}
+  >
     <FileCellContent
       {value}
       manifest={fileManifest}
@@ -127,13 +145,16 @@
       {thumbnailResolutionHeightPx}
       canUpload={isActive && !disabled}
       {openImageFileViewer}
+      {openFileDetailDropdown}
       {upload}
-      {remove}
     />
+    {#if isIndependentOfSheet && fileManifest}
+      <FileDetail {fileManifest} />
+    {/if}
   </div>
 </CellWrapper>
 
-<style>
+<style lang="scss">
   .file-cell {
     display: grid;
     overflow: hidden;

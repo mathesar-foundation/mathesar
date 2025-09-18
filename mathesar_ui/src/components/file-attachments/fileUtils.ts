@@ -1,4 +1,9 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import type { FileManifest } from '@mathesar/api/rpc/records';
+import { iconDeleteMajor } from '@mathesar/icons';
+import { confirm } from '@mathesar/stores/confirmation';
 import { hasStringProperty } from '@mathesar-component-library';
 
 export interface FileReference {
@@ -42,4 +47,15 @@ export function parseFileReference(value: unknown): FileReference | undefined {
 
 export function getFileName(manifest: FileManifest): string | undefined {
   return manifest.uri.split('/').at(-1);
+}
+
+export async function confirmRemoveFile() {
+  return confirm({
+    title: get(_)('remove_file_question'),
+    body: get(_)('remove_file_confirmation_body'),
+    proceedButton: {
+      label: get(_)('remove'),
+      icon: iconDeleteMajor,
+    },
+  });
 }

@@ -1,6 +1,6 @@
 import type { Writable } from 'svelte/store';
 
-import type { ResultValue } from '@mathesar/api/rpc/records';
+import type { FileManifest, ResultValue } from '@mathesar/api/rpc/records';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import { type ImmutableSet, defined } from '@mathesar-component-library';
 
@@ -135,6 +135,7 @@ export interface SelectedCellData {
     column: CellColumnFabric;
     value: ResultValue | undefined;
     recordSummary?: string;
+    fileManifest?: FileManifest;
   };
   selectionData: {
     cellCount: number;

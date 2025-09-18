@@ -1,19 +1,18 @@
 <script lang="ts">
   import { Icon } from '@mathesar/component-library';
   import type { IconProps } from '@mathesar/component-library/types';
-
   import {
     iconFileAlt,
-    iconFileCSV,
-    iconFilePDF,
-    iconFileImage,
-    iconFileVideo,
-    iconFileAudio,
-    iconFileCode,
     iconFileArchive,
-    iconFileWord,
+    iconFileAudio,
+    iconFileCSV,
+    iconFileCode,
     iconFileExcel,
+    iconFileImage,
+    iconFilePDF,
     iconFilePowerpoint,
+    iconFileVideo,
+    iconFileWord,
   } from '@mathesar/icons';
 
   export let mimetype: string;
@@ -45,10 +44,10 @@
     text: iconFileCode,
   };
 
-  function getIcon(mimetype: string) {
-    if (exact[mimetype]) return exact[mimetype];
+  function getIcon(iconMimetype: string) {
+    if (exact[iconMimetype]) return exact[iconMimetype];
 
-    const category = mimetype.split('/', 1).at(0);
+    const category = iconMimetype.split('/', 1).at(0);
     if (category) {
       return byCategory[category] ?? iconFileAlt;
     }

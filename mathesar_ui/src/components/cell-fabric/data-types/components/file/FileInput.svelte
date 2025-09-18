@@ -4,6 +4,7 @@
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
+  import { fileDetailDropdownContext } from '@mathesar/components/file-attachments/file-detail-dropdown/FileDetailDropdownController';
   import { modalFileAttachmentUploadContext } from '@mathesar/components/file-attachments/file-uploader/modalFileAttachmentUploadContext';
   import {
     getFileViewerType,
@@ -21,6 +22,7 @@
   const labelController = getLabelControllerFromContainingLabel();
   const dispatch = createEventDispatcher();
   const lightbox = lightboxContext.get();
+  const fileDetailDropdown = fileDetailDropdownContext.get();
   const modalFileAttachmentUploader = modalFileAttachmentUploadContext.get();
 
   export let id = getGloballyUniqueId();
@@ -70,6 +72,16 @@
     lightbox.open({
       imageElement,
       zoomOrigin,
+      fileManifest,
+      removeFile: () => updateCell(null),
+    });
+  }
+
+  function openFileDetailDropdown({ trigger }: { trigger: HTMLElement }) {
+    if (!fileManifest) return;
+    if (!fileDetailDropdown) return;
+    fileDetailDropdown.open({
+      trigger,
       fileManifest,
       removeFile: () => updateCell(null),
     });
@@ -152,6 +164,7 @@
       {thumbnailResolutionHeightPx}
       canUpload={!disabled}
       {openImageFileViewer}
+      {openFileDetailDropdown}
       {upload}
     />
   </div>

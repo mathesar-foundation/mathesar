@@ -40,21 +40,7 @@
     return { [firstFileUpload.fileId]: completion };
   })();
 
-  $: title = 'Upload File';
-  // I'm getting a weird JS console error when I try to use the translated title
-  // below.
-  //
-  // ```
-  // $: title = $_('upload_file');
-  // ```
-  //
-  // The error is:
-  //
-  // > "Cannot format a message without first setting the initial locale."
-  //
-  // I'm using a non-translated title for now.
-  //
-  // TODO_FILES_UI: troubleshoot and fix this error
+  $: title = $_('upload_file');
 
   function init() {
     controller.cancel();
