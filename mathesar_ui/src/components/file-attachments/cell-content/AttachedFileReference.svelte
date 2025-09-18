@@ -11,8 +11,8 @@
   } from '@mathesar/component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
-  import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
   import ContentLoading from '@mathesar/components/ContentLoading.svelte';
+  import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
   import { toast } from '@mathesar/stores/toast';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
