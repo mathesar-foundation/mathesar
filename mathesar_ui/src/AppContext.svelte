@@ -30,11 +30,9 @@
     LightboxController,
     lightboxContext,
   } from './components/file-attachments/lightbox/LightboxController';
-  import { initUiTheme } from './utils/uiThemePreference';
 
   export let commonData: CommonData;
 
-  initUiTheme();
   setBreadcrumbItemsInContext([]);
 
   function setUserProfileAndReleaseStores() {
