@@ -26,6 +26,8 @@
     td {
       line-height: 1.2;
       padding: 0.2em 0.8em;
+      word-break: break-all;
+      overflow-wrap: anywhere;
     }
   }
 </style>
