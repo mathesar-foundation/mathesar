@@ -14,8 +14,10 @@
   import Button from '@mathesar/component-library/button/Button.svelte';
   import focusTrap from '@mathesar/component-library/common/actions/focusTrap';
   import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
-  import { confirm } from '@mathesar/stores/confirmation';
   import { Dropdown, iconInfo, portal } from '@mathesar-component-library';
+
+  import FileDetail from '../FileDetail.svelte';
+  import { confirmRemoveFile } from '../fileUtils';
 
   export let imageElement: HTMLImageElement;
   export let zoomOrigin: DOMRect | undefined = undefined;
@@ -26,7 +28,7 @@
   let imageHolder: HTMLDivElement;
   let imageDisplayWidth: number;
 
-  $: ({ uri, attachment: downloadUrl, mimetype } = fileManifest);
+  $: ({ attachment: downloadUrl } = fileManifest);
   $: ({ naturalHeight, naturalWidth } = imageElement);
   $: showButtonLabels = imageDisplayWidth > 500;
 
@@ -85,14 +87,7 @@
   }
 
   async function handleClickRemove() {
-    const confirmed = await confirm({
-      title: $_('remove_file_question'),
-      body: $_('remove_file_confirmation_body'),
-      proceedButton: {
-        label: $_('remove'),
-        icon: iconDeleteMajor,
-      },
-    });
+    const confirmed = await confirmRemoveFile();
     if (!confirmed) return;
     removeFile();
     close();
@@ -165,10 +160,7 @@
               <span class="button-label">{$_('info')}</span>
             </svelte:fragment>
             <div class="info" slot="content">
-              <table>
-                <tr><th>{$_('storage_uri')}</th><td>{uri}</td></tr>
-                <tr><th>{$_('mime_type')}</th><td>{mimetype}</td></tr>
-              </table>
+              <FileDetail {fileManifest} />
             </div>
           </Dropdown>
           <div slot="content">{$_('info')}</div>
@@ -280,14 +272,5 @@
 
   .info {
     padding: var(--sm4);
-    th {
-      text-align: right;
-      min-width: max-content;
-      white-space: nowrap;
-    }
-    td {
-      line-height: 1.2;
-      padding: 0.2em;
-    }
   }
 </style>
