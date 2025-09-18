@@ -3732,9 +3732,58 @@ Args:
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
--- CREATE OR REPLACE FUNCTION
--- msar.add_col_default(tab_id regclass, col_id smallint) RETURNS text AS $$
--- $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION
+msar.set_col_default(tab_id regclass, col_id smallint, default_ text) RETURNS text AS $$/*
+Sets the default for a given column, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table containing the column whose default we'll alter.
+  col_id: The attnum of the column whose default we'll alter.
+  default_: 
+*/
+  SELECT __msar.exec_ddl(
+    'ALTER TABLE %I.%I ALTER COLUMN %I SET DEFAULT %L',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    default_
+  );
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.set_old_col_default(tab_id regclass, col_id smallint, old_default text, new_type text, is_default_dynamic boolean) RETURNS text AS $$/*
+Sets the old default for a given column, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table containing the column whose default we'll alter.
+  col_id: The attnum of the column whose default we'll alter.
+  old_default: 
+  new_type: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
+  is_default_dynamic:
+*/
+DECLARE
+  default_ text;
+  default_expr text;
+BEGIN
+  IF is_default_dynamic THEN
+    default_ := format('%s::%s', old_default, new_type);
+  ELSE
+    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type)) INTO default_;
+    default_ := quote_literal(default_);
+  END IF;
+
+  default_expr := format(
+    'ALTER TABLE %I.%I ALTER COLUMN %I SET DEFAULT %s',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    default_
+  );
+  EXECUTE default_expr;
+  RETURN default_expr;
+END; 
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3775,6 +3824,7 @@ DECLARE
   col RECORD;
   col_alter_str text := msar.process_col_alter_jsonb(tab_id, col_alters);
   return_attnum_arr integer[];
+  is_default_dynamic boolean;
 BEGIN
   FOR col IN
     SELECT
@@ -3783,40 +3833,48 @@ BEGIN
       (col_alter_obj ->> 'name')::text AS new_name,
       (col_alter_obj -> 'delete')::boolean AS delete_,
       msar.build_type_text_complete(col_alter_obj -> 'type', format_type(pga.atttypid, null)) AS new_type,
+      pg_get_expr(adbin, tab_id) old_default,
       col_alter_obj -> 'default' AS new_default,
 
       col_alter_obj->>'description' AS comment_,
       __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment
 
     FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
-      INNER JOIN pg_attribute AS pga ON pga.attnum=(x.col_alter_obj ->> 'attnum')::smallint AND pga.attrelid=tab_id
+      INNER JOIN pg_catalog.pg_attribute AS pga ON pga.attnum=(x.col_alter_obj ->> 'attnum')::smallint AND pga.attrelid=tab_id
+      LEFT JOIN pg_catalog.pg_attrdef AS pgat ON pgat.adnum=(x.col_alter_obj ->> 'attnum')::smallint AND pgat.adrelid=tab_id
     WHERE NOT msar.is_mathesar_id_column(tab_id, (x.col_alter_obj ->> 'attnum')::integer)
   LOOP
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
+
+    is_default_dynamic := msar.is_default_possibly_dynamic(tab_id, col.attnum);
+
     IF col.new_type IS NOT NULL OR jsonb_typeof(col.new_default)='null' THEN
       PERFORM msar.drop_col_default(tab_id, col.attnum);
     END IF;
     PERFORM msar.retype_column(tab_id, col.attnum, col.new_type);
+
+    IF jsonb_typeof(col.new_default)='null' THEN
+      NULL;
+    ELSEIF col.new_default #>> '{}' IS NOT NULL THEN
+      -- set new default
+      PERFORM msar.set_col_default(tab_id, col.attnum, col.new_default #>> '{}');
+    ELSEIF col.new_type IS NOT NULL THEN
+      -- preserve old default
+      PERFORM msar.set_old_col_default(tab_id, col.attnum, col.old_default, col.new_type, is_default_dynamic);
+    END IF;
+
     IF col.delete_ THEN
       PERFORM msar.drop_columns(tab_id, col.attnum);
     END IF;
+
     IF col.has_comment THEN
       PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
     END IF;
+
     -- PG13 doesn't allow concat b/w integer[] and smallint need to typecast
     return_attnum_arr := return_attnum_arr || col.attnum::integer; 
   END LOOP;
-  -- TODO: This section for bulk alter is to be removed entirely.
-  --*************************************************
-  IF col_alter_str IS NOT NULL THEN
-    PERFORM __msar.exec_ddl(
-      'ALTER TABLE %s %s',
-      __msar.get_qualified_relation_name(tab_id),
-      col_alter_str
-    );
-  END IF;
-  --**************************************************
   RETURN return_attnum_arr; -- do we really need this??
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
