@@ -90,19 +90,19 @@
       <!-- TODO_FILES_UI: add a loading indicator when thumbnail is loading -->
       <!-- TODO_FILES_UI: Fix hover behavior. Hovering the thumbnail of an
         inactive cell should _not_ open the tooltip. -->
-      <Tooltip>
-        <svelte:fragment slot="content">{fileName}</svelte:fragment>
-        <div slot="trigger" class="image">
-          <ContentLoading loading={imageLoading}>
+      <ContentLoading loading={imageLoading}>
+        <Tooltip>
+          <svelte:fragment slot="content">{fileName}</svelte:fragment>
+          <div slot="trigger" class="image">
             <img
               alt={uri}
               src={thumbnailUrl}
               on:click={handleImgClick}
               bind:this={thumbnailElement}
             />
-          </ContentLoading>
-        </div>
-      </Tooltip>
+          </div>
+        </Tooltip>
+      </ContentLoading>
     {:else if fileViewerType === 'default'}
       <Button
         on:click={handleDefaultFileClick}
@@ -124,6 +124,7 @@
     display: grid;
     overflow: hidden;
     height: 100%;
+    --ContentLoading__height: 100%;
   }
 
   .attached-file {
@@ -135,7 +136,6 @@
 
   .image {
     height: 100%;
-    --ContentLoading__height: 100%;
     img {
       display: block;
       height: 100%;
