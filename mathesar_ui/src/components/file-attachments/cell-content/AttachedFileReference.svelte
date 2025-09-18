@@ -12,6 +12,7 @@
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import ContentLoading from '@mathesar/components/ContentLoading.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import { onAnyUiInteraction } from '@mathesar/utils/onAnyUiInteraction';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
 
@@ -55,9 +56,16 @@
     if (!canOpenViewer) return;
 
     if (!imageElement) {
+      let uiInteraction = false;
+      onAnyUiInteraction(() => {
+        uiInteraction = true;
+      }, ['pointerdown', 'keydown']);
+
       await loadImage();
-      // TODO_FILES_UI consider click listener on window to stop lightbox from
-      // opening while image is fetching?
+
+      // If the user has interacted before the lightbox
+      // opened, do not open the lightbox.
+      if (uiInteraction) return;
     }
 
     if (!imageElement) {
