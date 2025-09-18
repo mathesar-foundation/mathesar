@@ -27,6 +27,7 @@
     imageElement: HTMLImageElement;
     zoomOrigin?: DOMRect;
   }) => void;
+  export let openFileDetailDropdown: (p: { trigger: HTMLElement }) => void;
 
   /**
    * This controls the pixel dimensions of the fetched thumbnail size, as
@@ -38,6 +39,7 @@
   let thumbnailElement: HTMLImageElement;
   let imageLoading = false;
   let imageElement: HTMLImageElement | undefined;
+  let defaultFileTrigger: HTMLElement;
 
   // Subscribe to UI interactions to cancel the lightbox opening if the
   // user interacts with anything _except_ a lightbox trigger.
@@ -93,6 +95,10 @@
       zoomOrigin: thumbnailElement.getBoundingClientRect(),
     });
   }
+
+  function handleDefaultFileClick() {
+    openFileDetailDropdown({ trigger: defaultFileTrigger });
+  }
 </script>
 
 <div class="file-cell-content">
@@ -115,7 +121,13 @@
         </div>
       </Tooltip>
     {:else if fileViewerType === 'default'}
-      <Button aria-label={uri} appearance="secondary" tooltip={fileName}>
+      <Button
+        on:click={handleDefaultFileClick}
+        bind:element={defaultFileTrigger}
+        aria-label={uri}
+        tooltip={fileName}
+        appearance="secondary"
+      >
         <Icon {...fileIcon} />
       </Button>
     {:else}
