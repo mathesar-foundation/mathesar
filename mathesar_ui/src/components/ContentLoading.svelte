@@ -32,6 +32,6 @@
   .overlay {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.5); /* TODO_FILES_UI: dark mode */
+    background: var(--color-loading-overlay);
   }
 </style>
