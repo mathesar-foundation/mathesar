@@ -24,7 +24,7 @@
 
 <div class="cell-inspector">
   {#if activeCellData}
-    {@const { column, value, recordSummary } = activeCellData}
+    {@const { column, value, recordSummary, fileManifest } = activeCellData}
     <section class="active-cell">
       <header class="header">{$_('content')}</header>
       <div class="content">
@@ -35,6 +35,7 @@
             columnFabric={column}
             {value}
             {recordSummary}
+            {fileManifest}
           />
         {/if}
       </div>

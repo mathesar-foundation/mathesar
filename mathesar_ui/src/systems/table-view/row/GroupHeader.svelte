@@ -1,5 +1,7 @@
 <script lang="ts">
+  import type { FileManifest } from '@mathesar/api/rpc/records';
   import { SheetPositionableCell } from '@mathesar/components/sheet';
+  import type { AssociatedCellValuesForSheet } from '@mathesar/stores/AssociatedCellData';
   import type {
     GroupHeaderRow,
     ProcessedColumn,
@@ -16,6 +18,7 @@
   export let grouping: RecordGrouping;
   export let group: RecordGroup;
   export let recordSummariesForSheet: RecordSummariesForSheet;
+  export let fileManifestsForSheet: AssociatedCellValuesForSheet<FileManifest>;
 
   $: ({ columnIds, preprocIds } = grouping);
   $: preProcFunctionsForColumn = columnIds.map(
@@ -40,6 +43,8 @@
           {recordSummariesForSheet}
           {columnId}
           preprocName={preprocNames[index]}
+          {fileManifestsForSheet}
+          totalColumns={columnIds.length}
         />
       {/each}
       <div class="count-container">
@@ -58,11 +63,13 @@
     height: 100%;
     border-bottom: 1px solid var(--color-border-grid);
     border-right: 1px solid var(--color-border-grid);
+    overflow: hidden;
 
     .groups-data {
       align-items: start;
       display: flex;
       gap: 1rem;
+      overflow: hidden;
     }
 
     .count-container {
