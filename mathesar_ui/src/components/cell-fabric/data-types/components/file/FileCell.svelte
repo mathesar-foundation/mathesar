@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
@@ -119,7 +120,12 @@
   on:mousedown={handleMouseDown}
   hasPadding={false}
 >
-  <div class="file-cell" class:disabled style={`height: ${ROW_HEIGHT_PX}px;`}>
+  <div
+    class="file-cell"
+    class:disabled
+    class:independent={isIndependentOfSheet}
+    style={isIndependentOfSheet ? '' : `height: ${ROW_HEIGHT_PX}px;`}
+  >
     <FileCellContent
       {value}
       manifest={fileManifest}
@@ -130,13 +136,35 @@
       {upload}
       {remove}
     />
+    {#if isIndependentOfSheet && fileManifest}
+      <table>
+        <tr><th>{$_('storage_uri')}</th><td>{fileManifest.uri}</td></tr>
+        <tr><th>{$_('mime_type')}</th><td>{fileManifest.mimetype}</td></tr>
+      </table>
+    {/if}
   </div>
 </CellWrapper>
 
-<style>
+<style lang="scss">
   .file-cell {
     display: grid;
     overflow: hidden;
     padding: 1px;
+  }
+
+  table {
+    padding: var(--sm4);
+    max-width: max-content;
+
+    th {
+      text-align: left;
+      min-width: max-content;
+      white-space: nowrap;
+      vertical-align: top;
+    }
+    td {
+      line-height: 1.2;
+      padding: 0.2em 0.8em;
+    }
   }
 </style>

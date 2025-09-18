@@ -8,6 +8,9 @@
   import AppContext from './AppContext.svelte';
   import { initI18n } from './i18n';
   import RootRoute from './routes/RootRoute.svelte';
+  import { initUiTheme } from './utils/uiThemePreference';
+
+  initUiTheme();
 
   const commonData = preloadCommonData();
   const userDisplayLanguage =
@@ -17,17 +20,17 @@
   void initI18n(userDisplayLanguage ?? 'en');
 </script>
 
-<AppContext {commonData}>
-  {#if $isTranslationLoading}
-    <div class="app-loader">
-      <Spinner size="2rem" />
-    </div>
-  {:else}
+{#if $isTranslationLoading}
+  <div class="app-loader">
+    <Spinner size="2rem" />
+  </div>
+{:else}
+  <AppContext {commonData}>
     {#key $locale}
       <RootRoute {commonData} />
     {/key}
-  {/if}
-</AppContext>
+  </AppContext>
+{/if}
 
 <!--
   Supporting aliases in scss within the preprocessor is a bit of work.

@@ -10,9 +10,9 @@
     iconPDF,
   } from '@mathesar/component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
-  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
+  import ContentLoading from '@mathesar/components/ContentLoading.svelte';
   import { toast } from '@mathesar/stores/toast';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
@@ -84,18 +84,17 @@
         inactive cell should _not_ open the tooltip. -->
       <Tooltip>
         <svelte:fragment slot="content">{fileName}</svelte:fragment>
-        <img
-          slot="trigger"
-          alt={uri}
-          src={thumbnailUrl}
-          on:click={handleImgClick}
-          bind:this={thumbnailElement}
-        />
+        <div slot="trigger" class="image">
+          <ContentLoading loading={imageLoading}>
+            <img
+              alt={uri}
+              src={thumbnailUrl}
+              on:click={handleImgClick}
+              bind:this={thumbnailElement}
+            />
+          </ContentLoading>
+        </div>
       </Tooltip>
-      {#if imageLoading}
-        <!-- TODO_FILES_UI: Display spinner over thumbnail somehow -->
-        <Spinner />
-      {/if}
     {:else if fileViewerType === 'default'}
       <Dropdown
         showArrow={false}
@@ -134,7 +133,7 @@
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .file-cell-content {
     display: grid;
     overflow: hidden;
@@ -148,15 +147,18 @@
     padding: 0.1em;
   }
 
-  img {
-    display: block;
+  .image {
     height: 100%;
-    width: auto;
-    border: solid 1px var(--color-border-input);
-    border-radius: var(--border-radius-m);
+    --ContentLoading__height: 100%;
+    img {
+      display: block;
+      height: 100%;
+      border: solid 1px var(--color-border-input);
+      border-radius: var(--border-radius-m);
+    }
   }
 
-  .attached-file.can-open img {
+  .attached-file.can-open .image {
     cursor: pointer;
   }
 
