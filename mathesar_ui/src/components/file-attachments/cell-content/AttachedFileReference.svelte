@@ -3,7 +3,6 @@
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import {
-    Dropdown,
     Icon,
     assertExhaustive,
     iconFileAlt,
@@ -12,7 +11,6 @@
   import Button from '@mathesar/component-library/button/Button.svelte';
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import ContentLoading from '@mathesar/components/ContentLoading.svelte';
-  import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
   import { toast } from '@mathesar/stores/toast';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
@@ -23,6 +21,7 @@
     imageElement: HTMLImageElement;
     zoomOrigin?: DOMRect;
   }) => void;
+  export let openFileDetailDropdown: (p: { trigger: HTMLElement }) => void;
 
   /**
    * This controls the pixel dimensions of the fetched thumbnail size, as
@@ -30,22 +29,19 @@
    * thumbnail.
    */
   export let thumbnailResolutionHeightPx: number;
-  export let remove: () => void;
 
   let thumbnailElement: HTMLImageElement;
   let imageLoading = false;
   let imageElement: HTMLImageElement | undefined;
+  let defaultFileTrigger: HTMLElement;
 
-  $: ({ uri, thumbnail, direct, mimetype, attachment: downloadUrl } = manifest);
+  $: ({ uri, thumbnail, direct, mimetype } = manifest);
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
   $: fileName = getFileName(manifest);
   // TODO_FILES_UI: Support a wider range of filetype icons and use a
   // more robust solution to map mime types to icons.
   $: fileIcon = mimetype === 'application/pdf' ? iconPDF : iconFileAlt;
-  // The non-image file dropdown state is managed here so the filename tooltip
-  // can be hidden while the dropdown is open to reduce visual clutter.
-  $: fileDropdownIsOpen = false;
 
   async function loadImage() {
     imageLoading = true;
@@ -74,6 +70,10 @@
       zoomOrigin: thumbnailElement.getBoundingClientRect(),
     });
   }
+
+  function handleDefaultFileClick() {
+    openFileDetailDropdown({ trigger: defaultFileTrigger });
+  }
 </script>
 
 <div class="file-cell-content">
@@ -96,37 +96,15 @@
         </div>
       </Tooltip>
     {:else if fileViewerType === 'default'}
-      <Dropdown
-        showArrow={false}
-        placements={['bottom', 'top']}
+      <Button
+        on:click={handleDefaultFileClick}
+        bind:element={defaultFileTrigger}
         aria-label={uri}
-        tooltip={fileDropdownIsOpen ? undefined : fileName}
-        on:open={() => {
-          fileDropdownIsOpen = true;
-        }}
-        on:close={() => {
-          fileDropdownIsOpen = false;
-        }}
+        tooltip={fileName}
         appearance="secondary"
       >
-        <Icon slot="trigger" {...fileIcon} />
-        <div slot="content" class="file-actions">
-          <table class="info">
-            <tr><th>{$_('storage_uri')}</th><td>{uri}</td></tr>
-            <tr><th>{$_('mime_type')}</th><td>{mimetype}</td></tr>
-          </table>
-          <div class="actions">
-            <Button on:click={remove} aria-label={$_('remove')}>
-              <Icon {...iconDeleteMajor} />
-              <span class="button-label">{$_('remove')}</span>
-            </Button>
-            <a class="btn btn-default" href={downloadUrl}>
-              <Icon {...iconDownload} />
-              <span class="button-label">{$_('download')}</span>
-            </a>
-          </div>
-        </div>
-      </Dropdown>
+        <Icon {...fileIcon} />
+      </Button>
     {:else}
       {assertExhaustive(fileViewerType)}
     {/if}
@@ -160,28 +138,5 @@
 
   .attached-file.can-open .image {
     cursor: pointer;
-  }
-
-  .file-actions {
-    width: 24rem;
-    max-width: 100%;
-    padding: var(--sm1);
-  }
-
-  .actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: var(--lg1);
-  }
-
-  th {
-    vertical-align: top;
-    text-align: right;
-    min-width: max-content;
-    white-space: nowrap;
-  }
-  td {
-    line-height: 1.2;
-    padding: 0.2em;
   }
 </style>
