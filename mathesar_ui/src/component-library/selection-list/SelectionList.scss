@@ -14,6 +14,18 @@
   li {
     border-radius: 0.2em;
 
+    &:hover {
+      background: var(--color-navigation-10);
+    }
+
+    &.in-focus {
+      background: var(--color-navigation-10);
+    }
+
+    &.selected {
+      background: var(--color-navigation-25);
+    }
+
     & + li {
       margin-top: var(--SelectionList__option-spacing-y, 0.2em);
     }

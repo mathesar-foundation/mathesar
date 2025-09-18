@@ -28,10 +28,6 @@ export function getColumnIconProps(column: {
     return iconTableLink;
   }
 
-  if (column.metadata?.file_backend) {
-    return iconFile;
-  }
-
   return getAbstractTypeForDbType(column.type, column.metadata).getIcon({
     dbType: column.type,
     typeOptions: column.type_options,
