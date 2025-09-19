@@ -13,12 +13,10 @@ export interface FileAttachmentUploadResult {
 }
 
 export function uploadFileAttachment(
-  storageProvider: string,
   file: File,
   completionCallback?: (obj: UploadCompletionOpts) => unknown,
 ): CancellablePromise<FileAttachmentUploadResult> {
   const formData = new FormData();
   formData.append('file', file);
-  // TODO_FILES_UI: pass `storageProvider` to API
   return uploadFile(ENDPOINT, formData, completionCallback);
 }

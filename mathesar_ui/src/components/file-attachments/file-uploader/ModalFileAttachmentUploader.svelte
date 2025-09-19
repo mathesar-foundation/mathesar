@@ -55,18 +55,12 @@
   }
 
   async function handleAdd(event: CustomEvent<FileUploadAddDetail>) {
-    /** TODO_FILES_UI: set this from column metadata */
-    const storageProvider = 'local_minio';
     try {
       error = '';
       isUploading = true;
       const file = event.detail.added.at(0)?.file;
       if (!file) return;
-      request = uploadFileAttachment(
-        storageProvider,
-        file,
-        handleProgressChange,
-      );
+      request = uploadFileAttachment(file, handleProgressChange);
       try {
         const result = await request;
         controller.submitResult(result);

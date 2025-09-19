@@ -37,8 +37,6 @@
   $: ({ isLoading } = fileViewerController);
 
   async function openViewer() {
-    // TODO_FILES_UI: Fix click behavior. Clicking on the thumbnail of an
-    // inactive cell should _not_ open the file viewer.
     try {
       await fileViewerController.openFileViewer();
     } catch (err) {
@@ -51,9 +49,6 @@
 <div class="file-cell-content">
   <div class="attached-file" class:can-open={$canOpenViewer}>
     {#if fileViewerType === 'image'}
-      <!-- TODO_FILES_UI: add a loading indicator when thumbnail is loading -->
-      <!-- TODO_FILES_UI: Fix hover behavior. Hovering the thumbnail of an
-        inactive cell should _not_ open the tooltip. -->
       <ContentLoading loading={$isLoading}>
         <Tooltip>
           <svelte:fragment slot="content">{fileName}</svelte:fragment>
