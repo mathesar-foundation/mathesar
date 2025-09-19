@@ -96,6 +96,7 @@
   .image {
     height: 100%;
     width: fit-content;
+    cursor: pointer;
 
     img {
       display: block;
