@@ -96,8 +96,9 @@ export type RecordSummaryColumnData = Record<string, string>;
 
 export interface FileManifest {
   uri: string;
-  mimetype: string;
-  thumbnail: string;
+  name: string;
+  mimetype: string | null;
+  thumbnail: string | null;
   attachment: string;
   direct: string;
 }

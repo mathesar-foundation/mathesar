@@ -18,10 +18,10 @@
   } from '@mathesar/icons';
 
   interface $$Props extends Partial<ComponentProps<Icon>> {
-    mimetype: string;
+    mimetype: string | null;
   }
 
-  export let mimetype: string;
+  export let mimetype: string | null;
 
   const exact: Partial<Record<string, IconProps>> = {
     'application/pdf': iconFilePDF,
@@ -50,7 +50,11 @@
     text: iconFileCode,
   };
 
-  function getIcon(iconMimetype: string): IconProps {
+  function getIcon(iconMimetype: string | null): IconProps {
+    if (!iconMimetype) {
+      return iconFileAlt;
+    }
+
     const exactIcon = exact[iconMimetype];
     if (exactIcon) return exactIcon;
 
