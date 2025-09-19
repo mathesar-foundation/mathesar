@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
+
   import { Icon } from '@mathesar/component-library';
   import type { IconProps } from '@mathesar/component-library/types';
   import {
@@ -15,9 +17,13 @@
     iconFileWord,
   } from '@mathesar/icons';
 
+  interface $$Props extends Partial<ComponentProps<Icon>> {
+    mimetype: string;
+  }
+
   export let mimetype: string;
 
-  const exact: Record<string, IconProps> = {
+  const exact: Partial<Record<string, IconProps>> = {
     'application/pdf': iconFilePDF,
     'application/msword': iconFileWord,
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
@@ -37,15 +43,16 @@
     'text/x-csv': iconFileCSV,
   };
 
-  const byCategory: Record<string, IconProps> = {
+  const byCategory: Partial<Record<string, IconProps>> = {
     image: iconFileImage,
     video: iconFileVideo,
     audio: iconFileAudio,
     text: iconFileCode,
   };
 
-  function getIcon(iconMimetype: string) {
-    if (exact[iconMimetype]) return exact[iconMimetype];
+  function getIcon(iconMimetype: string): IconProps {
+    const exactIcon = exact[iconMimetype];
+    if (exactIcon) return exactIcon;
 
     const category = iconMimetype.split('/', 1).at(0);
     if (category) {
