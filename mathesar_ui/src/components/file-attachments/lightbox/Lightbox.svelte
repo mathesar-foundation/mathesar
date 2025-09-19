@@ -100,13 +100,6 @@
       window.removeEventListener('keydown', handleKeydown);
     };
   });
-
-  // TODO_FILES_UI
-  //
-  // - Implement close on click overlay (but watch out because `.content`) often
-  //   obscures the overlay, especially when the viewport is short and wide.
-  // - Test with a tiny image (e.g. 16px x 16px) to make sure UI is usable.
-  //   Might need to adjust some min-width stuff somewhere.
 </script>
 
 <div

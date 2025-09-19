@@ -5,7 +5,7 @@ import type {
 } from '@mathesar/api/rpc/columns';
 import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
-import { iconConstraint, iconFile, iconTableLink } from '@mathesar/icons';
+import { iconConstraint, iconTableLink } from '@mathesar/icons';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';

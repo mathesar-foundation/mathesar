@@ -68,6 +68,9 @@ export interface AbstractTypeIconArgs {
   metadata: RawColumnWithMetadata['metadata'];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UntypedComponentWithProps = ComponentWithProps<any>;
+
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
   getIcon: (args?: AbstractTypeIconArgs) => IconProps | IconProps[];
@@ -76,7 +79,7 @@ export interface AbstractTypeConfiguration {
   getDbConfig?: (selectedDbType?: DbType) => AbstractTypeDbConfig;
   getDisplayConfig?: () => AbstractTypeDisplayConfig;
   getEnabledState?: () =>
-    | { enabled: false; cause: string | string[] | ComponentWithProps<any> }
+    | { enabled: false; cause: string | string[] | UntypedComponentWithProps }
     | { enabled: true };
 }
 
