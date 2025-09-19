@@ -1935,27 +1935,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_process_col_alter_jsonb() RETURNS SETOF TEXT AS $f$/*
-These don't actually modify the table, so we can run multiple tests in the same test.
-
-Only need to test null/empty behavior here, since main functionality is tested by testing
-msar.alter_columns
-
-It's debatable whether this test should continue to exist, but it was useful for initial
-development, and runs quickly.
-*/
-DECLARE
-  tab_id oid;
-BEGIN
-  PERFORM __setup_column_alter();
-  tab_id := 'test_schema.col_alters'::regclass::oid;
-  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2}]'), null);
-  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2, "name": "blah"}]'), null);
-  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[]'), null);
-END;
-$f$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_alter_columns_single_name() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
