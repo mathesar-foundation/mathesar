@@ -39,6 +39,8 @@
 
   $: hasValue = value !== undefined && value !== null && value !== '';
   $: labelController?.inputId.set(id);
+  $: showLargerInput =
+    hasValue && fileManifest && getFileViewerType(fileManifest) === 'image';
 
   function updateCell(newValue: unknown) {
     value = newValue;
@@ -156,7 +158,7 @@
   role="listbox"
   aria-labelledby={getLabelIdFromInputId(id)}
 >
-  <div class="file-input-content" class:filled={hasValue}>
+  <div class="file-input-content" class:large={showLargerInput}>
     <FileCellContent
       {value}
       manifest={fileManifest}
@@ -176,7 +178,7 @@
     overflow: hidden;
     padding: var(--sm5);
   }
-  .file-input-content.filled {
+  .file-input-content.large {
     height: 10em;
   }
 </style>

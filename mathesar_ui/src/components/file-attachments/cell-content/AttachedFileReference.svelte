@@ -2,18 +2,16 @@
   import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
-  import {
-    Icon,
-    assertExhaustive,
-    iconFileAlt,
-    iconPDF,
-  } from '@mathesar/component-library';
+  import { assertExhaustive } from '@mathesar/component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import ContentLoading from '@mathesar/components/ContentLoading.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import { onAnyUiInteraction } from '@mathesar/utils/onAnyUiInteraction';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
+
+  import FileIcon from './FileIcon.svelte';
 
   export let manifest: FileManifest;
   export let canOpenViewer: boolean;
@@ -39,9 +37,6 @@
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
   $: fileName = getFileName(manifest);
-  // TODO_FILES_UI: Support a wider range of filetype icons and use a
-  // more robust solution to map mime types to icons.
-  $: fileIcon = mimetype === 'application/pdf' ? iconPDF : iconFileAlt;
 
   async function loadImage() {
     imageLoading = true;
@@ -55,9 +50,16 @@
     if (!canOpenViewer) return;
 
     if (!imageElement) {
+      let uiInteraction = false;
+      onAnyUiInteraction(() => {
+        uiInteraction = true;
+      }, ['pointerdown', 'keydown']);
+
       await loadImage();
-      // TODO_FILES_UI consider click listener on window to stop lightbox from
-      // opening while image is fetching?
+
+      // If the user has interacted before the lightbox
+      // opened, do not open the lightbox.
+      if (uiInteraction) return;
     }
 
     if (!imageElement) {
@@ -82,19 +84,19 @@
       <!-- TODO_FILES_UI: add a loading indicator when thumbnail is loading -->
       <!-- TODO_FILES_UI: Fix hover behavior. Hovering the thumbnail of an
         inactive cell should _not_ open the tooltip. -->
-      <Tooltip>
-        <svelte:fragment slot="content">{fileName}</svelte:fragment>
-        <div slot="trigger" class="image">
-          <ContentLoading loading={imageLoading}>
+      <ContentLoading loading={imageLoading}>
+        <Tooltip>
+          <svelte:fragment slot="content">{fileName}</svelte:fragment>
+          <div slot="trigger" class="image">
             <img
               alt={uri}
               src={thumbnailUrl}
               on:click={handleImgClick}
               bind:this={thumbnailElement}
             />
-          </ContentLoading>
-        </div>
-      </Tooltip>
+          </div>
+        </Tooltip>
+      </ContentLoading>
     {:else if fileViewerType === 'default'}
       <Button
         on:click={handleDefaultFileClick}
@@ -103,7 +105,7 @@
         tooltip={fileName}
         appearance="secondary"
       >
-        <Icon {...fileIcon} />
+        <FileIcon {mimetype} />
       </Button>
     {:else}
       {assertExhaustive(fileViewerType)}
@@ -116,6 +118,7 @@
     display: grid;
     overflow: hidden;
     height: 100%;
+    --ContentLoading__height: 100%;
   }
 
   .attached-file {
@@ -127,7 +130,6 @@
 
   .image {
     height: 100%;
-    --ContentLoading__height: 100%;
     img {
       display: block;
       height: 100%;
