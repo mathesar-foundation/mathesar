@@ -2,6 +2,7 @@ import {
   type Readable,
   type Subscriber,
   type Unsubscriber,
+  get,
   writable,
 } from 'svelte/store';
 
@@ -16,6 +17,7 @@ export interface LightboxProps {
   fileManifest: FileManifest;
   /** Triggers removal of the file from where it is stored. No confirmation. */
   removeFile: () => void;
+  onClose: () => unknown;
 }
 
 export class LightboxController implements Readable<LightboxProps | undefined> {
@@ -26,7 +28,12 @@ export class LightboxController implements Readable<LightboxProps | undefined> {
   }
 
   close() {
-    this.props.set(undefined);
+    const props = get(this.props);
+    if (props !== undefined) {
+      const onClose = get(this.props)?.onClose;
+      this.props.set(undefined);
+      onClose?.();
+    }
   }
 
   subscribe(subscription: Subscriber<LightboxProps | undefined>): Unsubscriber {

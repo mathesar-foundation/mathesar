@@ -2,6 +2,7 @@ import {
   type Readable,
   type Subscriber,
   type Unsubscriber,
+  get,
   writable,
 } from 'svelte/store';
 
@@ -13,6 +14,7 @@ export interface FileDetailDropdownProps {
   fileManifest: FileManifest;
   /** Triggers removal of the file from where it is stored. No confirmation. */
   removeFile: () => void;
+  onClose: () => unknown;
 }
 
 export class FileDetailDropdownController
@@ -25,7 +27,12 @@ export class FileDetailDropdownController
   }
 
   close() {
-    this.props.set(undefined);
+    const props = get(this.props);
+    if (props !== undefined) {
+      const onClose = get(this.props)?.onClose;
+      this.props.set(undefined);
+      onClose?.();
+    }
   }
 
   subscribe(
