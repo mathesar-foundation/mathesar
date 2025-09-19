@@ -100,6 +100,8 @@
 
   .image {
     height: 100%;
+    width: fit-content;
+
     img {
       display: block;
       height: 100%;
