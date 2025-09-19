@@ -50,6 +50,7 @@
   $: fileViewerController?.canOpenViewer.set(isActive);
 
   async function upload() {
+    if (disabled) return; // Disallow uploads on read-only cells
     if (!modalFileAttachmentUploader) return;
     const attachment =
       await modalFileAttachmentUploader.acquireFileAttachment();
