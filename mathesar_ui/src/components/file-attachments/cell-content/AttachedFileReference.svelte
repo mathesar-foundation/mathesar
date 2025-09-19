@@ -2,12 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
-  import {
-    Icon,
-    assertExhaustive,
-    iconFileAlt,
-    iconPDF,
-  } from '@mathesar/component-library';
+  import { assertExhaustive } from '@mathesar/component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import ContentLoading from '@mathesar/components/ContentLoading.svelte';
@@ -15,6 +10,8 @@
   import { onAnyUiInteraction } from '@mathesar/utils/onAnyUiInteraction';
 
   import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
+
+  import FileIcon from './FileIcon.svelte';
 
   export let manifest: FileManifest;
   export let canOpenViewer: boolean;
@@ -40,9 +37,6 @@
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
   $: fileName = getFileName(manifest);
-  // TODO_FILES_UI: Support a wider range of filetype icons and use a
-  // more robust solution to map mime types to icons.
-  $: fileIcon = mimetype === 'application/pdf' ? iconPDF : iconFileAlt;
 
   async function loadImage() {
     imageLoading = true;
@@ -111,7 +105,7 @@
         tooltip={fileName}
         appearance="secondary"
       >
-        <Icon {...fileIcon} />
+        <FileIcon {mimetype} />
       </Button>
     {:else}
       {assertExhaustive(fileViewerType)}
