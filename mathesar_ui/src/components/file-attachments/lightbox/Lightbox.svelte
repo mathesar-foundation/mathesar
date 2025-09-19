@@ -237,6 +237,7 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--sm3);
+    background-color: var(--color-bg-base);
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.4);
 
     .img-holder {
@@ -252,6 +253,10 @@
         width: 100%;
         height: 100%;
         display: block;
+        // Classic "white and gray grid" background which
+        // will display behind images with transparent areas
+        background: conic-gradient(#ccc 25%, white 0 50%, #ccc 0 75%, white 0);
+        background-size: 20px 20px;
       }
     }
 
