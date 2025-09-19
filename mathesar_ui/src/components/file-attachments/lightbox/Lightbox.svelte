@@ -31,6 +31,7 @@
   $: ({ attachment: downloadUrl } = fileManifest);
   $: ({ naturalHeight, naturalWidth } = imageElement);
   $: showButtonLabels = imageDisplayWidth > 500;
+  $: useRoundedImageCorners = naturalWidth > 100;
 
   function handleKeydown(e: KeyboardEvent) {
     switch (e.key) {
@@ -127,7 +128,11 @@
         </Button>
       </div>
 
-      <div class="img-holder" bind:this={imageHolder} />
+      <div
+        class="img-holder"
+        bind:this={imageHolder}
+        class:rounded={useRoundedImageCorners}
+      />
 
       <div class="bottom">
         <Button
@@ -210,11 +215,15 @@
   .img-area {
     // Width is the smallest of:
     //
-    // - The natural image width — to prevent upscaling
+    // - The natural image width — to prevent upscaling (in most cases)
     // - The container width to — prevent horizontal overflow
     // - A computed value to — prevent vertical overflow
+    //
+    // BUT: if the natural image width is super small, then we don't go smaller
+    // than set limit (in order to prevent the lightbox UI from getting
+    // squished).
     width: min(
-      var(--img-natural-width-px),
+      max(var(--img-natural-width-px), 10rem),
       var(--img-viewport-boundary-width),
       calc(
         var(--img-viewport-boundary-height) * var(--img-natural-width-raw) /
@@ -224,13 +233,21 @@
     aspect-ratio: var(--img-natural-width-raw) / var(--img-natural-height-raw);
     height: auto;
     position: relative;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--sm3);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.4);
 
     .img-holder {
       width: 100%;
       height: 100%;
-      border-radius: var(--sm3);
-      box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.4);
+      max-width: var(--img-natural-width-px);
+      max-height: var(--img-natural-height-px);
       overflow: hidden;
+      &.rounded {
+        border-radius: var(--sm3);
+      }
       :global(img) {
         width: 100%;
         height: 100%;
