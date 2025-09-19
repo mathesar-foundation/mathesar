@@ -3510,32 +3510,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.build_col_drop_default_expr(tab_id oid, col_id integer, new_type text, new_default jsonb)
-  RETURNS TEXT AS $$/*
-Build an expression for dropping a column's default, returning the text of that expression.
-
-This function is private, and not general: It builds an expression in the context of the
-msar.process_col_alter_jsonb function and should not otherwise be called independently, since it has
-logic specific to that context. In that setting, we drop the default for the specified column if the
-caller specifies that we're setting a new_default of NULL, or if we're changing the type of the
-column.
-
-Args:
-  tab_id: The OID of the table where the column with the default to be dropped lives.
-  col_id: The attnum of the column with the undesired default.
-  new_type: This gives the function context letting it know whether to drop the default or not. If
-            we are setting a new type for the column, we will always drop the default first.
-  new_default: This also gives us context letting us know whether to drop the default. By setting
-               the 'new_default' to (jsonb) null, the caller specifies that we should drop the
-               column's default.
-*/
-SELECT CASE WHEN new_type IS NOT NULL OR jsonb_typeof(new_default)='null' THEN
-  'ALTER COLUMN ' || quote_ident(msar.get_column_name(tab_id, col_id)) || ' DROP DEFAULT'
- END;
-$$ LANGUAGE SQL;
-
-
-CREATE OR REPLACE FUNCTION
 msar.set_not_null(tab_id regclass, col_id smallint, not_null boolean) RETURNS text AS $$/*
 Alter a column's NOT NULL setting, returning the text of the expression executed.
 
