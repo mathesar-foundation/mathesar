@@ -1,25 +1,20 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { FileManifest } from '@mathesar/api/rpc/records';
   import { assertExhaustive } from '@mathesar/component-library';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import Tooltip from '@mathesar/component-library/tooltip/Tooltip.svelte';
   import ContentLoading from '@mathesar/components/ContentLoading.svelte';
   import { toast } from '@mathesar/stores/toast';
-  import { onAnyUiInteraction } from '@mathesar/utils/onAnyUiInteraction';
 
-  import { fetchImage, getFileName, getFileViewerType } from '../fileUtils';
+  import { getFileViewerType } from '../fileUtils';
 
   import FileIcon from './FileIcon.svelte';
+  import type { FileViewerController } from './FileViewerController';
 
-  export let manifest: FileManifest;
-  export let canOpenViewer: boolean;
-  export let openImageFileViewer: (p: {
-    imageElement: HTMLImageElement;
-    zoomOrigin?: DOMRect;
-  }) => void;
-  export let openFileDetailDropdown: (p: { trigger: HTMLElement }) => void;
+  export let fileViewerController: FileViewerController;
+
+  $: ({ manifest, canOpenViewer } = fileViewerController);
 
   /**
    * This controls the pixel dimensions of the fetched thumbnail size, as
@@ -29,69 +24,44 @@
   export let thumbnailResolutionHeightPx: number;
 
   let thumbnailElement: HTMLImageElement;
-  let imageLoading = false;
-  let imageElement: HTMLImageElement | undefined;
   let defaultFileTrigger: HTMLElement;
 
-  $: ({ uri, thumbnail, direct, mimetype } = manifest);
+  $: ({ uri, thumbnail, mimetype } = manifest);
   $: fileViewerType = getFileViewerType(manifest);
   $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
-  $: fileName = getFileName(manifest);
+  $: fileName = manifest.name;
 
-  async function loadImage() {
-    imageLoading = true;
-    imageElement = await fetchImage(direct);
-    imageLoading = false;
-  }
+  $: fileViewerController.setTriggerRetriever(() =>
+    fileViewerType === 'image' ? thumbnailElement : defaultFileTrigger,
+  );
+  $: ({ isLoading } = fileViewerController);
 
-  async function handleImgClick() {
+  async function openViewer() {
     // TODO_FILES_UI: Fix click behavior. Clicking on the thumbnail of an
     // inactive cell should _not_ open the file viewer.
-    if (!canOpenViewer) return;
-
-    if (!imageElement) {
-      let uiInteraction = false;
-      onAnyUiInteraction(() => {
-        uiInteraction = true;
-      }, ['pointerdown', 'keydown']);
-
-      await loadImage();
-
-      // If the user has interacted before the lightbox
-      // opened, do not open the lightbox.
-      if (uiInteraction) return;
-    }
-
-    if (!imageElement) {
+    try {
+      await fileViewerController.openFileViewer();
+    } catch (err) {
+      console.error(err);
       toast.error($_('failed_to_load_image'));
-      return;
     }
-
-    openImageFileViewer({
-      imageElement,
-      zoomOrigin: thumbnailElement.getBoundingClientRect(),
-    });
-  }
-
-  function handleDefaultFileClick() {
-    openFileDetailDropdown({ trigger: defaultFileTrigger });
   }
 </script>
 
 <div class="file-cell-content">
-  <div class="attached-file" class:can-open={canOpenViewer}>
+  <div class="attached-file" class:can-open={$canOpenViewer}>
     {#if fileViewerType === 'image'}
       <!-- TODO_FILES_UI: add a loading indicator when thumbnail is loading -->
       <!-- TODO_FILES_UI: Fix hover behavior. Hovering the thumbnail of an
         inactive cell should _not_ open the tooltip. -->
-      <ContentLoading loading={imageLoading}>
+      <ContentLoading loading={$isLoading}>
         <Tooltip>
           <svelte:fragment slot="content">{fileName}</svelte:fragment>
           <div slot="trigger" class="image">
             <img
               alt={uri}
               src={thumbnailUrl}
-              on:click={handleImgClick}
+              on:click={openViewer}
               bind:this={thumbnailElement}
             />
           </div>
@@ -99,7 +69,7 @@
       </ContentLoading>
     {:else if fileViewerType === 'default'}
       <Button
-        on:click={handleDefaultFileClick}
+        on:click={openViewer}
         bind:element={defaultFileTrigger}
         aria-label={uri}
         tooltip={fileName}
@@ -130,6 +100,8 @@
 
   .image {
     height: 100%;
+    width: fit-content;
+
     img {
       display: block;
       height: 100%;

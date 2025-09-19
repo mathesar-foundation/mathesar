@@ -4,6 +4,7 @@
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
+  import { FileViewerController } from '@mathesar/components/file-attachments/cell-content/FileViewerController';
   import { fileDetailDropdownContext } from '@mathesar/components/file-attachments/file-detail-dropdown/FileDetailDropdownController';
   import { modalFileAttachmentUploadContext } from '@mathesar/components/file-attachments/file-uploader/modalFileAttachmentUploadContext';
   import {
@@ -12,7 +13,6 @@
   } from '@mathesar/components/file-attachments/fileUtils';
   import { lightboxContext } from '@mathesar/components/file-attachments/lightbox/LightboxController';
   import {
-    assertExhaustive,
     getGloballyUniqueId,
     getLabelControllerFromContainingLabel,
     getLabelIdFromInputId,
@@ -21,8 +21,8 @@
   const thumbnailResolutionHeightPx = 400;
   const labelController = getLabelControllerFromContainingLabel();
   const dispatch = createEventDispatcher();
-  const lightbox = lightboxContext.get();
-  const fileDetailDropdown = fileDetailDropdownContext.get();
+  const lightboxController = lightboxContext.get();
+  const fileDetailController = fileDetailDropdownContext.get();
   const modalFileAttachmentUploader = modalFileAttachmentUploadContext.get();
 
   export let id = getGloballyUniqueId();
@@ -48,59 +48,21 @@
     dispatch('artificialInput', value);
   }
 
+  $: fileViewerController = fileManifest
+    ? new FileViewerController({
+        manifest: fileManifest,
+        removeFile: () => updateCell(null),
+        lightboxController,
+        fileDetailController,
+        onClose: () => element.focus(),
+      })
+    : undefined;
+
   function clear() {
     value = null;
     dispatch('artificialChange', value);
     dispatch('artificialInput', value);
-    if (lightbox) {
-      lightbox.close();
-    } else {
-      // If the value is cleared via a button, the focus may shift to that button.
-      // We'd like to shift it back to the input element to that the user can
-      // press `Enter` to launch the record selector.
-      element.focus();
-    }
-  }
-
-  function openImageFileViewer({
-    imageElement,
-    zoomOrigin,
-  }: {
-    imageElement: HTMLImageElement;
-    zoomOrigin?: DOMRect;
-  }) {
-    if (!fileManifest) return;
-    if (!lightbox) return;
-    lightbox.open({
-      imageElement,
-      zoomOrigin,
-      fileManifest,
-      removeFile: () => updateCell(null),
-    });
-  }
-
-  function openFileDetailDropdown({ trigger }: { trigger: HTMLElement }) {
-    if (!fileManifest) return;
-    if (!fileDetailDropdown) return;
-    fileDetailDropdown.open({
-      trigger,
-      fileManifest,
-      removeFile: () => updateCell(null),
-    });
-  }
-
-  function openFileViewer(manifest: FileManifest) {
-    const viewerType = getFileViewerType(manifest);
-    if (viewerType === 'image') {
-      // TODO_FILES_UI: load image, find thumbnail in DOM. Also consider moving
-      // loaded image cache up to this component.
-      //
-      // openImageFileViewer();
-    } else if (viewerType === 'default') {
-      // TODO_FILES_UI
-    } else {
-      assertExhaustive(viewerType);
-    }
+    fileViewerController?.close();
   }
 
   async function upload() {
@@ -119,7 +81,7 @@
       case 'Enter':
         if (e.target === element) {
           if (fileManifest) {
-            openFileViewer(fileManifest);
+            void fileViewerController?.openFileViewer();
           } else {
             void upload();
           }
@@ -161,12 +123,9 @@
   <div class="file-input-content" class:large={showLargerInput}>
     <FileCellContent
       {value}
-      manifest={fileManifest}
-      canOpenViewer={true}
+      {fileViewerController}
       {thumbnailResolutionHeightPx}
       canUpload={!disabled}
-      {openImageFileViewer}
-      {openFileDetailDropdown}
       {upload}
     />
   </div>

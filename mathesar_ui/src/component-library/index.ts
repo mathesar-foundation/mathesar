@@ -7,6 +7,7 @@ export { default as clickOffBounds } from './common/actions/clickOffBounds';
 export { default as popper } from './common/actions/popper';
 export { default as portal } from './common/actions/portal';
 export { default as slider } from './common/actions/slider';
+export { default as focusTrap } from './common/actions/focusTrap';
 
 // Simple Components
 export { default as AnchorButton } from './anchorButton/AnchorButton.svelte';

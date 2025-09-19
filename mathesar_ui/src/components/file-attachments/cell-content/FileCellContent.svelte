@@ -1,34 +1,25 @@
 <script lang="ts">
-  import type { FileManifest } from '@mathesar/api/rpc/records';
   import { iconAddNew } from '@mathesar/icons';
   import { Button, Icon } from '@mathesar-component-library';
 
   import AttachedFileReference from './AttachedFileReference.svelte';
+  import type { FileViewerController } from './FileViewerController';
 
   export let value: unknown = undefined;
-  export let manifest: FileManifest | undefined = undefined;
-  export let canOpenViewer: boolean;
   export let thumbnailResolutionHeightPx: number;
   export let canUpload: boolean;
   export let upload: () => void;
-  export let openImageFileViewer: (p: {
-    imageElement: HTMLImageElement;
-    zoomOrigin?: DOMRect;
-  }) => void;
-  export let openFileDetailDropdown: (p: { trigger: HTMLElement }) => void;
+  export let fileViewerController: FileViewerController | undefined;
 
   $: hasValue = value !== undefined && value !== null;
 </script>
 
 <div class="file-cell-content">
   {#if hasValue}
-    {#if manifest}
+    {#if fileViewerController}
       <AttachedFileReference
-        {manifest}
-        {canOpenViewer}
+        {fileViewerController}
         {thumbnailResolutionHeightPx}
-        {openImageFileViewer}
-        {openFileDetailDropdown}
       />
     {:else}
       <div class="centered">{value}</div>

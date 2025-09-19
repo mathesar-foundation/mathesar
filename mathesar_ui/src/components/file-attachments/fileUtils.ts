@@ -22,7 +22,7 @@ export function fetchImage(src: string): Promise<HTMLImageElement | undefined> {
 
 export function getFileViewerType(manifest: FileManifest): 'image' | 'default' {
   const { mimetype } = manifest;
-  const mimeCategory = mimetype.split('/').at(0) ?? 'unknown';
+  const mimeCategory = mimetype?.split('/').at(0) ?? 'unknown';
   if (mimeCategory === 'image') {
     return 'image';
   }
@@ -43,10 +43,6 @@ export function parseFileReference(value: unknown): FileReference | undefined {
   if (!hasStringProperty(obj, 'mash')) return undefined;
   if (!hasStringProperty(obj, 'uri')) return undefined;
   return obj;
-}
-
-export function getFileName(manifest: FileManifest): string | undefined {
-  return manifest.uri.split('/').at(-1);
 }
 
 export async function confirmRemoveFile() {

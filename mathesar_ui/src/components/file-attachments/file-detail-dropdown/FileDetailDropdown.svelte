@@ -3,10 +3,13 @@
   import { _ } from 'svelte-i18n';
 
   import type { FileManifest } from '@mathesar/api/rpc/records';
-  import { Icon } from '@mathesar/component-library';
-  import Button from '@mathesar/component-library/button/Button.svelte';
-  import AttachableDropdown from '@mathesar/component-library/dropdown/AttachableDropdown.svelte';
   import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
+  import {
+    AttachableDropdown,
+    Button,
+    Icon,
+    focusTrap,
+  } from '@mathesar-component-library';
 
   import FileDetail from '../FileDetail.svelte';
   import { confirmRemoveFile } from '../fileUtils';
@@ -49,7 +52,7 @@
   on:close={close}
   placements={['bottom', 'top']}
 >
-  <div class="file-actions">
+  <div class="file-actions" use:focusTrap>
     <FileDetail {fileManifest} />
     <div class="actions">
       <Button on:click={handleClickRemove} aria-label={$_('remove')}>
