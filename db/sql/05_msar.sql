@@ -3690,14 +3690,14 @@ BEGIN
     END IF;
     PERFORM msar.retype_column(tab_id, col.attnum, col.new_type);
 
-    IF jsonb_typeof(col.new_default)='null' THEN
-      -- do nothing, since we've already dropped the default in previous steps
-      NULL;
-    ELSEIF col.new_default #>> '{}' IS NOT NULL THEN
+    IF col.new_default #>> '{}' IS NOT NULL THEN
       -- set new default
       PERFORM msar.set_col_default(tab_id, col.attnum, col.new_default #>> '{}');
-    ELSEIF col.new_type IS NOT NULL THEN
-      -- preserve old default
+    ELSEIF (col.new_default IS NULL OR jsonb_typeof(col.new_default)<>'null') AND col.new_type IS NOT NULL THEN
+      -- preserve old default 
+      -- when a new_default is absent and col is retyped with a new_type.
+      -- Note: We don't want to preserve old default for jsonb_typeof(col.new_default)='null'
+      -- as we consider it as an intent to drop the default. 
       PERFORM msar.set_old_col_default(tab_id, col.attnum, col.old_default, col.new_type, is_default_dynamic);
     END IF;
 
