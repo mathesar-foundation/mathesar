@@ -3627,11 +3627,25 @@ Args:
   tab_id: The OID of the table whose columns we'll alter.
   col_alters: a JSONB describing the alterations to make.
 
-For the specification of the col_alters JSONB, see the msar.process_col_alter_jsonb function.
+The col_alters JSONB should have the form:
+[
+  {
+    "attnum": <int>,
+    "type": <obj> (optional),
+    "default": <any> (optional),
+    "not_null": <bool> (optional),
+    "delete": <bool> (optional),
+    "name": <str> (optional),
+  },
+  {
+    ...
+  },
+  ...
+]
 
-Note that all alterations except renaming, commenting & setting/unsetting not-null are done in bulk,
-and then all name changes are done one at a time afterwards. This is because the SQL design
-specifies at most one name-changing clause per query.
+Note that for all alterations, we create and execute separate SQL queries rather than combining them
+into a giant SQL statement. This has the benefit of providing better error messages(for users)
+and better code readability(for us) at the cost of a minor performance hit.
 */
 DECLARE
   col RECORD;
@@ -3645,7 +3659,7 @@ BEGIN
       (col_alter_obj ->> 'name')::text AS new_name,
       (col_alter_obj -> 'delete')::boolean AS delete_,
       msar.build_type_text_complete(col_alter_obj -> 'type', format_type(pga.atttypid, null)) AS new_type,
-      pg_get_expr(adbin, tab_id) old_default,
+      pg_get_expr(adbin, tab_id) AS old_default,
       col_alter_obj -> 'default' AS new_default,
 
       col_alter_obj->>'description' AS comment_,
@@ -3659,6 +3673,15 @@ BEGIN
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
 
+    IF col.delete_ THEN
+      PERFORM msar.drop_columns(tab_id, col.attnum);
+    END IF;
+
+    IF col.has_comment THEN
+      PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
+    END IF;
+
+    -- is_default_possibly_dynamic check must happen before we drop the default.
     is_default_dynamic := msar.is_default_possibly_dynamic(tab_id, col.attnum);
 
     IF col.new_type IS NOT NULL OR jsonb_typeof(col.new_default)='null' THEN
@@ -3667,6 +3690,7 @@ BEGIN
     PERFORM msar.retype_column(tab_id, col.attnum, col.new_type);
 
     IF jsonb_typeof(col.new_default)='null' THEN
+      -- do nothing, since we've already dropped the default in previous steps
       NULL;
     ELSEIF col.new_default #>> '{}' IS NOT NULL THEN
       -- set new default
@@ -3674,14 +3698,6 @@ BEGIN
     ELSEIF col.new_type IS NOT NULL THEN
       -- preserve old default
       PERFORM msar.set_old_col_default(tab_id, col.attnum, col.old_default, col.new_type, is_default_dynamic);
-    END IF;
-
-    IF col.delete_ THEN
-      PERFORM msar.drop_columns(tab_id, col.attnum);
-    END IF;
-
-    IF col.has_comment THEN
-      PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
     END IF;
 
     -- PG13 doesn't allow concat b/w integer[] and smallint need to typecast
