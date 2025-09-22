@@ -3552,7 +3552,7 @@ Sets the default for a given column, returning the text of the expression execut
 Args:
   tab_id: The OID of the table containing the column whose default we'll alter.
   col_id: The attnum of the column whose default we'll alter.
-  default_: 
+  default_: The desired default.
 */
   SELECT __msar.exec_ddl(
     'ALTER TABLE %I.%I ALTER COLUMN %I SET DEFAULT %L',
@@ -3571,9 +3571,10 @@ Sets the old default for a given column, returning the text of the expression ex
 Args:
   tab_id: The OID of the table containing the column whose default we'll alter.
   col_id: The attnum of the column whose default we'll alter.
-  old_default: 
-  new_type: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
-  is_default_dynamic:
+  old_default: The current default. In some cases in the context of the caller, we want to reset the
+               original default, but cast to a new type.
+  new_type: The target type to which we'll cast the new default.
+  is_default_dynamic: Whether the current default is dynamic, can be obtained with msar.is_default_possibly_dynamic.
 */
 DECLARE
   default_ text;
@@ -3606,7 +3607,7 @@ Alter a column's type, returning the text of the expression executed.
 Args:
   tab_id: The OID of the table containing the column whose type we'll alter.
   col_id: The attnum of the column whose type we'll alter.
-  new_type: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
+  new_type: The target type to which we'll alter the column.
 */
   SELECT __msar.exec_ddl(
     'ALTER TABLE %I.%I ALTER COLUMN %I TYPE %s USING %s',
