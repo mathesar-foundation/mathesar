@@ -1,5 +1,3 @@
-import { first } from 'iter-tools';
-
 import { ImmutableSet } from '@mathesar-component-library';
 
 import { parseCellId } from '../../cellIds';
@@ -22,15 +20,13 @@ export function basisFromPlaceholderCell(activeCellId: string): Basis {
     pasteOperation: 'insert',
     getFullySelectedColumnIds: () => new ImmutableSet(),
 
-    adaptToModifiedPlane({ oldPlane, newPlane }) {
-      const columnId = first(this.columnIds);
-      if (columnId === undefined) return emptyBasis();
-      const newPlaneHasSelectedCell =
-        newPlane.columnIds.has(columnId) &&
-        newPlane.placeholderRowId === oldPlane.placeholderRowId;
-      if (newPlaneHasSelectedCell) {
-        // If we can retain the selected placeholder cell, then do so.
-        return basisFromPlaceholderCell(columnId);
+    adaptToModifiedPlane({ newPlane }) {
+      if (this.activeCellId !== undefined) {
+        const { rowId, columnId } = parseCellId(this.activeCellId);
+        if (newPlane.rowIds.has(rowId) && newPlane.columnIds.has(columnId)) {
+          // If we can retain the selected placeholder cell, then do so.
+          return basisFromPlaceholderCell(this.activeCellId);
+        }
       }
       // Otherwise, return an empty basis
       return emptyBasis();
