@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
 
+import { getErrorMessage } from '@mathesar/utils/errors';
 import { CancellablePromise } from '@mathesar-component-library';
 
 import { ApiMultiError } from './errors';
@@ -192,6 +193,12 @@ export function deleteAPI<T>(
   return sendXHRRequest('DELETE', url, data);
 }
 
+function getXhrErrorMessage(request: XMLHttpRequest): string {
+  const basic = getErrorMessage(request.response).trim();
+  if (basic) return basic;
+  return `HTTP ${request.status}: ${request.statusText}`;
+}
+
 export function uploadFile<T>(
   url: string,
   formData: FormData,
@@ -225,12 +232,16 @@ export function uploadFile<T>(
             resolve(request.response as T);
           }
         } else {
-          const msg = [
-            'An error occurred while processing the file.',
-            'Supported file types are CSV and TSV.',
-          ].join(' ');
-          reject(new Error(msg));
+          reject(new Error(getXhrErrorMessage(request)));
         }
+      });
+
+      request.addEventListener('error', () => {
+        reject(new Error('Network error occurred'));
+      });
+
+      request.addEventListener('timeout', () => {
+        reject(new Error('Request timed out'));
       });
     },
     () => {

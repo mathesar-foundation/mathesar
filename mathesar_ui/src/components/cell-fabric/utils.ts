@@ -43,12 +43,14 @@ export function getCellCap({
       props,
     };
   }
+
   if (pkTargetTableId) {
     return {
       component: PrimaryKeyCell,
       props: { tableId: pkTargetTableId },
     };
   }
+
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].get(column, config);
 }
@@ -57,20 +59,22 @@ export function getDbTypeBasedInputCap(
   column: CellColumnLike,
   optionalCellInfo?: CellInfo,
 ): ComponentAndProps {
-  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  const cellInfo =
+    optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
 
-export function getDbTypeBasedFilterCap(
+export function getDbTypeBasedSimpleInputCap(
   column: CellColumnLike,
   optionalCellInfo?: CellInfo,
 ): ComponentAndProps | undefined {
-  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  const cellInfo =
+    optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   const factory = DataTypes[cellInfo?.type ?? 'string'];
-  if (!factory.getFilterInput) return undefined;
+  if (!factory.getSimpleInput) return undefined;
   const config = getCellConfiguration(column.type, cellInfo);
-  return factory.getFilterInput(column, config);
+  return factory.getSimpleInput(column, config);
 }
 
 export function getLinkedRecordInputCap(
@@ -87,7 +91,8 @@ export function getInitialInputValue(
   if (fkTargetTableId) {
     return undefined;
   }
-  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  const cellInfo =
+    optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   return DataTypes[cellInfo?.type ?? 'string'].initialInputValue;
 }
 
@@ -98,7 +103,7 @@ export function getDisplayFormatter(
   value: unknown,
   recordSummaries?: RecordSummariesForSheet,
 ) => string | null | undefined {
-  const cellInfo = getCellInfo(column.type);
+  const cellInfo = getCellInfo(column.type, column.metadata);
   const config = getCellConfiguration(column.type, cellInfo);
   const dataType = cellInfo?.type ?? 'string';
   const format = DataTypes[dataType].getDisplayFormatter(column, config);

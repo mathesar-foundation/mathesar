@@ -31,6 +31,7 @@
               type: '',
               type_options: null,
               constraintsType: ['foreignkey'],
+              metadata: null,
             }}
             truncate={false}
           />

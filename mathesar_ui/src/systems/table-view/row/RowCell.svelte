@@ -9,6 +9,7 @@
   import type { ResultValue } from '@mathesar/api/rpc/records';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
@@ -79,7 +80,7 @@
   const canViewLinkedEntities = true;
 
   $: recordsDataState = recordsData.state;
-  $: ({ linkedRecordSummaries } = recordsData);
+  $: ({ linkedRecordSummaries, fileManifests } = recordsData);
   $: ({ column, linkFk } = effectiveProcessedColumn);
   $: columnId = column.id;
   $: isWithinPlaceholderRow = isPlaceholderRecordRow(row);
@@ -100,6 +101,12 @@
   $: recordSummary = $linkedRecordSummaries
     .get(String(column.id))
     ?.get(String(value));
+  $: fileManifest = (() => {
+    if (!column.metadata?.file_backend) return undefined;
+    const fileReference = parseFileReference(value);
+    if (!fileReference) return undefined;
+    return $fileManifests.get(String(column.id))?.get(fileReference.mash);
+  })();
 
   async function setValue(newValue: unknown) {
     if (newValue === value) {
@@ -144,12 +151,20 @@
     {value}
     {isProcessing}
     {canViewLinkedEntities}
+    {fileManifest}
+    setFileManifest={(mash, manifest) => {
+      recordsData.fileManifests.addBespokeValue({
+        columnId: String(columnId),
+        key: mash,
+        value: manifest,
+      });
+    }}
     {recordSummary}
     setRecordSummary={(recordId, rs) =>
-      linkedRecordSummaries.addBespokeRecordSummary({
+      linkedRecordSummaries.addBespokeValue({
         columnId: String(columnId),
-        recordId,
-        recordSummary: rs,
+        key: recordId,
+        value: rs,
       })}
     showAsSkeleton={$recordsDataState === States.Loading}
     disabled={!isEditable}

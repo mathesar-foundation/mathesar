@@ -4,11 +4,11 @@
 
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
+  import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import type {
     ProcessedColumn,
     SearchFuzzy,
   } from '@mathesar/stores/table-data';
-  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import type { OverflowDetails } from '@mathesar/utils/overflowObserver';
   import {
     Debounce,
@@ -24,7 +24,7 @@
 
   export let processedColumn: ProcessedColumn;
   export let searchFuzzy: Writable<SearchFuzzy>;
-  export let recordSummaryStore: RecordSummaryStore;
+  export let recordSummaryStore: AssociatedCellData<string>;
   export let hasNestedSelectorOpen: boolean;
   export let overflowDetails: OverflowDetails | undefined = undefined;
 
@@ -71,16 +71,17 @@
       <Debounce on:artificialChange={updateValue} let:handleNewValue>
         <DynamicInput
           class="record-selector-input column-{column.id}"
-          componentAndProps={processedColumn.inputComponentAndProps}
+          componentAndProps={processedColumn.simpleInputComponentAndProps}
           {value}
           {recordSummary}
           {labelController}
           setRecordSummary={(recordId, _recordSummary) =>
-            recordSummaryStore.addBespokeRecordSummary({
+            recordSummaryStore.addBespokeValue({
               columnId: String(column.id),
-              recordId,
-              recordSummary: _recordSummary,
+              key: recordId,
+              value: _recordSummary,
             })}
+          disabled={processedColumn.abstractType.identifier === 'file'}
           on:input={(e) => {
             void updateSearchValue();
             handleNewValue({ value: getValueFromEvent(e), debounce: true });

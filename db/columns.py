@@ -210,3 +210,13 @@ def drop_columns_from_table(table_oid, column_attnums, conn):
     return db_conn.exec_msar_func(
         conn, 'drop_columns', table_oid, *column_attnums
     ).fetchone()[0]
+
+
+def reset_mash(conn, table_oid, column_attnum, uri_mash_map):
+    db_conn.exec_msar_func(
+        conn,
+        'reset_mash',
+        table_oid,
+        column_attnum,
+        json.dumps(uri_mash_map)
+    ).fetchone()[0]

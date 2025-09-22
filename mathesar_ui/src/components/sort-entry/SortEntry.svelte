@@ -110,6 +110,7 @@
           type: columnInfo?.column.type ?? 'unknown',
           type_options: columnInfo?.column.type_options ?? null,
           constraintsType: getColumnConstraintTypeByColumnId(option),
+          metadata: columnInfo?.column.metadata ?? null,
         }}
       />
     </Select>

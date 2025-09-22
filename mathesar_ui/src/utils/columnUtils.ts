@@ -1,3 +1,4 @@
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
 import type {
   ColumnTypeOptions,
   RawColumnWithMetadata,
@@ -17,6 +18,7 @@ export function getColumnIconProps(column: {
   type: RawColumnWithMetadata['type'];
   type_options: RawColumnWithMetadata['type_options'];
   constraintsType?: ConstraintType[];
+  metadata: ColumnMetadata | null;
 }): IconProps | IconProps[] {
   if (column.constraintsType?.includes('primary')) {
     return iconConstraint;
@@ -26,9 +28,10 @@ export function getColumnIconProps(column: {
     return iconTableLink;
   }
 
-  return getAbstractTypeForDbType(column.type).getIcon({
+  return getAbstractTypeForDbType(column.type, column.metadata).getIcon({
     dbType: column.type,
     typeOptions: column.type_options,
+    metadata: column.metadata,
   });
 }
 

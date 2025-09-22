@@ -16,6 +16,7 @@ import {
   faClipboardList,
   faClock,
   faClone,
+  faCloudDownloadAlt,
   faCogs,
   faCommentAlt,
   faComments,
@@ -28,7 +29,18 @@ import {
   faEnvelope,
   faExternalLink,
   faExternalLinkAlt,
+  faFile,
   faFileAlt,
+  faFileArchive,
+  faFileAudio,
+  faFileCode,
+  faFileCsv,
+  faFileExcel,
+  faFileImage,
+  faFilePdf,
+  faFilePowerpoint,
+  faFileVideo,
+  faFileWord,
   faFilter,
   faFilterCircleXmark,
   faFingerprint,
@@ -98,6 +110,7 @@ import {
   createDatabaseIcon,
   databaseLineIcon,
   explorationIcon,
+  jsonIcon,
   mathesarNameIcon,
   modalRecordViewIcon,
   outcomeIcon,
@@ -180,6 +193,7 @@ export const iconDuplicateRecord: IconProps = {
   flip: 'vertical',
 };
 export const iconFillOutForm: IconProps = { data: faPlay };
+export const iconDownload: IconProps = { data: faCloudDownloadAlt };
 
 // THINGS
 //
@@ -240,6 +254,19 @@ export const iconDescription: IconProps = { data: circleLowercaseIIcon };
 export const iconMathesarName: IconProps = { data: mathesarNameIcon };
 export const iconModalRecordView: IconProps = { data: modalRecordViewIcon };
 
+export const iconFile: IconProps = { data: faFile };
+export const iconFileAlt: IconProps = { data: faFileAlt };
+export const iconFileArchive: IconProps = { data: faFileArchive };
+export const iconFileAudio: IconProps = { data: faFileAudio };
+export const iconFileCode: IconProps = { data: faFileCode };
+export const iconFileCSV: IconProps = { data: faFileCsv };
+export const iconFileExcel: IconProps = { data: faFileExcel };
+export const iconFileImage: IconProps = { data: faFileImage };
+export const iconFilePDF: IconProps = { data: faFilePdf };
+export const iconFilePowerpoint: IconProps = { data: faFilePowerpoint };
+export const iconFileVideo: IconProps = { data: faFileVideo };
+export const iconFileWord: IconProps = { data: faFileWord };
+
 // STATUSES
 
 export const iconNotEditable: IconProps = { data: faLock };
@@ -256,6 +283,7 @@ export const iconUiTypeDate: IconProps = { data: faCalendarDay };
 export const iconUiTypeDateTime: IconProps = { data: faCalendarWeek };
 export const iconUiTypeDuration: IconProps = { data: faStopwatch };
 export const iconUiTypeEmail: IconProps = { data: faEnvelope };
+export const iconUiTypeJson: IconProps = { data: jsonIcon };
 export const iconUiTypeJsonArray: IconProps = { data: faClone };
 export const iconUiTypeJsonObject: IconProps = { data: faShapes };
 export const iconUiTypeMoney: IconProps = { data: faDollarSign };
