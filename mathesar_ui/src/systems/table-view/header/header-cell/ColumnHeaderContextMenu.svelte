@@ -40,8 +40,8 @@
 
   $: columnId = processedColumn.id;
 
-  $: filterEntries = $filtering.entries.filter((e) => e.columnId === columnId);
-  $: filterCount = filterEntries.length;
+  $: filterEntries = $filtering.filterEntries((e) => e.columnId === columnId);
+  $: filterCount = filterEntries.countAll();
 
   $: currentSorting = $sorting.get(processedColumn.id);
   $: sortingLabel = getSortingLabelForColumn(

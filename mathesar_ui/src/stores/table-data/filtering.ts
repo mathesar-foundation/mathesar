@@ -114,7 +114,10 @@ function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
 export const filterCombinations: FilterCombination[] = ['and', 'or'];
 export const defaultFilterCombination = filterCombinations[0];
 
-export type TerseFiltering = [FilterCombination, TerseFilterEntry[]];
+export type TerseFiltering = [
+  FilterCombination,
+  (TerseFilterEntry | TerseFiltering)[],
+];
 
 /**
  * The data structure here is designed to model the behavior of the UI, however
@@ -127,27 +130,27 @@ export type TerseFiltering = [FilterCombination, TerseFilterEntry[]];
 export class Filtering {
   combination: FilterCombination;
 
-  entries: FilterEntry[];
+  entries: (FilterEntry | Filtering)[];
 
   constructor({
     combination,
     entries,
   }: {
     combination?: FilterCombination;
-    entries?: FilterEntry[];
+    entries?: (FilterEntry | Filtering)[];
   } = {}) {
     this.combination = combination ?? defaultFilterCombination;
     this.entries = entries ?? [];
   }
 
-  withEntries(entries: Iterable<FilterEntry>): Filtering {
+  withEntries(entries: Iterable<FilterEntry | Filtering>): Filtering {
     return new Filtering({
       combination: this.combination,
       entries: [...this.entries, ...entries],
     });
   }
 
-  withEntry(entry: FilterEntry): Filtering {
+  withEntry(entry: FilterEntry | Filtering): Filtering {
     return this.withEntries([entry]);
   }
 
@@ -164,9 +167,12 @@ export class Filtering {
   withoutColumns(columnIds: number[]): Filtering {
     return new Filtering({
       combination: this.combination,
-      entries: this.entries.filter(
-        (entry) => !columnIds.includes(entry.columnId),
-      ),
+      entries: this.entries.flatMap<FilterEntry | Filtering>((entry) => {
+        if ('withoutColumns' in entry) {
+          return entry.withoutColumns(columnIds);
+        }
+        return columnIds.includes(entry.columnId) ? [] : [entry];
+      }),
     });
   }
 
@@ -177,52 +183,91 @@ export class Filtering {
     });
   }
 
-  equals(filtering: Filtering): boolean {
-    if (
-      this.entries.length !== filtering.entries.length ||
-      this.combination !== filtering.combination
-    ) {
-      return false;
+  getSqlExpr(): SqlExpr | undefined {
+    if (this.entries.length === 0) {
+      return undefined;
     }
-    for (
-      let entryIndex = 0;
-      entryIndex < filtering.entries.length;
-      entryIndex += 1
-    ) {
-      const currentEntry = this.entries[entryIndex];
-      const comparedEntry = filtering.entries[entryIndex];
-      if (
-        currentEntry.columnId !== comparedEntry.columnId ||
-        currentEntry.conditionId !== comparedEntry.conditionId ||
-        currentEntry.value !== comparedEntry.value
-      ) {
-        return false;
+
+    function getExpr(entry: FilterEntry | Filtering) {
+      if (entry instanceof Filtering) {
+        return entry.getSqlExpr();
+      }
+      return filterEntryToSqlExpr(entry);
+    }
+
+    if (this.entries.length === 1) {
+      const entry = this.entries[0];
+      return getExpr(entry);
+    }
+
+    let expr = getExpr(this.entries[0]);
+
+    for (let i = 1; i < this.entries.length; i += 1) {
+      const joinedExpr = getExpr(this.entries[i]);
+      if (expr !== undefined && joinedExpr) {
+        expr = {
+          type: this.combination,
+          args: [expr, joinedExpr],
+        };
+      } else if (joinedExpr) {
+        expr = joinedExpr;
       }
     }
-    return true;
+
+    return expr;
+  }
+
+  equals(comparedFiltering: Filtering): boolean {
+    return (
+      JSON.stringify(this.getSqlExpr()) ===
+      JSON.stringify(comparedFiltering.getSqlExpr())
+    );
   }
 
   recordsRequestParams(): Pick<RecordsListParams, 'filter'> {
-    if (this.entries.length === 0) {
-      return {};
-    }
-    if (this.entries.length === 1) {
-      return { filter: filterEntryToSqlExpr(this.entries[0]) };
-    }
+    const filter = this.getSqlExpr();
+    return filter ? { filter } : {};
+  }
 
-    let expr = filterEntryToSqlExpr(this.entries[0]);
-    for (let i = 1; i < this.entries.length; i += 1) {
-      expr = {
-        type: this.combination,
-        args: [expr, filterEntryToSqlExpr(this.entries[i])],
-      };
-    }
+  clone(): Filtering {
+    return new Filtering({
+      combination: this.combination,
+      entries: this.entries.map((entry) =>
+        'clone' in entry ? entry.clone() : { ...entry },
+      ),
+    });
+  }
 
-    return { filter: expr };
+  filterEntries(filterFn: (entry: FilterEntry) => boolean): Filtering {
+    return new Filtering({
+      combination: this.combination,
+      entries: this.entries.filter((entry) =>
+        'filterEntries' in entry
+          ? entry.filterEntries(filterFn)
+          : filterFn(entry),
+      ),
+    });
+  }
+
+  countAll(): number {
+    let filterEntriesCount = 0;
+    this.entries.forEach((entry) => {
+      if ('countAll' in entry) {
+        filterEntriesCount += entry.countAll();
+      } else {
+        filterEntriesCount += 1;
+      }
+    });
+    return filterEntriesCount;
   }
 
   terse(): TerseFiltering {
-    return [this.combination, this.entries.map(makeTerseFilterEntry)];
+    return [
+      this.combination,
+      this.entries.map((entry) =>
+        'terse' in entry ? entry.terse() : makeTerseFilterEntry(entry),
+      ),
+    ];
   }
 
   static fromTerse(terse: TerseFiltering): Filtering {
@@ -230,7 +275,12 @@ export class Filtering {
       combination:
         filterCombinations.find((c) => c === terse[0]) ??
         defaultFilterCombination,
-      entries: terse[1].map(makeFilterEntry),
+      entries: terse[1].map((terseEntry) => {
+        if (typeof terseEntry[0] === 'string') {
+          return this.fromTerse(terseEntry as TerseFiltering);
+        }
+        return makeFilterEntry(terseEntry as TerseFilterEntry);
+      }),
     });
   }
 }

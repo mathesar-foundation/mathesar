@@ -1,24 +1,21 @@
 <script lang="ts">
   import { takeLast } from 'iter-tools';
-  import { onMount, tick } from 'svelte';
+  import { onMount } from 'svelte';
   import { type Writable, writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import type { LinkedRecordInputElement } from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordUtils';
-  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import { FILTER_INPUT_CLASS } from '@mathesar/components/filter-entry/utils';
-  import { iconAddNew } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
   import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
-  import type {
+  import {
+    type FilterEntry,
     Filtering,
-    ProcessedColumns,
+    type ProcessedColumns,
+    defaultFilterCombination,
   } from '@mathesar/stores/table-data';
-  import type { FilterCombination } from '@mathesar/stores/table-data/filtering';
-  import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
-
-  import { deepCloneFiltering } from '../utils';
+  import { Button } from '@mathesar-component-library';
 
   import FilterEntries from './FilterEntries.svelte';
 
@@ -33,14 +30,15 @@
   // since each set call triggers requests.
   // This should be okay since this component is re-created
   // everytime the dropdown reopens.
-  const internalFiltering = writable(deepCloneFiltering($filtering));
+  const internalFiltering = writable($filtering.clone());
 
   let element: HTMLElement;
 
-  $: filterCount = $internalFiltering.entries.length;
+  $: filterCount = $internalFiltering.countAll();
+  $: console.log(filterCount);
 
   function checkAndSetExternalFiltering() {
-    const validFilters = $internalFiltering.entries.filter((filter) => {
+    const validFilters = $internalFiltering.filterEntries((filter) => {
       const column = processedColumns.get(filter.columnId);
       const condition = column?.allowedFiltersMap.get(filter.conditionId);
       if (condition) {
@@ -48,42 +46,53 @@
       }
       return false;
     });
-    const newFiltering = deepCloneFiltering({
-      ...$internalFiltering,
-      entries: validFilters,
-    });
-    if ($filtering.equals(newFiltering)) {
+
+    if ($filtering.equals(validFilters)) {
       return;
     }
-    filtering.set(newFiltering);
+    filtering.set(validFilters.clone());
   }
 
-  function addFilter(columnId: number) {
-    const column = processedColumns.get(columnId);
-    if (!column) {
+  function getNewFilter(): FilterEntry | undefined {
+    const pcs = [...processedColumns.values()];
+    const filterColumn = pcs.find((pc) => !pc.column.primary_key) ?? pcs[0];
+    if (!filterColumn) {
       return;
     }
-    const firstCondition = [...column.allowedFiltersMap.values()][0];
+    const firstCondition = [...filterColumn.allowedFiltersMap.values()][0];
     if (!firstCondition) {
       return;
     }
-    const newFilter = {
-      columnId: column.id,
+    // eslint-disable-next-line consistent-return
+    return {
+      columnId: filterColumn.id,
       conditionId: firstCondition.id,
       value: undefined,
-      isValid: validateFilterEntry(firstCondition, undefined),
     };
+  }
+
+  function addFilter() {
+    const newFilter = getNewFilter();
+    if (!newFilter) {
+      return;
+    }
     internalFiltering.update((f) => f.withEntry(newFilter));
     checkAndSetExternalFiltering();
   }
 
-  function removeFilter(index: number) {
-    internalFiltering.update((f) => f.withoutEntry(index));
-    checkAndSetExternalFiltering();
-  }
-
-  function setCombination(combination: FilterCombination) {
-    internalFiltering.update((f) => f.withCombination(combination));
+  function addFilterGroup() {
+    const newFilter = getNewFilter();
+    if (!newFilter) {
+      return;
+    }
+    internalFiltering.update((f) =>
+      f.withEntry(
+        new Filtering({
+          combination: defaultFilterCombination,
+          entries: [newFilter],
+        }),
+      ),
+    );
     checkAndSetExternalFiltering();
   }
 
@@ -106,7 +115,8 @@
     }
   }
 
-  onMount(() => imperativeFilterController?.onAddFilter(addFilter));
+  // TODO_FILTERING: Fix broken imperative filter controls
+  onMount(() => imperativeFilterController?.onAddFilter((columnId) => {}));
   onMount(() =>
     imperativeFilterController?.onActivateLastFilterInput(
       activateLastFilterInput,
@@ -121,11 +131,8 @@
       <FilterEntries
         {processedColumns}
         {recordSummaries}
-        bind:entries={$internalFiltering.entries}
-        bind:filterCombination={$internalFiltering.combination}
-        on:remove={(e) => removeFilter(e.detail)}
+        bind:filter={$internalFiltering}
         on:update={updateFilter}
-        on:updateCombination={(e) => setCombination(e.detail)}
       />
     {:else}
       <span class="muted">{$_('no_filters_added')}</span>
@@ -133,24 +140,13 @@
   </div>
   {#if processedColumns.size}
     <div class="footer">
-      <DropdownMenu
-        icon={iconAddNew}
-        label={$_('add_new_filter')}
-        disabled={processedColumns.size === 0}
-        triggerAppearance="secondary"
-      >
-        {#each [...processedColumns.values()] as column (column.id)}
-          <ButtonMenuItem
-            on:click={async () => {
-              addFilter(column.id);
-              await tick();
-              activateLastFilterInput();
-            }}
-          >
-            <ProcessedColumnName processedColumn={column} />
-          </ButtonMenuItem>
-        {/each}
-      </DropdownMenu>
+      <Button appearance="secondary" on:click={addFilter}>
+        {$_('add_new_filter')}
+      </Button>
+
+      <Button appearance="secondary" on:click={addFilterGroup}>
+        {$_('add_filter_group')}
+      </Button>
     </div>
   {/if}
 </div>
