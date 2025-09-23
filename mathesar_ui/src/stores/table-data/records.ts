@@ -756,7 +756,7 @@ export class RecordsData {
       const record = response.results[0];
       const newRow = PersistedRecordRow.fromDraft(row.withRecord(record));
 
-      this.meta.rowCreationStatus.delete(newRow.identifier);
+      this.meta.clearAllStatusesAndErrorsForRows([newRow.identifier]);
       this.meta.rowCreationStatus.set(newRow.identifier, { state: 'success' });
       this.newRecords.update((existing) =>
         existing.map((entry) => {
