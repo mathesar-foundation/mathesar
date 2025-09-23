@@ -56,8 +56,8 @@ x-config: &config
   # (Optional) Replace '5432' with the port on which postgres is running
   POSTGRES_PORT: ${POSTGRES_PORT:-5432}
 
-  # (Optional) Can be used to configure an S3-compliant file storage backend instead of a
-  # file_storage.yml configuration file.
+  # (Optional) Can be used to configure an S3-compliant file storage backend
+  # instead of a file_storage.yml configuration file.
   FILE_STORAGE_DICT: ${FILE_STORAGE_DICT:-{}}
 
   # (Optional) Can be used to configure single-sign on (sso) instead of an
@@ -111,8 +111,8 @@ x-config: &config
 #
 # FILE_STORAGE_DICT:
 #     Default: {}
-#     Info: Specifies the settings necessary to configure an S3-complaint file
-#     storage backend.
+#     Info: Specifies the settings necessary to configure an S3-complaint
+#           filestorage backend.
 #
 # OIDC_CONFIG_DICT:
 #   Default: {}
@@ -181,7 +181,8 @@ services:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
       - ./msar/secrets:/code/.secrets
-      # Uncomment the following to mount file_storage.yml to enable an S3-compliant file storage backend.
+      # Uncomment the following to mount file_storage.yml and enable
+      #  an S3-compliant file storage backend
       # - ./file_storage.yml:/code/file_storage.yml
       # Uncomment the following to mount sso.yml and enable Single Sign-On (SSO).
       # - ./sso.yml:/code/sso.yml
