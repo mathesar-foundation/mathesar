@@ -105,9 +105,7 @@ export class QueryRunner {
         return new Plane(rowIds, columnIds);
       },
     );
-    // Prevent autofocusing the new active cell when the plane changes.
-    // https://github.com/mathesar-foundation/mathesar/issues/3955
-    this.selection = new SheetSelectionStore(plane, { prevent: ['focus'] });
+    this.selection = new SheetSelectionStore(plane);
 
     this.inspector = new QueryInspector(this.query);
   }
