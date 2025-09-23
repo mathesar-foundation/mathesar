@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import mimetypes
+import os
 import posixpath
 from django.conf import settings
 from django.contrib.sessions.models import Session
@@ -19,6 +20,7 @@ from db.columns import reset_mash
 
 from mathesar.models import DownloadLink
 
+BACKEND_CONF_ENV = "FILE_STORAGE_DICT"
 BACKEND_CONF_YAML = settings.BASE_DIR.joinpath('file_storage.yml')
 URI = "uri"
 MASH = "mash"
@@ -220,7 +222,7 @@ def get_backends(public_info=False):
         with open(BACKEND_CONF_YAML, 'r') as f:
             backend_dict = yaml.full_load(f)
     except FileNotFoundError:
-        backend_dict = {}
+        backend_dict = {} or json.loads(os.getenv(BACKEND_CONF_ENV, "{}"))
     if public_info is True:
         return list(backend_dict.keys())
     else:
