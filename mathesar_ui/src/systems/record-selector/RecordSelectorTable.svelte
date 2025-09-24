@@ -56,6 +56,7 @@
     recordSummaries,
     linkedRecordSummaries,
     state: recordsDataState,
+    fileManifests,
   } = recordsData);
   $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
@@ -288,6 +289,7 @@
                 {row}
                 {processedColumn}
                 {linkedRecordSummaries}
+                {fileManifests}
                 {searchFuzzy}
                 isLoading={recordsDataIsLoading}
               />

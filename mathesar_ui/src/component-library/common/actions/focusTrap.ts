@@ -108,7 +108,22 @@ export default function focusTrap(container: HTMLElement): ActionReturn {
     await tick(); // Wait, in case Svelte has more to render (e.g. children)
     const firstElement = getFocusableElements(container).at(0);
     if (firstElement) {
-      focusElement(firstElement);
+      /*
+       * When the element is immediately focused, keydown events seem to get triggered
+       * on the element. This results in cases like lightboxes closing immediately after
+       * being opened when opened via an 'enter' keydown event.
+       *
+       * My hunch is that this bug has to do something with the way transitions/animations
+       * are executed by svelte/transition.
+       *
+       * Moving the focus task to a macrotask such as setTimeout seems to prevent this
+       * bug from occurring.
+       *
+       * The exact root cause / race condition is not entirely figured out.
+       */
+      setTimeout(() => {
+        focusElement(firstElement);
+      }, 10);
     }
   }
 

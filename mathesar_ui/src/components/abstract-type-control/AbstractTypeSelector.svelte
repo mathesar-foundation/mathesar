@@ -2,12 +2,14 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import { getAllowedAbstractTypesForDbTypeAndItsTargetTypes } from '@mathesar/stores/abstract-types';
-  import { typeCastMap } from '@mathesar/stores/abstract-types/typeCastMap';
+  import {
+    getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
+    isAbstractTypeDisabled,
+  } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import { LabeledInput, Select } from '@mathesar-component-library';
 
+  import AbstractTypeName from './AbstractTypeName.svelte';
   import type { ColumnWithAbstractType } from './utils';
 
   const dispatch = createEventDispatcher<{
@@ -24,7 +26,7 @@
 
   $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     column.type,
-    typeCastMap[column.type] ?? [],
+    column.metadata,
   ).filter((item) => !['jsonlist', 'map'].includes(item.identifier));
 
   function selectAbstractType(
@@ -52,6 +54,10 @@
       selectedAbstractType = newAbstractType;
     }
   }
+
+  function isOptionDisabled(type?: AbstractType) {
+    return type ? isAbstractTypeDisabled(type) : false;
+  }
 </script>
 
 <LabeledInput label={$_('data_type')} layout={'stacked'}>
@@ -60,13 +66,11 @@
     value={selectedAbstractType}
     getLabel={(entry) => entry?.name ?? ''}
     autoSelect="none"
+    isOptionDisabled={(t) => isOptionDisabled(t)}
     on:change={(e) => selectAbstractType(e.detail)}
     let:option
-    let:label
     {disabled}
   >
-    <NameWithIcon icon={option.getIcon()}>
-      {label}
-    </NameWithIcon>
+    <AbstractTypeName abstractType={option} />
   </Select>
 </LabeledInput>

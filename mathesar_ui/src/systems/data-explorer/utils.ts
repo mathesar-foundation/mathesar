@@ -11,8 +11,8 @@ import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
-  getDbTypeBasedFilterCap,
   getDbTypeBasedInputCap,
+  getDbTypeBasedSimpleInputCap,
   getDisplayFormatter,
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
@@ -47,7 +47,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   id: QueryColumnMetaData['alias'];
   column: QueryResultColumn;
   abstractType: AbstractType;
-  filterComponentAndProps: ComponentAndProps;
+  simpleInputComponentAndProps: ComponentAndProps;
   initialInputValue: unknown;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
@@ -81,6 +81,7 @@ export interface InputColumn {
 
 export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
   type: RawColumnWithMetadata['type'];
+  metadata: RawColumnWithMetadata['metadata'];
   linksTo?: LinkedTable;
   producesMultipleResults: boolean;
 }
@@ -172,6 +173,7 @@ export function getLinkFromColumn(
           ),
           jpPath: link.join_path,
           producesMultipleResults: link.multiple_results,
+          metadata: null,
         },
       ];
     });
@@ -185,7 +187,7 @@ export function getLinkFromColumn(
 export interface QueryTableStructure {
   joinableTables: JoinableTablesResult;
   baseTable: Pick<Table, 'oid' | 'name'>;
-  columns: Pick<RawColumnWithMetadata, 'id' | 'name' | 'type'>[];
+  columns: Pick<RawColumnWithMetadata, 'id' | 'name' | 'type' | 'metadata'>[];
 }
 
 export function getQueryTableStructure(p: {
@@ -199,7 +201,7 @@ export function getQueryTableStructure(p: {
   return batchRun([
     api.tables.list_joinable(args),
     api.tables.get(args),
-    api.columns.list(args),
+    api.columns.list_with_metadata(args),
   ]).transformResolved(([joinableTables, baseTable, columns]) => ({
     joinableTables,
     baseTable,
@@ -247,12 +249,13 @@ function getBaseTableColumnsWithLinks({
   columns,
 }: QueryTableStructure): Map<ColumnWithLink['id'], ColumnWithLink> {
   const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-    columns.map(({ id, name, type }) => [
+    columns.map(({ id, name, type, metadata }) => [
       id,
       {
         id,
         name,
         type,
+        metadata,
         tableName: baseTable.name,
         linksTo: getLinkFromColumn(joinableTables, id, 1),
         producesMultipleResults: false,
@@ -301,6 +304,7 @@ function getTablesThatReferenceBaseTable({
               ),
               jpPath: link.join_path,
               producesMultipleResults: link.multiple_results,
+              metadata: null,
             },
           ];
         });
@@ -341,9 +345,10 @@ function processColumn(
     display_name: columnInfo.display_name ?? columnInfo.alias,
     type: columnInfo.type ?? 'unknown',
     type_options: columnInfo.type_options ?? null,
+    metadata: columnInfo.metadata ?? null,
   };
 
-  const abstractType = getAbstractTypeForDbType(column.type);
+  const abstractType = getAbstractTypeForDbType(column.type, column.metadata);
   const source: ProcessedQueryResultColumnSource = columnInfo.is_initial_column
     ? {
         is_initial_column: true,
@@ -363,8 +368,8 @@ function processColumn(
       cellInfo: abstractType.cellInfo,
       column,
     }),
-    filterComponentAndProps:
-      getDbTypeBasedFilterCap(column, abstractType.cellInfo) ??
+    simpleInputComponentAndProps:
+      getDbTypeBasedSimpleInputCap(column, abstractType.cellInfo) ??
       getDbTypeBasedInputCap(column, abstractType.cellInfo),
     initialInputValue: getInitialInputValue(
       column,

@@ -3,6 +3,8 @@ import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import type { FileManifest } from '@mathesar/api/rpc/records';
+import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SelectedCellData } from '@mathesar/components/sheet/selection';
 import Plane from '@mathesar/components/sheet/selection/Plane';
@@ -19,6 +21,8 @@ import type {
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
+import type { AssociatedCellValuesForSheet } from '../AssociatedCellData';
+
 import { ColumnsDataStore } from './columns';
 import { ConstraintsDataStore } from './constraints';
 import { Display } from './display';
@@ -34,6 +38,7 @@ function getSelectedCellData(
   selectableRowsMap: Map<string, RecordRow>,
   processedColumns: ProcessedColumns,
   linkedRecordSummaries: RecordSummariesForSheet,
+  fileManifests: AssociatedCellValuesForSheet<FileManifest>,
 ): SelectedCellData {
   const { activeCellId } = selection;
   const selectionData = {
@@ -50,11 +55,18 @@ function getSelectedCellData(
     value,
     (v) => linkedRecordSummaries.get(columnId)?.get(String(v)),
   );
+  const fileManifest = (() => {
+    if (!column?.column.metadata?.file_backend) return undefined;
+    const fileReference = parseFileReference(value);
+    if (!fileReference) return undefined;
+    return fileManifests.get(String(column.id))?.get(fileReference.mash);
+  })();
   return {
     activeCellData: column && {
       column,
       value,
       recordSummary,
+      fileManifest,
     },
     selectionData,
   };
@@ -220,6 +232,7 @@ export class TabularData {
         this.recordsData.selectableRowsMap,
         this.processedColumns,
         this.recordsData.linkedRecordSummaries,
+        this.recordsData.fileManifests,
       ],
       (args) => getSelectedCellData(...args),
     );

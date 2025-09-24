@@ -4,12 +4,18 @@
   This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
+  import type { FileManifest } from '@mathesar/api/rpc/records';
+
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
   export let recordSummary: string | undefined = undefined;
+  export let fileManifest: FileManifest | undefined = undefined;
+  export let setFileManifest:
+    | ((mash: string, manifest: FileManifest) => void)
+    | undefined = undefined;
   export let setRecordSummary:
     | ((recordId: string, recordSummary: string) => void)
     | undefined = undefined;
@@ -46,6 +52,8 @@
     {horizontalAlignment}
     {recordSummary}
     {setRecordSummary}
+    {fileManifest}
+    {setFileManifest}
     {searchValue}
     {isProcessing}
     {showTruncationPopover}

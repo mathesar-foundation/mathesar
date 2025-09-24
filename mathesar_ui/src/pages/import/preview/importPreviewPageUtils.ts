@@ -35,7 +35,7 @@ export function processColumns(
   columns: RawColumnWithMetadata[],
 ): ProcessedPreviewColumn[] {
   return columns.map((column) => {
-    const abstractType = getAbstractTypeForDbType(column.type);
+    const abstractType = getAbstractTypeForDbType(column.type, column.metadata);
     return {
       id: column.id,
       column,

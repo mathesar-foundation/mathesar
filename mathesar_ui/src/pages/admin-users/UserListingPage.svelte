@@ -80,7 +80,7 @@
       <svelte:fragment slot="content">
         {#if filteredUsers.length}
           <div class="users-list">
-            {#each filteredUsers as user, index (user.id)}
+            {#each filteredUsers as user (user.id)}
               <UserRow {user} />
             {/each}
           </div>

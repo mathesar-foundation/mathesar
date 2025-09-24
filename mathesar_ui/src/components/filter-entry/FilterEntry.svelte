@@ -5,8 +5,8 @@
   import type { ConstraintType } from '@mathesar/api/rpc/constraints';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import {
-    getDbTypeBasedFilterCap,
     getDbTypeBasedInputCap,
+    getDbTypeBasedSimpleInputCap,
   } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
@@ -14,8 +14,7 @@
     AbstractTypeFilterDefinition,
     FilterId,
   } from '@mathesar/stores/abstract-types/types';
-  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
-  import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
   import {
     Button,
@@ -52,7 +51,8 @@
   export let disableColumnChange = false;
   export let allowDelete = true;
   export let numberOfFilters = 0;
-  export let recordSummaryStore: RecordSummaryStore | undefined = undefined;
+  export let recordSummaryStore: AssociatedCellData<string> | undefined =
+    undefined;
 
   /**
    * Eslint recognizes an unnecessary type assertion that typecheck fails to
@@ -74,7 +74,7 @@
   $: selectedCondition = conditionIdentifier
     ? selectedColumnFiltersMap.get(conditionIdentifier)
     : undefined;
-  $: selectedColumnInputCap = selectedColumn?.filterComponentAndProps;
+  $: selectedColumnInputCap = selectedColumn?.simpleInputComponentAndProps;
 
   const initialNoOfFilters = numberOfFilters;
   let showError = false;
@@ -164,7 +164,7 @@
       type_options: {},
       metadata: {},
     };
-    return getDbTypeBasedFilterCap(c) ?? getDbTypeBasedInputCap(c);
+    return getDbTypeBasedSimpleInputCap(c) ?? getDbTypeBasedInputCap(c);
   }
 
   $: inputCap = calculateInputCap(selectedCondition, selectedColumn);
@@ -192,15 +192,15 @@
 
   $: readableRecordSummaryStore =
     recordSummaryStore ??
-    readable(new ImmutableMap<string, RecordSummariesForColumn>());
+    readable(new ImmutableMap<string, ImmutableMap<string, string>>());
   $: recordSummaries = $readableRecordSummaryStore;
 
   function setRecordSummary(recordId: string, recordSummary: string) {
     if (recordSummaryStore) {
-      recordSummaryStore.addBespokeRecordSummary({
+      recordSummaryStore.addBespokeValue({
         columnId: String(columnIdentifier),
-        recordId,
-        recordSummary,
+        key: recordId,
+        value: recordSummary,
       });
     }
   }
@@ -229,6 +229,7 @@
           type: columnInfo?.column.type ?? 'unknown',
           type_options: columnInfo?.column.type_options ?? null,
           constraintsType: getColumnConstraintTypeFromColumnId(option),
+          metadata: columnInfo?.column.metadata ?? null,
         }}
       />
     </Select>

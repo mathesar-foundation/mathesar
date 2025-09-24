@@ -18,7 +18,7 @@
     const fkColumnId = joinableTable.join_path[0].slice(-1)[0][1];
     const { name } =
       joinableTablesResult.target_table_info[table.oid].columns[fkColumnId];
-    return { table, fkColumn: { id: fkColumnId, name } };
+    return { table, fkColumn: { id: fkColumnId, name, metadata: null } };
   }
 
   $: tableWidgetInputs = joinableTablesResult.joinable_tables

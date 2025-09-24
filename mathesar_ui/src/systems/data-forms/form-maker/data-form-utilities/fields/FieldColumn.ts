@@ -33,7 +33,10 @@ export class FieldColumn {
     this.tableOid = props.tableOid;
     this.column = props.column;
     this.foreignKeyLink = props.foreignKeyLink;
-    this.abstractType = getAbstractTypeForDbType(this.column.type);
+    this.abstractType = getAbstractTypeForDbType(
+      this.column.type,
+      this.column.metadata,
+    );
   }
 
   static fromProcessedColumn(pc: ProcessedColumn) {

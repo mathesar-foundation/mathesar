@@ -7,6 +7,7 @@ placed here since most utilities are shared. Will require a re-organization
 during Sheet component creation.
 -->
 <script lang="ts">
+  import type { FileManifest } from '@mathesar/api/rpc/records';
   import type {
     BaseInputProps,
     ComponentAndProps,
@@ -22,6 +23,8 @@ during Sheet component creation.
     componentAndProps: ComponentAndProps;
     recordSummary?: string;
     setRecordSummary?: (recordId: string, recordSummary: string) => void;
+    fileManifest?: FileManifest;
+    setFileManifest?: (mash: string, manifest: FileManifest) => void;
     allowsHyperlinks?: boolean;
   }
 
