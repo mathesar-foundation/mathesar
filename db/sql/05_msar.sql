@@ -3495,10 +3495,10 @@ Args:
 SELECT msar.get_cast_function_name(type_::regtype) || '(' ||
 CONCAT_WS(', ',
   val,
-  NULLIF(CONCAT('group_sep =>', quote_literal(cast_options ->> 'group_sep') || '::"char"'), 'group_sep =>'),
-  NULLIF(CONCAT('decimal_p =>', quote_literal(cast_options ->> 'decimal_p') || '::"char"'), 'decimal_p =>'),
-  NULLIF(CONCAT('curr_pref =>', quote_literal(cast_options ->> 'curr_pref') || '::text'), 'curr_pref =>'),
-  NULLIF(CONCAT('curr_suff =>', quote_literal(cast_options ->> 'curr_suff') || '::text'), 'curr_suff =>')
+  'group_sep =>' || quote_literal(cast_options ->> 'group_sep') || '::"char"',
+  'decimal_p =>' || quote_literal(cast_options ->> 'decimal_p') || '::"char"',
+  'curr_pref =>' || quote_literal(cast_options ->> 'curr_pref') || '::text',
+  'curr_suff =>' || quote_literal(cast_options ->> 'curr_suff') || '::text'
 ) || ')'
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
