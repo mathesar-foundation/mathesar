@@ -8,6 +8,7 @@ DEFAULT = "default"
 DESCRIPTION = "description"
 NAME = "name"
 NULLABLE = "nullable"
+CAST_OPTIONS = "cast_options"
 
 
 def get_column_info_for_table(table, conn):
@@ -99,12 +100,14 @@ def _transform_column_alter_dict(data):
     """
     type_ = {"name": data.get('type'), "options": data.get('type_options')}
     new_type = {k: v for k, v in type_.items() if v} or None
+    cast_options = data.get(CAST_OPTIONS)
     nullable = data.get(NULLABLE)
     not_null = not nullable if nullable is not None else None
     column_name = (data.get(NAME) or '').strip() or None
     raw_alter_def = {
         "attnum": data["id"],
         "type": new_type,
+        "cast_options": cast_options,
         "not_null": not_null,
         "name": column_name,
         "description": data.get("description")
