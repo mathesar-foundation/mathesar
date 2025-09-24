@@ -3596,7 +3596,7 @@ BEGIN
   );
   EXECUTE default_expr;
   RETURN default_expr;
-END; 
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
