@@ -1629,7 +1629,7 @@ BEGIN
       2, jsonb_build_object('type', 'text'),
       3, jsonb_build_object('type', 'boolean', 'details', jsonb_build_object('mathesar_casting', true)),
       4, jsonb_build_object('type', 'date', 'details', jsonb_build_object('mathesar_casting', true)),
-      5, jsonb_build_object('type', 'numeric', 'details', jsonb_build_object('mathesar_casting', true, 'decimal_p', '.')),
+      5, jsonb_build_object('type', 'numeric', 'details', jsonb_build_object('mathesar_casting', true, 'decimal_p', '.', 'group_sep', '')),
       6, jsonb_build_object('type', 'interval', 'details', jsonb_build_object('mathesar_casting', true)),
       7, jsonb_build_object('type', 'text'),
       8, jsonb_build_object('type', 'mathesar_types.mathesar_money', 'details', jsonb_build_object('curr_pref', '$', 'curr_suff', '', 'decimal_p', '.', 'group_sep', ',', 'mathesar_casting', true))
