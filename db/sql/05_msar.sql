@@ -3491,6 +3491,7 @@ Args:
   val: This is quite general, and isn't sanitized in any way. It can be either a literal or a column
        identifier, since we want to be able to produce a casting expression in either case.
   type_: This type name string must cast properly to a regtype.
+  cast_options: Suggestions to be used while type casting.
 */
 SELECT msar.get_cast_function_name(type_::regtype) || '(' ||
 CONCAT_WS(', ',
@@ -3595,6 +3596,7 @@ Args:
                original default, but cast to a new type.
   new_type: The target type to which we'll cast the new default.
   is_default_dynamic: Whether the current default is dynamic, can be obtained with msar.is_default_possibly_dynamic.
+  cast_options: Suggestions to be used while type casting.
 */
 DECLARE
   default_ text;
@@ -3628,6 +3630,7 @@ Args:
   tab_id: The OID of the table containing the column whose type we'll alter.
   col_id: The attnum of the column whose type we'll alter.
   new_type: The target type to which we'll alter the column.
+  cast_options: Suggestions to be used while type casting.
 */
   SELECT __msar.exec_ddl(
     'ALTER TABLE %I.%I ALTER COLUMN %I TYPE %s USING %s',

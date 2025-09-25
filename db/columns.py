@@ -78,6 +78,7 @@ def _transform_column_alter_dict(data):
         "id": <int>,
         "name": <str>,
         "type": <str>,
+        "cast_options": <dict>,
         "type_options": <dict>,
         "nullable": <bool>,
         "default": {"value": <any>}
@@ -88,6 +89,7 @@ def _transform_column_alter_dict(data):
     {
         "attnum": <int>,
         "type": {"name": <str>, "options": <dict>},
+        "cast_options": {"curr_pref": <str>, "curr_suff": <str>, "decimal_p": <str>, "group_sep": <str>, "mathesar_casting": <bool>},
         "name": <str>,
         "not_null": <bool>,
         "default": <any>,
