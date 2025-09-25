@@ -1639,6 +1639,37 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_retype_col_sql() RETURNS SETOF TEXT AS $f$
+DECLARE
+  tab_id regclass;
+  cast_options_1 jsonb := '{"mathesar_casting": true}'::jsonb;
+  cast_options_2 jsonb := '{"decimal_p": ".", "group_sep": "", "mathesar_casting": true}'::jsonb;
+  cast_options_3 jsonb := '{"curr_pref": "$", "curr_suff": "", "decimal_p": ".", "group_sep": ",", "mathesar_casting": true}'::jsonb;
+BEGIN
+  PERFORM __setup_type_inference();
+  tab_id := '"Types Test"'::regclass;
+  RETURN NEXT is(
+    msar.retype_column(tab_id, 3::smallint, 'boolean'::text, cast_options_1),
+    'ALTER TABLE public."Types Test" '
+    || 'ALTER COLUMN "Boolean" TYPE boolean '
+    || 'USING msar.cast_to_boolean("Boolean")'
+  );
+  RETURN NEXT is(
+    msar.retype_column(tab_id, 5::smallint, 'numeric'::text, cast_options_2),
+    'ALTER TABLE public."Types Test" '
+    || 'ALTER COLUMN "Numeric" TYPE numeric '
+    || 'USING msar.cast_to_numeric("Numeric", group_sep =>''''::"char", decimal_p =>''.''::"char")'
+  );
+  RETURN NEXT is(
+    msar.retype_column(tab_id, 8::smallint, 'mathesar_types.mathesar_money'::text, cast_options_3),
+    'ALTER TABLE public."Types Test" '
+    || 'ALTER COLUMN "Money" TYPE mathesar_types.mathesar_money '
+    || 'USING msar.cast_to_mathesar_money("Money", group_sep =>'',''::"char", decimal_p =>''.''::"char", curr_pref =>''$''::text, curr_suff =>''''::text)'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
 -- msar.add_mathesar_table
 
 CREATE OR REPLACE FUNCTION __setup_create_table() RETURNS SETOF TEXT AS $f$
