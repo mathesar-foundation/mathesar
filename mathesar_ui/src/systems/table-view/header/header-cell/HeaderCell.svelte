@@ -28,8 +28,7 @@
   $: ({ id, description } = column);
   $: ({ meta } = $tabularData);
   $: ({ filtering, sorting, grouping } = meta);
-  $: hasFilter =
-    $filtering.filterEntries((e) => e.columnId === id).countAll() > 0;
+  $: hasFilter = $filtering.appliedFilterCountForColumn(id) > 0;
   $: sorter = $sorting.get(id);
   $: grouped = $grouping.entries.some((entry) => entry.columnId === id);
 </script>

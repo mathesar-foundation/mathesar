@@ -39,9 +39,7 @@
   } = $tabularData);
 
   $: columnId = processedColumn.id;
-
-  $: filterEntries = $filtering.filterEntries((e) => e.columnId === columnId);
-  $: filterCount = filterEntries.countAll();
+  $: filterCount = $filtering.appliedFilterCountForColumn(columnId);
 
   $: currentSorting = $sorting.get(processedColumn.id);
   $: sortingLabel = getSortingLabelForColumn(

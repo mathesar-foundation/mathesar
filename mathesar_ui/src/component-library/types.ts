@@ -3,7 +3,6 @@ export * from './commonTypes';
 
 export type { BaseInputProps } from './common/base-components/BaseInputTypes';
 export type { Tab } from './tabs/TabContainerTypes';
-export type { TreeItem } from './tree/TreeTypes';
 export type {
   ComponentAndProps,
   ComponentWithProps,

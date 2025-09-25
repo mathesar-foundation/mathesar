@@ -14,7 +14,7 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { AnchorButton, Icon, Tooltip } from '@mathesar-component-library';
 
-  import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
+  import TableFilter from './record-operations/filter/TableFilter.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
 
@@ -32,8 +32,6 @@
     ...$filtering.recordsRequestParams(),
   });
 
-  const canViewLinkedEntities = true;
-
   function toggleTableInspector() {
     tableInspectorVisible.update((v) => !v);
   }
@@ -50,7 +48,7 @@
 >
   {#if isSelectable}
     <div class="quick-access">
-      <FilterDropdown {filtering} {canViewLinkedEntities} />
+      <TableFilter />
       <SortDropdown {sorting} />
       <GroupDropdown {grouping} />
     </div>
