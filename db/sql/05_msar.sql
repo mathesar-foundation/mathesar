@@ -3709,8 +3709,6 @@ BEGIN
     IF col.new_type IS NOT NULL OR jsonb_typeof(col.new_default)='null' THEN
       PERFORM msar.drop_col_default(tab_id, col.attnum);
     END IF;
-    -- RAISE NOTICE '%', col.cast_options;
-    -- RAISE NOTICE '%', msar.retype_column(tab_id, col.attnum, col.new_type, col.cast_options);
     PERFORM msar.retype_column(tab_id, col.attnum, col.new_type, col.cast_options);
     IF col.new_default #>> '{}' IS NOT NULL THEN
       -- set new default
