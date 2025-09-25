@@ -18,11 +18,11 @@ import {
   getInitialInputValue,
   getLinkedRecordInputCap,
 } from '@mathesar/components/cell-fabric/utils';
-import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
 import type { Table } from '@mathesar/models/Table';
 import {
   getAbstractTypeForDbType,
-  type getFiltersForAbstractType,
+  getEqualityFiltersForAbstractType,
+  getFiltersForAbstractType,
   getPreprocFunctionsForAbstractType,
 } from '@mathesar/stores/abstract-types';
 import type {
@@ -154,10 +154,10 @@ export class ProcessedColumn implements CellColumnFabric {
       getDbTypeBasedSimpleInputCap(this.column, this.abstractType.cellInfo) ??
       this.inputComponentAndProps;
 
-    this.allowedFiltersMap = retrieveFilters(
-      this.abstractType.identifier,
-      this.linkFk,
-    );
+    this.allowedFiltersMap = (() =>
+      this.linkFk !== undefined
+        ? getEqualityFiltersForAbstractType(this.abstractType.identifier)
+        : getFiltersForAbstractType(this.abstractType.identifier))();
 
     this.preprocFunctions = getPreprocFunctionsForAbstractType(
       this.abstractType.identifier,

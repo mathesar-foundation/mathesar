@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
+  import FilterEntryComponent from '@mathesar/components/filter/FilterEntry.svelte';
 
   import type QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../utils';
