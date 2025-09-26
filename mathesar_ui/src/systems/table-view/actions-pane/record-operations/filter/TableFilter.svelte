@@ -53,7 +53,7 @@
   async function beginAddingFilter(columnId: number) {
     const filter = makeIndividualFilter($processedColumns, columnId);
     if (filter) {
-      filterGroup = filterGroup.withFilter(filter);
+      // filterGroup = filterGroup.withFilter(filter);
     }
     await tick();
     activateLastFilterInput();
@@ -99,8 +99,9 @@
       getColumnLabel={(c) => $processedColumns.get(c.id)?.column.name ?? ''}
       getColumnConstraintType={(c) =>
         getColumnConstraintTypeByColumnId(c.id, $processedColumns)}
-      bind:filterGroup
       recordSummaries={recordsData.linkedRecordSummaries}
+      bind:operator={filterGroup.operator}
+      bind:args={filterGroup.args}
       on:update={setFilteringIfSqlExprHasChanged}
     />
   </div>

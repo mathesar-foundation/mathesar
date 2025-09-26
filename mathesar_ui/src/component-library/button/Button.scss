@@ -5,7 +5,7 @@
   position: relative;
 
   vertical-align: middle;
-  gap: 0.5em;
+  gap: var(--button-gap, 0.5em);
   cursor: pointer;
 
   font-family: inherit;

@@ -9,19 +9,13 @@
     getDbTypeBasedSimpleInputCap,
   } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { iconDeleteMajor } from '@mathesar/icons';
   import type {
     AbstractTypeFilterDefinition,
     FilterId,
   } from '@mathesar/stores/abstract-types/types';
   import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import {
-    Button,
-    Icon,
-    InputGroup,
-    Select,
-  } from '@mathesar-component-library';
+  import { InputGroup, Select } from '@mathesar-component-library';
   import {
     type ComponentAndProps,
     ImmutableMap,
@@ -52,7 +46,6 @@
 
   export let layout: 'horizontal' | 'vertical' = 'horizontal';
   export let disableColumnChange = false;
-  export let allowDelete = true;
   export let numberOfFilters = 0;
   export let recordSummaryStore: AssociatedCellData<string> | undefined =
     undefined;
@@ -201,11 +194,6 @@
 </script>
 
 <div class="filter-entry {layout}">
-  {#if $$slots.default}
-    <div class="prefix">
-      <slot />
-    </div>
-  {/if}
   <InputGroup class={layout}>
     <Select
       options={columnIdentifiers}
@@ -257,16 +245,6 @@
         />
       {/if}
     {/key}
-    {#if allowDelete}
-      <Button
-        size="small"
-        class="filter-remove"
-        appearance="secondary"
-        on:click={() => dispatch('removeFilter')}
-      >
-        <Icon {...iconDeleteMajor} />
-      </Button>
-    {/if}
   </InputGroup>
 </div>
 
@@ -275,25 +253,11 @@
     display: flex;
     gap: 10px;
 
-    .prefix {
-      flex-basis: 80px;
-      flex-shrink: 0;
-      flex-grow: 0;
-      display: flex;
-      align-items: center;
-
-      > :global(.input-group-text) {
-        padding: 5px 13px;
-      }
-    }
-
     & + :global(.filter-entry) {
       margin-top: 6px;
     }
 
     &.horizontal {
-      min-width: 560px;
-
       :global(.filter-column-id.trigger),
       :global(.filter-condition) {
         width: 140px;
@@ -316,11 +280,6 @@
         flex-grow: 1;
         resize: vertical;
       }
-    }
-
-    :global(.filter-remove) {
-      flex-shrink: 0;
-      flex-grow: 0;
     }
   }
 </style>

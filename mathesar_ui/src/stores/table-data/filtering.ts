@@ -191,7 +191,7 @@ function getCountOfNonConjunctionalExpr(expr: SqlExpr) {
 }
 
 function getCountOfColumnInExpr(expr: SqlExpr, columnId: number): number {
-  if (expr.type === 'attnum') {
+  if (expr.type === 'attnum' && expr.value === columnId) {
     return 1;
   }
   let count = 0;

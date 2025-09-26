@@ -20,7 +20,6 @@
 </script>
 
 <FilterEntryComponent
-  allowDelete={false}
   {columns}
   getColumnLabel={(column) => columns.get(column.id)?.column.display_name ?? ''}
   disableColumnChange={limitEditing}

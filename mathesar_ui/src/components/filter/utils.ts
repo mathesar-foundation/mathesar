@@ -54,13 +54,6 @@ export class FilterGroup<ID> {
     });
   }
 
-  withFilter(filter: IndividualFilter<ID> | FilterGroup<ID>) {
-    return new FilterGroup<ID>({
-      operator: this.operator,
-      args: [...this.args, filter],
-    });
-  }
-
   equals(filterGroup: FilterGroup<ID>) {
     if (this === filterGroup) {
       return true;
