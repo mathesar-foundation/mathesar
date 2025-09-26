@@ -119,8 +119,13 @@
     value = updatedRow.record?.[column.id] ?? value;
   }
 
+  function focus() {
+    selection.update((s) => s.ofOneCell(cellId));
+  }
+
   async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
     await setValue(e.detail.value);
+    focus();
   }
 </script>
 
