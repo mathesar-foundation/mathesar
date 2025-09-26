@@ -17,7 +17,7 @@ Once you have configured a backend, users with edit permissions on a table can a
 
 ## Adding file columns
 
-![Adding a "Employment Contract" file column to a "Mechanics" table](../assets/images/files-add-column.png)
+![Adding a "Employment Contract" file column to a "Mechanics" table](../assets/images/files/add-column.png)
 /// caption
 A bike shop owner adding an "Employment Contract" column to their "Mechanics" table.
 ///
@@ -35,14 +35,28 @@ Once the file column is created, you’ll be able to upload files into it direct
 
 To upload a file into a file cell, click the cell's "+" icon and upload an image using the file upload dialog:
 
-![Mathesar's file upload dialog](../assets/images/file-upload-dialog.png)
+![Mathesar's file upload dialog](../assets/images/files/upload-dialog.png)
 
 ## Viewing files
 
 Once uploaded, you'll now see a preview of your file in the cell:
 
-- **For image files**, Mathesar will show a thumbnail preview which can be clicked to view a larger preview in a lightbox.
-- **For all other files**, Mathesar will display a file icon which can be clicked to show the file path and other details.
+**For image files**, Mathesar will show a thumbnail preview which can be clicked to view a larger preview in a lightbox:
+
+![alt text](../assets/images/files/image-lightbox.png)
+
+**For all other files**, Mathesar will display a file icon which can be clicked to show the file path and other details:
+
+![alt text](../assets/images/files/non-image-popup.png)
+
+## Removing files
+
+To **remove** a file from a cell, click the "remove" button in either the image lightbox or the file popup.
+
+!!! warning "Removed files are not deleted from the backend"
+    Files that are _removed_ from a cell in Mathesar are **not deleted from the file backend**. Only the reference to the file is deleted from the cell.
+
+    In the future, we plan to develop tooling to help users clean up these "orphaned" files.
 
 ## Tips and technical information
 
@@ -63,7 +77,7 @@ For instance, if each order should have many photos attached:
 2. Add a foreign key from **Order Photos** back to **Orders**.
 3. Now each order can have as many photos as you like, while still keeping your schema clean.
 
- In the future, we plan to improve on this workflow by making it easier to see columns across tables in the same view.
+In the future, we plan to improve on this workflow by making it easier to see columns across tables in the same view.
 
 ### How files are stored
 
@@ -71,11 +85,17 @@ Files are stored in your PostgreSQL database in `JSONB` columns. A typical file 
 
 ```json
 {
-  "uri": "s3://my-mathesar-bucket/admin/20250919-192215167015/example.csv",
+  "uri": "s3://my-mathesar-bucket/my-username/20250919-192215167015/example.csv",
   "mash": "58f47a1eafd567cd9d0bdfa1f42a01978cc6f36eb7937b310b208d9957b7ee8b"
 }
 ```
 
+With the `uri` being the path to the file on the storage backend and the mash being a generated, unique value used by Mathesar.
+
 ### Removing file backends
 
 If you remove a file backend, you'll no longer see the "File" option in the add column dropdown. Existing file data will be preserved in your database, but in Mathesar's UI you'll see the underlying JSONB instead of image thumbnails or file icons.
+
+### Forms compatibility
+
+Files do not yet work with Mathesar's form builder. We plan to add support for anonymous file uploads via forms, with restrictions around file type and size to keep your Mathesar installation secure.
