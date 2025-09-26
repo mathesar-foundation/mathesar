@@ -1,10 +1,9 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
-
 import type { FileManifest } from '@mathesar/api/rpc/records';
 import { iconDeleteMajor } from '@mathesar/icons';
 import { confirm } from '@mathesar/stores/confirmation';
 import { hasStringProperty } from '@mathesar-component-library';
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 export interface FileReference {
   uri: string;
@@ -47,7 +46,7 @@ export function parseFileReference(value: unknown): FileReference | undefined {
 
 export async function confirmRemoveFile() {
   return confirm({
-    title: get(_)('remove_file_question'),
+    title: get(_)('remove_file_prompt'),
     body: get(_)('remove_file_confirmation_body'),
     proceedButton: {
       label: get(_)('remove'),
