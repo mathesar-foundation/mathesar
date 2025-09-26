@@ -101,3 +101,22 @@ The database specified in this section is used to store Mathesar's internal data
 - **Additional information**: The following tools might help you convert the YAML syntax from `sso.yml` into the proper format:
     - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
     - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
+
+## File backend configuration
+
+!!! info "**OPTIONAL**"
+    Only needed if [using file columns](../user-guide/files.md), in installations where the local filesystem is inaccessible.
+
+### `FILE_STORAGE_DICT` (optional)
+
+- **Description**: The configuration for enabling SSO and configuring providers in Mathesar.
+- **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example).
+
+    !!! example
+        ```env
+         FILE_STORAGE_DICT="{\"default\":{\"protocol\":\"s3\",\"nickname\":\"Example\",\"prefix\":\"mathesar-storage\",\"kwargs\":{\"client_kwargs\":{\"endpoint_url\":\"https:\/\/storage-example.mathesar.org\",\"region_name\":\"auto\",\"aws_access_key_id\":\"XXX\",\"aws_secret_access_key\":\"XXX\"}}}}"
+        ```
+
+- **Additional information**: The following tools might help you convert the YAML syntax from `file_storage.yml` into the proper format:
+    - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
+    - [JSON stringify online](https://jsonformatter.org/json-stringify-online)

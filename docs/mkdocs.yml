@@ -15,6 +15,7 @@ nav:
       - Configuration:
         - Environment variables: administration/environment-variables.md
         - Single sign-on (SSO): administration/single-sign-on.md
+        - File column backends: administration/file-backend-config.md
       - Maintenance:
         - Upgrade Mathesar: administration/upgrade.md
         - Uninstall Mathesar: administration/uninstall.md
@@ -34,8 +35,8 @@ nav:
           - PostgreSQL roles: user-guide/roles.md
           - Stored roles: user-guide/stored-roles.md
           - Collaborators: user-guide/collaborators.md
-      - Mathesar constructs:
-          - Metadata: user-guide/metadata.md
+      - Features:
+          - File columns : user-guide/files.md
           - Data Explorer: user-guide/data-explorer.md
       - Data management:
           - Importing data: user-guide/importing-data.md
