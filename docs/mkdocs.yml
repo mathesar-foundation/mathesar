@@ -15,7 +15,7 @@ nav:
       - Configuration:
         - Environment variables: administration/environment-variables.md
         - Single sign-on (SSO): administration/single-sign-on.md
-        - File column backends: administration/file-backend-config.md
+        - File storage backends: administration/file-backend-config.md
       - Maintenance:
         - Upgrade Mathesar: administration/upgrade.md
         - Uninstall Mathesar: administration/uninstall.md

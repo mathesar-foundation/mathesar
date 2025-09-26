@@ -1,4 +1,4 @@
-# File Storage
+# Configuring file storage backends
 
 !!! question "Help us refine file storage!"
     Our file storage feature is new and still evolving. We'd love to hear about how you're using it, what's working, and what additional workflows you'd like to see supported. If you [talk to us for 20 min](https://cal.com/mathesar/users), we'll give you a $25 gift card as a thank you!
@@ -32,7 +32,7 @@ After choosing a backend, you'll need to follow the basic steps for working with
 1. **Create an API key and secret key**
     - Generate credentials with **read/write permissions** scoped to your bucket.
 2. **Note the endpoint URL**
-    - AWS uses `https://s3.[region].amazonaws.com` by default.
+    - For example, AWS uses `https://s3.[region].amazonaws.com` by default.
     - Other providers (Cloudflare R2, DigitalOcean Spaces, MinIO) each provide a specific endpoint.
 
 ### 2. Enable file storage in Mathesar
