@@ -114,7 +114,7 @@ Separate from your connected PostgreSQL database, Mathesar also maintains an int
         <li><a href="/user-guide/users/">Users</a></li>
         <li>Database connection credentials, including saved role passwords</li>
         <li><a href="/user-guide/collaborators/">Collaborators</a></li>
-        <li><a href="#understanding-mathesars-metadata">Metadata</a></li>
+        <li><a href="#metadata">Metadata</a></li>
         <li><a href="/user-guide/data-explorer/">Saved Explorations</a></li>
       </ul>
     </td>
@@ -122,7 +122,7 @@ Separate from your connected PostgreSQL database, Mathesar also maintains an int
   </tbody>
 </table>
 
-### Understanding Mathesar's Metadata
+### Understanding Mathesar's Metadata {:#metadata}
 
 Mathesar keeps as much of your data as possible inside your connected PostgreSQL database, structured consistently with the way it appears in the Mathesar interface. However, some of the customization that Mathesar offers doesn't fit neatly into the PostgreSQL model, so Mathesar stores a thin layer of metadata in its [internal database](./databases.md#internal) to support these features.
 
