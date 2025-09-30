@@ -89,9 +89,10 @@
       schema: table.schema,
       table: {
         oid: table.oid,
-        metadata: { 
+        metadata: {
           ...$tabularData.meta,
-          column_order: newColumnOrder },
+          column_order: newColumnOrder,
+        },
       },
     });
 
