@@ -1,9 +1,10 @@
 import { get } from 'svelte/store';
 
-import type {
-  ClientPosition,
-  ContextMenuController,
-  ModalController,
+import {
+  type ClientPosition,
+  type ContextMenuController,
+  type ModalController,
+  menuSection,
 } from '@mathesar/component-library';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
@@ -55,10 +56,12 @@ export function openTableCellContextMenu({
   function* getEntriesForOneColumn(columnId: string) {
     const column = tabularData.getProcessedColumn(columnId);
     if (!column) return;
-    yield* openTable({ column });
+
     yield* modifyFilters({ tabularData, column, imperativeFilterController });
     yield* modifySorting({ tabularData, column });
     yield* modifyGrouping({ tabularData, column });
+
+    yield menuSection(...openTable({ column }));
   }
 
   function* getEntriesForMultipleCells(cellIds: string[]) {

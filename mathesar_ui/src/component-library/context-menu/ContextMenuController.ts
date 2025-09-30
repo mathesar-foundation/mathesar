@@ -1,6 +1,6 @@
 import { type Readable, writable } from 'svelte/store';
 
-import type { PreparedMenuEntry } from '@mathesar-component-library-dir/prepared-menu';
+import type { MenuEntry } from '@mathesar-component-library-dir/prepared-menu';
 
 export interface ClientPosition {
   clientX: number;
@@ -9,7 +9,7 @@ export interface ClientPosition {
 
 export interface ContextMenuProps {
   position: ClientPosition;
-  entries: PreparedMenuEntry[];
+  entries: MenuEntry[];
 }
 
 export class ContextMenuController

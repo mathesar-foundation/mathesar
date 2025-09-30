@@ -4,17 +4,19 @@
   import { Menu } from '@mathesar-component-library-dir/menu';
 
   import PreparedMenuEntryUi from './PreparedMenuEntryUi.svelte';
-  import type { PreparedMenuEntry } from './preparedMenuUtils';
+  import { type MenuEntry, flattenMenuEntries } from './preparedMenuUtils';
 
   interface $$Props extends ComponentProps<Menu> {
-    entries: PreparedMenuEntry[];
+    entries: MenuEntry[];
   }
 
-  export let entries: PreparedMenuEntry[];
+  export let entries: MenuEntry[];
+
+  $: flattenedEntries = [...flattenMenuEntries(entries)];
 </script>
 
 <Menu {...$$restProps}>
-  {#each entries as entry}
+  {#each flattenedEntries as entry}
     <PreparedMenuEntryUi {entry} />
   {/each}
 </Menu>

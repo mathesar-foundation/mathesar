@@ -11,8 +11,8 @@ import RecordStore from '@mathesar/systems/record-view/RecordStore';
 import {
   buttonMenuEntry,
   component,
-  dividerMenuEntry,
   hyperlinkMenuEntry,
+  menuSection,
 } from '@mathesar-component-library';
 
 import TranslatedTextWithRecordSummary from '../labels/TranslatedTextWithRecordSummary.svelte';
@@ -45,30 +45,30 @@ export function* viewLinkedRecord(p: {
     ?.get(String(p.cellValue));
   if (!recordSummary) return;
 
-  yield buttonMenuEntry({
-    label: component(TranslatedTextWithRecordSummary, {
-      translatedText: get(_)('quick_view_named_record'),
-      recordSummary,
+  yield menuSection(
+    buttonMenuEntry({
+      label: component(TranslatedTextWithRecordSummary, {
+        translatedText: get(_)('quick_view_named_record'),
+        recordSummary,
+      }),
+      icon: iconModalRecordView,
+      onClick: () => {
+        if (!p.modalRecordView) return;
+        const recordStore = new RecordStore({
+          table: linkedTable,
+          recordPk: String(p.cellValue),
+        });
+        p.modalRecordView.open(recordStore);
+      },
     }),
-    icon: iconModalRecordView,
-    onClick: () => {
-      if (!p.modalRecordView) return;
-      const recordStore = new RecordStore({
-        table: linkedTable,
-        recordPk: String(p.cellValue),
-      });
-      p.modalRecordView.open(recordStore);
-    },
-  });
 
-  yield hyperlinkMenuEntry({
-    label: component(TranslatedTextWithRecordSummary, {
-      translatedText: get(_)('open_named_record'),
-      recordSummary,
+    hyperlinkMenuEntry({
+      label: component(TranslatedTextWithRecordSummary, {
+        translatedText: get(_)('open_named_record'),
+        recordSummary,
+      }),
+      icon: iconLinkToRecordPage,
+      href,
     }),
-    icon: iconLinkToRecordPage,
-    href,
-  });
-
-  yield dividerMenuEntry();
+  );
 }
