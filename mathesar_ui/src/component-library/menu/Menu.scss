@@ -55,6 +55,7 @@
     > .label {
       flex-grow: 1;
       font-weight: var(--font-weight-medium);
+      overflow: hidden;
     }
     > .cell:not(:empty) {
       padding: var(--Menu__padding-y, $padding-y-default)

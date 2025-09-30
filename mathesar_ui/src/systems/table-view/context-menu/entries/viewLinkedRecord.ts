@@ -12,11 +12,10 @@ import {
   buttonMenuEntry,
   component,
   dividerMenuEntry,
-  headingMenuEntry,
   hyperlinkMenuEntry,
 } from '@mathesar-component-library';
 
-import LinkedRecordHeading from '../labels/LinkedRecordHeading.svelte';
+import TranslatedTextWithRecordSummary from '../labels/TranslatedTextWithRecordSummary.svelte';
 
 export function* viewLinkedRecord(p: {
   tabularData: TabularData;
@@ -46,12 +45,11 @@ export function* viewLinkedRecord(p: {
     ?.get(String(p.cellValue));
   if (!recordSummary) return;
 
-  yield headingMenuEntry({
-    label: component(LinkedRecordHeading, { recordSummary }),
-  });
-
   yield buttonMenuEntry({
-    label: get(_)('quick_view_linked_record'),
+    label: component(TranslatedTextWithRecordSummary, {
+      translatedText: get(_)('quick_view_named_record'),
+      recordSummary,
+    }),
     icon: iconModalRecordView,
     onClick: () => {
       if (!p.modalRecordView) return;
@@ -64,7 +62,10 @@ export function* viewLinkedRecord(p: {
   });
 
   yield hyperlinkMenuEntry({
-    label: get(_)('open_linked_record'),
+    label: component(TranslatedTextWithRecordSummary, {
+      translatedText: get(_)('open_named_record'),
+      recordSummary,
+    }),
     icon: iconLinkToRecordPage,
     href,
   });
