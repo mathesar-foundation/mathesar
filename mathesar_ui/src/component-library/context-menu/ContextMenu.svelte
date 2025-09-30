@@ -1,104 +1,29 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-
   import clickOffBounds from '@mathesar-component-library-dir/common/actions/clickOffBounds';
-  import popper from '@mathesar-component-library-dir/common/actions/popper';
+  import popper, {
+    getVirtualReferenceElement,
+  } from '@mathesar-component-library-dir/common/actions/popper';
   import portal from '@mathesar-component-library-dir/common/actions/portal';
-  import Menu from '@mathesar-component-library-dir/menu/Menu.svelte';
+  import { PreparedMenu } from '@mathesar-component-library-dir/prepared-menu';
 
-  /**
-   * A reference to the DOM node where we'll attach the contextmenu event
-   * listener. Right-clicking anywhere inside this element will open the context
-   * menu. If you don't pass an element, we'll use the parent element wherever
-   * this component is mounted.
-   */
-  let customTriggerElement: HTMLElement | undefined = undefined;
-  export { customTriggerElement as triggerElement };
-  export let closeOnInnerClick = true;
+  import type { ContextMenuController } from './ContextMenuController';
 
-  interface MousePosition {
-    x: number;
-    y: number;
-  }
+  export let controller: ContextMenuController;
 
-  let isVisible = false;
-  let element: HTMLDivElement | undefined;
-  let mousePosition: MousePosition = { x: 0, y: 0 };
-
-  function getVirtualReferenceElement(_mousePosition: MousePosition) {
-    const { x, y } = _mousePosition;
-    return {
-      getBoundingClientRect: () => ({
-        width: 0,
-        height: 0,
-        x,
-        y,
-        top: y,
-        right: x,
-        bottom: y,
-        left: x,
-        toJSON: () => ({ x, y }),
-      }),
-    };
-  }
-
-  function handleContextMenu(event: MouseEvent) {
-    event.preventDefault();
-    mousePosition = {
-      x: event.clientX,
-      y: event.clientY,
-    };
-    isVisible = !isVisible;
-  }
-
-  onMount(() => {
-    const triggerElement =
-      customTriggerElement ?? element?.parentElement ?? undefined;
-    if (!triggerElement) {
-      return () => {};
-    }
-    triggerElement.addEventListener('contextmenu', handleContextMenu);
-    return () => {
-      triggerElement.removeEventListener('contextmenu', handleContextMenu);
-    };
-  });
-
-  function close() {
-    isVisible = false;
-  }
-
-  function checkAndCloseOnInnerClick() {
-    if (closeOnInnerClick) {
-      close();
-    }
-  }
-
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && isVisible) {
-      close();
-    }
-    event.stopPropagation();
-  }
-
-  $: if (isVisible) {
-    document.addEventListener('keydown', handleKeydown, { capture: true });
-  } else {
-    document.removeEventListener('keydown', handleKeydown, { capture: true });
-  }
+  $: props = $controller;
 </script>
 
-<div bind:this={element} class="context-menu-wrapper">
-  {#if isVisible}
-    <div
-      class="context-menu dropdown content"
-      use:clickOffBounds={{ callback: close }}
-      use:popper={{ reference: getVirtualReferenceElement(mousePosition) }}
-      use:portal
-      on:click={checkAndCloseOnInnerClick}
-    >
-      <Menu>
-        <slot />
-      </Menu>
-    </div>
-  {/if}
-</div>
+{#if props}
+  <div
+    class="context-menu dropdown content"
+    use:clickOffBounds={{ callback: () => controller.close() }}
+    use:popper={{ reference: getVirtualReferenceElement(props.position) }}
+    use:portal
+    on:click={() => controller.close()}
+  >
+    <PreparedMenu
+      entries={props.entries}
+      modal={{ close: () => controller.close() }}
+    />
+  </div>
+{/if}

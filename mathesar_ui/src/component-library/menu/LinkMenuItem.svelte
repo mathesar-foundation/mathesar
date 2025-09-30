@@ -1,26 +1,31 @@
 <script lang="ts">
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+  import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
+  import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
 
   import MenuItemContents from './MenuItemContents.svelte';
-  import MenuItemWrapper from './MenuItemWrapper.svelte';
 
+  export let label: string | ComponentAndProps | undefined = undefined;
   export let icon: IconProps | undefined = undefined;
   export let href: string;
   export let hasNotificationDot = false;
   export let disabled = false;
-
-  let classes = '';
-  export { classes as class };
+  export let active = false;
 </script>
 
-<MenuItemWrapper
-  tag={disabled ? 'span' : 'a'}
-  class="menu-item-link {classes}"
-  {href}
-  {disabled}
+<a
+  data-menu-item-focusable={disabled ? undefined : ''}
+  class="menu-item menu-item-link"
+  class:active
+  class:disabled
+  href={disabled ? undefined : href}
   {...$$restProps}
 >
   <MenuItemContents {icon} {hasNotificationDot}>
-    <slot />
+    <slot>
+      {#if label}
+        <StringOrComponent arg={label} />
+      {/if}
+    </slot>
   </MenuItemContents>
-</MenuItemWrapper>
+</a>

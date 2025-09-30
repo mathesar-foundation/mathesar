@@ -2,13 +2,14 @@
   import { createEventDispatcher } from 'svelte';
 
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+  import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
+  import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
 
   import MenuItemContents from './MenuItemContents.svelte';
-  import MenuItemWrapper from './MenuItemWrapper.svelte';
 
   const dispatch = createEventDispatcher();
 
-  export let label: string | undefined = undefined;
+  export let label: string | ComponentAndProps | undefined = undefined;
   export let icon: IconProps | undefined = undefined;
   export let disabled = false;
   /** Visually indicates that the action is destructive */
@@ -23,19 +24,20 @@
   }
 </script>
 
-<MenuItemWrapper
-  tag="button"
-  class="menu-item-button"
+<button
   on:click={handleClick}
   {disabled}
-  {danger}
-  {...$$restProps}
+  role="menuitem"
+  data-menu-item-focusable={disabled ? undefined : ''}
+  class="menu-item menu-item-button"
+  class:disabled
+  class:danger
 >
   <MenuItemContents {icon} {hasNotificationDot}>
-    {#if label}
-      {label}
-    {:else}
-      <slot />
-    {/if}
+    <slot>
+      {#if label}
+        <StringOrComponent arg={label} />
+      {/if}
+    </slot>
   </MenuItemContents>
-</MenuItemWrapper>
+</button>

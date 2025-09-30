@@ -1,7 +1,7 @@
 import { tick } from 'svelte';
 import type { ActionReturn } from 'svelte/action';
 
-import { focusElement, hasProperty } from '../utils';
+import { focusElement, hasMethod, hasProperty } from '../utils';
 
 function getTabIndex(element: unknown): number | undefined {
   return hasProperty(element, 'tabIndex') &&
@@ -78,10 +78,22 @@ function getFocusableElements(container: Element): Element[] {
   return elements.map(({ element }) => element);
 }
 
-export default function focusTrap(container: HTMLElement): ActionReturn {
+export default function focusTrap(
+  container: HTMLElement,
+  options: { autoFocus?: boolean } = {},
+): ActionReturn {
+  let previouslyFocusedElement: Element | null;
+
+  const fullOptions = {
+    autoFocus: true,
+    ...options,
+  };
+
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key !== 'Tab') return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+    event.preventDefault();
 
     // We are re-computing the list of focusable elements any time Tab or
     // Shift+Tab is pressed. This is a somewhat expensive operation. But it's
@@ -89,6 +101,7 @@ export default function focusTrap(container: HTMLElement): ActionReturn {
     // changes (e.g. elements being added/removed from the DOM or state like
     // "disabled" being toggled).
     const elements = getFocusableElements(container);
+    if (!elements.length) return;
 
     function wrap(index: number): number {
       return ((index % elements.length) + elements.length) % elements.length;
@@ -100,39 +113,54 @@ export default function focusTrap(container: HTMLElement): ActionReturn {
     const targetElement = elements.at(targetIndex);
     if (!targetElement) return;
 
-    event.preventDefault();
     focusElement(targetElement);
   }
 
-  async function autoFocusFirstElement() {
-    await tick(); // Wait, in case Svelte has more to render (e.g. children)
-    const firstElement = getFocusableElements(container).at(0);
-    if (firstElement) {
-      /*
-       * When the element is immediately focused, keydown events seem to get triggered
-       * on the element. This results in cases like lightboxes closing immediately after
-       * being opened when opened via an 'enter' keydown event.
-       *
-       * My hunch is that this bug has to do something with the way transitions/animations
-       * are executed by svelte/transition.
-       *
-       * Moving the focus task to a macrotask such as setTimeout seems to prevent this
-       * bug from occurring.
-       *
-       * The exact root cause / race condition is not entirely figured out.
-       */
-      setTimeout(() => {
-        focusElement(firstElement);
-      }, 10);
+  async function initializeFocus() {
+    // Wait, in case Svelte has more to render (e.g. children) or in case custom
+    // imperative focus logic has been applied (e.g. focusing the first cell
+    // when clicking on a column header)
+    await tick();
+
+    previouslyFocusedElement = document.activeElement;
+
+    if (fullOptions.autoFocus) {
+      const firstElement = getFocusableElements(container).at(0);
+      if (firstElement) {
+        /*
+         * When the element is immediately focused, keydown events seem to get
+         * triggered on the element. This results in cases like the lightbox
+         * closing immediately after being opened when opened via an 'enter'
+         * keydown event.
+         *
+         * My hunch is that this bug has to do something with the way
+         * transitions/animations are executed by svelte/transition.
+         *
+         * Moving the focus task to a macrotask such as setTimeout seems to
+         * prevent this bug from occurring.
+         *
+         * The exact root cause / race condition is not entirely figured out.
+         */
+        setTimeout(() => {
+          focusElement(firstElement);
+        }, 10);
+      }
+    } else if (
+      previouslyFocusedElement &&
+      hasMethod(previouslyFocusedElement, 'blur')
+    ) {
+      previouslyFocusedElement.blur();
     }
   }
 
-  container.addEventListener('keydown', handleKeyDown);
-  void autoFocusFirstElement();
+  void initializeFocus();
+
+  window.addEventListener('keydown', handleKeyDown);
 
   return {
     destroy() {
-      container.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
+      focusElement(previouslyFocusedElement);
     },
   };
 }

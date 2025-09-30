@@ -140,3 +140,24 @@ export default function popper(
     destroy,
   };
 }
+
+export function getVirtualReferenceElement(pointerPosition: {
+  clientX: number;
+  clientY: number;
+}) {
+  const x = pointerPosition.clientX;
+  const y = pointerPosition.clientY;
+  return {
+    getBoundingClientRect: () => ({
+      width: 0,
+      height: 0,
+      x,
+      y,
+      top: y,
+      right: x,
+      bottom: y,
+      left: x,
+      toJSON: () => ({ x, y }),
+    }),
+  };
+}

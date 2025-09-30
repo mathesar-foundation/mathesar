@@ -8,7 +8,6 @@
   } from '@mathesar-component-library-dir/label/LabelController';
 
   import MenuItemContents from './MenuItemContents.svelte';
-  import MenuItemWrapper from './MenuItemWrapper.svelte';
 
   export let icon: IconProps | undefined = undefined;
   export let checked: boolean | null = false;
@@ -32,11 +31,11 @@
   }
 </script>
 
-<MenuItemWrapper
+<div
+  class="menu-item"
   on:click={handleClick}
-  {disabled}
-  {labelController}
-  {...$$restProps}
+  class:disabled
+  data-menu-item-focusable={disabled ? undefined : ''}
 >
   <MenuItemContents {icon} {hasNotificationDot}>
     <Checkbox slot="control" bind:checked {disabled} data-menu-control />
@@ -44,4 +43,4 @@
       <slot />
     </Label>
   </MenuItemContents>
-</MenuItemWrapper>
+</div>

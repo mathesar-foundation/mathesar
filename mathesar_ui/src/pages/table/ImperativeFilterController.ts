@@ -1,8 +1,9 @@
-import { getContext, setContext, tick } from 'svelte';
+import { tick } from 'svelte';
 
+import { makeContext } from '@mathesar/contexts/utils';
 import { EventHandler } from '@mathesar-component-library';
 
-export default class ImperativeFilterController extends EventHandler<{
+export class ImperativeFilterController extends EventHandler<{
   openDropdown: void;
   addFilter: number;
   activateLastFilterInput: void;
@@ -28,16 +29,5 @@ export default class ImperativeFilterController extends EventHandler<{
   }
 }
 
-const key = Symbol('ImperativeFilterController');
-
-export function setNewImperativeFilterControllerInContext(): ImperativeFilterController {
-  const bus = new ImperativeFilterController();
-  setContext(key, bus);
-  return bus;
-}
-
-export function getImperativeFilterControllerFromContext():
-  | ImperativeFilterController
-  | undefined {
-  return getContext(key);
-}
+export const imperativeFilterControllerContext =
+  makeContext<ImperativeFilterController>();

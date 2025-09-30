@@ -40,6 +40,7 @@
     slot="content"
     style="--Menu__min-width: 100%;{menuStyle}"
     let:close={menuClose}
+    modal={{ close: menuClose }}
   >
     <slot close={menuClose} />
   </Menu>
