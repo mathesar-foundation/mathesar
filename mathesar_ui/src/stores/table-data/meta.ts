@@ -92,9 +92,15 @@ function serializeMetaProps(p: MetaProps): string {
   return Url64.encode(JSON.stringify(makeTerseMetaProps(p)));
 }
 
-/** @throws Error if string is not properly formatted. */
-function deserializeMetaProps(s: string): MetaProps {
-  return makeMetaProps(JSON.parse(Url64.decode(s)) as TerseMetaProps);
+function deserializeMetaProps(s: string): MetaProps | undefined {
+  // NOTE: it would be good to someday validate the serialized meta props in a
+  // more robust manner.
+  if (!s) return undefined;
+  try {
+    return makeMetaProps(JSON.parse(Url64.decode(s)) as TerseMetaProps);
+  } catch {
+    return undefined;
+  }
 }
 
 const defaultMetaPropsSerialization = serializeMetaProps(getFullMetaProps());
@@ -281,13 +287,8 @@ export class Meta {
     this.cellModificationStatus.clear();
   }
 
-  static fromSerialization(s: string): Meta | undefined {
-    try {
-      if (!s) return new Meta();
-      return new Meta(deserializeMetaProps(s));
-    } catch (e) {
-      return undefined;
-    }
+  static fromSerialization(s: string): Meta {
+    return new Meta(deserializeMetaProps(s));
   }
 
   destroy(): void {
