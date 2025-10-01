@@ -90,7 +90,6 @@
       table: {
         oid: table.oid,
         metadata: {
-          ...$tabularData.meta,
           column_order: newColumnOrder,
         },
       },

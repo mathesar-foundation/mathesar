@@ -283,8 +283,10 @@ export class Meta {
 
   static fromSerialization(s: string): Meta | undefined {
     try {
+      if (!s) return new Meta();
       return new Meta(deserializeMetaProps(s));
     } catch (e) {
+      console.log(e);
       return undefined;
     }
   }
