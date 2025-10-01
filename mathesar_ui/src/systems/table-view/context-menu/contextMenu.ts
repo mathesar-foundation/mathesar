@@ -83,16 +83,14 @@ export function openTableCellContextMenu({
     yield* getEntriesForMultipleCells([cellId]);
   }
 
-  match(targetCell, 'type', {
+  const entries = match(targetCell, 'type', {
     'row-header-cell': ({ rowId }) => {
       selection.update((s) => (s.rowIds.has(rowId) ? s : s.ofOneRow(rowId)));
       const { rowIds } = get(selection);
       const soleRowId = takeFirstAndOnly(rowIds);
-      const entries = soleRowId
+      return soleRowId
         ? [...getEntriesForOneRow(soleRowId)]
         : [...getEntriesForMultipleRows([...rowIds])];
-      if (!entries.length) return;
-      contextMenu.open({ position, entries });
     },
 
     'column-header-cell': ({ columnId }) => {
@@ -101,11 +99,7 @@ export function openTableCellContextMenu({
       );
       const { columnIds } = get(selection);
       const soleColumnId = takeFirstAndOnly(columnIds);
-      const entries = soleColumnId
-        ? [...getEntriesForOneColumn(soleColumnId)]
-        : [];
-      if (!entries.length) return;
-      contextMenu.open({ position, entries });
+      return soleColumnId ? [...getEntriesForOneColumn(soleColumnId)] : [];
     },
 
     'data-cell': ({ cellId }) => {
@@ -114,23 +108,21 @@ export function openTableCellContextMenu({
       );
       const { cellIds } = get(selection);
       const soleCellId = takeFirstAndOnly(cellIds);
-      const entries = soleCellId
+      return soleCellId
         ? [...getEntriesForOneCell(cellId)]
         : [...getEntriesForMultipleCells([...cellIds])];
-      if (!entries.length) return;
-      contextMenu.open({ position, entries });
     },
 
-    'placeholder-data-cell': () => {
-      // We don't (yet?) offer a context menu for placeholder data cells. In the
-      // future, we might want to implement paste here, once we have that option
-      // in the context menu.
-    },
+    // We don't (yet?) offer a context menu for placeholder data cells. In the
+    // future, we might want to implement paste here, once we have that option
+    // in the context menu.
+    'placeholder-data-cell': () => [],
 
-    'placeholder-row-header-cell': () => {
-      // We don't offer a context menu for the placeholder row header cell.
-      // Clicking this cell inserts a new blank row. So we probably don't want
-      // any context menu options here.
-    },
+    // We don't offer a context menu for the placeholder row header cell.
+    // Clicking this cell inserts a new blank row. So we probably don't want
+    // any context menu options here.
+    'placeholder-row-header-cell': () => [],
   });
+
+  contextMenu.open({ position, entries });
 }

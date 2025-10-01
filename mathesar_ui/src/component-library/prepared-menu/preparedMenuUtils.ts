@@ -1,6 +1,6 @@
 import type { ComponentAndProps, IconProps } from '../types';
 
-export interface ButtonMenuEntryRecipe {
+export interface ButtonMenuEntry {
   type: 'button';
   label: string | ComponentAndProps;
   icon?: IconProps;
@@ -9,7 +9,7 @@ export interface ButtonMenuEntryRecipe {
   onClick: () => void;
 }
 
-export interface HyperlinkMenuEntryRecipe {
+export interface HyperlinkMenuEntry {
   type: 'hyperlink';
   label: string | ComponentAndProps;
   icon?: IconProps;
@@ -17,43 +17,43 @@ export interface HyperlinkMenuEntryRecipe {
   href: string;
 }
 
-export interface DividerMenuEntryRecipe {
+export interface DividerMenuEntry {
   type: 'divider';
 }
 
-export interface HeadingMenuEntryRecipe {
+export interface HeadingMenuEntry {
   type: 'heading';
   label: string | ComponentAndProps;
 }
 
 export function buttonMenuEntry(
-  args: Omit<ButtonMenuEntryRecipe, 'type'>,
-): ButtonMenuEntryRecipe {
+  args: Omit<ButtonMenuEntry, 'type'>,
+): ButtonMenuEntry {
   return { type: 'button', ...args };
 }
 
 export function hyperlinkMenuEntry(
-  args: Omit<HyperlinkMenuEntryRecipe, 'type'>,
-): HyperlinkMenuEntryRecipe {
+  args: Omit<HyperlinkMenuEntry, 'type'>,
+): HyperlinkMenuEntry {
   return { type: 'hyperlink', ...args };
 }
 
-export function dividerMenuEntry(): DividerMenuEntryRecipe {
+export function dividerMenuEntry(): DividerMenuEntry {
   return { type: 'divider' };
 }
 
 export function headingMenuEntry(
-  args: Omit<HeadingMenuEntryRecipe, 'type'>,
-): HeadingMenuEntryRecipe {
+  args: Omit<HeadingMenuEntry, 'type'>,
+): HeadingMenuEntry {
   return { type: 'heading', ...args };
 }
 
 export type BasicMenuEntry =
-  | ButtonMenuEntryRecipe
-  | HyperlinkMenuEntryRecipe
-  | HeadingMenuEntryRecipe;
+  | ButtonMenuEntry
+  | HyperlinkMenuEntry
+  | HeadingMenuEntry;
 
-export type PrimitiveMenuEntry = BasicMenuEntry | DividerMenuEntryRecipe;
+export type PrimitiveMenuEntry = BasicMenuEntry | DividerMenuEntry;
 
 export type MenuEntry = BasicMenuEntry | MenuSection;
 

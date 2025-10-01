@@ -18,6 +18,7 @@ export class ContextMenuController
   private props = writable<ContextMenuProps | undefined>(undefined);
 
   open(props: ContextMenuProps) {
+    if (!props.entries.length) return;
     this.props.set(props);
   }
 
