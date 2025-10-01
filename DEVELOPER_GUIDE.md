@@ -241,7 +241,27 @@ If you'd like to manually push or pull translations, follow the instructions in 
     ```
     docker exec -it mathesar_dev_db psql -U mathesar
     ```
- 
+
+## Working with file attachments
+
+Mathesar has a feature which allows users to upload files through the UI and store references to those file in data. Uploaded files are stored in an S3-compatible storage provider.
+
+To work with this feature in your local development environment, you'll need to take some extra steps to enable it:
+
+1. Copy `file_storage.yml.example` to `file_storage.yml`.
+
+1. Restart docker with the following command
+
+    ```
+    docker compose -f docker-compose.dev.yml up dev-service obj-store
+    ```
+
+    Notice that we start the `obj-store` service too, in addition to the normal `dev-service`.
+
+At this point you can run Mathesar and create new "File" columns in tables. Those columns will present a UI that allows you to attach files to table cells.
+
+With the `obj-store` service is running, you can also visit http://localhost:9001 to launch an admin view of your file storage backend. Log in with `mathesar`/`mathesar` to see and manage your uploaded files.
+
 ## Troubleshooting
 
 ### Permissions within Windows
