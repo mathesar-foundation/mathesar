@@ -554,7 +554,10 @@ export class RecordsData {
       if (isDraftRecordRow(row)) {
         return api.records.add({
           ...this.apiContext,
-          record_def: recordDef,
+          record_def: {
+            ...Object.fromEntries(this.contextualFilters),
+            ...recordDef,
+          },
         });
       }
       return api.records.patch({
