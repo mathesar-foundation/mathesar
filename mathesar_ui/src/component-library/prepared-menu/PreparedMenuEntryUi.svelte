@@ -7,9 +7,9 @@
     MenuHeading,
   } from '@mathesar-component-library-dir/menu';
 
-  import type { PrimitiveMenuEntry } from './preparedMenuUtils';
+  import type { FlattenedMenuEntry } from './preparedMenuUtils';
 
-  export let entry: PrimitiveMenuEntry;
+  export let entry: FlattenedMenuEntry;
 </script>
 
 {#if entry.type === 'button'}

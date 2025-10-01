@@ -9,6 +9,12 @@ export interface ButtonMenuEntry {
   onClick: () => void;
 }
 
+export function buttonMenuEntry(
+  args: Omit<ButtonMenuEntry, 'type'>,
+): ButtonMenuEntry {
+  return { type: 'button', ...args };
+}
+
 export interface HyperlinkMenuEntry {
   type: 'hyperlink';
   label: string | ComponentAndProps;
@@ -17,8 +23,10 @@ export interface HyperlinkMenuEntry {
   href: string;
 }
 
-export interface DividerMenuEntry {
-  type: 'divider';
+export function hyperlinkMenuEntry(
+  args: Omit<HyperlinkMenuEntry, 'type'>,
+): HyperlinkMenuEntry {
+  return { type: 'hyperlink', ...args };
 }
 
 export interface HeadingMenuEntry {
@@ -26,36 +34,11 @@ export interface HeadingMenuEntry {
   label: string | ComponentAndProps;
 }
 
-export function buttonMenuEntry(
-  args: Omit<ButtonMenuEntry, 'type'>,
-): ButtonMenuEntry {
-  return { type: 'button', ...args };
-}
-
-export function hyperlinkMenuEntry(
-  args: Omit<HyperlinkMenuEntry, 'type'>,
-): HyperlinkMenuEntry {
-  return { type: 'hyperlink', ...args };
-}
-
-export function dividerMenuEntry(): DividerMenuEntry {
-  return { type: 'divider' };
-}
-
 export function headingMenuEntry(
   args: Omit<HeadingMenuEntry, 'type'>,
 ): HeadingMenuEntry {
   return { type: 'heading', ...args };
 }
-
-export type BasicMenuEntry =
-  | ButtonMenuEntry
-  | HyperlinkMenuEntry
-  | HeadingMenuEntry;
-
-export type PrimitiveMenuEntry = BasicMenuEntry | DividerMenuEntry;
-
-export type MenuEntry = BasicMenuEntry | MenuSection;
 
 export interface MenuSection {
   type: 'section';
@@ -66,24 +49,38 @@ export function menuSection(...entries: MenuEntry[]): MenuSection {
   return { type: 'section', entries };
 }
 
-export function* flattenMenuEntries(
+export type MenuEntry =
+  | ButtonMenuEntry
+  | HyperlinkMenuEntry
+  | HeadingMenuEntry
+  | MenuSection;
+
+interface DividerMenuEntry {
+  type: 'divider';
+}
+
+export type FlattenedMenuEntry =
+  | Exclude<MenuEntry, MenuSection>
+  | DividerMenuEntry;
+
+export function* flattenMenuSections(
   entries: Iterable<MenuEntry>,
-): Generator<PrimitiveMenuEntry, void, undefined> {
+): Generator<FlattenedMenuEntry, void, undefined> {
   let lastEntryType: 'section' | 'primitive' | undefined;
 
   for (const entry of entries) {
     if (entry.type === 'section') {
-      const sectionEntries = [...flattenMenuEntries(entry.entries)];
+      const sectionEntries = [...flattenMenuSections(entry.entries)];
       if (!sectionEntries.length) continue;
 
       if (lastEntryType !== undefined) {
-        yield dividerMenuEntry();
+        yield { type: 'divider' };
       }
       yield* sectionEntries;
       lastEntryType = 'section';
     } else {
       if (lastEntryType === 'section') {
-        yield dividerMenuEntry();
+        yield { type: 'divider' };
       }
       yield entry;
       lastEntryType = 'primitive';
