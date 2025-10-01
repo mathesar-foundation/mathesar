@@ -145,7 +145,7 @@ services:
   #
   service:
     container_name: mathesar_service
-    image: mathesar/mathesar:latest
+    image: mathesar/mathesar:0.6.1
     environment:
       # First we load the variables configured above.
       <<: *config
@@ -169,6 +169,8 @@ services:
       SECRET_KEY: ${SECRET_KEY-}
 
     volumes:
+      - ./build-scripts/bin/mathesar:/code/bin/mathesar
+      - ./mathesar:/code/mathesar
       - ./msar/static:/code/static
       - ./msar/media:/code/media
       - ./msar/secrets:/code/.secrets
@@ -203,6 +205,7 @@ services:
   #
   db:
     image: pgautoupgrade/pgautoupgrade:17-bookworm
+    shm_size: 5gb
     container_name: mathesar_db
     # This service needs the config variables defined above.
     environment: *config

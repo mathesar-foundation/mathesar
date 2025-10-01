@@ -22,6 +22,19 @@ from . import export, users, download_link
 __all__ = [export, users, download_link]
 
 
+import time
+from django.http import JsonResponse
+
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
+def slow_view(request):
+    from mathesar.rpc.explorations import run_saved
+    t1 = time.perf_counter()
+    exp = run_saved(exploration_id=6, request=request)
+    t2 = time.perf_counter()
+    return JsonResponse({"status": "ok", "time": f"{t2 - t1}"})
+
+
 def get_database_list(request):
     return databases_list(request=request)
 
