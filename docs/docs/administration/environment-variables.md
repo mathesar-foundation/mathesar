@@ -21,6 +21,11 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Format**: A set of host/domain names separated by a comma
 - **Default value**: `.localhost,127.0.0.1,[::1]`
 
+### `WEB_CONCURRENCY` {: #web_concurrency}
+
+- **Description**: Sets the number of Gunicorn workers, affecting the number of concurrent requests Mathesar can handle. Bigger is better, subject to system resources. The typically-recommended number is `2 * $(NUM_PROC) + 1`, where `NUM_PROC` is the number of logical cores on your machine. So, if Mathesar is running on a server with 4 vCPUs, then this should be set to 9.
+- **Format**: An integer.
+
 
 ## Internal database configuration {: #db}
 
