@@ -169,7 +169,7 @@ services:
       SECRET_KEY: ${SECRET_KEY-}
 
       # If you are running Mathesar on a particularly powerful machine, you can
-      # improve performance by increasing this setting. Replace '5' below with
+      # improve performance by increasing this setting. Replace '3' below with
       # 2 * $(NUM_CORES) + 1. So if you have a VPS with 4 vCPUs you can use a
       # value of 2 * 4 + 1, or 9. The default is workable as long as you have at
       # least 1 logical core.
