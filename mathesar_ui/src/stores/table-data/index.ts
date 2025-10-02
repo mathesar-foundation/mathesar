@@ -2,12 +2,7 @@ export { RecordsData } from './records';
 export { ColumnsDataStore } from './columns';
 export { Meta, type MetaProps } from './meta';
 export { Display, getCellStyle, type DisplayRowDescriptor } from './display';
-export {
-  filterCombinations,
-  defaultFilterCombination,
-  Filtering,
-  type FilterEntry,
-} from './filtering';
+export { Filtering } from './filtering';
 export { Sorting } from './sorting';
 export { Grouping, type GroupEntry, type TerseGrouping } from './grouping';
 export { type TableRecordsData } from './records';
