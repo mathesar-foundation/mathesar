@@ -49,11 +49,23 @@ export function menuSection(...entries: MenuEntry[]): MenuSection {
   return { type: 'section', entries };
 }
 
+export interface SubMenuEntry {
+  type: 'submenu';
+  label: string | ComponentAndProps;
+  icon?: IconProps;
+  entries: MenuEntry[];
+}
+
+export function subMenu(args: Omit<SubMenuEntry, 'type'>): SubMenuEntry {
+  return { type: 'submenu', ...args };
+}
+
 export type MenuEntry =
   | ButtonMenuEntry
   | HyperlinkMenuEntry
   | HeadingMenuEntry
-  | MenuSection;
+  | MenuSection
+  | SubMenuEntry;
 
 interface DividerMenuEntry {
   type: 'divider';

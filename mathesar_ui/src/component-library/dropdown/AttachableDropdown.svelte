@@ -139,6 +139,7 @@
       references: clickOffBoundsReferences,
     }}
     on:click={checkAndCloseOnInnerClick}
+    on:click
     on:mouseenter
     on:mouseleave
     data-attachable-dropdown

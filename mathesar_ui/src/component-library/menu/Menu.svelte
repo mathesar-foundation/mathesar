@@ -12,10 +12,17 @@
   } from '@mathesar-component-library-dir/common/utils/styleUtils';
   import type { CssVariablesObj } from '@mathesar-component-library-dir/types';
 
-  import { setNewMenuControllerInContext } from './MenuController';
+  import {
+    type ModalMenuOptions,
+    type SubMenuController,
+    makeMenuController,
+    menuControllerContext,
+  } from './MenuController';
 
-  const controller = setNewMenuControllerInContext();
-  const { hasControlColumn, hasIconColumn } = controller;
+  const menuController = makeMenuController();
+  menuControllerContext.set(menuController);
+  const { hasControlColumn, hasIconColumn, hasSubMenu, hasSubMenuOpen } =
+    menuController;
 
   export let style: string | undefined = undefined;
   export let iconWidth = '1em';
@@ -23,9 +30,11 @@
   export let cssVariables: CssVariablesObj | undefined = undefined;
 
   /**
-   * When provided, the menu traps focus and provides keyboard navigation.
+   * When provided, the menu does special "modal" things like trapping focus and
+   * providing keyboard navigation.
    */
-  export let modal: { close: () => void } | undefined = undefined;
+  export let modal: ModalMenuOptions | undefined = undefined;
+  export let isSubMenu = false;
 
   let menuElement: HTMLElement;
 
@@ -68,8 +77,20 @@
     focusElement(elements.at(targetIndex));
   }
 
+  function getSubMenuFromEventTarget({
+    target,
+  }: Event): SubMenuController | undefined {
+    if (!target) return undefined;
+    return menuController.subMenuControllers.get(target);
+  }
+
+  function getSubMenu(element: object): SubMenuController | undefined {
+    return menuController.subMenuControllers.get(element);
+  }
+
   function handleKeydown(e: KeyboardEvent) {
-    let handled = true;
+    if ($hasSubMenuOpen) return;
+
     switch (e.key) {
       case 'Escape':
         modal?.close();
@@ -80,12 +101,29 @@
       case 'ArrowDown':
         moveSelectionByOffset(1);
         break;
+      case 'ArrowRight':
+        getSubMenuFromEventTarget(e)?.openActively();
+        break;
+      case 'ArrowLeft':
+        if (!isSubMenu) return;
+        modal?.close();
+        break;
       default:
-        handled = false;
+        return;
     }
-    if (handled) {
-      e.stopPropagation();
-      e.preventDefault();
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  function handleFocusIn(e: Event) {
+    // Any time an element inside the menu is focused, we close all the
+    // sub-menus which are _not_ the element being focused. We close them
+    // "passively" so that there is a small delay to account for the user
+    // quickly moving the mouse to an entry within a sub-menu.
+    const subMenus = menuElement.querySelectorAll('[data-menu-item-sub-menu]');
+    for (const subMenuElement of subMenus) {
+      if (subMenuElement === e.target) continue;
+      getSubMenu(subMenuElement)?.closePassively();
     }
   }
 
@@ -105,11 +143,16 @@
     role="menu"
     class:has-icon={$hasIconColumn}
     class:has-control={$hasControlColumn}
+    class:has-sub-menu={$hasSubMenu}
     class:menu-modal={modal}
     style={styleString}
     on:mousemove={handleMouseMove}
     on:mouseleave={handleMouseLeave}
-    use:focusTrap={{ autoFocus: false }}
+    on:focusin={handleFocusIn}
+    use:focusTrap={{
+      autoFocus: false,
+      autoRestore: modal.restoreFocusOnClose ?? true,
+    }}
     bind:this={menuElement}
   >
     <slot />
@@ -120,6 +163,7 @@
     role="menu"
     class:has-icon={$hasIconColumn}
     class:has-control={$hasControlColumn}
+    class:has-sub-menu={$hasSubMenu}
     style={styleString}
   >
     <slot />

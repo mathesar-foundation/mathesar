@@ -1,8 +1,5 @@
-import { getContext, setContext } from 'svelte';
-
+import { makeContext } from '@mathesar-component-library-dir/common/utils/contextUtils';
 import ReductionStore from '@mathesar-component-library-dir/common/utils/ReductionStore';
-
-const contextKey = Symbol('menu alignment stores context');
 
 /**
  * When at least one cell within the column is present, then the column is
@@ -12,24 +9,36 @@ function makeColumnStore() {
   return new ReductionStore<boolean, boolean>((cells) => cells.some((c) => c));
 }
 
-function makeMenuController() {
+/** Options which control the behavior of modal menus */
+export interface ModalMenuOptions {
+  /** Closes the modal menu */
+  close: () => void;
+  /** With nested menus, this closes all */
+  closeRoot: () => void;
+  /**
+   * When true, the user's focus will automatically be restored to the last
+   * focused element when the menu closes. True by default.
+   */
+  restoreFocusOnClose?: boolean;
+}
+
+export interface SubMenuController {
+  openActively: () => void;
+  openPassively: () => void;
+  closeActively: () => void;
+  closePassively: () => void;
+}
+
+export function makeMenuController() {
   return {
     hasControlColumn: makeColumnStore(),
     hasIconColumn: makeColumnStore(),
+    hasSubMenu: makeColumnStore(),
+    hasSubMenuOpen: makeColumnStore(),
+    subMenuControllers: new WeakMap<WeakKey, SubMenuController>(),
   };
 }
 
 type MenuController = ReturnType<typeof makeMenuController>;
 
-export function getMenuControllerFromContext(): MenuController | undefined {
-  return getContext(contextKey);
-}
-
-export function setNewMenuControllerInContext(): MenuController {
-  if (getMenuControllerFromContext() !== undefined) {
-    throw Error('MenuController context has already been set');
-  }
-  const menuController = makeMenuController();
-  setContext(contextKey, menuController);
-  return menuController;
-}
+export const menuControllerContext = makeContext<MenuController>();

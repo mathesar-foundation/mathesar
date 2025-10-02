@@ -1,5 +1,4 @@
+import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
 import type { ContextMenuController } from '@mathesar-component-library';
-
-import { makeContext } from './utils';
 
 export const contextMenuContext = makeContext<ContextMenuController>();

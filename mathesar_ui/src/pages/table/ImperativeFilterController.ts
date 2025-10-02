@@ -1,6 +1,6 @@
 import { tick } from 'svelte';
 
-import { makeContext } from '@mathesar/contexts/utils';
+import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
 import { EventHandler } from '@mathesar-component-library';
 
 export class ImperativeFilterController extends EventHandler<{

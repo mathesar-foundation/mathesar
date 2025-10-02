@@ -1,13 +1,16 @@
 import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import {
   type ClientPosition,
   type ContextMenuController,
   type ModalController,
   menuSection,
+  subMenu,
 } from '@mathesar/component-library';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
+import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { ImperativeFilterController } from '@mathesar/pages/table/ImperativeFilterController';
 import type { TabularData } from '@mathesar/stores/table-data';
 import type RecordStore from '@mathesar/systems/record-view/RecordStore';
@@ -53,6 +56,15 @@ export function openTableCellContextMenu({
     yield* getEntriesForMultipleRows([rowId]);
   }
 
+  function* getEntriesForArbitraryRows(rowIds: Iterable<string>) {
+    const soleRowId = takeFirstAndOnly(rowIds);
+    if (soleRowId) {
+      yield* getEntriesForOneRow(soleRowId);
+    } else {
+      yield* getEntriesForMultipleRows([...rowIds]);
+    }
+  }
+
   function* getEntriesForOneColumn(columnId: string) {
     const column = tabularData.getProcessedColumn(columnId);
     if (!column) return;
@@ -62,6 +74,20 @@ export function openTableCellContextMenu({
     yield* modifyGrouping({ tabularData, column });
 
     yield menuSection(...openTable({ column }));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function* getEntriesForMultipleColumns(columnIds: string[]) {
+    // None yet
+  }
+
+  function* getEntriesForArbitraryColumns(columnIds: Iterable<string>) {
+    const soleColumnId = takeFirstAndOnly(columnIds);
+    if (soleColumnId) {
+      yield* getEntriesForOneColumn(soleColumnId);
+    } else {
+      yield* getEntriesForMultipleColumns([...columnIds]);
+    }
   }
 
   function* getEntriesForMultipleCells(cellIds: string[]) {
@@ -83,34 +109,53 @@ export function openTableCellContextMenu({
     yield* getEntriesForMultipleCells([cellId]);
   }
 
+  function* getEntriesForArbitraryCells({
+    cellIds,
+    rowIds,
+    columnIds,
+  }: SheetSelection) {
+    const soleCellId = takeFirstAndOnly(cellIds);
+    if (soleCellId) {
+      yield* getEntriesForOneCell(soleCellId);
+    } else {
+      yield* getEntriesForMultipleCells([...cellIds]);
+    }
+
+    const rowEntries = [...getEntriesForArbitraryRows(rowIds)];
+    if (rowEntries.length) {
+      yield subMenu({
+        label: get(_)('row_plural', { values: { count: rowIds.size } }),
+        entries: rowEntries,
+      });
+    }
+
+    const columnEntries = [...getEntriesForArbitraryColumns(columnIds)];
+    if (columnEntries.length) {
+      yield subMenu({
+        label: get(_)('column_plural', { values: { count: columnIds.size } }),
+        entries: columnEntries,
+      });
+    }
+  }
+
   const entries = match(targetCell, 'type', {
     'row-header-cell': ({ rowId }) => {
       selection.update((s) => (s.rowIds.has(rowId) ? s : s.ofOneRow(rowId)));
-      const { rowIds } = get(selection);
-      const soleRowId = takeFirstAndOnly(rowIds);
-      return soleRowId
-        ? [...getEntriesForOneRow(soleRowId)]
-        : [...getEntriesForMultipleRows([...rowIds])];
+      return [...getEntriesForArbitraryRows(get(selection).rowIds)];
     },
 
     'column-header-cell': ({ columnId }) => {
       selection.update((s) =>
         s.columnIds.has(columnId) ? s : s.ofOneColumn(columnId),
       );
-      const { columnIds } = get(selection);
-      const soleColumnId = takeFirstAndOnly(columnIds);
-      return soleColumnId ? [...getEntriesForOneColumn(soleColumnId)] : [];
+      return [...getEntriesForArbitraryColumns(get(selection).columnIds)];
     },
 
     'data-cell': ({ cellId }) => {
       selection.update((s) =>
         s.cellIds.has(cellId) ? s : s.ofOneCell(cellId),
       );
-      const { cellIds } = get(selection);
-      const soleCellId = takeFirstAndOnly(cellIds);
-      return soleCellId
-        ? [...getEntriesForOneCell(cellId)]
-        : [...getEntriesForMultipleCells([...cellIds])];
+      return [...getEntriesForArbitraryCells(get(selection))];
     },
 
     // We don't (yet?) offer a context menu for placeholder data cells. In the

@@ -79,6 +79,7 @@
 
   &:not(.menu-modal) .menu-item-button:not(.disabled):hover,
   &:not(.menu-modal) .menu-item-link:not(.disabled):hover,
+  &:not(:focus-within) .menu-item.opened,
   & .menu-item-button:not(.disabled):focus,
   & .menu-item-link:not(.disabled):focus {
     background-color: var(--color-navigation-20-hover);
@@ -100,6 +101,13 @@
     .menu-item > .control {
       width: calc(
         var(--Menu__control-width) + var(--Menu__padding-x, $padding-x-default)
+      );
+    }
+  }
+  &.has-sub-menu {
+    .menu-item > .sub-menu {
+      width: calc(
+        var(--Menu__icon-width) + var(--Menu__padding-x, $padding-x-default)
       );
     }
   }

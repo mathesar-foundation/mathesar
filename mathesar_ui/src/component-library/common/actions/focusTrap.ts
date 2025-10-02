@@ -78,14 +78,28 @@ function getFocusableElements(container: Element): Element[] {
   return elements.map(({ element }) => element);
 }
 
+interface FocusTrapOptions {
+  /**
+   * Automatically focus the first focusable element when opening. True by
+   * default.
+   */
+  autoFocus?: boolean;
+  /**
+   * Automatically re-focus the last-focused element when closing. True by
+   * default.
+   */
+  autoRestore?: boolean;
+}
+
 export default function focusTrap(
   container: HTMLElement,
-  options: { autoFocus?: boolean } = {},
+  options: FocusTrapOptions = {},
 ): ActionReturn {
   let previouslyFocusedElement: Element | null;
 
   const fullOptions = {
     autoFocus: true,
+    autoRestore: true,
     ...options,
   };
 
@@ -160,7 +174,9 @@ export default function focusTrap(
   return {
     destroy() {
       window.removeEventListener('keydown', handleKeyDown);
-      focusElement(previouslyFocusedElement);
+      if (fullOptions.autoRestore) {
+        focusElement(previouslyFocusedElement);
+      }
     },
   };
 }

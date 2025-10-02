@@ -1,10 +1,11 @@
+import { some } from 'iter-tools';
 import type { ActionReturn } from 'svelte/action';
 import { type Readable, get } from 'svelte/store';
 
 type CallbackFn = (e: Event) => void;
 interface Options {
   callback: CallbackFn;
-  references?: Readable<(HTMLElement | undefined)[]>;
+  references?: Readable<Iterable<HTMLElement | undefined>>;
 }
 
 export default function clickOffBounds(
@@ -13,15 +14,19 @@ export default function clickOffBounds(
 ): ActionReturn {
   let { callback, references } = options;
 
-  function outOfBoundsListener(event: Event) {
-    const isWithinReferenceElement =
-      references &&
-      get(references)?.some(
-        (reference) => reference?.contains?.(event.target as Node) ?? false,
-      );
-    if (!isWithinReferenceElement && !node.contains(event.target as Node)) {
-      callback(event);
+  function* getReferenceElements(): Generator<HTMLElement> {
+    if (!references) return;
+    for (const element of get(references)) {
+      if (!element) continue;
+      yield element;
     }
+  }
+
+  function outOfBoundsListener(event: Event) {
+    const target = event.target as Node;
+    if (some((ref) => ref.contains(target), getReferenceElements())) return;
+    if (node.contains(target)) return;
+    callback(event);
   }
 
   /**
