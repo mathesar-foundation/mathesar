@@ -1,7 +1,9 @@
 # Configuring file storage backends
 
 !!! question "Help us refine file storage!"
-    Our file storage feature is new and still evolving. We'd love to hear about how you're using it, what's working, and what additional workflows you'd like to see supported. If you [talk to us for 20 min](https://cal.com/mathesar/users), we'll give you a $25 gift card as a thank you!
+    Our file storage feature is new and still evolving. We'd love to hear about how you're using it, what's working, and what additional workflows you'd like to see supported. 
+	
+	[Talk to us for 20 min](https://cal.com/mathesar/users)! We'll give you a $25 gift card as a thank you.
 
 Mathesar's [File columns](../user-guide/files.md) require you to configure an **S3-compatible object storage backend**. File storage allows users to upload, preview, and download files directly within Mathesar.
 

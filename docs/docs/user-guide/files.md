@@ -1,7 +1,9 @@
 # File columns in Mathesar
 
-!!! question "Help us refine file storage!"
-    We would like to support a wide variety of backends, storage formats, and use cases for file storage. If you need something beyond what’s currently documented, [schedule a call with us](https://cal.com/mathesar/users) to let us know your requirements.
+!!! question "Help us refine files!"
+    Our file column feature is new and still evolving. We would like to support a wide variety of backends, storage formats, and use cases in the future.
+	
+	We'd love to hear about how you're using files, what's working, and what additional workflows you'd like to see supported. If you [schedule a call with us for 20 min](https://cal.com/mathesar/users), we'll give you a $25 gift card as a thank you!
 
 Mathesar supports **file columns** which allow you to attach and interact with files of any type. These columns make it easy to store and preview files alongside your structured data.
 
