@@ -215,10 +215,8 @@ services:
     environment: *config
     # Expose the internal port 5432 only to other containers and not
     # the underlying host.
-    # expose:
-    #   - "5432"
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
       - ./msar/pgdata:/var/lib/postgresql/data
 
