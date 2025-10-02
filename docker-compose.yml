@@ -168,6 +168,13 @@ services:
       # leave this as-is.
       SECRET_KEY: ${SECRET_KEY-}
 
+      # If you are running Mathesar on a particularly powerful machine, you can
+      # improve performance by increasing this setting. Replace '5' below with
+      # 2 * $(NUM_CORES) + 1. So if you have a VPS with 4 vCPUs you can use a
+      # value of 2 * 4 + 1, or 9. The default is workable as long as you have at
+      # least 1 logical core.
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY-3}
+
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
@@ -208,8 +215,10 @@ services:
     environment: *config
     # Expose the internal port 5432 only to other containers and not
     # the underlying host.
-    expose:
-      - "5432"
+    # expose:
+    #   - "5432"
+    ports:
+      - "5432:5432"
     volumes:
       - ./msar/pgdata:/var/lib/postgresql/data
 
