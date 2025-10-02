@@ -10,7 +10,7 @@ Mathesar is built using:
 - [Python](https://www.python.org/) for the backend
 - [Django](https://www.djangoproject.com/) for the web application
 - [SQLAlchemy](https://www.sqlalchemy.org/) to talk to the database
-- [Django REST Framework](https://www.django-rest-framework.org/) for the API 
+- [Django REST Framework](https://www.django-rest-framework.org/) for the API
 - [Svelte](https://svelte.dev/) and [TypeScript](https://www.typescriptlang.org/) for the frontend
 
 ## Local development setup
@@ -77,7 +77,7 @@ We use [pytest](https://docs.pytest.org) for our backend tests.
     ```
     docker exec mathesar_service_dev pytest -k "test_name"
     ```
-    
+
 - See the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html), or run pytest with the `--help` flag to learn about more options for running tests.
 
 - Run all SQL tests:
@@ -183,7 +183,7 @@ Django uses gettext, which require the `.po` files to be compiled into a more ef
 ## Translation process
 
 - We use [Transifex](https://app.transifex.com/mathesar/mathesar/dashboard/) for managing our translation process.
-- You'll need to be a member of the Mathesar organization in Transifex, inorder to work with translations. Please reach out to us for information on how to join. 
+- You'll need to be a member of the Mathesar organization in Transifex, inorder to work with translations. Please reach out to us for information on how to join.
 
 ### For Translators
 
@@ -258,15 +258,17 @@ To work with this feature in your local development environment, you'll need to 
 
     Notice that we start the `obj-store` service too, in addition to the normal `dev-service`.
 
+1. Log in to the file storage backend UI at http://localhost:9001 with `mathesar`/`mathesar`. Create a new storage bucket in the UI called "mathesar-storages".
+
 At this point you can run Mathesar and create new "File" columns in tables. Those columns will present a UI that allows you to attach files to table cells.
 
-With the `obj-store` service is running, you can also visit http://localhost:9001 to launch an admin view of your file storage backend. Log in with `mathesar`/`mathesar` to see and manage your uploaded files.
+With the `obj-store` service running, you can return to http://localhost:9001 to view and manage your uploaded files.
 
 ## Troubleshooting
 
 ### Permissions within Windows
 
-- Running Script in powershell is disabled by default in windows , you have to change permission to run scripts  [Official Docs ](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.2) 
+- Running Script in powershell is disabled by default in windows , you have to change permission to run scripts  [Official Docs ](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.2)
 
 ### Fixing line endings on Windows
 
