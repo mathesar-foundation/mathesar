@@ -22,3 +22,4 @@ export * from './stringUtils';
 export * from './miscUtils';
 export * from './styleUtils';
 export * from './componentUtils';
+export * from './oneWayMessageChannel';

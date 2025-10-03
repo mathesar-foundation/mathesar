@@ -13,16 +13,15 @@
   import type { CssVariablesObj } from '@mathesar-component-library-dir/types';
 
   import {
+    MenuController,
     type ModalMenuOptions,
-    type SubMenuController,
-    makeMenuController,
     menuControllerContext,
   } from './MenuController';
 
-  const menuController = makeMenuController();
-  menuControllerContext.set(menuController);
+  const controller = new MenuController();
+  menuControllerContext.set(controller);
   const { hasControlColumn, hasIconColumn, hasSubMenu, hasSubMenuOpen } =
-    menuController;
+    controller;
 
   export let style: string | undefined = undefined;
   export let iconWidth = '1em';
@@ -55,6 +54,8 @@
     const item = target.closest('[data-menu-item-focusable]');
     if (!item) return;
     focusElement(item);
+
+    controller.openSubMenuAfterDelay(item);
   }
 
   function handleMouseLeave() {
@@ -77,18 +78,9 @@
     focusElement(elements.at(targetIndex));
   }
 
-  function getSubMenuFromEventTarget({
-    target,
-  }: Event): SubMenuController | undefined {
-    if (!target) return undefined;
-    return menuController.subMenuControllers.get(target);
-  }
-
-  function getSubMenu(element: object): SubMenuController | undefined {
-    return menuController.subMenuControllers.get(element);
-  }
-
   function handleKeydown(e: KeyboardEvent) {
+    // Don't handle keyboard events when a sub-menu is opened. The sub-menu will
+    // handle those events instead.
     if ($hasSubMenuOpen) return;
 
     switch (e.key) {
@@ -102,7 +94,7 @@
         moveSelectionByOffset(1);
         break;
       case 'ArrowRight':
-        getSubMenuFromEventTarget(e)?.openActively();
+        controller.openSubMenuImmediately(e.target);
         break;
       case 'ArrowLeft':
         if (!isSubMenu) return;
@@ -113,18 +105,6 @@
     }
     e.stopPropagation();
     e.preventDefault();
-  }
-
-  function handleFocusIn(e: Event) {
-    // Any time an element inside the menu is focused, we close all the
-    // sub-menus which are _not_ the element being focused. We close them
-    // "passively" so that there is a small delay to account for the user
-    // quickly moving the mouse to an entry within a sub-menu.
-    const subMenus = menuElement.querySelectorAll('[data-menu-item-sub-menu]');
-    for (const subMenuElement of subMenus) {
-      if (subMenuElement === e.target) continue;
-      getSubMenu(subMenuElement)?.closePassively();
-    }
   }
 
   onMount(() => {
@@ -148,7 +128,6 @@
     style={styleString}
     on:mousemove={handleMouseMove}
     on:mouseleave={handleMouseLeave}
-    on:focusin={handleFocusIn}
     use:focusTrap={{
       autoFocus: false,
       autoRestore: modal.restoreFocusOnClose ?? true,

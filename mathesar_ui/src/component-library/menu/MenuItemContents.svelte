@@ -10,19 +10,16 @@
 
   const menu = menuControllerContext.getOrError();
   const hasIconCell = writable(false);
-  const hasSubMenuStore = writable(false);
 
   export let icon: IconProps | undefined = undefined;
   export let hasNotificationDot = false;
   export let hasSubMenu = false;
 
   $: $hasIconCell = !!icon;
-  $: $hasSubMenuStore = hasSubMenu;
 
   if (menu) {
     onMount(() => menu.hasControlColumn.registerInput($$slots.control));
     onMount(() => menu.hasIconColumn.registerInput(hasIconCell));
-    onMount(() => menu.hasSubMenu.registerInput(hasSubMenuStore));
   }
 </script>
 
