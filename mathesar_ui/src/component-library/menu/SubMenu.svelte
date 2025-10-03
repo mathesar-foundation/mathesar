@@ -104,6 +104,7 @@
   on:mouseenter={() => {
     isOpen.setImmediately(true);
   }}
+  matchTriggerWidthPxUpTo={10}
 >
   <div class="sub-menu" bind:this={subMenu}>
     <slot close={closeActively} />
