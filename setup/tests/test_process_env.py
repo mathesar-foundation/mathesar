@@ -221,7 +221,8 @@ def test_main_generates_env_vars(monkeypatch):
     )
     assert code == 0
     parsed = dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
-    assert len(parsed) == 5
+    assert 'WEB_CONCURRENCY="3"\n' in out
+    assert len(parsed) == 6
     assert 'POSTGRES_USER="user"\n' in out
     assert 'POSTGRES_HOST="localhost"\n' in out
     assert 'POSTGRES_PORT="5411"\n' in out
@@ -238,7 +239,8 @@ def test_main_generates_replaces_existing_pg_env_vars(monkeypatch):
     )
     assert code == 0
     parsed = dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
-    assert len(parsed) == 5
+    assert len(parsed) == 6
+    assert 'WEB_CONCURRENCY="3"\n' in out
     assert 'POSTGRES_USER="newuser"\n' in out
     assert 'POSTGRES_HOST="someserver"\n' in out
     assert 'POSTGRES_PORT="5444"\n' in out
