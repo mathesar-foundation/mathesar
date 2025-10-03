@@ -36,14 +36,14 @@
       {/if}
     </span>
   </slot>
-  <Menu
-    slot="content"
-    style="--Menu__min-width: 100%;{menuStyle}"
-    let:close={menuClose}
-    modal={{ close: menuClose }}
-  >
-    <slot close={menuClose} />
-  </Menu>
+  <svelte:fragment slot="content" let:close>
+    <Menu
+      style="--Menu__min-width: 100%;{menuStyle}"
+      modal={{ close, closeRoot: close }}
+    >
+      <slot {close} />
+    </Menu>
+  </svelte:fragment>
 </Dropdown>
 
 <style>

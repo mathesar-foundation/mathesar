@@ -35,7 +35,7 @@ export function makeMenuController() {
     hasIconColumn: makeColumnStore(),
     hasSubMenu: makeColumnStore(),
     hasSubMenuOpen: makeColumnStore(),
-    subMenuControllers: new WeakMap<WeakKey, SubMenuController>(),
+    subMenuControllers: new WeakMap<object, SubMenuController>(),
   };
 }
 
