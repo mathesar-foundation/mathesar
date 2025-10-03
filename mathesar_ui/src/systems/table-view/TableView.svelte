@@ -29,6 +29,9 @@
   import StatusPane from './StatusPane.svelte';
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
   import { getCustomizedColumnWidths } from './tableViewUtils';
+  import { AppShortcutsHandler } from '@mathesar/shortcuts/AppShortcutsHandler';
+  import { SelectMode } from '@mathesar/shortcuts/SelectMode';
+  import { EditMode } from '@mathesar/shortcuts/EditMode';
 
   type Context = 'page' | 'widget';
 
@@ -78,6 +81,19 @@
     showToastInfo: toast.info,
     showToastError: toast.error,
   });
+
+  $: shortcutsSelectMode = new SelectMode({
+    selection,
+    setNullContext: {
+      getRecordRows: () => [
+        ...get(recordsData.fetchedRecordRows),
+        ...get(recordsData.newRecords),
+      ],
+      bulkDml: (...args) => recordsData.bulkDml(...args),
+    },
+  });
+  $: shortcutsEditMode = new EditMode();
+
   $: ({ horizontalScrollOffset, scrollOffset } = display);
   $: columnOrder = table.metadata?.column_order ?? [];
   $: hasNewColumnButton = context !== 'widget' && $currentRoleOwns;
@@ -116,6 +132,8 @@
       {#if $processedColumns.size}
         <Sheet
           {clipboardHandler}
+          {shortcutsSelectMode}
+          {shortcutsEditMode}
           {columnWidths}
           {selection}
           {usesVirtualList}

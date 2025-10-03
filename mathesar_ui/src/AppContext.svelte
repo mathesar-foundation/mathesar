@@ -41,6 +41,8 @@
     lightboxContext,
   } from './components/file-attachments/lightbox/LightboxController';
   import { contextMenuContext } from './contexts/contextMenuContext';
+  import { setNewShortcutsHandlerStoreInContext } from '@mathesar/stores/shortcuts';
+  import { AppShortcutsHandler } from '@mathesar/shortcuts/AppShortcutsHandler';
 
   export let commonData: CommonData;
 
@@ -118,9 +120,21 @@
     void clipboardHandler.handlePaste(e);
     e.preventDefault();
   }
+
+  const shortcutsHandlerStore = setNewShortcutsHandlerStoreInContext();
+  const shortcutsHandler = new AppShortcutsHandler(['edit', 'select']);
+  shortcutsHandlerStore.set(shortcutsHandler);
+
+  async function handleKeyDown(e: KeyboardEvent) {
+    await shortcutsHandler.handleKeyDown(e);
+  }
 </script>
 
-<svelte:body on:copy={handleCopy} on:paste={handlePaste} />
+<svelte:body
+  on:copy={handleCopy}
+  on:paste={handlePaste}
+  on:keydown={handleKeyDown}
+/>
 
 <ToastPresenter entries={toast.entries} />
 <Confirmation controller={confirmationController} />

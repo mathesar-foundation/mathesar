@@ -5,6 +5,8 @@
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
 
   import type { HorizontalAlignment } from './typeDefinitions';
+  import { getShortcutsHandlerStoreFromContext } from '@mathesar/stores/shortcuts';
+  import { get } from 'svelte/store';
 
   const dispatch = createEventDispatcher();
 
@@ -72,6 +74,13 @@
       e.stopPropagation();
     }
     dispatch('mousedown', e);
+  }
+
+  const shortcutsHandlerStore = getShortcutsHandlerStoreFromContext();
+  $: if (shortcutsHandlerStore !== undefined) {
+    const shortcutsHandler = get(shortcutsHandlerStore);
+    if (mode === 'edit') shortcutsHandler?.enableMode('edit');
+    else shortcutsHandler?.disableMode('edit');
   }
 </script>
 

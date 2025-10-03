@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
-  import { writable } from 'svelte/store';
+  import { get, writable } from 'svelte/store';
 
   import {
     type ClipboardHandler,
@@ -22,11 +22,15 @@
     normalizeColumnWidth,
     setSheetContext,
   } from './utils';
+  import { getShortcutsHandlerStoreFromContext } from '@mathesar/stores/shortcuts';
+  import type { SelectMode } from '@mathesar/shortcuts/SelectMode';
+  import type { EditMode } from '@mathesar/shortcuts/EditMode';
 
   type SheetColumnType = $$Generic;
   type SheetColumnIdentifierKey = $$Generic;
 
   const clipboardHandlerStore = getClipboardHandlerStoreFromContext();
+  const shortcutsHandlerStore = getShortcutsHandlerStoreFromContext();
 
   export let columns: SheetColumnType[];
   export let usesVirtualList = false;
@@ -34,6 +38,8 @@
   export let hasBorder = false;
   export let hasPaddingRight = false;
   export let clipboardHandler: ClipboardHandler | undefined = undefined;
+  export let shortcutsSelectMode: SelectMode | undefined = undefined;
+  export let shortcutsEditMode: EditMode | undefined = undefined;
   export let selection: SheetSelectionStore | undefined = undefined;
   export let onCellSelectionStart: (c: SheetCellDetails) => void = () => {};
 
@@ -122,6 +128,24 @@
     clipboardHandlerStore?.set(undefined);
   }
 
+  function enableShortcuts() {
+    if (shortcutsHandlerStore !== undefined) {
+      const shortcutsHandler = get(shortcutsHandlerStore);
+      shortcutsHandler?.registerMode('select', shortcutsSelectMode);
+      shortcutsHandler?.registerMode('edit', shortcutsEditMode);
+      shortcutsHandler?.enableMode('select');
+    }
+  }
+
+  function disableShortcuts() {
+    if (shortcutsHandlerStore !== undefined) {
+      const shortcutsHandler = get(shortcutsHandlerStore);
+      shortcutsHandler?.disableMode('select');
+      shortcutsHandler?.unregisterMode('edit');
+      shortcutsHandler?.unregisterMode('select');
+    }
+  }
+
   function handleMouseDown(e: MouseEvent) {
     if (e.button !== 0) return;
     if (!selection) return;
@@ -201,6 +225,8 @@
   on:contextmenu={handleContextMenu}
   on:focusin={enableClipboard}
   on:focusout={disableClipboard}
+  on:focusin={enableShortcuts}
+  on:focusout={disableShortcuts}
   bind:this={sheetElement}
 >
   {#if columns.length}
