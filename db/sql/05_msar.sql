@@ -3408,7 +3408,9 @@ BEGIN
     SELECT string_agg(
       'CAST(' ||
       __msar.build_cast_expr(
-        quote_ident(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer)), col_cast -> 'type' ->> 'name'
+        quote_ident(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer)),
+        col_cast -> 'type' ->> 'name',
+        coalesce(col_cast -> 'cast_options', '{}'::jsonb)
       ) ||
       ' AS ' ||
       msar.build_type_text(col_cast -> 'type') ||
@@ -3478,15 +3480,27 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION __msar.build_cast_expr(val text, type_ text) RETURNS text AS $$/*
+CREATE OR REPLACE FUNCTION __msar.build_cast_expr(
+  val text,
+  type_ text,
+  cast_options jsonb
+) RETURNS text AS $$/*
 Build an expression for casting a column in Mathesar, returning the text of that expression.
 
 Args:
   val: This is quite general, and isn't sanitized in any way. It can be either a literal or a column
        identifier, since we want to be able to produce a casting expression in either case.
   type_: This type name string must cast properly to a regtype.
+  cast_options: Suggestions to be used while type casting.
 */
-SELECT msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
+SELECT msar.get_cast_function_name(type_::regtype) || '(' ||
+CONCAT_WS(', ',
+  val,
+  'group_sep =>' || quote_literal(cast_options ->> 'group_sep') || '::"char"',
+  'decimal_p =>' || quote_literal(cast_options ->> 'decimal_p') || '::"char"',
+  'curr_pref =>' || quote_literal(cast_options ->> 'curr_pref') || '::text',
+  'curr_suff =>' || quote_literal(cast_options ->> 'curr_suff') || '::text'
+) || ')'
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -3565,7 +3579,14 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.set_old_col_default(tab_id regclass, col_id smallint, old_default text, new_type text, is_default_dynamic boolean) RETURNS text AS $$/*
+msar.set_old_col_default(
+  tab_id regclass,
+  col_id smallint,
+  old_default text,
+  new_type text,
+  is_default_dynamic boolean,
+  cast_options jsonb DEFAULT '{}'::jsonb
+) RETURNS text AS $$/*
 Sets the old default for a given column, returning the text of the expression executed.
 
 Args:
@@ -3575,6 +3596,7 @@ Args:
                original default, but cast to a new type.
   new_type: The target type to which we'll cast the new default.
   is_default_dynamic: Whether the current default is dynamic, can be obtained with msar.is_default_possibly_dynamic.
+  cast_options: Suggestions to be used while type casting.
 */
 DECLARE
   default_ text;
@@ -3601,13 +3623,14 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.retype_column(tab_id regclass, col_id smallint, new_type text) RETURNS text AS $$/*
+msar.retype_column(tab_id regclass, col_id smallint, new_type text, cast_options jsonb) RETURNS text AS $$/*
 Alter a column's type, returning the text of the expression executed.
 
 Args:
   tab_id: The OID of the table containing the column whose type we'll alter.
   col_id: The attnum of the column whose type we'll alter.
   new_type: The target type to which we'll alter the column.
+  cast_options: Suggestions to be used while type casting.
 */
   SELECT __msar.exec_ddl(
     'ALTER TABLE %I.%I ALTER COLUMN %I TYPE %s USING %s',
@@ -3615,7 +3638,7 @@ Args:
     msar.get_relation_name(tab_id),
     msar.get_column_name(tab_id, col_id),
     new_type,
-    __msar.build_cast_expr(quote_ident(msar.get_column_name(tab_id, col_id)), new_type)
+    __msar.build_cast_expr(quote_ident(msar.get_column_name(tab_id, col_id)), new_type, cast_options)
   );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -3660,6 +3683,7 @@ BEGIN
       (col_alter_obj ->> 'name')::text AS new_name,
       (col_alter_obj -> 'delete')::boolean AS delete_,
       msar.build_type_text_complete(col_alter_obj -> 'type', format_type(pga.atttypid, null)) AS new_type,
+      COALESCE((col_alter_obj -> 'cast_options')::jsonb, '{}'::jsonb) AS cast_options,
       pg_get_expr(adbin, tab_id) AS old_default,
       col_alter_obj -> 'default' AS new_default,
 
@@ -3688,8 +3712,7 @@ BEGIN
     IF col.new_type IS NOT NULL OR jsonb_typeof(col.new_default)='null' THEN
       PERFORM msar.drop_col_default(tab_id, col.attnum);
     END IF;
-    PERFORM msar.retype_column(tab_id, col.attnum, col.new_type);
-
+    PERFORM msar.retype_column(tab_id, col.attnum, col.new_type, col.cast_options);
     IF col.new_default #>> '{}' IS NOT NULL THEN
       -- set new default
       PERFORM msar.set_col_default(tab_id, col.attnum, col.new_default #>> '{}');
@@ -3698,7 +3721,7 @@ BEGIN
       -- when a new_default is absent and col is retyped with a new_type.
       -- Note: We don't want to preserve old default for jsonb_typeof(col.new_default)='null'
       -- as we consider it as an intent to drop the default. 
-      PERFORM msar.set_old_col_default(tab_id, col.attnum, col.old_default, col.new_type, is_default_dynamic);
+      PERFORM msar.set_old_col_default(tab_id, col.attnum, col.old_default, col.new_type, is_default_dynamic, col.cast_options);
     END IF;
 
     -- PG13 doesn't allow concat b/w integer[] and smallint need to typecast
