@@ -3510,207 +3510,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.build_col_drop_default_expr(tab_id oid, col_id integer, new_type text, new_default jsonb)
-  RETURNS TEXT AS $$/*
-Build an expression for dropping a column's default, returning the text of that expression.
-
-This function is private, and not general: It builds an expression in the context of the
-msar.process_col_alter_jsonb function and should not otherwise be called independently, since it has
-logic specific to that context. In that setting, we drop the default for the specified column if the
-caller specifies that we're setting a new_default of NULL, or if we're changing the type of the
-column.
-
-Args:
-  tab_id: The OID of the table where the column with the default to be dropped lives.
-  col_id: The attnum of the column with the undesired default.
-  new_type: This gives the function context letting it know whether to drop the default or not. If
-            we are setting a new type for the column, we will always drop the default first.
-  new_default: This also gives us context letting us know whether to drop the default. By setting
-               the 'new_default' to (jsonb) null, the caller specifies that we should drop the
-               column's default.
-*/
-SELECT CASE WHEN new_type IS NOT NULL OR jsonb_typeof(new_default)='null' THEN
-  'ALTER COLUMN ' || quote_ident(msar.get_column_name(tab_id, col_id)) || ' DROP DEFAULT'
- END;
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION
-__msar.build_col_retype_expr(tab_id oid, col_id integer, new_type text) RETURNS text AS $$/*
-Build an expression to change a column's type, returning the text of that expression.
-
-Note that this function wraps the type alteration in a cast expression. If we have the custom
-cast functions available, we prefer those to the default PostgreSQL casting behavior.
-
-Args:
-  tab_id: The OID of the table containing the column whose type we'll alter.
-  col_id: The attnum of the column whose type we'll alter.
-  new_type: The target type to which we'll alter the column.
-*/
-SELECT 'ALTER COLUMN '
-  || quote_ident(msar.get_column_name(tab_id, col_id))
-  || ' TYPE '
-  || new_type
-  || ' USING '
-  || __msar.build_cast_expr(quote_ident(msar.get_column_name(tab_id, col_id)), new_type);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION __msar.build_col_default_expr(
-  tab_id oid,
-  col_id integer,
-  old_default text,
-  new_default jsonb,
-  new_type text
-) RETURNS text AS $$/*
-Build an expression to set a column's default value, returning the text of that expression.
-
-This function is private, and not general. The expression it builds is in the context of the calling
-msar.process_col_alter_jsonb function. In particular, this function can also reset the original
-default after a column type alteration, but cast to the new type of the column. We also avoid
-setting a new default in cases where the new default argument is (sql) NULL, or a JSONB null.
-
-Args:
-  tab_id: The OID of the table containing the column whose default we'll alter.
-  col_id: The attnum of the column whose default we'll alter.
-  old_default: The current default. In some cases in the context of the caller, we want to reset the
-               original default, but cast to a new type.
-  new_default: The new desired default. It's left as JSONB since we are using JSONB 'null' values to
-               represent 'drop the column default'.
-  new_type: The target type to which we'll cast the new default.
-*/
-DECLARE
-  default_expr text;
-  raw_default_expr text;
-BEGIN
-  -- In this case, we assume the intent is to clear out the original default.
-  IF jsonb_typeof(new_default)='null' THEN
-    default_expr := null;
-  -- We get the root JSONB value as text if it exists.
-  ELSEIF new_default #>> '{}' IS NOT NULL THEN
-    default_expr := format('%L', new_default #>> '{}');  -- sanitize since this could be user input.
-  -- At this point, we know we're not setting a new default, or dropping the old one.
-  -- So, we check whether the original default is potentially dynamic, and whether we need to cast
-  -- it to a new type.
-  ELSEIF msar.is_default_possibly_dynamic(tab_id, col_id) AND new_type IS NOT NULL THEN
-    -- We add casting the possibly dynamic expression to the new type as part of the default
-    -- expression in this case.
-    default_expr := format('%s::%s', old_default, new_type);
-  ELSEIF old_default IS NOT NULL AND new_type IS NOT NULL THEN
-    -- If we arrive here, then we know the old_default is a constant value, and we want to cast the
-    -- old default value to the new type *before* setting it as the new default. This avoids
-    -- building up nested cast functions in the default expression.
-    -- The first step is to execute the cast expression, putting the result into a new variable.
-    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type))
-      INTO raw_default_expr;
-    -- Then we format that new variable's value as a literal.
-    default_expr := format('%L', raw_default_expr);
-  END IF;
-  RETURN
-    format('ALTER COLUMN %I SET DEFAULT ', msar.get_column_name(tab_id, col_id)) || default_expr;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION
-__msar.build_col_not_null_expr(tab_id oid, col_id integer, not_null boolean) RETURNS text AS $$/*
-Build an expression to alter a column's NOT NULL setting, returning the text of that expression.
-
-Args:
-  tab_id: The OID of the table containing the column whose nullability we'll alter.
-  col_id: The attnum of the column whose nullability we'll alter.
-  not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
-*/
-SELECT 'ALTER COLUMN '
-  || quote_ident(msar.get_column_name(tab_id, col_id))
-  || CASE WHEN not_null THEN ' SET ' ELSE ' DROP ' END
-  || 'NOT NULL';
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-__msar.build_col_drop_text(tab_id oid, col_id integer, col_delete boolean) RETURNS text AS $$/*
-Build an expression to drop a column from a table, returning the text of that expression.
-
-Args:
-  tab_id: The OID of the table containing the column whose nullability we'll alter.
-  col_id: The attnum of the column whose nullability we'll alter.
-  col_delete: If true, we drop the column. If false or null, we do nothing.
-*/
-SELECT CASE WHEN col_delete THEN 'DROP COLUMN ' || quote_ident(msar.get_column_name(tab_id, col_id)) END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.process_col_alter_jsonb(tab_id oid, col_alters jsonb) RETURNS text AS $$/*
-Turn a JSONB array representing a set of desired column alterations into a text expression.
-
-Args:
-  tab_id The OID of the table whose columns we'll alter.
-  col_alters: a JSONB array defining the list of column alterations.
-
-The col_alters JSONB should have the form:
-[
-  {
-    "attnum": <int>,
-    "type": <obj> (optional),
-    "default": <any> (optional),
-    "not_null": <bool> (optional),
-    "delete": <bool> (optional),
-    "name": <str> (optional),
-  },
-  {
-    ...
-  },
-  ...
-]
-
-Notes on the col_alters JSONB
-- For more info about the type object, see the msar.build_type_text function.
-- The "name" key isn't used in this function; it's included here for completeness.
-- A possible 'gotcha' is the "default" key.
-  - If omitted, no change to the default for the given column will occur, other than to cast it to
-    the new type if a type change is specified.
-  - If, on the other hand, the "default" key is set to an explicit value of null, then we will
-    interpret that as a directive to set the column's default to NULL, i.e., we'll drop the current
-    default setting.
-- If the column is a default mathesar ID column, we will silently skip it so it won't be altered.
-*/
-WITH prepped_alters AS (
-  SELECT
-    tab_id,
-    (col_alter_obj ->> 'attnum')::integer AS col_id,
-    msar.build_type_text_complete(col_alter_obj -> 'type', format_type(atttypid, null)) AS new_type,
-    -- We get the old default expression from a catalog table before modifying anything, so we can
-    -- reset it properly if we alter the column type.
-    pg_get_expr(adbin, tab_id) old_default,
-    col_alter_obj -> 'default' AS new_default,
-    (col_alter_obj -> 'not_null')::boolean AS not_null,
-    (col_alter_obj -> 'delete')::boolean AS delete_
-  FROM
-    (SELECT tab_id) as arg,
-    jsonb_array_elements(col_alters) as t(col_alter_obj)
-    INNER JOIN pg_attribute ON (t.col_alter_obj ->> 'attnum')::smallint=attnum AND tab_id=attrelid
-    LEFT JOIN pg_attrdef ON (t.col_alter_obj ->> 'attnum')::smallint=adnum AND tab_id=adrelid
-  WHERE NOT msar.is_mathesar_id_column(tab_id, (t.col_alter_obj ->> 'attnum')::integer)
-)
-SELECT string_agg(
-  nullif(
-    concat_ws(
-      ', ',
-      __msar.build_col_drop_default_expr(tab_id, col_id, new_type, new_default),
-      __msar.build_col_retype_expr(tab_id, col_id, new_type),
-      __msar.build_col_default_expr(tab_id, col_id, old_default, new_default, new_type),
-      __msar.build_col_drop_text(tab_id, col_id, delete_)
-    ),
-    ''
-  ),
-  ', '
-)
-FROM prepped_alters;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.set_not_null(tab_id regclass, col_id smallint, not_null boolean) RETURNS text AS $$/*
 Alter a column's NOT NULL setting, returning the text of the expression executed.
 
@@ -3730,6 +3529,98 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.drop_col_default(tab_id regclass, col_id smallint) RETURNS text AS $$/*
+Drop a column's default value, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table where the column with the default to be dropped lives.
+  col_id: The attnum of the column with the undesired default.
+*/
+  SELECT __msar.exec_ddl(
+    'ALTER TABLE %I.%I ALTER COLUMN %I DROP DEFAULT',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id)
+  );
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.set_col_default(tab_id regclass, col_id smallint, default_ text) RETURNS text AS $$/*
+Sets the default for a given column, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table containing the column whose default we'll alter.
+  col_id: The attnum of the column whose default we'll alter.
+  default_: The desired default.
+*/
+  SELECT __msar.exec_ddl(
+    'ALTER TABLE %I.%I ALTER COLUMN %I SET DEFAULT %L',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    default_
+  );
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.set_old_col_default(tab_id regclass, col_id smallint, old_default text, new_type text, is_default_dynamic boolean) RETURNS text AS $$/*
+Sets the old default for a given column, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table containing the column whose default we'll alter.
+  col_id: The attnum of the column whose default we'll alter.
+  old_default: The current default. In some cases in the context of the caller, we want to reset the
+               original default, but cast to a new type.
+  new_type: The target type to which we'll cast the new default.
+  is_default_dynamic: Whether the current default is dynamic, can be obtained with msar.is_default_possibly_dynamic.
+*/
+DECLARE
+  default_ text;
+  default_expr text;
+BEGIN
+  IF is_default_dynamic THEN
+    default_ := format('%s::%s', old_default, new_type);
+  ELSE
+    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type)) INTO default_;
+    default_ := quote_literal(default_);
+  END IF;
+
+  default_expr := format(
+    'ALTER TABLE %I.%I ALTER COLUMN %I SET DEFAULT %s',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    default_
+  );
+  EXECUTE default_expr;
+  RETURN default_expr;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.retype_column(tab_id regclass, col_id smallint, new_type text) RETURNS text AS $$/*
+Alter a column's type, returning the text of the expression executed.
+
+Args:
+  tab_id: The OID of the table containing the column whose type we'll alter.
+  col_id: The attnum of the column whose type we'll alter.
+  new_type: The target type to which we'll alter the column.
+*/
+  SELECT __msar.exec_ddl(
+    'ALTER TABLE %I.%I ALTER COLUMN %I TYPE %s USING %s',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    new_type,
+    __msar.build_cast_expr(quote_ident(msar.get_column_name(tab_id, col_id)), new_type)
+  );
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$/*
 Alter columns of the given table in bulk, returning the IDs of the columns so altered.
 
@@ -3737,43 +3628,79 @@ Args:
   tab_id: The OID of the table whose columns we'll alter.
   col_alters: a JSONB describing the alterations to make.
 
-For the specification of the col_alters JSONB, see the msar.process_col_alter_jsonb function.
+The col_alters JSONB should have the form:
+[
+  {
+    "attnum": <int>,
+    "type": <obj> (optional),
+    "default": <any> (optional),
+    "not_null": <bool> (optional),
+    "delete": <bool> (optional),
+    "name": <str> (optional),
+  },
+  {
+    ...
+  },
+  ...
+]
 
-Note that all alterations except renaming, commenting & setting/unsetting not-null are done in bulk,
-and then all name changes are done one at a time afterwards. This is because the SQL design
-specifies at most one name-changing clause per query.
+Note that for all alterations, we create and execute separate SQL queries rather than combining them
+into a giant SQL statement. This has the benefit of providing better error messages(for users)
+and better code readability(for us) at the cost of a minor performance hit.
 */
 DECLARE
   col RECORD;
-  col_alter_str text := msar.process_col_alter_jsonb(tab_id, col_alters);
   return_attnum_arr integer[];
+  is_default_dynamic boolean;
 BEGIN
-  -- TODO: This section for bulk alter is to be removed entirely.
-  --*************************************************
-  IF col_alter_str IS NOT NULL THEN
-    PERFORM __msar.exec_ddl(
-      'ALTER TABLE %s %s',
-      __msar.get_qualified_relation_name(tab_id),
-      msar.process_col_alter_jsonb(tab_id, col_alters)
-    );
-  END IF;
-  --**************************************************
   FOR col IN
     SELECT
       (col_alter_obj ->> 'attnum')::smallint AS attnum,
       (col_alter_obj -> 'not_null')::boolean AS not_null,
       (col_alter_obj ->> 'name')::text AS new_name,
+      (col_alter_obj -> 'delete')::boolean AS delete_,
+      msar.build_type_text_complete(col_alter_obj -> 'type', format_type(pga.atttypid, null)) AS new_type,
+      pg_get_expr(adbin, tab_id) AS old_default,
+      col_alter_obj -> 'default' AS new_default,
 
       col_alter_obj->>'description' AS comment_,
       __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment
 
     FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
+      INNER JOIN pg_catalog.pg_attribute AS pga ON pga.attnum=(x.col_alter_obj ->> 'attnum')::smallint AND pga.attrelid=tab_id
+      LEFT JOIN pg_catalog.pg_attrdef AS pgat ON pgat.adnum=(x.col_alter_obj ->> 'attnum')::smallint AND pgat.adrelid=tab_id
+    WHERE NOT msar.is_mathesar_id_column(tab_id, (x.col_alter_obj ->> 'attnum')::integer)
   LOOP
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
+
+    IF col.delete_ THEN
+      PERFORM msar.drop_columns(tab_id, col.attnum);
+    END IF;
+
     IF col.has_comment THEN
       PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
     END IF;
+
+    -- is_default_possibly_dynamic check must happen before we drop the default.
+    is_default_dynamic := msar.is_default_possibly_dynamic(tab_id, col.attnum);
+
+    IF col.new_type IS NOT NULL OR jsonb_typeof(col.new_default)='null' THEN
+      PERFORM msar.drop_col_default(tab_id, col.attnum);
+    END IF;
+    PERFORM msar.retype_column(tab_id, col.attnum, col.new_type);
+
+    IF col.new_default #>> '{}' IS NOT NULL THEN
+      -- set new default
+      PERFORM msar.set_col_default(tab_id, col.attnum, col.new_default #>> '{}');
+    ELSEIF (col.new_default IS NULL OR jsonb_typeof(col.new_default)<>'null') AND col.new_type IS NOT NULL THEN
+      -- preserve old default 
+      -- when a new_default is absent and col is retyped with a new_type.
+      -- Note: We don't want to preserve old default for jsonb_typeof(col.new_default)='null'
+      -- as we consider it as an intent to drop the default. 
+      PERFORM msar.set_old_col_default(tab_id, col.attnum, col.old_default, col.new_type, is_default_dynamic);
+    END IF;
+
     -- PG13 doesn't allow concat b/w integer[] and smallint need to typecast
     return_attnum_arr := return_attnum_arr || col.attnum::integer; 
   END LOOP;
