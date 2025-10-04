@@ -32,12 +32,11 @@ export function getCursorPositionAfterReformat({
         newCursorPosition += text.length;
         break;
       case Diff.EQUAL:
-        const length = Math.min(
+        newCursorPosition += Math.min(
           oldCursorPosition - parsingPosition,
           text.length,
         );
-        parsingPosition += length;
-        newCursorPosition += length;
+        parsingPosition += text.length;
         break;
       default:
         break;
