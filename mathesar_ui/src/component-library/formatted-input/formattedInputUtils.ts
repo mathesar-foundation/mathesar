@@ -20,18 +20,29 @@ export function getCursorPositionAfterReformat({
   oldCursorPosition: number;
   newText: string;
 }): number {
-  const diff = Diff(oldText, newText);
+  const diff = Diff(oldText, newText, oldCursorPosition);
+  let parsingPosition = 0;
   let newCursorPosition = 0;
-  diff.forEach((part) => {
-    const [action] = part;
-    if (action === Diff.DELETE) {
-      newCursorPosition -= 1;
-    } else if (action === Diff.INSERT) {
-      newCursorPosition += 1;
+  for (const [action, text] of diff) {
+    switch (action) {
+      case Diff.DELETE:
+        parsingPosition += text.length;
+        break;
+      case Diff.INSERT:
+        newCursorPosition += text.length;
+        break;
+      case Diff.EQUAL:
+        const length = Math.min(
+          oldCursorPosition - parsingPosition,
+          text.length,
+        );
+        parsingPosition += length;
+        newCursorPosition += length;
+        break;
+      default:
+        break;
     }
-  });
-  if (newCursorPosition < 0) {
-    newCursorPosition = 0;
+    if (parsingPosition >= oldCursorPosition) break;
   }
-  return oldCursorPosition + newCursorPosition;
+  return newCursorPosition;
 }
