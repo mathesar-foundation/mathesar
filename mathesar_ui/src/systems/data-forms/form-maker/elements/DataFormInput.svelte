@@ -5,10 +5,12 @@
   import {
     type LabelController,
     WritableMap,
+    ensureReadable,
     hasStringProperty,
   } from '@mathesar-component-library';
 
   import {
+    DataFormFillOutManager,
     type DataFormManager,
     EditableDataFormManager,
   } from '../data-form-utilities/DataFormManager';
@@ -25,6 +27,10 @@
 
   $: editableDataFormManager =
     dataFormManager instanceof EditableDataFormManager
+      ? dataFormManager
+      : undefined;
+  $: filloutDataFormManager =
+    dataFormManager instanceof DataFormFillOutManager
       ? dataFormManager
       : undefined;
 
@@ -47,6 +53,13 @@
     }
   })();
   $: fileManifest = fileManifests.derivedValue(fileMash);
+  $: token = ensureReadable(filloutDataFormManager?.token);
+  $: fileRequestParams = $token
+    ? {
+        form_token: $token,
+        form_field_key: dataFormField.key,
+      }
+    : undefined;
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
@@ -61,6 +74,7 @@
     setRecordSummary={(key, summary) => recordSummaries.set(key, summary)}
     fileManifest={$fileManifest}
     setFileManifest={(mash, manifest) => fileManifests.set(mash, manifest)}
+    {fileRequestParams}
     {placeholder}
   />
   {#if displayError}

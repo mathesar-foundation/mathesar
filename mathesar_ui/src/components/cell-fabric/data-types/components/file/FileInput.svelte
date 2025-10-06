@@ -34,6 +34,8 @@
   export let setFileManifest:
     | ((mash: string, manifest: FileManifest) => void)
     | undefined = undefined;
+  export let fileRequestParams: FileAttachmentRequestParams | undefined =
+    undefined;
 
   let element: HTMLSpanElement;
 
@@ -69,7 +71,9 @@
     if (disabled) return; // Disallow uploads on read-only inputs
     if (!modalFileAttachmentUploader) return;
     const attachment =
-      await modalFileAttachmentUploader.acquireFileAttachment();
+      await modalFileAttachmentUploader.acquireFileAttachment(
+        fileRequestParams,
+      );
     if (!attachment) return;
     const fileReference = parseFileReference(attachment.result);
     if (!fileReference) return;

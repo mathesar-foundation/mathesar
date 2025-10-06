@@ -73,9 +73,9 @@ export function getQueryStringFromParams<T extends Record<string, unknown>>(
   return new URLSearchParams(entries).toString();
 }
 
-export function addQueryParamsToUrl(
+export function addQueryParamsToUrl<T extends Record<string, unknown>>(
   url: string,
-  queryParams?: Record<string, unknown>,
+  queryParams?: T,
 ) {
   if (queryParams) {
     return `${url}?${getQueryStringFromParams(queryParams)}`;
