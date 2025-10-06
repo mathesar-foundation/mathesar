@@ -1629,11 +1629,42 @@ BEGIN
       2, jsonb_build_object('type', 'text'),
       3, jsonb_build_object('type', 'boolean', 'details', jsonb_build_object('mathesar_casting', true)),
       4, jsonb_build_object('type', 'date', 'details', jsonb_build_object('mathesar_casting', true)),
-      5, jsonb_build_object('type', 'numeric', 'details', jsonb_build_object('mathesar_casting', true, 'decimal_p', '.')),
+      5, jsonb_build_object('type', 'numeric', 'details', jsonb_build_object('mathesar_casting', true, 'decimal_p', '.', 'group_sep', '')),
       6, jsonb_build_object('type', 'interval', 'details', jsonb_build_object('mathesar_casting', true)),
       7, jsonb_build_object('type', 'text'),
       8, jsonb_build_object('type', 'mathesar_types.mathesar_money', 'details', jsonb_build_object('curr_pref', '$', 'curr_suff', '', 'decimal_p', '.', 'group_sep', ',', 'mathesar_casting', true))
     )
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_retype_col_sql() RETURNS SETOF TEXT AS $f$
+DECLARE
+  tab_id regclass;
+  cast_options_1 jsonb := '{"mathesar_casting": true}'::jsonb;
+  cast_options_2 jsonb := '{"decimal_p": ".", "group_sep": "", "mathesar_casting": true}'::jsonb;
+  cast_options_3 jsonb := '{"curr_pref": "$", "curr_suff": "", "decimal_p": ".", "group_sep": ",", "mathesar_casting": true}'::jsonb;
+BEGIN
+  PERFORM __setup_type_inference();
+  tab_id := '"Types Test"'::regclass;
+  RETURN NEXT is(
+    msar.retype_column(tab_id, 3::smallint, 'boolean'::text, cast_options_1),
+    'ALTER TABLE public."Types Test" '
+    || 'ALTER COLUMN "Boolean" TYPE boolean '
+    || 'USING msar.cast_to_boolean("Boolean")'
+  );
+  RETURN NEXT is(
+    msar.retype_column(tab_id, 5::smallint, 'numeric'::text, cast_options_2),
+    'ALTER TABLE public."Types Test" '
+    || 'ALTER COLUMN "Numeric" TYPE numeric '
+    || 'USING msar.cast_to_numeric("Numeric", group_sep =>''''::"char", decimal_p =>''.''::"char")'
+  );
+  RETURN NEXT is(
+    msar.retype_column(tab_id, 8::smallint, 'mathesar_types.mathesar_money'::text, cast_options_3),
+    'ALTER TABLE public."Types Test" '
+    || 'ALTER COLUMN "Money" TYPE mathesar_types.mathesar_money '
+    || 'USING msar.cast_to_mathesar_money("Money", group_sep =>'',''::"char", decimal_p =>''.''::"char", curr_pref =>''$''::text, curr_suff =>''''::text)'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -1933,27 +1964,6 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_process_col_alter_jsonb() RETURNS SETOF TEXT AS $f$/*
-These don't actually modify the table, so we can run multiple tests in the same test.
-
-Only need to test null/empty behavior here, since main functionality is tested by testing
-msar.alter_columns
-
-It's debatable whether this test should continue to exist, but it was useful for initial
-development, and runs quickly.
-*/
-DECLARE
-  tab_id oid;
-BEGIN
-  PERFORM __setup_column_alter();
-  tab_id := 'test_schema.col_alters'::regclass::oid;
-  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2}]'), null);
-  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2, "name": "blah"}]'), null);
-  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[]'), null);
-END;
-$f$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_alter_columns_single_name() RETURNS SETOF TEXT AS $f$

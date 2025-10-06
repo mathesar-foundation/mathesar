@@ -136,6 +136,7 @@ class SettableColumnInfo(TypedDict):
         id: The `attnum` of the column in the table.
         name: The name of the column.
         type: The type of the column on the database.
+        cast_options: Suggestions to be used while type casting.
         type_options: The options applied to the column type.
         nullable: Whether or not the column is nullable.
         default: The default value.
@@ -144,6 +145,7 @@ class SettableColumnInfo(TypedDict):
     id: int
     name: Optional[str]
     type: Optional[str]
+    cast_options: Optional[dict]
     type_options: Optional[TypeOptions]
     nullable: Optional[bool]
     default: Optional[ColumnDefault]
