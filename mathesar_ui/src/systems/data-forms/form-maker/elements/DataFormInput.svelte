@@ -1,9 +1,11 @@
 <script lang="ts">
+  import type { FileManifest } from '@mathesar/api/rpc/records';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { FieldErrors } from '@mathesar/components/form';
   import {
     type LabelController,
     WritableMap,
+    hasStringProperty,
   } from '@mathesar-component-library';
 
   import {
@@ -13,6 +15,7 @@
   import type { ColumnBasedDataFormField } from '../data-form-utilities/fields';
 
   const recordSummaries = new WritableMap<string, string>();
+  const fileManifests = new WritableMap<string, FileManifest>();
 
   export let dataFormManager: DataFormManager;
   export let dataFormField: ColumnBasedDataFormField;
@@ -32,6 +35,18 @@
 
   $: displayError = !editableDataFormManager && $showsError;
   $: recordSummary = recordSummaries.derivedValue(String($inputField));
+  $: fileMash = (() => {
+    try {
+      const obj =
+        typeof $inputField === 'object'
+          ? $inputField
+          : JSON.parse(String($inputField));
+      return hasStringProperty(obj, 'mash') ? obj.mash : String($inputField);
+    } catch {
+      return String($inputField);
+    }
+  })();
+  $: fileManifest = fileManifests.derivedValue(fileMash);
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
@@ -44,6 +59,8 @@
     disabled={$disabled}
     recordSummary={$recordSummary}
     setRecordSummary={(key, summary) => recordSummaries.set(key, summary)}
+    fileManifest={$fileManifest}
+    setFileManifest={(mash, manifest) => fileManifests.set(mash, manifest)}
     {placeholder}
   />
   {#if displayError}
