@@ -166,7 +166,7 @@
   "create_table_move_columns": "Create Table and Move Columns",
   "currently_installed": "Currently Installed",
   "custom": "Custom",
-  "custom_database_nickname_label_help": "Selecting this option can help you differentiate between multiple databases with the name name on separate PostgreSQL severs. You can modify this later if needed.",
+  "custom_database_nickname_label_help": "Selecting this option can help you differentiate between multiple databases with the same name on separate PostgreSQL servers. You can modify this later if needed.",
   "custom_default": "Custom Default",
   "custom_fields": "Custom Fields",
   "customization": "Customization",
