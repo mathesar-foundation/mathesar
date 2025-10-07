@@ -159,7 +159,7 @@ const docsPages = {
   fileDataType: '/user-guide/data-types/#file',
   import: '/user-guide/importing-data/',
   internalSchemas: '/user-guide/schemas/#internal',
-  metadata: '/user-guide/metadata/',
+  metadata: '/user-guide/databases#understanding-mathesars-metadata/',
   relationships: '/user-guide/relationships/',
   roles: '/user-guide/roles/',
   rolesInheritance: '/user-guide/roles/#inheritance',

@@ -56,6 +56,10 @@ x-config: &config
   # (Optional) Replace '5432' with the port on which postgres is running
   POSTGRES_PORT: ${POSTGRES_PORT:-5432}
 
+  # (Optional) Can be used to configure an S3-compliant file storage backend
+  # instead of a file_storage.yml configuration file.
+  FILE_STORAGE_DICT: ${FILE_STORAGE_DICT:-{}}
+
   # (Optional) Can be used to configure single-sign on (sso) instead of an
   # sso.yml configuration file.
   # See https://docs.mathesar.org/administration/single-sign-on/ for additional
@@ -104,6 +108,11 @@ x-config: &config
 #     Info: Specifies the port on which portgres listen for connections from
 #           client applications.
 #     Example: 5555
+#
+# FILE_STORAGE_DICT:
+#     Default: {}
+#     Info: Specifies the settings necessary to configure an S3-complaint
+#           filestorage backend.
 #
 # OIDC_CONFIG_DICT:
 #   Default: {}
@@ -168,10 +177,20 @@ services:
       # leave this as-is.
       SECRET_KEY: ${SECRET_KEY-}
 
+      # If you are running Mathesar on a particularly powerful machine, you can
+      # improve performance by increasing this setting. Replace '3' below with
+      # 2 * $(NUM_CORES) + 1. So if you have a VPS with 4 vCPUs you can use a
+      # value of 2 * 4 + 1, or 9. The default is workable as long as you have at
+      # least 1 logical core.
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY-3}
+
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
       - ./msar/secrets:/code/.secrets
+      # Uncomment the following to mount file_storage.yml and enable
+      #  an S3-compliant file storage backend
+      # - ./file_storage.yml:/code/file_storage.yml
       # Uncomment the following to mount sso.yml and enable Single Sign-On (SSO).
       # - ./sso.yml:/code/sso.yml
     depends_on:
