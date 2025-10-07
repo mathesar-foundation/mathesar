@@ -79,7 +79,6 @@ def export_exploration(request):
     form = ExportExplorationQueryForm(request.GET)
     if form.is_valid():
         data = form.cleaned_data
-        print(data)
         return stream_exploration_as_csv(
             request=request,
             database_id=data['database_id'],
