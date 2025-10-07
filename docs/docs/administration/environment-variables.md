@@ -23,8 +23,9 @@ This page contains all available environment variables supported by Mathesar. Se
 
 ### `WEB_CONCURRENCY` {: #web_concurrency}
 
-- **Description**: Sets the number of Gunicorn workers, affecting the number of concurrent requests Mathesar can handle. Bigger is better, subject to system resources. The typically-recommended number is `2 * $(NUM_PROC) + 1`, where `NUM_PROC` is the number of logical cores on your machine. So, if Mathesar is running on a server with 4 vCPUs, then this should be set to 9.
+- **Description**: Sets the number of sync Gunicorn workers, affecting the number of concurrent requests Mathesar can handle. Bigger is better, subject to system resources. The typically-recommended number is `2 * $(NUM_PROC) + 1`, where `NUM_PROC` is the number of logical cores on your machine. So, if Mathesar is running on a server with 4 vCPUs, then this should be set to 9.
 - **Format**: An integer.
+- **Default value**: `3`
 
 
 ## Internal database configuration {: #db}
@@ -114,8 +115,8 @@ The database specified in this section is used to store Mathesar's internal data
 
 ### `FILE_STORAGE_DICT` (optional)
 
-- **Description**: The configuration for enabling SSO and configuring providers in Mathesar.
-- **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example).
+- **Description**: The configuration to connect Mathesar to an S3-compatible [file storage backend](../administration/file-backend-config.md).
+- **Format**: A stringified JSON representation of the config in the [`file_storage.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/file_storage.yml.example).
 
     !!! example
         ```env
