@@ -154,6 +154,25 @@ def run_saved_exploration(exp_model, limit, offset, conn):
     return run_exploration(exploration_def, conn, limit, offset)
 
 
+def exploration_chunker(
+    conn,
+    exploration_id,
+    limit=None,
+    offset=None,
+    batch_size=2000
+):
+    exp_model = get_exploration(exploration_id)
+    exp_results = run_saved_exploration(exp_model, limit, offset, conn)
+    yield exp_results["output_columns"]
+    records = exp_results["records"]
+    if records["count"] <= batch_size:
+        yield records["results"]
+    else:
+        chunks = records["count"] // batch_size
+        for i in range(chunks + 1):
+            yield records["results"][i * batch_size:(i + 1) * batch_size]
+
+
 def _get_exploration_column_metadata(
     exploration_def,
     processed_initial_columns,
