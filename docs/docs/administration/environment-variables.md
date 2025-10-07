@@ -23,8 +23,9 @@ This page contains all available environment variables supported by Mathesar. Se
 
 ### `WEB_CONCURRENCY` {: #web_concurrency}
 
-- **Description**: Sets the number of Gunicorn workers, affecting the number of concurrent requests Mathesar can handle. Bigger is better, subject to system resources. The typically-recommended number is `2 * $(NUM_PROC) + 1`, where `NUM_PROC` is the number of logical cores on your machine. So, if Mathesar is running on a server with 4 vCPUs, then this should be set to 9.
+- **Description**: Sets the number of sync Gunicorn workers, affecting the number of concurrent requests Mathesar can handle. Bigger is better, subject to system resources. The typically-recommended number is `2 * $(NUM_PROC) + 1`, where `NUM_PROC` is the number of logical cores on your machine. So, if Mathesar is running on a server with 4 vCPUs, then this should be set to 9.
 - **Format**: An integer.
+- **Default value**: `3`
 
 
 ## Internal database configuration {: #db}
@@ -104,5 +105,24 @@ The database specified in this section is used to store Mathesar's internal data
 
 
 - **Additional information**: The following tools might help you convert the YAML syntax from `sso.yml` into the proper format:
+    - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
+    - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
+
+## File backend configuration
+
+!!! info "**OPTIONAL**"
+    Only needed if [using file columns](../user-guide/files.md), in installations where the local filesystem is inaccessible.
+
+### `FILE_STORAGE_DICT` (optional)
+
+- **Description**: The configuration to connect Mathesar to an S3-compatible [file storage backend](../administration/file-backend-config.md).
+- **Format**: A stringified JSON representation of the config in the [`file_storage.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/file_storage.yml.example).
+
+    !!! example
+        ```env
+         FILE_STORAGE_DICT="{\"default\":{\"protocol\":\"s3\",\"nickname\":\"Example\",\"prefix\":\"mathesar-storage\",\"kwargs\":{\"client_kwargs\":{\"endpoint_url\":\"https:\/\/storage-example.mathesar.org\",\"region_name\":\"auto\",\"aws_access_key_id\":\"XXX\",\"aws_secret_access_key\":\"XXX\"}}}}"
+        ```
+
+- **Additional information**: The following tools might help you convert the YAML syntax from `file_storage.yml` into the proper format:
     - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
     - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
