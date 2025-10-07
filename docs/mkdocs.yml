@@ -36,7 +36,7 @@ nav:
           - Stored roles: user-guide/stored-roles.md
           - Collaborators: user-guide/collaborators.md
       - Features:
-          - File columns : user-guide/files.md
+          - File data type: user-guide/files.md
           - Data Explorer: user-guide/data-explorer.md
       - Data management:
           - Importing data: user-guide/importing-data.md

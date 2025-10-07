@@ -5,7 +5,7 @@
 
 	[Talk to us for 20 min](https://cal.com/mathesar/users)! We'll give you a $25 gift card as a thank you.
 
-Mathesar's [File columns](../user-guide/files.md) require you to configure an **S3-compatible object storage backend**. File storage allows users to upload, preview, and download files directly within Mathesar.
+Mathesar's [**file data type**](../user-guide/files.md) requires you to configure an **S3-compatible object storage backend**. File storage allows users to upload, preview, and download files directly within Mathesar.
 
 **Configuring file storage and using file columns is optional.** By default, Mathesar does not expose file column controls unless a storage backend is set up. If you do not set up a backend, users will not be able to work directly with files in Mathesar.
 
@@ -138,7 +138,7 @@ Once you've finished configuring storage, restart Mathesar so it can load the up
 
 After restarting, file columns will be enabled in your Mathesar installation. To test this, check the UI for adding a new file column.
 
-## Tips & Technical Information
+## Tips & technical information
 
 ### How files are stored
 
@@ -155,4 +155,4 @@ With the `uri` being the path to the file on the storage backend and the mash be
 
 ### Removing file backends
 
-If you remove a file backend, you'll no longer see the "File" option in the add column dropdown. Existing file data will be preserved in your database, but in Mathesar's UI you'll see the underlying JSONB instead of image thumbnails or file icons.
+If you remove a file backend, you'll no longer see the "File" option in the "add column" dropdown. Existing file data will be preserved in your database, but in Mathesar's UI you'll see the underlying JSONB instead of image thumbnails or file icons.
