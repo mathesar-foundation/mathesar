@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { Appearance, Size } from '../commonTypes';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
+
+  import type { Appearance, Size } from '../commonTypes';
 
   export let href: string;
 
@@ -16,7 +17,7 @@
    */
   export let size: Size = 'medium';
 
-  export let disabled: boolean = false;
+  export let disabled = false;
 
   let classes = '';
   export { classes as class };
