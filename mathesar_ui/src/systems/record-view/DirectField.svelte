@@ -4,6 +4,7 @@
   import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
+  import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import Null from '@mathesar/components/Null.svelte';
@@ -55,7 +56,7 @@
   export let field: FieldStore;
   export let canUpdateTableRecords = true;
 
-  $: ({ recordSummaries } = record);
+  $: ({ recordSummaries, fileManifests } = record);
   $: ({ column, abstractType, linkFk } = processedColumn);
   $: canUpdateColumn = processedColumn.currentRolePrivileges.has('UPDATE');
   $: value = $field;
@@ -70,6 +71,12 @@
     abstractType.cellInfo.type,
   );
   $: getRecordUrl = $storeToGetRecordPageUrl;
+  $: fileManifest = (() => {
+    if (!column.metadata?.file_backend) return undefined;
+    const fileReference = parseFileReference(value);
+    if (!fileReference) return undefined;
+    return $fileManifests.get(String(column.id))?.get(fileReference.mash);
+  })();
 
   function quickViewRecord() {
     if (!modalRecordView) return;
@@ -149,11 +156,19 @@
         .get(String(column.id))
         ?.get(String(value))}
       setRecordSummary={(recordId, recordSummary) =>
-        recordSummaries.addBespokeRecordSummary({
+        recordSummaries.addBespokeValue({
           columnId: String(column.id),
-          recordId,
-          recordSummary,
+          key: recordId,
+          value: recordSummary,
         })}
+      {fileManifest}
+      setFileManifest={(mash, manifest) => {
+        fileManifests.addBespokeValue({
+          columnId: String(column.id),
+          key: mash,
+          value: manifest,
+        });
+      }}
       hasError={$showsError}
       allowsHyperlinks
     />
@@ -168,7 +183,7 @@
   .direct-field:not(:last-child) .cell {
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom: solid var(--border-color) 1px;
+    border-bottom: solid var(--color-border-section) 1px;
   }
   .left {
     display: flex;

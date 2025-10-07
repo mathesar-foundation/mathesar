@@ -131,7 +131,7 @@
     <span class="selected-values">
       {#each values as value}
         <span class="selected-value">
-          <span class="label">
+          <span class="value">
             {#if $$slots.default}
               <slot option={value} label={getLabel(value)} />
             {:else}

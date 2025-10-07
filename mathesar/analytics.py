@@ -39,8 +39,7 @@ ANALYTICS_FREQUENCY = 1  # a report is saved at most once per day.
 def wire_analytics(f):
     @wraps(f)
     def wrapped(*args, **kwargs):
-        if settings.TEST is False and cache.get(ANALYTICS_DONE) is None:
-            cache.set(ANALYTICS_DONE, True, CACHE_TIMEOUT)
+        if settings.TEST is False and cache.add(ANALYTICS_DONE, True, CACHE_TIMEOUT):
             threading.Thread(target=run_analytics).start()
         return f(*args, **kwargs)
     return wrapped

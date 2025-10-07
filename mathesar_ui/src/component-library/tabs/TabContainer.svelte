@@ -21,7 +21,6 @@
   export let idKey = 'id';
   export let labelKey = 'label';
   export let linkKey = 'href';
-  export let allowRemoval = false;
   export let preventDefault = false;
   export let fillTabWidth = false;
   export let fillContainerHeight = false;
@@ -39,26 +38,6 @@
     dispatch('tabSelected', {
       tab,
       originalEvent: e,
-    });
-  }
-
-  function removeTab(e: { detail: Event }, index: number) {
-    const removedTab = tabs.splice(index, 1);
-    if (activeTab?.[idKey] === removedTab[0]?.[idKey]) {
-      if (tabs[index]) {
-        activeTab = tabs[index];
-      } else if (tabs[index - 1]) {
-        activeTab = tabs[index - 1];
-      } else {
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        activeTab = null;
-      }
-    }
-    tabs = ([] as Tab[]).concat(tabs);
-    dispatch('tabRemoved', {
-      removedTab: removedTab[0],
-      activeTab,
-      originalEvent: e.detail,
     });
   }
 
@@ -93,11 +72,10 @@
 >
   {#if !hideTabs}
     <ul role="tablist" class="tabs" class:fill-tab-width={fillTabWidth}>
-      {#each tabs as tab, index (tab[idKey] || tab)}
+      {#each tabs as tab (tab[idKey] || tab)}
         <TabComponent
           {componentId}
           {tab}
-          {allowRemoval}
           {uniformTabWidth}
           link={getTabLink(tab)}
           totalTabs={tabs.length}
@@ -106,7 +84,6 @@
           on:blur={blurTab}
           on:click={checkAndPreventDefault}
           on:mousedown={(e) => selectActiveTab(e, tab)}
-          on:remove={(e) => removeTab(e, index)}
         >
           <slot name="tab" {tab}>
             {tab[labelKey]}

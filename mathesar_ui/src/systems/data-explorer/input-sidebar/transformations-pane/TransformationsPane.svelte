@@ -217,7 +217,7 @@
       gap: 0.3rem;
 
       .number {
-        border: 1px solid var(--color-gray-medium);
+        border: 1px solid var(--color-border-section);
         border-radius: 100%;
         font-size: var(--sm2);
         font-variant-numeric: tabular-nums;

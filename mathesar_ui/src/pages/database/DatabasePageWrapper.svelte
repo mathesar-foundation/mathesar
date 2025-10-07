@@ -91,66 +91,65 @@
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
-  <AppSecondaryHeader
-    slot="secondary-header"
-    name={database.displayName}
-    entityTypeName={$_('database')}
-    icon={iconDatabase}
-  >
-    <div slot="subText" class="database-info">
-      <div class="connection-details">
-        <div>
-          <span class="label">{$_('db_server')}{staticText.COLON}</span>
-          {database.server.getConnectionString()}
-        </div>
-        <div>
-          <span class="label">{$_('db_name')}{staticText.COLON}</span>
-          {database.name}
+  <div class="database-page-header" slot="secondary-header">
+    <AppSecondaryHeader
+      icon={iconDatabase}
+      name={database.displayName}
+      entityTypeName={$_('database')}
+    >
+      <div slot="subText" class="database-info">
+        <div class="connection-details">
+          <div>
+            <span class="label">
+              {$_('postgres_database')}{staticText.COLON}
+            </span>
+            <code>
+              {database.name} @ {database.server.getConnectionString()}
+            </code>
+          </div>
         </div>
       </div>
-
-      {#if isMathesarAdmin}
-        <div class="edit-connection">
-          <Button on:click={() => editModal.open()} appearance="link">
-            <Icon {...iconEdit} />
-            <span>{$_('edit_connection')}</span>
+      <div slot="action">
+        <div class="actions-container">
+          <Button
+            appearance="secondary"
+            on:click={() => permissionsModal.open()}
+          >
+            <Icon {...iconPermissions} />
+            <span>{$_('database_permissions')}</span>
           </Button>
-        </div>
-      {/if}
-    </div>
-    <div slot="action">
-      <div class="actions-container">
-        <Button appearance="secondary" on:click={() => permissionsModal.open()}>
-          <Icon {...iconPermissions} />
-          <span>{$_('database_permissions')}</span>
-        </Button>
-
-        {#if isMathesarAdmin}
-          <div class="dropdown-container">
-            <DropdownMenu
-              showArrow={false}
-              triggerAppearance="secondary"
-              closeOnInnerClick={false}
-              icon={iconMoreActions}
-              preferredPlacement="bottom-end"
-            >
-              <ButtonMenuItem
-                icon={iconDeleteMajor}
-                on:click={() => disconnectModal.open(database)}
+          {#if isMathesarAdmin}
+            <div class="dropdown-container">
+              <DropdownMenu
+                showArrow={false}
+                triggerAppearance="secondary"
+                closeOnInnerClick={false}
+                icon={iconMoreActions}
+                preferredPlacement="bottom-end"
               >
-                {$_('disconnect_database')}
-              </ButtonMenuItem>
-              <ButtonMenuItem
-                icon={iconReinstall}
-                on:click={() => reinstallModal.open(database)}
-              >
-                {$_('reinstall_mathesar_schemas')}
-              </ButtonMenuItem>
-              <!--
+                <ButtonMenuItem
+                  icon={iconDeleteMajor}
+                  on:click={() => disconnectModal.open(database)}
+                >
+                  {$_('disconnect_database')}
+                </ButtonMenuItem>
+                <ButtonMenuItem
+                  icon={iconEdit}
+                  on:click={() => editModal.open()}
+                >
+                  {$_('edit_connection')}
+                </ButtonMenuItem>
+                <ButtonMenuItem
+                  icon={iconReinstall}
+                  on:click={() => reinstallModal.open(database)}
+                >
+                  {$_('reinstall_mathesar_schemas')}
+                </ButtonMenuItem>
+                <!--
                 TODO: Allow dropping databases
                 https://github.com/mathesar-foundation/mathesar/issues/3862
               -->
-              <!-- {#if isDatabaseInInternalServer}
+                <!-- {#if isDatabaseInInternalServer}
                 <ButtonMenuItem
                   icon={iconDeleteMajor}
                   danger
@@ -159,12 +158,13 @@
                   {$_('delete_database')}
                 </ButtonMenuItem>
               {/if} -->
-            </DropdownMenu>
-          </div>
-        {/if}
+              </DropdownMenu>
+            </div>
+          {/if}
+        </div>
       </div>
-    </div>
-  </AppSecondaryHeader>
+    </AppSecondaryHeader>
+  </div>
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div class="tab-container">
@@ -207,12 +207,24 @@
 />
 
 <style>
+  .database-page-header {
+    --AppSecondaryHeader__background: linear-gradient(
+      135deg,
+      var(--color-bg-raised-1) 10%,
+      var(--color-bg-supporting) 30%,
+      var(--color-database-20) 50%,
+      var(--color-database-10) 100%
+    );
+    --entity-name-color: var(--color-database);
+  }
+
   .tab-container {
     padding: var(--lg3) 0;
   }
   .database-info {
     font-size: 1rem;
-    color: var(--text-color-secondary);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-fg-base);
     margin-top: var(--sm5);
   }
   .connection-details {
@@ -222,12 +234,8 @@
     flex-wrap: wrap;
   }
   .database-info .label {
-    color: var(--text-color-primary);
-    font-weight: var(--font-weight-bold);
-  }
-  .edit-connection {
-    margin-top: var(--sm1);
-    display: inline-flex;
+    color: var(--color-fg-subtle-1);
+    margin-right: var(--sm5);
   }
   .actions-container {
     display: flex;

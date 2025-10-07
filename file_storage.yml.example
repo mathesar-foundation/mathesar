@@ -1,0 +1,10 @@
+default:
+  protocol: s3
+  nickname: "Local object store"
+  prefix: mathesar-storages
+  kwargs:
+    client_kwargs:
+      endpoint_url: http://mathesar-dev-store:9000
+      region_name: us-east-2
+      aws_access_key_id: mathesar
+      aws_secret_access_key: mathesar

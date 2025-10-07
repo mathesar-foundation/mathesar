@@ -73,7 +73,7 @@
     <SubmissionSettings {dataFormManager} />
   </InspectorSection>
   <InspectorSection title={$_('actions')}>
-    <Button appearance="outline-primary" on:click={handleDelete}>
+    <Button appearance="danger" on:click={handleDelete}>
       <Icon {...iconDeleteMajor} />
       <span>{$_('delete_form')}</span>
     </Button>

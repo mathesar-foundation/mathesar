@@ -190,16 +190,7 @@
     }
 
     :global(.column-name-wrapper.selected) {
-      background: var(--neutral-200);
-    }
-    :global([data-sheet-element='data-cell'].selected) {
-      background: var(--hover-background);
-    }
-  }
-
-  :global(body.theme-dark) [data-identifier='query-run-result'] {
-    :global(.column-name-wrapper.selected) {
-      background: var(--neutral-700);
+      background: var(--color-selection);
     }
   }
 </style>

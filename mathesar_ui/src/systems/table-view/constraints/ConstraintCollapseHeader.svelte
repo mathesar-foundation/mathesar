@@ -43,9 +43,9 @@
 
   .column-name-container {
     font-size: var(--sm1);
-    background-color: var(--card-background);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius-xl);
+    background-color: var(--color-bg-raised-3);
+    border: 1px solid var(--color-border-raised-3);
+    border-radius: var(--border-radius-l);
     padding: 0.25rem 0.75rem;
     margin-bottom: var(--sm5);
     font-weight: var(--font-weight-bold);

@@ -156,7 +156,7 @@
 
     .null {
       font-style: italic;
-      color: var(--neutral-500);
+      color: var(--color-fg-base-muted);
     }
   }
 </style>

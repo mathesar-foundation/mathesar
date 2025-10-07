@@ -1,47 +1,19 @@
-import { map } from 'iter-tools';
+/**
+ * @file
+ *
+ * This module is vestigial cruft leftover from a refactor. It would be nice to
+ * clean this up at some point by either inlining these types or re-organizing
+ * them into a more intuitive location. I'm skipping that cleanup work for now,
+ * just for the sake of time.
+ */
 
-import type {
-  RecordSummaryColumnData,
-  RecordsResponse,
-} from '@mathesar/api/rpc/records';
-import { ImmutableMap } from '@mathesar-component-library';
+import type { ImmutableMap } from '@mathesar-component-library';
 
 /** Keys are stringifed record ids */
-export type RecordSummariesForColumn = ImmutableMap<string, string>;
-
-function buildRecordSummariesForColumn(
-  d: RecordSummaryColumnData,
-): RecordSummariesForColumn {
-  return new ImmutableMap(Object.entries(d));
-}
+type RecordSummariesForColumn = ImmutableMap<string, string>;
 
 /** Keys are stringified column ids */
 export type RecordSummariesForSheet = ImmutableMap<
   string,
   RecordSummariesForColumn
 >;
-
-export function buildRecordSummariesForSheet(
-  d: RecordsResponse['linked_record_summaries'],
-): RecordSummariesForSheet {
-  return new ImmutableMap(
-    map(
-      ([k, v]) => [k, buildRecordSummariesForColumn(v)],
-      Object.entries(d ?? {}),
-    ),
-  );
-}
-
-function mergeRecordSummariesForColumn(
-  a: RecordSummariesForColumn,
-  b: RecordSummariesForColumn,
-): RecordSummariesForColumn {
-  return a.withEntries(b);
-}
-
-export function mergeRecordSummariesForSheet(
-  a: RecordSummariesForSheet,
-  b: RecordSummariesForSheet,
-): RecordSummariesForSheet {
-  return a.withEntries(b, mergeRecordSummariesForColumn);
-}

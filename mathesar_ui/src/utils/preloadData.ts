@@ -40,6 +40,7 @@ export interface AuthenticatedCommonData extends BaseCommonData {
   current_schema: number | null;
   user: User;
   routing_context: 'normal';
+  file_backends: string[] | null;
 }
 
 export interface AnonymousCommonData extends BaseCommonData {

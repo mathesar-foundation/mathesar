@@ -51,7 +51,7 @@
   $: ({ isSelected, isImmediateChildSelected, isAnyChildSelected } =
     selectionOpts);
 
-  function onClick(e: Event) {
+  function activate(e: Event) {
     if (editableDataFormManager) {
       e.stopPropagation();
       editableDataFormManager.selectElement(element);
@@ -60,13 +60,14 @@
 </script>
 
 <div
-  tabindex={editableDataFormManager ? 0 : undefined}
   data-form-selectable
   class:can-select={!!editableDataFormManager}
   class:selected={isSelected}
   class:immediate-child-selected={isImmediateChildSelected}
   class:some-child-selected={isAnyChildSelected}
-  on:click={onClick}
+  on:click={activate}
+  on:focus={activate}
+  on:focusin={activate}
   use:sortableItem
 >
   {#if isSelected && $$slots.header}
@@ -138,7 +139,7 @@
   // background is set because fields can overlap when dragging to rearrange,
   // and it looks awkward without a background.
   :global([data-form-selectable][data-sortable-item].is-dragging) {
-    background: var(--elevated-background);
+    background: var(--color-bg-raised-2);
     z-index: var(--df__internal__z-index__field-being-dragged);
   }
 

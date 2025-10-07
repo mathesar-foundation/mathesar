@@ -7,6 +7,7 @@ export { default as clickOffBounds } from './common/actions/clickOffBounds';
 export { default as popper } from './common/actions/popper';
 export { default as portal } from './common/actions/portal';
 export { default as slider } from './common/actions/slider';
+export { default as focusTrap } from './common/actions/focusTrap';
 
 // Simple Components
 export { default as AnchorButton } from './anchorButton/AnchorButton.svelte';
@@ -18,7 +19,6 @@ export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as BooleanCheckbox } from './checkbox/BooleanCheckbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
-export { default as Chip } from './chip/Chip.svelte';
 export { default as Collapsible } from './collapsible/Collapsible.svelte';
 export { default as ContextMenu } from './context-menu/ContextMenu.svelte';
 export { default as Debounce } from './debounce/Debounce.svelte';

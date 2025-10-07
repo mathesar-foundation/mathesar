@@ -31,7 +31,7 @@
   export let recordPk: string;
   export let recordSummary: string;
   export let table: Table;
-  export let fkColumn: Pick<RawColumnWithMetadata, 'id' | 'name'>;
+  export let fkColumn: Pick<RawColumnWithMetadata, 'id' | 'name' | 'metadata'>;
 
   $: tabularData = new TabularData({
     database: table.schema.database,
@@ -64,6 +64,7 @@
                 name: fkColumn.name,
                 type: 'unknown',
                 type_options: null,
+                metadata: fkColumn.metadata,
                 constraintsType: ['foreignkey'],
               }}
               truncate={false}
@@ -98,7 +99,7 @@
     justify-content: space-between;
     align-items: center;
     overflow: hidden;
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
     margin-bottom: var(--sm1);
   }
   .top > :global(*) {
@@ -109,5 +110,6 @@
   }
   .results {
     margin-top: var(--sm1);
+    border: transparent;
   }
 </style>

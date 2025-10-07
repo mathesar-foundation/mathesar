@@ -20,4 +20,5 @@ export interface SelectionListProps<Option> extends BaseInputProps {
    */
   autoSelect?: 'first' | 'clear' | 'none';
   offsetOnFocus?: number;
+  isOptionDisabled?: ListBoxProps<Option>['checkIfOptionIsDisabled'];
 }

@@ -5,26 +5,42 @@
     Icon,
     Tooltip,
     Truncate,
+    makeStyleStringFromCssVariables,
   } from '@mathesar-component-library';
-  import type { IconProps } from '@mathesar-component-library/types';
+  import type {
+    CssVariablesObj,
+    IconProps,
+  } from '@mathesar-component-library/types';
 
   export let href: string;
   export let icon: IconProps;
   export let name: string;
-  export let description: string | undefined;
+  export let description: string | undefined = undefined;
   /**
    * If this entity is in a pending state, the given message will explain why
    * (e.g. an unconfirmed table import).
    */
   export let pendingMessage: string | undefined = undefined;
   export let primary = false;
+  export let cssVariables: CssVariablesObj | undefined = undefined;
+
+  $: style = cssVariables
+    ? makeStyleStringFromCssVariables(cssVariables)
+    : undefined;
 </script>
 
-<div class="entity-list-item" class:pending={!!pendingMessage} class:primary>
+<div
+  class="entity-list-item"
+  class:pending={!!pendingMessage}
+  class:primary
+  {style}
+>
   <a class="link passthrough" {href} aria-label={name}>
     <div class="top">
       <div class="name">
-        <Icon {...icon} />
+        <span class="icon">
+          <Icon {...icon} />
+        </span>
         <span>{name}</span>
       </div>
       {#if description && !primary}
@@ -53,23 +69,27 @@
     {/if}
   </a>
 
-  <div class="actions">
-    <slot name="action-buttons" />
-    <div class="menu-container">
-      <DropdownMenu
-        showArrow={false}
-        triggerAppearance="plain"
-        triggerClass="dropdown-menu-button"
-        closeOnInnerClick={true}
-        placements={['bottom-end', 'right-start', 'left-start']}
-        label=""
-        icon={iconMoreActions}
-        size="small"
-      >
-        <slot name="menu" />
-      </DropdownMenu>
+  {#if $$slots['action-buttons'] || $$slots.menu}
+    <div class="actions">
+      <slot name="action-buttons" />
+      {#if $$slots.menu}
+        <div class="menu-container">
+          <DropdownMenu
+            showArrow={false}
+            triggerAppearance="plain"
+            triggerClass="dropdown-menu-button"
+            closeOnInnerClick={true}
+            placements={['bottom-end', 'right-start', 'left-start']}
+            label=""
+            icon={iconMoreActions}
+            size="small"
+          >
+            <slot name="menu" />
+          </DropdownMenu>
+        </div>
+      {/if}
     </div>
-  </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -88,40 +108,53 @@
   }
 
   .entity-list-item.primary {
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--card-border-color);
     background-color: var(--card-background);
-  }
 
-  .entity-list-item.primary + :global(.entity-list-item.primary) {
-    border-top: none;
-  }
+    & + :global(.entity-list-item.primary) {
+      border-top: 1px solid transparent;
+    }
 
-  .entity-list-item.primary:first-child {
+    &:first-child {
+      --corner-tl: var(--border-radius-l);
+      --corner-tr: var(--border-radius-l);
+    }
+    &:last-child {
+      --corner-br: var(--border-radius-l);
+      --corner-bl: var(--border-radius-l);
+    }
+  }
+  .entity-list-item:not(.primary) {
     --corner-tl: var(--border-radius-l);
     --corner-tr: var(--border-radius-l);
-  }
-  .entity-list-item.primary:last-child {
     --corner-br: var(--border-radius-l);
     --corner-bl: var(--border-radius-l);
   }
 
-  .entity-list-item:has(.link:focus):not(:hover) {
-    outline: 1px solid var(--card-focus-outline);
-    outline-offset: -1px;
+  .entity-list-item:has(.link:focus) {
+    outline: 1px solid var(--card-focus-outline-color);
+    outline-offset: 2px;
+    z-index: 1;
+    box-shadow: var(--card-focus-box-shadow);
   }
 
   .entity-list-item:has(.link:hover) {
-    background: var(--card-hover-background);
+    background: color-mix(
+      in srgb,
+      var(--EntityListItem__accent-color, var(--color-navigation)),
+      transparent 90%
+    );
   }
 
-  .entity-list-item.primary:has(.link:hover) {
-    background: var(--card-hover-background);
+  .entity-list-item:has(.link:hover) {
     padding-left: 0;
+
     &::before {
       content: '';
       border-radius: var(--corner-tl) var(--corner-tr) var(--corner-br)
         var(--corner-bl);
-      border-left: solid 3px var(--salmon-400);
+      border-left: solid 3px
+        var(--EntityListItem__accent-color, var(--color-navigation));
       position: absolute;
       height: 100%;
       width: 10px;
@@ -129,11 +162,6 @@
       left: 0;
       pointer-events: none;
     }
-  }
-
-  .entity-list-item.pending {
-    color: var(--text-color-muted);
-    background-color: var(--disabled-background);
   }
 
   .link {
@@ -152,7 +180,7 @@
     .detail {
       margin: var(--sm6) 0 0 var(--lg1);
       font-size: var(--sm1);
-      color: var(--text-color-muted);
+      color: var(--color-fg-subtle-2);
     }
   }
   .entity-list-item.primary .link {
@@ -161,6 +189,10 @@
 
   .name {
     font-weight: var(--font-weight-medium);
+
+    .icon {
+      color: var(--EntityListItem__accent-color, var(--color-fg-base));
+    }
   }
   .entity-list-item.primary .name {
     font-size: var(--lg1);
@@ -168,18 +200,20 @@
 
   .description {
     overflow: hidden;
+    color: var(--color-fg-subtle-1);
   }
   .description-icon {
-    color: var(--text-color-muted);
+    color: var(--color-fg-subtle-2);
     font-size: var(--sm1);
   }
 
   .pending-message {
     font-size: var(--sm1);
     padding: 0.25rem 0.5rem;
-    border-radius: var(--border-radius-m);
-    background: var(--warning-background-color);
-    color: var(--warning-color);
+    border: 1px solid var(--color-border-warning);
+    border-radius: var(--border-radius-l);
+    background: var(--color-bg-warning);
+    color: var(--color-fg-warning);
   }
 
   .actions {

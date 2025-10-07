@@ -18,3 +18,10 @@ def set_columns_meta_data(column_meta_data_list, table_oid, database_id):
             defaults=meta_data_dict
         )
     return get_columns_meta_data(table_oid, database_id)
+
+
+def get_download_link_columns(table_oid, database_id):
+    return [
+        c.attnum for c in get_columns_meta_data(table_oid, database_id)
+        if c.file_backend
+    ]

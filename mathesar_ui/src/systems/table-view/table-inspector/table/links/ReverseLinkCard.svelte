@@ -29,6 +29,7 @@
               name: referencingColumn.name,
               type: '',
               type_options: null,
+              metadata: null,
               constraintsType: ['foreignkey'],
             }}
             truncate={false}

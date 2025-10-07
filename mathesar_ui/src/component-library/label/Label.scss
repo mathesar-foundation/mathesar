@@ -4,7 +4,7 @@
     cursor: pointer;
   }
   &.disabled {
-    color: #777;
+    color: var(--color-fg-base-disabled);
     cursor: not-allowed;
   }
 }

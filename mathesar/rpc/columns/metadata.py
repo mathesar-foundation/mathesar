@@ -31,6 +31,7 @@ class ColumnMetaDataRecord(TypedDict):
         duration_min: The smallest unit for displaying durations.
         duration_max: The largest unit for displaying durations.
         display_width: The pixel width of the column
+        file_backend: The name of a backend for storing file attachments.
     """
     database_id: int
     table_oid: int
@@ -70,6 +71,7 @@ class ColumnMetaDataRecord(TypedDict):
             duration_min=model.duration_min,
             duration_max=model.duration_max,
             display_width=model.display_width,
+            file_backend=model.file_backend,
         )
 
 
@@ -92,7 +94,8 @@ class ColumnMetaDataBlob(TypedDict):
         date_format: A string representing the format of date values.
         duration_min: The smallest unit for displaying durations.
         duration_max: The largest unit for displaying durations.
-        display_width: The pixel width of the column
+        display_width: The pixel width of the column.
+        file_backend: The name of a backend for storing file attachments.
     """
     attnum: int
     bool_input: Optional[Literal["dropdown", "checkbox"]]
@@ -128,6 +131,7 @@ class ColumnMetaDataBlob(TypedDict):
             duration_min=model.duration_min,
             duration_max=model.duration_max,
             display_width=model.display_width,
+            file_backend=model.file_backend,
         )
 
 

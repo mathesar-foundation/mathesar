@@ -26,7 +26,7 @@
       throw new Error('Current database not set');
     }
     const referentTableColumns = await api.columns
-      .list({
+      .list_with_metadata({
         database_id: database.id,
         table_oid: _constraint.referent_table_oid,
       })
@@ -79,16 +79,10 @@
 
   .entity-name-container {
     font-size: var(--sm1);
-    background-color: var(--neutral-200);
+    background-color: var(--color-bg-raised-2);
     border-radius: var(--border-radius-xl);
     padding: 0.285rem 0.428rem;
     font-weight: var(--font-weight-bold);
-
-    :global(body.theme-dark) & {
-      background-color: var(--stormy-800);
-      border: 1px solid var(--stormy-600);
-      color: var(--text-color-secondary);
-    }
   }
 
   .target {
