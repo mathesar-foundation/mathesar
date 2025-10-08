@@ -69,7 +69,7 @@
       {% load socialaccount %}
       {% get_providers as socialaccount_providers %}
       {% for provider in socialaccount_providers %}
-        <a class="btn btn-outline-primary" href="{% provider_login_url provider process='login'%}">
+        <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
         <img src="{% static 'images/sso/' %}{{ provider }}.svg" alt="{{ provider|capfirst }} logo"
           style="height:1em; vertical-align:middle; margin-right:0.5em" onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
         Login with {{provider|capfirst}}</a>

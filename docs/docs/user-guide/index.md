@@ -8,7 +8,7 @@ You can use Mathesar with PostgreSQL data sets you already have. Point it at you
 
 Or you can use Mathesar to build data sets and workflows from scratch, giving you a robust and highly scalable alternative to typical spreadsheet-based solutions.
 
-The Mathesar application has a small internal database where it stores the [users](./users.md) you create, the database [connection credentials](./databases.md#connection) you add, the [data explorations](./data-explorer.md) you save, and a small amount of [metadata](./metadata.md) which you may configure. But all your _actual_ data lives in your PostgreSQL database &mdash; outside Mathesar. The extensive interoperability afforded by PostgreSQL means you'll always have control over your data should you later choose to use incorporate other tools into your workflow or abandon Mathesar altogether.
+The Mathesar application has a small internal database where it stores the [users](./users.md) you create, the database [connection credentials](./databases.md#connection) you add, the [data explorations](./data-explorer.md) you save, and a small amount of [metadata](./databases.md#metadata) which you may configure. But all your _actual_ data lives in your PostgreSQL database &mdash; outside Mathesar. The extensive interoperability afforded by PostgreSQL means you'll always have control over your data should you later choose to use incorporate other tools into your workflow or abandon Mathesar altogether.
 
 ## About PostgreSQL {:#postgres}
 
@@ -19,4 +19,3 @@ While the choice to support PostgreSQL in a product like Mathesar would be obvio
 A short-term consequence of this development strategy is that, for the time being, Mathesar _only_ works with PostgreSQL databases. However we are hopeful that in the future we'll have the opportunity to leverage PostgreSQL's powerful [Foreign Data Wrapper](https://www.postgresql.org/docs/current/postgres-fdw.html) functionality to connect to other kinds of databases such as MySQL, SQLite, Oracle, MongoDB, and more.
 
 In order to function, Mathesar needs to install some functions on your PostgreSQL database. We install these functions inside [Mathesar-specific schemas](./schemas.md#internal) to separate them from any user defined functions on the database.
-

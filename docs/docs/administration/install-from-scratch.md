@@ -42,7 +42,7 @@ These steps create Mathesar's [internal database](../user-guide/databases.md#int
         Replace `strong‑pw‑here` with a strong, private password and make a note of it, you’ll need it later.
 
     !!! tip
-        About the extra privileges in the command,
+        About the extra privileges in the command:
 
         - **`CREATEDB`: gives the Postgres user permission to create new databases.**
             - It’s handy if you want Mathesar admins to spin up databases from the web interface.
@@ -202,6 +202,7 @@ Turn your local Mathesar installation into a public-facing production service.
     - Follow this section if you want Mathesar to run continuously on a server and be reachable by other users (with or without a public domain).
     - For personal use, evaluation, or on‑prem workstations, you can simply start Mathesar on demand with `mathesar run` and skip ahead to setting up your user account.
     - See our [guide to setting up single sign-on (SSO)](./single-sign-on.md) if that's of interest to you.
+    - Consider [configuring a file backend](./file-backend-config.md) to enable the file data type.
 
 !!! note "Linux-only"
     - The steps below **only target Linux servers** that use **systemd**.
@@ -210,6 +211,9 @@ Turn your local Mathesar installation into a public-facing production service.
 
 !!! note "Elevated permissions needed"
     Most of the commands below need to be run as a root user, or using `sudo`. If you try to run one of these commands, and see an error about "permission denied", run again with elevated privileges.
+
+!!! note "Gunicorn worker configuration"
+    By default Mathesar will use `3` Gunicorn sync workers. You may wish to adjust this if you're running Mathesar on a more powerful machine with additional vCPU cores. [See our recommendations for the `WEB_CONCURRENCY` env var to learn more](./environment-variables.md#web_concurrency).
 
 ### Run Mathesar as a systemd service
 

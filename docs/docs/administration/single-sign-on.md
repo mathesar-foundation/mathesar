@@ -50,7 +50,7 @@ Enabling SSO in Mathesar requires setting up a new configuration file or environ
 
 #### 2a. Create configuration file.
 
-You'll either create a file named `sso.yml` or set up the `OIDC_CONFIG_DICT` environmental variable. Which you create, and where you save it depends on how you installed Mathesar:
+You'll either create a file named `sso.yml` or set up the `OIDC_CONFIG_DICT` environment variable. Which you create, and where you save it depends on how you installed Mathesar:
 
 === "For Docker Compose installations"
 
@@ -238,7 +238,7 @@ This means that if you already have users in Mathesar, you can transition to SSO
 
 ## How to deactivate SSO
 
-You can remove the option for users to use SSO by deleting the `sso.yml` file or `OIDC_CONFIG_DICT` environmental variable and restarting Mathesar. Mathesar will then only support password-based authentication.
+You can remove the option for users to use SSO by deleting the `sso.yml` file or `OIDC_CONFIG_DICT` environment variable and restarting Mathesar. Mathesar will then only support password-based authentication.
 
 !!! danger "Deactivating SSO may require manual password resets"
 	Note that Mathesar users who only logged in via SSO will not have known passwords. If SSO is deactivated, these users will not be able to log in until an admin resets their password through the Mathesar UI.

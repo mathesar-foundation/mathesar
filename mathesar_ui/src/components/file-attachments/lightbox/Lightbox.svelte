@@ -273,7 +273,8 @@
       width: 100%;
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between;
+      justify-content: center;
+      gap: var(--sm2);
     }
 
     &:not(.show-button-labels) .button-label {
