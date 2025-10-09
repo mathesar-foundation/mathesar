@@ -51,7 +51,10 @@
 
   export let sheetElement: HTMLElement | undefined = undefined;
   export let onCellContextMenu:
-    | ((p: { targetCell: SheetCellDetails; position: ClientPosition }) => void)
+    | ((p: {
+        targetCell: SheetCellDetails;
+        position: ClientPosition;
+      }) => 'opened' | 'empty')
     | undefined = undefined;
 
   $: ({ columnStyleMap, rowWidth } = calculateColumnStyleMapAndRowWidth(
@@ -170,8 +173,10 @@
     const target = event.target as HTMLElement;
     const targetCell = findContainingSheetCell(target);
     if (!targetCell) return;
-    event.preventDefault();
-    onCellContextMenu({ targetCell, position: event });
+    const state = onCellContextMenu({ targetCell, position: event });
+    if (state === 'opened') {
+      event.preventDefault();
+    }
   }
 
   onMount(() => {

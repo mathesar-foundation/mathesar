@@ -128,8 +128,8 @@
             }
           }}
           onCellContextMenu={({ targetCell, position }) => {
-            if (!contextMenu) return;
-            openTableCellContextMenu({
+            if (!contextMenu) return 'empty';
+            return openTableCellContextMenu({
               targetCell,
               position,
               contextMenu,

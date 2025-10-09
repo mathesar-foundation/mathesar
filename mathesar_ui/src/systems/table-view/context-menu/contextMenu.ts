@@ -41,7 +41,7 @@ export function openTableCellContextMenu({
   modalRecordView: ModalController<RecordStore> | undefined;
   tabularData: TabularData;
   imperativeFilterController: ImperativeFilterController | undefined;
-}): void {
+}): 'opened' | 'empty' {
   const { selection } = tabularData;
 
   function* getEntriesForMultipleRows(rowIds: string[]) {
@@ -169,5 +169,8 @@ export function openTableCellContextMenu({
     'placeholder-row-header-cell': () => [],
   });
 
+  if (!entries.length) return 'empty';
+
   contextMenu.open({ position, entries });
+  return 'opened';
 }
