@@ -404,16 +404,23 @@ export class RecordsData {
       ].map((row) => row.record[pkColumn.id]);
 
       try {
-        await api.records
+        const deletedIds = await api.records
           .delete({
             database_id: this.apiContext.database_id,
             table_oid: this.apiContext.table_oid,
             record_ids: primaryKeysOfPersistedRows,
           })
           .run();
-        persistedRowsToDelete.forEach((row) =>
-          rowsSuccessfullyDeleted.add(row.identifier),
-        );
+        persistedRowsToDelete.forEach((row) => {
+          const rowId = row.record[pkColumn.id];
+          if (deletedIds.includes(rowId))
+            rowsSuccessfullyDeleted.add(row.identifier);
+          else
+            rowsFailedToDelete.set(
+              row.identifier,
+              RpcError.fromAnything('Unable to delete row'),
+            );
+        });
       } catch (error) {
         persistedRowsToDelete.forEach((row) =>
           rowsFailedToDelete.set(

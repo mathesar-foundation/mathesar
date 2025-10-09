@@ -5416,7 +5416,7 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS integer AS $$/*
+  msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS jsonb AS $$/*
 Delete records from table by id.
 
 Args:
@@ -5426,12 +5426,14 @@ Args:
 The table must have a single primary key column.
 */
 DECLARE
-  num_deleted integer;
+  pk_id integer;
+  ids_deleted jsonb;
 BEGIN
+  SELECT msar.get_pk_column(tab_id) INTO pk_id;
   EXECUTE format(
     $d$
     WITH delete_cte AS (DELETE FROM %1$I.%2$I %3$s RETURNING *)
-    SELECT count(1) FROM delete_cte
+    SELECT coalesce(json_agg(%4$I), '[]') FROM delete_cte
     $d$,
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
@@ -5440,15 +5442,16 @@ BEGIN
         'type', 'element_in_json_array_untyped', 'args', jsonb_build_array(
           jsonb_build_object(
             'type', 'format_data', 'args', jsonb_build_array(
-              jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
+              jsonb_build_object('type', 'attnum', 'value', pk_id)
             )
           ),
           jsonb_build_object('type', 'literal', 'value', rec_ids)
         )
       )
-    )
-  ) INTO num_deleted;
-  RETURN num_deleted;
+    ),
+    msar.get_column_name(tab_id, pk_id)
+  ) INTO ids_deleted;
+  RETURN ids_deleted;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
