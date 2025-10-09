@@ -169,7 +169,6 @@ def exploration_chunker(
         yield records["results"][i:i + batch_size]
 
 
-
 def _get_exploration_column_metadata(
     exploration_def,
     processed_initial_columns,
