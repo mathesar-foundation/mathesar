@@ -11,13 +11,18 @@
 
   $: props = $controller;
 
-  function handleClickBackdrop() {
+  function handleClickBackdrop(e: Event) {
     controller.close();
+    e.preventDefault();
   }
 </script>
 
 {#if props}
-  <div class="context-menu-backdrop" on:click={handleClickBackdrop} />
+  <div
+    class="context-menu-backdrop"
+    on:click={handleClickBackdrop}
+    on:contextmenu={handleClickBackdrop}
+  />
   <div
     class="context-menu dropdown content"
     use:popper={{ reference: getVirtualReferenceElement(props.position) }}
