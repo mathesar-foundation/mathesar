@@ -79,7 +79,7 @@
       let:api
     >
       <ScrollAndRowHeightHandler {api} />
-      {#each items as item (item.key)}
+      {#each items as item, i (i)}
         {@const shouldRender = !(
           isPlaceholderRecordRow($displayRowDescriptors[item.index].row) &&
           !$canInsertRecords
