@@ -59,6 +59,7 @@
             {#if columnAlreadyAdded}
               {$_('cannot_add_field_column_is_already_added')}
             {:else if isTypeFile}
+              <!-- TODO_FILES_IN_FORMS: Remove this logic when file handling is implemented. -->
               {$_('cannot_add_field_column_type_file')}
             {:else if isDynamicPk}
               {$_('cannot_add_field_column_value_is_dynamic_pk')}
