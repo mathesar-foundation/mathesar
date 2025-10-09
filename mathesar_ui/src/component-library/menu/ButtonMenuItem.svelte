@@ -28,7 +28,6 @@
   on:click={handleClick}
   {disabled}
   role="menuitem"
-  data-menu-item-focusable={disabled ? undefined : ''}
   class="menu-item menu-item-button"
   class:disabled
   class:danger

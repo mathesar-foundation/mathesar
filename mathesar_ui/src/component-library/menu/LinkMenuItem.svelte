@@ -14,7 +14,6 @@
 </script>
 
 <a
-  data-menu-item-focusable={disabled ? undefined : ''}
   class="menu-item menu-item-link"
   class:active
   class:disabled

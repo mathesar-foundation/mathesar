@@ -5,6 +5,8 @@
   import {
     blurElement,
     focusElement,
+    getFirstFocusableAncestor,
+    getFocusableDescendants,
   } from '@mathesar-component-library-dir/common/utils';
   import {
     makeStyleStringFromCssVariables,
@@ -51,7 +53,7 @@
 
   function handleMouseMove(e: MouseEvent) {
     const target = e.target as HTMLElement;
-    const item = target.closest('[data-menu-item-focusable]');
+    const item = getFirstFocusableAncestor(target);
     if (!item) return;
     focusElement(item);
 
@@ -63,9 +65,7 @@
   }
 
   function moveSelectionByOffset(offset: number) {
-    const elements = [
-      ...menuElement.querySelectorAll('[data-menu-item-focusable]'),
-    ];
+    const elements = [...getFocusableDescendants(menuElement)];
 
     const targetIndex = (() => {
       const focusedElement = document.activeElement;

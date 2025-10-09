@@ -1,82 +1,7 @@
 import { tick } from 'svelte';
 import type { ActionReturn } from 'svelte/action';
 
-import { focusElement, hasMethod, hasProperty } from '../utils';
-
-function getTabIndex(element: unknown): number | undefined {
-  return hasProperty(element, 'tabIndex') &&
-    typeof element.tabIndex === 'number'
-    ? element.tabIndex
-    : undefined;
-}
-
-/**
- * Yields focusable elements within a container. The elements are yielded in DOM
- * order (depth first, pre-order).
- */
-function* getFocusableElementsInDomOrder(
-  container: Element,
-): Generator<{ element: Element; tabIndex: number }> {
-  // Cast a wide net with selector for potentially focusable elements
-  const selectors = [
-    'input',
-    'button',
-    'select',
-    'textarea',
-    'a[href]',
-    'area[href]',
-    'iframe',
-    'object',
-    'embed',
-    '[tabindex]',
-    '[contenteditable="true"]',
-    '[contenteditable=""]',
-    'audio[controls]',
-    'video[controls]',
-    'details',
-    'summary',
-  ];
-  const potentiallyFocusable = container.querySelectorAll(selectors.join(', '));
-
-  for (const element of potentiallyFocusable) {
-    // Narrow the net by checking additional properties of each element...
-
-    const tabIndex = getTabIndex(element);
-
-    // Filter out elements which don't have a tabIndex property at all
-    if (tabIndex === undefined) continue;
-
-    // Filter out elements with negative tabIndex, e.g. div
-    if (tabIndex < 0) continue;
-
-    // Filter out disabled elements
-    if (hasProperty(element, 'disabled') && element.disabled) continue;
-
-    // Filter out elements that are not visible
-    const { display, visibility } = getComputedStyle(element);
-    if (display === 'none' || visibility === 'hidden') continue;
-
-    // Filter out hidden input elements
-    if (hasProperty(element, 'type') && element.type === 'hidden') continue;
-
-    // Yield most elements with a valid tabIndex
-    yield { element, tabIndex };
-  }
-}
-
-/**
- * Returns the focusable elements within a container. The elements are returned
- * sorted in tab order (i.e. the order of their tabIndex values primarily, and
- * then in DOM when their tabIndex values are equal).
- */
-function getFocusableElements(container: Element): Element[] {
-  const elements = Array.from(getFocusableElementsInDomOrder(container));
-
-  // Sort elements by tabIndex only, assuming stable sort keeps DOM order
-  elements.sort((a, b) => a.tabIndex - b.tabIndex);
-
-  return elements.map(({ element }) => element);
-}
+import { focusElement, getFocusableDescendants, hasMethod } from '../utils';
 
 interface FocusTrapOptions {
   /**
@@ -114,7 +39,7 @@ export default function focusTrap(
     // necessary because the list of focusable elements can change as state
     // changes (e.g. elements being added/removed from the DOM or state like
     // "disabled" being toggled).
-    const elements = getFocusableElements(container);
+    const elements = getFocusableDescendants(container);
     if (!elements.length) return;
 
     function wrap(index: number): number {
@@ -139,7 +64,7 @@ export default function focusTrap(
     previouslyFocusedElement = document.activeElement;
 
     if (fullOptions.autoFocus) {
-      const firstElement = getFocusableElements(container).at(0);
+      const firstElement = getFocusableDescendants(container).at(0);
       if (firstElement) {
         /*
          * When the element is immediately focused, keydown events seem to get

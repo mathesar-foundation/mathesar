@@ -31,12 +31,7 @@
   }
 </script>
 
-<div
-  class="menu-item"
-  on:click={handleClick}
-  class:disabled
-  data-menu-item-focusable={disabled ? undefined : ''}
->
+<div class="menu-item" on:click={handleClick} class:disabled>
   <MenuItemContents {icon} {hasNotificationDot}>
     <Checkbox slot="control" bind:checked {disabled} data-menu-control />
     <Label data-menu-control controller={labelController}>
