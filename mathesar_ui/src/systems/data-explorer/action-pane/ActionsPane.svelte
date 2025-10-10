@@ -32,7 +32,7 @@
     {};
   export let isInspectorOpen: boolean;
 
-  $: ({ query, queryHasUnsavedChanges } = queryManager);
+  $: ({ rowsData, query, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table_oid
     ? $tablesDataStore.tablesMap.get($query.base_table_oid)
     : undefined;
@@ -146,30 +146,46 @@
           onSave={saveExistingOrCreateNew}
         />
 
-        <Tooltip enabled={hasColumns}>
-          <AnchorButton
-            slot="trigger"
-            href="/api/export/v0/explorations/?{exportLinkParams}"
-            data-tinro-ignore
-            appearance="secondary"
-            disabled={!hasColumns || canSave}
-            size="medium"
-            aria-label={$_('export')}
-            download="{$query.name}.csv"
-          >
-            <Icon {...iconExport} />
-            <span class="responsive-button-label">{$_('export')}</span>
-          </AnchorButton>
-          <span slot="content">
-            {#if !canSave}
+        {#if hasColumns && !canSave}
+          <Tooltip allowHover>
+            <AnchorButton
+              slot="trigger"
+              href="/api/export/v0/explorations/?{exportLinkParams}"
+              data-tinro-ignore
+              appearance="secondary"
+              size="medium"
+              aria-label={$_('export')}
+              download="{$query.name}.csv"
+            >
+              <Icon {...iconExport} />
+              <span class="responsive-button-label">{$_('export')}</span>
+            </AnchorButton>
+            <span slot="content">
               {$_('export_exploration_as_csv_help', {
                 values: { explorationName: $query.name },
               })}
-            {:else}
-              {$_('export_exploration_save_help')}
-            {/if}
-          </span>
-        </Tooltip>
+              {#if $rowsData.totalCount > 50000}
+                {$_('export_exploration_50K_limit')}
+              {/if}
+            </span>
+          </Tooltip>
+        {:else}
+          <Tooltip enabled={hasColumns}>
+            <Button
+              slot="trigger"
+              appearance="secondary"
+              size="medium"
+              aria-label={$_('export')}
+              disabled=true
+            >
+              <Icon {...iconExport} />
+              <span class="responsive-button-label">{$_('export')}</span>
+            </Button>
+            <span slot="content">
+                {$_('export_exploration_save_help')}
+            </span>
+          </Tooltip>
+        {/if}
 
         <InspectorButton
           disabled={!hasColumns}
