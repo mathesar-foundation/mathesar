@@ -25,6 +25,7 @@ BACKEND_CONF_YAML = settings.BASE_DIR.joinpath('file_storage.yml')
 URI = "uri"
 MASH = "mash"
 DEFAULT_BACKEND_KEY = "default"
+PUBLIC_FORM_ACCESS_KEY = "public_form_access"
 
 
 def maintain_download_links():
@@ -225,7 +226,13 @@ def get_backends(public_info=False):
     except FileNotFoundError:
         backend_dict = {} or json.loads(os.getenv(BACKEND_CONF_ENV, "{}"))
     if public_info is True:
-        return list(backend_dict.keys())
+        return [
+            {
+                "backend": key,
+                "anonymous_access": value.get(PUBLIC_FORM_ACCESS_KEY, {}).get("enabled", False)
+            }
+            for key, value in backend_dict.items()
+        ]
     else:
         return backend_dict
 
@@ -248,3 +255,8 @@ def reset_file_column_mash(table_oid, column_attnum, conn):
         except Exception:
             continue
     reset_mash(conn, table_oid, column_attnum, updated_uri_mash_map)
+
+
+def get_public_form_conf_for_file_backend(backend_key=DEFAULT_BACKEND_KEY):
+    backend = get_backends().get(backend_key, {})
+    return backend.get(PUBLIC_FORM_ACCESS_KEY, {})

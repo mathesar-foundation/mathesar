@@ -282,7 +282,7 @@ export const defaultAbstractType = (() => {
 function getDefaultFileBackend() {
   const commonData = preloadCommonData();
   if (isDefinedNonNullable(commonData.file_backends)) {
-    return commonData.file_backends[0] ?? null;
+    return commonData.file_backends[0]?.backend ?? null;
   }
   return null;
 }

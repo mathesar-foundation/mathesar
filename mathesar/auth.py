@@ -4,9 +4,7 @@ from functools import wraps
 from mathesar.models.base import Form, ColumnMetaData
 from typing import Callable, Protocol, Any, Optional
 
-from mathesar.utils.download_links import (
-    get_backends, DEFAULT_BACKEND_KEY
-)
+from mathesar.utils.download_links import get_public_form_conf_for_file_backend
 
 
 # Auth checks are currently not centralized. Refer https://github.com/mathesar-foundation/mathesar/issues/4846.
@@ -76,9 +74,8 @@ def user_has_file_backend_access(request: HttpRequest) -> bool:
         return True
 
     if has_shared_form(request):
-        backend = get_backends().get(DEFAULT_BACKEND_KEY, {})
-        public_form_access = backend.get("public_form_access", {})
-        return bool(public_form_access.get("enabled", False))
+        public_form_conf_for_file_backend = get_public_form_conf_for_file_backend()
+        return bool(public_form_conf_for_file_backend.get("enabled", False))
 
     return False
 
