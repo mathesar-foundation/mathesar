@@ -1,19 +1,21 @@
 import html
-from django.conf import settings
+import math
 from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.template.defaultfilters import filesizeformat
 from django.views.decorators.http import require_http_methods
-from mathesar.auth import require, LOGIN_OR_SHARED_FORM_WITH_FILE_FIELD
+from mathesar.auth import (
+    require, user_is_logged_in, has_shared_form, FILE_ACCESS_VIA_LOGIN_OR_SHARED_FORM_FIELD
+)
 
 from mathesar.utils.download_links import (
-    get_link_contents, get_link_thumbnail, save_file
+    get_link_contents, get_link_thumbnail, save_file, get_backends, DEFAULT_BACKEND_KEY
 )
 
 
 CACHE_HEADER = {"Cache-Control": "public, max-age=31536000, immutable"}
 
 
-@require(LOGIN_OR_SHARED_FORM_WITH_FILE_FIELD, unauthorized_response="http_status")
+@require(FILE_ACCESS_VIA_LOGIN_OR_SHARED_FORM_FIELD, unauthorized_response="http_status")
 @require_http_methods(["GET"])
 def download_file(request, download_link_mash):
     stream_file, filename, content_type = get_link_contents(
@@ -30,7 +32,7 @@ def download_file(request, download_link_mash):
     return response
 
 
-@require(LOGIN_OR_SHARED_FORM_WITH_FILE_FIELD, unauthorized_response="http_status")
+@require(FILE_ACCESS_VIA_LOGIN_OR_SHARED_FORM_FIELD, unauthorized_response="http_status")
 @require_http_methods(["GET"])
 def load_file(request, download_link_mash):
     stream_file, _, content_type = get_link_contents(
@@ -44,7 +46,7 @@ def load_file(request, download_link_mash):
     )
 
 
-@require(LOGIN_OR_SHARED_FORM_WITH_FILE_FIELD, unauthorized_response="http_status")
+@require(FILE_ACCESS_VIA_LOGIN_OR_SHARED_FORM_FIELD, unauthorized_response="http_status")
 @require_http_methods(["GET"])
 def load_file_thumbnail(request, download_link_mash):
     thumbnail, content_type = get_link_thumbnail(
@@ -58,24 +60,34 @@ def load_file_thumbnail(request, download_link_mash):
     )
 
 
-@require(LOGIN_OR_SHARED_FORM_WITH_FILE_FIELD, unauthorized_response="json")
+@require(FILE_ACCESS_VIA_LOGIN_OR_SHARED_FORM_FIELD, unauthorized_response="json")
 @require_http_methods(["POST"])
 def upload_file(request):
     uploaded_file = request.FILES.get("file")
     if not uploaded_file:
         return JsonResponse({"detail": "No file uploaded"}, status=400)
 
-    user = getattr(request, "user", None)
-    is_authenticated_user = user and user.is_authenticated
-
-    if not is_authenticated_user and uploaded_file.size > settings.MATHESAR_PUBLIC_FILE_UPLOAD_MAX_SIZE:
-        human_readable_size = _get_human_readable_file_size(settings.MATHESAR_PUBLIC_FILE_UPLOAD_MAX_SIZE)
+    max_upload_size = _get_max_upload_size_limit(request)
+    if uploaded_file.size > max_upload_size:
+        human_readable_size = _get_human_readable_file_size(max_upload_size)
         return JsonResponse(
             {"detail": f"Max allowed file size is {human_readable_size}"},
             status=400
         )
 
     return JsonResponse(save_file(request.FILES["file"], request))
+
+
+def _get_max_upload_size_limit(request):
+    if user_is_logged_in(request):
+        return math.inf
+
+    if has_shared_form(request):
+        backend = getattr(get_backends(), DEFAULT_BACKEND_KEY, {})
+        public_form_access = getattr(backend, "public_form_access", {})
+        return int(getattr(public_form_access, "max_upload_size", 1024 * 1024 * 1024))
+
+    return 0
 
 
 def _get_human_readable_file_size(size):

@@ -24,6 +24,7 @@ BACKEND_CONF_ENV = "FILE_STORAGE_DICT"
 BACKEND_CONF_YAML = settings.BASE_DIR.joinpath('file_storage.yml')
 URI = "uri"
 MASH = "mash"
+DEFAULT_BACKEND_KEY = "default"
 
 
 def maintain_download_links():
@@ -84,7 +85,7 @@ def _build_thumbnail_bytes(of, size, format="AVIF", quality=50):
     return img_byte_arr.getvalue()
 
 
-def create_mash_for_uri(uri, backend_key='default'):
+def create_mash_for_uri(uri, backend_key=DEFAULT_BACKEND_KEY):
     return hashlib.sha256(
         settings.SECRET_KEY.encode('utf-8')
         + backend_key.encode('utf-8')
@@ -159,7 +160,7 @@ def build_links_from_json(json_strs):
     ]
 
 
-def save_file(f, request, backend_key='default'):
+def save_file(f, request, backend_key=DEFAULT_BACKEND_KEY):
     backend = get_backends()[backend_key]
     now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S%f')
     uri = f"{backend['protocol']}://{backend['prefix']}/{request.user}/{now}/{f.name}"
