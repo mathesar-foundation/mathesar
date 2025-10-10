@@ -61,6 +61,28 @@ interface RawColumn {
 }
 
 /**
+ * This is true when it's safe to insert values into a column.
+ *
+ * This is false in cases where PostgreSQL would allow us to insert into the
+ * column but it would mess things up, e.g. with sequences.
+ *
+ * The logic here is somewhat crude, but it works okay in most circumstances.
+ * Ideally the front end should have an easy (and opaque) way to determine
+ * whether it's appropriate to INSERT into a column. For example, if the column
+ * has a dynamic value set to be the result of a sequence, then we don't want to
+ * manually supply a value when inserting because it will mess up the sequence.
+ * But even non-PK column can have sequence-based default. And PK column can
+ * also have non-sequence dynamic defaults where inserting would theoretically
+ * be safe (e.g. UUID). It would be nice to improve this logic at some point via
+ * some accompanying backend work.
+ */
+export function columnDefaultAllowsInsertion(column: RawColumn): boolean {
+  if (!column.default) return true;
+  if (!column.primary_key) return true;
+  return !column.default.is_dynamic;
+}
+
+/**
  * The raw column data from the user database combined with Mathesar's metadata
  */
 export interface RawColumnWithMetadata extends RawColumn {

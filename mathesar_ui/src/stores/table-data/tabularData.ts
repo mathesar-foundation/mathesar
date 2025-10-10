@@ -127,6 +127,8 @@ export class TabularData {
 
   hasPrimaryKey: Readable<boolean>;
 
+  canSelectRecords: Readable<boolean>;
+
   canInsertRecords: Readable<boolean>;
 
   canUpdateRecords: Readable<boolean>;
@@ -192,6 +194,11 @@ export class TabularData {
 
     this.hasPrimaryKey = derived(this.processedColumns, (processedColumns) =>
       [...processedColumns.values()].some((pc) => pc.column.primary_key),
+    );
+
+    this.canSelectRecords = derived(
+      this.table.currentAccess.currentRolePrivileges,
+      (tableCurrentRolePrivileges) => tableCurrentRolePrivileges.has('SELECT'),
     );
 
     // TODO: We should be able to insert without a primary key column
