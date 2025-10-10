@@ -1,5 +1,6 @@
 import { type Writable, get, writable } from 'svelte/store';
 
+import type { FileAttachmentRequestParams } from '@mathesar/api/rest/fileAttachments';
 import type { FileManifest } from '@mathesar/api/rpc/records';
 import type { FileDetailDropdownController } from '@mathesar/components/file-attachments/file-detail-dropdown/FileDetailDropdownController';
 import type { LightboxController } from '@mathesar/components/file-attachments/lightbox/LightboxController';
@@ -9,10 +10,16 @@ import {
   isDefinedNonNullable,
 } from '@mathesar-component-library';
 
-import { fetchImage, getFileViewerType } from '../fileUtils';
+import {
+  FileManifestWithRequestParams,
+  fetchImage,
+  getFileViewerType,
+} from '../fileUtils';
 
 export class FileViewerController {
-  manifest: FileManifest;
+  private rawManifest: FileManifest;
+
+  manifestWithRequestParams: FileManifestWithRequestParams;
 
   canOpenViewer: Writable<boolean>;
 
@@ -31,20 +38,25 @@ export class FileViewerController {
   private onClose: () => unknown;
 
   constructor(props: {
-    manifest: FileManifest;
+    rawManifest: FileManifest;
     canOpen?: boolean;
     removeFile: () => unknown;
     lightboxController: LightboxController | undefined;
     fileDetailController: FileDetailDropdownController | undefined;
+    fileRequestParams?: FileAttachmentRequestParams;
     onClose: () => unknown;
   }) {
-    this.manifest = props.manifest;
+    this.rawManifest = props.rawManifest;
     this.canOpenViewer = writable(
       isDefinedNonNullable(props.canOpen) ? props.canOpen : true,
     );
     this.removeFile = props.removeFile;
     this.lightboxController = props.lightboxController;
     this.fileDetailController = props.fileDetailController;
+    this.manifestWithRequestParams = new FileManifestWithRequestParams(
+      this.rawManifest,
+      props.fileRequestParams,
+    );
     this.onClose = props.onClose;
   }
 
@@ -60,7 +72,9 @@ export class FileViewerController {
       }, ['pointerdown', 'keydown']);
 
       this.isLoading.set(true);
-      this.imageElement = await fetchImage(this.manifest.direct);
+      this.imageElement = await fetchImage(
+        this.manifestWithRequestParams.direct,
+      );
       this.isLoading.set(false);
 
       // If the user has interacted before the lightbox
@@ -78,7 +92,7 @@ export class FileViewerController {
     this.lightboxController.open({
       imageElement: this.imageElement,
       zoomOrigin: trigger?.getBoundingClientRect(),
-      fileManifest: this.manifest,
+      fileManifestWithRequestParams: this.manifestWithRequestParams,
       removeFile: () => this.removeFile(),
       onClose: () => this.onClose(),
     });
@@ -92,7 +106,7 @@ export class FileViewerController {
 
     this.fileDetailController.open({
       trigger,
-      fileManifest: this.manifest,
+      fileManifestWithRequestParams: this.manifestWithRequestParams,
       removeFile: () => this.removeFile(),
       onClose: () => this.onClose(),
     });
@@ -103,7 +117,7 @@ export class FileViewerController {
       return;
     }
 
-    const viewerType = getFileViewerType(this.manifest);
+    const viewerType = getFileViewerType(this.manifestWithRequestParams);
     if (viewerType === 'image') {
       await this.openImageFileViewer();
     } else if (viewerType === 'default') {

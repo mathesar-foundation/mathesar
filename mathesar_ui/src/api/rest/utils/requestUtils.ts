@@ -73,14 +73,20 @@ export function getQueryStringFromParams<T extends Record<string, unknown>>(
   return new URLSearchParams(entries).toString();
 }
 
-export function addQueryParamsToUrl(
+export function addQueryParamsToUrl<T extends Record<string, unknown>>(
   url: string,
-  queryParams?: Record<string, unknown>,
+  newOrUpdatedQueryParams?: T,
 ) {
-  if (queryParams) {
-    return `${url}?${getQueryStringFromParams(queryParams)}`;
+  if (!newOrUpdatedQueryParams) {
+    return url;
   }
-  return url;
+  const [baseUrl, existingQuery] = url.split('?');
+  const params = new URLSearchParams(existingQuery || '');
+  for (const [key, value] of Object.entries(newOrUpdatedQueryParams)) {
+    params.set(key, typeof value === 'string' ? value : JSON.stringify(value));
+  }
+  const queryString = params.toString();
+  return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
 
 export interface UploadCompletionOpts {

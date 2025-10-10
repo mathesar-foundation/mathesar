@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
+  import type { FileAttachmentRequestParams } from '@mathesar/api/rest/fileAttachments';
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
   import { FileViewerController } from '@mathesar/components/file-attachments/cell-content/FileViewerController';
@@ -28,6 +29,8 @@
   export let setFileManifest:
     | ((mash: string, manifest: FileManifest) => void)
     | undefined = undefined;
+  export let fileRequestParams: FileAttachmentRequestParams | undefined =
+    undefined;
 
   let cellWrapperElement: HTMLElement;
 
@@ -38,10 +41,11 @@
 
   $: fileViewerController = fileManifest
     ? new FileViewerController({
-        manifest: fileManifest,
+        rawManifest: fileManifest,
         removeFile: () => updateCell(null),
         lightboxController,
         fileDetailController,
+        fileRequestParams,
         onClose: async () => {
           cellWrapperElement?.focus();
         },
@@ -110,11 +114,14 @@
       {value}
       {fileViewerController}
       {thumbnailResolutionHeightPx}
-      canUpload={isActive && !disabled}
+      showUploadButton={isActive}
+      canUpload={!disabled}
       {upload}
     />
-    {#if isIndependentOfSheet && fileManifest}
-      <FileDetail {fileManifest} />
+    {#if isIndependentOfSheet && fileViewerController}
+      <FileDetail
+        fileManifestWithRequestParams={fileViewerController.manifestWithRequestParams}
+      />
     {/if}
   </div>
 </CellWrapper>

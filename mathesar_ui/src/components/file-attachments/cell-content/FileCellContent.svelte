@@ -7,6 +7,7 @@
 
   export let value: unknown = undefined;
   export let thumbnailResolutionHeightPx: number;
+  export let showUploadButton = true;
   export let canUpload: boolean;
   export let upload: () => void;
   export let fileViewerController: FileViewerController | undefined;
@@ -26,8 +27,8 @@
     {/if}
   {:else}
     <div class="add">
-      {#if canUpload}
-        <Button on:click={upload} tabindex="-1">
+      {#if showUploadButton}
+        <Button disabled={!canUpload} on:click={upload} tabindex="-1">
           <Icon {...iconAddNew} />
         </Button>
       {/if}

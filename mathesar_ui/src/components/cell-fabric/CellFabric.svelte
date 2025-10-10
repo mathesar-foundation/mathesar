@@ -4,6 +4,7 @@
   This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
+  import type { FileAttachmentRequestParams } from '@mathesar/api/rest/fileAttachments';
   import type { FileManifest } from '@mathesar/api/rpc/records';
 
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
@@ -16,6 +17,8 @@
   export let setFileManifest:
     | ((mash: string, manifest: FileManifest) => void)
     | undefined = undefined;
+  export let fileRequestParams: FileAttachmentRequestParams | undefined =
+    undefined;
   export let setRecordSummary:
     | ((recordId: string, recordSummary: string) => void)
     | undefined = undefined;
@@ -54,6 +57,7 @@
     {setRecordSummary}
     {fileManifest}
     {setFileManifest}
+    {fileRequestParams}
     {searchValue}
     {isProcessing}
     {showTruncationPopover}

@@ -1,9 +1,12 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
+import type { FileAttachmentRequestParams } from '@mathesar/api/rest/fileAttachments';
+import { addQueryParamsToUrl } from '@mathesar/api/rest/utils/requestUtils';
 import type { FileManifest } from '@mathesar/api/rpc/records';
 import { iconDeleteMajor } from '@mathesar/icons';
 import { confirm } from '@mathesar/stores/confirmation';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { hasStringProperty } from '@mathesar-component-library';
 
 export interface FileReference {
@@ -54,4 +57,49 @@ export async function confirmRemoveFile() {
       icon: iconDeleteMajor,
     },
   });
+}
+
+export class FileManifestWithRequestParams implements FileManifest {
+  uri: string;
+
+  name: string;
+
+  mimetype: string | null;
+
+  thumbnail: string | null;
+
+  attachment: string;
+
+  direct: string;
+
+  showFileStorageInfo: boolean;
+
+  constructor(
+    rawManifest: FileManifest,
+    requestParams: FileAttachmentRequestParams | undefined,
+  ) {
+    this.uri = rawManifest.uri;
+    this.name = rawManifest.name;
+    this.mimetype = rawManifest.mimetype;
+    this.thumbnail = rawManifest.thumbnail
+      ? addQueryParamsToUrl(rawManifest.thumbnail, requestParams)
+      : null;
+    this.attachment = addQueryParamsToUrl(
+      rawManifest.attachment,
+      requestParams,
+    );
+    this.direct = addQueryParamsToUrl(rawManifest.direct, requestParams);
+
+    const commonData = preloadCommonData();
+    this.showFileStorageInfo = commonData.is_authenticated;
+  }
+
+  thumbnailWithHeight(thumbnailResolutionHeightPx: number) {
+    if (this.thumbnail) {
+      return addQueryParamsToUrl(this.thumbnail, {
+        height: thumbnailResolutionHeightPx,
+      });
+    }
+    return undefined;
+  }
 }

@@ -4,7 +4,6 @@
   import { type TransitionConfig, fade } from 'svelte/transition';
   import { _ } from 'svelte-i18n';
 
-  import type { FileManifest } from '@mathesar/api/rpc/records';
   import {
     Icon,
     Tooltip,
@@ -17,18 +16,21 @@
   import { Dropdown, iconInfo, portal } from '@mathesar-component-library';
 
   import FileDetail from '../FileDetail.svelte';
-  import { confirmRemoveFile } from '../fileUtils';
+  import {
+    type FileManifestWithRequestParams,
+    confirmRemoveFile,
+  } from '../fileUtils';
 
   export let imageElement: HTMLImageElement;
   export let zoomOrigin: DOMRect | undefined = undefined;
-  export let fileManifest: FileManifest;
+  export let fileManifestWithRequestParams: FileManifestWithRequestParams;
   export let close: () => void = () => {};
   export let removeFile: () => void = () => {};
 
   let imageHolder: HTMLDivElement;
   let imageDisplayWidth: number;
 
-  $: ({ attachment: downloadUrl } = fileManifest);
+  $: ({ attachment: downloadUrl } = fileManifestWithRequestParams);
   $: ({ naturalHeight, naturalWidth } = imageElement);
   $: showButtonLabels = imageDisplayWidth > 500;
   $: useRoundedImageCorners = naturalWidth > 100;
@@ -158,7 +160,7 @@
               <span class="button-label">{$_('info')}</span>
             </svelte:fragment>
             <div class="info" slot="content">
-              <FileDetail {fileManifest} />
+              <FileDetail {fileManifestWithRequestParams} />
             </div>
           </Dropdown>
           <div slot="content">{$_('info')}</div>

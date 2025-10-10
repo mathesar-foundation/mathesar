@@ -14,7 +14,7 @@
 
   export let fileViewerController: FileViewerController;
 
-  $: ({ manifest, canOpenViewer } = fileViewerController);
+  $: ({ canOpenViewer, manifestWithRequestParams } = fileViewerController);
 
   /**
    * This controls the pixel dimensions of the fetched thumbnail size, as
@@ -26,10 +26,12 @@
   let thumbnailElement: HTMLImageElement;
   let defaultFileTrigger: HTMLElement;
 
-  $: ({ uri, thumbnail, mimetype } = manifest);
-  $: fileViewerType = getFileViewerType(manifest);
-  $: thumbnailUrl = `${thumbnail}?height=${thumbnailResolutionHeightPx}`;
-  $: fileName = manifest.name;
+  $: ({ uri, mimetype } = manifestWithRequestParams);
+  $: fileViewerType = getFileViewerType(manifestWithRequestParams);
+  $: thumbnailUrl = manifestWithRequestParams.thumbnailWithHeight(
+    thumbnailResolutionHeightPx,
+  );
+  $: fileName = manifestWithRequestParams.name;
 
   $: fileViewerController.setTriggerRetriever(() =>
     fileViewerType === 'image' ? thumbnailElement : defaultFileTrigger,

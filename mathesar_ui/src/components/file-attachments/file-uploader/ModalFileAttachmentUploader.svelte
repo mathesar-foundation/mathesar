@@ -30,7 +30,7 @@
     undefined;
   let error = '';
 
-  $: ({ isOpen } = controller);
+  $: ({ isOpen, requestParams } = controller);
   $: firstFileUpload = fileUploads?.[0];
   $: fileProgress = (() => {
     if (!firstFileUpload) return {};
@@ -60,7 +60,11 @@
       isUploading = true;
       const file = event.detail.added.at(0)?.file;
       if (!file) return;
-      request = uploadFileAttachment(file, handleProgressChange);
+      request = uploadFileAttachment(
+        file,
+        $requestParams,
+        handleProgressChange,
+      );
       try {
         const result = await request;
         controller.submitResult(result);

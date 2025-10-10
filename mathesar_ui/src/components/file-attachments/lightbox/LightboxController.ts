@@ -6,15 +6,16 @@ import {
   writable,
 } from 'svelte/store';
 
-import type { FileManifest } from '@mathesar/api/rpc/records';
 import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
+
+import type { FileManifestWithRequestParams } from '../fileUtils';
 
 export interface LightboxProps {
   /** The main image being displayed */
   imageElement: HTMLImageElement;
   /** If provided, the lightbox will zoom in/out from this rect */
   zoomOrigin?: DOMRect;
-  fileManifest: FileManifest;
+  fileManifestWithRequestParams: FileManifestWithRequestParams;
   /** Triggers removal of the file from where it is stored. No confirmation. */
   removeFile: () => void;
   onClose: () => unknown;
