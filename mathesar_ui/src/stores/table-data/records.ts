@@ -413,13 +413,14 @@ export class RecordsData {
           .run();
         persistedRowsToDelete.forEach((row) => {
           const rowId = row.record[pkColumn.id];
-          if (deletedIds.includes(rowId))
+          if (deletedIds.includes(rowId)) {
             rowsSuccessfullyDeleted.add(row.identifier);
-          else
+          } else {
             rowsFailedToDelete.set(
               row.identifier,
-              RpcError.fromAnything('Unable to delete row'),
+              RpcError.fromAnything(`Unable to delete row ${String(rowId)}`),
             );
+          }
         });
       } catch (error) {
         persistedRowsToDelete.forEach((row) =>
