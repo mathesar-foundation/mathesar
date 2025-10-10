@@ -1,7 +1,11 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { FieldErrors } from '@mathesar/components/form';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { getFileStorageBackend } from '@mathesar/utils/preloadData';
   import {
     type LabelController,
     WritableMap,
@@ -34,7 +38,8 @@
       ? dataFormManager
       : undefined;
 
-  $: ({ fieldValueHolder, inputComponentAndProps } = dataFormField);
+  $: ({ fieldValueHolder, inputComponentAndProps, fieldColumn, isRequired } =
+    dataFormField);
   $: ({ inputFieldStore } = fieldValueHolder);
   $: inputField = $inputFieldStore;
   $: ({ showsError, disabled } = inputField);
@@ -60,16 +65,44 @@
         form_field_key: dataFormField.key,
       }
     : undefined;
+  $: isFileType = fieldColumn.abstractType.identifier === 'file';
+  $: isAnonymousFileStorageAccessAllowed = (() => {
+    const fileBackendName = fieldColumn.column.metadata?.file_backend;
+    if (!fileBackendName) {
+      return false;
+    }
+    const fileStorageBackend = getFileStorageBackend(fileBackendName);
+    if (!fileStorageBackend) {
+      return false;
+    }
+    return fileStorageBackend.anonymous_access;
+  })();
+  $: inputDisabled =
+    $disabled || (isFileType && !isAnonymousFileStorageAccessAllowed);
 </script>
 
 <div class="data-form-input" class:selected={isSelected}>
+  {#if isFileType && !isAnonymousFileStorageAccessAllowed}
+    {#if editableDataFormManager}
+      <WarningBox>
+        {$_('anonymous_file_uploads_disabled')}
+      </WarningBox>
+    {:else}
+      <div class="disabled-file-input-help">
+        {$_('anonymous_file_uploads_disabled_public')}
+        {#if !$isRequired}
+          {$_('can_submit_without_uploading_file')}
+        {/if}
+      </div>
+    {/if}
+  {/if}
   <DynamicInput
     bind:value={$inputField}
     {labelController}
     id={dataFormField.key}
     componentAndProps={$inputComponentAndProps}
     hasError={displayError}
-    disabled={$disabled}
+    disabled={inputDisabled}
     recordSummary={$recordSummary}
     setRecordSummary={(key, summary) => recordSummaries.set(key, summary)}
     fileManifest={$fileManifest}
@@ -86,5 +119,12 @@
   .data-form-input {
     --input-element-min-height: 2.5rem;
     --text-area-min-height: 5.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sm3);
+
+    .disabled-file-input-help {
+      color: var(--color-fg-base-disabled);
+    }
   }
 </style>

@@ -114,7 +114,8 @@
       {value}
       {fileViewerController}
       {thumbnailResolutionHeightPx}
-      canUpload={isActive && !disabled}
+      showUploadButton={isActive}
+      canUpload={!disabled}
       {upload}
     />
     {#if isIndependentOfSheet && fileViewerController}
