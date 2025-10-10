@@ -97,8 +97,7 @@ def shared_form_field_column_has_file_backend(request):
         table_oid=table_oid,
         database=form_model.database
     ).first()
-
-    return bool(column_metadata.get("file_backend"))
+    return bool(getattr(column_metadata, "file_backend", None))
 
 
 def _get_publicly_shared_form_from_request(request: HttpRequest) -> Optional["Form"]:
@@ -107,7 +106,7 @@ def _get_publicly_shared_form_from_request(request: HttpRequest) -> Optional["Fo
     it in the request object.
 
     The form is identified via the request query param `form_token`, and is
-    only cached/returned if it is valid and shared publicly
+    only cached/returned if it is valid and shared publicly.
     """
     SHARED_FORM_CACHE_KEY = "_shared_form_cached"
 
