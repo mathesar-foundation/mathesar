@@ -7,7 +7,7 @@ import {
 } from 'svelte/store';
 
 import type { FileManifest } from '@mathesar/api/rpc/records';
-import { makeContext } from '@mathesar/contexts/utils';
+import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
 
 export interface FileDetailDropdownProps {
   trigger: HTMLElement;

@@ -46,6 +46,17 @@
    */
   export let autoReposition = false;
 
+  /**
+   * By default, we ensure that the dropdown content width is no smaller than
+   * the width of its trigger element — unless the trigger element is wider than
+   * 250px, in which case it ensures that the dropdown content width is no
+   * smaller than 250px.
+   *
+   * This option controls that threshold. Set it to 0 if you want to disable
+   * this min-width behavior, allowing the content to be quite narrow.
+   */
+  export let matchTriggerWidthPxUpTo: number | undefined = undefined;
+
   let contentElement: HTMLElement | undefined;
 
   $: placement = preferredPlacement ?? placements[0] ?? 'bottom-start';
@@ -133,12 +144,16 @@
           },
         ],
       },
+      customModifierOptions: {
+        matchTriggerWidthPxUpTo,
+      },
     }}
     use:clickOffBounds={{
       callback: close,
       references: clickOffBoundsReferences,
     }}
     on:click={checkAndCloseOnInnerClick}
+    on:click
     on:mouseenter
     on:mouseleave
     data-attachable-dropdown

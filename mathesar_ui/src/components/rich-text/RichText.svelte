@@ -49,11 +49,18 @@
   import { parse } from './richTextUtils';
 
   export let text: string;
+
+  /** When true, static text will be wrapped in a `span.static` element */
+  export let wrapStaticText = false;
 </script>
 
 {#each parse(text) as token}
   {#if token.type === 'text'}
-    {token.content}
+    {#if wrapStaticText}
+      <span class="static">{token.content}</span>
+    {:else}
+      {token.content}
+    {/if}
   {:else if token.type === 'slot'}
     <slot slotName={token.name} translatedArg={token.arg} />
   {:else}

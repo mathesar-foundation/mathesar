@@ -1,8 +1,8 @@
 import { distinct } from 'iter-tools';
-import type { ComponentProps, ComponentType, SvelteComponent } from 'svelte';
 
-import type { ComponentWithProps } from '@mathesar/component-library/types';
 import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+import { component } from '@mathesar-component-library';
+import type { ComponentWithProps } from '@mathesar-component-library/types';
 
 import NoConnection from './customized/NoConnection.svelte';
 import UnableToConnect from './customized/UnableToConnect.svelte';
@@ -22,13 +22,6 @@ export type GeneralizedError = string | RpcError | ClientSideError;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ReturnableComponent = ComponentWithProps<any>;
-
-function component<T extends SvelteComponent>(
-  c: ComponentType<T>,
-  p: ComponentProps<T>,
-): ComponentWithProps<T> {
-  return { component: c, props: p };
-}
 
 function getCustomizedRpcError({
   code,

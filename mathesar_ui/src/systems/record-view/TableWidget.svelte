@@ -11,6 +11,10 @@
   import { iconRecord } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
   import {
+    ImperativeFilterController,
+    imperativeFilterControllerContext,
+  } from '@mathesar/pages/table/ImperativeFilterController';
+  import {
     Meta,
     TabularData,
     setTabularDataStoreInContext,
@@ -27,6 +31,9 @@
   const meta = new Meta({
     pagination: new Pagination({ size: 10 }),
   });
+
+  const imperativeFilterController = new ImperativeFilterController();
+  imperativeFilterControllerContext.set(imperativeFilterController);
 
   export let recordPk: string;
   export let recordSummary: string;
