@@ -37,6 +37,7 @@ export type CellValueFormatter<T> = (
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
   isActive: boolean;
+  isEditMode?: boolean;
   disabled: boolean;
   searchValue?: unknown;
   isProcessing: boolean;

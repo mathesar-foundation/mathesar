@@ -20,6 +20,7 @@
     | ((recordId: string, recordSummary: string) => void)
     | undefined = undefined;
   export let isActive = false;
+  export let isEditMode = false;
   export let disabled = false;
   export let showAsSkeleton = false;
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
@@ -47,6 +48,7 @@
     {...props}
     {columnFabric}
     {isActive}
+    {isEditMode}
     {disabled}
     {isIndependentOfSheet}
     {horizontalAlignment}
@@ -61,6 +63,8 @@
     bind:value
     on:movementKeyDown
     on:update
+    on:enterEditMode
+    on:exitEditMode
   />
 
   <div class="loader">
