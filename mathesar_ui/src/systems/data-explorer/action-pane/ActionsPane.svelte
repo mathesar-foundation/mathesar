@@ -176,13 +176,13 @@
               appearance="secondary"
               size="medium"
               aria-label={$_('export')}
-              disabled=true
+              disabled="true"
             >
               <Icon {...iconExport} />
               <span class="responsive-button-label">{$_('export')}</span>
             </Button>
             <span slot="content">
-                {$_('export_exploration_save_help')}
+              {$_('export_exploration_save_help')}
             </span>
           </Tooltip>
         {/if}
