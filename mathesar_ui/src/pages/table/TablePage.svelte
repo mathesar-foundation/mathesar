@@ -17,7 +17,10 @@
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
 
-  import { setNewImperativeFilterControllerInContext } from './ImperativeFilterController';
+  import {
+    ImperativeFilterController,
+    imperativeFilterControllerContext,
+  } from './ImperativeFilterController';
 
   const metaSerializationQueryKey = 'q';
 
@@ -26,7 +29,9 @@
     // below.
     undefined as unknown as TabularData,
   );
-  setNewImperativeFilterControllerInContext();
+
+  const imperativeFilterController = new ImperativeFilterController();
+  imperativeFilterControllerContext.set(imperativeFilterController);
 
   export let table: Table;
 

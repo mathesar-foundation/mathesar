@@ -6,7 +6,7 @@ import {
   writable,
 } from 'svelte/store';
 
-import { makeContext } from '@mathesar/contexts/utils';
+import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
 
 import type { FileManifestWithRequestParams } from '../fileUtils';
 

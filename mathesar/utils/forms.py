@@ -61,33 +61,6 @@ def get_field_tab_col_info_map(form_model):
     return tab_col_info_map
 
 
-def get_col_info_for_field(form_model, field_key):
-    form_field = form_model.fields.get(key=field_key)
-    if not form_field.column_attnum:
-        return None
-
-    table_oid = form_field.parent_field.related_table_oid if form_field.parent_field else form_model.base_table_oid
-    column_attnum = form_field.column_attnum
-    table_oid_attnum_map = {table_oid: [column_attnum]}
-
-    with form_model.connection as conn:
-        tab_col_info_map = get_tab_col_info_map(table_oid_attnum_map, conn)
-        table_info = tab_col_info_map.get(str(table_oid))
-        if not table_info:
-            return None
-        column_info = table_info['columns'].get(str(column_attnum))
-        if not column_info:
-            return None
-
-    column_metadata = ColumnMetaData.objects.filter(
-        attnum=column_attnum,
-        table_oid=table_oid,
-        database=form_model.database
-    ).first()
-    column_info["metadata"] = ColumnMetaDataBlob.from_model(column_metadata) if column_metadata else None
-    return column_info
-
-
 def iterate_field_defs(field_defs, parent_field_defn=None):
     """
     Depth-first generator that iterates through the field definitions

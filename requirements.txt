@@ -1,6 +1,6 @@
 CairoSVG==2.8.2
 clevercsv==0.8.2
-Django==4.2.24
+Django==4.2.25
 django-allauth[socialaccount]==65.9.0
 django-filter==24.3
 django-modern-rpc==1.0.3

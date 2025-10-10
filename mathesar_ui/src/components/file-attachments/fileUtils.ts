@@ -50,7 +50,7 @@ export function parseFileReference(value: unknown): FileReference | undefined {
 
 export async function confirmRemoveFile() {
   return confirm({
-    title: get(_)('remove_file_question'),
+    title: get(_)('remove_file_prompt'),
     body: get(_)('remove_file_confirmation_body'),
     proceedButton: {
       label: get(_)('remove'),

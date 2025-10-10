@@ -16,7 +16,7 @@
   export let fieldColumn: FieldColumn;
   export let parentHasColumn: Readable<boolean>;
 
-  $: ({ column, abstractType } = fieldColumn);
+  $: ({ column } = fieldColumn);
 
   /**
    * This is somewhat crude, but it works okay in most circumstances. Ideally
