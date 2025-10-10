@@ -83,9 +83,9 @@ def _get_max_upload_size_limit(request):
         return math.inf
 
     if has_shared_form(request):
-        backend = getattr(get_backends(), DEFAULT_BACKEND_KEY, {})
-        public_form_access = getattr(backend, "public_form_access", {})
-        return int(getattr(public_form_access, "max_upload_size", 1024 * 1024 * 1024))
+        backend = get_backends().get(DEFAULT_BACKEND_KEY, {})
+        public_form_access = backend.get("public_form_access", {})
+        return int(public_form_access.get("max_upload_size", 1024 * 1024 * 1024))
 
     return 0
 
