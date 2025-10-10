@@ -9,7 +9,7 @@
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import { FILTER_INPUT_CLASS } from '@mathesar/components/filter-entry/utils';
   import { iconAddNew } from '@mathesar/icons';
-  import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
+  import { imperativeFilterControllerContext } from '@mathesar/pages/table/ImperativeFilterController';
   import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import type {
     Filtering,
@@ -22,7 +22,7 @@
 
   import FilterEntries from './FilterEntries.svelte';
 
-  const imperativeFilterController = getImperativeFilterControllerFromContext();
+  const imperativeFilterController = imperativeFilterControllerContext.get();
 
   export let filtering: Writable<Filtering>;
   export let processedColumns: ProcessedColumns;
