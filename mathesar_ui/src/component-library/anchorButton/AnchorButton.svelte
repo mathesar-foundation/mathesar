@@ -1,6 +1,5 @@
+<!-- TODO: Add support for disabled state -->
 <script lang="ts">
-  import Button from '@mathesar-component-library-dir/button/Button.svelte';
-
   import type { Appearance, Size } from '../commonTypes';
 
   export let href: string;
@@ -17,8 +16,6 @@
    */
   export let size: Size = 'medium';
 
-  export let disabled = false;
-
   let classes = '';
   export { classes as class };
 
@@ -31,8 +28,6 @@
   ].join(' ');
 </script>
 
-<a {...$$restProps} {href}>
-  <Button class={allClasses} {disabled}>
-    <slot />
-  </Button>
+<a {...$$restProps} {href} class={allClasses}>
+  <slot />
 </a>
