@@ -4,6 +4,10 @@ from functools import wraps
 from mathesar.models.base import Form, ColumnMetaData
 from typing import Callable, Protocol, Any, Optional
 
+from mathesar.utils.download_links import (
+    get_backends, DEFAULT_BACKEND_KEY
+)
+
 
 # Auth checks are currently not centralized. Refer https://github.com/mathesar-foundation/mathesar/issues/4846.
 
@@ -56,7 +60,7 @@ def _unauthorized_response(request: HttpRequest, response_mode) -> HttpResponse:
 def user_is_logged_in(request: HttpRequest) -> bool:
     """Checks if user is authenticated"""
     user = getattr(request, "user", None)
-    return bool(getattr(user, "is_authenticated", False))
+    return bool(user and user.is_authenticated)
 
 
 def has_shared_form(request: HttpRequest) -> bool:
@@ -67,10 +71,22 @@ def has_shared_form(request: HttpRequest) -> bool:
     return _get_publicly_shared_form_from_request(request) is not None
 
 
+def user_has_file_backend_access(request: HttpRequest) -> bool:
+    if user_is_logged_in(request):
+        return True
+
+    if has_shared_form(request):
+        backend = getattr(get_backends(), DEFAULT_BACKEND_KEY, {})
+        public_form_access = getattr(backend, "public_form_access", {})
+        return bool(getattr(public_form_access, "enabled", False))
+
+    return False
+
+
 # This logic is in place because of the way the "File" type is architected.
 # From the user's perspective, a file column is no different from any other column,
 # however, internally, a "file" column is determined by whether there's a column
-# metadata containing a "file_backend"
+# metadata containing a "file_backend".
 #
 # Eventually, we'd have to decouple the "file_backend" metadata from the UI column type
 # determination logic.
@@ -126,11 +142,11 @@ def _get_publicly_shared_form_from_request(request: HttpRequest) -> Optional["Fo
 
 # Mathesar specific guards
 
-LOGIN_OR_SHARED_FORM_WITH_FILE_FIELD: Guard = (
+FILE_ACCESS_VIA_LOGIN_OR_SHARED_FORM_FIELD: Guard = (
     any_of(
         user_is_logged_in,
         all_of(
-            has_shared_form,
+            user_has_file_backend_access,
             shared_form_field_column_has_file_backend
         ),
     )
