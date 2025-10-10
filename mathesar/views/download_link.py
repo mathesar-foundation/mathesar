@@ -8,7 +8,7 @@ from mathesar.auth import (
 )
 
 from mathesar.utils.download_links import (
-    get_link_contents, get_link_thumbnail, save_file, get_backends, DEFAULT_BACKEND_KEY
+    get_link_contents, get_link_thumbnail, save_file, get_public_form_conf_for_file_backend
 )
 
 
@@ -83,9 +83,8 @@ def _get_max_upload_size_limit(request):
         return math.inf
 
     if has_shared_form(request):
-        backend = get_backends().get(DEFAULT_BACKEND_KEY, {})
-        public_form_access = backend.get("public_form_access", {})
-        return int(public_form_access.get("max_upload_size", 1024 * 1024 * 1024))
+        public_form_conf_for_file_backend = get_public_form_conf_for_file_backend()
+        return int(public_form_conf_for_file_backend.get("max_upload_size", 1024 * 1024 * 1024))
 
     return 0
 

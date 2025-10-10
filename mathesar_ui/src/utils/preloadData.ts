@@ -22,6 +22,7 @@ export interface BaseCommonData {
   current_release_tag_name: string;
   supported_languages: Record<string, string>;
   is_authenticated: boolean;
+  file_backends: { backend: string; anonymous_access: boolean }[] | null;
 }
 
 export interface AuthenticatedCommonData extends BaseCommonData {
@@ -40,7 +41,6 @@ export interface AuthenticatedCommonData extends BaseCommonData {
   current_schema: number | null;
   user: User;
   routing_context: 'normal';
-  file_backends: string[] | null;
 }
 
 export interface AnonymousCommonData extends BaseCommonData {
