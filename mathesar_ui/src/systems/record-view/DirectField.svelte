@@ -8,6 +8,7 @@
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import Null from '@mathesar/components/Null.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import {
     iconLinkToRecordPage,
     iconModalRecordView,
@@ -133,8 +134,11 @@
             on:click={() => field.set(null)}
             {disabled}
           >
-            {$_('set_to')}
-            <Null />
+            <RichText text={$_('set_to_value')} let:slotName>
+              {#if slotName === 'value'}
+                <Null />
+              {/if}
+            </RichText>
           </ButtonMenuItem>
         </DropdownMenu>
       </div>
