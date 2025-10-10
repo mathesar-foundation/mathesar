@@ -272,7 +272,7 @@
   "explore_your_data": "Explore your Data",
   "exploring_from": "Exploring from",
   "export": "Export",
-  "export_exploration_50K_limit": "50K Export limit: Only the first 50,000 rows will be exported.",
+  "export_exploration_50K_limit": "Exports are limited to 50,000 rows. Since your dataset is larger, only the first 50,000 rows will be exported.",
   "export_exploration_as_csv_help": "Export the {explorationName} exploration as a CSV file. Your current transformations will be applied to the exported data.",
   "export_exploration_save_help": "Exploration has unsaved changes. Please save the changes before exporting.",
   "export_table_as_csv_help": "Export the {tableName} table as a CSV file. Your current filters and sorting will be applied to the exported data.",
