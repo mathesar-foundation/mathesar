@@ -76,20 +76,19 @@ def user_has_file_backend_access(request: HttpRequest) -> bool:
         return True
 
     if has_shared_form(request):
-        backend = getattr(get_backends(), DEFAULT_BACKEND_KEY, {})
-        public_form_access = getattr(backend, "public_form_access", {})
-        return bool(getattr(public_form_access, "enabled", False))
+        backend = get_backends().get(DEFAULT_BACKEND_KEY, {})
+        public_form_access = backend.get("public_form_access", {})
+        return bool(public_form_access.get("enabled", False))
 
     return False
 
 
 # This logic is in place because of the way the "File" type is architected.
 # From the user's perspective, a file column is no different from any other column,
-# however, internally, a "file" column is determined by whether there's a column
-# metadata containing a "file_backend".
+# however, internally, a "file" column is determined by whether its metadata contains
+# a "file_backend".
 #
-# Eventually, we'd have to decouple the "file_backend" metadata from the UI column type
-# determination logic.
+# Eventually, we'd have to decouple "file_backend" metadata from UI type determination logic.
 def shared_form_field_column_has_file_backend(request):
     """
     Checks if a field with a file backend is present in a valid shared form detected
