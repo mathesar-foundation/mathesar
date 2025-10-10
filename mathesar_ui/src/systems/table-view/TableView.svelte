@@ -14,6 +14,7 @@
   import { imperativeFilterControllerContext } from '@mathesar/pages/table/ImperativeFilterController';
   import { confirm } from '@mathesar/stores/confirmation';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
+  import { modal } from '@mathesar/stores/modal';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
@@ -26,6 +27,8 @@
   import Body from './Body.svelte';
   import { openTableCellContextMenu } from './context-menu/contextMenu';
   import Header from './header/Header.svelte';
+  import { importModalContext } from './import/ImportController';
+  import ImportModal from './import/ImportModal.svelte';
   import StatusPane from './StatusPane.svelte';
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
   import { getCustomizedColumnWidths } from './tableViewUtils';
@@ -33,6 +36,8 @@
   type Context = 'page' | 'widget';
 
   const tabularData = getTabularDataStoreFromContext();
+  const importModal = modal.spawnModalController();
+  importModalContext.set(importModal);
   const contextMenu = contextMenuContext.get();
   const modalRecordView = modalRecordViewContext.get();
   const imperativeFilterController = imperativeFilterControllerContext.get();
@@ -159,6 +164,8 @@
   </WithTableInspector>
   <StatusPane {context} />
 </div>
+
+<ImportModal controller={importModal} tableColumns={$processedColumns} />
 
 <style>
   .table-view {
