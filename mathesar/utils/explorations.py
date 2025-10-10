@@ -161,7 +161,7 @@ def exploration_chunker(
     offset=None,
     batch_size=2000
 ):
-    limit = limit or min(limit, 50000)  # We cap limit at 50000
+    limit = min(limit or 50000, 50000)  # We cap limit at 50000
     # so that we can avoid loading explorations > 50000 rows into memory.
     exp_model = get_exploration(exploration_id)
     exp_results = run_saved_exploration(exp_model, limit, offset, conn)
