@@ -281,11 +281,8 @@ export const defaultAbstractType = (() => {
 
 function getDefaultFileBackend() {
   const commonData = preloadCommonData();
-  if (
-    commonData.routing_context === 'normal' &&
-    isDefinedNonNullable(commonData.file_backends)
-  ) {
-    return commonData.file_backends[0] ?? null;
+  if (isDefinedNonNullable(commonData.file_backends)) {
+    return commonData.file_backends[0]?.backend ?? null;
   }
   return null;
 }
