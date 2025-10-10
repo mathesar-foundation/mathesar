@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import type { Readable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 
 import {
   DEFAULT_COLUMN_WIDTH_PX,
@@ -21,6 +21,7 @@ export interface SheetContextStores<SheetColumnIdentifierKey> {
   scrollOffset: Readable<number>;
   paddingRight: Readable<number>;
   selectionInProgress: Readable<boolean>;
+  editingCellId: Writable<string | undefined>;
 }
 
 export interface SheetContext<SheetColumnIdentifierKey> {
@@ -34,6 +35,7 @@ export interface SheetContext<SheetColumnIdentifierKey> {
     resetColumnWidth: (columnIdentifierKey: SheetColumnIdentifierKey) => void;
     setHorizontalScrollOffset: (offset: number) => void;
     setScrollOffset: (offset: number) => void;
+    setEditingCellId: (cellId: string | undefined) => void;
   };
 }
 

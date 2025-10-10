@@ -13,6 +13,7 @@
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
+  import { getSheetContext } from '@mathesar/components/sheet/utils';
   import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import {
     type CellKey,
@@ -41,6 +42,9 @@
   export let clientSideErrorMap: WritableMap<CellKey, ClientSideCellError[]>;
   export let value: unknown = undefined;
   export let canUpdateRecords: boolean;
+
+  const { stores, api } = getSheetContext();
+  const { editingCellId } = stores;
 
   $: effectiveProcessedColumn = isProvisionalRecordRow(row)
     ? processedColumn.withoutEnhancedPkCell()
@@ -100,6 +104,14 @@
     await setValue(e.detail.value);
     focus();
   }
+
+  function handleEnterEditMode() {
+    api.setEditingCellId(cellId);
+  }
+
+  function handleExitEditMode() {
+    api.setEditingCellId(undefined);
+  }
 </script>
 
 <SheetDataCell
@@ -126,6 +138,7 @@
   <CellFabric
     columnFabric={effectiveProcessedColumn}
     {isActive}
+    isEditMode={cellId === $editingCellId}
     {value}
     {isProcessing}
     {canViewLinkedEntities}
@@ -149,6 +162,8 @@
     on:movementKeyDown={({ detail }) =>
       handleKeyboardEventOnCell(detail.originalEvent, selection)}
     on:update={valueUpdated}
+    on:enterEditMode={handleEnterEditMode}
+    on:exitEditMode={handleExitEditMode}
     horizontalAlignment={column.primary_key ? 'left' : undefined}
     lightText={hasError || isProcessing}
   />

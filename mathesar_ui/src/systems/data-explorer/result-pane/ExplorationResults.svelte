@@ -120,7 +120,7 @@
         itemSize={() => ROW_HEIGHT_PX}
         let:items
       >
-        {#each items as item (item.key)}
+        {#each items as item, i (i)}
           {@const row = arrayIndex(rows, item.index)}
           {@const rowSelectionId = (row && getRowSelectionId(row)) ?? ''}
           {@const isSelected = $selection.rowIds.has(rowSelectionId)}

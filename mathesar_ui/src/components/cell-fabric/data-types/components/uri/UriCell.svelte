@@ -15,6 +15,7 @@
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
+  export let isEditMode = false;
   export let searchValue: $$Props['searchValue'] = undefined;
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
@@ -23,6 +24,7 @@
 <SteppedInputCell
   bind:value
   {isActive}
+  {isEditMode}
   {disabled}
   {searchValue}
   {isIndependentOfSheet}
@@ -32,6 +34,8 @@
   on:movementKeyDown
   on:mouseenter
   on:update
+  on:enterEditMode
+  on:exitEditMode
 >
   <span slot="content" let:matchParts>
     <CellValue {value}>

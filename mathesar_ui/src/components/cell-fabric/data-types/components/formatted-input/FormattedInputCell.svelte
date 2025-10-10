@@ -9,6 +9,7 @@
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
+  export let isEditMode = false;
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
   export let formatter: $$Props['formatter'];
@@ -19,6 +20,7 @@
 <SteppedInputCell
   bind:value
   {isActive}
+  {isEditMode}
   {disabled}
   {isIndependentOfSheet}
   {showTruncationPopover}
@@ -30,6 +32,8 @@
   on:movementKeyDown
   on:mouseenter
   on:update
+  on:enterEditMode
+  on:exitEditMode
 >
   <FormattedInput
     focusOnMount={true}

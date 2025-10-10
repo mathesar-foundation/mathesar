@@ -65,6 +65,7 @@
   ));
 
   const selectionInProgress = writable(false);
+  const editingCellId = writable<string | undefined>(undefined);
   const stores = {
     columnStyleMap: writable(columnStyleMap),
     rowWidth: writable(rowWidth),
@@ -72,6 +73,7 @@
     scrollOffset: writable(scrollOffset),
     paddingRight: writable(paddingRight),
     selectionInProgress,
+    editingCellId,
   };
 
   // Setting these values in stores for reactivity in context
@@ -96,6 +98,9 @@
       },
       setScrollOffset: (offset) => {
         scrollOffset = offset;
+      },
+      setEditingCellId: (cellId) => {
+        editingCellId.set(cellId);
       },
     },
   });

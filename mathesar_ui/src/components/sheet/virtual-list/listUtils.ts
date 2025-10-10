@@ -222,6 +222,7 @@ function getItemStyle(props: Props, index: number): Item['style'] {
 
 function getItemsInfo(props: Props): ItemInfo {
   const { itemKey, itemCount, isScrolling } = props;
+
   const [startIndex, stopIndex] = getRangeToRender(props);
   const items: Item[] = [];
   if (itemCount > 0) {
