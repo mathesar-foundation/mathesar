@@ -1,0 +1,47 @@
+{
+  "name": "Mathesar IDE (with DinD)",
+
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.13"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "workspaceFolder": "/workspace",
+
+  // run once after the container is created and features/extensions are in place
+  "postCreateCommand": "cp .env.example .env || true && pip install --no-cache-dir -r requirements-dev.txt && cd mathesar_ui && npm ci",
+
+  // run after the container has fully started (and mounted your workspace)
+  "postStartCommand": "docker compose -f docker-compose.dev.yml up -d dev-service",
+
+  "forwardPorts": [8000, 3000, 6006],
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "svelte.svelte-vscode"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.organizeImports": "explicit"
+        },
+        "eslint.validate": ["javascript","typescript","svelte"],
+        "svelte.enable-ts-plugin": true,
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
+  }
+}
