@@ -1,30 +1,20 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
-  import { _ } from 'svelte-i18n';
 
   import {
     type RequestStatus,
     States,
   } from '@mathesar/api/rest/utils/requestUtils';
-  import type { ResultValue } from '@mathesar/api/rpc/records';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
-  import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
-  import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { SheetDataCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
   import { getSheetContext } from '@mathesar/components/sheet/utils';
-  import {
-    iconLinkToRecordPage,
-    iconModalRecordView,
-    iconSetToNull,
-  } from '@mathesar/icons';
   import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type CellKey,
     type ClientSideCellError,
@@ -35,25 +25,13 @@
     isPlaceholderRecordRow,
     isProvisionalRecordRow,
   } from '@mathesar/stores/table-data';
-  import {
-    ButtonMenuItem,
-    ContextMenu,
-    LinkMenuItem,
-    MenuDivider,
-    MenuHeading,
-    type WritableMap,
-  } from '@mathesar-component-library';
-
-  import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import type { WritableMap } from '@mathesar-component-library';
 
   import CellErrors from './CellErrors.svelte';
-  import RowContextOptions from './RowContextOptions.svelte';
 
-  export let tableOid: number;
   export let recordsData: RecordsData;
   export let selection: Writable<SheetSelection>;
   export let row: RecordRow;
-  export let recordPk: ResultValue | undefined;
   export let rowHasErrors = false;
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<
@@ -63,10 +41,7 @@
   export let processedColumn: ProcessedColumn;
   export let clientSideErrorMap: WritableMap<CellKey, ClientSideCellError[]>;
   export let value: unknown = undefined;
-  export let canInsertRecords: boolean;
   export let canUpdateRecords: boolean;
-  export let canDeleteRecords: boolean;
-  export let quickViewRecord: (tableOid: number, recordId: unknown) => void;
 
   const { stores, api } = getSheetContext();
   const { editingCellId } = stores;
@@ -85,7 +60,7 @@
 
   $: recordsDataState = recordsData.state;
   $: ({ linkedRecordSummaries, fileManifests } = recordsData);
-  $: ({ column, linkFk } = effectiveProcessedColumn);
+  $: ({ column } = effectiveProcessedColumn);
   $: columnId = column.id;
   $: isWithinPlaceholderRow = isPlaceholderRecordRow(row);
   $: modificationStatus = $modificationStatusMap.get(key);
@@ -100,8 +75,6 @@
   // TODO: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
   $: isEditable = canUpdateRecords && effectiveProcessedColumn.isEditable;
-  $: canSetNull = isEditable && column.nullable && value !== null;
-  $: getRecordUrl = $storeToGetRecordPageUrl;
   $: recordSummary = $linkedRecordSummaries
     .get(String(column.id))
     ?.get(String(value));
@@ -194,73 +167,8 @@
     horizontalAlignment={column.primary_key ? 'left' : undefined}
     lightText={hasError || isProcessing}
   />
-  <ContextMenu>
-    <MenuHeading>{$_('cell')}</MenuHeading>
-    <ButtonMenuItem
-      icon={iconSetToNull}
-      disabled={!canSetNull}
-      on:click={() => setValue(null)}
-    >
-      {$_('set_to')}
-      <Null />
-    </ButtonMenuItem>
 
-    {#if linkFk && canViewLinkedEntities}
-      {@const linkedTableOid = linkFk.referent_table_oid}
-      <MenuDivider />
-      <MenuHeading>
-        <div class="linked-record-menu-heading">
-          <div class="title">{$_('linked_record')}</div>
-          <div class="record-summary">
-            <LinkedRecord {recordSummary} />
-          </div>
-        </div>
-      </MenuHeading>
-      <ButtonMenuItem
-        icon={iconModalRecordView}
-        on:click={() => quickViewRecord(linkedTableOid, value)}
-      >
-        {$_('quick_view_linked_record')}
-      </ButtonMenuItem>
-      {@const href = getRecordUrl({ tableId: linkedTableOid, recordId: value })}
-      {#if href}
-        <LinkMenuItem icon={iconLinkToRecordPage} {href}>
-          {$_('open_linked_record')}
-        </LinkMenuItem>
-      {/if}
-    {/if}
-
-    <MenuDivider />
-
-    <!-- Column Attributes -->
-    <MenuHeading>{$_('column')}</MenuHeading>
-    <ColumnHeaderContextMenu processedColumn={effectiveProcessedColumn} />
-
-    <!-- Row -->
-    <MenuDivider />
-    <MenuHeading>{$_('row')}</MenuHeading>
-    <RowContextOptions
-      {tableOid}
-      {recordPk}
-      {recordsData}
-      {row}
-      {canDeleteRecords}
-      {canInsertRecords}
-      quickViewThisRecord={() => quickViewRecord(tableOid, recordPk)}
-    />
-  </ContextMenu>
   {#if errors.length}
     <CellErrors {serverErrors} {clientErrors} forceShowErrors={isActive} />
   {/if}
 </SheetDataCell>
-
-<style lang="scss">
-  .linked-record-menu-heading {
-    display: grid;
-    grid-template: auto / auto 1fr;
-    gap: var(--sm3);
-    .record-summary {
-      font-size: var(--sm1);
-    }
-  }
-</style>

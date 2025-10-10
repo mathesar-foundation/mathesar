@@ -7,6 +7,7 @@
     getClipboardHandlerStoreFromContext,
   } from '@mathesar/stores/clipboard';
   import { getModifierKeyCombo } from '@mathesar/utils/pointerUtils';
+  import type { ClientPosition } from '@mathesar-component-library';
   import { ImmutableMap } from '@mathesar-component-library/types';
 
   import {
@@ -49,6 +50,12 @@
     new ImmutableMap();
 
   export let sheetElement: HTMLElement | undefined = undefined;
+  export let onCellContextMenu:
+    | ((p: {
+        targetCell: SheetCellDetails;
+        position: ClientPosition;
+      }) => 'opened' | 'empty')
+    | undefined = undefined;
 
   $: ({ columnStyleMap, rowWidth } = calculateColumnStyleMapAndRowWidth(
     columns,
@@ -124,6 +131,7 @@
   }
 
   function handleMouseDown(e: MouseEvent) {
+    if (e.button !== 0) return;
     if (!selection) return;
     if (!sheetElement) return;
 
@@ -165,6 +173,17 @@
     }
   }
 
+  function handleContextMenu(event: MouseEvent) {
+    if (!onCellContextMenu) return;
+    const target = event.target as HTMLElement;
+    const targetCell = findContainingSheetCell(target);
+    if (!targetCell) return;
+    const state = onCellContextMenu({ targetCell, position: event });
+    if (state === 'opened') {
+      event.preventDefault();
+    }
+  }
+
   onMount(() => {
     selection?.on('focus', async () => {
       if (!sheetElement) return;
@@ -189,6 +208,7 @@
   class:selection-in-progress={$selectionInProgress}
   {style}
   on:mousedown={handleMouseDown}
+  on:contextmenu={handleContextMenu}
   on:focusin={enableClipboard}
   on:focusout={disableClipboard}
   bind:this={sheetElement}
