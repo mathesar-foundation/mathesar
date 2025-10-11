@@ -81,7 +81,8 @@
 <style>
   .fields {
     display: grid;
-    grid-template-columns: auto auto auto auto;
+    --col: minmax(0, max-content);
+    grid-template-columns: var(--col) var(--col) auto var(--col);
     gap: var(--sm1);
     align-items: center;
     justify-content: start;
