@@ -7,6 +7,7 @@
     Fieldset,
     Icon,
     Spinner,
+    Truncate,
     assertExhaustive,
   } from '@mathesar/component-library';
   import LabeledInput from '@mathesar/component-library/labeled-input/LabeledInput.svelte';
@@ -43,7 +44,9 @@
 <div class="import-form">
   <Fieldset label={$_('file')} boxed>
     <div class="file-detail">
-      <div class="file-name">{file.name}</div>
+      <div class="file-name">
+        <Truncate>{file.name}</Truncate>
+      </div>
       <div class="file-size">({formatBytes(file.size)})</div>
       <Button
         on:click={() => resetFile?.()}
@@ -91,14 +94,13 @@
     gap: 1rem;
   }
   .file-detail {
-    display: grid;
-    grid-auto-flow: column;
-    justify-content: start;
+    display: flex;
     align-items: center;
     gap: var(--sm4);
   }
   .file-name {
     font-weight: 600;
+    max-width: 20rem;
   }
   .file-size {
     font-size: var(--sm1);

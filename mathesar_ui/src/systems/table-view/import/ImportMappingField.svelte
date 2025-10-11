@@ -1,13 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { Icon, LabelController } from '@mathesar/component-library';
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
   import { iconChangeAToB } from '@mathesar/icons';
   import type {
     ProcessedColumn,
     ProcessedColumns,
   } from '@mathesar/stores/table-data';
+  import { Icon, LabelController, Truncate } from '@mathesar-component-library';
 
   import type { CsvPreviewField } from './importUtils';
 
@@ -22,13 +22,15 @@
 
 <div class="column-name">
   {#if field.name}
-    {field.name}
+    <Truncate>{field.name}</Truncate>
   {:else}
     {$_('column_number', { values: { column_number: field.index + 1 } })}
   {/if}
 </div>
 
-<div class="sample-value">{field.sampleValue}</div>
+<div class="sample-value">
+  <Truncate>{field.sampleValue}</Truncate>
+</div>
 
 <div class="arrow">
   <Icon {...iconChangeAToB} />
