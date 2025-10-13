@@ -4,12 +4,14 @@ from rest_framework import routers
 
 from mathesar import views
 from mathesar.api.viewsets.data_files import DataFileViewSet
+from mathesar.api.viewsets.bulk_insert import BulkInsertViewSet
 from mathesar.views.installation.decorators import installation_complete, installation_incomplete
 from mathesar.views.installation.complete_installation import CompleteInstallationFormView
 from mathesar.views.users.password_reset import MathesarPasswordResetConfirmView
 
 db_router = routers.DefaultRouter()
 db_router.register(r'data_files', DataFileViewSet, basename='data-file')
+db_router.register(r'bulk_insert', BulkInsertViewSet, basename='bulk-insert')
 
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
