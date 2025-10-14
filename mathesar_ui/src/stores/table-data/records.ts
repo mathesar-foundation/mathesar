@@ -417,6 +417,7 @@ export class RecordsData {
           if (deletedIds.has(rowId)) {
             rowsSuccessfullyDeleted.add(row.identifier);
           } else {
+            // This can happen in the case of a failure due to RLS
             rowsFailedToDelete.set(
               row.identifier,
               RpcError.fromAnything(`Unable to delete row ${String(rowId)}`),
