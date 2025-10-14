@@ -249,7 +249,7 @@
   "explore_your_data": "あなたのデータを調べる",
   "exploring_from": "以下から調べる：",
   "export": "エクスポート",
-  "export_csv_help": "{tableName} テーブルを CSVファイルとしてエクスポートしてください。現在のフィルターとソート設定が、エクスポートされたデータに適用されます。",
+  "export_table_as_csv_help": "{tableName} テーブルを CSVファイルとしてエクスポートしてください。現在のフィルターとソート設定が、エクスポートされたデータに適用されます。",
   "extract_columns_to_new_table": "{count, plural, other {新しいテーブルに列を抽出}}",
   "failed_load_preview": "プレビューの読み込みに失敗しました",
   "failed_to_fetch_column_information": "列情報の取得に失敗しました。",
