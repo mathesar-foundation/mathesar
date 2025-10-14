@@ -85,7 +85,10 @@ export function getFirstFocusableAncestor(
   element: Element,
 ): Element | undefined {
   if (getElementFocusCapability(element).focusable) return element;
-  const ancestor = element.closest(potentiallyFocusableElementsSelector);
+  if (!element.parentElement) return undefined;
+  const ancestor = element.parentElement.closest(
+    potentiallyFocusableElementsSelector,
+  );
   if (!ancestor) return undefined;
   return getFirstFocusableAncestor(ancestor);
 }
