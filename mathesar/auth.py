@@ -1,32 +1,26 @@
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.views import redirect_to_login
 from functools import wraps
 from mathesar.models.base import Form, ColumnMetaData
-from typing import Callable, Protocol, Any, Optional
 
 from mathesar.utils.download_links import get_public_form_conf_for_file_backend
 
 
 # Auth checks are currently not centralized. Refer https://github.com/mathesar-foundation/mathesar/issues/4846.
 
-class Guard(Protocol):
-    def __call__(self, request: HttpRequest) -> bool:
-        ...
-
-
-def any_of(*guards: Guard) -> Guard:
-    def _g(request: HttpRequest) -> bool:
+def any_of(*guards):
+    def _g(request):
         return any(g(request) for g in guards)
     return _g
 
 
-def all_of(*guards: Guard) -> Guard:
-    def _g(request: HttpRequest) -> bool:
+def all_of(*guards):
+    def _g(request):
         return all(g(request) for g in guards)
     return _g
 
 
-def require(guard: Guard, *, unauthorized_response: str = "redirect_to_login") -> Callable:
+def require(guard, *, unauthorized_response: str = "redirect_to_login"):
     """
     Decorator: allow if `guard(request)` is True, else 401.
 
@@ -35,17 +29,17 @@ def require(guard: Guard, *, unauthorized_response: str = "redirect_to_login") -
         - `http_status`
         - `json`
     """
-    def decorator(view_func: Callable) -> Callable:
+    def decorator(view_func):
         @wraps(view_func)
-        def wrapped(request: HttpRequest, *args: Any, **kwargs: Any):
-            if guard(request):
+        def wrapped(request, *args, **kwargs):
+            if guard(request) is True:
                 return view_func(request, *args, **kwargs)
             return _unauthorized_response(request, unauthorized_response)
         return wrapped
     return decorator
 
 
-def _unauthorized_response(request: HttpRequest, response_mode) -> HttpResponse:
+def _unauthorized_response(request, response_mode):
     if response_mode == "json":
         return JsonResponse({"detail": "Unauthorized"}, status=401)
 
@@ -55,13 +49,12 @@ def _unauthorized_response(request: HttpRequest, response_mode) -> HttpResponse:
     return redirect_to_login(request.get_full_path())
 
 
-def user_is_logged_in(request: HttpRequest) -> bool:
+def user_is_logged_in(request):
     """Checks if user is authenticated"""
-    user = getattr(request, "user", None)
-    return bool(user and user.is_authenticated)
+    return request.user.is_authenticated
 
 
-def has_shared_form(request: HttpRequest) -> bool:
+def has_shared_form(request):
     """
     Checks if a valid shared form token is present in the request
     query params via `?form_token=...`
@@ -69,13 +62,13 @@ def has_shared_form(request: HttpRequest) -> bool:
     return _get_publicly_shared_form_from_request(request) is not None
 
 
-def user_has_file_backend_access(request: HttpRequest) -> bool:
+def user_has_file_backend_access(request):
     if user_is_logged_in(request):
         return True
 
     if has_shared_form(request):
         public_form_conf_for_file_backend = get_public_form_conf_for_file_backend()
-        return bool(public_form_conf_for_file_backend.get("enabled", False))
+        return public_form_conf_for_file_backend.get("enabled", False) is True
 
     return False
 
@@ -109,10 +102,10 @@ def shared_form_field_column_has_file_backend(request):
         table_oid=table_oid,
         database=form_model.database
     ).first()
-    return bool(getattr(column_metadata, "file_backend", None))
+    return column_metadata is not None and column_metadata.file_backend is not None
 
 
-def _get_publicly_shared_form_from_request(request: HttpRequest) -> Optional["Form"]:
+def _get_publicly_shared_form_from_request(request):
     """
     Returns a cached instance of the shared form, or retrieves it and caches
     it in the request object.
@@ -138,7 +131,7 @@ def _get_publicly_shared_form_from_request(request: HttpRequest) -> Optional["Fo
 
 # Mathesar specific guards
 
-FILE_ACCESS_VIA_LOGIN_OR_SHARED_FORM_FIELD: Guard = (
+FILE_ACCESS_VIA_LOGIN_OR_SHARED_FORM_FIELD = (
     any_of(
         user_is_logged_in,
         all_of(
