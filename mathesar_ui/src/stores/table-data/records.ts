@@ -19,6 +19,7 @@ import type {
   RecordsSearchParams,
   ResultValue,
 } from '@mathesar/api/rpc/records';
+import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
 import {
@@ -82,7 +83,7 @@ export interface TableRecordsData {
 /**
  * A recipe to set the value of one cell
  */
-interface NewCellValueRecipe {
+export interface NewCellValueRecipe {
   columnId: string;
   value: unknown;
 }
@@ -833,6 +834,14 @@ export class RecordsData {
     });
     this.newRecords.update((existing) => existing.concat(row));
     await this.createRecord(row);
+  }
+
+  getCellValue(cellSelectionId: string): ResultValue | undefined {
+    const { columnId, rowId } = parseCellId(cellSelectionId);
+    const rows = get(this.selectableRowsMap);
+    const row = rows.get(rowId);
+    if (!row) return undefined;
+    return row.record[columnId];
   }
 
   destroy(): void {

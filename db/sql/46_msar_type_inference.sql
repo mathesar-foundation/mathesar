@@ -40,8 +40,8 @@ EXECUTE format(
 IF array_length(group_sep, 1) > 1 THEN RAISE EXCEPTION 'Too many grouping separators found!';
 ELSIF array_length(decimal_p, 1) > 1 THEN RAISE EXCEPTION 'Too many decimal separators found!';
 ELSE
-  compat_details.group_sep := group_sep[1];
-  compat_details.decimal_p := decimal_p[1];
+  compat_details.group_sep := coalesce(group_sep[1], '');
+  compat_details.decimal_p := coalesce(decimal_p[1], '');
 END IF;
 END;
 $$ LANGUAGE plpgsql PARALLEL SAFE STABLE RETURNS NULL ON NULL INPUT;
@@ -87,10 +87,10 @@ ELSIF array_length(decimal_p, 1) > 1 THEN RAISE EXCEPTION 'Too many decimal sepa
 ELSIF array_length(curr_pref, 1) > 1 THEN RAISE EXCEPTION 'Too many currency prefixes found!';
 ELSIF array_length(curr_suff, 1) > 1 THEN RAISE EXCEPTION 'Too many currency suffixes found!';
 ELSE
-  compat_details.group_sep := group_sep[1];
-  compat_details.decimal_p := decimal_p[1];
-  compat_details.curr_pref := curr_pref[1];
-  compat_details.curr_suff := curr_suff[1];
+  compat_details.group_sep := coalesce(group_sep[1], '');
+  compat_details.decimal_p := coalesce(decimal_p[1], '');
+  compat_details.curr_pref := coalesce(curr_pref[1], '');
+  compat_details.curr_suff := coalesce(curr_suff[1], '');
 END IF;
 END;
 $$ LANGUAGE plpgsql PARALLEL SAFE STABLE RETURNS NULL ON NULL INPUT;
@@ -129,8 +129,8 @@ BEGIN
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     test_perc,
-    coalesce(compat_details.group_sep, ''),
-    coalesce(compat_details.decimal_p, '')
+    compat_details.group_sep,
+    compat_details.decimal_p
   );
   compat_details.mathesar_casting = true;
   compat_details.type_compatible = true;
@@ -165,10 +165,10 @@ BEGIN
     /* %2 */ msar.get_relation_schema_name(tab_id),
     /* %3 */ msar.get_relation_name(tab_id),
     /* %4 */ test_perc,
-    /* %5 */ coalesce(compat_details.group_sep, ''),
-    /* %6 */ coalesce(compat_details.decimal_p, ''),
-    /* %7 */ coalesce(compat_details.curr_pref, ''),
-    /* %8 */ coalesce(compat_details.curr_suff, '')
+    /* %5 */ compat_details.group_sep,
+    /* %6 */ compat_details.decimal_p,
+    /* %7 */ compat_details.curr_pref,
+    /* %8 */ compat_details.curr_suff
   );
   compat_details.mathesar_casting = true;
   compat_details.type_compatible = true;

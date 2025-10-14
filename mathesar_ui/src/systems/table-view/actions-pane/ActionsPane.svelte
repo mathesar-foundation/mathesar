@@ -85,7 +85,7 @@
           <span class="responsive-button-label">{$_('export')}</span>
         </AnchorButton>
         <span slot="content">
-          {$_('export_csv_help', {
+          {$_('export_table_as_csv_help', {
             values: { tableName: table.name },
           })}
         </span>
