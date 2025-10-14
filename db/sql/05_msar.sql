@@ -2515,8 +2515,6 @@ Args:
                   "not_null", and "default" keys optional).
   raw_default: This boolean tells us whether we chould reproduce the default with or without quoting
                and escaping. True means we don't quote or escape, but just use the raw value.
-  create_id: This boolean defines whether or not we should automatically add a default Mathesar 'id'
-             column to the input.
 
 The col_defs should have the form:
 [
@@ -3357,6 +3355,137 @@ BEGIN
   ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.prepare_temp_table_for_import(
+  tab_name text,
+  col_names text[]
+) RETURNS jsonb AS $$
+DECLARE
+  col_defs jsonb;
+  column_defs __msar.col_def[];
+  prefix text;
+  table_count integer := 1;
+  uq_tab_name text;
+  sch_name text;
+  rel_id bigint;
+  col_names_sql text;
+  copy_sql text;
+BEGIN
+  col_defs := jsonb_agg(jsonb_build_object('name', n)) FROM unnest(col_names) AS x(n);
+
+  IF NULLIF(tab_name, '') IS NOT NULL AND NOT EXISTS(
+      SELECT oid FROM pg_catalog.pg_class WHERE relname = tab_name AND relpersistence = 't'
+    )
+  THEN
+    uq_tab_name := tab_name;
+  ELSE
+    prefix := 'Temp Table ';
+    uq_tab_name := prefix || table_count;
+    -- avoid name collisions
+    WHILE EXISTS (
+      SELECT oid FROM pg_catalog.pg_class WHERE relname = uq_tab_name AND relpersistence = 't'
+    ) LOOP
+      table_count := table_count + 1;
+      uq_tab_name := prefix || table_count;
+    END LOOP;
+  END IF;
+  column_defs := __msar.process_col_def_jsonb(0, col_defs, false);
+  PERFORM msar.add_temp_table(tab_name, column_defs);
+
+  SELECT nspname, pgc.oid INTO sch_name, rel_id
+  FROM pg_catalog.pg_class AS pgc
+  LEFT JOIN pg_catalog.pg_namespace AS pgn
+  ON pgc.relnamespace = pgn.oid
+  WHERE pgc.relname = uq_tab_name AND pgc.relpersistence = 't';
+
+  -- Aggregate TEXT type column names of the created table
+  SELECT string_agg(quote_ident(attname), ', ') INTO col_names_sql
+  FROM pg_catalog.pg_attribute
+  WHERE attrelid = rel_id AND atttypid = 'TEXT'::regtype::oid;
+
+  -- Create a properly formatted COPY SQL string
+  copy_sql := format('COPY %I.%I(%s) FROM STDIN', sch_name, uq_tab_name, col_names_sql);
+
+  RETURN jsonb_build_object(
+    'copy_sql', copy_sql,
+    'table_oid', rel_id::bigint,
+    'table_name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = rel_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_temp_table(tab_name text, col_defs __msar.col_def[])
+RETURNS text AS $$/*
+Add a temporary table, returning the command executed.
+
+Args:
+  tab_name: An unqualified name for the table to be added.
+  col_defs: An array of __msar.col_def defining the column set of the new table.
+*/
+WITH col_cte AS (
+  SELECT string_agg(__msar.build_col_def_text(col), ', ') AS table_columns
+  FROM unnest(col_defs) AS col
+)
+SELECT __msar.exec_ddl(
+  'CREATE TEMPORARY TABLE %I (%s)',
+  tab_name,
+  table_columns
+)
+FROM col_cte;
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.insert_from_select(
+  src_tab_id regclass,
+  tar_tab_id regclass,
+  mappings jsonb
+) RETURNS bigint AS $$
+DECLARE
+  src_table_cols text;
+  tar_table_cols text;
+  insert_count bigint;
+BEGIN
+  SELECT
+    string_agg(
+      __msar.build_cast_expr(
+        quote_ident(src.attname),
+        dst.atttypid::regclass::text,
+        '{}'::jsonb
+      ), ', '
+    ),
+    string_agg(quote_ident(dst.attname), ', ')
+  INTO src_table_cols, tar_table_cols
+  FROM jsonb_to_recordset(mappings) AS mapping(
+    temp_table_attnum smallint,
+    target_table_attnum smallint
+  )
+  LEFT JOIN pg_catalog.pg_attribute AS src ON
+    src.attnum = mapping.temp_table_attnum
+    AND src.attrelid = src_tab_id
+    AND NOT src.attisdropped
+  LEFT JOIN pg_catalog.pg_attribute AS dst ON
+    dst.attnum = mapping.target_table_attnum
+    AND dst.attrelid = tar_tab_id
+    AND NOT dst.attisdropped;
+
+  EXECUTE format(
+    'INSERT INTO %I.%I(%s) SELECT %s FROM %I.%I RETURNING 1',
+    msar.get_relation_schema_name(tar_tab_id),
+    msar.get_relation_name(tar_tab_id),
+    tar_table_cols,
+    src_table_cols,
+    msar.get_relation_schema_name(src_tab_id),
+    msar.get_relation_name(src_tab_id)
+  );
+  GET DIAGNOSTICS insert_count = ROW_COUNT;
+  RETURN insert_count;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION

@@ -120,7 +120,8 @@ def create_and_import_from_rows(
         schema_oid,
         column_names,
         conn,
-        comment=None
+        comment=None,
+        import_into_temp_table=False
 ):
     """
     Create a Mathesar table as specified, with text columns.
@@ -131,14 +132,22 @@ def create_and_import_from_rows(
               the same length, and should have the same length as
               `column_names`
     """
-    import_info = db_conn.exec_msar_func(
-        conn,
-        'prepare_table_for_import',
-        schema_oid,
-        table_name,
-        column_names,
-        comment
-    ).fetchone()[0]
+    if import_into_temp_table:
+        import_info = db_conn.exec_msar_func(
+            conn,
+            'prepare_temp_table_for_import',
+            table_name,
+            column_names
+        ).fetchone()[0]
+    else:
+        import_info = db_conn.exec_msar_func(
+            conn,
+            'prepare_table_for_import',
+            schema_oid,
+            table_name,
+            column_names,
+            comment
+        ).fetchone()[0]
 
     cursor = conn.cursor()
     with cursor.copy(import_info['copy_sql']) as copy:
