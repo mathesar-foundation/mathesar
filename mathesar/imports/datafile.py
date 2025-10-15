@@ -3,7 +3,7 @@ import clevercsv as csv
 from db.constants import COLUMN_NAME_TEMPLATE
 from db.identifiers import truncate_if_necessary
 from db.tables import create_and_import_from_rows
-from db.insert import insert_from_select
+from db.records import insert_from_select
 
 from mathesar.models.base import DataFile
 

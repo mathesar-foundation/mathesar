@@ -3361,7 +3361,20 @@ CREATE OR REPLACE FUNCTION
 msar.prepare_temp_table_for_import(
   tab_name text,
   col_names text[]
-) RETURNS jsonb AS $$
+) RETURNS jsonb AS $$/*
+Add a temp table, returning a JSON object containing a properly formatted SQL
+statement to carry out `COPY FROM`, table_oid of the created temp table.
+
+Each returned JSON object will have the form:
+  {
+    "copy_sql": <str>,
+    "table_oid": <int>
+  }
+
+Args:
+  tab_name (optional): The unquoted name for the new temp table.
+  col_defs: The columns for the new table, in order.
+*/
 DECLARE
   col_defs jsonb;
   column_defs __msar.col_def[];
@@ -3443,7 +3456,22 @@ msar.insert_from_select(
   src_tab_id regclass,
   dst_tab_id regclass,
   mappings jsonb
-) RETURNS bigint AS $$
+) RETURNS bigint AS $$/*
+Insert records from a given source table to a destination/target table,
+returning the number of records inserted.
+
+Args:
+  src_tab_id: The OID of the source table.(OID if temp table if inserting into existing table).
+  dst_tab_id: The OID of the destination/target table.
+  mappings: The column mappings b/w src and dst tables based on which data will be inserted.
+
+mappings should have the following form:
+[
+  {"src_table_attnum": 1, "dst_table_attnum": 2},
+  {"src_table_attnum": 3, "dst_table_attnum": 3},
+  {...}
+]
+*/
 DECLARE
   src_table_cols text;
   dst_table_cols text;
