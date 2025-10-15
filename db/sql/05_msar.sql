@@ -3410,8 +3410,7 @@ BEGIN
 
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
-    'table_oid', rel_id::bigint,
-    'table_name', relname
+    'table_oid', rel_id::bigint
   ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -3461,15 +3460,15 @@ BEGIN
     string_agg(quote_ident(dst.attname), ', ')
   INTO src_table_cols, dst_table_cols
   FROM jsonb_to_recordset(mappings) AS mapping(
-    temp_table_attnum smallint,
-    target_table_attnum smallint
+    src_table_attnum smallint,
+    dst_table_attnum smallint
   )
   LEFT JOIN pg_catalog.pg_attribute AS src ON
-    src.attnum = mapping.temp_table_attnum
+    src.attnum = mapping.src_table_attnum
     AND src.attrelid = src_tab_id
     AND NOT src.attisdropped
   LEFT JOIN pg_catalog.pg_attribute AS dst ON
-    dst.attnum = mapping.target_table_attnum
+    dst.attnum = mapping.dst_table_attnum
     AND dst.attrelid = dst_tab_id
     AND NOT dst.attisdropped;
 
