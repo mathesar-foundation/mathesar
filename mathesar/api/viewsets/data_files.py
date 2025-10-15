@@ -6,7 +6,6 @@ from rest_framework.parsers import MultiPartParser, JSONParser
 
 from mathesar.api.dj_filters import DataFileFilter
 import mathesar.api.exceptions.data_import_exceptions.exceptions
-import mathesar.api.exceptions.database_exceptions.exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.errors import InvalidTableError
