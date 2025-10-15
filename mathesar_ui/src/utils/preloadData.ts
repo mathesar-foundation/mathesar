@@ -4,6 +4,7 @@ import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { RawServer } from '@mathesar/api/rpc/servers';
 import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
 import type { User } from '@mathesar/api/rpc/users';
+import { isDefinedNonNullable } from '@mathesar-component-library';
 
 type WithStatus<D> =
   | {
@@ -73,4 +74,20 @@ export function preloadCommonData(): CommonData {
     throw new Error('commonData is undefined. This state should never occur');
   }
   return commonData;
+}
+
+export function getFileStorageBackend(backend: string) {
+  const commonData = preloadCommonData();
+  return (
+    commonData.file_backends?.find((storage) => storage.backend === backend) ??
+    null
+  );
+}
+
+export function getDefaultFileStorageBackend() {
+  const commonData = preloadCommonData();
+  if (isDefinedNonNullable(commonData.file_backends)) {
+    return commonData.file_backends[0] ?? null;
+  }
+  return null;
 }
