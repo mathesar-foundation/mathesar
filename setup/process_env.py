@@ -123,6 +123,9 @@ def main():
 
     updates = {}
 
+    if not env_vars.get("WEB_CONCURRENCY"):
+        updates["WEB_CONCURRENCY"] = 3
+
     connection_string = sys.argv[1].strip() if (len(sys.argv) > 1 and sys.argv[1].strip()) else None
 
     if connection_string:

@@ -29,7 +29,7 @@
       </MenuHeading>
       <LinkMenuItem
         href={getDatabaseRolesUrl(database.id)}
-        class={section === 'roles' ? 'active' : ''}
+        active={section === 'roles'}
       >
         {$_('roles')}
       </LinkMenuItem>
@@ -41,13 +41,13 @@
       </MenuHeading>
       <LinkMenuItem
         href={getDatabaseRoleConfigurationUrl(database.id)}
-        class={section === 'roleConfiguration' ? 'active' : ''}
+        active={section === 'roleConfiguration'}
       >
         {$_('stored_role_passwords')}
       </LinkMenuItem>
       <LinkMenuItem
         href={getDatabaseCollaboratorsUrl(database.id)}
-        class={section === 'collaborators' ? 'active' : ''}
+        active={section === 'collaborators'}
       >
         {$_('collaborators')}
       </LinkMenuItem>
