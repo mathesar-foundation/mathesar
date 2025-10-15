@@ -1076,6 +1076,16 @@ RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(integer)
+RETURNS character varying AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(smallint)
+RETURNS character varying AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
 CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(oid)
 RETURNS character varying AS $$
   SELECT $1::text;
@@ -1230,6 +1240,16 @@ RETURNS character AS $$
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_character(int8range)
+RETURNS character AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_character(integer)
+RETURNS character AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_character(smallint)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
@@ -1392,6 +1412,16 @@ RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(integer)
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(smallint)
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
 CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(oid)
 RETURNS "char" AS $$
   SELECT $1::text;
@@ -1550,6 +1580,16 @@ RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
+CREATE OR REPLACE FUNCTION msar.cast_to_text(integer)
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_text(smallint)
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
 CREATE OR REPLACE FUNCTION msar.cast_to_text(oid)
 RETURNS text AS $$
   SELECT $1::text;
@@ -1704,6 +1744,16 @@ RETURNS name AS $$
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.cast_to_name(int8range)
+RETURNS name AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_name(integer)
+RETURNS name AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_name(smallint)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
