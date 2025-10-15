@@ -7,6 +7,7 @@ import {
   get,
   writable,
 } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
@@ -26,7 +27,6 @@ import {
   RpcError,
   batchSend,
 } from '@mathesar/packages/json-rpc-client-builder';
-import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
 import {
   type CancellablePromise,
@@ -418,10 +418,10 @@ export class RecordsData {
             rowsSuccessfullyDeleted.add(row.identifier);
           } else {
             // This can happen in the case of a failure due to RLS
-            rowsFailedToDelete.set(
-              row.identifier,
-              RpcError.fromAnything(`Unable to delete row ${String(rowId)}`),
-            );
+            const msg = get(_)('row_deletion_ignored_by_pg', {
+              values: { rowId },
+            });
+            rowsFailedToDelete.set(row.identifier, RpcError.fromAnything(msg));
           }
         });
       } catch (error) {
@@ -476,10 +476,9 @@ export class RecordsData {
     this.meta.rowDeletionStatus.clear();
 
     if (rowsFailedToDelete.size > 0) {
-      const uiMsg = `Unable to delete ${pluralize(
-        rowsFailedToDelete.size,
-        'rows',
-      )}.`;
+      const uiMsg = get(_)('unable_to_delete_count_rows', {
+        values: { count: rowsFailedToDelete.size },
+      });
       const apiMsg = [...rowsFailedToDelete.values()].join('\n');
       throw new Error(`${uiMsg} ${apiMsg}`);
     }
