@@ -1,31 +1,22 @@
-from rest_framework import viewsets
-from rest_framework.mixins import CreateModelMixin, ListModelMixin
-from rest_framework.parsers import MultiPartParser, JSONParser
+from rest_framework import status, viewsets
+from rest_framework.response import Response
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.parsers import MultiPartParser
+
+from db.insert import insert_from_select
 from mathesar.api.serializers.bulk_insert import BulkInsertSerializer
-# from mathesar.api.serializers.data_files import DataFileSerializer
-# from mathesar.api.viewsets.data_files import DataFileViewSet
 from mathesar.imports.datafile import copy_datafile_to_table
 from mathesar.utils.datafiles import create_datafile
 from mathesar.rpc.utils import connect
-# from mathesar.models.base import DataFile, UserDatabaseRoleMap
-
-"""
-{
-    "file": "http://localhost:8000/media/admin/type_inference.csv",
-    "header": true,
-    "target_table_oid": 12223,
-    "mappings": []
-}
-"""
 
 
-class BulkInsertViewSet(viewsets.GenericViewSet, ListModelMixin, CreateModelMixin):  # TODO: remove ListModelMixin
+class BulkInsertViewSet(viewsets.GenericViewSet, CreateModelMixin):
     serializer_class = BulkInsertSerializer
-    parser_classes = [MultiPartParser, JSONParser]
+    parser_classes = [MultiPartParser]
 
     def create(self, request, *args, **kwargs):
         serializer = BulkInsertSerializer(data=request.data, context={'request': request})
-        # print(serializer.validated_data)
+        serializer.is_valid()
         user = request.user
         data = serializer.validated_data
         database_id = data['database_id']
@@ -52,7 +43,5 @@ class BulkInsertViewSet(viewsets.GenericViewSet, ListModelMixin, CreateModelMixi
                 import_into_temp_table=True,
                 header_to_validate=header_to_validate
             )
-            temp_table['oid']
-            # insert_from_select()
-        # print(target_table_oid, mapping, datafile)
-        pass
+            inserted_rows = insert_from_select(conn, temp_table["oid"], target_table_oid, map)
+            return Response({"inserted_rows": inserted_rows}, status=status.HTTP_200_OK)
