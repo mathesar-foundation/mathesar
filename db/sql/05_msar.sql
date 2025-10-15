@@ -3442,12 +3442,12 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION
 msar.insert_from_select(
   src_tab_id regclass,
-  tar_tab_id regclass,
+  dst_tab_id regclass,
   mappings jsonb
 ) RETURNS bigint AS $$
 DECLARE
   src_table_cols text;
-  tar_table_cols text;
+  dst_table_cols text;
   insert_count bigint;
 BEGIN
   SELECT
@@ -3459,7 +3459,7 @@ BEGIN
       ), ', '
     ),
     string_agg(quote_ident(dst.attname), ', ')
-  INTO src_table_cols, tar_table_cols
+  INTO src_table_cols, dst_table_cols
   FROM jsonb_to_recordset(mappings) AS mapping(
     temp_table_attnum smallint,
     target_table_attnum smallint
@@ -3470,14 +3470,14 @@ BEGIN
     AND NOT src.attisdropped
   LEFT JOIN pg_catalog.pg_attribute AS dst ON
     dst.attnum = mapping.target_table_attnum
-    AND dst.attrelid = tar_tab_id
+    AND dst.attrelid = dst_tab_id
     AND NOT dst.attisdropped;
 
   EXECUTE format(
     'INSERT INTO %I.%I(%s) SELECT %s FROM %I.%I RETURNING 1',
-    msar.get_relation_schema_name(tar_tab_id),
-    msar.get_relation_name(tar_tab_id),
-    tar_table_cols,
+    msar.get_relation_schema_name(dst_tab_id),
+    msar.get_relation_name(dst_tab_id),
+    dst_table_cols,
     src_table_cols,
     msar.get_relation_schema_name(src_tab_id),
     msar.get_relation_name(src_tab_id)
