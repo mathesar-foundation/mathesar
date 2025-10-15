@@ -53,7 +53,13 @@
           POSTGRES_PORT: ${POSTGRES_PORT:-5432}
         ```
 
-2. This is a good time to [set up single sign-on (SSO)](./single-sign-on.md) if that's of interest to you.
+1. (Optional) set a `SECRET_KEY` for the Mathesar service.
+
+    By default, Mathesar will set up and persist a `SECRET_KEY` value for your installation. However, if you're on a serverless environment or using a production platform with an ephemeral filesystem, you must [set a secret key via environment variable](/administration/environment-variables/#secret_key) so that it persists between service builds.
+
+2. (Optional) Enable and configure optional features:
+    - [Single sign-on (SSO)](./single-sign-on.md)
+    - [File data type](./file-backend-config.md)
 3. Run the docker compose file using:
         ```
         docker compose -f docker-compose.yml up
