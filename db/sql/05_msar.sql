@@ -3501,7 +3501,7 @@ BEGIN
     AND NOT dst.attisdropped;
 
   EXECUTE format(
-    'INSERT INTO %I.%I(%s) SELECT %s FROM %I.%I RETURNING 1',
+    'INSERT INTO %I.%I(%s) SELECT %s FROM %I.%I',
     msar.get_relation_schema_name(dst_tab_id),
     msar.get_relation_name(dst_tab_id),
     dst_table_cols,
