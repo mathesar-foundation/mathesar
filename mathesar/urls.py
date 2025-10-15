@@ -16,6 +16,7 @@ db_router.register(r'bulk_insert', BulkInsertViewSet, basename='bulk-insert')
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
     path('api/db/v0/', include(db_router.urls)),
+    path('api/export/v0/explorations/', views.export.export_exploration, name='export_exploration'),
     path('api/export/v0/tables/', views.export.export_table, name='export_table'),
     path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),
     path('auth/password_reset_confirm/', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),

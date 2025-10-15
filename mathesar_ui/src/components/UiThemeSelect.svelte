@@ -18,4 +18,9 @@
   }
 </script>
 
-<Select {value} {options} on:change={setUiTheme} triggerAppearance="action" />
+<Select
+  {value}
+  {options}
+  on:change={setUiTheme}
+  triggerAppearance="secondary"
+/>

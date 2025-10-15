@@ -8,6 +8,19 @@ import type {
 } from '@popperjs/core/lib/types';
 import type { ActionReturn } from 'svelte/action';
 
+interface CustomModifierOptions {
+  /**
+   * By default, we ensure that the popper content width is no smaller than the
+   * width of its trigger element — unless the trigger element is wider than
+   * 250px, in which case it ensures that the popper content width is no smaller
+   * than 250px.
+   *
+   * This option controls that threshold. Set it to 0 if you want to disable
+   * this min-width behavior, allowing the popper content to be quite narrow.
+   */
+  matchTriggerWidthPxUpTo?: number;
+}
+
 interface Parameters {
   reference?: VirtualElement;
   options?: Partial<Options>;
@@ -16,6 +29,7 @@ interface Parameters {
    * resizes.
    */
   autoReposition?: boolean;
+  customModifierOptions?: CustomModifierOptions;
 }
 
 /**
@@ -25,7 +39,11 @@ interface Parameters {
  */
 function buildModifiers(
   suppliedModifiers: Options['modifiers'],
+  modifierOptions: CustomModifierOptions = {},
 ): Options['modifiers'] {
+  const matchTriggerWidthPxUpTo =
+    modifierOptions.matchTriggerWidthPxUpTo ?? 250;
+
   const defaultModifiers: Options['modifiers'] = [
     {
       name: 'flip',
@@ -50,14 +68,16 @@ function buildModifiers(
       phase: 'beforeWrite',
       requires: ['computeStyles'],
       fn: (obj: ModifierArguments<Record<string, unknown>>): void => {
-        // TODO: Make the default value configurable
-        const widthToSet = Math.min(250, obj.state.rects.reference.width);
+        const widthToSet = Math.min(
+          matchTriggerWidthPxUpTo,
+          obj.state.rects.reference.width,
+        );
         // eslint-disable-next-line no-param-reassign
         obj.state.styles.popper.minWidth = `${widthToSet}px`;
       },
       effect: (obj: ModifierArguments<Record<string, unknown>>): void => {
         const width = (obj.state.elements.reference as HTMLElement).offsetWidth;
-        const widthToSet = Math.min(250, width);
+        const widthToSet = Math.min(matchTriggerWidthPxUpTo, width);
         // eslint-disable-next-line no-param-reassign
         obj.state.elements.popper.style.minWidth = `${widthToSet}px`;
       },
@@ -91,7 +111,10 @@ export default function popper(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     popperInstance = createPopper(reference, node, {
       placement: options?.placement || 'bottom-start',
-      modifiers: buildModifiers(options?.modifiers ?? []),
+      modifiers: buildModifiers(
+        options?.modifiers ?? [],
+        actionOpts.customModifierOptions,
+      ),
     }) as Instance;
 
     if (autoReposition) {
@@ -138,5 +161,26 @@ export default function popper(
   return {
     update,
     destroy,
+  };
+}
+
+export function getVirtualReferenceElement(pointerPosition: {
+  clientX: number;
+  clientY: number;
+}) {
+  const x = pointerPosition.clientX;
+  const y = pointerPosition.clientY;
+  return {
+    getBoundingClientRect: () => ({
+      width: 0,
+      height: 0,
+      x,
+      y,
+      top: y,
+      right: x,
+      bottom: y,
+      left: x,
+      toJSON: () => ({ x, y }),
+    }),
   };
 }

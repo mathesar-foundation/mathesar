@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { FileManifest } from '@mathesar/api/rpc/records';
   import { iconDeleteMajor, iconDownload } from '@mathesar/icons';
   import {
     AttachableDropdown,
@@ -12,14 +11,17 @@
   } from '@mathesar-component-library';
 
   import FileDetail from '../FileDetail.svelte';
-  import { confirmRemoveFile } from '../fileUtils';
+  import {
+    type FileManifestWithRequestParams,
+    confirmRemoveFile,
+  } from '../fileUtils';
 
   export let trigger: HTMLElement;
-  export let fileManifest: FileManifest;
+  export let fileManifestWithRequestParams: FileManifestWithRequestParams;
   export let close: () => void = () => {};
   export let removeFile: () => void = () => {};
 
-  $: ({ attachment: downloadUrl } = fileManifest);
+  $: ({ attachment: downloadUrl } = fileManifestWithRequestParams);
 
   function handleKeydown(e: KeyboardEvent) {
     switch (e.key) {
@@ -53,7 +55,7 @@
   placements={['bottom', 'top']}
 >
   <div class="file-actions" use:focusTrap>
-    <FileDetail {fileManifest} />
+    <FileDetail {fileManifestWithRequestParams} />
     <div class="actions">
       <Button on:click={handleClickRemove} aria-label={$_('remove')}>
         <Icon {...iconDeleteMajor} />

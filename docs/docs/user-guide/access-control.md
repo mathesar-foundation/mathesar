@@ -1,4 +1,4 @@
-# Overview of Access Control in Mathesar
+# Access Control in Mathesar
 
 Mathesar manages data access using PostgreSQL's powerful role-based permissions system. Users interact with the database through designated PostgreSQL roles, with their access determined by the privileges assigned to those roles.
 

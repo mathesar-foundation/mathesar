@@ -33,11 +33,6 @@
       text-decoration: none;
       cursor: pointer;
     }
-    &.menu-item-link:not(.disabled):hover,
-    &.menu-item-button:not(.disabled):hover {
-      background-color: var(--color-navigation-20-hover);
-      color: var(--color-fg-navigation);
-    }
     &.menu-item-button {
       border: inherit;
       font-family: inherit;
@@ -47,11 +42,6 @@
     }
     &.danger {
       color: var(--color-fg-danger);
-
-      &:hover {
-        background-color: var(--color-bg-danger);
-        color: var(--color-fg-danger);
-      }
       .icon {
         color: var(--color-fg-danger);
       }
@@ -65,6 +55,7 @@
     > .label {
       flex-grow: 1;
       font-weight: var(--font-weight-medium);
+      overflow: hidden;
     }
     > .cell:not(:empty) {
       padding: var(--Menu__padding-y, $padding-y-default)
@@ -83,11 +74,19 @@
     &.active {
       background-color: var(--color-navigation-20-active);
       font-weight: var(--font-weight-medium);
+    }
+  }
 
-      &:hover {
-        background-color: var(--color-navigation-20-hover);
-        color: var(--color-fg-inverted);
-      }
+  &:not(.menu-modal) .menu-item-button:not(.disabled):hover,
+  &:not(.menu-modal) .menu-item-link:not(.disabled):hover,
+  &:not(:focus-within) .menu-item.opened,
+  & .menu-item-button:not(.disabled):focus,
+  & .menu-item-link:not(.disabled):focus {
+    background-color: var(--color-navigation-20-hover);
+    color: var(--color-fg-navigation);
+    &.danger {
+      background-color: var(--color-bg-danger);
+      color: var(--color-fg-danger);
     }
   }
 
@@ -102,6 +101,13 @@
     .menu-item > .control {
       width: calc(
         var(--Menu__control-width) + var(--Menu__padding-x, $padding-x-default)
+      );
+    }
+  }
+  &.has-sub-menu {
+    .menu-item > .sub-menu {
+      width: calc(
+        var(--Menu__icon-width) + var(--Menu__padding-x, $padding-x-default)
       );
     }
   }
