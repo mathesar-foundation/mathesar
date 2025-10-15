@@ -2,6 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.views import redirect_to_login
 from functools import wraps
 from mathesar.models.base import Form, ColumnMetaData
+import functools
 
 from mathesar.utils.download_links import get_public_form_conf_for_file_backend
 
@@ -105,28 +106,23 @@ def shared_form_field_column_has_file_backend(request):
     return column_metadata is not None and column_metadata.file_backend is not None
 
 
+# Note: This function is memoized on the request object to cache results only
+# for the duration of a single request lifecycle.
+# If the function parameters change, it should no longer be memoized, and the
+# result should be cached ad-hoc.
+@functools.cache
 def _get_publicly_shared_form_from_request(request):
     """
-    Returns a cached instance of the shared form, or retrieves it and caches
-    it in the request object.
+    Retrieves a shared form instance, returns a cached value when available.
 
-    The form is identified via the request query param `form_token`, and is
-    only cached/returned if it is valid and shared publicly.
+    The form is identified via the `form_token` query parameter and is only
+    returned if it is valid and shared publicly.
     """
-    SHARED_FORM_CACHE_KEY = "_shared_form_cached"
-
-    # `None` is a valid value here, we're only validating if the attr is present.
-    if hasattr(request, SHARED_FORM_CACHE_KEY):
-        return getattr(request, SHARED_FORM_CACHE_KEY)
-
-    token = request.GET.get("form_token")
-    if not token:
-        setattr(request, SHARED_FORM_CACHE_KEY, None)
+    try:
+        token = request.GET["form_token"]
+        return Form.objects.filter(token=token, publish_public=True).first()
+    except KeyError:
         return None
-
-    form = Form.objects.filter(token=token, publish_public=True).first()
-    setattr(request, SHARED_FORM_CACHE_KEY, form)
-    return form
 
 
 # Mathesar specific guards
