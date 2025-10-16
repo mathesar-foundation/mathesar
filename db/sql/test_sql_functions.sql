@@ -841,7 +841,7 @@ BEGIN
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
-    WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}' AND c.contype = 'p';
+    WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}' AND contype = 'p';
   RETURN NEXT is(created_name, 'mysuperkey');
   deferrable_ := condeferrable FROM pg_constraint WHERE conname='mysuperkey';
   RETURN NEXT is(deferrable_, true);
@@ -858,7 +858,7 @@ BEGIN
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
-    WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}' AND c.contype = 'p';
+    WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}' AND contype = 'p';
   RETURN NEXT is(created_name, 'add_pkeytest_pkey');
 END;
 $f$ LANGUAGE plpgsql;
