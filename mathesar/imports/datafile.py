@@ -33,7 +33,7 @@ def copy_datafile_to_table(
         if header:
             raw_col_names = next(reader)
             if import_into_temp_table:
-                assert list(enumerate(raw_col_names, start=1)) == header_to_validate, "Parsing mismatch"
+                assert list(enumerate(raw_col_names)) == header_to_validate, "Parsing mismatch"
             column_names = _process_column_names(raw_col_names)
         else:
             column_names = [
