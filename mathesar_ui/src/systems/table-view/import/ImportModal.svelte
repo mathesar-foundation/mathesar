@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import type { Table } from '@mathesar/models/Table';
   import type { ProcessedColumns } from '@mathesar/stores/table-data';
   import {
     ControlledModal,
@@ -11,7 +12,9 @@
   import ImportUpload from './ImportUpload.svelte';
 
   export let controller: ModalController;
+  export let table: Table;
   export let tableColumns: ProcessedColumns;
+  export let onFinish: () => void;
 
   let file: File | undefined;
 
@@ -21,6 +24,11 @@
 
   function resetFile() {
     setFile(undefined);
+  }
+
+  function handleFinish() {
+    controller.close();
+    onFinish();
   }
 </script>
 
@@ -33,6 +41,12 @@
   {#if file === undefined}
     <ImportUpload {setFile} />
   {:else}
-    <ImportForm {file} {tableColumns} {resetFile} />
+    <ImportForm
+      {table}
+      {file}
+      {tableColumns}
+      {resetFile}
+      onFinish={handleFinish}
+    />
   {/if}
 </ControlledModal>

@@ -361,6 +361,7 @@
   "id_column_has_been_renamed": "Your imported data's \"id\" column has been renamed to \"{renamedIdColumn}\" to prevent conflicts with Mathesar's reserved \"id\" Primary Key column. You may choose to rename the columns if desired.",
   "id_is_reserved_column": "The name \"id\" is reserved for the primary key column that will be created when creating the table.",
   "import": "Import",
+  "import_complete": "Import complete",
   "import_from_file": "Import from a File",
   "in_mathesar": "In Mathesar",
   "in_postgres": "In PostgreSQL",

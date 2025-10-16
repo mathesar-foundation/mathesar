@@ -165,7 +165,14 @@
   <StatusPane {context} />
 </div>
 
-<ImportModal controller={importModal} tableColumns={$processedColumns} />
+<ImportModal
+  controller={importModal}
+  {table}
+  tableColumns={$processedColumns}
+  onFinish={() => {
+    void recordsData.fetch();
+  }}
+/>
 
 <style>
   .table-view {

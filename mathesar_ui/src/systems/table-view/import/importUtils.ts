@@ -1,6 +1,10 @@
 import { filter, first, map } from 'iter-tools';
 import * as Papa from 'papaparse';
 
+import type {
+  ImportColumnMapping,
+  ImportColumnMappingEntry,
+} from '@mathesar/api/rest/bulkInsert';
 import { columnDefaultAllowsInsertion } from '@mathesar/api/rpc/columns';
 import type {
   ProcessedColumn,
@@ -189,4 +193,26 @@ export function guessCsvImportMapping(props: {
   setConnectionsByName();
   setRemainingConnections();
   return [...buildMapping()];
+}
+
+export function buildMappingForApi(
+  mapping: CsvImportMapping,
+  fields: CsvPreviewField[],
+): ImportColumnMapping {
+  function transformEntry(
+    tableColumn: ProcessedColumn | undefined,
+    index: number,
+  ): ImportColumnMappingEntry {
+    const field = fields.at(index);
+    if (!field) {
+      throw new Error('Field not found'); // If this happens, it's a bug
+    }
+
+    return {
+      csv_column: { index, name: field.name },
+      table_column: tableColumn?.id ?? null,
+    };
+  }
+
+  return mapping.map(transformEntry);
 }

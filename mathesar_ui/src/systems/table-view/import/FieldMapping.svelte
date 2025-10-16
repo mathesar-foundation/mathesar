@@ -2,38 +2,24 @@
   import { _ } from 'svelte-i18n';
 
   import Fieldset from '@mathesar/component-library/fieldset/Fieldset.svelte';
-  import {
-    FormSubmit,
-    makeForm,
-    requiredField,
-  } from '@mathesar/components/form';
   import type {
     ProcessedColumn,
     ProcessedColumns,
   } from '@mathesar/stores/table-data';
-  import { portalToWindowFooter } from '@mathesar-component-library';
 
   import ImportMappingField from './ImportMappingField.svelte';
-  import {
-    type CsvPreviewField,
-    getAvailableTableColumns,
-    guessCsvImportMapping,
-  } from './importUtils';
+  import type { CsvImportMapping, CsvPreviewField } from './importUtils';
 
+  export let mapping: CsvImportMapping;
+  export let setMapping: (m: CsvImportMapping) => void;
   export let fields: CsvPreviewField[];
-  export let tableColumns: ProcessedColumns;
-
-  $: availableTableColumns = getAvailableTableColumns(tableColumns);
-  $: mapping = requiredField(
-    guessCsvImportMapping({ csvColumns: fields, availableTableColumns }),
-  );
-  $: form = makeForm({ mapping });
+  export let availableTableColumns: ProcessedColumns;
 
   function setMappingEntry(
     index: number,
     newColumn: ProcessedColumn | undefined,
   ): void {
-    let newMapping = [...$mapping];
+    let newMapping = [...mapping];
     if (newColumn) {
       // Remove table column from any previous mappings
       newMapping = newMapping.map((c) =>
@@ -41,11 +27,7 @@
       );
     }
     newMapping[index] = newColumn;
-    $mapping = newMapping;
-  }
-
-  async function submit() {
-    // TODO
+    setMapping(newMapping);
   }
 </script>
 
@@ -60,23 +42,12 @@
       <ImportMappingField
         {field}
         {availableTableColumns}
-        mappedColumn={$mapping.at(index)}
+        mappedColumn={mapping.at(index)}
         onUpdate={(newColumn) => setMappingEntry(index, newColumn)}
       />
     {/each}
   </div>
 </Fieldset>
-
-<div use:portalToWindowFooter>
-  <FormSubmit
-    {form}
-    catchErrors
-    canProceed={$mapping.some(Boolean)}
-    hasCancelButton={false}
-    onProceed={submit}
-    proceedButton={{ label: $_('import') }}
-  />
-</div>
 
 <style>
   .fields {
