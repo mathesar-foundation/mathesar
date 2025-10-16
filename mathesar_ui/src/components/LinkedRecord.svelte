@@ -90,7 +90,7 @@
     isolation: isolate;
   }
   .disabled {
-    color: var(--text-color-muted);
+    color: var(--color-fg-base-disabled);
   }
   .background {
     position: absolute;
@@ -98,19 +98,19 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--color-fk);
+    background: var(--color-record-fk-20);
     border-radius: 0.25rem;
     z-index: 0;
-    border: 1px solid var(--color-fk-border);
+    border: 1px solid var(--color-record-fk-25);
   }
   .exact-match .background {
-    background: var(--color-substring-match);
+    background: var(--color-bg-highlight);
   }
   .no-match {
     text-decoration: line-through;
   }
   .no-match .background {
-    background: var(--color-substring-match-light);
+    background: var(--color-bg-highlight-subtle);
   }
   .record-page-link {
     color: inherit;
@@ -124,7 +124,7 @@
     left: calc(-1 * var(--border-width));
     top: calc(-1 * var(--border-width));
     box-sizing: content-box;
-    border: solid var(--border-width) var(--color-fk-border);
+    border: solid var(--border-width) var(--color-record-fk-40);
   }
   .record-summary {
     position: relative;
@@ -144,11 +144,10 @@
     padding: 0 0.3rem;
   }
   .linked-record.is-hovering-delete .background {
-    background: var(--color-substring-match-light);
-    opacity: 0.5;
+    background: var(--color-record-fk-20);
   }
   .linked-record.is-hovering-delete .record-summary {
-    opacity: 0.5;
+    opacity: 0.8;
   }
   .linked-record.is-hovering-delete .record-page-link {
     text-decoration: none;

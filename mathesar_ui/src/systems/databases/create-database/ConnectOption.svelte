@@ -9,23 +9,52 @@
   export let description: string;
 </script>
 
-<Button on:click={changeView} appearance="secondary">
-  <div class="content">
-    <div class="icon-circle">
-      <Icon {...icon} size="2rem" />
-    </div>
-    <div>
-      <div class="header">
-        {header}
+<div class="connect-option">
+  <Button on:click={changeView} appearance="custom">
+    <div class="content">
+      <div class="icon-circle">
+        <Icon {...icon} size="2rem" />
       </div>
-      <div class="description">
-        {description}
+      <div>
+        <div class="header">
+          {header}
+        </div>
+        <div class="description">
+          {description}
+        </div>
       </div>
     </div>
-  </div>
-</Button>
+  </Button>
+</div>
 
-<style>
+<style lang="scss">
+  .connect-option {
+    display: grid;
+    --button-background: var(--color-bg-raised-3);
+    --button-color: var(--color-fg-control);
+    --button-border-color: var(--color-border-raised-3);
+    --button-box-shadow: 0 1px 2px
+        color-mix(in srgb, var(--color-shadow), transparent 5%),
+      0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
+      0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%);
+
+    --button-hover-background: var(--color-database-10-hover);
+    --button-hover-border-color: var(--color-database-20-hover);
+    --button-hover-box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--color-shadow), transparent
+            10%),
+      0 2px 4px -2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+      0 0 0 1px color-mix(in srgb, var(--color-shadow), transparent 5%) inset;
+
+    --button-focus-outline: 2px solid;
+    --button-focus-outline-color: var(--color-database-40);
+
+    --button-active-background: var(--color-database-10-active);
+    --button-active-border-color: var(--color-database-20-active);
+    --button-active-box-shadow: 0 1px 2px
+        color-mix(in srgb, var(--color-shadow), transparent 5%),
+      0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
+      0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%);
+  }
   .content {
     display: grid;
     align-items: center;
@@ -38,15 +67,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--stormy-500);
+    color: var(--color-database-80);
   }
   .header {
     font-size: var(--lg1);
     font-weight: var(--font-weight-medium);
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
   }
   .description {
-    color: var(--text-color-muted);
+    color: var(--color-fg-subtle-2);
     margin-top: var(--sm4);
   }
 </style>

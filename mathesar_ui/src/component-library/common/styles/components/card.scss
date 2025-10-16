@@ -1,0 +1,19 @@
+body {
+  --card-background: var(--color-bg-raised-2);
+  --card-border-color: var(--color-border-raised-2);
+  --card-box-shadow: none;
+  --card-hover-background: var(--color-bg-raised-2-hover);
+  --card-hover-border-color: var(--color-border-raised-2-hover);
+  --card-hover-box-shadow: 0 2px 2px
+      color-mix(in srgb, var(--color-shadow), transparent 15%),
+    0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%);
+  --card-focus-background: var(--color-bg-raised-2-focused);
+  --card-focus-border-color: var(--color-border-raised-2-focused);
+  --card-focus-box-shadow: 0 2px 4px
+      color-mix(in srgb, var(--color-shadow), transparent 15%),
+    0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%);
+  --card-focus-outline-color: var(--color-border-raised-2-focused);
+  --card-disabled-background: var(--color-bg-raised-2-disabled);
+  --card-disabled-border-color: var(--color-border-raised-2-disabled);
+  --card-disabled-box-shadow: none;
+}

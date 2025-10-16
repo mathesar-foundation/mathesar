@@ -148,7 +148,11 @@
               {$_('what_is_an_exploration')}
             </div>
             <div slot="footer">
-              <AnchorButton href={dataExplorerPageUrl} size="small">
+              <AnchorButton
+                href={dataExplorerPageUrl}
+                size="small"
+                appearance="tip"
+              >
                 {$_('open_data_explorer')}
               </AnchorButton>
             </div>

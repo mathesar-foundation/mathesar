@@ -1,0 +1,72 @@
+@use './mixins.scss' as mixins;
+
+// Accent colors
+$tomato: hsl(8, 60%, 50%);
+$pumpkin: hsl(33, 90%, 50%);
+$amethyst: hsl(270, 40%, 55%);
+$salmon: hsl(12, 60%, 50%);
+$wisteria: hsl(250, 45%, 60%);
+$glacier: hsl(190, 60%, 50%);
+$asparagus: hsl(90, 45%, 30%);
+$fjord: hsl(220, 60%, 60%);
+$teal: hsl(180, 100%, 25%);
+
+// Main contextual colors
+$success: hsl(145, 50%, 50%);
+$warning: hsl(50, 50%, 50%);
+$danger: hsl(12, 50%, 50%);
+$info: hsl(215, 50%, 50%);
+$help: hsl(185, 50%, 50%);
+$tip: hsl(150, 50%, 50%);
+$outcome: hsl(275, 50%, 50%);
+
+// Special colors
+$input-fill: hsl(212, 84%, 44.1%);
+
+// These colors are common for all themes.
+$utility-colors: (
+  // brand
+  'brand': $tomato,
+  'brand-subtle': hsl(hue($tomato), 40%, 50%),
+  // interaction
+  'navigation': hsl(hue($wisteria), 10%, 70%),
+  // actions
+  'action-primary': hsl(hue($asparagus), 60%, 25%),
+  'action-secondary': hsl(hue($wisteria), 10%, 70%),
+  //highlights
+  'highlight-a': hsl(hue($salmon), 60%, 60%),
+  'highlight-b': hsl(hue($glacier), 90%, 60%),
+  'highlight-c': hsl(hue($asparagus), 50%, 60%)
+);
+
+$color-intensities: (
+  '5': 5%,
+  '10': 10%,
+  '15': 15%,
+  '20': 20%,
+  '25': 25%,
+  '40': 40%,
+  '60': 60%,
+  '80': 80%,
+);
+
+$utility-color-states: (
+  'hover': 0 3 -3,
+  'focused': 0 0 -4,
+  'active': 0 0 -7,
+);
+
+@mixin generate-utility-color-tokens($name, $color) {
+  @include mixins.generate-intensity-based-color-tokens(
+    $name,
+    $color,
+    $color-intensities,
+    $utility-color-states
+  );
+}
+
+body {
+  @each $name, $color in $utility-colors {
+    @include generate-utility-color-tokens($name, $color);
+  }
+}

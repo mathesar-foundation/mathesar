@@ -1,7 +1,6 @@
 <script lang="ts">
   import { first } from 'iter-tools';
 
-  import { ContextMenu } from '@mathesar/component-library';
   import {
     SheetCellResizer,
     SheetColumnCreationCell,
@@ -19,7 +18,6 @@
   import { updateTable } from '@mathesar/stores/tables';
 
   import { Draggable, Droppable } from './drag-and-drop';
-  import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
@@ -137,9 +135,6 @@
         afterResize={(width) => saveColumnWidth(processedColumn, width)}
         onReset={() => saveColumnWidth(processedColumn, null)}
       />
-      <ContextMenu>
-        <ColumnHeaderContextMenu {processedColumn} />
-      </ContextMenu>
     </SheetColumnHeaderCell>
   {/each}
 

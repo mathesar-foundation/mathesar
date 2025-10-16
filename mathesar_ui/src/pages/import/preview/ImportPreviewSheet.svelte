@@ -78,24 +78,16 @@
 
 <style lang="scss">
   .import-preview {
+    min-width: fit-content;
+
     :global([data-sheet-element='data-cell']) {
-      background: var(--white);
-    }
-    :global([data-sheet-element='data-cell']:last-child),
-    :global([data-sheet-element='column-header-cell']:last-child) {
-      border-right: none;
+      background: var(--color-bg-input);
     }
     :global(
         [data-sheet-element='data-row']:last-child
           [data-sheet-element='data-cell']
       ) {
       border-bottom: none;
-    }
-  }
-
-  :global(body.theme-dark) .import-preview {
-    :global([data-sheet-element='data-cell']) {
-      background: var(--neutral-900);
     }
   }
 </style>

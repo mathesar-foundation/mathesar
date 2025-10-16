@@ -1,19 +1,27 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { getQueryStringFromParams } from '@mathesar/api/rest/utils/requestUtils';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import InspectorButton from '@mathesar/components/InspectorButton.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconExploration, iconInspector } from '@mathesar/icons';
+  import { iconExploration, iconExport } from '@mathesar/icons';
   import { trackRecent } from '@mathesar/utils/recentTracker';
   import type { Table } from '@mathesar/models/Table';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesDataStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { Button, Help, Icon } from '@mathesar-component-library';
+  import {
+    AnchorButton,
+    Button,
+    Help,
+    Icon,
+    Tooltip,
+  } from '@mathesar-component-library';
 
   import type QueryManager from '../QueryManager';
   import type { ColumnWithLink } from '../utils';
@@ -25,13 +33,17 @@
     {};
   export let isInspectorOpen: boolean;
 
-  $: ({ query, queryHasUnsavedChanges } = queryManager);
+  $: ({ rowsData, query, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table_oid
     ? $tablesDataStore.tablesMap.get($query.base_table_oid)
     : undefined;
   $: isSaved = $query.isSaved();
   $: hasColumns = $query.initial_columns.length > 0;
   $: canSave = !!$query.base_table_oid && hasColumns && $queryHasUnsavedChanges;
+  $: exportLinkParams = getQueryStringFromParams({
+    database_id: $query.database_id,
+    exploration_id: $query.id,
+  });
 
   function updateBaseTable(table: Table | undefined) {
     void queryManager.update((q) =>
@@ -96,6 +108,8 @@
           entityDescription: $query.description,
         }
       : undefined}
+    style:--icon-fill-color="linear-gradient(135deg, var(--color-exploration), var(--color-exploration-40))"
+    style:--icon-stroke-color="var(--color-fg-inverted)"
   >
     <EntityPageHeader
       title={isSaved
@@ -145,17 +159,54 @@
             onSave={saveExistingOrCreateNew}
           />
 
-          <Button
-            appearance="secondary"
+          {#if hasColumns && !canSave}
+            <Tooltip allowHover>
+              <AnchorButton
+                slot="trigger"
+                href="/api/export/v0/explorations/?{exportLinkParams}"
+                data-tinro-ignore
+                appearance="secondary"
+                size="medium"
+                aria-label={$_('export')}
+                download="{$query.name}.csv"
+              >
+                <Icon {...iconExport} />
+                <span class="responsive-button-label">{$_('export')}</span>
+              </AnchorButton>
+              <span slot="content">
+                {$_('export_exploration_as_csv_help', {
+                  values: { explorationName: $query.name },
+                })}
+                {#if $rowsData.totalCount > 50000}
+                  {$_('export_exploration_50K_limit')}
+                {/if}
+              </span>
+            </Tooltip>
+          {:else}
+            <Tooltip enabled={hasColumns}>
+              <Button
+                slot="trigger"
+                appearance="secondary"
+                size="medium"
+                aria-label={$_('export')}
+                disabled="true"
+              >
+                <Icon {...iconExport} />
+                <span class="responsive-button-label">{$_('export')}</span>
+              </Button>
+              <span slot="content">
+                {$_('export_exploration_save_help')}
+              </span>
+            </Tooltip>
+          {/if}
+
+          <InspectorButton
             disabled={!hasColumns}
-            on:click={() => {
+            active={isInspectorOpen}
+            toggle={() => {
               isInspectorOpen = !isInspectorOpen;
             }}
-            active={isInspectorOpen}
-          >
-            <Icon {...iconInspector} size="0.8rem" />
-            <span>{$_('inspector')}</span>
-          </Button>
+          />
         {/if}
       </svelte:fragment>
     </EntityPageHeader>

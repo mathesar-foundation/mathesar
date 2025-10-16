@@ -163,7 +163,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--modal-overlay);
+    background: var(--color-modal-overlay);
     z-index: var(--z-index__record_selector__overlay);
   }
 </style>

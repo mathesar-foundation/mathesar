@@ -4,10 +4,16 @@ import { isDefinedNonNullable } from './typeUtils';
 
 const isCssVariable = (str: string) => str.indexOf('--') === 0;
 
+export function makeStyleString(css: Record<string, string>) {
+  return Object.entries(css)
+    .map(([property, value]) => `${property}: ${value};`)
+    .join('');
+}
+
 export function makeStyleStringFromCssVariables(cssVariables: CssVariablesObj) {
   return Object.entries(cssVariables)
     .filter((maybeCssVariable) => isCssVariable(maybeCssVariable[0]))
-    .map((cssVariable) => `${cssVariable[0]}: ${cssVariable[1]};`)
+    .map(([property, value]) => `${property}: ${value};`)
     .join('');
 }
 

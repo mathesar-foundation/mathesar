@@ -1,6 +1,7 @@
 <script lang="ts">
-  import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import type { FileManifest } from '@mathesar/api/rpc/records';
   import { SheetPositionableCell } from '@mathesar/components/sheet';
+  import type { AssociatedCellValuesForSheet } from '@mathesar/stores/AssociatedCellData';
   import type {
     GroupHeaderRow,
     ProcessedColumn,
@@ -17,6 +18,7 @@
   export let grouping: RecordGrouping;
   export let group: RecordGroup;
   export let recordSummariesForSheet: RecordSummariesForSheet;
+  export let fileManifestsForSheet: AssociatedCellValuesForSheet<FileManifest>;
 
   $: ({ columnIds, preprocIds } = grouping);
   $: preProcFunctionsForColumn = columnIds.map(
@@ -33,7 +35,6 @@
 
 <SheetPositionableCell index={0} columnSpan={processedColumnsMap.size + 1}>
   <div class="group-header">
-    <CellBackground color="var(--hover-background)" />
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
         <GroupHeaderCellValue
@@ -42,6 +43,8 @@
           {recordSummariesForSheet}
           {columnId}
           preprocName={preprocNames[index]}
+          {fileManifestsForSheet}
+          totalColumns={columnIds.length}
         />
       {/each}
       <div class="count-container">
@@ -56,18 +59,23 @@
 <style lang="scss">
   .group-header {
     padding: var(--sm4) var(--lg1);
-    background-color: var(--elevated-background);
+    background-color: var(--color-bg-header);
+    height: 100%;
+    border-bottom: 1px solid var(--color-border-grid);
+    border-right: 1px solid var(--color-border-grid);
+    overflow: hidden;
 
     .groups-data {
       align-items: start;
       display: flex;
       gap: 1rem;
+      overflow: hidden;
     }
 
     .count-container {
       --badge-font-size: var(--sm1);
-      --badge-text-color: var(--text-color-secondary);
-      --badge-background-color: var(--card-background);
+      --badge-text-color: var(--color-fg-subtle-1);
+      --badge-background-color: var(--color-bg-sunken-1-hover);
       height: 100%;
     }
   }

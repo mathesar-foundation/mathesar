@@ -4,15 +4,12 @@ export type Appearance =
   | 'secondary'
   | 'plain'
   | 'ghost'
-  | 'plain-primary'
   | 'action'
   | 'outcome'
-  | 'outline-primary'
-  | 'outline-danger'
-  | 'inspector'
-  | 'feedback'
+  | 'danger'
+  | 'link'
   | 'custom'
-  | 'link';
+  | 'tip';
 
 export type Size = 'small' | 'medium' | 'large';
 

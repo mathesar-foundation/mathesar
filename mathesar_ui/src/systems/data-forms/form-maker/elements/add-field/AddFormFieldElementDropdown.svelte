@@ -45,7 +45,8 @@
 <div class="add-field">
   <DropdownMenu
     showArrow={false}
-    triggerAppearance={display === 'tiny' ? 'outcome' : 'secondary'}
+    triggerAppearance={display === 'tiny' ? 'custom' : 'secondary'}
+    triggerClass="add-field-button"
     icon={iconAddNew}
     label={display === 'full' ? $_('add_fields') : ''}
     preferredPlacement="bottom-end"
@@ -77,6 +78,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
+    :global(.btn-custom.add-field-button) {
+      --button-padding: var(--sm5) var(--sm4);
+
+      --button-background: var(--color-selection-strong-2);
+      --button-border-color: var(--color-selection-strong-2);
+      --button-color: var(--color-fg-inverted);
+
+      --button-hover-box-shadow: 0 1px 2px
+          color-mix(in srgb, var(--color-shadow), transparent 5%),
+        0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%);
+
+      --button-focus-outline-color: color-mix(
+        in srgb,
+        var(--color-selection-strong-1),
+        transparent 10%
+      );
+
+      --button-active-box-shadow: 0 1px 2px
+          color-mix(in srgb, var(--color-shadow), transparent 5%),
+        0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        inset 1px 1px 2px
+          color-mix(in srgb, var(--color-shadow-dark), transparent 10%),
+        inset -1px -1px 2px
+          color-mix(in srgb, var(--color-shadow-dark), transparent 10%);
+    }
   }
   .add-field-table {
     font-weight: 500;

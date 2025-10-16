@@ -3,32 +3,17 @@
     Appearance,
     Size,
   } from '@mathesar-component-library-dir/commonTypes';
+  import Tooltip from '@mathesar-component-library-dir/tooltip/Tooltip.svelte';
 
-  import Tooltip from '../tooltip/Tooltip.svelte';
-
-  /**
-   * Button appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
-   * @required
-   */
   export let appearance: Appearance = 'default';
-
-  /**
-   * Button size. One of: 'small', 'medium', 'large'.
-   * @required
-   */
   export let size: Size = 'medium';
-
-  export let danger = false;
   export let active = false;
   export let type: 'button' | 'submit' = 'button';
 
-  // Additional classes
   let classes = '';
   export { classes as class };
 
-  // Underlying DOM element for direct access
   export let element: HTMLElement | undefined = undefined;
-
   export let tooltip: string | undefined = undefined;
 
   $: allClasses = ['btn', `btn-${appearance}`, `size-${size}`, classes].join(
@@ -43,7 +28,6 @@
       bind:this={element}
       {type}
       class={allClasses}
-      class:danger
       class:active
       {...$$restProps}
       on:click
@@ -63,7 +47,6 @@
     bind:this={element}
     {type}
     class={allClasses}
-    class:danger
     class:active
     {...$$restProps}
     on:click

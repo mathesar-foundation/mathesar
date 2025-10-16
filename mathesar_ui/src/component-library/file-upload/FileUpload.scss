@@ -8,16 +8,10 @@
 
     .file {
       padding: var(--sm3);
-      border: 1px solid var(--neutral-300);
-      border-radius: var(--border-radius-l);
       display: flex;
 
       & + .file {
         margin-top: var(--sm3);
-      }
-
-      > svg {
-        color: #c4c7ca;
       }
 
       > .file-info {
@@ -42,7 +36,7 @@
         > .upload-info {
           display: flex;
           justify-content: space-between;
-          color: var(--neutral-500);
+          color: var(--color-fg-subtle-1);
         }
       }
     }
@@ -50,8 +44,8 @@
 
   .file-upload-trigger {
     display: block;
-    background: var(--card-background);
-    border: 1px dashed var(--border-color);
+    background: var(--color-bg-input);
+    border: 1px dashed var(--color-border-input);
     border-radius: 3px;
     color: inherit;
     font-family: inherit;
@@ -81,21 +75,21 @@
           font-size: var(--lg1);
         }
         .desc {
-          color: var(--neutral-500);
+          color: var(--color-fg-subtle-1);
           margin-top: var(--sm6);
         }
       }
     }
 
     &:focus {
-      border-color: var(--sky-600);
+      border-color: var(--color-border-input-focused);
       border-width: 2px;
     }
     &:hover {
-      background: var(--hover-background);
+      background: var(--color-bg-input-hover);
     }
     &.dragging-over {
-      background: var(--info-background-color);
+      background: var(--color-bg-info);
     }
   }
 

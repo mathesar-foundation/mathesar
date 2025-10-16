@@ -23,6 +23,7 @@
           type_options: column.producesMultipleResults
             ? { item_type: column.type }
             : null,
+          metadata: column.metadata,
         }}
       />
     </div>
@@ -61,8 +62,8 @@
       overflow: hidden;
     }
     .add {
-      --badge-background-color: var(--neutral-200);
-      --badge-text-color: var(--neutral-800);
+      --badge-background-color: var(--color-bg-control);
+      --badge-text-color: var(--color-fg-control);
       --badge-padding: 0 0.45rem;
       --badge-border-radius: var(--border-radius-l);
       --badge-font-size: var(--sm1);

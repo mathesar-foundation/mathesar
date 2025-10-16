@@ -22,26 +22,28 @@
     user-select: none;
 
     &:hover {
-      background: var(--hover-background);
+      background: var(--color-navigation-10);
     }
 
     &.in-focus {
-      background: var(--hover-background);
+      background: var(--color-navigation-20);
     }
 
     &.disabled {
-      color: var(--text-color-muted);
+      color: var(--color-fg-base-disabled);
+      --icon-color: var(--color-fg-base-disabled);
       cursor: not-allowed;
     }
   }
 
   &.multiple {
     li {
-      border: 1px solid transparent;
-
       &.selected {
-        border: 1px solid var(--active-background);
-        background: var(--active-background);
+        background: var(--color-navigation-20);
+
+        &:hover {
+          background: var(--color-navigation-25);
+        }
       }
     }
   }

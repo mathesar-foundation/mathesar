@@ -327,17 +327,17 @@
   .loading {
     text-align: center;
     font-size: 2rem;
-    color: var(--neutral-500);
+    color: var(--color-fg-subtle-1);
   }
   .preview-header {
     margin: 0;
     padding: var(--sm1) var(--inset-page-section-padding);
-    background-color: var(--neutral-300);
-    border-top: 1px solid var(--card-border);
+    background-color: var(--color-bg-header);
+    border-top: 1px solid var(--color-border-header);
   }
   .preview-content {
     padding-bottom: 1rem;
-    background-color: var(--neutral-100);
+    background-color: var(--canvas-background);
   }
   .sheet-holder {
     overflow-x: auto;
@@ -348,14 +348,6 @@
   .truncation-alert {
     margin: 1rem auto 0 auto;
     max-width: max-content;
-    color: var(--color-text-muted);
-  }
-
-  :global(body.theme-dark) .preview-header {
-    background-color: var(--neutral-800);
-  }
-
-  :global(body.theme-dark) .preview-content {
-    background-color: var(--neutral-900);
+    color: var(--color-fg-base-muted);
   }
 </style>

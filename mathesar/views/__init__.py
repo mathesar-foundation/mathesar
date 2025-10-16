@@ -3,6 +3,7 @@ from functools import wraps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.views.decorators.csrf import ensure_csrf_cookie
 from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
 
@@ -13,12 +14,13 @@ from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.rpc.users import get as get_user_info
+from mathesar.utils.download_links import get_backends as get_file_backends
 from mathesar import __version__
 
-from . import export, users
+from . import export, users, download_link
 
 
-__all__ = [export, users]
+__all__ = [export, users, download_link]
 
 
 def get_database_list(request):
@@ -95,6 +97,7 @@ def get_base_common_data(request):
         'current_release_tag_name': __version__,
         'is_authenticated': not request.user.is_anonymous,
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
+        'file_backends': get_file_backends(public_info=True),
     }
 
 
@@ -171,7 +174,10 @@ def schema_route(request, database_id, schema_id, **kwargs):
     })
 
 
+@ensure_csrf_cookie
 def anonymous_route_home(request, **kwargs):
+    if not request.session.session_key:
+        request.session.save()
     return render(request, 'mathesar/index.html', {
         'common_data': get_anonymous_common_data(request)
     })

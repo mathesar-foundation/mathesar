@@ -205,7 +205,6 @@
      -->
     <span
       class="dropdown-button"
-      on:click={launchRecordSelector}
       role="button"
       tabindex="-1"
       aria-label={$_('pick_record')}
@@ -224,21 +223,23 @@
     grid-template: auto / 1fr auto;
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--color-border-input);
     border-radius: 0.25rem;
-    background: var(--input-background);
+    background: var(--color-bg-input);
     padding: var(--sm4);
     cursor: default;
   }
   .disabled {
-    background: var(--disabled-background);
-    border: solid 1px var(--input-border);
+    background: var(--color-bg-input-disabled);
+    border: solid 1px var(--color-border-input-disabled);
+    --input-element-focus-outline: none;
+    --input-element-focus-box-shadow: none;
   }
 
-  .linked-record-input:focus {
-    border-color: var(--input-focus-color);
+  .linked-record-input:not(.disabled):focus {
+    border-color: var(--color-border-input-focused);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--input-focus-shadow);
+    box-shadow: 0 0 0 2px var(--color-bg-input-focused);
   }
 
   .content {
@@ -249,7 +250,7 @@
   }
 
   .placeholder {
-    color: var(--text-color-muted);
+    color: var(--color-fg-base-muted);
     font-style: italic;
   }
 
@@ -257,10 +258,10 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    color: var(--text-color-primary);
+    color: var(--color-fg-base);
     padding: var(--padding);
   }
   .dropdown-button:hover {
-    color: var(--text-color);
+    color: var(--color-fg-base);
   }
 </style>

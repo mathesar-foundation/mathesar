@@ -25,6 +25,7 @@ def test_columns_meta_data_list(monkeypatch):
                 time_format=None, date_format=None,
                 duration_min=None, duration_max=None, num_format="english",
                 display_width=None,
+                file_backend='local_test1'
             ),
             ColumnMetaData(
                 database=db_model, table_oid=_table_oid, attnum=8,
@@ -34,6 +35,7 @@ def test_columns_meta_data_list(monkeypatch):
                 time_format=None, date_format=None,
                 duration_min=None, duration_max=None, num_format="german",
                 display_width=300,
+                file_backend='s3_test2'
             )
         ]
 
@@ -48,6 +50,7 @@ def test_columns_meta_data_list(monkeypatch):
             time_format=None, date_format=None,
             duration_min=None, duration_max=None, num_format="english",
             display_width=None,
+            file_backend='local_test1',
         ),
         metadata.ColumnMetaDataRecord(
             database_id=database_id, table_oid=table_oid, attnum=8,
@@ -57,6 +60,7 @@ def test_columns_meta_data_list(monkeypatch):
             time_format=None, date_format=None,
             duration_min=None, duration_max=None, num_format="german",
             display_width=300,
+            file_backend='s3_test2',
         ),
     ]
     actual_metadata_list = metadata.list_(table_oid=table_oid, database_id=database_id)

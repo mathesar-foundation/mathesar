@@ -82,6 +82,9 @@ export interface RequiredColumnMetadata {
 
   /** The pixel width of the column */
   display_width: number;
+
+  /** TODO: document this once the backend implementation is more settled */
+  file_backend: string | null;
 }
 
 /** The column metadata values, types as we get them from the API. */
@@ -104,6 +107,7 @@ export const defaultColumnMetadata: RequiredColumnMetadata = {
   duration_min: 's',
   duration_max: 'm',
   display_width: DEFAULT_COLUMN_WIDTH_PX,
+  file_backend: null,
 };
 
 /**

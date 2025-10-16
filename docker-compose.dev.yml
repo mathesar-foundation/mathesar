@@ -31,6 +31,19 @@ services:
       - dev_postgres_data:/var/lib/postgresql/data
       - dev_postgres_socket:/var/run/postgresql
       - ./db/sql:/sql/
+  # An S3-compatible object store for local development. Don't use in prod.
+  obj-store:
+    container_name: mathesar-dev-store
+    image: quay.io/minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=mathesar
+      - MINIO_ROOT_PASSWORD=mathesar
+    command: server --console-address ":9001" /data
+    volumes:
+      - dev_obj_store_data:/data
   # A Django development webserver + Svelte development server used when developing Mathesar.
   #  The code changes are hot reloaded and debug flags are enabled to aid developers working on Mathesar.
   #  It is not recommended to use this service in production environment.
@@ -52,6 +65,7 @@ services:
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       - SECRET_KEY=${SECRET_KEY-}
       - OIDC_CONFIG_DICT=${OIDC_CONFIG_DICT-{}}
+      - FILE_STORAGE_DICT=${FILE_STORAGE_DICT-{}}
       - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
       - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
       - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL-https://example.com/feedback}
@@ -100,4 +114,5 @@ volumes:
   ui_node_modules:
   dev_postgres_data:
   dev_postgres_socket:
+  dev_obj_store_data:
   mathesar_secrets:

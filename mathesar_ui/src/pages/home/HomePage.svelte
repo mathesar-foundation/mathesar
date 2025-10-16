@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
 
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {
     CommunityResource,
     DocumentationResource,
@@ -32,10 +33,8 @@
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
-  <div slot="secondary-header" class="home-page-header-title">
-    <div class="home-page-header-title-inner">
-      {welcomeMessage}
-    </div>
+  <div class="home-page-header" slot="secondary-header">
+    <AppSecondaryHeader name={$_(welcomeMessage)} />
   </div>
   <div class="content">
     <div class="main-section">
@@ -59,11 +58,14 @@
 <style lang="scss">
   $breakpoint: 50rem;
 
-  .home-page-header-title {
-    max-width: var(--max-layout-width);
-    width: 100%;
-    margin: var(--lg1) auto;
-    padding: 0 var(--page-padding-x);
+  .home-page-header {
+    --AppSecondaryHeader__background: linear-gradient(
+      135deg in hsl,
+      var(--color-brand-15),
+      var(--color-database-15),
+      var(--color-schema-15),
+      var(--color-table-15)
+    );
   }
 
   .content {

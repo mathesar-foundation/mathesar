@@ -20,13 +20,30 @@
     rowSeekerContext,
   } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   import type { CommonData } from '@mathesar/utils/preloadData';
-  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
+  import {
+    Confirmation,
+    ContextMenu,
+    ContextMenuController,
+    ToastPresenter,
+  } from '@mathesar-component-library';
 
-  import { initUiTheme } from './utils/uiThemePreference';
+  import ControlledFileDetailDropdown from './components/file-attachments/file-detail-dropdown/ControlledFileDetailDropdown.svelte';
+  import {
+    FileDetailDropdownController,
+    fileDetailDropdownContext,
+  } from './components/file-attachments/file-detail-dropdown/FileDetailDropdownController';
+  import { modalFileAttachmentUploadContext } from './components/file-attachments/file-uploader/modalFileAttachmentUploadContext';
+  import ModalFileAttachmentUploadController from './components/file-attachments/file-uploader/ModalFileAttachmentUploadController';
+  import ModalFileAttachmentUploader from './components/file-attachments/file-uploader/ModalFileAttachmentUploader.svelte';
+  import ControlledLightbox from './components/file-attachments/lightbox/ControlledLightbox.svelte';
+  import {
+    LightboxController,
+    lightboxContext,
+  } from './components/file-attachments/lightbox/LightboxController';
+  import { contextMenuContext } from './contexts/contextMenuContext';
 
   export let commonData: CommonData;
 
-  initUiTheme();
   setBreadcrumbItemsInContext([]);
 
   function setUserProfileAndReleaseStores() {
@@ -56,6 +73,18 @@
 
   const rowSeekerController = new AttachableRowSeekerController();
   rowSeekerContext.set(rowSeekerController);
+
+  const lightboxController = new LightboxController();
+  lightboxContext.set(lightboxController);
+
+  const fileDetailDropdownController = new FileDetailDropdownController();
+  fileDetailDropdownContext.set(fileDetailDropdownController);
+
+  const modalFileAttachmentUploader = new ModalFileAttachmentUploadController();
+  modalFileAttachmentUploadContext.set(modalFileAttachmentUploader);
+
+  const contextMenu = new ContextMenuController();
+  contextMenuContext.set(contextMenu);
 
   const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
   $: clipboardHandler = $clipboardHandlerStore;
@@ -100,5 +129,9 @@
   modalController={recordSelectorModal}
 />
 <AttachableRowSeeker controller={rowSeekerController} />
+<ControlledLightbox controller={lightboxController} />
+<ControlledFileDetailDropdown controller={fileDetailDropdownController} />
+<ModalFileAttachmentUploader controller={modalFileAttachmentUploader} />
+<ContextMenu controller={contextMenu} />
 
 <slot />

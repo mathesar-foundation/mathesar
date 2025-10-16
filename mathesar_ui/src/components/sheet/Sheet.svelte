@@ -7,6 +7,7 @@
     getClipboardHandlerStoreFromContext,
   } from '@mathesar/stores/clipboard';
   import { getModifierKeyCombo } from '@mathesar/utils/pointerUtils';
+  import type { ClientPosition } from '@mathesar-component-library';
   import { ImmutableMap } from '@mathesar-component-library/types';
 
   import {
@@ -49,6 +50,12 @@
     new ImmutableMap();
 
   export let sheetElement: HTMLElement | undefined = undefined;
+  export let onCellContextMenu:
+    | ((p: {
+        targetCell: SheetCellDetails;
+        position: ClientPosition;
+      }) => 'opened' | 'empty')
+    | undefined = undefined;
 
   $: ({ columnStyleMap, rowWidth } = calculateColumnStyleMapAndRowWidth(
     columns,
@@ -119,6 +126,7 @@
   }
 
   function handleMouseDown(e: MouseEvent) {
+    if (e.button !== 0) return;
     if (!selection) return;
     if (!sheetElement) return;
 
@@ -160,6 +168,17 @@
     }
   }
 
+  function handleContextMenu(event: MouseEvent) {
+    if (!onCellContextMenu) return;
+    const target = event.target as HTMLElement;
+    const targetCell = findContainingSheetCell(target);
+    if (!targetCell) return;
+    const state = onCellContextMenu({ targetCell, position: event });
+    if (state === 'opened') {
+      event.preventDefault();
+    }
+  }
+
   onMount(() => {
     selection?.on('focus', async () => {
       if (!sheetElement) return;
@@ -184,6 +203,7 @@
   class:selection-in-progress={$selectionInProgress}
   {style}
   on:mousedown={handleMouseDown}
+  on:contextmenu={handleContextMenu}
   on:focusin={enableClipboard}
   on:focusout={disableClipboard}
   bind:this={sheetElement}
@@ -195,8 +215,8 @@
 
 <style lang="scss">
   .sheet {
-    border: 1px solid var(--border-color);
-    background-color: var(--sheet-background);
+    border: 1px solid var(--canvas-border-color);
+    background-color: var(--canvas-background);
     margin: 0;
     border-radius: 0.5rem;
     overflow: hidden;
@@ -220,7 +240,7 @@
     );
 
     &.has-border {
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--color-border-header);
     }
 
     &.uses-virtual-list {

@@ -16,13 +16,16 @@
   export let column: ProcessedColumn;
 
   async function save(
-    columnInfo: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
+    columnInfo: Pick<
+      ColumnTypeOptionsSaveArgs,
+      'type' | 'type_options' | 'metadata'
+    >,
   ) {
-    await columnsDataStore.patch({
+    await columnsDataStore.changeType({
       id: column.id,
       type: columnInfo.type,
       type_options: columnInfo.type_options,
-      default: null,
+      metadata: columnInfo.metadata,
     });
   }
   $: disallowDataTypeChange =

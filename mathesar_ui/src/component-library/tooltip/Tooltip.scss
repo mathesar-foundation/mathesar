@@ -1,8 +1,24 @@
 .dropdown.content.tooltip {
   max-width: min(80vw, 25rem);
-  --Dropdown__background: rgba(23, 23, 23, 0.85);
-  --Dropdown__box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  --Dropdown__border: solid 1px rgba(255, 255, 255, 0.5);
-  color: var(--white);
+  background: color-mix(in srgb, var(--color-bg-help), transparent 1%);
+  border: 1px solid var(--color-border-help);
+  color: var(--color-fg-help);
   padding: var(--sm2);
+
+  $shadow-base: color-mix(
+    in srgb,
+    var(--color-shadow-dark),
+    var(--color-bg-help-strong) 60%
+  );
+  $shadow: color-mix(in srgb, $shadow-base, transparent 86%);
+
+  box-shadow:
+    $shadow -1px 3px 4px,
+    $shadow 1px 3px 4px;
+
+  &[data-popper-placement='top'] {
+    box-shadow:
+      $shadow -1px -3px 4px,
+      $shadow 1px -3px 4px;
+  }
 }

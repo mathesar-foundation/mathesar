@@ -1,34 +1,31 @@
 <script lang="ts">
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { AbstractTypeName } from '@mathesar/components/abstract-type-control';
   import {
-    defaultDbType,
-    getAbstractTypeForDbType,
+    defaultAbstractType,
     getAllowedAbstractTypesForNewColumn,
-    getDefaultDbTypeOfAbstractType,
+    isAbstractTypeDisabled,
   } from '@mathesar/stores/abstract-types';
+  import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import { SelectionList } from '@mathesar-component-library';
 
-  export let value = defaultDbType;
+  export let value: AbstractType;
   export let disabled = false;
 
-  $: abstractType = getAbstractTypeForDbType(value);
   $: options = getAllowedAbstractTypesForNewColumn();
 </script>
 
 <SelectionList
   {options}
   getLabel={(entry) => entry?.name ?? ''}
-  value={abstractType}
+  {value}
   on:change={(e) => {
-    value = e.detail ? getDefaultDbTypeOfAbstractType(e.detail) : defaultDbType;
+    value = e.detail ?? defaultAbstractType;
   }}
   valuesAreEqual={(a, b) => a?.identifier === b?.identifier}
   offsetOnFocus={2}
+  isOptionDisabled={(option) => isAbstractTypeDisabled(option)}
   {disabled}
   let:option
-  let:label
 >
-  <NameWithIcon icon={option.getIcon()}>
-    {label}
-  </NameWithIcon>
+  <AbstractTypeName abstractType={option} />
 </SelectionList>

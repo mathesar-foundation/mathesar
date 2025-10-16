@@ -3,6 +3,7 @@ import type { QuerySummarizationFunctionId } from '@mathesar/api/rpc/exploration
 import type { DbType } from '@mathesar/AppTypes';
 import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 import type {
+  ComponentWithProps,
   FormConfiguration,
   FormConfigurationVariable,
   FormValues,
@@ -64,7 +65,11 @@ export interface CellInfo {
 export interface AbstractTypeIconArgs {
   dbType: DbType;
   typeOptions: RawColumnWithMetadata['type_options'];
+  metadata: RawColumnWithMetadata['metadata'];
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UntypedComponentWithProps = ComponentWithProps<any>;
 
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
@@ -73,6 +78,9 @@ export interface AbstractTypeConfiguration {
   cellInfo: CellInfo;
   getDbConfig?: (selectedDbType?: DbType) => AbstractTypeDbConfig;
   getDisplayConfig?: () => AbstractTypeDisplayConfig;
+  getEnabledState?: () =>
+    | { enabled: false; cause: string | string[] | UntypedComponentWithProps }
+    | { enabled: true };
 }
 
 export type AbstractTypeConfigurationPartialMap = Partial<

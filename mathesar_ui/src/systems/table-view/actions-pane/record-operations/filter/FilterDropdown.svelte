@@ -4,7 +4,7 @@
   import { _ } from 'svelte-i18n';
 
   import { iconFiltering } from '@mathesar/icons';
-  import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
+  import { imperativeFilterControllerContext } from '@mathesar/pages/table/ImperativeFilterController';
   import {
     type Filtering,
     getTabularDataStoreFromContext,
@@ -18,7 +18,7 @@
     canViewLinkedEntities: boolean;
   }
 
-  const imperativeFilterController = getImperativeFilterControllerFromContext();
+  const imperativeFilterController = imperativeFilterControllerContext.get();
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns, recordsData } = $tabularData);
@@ -48,7 +48,7 @@
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconFiltering} size="0.8em" />
-    <span class="responsive-button-label">
+    <span class="responsive-button-label with-badge">
       {$_('filter')}
       <BadgeCount value={$filtering.entries.length} />
     </span>
@@ -60,3 +60,11 @@
     recordSummaries={recordsData.linkedRecordSummaries}
   />
 </Dropdown>
+
+<style lang="scss">
+  .with-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sm5);
+  }
+</style>

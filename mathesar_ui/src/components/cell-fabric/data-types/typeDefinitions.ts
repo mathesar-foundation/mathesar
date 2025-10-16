@@ -19,7 +19,8 @@ export type SimpleCellDataTypes =
   | 'date'
   | 'money'
   | 'time'
-  | 'datetime';
+  | 'datetime'
+  | 'file';
 
 export type CompoundCellDataTypes = 'array';
 
@@ -46,15 +47,19 @@ export interface CellComponentFactory {
   ): ComponentAndProps;
 
   /**
-   * Implement this method in order to customize the input used within filter
-   * conditions. If not implemented, then we fall back to using the `getInput`
+   * Implement this method in order to customize the input used within:
+   * - filter input
+   * - search boxes (record selector header)
+   * - default value input
+   *
+   * If not implemented, then we fall back to using the `getInput`
    * method. Custom filter input components are useful when we want slightly
    * different behavior for searching vs data entry. See [issue #4052][4052] for
    * an example.
    *
    * [4052]: https://github.com/mathesar-foundation/mathesar/issues/4052
    */
-  getFilterInput?(
+  getSimpleInput?(
     column: CellColumnLike,
     config?: Record<string, unknown>,
   ): ComponentAndProps;

@@ -1,6 +1,13 @@
 <script lang="ts">
-  import { Icon, Truncate } from '@mathesar-component-library';
-  import type { IconProps } from '@mathesar-component-library/types';
+  import {
+    Icon,
+    Truncate,
+    makeStyleStringFromCssVariables,
+  } from '@mathesar-component-library';
+  import type {
+    CssVariablesObj,
+    IconProps,
+  } from '@mathesar-component-library/types';
 
   export let title:
     | {
@@ -9,9 +16,14 @@
         description?: string;
       }
     | undefined = undefined;
+  export let cssVariables: CssVariablesObj | undefined = undefined;
+
+  $: style = cssVariables
+    ? makeStyleStringFromCssVariables(cssVariables)
+    : undefined;
 </script>
 
-<div class="entity-page-header">
+<div class="entity-page-header" {style}>
   {#if title}
     <div class="heading">
       <div class="icon">
@@ -65,14 +77,10 @@
       .icon {
         font-size: var(--lg2);
         padding: var(--sm4);
-        background: linear-gradient(
-          135deg,
-          var(--pumpkin-700),
-          var(--pumpkin-900)
-        );
+        background: var(--icon-fill-color);
         border-radius: var(--border-radius-l);
         margin-right: var(--sm2);
-        color: var(--white);
+        color: var(--icon-stroke-color);
       }
       .text {
         overflow: hidden;
@@ -82,11 +90,11 @@
         margin: 0;
         font-weight: var(--font-weight-bold);
         overflow: hidden;
-        color: var(--text-color-primary);
+        color: var(--color-fg-base);
       }
       .description {
         font-size: var(--sm1);
-        color: var(--text-color-secondary);
+        color: var(--color-fg-subtle-1);
         overflow: hidden;
       }
     }

@@ -2,7 +2,8 @@ import os
 
 from django.conf import settings
 from django.db import models
-from encrypted_fields.fields import EncryptedCharField
+from django.contrib.sessions.models import Session
+from encrypted_fields.fields import EncryptedCharField, EncryptedJSONField
 
 from db.sql.install import uninstall, install
 from db.analytics import get_object_counts
@@ -237,6 +238,7 @@ class ColumnMetaData(BaseModel):
     duration_min = models.CharField(max_length=255, null=True)
     duration_max = models.CharField(max_length=255, null=True)
     display_width = models.PositiveIntegerField(null=True)
+    file_backend = models.CharField(max_length=255, null=True)
 
     class Meta:
         constraints = [
@@ -388,3 +390,11 @@ class DataFile(BaseModel):
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
+
+
+class DownloadLink(BaseModel):
+    mash = models.CharField(primary_key=True, editable=False)
+    sessions = models.ManyToManyField(Session)
+    uri = models.CharField()  # should not contain sensitive info
+    thumbnail = models.JSONField(blank=True, default=dict)
+    fsspec_kwargs = EncryptedJSONField(blank=True, default=dict)

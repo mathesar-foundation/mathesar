@@ -80,10 +80,7 @@
       <svelte:fragment slot="content">
         {#if filteredUsers.length}
           <div class="users-list">
-            {#each filteredUsers as user, index (user.id)}
-              {#if index !== 0}
-                <hr />
-              {/if}
+            {#each filteredUsers as user (user.id)}
               <UserRow {user} />
             {/each}
           </div>
@@ -104,23 +101,10 @@
     gap: var(--lg1);
   }
 
-  .users-list {
-    border: 1px solid var(--border-color);
-    background-color: var(--inset-background-color);
-    border-radius: var(--border-radius-m);
-    overflow: hidden;
-
-    hr {
-      margin: 0;
-      border: none;
-      border-top: 1px solid var(--border-color);
-    }
-  }
-
   .no-users-found-text {
     text-align: center;
     padding: 2rem;
-    color: var(--text-color-secondary);
+    color: var(--color-fg-subtle-1);
     font-style: italic;
   }
 </style>

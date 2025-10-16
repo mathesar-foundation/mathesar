@@ -119,9 +119,9 @@
     grid-template: auto auto auto / 1fr;
     gap: 0.5rem;
     border-radius: 0.5rem;
-    border: solid 0.15rem var(--neutral-300);
     padding: 0.7rem 1rem;
     background: var(--card-background);
+    border: solid 0.15rem var(--card-border-color);
   }
   .link-type-option.checked {
     border-color: var(--color-checked);
@@ -129,7 +129,8 @@
   }
   .link-type-option.checked,
   .link-type-option:hover {
-    box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0.5em
+      color-mix(in srgb, var(--color-shadow), transparent 30%);
   }
   .top {
     align-self: start;

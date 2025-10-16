@@ -13,11 +13,13 @@ import { api } from '@mathesar/api/rpc';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   Result as ApiRecord,
+  FileManifest,
   RecordsListParams,
   RecordsResponse,
   RecordsSearchParams,
   ResultValue,
 } from '@mathesar/api/rpc/records';
+import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
 import {
@@ -33,16 +35,15 @@ import {
   defined,
 } from '@mathesar-component-library';
 
+import AssociatedCellData, {
+  buildAssociatedCellValuesForSheet,
+  mergeAssociatedValuesForSheet,
+} from '../AssociatedCellData';
+
 import type { ColumnsDataStore } from './columns';
 import type { FilterEntry, Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Meta } from './meta';
-import RecordSummaryStore from './record-summaries/RecordSummaryStore';
-import {
-  type RecordSummariesForSheet,
-  buildRecordSummariesForSheet,
-  mergeRecordSummariesForSheet,
-} from './record-summaries/recordSummaryUtils';
 import {
   DraftRecordRow,
   PersistedRecordRow,
@@ -82,7 +83,7 @@ export interface TableRecordsData {
 /**
  * A recipe to set the value of one cell
  */
-interface NewCellValueRecipe {
+export interface NewCellValueRecipe {
   columnId: string;
   value: unknown;
 }
@@ -180,7 +181,9 @@ export class RecordsData {
 
   recordSummaries = new WritableMap<string, string>();
 
-  linkedRecordSummaries = new RecordSummaryStore();
+  linkedRecordSummaries = new AssociatedCellData<string>();
+
+  fileManifests = new AssociatedCellData<FileManifest>();
 
   grouping: Writable<RecordGrouping | undefined>;
 
@@ -323,13 +326,18 @@ export class RecordsData {
         ? buildGrouping(response.grouping)
         : undefined;
       if (response.linked_record_summaries) {
-        this.linkedRecordSummaries.setFetchedSummaries(
-          buildRecordSummariesForSheet(response.linked_record_summaries),
+        this.linkedRecordSummaries.setFetchedValuesFromPrimitive(
+          response.linked_record_summaries,
         );
       }
       if (response.record_summaries) {
         this.recordSummaries.reconstruct(
           Object.entries(response.record_summaries),
+        );
+      }
+      if (response.download_links) {
+        this.fileManifests.setFetchedValuesFromPrimitive(
+          response.download_links,
         );
       }
       this.fetchedRecordRows.set(
@@ -550,7 +558,10 @@ export class RecordsData {
       if (isDraftRecordRow(row)) {
         return api.records.add({
           ...this.apiContext,
-          record_def: recordDef,
+          record_def: {
+            ...Object.fromEntries(this.contextualFilters),
+            ...recordDef,
+          },
         });
       }
       return api.records.patch({
@@ -630,17 +641,20 @@ export class RecordsData {
     this.fetchedRecordRows.update((rows) => rows.map(postProcessRecordRow));
     this.newRecords.update((rows) => rows.map(postProcessRecordRow));
 
-    let newRecordSummaries: RecordSummariesForSheet = new ImmutableMap();
+    let newRecordSummaries: ImmutableMap<
+      string,
+      ImmutableMap<string, string>
+    > = new ImmutableMap();
     for (const response of responses) {
       if (response.status === 'error') continue;
       const linkedRecordSummaries = response.value.linked_record_summaries;
       if (!linkedRecordSummaries) continue;
-      newRecordSummaries = mergeRecordSummariesForSheet(
+      newRecordSummaries = mergeAssociatedValuesForSheet(
         newRecordSummaries,
-        buildRecordSummariesForSheet(linkedRecordSummaries),
+        buildAssociatedCellValuesForSheet(linkedRecordSummaries),
       );
     }
-    this.linkedRecordSummaries.addBespokeRecordSummaries(newRecordSummaries);
+    this.linkedRecordSummaries.addBespokeValues(newRecordSummaries);
   }
 
   // TODO: it would be nice to refactor this function to utilize the
@@ -746,7 +760,7 @@ export class RecordsData {
       const record = response.results[0];
       const newRow = PersistedRecordRow.fromDraft(row.withRecord(record));
 
-      this.meta.rowCreationStatus.delete(newRow.identifier);
+      this.meta.clearAllStatusesAndErrorsForRows([newRow.identifier]);
       this.meta.rowCreationStatus.set(newRow.identifier, { state: 'success' });
       this.newRecords.update((existing) =>
         existing.map((entry) => {
@@ -823,6 +837,14 @@ export class RecordsData {
     });
     this.newRecords.update((existing) => existing.concat(row));
     await this.createRecord(row);
+  }
+
+  getCellValue(cellSelectionId: string): ResultValue | undefined {
+    const { columnId, rowId } = parseCellId(cellSelectionId);
+    const rows = get(this.selectableRowsMap);
+    const row = rows.get(rowId);
+    if (!row) return undefined;
+    return row.record[columnId];
   }
 
   destroy(): void {

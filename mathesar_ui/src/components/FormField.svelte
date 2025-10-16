@@ -22,7 +22,7 @@
 <style>
   .errors {
     margin: 0.5em 0 0 0em;
-    color: var(--danger-color);
+    color: var(--color-fg-danger);
   }
 
   ul {

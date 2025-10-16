@@ -80,23 +80,23 @@
   }
 
   path {
-    fill: var(--red-800);
+    fill: var(--color-fg-danger);
     stroke: none;
   }
 
   .required {
-    color: var(--red-800);
+    color: var(--color-fg-danger);
     font-size: var(--lg2);
   }
 
   .errors {
-    background: var(--background-color);
-    border: solid 2px var(--danger-border-color);
+    background: var(--color-bg-raised-2);
+    border: solid 1px var(--color-border-danger);
     box-shadow:
       #000 0 0 0 0,
-      rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
-      rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
-      rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+      color-mix(in srgb, var(--color-shadow), transparent 5%) 0px 0px 0px 1px,
+      color-mix(in srgb, var(--color-shadow), transparent 10%) 0px 10px 15px -3px,
+      color-mix(in srgb, var(--color-shadow), transparent 5%) 0px 4px 6px -2px;
     border-radius: 0.4em;
     max-width: 20em;
     padding: 0.5em;

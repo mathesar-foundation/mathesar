@@ -16,5 +16,5 @@
 -->
 <CellBackground
   class="cell-bg-row-hover"
-  color="var(--cell-bg-color-row-hover, var(--cell-bg-color-base, white))"
+  color="var(--cell-bg-color-row-hover, var(--cell-bg-color-base))"
 />

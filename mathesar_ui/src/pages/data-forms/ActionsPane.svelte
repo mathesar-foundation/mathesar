@@ -2,21 +2,17 @@
   import { _ } from 'svelte-i18n';
 
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import InspectorButton from '@mathesar/components/InspectorButton.svelte';
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
-  import {
-    iconForm,
-    iconInspector,
-    iconPubliclyShared,
-    iconShare,
-  } from '@mathesar/icons';
+  import { iconForm, iconPubliclyShared, iconShare } from '@mathesar/icons';
   import { trackRecent } from '@mathesar/utils/recentTracker';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { confirm } from '@mathesar/stores/confirmation';
   import { dataFormInspectorVisible } from '@mathesar/stores/localStorage';
   import { toast } from '@mathesar/stores/toast';
   import type { EditableDataFormManager } from '@mathesar/systems/data-forms/form-maker';
-  import { Button, Dropdown, Icon } from '@mathesar-component-library';
+  import { Dropdown, Icon } from '@mathesar-component-library';
 
   import ShareForm from './ShareForm.svelte';
 
@@ -72,6 +68,8 @@
     entityName: $structure.name || $_('untitled'),
     entityDescription: $structure.description ?? undefined,
   }}
+  style:--icon-fill-color="linear-gradient(135deg, var(--color-data-form), var(--color-data-form-60))"
+  style:--icon-stroke-color="var(--color-fg-inverted)"
 >
   <EntityPageHeader
     title={{
@@ -89,9 +87,7 @@
         <svelte:fragment slot="trigger">
           {#if $sharePreferences.isPublishedPublicly}
             <Icon {...iconPubliclyShared} />
-            <span class="responsive-button-label">
-              {$_('shared_publicly')}
-            </span>
+            <span class="responsive-button-label"> {$_('shared_publicly')} </span>
           {:else}
             <Icon {...iconShare} />
             <span class="responsive-button-label"> {$_('share')} </span>
@@ -101,16 +97,10 @@
           <ShareForm {dataForm} {dataFormManager} />
         </svelte:fragment>
       </Dropdown>
-      <Button
-        appearance="secondary"
-        size="medium"
-        on:click={toggleInspector}
+      <InspectorButton
         active={$dataFormInspectorVisible}
-        aria-label={$_('inspector')}
-      >
-        <Icon {...iconInspector} />
-        <span class="responsive-button-label">{$_('inspector')}</span>
-      </Button>
+        toggle={toggleInspector}
+      />
     </svelte:fragment>
   </EntityPageHeader>
 </div>

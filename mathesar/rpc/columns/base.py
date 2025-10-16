@@ -10,12 +10,13 @@ from db.columns import (
     add_pkey_column_to_table,
     alter_columns_in_table,
     drop_columns_from_table,
-    get_column_info_for_table,
+    get_column_info_for_table
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_columns_meta_data
+from mathesar.utils.download_links import reset_file_column_mash
 from mathesar.utils.tables import set_table_meta_data
 
 
@@ -135,6 +136,7 @@ class SettableColumnInfo(TypedDict):
         id: The `attnum` of the column in the table.
         name: The name of the column.
         type: The type of the column on the database.
+        cast_options: Suggestions to be used while type casting.
         type_options: The options applied to the column type.
         nullable: Whether or not the column is nullable.
         default: The default value.
@@ -143,6 +145,7 @@ class SettableColumnInfo(TypedDict):
     id: int
     name: Optional[str]
     type: Optional[str]
+    cast_options: Optional[dict]
     type_options: Optional[TypeOptions]
     nullable: Optional[bool]
     default: Optional[ColumnDefault]
@@ -366,3 +369,18 @@ def list_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> list:
         c.attnum: ColumnMetaDataBlob.from_model(c) for c in column_metadata
     }
     return [col | {"metadata": metadata_map.get(col["id"])} for col in column_info]
+
+
+@mathesar_rpc_method(name="columns.reset_mash", auth="superuser")
+def reset_mash(*, column_attnum: int, table_oid: int, database_id: int, **kwargs) -> None:
+    """
+    Resets the outdated "mash" for a given file column.
+
+    Args:
+        column_attnum: attnum of the file column whose mashes need to be reset.
+        table_oid: Identity of the table containing the file column.
+        database_id: The Django id of the database containing the table.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        reset_file_column_mash(table_oid, column_attnum, conn)

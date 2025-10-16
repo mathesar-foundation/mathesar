@@ -9,28 +9,9 @@ ul.pagination {
   li {
     margin: 0 0.25rem;
 
-    a {
-      padding: 0.25rem;
-
-      min-width: 1.5rem;
-      display: inline-block;
-      text-align: center;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #aeb9be21;
-      }
-
-      &:disabled {
-        color: #ccc;
-        background-color: inherit;
-        cursor: not-allowed;
-      }
-    }
-
     button {
       .ellipsis {
-        color: var(--neutral-300);
+        color: var(--color-fg-base-muted);
       }
 
       &:hover {
@@ -47,8 +28,13 @@ ul.pagination {
 
     &.active {
       .page {
-        color: var(--brand-500);
-        border-color: var(--brand-500);
+        --button-background: var(--color-selection);
+        --button-color: var(--color-fg-control);
+        --button-border-color: var(--color-selection);
+      }
+
+      &:hover {
+        --button-border-color: var(--color-selection-strong-1);
       }
     }
   }

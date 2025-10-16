@@ -15,7 +15,7 @@ export interface CellColumnLike {
   /** The PostgreSQL data type */
   type: string;
   type_options: ColumnTypeOptions | null;
-  metadata?: ColumnMetadata | null;
+  metadata: ColumnMetadata | null;
 }
 
 export interface CellColumnFabric {

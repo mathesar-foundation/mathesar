@@ -1,9 +1,15 @@
+import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import {
   iconUiTypeArray,
   iconUiTypeJsonArray,
   iconUiTypeJsonObject,
 } from '@mathesar/icons';
+import {
+  getDefaultFileStorageBackend,
+  getFileStorageBackend,
+} from '@mathesar/utils/preloadData';
 
 import { abstractTypeCategory } from './constants';
 import { DB_TYPES } from './dbTypes';
@@ -13,12 +19,16 @@ import DateTime from './type-configs/datetime';
 import Duration from './type-configs/duration';
 import Email from './type-configs/email';
 import Fallback from './type-configs/fallback';
+// eslint-disable-next-line import/no-cycle
+import File from './type-configs/file/file';
+import Json from './type-configs/json';
 import Money from './type-configs/money';
 import Number from './type-configs/number';
 import Text from './type-configs/text';
 import Time from './type-configs/time';
 import Uri from './type-configs/uri';
 import Uuid from './type-configs/uuid';
+import { typeCastMap } from './typeCastMap';
 import type {
   AbstractType,
   AbstractTypeCategoryIdentifier,
@@ -51,6 +61,8 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.Time]: Time,
   [abstractTypeCategory.DateTime]: DateTime,
   [abstractTypeCategory.Uuid]: Uuid,
+  [abstractTypeCategory.Json]: Json,
+  [abstractTypeCategory.File]: File,
 };
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
@@ -59,7 +71,10 @@ export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
     const itemType = args?.typeOptions?.item_type ?? undefined;
     if (!itemType) return arrayIcon;
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const innerAbstractType = getAbstractTypeForDbType(itemType);
+    const innerAbstractType = getAbstractTypeForDbType(
+      itemType,
+      args?.metadata ?? null,
+    );
     const innerIcon = innerAbstractType.getIcon();
     const innerIcons = Array.isArray(innerIcon) ? innerIcon : [innerIcon];
     return [arrayIcon, ...innerIcons];
@@ -92,8 +107,6 @@ const comboAbstractTypeCategories: Partial<
   [abstractTypeCategory.JsonArray]: jsonArrayFactory,
   [abstractTypeCategory.JsonObject]: jsonObjectFactory,
 };
-
-export const defaultDbType = DB_TYPES.TEXT;
 
 function constructAbstractTypeMapFromResponse(
   abstractTypesResponse: AbstractTypeResponse[],
@@ -240,17 +253,53 @@ const typesResponse: AbstractTypeResponse[] = [
     db_types: [DB_TYPES.MSAR__MATHESAR_JSON_OBJECT],
   },
   {
+    identifier: 'json',
+    name: 'JSON',
+    db_types: [DB_TYPES.JSON, DB_TYPES.JSONB],
+  },
+  {
     identifier: 'array',
     name: 'Array',
     db_types: [DB_TYPES.ARRAY],
   },
 ];
 
+const fileAbstractType: AbstractType = {
+  identifier: 'file',
+  name: 'File',
+  dbTypes: new Set([DB_TYPES.JSONB]),
+  ...File,
+};
+
 const abstractTypesMap = constructAbstractTypeMapFromResponse(typesResponse);
+
+export const defaultAbstractType = (() => {
+  const textType = abstractTypesMap.get('text');
+  if (!textType) {
+    throw new Error('Text UI type not found. This should never happen');
+  }
+  return textType;
+})();
+
+export function isFileTypeSupported() {
+  return !!getDefaultFileStorageBackend();
+}
+
+function isFileAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
+  return (
+    metadata?.file_backend &&
+    dbType === DB_TYPES.JSONB &&
+    !!getFileStorageBackend(metadata.file_backend)
+  );
+}
 
 function identifyAbstractTypeForDbType(
   dbType: DbType,
+  metadata: ColumnMetadata | null,
 ): AbstractType | undefined {
+  if (isFileAbstractType(dbType, metadata)) {
+    return fileAbstractType;
+  }
   let abstractTypeOfDbType;
   for (const [, abstractType] of abstractTypesMap) {
     if (abstractType.dbTypes.has(dbType)) {
@@ -261,8 +310,26 @@ function identifyAbstractTypeForDbType(
   return abstractTypeOfDbType;
 }
 
-export function getAbstractTypeForDbType(dbType: DbType): AbstractType {
-  let abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType);
+function identifyAllPossibleAbstractTypesForDbType(
+  dbType: DbType,
+): Set<AbstractType> {
+  const allPossibleAbstractTypes: Set<AbstractType> = new Set();
+  if (dbType === DB_TYPES.JSONB) {
+    allPossibleAbstractTypes.add(fileAbstractType);
+  }
+  for (const [, abstractType] of abstractTypesMap) {
+    if (abstractType.dbTypes.has(dbType)) {
+      allPossibleAbstractTypes.add(abstractType);
+    }
+  }
+  return allPossibleAbstractTypes;
+}
+
+export function getAbstractTypeForDbType(
+  dbType: DbType,
+  metadata: ColumnMetadata | null,
+): AbstractType {
+  let abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType, metadata);
   if (!abstractTypeOfDbType) {
     abstractTypeOfDbType = unknownAbstractType;
   }
@@ -271,20 +338,20 @@ export function getAbstractTypeForDbType(dbType: DbType): AbstractType {
 
 export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
   dbType: DbType,
-  targetDbTypes: DbType[],
+  metadata: ColumnMetadata | null,
 ): AbstractType[] {
   const abstractTypeSet: Set<AbstractType> = new Set();
 
-  const abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType);
+  const abstractTypeOfDbType = identifyAbstractTypeForDbType(dbType, metadata);
   if (abstractTypeOfDbType) {
     abstractTypeSet.add(abstractTypeOfDbType);
   }
 
+  const targetDbTypes = typeCastMap[dbType] ?? [];
   targetDbTypes.forEach((targetDbType) => {
-    const abstractType = identifyAbstractTypeForDbType(targetDbType);
-    if (abstractType) {
-      abstractTypeSet.add(abstractType);
-    }
+    const abstractTypes =
+      identifyAllPossibleAbstractTypesForDbType(targetDbType);
+    [...abstractTypes].forEach((absType) => abstractTypeSet.add(absType));
   });
   const abstractTypeList = [...abstractTypeSet].sort((a, b) =>
     a.name.localeCompare(b.name),
@@ -296,26 +363,77 @@ export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
   return abstractTypeList;
 }
 
-export function getAllowedAbstractTypesForNewColumn() {
-  return [...abstractTypesMap.values()]
-    .filter((type) => !comboAbstractTypeCategories[type.identifier])
-    .sort((a, b) => a.name.localeCompare(b.name));
+export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
+  dbOptions: {
+    type: DbType;
+    typeOptions: ColumnTypeOptions;
+  };
+  metadata: ColumnMetadata | null;
+} {
+  const type = (() => {
+    if (abstractType.defaultDbType) {
+      return abstractType.defaultDbType;
+    }
+    if (abstractType.dbTypes.size > 0) {
+      return [...abstractType.dbTypes][0];
+    }
+    return DB_TYPES.TEXT;
+  })();
+  const metadata: ColumnMetadata | null = (() => {
+    if (abstractType.identifier === 'file') {
+      return {
+        file_backend: getDefaultFileStorageBackend()?.backend,
+      };
+    }
+    return null;
+  })();
+
+  return {
+    dbOptions: {
+      type,
+      typeOptions: {},
+    },
+    metadata,
+  };
 }
 
-export function getDefaultDbTypeOfAbstractType(
-  abstractType: AbstractType,
-): DbType {
-  if (abstractType.defaultDbType) {
-    return abstractType.defaultDbType;
+export function mergeMetadataOnTypeChange(
+  newAbstractType: AbstractType,
+  metadata: ColumnMetadata | null,
+) {
+  if (newAbstractType.identifier === 'file') {
+    return {
+      ...(metadata ?? {}),
+      file_backend: getDefaultFileStorageBackend()?.backend,
+    };
   }
-  if (abstractType.dbTypes.size > 0) {
-    return [...abstractType.dbTypes][0];
+  if (metadata && metadata.file_backend) {
+    return {
+      ...metadata,
+      file_backend: null,
+    };
   }
-  return defaultDbType;
+  return metadata;
+}
+
+export function getAllowedAbstractTypesForNewColumn() {
+  return [...abstractTypesMap.values(), fileAbstractType]
+    .filter((type) => !comboAbstractTypeCategories[type.identifier])
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function getDbTypesForAbstractType(
   abstractTypeIdentifier: AbstractType['identifier'],
 ): Set<DbType> {
+  if (abstractTypeIdentifier === 'file') {
+    return fileAbstractType.dbTypes;
+  }
   return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();
+}
+
+export function isAbstractTypeDisabled(type: AbstractType) {
+  if (type.getEnabledState) {
+    return !type.getEnabledState().enabled;
+  }
+  return false;
 }

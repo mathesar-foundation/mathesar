@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
 
+import { getErrorMessage } from '@mathesar/utils/errors';
 import { CancellablePromise } from '@mathesar-component-library';
 
 import { ApiMultiError } from './errors';
@@ -72,14 +73,20 @@ export function getQueryStringFromParams<T extends Record<string, unknown>>(
   return new URLSearchParams(entries).toString();
 }
 
-export function addQueryParamsToUrl(
+export function addQueryParamsToUrl<T extends Record<string, unknown>>(
   url: string,
-  queryParams?: Record<string, unknown>,
+  newOrUpdatedQueryParams?: T,
 ) {
-  if (queryParams) {
-    return `${url}?${getQueryStringFromParams(queryParams)}`;
+  if (!newOrUpdatedQueryParams) {
+    return url;
   }
-  return url;
+  const [baseUrl, existingQuery] = url.split('?');
+  const params = new URLSearchParams(existingQuery || '');
+  for (const [key, value] of Object.entries(newOrUpdatedQueryParams)) {
+    params.set(key, typeof value === 'string' ? value : JSON.stringify(value));
+  }
+  const queryString = params.toString();
+  return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
 
 export interface UploadCompletionOpts {
@@ -192,6 +199,12 @@ export function deleteAPI<T>(
   return sendXHRRequest('DELETE', url, data);
 }
 
+function getXhrErrorMessage(request: XMLHttpRequest): string {
+  const basic = getErrorMessage(request.response).trim();
+  if (basic) return basic;
+  return `HTTP ${request.status}: ${request.statusText}`;
+}
+
 export function uploadFile<T>(
   url: string,
   formData: FormData,
@@ -225,12 +238,16 @@ export function uploadFile<T>(
             resolve(request.response as T);
           }
         } else {
-          const msg = [
-            'An error occurred while processing the file.',
-            'Supported file types are CSV and TSV.',
-          ].join(' ');
-          reject(new Error(msg));
+          reject(new Error(getXhrErrorMessage(request)));
         }
+      });
+
+      request.addEventListener('error', () => {
+        reject(new Error('Network error occurred'));
+      });
+
+      request.addEventListener('timeout', () => {
+        reject(new Error('Request timed out'));
       });
     },
     () => {

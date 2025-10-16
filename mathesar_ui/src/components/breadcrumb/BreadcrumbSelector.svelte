@@ -120,31 +120,28 @@
     margin-top: var(--sm5);
     padding-left: 0;
     padding-top: var(--sm5);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--color-border-section);
   }
   .entity-switcher .trigger {
-    color: var(--text-color-primary);
+    color: var(--color-fg-navigation);
     border-radius: var(--border-radius-m);
     display: flex;
     align-items: center;
     padding: var(--sm4);
 
     &:hover {
-      background-color: rgba(255, 117, 76, 0.15);
-      color: var(--salmon-800);
+      background-color: var(--color-bg-raised-1-hover);
+      color: var(--color-fg-navigation-hover);
+      border-color: var(--color-border-raised-1-hover);
     }
+  }
 
-    &:active {
-      background-color: rgba(255, 117, 76, 0.25);
-      color: var(--salmon-800);
-    }
-
-    :global(body.theme-dark) &:hover {
-      color: var(--salmon-200);
-    }
-
-    :global(body.theme-dark) &:active {
-      color: var(--salmon-200);
+  .entity-switcher:has(button:focus) {
+    .trigger {
+      background-color: var(--color-bg-raised-1-focused);
+      color: var(--color-fg-navigation-focused);
+      border-color: var(--color-border-raised-1-focused);
+      box-shadow: inset 0 0 2px 1px var(--color-shadow);
     }
   }
 </style>

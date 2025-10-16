@@ -25,10 +25,18 @@
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconGrouping} />
-    <span class="responsive-button-label">
+    <span class="responsive-button-label with-badge">
       {$_('group')}
       <BadgeCount value={$grouping.entries.length} />
     </span>
   </svelte:fragment>
   <Group slot="content" {grouping} />
 </Dropdown>
+
+<style lang="scss">
+  .with-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sm5);
+  }
+</style>

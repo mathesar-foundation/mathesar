@@ -4,12 +4,21 @@
   This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
+  import type { FileAttachmentRequestParams } from '@mathesar/api/rest/fileAttachments';
+  import type { FileManifest } from '@mathesar/api/rpc/records';
+
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
   export let recordSummary: string | undefined = undefined;
+  export let fileManifest: FileManifest | undefined = undefined;
+  export let setFileManifest:
+    | ((mash: string, manifest: FileManifest) => void)
+    | undefined = undefined;
+  export let fileRequestParams: FileAttachmentRequestParams | undefined =
+    undefined;
   export let setRecordSummary:
     | ((recordId: string, recordSummary: string) => void)
     | undefined = undefined;
@@ -46,6 +55,9 @@
     {horizontalAlignment}
     {recordSummary}
     {setRecordSummary}
+    {fileManifest}
+    {setFileManifest}
+    {fileRequestParams}
     {searchValue}
     {isProcessing}
     {showTruncationPopover}
@@ -84,7 +96,7 @@
     right: 1px;
     bottom: 1px;
     position: absolute;
-    background: var(--background-color);
+    background: var(--color-bg-input);
     z-index: 1;
   }
   .bg {
@@ -93,7 +105,7 @@
     right: var(--cell-padding);
     bottom: var(--cell-padding);
     position: absolute;
-    background: var(--disabled-background);
+    background: var(--color-bg-input-hover);
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;

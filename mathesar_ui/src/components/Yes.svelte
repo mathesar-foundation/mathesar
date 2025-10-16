@@ -14,15 +14,15 @@
     flex: 0 0 auto;
     display: block;
     font-size: 0.8em;
-    background: var(--success-background-color);
-    color: var(--text-color);
+    background: var(--color-highlight-c-60);
+    color: var(--color-fg-base);
     height: 1.8em;
     width: 1.8em;
     padding: 0.3em 0.4em;
     border-radius: 50%;
   }
   .yes :global(svg path) {
-    stroke: var(--success-color);
+    stroke: var(--color-highlight-c-5);
     stroke-width: 60;
   }
 </style>

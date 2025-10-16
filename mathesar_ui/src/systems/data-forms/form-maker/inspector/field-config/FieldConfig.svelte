@@ -83,7 +83,7 @@
       <div slot="trigger" class="remove-button">
         <Button
           disabled={!field.canDelete}
-          appearance="outline-primary"
+          appearance="action"
           on:click={() => field.container.delete(field)}
         >
           <Icon {...iconDeleteMajor} />

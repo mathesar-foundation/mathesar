@@ -72,6 +72,9 @@
   name={$structure.name}
   description={$structure.description ?? undefined}
   icon={iconForm}
+  cssVariables={{
+    '--EntityListItem__accent-color': 'var(--color-data-form-80)',
+  }}
 >
   <svelte:fragment slot="detail">
     {#if baseTable}

@@ -3,22 +3,17 @@
 
   import { getQueryStringFromParams } from '@mathesar/api/rest/utils/requestUtils';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import InspectorButton from '@mathesar/components/InspectorButton.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import {
     iconExport,
-    iconInspector,
     iconRequiresAttention,
     iconTable,
   } from '@mathesar/icons';
   import { trackRecent } from '@mathesar/utils/recentTracker';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import {
-    AnchorButton,
-    Button,
-    Icon,
-    Tooltip,
-  } from '@mathesar-component-library';
+  import { AnchorButton, Icon, Tooltip } from '@mathesar-component-library';
 
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
@@ -54,6 +49,8 @@
     entityName: table.name,
     entityDescription: table.description ?? undefined,
   }}
+  style:--icon-fill-color="linear-gradient(135deg, var(--color-table), var(--color-table-80))"
+  style:--icon-stroke-color="var(--color-fg-inverted)"
 >
   <EntityPageHeader
     title={{
@@ -107,17 +104,11 @@
           </span>
         </Tooltip>
 
-        <Button
-          appearance="secondary"
-          size="medium"
+        <InspectorButton
           disabled={$isLoading}
-          on:click={toggleTableInspector}
           active={$tableInspectorVisible}
-          aria-label={$_('inspector')}
-        >
-          <Icon {...iconInspector} />
-          <span class="responsive-button-label">{$_('inspector')}</span>
-        </Button>
+          toggle={toggleTableInspector}
+        />
       {/if}
     </div>
   </EntityPageHeader>
@@ -137,7 +128,7 @@
   .no-pk-warning {
     display: flex;
     align-items: center;
-    color: var(--yellow-400);
+    color: var(--color-fg-warning);
   }
 
   .aux-actions {

@@ -24,6 +24,6 @@
     font-weight: bold;
     font-style: italic;
     font-size: 130%;
-    color: rgba(255, 255, 255, 0.4);
+    color: color-mix(in srgb, var(--color-bg-base), transparent 40%);
   }
 </style>
