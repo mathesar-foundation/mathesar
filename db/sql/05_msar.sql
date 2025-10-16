@@ -5575,7 +5575,7 @@ BEGIN
   );
   GET DIAGNOSTICS num_updated = ROW_COUNT;
   IF num_updated = 0 THEN
-    RAISE EXCEPTION 'Unable to update row';
+    RAISE EXCEPTION 'No rows updated';
   END IF;
   rec_modified := msar.get_record_from_table(
     tab_id,
