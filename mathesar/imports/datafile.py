@@ -9,7 +9,14 @@ from mathesar.models.base import DataFile
 
 
 def copy_datafile_to_table(
-        user, data_file_id, table_name, schema_oid, conn, comment=None, import_into_temp_table=False, header_to_validate=[]
+    user,
+    data_file_id,
+    table_name,
+    schema_oid,
+    conn,
+    comment=None,
+    import_into_temp_table=False,
+    header_to_validate=[]
 ):
     data_file = DataFile.objects.get(id=data_file_id, user=user)
     file_path = data_file.file.path
