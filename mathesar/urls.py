@@ -4,14 +4,12 @@ from rest_framework import routers
 
 from mathesar import views
 from mathesar.api.viewsets.data_files import DataFileViewSet
-from mathesar.api.viewsets.bulk_insert import BulkInsertViewSet
 from mathesar.views.installation.decorators import installation_complete, installation_incomplete
 from mathesar.views.installation.complete_installation import CompleteInstallationFormView
 from mathesar.views.users.password_reset import MathesarPasswordResetConfirmView
 
 db_router = routers.DefaultRouter()
 db_router.register(r'data_files', DataFileViewSet, basename='data-file')
-db_router.register(r'bulk_insert', BulkInsertViewSet, basename='bulk-insert')
 
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
@@ -24,6 +22,7 @@ urlpatterns = [
     path('auth/3rdparty/<path:rest>/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='oidc'),  # hack to redirect '/login/cancelled', 'login/error/' 'signup/' and '' to login page
     path('auth/', include('django.contrib.auth.urls')),  # default auth/
     path('auth/', include('allauth.urls')),  # catch any urls that are not available in default auth/
+    path('bulk_insert/', views.bulk_insert.bulk_insert, name='bulk_insert'),
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
     path('administration/', views.admin_home, name='admin_home'),
