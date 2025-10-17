@@ -78,7 +78,11 @@ def _process_column_names(column_names):
 
 
 def insert_into_existing_table(user, data_file_id, target_table_oid, mappings, conn):
-    header_to_validate = sorted([(i["csv_column"]["index"], i["csv_column"]["name"]) for i in mappings], key=lambda x: x[0])
+    header_to_validate = sorted([
+        (
+            i["csv_column"]["index"], i["csv_column"].get("name")
+        ) for i in mappings
+    ], key=lambda x: x[0])  # sometimes we don't have "name" when there is no header.
     temp_table = copy_datafile_to_table(
         user,
         data_file_id,
