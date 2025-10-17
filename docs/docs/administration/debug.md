@@ -16,7 +16,7 @@ When debugging Mathesar's recommended [docker compose](../administration/install
 
 ### With the basic Mathesar docker image
 
-If you are just trying the Mathesar Docker image directly as instructed in the [introduction](../index.md#try-locally), you will follow the same approach of setting `DEBUG=true`:
+If you are just trying the Mathesar Docker image directly as instructed in the [introduction](../index.md#try-mathesar), you will follow the same approach of setting `DEBUG=true`:
 
 ```diff
 - docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
