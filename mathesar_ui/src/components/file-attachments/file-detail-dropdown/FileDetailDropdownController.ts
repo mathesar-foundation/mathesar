@@ -6,12 +6,13 @@ import {
   writable,
 } from 'svelte/store';
 
-import type { FileManifest } from '@mathesar/api/rpc/records';
 import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
+
+import type { FileManifestWithRequestParams } from '../fileUtils';
 
 export interface FileDetailDropdownProps {
   trigger: HTMLElement;
-  fileManifest: FileManifest;
+  fileManifestWithRequestParams: FileManifestWithRequestParams;
   /** Triggers removal of the file from where it is stored. No confirmation. */
   removeFile: () => void;
   onClose: () => unknown;

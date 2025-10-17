@@ -6,8 +6,10 @@ import {
   iconUiTypeJsonArray,
   iconUiTypeJsonObject,
 } from '@mathesar/icons';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { isDefinedNonNullable } from '@mathesar-component-library';
+import {
+  getDefaultFileStorageBackend,
+  getFileStorageBackend,
+} from '@mathesar/utils/preloadData';
 
 import { abstractTypeCategory } from './constants';
 import { DB_TYPES } from './dbTypes';
@@ -279,24 +281,15 @@ export const defaultAbstractType = (() => {
   return textType;
 })();
 
-function getDefaultFileBackend() {
-  const commonData = preloadCommonData();
-  if (
-    commonData.routing_context === 'normal' &&
-    isDefinedNonNullable(commonData.file_backends)
-  ) {
-    return commonData.file_backends[0] ?? null;
-  }
-  return null;
-}
-
 export function isFileTypeSupported() {
-  return !!getDefaultFileBackend();
+  return !!getDefaultFileStorageBackend();
 }
 
 function isFileAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
   return (
-    metadata?.file_backend && dbType === DB_TYPES.JSONB && isFileTypeSupported()
+    metadata?.file_backend &&
+    dbType === DB_TYPES.JSONB &&
+    !!getFileStorageBackend(metadata.file_backend)
   );
 }
 
@@ -389,7 +382,7 @@ export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
   const metadata: ColumnMetadata | null = (() => {
     if (abstractType.identifier === 'file') {
       return {
-        file_backend: getDefaultFileBackend(),
+        file_backend: getDefaultFileStorageBackend()?.backend,
       };
     }
     return null;
@@ -411,7 +404,7 @@ export function mergeMetadataOnTypeChange(
   if (newAbstractType.identifier === 'file') {
     return {
       ...(metadata ?? {}),
-      file_backend: getDefaultFileBackend(),
+      file_backend: getDefaultFileStorageBackend()?.backend,
     };
   }
   if (metadata && metadata.file_backend) {
