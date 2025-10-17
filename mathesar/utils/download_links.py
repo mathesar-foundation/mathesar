@@ -229,7 +229,7 @@ def get_backends(public_info=False):
         return [
             {
                 "backend": key,
-                "anonymous_access": value.get(PUBLIC_FORM_ACCESS_KEY, {}).get("enabled", False)
+                "anonymous_access": value.get(PUBLIC_FORM_ACCESS_KEY, {}).get("enabled", True)
             }
             for key, value in backend_dict.items()
         ]
