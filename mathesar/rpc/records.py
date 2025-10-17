@@ -426,7 +426,7 @@ def delete(
         table_oid: int,
         database_id: int,
         **kwargs
-) -> Optional[int]:
+) -> list[Any]:
     """
     Delete records from a table by primary key.
 
@@ -436,7 +436,7 @@ def delete(
         database_id: The Django id of the database containing the table.
 
     Returns:
-        The number of records deleted.
+        The primary key values of the records deleted.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:

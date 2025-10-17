@@ -205,7 +205,6 @@
      -->
     <span
       class="dropdown-button"
-      on:click={launchRecordSelector}
       role="button"
       tabindex="-1"
       aria-label={$_('pick_record')}

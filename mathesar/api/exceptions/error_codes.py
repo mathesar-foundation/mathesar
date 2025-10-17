@@ -36,6 +36,7 @@ class ErrorCodes(Enum):
     UnsupportedType = 4209
 
     # Data Imports error code
+    BulkImportError = 4304
     InvalidTableError = 4301
     UniqueImportViolation = 4303
 

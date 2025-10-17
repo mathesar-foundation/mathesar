@@ -7,6 +7,7 @@ import {
   get,
   writable,
 } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
@@ -19,13 +20,13 @@ import type {
   RecordsSearchParams,
   ResultValue,
 } from '@mathesar/api/rpc/records';
+import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
 import {
   RpcError,
   batchSend,
 } from '@mathesar/packages/json-rpc-client-builder';
-import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
 import {
   type CancellablePromise,
@@ -82,7 +83,7 @@ export interface TableRecordsData {
 /**
  * A recipe to set the value of one cell
  */
-interface NewCellValueRecipe {
+export interface NewCellValueRecipe {
   columnId: string;
   value: unknown;
 }
@@ -403,16 +404,26 @@ export class RecordsData {
       ].map((row) => row.record[pkColumn.id]);
 
       try {
-        await api.records
+        const deletionRequest = api.records
           .delete({
             database_id: this.apiContext.database_id,
             table_oid: this.apiContext.table_oid,
             record_ids: primaryKeysOfPersistedRows,
           })
           .run();
-        persistedRowsToDelete.forEach((row) =>
-          rowsSuccessfullyDeleted.add(row.identifier),
-        );
+        const deletedIds = new Set(await deletionRequest);
+        persistedRowsToDelete.forEach((row) => {
+          const rowId = row.record[pkColumn.id];
+          if (deletedIds.has(rowId)) {
+            rowsSuccessfullyDeleted.add(row.identifier);
+          } else {
+            // This can happen in the case of a failure due to RLS
+            const msg = get(_)('row_deletion_ignored_by_pg', {
+              values: { rowId },
+            });
+            rowsFailedToDelete.set(row.identifier, RpcError.fromAnything(msg));
+          }
+        });
       } catch (error) {
         persistedRowsToDelete.forEach((row) =>
           rowsFailedToDelete.set(
@@ -465,10 +476,9 @@ export class RecordsData {
     this.meta.rowDeletionStatus.clear();
 
     if (rowsFailedToDelete.size > 0) {
-      const uiMsg = `Unable to delete ${pluralize(
-        rowsFailedToDelete.size,
-        'rows',
-      )}.`;
+      const uiMsg = get(_)('unable_to_delete_count_rows', {
+        values: { count: rowsFailedToDelete.size },
+      });
       const apiMsg = [...rowsFailedToDelete.values()].join('\n');
       throw new Error(`${uiMsg} ${apiMsg}`);
     }
@@ -557,7 +567,10 @@ export class RecordsData {
       if (isDraftRecordRow(row)) {
         return api.records.add({
           ...this.apiContext,
-          record_def: recordDef,
+          record_def: {
+            ...Object.fromEntries(this.contextualFilters),
+            ...recordDef,
+          },
         });
       }
       return api.records.patch({
@@ -833,6 +846,14 @@ export class RecordsData {
     });
     this.newRecords.update((existing) => existing.concat(row));
     await this.createRecord(row);
+  }
+
+  getCellValue(cellSelectionId: string): ResultValue | undefined {
+    const { columnId, rowId } = parseCellId(cellSelectionId);
+    const rows = get(this.selectableRowsMap);
+    const row = rows.get(rowId);
+    if (!row) return undefined;
+    return row.record[columnId];
   }
 
   destroy(): void {

@@ -4,7 +4,7 @@
   import { _ } from 'svelte-i18n';
 
   import { iconFiltering } from '@mathesar/icons';
-  import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
+  import { imperativeFilterControllerContext } from '@mathesar/pages/table/ImperativeFilterController';
   import {
     type Filtering,
     getTabularDataStoreFromContext,
@@ -18,7 +18,7 @@
     canViewLinkedEntities: boolean;
   }
 
-  const imperativeFilterController = getImperativeFilterControllerFromContext();
+  const imperativeFilterController = imperativeFilterControllerContext.get();
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ processedColumns, recordsData } = $tabularData);

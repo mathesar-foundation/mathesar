@@ -195,3 +195,35 @@ def patch_record_in_table(
         _json_or_none(table_record_summary_templates),
     ).fetchone()[0]
     return result
+
+
+def insert_from_select(
+    conn,
+    src_table_id,
+    dst_table_id,
+    mappings
+):
+    """
+    Insert multiple records from a given source table to a destination/target table,
+    returning the number of records inserted.
+
+    Args:
+      src_tab_id: The OID of the source table.(OID if temp table if inserting into existing table).
+      dst_tab_id: The OID of the destination/target table.
+      mappings: The column mappings b/w src and dst tables based on which data will be inserted.
+
+    mappings should have the following form:
+    [
+      {"src_table_attnum": 1, "dst_table_attnum": 2},
+      {"src_table_attnum": 3, "dst_table_attnum": 3},
+      {...}
+    ]
+    """
+    result = db_conn.exec_msar_func(
+        conn,
+        'insert_from_select',
+        src_table_id,
+        dst_table_id,
+        json.dumps(mappings)
+    ).fetchone()[0]
+    return result

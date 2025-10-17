@@ -222,6 +222,7 @@ run_mathesar() {
     config.wsgi
     -b "0.0.0.0:${MATHESAR_PORT}"
     --chdir "${BASE_DIR}"
+    --worker-class gevent
   )
   if [[ "${DEBUG}" = "true" ]]; then
     gunicorn_args+=("--log-level=debug")

@@ -24,6 +24,8 @@ BACKEND_CONF_ENV = "FILE_STORAGE_DICT"
 BACKEND_CONF_YAML = settings.BASE_DIR.joinpath('file_storage.yml')
 URI = "uri"
 MASH = "mash"
+DEFAULT_BACKEND_KEY = "default"
+PUBLIC_FORM_ACCESS_KEY = "public_form_access"
 
 
 def maintain_download_links():
@@ -84,7 +86,7 @@ def _build_thumbnail_bytes(of, size, format="AVIF", quality=50):
     return img_byte_arr.getvalue()
 
 
-def create_mash_for_uri(uri, backend_key='default'):
+def create_mash_for_uri(uri, backend_key=DEFAULT_BACKEND_KEY):
     return hashlib.sha256(
         settings.SECRET_KEY.encode('utf-8')
         + backend_key.encode('utf-8')
@@ -159,7 +161,7 @@ def build_links_from_json(json_strs):
     ]
 
 
-def save_file(f, request, backend_key='default'):
+def save_file(f, request, backend_key=DEFAULT_BACKEND_KEY):
     backend = get_backends()[backend_key]
     now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S%f')
     uri = f"{backend['protocol']}://{backend['prefix']}/{request.user}/{now}/{f.name}"
@@ -224,7 +226,13 @@ def get_backends(public_info=False):
     except FileNotFoundError:
         backend_dict = {} or json.loads(os.getenv(BACKEND_CONF_ENV, "{}"))
     if public_info is True:
-        return list(backend_dict.keys())
+        return [
+            {
+                "backend": key,
+                "anonymous_access": value.get(PUBLIC_FORM_ACCESS_KEY, {}).get("enabled", True)
+            }
+            for key, value in backend_dict.items()
+        ]
     else:
         return backend_dict
 
@@ -247,3 +255,8 @@ def reset_file_column_mash(table_oid, column_attnum, conn):
         except Exception:
             continue
     reset_mash(conn, table_oid, column_attnum, updated_uri_mash_map)
+
+
+def get_public_form_conf_for_file_backend(backend_key=DEFAULT_BACKEND_KEY):
+    backend = get_backends().get(backend_key, {})
+    return backend.get(PUBLIC_FORM_ACCESS_KEY, {})

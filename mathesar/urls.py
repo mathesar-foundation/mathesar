@@ -14,6 +14,7 @@ db_router.register(r'data_files', DataFileViewSet, basename='data-file')
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
     path('api/db/v0/', include(db_router.urls)),
+    path('api/export/v0/explorations/', views.export.export_exploration, name='export_exploration'),
     path('api/export/v0/tables/', views.export.export_table, name='export_table'),
     path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),
     path('auth/password_reset_confirm/', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
@@ -21,6 +22,7 @@ urlpatterns = [
     path('auth/3rdparty/<path:rest>/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='oidc'),  # hack to redirect '/login/cancelled', 'login/error/' 'signup/' and '' to login page
     path('auth/', include('django.contrib.auth.urls')),  # default auth/
     path('auth/', include('allauth.urls')),  # catch any urls that are not available in default auth/
+    path('bulk_insert/', views.bulk_insert.bulk_insert, name='bulk_insert'),
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
     path('administration/', views.admin_home, name='admin_home'),

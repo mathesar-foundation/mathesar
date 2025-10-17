@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
+  import type { FileAttachmentRequestParams } from '@mathesar/api/rest/fileAttachments';
   import type { FileManifest } from '@mathesar/api/rpc/records';
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import FileCellContent from '@mathesar/components/file-attachments/cell-content/FileCellContent.svelte';
@@ -34,6 +35,8 @@
   export let setFileManifest:
     | ((mash: string, manifest: FileManifest) => void)
     | undefined = undefined;
+  export let fileRequestParams: FileAttachmentRequestParams | undefined =
+    undefined;
 
   let element: HTMLSpanElement;
 
@@ -50,10 +53,11 @@
 
   $: fileViewerController = fileManifest
     ? new FileViewerController({
-        manifest: fileManifest,
+        rawManifest: fileManifest,
         removeFile: () => updateCell(null),
         lightboxController,
         fileDetailController,
+        fileRequestParams,
         onClose: () => element.focus(),
       })
     : undefined;
@@ -69,7 +73,9 @@
     if (disabled) return; // Disallow uploads on read-only inputs
     if (!modalFileAttachmentUploader) return;
     const attachment =
-      await modalFileAttachmentUploader.acquireFileAttachment();
+      await modalFileAttachmentUploader.acquireFileAttachment(
+        fileRequestParams,
+      );
     if (!attachment) return;
     const fileReference = parseFileReference(attachment.result);
     if (!fileReference) return;
