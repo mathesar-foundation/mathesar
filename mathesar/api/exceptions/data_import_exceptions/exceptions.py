@@ -1,3 +1,4 @@
+from django.utils.encoding import force_str
 from rest_framework import status
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
@@ -15,6 +16,20 @@ class InvalidTableAPIException(MathesarAPIException):
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class BulkImportException(MathesarAPIException):
+    error_code = ErrorCodes.BulkImportError.value
+
+    def __init__(
+            self,
+            exception,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        message = 'Unable to import data into existing table. ' + force_str(exception)
         super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
