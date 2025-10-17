@@ -2906,15 +2906,13 @@ Args:
 */
 DECLARE
   con_create_defs __msar.con_def[];
-  added_contype char[];
 BEGIN
   con_create_defs := __msar.process_con_def_jsonb(tab_id, con_defs);
   PERFORM __msar.add_constraints(
     __msar.get_qualified_relation_name(tab_id),
     variadic con_create_defs
   );
-  added_contype := array_agg(x->>'type') FROM jsonb_array_elements(con_defs) AS x;
-  RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id AND contype=ANY(added_contype);
+  RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 

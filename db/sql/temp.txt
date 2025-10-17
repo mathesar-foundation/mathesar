@@ -1,0 +1,9 @@
+{'header': True,
+ 'target_table_oid': 929665,
+ 'database_id': 2,
+ 'mappings': '[{"csv_column": {"index": 1, "name": "col_1"}, "table_column": 2}, {"csv_column": {"index": 2, "name": "col_2"}, "table_column": 3}, {"csv_column": {"index": 3, "name": "col_3"}, "table_column": 4}, {"csv_column": {"index": 4, "name": "col_4"}, "table_column": 5}, {"csv_column": {"index": 5, "name": "col_5"}, "table_column": 6}, {"csv_column": {"index": 6, "name": "col_6"}, "table_column": 7}, {"csv_column": {"index": 7, "name": "col_7"}, "table_column": 8}]'}
+
+{'header': True,
+ 'target_table_oid': 929665,
+ 'database_id': 2,
+ 'mappings': '[{"csv_column": {"index": 1, "name": "col_1"}, "table_column": 2}, {"csv_column": {"index": 2, "name": "col_2"}, "table_column": 3}, {"csv_column": {"index": 3, "name": "col_3"}, "table_column": 4}, {"csv_column": {"index": 4, "name": "col_4"}, "table_column": 6}, {"csv_column": {"index": 5, "name": "col_5"}, "table_column": 5}, {"csv_column": {"index": 6, "name": "col_6"}, "table_column": 7}, {"csv_column": {"index": 7, "name": "col_7"}, "table_column": null}]'}
