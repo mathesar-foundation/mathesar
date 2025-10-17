@@ -91,7 +91,8 @@ def insert_into_existing_table(user, data_file_id, target_table_oid, mappings, c
     )
     validated_mappings = [
         {
-            'src_table_attnum': i["csv_column"]["index"],
+            'src_table_attnum': int(i["csv_column"]["index"]) + 1,  # The src/temp table attnums are indexed starting from 1
+            # but, the indicies we receive from the frontend start from 0, hence the +1.
             'dst_table_attnum': i["table_column"]
         } for i in mappings if i["table_column"] is not None
     ]
