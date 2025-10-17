@@ -22,7 +22,7 @@ export function bulkInsert(props: {
   file: File;
   headerRow: boolean;
   columnMapping: ImportColumnMapping;
-}): CancellablePromise<unknown> {
+}): CancellablePromise<{ inserted_rows: number }> {
   const formData = new FormData();
   formData.append('header', props.headerRow ? 'true' : '');
   formData.append('database_id', String(props.database.id));

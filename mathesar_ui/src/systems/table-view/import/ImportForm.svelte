@@ -70,14 +70,16 @@
   async function submit() {
     if (!parseResult) return;
     if (parseResult.status === 'failure') return;
-    await bulkInsert({
+    const { inserted_rows } = await bulkInsert({
       database: table.schema.database,
       table,
       file,
       headerRow: $hasHeaderRow,
       columnMapping: buildMappingForApi($mapping, parseResult.fields),
     });
-    toast.success($_('import_complete')); // TODO: add row count
+    toast.success(
+      $_('imported_count_rows', { values: { count: inserted_rows } }),
+    );
     onFinish();
   }
 
