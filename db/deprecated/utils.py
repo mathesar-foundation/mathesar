@@ -45,6 +45,7 @@ def execute_pg_query(engine, query, connection_to_use=None):
     # stringify them so that they are rendered by the frontend properly.
     col_list = stringify_json_cols(query)
     executable = sqlalchemy.select(col_list)
+    print(executable)
     return execute_statement(engine, executable, connection_to_use=connection_to_use).fetchall()
 
 
