@@ -5559,6 +5559,7 @@ corresponding to the attnums of desired columns and values corresponding to valu
 */
 DECLARE
   rec_modified jsonb;
+  num_updated bigint;
 BEGIN
   EXECUTE format(
     $p$ %1$s %2$s $p$,
@@ -5572,6 +5573,10 @@ BEGIN
       )
     )
   );
+  GET DIAGNOSTICS num_updated = ROW_COUNT;
+  IF num_updated = 0 THEN
+    RAISE EXCEPTION 'No rows updated';
+  END IF;
   rec_modified := msar.get_record_from_table(
     tab_id,
     rec_id,
