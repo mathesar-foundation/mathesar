@@ -108,7 +108,11 @@
     </AnchorButton>
   {/if}
 
-  <Button on:click={() => importModal.open()} disabled={!$canInsertRecords}>
+  <Button
+    on:click={() => importModal.open()}
+    disabled={!$canInsertRecords}
+    appearance="action"
+  >
     <Icon {...iconImportData} />
     <span>{$_('import')}</span>
   </Button>
