@@ -5,6 +5,7 @@
   import InspectorButton from '@mathesar/components/InspectorButton.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconRequiresAttention, iconTable } from '@mathesar/icons';
+  import { trackRecent } from '@mathesar/utils/recentTracker';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { Icon, Tooltip } from '@mathesar-component-library';
@@ -28,15 +29,25 @@
   }
 </script>
 
-<EntityPageHeader
-  title={{
-    name: table.name,
-    description: table.description ?? undefined,
-    icon: iconTable,
+<div
+  use:trackRecent={{
+    entityType: 'table',
+    entityId: table.oid,
+    databaseId: table.schema.database.id,
+    schemaOid: table.schema.oid,
+    entityName: table.name,
+    entityDescription: table.description ?? undefined,
   }}
-  --icon-fill-color="linear-gradient(135deg, var(--color-table), var(--color-table-80))"
-  --icon-stroke-color="var(--color-fg-inverted)"
+  style:--icon-fill-color="linear-gradient(135deg, var(--color-table), var(--color-table-80))"
+  style:--icon-stroke-color="var(--color-fg-inverted)"
 >
+  <EntityPageHeader
+    title={{
+      name: table.name,
+      description: table.description ?? undefined,
+      icon: iconTable,
+    }}
+  >
   {#if isSelectable}
     <div class="quick-access">
       <FilterDropdown {filtering} {canViewLinkedEntities} />
@@ -70,6 +81,7 @@
     {/if}
   </div>
 </EntityPageHeader>
+</div>
 
 <style lang="scss">
   .quick-access {

@@ -9,6 +9,7 @@
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration, iconExport } from '@mathesar/icons';
+  import { trackRecent } from '@mathesar/utils/recentTracker';
   import type { Table } from '@mathesar/models/Table';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
@@ -96,17 +97,29 @@
 </script>
 
 <div class="actions-pane">
-  <EntityPageHeader
-    title={isSaved
+  <div
+    use:trackRecent={isSaved && $query.id
       ? {
-          name: $query.name ?? '',
-          description: $query.description,
-          icon: iconExploration,
+          entityType: 'exploration',
+          entityId: $query.id,
+          databaseId: $query.database_id,
+          schemaOid: $query.schema_oid,
+          entityName: $query.name ?? '',
+          entityDescription: $query.description,
         }
       : undefined}
-    --icon-fill-color="linear-gradient(135deg, var(--color-exploration), var(--color-exploration-40))"
-    --icon-stroke-color="var(--color-fg-inverted)"
+    style:--icon-fill-color="linear-gradient(135deg, var(--color-exploration), var(--color-exploration-40))"
+    style:--icon-stroke-color="var(--color-fg-inverted)"
   >
+    <EntityPageHeader
+      title={isSaved
+        ? {
+            name: $query.name ?? '',
+            description: $query.description,
+            icon: iconExploration,
+          }
+        : undefined}
+    >
     <div class="detail-wrapper">
       <div class="detail">
         {isSaved ? $_('based_on') : $_('exploring_from')}
@@ -197,6 +210,7 @@
       {/if}
     </svelte:fragment>
   </EntityPageHeader>
+  </div>
 </div>
 
 <NameAndDescInputModalForm

@@ -6,10 +6,13 @@
     iconDeleteMajor,
     iconEdit,
     iconExploration,
+    iconRemoveFromFavorites,
+    iconAddToFavorites,
     iconPermissions,
     iconSelectRecord,
     iconTable,
   } from '@mathesar/icons';
+  import { favorites, favoritesStore } from '@mathesar/stores/favorites';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
@@ -42,6 +45,12 @@
 
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
   $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
+  $: isFavorited = $favorites.some(
+    (fav) =>
+      fav.entityType === 'table' &&
+      fav.entityId === table.oid &&
+      fav.databaseId === database.id,
+  );
   $: tablePageUrl = requiresImportConfirmation
     ? getImportPreviewPageUrl(database.id, schema.oid, table.oid, {
         useColumnTypeInference: true,
@@ -73,6 +82,23 @@
 
   function handleFindRecord() {
     recordSelector?.navigateToRecordPage({ tableOid: table.oid });
+  }
+
+  async function handleToggleFavorite() {
+    if (isFavorited) {
+      await favoritesStore.removeFavorite(
+        'table',
+        table.oid,
+        database.id,
+      );
+    } else {
+      await favoritesStore.addFavorite({
+        entityType: 'table',
+        entityId: table.oid,
+        databaseId: database.id,
+        schemaOid: schema.oid,
+      });
+    }
   }
 </script>
 
@@ -128,6 +154,12 @@
         icon={iconPermissions}
       >
         {$_('table_permissions')}
+      </ButtonMenuItem>
+      <ButtonMenuItem
+        on:click={handleToggleFavorite}
+        icon={isFavorited ? iconRemoveFromFavorites : iconAddToFavorites}
+      >
+        {isFavorited ? $_('remove_from_favorites') : $_('add_to_favorites')}
       </ButtonMenuItem>
     {/if}
     <ButtonMenuItem

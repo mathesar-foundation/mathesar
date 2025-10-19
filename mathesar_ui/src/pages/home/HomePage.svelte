@@ -8,6 +8,7 @@
     DonateResource,
     MailingListResource,
   } from '@mathesar/components/resources';
+  import RecentsFavorites from '@mathesar/components/favorites/RecentsFavorites.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -35,8 +36,11 @@
     <AppSecondaryHeader name={$_(welcomeMessage)} />
   </div>
   <div class="content">
-    <div class="databases-section">
-      <DatabasesList />
+    <div class="main-section">
+      <RecentsFavorites />
+      <div class="databases-section">
+        <DatabasesList />
+      </div>
     </div>
     <div class="resources-sidebar">
       <h2>{$_('resources')}</h2>
@@ -71,7 +75,8 @@
       grid-template-columns: 1fr 20rem;
     }
   }
-  .databases-section {
+
+  .main-section {
     grid-row: 1;
     display: flex;
     flex-direction: column;
@@ -81,6 +86,13 @@
       grid-column: 1;
     }
   }
+
+  .databases-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
   .resources-sidebar {
     grid-row: 2;
     display: flex;

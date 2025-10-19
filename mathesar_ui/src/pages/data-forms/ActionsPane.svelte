@@ -6,6 +6,7 @@
   import SaveButton from '@mathesar/components/SaveButton.svelte';
   import { DataFormRouteContext } from '@mathesar/contexts/DataFormRouteContext';
   import { iconForm, iconPubliclyShared, iconShare } from '@mathesar/icons';
+  import { trackRecent } from '@mathesar/utils/recentTracker';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { confirm } from '@mathesar/stores/confirmation';
   import { dataFormInspectorVisible } from '@mathesar/stores/localStorage';
@@ -58,18 +59,25 @@
   }
 </script>
 
-<EntityPageHeader
-  title={{
-    name: $structure.name || $_('untitled'),
-    icon: iconForm,
+<div
+  use:trackRecent={{
+    entityType: 'form',
+    entityId: dataForm.id,
+    databaseId: dataForm.schema.database.id,
+    schemaOid: dataForm.schema.oid,
+    entityName: $structure.name || $_('untitled'),
+    entityDescription: $structure.description ?? undefined,
   }}
-  cssVariables={{
-    '--icon-fill-color':
-      'linear-gradient(135deg, var(--color-data-form), var(--color-data-form-60))',
-    '--icon-stroke-color': 'var(--color-fg-inverted)',
-  }}
+  style:--icon-fill-color="linear-gradient(135deg, var(--color-data-form), var(--color-data-form-60))"
+  style:--icon-stroke-color="var(--color-fg-inverted)"
 >
-  <svelte:fragment slot="actions-right">
+  <EntityPageHeader
+    title={{
+      name: $structure.name || $_('untitled'),
+      icon: iconForm,
+    }}
+  >
+    <svelte:fragment slot="actions-right">
     <SaveButton onSave={saveForm} canSave={$hasChanges} />
     <Dropdown
       showArrow={false}
@@ -94,4 +102,5 @@
       toggle={toggleInspector}
     />
   </svelte:fragment>
-</EntityPageHeader>
+  </EntityPageHeader>
+</div>
