@@ -22,6 +22,7 @@
     ice_cream_employees: 'Ice  Cream Employee Management',
     library_makerspace: 'Library Makerspace',
     library_management: 'Library Management',
+    movie_rentals: 'Movie Rentals',
     museum_exhibits: 'Museum Exhibits',
     nonprofit_grants: 'Nonprofit Grant Tracking',
   };
@@ -32,6 +33,7 @@
     ice_cream_employees: $_('sample_data_ice_cream_employees_help'),
     library_makerspace: $_('sample_data_library_makerspace_help'),
     library_management: $_('sample_data_library_help'),
+    movie_rentals: $_('sample_data_movie_rentals_help'),
     museum_exhibits: $_('sample_data_museum_exhibits_help'),
     nonprofit_grants: $_('sample_data_nonprofit_grants_help'),
   };

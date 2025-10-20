@@ -33,6 +33,7 @@ export const sampleDataOptions = [
   'ice_cream_employees',
   'library_makerspace',
   'library_management',
+  'movie_rentals',
   'museum_exhibits',
   'nonprofit_grants',
 ] as const;
