@@ -1,6 +1,6 @@
 from mathesar.examples.base import load_dataset_sql
 
-MOVIES_SCHEMA = "Movie Rentals"
+MOVIES_SCHEMA = "movie_rentals"
 MOVIES_SQL = "movie_rentals_lite.sql"
 
 
