@@ -650,7 +650,6 @@
   "sample_data_bike_shop_help": "Manage service requests for a fictional bike shop.",
   "sample_data_hardware_store_help": "Manage inventory in a fictional hardware store.",
   "sample_data_ice_cream_employees_help": "Schedule employees for a fictional ice cream shop.",
-  "sample_data_library_help": "Manage a fictional library.",
   "sample_data_library_makerspace_help": "Track jobs and equipment usage at a fictional library makerspace.",
   "sample_data_movie_rentals_help": "Manage movie rentals. Large dataset demonstrating interlinked data.",
   "sample_data_museum_exhibits_help": "Schedule exhibitions of artifacts at a fictional museum.",
