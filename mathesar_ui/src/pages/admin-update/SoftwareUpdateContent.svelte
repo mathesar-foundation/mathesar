@@ -3,7 +3,6 @@
 
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import DonateResource from '@mathesar/components/resources/DonateResource.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconRefresh } from '@mathesar/icons';
   import type { ReleaseDataStore } from '@mathesar/stores/releases';
@@ -84,10 +83,6 @@
   {#if lastChecked}
     {$_('last_checked')}: {lastChecked}
   {/if}
-</div>
-
-<div class="donate">
-  <DonateResource />
 </div>
 
 <style>

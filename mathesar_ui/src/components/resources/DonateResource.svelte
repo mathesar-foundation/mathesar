@@ -13,5 +13,4 @@
   --icon-bg-color="var(--color-brand-10)"
 >
   <span slot="title">{$_('support_our_mission')}</span>
-  <span slot="description">{$_('donate_blurb')}</span>
 </ResourceCard>

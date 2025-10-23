@@ -68,7 +68,7 @@
     gap: 3.5rem;
     grid-template-columns: 1fr;
     @media screen and (min-width: $breakpoint) {
-      grid-template-columns: 1fr 20rem;
+      grid-template-columns: 1fr 21rem;
     }
   }
   .databases-section {

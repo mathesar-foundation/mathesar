@@ -8,5 +8,4 @@
 
 <ResourceCard icon={iconMailingList} href={getMarketingLink('mailingList')}>
   <span slot="title">{$_('stay_informed')}</span>
-  <span slot="description">{$_('join_mailing_list_help')}</span>
 </ResourceCard>

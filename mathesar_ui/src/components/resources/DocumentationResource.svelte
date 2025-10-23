@@ -8,5 +8,4 @@
 
 <ResourceCard icon={iconDocumentation} href={getDocsLink('userGuide')}>
   <span slot="title">{$_('documentation')}</span>
-  <span slot="description">{$_('user_guide_description')}</span>
 </ResourceCard>

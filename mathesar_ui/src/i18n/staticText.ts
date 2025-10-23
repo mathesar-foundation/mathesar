@@ -9,5 +9,5 @@ export const staticText = {
   LOGIN: 'LOGIN',
   COLON: ':',
   EN_DASH: '–',
-  MATHESAR: 'Mathesar',
+  MATHESAR: 'A+ RDM',
 } as const;
