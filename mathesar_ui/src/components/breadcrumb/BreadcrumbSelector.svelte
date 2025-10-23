@@ -5,6 +5,8 @@
     Icon,
     iconSearch,
   } from '@mathesar/component-library';
+  import focusTrap from '@mathesar/component-library/common/actions/focusTrap';
+  import { filterViaTextQuery } from '@mathesar/component-library';
   import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { iconExpandRight } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
@@ -27,13 +29,84 @@
   let triggerElement: HTMLButtonElement;
   let isOpen = false;
   let filterString: string;
+  let contentElement: HTMLDivElement | undefined;
+  let selectedIndex = -1;
 
   // Focus the text input when dropdown is opened
   let textInputEl: HTMLInputElement | undefined;
   $: if (isOpen) {
     textInputEl?.focus();
+    selectedIndex = -1;
   } else {
     filterString = '';
+    selectedIndex = -1;
+  }
+
+  // Get all filtered entries for keyboard navigation
+  $: allFilteredEntries = sections.flatMap((section) =>
+    filterViaTextQuery(
+      section.entries,
+      filterString,
+      (e) => e.getFilterableText(),
+    ),
+  ).concat(persistentLinks);
+
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      isOpen = false;
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, allFilteredEntries.length - 1);
+      scrollToSelected();
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (selectedIndex <= 0) {
+        // Focus search input when at the top
+        selectedIndex = -1;
+        textInputEl?.focus();
+      } else {
+        selectedIndex = Math.max(selectedIndex - 1, 0);
+        scrollToSelected();
+      }
+      return;
+    }
+
+    if (event.key === 'Enter' && selectedIndex >= 0) {
+      event.preventDefault();
+      const selectedEntry = allFilteredEntries[selectedIndex];
+      if (selectedEntry) {
+        window.location.href = selectedEntry.href;
+      }
+      return;
+    }
+
+    // For alphanumeric keys and editing keys, focus the search input
+    if (event.key.length === 1 || 
+        event.key === 'Backspace' || 
+        event.key === 'Delete') {
+      // If the search input isn't already focused, focus it
+      if (document.activeElement !== textInputEl) {
+        textInputEl?.focus();
+      }
+    }
+  }
+
+  function scrollToSelected() {
+    if (selectedIndex >= 0 && contentElement) {
+      const links = contentElement.querySelectorAll('.breadcrumb-selector-row a');
+      const selectedLink = links[selectedIndex] as HTMLElement;
+      if (selectedLink) {
+        selectedLink.focus();
+        selectedLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
   }
 </script>
 
@@ -58,7 +131,12 @@
     trigger={triggerElement}
     class="breadcrumb-selector-dropdown"
   >
-    <div class="entity-switcher-content">
+    <div 
+      class="entity-switcher-content"
+      bind:this={contentElement}
+      use:focusTrap
+      on:keydown={handleKeyDown}
+    >
       <div class="search">
         <TextInputWithPrefix
           prefixIcon={iconSearch}
