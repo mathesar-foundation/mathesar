@@ -74,13 +74,6 @@
 <div class="databases-list">
   <h2 class="page-header">
     {$_('databases')}
-    <Help>
-      <RichText text={$_('databases_list_help')} let:slotName let:translatedArg>
-        {#if slotName === 'docsLink'}
-          <DocsLink page="databases">{translatedArg}</DocsLink>
-        {/if}
-      </RichText>
-    </Help>
   </h2>
 
   <section class="databases-container">
