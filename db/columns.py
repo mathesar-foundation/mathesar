@@ -217,11 +217,16 @@ def drop_columns_from_table(table_oid, column_attnums, conn):
     ).fetchone()[0]
 
 
-def reset_mash(conn, table_oid, column_attnum, uri_mash_map):
-    db_conn.exec_msar_func(
-        conn,
-        'reset_mash',
-        table_oid,
-        column_attnum,
-        json.dumps(uri_mash_map)
-    ).fetchone()[0]
+def delete_column(table_oid, column_attnum, conn):
+    """
+    Delete a single column from the given table.
+
+    This function is a wrapper around `drop_columns_from_table` for deleting
+    a single column, ensuring consistency in parameter naming.
+
+    Args:
+        table_oid: OID of the table from which the column will be deleted.
+        column_attnum: The attnum of the column to delete.
+        conn: A psycopg connection to the relevant database.
+    """
+    return drop_columns_from_table(table_oid, [column_attnum], conn)
