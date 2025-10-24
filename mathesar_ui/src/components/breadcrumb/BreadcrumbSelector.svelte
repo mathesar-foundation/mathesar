@@ -3,10 +3,10 @@
     AttachableDropdown,
     Button,
     Icon,
+    filterViaTextQuery,
     iconSearch,
   } from '@mathesar/component-library';
   import focusTrap from '@mathesar/component-library/common/actions/focusTrap';
-  import { filterViaTextQuery } from '@mathesar/component-library';
   import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { iconExpandRight } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
@@ -43,13 +43,29 @@
   }
 
   // Get all filtered entries for keyboard navigation
-  $: allFilteredEntries = sections.flatMap((section) =>
-    filterViaTextQuery(
-      section.entries,
-      filterString,
-      (e) => e.getFilterableText(),
+  $: allFilteredEntries = [
+    ...sections.flatMap((section) =>
+      Array.from(
+        filterViaTextQuery(section.entries, filterString, (e) =>
+          e.getFilterableText(),
+        ),
+      ),
     ),
-  ).concat(persistentLinks);
+    ...persistentLinks,
+  ];
+
+  function scrollToSelected() {
+    if (selectedIndex >= 0 && contentElement) {
+      const links = contentElement.querySelectorAll(
+        '.breadcrumb-selector-row a',
+      );
+      const selectedLink = links[selectedIndex] as HTMLElement;
+      if (selectedLink) {
+        selectedLink.focus();
+        selectedLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }
 
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
@@ -60,7 +76,10 @@
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      selectedIndex = Math.min(selectedIndex + 1, allFilteredEntries.length - 1);
+      selectedIndex = Math.min(
+        selectedIndex + 1,
+        allFilteredEntries.length - 1,
+      );
       scrollToSelected();
       return;
     }
@@ -88,23 +107,14 @@
     }
 
     // For alphanumeric keys and editing keys, focus the search input
-    if (event.key.length === 1 || 
-        event.key === 'Backspace' || 
-        event.key === 'Delete') {
+    if (
+      event.key.length === 1 ||
+      event.key === 'Backspace' ||
+      event.key === 'Delete'
+    ) {
       // If the search input isn't already focused, focus it
       if (document.activeElement !== textInputEl) {
         textInputEl?.focus();
-      }
-    }
-  }
-
-  function scrollToSelected() {
-    if (selectedIndex >= 0 && contentElement) {
-      const links = contentElement.querySelectorAll('.breadcrumb-selector-row a');
-      const selectedLink = links[selectedIndex] as HTMLElement;
-      if (selectedLink) {
-        selectedLink.focus();
-        selectedLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
     }
   }
@@ -131,7 +141,7 @@
     trigger={triggerElement}
     class="breadcrumb-selector-dropdown"
   >
-    <div 
+    <div
       class="entity-switcher-content"
       bind:this={contentElement}
       use:focusTrap
