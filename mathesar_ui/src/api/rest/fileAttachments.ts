@@ -2,7 +2,11 @@ import type { CancellablePromise } from '@mathesar-component-library';
 
 import type { FileManifest } from '../rpc/records';
 
-import { type UploadCompletionOpts, uploadFile } from './utils/requestUtils';
+import {
+  type UploadCompletionOpts,
+  addQueryParamsToUrl,
+  uploadFile,
+} from './utils/requestUtils';
 
 const ENDPOINT = '/files/';
 
@@ -12,11 +16,24 @@ export interface FileAttachmentUploadResult {
   download_link: FileManifest;
 }
 
+type FileAttachmentQueryParamsForPublicForm = {
+  form_token: string;
+  form_field_key: string;
+};
+
+export type FileAttachmentRequestParams =
+  FileAttachmentQueryParamsForPublicForm;
+
 export function uploadFileAttachment(
   file: File,
+  queryParams?: FileAttachmentRequestParams,
   completionCallback?: (obj: UploadCompletionOpts) => unknown,
 ): CancellablePromise<FileAttachmentUploadResult> {
   const formData = new FormData();
   formData.append('file', file);
-  return uploadFile(ENDPOINT, formData, completionCallback);
+  return uploadFile(
+    addQueryParamsToUrl(ENDPOINT, queryParams),
+    formData,
+    completionCallback,
+  );
 }

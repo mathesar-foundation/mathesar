@@ -1,4 +1,4 @@
-import { makeContext } from '@mathesar/contexts/utils';
+import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
 
 import type ModalFileAttachmentUploadController from './ModalFileAttachmentUploadController';
 

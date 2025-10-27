@@ -41,7 +41,7 @@ To use an RPC method:
 
 !!! example
 
-    To list information about tables for a schema, call the [`tables.list`](./methods/#tables.list_) method with a payload like this:
+    To list information about tables for a schema, call the [`tables.list`](methods.md#tables.list_) method with a payload like this:
 
     `POST /api/rpc/v0/`
 

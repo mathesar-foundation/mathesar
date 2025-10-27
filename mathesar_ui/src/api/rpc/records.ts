@@ -171,7 +171,7 @@ export const records = {
       table_oid: number;
       record_ids: ResultValue[];
     },
-    void
+    ResultValue[]
   >(),
 
   list_summaries: rpcMethodTypeContainer<

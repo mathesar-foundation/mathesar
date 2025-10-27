@@ -53,7 +53,14 @@
           POSTGRES_PORT: ${POSTGRES_PORT:-5432}
         ```
 
-2. This is a good time to [set up single sign-on (SSO)](./single-sign-on.md) if that's of interest to you.
+1. (Optional) Set a `SECRET_KEY` for the Mathesar service.
+
+    By default, Mathesar will set up and persist a `SECRET_KEY` value for your installation. However, if you're on a serverless environment or using a production platform with an ephemeral filesystem, you must [set a secret key via environment variable](./environment-variables.md/#secret_key) so that it persists between service builds.
+
+2. (Optional) Enable and configure optional features:
+    - [Single sign-on (SSO)](./single-sign-on.md)
+    - [File data type](./file-backend-config.md)
+
 3. Run the docker compose file using:
         ```
         docker compose -f docker-compose.yml up
@@ -92,7 +99,7 @@ If you want Mathesar to be accessible over the internet, you'll probably want to
 
 **Ensure that the DNS for your domain or sub-domain is pointing to the public IP address of the machine that you're installing Mathesar on**.
 
-Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](../../configuration/env-variables/#domain_name) environment variable, in the **CONFIG** section of the docker-compose file.
+Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](./environment-variables.md#domain_name) environment variable, in the **CONFIG** section of the docker-compose file.
 
 !!! example
     ```yaml
@@ -100,6 +107,12 @@ Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](../../configuration/e
     ```
 
 Restart the docker containers for the configuration to take effect.
+
+### Modifying the number of Gunicorn workers
+
+If you're deploying Mathesar in a production or multi-user environment, you may want to increase the number of Gunicorn workers to improve performance and handle more concurrent requests.
+
+You can control this by adjusting the `WEB_CONCURRENCY` environment variable in the **CONFIG** section of the docker-compose file. [Learn more about the recommended value](./environment-variables.md#web_concurrency) on our ENV variables page.
 
 ### Using an external PostgreSQL server for Mathesar's internal database
 

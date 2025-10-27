@@ -130,8 +130,8 @@
 
     color: var(--color-fg-base);
 
-    --modal-z-index: 1;
-    --dropdown-z-index: 1;
+    --modal-z-index: 2;
+    --dropdown-z-index: 2;
     --cell-errors-z-index: 1;
     --new-item-highlighter-z-index: 1;
     --toast-z-index: 3;

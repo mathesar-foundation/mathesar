@@ -20,7 +20,7 @@ Each Mathesar data type is described in more detail below.
 
 - **PostgreSQL types**
     - [`boolean`](https://www.postgresql.org/docs/current/datatype-boolean.html)
-- **Formatting** options _(stored as [metadata](./metadata.md))_
+- **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Display a dropdown instead of a checkbox
     - Customize the text show within the two dropdown options
 
@@ -28,7 +28,7 @@ Each Mathesar data type is described in more detail below.
 
 - **PostgreSQL types**
     - [`date`](https://www.postgresql.org/docs/current/datatype-datetime.html)
-- **Formatting** options _(stored as [metadata](./metadata.md))_
+- **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the format of the displayed date
 
 ### Date & Time
@@ -36,7 +36,7 @@ Each Mathesar data type is described in more detail below.
 - **PostgreSQL types**
     - [`timestamp with time zone`](https://www.postgresql.org/docs/current/datatype-datetime.html) **(default)**
     - [`timestamp without time zone`](https://www.postgresql.org/docs/current/datatype-datetime.html)
-- **Formatting** options _(stored as [metadata](./metadata.md))_
+- **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the format of the displayed date and time
 
 ### Duration
@@ -45,7 +45,7 @@ Used to store a length of time, for example "1 hour" or "3 days"
 
 - **PostgreSQL types**
     - [`interval`](https://www.postgresql.org/docs/current/datatype-datetime.html)
-- **Formatting** options _(stored as [metadata](./metadata.md))_
+- **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the format of the displayed duration
 
 ### Email
@@ -75,7 +75,7 @@ Used to store valid email addresses
         ??? question "`mathesar_types.money` vs `money`"
             Although PostgreSQL _does_ natively have a `money` type, we've chosen to recommend our custom PostgreSQL type for money in order to give your more control over the fractional precision for money columns. The fractional precision of the native `money` type is controlled by the [`LC_MONETARY`](https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-LC-MONETARY) which is set at the database level and thus may not be granular enough or accessible enough for all Mathesar users to configure.
 
-- **Formatting** options _(stored as [metadata](./metadata.md))_
+- **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the number of decimal places displayed (e.g. 1.2 vs 1.20)
     - Customize the digit grouping (e.g. 1,000 vs 1000)
     - Customize the locale for number formatting (e.g. 1.000,00 vs 1,000.00)
@@ -92,7 +92,7 @@ Used to store valid email addresses
     - [`decimal`](https://www.postgresql.org/docs/17/datatype-numeric.html)
     - [`real`](https://www.postgresql.org/docs/17/datatype-numeric.html)
     - [`double precision`](https://www.postgresql.org/docs/17/datatype-numeric.html)
-- **Formatting** options _(stored as [metadata](./metadata.md))_
+- **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the number of decimal places displayed (e.g. 1.2 vs 1.20)
     - Customize the digit grouping (e.g. 1,000 vs 1000)
     - Customize the locale for number formatting (e.g. 1.000,00 vs 1,000.00)
@@ -109,7 +109,7 @@ Used to store valid email addresses
 - **PostgreSQL types**
     - [`time with time zone`](https://www.postgresql.org/docs/17/datatype-datetime.html) **(default)**
     - [`time without time zone`](https://www.postgresql.org/docs/17/datatype-datetime.html)
-- **Formatting** options _(stored as [metadata](./metadata.md))_
+- **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the format of the displayed time
 
 ### URL
@@ -118,6 +118,15 @@ Used to store valid email addresses
     - `mathesar_types.uri`
 
         This is a custom PostgreSQL type implemented by Mathesar. It is a [domain](https://www.postgresql.org/docs/17/sql-createdomain.html) over `text` with additional logic to validate that the input is a valid uri address.
+
+### Files
+
+- **PostgreSQL types**
+    - `JSONB`
+
+This is a custom type implemented in Mathesar's UI. To enable this data type, you must [configure a file backend](../administration/file-backend-config.md).
+
+Learn more about [Mathesar's file feature](./files.md).
 
 ## Other PostgreSQL types
 
@@ -130,4 +139,3 @@ In most cases Mathesar is able to _display_ data from such types, but the follow
 - Formatting cannot be applied
 
 If you would like to request additional support for a type, please [open an issue](https://github.com/mathesar-foundation/mathesar/issues) requesting the feature. And if you find that an unsupported type is causing _other_ features to break, please note it as a bug.
-

@@ -1,9 +1,16 @@
 import { getContext, setContext } from 'svelte';
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  readable,
+  writable,
+} from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { FileManifest } from '@mathesar/api/rpc/records';
+import type { FileManifest, ResultValue } from '@mathesar/api/rpc/records';
 import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SelectedCellData } from '@mathesar/components/sheet/selection';
@@ -120,11 +127,20 @@ export class TabularData {
 
   hasPrimaryKey: Readable<boolean>;
 
+  canSelectRecords: Readable<boolean>;
+
   canInsertRecords: Readable<boolean>;
 
   canUpdateRecords: Readable<boolean>;
 
   canDeleteRecords: Readable<boolean>;
+
+  /**
+   * In the future, this will be set dynamically in for publicly shared links
+   * where user should not be able to (for example) open the record page for
+   * linked records.
+   */
+  canViewLinkedEntities = readable(true);
 
   constructor(props: TabularDataProps) {
     this.database = props.database;
@@ -178,6 +194,11 @@ export class TabularData {
 
     this.hasPrimaryKey = derived(this.processedColumns, (processedColumns) =>
       [...processedColumns.values()].some((pc) => pc.column.primary_key),
+    );
+
+    this.canSelectRecords = derived(
+      this.table.currentAccess.currentRolePrivileges,
+      (tableCurrentRolePrivileges) => tableCurrentRolePrivileges.has('SELECT'),
     );
 
     // TODO: We should be able to insert without a primary key column
@@ -302,6 +323,19 @@ export class TabularData {
       return g.withoutColumns(extractedColumnIds);
     });
     return this.refresh();
+  }
+
+  getProcessedColumn(columnSelectionId: string): ProcessedColumn | undefined {
+    const numericColumnId = parseInt(columnSelectionId, 10);
+    return get(this.processedColumns).get(numericColumnId);
+  }
+
+  getRecordIdFromRowId(rowId: string): ResultValue | undefined {
+    const row = get(this.recordsData.selectableRowsMap).get(rowId);
+    if (!row) return undefined;
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    if (!pkColumn) return undefined;
+    return row.record[pkColumn.id];
   }
 
   destroy(): void {

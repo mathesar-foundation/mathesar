@@ -20,7 +20,12 @@
     rowSeekerContext,
   } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   import type { CommonData } from '@mathesar/utils/preloadData';
-  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
+  import {
+    Confirmation,
+    ContextMenu,
+    ContextMenuController,
+    ToastPresenter,
+  } from '@mathesar-component-library';
 
   import ControlledFileDetailDropdown from './components/file-attachments/file-detail-dropdown/ControlledFileDetailDropdown.svelte';
   import {
@@ -35,6 +40,7 @@
     LightboxController,
     lightboxContext,
   } from './components/file-attachments/lightbox/LightboxController';
+  import { contextMenuContext } from './contexts/contextMenuContext';
 
   export let commonData: CommonData;
 
@@ -76,6 +82,9 @@
 
   const modalFileAttachmentUploader = new ModalFileAttachmentUploadController();
   modalFileAttachmentUploadContext.set(modalFileAttachmentUploader);
+
+  const contextMenu = new ContextMenuController();
+  contextMenuContext.set(contextMenu);
 
   const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
   $: clipboardHandler = $clipboardHandlerStore;
@@ -123,5 +132,6 @@
 <ControlledLightbox controller={lightboxController} />
 <ControlledFileDetailDropdown controller={fileDetailDropdownController} />
 <ModalFileAttachmentUploader controller={modalFileAttachmentUploader} />
+<ContextMenu controller={contextMenu} />
 
 <slot />

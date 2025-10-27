@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
-import { makeContext } from '@mathesar/contexts/utils';
+import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
 
 import type { RecordSelectorPurpose } from './recordSelectorUtils';
 

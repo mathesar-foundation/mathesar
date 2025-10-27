@@ -9,6 +9,7 @@ from mathesar.examples.hardware_store_dataset import load_hardware_store_dataset
 from mathesar.examples.ice_cream_employees_dataset import load_ice_cream_employees_dataset
 from mathesar.examples.library_dataset import load_library_dataset
 from mathesar.examples.library_makerspace_dataset import load_library_makerspace_dataset
+from mathesar.examples.movies_lite_dataset import load_movie_rentals_dataset
 from mathesar.examples.museum_exhibits_dataset import load_museum_exhibits_dataset
 from mathesar.examples.nonprofit_grants_dataset import load_nonprofit_grants_dataset
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
@@ -112,6 +113,7 @@ def _load_sample_data(conn, sample_data):
         'ice_cream_employees': load_ice_cream_employees_dataset,
         'library_makerspace': load_library_makerspace_dataset,
         'library_management': load_library_dataset,
+        'movie_rentals': load_movie_rentals_dataset,
         'museum_exhibits': load_museum_exhibits_dataset,
         'nonprofit_grants': load_nonprofit_grants_dataset,
     }

@@ -2,6 +2,7 @@
   import type { Readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
+  import { columnDefaultAllowsInsertion } from '@mathesar/api/rpc/columns';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import {
     ButtonMenuItem,
@@ -16,23 +17,11 @@
   export let fieldColumn: FieldColumn;
   export let parentHasColumn: Readable<boolean>;
 
-  $: ({ column, abstractType } = fieldColumn);
+  $: ({ column } = fieldColumn);
 
-  /**
-   * This is somewhat crude, but it works okay in most circumstances. Ideally
-   * the front end should have an easy (and opaque) way to determine whether
-   * it's appropriate to INSERT into a column. For example, if the column has a
-   * dynamic value set to be the result of a sequence, then we don't want to
-   * manually supply a value when inserting because it will mess up the
-   * sequence. But even non-PK column can have sequence-based default. And PK
-   * column can also have non-sequence dynamic defaults where inserting would
-   * theoretically be safe (e.g. UUID). It would be nice to improve this logic
-   * at some point via some accompanying backend work.
-   */
-  $: isDynamicPk = column.default?.is_dynamic && column.primary_key;
-  $: isTypeFile = abstractType.identifier === 'file';
+  $: canInsert = columnDefaultAllowsInsertion(column);
   $: columnAlreadyAdded = $parentHasColumn;
-  $: disabled = columnAlreadyAdded || isDynamicPk || isTypeFile;
+  $: disabled = columnAlreadyAdded || !canInsert;
 </script>
 
 <ButtonMenuItem {disabled} on:click>
@@ -58,9 +47,7 @@
           <div slot="content">
             {#if columnAlreadyAdded}
               {$_('cannot_add_field_column_is_already_added')}
-            {:else if isTypeFile}
-              {$_('cannot_add_field_column_type_file')}
-            {:else if isDynamicPk}
+            {:else if !canInsert}
               {$_('cannot_add_field_column_value_is_dynamic_pk')}
             {/if}
           </div>
