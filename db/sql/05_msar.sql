@@ -544,7 +544,7 @@ Args:
   tab_id: The OID of the table whose column we'll check
   col_id: The attnum of the column in question
 */
-SELECT col_id=1 AND attname='id' AND atttypid='integer'::regtype::oid AND attidentity <> ''
+SELECT col_id=1 AND atttypid='integer'::regtype::oid AND attidentity <> ''
 FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -3846,13 +3846,22 @@ BEGIN
       col_alter_obj -> 'default' AS new_default,
 
       col_alter_obj->>'description' AS comment_,
-      __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment
+      __msar.jsonb_key_exists(col_alter_obj, 'description') AS has_comment,
+      msar.is_mathesar_id_column(tab_id, (col_alter_obj ->> 'attnum')::integer) AS is_msar_id
 
     FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
       INNER JOIN pg_catalog.pg_attribute AS pga ON pga.attnum=(x.col_alter_obj ->> 'attnum')::smallint AND pga.attrelid=tab_id
       LEFT JOIN pg_catalog.pg_attrdef AS pgat ON pgat.adnum=(x.col_alter_obj ->> 'attnum')::smallint AND pgat.adrelid=tab_id
-    WHERE NOT msar.is_mathesar_id_column(tab_id, (x.col_alter_obj ->> 'attnum')::integer)
   LOOP
+    IF col.is_msar_id THEN
+        PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
+        return_attnum_arr := return_attnum_arr || col.attnum::integer;
+      IF col.has_comment THEN
+        PERFORM msar.comment_on_column(tab_id, col.attnum, col.comment_);
+      END IF;
+      CONTINUE;
+    END IF;
+
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
 
