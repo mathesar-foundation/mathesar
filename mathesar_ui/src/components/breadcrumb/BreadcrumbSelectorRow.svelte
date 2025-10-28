@@ -88,7 +88,8 @@
     opacity: 0;
     transition: opacity 0.2s ease;
   }
-  .breadcrumb-selector-row:hover .hover-indicator {
+  .breadcrumb-selector-row:hover .hover-indicator,
+  .breadcrumb-selector-row:has(a:focus) .hover-indicator {
     opacity: 1;
   }
 

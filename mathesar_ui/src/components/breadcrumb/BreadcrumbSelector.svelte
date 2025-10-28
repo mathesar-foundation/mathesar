@@ -68,6 +68,9 @@
   }
 
   function handleKeyDown(event: KeyboardEvent) {
+    const target = event.target as HTMLElement;
+    const isSearchInput = target === textInputEl;
+
     if (event.key === 'Escape') {
       event.preventDefault();
       isOpen = false;
@@ -76,46 +79,43 @@
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      selectedIndex = Math.min(
-        selectedIndex + 1,
-        allFilteredEntries.length - 1,
-      );
-      scrollToSelected();
-      return;
-    }
-
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      if (selectedIndex <= 0) {
-        // Focus search input when at the top
+      if (selectedIndex >= allFilteredEntries.length - 1) {
+        // Loop back to search input, then to first item
         selectedIndex = -1;
         textInputEl?.focus();
       } else {
-        selectedIndex = Math.max(selectedIndex - 1, 0);
+        selectedIndex += 1;
         scrollToSelected();
       }
       return;
     }
 
-    if (event.key === 'Enter' && selectedIndex >= 0) {
+    if (event.key === 'ArrowUp') {
       event.preventDefault();
-      const selectedEntry = allFilteredEntries[selectedIndex];
-      if (selectedEntry) {
-        window.location.href = selectedEntry.href;
+      if (selectedIndex === -1) {
+        // From search input, go to last item
+        selectedIndex = allFilteredEntries.length - 1;
+        scrollToSelected();
+      } else if (selectedIndex === 0) {
+        // From first item, go to search input
+        selectedIndex = -1;
+        textInputEl?.focus();
+      } else {
+        selectedIndex -= 1;
+        scrollToSelected();
       }
       return;
     }
 
     // For alphanumeric keys and editing keys, focus the search input
+    // This works when an anchor link is focused
     if (
-      event.key.length === 1 ||
-      event.key === 'Backspace' ||
-      event.key === 'Delete'
+      !isSearchInput &&
+      (event.key.length === 1 ||
+        event.key === 'Backspace' ||
+        event.key === 'Delete')
     ) {
-      // If the search input isn't already focused, focus it
-      if (document.activeElement !== textInputEl) {
-        textInputEl?.focus();
-      }
+      textInputEl?.focus();
     }
   }
 </script>
