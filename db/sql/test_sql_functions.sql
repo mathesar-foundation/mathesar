@@ -841,7 +841,7 @@ BEGIN
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
-    WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}';
+    WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}' AND contype = 'p';
   RETURN NEXT is(created_name, 'mysuperkey');
   deferrable_ := condeferrable FROM pg_constraint WHERE conname='mysuperkey';
   RETURN NEXT is(deferrable_, true);
@@ -858,7 +858,7 @@ BEGIN
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
-    WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}';
+    WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}' AND contype = 'p';
   RETURN NEXT is(created_name, 'add_pkeytest_pkey');
 END;
 $f$ LANGUAGE plpgsql;
@@ -4646,7 +4646,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_delete_records_from_table_single() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
-  delete_result integer;
+  delete_result jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
@@ -4654,7 +4654,7 @@ BEGIN
     rel_id,
     '[2]'
   );
-  RETURN NEXT is(delete_result, 1);
+  RETURN NEXT is(delete_result, '[2]');
   RETURN NEXT results_eq(
     'SELECT id FROM atable ORDER BY id',
     $v$VALUES ('1'::integer), ('3'::integer)$v$
@@ -4686,7 +4686,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_delete_records_from_table_empty() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
-  delete_result integer;
+  delete_result jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
@@ -4694,7 +4694,7 @@ BEGIN
     rel_id,
     '[]'
   );
-  RETURN NEXT is(delete_result, 0);
+  RETURN NEXT is(delete_result, '[]');
   RETURN NEXT results_eq(
     'SELECT id FROM atable ORDER BY id',
     $v$VALUES ('1'::integer), ('2'::integer), ('3'::integer)$v$
@@ -4706,7 +4706,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_delete_records_from_table_multi() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
-  delete_result integer;
+  delete_result jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
@@ -4714,7 +4714,7 @@ BEGIN
     rel_id,
     '[1, 2]'
   );
-  RETURN NEXT is(delete_result, 2);
+  RETURN NEXT is(delete_result, '[1, 2]');
   RETURN NEXT results_eq(
     'SELECT id FROM atable ORDER BY id',
     $v$VALUES ('3'::integer)$v$
@@ -4726,7 +4726,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_delete_records_from_table_multi_nonexist() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
-  delete_result integer;
+  delete_result jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
@@ -4734,7 +4734,7 @@ BEGIN
     rel_id,
     '[1, 2, 342]'
   );
-  RETURN NEXT is(delete_result, 2);
+  RETURN NEXT is(delete_result, '[1, 2]');
   RETURN NEXT results_eq(
     'SELECT id FROM atable ORDER BY id',
     $v$VALUES ('3'::integer)$v$
@@ -4746,7 +4746,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_delete_records_from_table_stringy_pkey() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
-  delete_result integer;
+  delete_result jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
@@ -4754,7 +4754,7 @@ BEGIN
     rel_id,
     '["1", "2"]'
   );
-  RETURN NEXT is(delete_result, 2);
+  RETURN NEXT is(delete_result, '[1, 2]');
   RETURN NEXT results_eq(
     'SELECT id FROM atable ORDER BY id',
     $v$VALUES ('3'::integer)$v$

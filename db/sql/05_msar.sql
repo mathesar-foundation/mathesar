@@ -2515,8 +2515,6 @@ Args:
                   "not_null", and "default" keys optional).
   raw_default: This boolean tells us whether we chould reproduce the default with or without quoting
                and escaping. True means we don't quote or escape, but just use the raw value.
-  create_id: This boolean defines whether or not we should automatically add a default Mathesar 'id'
-             column to the input.
 
 The col_defs should have the form:
 [
@@ -3357,6 +3355,166 @@ BEGIN
   ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.prepare_temp_table_for_import(
+  tab_name text,
+  col_names text[]
+) RETURNS jsonb AS $$/*
+Add a temp table, returning a JSON object containing a properly formatted SQL
+statement to carry out `COPY FROM`, table_oid of the created temp table.
+
+Each returned JSON object will have the form:
+  {
+    "copy_sql": <str>,
+    "table_oid": <int>
+  }
+
+Args:
+  tab_name (optional): The unquoted name for the new temp table.
+  col_defs: The columns for the new table, in order.
+*/
+DECLARE
+  col_defs jsonb;
+  column_defs __msar.col_def[];
+  prefix text;
+  table_count integer := 1;
+  uq_tab_name text;
+  sch_name text;
+  rel_id bigint;
+  col_names_sql text;
+  copy_sql text;
+BEGIN
+  -- Passing 'id' as column name gets filtered out by __msar.process_col_def_jsonb,
+  -- pass NULL when 'id' is encountered.
+  col_defs := jsonb_agg(jsonb_build_object('name', NULLIF(n, 'id'))) FROM unnest(col_names) AS x(n);
+
+  IF NULLIF(tab_name, '') IS NOT NULL AND NOT EXISTS(
+      SELECT oid FROM pg_catalog.pg_class WHERE relname = tab_name AND relpersistence = 't'
+    )
+  THEN
+    uq_tab_name := tab_name;
+  ELSE
+    prefix := 'Temp Table ';
+    uq_tab_name := prefix || table_count;
+    -- avoid name collisions
+    WHILE EXISTS (
+      SELECT oid FROM pg_catalog.pg_class WHERE relname = uq_tab_name AND relpersistence = 't'
+    ) LOOP
+      table_count := table_count + 1;
+      uq_tab_name := prefix || table_count;
+    END LOOP;
+  END IF;
+  column_defs := __msar.process_col_def_jsonb(0, col_defs, false);
+  PERFORM msar.add_temp_table(tab_name, column_defs);
+
+  SELECT nspname, pgc.oid INTO sch_name, rel_id
+  FROM pg_catalog.pg_class AS pgc
+  LEFT JOIN pg_catalog.pg_namespace AS pgn
+  ON pgc.relnamespace = pgn.oid
+  WHERE pgc.relname = uq_tab_name AND pgc.relpersistence = 't';
+
+  -- Aggregate TEXT type column names of the created table
+  SELECT string_agg(quote_ident(attname), ', ') INTO col_names_sql
+  FROM pg_catalog.pg_attribute
+  WHERE attrelid = rel_id AND atttypid = 'TEXT'::regtype::oid;
+
+  -- Create a properly formatted COPY SQL string
+  copy_sql := format('COPY %I.%I(%s) FROM STDIN', sch_name, uq_tab_name, col_names_sql);
+
+  RETURN jsonb_build_object(
+    'copy_sql', copy_sql,
+    'table_oid', rel_id::bigint
+  ) FROM pg_catalog.pg_class WHERE oid = rel_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_temp_table(tab_name text, col_defs __msar.col_def[])
+RETURNS text AS $$/*
+Add a temporary table, returning the command executed.
+
+Args:
+  tab_name: An unqualified name for the table to be added.
+  col_defs: An array of __msar.col_def defining the column set of the new table.
+*/
+WITH col_cte AS (
+  SELECT string_agg(__msar.build_col_def_text(col), ', ') AS table_columns
+  FROM unnest(col_defs) AS col
+)
+SELECT __msar.exec_ddl(
+  'CREATE TEMPORARY TABLE %I (%s)',
+  tab_name,
+  table_columns
+)
+FROM col_cte;
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.insert_from_select(
+  src_tab_id regclass,
+  dst_tab_id regclass,
+  mappings jsonb
+) RETURNS bigint AS $$/*
+Insert records from a given source table to a destination/target table,
+returning the number of records inserted.
+
+Args:
+  src_tab_id: The OID of the source table.(OID if temp table if inserting into existing table).
+  dst_tab_id: The OID of the destination/target table.
+  mappings: The column mappings b/w src and dst tables based on which data will be inserted.
+
+mappings should have the following form:
+[
+  {"src_table_attnum": 1, "dst_table_attnum": 2},
+  {"src_table_attnum": 3, "dst_table_attnum": 3},
+  {...}
+]
+*/
+DECLARE
+  src_table_cols text;
+  dst_table_cols text;
+  insert_count bigint;
+BEGIN
+  SELECT
+    string_agg(
+      __msar.build_cast_expr(
+        quote_ident(src.attname),
+        dst.atttypid::regclass::text,
+        '{}'::jsonb
+      ), ', '
+    ),
+    string_agg(quote_ident(dst.attname), ', ')
+  INTO src_table_cols, dst_table_cols
+  FROM jsonb_to_recordset(mappings) AS mapping(
+    src_table_attnum smallint,
+    dst_table_attnum smallint
+  )
+  LEFT JOIN pg_catalog.pg_attribute AS src ON
+    src.attnum = mapping.src_table_attnum
+    AND src.attrelid = src_tab_id
+    AND NOT src.attisdropped
+  LEFT JOIN pg_catalog.pg_attribute AS dst ON
+    dst.attnum = mapping.dst_table_attnum
+    AND dst.attrelid = dst_tab_id
+    AND NOT dst.attisdropped;
+
+  EXECUTE format(
+    'INSERT INTO %I.%I(%s) SELECT %s FROM %I.%I',
+    msar.get_relation_schema_name(dst_tab_id),
+    msar.get_relation_name(dst_tab_id),
+    dst_table_cols,
+    src_table_cols,
+    msar.get_relation_schema_name(src_tab_id),
+    msar.get_relation_name(src_tab_id)
+  );
+  GET DIAGNOSTICS insert_count = ROW_COUNT;
+  RETURN insert_count;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -5416,7 +5574,7 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS integer AS $$/*
+  msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS jsonb AS $$/*
 Delete records from table by id.
 
 Args:
@@ -5426,12 +5584,14 @@ Args:
 The table must have a single primary key column.
 */
 DECLARE
-  num_deleted integer;
+  pk_id integer;
+  ids_deleted jsonb;
 BEGIN
+  SELECT msar.get_pk_column(tab_id) INTO pk_id;
   EXECUTE format(
     $d$
     WITH delete_cte AS (DELETE FROM %1$I.%2$I %3$s RETURNING *)
-    SELECT count(1) FROM delete_cte
+    SELECT coalesce(json_agg(%4$I), '[]') FROM delete_cte
     $d$,
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
@@ -5440,15 +5600,16 @@ BEGIN
         'type', 'element_in_json_array_untyped', 'args', jsonb_build_array(
           jsonb_build_object(
             'type', 'format_data', 'args', jsonb_build_array(
-              jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
+              jsonb_build_object('type', 'attnum', 'value', pk_id)
             )
           ),
           jsonb_build_object('type', 'literal', 'value', rec_ids)
         )
       )
-    )
-  ) INTO num_deleted;
-  RETURN num_deleted;
+    ),
+    msar.get_column_name(tab_id, pk_id)
+  ) INTO ids_deleted;
+  RETURN ids_deleted;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -5559,6 +5720,7 @@ corresponding to the attnums of desired columns and values corresponding to valu
 */
 DECLARE
   rec_modified jsonb;
+  num_updated bigint;
 BEGIN
   EXECUTE format(
     $p$ %1$s %2$s $p$,
@@ -5572,6 +5734,10 @@ BEGIN
       )
     )
   );
+  GET DIAGNOSTICS num_updated = ROW_COUNT;
+  IF num_updated = 0 THEN
+    RAISE EXCEPTION 'No rows updated';
+  END IF;
   rec_modified := msar.get_record_from_table(
     tab_id,
     rec_id,

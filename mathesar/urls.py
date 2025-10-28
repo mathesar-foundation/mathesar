@@ -22,6 +22,7 @@ urlpatterns = [
     path('auth/3rdparty/<path:rest>/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='oidc'),  # hack to redirect '/login/cancelled', 'login/error/' 'signup/' and '' to login page
     path('auth/', include('django.contrib.auth.urls')),  # default auth/
     path('auth/', include('allauth.urls')),  # catch any urls that are not available in default auth/
+    path('bulk_insert/', views.bulk_insert.bulk_insert, name='bulk_insert'),
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
     path('administration/', views.admin_home, name='admin_home'),
