@@ -1037,7 +1037,7 @@ SELECT
   msar.list_table_privileges_for_current_role(oid) AS current_role_priv,
   pg_catalog.pg_has_role(relowner, 'USAGE') AS current_role_owns
 FROM pg_catalog.pg_class
-WHERE relkind = 'r';
+WHERE relkind = 'r' OR relkind = 'v' OR relkind = 'm';
 $$ LANGUAGE SQL STABLE;
 
 
