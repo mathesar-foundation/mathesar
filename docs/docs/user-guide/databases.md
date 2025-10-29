@@ -93,29 +93,29 @@ Separate from your connected PostgreSQL database, Mathesar also maintains an int
       <ul>
         <li>
           The
-          <a href="/user-guide/schemas/">schemas</a>
+          <a href="../schemas">schemas</a>
           and
-          <a href="/user-guide/tables/">tables</a>
+          <a href="../tables">tables</a>
           you see from within Mathesar
         </li>
         <li>The rows, columns, and cells within those tables</li>
         <li>
-          <a href="/user-guide/relationships/">Relationships</a>
+          <a href="../relationships">Relationships</a>
           between those tables
         </li>
         <li>
-          <a href="/user-guide/roles/">Roles</a>
+          <a href="../roles">Roles</a>
           and their privileges
         </li>
       </ul>
     </td>
     <td>
       <ul>
-        <li><a href="/user-guide/users/">Users</a></li>
+        <li><a href="../users">Users</a></li>
         <li>Database connection credentials, including saved role passwords</li>
-        <li><a href="/user-guide/collaborators/">Collaborators</a></li>
+        <li><a href="../collaborators">Collaborators</a></li>
         <li><a href="#metadata">Metadata</a></li>
-        <li><a href="/user-guide/data-explorer/">Saved Explorations</a></li>
+        <li><a href="../data-explorer">Saved Explorations</a></li>
       </ul>
     </td>
   </tr>

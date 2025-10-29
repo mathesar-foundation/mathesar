@@ -69,7 +69,7 @@ def user_has_file_backend_access(request):
 
     if has_shared_form(request):
         public_form_conf_for_file_backend = get_public_form_conf_for_file_backend()
-        return public_form_conf_for_file_backend.get("enabled", False) is True
+        return public_form_conf_for_file_backend.get("enabled", True) is True
 
     return False
 
