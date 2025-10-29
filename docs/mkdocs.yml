@@ -37,6 +37,7 @@ nav:
           - Collaborators: user-guide/collaborators.md
       - Features:
           - File data type: user-guide/files.md
+          - Forms: user-guide/forms.md
           - Data Explorer: user-guide/data-explorer.md
       - Data management:
           - Importing data: user-guide/importing-data.md
