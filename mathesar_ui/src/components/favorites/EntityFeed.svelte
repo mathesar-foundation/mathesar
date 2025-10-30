@@ -1,5 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { flip } from 'svelte/animate';
+  import { fade } from 'svelte/transition';
   import { Button, Icon, Skeleton } from '@mathesar-component-library';
   import {
     iconRemoveFromFavorites,
@@ -104,21 +106,27 @@
       </div>
     {:else if items.length === 0}
       <div class="empty-state">
-        <Icon {...uiConfig.emptyIcon} size="large" />
         <h3>{uiConfig.emptyTitle}</h3>
         <p>{uiConfig.emptyDescription}</p>
       </div>
     {:else}
       <div class="cards-list" class:processing={isProcessing}>
         {#each items as { item, entityName, databaseName, schemaName }, index (`${type}-${item.entityType}-${item.entityId}-${item.databaseId}-${item.schemaOid}`)}
-          <EntityCard
-            {item}
-            {entityName}
-            {databaseName}
-            {schemaName}
-            type={type === 'favorites' ? 'favorite' : 'recent'}
-            on:remove={handleRemoveItem}
-          />
+          <div
+            class="card-wrapper"
+            in:fade={{ duration: 120 }}
+            out:fade={{ duration: 100 }}
+            animate:flip={{ duration: 200 }}
+          >
+            <EntityCard
+              {item}
+              {entityName}
+              {databaseName}
+              {schemaName}
+              type={type === 'favorites' ? 'favorite' : 'recent'}
+              on:remove={handleRemoveItem}
+            />
+          </div>
         {/each}
       </div>
     {/if}
@@ -160,7 +168,7 @@
 
   .empty-state {
     text-align: center;
-    padding: 3rem 1rem;
+    padding: var(--lg2) var(--sm2);
     color: var(--color-gray-dark);
 
     h3 {
@@ -174,5 +182,11 @@
       font-size: 0.875rem;
       line-height: 1.5;
     }
+  }
+
+  .cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sm4);
   }
 </style>

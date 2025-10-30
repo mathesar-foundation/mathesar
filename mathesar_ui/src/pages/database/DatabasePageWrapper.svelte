@@ -169,9 +169,11 @@
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div class="tab-container">
-      <div style="margin-bottom: var(--lg3);">
-        <RecentsFavorites databaseId={database.id} />
-      </div>
+      {#if section === 'schemas'}
+        <div style="margin-bottom: var(--lg3);">
+          <RecentsFavorites databaseId={database.id} />
+        </div>
+      {/if}
       <slot {setSection} />
     </div>
     <div slot="tab" let:tab>
