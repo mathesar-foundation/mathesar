@@ -8,6 +8,8 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { router } from 'tinro';
   import { iconRecord } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
   import {
@@ -49,12 +51,27 @@
   $: tabularDataStore.set(tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canViewTable = $currentRolePrivileges.has('SELECT');
+  $: getTablePageUrl = $storeToGetTablePageUrl;
+  $: href = getTablePageUrl ? getTablePageUrl({ tableId: table.oid }) : undefined;
 </script>
 
 <div class="table-widget">
   <div class="top">
     <h3 class="bold-header">
-      <TableName {table} truncate={false} />
+        {#if href}
+        <a
+          class="table-link"
+          href={href}
+          on:click|preventDefault={() => {
+            // use router to navigate so single-page app behavior is preserved
+            void router.goto(href);
+          }}
+        >
+          <TableName {table} truncate={false} />
+        </a>
+        {:else}
+          <TableName {table} truncate={false} />
+      {/if}
       <Help>
         <RichText text={$_('related_records_help')} let:slotName>
           {#if slotName === 'tableName'}
@@ -118,5 +135,12 @@
   .results {
     margin-top: var(--sm1);
     border: transparent;
+  }
+  .table-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .table-link:hover {
+    text-decoration: underline;
   }
 </style>
