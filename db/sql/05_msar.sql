@@ -3386,7 +3386,9 @@ DECLARE
   col_names_sql text;
   copy_sql text;
 BEGIN
-  col_defs := jsonb_agg(jsonb_build_object('name', n)) FROM unnest(col_names) AS x(n);
+  -- Passing 'id' as column name gets filtered out by __msar.process_col_def_jsonb,
+  -- pass NULL when 'id' is encountered.
+  col_defs := jsonb_agg(jsonb_build_object('name', NULLIF(n, 'id'))) FROM unnest(col_names) AS x(n);
 
   IF NULLIF(tab_name, '') IS NOT NULL AND NOT EXISTS(
       SELECT oid FROM pg_catalog.pg_class WHERE relname = tab_name AND relpersistence = 't'

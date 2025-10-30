@@ -119,6 +119,15 @@ Used to store valid email addresses
 
         This is a custom PostgreSQL type implemented by Mathesar. It is a [domain](https://www.postgresql.org/docs/17/sql-createdomain.html) over `text` with additional logic to validate that the input is a valid uri address.
 
+### Files
+
+- **PostgreSQL types**
+    - `JSONB`
+
+This is a custom type implemented in Mathesar's UI. To enable this data type, you must [configure a file backend](../administration/file-backend-config.md).
+
+Learn more about [Mathesar's file feature](./files.md).
+
 ## Other PostgreSQL types
 
 Mathesar has rudimentary support for other PostgreSQL types such as: `array`, `bytea`, `point`, `line`, `lseg`, `box`, `path`, `path`, `polygon`, `circle`, `cidr`, `inet`, `macaddr`, `macaddr8`, `bit`, `bit varying`, `tsquery`, `tsvector`, `json`, `jsonb`, `xml`, `pg_lsn`, `pg_snapshot`, `txid_snapshot`, `int4range`, `int8range`, `numrange`, `tsrange`, `tstzrange`, `daterange`.
