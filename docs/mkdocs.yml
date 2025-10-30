@@ -16,6 +16,7 @@ nav:
         - Environment variables: administration/environment-variables.md
         - Single sign-on (SSO): administration/single-sign-on.md
         - File storage backends: administration/file-backend-config.md
+        - Form builder configuration: administration/forms-config.md
       - Maintenance:
         - Upgrade Mathesar: administration/upgrade.md
         - Uninstall Mathesar: administration/uninstall.md
@@ -37,7 +38,7 @@ nav:
           - Collaborators: user-guide/collaborators.md
       - Features:
           - File data type: user-guide/files.md
-          - Forms: user-guide/forms.md
+          - Form builder: user-guide/forms.md
           - Data Explorer: user-guide/data-explorer.md
       - Data management:
           - Importing data: user-guide/importing-data.md
