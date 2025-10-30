@@ -81,16 +81,6 @@ export interface ResolutionResult {
 }
 
 /**
- * @deprecated Use ResolutionResult instead
- */
-export type ValidationResult = ResolutionResult;
-
-/**
- * @deprecated Use ResolvedEntity instead
- */
-export type ValidatedEntity = ResolvedEntity;
-
-/**
  * Resolves a single entity reference, checking stores first then falling back to API.
  * Returns entity metadata if found, null if invalid or deleted.
  */
@@ -275,19 +265,7 @@ export async function resolveEntityRefs(
   return { resolvedEntities, invalidEntityIds };
 }
 
-/**
- * @deprecated Use resolveEntityRefs instead
- */
-export async function validateEntities(
-  items: (FavoriteItem | RecentItem)[],
-): Promise<ValidationResult> {
-  return resolveEntityRefs(items);
-}
-
-/**
- * Resolves a single entity and returns just the display information.
- * Useful for UI components that only need name and schema.
- */
+// Helper for optional display info if needed by callers
 export async function getEntityDisplayInfo(
   item: FavoriteItem | RecentItem,
 ): Promise<{ name: string; schemaName?: string } | null> {
@@ -300,15 +278,6 @@ export async function getEntityDisplayInfo(
     };
   }
   return null;
-}
-
-/**
- * @deprecated Use getEntityDisplayInfo instead
- */
-export async function getValidatedEntityData(
-  item: FavoriteItem | RecentItem,
-): Promise<{ name: string; schemaName?: string } | null> {
-  return getEntityDisplayInfo(item);
 }
 
 export function createEntityKey(item: FavoriteItem | RecentItem): string {

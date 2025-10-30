@@ -2,8 +2,7 @@ import { type Readable, derived, get, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
 import {
-  type ValidationResult,
-  validateEntities,
+  type ResolutionResult,
   resolveEntityRefs,
   createEntityKey,
 } from '@mathesar/utils/entityResolution';
@@ -220,9 +219,9 @@ function isFavorited(
 }
 
 // Validation and cleanup functions
-async function validateAndCleanupFavorites(): Promise<ValidationResult> {
+async function validateAndCleanupFavorites(): Promise<ResolutionResult> {
   const currentFavorites = get(localFavorites);
-  const validationResult = await validateEntities(currentFavorites);
+  const validationResult = await resolveEntityRefs(currentFavorites);
 
   // Remove invalid entities from favorites
   if (validationResult.invalidEntityIds.length > 0) {
@@ -241,9 +240,9 @@ async function validateAndCleanupFavorites(): Promise<ValidationResult> {
   return validationResult;
 }
 
-async function validateAndCleanupRecents(): Promise<ValidationResult> {
+async function validateAndCleanupRecents(): Promise<ResolutionResult> {
   const currentRecents = get(localRecents);
-  const validationResult = await validateEntities(currentRecents);
+  const validationResult = await resolveEntityRefs(currentRecents);
 
   // Remove invalid entities from recents
   if (validationResult.invalidEntityIds.length > 0) {
@@ -516,8 +515,8 @@ const _autoDisplayDeriver = derived([favorites, recents], ([$favorites, $recents
 const __autoDisplayDeriverSubscription = _autoDisplayDeriver.subscribe(() => {});
 
 async function validateAndCleanupAll(): Promise<{
-  favoriteResults: ValidationResult;
-  recentResults: ValidationResult;
+  favoriteResults: ResolutionResult;
+  recentResults: ResolutionResult;
 }> {
   const [favoriteResults, recentResults] = await Promise.all([
     validateAndCleanupFavorites(),

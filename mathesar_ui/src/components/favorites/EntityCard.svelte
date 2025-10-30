@@ -8,12 +8,14 @@
     iconSchema,
     iconRemoveFromFavorites,
     iconDeleteMajor,
+    iconAddToFavorites,
   } from '@mathesar/icons';
   import type {
     FavoriteItem,
     RecentItem,
     EntityType,
   } from '@mathesar/stores/favorites';
+  import { favoritesStore } from '@mathesar/stores/favorites';
   import { getEntityIcon, getEntityUrl } from '@mathesar/utils/entityUtils';
   import Truncate from '@mathesar/component-library/truncate/Truncate.svelte';
 
@@ -39,6 +41,31 @@
       entityId: item.entityId,
       databaseId: item.databaseId,
     });
+  }
+
+  $: isFavorited = favoritesStore.isFavorited(
+    item.entityType,
+    item.entityId,
+    item.databaseId,
+  );
+
+  async function handleToggleFavorite(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (isFavorited) {
+      await favoritesStore.removeFavorite(
+        item.entityType,
+        item.entityId,
+        item.databaseId,
+      );
+    } else {
+      await favoritesStore.addFavorite({
+        entityType: item.entityType,
+        entityId: item.entityId,
+        databaseId: item.databaseId,
+        schemaOid: item.schemaOid,
+      });
+    }
   }
 </script>
 
@@ -81,6 +108,14 @@
         ? $_('remove_from_favorites')
         : $_('remove_from_recents')}
     </ButtonMenuItem>
+    {#if type === 'recent'}
+      <ButtonMenuItem
+        on:click={handleToggleFavorite}
+        icon={isFavorited ? iconRemoveFromFavorites : iconAddToFavorites}
+      >
+        {isFavorited ? $_('remove_from_favorites') : $_('add_to_favorites')}
+      </ButtonMenuItem>
+    {/if}
   </svelte:fragment>
 </EntityListItem>
 
