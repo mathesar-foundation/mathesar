@@ -10,9 +10,13 @@
   } from '@mathesar/stores/favorites';
   import EntityFeed from './EntityFeed.svelte';
 
-  // Load display data on mount
+  // Optional scoping props
+  export let databaseId: number | undefined = undefined;
+  export let schemaOid: number | undefined = undefined;
+
+  // With derived stores in place, no manual fetch is required
   onMount(() => {
-    void favoritesStore.fetchDisplayData();
+    // No-op: kept for symmetry and future hooks
   });
 
   // Handler functions for favorites and recents
@@ -40,7 +44,11 @@
 <div class="favorites-recents-section">
   <div class="favorites-section">
     <EntityFeed
-      items={$favoritesWithDisplay}
+      items={($favoritesWithDisplay).filter(({ item }) => {
+        if (databaseId != null && item.databaseId !== databaseId) return false;
+        if (schemaOid != null && item.schemaOid !== schemaOid) return false;
+        return true;
+      })}
       type="favorites"
       loading={$favoritesLoading}
       error={$favoritesError}
@@ -50,7 +58,11 @@
   </div>
   <div class="recents-section">
     <EntityFeed
-      items={$recentsWithDisplay}
+      items={($recentsWithDisplay).filter(({ item }) => {
+        if (databaseId != null && item.databaseId !== databaseId) return false;
+        if (schemaOid != null && item.schemaOid !== schemaOid) return false;
+        return true;
+      })}
       type="recents"
       loading={$favoritesLoading}
       error={$favoritesError}

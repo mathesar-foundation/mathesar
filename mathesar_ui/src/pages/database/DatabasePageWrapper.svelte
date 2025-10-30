@@ -37,6 +37,7 @@
 
   import DisconnectDatabaseModal from './disconnect/DisconnectDatabaseModal.svelte';
   import DatabasePermissionsModal from './permissions/DatabasePermissionsModal.svelte';
+  import RecentsFavorites from '@mathesar/components/favorites/RecentsFavorites.svelte';
 
   const databaseRouteContext = DatabaseRouteContext.get();
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
@@ -168,6 +169,9 @@
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div class="tab-container">
+      <div style="margin-bottom: var(--lg3);">
+        <RecentsFavorites databaseId={database.id} />
+      </div>
       <slot {setSection} />
     </div>
     <div slot="tab" let:tab>

@@ -12,6 +12,7 @@
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import { Button, Icon } from '@mathesar-component-library';
+  import RecentsFavorites from '@mathesar/components/favorites/RecentsFavorites.svelte';
 
   import CreateTableModal from './CreateTableModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
@@ -73,6 +74,9 @@
         {/if}
       </svelte:fragment>
     </AppSecondaryHeader>
+  </div>
+  <div style="padding: var(--lg3) 0;">
+    <RecentsFavorites databaseId={schema.database.id} schemaOid={schema.oid} />
   </div>
   <SchemaOverview
     {tablesRequestStatus}

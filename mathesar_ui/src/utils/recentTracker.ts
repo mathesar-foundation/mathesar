@@ -16,6 +16,12 @@ export async function trackRecentVisit(
   params: TrackRecentParams,
 ): Promise<void> {
   try {
+    // Enforce schemaOid for forms
+    if (params.entityType === 'form' && params.schemaOid == null) {
+      // eslint-disable-next-line no-console
+      console.warn('trackRecentVisit: schemaOid is required for forms; skipping');
+      return;
+    }
     await favoritesStore.addRecent({
       entityType: params.entityType,
       entityId: params.entityId,

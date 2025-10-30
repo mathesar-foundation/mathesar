@@ -4,6 +4,8 @@ import { api } from '@mathesar/api/rpc';
 import {
   type ValidationResult,
   validateEntities,
+  resolveEntityRefs,
+  createEntityKey,
 } from '@mathesar/utils/entityResolution';
 
 import { databasesStore } from './databases';
@@ -73,12 +75,7 @@ export const recentsWithDisplay: Readable<RecentItemWithDisplayData[]> =
 export const favoritesLoading = derived(isLoading, (loading) => loading);
 export const favoritesError = derived(error, (err) => err);
 
-// Helper function to create entity key for identification
-function createEntityKey(item: BaseEntityItem): string {
-  return `${item.entityType}-${item.entityId}-${item.databaseId}-${
-    item.schemaOid ?? ''
-  }`;
-}
+// Using shared helper from utils/entityResolution for entity keys
 
 // Helper function to create favorite/recent items
 function createFavoriteItem(params: {
@@ -110,6 +107,12 @@ async function addFavorite(params: {
   databaseId: number;
   schemaOid?: number;
 }) {
+  if (params.entityType === 'form' && params.schemaOid == null) {
+    // Forms require schema context; ignore invalid input
+    // eslint-disable-next-line no-console
+    console.warn('addFavorite: schemaOid is required for forms; skipping');
+    return;
+  }
   const newFavorite = createFavoriteItem(params);
   const currentFavorites = get(localFavorites);
 
@@ -150,6 +153,12 @@ async function addRecent(params: {
   databaseId: number;
   schemaOid?: number;
 }) {
+  if (params.entityType === 'form' && params.schemaOid == null) {
+    // Forms require schema context; ignore invalid input
+    // eslint-disable-next-line no-console
+    console.warn('addRecent: schemaOid is required for forms; skipping');
+    return;
+  }
   const newRecent = createRecentItem(params);
 
   function updateLocalRecents(newRecentItem: RecentItem) {
@@ -286,119 +295,37 @@ async function fetchDisplayData(): Promise<void> {
     isLoading.set(true);
     const { databases } = databasesStore;
 
-    // Collect unique database and schema IDs to batch API calls
-    const uniqueDatabaseIds = new Set(allItems.map((item) => item.databaseId));
-    const uniqueSchemaIds = new Set(
-      allItems
-        .filter((item) => item.schemaOid)
-        .map((item) => item.schemaOid as number),
-    );
+    const { resolvedEntities } = await resolveEntityRefs(allItems);
+    const resolvedByKey = new Map<string, typeof resolvedEntities[number]>();
+    for (const r of resolvedEntities) {
+      resolvedByKey.set(
+        createEntityKey({
+          entityType: r.entityType,
+          entityId: r.entityId,
+          databaseId: r.databaseId,
+          schemaOid: r.schemaOid,
+        }),
+        r,
+      );
+    }
 
-    // Batch fetch schemas for all unique database/schema combinations
-    const schemaDataMap = new Map<string, string>(); // key: "databaseId-schemaOid", value: schema name
-
-    const schemaPromises = Array.from(uniqueDatabaseIds).map(
-      async (databaseId) => {
-        try {
-          const schemas = await api.schemas
-            .list({ database_id: databaseId })
-            .run();
-
-          schemas.forEach((schema) => {
-            if (uniqueSchemaIds.has(schema.oid)) {
-              schemaDataMap.set(`${databaseId}-${schema.oid}`, schema.name);
-            }
-          });
-        } catch (schemaError) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `Failed to fetch schemas for database ${databaseId}:`,
-            schemaError,
-          );
-        }
-      },
-    );
-
-    await Promise.all(schemaPromises);
-
-    // Now fetch entity data for each item
-    const displayDataPromises = allItems.map(async (item) => {
-      // Get database name from store
+    const allDisplayData = allItems.map((item) => {
+      const key = createEntityKey(item);
+      const resolved = resolvedByKey.get(key);
       const database = get(databases).get(item.databaseId);
       const databaseName = database?.name ?? `Database ${item.databaseId}`;
-
-      // Get schema name from our batched data
-      let schemaName: string | undefined;
-      if (item.schemaOid) {
-        schemaName =
-          schemaDataMap.get(`${item.databaseId}-${item.schemaOid}`) ??
-          `Schema ${item.schemaOid}`;
-      }
-
-      // Get entity name via API (fallback first)
-      let entityName = `${
-        item.entityType.charAt(0).toUpperCase() + item.entityType.slice(1)
-      } ${item.entityId}`;
-
-      try {
-        // Fetch entity name based on type
-        switch (item.entityType) {
-          case 'table': {
-            const table = await api.tables
-              .get_with_metadata({
-                database_id: item.databaseId,
-                table_oid: item.entityId,
-              })
-              .run();
-            entityName = table.name;
-            break;
-          }
-          case 'exploration': {
-            const exploration = await api.explorations
-              .get({
-                exploration_id: item.entityId,
-              })
-              .run();
-            entityName = exploration.name;
-            break;
-          }
-          case 'form': {
-            if (item.schemaOid) {
-              const forms = await api.forms
-                .list({
-                  database_id: item.databaseId,
-                  schema_oid: item.schemaOid,
-                })
-                .run();
-              const form = forms.find((f) => f.id === item.entityId);
-              if (form) {
-                entityName = form.name;
-              }
-            }
-            break;
-          }
-          default:
-            // Keep fallback name for unknown entity types
-            break;
-        }
-      } catch (entityError) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `Failed to fetch display data for ${item.entityType} ${item.entityId}:`,
-          entityError,
-        );
-        // Keep fallback name
-      }
-
+      const entityName = resolved
+        ? resolved.name
+        : `${item.entityType.charAt(0).toUpperCase() + item.entityType.slice(1)} ${
+            item.entityId
+          }`;
       return {
         item,
         entityName,
         databaseName,
-        schemaName,
+        schemaName: resolved?.schemaName ?? (item.schemaOid ? `Schema ${item.schemaOid}` : undefined),
       };
     });
-
-    const allDisplayData = await Promise.all(displayDataPromises);
 
     // Split the results back into favorites and recents
     const favoritesDisplay = allDisplayData
@@ -421,7 +348,19 @@ async function fetchDisplayData(): Promise<void> {
             recent.databaseId === data.item.databaseId,
         ),
       )
-      .map((data) => ({ ...data, item: data.item as RecentItem }));
+      .map((data) => ({
+        ...data,
+        item: {
+          ...(data.item as RecentItem),
+          last_accessed_at:
+            currentRecents.find(
+              (r) =>
+                r.entityType === data.item.entityType &&
+                r.entityId === data.item.entityId &&
+                r.databaseId === data.item.databaseId,
+            )?.last_accessed_at ?? new Date().toISOString(),
+        },
+      }));
 
     favoritesWithDisplayData.set(favoritesDisplay);
     recentsWithDisplayData.set(recentsDisplay);
@@ -460,6 +399,121 @@ async function fetchDisplayData(): Promise<void> {
     isLoading.set(false);
   }
 }
+
+// Auto-derive display data from base favorites/recents
+// This triggers whenever favorites or recents change
+// and keeps the display stores in sync without manual refresh calls
+// Note: Uses the same logic as fetchDisplayData
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _autoDisplayDeriver = derived([favorites, recents], ([$favorites, $recents]) => {
+  void (async () => {
+    const currentFavorites = $favorites;
+    const currentRecents = $recents;
+
+    const allItemsMap = new Map<string, FavoriteItem | RecentItem>();
+    currentFavorites.forEach((item) => {
+      const key = createEntityKey(item);
+      allItemsMap.set(key, item);
+    });
+    currentRecents.forEach((item) => {
+      const key = createEntityKey(item);
+      if (!allItemsMap.has(key)) {
+        allItemsMap.set(key, item);
+      }
+    });
+    const allItems = Array.from(allItemsMap.values());
+
+    if (allItems.length === 0) {
+      favoritesWithDisplayData.set([]);
+      recentsWithDisplayData.set([]);
+      return;
+    }
+
+    try {
+      isLoading.set(true);
+      const { databases } = databasesStore;
+      const { resolvedEntities } = await resolveEntityRefs(allItems);
+      const resolvedByKey = new Map<string, typeof resolvedEntities[number]>();
+      for (const r of resolvedEntities) {
+        resolvedByKey.set(
+          createEntityKey({
+            entityType: r.entityType,
+            entityId: r.entityId,
+            databaseId: r.databaseId,
+            schemaOid: r.schemaOid,
+          }),
+          r,
+        );
+      }
+
+      const allDisplayData = allItems.map((item) => {
+        const key = createEntityKey(item);
+        const resolved = resolvedByKey.get(key);
+        const database = get(databases).get(item.databaseId);
+        const databaseName = database?.name ?? `Database ${item.databaseId}`;
+        const entityName = resolved
+          ? resolved.name
+          : `${item.entityType.charAt(0).toUpperCase() + item.entityType.slice(1)} ${
+              item.entityId
+            }`;
+        return {
+          item,
+          entityName,
+          databaseName,
+          schemaName:
+            resolved?.schemaName ?? (item.schemaOid ? `Schema ${item.schemaOid}` : undefined),
+        };
+      });
+
+      const favoritesDisplay = allDisplayData
+        .filter((data) =>
+          currentFavorites.some(
+            (fav) =>
+              fav.entityType === data.item.entityType &&
+              fav.entityId === data.item.entityId &&
+              fav.databaseId === data.item.databaseId,
+          ),
+        )
+        .map((data) => ({ ...data, item: data.item }));
+
+      const recentsDisplay = allDisplayData
+        .filter((data) =>
+          currentRecents.some(
+            (recent) =>
+              recent.entityType === data.item.entityType &&
+              recent.entityId === data.item.entityId &&
+              recent.databaseId === data.item.databaseId,
+          ),
+        )
+        .map((data) => ({
+          ...data,
+          item: {
+            ...(data.item as RecentItem),
+            last_accessed_at:
+              currentRecents.find(
+                (r) =>
+                  r.entityType === data.item.entityType &&
+                  r.entityId === data.item.entityId &&
+                  r.databaseId === data.item.databaseId,
+              )?.last_accessed_at ?? new Date().toISOString(),
+          },
+        }));
+
+      favoritesWithDisplayData.set(favoritesDisplay);
+      recentsWithDisplayData.set(recentsDisplay);
+      error.set(null);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to derive display data:', err);
+      error.set('Failed to load display data');
+    } finally {
+      isLoading.set(false);
+    }
+  })();
+});
+
+// Ensure the derived computation is active
+const __autoDisplayDeriverSubscription = _autoDisplayDeriver.subscribe(() => {});
 
 async function validateAndCleanupAll(): Promise<{
   favoriteResults: ValidationResult;

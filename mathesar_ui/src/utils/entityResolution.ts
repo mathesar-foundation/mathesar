@@ -239,7 +239,7 @@ async function resolveSingleEntity(
  * Resolves multiple entities concurrently with schema name caching.
  * Returns both successfully resolved entities and invalid entity identifiers for cleanup.
  */
-export async function resolveEntities(
+export async function resolveEntityRefs(
   items: (FavoriteItem | RecentItem)[],
 ): Promise<ResolutionResult> {
   const schemaCache = new SchemaNameCache();
@@ -276,12 +276,12 @@ export async function resolveEntities(
 }
 
 /**
- * @deprecated Use resolveEntities instead
+ * @deprecated Use resolveEntityRefs instead
  */
 export async function validateEntities(
   items: (FavoriteItem | RecentItem)[],
 ): Promise<ValidationResult> {
-  return resolveEntities(items);
+  return resolveEntityRefs(items);
 }
 
 /**
@@ -311,9 +311,6 @@ export async function getValidatedEntityData(
   return getEntityDisplayInfo(item);
 }
 
-/**
- * @deprecated This function is duplicated in favorites.ts and should be used from there instead
- */
 export function createEntityKey(item: FavoriteItem | RecentItem): string {
   return `${item.entityType}-${item.entityId}-${item.databaseId}-${
     item.schemaOid ?? ''
