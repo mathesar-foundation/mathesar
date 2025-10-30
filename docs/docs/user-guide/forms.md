@@ -18,20 +18,20 @@ Forms are created at the schema level and are linked to a specific base table wh
 4. Enter a **Name** and **Description** for your form (optional)
 5. Click **Save**
 
-![Creating a new form](../assets/images/forms/new-01-create-form-modal.png)
+![Creating a new form](../assets/images/forms/create-form-modal.png)
 /// caption
 Creating a "Service Request Form" for the Service Requests table.
 ///
 
 Once created, your form will appear in the Forms list on the schema page.
 
-![Form in list](../assets/images/forms/new-04-form-created-list.png)
+![Form in list](../assets/images/forms/form-created-list.png)
 
 ## Configuring a form
 
 Click on a form name to open the form builder. The builder shows a live preview of your form on the left and an inspector panel on the right.
 
-![Form builder interface](../assets/images/forms/new-05-form-editor-page.png)
+![Form builder interface](../assets/images/forms/form-editor-page.png)
 
 ### Form properties
 
@@ -81,7 +81,7 @@ Configure how users interact with foreign key fields by selecting a mode in the 
 
 
 
-![Nested fields for creating new records](../assets/images/forms/new-08-fk-create-new-fields.png)
+![Nested fields for creating new records](../assets/images/forms/fk-create-new-fields.png)
 /// caption
 When "Can choose or create new" is selected, nested fields appear below the foreign key field for creating new related records.
 ///
@@ -104,7 +104,7 @@ Forms support file uploads when your table includes file columns.
 
 When a form includes a file column, users see a file upload button:
 
-![File upload interface](../assets/images/forms/new-12-file-upload-interface.png)
+![File upload interface](../assets/images/forms/file-upload-interface.png)
 
 File upload capabilities:
 
@@ -121,7 +121,7 @@ To allow external users to submit data through your form, create a public link:
 2. Click the **Share** button in the top-right toolbar
 3. Click **Create public link**
 
-![Share panel](../assets/images/forms/new-09-share-panel.png)
+![Share panel](../assets/images/forms/share-panel.png)
 
 Once created, you can copy the public URL and share it with anyone. You can also **Regenerate Link** to invalidate the old URL or **Disable Link** to prevent all submissions.
 
@@ -136,15 +136,15 @@ Once created, you can copy the public URL and share it with anyone. You can also
 
 When users access your form via the public link, they see a clean interface with all form fields.
 
-![Public form view](../assets/images/forms/new-11-public-form-view.png)
+![Public form view](../assets/images/forms/public-form-view.png)
 
 For foreign key fields, users can search and select from existing records:
 
-![Foreign key dropdown](../assets/images/forms/new-13-fk-dropdown-public.png)
+![Foreign key dropdown](../assets/images/forms/fk-dropdown-public.png)
 
 After filling out required fields and clicking **Submit**, users see a confirmation message:
 
-![Success message](../assets/images/forms/new-15-form-submission-success.png)
+![Success message](../assets/images/forms/form-submission-success.png)
 
 Users can click **Submit another response** to submit additional entries.
 
