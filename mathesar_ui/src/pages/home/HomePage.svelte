@@ -77,6 +77,7 @@
   }
 
   .main-section {
+    min-width: 0;
     grid-row: 1;
     display: flex;
     flex-direction: column;

@@ -44,7 +44,7 @@
 <div class="favorites-recents-section">
   <div class="favorites-section">
     <EntityFeed
-      items={($favoritesWithDisplay).filter(({ item }) => {
+      items={$favoritesWithDisplay.filter(({ item }) => {
         if (databaseId != null && item.databaseId !== databaseId) return false;
         if (schemaOid != null && item.schemaOid !== schemaOid) return false;
         return true;
@@ -58,7 +58,7 @@
   </div>
   <div class="recents-section">
     <EntityFeed
-      items={($recentsWithDisplay).filter(({ item }) => {
+      items={$recentsWithDisplay.filter(({ item }) => {
         if (databaseId != null && item.databaseId !== databaseId) return false;
         if (schemaOid != null && item.schemaOid !== schemaOid) return false;
         return true;
@@ -75,13 +75,16 @@
 <style lang="scss">
   .favorites-recents-section {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     gap: 2rem;
-    margin-bottom: 2rem;
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
       gap: 1rem;
+    }
+
+    div {
+      overflow: hidden;
     }
   }
 </style>

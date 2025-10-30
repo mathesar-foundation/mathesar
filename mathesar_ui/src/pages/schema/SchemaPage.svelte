@@ -75,7 +75,7 @@
       </svelte:fragment>
     </AppSecondaryHeader>
   </div>
-  <div style="padding: var(--lg3) 0;">
+  <div style="padding-bottom: var(--lg3);">
     <RecentsFavorites databaseId={schema.database.id} schemaOid={schema.oid} />
   </div>
   <SchemaOverview
