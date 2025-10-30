@@ -63,7 +63,6 @@
           class="table-link"
           href={href}
           on:click|preventDefault={() => {
-            // use router to navigate so single-page app behavior is preserved
             void router.goto(href);
           }}
         >
