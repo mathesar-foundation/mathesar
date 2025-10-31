@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { router } from 'tinro';
 
   import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import { Help } from '@mathesar/component-library';
@@ -8,14 +9,13 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { router } from 'tinro';
   import { iconRecord } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
   import {
     ImperativeFilterController,
     imperativeFilterControllerContext,
   } from '@mathesar/pages/table/ImperativeFilterController';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     Meta,
     TabularData,
