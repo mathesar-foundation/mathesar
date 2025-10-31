@@ -52,24 +52,28 @@
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canViewTable = $currentRolePrivileges.has('SELECT');
   $: getTablePageUrl = $storeToGetTablePageUrl;
-  $: href = getTablePageUrl ? getTablePageUrl({ tableId: table.oid }) : undefined;
+  $: href = getTablePageUrl
+    ? getTablePageUrl({ tableId: table.oid })
+    : undefined;
 </script>
 
 <div class="table-widget">
   <div class="top">
     <h3 class="bold-header">
-        {#if href}
+      {#if href}
         <a
           class="table-link"
-          href={href}
+          {href}
           on:click|preventDefault={() => {
-            void router.goto(href);
+            if (href) {
+              void router.goto(href);
+            }
           }}
         >
           <TableName {table} truncate={false} />
         </a>
-        {:else}
-          <TableName {table} truncate={false} />
+      {:else}
+        <TableName {table} truncate={false} />
       {/if}
       <Help>
         <RichText text={$_('related_records_help')} let:slotName>
