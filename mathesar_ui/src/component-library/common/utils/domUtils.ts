@@ -26,3 +26,9 @@ export function focusElement(element: unknown): void {
     element.focus();
   }
 }
+
+export function blurElement(element: unknown): void {
+  if (hasMethod(element, 'blur')) {
+    element.blur();
+  }
+}

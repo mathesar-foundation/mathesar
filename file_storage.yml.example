@@ -8,3 +8,6 @@ default:
       region_name: us-east-2
       aws_access_key_id: mathesar
       aws_secret_access_key: mathesar
+  public_form_access:
+    enabled: false
+    max_upload_size: 1073741824

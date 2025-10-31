@@ -1,6 +1,9 @@
-import { type Readable, writable } from 'svelte/store';
+import { type Readable, type Writable, writable } from 'svelte/store';
 
-import type { FileAttachmentUploadResult } from '@mathesar/api/rest/fileAttachments';
+import type {
+  FileAttachmentRequestParams,
+  FileAttachmentUploadResult,
+} from '@mathesar/api/rest/fileAttachments';
 
 export default class ModalFileAttachmentUploadController {
   private resolve:
@@ -11,14 +14,22 @@ export default class ModalFileAttachmentUploadController {
 
   isOpen: Readable<boolean>;
 
+  private _requestParams: Writable<FileAttachmentRequestParams | undefined> =
+    writable(undefined);
+
+  get requestParams(): Readable<FileAttachmentRequestParams | undefined> {
+    return this._requestParams;
+  }
+
   constructor() {
     this.isOpen = this._isOpen;
   }
 
-  async acquireFileAttachment(): Promise<
-    FileAttachmentUploadResult | undefined
-  > {
+  async acquireFileAttachment(
+    reqParams?: FileAttachmentRequestParams,
+  ): Promise<FileAttachmentUploadResult | undefined> {
     this._isOpen.set(true);
+    this._requestParams.set(reqParams);
     return new Promise((resolve) => {
       this.resolve = resolve;
     });
@@ -27,6 +38,7 @@ export default class ModalFileAttachmentUploadController {
   submitResult(result: FileAttachmentUploadResult | undefined) {
     this.resolve?.(result);
     this._isOpen.set(false);
+    this._requestParams.set(undefined);
   }
 
   cancel() {

@@ -23,4 +23,4 @@ When you've opted-in to usage data collection, the following information is sent
 
 ## Viewing Actual Reports
 
-If you'd like to see an actual report from your running Mathesar installation, go to the path `/info/analytics_sample_report/` at the domain where you connect to Mathesar. You can also call the RPC function [`analytics.view_report`](../../api/methods#analytics.view_report).
+If you'd like to see an actual report from your running Mathesar installation, go to the path `/info/analytics_sample_report/` at the domain where you connect to Mathesar. You can also call the RPC function [`analytics.view_report`](../api/methods.md#analytics.view_report).

@@ -7,21 +7,28 @@
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
+  import { contextMenuContext } from '@mathesar/contexts/contextMenuContext';
   import { ROW_HEADER_WIDTH_PX } from '@mathesar/geometry';
   import { iconPaste } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
+  import { imperativeFilterControllerContext } from '@mathesar/pages/table/ImperativeFilterController';
   import { confirm } from '@mathesar/stores/confirmation';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
+  import { modal } from '@mathesar/stores/modal';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
+  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
 
   import Body from './Body.svelte';
+  import { openTableCellContextMenu } from './context-menu/contextMenu';
   import Header from './header/Header.svelte';
+  import { importModalContext } from './import/ImportController';
+  import ImportModal from './import/ImportModal.svelte';
   import StatusPane from './StatusPane.svelte';
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
   import { getCustomizedColumnWidths } from './tableViewUtils';
@@ -29,6 +36,11 @@
   type Context = 'page' | 'widget';
 
   const tabularData = getTabularDataStoreFromContext();
+  const importModal = modal.spawnModalController();
+  importModalContext.set(importModal);
+  const contextMenu = contextMenuContext.get();
+  const modalRecordView = modalRecordViewContext.get();
+  const imperativeFilterController = imperativeFilterControllerContext.get();
 
   export let context: Context = 'page';
   export let table: Table;
@@ -120,6 +132,17 @@
               tableInspectorTab = 'record';
             }
           }}
+          onCellContextMenu={({ targetCell, position }) => {
+            if (!contextMenu) return 'empty';
+            return openTableCellContextMenu({
+              targetCell,
+              position,
+              contextMenu,
+              modalRecordView,
+              tabularData: $tabularData,
+              imperativeFilterController,
+            });
+          }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
           columns={sheetColumns}
@@ -141,6 +164,15 @@
   </WithTableInspector>
   <StatusPane {context} />
 </div>
+
+<ImportModal
+  controller={importModal}
+  {table}
+  tableColumns={$processedColumns}
+  onFinish={() => {
+    void recordsData.fetch();
+  }}
+/>
 
 <style>
   .table-view {
