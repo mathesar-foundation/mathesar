@@ -17,6 +17,7 @@
     truncate?: boolean;
     bold?: boolean;
     cssVariables?: Record<string, string>;
+    hideIcon?: boolean;
   }
 
   /** TODO: Update component and prop names */
@@ -28,6 +29,7 @@
   export let truncate = true;
   export let bold = false;
   export let cssVariables: $$Props['cssVariables'] = undefined;
+  export let hideIcon = false;
 
   $: style = cssVariables
     ? makeStyleStringFromCssVariables(cssVariables)
@@ -43,15 +45,19 @@
     class:bold
     {style}
   >
-    <span class="icon" style="white-space: nowrap">
-      {#if isLoading}
-        <Spinner />
-      {:else}
-        {#each icons as innerIcon}
-          <Icon size="min(1em, 0.75em + 0.25rem)" {...innerIcon} />
-        {/each}
-      {/if}
-    </span>&nbsp;<span class="name">
+    {#if !hideIcon}
+      <span class="icon" style="white-space: nowrap">
+        {#if isLoading}
+          <Spinner />
+        {:else}
+          {#each icons as innerIcon}
+            <Icon size="min(1em, 0.75em + 0.25rem)" {...innerIcon} />
+          {/each}
+        {/if}
+      </span>
+    {/if}
+    &nbsp;
+    <span class="name">
       {#if name}
         {name}
       {:else}
