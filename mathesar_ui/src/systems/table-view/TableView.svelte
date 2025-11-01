@@ -54,31 +54,33 @@
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
+  $: copyingContext = {
+    getRows: () =>
+      new Map(
+        map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
+      ),
+    getColumns: () => stringifyMapKeys(get(processedColumns)),
+    getRecordSummaries: () => get(recordsData.linkedRecordSummaries),
+  };
+  $: pastingContext = {
+    getRecordRows: () => [
+      ...get(recordsData.fetchedRecordRows),
+      ...get(recordsData.newRecords),
+    ],
+    getSheetColumns: () => [
+      ...map(({ column }) => column, get(processedColumns).values()),
+    ],
+    bulkDml: (...args) => recordsData.bulkDml(...args),
+    confirm: (title) =>
+      confirm({
+        title,
+        body: [],
+        proceedButton: { label: $_('paste'), icon: iconPaste },
+      }),
+  };
   $: clipboardHandler = new SheetClipboardHandler({
-    copyingContext: {
-      getRows: () =>
-        new Map(
-          map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
-        ),
-      getColumns: () => stringifyMapKeys(get(processedColumns)),
-      getRecordSummaries: () => get(recordsData.linkedRecordSummaries),
-    },
-    pastingContext: {
-      getRecordRows: () => [
-        ...get(recordsData.fetchedRecordRows),
-        ...get(recordsData.newRecords),
-      ],
-      getSheetColumns: () => [
-        ...map(({ column }) => column, get(processedColumns).values()),
-      ],
-      bulkDml: (...args) => recordsData.bulkDml(...args),
-      confirm: (title) =>
-        confirm({
-          title,
-          body: [],
-          proceedButton: { label: $_('paste'), icon: iconPaste },
-        }),
-    },
+    copyingContext,
+    pastingContext,
     selection,
     showToastInfo: toast.info,
     showToastError: toast.error,
@@ -141,6 +143,10 @@
               modalRecordView,
               tabularData: $tabularData,
               imperativeFilterController,
+              copyingContext,
+              pastingContext,
+              showToastInfo: toast.info,
+              showToastError: toast.error,
             });
           }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
