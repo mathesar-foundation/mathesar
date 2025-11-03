@@ -239,6 +239,7 @@ class ColumnMetaData(BaseModel):
     duration_max = models.CharField(max_length=255, null=True)
     display_width = models.PositiveIntegerField(null=True)
     file_backend = models.CharField(max_length=255, null=True)
+    user_type = models.BooleanField(default=False, null=True)
 
     class Meta:
         constraints = [

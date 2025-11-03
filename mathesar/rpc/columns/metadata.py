@@ -32,6 +32,7 @@ class ColumnMetaDataRecord(TypedDict):
         duration_max: The largest unit for displaying durations.
         display_width: The pixel width of the column
         file_backend: The name of a backend for storing file attachments.
+        user_type: Whether this column stores Mathesar user IDs.
     """
     database_id: int
     table_oid: int
@@ -50,6 +51,8 @@ class ColumnMetaDataRecord(TypedDict):
     duration_min: Optional[str]
     duration_max: Optional[str]
     display_width: Optional[int]
+    file_backend: Optional[str]
+    user_type: Optional[bool]
 
     @classmethod
     def from_model(cls, model):
@@ -72,6 +75,7 @@ class ColumnMetaDataRecord(TypedDict):
             duration_max=model.duration_max,
             display_width=model.display_width,
             file_backend=model.file_backend,
+            user_type=model.user_type,
         )
 
 
@@ -96,6 +100,7 @@ class ColumnMetaDataBlob(TypedDict):
         duration_max: The largest unit for displaying durations.
         display_width: The pixel width of the column.
         file_backend: The name of a backend for storing file attachments.
+        user_type: Whether this column stores Mathesar user IDs.
     """
     attnum: int
     bool_input: Optional[Literal["dropdown", "checkbox"]]
@@ -112,6 +117,8 @@ class ColumnMetaDataBlob(TypedDict):
     duration_min: Optional[str]
     duration_max: Optional[str]
     display_width: Optional[int]
+    file_backend: Optional[str]
+    user_type: Optional[bool]
 
     @classmethod
     def from_model(cls, model):
@@ -132,6 +139,7 @@ class ColumnMetaDataBlob(TypedDict):
             duration_max=model.duration_max,
             display_width=model.display_width,
             file_backend=model.file_backend,
+            user_type=model.user_type,
         )
 
 

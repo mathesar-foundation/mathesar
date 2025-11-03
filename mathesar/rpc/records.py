@@ -19,6 +19,10 @@ from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_download_link_columns
 from mathesar.utils.tables import get_table_record_summary_templates
 from mathesar.utils.download_links import get_download_links
+from mathesar.utils.user_summaries import (
+    get_user_columns_for_table,
+    get_user_summaries_for_column,
+)
 
 
 class OrderBy(TypedDict):
@@ -212,6 +216,70 @@ class SummarizedRecordReference(TypedDict):
     summary: str
 
 
+def _add_user_summaries_to_record_info(
+    record_info: dict,
+    table_oid: int,
+    database_id: int,
+) -> None:
+    """
+    Add user summaries to the linked_record_summaries in record_info.
+
+    This function:
+    1. Detects user columns in the table
+    2. Extracts user IDs from the record results
+    3. Fetches user summaries from Django User model
+    4. Adds them to linked_record_summaries structure
+
+    Args:
+        record_info: The record info dict (modified in place)
+        table_oid: The OID of the table
+        database_id: The Django database ID
+    """
+    user_column_attnums = get_user_columns_for_table(table_oid, database_id)
+
+    if not user_column_attnums:
+        return
+
+    # Ensure linked_record_summaries exists and is a dict
+    if (
+        "linked_record_summaries" not in record_info
+        or record_info["linked_record_summaries"] is None
+    ):
+        record_info["linked_record_summaries"] = {}
+
+    # Extract user IDs from results
+    results = record_info.get("results", [])
+
+    for column_attnum in user_column_attnums:
+        # Collect all unique user IDs from this column
+        user_ids = set()
+        for record in results:
+            # Column values are keyed by attnum as string or integer
+            user_id = record.get(str(column_attnum)) or record.get(column_attnum)
+            if user_id is not None:
+                try:
+                    # Convert to int if needed
+                    user_ids.add(int(user_id) if not isinstance(user_id, int) else user_id)
+                except (ValueError, TypeError):
+                    # Skip invalid values
+                    continue
+
+        if not user_ids:
+            continue
+
+        # Get user summaries
+        user_summaries = get_user_summaries_for_column(
+            table_oid,
+            database_id,
+            column_attnum,
+            user_ids
+        )
+
+        if user_summaries:
+            # Add to linked_record_summaries using column attnum as key
+            record_info["linked_record_summaries"][str(column_attnum)] = user_summaries
+
+
 class RecordSummaryList(TypedDict):
     """
     Response for listing record summaries.
@@ -282,6 +350,9 @@ def list_(
         download_link_columns,
     ) or None
 
+    # Add user summaries for user type columns
+    _add_user_summaries_to_record_info(record_info, table_oid, database_id)
+
     return RecordList.from_dict(record_info)
 
 
@@ -332,6 +403,10 @@ def get(
         record_info["results"],
         download_link_columns,
     ) or None
+
+    # Add user summaries for user type columns
+    _add_user_summaries_to_record_info(record_info, table_oid, database_id)
+
     return RecordList.from_dict(record_info)
 
 
@@ -373,6 +448,10 @@ def add(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
+
+    # Add user summaries for user type columns
+    _add_user_summaries_to_record_info(record_info, table_oid, database_id)
+
     return RecordAdded.from_dict(record_info)
 
 
@@ -416,6 +495,10 @@ def patch(
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
+
+    # Add user summaries for user type columns
+    _add_user_summaries_to_record_info(record_info, table_oid, database_id)
+
     return RecordAdded.from_dict(record_info)
 
 
@@ -500,6 +583,10 @@ def search(
         record_info["results"],
         download_link_columns,
     ) or None
+
+    # Add user summaries for user type columns
+    _add_user_summaries_to_record_info(record_info, table_oid, database_id)
+
     return RecordList.from_dict(record_info)
 
 

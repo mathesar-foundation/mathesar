@@ -8,6 +8,7 @@ import money from './money';
 import number from './number';
 import string from './string';
 import time from './time';
+import user from './user';
 import type {
   CellComponentFactory,
   CellDataType,
@@ -30,6 +31,7 @@ const simpleDataTypeComponentFactories: Record<
   time,
   datetime,
   file,
+  user,
 };
 
 const compoundDataTypeComponentFactories: Record<
