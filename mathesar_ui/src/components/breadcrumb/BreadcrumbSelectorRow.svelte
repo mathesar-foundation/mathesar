@@ -9,13 +9,14 @@
   import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
 
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
+  import { BREADCRUMB_SELECTOR_ROW_CLASS } from './breadcrumbUtils';
 
   export let entry: BreadcrumbSelectorEntry;
   export let filterString = '';
   export let closeSelector: () => void;
 </script>
 
-<li class="breadcrumb-selector-row" class:active={entry.isActive()}>
+<li class={BREADCRUMB_SELECTOR_ROW_CLASS} class:active={entry.isActive()}>
   <div class="hover-indicator" />
   <a href={entry.href} on:click={closeSelector}>
     {#if entry.type === 'table'}
