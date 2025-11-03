@@ -122,7 +122,7 @@ jobs:
     strategy:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
-        pg-version: [13, 14, 15, 16, 17, 18]
+        pg-version: [13, 14, 15, 16, 17]
         connection-type: ['mathesar_dev_db', '/var/dev_postgres_socket']
     steps:
       - uses: actions/checkout@v4
@@ -153,7 +153,7 @@ jobs:
         needs.all_be_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
-        pg-version: [13, 14, 15, 16, 17, 18]
+        pg-version: [13, 14, 15, 16, 17]
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
@@ -181,7 +181,7 @@ jobs:
     strategy:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
-        pg-version: [13, 14, 15, 16, 17, 18]
+        pg-version: [13, 14, 15, 16, 17]
         init-db-args: ["", "--encoding=SQL_ASCII"]
     steps:
       - uses: actions/checkout@v4
