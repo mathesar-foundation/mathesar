@@ -138,7 +138,7 @@
     --app-header-z-index: 1;
 
     overflow: hidden;
-    height: 100vh;
+    height: 100svh;
 
     /* Apply typography base styles */
     font-family: var(--font-family-base);
@@ -264,8 +264,8 @@
   }
 
   .app-loader {
-    width: 100vw;
-    height: 100vh;
+    width: 100svw;
+    height: 100svh;
     align-items: center;
     justify-content: center;
     display: flex;
