@@ -397,7 +397,7 @@ Args:
   rel_id:  The OID of the relation.
   col_id:  The attnum of the column in the relation.
 */
-SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id;
+SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id AND NOT attisdropped;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -4927,15 +4927,14 @@ BEGIN
             alias text;
             join_clause text;
           BEGIN
-            IF NOT pg_catalog.has_column_privilege(contextual_tab_id, fk_col_id, 'SELECT') THEN
-              -- Silently ignore FK columns that we don't have permissions to select.
+            IF NOT pg_catalog.has_column_privilege(contextual_tab_id, ref_col_id, 'SELECT') THEN
+              -- Silently ignore referenced columns that we don't have permissions to select.
               CONTINUE template_parts_loop;
             END IF;
 
-            fk_col_name := msar.get_column_name(contextual_tab_id, fk_col_id);
-
-            IF fk_col_name IS NULL THEN
-              -- Silently ignore references to non-existing FK columns. This can happen if a column
+            ref_col_name := msar.get_column_name(contextual_tab_id, ref_col_id);
+            IF ref_col_name IS NULL THEN
+              -- Silently ignore references to non-existing ref columns. This can happen if a column
               -- has been deleted.
               CONTINUE template_parts_loop;
             END IF;
