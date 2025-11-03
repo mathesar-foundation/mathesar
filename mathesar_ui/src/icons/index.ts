@@ -27,6 +27,7 @@ import {
   faDownload,
   faEllipsisV,
   faEnvelope,
+  faExpand,
   faExternalLink,
   faExternalLinkAlt,
   faFile,
@@ -194,6 +195,7 @@ export const iconDuplicateRecord: IconProps = {
 };
 export const iconFillOutForm: IconProps = { data: faPlay };
 export const iconDownload: IconProps = { data: faCloudDownloadAlt };
+export const iconSelectMultipleCells: IconProps = { data: faExpand };
 
 // THINGS
 //

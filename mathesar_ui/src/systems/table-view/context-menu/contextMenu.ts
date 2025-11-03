@@ -24,6 +24,7 @@ import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
 import { openTable } from './entries/openTable';
+import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
 import { viewRowRecord } from './entries/viewRowRecord';
@@ -35,6 +36,7 @@ export function openTableCellContextMenu({
   modalRecordView,
   tabularData,
   imperativeFilterController,
+  beginSelectingCellRange,
 }: {
   targetCell: SheetCellDetails;
   position: ClientPosition;
@@ -42,6 +44,7 @@ export function openTableCellContextMenu({
   modalRecordView: ModalController<RecordStore> | undefined;
   tabularData: TabularData;
   imperativeFilterController: ImperativeFilterController | undefined;
+  beginSelectingCellRange: () => void;
 }): 'opened' | 'empty' {
   const { selection } = tabularData;
 
@@ -95,6 +98,7 @@ export function openTableCellContextMenu({
 
   function* getEntriesForMultipleCells(cellIds: string[]) {
     yield* setNull({ tabularData, cellIds });
+    yield* selectCellRange({ beginSelectingCellRange });
   }
 
   function* getEntriesForOneCell(cellId: string) {

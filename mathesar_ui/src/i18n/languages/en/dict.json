@@ -691,6 +691,7 @@
   "section_affects_postgresql_config": "The configuration in this section is stored within the connected PostgreSQL database.",
   "see_docs_for_stored_role_password_help": "See our [docsLink](documentation) for more information on stored role passwords.",
   "see_docs_to_learn_more": "See our [link](documentation) to learn more.",
+  "select_cell_range": "Select Cell Range",
   "select_cell_view_properties": "Select a cell to view its properties.",
   "select_cells_view_record_props": "Select one or more cells to view associated record properties.",
   "select_columns": "Select Columns",

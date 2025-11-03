@@ -2,6 +2,7 @@ import type { Writable } from 'svelte/store';
 
 import type { FileManifest, ResultValue } from '@mathesar/api/rpc/records';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import { match } from '@mathesar/utils/patternMatching';
 import { type ImmutableSet, defined } from '@mathesar-component-library';
 
 import type Series from './Series';
@@ -92,6 +93,21 @@ export function beginSelection({
   drawToCell(targetCell);
   sheetElement.addEventListener('mousemove', drawToPoint);
   window.addEventListener('mouseup', finish);
+}
+
+export function selectCellRange(p: {
+  selection: Writable<SheetSelection>;
+  targetCell: SheetCellDetails;
+}): void {
+  p.selection.update((s) =>
+    match(p.targetCell, 'type', {
+      'column-header-cell': ({ columnId }) => s.drawnToColumn(columnId),
+      'row-header-cell': ({ rowId }) => s.drawnToRow(rowId),
+      'data-cell': ({ cellId }) => s.drawnToDataCell(cellId),
+      'placeholder-data-cell': ({ cellId }) => s.ofOneCell(cellId),
+      'placeholder-row-header-cell': () => s,
+    }),
+  );
 }
 
 function positive(n: number): number {
