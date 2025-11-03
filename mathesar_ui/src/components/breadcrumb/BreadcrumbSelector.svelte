@@ -19,6 +19,7 @@
     BreadcrumbSelectorEntry,
     BreadcrumbSelectorSectionData,
   } from './breadcrumbTypes';
+  import { BREADCRUMB_SELECTOR_ROW_CLASS } from './breadcrumbUtils';
 
   const connectDatabaseModalController = modal.spawnModalController();
 
@@ -52,7 +53,7 @@
   function scrollToSelected() {
     if (selectedIndex >= 0 && contentElement) {
       const links = contentElement.querySelectorAll(
-        '.breadcrumb-selector-row a',
+        `.${BREADCRUMB_SELECTOR_ROW_CLASS} a`,
       );
       const selectedLink = links[selectedIndex] as HTMLElement;
       if (selectedLink) {
