@@ -34,13 +34,7 @@
 
   // Focus the text input when dropdown is opened
   let textInputEl: HTMLInputElement | undefined;
-  $: if (isOpen) {
-    textInputEl?.focus();
-    selectedIndex = -1;
-  } else {
-    filterString = '';
-    selectedIndex = -1;
-  }
+  $: isOpen, (filterString = '');
 
   // Get all filtered entries for keyboard navigation
   $: allFilteredEntries = [
@@ -53,6 +47,7 @@
     ),
     ...persistentLinks,
   ];
+  $: allFilteredEntries, (selectedIndex = -1);
 
   function scrollToSelected() {
     if (selectedIndex >= 0 && contentElement) {
@@ -68,6 +63,10 @@
   }
 
   function handleKeyDown(event: KeyboardEvent) {
+    if (!isOpen) {
+      return;
+    }
+
     const target = event.target as HTMLElement;
     const isSearchInput = target === textInputEl;
 
@@ -120,6 +119,8 @@
   }
 </script>
 
+<svelte:window on:keydown={handleKeyDown} />
+
 <div class="entity-switcher" class:is-open={isOpen}>
   <Button
     on:click={() => {
@@ -145,7 +146,6 @@
       class="entity-switcher-content"
       bind:this={contentElement}
       use:focusTrap
-      on:keydown={handleKeyDown}
     >
       <div class="search">
         <TextInputWithPrefix
