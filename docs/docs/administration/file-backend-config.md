@@ -113,6 +113,9 @@ default:
 +      region_name: us-east-2
 +      aws_access_key_id: YOUR_ACCESS_KEY
 +      aws_secret_access_key: YOUR_SECRET_KEY
++ public_form_access:
++    enabled: true # Set to false to disable files uplaod via public form
++    max_upload_size: 1073741824 # 1GB in bytes, adjust as-needed or remove for limitless uploads
 ```
 
 ### 4. Activate file storage
