@@ -105,7 +105,7 @@
     display: grid;
     grid-template: auto 1fr / 1fr;
     grid-gap: var(--sm4);
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100svh - 2rem);
   }
   .sections {
     overflow-y: auto;
