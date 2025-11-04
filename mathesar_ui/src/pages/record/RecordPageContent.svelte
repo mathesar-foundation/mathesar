@@ -19,6 +19,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import TableLink from '@mathesar/components/TableLink.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import { getTablePageUrl } from '@mathesar/routes/urls';
   import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
