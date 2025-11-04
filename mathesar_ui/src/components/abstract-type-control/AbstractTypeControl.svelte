@@ -10,6 +10,7 @@
     CancelOrProceedButtonPair,
     createValidationContext,
   } from '@mathesar-component-library';
+  import type { FormBuildConfiguration } from '@mathesar-component-library/types';
 
   import WarningBox from '../message-boxes/WarningBox.svelte';
 
@@ -40,11 +41,25 @@
     ...savedTypeOptions,
   };
   let { metadata } = column;
+  let dbFormValues: FormBuildConfiguration['values'] | undefined = undefined;
+
+  // Update metadata when dbFormValues change for user type
+  $: if (
+    selectedAbstractType?.identifier === 'user' &&
+    dbFormValues &&
+    'lastEditedBy' in $dbFormValues
+  ) {
+    metadata = {
+      ...metadata,
+      user_last_edited_by: $dbFormValues.lastEditedBy === true,
+    };
+  }
 
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
-    !columnTypeOptionsAreEqual(savedTypeOptions, typeOptions ?? {});
+    !columnTypeOptionsAreEqual(savedTypeOptions, typeOptions ?? {}) ||
+    JSON.stringify(metadata) !== JSON.stringify(column.metadata ?? {});
 
   let typeChangeState: RequestStatus;
 
@@ -120,6 +135,7 @@
       bind:typeOptions
       {column}
       {disabled}
+      bind:dbFormValues
     />
   {/key}
 {/if}

@@ -34,6 +34,7 @@ class ColumnMetaDataRecord(TypedDict):
         file_backend: The name of a backend for storing file attachments.
         user_type: Whether this column stores Mathesar user IDs.
         user_display_field: Which user field to display for user columns (full_name, email, or username).
+        user_last_edited_by: Whether this column automatically tracks the last user who edited the record.
     """
     database_id: int
     table_oid: int
@@ -55,6 +56,7 @@ class ColumnMetaDataRecord(TypedDict):
     file_backend: Optional[str]
     user_type: Optional[bool]
     user_display_field: Literal["full_name", "email", "username"]
+    user_last_edited_by: Optional[bool]
 
     @classmethod
     def from_model(cls, model):
@@ -78,6 +80,7 @@ class ColumnMetaDataRecord(TypedDict):
             display_width=model.display_width,
             file_backend=model.file_backend,
             user_type=model.user_type,
+            user_display_field=model.user_display_field,
         )
 
 
@@ -104,6 +107,7 @@ class ColumnMetaDataBlob(TypedDict):
         file_backend: The name of a backend for storing file attachments.
         user_type: Whether this column stores Mathesar user IDs.
         user_display_field: Which user field to display for user columns (full_name, email, or username).
+        user_last_edited_by: Whether this column automatically tracks the last user who edited the record.
     """
     attnum: int
     bool_input: Optional[Literal["dropdown", "checkbox"]]
@@ -123,6 +127,7 @@ class ColumnMetaDataBlob(TypedDict):
     file_backend: Optional[str]
     user_type: Optional[bool]
     user_display_field: Optional[Literal["full_name", "email", "username"]]
+    user_last_edited_by: Optional[bool]
 
     @classmethod
     def from_model(cls, model):
@@ -145,6 +150,7 @@ class ColumnMetaDataBlob(TypedDict):
             file_backend=model.file_backend,
             user_type=model.user_type,
             user_display_field=model.user_display_field,
+            user_last_edited_by=model.user_last_edited_by,
         )
 
 

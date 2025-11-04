@@ -246,6 +246,7 @@ class ColumnMetaData(BaseModel):
         max_length=50,
         null=False
     )
+    user_last_edited_by = models.BooleanField(default=False, null=True)
 
     class Meta:
         constraints = [

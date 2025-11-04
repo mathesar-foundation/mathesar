@@ -15,7 +15,12 @@ const userType: CellComponentFactory = {
       userDisplayField: getMetadataValue(column.metadata, 'user_display_field'),
     },
   }),
-  getInput: (): ComponentAndProps => ({ component: UserInput }),
+  getInput: (column: RawColumnWithMetadata): ComponentAndProps => ({
+    component: UserInput,
+    props: {
+      userDisplayField: getMetadataValue(column.metadata, 'user_display_field') ?? 'full_name',
+    },
+  }),
   getSimpleInput: (column: RawColumnWithMetadata): ComponentAndProps => ({
     component: UserFilterInput,
     props: {

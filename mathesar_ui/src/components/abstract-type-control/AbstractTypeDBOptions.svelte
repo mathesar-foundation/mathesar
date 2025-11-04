@@ -8,7 +8,10 @@
     FormBuilder,
     getValidationContext,
   } from '@mathesar-component-library';
-  import type { FormValues } from '@mathesar-component-library/types';
+  import type {
+    FormBuildConfiguration,
+    FormValues,
+  } from '@mathesar-component-library/types';
 
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import { type ColumnWithAbstractType, constructDbForm } from './utils';
@@ -18,12 +21,16 @@
   export let typeOptions: ColumnWithAbstractType['type_options'];
   export let column: ColumnWithAbstractType;
   export let disabled = false;
+  export let dbFormValues: FormBuildConfiguration['values'] | undefined = undefined;
 
-  $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
+  $: ({ dbOptionsConfig, dbForm, dbFormValues: _dbFormValues } = constructDbForm(
     selectedAbstractType,
     selectedDbType,
     column,
   ));
+  $: if (_dbFormValues && dbFormValues !== _dbFormValues) {
+    dbFormValues = _dbFormValues;
+  }
 
   const validationContext = getValidationContext();
   validationContext.addValidator('AbstractTypeConfigValidator', () => {

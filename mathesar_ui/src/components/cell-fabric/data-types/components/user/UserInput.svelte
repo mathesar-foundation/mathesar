@@ -5,10 +5,12 @@
   import { api } from '@mathesar/api/rpc';
   import { Select, Spinner } from '@mathesar-component-library';
   import type { FormattedInputProps } from '@mathesar-component-library/types';
+  import { getUserLabel, type UserDisplayField } from '@mathesar/utils/userUtils';
 
   export let value: FormattedInputProps['value'] = undefined;
   export let disabled: FormattedInputProps['disabled'] = false;
   export let placeholder: FormattedInputProps['placeholder'] = undefined;
+  export let userDisplayField: UserDisplayField = 'full_name';
 
   const dispatch = createEventDispatcher();
 
@@ -34,14 +36,6 @@
 
   $: userOptions = users.map((user) => user.id);
 
-  function getUserLabel(userId: number | undefined): string {
-    if (!userId) return '';
-    const user = users.find((u) => u.id === userId);
-    if (!user) return String(userId);
-    // Prefer full_name, fall back to username, then email
-    return user.full_name || user.username || user.email || String(userId);
-  }
-
   function handleChange(e: CustomEvent<number | undefined>) {
     const newValue = e.detail;
     value = newValue;
@@ -59,16 +53,19 @@
     <Select
       options={userOptions}
       {value}
-      getLabel={getUserLabel}
+      getLabel={(userId) => {
+        if (userId === null || userId === undefined) {
+          return '';
+        }
+        const user = users.find((u) => u.id === userId);
+        return user ? getUserLabel(user, userDisplayField) : String(userId);
+      }}
       valuesAreEqual={(a, b) => a === b}
       {disabled}
       {placeholder}
       autoSelect="none"
       on:change={handleChange}
-      let:option
-    >
-      {getUserLabel(option)}
-    </Select>
+    />
   {/if}
 </div>
 

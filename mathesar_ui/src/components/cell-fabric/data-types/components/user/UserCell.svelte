@@ -17,6 +17,10 @@
     iconExpandDown,
     type ListBoxApi,
   } from '@mathesar-component-library';
+  import {
+    getUserLabel,
+    type UserDisplayField,
+  } from '@mathesar/utils/userUtils';
 
   import CellWrapper from '../CellWrapper.svelte';
   import type { CellExternalProps } from '../typeDefinitions';
@@ -28,10 +32,12 @@
   export let value: CellExternalProps['value'] = undefined;
   export let searchValue: CellExternalProps['searchValue'] = undefined;
   export let recordSummary: CellExternalProps['recordSummary'] = undefined;
-  export let setRecordSummary: ((recordId: string, recordSummary: string) => void) | undefined = undefined;
+  export let setRecordSummary:
+    | ((recordId: string, recordSummary: string) => void)
+    | undefined = undefined;
   export let disabled: CellExternalProps['disabled'];
   export let isIndependentOfSheet: CellExternalProps['isIndependentOfSheet'];
-  export let userDisplayField: 'full_name' | 'email' | 'username' = 'full_name';
+  export let userDisplayField: UserDisplayField = 'full_name';
 
   let cellWrapperElement: HTMLElement;
   let users: User[] = [];
@@ -53,23 +59,6 @@
     }
   }
 
-  function getUserLabel(userId: number | undefined): string {
-    if (!userId) return '';
-    const user = users.find((u) => u.id === userId);
-    if (!user) return String(userId);
-
-    // Use the display field from column metadata (no fallback to avoid leaking email)
-    if (userDisplayField === 'full_name') {
-      return user.full_name || '';
-    } else if (userDisplayField === 'email') {
-      return user.email || '';
-    } else if (userDisplayField === 'username') {
-      return user.username || '';
-    }
-    // Default fallback
-    return user.full_name || '';
-  }
-
   function handleDropdownClick(event: MouseEvent, api: ListBoxApi<number>) {
     event.stopPropagation();
     if (!disabled) {
@@ -82,10 +71,13 @@
     const newValue = values[0];
     value = newValue ?? null;
 
-    // Set the record summary immediately if we have the user data
+    // Set the display value immediately if we have the user data
     if (newValue !== undefined && newValue !== null && setRecordSummary) {
-      const userSummary = getUserLabel(newValue);
-      setRecordSummary(String(newValue), userSummary);
+      const user = users.find((u) => u.id === newValue);
+      const userDisplayValue = user
+        ? getUserLabel(user, userDisplayField)
+        : String(newValue);
+      setRecordSummary(String(newValue), userDisplayValue);
     }
 
     dispatch('update', { value });
@@ -155,13 +147,18 @@
   selectionType="single"
   value={hasValue && value !== null ? [value] : []}
   on:change={(e) => handleValueChange(e.detail)}
-  getLabel={getUserLabel}
+  getLabel={(userId) => {
+    if (userId === null || userId === undefined) {
+      return '';
+    }
+    const user = users.find((u) => u.id === userId);
+    return user ? getUserLabel(user, userDisplayField) : String(userId);
+  }}
   checkEquality={(a, b) => a === b}
   {disabled}
   let:api
   let:isOpen
 >
-
   <CellWrapper
     bind:element={cellWrapperElement}
     aria-controls={id}

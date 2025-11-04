@@ -5,11 +5,12 @@
   import { api } from '@mathesar/api/rpc';
   import { Select, Spinner } from '@mathesar-component-library';
   import type { FormattedInputProps } from '@mathesar-component-library/types';
+  import { getUserLabel, type UserDisplayField } from '@mathesar/utils/userUtils';
 
   export let value: FormattedInputProps['value'] = undefined;
   export let disabled: FormattedInputProps['disabled'] = false;
   export let placeholder: FormattedInputProps['placeholder'] = undefined;
-  export let userDisplayField: 'full_name' | 'email' | 'username' = 'full_name';
+  export let userDisplayField: UserDisplayField = 'full_name';
 
   const dispatch = createEventDispatcher();
 
@@ -45,26 +46,6 @@
   // Use normalizedValue for the Select component
   $: selectValue = normalizedValue;
 
-  function getUserLabel(userId: number | undefined): string {
-    if (userId === undefined || userId === null) return '';
-    const user = users.find((u) => u.id === userId);
-    if (!user) {
-      // If user not found, return the ID as string (might be loading)
-      return String(userId);
-    }
-
-    // Use the display field from column metadata
-    if (userDisplayField === 'full_name') {
-      return user.full_name || '';
-    } else if (userDisplayField === 'email') {
-      return user.email || '';
-    } else if (userDisplayField === 'username') {
-      return user.username || '';
-    }
-    // Default fallback
-    return user.full_name || '';
-  }
-
   function handleChange(e: CustomEvent<number | undefined>) {
     const newValue = e.detail;
     value = newValue;
@@ -80,7 +61,13 @@
     <Select
       options={userOptions}
       value={selectValue}
-      getLabel={getUserLabel}
+      getLabel={(userId) => {
+        if (userId === null || userId === undefined) {
+          return '';
+        }
+        const user = users.find((u) => u.id === userId);
+        return user ? getUserLabel(user, userDisplayField) : String(userId);
+      }}
       valuesAreEqual={(a, b) => {
         // Handle both number and string comparisons
         const aNum = typeof a === 'string' ? parseInt(a, 10) : a;

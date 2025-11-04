@@ -46,13 +46,20 @@ export function constructDbForm(
   const dbOptionsConfig = selectedAbstractType.getDbConfig?.() ?? undefined;
   let dbForm;
   if (dbOptionsConfig) {
-    const dbFormValues =
+    let dbFormValues =
       column.type === selectedDbType
         ? dbOptionsConfig.constructDbFormValuesFromTypeOptions(
             column.type,
             column.type_options,
           )
         : {};
+    // Special handling for user type: initialize lastEditedBy from metadata
+    if (selectedAbstractType.identifier === 'user' && column.metadata) {
+      dbFormValues = {
+        ...dbFormValues,
+        lastEditedBy: column.metadata.user_last_edited_by ?? false,
+      };
+    }
     dbForm = makeForm(dbOptionsConfig.form, dbFormValues);
   }
   const dbFormValues = getFormValueStore(dbForm);

@@ -300,6 +300,7 @@
   "field_marked_required_column_disallows_null": "This setting cannot be modified since the underlying column does not allow NULL values",
   "field_properties": "Field Properties",
   "field_provide_help_text": "Provide help text",
+  "field_to_represent_each_user": "Field to represent each user",
   "field_validation": "Validations",
   "field_validation_mark_as_required": "Mark field as required",
   "file": "File",

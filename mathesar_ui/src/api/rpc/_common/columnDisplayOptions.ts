@@ -91,6 +91,9 @@ export interface RequiredColumnMetadata {
 
   /** Which user field to display for user columns (full_name, email, or username) */
   user_display_field: 'full_name' | 'email' | 'username';
+
+  /** Whether this column automatically tracks the last user who edited the record */
+  user_last_edited_by: boolean | null;
 }
 
 /** The column metadata values, types as we get them from the API. */
@@ -116,6 +119,7 @@ export const defaultColumnMetadata: RequiredColumnMetadata = {
   file_backend: null,
   user_type: null,
   user_display_field: 'full_name',
+  user_last_edited_by: null,
 };
 
 /**

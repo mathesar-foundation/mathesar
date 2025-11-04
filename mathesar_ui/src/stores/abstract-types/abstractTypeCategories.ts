@@ -429,23 +429,48 @@ export function mergeMetadataOnTypeChange(
   newAbstractType: AbstractType,
   metadata: ColumnMetadata | null,
 ) {
+  let result = metadata ?? {};
+
+  // Handle file type metadata
   if (newAbstractType.identifier === 'file') {
-    return {
-      ...(metadata ?? {}),
+    result = {
+      ...result,
       file_backend: getDefaultFileStorageBackend()?.backend,
     };
-  }
-  if (metadata && metadata.file_backend) {
-    return {
-      ...metadata,
+  } else if (metadata && metadata.file_backend) {
+    result = {
+      ...result,
       file_backend: null,
     };
   }
-  return metadata;
+
+  // Handle user type metadata
+  if (newAbstractType.identifier === 'user') {
+    // Set user-specific metadata when changing to user type
+    result = {
+      ...result,
+      user_type: true,
+      user_display_field: result.user_display_field ?? 'full_name',
+      user_last_edited_by: result.user_last_edited_by ?? false,
+    };
+  } else {
+    // Clear user-specific metadata when changing away from user type
+    // Note: user_display_field has a NOT NULL constraint, so we omit it instead of setting to null
+    const { user_type, user_display_field, user_last_edited_by, ...rest } = result;
+    result = {
+      ...rest,
+      user_type: null,
+      user_last_edited_by: null,
+    };
+    // Explicitly delete user_display_field to ensure it's not sent to backend
+    delete (result as Record<string, unknown>).user_display_field;
+  }
+
+  return result;
 }
 
 export function getAllowedAbstractTypesForNewColumn() {
-  return [...abstractTypesMap.values(), fileAbstractType]
+  return [...abstractTypesMap.values(), fileAbstractType, userAbstractType]
     .filter((type) => !comboAbstractTypeCategories[type.identifier])
     .sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -455,6 +480,9 @@ export function getDbTypesForAbstractType(
 ): Set<DbType> {
   if (abstractTypeIdentifier === 'file') {
     return fileAbstractType.dbTypes;
+  }
+  if (abstractTypeIdentifier === 'user') {
+    return userAbstractType.dbTypes;
   }
   return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();
 }
