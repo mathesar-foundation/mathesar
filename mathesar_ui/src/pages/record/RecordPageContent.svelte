@@ -19,11 +19,11 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import { getTablePageUrl } from '@mathesar/routes/urls';
   import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
   import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
-  import { getTablePageUrl } from '@mathesar/routes/urls';
 
   export let record: RecordStore;
 
