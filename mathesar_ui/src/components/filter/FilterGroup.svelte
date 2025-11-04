@@ -3,6 +3,10 @@
   import { _ } from 'svelte-i18n';
 
   import type { ConstraintType } from '@mathesar/api/rpc/constraints';
+  import {
+    dndDraggable,
+    dndDroppable,
+  } from '@mathesar/components/drag-and-drop/dnd';
   import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
   import { Button, Select } from '@mathesar-component-library';
@@ -17,8 +21,11 @@
 
   type T = $$Generic;
   type ColumnLikeType = FilterEntryColumn<T>;
+  interface $$Events {
+    update: void;
+  }
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<$$Events>();
   const filterOperators = ['and', 'or'] as const;
 
   export let columns: ReadableMapLike<ColumnLikeType['id'], ColumnLikeType>;
@@ -28,6 +35,7 @@
   ) => ConstraintType[] | undefined = () => undefined;
 
   export let level = 0;
+  export let getFilterGroup: () => FilterGroup<T>;
   export let operator: FilterGroup<T>['operator'];
   export let args: FilterGroup<T>['args'];
 
@@ -69,9 +77,14 @@
       {/if}
     </div>
   {/if}
-  <div class="group">
+  <div class="group" use:dndDroppable={{ getItem: () => getFilterGroup() }}>
     {#each args as innerFilter, index (innerFilter)}
-      <div class="filter">
+      <div
+        class="filter"
+        use:dndDraggable={{
+          getItem: () => innerFilter,
+        }}
+      >
         <div class="prefix">
           {#if index === 0}
             {$_('where')}
@@ -129,6 +142,7 @@
       flex-direction: column;
       gap: var(--sm4);
       overflow: hidden;
+      min-height: 20px; // for empty groups - add a default area here
 
       .filter {
         display: flex;
@@ -147,6 +161,11 @@
           overflow: hidden;
         }
       }
+    }
+  }
+  :global([data-ghost]) {
+    .prefix {
+      visibility: hidden;
     }
   }
 </style>

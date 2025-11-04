@@ -1,16 +1,22 @@
 <script lang="ts">
   import { takeLast } from 'iter-tools';
-  import { tick } from 'svelte';
+  import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import type { LinkedRecordInputElement } from '@mathesar/components/cell-fabric/types';
+  import {
+    type DndChangeDetail,
+    dnd,
+  } from '@mathesar/components/drag-and-drop/dnd';
   import FilterGroupComponent from '@mathesar/components/filter/FilterGroup.svelte';
   import {
     FILTER_INPUT_CLASS,
     FilterGroup,
+    type IndividualFilter,
     makeIndividualFilter,
   } from '@mathesar/components/filter/utils';
   import { iconFiltering } from '@mathesar/icons';
+  import { imperativeFilterControllerContext } from '@mathesar/pages/table/ImperativeFilterController';
   import {
     Filtering,
     getTabularDataStoreFromContext,
@@ -26,6 +32,8 @@
   $: ({ meta, processedColumns, recordsData } = $tabularData);
   $: ({ filtering } = meta);
   $: filteringSqlExpr = JSON.stringify($filtering.sqlExpr);
+
+  const imperativeFilterController = imperativeFilterControllerContext.get();
 
   let filterGroup = new FilterGroup<number>();
   function onExternalFilteringChange(_extFiltering: Filtering) {
@@ -50,32 +58,42 @@
     }
   }
 
-  async function beginAddingFilter(columnId: number) {
-    const filter = makeIndividualFilter($processedColumns, columnId);
-    if (filter) {
-      // filterGroup = filterGroup.withFilter(filter);
-    }
-    await tick();
-    activateLastFilterInput();
-  }
-
-  // export let controller: FilterDropdownController<T> | undefined = undefined;
-  // $: controller?.setControls({
-  //   open: () => {
-  //     isOpen = true;
-  //   },
-  //   close: () => {
-  //     isOpen = false;
-  //   },
-  //   beginAddingFilter,
-  // });
-
   function setFilteringIfSqlExprHasChanged() {
     const newFiltering = new Filtering(filterGroup.clone());
     if (JSON.stringify(newFiltering.sqlExpr) !== filteringSqlExpr) {
       filtering.set(newFiltering);
     }
   }
+
+  function onChange(
+    e: DndChangeDetail<IndividualFilter<number>, FilterGroup<number>>,
+  ) {
+    e.fromParent.removeArgument(e.item);
+    e.toParent.addArgument(e.item, e.toIndex);
+    filterGroup = filterGroup.clone();
+    setFilteringIfSqlExprHasChanged();
+  }
+
+  function addFilter(columnId: number) {
+    const filter = makeIndividualFilter($processedColumns, columnId);
+    if (filter) {
+      filterGroup.addArgument(filter, filterGroup.args.length);
+      filterGroup = filterGroup.clone();
+      setFilteringIfSqlExprHasChanged();
+    }
+  }
+
+  onMount(() =>
+    imperativeFilterController?.onOpenDropdown(() => {
+      isOpen = true;
+    }),
+  );
+  onMount(() => imperativeFilterController?.onAddFilter(addFilter));
+  onMount(() =>
+    imperativeFilterController?.onActivateLastFilterInput(
+      activateLastFilterInput,
+    ),
+  );
 </script>
 
 <Dropdown
@@ -92,7 +110,7 @@
       <BadgeCount value={$filtering.appliedFilterCount} />
     </span>
   </svelte:fragment>
-  <div bind:this={content} slot="content">
+  <div bind:this={content} slot="content" use:dnd={{ onChange }}>
     <FilterGroupComponent
       {...$$restProps}
       columns={$processedColumns}
@@ -100,6 +118,7 @@
       getColumnConstraintType={(c) =>
         getColumnConstraintTypeByColumnId(c.id, $processedColumns)}
       recordSummaries={recordsData.linkedRecordSummaries}
+      getFilterGroup={() => filterGroup}
       bind:operator={filterGroup.operator}
       bind:args={filterGroup.args}
       on:update={setFilteringIfSqlExprHasChanged}

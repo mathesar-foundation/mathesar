@@ -42,6 +42,18 @@ export class FilterGroup<ID> {
     this.args = props?.args ?? [];
   }
 
+  addArgument(
+    arg: IndividualFilter<ID> | FilterGroup<ID>,
+    destinationIndex: number,
+  ) {
+    this.args.splice(destinationIndex, 0, arg);
+    this.args = [...this.args];
+  }
+
+  removeArgument(arg: IndividualFilter<ID> | FilterGroup<ID>) {
+    this.args = this.args.filter((a) => a !== arg);
+  }
+
   withoutColumns(columnIds: ID[]): FilterGroup<ID> {
     return new FilterGroup<ID>({
       operator: this.operator,
