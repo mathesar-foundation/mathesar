@@ -43,21 +43,18 @@
     on:click
     class:boxed={iconHasBox}
     class:bold
+    class:hide-icon={hideIcon}
     {style}
   >
-    {#if !hideIcon}
-      <span class="icon" style="white-space: nowrap">
-        {#if isLoading}
-          <Spinner />
-        {:else}
-          {#each icons as innerIcon}
-            <Icon size="min(1em, 0.75em + 0.25rem)" {...innerIcon} />
-          {/each}
-        {/if}
-      </span>
-    {/if}
-    &nbsp;
-    <span class="name">
+    <span class="icon" style="white-space: nowrap">
+      {#if isLoading}
+        <Spinner />
+      {:else}
+        {#each icons as innerIcon}
+          <Icon size="min(1em, 0.75em + 0.25rem)" {...innerIcon} />
+        {/each}
+      {/if}
+    </span>&nbsp;<span class="name">
       {#if name}
         {name}
       {:else}
@@ -91,6 +88,9 @@
   }
   .name-with-icon.boxed .icon > :global(svg) {
     color: var(--color-fg-inverted);
+  }
+  .name-with-icon.hide-icon .icon {
+    display: none;
   }
   .name {
     color: var(--name-color, currentcolor);
