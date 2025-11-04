@@ -4926,16 +4926,14 @@ BEGIN
             ref_tab_name text;
             alias text;
             join_clause text;
+            ref_col_name text;
           BEGIN
-            IF NOT pg_catalog.has_column_privilege(contextual_tab_id, ref_col_id, 'SELECT') THEN
-              -- Silently ignore referenced columns that we don't have permissions to select.
+            fk_col_name := msar.get_column_name(contextual_tab_id, fk_col_id);
+            IF fk_col_name IS NULL THEN
               CONTINUE template_parts_loop;
             END IF;
 
-            ref_col_name := msar.get_column_name(contextual_tab_id, ref_col_id);
-            IF ref_col_name IS NULL THEN
-              -- Silently ignore references to non-existing ref columns. This can happen if a column
-              -- has been deleted.
+            IF NOT pg_catalog.has_column_privilege(contextual_tab_id, fk_col_id, 'SELECT') THEN
               CONTINUE template_parts_loop;
             END IF;
 
@@ -4944,8 +4942,11 @@ BEGIN
             WHERE contype = 'f' AND conrelid = contextual_tab_id AND conkey = array[fk_col_id];
 
             IF ref_tab_id IS NULL THEN
-              -- Silently ignore references to non-FK columns. This can happen if the constraint
-              -- has been dropped.
+              CONTINUE template_parts_loop;
+            END IF;
+
+            ref_col_name := msar.get_column_name(ref_tab_id, ref_col_id);
+            IF ref_col_name IS NULL THEN
               CONTINUE template_parts_loop;
             END IF;
 
@@ -4957,7 +4958,6 @@ BEGIN
 
             ref_tab_name := msar.get_relation_name(ref_tab_id);
             ref_sch_name := msar.get_relation_schema_name(ref_tab_id);
-            ref_col_name := msar.get_column_name(ref_tab_id, ref_col_id);
             alias := concat(prev_alias, '_', fk_col_id);
             join_clause := concat(
               'LEFT JOIN ',
@@ -4978,6 +4978,10 @@ BEGIN
         END LOOP;
 
         ref_col_id := ref_chain[ref_chain_length];
+        ref_col_name := msar.get_column_name(contextual_tab_id, ref_col_id);
+        IF ref_col_name IS NULL THEN
+          CONTINUE template_parts_loop;
+        END IF;
 
         IF NOT pg_catalog.has_column_privilege(contextual_tab_id, ref_col_id, 'SELECT') THEN
           -- Silently ignore the final column reference if we don't have permission to select it.
