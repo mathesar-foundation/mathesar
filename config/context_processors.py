@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.templatetags.static import static
+from urllib.parse import splitport
 
 
 from mathesar.utils.frontend import get_manifest_data
@@ -19,8 +20,12 @@ def frontend_settings(request):
     }
     # Only include development URL if we're in development mode.
     if frontend_settings['development_mode'] is True:
-        frontend_settings['client_dev_url'] = settings.MATHESAR_CLIENT_DEV_URL
-        i18n_settings = get_i18n_settings_dev(display_language)
+        scheme = request.scheme
+        domain, _ = splitport(request.get_host())
+        port = settings.MATHESAR_CLIENT_DEV_PORT
+        client_dev_url = f'{scheme}://{domain}:{port}'
+        frontend_settings['client_dev_url'] = client_dev_url
+        i18n_settings = get_i18n_settings_dev(client_dev_url, display_language)
     else:
         i18n_settings = get_i18n_settings_prod(display_language, manifest_data)
 
@@ -40,8 +45,7 @@ def get_display_language_from_request(request):
         return lang_from_locale_middleware
 
 
-def get_i18n_settings_dev(display_language):
-    client_dev_url = settings.MATHESAR_CLIENT_DEV_URL
+def get_i18n_settings_dev(client_dev_url, display_language):
     fallback_language = settings.FALLBACK_LANGUAGE
 
     return {
