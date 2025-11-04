@@ -80,8 +80,6 @@
           submit_button_label: null,
           fields: [...tableStructureSubstance.processedColumns.values()]
             .filter((pc) => !pc.column.default?.is_dynamic)
-            // TODO_FILES_IN_FORMS: Re-enable file fields in forms when file handling is implemented.
-            .filter((pc) => !(pc.abstractType.identifier === 'file'))
             .map((c, index) => processedColumnToRawDataFormField(c, index)),
         };
         await $schemaRouteContext.insertDataForm(rawEpf);
