@@ -53,7 +53,14 @@
   class:empty={!args.length}
 >
   {#if args.length > 0 && level > 0}
-    <FilterGroupActions {level} {columns} bind:operator bind:args on:update>
+    <FilterGroupActions
+      {level}
+      {columns}
+      {getColumnConstraintType}
+      bind:operator
+      bind:args
+      on:update
+    >
       <span slot="text">
         {#if operator === 'and'}
           {$_('all_of_the_following_are_true')}
@@ -64,6 +71,11 @@
       <slot />
     </FilterGroupActions>
   {/if}
+
+  {#if !args.length}
+    <slot name="empty" />
+  {/if}
+
   <div class="group" use:dndDroppable={{ getItem: () => getFilterGroup() }}>
     {#each args as innerFilter, index (innerFilter)}
       <div
@@ -101,9 +113,16 @@
       </div>
     {:else}
       {#if level > 0}
-        <FilterGroupActions {level} {columns} bind:operator bind:args on:update>
+        <FilterGroupActions
+          {level}
+          {columns}
+          {getColumnConstraintType}
+          bind:operator
+          bind:args
+          on:update
+        >
           <div class="empty-group-text" slot="text">
-            {$_('drag_items_here')}
+            {$_('drag_filter_items_here')}
           </div>
           <slot />
         </FilterGroupActions>
@@ -115,6 +134,7 @@
       showTextInButtons
       {level}
       {columns}
+      {getColumnConstraintType}
       bind:operator
       bind:args
       on:update
@@ -127,7 +147,6 @@
 <style lang="scss">
   .filter-group {
     border-radius: var(--border-radius-m);
-    padding: var(--sm1);
     gap: var(--sm3);
     display: flex;
     flex-direction: column;
@@ -135,6 +154,8 @@
 
     &:not(.top-level) {
       border: 1px solid var(--color-border-raised-1);
+      background: var(--color-navigation-5);
+      padding: var(--sm1);
     }
 
     &:not(.empty):not(.top-level) > .group {

@@ -1,5 +1,6 @@
-import { first, zip } from 'iter-tools';
+import { find, first, zip } from 'iter-tools';
 
+import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import type { CellColumnLike } from '@mathesar/components/cell-fabric/types';
 import type { getFiltersForAbstractType } from '@mathesar/stores/abstract-types';
 import type {
@@ -137,11 +138,18 @@ export function validateFilterEntry(
 
 export function makeIndividualFilter<T>(
   columns: ReadableMapLike<FilterEntryColumn<T>['id'], FilterEntryColumn<T>>,
+  getColumnConstraintType: (
+    column: FilterEntryColumn<T>,
+  ) => ConstraintType[] | undefined,
   columnId?: T,
 ): IndividualFilter<T> | undefined {
-  const filterColumn = columnId
-    ? columns.get(columnId)
-    : first(columns.values());
+  const firstNonPrimaryColumn = find((c) => {
+    const constraints = getColumnConstraintType(c);
+    return !constraints || !constraints.includes('primary');
+  }, columns.values());
+  const defaultColumn = firstNonPrimaryColumn ?? first(columns.values());
+
+  const filterColumn = columnId ? columns.get(columnId) : defaultColumn;
 
   if (!filterColumn) {
     return undefined;

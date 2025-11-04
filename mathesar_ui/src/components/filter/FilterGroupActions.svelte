@@ -2,6 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
+  import type { ConstraintType } from '@mathesar/api/rpc/constraints';
+  import type { Appearance } from '@mathesar/component-library/commonTypes';
   import { iconAddGroup, iconAddNew } from '@mathesar/icons';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
   import { Button, Icon } from '@mathesar-component-library';
@@ -22,14 +24,20 @@
 
   export let level = 0;
   export let columns: ReadableMapLike<ColumnLikeType['id'], ColumnLikeType>;
+  export let getColumnConstraintType: (
+    column: ColumnLikeType,
+  ) => ConstraintType[] | undefined;
 
   export let operator: FilterGroup<T>['operator'];
   export let args: FilterGroup<T>['args'];
 
   export let showTextInButtons = false;
 
+  let buttonAppearance: Appearance;
+  $: buttonAppearance = showTextInButtons ? 'secondary' : 'action';
+
   function addFilter() {
-    const filter = makeIndividualFilter(columns);
+    const filter = makeIndividualFilter<T>(columns, getColumnConstraintType);
     if (filter) {
       args = [...args, filter];
       dispatch('update');
@@ -55,7 +63,7 @@
     </div>
   {/if}
   <div class="actions">
-    <Button appearance="action" on:click={addFilter}>
+    <Button appearance={buttonAppearance} on:click={addFilter}>
       <Icon {...iconAddNew} />
       {#if showTextInButtons}
         {$_('add_filter')}
@@ -63,7 +71,7 @@
     </Button>
 
     {#if level < 2}
-      <Button appearance="action" on:click={addFilterGroup}>
+      <Button appearance={buttonAppearance} on:click={addFilterGroup}>
         <Icon {...iconAddGroup} />
         {#if showTextInButtons}
           {$_('add_filter_group')}

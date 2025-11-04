@@ -75,7 +75,11 @@
   }
 
   function addFilter(columnId: number) {
-    const filter = makeIndividualFilter($processedColumns, columnId);
+    const filter = makeIndividualFilter(
+      $processedColumns,
+      (c) => getColumnConstraintTypeByColumnId(c.id, $processedColumns),
+      columnId,
+    );
     if (filter) {
       filterGroup.addArgument(filter, filterGroup.args.length);
       filterGroup = filterGroup.clone();
@@ -110,26 +114,51 @@
       <BadgeCount value={$filtering.appliedFilterCount} />
     </span>
   </svelte:fragment>
-  <div bind:this={content} slot="content" use:dnd={{ onChange }}>
-    <FilterGroupComponent
-      {...$$restProps}
-      columns={$processedColumns}
-      getColumnLabel={(c) => $processedColumns.get(c.id)?.column.name ?? ''}
-      getColumnConstraintType={(c) =>
-        getColumnConstraintTypeByColumnId(c.id, $processedColumns)}
-      recordSummaries={recordsData.linkedRecordSummaries}
-      getFilterGroup={() => filterGroup}
-      bind:operator={filterGroup.operator}
-      bind:args={filterGroup.args}
-      on:update={setFilteringIfSqlExprHasChanged}
-    />
+  <div
+    class="filters"
+    bind:this={content}
+    slot="content"
+    use:dnd={{ onChange }}
+  >
+    <div class="header">{$_('filter_records')}</div>
+    <div class="content">
+      <FilterGroupComponent
+        {...$$restProps}
+        columns={$processedColumns}
+        getColumnLabel={(c) => $processedColumns.get(c.id)?.column.name ?? ''}
+        getColumnConstraintType={(c) =>
+          getColumnConstraintTypeByColumnId(c.id, $processedColumns)}
+        recordSummaries={recordsData.linkedRecordSummaries}
+        getFilterGroup={() => filterGroup}
+        bind:operator={filterGroup.operator}
+        bind:args={filterGroup.args}
+        on:update={setFilteringIfSqlExprHasChanged}
+      >
+        <div slot="empty" class="muted">
+          {$_('no_filters_added')}
+        </div>
+      </FilterGroupComponent>
+    </div>
   </div>
 </Dropdown>
 
 <style lang="scss">
+  .filters {
+    padding: 1rem;
+  }
+  .header {
+    font-weight: bolder;
+  }
   .with-badge {
     display: inline-flex;
     align-items: center;
     gap: var(--sm5);
+  }
+  .content {
+    margin-top: 0.8rem;
+  }
+
+  .muted {
+    color: var(--color-fg-base-disabled);
   }
 </style>
