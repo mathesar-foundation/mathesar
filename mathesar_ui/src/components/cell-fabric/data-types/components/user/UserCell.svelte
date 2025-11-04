@@ -31,6 +31,7 @@
   export let setRecordSummary: ((recordId: string, recordSummary: string) => void) | undefined = undefined;
   export let disabled: CellExternalProps['disabled'];
   export let isIndependentOfSheet: CellExternalProps['isIndependentOfSheet'];
+  export let userDisplayField: 'full_name' | 'email' | 'username' = 'full_name';
 
   let cellWrapperElement: HTMLElement;
   let users: User[] = [];
@@ -56,7 +57,17 @@
     if (!userId) return '';
     const user = users.find((u) => u.id === userId);
     if (!user) return String(userId);
-    return user.full_name || user.username || user.email || String(userId);
+
+    // Use the display field from column metadata (no fallback to avoid leaking email)
+    if (userDisplayField === 'full_name') {
+      return user.full_name || '';
+    } else if (userDisplayField === 'email') {
+      return user.email || '';
+    } else if (userDisplayField === 'username') {
+      return user.username || '';
+    }
+    // Default fallback
+    return user.full_name || '';
   }
 
   function handleDropdownClick(event: MouseEvent, api: ListBoxApi<number>) {
@@ -88,11 +99,7 @@
   function checkAndToggle(api: ListBoxApi<number>) {
     if (disabled) return;
     void loadUsers();
-    if (api.isOpen()) {
-      api.close();
-    } else {
-      api.open();
-    }
+    api.toggle();
   }
 
   function handleKeyDown(

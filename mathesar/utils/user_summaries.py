@@ -10,25 +10,33 @@ from mathesar.models import User
 from mathesar.utils.columns import get_columns_meta_data
 
 
-def get_user_summary(user_id: Optional[int]) -> Optional[str]:
+def get_user_summary(user_id: Optional[int], display_field: str = "full_name") -> Optional[str]:
     """
-    Get a summary string for a user ID.
+    Get a summary string for a user ID using the specified display field.
 
     Args:
         user_id: The Django user ID, or None
+        display_field: Which field to display ('full_name', 'email', or 'username')
 
     Returns:
-        A summary string (e.g., username or full_name if available), or None
+        A summary string for the specified field, or None if user doesn't exist
     """
     if user_id is None:
         return None
 
     try:
         user = User.objects.get(id=user_id)
-        # Prefer full_name, fall back to username
-        return user.full_name if user.full_name else user.username
+        if display_field == "full_name":
+            return user.full_name or ""
+        elif display_field == "email":
+            return user.email or ""
+        elif display_field == "username":
+            return user.username or ""
+        else:
+            # Default to full_name if invalid field
+            return user.full_name or ""
     except User.DoesNotExist:
-        # User was deleted, return None or ID as fallback
+        # User was deleted, return None
         return None
 
 
@@ -50,22 +58,39 @@ def get_user_summaries_for_column(
     Returns:
         A dictionary mapping user ID strings to summary strings
     """
+    from mathesar.utils.columns import get_columns_meta_data
+
     # Filter out None values
     valid_user_ids = {uid for uid in user_ids if uid is not None}
 
     if not valid_user_ids:
         return {}
 
+    # Get column metadata to determine display field
+    columns_meta_data = get_columns_meta_data(table_oid, database_id)
+    display_field = "full_name"  # Default
+    for col_meta in columns_meta_data:
+        if col_meta.attnum == column_attnum and col_meta.user_type:
+            display_field = col_meta.user_display_field or "full_name"
+            break
+
     # Fetch users in bulk
     users = User.objects.filter(id__in=valid_user_ids)
     user_map = {user.id: user for user in users}
 
-    # Build summaries - prefer full_name, fall back to username
+    # Build summaries using the specified display field
     summaries = {}
     for user_id in valid_user_ids:
         user = user_map.get(user_id)
         if user:
-            summary = user.full_name if user.full_name else user.username
+            if display_field == "full_name":
+                summary = user.full_name or ""
+            elif display_field == "email":
+                summary = user.email or ""
+            elif display_field == "username":
+                summary = user.username or ""
+            else:
+                summary = user.full_name or ""
             summaries[str(user_id)] = summary
         # If user doesn't exist, we just don't include it (returns None when accessed)
 

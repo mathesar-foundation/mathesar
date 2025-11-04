@@ -88,6 +88,9 @@ export interface RequiredColumnMetadata {
 
   /** Whether this column stores Mathesar user IDs */
   user_type: boolean | null;
+
+  /** Which user field to display for user columns (full_name, email, or username) */
+  user_display_field: 'full_name' | 'email' | 'username';
 }
 
 /** The column metadata values, types as we get them from the API. */
@@ -112,6 +115,7 @@ export const defaultColumnMetadata: RequiredColumnMetadata = {
   display_width: DEFAULT_COLUMN_WIDTH_PX,
   file_backend: null,
   user_type: null,
+  user_display_field: 'full_name',
 };
 
 /**
