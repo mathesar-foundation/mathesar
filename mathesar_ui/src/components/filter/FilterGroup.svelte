@@ -9,14 +9,14 @@
   } from '@mathesar/components/drag-and-drop/dnd';
   import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import { Button, Select } from '@mathesar-component-library';
+  import { Select } from '@mathesar-component-library';
 
   import Filter from './Filter.svelte';
-  import {
-    type FilterEntryColumn,
+  import FilterGroupActions from './FilterGroupActions.svelte';
+  import type {
+    FilterEntryColumn,
     FilterGroup,
-    type IndividualFilter,
-    makeIndividualFilter,
+    IndividualFilter,
   } from './utils';
 
   type T = $$Generic;
@@ -41,41 +41,28 @@
 
   export let recordSummaries: AssociatedCellData<string>;
 
-  function addFilter() {
-    const filter = makeIndividualFilter(columns);
-    if (filter) {
-      args = [...args, filter];
-      dispatch('update');
-    }
-  }
-
-  function addFilterGroup() {
-    const filter = makeIndividualFilter(columns);
-    args = [
-      ...args,
-      new FilterGroup({
-        operator: operator === 'and' ? 'or' : 'and',
-        args: filter ? [filter] : [],
-      }),
-    ];
-    dispatch('update');
-  }
-
   function remove(filter: IndividualFilter<T> | FilterGroup<T>) {
     args = args.filter((f) => f !== filter);
     dispatch('update');
   }
 </script>
 
-<div class="filter-group">
+<div
+  class="filter-group"
+  class:top-level={level === 0}
+  class:empty={!args.length}
+>
   {#if args.length > 0 && level > 0}
-    <div>
-      {#if operator === 'and'}
-        {$_('all_of_the_following_are_true')}
-      {:else}
-        {$_('any_of_the_following_are_true')}
-      {/if}
-    </div>
+    <FilterGroupActions {level} {columns} bind:operator bind:args on:update>
+      <span slot="text">
+        {#if operator === 'and'}
+          {$_('all_of_the_following_are_true')}
+        {:else}
+          {$_('any_of_the_following_are_true')}
+        {/if}
+      </span>
+      <slot />
+    </FilterGroupActions>
   {/if}
   <div class="group" use:dndDroppable={{ getItem: () => getFilterGroup() }}>
     {#each args as innerFilter, index (innerFilter)}
@@ -112,37 +99,53 @@
           />
         </div>
       </div>
+    {:else}
+      {#if level > 0}
+        <FilterGroupActions {level} {columns} bind:operator bind:args on:update>
+          <div class="empty-group-text" slot="text">
+            {$_('drag_items_here')}
+          </div>
+          <slot />
+        </FilterGroupActions>
+      {/if}
     {/each}
   </div>
-  <div class="footer">
-    <Button appearance="action" on:click={addFilter}>
-      {$_('add_new_filter')}
-    </Button>
-
-    {#if level < 2}
-      <Button appearance="action" on:click={addFilterGroup}>
-        {$_('add_filter_group')}
-      </Button>
-    {/if}
-  </div>
+  {#if level === 0}
+    <FilterGroupActions
+      showTextInButtons
+      {level}
+      {columns}
+      bind:operator
+      bind:args
+      on:update
+    >
+      <slot />
+    </FilterGroupActions>
+  {/if}
 </div>
 
 <style lang="scss">
   .filter-group {
-    border: 1px solid var(--color-border-raised-1);
     border-radius: var(--border-radius-m);
-    padding: var(--sm4);
-    gap: var(--sm5);
+    padding: var(--sm1);
+    gap: var(--sm3);
     display: flex;
     flex-direction: column;
     overflow: hidden;
 
+    &:not(.top-level) {
+      border: 1px solid var(--color-border-raised-1);
+    }
+
+    &:not(.empty):not(.top-level) > .group {
+      padding-right: 1rem;
+    }
+
     .group {
       display: flex;
       flex-direction: column;
-      gap: var(--sm4);
+      gap: var(--sm2);
       overflow: hidden;
-      min-height: 20px; // for empty groups - add a default area here
 
       .filter {
         display: flex;
@@ -159,8 +162,14 @@
 
         .content {
           overflow: hidden;
+          flex-grow: 1;
         }
       }
+    }
+
+    .empty-group-text {
+      width: 100%;
+      min-width: 20rem;
     }
   }
   :global([data-ghost]) {

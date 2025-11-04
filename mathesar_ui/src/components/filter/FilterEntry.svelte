@@ -245,6 +245,7 @@
         />
       {/if}
     {/key}
+    <slot />
   </InputGroup>
 </div>
 
@@ -252,33 +253,32 @@
   .filter-entry {
     display: flex;
     gap: 10px;
+    min-width: min(30rem, 100%);
+    max-width: 38rem;
 
-    & + :global(.filter-entry) {
-      margin-top: 6px;
-    }
-
-    &.horizontal {
-      :global(.filter-column-id.trigger),
-      :global(.filter-condition) {
-        width: 140px;
-        flex-basis: 140px;
-        flex-shrink: 0;
-        flex-grow: 0;
-      }
-
-      :global(.filter-input) {
-        width: 160px;
-        flex-basis: 160px;
-        flex-grow: 0;
-        flex-shrink: 0;
-        resize: none;
-      }
-    }
-
-    &.vertical {
+    @media (max-width: 600px) {
       :global(.filter-input) {
         flex-grow: 1;
         resize: vertical;
+      }
+    }
+    @media (min-width: 681px) {
+      &.horizontal {
+        :global(.filter-column-id.trigger),
+        :global(.filter-condition) {
+          width: 140px;
+          flex-basis: 140px;
+          flex-shrink: 0;
+          flex-grow: 0;
+        }
+
+        :global(.filter-input) {
+          width: 160px;
+          flex-basis: 160px;
+          flex-grow: 0;
+          flex-shrink: 0;
+          resize: none;
+        }
       }
     }
   }

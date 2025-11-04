@@ -149,7 +149,7 @@ export function dnd<Item, ParentItem>(
     const before = kids[index] ?? null;
 
     if (!placeholderEl) return;
-    placeholderEl.style.height = `${Math.max(1, Math.min(30, phHeight))}px`;
+    placeholderEl.style.height = `${phHeight}px`;
 
     if (before) {
       if (
@@ -174,7 +174,8 @@ export function dnd<Item, ParentItem>(
     if (!dragEl || !fromParentEl) return;
 
     ghostEl = makeGhost(dragEl);
-    dragEl.style.display = 'none';
+    dragEl.style.visibility = 'hidden';
+    dragEl.style.height = '1px';
 
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'grabbing';
@@ -187,6 +188,11 @@ export function dnd<Item, ParentItem>(
   function endDrag(commit: boolean) {
     document.body.style.userSelect = '';
     document.body.style.cursor = '';
+
+    // release capture if still held
+    if (dragEl && pointerId != null) {
+      dragEl.releasePointerCapture(pointerId);
+    }
 
     if (commit && dragging && dragEl && fromParentEl) {
       let finalIndex = lastIndex;
@@ -208,13 +214,11 @@ export function dnd<Item, ParentItem>(
       });
     }
 
-    if (dragEl) dragEl.style.display = '';
-    cleanupVisuals();
-
-    // release capture if still held
-    if (dragEl && pointerId != null) {
-      dragEl.releasePointerCapture(pointerId);
+    if (dragEl) {
+      dragEl.style.visibility = '';
+      dragEl.style.height = '';
     }
+    cleanupVisuals();
 
     dragging = false;
     pointerId = null;
