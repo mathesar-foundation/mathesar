@@ -96,7 +96,7 @@ function individualFilterToSqlExpr(
     lesser: cmp('lesser'),
     not_null: fn('not_null'),
     null: fn('null'),
-    starts_with_case_insensitive: cmp('starts_with'),
+    starts_with_case_insensitive: cmp('starts_with_case_insensitive'),
     uri_authority_contains: cmp('contains', [fn('uri_authority'), value()]),
     uri_scheme_equals: cmp('equal', [fn('uri_scheme'), value()]),
   };
