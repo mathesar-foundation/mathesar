@@ -6,6 +6,7 @@
 <script lang="ts">
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
+  import { getSheetColumnPosition } from '@mathesar/components/sheet';
   import {
     iconDescription,
     iconFiltering,
@@ -20,6 +21,7 @@
   import { Icon, Tooltip } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
+  const widthThresholdForIcon = 72;
 
   export let processedColumn: ProcessedColumn;
   export let isSelected = false;
@@ -31,6 +33,11 @@
   $: hasFilter = $filtering.appliedFilterCountForColumn(id) > 0;
   $: sorter = $sorting.get(id);
   $: grouped = $grouping.entries.some((entry) => entry.columnId === id);
+  $: columnPosition = getSheetColumnPosition(column.id);
+  $: hideIcon = (() => {
+    if (!$columnPosition) return false;
+    return $columnPosition.width < widthThresholdForIcon;
+  })();
 </script>
 
 <div class="header-cell-root">
@@ -42,7 +49,7 @@
     on:mousedown
     on:mouseenter
   >
-    <ProcessedColumnName {processedColumn} />
+    <ProcessedColumnName {hideIcon} {processedColumn} />
     {#if sorter || hasFilter || grouped || description}
       <div class="indicator-icons">
         {#if sorter}
