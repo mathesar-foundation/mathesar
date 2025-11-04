@@ -89,10 +89,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
       <div slot="subText" class="table-name">
         <RichText text={$_('record_in_table')} let:slotName>
           {#if slotName === 'tableName'}
-            <a
-              href={tablePageUrl}
-              class="table-name-link"
-            >
+            <a href={tablePageUrl} class="table-name-link">
               <TableName {table} truncate={false} />
             </a>
           {/if}
@@ -168,10 +165,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     color: var(--color-fg-subtle-1);
   }
   .table-name-link {
-    color: var(
-      --color-link,
-      var(--color-fg)
-    );
+    color: var(--color-link, var(--color-fg));
     text-decoration: none;
     cursor: pointer;
   }
@@ -184,7 +178,12 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
 
   .table-name-link:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--color-table, var(--entity-name-color, var(--color-record))) 30%, transparent);
+    outline: 3px solid
+      color-mix(
+        in srgb,
+        var(--color-table, var(--entity-name-color, var(--color-record))) 30%,
+        transparent
+      );
     outline-offset: 2px;
   }
   .form-status {

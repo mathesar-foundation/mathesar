@@ -3,11 +3,11 @@
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { SheetDataCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
-  import CellBackground from '@mathesar/components/CellBackground.svelte';
 
   import type { QueryRow } from '../QueryRunner';
   import type { ProcessedQueryOutputColumn } from '../utils';
@@ -27,7 +27,10 @@
   selection={$selection}
   let:isActive
 >
-  <CellBackground class="cell-bg-row-hover" color="var(--cell-bg-color-row-hover)" />
+  <CellBackground
+    class="cell-bg-row-hover"
+    color="var(--cell-bg-color-row-hover)"
+  />
   {#if row || recordRunState === 'processing'}
     <CellFabric
       {isActive}

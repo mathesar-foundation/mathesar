@@ -77,7 +77,6 @@
       });
     }
   }
-
 </script>
 
 <div data-identifier="query-run-result">
