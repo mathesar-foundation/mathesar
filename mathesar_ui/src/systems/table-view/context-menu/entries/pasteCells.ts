@@ -60,7 +60,10 @@ export function* pasteCells(p: {
           const encodedData = meta.getAttribute('content');
           if (encodedData) {
             const structuredData = decodeURIComponent(encodedData);
-            dataTransfer.setData('application/x-vnd.mathesar-sheet-clipboard', structuredData);
+            dataTransfer.setData(
+              'application/x-vnd.mathesar-sheet-clipboard',
+              structuredData,
+            );
           }
         }
       }

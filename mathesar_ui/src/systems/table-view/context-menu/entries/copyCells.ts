@@ -22,7 +22,9 @@ export function* copyCells(p: {
       // Using the modern Clipboard API to write to the clipboard
       // Note: Most browsers only support standard MIME types (text/plain, text/html)
       // We'll use text/html to carry our structured data as a data attribute
-      const htmlContent = `<meta name="mathesar-clipboard" content="${encodeURIComponent(content.structured)}"/>${content.tsv}`;
+      const htmlContent = `<meta name="mathesar-clipboard" content="${encodeURIComponent(
+        content.structured,
+      )}"/>${content.tsv}`;
 
       const clipboardItems = [
         new ClipboardItem({
@@ -41,9 +43,7 @@ export function* copyCells(p: {
         get(_)('copied_cells', { values: { count: content.cellCount } }),
       );
     } catch (e) {
-      p.showToastError(
-        e instanceof Error ? e.message : 'Failed to copy cells',
-      );
+      p.showToastError(e instanceof Error ? e.message : 'Failed to copy cells');
     }
   }
 

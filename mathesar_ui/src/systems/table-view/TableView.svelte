@@ -70,8 +70,11 @@
     getSheetColumns: () => [
       ...map(({ column }) => column, get(processedColumns).values()),
     ],
-    bulkDml: (...args) => recordsData.bulkDml(...args),
-    confirm: (title) =>
+    bulkDml: (
+      modificationRecipes: Parameters<typeof recordsData.bulkDml>[0],
+      additionRecipes?: Parameters<typeof recordsData.bulkDml>[1],
+    ) => recordsData.bulkDml(modificationRecipes, additionRecipes),
+    confirm: (title: string) =>
       confirm({
         title,
         body: [],
