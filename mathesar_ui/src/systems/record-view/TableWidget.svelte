@@ -1,6 +1,5 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { router } from 'tinro';
 
   import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
   import { Help } from '@mathesar/component-library';
@@ -41,6 +40,7 @@
   export let recordSummary: string;
   export let table: Table;
   export let fkColumn: Pick<RawColumnWithMetadata, 'id' | 'name' | 'metadata'>;
+  export let isInModal = false;
 
   $: tabularData = new TabularData({
     database: table.schema.database,
@@ -52,24 +52,14 @@
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canViewTable = $currentRolePrivileges.has('SELECT');
   $: getTablePageUrl = $storeToGetTablePageUrl;
-  $: href = getTablePageUrl
-    ? getTablePageUrl({ tableId: table.oid })
-    : undefined;
+  $: href = isInModal ? undefined : getTablePageUrl({ tableId: table.oid });
 </script>
 
 <div class="table-widget">
   <div class="top">
     <h3 class="bold-header">
       {#if href}
-        <a
-          class="table-link"
-          {href}
-          on:click|preventDefault={() => {
-            if (href) {
-              void router.goto(href);
-            }
-          }}
-        >
+        <a class="table-link" {href}>
           <TableName {table} truncate={false} />
         </a>
       {:else}
