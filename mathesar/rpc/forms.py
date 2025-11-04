@@ -414,4 +414,7 @@ def submit(*, form_token: str, values: dict, **kwargs) -> None:
         form_token: The unique token of the form.
         values: A dict describing the values to insert.
     """
-    return submit_form(form_token, values)
+    from modernrpc.core import REQUEST_KEY
+    request = kwargs.get(REQUEST_KEY)
+    user = request.user if request else None
+    return submit_form(form_token, values, user)

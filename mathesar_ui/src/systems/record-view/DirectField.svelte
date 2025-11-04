@@ -63,6 +63,7 @@
   $: value = $field;
   $: fieldIsDisabled = field.disabled;
   $: ({ showsError } = field);
+  $: isLastEditedBy = !!column.metadata?.user_last_edited_by;
   $: disabled =
     column.primary_key ||
     $fieldIsDisabled ||

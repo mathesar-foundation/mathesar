@@ -19,7 +19,7 @@ import type {
 import type { FormSource } from '../FormSource';
 
 import type { AbstractColumnBasedFieldProps } from './AbstractColumnBasedField';
-import { ErrorField } from './ErrorField';
+import { ErrorField, dataFormErrors } from './ErrorField';
 import { FieldColumn } from './FieldColumn';
 import { FkField } from './FkField';
 import { FormFields } from './FormFields';
@@ -190,6 +190,18 @@ export function buildFieldFactoryFromRaw({
       parentTableOid,
       rawField.column_attnum,
     );
+
+    // Check if this column has user_last_edited_by enabled
+    // If so, create an error field instead of a normal field
+    if (columnDetails.metadata?.user_last_edited_by) {
+      return makeErrorFieldFactory({
+        originalField: rawField,
+        error: dataFormErrors.columnUserLastEditedByError({
+          tableOid: parentTableOid,
+          columnAttnum: rawField.column_attnum,
+        }),
+      });
+    }
 
     const foreignKeyLink =
       'related_table_oid' in rawField &&

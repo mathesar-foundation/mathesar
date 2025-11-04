@@ -14,6 +14,7 @@ import type { FormFields } from './FormFields';
 
 export const dataFormErrorCodes = {
   COLUMN_NOT_FOUND: -31025,
+  COLUMN_USER_LAST_EDITED_BY: -31026,
 };
 
 export const dataFormErrors = {
@@ -21,6 +22,15 @@ export const dataFormErrors = {
     new ClientSideError({
       message: get(_)('form_field_column_not_found'),
       code: dataFormErrorCodes.COLUMN_NOT_FOUND,
+      data: props,
+    }),
+  columnUserLastEditedByError: (props: {
+    tableOid: number;
+    columnAttnum: number;
+  }) =>
+    new ClientSideError({
+      message: get(_)('form_field_column_user_last_edited_by'),
+      code: dataFormErrorCodes.COLUMN_USER_LAST_EDITED_BY,
       data: props,
     }),
 };
