@@ -134,7 +134,10 @@
             on:click={() => field.set(null)}
             {disabled}
           >
-            <RichText text={$_('set_to_value')} let:slotName>
+            <RichText
+              text={$_('set_count_cells_to_value', { values: { count: 1 } })}
+              let:slotName
+            >
               {#if slotName === 'value'}
                 <Null />
               {/if}
