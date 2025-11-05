@@ -239,6 +239,8 @@
   "disconnect": "Disconnect",
   "disconnect_database": "Disconnect Database",
   "disconnect_named_database": "Disconnect [databaseName] Database",
+  "database_disconnected_successfully": "Database disconnected successfully",
+  "database_disconnected_without_sql_cleanup": "Database disconnected successfully. Mathesar was unable to connect to the database to remove internal schemas.",
   "display_language": "Display Language",
   "display_name": "Display Name",
   "documentation": "Documentation",
