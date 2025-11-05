@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher, onMount, setContext } from 'svelte';
 
   import type { User } from '@mathesar/api/rpc/users';
   import { api } from '@mathesar/api/rpc';
@@ -9,9 +9,14 @@
   } from '@mathesar/api/rpc/_common/commonTypes';
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
-  import { AttachableRowSeekerController } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
+  import {
+    AttachableRowSeekerController,
+    rowSeekerContext,
+  } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   import AttachableRowSeeker from '@mathesar/systems/row-seeker/AttachableRowSeeker.svelte';
-  import { Button, Spinner } from '@mathesar-component-library';
+  import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
+  import LinkedRecordInput from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordInput.svelte';
+  import { Spinner } from '@mathesar-component-library';
   import {
     getUserLabel,
     type UserDisplayField,
@@ -27,18 +32,24 @@
   let users: User[] = [];
   let isLoading = true;
   let error: string | undefined;
-  let triggerElement: HTMLElement | undefined;
   let selectedUser: User | undefined;
+  let recordSummary: string | undefined = undefined;
   let rowSeekerController = new AttachableRowSeekerController();
+
+  // Set up context for row seeker
+  setContext(rowSeekerContext.key, rowSeekerController);
 
   async function loadUsers() {
     try {
       isLoading = true;
       error = undefined;
       users = await api.users.list().run();
-      // Update selected user if value is set
+      // Update selected user and record summary if value is set
       if (value !== undefined && value !== null) {
         selectedUser = users.find((u) => u.id === value);
+        if (selectedUser) {
+          recordSummary = getUserLabel(selectedUser, userDisplayField);
+        }
       }
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load users';
@@ -108,69 +119,36 @@
     });
   }
 
-  // Get previous value for row seeker
-  function getPreviousValue(): SummarizedRecordReference | undefined {
-    if (value === undefined || value === null || !selectedUser) {
-      return undefined;
-    }
-    return {
-      key: selectedUser.id,
-      summary: getUserLabel(selectedUser, userDisplayField),
-    };
-  }
-
-  async function openRowSeeker() {
-    if (disabled || !triggerElement) return;
-
-    try {
-      const selection = await rowSeekerController.acquireUserSelection({
-        triggerElement,
-        previousValue: getPreviousValue(),
-        constructRecordStore: createUserRecordStore,
-        onSelect: (v) => {
-          if (v) {
-            const user = users.find((u) => u.id === v.key);
-            if (user) {
-              selectedUser = user;
-              value = user.id;
-              dispatch('artificialChange', user.id);
-              dispatch('artificialInput', user.id);
-            }
-          } else {
-            selectedUser = undefined;
-            value = undefined;
-            dispatch('artificialChange', undefined);
-            dispatch('artificialInput', undefined);
-          }
-        },
-      });
-
-      if (selection) {
-        const user = users.find((u) => u.id === selection.key);
+  // Create record selection orchestrator factory for LinkedRecordInput
+  const recordSelectionOrchestratorFactory = makeRowSeekerOrchestratorFactory({
+    constructRecordStore: createUserRecordStore,
+    onSelect: (v) => {
+      if (v) {
+        const user = users.find((u) => u.id === v.key);
         if (user) {
           selectedUser = user;
-          value = user.id;
-          dispatch('artificialChange', user.id);
-          dispatch('artificialInput', user.id);
+          recordSummary = getUserLabel(user, userDisplayField);
         }
+      } else {
+        selectedUser = undefined;
+        recordSummary = undefined;
       }
-    } catch {
-      // User cancelled selection
-    }
-  }
+    },
+  });
 
-  function clearSelection() {
-    selectedUser = undefined;
-    value = undefined;
-    dispatch('artificialChange', undefined);
-    dispatch('artificialInput', undefined);
+  function setRecordSummary(key: string, summary: string) {
+    recordSummary = summary;
   }
 
   // Update selected user when value changes externally
   $: if (value !== undefined && value !== null && users.length > 0) {
     selectedUser = users.find((u) => u.id === value);
+    if (selectedUser) {
+      recordSummary = getUserLabel(selectedUser, userDisplayField);
+    }
   } else if (value === undefined || value === null) {
     selectedUser = undefined;
+    recordSummary = undefined;
   }
 </script>
 
@@ -180,33 +158,17 @@
   {:else if error}
     <div class="error">{error}</div>
   {:else}
-    <div class="row-seeker-container">
-      <div bind:this={triggerElement} class="trigger-wrapper">
-        <Button
-          appearance="secondary"
-          on:click={openRowSeeker}
-          {disabled}
-          class="user-select-trigger"
-        >
-          {#if selectedUser}
-            {getUserLabel(selectedUser, userDisplayField)}
-          {:else}
-            {placeholder ?? 'Select user'}
-          {/if}
-        </Button>
-      </div>
-      {#if selectedUser && !disabled}
-        <Button
-          appearance="plain"
-          on:click={clearSelection}
-          class="clear-button"
-          aria-label="Clear selection"
-        >
-          ×
-        </Button>
-      {/if}
-      <AttachableRowSeeker controller={rowSeekerController} />
-    </div>
+    <LinkedRecordInput
+      bind:value
+      {recordSelectionOrchestratorFactory}
+      {recordSummary}
+      {setRecordSummary}
+      {disabled}
+      {placeholder}
+      on:artificialChange={(e) => dispatch('artificialChange', e.detail)}
+      on:artificialInput={(e) => dispatch('artificialInput', e.detail)}
+    />
+    <AttachableRowSeeker controller={rowSeekerController} />
   {/if}
 </div>
 
@@ -217,27 +179,5 @@
   .error {
     color: var(--color-fg-error);
     padding: var(--sm4);
-  }
-  .row-seeker-container {
-    display: flex;
-    align-items: center;
-    gap: var(--sm2);
-    width: 100%;
-  }
-  .trigger-wrapper {
-    flex: 1;
-  }
-  :global(.user-select-trigger) {
-    width: 100%;
-    justify-content: flex-start;
-    text-align: left;
-  }
-  :global(.clear-button) {
-    padding: 0;
-    min-width: unset;
-    width: 1.5rem;
-    height: 1.5rem;
-    font-size: 1.2rem;
-    line-height: 1;
   }
 </style>
