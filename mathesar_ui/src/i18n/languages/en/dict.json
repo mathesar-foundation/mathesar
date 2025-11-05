@@ -191,6 +191,8 @@
   "database_access_connect_help": "Can access the database",
   "database_access_create_help": "Can access the database and create new schemas",
   "database_disconnect_form_into": "This will disconnect the database from Mathesar.",
+  "database_disconnected_successfully": "Database disconnected successfully",
+  "database_disconnected_without_sql_cleanup": "Database disconnected successfully. Mathesar was unable to connect to the database to remove internal schemas.",
   "database_name": "Database Name",
   "database_new_items_scroll_hint": "Scroll or click here to see the database.",
   "database_not_found": "Database with id [connectionId] is not found.",
