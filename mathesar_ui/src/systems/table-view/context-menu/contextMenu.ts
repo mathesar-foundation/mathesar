@@ -20,6 +20,7 @@ import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
 import { copyCells } from './entries/copyCells';
+import { deleteColumn } from './entries/deleteColumn';
 import { deleteRecords } from './entries/deleteRecords';
 import { duplicateRecord } from './entries/duplicateRecord';
 import { modifyFilters } from './entries/modifyFilters';
@@ -86,6 +87,8 @@ export function openTableCellContextMenu({
     yield* modifyGrouping({ tabularData, column });
 
     yield menuSection(...openTable({ column }));
+
+    yield* deleteColumn({ tabularData, column });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
