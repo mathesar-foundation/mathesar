@@ -23,6 +23,7 @@
   } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
+  import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
@@ -201,8 +202,14 @@
 <DisconnectDatabaseModal
   controller={disconnectModal}
   disconnect={async (opts) => {
-    await databasesStore.disconnectDatabase(opts);
+    const result = await databasesStore.disconnectDatabase(opts);
+    if (result.sql_cleaned) {
+      toast.success($_('database_disconnected_successfully'));
+    } else {
+      toast.success($_('database_disconnected_without_sql_cleanup'));
+    }
     router.goto('/');
+    return result;
   }}
 />
 
