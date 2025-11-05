@@ -1,15 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { router } from 'tinro';
+
   import type { Database } from '@mathesar/models/Database';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
-  import { modal } from '@mathesar/stores/modal';
   import { databasesStore } from '@mathesar/stores/databases';
+  import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
-
-  import DisconnectDatabaseModal from '../../database/disconnect/DisconnectDatabaseModal.svelte';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
+
+  import DisconnectDatabaseModal from '../../database/disconnect/DisconnectDatabaseModal.svelte';
 
   import DatabaseCardContent from './DatabaseCardContent.svelte';
 
