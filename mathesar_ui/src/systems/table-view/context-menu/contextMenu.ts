@@ -9,8 +9,7 @@ import {
   subMenu,
 } from '@mathesar/component-library';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
-import type { CopyingContext } from '@mathesar/components/sheet/clipboard/copy';
-import type { PastingContext } from '@mathesar/components/sheet/clipboard/paste';
+import type { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard/SheetClipboardHandler';
 import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { ImperativeFilterController } from '@mathesar/pages/table/ImperativeFilterController';
@@ -39,10 +38,7 @@ export function openTableCellContextMenu({
   modalRecordView,
   tabularData,
   imperativeFilterController,
-  copyingContext,
-  pastingContext,
-  showToastInfo,
-  showToastError,
+  clipboardHandler,
 }: {
   targetCell: SheetCellDetails;
   position: ClientPosition;
@@ -50,10 +46,7 @@ export function openTableCellContextMenu({
   modalRecordView: ModalController<RecordStore> | undefined;
   tabularData: TabularData;
   imperativeFilterController: ImperativeFilterController | undefined;
-  copyingContext: CopyingContext;
-  pastingContext?: PastingContext;
-  showToastInfo: (msg: string) => void;
-  showToastError: (msg: string) => void;
+  clipboardHandler: SheetClipboardHandler;
 }): 'opened' | 'empty' {
   const { selection } = tabularData;
 
@@ -107,15 +100,11 @@ export function openTableCellContextMenu({
 
   function* getEntriesForMultipleCells(cellIds: string[]) {
     yield* copyCells({
-      selection: get(selection),
-      copyingContext,
-      showToastInfo,
-      showToastError,
+      clipboardHandler,
     });
     yield* pasteCells({
       selection,
-      pastingContext,
-      showToastError,
+      clipboardHandler,
     });
     yield* setNull({ tabularData, cellIds });
   }

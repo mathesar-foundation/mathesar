@@ -146,10 +146,7 @@
               modalRecordView,
               tabularData: $tabularData,
               imperativeFilterController,
-              copyingContext,
-              pastingContext,
-              showToastInfo: toast.info,
-              showToastError: toast.error,
+              clipboardHandler,
             });
           }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
