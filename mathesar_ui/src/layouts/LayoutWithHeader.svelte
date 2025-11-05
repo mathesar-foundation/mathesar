@@ -1,12 +1,18 @@
 <script lang="ts">
   // TODO: Rename this component to something that represents layout for top-level page
   import AppHeader from '@mathesar/components/AppHeader.svelte';
+  import PoweredByMathesar from '@mathesar/components/PoweredByMathesar.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
   import type { CssVariablesObj } from '@mathesar-component-library/types';
 
   const commonData = preloadCommonData();
   const showHeader = commonData.routing_context !== 'anonymous';
+  $: customLogoUrl = commonData.custom_logo_url;
+  $: hasCustomLogo =
+    customLogoUrl &&
+    typeof customLogoUrl === 'string' &&
+    customLogoUrl.trim() !== '';
 
   export let fitViewport = false;
   export let restrictWidth = false;
@@ -27,6 +33,11 @@
   <main class="app-layout-content" class:restrict-width={restrictWidth}>
     <slot />
   </main>
+  {#if showHeader && hasCustomLogo}
+    <footer class="app-layout-footer">
+      <PoweredByMathesar />
+    </footer>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -53,6 +64,14 @@
         margin-right: auto;
         width: 100%;
       }
+    }
+
+    .app-layout-footer {
+      flex: 0 0;
+      border-top: 1px solid var(--color-border-divider);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     &:not(.fit-viewport) {

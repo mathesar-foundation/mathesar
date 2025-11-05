@@ -320,6 +320,7 @@
   "form": "Form",
   "form_contains_fields_with_errors": "The form contains field(s) with errors. Proceeding will auto-remove those fields from the form.",
   "form_created_with_mathesar": "This form was created with [mathesarLogo]",
+  "powered_by_mathesar": "Powered by [mathesarLogo]",
   "form_field_column_not_found": "The column associated with this field is no longer present.",
   "form_fk_field_allow_adding_new_records": "Allow users to add new entries if they cannot find one from the list",
   "form_fk_must_create_help": "Users must always create a new record in the related table.",

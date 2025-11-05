@@ -1,14 +1,31 @@
 <script lang="ts">
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
+
+  import CustomLogo from './CustomLogo.svelte';
   import Logo from './Logo.svelte';
   import MathesarName from './MathesarName.svelte';
 
   export let href: string;
   export let compactLayout = false;
+
+  const commonData = preloadCommonData();
+  $: customLogoUrl = commonData.custom_logo_url;
+  $: hasCustomLogo = customLogoUrl && typeof customLogoUrl === 'string' && customLogoUrl.trim() !== '';
+
+  // Debug logging (can be removed later)
+  $: if (commonData.custom_logo_url !== undefined) {
+    console.log('Custom logo URL from CommonData:', commonData.custom_logo_url);
+    console.log('Has custom logo:', hasCustomLogo);
+  }
 </script>
 
 <a {...$$restProps} {href} class="home-link" class:compact={compactLayout}>
-  <Logo />
-  <div class="mathesar"><MathesarName /></div>
+  {#if hasCustomLogo}
+    <CustomLogo logoUrl={customLogoUrl} />
+  {:else}
+    <Logo />
+    <div class="mathesar"><MathesarName /></div>
+  {/if}
 </a>
 
 <style>

@@ -316,6 +316,7 @@
   "form": "フォーム",
   "form_contains_fields_with_errors": "このフォームにはエラーのあるフィールドが含まれています。続行すると、それらのフィールドがフォームから自動的に削除されます。",
   "form_created_with_mathesar": "このフォームは[mathesarLogo]で作成されました。",
+  "powered_by_mathesar": "[mathesarLogo]によって提供",
   "form_field_column_not_found": "このフィールドに関連づけられた列はもう存在しません。",
   "form_fk_field_allow_adding_new_records": "リストに該当するエントリーが見当たらない場合、ユーザーが新規エントリーを追加できるようにします",
   "form_fk_must_create_help": "ユーザーは常に関連テーブルに新規レコードを作成する必要があります。",
