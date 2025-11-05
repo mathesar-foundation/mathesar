@@ -52,7 +52,7 @@ export const deviceInfo = {
 
   // We don't (yet?) have a good way to detect a physical keyboard, so we use
   // a physical mouse as a reasonably good proxy.
-  hasPhysicalKeyboard: readOnly(hasPhysicalMouse),
+  mayHavePhysicalKeyboard: readOnly(hasPhysicalMouse),
 
   hasTouchCapability: readOnly(hasTouchCapability),
 };
