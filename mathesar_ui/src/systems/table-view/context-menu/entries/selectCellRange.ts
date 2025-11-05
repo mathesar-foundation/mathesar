@@ -6,9 +6,9 @@ import { deviceInfo } from '@mathesar/packages/svelte-device-info';
 import { buttonMenuEntry } from '@mathesar-component-library';
 
 export function* selectCellRange(p: { beginSelectingCellRange: () => void }) {
-  const hasPhysicalKeyboard = get(deviceInfo.hasPhysicalKeyboard);
+  const mayHavePhysicalKeyboard = get(deviceInfo.mayHavePhysicalKeyboard);
   const hasTouchCapability = get(deviceInfo.hasTouchCapability);
-  if (hasTouchCapability || !hasPhysicalKeyboard) {
+  if (hasTouchCapability || !mayHavePhysicalKeyboard) {
     yield buttonMenuEntry({
       icon: iconSelectMultipleCells,
       label: get(_)('select_cell_range'),
