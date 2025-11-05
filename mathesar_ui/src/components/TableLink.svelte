@@ -10,6 +10,7 @@
   interface $$Props extends ComponentProps<TableName> {
     table: Table;
     boxed?: boolean;
+    showIcon?: boolean;
   }
 
   export let table: Table;
