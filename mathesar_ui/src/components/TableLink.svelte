@@ -14,6 +14,7 @@
 
   export let table: Table;
   export let boxed = false;
+  export let showIcon = true;
 
   $: tablePageUrl = getTablePageUrl(
     table.schema.database.id,
@@ -24,7 +25,9 @@
 
 <a class="table-link" class:boxed href={tablePageUrl}>
   <TableName {table} {...$$restProps} />
-  <Icon {...iconExternalLink} />
+  {#if showIcon}
+    <Icon {...iconExternalLink} />
+  {/if}
 </a>
 
 <style lang="scss">
@@ -34,10 +37,24 @@
     gap: var(--sm5);
     text-decoration: none;
     max-width: 100%;
+    color: var(--color-link, var(--color-fg));
+    cursor: pointer;
 
     &:hover,
-    &:focus {
+    &:active {
+      /* Use the yellow used by the table icon where available */
+      color: var(--color-table, var(--entity-name-color, var(--color-record)));
       text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 3px solid
+        color-mix(
+          in srgb,
+          var(--color-table, var(--entity-name-color, var(--color-record))) 30%,
+          transparent
+        );
+      outline-offset: 2px;
     }
 
     &.boxed {
