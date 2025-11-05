@@ -1,9 +1,22 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { iconDatabase, iconMoreActions, iconDeleteMajor, iconEdit, iconReinstall, iconRequiresUpgrade } from '@mathesar/icons';
+
+  import {
+    iconDatabase,
+    iconDeleteMajor,
+    iconEdit,
+    iconMoreActions,
+    iconReinstall,
+    iconRequiresUpgrade,
+  } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
-  import { Icon, Button, ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import {
+    Button,
+    ButtonMenuItem,
+    DropdownMenu,
+    Icon,
+  } from '@mathesar-component-library';
 
   export let database: Database;
   export let href: string;
@@ -11,7 +24,8 @@
   export let openEdit: () => void;
   export let openReinstall: () => void;
   export let upgradeRequired = false;
-  export let onTriggerUpgrade: ((database: Database) => void) | undefined = undefined;
+  export let onTriggerUpgrade: ((database: Database) => void) | undefined =
+    undefined;
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
@@ -23,7 +37,12 @@
   let isFocused = false;
 </script>
 
-<div class="db-card-content" class:hover={isHovered} class:focus={isFocused} class:upgrade-required={upgradeRequired}>
+<div
+  class="db-card-content"
+  class:hover={isHovered}
+  class:focus={isFocused}
+  class:upgrade-required={upgradeRequired}
+>
   <div class="content">
     <div class="content-header">
       <div class="icon-container">
@@ -59,22 +78,13 @@
             preferredPlacement="bottom-end"
             icon={iconMoreActions}
           >
-            <ButtonMenuItem
-              icon={iconEdit}
-              on:click={openEdit}
-            >
+            <ButtonMenuItem icon={iconEdit} on:click={openEdit}>
               {$_('edit_connection')}
             </ButtonMenuItem>
-            <ButtonMenuItem
-              icon={iconReinstall}
-              on:click={openReinstall}
-            >
+            <ButtonMenuItem icon={iconReinstall} on:click={openReinstall}>
               {$_('reinstall_mathesar_schemas')}
             </ButtonMenuItem>
-            <ButtonMenuItem
-              icon={iconDeleteMajor}
-              on:click={openDisconnect}
-            >
+            <ButtonMenuItem icon={iconDeleteMajor} on:click={openDisconnect}>
               {$_('disconnect_database')}
             </ButtonMenuItem>
           </DropdownMenu>
