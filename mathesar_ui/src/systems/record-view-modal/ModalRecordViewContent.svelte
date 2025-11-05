@@ -113,7 +113,12 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   {/if}
 
   {#await getJoinableTablesResult(table.oid) then joinableTablesResult}
-    <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />
+    <Widgets
+      {joinableTablesResult}
+      {recordPk}
+      recordSummary={$summary}
+      isInModal
+    />
   {/await}
 </div>
 
