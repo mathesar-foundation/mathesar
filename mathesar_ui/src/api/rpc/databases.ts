@@ -93,7 +93,9 @@ export const databases = {
         password?: string;
         disconnect_db_server?: boolean;
       },
-      void
+      {
+        sql_cleaned: boolean;
+      }
     >(),
   },
   setup: {
