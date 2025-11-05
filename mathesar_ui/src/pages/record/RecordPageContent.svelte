@@ -16,10 +16,9 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import TableName from '@mathesar/components/TableName.svelte';
+  import TableLink from '@mathesar/components/TableLink.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
-  import { getTablePageUrl } from '@mathesar/routes/urls';
   import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
@@ -40,11 +39,6 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     fieldPropsObjects.map((o) => [o.processedColumn.id, o.field]),
   );
   $: form = makeForm(formFields);
-  $: tablePageUrl = getTablePageUrl(
-    table.schema.database.id,
-    table.schema.oid,
-    table.oid,
-  );
 
   function getJoinableTablesResult(tableId: number) {
     return api.tables
@@ -89,9 +83,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
       <div slot="subText" class="table-name">
         <RichText text={$_('record_in_table')} let:slotName>
           {#if slotName === 'tableName'}
-            <a href={tablePageUrl} class="table-name-link">
-              <TableName {table} truncate={false} />
-            </a>
+            <TableLink {table} truncate={false} showIcon={false} />
           {/if}
         </RichText>
       </div>
@@ -164,28 +156,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     grid-column: 1;
     color: var(--color-fg-subtle-1);
   }
-  .table-name-link {
-    color: var(--color-link, var(--color-fg));
-    text-decoration: none;
-    cursor: pointer;
-  }
 
-  .table-name-link:hover,
-  .table-name-link:active {
-    /* Use the yellow used by the table icon where available */
-    color: var(--color-table, var(--entity-name-color, var(--color-record)));
-    text-decoration: underline;
-  }
-
-  .table-name-link:focus-visible {
-    outline: 3px solid
-      color-mix(
-        in srgb,
-        var(--color-table, var(--entity-name-color, var(--color-record))) 30%,
-        transparent
-      );
-    outline-offset: 2px;
-  }
   .form-status {
     grid-row: 1 / span 2;
     grid-column: 2;
