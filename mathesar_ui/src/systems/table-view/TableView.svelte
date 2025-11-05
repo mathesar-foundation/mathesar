@@ -85,7 +85,7 @@
   });
   $: ({ horizontalScrollOffset, scrollOffset } = display);
   $: columnOrder = table.metadata?.column_order ?? [];
-  $: hasNewColumnButton = context !== 'widget' && $currentRoleOwns;
+  $: hasNewColumnButton = $currentRoleOwns;
   /**
    * These are separate variables for readability and also to keep the door open
    * to more easily displaying the Table Inspector even if DDL operations are
