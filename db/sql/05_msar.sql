@@ -3654,10 +3654,22 @@ Args:
 SELECT msar.get_cast_function_name(type_::regtype) || '(' ||
 CONCAT_WS(', ',
   val,
-  'group_sep =>' || quote_literal(cast_options ->> 'group_sep') || '::"char"',
-  'decimal_p =>' || quote_literal(cast_options ->> 'decimal_p') || '::"char"',
-  'curr_pref =>' || quote_literal(cast_options ->> 'curr_pref') || '::text',
-  'curr_suff =>' || quote_literal(cast_options ->> 'curr_suff') || '::text'
+  CASE WHEN NULLIF(cast_options, '{}'::jsonb) IS NOT NULL THEN
+    CASE type_::regtype
+      WHEN 'numeric'::regtype THEN 
+        CONCAT_WS(', ',
+          'group_sep =>' || quote_literal(cast_options ->> 'group_sep') || '::"char"',
+          'decimal_p =>' || quote_literal(cast_options ->> 'decimal_p') || '::"char"'
+        )
+      WHEN 'mathesar_types.mathesar_money'::regtype THEN
+        CONCAT_WS(', ',
+          'group_sep =>' || quote_literal(cast_options ->> 'group_sep') || '::"char"',
+          'decimal_p =>' || quote_literal(cast_options ->> 'decimal_p') || '::"char"',
+          'curr_pref =>' || quote_literal(COALESCE(cast_options ->> 'curr_pref', '$')) || '::text',
+          'curr_suff =>' || quote_literal(COALESCE(cast_options ->> 'curr_suff', '')) || '::text'
+        )
+    END
+  END
 ) || ')'
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
