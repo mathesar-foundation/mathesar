@@ -137,7 +137,11 @@
               tableInspectorTab = 'record';
             }
           }}
-          onCellContextMenu={({ targetCell, position }) => {
+          onCellContextMenu={({
+            targetCell,
+            position,
+            beginSelectingCellRange,
+          }) => {
             if (!contextMenu) return 'empty';
             return openTableCellContextMenu({
               targetCell,
@@ -147,6 +151,7 @@
               tabularData: $tabularData,
               imperativeFilterController,
               clipboardHandler,
+              beginSelectingCellRange,
             });
           }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}

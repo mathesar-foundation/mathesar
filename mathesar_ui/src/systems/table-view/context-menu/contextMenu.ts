@@ -27,6 +27,7 @@ import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
 import { openTable } from './entries/openTable';
 import { pasteCells } from './entries/pasteCells';
+import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
 import { viewRowRecord } from './entries/viewRowRecord';
@@ -39,6 +40,7 @@ export function openTableCellContextMenu({
   tabularData,
   imperativeFilterController,
   clipboardHandler,
+  beginSelectingCellRange,
 }: {
   targetCell: SheetCellDetails;
   position: ClientPosition;
@@ -47,6 +49,7 @@ export function openTableCellContextMenu({
   tabularData: TabularData;
   imperativeFilterController: ImperativeFilterController | undefined;
   clipboardHandler: SheetClipboardHandler;
+  beginSelectingCellRange: () => void;
 }): 'opened' | 'empty' {
   const { selection } = tabularData;
 
@@ -107,6 +110,7 @@ export function openTableCellContextMenu({
       clipboardHandler,
     });
     yield* setNull({ tabularData, cellIds });
+    yield* selectCellRange({ beginSelectingCellRange });
   }
 
   function* getEntriesForOneCell(cellId: string) {
