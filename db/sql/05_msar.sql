@@ -3665,7 +3665,7 @@ CONCAT_WS(', ',
         CONCAT_WS(', ',
           'group_sep =>' || quote_literal(cast_options ->> 'group_sep') || '::"char"',
           'decimal_p =>' || quote_literal(cast_options ->> 'decimal_p') || '::"char"',
-          'curr_pref =>' || quote_literal(COALESCE(cast_options ->> 'curr_pref', '$')) || '::text',
+          'curr_pref =>' || quote_literal(COALESCE(cast_options ->> 'curr_pref', '')) || '::text',
           'curr_suff =>' || quote_literal(COALESCE(cast_options ->> 'curr_suff', '')) || '::text'
         )
     END
