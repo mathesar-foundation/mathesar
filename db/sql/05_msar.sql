@@ -3763,7 +3763,7 @@ BEGIN
   IF is_default_dynamic THEN
     default_ := format('%s::%s', old_default, new_type);
   ELSE
-    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type)) INTO default_;
+    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type, cast_options)) INTO default_;
     default_ := quote_literal(default_);
   END IF;
 
