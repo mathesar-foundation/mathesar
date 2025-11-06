@@ -1989,7 +1989,7 @@ BEGIN
   CREATE TABLE test_schema.col_alters (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     col1 text NOT NULL,
-    col2 numeric DEFAULT 5,
+    col2 numeric DEFAULT '5'::numeric,
     "Col sp" text,
     col_opts numeric(5, 3),
     coltim timestamp DEFAULT now()
