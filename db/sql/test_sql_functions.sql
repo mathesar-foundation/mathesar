@@ -5414,6 +5414,30 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_record_summary_after_dropped_referenced_column()
+RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+
+  ALTER TABLE "Counselors" DROP COLUMN "Name";
+  RETURN NEXT is(
+    msar.get_record_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      rec_id => 4,
+      return_record_summaries => true,
+      table_record_summary_templates => jsonb_build_object(
+        '"Students"'::regclass::oid,
+        '[[4], " ", [5], "% - (", [3, 3], " / ", [3, 2, 2], ")"]'::jsonb
+      )
+    ) -> 'record_summaries' ->> '4',
+    'Ida Idalia 90% - (Carol Carlson / )',
+    'record summary executes fine after dropping referenced FK column "Counselors"."Name"'
+  );
+
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_record_to_table_with_preview() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_preview_fkey_cols();
@@ -7321,52 +7345,5 @@ BEGIN
     $j$,
     results
   );
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_build_record_summary_query_skips_dropped_column()
-RETURNS SETOF TEXT AS $$
-DECLARE
-  t_oid oid;
-  key_col smallint;
-  template jsonb;
-  query_text text;
-  result text;
-BEGIN
-  CREATE TABLE table_with_references (
-    id serial PRIMARY KEY,
-    a text,
-    b text,
-    parent integer REFERENCES table_with_references(id)
-  );
-
-  INSERT INTO table_with_references (a, b, parent)
-  VALUES ('row1', 'foo', NULL), ('row2', 'bar', 1);
-
-  t_oid := 'table_with_references'::regclass::oid;
-  key_col := msar.get_pk_column(t_oid);
-
-  template := '[[2], [3]]'::jsonb;
-
-  query_text := msar.build_record_summary_query_from_template(t_oid, key_col, template);
-
-  RETURN NEXT matches(query_text::text, 'a', 'query before drop includes column a');
-  RETURN NEXT matches(query_text::text, 'b', 'query before drop includes column b');
-
-  EXECUTE query_text INTO result;
-  RETURN NEXT pass('summary query executes fine before dropping column');
-
-  ALTER TABLE table_with_references DROP COLUMN b;
-
-  query_text := msar.build_record_summary_query_from_template(t_oid, key_col, template);
-
-  BEGIN
-    EXECUTE query_text INTO result;
-    RETURN NEXT pass('summary query executes fine after dropping column');
-  EXCEPTION WHEN OTHERS THEN
-    RETURN NEXT fail('summary query failed after dropping column: ' || SQLERRM);
-  END;
-
 END;
 $$ LANGUAGE plpgsql;

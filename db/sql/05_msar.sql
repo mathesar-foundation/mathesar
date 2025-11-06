@@ -390,7 +390,7 @@ CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_id integer) RETURNS text AS $$/*
 Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
-More precisely, this function returns the name of attributes of any relation appearing in the
+More precisely, this function returns the name of attributes that are not dropped, for any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function).
 
 Args:
@@ -405,7 +405,7 @@ CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_name text) RETURNS text AS $$/*
 Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
-More precisely, this function returns the unquoted name of attributes of any relation appearing in the
+More precisely, this function returns the unquoted name of attributes that are not dropped, for any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function). If the given
 col_name is not in the relation, we return null.
 
@@ -416,7 +416,7 @@ Args:
   rel_id:  The OID of the relation.
   col_name:  The unquoted name of the column in the relation.
 */
-SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name;
+SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name AND NOT attisdropped;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -4928,12 +4928,16 @@ BEGIN
             join_clause text;
             ref_col_name text;
           BEGIN
-            fk_col_name := msar.get_column_name(contextual_tab_id, fk_col_id);
-            IF fk_col_name IS NULL THEN
+           IF NOT pg_catalog.has_column_privilege(contextual_tab_id, fk_col_id, 'SELECT') THEN
+              -- Silently ignore FK columns that we don't have permissions to select.
               CONTINUE template_parts_loop;
             END IF;
 
-            IF NOT pg_catalog.has_column_privilege(contextual_tab_id, fk_col_id, 'SELECT') THEN
+            fk_col_name := msar.get_column_name(contextual_tab_id, fk_col_id);
+
+            IF fk_col_name IS NULL THEN
+              -- Silently ignore references to non-existing FK columns. This can happen if a column
+              -- has been deleted.
               CONTINUE template_parts_loop;
             END IF;
 
@@ -4978,10 +4982,10 @@ BEGIN
         END LOOP;
 
         ref_col_id := ref_chain[ref_chain_length];
-        ref_col_name := msar.get_column_name(contextual_tab_id, ref_col_id);
-        IF ref_col_name IS NULL THEN
-          CONTINUE template_parts_loop;
-        END IF;
+        -- ref_col_name := msar.get_column_name(contextual_tab_id, ref_col_id);
+        -- IF ref_col_name IS NULL THEN
+        --   CONTINUE template_parts_loop;
+        -- END IF;
 
         IF NOT pg_catalog.has_column_privilege(contextual_tab_id, ref_col_id, 'SELECT') THEN
           -- Silently ignore the final column reference if we don't have permission to select it.
