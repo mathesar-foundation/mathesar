@@ -4982,10 +4982,6 @@ BEGIN
         END LOOP;
 
         ref_col_id := ref_chain[ref_chain_length];
-        -- ref_col_name := msar.get_column_name(contextual_tab_id, ref_col_id);
-        -- IF ref_col_name IS NULL THEN
-        --   CONTINUE template_parts_loop;
-        -- END IF;
 
         IF NOT pg_catalog.has_column_privilege(contextual_tab_id, ref_col_id, 'SELECT') THEN
           -- Silently ignore the final column reference if we don't have permission to select it.
