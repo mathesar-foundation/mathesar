@@ -5,6 +5,7 @@
   import { Button, Icon, iconError } from '@mathesar-component-library';
 
   export let state: 'loading' | 'error' | undefined = undefined;
+  export let showLabel = true;
 
   $: isLoading = state === 'loading';
   $: isError = state === 'error';
@@ -16,14 +17,16 @@
       {...isError && !isLoading ? iconError : iconRefresh}
       spin={isLoading}
     />
-    <span>
-      {#if isLoading}
-        {$_('loading')}
-      {:else if isError}
-        {$_('retry')}
-      {:else}
-        {$_('refresh')}
-      {/if}
-    </span>
+    {#if showLabel}
+      <span>
+        {#if isLoading}
+          {$_('loading')}
+        {:else if isError}
+          {$_('retry')}
+        {:else}
+          {$_('refresh')}
+        {/if}
+      </span>
+    {/if}
   </Button>
 </div>

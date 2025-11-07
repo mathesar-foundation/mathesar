@@ -191,7 +191,9 @@
             },
           })}
         {:else}
-          {$_('count_records', { values: { count: $recordCount } })}
+          {$_('count_records', {
+            values: { count: numberFormatter.format($recordCount) },
+          })}
         {/if}
       </div>
     {/if}
