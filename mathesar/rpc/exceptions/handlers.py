@@ -39,6 +39,6 @@ def _raise_generic_error(e):
                 ': '.join([k, v]) for k, v in diag_dict.items() if v is not None
             ]
         )
-    except:
+    except Exception:
         message = e.__class__.__name__ + ": " + str(e)
     raise RPCException(err_code, message)
