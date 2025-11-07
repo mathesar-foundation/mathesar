@@ -17,8 +17,7 @@ import {
   basisFromZeroEmptyColumns,
   emptyBasis,
 } from './basis';
-import type { Direction } from './Direction';
-import { getRowOffset, getColumnOffset } from './Direction';
+import { type Direction, getColumnOffset, getRowOffset } from './Direction';
 import Plane from './Plane';
 import type { SheetCellDetails } from './selectionUtils';
 
@@ -393,7 +392,8 @@ export default class SheetSelection {
 
     // Parse the active cell
     const activeCell = parseCellId(this.activeCellId);
-    let { rowId: activeRowId, columnId: activeColumnId } = activeCell;
+    const { rowId: initialActiveRowId, columnId: activeColumnId } = activeCell;
+    let activeRowId = initialActiveRowId;
 
     // Normalize placeholder row to last data row for comparison
     if (activeRowId === this.plane.placeholderRowId) {
