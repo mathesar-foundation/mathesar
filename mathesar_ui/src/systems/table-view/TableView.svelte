@@ -132,7 +132,11 @@
               tableInspectorTab = 'record';
             }
           }}
-          onCellContextMenu={({ targetCell, position }) => {
+          onCellContextMenu={({
+            targetCell,
+            position,
+            beginSelectingCellRange,
+          }) => {
             if (!contextMenu) return 'empty';
             return openTableCellContextMenu({
               targetCell,
@@ -141,6 +145,7 @@
               modalRecordView,
               tabularData: $tabularData,
               imperativeFilterController,
+              beginSelectingCellRange,
             });
           }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}

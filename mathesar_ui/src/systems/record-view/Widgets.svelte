@@ -11,6 +11,7 @@
   export let recordPk: string;
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
+  export let isInModal = false;
 
   function buildWidgetInput(joinableTable: JoinableTable) {
     const table = $currentTablesData.tablesMap.get(joinableTable.target);
@@ -32,7 +33,13 @@
   <div class="widgets">
     {#each tableWidgetInputs as { table, fkColumn } (`${table.oid}-${fkColumn.id}`)}
       <section class="table-widget-positioner">
-        <TableWidget {recordPk} {recordSummary} {table} {fkColumn} />
+        <TableWidget
+          {recordPk}
+          {recordSummary}
+          {table}
+          {fkColumn}
+          {isInModal}
+        />
       </section>
     {/each}
   </div>
