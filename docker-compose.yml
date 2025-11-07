@@ -66,6 +66,12 @@ x-config: &config
   # details on how to configure this variable.
   OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}}
 
+  # (Optional) Path to a custom logo file to use for whitelabeling. The file
+  # should be accessible at this path inside the container. For production,
+  # place the file in ./msar/static/images/ and reference it as
+  # /code/static/images/your-logo.png. The backend will serve it at /static/images/your-logo.png
+  MATHESAR_CUSTOM_LOGO: ${MATHESAR_CUSTOM_LOGO:-}
+
 #-------------------------------------------------------------------------------
 # ADDITIONAL INFO ABOUT CONFIG VARIABLES
 #
@@ -119,6 +125,16 @@ x-config: &config
 #   Info: Specifies the settings necessary to configure Single Sign-on (SS0)
 #   identity providers for Mathesar login. This is an optional, alternative
 #   approach to configuring SSO via a configuration file.
+#
+# MATHESAR_CUSTOM_LOGO:
+#   Default: (empty)
+#   Info: Path to a custom logo file for whitelabeling. When set, replaces the
+#         Mathesar logo in the header and adds "Powered by Mathesar" text.
+#         For production, place your logo file in ./msar/static/images/ and set
+#         this to /code/static/images/your-logo.png. The backend will serve it
+#         at /static/images/your-logo.png. For development, you can reference
+#         files in mathesar/static/non-code/images/.
+#   Example: /code/static/images/custom-logo.png
 #
 #-------------------------------------------------------------------------------
 # INFO ABOUT VOLUMES

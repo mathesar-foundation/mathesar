@@ -16,7 +16,11 @@ services:
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}",
+        ]
       interval: 5s
       timeout: 1s
       retries: 30
@@ -69,6 +73,7 @@ services:
       - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
       - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
       - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL-https://example.com/feedback}
+      - MATHESAR_CUSTOM_LOGO=${MATHESAR_CUSTOM_LOGO-/code/mathesar/static/non-code/images/circle-mask.png}
       - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
