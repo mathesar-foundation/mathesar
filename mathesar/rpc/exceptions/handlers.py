@@ -24,7 +24,7 @@ def _raise_generic_error(e):
     err_code = error_codes.get_error_code(e)
     try:
         diag_dict = {
-            e.__class__.__name__: e.diag.message_primary,
+            e.__class__.__name__: e.diag.message_primary or "",
             "Detail": e.diag.message_detail,
             "Hint": e.diag.message_hint,
             "Constraint": e.diag.constraint_name,
