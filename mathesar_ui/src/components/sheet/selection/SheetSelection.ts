@@ -401,8 +401,7 @@ export default class SheetSelection {
     }
 
     // Check if this is a single cell selection
-    const isSingleCell =
-      minRowId === maxRowId && minColumnId === maxColumnId;
+    const isSingleCell = minRowId === maxRowId && minColumnId === maxColumnId;
 
     // Determine if we should grow or shrink
     // In Google Sheets: if active cell is at the edge in the direction we're moving, shrink; otherwise grow
@@ -440,29 +439,26 @@ export default class SheetSelection {
             newMinRowId = newMin;
           }
         }
-      } else {
-        // Moving down
-        if (isSingleCell) {
-          // Single cell - always grow
-          const newMax = this.plane.rowIds.offset(maxRowId, 1);
-          if (newMax !== undefined) {
-            newMaxRowId = newMax;
-          }
-        } else if (activeRowId === maxRowId) {
-          // Active cell is at the bottom edge - shrink
-          const newMax = this.plane.rowIds.offset(maxRowId, -1);
-          if (newMax !== undefined && newMax >= minRowId) {
-            newMaxRowId = newMax;
-          } else {
-            // Can't shrink further, selection becomes a single row
-            newMaxRowId = minRowId;
-          }
+      } else if (isSingleCell) {
+        // Moving down - single cell - always grow
+        const newMax = this.plane.rowIds.offset(maxRowId, 1);
+        if (newMax !== undefined) {
+          newMaxRowId = newMax;
+        }
+      } else if (activeRowId === maxRowId) {
+        // Moving down - active cell is at the bottom edge - shrink
+        const newMax = this.plane.rowIds.offset(maxRowId, -1);
+        if (newMax !== undefined && newMax >= minRowId) {
+          newMaxRowId = newMax;
         } else {
-          // Active cell is not at the bottom edge - grow downward
-          const newMax = this.plane.rowIds.offset(maxRowId, 1);
-          if (newMax !== undefined) {
-            newMaxRowId = newMax;
-          }
+          // Can't shrink further, selection becomes a single row
+          newMaxRowId = minRowId;
+        }
+      } else {
+        // Moving down - active cell is not at the bottom edge - grow downward
+        const newMax = this.plane.rowIds.offset(maxRowId, 1);
+        if (newMax !== undefined) {
+          newMaxRowId = newMax;
         }
       }
     } else if (columnOffset !== 0) {
@@ -491,29 +487,26 @@ export default class SheetSelection {
             newMinColumnId = newMin;
           }
         }
-      } else {
-        // Moving right
-        if (isSingleCell) {
-          // Single cell - always grow
-          const newMax = this.plane.columnIds.offset(maxColumnId, 1);
-          if (newMax !== undefined) {
-            newMaxColumnId = newMax;
-          }
-        } else if (activeColumnId === maxColumnId) {
-          // Active cell is at the right edge - shrink
-          const newMax = this.plane.columnIds.offset(maxColumnId, -1);
-          if (newMax !== undefined && newMax >= minColumnId) {
-            newMaxColumnId = newMax;
-          } else {
-            // Can't shrink further, selection becomes a single column
-            newMaxColumnId = minColumnId;
-          }
+      } else if (isSingleCell) {
+        // Moving right - single cell - always grow
+        const newMax = this.plane.columnIds.offset(maxColumnId, 1);
+        if (newMax !== undefined) {
+          newMaxColumnId = newMax;
+        }
+      } else if (activeColumnId === maxColumnId) {
+        // Moving right - active cell is at the right edge - shrink
+        const newMax = this.plane.columnIds.offset(maxColumnId, -1);
+        if (newMax !== undefined && newMax >= minColumnId) {
+          newMaxColumnId = newMax;
         } else {
-          // Active cell is not at the right edge - grow rightward
-          const newMax = this.plane.columnIds.offset(maxColumnId, 1);
-          if (newMax !== undefined) {
-            newMaxColumnId = newMax;
-          }
+          // Can't shrink further, selection becomes a single column
+          newMaxColumnId = minColumnId;
+        }
+      } else {
+        // Moving right - active cell is not at the right edge - grow rightward
+        const newMax = this.plane.columnIds.offset(maxColumnId, 1);
+        if (newMax !== undefined) {
+          newMaxColumnId = newMax;
         }
       }
     }
