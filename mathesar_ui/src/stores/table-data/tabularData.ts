@@ -209,14 +209,17 @@ export class TabularData {
     );
 
     this.canUpdateRecords = derived(
-      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges, this.processedColumns],
+      [
+        this.hasPrimaryKey,
+        this.table.currentAccess.currentRolePrivileges,
+        this.processedColumns,
+      ],
       ([hasPrimaryKey, tableCurrentRolePrivileges, processedColumns]) =>
-        hasPrimaryKey && (
-          tableCurrentRolePrivileges.has('UPDATE') ||
-          [...processedColumns.values()].some(col =>
-            col.currentRolePrivileges.has('UPDATE')
-          )
-        ),
+        hasPrimaryKey &&
+        (tableCurrentRolePrivileges.has('UPDATE') ||
+          [...processedColumns.values()].some((col) =>
+            col.currentRolePrivileges.has('UPDATE'),
+          )),
     );
 
     this.canDeleteRecords = derived(
