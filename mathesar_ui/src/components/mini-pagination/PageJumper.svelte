@@ -33,7 +33,12 @@
   <Label controller={labelController}>{$_('go_to_page')}</Label>
   <div class="input">
     <InputGroup>
-      <NumberInput {labelController} bind:value={page} bind:element={input} />
+      <NumberInput
+        {labelController}
+        bind:value={page}
+        bind:element={input}
+        useGrouping={'auto'}
+      />
       <Button appearance="primary" type="submit">{$_('go')}</Button>
     </InputGroup>
   </div>
