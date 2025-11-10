@@ -103,7 +103,8 @@
               options={allPageSizeOptions}
               value={size}
               on:change={({ detail: newSize }) => {
-                changePageSize(newSize ?? allPageSizeOptions[0]);
+                if (!newSize) return;
+                changePageSize(newSize);
                 close();
               }}
             />
