@@ -147,10 +147,12 @@
     background: var(--color-navigation-20-hover);
   }
   .detail {
-    padding: var(--sm1);
+    padding: var(--sm4);
   }
   .page-size {
     margin-top: 1em;
     font-size: var(--sm1);
+    display: grid;
+    justify-content: center;
   }
 </style>
