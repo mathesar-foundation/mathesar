@@ -9,14 +9,11 @@ class MathesarObject:
         self._dependencies = dependencies
         self._name = name
         self._code_path = code_path
-        with open(self._code_path, 'rt') as f:
-            self._code = f.read()
 
     @property
     def code(self):
-        return self._code
-#        with open(self._code_path, 'rt') as f:
-#            return f.read()
+        with open(self._code_path, 'rt') as f:
+            return f.read()
 
     @property
     def dependencies(self):
