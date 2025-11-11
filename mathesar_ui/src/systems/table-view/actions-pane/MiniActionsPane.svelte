@@ -6,6 +6,7 @@
 
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
+  import RelatedColumnsDropdown from './record-operations/related-columns/RelatedColumnsDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
 
   const canViewLinkedEntities = true;
@@ -18,13 +19,14 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ meta } = $tabularData);
-  $: ({ filtering, sorting, grouping } = meta);
+  $: ({ filtering, sorting, grouping, relatedColumns } = meta);
 </script>
 
 <div class="mini-actions-pane">
   <FilterDropdown {filtering} {canViewLinkedEntities} {...dropdownProps} />
   <SortDropdown {sorting} {...dropdownProps} />
   <GroupDropdown {grouping} {...dropdownProps} />
+  <RelatedColumnsDropdown {relatedColumns} {...dropdownProps} />
 </div>
 
 <style>

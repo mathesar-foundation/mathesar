@@ -10,6 +10,12 @@ export {
 } from './filtering';
 export { Sorting } from './sorting';
 export { Grouping, type GroupEntry, type TerseGrouping } from './grouping';
+export {
+  RelatedColumns,
+  type RelatedColumnEntry,
+  type TerseRelatedColumns,
+  type AggregationType,
+} from './relatedColumns';
 export { type TableRecordsData } from './records';
 export {
   type GroupHeaderRow,
@@ -49,6 +55,8 @@ export {
   type ProcessedColumns,
   type ProcessedColumnsStore,
 } from './processedColumns';
+export { RelatedColumn } from './relatedColumnDefinitions';
+export type { RelatedColumn as VirtualColumn } from './relatedColumnDefinitions';
 export { type ConstraintsData, type ConstraintsDataStore } from './constraints';
 export { TableStructure } from './TableStructure';
 export { SearchFuzzy } from './searchFuzzy';

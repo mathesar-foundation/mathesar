@@ -29,11 +29,12 @@ function getApiSortDirection(sortDirection: SortDirection): ApiSortDirection {
 
 /**
  * [columnId, sortDirection]
+ * columnId can be a number (for regular columns) or string (for Related columns)
  */
-export type TerseSorting = [number, SortDirection][];
+export type TerseSorting = [number | string, SortDirection][];
 
-export class Sorting extends ImmutableMap<number, SortDirection> {
-  constructor(entries: Iterable<[number, SortDirection]> = []) {
+export class Sorting extends ImmutableMap<number | string, SortDirection> {
+  constructor(entries: Iterable<[number | string, SortDirection]> = []) {
     [...entries].forEach(([, sortDirection]) => {
       // Even though TS will catch build-time errors with SortDirection, we also
       // want runtime validation because new sorting entries are created from

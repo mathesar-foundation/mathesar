@@ -9,8 +9,10 @@ import {
 } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { FileManifest, ResultValue } from '@mathesar/api/rpc/records';
+import type { JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SelectedCellData } from '@mathesar/components/sheet/selection';
@@ -20,11 +22,13 @@ import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelec
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
+import AsyncStore from '@mathesar/stores/AsyncStore';
 import type {
   ProcessedColumns,
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
+import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
@@ -39,6 +43,11 @@ import {
   type ProcessedColumnsStore,
 } from './processedColumns';
 import { RecordsData } from './records';
+import { RecordSummariesCache } from './recordSummariesCache';
+import {
+  type RelatedColumn,
+  buildRelatedColumnsFromRelatedColumns,
+} from './relatedColumnDefinitions';
 
 function getSelectedCellData(
   selection: SheetSelection,
@@ -113,9 +122,21 @@ export class TabularData {
 
   processedColumns: ProcessedColumnsStore;
 
+  /**
+   * Store for fetching joinable tables data needed to build related columns
+   */
+  joinableTablesStore: AsyncStore<void, JoinableTablesResult>;
+
+  /**
+   * All columns including both real (processedColumns) and related columns
+   */
+  allColumns: Readable<Map<number | string, ProcessedColumn | RelatedColumn>>;
+
   constraintsDataStore: ConstraintsDataStore;
 
   recordsData: RecordsData;
+
+  recordSummariesCache: RecordSummariesCache;
 
   display: Display;
 
@@ -157,18 +178,6 @@ export class TabularData {
       database: props.database,
       table: props.table,
     });
-    this.recordsData = new RecordsData({
-      database: props.database,
-      table: props.table,
-      meta: this.meta,
-      columnsDataStore: this.columnsDataStore,
-      contextualFilters,
-      loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
-    });
-    this.display = new Display({
-      meta: this.meta,
-      recordsData: this.recordsData,
-    });
 
     this.table = props.table;
 
@@ -191,6 +200,75 @@ export class TabularData {
           this.table,
         ),
     );
+
+    // Fetch joinable tables for building related columns
+    this.joinableTablesStore = new AsyncStore(() =>
+      api.tables
+        .list_joinable({
+          database_id: this.database.id,
+          table_oid: this.table.oid,
+          // No max_depth - support unlimited depth
+        })
+        .run(),
+    );
+    // Start loading joinable tables immediately
+    void this.joinableTablesStore.run();
+
+    // Combine real columns with related columns
+    this.allColumns = derived(
+      [
+        this.processedColumns,
+        this.meta.relatedColumns,
+        this.joinableTablesStore,
+      ],
+      ([processedColumns, relatedColumns, joinableTablesResult]) => {
+        // Start with real columns
+        const realColumnsArray = [...processedColumns.values()];
+
+        // Build related columns if joinable tables data is available
+        // Use settlement value if it exists (even during reloads, as long as we have a previous resolved value)
+        const relatedColumnsArray =
+          joinableTablesResult.settlement?.state === 'resolved' &&
+          joinableTablesResult.settlement.value
+            ? buildRelatedColumnsFromRelatedColumns(
+                relatedColumns,
+                joinableTablesResult.settlement.value,
+                this.table.oid,
+                realColumnsArray.length, // Start index after real columns
+                this.database.id,
+              )
+            : [];
+
+        // Combine into a single map
+        const combined = new Map<
+          number | string,
+          ProcessedColumn | RelatedColumn
+        >([
+          ...processedColumns,
+          ...relatedColumnsArray.map(
+            (rc) => [rc.id, rc] as [string | number, RelatedColumn],
+          ),
+        ]);
+
+        return combined;
+      },
+    );
+
+    // Now create RecordsData after allColumns is defined
+    this.recordsData = new RecordsData({
+      allColumns: this.allColumns,
+      database: props.database,
+      table: this.table,
+      meta: this.meta,
+      columnsDataStore: this.columnsDataStore,
+      contextualFilters,
+      loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
+    });
+    this.recordSummariesCache = new RecordSummariesCache();
+    this.display = new Display({
+      meta: this.meta,
+      recordsData: this.recordsData,
+    });
 
     this.hasPrimaryKey = derived(this.processedColumns, (processedColumns) =>
       [...processedColumns.values()].some((pc) => pc.column.primary_key),
@@ -223,12 +301,12 @@ export class TabularData {
     const plane = derived(
       [
         this.recordsData.selectableRowsMap,
-        this.processedColumns,
+        this.allColumns,
         this.display.placeholderRowId,
       ],
-      ([selectableRowsMap, processedColumns, placeholderRowId]) => {
+      ([selectableRowsMap, allColumns, placeholderRowId]) => {
         const rowIds = new Series([...selectableRowsMap.keys()]);
-        const columns = [...processedColumns.values()];
+        const columns = [...allColumns.values()];
         const columnIds = new Series(columns.map((c) => String(c.id)));
         return new Plane(rowIds, columnIds, placeholderRowId);
       },
@@ -336,6 +414,22 @@ export class TabularData {
     const pkColumn = get(this.columnsDataStore.pkColumn);
     if (!pkColumn) return undefined;
     return row.record[pkColumn.id];
+  }
+
+  /**
+   * Get a shared AsyncStore for fetching record summaries for a specific table.
+   * This store is cached and shared across all cells that reference the same table,
+   * eliminating duplicate API calls.
+   *
+   * @param tableId - The table OID
+   * @param databaseId - The database ID
+   * @returns A RowSeekerRecordStore that caches results
+   */
+  getRecordSummariesStore(
+    tableId: number,
+    databaseId: number,
+  ): RowSeekerRecordStore {
+    return this.recordSummariesCache.getRecordStore(tableId, databaseId);
   }
 
   destroy(): void {

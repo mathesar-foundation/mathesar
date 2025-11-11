@@ -3,12 +3,18 @@
 
   import type { Tab } from '@mathesar/component-library/types';
   import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
+  import {
+    RelatedColumn,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
   import { TabContainer, defined } from '@mathesar-component-library';
 
   import CellMode from './cell/CellMode.svelte';
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';
   import TableMode from './table/TableMode.svelte';
+
+  const tabularData = getTabularDataStoreFromContext();
 
   const tabMap = {
     table: { label: $_('table'), component: TableMode },
@@ -21,7 +27,35 @@
 
   export let activeTabId: TableInspectorTabId | undefined;
 
-  $: tabs = Object.entries(tabMap).map(([id, tab]) => ({ id, ...tab }));
+  $: ({ allColumns, selection } = $tabularData);
+
+  // Check if any selected columns are related columns
+  $: hasRelatedColumnSelected = (() => {
+    const ids = $selection.columnIds;
+    for (const id of ids) {
+      // Handle both string IDs (related columns) and numeric IDs (real columns)
+      const columnId: string | number =
+        typeof id === 'string' && id.startsWith('related_')
+          ? id
+          : parseInt(id, 10);
+      const column = $allColumns.get(columnId);
+      if (column instanceof RelatedColumn) {
+        return true;
+      }
+    }
+    return false;
+  })();
+
+  // Filter out column tab if related column is selected
+  $: tabs = Object.entries(tabMap)
+    .filter(([id]) => {
+      if (id === 'column' && hasRelatedColumnSelected) {
+        return false;
+      }
+      return true;
+    })
+    .map(([id, tab]) => ({ id, ...tab }));
+
   $: activeTab = defined(activeTabId, (id) => ({ id, ...tabMap[id] }));
 
   function handleTabSelected(e: CustomEvent<{ tab: Tab }>) {

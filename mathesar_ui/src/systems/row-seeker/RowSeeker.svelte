@@ -20,25 +20,55 @@
   export let controller: RowSeekerController;
   export let close: () => void = () => {};
 
-  $: ({ elementId, records, pagination, previousValue, canAddNewRecord } =
-    controller);
+  $: ({
+    elementId,
+    records,
+    pagination,
+    previousValue,
+    canAddNewRecord,
+    selectionType,
+  } = controller);
   $: isLoading = $records.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
   $: hasPagination = recordsCount > $pagination.size;
   $: showSelection = (() => {
+    if (selectionType === 'multiple') {
+      return Array.isArray(previousValue) && previousValue.length > 0;
+    }
     if (!previousValue) return false;
-    const { key } = previousValue;
+    const singleValue = Array.isArray(previousValue)
+      ? previousValue[0]
+      : previousValue;
+    if (!singleValue) return false;
+    const { key } = singleValue;
     if (key === undefined) return false;
     if (key === null) return false;
     return true;
   })();
 
+  let listBoxValue: SummarizedRecordReference[] | undefined = undefined;
+
+  // Initialize listBoxValue from previousValue
+  $: {
+    if (selectionType === 'multiple') {
+      listBoxValue = Array.isArray(previousValue) ? previousValue : [];
+    } else {
+      const singleValue = Array.isArray(previousValue)
+        ? previousValue[0]
+        : previousValue;
+      listBoxValue = singleValue ? [singleValue] : undefined;
+    }
+  }
+
   function selectRecord(val: SummarizedRecordReference[]) {
-    const result = val.at(0);
-    if (!result) return;
-    controller.select(result);
+    if (selectionType === 'multiple') {
+      controller.select(val);
+    } else {
+      const result = val.at(0);
+      controller.select(result ?? null);
+    }
   }
 
   function handleKeyDown(
@@ -46,8 +76,14 @@
     e: KeyboardEvent,
   ) {
     if (e.key === 'Escape') {
-      controller.cancel();
-      close();
+      // In multiple mode, Escape just closes (selection already saved on each change)
+      // In single mode, Escape cancels
+      if (selectionType === 'multiple') {
+        close();
+      } else {
+        controller.cancel();
+        close();
+      }
       return;
     }
     api.handleKeyDown(e);
@@ -76,12 +112,12 @@
 
 <div id={elementId} tabindex="0" data-row-seeker>
   <ListBox
-    selectionType="single"
+    {selectionType}
     mode="static"
-    value={previousValue ? [previousValue] : undefined}
+    bind:value={listBoxValue}
     options={recordsArray}
     on:change={(e) => selectRecord(e.detail)}
-    on:pick={close}
+    on:pick={selectionType === 'single' ? close : undefined}
     checkEquality={(a, b) => a?.key === b?.key}
     let:api
   >

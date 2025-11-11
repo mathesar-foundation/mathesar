@@ -5,12 +5,16 @@ import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 import DataTypes from './data-types';
+import CountLinkedRecordCell from './data-types/components/linked-record/CountLinkedRecordCell.svelte';
 import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
 import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';
+import MultiLinkedRecordCell from './data-types/components/linked-record/MultiLinkedRecordCell.svelte';
 import PrimaryKeyCell from './data-types/components/primary-key/PrimaryKeyCell.svelte';
 import type {
+  CountLinkedRecordCellExternalProps,
   LinkedRecordCellExternalProps,
   LinkedRecordInputExternalProps,
+  MultiLinkedRecordCellExternalProps,
 } from './data-types/components/typeDefinitions';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 import { getCellConfiguration, getCellInfo } from './data-types/utils';
@@ -81,6 +85,18 @@ export function getLinkedRecordInputCap(
   props: LinkedRecordInputExternalProps,
 ): ComponentAndProps {
   return { component: LinkedRecordInput, props };
+}
+
+export function getMultiLinkedRecordCellCap(
+  props: MultiLinkedRecordCellExternalProps,
+): ComponentAndProps {
+  return { component: MultiLinkedRecordCell, props };
+}
+
+export function getCountLinkedRecordCellCap(
+  props: CountLinkedRecordCellExternalProps,
+): ComponentAndProps {
+  return { component: CountLinkedRecordCell, props };
 }
 
 export function getInitialInputValue(

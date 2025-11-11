@@ -52,8 +52,14 @@
   $: ({ currentRoleOwns } = table.currentAccess);
   $: usesVirtualList = context !== 'widget';
   $: sheetHasBorder = context === 'widget';
-  $: ({ processedColumns, display, isLoading, selection, recordsData } =
-    $tabularData);
+  $: ({
+    processedColumns,
+    allColumns,
+    display,
+    isLoading,
+    selection,
+    recordsData,
+  } = $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
     copyingContext: {
       getRows: () =>
@@ -95,7 +101,7 @@
   $: sheetColumns = (() => {
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...$processedColumns.values(),
+      ...$allColumns.values(),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
@@ -106,7 +112,7 @@
   $: columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
     [ID_ADD_NEW_COLUMN, 32],
-    ...getCustomizedColumnWidths($processedColumns.values()),
+    ...getCustomizedColumnWidths($allColumns.values()),
   ]);
   $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
 </script>
@@ -118,7 +124,7 @@
     bind:activeTabId={tableInspectorTab}
   >
     <div class="sheet-area">
-      {#if $processedColumns.size}
+      {#if $allColumns.size}
         <Sheet
           {clipboardHandler}
           {columnWidths}
@@ -132,11 +138,7 @@
               tableInspectorTab = 'record';
             }
           }}
-          onCellContextMenu={({
-            targetCell,
-            position,
-            beginSelectingCellRange,
-          }) => {
+          onCellContextMenu={({ targetCell, position }) => {
             if (!contextMenu) return 'empty';
             return openTableCellContextMenu({
               targetCell,
@@ -145,7 +147,6 @@
               modalRecordView,
               tabularData: $tabularData,
               imperativeFilterController,
-              beginSelectingCellRange,
             });
           }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}

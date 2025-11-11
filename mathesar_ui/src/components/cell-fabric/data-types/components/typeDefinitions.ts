@@ -86,6 +86,72 @@ export interface LinkedRecordInputProps
   setRecordSummary?: (recordId: string, recordSummary: string) => void;
 }
 
+// Multi-linked record (for list aggregation)
+
+export type MultiLinkedRecordCellValue = (string | number)[] | null;
+
+export interface MultiLinkedRecordCellExternalProps {
+  tableId: DBObjectEntry['id'];
+  databaseId: number;
+}
+
+export interface MultiLinkedRecordCellProps
+  extends CellTypeProps<MultiLinkedRecordCellValue>,
+    MultiLinkedRecordCellExternalProps {
+  columnFabric: CellColumnFabric;
+  recordSummaries?: Map<string, string>;
+  setRecordSummary?: (recordId: string, recordSummary: string) => void;
+  // Intermediate table info for DML operations (many-to-many relationships)
+  intermediateTableOid?: number;
+  fkToBaseAttnum?: number;
+  fkToTargetAttnum?: number;
+  baseTableRowPk?: string | number;
+  // For tracking modification status
+  cellKey?: string;
+  modificationStatusMap?: import('@mathesar-component-library').WritableMap<
+    string,
+    import('@mathesar/api/rest/utils/requestUtils').RequestStatus<
+      import('@mathesar/packages/json-rpc-client-builder').RpcError[]
+    >
+  >;
+}
+
+// Count-linked record (for count aggregation)
+
+export type CountLinkedRecordCellValue = {
+  count: number | null;
+  ids: (string | number)[];
+} | null;
+
+export interface CountLinkedRecordCellExternalProps {
+  tableId: DBObjectEntry['id'];
+  databaseId: number;
+  formatForDisplay: (
+    v: string | number | null | undefined,
+  ) => string | null | undefined;
+}
+
+export interface CountLinkedRecordCellProps
+  extends CellTypeProps<CountLinkedRecordCellValue>,
+    CountLinkedRecordCellExternalProps {
+  columnFabric: CellColumnFabric;
+  recordSummaries?: Map<string, string>;
+  setRecordSummary?: (recordId: string, recordSummary: string) => void;
+  // Intermediate table info for DML operations (many-to-many relationships)
+  intermediateTableOid?: number;
+  fkToBaseAttnum?: number;
+  fkToTargetAttnum?: number;
+  baseTableRowPk?: string | number;
+  // For tracking modification status
+  cellKey?: string;
+  modificationStatusMap?: import('@mathesar-component-library').WritableMap<
+    string,
+    import('@mathesar/api/rest/utils/requestUtils').RequestStatus<
+      import('@mathesar/packages/json-rpc-client-builder').RpcError[]
+    >
+  >;
+}
+
 // TextBox
 
 export interface TextBoxCellExternalProps {

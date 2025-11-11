@@ -26,8 +26,14 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, meta, processedColumns, selection, canUpdateRecords } =
-    $tabularData);
+  $: ({
+    recordsData,
+    meta,
+    processedColumns,
+    allColumns,
+    selection,
+    canUpdateRecords,
+  } = $tabularData);
   $: ({
     rowStatus,
     rowCreationStatus,
@@ -94,12 +100,12 @@
         {row}
         grouping={$grouping}
         group={row.group}
-        processedColumnsMap={$processedColumns}
+        processedColumnsMap={$allColumns}
         recordSummariesForSheet={$linkedRecordSummaries}
         fileManifestsForSheet={$fileManifests}
       />
     {:else if isRecordRow(row)}
-      {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+      {#each [...$allColumns] as [columnId, processedColumn] (columnId)}
         <RowCell
           {selection}
           {row}
@@ -114,7 +120,7 @@
         />
       {/each}
     {:else if isHelpTextRow(row)}
-      <NewRecordMessage columnCount={$processedColumns.size} />
+      <NewRecordMessage columnCount={$allColumns.size} />
     {/if}
   </div>
 </SheetRow>

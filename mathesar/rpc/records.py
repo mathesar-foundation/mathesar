@@ -26,10 +26,12 @@ class OrderBy(TypedDict):
     An object defining an `ORDER BY` clause.
 
     Attributes:
-        attnum: The attnum of the column to order by.
+        attnum: The attnum of the column to order by (int for standard columns,
+            string for Related columns like "related_abc123_2").
         direction: The direction to order by.
     """
-    attnum: int
+
+    attnum: int | str
     direction: Literal["asc", "desc"]
 
 
@@ -41,6 +43,7 @@ class FilterAttnum(TypedDict):
         type: Must be `"attnum"`
         value: The attnum of the column to filter by
     """
+
     type: Literal["attnum"]
     value: int
 
@@ -53,6 +56,7 @@ class FilterLiteral(TypedDict):
       type: must be `"literal"`.
       value: The value of the literal.
     """
+
     type: Literal["literal"]
     value: Any
 
@@ -68,6 +72,7 @@ class Filter(TypedDict):
       type: a function or operator to be used in filtering.
       args: The ordered arguments for the function or operator.
     """
+
     type: str
     args: list[Union['Filter', FilterAttnum, FilterLiteral]]
 
@@ -80,8 +85,26 @@ class SearchParam(TypedDict):
         attnum: The attnum of the column in the table.
         literal: The literal to search for in the column.
     """
+
     attnum: int
     literal: Any
+
+
+class RelatedColumnRequest(TypedDict):
+    """
+    Request for a related column value.
+
+    Attributes:
+        join_path: A nested array representing the join path from the base table
+            to the target table. Format: [[[table_oid, attnum], [table_oid, attnum]], ...]
+        column_attnum: The attnum of the column in the target table to retrieve.
+        aggregation: Optional aggregation type when multiple results are possible.
+            'list' returns an array, 'join' returns a comma-separated string, 'sum' returns a sum, 'count' returns a count.
+    """
+
+    join_path: list[list[list[int]]]
+    column_attnum: int
+    aggregation: Optional[Literal["list", "count"]]
 
 
 class Grouping(TypedDict):
@@ -94,6 +117,7 @@ class Grouping(TypedDict):
         columns: The columns to be grouped by.
         preproc: The preprocessing functions to apply (if any).
     """
+
     columns: list[int]
     preproc: list[str]
 
@@ -152,6 +176,9 @@ class RecordList(TypedDict):
         record_summaries: Information for previewing returned records.
         download_links: Information for viewing or downloading file
             attachments.
+        related_column_values: Optional map of related column IDs to values.
+            Keys are related column IDs (e.g., "related_[[[24399,1],[24424,3]]]_1").
+            Values are maps from base table primary key values to aggregated results.
     """
     count: int
     results: list[dict]
@@ -159,6 +186,7 @@ class RecordList(TypedDict):
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
     download_links: Optional[dict]
+    related_column_values: Optional[dict[str, dict[str, Any]]]
 
     @classmethod
     def from_dict(cls, d):
@@ -168,7 +196,8 @@ class RecordList(TypedDict):
             grouping=d.get("grouping"),
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
-            download_links=d.get("download_links") or None
+            download_links=d.get("download_links") or None,
+            related_column_values=d.get("related_column_values") or None,
         )
 
 
@@ -208,6 +237,7 @@ class SummarizedRecordReference(TypedDict):
         key: A unique identifier for the record.
         summary: The record summary
     """
+
     key: Any
     summary: str
 
@@ -242,6 +272,7 @@ def list_(
         filter: Filter = None,
         grouping: Grouping = None,
         return_record_summaries: bool = False,
+        related_columns: Optional[list[RelatedColumnRequest]] = None,
         **kwargs
 ) -> RecordList:
     """
@@ -258,6 +289,8 @@ def list_(
         grouping: An array of group definition objects.
         return_record_summaries: Whether to return summaries of retrieved
             records.
+        related_columns: Optional list of related column requests to fetch
+            aggregated values from related tables.
 
     Returns:
         The requested records, along with some metadata.
@@ -274,6 +307,7 @@ def list_(
             group=grouping,
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
+            related_columns=related_columns,
         )
     download_link_columns = get_download_link_columns(table_oid, database_id)
     record_info["download_links"] = get_download_links(
@@ -457,6 +491,7 @@ def search(
         limit: int = 10,
         offset: int = 0,
         return_record_summaries: bool = False,
+        related_columns: Optional[list[RelatedColumnRequest]] = None,
         **kwargs
 ) -> RecordList:
     """
@@ -479,6 +514,8 @@ def search(
             following rows.
         return_record_summaries: Whether to return summaries of retrieved
             records.
+        related_columns: Optional list of related column requests to fetch
+            aggregated values from related tables.
 
     Returns:
         The requested records, along with some metadata.
@@ -493,6 +530,7 @@ def search(
             offset=offset,
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
+            related_columns=related_columns,
         )
     download_link_columns = get_download_link_columns(table_oid, database_id)
     record_info["download_links"] = get_download_links(

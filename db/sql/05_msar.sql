@@ -954,7 +954,7 @@ CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
   type text, -- The type of the column for the table.
   type_options jsonb, -- type_options for the column(if any).
   nullable boolean, -- is the column nullable.
-  primary_key boolean, -- whether the column has primary key constraint. 
+  primary_key boolean, -- whether the column has primary key constraint.
   "default" jsonb, -- the default for the column(if any).
   has_dependents boolean, -- is the column referenced by others.
   description text, -- The description of the column on the database.
@@ -2488,7 +2488,7 @@ __msar.process_pk_col_def(
   -- The below tuple(s) defines a default 'id' column for Mathesar. It can have a given name, type
   -- integer or uuid, it's not null, it uses the 'identity' or 'gen_random_uuid()' functionality to
   -- generate default values, has a default comment.
-  SELECT CASE pkey_type 
+  SELECT CASE pkey_type
     WHEN 'IDENTITY' THEN
       ARRAY[
         (col_name, 'integer', true, null, pkey_type, 'Mathesar default integer ID column')
@@ -3260,7 +3260,7 @@ BEGIN
   END IF;
 
   IF jsonb_path_exists(col_defs, '$[*] ? (@.name == "id")') THEN
-    -- rename 'id' 
+    -- rename 'id'
     SELECT array_agg(col_def->>'name') INTO existing_col_names FROM jsonb_array_elements(col_defs) col_def;
     id_col_name := msar.get_unique_local_identifier(existing_col_names, 'id');
 
@@ -3875,15 +3875,15 @@ BEGIN
       -- set new default
       PERFORM msar.set_col_default(tab_id, col.attnum, col.new_default #>> '{}');
     ELSEIF (col.new_default IS NULL OR jsonb_typeof(col.new_default)<>'null') AND col.new_type IS NOT NULL THEN
-      -- preserve old default 
+      -- preserve old default
       -- when a new_default is absent and col is retyped with a new_type.
       -- Note: We don't want to preserve old default for jsonb_typeof(col.new_default)='null'
-      -- as we consider it as an intent to drop the default. 
+      -- as we consider it as an intent to drop the default.
       PERFORM msar.set_old_col_default(tab_id, col.attnum, col.old_default, col.new_type, is_default_dynamic, col.cast_options);
     END IF;
 
     -- PG13 doesn't allow concat b/w integer[] and smallint need to typecast
-    return_attnum_arr := return_attnum_arr || col.attnum::integer; 
+    return_attnum_arr := return_attnum_arr || col.attnum::integer;
   END LOOP;
   RETURN return_attnum_arr; -- do we really need this??
 END;
@@ -4554,16 +4554,23 @@ Build a deterministic order expression for the given table and order JSON.
 Args:
   tab_id: The OID of the table whose columns we'll order by.
   order_: A JSONB array defining any desired ordering of columns.
+  Note: This function only handles regular columns (numeric attnums).
+  For Related column sorting, use build_related_column_order_expr.
 */
 SELECT string_agg(format('%I %s', attnum, msar.sanitize_direction(direction)), ', ')
-FROM jsonb_to_recordset(
+FROM (
+  SELECT
+    (entry->>'attnum')::smallint AS attnum,
+    entry->>'direction' AS direction
+  FROM jsonb_array_elements(
     COALESCE(
       COALESCE(order_, '[]'::jsonb) || msar.get_pkey_order(tab_id),
       COALESCE(order_, '[]'::jsonb) || msar.get_total_order(tab_id)
     )
-)
-  AS x(attnum smallint, direction text)
-WHERE has_column_privilege(tab_id, attnum, 'SELECT');
+  ) AS entry
+  WHERE jsonb_typeof(entry->'attnum') = 'number'
+) AS x
+WHERE has_column_privilege(tab_id, x.attnum, 'SELECT');
 $$ LANGUAGE SQL STABLE;
 
 
@@ -4575,6 +4582,9 @@ The ORDER BY expression will refer to columns by their attnum. This is designed 
 with `msar.build_selectable_column_expr`. It will only use the columns to which the user has access.
 Finally, this function will append either a primary key, or all columns to the produced ORDER BY so
 the resulting ordering is totally defined (i.e., deterministic).
+
+Note: This function only handles regular columns (numeric attnums).
+For Related column sorting, the ORDER BY must be built separately and combined.
 
 Args:
   tab_id: The OID of the table whose columns we'll order by.
@@ -4719,7 +4729,7 @@ CREATE OR REPLACE FUNCTION
 msar.build_groups_cte_expr(tab_id oid, eq_cte_name text, ranked_cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
 */
 SELECT format(
-  $gj$
+  $gj$SELECT
     %1$I.__mathesar_gid AS id,
     __mathesar_gcount AS count,
     to_jsonb(%1$I) - '__mathesar_gid' AS results_eq,
@@ -4771,7 +4781,7 @@ this function will return a jsonb as follows:
 Args:
   tab_id: The OID of the table containing the columns to select.
 */
-SELECT coalesce(jsonb_object_agg(attnum, attname), '{}'::jsonb)
+SELECT coalesce(jsonb_object_agg(attnum, attname ORDER BY attnum), '{}'::jsonb)
 FROM pg_catalog.pg_attribute
 WHERE
   attrelid = tab_id
@@ -4792,7 +4802,7 @@ Args:
            { "2": <name of column with oid 2>, "4": <name of column with oid 4> }
 
 */
-SELECT string_agg(format('msar.format_data(%I) AS %I', sel_column.value, sel_column.key), ', ')
+SELECT string_agg(format('msar.format_data(%I) AS %I', sel_column.value, sel_column.key), ', ' ORDER BY sel_column.key::integer)
 FROM jsonb_each_text(columns) as sel_column;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -5115,9 +5125,7 @@ Args:
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT concat(
-  format(E'\nLEFT JOIN summary_cte_self ON %1$I.', cte_name)
-  || quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text)
-  || ' = summary_cte_self.key' ,
+  format(E'\nLEFT JOIN summary_cte_self ON %1$I.pk = summary_cte_self.key', cte_name),
   string_agg(
     format(
       $j$
@@ -5170,6 +5178,592 @@ END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.build_related_column_id(join_path jsonb, column_attnum integer) RETURNS text AS $$/*
+Build a unique identifier for a related column based on its join path and column attnum.
+
+Uses MD5 hash of the join path to create a safe SQL identifier (avoids JSON characters in identifiers).
+MD5 is used because it's built-in to PostgreSQL and doesn't require the pgcrypto extension.
+
+The join_path is normalized to compact JSON (no spaces) to match frontend hash generation.
+
+Args:
+  join_path: A JSONB array representing the join path: [[[table_oid, attnum], [table_oid, attnum]], ...]
+  column_attnum: The attnum of the target column in the final table.
+*/
+SELECT format('related_%s_%s', md5(replace(join_path::text, ' ', '')), column_attnum);
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.path_hash(join_path jsonb) RETURNS text AS $$/*
+Returns first 8 hex characters of MD5 hash of join_path for path grouping.
+
+This is used to group related columns that share the same join path, allowing
+one CTE to serve multiple related columns with different aggregations.
+
+Uses MD5 (built-in, no extensions required) instead of SHA256.
+
+Args:
+  join_path: A JSONB array representing the join path: [[[table_oid, attnum], [table_oid, attnum]], ...]
+*/
+SELECT substr(md5(replace(join_path::text, ' ', '')), 1, 8);
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.related_alias(h8 text) RETURNS text AS $$/*
+Returns CTE alias for a related column path group.
+
+Args:
+  h8: First 8 hex characters of path hash.
+*/
+SELECT 'rc_' || h8;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.value_col_name(attnum integer, agg text) RETURNS text AS $$/*
+Returns value column name for a related column aggregation.
+
+Args:
+  attnum: The column attnum.
+  agg: The aggregation type (e.g., 'sum', 'count', 'list').
+*/
+SELECT format('v_%s_%s', attnum, lower(coalesce(agg, '')));
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_related_column_query(
+  base_table_oid oid,
+  join_path jsonb,
+  target_column_attnum integer,
+  aggregation text,
+  ids_cte_name text DEFAULT NULL
+) RETURNS text AS $$/*
+Build a SQL query that retrieves related column values following a join path.
+
+Args:
+  base_table_oid: The OID of the base table to start from.
+  join_path: A JSONB array representing the join path: [[[table_oid, attnum], [table_oid, attnum]], ...]
+  target_column_attnum: The attnum of the target column in the final table.
+  aggregation: The aggregation type: 'list', 'join', 'sum', 'count', or NULL for single value.
+  ids_cte_name: Optional name of a CTE containing base_pk values to scope the query to (e.g., 'page_ids').
+*/
+DECLARE
+  query_parts text[];
+  base_alias text := 'base';
+  current_table_oid oid;
+  current_table_schema text;
+  current_table_name text;
+  join_step jsonb;
+  left_table_oid oid;
+  left_attnum integer;
+  left_attname text;
+  right_table_oid oid;
+  right_attnum integer;
+  right_attname text;
+  alias_counter integer := 0;
+  current_alias text;
+  next_alias text;
+  target_table_oid oid;
+  target_table_schema text;
+  target_table_name text;
+  target_column_name text;
+  target_pk_attnum integer;
+  target_pk_attname text;
+  base_pk_attnum integer;
+  base_pk_attname text;
+  ids_expr text;
+  values_expr text;
+  inner_query text;
+  outer_query text;
+BEGIN
+  -- Get base table info
+  current_table_oid := base_table_oid;
+  SELECT msar.get_relation_schema_name(current_table_oid),
+         msar.get_relation_name(current_table_oid)
+  INTO current_table_schema, current_table_name;
+
+  base_pk_attnum := msar.get_selectable_pkey_attnum(base_table_oid);
+
+  -- Get base PK column name
+  SELECT attname INTO base_pk_attname
+  FROM pg_attribute
+  WHERE attrelid = base_table_oid
+    AND attnum = base_pk_attnum
+    AND NOT attisdropped;
+
+  current_alias := base_alias;
+
+  -- Build initial FROM clause with optional JOIN to ids_cte if provided
+  IF ids_cte_name IS NOT NULL THEN
+    query_parts := array_append(query_parts, format(
+      'FROM %I.%I AS %I JOIN %I ON %I.base_pk = %I.%I',
+      current_table_schema,
+      current_table_name,
+      current_alias,
+      ids_cte_name,
+      ids_cte_name,
+      current_alias,
+      base_pk_attname
+    ));
+  ELSE
+    query_parts := array_append(query_parts, format(
+      'FROM %I.%I AS %I',
+      current_table_schema,
+      current_table_name,
+      current_alias
+    ));
+  END IF;
+
+  -- Process each join step
+  FOR join_step IN SELECT jsonb_array_elements(join_path)
+  LOOP
+    left_table_oid := (join_step -> 0 ->> 0)::bigint::oid;
+    left_attnum := (join_step -> 0 ->> 1)::integer;
+    right_table_oid := (join_step -> 1 ->> 0)::bigint::oid;
+    right_attnum := (join_step -> 1 ->> 1)::integer;
+
+    -- Get actual column names for join conditions
+    SELECT attname INTO left_attname
+    FROM pg_attribute
+    WHERE attrelid = left_table_oid
+      AND attnum = left_attnum
+      AND NOT attisdropped;
+
+    SELECT attname INTO right_attname
+    FROM pg_attribute
+    WHERE attrelid = right_table_oid
+      AND attnum = right_attnum
+      AND NOT attisdropped;
+
+    -- Determine which table we're joining to
+    IF current_table_oid = left_table_oid THEN
+      -- Joining from left to right
+      current_table_oid := right_table_oid;
+      alias_counter := alias_counter + 1;
+      next_alias := format('t%s', alias_counter);
+
+      SELECT msar.get_relation_schema_name(current_table_oid),
+             msar.get_relation_name(current_table_oid)
+      INTO current_table_schema, current_table_name;
+
+      query_parts := array_append(query_parts, format(
+        'LEFT JOIN %I.%I AS %I ON %I.%I = %I.%I',
+        current_table_schema,
+        current_table_name,
+        next_alias,
+        current_alias,
+        left_attname,
+        next_alias,
+        right_attname
+      ));
+
+      current_alias := next_alias;
+    ELSIF current_table_oid = right_table_oid THEN
+      -- Joining from right to left (reverse direction)
+      current_table_oid := left_table_oid;
+      alias_counter := alias_counter + 1;
+      next_alias := format('t%s', alias_counter);
+
+      SELECT msar.get_relation_schema_name(current_table_oid),
+             msar.get_relation_name(current_table_oid)
+      INTO current_table_schema, current_table_name;
+
+      query_parts := array_append(query_parts, format(
+        'LEFT JOIN %I.%I AS %I ON %I.%I = %I.%I',
+        current_table_schema,
+        current_table_name,
+        next_alias,
+        current_alias,
+        right_attname,
+        next_alias,
+        left_attname
+      ));
+
+      current_alias := next_alias;
+    ELSE
+      -- This shouldn't happen if join_path is valid, but handle gracefully
+      RAISE EXCEPTION 'Invalid join path: current table % does not match join step', current_table_oid;
+    END IF;
+  END LOOP;
+
+  -- Get target table info and column names
+  target_table_oid := current_table_oid;
+  SELECT msar.get_relation_schema_name(target_table_oid),
+         msar.get_relation_name(target_table_oid),
+         attname
+  INTO target_table_schema, target_table_name, target_column_name
+  FROM pg_attribute
+  WHERE attrelid = target_table_oid
+    AND attnum = target_column_attnum
+    AND NOT attisdropped;
+
+  -- Get target table PK column name
+  target_pk_attnum := msar.get_selectable_pkey_attnum(target_table_oid);
+  SELECT attname INTO target_pk_attname
+  FROM pg_attribute
+  WHERE attrelid = target_table_oid
+    AND attnum = target_pk_attnum
+    AND NOT attisdropped;
+
+  -- Build the inner query (FROM/JOINs) as a string
+  inner_query := array_to_string(query_parts, E'\n');
+
+  -- Validate aggregation type (only 'list' and 'count' are supported in this simplified version)
+  IF aggregation IS NOT NULL AND aggregation NOT IN ('list', 'count') THEN
+    RAISE EXCEPTION 'Unsupported aggregation type: %. Only ''list'' and ''count'' are supported.', aggregation;
+  END IF;
+
+  -- Build aggregation expressions with DISTINCT moved outside aggregates
+  -- Each CTE must expose a typed 'value' column for sorting (numeric/date/text/etc.)
+  IF aggregation = 'list' THEN
+    -- For 'list', aggregate as array of {id, value} objects
+    -- Limit to 25 items per base_pk for performance
+    -- Add a typed value column (NULL for list aggregation - not sortable)
+    -- Use window function for limiting, then aggregate
+    outer_query := format(
+        $q$SELECT base_pk,
+         jsonb_agg(jsonb_build_object('id', id, 'value', val) ORDER BY id) AS items,
+         NULL::text AS value
+        FROM (
+          SELECT base_pk, id, val
+          FROM (
+            SELECT base_pk,
+                   id,
+                   val,
+                   row_number() OVER (PARTITION BY base_pk ORDER BY id) AS rn
+            FROM (
+              SELECT %I.%I AS base_pk,
+                     %I.%I AS id,
+                     %I.%I AS val
+              %s
+              WHERE %I.%I IS NOT NULL
+            ) distinct_rows
+          ) numbered
+          WHERE rn <= 25
+        ) d
+        GROUP BY base_pk$q$,
+        base_alias,
+        base_pk_attname,
+        current_alias, target_pk_attname,
+        current_alias, target_column_name,
+        inner_query,
+        current_alias, target_pk_attname
+    );
+  ELSIF aggregation = 'count' THEN
+    -- For 'count', return typed integer value for sorting
+    -- Also return JSONB structure for frontend display (via aggregation query)
+    outer_query := format(
+        $q$SELECT base_pk,
+         COUNT(*)::bigint AS value,
+         jsonb_build_object(
+           'count', COUNT(*),
+           'ids', jsonb_agg(id ORDER BY id)
+         ) AS value_jsonb
+        FROM (
+          SELECT %I.%I AS base_pk,
+                 %I.%I AS id
+          %s
+          WHERE %I.%I IS NOT NULL
+        ) d
+        GROUP BY base_pk$q$,
+        base_alias,
+        base_pk_attname,
+        current_alias, target_pk_attname,
+        inner_query,
+        current_alias, target_pk_attname
+    );
+  ELSE
+    -- Single value (no aggregation) - return single value directly
+    outer_query := format(
+        $q$SELECT %I.%I AS base_pk, MIN(%I.%I) AS value
+        %s
+        GROUP BY %I.%I$q$,
+        base_alias,
+        base_pk_attname,
+        current_alias, target_column_name,
+        inner_query,
+        base_alias,
+        base_pk_attname
+    );
+  END IF;
+
+  RETURN outer_query;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_related_columns_ctes(
+  base_table_oid oid,
+  related_columns jsonb,
+  ids_cte_name text DEFAULT NULL
+) RETURNS text AS $$/*
+Build SQL text defining CTEs for related column queries.
+
+Args:
+  base_table_oid: The OID of the base table.
+  related_columns: A JSONB array of related column requests, each with:
+    - join_path: [[[table_oid, attnum], [table_oid, attnum]], ...]
+    - column_attnum: integer
+    - aggregation: 'list' or 'count' (only these two are supported)
+  ids_cte_name: Optional name of a CTE containing base_pk values to scope queries to (e.g., 'page_ids').
+*/
+DECLARE
+  cte_parts text[];
+  rel_col jsonb;
+  rel_col_id text;
+  rel_col_query text;
+BEGIN
+  IF related_columns IS NULL OR jsonb_array_length(related_columns) = 0 THEN
+    RETURN '';
+  END IF;
+
+  FOR rel_col IN SELECT jsonb_array_elements(related_columns)
+  LOOP
+    rel_col_id := msar.build_related_column_id(
+      rel_col -> 'join_path',
+      (rel_col -> 'column_attnum')::integer
+    );
+
+    rel_col_query := msar.build_related_column_query(
+      base_table_oid,
+      rel_col -> 'join_path',
+      (rel_col -> 'column_attnum')::integer,
+      NULLIF(rel_col ->> 'aggregation', '')::text,
+      ids_cte_name
+    );
+
+    cte_parts := array_append(cte_parts, format('%I AS (%s)', rel_col_id, rel_col_query));
+END LOOP;
+
+  RETURN ', ' || array_to_string(cte_parts, ', ');
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_related_columns_join_expr(
+  base_table_oid oid,
+  base_cte_name text,
+  related_columns jsonb
+) RETURNS text AS $$/*
+Build SQL expressions to LEFT JOIN related column CTEs to the main CTE.
+
+Args:
+  base_table_oid: The OID of the base table.
+  base_cte_name: The name of the main CTE to join to.
+  related_columns: A JSONB array of related column requests.
+*/
+DECLARE
+  join_parts text[];
+  rel_col jsonb;
+  rel_col_id text;
+  base_pk_attnum integer;
+  base_pk_attname text;
+BEGIN
+  IF related_columns IS NULL OR jsonb_array_length(related_columns) = 0 THEN
+    RETURN '';
+  END IF;
+
+  base_pk_attnum := msar.get_selectable_pkey_attnum(base_table_oid);
+
+  -- Get base PK column name
+  SELECT attname INTO base_pk_attname
+  FROM pg_attribute
+  WHERE attrelid = base_table_oid
+    AND attnum = base_pk_attnum
+    AND NOT attisdropped;
+
+  FOR rel_col IN SELECT jsonb_array_elements(related_columns)
+  LOOP
+    rel_col_id := msar.build_related_column_id(
+      rel_col -> 'join_path',
+      (rel_col -> 'column_attnum')::integer
+    );
+
+    join_parts := array_append(join_parts, format(E'
+LEFT JOIN %I ON %I.%I = %I.base_pk', rel_col_id, base_cte_name, base_pk_attname, rel_col_id));
+  END LOOP;
+
+  RETURN array_to_string(join_parts, '');
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_related_columns_aggregation_query(
+  related_columns jsonb,
+  page_ids_cte_name text DEFAULT NULL
+) RETURNS text AS $$/*
+Build a SQL query that aggregates all related column CTEs into the final JSON structure.
+
+Args:
+  related_columns: A JSONB array of related column requests.
+  page_ids_cte_name: Optional name of a CTE containing base_pk values to ensure all are included
+                     (e.g., 'page_ids'). If provided, LEFT JOINs with this CTE to include
+                     base_pk values with 0 related rows.
+*/
+DECLARE
+  union_parts text[];
+  rel_col jsonb;
+  rel_col_id text;
+  cte_alias text;
+  join_expr text;
+BEGIN
+  IF related_columns IS NULL OR jsonb_array_length(related_columns) = 0 THEN
+    RETURN 'SELECT NULL::text AS key, NULL::jsonb AS value WHERE false';
+  END IF;
+
+  FOR rel_col IN SELECT jsonb_array_elements(related_columns)
+  LOOP
+    rel_col_id := msar.build_related_column_id(
+      rel_col -> 'join_path',
+      (rel_col -> 'column_attnum')::integer
+    );
+    cte_alias := rel_col_id;  -- Use rel_col_id directly as the CTE alias
+
+    -- If page_ids_cte_name is provided, LEFT JOIN with it to ensure all base_pk values are included
+    -- This ensures that base_pk values with 0 related rows still appear in the result with NULL/0 values
+    -- Note: page_ids.base_pk is text (formatted column value), so we need to cast for comparison
+    IF page_ids_cte_name IS NOT NULL THEN
+      join_expr := format(' FROM %I LEFT JOIN %I ON %I.base_pk::text = %I.base_pk::text',
+                          page_ids_cte_name, cte_alias, page_ids_cte_name, cte_alias);
+    ELSE
+      join_expr := format(' FROM %I', cte_alias);
+    END IF;
+
+    -- Check aggregation type to determine which column to use
+    -- For 'list' aggregation, use 'items' column (array of {id, value} objects)
+    -- For 'count', use 'value_jsonb' column (JSONB structure for frontend)
+    -- Only 'list' and 'count' are supported in this simplified version
+    IF (rel_col -> 'aggregation')::text = '"list"' THEN
+      IF page_ids_cte_name IS NOT NULL THEN
+        -- When joining with page_ids, use COALESCE to provide default empty array for NULL values
+        union_parts := array_append(union_parts, format(
+          $q$SELECT %L::text AS key,
+            jsonb_object_agg(%I.base_pk::text, COALESCE(%I.items, '[]'::jsonb)) AS value
+          %s$q$,
+          rel_col_id,
+          page_ids_cte_name, cte_alias,
+          join_expr
+        ));
+      ELSE
+        union_parts := array_append(union_parts, format(
+          $q$SELECT %L::text AS key,
+            jsonb_object_agg(base_pk::text, COALESCE(items, '[]'::jsonb)) AS value
+          %s$q$,
+          rel_col_id,
+          join_expr
+        ));
+      END IF;
+    ELSIF (rel_col -> 'aggregation')::text = '"count"' THEN
+      IF page_ids_cte_name IS NOT NULL THEN
+        -- When joining with page_ids, use COALESCE to provide default {count: 0, ids: []} for NULL values
+        union_parts := array_append(union_parts, format(
+          $q$SELECT %L::text AS key,
+            jsonb_object_agg(%I.base_pk::text, COALESCE(%I.value_jsonb, '{"count": 0, "ids": []}'::jsonb)) AS value
+          %s$q$,
+          rel_col_id,
+          page_ids_cte_name, cte_alias,
+          join_expr
+        ));
+      ELSE
+        union_parts := array_append(union_parts, format(
+          $q$SELECT %L::text AS key,
+            jsonb_object_agg(base_pk::text, value_jsonb) AS value
+          %s$q$,
+          rel_col_id,
+          join_expr
+        ));
+      END IF;
+    ELSE
+      IF page_ids_cte_name IS NOT NULL THEN
+        union_parts := array_append(union_parts, format(
+          $q$SELECT %L::text AS key,
+            jsonb_object_agg(%I.base_pk::text, %I.value) AS value
+          %s$q$,
+          rel_col_id,
+          page_ids_cte_name, cte_alias,
+          join_expr
+        ));
+      ELSE
+        union_parts := array_append(union_parts, format(
+          $q$SELECT %L::text AS key,
+            jsonb_object_agg(base_pk::text, value) AS value
+          %s$q$,
+          rel_col_id,
+          join_expr
+        ));
+      END IF;
+    END IF;
+  END LOOP;
+
+  RETURN array_to_string(union_parts, ' UNION ALL ');
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.split_ctes(cte_block text)
+RETURNS text[] LANGUAGE plpgsql IMMUTABLE AS $$/*
+Splits a comma-separated string of CTE definitions, respecting parentheses depth.
+Used to safely parse multi-CTE blocks returned by helper functions.
+
+Expected input format:
+  ', cte1 AS (...), cte2 AS (...), cte3 AS (...)'
+  or
+  'cte1 AS (...), cte2 AS (...), cte3 AS (...)'
+
+The function handles:
+  - Leading comma (common in helper function outputs)
+  - Nested parentheses in CTE definitions
+  - Empty strings (returns empty array)
+  - Single CTE definitions
+
+Returns an array of CTE definition strings, each in the form 'cte_name AS (...)'.
+*/
+DECLARE
+  result text[];
+  start_ int := 1;
+  depth int := 0;
+  i int;
+  current char;
+  piece text;
+BEGIN
+  cte_block := btrim(coalesce(cte_block, ''));
+  IF cte_block = '' THEN
+    RETURN ARRAY[]::text[];
+  END IF;
+
+  FOR i IN 1..length(cte_block) LOOP
+    current := substring(cte_block, i, 1);
+    IF current = '(' THEN
+      depth := depth + 1;
+    ELSIF current = ')' THEN
+      depth := depth - 1;
+    END IF;
+
+    IF (current = ',' AND depth = 0) OR i = length(cte_block) THEN
+      -- When at the end, include the current character; when at comma, include everything up to (but not including) the comma
+      -- This means we want length = i - start_ (to include the character at position i-1, which is before the comma)
+      piece := trim(substring(cte_block, start_, i - start_ + (CASE WHEN i = length(cte_block) THEN 1 ELSE 0 END)));
+      IF piece <> '' THEN
+        result := array_append(result, piece);
+      END IF;
+      start_ := i + 1;
+    END IF;
+  END LOOP;
+
+  RETURN result;
+END;
+$$;
+
+
+
+
 CREATE OR REPLACE FUNCTION msar.build_record_list_query_components_with_ctes(
   tab_id oid,
   limit_ integer,
@@ -5204,6 +5798,9 @@ DECLARE
   count_cte_query text;
 BEGIN
   SELECT msar.get_selectable_columns(tab_id) INTO selectable_columns;
+
+  -- Note: filter_ should only contain base column filters (no related_* attnums)
+  -- Related column filtering is not supported in this simplified version
 
   SELECT jsonb_build_object(
     'relation_name', msar.get_relation_name(tab_id),
@@ -5251,123 +5848,246 @@ msar.list_records_from_table(
   filter_ jsonb,
   group_ jsonb,
   return_record_summaries boolean DEFAULT false,
-  table_record_summary_templates jsonb DEFAULT NULL
-) RETURNS jsonb AS $$/*
+  table_record_summary_templates jsonb DEFAULT NULL,
+  related_columns jsonb DEFAULT NULL
+) RETURNS jsonb AS $$
+/*
 Get records from a table. Only columns to which the user has access are returned.
 
 Args:
-  tab_id: The OID of the table whose records we'll get
-  limit_: The maximum number of rows we'll return
-  offset_: The number of rows to skip before returning records from following rows.
-  order_: An array of ordering definition objects.
-  filter_: An array of filter definition objects.
-  group_: An array of group definition objects.
-  return_record_summaries : Whether to return a summary for each record listed.
-  table_record_summary_templates: (optional) A JSON object that maps table OIDs to record summary
-    templates.
+  tab_id: OID of the base table.
+  limit_: Maximum number of rows to return (NULL = no limit).
+  offset_: Number of rows to skip before returning.
+  order_: JSONB array of order objects: [{"attnum": <int>, "direction": "asc"|"desc"}]. Base columns only.
+  filter_: JSONB array of filter objects (schema defined by msar.build_* utilities). Base columns only.
+  group_: JSONB array of group-by definitions (schema defined by msar.build_* utilities).
+  return_record_summaries: If TRUE, include a per-record self summary.
+  table_record_summary_templates: Optional JSON mapping { <table_oid>: <template> } for summaries.
+  related_columns: Optional JSONB array of related-column specs (only 'list' and 'count' aggregations supported):
+    [
+      {
+        "join_path": [[[table_oid, attnum], [table_oid, attnum]], ...],
+        "column_attnum": <int>,
+        "aggregation": "list" | "count"
+      },
+      ...
+    ]
 
-The order definition objects should have the form
-  {"attnum": <int>, "direction": <text>}
+Return:
+  JSONB object:
+  {
+    "results": [ {<record json>}, ... ],
+    "count": <int>,                        -- total rows matching (ignores limit/offset)
+    "grouping": <json or null>,            -- group aggregates if requested
+    "linked_record_summaries": <json|null>,
+    "record_summaries": <json|null>,
+    "related_column_values": { "<key>": <json>, ... }   -- present if related_columns requested
+  }
+
+Notes:
+  - This function uses page-scoped related column computation for efficiency.
+  - Related columns are computed only for the paginated result set (after limit/offset).
+  - No sorting or filtering by related columns is supported.
 */
 DECLARE
   expr_and_ctes jsonb;
   records jsonb;
+  ctes text[] := ARRAY[]::text[];
+  with_sql text;
+  select_sql text;
+  regular_order_by_expr text;
+  base_results_query text;
+  final_order_expr text;
+  base_pk_attnum integer;
+  base_pk_attname text;
+  linked_summaries_ctes_text text;
+  has_related_columns boolean;
+  related_columns_ctes_text text;
+  related_columns_agg_query text;
 BEGIN
+  -- Note: We no longer support filtering or sorting by related columns.
+  -- All filters and orders are for base columns only.
   SELECT msar.build_record_list_query_components_with_ctes(
     tab_id,
     limit_,
     offset_,
     order_,
-    filter_,
+    filter_,  -- All filters are base column filters
     group_
   ) INTO expr_and_ctes;
 
-  EXECUTE format(
-    $q$
-    WITH
-    count_cte AS ( %1$s ),
-    enriched_results_cte AS ( %2$s ),
-    results_ranked_cte AS (
-      SELECT *, row_number() OVER (%3$s) - 1 AS __mathesar_result_idx FROM enriched_results_cte
+  -- Get regular column ORDER BY
+  regular_order_by_expr := expr_and_ctes ->> 'order_by_expr';
+
+  -- Get PK attnum early (needed for pk alias and other operations)
+  base_pk_attnum := msar.get_selectable_pkey_attnum(tab_id);
+
+  -- Build final ORDER BY expression (base columns only, no related column ordering)
+  final_order_expr := msar.build_total_order_expr(tab_id, order_);
+  -- Remove PK column from build_total_order_expr output (if present) since we'll add it as 'pk' alias
+  -- build_total_order_expr formats PK as the attnum (e.g., "1"), but we want to use 'pk' alias
+  final_order_expr := regexp_replace(final_order_expr, format(',?\s*"%s"\s+(ASC|DESC)', base_pk_attnum::text), '', 'gi');
+  final_order_expr := btrim(final_order_expr, ', ');
+  -- Always add PK tiebreaker for stable, deterministic ordering (using stable 'pk' alias)
+  final_order_expr := final_order_expr || CASE WHEN final_order_expr <> '' THEN ', pk ASC' ELSE 'pk ASC' END;
+  -- Add "ORDER BY" prefix for use in window functions and trailing ORDER BY clauses
+  final_order_expr := 'ORDER BY ' || final_order_expr;
+
+  -- Determine if we have related columns (for page-scoped sidecar only)
+  has_related_columns := related_columns IS NOT NULL AND jsonb_array_length(related_columns) > 0;
+
+  -- Build base results query (without Related column JOINs - simple base table query)
+  -- Remove ORDER BY clause completely (ordering happens in results_ranked_cte)
+  base_results_query := regexp_replace(
+    expr_and_ctes ->> 'results_cte_query',
+    ' ORDER BY .*$',
+    ''
+  );
+
+  -- Add explicit pk alias to the SELECT list
+  -- We need to add the PK column expression (not the alias) to create the pk alias
+  -- The PK column expression is msar.format_data(<pk_column_name>), same as what creates the "1" alias
+  -- Get the PK column name to build the expression
+  SELECT attname INTO base_pk_attname
+  FROM pg_attribute
+  WHERE attrelid = tab_id
+    AND attnum = base_pk_attnum
+    AND NOT attisdropped;
+
+  -- Add the PK expression as 'pk' alias to the SELECT list
+  -- This duplicates the PK column expression but with a stable 'pk' alias
+  base_results_query := regexp_replace(
+    base_results_query,
+    '(SELECT\s+)(.*?)(\s+FROM)',
+    format('\1\2, msar.format_data(%I) AS pk\3', base_pk_attname),
+    'i'
+  );
+
+  -- Build ordered CTE list
+  ctes := array_append(ctes, format('count_cte AS (%s)', expr_and_ctes ->> 'count_cte_query'));
+  ctes := array_append(ctes, format('base_results_cte AS (%s)', base_results_query));
+
+  -- enriched_results_cte: just passes through base_results_cte (no joins for related columns)
+  ctes := array_append(ctes, format('enriched_results_cte AS (SELECT * FROM base_results_cte)'));
+
+  -- results_ranked_cte: apply ordering and add row numbers for pagination
+  -- Note: final_order_expr includes "ORDER BY" prefix, which is correct for window functions
+  ctes := array_append(ctes, format('results_ranked_cte AS (SELECT *, row_number() OVER (%s) - 1 AS __mathesar_result_idx FROM enriched_results_cte)', final_order_expr));
+
+  -- page_ids CTE (needed for page-scoped related columns)
+  -- Now that we have results_ranked_cte with stable pk alias, we can extract page IDs
+  IF has_related_columns THEN
+    ctes := array_append(ctes, format('page_ids AS (SELECT pk AS base_pk FROM results_ranked_cte)'));
+
+    -- Build page-scoped related column CTEs
+    related_columns_ctes_text := msar.build_related_columns_ctes(tab_id, related_columns, 'page_ids');
+    related_columns_agg_query := msar.build_related_columns_aggregation_query(related_columns, 'page_ids');
+
+    -- Add related column CTEs to the list (comma-prefixed, so strip and split)
+    IF related_columns_ctes_text <> '' THEN
+      ctes := ctes || msar.split_ctes(related_columns_ctes_text);
+    END IF;
+  ELSE
+    related_columns_agg_query := 'SELECT NULL::text AS key, NULL::jsonb AS value WHERE false';
+  END IF;
+
+  -- results_eq_cte
+  ctes := array_append(ctes, format('results_eq_cte AS (%s)', COALESCE(
+    msar.build_results_eq_cte_expr(tab_id, 'results_ranked_cte', group_),
+    'SELECT NULL AS id'
+  )));
+
+  -- groups_cte
+  ctes := array_append(ctes, format('groups_cte AS (%s)', COALESCE(
+    msar.build_groups_cte_expr(tab_id, 'results_eq_cte', 'results_ranked_cte', group_),
+    'SELECT NULL AS id'
+  )));
+
+  -- summary_cte_self
+  ctes := array_append(ctes, format('summary_cte_self AS (%s)', msar.build_record_summary_query_for_table(
+    tab_id,
+    NULL,
+    table_record_summary_templates
+  )));
+
+  -- linked summaries CTEs (optional)
+  linked_summaries_ctes_text := msar.build_linked_record_summaries_ctes(tab_id, table_record_summary_templates);
+  IF linked_summaries_ctes_text <> '' THEN
+    -- build_linked_record_summaries_ctes returns ', cte1 AS (...), cte2 AS (...)' - use split_ctes to parse
+    ctes := ctes || msar.split_ctes(linked_summaries_ctes_text);
+  END IF;
+
+  -- summary_cte: join enriched_results (which just passes through base results)
+  ctes := array_append(ctes, format('summary_cte AS (SELECT %s FROM enriched_results_cte %s)', COALESCE(
+    NULLIF(
+      concat_ws(', ',
+        msar.build_summary_json_expr_for_table(tab_id),
+        CASE WHEN return_record_summaries
+        THEN msar.build_self_summary_json_expr(tab_id)
+        END
+      ), ''
     ),
-    results_eq_cte AS (
-      SELECT %11$s
-    ),
-    groups_cte AS ( SELECT %6$s ),
-    summary_cte_self AS (%7$s)
-    %8$s,
-    summary_cte AS ( SELECT %10$s FROM enriched_results_cte %9$s ),
-    summaries_json_cte AS ( 
-      SELECT
-        jsonb_build_object(
-          'linked_record_summaries',
-          NULLIF(
-            to_jsonb(summary_cte) - 'summary_self' - 'count_hack',
-            '{}'::jsonb
-          ),
-          'record_summaries',
-          NULLIF(
-            to_jsonb(summary_cte) - 'count_hack' -> 'summary_self',
-            '{}'::jsonb
-          )
+    'COUNT(1) AS count_hack'
+  ), msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte')));
+
+  -- related_columns_json_cte: build JSON sidecar for related column values
+  ctes := array_append(ctes, format('related_columns_json_cte AS (%s)',
+    CASE
+      WHEN has_related_columns THEN
+        format(
+          'SELECT jsonb_build_object(''related_column_values'', COALESCE((SELECT jsonb_object_agg(key, value) FROM (%s) AS related_cols(key, value)), ''{}''::jsonb)) AS rcj',
+          related_columns_agg_query
         )
-      AS sj
-      FROM summary_cte
-    ),
-    records_json_cte AS ( SELECT jsonb_build_object(
-      'results', %4$s,
-      'count', coalesce(max(count_cte.count), 0),
-      'grouping', %5$s
-    ) AS rj
-    FROM enriched_results_cte
-      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id
-      CROSS JOIN count_cte
-    )
-    SELECT records_json_cte.rj || summaries_json_cte.sj
-    FROM records_json_cte, summaries_json_cte;
-    $q$,
-    /* %1 */ expr_and_ctes ->> 'count_cte_query',
-    /* %2 */ expr_and_ctes ->> 'results_cte_query',
-    /* %3 */ expr_and_ctes ->> 'order_by_expr',
-    /* %4 */ COALESCE(
-      msar.build_results_jsonb_array_expr(
-        'enriched_results_cte',
-        expr_and_ctes ->> 'order_by_expr'
+      ELSE
+        'SELECT ''{}''::jsonb AS rcj'
+    END
+  ));
+
+  -- summaries_json_cte
+  ctes := array_append(ctes, format($q$summaries_json_cte AS (
+    SELECT
+      jsonb_build_object(
+        'linked_record_summaries',
+        NULLIF(
+          to_jsonb(summary_cte) - 'summary_self' - 'count_hack',
+          '{}'::jsonb
+        ),
+        'record_summaries',
+        NULLIF(
+          (to_jsonb(summary_cte) - 'count_hack') -> 'summary_self',
+          '{}'::jsonb
+        )
+      ) AS sj
+    FROM summary_cte
+  )$q$));
+
+  -- records_json_cte
+  -- Use __mathesar_result_idx for ordering in jsonb_agg (avoids redundant sorting)
+  -- The results_ranked_cte already has the correct ordering applied via window function
+  ctes := array_append(ctes, format($q$records_json_cte AS (
+    SELECT jsonb_build_object(
+      'results',  (SELECT
+        COALESCE(
+          jsonb_agg(to_jsonb(er) - '__mathesar_gid' - '__mathesar_gcount' - '__mathesar_result_idx' ORDER BY er.__mathesar_result_idx),
+          jsonb_build_array()
+        )
+        FROM results_ranked_cte er
       ),
-      'NULL'
-    ),
-    /* %5 */ COALESCE(
-      msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_),
-      'NULL'
-    ),
-    /* %6 */ COALESCE(
-      msar.build_groups_cte_expr(tab_id, 'results_eq_cte', 'results_ranked_cte', group_),
-      'NULL AS id'
-    ),
-    /* %7 */ msar.build_record_summary_query_for_table(
-      tab_id,
-      null,
-      table_record_summary_templates
-    ),
-    /* %8 */ msar.build_linked_record_summaries_ctes(
-      tab_id,
-      table_record_summary_templates
-    ),
-    /* %9 */ msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    /* %10 */ COALESCE(
-      NULLIF(
-        concat_ws(', ',
-          msar.build_summary_json_expr_for_table(tab_id),
-          CASE WHEN return_record_summaries
-          THEN msar.build_self_summary_json_expr(tab_id)
-          END
-        ), ''
-      ), 'COUNT(1) AS count_hack' 
-      -- count_hack ensures that summary_cte is not empty,
-      -- which in turn helps to generate summaries_json_cte
-    ),
-    /* %11 */ msar.build_results_eq_cte_expr(tab_id, 'results_ranked_cte', group_)
-  ) INTO records;
+      'count',    COALESCE( (SELECT count FROM count_cte), 0 ),
+      'grouping', (SELECT %s)
+    ) AS rj
+  )$q$, COALESCE(
+    msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_),
+    'NULL'
+  )));
+
+  -- Compose WITH and the final SELECT
+  with_sql := 'WITH ' || array_to_string(ctes, ', ');
+  -- Use COALESCE to ensure related_columns_json_cte.rcj is never NULL (would cause merge to be NULL)
+  select_sql := 'SELECT records_json_cte.rj || summaries_json_cte.sj || COALESCE(related_columns_json_cte.rcj, ''{}''::jsonb) FROM records_json_cte, summaries_json_cte, related_columns_json_cte';
+
+  EXECUTE with_sql || ' ' || select_sql INTO records;
+
   RETURN records;
 END;
 $$ LANGUAGE plpgsql STABLE;
@@ -5445,7 +6165,8 @@ msar.search_records_from_table(
   limit_ integer,
   offset_ integer DEFAULT 0,
   return_record_summaries boolean DEFAULT false,
-  table_record_summary_templates jsonb DEFAULT NULL
+  table_record_summary_templates jsonb DEFAULT NULL,
+  related_columns jsonb DEFAULT NULL
 ) RETURNS jsonb AS $$/*
 Get records from a table, filtering and sorting according to a search specification.
 
@@ -5456,13 +6177,47 @@ Args:
   search_: An array of search definition objects.
   limit_: The maximum number of rows we'll return.
   offset_: The number of rows to skip before returning records from following rows
+  return_record_summaries: Whether to return summaries of retrieved records.
+  table_record_summary_templates: (optional) A JSON object that maps table OIDs to record summary
+    templates.
+  related_columns: (optional) A JSONB array of related column requests, each with:
+    - join_path: [[[table_oid, attnum], [table_oid, attnum]], ...]
+    - column_attnum: integer
+    - aggregation: 'list', 'join', 'sum', 'count', or NULL
 
 The search definition objects should have the form
   {"attnum": <int>, "literal": <any>}
 */
 DECLARE
   records jsonb;
+  has_related_columns boolean;
+  base_pk_attnum integer;
+  page_ids_cte_text text;
+  related_columns_ctes_text text;
+  related_columns_agg_query text;
 BEGIN
+  -- Determine related columns plan
+  has_related_columns := related_columns IS NOT NULL AND jsonb_array_length(related_columns) > 0;
+
+  -- Get base PK column name for page_ids CTE
+  IF has_related_columns THEN
+    base_pk_attnum := msar.get_selectable_pkey_attnum(tab_id);
+
+    -- Use results_cte and reference PK by its attnum alias (e.g., "1", "2", etc.)
+    -- The CTE uses numbered aliases like "1", "2", not the actual column names
+    page_ids_cte_text := format(
+      ', page_ids AS ( SELECT "%s" AS base_pk FROM results_cte )',
+      base_pk_attnum
+    );
+
+    related_columns_ctes_text := msar.build_related_columns_ctes(tab_id, related_columns, 'page_ids');
+    related_columns_agg_query := msar.build_related_columns_aggregation_query(related_columns, page_ids_cte_name);
+  ELSE
+    page_ids_cte_text := '';
+    related_columns_ctes_text := '';
+    related_columns_agg_query := 'SELECT NULL::text AS key, NULL::jsonb AS value WHERE false';
+  END IF;
+
   EXECUTE format(
     $q$
     WITH
@@ -5471,10 +6226,15 @@ BEGIN
     ),
     results_cte AS (
       SELECT %1$s FROM %2$I.%3$I %4$s %7$s LIMIT %5$L OFFSET %6$L
-    ),
+    )%15$s,
     summary_cte_self AS (%8$s)
-    %9$s,
+    %9$s
+    %12$s
     summary_cte AS ( SELECT %11$s FROM results_cte %10$s ),
+    related_columns_json_cte AS (
+      SELECT
+        %13$s
+    ),
     summaries_json_cte AS (
       SELECT
         jsonb_build_object(
@@ -5499,8 +6259,8 @@ BEGIN
       ) AS rj
       FROM results_cte CROSS JOIN count_cte
     )
-    SELECT results_json_cte.rj || summaries_json_cte.sj
-    FROM results_json_cte, summaries_json_cte;
+    SELECT results_json_cte.rj || summaries_json_cte.sj || related_columns_json_cte.rcj
+    FROM results_json_cte, summaries_json_cte, related_columns_json_cte;
     $q$,
     /* %1 */ COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
     /* %2 */ msar.get_relation_schema_name(tab_id),
@@ -5520,7 +6280,7 @@ BEGIN
       msar.get_selectable_pkey_attnum(tab_id),
       table_record_summary_templates
     ),
-    /* %9 */ msar.build_linked_record_summaries_ctes(tab_id),
+    /* %9 */ msar.build_linked_record_summaries_ctes(tab_id, table_record_summary_templates),
     /* %10 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
     /* %11 */ COALESCE(
       NULLIF(
@@ -5533,7 +6293,19 @@ BEGIN
       ), 'COUNT(1) AS count_hack'
       -- count_hack ensures that summary_cte is not empty,
       -- which in turn helps to generate summaries_json_cte
-    )
+    ),
+    /* %12 */ related_columns_ctes_text,
+    /* %13 */ CASE
+      WHEN has_related_columns THEN
+        format(
+          'jsonb_build_object(''related_column_values'', (SELECT jsonb_object_agg(key, value) FROM (%s) AS related_cols(key, value))) AS rcj',
+          related_columns_agg_query
+        )
+      ELSE
+        '''{}''::jsonb AS rcj'
+    END,
+    /* %14 */ quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text),
+    /* %15 */ page_ids_cte_text
   ) INTO records;
   RETURN records;
 END;
@@ -5867,7 +6639,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.raise_exception(err_msg text)
-RETURNS void AS $$/* 
+RETURNS void AS $$/*
 Utility function to raise an exceptions with an error message.
 
 Having this utility function allows us to raise exceptions within SQL functions
@@ -5934,9 +6706,9 @@ Returns a lookup table for given field_info_list and values_
 
 Example: Inserting into Items while creating a new book entry, adding a new Title,
 creating a new entry for Author, picking a Publisher.
-           table_name           |                  column_names                   |                values_                 | cte_name | from_cte_name 
+           table_name           |                  column_names                   |                values_                 | cte_name | from_cte_name
 --------------------------------+-------------------------------------------------+----------------------------------------+----------+---------------
- "Library Management"."Authors" | "First Name", "Last Name"                       | 'Jerome K.', 'Jerome                   | k1_cte   | 
+ "Library Management"."Authors" | "First Name", "Last Name"                       | 'Jerome K.', 'Jerome                   | k1_cte   |
  "Library Management"."Books"   | "Title", "Author", "Publisher"                  | 'Three men in a Boat', k1_cte.id, '12' | k0_cte   | k1_cte
  "Library Management"."Items"   | "Acquisition Date", "Acquisition Price", "Book" | '2025-10-09', '69.69', k0_cte.id       |          | k0_cte
 
@@ -6038,7 +6810,7 @@ BEGIN
   FOR ins IN SELECT * FROM msar.build_insert_lookup_table(field_info_list, values_) LOOP
     insert_stub := 'INSERT INTO ' ||
       ins.table_name || '(' || ins.column_names || ') SELECT ' || ins.values_ ||
-      CASE 
+      CASE
         WHEN ins.from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name)
         ELSE '' END || ' RETURNING *';
     CASE

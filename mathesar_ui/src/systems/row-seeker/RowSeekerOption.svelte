@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    Checkbox,
     MatchHighlighter,
     Radio,
     Truncate,
@@ -13,7 +14,7 @@
   export let inFocus: boolean;
   export let summary: string;
 
-  $: ({ searchValue } = controller);
+  $: ({ searchValue, selectionType } = controller);
 </script>
 
 <div
@@ -23,7 +24,11 @@
 >
   {#if showSelection}
     <div class="selection">
-      <Radio tabindex="-1" checked={isSelected} />
+      {#if selectionType === 'multiple'}
+        <Checkbox tabindex="-1" checked={isSelected} />
+      {:else}
+        <Radio tabindex="-1" checked={isSelected} />
+      {/if}
     </div>
   {/if}
   <Truncate>

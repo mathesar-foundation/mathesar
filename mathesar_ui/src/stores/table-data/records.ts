@@ -18,8 +18,10 @@ import type {
   RecordsListParams,
   RecordsResponse,
   RecordsSearchParams,
+  RelatedColumnRequest,
   ResultValue,
 } from '@mathesar/api/rpc/records';
+import { isReadable } from '@mathesar/component-library/common/utils/storeUtils';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
@@ -44,6 +46,10 @@ import type { ColumnsDataStore } from './columns';
 import type { FilterEntry, Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Meta } from './meta';
+import type { ProcessedColumn } from './processedColumns';
+import type { RelatedColumn } from './relatedColumnDefinitions';
+import { md5Hash } from './relatedColumnDefinitions';
+import type { RelatedColumns } from './relatedColumns';
 import {
   DraftRecordRow,
   PersistedRecordRow,
@@ -70,6 +76,7 @@ export interface RecordsRequestParamsData {
   grouping: GroupingRequest;
   filtering: Filtering;
   searchFuzzy: SearchFuzzy;
+  relatedColumns: RelatedColumns;
 }
 
 export interface TableRecordsData {
@@ -185,6 +192,33 @@ export class RecordsData {
 
   fileManifests = new AssociatedCellData<FileManifest>();
 
+  /**
+   * Related column values.
+   * Keys: related column ID (related_...), then row PK value (stringified).
+   * Values: aggregated result (single value, array, array of {id, value} objects for list aggregation, or {sum, ids} for sum aggregation).
+   */
+  relatedColumnValues = new WritableMap<
+    string,
+    WritableMap<
+      string,
+      | ResultValue
+      | ResultValue[]
+      | Array<{ id: ResultValue; value: ResultValue }>
+      | { sum: ResultValue; ids: ResultValue[] }
+    >
+  >();
+
+  /**
+   * Related column summaries (titles/labels for list aggregations).
+   * Keys: related column ID (related_...), then record ID (stringified).
+   * Values: summary string (title/label).
+   * This persists across refetches to ensure summaries don't disappear when sorting changes.
+   */
+  relatedColumnSummaries = new WritableMap<
+    string,
+    WritableMap<string, string>
+  >();
+
   grouping: Writable<RecordGrouping | undefined>;
 
   totalCount: Writable<number | undefined>;
@@ -212,6 +246,10 @@ export class RecordsData {
 
   private loadIntrinsicRecordSummaries?: boolean;
 
+  private allColumns?: Readable<
+    Map<number | string, ProcessedColumn | RelatedColumn>
+  >;
+
   constructor({
     database,
     table,
@@ -219,6 +257,7 @@ export class RecordsData {
     columnsDataStore,
     contextualFilters,
     loadIntrinsicRecordSummaries,
+    allColumns,
   }: {
     database: Pick<Database, 'id'>;
     table: Pick<Table, 'oid'>;
@@ -226,6 +265,9 @@ export class RecordsData {
     columnsDataStore: ColumnsDataStore;
     contextualFilters: Map<number, number | string>;
     loadIntrinsicRecordSummaries?: boolean;
+    allColumns?: Readable<
+      Map<number | string, ProcessedColumn | RelatedColumn>
+    >;
   }) {
     this.apiContext = { database_id: database.id, table_oid: table.oid };
     this.state = writable(States.Loading);
@@ -238,6 +280,7 @@ export class RecordsData {
     this.columnsDataStore = columnsDataStore;
     this.contextualFilters = contextualFilters;
     this.loadIntrinsicRecordSummaries = loadIntrinsicRecordSummaries;
+    this.allColumns = allColumns;
 
     void this.fetch();
 
@@ -295,6 +338,24 @@ export class RecordsData {
         ...this.contextualFilters,
       ].map(([columnId, value]) => ({ columnId, conditionId: 'equal', value }));
 
+      // Build related column requests from meta.relatedColumns
+      const relatedColumns = get(this.meta.relatedColumns);
+      const relatedColumnRequestsMap = new Map<string, RelatedColumnRequest>();
+
+      // Add Related columns from meta.relatedColumns
+      for (const entry of relatedColumns.entries) {
+        const key = `${JSON.stringify(entry.joinPath)}_${entry.columnId}`;
+        relatedColumnRequestsMap.set(key, {
+          join_path: entry.joinPath,
+          column_attnum: entry.columnId,
+          aggregation: entry.aggregation,
+        });
+      }
+
+      const relatedColumnRequests = Array.from(
+        relatedColumnRequestsMap.values(),
+      );
+
       const recordsListParams: RecordsListParams = {
         ...this.apiContext,
         ...params.pagination.recordsRequestParams(),
@@ -306,6 +367,8 @@ export class RecordsData {
           .withEntries(contextualFilterEntries)
           .recordsRequestParams(),
         return_record_summaries: this.loadIntrinsicRecordSummaries,
+        related_columns:
+          relatedColumnRequests.length > 0 ? relatedColumnRequests : undefined,
       };
 
       const fuzzySearchParams = params.searchFuzzy.getSearchParams();
@@ -314,6 +377,8 @@ export class RecordsData {
         ...params.pagination.recordsRequestParams(),
         search_params: fuzzySearchParams,
         return_record_summaries: this.loadIntrinsicRecordSummaries,
+        related_columns:
+          relatedColumnRequests.length > 0 ? relatedColumnRequests : undefined,
       };
 
       this.promise = fuzzySearchParams.length
@@ -339,6 +404,113 @@ export class RecordsData {
         this.fileManifests.setFetchedValuesFromPrimitive(
           response.download_links,
         );
+      }
+      if (response.related_column_values) {
+        // Store related column values
+        this.relatedColumnValues.clear();
+        const relatedColumnsForMapping = get(this.meta.relatedColumns);
+
+        for (const [relatedColumnId, rowValues] of Object.entries(
+          response.related_column_values,
+        )) {
+          // Backend and frontend use the same ID format: related_{md5_hash}_{column_attnum}
+          // No mapping needed - IDs are already consistent
+          const rowValuesMap = new WritableMap<
+            string,
+            | ResultValue
+            | ResultValue[]
+            | Array<{ id: ResultValue; value: ResultValue }>
+          >();
+          for (const [rowPk, valueOrObject] of Object.entries(rowValues)) {
+            if (
+              Array.isArray(valueOrObject) &&
+              valueOrObject.length > 0 &&
+              typeof valueOrObject[0] === 'object' &&
+              valueOrObject[0] !== null &&
+              'id' in valueOrObject[0] &&
+              'value' in valueOrObject[0]
+            ) {
+              // Array of {id, value} objects (for list aggregation)
+              rowValuesMap.set(
+                rowPk,
+                valueOrObject as Array<{ id: ResultValue; value: ResultValue }>,
+              );
+            } else if (
+              valueOrObject &&
+              typeof valueOrObject === 'object' &&
+              !Array.isArray(valueOrObject) &&
+              ('sum' in valueOrObject || 'count' in valueOrObject) &&
+              'ids' in valueOrObject
+            ) {
+              // Sum or count aggregation format: {sum, ids} or {count, ids}
+              rowValuesMap.set(
+                rowPk,
+                valueOrObject as {
+                  sum?: ResultValue;
+                  count?: ResultValue;
+                  ids: ResultValue[];
+                },
+              );
+            }
+          }
+          this.relatedColumnValues.set(relatedColumnId, rowValuesMap);
+
+          // Extract and store summaries for list aggregations
+          // This ensures summaries persist across refetches
+          const relatedColumnEntry = relatedColumnsForMapping.entries.find(
+            (entry) => {
+              const joinPathJson = JSON.stringify(entry.joinPath);
+              const normalizedJoinPath = joinPathJson.replace(/\s+/g, '');
+              const expectedId = `related_${md5Hash(normalizedJoinPath)}_${
+                entry.columnId
+              }`;
+              return expectedId === relatedColumnId;
+            },
+          );
+
+          if (relatedColumnEntry && relatedColumnEntry.aggregation === 'list') {
+            // Get or create the summaries map for this column
+            let columnSummaries =
+              this.relatedColumnSummaries.getValue(relatedColumnId);
+            if (!columnSummaries) {
+              columnSummaries = new WritableMap<string, string>();
+              this.relatedColumnSummaries.set(relatedColumnId, columnSummaries);
+            }
+
+            // Extract summaries from processed row values map
+            for (const [, valueOrObject] of rowValuesMap.getEntries()) {
+              if (
+                Array.isArray(valueOrObject) &&
+                valueOrObject.length > 0 &&
+                typeof valueOrObject[0] === 'object' &&
+                valueOrObject[0] !== null &&
+                'id' in valueOrObject[0] &&
+                'value' in valueOrObject[0]
+              ) {
+                // New unified format: array of {id, value} objects
+                (
+                  valueOrObject as Array<{
+                    id: ResultValue;
+                    value: ResultValue;
+                  }>
+                ).forEach((item) => {
+                  const recordId = String(item.id);
+                  // Only store summary if value is not null/undefined/empty
+                  if (
+                    item.value !== null &&
+                    item.value !== undefined &&
+                    item.value !== ''
+                  ) {
+                    columnSummaries.set(recordId, String(item.value));
+                  }
+                });
+              }
+            }
+          }
+        }
+      } else {
+        // Clear related column values if not present in response
+        this.relatedColumnValues.clear();
       }
       this.fetchedRecordRows.set(
         response.results.map(
@@ -854,6 +1026,21 @@ export class RecordsData {
     const row = rows.get(rowId);
     if (!row) return undefined;
     return row.record[columnId];
+  }
+
+  /**
+   * Get related column value for a specific row and related column.
+   * @param rowPk - The primary key value of the row (stringified)
+   * @param relatedColumnId - The ID of the related column (related_...)
+   * @returns The related column value, which may be a single value or an array for 'list' aggregation
+   */
+  getRelatedColumnValue(
+    rowPk: string,
+    relatedColumnId: string,
+  ): ResultValue | ResultValue[] | undefined {
+    const columnValuesMap = get(this.relatedColumnValues).get(relatedColumnId);
+    if (!columnValuesMap) return undefined;
+    return get(columnValuesMap).get(rowPk);
   }
 
   destroy(): void {

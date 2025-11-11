@@ -15,10 +15,13 @@
     type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
+  import { RelatedColumn } from '@mathesar/stores/table-data';
   import { updateTable } from '@mathesar/stores/tables';
+
 
   import { Draggable, Droppable } from './drag-and-drop';
   import HeaderCell from './header-cell/HeaderCell.svelte';
+  import RelatedColumnHeaderCell from './header-cell/RelatedColumnHeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -28,14 +31,15 @@
   export let table: Table;
 
   $: columnOrder = columnOrder ?? [];
-  $: ({ selection, processedColumns, columnsDataStore } = $tabularData);
+  $: ({ selection, processedColumns, allColumns, columnsDataStore } =
+    $tabularData);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
   let selectedColumnIdsOrdered: number[] = [];
   let newColumnOrder: number[] = [];
 
   function dragColumn() {
-    // Keep only IDs for which the column exists
+    // Keep only IDs for which the column exists (only real columns, not related)
     for (const columnId of $processedColumns.keys()) {
       columnOrder = [...new Set(columnOrder)];
       if (!columnOrder.includes(columnId)) {
@@ -97,7 +101,18 @@
     newColumnOrder = [];
   }
 
-  function saveColumnWidth(column: ProcessedColumn, width: number | null) {
+  function saveColumnWidth(
+    column: ProcessedColumn | RelatedColumn,
+    width: number | null,
+  ) {
+    // Don't save width for related columns - they don't have database columns
+    if (
+      column instanceof RelatedColumn ||
+      (column as RelatedColumn).isVirtual === true ||
+      (typeof column.id === 'string' && column.id.startsWith('related_'))
+    ) {
+      return;
+    }
     void columnsDataStore.setDisplayOptions(column, { display_width: width });
   }
 </script>
@@ -112,29 +127,40 @@
     />
   </SheetOriginCell>
 
-  {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+  {#each [...$allColumns] as [columnId, processedColumn] (columnId)}
     {@const isSelected = $selection.columnIds.has(String(columnId))}
+    {@const isRelated = processedColumn instanceof RelatedColumn}
     <SheetColumnHeaderCell columnIdentifierKey={columnId}>
-      <Draggable
-        on:dragstart={() => dragColumn()}
-        column={processedColumn}
-        {selection}
-      >
-        <Droppable
-          on:drop={() => dropColumn(processedColumn)}
-          on:dragover={(e) => e.preventDefault()}
-          {locationOfFirstDraggedColumn}
-          columnLocation={columnOrder.indexOf(columnId)}
-          {isSelected}
+      {#if isRelated}
+        <!-- Related columns are not draggable but can be resized (width not persisted) -->
+        <RelatedColumnHeaderCell relatedColumn={processedColumn} {isSelected} />
+        <SheetCellResizer
+          columnIdentifierKey={columnId}
+          afterResize={(width) => saveColumnWidth(processedColumn, width)}
+          onReset={() => saveColumnWidth(processedColumn, null)}
+        />
+      {:else}
+        <Draggable
+          on:dragstart={() => dragColumn()}
+          column={processedColumn}
+          {selection}
         >
-          <HeaderCell {processedColumn} {isSelected} />
-        </Droppable>
-      </Draggable>
-      <SheetCellResizer
-        columnIdentifierKey={columnId}
-        afterResize={(width) => saveColumnWidth(processedColumn, width)}
-        onReset={() => saveColumnWidth(processedColumn, null)}
-      />
+          <Droppable
+            on:drop={() => dropColumn(processedColumn)}
+            on:dragover={(e) => e.preventDefault()}
+            {locationOfFirstDraggedColumn}
+            columnLocation={columnOrder.indexOf(columnId)}
+            {isSelected}
+          >
+            <HeaderCell {processedColumn} {isSelected} />
+          </Droppable>
+        </Draggable>
+        <SheetCellResizer
+          columnIdentifierKey={columnId}
+          afterResize={(width) => saveColumnWidth(processedColumn, width)}
+          onReset={() => saveColumnWidth(processedColumn, null)}
+        />
+      {/if}
     </SheetColumnHeaderCell>
   {/each}
 
