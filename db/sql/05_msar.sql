@@ -6069,3 +6069,91 @@ BEGIN
   EXECUTE insert_str;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_join_expr(join_path jsonb) RETURNS TEXT AS $$
+  WITH cte AS (
+    SELECT
+      msar.get_relation_name((joins->0->>0)::oid) AS left_tab_name,
+      msar.get_column_name((joins->0->>0)::oid, (joins->0->>1)::int) AS left_col_name,
+      msar.get_relation_schema_name((joins->1->>0)::oid) AS right_tab_sch_name,
+      msar.get_relation_name((joins->1->>0)::oid) AS right_tab_name,
+      msar.get_column_name((joins->1->>0)::oid, (joins->1->>1)::int) AS right_col_name
+    FROM jsonb_array_elements(join_path) AS joins
+  ), cte_2 AS (
+    SELECT format(
+      'LEFT JOIN %I.%I ON %I.%I = %I.%I',
+      cte.right_tab_sch_name,
+      cte.right_tab_name,
+      cte.left_tab_name,
+      cte.left_col_name,
+      cte.right_tab_name,
+      cte.right_col_name
+    ) AS col FROM cte
+  ) SELECT string_agg(cte_2.col , E'\n') FROM cte_2
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_exploration_lookup_table(initial_columns jsonb) RETURNS TABLE
+(
+  alias text,
+  attnum smallint,
+  display_name text,
+  table_name text,
+  column_name text,
+  join_expr text
+) AS $$
+  SELECT
+    t.alias AS alias,
+    t.attnum AS attnum,
+    t.display_name AS display_name,
+    pgc.relname AS table_name,
+    pga.attname AS column_name,
+    msar.build_join_expr(t.join_path) AS join_expr
+  FROM ROWS FROM (
+    jsonb_to_recordset(initial_columns) AS (
+      alias text,
+      attnum smallint,
+      display_name text,
+      reloid oid,
+      join_path jsonb
+  )) WITH ORDINALITY AS t(alias, attnum, display_name, reloid, join_path, position)
+  LEFT JOIN pg_catalog.pg_attribute AS pga ON pga.attnum = t.attnum 
+    AND pga.attrelid = t.reloid AND NOT pga.attisdropped
+  LEFT JOIN pg_catalog.pg_class AS pgc ON pgc.oid = t.reloid
+  ORDER BY t.position ASC;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.run_explorations(exploration_def jsonb, limit_ integer, offset_ integer) RETURNS jsonb AS $$
+DECLARE
+  base_table_oid bigint := exploration_def -> 'base_table_oid';
+  schema_oid bigint := exploration_def -> 'schema_oid';
+  initial_columns jsonb := exploration_def -> 'initial_columns';
+  base_table_name text := msar.get_relation_name(base_table_oid);
+  schema_name text := msar.get_schema_name(schema_oid);
+  column_names_expr text;
+  from_expr text;
+  run_exp_sql text;
+  results jsonb;
+BEGIN
+  SELECT 
+    string_agg(format('%I.%I AS %I', exp.table_name, exp.column_name, exp.display_name) , ', ')
+    INTO column_names_expr
+  FROM msar.build_exploration_lookup_table(initial_columns) AS exp;
+
+  SELECT DISTINCT string_agg(format('%s', exp.join_expr), E'\n') INTO from_expr
+  FROM msar.build_exploration_lookup_table(initial_columns) AS exp;
+
+  run_exp_sql := format(
+    'SELECT %s FROM %I.%I %s',
+    column_names_expr,
+    schema_name,
+    base_table_name,
+    from_expr
+  );
+
+  RETURN __msar.exec_dql(run_exp_sql);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

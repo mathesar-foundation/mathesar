@@ -21,6 +21,7 @@ from db.deprecated.functions.base import (
 from db.deprecated.functions.packed import DistinctArrayAgg
 from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
+from db import connection as db_conn
 
 
 def list_explorations(database_id, schema_oid=None):
@@ -67,6 +68,19 @@ def create_exploration(exploration_def):
 
 
 def run_exploration(exploration_def, conn, limit=100, offset=0):
+    transformations = tuple(
+        deserialize_transformation(i)
+        for i in exploration_def.get("transformations", [])
+    )
+    exploration_def["display_names"] = _get_default_display_names_for_summarize_transforms(
+        transformations,
+        exploration_def.get("display_names", {})
+    )
+    for i in exploration_def['initial_columns']:
+        jp_path = i.get("join_path")
+        i['display_name'] = exploration_def['display_names'][i['alias']]
+        i['reloid'] = jp_path[-1][-1][0] if jp_path else exploration_def["base_table_oid"]
+
     engine = create_future_engine_with_custom_types(
         conn.info.user,
         conn.info.password,
@@ -80,6 +94,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
     processed_initial_columns = []
     for column in initial_columns:
         jp_path = column.get("join_path")
+        column['reloid'] = jp_path[-1][-1][0] if jp_path else base_table_oid
         if jp_path is not None:
             join_path = [
                 JoinParameter(
@@ -97,10 +112,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
                 jp_path=join_path if jp_path else None
             )
         )
-    transformations = tuple(
-        deserialize_transformation(i)
-        for i in exploration_def.get("transformations", [])
-    )
+    
     db_query = DBQuery(
         base_table_oid=base_table_oid,
         initial_columns=processed_initial_columns,
@@ -116,12 +128,19 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
             {"type": transformation.type, "spec": transformation.spec}
             for transformation in transformations
         ]
-    exploration_def["display_names"] = _get_default_display_names_for_summarize_transforms(
-        transformations,
-        exploration_def.get("display_names", {})
-    )
+    # print(exploration_def["display_names"])
+    print(exploration_def)
     query_results = db_query.get_records(limit=limit, offset=offset)
-
+    import json
+    result = db_conn.exec_msar_func(
+        conn,
+        'run_explorations',
+        json.dumps(exploration_def),
+        limit,
+        offset
+    ).fetchone()[0]
+    # print(result)
+    # assert result == [r._asdict() for r in query_results]
     column_metadata = _get_exploration_column_metadata(
         exploration_def,
         processed_initial_columns,
@@ -134,7 +153,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         "query": exploration_def,
         "records": {
             "count": db_query.count,
-            "results": [r._asdict() for r in query_results],
+            "results": result  # [r._asdict() for r in query_results],
         },
         "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
         "column_metadata": column_metadata,
