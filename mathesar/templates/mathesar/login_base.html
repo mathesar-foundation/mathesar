@@ -21,8 +21,30 @@
       margin-right: auto;
     }
     .logo img {
-      width: 13.25rem;
+      max-height: 100px;
+      width: auto;
       display: block;
+    }
+    .powered-by {
+      margin-top: var(--login-page-spacing);
+      text-align: center;
+    }
+    .powered-by-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--color-fg-subtle-2);
+      font-size: var(--lg1);
+    }
+    .powered-by-link:hover {
+      opacity: 0.8;
+    }
+    .powered-by img {
+      height: 1em;
+      width: auto;
+      vertical-align: middle;
     }
     .tutorial {
       max-width: 48rem;
@@ -120,7 +142,11 @@
 
 {% block content %}
   <div class="logo">
-    <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
+    {% if custom_logo_url %}
+      <img src="{{ custom_logo_url }}" alt="Logo" class="align-center"/>
+    {% else %}
+      <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
+    {% endif %}
   </div>
 
   <div class="login-card align-center">
@@ -140,6 +166,14 @@
           {% endfor %}
       </select>
     </form>
-   
+
   </div>
+  {% if custom_logo_url %}
+    <div class="powered-by">
+      <a href="https://mathesar.org" target="_blank" rel="noopener noreferrer" class="powered-by-link">
+        <span>{% translate "Powered by" %}</span>
+        <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo"/>
+      </a>
+    </div>
+  {% endif %}
 {% endblock %}

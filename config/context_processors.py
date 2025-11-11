@@ -4,6 +4,7 @@ from urllib.parse import splitport
 
 
 from mathesar.utils.frontend import get_manifest_data
+from mathesar.views import _get_custom_logo_url
 
 
 def frontend_settings(request):
@@ -73,4 +74,11 @@ def get_i18n_settings_prod(display_language, manifest_data):
     return {
         'prod_display_language_urls': display_language_urls,
         'prod_fallback_language_urls': fallback_language_urls,
+    }
+
+
+def custom_logo(request):
+    """Context processor to make custom_logo_url available to all templates."""
+    return {
+        'custom_logo_url': _get_custom_logo_url(),
     }

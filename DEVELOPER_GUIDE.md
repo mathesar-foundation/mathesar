@@ -43,6 +43,27 @@ Mathesar is built using:
 
 1. Keep Docker running while making your code changes. The app will update automatically with your new code. Please refer to our [Troubleshooting guide](#troubleshooting) if you are experiencing any issues.
 
+## Testing custom branding
+
+Mathesar supports custom branding through the `MATHESAR_CUSTOM_LOGO` environment variable. When configured, your custom logo will replace the default Mathesar logo on the login page, and a "Powered by Mathesar" attribution will appear below the login form.
+
+### Setting up a custom logo
+
+1. Place your custom logo image file in the `mathesar/static/non-code/images/` directory.
+2. Configure the `MATHESAR_CUSTOM_LOGO` environment variable in `docker-compose.dev.yml`:
+    ```yaml
+    environment:
+      - MATHESAR_CUSTOM_LOGO=${MATHESAR_CUSTOM_LOGO-/code/mathesar/static/non-code/images/your-logo.png}
+    ```
+
+    The path should be relative to the container's `/code/` directory, which maps to the repository root.
+
+3. Restart the development service:
+    ```
+    docker compose -f docker-compose.dev.yml restart dev-service
+    ```
+4. Visit http://localhost:8000/ to see your custom logo on the login page and in Mathesar's header.
+
 ## Contribution guidelines
 
 Before getting started with your code changes, read our [Contributor guide](./CONTRIBUTING.md) to understand our processes for handling issues and and PRs.
