@@ -22,4 +22,23 @@ def handle_rpc_exceptions(f):
 def _raise_generic_error(e):
     """Raises a fixed code and message for an error."""
     err_code = error_codes.get_error_code(e)
-    raise RPCException(err_code, e.__class__.__name__ + ": " + str(e))
+    try:
+        diag_dict = {
+            e.__class__.__name__: e.diag.message_primary or "",
+            "Detail": e.diag.message_detail,
+            "Hint": e.diag.message_hint,
+            "Constraint": e.diag.constraint_name,
+            "Column": e.diag.column_name,
+            "Table": e.diag.table_name,
+            "Schema": e.diag.schema_name,
+            "Datatype": e.diag.datatype_name,
+            "SQLSTATE": e.diag.sqlstate,
+        }
+        message = ' \n'.join(
+            [
+                ': '.join([k, v]) for k, v in diag_dict.items() if v is not None
+            ]
+        )
+    except Exception:
+        message = e.__class__.__name__ + ": " + str(e)
+    raise RPCException(err_code, message)
