@@ -52,11 +52,30 @@ type PayloadCell = TsvCell | MathesarCell;
 type Payload = PayloadCell[][];
 
 function getPayload(clipboardData: DataTransfer): Payload {
-  // First, try to read structured data from HTML meta tag (new format)
+  // First, try to read structured data from HTML table with data-mathesar-table attribute
   const htmlData = clipboardData.getData('text/html');
   if (htmlData) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlData, 'text/html');
+    const table = doc.querySelector('table[data-mathesar-table="true"]');
+    if (table) {
+      const content = table.getAttribute('data-mathesar-content');
+      if (content) {
+        try {
+          const structuredData = decodeURIComponent(content);
+          const rows = validateStructuredCellRows(JSON.parse(structuredData));
+          if (rows.length > 0) {
+            return rows.map((row) =>
+              row.map((value) => ({ type: 'mathesar', value })),
+            );
+          }
+        } catch {
+          // Fall through to try other formats
+        }
+      }
+    }
+
+    // Also check for old meta tag format for backwards compatibility
     const metaTag = doc.querySelector('meta[name="mathesar-clipboard"]');
     if (metaTag) {
       const content = metaTag.getAttribute('content');
@@ -84,6 +103,7 @@ function getPayload(clipboardData: DataTransfer): Payload {
     return rows.map((row) => row.map((value) => ({ type: 'mathesar', value })));
   }
 
+  // Finally, fall back to plain text (for external content)
   const textData = clipboardData.getData(MIME_PLAIN_TEXT);
   if (textData) {
     const rows = deserializeTsv(textData);

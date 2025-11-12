@@ -24,6 +24,34 @@ function shouldHandleEvent(): boolean {
   return document.activeElement?.hasAttribute('data-active-cell') ?? false;
 }
 
+/**
+ * Convert TSV data to an HTML table with embedded structured data.
+ *
+ * This creates a proper HTML table for compatibility with spreadsheet
+ * and document applications, while embedding Mathesar's structured data
+ * in a data attribute for internal paste operations.
+ *
+ * @param tsv - Tab-separated values
+ * @param structuredData - JSON-encoded structured cell data
+ */
+function tsvToHtmlTable(tsv: string, structuredData: string): string {
+  const rows = tsv.split('\n').filter((row) => row.length > 0);
+  const tableRows = rows
+    .map((row) => {
+      const cells = row
+        .split('\t')
+        .map((cell) => `<td>${cell}</td>`)
+        .join('');
+      return `<tr>${cells}</tr>`;
+    })
+    .join('');
+  // Using data-mathesar-table attribute to mark this as Mathesar content
+  // and embed the structured data for internal paste operations
+  return `<table data-mathesar-table="true" data-mathesar-content="${encodeURIComponent(
+    structuredData,
+  )}">${tableRows}</table>`;
+}
+
 export class SheetClipboardHandler implements ClipboardHandler {
   private readonly deps: Dependencies;
 
@@ -51,11 +79,11 @@ export class SheetClipboardHandler implements ClipboardHandler {
       // Write plain text
       event.clipboardData.setData(MIME_PLAIN_TEXT, content.tsv);
 
-      // Write structured data as HTML with meta tag (same format as copy() method)
+      // Write structured data as HTML table with data attributes
       // This ensures keyboard shortcut and context menu produce identical clipboard data
-      const htmlContent = `<meta name="mathesar-clipboard" content="${encodeURIComponent(
-        content.structured,
-      )}"/>${content.tsv}`;
+      // The table structure allows spreadsheet apps (Excel, Sheets) to create proper cells
+      // The data-mathesar-table attribute lets us identify our own content on paste
+      const htmlContent = tsvToHtmlTable(content.tsv, content.structured);
       event.clipboardData.setData('text/html', htmlContent);
     } catch (e) {
       this.deps.showToastError(getErrorMessage(e));
@@ -82,11 +110,10 @@ export class SheetClipboardHandler implements ClipboardHandler {
       const selection = get(this.deps.selection);
       const content = getCopyContent(selection, this.deps.copyingContext);
 
-      // Use modern Clipboard API with standard MIME types
-      // Note: HTML format is used to carry structured data as meta tag
-      const htmlContent = `<meta name="mathesar-clipboard" content="${encodeURIComponent(
-        content.structured,
-      )}"/>${content.tsv}`;
+      // Use modern Clipboard API with standard MIME types and proper HTML table
+      // The table structure allows spreadsheet apps (Excel, Sheets) to create proper cells
+      // The data-mathesar-table attribute lets us identify our own content on paste
+      const htmlContent = tsvToHtmlTable(content.tsv, content.structured);
 
       const clipboardItems = [
         new ClipboardItem({
@@ -122,23 +149,23 @@ export class SheetClipboardHandler implements ClipboardHandler {
       const item = clipboardItems[0];
       if (!item) return;
 
-      // Try to read HTML first to extract structured data
+      // Try to read HTML first to extract Mathesar's structured data
       let structuredData: string | undefined;
       if (item.types.includes('text/html')) {
         const htmlBlob = await item.getType('text/html');
         const htmlText = await htmlBlob.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlText, 'text/html');
-        const metaTag = doc.querySelector('meta[name="mathesar-clipboard"]');
-        if (metaTag) {
-          const content = metaTag.getAttribute('content');
+        const table = doc.querySelector('table[data-mathesar-table="true"]');
+        if (table) {
+          const content = table.getAttribute('data-mathesar-content');
           if (content) {
             structuredData = decodeURIComponent(content);
           }
         }
       }
 
-      // Read plain text
+      // Read plain text (used as fallback if no Mathesar data found)
       let plainText = '';
       if (item.types.includes(MIME_PLAIN_TEXT)) {
         const textBlob = await item.getType(MIME_PLAIN_TEXT);
