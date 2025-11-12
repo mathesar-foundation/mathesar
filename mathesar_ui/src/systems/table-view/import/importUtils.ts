@@ -122,7 +122,10 @@ export function guessCsvImportMapping(props: {
   }
 
   function getUnmappedTableColumns() {
-    return filter((c) => !connections.hasValue(Number(c.id)), tableColumns.values());
+    return filter(
+      (c) => !connections.hasValue(Number(c.id)),
+      tableColumns.values(),
+    );
   }
 
   const tableColumnsByName = new Map(

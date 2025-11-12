@@ -5,9 +5,7 @@ export interface GroupEntry {
   readonly preprocFnId?: string;
 }
 
-type TerseGroupEntry =
-  | [number, GroupEntry['preprocFnId']]
-  | [number];
+type TerseGroupEntry = [number, GroupEntry['preprocFnId']] | [number];
 
 export type TerseGrouping = TerseGroupEntry[];
 

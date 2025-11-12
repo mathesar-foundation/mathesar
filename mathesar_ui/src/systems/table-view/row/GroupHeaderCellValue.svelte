@@ -18,9 +18,7 @@
 
   $: processedColumn = processedColumnsMap.get(columnId);
   $: recordId = String(cellValue);
-  $: recordSummary = recordSummariesForSheet
-    .get(columnId)
-    ?.get(recordId);
+  $: recordSummary = recordSummariesForSheet.get(columnId)?.get(recordId);
   $: linkedTableId =
     processedColumnsMap?.get(columnId)?.linkFk?.referent_table_oid;
   $: fileManifest = (() => {

@@ -16,14 +16,18 @@ function partIsColumn(part: InternalTemplatePart): part is string[] {
   return Array.isArray(part);
 }
 
-function convertPartFromApi(part: RecordSummaryTemplatePart): InternalTemplatePart {
+function convertPartFromApi(
+  part: RecordSummaryTemplatePart,
+): InternalTemplatePart {
   if (Array.isArray(part)) {
     return part.map(String);
   }
   return part;
 }
 
-function convertPartToApi(part: InternalTemplatePart): RecordSummaryTemplatePart {
+function convertPartToApi(
+  part: InternalTemplatePart,
+): RecordSummaryTemplatePart {
   if (Array.isArray(part)) {
     return part.map(Number);
   }
@@ -93,10 +97,7 @@ export class TemplateConfig {
     return new TemplateConfig(this.parts.with(this.getNextKey(), part));
   }
 
-  withPartReplaced(
-    key: number,
-    part: InternalTemplatePart,
-  ): TemplateConfig {
+  withPartReplaced(key: number, part: InternalTemplatePart): TemplateConfig {
     return new TemplateConfig(this.parts.with(key, part));
   }
 

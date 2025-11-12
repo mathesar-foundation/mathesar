@@ -22,7 +22,8 @@
 
   $: ({ columnIds, preprocIds } = grouping);
   $: preProcFunctionsForColumn = columnIds.map(
-    (columnId) => processedColumnsMap.get(String(columnId))?.preprocFunctions ?? [],
+    (columnId) =>
+      processedColumnsMap.get(String(columnId))?.preprocFunctions ?? [],
   );
   $: preprocNames = preprocIds.map((preprocId, index) =>
     preprocId
@@ -40,7 +41,9 @@
         {@const stringColumnId = String(columnId)}
         <GroupHeaderCellValue
           {processedColumnsMap}
-          cellValue={row.groupValues ? row.groupValues[stringColumnId] : undefined}
+          cellValue={row.groupValues
+            ? row.groupValues[stringColumnId]
+            : undefined}
           {recordSummariesForSheet}
           columnId={stringColumnId}
           preprocName={preprocNames[index]}

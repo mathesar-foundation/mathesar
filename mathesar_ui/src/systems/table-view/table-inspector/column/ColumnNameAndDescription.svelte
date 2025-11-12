@@ -41,7 +41,10 @@
     description: string,
   ): Promise<void> {
     try {
-      await columnsDataStore.updateDescription(column.column.id, description ?? null);
+      await columnsDataStore.updateDescription(
+        column.column.id,
+        description ?? null,
+      );
     } catch (error) {
       toast.error(
         `${$_('unable_to_update_column_desc')} ${getErrorMessage(error)}`,

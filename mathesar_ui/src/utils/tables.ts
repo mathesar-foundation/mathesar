@@ -39,9 +39,7 @@ function getColumnOrder(
    * Note: Metadata stores column_order as number[], but we convert to string[]
    * for internal use.
    */
-  const orderedIds = new Set(
-    (table.metadata?.column_order ?? []).map(String),
-  );
+  const orderedIds = new Set((table.metadata?.column_order ?? []).map(String));
   const existingIds = new Set(processedColumns.map((c) => c.id));
 
   const orderedIdsThatExist = filter((i) => existingIds.has(i), orderedIds);

@@ -151,7 +151,9 @@ export class TabularData {
     this.columnsDataStore = new ColumnsDataStore({
       database: props.database,
       table: this.table,
-      hiddenColumns: Array.from(contextualFilters.keys()).map((id) => Number(id)),
+      hiddenColumns: Array.from(contextualFilters.keys()).map((id) =>
+        Number(id),
+      ),
     });
     this.constraintsDataStore = new ConstraintsDataStore({
       database: props.database,
@@ -292,10 +294,12 @@ export class TabularData {
     foreignKeyColumnId?: RawColumnWithMetadata['id'],
   ) {
     const stringExtractedColumnIds = extractedColumnIds.map(String);
-    const stringForeignKeyColumnId = foreignKeyColumnId ? String(foreignKeyColumnId) : undefined;
+    const stringForeignKeyColumnId = foreignKeyColumnId
+      ? String(foreignKeyColumnId)
+      : undefined;
     this.meta.sorting.update((s) => {
-      const firstExtractedColumnWithSort = stringExtractedColumnIds.find((columnId) =>
-        s.has(columnId),
+      const firstExtractedColumnWithSort = stringExtractedColumnIds.find(
+        (columnId) => s.has(columnId),
       );
       if (
         firstExtractedColumnWithSort &&
@@ -309,10 +313,12 @@ export class TabularData {
       }
       return s.without(stringExtractedColumnIds);
     });
-    this.meta.filtering.update((f) => f.withoutColumns(stringExtractedColumnIds));
+    this.meta.filtering.update((f) =>
+      f.withoutColumns(stringExtractedColumnIds),
+    );
     this.meta.grouping.update((g) => {
-      const extractedColumnsHaveGrouping = stringExtractedColumnIds.some((columnId) =>
-        g.hasColumn(columnId),
+      const extractedColumnsHaveGrouping = stringExtractedColumnIds.some(
+        (columnId) => g.hasColumn(columnId),
       );
       if (
         extractedColumnsHaveGrouping &&

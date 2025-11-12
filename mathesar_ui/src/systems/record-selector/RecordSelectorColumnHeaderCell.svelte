@@ -35,9 +35,7 @@
   $: ({ column } = processedColumn);
   $: columnId = processedColumn.id;
   $: value = $searchFuzzy.get(columnId);
-  $: recordSummary = $recordSummaryStore
-    .get(columnId)
-    ?.get(String(value));
+  $: recordSummary = $recordSummaryStore.get(columnId)?.get(String(value));
 
   function updateValue(e: CustomEvent<unknown>) {
     const newValue = e.detail;

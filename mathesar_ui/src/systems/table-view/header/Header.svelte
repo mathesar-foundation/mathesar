@@ -98,7 +98,9 @@
   }
 
   function saveColumnWidth(column: ProcessedColumn, width: number | null) {
-    void columnsDataStore.setDisplayOptions(column.column, { display_width: width });
+    void columnsDataStore.setDisplayOptions(column.column, {
+      display_width: width,
+    });
   }
 </script>
 

@@ -45,10 +45,7 @@
   $: effectiveProcessedColumn = isProvisionalRecordRow(row)
     ? processedColumn.withoutEnhancedPkCell()
     : processedColumn;
-  $: cellId = makeCellId(
-    getRowSelectionId(row),
-    effectiveProcessedColumn.id,
-  );
+  $: cellId = makeCellId(getRowSelectionId(row), effectiveProcessedColumn.id);
 
   // To be used in case of publicly shared links where user should not be able
   // to view linked tables & explorations
@@ -71,9 +68,7 @@
   // TODO: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
   $: isEditable = canUpdateRecords && effectiveProcessedColumn.isEditable;
-  $: recordSummary = $linkedRecordSummaries
-    .get(columnId)
-    ?.get(String(value));
+  $: recordSummary = $linkedRecordSummaries.get(columnId)?.get(String(value));
   $: fileManifest = (() => {
     if (!column.metadata?.file_backend) return undefined;
     const fileReference = parseFileReference(value);

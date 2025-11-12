@@ -42,7 +42,10 @@ export interface FilterEntry {
  * for this compatibility layer.
  */
 function filterEntryToSqlExpr(filterEntry: FilterEntry): SqlExpr {
-  const column: SqlColumn = { type: 'attnum', value: Number(filterEntry.columnId) };
+  const column: SqlColumn = {
+    type: 'attnum',
+    value: Number(filterEntry.columnId),
+  };
 
   /** Generate an SqlLiteral value */
   function value(v = filterEntry.value): SqlLiteral {
@@ -100,7 +103,11 @@ function filterEntryToSqlExpr(filterEntry: FilterEntry): SqlExpr {
 type TerseFilterEntry = [number, FilterId, unknown];
 
 function makeTerseFilterEntry(filterEntry: FilterEntry): TerseFilterEntry {
-  return [Number(filterEntry.columnId), filterEntry.conditionId, filterEntry.value];
+  return [
+    Number(filterEntry.columnId),
+    filterEntry.conditionId,
+    filterEntry.value,
+  ];
 }
 
 function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
