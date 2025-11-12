@@ -6,10 +6,10 @@
   import Part from './Part.svelte';
 
   export let table: Table;
-  export let columnIds: number[];
+  export let columnIds: string[];
   export let columns: ProcessedColumns;
   export let onDelete: () => void;
-  export let onUpdate: (columnIds: number[]) => void;
+  export let onUpdate: (columnIds: string[]) => void;
 </script>
 
 <Part {onDelete}>

@@ -33,7 +33,7 @@ export function* setNull(p: { tabularData: TabularData; cellIds: string[] }) {
 
   const someColumnRefuses = execPipe(
     columnIds,
-    map((columnId) => columnsInTable.get(parseInt(columnId, 10))),
+    map((columnId) => columnsInTable.get(columnId)),
     filter((column) => !!column),
     some((column) => !column?.isEditable || !column?.column.nullable),
   );

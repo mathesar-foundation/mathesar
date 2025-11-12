@@ -1,13 +1,13 @@
 import type { RecordsListParams } from '@mathesar/api/rpc/records';
 
 export interface GroupEntry {
-  readonly columnId: number;
+  readonly columnId: string;
   readonly preprocFnId?: string;
 }
 
 type TerseGroupEntry =
-  | [GroupEntry['columnId'], GroupEntry['preprocFnId']]
-  | [GroupEntry['columnId']];
+  | [number, GroupEntry['preprocFnId']]
+  | [number];
 
 export type TerseGrouping = TerseGroupEntry[];
 
@@ -52,7 +52,7 @@ export class Grouping {
     });
   }
 
-  withoutColumns(columnIds: number[]): Grouping {
+  withoutColumns(columnIds: string[]): Grouping {
     return new Grouping({
       entries: this.entries.filter(
         (entry) => !columnIds.includes(entry.columnId),
@@ -60,7 +60,7 @@ export class Grouping {
     });
   }
 
-  withPreprocForColumn(columnId: number, preprocFnId?: string): Grouping {
+  withPreprocForColumn(columnId: string, preprocFnId?: string): Grouping {
     return new Grouping({
       entries: this.entries.map((entry) => {
         if (entry.columnId === columnId) {
@@ -80,7 +80,7 @@ export class Grouping {
     }
     return {
       grouping: {
-        columns: this.entries.map((e) => e.columnId),
+        columns: this.entries.map((e) => Number(e.columnId)),
         preproc: this.entries.map((e) => e.preprocFnId ?? null),
       },
     };
@@ -89,15 +89,15 @@ export class Grouping {
   terse(): TerseGrouping {
     return this.entries.map((entry) =>
       entry.preprocFnId
-        ? [entry.columnId, entry.preprocFnId]
-        : [entry.columnId],
+        ? [Number(entry.columnId), entry.preprocFnId]
+        : [Number(entry.columnId)],
     );
   }
 
   static fromTerse(terse: TerseGrouping): Grouping {
     return new Grouping({
       entries: terse.map((terseEntry) => ({
-        columnId: terseEntry[0],
+        columnId: String(terseEntry[0]),
         preprocFnId: terseEntry[1] ?? undefined,
       })),
     });

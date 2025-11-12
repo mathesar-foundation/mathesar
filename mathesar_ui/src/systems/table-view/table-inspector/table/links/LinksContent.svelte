@@ -26,13 +26,13 @@
 
   export let table: Pick<Table, 'name' | 'oid'>;
   export let joinableTablesResult: JoinableTablesResult;
-  export let currentTableColumns: Map<number, ProcessedColumn>;
+  export let currentTableColumns: Map<string, ProcessedColumn>;
 
   $: linksInThisTable = [
     ...getLinksInThisTable(
       joinableTablesResult,
       new Map(
-        [...currentTableColumns.entries()].map(([id, pc]) => [id, pc.column]),
+        [...currentTableColumns.entries()].map(([id, pc]) => [Number(id), pc.column]),
       ),
     ),
   ];

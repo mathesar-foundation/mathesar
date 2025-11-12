@@ -22,16 +22,17 @@
   export let isLoading = false;
 
   $: ({ column } = processedColumn);
-  $: searchValue = $searchFuzzy.get(column.id);
-  $: value = row?.record?.[column.id];
+  $: columnId = processedColumn.id;
+  $: searchValue = $searchFuzzy.get(columnId);
+  $: value = row?.record?.[columnId];
   $: recordSummary = $linkedRecordSummaries
-    .get(String(column.id))
+    .get(columnId)
     ?.get(String(value));
   $: fileManifest = (() => {
     if (!column.metadata?.file_backend) return undefined;
     const fileReference = parseFileReference(value);
     if (!fileReference) return undefined;
-    return $fileManifests.get(String(column.id))?.get(fileReference.mash);
+    return $fileManifests.get(columnId)?.get(fileReference.mash);
   })();
 </script>
 

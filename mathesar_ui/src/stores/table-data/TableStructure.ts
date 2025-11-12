@@ -59,7 +59,7 @@ function getTableStructureAsyncStore(tableProps: TableStructureProps) {
         const processedColumns: ProcessedColumns = orderProcessedColumns(
           new Map(
             columns.map((c, index) => [
-              c.id,
+              String(c.id),
               new ProcessedColumn({
                 tableOid,
                 column: c,

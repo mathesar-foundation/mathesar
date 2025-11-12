@@ -27,8 +27,8 @@ function cellStyle(placement: ColumnPlacement, leftOffset: number): string {
 }
 
 export function getCellStyle(
-  placements: Map<number, ColumnPlacement>,
-  columnId: number,
+  placements: Map<string, ColumnPlacement>,
+  columnId: string,
   leftOffset = 0,
 ): string {
   const placement = placements.get(columnId) ?? { width: 0, left: 0 };
@@ -92,10 +92,11 @@ function combineRecordRowsWithGroupHeaders({
     grouping.groups.forEach((group) => {
       const groupValues: ApiRecord = {};
       grouping.columnIds.forEach((columnId) => {
+        const stringColumnId = String(columnId);
         if (group.eqValue[columnId] !== undefined) {
-          groupValues[columnId] = group.eqValue[columnId];
+          groupValues[stringColumnId] = group.eqValue[columnId];
         } else {
-          groupValues[columnId] = group.eqValue[columnId];
+          groupValues[stringColumnId] = group.eqValue[columnId];
         }
       });
       combinedRows.push({

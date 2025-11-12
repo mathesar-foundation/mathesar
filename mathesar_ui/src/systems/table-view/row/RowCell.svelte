@@ -47,7 +47,7 @@
     : processedColumn;
   $: cellId = makeCellId(
     getRowSelectionId(row),
-    String(effectiveProcessedColumn.id),
+    effectiveProcessedColumn.id,
   );
 
   // To be used in case of publicly shared links where user should not be able
@@ -57,7 +57,7 @@
   $: recordsDataState = recordsData.state;
   $: ({ linkedRecordSummaries, fileManifests } = recordsData);
   $: ({ column } = effectiveProcessedColumn);
-  $: columnId = column.id;
+  $: columnId = effectiveProcessedColumn.id;
   $: isWithinPlaceholderRow = isPlaceholderRecordRow(row);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
@@ -72,13 +72,13 @@
   // i.e. row is a placeholder row and record isn't saved yet
   $: isEditable = canUpdateRecords && effectiveProcessedColumn.isEditable;
   $: recordSummary = $linkedRecordSummaries
-    .get(String(column.id))
+    .get(columnId)
     ?.get(String(value));
   $: fileManifest = (() => {
     if (!column.metadata?.file_backend) return undefined;
     const fileReference = parseFileReference(value);
     if (!fileReference) return undefined;
-    return $fileManifests.get(String(column.id))?.get(fileReference.mash);
+    return $fileManifests.get(columnId)?.get(fileReference.mash);
   })();
 
   async function setValue(newValue: unknown) {
@@ -89,7 +89,7 @@
     const updatedRow = isProvisionalRecordRow(row)
       ? await recordsData.createOrUpdateRecord(row, column)
       : await recordsData.updateCell(row, column);
-    value = updatedRow.record?.[column.id] ?? value;
+    value = updatedRow.record?.[columnId] ?? value;
   }
 
   function focus() {
@@ -103,7 +103,7 @@
 </script>
 
 <SheetDataCell
-  columnIdentifierKey={column.id}
+  columnIdentifierKey={columnId}
   cellSelectionId={cellId}
   selection={$selection}
   {isWithinPlaceholderRow}

@@ -27,13 +27,14 @@
   export let isSelected = false;
 
   $: ({ column } = processedColumn);
-  $: ({ id, description } = column);
+  $: ({ description } = column);
+  $: id = processedColumn.id;
   $: ({ meta } = $tabularData);
   $: ({ filtering, sorting, grouping } = meta);
   $: hasFilter = $filtering.entries.some((entry) => entry.columnId === id);
   $: sorter = $sorting.get(id);
   $: grouped = $grouping.entries.some((entry) => entry.columnId === id);
-  $: columnPosition = getSheetColumnPosition(column.id);
+  $: columnPosition = getSheetColumnPosition(Number(column.id));
   $: hideIcon = (() => {
     if (!$columnPosition) return false;
     return $columnPosition.width < widthThresholdForIcon;

@@ -12,7 +12,7 @@ import type { FilterId } from '../abstract-types/types';
 export type FilterCombination = 'and' | 'or';
 
 export interface FilterEntry {
-  readonly columnId: number;
+  readonly columnId: string;
   readonly conditionId: FilterId;
   readonly value: unknown;
 }
@@ -42,7 +42,7 @@ export interface FilterEntry {
  * for this compatibility layer.
  */
 function filterEntryToSqlExpr(filterEntry: FilterEntry): SqlExpr {
-  const column: SqlColumn = { type: 'attnum', value: filterEntry.columnId };
+  const column: SqlColumn = { type: 'attnum', value: Number(filterEntry.columnId) };
 
   /** Generate an SqlLiteral value */
   function value(v = filterEntry.value): SqlLiteral {
@@ -100,12 +100,12 @@ function filterEntryToSqlExpr(filterEntry: FilterEntry): SqlExpr {
 type TerseFilterEntry = [number, FilterId, unknown];
 
 function makeTerseFilterEntry(filterEntry: FilterEntry): TerseFilterEntry {
-  return [filterEntry.columnId, filterEntry.conditionId, filterEntry.value];
+  return [Number(filterEntry.columnId), filterEntry.conditionId, filterEntry.value];
 }
 
 function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
   return {
-    columnId: terseFilterEntry[0],
+    columnId: String(terseFilterEntry[0]),
     conditionId: terseFilterEntry[1],
     value: terseFilterEntry[2],
   };
@@ -161,7 +161,7 @@ export class Filtering {
     });
   }
 
-  withoutColumns(columnIds: number[]): Filtering {
+  withoutColumns(columnIds: string[]): Filtering {
     return new Filtering({
       combination: this.combination,
       entries: this.entries.filter(

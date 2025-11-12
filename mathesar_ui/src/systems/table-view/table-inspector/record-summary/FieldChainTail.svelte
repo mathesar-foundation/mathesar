@@ -6,9 +6,9 @@
   import FieldChain from './FieldChain.svelte';
 
   export let schema: Schema;
-  export let columnIds: number[];
+  export let columnIds: string[];
   export let referentTable: TableStructure;
-  export let onUpdate: (columnIds: number[]) => void;
+  export let onUpdate: (columnIds: string[]) => void;
 
   $: ({ isLoading, processedColumns } = referentTable);
 </script>

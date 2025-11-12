@@ -22,7 +22,7 @@
     >,
   ) {
     await columnsDataStore.changeType({
-      id: column.id,
+      id: column.column.id,
       type: columnInfo.type,
       type_options: columnInfo.type_options,
       metadata: columnInfo.metadata,

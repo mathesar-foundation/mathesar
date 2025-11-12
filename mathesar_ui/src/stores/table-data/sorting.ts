@@ -29,11 +29,12 @@ function getApiSortDirection(sortDirection: SortDirection): ApiSortDirection {
 
 /**
  * [columnId, sortDirection]
+ * Note: columnId is a string in the frontend, but stored as number in terse format for backward compatibility
  */
 export type TerseSorting = [number, SortDirection][];
 
-export class Sorting extends ImmutableMap<number, SortDirection> {
-  constructor(entries: Iterable<[number, SortDirection]> = []) {
+export class Sorting extends ImmutableMap<string, SortDirection> {
+  constructor(entries: Iterable<[string, SortDirection]> = []) {
     [...entries].forEach(([, sortDirection]) => {
       // Even though TS will catch build-time errors with SortDirection, we also
       // want runtime validation because new sorting entries are created from
@@ -48,7 +49,7 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
   private recordsRequestParams(): Pick<RecordsListParams, 'order'> {
     const sortingEntries: ApiSortingEntry[] = [...this].map(
       ([columnId, sortDirection]) => ({
-        attnum: columnId,
+        attnum: Number(columnId),
         direction: getApiSortDirection(sortDirection),
       }),
     );
@@ -74,14 +75,14 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
 
   terse(): TerseSorting {
     return [...this].map(([columnId, sortDirection]) => [
-      columnId,
+      Number(columnId),
       sortDirection,
     ]);
   }
 
   static fromTerse(t: TerseSorting): Sorting {
     return new Sorting(
-      t.map(([columnId, sortDirection]) => [columnId, sortDirection]),
+      t.map(([columnId, sortDirection]) => [String(columnId), sortDirection]),
     );
   }
 }

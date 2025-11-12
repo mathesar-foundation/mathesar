@@ -33,14 +33,15 @@
   let textInput: HTMLInputElement | HTMLTextAreaElement | null;
 
   $: ({ column } = processedColumn);
-  $: value = $searchFuzzy.get(column.id);
+  $: columnId = processedColumn.id;
+  $: value = $searchFuzzy.get(columnId);
   $: recordSummary = $recordSummaryStore
-    .get(String(column.id))
+    .get(columnId)
     ?.get(String(value));
 
   function updateValue(e: CustomEvent<unknown>) {
     const newValue = e.detail;
-    searchFuzzy.update((s) => s.with(column.id, newValue));
+    searchFuzzy.update((s) => s.with(columnId, newValue));
   }
 
   async function updateSearchValue() {

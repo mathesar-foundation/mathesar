@@ -84,7 +84,7 @@
     showToastError: toast.error,
   });
   $: ({ horizontalScrollOffset, scrollOffset } = display);
-  $: columnOrder = table.metadata?.column_order ?? [];
+  $: columnOrder = (table.metadata?.column_order ?? []).map(String);
   $: hasNewColumnButton = $currentRoleOwns;
   /**
    * These are separate variables for readability and also to keep the door open
@@ -93,9 +93,9 @@
    */
   $: supportsTableInspector = context === 'page';
   $: sheetColumns = (() => {
-    const columns = [
+    const columns: Array<{ column: { id: string; name: string } }> = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...$processedColumns.values(),
+      ...[...$processedColumns.values()].map((pc) => ({ column: { id: pc.id, name: pc.column.name } })),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });

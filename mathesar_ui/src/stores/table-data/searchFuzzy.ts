@@ -12,15 +12,15 @@ function valueIsSearchable(v: unknown) {
   return v !== null && v !== undefined;
 }
 
-export class SearchFuzzy extends ImmutableMap<number, unknown> {
-  constructor(i: Iterable<[number, unknown]> = []) {
+export class SearchFuzzy extends ImmutableMap<string, unknown> {
+  constructor(i: Iterable<[string, unknown]> = []) {
     super(i);
     this.valueIsValid = valueIsSearchable;
   }
 
   getSearchParams(): RecordsSearchParams['search_params'] {
     return [...this].map(([columnId, value]) => ({
-      attnum: columnId,
+      attnum: Number(columnId),
       literal: value,
     }));
   }
