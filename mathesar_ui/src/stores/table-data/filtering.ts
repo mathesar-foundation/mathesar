@@ -100,19 +100,15 @@ function filterEntryToSqlExpr(filterEntry: FilterEntry): SqlExpr {
 }
 
 /** [ columnId, operation, value ] */
-type TerseFilterEntry = [number, FilterId, unknown];
+type TerseFilterEntry = [string, FilterId, unknown];
 
 function makeTerseFilterEntry(filterEntry: FilterEntry): TerseFilterEntry {
-  return [
-    Number(filterEntry.columnId),
-    filterEntry.conditionId,
-    filterEntry.value,
-  ];
+  return [filterEntry.columnId, filterEntry.conditionId, filterEntry.value];
 }
 
 function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
   return {
-    columnId: String(terseFilterEntry[0]),
+    columnId: terseFilterEntry[0],
     conditionId: terseFilterEntry[1],
     value: terseFilterEntry[2],
   };

@@ -5,7 +5,7 @@ export interface GroupEntry {
   readonly preprocFnId?: string;
 }
 
-type TerseGroupEntry = [number, GroupEntry['preprocFnId']] | [number];
+type TerseGroupEntry = [string, GroupEntry['preprocFnId']] | [string];
 
 export type TerseGrouping = TerseGroupEntry[];
 
@@ -87,15 +87,15 @@ export class Grouping {
   terse(): TerseGrouping {
     return this.entries.map((entry) =>
       entry.preprocFnId
-        ? [Number(entry.columnId), entry.preprocFnId]
-        : [Number(entry.columnId)],
+        ? [entry.columnId, entry.preprocFnId]
+        : [entry.columnId],
     );
   }
 
   static fromTerse(terse: TerseGrouping): Grouping {
     return new Grouping({
       entries: terse.map((terseEntry) => ({
-        columnId: String(terseEntry[0]),
+        columnId: terseEntry[0],
         preprocFnId: terseEntry[1] ?? undefined,
       })),
     });

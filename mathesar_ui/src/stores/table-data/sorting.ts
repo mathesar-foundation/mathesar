@@ -29,9 +29,8 @@ function getApiSortDirection(sortDirection: SortDirection): ApiSortDirection {
 
 /**
  * [columnId, sortDirection]
- * Note: columnId is a string in the frontend, but stored as number in terse format for backward compatibility
  */
-export type TerseSorting = [number, SortDirection][];
+export type TerseSorting = [string, SortDirection][];
 
 export class Sorting extends ImmutableMap<string, SortDirection> {
   constructor(entries: Iterable<[string, SortDirection]> = []) {
@@ -75,14 +74,14 @@ export class Sorting extends ImmutableMap<string, SortDirection> {
 
   terse(): TerseSorting {
     return [...this].map(([columnId, sortDirection]) => [
-      Number(columnId),
+      columnId,
       sortDirection,
     ]);
   }
 
   static fromTerse(t: TerseSorting): Sorting {
     return new Sorting(
-      t.map(([columnId, sortDirection]) => [String(columnId), sortDirection]),
+      t.map(([columnId, sortDirection]) => [columnId, sortDirection]),
     );
   }
 }
