@@ -293,11 +293,7 @@ export class RecordsData {
       const params = get(this.meta.recordsRequestParamsData);
       const contextualFilterEntries: FilterEntry[] = [
         ...this.contextualFilters,
-      ].map(([columnId, value]) => ({
-        columnId: String(columnId),
-        conditionId: 'equal',
-        value,
-      }));
+      ].map(([columnId, value]) => ({ columnId, conditionId: 'equal', value }));
 
       const recordsListParams: RecordsListParams = {
         ...this.apiContext,
