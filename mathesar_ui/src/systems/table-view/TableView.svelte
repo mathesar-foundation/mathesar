@@ -22,7 +22,6 @@
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
-  import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
 
   import Body from './Body.svelte';
   import { openTableCellContextMenu } from './context-menu/contextMenu';
@@ -60,7 +59,7 @@
         new Map(
           map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
         ),
-      getColumns: () => stringifyMapKeys(get(processedColumns)),
+      getColumns: () => get(processedColumns),
       getRecordSummaries: () => get(recordsData.linkedRecordSummaries),
     },
     pastingContext: {
@@ -95,7 +94,9 @@
   $: sheetColumns = (() => {
     const columns: Array<{ column: { id: string; name: string } }> = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...[...$processedColumns.values()].map((pc) => ({ column: { id: pc.id, name: pc.column.name } })),
+      ...[...$processedColumns.values()].map((pc) => ({
+        column: { id: pc.id, name: pc.column.name },
+      })),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
