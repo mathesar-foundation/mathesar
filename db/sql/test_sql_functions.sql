@@ -1965,22 +1965,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION test_alter_columns_id_name() RETURNS SETOF TEXT AS $f$
-DECLARE
-  col_alters_jsonb jsonb := '[{"attnum": 1, "name": "new_id"}]';
-BEGIN
-  PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb),
-                 ARRAY[1]);
-
-  RETURN NEXT columns_are(
-    'test_schema',
-    'col_alters',
-    ARRAY['new_id', 'col1', 'col2', 'Col sp', 'col_opts', 'coltim']
-  );
-END;
-$f$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION test_alter_columns_single_name() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
@@ -1992,6 +1976,25 @@ BEGIN
     'col_alters',
     ARRAY['id', 'blah', 'col2', 'Col sp', 'col_opts', 'coltim']
   );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_mathesar_id_column_name()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  tab_oid oid;
+  col_alters_jsonb jsonb := '[{"attnum": 1, "name": "new_id"}]';
+BEGIN
+  PERFORM __setup_column_alter();
+  tab_oid := 'test_schema.col_alters'::regclass::oid;
+
+  BEGIN
+    PERFORM msar.alter_columns(tab_oid, col_alters_jsonb);
+  EXCEPTION
+    WHEN OTHERS THEN
+      RETURN NEXT pass('Exception was correctly raised when renaming Mathesar ID column.');
+  END;
 END;
 $f$ LANGUAGE plpgsql;
 
