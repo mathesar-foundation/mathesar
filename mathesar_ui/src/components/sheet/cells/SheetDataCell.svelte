@@ -8,12 +8,10 @@
 
   import { getSheetCellStyle } from './sheetCellUtils';
 
-  type SheetColumnIdentifierKey = $$Generic;
-
   const isSelectingCellRange =
     isSelectingCellRangeContext.get() ?? readable(false);
 
-  export let columnIdentifierKey: SheetColumnIdentifierKey;
+  export let columnIdentifierKey: string;
   export let cellSelectionId: string | undefined = undefined;
   export let selection: SheetSelection | undefined = undefined;
   export let isWithinPlaceholderRow = false;

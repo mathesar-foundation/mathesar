@@ -1,10 +1,8 @@
 <script lang="ts">
   import { getSheetCellStyle } from './sheetCellUtils';
 
-  type ColumnIdentifierKey = $$Generic;
-
   export let rowSelectionId: string;
-  export let columnIdentifierKey: ColumnIdentifierKey;
+  export let columnIdentifierKey: string;
   export let isWithinPlaceholderRow = false;
   export let onMouseDown: ((e: MouseEvent) => void) | undefined = undefined;
 
