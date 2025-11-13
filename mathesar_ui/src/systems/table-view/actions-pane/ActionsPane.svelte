@@ -11,13 +11,14 @@
 
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
+  import RelatedColumnsDropdown from './record-operations/related-columns/RelatedColumnsDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ table, meta, isLoading, hasPrimaryKey } = $tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
-  $: ({ filtering, sorting, grouping, sheetState } = meta);
+  $: ({ filtering, sorting, grouping, relatedColumns, sheetState } = meta);
 
   $: isSelectable = $currentRolePrivileges.has('SELECT');
 
@@ -42,6 +43,7 @@
       <FilterDropdown {filtering} {canViewLinkedEntities} />
       <SortDropdown {sorting} />
       <GroupDropdown {grouping} />
+      <RelatedColumnsDropdown {relatedColumns} />
     </div>
   {/if}
 

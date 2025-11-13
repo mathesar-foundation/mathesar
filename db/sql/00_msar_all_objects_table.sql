@@ -83,6 +83,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('__msar', '__msar.rename_schema(text,text)', 'FUNCTION', NULL),
   ('__msar', '__msar.rename_table(text,text)', 'FUNCTION', NULL),
   ('__msar', '__msar.set_not_nulls(text,__msar.not_null_def[])', 'FUNCTION', NULL),
+  ('__msar', '__msar.split_ctes(text)', 'FUNCTION', NULL),
   ('__msar', '__msar.update_pk_sequence_to_latest(text,text)', 'FUNCTION', NULL),
   ('mathesar_types', 'mathesar_types.cast_to__double_quote_char_double_quote_("char")', 'FUNCTION', NULL),
   ('mathesar_types', 'mathesar_types.cast_to__double_quote_char_double_quote_(bigint)', 'FUNCTION', NULL),
@@ -1220,12 +1221,18 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.uri_parts(text)', 'FUNCTION', NULL),
   ('msar', 'msar.uri_path(text)', 'FUNCTION', NULL),
   ('msar', 'msar.uri_query(text)', 'FUNCTION', NULL),
-  ('msar', 'msar.uri_scheme(text)', 'FUNCTION', NULL);
-
-
---
--- Name: all_mathesar_objects all_mathesar_objects_obj_schema_obj_name_obj_kind_key; Type: CONSTRAINT; Schema: msar; Owner: -
---
+  ('msar', 'msar.uri_scheme(text)', 'FUNCTION', NULL),
+  ('msar', 'msar.build_related_column_id(jsonb,integer)', 'FUNCTION', NULL),
+  ('msar', 'msar.path_hash(jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.related_alias(text)', 'FUNCTION', NULL),
+  ('msar', 'msar.value_col_name(integer,text)', 'FUNCTION', NULL),
+  ('msar', 'msar.build_related_column_query(oid,jsonb,integer,text,text)', 'FUNCTION', NULL),
+  ('msar', 'msar.build_related_columns_aggregation_query(jsonb,text)', 'FUNCTION', NULL),
+  ('msar', 'msar.build_related_columns_ctes(oid,jsonb,text)', 'FUNCTION', NULL),
+  ('msar', 'msar.build_related_columns_join_expr(oid,text,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.list_records_from_table(oid,integer,integer,jsonb,jsonb,jsonb,boolean,jsonb,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.search_records_from_table(oid,jsonb,integer,integer,boolean,jsonb,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.split_ctes(text)', 'FUNCTION', NULL);
 
 ALTER TABLE ONLY msar.all_mathesar_objects
     ADD CONSTRAINT all_mathesar_objects_obj_schema_obj_name_obj_kind_key UNIQUE (obj_schema, obj_name, obj_kind);
@@ -1234,4 +1241,3 @@ ALTER TABLE ONLY msar.all_mathesar_objects
 --
 -- PostgreSQL database dump complete
 --
-

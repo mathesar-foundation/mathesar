@@ -13,6 +13,7 @@
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
   export let recordSummary: string | undefined = undefined;
+  export let recordSummaries: Map<string, string> | undefined = undefined;
   export let fileManifest: FileManifest | undefined = undefined;
   export let setFileManifest:
     | ((mash: string, manifest: FileManifest) => void)
@@ -21,6 +22,19 @@
     undefined;
   export let setRecordSummary:
     | ((recordId: string, recordSummary: string) => void)
+    | undefined = undefined;
+  export let intermediateTableOid: number | undefined = undefined;
+  export let fkToBaseAttnum: number | undefined = undefined;
+  export let fkToTargetAttnum: number | undefined = undefined;
+  export let baseTableRowPk: string | number | undefined = undefined;
+  export let cellKey: string | undefined = undefined;
+  export let modificationStatusMap:
+    | import('@mathesar-component-library').WritableMap<
+        string,
+        import('@mathesar/api/rest/utils/requestUtils').RequestStatus<
+          import('@mathesar/packages/json-rpc-client-builder').RpcError[]
+        >
+      >
     | undefined = undefined;
   export let isActive = false;
   export let disabled = false;
@@ -54,7 +68,14 @@
     {isIndependentOfSheet}
     {horizontalAlignment}
     {recordSummary}
+    {recordSummaries}
     {setRecordSummary}
+    {intermediateTableOid}
+    {fkToBaseAttnum}
+    {fkToTargetAttnum}
+    {baseTableRowPk}
+    {cellKey}
+    {modificationStatusMap}
     {fileManifest}
     {setFileManifest}
     {fileRequestParams}

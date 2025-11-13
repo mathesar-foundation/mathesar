@@ -1,13 +1,12 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { RecordsSummaryListResponse } from './_common/commonTypes';
-import type { RecordSummaryTemplate } from './tables';
+import type { JoinPath, RecordSummaryTemplate } from './tables';
 
 export type ResultValue = string | number | boolean | null;
 
 export type SortDirection = 'asc' | 'desc';
 export interface SortingEntry {
-  /** column id */
   attnum: number;
   direction: SortDirection;
 }
@@ -43,7 +42,7 @@ export interface SqlLiteral {
 }
 export interface SqlColumn {
   type: 'attnum';
-  value: number;
+  value: number | string; // string for related columns (e.g., "related_...")
 }
 export type SqlExpr = SqlComparison | SqlFunction | SqlLiteral | SqlColumn;
 
@@ -69,6 +68,12 @@ export interface GroupingResponse extends Grouping {
   groups: Group[] | null;
 }
 
+export interface RelatedColumnRequest {
+  join_path: JoinPath;
+  column_attnum: number;
+  aggregation?: 'list' | 'join' | 'sum' | 'count';
+}
+
 export interface RecordsListParams {
   database_id: number;
   table_oid: number;
@@ -78,6 +83,7 @@ export interface RecordsListParams {
   grouping?: Grouping;
   filter?: SqlExpr;
   return_record_summaries?: boolean;
+  related_columns?: RelatedColumnRequest[];
 }
 
 export interface RecordsSearchParams {
@@ -86,6 +92,7 @@ export interface RecordsSearchParams {
   search_params: { attnum: number; literal: unknown }[];
   limit?: number;
   return_record_summaries?: boolean;
+  related_columns?: RelatedColumnRequest[];
 }
 
 /** keys are stringified column ids */
@@ -115,6 +122,23 @@ export interface RecordsResponse {
   record_summaries: Record<string, string> | null;
   /** Keys are attnums. */
   download_links: Record<string, FileManifestColumnData>;
+  /**
+   * Related column values.
+   * Keys: related column ID (related_...), then row PK value (stringified).
+   * Values: aggregated result (single value, array, array of {id, value} objects for 'list' aggregation, {sum, ids} for 'sum' aggregation, or {count, ids} for 'count' aggregation).
+   * TODO: gross
+   */
+  related_column_values?: Record<
+    string,
+    Record<
+      string,
+      | ResultValue
+      | ResultValue[]
+      | Array<{ id: ResultValue; value: ResultValue }>
+      | { sum: ResultValue; ids: ResultValue[] }
+      | { count: ResultValue; ids: ResultValue[] }
+    >
+  >;
 }
 
 export const records = {

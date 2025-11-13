@@ -17,6 +17,7 @@ def list_records_from_table(
     group=None,
     return_record_summaries=False,
     table_record_summary_templates=None,
+    related_columns=None,
 ):
     """
     Get records from a table.
@@ -36,6 +37,8 @@ def list_records_from_table(
         group: An array of group definition objects.
         return_record_summaries: Whether to return self record summaries.
         table_record_summary_templates: A dict of record summary templates, per table.
+        related_columns: Optional list of related column requests to fetch
+            aggregated values from related tables.
     """
     result = db_conn.exec_msar_func(
         conn,
@@ -48,6 +51,7 @@ def list_records_from_table(
         _json_or_none(group),
         return_record_summaries,
         _json_or_none(table_record_summary_templates),
+        _json_or_none(related_columns),
     ).fetchone()[0]
     return result
 
@@ -89,6 +93,7 @@ def search_records_from_table(
     offset=0,
     return_record_summaries=False,
     table_record_summary_templates=None,
+    related_columns=None,
 ):
     """
     Get records from a table, according to a search specification
@@ -101,6 +106,8 @@ def search_records_from_table(
         limit: The maximum number of rows we'll return.
         return_record_summaries: Whether to return self record summaries.
         table_record_summary_templates: A dict of record summary templates, per table.
+        related_columns: Optional list of related column requests to fetch
+            aggregated values from related tables.
 
     The search definition objects should have the form
     {"attnum": <int>, "literal": <text>}
@@ -115,6 +122,7 @@ def search_records_from_table(
         offset,
         return_record_summaries,
         _json_or_none(table_record_summary_templates),
+        _json_or_none(related_columns),
     ).fetchone()[0]
     return result
 

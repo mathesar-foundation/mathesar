@@ -13,6 +13,7 @@ import {
 import { Filtering, type TerseFiltering } from './filtering';
 import { Grouping, type TerseGrouping } from './grouping';
 import type { RecordsRequestParamsData } from './records';
+import { RelatedColumns, type TerseRelatedColumns } from './relatedColumns';
 import { SearchFuzzy } from './searchFuzzy';
 import { Sorting, type TerseSorting } from './sorting';
 import {
@@ -50,6 +51,7 @@ export interface MetaProps {
   sorting: Sorting;
   grouping: Grouping;
   filtering: Filtering;
+  relatedColumns: RelatedColumns;
 }
 
 /** Adds default values. */
@@ -59,6 +61,7 @@ function getFullMetaProps(p?: Partial<MetaProps>): MetaProps {
     sorting: p?.sorting ?? new Sorting(),
     grouping: p?.grouping ?? new Grouping(),
     filtering: p?.filtering ?? new Filtering(),
+    relatedColumns: p?.relatedColumns ?? new RelatedColumns(),
   };
 }
 
@@ -67,6 +70,7 @@ export type TerseMetaProps = [
   TerseSorting,
   TerseGrouping,
   TerseFiltering,
+  TerseRelatedColumns,
 ];
 
 export function makeMetaProps(t: TerseMetaProps): MetaProps {
@@ -75,6 +79,7 @@ export function makeMetaProps(t: TerseMetaProps): MetaProps {
     sorting: Sorting.fromTerse(t[1]),
     grouping: Grouping.fromTerse(t[2]),
     filtering: Filtering.fromTerse(t[3]),
+    relatedColumns: RelatedColumns.fromTerse(t[4]),
   };
 }
 
@@ -85,6 +90,7 @@ export function makeTerseMetaProps(p?: Partial<MetaProps>): TerseMetaProps {
     props.sorting.terse(),
     props.grouping.terse(),
     props.filtering.terse(),
+    props.relatedColumns.terse(),
   ];
 }
 
@@ -119,6 +125,8 @@ export class Meta {
   grouping: Writable<Grouping>;
 
   filtering: Writable<Filtering>;
+
+  relatedColumns: Writable<RelatedColumns>;
 
   searchFuzzy: Writable<SearchFuzzy>;
 
@@ -172,6 +180,7 @@ export class Meta {
     this.sorting = writable(props.sorting);
     this.grouping = writable(props.grouping);
     this.filtering = writable(props.filtering);
+    this.relatedColumns = writable(props.relatedColumns);
     this.searchFuzzy = writable(new SearchFuzzy());
 
     this.rowsWithClientSideErrors = derived(
@@ -215,13 +224,20 @@ export class Meta {
     );
 
     this.serialization = derived(
-      [this.pagination, this.sorting, this.grouping, this.filtering],
-      ([pagination, sorting, grouping, filtering]) => {
+      [
+        this.pagination,
+        this.sorting,
+        this.grouping,
+        this.filtering,
+        this.relatedColumns,
+      ],
+      ([pagination, sorting, grouping, filtering, relatedColumns]) => {
         const serialization = serializeMetaProps({
           pagination,
           sorting,
           grouping,
           filtering,
+          relatedColumns,
         });
         if (serialization === defaultMetaPropsSerialization) {
           // Avoid returning a serialization which only includes the empty data
@@ -239,13 +255,22 @@ export class Meta {
         this.grouping,
         this.filtering,
         this.searchFuzzy,
+        this.relatedColumns,
       ],
-      ([pagination, sorting, grouping, filtering, searchFuzzy]) => ({
+      ([
         pagination,
         sorting,
         grouping,
         filtering,
         searchFuzzy,
+        relatedColumns,
+      ]) => ({
+        pagination,
+        sorting,
+        grouping,
+        filtering,
+        searchFuzzy,
+        relatedColumns,
       }),
     );
 
