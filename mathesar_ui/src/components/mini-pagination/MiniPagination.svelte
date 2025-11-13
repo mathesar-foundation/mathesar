@@ -2,11 +2,13 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
+  import Select from '@mathesar/component-library/select/Select.svelte';
   import Pagination from '@mathesar/utils/Pagination';
   import {
     Button,
     Dropdown,
     Icon,
+    LabeledInput,
     iconChooseItemNext,
     iconChooseItemPrevious,
   } from '@mathesar-component-library';
@@ -16,15 +18,22 @@
   export let pagination: Pagination;
   export let recordCount: number;
   export let pageJumperIsOpen = false;
+  export let pageSizeOptions: number[] | undefined = undefined;
 
   const dispatch = createEventDispatcher<{
     change: Pagination;
   }>();
 
-  $: ({ page } = pagination);
+  $: ({ page, size } = pagination);
   $: maxPage = pagination.getMaxPage(recordCount);
   $: canGoBackward = page > 1;
   $: canGoForward = page < maxPage;
+  $: allPageSizeOptions = (() => {
+    if (pageSizeOptions === undefined) return undefined;
+    if (pageSizeOptions.length < 2) return undefined;
+    const uniqueOptions = new Set([...pageSizeOptions, size]);
+    return [...uniqueOptions].sort((a, b) => a - b);
+  })();
 
   function goToPage(destination: number) {
     const nearestValidPage = Math.max(Math.min(destination, maxPage), 1);
@@ -43,7 +52,13 @@
     goToPage(page + 1);
   }
 
-  function handleDropdownOpen() {}
+  function changePageSize(newSize: number) {
+    pagination = new Pagination({
+      size: newSize,
+      page: pagination.page,
+    });
+    dispatch('change', pagination);
+  }
 </script>
 
 <div class="mini-pagination">
@@ -67,7 +82,6 @@
     placements={['bottom', 'bottom-end', 'bottom-start', 'left', 'top']}
     closeOnInnerClick={false}
     bind:isOpen={pageJumperIsOpen}
-    on:open={handleDropdownOpen}
   >
     <span slot="trigger" class="button">
       {$_('page_number', { values: { pageNumber: page } })}
@@ -81,6 +95,22 @@
           close();
         }}
       />
+
+      {#if allPageSizeOptions}
+        <div class="page-size">
+          <LabeledInput label={$_('page_size')}>
+            <Select
+              options={allPageSizeOptions}
+              value={size}
+              on:change={({ detail: newSize }) => {
+                if (!newSize) return;
+                changePageSize(newSize);
+                close();
+              }}
+            />
+          </LabeledInput>
+        </div>
+      {/if}
     </div>
   </Dropdown>
 
@@ -117,6 +147,12 @@
     background: var(--color-navigation-20-hover);
   }
   .detail {
-    padding: var(--sm1);
+    padding: var(--sm4);
+  }
+  .page-size {
+    margin-top: 1em;
+    font-size: var(--sm1);
+    display: grid;
+    justify-content: center;
   }
 </style>
