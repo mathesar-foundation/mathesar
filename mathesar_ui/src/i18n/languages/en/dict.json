@@ -373,6 +373,7 @@
   "inspector": "Inspector",
   "integer": "Integer",
   "internal_schema_help": "These schemas are necessary for Mathesar to function and will automatically be installed on the database after connecting.",
+  "join": "Join",
   "join_chat": "Join Community",
   "join_mailing_list_help": "Join our mailing list to keep on top of what's going on at the Mathesar Foundation.",
   "keep_first_row_as_data": "Set generic column names, keeping the first row as data",
