@@ -100,7 +100,7 @@
   async function handleSave() {
     try {
       await constraintsDataStore.add({
-        columns: constraintColumns.map((c) => c.id),
+        columns: constraintColumns.map((c) => c.column.id),
         type: 'u',
         name: constraintName,
       });
@@ -139,7 +139,7 @@
             column={{
               ...option.column,
               constraintsType: getColumnConstraintTypeByColumnId(
-                option.column.id,
+                option.id,
                 $processedColumns,
               ),
             }}

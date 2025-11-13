@@ -13,7 +13,7 @@
 
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
-  export let processedColumnsMap: Map<number, ProcessedColumn>;
+  export let processedColumnsMap: Map<string, ProcessedColumn>;
   export let row: GroupHeaderRow;
   export let grouping: RecordGrouping;
   export let group: RecordGroup;
@@ -22,7 +22,8 @@
 
   $: ({ columnIds, preprocIds } = grouping);
   $: preProcFunctionsForColumn = columnIds.map(
-    (columnId) => processedColumnsMap.get(columnId)?.preprocFunctions ?? [],
+    (columnId) =>
+      processedColumnsMap.get(String(columnId))?.preprocFunctions ?? [],
   );
   $: preprocNames = preprocIds.map((preprocId, index) =>
     preprocId
@@ -37,11 +38,14 @@
   <div class="group-header">
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
+        {@const stringColumnId = String(columnId)}
         <GroupHeaderCellValue
           {processedColumnsMap}
-          cellValue={row.groupValues ? row.groupValues[columnId] : undefined}
+          cellValue={row.groupValues
+            ? row.groupValues[stringColumnId]
+            : undefined}
           {recordSummariesForSheet}
-          {columnId}
+          columnId={stringColumnId}
           preprocName={preprocNames[index]}
           {fileManifestsForSheet}
           totalColumns={columnIds.length}

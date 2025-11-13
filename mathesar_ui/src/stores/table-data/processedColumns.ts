@@ -43,8 +43,11 @@ export class ProcessedColumn implements CellColumnFabric {
   /**
    * This property is also available via `column.id`, but it's duplicated at a
    * higher level for brevity's sake because it's used so frequently.
+   *
+   * Note: This is a stringified version of the column's attnum (RawColumn.id).
+   * The RawColumn.id remains a number for API compatibility.
    */
-  readonly id: RawColumnWithMetadata['id'];
+  readonly id: string;
 
   readonly column: RawColumnWithMetadata;
 
@@ -95,7 +98,7 @@ export class ProcessedColumn implements CellColumnFabric {
     constraints: RawConstraint[];
     hasEnhancedPrimaryKeyCell?: boolean;
   }) {
-    this.id = props.column.id;
+    this.id = String(props.column.id);
     this.column = props.column;
     this.columnIndex = props.columnIndex;
     this.tableOid = props.tableOid;
@@ -203,6 +206,6 @@ export function getFirstEditableColumn(
   );
 }
 
-/** Maps column ids to processed columns */
-export type ProcessedColumns = Map<number, ProcessedColumn>;
+/** Maps column ids (as strings) to processed columns */
+export type ProcessedColumns = Map<string, ProcessedColumn>;
 export type ProcessedColumnsStore = Readable<ProcessedColumns>;

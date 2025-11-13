@@ -51,7 +51,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
 
   function shouldPatchIncludeColumn(columnId: string) {
-    const processedColumn = $processedColumns.get(parseInt(columnId, 10));
+    const processedColumn = $processedColumns.get(columnId);
     if (!processedColumn) return false;
 
     // Only patch columns that are not primary keys.

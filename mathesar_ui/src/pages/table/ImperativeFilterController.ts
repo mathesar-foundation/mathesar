@@ -5,10 +5,10 @@ import { EventHandler } from '@mathesar-component-library';
 
 export class ImperativeFilterController extends EventHandler<{
   openDropdown: void;
-  addFilter: number;
+  addFilter: string;
   activateLastFilterInput: void;
 }> {
-  async beginAddingNewFilteringEntry(columnId: number) {
+  async beginAddingNewFilteringEntry(columnId: string) {
     await this.dispatch('openDropdown');
     await tick();
     await this.dispatch('addFilter', columnId);
@@ -20,7 +20,7 @@ export class ImperativeFilterController extends EventHandler<{
     return this.on('openDropdown', fn);
   }
 
-  onAddFilter(fn: (columnId: number) => void): () => void {
+  onAddFilter(fn: (columnId: string) => void): () => void {
     return this.on('addFilter', fn);
   }
 

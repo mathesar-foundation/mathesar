@@ -128,10 +128,10 @@ export function constructQueryModelFromHash(
     terseSummarization.columns.map((entry) => [entry.id, entry]),
   );
   const groupingEntries = terseSummarization.terseGrouping.filter((group) =>
-    columnMap.has(group[0]),
+    columnMap.has(Number(group[0])),
   );
   const groupingColumns = groupingEntries
-    .map((entry) => columnMap.get(entry[0]))
+    .map((entry) => columnMap.get(Number(entry[0])))
     .filter((entry): entry is TerseSummarizedColumn => entry !== undefined);
 
   if (groupingColumns.length === 0) {

@@ -13,9 +13,9 @@
   import FieldChainTail from './FieldChainTail.svelte';
 
   export let schema: Schema;
-  export let columnIds: number[];
+  export let columnIds: string[];
   export let columns: ProcessedColumns;
-  export let onUpdate: (columnIds: number[]) => void;
+  export let onUpdate: (columnIds: string[]) => void;
 
   $: column = defined(columnIds[0], (c) => columns.get(c));
   /**

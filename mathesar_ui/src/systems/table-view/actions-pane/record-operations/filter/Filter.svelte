@@ -58,7 +58,7 @@
     filtering.set(newFiltering);
   }
 
-  function addFilter(columnId: number) {
+  function addFilter(columnId: string) {
     const column = processedColumns.get(columnId);
     if (!column) {
       return;

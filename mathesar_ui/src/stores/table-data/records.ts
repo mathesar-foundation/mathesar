@@ -205,10 +205,10 @@ export class RecordsData {
   private requestParamsUnsubscriber: Unsubscriber;
 
   /**
-   * This maps column ids to cell values. It is used to supply default values
+   * This maps column ids (as strings) to cell values. It is used to supply default values
    * for the cells within hidden columns when creating new records.
    */
-  private contextualFilters: Map<number, number | string>;
+  private contextualFilters: Map<string, number | string>;
 
   private loadIntrinsicRecordSummaries?: boolean;
 
@@ -224,7 +224,7 @@ export class RecordsData {
     table: Pick<Table, 'oid'>;
     meta: Meta;
     columnsDataStore: ColumnsDataStore;
-    contextualFilters: Map<number, number | string>;
+    contextualFilters: Map<string, number | string>;
     loadIntrinsicRecordSummaries?: boolean;
   }) {
     this.apiContext = { database_id: database.id, table_oid: table.oid };

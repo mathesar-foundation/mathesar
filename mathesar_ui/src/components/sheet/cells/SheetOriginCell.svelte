@@ -1,9 +1,7 @@
 <script lang="ts">
   import { getSheetCellStyle } from './sheetCellUtils';
 
-  type ColumnIdentifierKey = $$Generic;
-
-  export let columnIdentifierKey: ColumnIdentifierKey;
+  export let columnIdentifierKey: string;
 
   $: style = getSheetCellStyle(columnIdentifierKey);
 </script>

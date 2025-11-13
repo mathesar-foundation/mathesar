@@ -33,17 +33,17 @@
   );
   $: availableColumnIds = availableColumns.map((c) => c.id);
 
-  function addSortColumn(columnId: number) {
+  function addSortColumn(columnId: string) {
     sorting.update((s) => s.with(columnId, 'ASCENDING'));
   }
 
-  function removeSortColumn(columnId: number) {
+  function removeSortColumn(columnId: string) {
     sorting.update((s) => s.without(columnId));
   }
 
   function updateSortEntry(
-    columnId: number,
-    newColumnId: number,
+    columnId: string,
+    newColumnId: string,
     newSortDirection: SortDirection,
   ) {
     // This logic may seem a bit complex for a simple update, but it's necessary

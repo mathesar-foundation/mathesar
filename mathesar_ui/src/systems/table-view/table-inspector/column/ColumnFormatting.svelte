@@ -35,7 +35,7 @@
   async function save() {
     typeChangeState = { state: 'processing' };
     try {
-      await columnsDataStore.setDisplayOptions(column, displayOptions);
+      await columnsDataStore.setDisplayOptions(column.column, displayOptions);
       actionButtonsVisible = false;
       typeChangeState = { state: 'success' };
     } catch (err) {

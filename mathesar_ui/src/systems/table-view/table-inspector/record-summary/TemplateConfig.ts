@@ -10,8 +10,28 @@ import type {
 } from '@mathesar/stores/table-data';
 import { ImmutableMap } from '@mathesar-component-library';
 
-function partIsColumn(part: RecordSummaryTemplatePart): part is number[] {
+type InternalTemplatePart = string | string[];
+
+function partIsColumn(part: InternalTemplatePart): part is string[] {
   return Array.isArray(part);
+}
+
+function convertPartFromApi(
+  part: RecordSummaryTemplatePart,
+): InternalTemplatePart {
+  if (Array.isArray(part)) {
+    return part.map(String);
+  }
+  return part;
+}
+
+function convertPartToApi(
+  part: InternalTemplatePart,
+): RecordSummaryTemplatePart {
+  if (Array.isArray(part)) {
+    return part.map(Number);
+  }
+  return part;
 }
 
 /**
@@ -32,9 +52,9 @@ function partIsColumn(part: RecordSummaryTemplatePart): part is number[] {
  * avoid re-rendering parts of the template.
  */
 export class TemplateConfig {
-  private readonly parts;
+  private readonly parts: ImmutableMap<number, InternalTemplatePart>;
 
-  constructor(parts: Iterable<[number, RecordSummaryTemplatePart]>) {
+  constructor(parts: Iterable<[number, InternalTemplatePart]>) {
     this.parts = new ImmutableMap(parts);
   }
 
@@ -43,7 +63,9 @@ export class TemplateConfig {
   }
 
   static fromTemplate(template: RecordSummaryTemplatePart[]): TemplateConfig {
-    return new TemplateConfig(template.map((part, i) => [i, part]));
+    return new TemplateConfig(
+      template.map((part, i) => [i, convertPartFromApi(part)]),
+    );
   }
 
   /**
@@ -57,26 +79,25 @@ export class TemplateConfig {
     );
     const firstTextColumn = first(textColumns);
     if (firstTextColumn) {
-      return TemplateConfig.fromTemplate([[firstTextColumn.id]]);
+      // Convert string[] to number[] for API compatibility
+      return TemplateConfig.fromTemplate([[Number(firstTextColumn.id)]]);
     }
     // Type assertion here because we know that every table has at least one
     // column.
     const firstColumn = first(columns.values()) as ProcessedColumn;
-    return TemplateConfig.fromTemplate([[firstColumn.id]]);
+    // Convert string[] to number[] for API compatibility
+    return TemplateConfig.fromTemplate([[Number(firstColumn.id)]]);
   }
 
   get template(): RecordSummaryTemplate {
-    return [...this.parts.values()];
+    return [...this.parts.values()].map(convertPartToApi);
   }
 
-  withPartAppended(part: RecordSummaryTemplatePart): TemplateConfig {
+  withPartAppended(part: InternalTemplatePart): TemplateConfig {
     return new TemplateConfig(this.parts.with(this.getNextKey(), part));
   }
 
-  withPartReplaced(
-    key: number,
-    part: RecordSummaryTemplatePart,
-  ): TemplateConfig {
+  withPartReplaced(key: number, part: InternalTemplatePart): TemplateConfig {
     return new TemplateConfig(this.parts.with(key, part));
   }
 

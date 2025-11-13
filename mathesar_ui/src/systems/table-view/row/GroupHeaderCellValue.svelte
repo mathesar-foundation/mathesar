@@ -8,9 +8,9 @@
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 
-  export let processedColumnsMap: Map<number, ProcessedColumn>;
+  export let processedColumnsMap: Map<string, ProcessedColumn>;
   export let recordSummariesForSheet: RecordSummariesForSheet;
-  export let columnId: number;
+  export let columnId: string;
   export let preprocName: string | undefined = undefined;
   export let cellValue: ResultValue | undefined = undefined;
   export let fileManifestsForSheet: AssociatedCellValuesForSheet<FileManifest>;
@@ -18,16 +18,14 @@
 
   $: processedColumn = processedColumnsMap.get(columnId);
   $: recordId = String(cellValue);
-  $: recordSummary = recordSummariesForSheet
-    .get(String(columnId))
-    ?.get(recordId);
+  $: recordSummary = recordSummariesForSheet.get(columnId)?.get(recordId);
   $: linkedTableId =
     processedColumnsMap?.get(columnId)?.linkFk?.referent_table_oid;
   $: fileManifest = (() => {
     if (!processedColumn?.column.metadata?.file_backend) return undefined;
     const fileReference = parseFileReference(cellValue);
     if (!fileReference) return undefined;
-    return fileManifestsForSheet.get(String(columnId))?.get(fileReference.mash);
+    return fileManifestsForSheet.get(columnId)?.get(fileReference.mash);
   })();
 </script>
 
