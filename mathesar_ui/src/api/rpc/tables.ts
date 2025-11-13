@@ -102,6 +102,7 @@ export interface JoinableTablesResult {
         {
           name: string;
           type: string;
+          primary_key: boolean;
         }
       >;
     }
