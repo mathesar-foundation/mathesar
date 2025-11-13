@@ -34,7 +34,7 @@
   $: hasFilter = $filtering.entries.some((entry) => entry.columnId === id);
   $: sorter = $sorting.get(id);
   $: grouped = $grouping.entries.some((entry) => entry.columnId === id);
-  $: columnPosition = getSheetColumnPosition(Number(column.id));
+  $: columnPosition = getSheetColumnPosition(column.id);
   $: hideIcon = (() => {
     if (!$columnPosition) return false;
     return $columnPosition.width < widthThresholdForIcon;

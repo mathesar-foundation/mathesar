@@ -29,7 +29,7 @@ export function* deleteColumn(p: {
           get(_)('are_you_sure_to_proceed'),
         ],
         onProceed: () =>
-          p.tabularData.columnsDataStore.deleteColumn(Number(p.column.id)),
+          p.tabularData.columnsDataStore.deleteColumn(p.column.column.id),
       });
     },
   });

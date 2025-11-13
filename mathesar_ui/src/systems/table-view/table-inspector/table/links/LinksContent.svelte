@@ -32,9 +32,9 @@
     ...getLinksInThisTable(
       joinableTablesResult,
       new Map(
-        [...currentTableColumns.entries()].map(([id, pc]) => [
-          Number(id),
-          pc.column,
+        [...currentTableColumns.entries()].map(([, { column }]) => [
+          column.id,
+          column,
         ]),
       ),
     ),
