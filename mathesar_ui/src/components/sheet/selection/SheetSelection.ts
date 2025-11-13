@@ -17,7 +17,7 @@ import {
   basisFromZeroEmptyColumns,
   emptyBasis,
 } from './basis';
-import type { Direction } from './Direction';
+import { type Direction, getColumnOffset, getRowOffset } from './Direction';
 import Plane from './Plane';
 import type { SheetCellDetails } from './selectionUtils';
 
@@ -369,10 +369,170 @@ export default class SheetSelection {
    * is simpler.
    */
   resized(direction: Direction): SheetSelection {
-    // TODO
+    // If there's no active cell or no selection, collapse and move instead
+    if (this.activeCellId === undefined || this.cellIds.size === 0) {
+      return this.collapsedAndMoved(direction);
+    }
 
-    // eslint-disable-next-line no-console
-    console.log(direction, 'Sheet selection resizing is not yet implemented');
-    return this;
+    // Get the bounds of the current selection
+    const minRowId = this.plane.rowIds.min(this.basis.rowIds);
+    const maxRowId = this.plane.rowIds.max(this.basis.rowIds);
+    const minColumnId = this.plane.columnIds.min(this.basis.columnIds);
+    const maxColumnId = this.plane.columnIds.max(this.basis.columnIds);
+
+    if (
+      minRowId === undefined ||
+      maxRowId === undefined ||
+      minColumnId === undefined ||
+      maxColumnId === undefined
+    ) {
+      // If we can't determine bounds, collapse and move
+      return this.collapsedAndMoved(direction);
+    }
+
+    // Parse the active cell
+    const activeCell = parseCellId(this.activeCellId);
+    const { rowId: initialActiveRowId, columnId: activeColumnId } = activeCell;
+    let activeRowId = initialActiveRowId;
+
+    // Normalize placeholder row to last data row for comparison
+    if (activeRowId === this.plane.placeholderRowId) {
+      activeRowId = this.plane.rowIds.last ?? activeRowId;
+    }
+
+    // Check if this is a single cell selection
+    const isSingleCell = minRowId === maxRowId && minColumnId === maxColumnId;
+
+    // Determine if we should grow or shrink
+    // In Google Sheets: if active cell is at the edge in the direction we're moving, shrink; otherwise grow
+    const rowOffset = getRowOffset(direction);
+    const columnOffset = getColumnOffset(direction);
+
+    let newMinRowId = minRowId;
+    let newMaxRowId = maxRowId;
+    let newMinColumnId = minColumnId;
+    let newMaxColumnId = maxColumnId;
+
+    if (rowOffset !== 0) {
+      // Moving vertically
+      if (rowOffset < 0) {
+        // Moving up
+        if (isSingleCell) {
+          // Single cell - always grow
+          const newMin = this.plane.rowIds.offset(minRowId, -1);
+          if (newMin !== undefined) {
+            newMinRowId = newMin;
+          }
+        } else if (activeRowId === minRowId) {
+          // Active cell is at the top edge - shrink
+          const newMin = this.plane.rowIds.offset(minRowId, 1);
+          if (newMin !== undefined && newMin <= maxRowId) {
+            newMinRowId = newMin;
+          } else {
+            // Can't shrink further, selection becomes a single row
+            newMinRowId = maxRowId;
+          }
+        } else {
+          // Active cell is not at the top edge - grow upward
+          const newMin = this.plane.rowIds.offset(minRowId, -1);
+          if (newMin !== undefined) {
+            newMinRowId = newMin;
+          }
+        }
+      } else if (isSingleCell) {
+        // Moving down - single cell - always grow
+        const newMax = this.plane.rowIds.offset(maxRowId, 1);
+        if (newMax !== undefined) {
+          newMaxRowId = newMax;
+        }
+      } else if (activeRowId === maxRowId) {
+        // Moving down - active cell is at the bottom edge - shrink
+        const newMax = this.plane.rowIds.offset(maxRowId, -1);
+        if (newMax !== undefined && newMax >= minRowId) {
+          newMaxRowId = newMax;
+        } else {
+          // Can't shrink further, selection becomes a single row
+          newMaxRowId = minRowId;
+        }
+      } else {
+        // Moving down - active cell is not at the bottom edge - grow downward
+        const newMax = this.plane.rowIds.offset(maxRowId, 1);
+        if (newMax !== undefined) {
+          newMaxRowId = newMax;
+        }
+      }
+    } else if (columnOffset !== 0) {
+      // Moving horizontally
+      if (columnOffset < 0) {
+        // Moving left
+        if (isSingleCell) {
+          // Single cell - always grow
+          const newMin = this.plane.columnIds.offset(minColumnId, -1);
+          if (newMin !== undefined) {
+            newMinColumnId = newMin;
+          }
+        } else if (activeColumnId === minColumnId) {
+          // Active cell is at the left edge - shrink
+          const newMin = this.plane.columnIds.offset(minColumnId, 1);
+          if (newMin !== undefined && newMin <= maxColumnId) {
+            newMinColumnId = newMin;
+          } else {
+            // Can't shrink further, selection becomes a single column
+            newMinColumnId = maxColumnId;
+          }
+        } else {
+          // Active cell is not at the left edge - grow leftward
+          const newMin = this.plane.columnIds.offset(minColumnId, -1);
+          if (newMin !== undefined) {
+            newMinColumnId = newMin;
+          }
+        }
+      } else if (isSingleCell) {
+        // Moving right - single cell - always grow
+        const newMax = this.plane.columnIds.offset(maxColumnId, 1);
+        if (newMax !== undefined) {
+          newMaxColumnId = newMax;
+        }
+      } else if (activeColumnId === maxColumnId) {
+        // Moving right - active cell is at the right edge - shrink
+        const newMax = this.plane.columnIds.offset(maxColumnId, -1);
+        if (newMax !== undefined && newMax >= minColumnId) {
+          newMaxColumnId = newMax;
+        } else {
+          // Can't shrink further, selection becomes a single column
+          newMaxColumnId = minColumnId;
+        }
+      } else {
+        // Moving right - active cell is not at the right edge - grow rightward
+        const newMax = this.plane.columnIds.offset(maxColumnId, 1);
+        if (newMax !== undefined) {
+          newMaxColumnId = newMax;
+        }
+      }
+    }
+
+    // If the bounds haven't changed, return the current selection
+    if (
+      newMinRowId === minRowId &&
+      newMaxRowId === maxRowId &&
+      newMinColumnId === minColumnId &&
+      newMaxColumnId === maxColumnId
+    ) {
+      return this;
+    }
+
+    // Create a new selection with the updated bounds
+    // Preserve the current active cell
+    return this.withBasis(
+      basisFromDataCells(
+        this.plane.dataCellsInFlexibleRowColumnRange(
+          newMinRowId,
+          newMaxRowId,
+          newMinColumnId,
+          newMaxColumnId,
+        ),
+        this.activeCellId,
+      ),
+    );
   }
 }
