@@ -5,6 +5,8 @@
   import { iconTableLink } from '@mathesar/icons';
   import { Dropdown, Icon } from '@mathesar-component-library';
 
+  import Join from './Join.svelte';
+
   type $$Props = ComponentProps<Dropdown>;
 </script>
 
@@ -20,7 +22,9 @@
       {$_('join')}
     </span>
   </svelte:fragment>
-  <div slot="content">TODO</div>
+  <div slot="content">
+    <Join />
+  </div>
 </Dropdown>
 
 <style lang="scss">
