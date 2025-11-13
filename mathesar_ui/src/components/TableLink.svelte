@@ -10,12 +10,10 @@
   interface $$Props extends ComponentProps<TableName> {
     table: Table;
     boxed?: boolean;
-    showIcon?: boolean;
   }
 
   export let table: Table;
   export let boxed = false;
-  export let showIcon = true;
 
   $: tablePageUrl = getTablePageUrl(
     table.schema.database.id,
@@ -26,9 +24,7 @@
 
 <a class="table-link" class:boxed href={tablePageUrl}>
   <TableName {table} {...$$restProps} />
-  {#if showIcon}
-    <Icon {...iconExternalLink} />
-  {/if}
+  <Icon {...iconExternalLink} />
 </a>
 
 <style lang="scss">

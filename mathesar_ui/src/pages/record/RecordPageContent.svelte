@@ -83,7 +83,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
       <div slot="subText" class="table-name">
         <RichText text={$_('record_in_table')} let:slotName>
           {#if slotName === 'tableName'}
-            <TableLink {table} truncate={false} showIcon={false} />
+            <TableLink {table} truncate={false} />
           {/if}
         </RichText>
       </div>
@@ -156,7 +156,6 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     grid-column: 1;
     color: var(--color-fg-subtle-1);
   }
-
   .form-status {
     grid-row: 1 / span 2;
     grid-column: 2;
