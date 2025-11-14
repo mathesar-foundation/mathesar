@@ -3,8 +3,8 @@
   import { _ } from 'svelte-i18n';
 
   import { iconTableLink } from '@mathesar/icons';
-  import { Dropdown, Icon } from '@mathesar-component-library';
   import type { Table } from '@mathesar/models/Table';
+  import { Dropdown, Icon } from '@mathesar-component-library';
 
   import Join from './Join.svelte';
 
@@ -38,6 +38,6 @@
     align-items: center;
   }
   .content {
-    padding: var(--sm1);
+    padding: var(--sm3) var(--sm5) var(--sm1) var(--sm5);
   }
 </style>
