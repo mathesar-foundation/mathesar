@@ -95,9 +95,9 @@
 <BreadcrumbSelector
   sections={[
     {
-      label: $_('tables'),
+      label: $_('tables_and_views'),
       entries: $currentTables.map(makeTableBreadcrumbSelectorItem),
-      emptyMessage: $_('no_tables'),
+      emptyMessage: $_('no_tables_or_views'),
     },
     {
       label: $_('explorations'),

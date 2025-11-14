@@ -55,7 +55,7 @@
 <div class="schema-overview" class:has-tables={hasTables}>
   <div class="tables">
     <header>
-      <h2>{$_('tables')}</h2>
+      <h2>{$_('tables_and_views')}</h2>
       <div>
         <CreateTableButton
           database={schema.database}
