@@ -43,7 +43,7 @@
       <FilterDropdown {filtering} {canViewLinkedEntities} />
       <SortDropdown {sorting} />
       <GroupDropdown {grouping} />
-      <JoinDropdown />
+      <JoinDropdown {table} />
     </div>
   {/if}
 

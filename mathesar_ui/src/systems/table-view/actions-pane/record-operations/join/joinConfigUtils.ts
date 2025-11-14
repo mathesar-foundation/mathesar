@@ -1,3 +1,5 @@
+import type { JoinableTablesResult } from '@mathesar/api/rpc/tables';
+
 /**
  * This represents a "simple" many-to-many relationship such that the mapping
  * table only contains FK columns for the mapping and does not contain any other
@@ -40,4 +42,10 @@ export interface SimpleManyToManyRelationship {
       column_attnum: number;
     };
   };
+}
+
+export function* getSimpleManyToManyRelationships(
+  joinableTablesResult: JoinableTablesResult,
+): Generator<SimpleManyToManyRelationship> {
+  // TODO
 }

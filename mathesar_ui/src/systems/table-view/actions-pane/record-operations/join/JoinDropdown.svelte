@@ -4,10 +4,15 @@
 
   import { iconTableLink } from '@mathesar/icons';
   import { Dropdown, Icon } from '@mathesar-component-library';
+  import type { Table } from '@mathesar/models/Table';
 
   import Join from './Join.svelte';
 
-  type $$Props = ComponentProps<Dropdown>;
+  interface $$Props extends ComponentProps<Dropdown> {
+    table: Table;
+  }
+
+  export let table: Table;
 </script>
 
 <Dropdown
@@ -23,7 +28,7 @@
     </span>
   </svelte:fragment>
   <div slot="content">
-    <Join />
+    <Join {table} />
   </div>
 </Dropdown>
 
