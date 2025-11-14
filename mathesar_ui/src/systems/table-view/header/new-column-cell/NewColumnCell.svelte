@@ -15,7 +15,12 @@
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { columnNameIsAvailable } from '@mathesar/utils/columnUtils';
-  import { Dropdown, Icon, Spinner } from '@mathesar-component-library';
+  import {
+    Dropdown,
+    Icon,
+    Spinner,
+    focusTrap,
+  } from '@mathesar-component-library';
 
   import ColumnTypeSelector from './ColumnTypeSelector.svelte';
 
@@ -57,7 +62,7 @@
       <Icon class="opt" {...iconAddNew} size="0.9em" />
     {/if}
   </svelte:fragment>
-  <div slot="content" class="new-column-dropdown" let:close>
+  <div slot="content" class="new-column-dropdown" let:close use:focusTrap>
     <Field field={columnName} label={$_('column_name')} layout="stacked" />
     <Field
       field={columnAbstractType}
