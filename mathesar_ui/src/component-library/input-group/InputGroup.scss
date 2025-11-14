@@ -12,14 +12,18 @@
     color: var(--color-fg-label);
     text-align: center;
     white-space: nowrap;
-    background-color: var(--color-bg-input);
-    border: var(--color-border-input);
+    background-color: var(--color-action-secondary-10);
+    border: 1px solid var(--color-border-input);
     border-radius: 0.25rem;
   }
 
   .input-element {
     position: relative;
     flex: 1 1 auto;
+  }
+
+  button {
+    --button-border-color: var(--color-border-input);
   }
 
   .input-element,

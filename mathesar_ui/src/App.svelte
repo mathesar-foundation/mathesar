@@ -271,4 +271,11 @@
     display: flex;
     background-color: var(--color-bg-base);
   }
+
+  [data-drag-handle] {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    cursor: grab;
+  }
 </style>

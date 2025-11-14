@@ -30,7 +30,7 @@
   $: ({ id, description } = column);
   $: ({ meta } = $tabularData);
   $: ({ filtering, sorting, grouping } = meta);
-  $: hasFilter = $filtering.entries.some((entry) => entry.columnId === id);
+  $: hasFilter = $filtering.appliedFilterCountForColumn(id) > 0;
   $: sorter = $sorting.get(id);
   $: grouped = $grouping.entries.some((entry) => entry.columnId === id);
   $: columnPosition = getSheetColumnPosition(column.id);

@@ -67,6 +67,7 @@ import {
   faPlay,
   faPlug,
   faPlus,
+  faPlusSquare,
   faProjectDiagram,
   faQuestion,
   faRedo,
@@ -137,6 +138,7 @@ import {
 // (These names should all be verbs)
 
 export const iconAddFilter: IconProps = { data: faFilter };
+export const iconAddGroup: IconProps = { data: faPlusSquare };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconChangeAToB = { data: faArrowRight };

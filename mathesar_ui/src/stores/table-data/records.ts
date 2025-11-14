@@ -41,7 +41,7 @@ import AssociatedCellData, {
 } from '../AssociatedCellData';
 
 import type { ColumnsDataStore } from './columns';
-import type { FilterEntry, Filtering } from './filtering';
+import type { Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Meta } from './meta';
 import {
@@ -291,9 +291,6 @@ export class RecordsData {
 
     try {
       const params = get(this.meta.recordsRequestParamsData);
-      const contextualFilterEntries: FilterEntry[] = [
-        ...this.contextualFilters,
-      ].map(([columnId, value]) => ({ columnId, conditionId: 'equal', value }));
 
       const recordsListParams: RecordsListParams = {
         ...this.apiContext,
@@ -303,7 +300,7 @@ export class RecordsData {
         ),
         ...params.grouping.recordsRequestParams(),
         ...params.filtering
-          .withEntries(contextualFilterEntries)
+          .withContextualFilters(this.contextualFilters)
           .recordsRequestParams(),
         return_record_summaries: this.loadIntrinsicRecordSummaries,
       };
