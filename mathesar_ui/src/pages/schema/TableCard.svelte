@@ -8,7 +8,6 @@
     iconExploration,
     iconPermissions,
     iconSelectRecord,
-    iconTable,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -22,7 +21,11 @@
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { recordSelectorContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
-  import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
+  import {
+    getTableAccentColor,
+    getTableIcon,
+    tableRequiresImportConfirmation,
+  } from '@mathesar/utils/tables';
   import {
     Button,
     ButtonMenuItem,
@@ -42,6 +45,8 @@
 
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
   $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
+  $: tableIcon = getTableIcon(table);
+  $: accentColor = getTableAccentColor(table);
   $: tablePageUrl = requiresImportConfirmation
     ? getImportPreviewPageUrl(database.id, schema.oid, table.oid, {
         useColumnTypeInference: true,
@@ -80,11 +85,11 @@
   href={tablePageUrl}
   name={table.name}
   description={table.description ?? undefined}
-  icon={iconTable}
+  icon={tableIcon}
   {pendingMessage}
   primary
   cssVariables={{
-    '--EntityListItem__accent-color': 'var(--color-table-80)',
+    '--EntityListItem__accent-color': accentColor,
   }}
 >
   <svelte:fragment slot="action-buttons">

@@ -1,11 +1,13 @@
 import { filter } from 'iter-tools';
 
+import { iconTable, iconView } from '@mathesar/icons';
 import type { Table } from '@mathesar/models/Table';
 import {
   getImportPreviewPageUrl,
   getTablePageUrl,
 } from '@mathesar/routes/urls';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import type { IconProps } from '@mathesar-component-library/types';
 
 interface TableWithImportVerification {
   metadata?: {
@@ -76,4 +78,26 @@ export function getLinkForTableItem(
     });
   }
   return getTablePageUrl(databaseId, schemaId, table.oid);
+}
+
+function isTableView(table: Pick<Table, 'type'>): boolean {
+  return table.type === 'view' || table.type === 'materialized_view';
+}
+
+export function getTableIcon(table: Pick<Table, 'type'>): IconProps {
+  return isTableView(table) ? iconView : iconTable;
+}
+
+export function getTableIconColor(table: Pick<Table, 'type'>): string {
+  return isTableView(table) ? 'var(--color-view)' : 'var(--color-table)';
+}
+
+export function getTableAccentColor(table: Pick<Table, 'type'>): string {
+  return isTableView(table) ? 'var(--color-view-80)' : 'var(--color-table-80)';
+}
+
+export function getTableIconFillColor(table: Pick<Table, 'type'>): string {
+  return isTableView(table)
+    ? 'linear-gradient(135deg, var(--color-view), var(--color-view-80))'
+    : 'linear-gradient(135deg, var(--color-table), var(--color-table-80))';
 }

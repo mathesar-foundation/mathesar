@@ -118,6 +118,7 @@ import {
   permissionsIcon,
   tableIcon,
   treeChildNodeArrowIcon,
+  viewIcon,
 } from './customIcons';
 
 /**
@@ -232,6 +233,7 @@ export const iconSorting: IconProps = { data: faSort };
 export const iconTable: IconProps = { data: tableIcon };
 export const iconInspector: IconProps = { data: faInfo };
 export const iconTableLink: IconProps = { data: faLink };
+export const iconView: IconProps = { data: viewIcon };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
 export const iconTreeChildNodeArrow: IconProps = {
   data: treeChildNodeArrowIcon,

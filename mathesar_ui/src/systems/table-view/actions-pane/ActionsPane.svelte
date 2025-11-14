@@ -4,9 +4,10 @@
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import InspectorButton from '@mathesar/components/InspectorButton.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
-  import { iconRequiresAttention, iconTable } from '@mathesar/icons';
+  import { iconRequiresAttention } from '@mathesar/icons';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { getTableIcon, getTableIconFillColor } from '@mathesar/utils/tables';
   import { Icon, Tooltip } from '@mathesar-component-library';
 
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
@@ -20,6 +21,8 @@
   $: ({ filtering, sorting, grouping, sheetState } = meta);
 
   $: isSelectable = $currentRolePrivileges.has('SELECT');
+  $: tableIcon = getTableIcon(table);
+  $: iconFillColor = getTableIconFillColor(table);
 
   const canViewLinkedEntities = true;
 
@@ -32,9 +35,9 @@
   title={{
     name: table.name,
     description: table.description ?? undefined,
-    icon: iconTable,
+    icon: tableIcon,
   }}
-  --icon-fill-color="linear-gradient(135deg, var(--color-table), var(--color-table-80))"
+  --icon-fill-color={iconFillColor}
   --icon-stroke-color="var(--color-fg-inverted)"
 >
   {#if isSelectable}
