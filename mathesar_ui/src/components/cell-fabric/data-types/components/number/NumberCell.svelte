@@ -12,6 +12,7 @@
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
+  export let isEditMode = false;
   export let searchValue: $$Props['searchValue'] = undefined;
   export let formatterOptions: $$Props['formatterOptions'];
   export let horizontalAlignment: HorizontalAlignment = 'right';
@@ -23,6 +24,7 @@
 <SteppedInputCell
   bind:value
   {isActive}
+  {isEditMode}
   {disabled}
   {isIndependentOfSheet}
   {showTruncationPopover}
@@ -35,6 +37,8 @@
   on:movementKeyDown
   on:mouseenter
   on:update
+  on:enterEditMode
+  on:exitEditMode
 >
   <NumberCellInput
     focusOnMount={true}

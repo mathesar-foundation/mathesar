@@ -24,6 +24,7 @@
   export let isActive: Props['isActive'];
   export let value: Props['value'];
   export let disabled: Props['disabled'];
+  export let isEditMode = false;
   export let multiLineTruncate = false;
   export let formatValue: CellValueFormatter<Value> | undefined = undefined;
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
@@ -34,7 +35,6 @@
   export let useTabularNumbers = false;
 
   let cellRef: HTMLElement;
-  let isEditMode = false;
   let lastSavedValue: Value | undefined | null = undefined;
 
   $: formattedValue = formatValue?.(value) ?? value;
@@ -59,12 +59,12 @@
 
   function setModeToEdit() {
     if (!disabled) {
-      isEditMode = true;
+      dispatch('enterEditMode');
     }
   }
 
   function resetEditMode() {
-    isEditMode = false;
+    dispatch('exitEditMode');
   }
 
   function revertValue() {
