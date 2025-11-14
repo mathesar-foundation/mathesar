@@ -22,9 +22,7 @@
 {#await joinableTablesPromise}
   <Spinner />
 {:then r}
-  {@const simpleManyToManyRelationships = [
-    ...getSimpleManyToManyRelationships(r),
-  ]}
+  {@const simpleManyToManyRelationships = getSimpleManyToManyRelationships(r)}
   <JoinConfig {simpleManyToManyRelationships} />
 {:catch error}
   <ErrorBox>{getErrorMessage(error)}</ErrorBox>

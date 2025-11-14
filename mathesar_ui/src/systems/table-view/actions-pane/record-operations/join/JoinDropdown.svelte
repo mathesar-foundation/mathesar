@@ -27,7 +27,7 @@
       {$_('join')}
     </span>
   </svelte:fragment>
-  <div slot="content">
+  <div slot="content" class="content">
     <Join {table} />
   </div>
 </Dropdown>
@@ -36,5 +36,8 @@
   .responsive-button-label {
     display: inline-flex;
     align-items: center;
+  }
+  .content {
+    padding: var(--sm1);
   }
 </style>

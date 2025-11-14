@@ -8,5 +8,5 @@
 
 <CheckboxGroup
   options={simpleManyToManyRelationships}
-  getCheckboxLabel={(r) => r.target_table.name}
+  getCheckboxLabel={(r) => r.targetTable.name}
 />
