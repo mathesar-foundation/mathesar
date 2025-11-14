@@ -80,7 +80,7 @@ export function getLinkForTableItem(
   return getTablePageUrl(databaseId, schemaId, table.oid);
 }
 
-function isTableView(table: Pick<Table, 'type'>): boolean {
+export function isTableView(table: Pick<Table, 'type'>): boolean {
   return table.type === 'view' || table.type === 'materialized_view';
 }
 

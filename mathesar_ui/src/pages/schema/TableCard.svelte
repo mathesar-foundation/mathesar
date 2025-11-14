@@ -24,6 +24,7 @@
   import {
     getTableAccentColor,
     getTableIcon,
+    isTableView,
     tableRequiresImportConfirmation,
   } from '@mathesar/utils/tables';
   import {
@@ -60,6 +61,7 @@
   $: pendingMessage = requiresImportConfirmation
     ? $_('needs_import_confirmation')
     : undefined;
+  $: isView = isTableView(table);
 
   function handleDeleteTable() {
     void confirmDelete({
@@ -93,7 +95,7 @@
   }}
 >
   <svelte:fragment slot="action-buttons">
-    {#if !requiresImportConfirmation}
+    {#if !requiresImportConfirmation && !isView}
       <Tooltip enabled={condensed}>
         <Button
           slot="trigger"
@@ -119,20 +121,20 @@
         icon={iconExploration}
         disabled={!$currentRolePrivileges.has('SELECT')}
       >
-        {$_('explore_table')}
+        {isView ? $_('explore_view') : $_('explore_table')}
       </LinkMenuItem>
       <ButtonMenuItem
         on:click={() => openEditTableModal(table)}
         icon={iconEdit}
         disabled={!$currentRoleOwns}
       >
-        {$_('rename_table')}
+        {isView ? $_('rename_view') : $_('rename_table')}
       </ButtonMenuItem>
       <ButtonMenuItem
         on:click={() => openTablePermissionsModal(table)}
         icon={iconPermissions}
       >
-        {$_('table_permissions')}
+        {isView ? $_('view_permissions') : $_('table_permissions')}
       </ButtonMenuItem>
     {/if}
     <ButtonMenuItem
@@ -141,7 +143,7 @@
       icon={iconDeleteMajor}
       disabled={!$currentRoleOwns}
     >
-      {$_('delete_table')}
+      {isView ? $_('delete_view') : $_('delete_table')}
     </ButtonMenuItem>
   </svelte:fragment>
 </EntityListItem>
