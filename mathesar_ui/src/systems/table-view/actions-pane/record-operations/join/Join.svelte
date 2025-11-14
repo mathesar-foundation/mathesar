@@ -20,10 +20,19 @@
 </script>
 
 {#await joinableTablesPromise}
-  <Spinner />
+  <div class="loading"><Spinner /></div>
 {:then r}
   {@const simpleManyToManyRelationships = getSimpleManyToManyRelationships(r)}
   <JoinConfig {simpleManyToManyRelationships} />
 {:catch error}
   <ErrorBox>{getErrorMessage(error)}</ErrorBox>
 {/await}
+
+<style>
+  .loading {
+    padding: var(--sm3);
+    color: var(--color-fg-base-muted);
+    display: grid;
+    justify-content: center;
+  }
+</style>
