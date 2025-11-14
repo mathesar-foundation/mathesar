@@ -20,6 +20,7 @@
   triggerAppearance="secondary"
   {...$$restProps}
   ariaLabel={$_('join')}
+  autoReposition
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconTableLink} />
