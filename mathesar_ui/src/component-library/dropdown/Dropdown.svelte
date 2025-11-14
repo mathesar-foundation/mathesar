@@ -23,6 +23,11 @@
   export let showArrow = true;
   export let size: Size = 'medium';
   export let disabled = false;
+  /**
+   * When true, the content element will automatically reposition when it
+   * resizes.
+   */
+  export let autoReposition = false;
 
   let triggerElement: HTMLElement | undefined;
 
@@ -89,6 +94,7 @@
   {preferredPlacement}
   class={contentClass}
   {closeOnInnerClick}
+  {autoReposition}
   on:close={close}
   on:open
   on:close
