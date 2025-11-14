@@ -25,6 +25,8 @@ export interface RawTable {
   owner_oid: RawRole['oid'];
   current_role_priv: TablePrivilege[];
   current_role_owns: boolean;
+  /** The type of the object: "table", "view", or "materialized_view" */
+  type: 'table' | 'view' | 'materialized_view';
 }
 
 export interface RawTablePrivilegesForRole {

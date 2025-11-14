@@ -3053,8 +3053,9 @@ BEGIN
     -- Check if all the required keys exist in the json blob
     -- Check whether the correct name is returned
     -- Check whether the correct description is returned
+    -- Check whether the correct type is returned
   RETURN NEXT is(
-    pi_table_info->0 ?& array['oid', 'name', 'schema', 'description'], true
+    pi_table_info->0 ?& array['oid', 'name', 'schema', 'description', 'type'], true
   );
   RETURN NEXT is(
     pi_table_info->0->>'name', 'three'
@@ -3062,15 +3063,21 @@ BEGIN
   RETURN NEXT is(
     pi_table_info->0->>'description', null
   );
+  RETURN NEXT is(
+    pi_table_info->0->>'type', 'table'
+  );
 
   RETURN NEXT is(
-    pi_table_info->1 ?& array['oid', 'name', 'schema', 'description'], true
+    pi_table_info->1 ?& array['oid', 'name', 'schema', 'description', 'type'], true
   );
   RETURN NEXT is(
     pi_table_info->1->>'name', 'one'
   );
   RETURN NEXT is(
     pi_table_info->1->>'description', 'first decimal digit of pi'
+  );
+  RETURN NEXT is(
+    pi_table_info->1->>'type', 'table'
   );
 
   -- Test table info for schema 'alice' that contains no tables
