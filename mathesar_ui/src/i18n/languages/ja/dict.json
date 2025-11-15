@@ -143,6 +143,7 @@
   "content": "コンテンツ",
   "content_of_first_row": "最初の行の内容",
   "copied_cells": "{count, plural, one {{count} cell} other {{count} cells}}をコピー済み",
+  "copy": "コピー",
   "copy_and_paste_text": "テキストをコピー＆ペースト",
   "could_break_tables_views": "これにより、既存のテーブルとビューが壊れる可能性があります。",
   "could_not_fetch_profile_error": "ユーザー・プロファイルの情報を取得できませんでした。ページの更新をお試しください。",
