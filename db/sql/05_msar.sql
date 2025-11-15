@@ -4938,7 +4938,6 @@ BEGIN
             ref_tab_name text;
             alias text;
             join_clause text;
-            ref_col_name text;
           BEGIN
             IF NOT pg_catalog.has_column_privilege(contextual_tab_id, fk_col_id, 'SELECT') THEN
               -- Silently ignore FK columns that we don't have permissions to select.
