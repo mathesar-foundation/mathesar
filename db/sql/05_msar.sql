@@ -4940,7 +4940,7 @@ BEGIN
             join_clause text;
             ref_col_name text;
           BEGIN
-           IF NOT pg_catalog.has_column_privilege(contextual_tab_id, fk_col_id, 'SELECT') THEN
+            IF NOT pg_catalog.has_column_privilege(contextual_tab_id, fk_col_id, 'SELECT') THEN
               -- Silently ignore FK columns that we don't have permissions to select.
               CONTINUE template_parts_loop;
             END IF;
@@ -4958,11 +4958,8 @@ BEGIN
             WHERE contype = 'f' AND conrelid = contextual_tab_id AND conkey = array[fk_col_id];
 
             IF ref_tab_id IS NULL THEN
-              CONTINUE template_parts_loop;
-            END IF;
-
-            ref_col_name := msar.get_column_name(ref_tab_id, ref_col_id);
-            IF ref_col_name IS NULL THEN
+              -- Silently ignore references to non-FK columns. This can happen if the constraint
+              -- has been dropped.
               CONTINUE template_parts_loop;
             END IF;
 
@@ -4974,6 +4971,7 @@ BEGIN
 
             ref_tab_name := msar.get_relation_name(ref_tab_id);
             ref_sch_name := msar.get_relation_schema_name(ref_tab_id);
+            ref_col_name := msar.get_column_name(ref_tab_id, ref_col_id);
             alias := concat(prev_alias, '_', fk_col_id);
             join_clause := concat(
               'LEFT JOIN ',
