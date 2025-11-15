@@ -3817,6 +3817,8 @@ CREATE OR REPLACE FUNCTION
 msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$/*
 Alter columns of the given table in bulk, returning the IDs of the columns so altered.
 
+Exception is raised when mathesar ID column is tried to be renamed.
+
 Args:
   tab_id: The OID of the table whose columns we'll alter.
   col_alters: a JSONB describing the alterations to make.
@@ -3863,8 +3865,13 @@ BEGIN
     FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
       INNER JOIN pg_catalog.pg_attribute AS pga ON pga.attnum=(x.col_alter_obj ->> 'attnum')::smallint AND pga.attrelid=tab_id
       LEFT JOIN pg_catalog.pg_attrdef AS pgat ON pgat.adnum=(x.col_alter_obj ->> 'attnum')::smallint AND pgat.adrelid=tab_id
-    WHERE NOT msar.is_mathesar_id_column(tab_id, (x.col_alter_obj ->> 'attnum')::integer)
   LOOP
+    IF col.new_name IS NOT NULL AND msar.is_mathesar_id_column(tab_id, col.attnum) THEN
+      RAISE EXCEPTION USING
+        MESSAGE = 'Mathesar ID column cannot be renamed',
+        ERRCODE = 'check_violation';
+    END IF;
+
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
 
