@@ -23,6 +23,12 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Format**: An integer.
 - **Default value**: `3`
 
+### `MATHESAR_DB_SSL_MODE` {: #mathesar_db_ssl_mode}
+
+- **Description**: Sets the SSL mode used by Mathesar when it connects to user-managed PostgreSQL databases.
+- **Format**: `disable` or `require`.
+- **Default value**: `disable`
+
 
 ## Internal database configuration {: #db}
 

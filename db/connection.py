@@ -1,6 +1,31 @@
+import os
+from uuid import uuid4
+
 import psycopg
 from psycopg.rows import dict_row
-from uuid import uuid4
+
+SSL_MODE_ENV_VAR = "MATHESAR_DB_SSL_MODE"
+_DEFAULT_SSL_MODE = "disable"
+_VALID_SSL_MODES = ("disable", "require")
+
+
+def _parse_mathesar_ssl_mode():
+    """Return the configured SSL mode ('disable' or 'require')."""
+    raw_value = os.getenv(SSL_MODE_ENV_VAR)
+    if raw_value is None:
+        return _DEFAULT_SSL_MODE
+
+    normalized = raw_value.strip().lower()
+    if normalized not in _VALID_SSL_MODES:
+        valid_values = ", ".join(sorted(_VALID_SSL_MODES))
+        raise ValueError(
+            f"Invalid value for {SSL_MODE_ENV_VAR}: {raw_value!r}. "
+            f"Expected one of: {valid_values}."
+        )
+    return normalized
+
+
+_LIBPQ_SSL_MODE = _parse_mathesar_ssl_mode()
 
 
 def exec_msar_func(conn, func_name, *args):
@@ -68,5 +93,6 @@ def mathesar_connection(*args, **kwargs):
     application name). This is visible in the `pg_stat_activity` table,
     useful for debugging (and perhaps required by some DBAs).
     """
+    kwargs.setdefault("sslmode", _LIBPQ_SSL_MODE)
     kwargs.update(application_name="Mathesar " + kwargs.get("application_name", ""))
     return psycopg.connect(*args, **kwargs)

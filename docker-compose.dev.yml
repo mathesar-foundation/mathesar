@@ -17,7 +17,11 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - PGDATA=/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}",
+        ]
       interval: 5s
       timeout: 1s
       retries: 30
@@ -32,6 +36,24 @@ services:
       - dev_postgres_data:/var/lib/postgresql/data
       - dev_postgres_socket:/var/run/postgresql
       - ./db/sql:/sql/
+  external-db:
+    image: postgres:${PG_VERSION-17}
+    environment:
+      - PG_VERSION=${PG_VERSION-17}
+      - POSTGRES_DB=external
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test123
+      - PGDATA=/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -d $${POSTGRES_DB-external} -U $${POSTGRES_USER-test}",
+        ]
+      interval: 5s
+      timeout: 1s
+      retries: 30
+      start_period: 5s
   # An S3-compatible object store for local development. Don't use in prod.
   obj-store:
     container_name: mathesar-dev-store
@@ -76,6 +98,7 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
       - POSTGRES_PORT=5432
+      - MATHESAR_DB_SSL_MODE=require
     volumes:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
@@ -83,6 +106,8 @@ services:
       - mathesar_secrets:/code/.secrets/
     depends_on:
       dev-db:
+        condition: service_healthy
+      external-db:
         condition: service_healthy
     # On dev, following ports are exposed to other containers, and the host.
     ports:
