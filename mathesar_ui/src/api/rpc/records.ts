@@ -78,6 +78,10 @@ export interface RecordsListParams {
   grouping?: Grouping;
   filter?: SqlExpr;
   return_record_summaries?: boolean;
+  joined_columns?: Array<{
+    alias: string;
+    join_path: Array<Array<[number, number]>>;
+  }>;
 }
 
 export interface RecordsSearchParams {
@@ -115,6 +119,18 @@ export interface RecordsResponse {
   record_summaries: Record<string, string> | null;
   /** Keys are attnums. */
   download_links: Record<string, FileManifestColumnData>;
+  /** Keys are column aliases. Values contain results with record summaries. */
+  joined_record_summaries?: Record<
+    string,
+    {
+      results: Record<string, string>;
+    }
+  > | null;
+  /** Mapping information for joined columns. */
+  mapping?: {
+    join_table: number;
+    joined_values: Record<string, number>;
+  };
 }
 
 export const records = {
@@ -181,6 +197,10 @@ export const records = {
       limit?: number | null;
       offset?: number | null;
       search?: string | null;
+      linked_record_path?: {
+        record_pkey: number;
+        join_path: Array<Array<[number, number]>>;
+      };
     },
     RecordsSummaryListResponse
   >(),

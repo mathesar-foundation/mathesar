@@ -6,4 +6,8 @@ export interface SummarizedRecordReference {
 export interface RecordsSummaryListResponse {
   count: number;
   results: SummarizedRecordReference[];
+  mapping?: {
+    join_table: number;
+    joined_values: Record<string, number>;
+  };
 }

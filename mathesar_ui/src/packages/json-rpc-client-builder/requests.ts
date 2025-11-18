@@ -1,5 +1,9 @@
 import { CancellablePromise, hasProperty } from '@mathesar-component-library';
 
+import {
+  enhanceResponseWithMockJoinedSummaries,
+  getMockListSummariesResponse,
+} from './mockRpcResponses';
 import { RpcError } from './RpcError';
 
 const METHOD_PATH_SEPARATOR = '.';
@@ -57,6 +61,62 @@ function makeRpcResponse<T = unknown>(value: unknown): RpcResponse<T> {
 }
 
 function send<T>(request: RpcRequest<T>): CancellablePromise<RpcResponse<T>> {
+  const { method } = request;
+  const params = request.params as Record<string, unknown>;
+
+  // ===========================================================================
+  // TODO_CROSS_TABLE_MVP: DELETE THIS BLOCK - calls mockRpcResponses.ts
+  // ===========================================================================
+  // Handle records.list_summaries mock (returns full mock response)
+  const mockListSummariesResponse = getMockListSummariesResponse(request);
+  if (mockListSummariesResponse) {
+    return new CancellablePromise((resolve) =>
+      resolve(mockListSummariesResponse),
+    );
+  }
+
+  // Handle records.list with joined_columns (enhances real response)
+  if (method === 'records.list' && params?.joined_columns) {
+    const joinedColumns = params.joined_columns as Array<{
+      alias: string;
+      join_path: Array<Array<[number, number]>>;
+    }>;
+
+    const fetch = cancellableFetch(request.endpoint, {
+      method: 'POST',
+      headers: {
+        ...request.getHeaders(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(getRpcRequestBody(request)),
+    });
+
+    return new CancellablePromise(
+      (resolve) =>
+        void fetch
+          .then(
+            (response) => response.json(),
+            (rejectionReason) =>
+              resolve(RpcError.fromAnything(rejectionReason)),
+          )
+          .then((json) => {
+            const rpcResponse = makeRpcResponse<T>(json);
+            if (rpcResponse.status === 'ok') {
+              const enhancedResponse = enhanceResponseWithMockJoinedSummaries(
+                rpcResponse,
+                joinedColumns,
+              );
+              return resolve(enhancedResponse as RpcResponse<T>);
+            }
+            return resolve(rpcResponse);
+          }),
+      () => fetch.cancel(),
+    );
+  }
+  // ===========================================================================
+  // END TODO_CROSS_TABLE_MVP
+  // ===========================================================================
+
   const fetch = cancellableFetch(request.endpoint, {
     method: 'POST',
     headers: {

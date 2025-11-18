@@ -295,6 +295,17 @@ export class RecordsData {
         ...this.contextualFilters,
       ].map(([columnId, value]) => ({ columnId, conditionId: 'equal', value }));
 
+      // TODO_CROSS_TABLE_MVP: Remove this logic once backend supports joined_columns
+      // Convert joining state to joined_columns format
+      const joining = get(this.meta.joining);
+      const joinedColumns =
+        joining.simpleManyToMany.size > 0
+          ? [...joining.simpleManyToMany].map(([intermediateTableOid, joinPath], index) => ({
+              alias: `column_alias_${index + 1}`,
+              join_path: joinPath,
+            }))
+          : undefined;
+
       const recordsListParams: RecordsListParams = {
         ...this.apiContext,
         ...params.pagination.recordsRequestParams(),
@@ -306,6 +317,7 @@ export class RecordsData {
           .withEntries(contextualFilterEntries)
           .recordsRequestParams(),
         return_record_summaries: this.loadIntrinsicRecordSummaries,
+        ...(joinedColumns && { joined_columns: joinedColumns }),
       };
 
       const fuzzySearchParams = params.searchFuzzy.getSearchParams();
