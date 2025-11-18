@@ -3,6 +3,7 @@
     JoinableTable,
     JoinableTablesResult,
   } from '@mathesar/api/rpc/tables';
+  import type { Table } from '@mathesar/models/Table';
   import { currentTablesData } from '@mathesar/stores/tables';
   import { isDefinedNonNullable } from '@mathesar-component-library';
 
@@ -13,8 +14,11 @@
   export let joinableTablesResult: JoinableTablesResult;
   export let isInModal = false;
 
-  function buildWidgetInput(joinableTable: JoinableTable) {
-    const table = $currentTablesData.tablesMap.get(joinableTable.target);
+  function buildWidgetInput(
+    joinableTable: JoinableTable,
+    tablesMap: Map<number, Table>,
+  ) {
+    const table = tablesMap.get(joinableTable.target);
     if (!table) return undefined;
     const fkColumnId = joinableTable.join_path[0].slice(-1)[0][1];
     const { name } =
@@ -24,14 +28,14 @@
 
   $: tableWidgetInputs = joinableTablesResult.joinable_tables
     .filter((joinableTable) => joinableTable.multiple_results)
-    .map(buildWidgetInput)
+    .map((jt) => buildWidgetInput(jt, $currentTablesData.tablesMap))
     .filter(isDefinedNonNullable)
     .sort((a, b) => a.table.name.localeCompare(b.table.name));
 </script>
 
 {#if tableWidgetInputs.length}
   <div class="widgets">
-    {#each tableWidgetInputs as { table, fkColumn } (`${table.oid}-${fkColumn.id}`)}
+    {#each tableWidgetInputs as { table, fkColumn } (`${table.oid}-${fkColumn.id}-${JSON.stringify(table.metadata?.column_order ?? [])}`)}
       <section class="table-widget-positioner">
         <TableWidget
           {recordPk}
