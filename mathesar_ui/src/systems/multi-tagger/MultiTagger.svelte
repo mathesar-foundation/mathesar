@@ -13,11 +13,13 @@
   export let controller: MultiTaggerController;
   export let close: () => void = () => {};
 
-  $: ({ elementId, records, pagination, canAddNewRecord } = controller);
+  $: ({ elementId, records, pagination, canAddNewRecord, searchValue } =
+    controller);
   $: isLoading = $records.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
+  $: joinTable = resolvedRecords?.mapping?.join_table;
   $: joinedValues = new Map(
     Object.entries(resolvedRecords?.mapping?.joined_values ?? {}),
   );
@@ -57,8 +59,9 @@
   <div class="option-container">
     {#each recordsArray as record (record.key)}
       <MultiTaggerOption
-        {controller}
-        isSelected={joinedValues.has(String(record.key))}
+        searchValue={$searchValue}
+        {joinTable}
+        joinValue={joinedValues.get(String(record.key))}
         summary={record.summary}
       />
     {:else}

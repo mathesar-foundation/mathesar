@@ -5,24 +5,28 @@
     Truncate,
     LabeledInput,
   } from '@mathesar-component-library';
+  import type { ResultValue } from '@mathesar/api/rpc/records';
 
-  import type MultiTaggerController from './MultiTaggerController';
-
-  export let controller: MultiTaggerController;
-  export let isSelected: boolean;
+  export let searchValue: string | undefined = undefined;
+  export let joinTable: number | undefined = undefined;
+  export let joinValue: ResultValue | undefined = undefined;
   export let summary: string;
 
-  $: ({ searchValue } = controller);
+  $: checked = joinValue !== undefined;
+
+  function handleChange(e: CustomEvent<boolean>) {
+    throw new Error('Not implemented');
+  }
 </script>
 
 <div class="record">
   <LabeledInput layout="inline-input-first">
     <span slot="label">
       <Truncate>
-        <MatchHighlighter text={summary} substring={$searchValue} />
+        <MatchHighlighter text={summary} substring={searchValue} />
       </Truncate>
     </span>
-    <Checkbox tabindex="-1" checked={isSelected} />
+    <Checkbox {checked} on:change={handleChange} />
   </LabeledInput>
 </div>
 
