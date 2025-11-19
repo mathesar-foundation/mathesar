@@ -20,7 +20,6 @@ export type MultiTaggerRecordStore = AsyncStore<
 >;
 
 export type MultiTaggerProps = {
-  previousValue?: SummarizedRecordReference;
   constructRecordStore: () => MultiTaggerRecordStore;
   addRecordOptions?: {
     text?: string;
@@ -28,13 +27,10 @@ export type MultiTaggerProps = {
       searchString?: string,
     ) => Promise<SummarizedRecordReference | null>;
   };
-  onSelect?: (v: SummarizedRecordReference | null) => unknown;
 };
 
 export default class MultiTaggerController {
   readonly elementId = getGloballyUniqueId();
-
-  readonly previousValue?: SummarizedRecordReference;
 
   records: MultiTaggerRecordStore;
 
@@ -42,21 +38,15 @@ export default class MultiTaggerController {
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
 
-  select: (v: SummarizedRecordReference | null) => void = () => {};
-
   cancel: () => void = () => {};
 
-  canAddNewRecord: boolean;
+  readonly canAddNewRecord: boolean;
 
   private addRecordOptions?: MultiTaggerProps['addRecordOptions'];
-
-  private onSelect: MultiTaggerProps['onSelect'];
 
   constructor(props: MultiTaggerProps) {
     this.records = props.constructRecordStore();
     this.addRecordOptions = props.addRecordOptions;
-    this.onSelect = props.onSelect;
-    this.previousValue = props.previousValue;
     this.canAddNewRecord = !!props.addRecordOptions;
   }
 
@@ -95,17 +85,12 @@ export default class MultiTaggerController {
 
   async addNewRecord() {
     if (this.addRecordOptions) {
-      const value = await this.addRecordOptions.create(get(this.searchValue));
-      this.select(value);
+      throw new Error('Not implemented');
     }
   }
 
   async acquireUserSelection(): Promise<SummarizedRecordReference | null> {
     return new Promise((resolve, reject) => {
-      this.select = (v) => {
-        resolve(v);
-        this.onSelect?.(v);
-      };
       this.cancel = () => {
         reject();
       };

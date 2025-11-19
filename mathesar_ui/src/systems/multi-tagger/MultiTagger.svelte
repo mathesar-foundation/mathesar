@@ -20,26 +20,12 @@
   export let controller: MultiTaggerController;
   export let close: () => void = () => {};
 
-  $: ({ elementId, records, pagination, previousValue, canAddNewRecord } =
-    controller);
+  $: ({ elementId, records, pagination, canAddNewRecord } = controller);
   $: isLoading = $records.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
   $: hasPagination = recordsCount > $pagination.size;
-  $: showSelection = (() => {
-    if (!previousValue) return false;
-    const { key } = previousValue;
-    if (key === undefined) return false;
-    if (key === null) return false;
-    return true;
-  })();
-
-  function selectRecord(val: SummarizedRecordReference[]) {
-    const result = val.at(0);
-    if (!result) return;
-    controller.select(result);
-  }
 
   function handleKeyDown(
     api: ListBoxApi<SummarizedRecordReference>,
@@ -78,10 +64,7 @@
   <ListBox
     selectionType="single"
     mode="static"
-    value={previousValue ? [previousValue] : undefined}
     options={recordsArray}
-    on:change={(e) => selectRecord(e.detail)}
-    on:pick={close}
     checkEquality={(a, b) => a?.key === b?.key}
     let:api
   >
@@ -102,7 +85,7 @@
         >
           {@const result = getTypeCastedOption(option)}
           <MultiTaggerOption
-            {showSelection}
+            showSelection={false}
             {controller}
             {isSelected}
             {inFocus}

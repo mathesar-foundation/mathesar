@@ -15,7 +15,7 @@ export class AttachableMultiTaggerController {
 
   multiTagger = writable<MultiTaggerController | undefined>(undefined);
 
-  async acquireUserSelection(props: AttachableMultiTaggerControllerProps) {
+  async open(props: AttachableMultiTaggerControllerProps) {
     this.triggerElement.set(props.triggerElement);
     const multiTagger = new MultiTaggerController(props);
     this.multiTagger.set(multiTagger);
