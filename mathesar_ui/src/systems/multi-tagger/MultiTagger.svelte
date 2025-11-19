@@ -1,17 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-  import {
-    Button,
-    ListBox,
-    ListBoxOptions,
-    Spinner,
-  } from '@mathesar-component-library';
-  import type { ListBoxApi } from '@mathesar-component-library/types';
+  import { Button, Spinner } from '@mathesar-component-library';
 
   import type MultiTaggerController from './MultiTaggerController';
   import MultiTaggerOption from './MultiTaggerOption.svelte';
@@ -25,24 +18,20 @@
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
+  $: joinedValues = new Map(
+    Object.entries(resolvedRecords?.mapping?.joined_values ?? {}),
+  );
   $: hasPagination = recordsCount > $pagination.size;
 
-  function handleKeyDown(
-    api: ListBoxApi<SummarizedRecordReference>,
-    e: KeyboardEvent,
-  ) {
+  function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
       controller.cancel();
       close();
       return;
     }
-    api.handleKeyDown(e);
   }
 
-  async function handleAddNewButtonKeyDown(
-    api: ListBoxApi<SummarizedRecordReference>,
-    e: KeyboardEvent,
-  ) {
+  async function handleAddNewButtonKeyDown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
       controller.cancel();
       close();
@@ -52,86 +41,65 @@
       return;
     }
     await controller.focusSearch();
-    api.handleKeyDown(e);
-  }
-
-  function getTypeCastedOption(opt: unknown): SummarizedRecordReference {
-    return opt as SummarizedRecordReference;
   }
 </script>
 
 <div id={elementId} tabindex="0" data-multi-tagger>
-  <ListBox
-    selectionType="single"
-    mode="static"
-    options={recordsArray}
-    checkEquality={(a, b) => a?.key === b?.key}
-    let:api
-  >
-    <div data-multi-tagger-controls>
-      <MultiTaggerSearch
-        {controller}
-        onKeyDown={(e) => handleKeyDown(api, e)}
-      />
-    </div>
+  <div data-multi-tagger-controls>
+    <MultiTaggerSearch
+      {controller}
+      onKeyDown={(e) => {
+        throw new Error('Not implemented');
+      }}
+    />
+  </div>
 
-    <div class="option-container">
-      {#if recordsArray.length > 0}
-        <ListBoxOptions
-          class="option-list-box"
-          let:option
-          let:isSelected
-          let:inFocus
-        >
-          {@const result = getTypeCastedOption(option)}
-          <MultiTaggerOption
-            showSelection={false}
-            {controller}
-            {isSelected}
-            {inFocus}
-            summary={result.summary}
+  <div class="option-container">
+    {#each recordsArray as record (record.key)}
+      <MultiTaggerOption
+        {controller}
+        isSelected={joinedValues.has(String(record.key))}
+        summary={record.summary}
+      />
+    {:else}
+      <div class="empty-states">
+        {#if isLoading}
+          <div class="loading"><Spinner /></div>
+        {:else if $records.error}
+          <ErrorBox>
+            {RpcError.fromAnything($records.error).message}
+          </ErrorBox>
+        {:else}
+          <div class="no-results">{$_('no_records_found')}</div>
+        {/if}
+      </div>
+    {/each}
+  </div>
+
+  {#if hasPagination || canAddNewRecord}
+    <div class="footer">
+      {#if canAddNewRecord}
+        <div class="add-record">
+          <Button
+            appearance="secondary"
+            on:click={() => controller.addNewRecord()}
+            on:keydown={(e) => handleAddNewButtonKeyDown(e)}
+          >
+            {$_('add_new_record')}
+          </Button>
+        </div>
+      {/if}
+      {#if hasPagination}
+        <div class="pagination">
+          <MiniPagination
+            bind:pagination={$pagination}
+            on:change={() => controller.getRecords()}
+            recordCount={recordsCount}
           />
-        </ListBoxOptions>
-      {:else}
-        <div class="empty-states">
-          {#if isLoading}
-            <div class="loading"><Spinner /></div>
-          {:else if $records.error}
-            <ErrorBox>
-              {RpcError.fromAnything($records.error).message}
-            </ErrorBox>
-          {:else}
-            <div class="no-results">{$_('no_records_found')}</div>
-          {/if}
         </div>
       {/if}
     </div>
-
-    {#if hasPagination || canAddNewRecord}
-      <div class="footer">
-        {#if canAddNewRecord}
-          <div class="add-record">
-            <Button
-              appearance="secondary"
-              on:click={() => controller.addNewRecord()}
-              on:keydown={(e) => handleAddNewButtonKeyDown(api, e)}
-            >
-              {$_('add_new_record')}
-            </Button>
-          </div>
-        {/if}
-        {#if hasPagination}
-          <div class="pagination">
-            <MiniPagination
-              bind:pagination={$pagination}
-              on:change={() => controller.getRecords()}
-              recordCount={recordsCount}
-            />
-          </div>
-        {/if}
-      </div>
-    {/if}
-  </ListBox>
+  {/if}
 </div>
 
 <style lang="scss">

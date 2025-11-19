@@ -1,48 +1,34 @@
 <script lang="ts">
   import {
+    Checkbox,
     MatchHighlighter,
-    Radio,
     Truncate,
+    LabeledInput,
   } from '@mathesar-component-library';
 
   import type MultiTaggerController from './MultiTaggerController';
 
   export let controller: MultiTaggerController;
-  export let showSelection = false;
   export let isSelected: boolean;
-  export let inFocus: boolean;
   export let summary: string;
 
   $: ({ searchValue } = controller);
 </script>
 
-<div
-  class="record"
-  class:in-focus={inFocus}
-  class:show-selection={showSelection}
->
-  {#if showSelection}
-    <div class="selection">
-      <Radio tabindex="-1" checked={isSelected} />
-    </div>
-  {/if}
-  <Truncate>
-    <MatchHighlighter text={summary} substring={$searchValue} />
-  </Truncate>
+<div class="record">
+  <LabeledInput layout="inline-input-first">
+    <span slot="label">
+      <Truncate>
+        <MatchHighlighter text={summary} substring={$searchValue} />
+      </Truncate>
+    </span>
+    <Checkbox tabindex="-1" checked={isSelected} />
+  </LabeledInput>
 </div>
 
-<style lang="scss">
+<style>
   .record {
     border-bottom: 1px solid var(--border-color);
-    padding: var(--sm4) var(--sm3);
-
-    &.show-selection {
-      display: grid;
-      grid-template: auto / auto 1fr;
-      gap: var(--sm4);
-      .selection > :global(input) {
-        cursor: default;
-      }
-    }
+    padding: var(--sm5) var(--sm3);
   }
 </style>
