@@ -20,6 +20,11 @@
     AttachableRowSeekerController,
     rowSeekerContext,
   } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
+  import AttachableMultiTagger from '@mathesar/systems/multi-tagger/AttachableMultiTagger.svelte';
+  import {
+    AttachableMultiTaggerController,
+    multiTaggerContext,
+  } from '@mathesar/systems/multi-tagger/AttachableMultiTaggerController';
   import type { CommonData } from '@mathesar/utils/preloadData';
   import {
     Confirmation,
@@ -75,6 +80,9 @@
 
   const rowSeekerController = new AttachableRowSeekerController();
   rowSeekerContext.set(rowSeekerController);
+
+  const multiTaggerController = new AttachableMultiTaggerController();
+  multiTaggerContext.set(multiTaggerController);
 
   const lightboxController = new LightboxController();
   lightboxContext.set(lightboxController);
@@ -133,6 +141,7 @@
   modalController={recordSelectorModal}
 />
 <AttachableRowSeeker controller={rowSeekerController} />
+<AttachableMultiTagger controller={multiTaggerController} />
 <ControlledLightbox controller={lightboxController} />
 <ControlledFileDetailDropdown controller={fileDetailDropdownController} />
 <ModalFileAttachmentUploader controller={modalFileAttachmentUploader} />
