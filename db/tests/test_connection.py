@@ -53,6 +53,6 @@ def test_mathesar_connection_uses_verify_mode(monkeypatch, reload_connection):
 
 def test_invalid_env_value_raises(monkeypatch, reload_connection):
     with pytest.raises(ValueError):
-        reload_connection("require")
+        reload_connection("foobar")
 
     reload_connection(None)
