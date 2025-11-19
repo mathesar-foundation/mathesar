@@ -14,6 +14,7 @@
     trigger={$triggerElement}
     isOpen
     autoReposition
+    trapFocus
     on:close={() => controller.close()}
   >
     <RowSeeker controller={$multiTagger} close={() => controller.close()} />
