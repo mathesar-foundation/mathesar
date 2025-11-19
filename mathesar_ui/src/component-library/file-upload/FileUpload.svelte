@@ -61,7 +61,7 @@
   }
 
   function checkAndOpen(event: KeyboardEvent) {
-    if (!disabled && event.key === 'Enter') {
+    if (!disabled && (event.key === 'Enter' || event.key === ' ')) {
       (event.target as HTMLElement).click();
     }
   }
@@ -103,24 +103,18 @@
 
   {#if multiple || !fileUploads || fileUploads.length === 0}
     <label
-      tabindex="0"
       for={componentId}
       class="file-upload-trigger"
       class:dragging-over={isDraggingOver}
+      tabindex="0"
+      role="button"
+      aria-disabled={disabled}
       on:keydown={checkAndOpen}
       on:drop|preventDefault|stopPropagation={onFileDrop}
-      on:dragenter|preventDefault|stopPropagation={() => {
-        isDraggingOver = true;
-      }}
-      on:dragover|preventDefault|stopPropagation={() => {
-        isDraggingOver = true;
-      }}
-      on:dragleave|preventDefault|stopPropagation={() => {
-        isDraggingOver = false;
-      }}
-      on:dragend|preventDefault|stopPropagation={() => {
-        isDraggingOver = false;
-      }}
+      on:dragenter|preventDefault|stopPropagation={() => (isDraggingOver = true)}
+      on:dragover|preventDefault|stopPropagation={() => (isDraggingOver = true)}
+      on:dragleave|preventDefault|stopPropagation={() => (isDraggingOver = false)}
+      on:dragend|preventDefault|stopPropagation={() => (isDraggingOver = false)}
     >
       <slot>
         <div class="message">

@@ -20,10 +20,6 @@
   const dispatch = createEventDispatcher();
 
   export let trigger: HTMLElement | undefined = undefined;
-  /**
-   * These `Placement` values will be tried in sequence until a placement is
-   * found that does not cause the dropdown content to overflow the viewport.
-   */
   export let placements: Placement[] = [
     'bottom-start',
     'bottom-end',
@@ -37,24 +33,9 @@
   export let classes = '';
   export { classes as class };
   export let closeOnInnerClick = false;
-  export let content: string | string[] | ComponentAndProps | undefined =
-    undefined;
+  export let content: string | string[] | ComponentAndProps | undefined = undefined;
   export let portalTarget: HTMLElement | undefined = undefined;
-  /**
-   * When true, the content element will automatically reposition when it
-   * resizes.
-   */
   export let autoReposition = false;
-
-  /**
-   * By default, we ensure that the dropdown content width is no smaller than
-   * the width of its trigger element — unless the trigger element is wider than
-   * 250px, in which case it ensures that the dropdown content width is no
-   * smaller than 250px.
-   *
-   * This option controls that threshold. Set it to 0 if you want to disable
-   * this min-width behavior, allowing the content to be quite narrow.
-   */
   export let matchTriggerWidthPxUpTo: number | undefined = undefined;
 
   let contentElement: HTMLElement | undefined;
@@ -62,46 +43,32 @@
   $: placement = preferredPlacement ?? placements[0] ?? 'bottom-start';
   $: fallbackPlacements = (() => {
     const p = placements.filter((pm) => pm !== placement);
-    if (p.length === 0) {
-      // If we didn't get any fallback placements, we want to send `undefined`
-      // to popper so that popper uses its default fallback placements.
-      return undefined;
-    }
+    if (p.length === 0) return undefined;
     return p;
   })();
 
-  const parentAccompanyingElements = getContext<
-    AccompanyingElements | undefined
-  >('dropdownAccompanyingElements');
+  const parentAccompanyingElements = getContext<AccompanyingElements | undefined>(
+    'dropdownAccompanyingElements'
+  );
   async function setThisContentToAccompanyParent() {
-    if (!contentElement) {
-      await tick();
-    }
-    if (!contentElement) {
-      return;
-    }
+    if (!contentElement) await tick();
+    if (!contentElement) return;
     parentAccompanyingElements?.add(contentElement);
   }
   async function unsetThisContentToAccompanyParent() {
-    if (!contentElement) {
-      await tick();
-    }
-    if (!contentElement) {
-      return;
-    }
+    if (!contentElement) await tick();
+    if (!contentElement) return;
     parentAccompanyingElements?.delete(contentElement);
   }
   onDestroy(unsetThisContentToAccompanyParent);
 
-  const accompanyingElements = new AccompanyingElements(
-    parentAccompanyingElements,
-  );
+  const accompanyingElements = new AccompanyingElements(parentAccompanyingElements);
   setContext('dropdownAccompanyingElements', accompanyingElements);
 
-  const clickOffBoundsReferences = derived(
-    accompanyingElements,
-    (_accompanyingElements) => [trigger, ..._accompanyingElements],
-  );
+  const clickOffBoundsReferences = derived(accompanyingElements, (_accompanyingElements) => [
+    trigger,
+    ..._accompanyingElements,
+  ]);
 
   function watchIsOpen(_isOpen: boolean) {
     if (_isOpen) {
@@ -123,6 +90,14 @@
       close();
     }
   }
+
+  // Keyboard-accessible click wrapper
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      checkAndCloseOnInnerClick();
+    }
+  }
 </script>
 
 {#if isOpen}
@@ -138,24 +113,20 @@
         modifiers: [
           {
             name: 'flip',
-            options: {
-              fallbackPlacements,
-            },
+            options: { fallbackPlacements },
           },
         ],
       },
-      customModifierOptions: {
-        matchTriggerWidthPxUpTo,
-      },
+      customModifierOptions: { matchTriggerWidthPxUpTo },
     }}
     use:clickOffBounds={{
       callback: close,
       references: clickOffBoundsReferences,
     }}
     on:click={checkAndCloseOnInnerClick}
-    on:click
-    on:mouseenter
-    on:mouseleave
+    role="button"
+    tabindex="0"
+    on:keydown={handleKeydown}
     data-attachable-dropdown
   >
     {#if $$slots.default}

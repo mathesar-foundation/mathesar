@@ -1,52 +1,57 @@
 <script lang="ts">
-  import popper, {
-    getVirtualReferenceElement,
-  } from '@mathesar-component-library-dir/common/actions/popper';
-  import portal from '@mathesar-component-library-dir/common/actions/portal';
-  import { PreparedMenu } from '@mathesar-component-library-dir/prepared-menu';
+  import { onMount } from 'svelte';
+  import { focusElement, blurElement, getFirstFocusableAncestor, getFocusableDescendants } from '@mathesar-component-library-dir/common/utils';
 
-  import type { ContextMenuController } from './ContextMenuController';
+  export let menuItems: HTMLElement[];
 
-  export let controller: ContextMenuController;
+  let menuElement: HTMLElement;
 
-  $: props = $controller;
-
-  function handleClickBackdrop(e: Event) {
-    controller.close();
-    e.preventDefault();
+  function handleMouseMove(e: MouseEvent) {
+    const target = e.target as HTMLElement;
+    const item = getFirstFocusableAncestor(target);
+    if (!item) return;
+    focusElement(item);
   }
+
+  function handleMouseLeave() {
+    blurElement(document.activeElement);
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    const elements = [...getFocusableDescendants(menuElement)];
+    const currentIndex = elements.findIndex(el => el === document.activeElement);
+
+    switch (e.key) {
+      case 'ArrowDown':
+        focusElement(elements[(currentIndex + 1) % elements.length]);
+        break;
+      case 'ArrowUp':
+        focusElement(elements[(currentIndex - 1 + elements.length) % elements.length]);
+        break;
+      case 'Escape':
+        blurElement(document.activeElement);
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown, { capture: true });
+    return () => window.removeEventListener('keydown', handleKeydown, { capture: true });
+  });
 </script>
 
-{#if props}
-  <div
-    class="context-menu-backdrop"
-    on:click={handleClickBackdrop}
-    on:contextmenu={handleClickBackdrop}
-  />
-  <div
-    class="context-menu dropdown content"
-    use:popper={{ reference: getVirtualReferenceElement(props.position) }}
-    use:portal
-    on:click={() => controller.close()}
-  >
-    <PreparedMenu
-      entries={props.entries}
-      modal={{
-        close: () => {
-          controller.close();
-        },
-        closeRoot: () => {
-          controller.close();
-        },
-      }}
-    />
-  </div>
-{/if}
-
-<style>
-  .context-menu-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: var(--dropdown-z-index);
-  }
-</style>
+<div
+  class="menu"
+  role="menu"
+  bind:this={menuElement}
+  on:mousemove={handleMouseMove}
+  on:mouseleave={handleMouseLeave}
+  tabindex="0"
+>
+  <slot />
+</div>

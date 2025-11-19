@@ -203,3 +203,7 @@ config/settings/local.py
 
 # Transifex binary
 tx
+
+
+msar/pgdata/
+msar/caddy/caddy/

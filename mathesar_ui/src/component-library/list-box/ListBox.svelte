@@ -3,7 +3,6 @@
   import { type Writable, writable } from 'svelte/store';
 
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
-
   import type {
     ListBoxApi,
     ListBoxContext,
@@ -29,7 +28,7 @@
   }>();
 
   export let selectionType: DefinedProps['selectionType'] = 'multiple';
-  export let options: DefinedProps['options'];
+  export let options: DefinedProps['options'] = [];
   export let value: DefinedProps['value'] = [];
 
   export let searchable: DefinedProps['searchable'] = false;
@@ -47,12 +46,6 @@
 
   const isOpen = writable(false);
   const focusedOptionIndex = writable(-1);
-
-  /**
-   * We have displayedOptions in order to be used:
-   * - when options is passed as a promise,
-   * - while searching through option list.
-   */
   const displayedOptions = writable(Array.isArray(options) ? options : []);
   $: displayedOptions.set(Array.isArray(options) ? options : []);
 
@@ -83,34 +76,26 @@
 
   function toggle(): void {
     if (disabled) return;
-    if ($isOpen) {
-      close();
-    } else {
-      open();
-    }
+    $isOpen ? close() : open();
   }
 
   function focusOption(option: Option): void {
     const index = $displayedOptions.findIndex((opt) =>
       checkEquality(option, opt),
     );
-    $focusedOptionIndex = index;
+    if (index >= 0) $focusedOptionIndex = index;
   }
 
   function focusNext(): void {
-    const displayOptionLength = $displayedOptions.length;
-    $focusedOptionIndex =
-      $focusedOptionIndex === displayOptionLength - 1
-        ? 0
-        : $focusedOptionIndex + 1;
+    const len = $displayedOptions.length;
+    if (len === 0) return;
+    $focusedOptionIndex = ($focusedOptionIndex + 1) % len;
   }
 
   function focusPrevious(): void {
-    const displayOptionLength = $displayedOptions.length;
-    $focusedOptionIndex =
-      $focusedOptionIndex <= 0
-        ? displayOptionLength - 1
-        : $focusedOptionIndex - 1;
+    const len = $displayedOptions.length;
+    if (len === 0) return;
+    $focusedOptionIndex = ($focusedOptionIndex - 1 + len) % len;
   }
 
   function isOptionSelected(option: Option): boolean {
@@ -122,55 +107,47 @@
 
   function select(option: Option): void {
     focusOption(option);
-    if (checkIfOptionIsDisabled(option)) {
-      return;
-    }
+    if (checkIfOptionIsDisabled(option)) return;
+
     if (isOptionSelected(option)) {
-      if (selectionType === 'single') {
-        close();
-      }
+      if (selectionType === 'single') close();
       return;
     }
+
     if (selectionType === 'single') {
       value = [option];
       close();
     } else {
       value = [...value, option];
     }
+
     void dispatch('change', value);
   }
 
   function deselect(option: Option): void {
     focusOption(option);
-    if (checkIfOptionIsDisabled(option)) {
-      return;
-    }
-    if (!isOptionSelected(option)) {
-      return;
-    }
+    if (checkIfOptionIsDisabled(option)) return;
+    if (!isOptionSelected(option)) return;
+
     if (selectionType === 'single') {
       value = [];
       close();
     } else {
       value = value.filter((opt) => !checkEquality(option, opt));
     }
+
     dispatch('change', value);
   }
 
   function pick(option: Option): void {
-    if (selectionType === 'single') {
-      select(option);
-    } else if (isOptionSelected(option)) {
-      deselect(option);
-    } else {
-      select(option);
-    }
+    if (selectionType === 'single') select(option);
+    else isOptionSelected(option) ? deselect(option) : select(option);
     dispatch('pick', option);
   }
 
   function pickFocused(): void {
     const focusedOption = $displayedOptions[$focusedOptionIndex];
-    pick(focusedOption);
+    if (focusedOption) pick(focusedOption);
   }
 
   function handleKeyDown(e: KeyboardEvent): void {
@@ -192,18 +169,10 @@
           e.preventDefault();
           pickFocused();
           break;
-        default:
-          break;
       }
-    } else {
-      switch (e.key) {
-        case 'Enter':
-          e.preventDefault();
-          open();
-          break;
-        default:
-          break;
-      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      open();
     }
   }
 
@@ -221,14 +190,6 @@
     pickFocused,
     handleKeyDown,
   };
-
-  // We need the following stores to not have undefined values. We need to
-  // update them when props change. The stores cannot be recreated, since we
-  // need to set them in context. The only way so far do that is to create a
-  // writable with the props, and then a reactive statement which updates the
-  // store when those props change.
-  //
-  // TODO: Check if we can do this in a better manner.
 
   const valueStore = writable(value);
   $: valueStore.set(value);

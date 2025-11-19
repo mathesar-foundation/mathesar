@@ -121,6 +121,7 @@
   <div
     class="menu"
     role="menu"
+    tabindex="0"
     class:has-icon={$hasIconColumn}
     class:has-control={$hasControlColumn}
     class:has-sub-menu={$hasSubMenu}
@@ -128,6 +129,7 @@
     style={styleString}
     on:mousemove={handleMouseMove}
     on:mouseleave={handleMouseLeave}
+    on:keydown={handleKeydown}
     use:focusTrap={{
       autoFocus: false,
       autoRestore: modal.restoreFocusOnClose ?? true,
@@ -140,10 +142,13 @@
   <div
     class="menu"
     role="menu"
+    tabindex="0"
     class:has-icon={$hasIconColumn}
     class:has-control={$hasControlColumn}
     class:has-sub-menu={$hasSubMenu}
     style={styleString}
+    on:keydown={handleKeydown}
+    bind:this={menuElement}
   >
     <slot />
   </div>
