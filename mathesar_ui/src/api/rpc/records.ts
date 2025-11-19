@@ -1,7 +1,7 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { RecordsSummaryListResponse } from './_common/commonTypes';
-import type { RecordSummaryTemplate } from './tables';
+import type { JoinPath, RecordSummaryTemplate } from './tables';
 
 export type ResultValue = string | number | boolean | null;
 
@@ -181,6 +181,10 @@ export const records = {
       limit?: number | null;
       offset?: number | null;
       search?: string | null;
+      linked_record_path?: {
+        record_pkey: ResultValue;
+        join_path: JoinPath;
+      } | null;
     },
     RecordsSummaryListResponse
   >(),
