@@ -14,4 +14,3 @@
     align-items: center;
   }
 </style>
-
