@@ -1,31 +1,140 @@
 <script lang="ts">
+  import { type Writable, get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
+  import { api } from '@mathesar/api/rpc';
+  import type {
+    RecordsSummaryListResponse,
+    SummarizedRecordReference,
+  } from '@mathesar/api/rpc/_common/commonTypes';
+  import type { ResultValue } from '@mathesar/api/rpc/records';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+  import { toast } from '@mathesar/stores/toast';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import { Spinner } from '@mathesar-component-library';
 
   import type MultiTaggerController from './MultiTaggerController';
-  import MultiTaggerOption from './MultiTaggerOption.svelte';
+  import type { MultiTaggerOption } from './MultiTaggerOption';
+  import MultiTaggerRow from './MultiTaggerRow.svelte';
   import MultiTaggerSearch from './MultiTaggerSearch.svelte';
+  import { buildOptions } from './multiTaggerUtils';
+
 
   export let controller: MultiTaggerController;
   export let close: () => void;
 
-  $: ({ elementId, records, pagination } = controller);
-  $: isLoading = $records.isLoading;
+  $: ({ elementId, records, searchValue, pagination } = controller);
   $: resolvedRecords = $records.resolvedValue;
-  $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
   $: hasPagination = recordsCount > $pagination.size;
 
-  function handleKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      close();
+  let options: Writable<MultiTaggerOption>[] = [];
+  let selectedIndex: number | undefined;
+
+  function rebuildOptions(response: RecordsSummaryListResponse | undefined) {
+    options = [...buildOptions(response)];
+    selectedIndex = undefined;
+  }
+
+  $: rebuildOptions($records.resolvedValue);
+
+  function getJoinTableOid(): number {
+    const joinTableOid = $records.resolvedValue?.mapping?.join_table;
+    if (joinTableOid === undefined) {
+      throw new Error('Join table OID is undefined');
+    }
+    return joinTableOid;
+  }
+
+  async function addMapping(
+    recordKey: SummarizedRecordReference['key'],
+  ): Promise<ResultValue> {
+    const { database, intermediateTable, currentRecordPk } = controller.props;
+    const targetFkAttnum = String(intermediateTable.attnumOfFkToTargetTable);
+    const currentFkAttnum = String(intermediateTable.attnumOfFkToCurrentTable);
+    const response = await api.records
+      .add({
+        database_id: database.id,
+        table_oid: getJoinTableOid(),
+        record_def: {
+          [targetFkAttnum]: recordKey,
+          [currentFkAttnum]: currentRecordPk,
+        },
+      })
+      .run();
+    const resultRow = response.results[0];
+    const pkAttnum = Object.keys(resultRow).find(
+      ([attnum]) => ![targetFkAttnum, currentFkAttnum].includes(attnum),
+    );
+    if (!pkAttnum) {
+      throw new Error('Unable to determine PK attnum');
+    }
+    return resultRow[pkAttnum];
+  }
+
+  async function removeMapping(mappingId: ResultValue) {
+    await api.records
+      .delete({
+        database_id: controller.props.database.id,
+        table_oid: getJoinTableOid(),
+        record_ids: [mappingId],
+      })
+      .run();
+  }
+
+  async function toggle(index: number) {
+    const option = options.at(index);
+    if (!option) return;
+    option.update((o) => o.asLoading());
+    const { key, mappingId } = get(option);
+    try {
+      if (mappingId === undefined) {
+        const newMappingId = await addMapping(key);
+        option.update((o) => o.withMapping(newMappingId));
+      } else {
+        await removeMapping(mappingId);
+        option.update((o) => o.withoutMapping());
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+    option.update((o) => o.asNotLoading());
+  }
+
+  function selectIndex(i: number) {
+    selectedIndex = i;
+  }
+
+  function selectNext() {
+    if (selectedIndex === undefined) {
+      selectedIndex = 0;
       return;
     }
-    // TODO implement Down/Up/Enter
+    selectedIndex = Math.min(selectedIndex + 1, options.length - 1);
+  }
+
+  function selectPrevious() {
+    if (selectedIndex === undefined) {
+      selectedIndex = 0;
+      return;
+    }
+    selectedIndex = Math.max(selectedIndex - 1, 0);
+  }
+
+  function toggleSelected() {
+    if (!selectedIndex) return;
+    void toggle(selectedIndex);
+  }
+
+  function handleKeyDown(e: KeyboardEvent) {
+    new Map([
+      ['Escape', close],
+      ['ArrowUp', selectPrevious],
+      ['ArrowDown', selectNext],
+      ['Enter', toggleSelected],
+    ]).get(e.key)?.();
   }
 </script>
 
@@ -34,34 +143,37 @@
     <MultiTaggerSearch {controller} onKeyDown={handleKeyDown} />
   </div>
 
-  <div class="option-container">
-    {#each recordsArray as record (record.key)}
-      <MultiTaggerOption {controller} {record} />
-    {:else}
-      <div class="empty-states">
-        {#if isLoading}
-          <div class="loading"><Spinner /></div>
-        {:else if $records.error}
-          <ErrorBox>
-            {RpcError.fromAnything($records.error).message}
-          </ErrorBox>
-        {:else}
-          <div class="no-results">{$_('no_records_found')}</div>
-        {/if}
-      </div>
-    {/each}
-  </div>
-
-  {#if hasPagination}
-    <div class="footer">
-      <div class="pagination">
-        <MiniPagination
-          bind:pagination={$pagination}
-          on:change={() => controller.getRecords()}
-          recordCount={recordsCount}
+  {#if $records.isInitializing}
+    <div class="loading"><Spinner /></div>
+  {:else if $records.error}
+    <ErrorBox>{RpcError.fromAnything($records.error).message}</ErrorBox>
+  {:else}
+    <div class="option-container">
+      {#each options as option, index}
+        <MultiTaggerRow
+          {option}
+          selected={index === selectedIndex}
+          searchValue={$searchValue}
+          onToggle={() => {
+            void toggle(index);
+          }}
+          onHover={() => selectIndex(index)}
         />
-      </div>
+      {:else}
+        <div class="no-results">{$_('no_records_found')}</div>
+      {/each}
     </div>
+    {#if hasPagination}
+      <div class="footer">
+        <div class="pagination">
+          <MiniPagination
+            bind:pagination={$pagination}
+            on:change={() => controller.getRecords()}
+            recordCount={recordsCount}
+          />
+        </div>
+      </div>
+    {/if}
   {/if}
 </div>
 
@@ -82,26 +194,6 @@
     background: var(--color-bg-raised-2);
   }
 
-  .empty-states {
-    padding: var(--sm1) var(--sm2);
-    max-height: 20rem;
-  }
-
-  .option-container {
-    overflow-x: hidden;
-    overflow-y: auto;
-    --list-box-options-padding: 0;
-
-    :global(.option-list-box) {
-      max-height: 25rem;
-      overflow-y: auto;
-    }
-  }
-
-  .no-results {
-    color: var(--color-fg-base-muted);
-  }
-
   .loading {
     padding: var(--sm5);
     display: grid;
@@ -109,15 +201,17 @@
     justify-content: center;
   }
 
+  .no-results {
+    color: var(--color-fg-base-muted);
+  }
   .footer {
     border-top: 1px solid var(--color-border-section);
     padding: var(--sm6);
     display: flex;
     align-items: center;
     font-size: var(--sm2);
-
-    .pagination {
-      margin-left: auto;
-    }
+  }
+  .pagination {
+    margin-left: auto;
   }
 </style>
