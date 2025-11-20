@@ -1,6 +1,10 @@
 """
-Classes and functions exposed to the RPC endpoint for managing mathesar users.
+RPC endpoints for managing Mathesar users.
+
+This module exposes RPC methods for creating users, listing users, updating
+profile information, and modifying passwords.
 """
+
 from typing import Optional, TypedDict
 from modernrpc.core import REQUEST_KEY
 
@@ -13,21 +17,21 @@ from mathesar.utils.users import (
     update_other_user_info,
     delete_user,
     change_password,
-    revoke_password
+    revoke_password,
 )
 
 
 class UserInfo(TypedDict):
     """
-    Information about a mathesar user.
+    Information about a Mathesar user.
 
     Attributes:
-        id: The Django id of the user.
+        id: The Django ID of the user.
         username: The username of the user.
-        is_superuser: Specifies whether the user is a superuser.
-        email: The email of the user.
-        full_name: The full name of the user.
-        display_language: Specifies the display language for the user, can be either `en` or `ja`.
+        is_superuser: Whether the user is a superuser.
+        email: The user's email address.
+        full_name: The user's full name.
+        display_language: The UI display language (`en` or `ja`).
     """
     id: int
     username: str
@@ -44,21 +48,21 @@ class UserInfo(TypedDict):
             is_superuser=model.is_superuser,
             email=model.email,
             full_name=model.full_name,
-            display_language=model.display_language
+            display_language=model.display_language,
         )
 
 
 class UserDef(TypedDict):
     """
-    Definition for creating a mathesar user.
+    Definition for creating a new Mathesar user.
 
     Attributes:
-        username: The username of the user.
-        password: The password of the user.
-        is_superuser: Whether the user is a superuser.
-        email: The email of the user.
-        full_name: The full name of the user.
-        display_language: Specifies the display language for the user, can be set to either `en` or `ja`.
+        username: Desired username.
+        password: Password for the user.
+        is_superuser: Whether the user should be a superuser.
+        email: Optional email address.
+        full_name: Optional full name.
+        display_language: Optional display language (`en` or `ja`).
     """
     username: str
     password: str
@@ -71,16 +75,16 @@ class UserDef(TypedDict):
 @mathesar_rpc_method(name='users.add')
 def add(*, user_def: UserDef) -> UserInfo:
     """
-    Add a new mathesar user.
+    Create a new Mathesar user.
 
     Args:
-        user_def: A dict describing the user to create.
+        user_def: Dictionary containing the fields required to create the user.
 
     Privileges:
-        This endpoint requires the caller to be a superuser.
+        Requires superuser privileges.
 
     Returns:
-        The information of the created user.
+        UserInfo: Information about the newly created user.
     """
     user = add_user(user_def)
     return UserInfo.from_model(user)
@@ -89,13 +93,13 @@ def add(*, user_def: UserDef) -> UserInfo:
 @mathesar_rpc_method(name='users.delete')
 def delete(*, user_id: int) -> None:
     """
-    Delete a mathesar user.
+    Delete a Mathesar user.
 
     Args:
-        user_id: The Django id of the user to delete.
+        user_id: The Django ID of the user to delete.
 
     Privileges:
-        This endpoint requires the caller to be a superuser.
+        Requires superuser privileges.
     """
     delete_user(user_id)
 
@@ -103,13 +107,13 @@ def delete(*, user_id: int) -> None:
 @mathesar_rpc_method(name="users.get", auth="login")
 def get(*, user_id: int) -> UserInfo:
     """
-    List information about a mathesar user.
+    Retrieve a user's information.
 
     Args:
-        user_id: The Django id of the user.
+        user_id: The Django ID of the user.
 
     Returns:
-        User information for a given user_id.
+        UserInfo: Information about the requested user.
     """
     user = get_user(user_id)
     return UserInfo.from_model(user)
@@ -118,10 +122,10 @@ def get(*, user_id: int) -> UserInfo:
 @mathesar_rpc_method(name='users.list', auth="login")
 def list_() -> list[UserInfo]:
     """
-    List information about all mathesar users. Exposed as `list`.
+    List all Mathesar users.
 
     Returns:
-        A list of information about mathesar users.
+        list[UserInfo]: A list of user information objects.
     """
     users = list_users()
     return [UserInfo.from_model(user) for user in users]
@@ -137,26 +141,27 @@ def patch_self(
     **kwargs
 ) -> UserInfo:
     """
-    Alter details of currently logged in mathesar user.
+    Update the profile information of the currently logged-in user.
 
     Args:
-        username: The username of the user.
-        email: The email of the user.
-        full_name: The full name of the user.
-        display_language: Specifies the display language for the user, can be set to either `en` or `ja`.
+        username: Updated username.
+        email: Updated email address.
+        full_name: Updated full name.
+        display_language: Updated display language (`en` or `ja`).
+        **kwargs: Additional request context passed by RPC.
 
     Returns:
-        Updated user information of the caller.
+        UserInfo: Updated information of the current user.
     """
     user = kwargs.get(REQUEST_KEY).user
-    updated_user_info = update_self_user_info(
+    updated = update_self_user_info(
         user_id=user.id,
         username=username,
         email=email,
         full_name=full_name,
-        display_language=display_language
+        display_language=display_language,
     )
-    return UserInfo.from_model(updated_user_info)
+    return UserInfo.from_model(updated)
 
 
 @mathesar_rpc_method(name='users.patch_other')
@@ -170,31 +175,31 @@ def patch_other(
     display_language: str
 ) -> UserInfo:
     """
-    Alter details of a mathesar user, given its user_id.
+    Update details of another user.
 
     Args:
-        user_id: The Django id of the user.
-        username: The username of the user.
-        email: The email of the user.
-        is_superuser: Specifies whether to set the user as a superuser.
-        full_name: The full name of the user.
-        display_language: Specifies the display language for the user, can be set to either `en` or `ja`.
+        user_id: The Django ID of the user.
+        username: Updated username.
+        is_superuser: Updated superuser status.
+        email: Updated email address.
+        full_name: Updated full name.
+        display_language: Updated display language (`en` or `ja`).
 
     Privileges:
-        This endpoint requires the caller to be a superuser.
+        Requires superuser privileges.
 
     Returns:
-        Updated user information for a given user_id.
+        UserInfo: Updated information of the user.
     """
-    updated_user_info = update_other_user_info(
+    updated = update_other_user_info(
         user_id=user_id,
         username=username,
         is_superuser=is_superuser,
         email=email,
         full_name=full_name,
-        display_language=display_language
+        display_language=display_language,
     )
-    return UserInfo.from_model(updated_user_info)
+    return UserInfo.from_model(updated)
 
 
 @mathesar_rpc_method(name='users.password.replace_own', auth="login")
@@ -205,15 +210,19 @@ def replace_own(
     **kwargs
 ) -> None:
     """
-    Alter password of currently logged in mathesar user.
+    Change the password of the currently logged-in user.
 
     Args:
-        old_password: Old password of the currently logged in user.
-        new_password: New password of the user to set.
+        old_password: Current password.
+        new_password: New password to set.
+        **kwargs: Additional request context passed by RPC.
+
+    Raises:
+        Exception: If the old password is incorrect.
     """
     user = kwargs.get(REQUEST_KEY).user
     if not user.check_password(old_password):
-        raise Exception('Old password is incorrect')
+        raise Exception("Old password is incorrect")
     change_password(user.id, new_password)
 
 
@@ -224,13 +233,13 @@ def revoke(
     new_password: str,
 ) -> None:
     """
-    Alter password of a mathesar user, given its user_id.
+    Reset another user's password.
 
     Args:
-        user_id: The Django id of the user.
-        new_password: New password of the user to set.
+        user_id: The Django ID of the user.
+        new_password: New password to assign.
 
     Privileges:
-        This endpoint requires the caller to be a superuser.
+        Requires superuser privileges.
     """
     revoke_password(user_id, new_password)
