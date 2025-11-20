@@ -10,6 +10,11 @@
   import { toast } from '@mathesar/stores/toast';
   import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
   import { AnonymousViewerUserModel } from '@mathesar/stores/users';
+  import AttachableMultiTagger from '@mathesar/systems/multi-tagger/AttachableMultiTagger.svelte';
+  import {
+    AttachableMultiTaggerController,
+    multiTaggerContext,
+  } from '@mathesar/systems/multi-tagger/AttachableMultiTaggerController';
   import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
   import {
     RecordSelectorController,
@@ -20,11 +25,6 @@
     AttachableRowSeekerController,
     rowSeekerContext,
   } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
-  import AttachableMultiTagger from '@mathesar/systems/multi-tagger/AttachableMultiTagger.svelte';
-  import {
-    AttachableMultiTaggerController,
-    multiTaggerContext,
-  } from '@mathesar/systems/multi-tagger/AttachableMultiTaggerController';
   import type { CommonData } from '@mathesar/utils/preloadData';
   import {
     Confirmation,

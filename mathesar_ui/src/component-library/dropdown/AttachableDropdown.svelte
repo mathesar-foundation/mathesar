@@ -15,8 +15,9 @@
   import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
   import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
 
-  import { AccompanyingElements } from './AccompanyingElements';
   import focusTrap from '../common/actions/focusTrap';
+
+  import { AccompanyingElements } from './AccompanyingElements';
 
   const dispatch = createEventDispatcher();
 
