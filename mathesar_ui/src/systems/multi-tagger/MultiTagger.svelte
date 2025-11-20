@@ -2,12 +2,7 @@
   import { type Writable, get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import { api } from '@mathesar/api/rpc';
-  import type {
-    RecordsSummaryListResponse,
-    SummarizedRecordReference,
-  } from '@mathesar/api/rpc/_common/commonTypes';
-  import type { ResultValue } from '@mathesar/api/rpc/records';
+  import type { RecordsSummaryListResponse } from '@mathesar/api/rpc/_common/commonTypes';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
@@ -19,8 +14,7 @@
   import type { MultiTaggerOption } from './MultiTaggerOption';
   import MultiTaggerRow from './MultiTaggerRow.svelte';
   import MultiTaggerSearch from './MultiTaggerSearch.svelte';
-  import { buildOptions } from './multiTaggerUtils';
-
+  import { addMapping, getOptions, removeMapping } from './multiTaggerUtils';
 
   export let controller: MultiTaggerController;
   export let close: () => void;
@@ -33,56 +27,12 @@
   let options: Writable<MultiTaggerOption>[] = [];
   let selectedIndex: number | undefined;
 
-  function rebuildOptions(response: RecordsSummaryListResponse | undefined) {
-    options = [...buildOptions(response)];
+  function handleRefresh(response: RecordsSummaryListResponse | undefined) {
+    options = [...getOptions(response)];
     selectedIndex = undefined;
   }
 
-  $: rebuildOptions($records.resolvedValue);
-
-  function getJoinTableOid(): number {
-    const joinTableOid = $records.resolvedValue?.mapping?.join_table;
-    if (joinTableOid === undefined) {
-      throw new Error('Join table OID is undefined');
-    }
-    return joinTableOid;
-  }
-
-  async function addMapping(
-    recordKey: SummarizedRecordReference['key'],
-  ): Promise<ResultValue> {
-    const { database, intermediateTable, currentRecordPk } = controller.props;
-    const targetFkAttnum = String(intermediateTable.attnumOfFkToTargetTable);
-    const currentFkAttnum = String(intermediateTable.attnumOfFkToCurrentTable);
-    const response = await api.records
-      .add({
-        database_id: database.id,
-        table_oid: getJoinTableOid(),
-        record_def: {
-          [targetFkAttnum]: recordKey,
-          [currentFkAttnum]: currentRecordPk,
-        },
-      })
-      .run();
-    const resultRow = response.results[0];
-    const pkAttnum = Object.keys(resultRow).find(
-      ([attnum]) => ![targetFkAttnum, currentFkAttnum].includes(attnum),
-    );
-    if (!pkAttnum) {
-      throw new Error('Unable to determine PK attnum');
-    }
-    return resultRow[pkAttnum];
-  }
-
-  async function removeMapping(mappingId: ResultValue) {
-    await api.records
-      .delete({
-        database_id: controller.props.database.id,
-        table_oid: getJoinTableOid(),
-        record_ids: [mappingId],
-      })
-      .run();
-  }
+  $: handleRefresh(resolvedRecords);
 
   async function toggle(index: number) {
     const option = options.at(index);
@@ -91,10 +41,10 @@
     const { key, mappingId } = get(option);
     try {
       if (mappingId === undefined) {
-        const newMappingId = await addMapping(key);
+        const newMappingId = await addMapping(controller, key);
         option.update((o) => o.withMapping(newMappingId));
       } else {
-        await removeMapping(mappingId);
+        await removeMapping(controller, mappingId);
         option.update((o) => o.withoutMapping());
       }
     } catch (error) {
