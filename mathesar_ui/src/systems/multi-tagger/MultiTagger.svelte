@@ -18,9 +18,6 @@
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
-  // $: joinedValues = new Map(
-  //   Object.entries(resolvedRecords?.mapping?.joined_values ?? {}),
-  // );
   $: hasPagination = recordsCount > $pagination.size;
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -28,28 +25,13 @@
       close();
       return;
     }
-  }
-
-  async function handleAddNewButtonKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      close();
-      return;
-    }
-    if (e.key === 'Enter') {
-      return;
-    }
-    await controller.focusSearch();
+    // TODO implement Down/Up/Enter
   }
 </script>
 
 <div id={elementId} tabindex="0" data-multi-tagger>
   <div data-multi-tagger-controls>
-    <MultiTaggerSearch
-      {controller}
-      onKeyDown={(e) => {
-        throw new Error('Not implemented');
-      }}
-    />
+    <MultiTaggerSearch {controller} onKeyDown={handleKeyDown} />
   </div>
 
   <div class="option-container">
