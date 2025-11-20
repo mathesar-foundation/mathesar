@@ -7,55 +7,82 @@
     Truncate,
     LabeledInput,
   } from '@mathesar-component-library';
-  import type { ResultValue } from '@mathesar/api/rpc/records';
   import { api } from '@mathesar/api/rpc';
+  import type MultiTaggerController from './MultiTaggerController';
+  import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
 
-  export let searchValue: string | undefined = undefined;
-  export let joinTable: number | undefined = undefined;
-  export let joinValue: ResultValue | undefined = undefined;
-  export let summary: string;
+  export let controller: MultiTaggerController;
+  export let record: SummarizedRecordReference;
 
-  let checked = joinValue !== undefined;
+  $: ({ props: controllerProps, searchValue, records } = controller);
+  $: ({ database, intermediateTable, currentRecordPk } = controllerProps);
+  $: ({ key, summary } = record);
+  $: joinTableOid = $records.resolvedValue?.mapping?.join_table;
+  $: joinedValues = $records.resolvedValue?.mapping?.joined_values ?? {};
+  $: joinValue = joinedValues[String(key)];
+
+  let checked = false;
   let changing = false;
 
+  $: if (joinValue !== undefined) {
+    checked = true;
+  } else {
+    checked = false;
+  }
+
   async function addMapping() {
-    try {
-      // await api.records
-      //   .add({
-      //   })
-      //   .run();
-    } catch (error) {
-      toast.error(getErrorMessage(error));
+    if (joinTableOid === undefined) {
+      throw new Error('Join table OID is undefined');
     }
+    await api.records
+      .add({
+        database_id: database.id,
+        table_oid: joinTableOid,
+        record_def: {
+          [String(intermediateTable.attnumOfFkToTargetTable)]: key,
+          [String(intermediateTable.attnumOfFkToCurrentTable)]: currentRecordPk,
+        },
+      })
+      .run();
   }
 
-  function removeMapping() {
-    try {
-      api;
-    } catch (error) {
-      toast.error(getErrorMessage(error));
+  async function removeMapping() {
+    if (joinTableOid === undefined) {
+      throw new Error('Join table OID is undefined');
     }
+    if (joinValue === undefined) {
+      throw new Error('Join value is undefined');
+    }
+    await api.records
+      .delete({
+        database_id: database.id,
+        table_oid: joinTableOid,
+        record_ids: [joinValue],
+      })
+      .run();
   }
 
-  function handleChange({ detail: checked }: CustomEvent<boolean>) {
+  async function handleChange() {
     changing = true;
-    if (checked) {
-      addMapping();
-    } else {
-      removeMapping();
+    const action = checked ? addMapping : removeMapping;
+    try {
+      await action();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      checked = !checked;
     }
     changing = false;
   }
 </script>
 
-<div class="record">
+<div class="record" class:changing>
   <LabeledInput layout="inline-input-first">
     <span slot="label">
       <Truncate>
-        <MatchHighlighter text={summary} substring={searchValue} />
+        <MatchHighlighter text={summary} substring={$searchValue} />
       </Truncate>
     </span>
-    <Checkbox bind:checked on:change={handleChange} />
+    <Checkbox bind:checked on:change={handleChange} disabled={changing} />
   </LabeledInput>
 </div>
 
@@ -63,5 +90,11 @@
   .record {
     border-bottom: 1px solid var(--border-color);
     padding: var(--sm5) var(--sm3);
+  }
+  .changing {
+    opacity: 0.5;
+  }
+  .changing :global(*) {
+    cursor: pointer;
   }
 </style>

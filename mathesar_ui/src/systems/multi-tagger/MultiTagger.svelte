@@ -4,7 +4,7 @@
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-  import { Button, Spinner } from '@mathesar-component-library';
+  import { Spinner } from '@mathesar-component-library';
 
   import type MultiTaggerController from './MultiTaggerController';
   import MultiTaggerOption from './MultiTaggerOption.svelte';
@@ -13,15 +13,14 @@
   export let controller: MultiTaggerController;
   export let close: () => void;
 
-  $: ({ elementId, records, pagination, searchValue } = controller);
+  $: ({ elementId, records, pagination } = controller);
   $: isLoading = $records.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
   $: recordsCount = resolvedRecords?.count ?? 0;
-  $: joinTable = resolvedRecords?.mapping?.join_table;
-  $: joinedValues = new Map(
-    Object.entries(resolvedRecords?.mapping?.joined_values ?? {}),
-  );
+  // $: joinedValues = new Map(
+  //   Object.entries(resolvedRecords?.mapping?.joined_values ?? {}),
+  // );
   $: hasPagination = recordsCount > $pagination.size;
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -55,12 +54,7 @@
 
   <div class="option-container">
     {#each recordsArray as record (record.key)}
-      <MultiTaggerOption
-        searchValue={$searchValue}
-        {joinTable}
-        joinValue={joinedValues.get(String(record.key))}
-        summary={record.summary}
-      />
+      <MultiTaggerOption {controller} {record} />
     {:else}
       <div class="empty-states">
         {#if isLoading}

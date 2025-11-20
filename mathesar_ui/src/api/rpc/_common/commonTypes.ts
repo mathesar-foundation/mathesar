@@ -8,8 +8,6 @@ export interface RecordsSummaryListResponse {
   results: SummarizedRecordReference[];
   mapping?: {
     join_table: number;
-    joined_values: {
-      [key: string]: string | number | boolean | null;
-    };
+    joined_values: Partial<Record<string, string | number | boolean | null>>;
   };
 }
