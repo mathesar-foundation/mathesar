@@ -15,14 +15,11 @@ export class AttachableMultiTaggerController {
 
   multiTagger = writable<MultiTaggerController | undefined>(undefined);
 
-  async open(props: AttachableMultiTaggerControllerProps) {
+  open(props: AttachableMultiTaggerControllerProps) {
     this.triggerElement.set(props.triggerElement);
     const multiTagger = new MultiTaggerController(props);
     this.multiTagger.set(multiTagger);
-    await multiTagger.getReady();
-    const selection = await multiTagger.acquireUserSelection();
-    this.close();
-    return selection;
+    void multiTagger.getRecords();
   }
 
   close() {

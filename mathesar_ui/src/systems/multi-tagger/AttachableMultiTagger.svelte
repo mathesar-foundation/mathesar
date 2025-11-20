@@ -2,7 +2,7 @@
   import { AttachableDropdown } from '@mathesar-component-library';
 
   import type { AttachableMultiTaggerController } from './AttachableMultiTaggerController';
-  import RowSeeker from './MultiTagger.svelte';
+  import MultiTagger from './MultiTagger.svelte';
 
   export let controller: AttachableMultiTaggerController;
 
@@ -17,6 +17,6 @@
     trapFocus
     on:close={() => controller.close()}
   >
-    <RowSeeker controller={$multiTagger} close={() => controller.close()} />
+    <MultiTagger controller={$multiTagger} close={() => controller.close()} />
   </AttachableDropdown>
 {/if}

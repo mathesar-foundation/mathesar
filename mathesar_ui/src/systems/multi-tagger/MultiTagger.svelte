@@ -11,10 +11,9 @@
   import MultiTaggerSearch from './MultiTaggerSearch.svelte';
 
   export let controller: MultiTaggerController;
-  export let close: () => void = () => {};
+  export let close: () => void;
 
-  $: ({ elementId, records, pagination, canAddNewRecord, searchValue } =
-    controller);
+  $: ({ elementId, records, pagination, searchValue } = controller);
   $: isLoading = $records.isLoading;
   $: resolvedRecords = $records.resolvedValue;
   $: recordsArray = resolvedRecords?.results ?? [];
@@ -27,7 +26,6 @@
 
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-      controller.cancel();
       close();
       return;
     }
@@ -35,7 +33,6 @@
 
   async function handleAddNewButtonKeyDown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-      controller.cancel();
       close();
       return;
     }
@@ -79,28 +76,15 @@
     {/each}
   </div>
 
-  {#if hasPagination || canAddNewRecord}
+  {#if hasPagination}
     <div class="footer">
-      {#if canAddNewRecord}
-        <div class="add-record">
-          <Button
-            appearance="secondary"
-            on:click={() => controller.addNewRecord()}
-            on:keydown={(e) => handleAddNewButtonKeyDown(e)}
-          >
-            {$_('add_new_record')}
-          </Button>
-        </div>
-      {/if}
-      {#if hasPagination}
-        <div class="pagination">
-          <MiniPagination
-            bind:pagination={$pagination}
-            on:change={() => controller.getRecords()}
-            recordCount={recordsCount}
-          />
-        </div>
-      {/if}
+      <div class="pagination">
+        <MiniPagination
+          bind:pagination={$pagination}
+          on:change={() => controller.getRecords()}
+          recordCount={recordsCount}
+        />
+      </div>
     </div>
   {/if}
 </div>

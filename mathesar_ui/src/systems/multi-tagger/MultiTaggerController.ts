@@ -1,10 +1,11 @@
 import { tick } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
-import type {
-  RecordsSummaryListResponse,
-  SummarizedRecordReference,
-} from '@mathesar/api/rpc/_common/commonTypes';
+import { api } from '@mathesar/api/rpc';
+import type { RecordsSummaryListResponse } from '@mathesar/api/rpc/_common/commonTypes';
+import type { ResultValue } from '@mathesar/api/rpc/records';
+import type { Database } from '@mathesar/models/Database';
+import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import type AsyncStore from '@mathesar/stores/AsyncStore';
 import Pagination from '@mathesar/utils/Pagination';
 import { getGloballyUniqueId } from '@mathesar-component-library';
@@ -20,17 +21,27 @@ export type MultiTaggerRecordStore = AsyncStore<
 >;
 
 export type MultiTaggerProps = {
-  constructRecordStore: () => MultiTaggerRecordStore;
-  addRecordOptions?: {
-    text?: string;
-    create: (
-      searchString?: string,
-    ) => Promise<SummarizedRecordReference | null>;
+  database: Pick<Database, 'id'>;
+  currentTable: {
+    oid: number;
+    pkColumnAttnum: number;
+  };
+  currentRecordPk: ResultValue;
+  intermediateTable: {
+    oid: number;
+    attnumOfFkToCurrentTable: number;
+    attnumOfFkToTargetTable: number;
+  };
+  targetTable: {
+    oid: number;
+    pkColumnAttnum: number;
   };
 };
 
 export default class MultiTaggerController {
   readonly elementId = getGloballyUniqueId();
+
+  readonly props: MultiTaggerProps;
 
   records: MultiTaggerRecordStore;
 
@@ -38,16 +49,33 @@ export default class MultiTaggerController {
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
 
-  cancel: () => void = () => {};
-
-  readonly canAddNewRecord: boolean;
-
-  private addRecordOptions?: MultiTaggerProps['addRecordOptions'];
-
-  constructor(props: MultiTaggerProps) {
-    this.records = props.constructRecordStore();
-    this.addRecordOptions = props.addRecordOptions;
-    this.canAddNewRecord = !!props.addRecordOptions;
+  constructor(p: MultiTaggerProps) {
+    this.props = p;
+    this.records = new AsyncRpcApiStore(api.records.list_summaries, {
+      staticProps: {
+        database_id: p.database.id,
+        table_oid: p.targetTable.oid,
+        linked_record_path: {
+          join_path: [
+            [
+              [p.currentTable.oid, p.currentTable.pkColumnAttnum],
+              [
+                p.intermediateTable.oid,
+                p.intermediateTable.attnumOfFkToCurrentTable,
+              ],
+            ],
+            [
+              [
+                p.intermediateTable.oid,
+                p.intermediateTable.attnumOfFkToTargetTable,
+              ],
+              [p.targetTable.oid, p.targetTable.pkColumnAttnum],
+            ],
+          ],
+          record_pkey: p.currentRecordPk,
+        },
+      },
+    });
   }
 
   async focusSearch() {
@@ -73,27 +101,12 @@ export default class MultiTaggerController {
     await this.getRecords();
   }
 
-  async getReady() {
-    await this.focusSearch();
-    await this.getRecords();
-  }
-
   clearRecords() {
     this.records.reset();
     this.searchValue.set('');
   }
 
   async addNewRecord() {
-    if (this.addRecordOptions) {
-      throw new Error('Not implemented');
-    }
-  }
-
-  async acquireUserSelection(): Promise<SummarizedRecordReference | null> {
-    return new Promise((resolve, reject) => {
-      this.cancel = () => {
-        reject();
-      };
-    });
+    throw new Error('Not implemented');
   }
 }
