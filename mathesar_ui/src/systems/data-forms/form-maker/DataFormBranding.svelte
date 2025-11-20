@@ -16,6 +16,17 @@
     {/if}
   </RichText>
 </div>
+<style>
+  .form-branding a {
+    color: var(--text-color);   /* uses theme base text color */
+    text-decoration: none;
+  }
+
+  .form-branding a:hover,
+  .form-branding a:focus {
+    text-decoration: underline;
+  }
+</style>
 
 <style lang="scss">
   .form-branding {
