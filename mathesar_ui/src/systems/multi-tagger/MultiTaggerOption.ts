@@ -7,29 +7,32 @@ export class MultiTaggerOption {
 
   readonly loading: boolean;
 
-  readonly mappingId?: ResultValue;
+  readonly mappingIds: ResultValue[];
 
   readonly checked: boolean;
 
   constructor(p: {
     key: ResultValue;
     summary: string;
-    mappingId?: ResultValue;
+    mappingIds?: ResultValue[];
     loading?: boolean;
   }) {
     this.key = p.key;
     this.summary = p.summary;
     this.loading = p.loading ?? false;
-    this.mappingId = p.mappingId;
-    this.checked = p.mappingId !== undefined;
+    this.mappingIds = p.mappingIds ?? [];
+    this.checked = this.mappingIds.length > 0;
   }
 
-  withMapping(mappingId: ResultValue): MultiTaggerOption {
-    return new MultiTaggerOption({ ...this, mappingId });
+  withMappings(mappingIds: ResultValue[]): MultiTaggerOption {
+    return new MultiTaggerOption({
+      ...this,
+      mappingIds: [...this.mappingIds, ...mappingIds],
+    });
   }
 
-  withoutMapping(): MultiTaggerOption {
-    return new MultiTaggerOption({ ...this, mappingId: undefined });
+  withoutMappings(): MultiTaggerOption {
+    return new MultiTaggerOption({ ...this, mappingIds: [] });
   }
 
   asLoading(): MultiTaggerOption {

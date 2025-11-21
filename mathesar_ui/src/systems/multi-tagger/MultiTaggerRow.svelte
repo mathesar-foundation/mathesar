@@ -16,8 +16,7 @@
   export let onToggle: () => void;
   export let onHover: (() => void) | undefined = undefined;
 
-  $: ({ summary, loading, mappingId } = $option);
-  $: checked = mappingId !== undefined;
+  $: ({ summary, loading, checked } = $option);
 </script>
 
 <button

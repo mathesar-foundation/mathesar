@@ -16,8 +16,8 @@ export function* getOptions(
   if (!response) return;
   const joinedValues = response.mapping?.joined_values ?? {};
   for (const { key, summary } of response.results) {
-    const mappingId = joinedValues[String(key)];
-    yield writable(new MultiTaggerOption({ key, summary, mappingId }));
+    const mappingIds = joinedValues[String(key)];
+    yield writable(new MultiTaggerOption({ key, summary, mappingIds }));
   }
 }
 
@@ -59,13 +59,13 @@ export async function addMapping(
 
 export async function removeMapping(
   controller: MultiTaggerController,
-  mappingId: ResultValue,
+  mappingIds: ResultValue[],
 ) {
   await api.records
     .delete({
       database_id: controller.props.database.id,
       table_oid: getJoinTableOid(controller),
-      record_ids: [mappingId],
+      record_ids: mappingIds,
     })
     .run();
 }

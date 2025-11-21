@@ -46,14 +46,14 @@
     const option = options.at(index);
     if (!option) return;
     option.update((o) => o.asLoading());
-    const { key, mappingId } = get(option);
+    const { key, mappingIds } = get(option);
     try {
-      if (mappingId === undefined) {
+      if (mappingIds.length === 0) {
         const newMappingId = await addMapping(controller, key);
-        option.update((o) => o.withMapping(newMappingId));
+        option.update((o) => o.withMappings([newMappingId]));
       } else {
-        await removeMapping(controller, mappingId);
-        option.update((o) => o.withoutMapping());
+        await removeMapping(controller, mappingIds);
+        option.update((o) => o.withoutMappings());
       }
     } catch (error) {
       toast.error(getErrorMessage(error));
