@@ -6,6 +6,7 @@
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import Tutorial from '@mathesar/component-library/tutorial/Tutorial.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import Testbed from '@mathesar/components/Testbed.svelte';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
   import { iconAddNew, iconRefresh } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
@@ -51,6 +52,8 @@
     schema.oid,
   );
 </script>
+
+<Testbed />
 
 <div class="schema-overview" class:has-tables={hasTables}>
   <div class="tables">
