@@ -88,12 +88,15 @@
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    new Map([
+    const action = new Map([
       ['Escape', close],
       ['ArrowUp', selectPrevious],
       ['ArrowDown', selectNext],
       ['Enter', toggleSelected],
-    ]).get(e.key)?.();
+    ]).get(e.key);
+    if (!action) return;
+    e.preventDefault();
+    action();
   }
 </script>
 
