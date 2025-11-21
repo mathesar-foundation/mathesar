@@ -239,6 +239,13 @@ class ColumnMetaData(BaseModel):
     duration_max = models.CharField(max_length=255, null=True)
     display_width = models.PositiveIntegerField(null=True)
     file_backend = models.CharField(max_length=255, null=True)
+    user_type = models.BooleanField(default=False, null=True)
+    user_display_field = models.CharField(
+        choices=[("full_name", "full_name"), ("email", "email"), ("username", "username")],
+        max_length=50,
+        null=True
+    )
+    user_last_edited_by = models.BooleanField(default=False, null=True)
 
     class Meta:
         constraints = [

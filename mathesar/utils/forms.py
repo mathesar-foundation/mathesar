@@ -9,6 +9,7 @@ from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
+from mathesar.utils.user_display import get_last_edited_by_columns_for_table
 
 
 def validate_and_get_associated_role(user, database_id, associated_role_id=None):
@@ -204,7 +205,17 @@ def iterate_form_fields(fields, parent_field=None, depth=0, fields_to_pick=[]):
         )
 
 
-def submit_form(form_token, values):
+def submit_form(form_token, values, user=None):
+    """
+    Submit a form.
+
+    Args:
+        form_token: The unique token of the form.
+        values: A dict describing the values to insert.
+        user: Optional Django user object. If provided and authenticated,
+            user_last_edited_by columns will be set to the user's ID.
+            If None or anonymous, these columns will remain unset (NULL).
+    """
     form_model = Form.objects.get(token=form_token)
     assert form_model.publish_public, 'This form does not accept submissions'
     fields_to_pick = [i for i in values.keys() if isinstance(values[i], dict) and values[i].get('type') == 'pick']
@@ -220,6 +231,46 @@ def submit_form(form_token, values):
             fields_to_pick=fields_to_pick
         )
     ]
+
+    # Set user_last_edited_by columns for authenticated users
+    # We need to handle this for each table that will be inserted into
+    if user and user.is_authenticated and hasattr(user, 'id'):
+        # Get unique table OIDs and their minimum depths from field_info_list
+        table_depths = {}
+        for field_info in field_info_list:
+            table_oid = field_info['table_oid']
+            depth = field_info['depth']
+            if table_oid not in table_depths or depth < table_depths[table_oid]:
+                table_depths[table_oid] = depth
+
+        # For each table, add user_last_edited_by columns to field_info_list and values
+        for table_oid, depth in table_depths.items():
+            last_edited_by_columns = get_last_edited_by_columns_for_table(
+                table_oid, form_model.database.id
+            )
+
+            for column_attnum in last_edited_by_columns:
+                # Check if this column is already in field_info_list
+                already_included = any(
+                    fi['table_oid'] == table_oid and fi['column_attnum'] == column_attnum
+                    for fi in field_info_list
+                )
+
+                if not already_included:
+                    # Add it to field_info_list with a generated key
+                    # Use a key that won't conflict with existing keys
+                    key = f"__user_last_edited_by_{table_oid}_{column_attnum}"
+                    field_info_list.append({
+                        "key": key,
+                        "parent_key": None,
+                        "column_attnum": column_attnum,
+                        "table_oid": table_oid,
+                        "depth": depth
+                    })
+
+                    # Set the value to the user ID
+                    values[key] = user.id
+
     with form_model.connection as conn:
         form_insert(field_info_list, values, conn)
 

@@ -1,6 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table records.
 """
+
 from typing import Any, Literal, Optional, TypedDict, Union
 
 from modernrpc.core import REQUEST_KEY
@@ -19,6 +20,11 @@ from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_download_link_columns
 from mathesar.utils.tables import get_table_record_summary_templates
 from mathesar.utils.download_links import get_download_links
+from mathesar.utils.user_display import (
+    get_user_columns_for_table,
+    get_user_display_values_for_column,
+    get_last_edited_by_columns_for_table,
+)
 
 
 class OrderBy(TypedDict):
@@ -29,6 +35,7 @@ class OrderBy(TypedDict):
         attnum: The attnum of the column to order by.
         direction: The direction to order by.
     """
+
     attnum: int
     direction: Literal["asc", "desc"]
 
@@ -41,6 +48,7 @@ class FilterAttnum(TypedDict):
         type: Must be `"attnum"`
         value: The attnum of the column to filter by
     """
+
     type: Literal["attnum"]
     value: int
 
@@ -53,6 +61,7 @@ class FilterLiteral(TypedDict):
       type: must be `"literal"`.
       value: The value of the literal.
     """
+
     type: Literal["literal"]
     value: Any
 
@@ -68,8 +77,9 @@ class Filter(TypedDict):
       type: a function or operator to be used in filtering.
       args: The ordered arguments for the function or operator.
     """
+
     type: str
-    args: list[Union['Filter', FilterAttnum, FilterLiteral]]
+    args: list[Union["Filter", FilterAttnum, FilterLiteral]]
 
 
 class SearchParam(TypedDict):
@@ -80,6 +90,7 @@ class SearchParam(TypedDict):
         attnum: The attnum of the column in the table.
         literal: The literal to search for in the column.
     """
+
     attnum: int
     literal: Any
 
@@ -94,6 +105,7 @@ class Grouping(TypedDict):
         columns: The columns to be grouped by.
         preproc: The preprocessing functions to apply (if any).
     """
+
     columns: list[int]
     preproc: list[str]
 
@@ -114,6 +126,7 @@ class Group(TypedDict):
         result_indices: The 0-indexed positions of group members in the
             results array.
     """
+
     id: int
     count: int
     results_eq: list[dict]
@@ -129,6 +142,7 @@ class GroupingResponse(TypedDict):
         preproc: The preprocessing functions to apply (if any).
         groups: The groups applicable to the records being returned.
     """
+
     columns: list[int]
     preproc: list[str]
     groups: list[Group]
@@ -153,6 +167,7 @@ class RecordList(TypedDict):
         download_links: Information for viewing or downloading file
             attachments.
     """
+
     count: int
     results: list[dict]
     grouping: GroupingResponse
@@ -168,7 +183,7 @@ class RecordList(TypedDict):
             grouping=d.get("grouping"),
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
-            download_links=d.get("download_links") or None
+            download_links=d.get("download_links") or None,
         )
 
 
@@ -187,6 +202,7 @@ class RecordAdded(TypedDict):
             values, provides a map of foreign key to a text summary.
         record_summaries: Information for previewing an added record.
     """
+
     results: list[dict]
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
@@ -200,6 +216,97 @@ class RecordAdded(TypedDict):
         )
 
 
+def _set_last_edited_by_columns(
+    record_def: dict,
+    table_oid: int,
+    database_id: int,
+    user_id: int,
+) -> None:
+    """
+    Automatically set user_last_edited_by columns to the current user ID.
+
+    This function modifies record_def in place to set any columns with
+    user_last_edited_by=True to the current user's ID.
+
+    Args:
+        record_def: The record definition dict (modified in place)
+        table_oid: The OID of the table
+        database_id: The Django database ID
+        user_id: The ID of the current user
+    """
+    last_edited_by_columns = get_last_edited_by_columns_for_table(
+        table_oid, database_id
+    )
+    for column_attnum in last_edited_by_columns:
+        # Set the column to the current user ID (ensure it's a string key)
+        record_def[str(column_attnum)] = user_id
+
+
+def _add_user_display_values_to_record_info(
+    record_info: dict,
+    table_oid: int,
+    database_id: int,
+) -> None:
+    """
+    Add user display values to the linked_record_summaries in record_info.
+
+    This function:
+    1. Detects user columns in the table
+    2. Extracts user IDs from the record results
+    3. Fetches user display values from Django User model
+    4. Adds them to linked_record_summaries structure
+
+    Args:
+        record_info: The record info dict (modified in place)
+        table_oid: The OID of the table
+        database_id: The Django database ID
+    """
+    user_column_attnums = get_user_columns_for_table(table_oid, database_id)
+
+    if not user_column_attnums:
+        return
+
+    # Ensure linked_record_summaries exists and is a dict
+    if (
+        "linked_record_summaries" not in record_info
+        or record_info["linked_record_summaries"] is None
+    ):
+        record_info["linked_record_summaries"] = {}
+
+    # Extract user IDs from results
+    results = record_info.get("results", [])
+
+    for column_attnum in user_column_attnums:
+        # Collect all unique user IDs from this column
+        user_ids = set()
+        for record in results:
+            # Column values are keyed by attnum as string or integer
+            user_id = record.get(str(column_attnum)) or record.get(column_attnum)
+            if user_id is not None:
+                try:
+                    # Convert to int if needed
+                    user_ids.add(
+                        int(user_id) if not isinstance(user_id, int) else user_id
+                    )
+                except (ValueError, TypeError):
+                    # Skip invalid values
+                    continue
+
+        if not user_ids:
+            continue
+
+        # Get user display values
+        user_display_values = get_user_display_values_for_column(
+            table_oid, database_id, column_attnum, user_ids
+        )
+
+        if user_display_values:
+            # Add to linked_record_summaries using column attnum as key
+            record_info["linked_record_summaries"][
+                str(column_attnum)
+            ] = user_display_values
+
+
 class SummarizedRecordReference(TypedDict):
     """
     A summarized reference to a record, typically used in foreign key fields.
@@ -208,6 +315,7 @@ class SummarizedRecordReference(TypedDict):
         key: A unique identifier for the record.
         summary: The record summary
     """
+
     key: Any
     summary: str
 
@@ -220,6 +328,7 @@ class RecordSummaryList(TypedDict):
         count: The total number of records matching the criteria.
         results: A list of summarized record references, each containing a key and a summary.
     """
+
     count: int
     results: list[SummarizedRecordReference]
 
@@ -233,16 +342,16 @@ class RecordSummaryList(TypedDict):
 
 @mathesar_rpc_method(name="records.list", auth="login")
 def list_(
-        *,
-        table_oid: int,
-        database_id: int,
-        limit: int = None,
-        offset: int = None,
-        order: list[OrderBy] = None,
-        filter: Filter = None,
-        grouping: Grouping = None,
-        return_record_summaries: bool = False,
-        **kwargs
+    *,
+    table_oid: int,
+    database_id: int,
+    limit: int = None,
+    offset: int = None,
+    order: list[OrderBy] = None,
+    filter: Filter = None,
+    grouping: Grouping = None,
+    return_record_summaries: bool = False,
+    **kwargs,
 ) -> RecordList:
     """
     List records from a table, and its row count. Exposed as `list`.
@@ -273,27 +382,34 @@ def list_(
             filter=filter,
             group=grouping,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
     download_link_columns = get_download_link_columns(table_oid, database_id)
-    record_info["download_links"] = get_download_links(
-        kwargs.get(REQUEST_KEY),
-        record_info["results"],
-        download_link_columns,
-    ) or None
+    record_info["download_links"] = (
+        get_download_links(
+            kwargs.get(REQUEST_KEY),
+            record_info["results"],
+            download_link_columns,
+        )
+        or None
+    )
+
+    _add_user_display_values_to_record_info(record_info, table_oid, database_id)
 
     return RecordList.from_dict(record_info)
 
 
 @mathesar_rpc_method(name="records.get", auth="login")
 def get(
-        *,
-        record_id: Any,
-        table_oid: int,
-        database_id: int,
-        return_record_summaries: bool = False,
-        table_record_summary_templates: dict[str, Any] = None,
-        **kwargs
+    *,
+    record_id: Any,
+    table_oid: int,
+    database_id: int,
+    return_record_summaries: bool = False,
+    table_record_summary_templates: dict[str, Any] = None,
+    **kwargs,
 ) -> RecordList:
     """
     Get single record from a table by its primary key.
@@ -327,22 +443,28 @@ def get(
             },
         )
     download_link_columns = get_download_link_columns(table_oid, database_id)
-    record_info["download_links"] = get_download_links(
-        kwargs.get(REQUEST_KEY),
-        record_info["results"],
-        download_link_columns,
-    ) or None
+    record_info["download_links"] = (
+        get_download_links(
+            kwargs.get(REQUEST_KEY),
+            record_info["results"],
+            download_link_columns,
+        )
+        or None
+    )
+
+    _add_user_display_values_to_record_info(record_info, table_oid, database_id)
+
     return RecordList.from_dict(record_info)
 
 
 @mathesar_rpc_method(name="records.add", auth="login")
 def add(
-        *,
-        record_def: dict,
-        table_oid: int,
-        database_id: int,
-        return_record_summaries: bool = False,
-        **kwargs
+    *,
+    record_def: dict,
+    table_oid: int,
+    database_id: int,
+    return_record_summaries: bool = False,
+    **kwargs,
 ) -> RecordAdded:
     """
     Add a single record to a table.
@@ -365,26 +487,33 @@ def add(
         The created record, along with some metadata.
     """
     user = kwargs.get(REQUEST_KEY).user
+    # Automatically set user_last_edited_by columns to current user ID
+    _set_last_edited_by_columns(record_def, table_oid, database_id, user.id)
     with connect(database_id, user) as conn:
         record_info = add_record_to_table(
             conn,
             record_def,
             table_oid,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
+
+    _add_user_display_values_to_record_info(record_info, table_oid, database_id)
+
     return RecordAdded.from_dict(record_info)
 
 
 @mathesar_rpc_method(name="records.patch", auth="login")
 def patch(
-        *,
-        record_def: dict,
-        record_id: Any,
-        table_oid: int,
-        database_id: int,
-        return_record_summaries: bool = False,
-        **kwargs
+    *,
+    record_def: dict,
+    record_id: Any,
+    table_oid: int,
+    database_id: int,
+    return_record_summaries: bool = False,
+    **kwargs,
 ) -> RecordAdded:
     """
     Modify a record in a table.
@@ -407,6 +536,8 @@ def patch(
         The modified record, along with some metadata.
     """
     user = kwargs.get(REQUEST_KEY).user
+    # Automatically set user_last_edited_by columns to current user ID
+    _set_last_edited_by_columns(record_def, table_oid, database_id, user.id)
     with connect(database_id, user) as conn:
         record_info = patch_record_in_table(
             conn,
@@ -414,18 +545,19 @@ def patch(
             record_id,
             table_oid,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
+
+    _add_user_display_values_to_record_info(record_info, table_oid, database_id)
+
     return RecordAdded.from_dict(record_info)
 
 
 @mathesar_rpc_method(name="records.delete", auth="login")
 def delete(
-        *,
-        record_ids: list[Any],
-        table_oid: int,
-        database_id: int,
-        **kwargs
+    *, record_ids: list[Any], table_oid: int, database_id: int, **kwargs
 ) -> list[Any]:
     """
     Delete records from a table by primary key.
@@ -450,14 +582,14 @@ def delete(
 
 @mathesar_rpc_method(name="records.search", auth="login")
 def search(
-        *,
-        table_oid: int,
-        database_id: int,
-        search_params: list[SearchParam] = [],
-        limit: int = 10,
-        offset: int = 0,
-        return_record_summaries: bool = False,
-        **kwargs
+    *,
+    table_oid: int,
+    database_id: int,
+    search_params: list[SearchParam] = [],
+    limit: int = 10,
+    offset: int = 0,
+    return_record_summaries: bool = False,
+    **kwargs,
 ) -> RecordList:
     """
     List records from a table according to `search_params`.
@@ -492,26 +624,34 @@ def search(
             limit=limit,
             offset=offset,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
     download_link_columns = get_download_link_columns(table_oid, database_id)
-    record_info["download_links"] = get_download_links(
-        kwargs.get(REQUEST_KEY),
-        record_info["results"],
-        download_link_columns,
-    ) or None
+    record_info["download_links"] = (
+        get_download_links(
+            kwargs.get(REQUEST_KEY),
+            record_info["results"],
+            download_link_columns,
+        )
+        or None
+    )
+
+    _add_user_display_values_to_record_info(record_info, table_oid, database_id)
+
     return RecordList.from_dict(record_info)
 
 
 @mathesar_rpc_method(name="records.list_summaries", auth="login")
 def list_summaries(
-        *,
-        table_oid: int,
-        database_id: int,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        search: Optional[str] = None,
-        **kwargs,
+    *,
+    table_oid: int,
+    database_id: int,
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+    search: Optional[str] = None,
+    **kwargs,
 ) -> RecordSummaryList:
     """
     List record summaries and keys for each record. Primarily used for selection via the Row seeker.
@@ -534,6 +674,8 @@ def list_summaries(
             limit=limit,
             offset=offset,
             search=search,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
     return RecordSummaryList.from_dict(record_info)

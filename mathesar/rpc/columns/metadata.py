@@ -32,6 +32,9 @@ class ColumnMetaDataRecord(TypedDict):
         duration_max: The largest unit for displaying durations.
         display_width: The pixel width of the column
         file_backend: The name of a backend for storing file attachments.
+        user_type: Whether this column stores Mathesar user IDs.
+        user_display_field: Which user field to display for user columns (full_name, email, or username).
+        user_last_edited_by: Whether this column automatically tracks the last user who edited the record.
     """
     database_id: int
     table_oid: int
@@ -50,6 +53,10 @@ class ColumnMetaDataRecord(TypedDict):
     duration_min: Optional[str]
     duration_max: Optional[str]
     display_width: Optional[int]
+    file_backend: Optional[str]
+    user_type: Optional[bool]
+    user_display_field: Optional[Literal["full_name", "email", "username"]]
+    user_last_edited_by: Optional[bool]
 
     @classmethod
     def from_model(cls, model):
@@ -72,6 +79,8 @@ class ColumnMetaDataRecord(TypedDict):
             duration_max=model.duration_max,
             display_width=model.display_width,
             file_backend=model.file_backend,
+            user_type=model.user_type,
+            user_display_field=model.user_display_field or "username",
         )
 
 
@@ -96,6 +105,9 @@ class ColumnMetaDataBlob(TypedDict):
         duration_max: The largest unit for displaying durations.
         display_width: The pixel width of the column.
         file_backend: The name of a backend for storing file attachments.
+        user_type: Whether this column stores Mathesar user IDs.
+        user_display_field: Which user field to display for user columns (full_name, email, or username).
+        user_last_edited_by: Whether this column automatically tracks the last user who edited the record.
     """
     attnum: int
     bool_input: Optional[Literal["dropdown", "checkbox"]]
@@ -112,6 +124,10 @@ class ColumnMetaDataBlob(TypedDict):
     duration_min: Optional[str]
     duration_max: Optional[str]
     display_width: Optional[int]
+    file_backend: Optional[str]
+    user_type: Optional[bool]
+    user_display_field: Optional[Literal["full_name", "email", "username"]]
+    user_last_edited_by: Optional[bool]
 
     @classmethod
     def from_model(cls, model):
@@ -132,6 +148,9 @@ class ColumnMetaDataBlob(TypedDict):
             duration_max=model.duration_max,
             display_width=model.display_width,
             file_backend=model.file_backend,
+            user_type=model.user_type,
+            user_display_field=model.user_display_field,
+            user_last_edited_by=model.user_last_edited_by,
         )
 
 
