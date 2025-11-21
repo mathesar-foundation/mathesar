@@ -16,28 +16,24 @@
     {/if}
   </RichText>
 </div>
-<style>
-  .form-branding a {
-    color: var(--text-color);   /* uses theme base text color */
+
+<style lang="scss">
+.form-branding {
+  padding: var(--sml);
+  color: var(--color-fg-base-muted);
+
+  a {
+    color: var(--text-color);
     text-decoration: none;
   }
 
-  .form-branding a:hover,
-  .form-branding a:focus {
+  a:hover,
+  a:focus {
     text-decoration: underline;
+    color: var(--color-fg-base);
+    border-bottom: solid 2px var(--color-brand);
   }
+}
 </style>
 
-<style lang="scss">
-  .form-branding {
-    padding: var(--sm1);
-    color: var(--color-fg-base-muted);
-    a {
-      text-decoration: none;
-      &:hover {
-        color: var(--color-fg-base);
-        border-bottom: solid 2px var(--color-brand);
-      }
-    }
-  }
-</style>
+
