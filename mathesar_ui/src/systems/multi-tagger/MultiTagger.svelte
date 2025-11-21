@@ -83,7 +83,7 @@
   }
 
   function toggleSelected() {
-    if (!selectedIndex) return;
+    if (selectedIndex === undefined) return;
     void toggle(selectedIndex);
   }
 
