@@ -36,8 +36,11 @@
     <Spinner />
   {:else if recordSummary !== undefined}
     <LinkedRecord {recordSummary} />
-  {:else}
-    <Errors errors={[$preview.error ?? $_('unknown_error')]} />
+
+  {:else if $preview.error}
+    <Errors errors={[$preview.error]} />
+  {:else} 
+    <p class="no-summary">No summary available for this record.</p>
   {/if}
 
   <div class="help">
