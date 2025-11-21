@@ -34,6 +34,14 @@
 
   $: handleRefresh(resolvedRecords);
 
+  function focusSearch() {
+    const componentElement = document.getElementById(elementId);
+    const searchBox = componentElement?.querySelector<HTMLElement>(
+      '[data-multi-tagger-search-box]',
+    );
+    searchBox?.focus?.();
+  }
+
   async function toggle(index: number) {
     const option = options.at(index);
     if (!option) return;
@@ -51,6 +59,7 @@
       toast.error(getErrorMessage(error));
     }
     option.update((o) => o.asNotLoading());
+    focusSearch();
   }
 
   function selectIndex(i: number) {
