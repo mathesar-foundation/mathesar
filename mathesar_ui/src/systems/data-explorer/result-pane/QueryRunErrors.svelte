@@ -12,6 +12,9 @@
   import QueryManager from '../QueryManager';
   import type { QueryRunner } from '../QueryRunner';
 
+  // ✅ Added required import at top (correct fix)
+  import { parseColumnId } from '@mathesar/stores/columnData/utils';
+
   const { currentDatabase } = databasesStore;
 
   export let queryHandler: QueryRunner | QueryManager;
@@ -35,71 +38,82 @@
       {#each errors.errors as apierror}
         <ul>
           {#if apierror.code === QUERY_CONTAINS_DELETED_COLUMN && hasProperty(apierror.detail, 'column_id')}
-            {@const columnId = Number(apierror.detail.column_id)}
-            <li class="error">
-              <p class="strong">
-                {$_('some_columns_in_query_missing')}
-              </p>
-              {#if queryManager}
-                {@const columnsAndTransformsToDelete =
-                  $query.getInitialColumnsAndTransformsUtilizingThemByColumnIds(
-                    [columnId],
-                  )}
-                {@const initialColumns =
-                  columnsAndTransformsToDelete.initialColumnsUsingColumnIds}
-                {@const transformsWithIndex =
-                  columnsAndTransformsToDelete.transformsUsingColumnIds}
-                <p>
-                  {$_('recover_query_click_button')}
+
+            <!-- ✅ Safe parsing instead of Number(...) -->
+            {@const parsed = parseColumnId(apierror.detail.column_id)}
+            {#if parsed !== undefined}
+              {@const columnId = parsed}
+
+              <li class="error">
+                <p class="strong">
+                  {$_('some_columns_in_query_missing')}
                 </p>
-                {#if initialColumns.length > 0}
-                  <p>{$_('this_will_remove_following_columns')}</p>
-                  <ul class="removal-list">
-                    {#each initialColumns as initialColumn (initialColumn.alias)}
-                      <li>
-                        {$query.display_names[initialColumn.alias] ??
-                          initialColumn.alias}
-                      </li>
-                    {/each}
-                  </ul>
-                {/if}
-                {#if transformsWithIndex.length > 0}
-                  <p>{$_('this_will_remove_following_transformations')}</p>
-                  <ul class="removal-list">
-                    {#each transformsWithIndex as transformInfo (transformInfo)}
-                      <li>
-                        {transformInfo.index + 1}: {transformInfo.transform
-                          .name}
-                      </li>
-                    {/each}
-                  </ul>
-                {/if}
-                <p>
-                  <Button
-                    appearance="secondary"
-                    on:click={() => deleteMissingColumns(columnId)}
-                  >
-                    {$_('attempt_exploration_recovery')}
-                  </Button>
-                </p>
-              {:else if $currentDatabase && $currentSchema && $query.id}
-                <p>
-                  {$_('edit_exploration_attempt_recovery')}
-                </p>
-                <p>
-                  <a
-                    class="btn btn-secondary"
-                    href={getExplorationPageUrl(
-                      $currentDatabase.id,
-                      $currentSchema.oid,
-                      $query.id,
+
+                {#if queryManager}
+                  {@const columnsAndTransformsToDelete =
+                    $query.getInitialColumnsAndTransformsUtilizingThemByColumnIds(
+                      [columnId],
                     )}
-                  >
-                    {$_('edit_in_data_explorer')}
-                  </a>
-                </p>
-              {/if}
-            </li>
+                  {@const initialColumns =
+                    columnsAndTransformsToDelete.initialColumnsUsingColumnIds}
+                  {@const transformsWithIndex =
+                    columnsAndTransformsToDelete.transformsUsingColumnIds}
+
+                  <p>
+                    {$_('recover_query_click_button')}
+                  </p>
+
+                  {#if initialColumns.length > 0}
+                    <p>{$_('this_will_remove_following_columns')}</p>
+                    <ul class="removal-list">
+                      {#each initialColumns as initialColumn (initialColumn.alias)}
+                        <li>
+                          {$query.display_names[initialColumn.alias] ??
+                            initialColumn.alias}
+                        </li>
+                      {/each}
+                    </ul>
+                  {/if}
+
+                  {#if transformsWithIndex.length > 0}
+                    <p>{$_('this_will_remove_following_transformations')}</p>
+                    <ul class="removal-list">
+                      {#each transformsWithIndex as transformInfo (transformInfo)}
+                        <li>
+                          {transformInfo.index + 1}: {transformInfo.transform.name}
+                        </li>
+                      {/each}
+                    </ul>
+                  {/if}
+
+                  <p>
+                    <Button
+                      appearance="secondary"
+                      on:click={() => deleteMissingColumns(columnId)}
+                    >
+                      {$_('attempt_exploration_recovery')}
+                    </Button>
+                  </p>
+
+                {:else if $currentDatabase && $currentSchema && $query.id}
+                  <p>
+                    {$_('edit_exploration_attempt_recovery')}
+                  </p>
+                  <p>
+                    <a
+                      class="btn btn-secondary"
+                      href={getExplorationPageUrl(
+                        $currentDatabase.id,
+                        $currentSchema.oid,
+                        $query.id,
+                      )}
+                    >
+                      {$_('edit_in_data_explorer')}
+                    </a>
+                  </p>
+                {/if}
+              </li>
+            {/if}
           {:else}
             <li class="error">
               {apierror.message}
