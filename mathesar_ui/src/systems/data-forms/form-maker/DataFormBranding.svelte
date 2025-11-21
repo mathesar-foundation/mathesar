@@ -18,22 +18,20 @@
 </div>
 
 <style lang="scss">
-.form-branding {
-  padding: var(--sml);
-  color: var(--color-fg-base-muted);
+  .form-branding {
+    padding: var(--sml);
+    color: var(--color-fg-base-muted);
 
-  a {
-    color: var(--text-color);
-    text-decoration: none;
-  }
+    a {
+      color: var(--text-color);
+      text-decoration: none;
+    }
 
-  a:hover,
-  a:focus {
-    text-decoration: underline;
-    color: var(--color-fg-base);
-    border-bottom: solid 2px var(--color-brand);
+    a:hover,
+    a:focus {
+      text-decoration: underline;
+      color: var(--color-fg-base);
+      border-bottom: solid 2px var(--color-brand);
+    }
   }
-}
 </style>
-
-
