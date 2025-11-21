@@ -10,6 +10,8 @@ import type AsyncStore from '@mathesar/stores/AsyncStore';
 import Pagination from '@mathesar/utils/Pagination';
 import { getGloballyUniqueId } from '@mathesar-component-library';
 
+const PAGE_SIZE = 200;
+
 export type MultiTaggerRecordStore = AsyncStore<
   {
     limit?: number | null;
@@ -47,7 +49,9 @@ export default class MultiTaggerController {
 
   searchValue: Writable<string> = writable('');
 
-  pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
+  pagination: Writable<Pagination> = writable(
+    new Pagination({ size: PAGE_SIZE }),
+  );
 
   constructor(p: MultiTaggerProps) {
     this.props = p;
@@ -97,7 +101,7 @@ export default class MultiTaggerController {
   }
 
   async resetPaginationAndGetRecords() {
-    this.pagination.set(new Pagination({ size: 200, page: 1 }));
+    this.pagination.set(new Pagination({ size: PAGE_SIZE, page: 1 }));
     await this.getRecords();
   }
 
