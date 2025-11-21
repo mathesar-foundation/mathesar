@@ -131,23 +131,27 @@
 <style lang="scss">
   div[data-multi-tagger] {
     max-width: min(30rem, 90vw);
+    max-height: inherit;
     overflow: hidden;
     position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
   }
   .search {
-    display: flex;
-    overflow: hidden;
-    gap: 0.1rem;
     border-bottom: 1px solid var(--color-border-raised-2);
     box-shadow: 0 1px 3px
       color-mix(in srgb, var(--color-shadow), transparent 10%);
     background: var(--color-bg-raised-2);
   }
   .padded {
-    padding: var(--sm5);
+    padding: var(--sm1);
     display: grid;
     align-items: center;
     justify-content: center;
+  }
+  .results {
+    overflow-x: hidden;
+    overflow-y: scroll;
   }
   .no-results {
     color: var(--color-fg-base-muted);

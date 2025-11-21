@@ -15,8 +15,16 @@
     isOpen
     autoReposition
     trapFocus
+    class="attachable-multi-tagger"
     on:close={() => controller.close()}
   >
     <MultiTagger controller={$multiTagger} close={() => controller.close()} />
   </AttachableDropdown>
 {/if}
+
+<style>
+  :global(.attachable-multi-tagger) {
+    display: grid;
+    --Dropdown-content__overflow: hidden;
+  }
+</style>
