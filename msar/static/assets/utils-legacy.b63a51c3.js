@@ -1,0 +1,1 @@
+System.register([],(function(t,n){"use strict";return{execute:function(){t("a",(function({language:t,dictionary:n}){window.Mathesar={...window.Mathesar,translations:{...window.Mathesar?.translations,[t]:n}}}))}}}));
