@@ -89,16 +89,16 @@
 </script>
 
 <div id={elementId} tabindex="0" data-multi-tagger>
-  <div data-multi-tagger-controls>
+  <div class="search">
     <MultiTaggerSearch {controller} onKeyDown={handleKeyDown} />
   </div>
 
   {#if $records.isInitializing}
-    <div class="loading"><Spinner /></div>
+    <div class="padded"><Spinner /></div>
   {:else if $records.error}
     <ErrorBox>{RpcError.fromAnything($records.error).message}</ErrorBox>
   {:else}
-    <div class="option-container">
+    <div class="results">
       {#each options as option, index}
         <MultiTaggerRow
           {option}
@@ -110,9 +110,10 @@
           onHover={() => selectIndex(index)}
         />
       {:else}
-        <div class="no-results">{$_('no_records_found')}</div>
+        <div class="no-results padded">{$_('no_records_found')}</div>
       {/each}
     </div>
+
     {#if hasPagination}
       <div class="footer">
         <div class="pagination">
@@ -133,8 +134,7 @@
     overflow: hidden;
     position: relative;
   }
-
-  [data-multi-tagger-controls] {
+  .search {
     display: flex;
     overflow: hidden;
     gap: 0.1rem;
@@ -143,14 +143,12 @@
       color-mix(in srgb, var(--color-shadow), transparent 10%);
     background: var(--color-bg-raised-2);
   }
-
-  .loading {
+  .padded {
     padding: var(--sm5);
     display: grid;
     align-items: center;
     justify-content: center;
   }
-
   .no-results {
     color: var(--color-fg-base-muted);
   }
