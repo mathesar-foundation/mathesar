@@ -1,3 +1,5 @@
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
@@ -54,3 +56,21 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
             raise mathesar.api.exceptions.data_import_exceptions.exceptions.InvalidTableAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = DataFileSerializer(datafile, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+# --- ADD THIS OUTSIDE THE CLASS ---
+@csrf_exempt
+def upload_file(request):
+    if request.method == "POST":
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return JsonResponse({"error": "No file uploaded"}, status=400)
+        
+        # Save the uploaded file somewhere (for testing)
+        with open(f"/tmp/{uploaded_file.name}", "wb+") as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
+        
+        return JsonResponse({"message": "File uploaded successfully"})
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
