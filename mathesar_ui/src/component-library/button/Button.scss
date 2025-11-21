@@ -40,7 +40,7 @@
   $btn-states: (hover, focus, active);
 
   $btn-variants: (
-    default: (
+    control: (
       normal: (
         background: var(--color-bg-control),
         border-color: var(--color-border-control),
@@ -53,8 +53,7 @@
       ),
       focus: (
         background: var(--color-bg-control-focused),
-        outline-color:
-          color-mix(
+        outline-color: color-mix(
             in srgb,
             var(--color-border-control-focused),
             transparent 70%
@@ -67,8 +66,7 @@
       active: (
         background: var(--color-bg-control-active),
         border-color: var(--color-border-control-active),
-        outline-color:
-          color-mix(
+        outline-color: color-mix(
             in srgb,
             var(--color-border-control-focused),
             transparent 60%
@@ -80,10 +78,47 @@
       ),
     ),
 
+    input: (
+      normal: (
+        background: var(--color-bg-input),
+        border-color: var(--color-border-input),
+      ),
+      hover: (
+        background: var(--color-bg-input-hover),
+        box-shadow: (
+          var(--color-shadow) 0 1px 3px 0,
+        ),
+      ),
+      focus: (
+        background: var(--color-bg-input-focused),
+        outline-color: color-mix(
+            in srgb,
+            var(--color-border-input-focused),
+            transparent 70%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+      active: (
+        background: var(--color-bg-input-active),
+        border-color: var(--color-border-input-active),
+        outline-color: color-mix(
+            in srgb,
+            var(--color-border-input-focused),
+            transparent 60%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+    ),
+
     primary: (
       normal: (
-        background:
-          linear-gradient(
+        background: linear-gradient(
             to bottom right,
             var(--color-action-primary),
             var(--color-action-primary-80)
@@ -93,26 +128,28 @@
         box-shadow: (
           0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 75%),
           0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 80%),
-          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 80%),
+          0 1px 2px -1px
+            color-mix(in srgb, var(--color-shadow), transparent 80%),
         ),
       ),
       hover: (
-        background:
-          linear-gradient(
+        background: linear-gradient(
             to bottom right,
             var(--color-action-primary-hover),
             var(--color-action-primary-80-hover)
           ),
         border-color: var(--color-action-primary-80),
         box-shadow: (
-          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 75%),
-          0 1px 3px -2px color-mix(in srgb, var(--color-shadow), transparent 80%),
-          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 80%),
+          0 1px 2px -1px
+            color-mix(in srgb, var(--color-shadow), transparent 75%),
+          0 1px 3px -2px
+            color-mix(in srgb, var(--color-shadow), transparent 80%),
+          0 1px 2px -1px
+            color-mix(in srgb, var(--color-shadow), transparent 80%),
         ),
       ),
       focus: (
-        background:
-          linear-gradient(
+        background: linear-gradient(
             to bottom right,
             var(--color-action-primary-focused),
             var(--color-action-primary-80-focused)
@@ -122,8 +159,7 @@
         box-shadow: var(--color-shadow) 0 1px 2px 0,
       ),
       active: (
-        background:
-          linear-gradient(
+        background: linear-gradient(
             to bottom right,
             var(--color-action-primary-active),
             var(--color-action-primary-80-active)
@@ -144,8 +180,10 @@
         background: var(--color-action-secondary-25),
         border-color: var(--color-action-secondary-40),
         box-shadow: (
-          0 4px 6px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
-          0 2px 4px -2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 4px 6px -1px
+            color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 2px 4px -2px
+            color-mix(in srgb, var(--color-shadow), transparent 10%),
           0 0 0 1px color-mix(in srgb, var(--color-shadow), transparent 70%),
         ),
       ),
@@ -156,7 +194,8 @@
         box-shadow: (
           0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 5%),
           0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 1px 2px -1px
+            color-mix(in srgb, var(--color-shadow), transparent 10%),
         ),
       ),
       active: (
@@ -166,7 +205,8 @@
         box-shadow: (
           0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 5%),
           0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
-          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 1px 2px -1px
+            color-mix(in srgb, var(--color-shadow), transparent 10%),
           inset 1px 1px 2px
             color-mix(in srgb, var(--color-shadow), transparent 10%),
         ),
@@ -184,8 +224,7 @@
         color: var(--color-fg-outcome-hover),
       ),
       focus: (
-        outline-color:
-          color-mix(
+        outline-color: color-mix(
             in srgb,
             var(--color-border-outcome-focused),
             transparent 60%
@@ -195,8 +234,7 @@
         background: var(--color-bg-outcome-active),
         border-color: var(--color-border-outcome-active),
         color: var(--color-fg-outcome-active),
-        outline-color:
-          color-mix(
+        outline-color: color-mix(
             in srgb,
             var(--color-border-outcome-focused),
             transparent 60%
@@ -266,8 +304,11 @@
         border-color: transparent,
       ),
       hover: (
-        background:
-          color-mix(in srgb, var(--color-action-secondary-20), transparent 60%),
+        background: color-mix(
+            in srgb,
+            var(--color-action-secondary-20),
+            transparent 60%
+          ),
         border-color: var(--color-action-secondary-20-hover),
       ),
       focus: (

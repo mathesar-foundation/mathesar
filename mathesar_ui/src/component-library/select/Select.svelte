@@ -63,7 +63,7 @@
   /**
    * Appearance of the trigger button. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
    */
-  export let triggerAppearance: DefinedProps['triggerAppearance'] = 'default';
+  export let triggerAppearance: DefinedProps['triggerAppearance'] = 'input';
 
   /**
    * The ARIA label for this select component.
