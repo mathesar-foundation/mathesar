@@ -1,3 +1,5 @@
+import type { ResultValue } from '../records';
+
 export interface SummarizedRecordReference {
   summary: string;
   key: string | number | boolean | null;
@@ -8,6 +10,6 @@ export interface RecordsSummaryListResponse {
   results: SummarizedRecordReference[];
   mapping?: {
     join_table: number;
-    joined_values: Partial<Record<string, string | number | boolean | null>>;
+    joined_values: Partial<Record<string, ResultValue[]>>;
   };
 }
