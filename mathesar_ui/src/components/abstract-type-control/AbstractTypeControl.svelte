@@ -44,7 +44,8 @@
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
-    !columnTypeOptionsAreEqual(savedTypeOptions, typeOptions ?? {});
+    !columnTypeOptionsAreEqual(savedTypeOptions, typeOptions ?? {}) ||
+    JSON.stringify(metadata) !== JSON.stringify(column.metadata ?? {});
 
   let typeChangeState: RequestStatus;
 

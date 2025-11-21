@@ -15,13 +15,13 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     type UserModel,
-    getUsersStoreFromContext,
+    getGlobalUsersStore,
   } from '@mathesar/stores/users';
   import { PasswordChangeForm, UserDetailsForm } from '@mathesar/systems/users';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
-  const usersStore = getUsersStoreFromContext();
+  const usersStore = getGlobalUsersStore();
 
   export let userId: number;
 

@@ -1,11 +1,10 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
-
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 import {
   ClientSideError,
   type GeneralizedError,
 } from '@mathesar/components/errors/errorUtils';
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import type { DataFormStructureCtx } from '../DataFormStructure';
 
@@ -14,6 +13,8 @@ import type { FormFields } from './FormFields';
 
 export const dataFormErrorCodes = {
   COLUMN_NOT_FOUND: -31025,
+  COLUMN_USER_LAST_EDITED_BY: -31026,
+  COLUMN_USER_TYPE: -31027,
 };
 
 export const dataFormErrors = {
@@ -21,6 +22,24 @@ export const dataFormErrors = {
     new ClientSideError({
       message: get(_)('form_field_column_not_found'),
       code: dataFormErrorCodes.COLUMN_NOT_FOUND,
+      data: props,
+    }),
+  columnUserLastEditedByError: (props: {
+    tableOid: number;
+    columnAttnum: number;
+  }) =>
+    new ClientSideError({
+      message: get(_)('form_field_column_user_last_edited_by'),
+      code: dataFormErrorCodes.COLUMN_USER_LAST_EDITED_BY,
+      data: props,
+    }),
+  columnUserTypeError: (props: {
+    tableOid: number;
+    columnAttnum: number;
+  }) =>
+    new ClientSideError({
+      message: get(_)('form_field_column_user_type'),
+      code: dataFormErrorCodes.COLUMN_USER_TYPE,
       data: props,
     }),
 };

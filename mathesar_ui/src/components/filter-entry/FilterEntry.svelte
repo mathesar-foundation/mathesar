@@ -74,7 +74,12 @@
   $: selectedCondition = conditionIdentifier
     ? selectedColumnFiltersMap.get(conditionIdentifier)
     : undefined;
-  $: selectedColumnInputCap = selectedColumn?.simpleInputComponentAndProps;
+  // Re-fetch simpleInputComponentAndProps from columns map to ensure reactivity
+  // when column metadata changes (e.g., when user changes display settings)
+  $: selectedColumnInputCap =
+    columnIdentifier !== undefined
+      ? columns.get(columnIdentifier)?.simpleInputComponentAndProps
+      : undefined;
 
   const initialNoOfFilters = numberOfFilters;
   let showError = false;

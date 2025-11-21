@@ -9,7 +9,10 @@
   import { setReleasesStoreInContext } from '@mathesar/stores/releases';
   import { toast } from '@mathesar/stores/toast';
   import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
-  import { AnonymousViewerUserModel } from '@mathesar/stores/users';
+  import {
+    AnonymousViewerUserModel,
+    setGlobalUsersStore,
+  } from '@mathesar/stores/users';
   import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
   import {
     RecordSelectorController,
@@ -75,6 +78,9 @@
 
   const rowSeekerController = new AttachableRowSeekerController();
   rowSeekerContext.set(rowSeekerController);
+
+  // Initialize global users store for User type cells
+  setGlobalUsersStore();
 
   const lightboxController = new LightboxController();
   lightboxContext.set(lightboxController);

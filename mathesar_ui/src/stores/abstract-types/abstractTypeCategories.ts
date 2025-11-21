@@ -21,6 +21,7 @@ import Email from './type-configs/email';
 import Fallback from './type-configs/fallback';
 // eslint-disable-next-line import/no-cycle
 import File from './type-configs/file/file';
+import User from './type-configs/user/user';
 import Json from './type-configs/json';
 import Money from './type-configs/money';
 import Number from './type-configs/number';
@@ -63,6 +64,7 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.Uuid]: Uuid,
   [abstractTypeCategory.Json]: Json,
   [abstractTypeCategory.File]: File,
+  [abstractTypeCategory.User]: User,
 };
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
@@ -271,6 +273,13 @@ const fileAbstractType: AbstractType = {
   ...File,
 };
 
+const userAbstractType: AbstractType = {
+  identifier: 'user',
+  name: 'User',
+  dbTypes: new Set([DB_TYPES.INTEGER]),
+  ...User,
+};
+
 const abstractTypesMap = constructAbstractTypeMapFromResponse(typesResponse);
 
 export const defaultAbstractType = (() => {
@@ -293,12 +302,22 @@ function isFileAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
   );
 }
 
+function isUserAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
+  return (
+    metadata?.user_type === true &&
+    dbType === DB_TYPES.INTEGER
+  );
+}
+
 function identifyAbstractTypeForDbType(
   dbType: DbType,
   metadata: ColumnMetadata | null,
 ): AbstractType | undefined {
   if (isFileAbstractType(dbType, metadata)) {
     return fileAbstractType;
+  }
+  if (isUserAbstractType(dbType, metadata)) {
+    return userAbstractType;
   }
   let abstractTypeOfDbType;
   for (const [, abstractType] of abstractTypesMap) {
@@ -312,10 +331,14 @@ function identifyAbstractTypeForDbType(
 
 function identifyAllPossibleAbstractTypesForDbType(
   dbType: DbType,
+  metadata: ColumnMetadata | null = null,
 ): Set<AbstractType> {
   const allPossibleAbstractTypes: Set<AbstractType> = new Set();
   if (dbType === DB_TYPES.JSONB) {
     allPossibleAbstractTypes.add(fileAbstractType);
+  }
+  if (dbType === DB_TYPES.INTEGER) {
+    allPossibleAbstractTypes.add(userAbstractType);
   }
   for (const [, abstractType] of abstractTypesMap) {
     if (abstractType.dbTypes.has(dbType)) {
@@ -350,7 +373,7 @@ export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
   const targetDbTypes = typeCastMap[dbType] ?? [];
   targetDbTypes.forEach((targetDbType) => {
     const abstractTypes =
-      identifyAllPossibleAbstractTypesForDbType(targetDbType);
+      identifyAllPossibleAbstractTypesForDbType(targetDbType, metadata);
     [...abstractTypes].forEach((absType) => abstractTypeSet.add(absType));
   });
   const abstractTypeList = [...abstractTypeSet].sort((a, b) =>
@@ -385,6 +408,11 @@ export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
         file_backend: getDefaultFileStorageBackend()?.backend,
       };
     }
+    if (abstractType.identifier === 'user') {
+      return {
+        user_type: true,
+      };
+    }
     return null;
   })();
 
@@ -401,23 +429,48 @@ export function mergeMetadataOnTypeChange(
   newAbstractType: AbstractType,
   metadata: ColumnMetadata | null,
 ) {
+  let result = metadata ?? {};
+
+  // Handle file type metadata
   if (newAbstractType.identifier === 'file') {
-    return {
-      ...(metadata ?? {}),
+    result = {
+      ...result,
       file_backend: getDefaultFileStorageBackend()?.backend,
     };
-  }
-  if (metadata && metadata.file_backend) {
-    return {
-      ...metadata,
+  } else if (metadata && metadata.file_backend) {
+    result = {
+      ...result,
       file_backend: null,
     };
   }
-  return metadata;
+
+  // Handle user type metadata
+  if (newAbstractType.identifier === 'user') {
+    // Set user-specific metadata when changing to user type
+    result = {
+      ...result,
+      user_type: true,
+      user_display_field: result.user_display_field ?? 'username',
+      user_last_edited_by: result.user_last_edited_by ?? false,
+    };
+  } else {
+    // Clear user-specific metadata when changing away from user type
+    // Note: user_display_field has a NOT NULL constraint, so we omit it instead of setting to null
+    const { user_type, user_display_field, user_last_edited_by, ...rest } = result;
+    result = {
+      ...rest,
+      user_type: null,
+      user_last_edited_by: null,
+    };
+    // Explicitly delete user_display_field to ensure it's not sent to backend
+    delete (result as Record<string, unknown>).user_display_field;
+  }
+
+  return result;
 }
 
 export function getAllowedAbstractTypesForNewColumn() {
-  return [...abstractTypesMap.values(), fileAbstractType]
+  return [...abstractTypesMap.values(), fileAbstractType, userAbstractType]
     .filter((type) => !comboAbstractTypeCategories[type.identifier])
     .sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -427,6 +480,9 @@ export function getDbTypesForAbstractType(
 ): Set<DbType> {
   if (abstractTypeIdentifier === 'file') {
     return fileAbstractType.dbTypes;
+  }
+  if (abstractTypeIdentifier === 'user') {
+    return userAbstractType.dbTypes;
   }
   return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();
 }

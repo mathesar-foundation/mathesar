@@ -31,10 +31,12 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   $: canUpdateTableRecords = $currentRolePrivileges.has('UPDATE');
   $: ({ processedColumns } = tableStructure);
   $: ({ recordPk, summary, fieldValues } = record);
-  $: fieldPropsObjects = [...$processedColumns.values()].map((c) => ({
-    processedColumn: c,
-    field: optionalField($fieldValues.get(c.id)),
-  }));
+  $: fieldPropsObjects = [...$processedColumns.values()]
+    .filter((c) => !c.column.metadata?.user_last_edited_by)
+    .map((c) => ({
+      processedColumn: c,
+      field: optionalField($fieldValues.get(c.id)),
+    }));
   $: formFields = Object.fromEntries(
     fieldPropsObjects.map((o) => [o.processedColumn.id, o.field]),
   );
@@ -54,14 +56,17 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     const processedColumn = $processedColumns.get(parseInt(columnId, 10));
     if (!processedColumn) return false;
 
-    // Only patch columns that are not primary keys.
+    // Only patch columns that are not primary keys and not user_last_edited_by columns.
     //
     // See https://github.com/mathesar-foundation/mathesar/issues/4318
     //
     // It would probably be better to check if the column is editable but we
     // don't have that information here. It would be good to include that in the
     // columns API response at some point.
-    return !processedColumn.column.primary_key;
+    return (
+      !processedColumn.column.primary_key &&
+      !processedColumn.column.metadata?.user_last_edited_by
+    );
   }
 
   async function save() {
@@ -95,12 +100,14 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   <InsetPageLayout>
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-        <DirectField
-          {record}
-          {processedColumn}
-          {field}
-          {canUpdateTableRecords}
-        />
+        {#if !processedColumn.column.metadata?.user_last_edited_by}
+          <DirectField
+            {record}
+            {processedColumn}
+            {field}
+            {canUpdateTableRecords}
+          />
+        {/if}
       {/each}
     </div>
     <div class="submit">

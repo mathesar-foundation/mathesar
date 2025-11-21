@@ -8,9 +8,6 @@
   import NewUserPage from '@mathesar/pages/admin-users/NewUserPage.svelte';
   import UserListingPage from '@mathesar/pages/admin-users/UserListingPage.svelte';
   import { ADMIN_USERS_PAGE_URL } from '@mathesar/routes/urls';
-  import { setUsersStoreInContext } from '@mathesar/stores/users';
-
-  setUsersStoreInContext();
 </script>
 
 <AppendBreadcrumb

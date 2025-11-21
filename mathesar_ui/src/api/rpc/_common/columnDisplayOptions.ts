@@ -85,6 +85,15 @@ export interface RequiredColumnMetadata {
 
   /** TODO: document this once the backend implementation is more settled */
   file_backend: string | null;
+
+  /** Whether this column stores Mathesar user IDs */
+  user_type: boolean | null;
+
+  /** Which user field to display for user columns (full_name, email, or username) */
+  user_display_field: 'full_name' | 'email' | 'username';
+
+  /** Whether this column automatically tracks the last user who edited the record */
+  user_last_edited_by: boolean | null;
 }
 
 /** The column metadata values, types as we get them from the API. */
@@ -108,6 +117,9 @@ export const defaultColumnMetadata: RequiredColumnMetadata = {
   duration_max: 'm',
   display_width: DEFAULT_COLUMN_WIDTH_PX,
   file_backend: null,
+  user_type: null,
+  user_display_field: 'username',
+  user_last_edited_by: null,
 };
 
 /**
