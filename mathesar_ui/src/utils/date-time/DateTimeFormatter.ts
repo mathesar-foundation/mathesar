@@ -96,6 +96,32 @@ export default class DateTimeFormatter implements InputFormatter<string> {
   }
 
   format(canonicalDateStringOrUserInput: string): string {
+    // Some date strings that PostgreSQL accepts are not safely representable
+    // via JavaScript `Date`/dayjs (for example: years with leading zeros
+    // like `0200`, BC dates with a trailing `BC`, or years with more than
+    // 4 digits). Attempting to parse/format these with dayjs can produce
+    // incorrect/mangled output in the UI. To avoid that, only attempt to
+    // parse+format when the year portion is a plain 4-digit AD year.
+    // Otherwise, return the original canonical string unchanged so the UI
+    // displays the API value verbatim.
+    const trimmed = String(canonicalDateStringOrUserInput).trim();
+
+    // If it explicitly contains a BC/AD marker, don't try to reformat.
+    if (/\bBC\b|\bAD\b/i.test(trimmed)) return canonicalDateStringOrUserInput;
+
+    // Match ISO-like leading year (may be negative or multi-digit). We only
+    // allow exactly 4-digit non-negative years to be formatted by dayjs.
+    const isoYearMatch = trimmed.match(/^(-?\d+)-\d{2}-\d{2}(?:$|\s)/);
+    if (isoYearMatch) {
+      const yearStr = isoYearMatch[1];
+      // Disallow years with leading zeros (e.g. `0200`) or years that are
+      // not exactly four digits. Only allow 4-digit years that don't start
+      // with `0` (i.e., AD years from 1000..9999) to be formatted.
+      if (!/^[1-9]\d{3}$/.test(yearStr)) {
+        return canonicalDateStringOrUserInput;
+      }
+    }
+
     const value = dayjs(
       canonicalDateStringOrUserInput,
       this.specification.getCanonicalFormattingStrings(),
