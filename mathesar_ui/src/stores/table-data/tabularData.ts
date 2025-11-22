@@ -28,6 +28,7 @@ import type {
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
+import { parseColumnId } from '../../component-library/common/utils/parseColumnId';
 import type { AssociatedCellValuesForSheet } from '../AssociatedCellData';
 
 import { ColumnsDataStore } from './columns';
@@ -51,14 +52,15 @@ function getSelectedCellData(
   const selectionData = {
     cellCount: selection.cellIds.size,
   };
+
   if (activeCellId === undefined) {
     return { selectionData };
   }
+
   const { rowId, columnId } = parseCellId(activeCellId);
   const row = selectableRowsMap.get(rowId);
-  const value = row?.record[columnId];
-  import { parseColumnId } from '../../component-library/common/utils/parseColumnId';
 
+<<<<<<< HEAD
   const parsedColumnId = parseColumnId(columnId);
 
   if (parsedColumnId !== undefined) {
@@ -68,24 +70,39 @@ function getSelectedCellData(
     console.warn('Invalid columnId:', columnId);
   }
 
+=======
+  // Safely parse columnId
+  const parsedColumnId = parseColumnId(columnId);
+  let column: ProcessedColumn | undefined;
+  if (parsedColumnId !== null) {
+    column = processedColumns.get(parsedColumnId);
+  }
+>>>>>>> 73c931ed5 (fix: type-safe getSelectedCellData function and resolve ESLint errors)
 
-  const recordSummary = defined(
-    value,
-    (v) => linkedRecordSummaries.get(columnId)?.get(String(v)),
-  );
-  const fileManifest = (() => {
-    if (!column?.column.metadata?.file_backend) return undefined;
+  // Safely access the cell value
+  const value: ResultValue | undefined =
+    row && parsedColumnId !== null ? row.record[parsedColumnId] : undefined;
+
+  // Safely access record summaries
+  const recordSummary =
+    parsedColumnId !== null
+      ? defined(value, (v) => linkedRecordSummaries.get(parsedColumnId)?.get(String(v)))
+      : undefined;
+
+  // Safely access file manifests
+  let fileManifest: FileManifest | undefined;
+  if (column && column.column.metadata?.file_backend) {
     const fileReference = parseFileReference(value);
-    if (!fileReference) return undefined;
-    return fileManifests.get(String(column.id))?.get(fileReference.mash);
-  })();
+    if (fileReference) {
+      fileManifest = fileManifests.get(String(column.id))?.get(fileReference.mash);
+    }
+  }
+
   return {
-    activeCellData: column && {
-      column,
-      value,
-      recordSummary,
-      fileManifest,
-    },
+    activeCellData:
+      column && value !== undefined
+        ? { column, value, recordSummary, fileManifest }
+        : undefined,
     selectionData,
   };
 }

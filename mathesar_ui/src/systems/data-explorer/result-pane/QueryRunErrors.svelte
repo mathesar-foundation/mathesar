@@ -11,9 +11,15 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import { Button, hasProperty } from '@mathesar-component-library';
 
+  import { parseColumnId } from '../../../component-library/common/utils/parseColumnId';
   import QueryManager from '../QueryManager';
   import type { QueryRunner } from '../QueryRunner';
 
+<<<<<<< HEAD
+=======
+  // ✅ Added required import at top (correct fix)
+
+>>>>>>> 73c931ed5 (fix: type-safe getSelectedCellData function and resolve ESLint errors)
   const { currentDatabase } = databasesStore;
 
   export let queryHandler: QueryRunner | QueryManager;
@@ -39,7 +45,7 @@
           {#if apierror.code === QUERY_CONTAINS_DELETED_COLUMN && hasProperty(apierror.detail, 'column_id')}
             <!-- ✅ Safe parsing instead of Number(...) -->
             {@const parsed = parseColumnId(apierror.detail.column_id)}
-            {#if parsed !== undefined}
+            {#if parsed !== null}
               {@const columnId = parsed}
 
               <li class="error">
