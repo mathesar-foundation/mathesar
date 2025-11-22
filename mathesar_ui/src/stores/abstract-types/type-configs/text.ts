@@ -73,7 +73,8 @@ function determineDbTypeAndOptions(
   const dbType = determineDbType(dbFormValues, columnType);
   const typeOptions: RawColumnWithMetadata['type_options'] = {};
   if (dbType === DB_TYPES.CHARACTER || dbType === DB_TYPES.CHARACTER_VARYING) {
-    typeOptions.length = Number(dbFormValues.length);
+    typeOptions.length = parseInt(dbFormValues.length, 10);
+
   }
   return {
     dbType,
