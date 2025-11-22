@@ -1,8 +1,5 @@
 <script lang="ts">
-  import type {
-    Appearance,
-    Size,
-  } from '@mathesar-component-library-dir/commonTypes';
+  import type { Appearance, Size } from '@mathesar-component-library-dir/commonTypes';
   import Tooltip from '@mathesar-component-library-dir/tooltip/Tooltip.svelte';
 
   // PROPS
@@ -19,19 +16,14 @@
     variant === 'control' || variant === 'input'
       ? variant
       : appearance === 'control' || appearance === 'input'
-      ? appearance
-      : 'default';
+        ? appearance
+        : 'default';
 
   let classes = '';
   export { classes as class };
 
   // BUILD CLASS LIST
-  $: allClasses = [
-    'btn',
-    `btn-${finalAppearance}`,
-    `size-${size}`,
-    classes,
-  ].join(' ');
+  $: allClasses = ['btn', `btn-${finalAppearance}`, `size-${size}`, classes].join(' ');
 </script>
 
 
