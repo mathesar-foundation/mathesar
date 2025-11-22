@@ -26,7 +26,10 @@ describe('DateTimeFormatter edge cases', () => {
   });
 
   test('formats normal 4-digit AD years for a friendly date format', () => {
-    const spec = new DateTimeSpecification({ type: 'date', dateFormat: 'friendly' });
+    const spec = new DateTimeSpecification({
+      type: 'date',
+      dateFormat: 'friendly',
+    });
     const formatter = new DateTimeFormatter(spec);
 
     // Friendly format uses `D MMM YYYY`, e.g. `31 Dec 2001`.
