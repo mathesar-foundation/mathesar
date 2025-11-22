@@ -1,0 +1,16 @@
+
+> mathesar_ui@0.0.0 lint
+> eslint .
+
+
+/code/mathesar_ui/src/stores/table-data/tabularData.ts
+  62:39  error    Unsafe argument of type `any` assigned to a parameter of type `number`  @typescript-eslint/no-unsafe-argument
+  62:39  warning  Forbidden non-null assertion                                            @typescript-eslint/no-non-null-assertion
+  62:39  error    Unsafe call of an `any` typed value                                     @typescript-eslint/no-unsafe-call
+
+/code/mathesar_ui/src/systems/data-explorer/result-pane/QueryRunErrors.svelte
+  16:3  error  `@mathesar/stores/columnData/utils` import should occur before import of `svelte-i18n`  import/order
+
+✖ 4 problems (3 errors, 1 warning)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

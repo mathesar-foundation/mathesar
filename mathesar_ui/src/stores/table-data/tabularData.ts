@@ -57,9 +57,9 @@ function getSelectedCellData(
   const { rowId, columnId } = parseCellId(activeCellId);
   const row = selectableRowsMap.get(rowId);
   const value = row?.record[columnId];
-  import { parseColumnId } from "../../component-library/common/utils/parseColumnId";
+  import { parseColumnId } from '../../component-library/common/utils/parseColumnId';
 
-const column = processedColumns.get(parseColumnId(columnId)!);
+  const column = processedColumns.get(parseColumnId(columnId)!);
 
   const recordSummary = defined(
     value,

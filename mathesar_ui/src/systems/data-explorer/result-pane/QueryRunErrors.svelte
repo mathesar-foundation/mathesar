@@ -38,7 +38,6 @@
       {#each errors.errors as apierror}
         <ul>
           {#if apierror.code === QUERY_CONTAINS_DELETED_COLUMN && hasProperty(apierror.detail, 'column_id')}
-
             <!-- ✅ Safe parsing instead of Number(...) -->
             {@const parsed = parseColumnId(apierror.detail.column_id)}
             {#if parsed !== undefined}
@@ -80,7 +79,8 @@
                     <ul class="removal-list">
                       {#each transformsWithIndex as transformInfo (transformInfo)}
                         <li>
-                          {transformInfo.index + 1}: {transformInfo.transform.name}
+                          {transformInfo.index + 1}: {transformInfo.transform
+                            .name}
                         </li>
                       {/each}
                     </ul>
@@ -94,7 +94,6 @@
                       {$_('attempt_exploration_recovery')}
                     </Button>
                   </p>
-
                 {:else if $currentDatabase && $currentSchema && $query.id}
                   <p>
                     {$_('edit_exploration_attempt_recovery')}
