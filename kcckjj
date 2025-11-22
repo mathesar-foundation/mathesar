@@ -1,0 +1,979 @@
+[33m956fa7945[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfix-issue-4769[m[33m, [m[1;32mdevelop[m[33m)[m Fix: Update Mathesar link style in form footer (fixes #4769)
+[33m66d7842b5[m Merge pull request #4951 from radheshpai87/fix/4914-added-row-hover-data-explorer
+[33m754b9e29f[m Merge pull request #4931 from wbonicki/fix/4890_unable_to_rename_PK_column_name
+[33m8b5869093[m Merge pull request #4956 from wbonicki/fix/4895_record_summary_template_references_deleted_column
+[33m5a3ad34c0[m reverting last change in build_record_summary_query_from_template sql function
+[33ma561f322f[m reverting changes in build_record_summary_query_from_template sql function
+[33m31dfac7fa[m Merge branch 'develop' into fix/4895_record_summary_template_references_deleted_column
+[33me643cee8b[m Merge branch 'develop' into fix/4914-added-row-hover-data-explorer
+[33ma7f5a7aa2[m Merge pull request #4965 from phatmandrake/enable-column-level-permissions
+[33m6f03d1a76[m Merge pull request #4949 from radheshpai87/fix/4916-make-table-name-clickable
+[33m318610171[m Remove showIcon prop in TableLink
+[33m7f3cf2cb0[m Merge branch 'develop' into fix/4916-make-table-name-clickable
+[33meb67d9a5e[m code cleaning - removed commented lines
+[33m9b89efd69[m Merge branch 'fix/4890_unable_to_rename_PK_column_name' of https://github.com/wbonicki/mathesar into fix/4890_unable_to_rename_PK_column_name
+[33m5be797325[m reverted changes and implemented new logic - exception raised when mathesar ID column is renamed
+[33mdc233571d[m Merge pull request #4973 from mathesar-foundation/master
+[33m586e41e39[m[33m ([m[1;33mtag: [m[1;33m0.7.1[m[33m)[m Merge pull request #4972 from mathesar-foundation/0.7.1
+[33m4d802bebd[m 0.7.1 Release notes
+[33maeb56fb27[m Update version numbers to 0.7.1
+[33m3aba514ae[m Merge pull request #4961 from mathesar-foundation/bugfix_typecast
+[33m09ceebd73[m make the default non dynamic in __setup_column_alter
+[33m9e3f065fa[m add tests
+[33m44f706861[m fix typecast behavior for casting numeric/money type during import
+[33m6cd638e4d[m pass cast_options for __msar.build_cast_expr within msar.set_old_col_default
+[33m9d709fea6[m Merge pull request #4968 from mathesar-foundation/master
+[33me510c2c8e[m Merge pull request #4967 from mathesar-foundation/fix-docs-railway-link
+[33m30684d208[m Fix railway link in docs
+[33mf7db3a210[m Merge branch 'develop' into fix/4914-added-row-hover-data-explorer
+[33mea82e5542[m Merge pull request #4958 from radheshpai87/fix/4917-allow-add-columns-in-table-widget
+[33meef014cd8[m Fix linting and formatting in tabularData.ts
+[33m0b230861d[m Enable column-level UPDATE privilege support
+[33m006fa9391[m Merge pull request #4936 from mathesar-foundation/improve_sql_errors
+[33mc7f86bb9c[m make flake8 happy
+[33mdaaf43fbb[m use empty message so error class gets returned
+[33m6d2dc2304[m Merge branch 'develop' into improve_sql_errors
+[33mad06b9243[m removed commented code in build_record_summary_query_from_template
+[33mb3badcbfd[m changes after code review - changed unittest, updated docstrings, changes in build_record_summary_query_from_template
+[33m122c5d48c[m Merge pull request #4950 from mathesar-foundation/reinstate_pg18
+[33m9311790b6[m Merge branch 'develop' into reinstate_pg18
+[33m027008898[m Merge pull request #4959 from mathesar-foundation/dependabot/pip/django-4.2.26
+[33m28729d7c3[m Merge branch 'develop' into fix/4917-allow-add-columns-in-table-widget
+[33m121bbb29f[m Bump django from 4.2.25 to 4.2.26
+[33mbe08e99db[m Merge pull request #4948 from mathesar-foundation/device_info
+[33m181b727a5[m Adjust property name
+[33m01b027783[m Merge branch 'develop' into fix/4917-allow-add-columns-in-table-widget
+[33m204d3985b[m fix: allow adding new columns from within the table widget (#4917)
+[33m9d9a24428[m fix failing test case
+[33mfc483493f[m Merge branch 'develop' into fix/4916-make-table-name-clickable
+[33m06cc7805b[m replace inline table link with TableLink component and move styles to shared component
+[33mab4011872[m Merge branch 'develop' into fix/4914-added-row-hover-data-explorer
+[33m72da9061d[m Removed the unrelated changes from #4949
+[33mbb64383b2[m Merge pull request #4957 from mathesar-foundation/add-toast-for-schema-reinstall
+[33ma7216fe71[m Add success messages for database upgrades and schema reinstall
+[33m3730483c6[m Merge pull request #4938 from divyanshu-vr/hyperlinkadde
+[33mf5d6e60f6[m Merge branch 'develop' into hyperlinkadde
+[33md7eb7697b[m Merge pull request #4953 from mathesar-foundation/column-dropdown-autofocus
+[33mac47dd08c[m sql test added for build_record_summary_query_from_template function after changes related to issue 4895
+[33m7b9b1593b[m Merge pull request #4955 from mathesar-foundation/fix-missing-string
+[33mfbfa0595d[m Merge pull request #4954 from mathesar-foundation/menu-for-db-cards
+[33m693e53a39[m Fix missing "Set to null" string in single record view field menus
+[33m940e18683[m Fix lint errors
+[33m7d24ff4d1[m Delete mathesar_ui/ADDING_NEW_TYPES.md
+[33m358284a49[m DB improvements
+[33mbf7f52b4d[m Add focus trap to the NewColumnCell dropdown
+[33m88fdaf41e[m fix/4914-added-row-hover-data-explorer
+[33m0d2a353e3[m fix/4914-added-row-hover-data-explorer
+[33ma4575a8d1[m Merge branch 'mathesar-foundation:develop' into fix/4914-added-row-hover-data-explorer
+[33m60413a0e1[m Merge branch 'develop' into fix/4890_unable_to_rename_PK_column_name
+[33mdec5c8c7a[m Merge branch 'develop' into fix/4916-make-table-name-clickable
+[33mff4c1b524[m Addressed requested changes
+[33md60c968fa[m Merge pull request #4945 from divyanshu-vr/ColumnDelete
+[33md8cd4a19b[m Merge branch 'develop' into ColumnDelete
+[33m802ce0052[m Merge pull request #4940 from ssnjr2002/header-cell-collapsible-icon
+[33m19a040f59[m Merge pull request #4930 from mathesar-foundation/views_experiment
+[33m5b6d8e4f1[m Merge branch 'develop' into improve_sql_errors
+[33mb00f8e407[m Merge branch 'develop' into views_experiment
+[33m94fd42f83[m Merge branch 'develop' into header-cell-collapsible-icon
+[33mc92eb16ce[m Hide icon via CSS instead of DOM
+[33md2559d038[m Make column icon hiding happen reactively
+[33mdf16079ce[m new changes in build_record_summary_query_from_template sql function making sql tests passed
+[33m7af4c4f2e[m Merge branch 'hyperlinkadde' of https://github.com/divyanshu-vr/mathesar into hyperlinkadde
+[33m20b55b9ec[m Made requested changes
+[33mc034d54c7[m Added row hover background for Data Explorer sheet (#4914)
+[33mc4516b6f0[m add PGDATA env var
+[33me3d20357b[m reinstate pg 18 into testing matrices
+[33m12fc310c3[m Made table name under record title clickable (#4916)
+[33m16ca4d864[m Implement multi-cell select for touch devices
+[33m67b3c3334[m Incorporate deviceInfo utility into app
+[33macd09249f[m Add deviceInfo utility
+[33m85f7ee144[m Merge branch 'develop' into fix/4895_record_summary_template_references_deleted_column
+[33m295e97a83[m changes in build_record_summary_query_from_template and get_column_name SQL functions to fix references to deleted columns
+[33ma02212490[m Merge pull request #4941 from mathesar-foundation/no_bypass
+[33m3a9061489[m Merge branch 'develop' into views_experiment
+[33m8f36de846[m Merge branch 'develop' into improve_sql_errors
+[33m04860459a[m Merge branch 'develop' into no_bypass
+[33m3a039e631[m Merge branch 'develop' into hyperlinkadde
+[33mbe2fe18eb[m Merge pull request #4910 from TudorGR/add-keyboard-nav-breadcrumb-dropdown
+[33m24ac9bc09[m Make breadcrumb selector row class a const
+[33m3cbf359db[m Merge branch 'develop' into add-keyboard-nav-breadcrumb-dropdown
+[33mdb06f1c60[m Fix search bar focus in breadcrumb selector
+[33m6d1b26e9b[m Merge branch 'develop' into add-keyboard-nav-breadcrumb-dropdown
+[33m8468e03fc[m Merge pull request #4935 from mathesar-foundation/4752_svh_units
+[33m6082b6d3a[m Hide the column type icon if the column width goes below threshold
+[33m8aacc4349[m Make icon hideable
+[33m58a7956dc[m Added Delete Column entry
+[33m77b17e582[m Merge pull request #4934 from divyanshu-vr/fix/sso-authentik-logo-4932
+[33m0053626a7[m Merge pull request #4944 from mathesar-foundation/translations_23897e6fd86c828760683099538d4710_ja
+[33mcc5a133da[m Merge branch 'develop' into fix/sso-authentik-logo-4932
+[33mc26797131[m Merge branch 'develop' into no_bypass
+[33mb99c3d9bb[m Translate dict.json in ja
+[33ma8a5d050e[m Merge pull request #4943 from mathesar-foundation/master
+[33m68686e79b[m[33m ([m[1;33mtag: [m[1;33m0.7.0[m[33m)[m Merge pull request #4886 from mathesar-foundation/release-0.7.0
+[33mf17fcc90d[m Merge pull request #4873 from mathesar-foundation/0.7.0-release-notes
+[33m7c001cf60[m Merge pull request #4942 from mathesar-foundation/translations_23897e6fd86c828760683099538d4710_ja
+[33mb5d86d735[m Translate dict.json in ja
+[33m4fe5aca78[m reorganize workflows and add all to checkpoint
+[33m43d2d5ffd[m typecheck and prettier fixes
+[33m83306de11[m Lint fixes
+[33m113766a36[m Added hyperlink to navigate to the table page from the table widget
+[33m14248f2df[m add CSS bit to keep line separators in errors
+[33m008aeabc2[m split SQL errors into parts, return line-separated
+[33m2213c3065[m Rename screenshots and update release notes
+[33m342f3963b[m Remove unused screenshots
+[33mab16fa8d0[m Forms guide polish, and length reduction
+[33mc5b0d2e41[m Improve config docs
+[33md85ac6344[m Init form backend doc, add screenshots
+[33mdd39c2c17[m Fix adding file fields to forms by default
+[33m82957c73a[m Merge branch 'forms-doc' into 0.7.0-release-notes
+[33mda683a393[m Merge branch 'release-0.7.0' into 0.7.0-release-notes
+[33me47e1cdd7[m Add forms documentation with screenshots
+[33m27cd24ba8[m Merge branch 'develop' into views_experiment
+[33mdb99d60f2[m Document code standard for viewport units
+[33mfca7880ce[m Use svh CSS units instead of vh
+[33m4d62a2d3f[m fix(sso): add official Authentik logo for SSO login button
+[33m953ec2ed3[m Merge pull request #4933 from mathesar-foundation/mobile_debugging
+[33m6e5540325[m Add dev docs for testing app from mobile device
+[33mb12476b12[m Merge branch 'develop' into fix/4890_unable_to_rename_PK_column_name
+[33m142684d5a[m Detect dev URL host from request
+[33ma6178525f[m Address code review feedback for keyboard navigation
+[33m591409873[m Merge remote-tracking branch 'upstream/develop' into add-keyboard-nav-breadcrumb-dropdown
+[33m9a27194c2[m Merge pull request #4929 from mathesar-foundation/revert_to_sync_worker
+[33m15ebdf483[m change in alter_columns and mathesar_id_column functions to enable renaming PK column
+[33maa825b9fd[m add views to table listing functions
+[33m047c051ad[m remove PG18 from Python testing matrices
+[33mc0976a4f9[m remove PG 18 from the testing matrix
+[33m9ceab8cc7[m remove gevent dependency and flag from gunicorn
+[33mecc9256a2[m Merge pull request #4851 from commonspider/1284_edge_cases
+[33m884f6a7f9[m Remove outdated comments in test
+[33m6e2af078d[m Merge branch 'develop' into 1284_edge_cases
+[33m9fb2e7689[m Fix linting and type errors.
+[33m47c9f5003[m Add keyboard navigation to breadcrumb dropdowns.
+[33m167bbb4d3[m Update version numbers to 0.7.0
+[33m01c7a56d8[m Merge pull request #4885 from mathesar-foundation/add_movies_lite_dataset
+[33m02e6f356a[m Merge branch 'develop' into add_movies_lite_dataset
+[33ma8b51652e[m remove Library Management from UI
+[33mce99cd25c[m Back to snake_case for movie_rentals
+[33m76469515c[m wire up movie rentals to UI
+[33m70794f5d9[m wire up movie rentals to API
+[33mc30aa51c0[m Merge pull request #4880 from mathesar-foundation/bulk_insert_bugfix
+[33m583fe8c80[m add movie rentals example
+[33m6b52d49a8[m Merge pull request #4881 from mathesar-foundation/define-version-support
+[33md105cc228[m Merge pull request #4857 from mathesar-foundation/fix-link-to-files-docs
+[33m98c5a63b9[m Merge branch 'develop' into fix-link-to-files-docs
+[33m057ff7ac0[m Add public form fields to file backend config
+[33md233bf601[m Update release notes with deprecation warning for pg13 and python 3.9
+[33m8ed646073[m Refine Mathesar's PostgreSQL and Python version support. Updates Mathesar's doc about version support to include a more detailed table (with mention of upcoming releases), adds clarification about the meaning of 'support', and updates the EOL messages to the latest relevant versions.
+[33me07b39d33[m use NULL instead of id for 'id' columns
+[33me33de62d3[m Merge pull request #4866 from mathesar-foundation/insert_via_import_ui
+[33m3274c73f9[m Merge branch 'develop' into insert_via_import_ui
+[33m8ec0dbaab[m Merge pull request #4875 from mathesar-foundation/enable_files_in_forms_by_default
+[33ma5f391ff7[m Fix button appearance
+[33mc1ebaec42[m Merge pull request #4870 from mathesar-foundation/bulk_insert
+[33mf0f8bdc16[m Merge branch 'bulk_insert' into insert_via_import_ui
+[33mb1279bf80[m handle case when there is no name for a csv column
+[33m4342a45f5[m Lint fix
+[33m910db27aa[m Display imported row count after import
+[33m15afd56c3[m Merge branch 'bulk_insert' into insert_via_import_ui
+[33m538a0ff1b[m Merge branch 'develop' into bulk_insert
+[33mc4e31ab91[m Merge pull request #4874 from mathesar-foundation/add_pg18_to_ci
+[33m8bdb1d423[m Merge branch 'develop' into bulk_insert
+[33m7449c5cc4[m update psycopg for mac build
+[33m3ed84f938[m Merge branch 'develop' into add_pg18_to_ci
+[33mf0665024d[m Delete db/sql/temp.txt
+[33m3e08e83c7[m revert add constraint change
+[33m94411e96a[m revert add constraint change
+[33mca7abbec8[m Merge pull request #4859 from commonspider/4736_rls_delete
+[33m8422d2e38[m Merge branch 'develop' into 4736_rls_delete
+[33m3a3628b3a[m Merge pull request #4867 from commonspider/4736_rls_update
+[33mb45ba9bb9[m Merge branch 'develop' into 4736_rls_update
+[33m5b3125d63[m add back contype filter
+[33mcb80bd62b[m check contype before returning added constraint oids
+[33ma6e1eeaab[m handle 0 based indicies from the frontend
+[33m7e321f7bc[m Merge branch 'bulk_insert' into insert_via_import_ui
+[33mb2453ce61[m csv index start from 0
+[33mecddee80a[m Integrate bulk import API into front end
+[33mad4ec619e[m fix typo
+[33medb8a1818[m add contype='p'
+[33meee10fc5f[m Make file upload in forms enabled by default
+[33mac0d53d2f[m add pg18 to CI
+[33m903ccc5da[m Handle long text content in UI gracefully
+[33mad714ca17[m Prototype UI for insert via import
+[33m25a393c3e[m Merge branch 'develop' into bulk_insert
+[33m0d962d31c[m function signature readability improvement
+[33m92c20200b[m remove bulk_insert viewsets and serializers
+[33m6223e3e92[m use views for bulk_insert instead of viewsets
+[33mc0c2502fb[m Merge pull request #4871 from mathesar-foundation/improve-secret-key-docs
+[33mac1f7762a[m Minor cleanup
+[33m579a4a96a[m Change the error message
+[33m5b6dee0b8[m Raise sql exception when unable to update row
+[33m930dc990f[m Merge pull request #4872 from mathesar-foundation/fix-docs-info-logs
+[33m3a0a93258[m don't need returning 1
+[33m7e9d56d96[m add docstrings and delete insert.py
+[33m04f3ffa6c[m remove unused import
+[33ma68c14b01[m add functions to all_objects_table
+[33mbe22c61a8[m Merge branch 'develop' into bulk_insert
+[33m166fd30fe[m use better aliases within sql functions
+[33m596807317[m extract main logic out of viewsets
+[33m776711d7e[m add custom exception for bulkimport
+[33me91e89e9e[m 0.7.0 Release notes
+[33mbdc7eea14[m Make improvements to the missing PRs script
+[33md735edf79[m Fix some INFO logs in the docs build
+[33m8f66c29bd[m Merge branch 'develop' into improve-secret-key-docs
+[33mdeea2cf9e[m Improve SECRET_KEY documentation
+[33m34fb43702[m Merge pull request #4869 from mathesar-foundation/add_tech_debt_template
+[33mc51d870dc[m Merge pull request #4852 from mathesar-foundation/add_files_to_forms_frontend
+[33m517b91deb[m wire up insert_from_select
+[33mab8a36e6f[m api fixups
+[33mb74ff4736[m Merge pull request #4861 from mathesar-foundation/async_worker_exp
+[33m3dff4476b[m Merge branch 'develop' into async_worker_exp
+[33mee7d2ff77[m Merge pull request #4848 from mathesar-foundation/add_files_to_forms
+[33m8b15466e0[m Merge branch 'add_files_to_forms' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms_frontend
+[33m4f9983f77[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms
+[33m061ec2b1c[m Memoize retrieved form based on the request
+[33mb520d8478[m change param names
+[33ma90db3384[m Merge pull request #4868 from mathesar-foundation/fix_casting_func_regression
+[33mbfa934508[m add tech debt issue template
+[33m4903ca412[m Merge branch 'develop' into fix_casting_func_regression
+[33m1f163a098[m Improve error message
+[33mf10477e04[m Add comment explaining rationale for logic branch
+[33m8d41dc118[m Use a Set for faster repeated lookup
+[33ma577e3d15[m prototype works, just needs some finesse
+[33mfd661e5cd[m fix cast_to text like types for integer and smallint
+[33med76f3b88[m Merge pull request #4865 from mathesar-foundation/fix_context_menu_element_focus
+[33mc9636490a[m Fix infinite recursion bug in context menu focus behaviour
+[33m1ea76d582[m Merge branch 'add_files_to_forms' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms_frontend
+[33m9de3087e9[m Changes based on review comments - Removed types, casts
+[33mdf3d3c4f8[m Merge branch 'develop' into add_files_to_forms
+[33mdf939e2c3[m setup scaffolding for bulk insert
+[33m53c4bb976[m Merge pull request #4854 from mathesar-foundation/exp_export
+[33m39ebcb7ae[m Make help text more user friendly
+[33m08d8df42f[m Merge branch 'develop' into exp_export
+[33mb3e5d6cf1[m Display message to user when file uploads are disabled for forms
+[33mbd8f326de[m make linter happy
+[33m290f5d952[m fix 50k cap when limit=None
+[33m4eb9a9b11[m add a tooltip for 50k limit and use a Button when export button is disabled
+[33m417f7940e[m Add primary key to error message of not deleted row
+[33m626c303d2[m Make msar.delete_records_from_table return a list of ids.
+[33m28f8094ab[m Merge branch 'add_files_to_forms' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms_frontend
+[33m5a5862be7[m Add information on file storage anonymous_access to common_data
+[33ma81524b26[m switch to non-blocking gevent worker
+[33m0a8fefc13[m revert AnchorButton
+[33m3d277614f[m cap limit even if a limit is provided
+[33m0c3564d07[m Merge branch 'add_files_to_forms' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms_frontend
+[33m78397df64[m Fix file backend checks
+[33mbbe070cdf[m Merge branch 'add_files_to_forms' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms_frontend
+[33m79af87bfe[m Add public_form_access configurations to filestorage.yml
+[33m9e266bb51[m Fix column_metadata check for file_backend
+[33m3f9e0173c[m Merge branch 'add_files_to_forms' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms_frontend
+[33m930ae0635[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms
+[33mad8407dde[m Implement composable auth guards
+[33maa9fab7f2[m Merge pull request #4836 from mathesar-foundation/context_menu
+[33mb68476b39[m Compute menu item focus capability dynamically
+[33md8a2b9a33[m On empty context menu, fall back to browser menu
+[33med2d218a6[m Close context menu when re-triggering it elsewhere
+[33m242a609a6[m cap exploration export to 50000 rows
+[33m32c8422f3[m Merge branch 'develop' into add_files_to_forms
+[33ma51b8169f[m make linter happy
+[33m9646e3968[m simplify chunker
+[33m6ae238a2e[m Merge branch 'develop' into context_menu
+[33m3d5662f73[m Add files into to the data types page
+[33m19588f9da[m Merge pull request #4856 from mathesar-foundation/master
+[33me78b7f923[m[33m ([m[1;33mtag: [m[1;33m0.6.0[m[33m)[m Merge pull request #4812 from mathesar-foundation/release-0.6.0
+[33m4d1d6c369[m Release notes final review
+[33m6cb2549c0[m remove print statement
+[33m48972c27c[m Merge pull request #4813 from mathesar-foundation/0.6.0-release-notes
+[33m5d5ead086[m make linter happy
+[33md5ddaa390[m Finish release notes
+[33m0479fc6ab[m add a button for export in the data explorer page
+[33m2d0fb303f[m fix the help text key for table page
+[33mf522ca2be[m update help text strings
+[33mb21f7d6f8[m add ability to make AnchorButton disabled
+[33m5d35dc19c[m add functionality to export explorations as attachments
+[33mecb08a323[m add exploration chunker
+[33mf16672102[m add url for exporting explorations
+[33m11dc83133[m Merge branch 'develop' into context_menu
+[33mac57289a5[m Improvements to gunicorn config docs and implemented feedback
+[33md154090f2[m Merge branch 'release-0.6.0' into 0.6.0-release-notes
+[33m6cb99f8b7[m Merge pull request #4838 from commonspider/4820_cannot_modify
+[33m10a5dff04[m Merge pull request #4843 from mathesar-foundation/dependabot/pip/django-4.2.25
+[33m5c93c90ee[m Merge branch 'develop' into dependabot/pip/django-4.2.25
+[33m52081f50c[m Ensure required params are passed for all file links - thumbnail, view, download
+[33m029c59870[m Implement uploading files via forms
+[33m43869f465[m Get FileInput to display in forms
+[33mbd92f0e4c[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into add_files_to_forms
+[33mef0cf9e17[m Add size limit for anonymously uploaded files
+[33meca95f3f9[m Fix a lint error with the previous commit
+[33m79e1ff76b[m Handle more edge cases when setting the user's cursor after auto-formatting an input
+[33mfdbd5ef1c[m Don't pass click when closing context menu
+[33m433c1d937[m Refactor sub-menu "open" state into parent menu
+[33mfbad7d96d[m Ensure anonymous pages have csrf token, a saved session, and file_backends info in common_data
+[33ma76129067[m Add authorization checks for download link views, when accessed anonymously via shared forms
+[33m50b55b008[m Merge pull request #4844 from mathesar-foundation/config_web_concurrency
+[33md542e1e20[m Merge pull request #4821 from mathesar-foundation/fast_inference
+[33md4fbc759e[m Merge branch 'develop' into fast_inference
+[33mb02a208de[m Merge pull request #4787 from mathesar-foundation/alter_col_refactor
+[33m1794b5c8c[m Merge branch 'develop' into alter_col_refactor
+[33m446a8e14e[m Fix issue with popper min-width
+[33m1576aa4b2[m Fix type errors
+[33m1682771e1[m revert testing ports change
+[33m5cb8cf256[m Build sub-menu system
+[33m6984ba575[m Minor updates to user requests.
+[33m19c2ff340[m Apply suggestion from @Anish9901
+[33mcb2504f1e[m Add default value for WEB_CONCURRENCY env variable for installations from script
+[33m054cd956b[m Merge pull request #4840 from mathesar-foundation/file_attachments_dev_docs
+[33ma98bf99de[m Add bucket creation step
+[33m169285424[m document the environment variable setting
+[33m07e7a268c[m add envvar to control # of gunicorn workers
+[33m51e30fb0c[m Bump django from 4.2.24 to 4.2.25
+[33m98583aaa1[m Merge pull request #4842 from salim-b/patch-1
+[33m45bf5d576[m fix: typos
+[33maac06b4c4[m Merge pull request #4839 from svihang8/bug-preserve-sort
+[33m62d210d89[m Minor code cleanup
+[33mfba617dd3[m Add dev docs on working with file attachments
+[33mad320787f[m Small type re-organization
+[33m2b0b67a26[m Minor code simplification
+[33mf71e5e158[m  minor tweaks and removing logging
+[33m750a6ae77[m fixed meta returning undefined object upon empty string input
+[33m9622d6dd6[m Remove a redundant launchRecordSelector on click in LinkedRecordInput
+[33m32b6e6943[m formatting
+[33m3b90e0756[m preserve tabularData.meta after drag and drop
+[33m2efea8978[m Add menu section system
+[33m8beea3dc6[m Improve menu entries to view linked records
+[33m1e9f56520[m Refactor context menu system
+[33m931014336[m Add additional PRs
+[33m17a3700e5[m Merge pull request #4832 from mathesar-foundation/fix-file-cols-added-to-forms
+[33m3fd37402b[m Merge pull request #4833 from mathesar-foundation/fix-dark-mode-theme-switcher
+[33mf7b88a93b[m Improve dark mode theme switcher
+[33m19b8a9072[m Prevent file columns from being added to forms
+[33m731d0c6f7[m Release notes
+[33m06e4e13eb[m Fix metadata links
+[33m6bb91f5f6[m Merge branch 'release-0.6.0' into 0.6.0-release-notes
+[33mf8758ab00[m Fix import order in fileUtils
+[33m7256b4d56[m Start work on release notes
+[33m28b2b8b9e[m Merge branch 'release-0.6.0' into 0.6.0-release-notes
+[33m37e5e631c[m Remove description of file backend behavior from removal dialog
+[33m7e8beeae1[m Change button spacing to center
+[33m774116884[m WIP
+[33mf3289a97b[m Merge pull request #4822 from commonspider/4751_placeholder_cell
+[33m5a3875342[m Merge branch 'release-0.6.0' into 0.6.0-release-notes
+[33m64065dce2[m Fix SSO login buttons
+[33mca2e537c6[m add docstrings
+[33m5b481baaf[m add tests for retype column sql
+[33mce30a3836[m Merge pull request #4815 from commonspider/4747_table_widget
+[33m504e4da32[m Focus cell after value update
+[33m737b0979e[m remove raise notices
+[33m8b4160aef[m update all_mathesar_objects entries
+[33m86574c6ef[m simplify concats
+[33m2efa5b70e[m wire up fast inference
+[33m1437edbec[m add all expected args to tests
+[33m9c61309df[m use coalesce one layer above
+[33m21ca9f4be[m send cast_options to sql functions
+[33m47f1948a8[m Merge branch 'develop' into alter_col_refactor
+[33mcc68ad3d7[m remove a blank space
+[33m9de57ea3c[m Merge pull request #4817 from mathesar-foundation/file_env
+[33m1bf43dab7[m Add FILE_STORAGE_DICT to docker-compose.dev.yml; tweak comment formatting
+[33mb3167a069[m mount file_storage.yml and add an env for configuring file_storage
+[33m3a1b7706f[m Merge pull request #4816 from mathesar-foundation/revert_4802
+[33md10abff37[m Revert PR #4802
+[33m1c0ebdf6e[m Adds the foreign key to new records created via paste in the table widget
+[33m6bfd3de09[m Categorize PRs
+[33ma3c33bdf8[m Init release notes
+[33m9f8298fdd[m Update version numbers to 0.6.0
+[33m33a878562[m Merge pull request #4757 from mathesar-foundation/file_attachment_feature
+[33m6d0ca44f9[m Merge branch 'develop' into file_attachment_feature
+[33m765dfaf69[m Merge pull request #4802 from commonspider/4751_placeholder_cell
+[33m220d3694b[m Merge branch 'develop' into file_attachment_feature
+[33m415c45e42[m simplify if condition
+[33m6116a373d[m add comments
+[33m1eacbc254[m some reorg and readability improvements
+[33m256c10973[m Merge pull request #4801 from mathesar-foundation/better_lightbox_backgrounds
+[33md4a3c1465[m Keep focus on selected placeholder cell on plane changes
+[33mf8b44bb26[m Improve light bg for transparent and small images
+[33m4d6dc4880[m Merge pull request #4798 from mathesar-foundation/lightbox_sm_img
+[33m7f8584be9[m Merge pull request #4799 from mathesar-foundation/disabled_cell_no_upload
+[33m0f62858a9[m Merge pull request #4800 from mathesar-foundation/files_todo_comments
+[33m417c4b1e5[m Use pointer cursor on thumbnails
+[33m9d632cec5[m Fix lint warnings
+[33m92a40efbd[m Clean up remaining TODO_FILES_UI comments
+[33m2bce3ecba[m Prevent file upload in disabled cells
+[33m14a0a0597[m Improve lightbox display for extra small images
+[33ma8dcd6753[m more code removal
+[33mcbb87bc26[m remove redundant process_col_alter functions
+[33m254f87109[m Merge pull request #4795 from mathesar-foundation/file_keyboard_nav_fixes
+[33m0a51cc8c6[m Fix file cells image display in safari
+[33m865c40b36[m Handle keyboard events for file type cells and inputs
+[33m1ba0cf63d[m Update FileManifest interface based on backend changes
+[33m3f1a4f58c[m Remove unused files
+[33mebb169376[m Merge branch 'file_attachment_feature' of https://github.com/mathesar-foundation/mathesar into file_keyboard_nav_fixes
+[33mbdb0a82da[m Merge pull request #4793 from mathesar-foundation/files_more_icon_support
+[33m5f85ed22a[m Improve type safety
+[33me8637245c[m Merge pull request #4794 from mathesar-foundation/files_fix_record_input_size
+[33m33b556b9a[m extract default setter from bulk alter
+[33m458a439cf[m Merge branch 'file_attachment_feature' into files_more_icon_support
+[33mc9e70da42[m Make the file input shorter for non-image files
+[33m05f116b32[m Merge pull request #4792 from mathesar-foundation/lightbox_loading_indicator_regression
+[33mb375072f2[m Merge base branch
+[33mc377ad301[m Create FileIcon component and support more icon types
+[33mdf93d7528[m Fix regression in lightbox loading indicator
+[33m33b6c3f96[m Merge pull request #4791 from mathesar-foundation/file_fix_img_race_condition
+[33m6c3c56fde[m Make images load 1000x faster!
+[33mddbf5bf19[m Switch to simpler onAnyUiInteraction approach
+[33m7accdce50[m Merge branch 'file_attachment_feature' of https://github.com/mathesar-foundation/mathesar into file_keyboard_nav_fixes
+[33mc85e061aa[m Merge branch 'file_attachment_feature' into file_fix_img_race_condition
+[33md477b1988[m Merge pull request #4783 from mathesar-foundation/files-non-image-cell-dropdown
+[33m83e716e7b[m Prevent horizontal scrollbar in file details
+[33mc3d66377a[m Open file detail dropdown from input too
+[33m2b70a63be[m Create util for subscribing to interactions and implement for image lightbox
+[33m7fbc74481[m Refactor FileDetailDropdown up to AppContext
+[33m7c6e33ef4[m Lint fixes
+[33ma36976d77[m Merge branch 'file_attachment_feature' into files-non-image-cell-dropdown
+[33m8f630ca22[m Merge pull request #4790 from mathesar-foundation/file_appearance_fixes
+[33m85d023e8c[m Merge branch 'file_attachment_feature' into file_appearance_fixes
+[33meb2238cfd[m Merge pull request #4784 from mathesar-foundation/lightbox_loading_indicator
+[33m3019c742f[m Merge branch 'file_attachment_feature' into files-non-image-cell-dropdown
+[33m7c8164edb[m Merge branch 'file_attachment_feature' into lightbox_loading_indicator
+[33md2d0298d6[m Merge pull request #4788 from mathesar-foundation/disable_type_no_file_backend
+[33mede89dfc1[m Fix loading overlay bg for dark mode
+[33m72c0eed22[m Fix i18n translation load bug
+[33m68e08d451[m Improve file content display in group header
+[33m8472d7102[m Improve display of file cell in table inspector
+[33mb8aedfff5[m Display files in record selector table
+[33m3a0a99eb7[m Merge branch 'file_attachment_feature' of https://github.com/mathesar-foundation/mathesar into disable_type_no_file_backend
+[33m66db29e01[m Disable File type when storage backends are not configured, do not hardcode default file_backend
+[33ma8b037c4a[m Allow disabling options in SelectionList
+[33mb3363dbf0[m Merge pull request #4786 from mathesar-foundation/fix_file_key_err
+[33mdb636ddab[m Merge pull request #4777 from mathesar-foundation/file-viewer-label-tooltips
+[33md33c7fd33[m Merge branch 'file_attachment_feature' into file-viewer-label-tooltips
+[33m30a7a19e9[m Merge pull request #4782 from mathesar-foundation/default-file-view
+[33m334986f5c[m Merge branch 'file_attachment_feature' into file-viewer-label-tooltips
+[33m3e5617912[m Merge branch 'file_attachment_feature' into file-viewer-label-tooltips
+[33mf2f13fe2e[m Merge pull request #4780 from mathesar-foundation/remove_file_from_lightbox
+[33m4d882d6cd[m Merge pull request #4779 from mathesar-foundation/files_input
+[33m217da8885[m Merge pull request #4776 from mathesar-foundation/prevent-file-columns-in-forms
+[33m4c7727169[m Merge pull request #4770 from mathesar-foundation/files_column_config
+[33ma858468f5[m Merge branch 'file_attachment_feature' of https://github.com/mathesar-foundation/mathesar into files_column_config
+[33m5bb0f25d9[m Move metadata merging to the same file with other type manipulation logic
+[33m5162c152f[m add entries for all_mathesar_objects table
+[33m83638c5b6[m Merge pull request #4781 from mathesar-foundation/file_attachment_maintenance
+[33m46ccf0ab3[m Merge branch 'develop' into alter_col_refactor
+[33ma5394bf2f[m Merge branch 'file_attachment_feature' into file_attachment_maintenance
+[33mb74fc7443[m some reorg and passing all tests
+[33mf8331385a[m Use a common simple input for filters, default value, and search boxes. Remove the need for the canUploadFile boolean.
+[33ma7c65c6c6[m Remove default values in interface and fix formatting issues in DynamicInput.svelte
+[33me78185f67[m Lint fixes
+[33m3ebccd60e[m Merge branch 'files_column_config' of https://github.com/mathesar-foundation/mathesar into files_input
+[33m846b2fd4d[m Merge branch 'files_column_config' of https://github.com/mathesar-foundation/mathesar into prevent-file-columns-in-forms
+[33m38b94dc80[m Merge branch 'file_attachment_feature' of https://github.com/mathesar-foundation/mathesar into files_column_config
+[33m9ce415cd5[m Merge branch 'file_attachment_feature' into fix_file_key_err
+[33m8af1e1107[m Merge pull request #4758 from mathesar-foundation/files_ui
+[33m527c82b44[m Merge branch 'default-file-view' into files-non-image-cell-dropdown
+[33m4251fb057[m Lint fixes
+[33mb5d39a5da[m Improve lightbox loading indicator
+[33m86eeaafa9[m add a filter within for loop
+[33mcdc67a0ec[m Initialize file cell dropdown
+[33m7c250cc7a[m Initial file cell appearance for non-images
+[33m6638e9d9a[m Merge pull request #4778 from mathesar-foundation/reset_mash
+[33m0eb9caeb2[m use more robust cache.add
+[33m77895bbc2[m Disallow uploading files in ancillary file inputs
+[33m7c2c2c787[m move exec call to db/
+[33m581cf1a83[m add a /n
+[33m1864843ae[m move reset_file_column_mash to download_links.py
+[33me45bfdf21[m create a mash if one doesn't exist
+[33m9b6cee2d6[m Don't display "default" in FileCellContent
+[33m6ca112e50[m Polish flow for deleting file from lightbox
+[33md675b8850[m Implement FileInput component for record page
+[33m66ea340bc[m add sql tests
+[33md397ea5ec[m add entry for all_objects_table
+[33m30d472598[m update docstring for reset_file_column_mash
+[33m071bd4d4c[m add test endpoint test and docs
+[33m3513eb7dd[m wire up rpc function
+[33mbc92d8702[m wire up sql function to python
+[33m0f95457f2[m add reset_mash sql function
+[33m709ddb883[m Lint fixes
+[33m6dff8101d[m Merge branch 'files_ui' into files_column_config
+[33m7625903bc[m Add tooltips to buttons in image file viewer when labels are hidden
+[33m58b50f09c[m Merge pull request #4746 from commonspider/4608_cell_level
+[33md9ea5b701[m Prevent file columns from being added to forms
+[33m255893ec7[m Run Prettier
+[33m885c18915[m Lint fix
+[33m9c51510d1[m Clear all statuses and errors when inserting a new row
+[33ma5573d45a[m Fix saving of cell value on upload
+[33m4aed6d3f5[m Fix file uploader init
+[33m09cad222c[m Get changing data type to & fro file type working
+[33mb8e0b07b6[m Implement saving metadata when file column is added
+[33m8f55da752[m Merge branch 'files_ui' of https://github.com/mathesar-foundation/mathesar into files_column_config
+[33m174d1782a[m Wire up more things to support upload flow
+[33m54c55b373[m Consolidate code to parse file reference
+[33m26fa837f7[m Scaffold file upload UI
+[33m953b39a04[m Improve error handling in uploadFile utility
+[33m7cde591cf[m Merge branch 'file_attachment_feature' into files_ui
+[33mcc5a19958[m Improve wiring of upload function
+[33m80060b016[m Merge pull request #4762 from mathesar-foundation/file_attachment_upload
+[33m16d0ce126[m Refactor FileCellContent
+[33m99ddaa288[m Fix type error
+[33mc051edbba[m Add zoom transition to lightbox
+[33m3ef751881[m Make lightbox layout work w/ new img load pattern
+[33m08ef68d00[m Add dedicated File ui type
+[33m11b3ab079[m Pass down metadata for all abstract type related operations
+[33m0a4b8b1e7[m wire up model maintenance functions to RPC wrapper
+[33m35b9da2a2[m Merge branch 'file_attachment_feature' into file_attachment_upload
+[33m74e68d064[m add prefix field to example file storage config
+[33m911ffda51[m Begin improving lightbox loading experience
+[33m413439b95[m Reorganize lightbox code
+[33m9664d7905[m Add fetchImage util
+[33me00996fb5[m Re-organize file cell content code
+[33m2fe1d4716[m Fix some colors in image viewer
+[33m2969b04c8[m add name to download link blobs
+[33me846fa235[m Re-organize some files
+[33m3985b47be[m Lint fixes
+[33mbc85f4037[m Merge remote-tracking branch 'origin/file_attachment_feature' into files_ui
+[33m0ed1f3c91[m fix bug when file JSON is correctly-formed but inaccurate
+[33m266c71be1[m Merge branch 'develop' into file_attachment_feature
+[33me19ed666e[m Merge pull request #4563 from mathesar-foundation/colors_experiment
+[33m98e78b660[m Polish image file viewer
+[33m8eb6389eb[m Use similar background as mini exploration tutorial for forms list empty state
+[33m445483717[m Add default background color to body
+[33m4e0c64b74[m Modify record & record-fk colors to improve contrast
+[33m3bb75ff76[m Remove Refresh button styling
+[33mae3c06f31[m Minor fixes
+[33mebf76db3a[m Fix table border related issues in import preview page
+[33mec0c12e05[m Improve button styles in form builder
+[33m80759efb4[m Fix background color in light mode for mini-exploration tutorial box
+[33m2427bfafe[m Modify selection colors based on theme
+[33mb789fb271[m Begin lightbox-style image file viewer
+[33m9296e4fe5[m Specify base hue and saturation in a single file
+[33mef3efbbcf[m some reordering
+[33m29d6b34a9[m Remove `on-bg` color system file placeholders
+[33ma3d788b95[m Fix colors in explorations page
+[33mfad54511f[m Improve colors in forms
+[33me44407677[m Improve colors in settings page and listbox
+[33mc52af1072[m extract and refactor retype_column
+[33m950ad55ea[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into colors_experiment
+[33md58d6bda3[m Minor fixes
+[33mcec76e06c[m Fix styles in django templates
+[33mcba1aa2a7[m Begin scaffolding file viewer
+[33m14446cc71[m Merge branch 'file_attachment_feature' into file_attachment_upload
+[33m5fbbd8c3a[m remove drop_columns from process_col_alter_jsonb
+[33m862ae91d8[m Merge remote-tracking branch 'origin/file_attachment_feature' into files_ui
+[33mf1920809d[m Merge pull request #4760 from mathesar-foundation/file_backend_cd
+[33m22258c2cf[m Minor fixes
+[33m4ffc237b3[m wire up file saving to a URL
+[33m8d9830068[m add file saving utility function
+[33madebf7f71[m add space around operator to make flake8 happy
+[33m3587da651[m Merge pull request #4755 from mathesar-foundation/dependabot/pip/django-4.2.24
+[33ma7494ea10[m handle case where there is no file storage config
+[33m9535a1cab[m Improve file cell display
+[33m54ce18492[m Minor improvements to input and breadcrumb focus states
+[33m4798c109e[m add file backend info to common data
+[33m6ed4244b3[m make get_backends public
+[33m113b1f4fa[m Remove unused EditableTitle component
+[33ma8d167318[m Minor fixes
+[33m7688696cc[m Fix scoping related issues in LabeledInput
+[33mff665fa72[m Add states for interactive fg elements
+[33m74093e3f8[m Organize theme files
+[33ma28b7dfb5[m Move highlight colors to bg from fg
+[33m01a631a3e[m Add different shadow color roles
+[33m9b1186c87[m Render image files in cells
+[33m5aa1b34ea[m Drill file manifest down to cell level
+[33m21236c941[m Create AssociatedCellData abstraction
+[33me98be490c[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into colors_experiment
+[33mc3424beb3[m Remove the need for the separate --hover-background and --active-background variables
+[33m8c92da12c[m Remove us-used remove-tab functionality from TabContainer component
+[33mdc341295f[m Move semantic colors to new structure
+[33m2e7e55116[m Add fg color configuration and move all text colors to use fg
+[33mdd0d9eb72[m Re-organize system to separate each color by semantics
+[33m9a88d3070[m Begin scaffolding File cell
+[33m1424b1fb0[m Use a file icon for File columns
+[33m097f8666f[m Add basic UI support for JSON column types
+[33m676fca209[m Reduce borders
+[33m640e5955e[m Merge pull request #4728 from mathesar-foundation/file_attachment_proto
+[33maa49955a4[m add caching and security headers to responses
+[33mc4f12f0ab[m Merge branch 'develop' into file_attachment_proto
+[33me611f9e39[m avoid stopping execution when DownloadLink deserialization fails
+[33m8068a5d4b[m Bump django from 4.2.22 to 4.2.24
+[33mabbc4e283[m Merge pull request #4748 from mathesar-foundation/fix-form-builder-focus-issue
+[33m1be653987[m Update all surfaces to use new pattern
+[33m064d59154[m Remove Chip component, make array cell token holder a flex layout
+[33m2d593ac42[m Fix formatting errors
+[33m25a734bba[m Remove the need for sunken surface colors
+[33m1aa90e02f[m Use updated variables for surface borders
+[33m17e60581f[m Add variables for surface visual components
+[33me815ed251[m Fix states in schema row card
+[33m8f0f87b0b[m Update elevation colors for light theme
+[33m1cdc98f53[m Improve states for database card
+[33mb6eee6139[m Update styles for card & EntityListItem, use accent color for each entity type
+[33mfe41c193f[m Make icon sizes in users page visually appear similar in size
+[33m1c2ddace7[m Fix surface raised-1 usage
+[33m1dd2d3e4e[m Specify css variables in style block instead of passing them as style props to AppSecondaryHeader
+[33mb41ef30c0[m Merge branch 'develop' into file_attachment_proto
+[33ma596eee99[m add file_backend to column metadata response
+[33m990dcae63[m remove return_download_links param
+[33ma2f8b8bcc[m Use updated card variables
+[33m4c3f21395[m Use EntityListItem in users page
+[33mf8347a683[m Use appropriate variables for elements that are not cards
+[33mb51173180[m Add variables for a card visual component
+[33m5460ad337[m Fix formatting issues
+[33mbe45ace72[m Rename border-shadow to color-shadow
+[33m1aae3bbeb[m Make surface cfg only hold colors
+[33mdffa28ce4[m Extend surface elevation cfg to allow more styles than colors
+[33m5ba4d0a7f[m Re-organize color related scss files
+[33mb52f26c40[m Improve keyboard navigation for the form builder
+[33m8896db4a2[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into colors_experiment
+[33md7130a3e1[m Add elevation structure and separate it from component based surface & border colors
+[33mfe0818a08[m Merge pull request #4741 from mathesar-foundation/fix_json_rendering
+[33ma86de745c[m use ::text[] instead of unnest and agg
+[33m94824aee9[m Merge branch 'develop' into fix_json_rendering
+[33m7bf3951ec[m use cast instead of agg
+[33ma3a2634de[m simplify casting for json(b)[] in data explorer
+[33md996febf5[m Merge pull request #4735 from commonspider/4615_language_switcher
+[33mf4f2da3ba[m Merge pull request #4734 from commonspider/4237_autoupdate_summary
+[33m198404049[m Merge branch 'develop' into 4237_autoupdate_summary
+[33m88a42ad8a[m Merge branch 'develop' into file_attachment_proto
+[33m8c6ba056c[m add one more docstring variable
+[33m23f0f4029[m fix and unify API variables and docstrings
+[33m14c30e967[m add SVG support for thumbnails
+[33mbd7ac24c8[m use AVIF format for thumbnails
+[33meaa21c768[m clean up unused AWS variables
+[33m307686469[m add tests for format_data(jsonb[])
+[33m9611c42b2[m fix rendering for json[] & jsonb[] columns in records and table page
+[33mc7da49816[m fix rendering for json like column within the data explorer
+[33mf5e700fe8[m Merge pull request #4739 from mathesar-foundation/master
+[33m49316b533[m Merge pull request #4715 from mathesar-foundation/release-0.5.0
+[33mf3ed6ee23[m Merge pull request #4716 from mathesar-foundation/0.5.0-release-notes
+[33mc1028e99e[m Release notes update.
+[33m823b3d54d[m Make focus states visible for commonly used button appearances
+[33m67737915d[m Remove unused anchors in pagination and simplify styles
+[33m02679653f[m Swap intensity and states in utility colors
+[33m0dcfdb3d9[m Move color scss files into its own sub-directory
+[33ma2f622365[m Rename highlight utility colors to not include color names in token
+[33m16ec5a4ca[m Make utility colors more clear, remove navigation-auxiliary
+[33mc78a72e9a[m Remove option-card appearance
+[33md199f058e[m Fix shared form and form description styles
+[33m5a3b43f5c[m Use tip for data explorer tutorial action button
+[33m1a5bdcdc0[m Fix table column header cell border
+[33mae6279239[m Update color tokens for forms
+[33m0bb688cbf[m add more tests for download links functions
+[33mb9c1d5085[m increase consistency of testing setup
+[33m51c484959[m increase consistency by sorting JSON keys
+[33mb6cdaf779[m add test for download links functions
+[33m540deb5a8[m Remove refresh appearance, add styles to RefreshButton component
+[33m2a2a9b075[m Remove inspector variant, create a InspectorButton component with styling
+[33mc89f23055[m Remove feedback from button Appearance, style the feedback button at the point of usage
+[33mc4d873c3c[m Remove danger prop in Button
+[33mab7460963[m Cleanup button variants, make it easier to create/edit variants
+[33me4bcf55a5[m extract methods for testability
+[33m1d149e7ed[m Fix type errors
+[33m855344cd4[m Add breadcrumb entry for dataForm and a data form name component
+[33mb08f4f146[m Move language-switcher to top right corner in installation template
+[33mf46bfbce8[m Update records when adding a constraint (Fixes #4237)
+[33mdb736b31c[m Make ConstraintsDataStore extend EventHandler
+[33m49493f06b[m Fix for code scanning alert no. 149: Use of a broken or weak cryptographic hashing algorithm on sensitive data
+[33ma2182952f[m Add images and remaining PRs
+[33ma9cdba473[m Merge branch 'release-0.5.0' into 0.5.0-release-notes
+[33m11fc6b609[m Initialize actual release notes
+[33m926a7704c[m fix linting problems
+[33m26e66233a[m make sure value is null when no record links are found
+[33m4c332ef84[m wire up download links for search and get
+[33m4b8bebf45[m clean up code for readability
+[33m70d647e4c[m Merge pull request #4726 from mathesar-foundation/form_analytics
+[33ma0931a8e4[m Merge pull request #4727 from mathesar-foundation/fix-qa-issues-0.5.0
+[33mc784fee45[m wire up download links info to records.list
+[33m835f6edac[m fix migrations broken by git merge
+[33m2f0115170[m Show an error message to authenticated users when they access an unshared form via the public fill-out page
+[33m328f033c6[m Only accept submissions for publicly shared forms
+[33mbcc624c7e[m Accept urls with and without trailing slashes for shared forms on the backend
+[33m25cf709e0[m Add trailing slash to shared form url on frontend
+[33m42144ca69[m satisfy the linter
+[33m9550d4577[m correct variable name in docstring
+[33me2235f6a8[m update docs with forms analytics info
+[33md7c636cf7[m wire up analytics for forms
+[33mb75b56c3b[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into colors_experiment
+[33mfdd83b89d[m Merge branch 'develop' into file_attachment_proto
+[33m7c3f641ca[m use mash in file URL and pkey for easier filtering
+[33md5a720fa5[m add remaining utility functions for making DL from rows
+[33ma52ebcf7b[m List all PRs
+[33m43f879f39[m Update evaluative one-liner to remove unneeded SECRET_KEY
+[33m210ff00f4[m Initialize 0.5.0 release notes
+[33m473f6ff91[m[33m ([m[1;33mtag: [m[1;33m0.5.0[m[33m)[m Update version numbers to 0.5.0
+[33mee5cd037a[m Merge pull request #4713 from mathesar-foundation/forms_ux_fixes
+[33mf16265df3[m Always show Form in inspector navigation, make the links slightly more obvious
+[33m4d5988bab[m Make public link accessible from form item in schema page
+[33m8c4e64de7[m Show indication for shared forms
+[33md9266f775[m Fix delete button height
+[33mb8e7658f4[m Fix bug where error is shown when user action is create for fk field
+[33mcaefb059c[m Rename field appearance to presentation since it now includes help text
+[33m5eb091c32[m Fix linter warning
+[33mcf0e0098c[m Fix bug where field appearance size was not being updated
+[33mbaaa2fcab[m Disable help input for error fields
+[33mfe91c9564[m Re-organize inspector sections for fields based on review comments
+[33m821227d18[m Use form element only for fill out view
+[33m88da66bc5[m Display source information for fields, make styling similar to base table link
+[33m0ebcd3cd2[m Make submission settings section more clear
+[33m9ea0a0aa3[m Fix keyboard navigation within RowSeeker where the list was focusable
+[33m256b135b3[m Use button type submit for form submit button
+[33m669b68432[m Send null for date/time values instead of empty string
+[33mae8f6c638[m Ensure field key is used as the input id
+[33m6c2221ffd[m Handle z-index stacking to ensure parent outline is visible
+[33mc8b13a3b3[m Highlight parents of selected element
+[33md92dd7424[m Make description text area grow as user types
+[33md8156923c[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_ux_fixes
+[33m13612dfd3[m Set column name as label for fields when cleared
+[33m7e35330e6[m Fix type errors
+[33m23b5f4d50[m Improve dark theme colors
+[33mdd05b5fde[m Fix loading states in forms pages
+[33m18d94a880[m Remove internal form fill out route & page
+[33m6ca61eef3[m Fix type errors
+[33md0833b5b9[m Use untitled as a fallback for race conditions
+[33m49a7ae8eb[m Set a default name when form name is empty
+[33mb53859ec5[m Fix bug with form name auto-generation when user changes base table multiple times
+[33m2f832c9f5[m Improve tooltip placement for add field dropdown
+[33m1f0db4bdb[m Display only valid roles in associated role selector dropdown
+[33me6c10bbd9[m Do not allow deleting fields with non-nullable columns
+[33m4506dfa3d[m Merge pull request #4597 from mathesar-foundation/secret_key_at_runtime
+[33mbfa808415[m Use semantic labels for inputs and fix tab order
+[33m272fd5244[m Merge branch 'develop' into secret_key_at_runtime
+[33m1fefc3f44[m Delete values in LinkedRecordInput on Backspace, to make it easier for mac users
+[33md49ea807f[m Use reject when selector closes instead of selecting undefined, allow null as a valid value from within selector, handle cancel in row seeker
+[33md51723c11[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_ux_fixes
+[33mee50a48fd[m Merge pull request #4709 from mathesar-foundation/edit_to_rename
+[33m312400198[m Merge branch 'develop' into edit_to_rename
+[33m68218475d[m Merge pull request #4711 from mathesar-foundation/forms_submission_page
+[33mf76c1af70[m Fix spelling
+[33m1771be8b6[m Fix typecheck error
+[33m1552b5e76[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_submission_page
+[33m45bdd23eb[m Fix spelling
+[33mff3f1667f[m Merge pull request #4710 from mathesar-foundation/forms_cleanup_1
+[33m518534571[m Show generic error and hide actual message within a collapsible
+[33m895314b4e[m add utility function for building DownloadLink objects
+[33mb1d62bab0[m Show branding info after form submission as well
+[33m4408e2e5d[m Merge branch 'forms_cleanup_1' of https://github.com/mathesar-foundation/mathesar into forms_submission_page
+[33mfb09fa65e[m Reduce the form min width
+[33m8371be62d[m Implement post submission ui
+[33m7d2cc5a7e[m Rename ReadonlyDataFormManager to DataFormFillOutManager
+[33md2c7dc96a[m Show error in footer if form submission fails
+[33m3a21bde54[m Fix typecheck errors
+[33m8b3529ede[m Cleanup styles, rename components to better reflect their usage
+[33m3e9079718[m Make showInspector logic more explicit
+[33m805feca07[m Add inspector button to actions pane
+[33m71c529077[m Make the DataFormBuildArea component leaner, move styles to DataFormCanvas
+[33m5cf022acc[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_submission_page
+[33mdac676ab2[m Merge branch 'forms_polish_sean_01' of https://github.com/mathesar-foundation/mathesar into forms_submission_page
+[33mdc584b656[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_submission_page
+[33ma0f0328ad[m Merge pull request #4707 from mathesar-foundation/forms_polish_sean_01
+[33m5e97ec89a[m Increase max-width back to 60rem
+[33m361f4b4e8[m Use pre-wrap for form description white space
+[33m9a6736843[m Merge pull request #4698 from mathesar-foundation/shared_form_page_responsive
+[33mf5113e258[m Merge branch 'develop' into secret_key_at_runtime
+[33m4b588323a[m Improve documentation of SECRET_KEY
+[33m87808b2d4[m remove unneeded python secret file
+[33m5e1408b73[m Change some terminology from "edit" to "rename"
+[33ma003648c4[m Sort list of forms
+[33mde90a5f76[m Loosen parameter type in utils fn
+[33m9855c6686[m Allow non-PK columns with dynamic defaults in form
+[33m6b95febaf[m Auto-generate form name from table name
+[33m35b785201[m Improve variable name to align with UI
+[33maf976441b[m Add help bubble for associated role
+[33mc3e3cf505[m Improve responsiveness of FK field in builder page
+[33m6b6f602c1[m Improve branding on form fill-out page
+[33m43a8c00b2[m Improve branding of Mathesar name using brand font
+[33mf445a148f[m Remove branding form authenticated forms pages
+[33m860a800eb[m Set a field background when dragging
+[33m1a99016f9[m Don't apply hover highlight to selected fields
+[33m8ffd50ac2[m Refactor JS hover logic to use CSS :has() instead
+[33m1712e0a86[m Improve padding on form builder page
+[33mc905ad334[m Fix form description overflow in fill-out page
+[33m9dfb4e04c[m Remove form description from actions pane
+[33m63f5dafa2[m Merge branch 'develop' into shared_form_page_responsive
+[33ma5563e93c[m Merge pull request #4704 from mathesar-foundation/forms_fk_nested_fields_fix
+[33md7443385f[m Fix lint warnings
+[33me8f067474[m Remove unused variable
+[33m0c7d6f0bf[m Fix minor spelling and comment wrapping issues
+[33m16f2be137[m update docs for new secret key process
+[33mb970025e2[m Remove secret key generation from install script
+[33m2f64bd3d7[m remove unneeded check
+[33mb43f89a27[m update docker machinery to use new file
+[33m3a70847b0[m change approach to use text file avoiding import
+[33mccfa19a94[m remove SECRET_KEY envvar
+[33m8d646442e[m Merge branch 'develop' into secret_key_at_runtime
+[33m2ef069396[m Merge pull request #4674 from mathesar-foundation/modal_record_page
+[33m933dcc5fc[m Merge branch 'develop' into shared_form_page_responsive
+[33m67f3102ea[m Merge branch 'develop' into modal_record_page
+[33m80e95a910[m Merge branch 'develop' into forms_fk_nested_fields_fix
+[33m8056925f6[m Fix type check errors
+[33me24d1af5e[m Merge pull request #4701 from mathesar-foundation/forms_improve_error_states
+[33m38a735ac4[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_improve_error_states
+[33mdf0493ad3[m Fix translations
+[33mf10f1394e[m Implement a low level utility for dynamic nested derived stores
+[33m5a291be67[m Remove nested fields when interaction rule changes to `must_pick`
+[33ma84623537[m Merge branch 'develop' into shared_form_page_responsive
+[33m668475ae1[m Merge branch 'develop' into modal_record_page
+[33m30755935d[m Merge pull request #4700 from mathesar-foundation/forms_multi_fks
+[33mda7fa87c5[m add a comment within the utility function
+[33mdb7da7070[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_improve_error_states
+[33m374304731[m Add additional help text for error fields in fill out views
+[33m42bd5a452[m Use similar styling as explorations for delete/remove buttons
+[33m4880a3f40[m Use readonly instead of disabled for label input
+[33ma31972232[m Fix type errors
+[33m0058cc825[m Show warning and auto-remove error fields when saving form
+[33maa01ee5af[m Merge branch 'develop' into shared_form_page_responsive
+[33m616bdc72d[m remove more namespacing
+[33m02c39151f[m remove unnecessary namespacing
+[33m3e9c3612c[m add tests for single_col_multi_fk_insert
+[33m00323c11d[m handle submit behavior when inserting into a column with foreign key constraints referencing multiple columns
+[33m64c01883f[m Provide option to remove fields in inspector, show error icon for ErrorFields
+[33mfd16fbe7f[m Display error within form, provide an action for user to perform when there's an error
+[33m2bc3f56c6[m Merge pull request #4695 from mathesar-foundation/row_seeker_add_button
+[33m14b58fbef[m Merge pull request #4699 from mathesar-foundation/forms_pick_and_create
+[33m0db2c10fb[m Do not let forms error scenarios break UI, create a ErrorField component
+[33m8d6dea424[m Merge branch 'develop' into modal_record_page
+[33m7528b0775[m Merge branch 'develop' into forms_pick_and_create
+[33mfb336b614[m Merge branch 'develop' into row_seeker_add_button
+[33m49b7e71a4[m Merge pull request #4694 from mathesar-foundation/sort_fields
+[33m6388d86b1[m Merge pull request #4691 from mathesar-foundation/forms_chk_collaborator_access
+[33m4850e4959[m Improve responsive behavior of shared form page
+[33mebc483c8c[m Merge branch 'develop' into forms_chk_collaborator_access
+[33mf14aefe4b[m Merge branch 'forms_feature_final' into forms_chk_collaborator_access
+[33mc9a55093e[m Add SummarizedRecordReference to docs
+[33mea083c87a[m Fix auth for list_summaries method
+[33m26201a149[m Show linked record summary configuration in inspector for fk fields
+[33m1819b46b9[m Improve UX for switching between picking records and creating new records in forms
+[33m744fff00d[m Implement 'Add New Record' button in Row Seeker
+[33m3f9ccf6cd[m Add a couple todo items
+[33m0bc6e6b5b[m Use records.list_summaries while building form, and  forms.list_related_records when filling out form
+[33mebc848c50[m Add records.list_summaries RPC method to list summaries by table oid
+[33m0d4f1a985[m Make row seeker records store more generic to support tables & forms
+[33m0d14ad0b5[m Support nested containers in sortable action
+[33mfa94fb9b6[m Fix array mutation in reactiveSort utility
+[33md43d64164[m Add implements bound for clarity
+[33mdb0540def[m Fix bug when removing transform style after sort
+[33m3d2d47941[m Sort form fields via drag and drop
+[33m08be59306[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into row_seeker_add_button
+[33m548b5caca[m Merge pull request #4673 from mathesar-foundation/forms_feature_final
+[33m7b11ef39e[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_feature_final
+[33ma0f01a404[m prune tree when pick
+[33m82e2515be[m use inner join on field keys and values
+[33m57a4d945a[m Merge branch 'forms_feature_final' into forms_chk_collaborator_access
+[33m123f81319[m Merge branch 'forms_feature_final' of https://github.com/mathesar-foundation/mathesar into row_seeker_add_button
+[33md29747236[m Merge pull request #4637 from mathesar-foundation/row_seeker
+[33m0a50353d2[m Merge branch 'row_seeker' of https://github.com/mathesar-foundation/mathesar into row_seeker_add_button
+[33m26ab8095d[m Merge branch 'forms_feature_final' of https://github.com/mathesar-foundation/mathesar into row_seeker
+[33md6bd88881[m Merge branch 'develop' of https://github.com/mathesar-foundation/mathesar into forms_feature_final
+[33me01a08739[m Merge pull request #4685 from mathesar-foundation/4612_column_desc_in_header
+[33m1b471840a[m Use custom icon for item description
+[33m1ec17a246[m Merge branch 'develop' into modal_record_page
+[33md09dcfdfc[m Merge pull request #4609 from mathesar-foundation/form_maker
+[33m56d9cc01d[m Use explicit type for object
+[33m0f4b1d6d1[m Move form share URL definition to urls.ts
+[33m26ac68a40[m Use simpler i18n keys
+[33mc9e1b7f59[m Fix spelling issues
+[33mf172b7787[m Implement reactiveSort store utility
+[33mc35b7307e[m Merge branch 'row_seeker' of https://github.com/mathesar-foundation/mathesar into row_seeker_add_button
+[33m88db72bed[m Merge branch 'form_maker' of https://github.com/mathesar-foundation/mathesar into row_seeker
+[33me0a92c877[m check for collaborator access instead of associated form role
+[33mbc4bafa60[m Fix linter warnings, add missing i18n translations, basic cleanup
+[33me2ae69ebc[m Merge branch 'form_maker' of https://github.com/mathesar-foundation/mathesar into row_seeker
+[33m7d29cc3f2[m Ensure SchemaRouteContext is safely obtained in breadcrumbs
+[33mff4314a8d[m Fix bug where foreignKeyLink exists for scalar fields
+[33mab3219442[m Merge branch 'form_maker' of https://github.com/mathesar-foundation/mathesar into row_seeker
+[33me19b57233[m Remove add & edit data form modal from actions pane
+[33m7515ba4b8[m Fix ui flicker when form is being saved
+[33m7750abb67[m Ensure allChanges callback is always called
+[33mfb2798639[m Move field specific classes to a nested directory
+[33ma1defb925[m Add client kwargs to DownloadLink model
+[33mb8dd9387c[m Make event handling more readable
+[33m2ab389e1c[m use many-to-many to avoid replicated download links
+[33md26767d59[m Make factory prop for field containers more readable
+[33mbed7d9128[m add thumbnail functionality to the API
+[33mecc45db18[m add thumbnail field to downloadlink model
+[33m575e595ff[m Remove the need for addFromFieldColumn method in FormFields
+[33ma37549035[m Add Actions to form inspector
+[33m044c2a957[m Rename configPane to inspector, move it to the right
+[33ma77c1ce88[m Remove header title and header subtitle in favour of name and description
+[33m1a6a76faf[m Render data form routes when context is set
+[33mcaeae0ad3[m Merge branch 'forms_feature_final' of https://github.com/mathesar-foundation/mathesar into form_maker
+[33md65c86e9a[m Merge pull request #4683 from mathesar-foundation/form_replace_to_update
+[33m3cf552aa0[m Update frontend based on changes to replace RPC method
+[33m2e166d2d4[m Merge branch 'forms_feature_final' into form_replace_to_update
+[33ma00d7edda[m Merge branch 'form_replace_to_update' of https://github.com/mathesar-foundation/mathesar into form_maker
+[33m94d0a4a3d[m Merge pull request #4681 from mathesar-foundation/forms_fe_pr_5_management_ui
+[33m93112d702[m Separate cachemanager get and getOrCreate
+[33m805027976[m Merge pull request #4686 from mathesar-foundation/4594_ui_hang
+[33m74477e2ba[m field_def_list could be []
+[33m9a9ae1a3e[m Always validate associated_role, make associated_role optional in request
+[33md45272075[m Merge branch 'forms_feature_final' into form_replace_to_update
+[33m6f1069146[m Merge branch 'forms_fe_pr_5_management_ui' of https://github.com/mathesar-foundation/mathesar into form_maker
+[33m32469c174[m Merge branch 'forms_fe_pr_5_management_ui' of https://github.com/mathesar-foundation/mathesar into forms_fe_pr_5_management_ui
+[33mb518fa667[m Move base table above name and description, remove sourceTableStructure loading state
+[33m4a0ad1b94[m Move base table above name and description
+[33mc89de5480[m Do not redirect to form when new form is created
+[33m3e8190798[m Fix spelling
+[33mf9229b7e8[m Merge branch 'forms_fe_pr_5_management_ui' of https://github.com/mathesar-foundation/mathesar into form_maker
+[33m8954edaf5[m Merge branch 'forms_feature_final' of https://github.com/mathesar-foundation/mathesar into forms_fe_pr_5_management_ui
+[33m851dddb00[m Merge pull request #4680 from mathesar-foundation/form_perms
+[33m297560e52[m extract download link wrangler to separate module
+[33med9aaf5df[m add AWS variables to environment example
+[33m97d31edf3[m remove missing user field from download link view
+[33m5b52438ee[m Fix UI hang bug
+[33m418d8b70c[m Display column descriptions in column header cells
+[33mb56fc9f22[m Fix spelling issue
+[33m5f5ecbd93[m Fix casing issue
+[33mcc205a856[m Fix table widget navigation bug
+[33m9c5b1dd08[m Use hyperlinks selectively in LinkedRecordInput
+[33m73179de8b[m Fix linked record in row group header
+[33m567611ffd[m let URI length be longer
+[33m1fb443383[m wire up download link to API
+[33m53fa4b2b4[m add initial DownloadLink model
+[33m2f8a16b65[m Set record hyperlink URL
+[33m2a6f24034[m Translate UI text
+[33m79f8a1617[m Improve spacing
+[33m1451f2b4d[m Simplify presentation of related records
+[33m49bf2d840[m Add linked record view options in field menu
+[33me00b920ac[m Use wrapper component to provide modal record view
+[33md43b3052a[m Reorganize some files
+[33m250f924e6[m Refactor JS var to use :has() CSS
+[33m0280379bd[m Use RecordHyperlink in LinkedRecordInput
+[33m4c1706443[m Merge branch 'form_perms' into form_replace_to_update
+[33md0c0c3380[m fix test
+[33mca3180348[m remove id from create
+[33m0f6292ec3[m update docs and endpoint tests
+[33md552baba5[m forms.replace is forms.patch
+[33mfec504342[m Create RecordHyperlink component
+[33mc0193f0e8[m Merge branch 'forms_fe_pr_5_management_ui' of https://github.com/mathesar-foundation/mathesar into form_maker
+[33m491db05ea[m Remove unused FormsList component
+[33md3a0d064c[m Merge branch 'forms_fe_pr_5_management_ui' of https://github.com/mathesar-foundation/mathesar into form_maker
+[33m6982d0ff2[m Add i18n text
+[33mc68f6fc3f[m Add forms to breadcrumb entity selector
+[33mdd1e1e66f[m Display forms section in schema overview
+[33ma80849996[m Add modal to add & edit data forms
+[33mcfa2d66a7[m Add schema route context and placeholder forms route
+[33ma42c77434[m Add methods to schema model to construct DataForms store
+[33m8ffc9fe71[m Implement DataForm model
+[33mc5f33fbe4[m Show two record view options in table inspector
+[33me2294dc9d[m Add forms RPC methods
+[33mf286ebfe0[m check form permission before get, get_source_info, submit
+[33mae3a046d2[m Add forms to breadcrumb entity selector
+[33m6faf9c4d9[m Once update stores of modified props in DataForm model
+[33mde984360f[m Adjust terminology in code
+[33ma527af2f9[m Removed unused component
+[33m968750d78[m Put for status in modal record title bar
+[33m5d0156298[m Narrow selectors in Window.scss
+[33m5257d0d6e[m Use portal for modal record view title
+[33m9edeb249c[m Add portalToWindowTitle action
+[33m1e2dd0e2d[m Fix text truncation in window title
+[33m42514cd5e[m Improve context menu options to open record
+[33mf93ebc1a7[m Improve widget styling
+[33m931fb0284[m Adjust styling of modal record view content
+[33ma743759e0[m Implement record title in modal window title
+[33mb53e50aad[m Use a custom icon for modal record view
+[33mddc656cfd[m Split RecordViewContent component up into separate components
+[33mf3812287b[m Add Record View wrapper component
+[33mcded67bc7[m Ignore import dependency cycle
+[33m00a812760[m Move TableStructure inside RecordStore
+[33mf64728048[m Use Table value from RecordStore
+[33m100685380[m Get record page rendering in modal (though ugly)
+[33m9eacfbbf2[m Add makeContext utility function
+[33m1bd9510d8[m Reorganize files
+[33ma495a2e3d[m Split RecordPage into two components
+[33m5bf2306b8[m Rename some components
+[33m08dcbf77a[m Simplify record page props
