@@ -3627,6 +3627,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
 CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -3688,6 +3689,169 @@ BEGIN
       "results": [
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 0,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 0,
+      "results": [],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 1,
+      offset_ => 1,
+      order_ => '[{"attnum": 2, "direction": "asc"}]',
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 3,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 5,
+      offset_ => 10,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 0,
+      "results": [],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_from_table_with_filter()
+RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => '{"type": "equal","args": [{ "type": "attnum", "value": 3 },{ "type": "literal", "value": "sdflkj" }]}',
+      group_ => null
+    ),
+    $j${
+      "count": 1,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}
+      ],
+      "grouping": null,
+      "record_summaries": null,
+      "linked_record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id  => rel_id,
+      limit_  => null,
+      offset_ => null,
+      order_  => null,
+      filter_ => '{"type":"equal","args":[{"type":"attnum","value":5},{"type":"literal","value":"{\"a\": \"val\"}"}]}',
+      group_  => null
+    ),
+    $j${
+      "count": 1,
+      "results": [
+        {"1":1,"2":5,"3":"sdflkj","4":"\"s\"","5":"{\"a\": \"val\"}"}
+      ],
+      "grouping":null,
+      "linked_record_summaries":null,
+      "record_summaries":null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => '{"type": "greater","args": [{ "type": "attnum", "value": 2 },{ "type": "literal", "value": 10 }]}',
+      group_ => null
+    ),
+    $j${
+      "count": 1,
+      "results": [
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ =>
+        '{"type": "lesser","args": [{ "type": "attnum", "value": 2 },{ "type": "literal", "value": 10 }]}',
+      group_ => null
+    ),
+    $j${
+      "count": 2,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"1": 3, "2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => '{"type": "lesser_or_equal","args": [{ "type": "attnum", "value": 2 },{ "type": "literal", "value": 5 }]}',
+      group_ => null
+    ),
+    $j${
+      "count": 2,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"1": 3, "2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}
       ],
       "grouping": null,
       "linked_record_summaries": null,
@@ -3860,6 +4024,93 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_list_records_from_table_with_filter_and_order()
+RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id  => rel_id,
+      limit_  => null,
+      offset_ => null,
+      order_  => '[{"attnum":1,"direction":"asc"}]',
+      filter_ => '{"type":"greater","args":[{"type":"attnum","value":2},{"type":"literal","value":2}]}',
+      group_  => null
+    ),
+    $j${
+      "count": 2,
+      "results": [
+        {"1":1,"2":5,"3":"sdflkj","4":"\"s\"","5":"{\"a\": \"val\"}"},
+        {"1":2,"2":34,"3":"sdflfflsk","4":null,"5":"[1, 2, 3, 4]"}
+      ],
+      "grouping":null,
+      "linked_record_summaries":null,
+      "record_summaries":null
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_from_table_with_filter_grouping_and_order()
+RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_customers_table();
+  rel_id := '"Customers"'::regclass::oid;
+
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id  => rel_id,
+      limit_  => null,
+      offset_ => null,
+      order_  => '[{"attnum":4,"direction":"asc"}]',
+      filter_ => '{"type":"equal","args":[
+                    {"type":"attnum","value":2},
+                    {"type":"literal","value":"Abigail"}
+                  ]}',
+      group_  => '{"columns":[3]}'
+    ),
+    $j${
+      "count": 12,
+      "results": [
+        {"1":2,"2":"Abigail","3":"Acosta","4":"2020-04-16 AD"},
+        {"1":4,"2":"Abigail","3":"Adams","4":"2020-05-29 AD"},
+        {"1":5,"2":"Abigail","3":"Abbott","4":"2020-07-05 AD"},
+        {"1":8,"2":"Abigail","3":"Abbott","4":"2020-10-30 AD"},
+        {"1":9,"2":"Abigail","3":"Adams","4":"2021-02-14 AD"},
+        {"1":10,"2":"Abigail","3":"Acevedo","4":"2021-03-29 AD"},
+        {"1":13,"2":"Abigail","3":"Adkins","4":"2021-09-12 AD"},
+        {"1":15,"2":"Abigail","3":"Abbott","4":"2021-11-30 AD"},
+        {"1":18,"2":"Abigail","3":"Abbott","4":"2022-03-23 AD"},
+        {"1":19,"2":"Abigail","3":"Adkins","4":"2022-03-27 AD"},
+        {"1":20,"2":"Abigail","3":"Abbott","4":"2022-04-29 AD"},
+        {"1":21,"2":"Abigail","3":"Adams","4":"2022-05-24 AD"}
+      ],
+      "grouping":{
+        "columns":[3],
+        "preproc":null,
+        "groups":[
+          {"id":1,"count":5,"results_eq":{"3":"Abbott"},"result_indices":[2,3,7,8,10]},
+          {"id":2,"count":1,"results_eq":{"3":"Acevedo"},"result_indices":[5]},
+          {"id":3,"count":1,"results_eq":{"3":"Acosta"},"result_indices":[0]},
+          {"id":4,"count":3,"results_eq":{"3":"Adams"},"result_indices":[1,4,11]},
+          {"id":5,"count":2,"results_eq":{"3":"Adkins"},"result_indices":[6,9]}
+        ]
+      },
+      "linked_record_summaries":null,
+      "record_summaries":null
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_list_records_for_table_with_self_referential_fk() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -3894,6 +4145,48 @@ BEGIN
           "3": "Hand tools"
         }
      }
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_self_fk_filter_group()
+RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_table_with_self_referential_fk();
+  rel_id := 'categories'::regclass::oid;
+
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id  => rel_id,
+      limit_  => null,
+      offset_ => null,
+      order_  => null,
+      filter_ => '{"type":"equal","args":[{"type":"attnum","value":3},{"type":"literal","value":1}]}',
+      group_  => '{"columns":[3]}'
+    ),
+    $j${
+      "count": 2,
+      "results": [
+        {"1":2,"2":"Power tools","3":1},
+        {"1":3,"2":"Hand tools","3":1}
+      ],
+      "grouping":{
+        "columns":[3],
+        "preproc":null,
+        "groups":[
+          {"id":1,"count":2,"results_eq":{"3":1},"result_indices":[0,1]}
+        ]
+      },
+      "linked_record_summaries":{
+        "3":{
+          "1":"Tools"
+        }
+      },
+      "record_summaries":null
     }$j$
   );
 END;
