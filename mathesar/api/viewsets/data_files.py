@@ -64,13 +64,11 @@ def upload_file(request):
     if request.method == "POST":
         uploaded_file = request.FILES.get("file")
         if not uploaded_file:
-            return JsonResponse({"error": "No file uploaded"}, status=400)
-        
+            return JsonResponse({"error": "No file uploaded"}, status=400)      
         # Save the uploaded file somewhere (for testing)
         with open(f"/tmp/{uploaded_file.name}", "wb+") as f:
             for chunk in uploaded_file.chunks():
-                f.write(chunk)
-        
+                f.write(chunk)     
         return JsonResponse({"message": "File uploaded successfully"})
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)

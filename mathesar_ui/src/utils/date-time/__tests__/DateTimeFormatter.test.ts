@@ -1,5 +1,5 @@
-import DateTimeSpecification from '../DateTimeSpecification';
 import DateTimeFormatter from '../DateTimeFormatter';
+import DateTimeSpecification from '../DateTimeSpecification';
 
 describe('DateTimeFormatter edge cases', () => {
   test('does not reformat BC/AD-marked dates', () => {
