@@ -59,7 +59,15 @@ function getSelectedCellData(
   const value = row?.record[columnId];
   import { parseColumnId } from '../../component-library/common/utils/parseColumnId';
 
-  const column = processedColumns.get(parseColumnId(columnId)!);
+  const parsedColumnId = parseColumnId(columnId);
+
+  if (parsedColumnId !== undefined) {
+    const column = processedColumns.get(parsedColumnId);
+    // Now column is safely retrieved
+  } else {
+    console.warn('Invalid columnId:', columnId);
+  }
+
 
   const recordSummary = defined(
     value,
