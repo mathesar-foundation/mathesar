@@ -17,11 +17,22 @@
   import type { QueryTransformationModel } from '../../QueryModel';
   import QuerySortTransformationModel from '../../QuerySortTransformationModel';
   import { QuerySummarizationTransformationModel } from '../../QuerySummarizationTransformationModel';
+  // Placeholder for calculation transform model
+  // import QueryCalculationTransformationModel from '../../QueryCalculationTransformationModel';
+  // Handler for adding calculation transform
+  async function addCalculationTransform() {
+    // Placeholder: You would create a new QueryCalculationTransformationModel here
+    // For now, just log or stub
+    // const newCalculation = new QueryCalculationTransformationModel({ ... });
+    // await queryManager.update((q) => q.addCalculationTransform(newCalculation));
+    alert('Calculation transform: UI and model to be implemented');
+  }
 
   import FilterTransformation from './FilterTransformation.svelte';
   import HideTransformation from './HideTransformation.svelte';
   import SortTransformation from './SortTransformation.svelte';
   import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
+  import CalculationTransformation from './CalculationTransformation.svelte';
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
 
   export let queryManager: QueryManager;
@@ -153,6 +164,13 @@
                 index < transformationModels.length - 1}
               on:update={() => updateTransformation(index, transformationModel)}
             />
+          {:else if transformationModel.type === 'calculation'}
+            <CalculationTransformation
+              columns={allowedColumnsPerTransformation[index]}
+              model={transformationModel}
+              limitEditing={hasNoColumns}
+              on:update={() => updateTransformation(index, transformationModel)}
+            />
           {:else if transformationModel.type === 'hide'}
             <HideTransformation
               columns={allowedColumnsPerTransformation[index]}
@@ -195,6 +213,9 @@
         on:click={addSummarization}
       >
         {$_('summarize')}
+      </ButtonMenuItem>
+      <ButtonMenuItem on:click={addCalculationTransform}>
+        Calculation
       </ButtonMenuItem>
       <ButtonMenuItem on:click={addHideTransform}>
         {$_('hide_columns')}

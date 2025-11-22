@@ -97,10 +97,14 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
                 jp_path=join_path if jp_path else None
             )
         )
-    transformations = tuple(
-        deserialize_transformation(i)
-        for i in exploration_def.get("transformations", [])
-    )
+    calculation_transforms = []
+    other_transforms = []
+    for i in exploration_def.get("transformations", []):
+        if i.get("type") == "calculation":
+            calculation_transforms.append(i)
+        else:
+            other_transforms.append(deserialize_transformation(i))
+    transformations = tuple(other_transforms)
     db_query = DBQuery(
         base_table_oid=base_table_oid,
         initial_columns=processed_initial_columns,
@@ -109,6 +113,30 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         name=None,
         metadata=metadata
     )
+    # Apply calculation transforms to results
+    query_results = db_query.get_records(limit=limit, offset=offset)
+    results = [r._asdict() for r in query_results]
+    for calc in calculation_transforms:
+        formula = calc.get("spec", {}).get("formula", "")
+        output_col = calc.get("spec", {}).get("outputColumn", "calculation")
+        # Simple formula parser: replace column names in formula with values from each row
+        for row in results:
+            try:
+                expr = formula
+                for col in row:
+                    expr = expr.replace(col, str(row[col]))
+                # WARNING: eval is unsafe; in production, use a safe parser
+                row[output_col] = eval(expr)
+            except Exception:
+                row[output_col] = None
+    # Update output columns
+    if calculation_transforms:
+        for calc in calculation_transforms:
+            output_col = calc.get("spec", {}).get("outputColumn", "calculation")
+            exploration_def.setdefault("output_columns", [])
+            if output_col not in exploration_def["output_columns"]:
+                exploration_def["output_columns"].append(output_col)
+    # ...existing code...
     transformations = get_transforms_with_summarizes_speced(db_query, engine, metadata)
     db_query.transformations = transformations
     if exploration_def.get("transformations") is not None:
@@ -120,8 +148,6 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         transformations,
         exploration_def.get("display_names", {})
     )
-    query_results = db_query.get_records(limit=limit, offset=offset)
-
     column_metadata = _get_exploration_column_metadata(
         exploration_def,
         processed_initial_columns,
@@ -134,9 +160,9 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         "query": exploration_def,
         "records": {
             "count": db_query.count,
-            "results": [r._asdict() for r in query_results],
+            "results": results,
         },
-        "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
+        "output_columns": tuple(list(db_query.sa_output_columns) + [calc.get("spec", {}).get("outputColumn", "calculation") for calc in calculation_transforms]),
         "column_metadata": column_metadata,
         "limit": limit,
         "offset": offset

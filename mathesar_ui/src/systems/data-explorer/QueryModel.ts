@@ -16,6 +16,15 @@ import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
 import QuerySortTransformationModel from './QuerySortTransformationModel';
 import { QuerySummarizationTransformationModel } from './QuerySummarizationTransformationModel';
+// Calculation transform model
+export class QueryCalculationTransformationModel {
+  type = 'calculation';
+  name = 'Calculation';
+  spec: { formula: string; outputColumn: string };
+  constructor(transformation: any) {
+    this.spec = transformation.spec || { formula: '', outputColumn: '' };
+  }
+}
 import type { ColumnWithLink } from './utils';
 
 export interface QueryModelUpdateDiff {
@@ -35,7 +44,8 @@ export type QueryTransformationModel =
   | QueryFilterTransformationModel
   | QuerySummarizationTransformationModel
   | QueryHideTransformationModel
-  | QuerySortTransformationModel;
+  | QuerySortTransformationModel
+  | QueryCalculationTransformationModel;
 
 export function getTransformationModel(
   transformation: QueryInstanceTransformation,
@@ -49,6 +59,8 @@ export function getTransformationModel(
       return new QueryHideTransformationModel(transformation);
     case 'order':
       return new QuerySortTransformationModel(transformation);
+    case 'calculation':
+      return new QueryCalculationTransformationModel(transformation);
     default:
       return assertExhaustive(transformation);
   }
