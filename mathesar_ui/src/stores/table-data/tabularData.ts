@@ -49,9 +49,7 @@ function getSelectedCellData(
   fileManifests: AssociatedCellValuesForSheet<FileManifest>,
 ): SelectedCellData {
   const { activeCellId } = selection;
-  const selectionData = {
-    cellCount: selection.cellIds.size,
-  };
+  const selectionData = { cellCount: selection.cellIds.size };
 
   if (activeCellId === undefined) {
     return { selectionData };
@@ -60,41 +58,33 @@ function getSelectedCellData(
   const { rowId, columnId } = parseCellId(activeCellId);
   const row = selectableRowsMap.get(rowId);
 
-<<<<<<< HEAD
+  // parse column id and get typed column
   const parsedColumnId = parseColumnId(columnId);
+  const column: ProcessedColumn | undefined =
+    parsedColumnId !== null ? processedColumns.get(parsedColumnId) : undefined;
 
-  if (parsedColumnId !== undefined) {
-    const column = processedColumns.get(parsedColumnId);
-    // Now column is safely retrieved
-  } else {
-    console.warn('Invalid columnId:', columnId);
-  }
-
-=======
-  // Safely parse columnId
-  const parsedColumnId = parseColumnId(columnId);
-  let column: ProcessedColumn | undefined;
-  if (parsedColumnId !== null) {
-    column = processedColumns.get(parsedColumnId);
-  }
->>>>>>> 73c931ed5 (fix: type-safe getSelectedCellData function and resolve ESLint errors)
-
-  // Safely access the cell value
+  // safely access the cell value using the numeric parsedColumnId
   const value: ResultValue | undefined =
     row && parsedColumnId !== null ? row.record[parsedColumnId] : undefined;
 
-  // Safely access record summaries
+  // record summaries expect string keys, convert parsedColumnId to string
   const recordSummary =
     parsedColumnId !== null
-      ? defined(value, (v) => linkedRecordSummaries.get(parsedColumnId)?.get(String(v)))
+      ? defined(
+          value,
+          (v) =>
+            linkedRecordSummaries.get(String(parsedColumnId))?.get(String(v)),
+        )
       : undefined;
 
-  // Safely access file manifests
+  // file manifest access, guarded by column existence and file_backend metadata
   let fileManifest: FileManifest | undefined;
-  if (column && column.column.metadata?.file_backend) {
+  if (column?.column.metadata?.file_backend) {
     const fileReference = parseFileReference(value);
     if (fileReference) {
-      fileManifest = fileManifests.get(String(column.id))?.get(fileReference.mash);
+      fileManifest = fileManifests
+        .get(String(column.id))
+        ?.get(fileReference.mash);
     }
   }
 
@@ -294,28 +284,32 @@ export class TabularData {
       (args) => getSelectedCellData(...args),
     );
 
-    this.columnsDataStore.on('columnRenamed', async () => {
-      await this.refresh();
-    });
-    this.columnsDataStore.on('columnAdded', async () => {
+    // Use void to ensure handler returns void (not Promise<unknown>)
+    this.columnsDataStore.on('columnRenamed', () => void this.refresh());
+    this.columnsDataStore.on(
+      'columnAdded',
+      () => void this.recordsData.fetch(),
+    );
+    this.columnsDataStore.on(
+      'columnDeleted',
+      async (columnId): Promise<void> => {
+        this.meta.sorting.update((s) => s.without(columnId));
+        this.meta.grouping.update((g) => g.withoutColumns([columnId]));
+        this.meta.filtering.update((f) => f.withoutColumns([columnId]));
+        await this.constraintsDataStore.fetch();
+      },
+    );
+    this.columnsDataStore.on('columnPatched', async (): Promise<void> => {
       await this.recordsData.fetch();
     });
-    this.columnsDataStore.on('columnDeleted', async (columnId) => {
-      this.meta.sorting.update((s) => s.without(columnId));
-      this.meta.grouping.update((g) => g.withoutColumns([columnId]));
-      this.meta.filtering.update((f) => f.withoutColumns([columnId]));
-      await this.constraintsDataStore.fetch();
-    });
-    this.columnsDataStore.on('columnPatched', async () => {
-      await this.recordsData.fetch();
-    });
-    this.constraintsDataStore.on('constraintAdded', async () => {
+    this.constraintsDataStore.on('constraintAdded', async (): Promise<void> => {
       await this.recordsData.fetch();
     });
   }
 
-  refresh(): Promise<unknown> {
-    return Promise.all([
+  // Return Promise<void> to satisfy event handler types
+  async refresh(): Promise<void> {
+    await Promise.all([
       this.columnsDataStore.fetch(),
       this.recordsData.fetch(),
       this.constraintsDataStore.fetch(),

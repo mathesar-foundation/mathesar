@@ -1,6 +1,4 @@
 <script lang="ts">
-
-  import { parseColumnId } from '@mathesar/stores/columnData/utils';
   import { _ } from 'svelte-i18n';
 
   import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/rest/utils/errorCodes';
@@ -15,11 +13,6 @@
   import QueryManager from '../QueryManager';
   import type { QueryRunner } from '../QueryRunner';
 
-<<<<<<< HEAD
-=======
-  // ✅ Added required import at top (correct fix)
-
->>>>>>> 73c931ed5 (fix: type-safe getSelectedCellData function and resolve ESLint errors)
   const { currentDatabase } = databasesStore;
 
   export let queryHandler: QueryRunner | QueryManager;
