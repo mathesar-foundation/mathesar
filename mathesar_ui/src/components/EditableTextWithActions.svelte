@@ -62,13 +62,13 @@
       {disabled}
     />
   {:else}
-    <div class="input-container">
-      <svelte:component
-        this={inputElement}
-        disabled={isSubmitting}
-        autofocus
-        bind:value
-      />
+    <div class="input-container" on:mousedown|preventDefault>
+  <svelte:component
+    this={inputElement}
+    disabled={isSubmitting}
+    autofocus
+    bind:value
+   />
       {#if validationErrors.length}
         {#each validationErrors as error}
           <span class="error">{error}</span>
