@@ -1,6 +1,6 @@
 <script lang="ts">
+
   import { _ } from 'svelte-i18n';
-  
   import { parseColumnId } from '@mathesar/stores/columnData/utils';
   import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/rest/utils/errorCodes';
   import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
