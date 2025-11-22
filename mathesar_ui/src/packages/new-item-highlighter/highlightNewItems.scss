@@ -45,29 +45,19 @@ body > .new-item-highlighter__hint {
     opacity: 1;
   }
 
-  .message {
+ .message {
   background-color: var(--color-bg-tip);
   color: var(--color-fg-tip);
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  transition: background-color 0.15s ease-in-out;
+  padding: 0.5rem;
+  border-radius: 0.3rem;
+  max-width: 15rem;
   text-align: center;
-
-  &:hover {
-    background-color: var(--color-bg-tip-hover);
-  }
+  cursor: pointer;
 }
 
-  
-  
-  
-  .arrow svg path {
-      fill: var(--color-fg-tip);
-      transition: fill 0.15s ease-in-out;
-  }
+&:hover {
+  --background: var(--color-bg-tip-hover);
 }
-
 
 
   svg {
