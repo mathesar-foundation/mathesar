@@ -34,7 +34,7 @@ body > .new-item-highlighter {
 body > .new-item-highlighter__hint {
   position: absolute;
   z-index: var(--new-item-highlighter-z-index, 1000);
-  //--background: color-mix(in srgb, var(--color-bg-base), transparent 70%);
+  --background: var(--color-bg-overlay);
   inset: 0px auto auto 0px;
   display: flex;
   flex-direction: column;
@@ -46,37 +46,41 @@ body > .new-item-highlighter__hint {
   }
 
   .message {
-    /* FIX 1: Use a semantic surface color for a solid, readable background.
-       Use `--color-surface-default` (or your theme's equivalent like 
-       `--color-bg-card` or `--color-bg-subtle`).
-    */
-    background-color: var(--color-surface-default);
-    color: var(--color-fg-base);
-    padding: 0.5rem 0.75rem; /* Slightly more padding */
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: background-color 0.15s ease-in-out;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for elevation */
-    text-align: center;
-    
-    /* FIX 2: Use a semantic hover color that ensures text (var(--color-fg-base)) 
-       remains readable in both light and dark modes.
-    */
-    &:hover {
-      background-color: var(--color-surface-hover);
-    }
+  background-color: var(--color-bg-tip);
+  color: var(--color-fg-tip);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  text-align: center;
+
+  &:hover {
+    background-color: var(--color-bg-tip-hover);
   }
+}
+
   
-  /* Ensure the arrow is styled correctly on hover by referencing the parent hover state. 
-     Based on your component structure, the arrow is likely a sibling or a direct 
-     child of the hint, but we can't be sure without the HTML.
-     If the arrow color is tied to the text color, it will usually be fine.
-  */
+  
+  
   .arrow svg path {
-      fill: var(--color-fg-base);
+      fill: var(--color-fg-tip);
       transition: fill 0.15s ease-in-out;
   }
 }
+
+
+
+  svg {
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-bottom: -1px;
+    cursor: pointer;
+
+    path {
+      fill: var(--background);
+    }
+  }
+
 
   &.down {
     flex-direction: column-reverse;
