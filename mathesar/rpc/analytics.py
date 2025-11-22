@@ -1,6 +1,12 @@
 """
-Classes and functions exposed to the RPC endpoint for managing analytics.
+RPC-exposed classes and functions for managing Mathesar analytics.
+
+This module provides RPC endpoints for checking analytics status,
+initializing analytics, disabling analytics, viewing generated reports,
+and uploading user feedback. These functions are consumed by the UI
+via the RPC API.
 """
+
 from typing import TypedDict, Optional
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.analytics import (
@@ -14,25 +20,28 @@ from mathesar.analytics import (
 
 class AnalyticsReport(TypedDict):
     """
-    A report with some statistics about the data accessible by Mathesar.
+    A structured report containing usage statistics collected by Mathesar.
 
     Attributes:
-        installation_id: A unique ID for this Mathesar installation.
-        mathesar_version: The version of Mathesar.
-        user_count: The number of configured users in Mathesar.
-        active_user_count: The number of users who have recently logged in.
-        configured_role_count: The number of DB roles configured.
-        connected_database_count: The number of databases configured.
-        connected_database_schema_count: The number of all schemas in
-            all connected databases.
-        connected_database_table_count: The total number of tables in
-            all connected databasees.
-        connected_database_record_count: The total number of records in
-            all connected databasees (approximated)
-        exploration_count: The number of explorations.
-        form_count: The number of forms.
-        public_form_count: The number of published forms.
+        installation_id (Optional[str]): A unique identifier for this
+            Mathesar installation. ``None`` indicates analytics has not
+            been initialized.
+        mathesar_version (str): The current version of Mathesar.
+        user_count (int): Total number of configured users.
+        active_user_count (int): Number of users who recently logged in.
+        configured_role_count (int): Number of configured database roles.
+        connected_database_count (int): Number of connected databases.
+        connected_database_schema_count (int): Total schemas across all
+            connected databases.
+        connected_database_table_count (int): Total tables across all
+            connected databases.
+        connected_database_record_count (int): Approximate count of all
+            records across connected databases.
+        exploration_count (int): Number of explorations created.
+        form_count (int): Number of forms created.
+        public_form_count (int): Number of forms published publicly.
     """
+
     installation_id: Optional[str]
     mathesar_version: str
     user_count: int
@@ -48,6 +57,16 @@ class AnalyticsReport(TypedDict):
 
     @classmethod
     def from_dict(cls, d):
+        """
+        Convert a raw dictionary from the analytics module into an
+        ``AnalyticsReport`` TypedDict.
+
+        Args:
+            d (dict): Raw input dictionary produced by analytics reporting.
+
+        Returns:
+            AnalyticsReport: A normalized, strongly-typed analytics report.
+        """
         if d["installation_id"] is not None:
             d["installation_id"] = str(d["installation_id"].value)
         return cls(d)
@@ -55,23 +74,35 @@ class AnalyticsReport(TypedDict):
 
 class AnalyticsState(TypedDict):
     """
-    Returns the current state of analytics.
+    Represents the current analytics state.
 
     Attributes:
-        enabled: A boolean representing if analytics is enabled.
+        enabled (bool): True if analytics collection is enabled, False otherwise.
     """
+
     enabled: bool
 
     @classmethod
     def from_boolean(cls, b):
+        """
+        Construct an ``AnalyticsState`` from a boolean value.
+
+        Args:
+            b (bool): Whether analytics is enabled.
+
+        Returns:
+            AnalyticsState: Wrapped state.
+        """
         return cls({"enabled": b})
 
 
 @mathesar_rpc_method(name="analytics.get_state")
 def get_state() -> AnalyticsState:
     """
+    Retrieve the current analytics enablement state.
+
     Returns:
-        A boolean to identify if analytics is enabled.
+        AnalyticsState: A structure indicating whether analytics is enabled.
     """
     return AnalyticsState.from_boolean(is_analytics_enabled())
 
@@ -79,10 +110,11 @@ def get_state() -> AnalyticsState:
 @mathesar_rpc_method(name="analytics.initialize")
 def initialize():
     """
-    Initialize analytics collection and reporting in Mathesar
+    Initialize analytics collection for this Mathesar installation.
 
-    If initialized, analytics are gathered to a local model once per day,
-    and uploaded.
+    Once initialized, analytics are gathered daily and uploaded based on
+    configured reporting settings. Initialization also creates a persistent
+    installation ID used to associate reports belonging to the same installation.
     """
     initialize_analytics()
 
@@ -90,12 +122,11 @@ def initialize():
 @mathesar_rpc_method(name="analytics.disable")
 def disable():
     """
-    Disable analytics collection and reporting in Mathesar
+    Disable analytics collection for this Mathesar installation.
 
-    Disabling analytics amounts to (for now) simply deleting the
-    Installation ID, ensuring that it's impossible to save analytics
-    reports. Any reports currently saved are removed when the
-    Installation ID is deleted.
+    This operation removes the stored installation ID and clears all
+    previously generated analytics reports. Once disabled, analytics
+    collection and uploading cannot occur until reinitialized.
     """
     disable_analytics()
 
@@ -103,11 +134,14 @@ def disable():
 @mathesar_rpc_method(name="analytics.view_report")
 def view_report() -> AnalyticsReport:
     """
-    View an example analytics report, prepared with the same function
-    that creates real reports that would be saved and uploaded.
+    Generate and return an example analytics report.
+
+    This uses the same underlying reporting logic used for real analytics
+    uploads but does not store or transmit any data.
 
     Returns:
-        An analytics report.
+        AnalyticsReport: A complete analytics report object containing
+        usage metrics and installation information.
     """
     report = prepare_analytics_report()
     return AnalyticsReport.from_dict(report)
@@ -116,9 +150,12 @@ def view_report() -> AnalyticsReport:
 @mathesar_rpc_method(name="analytics.upload_feedback", auth="login")
 def upload_feedback(message: str):
     """
-    Upload a feedback message to Mathesar's servers.
+    Upload a user feedback message to Mathesar's servers.
 
     Args:
-        message: The feedback message to send.
+        message (str): The user-provided feedback message.
+
+    Returns:
+        None
     """
     upload_feedback_message(message)
