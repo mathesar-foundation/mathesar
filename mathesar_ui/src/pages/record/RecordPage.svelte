@@ -4,23 +4,31 @@
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewGatekeeper from '@mathesar/systems/record-view/RecordViewGatekeeper.svelte';
   import WithModalRecordView from '@mathesar/systems/record-view-modal/WithModalRecordView.svelte';
-
   import RecordPageContent from './RecordPageContent.svelte';
+  import NotFoundPage from '@mathesar/components/NotFoundPage.svelte';
 
   export let record: RecordStore;
 
   $: recordStoreFetchRequest = record.fetchRequest;
   $: ({ summary } = record);
   $: recordStoreIsLoading = $recordStoreFetchRequest?.state === 'processing';
+  $: recordStoreHasError = $recordStoreFetchRequest?.state === 'error';
+  $: recordStoreNotFound = recordStoreHasError && $recordStoreFetchRequest?.error?.status === 404;
   $: title = recordStoreIsLoading ? '' : $summary;
 </script>
 
 <svelte:head><title>{makeSimplePageTitle(title)}</title></svelte:head>
 
-<LayoutWithHeader cssVariables={{ '--page-padding': '0' }} fitViewport>
-  <RecordViewGatekeeper {record}>
-    <WithModalRecordView>
-      <RecordPageContent {record} />
-    </WithModalRecordView>
-  </RecordViewGatekeeper>
-</LayoutWithHeader>
+{#if recordStoreNotFound}
+  <LayoutWithHeader cssVariables={{ '--page-padding': '0' }} fitViewport>
+    <NotFoundPage message="Record Not Found" />
+  </LayoutWithHeader>
+{:else}
+  <LayoutWithHeader cssVariables={{ '--page-padding': '0' }} fitViewport>
+    <RecordViewGatekeeper {record}>
+      <WithModalRecordView>
+        <RecordPageContent {record} />
+      </WithModalRecordView>
+    </RecordViewGatekeeper>
+  </LayoutWithHeader>
+{/if}
