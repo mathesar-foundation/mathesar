@@ -1,4 +1,17 @@
 <script lang="ts">
+mathesar_ui/src/component-library/button/Button.svelte
+// NEW PROPS
+
+export let variant: string = '';             // new prop
+
+// NEW MAPPING — decide final appearance
+$: finalAppearance =
+  variant === 'control' || variant === 'input'
+    ? variant
+    : appearance === 'control' || appearance === 'input'
+      ? appearance
+      : 'default';
+
   import type {
     Appearance,
     Size,
@@ -16,7 +29,8 @@
   export let element: HTMLElement | undefined = undefined;
   export let tooltip: string | undefined = undefined;
 
-  $: allClasses = ['btn', `btn-${appearance}`, `size-${size}`, classes].join(
+$: allClasses = ['btn', `btn-${finalAppearance}`, `size-${size}`, classes].join(
+
     ' ',
   );
 </script>
