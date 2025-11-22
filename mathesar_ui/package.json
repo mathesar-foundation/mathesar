@@ -9,6 +9,10 @@
     "lint-fix": "eslint --fix .",
     "typecheck": "svelte-check --tsconfig tsconfig.json --threshold warning .",
     "build": "vite build",
+    "build:production": "NODE_ENV=production npm run build",
+    "build:development": "NODE_ENV=development npm run build",
+    "package": "npm run build && echo 'package step completed'",
+    "checkpoint": "echo 'checkpoint step completed'",
     "test": "vitest",
     "extract-i18n": "svelte-i18n extract 'src/**/*{.svelte, .ts}' -c './svelte.config.cjs'"
   },
