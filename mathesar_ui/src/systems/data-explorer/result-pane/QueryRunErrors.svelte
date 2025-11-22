@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-
+  
+  import { parseColumnId } from '@mathesar/stores/columnData/utils';
   import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/rest/utils/errorCodes';
   import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
@@ -8,12 +9,8 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { Button, hasProperty } from '@mathesar-component-library';
-
   import QueryManager from '../QueryManager';
   import type { QueryRunner } from '../QueryRunner';
-
-  // ✅ Added required import at top (correct fix)
-  import { parseColumnId } from '@mathesar/stores/columnData/utils';
 
   const { currentDatabase } = databasesStore;
 
