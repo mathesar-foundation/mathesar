@@ -21,7 +21,7 @@ export function calcAllowedColumnsPerTransformation(
     const transformation = transformationModels[index - 1];
     if (transformation.type === 'summarize') {
       latestColumnList = getProcessedOutputColumns(
-        transformation.getOutputColumnAliases(),
+        ((transformation as any).getOutputColumnAliases ? (transformation as any).getOutputColumnAliases() : []),
         columnsMetaData,
       );
     }

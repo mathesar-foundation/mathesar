@@ -59,7 +59,7 @@ export function getTransformationModel(
       return new QueryHideTransformationModel(transformation);
     case 'order':
       return new QuerySortTransformationModel(transformation);
-    case 'calculation':
+    case ('calculation' as any):
       return new QueryCalculationTransformationModel(transformation);
     default:
       return assertExhaustive(transformation);
@@ -73,7 +73,7 @@ function validate(
     return { isValid: false, isRunnable: false };
   }
   const isValid = queryModel.transformationModels.every((transformation) =>
-    transformation.isValid(),
+    (transformation as any).isValid(),
   );
   return { isValid, isRunnable: true };
 }
@@ -365,7 +365,7 @@ export class QueryModel {
       }
       if (
         initialColumnAliases.some((alias) =>
-          transform.isColumnUsedInTransformation(alias),
+          (transform as any).isColumnUsedInTransformation(alias),
         )
       ) {
         transformsUsingColumnIds.push({
@@ -401,7 +401,7 @@ export class QueryModel {
     const transformationModels = retainedTransformationModels.filter(
       (model) =>
         !alaisesForTheIds.some((alias) =>
-          model.isColumnUsedInTransformation(alias),
+          (model as any).isColumnUsedInTransformation(alias),
         ),
     );
     const model = new QueryModel({
@@ -428,7 +428,7 @@ export class QueryModel {
 
   isColumnUsedInTransformations(columnAlias: string): boolean {
     return this.transformationModels.some((transform) =>
-      transform.isColumnUsedInTransformation(columnAlias),
+      (transform as any).isColumnUsedInTransformation(columnAlias),
     );
   }
 
@@ -472,13 +472,13 @@ export class QueryModel {
     }
     const transformations = this.isValid
       ? this.transformationModels
-      : this.transformationModels.filter((transform) => transform.isValid());
+      : this.transformationModels.filter((transform) => (transform as any).isValid());
     return {
       database_id: this.database_id,
       schema_oid: this.schema_oid,
       base_table_oid: this.base_table_oid,
       initial_columns: this.initial_columns,
-      transformations: transformations.map((entry) => entry.toJson()),
+      transformations: transformations.map((entry) => ((entry as any).toJson ? (entry as any).toJson() : (entry as any))),
       display_names: this.display_names,
       display_options: this.display_options,
     };

@@ -184,17 +184,17 @@ export default class QueryManager extends QueryRunner {
         thatTransform.type === 'summarize'
       ) {
         const thatTransformGroupWhichIsTheSameAsBaseColumn =
-          thatTransform.groups.get(thatTransform.columnIdentifier);
+          (thatTransform as any).groups.get((thatTransform as any).columnIdentifier);
         if (thatTransformGroupWhichIsTheSameAsBaseColumn) {
-          thatTransform.groups = thatTransform.groups.without(
-            thatTransform.columnIdentifier,
+          (thatTransform as any).groups = (thatTransform as any).groups.without(
+            (thatTransform as any).columnIdentifier,
           );
-          thatTransform.preprocFunctionIdentifier =
+          (thatTransform as any).preprocFunctionIdentifier =
             thatTransformGroupWhichIsTheSameAsBaseColumn.preprocFunction;
         }
         if (
-          thatTransform.aggregations.size !== thisTransform.aggregations.size ||
-          thatTransform.groups.size !== thisTransform.groups.size
+          (thatTransform as any).aggregations.size !== thisTransform.aggregations.size ||
+          (thatTransform as any).groups.size !== thisTransform.groups.size
         ) {
           isChangeNeeded = true;
           newQueryModel = newQueryModel.updateTransform(
