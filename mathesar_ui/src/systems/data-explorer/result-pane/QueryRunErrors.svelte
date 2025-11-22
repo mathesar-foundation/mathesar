@@ -1,4 +1,6 @@
 <script lang="ts">
+import { safeParseNumber } from "../utils/parseColumnId";
+
   import { _ } from 'svelte-i18n';
 
   import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/rest/utils/errorCodes';
@@ -35,7 +37,7 @@
       {#each errors.errors as apierror}
         <ul>
           {#if apierror.code === QUERY_CONTAINS_DELETED_COLUMN && hasProperty(apierror.detail, 'column_id')}
-            {@const columnId = Number(apierror.detail.column_id)}
+            {@const columnId = safeParseNumber(apierror.detail.column_id)}
             <li class="error">
               <p class="strong">
                 {$_('some_columns_in_query_missing')}
