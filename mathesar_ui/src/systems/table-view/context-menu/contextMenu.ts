@@ -8,15 +8,18 @@ import {
   menuSection,
   subMenu,
 } from '@mathesar/component-library';
+
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { ImperativeFilterController } from '@mathesar/pages/table/ImperativeFilterController';
 import type { TabularData } from '@mathesar/stores/table-data';
 import type RecordStore from '@mathesar/systems/record-view/RecordStore';
+
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
+// Existing entries
 import { deleteColumn } from './entries/deleteColumn';
 import { deleteRecords } from './entries/deleteRecords';
 import { duplicateRecord } from './entries/duplicateRecord';
@@ -28,6 +31,10 @@ import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
 import { viewRowRecord } from './entries/viewRowRecord';
+
+// ⭐ NEW COPY / PASTE entries
+import { copyCell } from './entries/copyCell';
+import { pasteCell } from './entries/pasteCell';
 
 export function openTableCellContextMenu({
   targetCell,
@@ -82,10 +89,7 @@ export function openTableCellContextMenu({
     yield* deleteColumn({ tabularData, column });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function* getEntriesForMultipleColumns(columnIds: string[]) {
-    // None yet
-  }
+  function* getEntriesForMultipleColumns(_columnIds: string[]) {}
 
   function* getEntriesForArbitraryColumns(columnIds: Iterable<string>) {
     const soleColumnId = takeFirstAndOnly(columnIds);
@@ -112,6 +116,10 @@ export function openTableCellContextMenu({
       cellValue,
       modalRecordView,
     });
+
+    // ⭐ ADD COPY + PASTE HERE
+    yield* copyCell({ tabularData, cellId });
+    yield* pasteCell({ tabularData, cellId });
 
     yield* getEntriesForMultipleCells([cellId]);
   }
