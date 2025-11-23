@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "prettier-plugin-sort-json": "^4.1.1",
+    "prettier-plugin-svelte": "^3.4.0"
+  }
+}
