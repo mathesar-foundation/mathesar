@@ -5,7 +5,7 @@
   } from '@mathesar-component-library-dir/commonTypes';
   import Tooltip from '@mathesar-component-library-dir/tooltip/Tooltip.svelte';
 
-  export let appearance: Appearance = 'control';
+  export let appearance: Appearance = 'default';
   export let size: Size = 'medium';
   export let active = false;
   export let type: 'button' | 'submit' = 'button';
