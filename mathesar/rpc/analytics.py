@@ -91,7 +91,7 @@ class AnalyticsState(TypedDict):
             b (bool): Whether analytics is enabled.
 
         Returns:
-            AnalyticsState: Wrapped state.
+            AnalyticsState: Wrapped state representing analytics state.
         """
         return cls({"enabled": b})
 
@@ -108,25 +108,25 @@ def get_state() -> AnalyticsState:
 
 
 @mathesar_rpc_method(name="analytics.initialize")
-def initialize():
+def initialize() -> None:
     """
     Initialize analytics collection for this Mathesar installation.
 
-    Once initialized, analytics are gathered daily and uploaded based on
-    configured reporting settings. Initialization also creates a persistent
-    installation ID used to associate reports belonging to the same installation.
+    Once initialized, analytics are gathered daily and can be uploaded
+    based on configured reporting settings. Initialization creates a
+    persistent installation ID for tracking analytics.
     """
     initialize_analytics()
 
 
 @mathesar_rpc_method(name="analytics.disable")
-def disable():
+def disable() -> None:
     """
     Disable analytics collection for this Mathesar installation.
 
     This operation removes the stored installation ID and clears all
-    previously generated analytics reports. Once disabled, analytics
-    collection and uploading cannot occur until reinitialized.
+    previously generated analytics reports. Analytics collection remains
+    disabled until explicitly reinitialized.
     """
     disable_analytics()
 
@@ -136,26 +136,23 @@ def view_report() -> AnalyticsReport:
     """
     Generate and return an example analytics report.
 
-    This uses the same underlying reporting logic used for real analytics
-    uploads but does not store or transmit any data.
+    This uses the same reporting logic used for real analytics uploads but
+    does not store or transmit any data.
 
     Returns:
-        AnalyticsReport: A complete analytics report object containing
-        usage metrics and installation information.
+        AnalyticsReport: A complete analytics report object containing usage
+        metrics and installation information.
     """
     report = prepare_analytics_report()
     return AnalyticsReport.from_dict(report)
 
 
 @mathesar_rpc_method(name="analytics.upload_feedback", auth="login")
-def upload_feedback(message: str):
+def upload_feedback(message: str) -> None:
     """
     Upload a user feedback message to Mathesar's servers.
 
     Args:
         message (str): The user-provided feedback message.
-
-    Returns:
-        None
     """
     upload_feedback_message(message)
