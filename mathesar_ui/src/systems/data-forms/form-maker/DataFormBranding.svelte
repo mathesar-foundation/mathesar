@@ -21,11 +21,18 @@
   .form-branding {
     padding: var(--sm1);
     color: var(--color-fg-base-muted);
+
     a {
+      color: var(--color-fg-base);
       text-decoration: none;
-      &:hover {
-        color: var(--color-fg-base);
-        border-bottom: solid 2px var(--color-brand);
+      transition:
+        color 120ms ease,
+        text-decoration 120ms ease;
+
+      &:hover,
+      &:focus {
+        text-decoration: underline;
+        outline: none;
       }
     }
   }
