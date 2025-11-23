@@ -12,7 +12,7 @@
   import AttachableDropdown from './AttachableDropdown.svelte';
 
   export let triggerClass = '';
-  export let triggerAppearance: Appearance = 'control';
+  export let triggerAppearance: Appearance = 'default';
   export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
