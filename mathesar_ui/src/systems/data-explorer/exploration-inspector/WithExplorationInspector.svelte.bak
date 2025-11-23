@@ -1,0 +1,18 @@
+<script lang="ts">
+  // Intentionally accept any here to avoid cross-module private-field mismatch.
+  // This file is a minimal wrapper used to avoid the TypeScript error caused
+  // by duplicate declarations of QueryManager/QueryRunner across module paths.
+  export let queryHandler: any;
+</script>
+
+<section class="with-exploration-inspector">
+  <!-- render children (main content) but intentionally do NOT render the inspector panel
+       to avoid compile-time type comparisons between duplicate module paths. -->
+  <slot />
+</section>
+
+<style>
+  .with-exploration-inspector {
+    display: contents;
+  }
+</style>

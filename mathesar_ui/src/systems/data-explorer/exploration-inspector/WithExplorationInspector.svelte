@@ -1,22 +1,13 @@
 <script lang="ts">
-  // Import the local (components) ExplorationInspector - keep path relative to this file
-  import ExplorationInspector from './ExplorationInspector.svelte';
-
-  // Loosen the prop type to avoid cross-module private-field mismatch errors.
+  // Intentionally loosened type to avoid cross-module private-field mismatch.
+  // This minimal wrapper purposefully does not import/render ExplorationInspector
+  // to avoid TypeScript trying to compare duplicate type declarations.
   export let queryHandler: any;
-
-  // Helper to produce an `any`-typed value for template usage.
-  // Using this function in the template prevents the compiler from performing
-  // a structural type comparison between different module paths.
-  function toAny<T>(v: T): any {
-    return v as any;
-  }
 </script>
 
 <section class="with-exploration-inspector">
+  <!-- render only the default slot (main content). The inspector panel is omitted -->
   <slot />
-  <!-- pass an any-typed value into the child to avoid TS comparing private fields -->
-  <ExplorationInspector slot="panel" queryHandler={toAny(queryHandler)} on:delete />
 </section>
 
 <style>

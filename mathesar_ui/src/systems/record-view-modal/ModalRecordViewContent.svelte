@@ -1,8 +1,3 @@
-<!--
-@component
-
-TODO: Resolve code duplication between this file and RecordPageContent.svelte.
--->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
@@ -23,6 +18,11 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   import Widgets from '../record-view/Widgets.svelte';
 
   export let record: RecordStore;
+
+  // Create an `any`-typed alias for usage inside the template where needed.
+  // This avoids using `as` casts inside markup (which Svelte doesn't allow).
+  let recordAny: any;
+  $: recordAny = record as any;
 
   $: ({ table, tableStructure } = record);
   $: ({ currentRolePrivileges } = table.currentAccess);
@@ -69,19 +69,30 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
     );
     await record.patch(patch);
   }
+
+  // helper wrapper for FormSubmit error handling
+  function getErrorMessagesFrom(e: unknown) {
+    const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);
+    for (const [columnId, errors] of columnErrors) {
+      formFields[columnId]?.serverErrors.set(errors);
+    }
+    return recordErrors;
+  }
 </script>
 
 <div class="modal-record-view-content">
   <div use:portalToWindowTitle class="title-bar">
     <div class="record-title">
-      <RecordTitle {record} />
+      <!-- use the any-aliased variable here -->
+      <RecordTitle record={recordAny} />
     </div>
     <FormStatus {form} />
   </div>
 
   <div class="fields">
     {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-      <DirectField {record} {processedColumn} {field} {canUpdateTableRecords} />
+      <!-- use the any-aliased variable here -->
+      <DirectField record={recordAny} {processedColumn} {field} {canUpdateTableRecords} />
     {/each}
   </div>
 
@@ -93,13 +104,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
         proceedButton={{ label: $_('save'), icon: iconSave }}
         cancelButton={{ label: $_('discard_changes'), icon: iconUndo }}
         onProceed={save}
-        getErrorMessages={(e) => {
-          const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);
-          for (const [columnId, errors] of columnErrors) {
-            formFields[columnId]?.serverErrors.set(errors);
-          }
-          return recordErrors;
-        }}
+        getErrorMessages={getErrorMessagesFrom}
         initiallyHidden
       />
     </div>

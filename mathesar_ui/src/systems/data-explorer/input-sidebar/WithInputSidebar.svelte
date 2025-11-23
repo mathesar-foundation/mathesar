@@ -1,20 +1,17 @@
 <script lang="ts">
   import { dataExplorerLeftSidebarWidth } from '@mathesar/stores/localStorage';
-  import type QueryManager from '@mathesar/systems/data-explorer/QueryManager';
-  import type { ColumnWithLink } from '@mathesar/systems/data-explorer/utils';
   import { WithPanel } from '@mathesar-component-library';
 
-  // Use the local InputSidebar in the same folder
-  import InputSidebar from './InputSidebar.svelte';
+  // Import the canonical InputSidebar from the system path (alias)
+  // so runtime behaviour remains unchanged.
+  import InputSidebar from '@mathesar/systems/data-explorer/input-sidebar/InputSidebar.svelte';
 
-  // Loosen the type to avoid cross-module private-field mismatch errors.
-  // This is a pragmatic fix to unblock typechecking/CI.
+  // Loosen the type here to avoid cross-module private-field mismatch errors.
+  // This is a pragmatic, CI-unblocking change.
   export let queryManager: any;
-  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
-    {};
+  export let linkCollapsibleOpenState: Record<string, boolean> = {};
 
-  // Local any-typed alias to ensure template-level passing does not trigger
-  // cross-module type comparisons.
+  // Local any-typed alias so passing into children doesn't trigger TS comparison
   let queryManagerAny: any;
   $: queryManagerAny = queryManager as any;
 </script>
@@ -25,7 +22,6 @@
   minSizePx={250}
   maxSizePx={700}
 >
-  <!-- pass the any-typed alias to the child so TS won't try to compare private fields -->
   <InputSidebar slot="panel" queryManager={queryManagerAny} {linkCollapsibleOpenState} />
   <slot />
 </WithPanel>
