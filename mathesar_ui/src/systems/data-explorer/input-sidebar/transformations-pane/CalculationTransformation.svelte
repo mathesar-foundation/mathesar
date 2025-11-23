@@ -5,7 +5,7 @@
   // can be a Map-like immutable structure in the codebase.
   export let model: any;
   export let columns: any = null;
-  export let limitEditing: boolean = false;
+  export let limitEditing = false;
 
   const dispatch = createEventDispatcher<{ change: { model: any } }>();
 
@@ -80,7 +80,7 @@
   </label>
 
   <!-- invisible usage of columnsCount so `columns` is treated as used -->
-  <div aria-hidden="true" style="display:none">{columnsCount}</div>
+  <div aria-hidden="true" style="display: none;">{columnsCount}</div>
 </div>
 
 <style>
@@ -96,7 +96,7 @@
     font-size: 0.95rem;
   }
 
-  .calculation-transform input[type="text"] {
+  .calculation-transform input[type='text'] {
     padding: 0.5rem;
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.12);

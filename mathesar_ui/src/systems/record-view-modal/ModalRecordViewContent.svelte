@@ -92,7 +92,12 @@
   <div class="fields">
     {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
       <!-- use the any-aliased variable here -->
-      <DirectField record={recordAny} {processedColumn} {field} {canUpdateTableRecords} />
+      <DirectField
+        record={recordAny}
+        {processedColumn}
+        {field}
+        {canUpdateTableRecords}
+      />
     {/each}
   </div>
 

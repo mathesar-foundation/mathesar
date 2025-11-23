@@ -28,20 +28,20 @@
     bind:linkCollapsibleOpenState
     bind:isInspectorOpen
   />
+
   {#if !$query.base_table_oid}
     <div class="initial-content">
       {#if $queries.requestStatus.state === 'success' && $queries.data.size === 0}
         <div class="tutorial-holder">
           <Tutorial>
-            <span slot="title">
-              {$_('create_share_explorations_of_your_data')}
-            </span>
-            <span slot="body">
-              {$_('create_exploration_empty_state_help')}
-            </span>
+            <span slot="title"
+              >{$_('create_share_explorations_of_your_data')}</span
+            >
+            <span slot="body">{$_('create_exploration_empty_state_help')}</span>
           </Tutorial>
         </div>
       {/if}
+
       <div class="help-text">
         {$_('get_started_by_adding_table_and_columns')}
       </div>
@@ -55,15 +55,13 @@
           </div>
         {:else}
           <div class="results-wrapper">
-            <WithExplorationInspector
-              queryHandler={queryManager}
-              on:delete
-            >
+            <WithExplorationInspector queryHandler={queryManager} on:delete>
               <ExplorationResults queryHandler={queryManager} />
             </WithExplorationInspector>
           </div>
         {/if}
       </WithInputSidebar>
+
       {#if hasColumns}
         <StatusBar queryHandler={queryManager} />
       {/if}
@@ -98,6 +96,7 @@
       .help-text {
         margin: 10rem 0;
       }
+
       .tutorial-holder + .help-text {
         margin: 5rem 0;
       }
@@ -108,6 +107,7 @@
       grid-template: 1fr auto / 1fr;
       overflow: hidden;
       padding: 0 var(--sm3);
+
       .results-wrapper {
         height: 100%;
       }
