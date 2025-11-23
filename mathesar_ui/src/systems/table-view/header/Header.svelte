@@ -96,7 +96,29 @@
     selectedColumnIdsOrdered = [];
     newColumnOrder = [];
   }
+  function handleResize(columnId: number, newWidth: number | null) {
+    const selected = $selection.columnIds;
 
+    const columnIsSelected = selected.has(String(columnId));
+
+    if (columnIsSelected && selected.size > 1) {
+      // Resize all selected columns
+      for (const colId of selected) {
+        const c = $processedColumns.get(Number(colId));
+        if (c) {
+          void columnsDataStore.setDisplayOptions(c, {
+            display_width: newWidth,
+          });
+        }
+      }
+    } else {
+      // Resize only the one column
+      const c = $processedColumns.get(columnId);
+      if (c) {
+        void columnsDataStore.setDisplayOptions(c, { display_width: newWidth });
+      }
+    }
+  }
   function saveColumnWidth(column: ProcessedColumn, width: number | null) {
     void columnsDataStore.setDisplayOptions(column, { display_width: width });
   }
@@ -132,8 +154,8 @@
       </Draggable>
       <SheetCellResizer
         columnIdentifierKey={columnId}
-        afterResize={(width) => saveColumnWidth(processedColumn, width)}
-        onReset={() => saveColumnWidth(processedColumn, null)}
+        afterResize={(width) => handleResize(columnId, width)}
+        onReset={() => handleResize(columnId, null)}
       />
     </SheetColumnHeaderCell>
   {/each}
