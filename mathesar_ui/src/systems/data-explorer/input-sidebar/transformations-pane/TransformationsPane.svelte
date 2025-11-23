@@ -28,14 +28,19 @@
     alert('Calculation transform: UI and model to be implemented');
   }
 
+  import CalculationTransformation from './CalculationTransformation.svelte';
   import FilterTransformation from './FilterTransformation.svelte';
   import HideTransformation from './HideTransformation.svelte';
   import SortTransformation from './SortTransformation.svelte';
   import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
-  import CalculationTransformation from './CalculationTransformation.svelte';
   import { calcAllowedColumnsPerTransformation } from './transformationUtils';
 
   export let queryManager: QueryManager;
+
+  // helper to safely cast inside script (avoids `as` in markup)
+  function toAny(x: unknown) {
+    return x as any;
+  }
 
   $: ({ query, processedColumns, columnsMetaData } = queryManager);
   $: ({ initial_columns, transformationModels } = $query);
@@ -151,7 +156,7 @@
           {#if transformationModel.type === 'filter'}
             <FilterTransformation
               columns={allowedColumnsPerTransformation[index]}
-              model={transformationModel}
+              model={toAny(transformationModel)}
               limitEditing={hasNoColumns}
               totalTransformations={transformationModels.length}
               on:update={() => updateTransformation(index, transformationModel)}
@@ -159,7 +164,7 @@
           {:else if transformationModel.type === 'summarize'}
             <SummarizationTransformation
               columns={allowedColumnsPerTransformation[index]}
-              model={transformationModel}
+              model={toAny(transformationModel)}
               limitEditing={hasNoColumns ||
                 index < transformationModels.length - 1}
               on:update={() => updateTransformation(index, transformationModel)}
@@ -167,14 +172,14 @@
           {:else if transformationModel.type === 'calculation'}
             <CalculationTransformation
               columns={allowedColumnsPerTransformation[index]}
-              model={transformationModel}
+              model={toAny(transformationModel)}
               limitEditing={hasNoColumns}
               on:update={() => updateTransformation(index, transformationModel)}
             />
           {:else if transformationModel.type === 'hide'}
             <HideTransformation
               columns={allowedColumnsPerTransformation[index]}
-              model={transformationModel}
+              model={toAny(transformationModel)}
               limitEditing={hasNoColumns}
               on:update={() => updateTransformation(index, transformationModel)}
             />
@@ -186,7 +191,7 @@
                   .without($query.getAllSortedColumns())
                   .values(),
               ].map((entry) => entry.column.alias)}
-              model={transformationModel}
+              model={toAny(transformationModel)}
               limitEditing={hasNoColumns}
               on:update={() => updateTransformation(index, transformationModel)}
             />

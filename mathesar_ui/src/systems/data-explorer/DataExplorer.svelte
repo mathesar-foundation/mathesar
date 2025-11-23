@@ -4,8 +4,9 @@
   import { queries } from '@mathesar/stores/queries';
   import { Tutorial } from '@mathesar-component-library';
 
+  // Correct (local) imports for components that live in the same systems/data-explorer tree
   import ActionsPane from './action-pane/ActionsPane.svelte';
-  import { WithExplorationInspector } from './exploration-inspector';
+  import WithExplorationInspector from './exploration-inspector/WithExplorationInspector.svelte';
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
   import type QueryManager from './QueryManager';
   import ExplorationResults from './result-pane/ExplorationResults.svelte';
@@ -56,7 +57,6 @@
         {:else}
           <div class="results-wrapper">
             <WithExplorationInspector
-              {isInspectorOpen}
               queryHandler={queryManager}
               on:delete
             >

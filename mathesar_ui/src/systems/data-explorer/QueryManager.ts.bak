@@ -176,64 +176,26 @@ export default class QueryManager extends QueryRunner {
     const thisQueryModel = this.getQueryModel();
     let newQueryModel = thisQueryModel;
     let isChangeNeeded = false;
-
-    // ---------- Type guard: summarization transform ----------
-    // This prefers a `type` discriminant if present, otherwise falls back to structural checks.
-    function isSummarizationTransform(
-      t: any,
-    ): t is QuerySummarizationTransformationModel {
-      if (!t) return false;
-      if (t?.type !== undefined && typeof t.type === 'string') {
-        const typeStr = String(t.type).toLowerCase();
-        return (
-          typeStr === 'summarize' ||
-          typeStr === 'summarization' ||
-          typeStr === 'summarise'
-        );
-      }
-      // fallback: summarization transforms should have 'aggregations' and 'groups'
-      return t?.aggregations !== undefined && t?.groups !== undefined;
-    }
-    // --------------------------------------------------------
-
     thisQueryModel.transformationModels.forEach((thisTransform, index) => {
       const thatTransform = transformationModels[index];
-      // Only attempt summarization-specific comparisons when both sides are summarization transforms
       if (
-        isSummarizationTransform(thisTransform) &&
+        thisTransform.type === 'summarize' &&
         thatTransform &&
-        isSummarizationTransform(thatTransform)
+        thatTransform.type === 'summarize'
       ) {
-        const thatTransformGroupWhichIsTheSameAsBaseColumn = (
-          thatTransform as any
-        ).groups?.get?.((thatTransform as any).columnIdentifier);
+        const thatTransformGroupWhichIsTheSameAsBaseColumn =
+          thatTransform.groups.get(thatTransform.columnIdentifier);
         if (thatTransformGroupWhichIsTheSameAsBaseColumn) {
-          // mutate a copy or the object as originally intended by your codebase:
-          (thatTransform as any).groups = (thatTransform as any).groups.without
-            ? (thatTransform as any).groups.without(
-                (thatTransform as any).columnIdentifier,
-              )
-            : (function () {
-                // fallback: if 'without' is not present, attempt to create a new Map-like object without the key
-                try {
-                  const g = new Map((thatTransform as any).groups);
-                  g.delete((thatTransform as any).columnIdentifier);
-                  return g;
-                } catch {
-                  return (thatTransform as any).groups;
-                }
-              })();
-          (thatTransform as any).preprocFunctionIdentifier =
+          thatTransform.groups = thatTransform.groups.without(
+            thatTransform.columnIdentifier,
+          );
+          thatTransform.preprocFunctionIdentifier =
             thatTransformGroupWhichIsTheSameAsBaseColumn.preprocFunction;
         }
-
-        // compare sizes safely (use optional chaining and default to 0)
-        const thatAggSize = (thatTransform as any).aggregations?.size ?? 0;
-        const thisAggSize = (thisTransform as any).aggregations?.size ?? 0;
-        const thatGroupsSize = (thatTransform as any).groups?.size ?? 0;
-        const thisGroupsSize = (thisTransform as any).groups?.size ?? 0;
-
-        if (thatAggSize !== thisAggSize || thatGroupsSize !== thisGroupsSize) {
+        if (
+          thatTransform.aggregations.size !== thisTransform.aggregations.size ||
+          thatTransform.groups.size !== thisTransform.groups.size
+        ) {
           isChangeNeeded = true;
           newQueryModel = newQueryModel.updateTransform(
             index,
