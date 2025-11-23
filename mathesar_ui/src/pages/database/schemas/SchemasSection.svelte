@@ -54,7 +54,7 @@
   }
 
   // Don't highlight items when the filter query changes
-  $: filterQuery, void momentarilyPauseHighlighting();
+  $: (filterQuery, void momentarilyPauseHighlighting());
 
   function addSchema() {
     targetSchema = undefined;

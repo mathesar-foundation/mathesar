@@ -35,7 +35,7 @@
 
   // Focus the text input when dropdown is opened
   let textInputEl: HTMLInputElement | undefined;
-  $: isOpen, (filterString = '');
+  $: (isOpen, (filterString = ''));
 
   // Get all filtered entries for keyboard navigation
   $: allFilteredEntries = [
@@ -48,7 +48,7 @@
     ),
     ...persistentLinks,
   ];
-  $: allFilteredEntries, (selectedIndex = -1);
+  $: (allFilteredEntries, (selectedIndex = -1));
 
   function scrollToSelected() {
     if (selectedIndex >= 0 && contentElement) {

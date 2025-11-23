@@ -57,7 +57,7 @@
   $: isAdmin = requiredField(user?.is_superuser ?? false);
 
   const password = requiredField('');
-  $: user, password.reset();
+  $: (user, password.reset());
 
   $: formFields = (() => {
     const fields = { fullName, username, email, isAdmin, displayLanguage };

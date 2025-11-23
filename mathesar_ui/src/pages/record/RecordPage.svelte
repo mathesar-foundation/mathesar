@@ -15,7 +15,8 @@
   $: ({ summary } = record);
   $: recordStoreIsLoading = $recordStoreFetchRequest?.state === 'processing';
   $: recordStoreHasError = $recordStoreFetchRequest?.state === 'error';
-  $: recordStoreNotFound = recordStoreHasError && $recordStoreFetchRequest?.error?.status === 404;
+  $: recordStoreNotFound =
+    recordStoreHasError && $recordStoreFetchRequest?.error?.status === 404;
   $: title = recordStoreIsLoading ? '' : $summary;
 </script>
 

@@ -140,7 +140,7 @@
       buildColumnPreviewSpec(columns, columnPropertiesMap),
     );
   }
-  $: table, useColumnTypeInference, void init();
+  $: (table, useColumnTypeInference, void init());
 
   function reload(props: {
     tableOid: Table['oid'];

@@ -95,7 +95,8 @@
     box-shadow:
       #000 0 0 0 0,
       color-mix(in srgb, var(--color-shadow), transparent 5%) 0px 0px 0px 1px,
-      color-mix(in srgb, var(--color-shadow), transparent 10%) 0px 10px 15px -3px,
+      color-mix(in srgb, var(--color-shadow), transparent 10%) 0px 10px
+        15px -3px,
       color-mix(in srgb, var(--color-shadow), transparent 5%) 0px 4px 6px -2px;
     border-radius: 0.4em;
     max-width: 20em;

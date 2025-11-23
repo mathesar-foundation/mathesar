@@ -84,9 +84,9 @@
       background: var(--color-bg-input);
     }
     :global(
-        [data-sheet-element='data-row']:last-child
-          [data-sheet-element='data-cell']
-      ) {
+      [data-sheet-element='data-row']:last-child
+        [data-sheet-element='data-cell']
+    ) {
       border-bottom: none;
     }
   }

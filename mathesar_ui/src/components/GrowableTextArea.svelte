@@ -37,8 +37,8 @@
     fitHeight();
   }
 
-  $: element, handleMountElement();
-  $: value, fitHeight();
+  $: (element, handleMountElement());
+  $: (value, fitHeight());
 </script>
 
 <TextArea

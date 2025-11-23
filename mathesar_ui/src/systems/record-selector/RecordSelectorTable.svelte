@@ -367,9 +367,8 @@
       var(--overflow-shadow-color) inset;
   }
   .has-overflow-right .inset-shadow {
-    box-shadow: -1rem 0 var(--overflow-shadow-size) -1rem var(
-        --overflow-shadow-color
-      ) inset;
+    box-shadow: -1rem 0 var(--overflow-shadow-size) -1rem
+      var(--overflow-shadow-color) inset;
   }
   .has-overflow-right.has-overflow-bottom .inset-shadow {
     box-shadow: -1rem -1rem var(--overflow-shadow-size) -1rem
