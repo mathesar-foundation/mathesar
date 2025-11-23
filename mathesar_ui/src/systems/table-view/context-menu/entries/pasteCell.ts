@@ -1,6 +1,6 @@
-import { buttonMenuEntry } from '@mathesar-component-library';
-import { iconPaste } from '@mathesar/icons';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
+import { iconPaste } from '@mathesar/icons';
+import { buttonMenuEntry } from '@mathesar-component-library';
 
 export function* pasteCell({
   tabularData,
@@ -20,13 +20,13 @@ export function* pasteCell({
         const parsed = JSON.parse(text);
 
         const newValue =
-          typeof parsed === "object" && parsed !== null && "value" in parsed
+          typeof parsed === 'object' && parsed !== null && 'value' in parsed
             ? parsed.value
             : text;
 
         const row = tabularData.recordsData.selectableRowsMap.get(rowId);
         if (!row) {
-          console.error("Row not found", rowId);
+          console.error('Row not found', rowId);
           return;
         }
 
@@ -37,7 +37,7 @@ export function* pasteCell({
           },
         ]);
       } catch (e) {
-        console.error("Paste failed:", e);
+        console.error('Paste failed:', e);
       }
     },
   });

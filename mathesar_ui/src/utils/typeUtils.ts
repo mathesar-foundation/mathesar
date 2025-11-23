@@ -1,8 +1,7 @@
 import type { Readable, Writable } from 'svelte/store';
 
-export type ChangeWritableToReadable<T> = T extends Writable<infer U>
-  ? Readable<U>
-  : T;
+export type ChangeWritableToReadable<T> =
+  T extends Writable<infer U> ? Readable<U> : T;
 
 /**
  * This makes all Svelte store properties Readable instead of Writable. With

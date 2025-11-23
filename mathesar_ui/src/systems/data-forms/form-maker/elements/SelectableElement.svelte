@@ -128,11 +128,11 @@
   }
 
   :global(
-      [data-form-selectable].can-select:not(.selected):hover:not(
-          :has([data-form-selectable]:hover)
-        )
-        > .content
-    ) {
+    [data-form-selectable].can-select:not(.selected):hover:not(
+        :has([data-form-selectable]:hover)
+      )
+      > .content
+  ) {
     background-color: var(--df__internal__selected-element-bg);
   }
 

@@ -86,8 +86,8 @@
       --button-border-color: var(--color-selection-strong-2);
       --button-color: var(--color-fg-inverted);
 
-      --button-hover-box-shadow: 0 1px 2px
-          color-mix(in srgb, var(--color-shadow), transparent 5%),
+      --button-hover-box-shadow:
+        0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 5%),
         0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
         0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%);
 
@@ -97,8 +97,8 @@
         transparent 10%
       );
 
-      --button-active-box-shadow: 0 1px 2px
-          color-mix(in srgb, var(--color-shadow), transparent 5%),
+      --button-active-box-shadow:
+        0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 5%),
         0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
         0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
         inset 1px 1px 2px

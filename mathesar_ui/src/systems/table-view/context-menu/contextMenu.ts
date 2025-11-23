@@ -8,20 +8,17 @@ import {
   menuSection,
   subMenu,
 } from '@mathesar/component-library';
-
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { ImperativeFilterController } from '@mathesar/pages/table/ImperativeFilterController';
 import type { TabularData } from '@mathesar/stores/table-data';
 import type RecordStore from '@mathesar/systems/record-view/RecordStore';
-
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
 // ⭐ MUST COME BEFORE ALL OTHER LOCAL IMPORTS
 import { copyCell } from './entries/copyCell';
-import { pasteCell } from './entries/pasteCell';
 
 // Existing entries
 import { deleteColumn } from './entries/deleteColumn';
@@ -31,11 +28,11 @@ import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
 import { openTable } from './entries/openTable';
+import { pasteCell } from './entries/pasteCell';
 import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
 import { viewRowRecord } from './entries/viewRowRecord';
-
 
 export function openTableCellContextMenu({
   targetCell,
@@ -88,7 +85,6 @@ export function openTableCellContextMenu({
   // ❗ Fix: must not be an empty generator
   function* getEntriesForMultipleColumns(_columnIds: string[]) {
     // No multi-column operations implemented yet
-    return;
   }
 
   function* getEntriesForArbitraryColumns(columnIds: Iterable<string>) {
@@ -155,14 +151,14 @@ export function openTableCellContextMenu({
 
     'column-header-cell': ({ columnId }) => {
       selection.update((s) =>
-        s.columnIds.has(columnId) ? s : s.ofOneColumn(columnId)
+        s.columnIds.has(columnId) ? s : s.ofOneColumn(columnId),
       );
       return [...getEntriesForArbitraryColumns(get(selection).columnIds)];
     },
 
     'data-cell': ({ cellId }) => {
       selection.update((s) =>
-        s.cellIds.has(cellId) ? s : s.ofOneCell(cellId)
+        s.cellIds.has(cellId) ? s : s.ofOneCell(cellId),
       );
       return [...getEntriesForArbitraryCells(get(selection))];
     },

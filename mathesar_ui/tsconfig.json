@@ -17,7 +17,7 @@
       "svelte",
       "vitest/globals",
       "js-cookie",
-      "svelte2tsx/svelte-jsx",
+      "svelte2tsx/svelte-jsx"
     ],
 
     "baseUrl": "./",
@@ -35,8 +35,7 @@
     "**/*.cjs",
     "**/*.config.js",
     "**/*.config.ts",
-    "src/**/*.json",
-    "setup/**/*.ts"
+    "src/**/*.json"
   ],
   "exclude": ["src/**/*.stories.svelte"]
 }
