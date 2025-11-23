@@ -1,35 +1,43 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
-
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
+    "target": "esnext",
+    "module": "esnext",
+
+    "strict": true,
     "isolatedModules": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "types": [
+      "svelte",
+      "vitest/globals",
+      "js-cookie",
+      "svelte2tsx/svelte-jsx"
+    ],
 
     "baseUrl": ".",
     "paths": {
       "@mathesar/*": ["src/*"],
       "@mathesar-component-library-dir/*": ["src/component-library/*"],
-      "@mathesar-component-library/types": [
-        "src/component-library/types.ts"
-      ],
-      "@mathesar-component-library": [
-        "src/component-library/index.ts"
-      ]
-    },
-
-    "declaration": false,
-    "skipLibCheck": true
+      "@mathesar-component-library/types": ["src/component-library/types.ts"],
+      "@mathesar-component-library": ["src/component-library/index.ts"]
+    }
   },
 
   "include": [
     "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.svelte",
-    "*.cjs",
-    "*.config.js",
+    "**/*.cjs",
+    "**/*.config.js",
+    "**/*.config.ts",
     "src/**/*.json"
   ],
+
   "exclude": ["src/**/*.stories.svelte"]
 }
