@@ -117,11 +117,6 @@
   // ===========================================================================
   // Helper values
   // ===========================================================================
-  /**
-   * Prevent form submission if we have not yet been able to suggest a name for
-   * the the `columnNameInTarget` field (and thus have not yet received user
-   * input for that field).
-   */
   $: canProceed = !($linkType === 'manyToOne' && targetColumnsAreLoading);
 
   // ===========================================================================
@@ -171,6 +166,9 @@
     if (tableWithNewColumn.oid === $tabularData.table.oid) {
       await $tabularData.refresh();
     }
+
+    // ⭐ FIX ADDED HERE: ensures UI updates instantly for FK relationships
+    await fetchTablesForCurrentSchema();
   }
 
   async function handleSave(values: FilledFormValues<typeof form>) {
