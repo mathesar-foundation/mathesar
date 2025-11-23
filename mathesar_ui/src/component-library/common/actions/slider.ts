@@ -1,4 +1,4 @@
-import type { ActionReturn } from 'svelte/action';
+import type { ActionReturn } from "svelte/action";
 
 interface Options {
   /**
@@ -35,7 +35,7 @@ interface Options {
   /**
    * Defaults to `'x'`.
    */
-  axis?: 'x' | 'y';
+  axis?: "x" | "y";
   /**
    * When `false`, moving the slider leftwards or downwards will increase the
    * value.
@@ -54,7 +54,7 @@ const defaults = {
   onStop: () => {},
   min: 0,
   max: Infinity,
-  axis: 'x',
+  axis: "x",
   invert: false,
 } as const;
 
@@ -63,12 +63,12 @@ function getFullDefaults(options: Options): Required<Options> {
 }
 
 function isTouchEvent(e: MouseEvent | TouchEvent): e is TouchEvent {
-  return 'touches' in e;
+  return "touches" in e;
 }
 
-function getPosition(e: MouseEvent | TouchEvent, axis: 'x' | 'y') {
+function getPosition(e: MouseEvent | TouchEvent, axis: "x" | "y") {
   const singularEvent = isTouchEvent(e) ? e.touches[0] : e;
-  return axis === 'x' ? singularEvent.clientX : singularEvent.clientY;
+  return axis === "x" ? singularEvent.clientX : singularEvent.clientY;
 }
 
 function disableSelect(event: Event) {
@@ -119,12 +119,12 @@ export default function slider(
 
   function stop() {
     opts.onStop(value);
-    window.removeEventListener('mousemove', move, true);
-    window.removeEventListener('touchmove', move, true);
-    window.removeEventListener('mouseup', stop, true);
-    window.removeEventListener('touchend', stop, true);
-    window.removeEventListener('touchcancel', stop, true);
-    window.removeEventListener('selectstart', disableSelect, true);
+    window.removeEventListener("mousemove", move, true);
+    window.removeEventListener("touchmove", move, true);
+    window.removeEventListener("mouseup", stop, true);
+    window.removeEventListener("touchend", stop, true);
+    window.removeEventListener("touchcancel", stop, true);
+    window.removeEventListener("selectstart", disableSelect, true);
   }
 
   function start(e: MouseEvent | TouchEvent) {
@@ -134,21 +134,21 @@ export default function slider(
     setValue(startingValue);
     opts.onStart(startingValue);
     startingPosition = getPosition(e, opts.axis);
-    window.addEventListener('mousemove', move, true);
-    window.addEventListener('touchmove', move, true);
-    window.addEventListener('mouseup', stop, true);
-    window.addEventListener('touchend', stop, true);
-    window.addEventListener('touchcancel', stop, true);
-    window.addEventListener('selectstart', disableSelect, true);
+    window.addEventListener("mousemove", move, true);
+    window.addEventListener("touchmove", move, true);
+    window.addEventListener("mouseup", stop, true);
+    window.addEventListener("touchend", stop, true);
+    window.addEventListener("touchcancel", stop, true);
+    window.addEventListener("selectstart", disableSelect, true);
   }
 
-  node.addEventListener('mousedown', start);
-  node.addEventListener('touchstart', start, { passive: false });
+  node.addEventListener("mousedown", start);
+  node.addEventListener("touchstart", start, { passive: false });
 
   return {
     destroy() {
-      node.removeEventListener('mousedown', start);
-      node.removeEventListener('touchstart', start);
+      node.removeEventListener("mousedown", start);
+      node.removeEventListener("touchstart", start);
     },
   };
 }

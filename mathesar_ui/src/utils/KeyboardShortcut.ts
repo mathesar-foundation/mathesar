@@ -2,9 +2,9 @@
  * A stricter definition KeyboardEvent['key']. We'll add more variants as we
  * need them.
  */
-type Key = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight' | 'Tab';
+type Key = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "Tab";
 
-type Mod = 'Ctrl' | 'Shift' | 'Alt' | 'Meta';
+type Mod = "Ctrl" | "Shift" | "Alt" | "Meta";
 
 export class KeyboardShortcut {
   ctrl: boolean;
@@ -33,10 +33,10 @@ export class KeyboardShortcut {
 
   static fromKey(key: Key, mods: Mod[] = []): KeyboardShortcut {
     return new KeyboardShortcut({
-      ctrl: mods.includes('Ctrl'),
-      shift: mods.includes('Shift'),
-      alt: mods.includes('Alt'),
-      meta: mods.includes('Meta'),
+      ctrl: mods.includes("Ctrl"),
+      shift: mods.includes("Shift"),
+      alt: mods.includes("Alt"),
+      meta: mods.includes("Meta"),
       key,
     });
   }
@@ -53,11 +53,11 @@ export class KeyboardShortcut {
 
   toString(): string {
     return [
-      ...(this.ctrl ? ['Ctrl'] : []),
-      ...(this.shift ? ['Shift'] : []),
-      ...(this.alt ? ['Alt'] : []),
-      ...(this.meta ? ['Meta'] : []),
+      ...(this.ctrl ? ["Ctrl"] : []),
+      ...(this.shift ? ["Shift"] : []),
+      ...(this.alt ? ["Alt"] : []),
+      ...(this.meta ? ["Meta"] : []),
       this.key,
-    ].join('+');
+    ].join("+");
   }
 }

@@ -1,33 +1,33 @@
-import { type Readable, derived, writable } from 'svelte/store';
+import { type Readable, derived, writable } from "svelte/store";
 
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
-import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
+import type { ColumnMetadata } from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import type {
   ColumnCreationSpec,
   ColumnPatchSpec,
   ColumnTypeOptions,
   RawColumnWithMetadata,
-} from '@mathesar/api/rpc/columns';
-import type { Database } from '@mathesar/models/Database';
-import type { Table } from '@mathesar/models/Table';
-import { getErrorMessage } from '@mathesar/utils/errors';
+} from "@mathesar/api/rpc/columns";
+import type { Database } from "@mathesar/models/Database";
+import type { Table } from "@mathesar/models/Table";
+import { getErrorMessage } from "@mathesar/utils/errors";
 import {
   type CancellablePromise,
   EventHandler,
   WritableSet,
   isDefinedNonNullable,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 export class ColumnsDataStore extends EventHandler<{
   columnRenamed: void;
   columnAdded: void;
-  columnDeleted: RawColumnWithMetadata['id'];
+  columnDeleted: RawColumnWithMetadata["id"];
   columnPatched: void;
 }> {
   private apiContext: {
     database_id: number;
-    table_oid: Table['oid'];
+    table_oid: Table["oid"];
   };
 
   private promise: CancellablePromise<RawColumnWithMetadata[]> | undefined;
@@ -48,8 +48,8 @@ export class ColumnsDataStore extends EventHandler<{
     table,
     hiddenColumns,
   }: {
-    database: Pick<Database, 'id'>;
-    table: Pick<Table, 'oid'>;
+    database: Pick<Database, "id">;
+    table: Pick<Table, "oid">;
     /** Values are column ids */
     hiddenColumns?: Iterable<number>;
   }) {
@@ -68,17 +68,17 @@ export class ColumnsDataStore extends EventHandler<{
 
   async fetch(): Promise<RawColumnWithMetadata[] | undefined> {
     try {
-      this.fetchStatus.set({ state: 'processing' });
+      this.fetchStatus.set({ state: "processing" });
       this.promise?.cancel();
       this.promise = api.columns
         .list_with_metadata({ ...this.apiContext })
         .run();
       const columns = await this.promise;
       this.fetchedColumns.set(columns);
-      this.fetchStatus.set({ state: 'success' });
+      this.fetchStatus.set({ state: "success" });
       return columns;
     } catch (e) {
-      this.fetchStatus.set({ state: 'failure', errors: [getErrorMessage(e)] });
+      this.fetchStatus.set({ state: "failure", errors: [getErrorMessage(e)] });
       return undefined;
     } finally {
       this.promise = undefined;
@@ -89,7 +89,7 @@ export class ColumnsDataStore extends EventHandler<{
     await api.columns
       .add({ ...this.apiContext, column_data_list: [columnDetails] })
       .run();
-    await this.dispatch('columnAdded');
+    await this.dispatch("columnAdded");
     await this.fetch();
   }
 
@@ -109,19 +109,19 @@ export class ColumnsDataStore extends EventHandler<{
         })
         .run();
     }
-    await this.dispatch('columnAdded');
+    await this.dispatch("columnAdded");
     await this.fetch();
   }
 
-  async rename(id: RawColumnWithMetadata['id'], name: string): Promise<void> {
+  async rename(id: RawColumnWithMetadata["id"], name: string): Promise<void> {
     await api.columns
       .patch({ ...this.apiContext, column_data_list: [{ id, name }] })
       .run();
-    await this.dispatch('columnRenamed');
+    await this.dispatch("columnRenamed");
   }
 
   async updateDescription(
-    id: RawColumnWithMetadata['id'],
+    id: RawColumnWithMetadata["id"],
     description: string | null,
   ): Promise<void> {
     await api.columns
@@ -158,11 +158,11 @@ export class ColumnsDataStore extends EventHandler<{
       })
       .run();
     await this.fetch();
-    await this.dispatch('columnPatched');
+    await this.dispatch("columnPatched");
   }
 
   async setDisplayOptions(
-    column: Pick<RawColumnWithMetadata, 'id'>,
+    column: Pick<RawColumnWithMetadata, "id">,
     displayOptions: ColumnMetadata | null,
   ): Promise<void> {
     await api.columns.metadata
@@ -185,8 +185,8 @@ export class ColumnsDataStore extends EventHandler<{
   }
 
   async changeType(spec: {
-    id: RawColumnWithMetadata['id'];
-    type: ColumnCreationSpec['type'];
+    id: RawColumnWithMetadata["id"];
+    type: ColumnCreationSpec["type"];
     type_options: ColumnTypeOptions | null;
     metadata: ColumnMetadata | null;
   }): Promise<void> {
@@ -205,7 +205,7 @@ export class ColumnsDataStore extends EventHandler<{
       })
       .run();
     await this.fetch();
-    await this.dispatch('columnPatched');
+    await this.dispatch("columnPatched");
   }
 
   destroy(): void {
@@ -214,11 +214,11 @@ export class ColumnsDataStore extends EventHandler<{
     super.destroy();
   }
 
-  async deleteColumn(columnId: RawColumnWithMetadata['id']): Promise<void> {
+  async deleteColumn(columnId: RawColumnWithMetadata["id"]): Promise<void> {
     await api.columns
       .delete({ ...this.apiContext, column_attnums: [columnId] })
       .run();
-    await this.dispatch('columnDeleted', columnId);
+    await this.dispatch("columnDeleted", columnId);
     await this.fetch();
   }
 }

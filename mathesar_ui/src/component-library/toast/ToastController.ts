@@ -1,18 +1,18 @@
-import type { SvelteComponent } from 'svelte';
-import { linear } from 'svelte/easing';
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import type { SvelteComponent } from "svelte";
+import { linear } from "svelte/easing";
+import { type Readable, type Writable, derived, writable } from "svelte/store";
 
 import {
   iconError,
   iconInfo,
   iconLoading,
   iconSuccess,
-} from '@mathesar-component-library-dir/common/icons';
+} from "@mathesar-component-library-dir/common/icons";
 import {
   type PauseableTweened,
   pauseableTweened,
-} from '@mathesar-component-library-dir/common/utils/pauseableTweened';
-import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+} from "@mathesar-component-library-dir/common/utils/pauseableTweened";
+import type { IconProps } from "@mathesar-component-library-dir/icon/IconTypes";
 
 /**
  * Allows control of the toast message after it is displayed
@@ -185,7 +185,7 @@ export interface MakeToast {
 }
 
 export function makeToastProps(detail: ToastDetail): Partial<ToastEntryProps> {
-  if (typeof detail === 'string') {
+  if (typeof detail === "string") {
     return { title: detail };
   }
   return detail;
@@ -200,7 +200,7 @@ export function makeToast(
     return controller.show(
       makeToastProps({
         icon: iconInfo,
-        backgroundColor: 'var(--color-bg-info)',
+        backgroundColor: "var(--color-bg-info)",
         ...makeToastProps(detail),
       }),
     );
@@ -209,7 +209,7 @@ export function makeToast(
   function success(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconSuccess,
-      backgroundColor: 'var(--color-bg-success)',
+      backgroundColor: "var(--color-bg-success)",
       ...makeToastProps(detail),
     });
   }
@@ -217,13 +217,13 @@ export function makeToast(
   function error(detail: ToastDetail = {}) {
     return controller.show({
       icon: iconError,
-      backgroundColor: 'var(--color-bg-danger)',
+      backgroundColor: "var(--color-bg-danger)",
       ...makeToastProps(detail),
     });
   }
 
   function fromError(err?: unknown) {
-    return error(err instanceof Error ? err.message : 'Something went wrong.');
+    return error(err instanceof Error ? err.message : "Something went wrong.");
   }
 
   function spinner(detail: ToastDetail = {}) {

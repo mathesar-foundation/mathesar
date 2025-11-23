@@ -1,8 +1,8 @@
-const CONTAINER_ATTR = 'data-sortable-container';
-const ITEM_ATTR = 'data-sortable-item';
-const TRIGGER_ATTR = 'data-sortable-trigger';
-const DRAGGING_CLASS = 'is-dragging';
-const SORTING_CLASS = 'is-sorting';
+const CONTAINER_ATTR = "data-sortable-container";
+const ITEM_ATTR = "data-sortable-item";
+const TRIGGER_ATTR = "data-sortable-trigger";
+const DRAGGING_CLASS = "is-dragging";
+const SORTING_CLASS = "is-sorting";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -61,9 +61,9 @@ function midpoint(rect: DOMRect) {
 
 function setTransform(element: HTMLElement, value: number) {
   if (value === 0) {
-    element.style.removeProperty('transform');
+    element.style.removeProperty("transform");
   } else {
-    element.style.setProperty('transform', `translateY(${value}px)`);
+    element.style.setProperty("transform", `translateY(${value}px)`);
   }
 }
 
@@ -185,7 +185,7 @@ export function sortableContainer<Item>(
     onSort: (newItems: Item[]) => void;
   },
 ) {
-  node.setAttribute(CONTAINER_ATTR, '');
+  node.setAttribute(CONTAINER_ATTR, "");
   const containerElement = node as ContainerElement<Item>;
   containerElement.sortableController = {
     isSorting: false,
@@ -197,7 +197,7 @@ export function sortableContainer<Item>(
 
 /** A Svelte action for each sortable item */
 export function sortableItem(itemElement: Element) {
-  itemElement.setAttribute(ITEM_ATTR, '');
+  itemElement.setAttribute(ITEM_ATTR, "");
   return {};
 }
 
@@ -232,10 +232,10 @@ export function sortableTrigger(triggerElement: HTMLElement) {
   }
 
   function handlePointerUp(event: PointerEvent) {
-    triggerElement.removeEventListener('pointermove', handlePointerMove);
-    triggerElement.removeEventListener('pointerup', handlePointerUp);
-    triggerElement.removeEventListener('pointercancel', handlePointerUp);
-    window.removeEventListener('selectstart', preventDefault);
+    triggerElement.removeEventListener("pointermove", handlePointerMove);
+    triggerElement.removeEventListener("pointerup", handlePointerUp);
+    triggerElement.removeEventListener("pointercancel", handlePointerUp);
+    window.removeEventListener("selectstart", preventDefault);
     triggerElement.releasePointerCapture(event.pointerId);
     containerElement.classList.remove(SORTING_CLASS);
     itemElement.classList.remove(DRAGGING_CLASS);
@@ -270,18 +270,18 @@ export function sortableTrigger(triggerElement: HTMLElement) {
     destination = analysis.draggingItemIndex;
     initialY = event.clientY;
     triggerElement.setPointerCapture(event.pointerId);
-    triggerElement.addEventListener('pointermove', handlePointerMove);
-    triggerElement.addEventListener('pointerup', handlePointerUp);
-    triggerElement.addEventListener('pointercancel', handlePointerUp);
-    window.addEventListener('selectstart', preventDefault);
+    triggerElement.addEventListener("pointermove", handlePointerMove);
+    triggerElement.addEventListener("pointerup", handlePointerUp);
+    triggerElement.addEventListener("pointercancel", handlePointerUp);
+    window.addEventListener("selectstart", preventDefault);
   }
 
-  triggerElement.setAttribute(TRIGGER_ATTR, '');
-  triggerElement.addEventListener('pointerdown', handlePointerDown);
-  triggerElement.addEventListener('contextmenu', preventDefault);
+  triggerElement.setAttribute(TRIGGER_ATTR, "");
+  triggerElement.addEventListener("pointerdown", handlePointerDown);
+  triggerElement.addEventListener("contextmenu", preventDefault);
   return {
     destroy() {
-      triggerElement.removeEventListener('pointerdown', handlePointerDown);
+      triggerElement.removeEventListener("pointerdown", handlePointerDown);
     },
   };
 }

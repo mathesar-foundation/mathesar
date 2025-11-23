@@ -22,7 +22,7 @@ export function isVerticallyScrollable(element: HTMLElement): boolean {
   const style = window.getComputedStyle(element);
   const { overflowY } = style;
   return (
-    (overflowY === 'auto' || overflowY === 'scroll') &&
+    (overflowY === "auto" || overflowY === "scroll") &&
     element.scrollHeight > element.clientHeight
   );
 }
@@ -41,7 +41,7 @@ export function* getNewlyAddedItemsFromMutations(
   mutations: Iterable<MutationRecord>,
 ): Generator<HTMLElement> {
   for (const mutation of mutations) {
-    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+    if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
       for (const node of mutation.addedNodes) {
         if (
           node.nodeType === Node.ELEMENT_NODE &&

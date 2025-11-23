@@ -1,19 +1,19 @@
-import { isDefinedNonNullable } from './typeUtils';
+import { isDefinedNonNullable } from "./typeUtils";
 
 /**
  * This is actually only a partial list. See
  * https://www.w3.org/TR/input-events-1/#interface-InputEvent-Attributes
  */
 type InputType =
-  | 'insertText'
-  | 'insertFromPaste'
-  | 'insertFromDrop'
-  | 'deleteContentBackward'
-  | 'deleteContentForward'
-  | 'deleteByCut'
-  | 'deleteByDrag'
-  | 'deleteWordBackward'
-  | 'deleteWordForward';
+  | "insertText"
+  | "insertFromPaste"
+  | "insertFromDrop"
+  | "deleteContentBackward"
+  | "deleteContentForward"
+  | "deleteByCut"
+  | "deleteByDrag"
+  | "deleteWordBackward"
+  | "deleteWordForward";
 
 export interface BeforeInputOutcome {
   value: string;
@@ -44,32 +44,32 @@ export function getOutcomeOfBeforeInputEvent(
 
   const operation = (() => {
     switch (inputType) {
-      case 'insertText':
-      case 'insertFromPaste':
-      case 'insertFromDrop':
-        return 'insert';
+      case "insertText":
+      case "insertFromPaste":
+      case "insertFromDrop":
+        return "insert";
       default:
-        return 'delete';
+        return "delete";
     }
   })();
 
   const direction = (() => {
     switch (inputType) {
-      case 'deleteContentBackward':
-      case 'deleteWordBackward':
-        return 'backward';
-      case 'deleteContentForward':
-      case 'deleteWordForward':
-        return 'forward';
+      case "deleteContentBackward":
+      case "deleteWordBackward":
+        return "backward";
+      case "deleteContentForward":
+      case "deleteWordForward":
+        return "forward";
       default:
         return undefined;
     }
   })();
 
-  if (operation === 'delete' && selectionIsCollapsed) {
-    if (direction === 'backward') {
+  if (operation === "delete" && selectionIsCollapsed) {
+    if (direction === "backward") {
       textBeforeSelection = textBeforeSelection.slice(0, -1);
-    } else if (direction === 'forward') {
+    } else if (direction === "forward") {
       textAfterSelection = textAfterSelection.slice(
         1,
         textAfterSelection.length,
@@ -77,7 +77,7 @@ export function getOutcomeOfBeforeInputEvent(
     }
   }
 
-  const insertionText = (operation === 'insert' && event.data) || '';
+  const insertionText = (operation === "insert" && event.data) || "";
   return {
     value: `${textBeforeSelection}${insertionText}${textAfterSelection}`,
     cursorPosition: textBeforeSelection.length + insertionText.length,
@@ -99,9 +99,9 @@ export function getValueFromEvent(e: Event): unknown {
 export function getStringValueFromEvent(e: Event): string {
   const value = getValueFromEvent(e);
   if (!isDefinedNonNullable(value)) {
-    return '';
+    return "";
   }
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     return JSON.stringify(value);
   }
   return String(value);

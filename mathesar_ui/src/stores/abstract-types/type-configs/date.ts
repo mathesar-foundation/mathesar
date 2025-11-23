@@ -1,33 +1,33 @@
-import type { DateFormat } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { DateFormat } from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import {
   type RawColumnWithMetadata,
   getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
-import { iconUiTypeDate } from '@mathesar/icons';
-import type { FormValues } from '@mathesar-component-library/types';
+} from "@mathesar/api/rpc/columns";
+import { iconUiTypeDate } from "@mathesar/icons";
+import type { FormValues } from "@mathesar-component-library/types";
 
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
-} from '../types';
+} from "../types";
 
-import { getDateFormatOptions } from './utils';
+import { getDateFormatOptions } from "./utils";
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
     format: {
-      type: 'string',
-      enum: ['none', 'us', 'eu', 'friendly', 'iso'],
-      default: 'none',
+      type: "string",
+      enum: ["none", "us", "eu", "friendly", "iso"],
+      default: "none",
     },
   },
   layout: {
-    orientation: 'vertical',
+    orientation: "vertical",
     elements: [
       {
-        type: 'input',
-        variable: 'format',
-        label: 'Date Format',
+        type: "input",
+        variable: "format",
+        label: "Date Format",
         options: getDateFormatOptions(),
       },
     ],
@@ -36,26 +36,26 @@ const displayForm: AbstractTypeConfigForm = {
 
 function determineDisplayOptions(
   formValues: FormValues,
-): RawColumnWithMetadata['metadata'] {
+): RawColumnWithMetadata["metadata"] {
   return {
     date_format: formValues.format as DateFormat,
   };
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: RawColumnWithMetadata['metadata'],
+  metadata: RawColumnWithMetadata["metadata"],
 ): FormValues {
   const column = { metadata };
   const formValues: FormValues = {
-    format: getColumnMetadataValue(column, 'date_format'),
+    format: getColumnMetadataValue(column, "date_format"),
   };
   return formValues;
 }
 
 const dateType: AbstractTypeConfiguration = {
-  getIcon: () => ({ ...iconUiTypeDate, label: 'Date' }),
+  getIcon: () => ({ ...iconUiTypeDate, label: "Date" }),
   cellInfo: {
-    type: 'date',
+    type: "date",
   },
   getDisplayConfig: () => ({
     form: displayForm,

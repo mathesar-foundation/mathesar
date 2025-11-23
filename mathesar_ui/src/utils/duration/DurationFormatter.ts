@@ -1,13 +1,13 @@
-import type { Duration, DurationUnitType } from 'dayjs/plugin/duration';
+import type { Duration, DurationUnitType } from "dayjs/plugin/duration";
 
-import type { DurationUnit } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import { dayjs } from '@mathesar-component-library';
+import type { DurationUnit } from "@mathesar/api/rpc/_common/columnDisplayOptions";
+import { dayjs } from "@mathesar-component-library";
 import type {
   InputFormatter,
   ParseResult,
-} from '@mathesar-component-library/types';
+} from "@mathesar-component-library/types";
 
-import type DurationSpecification from './DurationSpecification';
+import type DurationSpecification from "./DurationSpecification";
 
 const FLOAT_REGEX = /^((\.?\d+)|(\d+(\.\d+)?))$/;
 
@@ -16,37 +16,37 @@ function parseRawDurationStringToISOString(
   userInput: string,
 ): string | null {
   let unitsInRange = specification.getUnitsInRange();
-  if (unitsInRange[unitsInRange.length - 1] === 'ms') {
+  if (unitsInRange[unitsInRange.length - 1] === "ms") {
     unitsInRange = unitsInRange.slice(0, unitsInRange.length - 1);
   }
 
   let cleanedInput = userInput.trim();
-  if (cleanedInput === '') {
+  if (cleanedInput === "") {
     return null;
   }
 
   const firstEntry = cleanedInput[0];
-  if (firstEntry === ':') {
+  if (firstEntry === ":") {
     cleanedInput = `0${cleanedInput}`;
   }
 
   const lastEntry = cleanedInput[cleanedInput.length - 1];
-  if (lastEntry === ':' || lastEntry === '.') {
+  if (lastEntry === ":" || lastEntry === ".") {
     cleanedInput = `${cleanedInput}0`;
   }
 
-  const unitValues = cleanedInput.split(':');
+  const unitValues = cleanedInput.split(":");
   if (unitValues.length > unitsInRange.length) {
-    throw new Error('Duration exceeds specified unit range');
+    throw new Error("Duration exceeds specified unit range");
   }
 
   const terms = cleanedInput
-    .split(':')
+    .split(":")
     .map((entry) => {
       let valueString = entry;
       if (
         valueString.length > 1 &&
-        valueString[valueString.length - 1] === '.'
+        valueString[valueString.length - 1] === "."
       ) {
         valueString = `${valueString}0`;
       }
@@ -56,7 +56,7 @@ function parseRawDurationStringToISOString(
       // Since we have to direcly pass the input string as intermediateDisplay,
       // we will have to throw a parsing error here for such cases.
       if (Number.isNaN(value) || !FLOAT_REGEX.test(valueString)) {
-        throw new Error('Unable to parse duration');
+        throw new Error("Unable to parse duration");
       }
       return value;
     })
@@ -91,24 +91,24 @@ const unitConfig: Record<
 > = {
   ms: {
     convert: (duration: Duration) => duration.asMilliseconds(),
-    unitName: 'milliseconds',
+    unitName: "milliseconds",
     decimalCorrection: 0,
   },
   s: {
     convert: (duration: Duration) => duration.asSeconds(),
-    unitName: 'seconds',
+    unitName: "seconds",
   },
   m: {
     convert: (duration: Duration) => duration.asMinutes(),
-    unitName: 'minutes',
+    unitName: "minutes",
   },
   h: {
     convert: (duration: Duration) => duration.asHours(),
-    unitName: 'hours',
+    unitName: "hours",
   },
   d: {
     convert: (duration: Duration) => duration.asDays(),
-    unitName: 'days',
+    unitName: "days",
   },
 };
 
@@ -126,7 +126,7 @@ function shiftAndFormatISODurationString(
 
   if (units.length === 0) {
     // This should never happen;
-    throw new Error('Invalid duration specification');
+    throw new Error("Invalid duration specification");
   }
 
   let currentUnitConfig = unitConfig[units[0]];

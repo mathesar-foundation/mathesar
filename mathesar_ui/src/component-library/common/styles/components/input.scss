@@ -13,7 +13,7 @@
   width: 100%;
   box-sizing: border-box;
   min-height: var(--input-element-min-height, 2.2rem);
-  text-align: var(--input-element-text-align, 'left');
+  text-align: var(--input-element-text-align, "left");
 
   &::placeholder {
     color: var(--color-fg-base-disabled);

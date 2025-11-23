@@ -1,11 +1,11 @@
-import { api } from '@mathesar/api/rpc';
-import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
-import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
+import { api } from "@mathesar/api/rpc";
+import type { RawTableWithMetadata } from "@mathesar/api/rpc/tables";
+import AsyncRpcApiStore from "@mathesar/stores/AsyncRpcApiStore";
+import { CancellablePromise, ImmutableMap } from "@mathesar-component-library";
 
-import { ObjectCurrentAccess } from './internal/ObjectCurrentAccess';
-import type { Role } from './Role';
-import type { Schema } from './Schema';
+import { ObjectCurrentAccess } from "./internal/ObjectCurrentAccess";
+import type { Role } from "./Role";
+import type { Schema } from "./Schema";
 
 export class Table {
   oid: number;
@@ -32,7 +32,7 @@ export class Table {
     this.schema = props.schema;
   }
 
-  updateOwner(newOwner: Role['oid']) {
+  updateOwner(newOwner: Role["oid"]) {
     const promise = api.tables.privileges
       .transfer_ownership({
         database_id: this.schema.database.id,

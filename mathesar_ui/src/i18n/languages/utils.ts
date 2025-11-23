@@ -1,4 +1,4 @@
-export type Language = 'en' | 'ja';
+export type Language = "en" | "ja";
 
 export interface LangObject {
   language: Language;

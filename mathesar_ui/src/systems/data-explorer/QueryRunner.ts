@@ -4,28 +4,28 @@ import {
   derived,
   get,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
+import { ApiMultiError } from "@mathesar/api/rest/utils/errors";
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
 import type {
   ExplorationResult,
   QueryColumnMetaData,
   QueryResultRecord,
-} from '@mathesar/api/rpc/explorations';
-import Plane from '@mathesar/components/sheet/selection/Plane';
-import Series from '@mathesar/components/sheet/selection/Series';
-import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
-import { runSavedExploration } from '@mathesar/stores/queries';
-import Pagination from '@mathesar/utils/Pagination';
+} from "@mathesar/api/rpc/explorations";
+import Plane from "@mathesar/components/sheet/selection/Plane";
+import Series from "@mathesar/components/sheet/selection/Series";
+import SheetSelectionStore from "@mathesar/components/sheet/selection/SheetSelectionStore";
+import { runSavedExploration } from "@mathesar/stores/queries";
+import Pagination from "@mathesar/utils/Pagination";
 import {
   type CancellablePromise,
   ImmutableMap,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import QueryInspector from './QueryInspector';
-import type { QueryModel } from './QueryModel';
+import QueryInspector from "./QueryInspector";
+import type { QueryModel } from "./QueryModel";
 import {
   type InputColumnsStoreSubstance,
   type ProcessedQueryOutputColumnMap,
@@ -33,7 +33,7 @@ import {
   getProcessedOutputColumns,
   processColumnMetaData,
   speculateColumnMetaData,
-} from './utils';
+} from "./utils";
 
 export interface QueryRow {
   record: QueryResultRecord;
@@ -49,7 +49,7 @@ export interface QueryRowsData {
   rows: QueryRow[];
 }
 
-type QueryRunMode = 'queryId' | 'queryObject';
+type QueryRunMode = "queryId" | "queryObject";
 
 export class QueryRunner {
   query: Writable<QueryModel>;
@@ -87,7 +87,7 @@ export class QueryRunner {
     query: QueryModel;
     runMode?: QueryRunMode;
   }) {
-    this.runMode = runMode ?? 'queryObject';
+    this.runMode = runMode ?? "queryObject";
     this.query = writable(query);
     this.speculateProcessedColumns();
     void this.run();
@@ -116,13 +116,13 @@ export class QueryRunner {
    * query store changes.
    */
   protected speculateProcessedColumns(
-    inputColumnInformationMap?: InputColumnsStoreSubstance['inputColumnInformationMap'],
+    inputColumnInformationMap?: InputColumnsStoreSubstance["inputColumnInformationMap"],
   ) {
     const speculatedMetaData = speculateColumnMetaData({
       currentProcessedColumnsMetaData: get(this.columnsMetaData),
       inputColumnInformationMap:
         inputColumnInformationMap ??
-        (new Map() as InputColumnsStoreSubstance['inputColumnInformationMap']),
+        (new Map() as InputColumnsStoreSubstance["inputColumnInformationMap"]),
       queryModel: this.getQueryModel(),
     });
     this.columnsMetaData.set(speculatedMetaData);
@@ -143,15 +143,15 @@ export class QueryRunner {
       this.columnsMetaData.set(new ImmutableMap());
       this.processedColumns.set(new ImmutableMap());
       this.rowsData.set(rowsData);
-      this.runState.set({ state: 'success' });
+      this.runState.set({ state: "success" });
       return undefined;
     }
 
     let response: ExplorationResult;
     try {
       const paginationParams = get(this.pagination).recordsRequestParams();
-      this.runState.set({ state: 'processing' });
-      if (this.runMode === 'queryObject') {
+      this.runState.set({ state: "processing" });
+      if (this.runMode === "queryObject") {
         const internalRunPromise = api.explorations
           .run({
             exploration_def: queryModel.toAnonymousExploration(),
@@ -165,8 +165,8 @@ export class QueryRunner {
         const queryId = queryModel.id;
         if (!queryId) {
           this.runState.set({
-            state: 'failure',
-            errors: ['Query does not contain an id'],
+            state: "failure",
+            errors: ["Query does not contain an id"],
           });
           return undefined;
         }
@@ -190,18 +190,18 @@ export class QueryRunner {
           rowIndex: index,
         })),
       });
-      this.runState.set({ state: 'success' });
+      this.runState.set({ state: "success" });
       await this.afterRun(response);
       return response;
     } catch (err) {
       if (err instanceof ApiMultiError) {
-        this.runState.set({ state: 'failure', errors: err });
+        this.runState.set({ state: "failure", errors: err });
       } else {
         const errorMessage =
           err instanceof Error
             ? err.message
-            : 'Unable to run query due to an unknown reason';
-        this.runState.set({ state: 'failure', errors: [errorMessage] });
+            : "Unable to run query due to an unknown reason";
+        this.runState.set({ state: "failure", errors: [errorMessage] });
       }
     }
     return undefined;
@@ -247,13 +247,13 @@ export class QueryRunner {
     await this.run();
   }
 
-  selectColumn(alias: QueryColumnMetaData['alias']): void {
+  selectColumn(alias: QueryColumnMetaData["alias"]): void {
     const processedColumn = get(this.processedColumns).get(alias);
     if (!processedColumn) {
       return;
     }
     this.selection.update((s) => s.ofOneColumn(processedColumn.id));
-    this.inspector.activate('column');
+    this.inspector.activate("column");
   }
 
   getQueryModel(): QueryModel {

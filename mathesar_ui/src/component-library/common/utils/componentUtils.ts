@@ -1,6 +1,6 @@
-import type { ComponentProps, ComponentType, SvelteComponent } from 'svelte';
+import type { ComponentProps, ComponentType, SvelteComponent } from "svelte";
 
-import type { ComponentWithProps } from '../types/ComponentAndPropsTypes';
+import type { ComponentWithProps } from "../types/ComponentAndPropsTypes";
 
 /**
  * This is a utility function which prepares a pair of component/props objects

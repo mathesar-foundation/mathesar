@@ -1,15 +1,15 @@
-import type { CancellablePromise } from '@mathesar-component-library';
+import type { CancellablePromise } from "@mathesar-component-library";
 
-import type { DataFile } from './types/dataFiles';
+import type { DataFile } from "./types/dataFiles";
 import {
   type UploadCompletionOpts,
   getAPI,
   patchAPI,
   postAPI,
   uploadFile,
-} from './utils/requestUtils';
+} from "./utils/requestUtils";
 
-const ENDPOINT = '/api/db/v0/data_files/';
+const ENDPOINT = "/api/db/v0/data_files/";
 
 interface PostParams {
   url?: string;

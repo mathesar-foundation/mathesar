@@ -1,9 +1,9 @@
-import { type Readable, type Writable, writable } from 'svelte/store';
+import { type Readable, type Writable, writable } from "svelte/store";
 
 import type {
   FileAttachmentRequestParams,
   FileAttachmentUploadResult,
-} from '@mathesar/api/rest/fileAttachments';
+} from "@mathesar/api/rest/fileAttachments";
 
 export default class ModalFileAttachmentUploadController {
   private resolve:

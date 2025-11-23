@@ -1,20 +1,20 @@
-import { type Writable, get, writable } from 'svelte/store';
+import { type Writable, get, writable } from "svelte/store";
 
-import type { FileAttachmentRequestParams } from '@mathesar/api/rest/fileAttachments';
-import type { FileManifest } from '@mathesar/api/rpc/records';
-import type { FileDetailDropdownController } from '@mathesar/components/file-attachments/file-detail-dropdown/FileDetailDropdownController';
-import type { LightboxController } from '@mathesar/components/file-attachments/lightbox/LightboxController';
-import { onAnyUiInteraction } from '@mathesar/utils/onAnyUiInteraction';
+import type { FileAttachmentRequestParams } from "@mathesar/api/rest/fileAttachments";
+import type { FileManifest } from "@mathesar/api/rpc/records";
+import type { FileDetailDropdownController } from "@mathesar/components/file-attachments/file-detail-dropdown/FileDetailDropdownController";
+import type { LightboxController } from "@mathesar/components/file-attachments/lightbox/LightboxController";
+import { onAnyUiInteraction } from "@mathesar/utils/onAnyUiInteraction";
 import {
   assertExhaustive,
   isDefinedNonNullable,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 import {
   FileManifestWithRequestParams,
   fetchImage,
   getFileViewerType,
-} from '../fileUtils';
+} from "../fileUtils";
 
 export class FileViewerController {
   private rawManifest: FileManifest;
@@ -69,7 +69,7 @@ export class FileViewerController {
       let uiInteraction = false;
       onAnyUiInteraction(() => {
         uiInteraction = true;
-      }, ['pointerdown', 'keydown']);
+      }, ["pointerdown", "keydown"]);
 
       this.isLoading.set(true);
       this.imageElement = await fetchImage(
@@ -83,7 +83,7 @@ export class FileViewerController {
     }
 
     if (!this.imageElement) {
-      throw new Error('Failed to load image');
+      throw new Error("Failed to load image");
     }
 
     if (!this.lightboxController) return;
@@ -118,9 +118,9 @@ export class FileViewerController {
     }
 
     const viewerType = getFileViewerType(this.manifestWithRequestParams);
-    if (viewerType === 'image') {
+    if (viewerType === "image") {
       await this.openImageFileViewer();
-    } else if (viewerType === 'default') {
+    } else if (viewerType === "default") {
       this.openFileDetailDropdown();
     } else {
       assertExhaustive(viewerType);

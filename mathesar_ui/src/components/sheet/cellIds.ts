@@ -1,6 +1,6 @@
-import { map } from 'iter-tools';
+import { map } from "iter-tools";
 
-import { cartesianProduct } from '@mathesar/utils/iterUtils';
+import { cartesianProduct } from "@mathesar/utils/iterUtils";
 
 /**
  * ⚠️ Note: we have `cellId` and `cellKey` which are different.
@@ -17,7 +17,7 @@ export function parseCellId(cellId: string): {
 } {
   try {
     const [rowId, columnId] = JSON.parse(cellId) as unknown[];
-    if (typeof rowId !== 'string' || typeof columnId !== 'string') {
+    if (typeof rowId !== "string" || typeof columnId !== "string") {
       throw new Error();
     }
     return { rowId, columnId };

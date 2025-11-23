@@ -1,19 +1,19 @@
-import type { NumberFormat } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { NumberFormat } from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import {
   type RawColumnWithMetadata,
   getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+} from "@mathesar/api/rpc/columns";
 import {
   StringifiedNumberFormatter,
   assertExhaustive,
   isDefinedNonNullable,
-} from '@mathesar-component-library';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+} from "@mathesar-component-library";
+import type { ComponentAndProps } from "@mathesar-component-library/types";
 
-import NumberCell from './components/number/NumberCell.svelte';
-import NumberCellInput from './components/number/NumberCellInput.svelte';
-import type { NumberCellExternalProps } from './components/typeDefinitions';
-import type { CellComponentFactory } from './typeDefinitions';
+import NumberCell from "./components/number/NumberCell.svelte";
+import NumberCellInput from "./components/number/NumberCellInput.svelte";
+import type { NumberCellExternalProps } from "./components/typeDefinitions";
+import type { CellComponentFactory } from "./typeDefinitions";
 
 // prettier-ignore
 const localeMap = new Map<NumberFormat, string>([
@@ -28,7 +28,7 @@ const localeMap = new Map<NumberFormat, string>([
  * The strategy for determining the `allowFloat` prop, based on the column's
  * type_options.
  */
-type FloatAllowanceStrategy = 'always' | 'never' | 'scale-based';
+type FloatAllowanceStrategy = "always" | "never" | "scale-based";
 
 interface Config extends Record<string, unknown> {
   floatAllowanceStrategy: FloatAllowanceStrategy;
@@ -38,10 +38,10 @@ function getAllowFloat(
   column: RawColumnWithMetadata,
   floatAllowanceStrategy?: FloatAllowanceStrategy,
 ): boolean {
-  if (floatAllowanceStrategy === 'scale-based') {
+  if (floatAllowanceStrategy === "scale-based") {
     return (column.type_options?.scale ?? Infinity) !== 0;
   }
-  if (floatAllowanceStrategy === 'never') {
+  if (floatAllowanceStrategy === "never") {
     return false;
   }
   return true;
@@ -49,14 +49,14 @@ function getAllowFloat(
 
 export function getUseGrouping(
   column: RawColumnWithMetadata,
-): NumberCellExternalProps['formatterOptions']['useGrouping'] {
-  const grouping = getColumnMetadataValue(column, 'num_grouping');
+): NumberCellExternalProps["formatterOptions"]["useGrouping"] {
+  const grouping = getColumnMetadataValue(column, "num_grouping");
   switch (grouping) {
-    case 'always':
-      return 'always';
-    case 'auto':
-      return 'auto';
-    case 'never':
+    case "always":
+      return "always";
+    case "auto":
+      return "auto";
+    case "never":
       return false;
     default:
       return assertExhaustive(grouping);
@@ -66,7 +66,7 @@ export function getUseGrouping(
 function getFormatterOptions(
   column: RawColumnWithMetadata,
   config?: Config,
-): NumberCellExternalProps['formatterOptions'] {
+): NumberCellExternalProps["formatterOptions"] {
   const displayOptions = column.metadata;
   const format = displayOptions?.num_format ?? null;
   const locale = (format && localeMap.get(format)) ?? undefined;
@@ -126,7 +126,7 @@ const numberType: CellComponentFactory = {
   getInput(
     column: RawColumnWithMetadata,
     config?: Config,
-  ): ComponentAndProps<NumberCellExternalProps['formatterOptions']> {
+  ): ComponentAndProps<NumberCellExternalProps["formatterOptions"]> {
     return {
       component: NumberCellInput,
       props: getFormatterOptions(column, config),

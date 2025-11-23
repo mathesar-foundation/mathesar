@@ -1,5 +1,5 @@
-import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInputTypes';
-import type { SimplifiedInputProps } from '@mathesar-component-library-dir/commonTypes';
+import type { BaseInputProps } from "@mathesar-component-library-dir/common/base-components/BaseInputTypes";
+import type { SimplifiedInputProps } from "@mathesar-component-library-dir/commonTypes";
 
 export interface TextAreaProps extends SimplifiedInputProps, BaseInputProps {
   value?: string | null;
@@ -8,6 +8,6 @@ export interface TextAreaProps extends SimplifiedInputProps, BaseInputProps {
 }
 
 export interface TextAreaProcessedKeyDown {
-  type: 'normal' | 'newlineWithEnterKeyCombination';
+  type: "normal" | "newlineWithEnterKeyCombination";
   originalEvent: KeyboardEvent;
 }

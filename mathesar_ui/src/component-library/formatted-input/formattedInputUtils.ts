@@ -1,4 +1,4 @@
-import Diff from 'fast-diff';
+import Diff from "fast-diff";
 
 /**
  * When text is modified, and that text contains a user's cursor, determine

@@ -1,29 +1,29 @@
-import Cookies from 'js-cookie';
-import { addMessages, init, locale, register } from 'svelte-i18n';
+import Cookies from "js-cookie";
+import { addMessages, init, locale, register } from "svelte-i18n";
 
-import type { LangObject } from './languages/utils';
+import type { LangObject } from "./languages/utils";
 
 const loaders = {
-  en: () => import('./languages/en'),
-  ja: () => import('./languages/ja'),
+  en: () => import("./languages/en"),
+  ja: () => import("./languages/ja"),
 };
 
 async function loadDictionaryAsync(
-  language: LangObject['language'],
-): Promise<LangObject['dictionary']> {
+  language: LangObject["language"],
+): Promise<LangObject["dictionary"]> {
   const translationsModule = await loaders[language]();
   return { default: translationsModule.default.dictionary };
 }
 
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
-function setLanguageCookie(language: LangObject['language']) {
-  Cookies.set('display_language', language);
+function setLanguageCookie(language: LangObject["language"]) {
+  Cookies.set("display_language", language);
 }
 
-export async function initI18n(language: LangObject['language']) {
-  register('en', () => loadDictionaryAsync('en'));
-  register('ja', () => loadDictionaryAsync('ja'));
+export async function initI18n(language: LangObject["language"]) {
+  register("en", () => loadDictionaryAsync("en"));
+  register("ja", () => loadDictionaryAsync("ja"));
 
   const { translations } = window.Mathesar || {};
   const dictionary =
@@ -36,13 +36,13 @@ export async function initI18n(language: LangObject['language']) {
   }
 
   await init({
-    fallbackLocale: 'en',
+    fallbackLocale: "en",
     initialLocale: language,
   });
   setLanguageCookie(language);
 }
 
-export async function setLanguage(language: LangObject['language']) {
+export async function setLanguage(language: LangObject["language"]) {
   await locale.set(language);
   setLanguageCookie(language);
 }

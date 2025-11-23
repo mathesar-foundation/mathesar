@@ -1,5 +1,5 @@
-import { tick } from 'svelte';
-import type { ActionReturn } from 'svelte/action';
+import { tick } from "svelte";
+import type { ActionReturn } from "svelte/action";
 
 async function moveNodeToWindowArea(
   node: Element,

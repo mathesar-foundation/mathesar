@@ -1,8 +1,8 @@
-import * as Papa from 'papaparse';
+import * as Papa from "papaparse";
 
 export function serializeTsv(data: string[][]): string {
   return Papa.unparse(data, {
-    delimiter: '\t',
+    delimiter: "\t",
     // From the [Papa Parse][1] library, `escapeFormulae` helps defend against
     // formula [injection attacks][2]. We modify the default value though
     // because it [didn't work][3] for negative numbers. We're supplying our own
@@ -20,7 +20,7 @@ export function serializeTsv(data: string[][]): string {
 }
 
 function emptyStrings(count: number) {
-  return Array(count).fill('') as string[];
+  return Array(count).fill("") as string[];
 }
 
 /**
@@ -37,7 +37,7 @@ export function deserializeTsv(data: string): string[][] {
   const trimmedData = data.trim();
 
   const result = Papa.parse(trimmedData, {
-    delimiter: '\t',
+    delimiter: "\t",
     skipEmptyLines: false,
   });
 

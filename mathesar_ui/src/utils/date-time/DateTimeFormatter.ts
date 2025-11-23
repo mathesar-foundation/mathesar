@@ -1,10 +1,10 @@
-import { dayjs, isDefinedNonNullable } from '@mathesar-component-library';
+import { dayjs, isDefinedNonNullable } from "@mathesar-component-library";
 import type {
   InputFormatter,
   ParseResult,
-} from '@mathesar-component-library/types';
+} from "@mathesar-component-library/types";
 
-import type DateTimeSpecification from './DateTimeSpecification';
+import type DateTimeSpecification from "./DateTimeSpecification";
 
 type Dayjs = ReturnType<typeof dayjs>;
 
@@ -28,14 +28,14 @@ type Dayjs = ReturnType<typeof dayjs>;
  */
 function parseKeywords(input: string): Dayjs | undefined {
   switch (input.trim().toLowerCase()) {
-    case 'now':
+    case "now":
       return dayjs();
-    case 'today':
-      return dayjs().startOf('day');
-    case 'tomorrow':
-      return dayjs().startOf('day').add(1, 'day');
-    case 'yesterday':
-      return dayjs().startOf('day').subtract(1, 'day');
+    case "today":
+      return dayjs().startOf("day");
+    case "tomorrow":
+      return dayjs().startOf("day").add(1, "day");
+    case "yesterday":
+      return dayjs().startOf("day").subtract(1, "day");
     default:
       return undefined;
   }

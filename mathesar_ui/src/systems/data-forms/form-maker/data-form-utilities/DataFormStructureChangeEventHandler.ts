@@ -1,10 +1,10 @@
-import type { DataFormPropChangeEvent } from './DataFormStructure';
+import type { DataFormPropChangeEvent } from "./DataFormStructure";
 import type {
   DataFormField,
   FkFieldPropChangeEvent,
   FormFieldContainerChangeEvent,
   ScalarFieldPropChangeEvent,
-} from './fields';
+} from "./fields";
 
 type DataFormStructureChangeEvent =
   | DataFormPropChangeEvent
@@ -28,10 +28,10 @@ export class DataFormStructureChangeEventHandler {
   trigger(e: DataFormStructureChangeEvent) {
     this.callbacks?.allChanges?.();
     switch (e.type) {
-      case 'fields/add':
+      case "fields/add":
         this.callbacks?.fieldAdded?.(e.field);
         break;
-      case 'fields/delete':
+      case "fields/delete":
         this.callbacks?.fieldDeleted?.(e.field);
         break;
       default:

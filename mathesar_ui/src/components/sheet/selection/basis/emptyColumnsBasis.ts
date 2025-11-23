@@ -1,9 +1,9 @@
-import { ImmutableSet } from '@mathesar-component-library';
+import { ImmutableSet } from "@mathesar-component-library";
 
-import { getColumnOffset } from '../Direction';
+import { getColumnOffset } from "../Direction";
 
-import type Basis from './Basis';
-import { emptyBasis } from './emptyBasis';
+import type Basis from "./Basis";
+import { emptyBasis } from "./emptyBasis";
 
 export function basisFromEmptyColumns(columnIds: Iterable<string>): Basis {
   return {
@@ -11,7 +11,7 @@ export function basisFromEmptyColumns(columnIds: Iterable<string>): Basis {
     cellIds: new ImmutableSet(),
     columnIds: new ImmutableSet(columnIds),
     rowIds: new ImmutableSet(),
-    pasteOperation: 'none',
+    pasteOperation: "none",
 
     getFullySelectedColumnIds() {
       return this.columnIds;

@@ -1,10 +1,10 @@
-import { first } from 'iter-tools';
+import { first } from "iter-tools";
 
-import type { ResultValue } from '@mathesar/api/rpc/records';
-import { parseCellId } from '@mathesar/components/sheet/cellIds';
-import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
-import type { ProcessedColumns, RecordRow } from '@mathesar/stores/table-data';
-import { defined } from '@mathesar-component-library';
+import type { ResultValue } from "@mathesar/api/rpc/records";
+import { parseCellId } from "@mathesar/components/sheet/cellIds";
+import type SheetSelection from "@mathesar/components/sheet/selection/SheetSelection";
+import type { ProcessedColumns, RecordRow } from "@mathesar/stores/table-data";
+import { defined } from "@mathesar-component-library";
 
 export function getTableRecordId(p: {
   processedColumns: ProcessedColumns;

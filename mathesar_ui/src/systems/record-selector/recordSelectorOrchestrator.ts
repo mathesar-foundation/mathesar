@@ -1,14 +1,14 @@
-import { get } from 'svelte/store';
+import { get } from "svelte/store";
 
 import type {
   RecordSelectionOrchestrator,
   RecordSelectionOrchestratorFactory,
-} from '../record-selection-orchestrator/RecordSelectionOrchestrator';
+} from "../record-selection-orchestrator/RecordSelectionOrchestrator";
 
 import {
   type RecordSelectorController,
   recordSelectorContext,
-} from './RecordSelectorController';
+} from "./RecordSelectorController";
 
 /**
  * An adapter to make a RecordSelectorController work as a

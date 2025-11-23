@@ -3,10 +3,10 @@ import {
   type Subscriber,
   type Unsubscriber,
   derived,
-} from 'svelte/store';
+} from "svelte/store";
 
-import { collapse, ensureReadable, unite } from './storeUtils';
-import WritableSet from './WritableSet';
+import { collapse, ensureReadable, unite } from "./storeUtils";
+import WritableSet from "./WritableSet";
 
 /**
  * A store that holds a dynamically writable collection of readable input stores

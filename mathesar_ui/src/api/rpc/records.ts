@@ -1,11 +1,11 @@
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
-import type { RecordsSummaryListResponse } from './_common/commonTypes';
-import type { RecordSummaryTemplate } from './tables';
+import type { RecordsSummaryListResponse } from "./_common/commonTypes";
+import type { RecordSummaryTemplate } from "./tables";
 
 export type ResultValue = string | number | boolean | null;
 
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = "asc" | "desc";
 export interface SortingEntry {
   /** column id */
   attnum: number;
@@ -14,35 +14,35 @@ export interface SortingEntry {
 
 export interface SqlComparison {
   type:
-    | 'and'
-    | 'or'
-    | 'equal'
-    | 'lesser'
-    | 'greater'
-    | 'lesser_or_equal'
-    | 'greater_or_equal'
-    | 'contains_case_insensitive'
-    | 'contains'
-    | 'starts_with'
-    | 'json_array_contains';
+    | "and"
+    | "or"
+    | "equal"
+    | "lesser"
+    | "greater"
+    | "lesser_or_equal"
+    | "greater_or_equal"
+    | "contains_case_insensitive"
+    | "contains"
+    | "starts_with"
+    | "json_array_contains";
   args: [SqlExpr, SqlExpr];
 }
 export interface SqlFunction {
   type:
-    | 'null'
-    | 'not_null'
-    | 'json_array_length'
-    | 'uri_scheme'
-    | 'uri_authority'
-    | 'email_domain';
+    | "null"
+    | "not_null"
+    | "json_array_length"
+    | "uri_scheme"
+    | "uri_authority"
+    | "email_domain";
   args: [SqlExpr];
 }
 export interface SqlLiteral {
-  type: 'literal';
+  type: "literal";
   value: string | number | null;
 }
 export interface SqlColumn {
-  type: 'attnum';
+  type: "attnum";
   value: number;
 }
 export type SqlExpr = SqlComparison | SqlFunction | SqlLiteral | SqlColumn;

@@ -1,12 +1,12 @@
 // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-import { createPopper } from '@popperjs/core/dist/umd/popper.min';
+import { createPopper } from "@popperjs/core/dist/umd/popper.min";
 import type {
   Instance,
   ModifierArguments,
   Options,
   VirtualElement,
-} from '@popperjs/core/lib/types';
-import type { ActionReturn } from 'svelte/action';
+} from "@popperjs/core/lib/types";
+import type { ActionReturn } from "svelte/action";
 
 interface CustomModifierOptions {
   /**
@@ -38,35 +38,35 @@ interface Parameters {
  * occurs, use the supplied modifier instead of the default modifier.
  */
 function buildModifiers(
-  suppliedModifiers: Options['modifiers'],
+  suppliedModifiers: Options["modifiers"],
   modifierOptions: CustomModifierOptions = {},
-): Options['modifiers'] {
+): Options["modifiers"] {
   const matchTriggerWidthPxUpTo =
     modifierOptions.matchTriggerWidthPxUpTo ?? 250;
 
-  const defaultModifiers: Options['modifiers'] = [
+  const defaultModifiers: Options["modifiers"] = [
     {
-      name: 'flip',
+      name: "flip",
     },
     {
-      name: 'preventOverflow',
+      name: "preventOverflow",
       options: {
         altAxis: true,
       },
     },
     {
-      name: 'offset',
+      name: "offset",
       options: {
         offset: [0, 0],
       },
     },
   ];
-  const customModifiers: Options['modifiers'] = [
+  const customModifiers: Options["modifiers"] = [
     {
-      name: 'setMinWidth',
+      name: "setMinWidth",
       enabled: true,
-      phase: 'beforeWrite',
-      requires: ['computeStyles'],
+      phase: "beforeWrite",
+      requires: ["computeStyles"],
       fn: (obj: ModifierArguments<Record<string, unknown>>): void => {
         const widthToSet = Math.min(
           matchTriggerWidthPxUpTo,
@@ -110,7 +110,7 @@ export default function popper(
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     popperInstance = createPopper(reference, node, {
-      placement: options?.placement || 'bottom-start',
+      placement: options?.placement || "bottom-start",
       modifiers: buildModifiers(
         options?.modifiers ?? [],
         actionOpts.customModifierOptions,

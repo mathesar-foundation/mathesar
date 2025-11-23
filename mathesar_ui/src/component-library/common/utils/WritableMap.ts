@@ -6,9 +6,9 @@ import {
   derived,
   get,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import ImmutableMap from './ImmutableMap';
+import ImmutableMap from "./ImmutableMap";
 
 export default class WritableMap<Key, Value>
   implements Readable<ImmutableMap<Key, Value>>

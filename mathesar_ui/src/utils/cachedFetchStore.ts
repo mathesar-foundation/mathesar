@@ -1,4 +1,4 @@
-import { type Readable, type Writable, writable } from 'svelte/store';
+import { type Readable, type Writable, writable } from "svelte/store";
 
 function deserialize<T>(s: string): T | undefined {
   try {
@@ -26,7 +26,7 @@ export class CachedFetchStore<T>
    * Optionally, a hash of the input to the fetch function. If the input hash
    * changes, the cache will be invalidated.
    */
-  private inputHash = '';
+  private inputHash = "";
 
   private cacheKey: string;
 
@@ -105,13 +105,13 @@ export class CachedFetchStore<T>
     try {
       const deserialized = JSON.parse(serialized) as TimestampedValue<T>;
       const { inputHash, timestamp, value } = deserialized;
-      if (typeof inputHash !== 'string') {
+      if (typeof inputHash !== "string") {
         return undefined;
       }
-      if (typeof timestamp !== 'number') {
+      if (typeof timestamp !== "number") {
         return undefined;
       }
-      if (typeof value !== 'string') {
+      if (typeof value !== "string") {
         return undefined;
       }
       const deserializedValue = this.deserializeValue(value);
@@ -125,26 +125,26 @@ export class CachedFetchStore<T>
   }
 
   private fetchFromCache():
-    | 'no-cache-found'
-    | 'cache-too-old'
-    | 'hash-change'
-    | 'cache-ok' {
+    | "no-cache-found"
+    | "cache-too-old"
+    | "hash-change"
+    | "cache-ok" {
     const serialized = localStorage.getItem(this.cacheKey);
     if (serialized === null) {
-      return 'no-cache-found';
+      return "no-cache-found";
     }
     const deserialized = this.deserialize(serialized);
     if (deserialized === undefined) {
-      return 'no-cache-found';
+      return "no-cache-found";
     }
     if (now() - deserialized.timestamp > this.timeToLiveMs) {
-      return 'cache-too-old';
+      return "cache-too-old";
     }
     if (deserialized.inputHash !== this.inputHash) {
-      return 'hash-change';
+      return "hash-change";
     }
     this.value.set(deserialized);
-    return 'cache-ok';
+    return "cache-ok";
   }
 
   /**
@@ -168,7 +168,7 @@ export class CachedFetchStore<T>
 
   private async cachedFetch() {
     const cacheStatus = this.fetchFromCache();
-    if (cacheStatus === 'cache-ok') {
+    if (cacheStatus === "cache-ok") {
       return;
     }
     try {

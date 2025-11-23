@@ -2,28 +2,28 @@ import type {
   RawDataFormField,
   RawForeignKeyDataFormField,
   RawScalarDataFormField,
-} from '@mathesar/api/rpc/forms';
+} from "@mathesar/api/rpc/forms";
 import {
   ClientSideError,
   type GeneralizedError,
-} from '@mathesar/components/errors/errorUtils';
+} from "@mathesar/components/errors/errorUtils";
 import {
   getGloballyUniqueId,
   isDefinedNonNullable,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 import type {
   DataFormStructure,
   DataFormStructureCtx,
-} from '../DataFormStructure';
-import type { FormSource } from '../FormSource';
+} from "../DataFormStructure";
+import type { FormSource } from "../FormSource";
 
-import type { AbstractColumnBasedFieldProps } from './AbstractColumnBasedField';
-import { ErrorField } from './ErrorField';
-import { FieldColumn } from './FieldColumn';
-import { FkField } from './FkField';
-import { FormFields } from './FormFields';
-import { ScalarField } from './ScalarField';
+import type { AbstractColumnBasedFieldProps } from "./AbstractColumnBasedField";
+import { ErrorField } from "./ErrorField";
+import { FieldColumn } from "./FieldColumn";
+import { FkField } from "./FkField";
+import { FormFields } from "./FormFields";
+import { ScalarField } from "./ScalarField";
 
 export type DataFormField = ScalarField | FkField | ErrorField;
 export type ColumnBasedDataFormField = ScalarField | FkField;
@@ -47,7 +47,7 @@ function makeErrorFieldFactory({
       holder,
       {
         key: originalField.key,
-        label: originalField.label ?? 'Error',
+        label: originalField.label ?? "Error",
         help: originalField.help,
         index: originalField.index,
         styling: originalField.styling,
@@ -77,15 +77,15 @@ function columnToRawField({
   if (isDefinedNonNullable(fieldColumn.foreignKeyLink)) {
     return {
       ...base,
-      kind: 'foreign_key',
+      kind: "foreign_key",
       related_table_oid: fieldColumn.foreignKeyLink.relatedTableOid,
-      fk_interaction_rule: 'must_pick',
+      fk_interaction_rule: "must_pick",
       child_fields: [],
     };
   }
   return {
     ...base,
-    kind: 'scalar_column',
+    kind: "scalar_column",
   };
 }
 
@@ -97,7 +97,7 @@ function toResolvedBaseProps({
   fieldColumn: FieldColumn;
 }): AbstractColumnBasedFieldProps {
   if (rawField.column_attnum !== fieldColumn.column.id) {
-    throw new Error('Incorrect fieldColumn passed. This should never happen.');
+    throw new Error("Incorrect fieldColumn passed. This should never happen.");
   }
   return {
     key: rawField.key,
@@ -110,7 +110,7 @@ function toResolvedBaseProps({
   };
 }
 
-type FieldKind = RawDataFormField['kind'];
+type FieldKind = RawDataFormField["kind"];
 
 type FromResolvedRawArgsMap = {
   scalar_column: {
@@ -134,14 +134,14 @@ const FIELD_FACTORY_REGISTRY: {
   scalar_column: ({
     rawField,
     fieldColumn,
-  }: FromResolvedRawArgsMap['scalar_column']) => {
+  }: FromResolvedRawArgsMap["scalar_column"]) => {
     const base = toResolvedBaseProps({ rawField, fieldColumn });
     return (container, structureCtx) =>
       new ScalarField(
         container,
         {
           ...base,
-          kind: 'scalar_column',
+          kind: "scalar_column",
         },
         structureCtx,
       );
@@ -151,13 +151,13 @@ const FIELD_FACTORY_REGISTRY: {
     rawField,
     fieldColumn,
     createChildFields,
-  }: FromResolvedRawArgsMap['foreign_key']) => {
+  }: FromResolvedRawArgsMap["foreign_key"]) => {
     const base = toResolvedBaseProps({ rawField, fieldColumn });
     if (
       rawField.related_table_oid !== fieldColumn.foreignKeyLink?.relatedTableOid
     ) {
       throw new Error(
-        'Incorrect fk config in fieldColumn. This should never happen.',
+        "Incorrect fk config in fieldColumn. This should never happen.",
       );
     }
 
@@ -166,7 +166,7 @@ const FIELD_FACTORY_REGISTRY: {
         holder,
         {
           ...base,
-          kind: 'foreign_key',
+          kind: "foreign_key",
           relatedTableOid: rawField.related_table_oid,
           interactionRule: rawField.fk_interaction_rule,
           createFields: createChildFields,
@@ -192,7 +192,7 @@ export function buildFieldFactoryFromRaw({
     );
 
     const foreignKeyLink =
-      'related_table_oid' in rawField &&
+      "related_table_oid" in rawField &&
       isDefinedNonNullable(rawField.related_table_oid)
         ? {
             relatedTableOid: rawField.related_table_oid,
@@ -207,7 +207,7 @@ export function buildFieldFactoryFromRaw({
 
     const { kind } = rawField;
 
-    if (kind === 'scalar_column') {
+    if (kind === "scalar_column") {
       return FIELD_FACTORY_REGISTRY.scalar_column({
         rawField,
         fieldColumn,
@@ -243,7 +243,7 @@ export function buildFieldFactoryFromColumn({
   try {
     const { kind } = rawField;
 
-    if (kind === 'scalar_column') {
+    if (kind === "scalar_column") {
       return FIELD_FACTORY_REGISTRY.scalar_column({
         rawField,
         fieldColumn,

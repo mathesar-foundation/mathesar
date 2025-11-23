@@ -1,7 +1,7 @@
-import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInputTypes';
-import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
-import type { Appearance } from '@mathesar-component-library-dir/commonTypes';
-import type { ListBoxProps } from '@mathesar-component-library-dir/list-box/ListBoxTypes';
+import type { BaseInputProps } from "@mathesar-component-library-dir/common/base-components/BaseInputTypes";
+import type { LabelGetter } from "@mathesar-component-library-dir/common/utils/formatUtils";
+import type { Appearance } from "@mathesar-component-library-dir/commonTypes";
+import type { ListBoxProps } from "@mathesar-component-library-dir/list-box/ListBoxTypes";
 
 export interface SelectProps<Option> extends BaseInputProps {
   options: readonly Option[];
@@ -13,10 +13,10 @@ export interface SelectProps<Option> extends BaseInputProps {
   class?: string;
   triggerAppearance?: Appearance;
   ariaLabel?: string;
-  valuesAreEqual?: ListBoxProps<Option | undefined>['checkEquality'];
+  valuesAreEqual?: ListBoxProps<Option | undefined>["checkEquality"];
   isOptionDisabled?: ListBoxProps<
     Option | undefined
-  >['checkIfOptionIsDisabled'];
+  >["checkIfOptionIsDisabled"];
   /**
    * When options change and the selected value is either undefined or
    * not present in the options array, autoSelect determines how to
@@ -26,5 +26,5 @@ export interface SelectProps<Option> extends BaseInputProps {
    * clear: Sets selected value to undefined.
    * none: Disables auto select. Current value stays as it is.
    */
-  autoSelect?: 'first' | 'clear' | 'none';
+  autoSelect?: "first" | "clear" | "none";
 }

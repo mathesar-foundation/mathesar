@@ -1,7 +1,7 @@
-@use 'sass:list';
+@use "sass:list";
 
 @function _join_optional_token($token) {
-  @return if($token == '', '', '-#{$token}');
+  @return if($token == "", "", "-#{$token}");
 }
 
 @mixin generate-intensity-based-color-tokens(
@@ -42,8 +42,8 @@
 }
 
 @mixin generate-color-tokens($category, $exports) {
-  $stateless-color-group: map-get($exports, 'stateless');
-  $stateful-color-group: map-get($exports, 'stateful');
+  $stateless-color-group: map-get($exports, "stateless");
+  $stateful-color-group: map-get($exports, "stateful");
 
   $prefix: #{_join_optional_token($category)};
 

@@ -3,7 +3,7 @@ import {
   type Subscriber,
   type Unsubscriber,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
 /**
  * AccompanyingElements stores references to any DOM nodes which "accompany" a

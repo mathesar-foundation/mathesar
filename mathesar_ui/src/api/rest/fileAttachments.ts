@@ -1,14 +1,14 @@
-import type { CancellablePromise } from '@mathesar-component-library';
+import type { CancellablePromise } from "@mathesar-component-library";
 
-import type { FileManifest } from '../rpc/records';
+import type { FileManifest } from "../rpc/records";
 
 import {
   type UploadCompletionOpts,
   addQueryParamsToUrl,
   uploadFile,
-} from './utils/requestUtils';
+} from "./utils/requestUtils";
 
-const ENDPOINT = '/files/';
+const ENDPOINT = "/files/";
 
 export interface FileAttachmentUploadResult {
   /** The value to set in the cell into which the file was uploaded */
@@ -30,7 +30,7 @@ export function uploadFileAttachment(
   completionCallback?: (obj: UploadCompletionOpts) => unknown,
 ): CancellablePromise<FileAttachmentUploadResult> {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("file", file);
   return uploadFile(
     addQueryParamsToUrl(ENDPOINT, queryParams),
     formData,

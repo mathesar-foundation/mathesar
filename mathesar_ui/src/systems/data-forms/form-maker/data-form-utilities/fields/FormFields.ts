@@ -1,32 +1,32 @@
-import { enumerate, execPipe, flatMap, some, toArray } from 'iter-tools';
+import { enumerate, execPipe, flatMap, some, toArray } from "iter-tools";
 import {
   type Readable,
   type Subscriber,
   type Unsubscriber,
   derived,
   get,
-} from 'svelte/store';
+} from "svelte/store";
 
 import {
   WritableSet,
   asyncDynamicDerived,
   reactiveSort,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 import type {
   DataFormStructure,
   DataFormStructureCtx,
-} from '../DataFormStructure';
+} from "../DataFormStructure";
 
 import type {
   DataFormField,
   DataFormFieldFactory,
   ParentDataFormField,
-} from './factories';
-import type { FieldColumn } from './FieldColumn';
-import type { DataFormFieldInputValueHolder } from './FieldValueHolder';
-import type { FkField } from './FkField';
-import { getValidFormFields } from './utils';
+} from "./factories";
+import type { FieldColumn } from "./FieldColumn";
+import type { DataFormFieldInputValueHolder } from "./FieldValueHolder";
+import type { FkField } from "./FkField";
+import { getValidFormFields } from "./utils";
 
 export type DataFormFieldContainerFactory = (
   parent: DataFormStructure | ParentDataFormField,
@@ -35,17 +35,17 @@ export type DataFormFieldContainerFactory = (
 
 export type FormFieldContainerChangeEvent =
   | {
-      type: 'fields/add';
+      type: "fields/add";
       target: DataFormStructure | ParentDataFormField;
       field: DataFormField;
     }
   | {
-      type: 'fields/delete';
+      type: "fields/delete";
       target: DataFormStructure | ParentDataFormField;
       field: DataFormField;
     }
   | {
-      type: 'fields/reconstruct';
+      type: "fields/reconstruct";
       target: DataFormStructure | ParentDataFormField;
     };
 
@@ -84,7 +84,7 @@ export class FormFields implements Readable<DataFormField[]> {
       this.fieldSet,
       (fieldSetValues) => {
         const fkFields = [...fieldSetValues].filter(
-          (f): f is FkField => f.kind === 'foreign_key',
+          (f): f is FkField => f.kind === "foreign_key",
         );
 
         return fkFields.flatMap((item) => [
@@ -96,10 +96,10 @@ export class FormFields implements Readable<DataFormField[]> {
         execPipe(
           [...fieldSetValues],
           flatMap((f) => {
-            const stores = 'fieldValueHolder' in f ? [f.fieldValueHolder] : [];
+            const stores = "fieldValueHolder" in f ? [f.fieldValueHolder] : [];
             if (
-              f.kind === 'foreign_key' &&
-              _get(f.fieldValueHolder.userAction) === 'create'
+              f.kind === "foreign_key" &&
+              _get(f.fieldValueHolder.userAction) === "create"
             ) {
               stores.push(..._get(f.nestedFields.fieldValueStores));
             }
@@ -119,13 +119,13 @@ export class FormFields implements Readable<DataFormField[]> {
     return derived(this.fieldSet, ($fieldSet) =>
       execPipe(
         $fieldSet.values(),
-        some((f) => 'hasColumn' in f && f.hasColumn(fc)),
+        some((f) => "hasColumn" in f && f.hasColumn(fc)),
       ),
     );
   }
 
   getTableOid() {
-    return 'relatedTableOid' in this.parent
+    return "relatedTableOid" in this.parent
       ? this.parent.relatedTableOid
       : this.parent.baseTableOid;
   }
@@ -138,13 +138,13 @@ export class FormFields implements Readable<DataFormField[]> {
       )
     ) {
       throw new Error(
-        'The provided form fields do not reference this container. This should never occur.',
+        "The provided form fields do not reference this container. This should never occur.",
       );
     }
 
     this.fieldSet.reconstruct(dataFormFields);
     this.structureCtx.changeEventHandler?.trigger({
-      type: 'fields/reconstruct',
+      type: "fields/reconstruct",
       target: this.parent,
     });
   }
@@ -154,7 +154,7 @@ export class FormFields implements Readable<DataFormField[]> {
       [...fieldFactories].map((factory) => factory(this, this.structureCtx)),
     );
     this.structureCtx.changeEventHandler?.trigger({
-      type: 'fields/reconstruct',
+      type: "fields/reconstruct",
       target: this.parent,
     });
   }
@@ -172,7 +172,7 @@ export class FormFields implements Readable<DataFormField[]> {
 
   add(createDataFormField: DataFormFieldFactory) {
     const dataFormField = createDataFormField(this, this.structureCtx);
-    const isFieldColumnBased = 'fieldColumn' in dataFormField;
+    const isFieldColumnBased = "fieldColumn" in dataFormField;
     const canAddField =
       !isFieldColumnBased || !get(this.hasColumn(dataFormField.fieldColumn));
 
@@ -185,7 +185,7 @@ export class FormFields implements Readable<DataFormField[]> {
       }
       this.fieldSet.add(dataFormField);
       this.structureCtx.changeEventHandler?.trigger({
-        type: 'fields/add',
+        type: "fields/add",
         target: this.parent,
         field: dataFormField,
       });
@@ -202,7 +202,7 @@ export class FormFields implements Readable<DataFormField[]> {
       }
       this.fieldSet.delete(dataFormField);
       this.structureCtx.changeEventHandler?.trigger({
-        type: 'fields/delete',
+        type: "fields/delete",
         target: this.parent,
         field: dataFormField,
       });

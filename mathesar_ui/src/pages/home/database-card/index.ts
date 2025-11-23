@@ -1,1 +1,1 @@
-export { default as DatabaseCard } from './DatabaseCard.svelte';
+export { default as DatabaseCard } from "./DatabaseCard.svelte";

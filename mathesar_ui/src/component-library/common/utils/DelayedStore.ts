@@ -1,4 +1,4 @@
-import { type Readable, type Writable, writable } from 'svelte/store';
+import { type Readable, type Writable, writable } from "svelte/store";
 
 export class DelayedStore<T> implements Readable<T> {
   private delay: number;

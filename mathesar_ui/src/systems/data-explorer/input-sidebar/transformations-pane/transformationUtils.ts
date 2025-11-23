@@ -1,10 +1,10 @@
-import type { InitialColumn } from '@mathesar/api/rpc/explorations';
+import type { InitialColumn } from "@mathesar/api/rpc/explorations";
 
-import type { QueryTransformationModel } from '../../QueryModel';
+import type { QueryTransformationModel } from "../../QueryModel";
 import {
   type ProcessedQueryResultColumnMap,
   getProcessedOutputColumns,
-} from '../../utils';
+} from "../../utils";
 
 export function calcAllowedColumnsPerTransformation(
   initialColumns: InitialColumn[],
@@ -19,7 +19,7 @@ export function calcAllowedColumnsPerTransformation(
   allowedColumnsPerTransform.push(latestColumnList);
   for (let index = 1; index < transformationModels.length; index += 1) {
     const transformation = transformationModels[index - 1];
-    if (transformation.type === 'summarize') {
+    if (transformation.type === "summarize") {
       latestColumnList = getProcessedOutputColumns(
         transformation.getOutputColumnAliases(),
         columnsMetaData,

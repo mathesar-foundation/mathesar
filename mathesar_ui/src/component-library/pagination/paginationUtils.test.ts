@@ -1,6 +1,6 @@
-import { calculatePages } from './paginationUtils';
+import { calculatePages } from "./paginationUtils";
 
-test('calculatePages', () => {
+test("calculatePages", () => {
   expect(calculatePages(1, 1)).toEqual({
     currentWindow: [1],
     start: 1,

@@ -1,19 +1,19 @@
-import { forceAsciiMinusSign } from './cleaners';
-import { type DerivedOptions, getDerivedOptions } from './options';
+import { forceAsciiMinusSign } from "./cleaners";
+import { type DerivedOptions, getDerivedOptions } from "./options";
 
 type Parts = Intl.NumberFormatPart[];
 
 function factoryToAddTrailingDecimalSeparator(
-  opts: Pick<DerivedOptions, 'decimalSeparator'>,
+  opts: Pick<DerivedOptions, "decimalSeparator">,
 ): (parts: Parts) => Parts {
   return (parts: Parts) =>
-    parts.some((p) => p.type === 'decimal')
+    parts.some((p) => p.type === "decimal")
       ? parts
-      : [...parts, { type: 'decimal', value: opts.decimalSeparator }];
+      : [...parts, { type: "decimal", value: opts.decimalSeparator }];
 }
 
 function combineParts(parts: Parts): string {
-  return parts.map((part) => part.value).join('');
+  return parts.map((part) => part.value).join("");
 }
 
 export function makeFormatter(
@@ -21,13 +21,13 @@ export function makeFormatter(
 ): (value: number | bigint) => string {
   function getValidationErrors(value: number | bigint) {
     if (Number.isNaN(value)) {
-      return ['Value is NaN.'];
+      return ["Value is NaN."];
     }
     if (!opts.allowNegative && (value < 0 || Object.is(value, -0))) {
-      return ['Value must be positive.'];
+      return ["Value must be positive."];
     }
-    if (!opts.allowFloat && typeof value === 'number' && value % 1 !== 0) {
-      return ['Value must be an integer.'];
+    if (!opts.allowFloat && typeof value === "number" && value % 1 !== 0) {
+      return ["Value must be an integer."];
     }
     return [];
   }
@@ -35,7 +35,7 @@ export function makeFormatter(
   function format(value: number | bigint): string {
     const validationErrors = getValidationErrors(value);
     if (validationErrors.length) {
-      throw new Error(`Unable to format value. ${validationErrors.join(', ')}`);
+      throw new Error(`Unable to format value. ${validationErrors.join(", ")}`);
     }
 
     const parts = Intl.NumberFormat(opts.locale, {
@@ -45,7 +45,7 @@ export function makeFormatter(
       // displayed, and we don't yet have support to accept entry of numbers in
       // Bengali, Persian, or Marathi.
       // @ts-ignore because TypeScript's Intl.NumberFormatOptions is not up-to-date
-      numberingSystem: 'latn',
+      numberingSystem: "latn",
       minimumFractionDigits: opts.minimumFractionDigits,
       // Ensure that max is greater or equal to min, for safety's sake.
       maximumFractionDigits: Math.max(
@@ -75,7 +75,7 @@ export function makeFormatter(
 export function formatToNormalizedForm(value: number | bigint): string {
   return makeFormatter(
     getDerivedOptions({
-      locale: 'en-US',
+      locale: "en-US",
       allowFloat: true,
       allowNegative: true,
       useGrouping: false,
@@ -92,7 +92,7 @@ export function formatToNormalizedForm(value: number | bigint): string {
  * bigint because the source is a high precision float.
  */
 export function factoryToFormatSimplifiedInputForLocale(
-  opts: Pick<DerivedOptions, 'decimalSeparator'>,
+  opts: Pick<DerivedOptions, "decimalSeparator">,
 ): (simplifiedInput: string) => string {
   return (simplifiedInput: string) =>
     simplifiedInput.replace(/\./g, opts.decimalSeparator);

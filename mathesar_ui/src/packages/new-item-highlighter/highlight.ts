@@ -1,13 +1,13 @@
-import { HIGHLIGHT_TRANSITION_MS, HINT_EXPIRATION_END_MS } from './constants';
-import { displayHint } from './hint';
-import { getRectCssGeometry, onElementRemoved } from './utils';
+import { HIGHLIGHT_TRANSITION_MS, HINT_EXPIRATION_END_MS } from "./constants";
+import { displayHint } from "./hint";
+import { getRectCssGeometry, onElementRemoved } from "./utils";
 
 function makeHighlighterElement(): HTMLElement {
-  const effect = document.createElement('div');
-  effect.className = 'effect';
+  const effect = document.createElement("div");
+  effect.className = "effect";
 
-  const highlight = document.createElement('div');
-  highlight.className = 'new-item-highlighter';
+  const highlight = document.createElement("div");
+  highlight.className = "new-item-highlighter";
   highlight.appendChild(effect);
 
   return highlight;
@@ -15,7 +15,7 @@ function makeHighlighterElement(): HTMLElement {
 
 function displayHighlight(target: HTMLElement): void {
   const highlight = makeHighlighterElement();
-  highlight.style.setProperty('--duration', `${HIGHLIGHT_TRANSITION_MS}ms`);
+  highlight.style.setProperty("--duration", `${HIGHLIGHT_TRANSITION_MS}ms`);
   document.body.appendChild(highlight);
 
   // While the highlight is in effect, we use a requestAnimationFrame loop to

@@ -1,22 +1,22 @@
-import { type Readable, type Updater, get, writable } from 'svelte/store';
+import { type Readable, type Updater, get, writable } from "svelte/store";
 
-import type { RawDataFormField } from '@mathesar/api/rpc/forms';
+import type { RawDataFormField } from "@mathesar/api/rpc/forms";
 
-import type { DataFormStructureCtx } from '../DataFormStructure';
+import type { DataFormStructureCtx } from "../DataFormStructure";
 
-import type { FormFields } from './FormFields';
+import type { FormFields } from "./FormFields";
 
 export interface AbstractFieldProps {
-  key: RawDataFormField['key'];
-  label: RawDataFormField['label'];
-  help: RawDataFormField['help'];
-  index: RawDataFormField['index'];
-  styling: RawDataFormField['styling'];
+  key: RawDataFormField["key"];
+  label: RawDataFormField["label"];
+  help: RawDataFormField["help"];
+  index: RawDataFormField["index"];
+  styling: RawDataFormField["styling"];
 }
 
 export type AbstractFieldModifiableProps = keyof Pick<
   AbstractFieldProps,
-  'index' | 'label' | 'help' | 'styling'
+  "index" | "label" | "help" | "styling"
 >;
 
 export abstract class AbstractField {
@@ -28,25 +28,25 @@ export abstract class AbstractField {
 
   private _index;
 
-  get index(): Readable<AbstractFieldProps['index']> {
+  get index(): Readable<AbstractFieldProps["index"]> {
     return this._index;
   }
 
   private _label;
 
-  get label(): Readable<AbstractFieldProps['label']> {
+  get label(): Readable<AbstractFieldProps["label"]> {
     return this._label;
   }
 
   private _help;
 
-  get help(): Readable<AbstractFieldProps['help']> {
+  get help(): Readable<AbstractFieldProps["help"]> {
     return this._help;
   }
 
   private _styling;
 
-  get styling(): Readable<AbstractFieldProps['styling']> {
+  get styling(): Readable<AbstractFieldProps["styling"]> {
     return this._styling;
   }
 
@@ -68,20 +68,20 @@ export abstract class AbstractField {
 
   setLabel(label: string) {
     this._label.set(label);
-    this.triggerChangeEvent('label');
+    this.triggerChangeEvent("label");
   }
 
   setHelpText(help: string | null) {
     this._help.set(help);
-    this.triggerChangeEvent('help');
+    this.triggerChangeEvent("help");
   }
 
   updateIndex(updator: Updater<number>) {
     this._index.update(updator);
-    this.triggerChangeEvent('index');
+    this.triggerChangeEvent("index");
   }
 
-  updateStyling(styling: Partial<AbstractFieldProps['styling']>) {
+  updateStyling(styling: Partial<AbstractFieldProps["styling"]>) {
     this._styling.update((s) => {
       if (styling === null) {
         return styling;
@@ -91,7 +91,7 @@ export abstract class AbstractField {
         ...styling,
       };
     });
-    this.triggerChangeEvent('styling');
+    this.triggerChangeEvent("styling");
   }
 
   protected abstract triggerChangeEvent<T extends AbstractFieldModifiableProps>(

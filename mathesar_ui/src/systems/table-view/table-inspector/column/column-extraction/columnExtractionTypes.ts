@@ -1,8 +1,8 @@
-import type { FkConstraint } from '@mathesar/api/rpc/constraints';
-import type { Table } from '@mathesar/models/Table';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import type { FkConstraint } from "@mathesar/api/rpc/constraints";
+import type { Table } from "@mathesar/models/Table";
+import type { ProcessedColumn } from "@mathesar/stores/table-data";
 
-export type ColumnExtractionTargetType = 'newTable' | 'existingTable';
+export type ColumnExtractionTargetType = "newTable" | "existingTable";
 
 export interface ExtractColumnsImperativeProps {
   targetType: ColumnExtractionTargetType;

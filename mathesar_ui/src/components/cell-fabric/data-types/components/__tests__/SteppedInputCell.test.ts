@@ -1,7 +1,7 @@
-import '@testing-library/jest-dom';
-import { render } from '@testing-library/svelte';
+import "@testing-library/jest-dom";
+import { render } from "@testing-library/svelte";
 
-import SteppedInputCell from '../SteppedInputCell.svelte';
+import SteppedInputCell from "../SteppedInputCell.svelte";
 
 const requiredProps = {
   isActive: false,
@@ -9,21 +9,21 @@ const requiredProps = {
   disabled: false,
 };
 
-describe('StepperInputCell', () => {
-  test('renders valid string', () => {
+describe("StepperInputCell", () => {
+  test("renders valid string", () => {
     const { container } = render(SteppedInputCell, {
       props: {
         ...requiredProps,
-        value: 'string value',
+        value: "string value",
       },
     });
 
-    const cellContent = container.querySelector('.content');
+    const cellContent = container.querySelector(".content");
     expect(cellContent).not.toBeNull();
-    expect(cellContent).toHaveTextContent('string value');
+    expect(cellContent).toHaveTextContent("string value");
   });
 
-  test('renders valid numbers', () => {
+  test("renders valid numbers", () => {
     const { container } = render(SteppedInputCell, {
       props: {
         ...requiredProps,
@@ -31,12 +31,12 @@ describe('StepperInputCell', () => {
       },
     });
 
-    const cellContent = container.querySelector('.content');
+    const cellContent = container.querySelector(".content");
     expect(cellContent).not.toBeNull();
-    expect(cellContent).toHaveTextContent('0');
+    expect(cellContent).toHaveTextContent("0");
   });
 
-  test('renders Null component', () => {
+  test("renders Null component", () => {
     const { container } = render(SteppedInputCell, {
       props: {
         ...requiredProps,
@@ -44,12 +44,12 @@ describe('StepperInputCell', () => {
       },
     });
 
-    const cellContent = container.querySelector('.content');
+    const cellContent = container.querySelector(".content");
     expect(cellContent).not.toBeNull();
-    expect(cellContent).toHaveTextContent('NULL');
+    expect(cellContent).toHaveTextContent("NULL");
   });
 
-  test('renders nothing on invalid values', () => {
+  test("renders nothing on invalid values", () => {
     const { container } = render(SteppedInputCell, {
       props: {
         ...requiredProps,
@@ -57,8 +57,8 @@ describe('StepperInputCell', () => {
       },
     });
 
-    const cellContent = container.querySelector('.content');
+    const cellContent = container.querySelector(".content");
     expect(cellContent).not.toBeNull();
-    expect(cellContent).toHaveTextContent('DEFAULT');
+    expect(cellContent).toHaveTextContent("DEFAULT");
   });
 });

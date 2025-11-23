@@ -1,11 +1,11 @@
-import { abstractTypeCategory } from '../constants';
+import { abstractTypeCategory } from "../constants";
 import type {
   AbstractTypeCategoryIdentifier,
   AbstractTypeFilterDefinition,
   AbstractTypeFilterDefinitionMap,
   AbstractTypeFilterDefinitionResponse,
   AbstractTypeLimitedFilterInformation,
-} from '../types';
+} from "../types";
 
 const allDateTimeTypes = [
   abstractTypeCategory.Date,
@@ -56,21 +56,21 @@ function constructParamMapForAllTypes(
 
 const equalityFiltersResponse: AbstractTypeFilterDefinitionResponse[] = [
   {
-    id: 'equal',
-    name: 'equals',
-    aliases: constructAliasMapForTypes(allDateTimeTypes, 'is same as'),
+    id: "equal",
+    name: "equals",
+    aliases: constructAliasMapForTypes(allDateTimeTypes, "is same as"),
     uiTypeParameterMap: constructParamMapForAllTypes((category) => [category]),
     hasParams: true,
   },
   {
-    id: 'null',
-    name: 'is empty',
+    id: "null",
+    name: "is empty",
     uiTypeParameterMap: constructParamMapForAllTypes(() => []),
     hasParams: false,
   },
   {
-    id: 'not_null',
-    name: 'is not empty',
+    id: "not_null",
+    name: "is not empty",
     uiTypeParameterMap: constructParamMapForAllTypes(() => []),
     hasParams: false,
   },
@@ -80,8 +80,8 @@ const equalityFiltersResponse: AbstractTypeFilterDefinitionResponse[] = [
 // Might be better if we can have this with the types endpoint
 const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
   {
-    id: 'contains_case_insensitive',
-    name: 'contains',
+    id: "contains_case_insensitive",
+    name: "contains",
     uiTypeParameterMap: {
       [abstractTypeCategory.Text]: [abstractTypeCategory.Text],
       [abstractTypeCategory.Email]: [abstractTypeCategory.Text],
@@ -90,8 +90,8 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     hasParams: true,
   },
   {
-    id: 'starts_with_case_insensitive',
-    name: 'starts with',
+    id: "starts_with_case_insensitive",
+    name: "starts with",
     uiTypeParameterMap: {
       [abstractTypeCategory.Text]: [abstractTypeCategory.Text],
       [abstractTypeCategory.Email]: [abstractTypeCategory.Text],
@@ -101,121 +101,121 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
   },
   ...equalityFiltersResponse,
   {
-    id: 'uri_scheme_equals',
-    name: 'URI scheme is',
+    id: "uri_scheme_equals",
+    name: "URI scheme is",
     uiTypeParameterMap: {
       [abstractTypeCategory.Uri]: [abstractTypeCategory.Text],
     },
     hasParams: true,
   },
   {
-    id: 'uri_authority_contains',
-    name: 'URI authority contains',
+    id: "uri_authority_contains",
+    name: "URI authority contains",
     uiTypeParameterMap: {
       [abstractTypeCategory.Uri]: [abstractTypeCategory.Text],
     },
     hasParams: true,
   },
   {
-    id: 'json_array_length_equals',
-    name: 'number of elements is',
+    id: "json_array_length_equals",
+    name: "number of elements is",
     uiTypeParameterMap: {
       [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
     hasParams: true,
   },
   {
-    id: 'json_array_length_greater_than',
-    name: 'number of elements >',
+    id: "json_array_length_greater_than",
+    name: "number of elements >",
     uiTypeParameterMap: {
       [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
     hasParams: true,
   },
   {
-    id: 'json_array_length_greater_or_equal',
-    name: 'number of elements >=',
+    id: "json_array_length_greater_or_equal",
+    name: "number of elements >=",
     uiTypeParameterMap: {
       [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
     hasParams: true,
   },
   {
-    id: 'json_array_length_less_than',
-    name: 'number of elements <',
+    id: "json_array_length_less_than",
+    name: "number of elements <",
     uiTypeParameterMap: {
       [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
     hasParams: true,
   },
   {
-    id: 'json_array_length_less_or_equal',
-    name: 'number of elements <=',
+    id: "json_array_length_less_or_equal",
+    name: "number of elements <=",
     uiTypeParameterMap: {
       [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Number],
     },
     hasParams: true,
   },
   {
-    id: 'json_array_not_empty',
-    name: 'array is not empty',
+    id: "json_array_not_empty",
+    name: "array is not empty",
     uiTypeParameterMap: {
       [abstractTypeCategory.JsonArray]: [],
     },
     hasParams: false,
   },
   {
-    id: 'json_array_contains',
-    name: 'array contains',
+    id: "json_array_contains",
+    name: "array contains",
     uiTypeParameterMap: {
       [abstractTypeCategory.JsonArray]: [abstractTypeCategory.Text],
     },
     hasParams: true,
   },
   {
-    id: 'email_domain_equals',
-    name: 'email domain is',
+    id: "email_domain_equals",
+    name: "email domain is",
     uiTypeParameterMap: {
       [abstractTypeCategory.Email]: [abstractTypeCategory.Text],
     },
     hasParams: true,
   },
   {
-    id: 'email_domain_contains',
-    name: 'email domain contains',
+    id: "email_domain_contains",
+    name: "email domain contains",
     uiTypeParameterMap: {
       [abstractTypeCategory.Email]: [abstractTypeCategory.Text],
     },
     hasParams: true,
   },
   {
-    id: 'lesser',
-    name: 'is lesser than',
-    aliases: constructAliasMapForTypes(allDateTimeTypes, 'is before'),
+    id: "lesser",
+    name: "is lesser than",
+    aliases: constructAliasMapForTypes(allDateTimeTypes, "is before"),
     uiTypeParameterMap: numericallyOperableTypesParams,
     hasParams: true,
   },
   {
-    id: 'greater',
-    name: 'is greater than',
-    aliases: constructAliasMapForTypes(allDateTimeTypes, 'is after'),
+    id: "greater",
+    name: "is greater than",
+    aliases: constructAliasMapForTypes(allDateTimeTypes, "is after"),
     uiTypeParameterMap: numericallyOperableTypesParams,
     hasParams: true,
   },
   {
-    id: 'lesser_or_equal',
-    name: 'is lesser or equal to',
+    id: "lesser_or_equal",
+    name: "is lesser or equal to",
     aliases: constructAliasMapForTypes(
       allDateTimeTypes,
-      'is before or same as',
+      "is before or same as",
     ),
     uiTypeParameterMap: numericallyOperableTypesParams,
     hasParams: true,
   },
   {
-    id: 'greater_or_equal',
-    name: 'is greater or equal to',
-    aliases: constructAliasMapForTypes(allDateTimeTypes, 'is after or same as'),
+    id: "greater_or_equal",
+    name: "is greater or equal to",
+    aliases: constructAliasMapForTypes(allDateTimeTypes, "is after or same as"),
     uiTypeParameterMap: numericallyOperableTypesParams,
     hasParams: true,
   },
@@ -253,9 +253,9 @@ export const filterDefinitionMap = getFilterDefinitionMap(filterResponse);
 
 export function getEqualityFiltersForAbstractType(
   categoryIdentifier: AbstractTypeCategoryIdentifier,
-): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
+): Map<AbstractTypeFilterDefinition["id"], AbstractTypeFilterDefinition> {
   const allowedFiltersMap: Map<
-    AbstractTypeFilterDefinition['id'],
+    AbstractTypeFilterDefinition["id"],
     AbstractTypeFilterDefinition
   > = new Map();
 
@@ -268,9 +268,9 @@ export function getEqualityFiltersForAbstractType(
 
 export function getFiltersForAbstractType(
   categoryIdentifier: AbstractTypeCategoryIdentifier,
-): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
+): Map<AbstractTypeFilterDefinition["id"], AbstractTypeFilterDefinition> {
   const allowedFiltersMap: Map<
-    AbstractTypeFilterDefinition['id'],
+    AbstractTypeFilterDefinition["id"],
     AbstractTypeFilterDefinition
   > = new Map();
 
@@ -282,7 +282,7 @@ export function getFiltersForAbstractType(
 }
 
 export function getLimitedFilterInformationById(
-  filterIdentifier: AbstractTypeFilterDefinition['id'],
+  filterIdentifier: AbstractTypeFilterDefinition["id"],
 ): AbstractTypeLimitedFilterInformation | undefined {
   const filter = filterResponse.find((entry) => entry.id === filterIdentifier);
   if (filter) {

@@ -4,42 +4,42 @@ import {
   derived,
   get,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
-import type { RawSchema } from '@mathesar/api/rpc/schemas';
-import type { Database } from '@mathesar/models/Database';
-import { Schema } from '@mathesar/models/Schema';
-import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
+import type { RawSchema } from "@mathesar/api/rpc/schemas";
+import type { Database } from "@mathesar/models/Database";
+import { Schema } from "@mathesar/models/Schema";
+import { RpcError } from "@mathesar/packages/json-rpc-client-builder";
+import { preloadCommonData } from "@mathesar/utils/preloadData";
 import {
   type CancellablePromise,
   collapse,
   unite,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import { databasesStore } from './databases';
+import { databasesStore } from "./databases";
 
 const commonData = preloadCommonData();
-const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
+const isInAuthenticatedContext = commonData.routing_context !== "anonymous";
 const currentSchemaFromCommonData = isInAuthenticatedContext
   ? commonData.current_schema
   : null;
 
-export const currentSchemaId: Writable<Schema['oid'] | undefined> = writable(
+export const currentSchemaId: Writable<Schema["oid"] | undefined> = writable(
   currentSchemaFromCommonData ?? undefined,
 );
 
 export interface SchemaStoreData {
-  databaseId?: Database['id'];
+  databaseId?: Database["id"];
   requestStatus: RequestStatus<RpcError[]>;
-  data: Map<Schema['oid'], Schema>;
+  data: Map<Schema["oid"], Schema>;
 }
 
 function makeEmptySchemasData(): SchemaStoreData {
   return {
-    requestStatus: { state: 'success' },
+    requestStatus: { state: "success" },
     data: new Map(),
   };
 }
@@ -51,13 +51,13 @@ const schemasStore: Writable<SchemaStoreData> = writable(
 let request: CancellablePromise<RawSchema[]>;
 
 function setSchemasInStore(database: Database, rawSchemas: RawSchema[]) {
-  const schemasMap = new Map<Schema['oid'], Schema>();
+  const schemasMap = new Map<Schema["oid"], Schema>();
   rawSchemas.forEach((rawSchema) => {
     schemasMap.set(rawSchema.oid, new Schema({ database, rawSchema }));
   });
   schemasStore.set({
     databaseId: database.id,
-    requestStatus: { state: 'success' },
+    requestStatus: { state: "success" },
     data: schemasMap,
   });
 }
@@ -100,12 +100,12 @@ export async function fetchSchemasForCurrentDatabase() {
     if ($schemasStore.databaseId === $currentDatabase.id) {
       return {
         ...$schemasStore,
-        requestStatus: { state: 'processing' },
+        requestStatus: { state: "processing" },
       };
     }
     return {
       databaseId: $currentDatabase.id,
-      requestStatus: { state: 'processing' },
+      requestStatus: { state: "processing" },
       data: new Map(),
     };
   });
@@ -120,7 +120,7 @@ export async function fetchSchemasForCurrentDatabase() {
         return {
           ...$schemasStore,
           requestStatus: {
-            state: 'failure',
+            state: "failure",
             errors: [RpcError.fromAnything(err)],
           },
         };
@@ -128,7 +128,7 @@ export async function fetchSchemasForCurrentDatabase() {
       return {
         databaseId: $currentDatabase.id,
         requestStatus: {
-          state: 'failure',
+          state: "failure",
           errors: [RpcError.fromAnything(err)],
         },
         data: new Map(),
@@ -170,13 +170,13 @@ export const schemas = collapse(
         isInAuthenticatedContext &&
         commonData.current_database === $currentDatabase?.id
       ) {
-        if (commonData.schemas.state === 'success') {
+        if (commonData.schemas.state === "success") {
           setSchemasInStore($currentDatabase, commonData.schemas.data);
         } else {
           schemasStore.set({
             databaseId: $currentDatabase.id,
             requestStatus: {
-              state: 'failure',
+              state: "failure",
               errors: [RpcError.fromAnything(commonData.schemas.error)],
             },
             data: new Map(),
@@ -186,7 +186,7 @@ export const schemas = collapse(
         void fetchSchemasForCurrentDatabase();
       }
       preload = false;
-    } else if ($schemasStore.requestStatus.state === 'failure') {
+    } else if ($schemasStore.requestStatus.state === "failure") {
       void fetchSchemasForCurrentDatabase();
     }
     return schemasStore;

@@ -1,7 +1,7 @@
-import type { ActionReturn } from 'svelte/action';
+import type { ActionReturn } from "svelte/action";
 
-import AttachableDropdown from '@mathesar-component-library-dir/dropdown/AttachableDropdown.svelte';
-import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
+import AttachableDropdown from "@mathesar-component-library-dir/dropdown/AttachableDropdown.svelte";
+import type { ComponentAndProps } from "@mathesar-component-library-dir/types";
 
 type Content = string | string[] | ComponentAndProps;
 
@@ -12,9 +12,9 @@ export default function tooltip(
   const tooltipComponent = new AttachableDropdown({
     props: {
       trigger: node,
-      placements: ['top', 'right', 'bottom', 'left'],
+      placements: ["top", "right", "bottom", "left"],
       content,
-      class: 'tooltip',
+      class: "tooltip",
     },
     target: document.body,
   });
@@ -26,16 +26,16 @@ export default function tooltip(
     tooltipComponent.$set({ isOpen: false });
   }
 
-  node.addEventListener('mouseenter', showTooltip);
-  node.addEventListener('mouseleave', hideTooltip);
+  node.addEventListener("mouseenter", showTooltip);
+  node.addEventListener("mouseleave", hideTooltip);
 
   function update(newcontent: Content) {
     tooltipComponent.$set({ content: newcontent });
   }
 
   function destroy() {
-    node.removeEventListener('mouseenter', showTooltip);
-    node.removeEventListener('mouseleave', hideTooltip);
+    node.removeEventListener("mouseenter", showTooltip);
+    node.removeEventListener("mouseleave", hideTooltip);
     tooltipComponent.$destroy();
   }
 

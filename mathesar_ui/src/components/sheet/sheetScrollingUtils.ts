@@ -1,4 +1,4 @@
-import { tick } from 'svelte';
+import { tick } from "svelte";
 
 // TODO: Create a common utility action to handle active element based scroll
 function scrollToElement(htmlElement: HTMLElement | null): void {
@@ -37,12 +37,12 @@ function scrollToElement(htmlElement: HTMLElement | null): void {
 }
 
 export function scrollBasedOnActiveCell(): void {
-  const cell = document.querySelector<HTMLElement>('[data-cell-active]');
+  const cell = document.querySelector<HTMLElement>("[data-cell-active]");
   scrollToElement(cell);
 }
 
 export function scrollBasedOnSelection(): void {
-  const cell = document.querySelector<HTMLElement>('[data-cell-selected]');
+  const cell = document.querySelector<HTMLElement>("[data-cell-selected]");
   scrollToElement(cell);
 }
 

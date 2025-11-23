@@ -1,6 +1,6 @@
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
-import type { ColumnCastOptions } from './columns';
+import type { ColumnCastOptions } from "./columns";
 
 interface Referent {
   referent_table: number;
@@ -14,14 +14,14 @@ interface OneToAny {
 }
 
 export interface OneToOne extends OneToAny {
-  link_type: 'one-to-one';
+  link_type: "one-to-one";
 }
 export interface OneToMany extends OneToAny {
-  link_type: 'one-to-many';
+  link_type: "one-to-many";
 }
 
 export interface ManyToMany {
-  link_type: 'many-to-many';
+  link_type: "many-to-many";
   mapping_table_name: string;
   referents: Referent[];
 }
@@ -104,7 +104,7 @@ export const data_modeling = {
       database_id: number;
       table_oid: number;
       column_attnum: number;
-      default: 'IDENTITY' | 'UUIDv4' | null;
+      default: "IDENTITY" | "UUIDv4" | null;
       drop_existing_pk_column: boolean;
     },
     void

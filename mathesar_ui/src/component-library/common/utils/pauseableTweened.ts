@@ -1,5 +1,5 @@
-import { type Tweened, tweened } from 'svelte/motion';
-import { get } from 'svelte/store';
+import { type Tweened, tweened } from "svelte/motion";
+import { get } from "svelte/store";
 
 type Updater<T> = (target_value: T, value: T) => T;
 

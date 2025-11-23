@@ -1,7 +1,7 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import type { QueryInstanceHideTransformation } from '@mathesar/api/rpc/explorations';
+import type { QueryInstanceHideTransformation } from "@mathesar/api/rpc/explorations";
 
 export interface QueryHideTransformationEntry {
   columnAliases: string[];
@@ -10,16 +10,16 @@ export interface QueryHideTransformationEntry {
 export default class QueryHideTransformationModel
   implements QueryHideTransformationEntry
 {
-  type = 'hide' as const;
+  type = "hide" as const;
 
-  name = get(_)('hide_columns');
+  name = get(_)("hide_columns");
 
   columnAliases: string[];
 
   constructor(
     data: QueryInstanceHideTransformation | QueryHideTransformationEntry,
   ) {
-    if ('columnAliases' in data) {
+    if ("columnAliases" in data) {
       this.columnAliases = data.columnAliases;
     } else {
       this.columnAliases = data.spec;

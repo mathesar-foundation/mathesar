@@ -1,4 +1,4 @@
-import { getContext, setContext } from 'svelte';
+import { getContext, setContext } from "svelte";
 import {
   type Readable,
   type Writable,
@@ -6,39 +6,39 @@ import {
   get,
   readable,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import { States } from '@mathesar/api/rest/utils/requestUtils';
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { FileManifest, ResultValue } from '@mathesar/api/rpc/records';
-import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
-import { parseCellId } from '@mathesar/components/sheet/cellIds';
-import type { SelectedCellData } from '@mathesar/components/sheet/selection';
-import Plane from '@mathesar/components/sheet/selection/Plane';
-import Series from '@mathesar/components/sheet/selection/Series';
-import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
-import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
-import type { Database } from '@mathesar/models/Database';
-import type { Table } from '@mathesar/models/Table';
+import { States } from "@mathesar/api/rest/utils/requestUtils";
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import type { FileManifest, ResultValue } from "@mathesar/api/rpc/records";
+import { parseFileReference } from "@mathesar/components/file-attachments/fileUtils";
+import { parseCellId } from "@mathesar/components/sheet/cellIds";
+import type { SelectedCellData } from "@mathesar/components/sheet/selection";
+import Plane from "@mathesar/components/sheet/selection/Plane";
+import Series from "@mathesar/components/sheet/selection/Series";
+import type SheetSelection from "@mathesar/components/sheet/selection/SheetSelection";
+import SheetSelectionStore from "@mathesar/components/sheet/selection/SheetSelectionStore";
+import type { Database } from "@mathesar/models/Database";
+import type { Table } from "@mathesar/models/Table";
 import type {
   ProcessedColumns,
   RecordRow,
   RecordSummariesForSheet,
-} from '@mathesar/stores/table-data';
-import { orderProcessedColumns } from '@mathesar/utils/tables';
-import { defined } from '@mathesar-component-library';
+} from "@mathesar/stores/table-data";
+import { orderProcessedColumns } from "@mathesar/utils/tables";
+import { defined } from "@mathesar-component-library";
 
-import type { AssociatedCellValuesForSheet } from '../AssociatedCellData';
+import type { AssociatedCellValuesForSheet } from "../AssociatedCellData";
 
-import { ColumnsDataStore } from './columns';
-import { ConstraintsDataStore } from './constraints';
-import { Display } from './display';
-import { Meta } from './meta';
+import { ColumnsDataStore } from "./columns";
+import { ConstraintsDataStore } from "./constraints";
+import { Display } from "./display";
+import { Meta } from "./meta";
 import {
   ProcessedColumn,
   type ProcessedColumnsStore,
-} from './processedColumns';
-import { RecordsData } from './records';
+} from "./processedColumns";
+import { RecordsData } from "./records";
 
 function getSelectedCellData(
   selection: SheetSelection,
@@ -79,7 +79,7 @@ function getSelectedCellData(
 }
 
 export interface TabularDataProps {
-  database: Pick<Database, 'id'>;
+  database: Pick<Database, "id">;
   table: Table;
   meta?: Meta;
   /**
@@ -102,7 +102,7 @@ export interface TabularDataProps {
 }
 
 export class TabularData {
-  database: Pick<Database, 'id'>;
+  database: Pick<Database, "id">;
 
   table: Table;
 
@@ -197,14 +197,14 @@ export class TabularData {
 
     this.canSelectRecords = derived(
       this.table.currentAccess.currentRolePrivileges,
-      (tableCurrentRolePrivileges) => tableCurrentRolePrivileges.has('SELECT'),
+      (tableCurrentRolePrivileges) => tableCurrentRolePrivileges.has("SELECT"),
     );
 
     // TODO: We should be able to insert without a primary key column
     this.canInsertRecords = derived(
       [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
       ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
-        hasPrimaryKey && tableCurrentRolePrivileges.has('INSERT'),
+        hasPrimaryKey && tableCurrentRolePrivileges.has("INSERT"),
     );
 
     this.canUpdateRecords = derived(
@@ -215,16 +215,16 @@ export class TabularData {
       ],
       ([hasPrimaryKey, tableCurrentRolePrivileges, processedColumns]) =>
         hasPrimaryKey &&
-        (tableCurrentRolePrivileges.has('UPDATE') ||
+        (tableCurrentRolePrivileges.has("UPDATE") ||
           [...processedColumns.values()].some((col) =>
-            col.currentRolePrivileges.has('UPDATE'),
+            col.currentRolePrivileges.has("UPDATE"),
           )),
     );
 
     this.canDeleteRecords = derived(
       [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
       ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
-        hasPrimaryKey && tableCurrentRolePrivileges.has('DELETE'),
+        hasPrimaryKey && tableCurrentRolePrivileges.has("DELETE"),
     );
 
     const plane = derived(
@@ -249,7 +249,7 @@ export class TabularData {
         this.recordsData.state,
       ],
       ([columnsStatus, constraintsData, recordsDataState]) =>
-        columnsStatus?.state === 'processing' ||
+        columnsStatus?.state === "processing" ||
         constraintsData.state === States.Loading ||
         recordsDataState === States.Loading,
     );
@@ -265,22 +265,22 @@ export class TabularData {
       (args) => getSelectedCellData(...args),
     );
 
-    this.columnsDataStore.on('columnRenamed', async () => {
+    this.columnsDataStore.on("columnRenamed", async () => {
       await this.refresh();
     });
-    this.columnsDataStore.on('columnAdded', async () => {
+    this.columnsDataStore.on("columnAdded", async () => {
       await this.recordsData.fetch();
     });
-    this.columnsDataStore.on('columnDeleted', async (columnId) => {
+    this.columnsDataStore.on("columnDeleted", async (columnId) => {
       this.meta.sorting.update((s) => s.without(columnId));
       this.meta.grouping.update((g) => g.withoutColumns([columnId]));
       this.meta.filtering.update((f) => f.withoutColumns([columnId]));
       await this.constraintsDataStore.fetch();
     });
-    this.columnsDataStore.on('columnPatched', async () => {
+    this.columnsDataStore.on("columnPatched", async () => {
       await this.recordsData.fetch();
     });
-    this.constraintsDataStore.on('constraintAdded', async () => {
+    this.constraintsDataStore.on("constraintAdded", async () => {
       await this.recordsData.fetch();
     });
   }
@@ -294,8 +294,8 @@ export class TabularData {
   }
 
   refreshAfterColumnExtraction(
-    extractedColumnIds: RawColumnWithMetadata['id'][],
-    foreignKeyColumnId?: RawColumnWithMetadata['id'],
+    extractedColumnIds: RawColumnWithMetadata["id"][],
+    foreignKeyColumnId?: RawColumnWithMetadata["id"],
   ) {
     this.meta.sorting.update((s) => {
       const firstExtractedColumnWithSort = extractedColumnIds.find((columnId) =>
@@ -309,7 +309,7 @@ export class TabularData {
         const sortDirection = s.get(firstExtractedColumnWithSort);
         return s
           .without(extractedColumnIds)
-          .with(foreignKeyColumnId, sortDirection ?? 'ASCENDING');
+          .with(foreignKeyColumnId, sortDirection ?? "ASCENDING");
       }
       return s.without(extractedColumnIds);
     });

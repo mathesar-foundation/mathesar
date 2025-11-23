@@ -1,4 +1,4 @@
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
 interface BaseConstraint {
   oid: number;
@@ -8,15 +8,15 @@ interface BaseConstraint {
 }
 
 export interface PkConstraint extends BaseConstraint {
-  type: 'primary';
+  type: "primary";
 }
 
 export interface UniqueConstraint extends BaseConstraint {
-  type: 'unique';
+  type: "unique";
 }
 
 export interface FkConstraint extends BaseConstraint {
-  type: 'foreignkey';
+  type: "foreignkey";
   /** The ids of the columns in the table which this FK references */
   referent_columns: number[];
   /** The id of the table which this FK references */
@@ -24,11 +24,11 @@ export interface FkConstraint extends BaseConstraint {
 }
 
 export interface CheckConstraint extends BaseConstraint {
-  type: 'check';
+  type: "check";
 }
 
 export interface ExcludeConstraint extends BaseConstraint {
-  type: 'exclude';
+  type: "exclude";
 }
 
 export type RawConstraint =
@@ -38,17 +38,17 @@ export type RawConstraint =
   | CheckConstraint
   | ExcludeConstraint;
 
-export type ConstraintType = RawConstraint['type'];
+export type ConstraintType = RawConstraint["type"];
 
 export interface UniqueConstraintRecipe {
-  type: 'u';
+  type: "u";
   name?: string | null;
   /** Values are column attnums */
   columns: number[];
 }
 
 export interface FkConstraintRecipe {
-  type: 'f';
+  type: "f";
   name?: string | null;
   columns: number[];
   fkey_relation_id: number;

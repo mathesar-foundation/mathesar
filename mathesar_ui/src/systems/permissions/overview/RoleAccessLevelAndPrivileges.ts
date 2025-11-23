@@ -1,5 +1,5 @@
-import type { Role } from '@mathesar/models/Role';
-import { ImmutableSet } from '@mathesar-component-library';
+import type { Role } from "@mathesar/models/Role";
+import { ImmutableSet } from "@mathesar-component-library";
 
 export type AccessLevelConfig<A, P> = {
   id: A;
@@ -8,10 +8,10 @@ export type AccessLevelConfig<A, P> = {
   help: string;
 };
 
-export const customAccess = 'custom' as const;
+export const customAccess = "custom" as const;
 
 type Props<A, P> = {
-  roleOid: Role['oid'];
+  roleOid: Role["oid"];
   accessLevelConfig: readonly AccessLevelConfig<A, P>[];
   savedPrivileges?: P[];
 } & (
@@ -53,13 +53,13 @@ export class RoleAccessLevelAndPrivileges<A, P> {
     this.roleOid = props.roleOid;
     this.savedPrivileges = props.savedPrivileges;
     if (
-      'privileges' in props &&
-      'accessLevel' in props &&
+      "privileges" in props &&
+      "accessLevel" in props &&
       props.accessLevel === customAccess
     ) {
       this.accessLevel = customAccess;
       this.privileges = new ImmutableSet(props.privileges);
-    } else if ('privileges' in props) {
+    } else if ("privileges" in props) {
       this.privileges = new ImmutableSet(props.privileges);
       this.accessLevel = getAccessLevelBasedOnPrivileges(
         this.accessLevelConfig,
@@ -72,7 +72,7 @@ export class RoleAccessLevelAndPrivileges<A, P> {
       );
       if (!aL) {
         throw new Error(
-          'Access level not found in configuration. This should never occur.',
+          "Access level not found in configuration. This should never occur.",
         );
       }
       this.privileges = new ImmutableSet(aL.privileges);

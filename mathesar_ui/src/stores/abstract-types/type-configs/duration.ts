@@ -1,19 +1,19 @@
 import type {
   ColumnMetadata,
   DurationUnit,
-} from '@mathesar/api/rpc/_common/columnDisplayOptions';
+} from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import {
   type RawColumnWithMetadata,
   getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
-import { iconUiTypeDuration } from '@mathesar/icons';
-import { DurationSpecification } from '@mathesar/utils/duration';
-import type { FormValues } from '@mathesar-component-library/types';
+} from "@mathesar/api/rpc/columns";
+import { iconUiTypeDuration } from "@mathesar/icons";
+import { DurationSpecification } from "@mathesar/utils/duration";
+import type { FormValues } from "@mathesar-component-library/types";
 
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
-} from '../types';
+} from "../types";
 
 const durationDefaults = DurationSpecification.getDefaults();
 
@@ -27,7 +27,7 @@ const displayForm: AbstractTypeConfigForm = {
      * custom component.
      */
     durationConfig: {
-      type: 'custom',
+      type: "custom",
       default: {
         duration_max: durationDefaults.max,
         duration_min: durationDefaults.min,
@@ -35,12 +35,12 @@ const displayForm: AbstractTypeConfigForm = {
     },
   },
   layout: {
-    orientation: 'vertical',
+    orientation: "vertical",
     elements: [
       {
-        type: 'static',
-        variable: 'durationConfig',
-        componentId: 'duration-config-menu',
+        type: "static",
+        variable: "durationConfig",
+        componentId: "duration-config-menu",
       },
     ],
   },
@@ -51,7 +51,7 @@ function determineDisplayOptions(formValues: FormValues): ColumnMetadata {
     max: DurationUnit;
     min: DurationUnit;
   };
-  const displayOptions: RawColumnWithMetadata['metadata'] = {
+  const displayOptions: RawColumnWithMetadata["metadata"] = {
     duration_max: durationConfig.max,
     duration_min: durationConfig.min,
   };
@@ -59,22 +59,22 @@ function determineDisplayOptions(formValues: FormValues): ColumnMetadata {
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: RawColumnWithMetadata['metadata'],
+  metadata: RawColumnWithMetadata["metadata"],
 ): FormValues {
   const column = { metadata };
   const formValues: FormValues = {
     durationConfig: {
-      max: getColumnMetadataValue(column, 'duration_max'),
-      min: getColumnMetadataValue(column, 'duration_min'),
+      max: getColumnMetadataValue(column, "duration_max"),
+      min: getColumnMetadataValue(column, "duration_min"),
     },
   };
   return formValues;
 }
 
 const durationType: AbstractTypeConfiguration = {
-  getIcon: () => ({ ...iconUiTypeDuration, label: 'Duration' }),
+  getIcon: () => ({ ...iconUiTypeDuration, label: "Duration" }),
   cellInfo: {
-    type: 'duration',
+    type: "duration",
   },
   getDisplayConfig: () => ({
     form: displayForm,

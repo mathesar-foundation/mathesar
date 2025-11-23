@@ -1,14 +1,14 @@
-import { type Writable, writable } from 'svelte/store';
+import { type Writable, writable } from "svelte/store";
 
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
-import type { FileManifest, RecordsResponse } from '@mathesar/api/rpc/records';
-import { WritableMap } from '@mathesar/component-library';
-import type { Table } from '@mathesar/models/Table';
-import { getRecordPageUrl } from '@mathesar/routes/urls';
-import AssociatedCellData from '@mathesar/stores/AssociatedCellData';
-import { TableStructure } from '@mathesar/stores/table-data';
-import { getErrorMessage } from '@mathesar/utils/errors';
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
+import type { FileManifest, RecordsResponse } from "@mathesar/api/rpc/records";
+import { WritableMap } from "@mathesar/component-library";
+import type { Table } from "@mathesar/models/Table";
+import { getRecordPageUrl } from "@mathesar/routes/urls";
+import AssociatedCellData from "@mathesar/stores/AssociatedCellData";
+import { TableStructure } from "@mathesar/stores/table-data";
+import { getErrorMessage } from "@mathesar/utils/errors";
 
 export default class RecordStore {
   tableStructure: TableStructure;
@@ -35,7 +35,7 @@ export default class RecordStore {
     this.tableStructure = new TableStructure({ schema, oid: table.oid });
     this.table = table;
     this.recordPk = recordPk;
-    this.summary = writable('');
+    this.summary = writable("");
     this.recordPageUrl = getRecordPageUrl(
       table.schema.database.id,
       table.schema.oid,
@@ -50,7 +50,7 @@ export default class RecordStore {
     this.fieldValues.reconstruct(
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
-    this.summary.set(response.record_summaries?.[this.recordPk] ?? '');
+    this.summary.set(response.record_summaries?.[this.recordPk] ?? "");
     if (response.linked_record_summaries) {
       this.recordSummaries.setFetchedValuesFromPrimitive(
         response.linked_record_summaries,
@@ -62,7 +62,7 @@ export default class RecordStore {
   }
 
   async fetch(): Promise<void> {
-    this.fetchRequest.set({ state: 'processing' });
+    this.fetchRequest.set({ state: "processing" });
     const databaseId = this.table.schema.database.id;
     try {
       const response = await api.records
@@ -74,10 +74,10 @@ export default class RecordStore {
         })
         .run();
       this.updateSelfWithApiResponseData(response);
-      this.fetchRequest.set({ state: 'success' });
+      this.fetchRequest.set({ state: "success" });
     } catch (error) {
       this.fetchRequest.set({
-        state: 'failure',
+        state: "failure",
         errors: [getErrorMessage(error)],
       });
     }

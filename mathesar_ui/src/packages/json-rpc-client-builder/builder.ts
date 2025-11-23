@@ -1,4 +1,4 @@
-import { RpcRequest } from './requests';
+import { RpcRequest } from "./requests";
 
 type MethodTypeContainer<Params, Result> = [Params, Result];
 type MethodTree = { [key: string]: MethodTreeNode };

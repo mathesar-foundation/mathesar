@@ -1,1 +1,1 @@
-export { default as WithExplorationInspector } from './WithExplorationInspector.svelte';
+export { default as WithExplorationInspector } from "./WithExplorationInspector.svelte";

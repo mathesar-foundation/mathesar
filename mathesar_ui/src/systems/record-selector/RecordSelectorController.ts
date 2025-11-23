@@ -1,10 +1,10 @@
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
-import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import type { Result as ApiRecord } from "@mathesar/api/rpc/records";
+import { makeContext } from "@mathesar/component-library/common/utils/contextUtils";
 
-import type { RecordSelectorPurpose } from './recordSelectorUtils';
+import type { RecordSelectorPurpose } from "./recordSelectorUtils";
 
 interface RecordSelectorControllerProps {
   onOpen?: () => void;
@@ -28,7 +28,7 @@ export class RecordSelectorController {
   /** 0 = root level */
   nestingLevel: number;
 
-  purpose = writable<RecordSelectorPurpose>('dataEntry');
+  purpose = writable<RecordSelectorPurpose>("dataEntry");
 
   isOpen = writable(false);
 
@@ -66,7 +66,7 @@ export class RecordSelectorController {
     tableOid: number;
   }): Promise<RecordSelectorResult> {
     this.tableOid.set(tableOid);
-    this.purpose.set('dataEntry');
+    this.purpose.set("dataEntry");
     this.open();
     return new Promise((resolve, reject) => {
       this.submit = (v) => {
@@ -82,7 +82,7 @@ export class RecordSelectorController {
 
   navigateToRecordPage({ tableOid }: { tableOid: number }): void {
     this.tableOid.set(tableOid);
-    this.purpose.set('navigation');
+    this.purpose.set("navigation");
     this.open();
     this.cancel = () => {
       this.close();

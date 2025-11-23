@@ -1,21 +1,21 @@
 const cssPropertiesThatAffectWidth = [
-  'direction',
-  'boxSizing',
-  'paddingRight',
-  'paddingLeft',
-  'fontStyle',
-  'fontVariant',
-  'fontWeight',
-  'fontStretch',
-  'fontSize',
-  'fontSizeAdjust',
-  'fontFamily',
-  'textTransform',
-  'textIndent',
-  'textDecoration',
-  'letterSpacing',
-  'wordSpacing',
-  'tabSize',
+  "direction",
+  "boxSizing",
+  "paddingRight",
+  "paddingLeft",
+  "fontStyle",
+  "fontVariant",
+  "fontWeight",
+  "fontStretch",
+  "fontSize",
+  "fontSizeAdjust",
+  "fontFamily",
+  "textTransform",
+  "textIndent",
+  "textDecoration",
+  "letterSpacing",
+  "wordSpacing",
+  "tabSize",
 ] as const;
 
 function measureTextWidth(
@@ -24,22 +24,22 @@ function measureTextWidth(
 ): number {
   /** Change to `true` to display the element used to measure text */
   const debug = false;
-  const id = 'caret-position-measurement';
+  const id = "caret-position-measurement";
   if (debug) {
     document.getElementById(id)?.remove();
   }
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.id = id;
   document.body.appendChild(div);
   const { style } = div;
-  style.position = 'absolute';
-  style.top = '0px';
-  style.zIndex = '999999999';
-  style.backgroundColor = 'coral';
-  style.width = 'max-content';
-  style.whiteSpace = 'pre';
+  style.position = "absolute";
+  style.top = "0px";
+  style.zIndex = "999999999";
+  style.backgroundColor = "coral";
+  style.width = "max-content";
+  style.whiteSpace = "pre";
   if (!debug) {
-    style.visibility = 'hidden';
+    style.visibility = "hidden";
   }
   for (const property of cssPropertiesThatAffectWidth) {
     style[property] = computedStyle[property];

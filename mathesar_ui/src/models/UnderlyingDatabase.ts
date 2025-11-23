@@ -1,10 +1,10 @@
-import { api } from '@mathesar/api/rpc';
-import type { RawUnderlyingDatabase } from '@mathesar/api/rpc/databases';
-import { CancellablePromise } from '@mathesar-component-library';
+import { api } from "@mathesar/api/rpc";
+import type { RawUnderlyingDatabase } from "@mathesar/api/rpc/databases";
+import { CancellablePromise } from "@mathesar-component-library";
 
-import type { Database } from './Database';
-import { ObjectCurrentAccess } from './internal/ObjectCurrentAccess';
-import type { Role } from './Role';
+import type { Database } from "./Database";
+import { ObjectCurrentAccess } from "./internal/ObjectCurrentAccess";
+import type { Role } from "./Role";
 
 export class UnderlyingDatabase {
   readonly oid: number;
@@ -22,7 +22,7 @@ export class UnderlyingDatabase {
     this.database = props.database;
   }
 
-  updateOwner(newOwner: Role['oid']) {
+  updateOwner(newOwner: Role["oid"]) {
     const promise = api.databases.privileges
       .transfer_ownership({
         database_id: this.database.id,

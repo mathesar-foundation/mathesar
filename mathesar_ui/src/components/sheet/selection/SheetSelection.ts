@@ -1,12 +1,12 @@
-import { first } from 'iter-tools';
+import { first } from "iter-tools";
 
-import { match } from '@mathesar/utils/patternMatching';
+import { match } from "@mathesar/utils/patternMatching";
 import {
   type ImmutableSet,
   assertExhaustive,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import { makeCellId, makeCells, parseCellId } from '../cellIds';
+import { makeCellId, makeCells, parseCellId } from "../cellIds";
 
 import {
   type Basis,
@@ -16,10 +16,10 @@ import {
   basisFromPlaceholderCell,
   basisFromZeroEmptyColumns,
   emptyBasis,
-} from './basis';
-import type { Direction } from './Direction';
-import Plane from './Plane';
-import type { SheetCellDetails } from './selectionUtils';
+} from "./basis";
+import type { Direction } from "./Direction";
+import Plane from "./Plane";
+import type { SheetCellDetails } from "./selectionUtils";
 
 /**
  * This is an immutable data structure which fully represents the state of a
@@ -136,7 +136,7 @@ export default class SheetSelection {
     return this.withBasis(
       basisFromDataCells(
         this.plane.dataCellsInFlexibleRowRange(rowIdA, rowIdB),
-        makeCellId(rowIdA, this.plane.columnIds.first ?? ''),
+        makeCellId(rowIdA, this.plane.columnIds.first ?? ""),
       ),
     );
   }
@@ -190,54 +190,54 @@ export default class SheetSelection {
   ): SheetSelection {
     // Nullish coalescing is safe here since we know we'll have a first row and
     // first column in the cases where we're selecting things.
-    const firstRow = () => this.plane.rowIds.first ?? '';
-    const firstColumn = () => this.plane.columnIds.first ?? '';
+    const firstRow = () => this.plane.rowIds.first ?? "";
+    const firstColumn = () => this.plane.columnIds.first ?? "";
 
-    return match(startingCell, 'type', {
-      'data-cell': ({ cellId: startingCellId }) => {
-        const endingCellId = match(endingCell, 'type', {
-          'data-cell': (b) => b.cellId,
-          'column-header-cell': (b) => makeCellId(firstRow(), b.columnId),
-          'row-header-cell': (b) => makeCellId(b.rowId, firstColumn()),
-          'placeholder-row-header-cell': (b) =>
+    return match(startingCell, "type", {
+      "data-cell": ({ cellId: startingCellId }) => {
+        const endingCellId = match(endingCell, "type", {
+          "data-cell": (b) => b.cellId,
+          "column-header-cell": (b) => makeCellId(firstRow(), b.columnId),
+          "row-header-cell": (b) => makeCellId(b.rowId, firstColumn()),
+          "placeholder-row-header-cell": (b) =>
             makeCellId(b.rowId, firstColumn()),
-          'placeholder-data-cell': (b) => b.cellId,
+          "placeholder-data-cell": (b) => b.cellId,
         });
         return this.ofDataCellRange(startingCellId, endingCellId);
       },
 
-      'column-header-cell': ({ columnId: startingColumnId }) => {
-        const endingColumnId = match(endingCell, 'type', {
-          'data-cell': (b) => parseCellId(b.cellId).columnId,
-          'column-header-cell': (b) => b.columnId,
-          'row-header-cell': () => firstColumn(),
-          'placeholder-row-header-cell': () => firstColumn(),
-          'placeholder-data-cell': (b) => parseCellId(b.cellId).columnId,
+      "column-header-cell": ({ columnId: startingColumnId }) => {
+        const endingColumnId = match(endingCell, "type", {
+          "data-cell": (b) => parseCellId(b.cellId).columnId,
+          "column-header-cell": (b) => b.columnId,
+          "row-header-cell": () => firstColumn(),
+          "placeholder-row-header-cell": () => firstColumn(),
+          "placeholder-data-cell": (b) => parseCellId(b.cellId).columnId,
         });
         return this.ofColumnRange(startingColumnId, endingColumnId);
       },
 
-      'row-header-cell': ({ rowId: startingRowId }) => {
-        const endingRowId = match(endingCell, 'type', {
-          'data-cell': (b) => parseCellId(b.cellId).rowId,
-          'column-header-cell': () => firstRow(),
-          'row-header-cell': (b) => b.rowId,
-          'placeholder-row-header-cell': (b) => b.rowId,
-          'placeholder-data-cell': (b) => parseCellId(b.cellId).rowId,
+      "row-header-cell": ({ rowId: startingRowId }) => {
+        const endingRowId = match(endingCell, "type", {
+          "data-cell": (b) => parseCellId(b.cellId).rowId,
+          "column-header-cell": () => firstRow(),
+          "row-header-cell": (b) => b.rowId,
+          "placeholder-row-header-cell": (b) => b.rowId,
+          "placeholder-data-cell": (b) => parseCellId(b.cellId).rowId,
         });
         return this.ofRowRange(startingRowId, endingRowId);
       },
 
-      'placeholder-row-header-cell': ({ rowId }) =>
+      "placeholder-row-header-cell": ({ rowId }) =>
         this.ofRowRange(rowId, rowId),
 
-      'placeholder-data-cell': ({ cellId: startingCellId }) =>
-        match(endingCell, 'type', {
-          'data-cell': () => this.ofOneCell(startingCellId),
-          'column-header-cell': () => this.ofOneCell(startingCellId),
-          'row-header-cell': () => this.ofOneCell(startingCellId),
-          'placeholder-row-header-cell': () => this.ofOneCell(startingCellId),
-          'placeholder-data-cell': ({ cellId: endingCellId }) =>
+      "placeholder-data-cell": ({ cellId: startingCellId }) =>
+        match(endingCell, "type", {
+          "data-cell": () => this.ofOneCell(startingCellId),
+          "column-header-cell": () => this.ofOneCell(startingCellId),
+          "row-header-cell": () => this.ofOneCell(startingCellId),
+          "placeholder-row-header-cell": () => this.ofOneCell(startingCellId),
+          "placeholder-data-cell": ({ cellId: endingCellId }) =>
             this.ofOneCell(endingCellId),
         }),
     });
@@ -326,11 +326,11 @@ export default class SheetSelection {
 
     const adjacent = this.plane.getAdjacentCell(this.activeCellId, direction);
 
-    if (adjacent.type === 'none') {
+    if (adjacent.type === "none") {
       // If we can't move anywhere, then do nothing
       return this;
     }
-    if (adjacent.type === 'dataCell' || adjacent.type === 'placeholderCell') {
+    if (adjacent.type === "dataCell" || adjacent.type === "placeholderCell") {
       // Move to an adjacent data cell or adjacent placeholder cell
       return this.ofOneCell(adjacent.cellId);
     }
@@ -344,12 +344,12 @@ export default class SheetSelection {
    * This is to handle the `Tab` and `Shift+Tab` keys.
    */
   withActiveCellAdvanced(
-    direction: 'forward' | 'back' = 'forward',
+    direction: "forward" | "back" = "forward",
   ): SheetSelection {
     // TODO
 
     // eslint-disable-next-line no-console
-    console.log(direction, 'Active cell advancing is not yet implemented');
+    console.log(direction, "Active cell advancing is not yet implemented");
     return this;
   }
 
@@ -372,7 +372,7 @@ export default class SheetSelection {
     // TODO
 
     // eslint-disable-next-line no-console
-    console.log(direction, 'Sheet selection resizing is not yet implemented');
+    console.log(direction, "Sheet selection resizing is not yet implemented");
     return this;
   }
 }

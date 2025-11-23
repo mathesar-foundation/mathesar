@@ -1,14 +1,14 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
-import CancellablePromise from '../CancellablePromise';
+import CancellablePromise from "../CancellablePromise";
 
-const dummyOnCancel = vi.fn().mockReturnValueOnce('cancelled');
-test('CancellablePromise cancelled', () => {
+const dummyOnCancel = vi.fn().mockReturnValueOnce("cancelled");
+test("CancellablePromise cancelled", () => {
   const fakePromise = new CancellablePromise((resolve, reject) => {
     try {
       resolve(202);
     } catch (e) {
-      reject('Rejected: error');
+      reject("Rejected: error");
     }
   }, dummyOnCancel);
   expect(fakePromise.isCancelled).toBeFalsy();
@@ -20,24 +20,24 @@ test('CancellablePromise cancelled', () => {
   expect(fakePromise.finally(() => {})).toEqual(null);
 });
 
-test('CancellablePromise not cancelled gets resolved', async () => {
+test("CancellablePromise not cancelled gets resolved", async () => {
   const fakePromise = new CancellablePromise((resolve, reject) => {
     try {
       resolve(202);
     } catch (e) {
-      reject('Rejected: error');
+      reject("Rejected: error");
     }
   }, dummyOnCancel);
   expect(fakePromise.isCancelled).toBeFalsy();
   await expect(fakePromise.then((res) => res)).resolves.toBe(202);
 });
 
-test('CancellablePromise not cancelled gets rejected', async () => {
+test("CancellablePromise not cancelled gets rejected", async () => {
   const fakePromise = new CancellablePromise((resolve, reject) => {
-    reject('Rejected: error');
+    reject("Rejected: error");
   }, dummyOnCancel);
   expect(fakePromise.isCancelled).toBeFalsy();
   await expect(fakePromise.then((res) => res)).rejects.toEqual(
-    'Rejected: error',
+    "Rejected: error",
   );
 });

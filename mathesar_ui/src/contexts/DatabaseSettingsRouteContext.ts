@@ -1,18 +1,18 @@
-import { type Readable, derived } from 'svelte/store';
+import { type Readable, derived } from "svelte/store";
 
-import { api } from '@mathesar/api/rpc';
-import type { User } from '@mathesar/api/rpc/users';
-import type { Collaborator } from '@mathesar/models/Collaborator';
-import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
-import type { Database } from '@mathesar/models/Database';
-import type { Role } from '@mathesar/models/Role';
-import AsyncStore from '@mathesar/stores/AsyncStore';
-import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
+import { api } from "@mathesar/api/rpc";
+import type { User } from "@mathesar/api/rpc/users";
+import type { Collaborator } from "@mathesar/models/Collaborator";
+import type { ConfiguredRole } from "@mathesar/models/ConfiguredRole";
+import type { Database } from "@mathesar/models/Database";
+import type { Role } from "@mathesar/models/Role";
+import AsyncStore from "@mathesar/stores/AsyncStore";
+import { CancellablePromise, ImmutableMap } from "@mathesar-component-library";
 
-import type { DatabaseRouteContext } from './DatabaseRouteContext';
-import { getRouteContext, setRouteContext } from './utils';
+import type { DatabaseRouteContext } from "./DatabaseRouteContext";
+import { getRouteContext, setRouteContext } from "./utils";
 
-const contextKey = Symbol('database settings route store');
+const contextKey = Symbol("database settings route store");
 
 export type CombinedLoginRole = {
   name: string;
@@ -23,7 +23,7 @@ export type CombinedLoginRole = {
 // TODO: Make CancellablePromise chainable
 const getUsersPromise = () => {
   const promise = api.users.list().run();
-  return new CancellablePromise<ImmutableMap<User['id'], User>>(
+  return new CancellablePromise<ImmutableMap<User["id"], User>>(
     (resolve, reject) => {
       promise
         .then(
@@ -48,7 +48,7 @@ export class DatabaseSettingsRouteContext {
 
   collaborators;
 
-  users: AsyncStore<void, ImmutableMap<User['id'], User>>;
+  users: AsyncStore<void, ImmutableMap<User["id"], User>>;
 
   constructor(databaseRouteContext: DatabaseRouteContext) {
     this.databaseRouteContext = databaseRouteContext;
@@ -126,8 +126,8 @@ export class DatabaseSettingsRouteContext {
   }
 
   async addCollaborator(
-    userId: User['id'],
-    configuredRoleId: ConfiguredRole['id'],
+    userId: User["id"],
+    configuredRoleId: ConfiguredRole["id"],
   ) {
     const newCollaborator = await this.database.addCollaborator(
       userId,

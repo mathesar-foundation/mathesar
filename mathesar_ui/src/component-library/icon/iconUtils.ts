@@ -37,12 +37,12 @@ function getClipPathD(
   const r = dot.r * relativeDotCutout;
   return [
     // Cover the viewport box
-    'M 0 0',
+    "M 0 0",
     `L 0 ${viewBoxHeight}`,
     `L ${viewBoxWidth} ${viewBoxHeight}`,
     `L ${viewBoxWidth} 0`,
-    'L 0 0',
-    'z',
+    "L 0 0",
+    "z",
 
     // Cut out a circle centered on the dot
     `M ${cx} ${cy - r}`,
@@ -50,8 +50,8 @@ function getClipPathD(
     `A ${r} ${r} 0 0 1 ${cx} ${cy + r}`,
     `A ${r} ${r} 0 0 1 ${cx - r} ${cy}`,
     `A ${r} ${r} 0 0 1 ${cx} ${cy - r}`,
-    'z',
-  ].join(' ');
+    "z",
+  ].join(" ");
 }
 
 export function getPathStyle(

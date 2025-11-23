@@ -10,7 +10,7 @@
  */
 
 const hasNativePerformanceNow =
-  typeof performance === 'object' && typeof performance.now === 'function';
+  typeof performance === "object" && typeof performance.now === "function";
 
 const now = hasNativePerformanceNow
   ? () => performance.now()

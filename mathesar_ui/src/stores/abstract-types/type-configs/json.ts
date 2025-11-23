@@ -1,13 +1,13 @@
-import { iconUiTypeJson } from '@mathesar/icons';
+import { iconUiTypeJson } from "@mathesar/icons";
 
-import { DB_TYPES } from '../dbTypes';
-import type { AbstractTypeConfiguration } from '../types';
+import { DB_TYPES } from "../dbTypes";
+import type { AbstractTypeConfiguration } from "../types";
 
 const jsonType: AbstractTypeConfiguration = {
-  getIcon: () => ({ ...iconUiTypeJson, label: 'JSON' }),
+  getIcon: () => ({ ...iconUiTypeJson, label: "JSON" }),
   defaultDbType: DB_TYPES.JSONB,
   cellInfo: {
-    type: 'string',
+    type: "string",
     config: {
       multiLine: true,
     },

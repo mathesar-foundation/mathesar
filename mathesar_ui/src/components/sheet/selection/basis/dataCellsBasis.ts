@@ -1,13 +1,13 @@
-import { execPipe, filter, first, map } from 'iter-tools';
+import { execPipe, filter, first, map } from "iter-tools";
 
-import { ImmutableSet } from '@mathesar-component-library';
+import { ImmutableSet } from "@mathesar-component-library";
 
-import { parseCellId } from '../../cellIds';
-import { fitSelectedValuesToSeriesTransformation } from '../selectionUtils';
+import { parseCellId } from "../../cellIds";
+import { fitSelectedValuesToSeriesTransformation } from "../selectionUtils";
 
-import type Basis from './Basis';
-import { emptyBasis } from './emptyBasis';
-import { basisFromZeroEmptyColumns } from './emptyColumnsBasis';
+import type Basis from "./Basis";
+import { emptyBasis } from "./emptyBasis";
+import { basisFromZeroEmptyColumns } from "./emptyColumnsBasis";
 
 export function basisFromDataCells(
   _cellIds: Iterable<string>,
@@ -31,7 +31,7 @@ export function basisFromDataCells(
     columnIds: new ImmutableSet(map(({ columnId }) => columnId, parsedCells)),
     rowIds: new ImmutableSet(map(({ rowId }) => rowId, parsedCells)),
 
-    pasteOperation: 'update',
+    pasteOperation: "update",
 
     getFullySelectedColumnIds(plane) {
       // This logic is somewhat complex because:

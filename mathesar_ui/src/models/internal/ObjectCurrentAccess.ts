@@ -1,11 +1,11 @@
-import { type Readable, writable } from 'svelte/store';
+import { type Readable, writable } from "svelte/store";
 
-import type { Role } from '../Role';
+import type { Role } from "../Role";
 
 export class ObjectCurrentAccess<Privilege> {
   private _ownerOid;
 
-  get ownerOid(): Readable<Role['oid']> {
+  get ownerOid(): Readable<Role["oid"]> {
     return this._ownerOid;
   }
 
@@ -22,7 +22,7 @@ export class ObjectCurrentAccess<Privilege> {
   }
 
   constructor(props: {
-    owner_oid: Role['oid'];
+    owner_oid: Role["oid"];
     current_role_priv: Privilege[];
     current_role_owns: boolean;
   }) {
@@ -32,7 +32,7 @@ export class ObjectCurrentAccess<Privilege> {
   }
 
   set(props: {
-    owner_oid: Role['oid'];
+    owner_oid: Role["oid"];
     current_role_priv: Privilege[];
     current_role_owns: boolean;
   }) {

@@ -1,18 +1,18 @@
-import { get } from 'svelte/store';
+import { get } from "svelte/store";
 
 import type {
   RecordSelectionOrchestrator,
   RecordSelectionOrchestratorFactory,
-} from '../record-selection-orchestrator/RecordSelectionOrchestrator';
+} from "../record-selection-orchestrator/RecordSelectionOrchestrator";
 
 import {
   type AttachableRowSeekerController,
   rowSeekerContext,
-} from './AttachableRowSeekerController';
-import type { RowSeekerProps } from './RowSeekerController';
+} from "./AttachableRowSeekerController";
+import type { RowSeekerProps } from "./RowSeekerController";
 
 interface RowSeekerOrchestratorProps
-  extends Omit<RowSeekerProps, 'previousValue'> {
+  extends Omit<RowSeekerProps, "previousValue"> {
   rowSeeker: AttachableRowSeekerController;
 }
 
@@ -41,7 +41,7 @@ function makeRowSeekerOrchestrator(
  * necessary
  */
 export function makeRowSeekerOrchestratorFactory(
-  props: Omit<RowSeekerProps, 'previousValue'>,
+  props: Omit<RowSeekerProps, "previousValue">,
 ): RecordSelectionOrchestratorFactory {
   return () => {
     const rowSeeker = rowSeekerContext.getOrError();

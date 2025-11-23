@@ -461,7 +461,7 @@
    */
 
   @function _variant-state-suffix($state-name) {
-    @return if($state-name == 'normal', '', '-#{$state-name}');
+    @return if($state-name == "normal", "", "-#{$state-name}");
   }
 
   @mixin btn-variant-state($state-name, $cfg) {

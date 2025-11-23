@@ -1,17 +1,17 @@
-import type { Readable } from 'svelte/store';
+import type { Readable } from "svelte/store";
 
-import { api } from '@mathesar/api/rpc';
-import type { RawRole, RawRoleMember } from '@mathesar/api/rpc/roles';
+import { api } from "@mathesar/api/rpc";
+import type { RawRole, RawRoleMember } from "@mathesar/api/rpc/roles";
 import {
   CancellablePromise,
   type ImmutableMap,
   WritableMap,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import { ConfiguredRole } from './ConfiguredRole';
-import type { Database } from './Database';
+import { ConfiguredRole } from "./ConfiguredRole";
+import type { Database } from "./Database";
 
-function getMembersWritableMap(members: RawRole['members']) {
+function getMembersWritableMap(members: RawRole["members"]) {
   return new WritableMap((members ?? []).map((member) => [member.oid, member]));
 }
 
@@ -34,7 +34,7 @@ export class Role {
 
   private _members;
 
-  get members(): Readable<ImmutableMap<RawRoleMember['oid'], RawRoleMember>> {
+  get members(): Readable<ImmutableMap<RawRoleMember["oid"], RawRoleMember>> {
     return this._members;
   }
 
@@ -81,7 +81,7 @@ export class Role {
     );
   }
 
-  setMembers(memberOids: Set<Role['oid']>): CancellablePromise<Role> {
+  setMembers(memberOids: Set<Role["oid"]>): CancellablePromise<Role> {
     const promise = api.roles
       .set_members({
         database_id: this.database.id,

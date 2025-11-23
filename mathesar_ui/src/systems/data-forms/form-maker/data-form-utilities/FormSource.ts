@@ -1,8 +1,8 @@
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { RawDataFormSource } from '@mathesar/api/rpc/forms';
-import { ClientSideError } from '@mathesar/components/errors/errorUtils';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import type { RawDataFormSource } from "@mathesar/api/rpc/forms";
+import { ClientSideError } from "@mathesar/components/errors/errorUtils";
 
-import { dataFormErrorCodes, dataFormErrors } from './fields';
+import { dataFormErrorCodes, dataFormErrors } from "./fields";
 
 export class FormSource {
   rawSource: RawDataFormSource;
@@ -19,7 +19,7 @@ export class FormSource {
         columnAttnum,
       });
     }
-    if ('error' in column) {
+    if ("error" in column) {
       if (column.error.code === dataFormErrorCodes.COLUMN_NOT_FOUND) {
         throw dataFormErrors.columnNotFoundError({
           tableOid,

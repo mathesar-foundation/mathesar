@@ -1,18 +1,18 @@
-import type { RecursivePartial } from '@mathesar/component-library';
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import type { RecursivePartial } from "@mathesar/component-library";
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
-import type { ColumnCastOptions, ColumnTypeOptions } from './columns';
-import type { RawDatabase } from './databases';
-import type { RawRole } from './roles';
+import type { ColumnCastOptions, ColumnTypeOptions } from "./columns";
+import type { RawDatabase } from "./databases";
+import type { RawRole } from "./roles";
 
 export const allTablePrivileges = [
-  'SELECT',
-  'INSERT',
-  'UPDATE',
-  'DELETE',
-  'TRUNCATE',
-  'REFERENCES',
-  'TRIGGER',
+  "SELECT",
+  "INSERT",
+  "UPDATE",
+  "DELETE",
+  "TRUNCATE",
+  "REFERENCES",
+  "TRIGGER",
 ] as const;
 export type TablePrivilege = (typeof allTablePrivileges)[number];
 
@@ -22,13 +22,13 @@ export interface RawTable {
   /** The OID of the schema containing the table */
   schema: number;
   description: string | null;
-  owner_oid: RawRole['oid'];
+  owner_oid: RawRole["oid"];
   current_role_priv: TablePrivilege[];
   current_role_owns: boolean;
 }
 
 export interface RawTablePrivilegesForRole {
-  role_oid: RawRole['oid'];
+  role_oid: RawRole["oid"];
   direct: TablePrivilege[];
 }
 
@@ -69,7 +69,7 @@ export interface RawTableWithMetadata extends RawTable {
 export type JoinPath = [number, number][][];
 
 export interface JoinableTable {
-  target: RawTableWithMetadata['oid'];
+  target: RawTableWithMetadata["oid"];
   join_path: JoinPath;
   /**
    * [Constraint OID, is_reversed]
@@ -95,7 +95,7 @@ export interface JoinableTablesResult {
   target_table_info: Record<
     string,
     {
-      name: RawTableWithMetadata['name'];
+      name: RawTableWithMetadata["name"];
       /** Keys are stringified column attnum values */
       columns: Record<
         string,
@@ -120,7 +120,7 @@ export interface ColumnPreviewSpec {
   cast_options?: ColumnCastOptions;
 }
 
-export type NewPkColumnType = 'IDENTITY' | 'UUIDv4';
+export type NewPkColumnType = "IDENTITY" | "UUIDv4";
 
 export type TableLink = {
   table: { oid: number; name: string };
@@ -129,7 +129,7 @@ export type TableLink = {
 
 export function* getLinksInThisTable(
   joinableTablesResult: JoinableTablesResult,
-  currentTableColumns: Map<number, TableLink['column']>,
+  currentTableColumns: Map<number, TableLink["column"]>,
 ): Generator<TableLink> {
   const joinableTables = joinableTablesResult.joinable_tables;
   const linkedTables = joinableTables.filter((t) => !t.fkey_path[0][1]);
@@ -289,16 +289,16 @@ export const tables = {
   privileges: {
     list_direct: rpcMethodTypeContainer<
       {
-        database_id: RawDatabase['id'];
-        table_oid: RawTable['oid'];
+        database_id: RawDatabase["id"];
+        table_oid: RawTable["oid"];
       },
       Array<RawTablePrivilegesForRole>
     >(),
 
     replace_for_roles: rpcMethodTypeContainer<
       {
-        database_id: RawDatabase['id'];
-        table_oid: RawTable['oid'];
+        database_id: RawDatabase["id"];
+        table_oid: RawTable["oid"];
         privileges: Array<RawTablePrivilegesForRole>;
       },
       Array<RawTablePrivilegesForRole>
@@ -306,9 +306,9 @@ export const tables = {
 
     transfer_ownership: rpcMethodTypeContainer<
       {
-        database_id: RawDatabase['id'];
-        table_oid: RawTable['oid'];
-        new_owner_oid: RawRole['oid'];
+        database_id: RawDatabase["id"];
+        table_oid: RawTable["oid"];
+        new_owner_oid: RawRole["oid"];
       },
       RawTable
     >(),

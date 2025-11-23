@@ -1,1 +1,1 @@
-export { TupleMap } from './TupleMap';
+export { TupleMap } from "./TupleMap";

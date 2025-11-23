@@ -1,12 +1,12 @@
-import { TextInput } from '@mathesar-component-library';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import { TextInput } from "@mathesar-component-library";
+import type { ComponentAndProps } from "@mathesar-component-library/types";
 
-import FileCell from './components/file/FileCell.svelte';
-import FileInput from './components/file/FileInput.svelte';
-import type { CellComponentFactory } from './typeDefinitions';
+import FileCell from "./components/file/FileCell.svelte";
+import FileInput from "./components/file/FileInput.svelte";
+import type { CellComponentFactory } from "./typeDefinitions";
 
 const fileType: CellComponentFactory = {
-  initialInputValue: '',
+  initialInputValue: "",
   get: (): ComponentAndProps => ({ component: FileCell }),
   getInput: (): ComponentAndProps => ({ component: FileInput }),
   getSimpleInput: (): ComponentAndProps => ({ component: TextInput }),

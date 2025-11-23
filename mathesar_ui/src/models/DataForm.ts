@@ -1,15 +1,15 @@
-import { type Readable, derived, get, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from "svelte/store";
 
-import { api } from '@mathesar/api/rpc';
+import { api } from "@mathesar/api/rpc";
 import {
   type RawDataForm,
   type RawDataFormStructure,
   constructRequestToUpdateForm,
   dataFormStructureVersion,
-} from '@mathesar/api/rpc/forms';
-import { CancellablePromise } from '@mathesar-component-library';
+} from "@mathesar/api/rpc/forms";
+import { CancellablePromise } from "@mathesar-component-library";
 
-import type { Schema } from './Schema';
+import type { Schema } from "./Schema";
 
 export class DataForm {
   readonly schema: Schema;
@@ -27,7 +27,7 @@ export class DataForm {
   private _sharePreferences;
 
   get sharePreferences(): Readable<{
-    isPublishedPublicly: RawDataForm['publish_public'];
+    isPublishedPublicly: RawDataForm["publish_public"];
   }> {
     return this._sharePreferences;
   }

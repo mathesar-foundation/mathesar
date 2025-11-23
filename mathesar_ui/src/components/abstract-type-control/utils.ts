@@ -1,33 +1,33 @@
-import { readable } from 'svelte/store';
+import { readable } from "svelte/store";
 
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { DbType } from '@mathesar/AppTypes';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import type { DbType } from "@mathesar/AppTypes";
 import type {
   AbstractType,
   AbstractTypeDbConfig,
   AbstractTypeDisplayConfig,
-} from '@mathesar/stores/abstract-types/types';
-import { makeForm } from '@mathesar-component-library';
-import type { FormBuildConfiguration } from '@mathesar-component-library/types';
+} from "@mathesar/stores/abstract-types/types";
+import { makeForm } from "@mathesar-component-library";
+import type { FormBuildConfiguration } from "@mathesar-component-library/types";
 
-import DurationConfiguration from './config-components/DurationConfiguration.svelte';
+import DurationConfiguration from "./config-components/DurationConfiguration.svelte";
 
 export interface ColumnWithAbstractType
   extends Pick<
     RawColumnWithMetadata,
-    'id' | 'type' | 'type_options' | 'metadata'
+    "id" | "type" | "type_options" | "metadata"
   > {
   abstractType: AbstractType;
 }
 
 export type ColumnTypeOptionsSaveArgs = Pick<
   ColumnWithAbstractType,
-  'type' | 'type_options' | 'metadata'
+  "type" | "type_options" | "metadata"
 >;
 
 export function getFormValueStore(
   form: FormBuildConfiguration | undefined,
-): FormBuildConfiguration['values'] {
+): FormBuildConfiguration["values"] {
   if (form) {
     return form.values;
   }
@@ -41,7 +41,7 @@ export function constructDbForm(
 ): {
   dbOptionsConfig?: AbstractTypeDbConfig;
   dbForm?: FormBuildConfiguration;
-  dbFormValues: FormBuildConfiguration['values'];
+  dbFormValues: FormBuildConfiguration["values"];
 } {
   const dbOptionsConfig = selectedAbstractType.getDbConfig?.() ?? undefined;
   let dbForm;
@@ -70,7 +70,7 @@ export function constructDisplayForm(
 ): {
   displayOptionsConfig?: AbstractTypeDisplayConfig;
   displayForm?: FormBuildConfiguration;
-  displayFormValues: FormBuildConfiguration['values'];
+  displayFormValues: FormBuildConfiguration["values"];
 } {
   const displayOptionsConfig =
     selectedAbstractType.getDisplayConfig?.() ?? undefined;
@@ -83,7 +83,7 @@ export function constructDisplayForm(
           )
         : {};
     displayForm = makeForm(displayOptionsConfig.form, displayFormValues, {
-      'duration-config-menu': DurationConfiguration,
+      "duration-config-menu": DurationConfiguration,
     });
   }
   const displayFormValues = getFormValueStore(displayForm);

@@ -2,90 +2,90 @@ import type {
   CurrencyLocation,
   NumberFormat,
   NumberGrouping,
-} from '@mathesar/api/rpc/_common/columnDisplayOptions';
+} from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import {
   type RawColumnWithMetadata,
   getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
-import { iconUiTypeMoney } from '@mathesar/icons';
-import type { FormValues } from '@mathesar-component-library/types';
+} from "@mathesar/api/rpc/columns";
+import { iconUiTypeMoney } from "@mathesar/icons";
+import type { FormValues } from "@mathesar-component-library/types";
 
-import { DB_TYPES } from '../dbTypes';
+import { DB_TYPES } from "../dbTypes";
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
-} from '../types';
+} from "../types";
 
-import { getDecimalPlaces } from './number';
+import { getDecimalPlaces } from "./number";
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
     currencySymbol: {
-      type: 'string',
-      default: '$',
+      type: "string",
+      default: "$",
     },
     currencySymbolLocation: {
-      type: 'string',
-      enum: ['after-minus', 'end-with-space'],
-      default: 'after-minus',
+      type: "string",
+      enum: ["after-minus", "end-with-space"],
+      default: "after-minus",
     },
     numberFormat: {
-      type: 'string',
-      enum: ['none', 'english', 'german', 'french', 'hindi', 'swiss'],
-      default: 'none',
+      type: "string",
+      enum: ["none", "english", "german", "french", "hindi", "swiss"],
+      default: "none",
     },
     decimalPlaces: {
-      type: 'integer',
+      type: "integer",
       default: null,
     },
     useGrouping: {
-      type: 'string',
-      enum: ['auto', 'always', 'never'],
-      default: 'auto',
+      type: "string",
+      enum: ["auto", "always", "never"],
+      default: "auto",
     },
   },
   layout: {
-    orientation: 'vertical',
+    orientation: "vertical",
     elements: [
       {
-        type: 'input',
-        variable: 'currencySymbol',
-        label: 'Currency Symbol',
+        type: "input",
+        variable: "currencySymbol",
+        label: "Currency Symbol",
       },
       {
-        type: 'input',
-        variable: 'currencySymbolLocation',
-        label: 'Currency Symbol Location',
+        type: "input",
+        variable: "currencySymbolLocation",
+        label: "Currency Symbol Location",
         options: {
-          'after-minus': { label: 'Start' },
-          'end-with-space': { label: 'End' },
+          "after-minus": { label: "Start" },
+          "end-with-space": { label: "End" },
         },
       },
       {
-        type: 'input',
-        variable: 'decimalPlaces',
-        label: 'Decimal Places',
+        type: "input",
+        variable: "decimalPlaces",
+        label: "Decimal Places",
       },
       {
-        type: 'input',
-        variable: 'useGrouping',
-        label: 'Digit Grouping',
+        type: "input",
+        variable: "useGrouping",
+        label: "Digit Grouping",
         options: {
-          auto: { label: 'Auto' },
-          always: { label: 'Always' },
-          never: { label: 'Never' },
+          auto: { label: "Auto" },
+          always: { label: "Always" },
+          never: { label: "Never" },
         },
       },
       {
-        type: 'input',
-        variable: 'numberFormat',
-        label: 'Number Format',
+        type: "input",
+        variable: "numberFormat",
+        label: "Number Format",
         options: {
-          none: { label: 'Use browser locale' },
-          english: { label: '1,234,567.89' },
-          german: { label: '1.234.567,89' },
-          french: { label: '1 234 567,89' },
-          hindi: { label: '12,34,567.89' },
+          none: { label: "Use browser locale" },
+          english: { label: "1,234,567.89" },
+          german: { label: "1.234.567,89" },
+          french: { label: "1 234 567,89" },
+          hindi: { label: "12,34,567.89" },
           swiss: { label: "1'234'567.89" },
         },
       },
@@ -97,18 +97,18 @@ interface MoneyFormValues extends Record<string, unknown> {
   currencySymbol: string;
   decimalPlaces: number | null;
   currencySymbolLocation: CurrencyLocation;
-  numberFormat: NumberFormat | 'none';
+  numberFormat: NumberFormat | "none";
   useGrouping: NumberGrouping;
 }
 
 function determineDisplayOptions(
   form: FormValues,
-): RawColumnWithMetadata['metadata'] {
+): RawColumnWithMetadata["metadata"] {
   const f = form as MoneyFormValues;
-  const opts: Partial<RawColumnWithMetadata['metadata']> = {
+  const opts: Partial<RawColumnWithMetadata["metadata"]> = {
     mon_currency_symbol: f.currencySymbol,
     mon_currency_location: f.currencySymbolLocation,
-    num_format: f.numberFormat === 'none' ? null : f.numberFormat,
+    num_format: f.numberFormat === "none" ? null : f.numberFormat,
     num_grouping: f.useGrouping,
     num_min_frac_digits: f.decimalPlaces ?? undefined,
     num_max_frac_digits: f.decimalPlaces ?? undefined,
@@ -117,7 +117,7 @@ function determineDisplayOptions(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: RawColumnWithMetadata['metadata'],
+  metadata: RawColumnWithMetadata["metadata"],
 ): MoneyFormValues {
   const column = { metadata };
   const decimalPlaces = getDecimalPlaces(
@@ -125,14 +125,14 @@ function constructDisplayFormValuesFromDisplayOptions(
     metadata?.num_max_frac_digits ?? null,
   );
   const displayFormValues: MoneyFormValues = {
-    numberFormat: getColumnMetadataValue(column, 'num_format') ?? 'none',
-    currencySymbol: getColumnMetadataValue(column, 'mon_currency_symbol') ?? '',
+    numberFormat: getColumnMetadataValue(column, "num_format") ?? "none",
+    currencySymbol: getColumnMetadataValue(column, "mon_currency_symbol") ?? "",
     decimalPlaces,
     currencySymbolLocation: getColumnMetadataValue(
       column,
-      'mon_currency_location',
+      "mon_currency_location",
     ),
-    useGrouping: getColumnMetadataValue(column, 'num_grouping'),
+    useGrouping: getColumnMetadataValue(column, "num_grouping"),
   };
   return displayFormValues;
 }
@@ -140,7 +140,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 const moneyType: AbstractTypeConfiguration = {
   getIcon: () => iconUiTypeMoney,
   cellInfo: {
-    type: 'money',
+    type: "money",
   },
   defaultDbType: DB_TYPES.MSAR__MATHESAR_MONEY,
   getDisplayConfig: () => ({

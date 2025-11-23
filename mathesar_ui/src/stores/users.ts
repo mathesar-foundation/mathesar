@@ -1,27 +1,27 @@
 /* eslint-disable max-classes-per-file */
 
-import { getContext, setContext } from 'svelte';
-import { type Writable, get, writable } from 'svelte/store';
+import { getContext, setContext } from "svelte";
+import { type Writable, get, writable } from "svelte/store";
 
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
-import type { BaseUser, User } from '@mathesar/api/rpc/users';
-import { getErrorMessage } from '@mathesar/utils/errors';
-import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
-import type { CancellablePromise } from '@mathesar-component-library';
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
+import type { BaseUser, User } from "@mathesar/api/rpc/users";
+import { getErrorMessage } from "@mathesar/utils/errors";
+import type { MakeWritablePropertiesReadable } from "@mathesar/utils/typeUtils";
+import type { CancellablePromise } from "@mathesar-component-library";
 
 export class UserModel {
-  readonly id: User['id'];
+  readonly id: User["id"];
 
-  readonly isMathesarAdmin: User['is_superuser'];
+  readonly isMathesarAdmin: User["is_superuser"];
 
-  readonly fullName: User['full_name'];
+  readonly fullName: User["full_name"];
 
-  readonly email: User['email'];
+  readonly email: User["email"];
 
-  readonly username: User['username'];
+  readonly username: User["username"];
 
-  readonly displayLanguage: User['display_language'];
+  readonly displayLanguage: User["display_language"];
 
   constructor(userDetails: User) {
     this.id = userDetails.id;
@@ -60,15 +60,15 @@ export class AnonymousViewerUserModel extends UserModel {
     super({
       id: 0,
       is_superuser: false,
-      username: 'Anonymous',
-      full_name: 'Anonymous',
+      username: "Anonymous",
+      full_name: "Anonymous",
       email: null,
-      display_language: 'en',
+      display_language: "en",
     });
   }
 }
 
-const contextKey = Symbol('users list store');
+const contextKey = Symbol("users list store");
 
 class WritableUsersStore {
   readonly requestStatus: Writable<RequestStatus | undefined> = writable();
@@ -97,15 +97,15 @@ class WritableUsersStore {
   async fetchUsers() {
     try {
       this.requestStatus.set({
-        state: 'processing',
+        state: "processing",
       });
       await this.fetchUsersSilently();
       this.requestStatus.set({
-        state: 'success',
+        state: "success",
       });
     } catch (e) {
       this.requestStatus.set({
-        state: 'failure',
+        state: "failure",
         errors: [getErrorMessage(e)],
       });
     }
@@ -113,10 +113,10 @@ class WritableUsersStore {
 
   async getUserDetails(userId: number) {
     const requestStatus = get(this.requestStatus);
-    if (requestStatus?.state === 'success') {
+    if (requestStatus?.state === "success") {
       return get(this.users).find((user) => user.id === userId);
     }
-    if (requestStatus?.state === 'processing') {
+    if (requestStatus?.state === "processing") {
       const result = await this.request;
       const user = result?.find((entry) => entry.id === userId);
       if (user) {
@@ -128,13 +128,13 @@ class WritableUsersStore {
 
   async delete(userId: number) {
     this.requestStatus.set({
-      state: 'processing',
+      state: "processing",
     });
     await api.users.delete({ user_id: userId }).run();
     this.users.update((users) => users.filter((user) => user.id !== userId));
     this.count.update((count) => count - 1);
     this.requestStatus.set({
-      state: 'success',
+      state: "success",
     });
     // Re-fetching the users isn't strictly necessary, but we do it anyway
     // since it's a good opportunity to ensure the UI is up-to-date.
@@ -150,7 +150,7 @@ export function getUsersStoreFromContext(): UsersStore | undefined {
 
 export function setUsersStoreInContext(): UsersStore {
   if (getUsersStoreFromContext() !== undefined) {
-    throw Error('UsersStore context has already been set');
+    throw Error("UsersStore context has already been set");
   }
   const usersStore = new WritableUsersStore();
   setContext(contextKey, usersStore);

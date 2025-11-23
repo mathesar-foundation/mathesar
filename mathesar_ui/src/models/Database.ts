@@ -1,17 +1,17 @@
-import { api } from '@mathesar/api/rpc';
-import type { RawDatabase } from '@mathesar/api/rpc/databases';
-import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+import { api } from "@mathesar/api/rpc";
+import type { RawDatabase } from "@mathesar/api/rpc/databases";
+import AsyncRpcApiStore from "@mathesar/stores/AsyncRpcApiStore";
 import {
   CancellablePromise,
   ImmutableMap,
   SortedImmutableMap,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import { Collaborator } from './Collaborator';
-import { ConfiguredRole } from './ConfiguredRole';
-import { Role } from './Role';
-import type { Server } from './Server';
-import { UnderlyingDatabase } from './UnderlyingDatabase';
+import { Collaborator } from "./Collaborator";
+import { ConfiguredRole } from "./ConfiguredRole";
+import { Role } from "./Role";
+import type { Server } from "./Server";
+import { UnderlyingDatabase } from "./UnderlyingDatabase";
 
 export class Database {
   readonly id: number;
@@ -125,7 +125,7 @@ export class Database {
 
   addCollaborator(
     userId: number,
-    configuredRoleId: ConfiguredRole['id'],
+    configuredRoleId: ConfiguredRole["id"],
   ): CancellablePromise<Collaborator> {
     const promise = api.collaborators
       .add({

@@ -1,7 +1,7 @@
-import type { ComponentAndProps, IconProps } from '../types';
+import type { ComponentAndProps, IconProps } from "../types";
 
 export interface ButtonMenuEntry {
-  type: 'button';
+  type: "button";
   label: string | ComponentAndProps;
   icon?: IconProps;
   disabled?: boolean;
@@ -10,13 +10,13 @@ export interface ButtonMenuEntry {
 }
 
 export function buttonMenuEntry(
-  args: Omit<ButtonMenuEntry, 'type'>,
+  args: Omit<ButtonMenuEntry, "type">,
 ): ButtonMenuEntry {
-  return { type: 'button', ...args };
+  return { type: "button", ...args };
 }
 
 export interface HyperlinkMenuEntry {
-  type: 'hyperlink';
+  type: "hyperlink";
   label: string | ComponentAndProps;
   icon?: IconProps;
   disabled?: boolean;
@@ -24,40 +24,40 @@ export interface HyperlinkMenuEntry {
 }
 
 export function hyperlinkMenuEntry(
-  args: Omit<HyperlinkMenuEntry, 'type'>,
+  args: Omit<HyperlinkMenuEntry, "type">,
 ): HyperlinkMenuEntry {
-  return { type: 'hyperlink', ...args };
+  return { type: "hyperlink", ...args };
 }
 
 export interface HeadingMenuEntry {
-  type: 'heading';
+  type: "heading";
   label: string | ComponentAndProps;
 }
 
 export function headingMenuEntry(
-  args: Omit<HeadingMenuEntry, 'type'>,
+  args: Omit<HeadingMenuEntry, "type">,
 ): HeadingMenuEntry {
-  return { type: 'heading', ...args };
+  return { type: "heading", ...args };
 }
 
 export interface MenuSection {
-  type: 'section';
+  type: "section";
   entries: MenuEntry[];
 }
 
 export function menuSection(...entries: MenuEntry[]): MenuSection {
-  return { type: 'section', entries };
+  return { type: "section", entries };
 }
 
 export interface SubMenuEntry {
-  type: 'submenu';
+  type: "submenu";
   label: string | ComponentAndProps;
   icon?: IconProps;
   entries: MenuEntry[];
 }
 
-export function subMenu(args: Omit<SubMenuEntry, 'type'>): SubMenuEntry {
-  return { type: 'submenu', ...args };
+export function subMenu(args: Omit<SubMenuEntry, "type">): SubMenuEntry {
+  return { type: "submenu", ...args };
 }
 
 export type MenuEntry =
@@ -68,7 +68,7 @@ export type MenuEntry =
   | SubMenuEntry;
 
 interface DividerMenuEntry {
-  type: 'divider';
+  type: "divider";
 }
 
 export type FlattenedMenuEntry =
@@ -78,24 +78,24 @@ export type FlattenedMenuEntry =
 export function* flattenMenuSections(
   entries: Iterable<MenuEntry>,
 ): Generator<FlattenedMenuEntry, void, undefined> {
-  let lastEntryType: 'section' | 'primitive' | undefined;
+  let lastEntryType: "section" | "primitive" | undefined;
 
   for (const entry of entries) {
-    if (entry.type === 'section') {
+    if (entry.type === "section") {
       const sectionEntries = [...flattenMenuSections(entry.entries)];
       if (!sectionEntries.length) continue;
 
       if (lastEntryType !== undefined) {
-        yield { type: 'divider' };
+        yield { type: "divider" };
       }
       yield* sectionEntries;
-      lastEntryType = 'section';
+      lastEntryType = "section";
     } else {
-      if (lastEntryType === 'section') {
-        yield { type: 'divider' };
+      if (lastEntryType === "section") {
+        yield { type: "divider" };
       }
       yield entry;
-      lastEntryType = 'primitive';
+      lastEntryType = "primitive";
     }
   }
 }

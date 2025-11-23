@@ -4,31 +4,31 @@ import type {
   MaybeSavedExploration,
   QueryInstanceTransformation,
   SavedExploration,
-} from '@mathesar/api/rpc/explorations';
-import { assertExhaustive } from '@mathesar-component-library';
+} from "@mathesar/api/rpc/explorations";
+import { assertExhaustive } from "@mathesar-component-library";
 
 import {
   type ColumnDisplayOptionsEntry,
   type ExplorationDisplayOptions,
   validateDisplayOptions,
-} from './displayOptions';
-import QueryFilterTransformationModel from './QueryFilterTransformationModel';
-import QueryHideTransformationModel from './QueryHideTransformationModel';
-import QuerySortTransformationModel from './QuerySortTransformationModel';
-import { QuerySummarizationTransformationModel } from './QuerySummarizationTransformationModel';
-import type { ColumnWithLink } from './utils';
+} from "./displayOptions";
+import QueryFilterTransformationModel from "./QueryFilterTransformationModel";
+import QueryHideTransformationModel from "./QueryHideTransformationModel";
+import QuerySortTransformationModel from "./QuerySortTransformationModel";
+import { QuerySummarizationTransformationModel } from "./QuerySummarizationTransformationModel";
+import type { ColumnWithLink } from "./utils";
 
 export interface QueryModelUpdateDiff {
   model: QueryModel;
   type:
-    | 'id'
-    | 'name'
-    | 'displayOptions'
-    | 'baseTable'
-    | 'initialColumnsArray'
-    | 'initialColumnName'
-    | 'transformations'
-    | 'initialColumnsAndTransformations';
+    | "id"
+    | "name"
+    | "displayOptions"
+    | "baseTable"
+    | "initialColumnsArray"
+    | "initialColumnName"
+    | "transformations"
+    | "initialColumnsAndTransformations";
 }
 
 export type QueryTransformationModel =
@@ -41,13 +41,13 @@ export function getTransformationModel(
   transformation: QueryInstanceTransformation,
 ): QueryTransformationModel {
   switch (transformation.type) {
-    case 'filter':
+    case "filter":
       return new QueryFilterTransformationModel(transformation);
-    case 'summarize':
+    case "summarize":
       return new QuerySummarizationTransformationModel(transformation);
-    case 'hide':
+    case "hide":
       return new QueryHideTransformationModel(transformation);
-    case 'order':
+    case "order":
       return new QuerySortTransformationModel(transformation);
     default:
       return assertExhaustive(transformation);
@@ -55,7 +55,7 @@ export function getTransformationModel(
 }
 
 function validate(
-  queryModel: Pick<QueryModel, 'base_table_oid' | 'transformationModels'>,
+  queryModel: Pick<QueryModel, "base_table_oid" | "transformationModels">,
 ): { isValid: boolean; isRunnable: boolean } {
   if (queryModel.base_table_oid === undefined) {
     return { isValid: false, isRunnable: false };
@@ -67,23 +67,23 @@ function validate(
 }
 
 export class QueryModel {
-  readonly database_id: MaybeSavedExploration['database_id'];
+  readonly database_id: MaybeSavedExploration["database_id"];
 
-  readonly schema_oid: MaybeSavedExploration['schema_oid'];
+  readonly schema_oid: MaybeSavedExploration["schema_oid"];
 
-  readonly base_table_oid: MaybeSavedExploration['base_table_oid'];
+  readonly base_table_oid: MaybeSavedExploration["base_table_oid"];
 
-  readonly id: MaybeSavedExploration['id'];
+  readonly id: MaybeSavedExploration["id"];
 
-  readonly name: MaybeSavedExploration['name'];
+  readonly name: MaybeSavedExploration["name"];
 
-  readonly description: MaybeSavedExploration['description'];
+  readonly description: MaybeSavedExploration["description"];
 
   readonly initial_columns: InitialColumn[];
 
   readonly transformationModels: QueryTransformationModel[];
 
-  readonly display_names: NonNullable<SavedExploration['display_names']>;
+  readonly display_names: NonNullable<SavedExploration["display_names"]>;
 
   readonly display_options: ExplorationDisplayOptions;
 
@@ -100,7 +100,7 @@ export class QueryModel {
     this.description = model.description;
     this.initial_columns = model.initial_columns ?? [];
     let transformationModels;
-    if (model && 'transformationModels' in model) {
+    if (model && "transformationModels" in model) {
       transformationModels = [...model.transformationModels];
     } else {
       transformationModels =
@@ -127,7 +127,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'baseTable',
+      type: "baseTable",
     };
   }
 
@@ -138,7 +138,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'id',
+      type: "id",
     };
   }
 
@@ -149,7 +149,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'name',
+      type: "name",
     };
   }
 
@@ -160,7 +160,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'name',
+      type: "name",
     };
   }
 
@@ -176,7 +176,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'initialColumnsArray',
+      type: "initialColumnsArray",
     };
   }
 
@@ -190,7 +190,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'initialColumnsArray',
+      type: "initialColumnsArray",
     };
   }
 
@@ -212,7 +212,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'initialColumnName',
+      type: "initialColumnName",
     };
   }
 
@@ -236,7 +236,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'displayOptions',
+      type: "displayOptions",
     };
   }
 
@@ -249,7 +249,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'displayOptions',
+      type: "displayOptions",
     };
   }
 
@@ -262,7 +262,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'transformations',
+      type: "transformations",
     };
   }
 
@@ -278,7 +278,7 @@ export class QueryModel {
     if (this.hasSummarizationTransform()) {
       // This should never happen
       throw new Error(
-        'QueryModel currently allows only a single summarization transformation',
+        "QueryModel currently allows only a single summarization transformation",
       );
     }
     return this.addTransform(summarizationTransformationModel);
@@ -303,7 +303,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'transformations',
+      type: "transformations",
     };
   }
 
@@ -319,7 +319,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'transformations',
+      type: "transformations",
     };
   }
 
@@ -343,7 +343,7 @@ export class QueryModel {
         });
         return;
       }
-      if (transform.type === 'summarize') {
+      if (transform.type === "summarize") {
         selectAllFollowingTransforms = true;
         transformsUsingColumnIds.push({
           index,
@@ -375,7 +375,7 @@ export class QueryModel {
     let retainedTransformationModels = this.transformationModels;
     const firstSummarizationTransformIndex =
       this.transformationModels.findIndex(
-        (transformationModel) => transformationModel.type === 'summarize',
+        (transformationModel) => transformationModel.type === "summarize",
       );
     if (firstSummarizationTransformIndex > -1) {
       retainedTransformationModels = retainedTransformationModels.slice(
@@ -399,7 +399,7 @@ export class QueryModel {
     });
     return {
       model,
-      type: 'initialColumnsAndTransformations',
+      type: "initialColumnsAndTransformations",
     };
   }
 
@@ -410,7 +410,7 @@ export class QueryModel {
   getSummarizationTransforms(): QuerySummarizationTransformationModel[] {
     return this.transformationModels.filter(
       (transform): transform is QuerySummarizationTransformationModel =>
-        transform.type === 'summarize',
+        transform.type === "summarize",
     );
   }
 
@@ -440,7 +440,7 @@ export class QueryModel {
     return this.transformationModels
       .filter(
         (transform): transform is QuerySortTransformationModel =>
-          transform.type === 'order',
+          transform.type === "order",
       )
       .map((entry) => entry.columnIdentifier);
   }
@@ -455,7 +455,7 @@ export class QueryModel {
   toAnonymousExploration(): AnonymousExploration {
     if (this.base_table_oid === undefined) {
       throw new Error(
-        'Cannot formulate run request since base_table is undefined',
+        "Cannot formulate run request since base_table is undefined",
       );
     }
     const transformations = this.isValid
@@ -496,7 +496,7 @@ export class QueryModel {
   hasSummarizationTransform(): boolean {
     return this.transformationModels.some(
       (transform): transform is QuerySummarizationTransformationModel =>
-        transform.type === 'summarize',
+        transform.type === "summarize",
     );
   }
 }

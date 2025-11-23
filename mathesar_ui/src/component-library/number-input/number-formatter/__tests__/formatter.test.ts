@@ -1,5 +1,5 @@
-import { makeFormatter } from '../formatter';
-import { getDerivedOptions } from '../options';
+import { makeFormatter } from "../formatter";
+import { getDerivedOptions } from "../options";
 
 test.each(
   // prettier-ignore
@@ -35,7 +35,7 @@ test.each(
   //    zero are actually different values in JS, even though they are
   //    considered "equal".
 )(
-  'format case# %# - %s',
+  "format case# %# - %s",
   (
     locale,
     allowFloat,
@@ -61,9 +61,9 @@ test.each(
   },
 );
 
-test('format, errors', () => {
+test("format, errors", () => {
   const defaultOptions = {
-    locale: 'en-US',
+    locale: "en-US",
     allowFloat: false,
     allowNegative: true,
     useGrouping: true,

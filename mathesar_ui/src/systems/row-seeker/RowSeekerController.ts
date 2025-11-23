@@ -1,13 +1,13 @@
-import { tick } from 'svelte';
-import { type Writable, get, writable } from 'svelte/store';
+import { tick } from "svelte";
+import { type Writable, get, writable } from "svelte/store";
 
 import type {
   RecordsSummaryListResponse,
   SummarizedRecordReference,
-} from '@mathesar/api/rpc/_common/commonTypes';
-import type AsyncStore from '@mathesar/stores/AsyncStore';
-import Pagination from '@mathesar/utils/Pagination';
-import { getGloballyUniqueId } from '@mathesar-component-library';
+} from "@mathesar/api/rpc/_common/commonTypes";
+import type AsyncStore from "@mathesar/stores/AsyncStore";
+import Pagination from "@mathesar/utils/Pagination";
+import { getGloballyUniqueId } from "@mathesar-component-library";
 
 export type RowSeekerRecordStore = AsyncStore<
   {
@@ -38,7 +38,7 @@ export default class RowSeekerController {
 
   records: RowSeekerRecordStore;
 
-  searchValue: Writable<string> = writable('');
+  searchValue: Writable<string> = writable("");
 
   pagination: Writable<Pagination> = writable(new Pagination({ size: 200 }));
 
@@ -48,9 +48,9 @@ export default class RowSeekerController {
 
   canAddNewRecord: boolean;
 
-  private addRecordOptions?: RowSeekerProps['addRecordOptions'];
+  private addRecordOptions?: RowSeekerProps["addRecordOptions"];
 
-  private onSelect: RowSeekerProps['onSelect'];
+  private onSelect: RowSeekerProps["onSelect"];
 
   constructor(props: RowSeekerProps) {
     this.records = props.constructRecordStore();
@@ -90,7 +90,7 @@ export default class RowSeekerController {
 
   clearRecords() {
     this.records.reset();
-    this.searchValue.set('');
+    this.searchValue.set("");
   }
 
   async addNewRecord() {

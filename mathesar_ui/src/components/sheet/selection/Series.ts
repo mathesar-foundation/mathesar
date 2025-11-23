@@ -1,6 +1,6 @@
-import { filter, findBest, firstHighest, firstLowest } from 'iter-tools';
+import { filter, findBest, firstHighest, firstLowest } from "iter-tools";
 
-import { ImmutableMap } from '@mathesar-component-library';
+import { ImmutableMap } from "@mathesar-component-library";
 
 /**
  * A Series is an immutable ordered collection of unique values with methods
@@ -21,7 +21,7 @@ export default class Series<Value> {
       values.map((value, index) => [value, index]),
     );
     if (new Set(values).size !== values.length) {
-      throw new Error('Duplicate values are not allowed within a Series.');
+      throw new Error("Duplicate values are not allowed within a Series.");
     }
   }
 
@@ -45,7 +45,7 @@ export default class Series<Value> {
     const bIndex = this.getIndex(b);
 
     if (aIndex === undefined || bIndex === undefined) {
-      throw new Error('Id value not found within sequence.');
+      throw new Error("Id value not found within sequence.");
     }
 
     const startIndex = Math.min(aIndex, bIndex);

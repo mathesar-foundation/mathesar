@@ -10,28 +10,28 @@
   --resizer-offset: calc(-1 * (var(--half-gap) + var(--resizer-half-size)));
 
   &.top {
-    grid-template-areas: 'panel' 'main';
+    grid-template-areas: "panel" "main";
     grid-template-rows: auto 1fr;
     > .panel {
       margin-bottom: var(--gap);
     }
   }
   &.bottom {
-    grid-template-areas: 'main' 'panel';
+    grid-template-areas: "main" "panel";
     grid-template-rows: 1fr auto;
     > .panel {
       margin-top: var(--gap);
     }
   }
   &.left {
-    grid-template-areas: 'panel main';
+    grid-template-areas: "panel main";
     grid-template-columns: auto 1fr;
     > .panel {
       margin-right: var(--gap);
     }
   }
   &.right {
-    grid-template-areas: 'main panel';
+    grid-template-areas: "main panel";
     grid-template-columns: 1fr auto;
     > .panel {
       margin-left: var(--gap);

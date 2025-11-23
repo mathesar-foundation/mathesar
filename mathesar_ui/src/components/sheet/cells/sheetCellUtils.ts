@@ -1,6 +1,6 @@
-import { type Readable, derived } from 'svelte/store';
+import { type Readable, derived } from "svelte/store";
 
-import { type ColumnPosition, getSheetContext } from '../utils';
+import { type ColumnPosition, getSheetContext } from "../utils";
 
 export function getSheetColumnPosition<ColumnIdentifierKey>(
   columnIdentifierKey: ColumnIdentifierKey,

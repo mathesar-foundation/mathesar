@@ -1,13 +1,13 @@
-import { execPipe, filter, map, some } from 'iter-tools';
-import { get } from 'svelte/store';
+import { execPipe, filter, map, some } from "iter-tools";
+import { get } from "svelte/store";
 
-import { iconSetToNull } from '@mathesar/icons';
-import { confirm } from '@mathesar/stores/confirmation';
-import type { TabularData } from '@mathesar/stores/table-data';
-import type { RowModificationRecipe } from '@mathesar/stores/table-data/records';
-import { buttonMenuEntry, component } from '@mathesar-component-library';
+import { iconSetToNull } from "@mathesar/icons";
+import { confirm } from "@mathesar/stores/confirmation";
+import type { TabularData } from "@mathesar/stores/table-data";
+import type { RowModificationRecipe } from "@mathesar/stores/table-data/records";
+import { buttonMenuEntry, component } from "@mathesar-component-library";
 
-import SetToNull from '../labels/SetToNull.svelte';
+import SetToNull from "../labels/SetToNull.svelte";
 
 export function* setNull(p: { tabularData: TabularData; cellIds: string[] }) {
   const icon = iconSetToNull;

@@ -4,12 +4,12 @@ import {
   derived,
   get,
   writable,
-} from 'svelte/store';
-import { _ } from 'svelte-i18n';
+} from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import type { Tab } from '@mathesar-component-library/types';
+import type { Tab } from "@mathesar-component-library/types";
 
-import type { QueryModel } from './QueryModel';
+import type { QueryModel } from "./QueryModel";
 
 /**
  * This is a function instead of a const because we can't run `get(_)` at the
@@ -17,9 +17,9 @@ import type { QueryModel } from './QueryModel';
  */
 function makeTabMap() {
   return {
-    exploration: { label: get(_)('exploration') },
-    column: { label: get(_)('column') },
-    cell: { label: get(_)('cell') },
+    exploration: { label: get(_)("exploration") },
+    column: { label: get(_)("column") },
+    cell: { label: get(_)("cell") },
   };
 }
 
@@ -39,7 +39,7 @@ function makeTabList(tabMap: Record<string, { label: string }>) {
 export default class QueryInspector {
   tabs: Readable<ExplorationInspectorTab[]>;
 
-  activeTabId: Writable<ExplorationInspectorTab['id']>;
+  activeTabId: Writable<ExplorationInspectorTab["id"]>;
 
   activeTab: Readable<ExplorationInspectorTab>;
 
@@ -59,7 +59,7 @@ export default class QueryInspector {
     );
   }
 
-  activate(tabId: ExplorationInspectorTab['id']) {
+  activate(tabId: ExplorationInspectorTab["id"]) {
     this.activeTabId.set(tabId);
   }
 }

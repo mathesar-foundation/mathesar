@@ -1,4 +1,4 @@
-import { getContext, setContext } from 'svelte';
+import { getContext, setContext } from "svelte";
 
 export function makeContext<T>() {
   const key = {};
@@ -8,7 +8,7 @@ export function makeContext<T>() {
     getOrError: () => {
       const value = getContext<T | undefined>(key);
       if (value === undefined) {
-        throw new Error('Value not found in context');
+        throw new Error("Value not found in context");
       }
       return value as T;
     },

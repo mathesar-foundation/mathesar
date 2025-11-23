@@ -1,9 +1,9 @@
-import { toAsciiLowerCase } from '@mathesar-component-library-dir/common/utils';
+import { toAsciiLowerCase } from "@mathesar-component-library-dir/common/utils";
 
 import type {
   MatchPart,
   ValueComparisonOutcome,
-} from './matchHighlighterTypes';
+} from "./matchHighlighterTypes";
 
 export function match(text: string): MatchPart {
   return { text, isMatch: true };
@@ -44,7 +44,7 @@ export function splitMatchParts(text: string, substring: string): MatchPart[] {
 }
 
 function valueComparisonMatchIf(b: boolean): ValueComparisonOutcome {
-  return b ? 'exactMatch' : 'noMatch';
+  return b ? "exactMatch" : "noMatch";
 }
 
 export function compareWholeValues<T>(
@@ -52,11 +52,11 @@ export function compareWholeValues<T>(
   storedValue: T,
   formatter?: (v: T) => string,
 ): ValueComparisonOutcome | undefined {
-  if (searchValue === undefined || searchValue === null || searchValue === '') {
+  if (searchValue === undefined || searchValue === null || searchValue === "") {
     return undefined;
   }
   if (formatter && formatter(storedValue) === searchValue) {
-    return 'exactMatch';
+    return "exactMatch";
   }
   return valueComparisonMatchIf(
     searchValue === storedValue || String(searchValue) === String(storedValue),
@@ -72,5 +72,5 @@ export function getValueComparisonOutcome(
   if (matchParts.length === 1) {
     return valueComparisonMatchIf(matchParts[0].isMatch);
   }
-  return 'substringMatch';
+  return "substringMatch";
 }

@@ -1,22 +1,22 @@
 export type DataTypeBasedInputType =
-  | 'boolean'
-  | 'integer'
-  | 'float'
-  | 'string'
-  | 'date'
-  | 'datetime'
-  | 'time';
+  | "boolean"
+  | "integer"
+  | "float"
+  | "string"
+  | "date"
+  | "datetime"
+  | "time";
 
 export type DataTypeBasedInputInterface =
-  | 'text'
-  | 'textarea'
-  | 'number'
-  | 'checkbox'
-  | 'toggle'
-  | 'select';
+  | "text"
+  | "textarea"
+  | "number"
+  | "checkbox"
+  | "toggle"
+  | "select";
 
 export interface DataTypeBasedInputSelectElement {
-  interfaceType: 'select';
+  interfaceType: "select";
   options?: Record<
     string,
     {

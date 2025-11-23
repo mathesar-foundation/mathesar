@@ -1,4 +1,4 @@
-import { execPipe, first, map, zip } from 'iter-tools';
+import { execPipe, first, map, zip } from "iter-tools";
 import {
   type Readable,
   type Unsubscriber,
@@ -6,12 +6,12 @@ import {
   derived,
   get,
   writable,
-} from 'svelte/store';
-import { _ } from 'svelte-i18n';
+} from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import { States } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import { States } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
 import type {
   Result as ApiRecord,
   FileManifest,
@@ -19,31 +19,31 @@ import type {
   RecordsResponse,
   RecordsSearchParams,
   ResultValue,
-} from '@mathesar/api/rpc/records';
-import { parseCellId } from '@mathesar/components/sheet/cellIds';
-import type { Database } from '@mathesar/models/Database';
-import type { Table } from '@mathesar/models/Table';
+} from "@mathesar/api/rpc/records";
+import { parseCellId } from "@mathesar/components/sheet/cellIds";
+import type { Database } from "@mathesar/models/Database";
+import type { Table } from "@mathesar/models/Table";
 import {
   RpcError,
   batchSend,
-} from '@mathesar/packages/json-rpc-client-builder';
-import type Pagination from '@mathesar/utils/Pagination';
+} from "@mathesar/packages/json-rpc-client-builder";
+import type Pagination from "@mathesar/utils/Pagination";
 import {
   type CancellablePromise,
   ImmutableMap,
   WritableMap,
   defined,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 import AssociatedCellData, {
   buildAssociatedCellValuesForSheet,
   mergeAssociatedValuesForSheet,
-} from '../AssociatedCellData';
+} from "../AssociatedCellData";
 
-import type { ColumnsDataStore } from './columns';
-import type { FilterEntry, Filtering } from './filtering';
-import type { Grouping as GroupingRequest } from './grouping';
-import type { Meta } from './meta';
+import type { ColumnsDataStore } from "./columns";
+import type { FilterEntry, Filtering } from "./filtering";
+import type { Grouping as GroupingRequest } from "./grouping";
+import type { Meta } from "./meta";
 import {
   DraftRecordRow,
   PersistedRecordRow,
@@ -52,9 +52,9 @@ import {
   isDraftRecordRow,
   isPersistedRecordRow,
   isPlaceholderRecordRow,
-} from './Row';
-import type { SearchFuzzy } from './searchFuzzy';
-import type { Sorting } from './sorting';
+} from "./Row";
+import type { SearchFuzzy } from "./searchFuzzy";
+import type { Sorting } from "./sorting";
 import {
   type RecordGrouping,
   type RowKey,
@@ -62,7 +62,7 @@ import {
   getCellKey,
   getRowSelectionId,
   validateRow,
-} from './utils';
+} from "./utils";
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
@@ -119,7 +119,7 @@ function validateRowModificationRecipe(
   const primaryKeyValue = row.record[pkColumn.id];
   if (isPersistedRecordRow(row) && primaryKeyValue === undefined) {
     throw new Error(
-      'Unable to update record for a row with a missing primary key value',
+      "Unable to update record for a row with a missing primary key value",
     );
   }
 
@@ -128,7 +128,7 @@ function validateRowModificationRecipe(
   if (isEditingPk) {
     if (!isDraftRecordRow(row)) {
       // If modifying a PK cell in a saved record, then block editing.
-      throw new Error('Unable to modify primary key cells of saved rows');
+      throw new Error("Unable to modify primary key cells of saved rows");
     }
     if (pkColumn.default && pkColumn.default.is_dynamic) {
       // If modifying a PK cell in a _draft_ row, and when the PK column has a
@@ -136,7 +136,7 @@ function validateRowModificationRecipe(
       // want the user to stick with the default PK value when creating new
       // records.
       throw new Error(
-        'Unable to modify cells in a primary key column with a dynamic default',
+        "Unable to modify cells in a primary key column with a dynamic default",
       );
     }
     // Otherwise, (if we're modifying a PK cell in a draft row, and the PK
@@ -164,7 +164,7 @@ function makeRowModificationRecipe(
 export class RecordsData {
   private apiContext: {
     database_id: number;
-    table_oid: Table['oid'];
+    table_oid: Table["oid"];
   };
 
   private meta: Meta;
@@ -220,8 +220,8 @@ export class RecordsData {
     contextualFilters,
     loadIntrinsicRecordSummaries,
   }: {
-    database: Pick<Database, 'id'>;
-    table: Pick<Table, 'oid'>;
+    database: Pick<Database, "id">;
+    table: Pick<Table, "oid">;
     meta: Meta;
     columnsDataStore: ColumnsDataStore;
     contextualFilters: Map<number, number | string>;
@@ -293,7 +293,7 @@ export class RecordsData {
       const params = get(this.meta.recordsRequestParamsData);
       const contextualFilterEntries: FilterEntry[] = [
         ...this.contextualFilters,
-      ].map(([columnId, value]) => ({ columnId, conditionId: 'equal', value }));
+      ].map(([columnId, value]) => ({ columnId, conditionId: "equal", value }));
 
       const recordsListParams: RecordsListParams = {
         ...this.apiContext,
@@ -355,7 +355,7 @@ export class RecordsData {
     } catch (err) {
       this.state.set(States.Error);
       this.error.set(
-        err instanceof Error ? err.message : 'Unable to load records',
+        err instanceof Error ? err.message : "Unable to load records",
       );
     }
     return undefined;
@@ -364,10 +364,10 @@ export class RecordsData {
   /** @returns the number of selected rows deleted */
   async deleteSelected(rowSelectionIds: Iterable<string>): Promise<number> {
     const pkColumn = get(this.columnsDataStore.pkColumn);
-    if (!pkColumn) throw new Error('Cannot delete without primary key');
+    if (!pkColumn) throw new Error("Cannot delete without primary key");
 
     const rowIds =
-      typeof rowSelectionIds === 'string' ? [rowSelectionIds] : rowSelectionIds;
+      typeof rowSelectionIds === "string" ? [rowSelectionIds] : rowSelectionIds;
     const allSelectableRows = get(this.selectableRowsMap);
 
     const draftRowsToDelete: Map<string, DraftRecordRow> = new Map();
@@ -390,7 +390,7 @@ export class RecordsData {
 
     this.meta.rowDeletionStatus.setMultiple(
       [...draftRowsToDelete.keys(), ...persistedRowsToDelete.keys()],
-      { state: 'processing' },
+      { state: "processing" },
     );
 
     const rowsSuccessfullyDeleted = new Set<RowKey>(draftRowsToDelete.keys());
@@ -418,7 +418,7 @@ export class RecordsData {
             rowsSuccessfullyDeleted.add(row.identifier);
           } else {
             // This can happen in the case of a failure due to RLS
-            const msg = get(_)('row_deletion_ignored_by_pg', {
+            const msg = get(_)("row_deletion_ignored_by_pg", {
               values: { rowId },
             });
             rowsFailedToDelete.set(row.identifier, RpcError.fromAnything(msg));
@@ -470,16 +470,16 @@ export class RecordsData {
     this.meta.rowDeletionStatus.setEntries(
       [...rowsFailedToDelete.entries()].map(([rowKey, error]) => [
         rowKey,
-        { state: 'failure', errors: [error] },
+        { state: "failure", errors: [error] },
       ]),
     );
     this.meta.rowDeletionStatus.clear();
 
     if (rowsFailedToDelete.size > 0) {
-      const uiMsg = get(_)('unable_to_delete_count_rows', {
+      const uiMsg = get(_)("unable_to_delete_count_rows", {
         values: { count: rowsFailedToDelete.size },
       });
-      const apiMsg = [...rowsFailedToDelete.values()].join('\n');
+      const apiMsg = [...rowsFailedToDelete.values()].join("\n");
       throw new Error(`${uiMsg} ${apiMsg}`);
     }
 
@@ -491,7 +491,7 @@ export class RecordsData {
    */
   private getPkColumOrError() {
     const pkColumn = get(this.columnsDataStore.pkColumn);
-    if (!pkColumn) throw new Error('Unable to update without primary key');
+    if (!pkColumn) throw new Error("Unable to update without primary key");
     return pkColumn;
   }
 
@@ -552,12 +552,12 @@ export class RecordsData {
     }
 
     forEachCell((cellKey) => {
-      cellStatus.set(cellKey, { state: 'processing' });
+      cellStatus.set(cellKey, { state: "processing" });
       this.updatePromises?.get(cellKey)?.cancel();
     });
     forEachRow(({ row }) => {
       if (isDraftRecordRow(row)) {
-        rowCreationStatus.set(row.identifier, { state: 'processing' });
+        rowCreationStatus.set(row.identifier, { state: "processing" });
       }
       this.updatePromises?.get(row.identifier)?.cancel();
     });
@@ -614,7 +614,7 @@ export class RecordsData {
         return row.withRecord({ ...row.record, ...updatedValues }) as R;
       }
 
-      if (response.status === 'error') {
+      if (response.status === "error") {
         // NOTE: this is a bit weird and could potentially be improved. If we
         // were unable to save the record we need to indicate to the user that
         // all target cells in the record have failed to update. The code
@@ -626,7 +626,7 @@ export class RecordsData {
         blueprint.cells.forEach((cell) => {
           const cellKey = getCellKey(row.identifier, cell.columnId);
           cellStatus.set(cellKey, {
-            state: 'failure',
+            state: "failure",
             errors: [response],
           });
         });
@@ -637,7 +637,7 @@ export class RecordsData {
 
       for (const columnId of Object.keys(row.record)) {
         const cellKey = getCellKey(row.identifier, columnId);
-        cellStatus.set(cellKey, { state: 'success' });
+        cellStatus.set(cellKey, { state: "success" });
         cellClientSideErrors.delete(cellKey);
       }
 
@@ -655,7 +655,7 @@ export class RecordsData {
       ImmutableMap<string, string>
     > = new ImmutableMap();
     for (const response of responses) {
-      if (response.status === 'error') continue;
+      if (response.status === "error") continue;
       const linkedRecordSummaries = response.value.linked_record_summaries;
       if (!linkedRecordSummaries) continue;
       newRecordSummaries = mergeAssociatedValuesForSheet(
@@ -677,19 +677,19 @@ export class RecordsData {
     const pkColumn = get(this.columnsDataStore.pkColumn);
     if (pkColumn === undefined) {
       // eslint-disable-next-line no-console
-      console.error('Unable to update record for a row without a primary key');
+      console.error("Unable to update record for a row without a primary key");
       return row;
     }
     const primaryKeyValue = record[pkColumn.id];
     if (primaryKeyValue === undefined) {
       // eslint-disable-next-line no-console
       console.error(
-        'Unable to update record for a row with a missing primary key value',
+        "Unable to update record for a row with a missing primary key value",
       );
       return row;
     }
     const cellKey = getCellKey(row.identifier, column.id);
-    this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
+    this.meta.cellModificationStatus.set(cellKey, { state: "processing" });
     this.updatePromises?.get(cellKey)?.cancel();
 
     const promise = api.records
@@ -709,11 +709,11 @@ export class RecordsData {
 
     try {
       const result = await promise;
-      this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
+      this.meta.cellModificationStatus.set(cellKey, { state: "success" });
       return row.withRecord(result.results[0]);
     } catch (err) {
       this.meta.cellModificationStatus.set(cellKey, {
-        state: 'failure',
+        state: "failure",
         errors: [RpcError.fromAnything(err)],
       });
     } finally {
@@ -746,7 +746,7 @@ export class RecordsData {
       return row;
     }
 
-    this.meta.rowCreationStatus.set(row.identifier, { state: 'processing' });
+    this.meta.rowCreationStatus.set(row.identifier, { state: "processing" });
     this.createPromises?.get(row.identifier)?.cancel();
 
     const promise = api.records
@@ -770,7 +770,7 @@ export class RecordsData {
       const newRow = PersistedRecordRow.fromDraft(row.withRecord(record));
 
       this.meta.clearAllStatusesAndErrorsForRows([newRow.identifier]);
-      this.meta.rowCreationStatus.set(newRow.identifier, { state: 'success' });
+      this.meta.rowCreationStatus.set(newRow.identifier, { state: "success" });
       this.newRecords.update((existing) =>
         existing.map((entry) => {
           if (entry.identifier === row.identifier) {
@@ -782,7 +782,7 @@ export class RecordsData {
       return newRow;
     } catch (err) {
       this.meta.rowCreationStatus.set(row.identifier, {
-        state: 'failure',
+        state: "failure",
         errors: [RpcError.fromAnything(err)],
       });
     } finally {

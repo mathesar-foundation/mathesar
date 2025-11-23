@@ -1,13 +1,13 @@
-import type { ParseResult } from '@mathesar-component-library-dir/formatted-input/FormattedInputTypes';
+import type { ParseResult } from "@mathesar-component-library-dir/formatted-input/FormattedInputTypes";
 
-import { factoryToNormalize, factoryToSimplify } from './cleaners';
+import { factoryToNormalize, factoryToSimplify } from "./cleaners";
 import {
   factoryToFormatSimplifiedInputForLocale,
   formatToNormalizedForm,
   makeFormatter,
-} from './formatter';
-import { fractionDigitCount, hasTrailingDecimal } from './inference';
-import type { DerivedOptions } from './options';
+} from "./formatter";
+import { fractionDigitCount, hasTrailingDecimal } from "./inference";
+import type { DerivedOptions } from "./options";
 
 function parseNumber(simplifiedInput: string): number | undefined {
   // Why use `parseFloat` instead of `parseInt` in cases where we know we should
@@ -37,15 +37,15 @@ interface BaseParseValue {
   normalizedStringifiedNumber: string;
 }
 export interface SimpleNumberParseValue extends BaseParseValue {
-  type: 'number';
+  type: "number";
   numericalValue: number;
 }
 export interface BigIntNumberParseValue extends BaseParseValue {
-  type: 'bigint';
+  type: "bigint";
   numericalValue: bigint;
 }
 export interface BigFloatParseValue extends BaseParseValue {
-  type: 'bigfloat';
+  type: "bigfloat";
 }
 export type UniversalNumberParseValue =
   | SimpleNumberParseValue
@@ -80,7 +80,7 @@ export function makeUniversalNumberParser(
         : parseFloat(numberValue.toFixed(opts.maximumFractionDigits));
       return {
         value: {
-          type: 'number',
+          type: "number",
           numericalValue: roundedNumberValue,
           normalizedStringifiedNumber: roundedNumberValue.toString(),
         },
@@ -99,7 +99,7 @@ export function makeUniversalNumberParser(
     if (bigIntValue !== undefined) {
       return {
         value: {
-          type: 'bigint',
+          type: "bigint",
           numericalValue: bigIntValue,
           normalizedStringifiedNumber: normalizedInput,
         },
@@ -114,7 +114,7 @@ export function makeUniversalNumberParser(
 
     return {
       value: {
-        type: 'bigfloat',
+        type: "bigfloat",
         normalizedStringifiedNumber: normalizedInput,
       },
       intermediateDisplay:

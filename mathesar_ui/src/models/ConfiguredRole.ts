@@ -1,7 +1,7 @@
-import { api } from '@mathesar/api/rpc';
-import type { RawConfiguredRole } from '@mathesar/api/rpc/roles';
+import { api } from "@mathesar/api/rpc";
+import type { RawConfiguredRole } from "@mathesar/api/rpc/roles";
 
-import type { Database } from './Database';
+import type { Database } from "./Database";
 
 export class ConfiguredRole {
   readonly id: number;

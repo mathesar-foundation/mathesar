@@ -1,4 +1,4 @@
-import type { RawServer } from '@mathesar/api/rpc/servers';
+import type { RawServer } from "@mathesar/api/rpc/servers";
 
 export class Server {
   readonly id: number;
@@ -34,7 +34,7 @@ export class Server {
     return new Server({
       rawServer: {
         id,
-        host: 'unknown',
+        host: "unknown",
         port: 0,
       },
     });

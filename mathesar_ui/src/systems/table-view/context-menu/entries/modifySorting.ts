@@ -1,13 +1,13 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
 import {
   type SortDirection,
   getSortingLabelForColumn,
-} from '@mathesar/components/sort-entry/utils';
-import { iconSortAscending, iconSortDescending } from '@mathesar/icons';
-import type { ProcessedColumn, TabularData } from '@mathesar/stores/table-data';
-import { buttonMenuEntry } from '@mathesar-component-library';
+} from "@mathesar/components/sort-entry/utils";
+import { iconSortAscending, iconSortDescending } from "@mathesar/icons";
+import type { ProcessedColumn, TabularData } from "@mathesar/stores/table-data";
+import { buttonMenuEntry } from "@mathesar-component-library";
 
 export function* modifySorting(p: {
   column: ProcessedColumn;
@@ -29,10 +29,10 @@ export function* modifySorting(p: {
     sortingStore.update((s) => s.with(p.column.id, sortDirection));
   }
 
-  if (currentSorting === 'ASCENDING') {
+  if (currentSorting === "ASCENDING") {
     yield buttonMenuEntry({
       icon: iconSortAscending,
-      label: get(_)('remove_sorting_type', {
+      label: get(_)("remove_sorting_type", {
         values: { sortingType: sortingLabel.ASCENDING },
       }),
       onClick: removeSorting,
@@ -40,17 +40,17 @@ export function* modifySorting(p: {
   } else {
     yield buttonMenuEntry({
       icon: iconSortAscending,
-      label: get(_)('sort_type', {
+      label: get(_)("sort_type", {
         values: { sortingType: sortingLabel.ASCENDING },
       }),
-      onClick: () => applySorting('ASCENDING'),
+      onClick: () => applySorting("ASCENDING"),
     });
   }
 
-  if (currentSorting === 'DESCENDING') {
+  if (currentSorting === "DESCENDING") {
     yield buttonMenuEntry({
       icon: iconSortDescending,
-      label: get(_)('remove_sorting_type', {
+      label: get(_)("remove_sorting_type", {
         values: { sortingType: sortingLabel.DESCENDING },
       }),
       onClick: removeSorting,
@@ -58,10 +58,10 @@ export function* modifySorting(p: {
   } else {
     yield buttonMenuEntry({
       icon: iconSortDescending,
-      label: get(_)('sort_type', {
+      label: get(_)("sort_type", {
         values: { sortingType: sortingLabel.DESCENDING },
       }),
-      onClick: () => applySorting('DESCENDING'),
+      onClick: () => applySorting("DESCENDING"),
     });
   }
 }

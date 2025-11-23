@@ -23,8 +23,8 @@
 
   ```javascript
   export let randomVariable;
-  let aNewVariable = 'new variable';
-  const someValue = 'constant value';
+  let aNewVariable = "new variable";
+  const someValue = "constant value";
   ```
 
 - All function names should be in lowerCamelCase. Examples:
@@ -83,7 +83,6 @@
 - If a TypeScript file contains _only_ type definitions (without any values or implementation), then use the file extension `.d.ts` instead of `.ts`. If you use `enum` or `const` you'll need make the file a `.ts` file. If you only use `type` and `interface`, then make the file a `.d.ts` file.
 
 - Prefer the term "delete" in code and UI over similar terms like "remove" and "drop".
-
   - [discussion](https://github.com/centerofci/mathesar/discussions/872)
 
 ## HTML
@@ -151,7 +150,6 @@ Notes:
 - Don't use `px` — use `rem` or `em` instead.
 
   Exceptional cases where `px` is okay:
-
   - when setting the root `font-size`
 
 Note: some of our older code still does not conform to this standard.
@@ -167,12 +165,10 @@ To preserve modularity and encapsulation, components should not define their own
 - **margin**: The component's root element should not set any margin.
 - **padding**: If the component's root element has border, it's fine to set padding because the border will serve as the outer-most visual edge. But if there's no border, then there should be no padding.
 - **z-index**:
-
   - The component's root element should not set any z-index.
   - It's fine for child elements _within the component_ to set a z-index, but in such cases the component's root element must establish its own [stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context). It's best to use `isolation: isolate;` to establish the stacking context because it clearly communicates intent and works without setting z-index. Once your component has its own stacking context, then you're free to set the z-index values within the component without thinking about anything outside the component. You can use simple values like `1` and `2` within the component because everything is encapsulated.
   - If you want to render a child component with a specific z-index, then prefer to nest the child component inside a DOM element, setting the z-index on the DOM element (not the component).
   - If you absolutely must pass a z-index value _into_ a component, then do so using CSS variables as follows:
-
     1. Within the parent component (that establishes a stacking context), define one CSS variable for each "layer" within that stacking context.
     1. Follow this naming convention to scope your CSS variables:
 
@@ -287,7 +283,7 @@ Prefer using `undefined` over `null` where possible.
 - ❌ Bad because it uses an empty string to represent an empty value when it probably should be using `undefined` for greater code clarity.
 
   ```ts
-  const name = writable<string>('');
+  const name = writable<string>("");
   ```
 
 - ❌ Bad because it mixes `null` and `undefined` into the same type.
@@ -373,7 +369,6 @@ Additional context:
 ### When using `{...$$restProps}`, define a `$$Props` type
 
 - Example:
-
   - `Child.svelte`
 
     ```svelte
@@ -417,7 +412,7 @@ Additional context:
 - If you want to alter the props, you can define `$$Props` like this:
 
   ```ts
-  interface $$Props extends Omit<ComponentProps<Child>, 'notThatOne'> {
+  interface $$Props extends Omit<ComponentProps<Child>, "notThatOne"> {
     addThisOne: string;
   }
   ```

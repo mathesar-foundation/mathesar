@@ -1,3 +1,3 @@
-import { ModalMultiplexer } from '@mathesar-component-library';
+import { ModalMultiplexer } from "@mathesar-component-library";
 
 export const modal = new ModalMultiplexer();

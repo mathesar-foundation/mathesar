@@ -5,14 +5,14 @@ import {
   derived,
   get,
   readable,
-} from 'svelte/store';
+} from "svelte/store";
 
 export function isReadable<T>(v: Readable<T> | T): v is Readable<T> {
   return (
-    typeof v === 'object' &&
+    typeof v === "object" &&
     v !== null &&
-    'subscribe' in v &&
-    typeof v.subscribe === 'function'
+    "subscribe" in v &&
+    typeof v.subscribe === "function"
   );
 }
 
@@ -190,7 +190,7 @@ export function asyncDynamicDerived<SourceSubstance, T>(
     };
 
     // Place the call as a microtask in the event loop
-    if (typeof queueMicrotask === 'function') {
+    if (typeof queueMicrotask === "function") {
       queueMicrotask(run);
     } else {
       void Promise.resolve().then(run);

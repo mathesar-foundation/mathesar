@@ -1,6 +1,6 @@
-import { type Readable, writable } from 'svelte/store';
+import { type Readable, writable } from "svelte/store";
 
-import type { MenuEntry } from '@mathesar-component-library-dir/prepared-menu';
+import type { MenuEntry } from "@mathesar-component-library-dir/prepared-menu";
 
 export interface ClientPosition {
   clientX: number;

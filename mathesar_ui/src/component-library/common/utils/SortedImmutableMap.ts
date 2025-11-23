@@ -1,4 +1,4 @@
-import ImmutableMap from './ImmutableMap';
+import ImmutableMap from "./ImmutableMap";
 
 export default class SortedImmutableMap<Key, Value> extends ImmutableMap<
   Key,

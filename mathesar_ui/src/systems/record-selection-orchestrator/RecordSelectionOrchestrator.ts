@@ -1,4 +1,4 @@
-import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
+import type { SummarizedRecordReference } from "@mathesar/api/rpc/_common/commonTypes";
 
 /**
  * A polymorphic interface to be implemented by various systems that allow

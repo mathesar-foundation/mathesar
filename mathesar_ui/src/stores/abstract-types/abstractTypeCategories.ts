@@ -1,34 +1,34 @@
-import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
-import type { DbType } from '@mathesar/AppTypes';
+import type { ColumnMetadata } from "@mathesar/api/rpc/_common/columnDisplayOptions";
+import type { ColumnTypeOptions } from "@mathesar/api/rpc/columns";
+import type { DbType } from "@mathesar/AppTypes";
 import {
   iconUiTypeArray,
   iconUiTypeJsonArray,
   iconUiTypeJsonObject,
-} from '@mathesar/icons';
+} from "@mathesar/icons";
 import {
   getDefaultFileStorageBackend,
   getFileStorageBackend,
-} from '@mathesar/utils/preloadData';
+} from "@mathesar/utils/preloadData";
 
-import { abstractTypeCategory } from './constants';
-import { DB_TYPES } from './dbTypes';
-import Boolean from './type-configs/boolean';
-import Date from './type-configs/date';
-import DateTime from './type-configs/datetime';
-import Duration from './type-configs/duration';
-import Email from './type-configs/email';
-import Fallback from './type-configs/fallback';
+import { abstractTypeCategory } from "./constants";
+import { DB_TYPES } from "./dbTypes";
+import Boolean from "./type-configs/boolean";
+import Date from "./type-configs/date";
+import DateTime from "./type-configs/datetime";
+import Duration from "./type-configs/duration";
+import Email from "./type-configs/email";
+import Fallback from "./type-configs/fallback";
 // eslint-disable-next-line import/no-cycle
-import File from './type-configs/file/file';
-import Json from './type-configs/json';
-import Money from './type-configs/money';
-import Number from './type-configs/number';
-import Text from './type-configs/text';
-import Time from './type-configs/time';
-import Uri from './type-configs/uri';
-import Uuid from './type-configs/uuid';
-import { typeCastMap } from './typeCastMap';
+import File from "./type-configs/file/file";
+import Json from "./type-configs/json";
+import Money from "./type-configs/money";
+import Number from "./type-configs/number";
+import Text from "./type-configs/text";
+import Time from "./type-configs/time";
+import Uri from "./type-configs/uri";
+import Uuid from "./type-configs/uuid";
+import { typeCastMap } from "./typeCastMap";
 import type {
   AbstractType,
   AbstractTypeCategoryIdentifier,
@@ -36,11 +36,11 @@ import type {
   AbstractTypeConfigurationPartialMap,
   AbstractTypeResponse,
   AbstractTypesMap,
-} from './types';
+} from "./types";
 
 const unknownAbstractType: AbstractType = {
-  name: 'Other',
-  identifier: 'other',
+  name: "Other",
+  identifier: "other",
   ...Fallback,
   dbTypes: new Set([]),
 };
@@ -67,7 +67,7 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
   getIcon: (args) => {
-    const arrayIcon = { ...iconUiTypeArray, label: 'Array' };
+    const arrayIcon = { ...iconUiTypeArray, label: "Array" };
     const itemType = args?.typeOptions?.item_type ?? undefined;
     if (!itemType) return arrayIcon;
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -80,23 +80,23 @@ export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
     return [arrayIcon, ...innerIcons];
   },
   cellInfo: {
-    type: 'array',
+    type: "array",
   },
 });
 
 const jsonArrayFactory: AbstractTypeConfigurationFactory = () => ({
   getIcon: () => iconUiTypeJsonArray,
-  defaultDbType: 'mathesar_types.mathesar_json_array',
+  defaultDbType: "mathesar_types.mathesar_json_array",
   cellInfo: {
-    type: 'string',
+    type: "string",
   },
 });
 
 const jsonObjectFactory: AbstractTypeConfigurationFactory = () => ({
   getIcon: () => iconUiTypeJsonObject,
-  defaultDbType: 'mathesar_types.mathesar_json_object',
+  defaultDbType: "mathesar_types.mathesar_json_object",
   cellInfo: {
-    type: 'string',
+    type: "string",
   },
 });
 
@@ -111,11 +111,11 @@ const comboAbstractTypeCategories: Partial<
 function constructAbstractTypeMapFromResponse(
   abstractTypesResponse: AbstractTypeResponse[],
 ): AbstractTypesMap {
-  const simpleAbstractTypesMap: Map<AbstractType['identifier'], AbstractType> =
+  const simpleAbstractTypesMap: Map<AbstractType["identifier"], AbstractType> =
     new Map();
   const complexAbstractTypeFactories: (Pick<
     AbstractType,
-    'identifier' | 'name' | 'dbTypes'
+    "identifier" | "name" | "dbTypes"
   > & { factory: AbstractTypeConfigurationFactory })[] = [];
 
   abstractTypesResponse.forEach((entry) => {
@@ -171,38 +171,38 @@ function constructAbstractTypeMapFromResponse(
  */
 const typesResponse: AbstractTypeResponse[] = [
   {
-    identifier: 'boolean',
-    name: 'Boolean',
+    identifier: "boolean",
+    name: "Boolean",
     db_types: [DB_TYPES.BOOLEAN],
   },
   {
-    identifier: 'date',
-    name: 'Date',
+    identifier: "date",
+    name: "Date",
     db_types: [DB_TYPES.DATE],
   },
   {
-    identifier: 'time',
-    name: 'Time',
+    identifier: "time",
+    name: "Time",
     db_types: [DB_TYPES.TIME_WITH_TZ, DB_TYPES.TIME_WITHOUT_TZ],
   },
   {
-    identifier: 'datetime',
-    name: 'Date & Time',
+    identifier: "datetime",
+    name: "Date & Time",
     db_types: [DB_TYPES.TIMESTAMP_WITH_TZ, DB_TYPES.TIMESTAMP_WITHOUT_TZ],
   },
   {
-    identifier: 'duration',
-    name: 'Duration',
+    identifier: "duration",
+    name: "Duration",
     db_types: [DB_TYPES.INTERVAL],
   },
   {
-    identifier: 'email',
-    name: 'Email',
+    identifier: "email",
+    name: "Email",
     db_types: [DB_TYPES.MSAR__EMAIL],
   },
   {
-    identifier: 'money',
-    name: 'Money',
+    identifier: "money",
+    name: "Money",
     db_types: [
       DB_TYPES.MONEY,
       DB_TYPES.MSAR__MATHESAR_MONEY,
@@ -210,8 +210,8 @@ const typesResponse: AbstractTypeResponse[] = [
     ],
   },
   {
-    identifier: 'number',
-    name: 'Number',
+    identifier: "number",
+    name: "Number",
     db_types: [
       DB_TYPES.DOUBLE_PRECISION,
       DB_TYPES.REAL,
@@ -222,8 +222,8 @@ const typesResponse: AbstractTypeResponse[] = [
     ],
   },
   {
-    identifier: 'text',
-    name: 'Text',
+    identifier: "text",
+    name: "Text",
     db_types: [
       DB_TYPES.CHAR,
       DB_TYPES.CHARACTER_VARYING,
@@ -233,40 +233,40 @@ const typesResponse: AbstractTypeResponse[] = [
     ],
   },
   {
-    identifier: 'uri',
-    name: 'URI',
+    identifier: "uri",
+    name: "URI",
     db_types: [DB_TYPES.MSAR__URI],
   },
   {
-    identifier: 'uuid',
-    name: 'UUID',
+    identifier: "uuid",
+    name: "UUID",
     db_types: [DB_TYPES.UUID],
   },
   {
-    identifier: 'jsonlist',
-    name: 'JSON List',
+    identifier: "jsonlist",
+    name: "JSON List",
     db_types: [DB_TYPES.MSAR__MATHESAR_JSON_ARRAY],
   },
   {
-    identifier: 'map',
-    name: 'Map',
+    identifier: "map",
+    name: "Map",
     db_types: [DB_TYPES.MSAR__MATHESAR_JSON_OBJECT],
   },
   {
-    identifier: 'json',
-    name: 'JSON',
+    identifier: "json",
+    name: "JSON",
     db_types: [DB_TYPES.JSON, DB_TYPES.JSONB],
   },
   {
-    identifier: 'array',
-    name: 'Array',
+    identifier: "array",
+    name: "Array",
     db_types: [DB_TYPES.ARRAY],
   },
 ];
 
 const fileAbstractType: AbstractType = {
-  identifier: 'file',
-  name: 'File',
+  identifier: "file",
+  name: "File",
   dbTypes: new Set([DB_TYPES.JSONB]),
   ...File,
 };
@@ -274,9 +274,9 @@ const fileAbstractType: AbstractType = {
 const abstractTypesMap = constructAbstractTypeMapFromResponse(typesResponse);
 
 export const defaultAbstractType = (() => {
-  const textType = abstractTypesMap.get('text');
+  const textType = abstractTypesMap.get("text");
   if (!textType) {
-    throw new Error('Text UI type not found. This should never happen');
+    throw new Error("Text UI type not found. This should never happen");
   }
   return textType;
 })();
@@ -380,7 +380,7 @@ export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
     return DB_TYPES.TEXT;
   })();
   const metadata: ColumnMetadata | null = (() => {
-    if (abstractType.identifier === 'file') {
+    if (abstractType.identifier === "file") {
       return {
         file_backend: getDefaultFileStorageBackend()?.backend,
       };
@@ -401,7 +401,7 @@ export function mergeMetadataOnTypeChange(
   newAbstractType: AbstractType,
   metadata: ColumnMetadata | null,
 ) {
-  if (newAbstractType.identifier === 'file') {
+  if (newAbstractType.identifier === "file") {
     return {
       ...(metadata ?? {}),
       file_backend: getDefaultFileStorageBackend()?.backend,
@@ -423,9 +423,9 @@ export function getAllowedAbstractTypesForNewColumn() {
 }
 
 export function getDbTypesForAbstractType(
-  abstractTypeIdentifier: AbstractType['identifier'],
+  abstractTypeIdentifier: AbstractType["identifier"],
 ): Set<DbType> {
-  if (abstractTypeIdentifier === 'file') {
+  if (abstractTypeIdentifier === "file") {
     return fileAbstractType.dbTypes;
   }
   return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();

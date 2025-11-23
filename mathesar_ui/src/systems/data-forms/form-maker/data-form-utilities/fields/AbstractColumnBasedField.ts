@@ -1,27 +1,27 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, get, writable } from "svelte/store";
 
-import type { RawDataFormField } from '@mathesar/api/rpc/forms';
-import type { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+import type { RawDataFormField } from "@mathesar/api/rpc/forms";
+import type { getDbTypeBasedInputCap } from "@mathesar/components/cell-fabric/utils";
 
-import type { DataFormStructureCtx } from '../DataFormStructure';
+import type { DataFormStructureCtx } from "../DataFormStructure";
 
 import {
   AbstractField,
   type AbstractFieldModifiableProps,
   type AbstractFieldProps,
-} from './AbstractField';
-import type { FieldColumn } from './FieldColumn';
-import { DataFormFieldScalarInputValueHolder } from './FieldValueHolder';
-import type { FormFields } from './FormFields';
+} from "./AbstractField";
+import type { FieldColumn } from "./FieldColumn";
+import { DataFormFieldScalarInputValueHolder } from "./FieldValueHolder";
+import type { FormFields } from "./FormFields";
 
 export interface AbstractColumnBasedFieldProps extends AbstractFieldProps {
-  isRequired: RawDataFormField['is_required'];
+  isRequired: RawDataFormField["is_required"];
   fieldColumn: FieldColumn;
 }
 
 export type AbstractColumnBasedFieldModifiableProps =
   | AbstractFieldModifiableProps
-  | keyof Pick<AbstractColumnBasedFieldProps, 'isRequired'>;
+  | keyof Pick<AbstractColumnBasedFieldProps, "isRequired">;
 
 export abstract class AbstractColumnBasedField extends AbstractField {
   readonly fieldColumn;
@@ -34,7 +34,7 @@ export abstract class AbstractColumnBasedField extends AbstractField {
 
   private _isRequired;
 
-  get isRequired(): Readable<AbstractColumnBasedFieldProps['isRequired']> {
+  get isRequired(): Readable<AbstractColumnBasedFieldProps["isRequired"]> {
     return this._isRequired;
   }
 
@@ -61,11 +61,11 @@ export abstract class AbstractColumnBasedField extends AbstractField {
     if (!this.fieldColumn.column.nullable) {
       // required on db
       throw new Error(
-        'Cannot modify isRequired since this field is not nullable on the DB',
+        "Cannot modify isRequired since this field is not nullable on the DB",
       );
     }
     this._isRequired.set(isRequired);
-    this.triggerChangeEvent('isRequired');
+    this.triggerChangeEvent("isRequired");
   }
 
   hasColumn(fieldColumn: FieldColumn) {
@@ -77,7 +77,7 @@ export abstract class AbstractColumnBasedField extends AbstractField {
 
   checkAndSetDefaultLabel() {
     const label = get(this.label);
-    if (!label || label.trim() === '') {
+    if (!label || label.trim() === "") {
       this.setLabel(this.fieldColumn.column.name);
     }
   }
@@ -85,7 +85,7 @@ export abstract class AbstractColumnBasedField extends AbstractField {
   protected abstract triggerChangeEvent<
     T extends keyof Pick<
       AbstractColumnBasedFieldProps,
-      'index' | 'label' | 'help' | 'styling' | 'isRequired'
+      "index" | "label" | "help" | "styling" | "isRequired"
     >,
   >(e: T): unknown;
 

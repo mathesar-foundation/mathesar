@@ -1,15 +1,15 @@
-import { execPipe, find, map } from 'iter-tools';
-import type { Readable } from 'svelte/store';
+import { execPipe, find, map } from "iter-tools";
+import type { Readable } from "svelte/store";
 
 import type {
   ColumnPrivilege,
   RawColumnWithMetadata,
-} from '@mathesar/api/rpc/columns';
+} from "@mathesar/api/rpc/columns";
 import type {
   FkConstraint,
   RawConstraint,
-} from '@mathesar/api/rpc/constraints';
-import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+} from "@mathesar/api/rpc/constraints";
+import type { CellColumnFabric } from "@mathesar/components/cell-fabric/types";
 import {
   getCellCap,
   getDbTypeBasedInputCap,
@@ -17,23 +17,23 @@ import {
   getDisplayFormatter,
   getInitialInputValue,
   getLinkedRecordInputCap,
-} from '@mathesar/components/cell-fabric/utils';
-import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
-import type { Table } from '@mathesar/models/Table';
+} from "@mathesar/components/cell-fabric/utils";
+import { retrieveFilters } from "@mathesar/components/filter-entry/utils";
+import type { Table } from "@mathesar/models/Table";
 import {
   getAbstractTypeForDbType,
   type getFiltersForAbstractType,
   getPreprocFunctionsForAbstractType,
-} from '@mathesar/stores/abstract-types';
+} from "@mathesar/stores/abstract-types";
 import type {
   AbstractType,
   AbstractTypePreprocFunctionDefinition,
-} from '@mathesar/stores/abstract-types/types';
-import { makeRecordSelectorOrchestratorFactory } from '@mathesar/systems/record-selector/recordSelectorOrchestrator';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+} from "@mathesar/stores/abstract-types/types";
+import { makeRecordSelectorOrchestratorFactory } from "@mathesar/systems/record-selector/recordSelectorOrchestrator";
+import type { ComponentAndProps } from "@mathesar-component-library/types";
 
-import { findFkConstraintsForColumn } from './constraintsUtils';
-import type { RecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
+import { findFkConstraintsForColumn } from "./constraintsUtils";
+import type { RecordSummariesForSheet } from "./record-summaries/recordSummaryUtils";
 
 /**
  * Prefer properties over functions in this class since we use these properties in
@@ -44,13 +44,13 @@ export class ProcessedColumn implements CellColumnFabric {
    * This property is also available via `column.id`, but it's duplicated at a
    * higher level for brevity's sake because it's used so frequently.
    */
-  readonly id: RawColumnWithMetadata['id'];
+  readonly id: RawColumnWithMetadata["id"];
 
   readonly column: RawColumnWithMetadata;
 
   readonly columnIndex: number;
 
-  readonly tableOid: Table['oid'];
+  readonly tableOid: Table["oid"];
 
   /** All constriants relevant to this column */
   readonly relevantConstraints: RawConstraint[];
@@ -89,7 +89,7 @@ export class ProcessedColumn implements CellColumnFabric {
   readonly isEditable: boolean;
 
   constructor(props: {
-    tableOid: Table['oid'];
+    tableOid: Table["oid"];
     column: RawColumnWithMetadata;
     columnIndex: number;
     constraints: RawConstraint[];
@@ -169,7 +169,7 @@ export class ProcessedColumn implements CellColumnFabric {
 
     this.isEditable = (() => {
       const currRoleHasEditPrivileges =
-        this.currentRolePrivileges.has('UPDATE');
+        this.currentRolePrivileges.has("UPDATE");
       if (!currRoleHasEditPrivileges) {
         return false;
       }

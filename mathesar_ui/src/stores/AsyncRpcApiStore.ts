@@ -1,21 +1,21 @@
-import { get } from 'svelte/store';
+import { get } from "svelte/store";
 
 import {
   CancellablePromise,
   hasProperty,
   isDefinedNonNullable,
-} from '@mathesar/component-library';
+} from "@mathesar/component-library";
 import {
   RpcError,
   type RpcRequest,
   type RpcResponse,
   batchSend,
-} from '@mathesar/packages/json-rpc-client-builder';
+} from "@mathesar/packages/json-rpc-client-builder";
 
 import AsyncStore, {
   type AsyncStoreOptions,
   type AsyncStoreValue,
-} from './AsyncStore';
+} from "./AsyncStore";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BatchRunner<T = any, U = any> = {
@@ -54,7 +54,7 @@ export default class AsyncRpcApiStore<
     const asyncStoreOptions: AsyncStoreOptions<U, RpcError> = {
       getError: (err: unknown) => RpcError.fromAnything(err),
     };
-    if (hasProperty(options, 'initialValue')) {
+    if (hasProperty(options, "initialValue")) {
       asyncStoreOptions.initialValue = options.initialValue;
     }
     const staticProps = options?.staticProps ?? undefined;
@@ -96,7 +96,7 @@ export default class AsyncRpcApiStore<
     dynamicProps: OmitOrVoid<Props, StaticPropKeys>,
   ): BatchRunner<T, U> {
     const onResponse = (response: RpcResponse<T>) => {
-      if (response.status === 'ok') {
+      if (response.status === "ok") {
         this.setResolvedValue(this.postProcess(response.value));
       } else {
         this.setRejectedError(response);

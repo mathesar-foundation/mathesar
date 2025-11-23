@@ -1,7 +1,7 @@
-import { tick } from 'svelte';
-import type { ActionReturn } from 'svelte/action';
+import { tick } from "svelte";
+import type { ActionReturn } from "svelte/action";
 
-import { focusElement, getFocusableDescendants, hasMethod } from '../utils';
+import { focusElement, getFocusableDescendants, hasMethod } from "../utils";
 
 interface FocusTrapOptions {
   /**
@@ -29,7 +29,7 @@ export default function focusTrap(
   };
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.key !== 'Tab') return;
+    if (event.key !== "Tab") return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;
 
     event.preventDefault();
@@ -86,7 +86,7 @@ export default function focusTrap(
       }
     } else if (
       previouslyFocusedElement &&
-      hasMethod(previouslyFocusedElement, 'blur')
+      hasMethod(previouslyFocusedElement, "blur")
     ) {
       previouslyFocusedElement.blur();
     }
@@ -94,11 +94,11 @@ export default function focusTrap(
 
   void initializeFocus();
 
-  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener("keydown", handleKeyDown);
 
   return {
     destroy() {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
       if (fullOptions.autoRestore) {
         focusElement(previouslyFocusedElement);
       }

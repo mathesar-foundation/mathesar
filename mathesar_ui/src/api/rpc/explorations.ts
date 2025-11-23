@@ -1,13 +1,13 @@
-import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { JoinPath } from '@mathesar/api/rpc/tables';
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
-import type { FilterId } from '@mathesar/stores/abstract-types/types';
+import type { PaginatedResponse } from "@mathesar/api/rest/utils/requestUtils";
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import type { JoinPath } from "@mathesar/api/rpc/tables";
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
+import type { FilterId } from "@mathesar/stores/abstract-types/types";
 
 export interface InitialColumn {
   alias: string;
   /** The PostgreSQL attnum of the column */
-  attnum: RawColumnWithMetadata['id'];
+  attnum: RawColumnWithMetadata["id"];
   join_path?: JoinPath;
 }
 
@@ -18,29 +18,29 @@ type FilterConditionParams = [
 type FilterCondition = Partial<Record<FilterId, FilterConditionParams>>;
 
 export interface QueryInstanceFilterTransformation {
-  type: 'filter';
+  type: "filter";
   spec: FilterCondition;
 }
 
 export const querySummarizationFunctionIds = [
-  'distinct_aggregate_to_array',
-  'count',
-  'sum',
-  'median',
-  'mode',
-  'percentage_true',
-  'max',
-  'min',
-  'mean',
-  'peak_time',
-  'peak_month',
+  "distinct_aggregate_to_array",
+  "count",
+  "sum",
+  "median",
+  "mode",
+  "percentage_true",
+  "max",
+  "min",
+  "mean",
+  "peak_time",
+  "peak_month",
 ] as const;
 
 export type QuerySummarizationFunctionId =
   (typeof querySummarizationFunctionIds)[number];
 
 export interface QueryInstanceSummarizationTransformation {
-  type: 'summarize';
+  type: "summarize";
   spec: {
     base_grouping_column: string;
     grouping_expressions?: {
@@ -57,17 +57,17 @@ export interface QueryInstanceSummarizationTransformation {
 }
 
 export interface QueryInstanceHideTransformation {
-  type: 'hide';
+  type: "hide";
   /** Column aliases */
   spec: string[];
 }
 
 export interface QueryInstanceSortTransformation {
-  type: 'order';
+  type: "order";
   spec: [
     {
       field: string;
-      direction: 'asc' | 'desc';
+      direction: "asc" | "desc";
     },
   ];
 }
@@ -114,12 +114,12 @@ export function explorationIsAddable(
   e: MaybeSavedExploration,
 ): e is MaybeSavedExploration & AddableExploration {
   return (
-    'name' in e &&
-    e.name !== '' &&
+    "name" in e &&
+    e.name !== "" &&
     e.name !== undefined &&
-    'base_table_oid' in e &&
+    "base_table_oid" in e &&
     e.base_table_oid !== undefined &&
-    'initial_columns' in e &&
+    "initial_columns" in e &&
     e.initial_columns !== undefined &&
     e.initial_columns.length > 0
   );
@@ -128,7 +128,7 @@ export function explorationIsAddable(
 export function explorationIsSaved(
   e: MaybeSavedExploration,
 ): e is SavedExploration {
-  return explorationIsAddable(e) && 'id' in e && e.id !== undefined;
+  return explorationIsAddable(e) && "id" in e && e.id !== undefined;
 }
 
 export interface ExplorationRunParams {
@@ -140,9 +140,9 @@ export interface ExplorationRunParams {
 export interface QueryResultColumn {
   alias: string;
   display_name: string | null;
-  type: RawColumnWithMetadata['type'];
-  type_options: RawColumnWithMetadata['type_options'];
-  metadata: RawColumnWithMetadata['metadata'];
+  type: RawColumnWithMetadata["type"];
+  type_options: RawColumnWithMetadata["type_options"];
+  metadata: RawColumnWithMetadata["metadata"];
 }
 
 export interface QueryInitialColumnSource {

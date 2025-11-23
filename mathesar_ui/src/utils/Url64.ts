@@ -16,11 +16,11 @@
 export default class Url64 {
   static encode(s: string): string {
     const base64 = btoa(unescape(encodeURIComponent(s)));
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
 
   static decode(s: string): string {
-    const base64 = s.replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = s.replace(/-/g, "+").replace(/_/g, "/");
     return decodeURIComponent(escape(atob(base64)));
   }
 }

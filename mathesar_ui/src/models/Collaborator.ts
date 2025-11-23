@@ -1,20 +1,20 @@
-import { type Readable, type Writable, writable } from 'svelte/store';
+import { type Readable, type Writable, writable } from "svelte/store";
 
-import { api } from '@mathesar/api/rpc';
-import type { RawCollaborator } from '@mathesar/api/rpc/collaborators';
-import { CancellablePromise } from '@mathesar/component-library';
+import { api } from "@mathesar/api/rpc";
+import type { RawCollaborator } from "@mathesar/api/rpc/collaborators";
+import { CancellablePromise } from "@mathesar/component-library";
 
-import type { ConfiguredRole } from './ConfiguredRole';
-import type { Database } from './Database';
+import type { ConfiguredRole } from "./ConfiguredRole";
+import type { Database } from "./Database";
 
 export class Collaborator {
   readonly id;
 
   readonly userId;
 
-  readonly _configuredRoleId: Writable<ConfiguredRole['id']>;
+  readonly _configuredRoleId: Writable<ConfiguredRole["id"]>;
 
-  get configuredRoleId(): Readable<ConfiguredRole['id']> {
+  get configuredRoleId(): Readable<ConfiguredRole["id"]> {
     return this._configuredRoleId;
   }
 
@@ -28,7 +28,7 @@ export class Collaborator {
   }
 
   setConfiguredRole(
-    configuredRoleId: ConfiguredRole['id'],
+    configuredRoleId: ConfiguredRole["id"],
   ): CancellablePromise<Collaborator> {
     const promise = api.collaborators
       .set_role({

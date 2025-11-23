@@ -1,10 +1,10 @@
-import { type Readable, derived, get, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from "svelte/store";
 
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
 import {
   unite,
   withSideChannelSubscriptions,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 import {
   type FieldStore,
@@ -12,12 +12,12 @@ import {
   type ValuedField,
   comboErrorsKey,
   disabledKey,
-} from './field';
+} from "./field";
 import {
   type ComboValidator,
   type Filled,
   isValid as outcomeIsValid,
-} from './validators';
+} from "./validators";
 
 type GenericFieldsObj = Record<string, FieldStore>;
 type Values<FieldsObj extends GenericFieldsObj> = {
@@ -65,7 +65,7 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
 
   const isSubmitting = derived(
     requestStatus,
-    (status) => status?.state === 'processing',
+    (status) => status?.state === "processing",
   );
 
   const isValid = derived(
@@ -82,7 +82,7 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
   );
 
   function clearServerErrors() {
-    requestStatus.update((v) => (v?.state === 'failure' ? undefined : v));
+    requestStatus.update((v) => (v?.state === "failure" ? undefined : v));
     Object.values(fields).forEach((field) => {
       field.serverErrors.set([]);
     });
@@ -127,7 +127,7 @@ export function makeForm<FieldsObj extends GenericFieldsObj>(
       () =>
         requestStatus.subscribe((status) => {
           Object.values(fields).forEach((field) => {
-            field[disabledKey].set(status?.state === 'processing');
+            field[disabledKey].set(status?.state === "processing");
           });
         }),
     ],

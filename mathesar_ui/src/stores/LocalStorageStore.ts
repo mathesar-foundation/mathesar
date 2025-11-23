@@ -3,7 +3,7 @@ import {
   type Unsubscriber,
   type Writable,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
 interface Props<T> {
   key: string;

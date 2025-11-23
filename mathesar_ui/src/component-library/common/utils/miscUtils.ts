@@ -1,4 +1,4 @@
-import type { PartiallyMissingOrUndefined } from '../types/utilityTypes';
+import type { PartiallyMissingOrUndefined } from "../types/utilityTypes";
 
 export function withoutUndefinedValues<T>(
   object: PartiallyMissingOrUndefined<T> = {},

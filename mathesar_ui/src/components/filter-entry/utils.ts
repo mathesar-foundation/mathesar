@@ -1,16 +1,16 @@
-import type { FkConstraint } from '@mathesar/api/rpc/constraints';
+import type { FkConstraint } from "@mathesar/api/rpc/constraints";
 import {
   getEqualityFiltersForAbstractType,
   getFiltersForAbstractType,
-} from '@mathesar/stores/abstract-types';
+} from "@mathesar/stores/abstract-types";
 import type {
   AbstractTypeCategoryIdentifier,
   AbstractTypeFilterDefinition,
   AbstractTypeLimitedFilterInformation,
-} from '@mathesar/stores/abstract-types/types';
-import { isDefinedNonNullable } from '@mathesar-component-library';
+} from "@mathesar/stores/abstract-types/types";
+import { isDefinedNonNullable } from "@mathesar-component-library";
 
-export const FILTER_INPUT_CLASS = 'filter-input';
+export const FILTER_INPUT_CLASS = "filter-input";
 
 export function validateFilterEntry(
   filterCondition:
@@ -18,20 +18,20 @@ export function validateFilterEntry(
     | AbstractTypeLimitedFilterInformation,
   value: unknown,
 ): boolean {
-  if ('hasParams' in filterCondition) {
+  if ("hasParams" in filterCondition) {
     if (!filterCondition.hasParams) {
       return value === undefined;
     }
   } else if (filterCondition.parameters.length === 0) {
     return value === undefined;
   }
-  return isDefinedNonNullable(value) && String(value) !== '';
+  return isDefinedNonNullable(value) && String(value) !== "";
 }
 
 export function retrieveFilters(
   categoryIdentifier: AbstractTypeCategoryIdentifier,
   linkFK?: FkConstraint,
-): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
+): Map<AbstractTypeFilterDefinition["id"], AbstractTypeFilterDefinition> {
   const isFK: boolean = linkFK !== undefined;
   return isFK
     ? getEqualityFiltersForAbstractType(categoryIdentifier)

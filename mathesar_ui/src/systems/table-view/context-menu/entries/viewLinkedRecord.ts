@@ -1,21 +1,21 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import type { ResultValue } from '@mathesar/api/rpc/records';
-import type { ModalController } from '@mathesar/component-library';
-import { iconLinkToRecordPage, iconModalRecordView } from '@mathesar/icons';
-import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-import type { ProcessedColumn, TabularData } from '@mathesar/stores/table-data';
-import { currentTablesMap } from '@mathesar/stores/tables';
-import RecordStore from '@mathesar/systems/record-view/RecordStore';
+import type { ResultValue } from "@mathesar/api/rpc/records";
+import type { ModalController } from "@mathesar/component-library";
+import { iconLinkToRecordPage, iconModalRecordView } from "@mathesar/icons";
+import { storeToGetRecordPageUrl } from "@mathesar/stores/storeBasedUrls";
+import type { ProcessedColumn, TabularData } from "@mathesar/stores/table-data";
+import { currentTablesMap } from "@mathesar/stores/tables";
+import RecordStore from "@mathesar/systems/record-view/RecordStore";
 import {
   buttonMenuEntry,
   component,
   hyperlinkMenuEntry,
   menuSection,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import TranslatedTextWithRecordSummary from '../labels/TranslatedTextWithRecordSummary.svelte';
+import TranslatedTextWithRecordSummary from "../labels/TranslatedTextWithRecordSummary.svelte";
 
 export function* viewLinkedRecord(p: {
   tabularData: TabularData;
@@ -48,7 +48,7 @@ export function* viewLinkedRecord(p: {
   yield menuSection(
     buttonMenuEntry({
       label: component(TranslatedTextWithRecordSummary, {
-        translatedText: get(_)('quick_view_named_record'),
+        translatedText: get(_)("quick_view_named_record"),
         recordSummary,
       }),
       icon: iconModalRecordView,
@@ -64,7 +64,7 @@ export function* viewLinkedRecord(p: {
 
     hyperlinkMenuEntry({
       label: component(TranslatedTextWithRecordSummary, {
-        translatedText: get(_)('open_named_record'),
+        translatedText: get(_)("open_named_record"),
         recordSummary,
       }),
       icon: iconLinkToRecordPage,

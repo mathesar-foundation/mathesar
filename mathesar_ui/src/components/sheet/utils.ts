@@ -1,12 +1,12 @@
-import { getContext, setContext } from 'svelte';
-import type { Readable } from 'svelte/store';
+import { getContext, setContext } from "svelte";
+import type { Readable } from "svelte/store";
 
 import {
   DEFAULT_COLUMN_WIDTH_PX,
   MAX_COLUMN_WIDTH_PX,
   MIN_COLUMN_WIDTH_PX,
-} from '@mathesar/geometry';
-import type { ImmutableMap } from '@mathesar-component-library/types';
+} from "@mathesar/geometry";
+import type { ImmutableMap } from "@mathesar-component-library/types";
 
 export interface ColumnPosition {
   left: number;
@@ -85,5 +85,5 @@ export function getSheetContext<
 }
 
 export function focusActiveCell(sheetElement: HTMLElement): void {
-  sheetElement?.querySelector<HTMLElement>('[data-active-cell]')?.focus();
+  sheetElement?.querySelector<HTMLElement>("[data-active-cell]")?.focus();
 }

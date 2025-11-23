@@ -1,30 +1,30 @@
-import { hasProperty } from './typeUtils';
+import { hasProperty } from "./typeUtils";
 
 function getTabIndex(element: unknown): number | undefined {
-  return hasProperty(element, 'tabIndex') &&
-    typeof element.tabIndex === 'number'
+  return hasProperty(element, "tabIndex") &&
+    typeof element.tabIndex === "number"
     ? element.tabIndex
     : undefined;
 }
 
 const potentiallyFocusableElementsSelector = [
-  'input',
-  'button',
-  'select',
-  'textarea',
-  'a[href]',
-  'area[href]',
-  'iframe',
-  'object',
-  'embed',
-  '[tabindex]',
+  "input",
+  "button",
+  "select",
+  "textarea",
+  "a[href]",
+  "area[href]",
+  "iframe",
+  "object",
+  "embed",
+  "[tabindex]",
   '[contenteditable="true"]',
   '[contenteditable=""]',
-  'audio[controls]',
-  'video[controls]',
-  'details',
-  'summary',
-].join(', ');
+  "audio[controls]",
+  "video[controls]",
+  "details",
+  "summary",
+].join(", ");
 
 type Focusable = { focusable: true; tabIndex: number };
 type NotFocusable = { focusable: false };
@@ -36,12 +36,12 @@ function getElementFocusCapability(element: Element): FocusCapability {
   const tabIndex = getTabIndex(element);
   if (tabIndex === undefined) return no;
   if (tabIndex < 0) return no; // e.g. div
-  if (hasProperty(element, 'disabled') && element.disabled) return no;
+  if (hasProperty(element, "disabled") && element.disabled) return no;
 
   const { display, visibility } = getComputedStyle(element);
-  if (display === 'none' || visibility === 'hidden') return no;
+  if (display === "none" || visibility === "hidden") return no;
 
-  if (hasProperty(element, 'type') && element.type === 'hidden') return no;
+  if (hasProperty(element, "type") && element.type === "hidden") return no;
 
   return { focusable: true, tabIndex };
 }

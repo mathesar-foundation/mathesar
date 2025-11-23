@@ -1,7 +1,7 @@
-import { map } from 'iter-tools';
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import { map } from "iter-tools";
+import { type Readable, type Writable, derived, writable } from "svelte/store";
 
-import { ImmutableMap } from '@mathesar-component-library';
+import { ImmutableMap } from "@mathesar-component-library";
 
 /** Keys are stringified row or cell reference values */
 type PrimitiveValuesForColumn<T> = Record<string, T>;

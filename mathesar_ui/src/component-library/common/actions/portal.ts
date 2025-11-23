@@ -1,10 +1,10 @@
-import type { ActionReturn } from 'svelte/action';
+import type { ActionReturn } from "svelte/action";
 
 export default function portal(
   node: Element,
   target?: HTMLElement,
 ): ActionReturn {
-  const targetElement = target ?? document.querySelector('body') ?? undefined;
+  const targetElement = target ?? document.querySelector("body") ?? undefined;
 
   function update(newTarget: HTMLElement | undefined) {
     if (newTarget && newTarget instanceof HTMLElement) {

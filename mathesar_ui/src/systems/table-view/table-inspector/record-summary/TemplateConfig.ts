@@ -1,14 +1,14 @@
-import { filter, first, some } from 'iter-tools';
+import { filter, first, some } from "iter-tools";
 
 import type {
   RecordSummaryTemplate,
   RecordSummaryTemplatePart,
-} from '@mathesar/api/rpc/tables';
+} from "@mathesar/api/rpc/tables";
 import type {
   ProcessedColumn,
   ProcessedColumns,
-} from '@mathesar/stores/table-data';
-import { ImmutableMap } from '@mathesar-component-library';
+} from "@mathesar/stores/table-data";
+import { ImmutableMap } from "@mathesar-component-library";
 
 function partIsColumn(part: RecordSummaryTemplatePart): part is number[] {
   return Array.isArray(part);
@@ -52,7 +52,7 @@ export class TemplateConfig {
    */
   static newCustom(columns: ProcessedColumns): TemplateConfig {
     const textColumns = filter(
-      (c) => c.abstractType.identifier === 'text',
+      (c) => c.abstractType.identifier === "text",
       columns.values(),
     );
     const firstTextColumn = first(textColumns);

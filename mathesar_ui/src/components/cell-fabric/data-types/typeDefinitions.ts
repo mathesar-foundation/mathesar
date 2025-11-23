@@ -1,9 +1,9 @@
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type { ComponentAndProps } from "@mathesar-component-library/types";
 
 import type {
   CellColumnLike as CellColumnLikeInner,
   CellValueFormatter,
-} from './components/typeDefinitions';
+} from "./components/typeDefinitions";
 
 export type CellColumnLike = CellColumnLikeInner;
 
@@ -11,18 +11,18 @@ export type CellColumnLike = CellColumnLikeInner;
 // different from db types.
 // One frontend type can map to multiple db types
 export type SimpleCellDataTypes =
-  | 'string'
-  | 'boolean'
-  | 'number'
-  | 'uri'
-  | 'duration'
-  | 'date'
-  | 'money'
-  | 'time'
-  | 'datetime'
-  | 'file';
+  | "string"
+  | "boolean"
+  | "number"
+  | "uri"
+  | "duration"
+  | "date"
+  | "money"
+  | "time"
+  | "datetime"
+  | "file";
 
-export type CompoundCellDataTypes = 'array';
+export type CompoundCellDataTypes = "array";
 
 export type CellDataType = SimpleCellDataTypes | CompoundCellDataTypes;
 

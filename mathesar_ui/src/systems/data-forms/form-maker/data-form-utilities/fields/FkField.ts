@@ -1,38 +1,38 @@
-import { type Readable, derived, get, writable } from 'svelte/store';
+import { type Readable, derived, get, writable } from "svelte/store";
 
-import type { RawForeignKeyDataFormField } from '@mathesar/api/rpc/forms';
-import { getLinkedRecordInputCap } from '@mathesar/components/cell-fabric/utils';
-import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
-import { isDefinedNonNullable } from '@mathesar-component-library';
+import type { RawForeignKeyDataFormField } from "@mathesar/api/rpc/forms";
+import { getLinkedRecordInputCap } from "@mathesar/components/cell-fabric/utils";
+import { makeRowSeekerOrchestratorFactory } from "@mathesar/systems/row-seeker/rowSeekerOrchestrator";
+import { isDefinedNonNullable } from "@mathesar-component-library";
 
-import type { DataFormStructureCtx } from '../DataFormStructure';
+import type { DataFormStructureCtx } from "../DataFormStructure";
 
 import {
   AbstractColumnBasedField,
   type AbstractColumnBasedFieldModifiableProps,
   type AbstractColumnBasedFieldProps,
-} from './AbstractColumnBasedField';
-import type { DataFormField, DataFormFieldFactory } from './factories';
-import { DataFormFieldFkInputValueHolder } from './FieldValueHolder';
-import type { DataFormFieldContainerFactory, FormFields } from './FormFields';
+} from "./AbstractColumnBasedField";
+import type { DataFormField, DataFormFieldFactory } from "./factories";
+import { DataFormFieldFkInputValueHolder } from "./FieldValueHolder";
+import type { DataFormFieldContainerFactory, FormFields } from "./FormFields";
 
 interface FkFieldProps extends AbstractColumnBasedFieldProps {
-  kind: RawForeignKeyDataFormField['kind'];
-  interactionRule: RawForeignKeyDataFormField['fk_interaction_rule'];
+  kind: RawForeignKeyDataFormField["kind"];
+  interactionRule: RawForeignKeyDataFormField["fk_interaction_rule"];
   relatedTableOid: number;
   createFields: DataFormFieldContainerFactory;
 }
 
 export type FkFieldPropChangeEvent = {
-  type: 'fk-field/prop';
+  type: "fk-field/prop";
   target: FkField;
   prop:
     | AbstractColumnBasedFieldModifiableProps
-    | keyof Pick<FkFieldProps, 'interactionRule'>;
+    | keyof Pick<FkFieldProps, "interactionRule">;
 };
 
 export class FkField extends AbstractColumnBasedField {
-  readonly kind: RawForeignKeyDataFormField['kind'] = 'foreign_key';
+  readonly kind: RawForeignKeyDataFormField["kind"] = "foreign_key";
 
   readonly fieldValueHolder: DataFormFieldFkInputValueHolder;
 
@@ -42,12 +42,12 @@ export class FkField extends AbstractColumnBasedField {
 
   private cachedNestedFieldsBeforeMustPick: DataFormField[] | undefined;
 
-  readonly inputComponentAndProps: AbstractColumnBasedField['inputComponentAndProps'];
+  readonly inputComponentAndProps: AbstractColumnBasedField["inputComponentAndProps"];
 
   private _interactionRule;
 
   get interactionRule(): Readable<
-    RawForeignKeyDataFormField['fk_interaction_rule']
+    RawForeignKeyDataFormField["fk_interaction_rule"]
   > {
     return this._interactionRule;
   }
@@ -63,7 +63,7 @@ export class FkField extends AbstractColumnBasedField {
     const fkLink = this.fieldColumn.foreignKeyLink;
     if (!fkLink) {
       throw Error(
-        'The passed column is not a foreign key. This should never occur',
+        "The passed column is not a foreign key. This should never occur",
       );
     }
     this._interactionRule = writable(props.interactionRule);
@@ -85,15 +85,15 @@ export class FkField extends AbstractColumnBasedField {
             }),
             onSelect: (v) => {
               if (isDefinedNonNullable(v)) {
-                this.fieldValueHolder.setUserAction('pick');
+                this.fieldValueHolder.setUserAction("pick");
               }
             },
             addRecordOptions:
-              $interactionRule === 'must_pick'
+              $interactionRule === "must_pick"
                 ? undefined
                 : {
                     create: async () => {
-                      this.fieldValueHolder.setUserAction('create');
+                      this.fieldValueHolder.setUserAction("create");
                       return null;
                     },
                   },
@@ -103,7 +103,7 @@ export class FkField extends AbstractColumnBasedField {
   }
 
   async setInteractionRule(
-    nextRule: RawForeignKeyDataFormField['fk_interaction_rule'],
+    nextRule: RawForeignKeyDataFormField["fk_interaction_rule"],
     getDefaultNestedFields: () => Promise<Iterable<DataFormFieldFactory>>,
   ) {
     const prevRule = get(this._interactionRule);
@@ -111,9 +111,9 @@ export class FkField extends AbstractColumnBasedField {
       return;
     }
     this._interactionRule.set(nextRule);
-    this.triggerChangeEvent('interactionRule');
+    this.triggerChangeEvent("interactionRule");
 
-    if (prevRule !== 'must_pick') {
+    if (prevRule !== "must_pick") {
       /* We're caching this for UX convenience when users are building the form.
        *
        * We'd like to preserve the changes to the nested fields when users
@@ -123,12 +123,12 @@ export class FkField extends AbstractColumnBasedField {
       this.cachedNestedFieldsBeforeMustPick = get(this.nestedFields);
     }
 
-    if (nextRule === 'must_pick') {
+    if (nextRule === "must_pick") {
       this.nestedFields.reconstruct([]);
       return;
     }
 
-    if (prevRule === 'must_pick') {
+    if (prevRule === "must_pick") {
       if (this.cachedNestedFieldsBeforeMustPick === undefined) {
         const defaultNestedFieldsFactories = await getDefaultNestedFields();
         this.nestedFields.reconstruct(defaultNestedFieldsFactories);
@@ -141,9 +141,9 @@ export class FkField extends AbstractColumnBasedField {
     }
   }
 
-  protected triggerChangeEvent(prop: FkFieldPropChangeEvent['prop']) {
+  protected triggerChangeEvent(prop: FkFieldPropChangeEvent["prop"]) {
     this.structureCtx.changeEventHandler?.trigger({
-      type: 'fk-field/prop',
+      type: "fk-field/prop",
       target: this,
       prop,
     });
@@ -154,7 +154,7 @@ export class FkField extends AbstractColumnBasedField {
   }): RawForeignKeyDataFormField {
     return {
       ...this.getBaseFieldRawJson(),
-      kind: 'foreign_key',
+      kind: "foreign_key",
       related_table_oid: this.relatedTableOid,
       fk_interaction_rule: get(this.interactionRule),
       child_fields: this.nestedFields.toRawFields(options),

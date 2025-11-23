@@ -1,11 +1,11 @@
-import type { AbstractTypeCategoryIdentifier } from '@mathesar/stores/abstract-types/types';
-import type { RecordSummariesForSheet } from '@mathesar/stores/table-data';
-import type { ReadableMapLike } from '@mathesar/typeUtils';
+import type { AbstractTypeCategoryIdentifier } from "@mathesar/stores/abstract-types/types";
+import type { RecordSummariesForSheet } from "@mathesar/stores/table-data";
+import type { ReadableMapLike } from "@mathesar/typeUtils";
 
-import type SheetSelection from '../selection/SheetSelection';
+import type SheetSelection from "../selection/SheetSelection";
 
-import type { StructuredCell } from './StructuredCell';
-import { serializeTsv } from './tsv';
+import type { StructuredCell } from "./StructuredCell";
+import { serializeTsv } from "./tsv";
 
 /**
  * A column which allows the cells in it to be copied.
@@ -36,7 +36,7 @@ function getFormattedCellValue(
   recordSummaries: RecordSummariesForSheet,
 ): string {
   if (rawCellValue === undefined || rawCellValue === null) {
-    return '';
+    return "";
   }
   const processedColumn = columns.get(columnId);
   if (!processedColumn) {
@@ -47,7 +47,7 @@ function getFormattedCellValue(
     recordSummaries,
   );
   if (formattedValue === undefined || formattedValue === null) {
-    return '';
+    return "";
   }
   return formattedValue;
 }
@@ -66,7 +66,7 @@ export function getCopyContent(
     if (!row) {
       // If this happens, it's a bug. Fail loudly so we don't put incorrect data
       // into the clipboard.
-      throw new Error('Row not found');
+      throw new Error("Row not found");
     }
     const columns = context.getColumns();
     const recordSummaries = context.getRecordSummaries();
@@ -75,7 +75,7 @@ export function getCopyContent(
       if (!column) {
         // If this happens, it's a bug. Fail loudly so we don't put incorrect
         // data into the clipboard.
-        throw new Error('Column not found');
+        throw new Error("Column not found");
       }
       const rawCellValue = row[columnId];
       const formattedCellValue = getFormattedCellValue(

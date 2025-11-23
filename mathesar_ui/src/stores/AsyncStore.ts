@@ -7,17 +7,17 @@ import {
   type Writable,
   get,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import { getErrorMessage } from '@mathesar/utils/errors';
+import { getErrorMessage } from "@mathesar/utils/errors";
 import {
   type CancellablePromise,
   hasProperty,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 export type AsyncStoreSettlement<T, E> =
-  | { state: 'resolved'; value: T }
-  | { state: 'rejected'; error: E };
+  | { state: "resolved"; value: T }
+  | { state: "rejected"; error: E };
 
 export type AsyncStoreOptions<T, E> = Partial<{
   getError: (caughtValue: unknown) => E;
@@ -62,7 +62,7 @@ export class AsyncStoreValue<T, E> {
    * True when the async store is resolved and not reloading.
    */
   get isOk(): boolean {
-    return !this.isLoading && this.settlement?.state === 'resolved';
+    return !this.isLoading && this.settlement?.state === "resolved";
   }
 
   /**
@@ -77,26 +77,26 @@ export class AsyncStoreValue<T, E> {
     if (this.isLoading) {
       return false;
     }
-    if (this.settlement?.state === 'rejected') {
+    if (this.settlement?.state === "rejected") {
       return false;
     }
     return true;
   }
 
   get resolvedValue(): T | undefined {
-    return this.settlement?.state === 'resolved'
+    return this.settlement?.state === "resolved"
       ? this.settlement.value
       : undefined;
   }
 
   get error(): E | undefined {
-    return this.settlement?.state === 'rejected'
+    return this.settlement?.state === "rejected"
       ? this.settlement.error
       : undefined;
   }
 
   get isRejected(): boolean {
-    return !this.isLoading && this.settlement?.state === 'rejected';
+    return !this.isLoading && this.settlement?.state === "rejected";
   }
 
   get hasSettled(): boolean {
@@ -128,11 +128,11 @@ export default class AsyncStore<Props = void, T = unknown, E = string>
     this.runFn = run;
     this.getError =
       options?.getError ?? (getErrorMessage as (data: unknown) => E);
-    if (hasProperty(options, 'initialValue')) {
+    if (hasProperty(options, "initialValue")) {
       this.value = writable(
         new AsyncStoreValue<T, E>({
           isLoading: false,
-          settlement: { state: 'resolved', value: options.initialValue as T },
+          settlement: { state: "resolved", value: options.initialValue as T },
         }),
       );
     }
@@ -171,7 +171,7 @@ export default class AsyncStore<Props = void, T = unknown, E = string>
    * Cancels the promise, if possible. Retains the current value.
    */
   cancel() {
-    if (this.promise && 'cancel' in this.promise) {
+    if (this.promise && "cancel" in this.promise) {
       this.promise.cancel();
     }
   }
@@ -218,7 +218,7 @@ export default class AsyncStore<Props = void, T = unknown, E = string>
     this.value.set(
       new AsyncStoreValue({
         isLoading: false,
-        settlement: { state: 'resolved', value },
+        settlement: { state: "resolved", value },
       }),
     );
   }
@@ -227,7 +227,7 @@ export default class AsyncStore<Props = void, T = unknown, E = string>
     this.cancel();
     this.value.set(
       new AsyncStoreValue({
-        settlement: { state: 'rejected', error: this.getError(error) },
+        settlement: { state: "rejected", error: this.getError(error) },
         isLoading: false,
       }),
     );

@@ -1,29 +1,29 @@
-import { concat } from 'iter-tools';
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { concat } from "iter-tools";
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
 import {
   type RequestStatus,
   getMostImportantRequestStatusState,
-} from '@mathesar/api/rest/utils/requestUtils';
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+} from "@mathesar/api/rest/utils/requestUtils";
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
 import type {
   Group as ApiGroup,
   GroupingResponse as ApiGroupingResponse,
   Result as ApiRecord,
-} from '@mathesar/api/rpc/records';
-import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+} from "@mathesar/api/rpc/records";
+import { RpcError } from "@mathesar/packages/json-rpc-client-builder";
 import {
   ImmutableMap,
   ImmutableSet,
   type WritableMap,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import type { RowStatus } from './meta';
-import type { RecordRow, Row } from './Row';
+import type { RowStatus } from "./meta";
+import type { RecordRow, Row } from "./Row";
 
 export type CellKey = string;
-export type RowKey = Row['identifier'];
+export type RowKey = Row["identifier"];
 
 export interface ClientSideCellError {
   code: number;
@@ -34,7 +34,7 @@ export interface ClientSideCellError {
 export const ID_ROW_CONTROL_COLUMN = -1;
 export const ID_ADD_NEW_COLUMN = -2;
 
-const CELL_KEY_SEPARATOR = '::';
+const CELL_KEY_SEPARATOR = "::";
 
 /**
  * ⚠️ Note: we have `cellId` and `cellKey` which are different.
@@ -63,7 +63,7 @@ function getClientSideCellErrors(
     errors.push({
       code: CLIENT_VALIDATION_CANNOT_BE_NULL,
       column,
-      message: get(_)('cell_cannot_be_null_for_column'),
+      message: get(_)("cell_cannot_be_null_for_column"),
     });
   }
   return errors;
@@ -79,11 +79,11 @@ export function getWholeRowErrorFromClientSideCellErrors(
   if (nullValidationErrors) {
     wholeRowErrors.push(
       RpcError.fromAnything(
-        get(_)('columns_cannot_be_null', {
+        get(_)("columns_cannot_be_null", {
           values: {
             columnNames: nullValidationErrors
               .map((e) => `'${e.column.name}'`)
-              .join(', '),
+              .join(", "),
           },
         }),
       ),
@@ -135,14 +135,14 @@ export function getRowStatus({
     ...cellModificationStatus,
   ].reduce(
     (rows, [cellKey, cellStatus]) =>
-      cellStatus.state === 'failure'
+      cellStatus.state === "failure"
         ? rows.with(extractRowKeyFromCellKey(cellKey))
         : rows,
     new ImmutableSet<RowKey>(),
   );
 
   const ROW_HAS_CELL_ERROR_MSG = RpcError.fromAnything(
-    get(_)('row_contains_cell_with_error'),
+    get(_)("row_contains_cell_with_error"),
   );
 
   const statusFromServerSideCellErrors: PartialResult = new ImmutableMap(
@@ -162,7 +162,7 @@ export function getRowStatus({
     .mapValues((requestStatus) => ({
       wholeRowState: requestStatus.state,
       errorsFromWholeRowAndCells:
-        requestStatus.state === 'failure' ? requestStatus.errors : [],
+        requestStatus.state === "failure" ? requestStatus.errors : [],
     }));
 
   function mergeRowStatuses(
@@ -194,7 +194,7 @@ export function getSheetState(props: {
   cellModificationStatus: ImmutableMap<CellKey, RequestStatus<RpcError[]>>;
   rowCreationStatus: ImmutableMap<RowKey, RequestStatus<RpcError[]>>;
   rowDeletionStatus: ImmutableMap<RowKey, RequestStatus<RpcError[]>>;
-}): RequestStatus['state'] | undefined {
+}): RequestStatus["state"] | undefined {
   const allStatuses = concat(
     props.cellModificationStatus.values(),
     props.rowCreationStatus.values(),
@@ -248,7 +248,7 @@ export function getRowSelectionId(row: Row): string {
 
 export interface RecordGroup {
   count: number;
-  eqValue: ApiGroup['results_eq'];
+  eqValue: ApiGroup["results_eq"];
   resultIndices: number[];
 }
 
@@ -287,11 +287,11 @@ export function extractPrimaryKeyValue(
 ): string | number {
   const pkColumn = columns.find((c) => c.primary_key);
   if (!pkColumn) {
-    throw new Error('No primary key column found.');
+    throw new Error("No primary key column found.");
   }
   const pkValue = record[pkColumn.id];
-  if (!(typeof pkValue === 'string' || typeof pkValue === 'number')) {
-    throw new Error('Primary key value is not a string or number.');
+  if (!(typeof pkValue === "string" || typeof pkValue === "number")) {
+    throw new Error("Primary key value is not a string or number.");
   }
   return pkValue;
 }

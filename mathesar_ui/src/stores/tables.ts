@@ -9,45 +9,45 @@
  * sorting.
  */
 
-import { execPipe, filter, map } from 'iter-tools';
-import { type Readable, derived, get, writable } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { execPipe, filter, map } from "iter-tools";
+import { type Readable, derived, get, writable } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
-import type { ColumnPatchSpec } from '@mathesar/api/rpc/columns';
+import type { DataFile } from "@mathesar/api/rest/types/dataFiles";
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
+import type { ColumnPatchSpec } from "@mathesar/api/rpc/columns";
 import type {
   NewPkColumnType,
   RawTableWithMetadata,
-} from '@mathesar/api/rpc/tables';
-import { invalidIf } from '@mathesar/components/form';
-import type { Database } from '@mathesar/models/Database';
-import type { Schema } from '@mathesar/models/Schema';
-import { Table } from '@mathesar/models/Table';
+} from "@mathesar/api/rpc/tables";
+import { invalidIf } from "@mathesar/components/form";
+import type { Database } from "@mathesar/models/Database";
+import type { Schema } from "@mathesar/models/Schema";
+import { Table } from "@mathesar/models/Table";
 import {
   type RpcRequest,
   batchSend,
-} from '@mathesar/packages/json-rpc-client-builder';
-import { getErrorMessage } from '@mathesar/utils/errors';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
+} from "@mathesar/packages/json-rpc-client-builder";
+import { getErrorMessage } from "@mathesar/utils/errors";
+import { preloadCommonData } from "@mathesar/utils/preloadData";
+import { tableRequiresImportConfirmation } from "@mathesar/utils/tables";
 import {
   CancellablePromise,
   type RecursivePartial,
   collapse,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import { currentSchema } from './schemas';
+import { currentSchema } from "./schemas";
 
 const commonData = preloadCommonData();
-const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
+const isInAuthenticatedContext = commonData.routing_context !== "anonymous";
 
-type TablesMap = Map<Table['oid'], Table>;
+type TablesMap = Map<Table["oid"], Table>;
 
 interface TablesData {
-  databaseId?: Database['id'];
-  schemaOid?: Schema['oid'];
+  databaseId?: Database["id"];
+  schemaOid?: Schema["oid"];
   tablesMap: TablesMap;
   requestStatus: RequestStatus;
 }
@@ -55,7 +55,7 @@ interface TablesData {
 function makeEmptyTablesData(): TablesData {
   return {
     tablesMap: new Map(),
-    requestStatus: { state: 'success' },
+    requestStatus: { state: "success" },
   };
 }
 
@@ -84,7 +84,7 @@ function setTablesStore(
     databaseId: schema.database.id,
     schemaOid: schema.oid,
     tablesMap,
-    requestStatus: { state: 'success' },
+    requestStatus: { state: "success" },
   });
 }
 
@@ -107,14 +107,14 @@ export async function fetchTablesForCurrentSchema() {
       ) {
         return {
           ...$tablesStore,
-          requestStatus: { state: 'processing' },
+          requestStatus: { state: "processing" },
         };
       }
       return {
         databaseId: $currentSchema.database.id,
         schemaOid: $currentSchema.oid,
         tablesMap: new Map(),
-        requestStatus: { state: 'processing' },
+        requestStatus: { state: "processing" },
       };
     });
 
@@ -137,7 +137,7 @@ export async function fetchTablesForCurrentSchema() {
         return {
           ...$tablesStore,
           requestStatus: {
-            state: 'failure',
+            state: "failure",
             errors: [getErrorMessage(err)],
           },
         };
@@ -147,7 +147,7 @@ export async function fetchTablesForCurrentSchema() {
         schemaOid: $currentSchema.oid,
         tablesMap: new Map(),
         requestStatus: {
-          state: 'failure',
+          state: "failure",
           errors: [getErrorMessage(err)],
         },
       };
@@ -157,7 +157,7 @@ export async function fetchTablesForCurrentSchema() {
 
 export function deleteTable(
   schema: Schema,
-  tableOid: Table['oid'],
+  tableOid: Table["oid"],
 ): CancellablePromise<void> {
   const promise = api.tables
     .delete({
@@ -230,7 +230,7 @@ export async function updateTable({
 }: {
   schema: Schema;
   table: RecursivePartial<RawTableWithMetadata> & {
-    oid: RawTableWithMetadata['oid'];
+    oid: RawTableWithMetadata["oid"];
   };
   columnPatchSpecs?: ColumnPatchSpec[];
   columnsToDelete?: number[];
@@ -325,7 +325,7 @@ export async function createTable({
 
 export async function createTableFromDataFile(props: {
   schema: Schema;
-  dataFile: Pick<DataFile, 'id'>;
+  dataFile: Pick<DataFile, "id">;
   name?: string;
 }): Promise<{
   table: Table;
@@ -365,7 +365,7 @@ export function getTableFromStoreOrApi({
   clearCache = false,
 }: {
   schema: Schema;
-  tableOid: Table['oid'];
+  tableOid: Table["oid"];
   /** When true, the cached table in the store will be cleared */
   clearCache?: boolean;
 }): CancellablePromise<Table> {
@@ -422,7 +422,7 @@ export const currentTablesData = collapse(
         commonData.current_schema === $currentSchema?.oid &&
         commonData.current_database === $currentSchema?.database.id
       ) {
-        if (commonData.tables.state === 'success') {
+        if (commonData.tables.state === "success") {
           setTablesStore($currentSchema, commonData.tables.data);
         } else {
           tablesStore.set({
@@ -430,7 +430,7 @@ export const currentTablesData = collapse(
             schemaOid: $currentSchema.oid,
             tablesMap: new Map(),
             requestStatus: {
-              state: 'failure',
+              state: "failure",
               errors: [getErrorMessage(commonData.tables.error)],
             },
           });
@@ -439,7 +439,7 @@ export const currentTablesData = collapse(
         void fetchTablesForCurrentSchema();
       }
       preload = false;
-    } else if ($tablesStore.requestStatus.state === 'failure') {
+    } else if ($tablesStore.requestStatus.state === "failure") {
       void fetchTablesForCurrentSchema();
     }
     return tablesStore;
@@ -469,7 +469,7 @@ export const validateNewTableName = derived(currentTablesData, (tablesData) => {
   const names = new Set([...tablesData.tablesMap.values()].map((t) => t.name));
   return invalidIf(
     (name: string) => names.has(name),
-    'A table with that name already exists.',
+    "A table with that name already exists.",
   );
 });
 
@@ -501,10 +501,10 @@ export function factoryToGetTableNameValidationErrors(
   return derived([otherTableNames, _], ([$otherTableNames, $_]) => {
     function getNameValidationErrors(name: string): string[] {
       if (!name.trim()) {
-        return [$_('table_name_cannot_be_empty')];
+        return [$_("table_name_cannot_be_empty")];
       }
       if ($otherTableNames.has(name)) {
-        return [$_('table_with_name_already_exists')];
+        return [$_("table_with_name_already_exists")];
       }
       return [];
     }

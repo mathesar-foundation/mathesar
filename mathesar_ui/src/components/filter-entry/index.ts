@@ -1,2 +1,2 @@
-export { default as FilterEntry } from './FilterEntry.svelte';
-export { validateFilterEntry } from './utils';
+export { default as FilterEntry } from "./FilterEntry.svelte";
+export { validateFilterEntry } from "./utils";

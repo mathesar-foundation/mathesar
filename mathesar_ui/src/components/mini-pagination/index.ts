@@ -1,1 +1,1 @@
-export { default as MiniPagination } from './MiniPagination.svelte';
+export { default as MiniPagination } from "./MiniPagination.svelte";

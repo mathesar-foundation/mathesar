@@ -1,9 +1,9 @@
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
-import { getErrorMessage } from '@mathesar/utils/errors';
-import { CancellablePromise } from '@mathesar-component-library';
+import { getErrorMessage } from "@mathesar/utils/errors";
+import { CancellablePromise } from "@mathesar-component-library";
 
-import { ApiMultiError } from './errors';
+import { ApiMultiError } from "./errors";
 
 /**
  * @deprecated in favor of `RequestStatus` which also stores info about the
@@ -11,45 +11,45 @@ import { ApiMultiError } from './errors';
  */
 export enum States {
   /** Before any requests have been made */
-  Idle = 'idle',
-  Loading = 'loading',
+  Idle = "idle",
+  Loading = "loading",
   /** After a request has completed successfully */
-  Done = 'done',
-  Error = 'error',
+  Done = "done",
+  Error = "error",
 }
 
 export type RequestStatus<ErrorType = string[]> =
-  | { state: 'processing' }
-  | { state: 'success' }
-  | { state: 'failure'; errors: ErrorType };
+  | { state: "processing" }
+  | { state: "success" }
+  | { state: "failure"; errors: ErrorType };
 
 /**
  * When multiple states are present, the one listed highest here is considered
  * the most important.
  */
-const requestStatusStatesByImportance: RequestStatus['state'][] = [
-  'processing',
-  'failure',
-  'success',
+const requestStatusStatesByImportance: RequestStatus["state"][] = [
+  "processing",
+  "failure",
+  "success",
 ];
 const paramountRequestStatusState = requestStatusStatesByImportance[0];
 
 function pickMostImportantRequestStatusState(
-  a: RequestStatus['state'],
-  b: RequestStatus['state'],
-): RequestStatus['state'] {
+  a: RequestStatus["state"],
+  b: RequestStatus["state"],
+): RequestStatus["state"] {
   for (const state of requestStatusStatesByImportance) {
     if (a === state || b === state) {
       return state;
     }
   }
-  throw new Error('Invalid RequestStatus states.');
+  throw new Error("Invalid RequestStatus states.");
 }
 
 export function getMostImportantRequestStatusState(
   statuses: Iterable<RequestStatus<unknown>>,
-): RequestStatus['state'] | undefined {
-  let result: RequestStatus['state'] | undefined;
+): RequestStatus["state"] | undefined {
+  let result: RequestStatus["state"] | undefined;
   for (const { state } of statuses) {
     if (state === paramountRequestStatusState) {
       return state;
@@ -66,7 +66,7 @@ export function getQueryStringFromParams<T extends Record<string, unknown>>(
 ) {
   const entries: [string, string][] = Object.entries(queryParams).map(
     ([k, v]) => {
-      const value = typeof v === 'string' ? v : JSON.stringify(v);
+      const value = typeof v === "string" ? v : JSON.stringify(v);
       return [k, value];
     },
   );
@@ -80,10 +80,10 @@ export function addQueryParamsToUrl<T extends Record<string, unknown>>(
   if (!newOrUpdatedQueryParams) {
     return url;
   }
-  const [baseUrl, existingQuery] = url.split('?');
-  const params = new URLSearchParams(existingQuery || '');
+  const [baseUrl, existingQuery] = url.split("?");
+  const params = new URLSearchParams(existingQuery || "");
   for (const [key, value] of Object.entries(newOrUpdatedQueryParams)) {
-    params.set(key, typeof value === 'string' ? value : JSON.stringify(value));
+    params.set(key, typeof value === "string" ? value : JSON.stringify(value));
   }
   const queryString = params.toString();
   return queryString ? `${baseUrl}?${queryString}` : baseUrl;
@@ -125,10 +125,10 @@ function sendXHRRequest<T>(
 ): CancellablePromise<T> {
   const request = new XMLHttpRequest();
   request.open(method, url);
-  request.setRequestHeader('Content-Type', 'application/json');
-  const csrfToken = Cookies.get('csrftoken');
+  request.setRequestHeader("Content-Type", "application/json");
+  const csrfToken = Cookies.get("csrftoken");
   if (csrfToken) {
-    request.setRequestHeader('X-CSRFToken', csrfToken);
+    request.setRequestHeader("X-CSRFToken", csrfToken);
   }
   if (data) {
     request.send(JSON.stringify(data));
@@ -139,7 +139,7 @@ function sendXHRRequest<T>(
 
   return new CancellablePromise(
     (resolve, reject) => {
-      request.addEventListener('load', () => {
+      request.addEventListener("load", () => {
         if (successStatusCodes.has(request.status)) {
           resolve(getResultFromRequest<T>(request));
         } else {
@@ -151,21 +151,21 @@ function sendXHRRequest<T>(
             reject(new ApiMultiError(JSON.parse(String(request.response))));
           } catch {
             const msg = [
-              'When making an XHR request, the server responded with an',
-              'error, but the response body was not valid JSON.',
-            ].join(' ');
+              "When making an XHR request, the server responded with an",
+              "error, but the response body was not valid JSON.",
+            ].join(" ");
             reject(new Error(msg));
           }
         }
       });
 
-      request.addEventListener('error', () => {
-        reject(new Error('An unexpected error has occurred'));
+      request.addEventListener("error", () => {
+        reject(new Error("An unexpected error has occurred"));
       });
 
-      request.addEventListener('abort', () => {
+      request.addEventListener("abort", () => {
         if (!isManuallyAborted) {
-          reject(new Error('Request was aborted'));
+          reject(new Error("Request was aborted"));
         }
       });
     },
@@ -177,26 +177,26 @@ function sendXHRRequest<T>(
 }
 
 export function getAPI<T>(url: string): CancellablePromise<T> {
-  return sendXHRRequest('GET', url);
+  return sendXHRRequest("GET", url);
 }
 
 export function postAPI<T>(url: string, data?: unknown): CancellablePromise<T> {
-  return sendXHRRequest('POST', url, data);
+  return sendXHRRequest("POST", url, data);
 }
 
 export function patchAPI<T>(url: string, data: unknown): CancellablePromise<T> {
-  return sendXHRRequest('PATCH', url, data);
+  return sendXHRRequest("PATCH", url, data);
 }
 
 export function putAPI<T>(url: string, data: unknown): CancellablePromise<T> {
-  return sendXHRRequest('PUT', url, data);
+  return sendXHRRequest("PUT", url, data);
 }
 
 export function deleteAPI<T>(
   url: string,
   data?: unknown,
 ): CancellablePromise<T> {
-  return sendXHRRequest('DELETE', url, data);
+  return sendXHRRequest("DELETE", url, data);
 }
 
 function getXhrErrorMessage(request: XMLHttpRequest): string {
@@ -211,10 +211,10 @@ export function uploadFile<T>(
   completionCallback?: (obj: UploadCompletionOpts) => unknown,
 ): CancellablePromise<T> {
   const request = new XMLHttpRequest();
-  request.open('POST', url);
-  const csrfToken = Cookies.get('csrftoken');
+  request.open("POST", url);
+  const csrfToken = Cookies.get("csrftoken");
   if (csrfToken) {
-    request.setRequestHeader('X-CSRFToken', csrfToken);
+    request.setRequestHeader("X-CSRFToken", csrfToken);
   }
   request.upload.onprogress = (e) => {
     const { loaded, total } = e;
@@ -229,7 +229,7 @@ export function uploadFile<T>(
 
   return new CancellablePromise(
     (resolve, reject) => {
-      request.addEventListener('load', () => {
+      request.addEventListener("load", () => {
         if (successStatusCodes.has(request.status)) {
           try {
             const response = JSON.parse(String(request.response)) as T;
@@ -242,12 +242,12 @@ export function uploadFile<T>(
         }
       });
 
-      request.addEventListener('error', () => {
-        reject(new Error('Network error occurred'));
+      request.addEventListener("error", () => {
+        reject(new Error("Network error occurred"));
       });
 
-      request.addEventListener('timeout', () => {
-        reject(new Error('Request timed out'));
+      request.addEventListener("timeout", () => {
+        reject(new Error("Request timed out"));
       });
     },
     () => {
@@ -257,7 +257,7 @@ export function uploadFile<T>(
 }
 
 export async function getExternalApi<T>(url: string): Promise<T | undefined> {
-  const response = await fetch(url, { mode: 'cors' });
+  const response = await fetch(url, { mode: "cors" });
   if (!response.ok) {
     return undefined;
   }

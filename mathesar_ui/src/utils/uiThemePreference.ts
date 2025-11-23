@@ -1,21 +1,21 @@
-import { uiThemePreference } from '../stores/localStorage';
+import { uiThemePreference } from "../stores/localStorage";
 
-export type UiThemePreference = 'light' | 'dark' | 'system';
+export type UiThemePreference = "light" | "dark" | "system";
 
 let mediaQuery: MediaQueryList | null = null;
 
-function getSystemTheme(): Exclude<UiThemePreference, 'system'> {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+function getSystemTheme(): Exclude<UiThemePreference, "system"> {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 function applyTheme(pref: UiThemePreference) {
-  const theme = pref === 'system' ? getSystemTheme() : pref;
+  const theme = pref === "system" ? getSystemTheme() : pref;
 
   // Remove any existing "theme-" classes from the body element
   Array.from(document.body.classList)
-    .filter((cls) => cls.startsWith('theme-'))
+    .filter((cls) => cls.startsWith("theme-"))
     .forEach((cls) => document.body.classList.remove(cls));
 
   document.body.classList.add(`theme-${theme}`);
@@ -23,16 +23,16 @@ function applyTheme(pref: UiThemePreference) {
 
 function onSystemThemeChange() {
   uiThemePreference.subscribe((pref) => {
-    if (pref === 'system') applyTheme(pref);
+    if (pref === "system") applyTheme(pref);
   })();
 }
 
 function watchSystemThemeChanges() {
   if (mediaQuery) {
-    mediaQuery.removeEventListener('change', onSystemThemeChange);
+    mediaQuery.removeEventListener("change", onSystemThemeChange);
   }
-  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  mediaQuery.addEventListener('change', onSystemThemeChange);
+  mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  mediaQuery.addEventListener("change", onSystemThemeChange);
 }
 
 export function initUiTheme() {

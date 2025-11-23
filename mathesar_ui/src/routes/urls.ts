@@ -1,4 +1,4 @@
-import Url64 from '@mathesar/utils/Url64';
+import Url64 from "@mathesar/utils/Url64";
 
 export function getDatabasePageUrl(databaseId: number): string {
   return `/db/${databaseId}/`;
@@ -51,8 +51,8 @@ interface ImportPreviewPageQueryParams {
   renamedIdColumn?: string;
 }
 
-const TYPE_INFERENCE_QUERY_PARAM = 'inference';
-const RENAMED_ID_COLUMN_QUERY_PARAM = 'renamed_id_column';
+const TYPE_INFERENCE_QUERY_PARAM = "inference";
+const RENAMED_ID_COLUMN_QUERY_PARAM = "renamed_id_column";
 
 function serializeImportPreviewPageQueryParams(
   p: ImportPreviewPageQueryParams,
@@ -73,7 +73,7 @@ export function getImportPreviewPageQueryParams(
   queryParams: Record<string, string>,
 ): ImportPreviewPageQueryParams {
   return {
-    useColumnTypeInference: queryParams[TYPE_INFERENCE_QUERY_PARAM] === 'true',
+    useColumnTypeInference: queryParams[TYPE_INFERENCE_QUERY_PARAM] === "true",
     renamedIdColumn: queryParams[RENAMED_ID_COLUMN_QUERY_PARAM]
       ? Url64.decode(queryParams[RENAMED_ID_COLUMN_QUERY_PARAM])
       : undefined,
@@ -138,38 +138,38 @@ export function getFormShareUrl(formToken: string) {
   return `/shares/forms/${formToken}/`;
 }
 
-export const USER_PROFILE_URL = '/profile/';
-export const ADMIN_URL = '/administration/';
+export const USER_PROFILE_URL = "/profile/";
+export const ADMIN_URL = "/administration/";
 export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
 export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const ADMIN_SETTINGS_PAGE_URL = `${ADMIN_URL}settings/`;
-export const LOGOUT_URL = '/auth/logout/';
+export const LOGOUT_URL = "/auth/logout/";
 
 export function getEditUsersPageUrl(userId: number) {
   return `${ADMIN_USERS_PAGE_URL}${userId}/`;
 }
 
 const docsPages = {
-  usageDataCollection: '/user-guide/usage-data-collection/',
-  collaborators: '/user-guide/collaborators/',
-  databasePermissions: '/user-guide/databases/#permissions',
-  databases: '/user-guide/databases/',
-  dataTypes: '/user-guide/data-types/',
-  fileDataType: '/user-guide/data-types/#file',
-  import: '/user-guide/importing-data/',
-  internalSchemas: '/user-guide/schemas/#internal',
-  metadata: '/user-guide/databases#understanding-mathesars-metadata/',
-  relationships: '/user-guide/relationships/',
-  roles: '/user-guide/roles/',
-  rolesInheritance: '/user-guide/roles/#inheritance',
-  rolesLogin: '/user-guide/roles/#login',
-  schemaPermissions: '/user-guide/schemas/#permissions',
-  schemas: '/user-guide/schemas/',
-  storedRoles: '/user-guide/stored-roles/',
-  tablePermissions: '/user-guide/tables/#permissions',
-  userAdmin: '/user-guide/users/#admin',
-  userGuide: '/user-guide/',
+  usageDataCollection: "/user-guide/usage-data-collection/",
+  collaborators: "/user-guide/collaborators/",
+  databasePermissions: "/user-guide/databases/#permissions",
+  databases: "/user-guide/databases/",
+  dataTypes: "/user-guide/data-types/",
+  fileDataType: "/user-guide/data-types/#file",
+  import: "/user-guide/importing-data/",
+  internalSchemas: "/user-guide/schemas/#internal",
+  metadata: "/user-guide/databases#understanding-mathesars-metadata/",
+  relationships: "/user-guide/relationships/",
+  roles: "/user-guide/roles/",
+  rolesInheritance: "/user-guide/roles/#inheritance",
+  rolesLogin: "/user-guide/roles/#login",
+  schemaPermissions: "/user-guide/schemas/#permissions",
+  schemas: "/user-guide/schemas/",
+  storedRoles: "/user-guide/stored-roles/",
+  tablePermissions: "/user-guide/tables/#permissions",
+  userAdmin: "/user-guide/users/#admin",
+  userGuide: "/user-guide/",
 };
 
 export type DocsPage = keyof typeof docsPages;
@@ -179,11 +179,11 @@ export function getDocsLink(page: DocsPage): string {
 }
 
 const marketingPages = {
-  community: '/community',
-  donate: '/donate',
-  privacy: '/privacy',
-  mailingList: '/mailing-list',
-  survey: '/survey',
+  community: "/community",
+  donate: "/donate",
+  privacy: "/privacy",
+  mailingList: "/mailing-list",
+  survey: "/survey",
 };
 
 export type MarketingPage = keyof typeof marketingPages;

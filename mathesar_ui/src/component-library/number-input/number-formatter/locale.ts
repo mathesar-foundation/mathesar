@@ -17,7 +17,7 @@ export function getDecimalSeparator(locale?: string): string {
   // It gives: `Set { "1.2", "1,2", "১.২", "۱٫۲", "१.२" }` which tells me that
   // relying on the second character of the result should work in all locales.
   const decimalSeparator = new Intl.NumberFormat(locale).format(1.2)[1];
-  if (!['.', ','].includes(decimalSeparator)) {
+  if (![".", ","].includes(decimalSeparator)) {
     // This is an extra validation step for safety's sake since we'll be using
     // this decimal separator inside a regular expression.
     throw new Error(`Unsupported decimal separator: ${decimalSeparator}`);

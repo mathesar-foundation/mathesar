@@ -7,14 +7,14 @@
  */
 function stripNumericSuffix(
   input: string,
-  delimiter = '_',
+  delimiter = "_",
 ): [string, number | undefined] {
   let numericSuffix: number | undefined;
   // Digits can only be repeated 15 times max to avoid overflow
   const pattern = `${delimiter}\\d{1,15}$`;
   const strippedInput = input.replace(new RegExp(pattern), (s) => {
     numericSuffix = parseInt(s.slice(1), 10);
-    return '';
+    return "";
   });
   return [strippedInput, numericSuffix];
 }

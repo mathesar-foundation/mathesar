@@ -1,2 +1,2 @@
-export { default as ContextMenu } from './ContextMenu.svelte';
-export * from './ContextMenuController';
+export { default as ContextMenu } from "./ContextMenu.svelte";
+export * from "./ContextMenuController";

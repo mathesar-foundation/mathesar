@@ -32,37 +32,37 @@
  * to having us use the currentSchemaId store directly.
  */
 
-import { derived, get, writable } from 'svelte/store';
+import { derived, get, writable } from "svelte/store";
 
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
 import type {
   AddableExploration,
   ExplorationResult,
   SavedExploration,
-} from '@mathesar/api/rpc/explorations';
-import type { Database } from '@mathesar/models/Database';
-import type { Schema } from '@mathesar/models/Schema';
-import { getErrorMessage } from '@mathesar/utils/errors';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { type CancellablePromise, collapse } from '@mathesar-component-library';
+} from "@mathesar/api/rpc/explorations";
+import type { Database } from "@mathesar/models/Database";
+import type { Schema } from "@mathesar/models/Schema";
+import { getErrorMessage } from "@mathesar/utils/errors";
+import { preloadCommonData } from "@mathesar/utils/preloadData";
+import { type CancellablePromise, collapse } from "@mathesar-component-library";
 
-import { currentSchema } from './schemas';
+import { currentSchema } from "./schemas";
 
 const commonData = preloadCommonData();
-const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
+const isInAuthenticatedContext = commonData.routing_context !== "anonymous";
 
 export interface QueriesStoreSubstance {
-  databaseId?: Database['id'];
-  schemaOid?: Schema['oid'];
+  databaseId?: Database["id"];
+  schemaOid?: Schema["oid"];
   requestStatus: RequestStatus;
-  data: Map<SavedExploration['id'], SavedExploration>;
+  data: Map<SavedExploration["id"], SavedExploration>;
 }
 
 function makeEmptyQueriesStoreSubstance(): QueriesStoreSubstance {
   return {
     data: new Map(),
-    requestStatus: { state: 'success' },
+    requestStatus: { state: "success" },
   };
 }
 
@@ -78,7 +78,7 @@ function setExplorationsStore(
   schema: Schema,
   queryEntries: SavedExploration[],
 ) {
-  const queries: QueriesStoreSubstance['data'] = new Map();
+  const queries: QueriesStoreSubstance["data"] = new Map();
   sortedQueryEntries(queryEntries).forEach((entry) => {
     queries.set(entry.id, entry);
   });
@@ -87,7 +87,7 @@ function setExplorationsStore(
     databaseId: schema.database.id,
     schemaOid: schema.oid,
     data: queries,
-    requestStatus: { state: 'success' },
+    requestStatus: { state: "success" },
   });
 }
 
@@ -110,14 +110,14 @@ export async function fetchExplorationsForCurrentSchema(): Promise<void> {
       ) {
         return {
           ...$queriesStore,
-          requestStatus: { state: 'processing' },
+          requestStatus: { state: "processing" },
         };
       }
       return {
         databaseId: $currentSchema.database.id,
         schemaOid: $currentSchema.oid,
         data: new Map(),
-        requestStatus: { state: 'processing' },
+        requestStatus: { state: "processing" },
       };
     });
 
@@ -139,7 +139,7 @@ export async function fetchExplorationsForCurrentSchema(): Promise<void> {
         return {
           ...$queriesStore,
           requestStatus: {
-            state: 'failure',
+            state: "failure",
             errors: [getErrorMessage(err)],
           },
         };
@@ -149,7 +149,7 @@ export async function fetchExplorationsForCurrentSchema(): Promise<void> {
         schemaOid: $currentSchema.oid,
         data: new Map(),
         requestStatus: {
-          state: 'failure',
+          state: "failure",
           errors: [getErrorMessage(err)],
         },
       };
@@ -199,7 +199,7 @@ export function replaceExploration(
 }
 
 export function getExploration(
-  id: SavedExploration['id'],
+  id: SavedExploration["id"],
 ): CancellablePromise<SavedExploration> {
   return api.explorations.get({ exploration_id: id }).run();
 }
@@ -259,7 +259,7 @@ export const queries = collapse(
         void fetchExplorationsForCurrentSchema();
       }
       preload = false;
-    } else if ($queriesStore.requestStatus.state === 'failure') {
+    } else if ($queriesStore.requestStatus.state === "failure") {
       void fetchExplorationsForCurrentSchema();
     }
     return queriesStore;

@@ -1,34 +1,34 @@
-import type { TimeFormat } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { TimeFormat } from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import {
   type RawColumnWithMetadata,
   getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
-import { iconUiTypeTime } from '@mathesar/icons';
-import type { FormValues } from '@mathesar-component-library/types';
+} from "@mathesar/api/rpc/columns";
+import { iconUiTypeTime } from "@mathesar/icons";
+import type { FormValues } from "@mathesar-component-library/types";
 
-import { DB_TYPES } from '../dbTypes';
+import { DB_TYPES } from "../dbTypes";
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
   AbstractTypeDbConfig,
-} from '../types';
+} from "../types";
 
-import { getTimeFormatOptions } from './utils';
+import { getTimeFormatOptions } from "./utils";
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {
     supportTimeZones: {
-      type: 'boolean',
+      type: "boolean",
       default: false,
     },
   },
   layout: {
-    orientation: 'vertical',
+    orientation: "vertical",
     elements: [
       {
-        type: 'input',
-        variable: 'supportTimeZones',
-        label: 'Support Time Zones',
+        type: "input",
+        variable: "supportTimeZones",
+        label: "Support Time Zones",
       },
     ],
   },
@@ -36,7 +36,7 @@ const dbForm: AbstractTypeConfigForm = {
 
 function determineDbTypeAndOptions(
   dbFormValues: FormValues,
-): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
+): ReturnType<AbstractTypeDbConfig["determineDbTypeAndOptions"]> {
   const dbType = dbFormValues.supportTimeZones
     ? DB_TYPES.TIME_WITH_TZ
     : DB_TYPES.TIME_WITHOUT_TZ;
@@ -47,7 +47,7 @@ function determineDbTypeAndOptions(
 }
 
 function constructDbFormValuesFromTypeOptions(
-  columnType: RawColumnWithMetadata['type'],
+  columnType: RawColumnWithMetadata["type"],
 ): FormValues {
   return {
     supportTimeZones: columnType === DB_TYPES.TIME_WITH_TZ,
@@ -57,18 +57,18 @@ function constructDbFormValuesFromTypeOptions(
 const displayForm: AbstractTypeConfigForm = {
   variables: {
     format: {
-      type: 'string',
-      enum: ['24hr', '24hrLong', '12hr', '12hrLong'],
-      default: '24hr',
+      type: "string",
+      enum: ["24hr", "24hrLong", "12hr", "12hrLong"],
+      default: "24hr",
     },
   },
   layout: {
-    orientation: 'vertical',
+    orientation: "vertical",
     elements: [
       {
-        type: 'input',
-        variable: 'format',
-        label: 'Time Format',
+        type: "input",
+        variable: "format",
+        label: "Time Format",
         options: getTimeFormatOptions(),
       },
     ],
@@ -77,26 +77,26 @@ const displayForm: AbstractTypeConfigForm = {
 
 function determineDisplayOptions(
   formValues: FormValues,
-): RawColumnWithMetadata['metadata'] {
+): RawColumnWithMetadata["metadata"] {
   return {
     time_format: formValues.format as TimeFormat,
   };
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  metadata: RawColumnWithMetadata['metadata'],
+  metadata: RawColumnWithMetadata["metadata"],
 ): FormValues {
   const column = { metadata };
   return {
-    format: getColumnMetadataValue(column, 'time_format'),
+    format: getColumnMetadataValue(column, "time_format"),
   };
 }
 
 const timeType: AbstractTypeConfiguration = {
-  getIcon: () => ({ ...iconUiTypeTime, label: 'Time' }),
+  getIcon: () => ({ ...iconUiTypeTime, label: "Time" }),
   defaultDbType: DB_TYPES.TIME_WITHOUT_TZ,
   cellInfo: {
-    type: 'time',
+    type: "time",
     conditionalConfig: {
       [DB_TYPES.TIME_WITH_TZ]: {
         supportTimeZone: true,

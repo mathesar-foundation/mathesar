@@ -1,4 +1,4 @@
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
 export interface RawServer {
   id: number;
@@ -11,7 +11,7 @@ export const servers = {
     list: rpcMethodTypeContainer<void, Array<RawServer>>(),
     patch: rpcMethodTypeContainer<
       {
-        server_id: RawServer['id'];
+        server_id: RawServer["id"];
         patch: {
           host?: string;
           port?: number | null;

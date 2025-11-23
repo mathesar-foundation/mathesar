@@ -1,15 +1,15 @@
-import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
-import type { FkConstraint } from '@mathesar/api/rpc/constraints';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
-import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
+import type { ColumnMetadata } from "@mathesar/api/rpc/_common/columnDisplayOptions";
+import type { ColumnTypeOptions } from "@mathesar/api/rpc/columns";
+import type { FkConstraint } from "@mathesar/api/rpc/constraints";
+import type { DBObjectEntry } from "@mathesar/AppTypes";
+import type { RecordSelectionOrchestratorFactory } from "@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator";
+import type { DateTimeFormatter } from "@mathesar/utils/date-time/types";
 import type {
   ComponentAndProps,
   FormattedInputProps,
   NumberFormatterOptions,
   SelectProps,
-} from '@mathesar-component-library/types';
+} from "@mathesar-component-library/types";
 
 export interface CellColumnLike {
   /** The PostgreSQL data type */
@@ -50,7 +50,7 @@ export interface CellTypeProps<Value> {
 export type PrimaryKeyCellValue = string | number;
 
 export interface PrimaryKeyCellExternalProps {
-  tableId: DBObjectEntry['id'];
+  tableId: DBObjectEntry["id"];
 }
 
 export interface PrimaryKeyCellProps
@@ -62,7 +62,7 @@ export interface PrimaryKeyCellProps
 export type ForeignKeyCellValue = string | number | boolean | null;
 
 export interface LinkedRecordCellExternalProps {
-  tableId: DBObjectEntry['id'];
+  tableId: DBObjectEntry["id"];
 }
 
 export interface LinkedRecordCellProps
@@ -117,7 +117,7 @@ export interface NumberCellProps
 
 interface MoneyFormatterOptions extends Partial<NumberFormatterOptions> {
   currencySymbol: string;
-  currencySymbolLocation: 'after-minus' | 'end-with-space';
+  currencySymbolLocation: "after-minus" | "end-with-space";
 }
 
 export interface MoneyCellExternalProps {
@@ -139,7 +139,7 @@ export type CheckBoxCellProps = CellTypeProps<boolean>;
 
 export type SingleSelectCellExternalProps<Option> = Pick<
   SelectProps<Option>,
-  'options' | 'getLabel'
+  "options" | "getLabel"
 >;
 
 export interface SingleSelectCellProps<Option>
@@ -149,7 +149,7 @@ export interface SingleSelectCellProps<Option>
 // FormattedInput
 
 export interface FormattedInputCellExternalProps
-  extends Omit<FormattedInputProps<string>, 'disabled' | 'value'> {
+  extends Omit<FormattedInputProps<string>, "disabled" | "value"> {
   formatForDisplay: CellValueFormatter<string>;
   useTabularNumbers?: boolean;
 }
@@ -161,7 +161,7 @@ export interface FormattedInputCellProps
 // DateInput
 
 export interface DateTimeCellExternalProps {
-  type: 'date' | 'time' | 'datetime';
+  type: "date" | "time" | "datetime";
   formattingString: string;
   formatter: DateTimeFormatter;
   timeShow24Hr?: boolean;
@@ -186,4 +186,4 @@ export interface ArrayCellProps
 
 // Common
 
-export type HorizontalAlignment = 'left' | 'right' | 'center';
+export type HorizontalAlignment = "left" | "right" | "center";

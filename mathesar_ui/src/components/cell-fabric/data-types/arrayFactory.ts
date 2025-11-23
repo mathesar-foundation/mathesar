@@ -1,15 +1,15 @@
-import type { DbType } from '@mathesar/AppTypes';
-import { TextInput, isDefinedNonNullable } from '@mathesar-component-library';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type { DbType } from "@mathesar/AppTypes";
+import { TextInput, isDefinedNonNullable } from "@mathesar-component-library";
+import type { ComponentAndProps } from "@mathesar-component-library/types";
 
-import ArrayCell from './components/array/ArrayCell.svelte';
-import type { ArrayCellExternalProps } from './components/typeDefinitions';
+import ArrayCell from "./components/array/ArrayCell.svelte";
+import type { ArrayCellExternalProps } from "./components/typeDefinitions";
 import type {
   CellColumnLike,
   CellComponentFactory,
   SimpleCellDataTypes,
-} from './typeDefinitions';
-import { getCellConfiguration, getCellInfo } from './utils';
+} from "./typeDefinitions";
+import { getCellConfiguration, getCellInfo } from "./utils";
 
 export interface ArrayLikeColumn extends CellColumnLike {
   type_options: {
@@ -24,11 +24,11 @@ function makeDisplayFormatter(
   componentFactoryMap: ComponentFactoryMap,
   column: ArrayLikeColumn,
 ) {
-  const itemDbType = column.type_options?.item_type ?? 'string';
+  const itemDbType = column.type_options?.item_type ?? "string";
   const cellInfo = getCellInfo(itemDbType, column.metadata);
   const config = getCellConfiguration(itemDbType, cellInfo);
   const elementDataType =
-    !cellInfo || cellInfo.type === 'array' ? 'string' : cellInfo.type;
+    !cellInfo || cellInfo.type === "array" ? "string" : cellInfo.type;
   const elementCellFactory = componentFactoryMap[elementDataType];
   return (cellValue: unknown) => {
     if (!isDefinedNonNullable(cellValue)) {
@@ -68,7 +68,7 @@ export default function arrayType(
       const formatOneValue = makeDisplayFormatter(componentFactoryMap, column);
       return (cellValue: unknown) => {
         if (Array.isArray(cellValue)) {
-          return cellValue.map(formatOneValue).join(', ');
+          return cellValue.map(formatOneValue).join(", ");
         }
         return formatOneValue(cellValue);
       };

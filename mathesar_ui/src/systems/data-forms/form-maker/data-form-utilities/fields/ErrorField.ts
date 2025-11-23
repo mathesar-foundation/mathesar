@@ -1,16 +1,16 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import type { RawDataFormField } from '@mathesar/api/rpc/forms';
+import type { RawDataFormField } from "@mathesar/api/rpc/forms";
 import {
   ClientSideError,
   type GeneralizedError,
-} from '@mathesar/components/errors/errorUtils';
+} from "@mathesar/components/errors/errorUtils";
 
-import type { DataFormStructureCtx } from '../DataFormStructure';
+import type { DataFormStructureCtx } from "../DataFormStructure";
 
-import { AbstractField, type AbstractFieldProps } from './AbstractField';
-import type { FormFields } from './FormFields';
+import { AbstractField, type AbstractFieldProps } from "./AbstractField";
+import type { FormFields } from "./FormFields";
 
 export const dataFormErrorCodes = {
   COLUMN_NOT_FOUND: -31025,
@@ -19,7 +19,7 @@ export const dataFormErrorCodes = {
 export const dataFormErrors = {
   columnNotFoundError: (props: { tableOid: number; columnAttnum: number }) =>
     new ClientSideError({
-      message: get(_)('form_field_column_not_found'),
+      message: get(_)("form_field_column_not_found"),
       code: dataFormErrorCodes.COLUMN_NOT_FOUND,
       data: props,
     }),
@@ -31,7 +31,7 @@ interface ErrorFieldProps extends AbstractFieldProps {
 }
 
 export class ErrorField extends AbstractField {
-  readonly kind = 'error' as const;
+  readonly kind = "error" as const;
 
   readonly originalField: RawDataFormField;
 
@@ -50,7 +50,7 @@ export class ErrorField extends AbstractField {
   protected triggerChangeEvent() {}
 
   checkAndSetDefaultLabel() {
-    this.setLabel(this.originalField.label ?? '');
+    this.setLabel(this.originalField.label ?? "");
   }
 
   toRawEphemeralField(): RawDataFormField {

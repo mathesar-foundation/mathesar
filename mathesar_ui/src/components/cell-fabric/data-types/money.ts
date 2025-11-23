@@ -1,19 +1,19 @@
-import type { NumberFormat } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { NumberFormat } from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import {
   type RawColumnWithMetadata,
   getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+} from "@mathesar/api/rpc/columns";
 import {
   StringifiedNumberFormatter,
   isDefinedNonNullable,
-} from '@mathesar-component-library';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+} from "@mathesar-component-library";
+import type { ComponentAndProps } from "@mathesar-component-library/types";
 
-import MoneyCell from './components/money/MoneyCell.svelte';
-import MoneyCellInput from './components/money/MoneyCellInput.svelte';
-import type { MoneyCellExternalProps } from './components/typeDefinitions';
-import { getUseGrouping } from './number';
-import type { CellComponentFactory } from './typeDefinitions';
+import MoneyCell from "./components/money/MoneyCell.svelte";
+import MoneyCellInput from "./components/money/MoneyCellInput.svelte";
+import type { MoneyCellExternalProps } from "./components/typeDefinitions";
+import { getUseGrouping } from "./number";
+import type { CellComponentFactory } from "./typeDefinitions";
 
 // prettier-ignore
 const localeMap = new Map<NumberFormat, string>([
@@ -30,8 +30,8 @@ function ColumnIsInteger(column: RawColumnWithMetadata): boolean {
 
 function getFormatterOptions(
   column: RawColumnWithMetadata,
-): MoneyCellExternalProps['formatterOptions'] {
-  const format = getColumnMetadataValue(column, 'num_format');
+): MoneyCellExternalProps["formatterOptions"] {
+  const format = getColumnMetadataValue(column, "num_format");
   return {
     locale: (format && localeMap.get(format)) ?? undefined,
     useGrouping: getUseGrouping(column),
@@ -39,16 +39,16 @@ function getFormatterOptions(
     allowNegative: true,
     minimumFractionDigits: getColumnMetadataValue(
       column,
-      'num_min_frac_digits',
+      "num_min_frac_digits",
     ),
     maximumFractionDigits: getColumnMetadataValue(
       column,
-      'num_max_frac_digits',
+      "num_max_frac_digits",
     ),
-    currencySymbol: getColumnMetadataValue(column, 'mon_currency_symbol'),
+    currencySymbol: getColumnMetadataValue(column, "mon_currency_symbol"),
     currencySymbolLocation: getColumnMetadataValue(
       column,
-      'mon_currency_location',
+      "mon_currency_location",
     ),
   };
 }
@@ -58,10 +58,10 @@ function getProps(column: RawColumnWithMetadata): MoneyCellExternalProps {
   const displayFormatter = new StringifiedNumberFormatter(formatterOptions);
   const insertCurrencySymbol = (() => {
     switch (formatterOptions.currencySymbolLocation) {
-      case 'after-minus':
+      case "after-minus":
         return (s: string) =>
           s.replace(/^(-?)/, `$1${formatterOptions.currencySymbol}`);
-      case 'end-with-space':
+      case "end-with-space":
         return (s: string) => `${s} ${formatterOptions.currencySymbol}`;
       default:
         return (s: string) => s;
@@ -92,7 +92,7 @@ const moneyType: CellComponentFactory = {
 
   getInput(
     column: RawColumnWithMetadata,
-  ): ComponentAndProps<MoneyCellExternalProps['formatterOptions']> {
+  ): ComponentAndProps<MoneyCellExternalProps["formatterOptions"]> {
     return {
       component: MoneyCellInput,
       props: {

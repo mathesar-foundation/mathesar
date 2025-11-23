@@ -1,67 +1,67 @@
-import type { FormConfiguration } from '../types';
+import type { FormConfiguration } from "../types";
 
 const formConfig: FormConfiguration = {
   variables: {
     booleanValue: {
-      type: 'boolean',
+      type: "boolean",
       default: true,
     },
     integerValue: {
-      type: 'integer',
+      type: "integer",
       default: 100,
     },
     floatValue: {
-      type: 'float',
+      type: "float",
       default: 14.52,
     },
     stringTextValue: {
-      type: 'string',
-      default: 'TextInput',
+      type: "string",
+      default: "TextInput",
     },
     stringTextAreaValue: {
-      type: 'string',
-      default: 'TextArea',
+      type: "string",
+      default: "TextArea",
     },
     enumValue: {
-      type: 'string',
-      default: 'Pikachu',
-      enum: ['Pichu', 'Pikachu', 'Raichu'],
+      type: "string",
+      default: "Pikachu",
+      enum: ["Pichu", "Pikachu", "Raichu"],
     },
   },
   layout: {
-    orientation: 'vertical',
+    orientation: "vertical",
     elements: [
       {
-        type: 'input',
-        variable: 'booleanValue',
-        label: 'Boolean value',
+        type: "input",
+        variable: "booleanValue",
+        label: "Boolean value",
       },
       {
-        type: 'input',
-        variable: 'integerValue',
-        label: 'Integer value',
+        type: "input",
+        variable: "integerValue",
+        label: "Integer value",
       },
       {
-        type: 'input',
-        variable: 'floatValue',
-        label: 'Float value',
+        type: "input",
+        variable: "floatValue",
+        label: "Float value",
       },
       {
-        type: 'input',
-        variable: 'stringTextValue',
-        label: 'String value: TextInput',
+        type: "input",
+        variable: "stringTextValue",
+        label: "String value: TextInput",
       },
       {
-        type: 'input',
-        variable: 'stringTextAreaValue',
-        interfaceType: 'textarea',
-        label: 'String value: TextArea',
+        type: "input",
+        variable: "stringTextAreaValue",
+        interfaceType: "textarea",
+        label: "String value: TextArea",
       },
       {
-        type: 'input',
-        variable: 'enumValue',
-        interfaceType: 'select',
-        label: 'Enum value',
+        type: "input",
+        variable: "enumValue",
+        interfaceType: "select",
+        label: "Enum value",
       },
     ],
   },

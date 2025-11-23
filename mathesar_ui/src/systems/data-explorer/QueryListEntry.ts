@@ -1,4 +1,4 @@
-import type { MaybeSavedExploration } from '@mathesar/api/rpc/explorations';
+import type { MaybeSavedExploration } from "@mathesar/api/rpc/explorations";
 
 export default class QueryListEntry {
   queryJSON: MaybeSavedExploration;

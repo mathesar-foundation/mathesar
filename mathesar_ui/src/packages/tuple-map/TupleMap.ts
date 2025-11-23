@@ -1,4 +1,4 @@
-import { map } from 'iter-tools';
+import { map } from "iter-tools";
 
 function parse<T>(key: string): T {
   return JSON.parse(key) as T;

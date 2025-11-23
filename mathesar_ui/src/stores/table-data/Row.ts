@@ -2,17 +2,17 @@
 import type {
   Group as ApiGroup,
   Result as ApiRecord,
-} from '@mathesar/api/rpc/records';
-import { getGloballyUniqueId } from '@mathesar-component-library';
+} from "@mathesar/api/rpc/records";
+import { getGloballyUniqueId } from "@mathesar-component-library";
 
-import type { RecordGroup } from './utils';
+import type { RecordGroup } from "./utils";
 
 export enum RowType {
-  PersistedRecord = 'persistedRecord',
-  DraftRecord = 'draftRecord',
-  PlaceholderRecord = 'placeholderRecord',
-  GroupHeader = 'groupHeader',
-  Help = 'help',
+  PersistedRecord = "persistedRecord",
+  DraftRecord = "draftRecord",
+  PlaceholderRecord = "placeholderRecord",
+  GroupHeader = "groupHeader",
+  Help = "help",
 }
 
 /* For rows that manipulate records */
@@ -33,7 +33,7 @@ abstract class BaseRecordRow<
     record: ApiRecord;
     type: T;
   }) {
-    this.identifier = props.identifier ?? getGloballyUniqueId('record-row');
+    this.identifier = props.identifier ?? getGloballyUniqueId("record-row");
     this.record = props.record;
     this.type = props.type;
   }
@@ -104,17 +104,17 @@ export class PlaceholderRecordRow extends BaseRecordRow<RowType.PlaceholderRecor
 }
 
 export class GroupHeaderRow {
-  identifier = getGloballyUniqueId('group-header-row');
+  identifier = getGloballyUniqueId("group-header-row");
 
   group: RecordGroup;
 
-  groupValues: ApiGroup['results_eq'];
+  groupValues: ApiGroup["results_eq"];
 
   type = RowType.GroupHeader;
 
   constructor(props: {
     group: RecordGroup;
-    groupValues: ApiGroup['results_eq'];
+    groupValues: ApiGroup["results_eq"];
   }) {
     this.group = props.group;
     this.groupValues = props.groupValues;
@@ -122,7 +122,7 @@ export class GroupHeaderRow {
 }
 
 export class HelpTextRow {
-  identifier = getGloballyUniqueId('help-row');
+  identifier = getGloballyUniqueId("help-row");
 
   type = RowType.Help;
 }

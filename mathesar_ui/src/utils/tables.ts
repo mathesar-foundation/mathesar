@@ -1,11 +1,11 @@
-import { filter } from 'iter-tools';
+import { filter } from "iter-tools";
 
-import type { Table } from '@mathesar/models/Table';
+import type { Table } from "@mathesar/models/Table";
 import {
   getImportPreviewPageUrl,
   getTablePageUrl,
-} from '@mathesar/routes/urls';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
+} from "@mathesar/routes/urls";
+import type { ProcessedColumn } from "@mathesar/stores/table-data";
 
 interface TableWithImportVerification {
   metadata?: {
@@ -68,7 +68,7 @@ export function orderProcessedColumns(
 export function getLinkForTableItem(
   databaseId: number,
   schemaId: number,
-  table: TableWithImportVerification & { oid: Table['oid'] },
+  table: TableWithImportVerification & { oid: Table["oid"] },
 ) {
   if (tableRequiresImportConfirmation(table)) {
     return getImportPreviewPageUrl(databaseId, schemaId, table.oid, {

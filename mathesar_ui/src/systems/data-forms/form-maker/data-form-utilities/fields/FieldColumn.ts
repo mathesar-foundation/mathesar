@@ -1,8 +1,8 @@
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { Table } from '@mathesar/models/Table';
-import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
-import type { AbstractType } from '@mathesar/stores/abstract-types/types';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import type { Table } from "@mathesar/models/Table";
+import { getAbstractTypeForDbType } from "@mathesar/stores/abstract-types";
+import type { AbstractType } from "@mathesar/stores/abstract-types/types";
+import type { ProcessedColumn } from "@mathesar/stores/table-data";
 
 /**
  * We'd ideally like use ProcessedColumn here, however we do not have access to
@@ -24,7 +24,7 @@ export class FieldColumn {
   } | null;
 
   constructor(props: {
-    tableOid: Table['oid'];
+    tableOid: Table["oid"];
     column: RawColumnWithMetadata;
     foreignKeyLink: {
       relatedTableOid: number;

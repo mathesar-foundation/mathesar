@@ -177,7 +177,7 @@
 }
 .numInputWrapper span:after {
   display: block;
-  content: '';
+  content: "";
   position: absolute;
 }
 .numInputWrapper span.arrowUp {
@@ -611,7 +611,7 @@ span.flatpickr-weekday {
   display: flex;
 }
 .flatpickr-time:after {
-  content: '';
+  content: "";
   display: table;
   clear: both;
 }

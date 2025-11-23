@@ -1,18 +1,18 @@
-import type { RawDatabase } from '@mathesar/api/rpc/databases';
-import type { SavedExploration } from '@mathesar/api/rpc/explorations';
-import type { RawSchema } from '@mathesar/api/rpc/schemas';
-import type { RawServer } from '@mathesar/api/rpc/servers';
-import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
-import type { User } from '@mathesar/api/rpc/users';
-import { isDefinedNonNullable } from '@mathesar-component-library';
+import type { RawDatabase } from "@mathesar/api/rpc/databases";
+import type { SavedExploration } from "@mathesar/api/rpc/explorations";
+import type { RawSchema } from "@mathesar/api/rpc/schemas";
+import type { RawServer } from "@mathesar/api/rpc/servers";
+import type { RawTableWithMetadata } from "@mathesar/api/rpc/tables";
+import type { User } from "@mathesar/api/rpc/users";
+import { isDefinedNonNullable } from "@mathesar-component-library";
 
 type WithStatus<D> =
   | {
-      state: 'success';
+      state: "success";
       data: D;
     }
   | {
-      state: 'failure';
+      state: "failure";
       error: {
         code: number;
         message: string;
@@ -32,7 +32,7 @@ export interface AuthenticatedCommonData extends BaseCommonData {
   schemas: WithStatus<RawSchema[]>;
   tables: WithStatus<RawTableWithMetadata[]>;
   queries: SavedExploration[];
-  current_database: RawDatabase['id'] | null;
+  current_database: RawDatabase["id"] | null;
   internal_db: {
     database_name: string;
     host: string;
@@ -41,11 +41,11 @@ export interface AuthenticatedCommonData extends BaseCommonData {
   };
   current_schema: number | null;
   user: User;
-  routing_context: 'normal';
+  routing_context: "normal";
 }
 
 export interface AnonymousCommonData extends BaseCommonData {
-  routing_context: 'anonymous';
+  routing_context: "anonymous";
 }
 
 export type CommonData = AuthenticatedCommonData | AnonymousCommonData;
@@ -69,9 +69,9 @@ export function preloadRouteData<T>(routeName: string): T | undefined {
 }
 
 export function preloadCommonData(): CommonData {
-  const commonData = getData<CommonData>('#common-data');
+  const commonData = getData<CommonData>("#common-data");
   if (!commonData) {
-    throw new Error('commonData is undefined. This state should never occur');
+    throw new Error("commonData is undefined. This state should never occur");
   }
   return commonData;
 }

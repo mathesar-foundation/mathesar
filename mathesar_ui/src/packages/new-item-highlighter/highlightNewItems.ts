@@ -1,7 +1,7 @@
-import type { ActionReturn } from 'svelte/action';
+import type { ActionReturn } from "svelte/action";
 
-import { setupHighlighter } from './highlight';
-import { getNewlyAddedItemsFromMutations } from './utils';
+import { setupHighlighter } from "./highlight";
+import { getNewlyAddedItemsFromMutations } from "./utils";
 
 interface Options {
   /**

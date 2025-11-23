@@ -1,10 +1,10 @@
-import type { ResultValue } from '@mathesar/api/rpc/records';
-import { parseCellId } from '@mathesar/components/sheet/cellIds';
-import type { SelectedCellData } from '@mathesar/components/sheet/selection';
-import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+import type { ResultValue } from "@mathesar/api/rpc/records";
+import { parseCellId } from "@mathesar/components/sheet/cellIds";
+import type { SelectedCellData } from "@mathesar/components/sheet/selection";
+import type SheetSelection from "@mathesar/components/sheet/selection/SheetSelection";
 
-import { type QueryRow, getRowSelectionId } from '../../QueryRunner';
-import type { ProcessedQueryOutputColumnMap } from '../../utils';
+import { type QueryRow, getRowSelectionId } from "../../QueryRunner";
+import type { ProcessedQueryOutputColumnMap } from "../../utils";
 
 export function getSelectedCellData(
   selection: SheetSelection,

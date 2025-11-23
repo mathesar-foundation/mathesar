@@ -1,4 +1,4 @@
-import type { SimplifiedTextInputProps } from '@mathesar-component-library-dir/text-input/TextInputTypes';
+import type { SimplifiedTextInputProps } from "@mathesar-component-library-dir/text-input/TextInputTypes";
 
 export interface ParseResult<T> {
   /**

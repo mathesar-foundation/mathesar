@@ -1,10 +1,10 @@
-import type { SvelteComponent } from 'svelte';
-import type { Readable, Writable } from 'svelte/store';
+import type { SvelteComponent } from "svelte";
+import type { Readable, Writable } from "svelte/store";
 
-import type { DataTypeBasedInputType } from '@mathesar-component-library-dir/data-type-based-input/types';
+import type { DataTypeBasedInputType } from "@mathesar-component-library-dir/data-type-based-input/types";
 
 export interface FormInputBaseElement {
-  type: 'input';
+  type: "input";
   interfaceType?: string;
   variable: string;
   label?: string;
@@ -19,7 +19,7 @@ export interface FormInputBaseElement {
 }
 
 export interface FormInputSelectElement extends FormInputBaseElement {
-  interfaceType: 'select';
+  interfaceType: "select";
   options: Record<
     string,
     {
@@ -29,7 +29,7 @@ export interface FormInputSelectElement extends FormInputBaseElement {
 }
 
 export interface FormStaticElement {
-  type: 'static';
+  type: "static";
   variable: string;
   componentId: string;
   props?: Record<string, unknown>;
@@ -38,15 +38,15 @@ export interface FormStaticElement {
 export type FormInputElement = FormInputBaseElement | FormInputSelectElement;
 
 export type ConditionalSwitchElement = {
-  type: 'switch';
+  type: "switch";
   variable: string;
   cases: Record<string, FormElement[]>;
 };
 
 export type ConditionalIfElement = {
-  type: 'if';
+  type: "if";
   variable: string;
-  condition: 'eq' | 'neq';
+  condition: "eq" | "neq";
   value: unknown;
   elements: FormElement[];
 };
@@ -62,15 +62,15 @@ export type FormElement =
   | FormStaticElement;
 
 export interface FormLayout {
-  type?: 'layout';
-  orientation: 'vertical' | 'horizontal';
+  type?: "layout";
+  orientation: "vertical" | "horizontal";
   elements: FormElement[];
 }
 
-export type FormValidationCheck = 'isEmpty' | 'isInvalid';
+export type FormValidationCheck = "isEmpty" | "isInvalid";
 
 export interface FormConfigurationVariable {
-  type: DataTypeBasedInputType | 'custom';
+  type: DataTypeBasedInputType | "custom";
   default?: unknown;
   enum?: unknown[];
   validation?: {

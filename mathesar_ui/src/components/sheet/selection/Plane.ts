@@ -1,7 +1,7 @@
-import { makeCellId, makeCells, parseCellId } from '../cellIds';
+import { makeCellId, makeCells, parseCellId } from "../cellIds";
 
-import { Direction, getColumnOffset, getRowOffset } from './Direction';
-import Series from './Series';
+import { Direction, getColumnOffset, getRowOffset } from "./Direction";
+import Series from "./Series";
 
 /**
  * This describes the different kinds of cells that can be adjacent to a given
@@ -9,27 +9,27 @@ import Series from './Series';
  */
 export type AdjacentCell =
   | {
-      type: 'dataCell';
+      type: "dataCell";
       cellId: string;
     }
   | {
-      type: 'placeholderCell';
+      type: "placeholderCell";
       cellId: string;
     }
   | {
-      type: 'none';
+      type: "none";
     };
 
 function noAdjacentCell(): AdjacentCell {
-  return { type: 'none' };
+  return { type: "none" };
 }
 
 function adjacentDataCell(cellId: string): AdjacentCell {
-  return { type: 'dataCell', cellId };
+  return { type: "dataCell", cellId };
 }
 
 function adjacentPlaceholderCell(cellId: string): AdjacentCell {
-  return { type: 'placeholderCell', cellId };
+  return { type: "placeholderCell", cellId };
 }
 
 /**

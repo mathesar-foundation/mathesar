@@ -1,4 +1,4 @@
-import { DB_TYPES } from './dbTypes';
+import { DB_TYPES } from "./dbTypes";
 
 export const typeCastMap = {
   [DB_TYPES.BIGINT]: [

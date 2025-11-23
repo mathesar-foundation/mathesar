@@ -4,11 +4,11 @@ import {
   type Unsubscriber,
   get,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
+import { makeContext } from "@mathesar/component-library/common/utils/contextUtils";
 
-import type { FileManifestWithRequestParams } from '../fileUtils';
+import type { FileManifestWithRequestParams } from "../fileUtils";
 
 export interface LightboxProps {
   /** The main image being displayed */

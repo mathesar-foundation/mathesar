@@ -1,1 +1,1 @@
-export { default as AddEditDataFormModal } from './AddEditDataFormModal.svelte';
+export { default as AddEditDataFormModal } from "./AddEditDataFormModal.svelte";

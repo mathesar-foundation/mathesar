@@ -1,4 +1,4 @@
-import type { RecordsListParams } from '@mathesar/api/rpc/records';
+import type { RecordsListParams } from "@mathesar/api/rpc/records";
 
 export interface GroupEntry {
   readonly columnId: number;
@@ -6,8 +6,8 @@ export interface GroupEntry {
 }
 
 type TerseGroupEntry =
-  | [GroupEntry['columnId'], GroupEntry['preprocFnId']]
-  | [GroupEntry['columnId']];
+  | [GroupEntry["columnId"], GroupEntry["preprocFnId"]]
+  | [GroupEntry["columnId"]];
 
 export type TerseGrouping = TerseGroupEntry[];
 
@@ -22,7 +22,7 @@ export class Grouping {
     this.entries = entries ?? [];
   }
 
-  hasColumn(columnId: GroupEntry['columnId']): boolean {
+  hasColumn(columnId: GroupEntry["columnId"]): boolean {
     return this.entries.some((entry) => entry.columnId === columnId);
   }
 
@@ -74,7 +74,7 @@ export class Grouping {
     });
   }
 
-  recordsRequestParams(): Pick<RecordsListParams, 'grouping'> {
+  recordsRequestParams(): Pick<RecordsListParams, "grouping"> {
     if (!this.entries.length) {
       return {};
     }

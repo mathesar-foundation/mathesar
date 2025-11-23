@@ -1,22 +1,22 @@
 /* eslint-disable max-classes-per-file */
 
-import { type Readable, type Writable, get, writable } from 'svelte/store';
+import { type Readable, type Writable, get, writable } from "svelte/store";
 
-import { api } from '@mathesar/api/rpc';
-import type { Schema } from '@mathesar/models/Schema';
-import type { Table } from '@mathesar/models/Table';
-import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-import { TableStructure } from '@mathesar/stores/table-data';
-import type CacheManager from '@mathesar/utils/CacheManager';
+import { api } from "@mathesar/api/rpc";
+import type { Schema } from "@mathesar/models/Schema";
+import type { Table } from "@mathesar/models/Table";
+import AsyncRpcApiStore from "@mathesar/stores/AsyncRpcApiStore";
+import { TableStructure } from "@mathesar/stores/table-data";
+import type CacheManager from "@mathesar/utils/CacheManager";
 
-import { getDefaultFormName } from '../../utils';
+import { getDefaultFormName } from "../../utils";
 
 import type {
   DataFormStructure,
   DataFormStructureFactory,
-} from './DataFormStructure';
-import { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
-import type { DataFormField } from './fields';
+} from "./DataFormStructure";
+import { DataFormStructureChangeEventHandler } from "./DataFormStructureChangeEventHandler";
+import type { DataFormField } from "./fields";
 
 export interface DataFormManager {
   dataFormStructure: DataFormStructure;
@@ -65,11 +65,11 @@ export class DataFormFillOutManager implements DataFormManager {
 }
 
 interface SelectableStaticElement {
-  type: 'name' | 'description';
+  type: "name" | "description";
 }
 
 interface SelectableFieldElement {
-  type: 'field';
+  type: "field";
   field: DataFormField;
 }
 
@@ -103,7 +103,7 @@ export class EditableDataFormManager implements DataFormManager {
   constructor(props: {
     buildDataFormStructure: DataFormStructureFactory;
     schema: Schema;
-    tableStructureCache: CacheManager<Table['oid'], TableStructure>;
+    tableStructureCache: CacheManager<Table["oid"], TableStructure>;
     deleteDataForm: () => Promise<unknown>;
   }) {
     this.dataFormStructure = props.buildDataFormStructure({
@@ -135,7 +135,7 @@ export class EditableDataFormManager implements DataFormManager {
 
   private selectField(field: DataFormField) {
     this.selectElement({
-      type: 'field',
+      type: "field",
       field,
     });
   }
@@ -143,18 +143,18 @@ export class EditableDataFormManager implements DataFormManager {
   private isFieldSelected(field: DataFormField) {
     const currentSelectedElement = get(this.selectedElement);
     return (
-      currentSelectedElement?.type === 'field' &&
+      currentSelectedElement?.type === "field" &&
       currentSelectedElement.field === field
     );
   }
 
   private selectParentOfSelectedElement() {
     const currentSelectedElement = get(this.selectedElement);
-    if (currentSelectedElement?.type === 'field') {
+    if (currentSelectedElement?.type === "field") {
       const { parent } = currentSelectedElement.field.container;
-      if ('kind' in parent) {
+      if ("kind" in parent) {
         this.selectElement({
-          type: 'field',
+          type: "field",
           field: parent,
         });
         return;
@@ -180,7 +180,7 @@ export class EditableDataFormManager implements DataFormManager {
   }
 
   async checkAndSetDefaultFormName() {
-    if (get(this.dataFormStructure.name).trim() === '') {
+    if (get(this.dataFormStructure.name).trim() === "") {
       const tableStructure = this.getTableStructure(
         this.dataFormStructure.baseTableOid,
       );
@@ -188,7 +188,7 @@ export class EditableDataFormManager implements DataFormManager {
       // Checking again since name could have changed manually
       if (
         result.resolvedValue &&
-        get(this.dataFormStructure.name).trim() === ''
+        get(this.dataFormStructure.name).trim() === ""
       ) {
         this.dataFormStructure.setName(
           getDefaultFormName(result.resolvedValue.table),

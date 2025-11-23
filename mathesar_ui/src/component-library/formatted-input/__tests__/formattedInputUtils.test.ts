@@ -1,4 +1,4 @@
-import { getCursorPositionAfterReformat } from '../formattedInputUtils';
+import { getCursorPositionAfterReformat } from "../formattedInputUtils";
 
 test.each(
   // prettier-ignore

@@ -1,10 +1,10 @@
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
 import {
   type ColumnMetadata,
   type RequiredColumnMetadata,
   getMetadataValue,
-} from './_common/columnDisplayOptions';
+} from "./_common/columnDisplayOptions";
 
 /**
  * See the [Postgres docs][1] for an explanation of `scale` and `precision`.
@@ -37,10 +37,10 @@ interface ColumnDefault {
 }
 
 export const allColumnPrivileges = [
-  'SELECT',
-  'INSERT',
-  'UPDATE',
-  'REFERENCES',
+  "SELECT",
+  "INSERT",
+  "UPDATE",
+  "REFERENCES",
 ] as const;
 export type ColumnPrivilege = (typeof allColumnPrivileges)[number];
 
@@ -95,7 +95,7 @@ export interface RawColumnWithMetadata extends RawColumn {
  */
 export function getColumnMetadataValue<
   Key extends keyof RequiredColumnMetadata,
->(column: Pick<RawColumnWithMetadata, 'metadata'>, k: Key) {
+>(column: Pick<RawColumnWithMetadata, "metadata">, k: Key) {
   return getMetadataValue(column.metadata ?? {}, k);
 }
 
@@ -189,7 +189,7 @@ export const columns = {
     {
       database_id: number;
       table_oid: number;
-      pkey_type: 'IDENTITY' | 'UUIDv4';
+      pkey_type: "IDENTITY" | "UUIDv4";
       drop_existing_pkey_column?: boolean;
       name?: string;
     },

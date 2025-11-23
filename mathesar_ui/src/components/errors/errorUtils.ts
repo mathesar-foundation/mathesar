@@ -1,11 +1,11 @@
-import { distinct } from 'iter-tools';
+import { distinct } from "iter-tools";
 
-import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-import { component } from '@mathesar-component-library';
-import type { ComponentWithProps } from '@mathesar-component-library/types';
+import { RpcError } from "@mathesar/packages/json-rpc-client-builder";
+import { component } from "@mathesar-component-library";
+import type { ComponentWithProps } from "@mathesar-component-library/types";
 
-import NoConnection from './customized/NoConnection.svelte';
-import UnableToConnect from './customized/UnableToConnect.svelte';
+import NoConnection from "./customized/NoConnection.svelte";
+import UnableToConnect from "./customized/UnableToConnect.svelte";
 
 const NO_CONNECTION_AVAILABLE = -28030;
 const PSYCOPG_OPERATIONAL_ERROR = -30193;
@@ -40,15 +40,15 @@ function getCustomizedRpcError({
 function getCustomizedError(
   error: GeneralizedError,
 ): string | ReturnableComponent {
-  return typeof error === 'string' ? error : getCustomizedRpcError(error);
+  return typeof error === "string" ? error : getCustomizedRpcError(error);
 }
 
 function getErrorHash(error: GeneralizedError): string {
-  if (typeof error === 'string') {
-    return JSON.stringify({ type: 'string', error });
+  if (typeof error === "string") {
+    return JSON.stringify({ type: "string", error });
   }
   const { code, message } = error;
-  return JSON.stringify({ type: 'RpcError', code, message });
+  return JSON.stringify({ type: "RpcError", code, message });
 }
 
 export function getDistinctErrors(
@@ -65,7 +65,7 @@ export function groupErrors(errors: Iterable<GeneralizedError>): {
   const richErrors: ReturnableComponent[] = [];
   for (const error of errors) {
     const customizedError = getCustomizedError(error);
-    if (typeof customizedError === 'string') {
+    if (typeof customizedError === "string") {
       stringErrors.push(customizedError);
     } else {
       richErrors.push(customizedError);

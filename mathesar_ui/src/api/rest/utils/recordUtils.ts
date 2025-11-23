@@ -1,12 +1,12 @@
-import { getErrorMessage } from '@mathesar/utils/errors';
+import { getErrorMessage } from "@mathesar/utils/errors";
 import {
   ImmutableMap,
   hasProperty,
   hasStringProperty,
   isNumber,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import { ApiError, ApiMultiError } from './errors';
+import { ApiError, ApiMultiError } from "./errors";
 
 /** Keys are column ids */
 type ColumnErrors = ImmutableMap<number, string[]>;
@@ -57,13 +57,13 @@ function mergeDetailedRecordsErrors(
 const columnErrorParsers: ((detail: unknown) => ColumnErrors | undefined)[] = [
   // Constraint violation, e.g. uniqueness check
   (d) => {
-    if (!hasProperty(d, 'constraint_columns')) {
+    if (!hasProperty(d, "constraint_columns")) {
       return undefined;
     }
     if (!Array.isArray(d.constraint_columns)) {
       return undefined;
     }
-    if (!hasStringProperty(d, 'original_details')) {
+    if (!hasStringProperty(d, "original_details")) {
       return undefined;
     }
     return new ImmutableMap(

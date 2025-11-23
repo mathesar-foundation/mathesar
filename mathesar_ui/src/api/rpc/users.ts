@@ -1,5 +1,5 @@
-import type { Language } from '@mathesar/i18n/languages/utils';
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import type { Language } from "@mathesar/i18n/languages/utils";
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
 export interface BaseUser {
   readonly full_name: string | null;
@@ -21,16 +21,16 @@ export interface User extends BaseUser {
 export const users = {
   list: rpcMethodTypeContainer<void, User[]>(),
 
-  get: rpcMethodTypeContainer<{ user_id: User['id'] }, User>(),
+  get: rpcMethodTypeContainer<{ user_id: User["id"] }, User>(),
 
   add: rpcMethodTypeContainer<{ user_def: UserDef }, User>(),
 
-  delete: rpcMethodTypeContainer<{ user_id: User['id'] }, void>(),
+  delete: rpcMethodTypeContainer<{ user_id: User["id"] }, void>(),
 
   patch_self: rpcMethodTypeContainer<BaseUser, User>(),
 
   patch_other: rpcMethodTypeContainer<
-    Partial<Omit<User, 'id'>> & { user_id: User['id'] },
+    Partial<Omit<User, "id">> & { user_id: User["id"] },
     User
   >(),
 
@@ -45,7 +45,7 @@ export const users = {
 
     revoke: rpcMethodTypeContainer<
       {
-        user_id: User['id'];
+        user_id: User["id"];
         new_password: string;
       },
       void

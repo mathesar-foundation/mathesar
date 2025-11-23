@@ -49,15 +49,15 @@
  *
  */
 
-import { map } from 'iter-tools';
+import { map } from "iter-tools";
 
-import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { ColumnMetadata } from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import type {
   AddableExploration,
   ExplorationResult,
   QueryResultColumn,
-} from '@mathesar/api/rpc/explorations';
-import { Counter } from '@mathesar/utils/Counter';
+} from "@mathesar/api/rpc/explorations";
+import { Counter } from "@mathesar/utils/Counter";
 
 /**
  * This type represents enough information about an exploration column for us to
@@ -74,8 +74,8 @@ interface ColumnAnchor {
 }
 
 function anchorTypeEq(
-  a: ColumnAnchor['type'],
-  b: ColumnAnchor['type'],
+  a: ColumnAnchor["type"],
+  b: ColumnAnchor["type"],
 ): boolean {
   if (a.name !== b.name) return false;
   if (a.item_type !== b.item_type) return false;
@@ -110,7 +110,7 @@ export interface ExplorationDisplayOptions {
 }
 
 export function validateDisplayOptions(
-  input: AddableExploration['display_options'],
+  input: AddableExploration["display_options"],
 ): ExplorationDisplayOptions {
   if (!input) {
     return {
@@ -193,11 +193,11 @@ export function* getCustomColumnWidths(opts: ExplorationDisplayOptions) {
  *   things changed at once for us to successfully reconcile the column.
  */
 type ReconciledAnchorOutcome =
-  | 'new-index'
-  | 'new-name'
-  | 'new-type'
-  | 'unchanged'
-  | 'removed';
+  | "new-index"
+  | "new-name"
+  | "new-type"
+  | "unchanged"
+  | "removed";
 
 interface ReconciledEntry {
   outcome: ReconciledAnchorOutcome;
@@ -222,11 +222,11 @@ function reconcileEntry(
   if (oldAnchor.name === newAnchorAtIndex?.name) {
     if (anchorTypeEq(oldAnchor.type, newAnchorAtIndex.type)) {
       // name:✅ index:✅ type:✅  (The happy path 🙂)
-      return { outcome: 'unchanged', entry: oldEntry };
+      return { outcome: "unchanged", entry: oldEntry };
     }
     const newEntry = { ...oldEntry, column: newAnchorAtIndex };
     // name:✅ index:✅ type:❌
-    return { outcome: 'new-type', entry: newEntry };
+    return { outcome: "new-type", entry: newEntry };
   }
 
   // Try finding the anchor via name. Use it if the type also matches.
@@ -234,7 +234,7 @@ function reconcileEntry(
   if (newAnchorAtName && anchorTypeEq(oldAnchor.type, newAnchorAtName.type)) {
     const newEntry = { ...oldEntry, column: newAnchorAtName };
     // name:✅ index:❌ type:✅
-    return { outcome: 'new-index', entry: newEntry };
+    return { outcome: "new-index", entry: newEntry };
   }
 
   // If an anchor exists that matches the index and type, then use it as a last
@@ -242,7 +242,7 @@ function reconcileEntry(
   if (oldAnchor.type === newAnchorAtIndex?.type) {
     const newEntry = { ...oldEntry, column: newAnchorAtIndex };
     // name:❌ index:✅ type:✅
-    return { outcome: 'new-name', entry: newEntry };
+    return { outcome: "new-name", entry: newEntry };
   }
 
   // Otherwise, if too much has changed, we assume the anchor has been removed.
@@ -250,7 +250,7 @@ function reconcileEntry(
   // name:❌ index:✅ type:❌
   // name:✅ index:❌ type:❌
   // name:❌ index:❌ type:❌
-  return { outcome: 'removed', entry: oldEntry };
+  return { outcome: "removed", entry: oldEntry };
 }
 
 export type Reconciliation<T> =
@@ -271,7 +271,7 @@ function reconcileColumnDisplayOptions(
   const outcomeCounts = new Counter(map((e) => e.outcome, reconciledEntries));
 
   // If nothing changed — the happy path 🙂
-  if (outcomeCounts.isSubsetOf(['unchanged'])) {
+  if (outcomeCounts.isSubsetOf(["unchanged"])) {
     return { hasChanged: false };
   }
 
@@ -279,18 +279,18 @@ function reconcileColumnDisplayOptions(
   // reconciled display options for those changes.
   if (
     // The user has rearranged or deleted some columns
-    outcomeCounts.isSubsetOf(['unchanged', 'removed', 'new-index']) ||
+    outcomeCounts.isSubsetOf(["unchanged", "removed", "new-index"]) ||
     // The user has renamed some columns
-    outcomeCounts.isSubsetOf(['unchanged', 'new-name']) ||
+    outcomeCounts.isSubsetOf(["unchanged", "new-name"]) ||
     // Some types in Postgres have changed
-    outcomeCounts.isSubsetOf(['unchanged', 'new-type'])
+    outcomeCounts.isSubsetOf(["unchanged", "new-type"])
   ) {
     // Return all entries
     return {
       hasChanged: true,
       newValue: Object.fromEntries(
         reconciledEntries
-          .filter((r) => r.outcome !== 'removed')
+          .filter((r) => r.outcome !== "removed")
           .map(({ entry }) => [entry.column.index, entry]),
       ),
     };
@@ -303,7 +303,7 @@ function reconcileColumnDisplayOptions(
     hasChanged: true,
     newValue: Object.fromEntries(
       reconciledEntries
-        .filter((reconciledEntry) => reconciledEntry.outcome === 'unchanged')
+        .filter((reconciledEntry) => reconciledEntry.outcome === "unchanged")
         .map(({ entry }) => [entry.column.index, entry]),
     ),
   };

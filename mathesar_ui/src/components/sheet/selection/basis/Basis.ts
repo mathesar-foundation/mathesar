@@ -1,7 +1,7 @@
-import type { ImmutableSet } from '@mathesar-component-library';
+import type { ImmutableSet } from "@mathesar-component-library";
 
-import type { Direction } from '../Direction';
-import type Plane from '../Plane';
+import type { Direction } from "../Direction";
+import type Plane from "../Plane";
 
 /**
  * This is the common polymorphic type implemented by other basis types which
@@ -24,7 +24,7 @@ export default interface Basis {
    * What operation should be performed when pasting data into the selected
    * cells.
    */
-  readonly pasteOperation: 'update' | 'insert' | 'none';
+  readonly pasteOperation: "update" | "insert" | "none";
 
   /** Ids of columns in which _all_ data cells are selected */
   getFullySelectedColumnIds(plane: Plane): ImmutableSet<string>;

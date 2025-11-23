@@ -1,6 +1,6 @@
-import { some } from 'iter-tools';
-import type { ActionReturn } from 'svelte/action';
-import { type Readable, get } from 'svelte/store';
+import { some } from "iter-tools";
+import type { ActionReturn } from "svelte/action";
+import { type Readable, get } from "svelte/store";
 
 type CallbackFn = (e: Event) => void;
 interface Options {
@@ -36,9 +36,9 @@ export default function clickOffBounds(
    * should fire a mousedown event too.
    */
   const events =
-    'onpointerdown' in document.body
-      ? ['pointerdown']
-      : ['mousedown', 'contextmenu'];
+    "onpointerdown" in document.body
+      ? ["pointerdown"]
+      : ["mousedown", "contextmenu"];
 
   events.forEach((event) => {
     document.body.addEventListener(event, outOfBoundsListener, true);

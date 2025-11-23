@@ -1,4 +1,4 @@
-import { enumerate } from 'iter-tools';
+import { enumerate } from "iter-tools";
 
 export interface StructuredCell {
   /**
@@ -21,33 +21,33 @@ function validateCell(input: unknown): StructuredCell {
   // I also thought about bringing in Zod for this, but was reluctant to add
   // another dependency.
 
-  if (typeof input !== 'object') {
-    throw new Error('StructuredCell must be an object.');
+  if (typeof input !== "object") {
+    throw new Error("StructuredCell must be an object.");
   }
   if (input === null) {
-    throw new Error('StructuredCell must be an object.');
+    throw new Error("StructuredCell must be an object.");
   }
-  if (!('type' in input)) {
-    throw new Error('StructuredCell must have a `type` property.');
+  if (!("type" in input)) {
+    throw new Error("StructuredCell must have a `type` property.");
   }
-  if (typeof (input as { type: unknown }).type !== 'string') {
-    throw new Error('StructuredCell `type` property must be a string.');
+  if (typeof (input as { type: unknown }).type !== "string") {
+    throw new Error("StructuredCell `type` property must be a string.");
   }
-  if (!('raw' in input)) {
-    throw new Error('StructuredCell must have a `raw` property.');
+  if (!("raw" in input)) {
+    throw new Error("StructuredCell must have a `raw` property.");
   }
-  if (!('formatted' in input)) {
-    throw new Error('StructuredCell must have a `formatted` property.');
+  if (!("formatted" in input)) {
+    throw new Error("StructuredCell must have a `formatted` property.");
   }
-  if (typeof (input as { formatted: unknown }).formatted !== 'string') {
-    throw new Error('StructuredCell `formatted` property must be a string.');
+  if (typeof (input as { formatted: unknown }).formatted !== "string") {
+    throw new Error("StructuredCell `formatted` property must be a string.");
   }
   return input as StructuredCell;
 }
 
 function validateRow(input: unknown): StructuredCell[] {
   if (!Array.isArray(input)) {
-    throw new Error('StructuredCells must be an array.');
+    throw new Error("StructuredCells must be an array.");
   }
   return input.map(validateCell);
 }
@@ -58,18 +58,18 @@ function validateRow(input: unknown): StructuredCell[] {
  */
 function assertRowConsistency(a: StructuredCell[], b: StructuredCell[]): void {
   if (a.length !== b.length) {
-    throw new Error('StructuredCell rows must have the same length.');
+    throw new Error("StructuredCell rows must have the same length.");
   }
   for (const [i, cell] of enumerate(a)) {
     if (cell.type !== b[i].type) {
-      throw new Error('StructuredCell rows must have the same types.');
+      throw new Error("StructuredCell rows must have the same types.");
     }
   }
 }
 
 function* validateRows(input: unknown): Generator<StructuredCell[]> {
   if (!Array.isArray(input)) {
-    throw new Error('StructuredCellRows must be an array.');
+    throw new Error("StructuredCellRows must be an array.");
   }
 
   const iter = input[Symbol.iterator]();

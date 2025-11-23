@@ -1,12 +1,12 @@
-import type { Role } from '@mathesar/models/Role';
-import type { ImmutableMap } from '@mathesar-component-library';
+import type { Role } from "@mathesar/models/Role";
+import type { ImmutableMap } from "@mathesar-component-library";
 
-import type { RolePrivileges } from '../permissionsUtils';
+import type { RolePrivileges } from "../permissionsUtils";
 
 import {
   type AccessLevelConfig,
   RoleAccessLevelAndPrivileges,
-} from './RoleAccessLevelAndPrivileges';
+} from "./RoleAccessLevelAndPrivileges";
 
 export interface AccessControlConfig<AccessLevel, Privilege> {
   allPrivileges: {
@@ -21,7 +21,7 @@ export interface AccessControlConfig<AccessLevel, Privilege> {
 
 export function getObjectAccessPrivilegeMap<A, P>(
   accessLevelConfig: readonly AccessLevelConfig<A, P>[],
-  privilegesForRole: ImmutableMap<Role['oid'], RolePrivileges<P>>,
+  privilegesForRole: ImmutableMap<Role["oid"], RolePrivileges<P>>,
 ) {
   return privilegesForRole.mapValues(
     (entry) =>

@@ -1,23 +1,23 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
 import type {
   FkConstraint,
   RawConstraint,
-} from '@mathesar/api/rpc/constraints';
-import { isDefinedNonNullable } from '@mathesar/component-library';
+} from "@mathesar/api/rpc/constraints";
+import { isDefinedNonNullable } from "@mathesar/component-library";
 import {
   type ValidationOutcome,
   invalid,
   valid,
-} from '@mathesar/components/form';
-import type { Table } from '@mathesar/models/Table';
+} from "@mathesar/components/form";
+import type { Table } from "@mathesar/models/Table";
 import {
   type ProcessedColumn,
   constraintIsFk,
-} from '@mathesar/stores/table-data';
+} from "@mathesar/stores/table-data";
 
-import type { LinkedTable } from './columnExtractionTypes';
+import type { LinkedTable } from "./columnExtractionTypes";
 
 function getLinkedTable({
   fkConstraint,
@@ -67,7 +67,7 @@ export function validateTableIsNotLinkedViaSelectedColumn(
     linkedTable.columns.some((c) => c.id === selectedColumn.id),
   );
   const msg = (c: string, t: string) =>
-    get(_)('cannot_move_linked_column_to_linked_table', {
+    get(_)("cannot_move_linked_column_to_linked_table", {
       values: { columnName: c, tableName: t },
     });
   return offendingColumn

@@ -29,10 +29,10 @@ export interface Props {
   instanceProps: {
     lastMeasuredIndex: number;
     itemMetadataMap: Record<number, ItemMetaData>;
-    styleCache: Record<number, Item['style']>;
+    styleCache: Record<number, Item["style"]>;
   };
   isScrolling: boolean;
-  scrollDirection: 'forward' | 'backward';
+  scrollDirection: "forward" | "backward";
   itemCount: number;
   overscanCount: number;
   scrollOffset: number;
@@ -47,7 +47,7 @@ export interface ItemInfo {
   stopIndex: number;
 }
 
-const defaultItemKey: Props['itemKey'] = (index: number) => index;
+const defaultItemKey: Props["itemKey"] = (index: number) => index;
 
 function getItemMetadata(props: Props, index: number): ItemMetaData {
   const { itemSize, instanceProps } = props;
@@ -181,11 +181,11 @@ function getRangeToRender(props: Props): number[] {
   // Overscan by one item in each direction so that tab/focus works.
   // If there isn't at least one extra item, tab loops back around.
   const overscanBackward =
-    !isScrolling || scrollDirection === 'backward'
+    !isScrolling || scrollDirection === "backward"
       ? Math.max(1, overscanCount)
       : 1;
   const overscanForward =
-    !isScrolling || scrollDirection === 'forward'
+    !isScrolling || scrollDirection === "forward"
       ? Math.max(1, overscanCount)
       : 1;
 
@@ -197,10 +197,10 @@ function getRangeToRender(props: Props): number[] {
   ];
 }
 
-function getItemStyle(props: Props, index: number): Item['style'] {
+function getItemStyle(props: Props, index: number): Item["style"] {
   const { instanceProps } = props;
   const { styleCache } = instanceProps;
-  let style: Item['style'];
+  let style: Item["style"];
   if (Object.prototype.hasOwnProperty.call(styleCache, index)) {
     style = styleCache[index];
   } else {
@@ -208,11 +208,11 @@ function getItemStyle(props: Props, index: number): Item['style'] {
     const { size } = instanceProps.itemMetadataMap[index];
 
     style = {
-      position: 'absolute',
+      position: "absolute",
       left: 0,
       top: offset,
       height: size,
-      width: '100%',
+      width: "100%",
     };
 
     styleCache[index] = style;

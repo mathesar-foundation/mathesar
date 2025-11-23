@@ -6,9 +6,9 @@ import {
   type Writable,
   derived,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import type ModalStack from './ModalStack';
+import type ModalStack from "./ModalStack";
 
 /**
  * This function generates a new writable store for the `isOpen` property of

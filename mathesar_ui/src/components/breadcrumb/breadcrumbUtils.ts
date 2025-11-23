@@ -1,16 +1,16 @@
-import { getContext, setContext } from 'svelte';
-import { type Writable, writable } from 'svelte/store';
+import { getContext, setContext } from "svelte";
+import { type Writable, writable } from "svelte/store";
 
-import type { BreadcrumbItem, BreadcrumbItemDatabase } from './breadcrumbTypes';
+import type { BreadcrumbItem, BreadcrumbItemDatabase } from "./breadcrumbTypes";
 
-const contextKey = Symbol('breadcrumb items store');
+const contextKey = Symbol("breadcrumb items store");
 
-export const BREADCRUMB_SELECTOR_ROW_CLASS = 'breadcrumb-selector-row';
+export const BREADCRUMB_SELECTOR_ROW_CLASS = "breadcrumb-selector-row";
 
 export function breadcrumbItemIsDatabase(
   item: BreadcrumbItem,
 ): item is BreadcrumbItemDatabase {
-  return item.type === 'database';
+  return item.type === "database";
 }
 
 export function setBreadcrumbItemsInContext(items: BreadcrumbItem[]): void {

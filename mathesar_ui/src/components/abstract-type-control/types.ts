@@ -1,4 +1,4 @@
 export type {
   ColumnWithAbstractType,
   ColumnTypeOptionsSaveArgs,
-} from './utils';
+} from "./utils";

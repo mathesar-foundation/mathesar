@@ -5,11 +5,11 @@ import type {
   SqlExpr,
   SqlFunction,
   SqlLiteral,
-} from '@mathesar/api/rpc/records';
+} from "@mathesar/api/rpc/records";
 
-import type { FilterId } from '../abstract-types/types';
+import type { FilterId } from "../abstract-types/types";
 
-export type FilterCombination = 'and' | 'or';
+export type FilterCombination = "and" | "or";
 
 export interface FilterEntry {
   readonly columnId: number;
@@ -42,55 +42,55 @@ export interface FilterEntry {
  * for this compatibility layer.
  */
 function filterEntryToSqlExpr(filterEntry: FilterEntry): SqlExpr {
-  const column: SqlColumn = { type: 'attnum', value: filterEntry.columnId };
+  const column: SqlColumn = { type: "attnum", value: filterEntry.columnId };
 
   /** Generate an SqlLiteral value */
   function value(v = filterEntry.value): SqlLiteral {
-    return { type: 'literal', value: String(v) };
+    return { type: "literal", value: String(v) };
   }
 
   /** Generate an SqlComparison */
   function cmp(
-    type: SqlComparison['type'],
+    type: SqlComparison["type"],
     args: [SqlExpr, SqlExpr] = [column, value()],
   ): SqlComparison {
     return { type, args };
   }
 
   /** Generate an SqlFunction */
-  function fn(type: SqlFunction['type'], arg: SqlExpr = column): SqlFunction {
+  function fn(type: SqlFunction["type"], arg: SqlExpr = column): SqlFunction {
     return { type, args: [arg] };
   }
 
   /** Generate an SqlComparison of a JSON array length vs a value */
   function arrayLengthCmp(
-    type: SqlComparison['type'],
+    type: SqlComparison["type"],
     v = value(),
   ): SqlComparison {
-    return cmp(type, [fn('json_array_length'), v]);
+    return cmp(type, [fn("json_array_length"), v]);
   }
 
   const compatibilityMap: Record<FilterId, SqlExpr> = {
-    contains_case_insensitive: cmp('contains_case_insensitive'),
-    email_domain_contains: cmp('contains', [fn('email_domain'), value()]),
-    email_domain_equals: cmp('equal', [fn('email_domain'), value()]),
-    equal: cmp('equal'),
-    greater_or_equal: cmp('greater_or_equal'),
-    greater: cmp('greater'),
-    json_array_contains: cmp('json_array_contains'),
-    json_array_length_equals: arrayLengthCmp('equal'),
-    json_array_length_greater_or_equal: arrayLengthCmp('greater_or_equal'),
-    json_array_length_greater_than: arrayLengthCmp('greater'),
-    json_array_length_less_or_equal: arrayLengthCmp('lesser_or_equal'),
-    json_array_length_less_than: arrayLengthCmp('lesser'),
-    json_array_not_empty: arrayLengthCmp('greater', value(0)),
-    lesser_or_equal: cmp('lesser_or_equal'),
-    lesser: cmp('lesser'),
-    not_null: fn('not_null'),
-    null: fn('null'),
-    starts_with_case_insensitive: cmp('starts_with'),
-    uri_authority_contains: cmp('contains', [fn('uri_authority'), value()]),
-    uri_scheme_equals: cmp('equal', [fn('uri_scheme'), value()]),
+    contains_case_insensitive: cmp("contains_case_insensitive"),
+    email_domain_contains: cmp("contains", [fn("email_domain"), value()]),
+    email_domain_equals: cmp("equal", [fn("email_domain"), value()]),
+    equal: cmp("equal"),
+    greater_or_equal: cmp("greater_or_equal"),
+    greater: cmp("greater"),
+    json_array_contains: cmp("json_array_contains"),
+    json_array_length_equals: arrayLengthCmp("equal"),
+    json_array_length_greater_or_equal: arrayLengthCmp("greater_or_equal"),
+    json_array_length_greater_than: arrayLengthCmp("greater"),
+    json_array_length_less_or_equal: arrayLengthCmp("lesser_or_equal"),
+    json_array_length_less_than: arrayLengthCmp("lesser"),
+    json_array_not_empty: arrayLengthCmp("greater", value(0)),
+    lesser_or_equal: cmp("lesser_or_equal"),
+    lesser: cmp("lesser"),
+    not_null: fn("not_null"),
+    null: fn("null"),
+    starts_with_case_insensitive: cmp("starts_with"),
+    uri_authority_contains: cmp("contains", [fn("uri_authority"), value()]),
+    uri_scheme_equals: cmp("equal", [fn("uri_scheme"), value()]),
   };
 
   return compatibilityMap[filterEntry.conditionId];
@@ -111,7 +111,7 @@ function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
   };
 }
 
-export const filterCombinations: FilterCombination[] = ['and', 'or'];
+export const filterCombinations: FilterCombination[] = ["and", "or"];
 export const defaultFilterCombination = filterCombinations[0];
 
 export type TerseFiltering = [FilterCombination, TerseFilterEntry[]];
@@ -202,7 +202,7 @@ export class Filtering {
     return true;
   }
 
-  recordsRequestParams(): Pick<RecordsListParams, 'filter'> {
+  recordsRequestParams(): Pick<RecordsListParams, "filter"> {
     if (this.entries.length === 0) {
       return {};
     }

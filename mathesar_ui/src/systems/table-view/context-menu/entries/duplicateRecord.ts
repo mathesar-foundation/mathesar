@@ -1,9 +1,9 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import { iconDuplicateRecord } from '@mathesar/icons';
-import type { TabularData } from '@mathesar/stores/table-data';
-import { buttonMenuEntry } from '@mathesar-component-library';
+import { iconDuplicateRecord } from "@mathesar/icons";
+import type { TabularData } from "@mathesar/stores/table-data";
+import { buttonMenuEntry } from "@mathesar-component-library";
 
 export function* duplicateRecord(p: {
   rowId: string;
@@ -15,7 +15,7 @@ export function* duplicateRecord(p: {
 
   yield buttonMenuEntry({
     icon: iconDuplicateRecord,
-    label: get(_)('duplicate_record'),
+    label: get(_)("duplicate_record"),
     onClick: () => {
       const row = rows.get(p.rowId);
       if (!row) return;

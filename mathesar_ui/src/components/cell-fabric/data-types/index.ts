@@ -1,20 +1,20 @@
-import arrayFactory from './arrayFactory';
-import boolean from './boolean';
-import date from './date';
-import datetime from './datetime';
-import duration from './duration';
-import file from './file';
-import money from './money';
-import number from './number';
-import string from './string';
-import time from './time';
+import arrayFactory from "./arrayFactory";
+import boolean from "./boolean";
+import date from "./date";
+import datetime from "./datetime";
+import duration from "./duration";
+import file from "./file";
+import money from "./money";
+import number from "./number";
+import string from "./string";
+import time from "./time";
 import type {
   CellComponentFactory,
   CellDataType,
   CompoundCellDataTypes,
   SimpleCellDataTypes,
-} from './typeDefinitions';
-import uri from './uri';
+} from "./typeDefinitions";
+import uri from "./uri";
 
 const simpleDataTypeComponentFactories: Record<
   SimpleCellDataTypes,

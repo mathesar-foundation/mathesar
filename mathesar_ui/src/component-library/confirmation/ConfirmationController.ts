@@ -1,8 +1,8 @@
-import { type Writable, writable } from 'svelte/store';
+import { type Writable, writable } from "svelte/store";
 
-import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
-import type { ModalController } from '@mathesar-component-library-dir/modal';
-import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
+import type { IconProps } from "@mathesar-component-library-dir/icon/IconTypes";
+import type { ModalController } from "@mathesar-component-library-dir/modal";
+import type { ComponentAndProps } from "@mathesar-component-library-dir/types";
 
 interface ButtonDetails {
   label: string;
@@ -21,12 +21,12 @@ export interface ConfirmationProps<T> {
 }
 
 const baseConfirmationProps: ConfirmationProps<unknown> = {
-  body: 'Are you sure?',
+  body: "Are you sure?",
   proceedButton: {
-    label: 'Yes',
+    label: "Yes",
   },
   cancelButton: {
-    label: 'Cancel',
+    label: "Cancel",
   },
   onProceed: () => Promise.resolve(),
   onSuccess: () => {},

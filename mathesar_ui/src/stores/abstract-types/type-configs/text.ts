@@ -1,47 +1,47 @@
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { DbType } from '@mathesar/AppTypes';
-import { iconUiTypeText } from '@mathesar/icons';
-import type { FormValues } from '@mathesar-component-library/types';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import type { DbType } from "@mathesar/AppTypes";
+import { iconUiTypeText } from "@mathesar/icons";
+import type { FormValues } from "@mathesar-component-library/types";
 
-import { DB_TYPES } from '../dbTypes';
+import { DB_TYPES } from "../dbTypes";
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
   AbstractTypeDbConfig,
-} from '../types';
+} from "../types";
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {
     restrictFieldSize: {
-      type: 'boolean',
+      type: "boolean",
       default: false,
     },
     length: {
-      type: 'integer',
+      type: "integer",
       default: 255,
       validation: {
-        checks: ['isEmpty'],
+        checks: ["isEmpty"],
       },
     },
   },
   layout: {
-    orientation: 'vertical',
+    orientation: "vertical",
     elements: [
       {
-        type: 'input',
-        variable: 'restrictFieldSize',
-        label: 'Set a maximum length',
+        type: "input",
+        variable: "restrictFieldSize",
+        label: "Set a maximum length",
       },
       {
-        type: 'if',
-        variable: 'restrictFieldSize',
-        condition: 'eq',
+        type: "if",
+        variable: "restrictFieldSize",
+        condition: "eq",
         value: true,
         elements: [
           {
-            type: 'input',
-            variable: 'length',
-            label: 'Field Size Limit',
+            type: "input",
+            variable: "length",
+            label: "Field Size Limit",
           },
         ],
       },
@@ -52,9 +52,9 @@ const dbForm: AbstractTypeConfigForm = {
 function determineDbType(dbFormValues: FormValues, columnType: DbType): DbType {
   if (dbFormValues.restrictFieldSize) {
     const { length } = dbFormValues;
-    if (typeof length === 'string' || typeof length === 'number') {
+    if (typeof length === "string" || typeof length === "number") {
       const integerValueOfLength =
-        typeof length === 'string' ? parseInt(length, 10) : length;
+        typeof length === "string" ? parseInt(length, 10) : length;
       if (integerValueOfLength > 255) {
         return DB_TYPES.CHARACTER_VARYING;
       }
@@ -69,9 +69,9 @@ function determineDbType(dbFormValues: FormValues, columnType: DbType): DbType {
 function determineDbTypeAndOptions(
   dbFormValues: FormValues,
   columnType: DbType,
-): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
+): ReturnType<AbstractTypeDbConfig["determineDbTypeAndOptions"]> {
   const dbType = determineDbType(dbFormValues, columnType);
-  const typeOptions: RawColumnWithMetadata['type_options'] = {};
+  const typeOptions: RawColumnWithMetadata["type_options"] = {};
   if (dbType === DB_TYPES.CHARACTER || dbType === DB_TYPES.CHARACTER_VARYING) {
     typeOptions.length = Number(dbFormValues.length);
   }
@@ -83,7 +83,7 @@ function determineDbTypeAndOptions(
 
 function constructDbFormValuesFromTypeOptions(
   columnType: DbType,
-  typeOptions: RawColumnWithMetadata['type_options'],
+  typeOptions: RawColumnWithMetadata["type_options"],
 ): FormValues {
   switch (columnType) {
     case DB_TYPES.CHARACTER:
@@ -100,10 +100,10 @@ function constructDbFormValuesFromTypeOptions(
 }
 
 const textType: AbstractTypeConfiguration = {
-  getIcon: () => ({ ...iconUiTypeText, label: 'Text' }),
+  getIcon: () => ({ ...iconUiTypeText, label: "Text" }),
   defaultDbType: DB_TYPES.CHARACTER_VARYING,
   cellInfo: {
-    type: 'string',
+    type: "string",
     config: {
       multiLine: true,
     },

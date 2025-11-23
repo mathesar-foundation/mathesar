@@ -1,11 +1,11 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
 import type {
   QueryInstanceSummarizationTransformation,
   QuerySummarizationFunctionId,
-} from '@mathesar/api/rpc/explorations';
-import { ImmutableMap } from '@mathesar-component-library';
+} from "@mathesar/api/rpc/explorations";
+import { ImmutableMap } from "@mathesar-component-library";
 
 export interface QuerySummarizationAggregationEntry {
   inputAlias: string;
@@ -29,9 +29,9 @@ export interface QuerySummarizationTransformationEntry {
 export class QuerySummarizationTransformationModel
   implements QuerySummarizationTransformationEntry
 {
-  type = 'summarize' as const;
+  type = "summarize" as const;
 
-  name = get(_)('summarization');
+  name = get(_)("summarization");
 
   columnIdentifier;
 
@@ -48,7 +48,7 @@ export class QuerySummarizationTransformationModel
       | QueryInstanceSummarizationTransformation
       | QuerySummarizationTransformationEntry,
   ) {
-    if ('columnIdentifier' in transformation) {
+    if ("columnIdentifier" in transformation) {
       this.columnIdentifier = transformation.columnIdentifier;
       this.preprocFunctionIdentifier = transformation.preprocFunctionIdentifier;
       this.aggregations = transformation.aggregations;
@@ -106,7 +106,7 @@ export class QuerySummarizationTransformationModel
     const aggregationEntries = [...this.aggregations.entries()];
     const groupingEntries = [...this.groups.entries()];
 
-    const spec: QueryInstanceSummarizationTransformation['spec'] = {
+    const spec: QueryInstanceSummarizationTransformation["spec"] = {
       base_grouping_column: this.columnIdentifier,
       grouping_expressions: [
         {
@@ -130,7 +130,7 @@ export class QuerySummarizationTransformationModel
     };
 
     return {
-      type: 'summarize',
+      type: "summarize",
       spec,
     };
   }

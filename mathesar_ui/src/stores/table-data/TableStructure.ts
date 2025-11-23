@@ -1,31 +1,31 @@
-import { type Readable, derived } from 'svelte/store';
+import { type Readable, derived } from "svelte/store";
 
-import { api } from '@mathesar/api/rpc';
-import type { RawConstraint } from '@mathesar/api/rpc/constraints';
+import { api } from "@mathesar/api/rpc";
+import type { RawConstraint } from "@mathesar/api/rpc/constraints";
 import {
   type TableLink,
   getLinksInThisTable,
   getLinksToThisTable,
-} from '@mathesar/api/rpc/tables';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { Schema } from '@mathesar/models/Schema';
-import { Table } from '@mathesar/models/Table';
+} from "@mathesar/api/rpc/tables";
+import type { DBObjectEntry } from "@mathesar/AppTypes";
+import type { Schema } from "@mathesar/models/Schema";
+import { Table } from "@mathesar/models/Table";
 import {
   type RpcError,
   batchRun,
-} from '@mathesar/packages/json-rpc-client-builder';
-import AsyncStore, { type AsyncStoreValue } from '@mathesar/stores/AsyncStore';
-import { orderProcessedColumns } from '@mathesar/utils/tables';
+} from "@mathesar/packages/json-rpc-client-builder";
+import AsyncStore, { type AsyncStoreValue } from "@mathesar/stores/AsyncStore";
+import { orderProcessedColumns } from "@mathesar/utils/tables";
 
 import {
   ProcessedColumn,
   type ProcessedColumns,
   type ProcessedColumnsStore,
-} from './processedColumns';
+} from "./processedColumns";
 
 export interface TableStructureProps {
   schema: Schema;
-  oid: Table['oid'];
+  oid: Table["oid"];
 }
 
 export interface TableStructureSubstance {
@@ -89,7 +89,7 @@ function getTableStructureAsyncStore(tableProps: TableStructureProps) {
 }
 
 export class TableStructure {
-  oid: DBObjectEntry['id'];
+  oid: DBObjectEntry["id"];
 
   processedColumns: ProcessedColumnsStore;
 

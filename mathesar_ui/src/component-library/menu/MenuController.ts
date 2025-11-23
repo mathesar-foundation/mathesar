@@ -1,13 +1,13 @@
-import { type Readable, derived } from 'svelte/store';
+import { type Readable, derived } from "svelte/store";
 
 import {
   type MessageSender,
   WritableMap,
   oneWayMessageChannel,
-} from '@mathesar-component-library-dir/common/utils';
-import { makeContext } from '@mathesar-component-library-dir/common/utils/contextUtils';
-import { DelayedStore } from '@mathesar-component-library-dir/common/utils/DelayedStore';
-import ReductionStore from '@mathesar-component-library-dir/common/utils/ReductionStore';
+} from "@mathesar-component-library-dir/common/utils";
+import { makeContext } from "@mathesar-component-library-dir/common/utils/contextUtils";
+import { DelayedStore } from "@mathesar-component-library-dir/common/utils/DelayedStore";
+import ReductionStore from "@mathesar-component-library-dir/common/utils/ReductionStore";
 
 /**
  * When at least one cell within the column is present, then the column is
@@ -39,7 +39,7 @@ export interface SubMenuController {
 
 function isSubMenuTrigger(element: unknown): element is HTMLButtonElement {
   if (!(element instanceof HTMLButtonElement)) return false;
-  return element.getAttribute('data-menu-item-sub-menu') !== null;
+  return element.getAttribute("data-menu-item-sub-menu") !== null;
 }
 
 export class MenuController {

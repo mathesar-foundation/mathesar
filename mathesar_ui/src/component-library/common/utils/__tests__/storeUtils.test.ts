@@ -1,8 +1,8 @@
-import { type Readable, get, writable } from 'svelte/store';
+import { type Readable, get, writable } from "svelte/store";
 
-import { asyncDynamicDerived, collapse, unite } from '../storeUtils';
+import { asyncDynamicDerived, collapse, unite } from "../storeUtils";
 
-test('collapse', () => {
+test("collapse", () => {
   const innerA = writable(21);
   const innerB = writable(31);
   const outer = writable(innerA);
@@ -16,7 +16,7 @@ test('collapse', () => {
   expect(get(collapsed)).toBe(32);
 });
 
-test('unite', () => {
+test("unite", () => {
   const a = writable(21);
   const b = writable(31);
   const all = [a, b];
@@ -37,7 +37,7 @@ function track<T>(store: Readable<T>) {
   };
 }
 
-describe('asyncDynamicDerived', () => {
+describe("asyncDynamicDerived", () => {
   const innerA = writable(1);
   const innerB = writable(2);
   const nestedInner = writable(3);
@@ -75,7 +75,7 @@ describe('asyncDynamicDerived', () => {
     reset();
   });
 
-  test('store should compute when source changes', () => {
+  test("store should compute when source changes", () => {
     const { values, unsub } = track(result);
 
     const firstValue = 1 + 2 + 3;
@@ -96,7 +96,7 @@ describe('asyncDynamicDerived', () => {
     unsub();
   });
 
-  test('store should compute when inner stores change', async () => {
+  test("store should compute when inner stores change", async () => {
     const { values, unsub } = track(result);
 
     const firstValue = 1 + 2 + 3;
@@ -122,7 +122,7 @@ describe('asyncDynamicDerived', () => {
     unsub();
   });
 
-  test('inner store changes should be batched', async () => {
+  test("inner store changes should be batched", async () => {
     const { values, unsub } = track(result);
 
     const firstValue = 1 + 2 + 3;
@@ -150,7 +150,7 @@ describe('asyncDynamicDerived', () => {
     unsub();
   });
 
-  test('inner stores should not trigger re-compute immediately after source changes', async () => {
+  test("inner stores should not trigger re-compute immediately after source changes", async () => {
     const { values, unsub } = track(result);
 
     const firstValue = 1 + 2 + 3;

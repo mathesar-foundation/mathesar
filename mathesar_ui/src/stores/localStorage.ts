@@ -1,6 +1,6 @@
-import type { UiThemePreference } from '@mathesar/utils/uiThemePreference';
+import type { UiThemePreference } from "@mathesar/utils/uiThemePreference";
 
-import LocalStorageStore from './LocalStorageStore';
+import LocalStorageStore from "./LocalStorageStore";
 
 // prettier-ignore
 export const LOCAL_STORAGE_KEYS = {
@@ -100,7 +100,7 @@ export const tableInspectorColumnActionsVisible = new LocalStorageStore({
 
 export const uiThemePreference = new LocalStorageStore({
   key: LOCAL_STORAGE_KEYS.uiThemePreference,
-  defaultValue: 'system' as UiThemePreference,
+  defaultValue: "system" as UiThemePreference,
 });
 
 export const dataExplorerLeftSidebarWidth = new LocalStorageStore({

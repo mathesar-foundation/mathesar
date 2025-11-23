@@ -1,29 +1,29 @@
-import { get } from 'svelte/store';
+import { get } from "svelte/store";
 
-import { requiredField } from '../field';
-import { makeForm } from '../form';
-import { comboInvalidIf, min, uniqueWith } from '../validators';
+import { requiredField } from "../field";
+import { makeForm } from "../form";
+import { comboInvalidIf, min, uniqueWith } from "../validators";
 
-type Beverage = 'juice' | 'water' | 'beer';
+type Beverage = "juice" | "water" | "beer";
 
-const tooYoung = 'Too young.';
-const noBeer = 'Too young for beer.';
-const nameTakenMsg = 'Name already taken.';
+const tooYoung = "Too young.";
+const noBeer = "Too young for beer.";
+const nameTakenMsg = "Name already taken.";
 
-test('ReadableForm', async () => {
-  const name = requiredField<string>('', [uniqueWith(['Jim'], nameTakenMsg)]);
+test("ReadableForm", async () => {
+  const name = requiredField<string>("", [uniqueWith(["Jim"], nameTakenMsg)]);
   const age = requiredField<number | undefined>(undefined, [min(16, tooYoung)]);
   const beverage = requiredField<undefined | Beverage>(undefined);
   const form = makeForm({ name, age, beverage }, [
-    comboInvalidIf([age, beverage], ([a, b]) => b === 'beer' && a < 21, noBeer),
+    comboInvalidIf([age, beverage], ([a, b]) => b === "beer" && a < 21, noBeer),
   ]);
 
   // Form with empty values
-  expect(get(name)).toBe('');
+  expect(get(name)).toBe("");
   expect(get(age)).toBe(undefined);
   expect(get(beverage)).toBe(undefined);
   expect(get(form).values).toEqual({
-    name: '',
+    name: "",
     age: undefined,
     beverage: undefined,
   });
@@ -34,13 +34,13 @@ test('ReadableForm', async () => {
   //
   // - Name is already taken
   // - Age is too young on its own
-  name.set('Jim');
+  name.set("Jim");
   age.set(15);
-  beverage.set('water');
-  expect(get(form).values).toEqual({ name: 'Jim', age: 15, beverage: 'water' });
-  expect(get(name)).toBe('Jim');
+  beverage.set("water");
+  expect(get(form).values).toEqual({ name: "Jim", age: 15, beverage: "water" });
+  expect(get(name)).toBe("Jim");
   expect(get(age)).toBe(15);
-  expect(get(beverage)).toBe('water');
+  expect(get(beverage)).toBe("water");
   expect(get(name.errors)).toEqual([nameTakenMsg]);
   expect(get(age.errors)).toEqual([tooYoung]);
   expect(get(beverage.errors)).toEqual([]);
@@ -49,13 +49,13 @@ test('ReadableForm', async () => {
   // Fix the form validation problems
   age.set(20);
   expect(get(age.errors)).toEqual([]);
-  name.set('Lisa');
+  name.set("Lisa");
   expect(get(name.errors)).toEqual([]);
   expect(get(form).hasChanges).toBe(true);
   expect(get(form).isValid).toBe(true);
 
   // Change one field to a value that causes a combo validator to fail
-  beverage.set('beer');
+  beverage.set("beer");
   expect(get(beverage.errors)).toEqual([]);
   expect(get(beverage.isValid)).toEqual(true);
   expect(get(form).values).toBeDefined(); // <- QUIRK (See below)

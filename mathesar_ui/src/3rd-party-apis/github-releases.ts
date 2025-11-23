@@ -1,4 +1,4 @@
-import { getExternalApi } from '@mathesar/api/rest/utils/requestUtils';
+import { getExternalApi } from "@mathesar/api/rest/utils/requestUtils";
 
 /**
  * GitHub's REST API gives way more info than we have here. See [docs][1]. But
@@ -15,7 +15,7 @@ export interface GitHubRelease {
 
 // Toggle these lines if you want to test with a repo that has more releases.
 // const baseUrl = 'https://api.github.com/repos/microsoft/vscode';
-const baseUrl = 'https://api.github.com/repos/centerofci/mathesar';
+const baseUrl = "https://api.github.com/repos/centerofci/mathesar";
 
 /**
  * GitHub's documentation recommends that we set the HTTP header
@@ -35,7 +35,7 @@ function getOneRelease(endpoint: string): Promise<GitHubRelease | undefined> {
 export const gitHubReleases = {
   /** @throws Error if unable to reach GitHub */
   fetchLatest(): Promise<GitHubRelease | undefined> {
-    return getOneRelease('/releases/latest');
+    return getOneRelease("/releases/latest");
   },
 
   /** @throws Error if unable to reach GitHub */

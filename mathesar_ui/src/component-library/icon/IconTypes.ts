@@ -1,4 +1,4 @@
-import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
+import type { IconDefinition } from "@fortawesome/fontawesome-common-types";
 
 /**
  * NOTE:
@@ -10,7 +10,7 @@ import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
 
 interface IconPath {
   path: string;
-  fillRule?: 'nonzero' | 'evenodd' | 'inherit' | undefined;
+  fillRule?: "nonzero" | "evenodd" | "inherit" | undefined;
   clipRule?: string;
 }
 
@@ -19,17 +19,17 @@ export type IconPathDefinition = string | IconPath;
 export interface IconProps {
   data: {
     icon: [
-      IconDefinition['icon'][0],
-      IconDefinition['icon'][1],
-      IconDefinition['icon'][2],
-      IconDefinition['icon'][3],
+      IconDefinition["icon"][0],
+      IconDefinition["icon"][1],
+      IconDefinition["icon"][2],
+      IconDefinition["icon"][3],
       IconPathDefinition | IconPathDefinition[],
     ];
   };
   size?: string;
   spin?: boolean;
   pulse?: boolean;
-  flip?: 'vertical' | 'horizontal' | 'both';
+  flip?: "vertical" | "horizontal" | "both";
   rotate?: 90 | 180 | 270;
   label?: string;
 }

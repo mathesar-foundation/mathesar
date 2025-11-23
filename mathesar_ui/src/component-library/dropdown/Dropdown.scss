@@ -44,7 +44,7 @@ button.dropdown.trigger {
   max-height: calc(100svh - 0.5rem);
   overflow: auto;
 
-  &[data-popper-placement='top-start'] {
+  &[data-popper-placement="top-start"] {
     box-shadow:
       var(--color-shadow) 0px -10px 15px -3px,
       var(--color-shadow) 0px -4px 2px -2px;

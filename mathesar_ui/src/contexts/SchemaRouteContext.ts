@@ -1,13 +1,13 @@
-import { type Readable, derived } from 'svelte/store';
+import { type Readable, derived } from "svelte/store";
 
-import type { RawEphemeralDataForm } from '@mathesar/api/rpc/forms';
-import type { DataForm } from '@mathesar/models/DataForm';
-import type { Schema } from '@mathesar/models/Schema';
-import { ImmutableMap, reactiveSort } from '@mathesar-component-library';
+import type { RawEphemeralDataForm } from "@mathesar/api/rpc/forms";
+import type { DataForm } from "@mathesar/models/DataForm";
+import type { Schema } from "@mathesar/models/Schema";
+import { ImmutableMap, reactiveSort } from "@mathesar-component-library";
 
-import { getRouteContext, getSafeRouteContext, setRouteContext } from './utils';
+import { getRouteContext, getSafeRouteContext, setRouteContext } from "./utils";
 
-const contextKey = Symbol('schema route store');
+const contextKey = Symbol("schema route store");
 
 export class SchemaRouteContext {
   schema;

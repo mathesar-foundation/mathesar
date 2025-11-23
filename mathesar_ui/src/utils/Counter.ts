@@ -1,4 +1,4 @@
-import { every } from 'iter-tools';
+import { every } from "iter-tools";
 
 /**
  * Counts the number of occurrences of items.

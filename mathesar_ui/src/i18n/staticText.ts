@@ -6,8 +6,8 @@
  * - It won't raise linting errors for untranslated text.
  */
 export const staticText = {
-  LOGIN: 'LOGIN',
-  COLON: ':',
-  EN_DASH: '–',
-  MATHESAR: 'Mathesar',
+  LOGIN: "LOGIN",
+  COLON: ":",
+  EN_DASH: "–",
+  MATHESAR: "Mathesar",
 } as const;

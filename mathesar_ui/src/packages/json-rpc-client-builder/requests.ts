@@ -1,12 +1,12 @@
-import { CancellablePromise, hasProperty } from '@mathesar-component-library';
+import { CancellablePromise, hasProperty } from "@mathesar-component-library";
 
-import { RpcError } from './RpcError';
+import { RpcError } from "./RpcError";
 
-const METHOD_PATH_SEPARATOR = '.';
-const jsonrpc = '2.0';
+const METHOD_PATH_SEPARATOR = ".";
+const jsonrpc = "2.0";
 
 export interface RpcResult<T> {
-  status: 'ok';
+  status: "ok";
   value: T;
 }
 
@@ -15,8 +15,8 @@ export type RpcResponse<T> = RpcResult<T> | RpcError;
 interface RpcRequestBody<T> {
   id: number;
   jsonrpc: typeof jsonrpc;
-  method: RpcRequest<T>['method'];
-  params: RpcRequest<T>['params'];
+  method: RpcRequest<T>["method"];
+  params: RpcRequest<T>["params"];
 }
 
 function cancellableFetch(
@@ -46,9 +46,9 @@ function getRpcRequestBody<T = unknown>(
 }
 
 function makeRpcResponse<T = unknown>(value: unknown): RpcResponse<T> {
-  if (hasProperty(value, 'result')) {
+  if (hasProperty(value, "result")) {
     const response: RpcResult<T> = {
-      status: 'ok',
+      status: "ok",
       value: value.result as T,
     };
     return response;
@@ -58,10 +58,10 @@ function makeRpcResponse<T = unknown>(value: unknown): RpcResponse<T> {
 
 function send<T>(request: RpcRequest<T>): CancellablePromise<RpcResponse<T>> {
   const fetch = cancellableFetch(request.endpoint, {
-    method: 'POST',
+    method: "POST",
     headers: {
       ...request.getHeaders(),
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(getRpcRequestBody(request)),
   });
@@ -86,11 +86,11 @@ function makeRpcBatchResponse<T extends RpcRequest<unknown>[]>(
   requestBodies: RpcRequestBody<unknown>[],
 ): RpcBatchSendResponse<T> {
   if (!Array.isArray(values)) {
-    throw new Error('Response is not an array');
+    throw new Error("Response is not an array");
   }
   const idToRpcResponseMap = new Map(
     values.map((value) => {
-      if (!hasProperty(value, 'id')) {
+      if (!hasProperty(value, "id")) {
         throw new Error(
           'Response array does not conform to RPC spec: "id" missing in values',
         );
@@ -118,10 +118,10 @@ function sendBatchRequest<T extends RpcRequest<unknown>[]>(
     getRpcRequestBody(request, index),
   );
   const fetch = cancellableFetch(endpoint, {
-    method: 'POST',
+    method: "POST",
     headers: {
       ...headers,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(rpcRequestBody),
   });
@@ -181,7 +181,7 @@ export class RpcRequest<T> {
       (resolve, reject) =>
         void responsePromise.then(
           (rpcResponse) =>
-            rpcResponse.status === 'ok'
+            rpcResponse.status === "ok"
               ? resolve(rpcResponse.value)
               : reject(rpcResponse),
           (error) => reject(RpcError.fromAnything(error)),
@@ -219,12 +219,12 @@ export function batchSend<
     | RpcRequest<unknown>[],
 >(requests: T): CancellablePromise<RpcBatchSendResponse<T>> {
   if (requests.length === 0) {
-    throw new Error('There must be atleast one request');
+    throw new Error("There must be atleast one request");
   }
   const [firstRequest, ...rest] = requests;
   const { endpoint } = firstRequest;
   if (rest.some((request) => request.endpoint !== endpoint)) {
-    throw new Error('Only RPC requests to the same endpoint can be batched');
+    throw new Error("Only RPC requests to the same endpoint can be batched");
   }
   // TODO: Decide if headers need to be merged
   return sendBatchRequest(endpoint, firstRequest.getHeaders(), requests);
@@ -256,7 +256,7 @@ export function batchRun<
         .then((responses) => {
           const values = [];
           for (const response of responses as RpcResponse<unknown>[]) {
-            if (response.status !== 'ok') return reject(response);
+            if (response.status !== "ok") return reject(response);
             values.push(response.value);
           }
           return resolve(values as RpcBatchRunResponse<T>);

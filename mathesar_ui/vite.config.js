@@ -1,17 +1,17 @@
-import path from 'path';
+import path from "path";
 
-import { svelte } from '@sveltejs/vite-plugin-svelte';
-import legacy from '@vitejs/plugin-legacy';
-import { defineConfig } from 'vite';
+import { svelte } from "@sveltejs/vite-plugin-svelte";
+import legacy from "@vitejs/plugin-legacy";
+import { defineConfig } from "vite";
 
-import * as data from './tsconfig.json';
+import * as data from "./tsconfig.json";
 
 function getAlias() {
   const alias = [];
   const { paths } = data.compilerOptions;
   Object.keys(paths).forEach((key) => {
-    const find = (__dirname, key.replace('/*', ''));
-    const replacement = path.resolve(paths[key][0].replace('/*', ''));
+    const find = (__dirname, key.replace("/*", ""));
+    const replacement = path.resolve(paths[key][0].replace("/*", ""));
     alias.push({
       find,
       replacement,
@@ -27,11 +27,11 @@ export default defineConfig({
   plugins: [
     svelte(),
     legacy({
-      targets: ['defaults', 'not IE 11'],
+      targets: ["defaults", "not IE 11"],
     }),
   ],
   optimizeDeps: {
-    exclude: ['tinro'],
+    exclude: ["tinro"],
   },
   server: {
     port: 3000,
@@ -41,25 +41,25 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: {
-        main: './src/main.ts',
-        en: './src/i18n/languages/en/index.ts',
-        ja: './src/i18n/languages/ja/index.ts',
+        main: "./src/main.ts",
+        en: "./src/i18n/languages/en/index.ts",
+        ja: "./src/i18n/languages/ja/index.ts",
       },
     },
-    outDir: '../mathesar/static/mathesar/',
+    outDir: "../mathesar/static/mathesar/",
     emptyOutDir: true,
   },
-  base: '/static/',
+  base: "/static/",
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
     testTimeout: 30000,
-    setupFiles: ['vitest-setup.config.ts'],
+    setupFiles: ["vitest-setup.config.ts"],
   },
   css: {
     preprocessorOptions: {
       scss: {
-        api: 'modern', // Or 'modern'
+        api: "modern", // Or 'modern'
       },
     },
   },

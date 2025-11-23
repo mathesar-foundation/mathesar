@@ -1,2 +1,2 @@
-export { default as DurationSpecification } from './DurationSpecification';
-export { default as DurationFormatter } from './DurationFormatter';
+export { default as DurationSpecification } from "./DurationSpecification";
+export { default as DurationFormatter } from "./DurationFormatter";

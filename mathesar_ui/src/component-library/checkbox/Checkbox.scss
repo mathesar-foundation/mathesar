@@ -39,7 +39,7 @@
   &:checked::before,
   &:indeterminate::before {
     --icon-size: calc(0.8 * var(--size));
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background-color: white;

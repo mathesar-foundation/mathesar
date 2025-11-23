@@ -1,30 +1,30 @@
-import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { ColumnMetadata } from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import type {
   ColumnTypeOptions,
   RawColumnWithMetadata,
-} from '@mathesar/api/rpc/columns';
-import type { ConstraintType } from '@mathesar/api/rpc/constraints';
-import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
-import { iconConstraint, iconTableLink } from '@mathesar/icons';
-import type { Table } from '@mathesar/models/Table';
-import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import { getAvailableName } from '@mathesar/utils/db';
-import type { IconProps } from '@mathesar-component-library/types';
+} from "@mathesar/api/rpc/columns";
+import type { ConstraintType } from "@mathesar/api/rpc/constraints";
+import { type ValidationFn, uniqueWith } from "@mathesar/components/form";
+import { iconConstraint, iconTableLink } from "@mathesar/icons";
+import type { Table } from "@mathesar/models/Table";
+import { getAbstractTypeForDbType } from "@mathesar/stores/abstract-types";
+import type { ProcessedColumn } from "@mathesar/stores/table-data";
+import { getAvailableName } from "@mathesar/utils/db";
+import type { IconProps } from "@mathesar-component-library/types";
 
-import { makeSingular } from './languageUtils';
+import { makeSingular } from "./languageUtils";
 
 export function getColumnIconProps(column: {
-  type: RawColumnWithMetadata['type'];
-  type_options: RawColumnWithMetadata['type_options'];
+  type: RawColumnWithMetadata["type"];
+  type_options: RawColumnWithMetadata["type_options"];
   constraintsType?: ConstraintType[];
   metadata: ColumnMetadata | null;
 }): IconProps | IconProps[] {
-  if (column.constraintsType?.includes('primary')) {
+  if (column.constraintsType?.includes("primary")) {
     return iconConstraint;
   }
 
-  if (column.constraintsType?.includes('foreignkey')) {
+  if (column.constraintsType?.includes("foreignkey")) {
     return iconTableLink;
   }
 
@@ -36,19 +36,19 @@ export function getColumnIconProps(column: {
 }
 
 export function getSuggestedFkColumnName(
-  targetTable: Pick<Table, 'name'> | undefined,
-  existingColumns: { name: string }[] = [{ name: 'id' }],
+  targetTable: Pick<Table, "name"> | undefined,
+  existingColumns: { name: string }[] = [{ name: "id" }],
 ): string {
   const columnNames = new Set(existingColumns.map((c) => c.name));
   return targetTable
     ? getAvailableName(makeSingular(targetTable.name), columnNames)
-    : '';
+    : "";
 }
 
 export function columnNameIsAvailable(
   columns: { name: string }[],
 ): ValidationFn<string> {
-  const msg = 'A column with that name already exists';
+  const msg = "A column with that name already exists";
   return uniqueWith(
     columns.map((c) => c.name),
     msg,

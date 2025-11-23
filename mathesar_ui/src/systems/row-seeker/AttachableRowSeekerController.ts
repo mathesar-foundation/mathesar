@@ -1,10 +1,10 @@
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
-import { makeContext } from '@mathesar/component-library/common/utils/contextUtils';
+import { makeContext } from "@mathesar/component-library/common/utils/contextUtils";
 
 import RowSeekerController, {
   type RowSeekerProps,
-} from './RowSeekerController';
+} from "./RowSeekerController";
 
 interface AttachableRowSeekerControllerProps extends RowSeekerProps {
   triggerElement: HTMLElement;

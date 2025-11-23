@@ -1,15 +1,15 @@
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
 import type {
   MaybeSavedExploration,
   QueryInstanceSummarizationTransformation,
-} from '@mathesar/api/rpc/explorations';
-import type { Table } from '@mathesar/models/Table';
-import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-import type { TerseGrouping } from '@mathesar/stores/table-data';
-import Url64 from '@mathesar/utils/Url64';
+} from "@mathesar/api/rpc/explorations";
+import type { Table } from "@mathesar/models/Table";
+import { getDataExplorerPageUrl } from "@mathesar/routes/urls";
+import type { TerseGrouping } from "@mathesar/stores/table-data";
+import Url64 from "@mathesar/utils/Url64";
 
-type TerseSummarizedColumn = Pick<RawColumnWithMetadata, 'id' | 'name'>;
-type BaseTable = Pick<Table, 'oid' | 'name'>;
+type TerseSummarizedColumn = Pick<RawColumnWithMetadata, "id" | "name">;
+type BaseTable = Pick<Table, "oid" | "name">;
 
 interface TerseSummarization {
   databaseId: number;
@@ -110,8 +110,8 @@ export function constructQueryModelFromHash(
   }
 
   const { baseTable, databaseId, schemaOid } = terseSummarization;
-  let initialColumns: MaybeSavedExploration['initial_columns'] = [];
-  let transformations: MaybeSavedExploration['transformations'] = [];
+  let initialColumns: MaybeSavedExploration["initial_columns"] = [];
+  let transformations: MaybeSavedExploration["transformations"] = [];
 
   if (
     !terseSummarization.terseGrouping?.length ||
@@ -161,15 +161,15 @@ export function constructQueryModelFromHash(
     preproc: index === 0 ? preprocFunction : undefined,
   }));
 
-  const aggregatedExpressions: QueryInstanceSummarizationTransformation['spec']['aggregation_expressions'] =
+  const aggregatedExpressions: QueryInstanceSummarizationTransformation["spec"]["aggregation_expressions"] =
     aggregatedColumns.map((entry) => ({
       input_alias: entry.name,
       output_alias: `${baseTable.name}_agged`,
-      function: 'count',
+      function: "count",
     }));
 
   const summarizationTransform: QueryInstanceSummarizationTransformation = {
-    type: 'summarize',
+    type: "summarize",
     spec: {
       base_grouping_column: baseGroupingColumn.name,
       grouping_expressions: groupingExpressions,

@@ -1,5 +1,5 @@
-import { getContext, setContext } from 'svelte';
-import { type Writable, writable } from 'svelte/store';
+import { getContext, setContext } from "svelte";
+import { type Writable, writable } from "svelte/store";
 
 export interface ClipboardHandler {
   shouldHandleCopy: (event: ClipboardEvent) => boolean;
@@ -8,7 +8,7 @@ export interface ClipboardHandler {
   handlePaste: (event: ClipboardEvent) => Promise<void>;
 }
 
-const contextKey = Symbol('ClipboardHandlerStore');
+const contextKey = Symbol("ClipboardHandlerStore");
 
 export function setNewClipboardHandlerStoreInContext(): Writable<
   ClipboardHandler | undefined

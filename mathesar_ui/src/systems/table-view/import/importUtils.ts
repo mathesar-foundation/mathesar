@@ -1,16 +1,16 @@
-import { filter, first, map } from 'iter-tools';
-import * as Papa from 'papaparse';
+import { filter, first, map } from "iter-tools";
+import * as Papa from "papaparse";
 
 import type {
   ImportColumnMapping,
   ImportColumnMappingEntry,
-} from '@mathesar/api/rest/bulkInsert';
-import { columnDefaultAllowsInsertion } from '@mathesar/api/rpc/columns';
+} from "@mathesar/api/rest/bulkInsert";
+import { columnDefaultAllowsInsertion } from "@mathesar/api/rpc/columns";
 import type {
   ProcessedColumn,
   ProcessedColumns,
-} from '@mathesar/stores/table-data';
-import { BidirectionalMap } from '@mathesar/utils/BidirectionalMap';
+} from "@mathesar/stores/table-data";
+import { BidirectionalMap } from "@mathesar/utils/BidirectionalMap";
 
 export interface CsvPreviewField {
   index: number;
@@ -27,12 +27,12 @@ function isNamed(f: CsvPreviewField): f is NamedCsvPreviewField {
 }
 
 export interface CsvPreviewSuccess {
-  status: 'success';
+  status: "success";
   fields: CsvPreviewField[];
 }
 
 export interface ParseFailure {
-  status: 'failure';
+  status: "failure";
   message: string;
 }
 
@@ -68,11 +68,11 @@ export async function parseCsvPreview(
           const row = firstRow as string[];
           return row.map((sampleValue, index) => ({ sampleValue, index }));
         })();
-        resolve({ status: 'success', fields });
+        resolve({ status: "success", fields });
       },
       error: () => {
         // TODO improve message
-        resolve({ status: 'failure', message: 'Parse error' });
+        resolve({ status: "failure", message: "Parse error" });
       },
     });
   });
@@ -92,7 +92,7 @@ export async function parseCsvPreview(
 export type CsvImportMapping = (ProcessedColumn | undefined)[];
 
 function simplifyName(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 /** Filters out columns into which we cannot insert data. */
@@ -205,7 +205,7 @@ export function buildMappingForApi(
   ): ImportColumnMappingEntry {
     const field = fields.at(index);
     if (!field) {
-      throw new Error('Field not found'); // If this happens, it's a bug
+      throw new Error("Field not found"); // If this happens, it's a bug
     }
 
     return {

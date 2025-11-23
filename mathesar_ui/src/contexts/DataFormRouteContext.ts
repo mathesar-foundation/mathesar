@@ -1,12 +1,12 @@
-import { api } from '@mathesar/api/rpc';
-import type { RawDataForm } from '@mathesar/api/rpc/forms';
-import type { DataForm } from '@mathesar/models/DataForm';
-import AsyncStore from '@mathesar/stores/AsyncStore';
+import { api } from "@mathesar/api/rpc";
+import type { RawDataForm } from "@mathesar/api/rpc/forms";
+import type { DataForm } from "@mathesar/models/DataForm";
+import AsyncStore from "@mathesar/stores/AsyncStore";
 
-import type { SchemaRouteContext } from './SchemaRouteContext';
-import { getRouteContext, setRouteContext } from './utils';
+import type { SchemaRouteContext } from "./SchemaRouteContext";
+import { getRouteContext, setRouteContext } from "./utils";
 
-const contextKey = Symbol('dataform route store');
+const contextKey = Symbol("dataform route store");
 
 function getCombinedAsyncStore() {
   return new AsyncStore((_rawDataForm: RawDataForm) =>

@@ -1,22 +1,22 @@
-import { querySummarizationFunctionIds } from '@mathesar/api/rpc/explorations';
+import { querySummarizationFunctionIds } from "@mathesar/api/rpc/explorations";
 
-import { abstractTypeCategory } from '../constants';
+import { abstractTypeCategory } from "../constants";
 import type {
   AbstractTypeCategoryIdentifier,
   AbstractTypeSummarizationFunction,
   AbstractTypeSummarizationFunctionsResponse,
   AbstractTypeSummarizationFunctionsResponseValue,
-} from '../types';
+} from "../types";
 
 function mapAllInputTypesToOneOutputType(
   returnType: AbstractTypeCategoryIdentifier,
-): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
+): AbstractTypeSummarizationFunctionsResponseValue["inputOutputTypeMap"] {
   return Object.fromEntries(
     Object.values(abstractTypeCategory).map((t) => [t, returnType]),
   );
 }
 
-function mapInputTypesToTheSameOutputType(): AbstractTypeSummarizationFunctionsResponseValue['inputOutputTypeMap'] {
+function mapInputTypesToTheSameOutputType(): AbstractTypeSummarizationFunctionsResponseValue["inputOutputTypeMap"] {
   return Object.fromEntries(
     Object.values(abstractTypeCategory).map((t) => [t, t]),
   );
@@ -24,19 +24,19 @@ function mapInputTypesToTheSameOutputType(): AbstractTypeSummarizationFunctionsR
 
 const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   distinct_aggregate_to_array: {
-    label: 'List',
+    label: "List",
     inputOutputTypeMap: mapAllInputTypesToOneOutputType(
       abstractTypeCategory.Array,
     ),
   },
   count: {
-    label: 'Count',
+    label: "Count",
     inputOutputTypeMap: mapAllInputTypesToOneOutputType(
       abstractTypeCategory.Number,
     ),
   },
   sum: {
-    label: 'Sum',
+    label: "Sum",
     inputOutputTypeMap: {
       [abstractTypeCategory.Number]: abstractTypeCategory.Number,
       [abstractTypeCategory.Money]: abstractTypeCategory.Money,
@@ -44,29 +44,29 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
     },
   },
   median: {
-    label: 'Median',
+    label: "Median",
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
   mode: {
-    label: 'Mode',
+    label: "Mode",
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
   percentage_true: {
-    label: 'Percentage True',
+    label: "Percentage True",
     inputOutputTypeMap: {
       [abstractTypeCategory.Boolean]: abstractTypeCategory.Number,
     },
   },
   max: {
-    label: 'Max',
+    label: "Max",
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
   min: {
-    label: 'Min',
+    label: "Min",
     inputOutputTypeMap: mapInputTypesToTheSameOutputType(),
   },
   mean: {
-    label: 'Mean',
+    label: "Mean",
     inputOutputTypeMap: {
       [abstractTypeCategory.Number]: abstractTypeCategory.Number,
       [abstractTypeCategory.Money]: abstractTypeCategory.Money,
@@ -74,14 +74,14 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
     },
   },
   peak_time: {
-    label: 'Peak time',
+    label: "Peak time",
     inputOutputTypeMap: {
       [abstractTypeCategory.DateTime]: abstractTypeCategory.Time,
       [abstractTypeCategory.Time]: abstractTypeCategory.Time,
     },
   },
   peak_month: {
-    label: 'Peak month',
+    label: "Peak month",
     inputOutputTypeMap: {
       [abstractTypeCategory.DateTime]: abstractTypeCategory.Number,
       [abstractTypeCategory.Date]: abstractTypeCategory.Number,

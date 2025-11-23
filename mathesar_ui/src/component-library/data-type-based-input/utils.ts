@@ -2,22 +2,22 @@ import type {
   DataTypeBasedInputSelectElement,
   DataTypeBasedInputType,
   EnumSelectOption,
-} from './types';
+} from "./types";
 
 export function generateSelectOptions(
   dataType: DataTypeBasedInputType,
   enumValues?: unknown[],
-  options?: DataTypeBasedInputSelectElement['options'],
+  options?: DataTypeBasedInputSelectElement["options"],
 ): EnumSelectOption[] {
-  if (dataType === 'boolean') {
+  if (dataType === "boolean") {
     return [
       {
         value: true,
-        label: options?.true?.label ?? 'True',
+        label: options?.true?.label ?? "True",
       },
       {
         value: false,
-        label: options?.false?.label ?? 'False',
+        label: options?.false?.label ?? "False",
       },
     ];
   }
@@ -43,7 +43,7 @@ export function getInitialValue(
   dataType: DataTypeBasedInputType,
   enumValues?: unknown[],
 ): unknown {
-  if (dataType === 'boolean') {
+  if (dataType === "boolean") {
     return true;
   }
   return enumValues?.[0];

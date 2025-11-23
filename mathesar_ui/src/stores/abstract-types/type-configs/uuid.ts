@@ -1,13 +1,13 @@
-import { iconUiTypeUuid } from '@mathesar/icons';
+import { iconUiTypeUuid } from "@mathesar/icons";
 
-import { DB_TYPES } from '../dbTypes';
-import type { AbstractTypeConfiguration } from '../types';
+import { DB_TYPES } from "../dbTypes";
+import type { AbstractTypeConfiguration } from "../types";
 
 const uuidType: AbstractTypeConfiguration = {
-  getIcon: () => ({ ...iconUiTypeUuid, label: 'UUID' }),
+  getIcon: () => ({ ...iconUiTypeUuid, label: "UUID" }),
   defaultDbType: DB_TYPES.UUID,
   cellInfo: {
-    type: 'string',
+    type: "string",
   },
 };
 

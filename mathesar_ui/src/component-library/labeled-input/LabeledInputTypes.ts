@@ -1,1 +1,1 @@
-export type LabeledInputLayout = 'stacked' | 'inline' | 'inline-input-first';
+export type LabeledInputLayout = "stacked" | "inline" | "inline-input-first";

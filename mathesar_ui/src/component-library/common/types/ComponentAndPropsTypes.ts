@@ -1,4 +1,4 @@
-import type { ComponentProps, ComponentType, SvelteComponent } from 'svelte';
+import type { ComponentProps, ComponentType, SvelteComponent } from "svelte";
 
 /**
  * Why `T = unknown` here?

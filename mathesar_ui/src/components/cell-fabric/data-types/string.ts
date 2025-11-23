@@ -1,21 +1,21 @@
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import GrowableTextArea from '@mathesar/components/GrowableTextArea.svelte';
-import { TextInput, optionalNonNullable } from '@mathesar-component-library';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import GrowableTextArea from "@mathesar/components/GrowableTextArea.svelte";
+import { TextInput, optionalNonNullable } from "@mathesar-component-library";
 import type {
   ComponentAndProps,
   TextInputProps,
-} from '@mathesar-component-library/types';
+} from "@mathesar-component-library/types";
 
-import TextAreaCell from './components/textarea/TextAreaCell.svelte';
-import TextBoxCell from './components/textbox/TextBoxCell.svelte';
+import TextAreaCell from "./components/textarea/TextAreaCell.svelte";
+import TextBoxCell from "./components/textbox/TextBoxCell.svelte";
 import type {
   TextAreaCellExternalProps,
   TextBoxCellExternalProps,
-} from './components/typeDefinitions';
-import type { CellComponentFactory } from './typeDefinitions';
+} from "./components/typeDefinitions";
+import type { CellComponentFactory } from "./typeDefinitions";
 
 const stringType: CellComponentFactory = {
-  initialInputValue: '',
+  initialInputValue: "",
   get: (
     column: RawColumnWithMetadata,
     config?: { multiLine?: boolean },

@@ -1,15 +1,15 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
-import { iconDeleteMajor } from '@mathesar/icons';
+import PhraseContainingIdentifier from "@mathesar/components/PhraseContainingIdentifier.svelte";
+import { iconDeleteMajor } from "@mathesar/icons";
 import {
   type ConfirmationProps,
   makeConfirm,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import { modal } from './modal';
-import { toast } from './toast';
+import { modal } from "./modal";
+import { toast } from "./toast";
 
 const confirmationModal = modal.spawnModalController();
 
@@ -35,25 +35,25 @@ export function confirmDelete<T>(
         component: PhraseContainingIdentifier,
         props: {
           identifier: props.identifierName,
-          wrappingString: get(_)('delete_item_question_with_identifier', {
+          wrappingString: get(_)("delete_item_question_with_identifier", {
             values: { item: type },
           }),
         },
       };
     }
-    return get(_)('delete_item_question', { values: { item: type } });
+    return get(_)("delete_item_question", { values: { item: type } });
   }
 
   return confirm({
     title: getTitle(),
-    body: get(_)('are_you_sure_to_proceed'),
+    body: get(_)("are_you_sure_to_proceed"),
     proceedButton: {
-      label: get(_)('delete_item', { values: { item: type } }),
+      label: get(_)("delete_item", { values: { item: type } }),
       icon: iconDeleteMajor,
     },
     onError: (e) =>
       toast.error(
-        `${get(_)('unable_to_delete_item', { values: { item: type } })} ${
+        `${get(_)("unable_to_delete_item", { values: { item: type } })} ${
           e.message
         }`,
       ),

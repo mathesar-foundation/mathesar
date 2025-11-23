@@ -1,9 +1,9 @@
-import { type LangObject, addTranslationsToGlobalWindowObject } from '../utils';
+import { type LangObject, addTranslationsToGlobalWindowObject } from "../utils";
 
-import jaDict from './dict.json';
+import jaDict from "./dict.json";
 
 const lang: LangObject = {
-  language: 'ja',
+  language: "ja",
   dictionary: jaDict,
 };
 

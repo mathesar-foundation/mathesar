@@ -1,16 +1,16 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import { iconLinkToRecordPage, iconModalRecordView } from '@mathesar/icons';
-import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-import type { TabularData } from '@mathesar/stores/table-data';
-import { currentTablesMap } from '@mathesar/stores/tables';
-import RecordStore from '@mathesar/systems/record-view/RecordStore';
+import { iconLinkToRecordPage, iconModalRecordView } from "@mathesar/icons";
+import { storeToGetRecordPageUrl } from "@mathesar/stores/storeBasedUrls";
+import type { TabularData } from "@mathesar/stores/table-data";
+import { currentTablesMap } from "@mathesar/stores/tables";
+import RecordStore from "@mathesar/systems/record-view/RecordStore";
 import {
   type ModalController,
   buttonMenuEntry,
   hyperlinkMenuEntry,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 export function* viewRowRecord(p: {
   recordId: unknown;
@@ -22,7 +22,7 @@ export function* viewRowRecord(p: {
   if (!canViewLinkedEntities) return;
 
   yield buttonMenuEntry({
-    label: get(_)('quick_view_record'),
+    label: get(_)("quick_view_record"),
     icon: iconModalRecordView,
     onClick: () => {
       if (!p.modalRecordView) return;
@@ -48,7 +48,7 @@ export function* viewRowRecord(p: {
 
   yield hyperlinkMenuEntry({
     icon: iconLinkToRecordPage,
-    label: get(_)('open_record'),
+    label: get(_)("open_record"),
     href: recordPageUrl,
   });
 }

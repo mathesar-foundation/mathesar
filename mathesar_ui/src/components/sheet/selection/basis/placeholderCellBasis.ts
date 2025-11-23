@@ -1,11 +1,11 @@
-import { first } from 'iter-tools';
+import { first } from "iter-tools";
 
-import { ImmutableSet } from '@mathesar-component-library';
+import { ImmutableSet } from "@mathesar-component-library";
 
-import { parseCellId } from '../../cellIds';
+import { parseCellId } from "../../cellIds";
 
-import type Basis from './Basis';
-import { emptyBasis } from './emptyBasis';
+import type Basis from "./Basis";
+import { emptyBasis } from "./emptyBasis";
 
 /**
  * This is used when the user is selecting a cell in the placeholder row. This
@@ -19,7 +19,7 @@ export function basisFromPlaceholderCell(activeCellId: string): Basis {
     cellIds: new ImmutableSet([activeCellId]),
     columnIds: new ImmutableSet([parseCellId(activeCellId).columnId]),
     rowIds: new ImmutableSet(),
-    pasteOperation: 'insert',
+    pasteOperation: "insert",
     getFullySelectedColumnIds: () => new ImmutableSet(),
 
     adaptToModifiedPlane({ oldPlane, newPlane }) {

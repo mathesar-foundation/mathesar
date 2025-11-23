@@ -1,19 +1,19 @@
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from "svelte/store";
 
-import type { Result as ApiRecord } from '@mathesar/api/rpc/records';
-import type Pagination from '@mathesar/utils/Pagination';
-import { assertExhaustive } from '@mathesar-component-library';
+import type { Result as ApiRecord } from "@mathesar/api/rpc/records";
+import type Pagination from "@mathesar/utils/Pagination";
+import { assertExhaustive } from "@mathesar-component-library";
 
-import type { Meta } from './meta';
-import type { RecordsData } from './records';
+import type { Meta } from "./meta";
+import type { RecordsData } from "./records";
 import {
   type DraftRecordRow,
   GroupHeaderRow,
   HelpTextRow,
   type PersistedRecordRow,
   PlaceholderRecordRow,
-} from './Row';
-import type { RecordGrouping } from './utils';
+} from "./Row";
+import type { RecordGrouping } from "./utils";
 
 export interface ColumnPlacement {
   /** CSS value in px */
@@ -36,9 +36,9 @@ export function getCellStyle(
 }
 
 export enum RowOrigin {
-  FetchedFromDb = 'fetchedFromDb',
-  NewlyCreatedViaUi = 'newlyCreatedViaUi',
-  StaticUiElement = 'staticlyPresentInUi',
+  FetchedFromDb = "fetchedFromDb",
+  NewlyCreatedViaUi = "newlyCreatedViaUi",
+  StaticUiElement = "staticlyPresentInUi",
 }
 
 export interface DisplayRecordRowDescriptor {
@@ -146,7 +146,7 @@ export class Display {
     this.horizontalScrollOffset = writable(0);
     this.scrollOffset = writable(0);
 
-    const placeholderRowId = writable('');
+    const placeholderRowId = writable("");
     this.placeholderRowId = placeholderRowId;
 
     this.displayRowDescriptors = derived(

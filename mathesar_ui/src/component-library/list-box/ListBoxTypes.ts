@@ -1,16 +1,16 @@
-import type { Readable } from 'svelte/store';
+import type { Readable } from "svelte/store";
 
-import type CancellablePromise from '@mathesar-component-library-dir/common/utils/CancellablePromise';
-import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
+import type CancellablePromise from "@mathesar-component-library-dir/common/utils/CancellablePromise";
+import type { LabelGetter } from "@mathesar-component-library-dir/common/utils/formatUtils";
 
 export interface ListBoxStaticContextProps<Option> {
-  selectionType: 'single' | 'multiple';
+  selectionType: "single" | "multiple";
   getLabel: LabelGetter<Option>;
   searchable: boolean;
   disabled: boolean;
   checkEquality: (option: Option, optionToCompare: Option) => boolean;
   checkIfOptionIsDisabled: (optionToCheck: Option) => boolean;
-  mode: 'dropdown' | 'static';
+  mode: "dropdown" | "static";
 }
 
 export interface ListBoxProps<Option>

@@ -1,50 +1,50 @@
-import { api } from '@mathesar/api/rpc';
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import { api } from "@mathesar/api/rpc";
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
 import type {
   ExplorationResult,
   QueryColumnMetaData,
   QueryGeneratedColumnSource,
   QueryInitialColumnSource,
   QueryResultColumn,
-} from '@mathesar/api/rpc/explorations';
-import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
-import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+} from "@mathesar/api/rpc/explorations";
+import type { JoinPath, JoinableTablesResult } from "@mathesar/api/rpc/tables";
+import type { CellColumnFabric } from "@mathesar/components/cell-fabric/types";
 import {
   getCellCap,
   getDbTypeBasedInputCap,
   getDbTypeBasedSimpleInputCap,
   getDisplayFormatter,
   getInitialInputValue,
-} from '@mathesar/components/cell-fabric/utils';
-import type { Database } from '@mathesar/models/Database';
-import type { Table } from '@mathesar/models/Table';
-import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
+} from "@mathesar/components/cell-fabric/utils";
+import type { Database } from "@mathesar/models/Database";
+import type { Table } from "@mathesar/models/Table";
+import { batchRun } from "@mathesar/packages/json-rpc-client-builder";
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
   getPreprocFunctionsForAbstractType,
   getSummarizationFunctionsForAbstractType,
-} from '@mathesar/stores/abstract-types';
+} from "@mathesar/stores/abstract-types";
 import type {
   AbstractType,
   AbstractTypePreprocFunctionDefinition,
   AbstractTypeSummarizationFunction,
-} from '@mathesar/stores/abstract-types/types';
-import { ImmutableMap } from '@mathesar-component-library';
+} from "@mathesar/stores/abstract-types/types";
+import { ImmutableMap } from "@mathesar-component-library";
 import type {
   CancellablePromise,
   ComponentAndProps,
-} from '@mathesar-component-library/types';
+} from "@mathesar-component-library/types";
 
-import type { QueryModel } from './QueryModel';
+import type { QueryModel } from "./QueryModel";
 
 type ProcessedQueryResultColumnSource =
-  | (Pick<QueryInitialColumnSource, 'is_initial_column'> &
+  | (Pick<QueryInitialColumnSource, "is_initial_column"> &
       Partial<QueryInitialColumnSource>)
   | QueryGeneratedColumnSource;
 
 export interface ProcessedQueryResultColumn extends CellColumnFabric {
-  id: QueryColumnMetaData['alias'];
+  id: QueryColumnMetaData["alias"];
   column: QueryResultColumn;
   abstractType: AbstractType;
   simpleInputComponentAndProps: ComponentAndProps;
@@ -61,59 +61,59 @@ export interface ProcessedQueryOutputColumn extends ProcessedQueryResultColumn {
 }
 
 export type ProcessedQueryResultColumnMap = ImmutableMap<
-  ProcessedQueryResultColumn['id'],
+  ProcessedQueryResultColumn["id"],
   ProcessedQueryResultColumn
 >;
 
 export type ProcessedQueryOutputColumnMap = ImmutableMap<
-  ProcessedQueryOutputColumn['id'],
+  ProcessedQueryOutputColumn["id"],
   ProcessedQueryOutputColumn
 >;
 
 export interface InputColumn {
-  id: RawColumnWithMetadata['id'];
-  name: RawColumnWithMetadata['name'];
-  tableName: Table['name'];
+  id: RawColumnWithMetadata["id"];
+  name: RawColumnWithMetadata["name"];
+  tableName: Table["name"];
   jpPath?: JoinPath;
-  type: RawColumnWithMetadata['type'];
-  tableId: Table['oid'];
+  type: RawColumnWithMetadata["type"];
+  tableId: Table["oid"];
 }
 
-export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
-  type: RawColumnWithMetadata['type'];
-  metadata: RawColumnWithMetadata['metadata'];
+export interface ColumnWithLink extends Omit<InputColumn, "tableId"> {
+  type: RawColumnWithMetadata["type"];
+  metadata: RawColumnWithMetadata["metadata"];
   linksTo?: LinkedTable;
   producesMultipleResults: boolean;
 }
 
 export interface LinkedTable {
-  id: Table['oid'];
-  name: Table['name'];
+  id: Table["oid"];
+  name: Table["name"];
   linkedToColumn: {
-    id: RawColumnWithMetadata['id'];
-    name: RawColumnWithMetadata['name'];
+    id: RawColumnWithMetadata["id"];
+    name: RawColumnWithMetadata["name"];
   };
-  columns: Map<ColumnWithLink['id'], ColumnWithLink>;
+  columns: Map<ColumnWithLink["id"], ColumnWithLink>;
 }
 
 export interface ReferencedByTable extends LinkedTable {
   referencedViaColumn: {
-    id: RawColumnWithMetadata['id'];
-    name: RawColumnWithMetadata['name'];
-    type: RawColumnWithMetadata['type'];
+    id: RawColumnWithMetadata["id"];
+    name: RawColumnWithMetadata["name"];
+    type: RawColumnWithMetadata["type"];
   };
 }
 
 export interface InputColumnsStoreSubstance {
-  baseTableColumns: Map<ColumnWithLink['id'], ColumnWithLink>;
+  baseTableColumns: Map<ColumnWithLink["id"], ColumnWithLink>;
   tablesThatReferenceBaseTable: ReferencedByTable[];
-  inputColumnInformationMap: Map<InputColumn['id'], InputColumn>;
+  inputColumnInformationMap: Map<InputColumn["id"], InputColumn>;
 }
 
 // Inorder to place all columns with links at the end while sorting
 const compareColumnByLinks = (
-  a: [ColumnWithLink['id'], ColumnWithLink],
-  b: [ColumnWithLink['id'], ColumnWithLink],
+  a: [ColumnWithLink["id"], ColumnWithLink],
+  b: [ColumnWithLink["id"], ColumnWithLink],
 ) => {
   if (a[1].linksTo && !b[1].linksTo) {
     return 1;
@@ -126,16 +126,16 @@ const compareColumnByLinks = (
 
 export function getLinkFromColumn(
   result: JoinableTablesResult,
-  columnId: RawColumnWithMetadata['id'],
+  columnId: RawColumnWithMetadata["id"],
   depth: number,
-  parentPath = '',
+  parentPath = "",
 ): LinkedTable | undefined {
   const allLinksFromColumn = result.joinable_tables.filter(
     (entry) =>
       entry.depth === depth &&
       entry.fkey_path[depth - 1][1] === false &&
       entry.join_path[depth - 1][0][1] === columnId &&
-      entry.join_path.join(',').indexOf(parentPath) === 0,
+      entry.join_path.join(",").indexOf(parentPath) === 0,
   );
   if (allLinksFromColumn.length === 0) {
     return undefined;
@@ -155,7 +155,7 @@ export function getLinkFromColumn(
     id: toColumnId,
     name: toTableInfo.columns[toColumnId].name,
   };
-  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+  const columnMapEntries: [ColumnWithLink["id"], ColumnWithLink][] =
     Object.entries(toTableInfo.columns).map(([id, columnInLinkedTable]) => {
       const columnIdInLinkedTable = parseInt(id, 10);
       return [
@@ -169,7 +169,7 @@ export function getLinkFromColumn(
             result,
             columnIdInLinkedTable,
             depth + 1,
-            link.join_path.join(','),
+            link.join_path.join(","),
           ),
           jpPath: link.join_path,
           producesMultipleResults: link.multiple_results,
@@ -186,13 +186,13 @@ export function getLinkFromColumn(
 
 export interface QueryTableStructure {
   joinableTables: JoinableTablesResult;
-  baseTable: Pick<Table, 'oid' | 'name'>;
-  columns: Pick<RawColumnWithMetadata, 'id' | 'name' | 'type' | 'metadata'>[];
+  baseTable: Pick<Table, "oid" | "name">;
+  columns: Pick<RawColumnWithMetadata, "id" | "name" | "type" | "metadata">[];
 }
 
 export function getQueryTableStructure(p: {
-  database: Pick<Database, 'id'>;
-  baseTableId: Table['oid'];
+  database: Pick<Database, "id">;
+  baseTableId: Table["oid"];
 }): CancellablePromise<QueryTableStructure> {
   const args = {
     database_id: p.database.id,
@@ -213,8 +213,8 @@ function getColumnInformationMap({
   joinableTables,
   baseTable,
   columns,
-}: QueryTableStructure): InputColumnsStoreSubstance['inputColumnInformationMap'] {
-  const map: InputColumnsStoreSubstance['inputColumnInformationMap'] =
+}: QueryTableStructure): InputColumnsStoreSubstance["inputColumnInformationMap"] {
+  const map: InputColumnsStoreSubstance["inputColumnInformationMap"] =
     new Map();
   columns.forEach((column) => {
     map.set(column.id, {
@@ -247,8 +247,8 @@ function getBaseTableColumnsWithLinks({
   joinableTables,
   baseTable,
   columns,
-}: QueryTableStructure): Map<ColumnWithLink['id'], ColumnWithLink> {
-  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+}: QueryTableStructure): Map<ColumnWithLink["id"], ColumnWithLink> {
+  const columnMapEntries: [ColumnWithLink["id"], ColumnWithLink][] =
     columns.map(({ id, name, type, metadata }) => [
       id,
       {
@@ -283,12 +283,12 @@ function getTablesThatReferenceBaseTable({
     const targetTableId = link.target;
     const targetTable = joinableTables.target_table_info[targetTableId];
     const targetTableColumn = targetTable.columns[referenceTableColumnId];
-    const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+    const columnMapEntries: [ColumnWithLink["id"], ColumnWithLink][] =
       Object.entries(targetTable.columns)
         .filter(([columnId]) => columnId !== String(referenceTableColumnId))
         .map(([columnIdKey, column]) => {
           const columnId = parseInt(columnIdKey, 10);
-          const parentPath = link.join_path.join(',');
+          const parentPath = link.join_path.join(",");
           return [
             columnId,
             {
@@ -336,14 +336,14 @@ export function getInputColumns(
 }
 
 function processColumn(
-  columnInfo: Pick<QueryColumnMetaData, 'alias'> &
+  columnInfo: Pick<QueryColumnMetaData, "alias"> &
     ProcessedQueryResultColumnSource &
     Partial<QueryColumnMetaData>,
 ): ProcessedQueryResultColumn {
   const column: QueryResultColumn = {
     alias: columnInfo.alias,
     display_name: columnInfo.display_name ?? columnInfo.alias,
-    type: columnInfo.type ?? 'unknown',
+    type: columnInfo.type ?? "unknown",
     type_options: columnInfo.type_options ?? null,
     metadata: columnInfo.metadata ?? null,
   };
@@ -389,7 +389,7 @@ function processColumn(
 }
 
 export function processColumnMetaData(
-  columnMetaData: ExplorationResult['column_metadata'],
+  columnMetaData: ExplorationResult["column_metadata"],
 ): ProcessedQueryResultColumnMap {
   return new ImmutableMap(
     Object.entries(columnMetaData).map(([alias, columnMeta]) => [
@@ -405,7 +405,7 @@ export function speculateColumnMetaData({
   queryModel,
 }: {
   currentProcessedColumnsMetaData: ProcessedQueryResultColumnMap;
-  inputColumnInformationMap: InputColumnsStoreSubstance['inputColumnInformationMap'];
+  inputColumnInformationMap: InputColumnsStoreSubstance["inputColumnInformationMap"];
   queryModel: QueryModel;
 }): ProcessedQueryResultColumnMap {
   const initialColumns = queryModel.initial_columns;
@@ -464,7 +464,7 @@ export function speculateColumnMetaData({
             processColumn({
               alias: group.outputAlias,
               display_name: null,
-              type: inputColumn?.type ?? 'unknown',
+              type: inputColumn?.type ?? "unknown",
               type_options: inputColumn?.type_options ?? null,
               is_initial_column: false,
               input_alias: group.inputAlias,
@@ -479,15 +479,15 @@ export function speculateColumnMetaData({
             processColumn({
               alias: aggregation.outputAlias,
               type:
-                aggregation.function === 'distinct_aggregate_to_array'
-                  ? '_array'
-                  : 'integer',
+                aggregation.function === "distinct_aggregate_to_array"
+                  ? "_array"
+                  : "integer",
               type_options:
-                aggregation.function === 'distinct_aggregate_to_array'
+                aggregation.function === "distinct_aggregate_to_array"
                   ? {
                       item_type:
                         updatedColumnsMetaData.get(aggregation.inputAlias)
-                          ?.column.type ?? 'unknown',
+                          ?.column.type ?? "unknown",
                     }
                   : null,
               is_initial_column: false,
@@ -519,7 +519,7 @@ export function speculateColumnMetaData({
 }
 
 export function getProcessedOutputColumns(
-  outputColumnAliases: ExplorationResult['output_columns'],
+  outputColumnAliases: ExplorationResult["output_columns"],
   processedColumnMetaData: ProcessedQueryResultColumnMap,
 ): ProcessedQueryOutputColumnMap {
   return new ImmutableMap(

@@ -1,20 +1,20 @@
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
 import {
   DurationFormatter,
   DurationSpecification,
-} from '@mathesar/utils/duration';
+} from "@mathesar/utils/duration";
 import {
   FormattedInput,
   isDefinedNonNullable,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 import type {
   ComponentAndProps,
   FormattedInputProps,
-} from '@mathesar-component-library/types';
+} from "@mathesar-component-library/types";
 
-import FormattedInputCell from './components/formatted-input/FormattedInputCell.svelte';
-import type { FormattedInputCellExternalProps } from './components/typeDefinitions';
-import type { CellComponentFactory } from './typeDefinitions';
+import FormattedInputCell from "./components/formatted-input/FormattedInputCell.svelte";
+import type { FormattedInputCellExternalProps } from "./components/typeDefinitions";
+import type { CellComponentFactory } from "./typeDefinitions";
 
 function getProps(
   column: RawColumnWithMetadata,

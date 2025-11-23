@@ -1,11 +1,11 @@
-import { iconUiTypeUnknown } from '@mathesar/icons';
+import { iconUiTypeUnknown } from "@mathesar/icons";
 
-import type { AbstractTypeConfiguration } from '../types';
+import type { AbstractTypeConfiguration } from "../types";
 
 const fallbackType: AbstractTypeConfiguration = {
-  getIcon: () => ({ ...iconUiTypeUnknown, label: 'Unknown column type' }),
+  getIcon: () => ({ ...iconUiTypeUnknown, label: "Unknown column type" }),
   cellInfo: {
-    type: 'string',
+    type: "string",
   },
 };
 

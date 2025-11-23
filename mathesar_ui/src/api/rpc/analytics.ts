@@ -1,4 +1,4 @@
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
 export const analytics = {
   get_state: rpcMethodTypeContainer<

@@ -9,7 +9,6 @@ This is a set of Svelte actions which make it easy to add drag-and-drop sorting 
 ## Usage
 
 1. Apply the `sortableContainer` action to the container element which contains the items you want to sort. This action takes two arguments:
-
    - `getItems` — a function which returns the items to be sorted
    - `onSort` — a function which is called when the user drops an item, with the new sorted items as its argument. Use this to update your data.
 

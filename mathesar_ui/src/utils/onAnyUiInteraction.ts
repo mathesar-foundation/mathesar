@@ -1,15 +1,15 @@
 const EVENT_TYPES = [
-  'click',
-  'pointerdown',
-  'pointerup',
-  'pointermove',
-  'pointercancel',
-  'touchstart',
-  'touchend',
-  'touchmove',
-  'wheel',
-  'keydown',
-  'keyup',
+  "click",
+  "pointerdown",
+  "pointerup",
+  "pointermove",
+  "pointercancel",
+  "touchstart",
+  "touchend",
+  "touchmove",
+  "wheel",
+  "keydown",
+  "keyup",
 ] as const;
 
 type UIEventType = (typeof EVENT_TYPES)[number];

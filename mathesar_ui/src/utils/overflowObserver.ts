@@ -1,5 +1,5 @@
-import type { ActionReturn } from 'svelte/action';
-import { type Writable, writable } from 'svelte/store';
+import type { ActionReturn } from "svelte/action";
+import { type Writable, writable } from "svelte/store";
 
 export interface OverflowDetails {
   hasOverflowTop: Writable<boolean>;
@@ -50,13 +50,13 @@ export default function overflowObserver(
     hasOverflowRight.set(Math.abs(scrollWidth - clientWidth - scrollLeft) > 1);
   }
 
-  node.addEventListener('scroll', handleChange);
+  node.addEventListener("scroll", handleChange);
   const resizeObserver = new ResizeObserver(handleChange);
   resizeObserver.observe(node);
 
   return {
     destroy: () => {
-      node.removeEventListener('scroll', handleChange);
+      node.removeEventListener("scroll", handleChange);
       resizeObserver.disconnect();
     },
   };

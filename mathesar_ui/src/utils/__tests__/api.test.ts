@@ -1,23 +1,23 @@
-import { getMostImportantRequestStatusState } from '@mathesar/api/rest/utils/requestUtils';
+import { getMostImportantRequestStatusState } from "@mathesar/api/rest/utils/requestUtils";
 
-test('getMostImportantRequestStatusState', () => {
+test("getMostImportantRequestStatusState", () => {
   expect(
     getMostImportantRequestStatusState([
-      { state: 'processing' },
-      { state: 'success' },
-      { state: 'failure', errors: ['foo'] },
+      { state: "processing" },
+      { state: "success" },
+      { state: "failure", errors: ["foo"] },
     ]),
-  ).toBe('processing');
+  ).toBe("processing");
 
   expect(
     getMostImportantRequestStatusState([
-      { state: 'success' },
-      { state: 'failure', errors: ['foo'] },
+      { state: "success" },
+      { state: "failure", errors: ["foo"] },
     ]),
-  ).toBe('failure');
+  ).toBe("failure");
 
-  expect(getMostImportantRequestStatusState([{ state: 'success' }])).toBe(
-    'success',
+  expect(getMostImportantRequestStatusState([{ state: "success" }])).toBe(
+    "success",
   );
 
   expect(getMostImportantRequestStatusState([])).toBe(undefined);

@@ -1,9 +1,9 @@
-import DurationFormatter from '../DurationFormatter';
+import DurationFormatter from "../DurationFormatter";
 import DurationSpecification, {
   type DurationConfig,
-} from '../DurationSpecification';
+} from "../DurationSpecification";
 
-describe('parse', () => {
+describe("parse", () => {
   // prettier-ignore
   const successScenarios: [string, DurationConfig, string, string][] = [
     // input             , config                 , formatted value  , value
@@ -26,7 +26,7 @@ describe('parse', () => {
   ];
 
   test.each(successScenarios)(
-    'with userInput=%s config=%s',
+    "with userInput=%s config=%s",
     (input, { min, max }, formattedValue, expectedValue) => {
       const formatter = new DurationFormatter(
         new DurationSpecification({ min, max }),
@@ -40,7 +40,7 @@ describe('parse', () => {
   );
 
   test.each(failureScenarios)(
-    'with userInput=%s config=%s',
+    "with userInput=%s config=%s",
     (input, { min, max }) => {
       const formatter = new DurationFormatter(
         new DurationSpecification({ min, max }),
@@ -49,15 +49,15 @@ describe('parse', () => {
     },
   );
 
-  test('empty string', () => {
+  test("empty string", () => {
     const formatter = new DurationFormatter(
-      new DurationSpecification({ min: 'm', max: 's' }),
+      new DurationSpecification({ min: "m", max: "s" }),
     );
-    expect(formatter.parse('').value).toBeNull();
+    expect(formatter.parse("").value).toBeNull();
   });
 });
 
-describe('format', () => {
+describe("format", () => {
   // prettier-ignore
   const entries: [string, DurationConfig, string][] = [
     [ 'P1D'      , { max: 'm' , min: 's'  }, '1440:00'  ],
@@ -67,7 +67,7 @@ describe('format', () => {
   ];
 
   test.each(entries)(
-    'with userInput=%s config=%s',
+    "with userInput=%s config=%s",
     (canonicalInput, { min, max }, expectedValue) => {
       const formatter = new DurationFormatter(
         new DurationSpecification({ min, max }),

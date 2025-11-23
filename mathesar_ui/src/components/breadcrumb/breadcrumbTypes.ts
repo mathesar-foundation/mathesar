@@ -1,33 +1,33 @@
-import type { SavedExploration } from '@mathesar/api/rpc/explorations';
-import type { Database } from '@mathesar/models/Database';
-import type { DataForm } from '@mathesar/models/DataForm';
-import type { Schema } from '@mathesar/models/Schema';
-import type { Table } from '@mathesar/models/Table';
+import type { SavedExploration } from "@mathesar/api/rpc/explorations";
+import type { Database } from "@mathesar/models/Database";
+import type { DataForm } from "@mathesar/models/DataForm";
+import type { Schema } from "@mathesar/models/Schema";
+import type { Table } from "@mathesar/models/Table";
 import type {
   ComponentAndProps,
   IconProps,
-} from '@mathesar-component-library/types';
+} from "@mathesar-component-library/types";
 
 export interface BreadcrumbItemDatabase {
-  type: 'database';
+  type: "database";
   database: Database;
 }
 
 export interface BreadcrumbItemSchema {
-  type: 'schema';
+  type: "schema";
   database: Database;
   schema: Schema;
 }
 
 export interface BreadcrumbItemTable {
-  type: 'table';
+  type: "table";
   database: Database;
   schema: Schema;
   table: Table;
 }
 
 export interface BreadcrumbItemSimple {
-  type: 'simple';
+  type: "simple";
   href: string;
   label: string | ComponentAndProps;
   icon?: IconProps;
@@ -35,7 +35,7 @@ export interface BreadcrumbItemSimple {
 }
 
 export interface BreadcrumbItemRecord {
-  type: 'record';
+  type: "record";
   database: Database;
   schema: Schema;
   table: Table;
@@ -46,14 +46,14 @@ export interface BreadcrumbItemRecord {
 }
 
 export interface BreadcrumbItemExploration {
-  type: 'exploration';
+  type: "exploration";
   database: Database;
   schema: Schema;
-  query: Pick<SavedExploration, 'id' | 'name'>;
+  query: Pick<SavedExploration, "id" | "name">;
 }
 
 export interface BreadcrumbItemDataForm {
-  type: 'dataForm';
+  type: "dataForm";
   dataForm: DataForm;
 }
 
@@ -74,38 +74,38 @@ export interface BaseBreadcrumbSelectorEntry {
 
 export interface SimpleBreadcrumbSelectorEntry
   extends BaseBreadcrumbSelectorEntry {
-  type: 'simple';
+  type: "simple";
   label: string;
   icon: IconProps;
 }
 
 export interface BreadcrumbSelectorEntryForTable
   extends BaseBreadcrumbSelectorEntry {
-  type: 'table';
+  type: "table";
   table: Table;
 }
 
 export interface BreadcrumbSelectorEntryForExploration
   extends BaseBreadcrumbSelectorEntry {
-  type: 'exploration';
+  type: "exploration";
   exploration: SavedExploration;
 }
 
 export interface BreadcrumbSelectorEntryForDataForm
   extends BaseBreadcrumbSelectorEntry {
-  type: 'dataForm';
+  type: "dataForm";
   dataForm: DataForm;
 }
 
 export interface BreadcrumbSelectorEntryForSchema
   extends BaseBreadcrumbSelectorEntry {
-  type: 'schema';
+  type: "schema";
   schema: Schema;
 }
 
 export interface BreadcrumbSelectorEntryForDatabase
   extends BaseBreadcrumbSelectorEntry {
-  type: 'database';
+  type: "database";
   database: Database;
 }
 

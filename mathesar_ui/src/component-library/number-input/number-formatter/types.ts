@@ -1,1 +1,1 @@
-export type { Options as NumberFormatterOptions } from './options';
+export type { Options as NumberFormatterOptions } from "./options";

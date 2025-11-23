@@ -1,19 +1,19 @@
-import { map } from 'iter-tools';
-import { type Readable, derived, writable } from 'svelte/store';
+import { map } from "iter-tools";
+import { type Readable, derived, writable } from "svelte/store";
 
-import { api } from '@mathesar/api/rpc';
-import type { RawDatabase, SystemSchema } from '@mathesar/api/rpc/databases';
-import type { RawServer } from '@mathesar/api/rpc/servers';
-import { Database } from '@mathesar/models/Database';
-import { Server } from '@mathesar/models/Server';
-import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
+import { api } from "@mathesar/api/rpc";
+import type { RawDatabase, SystemSchema } from "@mathesar/api/rpc/databases";
+import type { RawServer } from "@mathesar/api/rpc/servers";
+import { Database } from "@mathesar/models/Database";
+import { Server } from "@mathesar/models/Server";
+import { batchRun } from "@mathesar/packages/json-rpc-client-builder";
+import { preloadCommonData } from "@mathesar/utils/preloadData";
+import type { MakeWritablePropertiesReadable } from "@mathesar/utils/typeUtils";
 import {
   ImmutableMap,
   WritableMap,
   defined,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 const commonData = preloadCommonData();
 
@@ -39,13 +39,13 @@ function* generateDatabaseEntries(
 
 class DatabasesStore {
   private readonly unsortedDatabases = new WritableMap<
-    Database['id'],
+    Database["id"],
     Database
   >();
 
-  readonly databases: Readable<ImmutableMap<Database['id'], Database>>;
+  readonly databases: Readable<ImmutableMap<Database["id"], Database>>;
 
-  private readonly currentDatabaseId = writable<Database['id'] | undefined>();
+  private readonly currentDatabaseId = writable<Database["id"] | undefined>();
 
   readonly currentDatabase: Readable<Database | undefined>;
 
@@ -99,7 +99,7 @@ class DatabasesStore {
   }
 
   async disconnectDatabase(p: {
-    database: Pick<Database, 'id'>;
+    database: Pick<Database, "id">;
     schemas_to_remove?: SystemSchema[];
     role?: { name: string; password: string };
     disconnect_db_server: boolean;
@@ -127,7 +127,7 @@ class DatabasesStore {
     this.unsortedDatabases.reconstruct(databases);
   }
 
-  setCurrentDatabaseId(databaseId: Database['id']) {
+  setCurrentDatabaseId(databaseId: Database["id"]) {
     this.currentDatabaseId.set(databaseId);
   }
 
@@ -140,7 +140,7 @@ export type DatabaseDisconnectFn = typeof databasesStore.disconnectDatabase;
 
 export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
   (() => {
-    const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
+    const isInAuthenticatedContext = commonData.routing_context !== "anonymous";
     const servers = isInAuthenticatedContext ? commonData.servers : [];
     const databases = isInAuthenticatedContext ? commonData.databases : [];
     const currentDatabase = isInAuthenticatedContext

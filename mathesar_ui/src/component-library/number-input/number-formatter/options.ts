@@ -1,4 +1,4 @@
-import { getDecimalSeparator } from './locale';
+import { getDecimalSeparator } from "./locale";
 
 export interface Options {
   locale?: string;
@@ -10,7 +10,7 @@ export interface Options {
    * [1]:
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
    */
-  useGrouping: 'always' | 'auto' | 'min2' | true | false;
+  useGrouping: "always" | "auto" | "min2" | true | false;
   minimumFractionDigits: number;
   maximumFractionDigits: number;
   forceTrailingDecimal: boolean;

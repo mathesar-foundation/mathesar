@@ -1,11 +1,11 @@
 export function isDefinedObject(
   object: unknown,
 ): object is Record<string, unknown> {
-  return typeof object === 'object' && object !== null;
+  return typeof object === "object" && object !== null;
 }
 
 export function isNumber(v: unknown): v is number {
-  return typeof v === 'number';
+  return typeof v === "number";
 }
 
 export function hasProperty<PropertyName extends string>(
@@ -19,14 +19,14 @@ export function hasStringProperty<PropertyName extends string>(
   object: unknown,
   property: PropertyName,
 ): object is { [k in PropertyName]: string } {
-  return hasProperty(object, property) && typeof object[property] === 'string';
+  return hasProperty(object, property) && typeof object[property] === "string";
 }
 
 export function hasMethod<MethodName extends string>(
   object: unknown,
   method: MethodName,
 ): object is { [k in MethodName]: () => unknown } {
-  return hasProperty(object, method) && typeof object[method] === 'function';
+  return hasProperty(object, method) && typeof object[method] === "function";
 }
 
 export function isDefinedNonNullable<T>(x: T): x is NonNullable<T> {

@@ -7,7 +7,7 @@
  * just for the sake of time.
  */
 
-import type { ImmutableMap } from '@mathesar-component-library';
+import type { ImmutableMap } from "@mathesar-component-library";
 
 /** Keys are stringifed record ids */
 type RecordSummariesForColumn = ImmutableMap<string, string>;

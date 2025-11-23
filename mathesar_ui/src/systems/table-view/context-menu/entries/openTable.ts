@@ -1,13 +1,13 @@
-import { get } from 'svelte/store';
+import { get } from "svelte/store";
 
-import { iconTable } from '@mathesar/icons';
-import type { Table } from '@mathesar/models/Table';
-import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import { currentTablesData } from '@mathesar/stores/tables';
-import { component, hyperlinkMenuEntry } from '@mathesar-component-library';
+import { iconTable } from "@mathesar/icons";
+import type { Table } from "@mathesar/models/Table";
+import { storeToGetTablePageUrl } from "@mathesar/stores/storeBasedUrls";
+import type { ProcessedColumn } from "@mathesar/stores/table-data";
+import { currentTablesData } from "@mathesar/stores/tables";
+import { component, hyperlinkMenuEntry } from "@mathesar-component-library";
 
-import OpenNamedTable from '../labels/OpenNamedTable.svelte';
+import OpenNamedTable from "../labels/OpenNamedTable.svelte";
 
 /**
  * This method returns information about a table linked through a FK to a

@@ -1,36 +1,36 @@
-import { type Writable, get, writable } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { type Writable, get, writable } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import type { ColumnMetadata } from "@mathesar/api/rpc/_common/columnDisplayOptions";
 import {
   type ExplorationResult,
   type SavedExploration,
   explorationIsAddable,
   explorationIsSaved,
-} from '@mathesar/api/rpc/explorations';
-import { databasesStore } from '@mathesar/stores/databases';
-import { addExploration, replaceExploration } from '@mathesar/stores/queries';
-import CacheManager from '@mathesar/utils/CacheManager';
-import type { CancellablePromise } from '@mathesar-component-library';
+} from "@mathesar/api/rpc/explorations";
+import { databasesStore } from "@mathesar/stores/databases";
+import { addExploration, replaceExploration } from "@mathesar/stores/queries";
+import CacheManager from "@mathesar/utils/CacheManager";
+import type { CancellablePromise } from "@mathesar-component-library";
 
 import {
   makeColumnAnchor,
   reconcileDisplayOptionsWithServerResponse,
-} from './displayOptions';
+} from "./displayOptions";
 import {
   type QueryModel,
   type QueryModelUpdateDiff,
   getTransformationModel,
-} from './QueryModel';
-import { QueryRunner } from './QueryRunner';
-import { QuerySummarizationTransformationModel } from './QuerySummarizationTransformationModel';
+} from "./QueryModel";
+import { QueryRunner } from "./QueryRunner";
+import { QuerySummarizationTransformationModel } from "./QuerySummarizationTransformationModel";
 import {
   type InputColumnsStoreSubstance,
   type QueryTableStructure,
   getInputColumns,
   getQueryTableStructure,
-} from './utils';
+} from "./utils";
 
 export default class QueryManager extends QueryRunner {
   private cacheManagers: {
@@ -91,7 +91,7 @@ export default class QueryManager extends QueryRunner {
       });
       this.state.update((state) => ({
         ...state,
-        inputColumnsFetchState: { state: 'success' },
+        inputColumnsFetchState: { state: "success" },
       }));
       return;
     }
@@ -101,7 +101,7 @@ export default class QueryManager extends QueryRunner {
       this.inputColumns.set({ ...cachedResult });
       this.state.update((state) => ({
         ...state,
-        inputColumnsFetchState: { state: 'success' },
+        inputColumnsFetchState: { state: "success" },
       }));
       this.speculateColumns();
       return;
@@ -110,11 +110,11 @@ export default class QueryManager extends QueryRunner {
     try {
       const database = get(databasesStore.currentDatabase);
       if (!database) {
-        throw new Error('Current database not set');
+        throw new Error("Current database not set");
       }
       this.state.update((state) => ({
         ...state,
-        inputColumnsFetchState: { state: 'processing' },
+        inputColumnsFetchState: { state: "processing" },
       }));
 
       this.tableStructurePromise?.cancel();
@@ -129,16 +129,16 @@ export default class QueryManager extends QueryRunner {
       this.speculateColumns();
       this.state.update((state) => ({
         ...state,
-        inputColumnsFetchState: { state: 'success' },
+        inputColumnsFetchState: { state: "success" },
       }));
     } catch (err: unknown) {
       const error =
         err instanceof Error
           ? err.message
-          : get(_)('error_fetching_joinable_links');
+          : get(_)("error_fetching_joinable_links");
       this.state.update((state) => ({
         ...state,
-        inputColumnsFetchState: { state: 'failure', errors: [error] },
+        inputColumnsFetchState: { state: "failure", errors: [error] },
       }));
     }
   }
@@ -155,7 +155,7 @@ export default class QueryManager extends QueryRunner {
   }> {
     this.query.set(queryModel);
     this.queryHasUnsavedChanges.set(true);
-    if (get(this.state).inputColumnsFetchState?.state !== 'success') {
+    if (get(this.state).inputColumnsFetchState?.state !== "success") {
       await this.calculateInputColumnTree();
     }
     return { isValid: queryModel.isValid, isRunnable: queryModel.isRunnable };
@@ -179,9 +179,9 @@ export default class QueryManager extends QueryRunner {
     thisQueryModel.transformationModels.forEach((thisTransform, index) => {
       const thatTransform = transformationModels[index];
       if (
-        thisTransform.type === 'summarize' &&
+        thisTransform.type === "summarize" &&
         thatTransform &&
-        thatTransform.type === 'summarize'
+        thatTransform.type === "summarize"
       ) {
         const thatTransformGroupWhichIsTheSameAsBaseColumn =
           thatTransform.groups.get(thatTransform.columnIdentifier);
@@ -242,16 +242,16 @@ export default class QueryManager extends QueryRunner {
     const { isRunnable } = await this.updateQuery(model);
     if (isRunnable) {
       switch (type) {
-        case 'baseTable':
+        case "baseTable":
           this.resetResults();
           this.confirmationNeededForMultipleResults.set(true);
           this.queryHasUnsavedChanges.set(false);
           await this.calculateInputColumnTree();
           break;
-        case 'initialColumnName':
+        case "initialColumnName":
           this.speculateColumns();
           break;
-        case 'initialColumnsArray':
+        case "initialColumnsArray":
           if (!model.initial_columns?.length) {
             // All columns have been deleted
             this.resetResults();
@@ -260,8 +260,8 @@ export default class QueryManager extends QueryRunner {
             await this.run();
           }
           break;
-        case 'transformations':
-        case 'initialColumnsAndTransformations':
+        case "transformations":
+        case "initialColumnsAndTransformations":
           await this.resetPaginationAndRun();
           break;
         default:
@@ -278,7 +278,7 @@ export default class QueryManager extends QueryRunner {
       this.getQueryModel().toMaybeSavedExploration();
     this.state.update((_state) => ({
       ..._state,
-      saveState: { state: 'processing' },
+      saveState: { state: "processing" },
     }));
     try {
       this.querySavePromise?.cancel();
@@ -288,24 +288,24 @@ export default class QueryManager extends QueryRunner {
       } else if (explorationIsAddable(maybeSavedExploration)) {
         this.querySavePromise = addExploration(maybeSavedExploration);
       } else {
-        throw new Error(get(_)('error_saving_query'));
+        throw new Error(get(_)("error_saving_query"));
       }
       const result = await this.querySavePromise;
       this.query.update((qr) => qr.withId(result.id).model);
       await this.onSaveCallback(result);
       this.state.update((_state) => ({
         ..._state,
-        saveState: { state: 'success' },
+        saveState: { state: "success" },
       }));
       this.queryHasUnsavedChanges.set(false);
       return this.getQueryModel();
     } catch (err) {
       const errors =
-        err instanceof Error ? [err.message] : [get(_)('error_saving_query')];
+        err instanceof Error ? [err.message] : [get(_)("error_saving_query")];
       this.state.update((_state) => ({
         ..._state,
         saveState: {
-          state: 'failure',
+          state: "failure",
           errors,
         },
       }));
@@ -340,7 +340,7 @@ export default class QueryManager extends QueryRunner {
       );
     if (firstBaseTableInitialColumn) {
       return new QuerySummarizationTransformationModel({
-        type: 'summarize',
+        type: "summarize",
         spec: {
           base_grouping_column: firstBaseTableInitialColumn.alias,
         },

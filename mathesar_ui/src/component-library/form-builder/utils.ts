@@ -2,17 +2,17 @@ import type {
   ConditionalIfElement,
   ConditionalSwitchElement,
   FormElement,
-} from './types';
+} from "./types";
 
 function checkCondition(
   term: unknown,
-  condition: ConditionalIfElement['condition'],
-  value: ConditionalIfElement['value'],
+  condition: ConditionalIfElement["condition"],
+  value: ConditionalIfElement["value"],
 ): boolean {
-  if (condition === 'eq') {
+  if (condition === "eq") {
     return term === value;
   }
-  if (condition === 'neq') {
+  if (condition === "neq") {
     return term !== value;
   }
   return false;
@@ -20,7 +20,7 @@ function checkCondition(
 
 export function computeSwitchElements(
   storeValue: unknown,
-  switchArgs: { cases: ConditionalSwitchElement['cases'] },
+  switchArgs: { cases: ConditionalSwitchElement["cases"] },
 ): FormElement[] {
   const { cases } = switchArgs;
   return cases[String(storeValue)] ?? cases.default ?? [];
@@ -29,9 +29,9 @@ export function computeSwitchElements(
 export function computeIfElements(
   storeValue: unknown,
   ifArgs: {
-    condition: ConditionalIfElement['condition'];
-    value: ConditionalIfElement['value'];
-    elements: ConditionalIfElement['elements'];
+    condition: ConditionalIfElement["condition"];
+    value: ConditionalIfElement["value"];
+    elements: ConditionalIfElement["elements"];
   },
 ): FormElement[] {
   if (checkCondition(storeValue, ifArgs.condition, ifArgs.value)) {

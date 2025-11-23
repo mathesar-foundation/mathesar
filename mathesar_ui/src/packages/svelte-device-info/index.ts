@@ -1,4 +1,4 @@
-import { type Readable, type Writable, writable } from 'svelte/store';
+import { type Readable, type Writable, writable } from "svelte/store";
 
 function readOnly<T>(store: Writable<T>): Readable<T> {
   return store;
@@ -16,17 +16,17 @@ function listenForMouseEvents() {
   }
 
   function stop() {
-    window.removeEventListener('mousemove', onMouseMove, { capture: true });
+    window.removeEventListener("mousemove", onMouseMove, { capture: true });
   }
 
-  window.addEventListener('mousemove', onMouseMove, { capture: true });
+  window.addEventListener("mousemove", onMouseMove, { capture: true });
 
   return stop;
 }
 
 function listenForTouchEvents() {
   function onPointerDown(event: PointerEvent) {
-    if (event.pointerType === 'touch') {
+    if (event.pointerType === "touch") {
       hasTouchCapability.set(true);
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       stop();
@@ -34,10 +34,10 @@ function listenForTouchEvents() {
   }
 
   function stop() {
-    window.removeEventListener('pointerdown', onPointerDown, { capture: true });
+    window.removeEventListener("pointerdown", onPointerDown, { capture: true });
   }
 
-  window.addEventListener('pointerdown', onPointerDown, { capture: true });
+  window.addEventListener("pointerdown", onPointerDown, { capture: true });
 
   return stop;
 }

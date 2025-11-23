@@ -1,45 +1,45 @@
-import { abstractTypeCategory } from '../constants';
+import { abstractTypeCategory } from "../constants";
 import type {
   AbstractTypeCategoryIdentifier,
   AbstractTypePreprocFunctionDefinition,
   AbstractTypePreprocFunctionDefinitionMap,
   AbstractTypePreprocFunctionsResponse,
-} from '../types';
+} from "../types";
 
 const preprocFunctionsResponse: AbstractTypePreprocFunctionsResponse[] = [
   {
-    id: 'truncate_to_day',
-    name: 'Year, Month, Day',
+    id: "truncate_to_day",
+    name: "Year, Month, Day",
     appliesTo: [abstractTypeCategory.DateTime],
     returns: abstractTypeCategory.Text,
   },
   {
-    id: 'truncate_to_year',
-    name: 'Year',
+    id: "truncate_to_year",
+    name: "Year",
     appliesTo: [abstractTypeCategory.Date, abstractTypeCategory.DateTime],
     returns: abstractTypeCategory.Number,
   },
   {
-    id: 'truncate_to_month',
-    name: 'Year, Month',
+    id: "truncate_to_month",
+    name: "Year, Month",
     appliesTo: [abstractTypeCategory.Date, abstractTypeCategory.DateTime],
     returns: abstractTypeCategory.Text,
   },
   {
-    id: 'uri_scheme',
-    name: 'URI scheme',
+    id: "uri_scheme",
+    name: "URI scheme",
     appliesTo: [abstractTypeCategory.Uri],
     returns: abstractTypeCategory.Text,
   },
   {
-    id: 'uri_authority',
-    name: 'URI Authority',
+    id: "uri_authority",
+    name: "URI Authority",
     appliesTo: [abstractTypeCategory.Uri],
     returns: abstractTypeCategory.Text,
   },
   {
-    id: 'email_domain',
-    name: 'Domain',
+    id: "email_domain",
+    name: "Domain",
     appliesTo: [abstractTypeCategory.Email],
     returns: abstractTypeCategory.Text,
   },

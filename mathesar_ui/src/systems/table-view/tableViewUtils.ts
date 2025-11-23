@@ -1,4 +1,4 @@
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import type { ProcessedColumn } from "@mathesar/stores/table-data";
 
 export function* getCustomizedColumnWidths(columns: Iterable<ProcessedColumn>) {
   for (const column of columns) {

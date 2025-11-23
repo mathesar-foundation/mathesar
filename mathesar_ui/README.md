@@ -57,7 +57,6 @@ We use [Prettier](https://prettier.io/) to automatically format code.
 Prettier works great when configured to automatically format files when you save them in your editor.
 
 - VS Code
-
   1. In "Settings" > "Workspace", search for "format on save".
   1. Install the "Prettier" extension (`esbenp.prettier-vscode`).
   1. Set "Editor: Default Formatter" to "Prettier".
@@ -138,9 +137,9 @@ We use [Vitest](https://vitest.dev/) to run our unit tests, and we use [Testing 
   We can test function with a file `primeUtils.test.ts` as follows:
 
   ```ts
-  import { getPrimality } from './primeUtils';
+  import { getPrimality } from "./primeUtils";
 
-  test('getPrimality', () => {
+  test("getPrimality", () => {
     expect(getPrimality(2)).toBe(true);
     expect(getPrimality(3)).toBe(true);
     expect(getPrimality(4)).toBe(false);
@@ -181,21 +180,21 @@ Some UI interactions are difficult to test on a traditional desktop/laptop, for 
 
 1. In your `.env` file, change the `ALLOWED_HOSTS` line to read as follows:
 
-    ```
-    ALLOWED_HOSTS=*
-    ```
+   ```
+   ALLOWED_HOSTS=*
+   ```
 
 1. Restart Mathesar.
 
 1. Determine the local IP address of your computer.
 
-    E.g. on Linux:
+   E.g. on Linux:
 
-    ```
-    ip addr show
-    ```
+   ```
+   ip addr show
+   ```
 
-    You'll probably see something like `192.168.1.123` somewhere in the output.
+   You'll probably see something like `192.168.1.123` somewhere in the output.
 
 1. From your mobile device, direct the browser to http://192.168.1.123:8000 (or similar, based on your computer's IP).
 
@@ -208,34 +207,31 @@ These steps work for Firefox on Android + Firefox on Linux.
 1. Plug your device into your computer via USB.
 
 1. On Android:
+   1. Open **Settings → About tablet → Build number**
+   1. Tap **Build number** 7 times until it says _“You are now a developer”_.
 
-    1. Open **Settings → About tablet → Build number**
-    
-    1. Tap **Build number** 7 times until it says _“You are now a developer”_.
+   1. Go to **Settings → System → Developer options** and enable **USB debugging**
 
-    1. Go to **Settings → System → Developer options**  and enable **USB debugging**
+   1. In Firefox, go to **Settings → Advanced** and enable **Remote debugging via USB**.
 
-    1. In Firefox, go to **Settings → Advanced** and enable **Remote debugging via USB**.
-
-    1. In Firefox, load a page you'd like to inspect.
+   1. In Firefox, load a page you'd like to inspect.
 
 1. On Linux
+   1. Install the Android Debug Bridge.
 
-    1. Install the Android Debug Bridge.
+      ```
+      sudo apt install android-tools-adb
+      ```
 
-        ```
-        sudo apt install android-tools-adb
-        ```
+   1. In Firefox, go to the following URL:
 
-    1. In Firefox, go to the following URL:
+      ```
+      about:debugging#/setup
+      ```
 
-        ```
-        about:debugging#/setup
-        ```
+   1. You should see your android device listed with an option to connect to it.
 
-    1. You should see your android device listed with an option to connect to it.
-
-    1. Once connected to a device, you should see a list of the device's Firefox tabs. Click **Inspect** on one of the listed tabs to launch the inspector on your computer for the tab on your Android device.
+   1. Once connected to a device, you should see a list of the device's Firefox tabs. Click **Inspect** on one of the listed tabs to launch the inspector on your computer for the tab on your Android device.
 
 ## Live reloading on Windows
 
@@ -286,7 +282,6 @@ If the `audit` check on your pull request fails, here are the steps to fix it:
   Please make sure to run these within the container only. If you are running Mathesar locally, without Docker, make sure you use the same node and npm versions.
 
 - If the issues are non auto-fixable, identify the packages that are vulnerable.
-
   - If they are directly used packages, update their versions.
   - If they are dependencies of packages used by us (most common), update the parent packages.
   - Most often, newer parent packages may not have been released yet. In which case, we can use the 'resolutions' field in package.json to force the version of packages. Make sure to only update it to the closest non-vulnerable minor release, in this case.

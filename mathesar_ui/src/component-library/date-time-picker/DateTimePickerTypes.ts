@@ -1,5 +1,5 @@
 export interface InlineDateTimePickerProps {
-  type: 'date' | 'time' | 'datetime';
+  type: "date" | "time" | "datetime";
   format: string;
   value?: string | null;
   timeShow24Hr?: boolean;

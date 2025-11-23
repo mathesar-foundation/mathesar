@@ -6,9 +6,9 @@ import {
   derived,
   get,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import ImmutableSet from './ImmutableSet';
+import ImmutableSet from "./ImmutableSet";
 
 export default class WritableSet<Value>
   implements Readable<ImmutableSet<Value>>

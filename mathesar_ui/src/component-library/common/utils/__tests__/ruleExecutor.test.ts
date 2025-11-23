@@ -1,10 +1,10 @@
-import { type Rule, executeRule } from '../ruleExecuter';
+import { type Rule, executeRule } from "../ruleExecuter";
 
-describe('Rule executer', () => {
-  test('Single term rule', () => {
+describe("Rule executer", () => {
+  test("Single term rule", () => {
     const rule: Rule = {
-      id: 'restrictFieldSize',
-      op: 'eq',
+      id: "restrictFieldSize",
+      op: "eq",
       value: false,
     };
 
@@ -13,18 +13,18 @@ describe('Rule executer', () => {
     expect(executeRule(rule, {})).toBe(false);
   });
 
-  test('Multi term rule with and', () => {
+  test("Multi term rule with and", () => {
     const rule: Rule = {
-      combination: 'and',
+      combination: "and",
       terms: [
         {
-          id: 'restrictFieldSize',
-          op: 'eq',
+          id: "restrictFieldSize",
+          op: "eq",
           value: true,
         },
         {
-          id: 'fieldSizeLimit',
-          op: 'lte',
+          id: "fieldSizeLimit",
+          op: "lte",
           value: 255,
         },
       ],
@@ -57,18 +57,18 @@ describe('Rule executer', () => {
     expect(executeRule(rule, {})).toBe(false);
   });
 
-  test('Multi term rule with or', () => {
+  test("Multi term rule with or", () => {
     const rule: Rule = {
-      combination: 'or',
+      combination: "or",
       terms: [
         {
-          id: 'restrictFieldSize',
-          op: 'eq',
+          id: "restrictFieldSize",
+          op: "eq",
           value: true,
         },
         {
-          id: 'fieldSizeLimit',
-          op: 'lte',
+          id: "fieldSizeLimit",
+          op: "lte",
           value: 255,
         },
       ],

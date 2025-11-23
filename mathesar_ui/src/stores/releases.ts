@@ -1,13 +1,13 @@
-import { compare } from 'compare-versions';
-import { getContext, setContext } from 'svelte';
+import { compare } from "compare-versions";
+import { getContext, setContext } from "svelte";
 
 import {
   type GitHubRelease,
   gitHubReleases,
-} from '@mathesar/3rd-party-apis/github-releases';
-import { CachedFetchStore } from '@mathesar/utils/cachedFetchStore';
+} from "@mathesar/3rd-party-apis/github-releases";
+import { CachedFetchStore } from "@mathesar/utils/cachedFetchStore";
 
-import { LOCAL_STORAGE_KEYS } from './localStorage';
+import { LOCAL_STORAGE_KEYS } from "./localStorage";
 
 export interface Release {
   id: number;
@@ -32,7 +32,7 @@ function buildRelease(gh: GitHubRelease | undefined): Release | undefined {
   };
 }
 
-type UpgradeStatus = 'upgradable' | 'up-to-date';
+type UpgradeStatus = "upgradable" | "up-to-date";
 
 function getUpgradeStatus(
   current: Release | undefined,
@@ -41,9 +41,9 @@ function getUpgradeStatus(
   if (current === undefined || latest === undefined) {
     return undefined;
   }
-  return compare(latest.tagName, current.tagName, '>')
-    ? 'upgradable'
-    : 'up-to-date';
+  return compare(latest.tagName, current.tagName, ">")
+    ? "upgradable"
+    : "up-to-date";
 }
 
 export class ReleaseData {
@@ -104,7 +104,7 @@ function makeReleaseDataStore(currentTagName: string) {
   });
 }
 
-const contextKey = Symbol('ReleaseDataStore');
+const contextKey = Symbol("ReleaseDataStore");
 
 export function getReleaseDataStoreFromContext(): ReleaseDataStore | undefined {
   return getContext(contextKey);
@@ -112,7 +112,7 @@ export function getReleaseDataStoreFromContext(): ReleaseDataStore | undefined {
 
 export function setReleasesStoreInContext(currentTagName: string): void {
   if (getReleaseDataStoreFromContext() !== undefined) {
-    throw Error('ReleaseDataStore context has already been set');
+    throw Error("ReleaseDataStore context has already been set");
   }
   setContext(contextKey, makeReleaseDataStore(currentTagName));
 }

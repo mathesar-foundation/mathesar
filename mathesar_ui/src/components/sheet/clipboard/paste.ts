@@ -1,27 +1,27 @@
-import { arrayFrom, cycle, execPipe, first, map, take, zip } from 'iter-tools';
-import { type Writable, get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { arrayFrom, cycle, execPipe, first, map, take, zip } from "iter-tools";
+import { type Writable, get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import { type RecordRow, getRowSelectionId } from '@mathesar/stores/table-data';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import { type RecordRow, getRowSelectionId } from "@mathesar/stores/table-data";
 import type {
   RowAdditionRecipe,
   RowModificationRecipe,
-} from '@mathesar/stores/table-data/records';
-import { startingFrom } from '@mathesar/utils/iterUtils';
+} from "@mathesar/stores/table-data/records";
+import { startingFrom } from "@mathesar/utils/iterUtils";
 import {
   type ImmutableSet,
   assertExhaustive,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import type SheetSelection from '../selection/SheetSelection';
+import type SheetSelection from "../selection/SheetSelection";
 
-import { MIME_MATHESAR_SHEET_CLIPBOARD, MIME_PLAIN_TEXT } from './constants';
+import { MIME_MATHESAR_SHEET_CLIPBOARD, MIME_PLAIN_TEXT } from "./constants";
 import {
   type StructuredCell,
   validateStructuredCellRows,
-} from './StructuredCell';
-import { deserializeTsv } from './tsv';
+} from "./StructuredCell";
+import { deserializeTsv } from "./tsv";
 
 /**
  * This is the stuff we need to have from the Sheet in order to paste into it
@@ -37,13 +37,13 @@ export interface PastingContext {
 }
 
 interface TsvCell {
-  type: 'tsv';
+  type: "tsv";
   value: string;
 }
 
 /** Data that was copied from Mathesar */
 interface MathesarCell {
-  type: 'mathesar';
+  type: "mathesar";
   value: StructuredCell;
 }
 
@@ -55,19 +55,19 @@ function getPayload(clipboardData: DataTransfer): Payload {
   const mathesarData = clipboardData.getData(MIME_MATHESAR_SHEET_CLIPBOARD);
   if (mathesarData) {
     const rows = validateStructuredCellRows(JSON.parse(mathesarData));
-    if (rows.length === 0) throw new Error(get(_)('paste_error_empty'));
-    return rows.map((row) => row.map((value) => ({ type: 'mathesar', value })));
+    if (rows.length === 0) throw new Error(get(_)("paste_error_empty"));
+    return rows.map((row) => row.map((value) => ({ type: "mathesar", value })));
   }
 
   const textData = clipboardData.getData(MIME_PLAIN_TEXT);
   if (textData) {
     const rows = deserializeTsv(textData);
-    if (rows.length === 0) throw new Error(get(_)('paste_error_empty'));
+    if (rows.length === 0) throw new Error(get(_)("paste_error_empty"));
     // return makeTsvPayload(rows);
-    return rows.map((row) => row.map((value) => ({ type: 'tsv', value })));
+    return rows.map((row) => row.map((value) => ({ type: "tsv", value })));
   }
 
-  throw new Error(get(_)('paste_error_unsupported_mime_type'));
+  throw new Error(get(_)("paste_error_unsupported_mime_type"));
 }
 
 /** Gets the subset of sheet columns that we're actually pasting into */
@@ -79,7 +79,7 @@ function getDestinationColumns(
   const selectedColumnCount = selectedColumnIds.size;
 
   if (selectedColumnCount > payloadColumnCount) {
-    throw new Error(get(_)('paste_error_too_many_destination_columns'));
+    throw new Error(get(_)("paste_error_too_many_destination_columns"));
   }
 
   /** The index within `sheetColumns` of the first pasted column */
@@ -87,13 +87,13 @@ function getDestinationColumns(
     selectedColumnIds.has(String(c.id)),
   );
   if (firstIndex === -1) {
-    throw new Error(get(_)('paste_error_no_columns_selected'));
+    throw new Error(get(_)("paste_error_no_columns_selected"));
   }
 
   /** The index within `sheetColumns` of the final pasted column */
   const lastIndex = firstIndex + payloadColumnCount - 1;
   if (lastIndex >= sheetColumns.length) {
-    throw new Error(get(_)('paste_error_too_few_destination_columns'));
+    throw new Error(get(_)("paste_error_too_few_destination_columns"));
   }
 
   return sheetColumns.slice(firstIndex, lastIndex + 1);
@@ -103,21 +103,21 @@ function prepareStructuredCellValue(
   column: RawColumnWithMetadata,
   cell: PayloadCell,
 ) {
-  if (cell.type === 'tsv') {
+  if (cell.type === "tsv") {
     // Since TSV doesn't have a mechanism to faithfully represent NULLs, we
     // assume that empty strings are NULLs.
-    if (cell.value === '' && column.nullable) return null;
+    if (cell.value === "" && column.nullable) return null;
 
     return cell.value;
   }
 
-  if (cell.type === 'mathesar') {
+  if (cell.type === "mathesar") {
     // We need to check for NULL first because the "formatted" value of a copied
     // null cell will be an empty string, which we don't want to return.
     if (cell.value.raw === null) return null;
 
     // If we're pasting into a text column, use the formatted value.
-    if (column.type === 'text') return cell.value.formatted;
+    if (column.type === "text") return cell.value.formatted;
 
     // Otherwise use the raw value
     return cell.value.raw;
@@ -152,7 +152,7 @@ async function updateViaPaste({
   const targetRowCount = Math.max(initialSelection.rowIds.size, payload.length);
   const sourceRows = [...take(targetRowCount, cycle(payload))];
   const firstSourceRow = first(sourceRows);
-  if (!firstSourceRow) throw new Error(get(_)('paste_error_no_rows'));
+  if (!firstSourceRow) throw new Error(get(_)("paste_error_no_rows"));
 
   const sourceColumnCount = firstSourceRow.length;
   const sheetColumns = context.getSheetColumns();
@@ -205,7 +205,7 @@ async function updateViaPaste({
   const totalCellCount = rowCount * columnCount;
   if (confirm) {
     const confirmed = await context.confirm(
-      get(_)('paste_confirmation', { values: { count: totalCellCount } }),
+      get(_)("paste_confirmation", { values: { count: totalCellCount } }),
     );
     if (!confirmed) return;
   }
@@ -233,12 +233,12 @@ export async function paste(
   const payload = getPayload(clipboardData);
 
   const operation = get(selectionStore).pasteOperation;
-  if (operation === 'none') return;
-  if (operation === 'insert') {
+  if (operation === "none") return;
+  if (operation === "insert") {
     await updateViaPaste({ payload, selectionStore, context, confirm: false });
     return;
   }
-  if (operation === 'update') {
+  if (operation === "update") {
     await updateViaPaste({ payload, selectionStore, context, confirm: true });
     return;
   }

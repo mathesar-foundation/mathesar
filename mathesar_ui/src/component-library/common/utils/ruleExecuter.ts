@@ -1,4 +1,4 @@
-export type RuleTermOperator = 'eq' | 'neq' | 'lt' | 'gt' | 'lte' | 'gte';
+export type RuleTermOperator = "eq" | "neq" | "lt" | "gt" | "lte" | "gte";
 
 export interface RuleTerm {
   id: string;
@@ -7,18 +7,18 @@ export interface RuleTerm {
 }
 
 export interface RuleTermCombination {
-  combination: 'and' | 'or';
+  combination: "and" | "or";
   terms: Rule[];
 }
 
 export type Rule = RuleTerm | RuleTermCombination;
 
 function combine(
-  combination: RuleTermCombination['combination'],
+  combination: RuleTermCombination["combination"],
   term1: boolean,
   term2: boolean,
 ): boolean {
-  if (combination === 'and') {
+  if (combination === "and") {
     return term1 && term2;
   }
   return term1 || term2;
@@ -26,24 +26,24 @@ function combine(
 
 function executeTerm(
   term: RuleTerm,
-  values: Record<RuleTerm['id'], unknown>,
+  values: Record<RuleTerm["id"], unknown>,
 ): boolean {
   const termValue = values[term.id];
   switch (term.op) {
-    case 'eq':
+    case "eq":
       return termValue === term.value;
-    case 'neq':
+    case "neq":
       return termValue !== term.value;
-    case 'gt':
+    case "gt":
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return termValue > term.value;
-    case 'gte':
+    case "gte":
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return termValue >= term.value;
-    case 'lt':
+    case "lt":
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return termValue < term.value;
-    case 'lte':
+    case "lte":
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return termValue <= term.value;
     default:
@@ -53,10 +53,10 @@ function executeTerm(
 
 export function executeRule(
   rule: Rule,
-  values: Record<RuleTerm['id'], unknown>,
+  values: Record<RuleTerm["id"], unknown>,
 ): boolean {
-  if ('combination' in rule) {
-    let isSuccess = rule.combination === 'and';
+  if ("combination" in rule) {
+    let isSuccess = rule.combination === "and";
     rule.terms.forEach((term) => {
       isSuccess = combine(
         rule.combination,

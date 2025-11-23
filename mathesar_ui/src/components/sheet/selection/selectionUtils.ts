@@ -1,54 +1,54 @@
-import type { Writable } from 'svelte/store';
+import type { Writable } from "svelte/store";
 
-import type { FileManifest, ResultValue } from '@mathesar/api/rpc/records';
-import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
-import { match } from '@mathesar/utils/patternMatching';
-import { type ImmutableSet, defined } from '@mathesar-component-library';
+import type { FileManifest, ResultValue } from "@mathesar/api/rpc/records";
+import type { CellColumnFabric } from "@mathesar/components/cell-fabric/types";
+import { match } from "@mathesar/utils/patternMatching";
+import { type ImmutableSet, defined } from "@mathesar-component-library";
 
-import type Series from './Series';
-import type SheetSelection from './SheetSelection';
+import type Series from "./Series";
+import type SheetSelection from "./SheetSelection";
 
 export type SheetCellDetails =
-  | { type: 'data-cell'; cellId: string }
-  | { type: 'column-header-cell'; columnId: string }
-  | { type: 'row-header-cell'; rowId: string }
-  | { type: 'placeholder-row-header-cell'; rowId: string }
-  | { type: 'placeholder-data-cell'; cellId: string };
+  | { type: "data-cell"; cellId: string }
+  | { type: "column-header-cell"; columnId: string }
+  | { type: "row-header-cell"; rowId: string }
+  | { type: "placeholder-row-header-cell"; rowId: string }
+  | { type: "placeholder-data-cell"; cellId: string };
 
 export function findContainingSheetCell(
   element: HTMLElement,
 ): SheetCellDetails | undefined {
-  const containingElement = element.closest('[data-sheet-element]');
+  const containingElement = element.closest("[data-sheet-element]");
   if (!containingElement) return undefined;
 
-  const elementType = containingElement.getAttribute('data-sheet-element');
+  const elementType = containingElement.getAttribute("data-sheet-element");
   if (!elementType) return undefined;
 
-  if (elementType === 'data-cell') {
-    const rowType = containingElement.getAttribute('data-sheet-row-type');
-    const cellId = containingElement.getAttribute('data-cell-selection-id');
+  if (elementType === "data-cell") {
+    const rowType = containingElement.getAttribute("data-sheet-row-type");
+    const cellId = containingElement.getAttribute("data-cell-selection-id");
     if (!cellId) return undefined;
     return {
-      type: rowType === 'placeholder' ? 'placeholder-data-cell' : 'data-cell',
+      type: rowType === "placeholder" ? "placeholder-data-cell" : "data-cell",
       cellId,
     };
   }
 
-  if (elementType === 'column-header-cell') {
-    const columnId = containingElement.getAttribute('data-column-identifier');
+  if (elementType === "column-header-cell") {
+    const columnId = containingElement.getAttribute("data-column-identifier");
     if (!columnId) return undefined;
-    return { type: 'column-header-cell', columnId };
+    return { type: "column-header-cell", columnId };
   }
 
-  if (elementType === 'row-header-cell') {
-    const rowType = containingElement.getAttribute('data-sheet-row-type');
-    const rowId = containingElement.getAttribute('data-row-selection-id');
+  if (elementType === "row-header-cell") {
+    const rowType = containingElement.getAttribute("data-sheet-row-type");
+    const rowId = containingElement.getAttribute("data-row-selection-id");
     if (!rowId) return undefined;
     return {
       type:
-        rowType === 'placeholder'
-          ? 'placeholder-row-header-cell'
-          : 'row-header-cell',
+        rowType === "placeholder"
+          ? "placeholder-row-header-cell"
+          : "row-header-cell",
       rowId,
     };
   }
@@ -84,15 +84,15 @@ export function beginSelection({
   }
 
   function finish() {
-    sheetElement.removeEventListener('mousemove', drawToPoint);
-    window.removeEventListener('mouseup', finish);
+    sheetElement.removeEventListener("mousemove", drawToPoint);
+    window.removeEventListener("mouseup", finish);
     selectionInProgress.set(false);
   }
 
   selectionInProgress.set(true);
   drawToCell(targetCell);
-  sheetElement.addEventListener('mousemove', drawToPoint);
-  window.addEventListener('mouseup', finish);
+  sheetElement.addEventListener("mousemove", drawToPoint);
+  window.addEventListener("mouseup", finish);
 }
 
 export function selectCellRange(p: {
@@ -100,12 +100,12 @@ export function selectCellRange(p: {
   targetCell: SheetCellDetails;
 }): void {
   p.selection.update((s) =>
-    match(p.targetCell, 'type', {
-      'column-header-cell': ({ columnId }) => s.drawnToColumn(columnId),
-      'row-header-cell': ({ rowId }) => s.drawnToRow(rowId),
-      'data-cell': ({ cellId }) => s.drawnToDataCell(cellId),
-      'placeholder-data-cell': ({ cellId }) => s.ofOneCell(cellId),
-      'placeholder-row-header-cell': () => s,
+    match(p.targetCell, "type", {
+      "column-header-cell": ({ columnId }) => s.drawnToColumn(columnId),
+      "row-header-cell": ({ rowId }) => s.drawnToRow(rowId),
+      "data-cell": ({ cellId }) => s.drawnToDataCell(cellId),
+      "placeholder-data-cell": ({ cellId }) => s.ofOneCell(cellId),
+      "placeholder-row-header-cell": () => s,
     }),
   );
 }

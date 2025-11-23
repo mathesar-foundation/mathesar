@@ -1,9 +1,9 @@
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from "svelte/store";
 
-import { type Filled, type ValidationFn, getErrors } from './validators';
+import { type Filled, type ValidationFn, getErrors } from "./validators";
 
-export const comboErrorsKey = Symbol('comboErrors');
-export const disabledKey = Symbol('disabled');
+export const comboErrorsKey = Symbol("comboErrors");
+export const disabledKey = Symbol("disabled");
 
 export interface BaseField<T> extends Writable<T> {
   initialValue: T;

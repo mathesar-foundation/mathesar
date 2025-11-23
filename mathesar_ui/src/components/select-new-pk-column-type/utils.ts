@@ -1,5 +1,5 @@
-import Identity from './Identity.svelte';
-import Uuid from './Uuid.svelte';
+import Identity from "./Identity.svelte";
+import Uuid from "./Uuid.svelte";
 
 export const pkColumnTypeMap = {
   IDENTITY: {

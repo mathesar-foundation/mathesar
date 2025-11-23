@@ -1,11 +1,11 @@
 /* eslint-disable max-classes-per-file */
 
-import { getErrorMessage } from '@mathesar/utils/errors';
+import { getErrorMessage } from "@mathesar/utils/errors";
 import {
   ImmutableMap,
   hasProperty,
   hasStringProperty,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 /**
  * This is our front end representation of API errors. It's almost the same as
@@ -27,9 +27,9 @@ interface SegregatedErrorMessages<T extends string = string> {
 }
 
 function getApiErrorCode(data: unknown): string | number | undefined {
-  if (hasProperty(data, 'code')) {
+  if (hasProperty(data, "code")) {
     const { code } = data;
-    if (typeof code === 'string' || typeof code === 'number') {
+    if (typeof code === "string" || typeof code === "number") {
       return code;
     }
   }
@@ -40,8 +40,8 @@ function getApiErrorData(data: unknown): ApiErrorData {
   return {
     message: getErrorMessage(data),
     code: getApiErrorCode(data),
-    field: hasStringProperty(data, 'field') ? data.field : undefined,
-    detail: hasProperty(data, 'detail') ? data.detail : undefined,
+    field: hasStringProperty(data, "field") ? data.field : undefined,
+    detail: hasProperty(data, "detail") ? data.detail : undefined,
   };
 }
 
@@ -55,7 +55,7 @@ export class ApiError extends Error {
   constructor(anything: unknown) {
     const data = getApiErrorData(anything);
     super(data.message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.code = data.code;
     this.field = data.field;
     this.detail = data.detail;
@@ -83,8 +83,8 @@ export class ApiMultiError extends Error {
   constructor(anything: unknown) {
     const inputArray = Array.isArray(anything) ? anything : [anything];
     const errors = inputArray.map((d) => new ApiError(d));
-    super(errors.map((e) => e.message).join(' '));
-    this.name = 'ApiMultiError';
+    super(errors.map((e) => e.message).join(" "));
+    this.name = "ApiMultiError";
     this.errors = errors;
   }
 

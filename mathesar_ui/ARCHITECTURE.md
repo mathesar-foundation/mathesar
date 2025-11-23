@@ -27,11 +27,10 @@ A writable Svelte store holds an instance of a custom immutable class.
 - **Updating the store**:
 
   ```typescript
-  pizza.update((p) => p.withTopping('mushrooms'));
+  pizza.update((p) => p.withTopping("mushrooms"));
   ```
 
 - **Benefits**:
-
   - The class is kept simple.
   - Unit tests for the class can be written declaratively with no need to sequentially build up state.
   - Avoiding invalid state is straightforward because the constructor can serve as a single point of control for complex validation and recovery logic.
@@ -45,16 +44,14 @@ A custom class has a property which holds an instance of a writable Svelte store
 - **Updating the store**:
 
   ```typescript
-  pizza.addTopping('mushrooms');
+  pizza.addTopping("mushrooms");
   ```
 
 - **Benefits**:
-
   - The consuming code is kept clean and simple.
   - Reactivity is granular, which might be crucial for performance or UX concerns
 
 - Sub-patterns with varying member visibility
-
   - **Public**: In many cases the underlying store is public, grating consumers the privilege to modify the store directly without calling the store methods. We would like to avoid this pattern going forward to reduce the opportunity for bugs.
 
     Example: [RecordsData](https://github.com/centerofci/mathesar/blob/60d50dbcabb519f4260500724aef2ba6fbc96059/mathesar_ui/src/stores/table-data/records.ts#L269)

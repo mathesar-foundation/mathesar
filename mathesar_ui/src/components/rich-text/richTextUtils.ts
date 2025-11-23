@@ -1,13 +1,13 @@
-type SlotToken = { type: 'slot'; name: string; arg?: string };
-type TextToken = { type: 'text'; content: string };
+type SlotToken = { type: "slot"; name: string; arg?: string };
+type TextToken = { type: "text"; content: string };
 export type Token = SlotToken | TextToken;
 
 export function textToken(s: string): TextToken {
-  return { type: 'text', content: s };
+  return { type: "text", content: s };
 }
 
 export function slotToken(name: string, arg?: string): SlotToken {
-  return { type: 'slot', name, arg };
+  return { type: "slot", name, arg };
 }
 
 interface ParseState {
@@ -34,7 +34,7 @@ function parseSlot(text: string): ParseState | undefined {
       } else if (nameOfSlotWithoutArg) {
         token = slotToken(nameOfSlotWithoutArg);
       }
-      return '';
+      return "";
     },
   );
 
@@ -49,7 +49,7 @@ function consumeChar({ tokens, remainder }: ParseState): ParseState {
   const char = remainder[0];
   const last = tokens[tokens.length - 1];
   const newTokens: Token[] =
-    last && last.type === 'text'
+    last && last.type === "text"
       ? [...tokens.slice(0, -1), textToken(last.content + char)]
       : [...tokens, textToken(char)];
   return {
@@ -62,7 +62,7 @@ function consumeChar({ tokens, remainder }: ParseState): ParseState {
  * Recursively consume the remainder text into extracted tokens.
  */
 function advance(state: ParseState): ParseState {
-  if (state.remainder === '') {
+  if (state.remainder === "") {
     return state;
   }
   const slot = parseSlot(state.remainder);

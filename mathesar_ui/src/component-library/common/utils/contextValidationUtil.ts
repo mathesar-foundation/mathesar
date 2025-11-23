@@ -1,10 +1,10 @@
-import { getContext, hasContext, onDestroy, setContext } from 'svelte';
-import { type Writable, writable } from 'svelte/store';
+import { getContext, hasContext, onDestroy, setContext } from "svelte";
+import { type Writable, writable } from "svelte/store";
 
 export type ValidationFunction = () => boolean;
 export type ValidationResultStore = Writable<boolean>;
 
-const VALIDATION_CONTEXT_KEY = 'validationContext';
+const VALIDATION_CONTEXT_KEY = "validationContext";
 
 class ContextBasedValidator {
   validationResult: Writable<boolean> = writable(true);
@@ -38,7 +38,7 @@ export function createValidationContext(): ContextBasedValidator {
 
 export function getValidationContext(): ContextBasedValidator {
   if (!hasContext(VALIDATION_CONTEXT_KEY)) {
-    throw Error('Validation context not present');
+    throw Error("Validation context not present");
   }
   return getContext<ContextBasedValidator>(VALIDATION_CONTEXT_KEY);
 }

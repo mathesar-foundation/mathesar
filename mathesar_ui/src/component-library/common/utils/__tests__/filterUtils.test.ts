@@ -1,4 +1,4 @@
-import { filterTree } from '../filterUtils';
+import { filterTree } from "../filterUtils";
 
 function filterRecords(
   data: Record<string, unknown>[],
@@ -14,29 +14,29 @@ function filterRecords(
 
 const dummyData = [
   {
-    alevel1Key1: 'level1Value1',
+    alevel1Key1: "level1Value1",
     targetChildKey: [
       {
-        level2Key1: 'level2Value1',
+        level2Key1: "level2Value1",
         targetChildKey: [
           {
-            level3Key1: 'target',
+            level3Key1: "target",
           },
           {
-            nonSearchNonChildEntry: 'someValue',
+            nonSearchNonChildEntry: "someValue",
           },
         ],
       },
     ],
   },
   {
-    blevel1Key1: 'level1Value1',
+    blevel1Key1: "level1Value1",
     targetChildKey: [
       {
-        level2Key1: 'level2Value1',
+        level2Key1: "level2Value1",
         targetChildKey: [
           {
-            level3Key1: 'randomValue',
+            level3Key1: "randomValue",
           },
         ],
       },
@@ -46,24 +46,24 @@ const dummyData = [
 
 const testRes = [
   {
-    alevel1Key1: 'level1Value1',
+    alevel1Key1: "level1Value1",
     targetChildKey: [
       {
-        level2Key1: 'level2Value1',
+        level2Key1: "level2Value1",
         targetChildKey: [
           {
-            level3Key1: 'target',
+            level3Key1: "target",
           },
         ],
       },
     ],
   },
 ];
-test('filterUtils', () => {
+test("filterUtils", () => {
   expect(
-    filterRecords(dummyData, 'level3Key1', 'targetChildKey', 'get'),
+    filterRecords(dummyData, "level3Key1", "targetChildKey", "get"),
   ).toEqual(testRes);
-  expect(filterRecords(dummyData, 'level3Key1', 'targetChildKey', '')).toEqual(
+  expect(filterRecords(dummyData, "level3Key1", "targetChildKey", "")).toEqual(
     dummyData,
   );
 });

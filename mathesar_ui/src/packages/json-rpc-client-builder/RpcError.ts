@@ -1,10 +1,10 @@
-import { hasProperty, hasStringProperty } from '@mathesar-component-library';
+import { hasProperty, hasStringProperty } from "@mathesar-component-library";
 
 // TODO: create and document specific error codes instead of using a fallback
 const FALLBACK_ERROR_CODE = 0;
 
 export class RpcError extends Error {
-  status = 'error' as const;
+  status = "error" as const;
 
   code: number;
 
@@ -38,20 +38,20 @@ export class RpcError extends Error {
     // If our HTTP request succeeded (status 200) and we've received a valid
     // response object conforming to the JSON-RPC spec, then this is the place
     // where we handle the standard JSON-RPC error object within that response.
-    if (hasProperty(value, 'error')) {
+    if (hasProperty(value, "error")) {
       return RpcError.fromAnything(value.error);
     }
 
     const message = (() => {
-      if (hasStringProperty(value, 'message')) {
+      if (hasStringProperty(value, "message")) {
         return value.message;
       }
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         return value;
       }
       if (
-        hasProperty(value, 'toString') &&
-        typeof value.toString === 'function'
+        hasProperty(value, "toString") &&
+        typeof value.toString === "function"
       ) {
         return String(value.toString());
       }
@@ -59,11 +59,11 @@ export class RpcError extends Error {
     })();
 
     const code =
-      hasProperty(value, 'code') && typeof value.code === 'number'
+      hasProperty(value, "code") && typeof value.code === "number"
         ? value.code
         : FALLBACK_ERROR_CODE;
 
-    const data = hasProperty(value, 'data') ? value.data : undefined;
+    const data = hasProperty(value, "data") ? value.data : undefined;
 
     return new RpcError({ code, message, data });
   }

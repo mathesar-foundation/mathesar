@@ -3,12 +3,12 @@
  */
 export function escapeRegex(s: string): string {
   // eslint-disable-next-line no-useless-escape
-  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
 
 /** From https://stackoverflow.com/a/49901740/895563 */
 export function transliterateToAscii(input: string): string {
-  return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 export function toAsciiLowerCase(input: string): string {
@@ -20,7 +20,7 @@ export function* filterViaTextQuery<I>(
   query: string | undefined | null,
   getStringRepresentation: (item: I) => string | string[],
 ): Generator<I, void, undefined> {
-  if (query === undefined || query === null || query.trim() === '') {
+  if (query === undefined || query === null || query.trim() === "") {
     yield* items;
     return;
   }

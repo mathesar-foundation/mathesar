@@ -1,9 +1,9 @@
-import type { Database } from '@mathesar/models/Database';
-import type { Role } from '@mathesar/models/Role';
+import type { Database } from "@mathesar/models/Database";
+import type { Role } from "@mathesar/models/Role";
 
-import { getRouteContext, setRouteContext } from './utils';
+import { getRouteContext, setRouteContext } from "./utils";
 
-const contextKey = Symbol('database route store');
+const contextKey = Symbol("database route store");
 
 export class DatabaseRouteContext {
   database;
@@ -32,11 +32,11 @@ export class DatabaseRouteContext {
   async addRole(
     props:
       | {
-          roleName: Role['name'];
+          roleName: Role["name"];
           login: false;
           password?: never;
         }
-      | { roleName: Role['name']; login: true; password: string },
+      | { roleName: Role["name"]; login: true; password: string },
   ) {
     const newRole = await this.database.addRole(
       props.roleName,

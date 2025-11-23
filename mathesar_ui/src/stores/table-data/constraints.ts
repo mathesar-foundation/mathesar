@@ -7,21 +7,21 @@ import {
   derived,
   get as getStoreValue,
   writable,
-} from 'svelte/store';
+} from "svelte/store";
 
-import { States } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import { States } from "@mathesar/api/rest/utils/requestUtils";
+import { api } from "@mathesar/api/rpc";
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
 import type {
   ConstraintRecipe,
   RawConstraint,
-} from '@mathesar/api/rpc/constraints';
-import type { Database } from '@mathesar/models/Database';
-import type { Table } from '@mathesar/models/Table';
+} from "@mathesar/api/rpc/constraints";
+import type { Database } from "@mathesar/models/Database";
+import type { Table } from "@mathesar/models/Table";
 import {
   type CancellablePromise,
   EventHandler,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
 export interface ConstraintsData {
   state: States;
@@ -59,7 +59,7 @@ function uniqueColumns(
     ({ constraints }) =>
       new Set(
         constraints
-          .filter((c) => c.type === 'unique' && c.columns.length === 1)
+          .filter((c) => c.type === "unique" && c.columns.length === 1)
           .map((c) => c.columns[0]),
       ),
   );
@@ -74,7 +74,7 @@ export class ConstraintsDataStore
 {
   private apiContext: {
     database_id: number;
-    table_oid: Table['oid'];
+    table_oid: Table["oid"];
   };
 
   private store: Writable<ConstraintsData>;
@@ -94,8 +94,8 @@ export class ConstraintsDataStore
     database,
     table,
   }: {
-    database: Pick<Database, 'id'>;
-    table: Pick<Table, 'oid'>;
+    database: Pick<Database, "id">;
+    table: Pick<Table, "oid">;
   }) {
     super();
     this.apiContext = { database_id: database.id, table_oid: table.oid };
@@ -152,7 +152,7 @@ export class ConstraintsDataStore
     await api.constraints
       .add({ ...this.apiContext, constraint_def_list: [recipe] })
       .run();
-    await this.dispatch('constraintAdded');
+    await this.dispatch("constraintAdded");
     await this.fetch();
   }
 
@@ -160,7 +160,7 @@ export class ConstraintsDataStore
     await api.constraints
       .delete({ ...this.apiContext, constraint_oid: constraintId })
       .run();
-    await this.dispatch('constraintRemoved');
+    await this.dispatch("constraintRemoved");
     await this.fetch();
   }
 
@@ -182,7 +182,7 @@ export class ConstraintsDataStore
       return;
     }
     if (shouldBeUnique) {
-      await this.add({ type: 'u', columns: [column.id] });
+      await this.add({ type: "u", columns: [column.id] });
       return;
     }
     // Technically, one column can have two unique constraints applied on it,
@@ -191,7 +191,7 @@ export class ConstraintsDataStore
     const uniqueConstraintsForColumn = filterConstraintsByColumnSet(
       constraints,
       [column.id],
-    ).filter((c) => c.type === 'unique');
+    ).filter((c) => c.type === "unique");
     await Promise.all(
       uniqueConstraintsForColumn.map((c) =>
         api.constraints

@@ -1,10 +1,10 @@
-import type { Readable, Writable } from 'svelte/store';
+import type { Readable, Writable } from "svelte/store";
 
-import { EventHandler } from '@mathesar/component-library';
-import PreventableEffectsStore from '@mathesar/stores/PreventableEffectsStore';
+import { EventHandler } from "@mathesar/component-library";
+import PreventableEffectsStore from "@mathesar/stores/PreventableEffectsStore";
 
-import type Plane from './Plane';
-import SheetSelection from './SheetSelection';
+import type Plane from "./Plane";
+import SheetSelection from "./SheetSelection";
 
 export default class SheetSelectionStore
   extends EventHandler<{
@@ -12,7 +12,7 @@ export default class SheetSelectionStore
   }>
   implements Writable<SheetSelection>
 {
-  private selection: PreventableEffectsStore<SheetSelection, 'focus'>;
+  private selection: PreventableEffectsStore<SheetSelection, "focus">;
 
   private cleanupFunctions: (() => void)[] = [];
 
@@ -31,13 +31,13 @@ export default class SheetSelectionStore
         // handle those cases imperatively as needed.
         //
         // [1]: https://github.com/mathesar-foundation/mathesar/issues/3955
-        this.selection.update((s) => s.forNewPlane(p), { prevent: ['focus'] }),
+        this.selection.update((s) => s.forNewPlane(p), { prevent: ["focus"] }),
       ),
     );
   }
 
   private focus(): void {
-    void this.dispatch('focus');
+    void this.dispatch("focus");
   }
 
   subscribe(run: (value: SheetSelection) => void): () => void {
@@ -55,7 +55,7 @@ export default class SheetSelectionStore
   updateWithoutFocus(
     getNewValue: (oldValue: SheetSelection) => SheetSelection,
   ): void {
-    this.selection.update(getNewValue, { prevent: ['focus'] });
+    this.selection.update(getNewValue, { prevent: ["focus"] });
   }
 
   set(value: SheetSelection): void {
@@ -67,7 +67,7 @@ export default class SheetSelectionStore
    * cell.
    */
   setWithoutFocus(value: SheetSelection): void {
-    this.selection.update(() => value, { prevent: ['focus'] });
+    this.selection.update(() => value, { prevent: ["focus"] });
   }
 
   destroy(): void {

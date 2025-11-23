@@ -8,13 +8,13 @@
  * store instances and this store will get used in every FK cell.
  */
 
-import { derived } from 'svelte/store';
+import { derived } from "svelte/store";
 
-import * as urls from '@mathesar/routes/urls';
+import * as urls from "@mathesar/routes/urls";
 
-import { databasesStore } from './databases';
-import { currentSchema } from './schemas';
-import { currentTable } from './tables';
+import { databasesStore } from "./databases";
+import { currentSchema } from "./schemas";
+import { currentTable } from "./tables";
 
 export const storeToGetRecordPageUrl = derived(
   [databasesStore.currentDatabase, currentSchema, currentTable],

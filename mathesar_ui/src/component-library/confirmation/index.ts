@@ -1,2 +1,2 @@
-export * from './ConfirmationController';
-export { default as Confirmation } from './Confirmation.svelte';
+export * from "./ConfirmationController";
+export { default as Confirmation } from "./Confirmation.svelte";

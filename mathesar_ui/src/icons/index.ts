@@ -100,9 +100,9 @@ import {
   faUsers,
   faWandSparkles,
   faXmark,
-} from '@fortawesome/free-solid-svg-icons';
+} from "@fortawesome/free-solid-svg-icons";
 
-import type { IconProps } from '@mathesar-component-library/types';
+import type { IconProps } from "@mathesar-component-library/types";
 
 import {
   arrayIcon,
@@ -118,7 +118,7 @@ import {
   permissionsIcon,
   tableIcon,
   treeChildNodeArrowIcon,
-} from './customIcons';
+} from "./customIcons";
 
 /**
  * @file
@@ -191,7 +191,7 @@ export const iconAddPrimaryKeyColumn = iconAddNew;
 export const iconPickPrimaryKeyColumn = { data: faHandPointer };
 export const iconDuplicateRecord: IconProps = {
   data: faClone,
-  flip: 'vertical',
+  flip: "vertical",
 };
 export const iconFillOutForm: IconProps = { data: faPlay };
 export const iconDownload: IconProps = { data: faCloudDownloadAlt };

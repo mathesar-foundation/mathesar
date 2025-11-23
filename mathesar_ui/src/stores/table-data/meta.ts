@@ -1,20 +1,20 @@
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from "svelte/store";
 
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
-import Pagination, { type TersePagination } from '@mathesar/utils/Pagination';
-import Url64 from '@mathesar/utils/Url64';
+import type { RequestStatus } from "@mathesar/api/rest/utils/requestUtils";
+import type { RpcError } from "@mathesar/packages/json-rpc-client-builder";
+import Pagination, { type TersePagination } from "@mathesar/utils/Pagination";
+import Url64 from "@mathesar/utils/Url64";
 import {
   type ImmutableMap,
   ImmutableSet,
   WritableMap,
-} from '@mathesar-component-library';
+} from "@mathesar-component-library";
 
-import { Filtering, type TerseFiltering } from './filtering';
-import { Grouping, type TerseGrouping } from './grouping';
-import type { RecordsRequestParamsData } from './records';
-import { SearchFuzzy } from './searchFuzzy';
-import { Sorting, type TerseSorting } from './sorting';
+import { Filtering, type TerseFiltering } from "./filtering";
+import { Grouping, type TerseGrouping } from "./grouping";
+import type { RecordsRequestParamsData } from "./records";
+import { SearchFuzzy } from "./searchFuzzy";
+import { Sorting, type TerseSorting } from "./sorting";
 import {
   type CellKey,
   type ClientSideCellError,
@@ -22,7 +22,7 @@ import {
   extractRowKeyFromCellKey,
   getRowStatus,
   getSheetState,
-} from './utils';
+} from "./utils";
 
 /**
  * Unlike in `RequestStatus`, here the state and the error messages are
@@ -36,7 +36,7 @@ export interface RowStatus {
    * The combined state of the most recent "creation" or "deletion" request. We
    * use this to set the background color for all cells and the row header.
    */
-  wholeRowState?: RequestStatus['state'];
+  wholeRowState?: RequestStatus["state"];
 
   /**
    * The triangle error popover indicator will display whenever this array
@@ -150,7 +150,7 @@ export class Meta {
 
   rowStatus: Readable<ImmutableMap<RowKey, RowStatus>>;
 
-  sheetState: Readable<RequestStatus['state'] | undefined>;
+  sheetState: Readable<RequestStatus["state"] | undefined>;
 
   /**
    * Allows us to save and re-create Meta, e.g. from data stored in the tab
@@ -226,7 +226,7 @@ export class Meta {
         if (serialization === defaultMetaPropsSerialization) {
           // Avoid returning a serialization which only includes the empty data
           // structure.
-          return '';
+          return "";
         }
         return serialization;
       },

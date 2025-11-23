@@ -1,19 +1,19 @@
-import { type Readable, get, writable } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { type Readable, get, writable } from "svelte/store";
+import { _ } from "svelte-i18n";
 
 import type {
   RawDataForm,
   RawDataFormStructure,
-} from '@mathesar/api/rpc/forms';
+} from "@mathesar/api/rpc/forms";
 import {
   type FieldStore,
   type Form,
   makeForm,
-} from '@mathesar/components/form';
-import type { RowSeekerProps } from '@mathesar/systems/row-seeker/RowSeekerController';
-import { asyncDynamicDerived, collapse } from '@mathesar-component-library';
+} from "@mathesar/components/form";
+import type { RowSeekerProps } from "@mathesar/systems/row-seeker/RowSeekerController";
+import { asyncDynamicDerived, collapse } from "@mathesar-component-library";
 
-import type { DataFormStructureChangeEventHandler } from './DataFormStructureChangeEventHandler';
+import type { DataFormStructureChangeEventHandler } from "./DataFormStructureChangeEventHandler";
 import {
   type DataFormFieldContainerFactory,
   type DataFormFieldFkInputValueHolder,
@@ -21,33 +21,33 @@ import {
   type FormFields,
   buildFormFieldContainerFactory,
   walkFormFields,
-} from './fields';
-import type { FormSource } from './FormSource';
+} from "./fields";
+import type { FormSource } from "./FormSource";
 
 interface DataFormStructureProps {
   baseTableOid: number;
   schemaOid: number;
   databaseId: number;
-  name: RawDataForm['name'];
-  description: RawDataForm['description'];
-  associatedRoleId: RawDataForm['associated_role_id'];
-  submitMessage: RawDataForm['submit_message'];
-  submitRedirectUrl: RawDataForm['submit_redirect_url'];
-  submitButtonLabel: RawDataForm['submit_button_label'];
+  name: RawDataForm["name"];
+  description: RawDataForm["description"];
+  associatedRoleId: RawDataForm["associated_role_id"];
+  submitMessage: RawDataForm["submit_message"];
+  submitRedirectUrl: RawDataForm["submit_redirect_url"];
+  submitButtonLabel: RawDataForm["submit_button_label"];
   createFields: DataFormFieldContainerFactory;
 }
 
 export type DataFormPropChangeEvent = {
-  type: 'form/prop';
+  type: "form/prop";
   target: DataFormStructure;
   prop: keyof Pick<
     DataFormStructureProps,
-    | 'name'
-    | 'description'
-    | 'associatedRoleId'
-    | 'submitMessage'
-    | 'submitRedirectUrl'
-    | 'submitButtonLabel'
+    | "name"
+    | "description"
+    | "associatedRoleId"
+    | "submitMessage"
+    | "submitRedirectUrl"
+    | "submitButtonLabel"
   >;
 };
 
@@ -57,7 +57,7 @@ export interface DataFormStructureCtx {
     relatedTableOid: number;
     tableOid: number;
     columnAttnum: number;
-  }) => RowSeekerProps['constructRecordStore'];
+  }) => RowSeekerProps["constructRecordStore"];
   changeEventHandler?: DataFormStructureChangeEventHandler;
 }
 
@@ -74,37 +74,37 @@ export class DataFormStructure {
 
   private _name;
 
-  get name(): Readable<RawDataForm['name']> {
+  get name(): Readable<RawDataForm["name"]> {
     return this._name;
   }
 
   private _description;
 
-  get description(): Readable<RawDataForm['description']> {
+  get description(): Readable<RawDataForm["description"]> {
     return this._description;
   }
 
   private _associatedRoleId;
 
-  get associatedRoleId(): Readable<RawDataForm['associated_role_id']> {
+  get associatedRoleId(): Readable<RawDataForm["associated_role_id"]> {
     return this._associatedRoleId;
   }
 
   private _submitMessage;
 
-  get submitMessage(): Readable<RawDataForm['submit_message']> {
+  get submitMessage(): Readable<RawDataForm["submit_message"]> {
     return this._submitMessage;
   }
 
   private _submitRedirectUrl;
 
-  get submitRedirectUrl(): Readable<RawDataForm['submit_redirect_url']> {
+  get submitRedirectUrl(): Readable<RawDataForm["submit_redirect_url"]> {
     return this._submitRedirectUrl;
   }
 
   private _submitButtonLabel;
 
-  get submitButtonLabel(): Readable<RawDataForm['submit_button_label']> {
+  get submitButtonLabel(): Readable<RawDataForm["submit_button_label"]> {
     return this._submitButtonLabel;
   }
 
@@ -153,9 +153,9 @@ export class DataFormStructure {
     );
   }
 
-  private triggerChangeEvent(prop: DataFormPropChangeEvent['prop']) {
+  private triggerChangeEvent(prop: DataFormPropChangeEvent["prop"]) {
     this.structureCtx.changeEventHandler?.trigger({
-      type: 'form/prop',
+      type: "form/prop",
       target: this,
       prop,
     });
@@ -163,17 +163,17 @@ export class DataFormStructure {
 
   setName(name: string) {
     this._name.set(name);
-    this.triggerChangeEvent('name');
+    this.triggerChangeEvent("name");
   }
 
   setDescription(desc: string) {
     this._description.set(desc);
-    this.triggerChangeEvent('description');
+    this.triggerChangeEvent("description");
   }
 
   setAssociatedRoleId(configuredRoleId: number | null) {
     this._associatedRoleId.set(configuredRoleId);
-    this.triggerChangeEvent('associatedRoleId');
+    this.triggerChangeEvent("associatedRoleId");
   }
 
   setSubmissionMessage(message: string | null) {
@@ -184,17 +184,17 @@ export class DataFormStructure {
           }
         : null,
     );
-    this.triggerChangeEvent('submitMessage');
+    this.triggerChangeEvent("submitMessage");
   }
 
   setSubmissionRedirectUrl(url: string | null) {
     this._submitRedirectUrl.set(url);
-    this.triggerChangeEvent('submitRedirectUrl');
+    this.triggerChangeEvent("submitRedirectUrl");
   }
 
   setSubmissionButtonLabel(label: string | null) {
     this._submitButtonLabel.set(label);
-    this.triggerChangeEvent('submitButtonLabel');
+    this.triggerChangeEvent("submitButtonLabel");
   }
 
   getFormSubmitRequest() {
@@ -204,7 +204,7 @@ export class DataFormStructure {
     };
     const fieldValueStores = get(this.fields.fieldValueStores);
     const fkFieldValueStores = fieldValueStores.filter(
-      (s): s is DataFormFieldFkInputValueHolder => 'userAction' in s,
+      (s): s is DataFormFieldFkInputValueHolder => "userAction" in s,
     );
     fkFieldValueStores.forEach((s) => {
       const ua = get(s.userAction);
@@ -212,7 +212,7 @@ export class DataFormStructure {
       request = {
         ...request,
         [s.key]:
-          ua === 'create'
+          ua === "create"
             ? {
                 type: ua,
               }
@@ -240,7 +240,7 @@ export class DataFormStructure {
     const name = get(this.name);
     return {
       associated_role_id: get(this.associatedRoleId),
-      name: name.trim() || get(_)('untitled'),
+      name: name.trim() || get(_)("untitled"),
       description: get(this.description),
       fields: this.fields.toRawFields(options),
       submit_message: get(this.submitMessage),
@@ -251,9 +251,9 @@ export class DataFormStructure {
 
   static factoryFromRawInfo(
     props: RawDataFormStructure & {
-      database_id: RawDataForm['database_id'];
-      schema_oid: RawDataForm['schema_oid'];
-      base_table_oid: RawDataForm['base_table_oid'];
+      database_id: RawDataForm["database_id"];
+      schema_oid: RawDataForm["schema_oid"];
+      base_table_oid: RawDataForm["base_table_oid"];
     },
     formSource: FormSource,
   ): DataFormStructureFactory {

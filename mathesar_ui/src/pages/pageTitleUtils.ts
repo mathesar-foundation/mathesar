@@ -1,6 +1,6 @@
-import { staticText } from '@mathesar/i18n/staticText';
+import { staticText } from "@mathesar/i18n/staticText";
 
-const SEPARATOR = ' | ';
+const SEPARATOR = " | ";
 
 function makePageTitle(parts: string[]): string {
   const allParts = [...parts];

@@ -6,92 +6,92 @@ import {
   removePrecedingZeros,
   removeTrailingDecimalSeparator,
   removeTrailingDecimalZeros,
-} from '../cleaners';
+} from "../cleaners";
 
 test.each([
-  ['', ''],
-  ['.', '.'],
-  ['...', '.'],
-  ['ab', 'ab'],
-  ['a.b', 'a.b'],
-  ['ab.', 'ab.'],
-  ['ab..', 'ab.'],
-  ['..ab', '.ab'],
-  ['a..b', 'a.b'],
-  ['.a.b.c.', '.abc'],
-])('removeExtraneousDecimalSeparators, %s', (input, output) => {
+  ["", ""],
+  [".", "."],
+  ["...", "."],
+  ["ab", "ab"],
+  ["a.b", "a.b"],
+  ["ab.", "ab."],
+  ["ab..", "ab."],
+  ["..ab", ".ab"],
+  ["a..b", "a.b"],
+  [".a.b.c.", ".abc"],
+])("removeExtraneousDecimalSeparators, %s", (input, output) => {
   const clean = factoryToRemoveExtraneousDecimalSeparators({
-    decimalSeparator: '.',
+    decimalSeparator: ".",
   });
   expect(clean(input)).toBe(output);
 });
 
 test.each([
-  ['', ''],
-  ['-', '-'],
-  ['---', '-'],
-  ['12', '12'],
-  ['-12', '-12'],
-  ['--12', '-12'],
-  ['1-2', '12'],
-  ['12-', '12'],
-  ['12--', '12'],
-  ['-1-2-3', '-123'],
-])('removeExtraneousMinusSigns, %s', (input, output) => {
+  ["", ""],
+  ["-", "-"],
+  ["---", "-"],
+  ["12", "12"],
+  ["-12", "-12"],
+  ["--12", "-12"],
+  ["1-2", "12"],
+  ["12-", "12"],
+  ["12--", "12"],
+  ["-1-2-3", "-123"],
+])("removeExtraneousMinusSigns, %s", (input, output) => {
   expect(removeExtraneousMinusSigns(input)).toBe(output);
 });
 
 test.each([
-  ['.', '0.'],
-  ['.1', '0.1'],
-  ['-.', '-0.'],
-  ['1.', '1.'],
-  ['0.', '0.'],
-])('prependShorthandDecimalWithZero, %s', (input, output) => {
+  [".", "0."],
+  [".1", "0.1"],
+  ["-.", "-0."],
+  ["1.", "1."],
+  ["0.", "0."],
+])("prependShorthandDecimalWithZero, %s", (input, output) => {
   const clean = factoryToPrependShorthandDecimalWithZero({
-    decimalSeparator: '.',
+    decimalSeparator: ".",
   });
   expect(clean(input)).toBe(output);
 });
 
 test.each([
-  ['.', '.'],
-  ['0.1', '0.1'],
-  ['-0.1', '-0.1'],
-  ['-00.1', '-0.1'],
-  ['0.', '0.'],
-  ['00.', '0.'],
-  ['000', '0'],
-  ['00.0', '0.0'],
-  ['00.000', '0.000'],
-  ['0', '0'],
-  ['-01', '-1'],
-  ['01', '1'],
-  ['0001', '1'],
-  ['000100000', '100000'],
-  ['0001000001', '1000001'],
-  ['-000100000.000', '-100000.000'],
-])('removePrecedingZeros, %s', (input, output) => {
+  [".", "."],
+  ["0.1", "0.1"],
+  ["-0.1", "-0.1"],
+  ["-00.1", "-0.1"],
+  ["0.", "0."],
+  ["00.", "0."],
+  ["000", "0"],
+  ["00.0", "0.0"],
+  ["00.000", "0.000"],
+  ["0", "0"],
+  ["-01", "-1"],
+  ["01", "1"],
+  ["0001", "1"],
+  ["000100000", "100000"],
+  ["0001000001", "1000001"],
+  ["-000100000.000", "-100000.000"],
+])("removePrecedingZeros, %s", (input, output) => {
   expect(removePrecedingZeros(input)).toBe(output);
 });
 
 test.each([
-  ['1000', '1000'],
-  ['1.0001', '1.0001'],
-  ['1.10001', '1.10001'],
-  ['1.0001000', '1.0001'],
-  ['1.10001000', '1.10001'],
-  ['1.000', '1.'],
-  ['0', '0'],
-])('removeTrailingDecimalZeros, %s', (input, output) => {
+  ["1000", "1000"],
+  ["1.0001", "1.0001"],
+  ["1.10001", "1.10001"],
+  ["1.0001000", "1.0001"],
+  ["1.10001000", "1.10001"],
+  ["1.000", "1."],
+  ["0", "0"],
+])("removeTrailingDecimalZeros, %s", (input, output) => {
   expect(removeTrailingDecimalZeros(input)).toBe(output);
 });
 
 test.each([
-  ['0', '0'],
-  ['0.', '0'],
-  ['0.1', '0.1'],
-])('removeTrailingDecimalSeparator, %s', (input, output) => {
+  ["0", "0"],
+  ["0.", "0"],
+  ["0.1", "0.1"],
+])("removeTrailingDecimalSeparator, %s", (input, output) => {
   expect(removeTrailingDecimalSeparator(input)).toBe(output);
 });
 

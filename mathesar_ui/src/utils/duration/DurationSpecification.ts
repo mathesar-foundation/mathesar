@@ -2,7 +2,7 @@ import {
   type DurationUnit,
   allDurationUnits,
   defaultColumnMetadata,
-} from '@mathesar/api/rpc/_common/columnDisplayOptions';
+} from "@mathesar/api/rpc/_common/columnDisplayOptions";
 
 export interface DurationConfig {
   max: DurationUnit;
@@ -15,11 +15,11 @@ const defaults: DurationConfig = {
 };
 
 const formattingTokens: Record<DurationUnit, string> = {
-  d: 'D',
-  h: 'HH',
-  m: 'mm',
-  s: 'ss',
-  ms: 'SSS',
+  d: "D",
+  h: "HH",
+  m: "mm",
+  s: "ss",
+  ms: "SSS",
 };
 
 export default class DurationSpecification {
@@ -59,11 +59,11 @@ export default class DurationSpecification {
     }
     if (tokens[tokens.length - 1] === formattingTokens.ms) {
       return [
-        tokens.slice(0, tokens.length - 1).join(':'),
+        tokens.slice(0, tokens.length - 1).join(":"),
         tokens[tokens.length - 1],
-      ].join('.');
+      ].join(".");
     }
-    return tokens.join(':');
+    return tokens.join(":");
   }
 
   static getAllUnits(): DurationUnit[] {

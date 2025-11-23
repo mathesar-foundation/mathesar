@@ -1,10 +1,10 @@
-import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInputTypes';
+import type { BaseInputProps } from "@mathesar-component-library-dir/common/base-components/BaseInputTypes";
 import type {
   CssVariablesObj,
   SimplifiedInputProps,
-} from '@mathesar-component-library-dir/commonTypes';
+} from "@mathesar-component-library-dir/commonTypes";
 
-import type { IconProps } from '../types';
+import type { IconProps } from "../types";
 
 export interface TextInputProps extends SimplifiedInputProps, BaseInputProps {
   value?: string | null;
@@ -13,7 +13,7 @@ export interface TextInputProps extends SimplifiedInputProps, BaseInputProps {
   cssVariables?: CssVariablesObj;
 }
 
-export type SimplifiedTextInputProps = Omit<TextInputProps, 'value'>;
+export type SimplifiedTextInputProps = Omit<TextInputProps, "value">;
 
 export type TextInputWithPrefixProps = TextInputProps & {
   prefixIcon: IconProps;

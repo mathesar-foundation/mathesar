@@ -1,23 +1,23 @@
-import { escapeRegex } from '@mathesar-component-library-dir/common/utils/stringUtils';
+import { escapeRegex } from "@mathesar-component-library-dir/common/utils/stringUtils";
 
-import type { DerivedOptions } from './options';
+import type { DerivedOptions } from "./options";
 
 type Cleaner = (input: string) => string;
 
 export function forceAsciiMinusSign(input: string): string {
   const otherSigns = [
-    '\u2010',
-    '\u2011',
-    '\u2012',
-    '\u2013',
-    '\u2014',
-    '\u2015',
-    '\u2043',
-    '\u2212',
-    '\uFE63',
-    '\uFF0D',
+    "\u2010",
+    "\u2011",
+    "\u2012",
+    "\u2013",
+    "\u2014",
+    "\u2015",
+    "\u2043",
+    "\u2212",
+    "\uFE63",
+    "\uFF0D",
   ];
-  return input.replace(new RegExp(`[${otherSigns.join('')}]`, 'g'), '-');
+  return input.replace(new RegExp(`[${otherSigns.join("")}]`, "g"), "-");
 }
 
 /**
@@ -27,12 +27,12 @@ export function forceAsciiMinusSign(input: string): string {
  */
 export function removeExtraneousMinusSigns(input: string): string {
   const isNegative = !!/^-/.exec(input);
-  const cleanedInput = input.replace(/-/g, '');
-  return `${isNegative ? '-' : ''}${cleanedInput}`;
+  const cleanedInput = input.replace(/-/g, "");
+  return `${isNegative ? "-" : ""}${cleanedInput}`;
 }
 
 export function convertCommasToDots(input: string): string {
-  return input.replace(/,/g, '.');
+  return input.replace(/,/g, ".");
 }
 
 /**
@@ -42,26 +42,26 @@ export function convertCommasToDots(input: string): string {
 export function factoryToRemoveInvalidCharacters(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    "allowNegative" | "decimalSeparator" | "allowFloat"
   >,
 ): Cleaner {
   const validCharacterPatterns = [
     // Allow all digits.
     String.raw`\d`,
     // Allow minus sign, only if permitted.
-    ...(opts.allowNegative ? [escapeRegex('-')] : []),
+    ...(opts.allowNegative ? [escapeRegex("-")] : []),
     // Allow decimal separator, only if permitted.
     ...(opts.allowFloat ? [escapeRegex(opts.decimalSeparator)] : []),
   ];
   const invalidCharacterPattern = new RegExp(
-    `[^${validCharacterPatterns.join('')}]`,
-    'g',
+    `[^${validCharacterPatterns.join("")}]`,
+    "g",
   );
-  return (input: string) => input.replace(invalidCharacterPattern, '');
+  return (input: string) => input.replace(invalidCharacterPattern, "");
 }
 
 export function factoryToRemoveExtraneousDecimalSeparators(
-  opts: Pick<DerivedOptions, 'decimalSeparator'>,
+  opts: Pick<DerivedOptions, "decimalSeparator">,
 ): Cleaner {
   const maxCount = 1;
   return (input: string) =>
@@ -69,7 +69,7 @@ export function factoryToRemoveExtraneousDecimalSeparators(
       if (result === undefined) {
         return piece;
       }
-      const glue = index <= maxCount ? opts.decimalSeparator : '';
+      const glue = index <= maxCount ? opts.decimalSeparator : "";
       return `${result}${glue}${piece}`;
     });
 }
@@ -80,12 +80,12 @@ export function factoryToRemoveExtraneousDecimalSeparators(
  * - `convertCommasToDots`
  */
 export function factoryToPrependShorthandDecimalWithZero(
-  opts: Pick<DerivedOptions, 'decimalSeparator'>,
+  opts: Pick<DerivedOptions, "decimalSeparator">,
 ): Cleaner {
   const pattern = new RegExp(
     `(^|[^\\d])(?=${escapeRegex(opts.decimalSeparator)})`,
   );
-  return (input: string) => input.replace(pattern, '$10');
+  return (input: string) => input.replace(pattern, "$10");
 }
 
 /**
@@ -94,7 +94,7 @@ export function factoryToPrependShorthandDecimalWithZero(
  * - `convertCommasToDots`
  */
 export function removePrecedingZeros(input: string): string {
-  return input.replace(/^(-?)0*(?!\.|$)/, '$1');
+  return input.replace(/^(-?)0*(?!\.|$)/, "$1");
 }
 
 /**
@@ -103,7 +103,7 @@ export function removePrecedingZeros(input: string): string {
  * - `convertCommasToDots`
  */
 export function removeTrailingDecimalZeros(input: string): string {
-  return input.replace(/(\.(?:[1-9]|0(?=0*[1-9]))*)(0*)$/, '$1');
+  return input.replace(/(\.(?:[1-9]|0(?=0*[1-9]))*)(0*)$/, "$1");
 }
 
 /**
@@ -114,7 +114,7 @@ export function removeTrailingDecimalZeros(input: string): string {
  * - `removeTrailingDecimalZeros`
  */
 export function removeTrailingDecimalSeparator(input: string): string {
-  return input.replace(/\.$/, '');
+  return input.replace(/\.$/, "");
 }
 
 /**
@@ -148,7 +148,7 @@ function cleanInSequence(cleaners: Cleaner[]): Cleaner {
 export function factoryToSimplify(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    "allowNegative" | "decimalSeparator" | "allowFloat"
   >,
 ): (input: string) => string {
   return cleanInSequence([
@@ -175,7 +175,7 @@ export function factoryToSimplify(
 export function factoryToNormalize(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    "allowNegative" | "decimalSeparator" | "allowFloat"
   >,
 ): (input: string) => string {
   return cleanInSequence([

@@ -1,6 +1,6 @@
-import { hasMethod } from './typeUtils';
+import { hasMethod } from "./typeUtils";
 
-const ID_PREFIX = '_id';
+const ID_PREFIX = "_id";
 
 export function getGloballyUniqueId(customPrefix?: string): string {
   const prefix = customPrefix ?? ID_PREFIX;
@@ -22,13 +22,13 @@ export function focusAndSelectAll(element: HTMLInputElement): void {
 }
 
 export function focusElement(element: unknown): void {
-  if (hasMethod(element, 'focus')) {
+  if (hasMethod(element, "focus")) {
     element.focus();
   }
 }
 
 export function blurElement(element: unknown): void {
-  if (hasMethod(element, 'blur')) {
+  if (hasMethod(element, "blur")) {
     element.blur();
   }
 }

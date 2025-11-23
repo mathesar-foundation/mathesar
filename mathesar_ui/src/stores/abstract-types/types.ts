@@ -1,16 +1,16 @@
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import type { QuerySummarizationFunctionId } from '@mathesar/api/rpc/explorations';
-import type { DbType } from '@mathesar/AppTypes';
-import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
+import type { RawColumnWithMetadata } from "@mathesar/api/rpc/columns";
+import type { QuerySummarizationFunctionId } from "@mathesar/api/rpc/explorations";
+import type { DbType } from "@mathesar/AppTypes";
+import type { CellDataType } from "@mathesar/components/cell-fabric/data-types/typeDefinitions";
 import type {
   ComponentWithProps,
   FormConfiguration,
   FormConfigurationVariable,
   FormValues,
   IconProps,
-} from '@mathesar-component-library/types';
+} from "@mathesar-component-library/types";
 
-import type { abstractTypeCategory } from './constants';
+import type { abstractTypeCategory } from "./constants";
 
 type AbstractTypeCategoryKeys = keyof typeof abstractTypeCategory;
 export type AbstractTypeCategoryIdentifier =
@@ -38,11 +38,11 @@ export interface AbstractTypeDbConfig {
     columnType: DbType,
   ) => {
     dbType: DbType;
-    typeOptions: RawColumnWithMetadata['type_options'];
+    typeOptions: RawColumnWithMetadata["type_options"];
   };
   constructDbFormValuesFromTypeOptions: (
     columnType: DbType,
-    typeOptions: RawColumnWithMetadata['type_options'],
+    typeOptions: RawColumnWithMetadata["type_options"],
   ) => FormValues;
 }
 
@@ -50,9 +50,9 @@ export interface AbstractTypeDisplayConfig {
   form: AbstractTypeConfigForm;
   determineDisplayOptions: (
     dbFormValues: FormValues,
-  ) => RawColumnWithMetadata['metadata'];
+  ) => RawColumnWithMetadata["metadata"];
   constructDisplayFormValuesFromDisplayOptions: (
-    displayOptions: RawColumnWithMetadata['metadata'],
+    displayOptions: RawColumnWithMetadata["metadata"],
   ) => FormValues;
 }
 
@@ -64,8 +64,8 @@ export interface CellInfo {
 
 export interface AbstractTypeIconArgs {
   dbType: DbType;
-  typeOptions: RawColumnWithMetadata['type_options'];
-  metadata: RawColumnWithMetadata['metadata'];
+  typeOptions: RawColumnWithMetadata["type_options"];
+  metadata: RawColumnWithMetadata["metadata"];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,12 +88,12 @@ export type AbstractTypeConfigurationPartialMap = Partial<
 >;
 
 export interface AbstractType
-  extends Omit<AbstractTypeResponse, 'db_types'>,
+  extends Omit<AbstractTypeResponse, "db_types">,
     AbstractTypeConfiguration {
   dbTypes: Set<DbType>;
 }
 
-export type AbstractTypesMap = Map<AbstractType['identifier'], AbstractType>;
+export type AbstractTypesMap = Map<AbstractType["identifier"], AbstractType>;
 
 export type AbstractTypeConfigurationFactory = () => AbstractTypeConfiguration;
 
@@ -118,26 +118,26 @@ export type AbstractTypeConfigurationFactory = () => AbstractTypeConfiguration;
  * filtering expressions that the API expects.
  */
 export type FilterId =
-  | 'contains_case_insensitive'
-  | 'email_domain_contains'
-  | 'email_domain_equals'
-  | 'equal'
-  | 'greater_or_equal'
-  | 'greater'
-  | 'json_array_contains'
-  | 'json_array_length_equals'
-  | 'json_array_length_greater_or_equal'
-  | 'json_array_length_greater_than'
-  | 'json_array_length_less_or_equal'
-  | 'json_array_length_less_than'
-  | 'json_array_not_empty'
-  | 'lesser_or_equal'
-  | 'lesser'
-  | 'not_null'
-  | 'null'
-  | 'starts_with_case_insensitive'
-  | 'uri_authority_contains'
-  | 'uri_scheme_equals';
+  | "contains_case_insensitive"
+  | "email_domain_contains"
+  | "email_domain_equals"
+  | "equal"
+  | "greater_or_equal"
+  | "greater"
+  | "json_array_contains"
+  | "json_array_length_equals"
+  | "json_array_length_greater_or_equal"
+  | "json_array_length_greater_than"
+  | "json_array_length_less_or_equal"
+  | "json_array_length_less_than"
+  | "json_array_not_empty"
+  | "lesser_or_equal"
+  | "lesser"
+  | "not_null"
+  | "null"
+  | "starts_with_case_insensitive"
+  | "uri_authority_contains"
+  | "uri_scheme_equals";
 
 export interface AbstractTypeFilterDefinitionResponse {
   id: FilterId;
@@ -150,15 +150,15 @@ export interface AbstractTypeFilterDefinitionResponse {
 }
 
 export interface AbstractTypeLimitedFilterInformation {
-  id: AbstractTypeFilterDefinitionResponse['id'];
-  name: AbstractTypeFilterDefinitionResponse['name'];
+  id: AbstractTypeFilterDefinitionResponse["id"];
+  name: AbstractTypeFilterDefinitionResponse["name"];
   hasAliases: boolean;
   hasParams: boolean;
 }
 
 export interface AbstractTypeFilterDefinition {
-  id: AbstractTypeFilterDefinitionResponse['id'];
-  name: AbstractTypeFilterDefinitionResponse['name']; // Would be extraced from alias if present
+  id: AbstractTypeFilterDefinitionResponse["id"];
+  name: AbstractTypeFilterDefinitionResponse["name"]; // Would be extraced from alias if present
   parameters: AbstractTypeCategoryIdentifier[];
 }
 
@@ -177,7 +177,7 @@ export interface AbstractTypePreprocFunctionsResponse {
 
 export type AbstractTypePreprocFunctionDefinition = Omit<
   AbstractTypePreprocFunctionsResponse,
-  'appliesTo'
+  "appliesTo"
 >;
 
 export type AbstractTypePreprocFunctionDefinitionMap = Map<
@@ -207,7 +207,7 @@ export type AbstractTypeSummarizationFunctionsResponse = Record<
  */
 export interface AbstractTypeSummarizationFunction {
   id: QuerySummarizationFunctionId;
-  label: AbstractTypeSummarizationFunctionsResponseValue['label'];
+  label: AbstractTypeSummarizationFunctionsResponseValue["label"];
   inputType: AbstractTypeCategoryIdentifier;
   outputType: AbstractTypeCategoryIdentifier;
 }

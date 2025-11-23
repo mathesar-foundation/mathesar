@@ -1,19 +1,19 @@
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import { rpcMethodTypeContainer } from "@mathesar/packages/json-rpc-client-builder";
 
-import type { RecordsSummaryListResponse } from './_common/commonTypes';
-import type { RawColumnWithMetadata } from './columns';
-import type { RawDatabase } from './databases';
-import type { RawConfiguredRole } from './roles';
-import type { RawTable } from './tables';
+import type { RecordsSummaryListResponse } from "./_common/commonTypes";
+import type { RawColumnWithMetadata } from "./columns";
+import type { RawDatabase } from "./databases";
+import type { RawConfiguredRole } from "./roles";
+import type { RawTable } from "./tables";
 
 export interface RichTextJson {
   text: string;
 }
 
 export const fkFieldInteractionRules = [
-  'must_pick',
-  'can_pick_or_create',
-  'must_create',
+  "must_pick",
+  "can_pick_or_create",
+  "must_create",
 ] as const;
 
 export const dataFormStructureVersion = 1;
@@ -24,18 +24,18 @@ interface RawDataFormBaseField {
   label?: string | null;
   help?: string | null;
   styling?: {
-    size?: 'regular' | 'large';
+    size?: "regular" | "large";
   } | null;
   is_required: boolean;
 }
 
 export interface RawScalarDataFormField extends RawDataFormBaseField {
-  kind: 'scalar_column';
+  kind: "scalar_column";
   column_attnum: number;
 }
 
 export interface RawForeignKeyDataFormField extends RawDataFormBaseField {
-  kind: 'foreign_key';
+  kind: "foreign_key";
   column_attnum: number;
   related_table_oid: number;
   fk_interaction_rule: (typeof fkFieldInteractionRules)[number];
@@ -53,7 +53,7 @@ export interface RawDataFormStructure {
   submit_message: RichTextJson | null;
   submit_redirect_url: string | null;
   submit_button_label: string | null;
-  associated_role_id: RawConfiguredRole['id'] | null;
+  associated_role_id: RawConfiguredRole["id"] | null;
 }
 
 export interface RawEphemeralDataForm extends RawDataFormStructure {
@@ -139,20 +139,20 @@ export function constructRequestToUpdateForm(
 export const forms = {
   get: rpcMethodTypeContainer<
     {
-      form_token: RawDataForm['token'];
+      form_token: RawDataForm["token"];
     },
     RawDataFormResponse
   >(),
   get_source_info: rpcMethodTypeContainer<
     {
-      form_token: RawDataForm['token'];
+      form_token: RawDataForm["token"];
     },
     RawDataFormSource
   >(),
   list: rpcMethodTypeContainer<
     {
-      database_id: RawDatabase['id'];
-      schema_oid: RawDataForm['schema_oid'];
+      database_id: RawDatabase["id"];
+      schema_oid: RawDataForm["schema_oid"];
     },
     RawDataFormResponse[]
   >(),
@@ -170,7 +170,7 @@ export const forms = {
   >(),
   delete: rpcMethodTypeContainer<
     {
-      form_id: RawDataForm['id'];
+      form_id: RawDataForm["id"];
     },
     void
   >(),
@@ -186,20 +186,20 @@ export const forms = {
   >(),
   submit: rpcMethodTypeContainer<
     {
-      form_token: RawDataForm['token'];
+      form_token: RawDataForm["token"];
       values: Record<string, unknown>;
     },
     void
   >(),
   regenerate_token: rpcMethodTypeContainer<
     {
-      form_id: RawDataForm['id'];
+      form_id: RawDataForm["id"];
     },
     string
   >(),
   set_publish_public: rpcMethodTypeContainer<
     {
-      form_id: RawDataForm['id'];
+      form_id: RawDataForm["id"];
       publish_public: boolean;
     },
     boolean

@@ -1,5 +1,5 @@
-import NumberFormatter from '../NumberFormatter';
-import type { Options } from '../options';
+import NumberFormatter from "../NumberFormatter";
+import type { Options } from "../options";
 
 function getFormatter(partialOpts: Partial<Options> = {}): NumberFormatter {
   /**
@@ -7,12 +7,12 @@ function getFormatter(partialOpts: Partial<Options> = {}): NumberFormatter {
    * don't have any unexpected behavior when running the tests across different
    * machines which might be configured with different locales.
    */
-  const defaultsForTestRunning = { locale: 'en-US', useGrouping: true };
+  const defaultsForTestRunning = { locale: "en-US", useGrouping: true };
   const opts = { ...defaultsForTestRunning, ...partialOpts };
   return new NumberFormatter(opts);
 }
 
-describe('parse and re-parse', () => {
+describe("parse and re-parse", () => {
   const u = undefined;
   // prettier-ignore
   const cases: [
@@ -116,7 +116,7 @@ describe('parse and re-parse', () => {
     //    we're overriding it with a hyphen.
   ];
   test.each(cases)(
-    'case %#',
+    "case %#",
     (
       locale,
       allowFloat,

@@ -1,31 +1,31 @@
 import {
   type RawColumnWithMetadata,
   getColumnMetadataValue,
-} from '@mathesar/api/rpc/columns';
+} from "@mathesar/api/rpc/columns";
 import {
   DateTimeFormatter,
   DateTimeSpecification,
-} from '@mathesar/utils/date-time';
-import { isDefinedNonNullable } from '@mathesar-component-library';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+} from "@mathesar/utils/date-time";
+import { isDefinedNonNullable } from "@mathesar-component-library";
+import type { ComponentAndProps } from "@mathesar-component-library/types";
 
-import DateTimeCell from './components/date-time/DateTimeCell.svelte';
-import DateTimeInput from './components/date-time/DateTimeInput.svelte';
-import type { DateTimeCellExternalProps } from './components/typeDefinitions';
-import type { CellComponentFactory } from './typeDefinitions';
+import DateTimeCell from "./components/date-time/DateTimeCell.svelte";
+import DateTimeInput from "./components/date-time/DateTimeInput.svelte";
+import type { DateTimeCellExternalProps } from "./components/typeDefinitions";
+import type { CellComponentFactory } from "./typeDefinitions";
 
 function getProps(
   column: RawColumnWithMetadata,
   supportTimeZone: boolean,
 ): DateTimeCellExternalProps {
-  const format = getColumnMetadataValue(column, 'time_format');
+  const format = getColumnMetadataValue(column, "time_format");
   const specification = new DateTimeSpecification({
-    type: supportTimeZone ? 'timeWithTZ' : 'time',
+    type: supportTimeZone ? "timeWithTZ" : "time",
     timeFormat: format,
   });
   const formatter = new DateTimeFormatter(specification);
   return {
-    type: 'time',
+    type: "time",
     formattingString: specification.getFormattingString(),
     formatter,
     timeEnableSeconds: specification.hasSecondsInTime(),
@@ -53,7 +53,7 @@ const timeType: CellComponentFactory = {
     column: RawColumnWithMetadata,
     config?: { supportTimeZone?: boolean },
   ): ComponentAndProps<
-    Omit<DateTimeCellExternalProps, 'formatForDisplay'>
+    Omit<DateTimeCellExternalProps, "formatForDisplay">
   > => ({
     component: DateTimeInput,
     props: {

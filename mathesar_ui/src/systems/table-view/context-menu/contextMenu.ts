@@ -1,5 +1,5 @@
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { get } from "svelte/store";
+import { _ } from "svelte-i18n";
 
 import {
   type ClientPosition,
@@ -7,27 +7,27 @@ import {
   type ModalController,
   menuSection,
   subMenu,
-} from '@mathesar/component-library';
-import { parseCellId } from '@mathesar/components/sheet/cellIds';
-import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
-import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
-import type { ImperativeFilterController } from '@mathesar/pages/table/ImperativeFilterController';
-import type { TabularData } from '@mathesar/stores/table-data';
-import type RecordStore from '@mathesar/systems/record-view/RecordStore';
-import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
-import { match } from '@mathesar/utils/patternMatching';
+} from "@mathesar/component-library";
+import { parseCellId } from "@mathesar/components/sheet/cellIds";
+import type { SheetCellDetails } from "@mathesar/components/sheet/selection";
+import type SheetSelection from "@mathesar/components/sheet/selection/SheetSelection";
+import type { ImperativeFilterController } from "@mathesar/pages/table/ImperativeFilterController";
+import type { TabularData } from "@mathesar/stores/table-data";
+import type RecordStore from "@mathesar/systems/record-view/RecordStore";
+import { takeFirstAndOnly } from "@mathesar/utils/iterUtils";
+import { match } from "@mathesar/utils/patternMatching";
 
-import { deleteColumn } from './entries/deleteColumn';
-import { deleteRecords } from './entries/deleteRecords';
-import { duplicateRecord } from './entries/duplicateRecord';
-import { modifyFilters } from './entries/modifyFilters';
-import { modifyGrouping } from './entries/modifyGrouping';
-import { modifySorting } from './entries/modifySorting';
-import { openTable } from './entries/openTable';
-import { selectCellRange } from './entries/selectCellRange';
-import { setNull } from './entries/setNull';
-import { viewLinkedRecord } from './entries/viewLinkedRecord';
-import { viewRowRecord } from './entries/viewRowRecord';
+import { deleteColumn } from "./entries/deleteColumn";
+import { deleteRecords } from "./entries/deleteRecords";
+import { duplicateRecord } from "./entries/duplicateRecord";
+import { modifyFilters } from "./entries/modifyFilters";
+import { modifyGrouping } from "./entries/modifyGrouping";
+import { modifySorting } from "./entries/modifySorting";
+import { openTable } from "./entries/openTable";
+import { selectCellRange } from "./entries/selectCellRange";
+import { setNull } from "./entries/setNull";
+import { viewLinkedRecord } from "./entries/viewLinkedRecord";
+import { viewRowRecord } from "./entries/viewRowRecord";
 
 export function openTableCellContextMenu({
   targetCell,
@@ -45,7 +45,7 @@ export function openTableCellContextMenu({
   tabularData: TabularData;
   imperativeFilterController: ImperativeFilterController | undefined;
   beginSelectingCellRange: () => void;
-}): 'opened' | 'empty' {
+}): "opened" | "empty" {
   const { selection } = tabularData;
 
   function* getEntriesForMultipleRows(rowIds: string[]) {
@@ -131,7 +131,7 @@ export function openTableCellContextMenu({
     const rowEntries = [...getEntriesForArbitraryRows(rowIds)];
     if (rowEntries.length) {
       yield subMenu({
-        label: get(_)('row_plural', { values: { count: rowIds.size } }),
+        label: get(_)("row_plural", { values: { count: rowIds.size } }),
         entries: rowEntries,
       });
     }
@@ -139,26 +139,26 @@ export function openTableCellContextMenu({
     const columnEntries = [...getEntriesForArbitraryColumns(columnIds)];
     if (columnEntries.length) {
       yield subMenu({
-        label: get(_)('column_plural', { values: { count: columnIds.size } }),
+        label: get(_)("column_plural", { values: { count: columnIds.size } }),
         entries: columnEntries,
       });
     }
   }
 
-  const entries = match(targetCell, 'type', {
-    'row-header-cell': ({ rowId }) => {
+  const entries = match(targetCell, "type", {
+    "row-header-cell": ({ rowId }) => {
       selection.update((s) => (s.rowIds.has(rowId) ? s : s.ofOneRow(rowId)));
       return [...getEntriesForArbitraryRows(get(selection).rowIds)];
     },
 
-    'column-header-cell': ({ columnId }) => {
+    "column-header-cell": ({ columnId }) => {
       selection.update((s) =>
         s.columnIds.has(columnId) ? s : s.ofOneColumn(columnId),
       );
       return [...getEntriesForArbitraryColumns(get(selection).columnIds)];
     },
 
-    'data-cell': ({ cellId }) => {
+    "data-cell": ({ cellId }) => {
       selection.update((s) =>
         s.cellIds.has(cellId) ? s : s.ofOneCell(cellId),
       );
@@ -168,16 +168,16 @@ export function openTableCellContextMenu({
     // We don't (yet?) offer a context menu for placeholder data cells. In the
     // future, we might want to implement paste here, once we have that option
     // in the context menu.
-    'placeholder-data-cell': () => [],
+    "placeholder-data-cell": () => [],
 
     // We don't offer a context menu for the placeholder row header cell.
     // Clicking this cell inserts a new blank row. So we probably don't want
     // any context menu options here.
-    'placeholder-row-header-cell': () => [],
+    "placeholder-row-header-cell": () => [],
   });
 
-  if (!entries.length) return 'empty';
+  if (!entries.length) return "empty";
 
   contextMenu.open({ position, entries });
-  return 'opened';
+  return "opened";
 }

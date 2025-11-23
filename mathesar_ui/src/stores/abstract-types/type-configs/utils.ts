@@ -1,12 +1,12 @@
 import type {
   DateFormat,
   TimeFormat,
-} from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import { DateTimeSpecification } from '@mathesar/utils/date-time';
-import { dayjs } from '@mathesar-component-library';
+} from "@mathesar/api/rpc/_common/columnDisplayOptions";
+import { DateTimeSpecification } from "@mathesar/utils/date-time";
+import { dayjs } from "@mathesar-component-library";
 
 export function getDateFormatOptions(): Record<DateFormat, { label: string }> {
-  const day = dayjs('2001-12-31');
+  const day = dayjs("2001-12-31");
   const dateFormattingStringMap =
     DateTimeSpecification.getDateFormattingStringMap();
 
@@ -29,24 +29,24 @@ export function getTimeFormatOptions(): Record<TimeFormat, { label: string }> {
     DateTimeSpecification.getTimeFormattingStringMap();
 
   return {
-    '24hr': {
+    "24hr": {
       label: `Short time 24 hr (${day.format(
-        timeFormattingStringMap['24hr'],
+        timeFormattingStringMap["24hr"],
       )})`,
     },
-    '24hrLong': {
+    "24hrLong": {
       label: `Long time 24 hr (${day.format(
-        timeFormattingStringMap['24hrLong'],
+        timeFormattingStringMap["24hrLong"],
       )})`,
     },
-    '12hr': {
+    "12hr": {
       label: `Short time 12 hr (${day.format(
-        timeFormattingStringMap['12hr'],
+        timeFormattingStringMap["12hr"],
       )})`,
     },
-    '12hrLong': {
+    "12hrLong": {
       label: `Long time 12 hr (${day.format(
-        timeFormattingStringMap['12hrLong'],
+        timeFormattingStringMap["12hrLong"],
       )})`,
     },
   };
