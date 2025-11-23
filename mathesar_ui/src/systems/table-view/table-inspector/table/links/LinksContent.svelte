@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-
+  import { invalidateAll } from '$app/navigation';
   import {
     type JoinableTablesResult,
     getLinksInThisTable,
@@ -27,6 +27,9 @@
   export let table: Pick<Table, 'name' | 'oid'>;
   export let joinableTablesResult: JoinableTablesResult;
   export let currentTableColumns: Map<number, ProcessedColumn>;
+  async function handleSuccess() {
+    await invalidateAll();
+  }
 
   $: linksInThisTable = [
     ...getLinksInThisTable(
@@ -133,7 +136,10 @@
       <Icon {...iconAddNew} />
       <span>{$_('create_relationship')}</span>
     </Button>
-    <LinkTableModal controller={linkTableModal} />
+    <LinkTableModal 
+      controller={linkTableModal} 
+      on:success={handleSuccess} 
+    />
   </div>
 </div>
 
