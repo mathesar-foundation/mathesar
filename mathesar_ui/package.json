@@ -39,7 +39,7 @@
     "postcss": "^8.4.16",
     "prettier": "^3.1.0",
     "prettier-plugin-sort-json": "^3.1.0",
-    "prettier-plugin-svelte": "^3.1.2",
+    "prettier-plugin-svelte": "^3.4.0",
     "sass": "^1.55.0",
     "svelte": "^3.50.1",
     "svelte-check": "^2.9.0",
