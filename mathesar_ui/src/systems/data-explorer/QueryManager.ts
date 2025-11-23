@@ -61,191 +61,99 @@ export default class QueryManager extends QueryRunner {
 
   // Promises
 
-  private tableStructurePromise:
-    | CancellablePromise<QueryTableStructure>
-    | undefined;
+  // file: mathesar_ui/src/systems/data-explorer/QueryManager.ts (ref: 1c6eefe1c2392e61a1173ba35d88ce4e1cd60ca6)
+private reconcileQueryWithServerResponse(serverResponse: ExplorationResult) {
+  const { transformations } = serverResponse.query;
+  if (!transformations) return;
+  const transformationModels = transformations.map(getTransformationModel);
 
-  private querySavePromise: CancellablePromise<SavedExploration> | undefined;
+  const thisQueryModel = this.getQueryModel();
+  let newQueryModel = thisQueryModel;
+  let isChangeNeeded = false;
 
-  private onSaveCallback: (instance: SavedExploration) => unknown;
-
-  constructor({
-    query,
-    onSave,
-  }: {
-    query: QueryModel;
-    onSave?: (instance: SavedExploration) => unknown;
-  }) {
-    super({ query });
-    this.onSaveCallback = onSave ?? (() => {});
-    void this.calculateInputColumnTree();
-  }
-
-  private async calculateInputColumnTree(): Promise<void> {
-    const baseTableId = get(this.query).base_table_oid;
-    if (!baseTableId) {
-      this.inputColumns.set({
-        baseTableColumns: new Map(),
-        tablesThatReferenceBaseTable: [],
-        inputColumnInformationMap: new Map(),
-      });
-      this.state.update((state) => ({
-        ...state,
-        inputColumnsFetchState: { state: 'success' },
-      }));
-      return;
+  // Type guard: detect summarization transform shape
+  function isSummarizationTransform(
+    t: unknown,
+  ): t is QuerySummarizationTransformationModel {
+    if (!t || typeof t !== 'object') return false;
+    const asAny = t as Record<string, unknown>;
+    // prefer a discriminant if present
+    if (asAny.type !== undefined && typeof asAny.type === 'string') {
+      const typeStr = String(asAny.type).toLowerCase();
+      return (
+        typeStr === 'summarize' ||
+        typeStr === 'summarization' ||
+        typeStr === 'summarise'
+      );
     }
-
-    const cachedResult = this.cacheManagers.inputColumns.get(baseTableId);
-    if (cachedResult) {
-      this.inputColumns.set({ ...cachedResult });
-      this.state.update((state) => ({
-        ...state,
-        inputColumnsFetchState: { state: 'success' },
-      }));
-      this.speculateColumns();
-      return;
-    }
-
-    try {
-      const database = get(databasesStore.currentDatabase);
-      if (!database) {
-        throw new Error('Current database not set');
-      }
-      this.state.update((state) => ({
-        ...state,
-        inputColumnsFetchState: { state: 'processing' },
-      }));
-
-      this.tableStructurePromise?.cancel();
-      this.tableStructurePromise = getQueryTableStructure({
-        database,
-        baseTableId,
-      });
-      const inputColumns = getInputColumns(await this.tableStructurePromise);
-
-      this.cacheManagers.inputColumns.set(baseTableId, inputColumns);
-      this.inputColumns.set(inputColumns);
-      this.speculateColumns();
-      this.state.update((state) => ({
-        ...state,
-        inputColumnsFetchState: { state: 'success' },
-      }));
-    } catch (err: unknown) {
-      const error =
-        err instanceof Error
-          ? err.message
-          : get(_)('error_fetching_joinable_links');
-      this.state.update((state) => ({
-        ...state,
-        inputColumnsFetchState: { state: 'failure', errors: [error] },
-      }));
-    }
-  }
-
-  private speculateColumns() {
-    super.speculateProcessedColumns(
-      get(this.inputColumns).inputColumnInformationMap,
+    // fallback structural checks: expect 'aggregations' and 'groups' to exist
+    return (
+      asAny.aggregations !== undefined &&
+      asAny.groups !== undefined
     );
   }
 
-  private async updateQuery(queryModel: QueryModel): Promise<{
-    isValid: boolean;
-    isRunnable: boolean;
-  }> {
-    this.query.set(queryModel);
-    this.queryHasUnsavedChanges.set(true);
-    if (get(this.state).inputColumnsFetchState?.state !== 'success') {
-      await this.calculateInputColumnTree();
-    }
-    return { isValid: queryModel.isValid, isRunnable: queryModel.isRunnable };
-  }
+  thisQueryModel.transformationModels.forEach((thisTransform, index) => {
+    const thatTransform = transformationModels[index];
+    if (
+      isSummarizationTransform(thisTransform) &&
+      thatTransform &&
+      isSummarizationTransform(thatTransform)
+    ) {
+      // Narrowed types here:
+      const thisSumm = thisTransform as QuerySummarizationTransformationModel;
+      const thatSumm = thatTransform as QuerySummarizationTransformationModel;
 
-  /**
-   * There are cases where the server response contains a _different query_ than
-   * the one we sent. This can happen if the server knows that the query needs
-   * to be adjusted in specific ways in order to remain valid. This function
-   * updates the saved query to be consistent with the query details we got back
-   * from the server after running a query.
-   */
-  private reconcileQueryWithServerResponse(serverResponse: ExplorationResult) {
-    const { transformations } = serverResponse.query;
-    if (!transformations) return;
-    const transformationModels = transformations.map(getTransformationModel);
+      // Safely extract groups and other maps (they may be Map-like or plain objects)
+      const thatGroups: unknown = thatSumm.groups;
+      const columnId = (thatSumm as any).columnIdentifier; // if columnIdentifier not typed, keep narrow use
+      let thatTransformGroupWhichIsTheSameAsBaseColumn: unknown;
 
-    const thisQueryModel = this.getQueryModel();
-    let newQueryModel = thisQueryModel;
-    let isChangeNeeded = false;
-
-    // ---------- Type guard: summarization transform ----------
-    // This prefers a `type` discriminant if present, otherwise falls back to structural checks.
-    function isSummarizationTransform(
-      t: any,
-    ): t is QuerySummarizationTransformationModel {
-      if (!t) return false;
-      if (t?.type !== undefined && typeof t.type === 'string') {
-        const typeStr = String(t.type).toLowerCase();
-        return (
-          typeStr === 'summarize' ||
-          typeStr === 'summarization' ||
-          typeStr === 'summarise'
-        );
+      if (thatGroups && typeof (thatGroups as any).get === 'function') {
+        // Map-like API
+        thatTransformGroupWhichIsTheSameAsBaseColumn = (thatGroups as Map<any, any>).get(columnId);
+      } else if (thatGroups && Object.prototype.hasOwnProperty.call(thatGroups, columnId)) {
+        thatTransformGroupWhichIsTheSameAsBaseColumn = (thatGroups as Record<string, any>)[columnId];
       }
-      // fallback: summarization transforms should have 'aggregations' and 'groups'
-      return t?.aggregations !== undefined && t?.groups !== undefined;
-    }
-    // --------------------------------------------------------
 
-    thisQueryModel.transformationModels.forEach((thisTransform, index) => {
-      const thatTransform = transformationModels[index];
-      // Only attempt summarization-specific comparisons when both sides are summarization transforms
-      if (
-        isSummarizationTransform(thisTransform) &&
-        thatTransform &&
-        isSummarizationTransform(thatTransform)
-      ) {
-        const thatTransformGroupWhichIsTheSameAsBaseColumn = (
-          thatTransform as any
-        ).groups?.get?.((thatTransform as any).columnIdentifier);
-        if (thatTransformGroupWhichIsTheSameAsBaseColumn) {
-          // mutate a copy or the object as originally intended by your codebase:
-          (thatTransform as any).groups = (thatTransform as any).groups.without
-            ? (thatTransform as any).groups.without(
-                (thatTransform as any).columnIdentifier,
-              )
-            : (function () {
-                // fallback: if 'without' is not present, attempt to create a new Map-like object without the key
-                try {
-                  const g = new Map((thatTransform as any).groups);
-                  g.delete((thatTransform as any).columnIdentifier);
-                  return g;
-                } catch {
-                  return (thatTransform as any).groups;
-                }
-              })();
-          (thatTransform as any).preprocFunctionIdentifier =
-            thatTransformGroupWhichIsTheSameAsBaseColumn.preprocFunction;
+      if (thatTransformGroupWhichIsTheSameAsBaseColumn) {
+        // replace groups without mutating original when possible
+        if (thatGroups && typeof (thatGroups as any).without === 'function') {
+          // e.g., Immutable.js style
+          (thatSumm as any).groups = (thatGroups as any).without(columnId);
+        } else {
+          try {
+            // attempt to build a new Map copy without the key
+            const gCopy = new Map(Object.entries(Object.fromEntries((thatGroups as any))));
+            gCopy.delete(columnId);
+            (thatSumm as any).groups = gCopy;
+          } catch {
+            // fallback: leave as-is
+            (thatSumm as any).groups = thatGroups;
+          }
         }
-
-        // compare sizes safely (use optional chaining and default to 0)
-        const thatAggSize = (thatTransform as any).aggregations?.size ?? 0;
-        const thisAggSize = (thisTransform as any).aggregations?.size ?? 0;
-        const thatGroupsSize = (thatTransform as any).groups?.size ?? 0;
-        const thisGroupsSize = (thisTransform as any).groups?.size ?? 0;
-
-        if (thatAggSize !== thisAggSize || thatGroupsSize !== thisGroupsSize) {
-          isChangeNeeded = true;
-          newQueryModel = newQueryModel.updateTransform(
-            index,
-            thatTransform,
-          ).model;
-        }
+        // safe assignment for preprocFunctionIdentifier
+        (thatSumm as any).preprocFunctionIdentifier =
+          (thatTransformGroupWhichIsTheSameAsBaseColumn as any).preprocFunction;
       }
-    });
-    if (isChangeNeeded) {
-      this.query.set(newQueryModel);
+
+      // safe size comparisons with optional chaining and defaults
+      const thatAggSize = (thatSumm as any).aggregations?.size ?? 0;
+      const thisAggSize = (thisSumm as any).aggregations?.size ?? 0;
+      const thatGroupsSize = (thatSumm as any).groups?.size ?? 0;
+      const thisGroupsSize = (thisSumm as any).groups?.size ?? 0;
+
+      if (thatAggSize !== thisAggSize || thatGroupsSize !== thisGroupsSize) {
+        isChangeNeeded = true;
+        newQueryModel = newQueryModel.updateTransform(index, thatSumm).model;
+      }
     }
+  });
+
+  if (isChangeNeeded) {
+    this.query.set(newQueryModel);
   }
+}
 
   private async reconcileDisplayOptions(serverResponse: ExplorationResult) {
     const reconciliation = reconcileDisplayOptionsWithServerResponse(
