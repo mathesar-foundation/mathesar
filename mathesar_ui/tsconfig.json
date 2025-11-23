@@ -11,7 +11,8 @@
       "js-cookie",
       "svelte2tsx/svelte-jsx"
     ],
-    "importsNotUsedAsValues": "error",
+
+    "verbatimModuleSyntax": true,
     "strict": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
