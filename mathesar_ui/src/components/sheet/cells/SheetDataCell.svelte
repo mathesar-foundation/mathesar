@@ -79,8 +79,8 @@
   }
 
   :global(
-      [data-sheet-element='data-cell']:has(.is-edit-mode) .active-indicator
-    ) {
+    [data-sheet-element='data-cell']:has(.is-edit-mode) .active-indicator
+  ) {
     // Hide the active indicator when the cell is in edit mode
     display: none;
   }
@@ -99,7 +99,8 @@
 
   .active-indicator.is-selecting-cell-range {
     border: none;
-    background-image: repeating-linear-gradient(
+    background-image:
+      repeating-linear-gradient(
         90deg,
         var(--color) 0 10px,
         transparent 10px 20px

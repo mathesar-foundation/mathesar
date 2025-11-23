@@ -75,7 +75,7 @@
       ? ['manyToOne', 'manyToMany']
       : ['manyToOne', 'oneToMany', 'manyToMany'])();
   $: linkType = requiredField<LinkType>('manyToOne');
-  $: $targetTable, linkType.reset();
+  $: ($targetTable, linkType.reset());
   $: targetColumnsStore = target
     ? new ColumnsDataStore({ database: target.schema.database, table: target })
     : undefined;

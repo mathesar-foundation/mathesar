@@ -63,7 +63,7 @@
     }
   }
 
-  $: commonData, setUserProfileAndReleaseStores();
+  $: (commonData, setUserProfileAndReleaseStores());
 
   const recordSelectorModal = modal.spawnModalController();
   const recordSelectorController = new RecordSelectorController({

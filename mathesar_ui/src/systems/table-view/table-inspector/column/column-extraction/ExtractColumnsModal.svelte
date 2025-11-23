@@ -66,7 +66,7 @@
     columnNameIsAvailable(availableColumns),
   ]);
   $: targetTableName =
-    $targetType === 'newTable' ? $tableName : $linkedTable?.table.name ?? '';
+    $targetType === 'newTable' ? $tableName : ($linkedTable?.table.name ?? '');
 
   $: form =
     $targetType === 'newTable'

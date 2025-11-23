@@ -53,7 +53,7 @@
       return getValueComparisonOutcome(matchParts);
     }
     const formatter = (v: Value | null | undefined) =>
-      v === undefined || v === null ? '' : formatValue?.(v) ?? '';
+      v === undefined || v === null ? '' : (formatValue?.(v) ?? '');
     return compareWholeValues(searchValue, value, formatter);
   })();
 

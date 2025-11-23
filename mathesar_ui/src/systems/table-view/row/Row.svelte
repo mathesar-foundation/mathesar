@@ -137,11 +137,11 @@
       // placeholder row. (There is probably a cleaner way to do this via props
       // instead of global CSS, but oh well).
       :global(
-          [data-sheet-element='data-cell']
-            .cell-fabric
-            .cell-wrapper:not(.is-edit-mode)
-            > *
-        ) {
+        [data-sheet-element='data-cell']
+          .cell-fabric
+          .cell-wrapper:not(.is-edit-mode)
+          > *
+      ) {
         visibility: hidden;
       }
     }

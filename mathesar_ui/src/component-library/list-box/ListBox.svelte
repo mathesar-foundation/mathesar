@@ -62,7 +62,7 @@
       checkEquality(lastSelectedOption, opt),
     );
   }
-  $: value, $displayedOptions, focusSelected();
+  $: (value, $displayedOptions, focusSelected());
 
   onMount(() => {
     if (mode === 'static') {

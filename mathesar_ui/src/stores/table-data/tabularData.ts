@@ -58,9 +58,8 @@ function getSelectedCellData(
   const row = selectableRowsMap.get(rowId);
   const value = row?.record[columnId];
   const column = processedColumns.get(Number(columnId));
-  const recordSummary = defined(
-    value,
-    (v) => linkedRecordSummaries.get(columnId)?.get(String(v)),
+  const recordSummary = defined(value, (v) =>
+    linkedRecordSummaries.get(columnId)?.get(String(v)),
   );
   const fileManifest = (() => {
     if (!column?.column.metadata?.file_backend) return undefined;
