@@ -1,6 +1,5 @@
 <script lang="ts">
   import NotFoundPage from '@mathesar/components/NotFoundPage.svelte';
-
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
@@ -13,10 +12,16 @@
 
   $: recordStoreFetchRequest = record.fetchRequest;
   $: ({ summary } = record);
+
+  function isFailureStatus(x: unknown): x is { state: 'failure'; errors: unknown } {
+    return typeof x === 'object' && x !== null && (x as { state?: unknown }).state === 'failure';
+  }
+
   $: recordStoreIsLoading = $recordStoreFetchRequest?.state === 'processing';
-  $: recordStoreHasError = $recordStoreFetchRequest?.state === 'error';
   $: recordStoreNotFound =
-    recordStoreHasError && $recordStoreFetchRequest?.error?.status === 404;
+    isFailureStatus($recordStoreFetchRequest) &&
+    Array.isArray(($recordStoreFetchRequest as { errors?: unknown }).errors) &&
+    ((($recordStoreFetchRequest as { errors?: unknown }).errors as unknown[])[0] as { code?: unknown }).code === 404;
   $: title = recordStoreIsLoading ? '' : $summary;
 </script>
 
