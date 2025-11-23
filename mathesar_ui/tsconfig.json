@@ -4,14 +4,7 @@
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
-    "types": [
-      "svelte",
-      "vitest/globals",
-      "@testing-library/jest-dom",
-      "js-cookie",
-      "svelte2tsx/svelte-jsx"
-    ],
-    "importsNotUsedAsValues": "error",
+
     "strict": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
@@ -19,6 +12,14 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+
+    "types": [
+      "svelte",
+      "vitest/globals",
+      "js-cookie",
+      "svelte2tsx/svelte-jsx",
+    ],
+
     "baseUrl": "./",
     "paths": {
       "@mathesar/*": ["src/*"],
@@ -31,11 +32,11 @@
     "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.svelte",
-    "**.cjs",
     "**/*.cjs",
-    "**.config.js",
-    "**.config.ts",
-    "src/**/*.json"
+    "**/*.config.js",
+    "**/*.config.ts",
+    "src/**/*.json",
+    "setup/**/*.ts"
   ],
   "exclude": ["src/**/*.stories.svelte"]
 }

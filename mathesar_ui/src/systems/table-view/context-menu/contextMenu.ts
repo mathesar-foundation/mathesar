@@ -19,6 +19,10 @@ import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
+// ⭐ MUST COME BEFORE ALL OTHER LOCAL IMPORTS
+import { copyCell } from './entries/copyCell';
+import { pasteCell } from './entries/pasteCell';
+
 // Existing entries
 import { deleteColumn } from './entries/deleteColumn';
 import { deleteRecords } from './entries/deleteRecords';
@@ -32,9 +36,6 @@ import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
 import { viewRowRecord } from './entries/viewRowRecord';
 
-// ⭐ NEW COPY / PASTE entries
-import { copyCell } from './entries/copyCell';
-import { pasteCell } from './entries/pasteCell';
 
 export function openTableCellContextMenu({
   targetCell,
@@ -63,17 +64,13 @@ export function openTableCellContextMenu({
     const recordId = tabularData.getRecordIdFromRowId(rowId);
     yield* viewRowRecord({ tabularData, recordId, modalRecordView });
     yield* duplicateRecord({ tabularData, rowId });
-
     yield* getEntriesForMultipleRows([rowId]);
   }
 
   function* getEntriesForArbitraryRows(rowIds: Iterable<string>) {
     const soleRowId = takeFirstAndOnly(rowIds);
-    if (soleRowId) {
-      yield* getEntriesForOneRow(soleRowId);
-    } else {
-      yield* getEntriesForMultipleRows([...rowIds]);
-    }
+    if (soleRowId) yield* getEntriesForOneRow(soleRowId);
+    else yield* getEntriesForMultipleRows([...rowIds]);
   }
 
   function* getEntriesForOneColumn(columnId: string) {
@@ -85,19 +82,19 @@ export function openTableCellContextMenu({
     yield* modifyGrouping({ tabularData, column });
 
     yield menuSection(...openTable({ column }));
-
     yield* deleteColumn({ tabularData, column });
   }
 
-  function* getEntriesForMultipleColumns(_columnIds: string[]) {}
+  // ❗ Fix: must not be an empty generator
+  function* getEntriesForMultipleColumns(_columnIds: string[]) {
+    // No multi-column operations implemented yet
+    return;
+  }
 
   function* getEntriesForArbitraryColumns(columnIds: Iterable<string>) {
     const soleColumnId = takeFirstAndOnly(columnIds);
-    if (soleColumnId) {
-      yield* getEntriesForOneColumn(soleColumnId);
-    } else {
-      yield* getEntriesForMultipleColumns([...columnIds]);
-    }
+    if (soleColumnId) yield* getEntriesForOneColumn(soleColumnId);
+    else yield* getEntriesForMultipleColumns([...columnIds]);
   }
 
   function* getEntriesForMultipleCells(cellIds: string[]) {
@@ -117,7 +114,7 @@ export function openTableCellContextMenu({
       modalRecordView,
     });
 
-    // ⭐ ADD COPY + PASTE HERE
+    // ⭐ COPY + PASTE
     yield* copyCell({ tabularData, cellId });
     yield* pasteCell({ tabularData, cellId });
 
@@ -130,11 +127,8 @@ export function openTableCellContextMenu({
     columnIds,
   }: SheetSelection) {
     const soleCellId = takeFirstAndOnly(cellIds);
-    if (soleCellId) {
-      yield* getEntriesForOneCell(soleCellId);
-    } else {
-      yield* getEntriesForMultipleCells([...cellIds]);
-    }
+    if (soleCellId) yield* getEntriesForOneCell(soleCellId);
+    else yield* getEntriesForMultipleCells([...cellIds]);
 
     const rowEntries = [...getEntriesForArbitraryRows(rowIds)];
     if (rowEntries.length) {
@@ -161,26 +155,19 @@ export function openTableCellContextMenu({
 
     'column-header-cell': ({ columnId }) => {
       selection.update((s) =>
-        s.columnIds.has(columnId) ? s : s.ofOneColumn(columnId),
+        s.columnIds.has(columnId) ? s : s.ofOneColumn(columnId)
       );
       return [...getEntriesForArbitraryColumns(get(selection).columnIds)];
     },
 
     'data-cell': ({ cellId }) => {
       selection.update((s) =>
-        s.cellIds.has(cellId) ? s : s.ofOneCell(cellId),
+        s.cellIds.has(cellId) ? s : s.ofOneCell(cellId)
       );
       return [...getEntriesForArbitraryCells(get(selection))];
     },
 
-    // We don't (yet?) offer a context menu for placeholder data cells. In the
-    // future, we might want to implement paste here, once we have that option
-    // in the context menu.
     'placeholder-data-cell': () => [],
-
-    // We don't offer a context menu for the placeholder row header cell.
-    // Clicking this cell inserts a new blank row. So we probably don't want
-    // any context menu options here.
     'placeholder-row-header-cell': () => [],
   });
 
