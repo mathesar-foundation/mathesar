@@ -1,11 +1,13 @@
 <script lang="ts">
+  import NotFoundPage from '@mathesar/components/NotFoundPage.svelte';
+
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewGatekeeper from '@mathesar/systems/record-view/RecordViewGatekeeper.svelte';
   import WithModalRecordView from '@mathesar/systems/record-view-modal/WithModalRecordView.svelte';
+
   import RecordPageContent from './RecordPageContent.svelte';
-  import NotFoundPage from '@mathesar/components/NotFoundPage.svelte';
 
   export let record: RecordStore;
 
