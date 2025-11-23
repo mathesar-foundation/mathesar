@@ -16,11 +16,9 @@ import type { TabularData } from '@mathesar/stores/table-data';
 import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
-
 // ⭐ MUST COME BEFORE ALL OTHER LOCAL IMPORTS
 import { copyCell } from './entries/copyCell';
 
-// Existing entries
 import { deleteColumn } from './entries/deleteColumn';
 import { deleteRecords } from './entries/deleteRecords';
 import { duplicateRecord } from './entries/duplicateRecord';

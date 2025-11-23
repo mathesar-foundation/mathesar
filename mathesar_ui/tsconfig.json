@@ -20,7 +20,7 @@
       "svelte2tsx/svelte-jsx"
     ],
 
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
       "@mathesar/*": ["src/*"],
       "@mathesar-component-library-dir/*": ["src/component-library/*"],
@@ -28,6 +28,7 @@
       "@mathesar-component-library": ["src/component-library/index.ts"]
     }
   },
+
   "include": [
     "src/**/*.d.ts",
     "src/**/*.ts",
@@ -37,5 +38,6 @@
     "**/*.config.ts",
     "src/**/*.json"
   ],
+
   "exclude": ["src/**/*.stories.svelte"]
 }
