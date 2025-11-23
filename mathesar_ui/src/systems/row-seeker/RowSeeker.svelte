@@ -74,7 +74,7 @@
   }
 </script>
 
-<div id={elementId} tabindex="0" data-row-seeker>
+<button id={elementId} tabindex="0" data-row-seeker>
   <ListBox
     selectionType="single"
     mode="static"
@@ -146,10 +146,10 @@
       </div>
     {/if}
   </ListBox>
-</div>
+</button>
 
 <style lang="scss">
-  div[data-row-seeker] {
+  button[data-row-seeker] {
     max-width: min(30rem, 90vw);
     overflow: hidden;
     position: relative;

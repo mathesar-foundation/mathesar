@@ -11,7 +11,7 @@
   let searchElement: HTMLInputElement;
 </script>
 
-<div
+<button
   class="search-box"
   data-row-seeker-search
   on:click={() => searchElement.focus()}
@@ -26,7 +26,7 @@
     on:input={() => controller.resetPaginationAndGetRecords()}
     on:keydown={onKeyDown}
   />
-</div>
+</button>
 
 <style lang="scss">
   .search-box {

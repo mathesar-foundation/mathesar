@@ -36,7 +36,7 @@
   }
 </script>
 
-<span
+<button
   class="linked-record"
   class:is-hovering-delete={isHoveringDelete}
   class:exact-match={valueComparisonOutcome === 'exactMatch'}
@@ -61,10 +61,9 @@
       nested within a label). There may be a better way to do this from an a11y
       perspective.
     -->
-    <span
+    <button
       class="delete-button"
       on:click|stopPropagation={handleDeleteButtonClick}
-      role="button"
       tabindex="-1"
       aria-label={$_('clear_value')}
       title={$_('clear_value')}
@@ -76,10 +75,10 @@
       }}
     >
       <Icon {...iconDeleteMinor} />
-    </span>
+    </button>
   {/if}
   <span class="background" />
-</span>
+</button>
 
 <style>
   .linked-record {

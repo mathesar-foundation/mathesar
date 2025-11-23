@@ -118,7 +118,7 @@
 </script>
 
 {#if modal}
-  <div
+  <button
     class="menu"
     role="menu"
     class:has-icon={$hasIconColumn}
@@ -135,7 +135,7 @@
     bind:this={menuElement}
   >
     <slot />
-  </div>
+  </button>
 {:else}
   <div
     class="menu"

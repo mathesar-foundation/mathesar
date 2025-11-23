@@ -18,12 +18,12 @@
 </script>
 
 {#if props}
-  <div
+  <button
     class="context-menu-backdrop"
     on:click={handleClickBackdrop}
     on:contextmenu={handleClickBackdrop}
   />
-  <div
+  <button
     class="context-menu dropdown content"
     use:popper={{ reference: getVirtualReferenceElement(props.position) }}
     use:portal
@@ -40,7 +40,7 @@
         },
       }}
     />
-  </div>
+  </button>
 {/if}
 
 <style>

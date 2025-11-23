@@ -164,7 +164,7 @@
 
 <BaseInput {disabled} {...$$restProps} bind:id />
 
-<span
+<button
   {id}
   class="input-element linked-record-input {classes}"
   class:has-value={hasValue}
@@ -213,7 +213,7 @@
       <Icon {...iconExpandDown} />
     </span>
   {/if}
-</span>
+</button>
 
 <style>
   /* TODO resolve some code duplication with `.input-element` */

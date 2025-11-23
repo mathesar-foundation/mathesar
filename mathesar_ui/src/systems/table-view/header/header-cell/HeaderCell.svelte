@@ -42,7 +42,7 @@
 
 <div class="header-cell-root">
   <CellBackground when={isSelected} color="var(--cell-bg-color-row-selected)" />
-  <div
+  <button
     class="header-cell-btn btn btn-ghost"
     style="cursor: inherit;"
     on:click
@@ -71,7 +71,7 @@
         {/if}
       </div>
     {/if}
-  </div>
+  </button>
 </div>
 
 <style lang="scss">

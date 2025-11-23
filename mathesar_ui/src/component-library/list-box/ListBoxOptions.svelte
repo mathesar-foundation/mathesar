@@ -87,6 +87,12 @@
       aria-selected={isSelected ? true : undefined}
       on:mousedown={() => api.focusOption(option)}
       on:click={() => api.pick(option)}
+      on:keydown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          api.pick(option);
+        }
+      }}
     >
       <slot
         {option}

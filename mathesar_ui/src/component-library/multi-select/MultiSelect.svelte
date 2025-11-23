@@ -124,7 +124,6 @@
     bind:this={trigger}
     on:click={api.toggle}
     aria-label={ariaLabel}
-    tabindex="0"
     {id}
     on:keydown={api.handleKeyDown}
   >
@@ -138,21 +137,21 @@
               <StringOrComponent arg={getLabel(value)} />
             {/if}
           </span>
-          <span
+          <button
             class="remove-button icon-button"
             on:click|stopPropagation={() => removeValue(value)}
           >
             <Icon data={faTimes} size="0.8em" />
-          </span>
+          </button>
         </span>
       {/each}
     </span>
-    <span
+    <button
       class="clear-button icon-button"
       on:click|stopPropagation={() => setValues([])}
     >
       <Icon data={faBackspace} />
-    </span>
+    </button>
   </span>
 
   <AttachableDropdown

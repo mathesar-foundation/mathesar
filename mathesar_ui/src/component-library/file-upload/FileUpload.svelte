@@ -103,7 +103,6 @@
 
   {#if multiple || !fileUploads || fileUploads.length === 0}
     <label
-      tabindex="0"
       for={componentId}
       class="file-upload-trigger"
       class:dragging-over={isDraggingOver}

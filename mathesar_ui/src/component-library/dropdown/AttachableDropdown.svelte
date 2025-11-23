@@ -126,7 +126,7 @@
 </script>
 
 {#if isOpen}
-  <div
+  <button
     class={['dropdown content', classes].join(' ')}
     bind:this={contentElement}
     use:portal={portalTarget}
@@ -163,5 +163,5 @@
     {:else if content}
       <StringOrComponent arg={content} />
     {/if}
-  </div>
+  </button>
 {/if}

@@ -38,7 +38,7 @@
 </script>
 
 <Truncate {...$$restProps} passthrough={!truncate}>
-  <span
+  <button
     class="name-with-icon"
     on:click
     class:boxed={iconHasBox}
@@ -61,7 +61,7 @@
         <slot />
       {/if}
     </span>
-  </span>
+  </button>
 </Truncate>
 
 <style lang="scss">

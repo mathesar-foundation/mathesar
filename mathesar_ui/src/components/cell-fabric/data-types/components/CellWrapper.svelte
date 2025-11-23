@@ -75,7 +75,7 @@
   }
 </script>
 
-<div
+<button
   class="cell-wrapper"
   class:disabled
   class:is-edit-mode={mode === 'edit'}
@@ -106,7 +106,7 @@
     />
   {/if}
   <slot />
-</div>
+</button>
 
 <style lang="scss">
   .cell-wrapper {

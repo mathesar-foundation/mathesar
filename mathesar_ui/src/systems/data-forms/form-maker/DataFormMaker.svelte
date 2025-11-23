@@ -40,9 +40,9 @@
     showPanel={showInspector}
   >
     <div class="workarea">
-      <div class="form-holder" on:click={handleFormSelection}>
+      <button class="form-holder" on:click={handleFormSelection}>
         <DataForm {dataFormManager} showBranding={false} />
-      </div>
+      </button>
     </div>
     <div class="data-form-inspector-panel" slot="panel">
       {#if editableDataFormManager}

@@ -23,7 +23,7 @@
    */
   export let thumbnailResolutionHeightPx: number;
 
-  let thumbnailElement: HTMLImageElement;
+  let thumbnailElement: HTMLButtonElement;
   let defaultFileTrigger: HTMLElement;
 
   $: ({ uri, mimetype } = manifestWithRequestParams);
@@ -55,12 +55,14 @@
         <Tooltip>
           <svelte:fragment slot="content">{fileName}</svelte:fragment>
           <div slot="trigger" class="image">
-            <img
-              alt={uri}
-              src={thumbnailUrl}
+            <button
+              class="thumbnail-button"
               on:click={openViewer}
               bind:this={thumbnailElement}
-            />
+              aria-label={fileName}
+            >
+              <img alt={uri} src={thumbnailUrl} />
+            </button>
           </div>
         </Tooltip>
       </ContentLoading>

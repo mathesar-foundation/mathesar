@@ -55,9 +55,9 @@
       <div class="title">{$readableTitle}</div>
     {/if}
     {#if props.allowDismiss}
-      <div class="close-button" role="button" tabindex="-1" on:click={dismiss}>
+      <button class="close-button" tabindex="-1" on:click={dismiss}>
         <Icon {...iconClose} />
-      </div>
+      </button>
     {/if}
   </div>
   {#if props.contentComponent || props.message}

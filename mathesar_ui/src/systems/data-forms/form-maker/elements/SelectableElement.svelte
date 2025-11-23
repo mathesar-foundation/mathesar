@@ -59,7 +59,7 @@
   }
 </script>
 
-<div
+<button
   data-form-selectable
   class:can-select={!!editableDataFormManager}
   class:selected={isSelected}
@@ -88,7 +88,7 @@
       <slot name="left" />
     </div>
   {/if}
-</div>
+</button>
 
 <style lang="scss">
   [data-form-selectable] {

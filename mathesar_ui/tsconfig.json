@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
+    "verbatimModuleSyntax": true,
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
@@ -11,7 +12,6 @@
       "js-cookie",
       "svelte2tsx/svelte-jsx"
     ],
-    "importsNotUsedAsValues": "error",
     "strict": true,
     "isolatedModules": true,
     "resolveJsonModule": true,

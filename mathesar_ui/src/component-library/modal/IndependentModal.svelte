@@ -70,7 +70,7 @@
 {#if isOpen}
   <div class="modal" data-modal-id={modalId} use:portal>
     {#if hasOverlay}
-      <div
+      <button
         class="overlay"
         on:click={handleOverlayClick}
         in:fade={{ duration: 150 }}

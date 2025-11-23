@@ -94,7 +94,6 @@
   </div>
 
   {#if !upgradeRequired}
-    <!-- svelte-ignore a11y-missing-content -->
     <a
       {href}
       class="hyperlink-overlay"

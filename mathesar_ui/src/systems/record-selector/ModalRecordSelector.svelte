@@ -41,7 +41,7 @@
 {#if $isOpen}
   <div use:portal class="modal-record-selector">
     {#if $isOnTop}
-      <div
+      <button
         class="overlay"
         on:click={handleOverlayClick}
         in:fade={{ duration: 150 }}
