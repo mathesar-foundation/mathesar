@@ -18,3 +18,19 @@ try:
     from .local import * # noqa 
 except ImportError:
     pass
+# config/settings/production.py
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  # or 'django.db.backends.mysql' if using MySQL
+        'NAME': 'your_db_name',                      # database name
+        'USER': 'your_db_user',                      # database username
+        'PASSWORD': 'your_db_password',              # database password
+        'HOST': 'localhost',                         # or your DB host
+        'PORT': '5432',                              # default PostgreSQL port, change if needed
+    }
+}
+try:
+    from .local import *
+except ImportError:
+    pass

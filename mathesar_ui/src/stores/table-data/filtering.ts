@@ -141,11 +141,12 @@ export class Filtering {
   }
 
   withEntries(entries: Iterable<FilterEntry>): Filtering {
-    return new Filtering({
-      combination: this.combination,
-      entries: [...this.entries, ...entries],
-    });
-  }
+  return new Filtering({
+    combination: this.combination,
+    entries: [...entries],  // overwrite instead of append
+  });
+}
+
 
   withEntry(entry: FilterEntry): Filtering {
     return this.withEntries([entry]);

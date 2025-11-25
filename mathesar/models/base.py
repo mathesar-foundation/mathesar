@@ -52,11 +52,11 @@ class Server(BaseModel):
 
 class Database(BaseModel):
     name = models.CharField(max_length=128)
-    nickname = models.CharField(null=True)
+    nickname = models.CharField(max_length=255, null=True)
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='databases'
     )
-    last_confirmed_sql_version = models.CharField(default='0.0.0')
+    last_confirmed_sql_version = models.CharField(max_length=255, default='0.0.0')
 
     class Meta:
         constraints = [
@@ -212,29 +212,29 @@ class ColumnMetaData(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
     table_oid = models.PositiveBigIntegerField()
     attnum = models.SmallIntegerField()
-    bool_input = models.CharField(
+    bool_input = models.CharField(max_length=255, 
         choices=[("dropdown", "dropdown"), ("checkbox", "checkbox")],
         null=True
     )
-    bool_true = models.CharField(null=True)
-    bool_false = models.CharField(null=True)
+    bool_true = models.CharField(max_length=255, null=True)
+    bool_false = models.CharField(max_length=255, null=True)
     num_min_frac_digits = models.PositiveIntegerField(null=True)
     num_max_frac_digits = models.PositiveIntegerField(null=True)
-    num_grouping = models.CharField(
+    num_grouping = models.CharField(max_length=255, 
         choices=[("always", "always"), ("auto", "auto"), ("never", "never")],
         null=True
     )
-    num_format = models.CharField(
+    num_format = models.CharField(max_length=255, 
         choices=[("english", "english"), ("german", "german"), ("french", "french"), ("hindi", "hindi"), ("swiss", "swiss")],
         null=True
     )
-    mon_currency_symbol = models.CharField(null=True)
-    mon_currency_location = models.CharField(
+    mon_currency_symbol = models.CharField(max_length=255, null=True)
+    mon_currency_location = models.CharField(max_length=255, 
         choices=[("after-minus", "after-minus"), ("end-with-space", "end-with-space")],
         null=True
     )
-    time_format = models.CharField(null=True)
-    date_format = models.CharField(null=True)
+    time_format = models.CharField(max_length=255, null=True)
+    date_format = models.CharField(max_length=255, null=True)
     duration_min = models.CharField(max_length=255, null=True)
     duration_max = models.CharField(max_length=255, null=True)
     display_width = models.PositiveIntegerField(null=True)
@@ -284,13 +284,13 @@ class Explorations(BaseModel):
     transformations = models.JSONField(null=True)
     display_options = models.JSONField(null=True)
     display_names = models.JSONField(null=True)
-    description = models.CharField(null=True)
+    description = models.CharField(max_length=255, null=True)
 
 
 class Form(BaseModel):
     token = models.UUIDField(unique=True)
-    name = models.CharField()
-    description = models.CharField(null=True)
+    name = models.CharField(max_length=255, )
+    description = models.CharField(max_length=255, null=True)
     version = models.PositiveSmallIntegerField()
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
     server = models.ForeignKey('Server', on_delete=models.CASCADE)
@@ -305,7 +305,7 @@ class Form(BaseModel):
     # Submission related settings
     submit_message = models.JSONField(null=True)
     submit_redirect_url = models.URLField(null=True)
-    submit_button_label = models.CharField(null=True)
+    submit_button_label = models.CharField(max_length=255, null=True)
 
     @property
     def connection(self):
@@ -326,9 +326,9 @@ class FormField(BaseModel):
     key = models.CharField(max_length=128)
     form = models.ForeignKey('Form', on_delete=models.CASCADE, related_name='fields')
     index = models.PositiveIntegerField()
-    label = models.CharField(null=True)
-    help = models.CharField(null=True)
-    kind = models.CharField(
+    label = models.CharField(max_length=255, null=True)
+    help = models.CharField(max_length=255, null=True)
+    kind = models.CharField(max_length=255, 
         choices=[
             ("scalar_column", "Scalar column"),
             ("foreign_key", "Foreign key")
@@ -336,7 +336,7 @@ class FormField(BaseModel):
     )
     column_attnum = models.SmallIntegerField()
     related_table_oid = models.PositiveBigIntegerField(null=True)
-    fk_interaction_rule = models.CharField(
+    fk_interaction_rule = models.CharField(max_length=255, 
         choices=[
             ("must_pick", "Must pick an existing record from the related table"),
             ("can_pick_or_create", "Can pick an existing record from the related table or create a new record"),
@@ -393,8 +393,8 @@ class DataFile(BaseModel):
 
 
 class DownloadLink(BaseModel):
-    mash = models.CharField(primary_key=True, editable=False)
+    mash = models.CharField(max_length=255, primary_key=True, editable=False)
     sessions = models.ManyToManyField(Session)
-    uri = models.CharField()  # should not contain sensitive info
+    uri = models.CharField(max_length=255, )  # should not contain sensitive info
     thumbnail = models.JSONField(blank=True, default=dict)
     fsspec_kwargs = EncryptedJSONField(blank=True, default=dict)
