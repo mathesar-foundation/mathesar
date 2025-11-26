@@ -21,7 +21,7 @@ This guide walks you through how to deploy Mathesar on Railway.
 
 	Otherwise, you'll be placed on a "limited" trial, which doesn't support code deployment. Instead, Railway will prompt you to upgrade to one of their "Hobby"-tier monthly plans in order to deploy Mathesar.
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/mathesar-official?referralCode=piCyQa)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/mathesar?referralCode=piCyQa&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
 ### Step 2: Create the application
 

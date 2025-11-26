@@ -171,6 +171,72 @@ We use [Vitest](https://vitest.dev/) to run our unit tests, and we use [Testing 
 - The `src/component-library` directory contains general-purpose components which will eventually be spun off into its own package, separate from Mathesar.
 - See the [Components README](./src/component-library/README.md) for more details.
 
+## Accessing the app in dev mode from a mobile device
+
+Some UI interactions are difficult to test on a traditional desktop/laptop, for example touch interactions, mobile-native HTML date/time inputs, and mobile-specific address bar hiding behavior. If you need to test interactions like these, you can run Mathesar in development mode on your main computer while accessing the application from a mobile device.
+
+### Connecting over your local network
+
+1. Put your two devices on the same local network (e.g. your home router).
+
+1. In your `.env` file, change the `ALLOWED_HOSTS` line to read as follows:
+
+    ```
+    ALLOWED_HOSTS=*
+    ```
+
+1. Restart Mathesar.
+
+1. Determine the local IP address of your computer.
+
+    E.g. on Linux:
+
+    ```
+    ip addr show
+    ```
+
+    You'll probably see something like `192.168.1.123` somewhere in the output.
+
+1. From your mobile device, direct the browser to http://192.168.1.123:8000 (or similar, based on your computer's IP).
+
+### Remote debugging
+
+Use these steps to access the browser dev tools for the web page running on the mobile device.
+
+These steps work for Firefox on Android + Firefox on Linux.
+
+1. Plug your device into your computer via USB.
+
+1. On Android:
+
+    1. Open **Settings → About tablet → Build number**
+    
+    1. Tap **Build number** 7 times until it says _“You are now a developer”_.
+
+    1. Go to **Settings → System → Developer options**  and enable **USB debugging**
+
+    1. In Firefox, go to **Settings → Advanced** and enable **Remote debugging via USB**.
+
+    1. In Firefox, load a page you'd like to inspect.
+
+1. On Linux
+
+    1. Install the Android Debug Bridge.
+
+        ```
+        sudo apt install android-tools-adb
+        ```
+
+    1. In Firefox, go to the following URL:
+
+        ```
+        about:debugging#/setup
+        ```
+
+    1. You should see your android device listed with an option to connect to it.
+
+    1. Once connected to a device, you should see a list of the device's Firefox tabs. Click **Inspect** on one of the listed tabs to launch the inspector on your computer for the tab on your Android device.
+
 ## Live reloading on Windows
 
 - Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).

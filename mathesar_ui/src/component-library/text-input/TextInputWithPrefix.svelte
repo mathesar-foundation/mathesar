@@ -13,10 +13,12 @@
   export let value: $$Props['value'] = '';
 
   // Additional classes
-  let classes = '';
+  let classes: $$Props['class'] = '';
   export { classes as class };
 
   export let prefixIcon: $$Props['prefixIcon'];
+
+  export let element: $$Props['element'] = undefined;
 </script>
 
 <span class="prefix-wrapper">
@@ -27,6 +29,7 @@
     class={['prefixed-input', classes].join(' ')}
     {...$$restProps}
     bind:value
+    bind:element
     on:input
     on:focus
     on:blur

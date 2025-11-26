@@ -412,6 +412,170 @@ jobs:
           TARGET: ${{ matrix.target }}
 
 ################################################################################
+##                      PACKAGE & INSTALLATION TESTERS.                       ##
+##                                                                            ##
+## This job tests if we can successfully package & install mathesar for       ##
+## non-docker based setups.                                                   ##
+##                                                                            ##
+################################################################################
+
+  package:
+    name: Package mathesar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install GNU gettext
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext
+
+      - name: Run package Script
+        run: |
+          python3 ./build-scripts/package/package.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathesar-artifact
+          path: ./dist/*
+
+  install:
+    name: Test script based installation
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-14]
+        arch: [x64] # TODO: Include self-hosted arm runners
+        include:
+          - os: ubuntu-22.04
+            arch: x64
+            runner: ubuntu-22.04
+          - os: macos-14
+            arch: x64
+            runner: macos-14
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mathesar-artifact
+          path: ./mathesar-dist
+
+      - name: Install curl
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install curl
+          else
+            sudo apt-get update
+            sudo apt-get install -y curl
+          fi
+
+      - name: Install PostgreSQL
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install postgresql@15
+            echo 'export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"' >> "$HOME/.bash_profile"
+            echo "/opt/homebrew/opt/postgresql@15/bin" >> $GITHUB_PATH
+            brew services start postgresql@15
+          else
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+            sudo service postgresql start
+          fi
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to become ready..."
+          for i in {1..10}; do
+            if pg_isready -h localhost -p 5432 > /dev/null 2>&1; then
+              echo "PostgreSQL is ready."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "PostgreSQL did not become ready in time."
+          exit 1
+
+      - name: Setup DB and User
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
+            createuser --superuser testuser
+            createdb -O testuser testdb
+          else
+            sudo -u postgres psql -c "CREATE USER testuser WITH PASSWORD 'testpass';"
+            sudo -u postgres psql -c "CREATE DATABASE testdb OWNER testuser;"
+          fi
+
+      - name: Install Mathesar
+        run: |
+          cd ./mathesar-dist
+          chmod +x ./install.sh
+          ./install.sh . -n -c "postgres://testuser:testpass@localhost:5432/testdb" --test-package-location "file:///$(pwd)/mathesar.tar.gz"
+          cd ..
+
+      - name: Start Mathesar server
+        run: |
+          ./mathesar-dist/bin/mathesar run --port 8000 > server.log 2>&1 &
+          echo $! > pidfile
+          sleep 10
+
+      - name: Check if Mathesar is running
+        run: |
+          curl -sL -D headers.txt http://localhost:8000 -o response_body.txt
+
+          STATUS_CODE=$(grep HTTP headers.txt | tail -1 | awk '{print $2}')
+          CONTENT_TYPE=$(grep -i 'Content-Type:' headers.txt | tail -1)
+
+          if [[ "$STATUS_CODE" != "200" ]]; then
+            echo "Unexpected HTTP status: $STATUS_CODE"
+            cat server.log
+            exit 1
+          fi
+
+          if ! grep -qi 'text/html' <<< "$CONTENT_TYPE"; then
+            echo "Content-Type is not HTML: $CONTENT_TYPE"
+            cat headers.txt
+            exit 1
+          fi
+
+          if ! grep -q "Welcome to Mathesar!" response_body.txt; then
+            echo "HTML does not contain expected text: 'Welcome to Mathesar!'"
+            echo "--- Partial HTML ---"
+            head -n 20 response_body.txt
+            exit 1
+          fi
+
+          echo "Mathesar server started successfully"
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathesar-debug-logs-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            server.log
+            response_body.txt
+
+      - name: Stop Mathesar server
+        run: kill $(cat pidfile)
+
+################################################################################
 ##                       REQUIRED TEST/LINT COLLECTORS                        ##
 ## Jobs in this section collect outputs from testing jobs, since these are    ##
 ## otherwise impossible to capture for branch protection purposes.            ##
@@ -443,6 +607,9 @@ jobs:
       - front_end_tests
       # Build test
       - build_tests
+      # Package and Installation tests
+      - package
+      - install
     steps:
       - name: Check Dependency Results
         run: |
@@ -498,6 +665,18 @@ jobs:
           # Check if build succeeds
           if [[ "${{ needs.build_tests.result }}" != "success" ]]; then
             echo "Build failed."
+            exit 1
+          fi
+
+          # Check if package succeeds
+          if [[ "${{ needs.package.result }}" != "success" ]]; then
+            echo "Packaging failed."
+            exit 1
+          fi
+
+          # Check if installation succeeds
+          if [[ "${{ needs.install.result }}" != "success" ]]; then
+            echo "Install from script failed."
             exit 1
           fi
       - name: Report success

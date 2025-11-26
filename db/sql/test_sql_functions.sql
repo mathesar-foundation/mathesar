@@ -1639,7 +1639,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_retype_col_sql() RETURNS SETOF TEXT AS $f$
+CREATE OR REPLACE FUNCTION test_retype_col_sql_for_correct_inference() RETURNS SETOF TEXT AS $f$
 DECLARE
   tab_id regclass;
   cast_options_1 jsonb := '{"mathesar_casting": true}'::jsonb;
@@ -1665,6 +1665,38 @@ BEGIN
     'ALTER TABLE public."Types Test" '
     || 'ALTER COLUMN "Money" TYPE mathesar_types.mathesar_money '
     || 'USING msar.cast_to_mathesar_money("Money", group_sep =>'',''::"char", decimal_p =>''.''::"char", curr_pref =>''$''::text, curr_suff =>''''::text)'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_retype_col_sql_for_incorrect_inference() RETURNS SETOF TEXT AS $f$
+DECLARE
+  tab_id regclass;
+  cast_options_1 jsonb := '{"decimal_p": ".", "group_sep": "", "mathesar_casting": true}'::jsonb;
+  cast_options_2 jsonb := '{"curr_pref": "$", "curr_suff": "", "decimal_p": ".", "group_sep": ",", "mathesar_casting": true}'::jsonb;
+BEGIN
+  PERFORM __setup_type_inference();
+  tab_id := '"Types Test"'::regclass;
+  -- retyping a column inferred as numeric to mathesar_types.mathesar_money instead of numeric
+  RETURN NEXT is(
+    msar.retype_column(tab_id, 5::smallint, 'mathesar_types.mathesar_money'::text, cast_options_1),
+    'ALTER TABLE public."Types Test" '
+    || 'ALTER COLUMN "Numeric" TYPE mathesar_types.mathesar_money '
+    || 'USING msar.cast_to_mathesar_money("Numeric", group_sep =>''''::"char", decimal_p =>''.''::"char", curr_pref =>''''::text, curr_suff =>''''::text)'
+  );
+  -- retyping a column inferred as mathesar_types.mathesar_money to numeric instead of mathesar_types.mathesar_money
+  RETURN NEXT throws_ok(
+    format(
+      $s$
+        SELECT msar.retype_column(%s, 8::smallint, 'numeric'::text, %L::jsonb);
+      $s$,
+      tab_id::oid,
+      cast_options_2
+    ),
+    '22P02',
+    'invalid input syntax for type numeric: "$9850000.00"',
+    'Retyping a text column with currency symbols to numeric throws an error to avoid data loss during import.'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -1957,14 +1989,13 @@ BEGIN
   CREATE TABLE test_schema.col_alters (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     col1 text NOT NULL,
-    col2 numeric DEFAULT 5,
+    col2 numeric DEFAULT '5'::numeric,
     "Col sp" text,
     col_opts numeric(5, 3),
     coltim timestamp DEFAULT now()
   );
 END;
 $$ LANGUAGE plpgsql;
-
 
 CREATE OR REPLACE FUNCTION test_alter_columns_single_name() RETURNS SETOF TEXT AS $f$
 DECLARE
@@ -1977,6 +2008,25 @@ BEGIN
     'col_alters',
     ARRAY['id', 'blah', 'col2', 'Col sp', 'col_opts', 'coltim']
   );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_mathesar_id_column_name()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  tab_oid oid;
+  col_alters_jsonb jsonb := '[{"attnum": 1, "name": "new_id"}]';
+BEGIN
+  PERFORM __setup_column_alter();
+  tab_oid := 'test_schema.col_alters'::regclass::oid;
+
+  BEGIN
+    PERFORM msar.alter_columns(tab_oid, col_alters_jsonb);
+  EXCEPTION
+    WHEN OTHERS THEN
+      RETURN NEXT pass('Exception was correctly raised when renaming Mathesar ID column.');
+  END;
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -3577,6 +3627,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
 CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -3638,6 +3689,169 @@ BEGIN
       "results": [
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 0,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 0,
+      "results": [],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 1,
+      offset_ => 1,
+      order_ => '[{"attnum": 2, "direction": "asc"}]',
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 3,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 5,
+      offset_ => 10,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 0,
+      "results": [],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_from_table_with_filter()
+RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => '{"type": "equal","args": [{ "type": "attnum", "value": 3 },{ "type": "literal", "value": "sdflkj" }]}',
+      group_ => null
+    ),
+    $j${
+      "count": 1,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"}
+      ],
+      "grouping": null,
+      "record_summaries": null,
+      "linked_record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id  => rel_id,
+      limit_  => null,
+      offset_ => null,
+      order_  => null,
+      filter_ => '{"type":"equal","args":[{"type":"attnum","value":5},{"type":"literal","value":"{\"a\": \"val\"}"}]}',
+      group_  => null
+    ),
+    $j${
+      "count": 1,
+      "results": [
+        {"1":1,"2":5,"3":"sdflkj","4":"\"s\"","5":"{\"a\": \"val\"}"}
+      ],
+      "grouping":null,
+      "linked_record_summaries":null,
+      "record_summaries":null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => '{"type": "greater","args": [{ "type": "attnum", "value": 2 },{ "type": "literal", "value": 10 }]}',
+      group_ => null
+    ),
+    $j${
+      "count": 1,
+      "results": [
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ =>
+        '{"type": "lesser","args": [{ "type": "attnum", "value": 2 },{ "type": "literal", "value": 10 }]}',
+      group_ => null
+    ),
+    $j${
+      "count": 2,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"1": 3, "2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => '{"type": "lesser_or_equal","args": [{ "type": "attnum", "value": 2 },{ "type": "literal", "value": 5 }]}',
+      group_ => null
+    ),
+    $j${
+      "count": 2,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "\"s\"", "5": "{\"a\": \"val\"}"},
+        {"1": 3, "2": 2, "3": "abcde", "4": "{\"k\": 3242348}", "5": "true"}
       ],
       "grouping": null,
       "linked_record_summaries": null,
@@ -3810,6 +4024,93 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_list_records_from_table_with_filter_and_order()
+RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id  => rel_id,
+      limit_  => null,
+      offset_ => null,
+      order_  => '[{"attnum":1,"direction":"asc"}]',
+      filter_ => '{"type":"greater","args":[{"type":"attnum","value":2},{"type":"literal","value":2}]}',
+      group_  => null
+    ),
+    $j${
+      "count": 2,
+      "results": [
+        {"1":1,"2":5,"3":"sdflkj","4":"\"s\"","5":"{\"a\": \"val\"}"},
+        {"1":2,"2":34,"3":"sdflfflsk","4":null,"5":"[1, 2, 3, 4]"}
+      ],
+      "grouping":null,
+      "linked_record_summaries":null,
+      "record_summaries":null
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_from_table_with_filter_grouping_and_order()
+RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_customers_table();
+  rel_id := '"Customers"'::regclass::oid;
+
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id  => rel_id,
+      limit_  => null,
+      offset_ => null,
+      order_  => '[{"attnum":4,"direction":"asc"}]',
+      filter_ => '{"type":"equal","args":[
+                    {"type":"attnum","value":2},
+                    {"type":"literal","value":"Abigail"}
+                  ]}',
+      group_  => '{"columns":[3]}'
+    ),
+    $j${
+      "count": 12,
+      "results": [
+        {"1":2,"2":"Abigail","3":"Acosta","4":"2020-04-16 AD"},
+        {"1":4,"2":"Abigail","3":"Adams","4":"2020-05-29 AD"},
+        {"1":5,"2":"Abigail","3":"Abbott","4":"2020-07-05 AD"},
+        {"1":8,"2":"Abigail","3":"Abbott","4":"2020-10-30 AD"},
+        {"1":9,"2":"Abigail","3":"Adams","4":"2021-02-14 AD"},
+        {"1":10,"2":"Abigail","3":"Acevedo","4":"2021-03-29 AD"},
+        {"1":13,"2":"Abigail","3":"Adkins","4":"2021-09-12 AD"},
+        {"1":15,"2":"Abigail","3":"Abbott","4":"2021-11-30 AD"},
+        {"1":18,"2":"Abigail","3":"Abbott","4":"2022-03-23 AD"},
+        {"1":19,"2":"Abigail","3":"Adkins","4":"2022-03-27 AD"},
+        {"1":20,"2":"Abigail","3":"Abbott","4":"2022-04-29 AD"},
+        {"1":21,"2":"Abigail","3":"Adams","4":"2022-05-24 AD"}
+      ],
+      "grouping":{
+        "columns":[3],
+        "preproc":null,
+        "groups":[
+          {"id":1,"count":5,"results_eq":{"3":"Abbott"},"result_indices":[2,3,7,8,10]},
+          {"id":2,"count":1,"results_eq":{"3":"Acevedo"},"result_indices":[5]},
+          {"id":3,"count":1,"results_eq":{"3":"Acosta"},"result_indices":[0]},
+          {"id":4,"count":3,"results_eq":{"3":"Adams"},"result_indices":[1,4,11]},
+          {"id":5,"count":2,"results_eq":{"3":"Adkins"},"result_indices":[6,9]}
+        ]
+      },
+      "linked_record_summaries":null,
+      "record_summaries":null
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_list_records_for_table_with_self_referential_fk() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -3844,6 +4145,48 @@ BEGIN
           "3": "Hand tools"
         }
      }
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_self_fk_filter_group()
+RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_table_with_self_referential_fk();
+  rel_id := 'categories'::regclass::oid;
+
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id  => rel_id,
+      limit_  => null,
+      offset_ => null,
+      order_  => null,
+      filter_ => '{"type":"equal","args":[{"type":"attnum","value":3},{"type":"literal","value":1}]}',
+      group_  => '{"columns":[3]}'
+    ),
+    $j${
+      "count": 2,
+      "results": [
+        {"1":2,"2":"Power tools","3":1},
+        {"1":3,"2":"Hand tools","3":1}
+      ],
+      "grouping":{
+        "columns":[3],
+        "preproc":null,
+        "groups":[
+          {"id":1,"count":2,"results_eq":{"3":1},"result_indices":[0,1]}
+        ]
+      },
+      "linked_record_summaries":{
+        "3":{
+          "1":"Tools"
+        }
+      },
+      "record_summaries":null
     }$j$
   );
 END;
@@ -5410,6 +5753,30 @@ BEGIN
       '/'           -- ❌ widget.projection.sensitivity (❌ because can't join)
     )
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_record_summary_after_dropped_referenced_column()
+RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+
+  ALTER TABLE "Counselors" DROP COLUMN "Name";
+  RETURN NEXT is(
+    msar.get_record_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      rec_id => 4,
+      return_record_summaries => true,
+      table_record_summary_templates => jsonb_build_object(
+        '"Students"'::regclass::oid,
+        '[[4], " ", [5], "% - (", [3, 3], " / ", [3, 2, 2], ")"]'::jsonb
+      )
+    ) -> 'record_summaries' ->> '4',
+    'Ida Idalia 90% - (Carol Carlson / )',
+    'record summary executes fine after dropping referenced FK column "Counselors"."Name"'
+  );
+
 END;
 $$ LANGUAGE plpgsql;
 

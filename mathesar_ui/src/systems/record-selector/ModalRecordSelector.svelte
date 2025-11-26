@@ -115,12 +115,12 @@
       justify-content: center;
     }
     .root-record-selector {
-      max-height: calc(100vh - var(--nested-selector-extra-top-inset));
+      max-height: calc(100svh - var(--nested-selector-extra-top-inset));
     }
     :global(.nested-record-selector) {
       margin-top: calc(-1 * var(--nested-selector-extra-top-inset));
       padding-top: var(--nested-selector-extra-top-inset);
-      max-height: calc(100vh - var(--nested-selector-extra-top-inset));
+      max-height: calc(100svh - var(--nested-selector-extra-top-inset));
     }
   }
 </style>

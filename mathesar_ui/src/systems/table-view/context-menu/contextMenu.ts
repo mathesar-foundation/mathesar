@@ -17,12 +17,14 @@ import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
+import { deleteColumn } from './entries/deleteColumn';
 import { deleteRecords } from './entries/deleteRecords';
 import { duplicateRecord } from './entries/duplicateRecord';
 import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
 import { openTable } from './entries/openTable';
+import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
 import { viewRowRecord } from './entries/viewRowRecord';
@@ -34,6 +36,7 @@ export function openTableCellContextMenu({
   modalRecordView,
   tabularData,
   imperativeFilterController,
+  beginSelectingCellRange,
 }: {
   targetCell: SheetCellDetails;
   position: ClientPosition;
@@ -41,6 +44,7 @@ export function openTableCellContextMenu({
   modalRecordView: ModalController<RecordStore> | undefined;
   tabularData: TabularData;
   imperativeFilterController: ImperativeFilterController | undefined;
+  beginSelectingCellRange: () => void;
 }): 'opened' | 'empty' {
   const { selection } = tabularData;
 
@@ -74,6 +78,8 @@ export function openTableCellContextMenu({
     yield* modifyGrouping({ tabularData, column });
 
     yield menuSection(...openTable({ column }));
+
+    yield* deleteColumn({ tabularData, column });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -92,6 +98,7 @@ export function openTableCellContextMenu({
 
   function* getEntriesForMultipleCells(cellIds: string[]) {
     yield* setNull({ tabularData, cellIds });
+    yield* selectCellRange({ beginSelectingCellRange });
   }
 
   function* getEntriesForOneCell(cellId: string) {

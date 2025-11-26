@@ -10,6 +10,7 @@
     requiredField,
   } from '@mathesar/components/form';
   import type { Database } from '@mathesar/models/Database';
+  import { toast } from '@mathesar/stores/toast';
   import {
     Checkbox,
     Help,
@@ -42,6 +43,11 @@
       })
       .run();
     await refreshDatabaseList();
+    if (isReinstall) {
+      toast.success($_('database_reinstalled_successfully'));
+    } else {
+      toast.success($_('database_upgraded_successfully'));
+    }
     close();
   }
 </script>

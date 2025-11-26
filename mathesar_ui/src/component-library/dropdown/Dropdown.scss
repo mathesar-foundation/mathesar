@@ -41,7 +41,7 @@ button.dropdown.trigger {
   border: 1px solid var(--color-border-raised-1);
   border-radius: var(--border-radius-m);
   z-index: var(--dropdown-z-index, 100);
-  max-height: calc(100vh - 0.5rem);
+  max-height: calc(100svh - 0.5rem);
   overflow: auto;
 
   &[data-popper-placement='top-start'] {

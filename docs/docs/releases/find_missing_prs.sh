@@ -52,6 +52,14 @@ fi
 PREV_NOTES_FILE=$(ls -1 | sort | grep -B 1 $NOTES_FILE | head -n 1)
 PREV_RELEASE=$(echo $PREV_NOTES_FILE | sed s/.md$//)
 
+# Validate that PREV_RELEASE is a valid git reference (branch or tag).
+# If not, fall back to the most recent git tag.
+if ! git rev-parse --verify "$PREV_RELEASE" >/dev/null 2>&1; then
+  echo "Warning: '$PREV_RELEASE' is not a valid git reference. Using most recent tag instead."
+  PREV_RELEASE=$(git describe --tags --abbrev=0)
+  echo "Using tag: $PREV_RELEASE"
+fi
+
 CACHE_DIR=cache
 COMMITS_FILE="$CACHE_DIR/commits.txt"
 ALL_PRS_FILE="$CACHE_DIR/all_prs.json"
@@ -63,18 +71,14 @@ NOTES_FILE=$(ls -1 | grep -e '^[0-9]\.[0-9]\.[0-9]' | sort | tail -n 1)
 # Assume the release version number to match the file name
 RELEASE=$(echo $NOTES_FILE | sed s/.md$//)
 
-# See all our local branches
-BRANCHES=$(git branch --format="%(refname:short)")
-
 # Find the release branch. If we've already cut a branch for the release (and we
 # have it locally), then use that. Otherwise, use "develop".
-RELEASE_BRANCH=$(
-  if echo $BRANCHES | grep -q $RELEASE; then
-    echo $RELEASE
-  else
-    echo "develop"
-  fi
-)
+MATCHING_BRANCH=$(git branch --format="%(refname:short)" | grep "$RELEASE" | head -n 1)
+if [ -n "$MATCHING_BRANCH" ]; then
+  RELEASE_BRANCH=$MATCHING_BRANCH
+else
+  RELEASE_BRANCH="develop"
+fi
 
 mkdir -p "$CACHE_DIR"
 
@@ -83,8 +87,8 @@ mkdir -p "$CACHE_DIR"
 git log --format=%H $PREV_RELEASE..$RELEASE_BRANCH > $COMMITS_FILE
 
 ONE_YEAR_AGO=$(python3 -c "
-from datetime import datetime, timedelta
-one_year_ago = datetime.utcnow() - timedelta(days=365)
+from datetime import datetime, timedelta, timezone
+one_year_ago = datetime.now(timezone.utc) - timedelta(days=365)
 print(one_year_ago.strftime('%Y-%m-%d'))")
 
 # Find and cache details about all the PRs merged within the past year. This

@@ -312,7 +312,7 @@ If you prefer nginx or another proxy, please refer to their documentation.
   sudo systemctl restart mathesar.service
   ```
 
-#### Install and configure Caddy
+#### Install and configure Caddy {:#install-and-configure-caddy}
 
 1. Install Caddy by following the instructions from the [Caddy documentation](https://caddyserver.com/docs/install).
 
