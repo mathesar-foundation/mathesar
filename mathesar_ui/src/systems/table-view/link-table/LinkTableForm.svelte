@@ -159,20 +159,6 @@
   // Saving
   // ===========================================================================
 
-  async function reFetchOtherThingsThatChanged() {
-    if ($linkType === 'manyToMany') {
-      await fetchTablesForCurrentSchema();
-      return;
-    }
-    const tableWithNewColumn = $linkType === 'oneToMany' ? target : base;
-    if (!tableWithNewColumn) {
-      return;
-    }
-    if (tableWithNewColumn.oid === $tabularData.table.oid) {
-      await $tabularData.refresh();
-    }
-  }
-
   async function handleSave(values: FilledFormValues<typeof form>) {
     try {
       if ($linkType === 'oneToMany') {
@@ -215,7 +201,7 @@
         assertExhaustive($linkType);
       }
       toast.success('The link has been created successfully');
-      await reFetchOtherThingsThatChanged();
+      await fetchTablesForCurrentSchema();
       close();
     } catch (error) {
       toast.error(getErrorMessage(error));
