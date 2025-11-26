@@ -31,6 +31,7 @@
     $preview.resolvedValue?.record_summaries?.[String(recordId)];
 </script>
 
+{#if recordId != null && recordId !== undefined}
 <Fieldset label={$_('preview')} boxed>
   {#if $preview.isLoading}
     <Spinner />
@@ -48,6 +49,7 @@
     </RichText>
   </div>
 </Fieldset>
+{/if}
 
 <style>
   .help {
