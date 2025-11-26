@@ -1,70 +1,99 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { AnchorButton, Button, Icon } from '@mathesar-component-library';
 
   import {
     iconDeleteMajor,
     iconLinkToRecordPage,
     iconModalRecordView,
+    iconDuplicateMajor,
   } from '@mathesar/icons';
+
+  import { toast } from '@mathesar/stores/toast';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import RecordStore from '@mathesar/systems/record-view/RecordStore';
+  import { currentTablesMap } from '@mathesar/stores/tables';
+  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import {
     extractPrimaryKeyValue,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { currentTablesMap } from '@mathesar/stores/tables';
-  import { toast } from '@mathesar/stores/toast';
-  import RecordStore from '@mathesar/systems/record-view/RecordStore';
-  import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
-  import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
-  import { AnchorButton, Button, Icon } from '@mathesar-component-library';
 
-  const tabularData = getTabularDataStoreFromContext();
+  // --- Props and Contexts ---
+  export let selectedRowIds: Set<string>;
+  export let recordsData;
+  export let table;
+  export let columns;
+  export let canDeleteRecords: boolean;
+
   const modalRecordView = modalRecordViewContext.get();
 
-  $: ({ table, selection, recordsData, columnsDataStore, canDeleteRecords } =
-    $tabularData);
-  $: selectedRowIds = $selection.rowIds;
   $: selectedRowCount = selectedRowIds.size;
-  $: ({ columns } = columnsDataStore);
-  $: ({ selectableRowsMap } = recordsData);
+
+  // --- Logic for Single Selection Actions ---
+  // compute recordId only for single selection
   $: recordId = (() => {
-    const id = takeFirstAndOnly(selectedRowIds);
-    if (!id) return undefined;
-    const row = $selectableRowsMap.get(id);
+    if (selectedRowCount !== 1) return undefined;
+
+    const id = [...selectedRowIds][0];
+    const row = recordsData.selectableRowsMap.get(id);
     if (!row) return undefined;
+
     try {
-      return extractPrimaryKeyValue(row.record, $columns);
-    } catch (e) {
+      return extractPrimaryKeyValue(row.record, columns);
+    } catch (_) {
       return undefined;
     }
   })();
-  $: recordPageLink = $storeToGetRecordPageUrl({
-    tableId: table.oid,
-    recordId,
-  });
+
+  $: recordPageLink = recordId
+    ? storeToGetRecordPageUrl({
+        tableId: table.oid,
+        recordId,
+      })
+    : undefined;
 
   function quickViewRecord() {
-    if (!modalRecordView) return;
-    if (recordId === undefined) return;
-    const containingTable = $currentTablesMap.get(table.oid);
+    if (!modalRecordView || recordId === undefined) return;
+
+    const containingTable = currentTablesMap.get(table.oid);
     if (!containingTable) return;
+
     const recordStore = new RecordStore({
       table: containingTable,
       recordPk: String(recordId),
     });
+
     modalRecordView.open(recordStore);
   }
 
-  async function handleDeleteRecords() {
-    void confirmDelete({
-      identifierType: $_('multiple_records', {
-        values: { count: selectedRowCount },
-      }),
-      body: [
-        $_('deleted_records_cannot_be_recovered', {
-          values: { count: selectedRowCount },
+  // --- Action Handlers ---
+
+  async function handleDuplicateRecords() {
+    const count = selectedRowCount;
+    if (count === 0) return;
+
+    try {
+      await recordsData.duplicateSelected(selectedRowIds);
+      toast.success({
+        title: $_('count_records_duplicated_successfully', {
+          values: { count },
         }),
+      });
+    } catch (e) {
+      toast.fromError(e);
+    }
+  }
+
+  async function handleDeleteRecords() {
+    const count = selectedRowCount;
+    if (count === 0) return;
+
+    confirmDelete({
+      identifierType: $_('multiple_records', { values: { count } }),
+      body: [
+        $_('deleted_records_cannot_be_recovered', { values: { count } }),
         $_('are_you_sure_to_proceed'),
       ],
       onProceed: () => recordsData.deleteSelected(selectedRowIds),
@@ -81,7 +110,7 @@
 </script>
 
 <div class="actions-container">
-  {#if recordPageLink}
+  {#if recordPageLink && selectedRowCount === 1}
     <Button on:click={quickViewRecord} appearance="action">
       <Icon {...iconModalRecordView} />
       <span>{$_('quick_view_record')}</span>
@@ -93,9 +122,16 @@
     </AnchorButton>
   {/if}
 
+  <Button on:click={handleDuplicateRecords} appearance="action">
+    <Icon {...iconDuplicateMajor} />
+    <span>
+      {$_('duplicate_records', { values: { count: selectedRowCount } })}
+    </span>
+  </Button>
+
   <Button
     on:click={handleDeleteRecords}
-    disabled={!$canDeleteRecords}
+    disabled={!canDeleteRecords}
     appearance="danger"
   >
     <Icon {...iconDeleteMajor} />
