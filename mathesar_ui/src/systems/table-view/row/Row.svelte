@@ -13,8 +13,10 @@
     isPlaceholderRecordRow,
     isRecordRow,
   } from '@mathesar/stores/table-data';
+  import RowContextMenuActions from '../table-inspector/record/RowContextMenuActions.svelte';
   import { getFirstEditableColumn } from '@mathesar/stores/table-data/processedColumns';
-
+  import RowActions from '../table-inspector/record/RowActions.svelte';
+  import ContextMenuWrapper from '@mathesar/components/ContextMenuWrapper.svelte';
   import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';
   import RowCell from './RowCell.svelte';
@@ -44,6 +46,29 @@
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
+  
+  let contextMenuVisible = false;
+  let contextMenuX = 0;
+  let contextMenuY = 0;
+
+  function handleContextMenu(e: MouseEvent) {
+    if (!isRecordRow(row)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isSelected) {
+      selection.update((s) => s.clear().add(getRowSelectionId(row)));
+    }
+
+    contextMenuX = e.clientX;
+    contextMenuY = e.clientY;
+    contextMenuVisible = true;
+  }
+
+  function closeContextMenu() {
+    contextMenuVisible = false;
+  }
 
   async function handleRowHeaderMouseDown(e: MouseEvent) {
     if (!isPlaceholderRecordRow(row)) return;
@@ -60,7 +85,7 @@
   }
 </script>
 
-<SheetRow {style} let:htmlAttributes let:styleString>
+<SheetRow {style}     on:contextmenu={handleContextMenu} {...htmlAttributes} let:styleString>
   <div
     class="row"
     class:selected={isSelected}
@@ -87,7 +112,7 @@
           hasErrors={hasAnyErrors}
         />
       </SheetRowHeaderCell>
-    {/if}
+    
 
     {#if isGroupHeaderRow(row) && $grouping}
       <GroupHeader
@@ -118,7 +143,21 @@
     {/if}
   </div>
 </SheetRow>
-
+{#if contextMenuVisible && isRecordRow(row)}
+  <ContextMenuWrapper
+    x={contextMenuX}
+    y={contextMenuY}
+    on:close={closeContextMenu}
+  >
+    <RowContextMenuActions
+      selectedRowIds={$selection.rowIds}
+      recordsData={recordsData}
+      table={$tabularData.table}
+      columns={$tabularData.columnsDataStore.columns}
+      canDeleteRecords={$tabularData.canDeleteRecords}
+    />
+  </ContextMenuWrapper>
+    {/if}
 <style lang="scss">
   .row {
     user-select: none;
