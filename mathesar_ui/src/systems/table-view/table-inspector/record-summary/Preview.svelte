@@ -31,7 +31,7 @@
     $preview.resolvedValue?.record_summaries?.[String(recordId)];
 </script>
 
-{#if recordId != null && recordId !== undefined}
+{#if recordId != null}
 <Fieldset label={$_('preview')} boxed>
   {#if $preview.isLoading}
     <Spinner />
