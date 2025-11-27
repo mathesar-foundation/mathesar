@@ -11,11 +11,8 @@
   export let minColumnWidth = MIN_COLUMN_WIDTH_PX;
   export let maxColumnWidth = MAX_COLUMN_WIDTH_PX;
   export let columnIdentifierKey: SheetColumnIdentifierKey;
-
-  /**
-   * Runs once — when the resize is finished. Does NOT run in realtime on each
-   * pixel movement.
-   */
+  export let relatedColumnKeys: SheetColumnIdentifierKey[] = [];
+  export let onResize: (width: number) => void = () => {};
   export let afterResize: (width: number) => void = () => {};
 
   /**
@@ -34,7 +31,13 @@
   class:is-resizing={!!startingWidth}
   use:slider={{
     getStartingValue: () => api.getColumnWidth(columnIdentifierKey) ?? 0,
-    onMove: (width) => api.setColumnWidth(columnIdentifierKey, width),
+    onMove: (width) => {
+      api.setColumnWidth(columnIdentifierKey, width);
+      for (const key of relatedColumnKeys) {
+        api.setColumnWidth(key, width);
+      }
+      onResize(width);
+    },
     onStart: (startingValue) => {
       startingWidth = startingValue;
     },

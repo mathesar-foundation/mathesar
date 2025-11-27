@@ -102,7 +102,7 @@
     const columnIsSelected = selected.has(String(columnId));
 
     if (columnIsSelected && selected.size > 1) {
-      // Resize all selected columns
+      // Persist resize for all selected columns
       for (const colId of selected) {
         const c = $processedColumns.get(Number(colId));
         if (c) {
@@ -112,7 +112,7 @@
         }
       }
     } else {
-      // Resize only the one column
+      // Persist resize for single column
       const c = $processedColumns.get(columnId);
       if (c) {
         void columnsDataStore.setDisplayOptions(c, { display_width: newWidth });
@@ -154,6 +154,11 @@
       </Draggable>
       <SheetCellResizer
         columnIdentifierKey={columnId}
+        relatedColumnKeys={isSelected && $selection.columnIds.size > 1
+          ? Array.from($selection.columnIds)
+              .map(Number)
+              .filter((id) => id !== columnId)
+          : []}
         afterResize={(width) => handleResize(columnId, width)}
         onReset={() => handleResize(columnId, null)}
       />
