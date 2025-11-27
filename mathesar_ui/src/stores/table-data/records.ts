@@ -23,6 +23,7 @@ import type {
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
+import { DB_TYPES } from '@mathesar/stores/abstract-types/dbTypes';
 import {
   RpcError,
   batchSend,
@@ -692,12 +693,33 @@ export class RecordsData {
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
 
+    // Defensive: If a user clears a string-like field we should send `null`
+    // instead of an empty string to avoid violating DB domain CHECK constraints
+    // (e.g. mathesar_types.email). Formatters should normally enforce this,
+    // but guard here in case a value slips through.
+    let cellValue: unknown = record[column.id];
+    if (typeof cellValue === 'string' && cellValue.trim() === '') {
+      const t = column.type;
+      const emptyToNullTypes = new Set([
+        DB_TYPES.MSAR__EMAIL,
+        DB_TYPES.MSAR__URI,
+        DB_TYPES.DATE,
+        DB_TYPES.TIMESTAMP_WITHOUT_TZ,
+        DB_TYPES.TIMESTAMP_WITH_TZ,
+        DB_TYPES.TIME_WITH_TZ,
+        DB_TYPES.TIME_WITHOUT_TZ,
+      ]);
+      if (emptyToNullTypes.has(t)) {
+        cellValue = null;
+      }
+    }
+
     const promise = api.records
       .patch({
         ...this.apiContext,
         record_id: primaryKeyValue,
         record_def: {
-          [String(column.id)]: record[column.id],
+          [String(column.id)]: cellValue,
         },
       })
       .run();
