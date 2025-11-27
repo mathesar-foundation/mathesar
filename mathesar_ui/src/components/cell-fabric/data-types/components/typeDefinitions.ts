@@ -187,3 +187,21 @@ export interface ArrayCellProps
 // Common
 
 export type HorizontalAlignment = 'left' | 'right' | 'center';
+
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+
+export interface CellComponentFactory {
+  initialInputValue?: any;
+  get: (
+    column: RawColumnWithMetadata,
+    config?: any
+  ) => ComponentAndProps<any>;
+  getInput: (
+    column: RawColumnWithMetadata,
+    config?: any
+  ) => ComponentAndProps<any>;
+  getSimpleInput?: (
+    column: RawColumnWithMetadata
+  ) => ComponentAndProps<any>;
+  getDisplayFormatter: (column: RawColumnWithMetadata) => any;
+}

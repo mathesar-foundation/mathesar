@@ -86,7 +86,7 @@ services:
         condition: service_healthy
     # On dev, following ports are exposed to other containers, and the host.
     ports:
-      - "8000:8000"
+      - "8002:8000"
       - "3000:3000"
       - "6006:6006"
   test-service:
@@ -110,7 +110,7 @@ services:
     depends_on:
       - dev-db
     ports:
-      - "8000:8000"
+      - "8003:8000"
 volumes:
   ui_node_modules:
   dev_postgres_data:
