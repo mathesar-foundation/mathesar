@@ -5,6 +5,8 @@ import {
   type ClientPosition,
   type ContextMenuController,
   type ModalController,
+  buttonMenuEntry,
+  hyperlinkMenuEntry,
   menuSection,
   subMenu,
 } from '@mathesar/component-library';
@@ -17,9 +19,8 @@ import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
+import { getRowActions } from '../row-actions';
 import { deleteColumn } from './entries/deleteColumn';
-import { deleteRecords } from './entries/deleteRecords';
-import { duplicateRecord } from './entries/duplicateRecord';
 import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
@@ -27,7 +28,6 @@ import { openTable } from './entries/openTable';
 import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
-import { viewRowRecord } from './entries/viewRowRecord';
 
 export function openTableCellContextMenu({
   targetCell,
@@ -49,14 +49,33 @@ export function openTableCellContextMenu({
   const { selection } = tabularData;
 
   function* getEntriesForMultipleRows(rowIds: string[]) {
-    yield* deleteRecords({ tabularData, rowIds });
+    // Use the headless row actions component
+    const actions = getRowActions({
+      rowIds,
+      tabularData,
+      modalRecordView,
+    });
+    
+    for (const action of actions) {
+      if (action.href) {
+        yield hyperlinkMenuEntry({
+          icon: action.icon,
+          label: action.label,
+          href: action.href,
+        });
+      } else {
+        yield buttonMenuEntry({
+          icon: action.icon,
+          label: action.label,
+          onClick: action.onClick ?? (() => {}),
+          danger: action.danger,
+          disabled: action.disabled,
+        });
+      }
+    }
   }
 
   function* getEntriesForOneRow(rowId: string) {
-    const recordId = tabularData.getRecordIdFromRowId(rowId);
-    yield* viewRowRecord({ tabularData, recordId, modalRecordView });
-    yield* duplicateRecord({ tabularData, rowId });
-
     yield* getEntriesForMultipleRows([rowId]);
   }
 
