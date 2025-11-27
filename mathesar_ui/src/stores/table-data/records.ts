@@ -23,11 +23,11 @@ import type {
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
-import { DB_TYPES } from '@mathesar/stores/abstract-types/dbTypes';
 import {
   RpcError,
   batchSend,
 } from '@mathesar/packages/json-rpc-client-builder';
+import { DB_TYPES } from '@mathesar/stores/abstract-types/dbTypes';
 import type Pagination from '@mathesar/utils/Pagination';
 import {
   type CancellablePromise,
