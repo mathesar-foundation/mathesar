@@ -1,28 +1,25 @@
 import { FormattedInput } from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 
 // Standard Display Component
-import TextBoxCell from '../components/textbox/TextBoxCell.svelte'; 
+import { EmailFormatter } from '../../../utils/email/EmailFormatter';
+
+import TextBoxCell from './components/textbox/TextBoxCell.svelte';
+import type { CellComponentFactory } from './typeDefinitions';
 
 // Import your fixed formatter logic
-import { EmailFormatter } from '../../../utils/email/EmailFormatter'; 
 
 // --- THE FIX: We define the object without importing the broken type file ---
 
-const emailType = {
+const emailType: CellComponentFactory = {
   // VIEW MODE: Show standard text display
-  get: (
-    column: RawColumnWithMetadata
-  ): ComponentAndProps<any> => ({
+  get: (): ComponentAndProps => ({
     component: TextBoxCell,
     props: {},
   }),
 
-  // EDIT MODE: Use FormattedInput (from library) + your logic (THE FIX)
-  getInput: (
-    column: RawColumnWithMetadata
-  ): ComponentAndProps<any> => ({
+  // EDIT MODE: Use FormattedInput (from library) + EmailFormatter
+  getInput: (): ComponentAndProps => ({
     component: FormattedInput,
     props: {
       formatter: new EmailFormatter(),
@@ -30,7 +27,7 @@ const emailType = {
     },
   }),
 
-  getDisplayFormatter: () => String,
+  getDisplayFormatter: () => (v) => String(v),
 };
 
 export default emailType;

@@ -1,21 +1,18 @@
 import { FormattedInput } from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import TextBoxCell from './components/textbox/TextBoxCell.svelte';
+
 import { UriFormatter } from '../../../utils/uri/UriFormatter';
+
+import TextBoxCell from './components/textbox/TextBoxCell.svelte';
 import type { CellComponentFactory } from './typeDefinitions';
 
 const uriType: CellComponentFactory = {
-  get: (
-    column: RawColumnWithMetadata
-  ): ComponentAndProps<any> => ({
+  get: (): ComponentAndProps => ({
     component: TextBoxCell,
     props: {},
   }),
 
-  getInput: (
-    column: RawColumnWithMetadata
-  ): ComponentAndProps<any> => ({
+  getInput: (): ComponentAndProps => ({
     component: FormattedInput,
     props: {
       formatter: new UriFormatter(),
@@ -23,7 +20,7 @@ const uriType: CellComponentFactory = {
     },
   }),
 
-  getDisplayFormatter: () => String,
+  getDisplayFormatter: () => (v) => String(v),
 };
 
 export default uriType;

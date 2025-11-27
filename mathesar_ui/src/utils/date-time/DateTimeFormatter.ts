@@ -61,7 +61,9 @@ function parseWithSpec(
   return undefined;
 }
 
-export default class DateTimeFormatter implements InputFormatter<string> {
+export default class DateTimeFormatter
+  implements InputFormatter<string | null>
+{
   specification: DateTimeSpecification;
 
   constructor(specification: DateTimeSpecification) {
@@ -71,7 +73,7 @@ export default class DateTimeFormatter implements InputFormatter<string> {
   /**
    * @param input could come from the user or from an API response
    */
-  parse(input: string): ParseResult<string> {
+  parse(input: string): ParseResult<string | null> {
     const dayjsValue =
       parseKeywords(input) ?? parseWithSpec(input, this.specification);
 

@@ -1,5 +1,8 @@
 import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
-import type { ColumnTypeOptions } from '@mathesar/api/rpc/columns';
+import type {
+  ColumnTypeOptions,
+  RawColumnWithMetadata,
+} from '@mathesar/api/rpc/columns';
 import type { FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
@@ -188,20 +191,18 @@ export interface ArrayCellProps
 
 export type HorizontalAlignment = 'left' | 'right' | 'center';
 
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-
 export interface CellComponentFactory {
-  initialInputValue?: any;
+  initialInputValue?: unknown;
   get: (
     column: RawColumnWithMetadata,
-    config?: any
-  ) => ComponentAndProps<any>;
+    config?: Record<string, unknown>,
+  ) => ComponentAndProps;
   getInput: (
     column: RawColumnWithMetadata,
-    config?: any
-  ) => ComponentAndProps<any>;
-  getSimpleInput?: (
-    column: RawColumnWithMetadata
-  ) => ComponentAndProps<any>;
-  getDisplayFormatter: (column: RawColumnWithMetadata) => any;
+    config?: Record<string, unknown>,
+  ) => ComponentAndProps;
+  getSimpleInput?: (column: RawColumnWithMetadata) => ComponentAndProps;
+  getDisplayFormatter: (
+    column: RawColumnWithMetadata,
+  ) => CellValueFormatter<unknown>;
 }

@@ -19,7 +19,7 @@
 
   const dispatch = createEventDispatcher();
 
-  type $$Props = FormattedInputProps<string> &
+  type $$Props = FormattedInputProps<string | null> &
     Omit<DateTimeCellExternalProps, 'formatForDisplay'> & {
       value: DateTimeCellProps['value'];
     };

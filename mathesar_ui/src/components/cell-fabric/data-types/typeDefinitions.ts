@@ -12,6 +12,7 @@ export type CellColumnLike = CellColumnLikeInner;
 // One frontend type can map to multiple db types
 export type SimpleCellDataTypes =
   | 'string'
+  | 'email'
   | 'boolean'
   | 'number'
   | 'uri'
