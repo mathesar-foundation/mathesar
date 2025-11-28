@@ -34,12 +34,21 @@ body > .new-item-highlighter {
 body > .new-item-highlighter__hint {
   position: absolute;
   z-index: var(--new-item-highlighter-z-index, 1000);
-  --background: color-mix(in srgb, var(--color-bg-base), transparent 70%);
   inset: 0px auto auto 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
   opacity: 0;
+
+  --background: var(--color-bg-tip);
+  --foreground: var(--color-fg-tip);
+  --strong: var(--color-bg-tip-strong);
+
+  &:hover {
+    --background: var(--color-bg-tip-hover);
+    --foreground: var(--color-fg-tip-hover);
+    --strong: var(--color-bg-tip-strong-hover);
+  }
 
   @starting-style {
     opacity: 1;
@@ -47,16 +56,13 @@ body > .new-item-highlighter__hint {
 
   .message {
     background-color: var(--background);
-    color: var(--color-fg-base);
+    color: var(--foreground);
+    border: 1px solid var(--strong);
     padding: 0.5rem;
     border-radius: 0.3rem;
     max-width: 15rem;
     text-align: center;
     cursor: pointer;
-  }
-
-  &:hover {
-    --background: black;
   }
 
   svg {
@@ -66,7 +72,7 @@ body > .new-item-highlighter__hint {
     cursor: pointer;
 
     path {
-      fill: var(--background);
+      fill: var(--strong);
     }
   }
 

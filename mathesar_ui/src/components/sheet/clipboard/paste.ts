@@ -16,7 +16,7 @@ import {
 
 import type SheetSelection from '../selection/SheetSelection';
 
-import { MIME_MATHESAR_SHEET_CLIPBOARD, MIME_PLAIN_TEXT } from './constants';
+import { MIME_PLAIN_TEXT } from './constants';
 import {
   type StructuredCell,
   validateStructuredCellRows,
@@ -52,11 +52,27 @@ type PayloadCell = TsvCell | MathesarCell;
 type Payload = PayloadCell[][];
 
 function getPayload(clipboardData: DataTransfer): Payload {
-  const mathesarData = clipboardData.getData(MIME_MATHESAR_SHEET_CLIPBOARD);
-  if (mathesarData) {
-    const rows = validateStructuredCellRows(JSON.parse(mathesarData));
-    if (rows.length === 0) throw new Error(get(_)('paste_error_empty'));
-    return rows.map((row) => row.map((value) => ({ type: 'mathesar', value })));
+  const htmlData = clipboardData.getData('text/html');
+  if (htmlData) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlData, 'text/html');
+    const table = doc.querySelector('table[data-mathesar-content]');
+    if (table) {
+      const content = table.getAttribute('data-mathesar-content');
+      if (content) {
+        try {
+          const structuredData = decodeURIComponent(content);
+          const rows = validateStructuredCellRows(JSON.parse(structuredData));
+          if (rows.length > 0) {
+            return rows.map((row) =>
+              row.map((value) => ({ type: 'mathesar', value })),
+            );
+          }
+        } catch {
+          // fall through to plain text if structured data is malformed
+        }
+      }
+    }
   }
 
   const textData = clipboardData.getData(MIME_PLAIN_TEXT);
