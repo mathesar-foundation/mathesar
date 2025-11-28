@@ -19,7 +19,6 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
-static/
 lib/
 lib64/
 parts/
