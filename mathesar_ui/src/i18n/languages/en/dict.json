@@ -143,6 +143,7 @@
   "content": "Content",
   "content_of_first_row": "Content of First Row",
   "copied_cells": "Copied {count, plural, one {{count} cell} other {{count} cells}}",
+  "copy": "Copy",
   "copy_and_paste_text": "Copy and Paste Text",
   "could_break_tables_views": "This could break existing tables and views.",
   "could_not_fetch_profile_error": "Could not fetch user profile details. Try refreshing your page.",
