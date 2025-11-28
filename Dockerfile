@@ -1,7 +1,6 @@
 #=========== STAGE: BASE =====================================================#
 
-# FIX 1: Use Python 3.11 (Stable) instead of 3.13
-ARG PYTHON_VERSION=3.11-bookworm
+ARG PYTHON_VERSION=3.13-bookworm
 FROM python:$PYTHON_VERSION AS base
 
 ENV PYTHONUNBUFFERED=1
@@ -56,8 +55,7 @@ WORKDIR /code/
 
 #=========== STAGE: TESTING ==================================================#
 
-# FIX 1: Use Python 3.11 here too
-ARG PYTHON_VERSION=3.11-bookworm
+ARG PYTHON_VERSION=3.13-bookworm
 FROM python:$PYTHON_VERSION AS testing
 
 # Mathesar source
@@ -65,8 +63,7 @@ WORKDIR /code/
 COPY . .
 
 # Install dev requirements
-# FIX 2: Added default-timeout to prevent network disconnects
-RUN pip install --default-timeout=1000 --no-cache-dir -r requirements-dev.txt
+RUN pip install --no-cache-dir -r requirements-dev.txt
 
 EXPOSE 8000
 
@@ -82,8 +79,7 @@ COPY . .
 ENV NODE_MAJOR=18
 
 # Install dev requirements
-# FIX 2: Added default-timeout here as well
-RUN pip install --default-timeout=1000 --no-cache-dir -r requirements-dev.txt
+RUN pip install --no-cache-dir -r requirements-dev.txt
 
 # Compile translation files
 # We set a temporary secret key to avoid mounting a volume during buildtime.
@@ -107,8 +103,7 @@ RUN apt-get update && \
 FROM development_base AS development
 
 # Install npm packages
-# FIX 3: Added --legacy-peer-deps to handle TypeScript version mismatch safely
-RUN cd mathesar_ui && npm ci --legacy-peer-deps && cd ..
+RUN cd mathesar_ui && npm ci && cd ..
 
 EXPOSE 8000 3000 6006
 
@@ -139,4 +134,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
 
-CMD ["bash", "./bin/mathesar", "run", "-fnse", "-fnse"]
+CMD ["bash", "./bin/mathesar", "run", "-fnse"]

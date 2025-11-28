@@ -31,8 +31,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 dist/
-msar/
-c/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
