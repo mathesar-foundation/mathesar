@@ -1,3 +1,8 @@
+## Purpose of this folder
+
+This `docs/` folder contains documentation **for developers contributing to the Mathesar codebase**.  
+This is **not** the user documentation site (https://docs.mathesar.org).  
+Instead, this folder includes internal developer docs, notes, and style guidelines relevant while working on the repository itself.
 # Mathesar's Documentation
 
 This directory contains the source code for Mathesar's user and administrator documentation published to https://docs.mathesar.org/
