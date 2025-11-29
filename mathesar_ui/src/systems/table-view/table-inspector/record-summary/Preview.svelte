@@ -31,23 +31,25 @@
     $preview.resolvedValue?.record_summaries?.[String(recordId)];
 </script>
 
-<Fieldset label={$_('preview')} boxed>
-  {#if $preview.isLoading}
-    <Spinner />
-  {:else if recordSummary !== undefined}
-    <LinkedRecord {recordSummary} />
-  {:else}
-    <Errors errors={[$preview.error ?? $_('unknown_error')]} />
-  {/if}
+{#if recordId != null}
+  <Fieldset label={$_('preview')} boxed>
+    {#if $preview.isLoading}
+      <Spinner />
+    {:else if recordSummary !== undefined}
+      <LinkedRecord {recordSummary} />
+    {:else}
+      <Errors errors={[$preview.error ?? $_('unknown_error')]} />
+    {/if}
 
-  <div class="help">
-    <RichText text={$_('record_summary_preview_help')} let:slotName>
-      {#if slotName === 'tableName'}
-        <Identifier>{table.name}</Identifier>
-      {/if}
-    </RichText>
-  </div>
-</Fieldset>
+    <div class="help">
+      <RichText text={$_('record_summary_preview_help')} let:slotName>
+        {#if slotName === 'tableName'}
+          <Identifier>{table.name}</Identifier>
+        {/if}
+      </RichText>
+    </div>
+  </Fieldset>
+{/if}
 
 <style>
   .help {
