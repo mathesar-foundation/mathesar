@@ -28,6 +28,8 @@ from mathesar.models import (
     InstallationID,
     User,
 )
+from mathesar.utils.database import get_postgres_version, is_deprecated_postgres
+
 
 ANALYTICS_DONE = "analytics_done"
 CACHE_TIMEOUT = 1800  # seconds
@@ -76,7 +78,6 @@ def save_analytics_report():
         analytics_report = AnalyticsReport(**raw_analytics_report)
         analytics_report.save()
 
-
 def prepare_analytics_report():
     installation_id = InstallationID.objects.first()
     connected_database_count = 0
@@ -93,9 +94,14 @@ def prepare_analytics_report():
         except Exception:
             print(f"Couldn't retrieve object counts for {d.name}")
 
+    postgres_version = get_postgres_version()
+    postgres_deprecated = is_deprecated_postgres(postgres_version)
+
     return dict(
         installation_id=installation_id,
         mathesar_version=__version__,
+        postgres_version=postgres_version,
+        postgres_deprecated=postgres_deprecated,
         user_count=User.objects.filter(is_active=True).count(),
         active_user_count=User.objects.filter(
             is_active=True,
@@ -122,6 +128,8 @@ def upload_analytics_reports():
             "created_at": report.created_at.isoformat(),
             "installation_id": str(report.installation_id.value),
             "mathesar_version": report.mathesar_version,
+            "postgres_version": report.postgres_version,
+            "postgres_deprecated": report.postgres_deprecated,
             "user_count": report.user_count,
             "active_user_count": report.active_user_count,
             "sso_connected_user_count": report.sso_connected_user_count,

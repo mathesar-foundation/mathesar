@@ -202,7 +202,20 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # TODO: Add to documentation that database keys should not be than 128 characters.
 
-DATABASES = {}
+# Database
+# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "mathesar",          # database name
+        "USER": "mathesar_user",     # database user
+        "PASSWORD": "your_password_here",  # password you set for the user
+        "HOST": "localhost",         # or your DB server hostname
+        "PORT": "5432",              # default PostgreSQL port
+    }
+}
+
 POSTGRES_DB = os.environ.get('POSTGRES_DB', default=None)
 POSTGRES_USER = os.environ.get('POSTGRES_USER', default=None)
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default=None)

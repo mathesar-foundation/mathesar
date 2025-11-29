@@ -12,7 +12,11 @@ class AnalyticsReport(BaseModel):
     installation_id = models.ForeignKey(
         'InstallationID', default=1, on_delete=models.CASCADE
     )
-    mathesar_version = models.CharField()
+    mathesar_version = models.CharField(max_length=50)
+
+    postgres_version = models.CharField(max_length=20, null=True, blank=True)
+    postgres_deprecated = models.BooleanField(default=False)
+
     user_count = models.PositiveIntegerField(null=True, blank=True)
     active_user_count = models.PositiveIntegerField(null=True, blank=True)
     sso_connected_user_count = models.PositiveIntegerField(null=True, blank=True)
