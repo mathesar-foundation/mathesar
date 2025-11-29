@@ -68,7 +68,19 @@
         $_('are_you_sure_to_proceed'),
       ],
       onProceed: () => recordsData.deleteSelected(selectedRowIds),
-      onError: (e) => toast.fromError(e),
+      onError: (e) => {
+  if (e?.error?.code === -30087 || e?.error?.message?.includes("ForeignKeyViolation")) 
+  {                                            // This is the FK violation error
+    toast.error({
+      title: $_('cannot_delete_due_to_fk'),
+      message: $_('record_is_referenced_by_other_table'),
+    });
+  } else 
+  {
+    toast.fromError(e);                        // fallback
+  }
+},
+
       onSuccess: (count) => {
         toast.success({
           title: $_('count_records_deleted_successfully', {
