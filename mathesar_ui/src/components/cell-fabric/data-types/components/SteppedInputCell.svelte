@@ -37,6 +37,10 @@
   let isEditMode = false;
   let lastSavedValue: Value | undefined | null = undefined;
 
+  $: if (!isEditMode) {
+    lastSavedValue = value;
+  }
+
   $: formattedValue = formatValue?.(value) ?? value;
   $: matchParts = (() => {
     if (
@@ -129,6 +133,7 @@
     switch (e.key) {
       case 'Escape':
         revertValue();
+        resetEditMode();
         break;
       case 'Enter':
       case 'Tab':

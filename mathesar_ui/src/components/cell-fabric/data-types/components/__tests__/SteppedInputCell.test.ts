@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 import SteppedInputCell from '../SteppedInputCell.svelte';
 
@@ -60,5 +61,33 @@ describe('StepperInputCell', () => {
     const cellContent = container.querySelector('.content');
     expect(cellContent).not.toBeNull();
     expect(cellContent).toHaveTextContent('DEFAULT');
+  });
+
+  test('syncs lastSavedValue with value prop updates when not in edit mode (Bug A)', async () => {
+    const { component, container } = render(SteppedInputCell, {
+      props: {
+        ...requiredProps,
+        value: 'Initial',
+      },
+    });
+
+    // Simulate store update (e.g. soft refresh)
+    component.$set({ value: 'Updated' });
+    await tick();
+
+    // Enter edit mode
+    const cellWrapper = container.querySelector('.cell-wrapper');
+    if (cellWrapper) {
+      await fireEvent.dblClick(cellWrapper);
+
+      // Simulate editing (though we just want to check revert value)
+      // Press Escape to revert
+      await fireEvent.keyDown(cellWrapper, { key: 'Escape' });
+
+      // Check if value reverted to 'Updated'
+      await tick();
+      const content = container.querySelector('.content');
+      expect(content).toHaveTextContent('Updated');
+    }
   });
 });
