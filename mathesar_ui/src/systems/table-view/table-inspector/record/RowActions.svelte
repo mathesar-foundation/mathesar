@@ -70,16 +70,19 @@
       onProceed: () => recordsData.deleteSelected(selectedRowIds),
       onError: (e: unknown) => {
         const err = e as { error?: { code?: number; message?: string } };
-        if (err?.error?.code === -30087 || err?.error?.message?.includes('ForeignKeyViolation')) {
-    // handle the FK violation
-         toast.error({
-           title: $_('cannot_delete_due_to_fk'),
-           message: $_('record_is_referenced_by_other_table'),
-         });
-      } else {
-        toast.fromError(e); // fallback
-      }
-   },
+        if (
+          err?.error?.code === -30087 ||
+          err?.error?.message?.includes('ForeignKeyViolation')
+        ) {
+          // handle the FK violation
+          toast.error({
+            title: $_('cannot_delete_due_to_fk'),
+            message: $_('record_is_referenced_by_other_table'),
+          });
+        } else {
+          toast.fromError(e); // fallback
+        }
+      },
 
       onSuccess: (count) => {
         toast.success({
