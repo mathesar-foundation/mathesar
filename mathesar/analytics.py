@@ -28,8 +28,8 @@ from mathesar.models import (
     InstallationID,
     User,
 )
-from mathesar.utils.database import get_postgres_version, is_deprecated_postgres
 
+from mathesar.utils.database import get_postgres_version_info
 
 ANALYTICS_DONE = "analytics_done"
 CACHE_TIMEOUT = 1800  # seconds
@@ -49,11 +49,11 @@ def wire_analytics(f):
 
 def run_analytics():
     if (
-            InstallationID.objects.first() is not None
-            and not AnalyticsReport.objects.filter(
-                created_at__gte=timezone.now()
-                - timezone.timedelta(days=ANALYTICS_FREQUENCY)
-            )
+        InstallationID.objects.first() is not None
+        and not AnalyticsReport.objects.filter(
+            created_at__gte=timezone.now()
+            - timezone.timedelta(days=ANALYTICS_FREQUENCY)
+        )
     ):
         save_analytics_report()
         upload_analytics_reports()
@@ -78,6 +78,7 @@ def save_analytics_report():
         analytics_report = AnalyticsReport(**raw_analytics_report)
         analytics_report.save()
 
+
 def prepare_analytics_report():
     installation_id = InstallationID.objects.first()
     connected_database_count = 0
@@ -94,14 +95,15 @@ def prepare_analytics_report():
         except Exception:
             print(f"Couldn't retrieve object counts for {d.name}")
 
-    postgres_version = get_postgres_version()
-    postgres_deprecated = is_deprecated_postgres(postgres_version)
+    # ✅ Use the new helper
+    version_info = get_postgres_version_info()
 
     return dict(
         installation_id=installation_id,
         mathesar_version=__version__,
-        postgres_version=postgres_version,
-        postgres_deprecated=postgres_deprecated,
+        postgres_version=version_info["version"],
+        postgres_deprecated=version_info["deprecated"],
+        postgres_deprecation_message=version_info["message"],  # <-- new field
         user_count=User.objects.filter(is_active=True).count(),
         active_user_count=User.objects.filter(
             is_active=True,
@@ -130,6 +132,7 @@ def upload_analytics_reports():
             "mathesar_version": report.mathesar_version,
             "postgres_version": report.postgres_version,
             "postgres_deprecated": report.postgres_deprecated,
+            "postgres_deprecation_message": report.postgres_deprecation_message,  # <-- new field
             "user_count": report.user_count,
             "active_user_count": report.active_user_count,
             "sso_connected_user_count": report.sso_connected_user_count,
@@ -151,11 +154,9 @@ def upload_analytics_reports():
 def delete_stale_reports():
     AnalyticsReport.objects.filter(
         Q(
-            # Delete uploaded analytics objects older than 2 days
             uploaded=True,
             created_at__lte=timezone.now() - timezone.timedelta(days=2)
         ) | Q(
-            # Delete analytics reports after a time regardless of upload status
             updated_at__lte=timezone.now()
             - timezone.timedelta(days=ANALYTICS_REPORT_MAX_AGE)
         )
@@ -172,13 +173,9 @@ def upload_initial_report():
 
 def upload_feedback_message(message):
     if message is None:
-        # No point in proceeding without a message.
         return
     installation_id_obj = InstallationID.objects.first()
-    if installation_id_obj is not None:
-        installation_id = str(installation_id_obj.value)
-    else:
-        installation_id = None
+    installation_id = str(installation_id_obj.value) if installation_id_obj else None
     requests.post(
         settings.MATHESAR_FEEDBACK_URL,
         json={

@@ -380,3 +380,5 @@ LANGUAGE_COOKIE_NAME = 'display_language'
 FALLBACK_LANGUAGE = 'en'
 
 SALT_KEY = SECRET_KEY
+ENCRYPTED_FIELDS_KEYDIR = os.path.join(BASE_DIR, "keys")
+

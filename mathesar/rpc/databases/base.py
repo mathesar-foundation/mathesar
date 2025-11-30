@@ -6,6 +6,10 @@ from db.databases import get_database, drop_database
 from mathesar.models.base import Database
 from mathesar.rpc.utils import connect
 from mathesar.rpc.decorators import mathesar_rpc_method
+from mathesar.utils.database_warnings import (
+    get_database_deprecation_warnings,
+    get_all_database_deprecation_warnings
+)
 
 
 class DatabaseInfo(TypedDict):
@@ -85,3 +89,32 @@ def upgrade_sql(
     """
     database = Database.objects.get(id=database_id)
     database.install_sql(username=username, password=password)
+
+
+@mathesar_rpc_method(name="databases.get_deprecation_warnings", auth="login")
+def get_deprecation_warnings(*, database_id: int, **kwargs) -> list:
+    """
+    Get deprecation warnings for a specific database.
+
+    Args:
+        database_id: The Django id of the database.
+
+    Returns:
+        List of deprecation warnings for the database.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    warnings = get_database_deprecation_warnings(database_id, user)
+    return [dict(warning) for warning in warnings]
+
+
+@mathesar_rpc_method(name="databases.get_all_deprecation_warnings", auth="login")
+def get_all_deprecation_warnings(**kwargs) -> list:
+    """
+    Get all deprecation warnings across all databases the user has access to.
+
+    Returns:
+        List of all deprecation warnings for the user's databases.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    warnings = get_all_database_deprecation_warnings(user)
+    return [dict(warning) for warning in warnings]

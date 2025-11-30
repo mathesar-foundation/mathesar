@@ -3,7 +3,9 @@ import os
 from django.conf import settings
 from django.db import models
 from django.contrib.sessions.models import Session
-from encrypted_fields.fields import EncryptedCharField, EncryptedJSONField
+from encrypted_fields.fields import EncryptedCharField
+from mathesar.fields import EncryptedJSONField
+
 
 from db.sql.install import uninstall, install
 from db.analytics import get_object_counts
@@ -404,3 +406,4 @@ class DownloadLink(BaseModel):
     uri = models.CharField(max_length=50)  # should not contain sensitive info
     thumbnail = models.JSONField(blank=True, default=dict)
     fsspec_kwargs = EncryptedJSONField(blank=True, default=dict)
+

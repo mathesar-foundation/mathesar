@@ -17,6 +17,8 @@ class AnalyticsReport(BaseModel):
     postgres_version = models.CharField(max_length=20, null=True, blank=True)
     postgres_deprecated = models.BooleanField(default=False)
 
+    postgres_deprecation_message = models.TextField(null=True, blank=True)
+
     user_count = models.PositiveIntegerField(null=True, blank=True)
     active_user_count = models.PositiveIntegerField(null=True, blank=True)
     sso_connected_user_count = models.PositiveIntegerField(null=True, blank=True)
