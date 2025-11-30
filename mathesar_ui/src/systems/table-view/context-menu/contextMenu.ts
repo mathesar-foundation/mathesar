@@ -9,6 +9,7 @@ import {
   subMenu,
 } from '@mathesar/component-library';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
+import type { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard/SheetClipboardHandler';
 import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { ImperativeFilterController } from '@mathesar/pages/table/ImperativeFilterController';
@@ -17,12 +18,16 @@ import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
+import { copyCells } from './entries/copyCells';
+import { deleteColumn } from './entries/deleteColumn';
 import { deleteRecords } from './entries/deleteRecords';
 import { duplicateRecord } from './entries/duplicateRecord';
 import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
 import { openTable } from './entries/openTable';
+import { pasteCells } from './entries/pasteCells';
+import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
 import { viewRowRecord } from './entries/viewRowRecord';
@@ -34,6 +39,8 @@ export function openTableCellContextMenu({
   modalRecordView,
   tabularData,
   imperativeFilterController,
+  clipboardHandler,
+  beginSelectingCellRange,
 }: {
   targetCell: SheetCellDetails;
   position: ClientPosition;
@@ -41,6 +48,8 @@ export function openTableCellContextMenu({
   modalRecordView: ModalController<RecordStore> | undefined;
   tabularData: TabularData;
   imperativeFilterController: ImperativeFilterController | undefined;
+  clipboardHandler: SheetClipboardHandler;
+  beginSelectingCellRange: () => void;
 }): 'opened' | 'empty' {
   const { selection } = tabularData;
 
@@ -74,6 +83,8 @@ export function openTableCellContextMenu({
     yield* modifyGrouping({ tabularData, column });
 
     yield menuSection(...openTable({ column }));
+
+    yield* deleteColumn({ tabularData, column });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -91,7 +102,15 @@ export function openTableCellContextMenu({
   }
 
   function* getEntriesForMultipleCells(cellIds: string[]) {
+    yield* copyCells({
+      clipboardHandler,
+    });
+    yield* pasteCells({
+      selection,
+      clipboardHandler,
+    });
     yield* setNull({ tabularData, cellIds });
+    yield* selectCellRange({ beginSelectingCellRange });
   }
 
   function* getEntriesForOneCell(cellId: string) {

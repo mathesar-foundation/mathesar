@@ -5,6 +5,8 @@ import type { BreadcrumbItem, BreadcrumbItemDatabase } from './breadcrumbTypes';
 
 const contextKey = Symbol('breadcrumb items store');
 
+export const BREADCRUMB_SELECTOR_ROW_CLASS = 'breadcrumb-selector-row';
+
 export function breadcrumbItemIsDatabase(
   item: BreadcrumbItem,
 ): item is BreadcrumbItemDatabase {

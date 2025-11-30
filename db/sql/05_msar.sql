@@ -390,14 +390,14 @@ CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_id integer) RETURNS text AS $$/*
 Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
-More precisely, this function returns the name of attributes of any relation appearing in the
+More precisely, this function returns the name of attributes that are not dropped, for any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function).
 
 Args:
   rel_id:  The OID of the relation.
   col_id:  The attnum of the column in the relation.
 */
-SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id;
+SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id AND NOT attisdropped;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -405,7 +405,7 @@ CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_name text) RETURNS text AS $$/*
 Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
-More precisely, this function returns the unquoted name of attributes of any relation appearing in the
+More precisely, this function returns the unquoted name of attributes that are not dropped, for any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function). If the given
 col_name is not in the relation, we return null.
 
@@ -416,7 +416,7 @@ Args:
   rel_id:  The OID of the relation.
   col_name:  The unquoted name of the column in the relation.
 */
-SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name;
+SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name AND NOT attisdropped;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -1037,7 +1037,7 @@ SELECT
   msar.list_table_privileges_for_current_role(oid) AS current_role_priv,
   pg_catalog.pg_has_role(relowner, 'USAGE') AS current_role_owns
 FROM pg_catalog.pg_class
-WHERE relkind = 'r';
+WHERE relkind = 'r' OR relkind = 'v' OR relkind = 'm';
 $$ LANGUAGE SQL STABLE;
 
 
@@ -3817,6 +3817,8 @@ CREATE OR REPLACE FUNCTION
 msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$/*
 Alter columns of the given table in bulk, returning the IDs of the columns so altered.
 
+Exception is raised when mathesar ID column is tried to be renamed.
+
 Args:
   tab_id: The OID of the table whose columns we'll alter.
   col_alters: a JSONB describing the alterations to make.
@@ -3863,8 +3865,13 @@ BEGIN
     FROM jsonb_array_elements(col_alters) AS x(col_alter_obj)
       INNER JOIN pg_catalog.pg_attribute AS pga ON pga.attnum=(x.col_alter_obj ->> 'attnum')::smallint AND pga.attrelid=tab_id
       LEFT JOIN pg_catalog.pg_attrdef AS pgat ON pgat.adnum=(x.col_alter_obj ->> 'attnum')::smallint AND pgat.adrelid=tab_id
-    WHERE NOT msar.is_mathesar_id_column(tab_id, (x.col_alter_obj ->> 'attnum')::integer)
   LOOP
+    IF col.new_name IS NOT NULL AND msar.is_mathesar_id_column(tab_id, col.attnum) THEN
+      RAISE EXCEPTION USING
+        MESSAGE = 'Mathesar ID column cannot be renamed',
+        ERRCODE = 'check_violation';
+    END IF;
+
     PERFORM msar.set_not_null(tab_id, col.attnum, col.not_null);
     PERFORM msar.rename_column(tab_id, col.attnum, col.new_name);
 

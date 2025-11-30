@@ -17,6 +17,7 @@
     truncate?: boolean;
     bold?: boolean;
     cssVariables?: Record<string, string>;
+    hideIcon?: boolean;
   }
 
   /** TODO: Update component and prop names */
@@ -28,6 +29,7 @@
   export let truncate = true;
   export let bold = false;
   export let cssVariables: $$Props['cssVariables'] = undefined;
+  export let hideIcon = false;
 
   $: style = cssVariables
     ? makeStyleStringFromCssVariables(cssVariables)
@@ -41,6 +43,7 @@
     on:click
     class:boxed={iconHasBox}
     class:bold
+    class:hide-icon={hideIcon}
     {style}
   >
     <span class="icon" style="white-space: nowrap">
@@ -85,6 +88,9 @@
   }
   .name-with-icon.boxed .icon > :global(svg) {
     color: var(--color-fg-inverted);
+  }
+  .name-with-icon.hide-icon .icon {
+    display: none;
   }
   .name {
     color: var(--name-color, currentcolor);
