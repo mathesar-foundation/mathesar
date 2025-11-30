@@ -61,7 +61,6 @@
   "cancel": "キャンセル",
   "cancel_upload": "アップロードをキャンセル",
   "cannot_add_field_column_is_already_added": "この列はすでにフォームに追加されています",
-  "cannot_add_field_column_type_file": "フォームでファイルのアップロードがまだサポートされていないため、この列をフォームに追加することはできません。",
   "cannot_add_field_column_value_is_dynamic_pk": "この列には主キー制約と動的なデフォルト値があるため、フォームに追加できません。",
   "cannot_move_linked_column_to_linked_table": "リンクしているカラム「{columnName}」をリンクされたテーブル「{tableName}」に移動できません。",
   "cell": "セル",

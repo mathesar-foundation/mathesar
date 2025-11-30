@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { get } from 'svelte/store';
 
   import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
@@ -41,6 +42,7 @@
     lightboxContext,
   } from './components/file-attachments/lightbox/LightboxController';
   import { contextMenuContext } from './contexts/contextMenuContext';
+  import { observeDeviceInfo } from './packages/svelte-device-info';
 
   export let commonData: CommonData;
 
@@ -118,6 +120,8 @@
     void clipboardHandler.handlePaste(e);
     e.preventDefault();
   }
+
+  onMount(observeDeviceInfo);
 </script>
 
 <svelte:body on:copy={handleCopy} on:paste={handlePaste} />

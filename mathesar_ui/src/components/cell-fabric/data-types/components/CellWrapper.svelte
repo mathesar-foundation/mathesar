@@ -116,6 +116,7 @@
     min-height: var(--cell-height, var(--default-cell-height));
     display: flex;
     flex-direction: column;
+    border-radius: 2px;
 
     &.has-padding {
       padding: var(--cell-padding);
@@ -123,15 +124,6 @@
 
     &.h-align-right {
       text-align: right;
-    }
-
-    &[data-active-cell] {
-      box-shadow: 0 0 0 2px var(--color-border-raised-3);
-      border-radius: 2px;
-
-      &:focus {
-        box-shadow: 0 0 0 3px var(--color-selection-strong-2);
-      }
     }
 
     :global(.input-element) {

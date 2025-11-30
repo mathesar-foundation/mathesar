@@ -16,7 +16,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import TableName from '@mathesar/components/TableName.svelte';
+  import TableLink from '@mathesar/components/TableLink.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
@@ -83,7 +83,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
       <div slot="subText" class="table-name">
         <RichText text={$_('record_in_table')} let:slotName>
           {#if slotName === 'tableName'}
-            <TableName {table} truncate={false} />
+            <TableLink {table} truncate={false} />
           {/if}
         </RichText>
       </div>

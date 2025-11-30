@@ -146,7 +146,7 @@ Notes:
 
 ## CSS
 
-### CSS units
+### Pixel units
 
 - Don't use `px` — use `rem` or `em` instead.
 
@@ -155,6 +155,10 @@ Notes:
   - when setting the root `font-size`
 
 Note: some of our older code still does not conform to this standard.
+
+### Viewport units
+
+- Don't use `vh` or `vw` — use `svh` and `svw` instead. See [#4752](https://github.com/mathesar-foundation/mathesar/issues/4752) to understand why.
 
 ### Component spacing and layout
 
