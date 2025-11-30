@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import DeprecationWarningBox from './message-boxes/DeprecationWarningBox.svelte';
-  import { 
-    postgresDeprecationWarnings, 
-    deprecationWarnings 
+
+  import {
+    deprecationWarnings,
+    postgresDeprecationWarnings,
   } from '../stores/deprecationWarnings';
+
+  import DeprecationWarningBox from './message-boxes/DeprecationWarningBox.svelte';
 
   onMount(async () => {
     await deprecationWarnings.refresh();

@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import { iconWarning } from '@mathesar-component-library';
+
   import MessageBox from './MessageBox.svelte';
 
   export let databaseName: string;
@@ -10,12 +13,16 @@
 <div class="deprecation-warning-box">
   <MessageBox icon={iconWarning}>
     <div class="warning-content">
-      <p class="warning-title">⚠️ Deprecation Notice</p>
+      <p class="warning-title">{$_('deprecation_warning_title')}</p>
       <p class="warning-text">
-        Your connected database <strong>{databaseName}</strong> is running
-        PostgreSQL {postgresVersion}, which {warningMessage.toLowerCase()}.
+        {$_('deprecation_warning_message', {
+          values: { databaseName, postgresVersion },
+        })}
+        {warningMessage.toLowerCase()}.
       </p>
-      <p class="warning-action">Please upgrade to PostgreSQL 14 or higher to ensure continued compatibility and support.</p>
+      <p class="warning-action">
+        {$_('deprecation_warning_action')}
+      </p>
     </div>
   </MessageBox>
 </div>
