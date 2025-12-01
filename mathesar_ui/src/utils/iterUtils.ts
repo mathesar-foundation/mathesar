@@ -71,9 +71,8 @@ export function takeFirstAndOnly<T>(iterable: Iterable<T>): T | undefined {
  * 2. const [known, unknown] = partition(rpcErrors, (err) => KnownRPCErrors.has(err.code));
  * Both known and unknown need to be of the type Iterable<RpcError>
  */
-type Remaining<Base, Filtered> = Exclude<Base, Filtered> extends never
-  ? Base
-  : Exclude<Base, Filtered>;
+type Remaining<Base, Filtered> =
+  Exclude<Base, Filtered> extends never ? Base : Exclude<Base, Filtered>;
 
 export function partition<T, U extends T>(
   iterable: Iterable<T>,

@@ -49,7 +49,7 @@
   $: form = makeForm(formFields, [
     comboMustBeEqual([password, confirmPassword], $_('passwords_do_not_match')),
   ]);
-  $: login, password.reset(), confirmPassword.reset();
+  $: (login, password.reset(), confirmPassword.reset());
 
   async function createRole() {
     if (login) {

@@ -3,14 +3,12 @@ import { RpcRequest } from './requests';
 type MethodTypeContainer<Params, Result> = [Params, Result];
 type MethodTree = { [key: string]: MethodTreeNode };
 type MethodTreeNode = MethodTree | MethodTypeContainer<unknown, unknown>;
-type Api<Node extends MethodTreeNode> = Node extends MethodTypeContainer<
-  infer Params,
-  infer Result
->
-  ? (params: Params) => RpcRequest<Result>
-  : Node extends MethodTree
-    ? { [MethodName in keyof Node]: Api<Node[MethodName]> }
-    : never;
+type Api<Node extends MethodTreeNode> =
+  Node extends MethodTypeContainer<infer Params, infer Result>
+    ? (params: Params) => RpcRequest<Result>
+    : Node extends MethodTree
+      ? { [MethodName in keyof Node]: Api<Node[MethodName]> }
+      : never;
 
 function nodeIsMethod(
   node: MethodTreeNode,

@@ -49,9 +49,8 @@ function valueIsFilled<T>(v: T | undefined | null): v is T {
   );
 }
 
-type FilledFieldValue<F> = FieldValue<F> extends infer T | undefined | null
-  ? T
-  : never;
+type FilledFieldValue<F> =
+  FieldValue<F> extends infer T | undefined | null ? T : never;
 
 export function required(
   msg = get(_)('value_cannot_be_empty'),

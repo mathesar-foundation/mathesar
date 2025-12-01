@@ -49,11 +49,11 @@
     comboMustBeEqual([password, confirmPassword], $_('passwords_do_not_match')),
   ]);
 
-  $: userId,
+  $: (userId,
     (() => {
       showChangePasswordForm = false;
       form.reset();
-    })();
+    })());
 
   async function updatePassword() {
     const formValues = $form.values;
