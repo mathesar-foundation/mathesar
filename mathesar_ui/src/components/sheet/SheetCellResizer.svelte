@@ -1,7 +1,9 @@
 <script lang="ts">
   import { tick } from 'svelte';
+
   import { MAX_COLUMN_WIDTH_PX, MIN_COLUMN_WIDTH_PX } from '@mathesar/geometry';
   import { slider } from '@mathesar-component-library';
+
   import { getSheetContext } from './utils';
 
   type SheetColumnIdentifierKey = $$Generic;
@@ -26,9 +28,7 @@
 
   function twoAnimationFrames(): Promise<void> {
     return new Promise((resolve) => {
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => resolve())
-      );
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
     });
   }
 </script>
