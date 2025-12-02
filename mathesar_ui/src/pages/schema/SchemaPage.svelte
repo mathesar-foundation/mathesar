@@ -1,6 +1,7 @@
 <script lang="ts">
   import { map } from 'iter-tools';
   import { _ } from 'svelte-i18n';
+  import ERDiagram from '@mathesar/systems/er-diagram/ERDiagram.svelte';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { SchemaRouteContext } from '@mathesar/contexts/SchemaRouteContext';
@@ -81,6 +82,11 @@
     {explorationsRequestStatus}
     onCreateEmptyTable={() => createTableModal.open()}
   />
+
+  
+  <ERDiagram {tablesMap}>
+  </ERDiagram>
+
 </LayoutWithHeader>
 
 <AddEditSchemaModal
