@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { MAX_COLUMN_WIDTH_PX, MIN_COLUMN_WIDTH_PX } from '@mathesar/geometry';
   import { slider } from '@mathesar-component-library';
-  import { tick } from 'svelte';
   import { getSheetContext } from './utils';
 
   type SheetColumnIdentifierKey = $$Generic;
@@ -26,7 +26,9 @@
 
   function twoAnimationFrames(): Promise<void> {
     return new Promise((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => resolve())
+      );
     });
   }
 </script>
@@ -37,6 +39,7 @@
   class:is-resizing={!!startingWidth}
   use:slider={{
     getStartingValue: () => api.getColumnWidth(columnIdentifierKey) ?? 0,
+
     onMove: (width) => {
       api.setColumnWidth(columnIdentifierKey, width);
       for (const key of relatedColumnKeys) {
@@ -44,23 +47,28 @@
       }
       onResize(width);
     },
+
     onStart: (startingValue) => {
       startingWidth = startingValue;
     },
 
-    onStop: async (width) => {
-      if (width !== startingWidth) {
-        try {
-          await afterResize(width);
-        } catch (e) {
-          console.error('afterResize failed:', e);
+    onStop: (width) => {
+      void (async () => {
+        if (width !== startingWidth) {
+          try {
+            await afterResize(width);
+          } catch (e) {
+            console.error('afterResize failed:', e);
+          }
+
+          await tick();
+          await twoAnimationFrames();
         }
 
-        await tick();
-        await twoAnimationFrames();
-      }
-      startingWidth = undefined;
+        startingWidth = undefined;
+      })();
     },
+
     min: minColumnWidth,
     max: maxColumnWidth,
   }}

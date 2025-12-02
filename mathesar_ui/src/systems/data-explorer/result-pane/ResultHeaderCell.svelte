@@ -16,6 +16,16 @@
 
   $: ({ runState } = queryRunner);
   $: columnRunState = $runState?.state;
+
+  function handleAfterResize(width: number): Promise<void> {
+    setColumnWidth(width);
+    return Promise.resolve();
+  }
+
+  function handleReset(): Promise<void> {
+    setColumnWidth(null);
+    return Promise.resolve();
+  }
 </script>
 
 <SheetColumnHeaderCell columnIdentifierKey={processedQueryColumn.id}>
@@ -23,10 +33,6 @@
     appearance="plain"
     class="column-name-wrapper {isSelected ? 'selected' : ''}"
   >
-    <!--
-      TODO: Use a separate prop to identify column that isn't fetched yet
-      instead of type:unknown
-    -->
     <ColumnName
       isLoading={columnRunState === 'processing' &&
         processedQueryColumn.column.type === 'unknown'}
@@ -40,7 +46,7 @@
   </Button>
   <SheetCellResizer
     columnIdentifierKey={processedQueryColumn.id}
-    afterResize={(width) => setColumnWidth(width)}
-    onReset={() => setColumnWidth(null)}
+    afterResize={handleAfterResize}
+    onReset={handleReset}
   />
 </SheetColumnHeaderCell>

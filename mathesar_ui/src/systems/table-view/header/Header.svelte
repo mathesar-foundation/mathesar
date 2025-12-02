@@ -97,7 +97,7 @@
     newColumnOrder = [];
   }
 
-  //Multi-column or single-column resize with optimistic local update
+  // Multi-column or single-column resize with optimistic local update
   async function handleResize(
     columnId: number,
     newWidth: number | null,
@@ -106,7 +106,6 @@
     const columnIsSelected = selected.has(String(columnId));
 
     if (columnIsSelected && selected.size > 1) {
-      // Local optimistic update for all
       for (const colId of selected) {
         const numeric = Number(colId);
         const c = $processedColumns.get(numeric);
@@ -117,7 +116,6 @@
         }
       }
 
-      // Persist
       try {
         const promises: Promise<void>[] = [];
         for (const colId of selected) {
@@ -133,10 +131,9 @@
         await Promise.all(promises);
       } catch (e) {
         console.error('Failed to persist multi-column width update:', e);
-        await columnsDataStore.fetch(); // revert
+        await columnsDataStore.fetch();
       }
     } else {
-      // Single column
       const c = $processedColumns.get(columnId);
       if (c) {
         columnsDataStore.applyLocalDisplayOptions(c.id, {
@@ -184,6 +181,7 @@
           <HeaderCell {processedColumn} {isSelected} />
         </Droppable>
       </Draggable>
+
       <SheetCellResizer
         columnIdentifierKey={columnId}
         relatedColumnKeys={isSelected && $selection.columnIds.size > 1
