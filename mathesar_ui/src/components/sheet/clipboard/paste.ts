@@ -2,12 +2,19 @@ import { arrayFrom, cycle, execPipe, first, map, take, zip } from 'iter-tools';
 import { type Writable, get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { type RecordRow, getRowSelectionId } from '@mathesar/stores/table-data';
 import type {
   RowAdditionRecipe,
   RowModificationRecipe,
 } from '@mathesar/stores/table-data/records';
+import {
+  DateTimeFormatter,
+  DateTimeSpecification,
+} from '@mathesar/utils/date-time';
 import { startingFrom } from '@mathesar/utils/iterUtils';
 import {
   type ImmutableSet,
@@ -122,7 +129,52 @@ function prepareStructuredCellValue(
   if (cell.type === 'tsv') {
     // Since TSV doesn't have a mechanism to faithfully represent NULLs, we
     // assume that empty strings are NULLs.
-    if (cell.value === '' && column.nullable) return null;
+    if (cell.value === '' && column.nullable) {
+      return null;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let type: any;
+
+    // FIX: Using curly braces to satisfy linter rule 'curly'
+    if (column.type === 'date') {
+      type = 'date';
+    } else if (column.type === 'timestamp without time zone') {
+      type = 'timestamp';
+    } else if (column.type === 'timestamp with time zone') {
+      type = 'timestampWithTZ';
+    } else if (column.type === 'time without time zone') {
+      type = 'time';
+    } else if (column.type === 'time with time zone') {
+      type = 'timeWithTZ';
+    }
+
+    if (type) {
+      const dateFormat = getColumnMetadataValue(column, 'date_format');
+      const timeFormat = getColumnMetadataValue(column, 'time_format');
+      const specification = new DateTimeSpecification({
+        type,
+        dateFormat,
+        timeFormat,
+      });
+      const formatter = new DateTimeFormatter(specification);
+
+      // FIX: Suppress assignment error for parsed variable
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const parsed = formatter.parse(cell.value);
+
+      // If parsing returns a string, use it.
+      if (typeof parsed === 'string' && parsed) {
+        return parsed;
+      }
+
+      if (typeof parsed === 'object' && parsed !== null && 'value' in parsed) {
+        // FIX: Suppress return and member-access errors for extracting the value property
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+        return parsed.value;
+      }
+      // END FIX
+    }
 
     return cell.value;
   }
@@ -130,10 +182,14 @@ function prepareStructuredCellValue(
   if (cell.type === 'mathesar') {
     // We need to check for NULL first because the "formatted" value of a copied
     // null cell will be an empty string, which we don't want to return.
-    if (cell.value.raw === null) return null;
+    if (cell.value.raw === null) {
+      return null;
+    }
 
     // If we're pasting into a text column, use the formatted value.
-    if (column.type === 'text') return cell.value.formatted;
+    if (column.type === 'text') {
+      return cell.value.formatted;
+    }
 
     // Otherwise use the raw value
     return cell.value.raw;
@@ -168,7 +224,9 @@ async function updateViaPaste({
   const targetRowCount = Math.max(initialSelection.rowIds.size, payload.length);
   const sourceRows = [...take(targetRowCount, cycle(payload))];
   const firstSourceRow = first(sourceRows);
-  if (!firstSourceRow) throw new Error(get(_)('paste_error_no_rows'));
+  if (!firstSourceRow) {
+    throw new Error(get(_)('paste_error_no_rows'));
+  }
 
   const sourceColumnCount = firstSourceRow.length;
   const sheetColumns = context.getSheetColumns();
@@ -223,7 +281,9 @@ async function updateViaPaste({
     const confirmed = await context.confirm(
       get(_)('paste_confirmation', { values: { count: totalCellCount } }),
     );
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
   }
 
   const { rowIds, columnIds } = await context.bulkDml(
@@ -249,7 +309,9 @@ export async function paste(
   const payload = getPayload(clipboardData);
 
   const operation = get(selectionStore).pasteOperation;
-  if (operation === 'none') return;
+  if (operation === 'none') {
+    return;
+  }
   if (operation === 'insert') {
     await updateViaPaste({ payload, selectionStore, context, confirm: false });
     return;
