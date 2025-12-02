@@ -96,31 +96,63 @@
     selectedColumnIdsOrdered = [];
     newColumnOrder = [];
   }
-  function handleResize(columnId: number, newWidth: number | null) {
-    const selected = $selection.columnIds;
 
+  //Multi-column or single-column resize with optimistic local update
+  async function handleResize(
+    columnId: number,
+    newWidth: number | null,
+  ): Promise<void> {
+    const selected = $selection.columnIds;
     const columnIsSelected = selected.has(String(columnId));
 
     if (columnIsSelected && selected.size > 1) {
-      // Persist resize for all selected columns
+      // Local optimistic update for all
       for (const colId of selected) {
-        const c = $processedColumns.get(Number(colId));
+        const numeric = Number(colId);
+        const c = $processedColumns.get(numeric);
         if (c) {
-          void columnsDataStore.setDisplayOptions(c, {
+          columnsDataStore.applyLocalDisplayOptions(c.id, {
             display_width: newWidth,
           });
         }
       }
+
+      // Persist
+      try {
+        const promises: Promise<void>[] = [];
+        for (const colId of selected) {
+          const c = $processedColumns.get(Number(colId));
+          if (c) {
+            promises.push(
+              columnsDataStore.setDisplayOptions(c, {
+                display_width: newWidth,
+              }),
+            );
+          }
+        }
+        await Promise.all(promises);
+      } catch (e) {
+        console.error('Failed to persist multi-column width update:', e);
+        await columnsDataStore.fetch(); // revert
+      }
     } else {
-      // Persist resize for single column
+      // Single column
       const c = $processedColumns.get(columnId);
       if (c) {
-        void columnsDataStore.setDisplayOptions(c, { display_width: newWidth });
+        columnsDataStore.applyLocalDisplayOptions(c.id, {
+          display_width: newWidth,
+        });
+
+        try {
+          await columnsDataStore.setDisplayOptions(c, {
+            display_width: newWidth,
+          });
+        } catch (e) {
+          console.error('Failed to persist width update:', e);
+          await columnsDataStore.fetch();
+        }
       }
     }
-  }
-  function saveColumnWidth(column: ProcessedColumn, width: number | null) {
-    void columnsDataStore.setDisplayOptions(column, { display_width: width });
   }
 </script>
 

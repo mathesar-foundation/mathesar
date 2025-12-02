@@ -1,7 +1,7 @@
 <script lang="ts">
   import { MAX_COLUMN_WIDTH_PX, MIN_COLUMN_WIDTH_PX } from '@mathesar/geometry';
   import { slider } from '@mathesar-component-library';
-
+  import { tick } from 'svelte';
   import { getSheetContext } from './utils';
 
   type SheetColumnIdentifierKey = $$Generic;
@@ -13,7 +13,7 @@
   export let columnIdentifierKey: SheetColumnIdentifierKey;
   export let relatedColumnKeys: SheetColumnIdentifierKey[] = [];
   export let onResize: (width: number) => void = () => {};
-  export let afterResize: (width: number) => void = () => {};
+  export let afterResize: (width: number) => Promise<void> = async () => {};
 
   /**
    * Runs after the user double-clicks the resizer (to reset the column width).
@@ -23,6 +23,12 @@
   let startingWidth: number | undefined = undefined;
 
   $: ({ selectionInProgress } = stores);
+
+  function twoAnimationFrames(): Promise<void> {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+  }
 </script>
 
 <div
@@ -41,9 +47,17 @@
     onStart: (startingValue) => {
       startingWidth = startingValue;
     },
-    onStop: (width) => {
+
+    onStop: async (width) => {
       if (width !== startingWidth) {
-        afterResize(width);
+        try {
+          await afterResize(width);
+        } catch (e) {
+          console.error('afterResize failed:', e);
+        }
+
+        await tick();
+        await twoAnimationFrames();
       }
       startingWidth = undefined;
     },

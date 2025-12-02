@@ -161,6 +161,9 @@ export class ColumnsDataStore extends EventHandler<{
     await this.dispatch('columnPatched');
   }
 
+  /**
+   * Server-persisted update.
+   */
   async setDisplayOptions(
     column: Pick<RawColumnWithMetadata, 'id'>,
     displayOptions: ColumnMetadata | null,
@@ -179,6 +182,23 @@ export class ColumnsDataStore extends EventHandler<{
               ...c,
               metadata: { ...c.metadata, ...displayOptions },
             }
+          : c,
+      ),
+    );
+  }
+
+  /**
+   * Optimistic local update — no RPC.
+   * Fixes UI flashing when a sheet recalculates layout while RPC is pending.
+   */
+  applyLocalDisplayOptions(
+    columnId: RawColumnWithMetadata['id'],
+    displayOptions: ColumnMetadata | null,
+  ): void {
+    this.fetchedColumns.update((columns) =>
+      columns.map((c) =>
+        c.id === columnId
+          ? { ...c, metadata: { ...c.metadata, ...displayOptions } }
           : c,
       ),
     );
