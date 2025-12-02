@@ -20,11 +20,13 @@ import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
 import { getRowActions } from '../row-actions';
+import { copyCells } from './entries/copyCells';
 import { deleteColumn } from './entries/deleteColumn';
 import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
 import { openTable } from './entries/openTable';
+import { pasteCells } from './entries/pasteCells';
 import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
@@ -116,6 +118,13 @@ export function openTableCellContextMenu({
   }
 
   function* getEntriesForMultipleCells(cellIds: string[]) {
+    yield* copyCells({
+      clipboardHandler,
+    });
+    yield* pasteCells({
+      selection,
+      clipboardHandler,
+    });
     yield* setNull({ tabularData, cellIds });
     yield* selectCellRange({ beginSelectingCellRange });
   }
