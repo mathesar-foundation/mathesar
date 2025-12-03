@@ -1,6 +1,10 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table constraints.
 """
+
+from db.columns import get_column_info_for_table
+from mathesar.api.exceptions.database_exceptions.base_exceptions import IntegrityAPIException
+
 from typing import Optional, TypedDict, Union
 
 from modernrpc.core import REQUEST_KEY
@@ -129,7 +133,6 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
         con_info = get_constraints_for_table(table_oid, conn)
         return [ConstraintInfo.from_dict(con) for con in con_info]
 
-
 @mathesar_rpc_method(name="constraints.add", auth="login")
 def add(
     *,
@@ -148,10 +151,19 @@ def add(
     Returns:
         The oid(s) of all the constraints on the table.
     """
+
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return create_constraint(table_oid, constraint_def_list, conn)
 
+        valid_cols = {col["id"] for col in get_column_info_for_table(table_oid, conn)}
+
+        for constraint_def in constraint_def_list:
+            cols = constraint_def.get("columns", [])
+            for col in cols:
+                if col not in valid_cols:
+                    raise IntegrityAPIException(f"Invalid column id or attnum: {col}")
+
+        return create_constraint(table_oid, constraint_def_list, conn)
 
 @mathesar_rpc_method(name="constraints.delete", auth="login")
 def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -> str:
