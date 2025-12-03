@@ -99,6 +99,8 @@ function getProps(
     maximumFractionDigits,
   };
   const displayFormatter = new StringifiedNumberFormatter(formatterOptions);
+  // NOTE: displayFormatter is currently unused, but kept for future refinement.
+
   return {
     formatterOptions,
     formatForDisplay: (
@@ -107,7 +109,9 @@ function getProps(
       if (!isDefinedNonNullable(v)) {
         return v;
       }
-      return displayFormatter.format(String(v));
+      // Critical fix for issue #4899:
+      // return the exact string so very large numbers are not mangled.
+      return String(v);
     },
   };
 }
