@@ -17,4 +17,5 @@ CREATE DATABASE mathesar_testing;
 \ir 45_msar_type_casting.sql
 \ir 46_msar_type_inference.sql
 \ir 50_msar_permissions.sql
+\ir test_permissions_filtering.sql
 \ir test_sql_functions.sql

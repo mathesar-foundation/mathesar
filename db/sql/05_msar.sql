@@ -1083,7 +1083,16 @@ Args:
 */
 SELECT coalesce(jsonb_agg(table_data),'[]'::jsonb)
 FROM msar.table_info_table() AS table_data
-WHERE table_data.schema = sch_id;
+WHERE table_data.schema = sch_id
+AND (
+  jsonb_array_length(table_data.current_role_priv) > 0
+  OR
+  pg_has_role(current_user, (SELECT datdba FROM pg_catalog.pg_database WHERE datname = current_database()), 'MEMBER')
+  OR
+  pg_has_role(current_user, (SELECT nspowner FROM pg_catalog.pg_namespace WHERE oid = sch_id), 'MEMBER')
+  OR
+  has_schema_privilege(current_user, sch_id, 'CREATE')
+);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1178,7 +1187,14 @@ Each returned JSON object in the array will have the form:
 SELECT jsonb_agg(schema_data)
 FROM msar.schema_info_table() AS schema_data
 WHERE schema_data.name <> 'information_schema'
-AND schema_data.name NOT LIKE 'pg_%';
+AND schema_data.name NOT LIKE 'pg_%'
+AND (
+  jsonb_array_length(schema_data.current_role_priv) > 0
+  OR
+  pg_has_role(current_user, (SELECT datdba FROM pg_catalog.pg_database WHERE datname = current_database()), 'MEMBER')
+  OR
+  has_database_privilege(current_user, current_database(), 'CREATE')
+);
 $$ LANGUAGE SQL STABLE;
 
 
