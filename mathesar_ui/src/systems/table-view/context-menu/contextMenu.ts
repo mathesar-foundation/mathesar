@@ -60,7 +60,7 @@ export function openTableCellContextMenu({
       tabularData,
       modalRecordView,
     });
-    
+
     for (const action of actions) {
       if (action.href) {
         yield hyperlinkMenuEntry({
