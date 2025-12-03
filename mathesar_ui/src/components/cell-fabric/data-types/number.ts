@@ -99,7 +99,7 @@ function getProps(
     maximumFractionDigits,
   };
   const displayFormatter = new StringifiedNumberFormatter(formatterOptions);
-  // NOTE: displayFormatter is currently unused, but kept for future refinement.
+  // NOTE: displayFormatter is currently unused, but kept for possible future use.
 
   return {
     formatterOptions,

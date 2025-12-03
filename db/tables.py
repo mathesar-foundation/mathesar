@@ -34,30 +34,60 @@ def get_table_info(schema, conn):
 
 
 def list_joinable_tables(table_oid, conn, max_depth):
-    return db_conn.exec_msar_func(conn, 'get_joinable_tables', max_depth, table_oid).fetchone()[0]
+    return db_conn.exec_msar_func(
+        conn, 'get_joinable_tables', max_depth, table_oid
+    ).fetchone()[0]
 
 
 def get_preview(table_oid, column_list, conn, limit=20):
     """
-    Preview an imported table. Returning the records from the specified columns of the table.
+    Preview an imported table. Returning the records from the specified
+    columns of the table.
 
     Args:
         table_oid: Identity of the imported table in the user's database.
-        column_list: List of settings describing the casts to be applied to the columns.
+        column_list: List of settings describing the casts to be applied to
+            the columns.
         limit: The upper limit for the number of records to return.
 
-    Note that these casts are temporary and do not alter the data in the underlying table,
-    if you wish to alter these settings permanantly for the columns see tables/alter.py.
+    Note that these casts are temporary and do not alter the data in the
+    underlying table; if you wish to alter these settings permanently for
+    the columns see tables/alter.py.
     """
-    transformed_column_data = [_transform_column_alter_dict(col) for col in column_list]
-    return db_conn.exec_msar_func(
-        conn, 'get_preview', table_oid, json.dumps(transformed_column_data), limit
+    transformed_column_data = [
+        _transform_column_alter_dict(col) for col in column_list
+    ]
+    raw_result = db_conn.exec_msar_func(
+        conn,
+        'get_preview',
+        table_oid,
+        json.dumps(transformed_column_data),
+        limit,
     ).fetchone()[0]
+
+    # Ensure preview uses exact string representations so very large numbers
+    # do not get converted to scientific notation (e.g. 1.2345e+49).
+    if isinstance(raw_result, list):
+        result: list[dict] = []
+        for row in raw_result:
+            if isinstance(row, dict):
+                result.append(
+                    {
+                        key: None if value is None else str(value)
+                        for key, value in row.items()
+                    }
+                )
+            else:
+                result.append(row)
+        return result
+
+    return raw_result
 
 
 def alter_table_on_database(table_oid, table_data_dict, conn):
     """
-    Alter the name, description, or columns of a table, returning name of the altered table.
+    Alter the name, description, or columns of a table, returning name of
+    the altered table.
 
     Args:
         table_oid: The OID of the table to be altered.
@@ -83,7 +113,7 @@ def create_table_on_database(
     column_data_list=[],
     constraint_data_list=[],
     owner_oid=None,
-    comment=None
+    comment=None,
 ):
     """
     Creates a table with a default id column.
@@ -91,15 +121,15 @@ def create_table_on_database(
     Args:
         table_name: Name of the table to be created.
         schema_oid: The OID of the schema where the table will be created.
-        pk_column: A dict describing the name and type of the primary key. (optional)
-        columns: The columns dict for the new table, in order. (optional)
-        constraints: The constraints dict for the new table. (optional)
-        owner_oid: The OID of the role who will own the new table.(optional)
-        comment: The comment for the new table. (optional)
+        pk_column: A dict describing the name and type of the primary key.
+        columns: The columns dict for the new table, in order.
+        constraints: The constraints dict for the new table.
+        owner_oid: The OID of the role who will own the new table.
+        comment: The comment for the new table.
 
     Returns:
         An object with the OID, name, renamed_columns, and primary key
-        column attnum  of the created table.
+        column attnum of the created table.
     """
     return db_conn.exec_msar_func(
         conn,
@@ -110,18 +140,18 @@ def create_table_on_database(
         json.dumps(column_data_list),
         json.dumps(constraint_data_list),
         owner_oid,
-        comment
+        comment,
     ).fetchone()[0]
 
 
 def create_and_import_from_rows(
-        rows,
-        table_name,
-        schema_oid,
-        column_names,
-        conn,
-        comment=None,
-        import_into_temp_table=False
+    rows,
+    table_name,
+    schema_oid,
+    column_names,
+    conn,
+    comment=None,
+    import_into_temp_table=False,
 ):
     """
     Create a Mathesar table as specified, with text columns.
@@ -137,7 +167,7 @@ def create_and_import_from_rows(
             conn,
             'prepare_temp_table_for_import',
             table_name,
-            column_names
+            column_names,
         ).fetchone()[0]
     else:
         import_info = db_conn.exec_msar_func(
@@ -146,7 +176,7 @@ def create_and_import_from_rows(
             schema_oid,
             table_name,
             column_names,
-            comment
+            comment,
         ).fetchone()[0]
 
     cursor = conn.cursor()
@@ -193,14 +223,14 @@ def infer_table_column_data_types(conn, table_oid):
 
 
 def move_columns_to_referenced_table(
-        conn, source_table_oid, target_table_oid, move_column_attnums
+    conn, source_table_oid, target_table_oid, move_column_attnums
 ):
     db_conn.exec_msar_func(
         conn,
         'move_columns_to_referenced_table',
         source_table_oid,
         target_table_oid,
-        move_column_attnums
+        move_column_attnums,
     )
 
 
@@ -209,7 +239,7 @@ def split_table(
     old_table_oid,
     extracted_column_attnums,
     extracted_table_name,
-    relationship_fk_column_name=None
+    relationship_fk_column_name=None,
 ):
     extracted_table_oid, new_fkey_attnum = db_conn.exec_msar_func(
         conn,
@@ -217,11 +247,11 @@ def split_table(
         old_table_oid,
         extracted_column_attnums,
         extracted_table_name,
-        relationship_fk_column_name
+        relationship_fk_column_name,
     ).fetchone()[0]
     return {
         'extracted_table_oid': extracted_table_oid,
-        'new_fkey_attnum': new_fkey_attnum
+        'new_fkey_attnum': new_fkey_attnum,
     }
 
 
@@ -233,7 +263,7 @@ def fetch_table_in_chunks(
     order=None,
     filter=None,
     with_column_header=True,
-    batch_size=2000
+    batch_size=2000,
 ):
     with conn.transaction():
         with db_conn.exec_msar_func_server_cursor(
@@ -256,11 +286,11 @@ def fetch_table_in_chunks(
 
 
 def set_primary_key_column_on_table(
-        conn,
-        table_oid,
-        column_attnum,
-        default_type=None,
-        drop_old_pkey_column=False,
+    conn,
+    table_oid,
+    column_attnum,
+    default_type=None,
+    drop_old_pkey_column=False,
 ):
     db_conn.exec_msar_func(
         conn,
@@ -268,5 +298,5 @@ def set_primary_key_column_on_table(
         table_oid,
         column_attnum,
         default_type,
-        drop_old_pkey_column
+        drop_old_pkey_column,
     )
