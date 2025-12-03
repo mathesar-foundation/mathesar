@@ -7,11 +7,10 @@ Fixtures:
     mocked_exec_msar_func(mathesar/tests/conftest.py): Lets you patch the exec_msar_func() for testing.
 """
 import json
-from decimal import Decimal
 from contextlib import contextmanager
 
-from mathesar.rpc import tables
 from mathesar.models.users import User
+from mathesar.rpc import tables
 
 
 def test_tables_list(rf, monkeypatch, mocked_exec_msar_func):
