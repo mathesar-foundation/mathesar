@@ -11,6 +11,7 @@ import {
   subMenu,
 } from '@mathesar/component-library';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
+import type { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard/SheetClipboardHandler';
 import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { ImperativeFilterController } from '@mathesar/pages/table/ImperativeFilterController';
@@ -38,6 +39,7 @@ export function openTableCellContextMenu({
   modalRecordView,
   tabularData,
   imperativeFilterController,
+  clipboardHandler,
   beginSelectingCellRange,
 }: {
   targetCell: SheetCellDetails;
@@ -46,6 +48,7 @@ export function openTableCellContextMenu({
   modalRecordView: ModalController<RecordStore> | undefined;
   tabularData: TabularData;
   imperativeFilterController: ImperativeFilterController | undefined;
+  clipboardHandler: SheetClipboardHandler;
   beginSelectingCellRange: () => void;
 }): 'opened' | 'empty' {
   const { selection } = tabularData;
