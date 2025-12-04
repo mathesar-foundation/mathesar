@@ -9,7 +9,11 @@
 <div class="form-branding">
   <RichText text={$_('form_created_with_mathesar')} let:slotName>
     {#if slotName === 'mathesarLogo'}
+<<<<<<< HEAD
       <a
+=======
+       <a
+>>>>>>> e0ac3d663 (Fix: Improve form branding link hover and accessibility behavior (fix #4769))
         {...$$restProps}
         href="https://mathesar.org"
         target="_blank"
@@ -35,6 +39,9 @@
     }
   }
 
+
+
+ 
   .mathesar-link {
     color: var(--base-text-color);
     text-decoration: none;
@@ -47,4 +54,9 @@
   .mathesar-link:focus {
     text-decoration: underline;
   }
-</style>
+
+
+
+
+
+
