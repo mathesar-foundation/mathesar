@@ -23,6 +23,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
   import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
+  import { parseColumnId } from '@mathesar/utils/columnUtils';
 
   export let record: RecordStore;
 
@@ -51,7 +52,8 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
 
   function shouldPatchIncludeColumn(columnId: string) {
-    const processedColumn = $processedColumns.get(parseInt(columnId, 10));
+    const numericId = parseColumnId(columnId);
+    const processedColumn = numericId !== undefined ? $processedColumns.get(numericId) : undefined;
     if (!processedColumn) return false;
 
     // Only patch columns that are not primary keys.

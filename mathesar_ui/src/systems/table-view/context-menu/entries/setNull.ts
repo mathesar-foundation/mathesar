@@ -5,6 +5,7 @@ import { iconSetToNull } from '@mathesar/icons';
 import { confirm } from '@mathesar/stores/confirmation';
 import type { TabularData } from '@mathesar/stores/table-data';
 import type { RowModificationRecipe } from '@mathesar/stores/table-data/records';
+import { parseColumnId } from '@mathesar/utils/columnUtils';
 import { buttonMenuEntry, component } from '@mathesar-component-library';
 
 import SetToNull from '../labels/SetToNull.svelte';
@@ -33,7 +34,10 @@ export function* setNull(p: { tabularData: TabularData; cellIds: string[] }) {
 
   const someColumnRefuses = execPipe(
     columnIds,
-    map((columnId) => columnsInTable.get(parseInt(columnId, 10))),
+    map((columnId) => {
+      const numericId = parseColumnId(columnId);
+      return numericId !== undefined ? columnsInTable.get(numericId) : undefined;
+    }),
     filter((column) => !!column),
     some((column) => !column?.isEditable || !column?.column.nullable),
   );

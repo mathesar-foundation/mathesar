@@ -101,3 +101,36 @@ export function columnTypeOptionsAreEqual(
   }
   return true;
 }
+
+/**
+ * Safely parses a column ID from a string or number to a number.
+ *
+ * This utility handles edge cases that the Number constructor doesn't handle well:
+ * - Number(null) returns 0
+ * - Number("") returns 0
+ * - Number("randomstring") returns NaN
+ *
+ * @param columnId - The column ID to parse (can be string, number, null, or undefined)
+ * @returns The parsed column ID as a number, or undefined if parsing fails
+ *
+ * @example
+ * parseColumnId("123") // 123
+ * parseColumnId(123) // 123
+ * parseColumnId(null) // undefined
+ * parseColumnId("") // undefined
+ * parseColumnId("abc") // undefined
+ */
+export function parseColumnId(
+  columnId: string | number | null | undefined,
+): number | undefined {
+  if (columnId === null || columnId === undefined || columnId === '') {
+    return undefined;
+  }
+
+  if (typeof columnId === 'number') {
+    return Number.isNaN(columnId) ? undefined : columnId;
+  }
+
+  const parsed = parseInt(String(columnId), 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}

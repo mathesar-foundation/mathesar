@@ -17,6 +17,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
+  import { parseColumnId } from '@mathesar/utils/columnUtils';
 
   import DirectField from '../record-view/DirectField.svelte';
   import RecordTitle from '../record-view/RecordTitle.svelte';
@@ -49,7 +50,8 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   }
 
   function shouldPatchIncludeColumn(columnId: string) {
-    const processedColumn = $processedColumns.get(parseInt(columnId, 10));
+    const numericId = parseColumnId(columnId);
+    const processedColumn = numericId !== undefined ? $processedColumns.get(numericId) : undefined;
     if (!processedColumn) return false;
 
     // Only patch columns that are not primary keys.

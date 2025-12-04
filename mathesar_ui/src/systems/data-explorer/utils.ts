@@ -30,6 +30,7 @@ import type {
   AbstractTypePreprocFunctionDefinition,
   AbstractTypeSummarizationFunction,
 } from '@mathesar/stores/abstract-types/types';
+import { parseColumnId } from '@mathesar/utils/columnUtils';
 import { ImmutableMap } from '@mathesar-component-library';
 import type {
   CancellablePromise,
@@ -156,27 +157,30 @@ export function getLinkFromColumn(
     name: toTableInfo.columns[toColumnId].name,
   };
   const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-    Object.entries(toTableInfo.columns).map(([id, columnInLinkedTable]) => {
-      const columnIdInLinkedTable = parseInt(id, 10);
-      return [
-        columnIdInLinkedTable,
-        {
-          id: columnIdInLinkedTable,
-          name: columnInLinkedTable.name,
-          tableName: toTableInfo.name,
-          type: columnInLinkedTable.type,
-          linksTo: getLinkFromColumn(
-            result,
-            columnIdInLinkedTable,
-            depth + 1,
-            link.join_path.join(','),
-          ),
-          jpPath: link.join_path,
-          producesMultipleResults: link.multiple_results,
-          metadata: null,
-        },
-      ];
-    });
+    Object.entries(toTableInfo.columns)
+      .map(([id, columnInLinkedTable]) => {
+        const columnIdInLinkedTable = parseColumnId(id);
+        if (columnIdInLinkedTable === undefined) return null;
+        return [
+          columnIdInLinkedTable,
+          {
+            id: columnIdInLinkedTable,
+            name: columnInLinkedTable.name,
+            tableName: toTableInfo.name,
+            type: columnInLinkedTable.type,
+            linksTo: getLinkFromColumn(
+              result,
+              columnIdInLinkedTable,
+              depth + 1,
+              link.join_path.join(','),
+            ),
+            jpPath: link.join_path,
+            producesMultipleResults: link.multiple_results,
+            metadata: null,
+          },
+        ] as [ColumnWithLink['id'], ColumnWithLink];
+      })
+      .filter((entry): entry is [ColumnWithLink['id'], ColumnWithLink] => entry !== null);
   return {
     ...toTable,
     linkedToColumn: toColumn,
@@ -228,9 +232,11 @@ function getColumnInformationMap({
   for (const [tableIdKey, table] of Object.entries(
     joinableTables.target_table_info,
   )) {
-    const tableId = parseInt(tableIdKey, 10);
+    const tableId = parseColumnId(tableIdKey);
+    if (tableId === undefined) continue;
     for (const [columnIdKey, column] of Object.entries(table.columns)) {
-      const columnId = parseInt(columnIdKey, 10);
+      const columnId = parseColumnId(columnIdKey);
+      if (columnId === undefined) continue;
       map.set(columnId, {
         id: columnId,
         name: column.name,
@@ -287,7 +293,8 @@ function getTablesThatReferenceBaseTable({
       Object.entries(targetTable.columns)
         .filter(([columnId]) => columnId !== String(referenceTableColumnId))
         .map(([columnIdKey, column]) => {
-          const columnId = parseInt(columnIdKey, 10);
+          const columnId = parseColumnId(columnIdKey);
+          if (columnId === undefined) return null;
           const parentPath = link.join_path.join(',');
           return [
             columnId,
@@ -306,8 +313,9 @@ function getTablesThatReferenceBaseTable({
               producesMultipleResults: link.multiple_results,
               metadata: null,
             },
-          ];
-        });
+          ] as [ColumnWithLink['id'], ColumnWithLink];
+        })
+        .filter((entry): entry is [ColumnWithLink['id'], ColumnWithLink] => entry !== null);
 
     references.push({
       id: targetTableId,

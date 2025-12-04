@@ -25,6 +25,7 @@ import type {
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
+import { parseColumnId } from '@mathesar/utils/columnUtils';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { defined } from '@mathesar-component-library';
 
@@ -57,7 +58,8 @@ function getSelectedCellData(
   const { rowId, columnId } = parseCellId(activeCellId);
   const row = selectableRowsMap.get(rowId);
   const value = row?.record[columnId];
-  const column = processedColumns.get(Number(columnId));
+  const numericColumnId = parseColumnId(columnId);
+  const column = numericColumnId !== undefined ? processedColumns.get(numericColumnId) : undefined;
   const recordSummary = defined(
     value,
     (v) => linkedRecordSummaries.get(columnId)?.get(String(v)),
@@ -334,7 +336,8 @@ export class TabularData {
   }
 
   getProcessedColumn(columnSelectionId: string): ProcessedColumn | undefined {
-    const numericColumnId = parseInt(columnSelectionId, 10);
+    const numericColumnId = parseColumnId(columnSelectionId);
+    if (numericColumnId === undefined) return undefined;
     return get(this.processedColumns).get(numericColumnId);
   }
 
