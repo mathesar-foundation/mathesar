@@ -17,18 +17,22 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableLink from '@mathesar/components/TableLink.svelte';
-  import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
+  import { iconDeleteMajor, iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
   import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { toast } from '@mathesar/stores/toast';
+  import { Button, Icon } from '@mathesar-component-library';
 
   export let record: RecordStore;
 
   $: ({ table, tableStructure } = record);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canUpdateTableRecords = $currentRolePrivileges.has('UPDATE');
+  $: canDeleteTableRecords = $currentRolePrivileges.has('DELETE');
   $: ({ processedColumns } = tableStructure);
   $: ({ recordPk, summary, fieldValues } = record);
   $: fieldPropsObjects = [...$processedColumns.values()].map((c) => ({
@@ -71,6 +75,31 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     );
     await record.patch(patch);
   }
+
+  async function handleDeleteRecord() {
+    void confirmDelete({
+      identifierType: $_('record'),
+      body: [
+        $_('deleted_records_cannot_be_recovered', {
+          values: { count: 1 },
+        }),
+        $_('are_you_sure_to_proceed'),
+      ],
+      onProceed: async () => {
+        await record.delete();
+        const tablePageUrl = `${window.location.origin}/db/${table.schema.database.id}/schema/${table.schema.oid}/table/${table.oid}/`;
+        window.location.href = tablePageUrl;
+      },
+      onError: (e) => toast.fromError(e),
+      onSuccess: () => {
+        toast.success({
+          title: $_('count_records_deleted_successfully', {
+            values: { count: 1 },
+          }),
+        });
+      },
+    });
+  }
 </script>
 
 <div class="record-page-content">
@@ -88,7 +117,17 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
         </RichText>
       </div>
       <div slot="action">
-        <div class="form-status"><FormStatus {form} /></div>
+        <div class="header-actions">
+          <div class="form-status"><FormStatus {form} /></div>
+          <Button
+            on:click={handleDeleteRecord}
+            disabled={!canDeleteTableRecords}
+            appearance="danger"
+          >
+            <Icon {...iconDeleteMajor} />
+            <span>{$_('delete_records', { values: { count: 1 } })}</span>
+          </Button>
+        </div>
       </div>
     </AppSecondaryHeader>
   </div>
@@ -156,9 +195,15 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     grid-column: 1;
     color: var(--color-fg-subtle-1);
   }
-  .form-status {
+  .header-actions {
     grid-row: 1 / span 2;
     grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .form-status {
+    flex: 1;
   }
 
   .fields {

@@ -96,4 +96,15 @@ export default class RecordStore {
       .run();
     this.updateSelfWithApiResponseData(response);
   }
+
+  async delete(): Promise<void> {
+    const databaseId = this.table.schema.database.id;
+    await api.records
+      .delete({
+        database_id: databaseId,
+        table_oid: this.table.oid,
+        record_ids: [this.recordPk],
+      })
+      .run();
+  }
 }
