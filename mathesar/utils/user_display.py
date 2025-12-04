@@ -4,51 +4,34 @@ Utilities for building user display values from Mathesar User model.
 This module provides functions to fetch user display values from the Django User model
 and format them for display in cells (similar to linked record summaries).
 """
-from typing import Optional
 
 from mathesar.models import User
-from mathesar.utils.columns import get_columns_meta_data
 
 
-def get_user_display_values_for_column(
-    table_oid: int,
-    database_id: int,
-    column_attnum: int,
-    user_ids: set[Optional[int]]
+def get_user_display_values(
+    user_ids: set[int],
+    display_field: str,
 ) -> dict[str, str]:
     """
-    Get user display values for a set of user IDs, formatted for a specific column.
+    Get user display values for a set of user IDs.
 
     Args:
-        table_oid: The OID of the table containing the column
-        database_id: The Django database ID
-        column_attnum: The attnum of the user column
         user_ids: A set of user IDs to get display values for
+        display_field: The user field to display (full_name, email, or username)
 
     Returns:
         A dictionary mapping user ID strings to display value strings
     """
-    # Filter out None values
-    valid_user_ids = {uid for uid in user_ids if uid is not None}
-
-    if not valid_user_ids:
+    if not user_ids:
         return {}
 
-    # Get column metadata to determine display field
-    columns_meta_data = get_columns_meta_data(table_oid, database_id)
-    display_field = "username"  # Default
-    for col_meta in columns_meta_data:
-        if col_meta.attnum == column_attnum and col_meta.user_type:
-            display_field = col_meta.user_display_field or "username"
-            break
-
     # Fetch users in bulk
-    users = User.objects.filter(id__in=valid_user_ids)
+    users = User.objects.filter(id__in=user_ids)
     user_map = {user.id: user for user in users}
 
     # Build display values using the specified display field
     display_values = {}
-    for user_id in valid_user_ids:
+    for user_id in user_ids:
         user = user_map.get(user_id)
         if user:
             value = getattr(user, display_field, None)
@@ -57,37 +40,60 @@ def get_user_display_values_for_column(
     return display_values
 
 
-def get_user_columns_for_table(table_oid: int, database_id: int) -> list[int]:
+def get_user_linked_record_summaries(columns_meta_data, results):
     """
-    Get the list of column attnums that are user type columns.
+    Build user display values for user columns in the given results.
 
     Args:
-        table_oid: The OID of the table
-        database_id: The Django database ID
+        columns_meta_data: List of column metadata objects (already fetched)
+        results: List of record dicts from the database
 
     Returns:
-        A list of column attnums that are user type columns
+        A dict mapping column attnum strings to user display value dicts,
+        or None if there are no user columns.
     """
-    columns_meta_data = get_columns_meta_data(table_oid, database_id)
-    return [
-        c.attnum for c in columns_meta_data
-        if c.user_type
+    user_columns = [
+        (c.attnum, c.user_display_field)
+        for c in columns_meta_data
+        if c.user_display_field
     ]
+    if not user_columns:
+        return None
+
+    linked_record_summaries = {}
+    for column_attnum, display_field in user_columns:
+        user_ids = set()
+        for record in results:
+            user_id = record.get(str(column_attnum)) or record.get(column_attnum)
+            if user_id is not None:
+                try:
+                    user_ids.add(
+                        int(user_id) if not isinstance(user_id, int) else user_id
+                    )
+                except (ValueError, TypeError):
+                    continue
+        if user_ids:
+            user_display_values = get_user_display_values(user_ids, display_field)
+            if user_display_values:
+                linked_record_summaries[str(column_attnum)] = user_display_values
+
+    return linked_record_summaries if linked_record_summaries else None
 
 
-def get_last_edited_by_columns_for_table(table_oid: int, database_id: int) -> list[int]:
+def apply_track_editing_user(record_def, columns_meta_data, user_id):
     """
-    Get the list of column attnums that are user type columns with user_last_edited_by enabled.
+    Return a new record_def with track_editing_user columns set to the user ID.
 
     Args:
-        table_oid: The OID of the table
-        database_id: The Django database ID
+        record_def: The original record definition dict
+        columns_meta_data: List of column metadata objects (already fetched)
+        user_id: The ID of the current user
 
     Returns:
-        A list of column attnums that should be automatically set to the current user ID
+        A new dict with track_editing_user columns set to user_id
     """
-    columns_meta_data = get_columns_meta_data(table_oid, database_id)
-    return [
-        c.attnum for c in columns_meta_data
-        if c.user_type and c.user_last_edited_by
-    ]
+    result = dict(record_def)
+    for col in columns_meta_data:
+        if col.user_display_field and col.track_editing_user:
+            result[str(col.attnum)] = user_id
+    return result

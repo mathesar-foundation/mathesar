@@ -82,7 +82,7 @@
             .filter(
               (pc) =>
                 !pc.column.default?.is_dynamic &&
-                !pc.column.metadata?.user_last_edited_by,
+                !pc.column.metadata?.track_editing_user,
             )
             .map((c, index) => processedColumnToRawDataFormField(c, index)),
         };

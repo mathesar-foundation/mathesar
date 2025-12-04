@@ -21,17 +21,17 @@ export interface DefaultValueOptions {
  * This allows type-specific logic to be handled separately from the generic component.
  */
 export function getDefaultValueOptions(column: ProcessedColumn): DefaultValueOptions {
-  const isUserType =
+  const isUserColumn =
     column.column.type === DB_TYPES.INTEGER &&
-    column.column.metadata?.user_type === true;
+    column.column.metadata?.user_display_field != null;
 
-  if (isUserType) {
-    const initialIsLastEditedBy =
-      column.column.metadata?.user_last_edited_by ?? false;
+  if (isUserColumn) {
+    const initialIsTrackEditingUser =
+      column.column.metadata?.track_editing_user ?? false;
     const initialIsDefaultNull = column.column.default === null;
 
     let initialMode: DefaultValueMode;
-    if (initialIsLastEditedBy) {
+    if (initialIsTrackEditingUser) {
       initialMode = 'auto_set_editor';
     } else if (initialIsDefaultNull) {
       initialMode = 'none';
@@ -45,7 +45,7 @@ export function getDefaultValueOptions(column: ProcessedColumn): DefaultValueOpt
       customValueLabel: 'default_value_set_default_user',
       supportsMetadataUpdate: true,
       getMetadataUpdate: (mode) => ({
-        user_last_edited_by: mode === 'auto_set_editor',
+        track_editing_user: mode === 'auto_set_editor',
       }),
     };
   }

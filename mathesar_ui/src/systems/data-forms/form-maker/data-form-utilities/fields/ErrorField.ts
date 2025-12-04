@@ -13,8 +13,8 @@ import type { FormFields } from './FormFields';
 
 export const dataFormErrorCodes = {
   COLUMN_NOT_FOUND: -31025,
-  COLUMN_USER_LAST_EDITED_BY: -31026,
-  COLUMN_USER_TYPE: -31027,
+  COLUMN_TRACK_EDITING_USER: -31026,
+  COLUMN_USER_DISPLAY: -31027,
 };
 
 export const dataFormErrors = {
@@ -24,22 +24,22 @@ export const dataFormErrors = {
       code: dataFormErrorCodes.COLUMN_NOT_FOUND,
       data: props,
     }),
-  columnUserLastEditedByError: (props: {
+  columnTrackEditingUserError: (props: {
     tableOid: number;
     columnAttnum: number;
   }) =>
     new ClientSideError({
-      message: get(_)('form_field_column_user_last_edited_by'),
-      code: dataFormErrorCodes.COLUMN_USER_LAST_EDITED_BY,
+      message: get(_)('form_field_column_track_editing_user'),
+      code: dataFormErrorCodes.COLUMN_TRACK_EDITING_USER,
       data: props,
     }),
-  columnUserTypeError: (props: {
+  columnUserDisplayError: (props: {
     tableOid: number;
     columnAttnum: number;
   }) =>
     new ClientSideError({
-      message: get(_)('form_field_column_user_type'),
-      code: dataFormErrorCodes.COLUMN_USER_TYPE,
+      message: get(_)('form_field_column_user_display'),
+      code: dataFormErrorCodes.COLUMN_USER_DISPLAY,
       data: props,
     }),
 };

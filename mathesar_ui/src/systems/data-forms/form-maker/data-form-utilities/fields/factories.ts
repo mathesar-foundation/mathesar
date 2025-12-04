@@ -191,12 +191,12 @@ export function buildFieldFactoryFromRaw({
       rawField.column_attnum,
     );
 
-    // Check if this column has user_last_edited_by enabled
+    // Check if this column has track_editing_user enabled
     // If so, create an error field instead of a normal field
-    if (columnDetails.metadata?.user_last_edited_by) {
+    if (columnDetails.metadata?.track_editing_user) {
       return makeErrorFieldFactory({
         originalField: rawField,
-        error: dataFormErrors.columnUserLastEditedByError({
+        error: dataFormErrors.columnTrackEditingUserError({
           tableOid: parentTableOid,
           columnAttnum: rawField.column_attnum,
         }),
@@ -206,10 +206,10 @@ export function buildFieldFactoryFromRaw({
     // Check if this column is a user type column
     // User type fields cannot be used in forms because they require authentication
     // to load the user list, which fails for anonymous form submissions
-    if (columnDetails.metadata?.user_type) {
+    if (columnDetails.metadata?.user_display_field != null) {
       return makeErrorFieldFactory({
         originalField: rawField,
-        error: dataFormErrors.columnUserTypeError({
+        error: dataFormErrors.columnUserDisplayError({
           tableOid: parentTableOid,
           columnAttnum: rawField.column_attnum,
         }),
@@ -266,12 +266,12 @@ export function buildFieldFactoryFromColumn({
 }): DataFormFieldFactory {
   const rawField = columnToRawField({ fieldColumn, index });
   try {
-    // Check if this column has user_last_edited_by enabled
+    // Check if this column has track_editing_user enabled
     // If so, create an error field instead of a normal field
-    if (fieldColumn.column.metadata?.user_last_edited_by) {
+    if (fieldColumn.column.metadata?.track_editing_user) {
       return makeErrorFieldFactory({
         originalField: rawField,
-        error: dataFormErrors.columnUserLastEditedByError({
+        error: dataFormErrors.columnTrackEditingUserError({
           tableOid: fieldColumn.tableOid,
           columnAttnum: rawField.column_attnum,
         }),
@@ -281,10 +281,10 @@ export function buildFieldFactoryFromColumn({
     // Check if this column is a user type column
     // User type fields cannot be used in forms because they require authentication
     // to load the user list, which fails for anonymous form submissions
-    if (fieldColumn.column.metadata?.user_type) {
+    if (fieldColumn.column.metadata?.user_display_field != null) {
       return makeErrorFieldFactory({
         originalField: rawField,
-        error: dataFormErrors.columnUserTypeError({
+        error: dataFormErrors.columnUserDisplayError({
           tableOid: fieldColumn.tableOid,
           columnAttnum: rawField.column_attnum,
         }),

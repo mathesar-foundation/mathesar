@@ -12,11 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="columnmetadata",
-            name="user_type",
-            field=models.BooleanField(default=False, null=True),
-        ),
-        migrations.AddField(
-            model_name="columnmetadata",
             name="user_display_field",
             field=models.CharField(
                 choices=[
@@ -30,7 +25,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="columnmetadata",
-            name="user_last_edited_by",
-            field=models.BooleanField(default=False, null=True),
+            name="track_editing_user",
+            field=models.BooleanField(default=False),
         ),
     ]

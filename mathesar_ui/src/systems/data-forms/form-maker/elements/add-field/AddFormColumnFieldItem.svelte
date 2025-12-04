@@ -20,10 +20,11 @@
   $: ({ column } = fieldColumn);
 
   $: canInsert = columnDefaultAllowsInsertion(column);
-  $: isLastEditedBy = !!column.metadata?.user_last_edited_by;
-  $: isUserType = !!column.metadata?.user_type;
+  $: isTrackEditingUser = !!column.metadata?.track_editing_user;
+  $: isUserColumn = column.metadata?.user_display_field != null;
   $: columnAlreadyAdded = $parentHasColumn;
-  $: disabled = columnAlreadyAdded || !canInsert || isLastEditedBy || isUserType;
+  $: disabled =
+    columnAlreadyAdded || !canInsert || isTrackEditingUser || isUserColumn;
 </script>
 
 <ButtonMenuItem {disabled} on:click>
@@ -49,10 +50,10 @@
           <div slot="content">
             {#if columnAlreadyAdded}
               {$_('cannot_add_field_column_is_already_added')}
-            {:else if isLastEditedBy}
-              {$_('cannot_add_field_column_user_last_edited_by')}
-            {:else if isUserType}
-              {$_('cannot_add_field_column_user_type')}
+            {:else if isTrackEditingUser}
+              {$_('cannot_add_field_column_track_editing_user')}
+            {:else if isUserColumn}
+              {$_('cannot_add_field_column_user_display')}
             {:else if !canInsert}
               {$_('cannot_add_field_column_value_is_dynamic_pk')}
             {/if}

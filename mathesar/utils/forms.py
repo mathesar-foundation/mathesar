@@ -9,7 +9,7 @@ from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
-from mathesar.utils.user_display import get_last_edited_by_columns_for_table
+from mathesar.utils.columns import get_columns_meta_data
 
 
 def validate_and_get_associated_role(user, database_id, associated_role_id=None):
@@ -213,7 +213,7 @@ def submit_form(form_token, values, user=None):
         form_token: The unique token of the form.
         values: A dict describing the values to insert.
         user: Optional Django user object. If provided and authenticated,
-            user_last_edited_by columns will be set to the user's ID.
+            track_editing_user columns will be set to the user's ID.
             If None or anonymous, these columns will remain unset (NULL).
     """
     form_model = Form.objects.get(token=form_token)
@@ -232,7 +232,7 @@ def submit_form(form_token, values, user=None):
         )
     ]
 
-    # Set user_last_edited_by columns for authenticated users
+    # Set track_editing_user columns for authenticated users
     # We need to handle this for each table that will be inserted into
     if user and user.is_authenticated and hasattr(user, 'id'):
         # Get unique table OIDs and their minimum depths from field_info_list
@@ -243,13 +243,15 @@ def submit_form(form_token, values, user=None):
             if table_oid not in table_depths or depth < table_depths[table_oid]:
                 table_depths[table_oid] = depth
 
-        # For each table, add user_last_edited_by columns to field_info_list and values
+        # For each table, add track_editing_user columns to field_info_list and values
         for table_oid, depth in table_depths.items():
-            last_edited_by_columns = get_last_edited_by_columns_for_table(
-                table_oid, form_model.database.id
-            )
+            columns_meta_data = get_columns_meta_data(table_oid, form_model.database.id)
+            track_editing_columns = [
+                c.attnum for c in columns_meta_data
+                if c.user_display_field and c.track_editing_user
+            ]
 
-            for column_attnum in last_edited_by_columns:
+            for column_attnum in track_editing_columns:
                 # Check if this column is already in field_info_list
                 already_included = any(
                     fi['table_oid'] == table_oid and fi['column_attnum'] == column_attnum
@@ -259,7 +261,7 @@ def submit_form(form_token, values, user=None):
                 if not already_included:
                     # Add it to field_info_list with a generated key
                     # Use a key that won't conflict with existing keys
-                    key = f"__user_last_edited_by_{table_oid}_{column_attnum}"
+                    key = f"__track_editing_user_{table_oid}_{column_attnum}"
                     field_info_list.append({
                         "key": key,
                         "parent_key": None,

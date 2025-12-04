@@ -303,10 +303,7 @@ function isFileAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
 }
 
 function isUserAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
-  return (
-    metadata?.user_type === true &&
-    dbType === DB_TYPES.INTEGER
-  );
+  return metadata?.user_display_field != null && dbType === DB_TYPES.INTEGER;
 }
 
 function identifyAbstractTypeForDbType(
@@ -410,7 +407,7 @@ export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
     }
     if (abstractType.identifier === 'user') {
       return {
-        user_type: true,
+        user_display_field: 'username',
       };
     }
     return null;
@@ -449,21 +446,17 @@ export function mergeMetadataOnTypeChange(
     // Set user-specific metadata when changing to user type
     result = {
       ...result,
-      user_type: true,
       user_display_field: result.user_display_field ?? 'username',
-      user_last_edited_by: result.user_last_edited_by ?? false,
+      track_editing_user: result.track_editing_user ?? false,
     };
-  } else {
+  } else if (metadata?.user_display_field != null) {
     // Clear user-specific metadata when changing away from user type
-    // Note: user_display_field has a NOT NULL constraint, so we omit it instead of setting to null
-    const { user_type, user_display_field, user_last_edited_by, ...rest } = result;
+    const { user_display_field, track_editing_user, ...rest } = result;
     result = {
       ...rest,
-      user_type: null,
-      user_last_edited_by: null,
+      user_display_field: null,
+      track_editing_user: false,
     };
-    // Explicitly delete user_display_field to ensure it's not sent to backend
-    delete (result as Record<string, unknown>).user_display_field;
   }
 
   return result;

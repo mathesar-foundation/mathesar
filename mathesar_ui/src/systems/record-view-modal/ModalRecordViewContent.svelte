@@ -30,7 +30,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   $: ({ processedColumns } = tableStructure);
   $: ({ recordPk, summary, fieldValues } = record);
   $: fieldPropsObjects = [...$processedColumns.values()]
-    .filter((c) => !c.column.metadata?.user_last_edited_by)
+    .filter((c) => !c.column.metadata?.track_editing_user)
     .map((c) => ({
       processedColumn: c,
       field: optionalField($fieldValues.get(c.id)),
@@ -54,7 +54,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
     const processedColumn = $processedColumns.get(parseInt(columnId, 10));
     if (!processedColumn) return false;
 
-    // Only patch columns that are not primary keys and not user_last_edited_by columns.
+    // Only patch columns that are not primary keys and not track_editing_user columns.
     //
     // See https://github.com/mathesar-foundation/mathesar/issues/4318
     //
@@ -63,7 +63,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
     // columns API response at some point.
     return (
       !processedColumn.column.primary_key &&
-      !processedColumn.column.metadata?.user_last_edited_by
+      !processedColumn.column.metadata?.track_editing_user
     );
   }
 
@@ -86,7 +86,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
 
   <div class="fields">
     {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-      {#if !processedColumn.column.metadata?.user_last_edited_by}
+      {#if !processedColumn.column.metadata?.track_editing_user}
         <DirectField {record} {processedColumn} {field} {canUpdateTableRecords} />
       {/if}
     {/each}

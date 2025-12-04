@@ -178,9 +178,9 @@ export class ProcessedColumn implements CellColumnFabric {
       if (isPk) {
         return !this.hasEnhancedPrimaryKeyCell && !hasDynamicDefault;
       }
-      // Disable editing for user columns with user_last_edited_by enabled
-      const isLastEditedBy = !!this.column.metadata?.user_last_edited_by;
-      if (isLastEditedBy) {
+      // Disable editing for user columns with track_editing_user enabled
+      const isTrackEditingUser = !!this.column.metadata?.track_editing_user;
+      if (isTrackEditingUser) {
         return false;
       }
       return true;
