@@ -1,0 +1,28 @@
+name: PR Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  dockerized-api-tests:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and run dockerized API tests
+        env:
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_BUILDKIT: 1
+        run: |
+          docker-compose -f docker-compose.test.yml build --parallel
+          # Run pytest inside the test-runner container. Do not attempt to
+          # execute host scripts inside the container (they are not present).
+          docker-compose -f docker-compose.test.yml run --rm test-runner pytest -q || EXIT_CODE=$?
+          docker-compose -f docker-compose.test.yml down -v -t 1
+          exit ${EXIT_CODE:-0}
