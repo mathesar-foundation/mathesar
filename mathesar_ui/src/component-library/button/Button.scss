@@ -40,6 +40,46 @@
   $btn-states: (hover, focus, active);
 
   $btn-variants: (
+    control: (
+      normal: (
+        background: var(--color-bg-control),
+        border-color: var(--color-border-control),
+      ),
+      hover: (
+        background: var(--color-bg-control-hover),
+        box-shadow: (
+          var(--color-shadow) 0 1px 3px 0,
+        ),
+      ),
+      focus: (
+        background: var(--color-bg-control-focused),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-control-focused),
+            transparent 70%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+      active: (
+        background: var(--color-bg-control-active),
+        border-color: var(--color-border-control-active),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-control-focused),
+            transparent 60%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+    ),
+
     default: (
       normal: (
         background: var(--color-bg-control),
@@ -71,6 +111,46 @@
           color-mix(
             in srgb,
             var(--color-border-control-focused),
+            transparent 60%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+    ),
+
+    input: (
+      normal: (
+        background: var(--color-bg-input),
+        border-color: var(--color-border-input),
+      ),
+      hover: (
+        background: var(--color-bg-input-hover),
+        box-shadow: (
+          var(--color-shadow) 0 1px 3px 0,
+        ),
+      ),
+      focus: (
+        background: var(--color-bg-input-focused),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-input-focused),
+            transparent 70%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+      active: (
+        background: var(--color-bg-input-active),
+        border-color: var(--color-border-input-active),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-input-focused),
             transparent 60%
           ),
         box-shadow: (
