@@ -38,6 +38,7 @@
 
 <div
   data-sheet-element="data-cell"
+  on:pointerdown={() => selection?.setActiveCell(cellSelectionId)}
   data-sheet-row-type={isWithinPlaceholderRow ? 'placeholder' : 'data'}
   data-cell-selection-id={cellSelectionId}
   data-cell-active={isActive ? '' : undefined}
