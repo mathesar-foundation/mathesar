@@ -12,17 +12,20 @@ class ConfiguredServerInfo(TypedDict):
         id: the Django ID of the server model instance.
         host: The host of the database server.
         port: the port of the database server.
+        sslmode: SSL mode for the connection ('disable', 'prefer', or 'require').
     """
     id: int
     host: str
     port: Optional[int]
+    sslmode: str
 
     @classmethod
     def from_model(cls, model):
         return cls(
             id=model.id,
             host=model.host,
-            port=model.port
+            port=model.port,
+            sslmode=model.sslmode
         )
 
 
@@ -33,9 +36,11 @@ class ConfiguredServerPatch(TypedDict):
     Attributes:
         host: The host of the database server.
         port: the port of the database server.
+        sslmode: SSL mode for the connection ('disable', 'prefer', or 'require').
     """
     host: Optional[str]
     port: Optional[int]
+    sslmode: Optional[str]
 
 
 @mathesar_rpc_method(name="servers.configured.list", auth="login")
@@ -68,5 +73,7 @@ def patch(*, server_id: int, patch: ConfiguredServerPatch, **kwargs) -> Configur
         server.host = patch.get("host")
     if "port" in patch:
         server.port = patch.get("port")
+    if "sslmode" in patch:
+        server.sslmode = patch.get("sslmode")
     server.save()
     return ConfiguredServerInfo.from_model(server)

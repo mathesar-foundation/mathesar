@@ -122,7 +122,10 @@ export function guessCsvImportMapping(props: {
   }
 
   function getUnmappedTableColumns() {
-    return filter((c) => !connections.hasValue(c.id), tableColumns.values());
+    return filter(
+      ({ column }) => !connections.hasValue(column.id),
+      tableColumns.values(),
+    );
   }
 
   const tableColumnsByName = new Map(
@@ -151,7 +154,7 @@ export function guessCsvImportMapping(props: {
     for (const [simplifiedName, csvColumn] of columnEntries) {
       const tableColumn = tableColumnsBySimplifiedName.get(simplifiedName);
       if (!tableColumn) continue;
-      connections.set(csvColumn.index, tableColumn.id);
+      connections.set(csvColumn.index, tableColumn.column.id);
     }
   }
 
@@ -160,7 +163,7 @@ export function guessCsvImportMapping(props: {
       if (!csvColumn.name) continue;
       const tableColumn = tableColumnsByName.get(csvColumn.name);
       if (!tableColumn) continue;
-      connections.set(csvColumn.index, tableColumn.id);
+      connections.set(csvColumn.index, tableColumn.column.id);
     }
   }
 
@@ -169,7 +172,7 @@ export function guessCsvImportMapping(props: {
       const tableColumn = first(getUnmappedTableColumns());
       // Stop if we're out of table columns
       if (!tableColumn) return;
-      connections.set(csvColumn.index, tableColumn.id);
+      connections.set(csvColumn.index, tableColumn.column.id);
     }
   }
 
@@ -180,7 +183,7 @@ export function guessCsvImportMapping(props: {
         yield undefined;
         continue;
       }
-      const column = tableColumns.get(attnum);
+      const column = tableColumns.get(String(attnum));
       if (!column) {
         yield undefined;
         continue;
@@ -210,7 +213,7 @@ export function buildMappingForApi(
 
     return {
       csv_column: { index, name: field.name },
-      table_column: tableColumn?.id ?? null,
+      table_column: tableColumn ? tableColumn.column.id : null,
     };
   }
 
