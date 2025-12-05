@@ -9,8 +9,12 @@ Fixtures:
 import json
 from contextlib import contextmanager
 
+from django.core.exceptions import ValidationError
+import pytest
+
 from mathesar.rpc import columns
 from mathesar.models.users import User
+from mathesar.models.base import TableMetaData
 
 
 def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
@@ -227,3 +231,51 @@ def test_add_primary_key_column(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[3] == "IDENTITY"
     assert call_args[4] is True
     assert call_args[5] == 'Identity'
+
+
+def test_columns_patch_prevent_rename_default_pk(rf, monkeypatch, mocked_exec_msar_func):
+    """Test that renaming the default Mathesar ID column raises ValidationError."""
+    from modernrpc.core import REQUEST_KEY
+    from modernrpc.exceptions import RPCException
+    
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username='alice', password='pass1234')
+    table_oid = 23457
+    database_id = 2
+    pk_attnum = 1
+
+    # Create a mock TableMetaData with the default PK column set
+    mock_table_metadata = type('MockTableMetaData', (), {
+        'mathesar_added_pkey_attnum': pk_attnum,
+        'oid': table_oid,
+    })()
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        try:
+            yield True
+        finally:
+            pass
+
+    def mock_get_table_metadata(**kwargs):
+        if kwargs.get('oid') == table_oid:
+            return mock_table_metadata
+        raise TableMetaData.DoesNotExist()
+
+    monkeypatch.setattr(columns.base, 'connect', mock_connect)
+    monkeypatch.setattr(TableMetaData.objects, 'get', mock_get_table_metadata)
+
+    # Try to rename the default PK column - should raise ValidationError wrapped in RPCException
+    with pytest.raises(RPCException) as exc_info:
+        columns.patch(
+            column_data_list=[{
+                'id': pk_attnum,
+                'name': 'new_id_name',  # Attempting to rename
+            }],
+            table_oid=table_oid,
+            database_id=database_id,
+            **{REQUEST_KEY: request}
+        )
+    
+    # Verify the error message contains the expected validation message
+    assert "Cannot rename default Mathesar ID column" in str(exc_info.value)
