@@ -33,7 +33,10 @@
     try {
       await columnsDataStore.rename(column.id, newName);
     } catch (error) {
-      toast.error(`${$_('unable_to_rename_column')} ${getErrorMessage(error)}`);
+      const errorMsg = error instanceof Error && error.cause && typeof error.cause === 'object' && 'detail' in error.cause
+        ? (error.cause as { detail: string }).detail
+        : getErrorMessage(error);
+      toast.error(`${$_('unable_to_rename_column')} ${errorMsg}`);
     }
   }
 

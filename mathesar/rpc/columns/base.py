@@ -3,6 +3,7 @@ Classes and functions exposed to the RPC endpoint for managing table columns.
 """
 from typing import Literal, Optional, TypedDict
 
+from django.core.exceptions import ValidationError
 from modernrpc.core import REQUEST_KEY
 
 from db.columns import (
@@ -12,6 +13,7 @@ from db.columns import (
     drop_columns_from_table,
     get_column_info_for_table
 )
+from mathesar.models.base import TableMetaData
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
@@ -326,6 +328,15 @@ def patch(
     Returns:
         The number of columns altered.
     """
+    # Validate that we're not renaming the default Mathesar ID column
+    try:
+        table_metadata = TableMetaData.objects.get(table_oid=table_oid, database_id=database_id)
+        for col_data in column_data_list:
+            if col_data.get('name') is not None and col_data['id'] == table_metadata.mathesar_added_pkey_attnum:
+                raise ValidationError("Cannot rename default Mathesar ID column.")
+    except TableMetaData.DoesNotExist:
+        pass
+    
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return alter_columns_in_table(table_oid, column_data_list, conn)
