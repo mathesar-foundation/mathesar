@@ -137,21 +137,10 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
 def add(
     *,
     table_oid: int,
-    constraint_def_list: CreatableConstraintInfo,
-    database_id: int, **kwargs
-) -> list[int]:
-    """
-    Add constraint(s) on a table in bulk.
-
-    Args:
-        table_oid: Identity of the table to delete constraint for.
-        constraint_def_list: A list describing the constraints to add.
-        database_id: The Django id of the database containing the table.
-
-    Returns:
-        The oid(s) of all the constraints on the table.
-    """
-
+    constraint_def_list: list,
+    database_id: int,
+    **kwargs
+):
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
 
@@ -161,9 +150,12 @@ def add(
             cols = constraint_def.get("columns", [])
             for col in cols:
                 if col not in valid_cols:
-                    raise IntegrityAPIException(f"Invalid column id or attnum: {col}")
+                    raise IntegrityAPIException(
+                        f"Invalid column id: {col}. Column does not exist in table."
+                    )
 
         return create_constraint(table_oid, constraint_def_list, conn)
+
 
 @mathesar_rpc_method(name="constraints.delete", auth="login")
 def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -> str:
