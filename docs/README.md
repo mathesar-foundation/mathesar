@@ -2,6 +2,22 @@
 
 This directory contains the source code for Mathesar's user and administrator documentation published to https://docs.mathesar.org/
 
+# Purpose of the `docs/` directory
+
+The `docs/` folder contains **developer-focused documentation** for contributors working on Mathesar.  
+It is not the primary location for user-facing product documentation.
+
+This directory typically includes:
+
+- internal developer guides and explanations  
+- documentation style guides  
+- conventions and reference material  
+- configuration files used for documentation tooling  
+- notes that support contributors working inside the codebase
+
+User-facing documentation (installation guides, feature guides, walkthroughs, etc.) lives in a separate documentation system and is not stored here. When contributing documentation changes, ensure they belong to the correct location depending on whether the audience is **developers** or **end-users**.
+
+
 ## Preview your documentation edits locally
 
 1. Install requirements
