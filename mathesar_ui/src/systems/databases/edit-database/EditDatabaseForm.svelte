@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
+  import type { SslMode } from '@mathesar/api/rpc/servers';
   import Fieldset from '@mathesar/component-library/fieldset/Fieldset.svelte';
   import {
     FieldLayout,
@@ -14,6 +15,7 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { iconUndo } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import { databasesStore } from '@mathesar/stores/databases';
@@ -23,6 +25,7 @@
   } from '@mathesar-component-library';
 
   import DatabaseNicknameInput from '../common/DatabaseNicknameInput.svelte';
+  import SelectSslMode from '../common/SelectSslMode.svelte';
 
   export let database: Database;
   export let close: () => void;
@@ -31,11 +34,14 @@
   $: nickname = optionalField(database.nickname ?? undefined);
   $: host = requiredField(database.server.host);
   $: port = optionalField(database.server.port);
-  $: form = makeForm({ name, nickname, host, port });
+  $: sslmode = requiredField<SslMode>(database.server.sslmode);
+  $: form = makeForm({ name, nickname, host, port, sslmode });
 
   $: hasHostChanges = host.hasChanges;
   $: hasPortChanges = port.hasChanges;
-  $: hasServerChanges = $hasHostChanges || $hasPortChanges;
+  $: hasSslModeChanges = sslmode.hasChanges;
+  $: hasServerChanges =
+    $hasHostChanges || $hasPortChanges || $hasSslModeChanges;
 
   $: ({ databases } = databasesStore);
   $: otherDatabasesOnServer = [...$databases.values()].filter(
@@ -62,6 +68,7 @@
           patch: {
             host: $host,
             port: $port,
+            sslmode: $sslmode,
           },
         })
         .run();
@@ -94,6 +101,17 @@
         />
       </div>
     </div>
+    <Field
+      label={$_('ssl_mode')}
+      layout="stacked"
+      field={sslmode}
+      input={{ component: SelectSslMode }}
+    >
+      <svelte:fragment slot="help">
+        {$_('ssl_mode_help')}
+        <SeeDocsToLearnMore page="sslMode" />
+      </svelte:fragment>
+    </Field>
 
     {#if hasServerChanges && serverChangesAffectOtherDatabases}
       <FieldLayout>

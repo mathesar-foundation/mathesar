@@ -1,19 +1,15 @@
 from django.contrib.auth.views import LoginView
 from django.urls import include, path, re_path
-from rest_framework import routers
 
 from mathesar import views
-from mathesar.api.viewsets.data_files import DataFileViewSet
 from mathesar.views.installation.decorators import installation_complete, installation_incomplete
 from mathesar.views.installation.complete_installation import CompleteInstallationFormView
 from mathesar.views.users.password_reset import MathesarPasswordResetConfirmView
 
-db_router = routers.DefaultRouter()
-db_router.register(r'data_files', DataFileViewSet, basename='data-file')
-
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
-    path('api/db/v0/', include(db_router.urls)),
+    path('api/db/v0/data_files/', views.data_files.list_or_create_data_file, name='list_or_create_data_file'),
+    path('api/db/v0/data_files/<int:data_file_id>/', views.data_files.get_or_patch_data_file, name='get_or_patch_data_file'),
     path('api/export/v0/explorations/', views.export.export_exploration, name='export_exploration'),
     path('api/export/v0/tables/', views.export.export_table, name='export_table'),
     path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),

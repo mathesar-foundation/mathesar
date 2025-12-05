@@ -10,6 +10,11 @@
   import { toast } from '@mathesar/stores/toast';
   import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
   import { AnonymousViewerUserModel } from '@mathesar/stores/users';
+  import AttachableMultiTagger from '@mathesar/systems/multi-tagger/AttachableMultiTagger.svelte';
+  import {
+    AttachableMultiTaggerController,
+    multiTaggerContext,
+  } from '@mathesar/systems/multi-tagger/AttachableMultiTaggerController';
   import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
   import {
     RecordSelectorController,
@@ -76,6 +81,9 @@
   const rowSeekerController = new AttachableRowSeekerController();
   rowSeekerContext.set(rowSeekerController);
 
+  const multiTaggerController = new AttachableMultiTaggerController();
+  multiTaggerContext.set(multiTaggerController);
+
   const lightboxController = new LightboxController();
   lightboxContext.set(lightboxController);
 
@@ -133,6 +141,7 @@
   modalController={recordSelectorModal}
 />
 <AttachableRowSeeker controller={rowSeekerController} />
+<AttachableMultiTagger controller={multiTaggerController} />
 <ControlledLightbox controller={lightboxController} />
 <ControlledFileDetailDropdown controller={fileDetailDropdownController} />
 <ModalFileAttachmentUploader controller={modalFileAttachmentUploader} />

@@ -31,13 +31,15 @@ interface TableWithColumnOrder {
 function getColumnOrder(
   processedColumns: ProcessedColumn[],
   table: TableWithColumnOrder,
-): number[] {
+): string[] {
   /**
    * The column ids set in metadata. Because this array comes from
    * loosely-coupled metadata, it might contain ids of columns which no longer
    * exist, and it might lack ids of columns that do exist.
+   * Note: Metadata stores column_order as number[], but we convert to string[]
+   * for internal use.
    */
-  const orderedIds = new Set(table.metadata?.column_order ?? []);
+  const orderedIds = new Set((table.metadata?.column_order ?? []).map(String));
   const existingIds = new Set(processedColumns.map((c) => c.id));
 
   const orderedIdsThatExist = filter((i) => existingIds.has(i), orderedIds);
@@ -47,11 +49,11 @@ function getColumnOrder(
 }
 
 export function orderProcessedColumns(
-  processedColumns: Map<number, ProcessedColumn>,
+  processedColumns: Map<string, ProcessedColumn>,
   table: TableWithColumnOrder,
-): Map<number, ProcessedColumn> {
+): Map<string, ProcessedColumn> {
   const columns = [...processedColumns.values()];
-  const orderedColumns = new Map<number, ProcessedColumn>();
+  const orderedColumns = new Map<string, ProcessedColumn>();
 
   const columnOrder = getColumnOrder(columns, table);
   columnOrder.forEach((id) => {
