@@ -26,7 +26,6 @@
   } from './utils';
 
   type SheetColumnType = $$Generic;
-  type SheetColumnIdentifierKey = $$Generic;
 
   const clipboardHandlerStore = getClipboardHandlerStoreFromContext();
   const isSelectingCellRange = writable(false);
@@ -41,17 +40,14 @@
   export let selection: SheetSelectionStore | undefined = undefined;
   export let onCellSelectionStart: (c: SheetCellDetails) => void = () => {};
 
-  export let getColumnIdentifier: (
-    c: SheetColumnType,
-  ) => SheetColumnIdentifierKey;
+  export let getColumnIdentifier: (c: SheetColumnType) => string;
 
   export let scrollOffset = 0;
 
   export let horizontalScrollOffset = 0;
   export let paddingRight = hasPaddingRight ? 100 : 0;
 
-  export let columnWidths: ImmutableMap<SheetColumnIdentifierKey, number> =
-    new ImmutableMap();
+  export let columnWidths: ImmutableMap<string, number> = new ImmutableMap();
 
   export let sheetElement: HTMLElement | undefined = undefined;
 

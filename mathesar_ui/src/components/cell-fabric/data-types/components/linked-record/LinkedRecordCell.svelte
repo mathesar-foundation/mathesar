@@ -47,7 +47,10 @@
       if (result) {
         const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
         if (linkedFkColumnId) {
-          value = result.record[linkedFkColumnId];
+          const fkValue = result.record[linkedFkColumnId];
+          // ResultValue accepts arrays, however we do not support fk values that are arrays.
+          // If an fk value is an array (currently not possible in Mathesar), we take the first element.
+          value = Array.isArray(fkValue) ? fkValue[0] : fkValue;
         } else {
           value = result.recordId;
         }

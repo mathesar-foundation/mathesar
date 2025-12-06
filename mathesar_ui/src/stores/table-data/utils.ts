@@ -31,8 +31,8 @@ export interface ClientSideCellError {
   column: RawColumnWithMetadata;
 }
 
-export const ID_ROW_CONTROL_COLUMN = -1;
-export const ID_ADD_NEW_COLUMN = -2;
+export const ID_ROW_CONTROL_COLUMN = '-1';
+export const ID_ADD_NEW_COLUMN = '-2';
 
 const CELL_KEY_SEPARATOR = '::';
 
@@ -42,7 +42,7 @@ const CELL_KEY_SEPARATOR = '::';
  * See notes in `records.ts.README.md`.
  */
 export function getCellKey(rowKey: RowKey, columnId: string | number): CellKey {
-  return `${String(rowKey)}${CELL_KEY_SEPARATOR}${columnId}`;
+  return `${String(rowKey)}${CELL_KEY_SEPARATOR}${String(columnId)}`;
 }
 
 export function extractRowKeyFromCellKey(cellKey: CellKey): RowKey {
