@@ -30,6 +30,7 @@ import type {
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 import { ImmutableSet, defined } from '@mathesar-component-library';
 
 import type { AssociatedCellValuesForSheet } from '../AssociatedCellData';
@@ -171,9 +172,9 @@ export class TabularData {
     this.columnsDataStore = new ColumnsDataStore({
       database: props.database,
       table: this.table,
-      hiddenColumns: Array.from(contextualFilters.keys()).map((id) =>
-        Number(id),
-      ),
+      hiddenColumns: Array.from(contextualFilters.keys())
+        .map((id) => normalizeColumnId(String(id)))
+        .filter((n): n is number => n !== undefined),
     });
     this.constraintsDataStore = new ConstraintsDataStore({
       database: props.database,

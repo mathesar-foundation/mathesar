@@ -4,6 +4,7 @@ import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 import type { Joining } from './joining';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 import type { ProcessedColumn } from './processedColumns';
 
 type TargetTableJoinedColumn = Pick<
@@ -81,8 +82,13 @@ export class SimpleManyToManyJoinedColumn {
         }
 
         const [attnum, info] = pkColumnEntry;
+        const idNum = normalizeColumnId(attnum);
+        if (idNum === undefined) {
+          console.error(`Invalid attnum for pk column: ${attnum}`);
+          return null;
+        }
         const joinedColumn = {
-          id: Number(attnum),
+          id: idNum,
           type: '_array',
           type_options: {
             item_type: info.type,

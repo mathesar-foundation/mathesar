@@ -1,4 +1,5 @@
 import type { RecordsListParams } from '@mathesar/api/rpc/records';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 
 export interface GroupEntry {
   readonly columnId: string;
@@ -76,9 +77,12 @@ export class Grouping {
     if (!this.entries.length) {
       return {};
     }
+    const columns = this.entries
+      .map((e) => normalizeColumnId(e.columnId))
+      .filter((n): n is number => n !== undefined);
     return {
       grouping: {
-        columns: this.entries.map((e) => Number(e.columnId)),
+        columns,
         preproc: this.entries.map((e) => e.preprocFnId ?? null),
       },
     };

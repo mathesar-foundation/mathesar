@@ -8,6 +8,7 @@ import {
   allowedSortDirections,
 } from '@mathesar/components/sort-entry/utils';
 import { ImmutableMap } from '@mathesar-component-library';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 
 import type { Grouping } from './grouping';
 
@@ -46,12 +47,12 @@ export class Sorting extends ImmutableMap<string, SortDirection> {
   }
 
   private recordsRequestParams(): Pick<RecordsListParams, 'order'> {
-    const sortingEntries: ApiSortingEntry[] = [...this].map(
-      ([columnId, sortDirection]) => ({
-        attnum: Number(columnId),
+    const sortingEntries: ApiSortingEntry[] = [...this]
+      .map(([columnId, sortDirection]) => ({
+        attnum: normalizeColumnId(columnId),
         direction: getApiSortDirection(sortDirection),
-      }),
-    );
+      }))
+      .filter((entry): entry is ApiSortingEntry => entry.attnum !== undefined);
     if (!sortingEntries.length) {
       return {};
     }

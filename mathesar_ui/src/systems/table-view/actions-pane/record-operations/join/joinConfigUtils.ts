@@ -3,6 +3,7 @@ import type {
   JoinableTable,
   JoinableTablesResult,
 } from '@mathesar/api/rpc/tables';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 
 /**
  * This represents a "simple" many-to-many relationship such that the mapping
@@ -144,6 +145,13 @@ export function getSimpleManyToManyJoinPath(
     );
   }
 
+  const targetPk = normalizeColumnId(targetTablePkColumn);
+  if (targetPk === undefined) {
+    throw new Error(
+      `Target table ${targetTableOid} primary key attnum is invalid: ${targetTablePkColumn}`,
+    );
+  }
+
   return [
     [
       [currentTableOid, currentTablePkColumn],
@@ -151,7 +159,7 @@ export function getSimpleManyToManyJoinPath(
     ],
     [
       [intermediateTableOid, intermediateTableFkToTargetColumn],
-      [targetTableOid, Number(targetTablePkColumn)],
+      [targetTableOid, targetPk],
     ],
   ];
 }

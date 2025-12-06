@@ -1,4 +1,5 @@
 import { filter, first, some } from 'iter-tools';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 
 import type {
   RecordSummaryTemplate,
@@ -29,7 +30,7 @@ function convertPartToApi(
   part: InternalTemplatePart,
 ): RecordSummaryTemplatePart {
   if (Array.isArray(part)) {
-    return part.map(Number);
+    return part.map((p) => normalizeColumnId(p) as number);
   }
   return part;
 }
@@ -80,13 +81,15 @@ export class TemplateConfig {
     const firstTextColumn = first(textColumns);
     if (firstTextColumn) {
       // Convert string[] to number[] for API compatibility
-      return TemplateConfig.fromTemplate([[Number(firstTextColumn.id)]]);
+      return TemplateConfig.fromTemplate([
+        [normalizeColumnId(firstTextColumn.id) as number],
+      ]);
     }
     // Type assertion here because we know that every table has at least one
     // column.
     const firstColumn = first(columns.values()) as ProcessedColumn;
     // Convert string[] to number[] for API compatibility
-    return TemplateConfig.fromTemplate([[Number(firstColumn.id)]]);
+  return TemplateConfig.fromTemplate([[normalizeColumnId(firstColumn.id) as number]]);
   }
 
   get template(): RecordSummaryTemplate {

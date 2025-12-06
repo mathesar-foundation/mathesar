@@ -14,6 +14,19 @@ import type { IconProps } from '@mathesar-component-library/types';
 
 import { makeSingular } from './languageUtils';
 
+/**
+ * Safely converts a column ID string to a number.
+ * Returns undefined for null, empty string, or non-numeric values.
+ */
+export function normalizeColumnId(
+  columnId: string | null | undefined,
+): number | undefined {
+  if (columnId == null) return undefined;
+  if (columnId === '') return undefined;
+  const n = Number(columnId);
+  return Number.isNaN(n) ? undefined : n;
+}
+
 export function getColumnIconProps(column: {
   type: RawColumnWithMetadata['type'];
   type_options: RawColumnWithMetadata['type_options'];

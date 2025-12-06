@@ -7,6 +7,7 @@ import type { Table } from '@mathesar/models/Table';
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { TerseGrouping } from '@mathesar/stores/table-data';
 import Url64 from '@mathesar/utils/Url64';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 
 type TerseSummarizedColumn = Pick<RawColumnWithMetadata, 'id' | 'name'>;
 type BaseTable = Pick<Table, 'oid' | 'name'>;
@@ -127,11 +128,15 @@ export function constructQueryModelFromHash(
   const columnMap = new Map(
     terseSummarization.columns.map((entry) => [entry.id, entry]),
   );
-  const groupingEntries = terseSummarization.terseGrouping.filter((group) =>
-    columnMap.has(Number(group[0])),
-  );
+  const groupingEntries = terseSummarization.terseGrouping.filter((group) => {
+    const idNum = normalizeColumnId(group[0]);
+    return idNum !== undefined && columnMap.has(idNum);
+  });
   const groupingColumns = groupingEntries
-    .map((entry) => columnMap.get(Number(entry[0])))
+    .map((entry) => {
+      const idNum = normalizeColumnId(entry[0]);
+      return idNum !== undefined ? columnMap.get(idNum) : undefined;
+    })
     .filter((entry): entry is TerseSummarizedColumn => entry !== undefined);
 
   if (groupingColumns.length === 0) {

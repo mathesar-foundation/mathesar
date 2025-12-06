@@ -1,4 +1,5 @@
 import type { RecordsSearchParams } from '@mathesar/api/rpc/records';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 import { ImmutableMap } from '@mathesar/component-library';
 
 /**
@@ -19,9 +20,13 @@ export class SearchFuzzy extends ImmutableMap<string, unknown> {
   }
 
   getSearchParams(): RecordsSearchParams['search_params'] {
-    return [...this].map(([columnId, value]) => ({
-      attnum: Number(columnId),
-      literal: value,
-    }));
+    return [...this]
+      .map(([columnId, value]) => ({
+        attnum: normalizeColumnId(columnId),
+        literal: value,
+      }))
+      .filter((entry): entry is { attnum: number; literal: unknown } =>
+        entry.attnum !== undefined,
+      );
   }
 }

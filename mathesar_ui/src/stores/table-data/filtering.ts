@@ -8,6 +8,7 @@ import type {
 } from '@mathesar/api/rpc/records';
 
 import type { FilterId } from '../abstract-types/types';
+import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 
 export type FilterCombination = 'and' | 'or';
 
@@ -42,9 +43,13 @@ export interface FilterEntry {
  * for this compatibility layer.
  */
 function filterEntryToSqlExpr(filterEntry: FilterEntry): SqlExpr {
+  const columnNum = normalizeColumnId(filterEntry.columnId);
+  if (columnNum === undefined) {
+    throw new Error(`Invalid column id: ${String(filterEntry.columnId)}`);
+  }
   const column: SqlColumn = {
     type: 'attnum',
-    value: Number(filterEntry.columnId),
+    value: columnNum,
   };
 
   /** Generate an SqlLiteral value */

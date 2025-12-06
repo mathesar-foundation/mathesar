@@ -8,6 +8,7 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { Button, hasProperty } from '@mathesar-component-library';
+  import { normalizeColumnId } from '@mathesar/utils/columnUtils';
 
   import QueryManager from '../QueryManager';
   import type { QueryRunner } from '../QueryRunner';
@@ -33,9 +34,9 @@
     <p class="error-header">{$_('result_could_not_be_displayed')}</p>
     {#if errors instanceof ApiMultiError}
       {#each errors.errors as apierror}
+  {@const columnId = hasProperty(apierror.detail, 'column_id') ? normalizeColumnId(String(apierror.detail.column_id)) : undefined}
         <ul>
-          {#if apierror.code === QUERY_CONTAINS_DELETED_COLUMN && hasProperty(apierror.detail, 'column_id')}
-            {@const columnId = Number(apierror.detail.column_id)}
+          {#if apierror.code === QUERY_CONTAINS_DELETED_COLUMN && columnId !== undefined}
             <li class="error">
               <p class="strong">
                 {$_('some_columns_in_query_missing')}
