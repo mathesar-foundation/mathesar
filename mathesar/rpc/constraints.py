@@ -4,6 +4,7 @@ Classes and functions exposed to the RPC endpoint for managing table constraints
 
 from db.columns import get_column_info_for_table
 from mathesar.api.exceptions.database_exceptions.base_exceptions import IntegrityAPIException
+from mathesar.utils.columns import get_column_info_for_table  
 
 from typing import Optional, TypedDict, Union
 
@@ -134,28 +135,24 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
         return [ConstraintInfo.from_dict(con) for con in con_info]
 
 @mathesar_rpc_method(name="constraints.add", auth="login")
-def add(
-    *,
-    table_oid: int,
-    constraint_def_list: list,
-    database_id: int,
-    **kwargs
-):
-    user = kwargs.get(REQUEST_KEY).user
-    with connect(database_id, user) as conn:
+def add(table_oid: int, database_id: int, constraint_def_list: List[dict]):
+    results = []
+  
+    valid_columns = [col["id"] for col in get_column_info_for_table(table_oid)]
 
-        valid_cols = {col["id"] for col in get_column_info_for_table(table_oid, conn)}
+    for constraint_def in constraint_def_list:
+        for col in constraint_def.get("columns", []):
+            if col not in valid_columns:
+                raise IntegrityAPIException(f"Invalid column id: {col}")
 
-        for constraint_def in constraint_def_list:
-            cols = constraint_def.get("columns", [])
-            for col in cols:
-                if col not in valid_cols:
-                    raise IntegrityAPIException(
-                        f"Invalid column id: {col}. Column does not exist in table."
-                    )
+        result = create_constraint(
+            database_id=database_id,
+            table_oid=table_oid,
+            constraint_def=constraint_def,
+        )
+        results.append(result)
 
-        return create_constraint(table_oid, constraint_def_list, conn)
-
+    return results
 
 @mathesar_rpc_method(name="constraints.delete", auth="login")
 def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -> str:
