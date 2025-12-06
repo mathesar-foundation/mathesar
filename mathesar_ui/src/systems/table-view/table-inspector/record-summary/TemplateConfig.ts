@@ -30,7 +30,13 @@ function convertPartToApi(
   part: InternalTemplatePart,
 ): RecordSummaryTemplatePart {
   if (Array.isArray(part)) {
-    return part.map((p) => normalizeColumnId(p) as number);
+    const nums = part
+      .map((p) => normalizeColumnId(p))
+      .filter((n): n is number => n !== undefined);
+    if (nums.length !== part.length) {
+      throw new Error('TemplateConfig: one or more column ids are invalid');
+    }
+    return nums;
   }
   return part;
 }
@@ -80,16 +86,32 @@ export class TemplateConfig {
     );
     const firstTextColumn = first(textColumns);
     if (firstTextColumn) {
-      // Convert string[] to number[] for API compatibility
-      return TemplateConfig.fromTemplate([
-        [normalizeColumnId(firstTextColumn.id) as number],
-      ]);
+      const idNum = normalizeColumnId(firstTextColumn.id);
+      if (idNum === undefined) {
+        // Fallback to searching for any valid column id
+  const anyValid = Array.from(columns.values()).find((c) => normalizeColumnId(c.id) !== undefined);
+  const anyId = anyValid ? normalizeColumnId(anyValid.id) : undefined;
+        if (anyId === undefined) {
+          throw new Error('TemplateConfig.newCustom: no valid column id found');
+        }
+        return TemplateConfig.fromTemplate([[anyId]]);
+      }
+      return TemplateConfig.fromTemplate([[idNum]]);
     }
     // Type assertion here because we know that every table has at least one
     // column.
     const firstColumn = first(columns.values()) as ProcessedColumn;
-    // Convert string[] to number[] for API compatibility
-  return TemplateConfig.fromTemplate([[normalizeColumnId(firstColumn.id) as number]]);
+    const firstId = normalizeColumnId(firstColumn.id);
+    if (firstId === undefined) {
+      // Find any valid column id as fallback
+  const anyValid = Array.from(columns.values()).find((c) => normalizeColumnId(c.id) !== undefined);
+  const anyId = anyValid ? normalizeColumnId(anyValid.id) : undefined;
+      if (anyId === undefined) {
+        throw new Error('TemplateConfig.newCustom: no valid column id found');
+      }
+      return TemplateConfig.fromTemplate([[anyId]]);
+    }
+    return TemplateConfig.fromTemplate([[firstId]]);
   }
 
   get template(): RecordSummaryTemplate {
