@@ -131,3 +131,15 @@ export default class AsyncRpcApiStore<
     await AsyncRpcApiStore.runBatch(toRun);
   }
 }
+
+export type AsyncRpcApiStoreFromMethod<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Method extends (params: any) => RpcRequest<any>,
+  StaticPropKeys extends
+    keyof Parameters<Method>[0] = keyof Parameters<Method>[0],
+> = AsyncRpcApiStore<
+  Parameters<Method>[0],
+  ReturnType<Method> extends RpcRequest<infer Result> ? Result : never,
+  ReturnType<Method> extends RpcRequest<infer Result> ? Result : never,
+  StaticPropKeys
+>;

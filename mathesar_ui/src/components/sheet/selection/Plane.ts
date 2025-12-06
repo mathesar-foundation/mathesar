@@ -1,3 +1,5 @@
+import { ImmutableSet } from '@mathesar-component-library';
+
 import { makeCellId, makeCells, parseCellId } from '../cellIds';
 
 import { Direction, getColumnOffset, getRowOffset } from './Direction';
@@ -41,6 +43,9 @@ function adjacentPlaceholderCell(cellId: string): AdjacentCell {
  * It never contains any data, but we allow the user to move the active cell
  * into the placeholder row in order to easily add more rows.
  *
+ * The Plane can also track range-restricted columns. These columns
+ * can only be selected individually and cannot be part of range selections.
+ *
  * The term "Flexible" is used in methods to indicate that it will gracefully
  * handle ids of cells within the placeholder row.
  */
@@ -51,14 +56,18 @@ export default class Plane {
 
   readonly placeholderRowId: string | undefined;
 
+  readonly rangeRestrictedColumnIds: ImmutableSet<string>;
+
   constructor(
     rowIds: Series<string> = new Series(),
     columnIds: Series<string> = new Series(),
     placeholderRowId?: string,
+    rangeRestrictedColumnIds: ImmutableSet<string> = new ImmutableSet(),
   ) {
     this.rowIds = rowIds;
     this.columnIds = columnIds;
     this.placeholderRowId = placeholderRowId;
+    this.rangeRestrictedColumnIds = rangeRestrictedColumnIds;
   }
 
   /**

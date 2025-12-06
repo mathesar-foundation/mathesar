@@ -4,13 +4,11 @@
 
   import { getSheetContext } from './utils';
 
-  type SheetColumnIdentifierKey = $$Generic;
-
-  const { api, stores } = getSheetContext<SheetColumnIdentifierKey>();
+  const { api, stores } = getSheetContext();
 
   export let minColumnWidth = MIN_COLUMN_WIDTH_PX;
   export let maxColumnWidth = MAX_COLUMN_WIDTH_PX;
-  export let columnIdentifierKey: SheetColumnIdentifierKey;
+  export let columnIdentifierKey: string;
 
   /**
    * Runs once — when the resize is finished. Does NOT run in realtime on each

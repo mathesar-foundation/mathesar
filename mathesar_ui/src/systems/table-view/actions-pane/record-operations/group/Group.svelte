@@ -36,7 +36,7 @@
     index: number,
     updateEventDetail: {
       preprocFunctionIdentifier: string | undefined;
-      columnIdentifier: number;
+      columnIdentifier: string;
     },
   ) {
     grouping.update((g) =>

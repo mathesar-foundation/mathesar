@@ -103,6 +103,16 @@
     --cell-bg-color-disabled: var(--color-bg-input-disabled);
     --cell-bg-color-row-hover: var(--color-bg-input-hover);
     --cell-bg-color-row-selected: var(--color-selection-subtle-1);
+    --cell-bg-color-joined-cell: color-mix(
+      in srgb,
+      var(--color-highlight-d),
+      transparent 88%
+    );
+    --cell-bg-color-joined-header: color-mix(
+      in srgb,
+      var(--color-highlight-d),
+      transparent 78%
+    );
 
     --cell-text-color-processing: var(--color-fg-base-muted);
 

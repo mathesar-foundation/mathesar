@@ -60,6 +60,19 @@ The database specified in this section is used to store Mathesar's internal data
 - **Description**: Specifies the port on which portgres listen for connections from client applications.
 - **Default value**: `5432`
 
+### `POSTGRES_SSLMODE` (optional)
+
+- **Description**: Specifies the SSL mode for connecting to the internal PostgreSQL database. Controls whether and how SSL encryption is used for the connection.
+- **Format**: One of `disable`, `prefer`, or `require`
+- **Default value**: `prefer`
+- **Additional information**:
+    - `disable`: Do not use SSL.
+    - `prefer`: Use SSL if the server supports it, otherwise connect without SSL.
+    - `require`: Always use SSL, but do not verify the server certificate.
+
+    !!! note
+        PostgreSQL also supports `verify-ca` and `verify-full` modes for certificate verification, but Mathesar does not currently support these. If you need certificate verification, please [open an issue](https://github.com/mathesar-foundation/mathesar/issues) to let us know.
+
 
 ## Caddy reverse proxy configuration {: #caddy}
 

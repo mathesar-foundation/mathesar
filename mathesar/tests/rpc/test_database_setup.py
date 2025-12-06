@@ -67,7 +67,7 @@ def test_connect_existing(monkeypatch, rf):
     role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
 
     def mock_set_up_preexisting_database_for_user(
-            host, port, database_name, nickname, role_name, password, user, sample_data=[]
+            host, port, database_name, nickname, role_name, password, user, sample_data=[], sslmode="prefer"
     ):
         if not (
                 host == test_host
@@ -78,6 +78,7 @@ def test_connect_existing(monkeypatch, rf):
                 and password == test_password
                 and user == request.user
                 and sample_data == test_sample_data
+                and sslmode == "prefer"
         ):
             raise AssertionError("incorrect parameters passed")
         return UserDatabaseRoleMap(

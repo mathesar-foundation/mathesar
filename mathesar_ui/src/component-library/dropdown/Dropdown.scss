@@ -42,7 +42,7 @@ button.dropdown.trigger {
   border-radius: var(--border-radius-m);
   z-index: var(--dropdown-z-index, 100);
   max-height: calc(100svh - 0.5rem);
-  overflow: auto;
+  overflow: var(--Dropdown-content__overflow, auto);
 
   &[data-popper-placement='top-start'] {
     box-shadow:

@@ -177,6 +177,14 @@ export function openTableCellContextMenu({
       return [...getEntriesForArbitraryCells(get(selection))];
     },
 
+    'range-restricted-data-cell': ({ cellId }) => {
+      // Range-restricted cells can only be selected individually, similar to data cells
+      selection.update((s) =>
+        s.cellIds.has(cellId) ? s : s.ofOneCell(cellId),
+      );
+      return [...getEntriesForArbitraryCells(get(selection))];
+    },
+
     // We don't (yet?) offer a context menu for placeholder data cells. In the
     // future, we might want to implement paste here, once we have that option
     // in the context menu.

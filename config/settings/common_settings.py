@@ -35,9 +35,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
-    "rest_framework",
-    "django_filters",
-    "django_property_filter",
     "modernrpc",
     "mathesar",
     "allauth",
@@ -208,6 +205,7 @@ POSTGRES_USER = os.environ.get('POSTGRES_USER', default=None)
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default=None)
 POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default=None)
 POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default=None)
+POSTGRES_SSLMODE = os.environ.get('POSTGRES_SSLMODE', default='prefer')
 
 # POSTGRES_DB, POSTGRES_USER, and POSTGRES_HOST are required env variables for forming a pg connection string for the django database
 if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
@@ -217,6 +215,7 @@ if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
         port=parse_port(POSTGRES_PORT),
         role=POSTGRES_USER,
         password=POSTGRES_PASSWORD,
+        sslmode=POSTGRES_SSLMODE,
     ).to_django_dict()
     DATABASES['default']['OPTIONS'] = {
         "application_name": "Mathesar Django"
@@ -302,35 +301,12 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
-# Update Authentication classes, removed BasicAuthentication
-# Defaults: https://www.django-rest-framework.org/api-guide/settings/
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication'
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_PARSER_CLASSES': [
-        'rest_framework.parsers.JSONParser',
-    ],
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.OrderingFilter',
-    ),
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
-    'EXCEPTION_HANDLER':
-        'mathesar.exception_handlers.mathesar_exception_handler',
-}
-
 # Mathesar settings
 MATHESAR_MODE = os.environ.get('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
 MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
 MATHESAR_CLIENT_DEV_PORT = os.environ.get('MATHESAR_CLIENT_DEV_PORT', default='3000')
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
-MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = os.environ.get('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
 MATHESAR_ANALYTICS_URL = os.environ.get('MATHESAR_ANALYTICS_URL', default='https://example.com/collector')
 MATHESAR_INIT_REPORT_URL = os.environ.get('MATHESAR_INIT_REPORT_URL', default='https://example.com/hello')
@@ -349,9 +325,7 @@ AUTH_USER_MODEL = 'mathesar.User'
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = LOGIN_URL
-DRF_ACCESS_POLICY = {
-    'reusable_conditions': ['mathesar.api.permission_conditions']
-}
+
 # List of Template names that contains additional script tags to be added to the base template
 BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
 
