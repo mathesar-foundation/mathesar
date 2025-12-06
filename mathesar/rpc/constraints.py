@@ -134,25 +134,31 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
         con_info = get_constraints_for_table(table_oid, conn)
         return [ConstraintInfo.from_dict(con) for con in con_info]
 
+from typing import List   
+
 @mathesar_rpc_method(name="constraints.add", auth="login")
-def add(table_oid: int, database_id: int, constraint_def_list: List[dict]):
-    results = []
-  
-    valid_columns = [col["id"] for col in get_column_info_for_table(table_oid)]
+def add(*, table_oid: int, database_id: int, constraint_def_list: List[dict], **kwargs):
+    user = kwargs.get(REQUEST_KEY).user
 
-    for constraint_def in constraint_def_list:
-        for col in constraint_def.get("columns", []):
-            if col not in valid_columns:
-                raise IntegrityAPIException(f"Invalid column id: {col}")
+    with connect(database_id, user) as conn:
 
-        result = create_constraint(
-            database_id=database_id,
-            table_oid=table_oid,
-            constraint_def=constraint_def,
-        )
-        results.append(result)
+        valid_columns = [col["id"] for col in get_column_info_for_table(table_oid, conn)]
 
-    return results
+        for constraint_def in constraint_def_list:
+            for col in constraint_def.get("columns", []):
+                if col not in valid_columns:
+                    raise IntegrityAPIException(f"Invalid column id: {col}")
+
+        results = []
+        for constraint_def in constraint_def_list:
+            result = create_constraint(
+                database_id=database_id,
+                table_oid=table_oid,
+                constraint_def=constraint_def,
+            )
+            results.append(result)
+
+        return results
 
 @mathesar_rpc_method(name="constraints.delete", auth="login")
 def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -> str:
