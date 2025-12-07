@@ -1,6 +1,10 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table constraints.
 """
+from rest_framework import status
+from mathesar.api.exceptions.generic_exceptions.base_exceptions import MathesarAPIException
+from mathesar.utils.columns import get_column_info_for_table
+
 from typing import Optional, TypedDict, Union
 
 from modernrpc.core import REQUEST_KEY
@@ -129,27 +133,35 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
         con_info = get_constraints_for_table(table_oid, conn)
         return [ConstraintInfo.from_dict(con) for con in con_info]
 
-
 @mathesar_rpc_method(name="constraints.add", auth="login")
 def add(
     *,
     table_oid: int,
     constraint_def_list: CreatableConstraintInfo,
-    database_id: int, **kwargs
+    database_id: int,
+    **kwargs
 ) -> list[int]:
     """
-    Add constraint(s) on a table in bulk.
+       Add constraint(s) to a table.
 
-    Args:
-        table_oid: Identity of the table to delete constraint for.
-        constraint_def_list: A list describing the constraints to add.
-        database_id: The Django id of the database containing the table.
-
-    Returns:
-        The oid(s) of all the constraints on the table.
+       Validates that all provided column IDs exist in the target table.
+       If any invalid column ID is passed, returns HTTP 400 instead of 500.
     """
+
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
+
+        valid_cols = {col["id"] for col in get_column_info_for_table(table_oid, conn)}
+
+        for constraint in constraint_def_list:
+            for col in constraint.get("columns", []):
+                if col not in valid_cols:
+                    raise MathesarAPIException(
+                        exception="Invalid column id",
+                        message=f"Invalid column id: {col}",
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
+
         return create_constraint(table_oid, constraint_def_list, conn)
 
 
