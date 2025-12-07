@@ -1,12 +1,9 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table constraints.
 """
-
-from db.columns import get_column_info_for_table
-from mathesar.api.exceptions.generic_exceptions.base_exceptions import MathesarAPIException
-from mathesar.utils.columns import get_column_info_for_table  
-from base import IntegrityError 
-from rest_framework import status
+from mathesar.models.base import ColumnMetaData
+from modernrpc.exceptions import RPCException
+from mathesar.rpc.exceptions.error_codes import mathesar_error_map
 
 from typing import Optional, TypedDict, Union
 
@@ -135,6 +132,8 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
     with connect(database_id, user) as conn:
         con_info = get_constraints_for_table(table_oid, conn)
         return [ConstraintInfo.from_dict(con) for con in con_info]
+
+
 @mathesar_rpc_method(name="constraints.add", auth="login")
 def add(
     *,
@@ -147,15 +146,21 @@ def add(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
 
-        valid_cols = {col["id"] for col in get_column_info_for_table(table_oid, conn)}
+        valid_cols = set(
+            ColumnMetaData.objects.filter(
+                database_id=database_id, table_oid=table_oid
+            ).values_list("attnum", flat=True)
+        )
 
-        for constraint in constraint_def_list:
-            for col in constraint.get("columns", []):
-                if col not in valid_cols:
-                    raise InvalidColumnException(col)
-
+        if valid_cols:
+            for constraint in constraint_def_list:
+                for col in constraint.get("columns", []):
+                    if col not in valid_cols:
+                        raise RPCException(
+                            mathesar_error_map["MathesarAPIException"],
+                            f"Invalid column id: {col}"
+                        )
         return create_constraint(table_oid, constraint_def_list, conn)
-
 
 
 @mathesar_rpc_method(name="constraints.delete", auth="login")
@@ -174,13 +179,3 @@ def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return drop_constraint_via_oid(table_oid, constraint_oid, conn)
-
-
-class InvalidColumnException(MathesarAPIException):
-    def __init__(self, column_id):
-        super().__init__(
-            exception=f"Invalid column id: {column_id}",
-            status_code=status.HTTP_400_BAD_REQUEST,
-            message=f"Invalid column id: {column_id}"
-        )
-
