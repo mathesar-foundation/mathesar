@@ -42,6 +42,7 @@ def test_records_list(rf, monkeypatch, mocked_exec_msar_func):
             ]
         },
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+        "joined_record_summaries": None,
         "record_summaries": {"3": "abcde"},
     }
     mocked_exec_msar_func.fetchone.return_value = [expect_records_list]
@@ -59,8 +60,9 @@ def test_records_list(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[5] is None  # order
     assert call_args[6] is None  # filter
     assert call_args[7] is None  # group
-    assert call_args[8] is True  # return_record_summaries
-    assert call_args[9] == json.dumps({})  # summary template
+    assert call_args[8] is None  # joined_columns
+    assert call_args[9] is True  # return_record_summaries
+    assert call_args[10] == json.dumps({})  # summary template
 
 
 def test_records_get(rf, monkeypatch, mocked_exec_msar_func):
@@ -88,6 +90,7 @@ def test_records_get(rf, monkeypatch, mocked_exec_msar_func):
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
         "grouping": None,
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+        "joined_record_summaries": None,
         "record_summaries": {"3": "abcde"},
     }
     mocked_exec_msar_func.fetchone.return_value = [expect_record]
@@ -102,8 +105,9 @@ def test_records_get(rf, monkeypatch, mocked_exec_msar_func):
     assert actual_record == expect_record
     assert call_args[2] == table_oid
     assert call_args[3] == record_id
-    assert call_args[4] is True  # return_record_summaries
-    assert call_args[5] == json.dumps({})  # table_record_summary_templates
+    assert call_args[4] is None  # joined_columns
+    assert call_args[5] is True  # return_record_summaries
+    assert call_args[6] == json.dumps({})  # table_record_summary_templates
 
 
 def test_records_add(rf, monkeypatch, mocked_exec_msar_func):
@@ -247,6 +251,7 @@ def test_records_search(rf, monkeypatch, mocked_exec_msar_func):
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
         "grouping": None,
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+        "joined_record_summaries": None,
         "record_summaries": {"3": "abcde"},
     }
     mocked_exec_msar_func.fetchone.return_value = [expect_records_list]

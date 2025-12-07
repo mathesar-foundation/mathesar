@@ -15,6 +15,8 @@
   import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
   import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
 
+  import focusTrap from '../common/actions/focusTrap';
+
   import { AccompanyingElements } from './AccompanyingElements';
 
   const dispatch = createEventDispatcher();
@@ -45,6 +47,7 @@
    * resizes.
    */
   export let autoReposition = false;
+  export let trapFocus = false;
 
   /**
    * By default, we ensure that the dropdown content width is no smaller than
@@ -59,6 +62,7 @@
 
   let contentElement: HTMLElement | undefined;
 
+  $: focusTrapAction = trapFocus ? focusTrap : () => {};
   $: placement = preferredPlacement ?? placements[0] ?? 'bottom-start';
   $: fallbackPlacements = (() => {
     const p = placements.filter((pm) => pm !== placement);
@@ -130,6 +134,7 @@
     class={['dropdown content', classes].join(' ')}
     bind:this={contentElement}
     use:portal={portalTarget}
+    use:focusTrapAction
     use:popper={{
       reference: trigger,
       autoReposition,

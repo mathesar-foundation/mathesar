@@ -19,35 +19,39 @@
   export let table: Table;
   export let recordId: ResultValue;
 
-  $: void preview.run({
-    database_id: table.schema.database.id,
-    table_oid: table.oid,
-    return_record_summaries: true,
-    record_id: recordId,
-    table_record_summary_templates: { [table.oid]: template },
-  });
+  $: if (recordId !== null && recordId !== undefined) {
+    void preview.run({
+      database_id: table.schema.database.id,
+      table_oid: table.oid,
+      return_record_summaries: true,
+      record_id: recordId,
+      table_record_summary_templates: { [table.oid]: template },
+    });
+  }
 
   $: recordSummary =
     $preview.resolvedValue?.record_summaries?.[String(recordId)];
 </script>
 
-<Fieldset label={$_('preview')} boxed>
-  {#if $preview.isLoading}
-    <Spinner />
-  {:else if recordSummary !== undefined}
-    <LinkedRecord {recordSummary} />
-  {:else}
-    <Errors errors={[$preview.error ?? $_('unknown_error')]} />
-  {/if}
+{#if recordId !== null && recordId !== undefined}
+  <Fieldset label={$_('preview')} boxed>
+    {#if $preview.isLoading}
+      <Spinner />
+    {:else if recordSummary !== undefined}
+      <LinkedRecord {recordSummary} />
+    {:else}
+      <Errors errors={[$preview.error ?? $_('unknown_error')]} />
+    {/if}
 
-  <div class="help">
-    <RichText text={$_('record_summary_preview_help')} let:slotName>
-      {#if slotName === 'tableName'}
-        <Identifier>{table.name}</Identifier>
-      {/if}
-    </RichText>
-  </div>
-</Fieldset>
+    <div class="help">
+      <RichText text={$_('record_summary_preview_help')} let:slotName>
+        {#if slotName === 'tableName'}
+          <Identifier>{table.name}</Identifier>
+        {/if}
+      </RichText>
+    </div>
+  </Fieldset>
+{/if}
 
 <style>
   .help {

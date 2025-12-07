@@ -54,7 +54,7 @@
         };
     try {
       await columnsDataStore.patch({
-        id: column.id,
+        id: column.column.id,
         default: defaultRequest,
       });
       typeChangeState = { state: 'success' };

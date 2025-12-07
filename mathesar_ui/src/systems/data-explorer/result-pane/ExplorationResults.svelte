@@ -127,7 +127,6 @@
           {#if row || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div
-                class="row"
                 {...htmlAttributes}
                 style="--cell-height:{ROW_HEIGHT_PX - 1}px;{styleString}"
               >
@@ -136,10 +135,6 @@
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
                 >
                   <CellBackground color="var(--cell-bg-color-header)" />
-                  <CellBackground
-                    class="cell-bg-row-hover"
-                    color="var(--cell-bg-color-row-hover)"
-                  />
                   <CellBackground
                     when={isSelected}
                     color="var(--cell-bg-color-row-selected)"
@@ -196,15 +191,6 @@
 
     :global(.column-name-wrapper.selected) {
       background: var(--color-selection);
-    }
-
-    .row {
-      user-select: none;
-      -webkit-user-select: none;
-
-      &:not(:hover) :global(.cell-bg-row-hover) {
-        display: none;
-      }
     }
   }
 </style>

@@ -1,6 +1,7 @@
 // Utils
 export * from './common/utils';
 export { getPageCount as getPaginationPageCount } from './pagination/paginationUtils';
+export { createDebounce } from './debounce/debounceUtils';
 
 // Actions
 export { default as clickOffBounds } from './common/actions/clickOffBounds';
@@ -17,6 +18,7 @@ export { default as Tutorial } from './tutorial/Tutorial.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
+export { default as DummyCheckbox } from './checkbox/DummyCheckbox.svelte';
 export { default as BooleanCheckbox } from './checkbox/BooleanCheckbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
 export { default as Collapsible } from './collapsible/Collapsible.svelte';
