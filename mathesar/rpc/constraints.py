@@ -135,7 +135,7 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
     with connect(database_id, user) as conn:
         con_info = get_constraints_for_table(table_oid, conn)
         return [ConstraintInfo.from_dict(con) for con in con_info]
- @mathesar_rpc_method(name="constraints.add", auth="login")
+@mathesar_rpc_method(name="constraints.add", auth="login")
 def add(
     *,
     table_oid: int,
