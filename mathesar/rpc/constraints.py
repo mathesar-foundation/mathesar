@@ -1,9 +1,10 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table constraints.
 """
+from django.http import HttpResponseBadRequest
 from rest_framework import status
-from mathesar.api.exceptions.generic_exceptions.base_exceptions import MathesarAPIException
-from mathesar.utils.columns import get_column_info_for_table
+from mathesar.models.base import ColumnMetaData
+
 
 from typing import Optional, TypedDict, Union
 
@@ -141,29 +142,26 @@ def add(
     database_id: int,
     **kwargs
 ) -> list[int]:
-    """
-       Add constraint(s) to a table.
-
-       Validates that all provided column IDs exist in the target table.
-       If any invalid column ID is passed, returns HTTP 400 instead of 500.
-    """
 
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
 
-        valid_cols = {col["id"] for col in get_column_info_for_table(table_oid, conn)}
+        valid_cols = set(
+            ColumnMetaData.objects.filter(
+                database_id=database_id, table_oid=table_oid
+            ).values_list("attnum", flat=True)
+        )
 
-        for constraint in constraint_def_list:
-            for col in constraint.get("columns", []):
-                if col not in valid_cols:
-                    raise MathesarAPIException(
-                        exception="Invalid column id",
-                        message=f"Invalid column id: {col}",
-                        status_code=status.HTTP_400_BAD_REQUEST
-                    )
-
+        if valid_cols:
+            for constraint in constraint_def_list:
+                for col in constraint.get("columns", []):
+                    if col not in valid_cols:
+                        raise RPCException(
+                            error_codes.get_error_code(Exception),
+                            f"Invalid column id: {col}"
+                        )
+        
         return create_constraint(table_oid, constraint_def_list, conn)
-
 
 @mathesar_rpc_method(name="constraints.delete", auth="login")
 def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -> str:
