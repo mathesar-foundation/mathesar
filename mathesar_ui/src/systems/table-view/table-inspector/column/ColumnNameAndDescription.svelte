@@ -1,12 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
+  // @mathesar/stores imports (grouped at the top)
   import type {
     ColumnsDataStore,
     ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
+
+  // @mathesar/components import
+  import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
+
+  // @mathesar/utils import
   import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let column: ProcessedColumn;
@@ -33,7 +38,10 @@
     try {
       await columnsDataStore.rename(column.id, newName);
     } catch (error) {
-      toast.error(`${$_('unable_to_rename_column')} ${getErrorMessage(error)}`);
+      const errorMsg = error instanceof Error && error.cause && typeof error.cause === 'object' && 'detail' in error.cause
+        ? (error.cause as { detail: string }).detail
+        : getErrorMessage(error);
+      toast.error(`${$_('unable_to_rename_column')} ${errorMsg}`);
     }
   }
 
