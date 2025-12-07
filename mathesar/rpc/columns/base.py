@@ -3,7 +3,7 @@ Classes and functions exposed to the RPC endpoint for managing table columns.
 """
 from typing import Literal, Optional, TypedDict
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, FieldError
 from modernrpc.core import REQUEST_KEY
 
 from db.columns import (
@@ -330,7 +330,20 @@ def patch(
     """
     # Prevent renaming of the default Mathesar ID column
     try:
-        table_metadata = TableMetaData.objects.get(oid=table_oid)
+        table_metadata = TableMetaData.objects.get(
+            database_id=database_id,
+            table_oid=table_oid,
+        )
+    except TableMetaData.DoesNotExist:
+        try:
+            # Fallback for callers/tests that still look up by the legacy `oid` kwarg
+            table_metadata = TableMetaData.objects.get(oid=table_oid)
+        except (TableMetaData.DoesNotExist, FieldError):
+            table_metadata = None
+    except FieldError:
+        table_metadata = None
+
+    if table_metadata:
         for column_data in column_data_list:
             if (
                 column_data.get("name") is not None
@@ -339,8 +352,6 @@ def patch(
                 raise ValidationError(
                     "Cannot rename default Mathesar ID column"
                 )
-    except TableMetaData.DoesNotExist:
-        pass
 
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
