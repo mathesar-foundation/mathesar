@@ -4,7 +4,6 @@
   import CellBackground from '@mathesar/components/CellBackground.svelte';
 
   import { isSelectingCellRangeContext } from '../selection/isSelectingCellRangeContext';
-  import type SheetSelection from '../selection/SheetSelection';
 
   import { getSheetCellStyle } from './sheetCellUtils';
 
@@ -13,7 +12,7 @@
 
   export let columnIdentifierKey: string;
   export let cellSelectionId: string | undefined = undefined;
-  export let selection: SheetSelection | undefined = undefined;
+  export let selection: any = null;
   export let isWithinPlaceholderRow = false;
   export let isRangeRestricted = false;
 
