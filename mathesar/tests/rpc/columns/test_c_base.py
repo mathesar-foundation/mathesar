@@ -9,7 +9,6 @@ Fixtures:
 import json
 from contextlib import contextmanager
 
-from django.core.exceptions import ValidationError
 import pytest
 
 from mathesar.rpc import columns

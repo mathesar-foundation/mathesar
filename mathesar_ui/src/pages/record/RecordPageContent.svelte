@@ -5,7 +5,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
 -->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-
+  import { Button, Icon } from '@mathesar-component-library';
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
@@ -25,7 +25,6 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
-  import { Button, Icon } from '@mathesar-component-library';
 
   export let record: RecordStore;
 
