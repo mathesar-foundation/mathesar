@@ -1,8 +1,6 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table constraints.
 """
-from django.http import HttpResponseBadRequest
-from rest_framework import status
 from mathesar.models.base import ColumnMetaData
 from modernrpc.exceptions import RPCException
 from mathesar.rpc.exceptions.error_codes import mathesar_error_map
@@ -134,6 +132,7 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
         con_info = get_constraints_for_table(table_oid, conn)
         return [ConstraintInfo.from_dict(con) for con in con_info]
 
+
 @mathesar_rpc_method(name="constraints.add", auth="login")
 def add(
     *,
@@ -161,6 +160,7 @@ def add(
                             f"Invalid column id: {col}"
                         )         
         return create_constraint(table_oid, constraint_def_list, conn)
+
 
 @mathesar_rpc_method(name="constraints.delete", auth="login")
 def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -> str:
