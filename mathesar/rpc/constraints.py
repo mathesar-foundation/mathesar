@@ -4,8 +4,8 @@ Classes and functions exposed to the RPC endpoint for managing table constraints
 from django.http import HttpResponseBadRequest
 from rest_framework import status
 from mathesar.models.base import ColumnMetaData
-
-
+from modernrpc.exceptions import RPCException
+from mathesar.rpc.exceptions.error_codes import mathesar_error_map
 from typing import Optional, TypedDict, Union
 
 from modernrpc.core import REQUEST_KEY
@@ -157,10 +157,9 @@ def add(
                 for col in constraint.get("columns", []):
                     if col not in valid_cols:
                         raise RPCException(
-                            error_codes.get_error_code(Exception),
+                            mathesar_error_map["MathesarAPIException"],
                             f"Invalid column id: {col}"
-                        )
-        
+                        )         
         return create_constraint(table_oid, constraint_def_list, conn)
 
 @mathesar_rpc_method(name="constraints.delete", auth="login")
