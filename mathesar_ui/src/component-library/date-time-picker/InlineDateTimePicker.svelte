@@ -1,7 +1,7 @@
 <script lang="ts">
   import flatpickr from 'flatpickr';
   import type FlatPickr from 'flatpickr/dist/typings';
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 
   import { dayjs } from '@mathesar-component-library-dir/common/utils';
 
@@ -22,6 +22,13 @@
 
   let element: HTMLDivElement;
   let instance: FlatPickr.Instance;
+
+  function handleVisibilityChange() {
+    if (!document.hidden && instance) {
+      // Force flatpickr to re-render by jumping to current month
+      instance.jumpToDate(new Date());
+    }
+  }
 
   onMount(() => {
     instance = flatpickr(element, {
@@ -64,11 +71,25 @@
           }
         }
       },
+      onDayCreate: (_dObj, _dStr, _fp, dayElem) => {
+        if (type === 'time') return;
+        const today = dayjs().startOf('day');
+        const dayDate = dayjs(dayElem.dateObj).startOf('day');
+        if (dayDate.isSame(today, 'day')) {
+          dayElem.classList.add('today');
+        } else {
+          dayElem.classList.remove('today');
+        }
+      },
     });
 
-    return () => instance.destroy();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
   });
 
+  onDestroy(() => {
+    instance?.destroy();
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  });
   $: {
     if (typeof value === 'undefined' || value === null) {
       instance?.clear();
