@@ -131,8 +131,6 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
     with connect(database_id, user) as conn:
         con_info = get_constraints_for_table(table_oid, conn)
         return [ConstraintInfo.from_dict(con) for con in con_info]
-
-
 @mathesar_rpc_method(name="constraints.add", auth="login")
 def add(
     *,
@@ -158,10 +156,8 @@ def add(
                         raise RPCException(
                             mathesar_error_map["MathesarAPIException"],
                             f"Invalid column id: {col}"
-                        )         
+                        )
         return create_constraint(table_oid, constraint_def_list, conn)
-
-
 @mathesar_rpc_method(name="constraints.delete", auth="login")
 def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -> str:
     """
