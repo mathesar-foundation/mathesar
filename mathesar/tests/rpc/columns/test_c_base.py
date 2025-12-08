@@ -236,7 +236,7 @@ def test_columns_patch_prevent_rename_default_pk(rf, monkeypatch, mocked_exec_ms
     """Test that renaming the default Mathesar ID column raises ValidationError."""
     from modernrpc.core import REQUEST_KEY
     from modernrpc.exceptions import RPCException
-    
+
     request = rf.post('/api/rpc/v0/', data={})
     request.user = User(username='alice', password='pass1234')
     table_oid = 23457
@@ -275,6 +275,6 @@ def test_columns_patch_prevent_rename_default_pk(rf, monkeypatch, mocked_exec_ms
             database_id=database_id,
             **{REQUEST_KEY: request}
         )
-    
+
     # Verify the error message contains the expected validation message
     assert "Cannot rename default Mathesar ID column" in str(exc_info.value)

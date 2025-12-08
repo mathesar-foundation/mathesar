@@ -8,7 +8,6 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
 
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
-
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {
     FormSubmit,
@@ -18,19 +17,14 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableLink from '@mathesar/components/TableLink.svelte';
-
   import { iconDeleteMajor, iconRecord, iconSave, iconUndo } from '@mathesar/icons';
-
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
-
+  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
   import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
-
-  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
-
   import { Button, Icon } from '@mathesar-component-library';
 
   export let record: RecordStore;
