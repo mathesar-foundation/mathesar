@@ -22,8 +22,10 @@ export function normalizeColumnId(
   columnId: string | null | undefined,
 ): number | undefined {
   if (columnId == null) return undefined;
-  if (columnId === '') return undefined;
-  const n = Number(columnId);
+  // Trim whitespace so strings like '  ' are treated as empty/invalid
+  const s = columnId.trim();
+  if (s === '') return undefined;
+  const n = Number(s);
   return Number.isNaN(n) ? undefined : n;
 }
 
