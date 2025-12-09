@@ -24,7 +24,7 @@ abstract class BaseRecordRow<
 > {
   readonly identifier: string;
 
-  readonly record: ApiRecord;
+  record: ApiRecord;
 
   readonly type: T;
 
@@ -54,6 +54,11 @@ export class PersistedRecordRow extends BaseRecordRow<RowType.PersistedRecord> {
       identifier: this.identifier,
       record: updatedRecord,
     });
+  }
+
+  mutateRecord(updatedRecord: ApiRecord): PersistedRecordRow {
+    this.record = updatedRecord;
+    return this;
   }
 
   static fromDraft(draft: DraftRecordRow): PersistedRecordRow {

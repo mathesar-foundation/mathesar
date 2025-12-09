@@ -25,6 +25,7 @@ export interface RawTable {
   owner_oid: RawRole['oid'];
   current_role_priv: TablePrivilege[];
   current_role_owns: boolean;
+  type: 'table' | 'view' | 'materialized_view';
 }
 
 export interface RawTablePrivilegesForRole {
@@ -102,6 +103,7 @@ export interface JoinableTablesResult {
         {
           name: string;
           type: string;
+          primary_key: boolean;
         }
       >;
     }
@@ -159,6 +161,19 @@ export function* getLinksToThisTable(
       column: table.columns[columnId],
     };
   }
+}
+
+export function filterJoinableTablesByMaxDepth(
+  result: JoinableTablesResult,
+  maxDepth: number,
+): JoinableTablesResult {
+  const filteredTables = result.joinable_tables.filter(
+    (t) => t.depth <= maxDepth,
+  );
+  return {
+    joinable_tables: filteredTables,
+    target_table_info: result.target_table_info,
+  };
 }
 
 export const tables = {

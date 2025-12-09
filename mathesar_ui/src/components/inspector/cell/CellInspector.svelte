@@ -24,7 +24,13 @@
 
 <div class="cell-inspector">
   {#if activeCellData}
-    {@const { column, value, recordSummary, fileManifest } = activeCellData}
+    {@const {
+      column,
+      value,
+      recordSummary,
+      fileManifest,
+      joinedRecordSummariesMap,
+    } = activeCellData}
     <section class="active-cell">
       <header class="header">{$_('content')}</header>
       <div class="content">
@@ -36,6 +42,7 @@
             {value}
             {recordSummary}
             {fileManifest}
+            {joinedRecordSummariesMap}
           />
         {/if}
       </div>

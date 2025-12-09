@@ -23,6 +23,15 @@ class BaseModel(models.Model):
 class Server(BaseModel):
     host = models.CharField(max_length=255)
     port = models.IntegerField(null=True, blank=True)
+    sslmode = models.CharField(
+        max_length=20,
+        choices=[
+            ("disable", "disable"),
+            ("prefer", "prefer"),
+            ("require", "require"),
+        ],
+        default="prefer"
+    )
 
     class Meta:
         constraints = [
@@ -128,6 +137,7 @@ class Database(BaseModel):
             dbname=self.name,
             user=role,
             password=password,
+            sslmode=self.server.sslmode,
             application_name='mathesar.models.base.Database.connect_manually',
         )
 
@@ -204,6 +214,7 @@ class UserDatabaseRoleMap(BaseModel):
             dbname=self.database.name,
             user=self.configured_role.name,
             password=self.configured_role.password,
+            sslmode=self.server.sslmode,
             application_name='mathesar.models.base.UserDatabaseRoleMap.connection',
         )
 
@@ -318,6 +329,7 @@ class Form(BaseModel):
             dbname=self.database.name,
             user=self.associated_role.name,
             password=self.associated_role.password,
+            sslmode=self.database.server.sslmode,
             application_name='mathesar.models.base.Form.connection',
         )
 

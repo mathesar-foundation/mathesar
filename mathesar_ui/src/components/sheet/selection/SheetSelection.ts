@@ -14,6 +14,7 @@ import {
   basisFromEmptyColumns,
   basisFromOneDataCell,
   basisFromPlaceholderCell,
+  basisFromRangeRestrictedCell,
   basisFromZeroEmptyColumns,
   emptyBasis,
 } from './basis';
@@ -131,14 +132,21 @@ export default class SheetSelection {
    * will be used in their place. This ensures that the selection is made only
    * of data rows, and will never include the placeholder row, even if a user
    * drags to select it.
+   *
+   * Columns with range selection restrictions are excluded from row selections, they can only be
+   * selected individually.
    */
   ofRowRange(rowIdA: string, rowIdB: string): SheetSelection {
-    return this.withBasis(
-      basisFromDataCells(
-        this.plane.dataCellsInFlexibleRowRange(rowIdA, rowIdB),
-        makeCellId(rowIdA, this.plane.columnIds.first ?? ''),
-      ),
+    const regularCells = this.filterRestrictedCells(
+      this.plane.dataCellsInFlexibleRowRange(rowIdA, rowIdB),
     );
+    const firstRegularColumnId = this.filterRestrictedColumns(
+      this.plane.columnIds,
+    )[0];
+    const activeCellId = firstRegularColumnId
+      ? makeCellId(rowIdA, firstRegularColumnId)
+      : undefined;
+    return this.withBasis(basisFromDataCells(regularCells, activeCellId));
   }
 
   /**
@@ -146,12 +154,37 @@ export default class SheetSelection {
    * provided columnIds, inclusive.
    */
   ofColumnRange(columnIdA: string, columnIdB: string): SheetSelection {
+    // If starting column is range-restricted, only select that one column's first cell
+    if (this.plane.rangeRestrictedColumnIds.has(columnIdA)) {
+      return this.selectFirstCellInColumn(columnIdA);
+    }
+
+    // If ending column is range-restricted, find the last normal column before it
+    let adjustedColumnIdB = columnIdB;
+    if (this.plane.rangeRestrictedColumnIds.has(columnIdB)) {
+      const lastNormalColumn = this.findLastNormalColumnInRange(
+        columnIdA,
+        columnIdB,
+      );
+      if (!lastNormalColumn) {
+        // No normal columns in range, only select the starting column's first cell
+        return this.selectFirstCellInColumn(columnIdA);
+      }
+      adjustedColumnIdB = lastNormalColumn;
+    }
+
     const newBasis = this.plane.rowIds.first
       ? basisFromDataCells(
-          this.plane.dataCellsInColumnRange(columnIdA, columnIdB),
+          this.filterRestrictedCells(
+            this.plane.dataCellsInColumnRange(columnIdA, adjustedColumnIdB),
+          ),
           makeCellId(this.plane.rowIds.first, columnIdA),
         )
-      : basisFromEmptyColumns(this.plane.columnIds.range(columnIdA, columnIdB));
+      : basisFromEmptyColumns(
+          this.filterRestrictedColumns(
+            this.plane.columnIds.range(columnIdA, adjustedColumnIdB),
+          ),
+        );
     return this.withBasis(newBasis);
   }
 
@@ -163,7 +196,66 @@ export default class SheetSelection {
     rowIds: Iterable<string>,
     columnIds: Iterable<string>,
   ): SheetSelection {
-    return this.withBasis(basisFromDataCells(makeCells(rowIds, columnIds)));
+    return this.withBasis(
+      basisFromDataCells(
+        this.filterRestrictedCells(makeCells(rowIds, columnIds)),
+      ),
+    );
+  }
+
+  private filterRestrictedCells(cellIds: Iterable<string>): string[] {
+    return [...cellIds].filter((cellId) => {
+      const { columnId } = parseCellId(cellId);
+      return !this.plane.rangeRestrictedColumnIds.has(columnId);
+    });
+  }
+
+  private filterRestrictedColumns(columnIds: Iterable<string>): string[] {
+    return [...columnIds].filter(
+      (columnId) => !this.plane.rangeRestrictedColumnIds.has(columnId),
+    );
+  }
+
+  private selectFirstCellInColumn(columnId: string): SheetSelection {
+    if (!this.plane.rowIds.first) {
+      return this.withBasis(basisFromZeroEmptyColumns());
+    }
+    const cellId = makeCellId(this.plane.rowIds.first, columnId);
+    return this.withBasis(basisFromDataCells([cellId], cellId));
+  }
+
+  /**
+   * Find the last normal (non-range-restricted) column in a range.
+   * Returns undefined if no normal columns exist in the range.
+   */
+  private findLastNormalColumnInRange(
+    columnIdA: string,
+    columnIdB: string,
+  ): string | undefined {
+    const normalColumns = this.filterRestrictedColumns(
+      this.plane.columnIds.range(columnIdA, columnIdB),
+    );
+    return normalColumns.length > 0
+      ? normalColumns[normalColumns.length - 1]
+      : undefined;
+  }
+
+  /**
+   * Adjust a column ID if it's restricted by finding the last normal column before it.
+   * Returns the original columnId if it's not restricted or if no normal columns
+   * exist in the range.
+   */
+  private adjustRestrictedColumn(
+    startingColumnId: string,
+    endingColumnId: string,
+  ): string {
+    if (!this.plane.rangeRestrictedColumnIds.has(endingColumnId)) {
+      return endingColumnId;
+    }
+    return (
+      this.findLastNormalColumnInRange(startingColumnId, endingColumnId) ??
+      startingColumnId
+    );
   }
 
   /**
@@ -174,11 +266,40 @@ export default class SheetSelection {
    * in the last data row will be used in its place. This ensures that the
    * selection is made only of data cells, and will never include cells in the
    * placeholder row, even if a user drags to select a cell in it.
+   *
+   * Columns with range restrictions are excluded from range selections, they can only be
+   * selected individually. When a range includes columns with range restrictions, the
+   * selection extends up to the last normal column before the restricted column.
    */
   ofDataCellRange(cellIdA: string, cellIdB: string): SheetSelection {
+    const cellA = parseCellId(cellIdA);
+    const cellB = parseCellId(cellIdB);
+
+    // If starting cell is in a range-restricted column, only select that one cell
+    if (this.plane.rangeRestrictedColumnIds.has(cellA.columnId)) {
+      return this.ofOneCell(cellIdA);
+    }
+
+    // If ending cell is in a range-restricted column, find the last normal column
+    // before it and adjust the ending cell accordingly
+    let adjustedCellB = cellIdB;
+    if (this.plane.rangeRestrictedColumnIds.has(cellB.columnId)) {
+      const lastNormalColumn = this.findLastNormalColumnInRange(
+        cellA.columnId,
+        cellB.columnId,
+      );
+      if (!lastNormalColumn) {
+        // No normal columns in range, only select the starting cell
+        return this.ofOneCell(cellIdA);
+      }
+      adjustedCellB = makeCellId(cellB.rowId, lastNormalColumn);
+    }
+
     return this.withBasis(
       basisFromDataCells(
-        this.plane.dataCellsInFlexibleCellRange(cellIdA, cellIdB),
+        this.filterRestrictedCells(
+          this.plane.dataCellsInFlexibleCellRange(cellIdA, adjustedCellB),
+        ),
         cellIdA,
       ),
     );
@@ -194,10 +315,29 @@ export default class SheetSelection {
     const firstColumn = () => this.plane.columnIds.first ?? '';
 
     return match(startingCell, 'type', {
+      // Range-restricted cells can only be selected individually
+      'range-restricted-data-cell': ({ cellId: startingCellId }) =>
+        this.ofOneCell(startingCellId),
+
       'data-cell': ({ cellId: startingCellId }) => {
+        const { columnId: startingColumnId } = parseCellId(startingCellId);
         const endingCellId = match(endingCell, 'type', {
           'data-cell': (b) => b.cellId,
-          'column-header-cell': (b) => makeCellId(firstRow(), b.columnId),
+          'range-restricted-data-cell': (b) => {
+            const { rowId, columnId } = parseCellId(b.cellId);
+            const adjustedColumn = this.adjustRestrictedColumn(
+              startingColumnId,
+              columnId,
+            );
+            return makeCellId(rowId, adjustedColumn);
+          },
+          'column-header-cell': (b) => {
+            const adjustedColumn = this.adjustRestrictedColumn(
+              startingColumnId,
+              b.columnId,
+            );
+            return makeCellId(firstRow(), adjustedColumn);
+          },
           'row-header-cell': (b) => makeCellId(b.rowId, firstColumn()),
           'placeholder-row-header-cell': (b) =>
             makeCellId(b.rowId, firstColumn()),
@@ -207,12 +347,44 @@ export default class SheetSelection {
       },
 
       'column-header-cell': ({ columnId: startingColumnId }) => {
+        // If starting column is range-restricted, don't allow range selection
+        if (this.plane.rangeRestrictedColumnIds.has(startingColumnId)) {
+          return match(endingCell, 'type', {
+            'data-cell': (b) => this.ofOneCell(b.cellId),
+            'range-restricted-data-cell': (b) => this.ofOneCell(b.cellId),
+            'column-header-cell': (b) => {
+              if (this.plane.rangeRestrictedColumnIds.has(b.columnId)) {
+                return this.ofOneCell(makeCellId(firstRow(), b.columnId));
+              }
+              return this.ofOneCell(makeCellId(firstRow(), startingColumnId));
+            },
+            'row-header-cell': () =>
+              this.ofOneCell(makeCellId(firstRow(), startingColumnId)),
+            'placeholder-row-header-cell': () =>
+              this.ofOneCell(makeCellId(firstRow(), startingColumnId)),
+            'placeholder-data-cell': (b) => this.ofOneCell(b.cellId),
+          });
+        }
         const endingColumnId = match(endingCell, 'type', {
-          'data-cell': (b) => parseCellId(b.cellId).columnId,
-          'column-header-cell': (b) => b.columnId,
+          'data-cell': (b) =>
+            this.adjustRestrictedColumn(
+              startingColumnId,
+              parseCellId(b.cellId).columnId,
+            ),
+          'range-restricted-data-cell': (b) =>
+            this.adjustRestrictedColumn(
+              startingColumnId,
+              parseCellId(b.cellId).columnId,
+            ),
+          'column-header-cell': (b) =>
+            this.adjustRestrictedColumn(startingColumnId, b.columnId),
           'row-header-cell': () => firstColumn(),
           'placeholder-row-header-cell': () => firstColumn(),
-          'placeholder-data-cell': (b) => parseCellId(b.cellId).columnId,
+          'placeholder-data-cell': (b) =>
+            this.adjustRestrictedColumn(
+              startingColumnId,
+              parseCellId(b.cellId).columnId,
+            ),
         });
         return this.ofColumnRange(startingColumnId, endingColumnId);
       },
@@ -220,6 +392,7 @@ export default class SheetSelection {
       'row-header-cell': ({ rowId: startingRowId }) => {
         const endingRowId = match(endingCell, 'type', {
           'data-cell': (b) => parseCellId(b.cellId).rowId,
+          'range-restricted-data-cell': (b) => parseCellId(b.cellId).rowId,
           'column-header-cell': () => firstRow(),
           'row-header-cell': (b) => b.rowId,
           'placeholder-row-header-cell': (b) => b.rowId,
@@ -234,6 +407,7 @@ export default class SheetSelection {
       'placeholder-data-cell': ({ cellId: startingCellId }) =>
         match(endingCell, 'type', {
           'data-cell': () => this.ofOneCell(startingCellId),
+          'range-restricted-data-cell': () => this.ofOneCell(startingCellId),
           'column-header-cell': () => this.ofOneCell(startingCellId),
           'row-header-cell': () => this.ofOneCell(startingCellId),
           'placeholder-row-header-cell': () => this.ofOneCell(startingCellId),
@@ -244,16 +418,20 @@ export default class SheetSelection {
   }
 
   /**
-   * @returns a new selection formed from one cell within the data rows or the
-   * placeholder row.
+   * @returns a new selection formed from one cell within the data rows, or the
+   * placeholder row, or range-restricted columns.
    */
   ofOneCell(cellId: string): SheetSelection {
-    const { rowId } = parseCellId(cellId);
+    const { rowId, columnId } = parseCellId(cellId);
     const { placeholderRowId } = this.plane;
-    const makeBasis =
-      rowId === placeholderRowId
-        ? basisFromPlaceholderCell
-        : basisFromOneDataCell;
+    let makeBasis;
+    if (rowId === placeholderRowId) {
+      makeBasis = basisFromPlaceholderCell;
+    } else if (this.plane.rangeRestrictedColumnIds.has(columnId)) {
+      makeBasis = basisFromRangeRestrictedCell;
+    } else {
+      makeBasis = basisFromOneDataCell;
+    }
     return this.withBasis(makeBasis(cellId));
   }
 

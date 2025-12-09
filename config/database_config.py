@@ -99,7 +99,7 @@ class DBConfig(ABC):
 @dataclass(frozen=True)
 class PostgresConfig(DBConfig):
     engine: str = POSTGRES_ENGINE
-    sslmode: Optional[str] = None
+    sslmode: str = "prefer"
 
     # Inject sslmode into OPTIONS
     # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION
@@ -115,7 +115,9 @@ class PostgresConfig(DBConfig):
         params = conninfo.conninfo_to_dict(url)
         dbname = params.get("dbname")
         if not dbname:
-            raise ValueError("PostgresConfig.from_connection_string: missing database name in URL")
+            raise ValueError(
+                "PostgresConfig.from_connection_string: missing database name in URL"
+            )
 
         return cls(
             dbname=dbname,
@@ -129,7 +131,7 @@ class PostgresConfig(DBConfig):
     @classmethod
     def from_django_dict(cls, cfg: Mapping[str, Any]) -> "PostgresConfig":
         raw_opts = cfg.get("OPTIONS", {}).copy()
-        sslmode = raw_opts.pop("sslmode", None)
+        sslmode = raw_opts.pop("sslmode", "prefer")
         base_cfg = dict(cfg, OPTIONS=raw_opts)
         base = super().from_django_dict(base_cfg)
         return replace(base, sslmode=sslmode)

@@ -22,7 +22,6 @@ from mathesar import urls as mathesar_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(mathesar_urls)),
-    path('api-docs/', include('rest_framework.urls')),
 ]
 
 handler404 = 'mathesar.views.page_not_found_view'

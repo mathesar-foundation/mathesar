@@ -15,7 +15,7 @@
   } from '@mathesar/routes/urls';
   import { queries as queriesStore } from '@mathesar/stores/queries';
   import { currentTableId, currentTables } from '@mathesar/stores/tables';
-  import { getLinkForTableItem } from '@mathesar/utils/tables';
+  import { getLinkForTableItem, isTableView } from '@mathesar/utils/tables';
   import { ensureReadable } from '@mathesar-component-library';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
@@ -31,6 +31,9 @@
   const schemaRouteContext = SchemaRouteContext.getSafe();
   $: dataFormsStore = ensureReadable($schemaRouteContext?.dataForms);
   $: dataFormsList = [...($dataFormsStore?.values() ?? [])];
+  $: hasViews = [...$currentTables.values()].some((table) =>
+    isTableView(table),
+  );
 
   function makeTableBreadcrumbSelectorItem(
     table: Table,
@@ -95,9 +98,9 @@
 <BreadcrumbSelector
   sections={[
     {
-      label: $_('tables'),
+      label: hasViews ? $_('tables_and_views') : $_('tables'),
       entries: $currentTables.map(makeTableBreadcrumbSelectorItem),
-      emptyMessage: $_('no_tables'),
+      emptyMessage: hasViews ? $_('no_tables_or_views') : $_('no_tables'),
     },
     {
       label: $_('explorations'),

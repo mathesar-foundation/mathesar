@@ -170,6 +170,7 @@ const docsPages = {
   tablePermissions: '/user-guide/tables/#permissions',
   userAdmin: '/user-guide/users/#admin',
   userGuide: '/user-guide/',
+  sslMode: '/user-guide/databases/#ssl',
 };
 
 export type DocsPage = keyof typeof docsPages;

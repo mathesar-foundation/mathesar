@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import type { SslMode } from '@mathesar/api/rpc/servers';
   import Help from '@mathesar/component-library/help/Help.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import {
@@ -12,6 +13,7 @@
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import type { Database } from '@mathesar/models/Database';
   import { databasesStore } from '@mathesar/stores/databases';
   import {
@@ -21,6 +23,7 @@
   } from '@mathesar-component-library';
 
   import DatabaseNicknameInput from '../common/DatabaseNicknameInput.svelte';
+  import SelectSslMode from '../common/SelectSslMode.svelte';
 
   import {
     type InstallationSchema,
@@ -37,6 +40,7 @@
   const port = optionalField(5432);
   const role = requiredField('');
   const password = optionalField('');
+  const sslmode = requiredField<SslMode>('prefer');
   const installationSchemas = requiredField<InstallationSchema[]>(['internal']);
   const form = makeForm({
     databaseName,
@@ -45,6 +49,7 @@
     port,
     role,
     password,
+    sslmode,
     installationSchemas,
   });
 
@@ -56,6 +61,7 @@
       password: $password,
       database: $databaseName,
       nickname: $nickname ?? null,
+      sslmode: $sslmode,
       sample_data:
         getSampleSchemasFromInstallationSchemas($installationSchemas),
     });
@@ -124,6 +130,18 @@
           <DocsLink page="storedRoles">{translatedArg}</DocsLink>
         {/if}
       </RichText>
+    </svelte:fragment>
+  </Field>
+
+  <Field
+    label={$_('ssl_mode')}
+    layout="stacked"
+    field={sslmode}
+    input={{ component: SelectSslMode }}
+  >
+    <svelte:fragment slot="help">
+      {$_('ssl_mode_help')}
+      <SeeDocsToLearnMore page="sslMode" />
     </svelte:fragment>
   </Field>
 
