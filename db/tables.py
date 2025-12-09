@@ -50,9 +50,28 @@ def get_preview(table_oid, column_list, conn, limit=20):
     if you wish to alter these settings permanantly for the columns see tables/alter.py.
     """
     transformed_column_data = [_transform_column_alter_dict(col) for col in column_list]
-    return db_conn.exec_msar_func(
+    raw_result = db_conn.exec_msar_func(
         conn, 'get_preview', table_oid, json.dumps(transformed_column_data), limit
     ).fetchone()[0]
+
+    # Normalize preview values so that very large numeric values are not coerced to
+    # floats and displayed in scientific notation. This affects import preview only.
+    if isinstance(raw_result, list):
+        normalized: list[dict] = []
+        for row in raw_result:
+            if isinstance(row, dict):
+                new_row = {}
+                for key, value in row.items():
+                    if value is None or isinstance(value, str):
+                        new_row[key] = value
+                    else:
+                        new_row[key] = str(value)
+                normalized.append(new_row)
+            else:
+                normalized.append(row)
+        return normalized
+
+    return raw_result
 
 
 def alter_table_on_database(table_oid, table_data_dict, conn):

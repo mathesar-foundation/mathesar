@@ -7,7 +7,6 @@ Fixtures:
     mocked_exec_msar_func(mathesar/tests/conftest.py): Lets you patch the exec_msar_func() for testing.
 """
 import json
-from decimal import Decimal
 from contextlib import contextmanager
 
 from mathesar.rpc import tables
@@ -234,7 +233,9 @@ def test_tables_preview(rf, monkeypatch, mocked_exec_msar_func):
     request.user = User(username='alice', password='pass1234')
     table_oid = 1964474
     database_id = 11
-    column_list = [{'id': 2, 'type': 'numeric', 'type_options': {'precision': 3, 'scale': 2}}]
+    column_list = [
+        {'id': 2, 'type': 'numeric', 'type_options': {'precision': 3, 'scale': 2}}
+    ]
 
     @contextmanager
     def mock_connect(_database_id, user):
@@ -247,13 +248,17 @@ def test_tables_preview(rf, monkeypatch, mocked_exec_msar_func):
             raise AssertionError('incorrect parameters passed')
 
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
+
+    # db.tables.get_preview now stringifies preview values, so the preview
+    # records contain strings instead of numeric types.
     expected_records_list = [
-        {'id': 1, 'length': Decimal('2.0')},
-        {'id': 2, 'length': Decimal('3.0')},
-        {'id': 3, 'length': Decimal('4.0')},
-        {'id': 4, 'length': Decimal('5.22')}
+        {'id': '1', 'length': '2.0'},
+        {'id': '2', 'length': '3.0'},
+        {'id': '3', 'length': '4.0'},
+        {'id': '4', 'length': '5.22'},
     ]
     mocked_exec_msar_func.fetchone.return_value = [expected_records_list]
+
     records = tables.get_import_preview(
         table_oid=1964474,
         columns=column_list,
@@ -263,7 +268,8 @@ def test_tables_preview(rf, monkeypatch, mocked_exec_msar_func):
     call_args = mocked_exec_msar_func.call_args_list[0][0]
     transformed_col_list = [
         {
-            'attnum': 2, 'type': {'name': 'numeric', 'options': {'precision': 3, 'scale': 2}}
+            'attnum': 2,
+            'type': {'name': 'numeric', 'options': {'precision': 3, 'scale': 2}},
         }
     ]
     assert records == expected_records_list
