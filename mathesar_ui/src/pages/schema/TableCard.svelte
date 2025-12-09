@@ -8,7 +8,6 @@
     iconExploration,
     iconPermissions,
     iconSelectRecord,
-    iconTable,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -22,7 +21,12 @@
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { recordSelectorContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
-  import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
+  import {
+    getTableAccentColor,
+    getTableIcon,
+    isTableView,
+    tableRequiresImportConfirmation,
+  } from '@mathesar/utils/tables';
   import {
     Button,
     ButtonMenuItem,
@@ -42,6 +46,8 @@
 
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
   $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
+  $: tableIcon = getTableIcon(table);
+  $: accentColor = getTableAccentColor(table);
   $: tablePageUrl = requiresImportConfirmation
     ? getImportPreviewPageUrl(database.id, schema.oid, table.oid, {
         useColumnTypeInference: true,
@@ -55,14 +61,16 @@
   $: pendingMessage = requiresImportConfirmation
     ? $_('needs_import_confirmation')
     : undefined;
+  $: isView = isTableView(table);
 
   function handleDeleteTable() {
     void confirmDelete({
-      identifierType: $_('table'),
+      identifierType: isView ? $_('view') : $_('table'),
       body: {
         component: TableDeleteConfirmationBody,
         props: {
           tableName: table.name,
+          type: table.type,
         },
       },
       onProceed: async () => {
@@ -80,15 +88,15 @@
   href={tablePageUrl}
   name={table.name}
   description={table.description ?? undefined}
-  icon={iconTable}
+  icon={tableIcon}
   {pendingMessage}
   primary
   cssVariables={{
-    '--EntityListItem__accent-color': 'var(--color-table-80)',
+    '--EntityListItem__accent-color': accentColor,
   }}
 >
   <svelte:fragment slot="action-buttons">
-    {#if !requiresImportConfirmation}
+    {#if !requiresImportConfirmation && !isView}
       <Tooltip enabled={condensed}>
         <Button
           slot="trigger"
@@ -114,29 +122,35 @@
         icon={iconExploration}
         disabled={!$currentRolePrivileges.has('SELECT')}
       >
-        {$_('explore_table')}
+        {isView ? $_('explore_view') : $_('explore_table')}
       </LinkMenuItem>
-      <ButtonMenuItem
-        on:click={() => openEditTableModal(table)}
-        icon={iconEdit}
-        disabled={!$currentRoleOwns}
-      >
-        {$_('rename_table')}
-      </ButtonMenuItem>
+      {#if !isView}
+        <!-- Hiding option till updating view description is supported on the backend -->
+        <ButtonMenuItem
+          on:click={() => openEditTableModal(table)}
+          icon={iconEdit}
+          disabled={!$currentRoleOwns}
+        >
+          {isView ? $_('rename_view') : $_('rename_table')}
+        </ButtonMenuItem>
+      {/if}
       <ButtonMenuItem
         on:click={() => openTablePermissionsModal(table)}
         icon={iconPermissions}
       >
-        {$_('table_permissions')}
+        {isView ? $_('view_permissions') : $_('table_permissions')}
       </ButtonMenuItem>
     {/if}
-    <ButtonMenuItem
-      on:click={handleDeleteTable}
-      danger
-      icon={iconDeleteMajor}
-      disabled={!$currentRoleOwns}
-    >
-      {$_('delete_table')}
-    </ButtonMenuItem>
+    {#if !isView}
+      <!-- Hiding option till deleting view is supported on the backend -->
+      <ButtonMenuItem
+        on:click={handleDeleteTable}
+        danger
+        icon={iconDeleteMajor}
+        disabled={!$currentRoleOwns}
+      >
+        {isView ? $_('delete_view') : $_('delete_table')}
+      </ButtonMenuItem>
+    {/if}
   </svelte:fragment>
 </EntityListItem>

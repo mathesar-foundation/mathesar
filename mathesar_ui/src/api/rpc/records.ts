@@ -23,7 +23,7 @@ export interface SqlComparison {
     | 'greater_or_equal'
     | 'contains_case_insensitive'
     | 'contains'
-    | 'starts_with'
+    | 'starts_with_case_insensitive'
     | 'json_array_contains';
   args: [SqlExpr, SqlExpr];
 }
