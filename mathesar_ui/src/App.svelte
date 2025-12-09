@@ -31,7 +31,11 @@
       <RootRoute {commonData} />
     {/key}
     {#if import.meta.env.DEV}
-      <DevBanner filePath="mathesar_ui/src/utils/columnUtils.ts" message="normalizeColumnId: trim whitespace, added tests" commit="4c7de23ff" />
+      <DevBanner
+        filePath="mathesar_ui/src/utils/columnUtils.ts"
+        message="normalizeColumnId: trim whitespace, added tests"
+        commit="4c7de23ff"
+      />
     {/if}
   </AppContext>
 {/if}

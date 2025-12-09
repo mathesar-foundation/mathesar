@@ -89,8 +89,10 @@ export class TemplateConfig {
       const idNum = normalizeColumnId(firstTextColumn.id);
       if (idNum === undefined) {
         // Fallback to searching for any valid column id
-  const anyValid = Array.from(columns.values()).find((c) => normalizeColumnId(c.id) !== undefined);
-  const anyId = anyValid ? normalizeColumnId(anyValid.id) : undefined;
+        const anyValid = Array.from(columns.values()).find(
+          (c) => normalizeColumnId(c.id) !== undefined,
+        );
+        const anyId = anyValid ? normalizeColumnId(anyValid.id) : undefined;
         if (anyId === undefined) {
           throw new Error('TemplateConfig.newCustom: no valid column id found');
         }
@@ -104,8 +106,10 @@ export class TemplateConfig {
     const firstId = normalizeColumnId(firstColumn.id);
     if (firstId === undefined) {
       // Find any valid column id as fallback
-  const anyValid = Array.from(columns.values()).find((c) => normalizeColumnId(c.id) !== undefined);
-  const anyId = anyValid ? normalizeColumnId(anyValid.id) : undefined;
+      const anyValid = Array.from(columns.values()).find(
+        (c) => normalizeColumnId(c.id) !== undefined,
+      );
+      const anyId = anyValid ? normalizeColumnId(anyValid.id) : undefined;
       if (anyId === undefined) {
         throw new Error('TemplateConfig.newCustom: no valid column id found');
       }

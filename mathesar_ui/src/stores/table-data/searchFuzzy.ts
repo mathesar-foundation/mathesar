@@ -25,8 +25,9 @@ export class SearchFuzzy extends ImmutableMap<string, unknown> {
         attnum: normalizeColumnId(columnId),
         literal: value,
       }))
-      .filter((entry): entry is { attnum: number; literal: unknown } =>
-        entry.attnum !== undefined,
+      .filter(
+        (entry): entry is { attnum: number; literal: unknown } =>
+          entry.attnum !== undefined,
       );
   }
 }

@@ -34,7 +34,9 @@
     <p class="error-header">{$_('result_could_not_be_displayed')}</p>
     {#if errors instanceof ApiMultiError}
       {#each errors.errors as apierror}
-  {@const columnId = hasProperty(apierror.detail, 'column_id') ? normalizeColumnId(String(apierror.detail.column_id)) : undefined}
+        {@const columnId = hasProperty(apierror.detail, 'column_id')
+          ? normalizeColumnId(String(apierror.detail.column_id))
+          : undefined}
         <ul>
           {#if apierror.code === QUERY_CONTAINS_DELETED_COLUMN && columnId !== undefined}
             <li class="error">
