@@ -5,6 +5,17 @@ import { RpcError } from './RpcError';
 const METHOD_PATH_SEPARATOR = '.';
 const jsonrpc = '2.0';
 
+async function parseResponseJSON(response: Response): Promise<unknown> {
+  const text = await response.text();
+  const processed = text.replace(
+    /:\s*(-?\d{16,})\b/g,
+    (match, num) => {
+      return match.replace(num, `"${num}"`);
+    },
+  );
+  return JSON.parse(processed);
+}
+
 export interface RpcResult<T> {
   status: 'ok';
   value: T;
@@ -69,7 +80,7 @@ function send<T>(request: RpcRequest<T>): CancellablePromise<RpcResponse<T>> {
     (resolve) =>
       void fetch
         .then(
-          (response) => response.json(),
+          (response) => parseResponseJSON(response),
           // If the fetch promise rejects (e.g. for a network connection error),
           // we still want to _resolve_ the returned promise (instead of
           // _rejecting_ it). This way all error-handling is done consistently
@@ -129,7 +140,7 @@ function sendBatchRequest<T extends RpcRequest<unknown>[]>(
     (resolve) =>
       void fetch
         .then(
-          (response) => response.json(),
+          (response) => parseResponseJSON(response),
           (rejectionReason) =>
             resolve(
               requests.map(() =>

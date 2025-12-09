@@ -20,6 +20,9 @@
     if (newParentValue === undefined || newParentValue === null) {
       return null;
     }
+    if (typeof newParentValue === 'string') {
+      return newParentValue;
+    }
     return String(newParentValue);
   }
   function handleParentValueChange(newParentValue: ParentValue) {
