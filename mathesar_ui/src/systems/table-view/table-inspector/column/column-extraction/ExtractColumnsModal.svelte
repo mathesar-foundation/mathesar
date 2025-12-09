@@ -137,7 +137,7 @@
     const newTableName = $tableName;
     const followUps: Promise<unknown>[] = [];
     const extractedColumns = $columns;
-    const extractedColumnIds = extractedColumns.map((c) => c.id);
+    const extractedColumnIds = extractedColumns.map((c) => c.column.id);
     try {
       if ($targetType === 'existingTable') {
         const targetTableId = $linkedTable?.table.oid;

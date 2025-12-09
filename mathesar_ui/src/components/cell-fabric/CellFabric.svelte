@@ -6,6 +6,7 @@
 <script lang="ts">
   import type { FileAttachmentRequestParams } from '@mathesar/api/rest/fileAttachments';
   import type { FileManifest } from '@mathesar/api/rpc/records';
+  import type { ImmutableMap } from '@mathesar-component-library';
 
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
@@ -21,6 +22,9 @@
     undefined;
   export let setRecordSummary:
     | ((recordId: string, recordSummary: string) => void)
+    | undefined = undefined;
+  export let joinedRecordSummariesMap:
+    | ImmutableMap<string, string>
     | undefined = undefined;
   export let isActive = false;
   export let disabled = false;
@@ -55,6 +59,7 @@
     {horizontalAlignment}
     {recordSummary}
     {setRecordSummary}
+    {joinedRecordSummariesMap}
     {fileManifest}
     {setFileManifest}
     {fileRequestParams}

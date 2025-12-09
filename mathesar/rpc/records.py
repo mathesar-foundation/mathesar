@@ -134,6 +134,36 @@ class GroupingResponse(TypedDict):
     groups: list[Group]
 
 
+class LinkedRecordPath(TypedDict):
+    """
+    Represents a path through a simple mapping table to a record on the
+    other side of a many-to-many link. The near side of the link is the
+    last part of the path, to match what's returned by
+    `tables.list_joinable` in the context where this is used. So, if one
+    calls `tables.list_joinable` on the table page, one can simply put
+    a join path to a table whose summaries are aggregated and displayed
+    on the table page into this object.
+
+    join_path should thus have the structure:
+
+    [
+        [[oid_1, attnum_1], [oid_2, attnum_2]],
+        [[oid_2, attnum_3], [oid_3, attnum_4]]
+    ]
+
+    In particular, it should be of length 2, representing a many-to-many
+    through a simple mapping table, and the OID of the right side of the
+    first join must bequal the OID on the left side of the second join.
+
+    Attributes:
+        record_pkey: The primary key of the record linked to.
+        join_path: A path giving the route through a simple mapping table
+            to the table linked to.
+    """
+    record_pkey: Any
+    join_path: list[list[list[int]]]
+
+
 class RecordList(TypedDict):
     """
     Records from a table, along with some meta data
@@ -158,6 +188,7 @@ class RecordList(TypedDict):
     grouping: GroupingResponse
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
+    joined_record_summaries: dict
     download_links: Optional[dict]
 
     @classmethod
@@ -168,6 +199,7 @@ class RecordList(TypedDict):
             grouping=d.get("grouping"),
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
+            joined_record_summaries=d.get("joined_record_summaries"),
             download_links=d.get("download_links") or None
         )
 
@@ -212,6 +244,22 @@ class SummarizedRecordReference(TypedDict):
     summary: str
 
 
+class RecordSummaryMapping(TypedDict):
+    """
+    Represents a mapping to simple mapping table primary keys, which can
+    be deleted to unlink a linked record.
+
+    Attributes:
+        join_table: The OID of the simple mapping table referenced.
+        joined_values: A dict with each key being the key of a
+            `SummarizedRecordReference`, and each value being the pkey
+            of a row in the join table which references the summarized
+            row.
+    """
+    join_table: int
+    joined_values: dict[str, list[Any]]
+
+
 class RecordSummaryList(TypedDict):
     """
     Response for listing record summaries.
@@ -222,12 +270,14 @@ class RecordSummaryList(TypedDict):
     """
     count: int
     results: list[SummarizedRecordReference]
+    mapping: RecordSummaryMapping
 
     @classmethod
     def from_dict(cls, d):
         return cls(
             count=d["count"],
             results=d["results"],
+            mapping=d["mapping"],
         )
 
 
@@ -241,6 +291,7 @@ def list_(
         order: list[OrderBy] = None,
         filter: Filter = None,
         grouping: Grouping = None,
+        joined_columns: list[dict] = None,
         return_record_summaries: bool = False,
         **kwargs
 ) -> RecordList:
@@ -256,6 +307,8 @@ def list_(
         order: An array of ordering definition objects.
         filter: An array of filter definition objects.
         grouping: An array of group definition objects.
+        joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
+            "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
         return_record_summaries: Whether to return summaries of retrieved
             records.
 
@@ -272,6 +325,7 @@ def list_(
             order=order,
             filter=filter,
             group=grouping,
+            joined_columns=joined_columns,
             return_record_summaries=return_record_summaries,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
@@ -291,6 +345,7 @@ def get(
         record_id: Any,
         table_oid: int,
         database_id: int,
+        joined_columns: list[dict] = None,
         return_record_summaries: bool = False,
         table_record_summary_templates: dict[str, Any] = None,
         **kwargs
@@ -302,6 +357,8 @@ def get(
         record_id: The primary key value of the record to be gotten.
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
+        joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
+            "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
         return_record_summaries: Whether to return summaries of the
             retrieved record.
         table_record_summary_templates: A dict of record summary templates.
@@ -320,6 +377,7 @@ def get(
             conn,
             record_id,
             table_oid,
+            joined_columns,
             return_record_summaries=return_record_summaries,
             table_record_summary_templates={
                 **get_table_record_summary_templates(database_id),
@@ -511,6 +569,7 @@ def list_summaries(
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         search: Optional[str] = None,
+        linked_record_path: Optional[LinkedRecordPath] = None,
         **kwargs,
 ) -> RecordSummaryList:
     """
@@ -522,6 +581,8 @@ def list_summaries(
         limit: Optional limit on the number of records to return.
         offset: Optional offset for pagination.
         search: Optional search term to filter records.
+        linked_record_path: Optional blob representing linkages to a
+            record for determining many-to-many inclusion.
 
     Returns:
         A list of objects, each containing a record summary and key pertaining to a record.
@@ -535,5 +596,6 @@ def list_summaries(
             offset=offset,
             search=search,
             table_record_summary_templates=get_table_record_summary_templates(database_id),
+            linked_record_path=linked_record_path,
         )
     return RecordSummaryList.from_dict(record_info)

@@ -12,8 +12,10 @@
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
+    type JoinedColumn,
     type ProcessedColumn,
     getTabularDataStoreFromContext,
+    isJoinedColumn,
   } from '@mathesar/stores/table-data';
   import { updateTable } from '@mathesar/stores/tables';
 
@@ -24,15 +26,16 @@
   const tabularData = getTabularDataStoreFromContext();
 
   export let hasNewColumnButton = false;
-  export let columnOrder: number[];
+  export let columnOrder: string[];
   export let table: Table;
 
   $: columnOrder = columnOrder ?? [];
-  $: ({ selection, processedColumns, columnsDataStore } = $tabularData);
+  $: ({ selection, processedColumns, allColumns, columnsDataStore } =
+    $tabularData);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
-  let selectedColumnIdsOrdered: number[] = [];
-  let newColumnOrder: number[] = [];
+  let selectedColumnIdsOrdered: string[] = [];
+  let newColumnOrder: string[] = [];
 
   function dragColumn() {
     // Keep only IDs for which the column exists
@@ -45,7 +48,7 @@
     columnOrder = columnOrder;
     // Remove selected column IDs and keep their order
     for (const id of columnOrder) {
-      if ($selection.columnIds.has(String(id))) {
+      if ($selection.columnIds.has(id)) {
         selectedColumnIdsOrdered.push(id);
         if (!locationOfFirstDraggedColumn) {
           locationOfFirstDraggedColumn = columnOrder.indexOf(id);
@@ -87,7 +90,7 @@
       schema: table.schema,
       table: {
         oid: table.oid,
-        metadata: { column_order: newColumnOrder },
+        metadata: { column_order: newColumnOrder.map(Number) },
       },
     });
 
@@ -97,8 +100,17 @@
     newColumnOrder = [];
   }
 
-  function saveColumnWidth(column: ProcessedColumn, width: number | null) {
-    void columnsDataStore.setDisplayOptions(column, { display_width: width });
+  function saveColumnWidth(
+    column: ProcessedColumn | JoinedColumn,
+    width: number | null,
+  ) {
+    // Joined columns do not persist width to the database
+    if (isJoinedColumn(column)) {
+      return;
+    }
+    void columnsDataStore.setDisplayOptions(column.column, {
+      display_width: width,
+    });
   }
 </script>
 
@@ -112,28 +124,36 @@
     />
   </SheetOriginCell>
 
-  {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-    {@const isSelected = $selection.columnIds.has(String(columnId))}
-    <SheetColumnHeaderCell columnIdentifierKey={columnId}>
-      <Draggable
-        on:dragstart={() => dragColumn()}
-        column={processedColumn}
-        {selection}
-      >
-        <Droppable
-          on:drop={() => dropColumn(processedColumn)}
-          on:dragover={(e) => e.preventDefault()}
-          {locationOfFirstDraggedColumn}
-          columnLocation={columnOrder.indexOf(columnId)}
-          {isSelected}
+  {#each [...$allColumns] as [columnId, columnFabric] (columnId)}
+    {@const isSelected = $selection.columnIds.has(columnId)}
+    {@const isJoined = isJoinedColumn(columnFabric)}
+    <SheetColumnHeaderCell
+      columnIdentifierKey={columnId}
+      isRangeRestricted={isJoined}
+    >
+      {#if isJoined}
+        <HeaderCell {columnFabric} {isSelected} />
+      {:else}
+        <Draggable
+          on:dragstart={() => dragColumn()}
+          column={columnFabric}
+          {selection}
         >
-          <HeaderCell {processedColumn} {isSelected} />
-        </Droppable>
-      </Draggable>
+          <Droppable
+            on:drop={() => dropColumn(columnFabric)}
+            on:dragover={(e) => e.preventDefault()}
+            {locationOfFirstDraggedColumn}
+            columnLocation={columnOrder.indexOf(columnId)}
+            {isSelected}
+          >
+            <HeaderCell {columnFabric} {isSelected} />
+          </Droppable>
+        </Draggable>
+      {/if}
       <SheetCellResizer
         columnIdentifierKey={columnId}
-        afterResize={(width) => saveColumnWidth(processedColumn, width)}
-        onReset={() => saveColumnWidth(processedColumn, null)}
+        afterResize={(width) => saveColumnWidth(columnFabric, width)}
+        onReset={() => saveColumnWidth(columnFabric, null)}
       />
     </SheetColumnHeaderCell>
   {/each}

@@ -3,13 +3,13 @@
 
   import type { ArtificialEvents } from '@mathesar-component-library-dir/common/types/ArtificialEvents';
 
+  import { createDebounce } from './debounceUtils';
+
   const dispatch = createEventDispatcher<ArtificialEvents<unknown>>();
 
   export let duration = 300;
   let parentValue: unknown = undefined;
   export { parentValue as value };
-
-  let timeout: number;
 
   function setParentValue(v: unknown) {
     if (parentValue !== v) {
@@ -19,6 +19,11 @@
     }
   }
 
+  const { debounced: debouncedSetParentValue, cancel } = createDebounce(
+    (v: unknown) => setParentValue(v),
+    duration,
+  );
+
   function handleNewValue({
     value,
     debounce,
@@ -26,18 +31,15 @@
     value: unknown;
     debounce: boolean;
   }) {
-    clearTimeout(timeout);
-
     if (debounce) {
-      timeout = window.setTimeout(() => {
-        setParentValue(value);
-      }, duration);
+      debouncedSetParentValue(value);
     } else {
+      cancel();
       setParentValue(value);
     }
   }
 
-  onDestroy(() => clearTimeout(timeout));
+  onDestroy(() => cancel());
 </script>
 
 <slot {handleNewValue} />

@@ -40,6 +40,7 @@
 <input
   {...$$restProps}
   class="checkbox"
+  class:checked={checked ?? false}
   type="checkbox"
   {id}
   checked={checked ?? undefined}
