@@ -2,7 +2,7 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { QueryInstanceFilterTransformation } from '@mathesar/api/rpc/explorations';
-import { validateFilterEntry } from '@mathesar/components/filter-entry';
+import { validateFilterEntry } from '@mathesar/components/filter/utils';
 import { getLimitedFilterInformationById } from '@mathesar/stores/abstract-types';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
 

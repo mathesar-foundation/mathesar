@@ -13,10 +13,9 @@ export function* modifyFilters(p: {
 }) {
   const filteringStore = p.tabularData.meta.filtering;
   const filtering = get(filteringStore);
-  const entries = filtering.entries.filter((e) => e.columnId === p.column.id);
+  const filterCount = filtering.appliedFilterCountForColumn(p.column.id);
   if (!p.imperativeFilterController) return;
   const { imperativeFilterController } = p;
-  const filterCount = entries.length;
 
   yield buttonMenuEntry({
     icon: iconAddFilter,

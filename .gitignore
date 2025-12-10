@@ -181,6 +181,7 @@ Temporary Items
 .media/
 .secrets/
 docs/_build/
+msar/
 
 ## yaml config files ##
 sso.yml

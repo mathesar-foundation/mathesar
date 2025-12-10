@@ -23,6 +23,7 @@
     PermissionsOverview,
     TransferOwnership,
   } from '@mathesar/systems/permissions';
+  import { isTableView } from '@mathesar/utils/tables';
   import {
     Help,
     ImmutableMap,
@@ -34,6 +35,7 @@
   $: tablePrivileges = table.constructTablePrivilegesStore();
   const databaseContext = DatabaseRouteContext.get();
   $: ({ roles, currentRole } = $databaseContext);
+  $: isView = isTableView(table);
 
   const accessControlConfig: AccessControlConfig<
     'read' | 'write',
@@ -141,8 +143,13 @@
   onClose={() => tablePrivileges.reset()}
 >
   <span slot="title">
-    <RichText text={$_('permissions_for_named_table')} let:slotName>
-      {#if slotName === 'tableName'}
+    <RichText
+      text={isView
+        ? $_('permissions_for_named_view')
+        : $_('permissions_for_named_table')}
+      let:slotName
+    >
+      {#if slotName === 'tableName' || slotName === 'viewName'}
         <Identifier>{table.name}</Identifier>
       {/if}
     </RichText>

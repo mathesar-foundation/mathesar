@@ -70,11 +70,25 @@
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
 
-  function setColumnWidth(index: number, width: number | null) {
-    if (queryHandler instanceof QueryManager) {
-      void queryHandler.setColumnDisplayOptions(index, {
-        display_width: width,
-      });
+  async function persistColumnWidths(widthsMap: [string, number | null][]) {
+    for (const [columnId, width] of widthsMap) {
+      if (queryHandler instanceof QueryManager) {
+        const index = columnList.findIndex((c) => c.id === columnId);
+        if (index === -1) return;
+        // This might seem fishy having await inside a loop, but I think it's
+        // okay in this case. It seems to me that the only reason this
+        // `setColumnDisplayOptions` method is async is because of all the
+        // conditional logic happening inside `QueryManager.update` which
+        // _sometimes_ run network requests. Setting column display options
+        // seems to happen synchronously. There don't appear to be any perf
+        // issues with awaiting in a loop here. I didn't want to run these in
+        // parallel because I didn't want to risk race conditions.
+        //
+        // eslint-disable-next-line no-await-in-loop
+        await queryHandler.setColumnDisplayOptions(index, {
+          display_width: width,
+        });
+      }
     }
   }
 </script>
@@ -101,15 +115,15 @@
           inspector.activate('column');
         }
       }}
+      {persistColumnWidths}
     >
       <SheetHeader>
         <SheetOriginCell columnIdentifierKey={ID_ROW_CONTROL_COLUMN} />
-        {#each columnList as processedQueryColumn, i (processedQueryColumn.id)}
+        {#each columnList as processedQueryColumn (processedQueryColumn.id)}
           <ResultHeaderCell
             {processedQueryColumn}
             queryRunner={queryHandler}
             isSelected={columnIds.has(processedQueryColumn.id)}
-            setColumnWidth={(width) => setColumnWidth(i, width)}
           />
         {/each}
       </SheetHeader>

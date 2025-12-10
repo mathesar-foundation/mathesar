@@ -1026,7 +1026,8 @@ CREATE OR REPLACE FUNCTION msar.table_info_table() RETURNS TABLE
   description text, -- The description of the table on the database.
   owner_oid bigint, -- The owner of the table.
   current_role_priv jsonb, -- Privileges of the current role on the table.
-  current_role_owns boolean -- Whether the current role owns the table.
+  current_role_owns boolean, -- Whether the current role owns the table.
+  type text -- The type of the object: 'table', 'view', or 'materialized_view'.
 ) AS $$
 SELECT
   oid::bigint AS oid,
@@ -1035,7 +1036,12 @@ SELECT
   msar.obj_description(oid, 'pg_class') AS description,
   relowner::bigint AS owner_oid,
   msar.list_table_privileges_for_current_role(oid) AS current_role_priv,
-  pg_catalog.pg_has_role(relowner, 'USAGE') AS current_role_owns
+  pg_catalog.pg_has_role(relowner, 'USAGE') AS current_role_owns,
+  CASE relkind
+    WHEN 'r' THEN 'table'
+    WHEN 'v' THEN 'view'
+    WHEN 'm' THEN 'materialized_view'
+  END::text AS type
 FROM pg_catalog.pg_class
 WHERE relkind = 'r' OR relkind = 'v' OR relkind = 'm';
 $$ LANGUAGE SQL STABLE;
@@ -1052,8 +1058,11 @@ Each returned JSON object will have the form:
     "description": <str>,
     "owner_oid": <int>,
     "current_role_priv": [<str>],
-    "current_role_owns": <bool>
+    "current_role_owns": <bool>,
+    "type": <str>
   }
+
+The "type" field will be one of: "table", "view", or "materialized_view".
 
 Args:
   tab_id: The OID or name of the table.
@@ -1075,8 +1084,11 @@ Each returned JSON object in the array will have the form:
     "description": <str>,
     "owner_oid": <int>,
     "current_role_priv": [<str>],
-    "current_role_owns": <bool>
+    "current_role_owns": <bool>,
+    "type": <str>
   }
+
+The "type" field will be one of: "table", "view", or "materialized_view".
 
 Args:
   sch_id: The OID or name of the schema.
