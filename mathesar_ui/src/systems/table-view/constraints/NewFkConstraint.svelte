@@ -85,7 +85,7 @@
     targetTableStructure?.processedColumns,
   );
   $: targetTableColumnsMap =
-    $targetTableColumnsStore ?? new Map<number, ProcessedColumn>();
+    $targetTableColumnsStore ?? new Map<string, ProcessedColumn>();
   $: targetTableColumns = [...targetTableColumnsMap.values()];
 
   function handleNamingStrategyChange() {
@@ -99,11 +99,11 @@
 
   async function handleSave(values: FilledFormValues<typeof form>) {
     await constraintsDataStore.add({
-      columns: [values.baseColumn.id],
+      columns: [values.baseColumn.column.id],
       type: 'f',
       name: values.constraintName,
       fkey_relation_id: values.targetTable.oid,
-      fkey_columns: [values.targetColumn.id],
+      fkey_columns: [values.targetColumn.column.id],
     });
     // Why reset before close when the form is automatically reset during
     // mount? Because without reset here, there's a weird UI state during the

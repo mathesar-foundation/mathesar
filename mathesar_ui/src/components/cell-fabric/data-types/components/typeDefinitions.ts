@@ -4,12 +4,14 @@ import type {
   RawColumnWithMetadata,
 } from '@mathesar/api/rpc/columns';
 import type { FkConstraint } from '@mathesar/api/rpc/constraints';
+import type { JoinPath } from '@mathesar/api/rpc/tables';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { RecordSelectionOrchestratorFactory } from '@mathesar/systems/record-selection-orchestrator/RecordSelectionOrchestrator';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 import type {
   ComponentAndProps,
   FormattedInputProps,
+  ImmutableMap,
   NumberFormatterOptions,
   SelectProps,
 } from '@mathesar-component-library/types';
@@ -87,6 +89,24 @@ export interface LinkedRecordInputProps
   columnFabric: CellColumnFabric;
   recordSummary?: string;
   setRecordSummary?: (recordId: string, recordSummary: string) => void;
+}
+
+// Many-to-many
+
+export interface SimpleManyToManyJoinCellValue {
+  count: number;
+  result: number[];
+}
+
+export interface SimpleManyToManyJoinCellExternalProps {
+  columnAlias: string;
+  joinPath: JoinPath;
+}
+
+export interface SimpleManyToManyJoinCellProps
+  extends CellTypeProps<SimpleManyToManyJoinCellValue>,
+    SimpleManyToManyJoinCellExternalProps {
+  joinedRecordSummariesMap?: ImmutableMap<string, string>;
 }
 
 // TextBox

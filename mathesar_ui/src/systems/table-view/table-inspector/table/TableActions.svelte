@@ -18,6 +18,7 @@
     createDataExplorerUrlToExploreATable,
   } from '@mathesar/systems/data-explorer';
   import { importModalContext } from '@mathesar/systems/table-view/import/ImportController';
+  import { isTableView } from '@mathesar/utils/tables';
   import {
     AnchorButton,
     Button,
@@ -34,6 +35,7 @@
   $: ({ table, columnsDataStore, meta, canInsertRecords, canSelectRecords } =
     $tabularData);
 
+  $: isView = isTableView(table);
   $: ({ filtering, sorting, grouping } = meta);
   $: ({ columns } = columnsDataStore);
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
@@ -63,11 +65,12 @@
 
   function handleDeleteTable() {
     void confirmDelete({
-      identifierType: $_('table'),
+      identifierType: isView ? $_('view') : $_('table'),
       body: {
         component: TableDeleteConfirmationBody,
         props: {
           tableName: table.name,
+          type: table.type,
         },
       },
       onProceed: async () => {
@@ -139,14 +142,16 @@
     </AnchorButton>
   {/if}
 
-  <Button
-    appearance="danger"
-    on:click={handleDeleteTable}
-    disabled={!$currentRoleOwns}
-  >
-    <Icon {...iconDeleteMajor} />
-    <span>{$_('delete_table')}</span>
-  </Button>
+  {#if !isView}
+    <Button
+      appearance="danger"
+      on:click={handleDeleteTable}
+      disabled={!$currentRoleOwns}
+    >
+      <Icon {...iconDeleteMajor} />
+      <span>{isView ? $_('delete_view') : $_('delete_table')}</span>
+    </Button>
+  {/if}
 </div>
 
 <style lang="scss">

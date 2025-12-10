@@ -1,7 +1,7 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { RawConfiguredRole, RawRole } from './roles';
-import type { RawServer } from './servers';
+import type { RawServer, SslMode } from './servers';
 
 export interface RawDatabase {
   id: number;
@@ -116,6 +116,7 @@ export const databases = {
         password: string;
         sample_data?: SampleDataSchemaIdentifier[];
         nickname: RawDatabase['nickname'];
+        sslmode?: SslMode;
       },
       DatabaseConnectionResult
     >(),

@@ -142,7 +142,8 @@ jsonb AS $$
         'columns', jsonb_object_agg(
             pga.attnum, jsonb_build_object(
               'name', pga.attname,
-              'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END
+              'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END,
+              'primary_key', msar.is_pkey_col(pga.attrelid, pga.attnum)
             )
           )
       ) AS tt_info

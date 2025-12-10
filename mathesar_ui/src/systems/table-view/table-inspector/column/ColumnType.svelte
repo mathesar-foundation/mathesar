@@ -8,10 +8,12 @@
     type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
+  import { isTableView } from '@mathesar/utils/tables';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ table, columnsDataStore } = $tabularData);
   $: ({ currentRoleOwns } = table.currentAccess);
+  $: isView = isTableView(table);
 
   export let column: ProcessedColumn;
 
@@ -22,14 +24,14 @@
     >,
   ) {
     await columnsDataStore.changeType({
-      id: column.id,
+      id: column.column.id,
       type: columnInfo.type,
       type_options: columnInfo.type_options,
       metadata: columnInfo.metadata,
     });
   }
   $: disallowDataTypeChange =
-    column.column.primary_key || !!column.linkFk || !$currentRoleOwns;
+    isView || column.column.primary_key || !!column.linkFk || !$currentRoleOwns;
   $: columnWithAbstractType = {
     ...column.column,
     abstractType: column.abstractType,

@@ -27,6 +27,20 @@ Mathesar will remember the connection even after the application is shut down. Y
     - To connect to PostgreSQL via Unix socket, set the "Host" value as the path to the socket, for example: (`/var/run/postgresql`). You may omit the "Port" if using the default (`5432`) or otherwise specify.
         - When using Docker, make sure the container can access the socket path as a mounted volume.
 
+### SSL Mode {:#ssl}
+
+When connecting to an external database, you can configure the SSL mode to control how Mathesar establishes secure connections:
+
+- **Prefer SSL** (default): Attempts to use SSL if the server supports it, but falls back to an unencrypted connection if SSL is not available. This is a good balance between security and compatibility.
+- **Require SSL**: Always uses SSL encryption. The connection will fail if the server doesn't support SSL. Use this for production databases where security is critical.
+- **Disable SSL**: Never uses SSL. Only use this for local development or trusted networks where encryption is not needed.
+
+!!! tip
+    Most cloud-hosted PostgreSQL services (AWS RDS, Google Cloud SQL, Supabase, etc.) support SSL connections. We recommend using "Prefer SSL" or "Require SSL" for these services.
+
+!!! note
+    PostgreSQL also supports `verify-ca` and `verify-full` modes for server certificate verification, but Mathesar does not currently support these. If you need certificate verification for your use case, please [open an issue](https://github.com/mathesar-foundation/mathesar/issues) to let us know.
+
 ## Creating a new database
 
 If you're starting your database from scratch with Mathesar you can either:

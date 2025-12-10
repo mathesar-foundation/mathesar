@@ -9,12 +9,14 @@
     factoryToGetTableNameValidationErrors,
     updateTable,
   } from '@mathesar/stores/tables';
+  import { isTableView } from '@mathesar/utils/tables';
   import type { ModalController } from '@mathesar-component-library';
 
   export let table: Table;
   export let controller: ModalController;
 
   $: getNameValidationErrors = factoryToGetTableNameValidationErrors(table);
+  $: isView = isTableView(table);
 
   async function handleSave(name: string, description: string) {
     await updateTable({
@@ -36,8 +38,11 @@
   getInitialDescription={() => table.description ?? ''}
 >
   <span slot="title" let:initialName>
-    <RichText text={$_('rename_table_with_name')} let:slotName>
-      {#if slotName === 'tableName'}
+    <RichText
+      text={isView ? $_('rename_view_with_name') : $_('rename_table_with_name')}
+      let:slotName
+    >
+      {#if slotName === 'tableName' || slotName === 'viewName'}
         <Identifier>{initialName}</Identifier>
       {/if}
     </RichText>
