@@ -3419,7 +3419,7 @@ BEGIN
     END LOOP;
   END IF;
   column_defs := __msar.process_col_def_jsonb(0, col_defs, false);
-  PERFORM msar.add_temp_table(tab_name, column_defs);
+  PERFORM msar.add_temp_table(uq_tab_name, column_defs);
 
   SELECT nspname, pgc.oid INTO sch_name, rel_id
   FROM pg_catalog.pg_class AS pgc

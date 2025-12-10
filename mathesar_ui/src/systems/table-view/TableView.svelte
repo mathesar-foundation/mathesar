@@ -4,6 +4,7 @@
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
+  import type { ColumnMetadata } from '@mathesar/api/rpc/_common/columnDisplayOptions';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
@@ -19,6 +20,7 @@
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     getTabularDataStoreFromContext,
+    isJoinedColumn,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
@@ -58,6 +60,8 @@
     isLoading,
     selection,
     recordsData,
+    allColumns,
+    columnsDataStore,
   } = $tabularData);
   $: $tabularData, (tableInspectorTab = 'table');
   $: clipboardHandler = new SheetClipboardHandler({
@@ -121,6 +125,19 @@
     ...[...$joinedColumns.keys()].map((id): [string, number] => [id, 300]),
   ]);
   $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
+
+  function persistColumnWidths(widthsMap: [string, number | null][]): void {
+    function* getChanges(): Generator<[number, ColumnMetadata | null]> {
+      for (const [columnId, width] of widthsMap) {
+        const column = $allColumns.get(columnId);
+        if (!column) continue;
+        // Joined columns do not persist width to the database
+        if (isJoinedColumn(column)) continue;
+        yield [parseInt(column.id, 10), { display_width: width }];
+      }
+    }
+    void columnsDataStore.setDisplayOptions(new Map(getChanges()));
+  }
 </script>
 
 <div class="table-view">
@@ -137,6 +154,7 @@
           {columnWidths}
           {selection}
           {usesVirtualList}
+          {persistColumnWidths}
           onCellSelectionStart={(cell) => {
             if (cell.type === 'column-header-cell') {
               tableInspectorTab = 'column';
