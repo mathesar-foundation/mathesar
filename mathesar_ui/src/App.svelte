@@ -44,11 +44,13 @@
 <style global lang="scss">
   @import 'component-library/styles.scss';
   @import 'packages/new-item-highlighter/highlightNewItems.scss';
+  @import 'components/drag-and-drop/dnd.css';
 
   $product-utility-colors: (
     'schema': $salmon,
     'database': $amethyst,
     'table': $pumpkin,
+    'view': hsl(220, 65%, 55%),
     'column': hsl(hue($salmon), 40%, 60%),
     'record': hsl(296, 35%, 45%),
     'record-fk': hsl(296, 70%, 45%),

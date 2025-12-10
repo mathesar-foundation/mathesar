@@ -16,6 +16,8 @@ export class Table {
 
   metadata;
 
+  type: 'table' | 'view' | 'materialized_view';
+
   readonly schema;
 
   readonly currentAccess;
@@ -28,6 +30,7 @@ export class Table {
     this.name = props.rawTableWithMetadata.name;
     this.description = props.rawTableWithMetadata.description;
     this.metadata = props.rawTableWithMetadata.metadata;
+    this.type = props.rawTableWithMetadata.type;
     this.currentAccess = new ObjectCurrentAccess(props.rawTableWithMetadata);
     this.schema = props.schema;
   }

@@ -19,6 +19,7 @@
   } from '@mathesar/stores/table-data';
   import { currentTablesData } from '@mathesar/stores/tables';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
+  import { isTableView } from '@mathesar/utils/tables';
   import { defined } from '@mathesar-component-library';
 
   import ColumnActions from './ColumnActions.svelte';
@@ -76,6 +77,7 @@
       mappingTable,
     };
   })();
+  $: isView = isTableView(table);
 </script>
 
 {#if selectedColumns.length === 0}
@@ -131,12 +133,14 @@
           {#if !!column.linkFk}
             <ColumnTypeSpecifierTag {column} type="foreignKey" />
           {/if}
-          <ColumnOptions
-            {column}
-            columnsDataStore={$tabularData.columnsDataStore}
-            constraintsDataStore={$tabularData.constraintsDataStore}
-            currentRoleOwnsTable={$currentRoleOwns}
-          />
+          {#if !isView}
+            <ColumnOptions
+              {column}
+              columnsDataStore={$tabularData.columnsDataStore}
+              constraintsDataStore={$tabularData.constraintsDataStore}
+              currentRoleOwnsTable={$currentRoleOwns}
+            />
+          {/if}
         {/if}
       </InspectorSection>
     {/key}
@@ -152,7 +156,7 @@
     </InspectorSection>
   {/if}
 
-  {#if column && !column.column.default?.is_dynamic}
+  {#if !isView && column && !column.column.default?.is_dynamic}
     <InspectorSection
       title={$_('default_value')}
       bind:isOpen={$tableInspectorColumnDefaultValueVisible}
@@ -186,7 +190,7 @@
     </InspectorSection>
   {/if}
 
-  {#if selectedProcessedColumns.length > 0}
+  {#if !isView && selectedProcessedColumns.length > 0}
     <InspectorSection
       title={$_('actions')}
       bind:isOpen={$tableInspectorColumnActionsVisible}

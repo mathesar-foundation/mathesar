@@ -9,19 +9,13 @@
     getDbTypeBasedSimpleInputCap,
   } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { iconDeleteMajor } from '@mathesar/icons';
   import type {
     AbstractTypeFilterDefinition,
     FilterId,
   } from '@mathesar/stores/abstract-types/types';
   import type AssociatedCellData from '@mathesar/stores/AssociatedCellData';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import {
-    Button,
-    Icon,
-    InputGroup,
-    Select,
-  } from '@mathesar-component-library';
+  import { InputGroup, Select } from '@mathesar-component-library';
   import {
     type ComponentAndProps,
     ImmutableMap,
@@ -29,48 +23,41 @@
 
   import type { CellColumnLike } from '../cell-fabric/data-types/typeDefinitions';
 
-  import type { FilterEntryColumnLike } from './types';
-  import { FILTER_INPUT_CLASS, validateFilterEntry } from './utils';
-
-  type T = $$Generic;
-  type ColumnLikeType = FilterEntryColumnLike & T;
+  import {
+    FILTER_INPUT_CLASS,
+    type FilterEntryColumn,
+    validateFilterEntry,
+  } from './utils';
 
   const dispatch = createEventDispatcher();
 
-  export let columns: ReadableMapLike<ColumnLikeType['id'], ColumnLikeType>;
-  export let getColumnLabel: (column: ColumnLikeType) => string;
+  export let columns: ReadableMapLike<
+    FilterEntryColumn['id'],
+    FilterEntryColumn
+  >;
+  export let getColumnLabel: (column: FilterEntryColumn) => string;
   export let getColumnConstraintType: (
-    column: ColumnLikeType,
+    column: FilterEntryColumn,
   ) => ConstraintType[] | undefined = () => undefined;
 
-  export let columnIdentifier: ColumnLikeType['id'] | undefined;
+  export let columnIdentifier: FilterEntryColumn['id'] | undefined;
   export let conditionIdentifier: FilterId | undefined;
   export let value: unknown | undefined;
 
   export let layout: 'horizontal' | 'vertical' = 'horizontal';
   export let disableColumnChange = false;
-  export let allowDelete = true;
   export let numberOfFilters = 0;
   export let recordSummaryStore: AssociatedCellData<string> | undefined =
     undefined;
 
-  /**
-   * Eslint recognizes an unnecessary type assertion that typecheck fails to
-   * do in the svelte template below. *:/ Needs more digging down*
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  $: columnIdentifiers = [...columns.values()].map(
-    (_column) => _column.id,
-  ) as ColumnLikeType['id'][];
+  $: columnIdentifiers = [...columns.values()].map((_column) => _column.id);
   $: selectedColumn = columnIdentifier
     ? columns.get(columnIdentifier)
     : undefined;
   $: selectedColumnFiltersMap =
     selectedColumn?.allowedFiltersMap ??
-    (new Map() as ColumnLikeType['allowedFiltersMap']);
-  $: conditionIds = [...selectedColumnFiltersMap].map(
-    ([_conditionId]) => _conditionId,
-  );
+    (new Map() as FilterEntryColumn['allowedFiltersMap']);
+  $: conditionIds = [...selectedColumnFiltersMap.keys()];
   $: selectedCondition = conditionIdentifier
     ? selectedColumnFiltersMap.get(conditionIdentifier)
     : undefined;
@@ -92,7 +79,7 @@
     window.clearTimeout(timer);
   });
 
-  function getColumnName(_columnId?: ColumnLikeType['id']) {
+  function getColumnName(_columnId?: FilterEntryColumn['id']) {
     if (_columnId) {
       const column = columns.get(_columnId);
       if (column) {
@@ -103,7 +90,7 @@
   }
 
   function getColumnConstraintTypeFromColumnId(
-    _columnId?: ColumnLikeType['id'],
+    _columnId?: FilterEntryColumn['id'],
   ) {
     if (_columnId) {
       const column = columns.get(_columnId);
@@ -143,7 +130,7 @@
 
   function calculateInputCap(
     _selectedCondition?: AbstractTypeFilterDefinition,
-    _selectedColumn?: FilterEntryColumnLike,
+    _selectedColumn?: FilterEntryColumn,
   ): ComponentAndProps | undefined {
     const parameterTypeId = _selectedCondition?.parameters[0];
     // If there are no parameters, show no input. eg., isEmpty
@@ -207,11 +194,6 @@
 </script>
 
 <div class="filter-entry {layout}">
-  {#if $$slots.default}
-    <div class="prefix">
-      <slot />
-    </div>
-  {/if}
   <InputGroup class={layout}>
     <Select
       options={columnIdentifiers}
@@ -263,70 +245,46 @@
         />
       {/if}
     {/key}
-    {#if allowDelete}
-      <Button
-        size="small"
-        class="filter-remove"
-        appearance="secondary"
-        on:click={() => dispatch('removeFilter')}
-      >
-        <Icon {...iconDeleteMajor} />
-      </Button>
-    {/if}
   </InputGroup>
+  <slot />
 </div>
 
 <style lang="scss">
   .filter-entry {
     display: flex;
-    gap: 10px;
-
-    .prefix {
-      flex-basis: 80px;
-      flex-shrink: 0;
-      flex-grow: 0;
-      display: flex;
-      align-items: center;
-
-      > :global(.input-group-text) {
-        padding: 5px 13px;
-      }
-    }
-
-    & + :global(.filter-entry) {
-      margin-top: 6px;
-    }
+    gap: 0.2rem;
+    min-width: min(30rem, 100%);
+    max-width: 38rem;
 
     &.horizontal {
-      min-width: 560px;
-
-      :global(.filter-column-id.trigger),
-      :global(.filter-condition) {
-        width: 140px;
-        flex-basis: 140px;
-        flex-shrink: 0;
-        flex-grow: 0;
-      }
-
-      :global(.filter-input) {
-        width: 160px;
-        flex-basis: 160px;
-        flex-grow: 0;
-        flex-shrink: 0;
-        resize: none;
-      }
+      align-items: center;
+      flex-grow: 1;
     }
 
-    &.vertical {
+    @media (max-width: 600px) {
       :global(.filter-input) {
         flex-grow: 1;
         resize: vertical;
       }
     }
+    @media (min-width: 681px) {
+      &.horizontal {
+        :global(.filter-column-id.trigger),
+        :global(.filter-condition) {
+          width: 140px;
+          flex-basis: 140px;
+          flex-shrink: 0;
+          flex-grow: 0;
+        }
 
-    :global(.filter-remove) {
-      flex-shrink: 0;
-      flex-grow: 0;
+        :global(.filter-input) {
+          width: 160px;
+          flex-basis: 160px;
+          flex-grow: 0;
+          flex-shrink: 0;
+          resize: none;
+        }
+      }
     }
   }
 </style>
