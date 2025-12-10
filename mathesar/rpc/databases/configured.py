@@ -5,6 +5,7 @@ from modernrpc.core import REQUEST_KEY
 from mathesar.models.base import Database
 from mathesar.models import exceptions as db_exceptions
 from mathesar.rpc.decorators import mathesar_rpc_method
+from db.databases import get_postgres_version
 
 
 class ConfiguredDatabaseInfo(TypedDict):
@@ -20,6 +21,10 @@ class ConfiguredDatabaseInfo(TypedDict):
         needs_upgrade_attention: This is `True` if the SQL version isn't the
             same as the service version.
         nickname: A optional user-configurable name for the database.
+        postgres_version: The PostgreSQL server version as an integer (e.g., 140000 for version 14).
+            None if unable to retrieve version.
+        is_deprecated: True if the PostgreSQL version is deprecated and will not be
+            supported in future Mathesar versions.
     """
     id: int
     name: str
@@ -27,9 +32,12 @@ class ConfiguredDatabaseInfo(TypedDict):
     last_confirmed_sql_version: str
     needs_upgrade_attention: bool
     nickname: Optional[str]
+    postgres_version: Optional[int]
+    is_deprecated: bool
 
     @classmethod
     def from_model(cls, model):
+        is_deprecated = model.postgres_version is not None and model.postgres_version < 140000 
         return cls(
             id=model.id,
             name=model.name,
@@ -37,6 +45,8 @@ class ConfiguredDatabaseInfo(TypedDict):
             last_confirmed_sql_version=model.last_confirmed_sql_version,
             needs_upgrade_attention=model.needs_upgrade_attention,
             nickname=model.nickname,
+            postgres_version=model.postgres_version,
+            is_deprecated=is_deprecated
         )
 
 
@@ -63,7 +73,7 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
         server_id: The Django id of the server containing the databases.
 
     Returns:
-        A list of database details.
+        A list of database details. Including the Postgres database version
     """
     user = kwargs.get(REQUEST_KEY).user
     if user.is_superuser:
@@ -77,8 +87,18 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
         ) if server_id is not None else Database.objects.filter(
             userdatabaserolemap__user=user
         )
+        
+    result=[]
+    for db_model in database_qs:
+        postgres_version=None
+        try:
+            with db_model.connect_as_user(user) as conn:
+                postgres_version= get_postgres_version(conn)
+        except Exception:
+            pass
+        result.append(ConfiguredDatabaseInfo.from_model(db_model,postgres_version))
 
-    return [ConfiguredDatabaseInfo.from_model(db_model) for db_model in database_qs]
+    return result
 
 
 @mathesar_rpc_method(name="databases.configured.patch")
