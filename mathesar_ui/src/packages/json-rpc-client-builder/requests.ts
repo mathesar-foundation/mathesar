@@ -7,13 +7,12 @@ const jsonrpc = '2.0';
 
 async function parseResponseJSON(response: Response): Promise<unknown> {
   const text = await response.text();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/restrict-template-expressions
   const processed = text.replace(
     /:\s*(-?\d{16,})\b/g,
-    (match, num) => {
-      return match.replace(num, `"${num}"`);
-    },
+    (_match: string, num: string) => `:"${num}"`,
   );
-  return JSON.parse(processed);
+  return JSON.parse(processed) as unknown;
 }
 
 export interface RpcResult<T> {

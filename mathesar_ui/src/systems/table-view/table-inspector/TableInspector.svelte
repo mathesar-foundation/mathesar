@@ -5,7 +5,7 @@
   import InspectorTabContent from '@mathesar/components/InspectorTabContent.svelte';
   import type { Table } from '@mathesar/models/Table';
   import { isTableView } from '@mathesar/utils/tables';
-  import { TabContainer, defined } from '@mathesar-component-library';
+  import { TabContainer } from '@mathesar-component-library';
 
   import CellMode from './cell/CellMode.svelte';
   import ColumnMode from './column/ColumnMode.svelte';
