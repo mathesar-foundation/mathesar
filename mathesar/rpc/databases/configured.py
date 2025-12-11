@@ -36,8 +36,8 @@ class ConfiguredDatabaseInfo(TypedDict):
     is_deprecated: bool
 
     @classmethod
-    def from_model(cls, model):
-        is_deprecated = model.postgres_version is not None and model.postgres_version < 140000 
+    def from_model(cls, model, postgres_version: Optional[int] = None):
+        is_deprecated = postgres_version is not None and postgres_version < 140000 
         return cls(
             id=model.id,
             name=model.name,
@@ -45,7 +45,7 @@ class ConfiguredDatabaseInfo(TypedDict):
             last_confirmed_sql_version=model.last_confirmed_sql_version,
             needs_upgrade_attention=model.needs_upgrade_attention,
             nickname=model.nickname,
-            postgres_version=model.postgres_version,
+            postgres_version=postgres_version,
             is_deprecated=is_deprecated
         )
 
@@ -113,13 +113,22 @@ def patch(*, database_id: int, patch: ConfiguredDatabasePatch, **kwargs) -> Conf
     Returns:
         An object describing the database.
     """
+    user = kwargs.get(REQUEST_KEY).user
     database = Database.objects.get(id=database_id)
     if "name" in patch:
         database.name = patch.get("name")
     if "nickname" in patch:
         database.nickname = patch.get("nickname")
     database.save()
-    return ConfiguredDatabaseInfo.from_model(database)
+    
+    postgres_version = None
+    try:
+        with database.connect_as_user(user) as conn:
+            postgres_version = get_postgres_version(conn)
+    except Exception:
+        pass
+    
+    return ConfiguredDatabaseInfo.from_model(database, postgres_version)
 
 
 class DisconnectResult(TypedDict):

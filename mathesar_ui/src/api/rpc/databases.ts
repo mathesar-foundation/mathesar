@@ -10,6 +10,8 @@ export interface RawDatabase {
   server_id: RawServer['id'];
   last_confirmed_sql_version: string;
   needs_upgrade_attention: boolean;
+  postgres_version: number | null;
+  is_deprecated: boolean;
 }
 
 export const allDatabasePrivileges = [

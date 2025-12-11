@@ -32,8 +32,8 @@ def create_database(database_name, conn):
 def get_postgres_version(conn):
     try:
         version = conn.execute(
-            sql.SQL("SELECT current_setting('server_version_num')::int").fetchone()
-        )
+            sql.SQL("SELECT current_setting('server_version_num')::int")
+        ).fetchone()
         return version[0] if version else None
     except Exception:
         return None

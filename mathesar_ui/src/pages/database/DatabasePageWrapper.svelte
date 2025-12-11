@@ -3,6 +3,7 @@
   import { router } from 'tinro';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import PostgresDeprecationWarning from '@mathesar/components/PostgresDeprecationWarning.svelte';
   import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import { staticText } from '@mathesar/i18n/staticText';
@@ -93,6 +94,9 @@
   }}
 >
   <div class="database-page-header" slot="secondary-header">
+    <PostgresDeprecationWarning
+      deprecatedDatabaseNames={database.isDeprecated ? [database.displayName] : []}
+    />
     <AppSecondaryHeader
       icon={iconDatabase}
       name={database.displayName}

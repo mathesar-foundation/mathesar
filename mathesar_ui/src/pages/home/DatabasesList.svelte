@@ -6,6 +6,7 @@
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import PostgresDeprecationWarning from '@mathesar/components/PostgresDeprecationWarning.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconConnection } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -44,6 +45,9 @@
   ];
   $: databasesNeedingUpgrade = [
     ...filter((d) => d.needsUpgradeAttention, $databases.values()),
+  ];
+  $: deprecatedDatabases = [
+    ...filter((d) => d.isDeprecated, $databases.values()),
   ];
   $: countDatabases = $databases.size;
   $: countDatabasesNeedingUpgrade = databasesNeedingUpgrade.length;
@@ -119,6 +123,11 @@
 
         <div class="content" slot="content">
           <div class="message-area">
+            <PostgresDeprecationWarning
+              deprecatedDatabaseNames={deprecatedDatabases.map((d) =>
+                d.displayName,
+              )}
+            />
             {#if needToUpgrade !== 'none'}
               <WarningBox>
                 <div class="bulk-upgrade-message">
