@@ -62,7 +62,7 @@
         {#if field.kind === 'foreign_key'}
           <LabeledInput layout="stacked" label={$_('field_fk_rule_label')}>
             <FkFormFieldRuleSelector
-              appearance="default"
+              appearance="control"
               {dataFormManager}
               dataFormField={field}
             />

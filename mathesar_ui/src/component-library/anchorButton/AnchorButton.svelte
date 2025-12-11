@@ -5,10 +5,10 @@
   export let href: string;
 
   /**
-   * Appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
+   * Appearance. One of: 'control', 'primary', 'secondary', 'plain', 'ghost'.
    * @required
    */
-  export let appearance: Appearance = 'default';
+  export let appearance: Appearance = 'control';
 
   /**
    * Size. One of: 'small', 'medium', 'large'.

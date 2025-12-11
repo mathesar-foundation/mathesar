@@ -19,7 +19,7 @@
     appearance: {
       control: {
         type: 'select',
-        options: ['default', 'primary', 'secondary', 'plain', 'ghost'],
+        options: ['control', 'primary', 'secondary', 'plain', 'ghost'],
       },
     },
   };
@@ -57,7 +57,7 @@
 <Story
   name="Basic"
   args={{
-    appearance: 'default',
+    appearance: 'control',
     slotContent: 'Basic button',
   }}
   {argTypes}
@@ -69,7 +69,7 @@
 </Story>
 
 <Story name="Appearances" parameters={disabledAddons}>
-  <Button appearance="default">Default button</Button>
+  <Button appearance="control">Control button</Button>
   <Button appearance="primary">Primary button</Button>
   <Button appearance="secondary">Secondary button</Button>
   <Button appearance="plain">Plain button</Button>
