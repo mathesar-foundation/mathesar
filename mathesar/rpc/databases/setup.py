@@ -67,6 +67,9 @@ def create_new(
             - 'museum_exhibits'
             - 'nonprofit_grants'
         nickname: An optional nickname for the database.
+
+    Returns:
+        Info about the objects resulting from calling the setup functions.
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_new_database_for_user_on_internal_server(
@@ -114,6 +117,9 @@ def connect_existing(
         nickname: An optional nickname for the database.
         sslmode: SSL mode for the connection. One of 'disable', 'prefer',
             or 'require'. Defaults to 'prefer'.
+
+    Returns:
+        Info about the objects resulting from calling the setup functions.
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_preexisting_database_for_user(

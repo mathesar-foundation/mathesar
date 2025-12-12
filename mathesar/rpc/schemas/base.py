@@ -68,7 +68,7 @@ def add(
         database_id: The Django id of the database containing the schema.
         owner_oid: The OID of the role who will own the new schema.
             If owner_oid is None, the current role will be the owner of the new schema.
-        description: A description of the schema
+        description: A description of the schema.
 
     Returns:
         The SchemaInfo describing the user-defined schema in the database.
@@ -88,10 +88,10 @@ def list_(*, database_id: int, **kwargs) -> list[SchemaInfo]:
     List information about schemas in a database. Exposed as `list`.
 
     Args:
-        database_id: The Django id of the database containing the table.
+        database_id: The Django id of the database containing the schemas.
 
     Returns:
-        A list of SchemaInfo objects
+        A list of SchemaInfo objects.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -107,7 +107,7 @@ def get(*, schema_oid: int, database_id: int, **kwargs) -> SchemaInfo:
 
     Args:
         schema_oid: The OID of the schema to get.
-        database_id: The Django id of the database containing the table.
+        database_id: The Django id of the database containing the schema.
 
     Returns:
         The SchemaInfo describing the user-defined schema in the database.
@@ -143,7 +143,7 @@ def patch(*, schema_oid: int, database_id: int, patch: SchemaPatch, **kwargs) ->
     Patch a schema, given its OID.
 
     Args:
-        schema_oid: The OID of the schema to delete.
+        schema_oid: The OID of the schema to patch.
         database_id: The Django id of the database containing the schema.
         patch: A SchemaPatch object containing the fields to update.
 

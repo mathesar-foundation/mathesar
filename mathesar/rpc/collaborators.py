@@ -66,6 +66,9 @@ def add(
         database_id: The Django id of the Database to associate with the collaborator.
         user_id: The Django id of the User model instance who'd be the collaborator.
         configured_role_id: The Django id of the ConfiguredRole model instance to associate with the collaborator.
+
+    Returns:
+        The information of the created collaborator.
     """
     database = Database.objects.get(id=database_id)
     user = User.objects.get(id=user_id)
@@ -104,6 +107,9 @@ def set_role(
     Args:
         collaborator_id: The Django id of the UserDatabaseRoleMap model instance of the collaborator.
         configured_role_id: The Django id of the ConfiguredRole model instance to associate with the collaborator.
+
+    Returns:
+        The updated information of the collaborator.
     """
     collaborator = UserDatabaseRoleMap.objects.get(id=collaborator_id)
     configured_role = ConfiguredRole.objects.get(id=configured_role_id)

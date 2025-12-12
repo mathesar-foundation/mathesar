@@ -59,7 +59,7 @@ def delete(*, database_oid: int, database_id: int, **kwargs) -> None:
     Drop a database from the server.
 
     Args:
-        database_oid: The OID of the database to delete on the database.
+        database_oid: The OID of the database to delete.
         database_id: The Django id of the database to connect to.
     """
     user = kwargs.get(REQUEST_KEY).user
