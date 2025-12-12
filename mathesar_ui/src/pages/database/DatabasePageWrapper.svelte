@@ -95,7 +95,9 @@
 >
   <div class="database-page-header" slot="secondary-header">
     <PostgresDeprecationWarning
-      deprecatedDatabaseNames={database.isDeprecated ? [database.displayName] : []}
+      deprecatedDatabaseNames={database.isDeprecated
+        ? [database.displayName]
+        : []}
     />
     <AppSecondaryHeader
       icon={iconDatabase}

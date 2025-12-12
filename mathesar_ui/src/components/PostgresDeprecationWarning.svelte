@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
 
   export let deprecatedDatabaseNames: string[] = [];

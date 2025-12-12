@@ -124,8 +124,8 @@
         <div class="content" slot="content">
           <div class="message-area">
             <PostgresDeprecationWarning
-              deprecatedDatabaseNames={deprecatedDatabases.map((d) =>
-                d.displayName,
+              deprecatedDatabaseNames={deprecatedDatabases.map(
+                (d) => d.displayName,
               )}
             />
             {#if needToUpgrade !== 'none'}
