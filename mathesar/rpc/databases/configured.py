@@ -2,10 +2,10 @@ from typing import TypedDict, Optional
 
 from modernrpc.core import REQUEST_KEY
 
+from db.databases import get_postgres_version
 from mathesar.models.base import Database
 from mathesar.models import exceptions as db_exceptions
 from mathesar.rpc.decorators import mathesar_rpc_method
-from db.databases import get_postgres_version
 
 
 class ConfiguredDatabaseInfo(TypedDict):
@@ -36,8 +36,7 @@ class ConfiguredDatabaseInfo(TypedDict):
     is_deprecated: bool
 
     @classmethod
-    def from_model(cls, model, postgres_version: Optional[int] = None):
-        is_deprecated = postgres_version is not None and postgres_version < 140000 
+    def from_model(cls, model):
         return cls(
             id=model.id,
             name=model.name,
@@ -45,8 +44,8 @@ class ConfiguredDatabaseInfo(TypedDict):
             last_confirmed_sql_version=model.last_confirmed_sql_version,
             needs_upgrade_attention=model.needs_upgrade_attention,
             nickname=model.nickname,
-            postgres_version=postgres_version,
-            is_deprecated=is_deprecated
+            postgres_version=None,
+            is_deprecated=False,
         )
 
 
@@ -73,7 +72,7 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
         server_id: The Django id of the server containing the databases.
 
     Returns:
-        A list of database details. Including the Postgres database version
+        A list of database details.
     """
     user = kwargs.get(REQUEST_KEY).user
     if user.is_superuser:
@@ -87,18 +86,26 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
         ) if server_id is not None else Database.objects.filter(
             userdatabaserolemap__user=user
         )
-        
-    result=[]
+
+    db_list=[]
     for db_model in database_qs:
-        postgres_version=None
+        db_info = ConfiguredDatabaseInfo.from_model(db_model)
+
+        # NOTE: When a connection cannot be established to the database,
+        # there could be a delay in startup due to connection timeout.
         try:
             with db_model.connect_user(user) as conn:
-                postgres_version= get_postgres_version(conn)
+                postgres_version = get_postgres_version(conn)
+                db_info["postgres_version"] = postgres_version
+                db_info["is_deprecated"] = (
+                    postgres_version is not None and postgres_version < 140000
+                )
         except Exception:
             pass
-        result.append(ConfiguredDatabaseInfo.from_model(db_model,postgres_version))
 
-    return result
+        db_list.append(db_info)
+
+    return db_list
 
 
 @mathesar_rpc_method(name="databases.configured.patch")
@@ -113,22 +120,13 @@ def patch(*, database_id: int, patch: ConfiguredDatabasePatch, **kwargs) -> Conf
     Returns:
         An object describing the database.
     """
-    user = kwargs.get(REQUEST_KEY).user
     database = Database.objects.get(id=database_id)
     if "name" in patch:
         database.name = patch.get("name")
     if "nickname" in patch:
         database.nickname = patch.get("nickname")
     database.save()
-    
-    postgres_version = None
-    try:
-        with database.connect_user(user) as conn:
-            postgres_version = get_postgres_version(conn)
-    except Exception:
-        pass
-    
-    return ConfiguredDatabaseInfo.from_model(database, postgres_version)
+    return ConfiguredDatabaseInfo.from_model(database)
 
 
 class DisconnectResult(TypedDict):
