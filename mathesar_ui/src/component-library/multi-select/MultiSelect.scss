@@ -1,0 +1,63 @@
+.multi-select-trigger {
+  --spacing: 0.2em;
+  --spacing-2: calc(2 * var(--spacing));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: solid 0.02em var(--color-border-input);
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing);
+  min-height: 2.37em;
+  background: var(--color-bg-input);
+  gap: var(--spacing);
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .selected-values {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+    gap: var(--spacing);
+    align-items: center;
+  }
+
+  .selected-value {
+    display: flex;
+    padding: 0.285rem 0.428rem;
+    background: var(--color-bg-token);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--border-radius-m);
+    color: var(--color-fg-base);
+    align-items: center;
+  }
+
+  .icon-button {
+    color: var(--color-fg-subtle-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-button:hover {
+    color: var(--color-fg-base);
+  }
+
+  .remove-button {
+    display: flex;
+    align-items: center;
+    padding-left: var(--spacing-2);
+  }
+
+  .clear-button {
+    padding-left: var(--spacing);
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+  }
+  &:hover .clear-button {
+    visibility: visible;
+  }
+}

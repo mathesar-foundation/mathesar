@@ -1,0 +1,78 @@
+@use '../colors.scss' as colors;
+@use './dark-base.scss' as dark-base;
+
+/**
+ * These colors should only be used with the following properties:
+ * - `background`
+ * - `background-color`
+ */
+
+$base-hue: dark-base.$base-hue;
+$base-saturation: dark-base.$base-saturation;
+
+$static: (
+  'highlight': hsl(38, 80%, 30%),
+  'highlight-subtle': hsl(38, 80%, 8%),
+);
+
+$elevations: (
+  'sunken-1': hsl($base-hue, $base-saturation, 0%),
+  'base': hsl($base-hue, $base-saturation, 2%),
+  'raised-1': hsl($base-hue, $base-saturation, 5%),
+  'raised-2': hsl($base-hue, $base-saturation, 7%),
+  'raised-3': hsl($base-hue, $base-saturation, 10%),
+);
+
+$components: (
+  'control': hsl($base-hue, $base-saturation, 5%),
+  'header': hsl($base-hue, $base-saturation, 5%),
+  'supporting': hsl($base-hue, $base-saturation, 5%),
+  'group': hsl($base-hue, $base-saturation, 2%),
+  'input': hsl($base-hue, $base-saturation, 0%),
+  'token': hsl($base-hue, $base-saturation, 20%),
+  'filled-input': colors.$input-fill,
+);
+
+$common-state-deltas: (
+  'muted': 0 10 10,
+  'hover': 0 8 4,
+  'active': 0 0 9,
+  'focused': 0 0 2,
+  'disabled': 0 0 10,
+);
+
+$contextual: (
+  'success': hsl(hue(colors.$success), 25%, 10%),
+  'success-strong': hsl(hue(colors.$success), 25%, 60%),
+  'warning': hsl(hue(colors.$warning), 40%, 10%),
+  'warning-strong': hsl(hue(colors.$warning), 40%, 60%),
+  'danger': hsl(hue(colors.$danger), 60%, 10%),
+  'danger-strong': hsl(hue(colors.$danger), 60%, 60%),
+  'info': hsl(hue(colors.$info), 35%, 10%),
+  'info-strong': hsl(hue(colors.$info), 35%, 60%),
+  'help': hsl(hue(colors.$help), 30%, 5%),
+  'help-strong': hsl(hue(colors.$help), 30%, 50%),
+  'tip': hsl(hue(colors.$tip), 20%, 10%),
+  'tip-strong': hsl(hue(colors.$tip), 20%, 60%),
+  'outcome': hsl(hue(colors.$outcome), 20%, 10%),
+  'outcome-strong': hsl(hue(colors.$outcome), 20%, 60%),
+);
+
+$contextual-state-deltas: (
+  'hover': 0 6 6,
+  'active': 0 2 10,
+  'focused': 5 5 3,
+  'disabled': 0 0 -20,
+  'muted': 0 0 -10,
+);
+
+$exports: (
+  'stateless': (
+    $static,
+  ),
+  'stateful': (
+    ($elevations, $common-state-deltas),
+    ($components, $common-state-deltas),
+    ($contextual, $contextual-state-deltas),
+  ),
+);

@@ -1,0 +1,60 @@
+.tutorial {
+  position: relative;
+  border-radius: var(--border-radius-xl);
+  border: 1px solid var(--color-border-tip);
+  padding: var(--lg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.6;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-bg-tip), transparent 60%);
+  box-shadow: 0 4px 8px color-mix(in srgb, var(--color-shadow), transparent 8%);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: color-mix(in srgb, var-(--color-bg-tip), transparent 60%);
+  }
+
+  .content {
+    text-align: center;
+    width: 100%;
+    padding: 1rem 0;
+    position: relative;
+  }
+
+  > * + * {
+    margin-top: 1rem;
+  }
+
+  .icon {
+    margin-bottom: var(--lg1);
+    color: var(--color-fg-tip);
+  }
+
+  .title {
+    font-size: var(--lg2);
+    color: var(--color-fg-tip);
+    font-weight: var(--font-weight-extra-bold);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0 0 1rem 0;
+    text-align: center;
+  }
+
+  .body {
+    color: var(--color-fg-tip);
+  }
+
+  .footer {
+    margin-top: var(--lg1);
+    display: flex;
+    color: var(--color-fg-base);
+    justify-content: center;
+  }
+}

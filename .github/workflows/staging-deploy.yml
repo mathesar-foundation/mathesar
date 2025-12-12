@@ -1,0 +1,30 @@
+name: Deploy to staging
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  staging-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout infrastructure repo
+      uses: actions/checkout@v2
+      with:
+        repository: 'mathesar-foundation/mathesar-infrastructure'
+        token: ${{ secrets.MATHESAR_ORG_GITHUB_TOKEN }} # Repo is private, so an access token is used
+    # This checkout is used for getting the 'action' from the current repo
+    - name: Checkout mathesar repo
+      uses: actions/checkout@v2
+      with:
+        path: mathesar
+    - name: Run ansible
+      uses: ./mathesar/.github/actions/ansible
+      with:
+        playbook: staging
+        inventory: hosts
+        vault_password: ${{ secrets.ANSIBLE_VAULT_PASS }}
+        deploy_key: ${{ secrets.STAGING_DEPLOY_KEY }}
+      env:
+        ANSIBLE_HOST_KEY_CHECKING: False
+        DEBIAN_FRONTEND: noninteractive # needed so that apt doesn't show interactive prompts

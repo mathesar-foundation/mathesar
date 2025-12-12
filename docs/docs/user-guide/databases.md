@@ -1,0 +1,163 @@
+# Databases
+
+Each installation of Mathesar can connect to multiple PostgreSQL databases. When you begin using Mathesar, your first step will likely be connecting to or creating a database. But what exactly is a database, and how does it differ from tools you might be more familiar with, like spreadsheets?
+
+## What is a database
+
+If you're using Mathesar as a spreadsheet alternative, you might be curious what makes a database different from a spreadsheet and why it matters. A database is a self-contained set of data stored within a rigid structure that maintains data integrity and allows for efficient data operations. There are many different kinds of databases, and Mathesar [works specifically with _PostgreSQL_](./index.md#postgres) databases, so that's what we'll focus on here.
+
+Within a database, you can have multiple [tables](./tables.md) &mdash; much like you might have multiple _sheets_ within a spreadsheet. And within each table in your database, you'll have rows and columns, similar to a spreadsheet. But while a spreadsheet gives you a blank canvas to freely enter any data into any cell you choose, a database is more structured. Rows and columns must be explicitly added before you can enter data, and each column must have a name and a [data type](./data-types.md). In a database, rows are sometimes called "records".
+
+One superpower of PostgreSQL is that cells from one table can reference records from another table. These references are called _foreign key constraints_, and Mathesar leverages them so you can model your data with [relationships](./relationships.md).
+
+If you've ever used `VLOOKUP` in a spreadsheet, you'll love using relationships in Mathesar!
+
+## Connecting a database {:#connection}
+
+Click the **Connect Database** button from the home page of your Mathesar application and follow the prompts.
+
+Once you've connected a database, you can navigate to Mathesar's page for it where you can browse the database's [schemas](./schemas.md) and configure various settings for it.
+
+Mathesar will remember the connection even after the application is shut down. Your Mathesar [user](./users.md) will be added as a [collaborator](./collaborators.md) on the database (along with the PostgreSQL [role](./roles.md) you entered). The password you entered for that role will be stored in Mathesar's [internal database](#internal), encrypted using Mathesar's [SECRET_KEY](../administration/environment-variables.md#secret_key).
+
+???+ tip "Trouble connecting a database?"
+    - If you are running Mathesar via [Docker](../administration/install-via-docker-compose.md), keep in mind that setting the "Host" to `localhost` may not work as expected. Instead:
+        - On macOS and Windows, `host.docker.internal` generally works instead of `localhost` without additional setup.
+        - On Linux, configure `host.docker.internal` explicitly, or try the Docker network gateway IP `172.17.0.1`.
+    - To connect to PostgreSQL via Unix socket, set the "Host" value as the path to the socket, for example: (`/var/run/postgresql`). You may omit the "Port" if using the default (`5432`) or otherwise specify.
+        - When using Docker, make sure the container can access the socket path as a mounted volume.
+
+### SSL Mode {:#ssl}
+
+When connecting to an external database, you can configure the SSL mode to control how Mathesar establishes secure connections:
+
+- **Prefer SSL** (default): Attempts to use SSL if the server supports it, but falls back to an unencrypted connection if SSL is not available. This is a good balance between security and compatibility.
+- **Require SSL**: Always uses SSL encryption. The connection will fail if the server doesn't support SSL. Use this for production databases where security is critical.
+- **Disable SSL**: Never uses SSL. Only use this for local development or trusted networks where encryption is not needed.
+
+!!! tip
+    Most cloud-hosted PostgreSQL services (AWS RDS, Google Cloud SQL, Supabase, etc.) support SSL connections. We recommend using "Prefer SSL" or "Require SSL" for these services.
+
+!!! note
+    PostgreSQL also supports `verify-ca` and `verify-full` modes for server certificate verification, but Mathesar does not currently support these. If you need certificate verification for your use case, please [open an issue](https://github.com/mathesar-foundation/mathesar/issues) to let us know.
+
+## Creating a new database
+
+If you're starting your database from scratch with Mathesar you can either:
+
+- Use Mathesar to create a new database within Mathesar's internal server and connect to it. This is a good option to get up and running quickly, but it might require more work later should you decide to set up periodic backups or connect other tools to the same database. Also, this option won't be possible if Mathesar was installed without an internal server.
+
+    _OR_
+
+- Use another tool to create your database on an external server and then connect Mathesar to it. You can administer that external server yourself, or choose from a variety of hosted PostgreSQL solutions such as [Amazon RDS](https://aws.amazon.com/rds/postgresql/pricing/), [Google Cloud SQL](https://cloud.google.com/sql/postgresql), [Supabase](https://supabase.com/database), and others.
+
+## Database Permissions {:#permissions}
+
+PostgreSQL databases use a careful system of privileges (colloquially referred to as "permissions") to control what different users can do. Understanding these permissions is crucial for keeping your data secure while ensuring everyone has the access they need to do their work.
+
+- **Owner:** In PostgreSQL, every database has a role set as its [owner](./roles.md#ownership).
+
+    Only the owner can:
+
+    - Drop the database
+    - Manage database-level privileges
+    - Transfer ownership
+
+- **Granted Privileges:** Additionally, the following privileges on one database may be granted to specific roles in PostgreSQL:
+    - `CONNECT`- Allows the role to connect to the database.
+    - `CREATE`- Allows the role to create new schemas within the database.
+    - `TEMPORARY`- Allows the role to create temporary tables within the database.
+
+See the [PostgreSQL docs](https://www.postgresql.org/docs/17/ddl-priv.html) for more info.
+
+To manage the owner and granted privileges for a database, navigate to the database page in Mathesar and click on the **Database Permissions** button at the top right.
+
+!!! info "See also"
+    To manage the access that Mathesar _users_ have to a database, go to **Database Settings** > **Collaborators**. See [Access Control](./access-control.md) for more information.
+
+## Disconnecting a database
+
+1. From the Mathesar home page, click on your database to its database page.
+1. At the top right, click on the dropdown menu, and select "Disconnect Database".
+
+Disconnecting a database will _not_ delete the database. It will still be accessible outside Mathesar, and you can reconnect it in the future.
+
+However, disconnecting your database will delete the Mathesar-specific metadata associated with objects in the database. This includes saved explorations, customized column display options, and customized record summary templates.
+
+## Dropping a database
+
+If you want to entirely remove all the data in your database by dropping the database from the PostgreSQL server, you'll need to do so outside of Mathesar via PostgreSQL itself.
+
+We plan to add support for dropping databases in the future. If this is a feature you would like, please comment on this [issue](https://github.com/mathesar-foundation/mathesar/issues/3862) to let us know.
+
+## Mathesar's internal database {:#internal}
+
+Mathesar keeps as much of your data as possible inside your connected PostgreSQL database, structured consistently with the way it appears in the Mathesar interface.
+
+Separate from your connected PostgreSQL database, Mathesar also maintains an internal database to store configuration relevant to the Mathesar application itself. While Mathesar does not allow you to work directly with this internal database, you might be interested to understand the distinction between it and your connected database. Below is a comparison of the data stored in each:
+
+<table>
+  <tbody>
+  <tr>
+    <th>Data in your connected database</th>
+    <th>Data in Mathesar's internal database</th>
+  </tr>
+  <tr>
+    <td>
+      <ul>
+        <li>
+          The
+          <a href="../schemas">schemas</a>
+          and
+          <a href="../tables">tables</a>
+          you see from within Mathesar
+        </li>
+        <li>The rows, columns, and cells within those tables</li>
+        <li>
+          <a href="../relationships">Relationships</a>
+          between those tables
+        </li>
+        <li>
+          <a href="../roles">Roles</a>
+          and their privileges
+        </li>
+      </ul>
+    </td>
+    <td>
+      <ul>
+        <li><a href="../users">Users</a></li>
+        <li>Database connection credentials, including saved role passwords</li>
+        <li><a href="../collaborators">Collaborators</a></li>
+        <li><a href="#metadata">Metadata</a></li>
+        <li><a href="../data-explorer">Saved Explorations</a></li>
+      </ul>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+### Understanding Mathesar's Metadata {:#metadata}
+
+Mathesar keeps as much of your data as possible inside your connected PostgreSQL database, structured consistently with the way it appears in the Mathesar interface. However, some of the customization that Mathesar offers doesn't fit neatly into the PostgreSQL model, so Mathesar stores a thin layer of metadata in its [internal database](./databases.md#internal) to support these features.
+
+#### Table metadata
+
+For each table, the following optional configurations are stored as metadata:
+
+- **Column order**
+
+    Interestingly, PostgreSQL does not allow existing columns to be rearranged. Mathesar allows you to customize the column order by dragging and dropping columns in the table view. This order is stored as metadata. When no metadata is present, the columns will be displayed in the order they are stored in PostgreSQL.
+
+- **Record summary template**
+
+    The template used to generate [record summaries](./relationships.md#record-summaries). This allows links to records in the table to be summarized into short human-readable pieces of text.
+
+    Without any metadata, the record summary will be generated using the first text-like column of the table if possible.
+
+#### Column metadata
+
+Many of Mathesar's [data types](./data-types.md) have type-specific **formatting** options which are stored as metadata. These options allow you to customize the way the data is displayed in the Mathesar interface.
+
+#### Metadata access control
+
+{% include 'snippets/metadata-access-control.md' %}

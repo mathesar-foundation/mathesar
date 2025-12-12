@@ -1,0 +1,44 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mathesar - {% block title %}{% endblock %}</title>
+
+    <link rel="icon"  type="image/x-icon"href="{% static 'icons/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/favicon-16x16.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="180x180" href="{% static 'icons/favicon-180x180.png' %}">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+
+    <style type="text/css">
+      html,
+      body {
+        font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica,
+          Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+          "Segoe UI Symbol";
+        font-weight: 400;
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+      * {
+        box-sizing: border-box;
+        outline: 0;
+      }
+    </style>
+    {% block styles %} {% endblock %}
+  </head>
+  <body>
+    {% block scripts %} {% endblock %}
+
+    {% block content %} {% endblock %}
+    {% for template in scripts_extension_templates %}
+        {% include template %}
+    {% endfor %}
+  </body>
+</html>

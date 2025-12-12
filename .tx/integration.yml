@@ -1,0 +1,14 @@
+git:
+  filters:
+  - filter_type: dir
+    file_format: PO
+    source_file_extension: po
+    source_language: en
+    source_file_dir: translations/en/LC_MESSAGES/
+    translation_files_expression: 'translations/<lang>/LC_MESSAGES/'
+  - filter_type: dir
+    file_format: KEYVALUEJSON
+    source_file_extension: json
+    source_language: en
+    source_file_dir: mathesar_ui/src/i18n/languages/en/
+    translation_files_expression: 'mathesar_ui/src/i18n/languages/<lang>/'

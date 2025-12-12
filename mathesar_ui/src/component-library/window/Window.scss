@@ -1,0 +1,76 @@
+.window {
+  background-color: var(--color-bg-raised-2);
+  border: 1px solid var(--color-border-raised-2);
+  border-radius: 0.4em;
+  min-height: var(--window-min-height, 7em);
+  width: var(--window-width, 100%);
+  overflow: hidden;
+  display: grid;
+  grid-template: auto 1fr auto / auto;
+  box-shadow: 1px 3px 7px 1px var(--color-shadow-dark);
+  position: relative;
+  isolation: isolate;
+
+  > .title-bar {
+    grid-row: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border-section);
+    overflow: hidden;
+    > .title {
+      &:empty {
+        display: none;
+      }
+      flex: 1 1 100%;
+      margin: auto;
+      font-weight: 500;
+      font-size: var(--lg2);
+      overflow: hidden;
+    }
+  }
+
+  > .body {
+    grid-row: 2;
+  }
+
+  > .footer {
+    grid-row: 3;
+    border-top: 1px solid var(--color-border-section);
+    background: var(--color-bg-raised-2);
+  }
+
+  &.has-body-padding > .body {
+    padding: 1rem;
+  }
+  > .footer {
+    padding: 1rem;
+  }
+
+  > .body,
+  > .footer {
+    overflow: hidden;
+    &:empty {
+      display: none;
+    }
+
+    > :first-child {
+      margin-top: 0;
+    }
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &.can-scroll-body > .body {
+    overflow-y: auto;
+  }
+  &:not(.can-scroll-body) > .body {
+    display: flex;
+    flex-direction: column;
+    > * {
+      flex: 0 1 auto;
+    }
+  }
+}

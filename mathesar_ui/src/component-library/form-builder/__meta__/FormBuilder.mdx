@@ -1,0 +1,40 @@
+import { Story, Canvas, ArgsTable, Source } from '@storybook/addon-docs/blocks';
+import FormBuilder from '../FormBuilder.svelte';
+
+# Form
+
+Form system design specification.
+
+## Usage
+
+<Source language='html' code={`
+<script>
+  import { makeForm, FormBuilder } from '@mathesar-component-library';
+  const formConfig = { ... };
+  const form = makeForm(formConfig);
+<\/script>
+
+<FormBuilder {form}/>
+`}/>
+
+### Basic example
+
+<Canvas withSource="none">
+  <Story name="basic" id="systems-formbuilder--basic" />
+</Canvas>
+
+### If example
+
+<Canvas withSource="none">
+  <Story name="ifExample" id="systems-formbuilder--if-condition" />
+</Canvas>
+
+### Switch case example
+
+<Canvas withSource="none">
+  <Story name="switchCase" id="systems-formbuilder--switch-condition" />
+</Canvas>
+
+## Arguments
+
+<ArgsTable of={FormBuilder} />

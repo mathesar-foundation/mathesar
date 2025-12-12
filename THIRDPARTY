@@ -1,0 +1,43 @@
+Mathesar contains derivatives of the following components that are subject to 
+separate license terms. Your use of these derivatives is subject to the separate
+license terms applicable to each component, in addition to Mathesar's license.
+The full text of all referenced licenses is present within the LICENSES folder.
+
+Derivative module: VirtualList
+Location: /mathesar_ui/src/sections/table-view/virtual-list
+
+Component: react-window
+Version: 1.8.6
+Copyright: 2018 Brian Vaughn
+License: MIT
+License Text: https://github.com/bvaughn/react-window/blob/master/LICENSE.md
+Derivative files:
+    /mathesar_ui/src/sections/table-view/virtual-list/VirtualList.svelte
+    /mathesar_ui/src/sections/table-view/virtual-list/listUtils.ts
+    /mathesar_ui/src/sections/table-view/virtual-list/timer.ts
+
+Component: react-virtualized-auto-sizer
+Version: 1.0.5
+Copyright: MIT @ bvaughn
+License: MIT
+    License information specified in Readme file
+    Readme File: https://github.com/bvaughn/react-virtualized-auto-sizer
+Derivative files:
+    /mathesar_ui/src/sections/table-view/virtual-list/Resizer.svelte
+    /mathesar_ui/src/sections/table-view/virtual-list/detectElementResize.ts
+
+Component: javascript-detect-element-resize
+Version: 0.5.3
+Copyright: 2013 Sebastián Décima
+License: MIT
+License Text: https://github.com/sdecima/javascript-detect-element-resize/blob/master/LICENSE
+Derivative files:
+    /mathesar_ui/src/sections/table-view/virtual-list/detectElementResize.ts
+
+Component: django-prefetch
+Version: 1.2.3
+Copyright: 2012-2021, Ionel Cristian Mărieș
+License: BSD 2-Clause
+License Text: https://github.com/ionelmc/django-prefetch/blob/master/LICENSE
+Derivative files:
+    /mathesar/utils/prefetch.py

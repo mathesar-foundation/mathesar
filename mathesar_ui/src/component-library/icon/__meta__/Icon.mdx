@@ -1,0 +1,37 @@
+import { Story, Canvas, ArgsTable, Source } from '@storybook/addon-docs/blocks';
+import Icon from '../Icon.svelte';
+
+# Icon
+
+Icon component design specification. Uses font-awesome icons. Import the icon definition from any of the @fortawesome packages, and pass it to the icon.
+
+Refer the official [fontawesome site](https://fontawesome.com/) for the list of icons.
+
+## Usage
+
+<p></p>
+
+### Basic
+
+<Canvas withSource="none">
+  <Story name="basic" id="components-icon--basic" />
+</Canvas>
+
+<Source language='html' code={`
+<script>
+  import { faCat } from '@fortawesome/free-solid-svg-icons';
+  import { Icon } from '@mathesar-component-library';
+<\/script>
+
+<Icon data={faCat} />
+`}/>
+
+### Customizations
+
+<Canvas withSource="open">
+  <Story id="components-icon--customizations" />
+</Canvas>
+
+## Arguments
+
+<ArgsTable of={Icon} />

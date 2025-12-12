@@ -1,0 +1,41 @@
+ul.pagination {
+  margin: 0;
+  list-style: none;
+  list-style-type: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+
+  li {
+    margin: 0 0.25rem;
+
+    button {
+      .ellipsis {
+        color: var(--color-fg-base-muted);
+      }
+
+      &:hover {
+        .ellipsis {
+          display: none;
+        }
+      }
+      &:not(:hover) {
+        .arrow {
+          display: none;
+        }
+      }
+    }
+
+    &.active {
+      .page {
+        --button-background: var(--color-selection);
+        --button-color: var(--color-fg-control);
+        --button-border-color: var(--color-selection);
+      }
+
+      &:hover {
+        --button-border-color: var(--color-selection-strong-1);
+      }
+    }
+  }
+}

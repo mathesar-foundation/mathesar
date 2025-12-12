@@ -1,0 +1,27 @@
+.fieldset {
+  padding: 0;
+  margin: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: 0.5rem;
+    color: var(--color-fg-label);
+  }
+  legend:empty {
+    display: none;
+  }
+
+  &:not(.boxed) {
+    border: 0;
+  }
+  &.boxed {
+    background-color: var(
+      --fieldset-boxed-background-color,
+      color-mix(in srgb, var(--color-bg-group), transparent 85%)
+    );
+    border: 1px solid var(--color-border-group);
+    border-radius: var(--border-radius-m);
+    padding: 1em;
+    padding-top: 0;
+  }
+}

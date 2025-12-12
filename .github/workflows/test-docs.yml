@@ -1,0 +1,21 @@
+name: test-docs
+
+on: 
+  push:
+    paths:
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - run: pip install -r ./docs/requirements.txt
+      - working-directory: ./docs
+        run: mkdocs build --strict

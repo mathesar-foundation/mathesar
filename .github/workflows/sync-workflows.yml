@@ -1,0 +1,16 @@
+name: Sync GitHub workflows to other repos
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+jobs:
+  sync_workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@master
+      - name: Run GitHub file sync
+        uses: BetaHuhn/repo-file-sync-action@v1
+        with:
+          GH_PAT: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}

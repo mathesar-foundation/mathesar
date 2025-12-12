@@ -1,0 +1,189 @@
+import { api } from '@mathesar/api/rpc';
+import type { RawDatabase } from '@mathesar/api/rpc/databases';
+import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+import {
+  CancellablePromise,
+  ImmutableMap,
+  SortedImmutableMap,
+} from '@mathesar-component-library';
+
+import { Collaborator } from './Collaborator';
+import { ConfiguredRole } from './ConfiguredRole';
+import { Role } from './Role';
+import type { Server } from './Server';
+import { UnderlyingDatabase } from './UnderlyingDatabase';
+
+export class Database {
+  readonly id: number;
+
+  readonly name: string;
+
+  readonly nickname: string | null;
+
+  readonly server: Server;
+
+  readonly needsUpgradeAttention: boolean;
+
+  constructor(props: { server: Server; rawDatabase: RawDatabase }) {
+    this.id = props.rawDatabase.id;
+    this.name = props.rawDatabase.name;
+    this.nickname = props.rawDatabase.nickname;
+    this.server = props.server;
+    this.needsUpgradeAttention = props.rawDatabase.needs_upgrade_attention;
+  }
+
+  get displayName() {
+    return this.nickname ?? this.name;
+  }
+
+  /** Returns all the names that can be used to identify this database */
+  get allNames(): string[] {
+    return [this.name, ...(this.nickname ? [this.nickname] : [])];
+  }
+
+  constructConfiguredRolesStore() {
+    return new AsyncRpcApiStore(api.roles.configured.list, {
+      staticProps: { server_id: this.server.id },
+      postProcess: (rawConfiguredRoles) =>
+        new SortedImmutableMap(
+          (v) => [...v].sort(([, a], [, b]) => a.name.localeCompare(b.name)),
+          rawConfiguredRoles.map((rawConfiguredRole) => [
+            rawConfiguredRole.id,
+            new ConfiguredRole({ database: this, rawConfiguredRole }),
+          ]),
+        ),
+    });
+  }
+
+  constructRolesStore() {
+    return new AsyncRpcApiStore(api.roles.list, {
+      staticProps: { database_id: this.id },
+      postProcess: (rawRoles) =>
+        new SortedImmutableMap(
+          (v) => [...v].sort(([, a], [, b]) => a.name.localeCompare(b.name)),
+          rawRoles.map((rawRole) => [
+            rawRole.oid,
+            new Role({ database: this, rawRole }),
+          ]),
+        ),
+    });
+  }
+
+  constructCollaboratorsStore() {
+    return new AsyncRpcApiStore(api.collaborators.list, {
+      staticProps: { database_id: this.id },
+      postProcess: (rawCollaborators) =>
+        new ImmutableMap(
+          rawCollaborators.map((rawCollaborator) => [
+            rawCollaborator.id,
+            new Collaborator({ database: this, rawCollaborator }),
+          ]),
+        ),
+    });
+  }
+
+  constructDatabasePrivilegesStore() {
+    return new AsyncRpcApiStore(api.databases.privileges.list_direct, {
+      staticProps: { database_id: this.id },
+      postProcess: (rawDbPrivilegesForRoles) =>
+        new ImmutableMap(
+          rawDbPrivilegesForRoles.map((rawDatabasePrivilegesForRole) => [
+            rawDatabasePrivilegesForRole.role_oid,
+            rawDatabasePrivilegesForRole,
+          ]),
+        ),
+    });
+  }
+
+  constructUnderlyingDatabaseStore() {
+    return new AsyncRpcApiStore(api.databases.get, {
+      staticProps: { database_id: this.id },
+      postProcess: (rawUnderlyingDatabase) =>
+        new UnderlyingDatabase({
+          database: this,
+          rawUnderlyingDatabase,
+        }),
+    });
+  }
+
+  constructCurrentRoleStore() {
+    return new AsyncRpcApiStore(api.roles.get_current_role, {
+      staticProps: { database_id: this.id },
+      postProcess: (currentRole) => ({
+        oid: currentRole.current_role.oid,
+        name: currentRole.current_role.name,
+        super: currentRole.current_role.super,
+        parentRoles: new Map(
+          currentRole.parent_roles.map((pr) => [
+            pr.oid,
+            { oid: pr.oid, name: pr.name },
+          ]),
+        ),
+      }),
+    });
+  }
+
+  addCollaborator(
+    userId: number,
+    configuredRoleId: ConfiguredRole['id'],
+  ): CancellablePromise<Collaborator> {
+    const promise = api.collaborators
+      .add({
+        database_id: this.id,
+        user_id: userId,
+        configured_role_id: configuredRoleId,
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then(
+            (rawCollaborator) =>
+              resolve(
+                new Collaborator({
+                  database: this,
+                  rawCollaborator,
+                }),
+              ),
+            reject,
+          )
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
+  }
+
+  addRole(
+    roleName: string,
+    login: boolean,
+    password?: string,
+  ): CancellablePromise<Role> {
+    const promise = api.roles
+      .add({
+        database_id: this.id,
+        rolename: roleName,
+        login,
+        password,
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then(
+            (rawRole) =>
+              resolve(
+                new Role({
+                  database: this,
+                  rawRole,
+                }),
+              ),
+            reject,
+          )
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
+  }
+}

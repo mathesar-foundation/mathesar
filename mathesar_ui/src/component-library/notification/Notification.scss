@@ -1,0 +1,42 @@
+.notification {
+  display: flex;
+  flex-direction: column;
+
+  &.danger {
+    background: var(--color-bg-danger);
+    border-left: 6px solid var(--color-border-danger);
+    color: var(--color-fg-danger);
+    padding: 15px;
+    border-radius: 3px;
+    line-height: 1.4em;
+
+    .header {
+      color: var(--color-bg-danger);
+    }
+  }
+
+  > .header {
+    display: flex;
+    align-items: flex-start;
+
+    .icon,
+    .close {
+      flex-shrink: 0;
+      flex-basis: 1rem;
+    }
+    .icon {
+      margin-right: 10px;
+    }
+    .message {
+      flex-grow: 1;
+    }
+    button.btn.close {
+      margin-left: 10px;
+      padding: 0;
+      color: var(--color-fg-icon);
+    }
+  }
+  > .description {
+    margin-top: 10px;
+  }
+}

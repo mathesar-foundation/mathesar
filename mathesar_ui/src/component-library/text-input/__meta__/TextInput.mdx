@@ -1,0 +1,28 @@
+import { Story, Canvas, ArgsTable, Source } from '@storybook/addon-docs/blocks';
+import TextInput from '../TextInput.svelte';
+
+# TextInput
+
+TextInput component design specification.
+
+## Usage
+
+<p></p>
+
+### Basic
+
+<Canvas withSource="none">
+  <Story name="basic" id="components-textinput--basic" />
+</Canvas>
+
+<Source language='html' code={`
+<script>
+  import { TextInput } from '@mathesar-component-library';
+<\/script>
+
+<TextInput bind:value="Pikachu" />
+`}/>
+
+## Arguments
+
+<ArgsTable of={TextInput} />

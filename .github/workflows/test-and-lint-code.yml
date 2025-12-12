@@ -1,0 +1,683 @@
+## This workflow runs all tests, audits, and linters for Mathesar's source code.
+## It's set up to run for every pull request change, as well as when a pull
+## request is added to the merge queue. This, combined with our branch
+## protections requiring pull requests and a merge queue for `develop` and
+## `master` ensures that no code is merged into those branches without
+## appropriate tests having run.
+
+name: Test and Lint Code
+on:  [pull_request, merge_group]
+jobs:
+
+################################################################################
+##                         FILE CHANGE CHECKERS                               ##
+##                                                                            ##
+## These jobs check which files have changed so that we can call appropriate  ##
+## testing, auditing, and linting jobs. Jobs in this section should check for ##
+## file changes that would indicate whether we need to run some particular    ##
+## test suite, then they should output 'true' if such file changes are found. ##
+##                                                                            ##
+################################################################################
+
+  python_tests_required:
+    name: Check for file changes requiring python tests
+    runs-on: ubuntu-latest
+    outputs:
+      tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            *.py
+            mathesar/**
+            db/**
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
+
+  python_lint_required:
+    name: Check for file changes requiring python linter
+    runs-on: ubuntu-latest
+    outputs:
+      lint_should_run: ${{ steps.changed_files.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: '**.py'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
+
+  sql_tests_required:
+    name: Check for file changes requiring SQL tests
+    runs-on: ubuntu-latest
+    outputs:
+      tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: '**.sql'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
+
+  front_end_checks_required:
+    name: Check for file changes requiring front end checks
+    runs-on: ubuntu-latest
+    outputs:
+      checks_should_run: ${{ steps.changed_files.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: 'mathesar_ui/**'
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
+
+  all_be_tests_required:
+    name: Check for file changes requiring all backend tests
+    runs-on: ubuntu-latest
+    outputs:
+      tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            **.yml
+            **.sh
+            Dockerfile*
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
+
+################################################################################
+##                         BACK END TEST/LINT RUNNERS                         ##
+##                                                                            ##
+## These jobs run tests and linters. Each job in this section should be       ##
+## dependent on one of the FILE CHANGE CHECKERS above, and should only run if ##
+## appropriate files have changed. You can see this by using a `needs:` block ##
+## to make the job dependent on the relevant file checker, and an `if:` block ##
+## to ensure that the file checker returned 'true' before running the actual  ##
+## job.  Job IDs in this section must be namespaced (so `python_tests`        ##
+## instead of just `tests`).                                                  ##
+##                                                                            ##
+################################################################################
+
+  python_tests:
+    name: Run Python tests
+    runs-on: ubuntu-latest
+    needs: [python_tests_required, all_be_tests_required]
+    if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
+    strategy:
+      matrix:
+        py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
+        pg-version: [13, 14, 15, 16, 17, 18]
+        connection-type: ['mathesar_dev_db', '/var/dev_postgres_socket']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy env file
+        run: cp .env.example .env
+      # The code is checked out under uid 1001 - reset this to 1000 for the
+      # container to run tests successfully
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+      - name: Pull images
+        run: |
+          docker pull python:${{ matrix.py-version }}
+          docker pull postgres:${{ matrix.pg-version }}
+      - name: Build the stack
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service dev-db
+        env:
+          PYTHON_VERSION: ${{ matrix.py-version }}
+          PG_VERSION: ${{ matrix.pg-version }}
+          POSTGRES_HOST: ${{ matrix.connection-type }}
+      - name: Run tests with pytest
+        run: docker exec mathesar_service_test ./run_pytest.sh
+
+  sql_tests:
+    name: Run SQL tests
+    runs-on: ubuntu-latest
+    needs: [sql_tests_required, all_be_tests_required]
+    if: needs.sql_tests_required.outputs.tests_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
+    strategy:
+      matrix:
+        pg-version: [13, 14, 15, 16, 17, 18]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy env file
+        run: cp .env.example .env
+      # The code is checked out under uid 1001 - reset this to 1000 for the
+      # container to run tests successfully
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+      - name: Pull image
+        run: |
+          docker pull postgres:${{ matrix.pg-version }}
+      - name: Build the test DB
+        run: docker compose -f docker-compose.dev.yml up --build -d dev-db
+        env:
+          PG_VERSION: ${{ matrix.pg-version }}
+      - name: Run tests with pg_prove
+        run: docker exec mathesar_dev_db /bin/bash /sql/run_tests.sh
+
+  api_tests:
+    name: Run API scenario tests
+    runs-on: ubuntu-latest
+    needs: [python_tests_required, all_be_tests_required]
+    if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
+    strategy:
+      matrix:
+        py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
+        pg-version: [13, 14, 15, 16, 17, 18]
+        init-db-args: ["", "--encoding=SQL_ASCII"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy env file
+        run: cp .env.example .env
+      # The code is checked out under uid 1001 - reset this to 1000 for the
+      # container to run tests successfully
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+      - name: Pull images
+        run: |
+          docker pull python:${{ matrix.py-version }}
+          docker pull postgres:${{ matrix.pg-version }}
+      - name: Run tests
+        run: sh run_api_tests.sh
+        env:
+          PYTHON_VERSION: ${{ matrix.py-version }}
+          PG_VERSION: ${{ matrix.pg-version }}
+          POSTGRES_INITDB_ARGS: ${{ matrix.init-db-args }}
+
+  python_lint:
+    name: Run Python linter
+    runs-on: ubuntu-latest
+    needs: [python_lint_required, all_be_tests_required]
+    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+      - name: Run flake8
+        uses: julianwachholz/flake8-action@main
+        with:
+          checkName: "flake8"
+          path: "."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  vulture:
+    name: Find unused code
+    runs-on: ubuntu-latest
+    needs: [python_lint_required, all_be_tests_required]
+    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+      - name: Install Vulture
+        run: pip3 install vulture
+      - name: Run Vulture
+        run: vulture .
+
+################################################################################
+##                        FRONT END CHECK RUNNERS                             ##
+##                                                                            ##
+## These jobs run front end checks. Each job in this section should be        ##
+## dependent on one of the FILE CHANGE CHECKERS above (currently only         ##
+## front_end_checks_required), and should only run if appropriate files have  ##
+## changed. You can see this by using a `needs:` block to make the job        ##
+## dependent on the relevant file checker, and an `if:` block to ensure that  ##
+## the file checker returned 'true' before running the actual job. `lint` and ##
+## `tests` Job IDs in this section must be namespaced (`front_end_tests`      ##
+## rather than `tests`).                                                      ##
+##                                                                            ##
+################################################################################
+
+  front_end_format:
+    name: Check front end code format
+    runs-on: ubuntu-latest
+    needs: front_end_checks_required
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm ci --no-audit --prefer-offline
+      - run: npm run check-format
+
+  front_end_lint:
+    name: Run front end linter
+    runs-on: ubuntu-latest
+    needs: front_end_checks_required
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm ci --no-audit --prefer-offline
+      - run: npm run lint
+
+  front_end_typecheck:
+    name: Check front end types
+    runs-on: ubuntu-latest
+    needs: front_end_checks_required
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm ci --no-audit --prefer-offline
+      - run: npm run typecheck
+
+  front_end_audit:
+    name: Audit front end code
+    runs-on: ubuntu-latest
+    needs: front_end_checks_required
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm ci
+      - uses: oke-py/npm-audit-action@v1.8.2
+        with:
+          audit_level: moderate
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          create_pr_comments: false
+          dedupe_issues: true
+          working_directory: './mathesar_ui'
+          issue_labels: 'restricted: maintainers,type: bug,work: frontend,needs: triage'
+          production_flag: true
+        continue-on-error: true
+
+  front_end_tests:
+    name: Run front end tests
+    runs-on: ubuntu-latest
+    needs: front_end_checks_required
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm ci --no-audit --prefer-offline
+      - run: npm test
+
+################################################################################
+##                         BUILD TESTER                                       ##
+##                                                                            ##
+## This job tests if we can successfully build mathesar in both development   ##
+## and production modes we don't use these build for any other tests as they  ##
+## involve building the frontend which slows down backend tests significantly ##
+## and threfore, we test to make sure that we can still build mathesar in     ##
+## these modes separately.                                                    ##
+##                                                                            ##
+################################################################################
+
+  build_tests:
+    name: Build mathesar
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [production, development]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy env file
+        run: cp .env.example .env
+      # The code is checked out under uid 1001 - reset this to 1000 for the
+      # container to run tests successfully
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+      - name: Build the stack
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service dev-db
+        env:
+          TARGET: ${{ matrix.target }}
+
+################################################################################
+##                      PACKAGE & INSTALLATION TESTERS.                       ##
+##                                                                            ##
+## This job tests if we can successfully package & install mathesar for       ##
+## non-docker based setups.                                                   ##
+##                                                                            ##
+################################################################################
+
+  package:
+    name: Package mathesar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install GNU gettext
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext
+
+      - name: Run package Script
+        run: |
+          python3 ./build-scripts/package/package.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathesar-artifact
+          path: ./dist/*
+
+  install:
+    name: Test script based installation
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-14]
+        arch: [x64] # TODO: Include self-hosted arm runners
+        include:
+          - os: ubuntu-22.04
+            arch: x64
+            runner: ubuntu-22.04
+          - os: macos-14
+            arch: x64
+            runner: macos-14
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mathesar-artifact
+          path: ./mathesar-dist
+
+      - name: Install curl
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install curl
+          else
+            sudo apt-get update
+            sudo apt-get install -y curl
+          fi
+
+      - name: Install PostgreSQL
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install postgresql@15
+            echo 'export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"' >> "$HOME/.bash_profile"
+            echo "/opt/homebrew/opt/postgresql@15/bin" >> $GITHUB_PATH
+            brew services start postgresql@15
+          else
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+            sudo service postgresql start
+          fi
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to become ready..."
+          for i in {1..10}; do
+            if pg_isready -h localhost -p 5432 > /dev/null 2>&1; then
+              echo "PostgreSQL is ready."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "PostgreSQL did not become ready in time."
+          exit 1
+
+      - name: Setup DB and User
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
+            createuser --superuser testuser
+            createdb -O testuser testdb
+          else
+            sudo -u postgres psql -c "CREATE USER testuser WITH PASSWORD 'testpass';"
+            sudo -u postgres psql -c "CREATE DATABASE testdb OWNER testuser;"
+          fi
+
+      - name: Install Mathesar
+        run: |
+          cd ./mathesar-dist
+          chmod +x ./install.sh
+          ./install.sh . -n -c "postgres://testuser:testpass@localhost:5432/testdb" --test-package-location "file:///$(pwd)/mathesar.tar.gz"
+          cd ..
+
+      - name: Start Mathesar server
+        run: |
+          ./mathesar-dist/bin/mathesar run --port 8000 > server.log 2>&1 &
+          echo $! > pidfile
+          sleep 10
+
+      - name: Check if Mathesar is running
+        run: |
+          curl -sL -D headers.txt http://localhost:8000 -o response_body.txt
+
+          STATUS_CODE=$(grep HTTP headers.txt | tail -1 | awk '{print $2}')
+          CONTENT_TYPE=$(grep -i 'Content-Type:' headers.txt | tail -1)
+
+          if [[ "$STATUS_CODE" != "200" ]]; then
+            echo "Unexpected HTTP status: $STATUS_CODE"
+            cat server.log
+            exit 1
+          fi
+
+          if ! grep -qi 'text/html' <<< "$CONTENT_TYPE"; then
+            echo "Content-Type is not HTML: $CONTENT_TYPE"
+            cat headers.txt
+            exit 1
+          fi
+
+          if ! grep -q "Welcome to Mathesar!" response_body.txt; then
+            echo "HTML does not contain expected text: 'Welcome to Mathesar!'"
+            echo "--- Partial HTML ---"
+            head -n 20 response_body.txt
+            exit 1
+          fi
+
+          echo "Mathesar server started successfully"
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathesar-debug-logs-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            server.log
+            response_body.txt
+
+      - name: Stop Mathesar server
+        run: kill $(cat pidfile)
+
+################################################################################
+##                       REQUIRED TEST/LINT COLLECTORS                        ##
+## Jobs in this section collect outputs from testing jobs, since these are    ##
+## otherwise impossible to capture for branch protection purposes.            ##
+## At the moment, they only need to have each required check as a dependency. ##
+## Required checks should skip themselves if no relevant files have changed.  ##
+##                                                                            ##
+################################################################################
+
+  checkpoint:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    needs:
+      # Checkers
+      - python_tests_required
+      - python_lint_required
+      - sql_tests_required
+      - front_end_checks_required
+      - all_be_tests_required
+      # Backend tests
+      - python_tests
+      - sql_tests
+      - api_tests
+      - python_lint
+      # Frontend tests
+      - front_end_format
+      - front_end_lint
+      - front_end_typecheck
+      - front_end_audit
+      - front_end_tests
+      # Build test
+      - build_tests
+      # Package and Installation tests
+      - package
+      - install
+    steps:
+      - name: Check Dependency Results
+        run: |
+          # Check "all_be_tests_required" conditions
+          if [[ "${{ needs.all_be_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.python_tests.result }}" != "success"
+              || "${{ needs.sql_tests.result }}" != "success"
+              || "${{ needs.api_tests.result }}" != "success"
+              || "${{ needs.python_lint.result }}" != "success"
+            ]]; then
+              echo "One or more backend tests failed."
+              exit 1
+            fi
+          # Check "python_tests_required" conditions
+          elif [[ "${{ needs.python_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.python_tests.result }}" != "success"
+              || "${{ needs.api_tests.result }}" != "success"
+            ]]; then
+              echo "One or more python tests failed."
+              exit 1
+            fi
+          fi
+
+          # Check "python_lint_required" conditions
+          if [[ "${{ needs.python_lint_required.outputs.lint_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.python_lint.result }}" != "success" ]]; then
+              echo "python linter failed."
+              exit 1
+            fi
+          fi
+
+          # Check "sql_tests_required" conditions
+          if [[ "${{ needs.sql_tests_required.outputs.tests_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.sql_tests.result }}" != "success" ]]; then
+              echo "SQL tests failed."
+              exit 1
+            fi
+          fi
+
+          # Check "front_end_checks_required" conditions
+          if [[ "${{ needs.front_end_checks_required.outputs.checks_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.front_end_format.result }}" != "success"
+              || "${{ needs.front_end_lint.result }}" != "success"
+              || "${{ needs.front_end_typecheck.result }}" != "success"
+              || "${{ needs.front_end_audit.result }}" != "success"
+              || "${{ needs.front_end_tests.result }}" != "success"
+            ]]; then
+              echo "One or more frontend tests failed."
+              exit 1
+            fi
+          fi
+
+          # Check if build succeeds
+          if [[ "${{ needs.build_tests.result }}" != "success" ]]; then
+            echo "Build failed."
+            exit 1
+          fi
+
+          # Check if package succeeds
+          if [[ "${{ needs.package.result }}" != "success" ]]; then
+            echo "Packaging failed."
+            exit 1
+          fi
+
+          # Check if installation succeeds
+          if [[ "${{ needs.install.result }}" != "success" ]]; then
+            echo "Install from script failed."
+            exit 1
+          fi
+      - name: Report success
+        run: echo "All tests succeeded or skipped!"

@@ -1,0 +1,255 @@
+<script lang="ts">
+  import { _ } from 'svelte-i18n';
+  import { router } from 'tinro';
+
+  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
+  import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import { staticText } from '@mathesar/i18n/staticText';
+  import {
+    iconDatabase,
+    iconDeleteMajor,
+    iconEdit,
+    iconMoreActions,
+    iconPermissions,
+    iconReinstall,
+  } from '@mathesar/icons';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/Database';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import {
+    getDatabasePageSchemasSectionUrl,
+    getDatabasePageSettingsSectionUrl,
+  } from '@mathesar/routes/urls';
+  import { databasesStore } from '@mathesar/stores/databases';
+  import { modal } from '@mathesar/stores/modal';
+  import { toast } from '@mathesar/stores/toast';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
+  import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
+  import {
+    Button,
+    ButtonMenuItem,
+    DropdownMenu,
+    Help,
+    Icon,
+    TabContainer,
+  } from '@mathesar-component-library';
+
+  import DisconnectDatabaseModal from './disconnect/DisconnectDatabaseModal.svelte';
+  import DatabasePermissionsModal from './permissions/DatabasePermissionsModal.svelte';
+
+  const databaseRouteContext = DatabaseRouteContext.get();
+  $: ({ database, underlyingDatabase } = $databaseRouteContext);
+  $: void underlyingDatabase.runConservatively();
+
+  // // TODO Allow dropping databases
+  // const commonData = preloadCommonData();
+  // $: currentRoleOwnsDatabase =
+  //   $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
+  // $: isDatabaseInInternalServer =
+  //   database.server.host === commonData.internal_db.host &&
+  //   database.server.port === commonData.internal_db.port;
+
+  const permissionsModal = modal.spawnModalController();
+  const disconnectModal = modal.spawnModalController<Database>();
+  const reinstallModal = modal.spawnModalController<Database>();
+  const editModal = modal.spawnModalController();
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: ({ isMathesarAdmin } = $userProfileStore);
+
+  type Section = 'schemas' | 'settings';
+  let section: Section = 'schemas';
+
+  $: tabs = [
+    {
+      id: 'schemas',
+      label: $_('schemas'),
+      href: getDatabasePageSchemasSectionUrl(database.id),
+    },
+    {
+      id: 'settings',
+      label: $_('database_settings'),
+      href: getDatabasePageSettingsSectionUrl(database.id),
+    },
+  ];
+  $: activeTab = tabs.find((tab) => tab.id === section);
+
+  export function setSection(_section: Section) {
+    section = _section;
+  }
+</script>
+
+<svelte:head>
+  <title>{makeSimplePageTitle(database.displayName)}</title>
+</svelte:head>
+
+<LayoutWithHeader
+  restrictWidth
+  cssVariables={{
+    '--page-padding': '0 var(--page-padding-x)',
+    '--max-layout-width': 'var(--max-layout-width-console-pages)',
+  }}
+>
+  <div class="database-page-header" slot="secondary-header">
+    <AppSecondaryHeader
+      icon={iconDatabase}
+      name={database.displayName}
+      entityTypeName={$_('database')}
+    >
+      <div slot="subText" class="database-info">
+        <div class="connection-details">
+          <div>
+            <span class="label">
+              {$_('postgres_database')}{staticText.COLON}
+            </span>
+            <code>
+              {database.name} @ {database.server.getConnectionString()}
+            </code>
+          </div>
+        </div>
+      </div>
+      <div slot="action">
+        <div class="actions-container">
+          <Button
+            appearance="secondary"
+            on:click={() => permissionsModal.open()}
+          >
+            <Icon {...iconPermissions} />
+            <span>{$_('database_permissions')}</span>
+          </Button>
+          {#if isMathesarAdmin}
+            <div class="dropdown-container">
+              <DropdownMenu
+                showArrow={false}
+                triggerAppearance="secondary"
+                closeOnInnerClick={false}
+                icon={iconMoreActions}
+                preferredPlacement="bottom-end"
+              >
+                <ButtonMenuItem
+                  icon={iconDeleteMajor}
+                  on:click={() => disconnectModal.open(database)}
+                >
+                  {$_('disconnect_database')}
+                </ButtonMenuItem>
+                <ButtonMenuItem
+                  icon={iconEdit}
+                  on:click={() => editModal.open()}
+                >
+                  {$_('edit_connection')}
+                </ButtonMenuItem>
+                <ButtonMenuItem
+                  icon={iconReinstall}
+                  on:click={() => reinstallModal.open(database)}
+                >
+                  {$_('reinstall_mathesar_schemas')}
+                </ButtonMenuItem>
+                <!--
+                TODO: Allow dropping databases
+                https://github.com/mathesar-foundation/mathesar/issues/3862
+              -->
+                <!-- {#if isDatabaseInInternalServer}
+                <ButtonMenuItem
+                  icon={iconDeleteMajor}
+                  danger
+                  disabled={!$currentRoleOwnsDatabase}
+                >
+                  {$_('delete_database')}
+                </ButtonMenuItem>
+              {/if} -->
+              </DropdownMenu>
+            </div>
+          {/if}
+        </div>
+      </div>
+    </AppSecondaryHeader>
+  </div>
+
+  <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
+    <div class="tab-container">
+      <slot {setSection} />
+    </div>
+    <div slot="tab" let:tab>
+      <!--
+        From Sean: I wrote this `{#if}` block because I needed to customize the
+        tab label using rich text, but I don't like the approach here.
+
+        I'd rather do something like pass a property from `tab` into our
+        `<Render>` component. But to do that we'd need to make the
+        `<TabContainer>` component generic over `Tab` or use a type assertion.
+        I'd argue that `TabContainer` should be generic anyway. But I don't want
+        to refactor that right now. And type assertions are tricky to put into
+        the Svelte template area. So I'm leaving this for now.
+       -->
+      {#if tab.id === 'schemas'}
+        {tab.label}
+        <Help placements={['top-start', 'bottom-start']}>
+          <p>{$_('schemas_list_help')}</p>
+          <p><SeeDocsToLearnMore page="schemas" /></p>
+        </Help>
+      {:else}
+        {tab.label}
+      {/if}
+    </div>
+  </TabContainer>
+</LayoutWithHeader>
+
+<EditDatabaseModal controller={editModal} {database} />
+<DatabasePermissionsModal controller={permissionsModal} />
+<UpgradeDatabaseModal controller={reinstallModal} isReinstall />
+<DisconnectDatabaseModal
+  controller={disconnectModal}
+  disconnect={async (opts) => {
+    const result = await databasesStore.disconnectDatabase(opts);
+    if (result.sql_cleaned) {
+      toast.success($_('database_disconnected_successfully'));
+    } else {
+      toast.success($_('database_disconnected_without_sql_cleanup'));
+    }
+    router.goto('/');
+    return result;
+  }}
+/>
+
+<style>
+  .database-page-header {
+    --AppSecondaryHeader__background: linear-gradient(
+      135deg,
+      var(--color-bg-raised-1) 10%,
+      var(--color-bg-supporting) 30%,
+      var(--color-database-20) 50%,
+      var(--color-database-10) 100%
+    );
+    --entity-name-color: var(--color-database);
+  }
+
+  .tab-container {
+    padding: var(--lg3) 0;
+  }
+  .database-info {
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-fg-base);
+    margin-top: var(--sm5);
+  }
+  .connection-details {
+    display: flex;
+    align-items: center;
+    gap: var(--lg1);
+    flex-wrap: wrap;
+  }
+  .database-info .label {
+    color: var(--color-fg-subtle-1);
+    margin-right: var(--sm5);
+  }
+  .actions-container {
+    display: flex;
+    align-items: center;
+    gap: var(--sm1);
+  }
+  .dropdown-container {
+    margin-left: auto;
+  }
+</style>

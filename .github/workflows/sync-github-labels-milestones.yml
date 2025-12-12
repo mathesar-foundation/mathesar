@@ -1,0 +1,31 @@
+name: Sync labels and milestones
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_API_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+    steps:
+    - uses: actions/checkout@v2
+    - run: composer global require 'vanilla/github-sync'
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-infrastructure -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-data-playground -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-design -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-internal-crm -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-private-notes -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-scripts -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-website -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-wiki -d
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-infrastructure -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-data-playground -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-design -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-internal-crm -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-private-notes -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-scripts -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-website -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-wiki -s open

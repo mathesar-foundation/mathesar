@@ -1,0 +1,25 @@
+{$DOMAIN_NAME} {
+	log {
+		output stdout
+	}
+	respond /caddy-health-check 200
+	encode zstd gzip
+	handle_path /media/* {
+		@downloads {
+			query dl=*
+		}
+		header @downloads Content-disposition "attachment; filename={query.dl}"
+
+		file_server {
+			precompressed br zstd gzip
+			root {$MEDIA_ROOT:/code/media/}
+		}
+	}
+	handle_path /static/* {
+		file_server {
+			precompressed br zstd gzip
+			root {$STATIC_ROOT:/code/static/}
+		}
+	}
+	reverse_proxy mathesar_service:8000
+}

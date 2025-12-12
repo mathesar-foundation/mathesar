@@ -1,0 +1,47 @@
+<script lang="ts">
+  import { iconExpandRight } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
+  import { recordSelectorContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import { Button, Icon, iconSearch } from '@mathesar-component-library';
+
+  const recordSelector = recordSelectorContext.get();
+  export let table: Table;
+
+  function handleClick() {
+    recordSelector?.navigateToRecordPage({ tableOid: table.oid });
+  }
+</script>
+
+<Button on:click={handleClick} appearance="ghost" class="padding-zero">
+  <span class="trigger">
+    <span class="icon"><Icon {...iconSearch} /></span>
+    <Icon {...iconExpandRight} class="expand-right-icon" />
+  </span>
+</Button>
+
+<style lang="scss">
+  .trigger {
+    color: var(--color-fg-subtle-1);
+    border-radius: var(--border-radius-m);
+    display: flex;
+    align-items: center;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+
+    .icon {
+      font-size: 90%;
+    }
+
+    :global(.expand-right-icon) {
+      color: var(--color-fg-navigation);
+    }
+
+    &:hover,
+    &:active {
+      background-color: var(--color-bg-raised-1-active);
+      color: var(--color-fg-navigation-active);
+      border-color: var(--color-border-raised-1-active);
+    }
+  }
+</style>

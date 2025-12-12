@@ -1,0 +1,64 @@
+import { Story, Canvas, ArgsTable, Source } from '@storybook/addon-docs/blocks';
+import Button from '../Button.svelte';
+
+# Button
+
+<p>Button component design specification</p>
+
+## Usage
+
+<p></p>
+
+### Basic
+
+<Canvas withSource="none">
+  <Story id="components-button--basic" />
+</Canvas>
+
+<Source language='html' code={`
+<script>
+  import { Button } from '@mathesar-component-library';
+<\/script>
+
+<Button>Basic Button</Button>
+`}/>
+
+### Appearances
+
+<Canvas withSource="open">
+  <Story id="components-button--appearances" />
+</Canvas>
+
+### Sizes
+
+<Canvas withSource="open">
+  <Story id="components-button--sizes" />
+</Canvas>
+
+### Custom styling
+
+The Button component accepts class and style attributes similar to a native button. The same can be used to style the component as required.
+
+<Canvas withSource="open">
+  <Story id="components-button--custom-styling" />
+</Canvas>
+
+### Composite
+
+Composite buttons can be created by specifying html or other components within the Button slot
+
+<Canvas withSource="open">
+  <Story id="components-button--composite" />
+</Canvas>
+
+### Attributes
+
+Then Button component accepts all valid DOM attributes that are applicable for native button, except event handlers.
+
+### Events
+
+Upon click, the button emits a click event.
+
+## Arguments
+
+<ArgsTable of={Button} />

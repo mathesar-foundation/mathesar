@@ -1,0 +1,446 @@
+import { getContext, setContext } from 'svelte';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  readable,
+  writable,
+} from 'svelte/store';
+
+import { States } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import type { FileManifest, ResultValue } from '@mathesar/api/rpc/records';
+import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
+import { parseCellId } from '@mathesar/components/sheet/cellIds';
+import type { SelectedCellData } from '@mathesar/components/sheet/selection';
+import Plane from '@mathesar/components/sheet/selection/Plane';
+import Series from '@mathesar/components/sheet/selection/Series';
+import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
+import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
+import AsyncRpcApiStore, {
+  type AsyncRpcApiStoreFromMethod,
+} from '@mathesar/stores/AsyncRpcApiStore';
+import type {
+  ProcessedColumns,
+  RecordRow,
+  RecordSummariesForSheet,
+} from '@mathesar/stores/table-data';
+import { orderProcessedColumns } from '@mathesar/utils/tables';
+import { ImmutableSet, defined } from '@mathesar-component-library';
+
+import type { AssociatedCellValuesForSheet } from '../AssociatedCellData';
+
+import { ColumnsDataStore } from './columns';
+import { ConstraintsDataStore } from './constraints';
+import { Display } from './display';
+import {
+  type JoinedColumn,
+  SimpleManyToManyJoinedColumn,
+} from './joinedColumns';
+import { Meta } from './meta';
+import {
+  ProcessedColumn,
+  type ProcessedColumnsStore,
+} from './processedColumns';
+import { RecordsData } from './records';
+
+function getSelectedCellData(
+  selection: SheetSelection,
+  selectableRowsMap: Map<string, RecordRow>,
+  processedColumns: ProcessedColumns,
+  linkedRecordSummaries: RecordSummariesForSheet,
+  fileManifests: AssociatedCellValuesForSheet<FileManifest>,
+  joinedColumns: Map<string, JoinedColumn>,
+  joinedRecordSummaries: AssociatedCellValuesForSheet<string>,
+): SelectedCellData {
+  const { activeCellId } = selection;
+  const selectionData = {
+    cellCount: selection.cellIds.size,
+  };
+  if (activeCellId === undefined) {
+    return { selectionData };
+  }
+  const { rowId, columnId } = parseCellId(activeCellId);
+  const row = selectableRowsMap.get(rowId);
+  const value = row?.record[columnId];
+  const normalColumn = processedColumns.get(columnId);
+  const recordSummary = defined(
+    value,
+    (v) => linkedRecordSummaries.get(columnId)?.get(String(v)),
+  );
+  const fileManifest = (() => {
+    if (!normalColumn?.column.metadata?.file_backend) return undefined;
+    const fileReference = parseFileReference(value);
+    if (!fileReference) return undefined;
+    return fileManifests.get(normalColumn.id)?.get(fileReference.mash);
+  })();
+  const joinedColumn = joinedColumns.get(columnId);
+  const joinedRecordSummariesMap = joinedRecordSummaries.get(columnId);
+  const column = normalColumn ?? joinedColumn;
+  return {
+    activeCellData: column && {
+      column,
+      value,
+      recordSummary,
+      fileManifest,
+      joinedRecordSummariesMap,
+    },
+    selectionData,
+  };
+}
+
+export interface TabularDataProps {
+  database: Pick<Database, 'id'>;
+  table: Table;
+  meta?: Meta;
+  /**
+   * Keys are columns ids (as strings). Values are cell values.
+   *
+   * Setting an entry in this Map will apply a filter condition which the user
+   * cannot see or remove. And the column used for the filter condition will be
+   * removed from view.
+   */
+  contextualFilters?: Map<string, number | string>;
+  hasEnhancedPrimaryKeyCell?: boolean;
+  /**
+   * When true, load the record summaries associated directly with each record
+   * in the table. These are *not* the record summaries associated with linked
+   * records. Instead they are the summaries of the records themselves. By
+   * default, we don't load these summaries because it's a performance hit. But
+   * we need them for the records within the record selector.
+   */
+  loadIntrinsicRecordSummaries?: boolean;
+}
+
+export class TabularData {
+  database: Pick<Database, 'id'>;
+
+  table: Table;
+
+  meta: Meta;
+
+  columnsDataStore: ColumnsDataStore;
+
+  processedColumns: ProcessedColumnsStore;
+
+  constraintsDataStore: ConstraintsDataStore;
+
+  recordsData: RecordsData;
+
+  display: Display;
+
+  isLoading: Readable<boolean>;
+
+  selection: SheetSelectionStore;
+
+  selectedCellData: Readable<SelectedCellData>;
+
+  hasPrimaryKey: Readable<boolean>;
+
+  canSelectRecords: Readable<boolean>;
+
+  canInsertRecords: Readable<boolean>;
+
+  canUpdateRecords: Readable<boolean>;
+
+  canDeleteRecords: Readable<boolean>;
+
+  joinableTables: AsyncRpcApiStoreFromMethod<typeof api.tables.list_joinable>;
+
+  joinedColumns: Readable<Map<string, JoinedColumn>>;
+
+  allColumns: Readable<Map<string, ProcessedColumn | JoinedColumn>>;
+
+  /**
+   * In the future, this will be set dynamically in for publicly shared links
+   * where user should not be able to (for example) open the record page for
+   * linked records.
+   */
+  canViewLinkedEntities = readable(true);
+
+  constructor(props: TabularDataProps) {
+    this.database = props.database;
+    const contextualFilters =
+      props.contextualFilters ?? new Map<string, string | number>();
+    this.table = props.table;
+    this.meta = props.meta ?? new Meta();
+    this.columnsDataStore = new ColumnsDataStore({
+      database: props.database,
+      table: this.table,
+      hiddenColumns: Array.from(contextualFilters.keys()).map((id) =>
+        Number(id),
+      ),
+    });
+    this.constraintsDataStore = new ConstraintsDataStore({
+      database: props.database,
+      table: props.table,
+    });
+    this.recordsData = new RecordsData({
+      database: props.database,
+      table: props.table,
+      meta: this.meta,
+      columnsDataStore: this.columnsDataStore,
+      contextualFilters,
+      loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
+    });
+    this.display = new Display({
+      meta: this.meta,
+      recordsData: this.recordsData,
+    });
+
+    this.table = props.table;
+
+    this.processedColumns = derived(
+      [this.columnsDataStore.columns, this.constraintsDataStore],
+      ([columns, constraintsData]) =>
+        orderProcessedColumns(
+          new Map(
+            columns.map((column, columnIndex) => [
+              String(column.id),
+              new ProcessedColumn({
+                tableOid: this.table.oid,
+                column,
+                columnIndex,
+                constraints: constraintsData.constraints,
+                hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
+              }),
+            ]),
+          ),
+          this.table,
+        ),
+    );
+
+    this.hasPrimaryKey = derived(this.processedColumns, (processedColumns) =>
+      [...processedColumns.values()].some((pc) => pc.column.primary_key),
+    );
+
+    this.canSelectRecords = derived(
+      this.table.currentAccess.currentRolePrivileges,
+      (tableCurrentRolePrivileges) => tableCurrentRolePrivileges.has('SELECT'),
+    );
+
+    // TODO: We should be able to insert without a primary key column
+    this.canInsertRecords = derived(
+      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
+      ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
+        hasPrimaryKey && tableCurrentRolePrivileges.has('INSERT'),
+    );
+
+    this.canUpdateRecords = derived(
+      [
+        this.hasPrimaryKey,
+        this.table.currentAccess.currentRolePrivileges,
+        this.processedColumns,
+      ],
+      ([hasPrimaryKey, tableCurrentRolePrivileges, processedColumns]) =>
+        hasPrimaryKey &&
+        (tableCurrentRolePrivileges.has('UPDATE') ||
+          [...processedColumns.values()].some((col) =>
+            col.currentRolePrivileges.has('UPDATE'),
+          )),
+    );
+
+    this.canDeleteRecords = derived(
+      [this.hasPrimaryKey, this.table.currentAccess.currentRolePrivileges],
+      ([hasPrimaryKey, tableCurrentRolePrivileges]) =>
+        hasPrimaryKey && tableCurrentRolePrivileges.has('DELETE'),
+    );
+
+    this.joinableTables = new AsyncRpcApiStore(api.tables.list_joinable, {
+      staticProps: {
+        database_id: this.database.id,
+        table_oid: this.table.oid,
+        max_depth: 2,
+      },
+    });
+    void this.joinableTables.run();
+
+    this.joinedColumns = derived(
+      [this.meta.joining, this.joinableTables],
+      ([joining, joinableTables]) => {
+        if (!joinableTables.resolvedValue) {
+          return new Map<string, JoinedColumn>();
+        }
+        const manyToManyJoinedColumns =
+          SimpleManyToManyJoinedColumn.createFromJoining(
+            joining,
+            joinableTables.resolvedValue,
+          );
+        return new Map(manyToManyJoinedColumns.map((col) => [col.id, col]));
+      },
+    );
+
+    this.allColumns = derived(
+      [this.processedColumns, this.joinedColumns],
+      ([processedColumns, joinedColumns]) =>
+        new Map<string, ProcessedColumn | JoinedColumn>([
+          ...processedColumns,
+          ...joinedColumns,
+        ]),
+    );
+
+    const plane = derived(
+      [
+        this.recordsData.selectableRowsMap,
+        this.allColumns,
+        this.display.placeholderRowId,
+        this.joinedColumns,
+      ],
+      ([selectableRowsMap, allColumns, placeholderRowId, joinedColumns]) => {
+        const rowIds = new Series([...selectableRowsMap.keys()]);
+        const columnIds = new Series([...allColumns.keys()]);
+        const rangeRestrictedColumnIds = new ImmutableSet(joinedColumns.keys());
+        return new Plane(
+          rowIds,
+          columnIds,
+          placeholderRowId,
+          rangeRestrictedColumnIds,
+        );
+      },
+    );
+    this.selection = new SheetSelectionStore(plane);
+
+    this.isLoading = derived(
+      [
+        this.columnsDataStore.fetchStatus,
+        this.constraintsDataStore,
+        this.recordsData.state,
+      ],
+      ([columnsStatus, constraintsData, recordsDataState]) =>
+        columnsStatus?.state === 'processing' ||
+        constraintsData.state === States.Loading ||
+        recordsDataState === States.Loading,
+    );
+
+    this.selectedCellData = derived(
+      [
+        this.selection,
+        this.recordsData.selectableRowsMap,
+        this.processedColumns,
+        this.recordsData.linkedRecordSummaries,
+        this.recordsData.fileManifests,
+        this.joinedColumns,
+        this.recordsData.joinedRecordSummaries,
+      ],
+      (args) => getSelectedCellData(...args),
+    );
+
+    this.columnsDataStore.on('columnRenamed', async () => {
+      await this.refresh();
+    });
+    this.columnsDataStore.on('columnAdded', async () => {
+      await this.recordsData.fetch();
+    });
+    this.columnsDataStore.on('columnDeleted', async (columnId) => {
+      const stringColumnId = String(columnId);
+      this.meta.sorting.update((s) => s.without(stringColumnId));
+      this.meta.grouping.update((g) => g.withoutColumns([stringColumnId]));
+      this.meta.filtering.update((f) => f.withoutColumns([stringColumnId]));
+      await this.constraintsDataStore.fetch();
+      void this.joinableTables.run();
+    });
+    this.columnsDataStore.on('columnPatched', async () => {
+      await this.recordsData.fetch();
+    });
+    this.constraintsDataStore.on('constraintAdded', async () => {
+      await this.recordsData.fetch();
+      void this.joinableTables.run();
+    });
+    this.constraintsDataStore.on('constraintRemoved', async () => {
+      void this.joinableTables.run();
+    });
+  }
+
+  refresh(): Promise<unknown> {
+    return Promise.all([
+      this.columnsDataStore.fetch(),
+      this.recordsData.fetch(),
+      this.constraintsDataStore.fetch(),
+      this.joinableTables.run(),
+    ]);
+  }
+
+  refreshAfterColumnExtraction(
+    extractedColumnIds: RawColumnWithMetadata['id'][],
+    foreignKeyColumnId?: RawColumnWithMetadata['id'],
+  ) {
+    const stringExtractedColumnIds = extractedColumnIds.map(String);
+    const stringForeignKeyColumnId = foreignKeyColumnId
+      ? String(foreignKeyColumnId)
+      : undefined;
+    this.meta.sorting.update((s) => {
+      const firstExtractedColumnWithSort = stringExtractedColumnIds.find(
+        (columnId) => s.has(columnId),
+      );
+      if (
+        firstExtractedColumnWithSort &&
+        stringForeignKeyColumnId &&
+        !s.has(stringForeignKeyColumnId)
+      ) {
+        const sortDirection = s.get(firstExtractedColumnWithSort);
+        return s
+          .without(stringExtractedColumnIds)
+          .with(stringForeignKeyColumnId, sortDirection ?? 'ASCENDING');
+      }
+      return s.without(stringExtractedColumnIds);
+    });
+    this.meta.filtering.update((f) =>
+      f.withoutColumns(stringExtractedColumnIds),
+    );
+    this.meta.grouping.update((g) => {
+      const extractedColumnsHaveGrouping = stringExtractedColumnIds.some(
+        (columnId) => g.hasColumn(columnId),
+      );
+      if (
+        extractedColumnsHaveGrouping &&
+        stringForeignKeyColumnId &&
+        !g.hasColumn(stringForeignKeyColumnId)
+      ) {
+        return g.withoutColumns(stringExtractedColumnIds).withEntry({
+          columnId: stringForeignKeyColumnId,
+        });
+      }
+      return g.withoutColumns(stringExtractedColumnIds);
+    });
+    return this.refresh();
+  }
+
+  getProcessedColumn(columnSelectionId: string): ProcessedColumn | undefined {
+    return get(this.processedColumns).get(columnSelectionId);
+  }
+
+  getRecordIdFromRowId(rowId: string): ResultValue | undefined {
+    const row = get(this.recordsData.selectableRowsMap).get(rowId);
+    if (!row) return undefined;
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    if (!pkColumn) return undefined;
+    return row.record[pkColumn.id];
+  }
+
+  destroy(): void {
+    this.recordsData.destroy();
+    this.constraintsDataStore.destroy();
+    this.columnsDataStore.destroy();
+    this.selection.destroy();
+    this.meta.destroy();
+    this.joinableTables.cancel();
+  }
+}
+
+const tabularDataStoreContextKey = {};
+
+export function setTabularDataStoreInContext(
+  t: TabularData,
+): Writable<TabularData> {
+  const store = writable(t);
+  setContext(tabularDataStoreContextKey, store);
+  return store;
+}
+
+export function getTabularDataStoreFromContext(): Writable<TabularData> {
+  return getContext(tabularDataStoreContextKey);
+}

@@ -1,0 +1,239 @@
+import json
+
+from db import connection as db_conn
+
+
+def _json_or_none(value):
+    return json.dumps(value) if value is not None else None
+
+
+def list_records_from_table(
+    conn,
+    table_oid,
+    limit=None,
+    offset=None,
+    order=None,
+    filter=None,
+    group=None,
+    joined_columns=None,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
+):
+    """
+    Get records from a table.
+
+    The order definition objects should have the form
+    {"attnum": <int>, "direction": <text>}
+
+    Only data from which the user is granted `SELECT` is returned.
+
+    Args:
+        tab_id: The OID of the table whose records we'll get.
+        limit: The maximum number of rows we'll return.
+        offset: The number of rows to skip before returning records from
+                 following rows.
+        order: An array of ordering definition objects.
+        filter: An array of filter definition objects.
+        group: An array of group definition objects.
+        joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
+            "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
+        return_record_summaries: Whether to return self record summaries.
+        table_record_summary_templates: A dict of record summary templates, per table.
+    """
+    result = db_conn.exec_msar_func(
+        conn,
+        'list_records_from_table',
+        table_oid,
+        limit,
+        offset,
+        _json_or_none(order),
+        _json_or_none(filter),
+        _json_or_none(group),
+        _json_or_none(joined_columns),
+        return_record_summaries,
+        _json_or_none(table_record_summary_templates),
+    ).fetchone()[0]
+    return result
+
+
+def get_record_from_table(
+    conn,
+    record_id,
+    table_oid,
+    joined_columns=None,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
+):
+    """
+    Get single record from a table by its primary key
+
+    Only data from which the user is granted `SELECT` is returned.
+
+    Args:
+        record_id: The primary key value of the record.
+        table_id: The OID of the table whose record we'll get.
+        joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
+            "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
+        return_record_summaries: Whether to return self record summaries.
+        table_record_summary_templates: A dict of record summary templates, per table.
+    """
+    result = db_conn.exec_msar_func(
+        conn,
+        'get_record_from_table',
+        table_oid,
+        record_id,
+        _json_or_none(joined_columns),
+        return_record_summaries,
+        _json_or_none(table_record_summary_templates),
+    ).fetchone()[0]
+    return result
+
+
+def search_records_from_table(
+    conn,
+    table_oid,
+    search=[],
+    limit=10,
+    offset=0,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
+):
+    """
+    Get records from a table, according to a search specification
+
+    Only data from which the user is granted `SELECT` is returned.
+
+    Args:
+        tab_id: The OID of the table whose records we'll get.
+        search: A list of dictionaries defining a search.
+        limit: The maximum number of rows we'll return.
+        return_record_summaries: Whether to return self record summaries.
+        table_record_summary_templates: A dict of record summary templates, per table.
+
+    The search definition objects should have the form
+    {"attnum": <int>, "literal": <text>}
+    """
+    search = search or []
+    result = db_conn.exec_msar_func(
+        conn,
+        'search_records_from_table',
+        table_oid,
+        json.dumps(search),
+        limit,
+        offset,
+        return_record_summaries,
+        _json_or_none(table_record_summary_templates),
+    ).fetchone()[0]
+    return result
+
+
+def list_by_record_summaries(
+    conn,
+    table_oid,
+    limit=500,
+    offset=0,
+    search=None,
+    table_record_summary_templates=None,
+    linked_record_path=None,
+):
+    result = db_conn.exec_msar_func(
+        conn,
+        'list_by_record_summaries',
+        table_oid,
+        limit,
+        offset,
+        search,
+        _json_or_none(table_record_summary_templates),
+        _json_or_none(linked_record_path),
+    ).fetchone()[0]
+    return result
+
+
+def delete_records_from_table(conn, record_ids, table_oid):
+    """
+    Delete records from table by id.
+
+    Args:
+        tab_id: The OID of the table whose record we'll delete.
+        record_ids: A list of primary values
+
+    The table must have a single primary key column.
+    """
+    return db_conn.exec_msar_func(
+        conn,
+        'delete_records_from_table',
+        table_oid,
+        json.dumps(record_ids),
+    ).fetchone()[0]
+
+
+def add_record_to_table(
+    conn,
+    record_def,
+    table_oid,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
+):
+    """Add a record to a table."""
+    result = db_conn.exec_msar_func(
+        conn,
+        'add_record_to_table',
+        table_oid,
+        json.dumps(record_def),
+        return_record_summaries,
+        _json_or_none(table_record_summary_templates),
+    ).fetchone()[0]
+    return result
+
+
+def patch_record_in_table(
+    conn,
+    record_def,
+    record_id,
+    table_oid,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
+):
+    """Update a record in a table."""
+    result = db_conn.exec_msar_func(
+        conn,
+        'patch_record_in_table',
+        table_oid,
+        record_id,
+        json.dumps(record_def),
+        return_record_summaries,
+        _json_or_none(table_record_summary_templates),
+    ).fetchone()[0]
+    return result
+
+
+def insert_from_select(
+    conn,
+    src_table_id,
+    dst_table_id,
+    mappings
+):
+    """
+    Insert multiple records from a given source table to a destination/target table,
+    returning the number of records inserted.
+
+    Args:
+      src_tab_id: The OID of the source table.(OID if temp table if inserting into existing table).
+      dst_tab_id: The OID of the destination/target table.
+      mappings: The column mappings b/w src and dst tables based on which data will be inserted.
+
+    mappings should have the following form:
+    [
+      {"src_table_attnum": 1, "dst_table_attnum": 2},
+      {"src_table_attnum": 3, "dst_table_attnum": 3},
+      {...}
+    ]
+    """
+    result = db_conn.exec_msar_func(
+        conn,
+        'insert_from_select',
+        src_table_id,
+        dst_table_id,
+        json.dumps(mappings)
+    ).fetchone()[0]
+    return result

@@ -1,0 +1,32 @@
+import { Story, Canvas, ArgsTable, Source } from '@storybook/addon-docs/blocks';
+import Skeleton from '../Skeleton.svelte';
+
+# Skeleton
+
+Skeleton component design specification. Renders a skeleton loader, when loading prop is true, does not render anything when loading is false.
+
+Has a style of inset-0 i.e fills the parent element.
+
+## Usage
+
+<p></p>
+
+### Basic
+
+<Canvas withSource="none">
+  <Story name="basic" id="components-skeleton--basic" />
+</Canvas>
+
+<Source language='html' code={`
+<script>
+  import { Skeleton } from '@mathesar-component-library';
+<\/script>
+
+<div style="position:relative;height:30px;width:100px;">
+  <Skeleton loading={true} />
+</div>
+`}/>
+
+## Arguments
+
+<ArgsTable of={Skeleton} />

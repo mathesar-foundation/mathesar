@@ -1,0 +1,19 @@
+.progress {
+  height: 10px;
+  border-radius: 2px;
+  background: var(--color-bg-info);
+  position: relative;
+  overflow: hidden;
+
+  > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: color-mix(
+      in srgb,
+      var(--color-bg-info-strong),
+      transparent 30%
+    );
+  }
+}

@@ -1,0 +1,20 @@
+@import './variables.scss';
+@import './themes/main.scss';
+@import './components/main.scss';
+
+.trim-child-margins > :first-child {
+  margin-top: 0;
+}
+.trim-child-margins > :last-child {
+  margin-bottom: 0;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  font-variant-numeric: inherit;
+}

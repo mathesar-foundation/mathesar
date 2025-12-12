@@ -1,0 +1,79 @@
+.toast-item {
+  width: 22rem;
+  height: auto;
+  min-height: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  padding: var(--sm1);
+  background-color: var(--ToastItem__background-color);
+  color: var(--ToastItem__text-color);
+  box-shadow:
+    0 4px 6px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
+    0 2px 4px -1px color-mix(in srgb, var(--color-shadow), transparent 6%);
+  border: none;
+  border-radius: var(--sm4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+  white-space: pre-line;
+  will-change: transform, opacity;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1.2;
+
+  > .header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    overflow: hidden;
+    width: 100%;
+
+    > .title {
+      overflow: hidden;
+      overflow-wrap: break-word;
+    }
+
+    > * + * {
+      margin-left: 0.5rem;
+    }
+
+    > .close-button {
+      margin-left: auto;
+      cursor: pointer;
+      outline: none;
+    }
+  }
+
+  > .message {
+    overflow: hidden;
+    width: 100%;
+    overflow-wrap: break-word;
+    margin-top: 0.6rem;
+  }
+
+  > progress {
+    top: auto;
+    right: auto;
+    bottom: 0;
+    left: 0;
+    height: 6px;
+    width: 100%;
+    position: absolute;
+    display: block;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    background: transparent;
+    pointer-events: none;
+  }
+  > progress::-webkit-progress-bar {
+    background: transparent;
+  }
+  > progress::-webkit-progress-value {
+    background: var(--ToastItem__progress-color);
+  }
+  > progress::-moz-progress-bar {
+    background: var(--ToastItem__progress-color);
+  }
+}

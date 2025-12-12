@@ -1,0 +1,13 @@
+name: ShellCheck Lint
+on: [pull_request, merge_group]
+
+jobs:
+
+  # Reference: https://github.com/koalaman/shellcheck/wiki/GitHub-Actions#github-advanced-security-integration
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v4
+        - name: Run ShellCheck
+          run: find build-scripts bin -type f \( -name '*.sh' -o ! -name '*.*' \) -print -exec shellcheck {} +

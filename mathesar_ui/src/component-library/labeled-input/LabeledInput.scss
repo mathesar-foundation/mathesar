@@ -1,0 +1,85 @@
+.labeled-input {
+  --spacing-y-default: 0.25em;
+  --spacing-x-default: 0.4em;
+
+  .labeled-input-label {
+    display: inline-block;
+    color: var(--color-fg-label);
+  }
+  .labeled-input-slot {
+    display: block;
+
+    // TODO: Unify styling for all form elements
+    > button.dropdown.trigger {
+      display: flex;
+      width: 100%;
+    }
+  }
+
+  .label-content > .help {
+    display: block;
+    font-size: var(--sm1);
+    color: var(--color-fg-base-muted);
+    margin-top: var(--spacing-y, var(--spacing-y-default));
+    &:empty {
+      display: none;
+    }
+  }
+
+  .description {
+    display: block;
+    font-size: var(--sm1);
+    color: var(--color-fg-base-muted);
+    margin-top: var(--spacing-y, var(--spacing-y-default));
+    margin-left: 1.5rem;
+    &:empty {
+      display: none;
+    }
+  }
+
+  &.layout-stacked {
+    .labeled-input-slot {
+      margin-top: var(--spacing-y, var(--spacing-y-default));
+    }
+  }
+
+  &.layout-inline,
+  &.layout-inline-input-first {
+    // This is to avoid having the `<label>` element take up the full width of
+    // its parent. If that happens it can become an annoyingly large click
+    // target. The problem is especially evident when a `Select` component is
+    // used as the input element.
+    max-width: max-content;
+  }
+
+  &.layout-inline .label-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    > .labeled-input-label {
+      flex: 0 0 auto;
+      margin-right: 0.5rem;
+      padding-top: calc(var(--input-padding-y, 0.5em));
+      padding-bottom: calc(var(--input-padding-y, 0.5em));
+    }
+    .field-help {
+      margin-top: 0.25em;
+    }
+  }
+
+  &.layout-inline-input-first .label-content {
+    display: grid;
+    grid-template: auto auto / auto 1fr;
+    > .labeled-input-slot {
+      grid-area: 1 / 1 / 1 / 1;
+      margin-right: var(--spacing-x, var(--spacing-x-default));
+    }
+    > .labeled-input-label {
+      grid-area: 1 / 2 / 1 / 2;
+    }
+    > .help {
+      grid-area: 2 / 2 / 2 / 2;
+      margin-top: var(--spacing-y, var(--spacing-y-default));
+    }
+  }
+}

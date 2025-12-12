@@ -1,0 +1,47 @@
+<script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
+
+  import { Icon } from '@mathesar/component-library';
+  import { iconSelectRecord } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
+
+  import { recordSelectorContext } from './RecordSelectorController';
+
+  const recordSelector = recordSelectorContext.get();
+  const dispatch = createEventDispatcher();
+
+  export let table: { oid: Table['oid']; name?: Table['name'] };
+
+  $: ({ oid, name } = table);
+  $: label = name
+    ? $_('navigate_to_table_record', { values: { tableName: name } })
+    : $_('navigate_to_record');
+
+  function handleClick() {
+    recordSelector?.navigateToRecordPage({ tableOid: oid });
+    dispatch('click');
+  }
+</script>
+
+<button
+  class="record-selector-navigation-button passthrough"
+  aria-label={label}
+  title={label}
+  on:click={handleClick}
+>
+  <Icon {...iconSelectRecord} />
+</button>
+
+<style>
+  .record-selector-navigation-button {
+    color: var(--color-fg-subtle-1);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .record-selector-navigation-button:hover {
+    color: var(--color-fg-base);
+  }
+</style>

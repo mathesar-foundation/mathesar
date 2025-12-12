@@ -1,0 +1,447 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative;
+
+  vertical-align: middle;
+  gap: var(--button-gap, 0.5em);
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 1em;
+  line-height: var(--input-line-height);
+
+  outline-offset: 1px;
+  transition: background-color 0.15s ease;
+
+  padding: var(--button-padding, var(--input-padding) var(--sm3));
+  font-weight: var(--button-font-weight, var(--font-weight-medium));
+  border-radius: var(--button-border-radius, var(--sm4));
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  /**
+   * Css properties that are altered for each variant.
+   */
+  $btn-configurable-props: (
+    background: transparent,
+    color: inherit,
+    border: 1px solid,
+    border-color: transparent,
+    outline: 2px solid,
+    outline-color: transparent,
+    box-shadow: none,
+  );
+
+  $btn-states: (hover, focus, active);
+
+  $btn-variants: (
+    default: (
+      normal: (
+        background: var(--color-bg-control),
+        border-color: var(--color-border-control),
+      ),
+      hover: (
+        background: var(--color-bg-control-hover),
+        box-shadow: (
+          var(--color-shadow) 0 1px 3px 0,
+        ),
+      ),
+      focus: (
+        background: var(--color-bg-control-focused),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-control-focused),
+            transparent 70%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+      active: (
+        background: var(--color-bg-control-active),
+        border-color: var(--color-border-control-active),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-control-focused),
+            transparent 60%
+          ),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+    ),
+
+    primary: (
+      normal: (
+        background:
+          linear-gradient(
+            to bottom right,
+            var(--color-action-primary),
+            var(--color-action-primary-80)
+          ),
+        color: var(--color-fg-light),
+        border-color: var(--color-action-primary-80),
+        box-shadow: (
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 75%),
+          0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 80%),
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 80%),
+        ),
+      ),
+      hover: (
+        background:
+          linear-gradient(
+            to bottom right,
+            var(--color-action-primary-hover),
+            var(--color-action-primary-80-hover)
+          ),
+        border-color: var(--color-action-primary-80),
+        box-shadow: (
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 75%),
+          0 1px 3px -2px color-mix(in srgb, var(--color-shadow), transparent 80%),
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 80%),
+        ),
+      ),
+      focus: (
+        background:
+          linear-gradient(
+            to bottom right,
+            var(--color-action-primary-focused),
+            var(--color-action-primary-80-focused)
+          ),
+        border-color: var(--color-action-primary-80-focused),
+        outline-color: var(--color-action-primary-40),
+        box-shadow: var(--color-shadow) 0 1px 2px 0,
+      ),
+      active: (
+        background:
+          linear-gradient(
+            to bottom right,
+            var(--color-action-primary-active),
+            var(--color-action-primary-80-active)
+          ),
+        border-color: var(--color-action-primary-80-active),
+        outline-color: var(--color-action-primary-40-active),
+        box-shadow: var(--color-shadow) 0 1px 2px 0,
+      ),
+    ),
+
+    secondary: (
+      normal: (
+        background: var(--color-action-secondary-20),
+        color: var(--color-fg-control),
+        border-color: var(--color-action-secondary-25),
+      ),
+      hover: (
+        background: var(--color-action-secondary-25),
+        border-color: var(--color-action-secondary-40),
+        box-shadow: (
+          0 4px 6px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 2px 4px -2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 0 0 1px color-mix(in srgb, var(--color-shadow), transparent 70%),
+        ),
+      ),
+      focus: (
+        background: var(--color-action-secondary-25-active),
+        outline-color: var(--color-action-secondary-25),
+        border-color: var(--color-action-secondary-40),
+        box-shadow: (
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+      active: (
+        background: var(--color-action-secondary-25-active),
+        border-color: var(--color-action-secondary-40),
+        outline-color: var(--color-action-secondary-25),
+        box-shadow: (
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 5%),
+          0 1px 3px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          0 1px 2px -1px color-mix(in srgb, var(--color-shadow), transparent 10%),
+          inset 1px 1px 2px
+            color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+    ),
+
+    outcome: (
+      normal: (
+        background: var(--color-bg-outcome),
+        border-color: var(--color-border-outcome),
+        color: var(--color-fg-outcome),
+      ),
+      hover: (
+        background: var(--color-bg-outcome-hover),
+        color: var(--color-fg-outcome-hover),
+      ),
+      focus: (
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-outcome-focused),
+            transparent 60%
+          ),
+      ),
+      active: (
+        background: var(--color-bg-outcome-active),
+        border-color: var(--color-border-outcome-active),
+        color: var(--color-fg-outcome-active),
+        outline-color:
+          color-mix(
+            in srgb,
+            var(--color-border-outcome-focused),
+            transparent 60%
+          ),
+      ),
+    ),
+
+    plain: (
+      normal: (
+        background: transparent,
+        border-color: transparent,
+        box-shadow: none,
+      ),
+      hover: (
+        background: var(--color-bg-control-hover),
+        color: var(--color-fg-base),
+      ),
+      focus: (
+        background: var(--color-bg-control-focused),
+        border-color: var(--color-border-control-focused),
+        box-shadow: (
+          0 2px 4px color-mix(in srgb, var(--color-shadow), transparent 15%),
+          0 1px 2px color-mix(in srgb, var(--color-shadow), transparent 10%),
+        ),
+      ),
+      active: (
+        background: var(--color-bg-control-active),
+        box-shadow: 0 0 0 2px var(--color-bg-control-active),
+      ),
+    ),
+
+    ghost: (
+      normal: (
+        background: transparent,
+        border-color: transparent,
+        box-shadow: none,
+      ),
+    ),
+
+    danger: (
+      normal: (
+        background: transparent,
+        border-color: transparent,
+        color: var(--color-fg-danger),
+      ),
+      hover: (
+        background: color-mix(in srgb, var(--color-bg-danger), transparent 60%),
+        border-color: var(--color-border-danger-hover),
+        color: var(--color-fg-danger-hover),
+      ),
+      focus: (
+        border-color: var(--color-border-danger),
+        outline-color: var(--color-border-danger-active),
+      ),
+      active: (
+        background: color-mix(in srgb, var(--color-bg-danger), transparent 50%),
+        border-color: var(--color-border-danger),
+        outline-color: var(--color-border-danger-active),
+        color: var(--color-fg-danger-active),
+      ),
+    ),
+
+    action: (
+      normal: (
+        background: var(--color-action-secondary-10),
+        color: var(--color-fg-navigation),
+        border-color: transparent,
+      ),
+      hover: (
+        background:
+          color-mix(in srgb, var(--color-action-secondary-20), transparent 60%),
+        border-color: var(--color-action-secondary-20-hover),
+      ),
+      focus: (
+        border-color: var(--color-action-secondary-40-active),
+        outline-color: var(--color-action-secondary-40-active),
+      ),
+      active: (
+        background: var(--color-action-secondary-20-active),
+        border-color: var(--color-action-secondary-40-active),
+        outline-color: var(--color-action-secondary-40-active),
+      ),
+    ),
+
+    tip: (
+      normal: (
+        background: var(--color-bg-tip),
+        border-color: var(--color-border-tip),
+        color: var(--color-fg-tip),
+      ),
+      hover: (
+        background: var(--color-bg-tip-hover),
+        border-color: var(--color-border-tip-hover),
+        color: var(--color-fg-tip-hover),
+      ),
+      focus: (
+        border-color: var(--color-border-tip-hover),
+        outline-color: var(--color-border-tip),
+      ),
+      active: (
+        background: var(--color-bg-tip-active),
+        border-color: var(--color-border-tip-active),
+        outline-color: var(--color-border-tip),
+        color: var(--color-fg-tip-active),
+      ),
+    ),
+
+    link: (
+      normal: (
+        color: var(--color-fg-link),
+        background: transparent,
+        border-color: transparent,
+      ),
+      hover: (
+        color: var(--color-fg-link-hover),
+      ),
+      active: (
+        color: var(--color-fg-link-active),
+      ),
+    ),
+  );
+
+  // Utilities
+  &.size-medium {
+    font-size: 1em;
+  }
+
+  &.size-small {
+    font-size: 0.889em;
+  }
+
+  &.size-large {
+    font-size: 1.2em;
+  }
+
+  &.padding-zero {
+    padding: 0px;
+  }
+
+  &.padding-compact {
+    padding: var(--sm4) var(--sm3);
+  }
+
+  &.full-width {
+    width: 100%;
+  }
+
+  // Mixins & scss functions
+
+  /**
+   * Produce external configurable css vars.
+   * Examples:
+   *  background: var(--button-background, var(--button-internal-background));
+   *  color: var(--button-color, var(--button-internal-color));
+   */
+  @each $prop-name, $def-value in $btn-configurable-props {
+    #{$prop-name}: var(
+      --button-#{$prop-name},
+      var(--button-internal-#{$prop-name})
+    );
+  }
+
+  /**
+   * Produce internal css vars, with their defaults.
+   * Examples:
+   *  --button-internal-background: transparent;
+   *  --button-internal-color: inherit;
+   */
+  @each $prop-name, $def-value in $btn-configurable-props {
+    --button-internal-#{$prop-name}: #{$def-value};
+  }
+
+  /**
+   * Produce internal css vars for different states with their defaults.
+   * Examples:
+   *  --button-internal-hover-background: var(--button-internal-background);
+   *  --button-internal-hover-color: var(--button-internal-color);
+   */
+  @each $state in $btn-states {
+    @each $prop-name, $def-value in $btn-configurable-props {
+      --button-internal-#{$state}-#{$prop-name}: var(
+        --button-internal-#{$prop-name}
+      );
+    }
+  }
+
+  &:not(:disabled) {
+    /**
+     * Produces external css vars for states.
+     * Example:
+     *   &:hover,
+     *   &.hover {
+     *     background: var(
+     *       --button-hover-background,
+     *       var(--button-background, var(--button-internal-hover-background))
+     *     );
+     *     border-color: var(
+     *       --button-hover-border-color,
+     *       var(--button-border-color, var(--button-internal-hover-border-color))
+     *     );
+     *   }
+     */
+    @each $state in $btn-states {
+      &:#{$state},
+      &.#{$state} {
+        @each $prop-name, $def-value in $btn-configurable-props {
+          #{$prop-name}: var(
+            --button-#{$state}-#{$prop-name},
+            var(
+              --button-#{$prop-name},
+              var(--button-internal-#{$state}-#{$prop-name})
+            )
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * The following calls produce the css variables for each variant.
+   */
+
+  @function _variant-state-suffix($state-name) {
+    @return if($state-name == 'normal', '', '-#{$state-name}');
+  }
+
+  @mixin btn-variant-state($state-name, $cfg) {
+    $seg: _variant-state-suffix($state-name);
+
+    @each $prop-name, $def-value in $btn-configurable-props {
+      @if map-has-key($cfg, $prop-name) {
+        --button-internal#{$seg}-#{$prop-name}: #{map-get($cfg, $prop-name)};
+      }
+    }
+  }
+
+  @each $name, $states in $btn-variants {
+    &.btn-#{$name} {
+      @each $state-name, $state in $states {
+        @include btn-variant-state($state-name, $state);
+      }
+    }
+  }
+}
+
+a.btn {
+  text-decoration: none;
+}

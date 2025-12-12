@@ -1,0 +1,601 @@
+"""
+Classes and functions exposed to the RPC endpoint for managing table records.
+"""
+from typing import Any, Literal, Optional, TypedDict, Union
+
+from modernrpc.core import REQUEST_KEY
+
+from db.records import (
+    list_records_from_table,
+    get_record_from_table,
+    search_records_from_table,
+    delete_records_from_table,
+    add_record_to_table,
+    patch_record_in_table,
+    list_by_record_summaries,
+)
+from mathesar.rpc.decorators import mathesar_rpc_method
+from mathesar.rpc.utils import connect
+from mathesar.utils.columns import get_download_link_columns
+from mathesar.utils.tables import get_table_record_summary_templates
+from mathesar.utils.download_links import get_download_links
+
+
+class OrderBy(TypedDict):
+    """
+    An object defining an `ORDER BY` clause.
+
+    Attributes:
+        attnum: The attnum of the column to order by.
+        direction: The direction to order by.
+    """
+    attnum: int
+    direction: Literal["asc", "desc"]
+
+
+class FilterAttnum(TypedDict):
+    """
+    An object choosing a column for a filter.
+
+    Attributes:
+        type: Must be `"attnum"`
+        value: The attnum of the column to filter by
+    """
+    type: Literal["attnum"]
+    value: int
+
+
+class FilterLiteral(TypedDict):
+    """
+    An object defining a literal for an argument to a filter.
+
+    Attributes:
+      type: must be `"literal"`.
+      value: The value of the literal.
+    """
+    type: Literal["literal"]
+    value: Any
+
+
+class Filter(TypedDict):
+    """
+    An object defining a filter to be used in a `WHERE` clause.
+
+    For valid `type` values, see the `msar.filter_templates` table
+    defined in `mathesar/db/sql/05_msar.sql`.
+
+    Attributes:
+      type: a function or operator to be used in filtering.
+      args: The ordered arguments for the function or operator.
+    """
+    type: str
+    args: list[Union['Filter', FilterAttnum, FilterLiteral]]
+
+
+class SearchParam(TypedDict):
+    """
+    Search definition for a single column.
+
+    Attributes:
+        attnum: The attnum of the column in the table.
+        literal: The literal to search for in the column.
+    """
+    attnum: int
+    literal: Any
+
+
+class Grouping(TypedDict):
+    """
+    Grouping definition.
+
+    The table involved must have a single column primary key.
+
+    Attributes:
+        columns: The columns to be grouped by.
+        preproc: The preprocessing functions to apply (if any).
+    """
+    columns: list[int]
+    preproc: list[str]
+
+
+class Group(TypedDict):
+    """
+    Group definition.
+
+    Note that the `count` is over all rows in the group, whether returned
+    or not. However, `result_indices` is restricted to only the rows
+    returned. This is to avoid potential problems if there are many rows
+    in the group (e.g., the whole table), but we only return a few.
+
+    Attributes:
+        id: The id of the group. Consistent for same input.
+        count: The number of items in the group.
+        results_eq: The value the results of the group equal.
+        result_indices: The 0-indexed positions of group members in the
+            results array.
+    """
+    id: int
+    count: int
+    results_eq: list[dict]
+    result_indices: list[int]
+
+
+class GroupingResponse(TypedDict):
+    """
+    Grouping response object. Extends Grouping with actual groups.
+
+    Attributes:
+        columns: The columns to be grouped by.
+        preproc: The preprocessing functions to apply (if any).
+        groups: The groups applicable to the records being returned.
+    """
+    columns: list[int]
+    preproc: list[str]
+    groups: list[Group]
+
+
+class LinkedRecordPath(TypedDict):
+    """
+    Represents a path through a simple mapping table to a record on the
+    other side of a many-to-many link. The near side of the link is the
+    last part of the path, to match what's returned by
+    `tables.list_joinable` in the context where this is used. So, if one
+    calls `tables.list_joinable` on the table page, one can simply put
+    a join path to a table whose summaries are aggregated and displayed
+    on the table page into this object.
+
+    join_path should thus have the structure:
+
+    [
+        [[oid_1, attnum_1], [oid_2, attnum_2]],
+        [[oid_2, attnum_3], [oid_3, attnum_4]]
+    ]
+
+    In particular, it should be of length 2, representing a many-to-many
+    through a simple mapping table, and the OID of the right side of the
+    first join must bequal the OID on the left side of the second join.
+
+    Attributes:
+        record_pkey: The primary key of the record linked to.
+        join_path: A path giving the route through a simple mapping table
+            to the table linked to.
+    """
+    record_pkey: Any
+    join_path: list[list[list[int]]]
+
+
+class RecordList(TypedDict):
+    """
+    Records from a table, along with some meta data
+
+    The form of the objects in the `results` array is determined by the
+    underlying records being listed. The keys of each object are the
+    attnums of the retrieved columns. The values are the value for the
+    given row, for the given column.
+
+    Attributes:
+        count: The total number of records in the table.
+        results: An array of record objects.
+        grouping: Information for displaying grouped records.
+        linked_record_smmaries: Information for previewing foreign key
+            values, provides a map of foreign key to a text summary.
+        record_summaries: Information for previewing returned records.
+        download_links: Information for viewing or downloading file
+            attachments.
+    """
+    count: int
+    results: list[dict]
+    grouping: GroupingResponse
+    linked_record_summaries: dict[str, dict[str, str]]
+    record_summaries: dict[str, str]
+    joined_record_summaries: dict
+    download_links: Optional[dict]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            count=d["count"],
+            results=d["results"],
+            grouping=d.get("grouping"),
+            linked_record_summaries=d.get("linked_record_summaries"),
+            record_summaries=d.get("record_summaries"),
+            joined_record_summaries=d.get("joined_record_summaries"),
+            download_links=d.get("download_links") or None
+        )
+
+
+class RecordAdded(TypedDict):
+    """
+    Record from a table, along with some meta data
+
+    The form of the object in the `results` array is determined by the
+    underlying records being listed. The keys of each object are the
+    attnums of the retrieved columns. The values are the value for the
+    given row, for the given column.
+
+    Attributes:
+        results: An array of a single record objects (the one added).
+        linked_record_summaries: Information for previewing foreign key
+            values, provides a map of foreign key to a text summary.
+        record_summaries: Information for previewing an added record.
+    """
+    results: list[dict]
+    linked_record_summaries: dict[str, dict[str, str]]
+    record_summaries: dict[str, str]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            results=d["results"],
+            linked_record_summaries=d.get("linked_record_summaries"),
+            record_summaries=d.get("record_summaries"),
+        )
+
+
+class SummarizedRecordReference(TypedDict):
+    """
+    A summarized reference to a record, typically used in foreign key fields.
+
+    Attributes:
+        key: A unique identifier for the record.
+        summary: The record summary
+    """
+    key: Any
+    summary: str
+
+
+class RecordSummaryMapping(TypedDict):
+    """
+    Represents a mapping to simple mapping table primary keys, which can
+    be deleted to unlink a linked record.
+
+    Attributes:
+        join_table: The OID of the simple mapping table referenced.
+        joined_values: A dict with each key being the key of a
+            `SummarizedRecordReference`, and each value being the pkey
+            of a row in the join table which references the summarized
+            row.
+    """
+    join_table: int
+    joined_values: dict[str, list[Any]]
+
+
+class RecordSummaryList(TypedDict):
+    """
+    Response for listing record summaries.
+
+    Attributes:
+        count: The total number of records matching the criteria.
+        results: A list of summarized record references, each containing a key and a summary.
+    """
+    count: int
+    results: list[SummarizedRecordReference]
+    mapping: RecordSummaryMapping
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            count=d["count"],
+            results=d["results"],
+            mapping=d["mapping"],
+        )
+
+
+@mathesar_rpc_method(name="records.list", auth="login")
+def list_(
+        *,
+        table_oid: int,
+        database_id: int,
+        limit: int = None,
+        offset: int = None,
+        order: list[OrderBy] = None,
+        filter: Filter = None,
+        grouping: Grouping = None,
+        joined_columns: list[dict] = None,
+        return_record_summaries: bool = False,
+        **kwargs
+) -> RecordList:
+    """
+    List records from a table, and its row count. Exposed as `list`.
+
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        limit: The maximum number of rows we'll return.
+        offset: The number of rows to skip before returning records from
+            following rows.
+        order: An array of ordering definition objects.
+        filter: An array of filter definition objects.
+        grouping: An array of group definition objects.
+        joined_columns: An array of dict(s) that include an "alias" and "join_path" where
+            "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
+        return_record_summaries: Whether to return summaries of retrieved
+            records.
+
+    Returns:
+        The requested records, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = list_records_from_table(
+            conn,
+            table_oid,
+            limit=limit,
+            offset=offset,
+            order=order,
+            filter=filter,
+            group=grouping,
+            joined_columns=joined_columns,
+            return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+        )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns,
+    ) or None
+
+    return RecordList.from_dict(record_info)
+
+
+@mathesar_rpc_method(name="records.get", auth="login")
+def get(
+        *,
+        record_id: Any,
+        table_oid: int,
+        database_id: int,
+        joined_columns: list[dict] = None,
+        return_record_summaries: bool = False,
+        table_record_summary_templates: dict[str, Any] = None,
+        **kwargs
+) -> RecordList:
+    """
+    Get a single record from a table by its primary key.
+
+    Args:
+        record_id: The primary key value of the record to retrieve.
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
+            "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
+        return_record_summaries: Whether to return summaries of the
+            retrieved record.
+        table_record_summary_templates: A dict of record summary templates.
+            If none are provided, then the templates will be taken from the
+            Django metadata. Any templates provided will take precedence on a
+            per-table basis over the stored metadata templates. The purpose of
+            this function parameter is to allow clients to generate record
+            summary previews without persisting any metadata.
+
+    Returns:
+        The requested record, along with some metadata.
+    """
+
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = get_record_from_table(
+            conn,
+            record_id,
+            table_oid,
+            joined_columns,
+            return_record_summaries=return_record_summaries,
+            table_record_summary_templates={
+                **get_table_record_summary_templates(database_id),
+                **(table_record_summary_templates or {}),
+            },
+        )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns,
+    ) or None
+    return RecordList.from_dict(record_info)
+
+
+@mathesar_rpc_method(name="records.add", auth="login")
+def add(
+        *,
+        record_def: dict,
+        table_oid: int,
+        database_id: int,
+        return_record_summaries: bool = False,
+        **kwargs
+) -> RecordAdded:
+    """
+    Add a single record to a table.
+
+    The form of the `record_def` is determined by the underlying table.
+    Keys should be attnums, and values should be the desired value for
+    that column in the created record. Missing keys will use default
+    values (if set on the DB), and explicit `null` values will set null
+    for that value regardless of default (with obvious exceptions where
+    that would violate some constraint).
+
+    Args:
+        record_def: An object representing the record to be added.
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        return_record_summaries: Whether to return summaries of the added
+            record.
+
+    Returns:
+        The created record, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = add_record_to_table(
+            conn,
+            record_def,
+            table_oid,
+            return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+        )
+    return RecordAdded.from_dict(record_info)
+
+
+@mathesar_rpc_method(name="records.patch", auth="login")
+def patch(
+        *,
+        record_def: dict,
+        record_id: Any,
+        table_oid: int,
+        database_id: int,
+        return_record_summaries: bool = False,
+        **kwargs
+) -> RecordAdded:
+    """
+    Modify a record in a table.
+
+    The form of the `record_def` is determined by the underlying table.
+    Keys should be attnums, and values should be the desired value for
+    that column in the modified record. Explicit `null` values will set
+    null for that value (with obvious exceptions where that would violate
+    some constraint).
+
+    Args:
+        record_def: An object representing the record to be modified.
+        record_id: The primary key value of the record to modify.
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        return_record_summaries: Whether to return summaries of the
+            modified record.
+
+    Returns:
+        The modified record, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = patch_record_in_table(
+            conn,
+            record_def,
+            record_id,
+            table_oid,
+            return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+        )
+    return RecordAdded.from_dict(record_info)
+
+
+@mathesar_rpc_method(name="records.delete", auth="login")
+def delete(
+        *,
+        record_ids: list[Any],
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> list[Any]:
+    """
+    Delete records from a table by primary key.
+
+    Args:
+        record_ids: The primary key values of the records to be deleted.
+        table_oid: The identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The primary key values of the records deleted.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        num_deleted = delete_records_from_table(
+            conn,
+            record_ids,
+            table_oid,
+        )
+    return num_deleted
+
+
+@mathesar_rpc_method(name="records.search", auth="login")
+def search(
+        *,
+        table_oid: int,
+        database_id: int,
+        search_params: list[SearchParam] = [],
+        limit: int = 10,
+        offset: int = 0,
+        return_record_summaries: bool = False,
+        **kwargs
+) -> RecordList:
+    """
+    List records from a table according to `search_params`.
+
+    Literals will be searched for in a basic way in string-like columns,
+    but will have to match exactly in non-string-like columns.
+
+    Records are assigned a score based on how many matches, and of what
+    quality, they have with the passed search parameters.
+
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        search_params: Results are ranked and filtered according to the
+                       objects passed here.
+        limit: The maximum number of rows we'll return.
+        offset: The number of rows to skip before returning records from
+            following rows.
+        return_record_summaries: Whether to return summaries of retrieved
+            records.
+
+    Returns:
+        The requested records, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = search_records_from_table(
+            conn,
+            table_oid,
+            search=search_params,
+            limit=limit,
+            offset=offset,
+            return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+        )
+    download_link_columns = get_download_link_columns(table_oid, database_id)
+    record_info["download_links"] = get_download_links(
+        kwargs.get(REQUEST_KEY),
+        record_info["results"],
+        download_link_columns,
+    ) or None
+    return RecordList.from_dict(record_info)
+
+
+@mathesar_rpc_method(name="records.list_summaries", auth="login")
+def list_summaries(
+        *,
+        table_oid: int,
+        database_id: int,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        search: Optional[str] = None,
+        linked_record_path: Optional[LinkedRecordPath] = None,
+        **kwargs,
+) -> RecordSummaryList:
+    """
+    List record summaries and keys for each record. Primarily used for selection via the Row seeker.
+
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        limit: Optional limit on the number of records to return.
+        offset: Optional offset for pagination.
+        search: Optional search term to filter records.
+        linked_record_path: Optional blob representing linkages to a
+            record for determining many-to-many inclusion.
+
+    Returns:
+        A list of objects, each containing a record summary and key pertaining to a record.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = list_by_record_summaries(
+            conn,
+            table_oid,
+            limit=limit,
+            offset=offset,
+            search=search,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            linked_record_path=linked_record_path,
+        )
+    return RecordSummaryList.from_dict(record_info)

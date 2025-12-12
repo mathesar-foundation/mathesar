@@ -1,0 +1,154 @@
+import { map } from 'iter-tools';
+import { type Readable, derived, writable } from 'svelte/store';
+
+import { api } from '@mathesar/api/rpc';
+import type { RawDatabase, SystemSchema } from '@mathesar/api/rpc/databases';
+import type { RawServer } from '@mathesar/api/rpc/servers';
+import { Database } from '@mathesar/models/Database';
+import { Server } from '@mathesar/models/Server';
+import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
+import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
+import {
+  ImmutableMap,
+  WritableMap,
+  defined,
+} from '@mathesar-component-library';
+
+const commonData = preloadCommonData();
+
+function sortDatabases(c: Iterable<Database>): Database[] {
+  return [...c].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function* generateDatabaseEntries(
+  rawServers: Iterable<RawServer>,
+  rawDatabases: Iterable<RawDatabase>,
+): Iterable<[number, Database]> {
+  const serverMap = new Map(
+    map((s) => [s.id, new Server({ rawServer: s })], rawServers),
+  );
+  for (const rawDatabase of rawDatabases) {
+    const server =
+      serverMap.get(rawDatabase.server_id) ??
+      Server.dummy(rawDatabase.server_id);
+    const database = new Database({ rawDatabase, server });
+    yield [database.id, database];
+  }
+}
+
+class DatabasesStore {
+  private readonly unsortedDatabases = new WritableMap<
+    Database['id'],
+    Database
+  >();
+
+  readonly databases: Readable<ImmutableMap<Database['id'], Database>>;
+
+  private readonly currentDatabaseId = writable<Database['id'] | undefined>();
+
+  readonly currentDatabase: Readable<Database | undefined>;
+
+  constructor(
+    databases: Iterable<[number, Database]>,
+    currentDatabaseId: number | null | undefined,
+  ) {
+    this.unsortedDatabases.reconstruct(databases);
+    this.databases = derived(
+      this.unsortedDatabases,
+      (ud) =>
+        new ImmutableMap(sortDatabases(ud.values()).map((d) => [d.id, d])),
+    );
+    this.currentDatabaseId.set(currentDatabaseId ?? undefined);
+    this.currentDatabase = derived(
+      [this.databases, this.currentDatabaseId],
+      ([d, id]) => defined(id, (v) => d.get(v)),
+    );
+  }
+
+  private addDatabase(database: Database) {
+    this.unsortedDatabases.set(database.id, database);
+  }
+
+  async connectExistingDatabase(
+    props: Parameters<typeof api.databases.setup.connect_existing>[0],
+  ) {
+    const { database, server } = await api.databases.setup
+      .connect_existing(props)
+      .run();
+    const connectedDatabase = new Database({
+      rawDatabase: database,
+      server: new Server({ rawServer: server }),
+    });
+    this.addDatabase(connectedDatabase);
+    return connectedDatabase;
+  }
+
+  async createNewDatabase(
+    props: Parameters<typeof api.databases.setup.create_new>[0],
+  ) {
+    const { database, server } = await api.databases.setup
+      .create_new(props)
+      .run();
+    const connectedDatabase = new Database({
+      rawDatabase: database,
+      server: new Server({ rawServer: server }),
+    });
+    this.addDatabase(connectedDatabase);
+    return connectedDatabase;
+  }
+
+  async disconnectDatabase(p: {
+    database: Pick<Database, 'id'>;
+    schemas_to_remove?: SystemSchema[];
+    role?: { name: string; password: string };
+    disconnect_db_server: boolean;
+  }): Promise<{ sql_cleaned: boolean }> {
+    const result = await api.databases.configured
+      .disconnect({
+        database_id: p.database.id,
+        strict: true,
+        schemas_to_remove: p.schemas_to_remove,
+        role_name: p.role?.name,
+        password: p.role?.password,
+        disconnect_db_server: p.disconnect_db_server,
+      })
+      .run();
+    this.unsortedDatabases.delete(p.database.id);
+    return result;
+  }
+
+  async refresh() {
+    const [rawServers, rawDatabases] = await batchRun([
+      api.servers.configured.list(),
+      api.databases.configured.list({}),
+    ]);
+    const databases = generateDatabaseEntries(rawServers, rawDatabases);
+    this.unsortedDatabases.reconstruct(databases);
+  }
+
+  setCurrentDatabaseId(databaseId: Database['id']) {
+    this.currentDatabaseId.set(databaseId);
+  }
+
+  clearCurrentDatabaseId() {
+    this.currentDatabaseId.set(undefined);
+  }
+}
+
+export type DatabaseDisconnectFn = typeof databasesStore.disconnectDatabase;
+
+export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
+  (() => {
+    const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
+    const servers = isInAuthenticatedContext ? commonData.servers : [];
+    const databases = isInAuthenticatedContext ? commonData.databases : [];
+    const currentDatabase = isInAuthenticatedContext
+      ? commonData.current_database
+      : null;
+
+    return new DatabasesStore(
+      generateDatabaseEntries(servers, databases),
+      currentDatabase,
+    );
+  })();

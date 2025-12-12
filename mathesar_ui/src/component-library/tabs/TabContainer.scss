@@ -1,0 +1,109 @@
+.tab-container {
+  display: flex;
+  flex-direction: column;
+
+  > ul.tabs {
+    align-items: center;
+    display: flex;
+    position: relative;
+    isolation: isolate;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: transparent;
+    border-bottom: 0.5px solid var(--color-border-base);
+
+    > li.tab {
+      align-items: stretch;
+      cursor: pointer;
+      display: inline-flex;
+      outline: none;
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none; /* Safari */
+      list-style: none;
+      overflow: hidden;
+      border-radius: var(--border-radius-s) var(--border-radius-s) 0 0;
+      border-bottom: 0.25em solid transparent;
+      margin-bottom: -1px;
+      margin-right: var(--Tab_margin-right, 2rem);
+      font-size: var(--lg1);
+      opacity: 0.75;
+
+      > div,
+      a {
+        padding: var(--sm3) var(--sm2);
+        white-space: nowrap;
+        text-decoration: none;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        color: inherit;
+        font-weight: var(--font-weight-medium);
+        width: 100%;
+      }
+
+      &:hover {
+        border-bottom-color: var(--color-navigation-40-hover);
+        opacity: 1;
+      }
+
+      & + li.tab {
+        margin-left: -1px;
+      }
+
+      &.active {
+        border-bottom-color: var(--color-navigation-active);
+        opacity: 1;
+      }
+
+      &.focused {
+        border-color: var(--color-navigation-active);
+        z-index: 1;
+      }
+    }
+
+    &.fill-tab-width {
+      > li.tab {
+        flex-grow: 1;
+
+        > div {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  > ul.tabs:before {
+    border-bottom: 1px solid var(--color-navigation);
+  }
+
+  .tab-content-holder {
+    min-height: 0;
+    min-width: 0;
+    position: relative;
+    isolation: isolate;
+  }
+
+  &.fill-container-height {
+    height: 100%;
+    overflow: hidden;
+
+    .tab-content-holder {
+      overflow: auto;
+    }
+  }
+
+  &.compact {
+    > ul.tabs {
+      > li.tab {
+        font-size: 1rem;
+        text-align: center;
+        margin-right: var(--Tab_margin-right, 0);
+        > div {
+          padding: var(--sm4) 0;
+        }
+      }
+    }
+  }
+}

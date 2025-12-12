@@ -1,0 +1,12 @@
+<script lang="ts"></script>
+
+<span class="field-help"><slot /></span>
+
+<style>
+  .field-help {
+    display: block;
+    font-size: var(--sm1);
+    color: var(--color-fg-base-muted);
+    margin-top: 0.5rem;
+  }
+</style>

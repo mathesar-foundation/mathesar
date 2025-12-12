@@ -1,0 +1,31 @@
+@use './mixins.scss' as mixins;
+
+@use './light/light-base' as light-base;
+@use './light/light-bg' as light-bg;
+@use './light/light-border' as light-border;
+@use './light/light-fg' as light-fg;
+
+@use './dark/dark-base' as dark-base;
+@use './dark/dark-bg' as dark-bg;
+@use './dark/dark-border' as dark-border;
+@use './dark/dark-fg' as dark-fg;
+
+@import './colors.scss';
+
+body {
+  --mix-blend-mode: multiply;
+
+  @include mixins.generate-color-tokens('', light-base.$exports);
+  @include mixins.generate-color-tokens('bg', light-bg.$exports);
+  @include mixins.generate-color-tokens('border', light-border.$exports);
+  @include mixins.generate-color-tokens('fg', light-fg.$exports);
+}
+
+body.theme-dark {
+  --mix-blend-mode: screen;
+
+  @include mixins.generate-color-tokens('', dark-base.$exports);
+  @include mixins.generate-color-tokens('bg', dark-bg.$exports);
+  @include mixins.generate-color-tokens('border', dark-border.$exports);
+  @include mixins.generate-color-tokens('fg', dark-fg.$exports);
+}

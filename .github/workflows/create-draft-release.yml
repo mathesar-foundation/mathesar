@@ -1,0 +1,46 @@
+name: Package Mathesar and create draft release
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install GNU gettext
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext
+
+      - name: Run package Script
+        run: |
+          python3 ./build-scripts/package/package.py
+
+      - name: Create a draft release
+        id: create_release
+        uses: shogo82148/actions-create-release@v1
+        with:
+          draft: true
+
+      - name: Upload assets
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/*

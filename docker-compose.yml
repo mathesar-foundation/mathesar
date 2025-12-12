@@ -1,0 +1,262 @@
+---
+# This file defines a viable production setup for Mathesar.
+#
+# It can be used in production directly, or used as an example to help define
+# your own infrastructure.
+#
+#-------------------------------------------------------------------------------
+# PREREQUISITES
+#
+# Please double-check that your docker setup meets the following criteria:
+#
+# OS: Linux, Mac, Windows(WSL).
+# Docker v23+  $ docker version
+# Docker Compose v2.10+  $ docker compose version
+#
+#-------------------------------------------------------------------------------
+# HOW TO USE THIS FILE
+#
+# First, make sure you meet the prerequisites, and then run:
+#
+# $ docker compose -f docker-compose.yml up
+#
+# Note: You may need to run Docker commands using sudo, depending on your setup.
+# Running Docker in rootless mode isn't currently supported.
+#
+#-------------------------------------------------------------------------------
+# CONFIG
+#
+# Customize your Mathesar installation with the following variables.
+# See https://docs.mathesar.org/configuration/env-variables/ for more info.
+#
+x-config: &config
+  # (Optional) Replace 'http://localhost' with custom domain(s) e.g.
+  # 'yourdomain.com, 127.0.0.1' to manage the host(s) at which you want to
+  # access Mathesar over http or https
+  DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}
+
+  # Edit the POSTGRES_* variables if you are not using the db service provided
+  # below, or if you want to use a custom database user.
+
+  # (Optional) Replace 'mathesar_django' with any custom name for the internal
+  # database managed by mathesar web-service
+  POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
+
+  # (Optional) Replace 'mathesar' with any custom username for the
+  # aforementioned database
+  POSTGRES_USER: ${POSTGRES_USER:-mathesar}
+
+  # (Optional) Replace 'mathesar' with any custom password for the
+  # aforementioned database
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+
+  # (Optional) Replace 'mathesar_db' with the name of the host running postgres
+  POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}
+
+  # (Optional) Replace '5432' with the port on which postgres is running
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+
+  # (Optional) Can be used to configure an S3-compliant file storage backend
+  # instead of a file_storage.yml configuration file.
+  FILE_STORAGE_DICT: ${FILE_STORAGE_DICT:-{}}
+
+  # (Optional) Can be used to configure single-sign on (sso) instead of an
+  # sso.yml configuration file.
+  # See https://docs.mathesar.org/administration/single-sign-on/ for additional
+  # details on how to configure this variable.
+  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}}
+
+#-------------------------------------------------------------------------------
+# ADDITIONAL INFO ABOUT CONFIG VARIABLES
+#
+# DOMAIN_NAME:
+#     Default: http://localhost
+#     Info: Specifies the domains that can access Mathesar over http(port 80)
+#           or https(port 443), also automatically creating SSL certificates
+#           for the same. If you want to host an instance of Mathesar over the
+#           internet or over your local network, add those domains here.
+#     Example: yourdomain.com, *.subdomain.com, 127.0.0.1
+#
+# POSTGRES_DB:
+#     Default: mathesar_django
+#     Info: Specifies a name for the database that will be created and used by
+#           Mathesar for managing internal data.
+#     Example: zeus
+#
+# POSTGRES_USER:
+#     Default: mathesar
+#     Info: Specifies creation of a user with superuser privileges
+#           and a database with the same name.
+#     Example: athena
+#
+# POSTGRES_PASSWORD:
+#     Default: mathesar
+#     Info: Specifies the superuser password that is required to be set for the
+#           PostgreSQL docker image.
+#     Example: apollo
+#
+# POSTGRES_HOST:
+#     Default: mathesar_db (name of the db service provided below)
+#     Info: Specifies the host name on which portgres listen for connections
+#           from client applications. Can be a docker compose service name,
+#           a A TCP host address (e.g., host.docker.internal), or a Unix
+#           socket path (e.g., /var/run/postgresql).
+#     Example: kratos
+#
+# POSTGRES_PORT:
+#     Default: 5432
+#     Info: Specifies the port on which portgres listen for connections from
+#           client applications.
+#     Example: 5555
+#
+# FILE_STORAGE_DICT:
+#     Default: {}
+#     Info: Specifies the settings necessary to configure an S3-complaint
+#           filestorage backend.
+#
+# OIDC_CONFIG_DICT:
+#   Default: {}
+#   Info: Specifies the settings necessary to configure Single Sign-on (SS0)
+#   identity providers for Mathesar login. This is an optional, alternative
+#   approach to configuring SSO via a configuration file.
+#
+#-------------------------------------------------------------------------------
+# INFO ABOUT VOLUMES
+#
+# Volumes are used by Mathesar to persist essential data.
+#
+# Running this compose file will automatically create a subdirectory named
+# "msar" with the following file structure:
+#
+# msar
+# ├── caddy/  (stores certificates, keys, and other information for Caddy)
+# ├── media/  (stores user uploaded datafiles(.csv/.tsv) to Mathesar)
+# ├── pgdata/ (stores PostgreSQL data)
+# ├── secrets/ (stores the SECRET_KEY, eventually other secret info)
+# └── static/ (stores static files for Mathesar)
+#
+#
+#-------------------------------------------------------------------------------
+# MATHESAR SERVICES
+#
+# The next section defines various containers in a workable production setup.
+#
+services:
+  #-----------------------------------------------------------------------------
+  # Mathesar web service
+  #
+  # This service provides the main web server required to run Mathesar, using
+  # our official Docker image hosted on Docker Hub
+  #
+  # As configured, this service exposes port 8000 to other services but not the
+  # host system. This isolates it from being directly accessed  by the host
+  # while allowing access via caddy.
+  #
+  service:
+    container_name: mathesar_service
+    image: mathesar/mathesar:latest
+    environment:
+      # First we load the variables configured above.
+      <<: *config
+
+      DJANGO_SETTINGS_MODULE: config.settings.production
+
+      # We set ALLOWED_HOSTS to * (allow all hosts) by default here since we are
+      # relying on caddy to manage which domains could access the mathesar web
+      # service.  If you do not want to use caddy add the domain(s) that you
+      # want to ALLOWED_HOSTS. Doing so will restrict traffic from all other
+      # domains.
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
+
+      # SECURITY WARNING: don't run with DEBUG=true in production!
+      DEBUG: ${DEBUG:-false}
+
+      # To use a custom secret key, use an .env file, or add a sufficiently
+      # random 50 character string after '-'. Otherwise a random value will be
+      # generated when you start Mathesar. If you aren't sure, it's safe to
+      # leave this as-is.
+      SECRET_KEY: ${SECRET_KEY-}
+
+      # If you are running Mathesar on a particularly powerful machine, you can
+      # improve performance by increasing this setting. Replace '3' below with
+      # 2 * $(NUM_CORES) + 1. So if you have a VPS with 4 vCPUs you can use a
+      # value of 2 * 4 + 1, or 9. The default is workable as long as you have at
+      # least 1 logical core.
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY-3}
+
+    volumes:
+      - ./msar/static:/code/static
+      - ./msar/media:/code/media
+      - ./msar/secrets:/code/.secrets
+      # Uncomment the following to mount file_storage.yml and enable
+      #  an S3-compliant file storage backend
+      # - ./file_storage.yml:/code/file_storage.yml
+      # Uncomment the following to mount sso.yml and enable Single Sign-On (SSO).
+      # - ./sso.yml:/code/sso.yml
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: curl -f http://localhost:8000
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    # If using caddy, expose the internal port 8000 only to other containers and
+    # not the docker host.
+    expose:
+      - "8000"
+    # Uncomment the following if not using caddy
+    # ports:
+    #   - ${HOST_PORT:-8000}:8000
+
+  #-----------------------------------------------------------------------------
+  # PostgreSQL Database
+  #
+  # This service provides a Postgres database instance for holding both internal
+  # Mathesar data, as well as user data if desired, using the official
+  # PostgreSQL image hosted on Docker Hub
+  #
+  # As configured, this service exposes Postgres' default port (5432) to other
+  # services, allowing the Mathesar web sevice to connect to it.
+  #
+  db:
+    image: pgautoupgrade/pgautoupgrade:17-bookworm
+    container_name: mathesar_db
+    # This service needs the config variables defined above.
+    environment: *config
+    # Expose the internal port 5432 only to other containers and not
+    # the underlying host.
+    expose:
+      - "5432"
+    volumes:
+      - ./msar/pgdata:/var/lib/postgresql/data
+
+  #-----------------------------------------------------------------------------
+  # Caddy
+  #
+  # This service provides a reverse proxy for the Mathesar web server, using our
+  # custom Caddy image hosted on Docker Hub. That image is customized to use a
+  # Caddyfile with an appropriate configuration for Mathesar.
+  #
+  # Specifically, this service routes the requests to backend and the web
+  # frontend of Mathesar while also serving essential staic files and user
+  # uploaded datafiles(.csv/.tsv). It also provides SSL certificates
+  # automatically for any custom domain(s) listed in DOMAIN_NAME that you might
+  # want to use to access Mathesar.
+  #
+  # This service maps the default port for http(80) and https(443) of the host
+  # system to that of docker's for allowing access to Mathesar over http or
+  # https.
+  #
+  caddy-reverse-proxy:
+    image: mathesar/mathesar-caddy:latest
+    # This service needs the config variables defined above.
+    environment: *config
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./msar/media:/code/media
+      - ./msar/static:/code/static
+      - ./msar/caddy:/data

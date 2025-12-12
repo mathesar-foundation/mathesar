@@ -1,0 +1,1 @@
+export { highlightNewItems } from './highlightNewItems';

@@ -1,0 +1,315 @@
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
+
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
+import Pagination, { type TersePagination } from '@mathesar/utils/Pagination';
+import Url64 from '@mathesar/utils/Url64';
+import {
+  type ImmutableMap,
+  ImmutableSet,
+  WritableMap,
+} from '@mathesar-component-library';
+
+import { Filtering, type TerseFiltering } from './filtering';
+import { Grouping, type TerseGrouping } from './grouping';
+import { Joining, type TerseJoining } from './joining';
+import type { RecordsRequestParamsData } from './records';
+import { SearchFuzzy } from './searchFuzzy';
+import { Sorting, type TerseSorting } from './sorting';
+import {
+  type CellKey,
+  type ClientSideCellError,
+  type RowKey,
+  extractRowKeyFromCellKey,
+  getRowStatus,
+  getSheetState,
+} from './utils';
+
+/**
+ * Unlike in `RequestStatus`, here the state and the error messages are
+ * disentangled. That's because it's possible to have a `wholeRowState` of
+ * `'success'` (if the row has been added) and still have error messages to
+ * display (if the user has attempted to update a _cell_ within the row, but
+ * that update has failed.)
+ */
+export interface RowStatus {
+  /**
+   * The combined state of the most recent "creation" or "deletion" request. We
+   * use this to set the background color for all cells and the row header.
+   */
+  wholeRowState?: RequestStatus['state'];
+
+  /**
+   * The triangle error popover indicator will display whenever this array
+   * contains errors -- even if `wholeRowState` is `'success'`.
+   */
+  errorsFromWholeRowAndCells: RpcError[];
+}
+
+export interface MetaProps {
+  pagination: Pagination;
+  sorting: Sorting;
+  grouping: Grouping;
+  filtering: Filtering;
+  joining: Joining;
+}
+
+/** Adds default values. */
+function getFullMetaProps(p?: Partial<MetaProps>): MetaProps {
+  return {
+    pagination: p?.pagination ?? new Pagination(),
+    sorting: p?.sorting ?? new Sorting(),
+    grouping: p?.grouping ?? new Grouping(),
+    filtering: p?.filtering ?? new Filtering(),
+    joining: p?.joining ?? new Joining(),
+  };
+}
+
+export type TerseMetaProps = [
+  TersePagination,
+  TerseSorting,
+  TerseGrouping,
+  TerseFiltering,
+  TerseJoining,
+];
+
+export function makeMetaProps(t: TerseMetaProps): MetaProps {
+  return {
+    pagination: Pagination.fromTerse(t[0]),
+    sorting: Sorting.fromTerse(t[1]),
+    grouping: Grouping.fromTerse(t[2]),
+    filtering: Filtering.fromTerse(t[3]),
+    joining: Joining.fromTerse(t[4]),
+  };
+}
+
+export function makeTerseMetaProps(p?: Partial<MetaProps>): TerseMetaProps {
+  const props = getFullMetaProps(p);
+  return [
+    props.pagination.terse(),
+    props.sorting.terse(),
+    props.grouping.terse(),
+    props.filtering.terse(),
+    props.joining.terse(),
+  ];
+}
+
+function serializeMetaProps(p: MetaProps): string {
+  return Url64.encode(JSON.stringify(makeTerseMetaProps(p)));
+}
+
+function deserializeMetaProps(s: string): MetaProps | undefined {
+  // NOTE: it would be good to someday validate the serialized meta props in a
+  // more robust manner.
+  if (!s) return undefined;
+  try {
+    return makeMetaProps(JSON.parse(Url64.decode(s)) as TerseMetaProps);
+  } catch {
+    return undefined;
+  }
+}
+
+const defaultMetaPropsSerialization = serializeMetaProps(getFullMetaProps());
+
+/**
+ * The Meta store is meant to be used by other stores for storing and operating
+ * on meta information. This may also include display properties. Properties in
+ * Meta store do not depend on other stores. For display specific properties
+ * that depend on other stores, the Display store can be used.
+ */
+export class Meta {
+  pagination: Writable<Pagination>;
+
+  sorting: Writable<Sorting>;
+
+  grouping: Writable<Grouping>;
+
+  filtering: Writable<Filtering>;
+
+  joining: Writable<Joining>;
+
+  searchFuzzy: Writable<SearchFuzzy>;
+
+  cellClientSideErrors = new WritableMap<CellKey, ClientSideCellError[]>();
+
+  rowsWithClientSideErrors: Readable<ImmutableSet<RowKey>>;
+
+  /**
+   * For each cell, the status of the most recent request to update the cell. If
+   * no request has been made, then no entry will be present in the map.
+   */
+  cellModificationStatus = new WritableMap<
+    CellKey,
+    RequestStatus<RpcError[]>
+  >();
+
+  /**
+   * For each row, the status of the most recent request to delete the row. If
+   * no request has been made, then no entry will be present in the map.
+   */
+  rowDeletionStatus = new WritableMap<RowKey, RequestStatus<RpcError[]>>();
+
+  /**
+   * For each newly added row, the status of the most recent request to add
+   * the row. If no request has been made, then no entry will be present in the
+   * map. Rows that are not newly added rows will never have entries here.
+   */
+  rowCreationStatus = new WritableMap<RowKey, RequestStatus<RpcError[]>>();
+
+  rowStatus: Readable<ImmutableMap<RowKey, RowStatus>>;
+
+  sheetState: Readable<RequestStatus['state'] | undefined>;
+
+  /**
+   * Allows us to save and re-create Meta, e.g. from data stored in the tab
+   * system.
+   */
+  serialization: Readable<string>;
+
+  /**
+   * Allows us to re-fetch records from the server when some of the parameters
+   * change.
+   */
+  recordsRequestParamsData: Readable<RecordsRequestParamsData>;
+
+  private cleanupFunctions: (() => void)[] = [];
+
+  constructor(p?: Partial<MetaProps>) {
+    const props = getFullMetaProps(p);
+    this.pagination = writable(props.pagination);
+    this.sorting = writable(props.sorting);
+    this.grouping = writable(props.grouping);
+    this.filtering = writable(props.filtering);
+    this.joining = writable(props.joining);
+    this.searchFuzzy = writable(new SearchFuzzy());
+
+    this.rowsWithClientSideErrors = derived(
+      this.cellClientSideErrors,
+      (e) => new ImmutableSet([...e.keys()].map(extractRowKeyFromCellKey)),
+    );
+
+    this.rowStatus = derived(
+      [
+        this.cellClientSideErrors,
+        this.cellModificationStatus,
+        this.rowDeletionStatus,
+        this.rowCreationStatus,
+      ],
+      ([
+        cellClientSideErrors,
+        cellModificationStatus,
+        rowDeletionStatus,
+        rowCreationStatus,
+      ]) =>
+        getRowStatus({
+          cellClientSideErrors,
+          cellModificationStatus,
+          rowDeletionStatus,
+          rowCreationStatus,
+        }),
+    );
+
+    this.sheetState = derived(
+      [
+        this.cellModificationStatus,
+        this.rowDeletionStatus,
+        this.rowCreationStatus,
+      ],
+      ([cellModificationStatus, rowDeletionStatus, rowCreationStatus]) =>
+        getSheetState({
+          cellModificationStatus,
+          rowDeletionStatus,
+          rowCreationStatus,
+        }),
+    );
+
+    this.serialization = derived(
+      [
+        this.pagination,
+        this.sorting,
+        this.grouping,
+        this.filtering,
+        this.joining,
+      ],
+      ([pagination, sorting, grouping, filtering, joining]) => {
+        const serialization = serializeMetaProps({
+          pagination,
+          sorting,
+          grouping,
+          filtering,
+          joining,
+        });
+        if (serialization === defaultMetaPropsSerialization) {
+          // Avoid returning a serialization which only includes the empty data
+          // structure.
+          return '';
+        }
+        return serialization;
+      },
+    );
+
+    this.recordsRequestParamsData = derived(
+      [
+        this.pagination,
+        this.sorting,
+        this.grouping,
+        this.filtering,
+        this.searchFuzzy,
+        this.joining,
+      ],
+      ([pagination, sorting, grouping, filtering, searchFuzzy, joining]) => ({
+        pagination,
+        sorting,
+        grouping,
+        filtering,
+        searchFuzzy,
+        joining,
+      }),
+    );
+
+    const { pagination } = this;
+    function goToFirstPage() {
+      pagination.update(($p) => new Pagination({ size: $p.size, page: 1 }));
+    }
+
+    this.cleanupFunctions.push(
+      // When the user modifies the filter params or fuzzy search params (in the
+      // record  selector), we reset the pagination to go to the first page.
+      // This is to avoid confusion. If we don't do this, the user can end up
+      // beyond the last page after paginating and then applying a filter.
+      this.filtering.subscribe(goToFirstPage),
+      this.searchFuzzy.subscribe(goToFirstPage),
+    );
+  }
+
+  clearAllStatusesAndErrorsForRows(rowKeys: RowKey[]): void {
+    this.rowCreationStatus.delete(rowKeys);
+    this.rowDeletionStatus.delete(rowKeys);
+    const rowKeySet = new Set(rowKeys);
+    this.cellClientSideErrors.delete(
+      [...this.cellClientSideErrors.getKeys()].filter((cellkey) =>
+        rowKeySet.has(extractRowKeyFromCellKey(cellkey)),
+      ),
+    );
+    this.cellModificationStatus.delete(
+      [...this.cellModificationStatus.getKeys()].filter((cellkey) =>
+        rowKeySet.has(extractRowKeyFromCellKey(cellkey)),
+      ),
+    );
+  }
+
+  clearAllStatusesAndErrors(): void {
+    this.rowCreationStatus.clear();
+    this.rowDeletionStatus.clear();
+    this.cellClientSideErrors.clear();
+    this.cellModificationStatus.clear();
+  }
+
+  static fromSerialization(s: string): Meta {
+    return new Meta(deserializeMetaProps(s));
+  }
+
+  destroy(): void {
+    this.cleanupFunctions.forEach((fn) => fn());
+  }
+}
