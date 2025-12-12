@@ -386,6 +386,8 @@
   "join_mailing_list_help": "Join our mailing list to keep on top of what's going on at the Mathesar Foundation.",
   "joined_column_tooltip": "This column is joined via a mapping table and does not exist in the database.",
   "joined_table": "Joined Table",
+  "postgres_deprecation_warning": "Deprecation Notice: Your connected database(s) {names} are running PostgreSQL 13, which will no longer be supported starting in Mathesar 0.8.0. Please upgrade to PostgreSQL 14 or higher to ensure continued compatibility and support.",
+  "postgres_deprecation_help": "Mathesar 0.8.0 will drop support for PostgreSQL 13. Upgrading to PostgreSQL 14+ is recommended to continue receiving updates and support.",
   "keep_first_row_as_data": "Set generic column names, keeping the first row as data",
   "keep_the_database": "Keep the database",
   "large": "Large",

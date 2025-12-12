@@ -12,7 +12,7 @@
   <WarningBox>
     <div class="warning-content">
       <p>
-        ⚠️ {$_('postgres_deprecation_warning', {
+        {$_('postgres_deprecation_warning', {
           values: { names: databaseList },
         })}
       </p>

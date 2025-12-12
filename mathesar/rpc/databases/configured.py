@@ -92,7 +92,7 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
     for db_model in database_qs:
         postgres_version=None
         try:
-            with db_model.connect_as_user(user) as conn:
+            with db_model.connect_user(user) as conn:
                 postgres_version= get_postgres_version(conn)
         except Exception:
             pass
@@ -123,7 +123,7 @@ def patch(*, database_id: int, patch: ConfiguredDatabasePatch, **kwargs) -> Conf
     
     postgres_version = None
     try:
-        with database.connect_as_user(user) as conn:
+        with database.connect_user(user) as conn:
             postgres_version = get_postgres_version(conn)
     except Exception:
         pass

@@ -22,6 +22,8 @@
   "add_tables_to_new_schema": "新しいスキーマを作成したので、次にテーブルを追加します。",
   "add_transformation_step": "変換ステップを追加",
   "add_unique_constraint": "一意の制約を追加",
+  "postgres_deprecation_warning": "非推奨のお知らせ: 接続されているデータベース {names} は PostgreSQL 13 を使用しています。Mathesar 0.8.0 以降ではサポート対象外となります。継続的な互換性とサポートのために、PostgreSQL 14 以上へのアップグレードをお願いします。",
+  "postgres_deprecation_help": "Mathesar 0.8.0 では PostgreSQL 13 のサポートが終了します。継続的なアップデートとサポートのため、PostgreSQL 14+ へのアップグレードを推奨します。",
   "add_user": "ユーザーを追加",
   "adding_new_record": "新規レコードの追加",
   "admin": "管理者",
