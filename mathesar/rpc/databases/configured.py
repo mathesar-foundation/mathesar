@@ -20,6 +20,8 @@ class ConfiguredDatabaseInfo(TypedDict):
         needs_upgrade_attention: This is `True` if the SQL version isn't the
             same as the service version.
         nickname: A optional user-configurable name for the database.
+        default_upgrade_role_id: The Django ID of the default ConfiguredRole
+            to use for upgrades, or None if no default is set.
     """
     id: int
     name: str
@@ -27,6 +29,7 @@ class ConfiguredDatabaseInfo(TypedDict):
     last_confirmed_sql_version: str
     needs_upgrade_attention: bool
     nickname: Optional[str]
+    default_upgrade_role_id: Optional[int]
 
     @classmethod
     def from_model(cls, model):
@@ -37,6 +40,7 @@ class ConfiguredDatabaseInfo(TypedDict):
             last_confirmed_sql_version=model.last_confirmed_sql_version,
             needs_upgrade_attention=model.needs_upgrade_attention,
             nickname=model.nickname,
+            default_upgrade_role_id=model.default_upgrade_role_id,
         )
 
 

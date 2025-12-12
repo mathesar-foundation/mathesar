@@ -57,6 +57,11 @@ class Database(BaseModel):
         'Server', on_delete=models.CASCADE, related_name='databases'
     )
     last_confirmed_sql_version = models.CharField(default='0.0.0')
+    default_upgrade_role = models.ForeignKey(
+        'ConfiguredRole', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='default_for_databases',
+        help_text='The default configured role to use for database upgrades'
+    )
 
     class Meta:
         constraints = [

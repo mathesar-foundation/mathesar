@@ -30,6 +30,7 @@
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
   import ConfigureRoleModal from './ConfigureRoleModal.svelte';
+  import DefaultUpgradeRoleSelector from './DefaultUpgradeRoleSelector.svelte';
 
   const routeContext = DatabaseSettingsRouteContext.get();
   const configureRoleModalController = modal.spawnModalController();
@@ -155,6 +156,16 @@
           {/each}
         </GridTable>
       </div>
+
+      <div class="default-upgrade-role-section">
+        <h3>
+          {$_('default_upgrade_role')}
+          <Help>
+            {$_('default_upgrade_role_help')}
+          </Help>
+        </h3>
+        <DefaultUpgradeRoleSelector database={databaseRouteContext.database} />
+      </div>
     {/if}
 
     {#if errors.length}
@@ -184,6 +195,20 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+    }
+  }
+  .default-upgrade-role-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--slate-200);
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
     }
   }
 </style>

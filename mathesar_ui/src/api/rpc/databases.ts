@@ -10,6 +10,7 @@ export interface RawDatabase {
   server_id: RawServer['id'];
   last_confirmed_sql_version: string;
   needs_upgrade_attention: boolean;
+  default_upgrade_role_id: RawConfiguredRole['id'] | null;
 }
 
 export const allDatabasePrivileges = [
@@ -64,6 +65,13 @@ export const databases = {
       database_id: RawDatabase['id'];
       username?: string;
       password?: string;
+    },
+    void
+  >(),
+  set_default_upgrade_role: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+      configured_role_id?: RawConfiguredRole['id'] | null;
     },
     void
   >(),

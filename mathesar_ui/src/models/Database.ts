@@ -24,12 +24,15 @@ export class Database {
 
   readonly needsUpgradeAttention: boolean;
 
+  readonly defaultUpgradeRoleId: number | null;
+
   constructor(props: { server: Server; rawDatabase: RawDatabase }) {
     this.id = props.rawDatabase.id;
     this.name = props.rawDatabase.name;
     this.nickname = props.rawDatabase.nickname;
     this.server = props.server;
     this.needsUpgradeAttention = props.rawDatabase.needs_upgrade_attention;
+    this.defaultUpgradeRoleId = props.rawDatabase.default_upgrade_role_id;
   }
 
   get displayName() {
@@ -185,5 +188,16 @@ export class Database {
       },
       () => promise.cancel(),
     );
+  }
+
+  setDefaultUpgradeRole(
+    configuredRoleId: number | null,
+  ): CancellablePromise<void> {
+    return api.databases
+      .set_default_upgrade_role({
+        database_id: this.id,
+        configured_role_id: configuredRoleId,
+      })
+      .run();
   }
 }
