@@ -17,9 +17,6 @@
           values: { names: databaseList },
         })}
       </p>
-      <p class="help-text">
-        {$_('postgres_deprecation_help')}
-      </p>
     </div>
   </WarningBox>
 {/if}
