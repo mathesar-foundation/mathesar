@@ -532,7 +532,7 @@
   "port": "Port",
   "port_invalid": "The port is invalid",
   "postgres_database": "PostgreSQL database",
-  "postgres_deprecation_warning": "Deprecation Notice: Your connected database(s) {names} are running PostgreSQL 13, which will no longer be supported starting in Mathesar 0.8.0. Please upgrade to PostgreSQL 14 or higher to ensure continued compatibility and support.",
+  "postgres_deprecation_warning": "[bold](Deprecation Notice:) Your connected database(s) [databaseList] run on PostgreSQL versions that are [versionSupportLink](no longer supported). Please upgrade to [bold](PostgreSQL 14 or higher) to ensure continued compatibility and support.",
   "postgres_server_changes_warning_1": "Your changes to the host and port will affect all connected databases using this server. Specifically, the following [italic](other) databases will be affected by this change:",
   "postgres_server_changes_warning_2": "Modifying these settings here is appropriate if your PostgreSQL configuration has changed.",
   "postgres_server_changes_warning_3": "However, if you have moved your database to another server, you should instead disconnect this database within Mathesar and re-connect it. That will ensure that Mathesar can still connect to the other databases on this server.",

@@ -1,7 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
 
   export let deprecatedDatabaseNames: string[] = [];
 
@@ -10,30 +12,23 @@
 </script>
 
 {#if hasDeprecated}
-  <WarningBox>
-    <div class="warning-content">
-      <p>
-        {$_('postgres_deprecation_warning', {
-          values: { names: databaseList },
-        })}
-      </p>
-    </div>
+  <WarningBox fullWidth>
+    <RichText
+      text={$_('postgres_deprecation_warning')}
+      let:slotName
+      let:translatedArg
+    >
+      {#if slotName === 'bold'}
+        <b>{translatedArg}</b>
+      {/if}
+      {#if slotName === 'databaseList'}
+        <b>{databaseList}</b>
+      {/if}
+      {#if slotName === 'versionSupportLink'}
+        <DocsLink page="versionSupport">
+          {translatedArg}
+        </DocsLink>
+      {/if}
+    </RichText>
   </WarningBox>
 {/if}
-
-<style lang="scss">
-  .warning-content {
-    p {
-      margin: 0.25rem 0;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-
-    .help-text {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-  }
-</style>
