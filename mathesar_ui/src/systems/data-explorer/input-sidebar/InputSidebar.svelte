@@ -37,7 +37,7 @@
       $confirmationNeededForMultipleResults &&
       queryHasNoSummarization
     ) {
-      addNewAutoSummarization = await confirm({
+      const userConfirmed = await confirm({
         title: {
           component: PhraseContainingIdentifier,
           props: {
@@ -58,6 +58,11 @@
           icon: undefined,
         },
       });
+      // If user canceled/closed the dialog, don't add the column
+      if (!userConfirmed) {
+        return;
+      }
+      addNewAutoSummarization = userConfirmed;
     }
     await queryManager.update((q) => {
       const newQuery = q.withInitialColumn({
