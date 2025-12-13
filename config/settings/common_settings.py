@@ -206,8 +206,10 @@ DATABASES = {}
 POSTGRES_DB = os.environ.get('POSTGRES_DB', default=None)
 POSTGRES_USER = os.environ.get('POSTGRES_USER', default=None)
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default=None)
-POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default=None)
-POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default=None)
+POSTGRES_HOST = (os.environ.get('POSTGRES_HOST', default=None) or None)
+if POSTGRES_HOST is not None:
+    POSTGRES_HOST = POSTGRES_HOST.strip()
+POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default='5432')
 POSTGRES_SSLMODE = os.environ.get('POSTGRES_SSLMODE', default='prefer')
 
 # POSTGRES_DB, POSTGRES_USER, and POSTGRES_HOST are required env variables for forming a pg connection string for the django database
