@@ -36,7 +36,7 @@
 
   async function handleColumnNameChange(newName: string): Promise<void> {
     try {
-      await columnsDataStore.rename(column.id, newName);
+      await columnsDataStore.rename(column.column.id, newName);
     } catch (error) {
       const errorMsg = error instanceof Error && error.cause && typeof error.cause === 'object' && 'detail' in error.cause
         ? (error.cause as { detail: string }).detail
@@ -49,7 +49,10 @@
     description: string,
   ): Promise<void> {
     try {
-      await columnsDataStore.updateDescription(column.id, description ?? null);
+      await columnsDataStore.updateDescription(
+        column.column.id,
+        description ?? null,
+      );
     } catch (error) {
       toast.error(
         `${$_('unable_to_update_column_desc')} ${getErrorMessage(error)}`,

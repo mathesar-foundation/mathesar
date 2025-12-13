@@ -62,7 +62,7 @@ def patch(*, server_id: int, patch: ConfiguredServerPatch, **kwargs) -> Configur
     Patch a server, given its id.
 
     Args:
-        server: The Django id of the server
+        server_id: The Django id of the server.
         patch: An object containing the fields to update.
 
     Returns:

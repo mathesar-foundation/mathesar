@@ -83,7 +83,7 @@ def list_(*, database_id: int, **kwargs) -> list[TableMetaDataRecord]:
         database_id: The Django id of the database containing the table.
 
     Returns:
-        Metadata object for a given table oid.
+        A list of metadata objects for tables in the database.
     """
     table_meta_data = list_tables_meta_data(database_id)
     return [

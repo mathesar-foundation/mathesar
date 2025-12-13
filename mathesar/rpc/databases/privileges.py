@@ -63,7 +63,7 @@ def replace_for_roles(
     WARNING: Any privilege included in the `direct` list for a role
     is GRANTed, and any privilege not included is REVOKEd.
 
-    Attributes:
+    Args:
         privileges: The new privilege sets for roles.
         database_id: The Django id of the database.
 
@@ -84,7 +84,7 @@ def transfer_ownership(*, new_owner_oid: int, database_id: int, **kwargs) -> Dat
     """
     Transfers ownership of the current database to a new owner.
 
-    Attributes:
+    Args:
         new_owner_oid: The OID of the role whom we want to be the new owner of the current database.
         database_id: The Django id of the database whose ownership is to be transferred.
 

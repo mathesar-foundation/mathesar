@@ -4,8 +4,10 @@
   import { _ } from 'svelte-i18n';
 
   import { iconSorting } from '@mathesar/icons';
-  import type { Sorting } from '@mathesar/stores/table-data';
-  import { BadgeCount, Dropdown, Icon } from '@mathesar-component-library';
+  import type { ProcessedColumn, Sorting } from '@mathesar/stores/table-data';
+  import type { Dropdown } from '@mathesar-component-library';
+
+  import OperationDropdown from '../OperationDropdown.svelte';
 
   import Sort from './Sort.svelte';
 
@@ -14,28 +16,19 @@
   }
 
   export let sorting: Writable<Sorting>;
+
+  async function addColumnToOperation(column: ProcessedColumn) {
+    sorting.update((s) => s.with(column.id, 'ASCENDING'));
+  }
 </script>
 
-<Dropdown
-  showArrow={false}
-  triggerAppearance="secondary"
+<OperationDropdown
+  label={$_('sort')}
+  icon={iconSorting}
+  badgeCount={$sorting.size}
+  {addColumnToOperation}
+  applied={$sorting.size > 0}
   {...$$restProps}
-  ariaLabel={$_('sort')}
 >
-  <svelte:fragment slot="trigger">
-    <Icon {...iconSorting} />
-    <span class="responsive-button-label with-badge">
-      {$_('sort')}
-      <BadgeCount value={$sorting.size} />
-    </span>
-  </svelte:fragment>
-  <Sort slot="content" {sorting} />
-</Dropdown>
-
-<style lang="scss">
-  .with-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sm5);
-  }
-</style>
+  <Sort {sorting} />
+</OperationDropdown>

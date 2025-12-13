@@ -118,9 +118,8 @@ def test_data_file_create_csv_long_name(client, patents_csv_filepath):
 @pytest.mark.parametrize('header', [True, False])
 def test_data_file_create_paste(client, paste_filename, header):
     num_data_files = DataFile.objects.count()
-    with open(paste_filename, 'rb') as paste_file:
+    with open(paste_filename, 'r') as paste_file:
         paste_text = paste_file.read()
-
     data = {'paste': paste_text, 'header': header}
     response = client.post('/api/db/v0/data_files/', data)
 
@@ -166,7 +165,7 @@ def test_data_file_partial_update_invalid(client_alice, data_file):
 
 def test_data_file_partial_update_valid(client_alice, data_file):
     assert data_file.header is True
-    response = client_alice.patch(f'/api/db/v0/data_files/{data_file.id}/', {"header": False})
+    response = client_alice.patch(f'/api/db/v0/data_files/{data_file.id}/', {"header": False}, content_type="application/json")
     assert response.status_code == 200
     assert response.json()['header'] is False
 

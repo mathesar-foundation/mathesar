@@ -17,13 +17,13 @@
   background: var(--color-bg-input);
   position: relative;
 
-  &:not(:disabled):not(:checked):not(:indeterminate):hover {
+  &:not(.no-hover):not(:disabled):not(.checked):not(:indeterminate):hover {
     background-color: var(--color-bg-input-hover);
   }
-  &:not(:disabled):hover {
+  &:not(.no-hover):not(:disabled):hover {
     background-color: var(--color-bg-filled-input-hover);
   }
-  &:checked,
+  &.checked,
   &:indeterminate {
     border: 0.05em solid var(--color-border-input);
     background: var(--color-bg-filled-input);
@@ -36,7 +36,7 @@
     border-color: var(--color-border-input);
   }
 
-  &:checked::before,
+  &.checked::before,
   &:indeterminate::before {
     --icon-size: calc(0.8 * var(--size));
     content: '';
@@ -53,7 +53,7 @@
     mask-repeat: no-repeat;
     -webkit-mask-repeat: no-repeat;
   }
-  &:checked::before {
+  &.checked::before {
     mask-image: var(--icon-check);
     -webkit-mask-image: var(--icon-check);
   }
@@ -65,12 +65,18 @@
     background-color: var(--color-fg-base);
   }
 
-  cursor: pointer;
+  &:not(.no-hover) {
+    cursor: pointer;
+  }
   &:disabled {
     cursor: not-allowed;
   }
 
   &:not(:disabled):focus {
     outline: 1px solid var(--color-border-input-focused);
+  }
+
+  &.no-margin {
+    margin: 0;
   }
 }

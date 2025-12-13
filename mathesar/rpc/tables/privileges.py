@@ -87,7 +87,7 @@ def transfer_ownership(*, table_oid: int, new_owner_oid: int, database_id: int, 
     """
     Transfers ownership of a given table to a new owner.
 
-    Attributes:
+    Args:
         table_oid: The OID of the table to transfer.
         new_owner_oid: The OID of the role whom we want to be the new owner of the table.
 

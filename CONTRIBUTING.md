@@ -6,13 +6,13 @@ Mathesar's development happens on [GitHub](https://github.com/mathesar-foundatio
 
 ## Joining the Community
 
-We highly recommend joining our [Matrix community](https://wiki.mathesar.org/en/community/matrix) and our [developer mailing list](https://wiki.mathesar.org/en/community/mailing-lists) before making contributions. This is where most of the core team's conversations about building Mathesar happen.
+We highly recommend joining our [Matrix community](https://wiki.mathesar.org/community/matrix) and our [developer mailing list](https://wiki.mathesar.org/community/mailing-lists) before making contributions. This is where most of the core team's conversations about building Mathesar happen.
 
 ## Contributing code
 
 1. **Get Mathesar [running locally](./DEVELOPER_GUIDE.md#local-development-setup).**
 
-    Make sure to **do this before moving on**. If you need help, ask in [Matrix](https://wiki.mathesar.org/en/community/matrix), taking care to form *specific* questions that people can answer asynchronously.
+    Make sure to **do this before moving on**. If you need help, ask in [Matrix](https://wiki.mathesar.org/community/matrix), taking care to form *specific* questions that people can answer asynchronously.
 
 1. **Find an [issue](https://github.com/mathesar-foundation/mathesar/issues) to work on.**
 
@@ -21,7 +21,7 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/en/
     - ❌ If an issue is _not_ labeled "help wanted", then it is not open to community contribution. One of the Mathesar maintainers will work on it instead.
     - ❌ Issues already assigned to other users are also not open to contribution.
 
-    If you want to work on something for which there is no GitHub issue open yet, [create an issue](https://github.com/mathesar-foundation/mathesar/issues/new/choose) and propose your change there. A Mathesar [team member](https://wiki.mathesar.org/en/team) will evaluate your issue and decide whether we'll accept a pull request for the issue.
+    If you want to work on something for which there is no GitHub issue open yet, [create an issue](https://github.com/mathesar-foundation/mathesar/issues/new/choose) and propose your change there. A Mathesar [team member](https://wiki.mathesar.org/team) will evaluate your issue and decide whether we'll accept a pull request for the issue.
 
 1. ***(Optionally)* Claim the issue.**
 
@@ -56,7 +56,7 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/en/
 
 ## Contributing PR reviews
 
-We encourage and appreciate code review by contributors. Feel free to review any open pull requests. Follow our [code review guidelines](https://wiki.mathesar.org/en/engineering/code-review).
+We encourage and appreciate code review by contributors. Feel free to review any open pull requests. Follow our [code review guidelines](https://wiki.mathesar.org/engineering/code-review).
 
 ## Contributing documentation
 
@@ -68,5 +68,5 @@ We encourage and appreciate code review by contributors. Feel free to review any
 
 Due to limited capacity, we are currently unable to accept design volunteers. Please return to this page for updates.
 
-Please read through our [Design](https://wiki.mathesar.org/en/design) section to learn more about our design process.
+Please read through our [Design](https://wiki.mathesar.org/archive/product/design/) section to learn more about our design process.
 

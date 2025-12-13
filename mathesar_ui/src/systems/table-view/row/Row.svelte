@@ -26,8 +26,14 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, meta, processedColumns, selection, canUpdateRecords } =
-    $tabularData);
+  $: ({
+    recordsData,
+    meta,
+    processedColumns,
+    selection,
+    canUpdateRecords,
+    allColumns,
+  } = $tabularData);
   $: ({
     rowStatus,
     rowCreationStatus,
@@ -99,7 +105,7 @@
         fileManifestsForSheet={$fileManifests}
       />
     {:else if isRecordRow(row)}
-      {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+      {#each [...$allColumns] as [columnId, columnFabric] (columnId)}
         <RowCell
           {selection}
           {row}
@@ -108,7 +114,7 @@
           modificationStatusMap={cellModificationStatus}
           clientSideErrorMap={cellClientSideErrors}
           bind:value={row.record[columnId]}
-          {processedColumn}
+          {columnFabric}
           {recordsData}
           canUpdateRecords={$canUpdateRecords}
         />

@@ -4,24 +4,31 @@
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import InspectorButton from '@mathesar/components/InspectorButton.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
-  import { iconRequiresAttention, iconTable } from '@mathesar/icons';
+  import { iconRequiresAttention } from '@mathesar/icons';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    getTableIcon,
+    getTableIconFillColor,
+    isTableView,
+  } from '@mathesar/utils/tables';
   import { Icon, Tooltip } from '@mathesar-component-library';
 
-  import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
+  import TableFilter from './record-operations/filter/TableFilter.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
+  import JoinDropdown from './record-operations/join/JoinDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ table, meta, isLoading, hasPrimaryKey } = $tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
-  $: ({ filtering, sorting, grouping, sheetState } = meta);
+  $: ({ sorting, grouping, sheetState } = meta);
 
   $: isSelectable = $currentRolePrivileges.has('SELECT');
-
-  const canViewLinkedEntities = true;
+  $: isView = isTableView(table);
+  $: tableIcon = getTableIcon(table);
+  $: iconFillColor = getTableIconFillColor(table);
 
   function toggleTableInspector() {
     tableInspectorVisible.update((v) => !v);
@@ -32,16 +39,19 @@
   title={{
     name: table.name,
     description: table.description ?? undefined,
-    icon: iconTable,
+    icon: tableIcon,
   }}
-  --icon-fill-color="linear-gradient(135deg, var(--color-table), var(--color-table-80))"
+  --icon-fill-color={iconFillColor}
   --icon-stroke-color="var(--color-fg-inverted)"
 >
   {#if isSelectable}
     <div class="quick-access">
-      <FilterDropdown {filtering} {canViewLinkedEntities} />
+      <TableFilter />
       <SortDropdown {sorting} />
       <GroupDropdown {grouping} />
+      {#if !isView}
+        <JoinDropdown />
+      {/if}
     </div>
   {/if}
 
@@ -54,7 +64,11 @@
           <Icon size="1.3em" {...iconRequiresAttention} />
         </div>
         <span slot="content">
-          {$_('no_row_op_support_table_without_pk')}
+          {#if isView}
+            {$_('no_support_editing_views')}
+          {:else}
+            {$_('no_row_op_support_table_without_pk')}
+          {/if}
         </span>
       </Tooltip>
     </div>

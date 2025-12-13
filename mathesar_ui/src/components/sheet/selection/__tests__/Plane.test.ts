@@ -1,3 +1,5 @@
+import { ImmutableSet } from '@mathesar-component-library';
+
 import { Direction } from '../Direction';
 import Plane from '../Plane';
 import Series from '../Series';
@@ -7,6 +9,7 @@ test('Plane with placeholder row', () => {
     new Series(['r1', 'r2', 'r3', 'r4']),
     new Series(['c1', 'c2', 'c3', 'c4']),
     'PH',
+    new ImmutableSet(),
   );
 
   expect([...p.allDataCells()]).toEqual([
