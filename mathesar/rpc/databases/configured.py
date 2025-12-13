@@ -87,7 +87,7 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
             userdatabaserolemap__user=user
         )
 
-    db_list=[]
+    db_list = []
     for db_model in database_qs:
         db_info = ConfiguredDatabaseInfo.from_model(db_model)
 
