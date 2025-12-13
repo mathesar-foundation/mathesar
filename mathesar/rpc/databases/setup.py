@@ -1,6 +1,7 @@
 """
 RPC functions for setting up database connections.
 """
+
 from typing import TypedDict, Optional
 
 from modernrpc.core import REQUEST_KEY
@@ -24,6 +25,7 @@ class DatabaseConnectionResult(TypedDict):
         database: Information on the Database model instance.
         configured_role: Information on the ConfiguredRole model instance.
     """
+
     server: ConfiguredServerInfo
     database: ConfiguredDatabaseInfo
     configured_role: ConfiguredRoleInfo
@@ -37,13 +39,13 @@ class DatabaseConnectionResult(TypedDict):
         )
 
 
-@mathesar_rpc_method(name='databases.setup.create_new')
+@mathesar_rpc_method(name="databases.setup.create_new")
 def create_new(
-        *,
-        database: str,
-        sample_data: list[str] = [],
-        nickname: Optional[str] = None,
-        **kwargs
+    *,
+    database: str,
+    sample_data: list[str] = [],
+    nickname: Optional[str] = None,
+    **kwargs,
 ) -> DatabaseConnectionResult:
     """
     Set up a new database on the internal server.
@@ -65,6 +67,9 @@ def create_new(
             - 'museum_exhibits'
             - 'nonprofit_grants'
         nickname: An optional nickname for the database.
+
+    Returns:
+        Info about the objects resulting from calling the setup functions.
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_new_database_for_user_on_internal_server(
@@ -73,17 +78,18 @@ def create_new(
     return DatabaseConnectionResult.from_model(result)
 
 
-@mathesar_rpc_method(name='databases.setup.connect_existing')
+@mathesar_rpc_method(name="databases.setup.connect_existing")
 def connect_existing(
-        *,
-        host: str,
-        port: Optional[int] = None,
-        database: str,
-        role: str,
-        password: str,
-        sample_data: list[str] = [],
-        nickname: Optional[str] = None,
-        **kwargs
+    *,
+    host: str,
+    port: Optional[int] = None,
+    database: str,
+    role: str,
+    password: str,
+    sample_data: list[str] = [],
+    nickname: Optional[str] = None,
+    sslmode: str = "prefer",
+    **kwargs,
 ) -> DatabaseConnectionResult:
     """
     Connect Mathesar to an existing database on a server.
@@ -109,9 +115,22 @@ def connect_existing(
             - 'museum_exhibits'
             - 'nonprofit_grants'
         nickname: An optional nickname for the database.
+        sslmode: SSL mode for the connection. One of 'disable', 'prefer',
+            or 'require'. Defaults to 'prefer'.
+
+    Returns:
+        Info about the objects resulting from calling the setup functions.
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_preexisting_database_for_user(
-        host, port, database, nickname, role, password, user, sample_data=sample_data
+        host,
+        port,
+        database,
+        nickname,
+        role,
+        password,
+        user,
+        sample_data=sample_data,
+        sslmode=sslmode,
     )
     return DatabaseConnectionResult.from_model(result)

@@ -20,13 +20,18 @@
 <style lang="scss">
   .form-branding {
     padding: var(--sm1);
-    color: var(--color-fg-base-muted);
-    a {
-      text-decoration: none;
-      &:hover {
-        color: var(--color-fg-base);
-        border-bottom: solid 2px var(--color-brand);
-      }
-    }
+  }
+
+  .form-branding a {
+    color: var(--color-fg-base);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    text-decoration: none;
+  }
+
+  .form-branding a:hover,
+  .form-branding a:focus {
+    border-bottom: 1.5px solid var(--color-brand);
   }
 </style>

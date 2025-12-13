@@ -40,8 +40,9 @@ def copy_datafile_to_table(
                 f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(next(reader)))
             ]
             f.seek(0)
+        processed_rows = ([None if val == '' else val for val in row] for row in reader)
         import_info = create_and_import_from_rows(
-            reader,
+            processed_rows,
             table_name,
             schema_oid,
             column_names,

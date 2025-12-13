@@ -12,7 +12,6 @@
   export let queryRunner: QueryRunner;
   export let processedQueryColumn: ProcessedQueryOutputColumn;
   export let isSelected: boolean;
-  export let setColumnWidth: (width: number | null) => void;
 
   $: ({ runState } = queryRunner);
   $: columnRunState = $runState?.state;
@@ -38,9 +37,5 @@
       }}
     />
   </Button>
-  <SheetCellResizer
-    columnIdentifierKey={processedQueryColumn.id}
-    afterResize={(width) => setColumnWidth(width)}
-    onReset={() => setColumnWidth(null)}
-  />
+  <SheetCellResizer columnId={processedQueryColumn.id} />
 </SheetColumnHeaderCell>

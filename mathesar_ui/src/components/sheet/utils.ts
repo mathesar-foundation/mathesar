@@ -14,8 +14,8 @@ export interface ColumnPosition {
   styleString: string;
 }
 
-export interface SheetContextStores<SheetColumnIdentifierKey> {
-  columnStyleMap: Readable<Map<SheetColumnIdentifierKey, ColumnPosition>>;
+export interface SheetContextStores {
+  columnStyleMap: Readable<Map<string, ColumnPosition>>;
   rowWidth: Readable<number>;
   horizontalScrollOffset: Readable<number>;
   scrollOffset: Readable<number>;
@@ -23,15 +23,14 @@ export interface SheetContextStores<SheetColumnIdentifierKey> {
   selectionInProgress: Readable<boolean>;
 }
 
-export interface SheetContext<SheetColumnIdentifierKey> {
-  stores: SheetContextStores<SheetColumnIdentifierKey>;
+export interface SheetContext {
+  stores: SheetContextStores;
   api: {
-    setColumnWidth: (
-      columnIdentifierKey: SheetColumnIdentifierKey,
-      width: number,
-    ) => void;
-    getColumnWidth: (columnIdentifierKey: SheetColumnIdentifierKey) => number;
-    resetColumnWidth: (columnIdentifierKey: SheetColumnIdentifierKey) => void;
+    getColumnWidth: (columnId: string) => number;
+    /** Called continuously — while the user is resizing a column. */
+    handleDraggingColumnWidth: (columnId: string, width: number | null) => void;
+    /** Called once — when the user is finished resizing a column */
+    handleReleaseColumnWidth: (columnId: string, width: number | null) => void;
     setHorizontalScrollOffset: (offset: number) => void;
     setScrollOffset: (offset: number) => void;
   };
@@ -44,20 +43,17 @@ export function normalizeColumnWidth(width: number | undefined): number {
   return Math.max(MIN_COLUMN_WIDTH_PX, Math.min(MAX_COLUMN_WIDTH_PX, width));
 }
 
-export function calculateColumnStyleMapAndRowWidth<
-  SheetColumnType,
-  SheetColumnIdentifierKey,
->(
+export function calculateColumnStyleMapAndRowWidth<SheetColumnType>(
   columns: SheetColumnType[],
-  getColumnIdentifier: (column: SheetColumnType) => SheetColumnIdentifierKey,
-  customizedColumnWidths: ImmutableMap<SheetColumnIdentifierKey, number>,
+  getColumnIdentifier: (column: SheetColumnType) => string,
+  customizedColumnWidths: ImmutableMap<string, number>,
   paddingRight: number,
 ): {
   rowWidth: number;
-  columnStyleMap: Map<SheetColumnIdentifierKey, ColumnPosition>;
+  columnStyleMap: Map<string, ColumnPosition>;
 } {
   let left = 0;
-  const map = new Map<SheetColumnIdentifierKey, ColumnPosition>();
+  const map = new Map<string, ColumnPosition>();
   columns.forEach((column) => {
     const key = getColumnIdentifier(column);
     const width = normalizeColumnWidth(customizedColumnWidths.get(key));
@@ -72,15 +68,11 @@ export function calculateColumnStyleMapAndRowWidth<
   return { columnStyleMap: map, rowWidth };
 }
 
-export function setSheetContext<SheetColumnIdentifierKey>(
-  sheetContext: SheetContext<SheetColumnIdentifierKey>,
-): void {
+export function setSheetContext(sheetContext: SheetContext): void {
   setContext(SHEET_CONTEXT_KEY, sheetContext);
 }
 
-export function getSheetContext<
-  SheetColumnIdentifierKey,
->(): SheetContext<SheetColumnIdentifierKey> {
+export function getSheetContext(): SheetContext {
   return getContext(SHEET_CONTEXT_KEY);
 }
 

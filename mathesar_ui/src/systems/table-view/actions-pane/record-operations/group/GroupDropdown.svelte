@@ -3,10 +3,11 @@
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import BadgeCount from '@mathesar/component-library/badge-count/BadgeCount.svelte';
   import { iconGrouping } from '@mathesar/icons';
-  import type { Grouping } from '@mathesar/stores/table-data';
-  import { Dropdown, Icon } from '@mathesar-component-library';
+  import type { Grouping, ProcessedColumn } from '@mathesar/stores/table-data';
+  import type { Dropdown } from '@mathesar-component-library';
+
+  import OperationDropdown from '../OperationDropdown.svelte';
 
   import Group from './Group.svelte';
 
@@ -15,28 +16,24 @@
   }
 
   export let grouping: Writable<Grouping>;
+
+  async function addColumnToOperation(column: ProcessedColumn) {
+    grouping.update((g) =>
+      g.withEntry({
+        columnId: column.id,
+        preprocFnId: undefined,
+      }),
+    );
+  }
 </script>
 
-<Dropdown
-  showArrow={false}
-  triggerAppearance="secondary"
+<OperationDropdown
+  label={$_('group')}
+  icon={iconGrouping}
+  badgeCount={$grouping.entries.length}
+  {addColumnToOperation}
+  applied={$grouping.entries.length > 0}
   {...$$restProps}
-  ariaLabel={$_('group')}
 >
-  <svelte:fragment slot="trigger">
-    <Icon {...iconGrouping} />
-    <span class="responsive-button-label with-badge">
-      {$_('group')}
-      <BadgeCount value={$grouping.entries.length} />
-    </span>
-  </svelte:fragment>
-  <Group slot="content" {grouping} />
-</Dropdown>
-
-<style lang="scss">
-  .with-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sm5);
-  }
-</style>
+  <Group {grouping} />
+</OperationDropdown>

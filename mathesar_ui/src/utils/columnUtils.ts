@@ -56,8 +56,8 @@ export function columnNameIsAvailable(
 }
 
 export function getColumnConstraintTypeByColumnId(
-  columnId: number,
-  processedColumns: Map<number, ProcessedColumn>,
+  columnId: string,
+  processedColumns: Map<string, ProcessedColumn>,
 ) {
   const processedColumn = processedColumns.get(columnId);
   const constraintsType = Array.from(

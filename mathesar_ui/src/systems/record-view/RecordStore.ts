@@ -15,8 +15,8 @@ export default class RecordStore {
 
   fetchRequest = writable<RequestStatus | undefined>(undefined);
 
-  /** Keys are column ids */
-  fieldValues = new WritableMap<number, unknown>();
+  /** Keys are column ids (as strings) */
+  fieldValues = new WritableMap<string, unknown>();
 
   recordSummaries = new AssociatedCellData<string>();
 
@@ -48,7 +48,7 @@ export default class RecordStore {
   private updateSelfWithApiResponseData(response: RecordsResponse): void {
     const result = response.results[0];
     this.fieldValues.reconstruct(
-      Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
+      Object.entries(result).map(([k, v]) => [k, v]),
     );
     this.summary.set(response.record_summaries?.[this.recordPk] ?? '');
     if (response.linked_record_summaries) {

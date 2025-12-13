@@ -355,9 +355,11 @@ def delete(
 def list_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> list:
     """
     List information about columns for a table, along with the metadata associated with each column.
+
     Args:
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
+
     Returns:
         A list of column details.
     """
@@ -374,10 +376,10 @@ def list_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> list:
 @mathesar_rpc_method(name="columns.reset_mash", auth="superuser")
 def reset_mash(*, column_attnum: int, table_oid: int, database_id: int, **kwargs) -> None:
     """
-    Resets the outdated "mash" for a given file column.
+    Reset the outdated "mash" for a given file column.
 
     Args:
-        column_attnum: attnum of the file column whose mashes need to be reset.
+        column_attnum: The attnum of the file column whose mashes need to be reset.
         table_oid: Identity of the table containing the file column.
         database_id: The Django id of the database containing the table.
     """
