@@ -336,7 +336,6 @@ def patch(
                 raise ValidationError("Cannot rename default Mathesar ID column.")
     except TableMetaData.DoesNotExist:
         pass
-    
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return alter_columns_in_table(table_oid, column_data_list, conn)

@@ -4542,34 +4542,29 @@ WHERE contype='p' AND conrelid=tab_id AND has_column_privilege(tab_id, attnum, '
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$/*
-Get a total order for columns of a table based on B-tree orderable types.
-
-This function identifies columns that can be used in ORDER BY clauses by checking if their
-types have B-tree operator classes (pg_opclass with amname = 'btree'). This is more reliable than
-checking for a < operator since some types may have < operators but still can't be ordered in B-tree
-indexes (e.g., JSON, JSONB without proper operator classes for ordering).
-
-Returns a JSONB array of column ordering specifications, one per orderable column in attnum order.
-Returns empty array if no orderable columns exist.
-
-Args:
-  tab_id: The OID of the table whose columns we'll check for orderability.
-*/
+CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$
+-- Build a deterministic list of orderable columns using BTREE capability only.
 WITH orderable_cte AS (
-  SELECT DISTINCT pga.attnum
-  FROM pg_catalog.pg_attribute pga
-  INNER JOIN pg_catalog.pg_type pgt ON pga.atttypid = pgt.oid
-  INNER JOIN pg_catalog.pg_opclass pgoc ON pgt.oid = pgoc.opcintype
-  INNER JOIN pg_catalog.pg_am pgam ON pgoc.opcmethod = pgam.oid
+  SELECT attnum
+  FROM pg_catalog.pg_attribute pa
   WHERE
-    pga.attrelid = tab_id
-    AND pga.attnum > 0
-    AND NOT pga.attisdropped
-    AND pgam.amname = 'btree'
-  ORDER BY pga.attnum
+    pa.attrelid = tab_id
+    AND pa.attnum > 0
+    AND NOT pa.attisdropped
+    -- Keep only types that have a BTREE opclass; this excludes non-orderable types like circle/json.
+    AND EXISTS (
+      SELECT 1
+      FROM pg_catalog.pg_opclass opc
+      JOIN pg_catalog.pg_am am ON am.oid = opc.opcmethod
+      WHERE
+        opc.opcintype = pa.atttypid
+        AND am.amname = 'btree'
+    )
 )
-SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
+SELECT COALESCE(
+  jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc') ORDER BY attnum),
+  '[]'::jsonb
+)
 FROM orderable_cte
 WHERE has_column_privilege(tab_id, attnum, 'SELECT');
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
@@ -4634,8 +4629,23 @@ Args:
   tab_id: The OID of the table whose columns we'll order by.
   order_: A JSONB array defining any desired ordering of columns.
 */
-SELECT 'ORDER BY ' || msar.build_total_order_expr(tab_id, order_)
-$$ LANGUAGE SQL STABLE;
+DECLARE
+  order_expr text;
+BEGIN
+  IF NOT pg_catalog.has_table_privilege(tab_id, 'SELECT') THEN
+    -- Enforce permission check before any ordering logic as per Issue #1321 requirements.
+    RAISE EXCEPTION USING ERRCODE = '42501';
+  END IF;
+
+  order_expr := msar.build_total_order_expr(tab_id, order_);
+  IF order_expr IS NULL THEN
+    RAISE EXCEPTION USING
+      ERRCODE = '42P17',
+      MESSAGE = 'Table has no orderable columns. Please add a primary key or an orderable column.';
+  END IF;
+  RETURN 'ORDER BY ' || order_expr;
+END;
+$$ LANGUAGE plpgsql STABLE;
 
 
 CREATE OR REPLACE FUNCTION
@@ -5353,14 +5363,6 @@ DECLARE
   count_cte_query text;
   schema_oid oid;
 BEGIN
-  -- Determine schema OID (kept for potential use); do not enforce schema USAGE here.
-  SELECT relnamespace INTO schema_oid FROM pg_catalog.pg_class WHERE oid = tab_id;
-
-  -- Then check table privilege (SELECT)
-  IF NOT pg_catalog.has_table_privilege(tab_id, 'SELECT') THEN
-    RAISE insufficient_privilege USING MESSAGE = 'permission denied for table ' || tab_id::regclass::text;
-  END IF;
-
   SELECT jsonb_build_object(
     'relation_name', msar.get_relation_name(tab_id),
     'relation_schema_name', msar.get_relation_schema_name(tab_id),
