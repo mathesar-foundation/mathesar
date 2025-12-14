@@ -75,11 +75,7 @@ export class QueryRunner {
 
   private runPromise: CancellablePromise<ExplorationResult> | undefined;
 
-  constructor({
-    query,
-  }: {
-    query: QueryModel;
-  }) {
+  constructor({ query }: { query: QueryModel }) {
     this.query = writable(query);
     this.speculateProcessedColumns();
     void this.run();

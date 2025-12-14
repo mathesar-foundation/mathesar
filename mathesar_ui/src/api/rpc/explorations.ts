@@ -159,11 +159,11 @@ export interface QueryGeneratedColumnSource {
 
 interface QueryInitialColumnMetaData
   extends QueryResultColumn,
-  QueryInitialColumnSource { }
+    QueryInitialColumnSource {}
 
 interface QueryVirtualColumnMetaData
   extends QueryResultColumn,
-  QueryGeneratedColumnSource { }
+    QueryGeneratedColumnSource {}
 
 export type QueryColumnMetaData =
   | QueryInitialColumnMetaData
@@ -213,5 +213,4 @@ export const explorations = {
   >(),
 
   run: rpcMethodTypeContainer<ExplorationRunParams, ExplorationResult>(),
-
 };
