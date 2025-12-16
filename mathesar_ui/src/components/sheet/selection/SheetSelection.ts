@@ -175,16 +175,16 @@ export default class SheetSelection {
 
     const newBasis = this.plane.rowIds.first
       ? basisFromDataCells(
-          this.filterRestrictedCells(
-            this.plane.dataCellsInColumnRange(columnIdA, adjustedColumnIdB),
-          ),
-          makeCellId(this.plane.rowIds.first, columnIdA),
-        )
+        this.filterRestrictedCells(
+          this.plane.dataCellsInColumnRange(columnIdA, adjustedColumnIdB),
+        ),
+        makeCellId(this.plane.rowIds.first, columnIdA),
+      )
       : basisFromEmptyColumns(
-          this.filterRestrictedColumns(
-            this.plane.columnIds.range(columnIdA, adjustedColumnIdB),
-          ),
-        );
+        this.filterRestrictedColumns(
+          this.plane.columnIds.range(columnIdA, adjustedColumnIdB),
+        ),
+      );
     return this.withBasis(newBasis);
   }
 
@@ -547,10 +547,48 @@ export default class SheetSelection {
    * is simpler.
    */
   resized(direction: Direction): SheetSelection {
-    // TODO
+    const { activeCellId } = this;
+    if (!activeCellId) return this;
 
-    // eslint-disable-next-line no-console
-    console.log(direction, 'Sheet selection resizing is not yet implemented');
-    return this;
+    const { rowId: activeRowId, columnId: activeColId } =
+      parseCellId(activeCellId);
+
+    const firstRowId = this.plane.rowIds.min(this.basis.rowIds);
+    const lastRowId = this.plane.rowIds.max(this.basis.rowIds);
+    const firstColId = this.plane.columnIds.min(this.basis.columnIds);
+    const lastColId = this.plane.columnIds.max(this.basis.columnIds);
+
+    if (!firstRowId || !lastRowId || !firstColId || !lastColId) return this;
+
+    // The anchor is the corner of the selection opposite to the active cell.
+    // If the active cell is at one end of the selection, the anchor is at the
+    // other.
+    const anchorRowId = activeRowId === firstRowId ? lastRowId : firstRowId;
+    const anchorColId = activeColId === firstColId ? lastColId : firstColId;
+    const anchorCellId = makeCellId(anchorRowId, anchorColId);
+
+    // We change the selection by moving the anchor.
+    // Note that "moving the anchor" is just a mental model. In reality, we define
+    // a new selection between the *current* active cell and the *new* anchor position.
+    // The active cell remains the same, but the selection shape changes.
+    // Wait, my mental model in thought process was: Move the OPPOSITE end.
+    // If active is at A1 (TopLeft). Opposite is BottomRight.
+    // If I Shift+Down, I want to move the BottomRight DOWN.
+    // So I move the Anchor?
+    // In my variable naming: "anchor" = opposite.
+    // So "New Selection is between Active and (Moved Anchor)".
+    // Correct.
+
+    const newAnchorDiff = this.plane.getAdjacentCell(anchorCellId, direction);
+
+    if (newAnchorDiff.type === 'none') {
+      return this;
+    }
+
+    // We can confidently cast this because ofDataCellRange will handle the
+    // details of clamping to data cells if necessary.
+    const newAnchorCellId = newAnchorDiff.cellId;
+
+    return this.ofDataCellRange(activeCellId, newAnchorCellId);
   }
 }
