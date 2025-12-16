@@ -1,7 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
+  import {
+    CancelOrProceedButtonPair,
+    TextArea,
+    TextInput,
+  } from '@mathesar-component-library';
   import type {
     ColumnsDataStore,
     ProcessedColumn,
@@ -15,65 +19,96 @@
 
   $: ({ columns } = columnsDataStore);
 
-  function getValidationErrors(newName: string): string[] {
-    if (newName === column.column.name) {
-      return [];
-    }
-    if (!newName) {
-      return [$_('column_name_cannot_be_empty')];
-    }
-    const columnNames = $columns.map((c) => c.name);
-    if (columnNames.includes(newName)) {
+  let isEditing = false;
+  let name = '';
+  let description = '';
+  let isSubmitting = false;
+
+  $: liveColumn = $columns.find((c) => c.id === column.column.id);
+  $: columnSource = liveColumn ?? column.column;
+
+  $: if (!isEditing && columnSource) {
+    name = columnSource.name;
+    description = columnSource.description ?? '';
+  }
+
+  $: validationErrors = (() => {
+    if (name === column.column.name) return [];
+    if (!name) return [$_('column_name_cannot_be_empty')];
+    if ($columns.some((c) => c.name === name))
       return [$_('column_name_already_exists')];
-    }
     return [];
-  }
+  })();
 
-  async function handleColumnNameChange(newName: string): Promise<void> {
-    try {
-      await columnsDataStore.rename(column.column.id, newName);
-    } catch (error) {
-      toast.error(`${$_('unable_to_rename_column')} ${getErrorMessage(error)}`);
-    }
-  }
+  $: canSave =
+    validationErrors.length === 0 &&
+    (name !== column.column.name ||
+      description !== (column.column.description ?? ''));
 
-  async function handleColumnDescriptionChange(
-    description: string,
-  ): Promise<void> {
+  async function save() {
+    isSubmitting = true;
     try {
-      await columnsDataStore.updateDescription(
-        column.column.id,
-        description ?? null,
-      );
+      if (canSave) {
+        await columnsDataStore.patch({
+          id: column.column.id,
+          name,
+          description,
+        });
+      }
+      isEditing = false;
     } catch (error) {
-      toast.error(
-        `${$_('unable_to_update_column_desc')} ${getErrorMessage(error)}`,
-      );
+      toast.error(`${$_('unable_to_update_column')} ${getErrorMessage(error)}`);
+    } finally {
+      isSubmitting = false;
     }
   }
 </script>
 
-<div class="column-property column-name">
-  <span class="label">{$_('column_name')}</span>
-  <EditableTextWithActions
-    initialValue={column.column.name}
-    onSubmit={handleColumnNameChange}
-    {getValidationErrors}
-    disabled={!currentRoleOwnsTable}
-  />
-</div>
+<div class="container">
+  <div class="column-property column-name">
+    <span class="label">{$_('column_name')}</span>
+    <TextInput
+      bind:value={name}
+      on:focus={() => currentRoleOwnsTable && (isEditing = true)}
+      disabled={!currentRoleOwnsTable}
+    />
+    {#if isEditing}
+      {#each validationErrors as error}
+        <span class="error">{error}</span>
+      {/each}
+    {/if}
+  </div>
 
-<div class="column-property column-description">
-  <span class="label">{$_('column_description')}</span>
-  <EditableTextWithActions
-    initialValue={column.column.description ?? ''}
-    onSubmit={handleColumnDescriptionChange}
-    isLongText
-    disabled={!currentRoleOwnsTable}
-  />
+  <div class="column-property column-description">
+    <span class="label">{$_('column_description')}</span>
+    <TextArea
+      bind:value={description}
+      on:focus={() => currentRoleOwnsTable && (isEditing = true)}
+      disabled={!currentRoleOwnsTable}
+    />
+  </div>
+
+  {#if isEditing}
+    <div class="actions">
+      <CancelOrProceedButtonPair
+        onProceed={save}
+        onCancel={() => (isEditing = false)}
+        isProcessing={isSubmitting}
+        canProceed={canSave}
+        proceedButton={{ label: $_('save') }}
+        size="small"
+      />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
   .column-property {
     display: flex;
     flex-direction: column;
@@ -85,5 +120,10 @@
     > :global(* + *) {
       margin-top: 0.25rem;
     }
+  }
+
+  .error {
+    color: var(--color-fg-danger);
+    font-size: var(--sm2);
   }
 </style>
