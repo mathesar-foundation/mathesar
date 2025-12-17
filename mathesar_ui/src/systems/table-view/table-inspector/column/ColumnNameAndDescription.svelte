@@ -35,7 +35,9 @@
   $: validationErrors = (() => {
     if (name === liveColumn.name) return [];
     if (!name) return [$_('column_name_cannot_be_empty')];
-    if ($columns.some((c) => c.name === name)) return [$_('column_name_already_exists')];
+    if ($columns.some((c) => c.name === name)) {
+      return [$_('column_name_already_exists')];
+    }
     return [];
   })();
 
