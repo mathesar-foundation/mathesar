@@ -1,17 +1,13 @@
 import { FormattedInput } from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
+import UriCell from './components/uri/UriCell.svelte';
 import { UriFormatter } from '../../../utils/uri/UriFormatter';
 
-import TextBoxCell from './components/textbox/TextBoxCell.svelte';
 import type { CellComponentFactory } from './typeDefinitions';
 
 const uriType: CellComponentFactory = {
-  get: (): ComponentAndProps => ({
-    component: TextBoxCell,
-    props: {},
-  }),
-
+  get: (): ComponentAndProps => ({ component: UriCell }),
   getInput: (): ComponentAndProps => ({
     component: FormattedInput,
     props: {
@@ -19,7 +15,6 @@ const uriType: CellComponentFactory = {
       placeholder: 'Enter URI',
     },
   }),
-
   getDisplayFormatter: () => (v) => String(v),
 };
 
