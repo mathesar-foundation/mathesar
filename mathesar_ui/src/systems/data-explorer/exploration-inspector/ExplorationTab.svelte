@@ -110,8 +110,10 @@
         <TextInput
           value={name}
           aria-label={$_('name')}
-          on:change={handleNameChange}
-          on:input={setHasChangesToTrue}
+          on:input={(e) => {
+            setHasChangesToTrue();
+            handleNameChange(e);
+          }}
         />
       </LabeledInput>
     </FormField>
@@ -120,8 +122,10 @@
         <TextArea
           value={description}
           aria-label={$_('description')}
-          on:change={handleDescriptionChange}
-          on:input={setHasChangesToTrue}
+          on:input={(e) => {
+            setHasChangesToTrue();
+            handleDescriptionChange(e);
+          }}
         />
       </LabeledInput>
     </FormField>
