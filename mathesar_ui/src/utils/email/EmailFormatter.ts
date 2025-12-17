@@ -1,6 +1,6 @@
 import type {
   InputFormatter,
-  ParseResult,
+  ParseResultif (!cleanedInput),
 } from '@mathesar-component-library/types';
 
 // We use <string | null> to allow null values without red lines
@@ -9,7 +9,7 @@ export class EmailFormatter implements InputFormatter<string | null> {
     const cleanedInput = input.trim();
 
     // THE FIX: If empty, return NULL
-    if (!input || cleanedInput === '') {
+    if (!cleanedInput) {
       return { value: null, intermediateDisplay: input };
     }
 
