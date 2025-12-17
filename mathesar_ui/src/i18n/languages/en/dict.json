@@ -319,6 +319,7 @@
   "filter": "Filter",
   "filter_column": "Filter Column",
   "filter_records": "Filter records",
+  "clear_all_filters": "Clear all filters",
   "find_record": "Find a Record",
   "finish_setting_up_table": "Finish setting up your table",
   "first_page": "First Page",

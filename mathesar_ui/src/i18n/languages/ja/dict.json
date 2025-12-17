@@ -307,6 +307,7 @@
   "filter": "フィルター",
   "filter_column": "列をフィルタリング",
   "filter_records": "記録をフィルタリング",
+  "clear_all_filters": "すべてのフィルターをクリア",
   "find_record": "記録を検索",
   "finish_setting_up_table": "テーブルのセットアップを終了",
   "for_named_table": "[tableName]用",

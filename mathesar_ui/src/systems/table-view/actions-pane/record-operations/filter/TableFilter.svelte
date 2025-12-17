@@ -16,7 +16,7 @@
     calcNumberOfIndividualFilters,
     makeIndividualFilter,
   } from '@mathesar/components/filter/utils';
-  import { iconFiltering } from '@mathesar/icons';
+  import { iconDeleteMinor, iconFiltering } from '@mathesar/icons';
   import { imperativeFilterControllerContext } from '@mathesar/pages/table/ImperativeFilterController';
   import {
     Filtering,
@@ -24,6 +24,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { Button, Icon } from '@mathesar-component-library';
 
   import OperationDropdown from '../OperationDropdown.svelte';
 
@@ -108,6 +109,11 @@
       activateLastFilterInput,
     ),
   );
+
+  function clearAllFilters() {
+    filterGroup = new FilterGroup();
+    updateVarsAndExternalFiltering();
+  }
 </script>
 
 <OperationDropdown
@@ -120,7 +126,19 @@
   {...$$restProps}
 >
   <div class="filters" bind:this={content} use:dnd={{ onChange }}>
-    <div class="header">{$_('filter_records')}</div>
+    <div class="header">
+      <span>{$_('filter_records')}</span>
+      {#if displayFilterList}
+        <Button
+          appearance="plain"
+          on:click={clearAllFilters}
+          title={$_('clear_all_filters')}
+          class="clear-all-button"
+        >
+          <Icon {...iconDeleteMinor} />
+        </Button>
+      {/if}
+    </div>
     <div class="content">
       <FilterGroupComponent
         columns={$processedColumns}
@@ -142,6 +160,10 @@
   }
   .header {
     font-weight: bolder;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
   .content {
     margin-top: 0.8rem;
