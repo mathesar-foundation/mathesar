@@ -1,17 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import {
-    CancelOrProceedButtonPair,
-    TextArea,
-    TextInput,
-  } from '@mathesar-component-library';
   import type {
     ColumnsDataStore,
     ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import {
+    CancelOrProceedButtonPair,
+    TextArea,
+    TextInput,
+  } from '@mathesar-component-library';
 
   export let column: ProcessedColumn;
   export let columnsDataStore: ColumnsDataStore;
@@ -24,43 +24,46 @@
   let description = '';
   let isSubmitting = false;
 
-  $: liveColumn = $columns.find((c) => c.id === column.column.id);
-  $: columnSource = liveColumn ?? column.column;
+  $: liveColumn =
+    $columns.find((c) => c.id === column.column.id) ?? column.column;
 
-  $: if (!isEditing && columnSource) {
-    name = columnSource.name;
-    description = columnSource.description ?? '';
+  $: if (!isEditing) {
+    name = liveColumn.name;
+    description = liveColumn.description ?? '';
   }
 
   $: validationErrors = (() => {
-    if (name === column.column.name) return [];
+    if (name === liveColumn.name) return [];
     if (!name) return [$_('column_name_cannot_be_empty')];
-    if ($columns.some((c) => c.name === name))
-      return [$_('column_name_already_exists')];
+    if ($columns.some((c) => c.name === name)) return [$_('column_name_already_exists')];
     return [];
   })();
 
-  $: canSave =
-    validationErrors.length === 0 &&
-    (name !== column.column.name ||
-      description !== (column.column.description ?? ''));
+  $: hasChanges =
+    name !== liveColumn.name || description !== (liveColumn.description ?? '');
+  $: canSave = !validationErrors.length && hasChanges;
 
   async function save() {
+    if (!canSave) return;
     isSubmitting = true;
     try {
-      if (canSave) {
-        await columnsDataStore.patch({
-          id: column.column.id,
-          name,
-          description,
-        });
-      }
+      await columnsDataStore.patch({
+        id: column.column.id,
+        name,
+        description,
+      });
       isEditing = false;
     } catch (error) {
       toast.error(`${$_('unable_to_update_column')} ${getErrorMessage(error)}`);
     } finally {
       isSubmitting = false;
     }
+  }
+
+  function cancel() {
+    name = liveColumn.name;
+    description = liveColumn.description ?? '';
+    isEditing = false;
   }
 </script>
 
@@ -69,7 +72,9 @@
     <span class="label">{$_('column_name')}</span>
     <TextInput
       bind:value={name}
-      on:focus={() => currentRoleOwnsTable && (isEditing = true)}
+      on:focus={() => {
+        if (currentRoleOwnsTable) isEditing = true;
+      }}
       disabled={!currentRoleOwnsTable}
     />
     {#if isEditing}
@@ -83,22 +88,22 @@
     <span class="label">{$_('column_description')}</span>
     <TextArea
       bind:value={description}
-      on:focus={() => currentRoleOwnsTable && (isEditing = true)}
+      on:focus={() => {
+        if (currentRoleOwnsTable) isEditing = true;
+      }}
       disabled={!currentRoleOwnsTable}
     />
   </div>
 
   {#if isEditing}
-    <div class="actions">
-      <CancelOrProceedButtonPair
-        onProceed={save}
-        onCancel={() => (isEditing = false)}
-        isProcessing={isSubmitting}
-        canProceed={canSave}
-        proceedButton={{ label: $_('save') }}
-        size="small"
-      />
-    </div>
+    <CancelOrProceedButtonPair
+      onProceed={save}
+      onCancel={cancel}
+      isProcessing={isSubmitting}
+      canProceed={canSave}
+      proceedButton={{ label: $_('save') }}
+      size="small"
+    />
   {/if}
 </div>
 
