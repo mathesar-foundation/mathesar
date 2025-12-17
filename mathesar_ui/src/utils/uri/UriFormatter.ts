@@ -7,7 +7,7 @@ export class UriFormatter implements InputFormatter<string | null> {
   parse(input: string): ParseResult<string | null> {
     const cleanedInput = input.trim();
 
-    if (!input || cleanedInput === '') {
+    if (!cleanedInput) {
       return { value: null, intermediateDisplay: input };
     }
 
