@@ -1,6 +1,116 @@
 DROP EXTENSION IF EXISTS pgtap CASCADE;
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
+-- movie_rentals sample data (structure only) ------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_movie_rentals_structure() RETURNS SETOF TEXT AS $$
+BEGIN
+
+  CREATE TABLE customers (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    full_name text NOT NULL,
+    notes text
+  );
+  CREATE TABLE genres (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text NOT NULL UNIQUE
+  );
+  CREATE TABLE location_types (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text NOT NULL UNIQUE
+  );
+  CREATE TABLE movies (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    title text NOT NULL,
+    overview text,
+    release_date date,
+    lang text,
+    rating text,
+    popularity real,
+    vote_count integer,
+    vote_average real,
+    budget bigint,
+    revenue bigint,
+    runtime integer
+  );
+  CREATE TABLE people (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text NOT NULL,
+    also_known_as text[] DEFAULT '{}'::text[] NOT NULL,
+    birth_date date,
+    death_date date,
+    popularity real,
+    imdb_id text,
+    biography text
+  );
+  CREATE TABLE stores (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    street_name text NOT NULL,
+    phone text
+  );
+  CREATE TABLE studios (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text NOT NULL
+  );
+  CREATE TABLE cast_roles (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    movie bigint NOT NULL REFERENCES movies(id),
+    person bigint NOT NULL REFERENCES people(id),
+    character_name text
+  );
+  CREATE TABLE crew_roles (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    movie bigint NOT NULL REFERENCES movies(id),
+    person bigint NOT NULL REFERENCES people(id),
+    department text,
+    job text
+  );
+  CREATE TABLE emails (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    customer bigint REFERENCES customers(id),
+    email text NOT NULL,
+    location_type bigint REFERENCES location_types(id),
+    weight integer,
+    UNIQUE (email, customer)
+  );
+  CREATE TABLE items (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    barcode uuid DEFAULT gen_random_uuid() NOT NULL UNIQUE,
+    movie bigint NOT NULL REFERENCES movies(id),
+    store bigint REFERENCES stores(id)
+  );
+  CREATE TABLE movies_genres (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    movie bigint NOT NULL REFERENCES movies(id),
+    genre bigint NOT NULL REFERENCES genres(id)
+  );
+  CREATE TABLE movies_studios (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    movie bigint NOT NULL REFERENCES movies(id),
+    studio bigint NOT NULL REFERENCES studios(id),
+    UNIQUE (movie, studio)
+  );
+  CREATE TABLE phones (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    customer bigint NOT NULL REFERENCES customers(id),
+    phone text NOT NULL,
+    location_type bigint REFERENCES location_types(id),
+    weight integer,
+    UNIQUE (phone, customer)
+  );
+  CREATE TABLE rentals (
+    /* 1 */ id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    /* 2 */ customer bigint NOT NULL REFERENCES customers(id),
+    /* 3 */ item bigint NOT NULL REFERENCES items(id),
+    /* 4 */ price numeric(10,2) NOT NULL,
+    /* 5 */ time_out timestamp with time zone NOT NULL,
+    /* 6 */ time_in timestamp with time zone
+  );
+
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- msar.drop_columns -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_drop_columns() RETURNS SETOF TEXT AS $$
@@ -8337,6 +8447,489 @@ BEGIN
     ]
     $j$,
     results
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.insert_related -------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_insert_related__basic() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `movies` record titled "Galaxy Quest" released on 1999-12-25.
+
+  PERFORM __setup_movie_rentals_structure();
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'movies'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object('type', 'literal', 'value', 'Galaxy Quest')
+      ),
+      jsonb_build_object(
+        'column_attnum', 4,
+        'value', jsonb_build_object('type', 'literal', 'value', '1999-12-25')
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT title, release_date FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest', '1999-12-25'::date) $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__many_to_one_simple() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `items` record with barcode "682254fd-c78b-473f-8df1-44c560051218". Associate it
+  -- with an existing `stores` record having id 1. And associate it with a new `movies` record
+  -- having title "Galaxy Quest".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  -- Insert a store with id 1 for the test
+  INSERT INTO stores (street_name) VALUES ('Main Street');
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'items'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object(
+          'type', 'literal',
+          'value', '682254fd-c78b-473f-8df1-44c560051218'
+        )
+      ),
+      jsonb_build_object(
+        'column_attnum', 4,
+        'value', jsonb_build_object('type', 'literal', 'value', 1)
+      ),
+      jsonb_build_object(
+        'column_attnum', 3,
+        'value', jsonb_build_object(
+          'type', 'new_linked_record_id',
+          'record', jsonb_build_object(
+            'table_oid', 'movies'::regclass::oid,
+            'fields', jsonb_build_array(
+              jsonb_build_object(
+                'column_attnum', 2,
+                'value', jsonb_build_object(
+                  'type', 'literal',
+                  'value', 'Galaxy Quest'
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT barcode, movie, store FROM items $q$,
+    $v$ VALUES ('682254fd-c78b-473f-8df1-44c560051218'::uuid, 1::bigint, 1::bigint) $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT title FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest') $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__many_to_one_transitive() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `rentals` record.
+  -- Associate the rental with an existing customer named Alice.
+  -- Associate the rental with a new item.
+  -- Associate the item with an existing store named Main Street.
+  -- Set the item barcode to "682254fd-c78b-473f-8df1-44c560051218".
+  -- Associate the item with a new movie named "Galaxy Quest".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  INSERT INTO customers (full_name) VALUES ('Alice');
+  INSERT INTO stores (street_name) VALUES ('Main Street');
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'rentals'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 4, -- Price
+        'value', jsonb_build_object(
+          'type', 'literal',
+          'value', 2.99
+        )
+      ),
+      jsonb_build_object(
+        'column_attnum', 5, -- Time out
+        'value', jsonb_build_object(
+          'type', 'literal',
+          'value', '2000-01-01 12:00:00'::timestamp
+        )
+      ),
+      -- Associate rental with existing customer Alice (id = 1)
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object(
+          'type', 'literal',
+          'value', 1
+        )
+      ),
+      -- Associate rental with a new item, itself linked to existing store and new movie
+      jsonb_build_object(
+        'column_attnum', 3,
+        'value', jsonb_build_object(
+          'type', 'new_linked_record_id',
+          'record', jsonb_build_object(
+            'table_oid', 'items'::regclass::oid,
+            'fields', jsonb_build_array(
+              -- item barcode
+              jsonb_build_object(
+                'column_attnum', 2,
+                'value', jsonb_build_object(
+                  'type', 'literal',
+                  'value', '682254fd-c78b-473f-8df1-44c560051218'
+                )
+              ),
+              -- item.store -> existing store with id = 1
+              jsonb_build_object(
+                'column_attnum', 4,
+                'value', jsonb_build_object(
+                  'type', 'literal',
+                  'value', 1
+                )
+              ),
+              -- item.movie -> new movie "Galaxy Quest"
+              jsonb_build_object(
+                'column_attnum', 3,
+                'value', jsonb_build_object(
+                  'type', 'new_linked_record_id',
+                  'record', jsonb_build_object(
+                    'table_oid', 'movies'::regclass::oid,
+                    'fields', jsonb_build_array(
+                      jsonb_build_object(
+                        'column_attnum', 2,
+                        'value', jsonb_build_object(
+                          'type', 'literal',
+                          'value', 'Galaxy Quest'
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT customer, item FROM rentals $q$,
+    $v$ VALUES (1::bigint, 1::bigint) $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT barcode, movie, store FROM items $q$,
+    $v$ VALUES ('682254fd-c78b-473f-8df1-44c560051218'::uuid, 1::bigint, 1::bigint) $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT title FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest') $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__one_to_many() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `customers` record named "Alice", and associate it two new `emails` records having
+  -- email values "a@b.c" and "x@y.z".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'customers'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object('type', 'literal', 'value', 'Alice')
+      )
+    ),
+    'related_records', jsonb_build_array(
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'emails'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object('type', 'literal', 'value', 'a@b.c')
+          )
+        )
+      ),
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'emails'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object('type', 'literal', 'value', 'x@y.z')
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT full_name FROM customers $q$,
+    $v$ VALUES ('Alice') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT customer, email FROM emails $q$,
+    $v$ VALUES (1::bigint, 'a@b.c'), (1::bigint, 'x@y.z') $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__tag_pick_and_insert() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `movies` record titled "Galaxy Quest". Associate it with existing `genres` records
+  -- that have id values 1 and 2, plus a new `genres` record named "Comedy".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  -- Insert existing genres with ids 1 and 2
+  INSERT INTO genres (name) VALUES ('Action'), ('Adventure');
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'movies'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object('type', 'literal', 'value', 'Galaxy Quest')
+      )
+    ),
+    'related_records', jsonb_build_array(
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object('type', 'literal', 'value', 1)
+          )
+        )
+      ),
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object('type', 'literal', 'value', 2)
+          )
+        )
+      ),
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                'table_oid', 'genres'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Comedy')
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT title FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT name FROM genres ORDER BY id $q$,
+    $v$ VALUES ('Action'), ('Adventure'), ('Comedy') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT movie, genre FROM movies_genres ORDER BY genre $q$,
+    $v$ VALUES (1::bigint, 1::bigint), (1::bigint, 2::bigint), (1::bigint, 3::bigint) $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__multiple_tag_fields() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `movies` record titled "Galaxy Quest". Associate it with new `genres` records
+  -- named and "Action" and "Adventure". And associate it with new `studios` records named "Foo" and
+  -- "Bar".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'movies'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object('type', 'literal', 'value', 'Galaxy Quest')
+      )
+    ),
+    'related_records', jsonb_build_array(
+      jsonb_build_object(
+        -- insert a `movies_genres` record for genre "Action"
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fk_column_attnum', 2,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                -- insert a `genres` record named "Action"
+                'table_oid', 'genres'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Action')
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+      jsonb_build_object(
+        -- insert a `movies_genres` record for genre "Adventure"
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fk_column_attnum', 2,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                -- insert a `genres` record named "Adventure"
+                'table_oid', 'genres'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Adventure')
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+      jsonb_build_object(
+        -- insert a `movies_studios` record for studio "Foo"
+        'table_oid', 'movies_studios'::regclass::oid,
+        'fk_column_attnum', 2,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                -- insert a `studios` record named "Foo"
+                'table_oid', 'studios'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Foo')
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+      jsonb_build_object(
+        -- insert a `movies_studios` record for studio "Bar"
+        'table_oid', 'movies_studios'::regclass::oid,
+        'fk_column_attnum', 2,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                -- insert a `studios` record named "Bar"
+                'table_oid', 'studios'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Bar')
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT title FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT name FROM genres $q$,
+    $v$ VALUES ('Action'), ('Adventure') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT name FROM studios $q$,
+    $v$ VALUES ('Bar'), ('Foo') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT movie, genre FROM movies_genres $q$,
+    $v$ VALUES (1::bigint, 1::bigint), (1::bigint, 2::bigint) $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT movie, studio FROM movies_studios $q$,
+    $v$ VALUES (1::bigint, 1::bigint), (1::bigint, 2::bigint) $v$
   );
 END;
 $$ LANGUAGE plpgsql;
