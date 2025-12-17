@@ -2,12 +2,20 @@ import { arrayFrom, cycle, execPipe, first, map, take, zip } from 'iter-tools';
 import { type Writable, get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { type RecordRow, getRowSelectionId } from '@mathesar/stores/table-data';
 import type {
   RowAdditionRecipe,
   RowModificationRecipe,
 } from '@mathesar/stores/table-data/records';
+import {
+  DateTimeFormatter,
+  DateTimeSpecification,
+} from '@mathesar/utils/date-time';
+import type { DateTimeConfig } from '@mathesar/utils/date-time/DateTimeSpecification';
 import { startingFrom } from '@mathesar/utils/iterUtils';
 import {
   type ImmutableSet,
@@ -115,6 +123,40 @@ function getDestinationColumns(
   return sheetColumns.slice(firstIndex, lastIndex + 1);
 }
 
+/**
+ * For date/datetime/time columns, parse the TSV value using DateTimeFormatter
+ * to ensure it respects the column's format metadata (e.g., European date
+ * format). This mirrors the behavior of edit-mode parsing.
+ */
+function makeDateTimeValueParser(config: DateTimeConfig) {
+  const formatter = new DateTimeFormatter(new DateTimeSpecification(config));
+  return (value: string): string => formatter.parse(value).value ?? value;
+}
+
+function getTsvValueParser(
+  column: RawColumnWithMetadata,
+): ((v: string) => string) | undefined {
+  const dateFormat = getColumnMetadataValue(column, 'date_format');
+  const timeFormat = getColumnMetadataValue(column, 'time_format');
+
+  if (column.type === 'date') {
+    return makeDateTimeValueParser({ type: 'date', dateFormat });
+  }
+  if (column.type === 'time') {
+    return makeDateTimeValueParser({ type: 'time', timeFormat });
+  }
+  if (column.type === 'timestamp') {
+    const type = 'timestamp';
+    return makeDateTimeValueParser({ type, dateFormat, timeFormat });
+  }
+  if (column.type === 'timestamptz') {
+    const type = 'timestampWithTZ';
+    return makeDateTimeValueParser({ type, dateFormat, timeFormat });
+  }
+
+  return undefined;
+}
+
 function prepareStructuredCellValue(
   column: RawColumnWithMetadata,
   cell: PayloadCell,
@@ -124,7 +166,13 @@ function prepareStructuredCellValue(
     // assume that empty strings are NULLs.
     if (cell.value === '' && column.nullable) return null;
 
-    return cell.value;
+    const parse = getTsvValueParser(column);
+    if (!parse) return cell.value;
+    try {
+      return parse(cell.value);
+    } catch {
+      return cell.value;
+    }
   }
 
   if (cell.type === 'mathesar') {
