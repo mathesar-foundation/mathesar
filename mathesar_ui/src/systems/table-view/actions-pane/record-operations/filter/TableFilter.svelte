@@ -24,6 +24,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { iconClose, Button, Icon } from '@mathesar-component-library';
 
   import OperationDropdown from '../OperationDropdown.svelte';
 
@@ -97,6 +98,11 @@
     activateLastFilterInput();
   }
 
+  function clearAllFilters() {
+    filterGroup = new FilterGroup();
+    updateVarsAndExternalFiltering();
+  }
+
   onMount(() =>
     imperativeFilterController?.onOpenDropdown(() => {
       isOpen = true;
@@ -120,7 +126,19 @@
   {...$$restProps}
 >
   <div class="filters" bind:this={content} use:dnd={{ onChange }}>
-    <div class="header">{$_('filter_records')}</div>
+    <div class="header">
+      <span>{$_('filter_records')}</span>
+      {#if displayFilterList}
+        <Button
+          appearance="plain"
+          class="clear-all-button"
+          on:click={clearAllFilters}
+          title={$_('clear_all_filters')}
+        >
+          <Icon {...iconClose} />
+        </Button>
+      {/if}
+    </div>
     <div class="content">
       <FilterGroupComponent
         columns={$processedColumns}
@@ -142,8 +160,15 @@
   }
   .header {
     font-weight: bolder;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   .content {
     margin-top: 0.8rem;
+  }
+  :global(.clear-all-button) {
+    --button-color: var(--color-fg-subtle-2);
+    --button-padding: var(--sm6);
   }
 </style>
