@@ -29,6 +29,8 @@ import type {
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
+import { _ } from 'svelte-i18n';
+import { toast } from '@mathesar/stores/toast';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { ImmutableSet, defined } from '@mathesar-component-library';
 
@@ -275,12 +277,18 @@ export class TabularData {
     );
 
     this.allColumns = derived(
-      [this.processedColumns, this.joinedColumns],
-      ([processedColumns, joinedColumns]) =>
-        new Map<string, ProcessedColumn | JoinedColumn>([
+      [this.processedColumns, this.joinedColumns, this.meta.hiddenColumns],
+      ([processedColumns, joinedColumns, hiddenColumns]) => {
+        const all = new Map<string, ProcessedColumn | JoinedColumn>([
           ...processedColumns,
           ...joinedColumns,
-        ]),
+        ]);
+        // Filter out hidden columns
+        for (const columnId of hiddenColumns) {
+          all.delete(columnId);
+        }
+        return all;
+      },
     );
 
     const plane = derived(
@@ -340,6 +348,7 @@ export class TabularData {
       this.meta.sorting.update((s) => s.without(stringColumnId));
       this.meta.grouping.update((g) => g.withoutColumns([stringColumnId]));
       this.meta.filtering.update((f) => f.withoutColumns([stringColumnId]));
+      this.meta.hiddenColumns.update((h) => h.withoutColumn(stringColumnId));
       await this.constraintsDataStore.fetch();
       void this.joinableTables.run();
     });
@@ -352,6 +361,34 @@ export class TabularData {
     });
     this.constraintsDataStore.on('constraintRemoved', async () => {
       void this.joinableTables.run();
+    });
+
+    // Automatically unhide required (non-nullable) columns when new records are being created
+    this.recordsData.newRecords.subscribe((newRecords) => {
+      if (newRecords.length > 0) {
+        // Get all required (non-nullable) columns
+        const requiredColumnIds = get(this.columnsDataStore.columns)
+          .filter((column) => !column.nullable)
+          .map((column) => String(column.id));
+
+        // Unhide any required columns that are currently hidden
+        let columnsUnhidden = false;
+        this.meta.hiddenColumns.update((hiddenColumns) => {
+          let updated = hiddenColumns;
+          for (const columnId of requiredColumnIds) {
+            if (hiddenColumns.hasColumn(columnId)) {
+              updated = updated.withoutColumn(columnId);
+              columnsUnhidden = true;
+            }
+          }
+          return updated;
+        });
+
+        // Show toast notification if columns were unhidden
+        if (columnsUnhidden) {
+          toast.info(get(_)('required_hidden_columns_made_visible'));
+        }
+      }
     });
   }
 

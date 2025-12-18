@@ -105,12 +105,17 @@
   $: sheetColumns = (() => {
     const columns: Array<{ column: { id: string; name: string } }> = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...[...$processedColumns.values()].map((pc) => ({
-        column: { id: pc.id, name: pc.column.name },
-      })),
-      ...[...$joinedColumns.values()].map((jc) => ({
-        column: { id: jc.id, name: jc.displayName },
-      })),
+      ...[...$allColumns].map(([columnId, columnFabric]) => {
+        const name = isJoinedColumn(columnFabric)
+          ? columnFabric.displayName
+          : columnFabric.column.name;
+        return {
+          column: {
+            id: columnId,
+            name,
+          },
+        };
+      }),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
@@ -121,8 +126,10 @@
   $: columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
     [ID_ADD_NEW_COLUMN, 32],
-    ...getCustomizedColumnWidths($processedColumns.values()),
-    ...[...$joinedColumns.keys()].map((id): [string, number] => [id, 300]),
+    ...[...getCustomizedColumnWidths($processedColumns.values())],
+    ...[...$allColumns]
+      .filter(([, col]) => isJoinedColumn(col))
+      .map(([id]): [string, number] => [id, 300]),
   ]);
   $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
 
