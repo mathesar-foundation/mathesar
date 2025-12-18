@@ -87,7 +87,7 @@ def patch(*, database_id: int, patch: ConfiguredDatabasePatch, **kwargs) -> Conf
     Patch a configured database, given its id.
 
     Args:
-        database_id: The Django id of the database
+        database_id: The Django id of the database.
         patch: An object containing the fields to update.
 
     Returns:
@@ -142,12 +142,15 @@ def disconnect(
         schemas_to_remove: Mathesar schemas we should remove SQL from.
         strict: If True, we throw an exception and roll back changes if
             we fail to remove any objects which we expected to remove.
-        role_name: the username of the role used for upgrading.
-        password: the password of the role used for upgrading.
+        role_name: The username of the role used for SQL removal.
+        password: The password of the role used for SQL removal.
         disconnect_db_server: If True, will delete the stored server
             metadata(host, port, role credentials) from Mathesar.
             This is intended for optional use while disconnecting the
             last database on the server.
+
+    Returns:
+        The result of the disconnect operation.
     """
     database = Database.objects.get(id=database_id)
 

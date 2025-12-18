@@ -138,7 +138,7 @@ def list_(*, database_id: int, schema_oid: int = None, **kwargs) -> list[Explora
 @mathesar_rpc_method(name="explorations.get", auth="login")
 def get(*, exploration_id: int, **kwargs) -> ExplorationInfo:
     """
-    List information about an exploration.
+    Get information about an exploration.
 
     Args:
         exploration_id: The Django id of the exploration.

@@ -145,7 +145,7 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnMetaDataR
         database_id: The Django id of the database containing the table.
 
     Returns:
-        A list of column meta data objects.
+        A list of column metadata objects.
     """
     columns_meta_data = get_columns_meta_data(table_oid, database_id)
     return [

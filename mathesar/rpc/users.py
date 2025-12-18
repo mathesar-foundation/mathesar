@@ -103,7 +103,7 @@ def delete(*, user_id: int) -> None:
 @mathesar_rpc_method(name="users.get", auth="login")
 def get(*, user_id: int) -> UserInfo:
     """
-    List information about a mathesar user.
+    Get information about a mathesar user.
 
     Args:
         user_id: The Django id of the user.
@@ -175,8 +175,8 @@ def patch_other(
     Args:
         user_id: The Django id of the user.
         username: The username of the user.
-        email: The email of the user.
         is_superuser: Specifies whether to set the user as a superuser.
+        email: The email of the user.
         full_name: The full name of the user.
         display_language: Specifies the display language for the user, can be set to either `en` or `ja`.
 

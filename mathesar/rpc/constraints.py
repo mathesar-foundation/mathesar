@@ -118,7 +118,7 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
     List information about constraints in a table. Exposed as `list`.
 
     Args:
-        table_oid: The oid of the table to list constraints for.
+        table_oid: The OID of the table to list constraints for.
         database_id: The Django id of the database containing the table.
 
     Returns:
@@ -141,12 +141,12 @@ def add(
     Add constraint(s) on a table in bulk.
 
     Args:
-        table_oid: Identity of the table to delete constraint for.
+        table_oid: Identity of the table to add constraints to.
         constraint_def_list: A list describing the constraints to add.
         database_id: The Django id of the database containing the table.
 
     Returns:
-        The oid(s) of all the constraints on the table.
+        The OID(s) of all the constraints on the table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -159,7 +159,7 @@ def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -
     Delete a constraint from a table.
 
     Args:
-        table_oid: Identity of the table to delete constraint for.
+        table_oid: Identity of the table to delete constraint from.
         constraint_oid: The OID of the constraint to delete.
         database_id: The Django id of the database containing the table.
 
