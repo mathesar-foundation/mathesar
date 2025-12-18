@@ -563,6 +563,7 @@
   "record": "Record",
   "record_deleted_successfully": "Record deleted successfully!",
   "record_in_table": "Record in [tableName]",
+  "record_not_found": "Record with id {id} not found.",
   "record_sel_no_support_for_table_without_pk": "The Record selector does not support tables without a Primary key.",
   "record_summary": "Record Summary",
   "record_summary_config_help": "Configure [tableName] record summaries here.",
