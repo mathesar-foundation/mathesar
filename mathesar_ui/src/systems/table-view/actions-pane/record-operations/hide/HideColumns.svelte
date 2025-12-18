@@ -16,7 +16,6 @@
   export let hiddenColumns: Writable<HiddenColumns>;
   $: ({ processedColumns } = $tabularData);
 
-  /** All columns in order */
   $: allColumns = [...$processedColumns.values()];
 
   function handleCheckboxChange(columnId: string, checked: boolean) {
@@ -26,13 +25,10 @@
   }
 
   function hideAll() {
-    // Build all column IDs at once for better performance
-    const allColumnIds = allColumns.map((c) => c.id);
-    hiddenColumns.set(new HiddenColumns(allColumnIds));
+    hiddenColumns.set(new HiddenColumns(allColumns.map((c) => c.id)));
   }
 
   function showAll() {
-    // Create empty HiddenColumns for better performance
     hiddenColumns.set(new HiddenColumns());
   }
 </script>

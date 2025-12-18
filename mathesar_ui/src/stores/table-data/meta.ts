@@ -110,10 +110,6 @@ function deserializeMetaProps(s: string): MetaProps | undefined {
   if (!s) return undefined;
   try {
     const terse = JSON.parse(Url64.decode(s)) as unknown[];
-    // Handle backward compatibility: if hiddenColumns is missing, add empty array
-    if (terse.length === 5) {
-      terse.push([]);
-    }
     return makeMetaProps(terse as TerseMetaProps);
   } catch {
     return undefined;

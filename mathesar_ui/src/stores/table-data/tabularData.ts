@@ -283,7 +283,6 @@ export class TabularData {
           ...processedColumns,
           ...joinedColumns,
         ]);
-        // Filter out hidden columns
         for (const columnId of hiddenColumns) {
           all.delete(columnId);
         }
@@ -363,15 +362,13 @@ export class TabularData {
       void this.joinableTables.run();
     });
 
-    // Automatically unhide required (non-nullable) columns when new records are being created
+    // Automatically unhide required columns when new records are being created
     this.recordsData.newRecords.subscribe((newRecords) => {
       if (newRecords.length > 0) {
-        // Get all required (non-nullable) columns
         const requiredColumnIds = get(this.columnsDataStore.columns)
           .filter((column) => !column.nullable)
           .map((column) => String(column.id));
 
-        // Unhide any required columns that are currently hidden
         let columnsUnhidden = false;
         this.meta.hiddenColumns.update((hiddenColumns) => {
           let updated = hiddenColumns;
@@ -384,7 +381,6 @@ export class TabularData {
           return updated;
         });
 
-        // Show toast notification if columns were unhidden
         if (columnsUnhidden) {
           toast.info(get(_)('required_hidden_columns_made_visible'));
         }

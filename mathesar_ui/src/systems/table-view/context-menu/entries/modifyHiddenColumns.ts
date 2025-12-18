@@ -39,15 +39,10 @@ export function* modifyHiddenColumnsMultiple(p: {
   const hiddenColumnsStore = p.tabularData.meta.hiddenColumns;
   const hiddenColumns = get(hiddenColumnsStore);
   const count = p.columnIds.length;
-
-  // Check if all selected columns are hidden
   const allHidden = p.columnIds.every((id) => hiddenColumns.has(id));
-
-  // Check if any selected columns are hidden
   const someHidden = p.columnIds.some((id) => hiddenColumns.has(id));
 
   if (allHidden) {
-    // All are hidden, show "Show X columns"
     yield buttonMenuEntry({
       icon: iconShowColumn,
       label: get(_)('show_columns_count', { values: { count } }),
@@ -56,7 +51,6 @@ export function* modifyHiddenColumnsMultiple(p: {
       },
     });
   } else if (someHidden) {
-    // Some are hidden, show both options
     yield buttonMenuEntry({
       icon: iconHideColumn,
       label: get(_)('hide_columns_count', { values: { count } }),
@@ -72,7 +66,6 @@ export function* modifyHiddenColumnsMultiple(p: {
       },
     });
   } else {
-    // None are hidden, show "Hide X columns"
     yield buttonMenuEntry({
       icon: iconHideColumn,
       label: get(_)('hide_columns_count', { values: { count } }),
