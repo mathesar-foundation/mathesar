@@ -1,9 +1,9 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { RecordsSummaryListResponse } from './_common/commonTypes';
-import type { RecordSummaryTemplate } from './tables';
+import type { JoinPath, RecordSummaryTemplate } from './tables';
 
-export type ResultValue = string | number | boolean | null;
+export type ResultValue = string | number | boolean | number[] | null;
 
 export type SortDirection = 'asc' | 'desc';
 export interface SortingEntry {
@@ -23,7 +23,7 @@ export interface SqlComparison {
     | 'greater_or_equal'
     | 'contains_case_insensitive'
     | 'contains'
-    | 'starts_with'
+    | 'starts_with_case_insensitive'
     | 'json_array_contains';
   args: [SqlExpr, SqlExpr];
 }
@@ -78,6 +78,7 @@ export interface RecordsListParams {
   grouping?: Grouping;
   filter?: SqlExpr;
   return_record_summaries?: boolean;
+  joined_columns?: { alias: string; join_path: JoinPath }[];
 }
 
 export interface RecordsSearchParams {
@@ -115,6 +116,7 @@ export interface RecordsResponse {
   record_summaries: Record<string, string> | null;
   /** Keys are attnums. */
   download_links: Record<string, FileManifestColumnData>;
+  joined_record_summaries: Record<string, RecordSummaryColumnData> | null;
 }
 
 export const records = {
@@ -157,6 +159,7 @@ export const records = {
         string,
         RecordSummaryTemplate | null
       > | null;
+      joined_columns?: { alias: string; join_path: JoinPath }[];
     },
     RecordsResponse
   >(),
@@ -181,6 +184,10 @@ export const records = {
       limit?: number | null;
       offset?: number | null;
       search?: string | null;
+      linked_record_path?: {
+        record_pkey: ResultValue;
+        join_path: JoinPath;
+      } | null;
     },
     RecordsSummaryListResponse
   >(),

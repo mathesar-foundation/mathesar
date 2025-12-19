@@ -14,6 +14,7 @@
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'] = undefined;
+  export let setValue: (newValue: $$Props['value']) => void;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
@@ -21,17 +22,17 @@
 </script>
 
 <SteppedInputCell
-  bind:value
+  {value}
+  {setValue}
   {isActive}
   {disabled}
   {searchValue}
   {isIndependentOfSheet}
   {showTruncationPopover}
   let:handleInputBlur
-  let:handleInputKeydown
+  let:setValueInEditMode
   on:movementKeyDown
   on:mouseenter
-  on:update
 >
   <span slot="content" let:matchParts>
     <CellValue {value}>
@@ -47,8 +48,8 @@
   <TextInput
     focusOnMount={true}
     {disabled}
-    bind:value
+    {value}
+    onValueChange={setValueInEditMode}
     on:blur={handleInputBlur}
-    on:keydown={handleInputKeydown}
   />
 </SteppedInputCell>

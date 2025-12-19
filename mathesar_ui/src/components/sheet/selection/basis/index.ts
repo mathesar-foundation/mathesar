@@ -5,4 +5,5 @@ export {
   basisFromZeroEmptyColumns,
 } from './emptyColumnsBasis';
 export { emptyBasis } from './emptyBasis';
+export { basisFromRangeRestrictedCell } from './rangeRestrictedCellBasis';
 export { basisFromPlaceholderCell } from './placeholderCellBasis';

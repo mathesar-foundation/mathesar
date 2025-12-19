@@ -1,4 +1,4 @@
-import type { RawServer } from '@mathesar/api/rpc/servers';
+import type { RawServer, SslMode } from '@mathesar/api/rpc/servers';
 
 export class Server {
   readonly id: number;
@@ -7,10 +7,13 @@ export class Server {
 
   readonly port: number | null;
 
+  readonly sslmode: SslMode;
+
   constructor(props: { rawServer: RawServer }) {
     this.id = props.rawServer.id;
     this.host = props.rawServer.host;
     this.port = props.rawServer.port;
+    this.sslmode = props.rawServer.sslmode;
   }
 
   getConnectionString() {
@@ -36,6 +39,7 @@ export class Server {
         id,
         host: 'unknown',
         port: 0,
+        sslmode: 'prefer',
       },
     });
   }

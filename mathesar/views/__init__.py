@@ -17,10 +17,10 @@ from mathesar.rpc.users import get as get_user_info
 from mathesar.utils.download_links import get_backends as get_file_backends
 from mathesar import __version__
 
-from . import export, users, download_link, bulk_insert
+from . import export, users, download_link, bulk_insert, data_files
 
 
-__all__ = [export, users, download_link, bulk_insert]
+__all__ = [export, users, download_link, bulk_insert, data_files]
 
 
 def get_database_list(request):

@@ -27,11 +27,14 @@ import type { Schema } from '@mathesar/models/Schema';
 import { Table } from '@mathesar/models/Table';
 import {
   type RpcRequest,
-  batchSend,
+  batchRun,
 } from '@mathesar/packages/json-rpc-client-builder';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
+import {
+  isTableView,
+  tableRequiresImportConfirmation,
+} from '@mathesar/utils/tables';
 import {
   CancellablePromise,
   type RecursivePartial,
@@ -45,7 +48,7 @@ const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
 
 type TablesMap = Map<Table['oid'], Table>;
 
-interface TablesData {
+export interface TablesData {
   databaseId?: Database['id'];
   schemaOid?: Schema['oid'];
   tablesMap: TablesMap;
@@ -62,7 +65,12 @@ function makeEmptyTablesData(): TablesData {
 const tablesStore = writable(makeEmptyTablesData());
 
 function sortTables(tables: Iterable<Table>): Table[] {
-  return [...tables].sort((a, b) => a.name.localeCompare(b.name));
+  const allTables = [...tables];
+  const regularTables = allTables.filter((table) => !isTableView(table));
+  const views = allTables.filter((table) => isTableView(table));
+
+  const sort = (a: Table, b: Table) => a.name.localeCompare(b.name);
+  return [...views.sort(sort), ...regularTables.sort(sort)];
 }
 
 function setTablesStore(
@@ -275,7 +283,7 @@ export async function updateTable({
       }),
     );
   }
-  await batchSend(requests);
+  await batchRun(requests);
 
   // TODO: Remove once tables.patch_with_metadata response provides RawTableWithMetadata
   const rawTableWithMetadata = await api.tables

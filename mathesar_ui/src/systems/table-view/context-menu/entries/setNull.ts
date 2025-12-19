@@ -30,10 +30,20 @@ export function* setNull(p: { tabularData: TabularData; cellIds: string[] }) {
   const { rowIds, columnIds } = get(p.tabularData.selection);
   const selectedRows = get(p.tabularData.recordsData.selectableRowsMap);
   const columnsInTable = get(p.tabularData.processedColumns);
+  const joinedColumns = get(p.tabularData.joinedColumns);
+
+  const hasJoinedColumn = execPipe(
+    columnIds,
+    some((columnId) => joinedColumns.has(columnId)),
+  );
+  if (hasJoinedColumn) {
+    yield fallback;
+    return;
+  }
 
   const someColumnRefuses = execPipe(
     columnIds,
-    map((columnId) => columnsInTable.get(parseInt(columnId, 10))),
+    map((columnId) => columnsInTable.get(columnId)),
     filter((column) => !!column),
     some((column) => !column?.isEditable || !column?.column.nullable),
   );

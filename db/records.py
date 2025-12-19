@@ -15,6 +15,7 @@ def list_records_from_table(
     order=None,
     filter=None,
     group=None,
+    joined_columns=None,
     return_record_summaries=False,
     table_record_summary_templates=None,
 ):
@@ -34,6 +35,8 @@ def list_records_from_table(
         order: An array of ordering definition objects.
         filter: An array of filter definition objects.
         group: An array of group definition objects.
+        joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
+            "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
         return_record_summaries: Whether to return self record summaries.
         table_record_summary_templates: A dict of record summary templates, per table.
     """
@@ -46,6 +49,7 @@ def list_records_from_table(
         _json_or_none(order),
         _json_or_none(filter),
         _json_or_none(group),
+        _json_or_none(joined_columns),
         return_record_summaries,
         _json_or_none(table_record_summary_templates),
     ).fetchone()[0]
@@ -56,6 +60,7 @@ def get_record_from_table(
     conn,
     record_id,
     table_oid,
+    joined_columns=None,
     return_record_summaries=False,
     table_record_summary_templates=None,
 ):
@@ -67,6 +72,8 @@ def get_record_from_table(
     Args:
         record_id: The primary key value of the record.
         table_id: The OID of the table whose record we'll get.
+        joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
+            "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
         return_record_summaries: Whether to return self record summaries.
         table_record_summary_templates: A dict of record summary templates, per table.
     """
@@ -75,6 +82,7 @@ def get_record_from_table(
         'get_record_from_table',
         table_oid,
         record_id,
+        _json_or_none(joined_columns),
         return_record_summaries,
         _json_or_none(table_record_summary_templates),
     ).fetchone()[0]
@@ -126,6 +134,7 @@ def list_by_record_summaries(
     offset=0,
     search=None,
     table_record_summary_templates=None,
+    linked_record_path=None,
 ):
     result = db_conn.exec_msar_func(
         conn,
@@ -135,6 +144,7 @@ def list_by_record_summaries(
         offset,
         search,
         _json_or_none(table_record_summary_templates),
+        _json_or_none(linked_record_path),
     ).fetchone()[0]
     return result
 

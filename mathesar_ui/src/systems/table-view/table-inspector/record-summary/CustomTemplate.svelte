@@ -29,7 +29,7 @@
     templateConfig = templateConfig.withoutPart(key);
   }
 
-  function replacePart(key: number, part: string | number[]) {
+  function replacePart(key: number, part: string | string[]) {
     templateConfig = templateConfig.withPartReplaced(key, part);
   }
 

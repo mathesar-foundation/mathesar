@@ -1,4 +1,5 @@
-import { type Writable, writable } from 'svelte/store';
+import { type Writable, get, writable } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
@@ -15,8 +16,8 @@ export default class RecordStore {
 
   fetchRequest = writable<RequestStatus | undefined>(undefined);
 
-  /** Keys are column ids */
-  fieldValues = new WritableMap<number, unknown>();
+  /** Keys are column ids (as strings) */
+  fieldValues = new WritableMap<string, unknown>();
 
   recordSummaries = new AssociatedCellData<string>();
 
@@ -48,7 +49,7 @@ export default class RecordStore {
   private updateSelfWithApiResponseData(response: RecordsResponse): void {
     const result = response.results[0];
     this.fieldValues.reconstruct(
-      Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
+      Object.entries(result).map(([k, v]) => [k, v]),
     );
     this.summary.set(response.record_summaries?.[this.recordPk] ?? '');
     if (response.linked_record_summaries) {
@@ -73,6 +74,11 @@ export default class RecordStore {
           return_record_summaries: true,
         })
         .run();
+      if (response.count === 0) {
+        throw new Error(
+          get(_)('record_not_found', { values: { id: this.recordPk } }),
+        );
+      }
       this.updateSelfWithApiResponseData(response);
       this.fetchRequest.set({ state: 'success' });
     } catch (error) {

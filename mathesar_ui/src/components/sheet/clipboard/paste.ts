@@ -2,12 +2,20 @@ import { arrayFrom, cycle, execPipe, first, map, take, zip } from 'iter-tools';
 import { type Writable, get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { type RecordRow, getRowSelectionId } from '@mathesar/stores/table-data';
 import type {
   RowAdditionRecipe,
   RowModificationRecipe,
 } from '@mathesar/stores/table-data/records';
+import {
+  DateTimeFormatter,
+  DateTimeSpecification,
+} from '@mathesar/utils/date-time';
+import type { DateTimeConfig } from '@mathesar/utils/date-time/DateTimeSpecification';
 import { startingFrom } from '@mathesar/utils/iterUtils';
 import {
   type ImmutableSet,
@@ -16,7 +24,7 @@ import {
 
 import type SheetSelection from '../selection/SheetSelection';
 
-import { MIME_MATHESAR_SHEET_CLIPBOARD, MIME_PLAIN_TEXT } from './constants';
+import { MIME_PLAIN_TEXT } from './constants';
 import {
   type StructuredCell,
   validateStructuredCellRows,
@@ -30,10 +38,10 @@ export interface PastingContext {
   getSheetColumns: () => RawColumnWithMetadata[];
   getRecordRows: () => RecordRow[];
   confirm: (message: string) => Promise<boolean>;
-  bulkDml: (
-    modificationRecipes: RowModificationRecipe[],
-    additionRecipes?: RowAdditionRecipe[],
-  ) => Promise<{ rowIds: string[]; columnIds: string[] }>;
+  bulkDml: (args: {
+    modificationRecipes: RowModificationRecipe[];
+    additionRecipes: RowAdditionRecipe[];
+  }) => Promise<{ rowIds: string[]; columnIds: string[] }>;
 }
 
 interface TsvCell {
@@ -52,11 +60,27 @@ type PayloadCell = TsvCell | MathesarCell;
 type Payload = PayloadCell[][];
 
 function getPayload(clipboardData: DataTransfer): Payload {
-  const mathesarData = clipboardData.getData(MIME_MATHESAR_SHEET_CLIPBOARD);
-  if (mathesarData) {
-    const rows = validateStructuredCellRows(JSON.parse(mathesarData));
-    if (rows.length === 0) throw new Error(get(_)('paste_error_empty'));
-    return rows.map((row) => row.map((value) => ({ type: 'mathesar', value })));
+  const htmlData = clipboardData.getData('text/html');
+  if (htmlData) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlData, 'text/html');
+    const table = doc.querySelector('table[data-mathesar-content]');
+    if (table) {
+      const content = table.getAttribute('data-mathesar-content');
+      if (content) {
+        try {
+          const structuredData = decodeURIComponent(content);
+          const rows = validateStructuredCellRows(JSON.parse(structuredData));
+          if (rows.length > 0) {
+            return rows.map((row) =>
+              row.map((value) => ({ type: 'mathesar', value })),
+            );
+          }
+        } catch {
+          // fall through to plain text if structured data is malformed
+        }
+      }
+    }
   }
 
   const textData = clipboardData.getData(MIME_PLAIN_TEXT);
@@ -99,6 +123,40 @@ function getDestinationColumns(
   return sheetColumns.slice(firstIndex, lastIndex + 1);
 }
 
+/**
+ * For date/datetime/time columns, parse the TSV value using DateTimeFormatter
+ * to ensure it respects the column's format metadata (e.g., European date
+ * format). This mirrors the behavior of edit-mode parsing.
+ */
+function makeDateTimeValueParser(config: DateTimeConfig) {
+  const formatter = new DateTimeFormatter(new DateTimeSpecification(config));
+  return (value: string): string => formatter.parse(value).value ?? value;
+}
+
+function getTsvValueParser(
+  column: RawColumnWithMetadata,
+): ((v: string) => string) | undefined {
+  const dateFormat = getColumnMetadataValue(column, 'date_format');
+  const timeFormat = getColumnMetadataValue(column, 'time_format');
+
+  if (column.type === 'date') {
+    return makeDateTimeValueParser({ type: 'date', dateFormat });
+  }
+  if (column.type === 'time') {
+    return makeDateTimeValueParser({ type: 'time', timeFormat });
+  }
+  if (column.type === 'timestamp') {
+    const type = 'timestamp';
+    return makeDateTimeValueParser({ type, dateFormat, timeFormat });
+  }
+  if (column.type === 'timestamptz') {
+    const type = 'timestampWithTZ';
+    return makeDateTimeValueParser({ type, dateFormat, timeFormat });
+  }
+
+  return undefined;
+}
+
 function prepareStructuredCellValue(
   column: RawColumnWithMetadata,
   cell: PayloadCell,
@@ -108,7 +166,13 @@ function prepareStructuredCellValue(
     // assume that empty strings are NULLs.
     if (cell.value === '' && column.nullable) return null;
 
-    return cell.value;
+    const parse = getTsvValueParser(column);
+    if (!parse) return cell.value;
+    try {
+      return parse(cell.value);
+    } catch {
+      return cell.value;
+    }
   }
 
   if (cell.type === 'mathesar') {
@@ -210,10 +274,10 @@ async function updateViaPaste({
     if (!confirmed) return;
   }
 
-  const { rowIds, columnIds } = await context.bulkDml(
+  const { rowIds, columnIds } = await context.bulkDml({
     modificationRecipes,
     additionRecipes,
-  );
+  });
 
   // Note: When we call `context.bulkDml` the selection store might end up
   // getting updated. This happens if rows are inserted (because a new Plane

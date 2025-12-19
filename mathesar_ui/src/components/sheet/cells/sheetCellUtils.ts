@@ -2,8 +2,8 @@ import { type Readable, derived } from 'svelte/store';
 
 import { type ColumnPosition, getSheetContext } from '../utils';
 
-export function getSheetColumnPosition<ColumnIdentifierKey>(
-  columnIdentifierKey: ColumnIdentifierKey,
+export function getSheetColumnPosition(
+  columnIdentifierKey: string,
 ): Readable<ColumnPosition | undefined> {
   const { stores } = getSheetContext();
   const { columnStyleMap } = stores;
@@ -13,8 +13,8 @@ export function getSheetColumnPosition<ColumnIdentifierKey>(
   });
 }
 
-export function getSheetCellStyle<ColumnIdentifierKey>(
-  columnIdentifierKey: ColumnIdentifierKey,
+export function getSheetCellStyle(
+  columnIdentifierKey: string,
 ): Readable<string | undefined> {
   return derived(
     getSheetColumnPosition(columnIdentifierKey),

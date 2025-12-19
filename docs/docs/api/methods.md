@@ -179,7 +179,9 @@
       - Group
       - GroupingResponse
       - SearchParam
+      - RecordSummaryMapping
       - RecordSummaryList
+      - LinkedRecordPath
       - SummarizedRecordReference
 
 ## Roles
