@@ -90,7 +90,7 @@ def transfer_ownership(*, schema_oid: int, new_owner_oid: int, database_id: int,
     """
     Transfers ownership of a given schema to a new owner.
 
-    Attributes:
+    Args:
         schema_oid: The OID of the schema to transfer.
         new_owner_oid: The OID of the role whom we want to be the new owner of the schema.
 

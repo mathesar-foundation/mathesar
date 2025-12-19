@@ -11,6 +11,7 @@ import type {
 } from '@mathesar/api/rpc/columns';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
+import { batchRun } from '@mathesar/packages/json-rpc-client-builder';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import {
   type CancellablePromise,
@@ -162,25 +163,29 @@ export class ColumnsDataStore extends EventHandler<{
   }
 
   async setDisplayOptions(
-    column: Pick<RawColumnWithMetadata, 'id'>,
-    displayOptions: ColumnMetadata | null,
+    /** Key is column id, value is display options */
+    changes: Map<number, ColumnMetadata | null>,
   ): Promise<void> {
-    await api.columns.metadata
-      .set({
-        ...this.apiContext,
-        column_meta_data_list: [{ attnum: column.id, ...displayOptions }],
-      })
-      .run();
+    if (!changes.size) {
+      return;
+    }
+
+    const { apiContext } = this;
+    function* getApiRequests() {
+      for (const [columnId, displayOptions] of changes.entries()) {
+        yield api.columns.metadata.set({
+          ...apiContext,
+          column_meta_data_list: [{ attnum: columnId, ...displayOptions }],
+        });
+      }
+    }
+    await batchRun([...getApiRequests()]);
 
     this.fetchedColumns.update((columns) =>
-      columns.map((c) =>
-        c.id === column.id
-          ? {
-              ...c,
-              metadata: { ...c.metadata, ...displayOptions },
-            }
-          : c,
-      ),
+      columns.map((column) => {
+        const metadata = changes.get(column.id);
+        return metadata === undefined ? column : { ...column, metadata };
+      }),
     );
   }
 

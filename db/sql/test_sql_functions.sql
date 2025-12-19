@@ -102,26 +102,10 @@ CREATE OR REPLACE FUNCTION test_drop_table_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_tables();
   PERFORM msar.drop_table(
-    sch_name => 'public',
-    tab_name => 'dropme',
-    cascade_ => false,
-    if_exists => false
+    tab_id => 'dropme'::regclass::oid,
+    cascade_ => false
   );
   RETURN NEXT hasnt_table('dropme', 'Drops table');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_table_name_missing_if_exists() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_drop_tables();
-  PERFORM msar.drop_table(
-    sch_name => 'public',
-    tab_name => 'dropmenew',
-    cascade_ => false,
-    if_exists => true
-  );
-  RETURN NEXT has_table('dropme', 'Drops table with IF EXISTS');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -129,9 +113,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_table_name_missing_no_if_exists() RETURNS SETOF TEXT AS $$
 BEGIN
   RETURN NEXT throws_ok(
-    'SELECT msar.drop_table(''public'', ''doesntexist'', false, false);',
+    'SELECT msar.drop_table(''doesntexist''::regclass::oid, false);',
     '42P01',
-    'table "doesntexist" does not exist',
+    'relation "doesntexist" does not exist',
     'Table dropper throws for missing table'
   );
 END;
@@ -417,9 +401,9 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_is_null('add_col_testable', 'Column 4');
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'text');
-  RETURN NEXT col_hasnt_default('add_col_testable', 'Column 4');
+  RETURN NEXT col_is_null('add_col_testable', 'Column');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'text');
+  RETURN NEXT col_hasnt_default('add_col_testable', 'Column');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -457,8 +441,8 @@ BEGIN
   RETURN NEXT is(
     msar.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4, 5}'::smallint[]
   );
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'text');
-  RETURN NEXT col_type_is('add_col_testable', 'Column 5', 'numeric');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'text');
+  RETURN NEXT col_type_is('add_col_testable', 'Column 1', 'numeric');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -469,8 +453,8 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric');
-  RETURN NEXT col_default_is('add_col_testable', 'Column 4', 3.14159);
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric');
+  RETURN NEXT col_default_is('add_col_testable', 'Column', 3.14159);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -481,7 +465,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,0)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric(3,0)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -494,7 +478,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,2)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric(3,2)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -505,7 +489,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -516,7 +500,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'character varying(128)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'character varying(128)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -526,7 +510,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval(6)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval(6)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -537,7 +521,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval year');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval year');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -550,7 +534,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval second(3)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval second(3)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -563,7 +547,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp(3) without time zone');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'timestamp(3) without time zone');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -577,9 +561,9 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => true);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp without time zone');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'timestamp without time zone');
   RETURN NEXT col_default_is(
-    'add_col_testable', 'Column 4', '(now())::timestamp without time zone'
+    'add_col_testable', 'Column', '(now())::timestamp without time zone'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -1772,10 +1756,8 @@ BEGIN
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 1'::name);
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 2'::name);
   PERFORM msar.drop_table(
-    sch_name => 'tab_create_schema',
-    tab_name => 'Table 1',
-    cascade_ => false,
-    if_exists => false
+    tab_id => 'tab_create_schema."Table 1"'::regclass::oid,
+    cascade_ => false
   );
   RETURN NEXT hasnt_table('tab_create_schema'::name, 'Table 1'::name);
   PERFORM msar.add_mathesar_table(
@@ -1979,6 +1961,205 @@ BEGIN
   );
   RETURN NEXT is(response -> 'renamed_columns', '{}'::jsonb);
   RETURN NEXT is((response ->> 'pkey_column_attnum')::integer, 1);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+-- msar.prepare_temp_table_for_import -------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_prepare_temp_table_multiple_id_cols()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+  tmp_tab_oid oid;
+BEGIN
+  response := msar.prepare_temp_table_for_import(
+    tab_name := 'tmp_multi_id',
+    col_names := ARRAY['id', 'id', 'id', 'other']
+  );
+
+  -- id columns are renamed to 'Column 1', 'Column 2' and 'Column 3' respectively.
+  RETURN NEXT has_column('tmp_multi_id', 'Column 1');
+  RETURN NEXT has_column('tmp_multi_id', 'Column 2');
+  RETURN NEXT has_column('tmp_multi_id', 'Column 3');
+  RETURN NEXT has_column('tmp_multi_id', 'other');
+
+  RETURN NEXT alike(
+    response ->> 'copy_sql',
+    'COPY pg_temp_%.tmp_multi_id("Column 1", "Column 2", "Column 3", other) FROM STDIN'
+  );
+  SELECT oid INTO tmp_tab_oid FROM pg_catalog.pg_class WHERE relname = 'tmp_multi_id';
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid,
+    tmp_tab_oid
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_prepare_temp_table_with_tab_name()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+  tmp_tab_oid oid;
+BEGIN
+  response := msar.prepare_temp_table_for_import(
+    tab_name := 'tmp_explicit_table',
+    col_names := ARRAY['col1','col2']
+  );
+
+  RETURN NEXT has_column('tmp_explicit_table', 'col1');
+  RETURN NEXT has_column('tmp_explicit_table', 'col2');
+
+  RETURN NEXT alike(
+    response ->> 'copy_sql',
+    'COPY pg_temp_%.tmp_explicit_table(col1, col2) FROM STDIN'
+  );
+  SELECT oid INTO tmp_tab_oid FROM pg_catalog.pg_class WHERE relname = 'tmp_explicit_table';
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid,
+    tmp_tab_oid
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_prepare_temp_table_without_tab_name()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  response jsonb;
+  tmp_tab_oid oid;
+BEGIN
+  response := msar.prepare_temp_table_for_import(
+    tab_name := null,
+    col_names := ARRAY['col1','col2']
+  );
+
+  RETURN NEXT has_column('Temp Table 1', 'col1');
+  RETURN NEXT has_column('Temp Table 1', 'col2');
+
+  RETURN NEXT alike(
+    response ->> 'copy_sql',
+    'COPY pg_temp_%.\"Temp Table 1\"(col1, col2) FROM STDIN'
+  );
+  SELECT oid INTO tmp_tab_oid FROM pg_catalog.pg_class WHERE relname = 'Temp Table 1';
+  RETURN NEXT is(
+    (response ->> 'table_oid')::oid,
+    tmp_tab_oid
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+-- msar.insert_from_select -----------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_insert_from_select() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TEMPORARY TABLE src (
+    text_col text, -- 1
+    email_col text, -- 2
+    numeric_col text, -- 3
+    money_col text, -- 4 
+    bool_col text, -- 5
+    num_col text -- 6
+  );
+  INSERT INTO src VALUES 
+    ('100', 'test@example.com', '123.45', '$50.00', 'true', '1'),
+    ('200', 'user@test.org', '678.90', '$100.50', 'false', '2');
+
+  CREATE TABLE dest (
+    id integer, -- 1
+    value integer, -- 2
+    is_active boolean, -- 3
+    amount numeric, -- 4
+    email mathesar_types.email, -- 5
+    price mathesar_types.mathesar_money -- 6
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_from_select_success() RETURNS SETOF TEXT AS $f$
+DECLARE
+  insert_count bigint;
+  records jsonb;
+BEGIN
+  PERFORM __setup_insert_from_select();
+  SELECT msar.insert_from_select(
+    src_tab_id := 'src'::regclass,
+    dst_tab_id := 'dest'::regclass,
+    mappings := jsonb_build_array(
+      jsonb_build_object('src_table_attnum', 6, 'dst_table_attnum', 1),
+      jsonb_build_object('src_table_attnum', 1, 'dst_table_attnum', 2),
+      jsonb_build_object('src_table_attnum', 5, 'dst_table_attnum', 3),
+      jsonb_build_object('src_table_attnum', 3, 'dst_table_attnum', 4),
+      jsonb_build_object('src_table_attnum', 2, 'dst_table_attnum', 5),
+      jsonb_build_object('src_table_attnum', 4, 'dst_table_attnum', 6)
+    )
+  ) INTO insert_count;
+
+  RETURN NEXT is(insert_count, 2::bigint);
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => 'dest'::regclass::oid,
+      limit_ => NULL,
+      offset_ => NULL,
+      order_ => NULL,
+      filter_ => NULL,
+      group_ => NULL
+    ) -> 'results',
+    $j$[
+      {
+        "1": 1, "2": 100, "3": true, "4": 123.45, "5": "test@example.com", "6": 50.00
+      },
+      {
+        "1": 2, "2": 200, "3": false, "4": 678.90, "5": "user@test.org", "6": 100.50
+      }
+    ]$j$::jsonb, 'insert_from_select() succeeds with appropriate type casts'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_from_select_failure() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_insert_from_select();
+  /* Invaid mappings, as the type of src col can't be type casted to dest col type */
+  RETURN NEXT throws_ok(
+    $$SELECT msar.insert_from_select(
+      src_tab_id := 'src'::regclass,
+      dst_tab_id := 'dest'::regclass,
+      mappings := jsonb_build_array(
+        jsonb_build_object('src_table_attnum', 3, 'dst_table_attnum', 5)
+      )
+    )$$,
+    '23514',
+    'value for domain mathesar_types.email violates check constraint "email_check"'
+  );
+
+  RETURN NEXT throws_ok(
+    $$SELECT msar.insert_from_select(
+      src_tab_id := 'src'::regclass,
+      dst_tab_id := 'dest'::regclass,
+      mappings := jsonb_build_array(
+        jsonb_build_object('src_table_attnum', 3, 'dst_table_attnum', 2)
+      ) 
+    )$$,
+    '22P02',
+    'invalid input syntax for type integer: "123.45"'
+  );
+
+  RETURN NEXT throws_ok(
+    $$SELECT msar.insert_from_select(
+      src_tab_id := 'src'::regclass,
+      dst_tab_id := 'dest'::regclass,
+      mappings := jsonb_build_array(
+        jsonb_build_object('src_table_attnum', 1, 'dst_table_attnum', 3)
+      )
+    )$$,
+    'P0001',
+    '100 is not a boolean'
+  );
 END;
 $f$ LANGUAGE plpgsql;
 

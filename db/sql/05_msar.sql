@@ -101,41 +101,6 @@ $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.exec_ddl(command text) RETURNS text AS $$/*
-Execute the given command, returning the command executed.
-
-Not useful for SELECTing from tables. Most useful when you're performing DDL.
-
-Args:
-  command: Raw string that will be executed as a command.
-*/
-BEGIN
-  EXECUTE command;
-  RETURN command;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-__msar.exec_ddl(command_template text, arguments variadic anyarray) RETURNS text AS $$/*
-Execute a templated command, returning the command executed.
-
-The template is given in the first argument, and all further arguments are used to fill in the
-template. Not useful for SELECTing from tables. Most useful when you're performing DDL.
-
-Args:
-  command_template: Raw string that will be executed as a command.
-  arguments: arguments that will be used to fill in the template.
-*/
-DECLARE formatted_command TEXT;
-BEGIN
-  formatted_command := format(command_template, VARIADIC arguments);
-  RETURN __msar.exec_ddl(formatted_command);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 __msar.build_text_tuple(text[]) RETURNS text AS $$
 SELECT '(' || string_agg(col, ', ') || ')' FROM unnest($1) x(col);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
@@ -2154,7 +2119,52 @@ CREATE TYPE __msar.col_def AS (
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_fresh_copy_name(tab_id oid, col_id smallint) RETURNS text AS $$/*
+msar.build_unique_column_name(tab_id regclass, base text, idx integer) RETURNS text AS $$/*
+This function creates a version of the given `base` column name which is unique in a table.
+
+Given an original column name 'abc', the resulting copies will be named 'abc <n>', where <n> is
+minimal (at least 1) subject to the restriction that 'abc <n>' is not already a column of the table
+given. The given idx is attempted as a suffix to make the column name unique. If the result isn't
+unique after all, it's incremented by further calls.
+
+Args:
+  tab_id: the table for which we'll generate a column name.
+  base: the original column name we'll use to build a unique name.
+  idx: an integer to use as a suffix for making the name unique.
+*/
+  SELECT CASE
+    WHEN NOT EXISTS(
+      SELECT 1 FROM pg_catalog.pg_attribute pga
+      WHERE attrelid=tab_id AND attname=concat(base, ' ', idx)
+    ) THEN concat(base, ' ', idx)
+    ELSE msar.build_unique_column_name(tab_id, base, idx + 1)
+  END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unique_column_name(tab_id regclass, base text) RETURNS text AS $$ /*
+This function creates a version of the given `base` column name which is unique in a table.
+
+Given an original column name 'abc', the resulting copies will be named 'abc <n>', where <n> is
+minimal (at least 1) subject to the restriction that 'abc <n>' is not already a column of the table
+given.
+
+Args:
+  tab_id: the table for which we'll generate a column name.
+  base: the original column name we'll use to build a unique name.
+*/
+  SELECT CASE
+    WHEN NOT EXISTS(
+      SELECT 1 FROM pg_catalog.pg_attribute pga WHERE attrelid=tab_id AND attname=base
+    ) THEN base
+    ELSE msar.build_unique_column_name(tab_id, base, 1)
+  END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unique_column_name(tab_id oid, col_id smallint) RETURNS text AS $$/*
 This function generates a name to be used for a duplicated column.
 
 Given an original column name 'abc', the resulting copies will be named 'abc <n>', where <n> is
@@ -2165,79 +2175,10 @@ Args:
   tab_id: the table for which we'll generate a column name.
   col_id: the original column whose name we'll use as the prefix in our copied column name.
 */
-DECLARE
-  original_col_name text;
-  idx integer := 1;
-BEGIN
-  original_col_name := attname FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
-  WHILE format('%s %s', original_col_name, idx) IN (
-    SELECT attname FROM pg_attribute WHERE attrelid=tab_id
-  ) LOOP
-    idx = idx + 1;
-  END LOOP;
-  RETURN format('%s %s', original_col_name, idx);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION __msar.get_duplicate_col_defs(
-  tab_id oid,
-  col_ids smallint[],
-  new_names text[],
-  copy_defaults boolean
-) RETURNS __msar.col_def[] AS $$/*
-Get an array of __msar.col_def from given columns in a table.
-
-Args:
-  tab_id: The OID of the table containing the column whose definition we want.
-  col_ids: The attnums of the columns whose definitions we want.
-  new_names: The desired names of the column defs. Must be in same order as col_ids, and same
-    length.
-  copy_defaults: Whether or not we should copy the defaults
-*/
-SELECT array_agg(
-  (
-    -- build a name for the duplicate column
-    quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, pg_columns.attnum))),
-    -- build text specifying the type of the duplicate column
-    format_type(atttypid, atttypmod),
-    -- set the duplicate column to be nullable, since it will initially be empty
-    false,
-    -- set the default value for the duplicate column if specified
-    CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END,
-    -- We don't set a duplicate column as a primary key, since that would cause an error.
-    null,
-    msar.col_description(tab_id, pg_columns.attnum)
-  )::__msar.col_def
-)
-FROM pg_attribute AS pg_columns
-  JOIN unnest(col_ids, new_names) AS columns_to_copy(col_id, new_name)
-    ON pg_columns.attnum=columns_to_copy.col_id
-  LEFT JOIN pg_attrdef AS pg_column_defaults
-    ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
-WHERE pg_columns.attrelid=tab_id;
-$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.build_unique_column_name(tab_id oid, col_name text) RETURNS text AS $$/*
-Get a unique column name based on the given name.
-
-Args:
-  tab_id: The OID of the table where the column name should be unique.
-  col_name: The resulting column name will be equal to or at least based on this.
-
-See the msar.get_fresh_copy_name function for how unique column names are generated.
-*/
-DECLARE
-  col_attnum smallint;
-BEGIN
-  col_attnum := msar.get_attnum(tab_id, col_name);
-  RETURN CASE
-    WHEN col_attnum IS NOT NULL THEN msar.get_fresh_copy_name(tab_id, col_attnum) ELSE col_name
-  END;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+  SELECT msar.build_unique_column_name(tab_id, attname)
+  FROM pg_catalog.pg_attribute pga
+  WHERE attrelid=tab_id AND attnum=col_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -2586,6 +2527,64 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
+msar.add_column(tab_id regclass, col_def jsonb, raw_default boolean DEFAULT false)
+  RETURNS smallint AS $$/*
+Add a column to a table.
+
+Args:
+  tab_id: The OID of the table where we'll create the columns.
+  col_def: An object defining the new column. See below for details.
+  raw_default: This boolean tells us whether we chould reproduce the default with or without quoting
+               and escaping. True means we don't quote or escape, but just use the raw value.
+
+Returns:
+  The attnum of the newly created column.
+
+
+col_def should have the form:
+  {
+    "name": <str> (optional),
+    "type": {
+      "name": <str> (optional),
+      "options": <obj> (optional),
+    },
+    "not_null": <bool> (optional; default false),
+    "default": <any> (optional),
+    "description": <str> (optional)
+  }
+*/
+DECLARE
+  unique_col_name text;
+  sanitized_default text;
+  created_attnum smallint;
+BEGIN
+  unique_col_name = msar.build_unique_column_name(tab_id, coalesce(col_def ->> 'name', 'Column'));
+  sanitized_default = CASE
+    WHEN col_def ->> 'default' IS NULL THEN null
+    WHEN raw_default THEN col_def ->> 'default'
+    ELSE format('%L', col_def ->> 'default')
+  END;
+  EXECUTE format(
+    'ALTER TABLE %1$I.%2$I ADD COLUMN %3$I %4$s %5$s %6$s',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    unique_col_name,
+    msar.build_type_text(col_def -> 'type'),
+    CASE WHEN (col_def -> 'not_null')::boolean THEN 'NOT NULL' END,
+    'DEFAULT ' || sanitized_default
+  );
+  created_attnum = attnum
+    FROM pg_catalog.pg_attribute
+    WHERE attrelid = tab_id AND attname = unique_col_name;
+  IF col_def ? 'description' THEN
+    PERFORM msar.comment_on_column(tab_id, created_attnum, col_def ->> 'description');
+  END IF;
+  RETURN created_attnum;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.add_pkey_column(
   tab_id regclass,
   pkey_type msar.pkey_kind,
@@ -2678,25 +2677,6 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.add_columns(tab_name text, col_defs variadic __msar.col_def[]) RETURNS text AS $$/*
-Add the given columns to the given table.
-
-Args:
-  tab_name: Fully-qualified, quoted table name.
-  col_defs: The columns to be added.
-*/
-WITH ca_cte AS (
-  SELECT string_agg(
-    'ADD COLUMN ' || __msar.build_col_def_text(col),
-      ', '
-    ) AS col_additions
-  FROM unnest(col_defs) AS col
-)
-SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, col_additions) FROM ca_cte;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.add_columns(tab_id oid, col_defs jsonb, raw_default boolean DEFAULT false)
   RETURNS smallint[] AS $$/*
 Add columns to a table.
@@ -2706,28 +2686,12 @@ Args:
   col_defs: a JSONB array defining columns to add. See __msar.process_col_def_jsonb for details.
   raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
-DECLARE
-  col_create_defs __msar.col_def[];
-  fq_table_name text := __msar.get_qualified_relation_name(tab_id);
-BEGIN
-  col_create_defs := __msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
-  PERFORM __msar.add_columns(fq_table_name, variadic col_create_defs);
-
-  PERFORM
-  __msar.comment_on_column(
-      fq_table_name,
-      col_create_def.name_,
-      col_create_def.description
-    )
-  FROM unnest(col_create_defs) AS col_create_def
-  WHERE col_create_def.description IS NOT NULL;
-
-  RETURN array_agg(attnum)
-    FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
-    INNER JOIN unnest(col_create_defs) R
-    ON quote_ident(L.attname) = R.name_;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+  WITH perf_cte AS (
+    SELECT msar.add_column(tab_id, col_def, raw_default) AS attnum
+    FROM jsonb_array_elements(col_defs) AS col_def
+  )
+  SELECT array_agg(attnum) FROM perf_cte;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -2898,12 +2862,18 @@ Args:
   tab_name: Fully-qualified, quoted table name.
   con_defs: The constraints to be added.
 */
-WITH con_cte AS (
-  SELECT string_agg('ADD ' || __msar.build_con_def_text(con), ', ') as con_additions
-  FROM unnest(con_defs) as con
-)
-SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, con_additions) FROM con_cte;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+DECLARE
+  add_con_sql text;
+BEGIN
+  WITH con_cte AS (
+    SELECT string_agg('ADD ' || __msar.build_con_def_text(con), ', ') as con_additions
+    FROM unnest(con_defs) as con
+  )
+  SELECT format('ALTER TABLE %s %s', tab_name, con_additions) INTO add_con_sql FROM con_cte;
+  EXECUTE add_con_sql;
+  RETURN add_con_sql;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -2931,24 +2901,6 @@ CREATE TYPE __msar.not_null_def AS (
   col_name text, -- The column to be modified, quoted.
   not_null boolean -- The value to set for null or not null.
 );
-
-
-CREATE OR REPLACE FUNCTION
-__msar.set_not_nulls(tab_name text, not_null_defs __msar.not_null_def[]) RETURNS TEXT AS $$/*
-Set or drop not null constraints on columns
-*/
-WITH not_null_cte AS (
-  SELECT string_agg(
-    CASE
-      WHEN not_null_def.not_null=true THEN format('ALTER %s SET NOT NULL', not_null_def.col_name)
-      WHEN not_null_def.not_null=false THEN format ('ALTER %s DROP NOT NULL', not_null_def.col_name)
-    END,
-    ', '
-  ) AS not_nulls
-  FROM unnest(not_null_defs) as not_null_def
-)
-SELECT __msar.exec_ddl('ALTER TABLE %s %s', tab_name, not_nulls) FROM not_null_cte;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -2994,19 +2946,28 @@ DECLARE
   col_name text;
   created_col_id smallint;
 BEGIN
-  col_defs := __msar.get_duplicate_col_defs(
-    tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
-  );
-  tab_name := __msar.get_qualified_relation_name(tab_id);
-  col_name := quote_ident(msar.get_column_name(tab_id, col_id));
-  PERFORM __msar.add_columns(tab_name, VARIADIC col_defs);
-  created_col_id := attnum
-    FROM pg_attribute
-    WHERE attrelid=tab_id AND quote_ident(attname)=col_defs[1].name_;
+  created_col_id = msar.add_column(
+    tab_id,
+    jsonb_build_object(
+      'name', coalesce(copy_name, msar.build_unique_column_name(tab_id, col_id)),
+      'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
+      'not_null', false,  -- Required since the column will initially be empty.
+      'default', CASE WHEN copy_data THEN pg_get_expr(adbin, tab_id) END,
+      'description', msar.col_description(tab_id, attnum)
+    ),
+    raw_default => true
+  )
+    FROM pg_catalog.pg_attribute LEFT JOIN pg_catalog.pg_attrdef
+      ON adnum=attnum AND adrelid=attrelid
+    WHERE attrelid=tab_id AND attnum=col_id;
+
   IF copy_data THEN
-    PERFORM __msar.exec_ddl(
-      'UPDATE %s SET %s=%s',
-      tab_name, col_defs[1].name_, quote_ident(msar.get_column_name(tab_id, col_id))
+    EXECUTE format(
+      'UPDATE %I.%I SET %I=%I',
+      msar.get_relation_schema_name(tab_id),
+      msar.get_relation_name(tab_id),
+      msar.get_column_name(tab_id, created_col_id),
+      msar.get_column_name(tab_id, col_id)
     );
   END IF;
   IF copy_constraints THEN
@@ -3065,33 +3026,6 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 -- Drop table --------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.drop_table(tab_name text, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
-Drop a table, returning the command executed.
-
-Args:
-  tab_name: The qualified, quoted name of the table we will drop.
-  cascade_: Whether to add CASCADE.
-  if_exists_: Whether to ignore an error if the table doesn't exist
-*/
-DECLARE
-  cmd_template TEXT;
-BEGIN
-  IF if_exists
-  THEN
-    cmd_template := 'DROP TABLE IF EXISTS %s';
-  ELSE
-    cmd_template := 'DROP TABLE %s';
-  END IF;
-  IF cascade_
-  THEN
-    cmd_template = cmd_template || ' CASCADE';
-  END IF;
-  RETURN __msar.exec_ddl(cmd_template, tab_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.drop_table(tab_id oid, cascade_ boolean) RETURNS text AS $$/*
 Drop a table, returning the fully qualified name of the dropped table.
 
@@ -3099,33 +3033,20 @@ Args:
   tab_id: The OID of the table to drop
   cascade_: Whether to drop dependent objects.
 */
-DECLARE relation_name text;
+DECLARE
+  relation_name text;
 BEGIN
-  relation_name := __msar.get_qualified_relation_name_or_null(tab_id);
-  -- if_exists doesn't work while working with oids because
-  -- the SQL query gets parameterized with tab_id instead of relation_name
-  -- since we're unable to find the relation_name for a non existing table.
-  PERFORM __msar.drop_table(relation_name, cascade_, if_exists => false);
+  relation_name := format(
+    '%I.%I',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id)
+  );
+  EXECUTE format(
+    'DROP TABLE %s %s',
+    relation_name,
+    CASE WHEN cascade_ THEN 'CASCADE' ELSE '' END
+  );
   RETURN relation_name;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_table(sch_name text, tab_name text, cascade_ boolean, if_exists boolean)
-  RETURNS text AS $$/*
-Drop a table, returning the command executed.
-
-Args:
-  sch_name: The schema of the table to drop.
-  tab_name: The name of the table to drop.
-  cascade_: Whether to drop dependent objects.
-  if_exists_: Whether to ignore an error if the table doesn't exist
-*/
-DECLARE qualified_tab_name text;
-BEGIN
-  qualified_tab_name := __msar.build_qualified_name_sql(sch_name, tab_name);
-  RETURN __msar.drop_table(qualified_tab_name, cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -3186,20 +3107,26 @@ Args:
 
 Note: Even if con_defs is null, there can be some column-level constraints set in col_defs.
 */
-WITH col_cte AS (
-  SELECT string_agg(__msar.build_col_def_text(col), ', ') AS table_columns
-  FROM unnest(col_defs) AS col
-), con_cte AS (
-  SELECT string_agg(__msar.build_con_def_text(con), ', ') AS table_constraints
-  FROM unnest(con_defs) as con
-)
-SELECT __msar.exec_ddl(
-  'CREATE TABLE %s (%s)',
-  tab_name,
-  concat_ws(', ', table_columns, table_constraints)
-)
-FROM col_cte, con_cte;
-$$ LANGUAGE SQL;
+DECLARE
+  add_tab_sql text;
+BEGIN
+  WITH col_cte AS (
+    SELECT string_agg(__msar.build_col_def_text(col), ', ') AS table_columns
+    FROM unnest(col_defs) AS col
+  ), con_cte AS (
+    SELECT string_agg(__msar.build_con_def_text(con), ', ') AS table_constraints
+    FROM unnest(con_defs) as con
+  )
+  SELECT format(
+    'CREATE TABLE %s (%s)',
+    tab_name,
+    concat_ws(', ', table_columns, table_constraints)
+  ) INTO add_tab_sql
+  FROM col_cte, con_cte;
+  EXECUTE add_tab_sql;
+  RETURN add_tab_sql;
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3419,7 +3346,7 @@ BEGIN
     END LOOP;
   END IF;
   column_defs := __msar.process_col_def_jsonb(0, col_defs, false);
-  PERFORM msar.add_temp_table(tab_name, column_defs);
+  PERFORM msar.add_temp_table(uq_tab_name, column_defs);
 
   SELECT nspname, pgc.oid INTO sch_name, rel_id
   FROM pg_catalog.pg_class AS pgc
@@ -3452,17 +3379,23 @@ Args:
   tab_name: An unqualified name for the table to be added.
   col_defs: An array of __msar.col_def defining the column set of the new table.
 */
-WITH col_cte AS (
-  SELECT string_agg(__msar.build_col_def_text(col), ', ') AS table_columns
-  FROM unnest(col_defs) AS col
-)
-SELECT __msar.exec_ddl(
-  'CREATE TEMPORARY TABLE %I (%s)',
-  tab_name,
-  table_columns
-)
-FROM col_cte;
-$$ LANGUAGE SQL;
+DECLARE
+  tmp_tab_sql text;
+BEGIN
+  WITH col_cte AS (
+    SELECT string_agg(__msar.build_col_def_text(col), ', ') AS table_columns
+    FROM unnest(col_defs) AS col
+  )
+  SELECT format(
+    'CREATE TEMPORARY TABLE %I (%s)',
+    tab_name,
+    table_columns
+  ) INTO tmp_tab_sql
+  FROM col_cte;
+  EXECUTE tmp_tab_sql;
+  RETURN tmp_tab_sql;
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3493,7 +3426,7 @@ DECLARE
 BEGIN
   SELECT
     string_agg(
-      __msar.build_cast_expr(
+      msar.build_cast_expr(
         quote_ident(src.attname),
         dst.atttypid::regclass::text,
         '{}'::jsonb
@@ -3577,7 +3510,7 @@ BEGIN
   WITH preview_cte AS (
     SELECT string_agg(
       'CAST(' ||
-      __msar.build_cast_expr(
+      msar.build_cast_expr(
         quote_ident(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer)),
         col_cast -> 'type' ->> 'name',
         coalesce(col_cast -> 'cast_options', '{}'::jsonb)
@@ -3608,27 +3541,6 @@ $$ LANGUAGE plpgsql;
 
 -- Rename columns ----------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION
-__msar.rename_column(tab_name text, old_col_name text, new_col_name text) RETURNS text AS $$/*
-Change a column name, returning the command executed
-
-Args:
-  tab_name: The qualified, quoted name of the table where we'll change a column name
-  old_col_name: The quoted name of the column to change.
-  new_col_name: The quoted new name for the column.
-*/
-DECLARE
-  cmd_template text;
-BEGIN
-  cmd_template := 'ALTER TABLE %s RENAME COLUMN %s TO %s';
-  IF old_col_name <> new_col_name THEN
-    RETURN __msar.exec_ddl(cmd_template, tab_name, old_col_name, new_col_name);
-  ELSE
-    RETURN null;
-  END IF;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 
 CREATE OR REPLACE FUNCTION
 msar.rename_column(tab_id oid, col_id integer, new_col_name text) RETURNS smallint AS $$/*
@@ -3639,18 +3551,27 @@ Args:
   col_id: The ID of the column to rename
   new_col_name: The unquoted new name for the column.
 */
+DECLARE
+  old_col_name text;
 BEGIN
-  PERFORM __msar.rename_column(
-    tab_name => __msar.get_qualified_relation_name(tab_id),
-    old_col_name => quote_ident(msar.get_column_name(tab_id, col_id)),
-    new_col_name => quote_ident(new_col_name)
-  );
-  RETURN col_id;
+  old_col_name := msar.get_column_name(tab_id, col_id);
+  IF old_col_name <> new_col_name THEN
+    EXECUTE format(
+      'ALTER TABLE %I.%I RENAME COLUMN %I TO %I',
+      msar.get_relation_schema_name(tab_id),
+      msar.get_relation_name(tab_id),
+      old_col_name,
+      new_col_name
+    );
+    RETURN col_id;
+  ELSE
+    RETURN null;
+  END IF;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION __msar.build_cast_expr(
+CREATE OR REPLACE FUNCTION msar.build_cast_expr(
   val text,
   type_ text,
   cast_options jsonb
@@ -3714,14 +3635,20 @@ Args:
   col_id: The attnum of the column whose nullability we'll alter.
   not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
 */
-  SELECT __msar.exec_ddl(
+DECLARE
+  not_null_sql text;
+BEGIN
+  SELECT format(
     'ALTER TABLE %I.%I ALTER COLUMN %I %s NOT NULL',
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     msar.get_column_name(tab_id, col_id),
     CASE WHEN not_null THEN 'SET' ELSE 'DROP' END
-  );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+  ) INTO not_null_sql;
+  EXECUTE not_null_sql;
+  RETURN not_null_sql;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3732,13 +3659,19 @@ Args:
   tab_id: The OID of the table where the column with the default to be dropped lives.
   col_id: The attnum of the column with the undesired default.
 */
-  SELECT __msar.exec_ddl(
+DECLARE
+  drop_col_default_sql text;
+BEGIN
+  SELECT format(
     'ALTER TABLE %I.%I ALTER COLUMN %I DROP DEFAULT',
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     msar.get_column_name(tab_id, col_id)
-  );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+  ) INTO drop_col_default_sql;
+  EXECUTE drop_col_default_sql;
+  RETURN drop_col_default_sql;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3750,14 +3683,20 @@ Args:
   col_id: The attnum of the column whose default we'll alter.
   default_: The desired default.
 */
-  SELECT __msar.exec_ddl(
+DECLARE
+  col_default_sql text;
+BEGIN
+  SELECT format(
     'ALTER TABLE %I.%I ALTER COLUMN %I SET DEFAULT %L',
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     msar.get_column_name(tab_id, col_id),
     default_
-  );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+  ) INTO col_default_sql;
+  EXECUTE col_default_sql;
+  RETURN col_default_sql;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3787,7 +3726,7 @@ BEGIN
   IF is_default_dynamic THEN
     default_ := format('%s::%s', old_default, new_type);
   ELSE
-    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type, cast_options)) INTO default_;
+    EXECUTE format('SELECT %s', msar.build_cast_expr(old_default, new_type, cast_options)) INTO default_;
     default_ := quote_literal(default_);
   END IF;
 
@@ -3814,15 +3753,21 @@ Args:
   new_type: The target type to which we'll alter the column.
   cast_options: Suggestions to be used while type casting.
 */
-  SELECT __msar.exec_ddl(
+DECLARE
+  retype_col_sql text;
+BEGIN
+  SELECT format(
     'ALTER TABLE %I.%I ALTER COLUMN %I TYPE %s USING %s',
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     msar.get_column_name(tab_id, col_id),
     new_type,
-    __msar.build_cast_expr(quote_ident(msar.get_column_name(tab_id, col_id)), new_type, cast_options)
-  );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+    msar.build_cast_expr(quote_ident(msar.get_column_name(tab_id, col_id)), new_type, cast_options)
+  ) INTO retype_col_sql;
+  EXECUTE retype_col_sql;
+  RETURN retype_col_sql;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3918,95 +3863,32 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_column(
-  tab_name text,
-  col_name text,
+msar.comment_on_column(
+  tab_id oid,
+  col_id integer,
   comment_ text
 ) RETURNS text AS $$/*
-Change the description of a column, returning command executed. If comment_ is NULL, column's
-comment is removed.
+Change the description of a column, returning command executed.
 
 Args:
-  tab_name: The name of the table containg the column whose comment we will change.
-  col_name: The name of the column whose comment we'll change
-  comment_: The new comment. Any quotes or special characters must be escaped.
+  tab_id: The OID of the table containg the column whose comment we will change.
+  col_id: The ATTNUM of the column whose comment we will change.
+  comment_: The new comment.
 */
 DECLARE
-  comment_or_null text := COALESCE(comment_, 'NULL');
+  comment_sql text;
 BEGIN
-RETURN __msar.exec_ddl(
-  'COMMENT ON COLUMN %s.%s IS %s',
-  tab_name,
-  col_name,
-  comment_or_null
-);
+  SELECT format(
+    'COMMENT ON COLUMN %I.%I.%I IS %L',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id),
+    comment_
+  ) INTO comment_sql;
+  EXECUTE comment_sql;
+  RETURN comment_sql;
 END;
 $$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION
-msar.comment_on_column(
-  sch_name text,
-  tab_name text,
-  col_name text,
-  comment_ text
-) RETURNS text AS $$/*
-Change the description of a column, returning command executed.
-
-Args:
-  sch_name: The schema of the table whose column's comment we will change.
-  tab_name: The name of the table whose column's comment we will change.
-  col_name: The name of the column whose comment we will change.
-  comment_: The new comment.
-*/
-SELECT __msar.comment_on_column(
-  __msar.build_qualified_name_sql(sch_name, tab_name),
-  quote_ident(col_name),
-  quote_literal(comment_)
-);
-$$ LANGUAGE SQL;
-
-
-CREATE OR REPLACE FUNCTION
-__msar.comment_on_column(
-  tab_id oid,
-  col_id integer,
-  comment_ text
-) RETURNS text AS $$/*
-Change the description of a column, returning command executed.
-
-Args:
-  tab_id: The OID of the table containg the column whose comment we will change.
-  col_id: The ATTNUM of the column whose comment we will change.
-  comment_: The new comment.
-*/
-SELECT __msar.comment_on_column(
-  __msar.get_qualified_relation_name(tab_id),
-  quote_ident(msar.get_column_name(tab_id, col_id)),
-  comment_
-);
-$$ LANGUAGE SQL;
-
-
-CREATE OR REPLACE FUNCTION
-msar.comment_on_column(
-  tab_id oid,
-  col_id integer,
-  comment_ text
-) RETURNS text AS $$/*
-Change the description of a column, returning command executed.
-
-Args:
-  tab_id: The OID of the table containg the column whose comment we will change.
-  col_id: The ATTNUM of the column whose comment we will change.
-  comment_: The new comment.
-*/
-SELECT __msar.comment_on_column(
-  tab_id,
-  col_id,
-  quote_literal(comment_)
-);
-$$ LANGUAGE SQL;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -4152,7 +4034,7 @@ BEGIN
   -- Insert the data from the original table's columns into the extracted columns, and add
   -- appropriate fkey values to the new fkey column in the original table to give the proper
   -- mapping.
-  PERFORM __msar.exec_ddl($t$
+  EXECUTE format($t$
     WITH fkey_cte AS (
       SELECT id, %1$s, dense_rank() OVER (ORDER BY %1$s) AS __msar_tmp_id
       FROM %2$s

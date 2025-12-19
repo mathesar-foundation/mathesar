@@ -8,6 +8,7 @@
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'];
+  export let setValue: (newValue: $$Props['value']) => void;
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
@@ -20,7 +21,8 @@
 </script>
 
 <SteppedInputCell
-  bind:value
+  {value}
+  {setValue}
   {isActive}
   {disabled}
   highlightSubstringMatches={false}
@@ -28,21 +30,20 @@
   {showTruncationPopover}
   useTabularNumbers={true}
   let:handleInputBlur
-  let:handleInputKeydown
+  let:setValueInEditMode
   formatValue={formatForDisplay}
   on:movementKeyDown
   on:mouseenter
-  on:update
 >
   <DateTimeInput
     focusOnMount={true}
-    bind:value
+    {value}
     {type}
     {formattingString}
     {formatter}
     {timeShow24Hr}
     {timeEnableSeconds}
     on:blur={handleInputBlur}
-    on:keydown={handleInputKeydown}
+    on:artificialInput={({ detail }) => setValueInEditMode(detail)}
   />
 </SteppedInputCell>

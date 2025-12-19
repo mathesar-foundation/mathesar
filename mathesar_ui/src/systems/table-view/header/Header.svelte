@@ -12,7 +12,6 @@
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
-    type JoinedColumn,
     type ProcessedColumn,
     getTabularDataStoreFromContext,
     isJoinedColumn,
@@ -30,8 +29,7 @@
   export let table: Table;
 
   $: columnOrder = columnOrder ?? [];
-  $: ({ selection, processedColumns, allColumns, columnsDataStore } =
-    $tabularData);
+  $: ({ selection, processedColumns, allColumns } = $tabularData);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
   let selectedColumnIdsOrdered: string[] = [];
@@ -99,19 +97,6 @@
     selectedColumnIdsOrdered = [];
     newColumnOrder = [];
   }
-
-  function saveColumnWidth(
-    column: ProcessedColumn | JoinedColumn,
-    width: number | null,
-  ) {
-    // Joined columns do not persist width to the database
-    if (isJoinedColumn(column)) {
-      return;
-    }
-    void columnsDataStore.setDisplayOptions(column.column, {
-      display_width: width,
-    });
-  }
 </script>
 
 <SheetHeader>
@@ -150,11 +135,7 @@
           </Droppable>
         </Draggable>
       {/if}
-      <SheetCellResizer
-        columnIdentifierKey={columnId}
-        afterResize={(width) => saveColumnWidth(columnFabric, width)}
-        onReset={() => saveColumnWidth(columnFabric, null)}
-      />
+      <SheetCellResizer {columnId} />
     </SheetColumnHeaderCell>
   {/each}
 
