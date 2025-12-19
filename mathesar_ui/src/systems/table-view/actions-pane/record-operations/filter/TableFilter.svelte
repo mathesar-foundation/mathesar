@@ -24,7 +24,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
-  import { iconClose, Button, Icon } from '@mathesar-component-library';
+  import { Button, Icon, iconClose } from '@mathesar-component-library';
 
   import OperationDropdown from '../OperationDropdown.svelte';
 
