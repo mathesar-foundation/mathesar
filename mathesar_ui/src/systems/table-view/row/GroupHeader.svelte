@@ -21,10 +21,12 @@
   export let fileManifestsForSheet: AssociatedCellValuesForSheet<FileManifest>;
 
   $: ({ columnIds, preprocIds } = grouping);
+
   $: preProcFunctionsForColumn = columnIds.map(
     (columnId) =>
       processedColumnsMap.get(String(columnId))?.preprocFunctions ?? [],
   );
+
   $: preprocNames = preprocIds.map((preprocId, index) =>
     preprocId
       ? preProcFunctionsForColumn[index].find(
@@ -34,23 +36,27 @@
   );
 </script>
 
-<SheetPositionableCell index={0} columnSpan={processedColumnsMap.size + 1}>
+<!-- ✅ FIX: columnSpan now matches grouped columns only -->
+<SheetPositionableCell index={0} columnSpan={columnIds.length + 1}>
   <div class="group-header">
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
         {@const stringColumnId = String(columnId)}
-        <GroupHeaderCellValue
-          {processedColumnsMap}
-          cellValue={row.groupValues
-            ? row.groupValues[stringColumnId]
-            : undefined}
-          {recordSummariesForSheet}
-          columnId={stringColumnId}
-          preprocName={preprocNames[index]}
-          {fileManifestsForSheet}
-          totalColumns={columnIds.length}
-        />
+        <div class="group-header-item">
+          <GroupHeaderCellValue
+            {processedColumnsMap}
+            cellValue={row.groupValues
+              ? row.groupValues[stringColumnId]
+              : undefined}
+            {recordSummariesForSheet}
+            columnId={stringColumnId}
+            preprocName={preprocNames[index]}
+            {fileManifestsForSheet}
+            totalColumns={columnIds.length}
+          />
+        </div>
       {/each}
+
       <div class="count-container">
         <Badge>
           {group.count}
@@ -74,6 +80,15 @@
       display: flex;
       gap: 1rem;
       overflow: hidden;
+      min-width: 0;
+    }
+
+    /* ✅ NEW: guarantees ellipsis + prevents layout break */
+    .group-header-item {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .count-container {
@@ -81,6 +96,7 @@
       --badge-text-color: var(--color-fg-subtle-1);
       --badge-background-color: var(--color-bg-sunken-1-hover);
       height: 100%;
+      flex-shrink: 0;
     }
   }
 </style>
