@@ -16,6 +16,7 @@ CREATE SCHEMA IF NOT EXISTS msar;
 ----------------------------------------------------------------------------------------------------
 
 
+-->>> utils DONE
 CREATE OR REPLACE FUNCTION msar.mathesar_system_schemas() RETURNS text[] AS $$/*
 Return a text array of the Mathesar System schemas.
 
@@ -25,6 +26,7 @@ SELECT ARRAY['msar', '__msar', 'mathesar_types']
 $$ LANGUAGE SQL STABLE;
 
 
+-->>> utils
 CREATE OR REPLACE FUNCTION msar.extract_smallints(v jsonb) RETURNS smallint[] AS $$/*
 From the supplied JSONB value, extract all top-level JSONB array elements which can be successfully
 cast to PostgreSQL smallint values. Return the resulting array of smallint values.
@@ -65,6 +67,7 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
+-->>> utils
 CREATE OR REPLACE FUNCTION msar.get_unique_local_identifier(
   existing_identifiers text[],
   base_identifier text
@@ -100,6 +103,7 @@ $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 
 
+-->>> utils
 CREATE OR REPLACE FUNCTION
 __msar.build_text_tuple(text[]) RETURNS text AS $$
 SELECT '(' || string_agg(col, ', ') || ')' FROM unnest($1) x(col);
@@ -115,6 +119,7 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 
 
+-->>> utils
 CREATE OR REPLACE FUNCTION
 __msar.exec_dql(command text) RETURNS jsonb AS $$/*
 Execute the given command, returning a JSON object describing the records in the following form:
@@ -143,6 +148,7 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+-->>> utils
 CREATE OR REPLACE FUNCTION
 __msar.exec_dql(command_template text, arguments variadic anyarray) RETURNS jsonb AS $$/*
 Execute a templated command, returning a JSON object describing the records in the following form:
@@ -179,6 +185,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+-->>> d3l
 CREATE OR REPLACE FUNCTION msar.col_description(tab_id oid, col_id integer) RETURNS text AS $$/*
 Transparent wrapper for col_description. Putting it in the `msar` namespace helps route all DB calls
 from Python through a single Python module.
@@ -189,6 +196,7 @@ from Python through a single Python module.
 $$ LANGUAGE plpgsql;
 
 
+-->>> d3l
 CREATE OR REPLACE FUNCTION msar.obj_description(obj_id oid, catalog_name text) RETURNS text AS $$/*
 Transparent wrapper for obj_description. Putting it in the `msar` namespace helps route all DB calls
 from Python through a single Python module.
@@ -199,6 +207,7 @@ from Python through a single Python module.
 $$ LANGUAGE plpgsql;
 
 
+-->>> utils
 CREATE OR REPLACE FUNCTION __msar.jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
 Wraps the `?` jsonb operator for improved readability.
 */
@@ -208,6 +217,7 @@ Wraps the `?` jsonb operator for improved readability.
 $$ LANGUAGE plpgsql;
 
 
+-->>> d3l
 CREATE OR REPLACE FUNCTION msar.get_schema_oid(sch_name text) RETURNS oid AS $$/*
 Return the OID of a schema, or NULL if the schema does not exist.
 
@@ -218,6 +228,7 @@ SELECT oid FROM pg_namespace WHERE nspname=sch_name;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+-->>> d3l
 CREATE OR REPLACE FUNCTION msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
 Return the UNQUOTED name for a given schema.
 
@@ -1078,6 +1089,7 @@ WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+-->>> analytics DONE
 CREATE OR REPLACE FUNCTION
 msar.get_object_counts() RETURNS jsonb AS $$/*
 Return a JSON object with counts of some objects in the database.

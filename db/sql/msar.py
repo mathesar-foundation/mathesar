@@ -9,6 +9,8 @@ class MathesarObject:
         self._dependencies = dependencies
         self._name = name
         self._code_path = code_path
+        with open(self._code_path, 'rt') as f:
+            self._code = f.read()
 
     @property
     def code(self):
@@ -37,17 +39,3 @@ class MathesarFunction(MathesarObject):
                 args
             )
         return result
-
-
-get_constraint_type_api_code = MathesarFunction(
-    dependencies = [],
-    name = "get_constraint_type_api_code",
-    code_path=os.path.join(FUNCTIONS_DIR, "get_constraint_type_api_code.sql")
-) 
-
-get_constraints_for_table = MathesarFunction(
-    dependencies = [get_constraint_type_api_code],
-    name = "get_constraints_for_table",
-    code_path=os.path.join(FUNCTIONS_DIR, "get_constraint_type_api_code.sql")
-)
-

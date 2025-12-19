@@ -1,5 +1,6 @@
 from db import connection as db_conn
 
+from db.sql import analytics
 
 def get_object_counts(conn):
-    return db_conn.exec_msar_func(conn, 'get_object_counts').fetchone()[0]
+    return analytics.get_object_counts.run(conn).fetchone()[0]
