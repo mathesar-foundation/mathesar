@@ -29,6 +29,7 @@ import type {
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { ImmutableSet, defined } from '@mathesar-component-library';
 
@@ -172,7 +173,7 @@ export class TabularData {
       database: props.database,
       table: this.table,
       hiddenColumns: Array.from(contextualFilters.keys()).map((id) =>
-        Number(id),
+        castColumnIdToNumber(id),
       ),
     });
     this.constraintsDataStore = new ConstraintsDataStore({
