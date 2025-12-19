@@ -1,4 +1,5 @@
 import type { RecordsListParams } from '@mathesar/api/rpc/records';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 
 export interface GroupEntry {
   readonly columnId: string;
@@ -78,7 +79,7 @@ export class Grouping {
     }
     return {
       grouping: {
-        columns: this.entries.map((e) => Number(e.columnId)),
+        columns: this.entries.map((e) => castColumnIdToNumber(e.columnId)),
         preproc: this.entries.map((e) => e.preprocFnId ?? null),
       },
     };

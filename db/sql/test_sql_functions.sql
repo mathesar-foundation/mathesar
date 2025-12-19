@@ -102,26 +102,10 @@ CREATE OR REPLACE FUNCTION test_drop_table_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_tables();
   PERFORM msar.drop_table(
-    sch_name => 'public',
-    tab_name => 'dropme',
-    cascade_ => false,
-    if_exists => false
+    tab_id => 'dropme'::regclass::oid,
+    cascade_ => false
   );
   RETURN NEXT hasnt_table('dropme', 'Drops table');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_table_name_missing_if_exists() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_drop_tables();
-  PERFORM msar.drop_table(
-    sch_name => 'public',
-    tab_name => 'dropmenew',
-    cascade_ => false,
-    if_exists => true
-  );
-  RETURN NEXT has_table('dropme', 'Drops table with IF EXISTS');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -129,9 +113,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_table_name_missing_no_if_exists() RETURNS SETOF TEXT AS $$
 BEGIN
   RETURN NEXT throws_ok(
-    'SELECT msar.drop_table(''public'', ''doesntexist'', false, false);',
+    'SELECT msar.drop_table(''doesntexist''::regclass::oid, false);',
     '42P01',
-    'table "doesntexist" does not exist',
+    'relation "doesntexist" does not exist',
     'Table dropper throws for missing table'
   );
 END;
@@ -417,9 +401,9 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_is_null('add_col_testable', 'Column 4');
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'text');
-  RETURN NEXT col_hasnt_default('add_col_testable', 'Column 4');
+  RETURN NEXT col_is_null('add_col_testable', 'Column');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'text');
+  RETURN NEXT col_hasnt_default('add_col_testable', 'Column');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -457,8 +441,8 @@ BEGIN
   RETURN NEXT is(
     msar.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4, 5}'::smallint[]
   );
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'text');
-  RETURN NEXT col_type_is('add_col_testable', 'Column 5', 'numeric');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'text');
+  RETURN NEXT col_type_is('add_col_testable', 'Column 1', 'numeric');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -469,8 +453,8 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric');
-  RETURN NEXT col_default_is('add_col_testable', 'Column 4', 3.14159);
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric');
+  RETURN NEXT col_default_is('add_col_testable', 'Column', 3.14159);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -481,7 +465,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,0)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric(3,0)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -494,7 +478,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,2)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric(3,2)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -505,7 +489,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -516,7 +500,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'character varying(128)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'character varying(128)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -526,7 +510,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval(6)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval(6)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -537,7 +521,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval year');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval year');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -550,7 +534,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval second(3)');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval second(3)');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -563,7 +547,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp(3) without time zone');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'timestamp(3) without time zone');
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -577,9 +561,9 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => true);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp without time zone');
+  RETURN NEXT col_type_is('add_col_testable', 'Column', 'timestamp without time zone');
   RETURN NEXT col_default_is(
-    'add_col_testable', 'Column 4', '(now())::timestamp without time zone'
+    'add_col_testable', 'Column', '(now())::timestamp without time zone'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -1772,10 +1756,8 @@ BEGIN
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 1'::name);
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 2'::name);
   PERFORM msar.drop_table(
-    sch_name => 'tab_create_schema',
-    tab_name => 'Table 1',
-    cascade_ => false,
-    if_exists => false
+    tab_id => 'tab_create_schema."Table 1"'::regclass::oid,
+    cascade_ => false
   );
   RETURN NEXT hasnt_table('tab_create_schema'::name, 'Table 1'::name);
   PERFORM msar.add_mathesar_table(

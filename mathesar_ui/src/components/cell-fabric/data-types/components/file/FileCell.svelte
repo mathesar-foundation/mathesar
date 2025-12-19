@@ -24,6 +24,7 @@
   export let fileManifest: FileManifest | undefined = undefined;
   export let isActive: boolean;
   export let value: unknown = undefined;
+  export let setValue: (newValue: unknown) => void;
   export let disabled: boolean;
   export let isIndependentOfSheet: boolean;
   export let setFileManifest:
@@ -35,8 +36,7 @@
   let cellWrapperElement: HTMLElement;
 
   function updateCell(newValue: unknown) {
-    value = newValue;
-    dispatch('update', { value });
+    setValue(newValue);
   }
 
   $: fileViewerController = fileManifest

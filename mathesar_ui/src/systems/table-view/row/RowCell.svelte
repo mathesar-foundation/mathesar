@@ -26,6 +26,7 @@
     isPlaceholderRecordRow,
     isProvisionalRecordRow,
   } from '@mathesar/stores/table-data';
+  import type { NewCellValueRecipe } from '@mathesar/stores/table-data/records';
   import type { WritableMap } from '@mathesar-component-library';
 
   import CellErrors from './CellErrors.svelte';
@@ -55,8 +56,12 @@
   const canViewLinkedEntities = true;
 
   $: recordsDataState = recordsData.state;
-  $: ({ linkedRecordSummaries, joinedRecordSummaries, fileManifests } =
-    recordsData);
+  $: ({
+    linkedRecordSummaries,
+    joinedRecordSummaries,
+    fileManifests,
+    newRecords,
+  } = recordsData);
   $: ({ column } = effectiveColumnFabric);
   $: columnId = effectiveColumnFabric.id;
   $: isWithinPlaceholderRow = isPlaceholderRecordRow(row);
@@ -85,31 +90,21 @@
   $: isPrimaryKey = 'primary_key' in column && column.primary_key;
 
   async function setValue(newValue: unknown) {
-    if (newValue === value) {
-      return;
-    }
-    value = newValue;
-    if (isJoinedColumn(effectiveColumnFabric)) {
-      // Joined columns do not support direct updates through RecordsData
-      return;
-    }
-    const col = effectiveColumnFabric.column;
-    const updatedRow = isProvisionalRecordRow(row)
-      ? await recordsData.createOrUpdateRecord(row, col)
-      : await recordsData.updateCell(row, col);
-    value = updatedRow.record?.[columnId] ?? value;
-  }
-
-  function focus() {
-    selection.update((s) => s.ofOneCell(cellId));
-  }
-
-  async function valueUpdated(
-    e: CustomEvent<{ value: unknown; preventFocus?: boolean }>,
-  ) {
-    await setValue(e.detail.value);
-    if (!e.detail.preventFocus) {
-      focus();
+    if (newValue === value) return;
+    const cells: NewCellValueRecipe[] = [{ columnId, value: newValue }];
+    await recordsData.bulkDml(
+      isWithinPlaceholderRow
+        ? { modificationRecipes: [], additionRecipes: [{ cells }] }
+        : { modificationRecipes: [{ row, cells }], additionRecipes: [] },
+    );
+    if (isWithinPlaceholderRow) {
+      // Re-focus the cell just edited. The placeholder row requires this extra
+      // logic because it gets a new id value after it's saved, and that ends up
+      // wiping out the fact that a cell in that row was selected.
+      const newRowId = $newRecords[$newRecords.length - 1].identifier;
+      selection.update((s) =>
+        s.ofRowColumnIntersection([newRowId], [columnId]),
+      );
     }
   }
 </script>
@@ -144,6 +139,7 @@
     columnFabric={effectiveColumnFabric}
     {isActive}
     {value}
+    {setValue}
     {isProcessing}
     {canViewLinkedEntities}
     {fileManifest}
@@ -166,7 +162,6 @@
     disabled={!isEditable}
     on:movementKeyDown={({ detail }) =>
       handleKeyboardEventOnCell(detail.originalEvent, selection)}
-    on:update={valueUpdated}
     horizontalAlignment={isPrimaryKey ? 'left' : undefined}
     lightText={hasError || isProcessing}
   />
