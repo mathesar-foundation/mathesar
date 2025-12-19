@@ -81,7 +81,7 @@
       getSheetColumns: () => [
         ...map(({ column }) => column, get(processedColumns).values()),
       ],
-      bulkDml: (...args) => recordsData.bulkDml(...args),
+      bulkDml: (args) => recordsData.bulkDml(args),
       confirm: (title) =>
         confirm({
           title,

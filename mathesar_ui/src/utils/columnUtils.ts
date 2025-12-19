@@ -101,3 +101,12 @@ export function columnTypeOptionsAreEqual(
   }
   return true;
 }
+
+export function castColumnIdToNumber(columnId: string | number) {
+  const numericId = columnId === '' ? NaN : Number(columnId);
+  if (Number.isNaN(numericId)) {
+    throw new Error('Invalid columnId');
+  } else {
+    return numericId;
+  }
+}

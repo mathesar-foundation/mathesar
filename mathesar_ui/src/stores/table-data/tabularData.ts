@@ -7,6 +7,7 @@ import {
   readable,
   writable,
 } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
@@ -29,8 +30,8 @@ import type {
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
-import { _ } from 'svelte-i18n';
 import { toast } from '@mathesar/stores/toast';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { ImmutableSet, defined } from '@mathesar-component-library';
 
@@ -174,7 +175,7 @@ export class TabularData {
       database: props.database,
       table: this.table,
       hiddenColumns: Array.from(contextualFilters.keys()).map((id) =>
-        Number(id),
+        castColumnIdToNumber(id),
       ),
     });
     this.constraintsDataStore = new ConstraintsDataStore({

@@ -24,6 +24,8 @@
 
   export let addNewLineOnEnterKeyCombinations = false;
 
+  export let onValueChange: $$Props['onValueChange'] = undefined;
+
   /**
    * Value of the input. Use bind tag for two-way binding.
    * Refer Svelte docs for more info on binding form input values.
@@ -58,6 +60,11 @@
       originalEvent: e,
     });
   }
+
+  function handleInput(e: Event) {
+    const target = e.target as HTMLTextAreaElement;
+    onValueChange?.(target.value);
+  }
 </script>
 
 <BaseInput {...$$restProps} bind:id {disabled} />
@@ -71,6 +78,7 @@
   {disabled}
   bind:value
   on:input
+  on:input={handleInput}
   on:change
   on:focus
   on:blur

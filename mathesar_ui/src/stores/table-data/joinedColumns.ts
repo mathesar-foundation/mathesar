@@ -1,6 +1,7 @@
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 import type { Joining } from './joining';
@@ -82,7 +83,7 @@ export class SimpleManyToManyJoinedColumn {
 
         const [attnum, info] = pkColumnEntry;
         const joinedColumn = {
-          id: Number(attnum),
+          id: castColumnIdToNumber(attnum),
           type: '_array',
           type_options: {
             item_type: info.type,
