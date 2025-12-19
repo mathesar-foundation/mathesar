@@ -55,7 +55,6 @@
   $: sheetHasBorder = context === 'widget';
   $: ({
     processedColumns,
-    joinedColumns,
     display,
     isLoading,
     selection,

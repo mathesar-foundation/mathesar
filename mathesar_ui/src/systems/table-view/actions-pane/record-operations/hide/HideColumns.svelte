@@ -1,12 +1,10 @@
 <script lang="ts">
-  import type { Writable } from 'svelte/store';
-  import { get } from 'svelte/store';
+  import { type Writable, get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import {
     HiddenColumns,
-    type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { Checkbox, LabeledInput } from '@mathesar-component-library';
