@@ -10,6 +10,7 @@
   } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { Badge } from '@mathesar-component-library';
+
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<string, ProcessedColumn>;
@@ -46,9 +47,7 @@
         >
           <GroupHeaderCellValue
             {processedColumnsMap}
-            cellValue={row.groupValues
-              ? row.groupValues[stringColumnId]
-              : undefined}
+            cellValue={row.groupValues?.[stringColumnId]}
             {recordSummariesForSheet}
             columnId={stringColumnId}
             preprocName={preprocNames[index]}
@@ -91,10 +90,9 @@
   }
 
   .count-container {
-    flex: 0 0 auto;
+    flex-shrink: 0;
     --badge-font-size: var(--sm1);
     --badge-text-color: var(--color-fg-subtle-1);
     --badge-background-color: var(--color-bg-sunken-1-hover);
-    height: 100%;
   }
 </style>
