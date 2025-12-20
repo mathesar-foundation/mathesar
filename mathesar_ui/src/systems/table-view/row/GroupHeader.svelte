@@ -10,7 +10,6 @@
   } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { Badge } from '@mathesar-component-library';
-
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<string, ProcessedColumn>;
