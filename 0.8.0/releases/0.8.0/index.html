@@ -1,0 +1,2843 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mathesar.org/0.8.0/releases/0.8.0/">
+      
+      
+        <link rel="prev" href="../../api/methods/">
+      
+      
+        <link rel="next" href="../0.7.1/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>0.8.0 - Mathesar Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../../assets/javascripts/placeholder-plugin.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      <!--
+ Simple Analytics
+  
+ This script integrates Simple Analytics into the site by overriding analytics.html directly from mkdocs-material.
+ 
+ References:
+ - https://squidfunk.github.io/mkdocs-material/customization/#setup-and-theme-structure
+ - https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-analytics/#custom-site-analytics
+-->
+<script async defer src="https://sa.mathesar.org/latest.js"></script>
+<noscript>
+  <img src="https://sa.mathesar.org/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" />
+</noscript>
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mathesar-080" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Mathesar Documentation" class="md-header__button md-logo" aria-label="Mathesar Documentation" data-md-component="logo">
+      
+  <img src="../../assets/images/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Mathesar Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              0.8.0
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mathesar-foundation/mathesar/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mathesar-foundation/mathesar
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Mathesar Documentation" class="md-nav__button md-logo" aria-label="Mathesar Documentation" data-md-component="logo">
+      
+  <img src="../../assets/images/logo.svg" alt="logo">
+
+    </a>
+    Mathesar Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mathesar-foundation/mathesar/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mathesar-foundation/mathesar
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Install Mathesar
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Install Mathesar
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/install-via-docker-compose/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Using Docker Compose
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/install-from-scratch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    On Linux · macOS · WSL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/install-digitalocean/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DigitalOcean
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/install-railway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Railway
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Administrator Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Administrator Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/environment-variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Environment variables
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/single-sign-on/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Single sign-on (SSO)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/file-backend-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File storage backends
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/forms-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Form builder configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Maintenance
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/upgrade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Upgrade Mathesar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/uninstall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Uninstall Mathesar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/version-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Postgres & Python versions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/debug/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debugging Mathesar
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Your data in PostgreSQL
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Your data in PostgreSQL
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/databases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Databases
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Schemas
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/tables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tables
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/data-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data types
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/relationships/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Relationships
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Access control
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Access control
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/access-control/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mathesar users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/roles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    PostgreSQL roles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/stored-roles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Stored roles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/collaborators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Collaborators
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Features
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            Features
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File data type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/forms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Form builder
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/data-explorer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Explorer
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data management
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            Data management
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/importing-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Importing data
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/exporting-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Exporting data
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Settings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            Settings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/usage-data-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Usage data collection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Methods
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Releases
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Releases
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    0.8.0
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.8.0
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Improvements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Improvements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extend-tables-with-related-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extend tables with related data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-powerful-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      More powerful filtering
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-views-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database views support
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configurable-ssl-mode-for-database-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurable SSL mode for database connections
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#column-level-update-privilege-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Column-level UPDATE privilege support
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copy-and-paste-in-context-menu" class="md-nav__link">
+    <span class="md-ellipsis">
+      Copy and paste in context menu
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improved-support-for-touch-only-devices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Improved support for touch-only devices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expanded-database-options-on-the-home-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expanded database options on the home page
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-ui-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional UI improvements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bug fixes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintenance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrading to 0.8.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrading to 0.8.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-installations-using-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      For installations using Docker Compose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-direct-installations-of-mathesar-on-linux-macos-or-wsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      For direct installations of Mathesar on Linux, macOS, or WSL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Previous releases
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Previous releases
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.7.1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.7.1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.7.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.7.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.6.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.6.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.5.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.5.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.4.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.4.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.3.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.3.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.2.5/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.2.5
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.2.4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.2.4
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.2.3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.2.3
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.2.2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.2.2
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.2.1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.2.1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.2.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.2.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.7/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.1.7
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.1.6
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.5/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.1.5
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.1.4
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.1.3
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.1.2
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.1.1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0.1.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0.1.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Improvements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Improvements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extend-tables-with-related-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extend tables with related data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-powerful-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      More powerful filtering
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-views-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database views support
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configurable-ssl-mode-for-database-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configurable SSL mode for database connections
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#column-level-update-privilege-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Column-level UPDATE privilege support
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copy-and-paste-in-context-menu" class="md-nav__link">
+    <span class="md-ellipsis">
+      Copy and paste in context menu
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improved-support-for-touch-only-devices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Improved support for touch-only devices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expanded-database-options-on-the-home-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expanded database options on the home page
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-ui-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional UI improvements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bug fixes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintenance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrading to 0.8.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrading to 0.8.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-installations-using-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      For installations using Docker Compose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-direct-installations-of-mathesar-on-linux-macos-or-wsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      For direct installations of Mathesar on Linux, macOS, or WSL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="mathesar-080">Mathesar 0.8.0<a class="headerlink" href="#mathesar-080" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Mathesar 0.8.0 introduces the ability to edit data from multiple related tables in a single place on the table page. We&rsquo;ve also added support for more precise filtering, including combining and excluding groups of filters. Additionally, PostgreSQL views set up in the database are now automatically displayed in the UI along with tables.</p>
+<p>This release also includes usability improvements for smaller screens, a new way to access copy and paste functionality, and support for multiple SSL modes when configuring databases, as well as many other enhancements and bug fixes.</p>
+<div class="admonition info">
+<p>This page provides a comprehensive list of all changes in the release.</p>
+</div>
+<h2 id="improvements">Improvements<a class="headerlink" href="#improvements" title="Permanent link">&para;</a></h2>
+<h3 id="extend-tables-with-related-data">Extend tables with related data<a class="headerlink" href="#extend-tables-with-related-data" title="Permanent link">&para;</a></h3>
+<figure>
+<p><img alt="Extending the Movies table with genres from a related table" src="../../assets/releases/0.8.0/extend-movies-with-genres.png" /></p>
+<figcaption>
+<p>Extending the Movies table with genres and studios from related tables.</p>
+</figcaption>
+</figure>
+<p>The table page now has an &ldquo;Extend&rdquo; button to display columns from some related tables alongside columns from the current table. Users can also add and remove related data by editing the related data cell.</p>
+<p>This feature currently only supports &ldquo;many to many&rdquo; relationships via mapping tables that do not have any additional fields other than foreign keys. For instance, <code>genres</code> related to <code>movies</code> via a <code>movies_genres</code> table, or <code>categories</code> applied to <code>support_tickets</code> via a <code>ticket_categories</code> table.</p>
+<p><em>Related work:</em></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/5035" title="Cross-table editing MVP">#5035</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4995" title="Simple many-to-many joined columns">#4995</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/5033" title="Multi-tagger UI">#5033</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4989" title="Support joined columns in records.list">#4989</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4977" title="Build UI to select joined columns">#4977</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4983" title="Persist join config in Meta class">#4983</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4984" title="Show the count of active joined columns in the button">#4984</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4988" title="Add linked record paths to records.list_summaries">#4988</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/5053" title="Refresh cell when checkboxes in multi-tagger change">#5053</a></p>
+<h3 id="more-powerful-filtering">More powerful filtering<a class="headerlink" href="#more-powerful-filtering" title="Permanent link">&para;</a></h3>
+<figure>
+<p><img alt="Complex nested filters with AND/OR groups" src="../../assets/releases/0.8.0/complex-filters.png" /></p>
+<figcaption>
+<p>Filter for kid-friendly movies released after the year 2000.</p>
+</figcaption>
+</figure>
+<p>Mathesar now supports more flexible filtering options for tables that can use complex logical expressions. You can group related conditions together and then combine those groups to support extremely precise filters. </p>
+<p>Previously, Mathesar&rsquo;s filtering only supported either a single <code>AND</code> or a single <code>OR</code> operation.</p>
+<p><em>Related work:</em></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4808" title="Implement nested filtering">#4808</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/5111" title="Add negation filters">#5111</a></p>
+<h3 id="database-views-support">Database views support<a class="headerlink" href="#database-views-support" title="Permanent link">&para;</a></h3>
+<figure>
+<p><img alt="Views appear on the schema page with a distinct icon and tag" src="../../assets/releases/0.8.0/views-on-schema-page.png" /></p>
+<figcaption>
+<p>Views appear on the schema page with a distinct blue icon and at the top of the list.</p>
+</figcaption>
+</figure>
+<figure>
+<p><img alt="Viewing data from a database view in Mathesar" src="../../assets/releases/0.8.0/example-view.png" /></p>
+<figcaption>
+<p>View records the same way you would in tables, but with editing disabled.</p>
+</figcaption>
+</figure>
+<p>PostgreSQL views that have been set up in the database now automatically appear in Mathesar. They are displayed on the schema page alongside tables with their own icon and color.</p>
+<p><em>Related work:</em></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4992" title="Differentiate views on the frontend (public dataset navigability)">#4992</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4930" title="EXPERIMENTAL: Add views to table listing">#4930</a></p>
+<h3 id="configurable-ssl-mode-for-database-connections">Configurable SSL mode for database connections<a class="headerlink" href="#configurable-ssl-mode-for-database-connections" title="Permanent link">&para;</a></h3>
+<figure>
+<p><img alt="SSL mode configuration in database settings" src="../../assets/releases/0.8.0/db-ssl-settings.png" /></p>
+<figcaption>
+<p>SSL mode configuration in database settings</p>
+</figcaption>
+</figure>
+<p>We&rsquo;ve improved compatibility with more databases in the wild by adding support multiple for SSL modes when configuring connected databases in Mathesar. You can set up the SSL mode for the UI, or use environment variables for local database connections.</p>
+<p><em>Related work:</em></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/5062" title="Make SSL mode configurable for internal and external databases">#5062</a></p>
+<h3 id="column-level-update-privilege-support">Column-level <code>UPDATE</code> privilege support<a class="headerlink" href="#column-level-update-privilege-support" title="Permanent link">&para;</a></h3>
+<p>Mathesar now allows users to edit columns if they have PostgreSQL’s column-level <code>UPDATE</code> privileges without having table-level <code>UPDATE</code> privileges. Previously, we checked for table-level privileges in all cases.</p>
+<p><em>Related work:</em></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4965" title="Enable column-level UPDATE privilege support">#4965</a></p>
+<h3 id="copy-and-paste-in-context-menu">Copy and paste in context menu<a class="headerlink" href="#copy-and-paste-in-context-menu" title="Permanent link">&para;</a></h3>
+<figure>
+<p><img alt="Copy and paste options in the cell context menu" src="../../assets/releases/0.8.0/copy-in-context-menu.png" /></p>
+<figcaption>
+<p>Copy and paste options in the cell context menu</p>
+</figcaption>
+</figure>
+<p>Mathesar tables now allow users to copy and paste using the cell context menu. This also improves copy/paste support for touch-only devices where keyboard shortcuts aren&rsquo;t available.</p>
+<p><em>Related work:</em></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4946" title="Add copy/paste entries to cell context menu">#4946</a></p>
+<h3 id="improved-support-for-touch-only-devices">Improved support for touch-only devices<a class="headerlink" href="#improved-support-for-touch-only-devices" title="Permanent link">&para;</a></h3>
+<p>We&rsquo;ve added the ability to select multiple cells in the table page using a new context menu option. Additionally, we&rsquo;ve made the table page status pane more responsive to narrow viewports.</p>
+<p><em>Related work:</em></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4948" title="Add feature to select multiple cells on touch-only devices">#4948</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4933" title="Make it easier to access Mathesar in dev mode from a mobile device">#4933</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4963" title="Make table page status pane respond well to narrow viewports">#4963</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4935" title="Use svh CSS units instead of vh">#4935</a></p>
+<h3 id="expanded-database-options-on-the-home-page">Expanded database options on the home page<a class="headerlink" href="#expanded-database-options-on-the-home-page" title="Permanent link">&para;</a></h3>
+<p><img alt="Manage DB cards" src="../../assets/releases/0.8.0/manage-db-cards.png" /></p>
+<p>Database management options like disconnecting databases, editing connections, and reinstalling Mathesar schemas are now available on Mathesar&rsquo;s home page. Database cards also provide clearer feedback on the status of Mathesar&rsquo;s internal schemas when a database is disconnected.</p>
+<p><em>Related work:</em></p>
+<p><a href="https://github.com/mathesar-foundation/mathesar/pull/4954" title="Database card and disconnection improvements">#4954</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4957" title="Add success toast for database upgrades and schema reinstall">#4957</a></p>
+<h3 id="additional-ui-improvements">Additional UI improvements<a class="headerlink" href="#additional-ui-improvements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Added &ldquo;Delete Column&rdquo; option to column context menu <a href="https://github.com/mathesar-foundation/mathesar/pull/4945" title="Added Delete Column entry to column context menu">#4945</a></li>
+<li>Made table name under record title clickable for easier navigation <a href="https://github.com/mathesar-foundation/mathesar/pull/4949" title="Made table name under record title clickable (#4916)">#4949</a></li>
+<li>Added hyperlink to navigate to the table page from the table widget <a href="https://github.com/mathesar-foundation/mathesar/pull/4938" title="Added hyperlink to navigate to the table page from the table widget">#4938</a></li>
+<li>Allow adding new columns from within the table widget <a href="https://github.com/mathesar-foundation/mathesar/pull/4958" title="fix: allow adding new columns from within the table widget (#4917)">#4958</a></li>
+<li>Improved keyboard navigation for breadcrumb dropdowns <a href="https://github.com/mathesar-foundation/mathesar/pull/4910" title="Add keyboard navigation to breadcrumb dropdowns.">#4910</a></li>
+<li>Hide column type icon when column width is very narrow for better space utilization <a href="https://github.com/mathesar-foundation/mathesar/pull/4940" title="Hide column type icon when column width is very narrow">#4940</a></li>
+<li>Improved color of the Mathesar link in forms <a href="https://github.com/mathesar-foundation/mathesar/pull/5002" title="Improve color of the Mathesar link in forms">#5002</a></li>
+<li>Apply appropriate colors to new item hint <a href="https://github.com/mathesar-foundation/mathesar/pull/4994" title="Apply appropriate colors to new item hint">#4994</a></li>
+<li>Add focus trap to the NewColumnCell dropdown for better accessibility <a href="https://github.com/mathesar-foundation/mathesar/pull/4953" title="Add focus trap to the NewColumnCell dropdown">#4953</a></li>
+<li>Allow renaming of primary key (Mathesar ID) columns <a href="https://github.com/mathesar-foundation/mathesar/pull/4931" title="issue 4890 - Allow renaming of primary key (Mathesar ID) columns">#4931</a></li>
+<li>Fix SSO login page to display Authentik logo instead of generic icon <a href="https://github.com/mathesar-foundation/mathesar/pull/4934" title="Fix SSO login page to display Authentik logo instead of generic icon">#4934</a></li>
+</ul>
+<h2 id="bug-fixes">Bug fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fix primary key recognition when column has multiple indexes <a href="https://github.com/mathesar-foundation/mathesar/pull/5058" title="Fix primary key recognition when column has multiple indexes">#5058</a></li>
+<li>Fix error when previewing record summary if selected cell is null <a href="https://github.com/mathesar-foundation/mathesar/pull/5032" title="Fix error when previewing record summary if selected cell is null">#5032</a></li>
+<li>Fix record summary template referencing deleted column <a href="https://github.com/mathesar-foundation/mathesar/pull/4956" title="Fix/4895 record summary template references deleted column">#4956</a></li>
+<li>Fix date picker to determine the current date on open, not on page load <a href="https://github.com/mathesar-foundation/mathesar/pull/5031" title="Fix #4891: Date picker should determine the current date on open, not on page load">#5031</a></li>
+<li>Fix missing error message when deleting records with foreign key constraints <a href="https://github.com/mathesar-foundation/mathesar/pull/5045" title="Fix missing error on deleting records with foreign key">#5045</a></li>
+<li>Fix displayed table relationships not updating after adding a new relationship <a href="https://github.com/mathesar-foundation/mathesar/pull/5014" title="Fix #4893: Displayed table relationships do not update after adding a new relationship">#5014</a></li>
+<li>Prevent record selector opening on Shift+click of foreign key cell chevron <a href="https://github.com/mathesar-foundation/mathesar/pull/5007" title="Fix: Prevent record selector opening on Shift+click of FK cell chevron (fixes #4913)">#5007</a></li>
+<li>Fix missing &ldquo;Set to null&rdquo; string in single record view field menus <a href="https://github.com/mathesar-foundation/mathesar/pull/4955" title="Fix missing Set to null string in single record view field menus">#4955</a></li>
+<li>Fix row hover in data explorer <a href="https://github.com/mathesar-foundation/mathesar/pull/4951" title="Fix/4914 added row hover data explorer">#4951</a></li>
+<li>Handle more edge cases when setting the user&rsquo;s cursor after auto-formatting an input <a href="https://github.com/mathesar-foundation/mathesar/pull/4851" title="Handle more edge cases when setting the user's cursor after auto-formatting an input">#4851</a></li>
+<li>Convert empty string to <code>None</code> for data imports to ensure proper null handling <a href="https://github.com/mathesar-foundation/mathesar/pull/5055" title="Convert empty string to None for data imports">#5055</a></li>
+<li>Change default &ldquo;Date &amp; Time&rdquo; column type to &ldquo;timestamp without time zone&rdquo; <a href="https://github.com/mathesar-foundation/mathesar/pull/5063" title="Fix #5056:Fix: Change default Date &amp; Time column type to timestamp without time zone">#5063</a></li>
+<li>Improve SQL error messages for better debugging <a href="https://github.com/mathesar-foundation/mathesar/pull/4936" title="Improve sql errors">#4936</a></li>
+<li>Use correct path for media files in Docker <a href="https://github.com/mathesar-foundation/mathesar/pull/5091" title="Fix path for .media/ volume">#5091</a></li>
+</ul>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Refine Mathesar&rsquo;s PostgreSQL and Python version support documentation <a href="https://github.com/mathesar-foundation/mathesar/pull/4881" title="Refine Mathesar's PostgreSQL and Python version support">#4881</a></li>
+</ul>
+<h2 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Remove Django REST Framework (DRF) as a dependency <a href="https://github.com/mathesar-foundation/mathesar/pull/5067" title="Remove DRF as a dependency">#5067</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/5065" title="Remove data_files/ dependency on DRF">#5065</a></li>
+<li>Refactor table view system to use string-based column ids <a href="https://github.com/mathesar-foundation/mathesar/pull/4975" title="Refactor table view system to use string-based column ids">#4975</a></li>
+<li>Bump Django from 4.2.25 to 4.2.27 <a href="https://github.com/mathesar-foundation/mathesar/pull/5070" title="Bump django from 4.2.26 to 4.2.27">#5070</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/4959" title="Bump django from 4.2.25 to 4.2.26">#4959</a></li>
+<li>Reinstate PostgreSQL 18 in CI <a href="https://github.com/mathesar-foundation/mathesar/pull/4950" title="Reinstate pg18 in CI">#4950</a></li>
+<li>Improved SQL list_records_from_table unit tests <a href="https://github.com/mathesar-foundation/mathesar/pull/4991" title="improved SQL list_records_from_table unittests">#4991</a></li>
+<li>Add package and installation workflows to checkpoint <a href="https://github.com/mathesar-foundation/mathesar/pull/4941" title="Add package and installation workflows to checkpoint">#4941</a></li>
+<li>Updated Japanese translations <a href="https://github.com/mathesar-foundation/mathesar/pull/4944" title="Updates for file mathesar_ui/src/i18n/languages/en/dict.json in ja">#4944</a></li>
+</ul>
+<h2 id="upgrading">Upgrading to 0.8.0<a class="headerlink" href="#upgrading" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">PostgreSQL 13 and Python 3.9 no longer supported</p>
+<p>Mathesar 0.8.0 ends official support for PostgreSQL 13 and Python 3.9. Please upgrade to PostgreSQL 14+ and Python 3.10+ before upgrading to Mathesar 0.8.0.</p>
+</div>
+<h3 id="for-installations-using-docker-compose">For installations using Docker Compose<a class="headerlink" href="#for-installations-using-docker-compose" title="Permanent link">&para;</a></h3>
+<p>If you have a Docker compose installation, run the command below:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker compose -f /etc/mathesar/docker-compose.yml up --pull always -d
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Your installation directory may be different</p>
+<p>You may need to change <code>/etc/mathesar/</code> in the command above if you chose to install Mathesar to a different directory.</p>
+</div>
+<h3 id="for-direct-installations-of-mathesar-on-linux-macos-or-wsl">For direct installations of Mathesar on Linux, macOS, or WSL<a class="headerlink" href="#for-direct-installations-of-mathesar-on-linux-macos-or-wsl" title="Permanent link">&para;</a></h3>
+<p>Mathesar provides an install script that automates both fresh installs and upgrades for standalone (non-Docker) installations.</p>
+<p>Follow the steps below to upgrade Mathesar:</p>
+<ol>
+<li>
+<p>Enter your installation directory into the box below and press <kbd>Enter</kbd> to personalize this guide:</p>
+<p><input data-input-for="MATHESAR_INSTALL_DIR" aria-label="Your Mathesar installation directory" value="Please enable JavaScript"></p>
+<ul>
+<li>Do <em>not</em> include a trailing slash.</li>
+<li>Do <em>not</em> use any variables like <code>$HOME</code>.</li>
+</ul>
+</li>
+<li>
+<p>Go to your Mathesar installation directory.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>cd xMATHESAR_INSTALL_DIRx
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Your installation directory may be different from above if you used a different directory when installing Mathesar.</p>
+</div>
+</li>
+<li>
+<p>Download and run the install script for 0.8.0
+    <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl -sSfL https://github.com/mathesar-foundation/mathesar/releases/download/0.8.0/install.sh -o install.sh
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>chmod +x install.sh
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>./install.sh .
+</span></code></pre></div></p>
+</li>
+<li>
+<p>Replace your gunicorn systemd service with a Mathesar systemd service</p>
+<ol>
+<li>
+<p>Disable and stop the existing gunicorn service
+    <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>systemctl disable gunicorn.service
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>systemctl stop gunicorn.service
+</span></code></pre></div></p>
+</li>
+<li>
+<p>Follow the steps in <a href="../../administration/install-from-scratch/#run-mathesar-as-a-systemd-service">Run Mathesar as a systemd service</a> from the installation guide</p>
+</li>
+<li>
+<p>Remove the gunicorn service file
+    <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo rm /lib/systemd/system/gunicorn.service
+</span></code></pre></div></p>
+</li>
+</ol>
+</li>
+<li>
+<p>Update your Caddyfile</p>
+<ol>
+<li>
+<p>Use the configuration shown in <a href="../../administration/install-from-scratch/#install-and-configure-caddy">Install and configure Caddy</a> in the installation guide, and update your Caddyfile accordingly</p>
+</li>
+<li>
+<p>Ensure that your domains are specified directly in the first line of the Caddyfile</p>
+</li>
+<li>
+<p>Restart your Caddy service
+  <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>systemctl restart caddy.service
+</span></code></pre></div></p>
+</li>
+</ol>
+</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>If you&rsquo;re running Mathesar only on localhost and do not want it to run as a service</strong>, you could:</p>
+<ol>
+<li>Remove the gunicorn and caddy services</li>
+<li>Start Mathesar manually with:
+  <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mathesar run
+</span></code></pre></div></li>
+</ol>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["content.tabs.link", "content.code.copy", "navigation.sections", "navigation.expand"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+        <script src="../../assets/javascripts/placeholder-plugin.js"></script>
+      
+        <script src="../../assets/javascripts/placeholder.min.js"></script>
+      
+    
+  </body>
+</html>
