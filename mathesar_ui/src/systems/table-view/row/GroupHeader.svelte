@@ -10,7 +10,6 @@
   } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { Badge } from '@mathesar-component-library';
-
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<string, ProcessedColumn>;
@@ -36,13 +35,15 @@
   );
 </script>
 
-<!-- ✅ FIX: columnSpan now matches grouped columns only -->
 <SheetPositionableCell index={0} columnSpan={columnIds.length + 1}>
   <div class="group-header">
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
         {@const stringColumnId = String(columnId)}
-        <div class="group-header-item">
+        <div
+          class="group-header-item"
+          title={row.groupValues?.[stringColumnId]}
+        >
           <GroupHeaderCellValue
             {processedColumnsMap}
             cellValue={row.groupValues
@@ -58,9 +59,7 @@
       {/each}
 
       <div class="count-container">
-        <Badge>
-          {group.count}
-        </Badge>
+        <Badge>{group.count}</Badge>
       </div>
     </div>
   </div>
@@ -74,29 +73,28 @@
     border-bottom: 1px solid var(--color-border-grid);
     border-right: 1px solid var(--color-border-grid);
     overflow: hidden;
+  }
 
-    .groups-data {
-      align-items: start;
-      display: flex;
-      gap: 1rem;
-      overflow: hidden;
-      min-width: 0;
-    }
+  .groups-data {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+    overflow: hidden;
+  }
 
-    /* ✅ NEW: guarantees ellipsis + prevents layout break */
-    .group-header-item {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+  .group-header-item {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-    .count-container {
-      --badge-font-size: var(--sm1);
-      --badge-text-color: var(--color-fg-subtle-1);
-      --badge-background-color: var(--color-bg-sunken-1-hover);
-      height: 100%;
-      flex-shrink: 0;
-    }
+  .count-container {
+    flex: 0 0 auto;
+    --badge-font-size: var(--sm1);
+    --badge-text-color: var(--color-fg-subtle-1);
+    --badge-background-color: var(--color-bg-sunken-1-hover);
+    height: 100%;
   }
 </style>
