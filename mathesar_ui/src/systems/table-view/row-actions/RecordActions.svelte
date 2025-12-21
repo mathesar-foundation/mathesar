@@ -43,7 +43,14 @@
   const tabularData = getTabularDataStoreFromContext();
   const modalRecordView = modalRecordViewContext.get();
 
-  $: ({ table, recordsData, columnsDataStore, canDeleteRecords, canInsertRecords, canViewLinkedEntities } = $tabularData);
+  $: ({
+    table,
+    recordsData,
+    columnsDataStore,
+    canDeleteRecords,
+    canInsertRecords,
+    canViewLinkedEntities,
+  } = $tabularData);
   $: ({ columns } = columnsDataStore);
   $: ({ selectableRowsMap } = recordsData);
   $: isSingleRow = rowIds.size === 1;
@@ -98,9 +105,12 @@
       ],
       onProceed: () => recordsData.deleteSelected(rowIds),
       onError: (e) => toast.fromError(e),
-      onSuccess: (c) => toast.success({
-        title: $_('count_records_deleted_successfully', { values: { count: c } }),
-      }),
+      onSuccess: (c) =>
+        toast.success({
+          title: $_('count_records_deleted_successfully', {
+            values: { count: c },
+          }),
+        }),
     });
   }
 

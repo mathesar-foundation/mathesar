@@ -18,6 +18,8 @@ import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
+import { getRecordActionMenuEntries } from '../row-actions/recordActionsUtils';
+
 import { copyCells } from './entries/copyCells';
 import { deleteColumn } from './entries/deleteColumn';
 import { modifyFilters } from './entries/modifyFilters';
@@ -29,7 +31,6 @@ import { pasteCells } from './entries/pasteCells';
 import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
-import { getRecordActionMenuEntries } from '../row-actions/recordActionsUtils';
 
 export function openTableCellContextMenu({
   targetCell,

@@ -1,7 +1,7 @@
 import type { TabularData } from '@mathesar/stores/table-data';
-import type { ModalController } from '@mathesar-component-library';
 import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
+import type { ModalController } from '@mathesar-component-library';
 
 import { deleteRecords } from '../context-menu/entries/deleteRecords';
 import { duplicateRecord } from '../context-menu/entries/duplicateRecord';
