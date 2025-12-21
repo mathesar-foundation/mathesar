@@ -105,6 +105,6 @@
   .donate {
     margin-top: 2rem;
     max-width: 40rem;
-    overflow-wrap: break-word;
+    text-wrap: balance;
   }
 </style>

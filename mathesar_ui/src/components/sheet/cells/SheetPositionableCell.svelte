@@ -32,9 +32,9 @@
 
 <style>
   [data-sheet-element='positionable-cell'] {
-  position: sticky;
-  top: 0;
-  height: 100%;
-  z-index: 2;
-}
+    position: sticky;
+    top: 0;
+    height: 100%;
+    z-index: 2;
+  }
 </style>
