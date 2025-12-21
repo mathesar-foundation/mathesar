@@ -43,12 +43,9 @@
         {@const stringColumnId = String(columnId)}
         <div
           class="group-header-item"
-          title={
-          row.groupValues?.[stringColumnId] != null
-          ? String(row.groupValues[stringColumnId])
-          : undefined
-}
-
+          title={row.groupValues?.[stringColumnId] != null
+            ? String(row.groupValues[stringColumnId])
+            : undefined}
         >
           <GroupHeaderCellValue
             {processedColumnsMap}
