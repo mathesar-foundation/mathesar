@@ -43,18 +43,10 @@
   const tabularData = getTabularDataStoreFromContext();
   const modalRecordView = modalRecordViewContext.get();
 
-  $: ({
-    table,
-    recordsData,
-    columnsDataStore,
-    canDeleteRecords,
-    canInsertRecords,
-    canViewLinkedEntities,
-  } = $tabularData);
+  $: ({ table, recordsData, columnsDataStore, canDeleteRecords, canInsertRecords, canViewLinkedEntities } = $tabularData);
   $: ({ columns } = columnsDataStore);
   $: ({ selectableRowsMap } = recordsData);
-  $: rowCount = rowIds.size;
-  $: isSingleRow = rowCount === 1;
+  $: isSingleRow = rowIds.size === 1;
 
   // Extract record ID for single row selection
   $: recordId = (() => {
@@ -96,26 +88,19 @@
     void recordsData.duplicateRecord(row);
   }
 
-  async function handleDeleteRecords() {
+  function handleDeleteRecords() {
+    const count = rowIds.size;
     void confirmDelete({
-      identifierType: $_('multiple_records', {
-        values: { count: rowCount },
-      }),
+      identifierType: $_('multiple_records', { values: { count } }),
       body: [
-        $_('deleted_records_cannot_be_recovered', {
-          values: { count: rowCount },
-        }),
+        $_('deleted_records_cannot_be_recovered', { values: { count } }),
         $_('are_you_sure_to_proceed'),
       ],
       onProceed: () => recordsData.deleteSelected(rowIds),
       onError: (e) => toast.fromError(e),
-      onSuccess: (count) => {
-        toast.success({
-          title: $_('count_records_deleted_successfully', {
-            values: { count },
-          }),
-        });
-      },
+      onSuccess: (c) => toast.success({
+        title: $_('count_records_deleted_successfully', { values: { count: c } }),
+      }),
     });
   }
 
@@ -162,12 +147,13 @@
       label: $_('delete_records', { values: { count: rowCount } }),
       icon: iconDeleteMajor,
       onClick: handleDeleteRecords,
+    // Delete action (single or multiple rows)
+    result.push({
+      type: 'button',
+      key: 'delete',
+      label: $_('delete_records', { values: { count: rowIds.size } }),
+      icon: iconDeleteMajor,
+      onClick: handleDeleteRecords,
       disabled: !$canDeleteRecords,
       danger: true,
     });
-
-    return result;
-  })();
-</script>
-
-<slot {actions} />

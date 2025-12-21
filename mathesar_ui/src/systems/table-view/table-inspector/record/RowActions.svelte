@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import RecordActions from '@mathesar/systems/table-view/row-actions/RecordActions.svelte';
   import { AnchorButton, Button, Icon } from '@mathesar-component-library';
+  import RecordActions from '../../row-actions/RecordActions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
