@@ -20,8 +20,6 @@ import { match } from '@mathesar/utils/patternMatching';
 
 import { copyCells } from './entries/copyCells';
 import { deleteColumn } from './entries/deleteColumn';
-import { deleteRecords } from './entries/deleteRecords';
-import { duplicateRecord } from './entries/duplicateRecord';
 import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
@@ -31,7 +29,7 @@ import { pasteCells } from './entries/pasteCells';
 import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
-import { viewRowRecord } from './entries/viewRowRecord';
+import { getRecordActionMenuEntries } from '../row-actions/recordActionsUtils';
 
 export function openTableCellContextMenu({
   targetCell,
@@ -55,15 +53,15 @@ export function openTableCellContextMenu({
   const { selection } = tabularData;
 
   function* getEntriesForMultipleRows(rowIds: string[]) {
-    yield* deleteRecords({ tabularData, rowIds });
+    yield* getRecordActionMenuEntries({ rowIds, tabularData, modalRecordView });
   }
 
   function* getEntriesForOneRow(rowId: string) {
-    const recordId = tabularData.getRecordIdFromRowId(rowId);
-    yield* viewRowRecord({ tabularData, recordId, modalRecordView });
-    yield* duplicateRecord({ tabularData, rowId });
-
-    yield* getEntriesForMultipleRows([rowId]);
+    yield* getRecordActionMenuEntries({
+      rowIds: [rowId],
+      tabularData,
+      modalRecordView,
+    });
   }
 
   function* getEntriesForArbitraryRows(rowIds: Iterable<string>) {
