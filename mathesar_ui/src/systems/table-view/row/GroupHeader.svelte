@@ -10,6 +10,7 @@
   } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { Badge } from '@mathesar-component-library';
+
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<string, ProcessedColumn>;
@@ -42,7 +43,12 @@
         {@const stringColumnId = String(columnId)}
         <div
           class="group-header-item"
-          title={row.groupValues?.[stringColumnId]}
+          title={
+          row.groupValues?.[stringColumnId] != null
+          ? String(row.groupValues[stringColumnId])
+          : undefined
+}
+
         >
           <GroupHeaderCellValue
             {processedColumnsMap}
