@@ -144,16 +144,15 @@
     result.push({
       type: 'button',
       key: 'delete',
-      label: $_('delete_records', { values: { count: rowCount } }),
-      icon: iconDeleteMajor,
-      onClick: handleDeleteRecords,
-    // Delete action (single or multiple rows)
-    result.push({
-      type: 'button',
-      key: 'delete',
       label: $_('delete_records', { values: { count: rowIds.size } }),
       icon: iconDeleteMajor,
       onClick: handleDeleteRecords,
       disabled: !$canDeleteRecords,
       danger: true,
     });
+
+    return result;
+  })();
+</script>
+
+<slot {actions} />
