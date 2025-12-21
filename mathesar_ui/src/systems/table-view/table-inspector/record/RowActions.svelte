@@ -13,7 +13,7 @@
 <div class="actions-container">
   <RecordActions rowIds={new Set(selectedRowIds)} let:actions>
     {#each actions as action (action.key)}
-      {#if action.type === 'button'}
+      {#if action.type === 'button' && action.onClick}
         <Button
           on:click={action.onClick}
           disabled={action.disabled}
