@@ -132,7 +132,6 @@
       - delete
       - replace
       - run
-      - run_saved
       - ExplorationInfo
       - ExplorationDef
       - ExplorationResult
