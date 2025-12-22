@@ -1,16 +1,9 @@
-import os
-
-FILE_DIR = os.path.abspath(os.path.dirname(__file__))
-FUNCTIONS_DIR = os.path.join(FILE_DIR, "functions")
-
 class MathesarObject:
 
     def __init__(self, dependencies=[], name="", code_path=""):
         self._dependencies = dependencies
         self._name = name
         self._code_path = code_path
-        with open(self._code_path, 'rt') as f:
-            self._code = f.read()
 
     @property
     def code(self):

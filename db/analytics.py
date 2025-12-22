@@ -1,6 +1,6 @@
 from db import connection as db_conn
 
-from db.sql import analytics
+from db.sql import d3l
 
 def get_object_counts(conn):
-    return analytics.get_object_counts.run(conn).fetchone()[0]
+    return d3l.get_object_counts.run(conn).fetchone()[0]

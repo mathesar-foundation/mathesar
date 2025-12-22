@@ -747,6 +747,7 @@ AND attrelid = rel_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+-->>> utils DONE
 CREATE OR REPLACE FUNCTION
 msar.get_interval_fields(typ_mod integer) RETURNS text AS $$/*
 Return the string giving the fields for an interval typmod integer.
@@ -953,6 +954,7 @@ WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+-->>> columns DONE
 CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return an array of objects describing the columns of the table.
 
@@ -1087,31 +1089,6 @@ FROM
   pg_catalog.has_schema_privilege(sch_id, privilege) as has_privilege
 WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
-
-
--->>> analytics DONE
-CREATE OR REPLACE FUNCTION
-msar.get_object_counts() RETURNS jsonb AS $$/*
-Return a JSON object with counts of some objects in the database.
-
-We exclude the mathesar-system schemas.
-
-The objects counted are:
-- total schemas, excluding Mathesar internal schemas
-- total tables in the included schemas
-- total rows of tables included
-*/
-SELECT jsonb_build_object(
-  'schema_count', COUNT(DISTINCT pgn.oid),
-  'table_count', COUNT(pgc.oid),
-  'record_count', SUM(pgc.reltuples)
-)
-FROM pg_catalog.pg_namespace pgn
-LEFT JOIN pg_catalog.pg_class pgc ON pgc.relnamespace = pgn.oid AND pgc.relkind = 'r'
-WHERE pgn.nspname <> 'information_schema'
-AND NOT (pgn.nspname = ANY(msar.mathesar_system_schemas()))
-AND pgn.nspname NOT LIKE 'pg_%';
-$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION msar.schema_info_table() RETURNS TABLE
