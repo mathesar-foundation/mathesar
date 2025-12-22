@@ -175,16 +175,16 @@ export default class SheetSelection {
 
     const newBasis = this.plane.rowIds.first
       ? basisFromDataCells(
-        this.filterRestrictedCells(
-          this.plane.dataCellsInColumnRange(columnIdA, adjustedColumnIdB),
-        ),
-        makeCellId(this.plane.rowIds.first, columnIdA),
-      )
+          this.filterRestrictedCells(
+            this.plane.dataCellsInColumnRange(columnIdA, adjustedColumnIdB),
+          ),
+          makeCellId(this.plane.rowIds.first, columnIdA),
+        )
       : basisFromEmptyColumns(
-        this.filterRestrictedColumns(
-          this.plane.columnIds.range(columnIdA, adjustedColumnIdB),
-        ),
-      );
+          this.filterRestrictedColumns(
+            this.plane.columnIds.range(columnIdA, adjustedColumnIdB),
+          ),
+        );
     return this.withBasis(newBasis);
   }
 
