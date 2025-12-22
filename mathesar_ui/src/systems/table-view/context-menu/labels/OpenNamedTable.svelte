@@ -1,14 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import TableName from '@mathesar/components/TableName.svelte';
+  import type { Table } from '@mathesar/models/Table';
 
-  export let name: string;
+  export let table: Table;
 </script>
 
 <RichText text={$_('open_named_table')} let:slotName>
   {#if slotName === 'tableName'}
-    <Identifier>{name}</Identifier>
+    <TableName truncate={false} {table} />
   {/if}
 </RichText>

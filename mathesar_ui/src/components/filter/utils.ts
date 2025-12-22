@@ -58,14 +58,14 @@ export class IndividualFilter {
 
 export interface RawFilterGroup {
   type: 'group';
-  operator: 'and' | 'or';
+  operator: 'and' | 'or' | 'not';
   args: (RawIndividualFilter | RawFilterGroup)[];
 }
 
 export class FilterGroup {
   type = 'group' as const;
 
-  operator: Writable<'and' | 'or'>;
+  operator: Writable<RawFilterGroup['operator']>;
 
   args: Writable<(IndividualFilter | FilterGroup)[]>;
 

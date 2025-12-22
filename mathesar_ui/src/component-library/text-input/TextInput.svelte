@@ -32,6 +32,13 @@
     ? makeStyleStringFromCssVariables(cssVariables)
     : '';
   $: style = mergeStyleStrings(styleStringFromCssVariables, $$restProps.style);
+
+  export let onValueChange: $$Props['onValueChange'] = undefined;
+
+  function handleInput(e: Event) {
+    const target = e.target as HTMLInputElement;
+    onValueChange?.(target.value);
+  }
 </script>
 
 <BaseInput {...$$restProps} bind:id />
@@ -47,6 +54,7 @@
   bind:value
   {id}
   on:input
+  on:input={handleInput}
   on:focus
   on:blur
   on:keydown

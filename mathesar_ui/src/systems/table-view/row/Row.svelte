@@ -113,7 +113,7 @@
           key={getCellKey(row.identifier, columnId)}
           modificationStatusMap={cellModificationStatus}
           clientSideErrorMap={cellClientSideErrors}
-          bind:value={row.record[columnId]}
+          value={row.record[columnId]}
           {columnFabric}
           {recordsData}
           canUpdateRecords={$canUpdateRecords}

@@ -20,7 +20,7 @@ import type {
   RecordsSearchParams,
   ResultValue,
 } from '@mathesar/api/rpc/records';
-import { parseCellId } from '@mathesar/components/sheet/cellIds';
+import { makeCellId, parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
 import {
@@ -34,6 +34,7 @@ import {
   ImmutableMap,
   WritableMap,
   defined,
+  getGloballyUniqueId,
 } from '@mathesar-component-library';
 
 import AssociatedCellData, {
@@ -53,11 +54,11 @@ import {
   type Row,
   isDraftRecordRow,
   isPersistedRecordRow,
-  isPlaceholderRecordRow,
 } from './Row';
 import type { SearchFuzzy } from './searchFuzzy';
 import type { Sorting } from './sorting';
 import {
+  type CellKey,
   type RecordGrouping,
   type RowKey,
   buildGrouping,
@@ -204,8 +205,7 @@ export class RecordsData {
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private createPromises: Map<unknown, CancellablePromise<unknown>>;
 
-  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-  private updatePromises: Map<unknown, CancellablePromise<unknown>>;
+  private latestCellUpdateRequestId: Map<CellKey, string> = new Map();
 
   private requestParamsUnsubscriber: Unsubscriber;
 
@@ -500,28 +500,6 @@ export class RecordsData {
     return pkColumn;
   }
 
-  /**
-   * When updating records, we do not get the values for joined columns.
-   * Eg., records.patch only provides values for columns in the table.
-   *
-   * We retain previous values in such scenarios.
-   */
-  private mergePreviousJoinedColumnValues(
-    previousRecord: ApiRecord,
-    newRecord: ApiRecord,
-  ): ApiRecord {
-    const joining = get(this.meta.joining);
-    const joinedColumns = joining.recordsRequestParams().joined_columns;
-
-    const mergedRecord: ApiRecord = { ...newRecord };
-    joinedColumns?.forEach(({ alias }) => {
-      if (!(alias in mergedRecord) && alias in previousRecord) {
-        mergedRecord[alias] = previousRecord[alias];
-      }
-    });
-    return mergedRecord;
-  }
-
   private updateSummaryStores(responses: RpcResponse<RecordsResponse>[]): void {
     let newLinkedRecordSummaries: ImmutableMap<
       string,
@@ -552,10 +530,48 @@ export class RecordsData {
     this.joinedRecordSummaries.addBespokeValues(newJoinedRecordSummaries);
   }
 
-  async bulkDml(
-    modificationRecipes: RowModificationRecipe[],
-    additionRecipes: RowAdditionRecipe[] = [],
-  ): Promise<{ rowIds: string[]; columnIds: string[] }> {
+  /**
+   * Why are we merging?
+   * - We have some attributes of a record like joined columns, that are not provided
+   *   in the response by all requests.
+   *   Eg., records.patch only provides columns in the table, not joined columns.
+   */
+  private mergeUpdatedRecord(
+    rowIdentifier: string,
+    record: ApiRecord,
+    updatedRecord: ApiRecord,
+  ): ApiRecord {
+    const cellsLoading = get(this.meta.cellsLoading);
+
+    const mergedResult = { ...record };
+    for (const [columnId, newValue] of Object.entries(updatedRecord)) {
+      const cellKey = getCellKey(rowIdentifier, columnId);
+
+      // Ignore any loading cells. This is to handle the case where
+      // a user is updating multiple cells in one record faster than the
+      // network can respond. For example if the user updates cell A, then
+      // updates B in the same row, and _then_ we receive the response for
+      // cell A, we don't want to mutate cell B with the response from
+      // update A because that would wipe out the optimistic UI updates that
+      // we did at the start of operation B.
+      // The user may also have updated the same cell again.
+
+      const shouldStoreNewValue = !cellsLoading.has(cellKey);
+      if (shouldStoreNewValue) {
+        mergedResult[columnId] = newValue;
+      }
+    }
+
+    return mergedResult;
+  }
+
+  async bulkDml({
+    modificationRecipes,
+    additionRecipes,
+  }: {
+    modificationRecipes: RowModificationRecipe[];
+    additionRecipes: RowAdditionRecipe[];
+  }): Promise<{ rowIds: string[]; columnIds: string[] }> {
     const convertedRecipes = additionRecipes.map(makeRowModificationRecipe);
     const additionalRows = convertedRecipes
       .map(({ row }) => row)
@@ -592,6 +608,23 @@ export class RecordsData {
     const { cellClientSideErrors, rowCreationStatus } = this.meta;
     const pkColumn = this.getPkColumOrError();
 
+    const recipeMap = new Map(
+      recipes.map((recipe) => [recipe.row.identifier, recipe]),
+    );
+
+    function preProcessRecordRow<R extends RecordRow>(row: R): R {
+      const recipe = recipeMap.get(row.identifier);
+      if (!recipe) return row;
+      return row.withRecord({
+        ...row.record,
+        ...buildRecordFromRecipe(recipe.cells),
+      }) as R;
+    }
+
+    // Optimistic UI updates prior to API calls
+    this.fetchedRecordRows.update((rows) => rows.map(preProcessRecordRow));
+    this.newRecords.update((rows) => rows.map(preProcessRecordRow));
+
     function forEachRow(fn: (r: RowModificationRecipe) => void) {
       recipes.forEach(fn);
     }
@@ -608,15 +641,16 @@ export class RecordsData {
       forEachRow((r) => validateRowModificationRecipe(r, pkColumn));
     }
 
+    const requestId = getGloballyUniqueId();
+
     forEachCell((cellKey) => {
       cellStatus.set(cellKey, { state: 'processing' });
-      this.updatePromises?.get(cellKey)?.cancel();
+      this.latestCellUpdateRequestId.set(cellKey, requestId);
     });
     forEachRow(({ row }) => {
       if (isDraftRecordRow(row)) {
         rowCreationStatus.set(row.identifier, { state: 'processing' });
       }
-      this.updatePromises?.get(row.identifier)?.cancel();
     });
 
     const requests = recipes.map(({ row, cells }) => {
@@ -625,6 +659,7 @@ export class RecordsData {
         return api.records.add({
           ...this.apiContext,
           record_def: {
+            ...row.record,
             ...Object.fromEntries(this.contextualFilters),
             ...recordDef,
           },
@@ -689,19 +724,28 @@ export class RecordsData {
         });
         return makeFallbackRow();
       }
+
       const result = first(response.value.results);
       if (!result) return makeFallbackRow();
 
-      const mergedResult = this.mergePreviousJoinedColumnValues(
+      for (const columnId of Object.keys(row.record)) {
+        const cellKey = getCellKey(row.identifier, columnId);
+        if (
+          // If no other request is updating the same cell, update the status
+          this.latestCellUpdateRequestId.get(cellKey) === requestId ||
+          isDraftRecordRow(row)
+        ) {
+          cellStatus.set(cellKey, { state: 'success' });
+          cellClientSideErrors.delete(cellKey);
+          this.latestCellUpdateRequestId.delete(cellKey);
+        }
+      }
+
+      const mergedResult = this.mergeUpdatedRecord(
+        row.identifier,
         row.record,
         result,
       );
-
-      for (const columnId of Object.keys(row.record)) {
-        const cellKey = getCellKey(row.identifier, columnId);
-        cellStatus.set(cellKey, { state: 'success' });
-        cellClientSideErrors.delete(cellKey);
-      }
 
       if (isDraftRecordRow(row)) {
         return PersistedRecordRow.fromDraft(row.withRecord(mergedResult)) as R;
@@ -715,124 +759,49 @@ export class RecordsData {
     this.updateSummaryStores(responses);
   }
 
-  // TODO: it would be nice to refactor this function to utilize the
-  // `bulkDml` function (which actually updates the store values too).
-  async updateCell(
-    row: PersistedRecordRow,
-    column: RawColumnWithMetadata,
-  ): Promise<PersistedRecordRow> {
-    // TODO compute and validate client side errors before saving
+  async refreshRow(rowId: string): Promise<void> {
+    const row = get(this.selectableRowsMap).get(rowId);
+    if (!row) return;
+    if (!isPersistedRecordRow(row)) return;
+
     const { record } = row;
     const pkColumn = get(this.columnsDataStore.pkColumn);
-    if (pkColumn === undefined) {
-      // eslint-disable-next-line no-console
-      console.error('Unable to update record for a row without a primary key');
-      return row;
-    }
+    if (pkColumn === undefined) return;
+
     const primaryKeyValue = record[pkColumn.id];
-    if (primaryKeyValue === undefined) {
-      // eslint-disable-next-line no-console
-      console.error(
-        'Unable to update record for a row with a missing primary key value',
-      );
-      return row;
-    }
-    const cellKey = getCellKey(row.identifier, column.id);
-    this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
-    this.updatePromises?.get(cellKey)?.cancel();
+    if (primaryKeyValue === undefined) return;
 
-    const promise = api.records
-      .patch({
-        ...this.apiContext,
-        record_id: primaryKeyValue,
-        record_def: {
-          [String(column.id)]: record[column.id],
-        },
-      })
-      .run();
-
-    if (!this.updatePromises) {
-      this.updatePromises = new Map();
-    }
-    this.updatePromises.set(cellKey, promise);
-
-    try {
-      const result = await promise;
-      this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
-
-      const response: RpcResponse<RecordsResponse> = {
-        status: 'ok',
-        value: result,
-      };
-      this.updateSummaryStores([response]);
-
-      const updatedRecord = result.results[0];
-      const mergedRecord = this.mergePreviousJoinedColumnValues(
-        row.record,
-        updatedRecord,
-      );
-
-      return row.withRecord(mergedRecord);
-    } catch (err) {
-      this.meta.cellModificationStatus.set(cellKey, {
-        state: 'failure',
-        errors: [RpcError.fromAnything(err)],
-      });
-    } finally {
-      if (this.updatePromises.get(cellKey) === promise) {
-        this.updatePromises.delete(cellKey);
-      }
-    }
-    return row;
-  }
-
-  async refetchAndMutateRow(
-    row: PersistedRecordRow,
-  ): Promise<PersistedRecordRow> {
-    const { record } = row;
-    const pkColumn = get(this.columnsDataStore.pkColumn);
-    if (pkColumn === undefined) {
-      // eslint-disable-next-line no-console
-      console.error('Unable to fetch record without a primary key column');
-      return row;
-    }
-    const primaryKeyValue = record[pkColumn.id];
-    if (primaryKeyValue === undefined) {
-      // eslint-disable-next-line no-console
-      console.error('Unable to fetch record with a missing primary key value');
-      return row;
-    }
     const { joining } = get(this.meta.recordsRequestParamsData);
 
-    try {
-      const result = await api.records
-        .get({
-          ...this.apiContext,
-          record_id: primaryKeyValue,
-          return_record_summaries: this.loadIntrinsicRecordSummaries,
-          ...joining.recordsRequestParams(),
-        })
-        .run();
+    const response = await api.records
+      .get({
+        ...this.apiContext,
+        record_id: primaryKeyValue,
+        return_record_summaries: this.loadIntrinsicRecordSummaries,
+        ...joining.recordsRequestParams(),
+      })
+      .send();
 
-      const response: RpcResponse<RecordsResponse> = {
-        status: 'ok',
-        value: result,
-      };
-      this.updateSummaryStores([response]);
+    // We're silently swallowing errors. This might not be great for the user.
+    // We could consider ways of displaying this, but it might require some
+    // thought and design.
+    if (response.status === 'error') return;
+    const result = response.value;
 
-      const updatedRecord = result.results[0];
-      const mergedRecord = this.mergePreviousJoinedColumnValues(
-        row.record,
+    const updatedRecord = result.results[0];
+
+    const postProcessRow = (r: PersistedRecordRow) => {
+      if (r.identifier !== rowId) return r;
+      const mergedResult = this.mergeUpdatedRecord(
+        rowId,
+        r.record,
         updatedRecord,
       );
+      return r.withRecord(mergedResult);
+    };
 
-      return row.mutateRecord(mergedRecord);
-    } catch (err) {
-      // When error in refetching, return row as-is
-      // eslint-disable-next-line no-console
-      console.error('Error refetching row', err);
-      return row;
-    }
+    this.fetchedRecordRows.update((rows) => rows.map(postProcessRow));
+    this.updateSummaryStores([{ status: 'ok', value: result }]);
   }
 
   getEmptyApiRecord(): ApiRecord {
@@ -902,34 +871,6 @@ export class RecordsData {
       }
     }
     return row;
-  }
-
-  async createOrUpdateRecord(
-    row: RecordRow,
-    column: RawColumnWithMetadata,
-  ): Promise<PersistedRecordRow | DraftRecordRow> {
-    const rowToCreateOrUpdate = isPlaceholderRecordRow(row)
-      ? DraftRecordRow.fromPlaceholder(row)
-      : row;
-
-    // Row may not have been updated yet in view when additional request is made.
-    // So check current values to ensure another row has not been created.
-    const existingNewRecordRow = get(this.newRecords).find(
-      (entry) => entry.identifier === rowToCreateOrUpdate.identifier,
-    );
-
-    if (!existingNewRecordRow) {
-      this.newRecords.update((existing) => [...existing, rowToCreateOrUpdate]);
-    }
-
-    let result: PersistedRecordRow | DraftRecordRow;
-    if (isPersistedRecordRow(rowToCreateOrUpdate)) {
-      result = await this.updateCell(rowToCreateOrUpdate, column);
-    } else {
-      result = await this.createRecord(rowToCreateOrUpdate);
-    }
-
-    return result;
   }
 
   async duplicateRecord(sourceRow: RecordRow): Promise<void> {
