@@ -40,3 +40,9 @@ get_type_options = msar.MathesarFunction(
     name="get_type_options",
     code_path=d3l_path("get_type_options.sql"),
 )
+
+is_default_possibly_dynamic = msar.MathesarFunction(
+    dependencies=[],
+    name="is_default_possibly_dynamic",
+    code_path=d3l_path("is_default_possibly_dynamic.sql"),
+)
