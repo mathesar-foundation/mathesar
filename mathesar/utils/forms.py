@@ -1,9 +1,11 @@
 from uuid import uuid4
+import json
 from collections import defaultdict
 
 from django.db import transaction
 
-from db.forms import get_tab_col_info_map, form_insert
+from db import connection as db_conn
+from db.forms import get_tab_col_info_map
 from db.roles import get_current_role_from_db
 from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
@@ -175,53 +177,88 @@ def delete_form(form_id):
     Form.objects.get(id=form_id).delete()
 
 
-def iterate_form_fields(fields, parent_field=None, depth=0, fields_to_pick=[]):
-    """
-    Depth-first generator that iterates through the form fields
-    """
-    for field in fields:
-        yield field, parent_field, depth
-        if field.key in fields_to_pick:
-            # We prune the tree early if the fk interaction for a field is "pick" instead of "create"
-            #
-            #              A
-            #            /   \
-            # ("create")B     C("pick")
-            #          / \   / \
-            #         D   E F   G
-            #
-            # We don't traverse fields F and G since we know we're going to "pick" a value for C.
-            # This has 2 main advantages:
-            # - Even if values for F and G are provided by the frontend during submit,
-            #   we won't "pick" for C _and_ "create" for F and G, we'll only "pick" for C.
-            # - We only send the fields that are required for insert to the db.
-            continue
-        yield from iterate_form_fields(
-            field.child_fields.all(),
-            field,
-            depth + 1,
-            fields_to_pick
-        )
-
-
 def submit_form(form_token, values):
     form_model = Form.objects.get(token=form_token)
     assert form_model.publish_public, 'This form does not accept submissions'
-    fields_to_pick = [i for i in values.keys() if isinstance(values[i], dict) and values[i].get('type') == 'pick']
-    field_info_list = [
-        {
-            "key": field.key,
-            "parent_key": parent_field.key if parent_field else None,
-            "column_attnum": field.column_attnum,
-            "table_oid": parent_field.related_table_oid if parent_field else form_model.base_table_oid,
-            "depth": depth
-        } for field, parent_field, depth in iterate_form_fields(
-            form_model.fields.filter(parent_field__isnull=True),
-            fields_to_pick=fields_to_pick
-        )
-    ]
+    fields = list(form_model.fields.all().select_related("parent_field"))
+    children_by_parent_id = defaultdict(list)
+    field_by_key = {}
+    for field in fields:
+        children_by_parent_id[field.parent_field_id].append(field)
+        field_by_key[field.key] = field
+
+    safe_values = {
+        key: value for key, value in (values or {}).items() if key in field_by_key
+    }
+
+    def build_record_spec_for_parent(parent_field):
+        if parent_field is None:
+            table_oid = form_model.base_table_oid
+            parent_id = None
+        else:
+            table_oid = parent_field.related_table_oid
+            parent_id = parent_field.id
+
+        field_specs = []
+        for field in children_by_parent_id.get(parent_id, []):
+            if field.kind == "scalar_column":
+                if field.key not in safe_values:
+                    continue
+                value = safe_values[field.key]
+                field_specs.append(
+                    {
+                        "column_attnum": field.column_attnum,
+                        "value": {
+                            "type": "literal",
+                            "value": value,
+                        },
+                    }
+                )
+
+            elif field.kind == "foreign_key":
+                fk_value = safe_values.get(field.key)
+                if not isinstance(fk_value, dict):
+                    continue
+
+                action = fk_value.get("type")
+
+                if action == "pick":
+                    if "value" not in fk_value and not field.is_required:
+                        continue
+                    field_specs.append(
+                        {
+                            "column_attnum": field.column_attnum,
+                            "value": {
+                                "type": "literal",
+                                "value": fk_value.get("value"),
+                            },
+                        }
+                    )
+
+                elif action == "create":
+                    if field.related_table_oid is None:
+                        continue
+                    nested_record_spec = build_record_spec_for_parent(field)
+                    field_specs.append(
+                        {
+                            "column_attnum": field.column_attnum,
+                            "value": {
+                                "type": "new_linked_record_id",
+                                "record": nested_record_spec,
+                            },
+                        }
+                    )
+
+        record_spec = {
+            "table_oid": table_oid,
+            "fields": field_specs,
+        }
+        return record_spec
+
+    record_spec = build_record_spec_for_parent(None)
+
     with form_model.connection as conn:
-        form_insert(field_info_list, values, conn)
+        db_conn.exec_msar_func(conn, "insert_related", json.dumps(record_spec)).fetchone()
 
 
 @transaction.atomic
