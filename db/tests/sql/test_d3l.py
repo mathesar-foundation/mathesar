@@ -16,3 +16,67 @@ def test_get_object_counts(db_conn):
     assert object_counts["schema_count"] == 2
     assert object_counts["table_count"] == 3
     assert object_counts["record_count"] is not None
+
+
+def test_get_type_options(manytypes):
+    d3l.get_type_options.install(manytypes)
+    # We testa against attribute metadata returned from pg_attribute, since
+    # that's what needs to work in practice.
+    res = manytypes.execute(
+        """
+        SELECT attname, pg_temp.get_type_options(atttypid, atttypmod, attndims)
+        FROM pg_attribute
+          WHERE attrelid='manytypes'::regclass AND attnum > 0
+        ORDER BY attnum;
+        """
+    ).fetchall()
+    expect_res = [
+        ('id', None),
+        ('ivl_plain', {'fields': None, 'precision': None}),
+        ('ivl_yr', {'fields': 'year', 'precision': None}),
+        ('ivl_mo', {'fields': 'month', 'precision': None}),
+        ('ivl_dy', {'fields': 'day', 'precision': None}),
+        ('ivl_hr', {'fields': 'hour', 'precision': None}),
+        ('ivl_mi', {'fields': 'minute', 'precision': None}),
+        ('ivl_se', {'fields': 'second', 'precision': None}),
+        ('ivl_ye_mo', {'fields': 'year to month', 'precision': None}),
+        ('ivl_dy_hr', {'fields': 'day to hour', 'precision': None}),
+        ('ivl_dy_mi', {'fields': 'day to minute', 'precision': None}),
+        ('ivl_dy_se', {'fields': 'day to second', 'precision': None}),
+        ('ivl_hr_mi', {'fields': 'hour to minute', 'precision': None}),
+        ('ivl_hr_se', {'fields': 'hour to second', 'precision': None}),
+        ('ivl_mi_se', {'fields': 'minute to second', 'precision': None}),
+        ('ivl_se_0', {'fields': 'second', 'precision': 0}),
+        ('ivl_se_3', {'fields': 'second', 'precision': 3}),
+        ('ivl_se_6', {'fields': 'second', 'precision': 6}),
+        ('ivl_dy_se0', {'fields': 'day to second', 'precision': 0}),
+        ('ivl_dy_se3', {'fields': 'day to second', 'precision': 3}),
+        ('ivl_dy_se6', {'fields': 'day to second', 'precision': 6}),
+        ('ivl_hr_se0', {'fields': 'hour to second', 'precision': 0}),
+        ('ivl_hr_se3', {'fields': 'hour to second', 'precision': 3}),
+        ('ivl_hr_se6', {'fields': 'hour to second', 'precision': 6}),
+        ('ivl_mi_se0', {'fields': 'minute to second', 'precision': 0}),
+        ('ivl_mi_se3', {'fields': 'minute to second', 'precision': 3}),
+        ('ivl_mi_se6', {'fields': 'minute to second', 'precision': 6}),
+        ('ivl_plain_arr', {'fields': None, 'item_type': 'interval', 'precision': None}),
+        ('ivl_mi_se6_arr', {'fields': 'minute to second', 'item_type': 'interval', 'precision': 6}),
+        ('num_plain', {'scale': None, 'precision': None}),
+        ('num_8', {'scale': 0, 'precision': 8}),
+        ('num_17_2', {'scale': 2, 'precision': 17}),
+        ('num_plain_arr', {'scale': None, 'item_type': 'numeric', 'precision': None}),
+        ('num_17_2_arr', {'scale': 2, 'item_type': 'numeric', 'precision': 17}),
+        ('var_plain', {'length': None}),
+        ('var_16', {'length': 16}),
+        ('var_255', {'length': 255}),
+        ('cha_1', {'length': 1}),
+        ('cha_20', {'length': 20}),
+        ('var_16_arr', {'length': 16, 'item_type': 'character varying'}),
+        ('cha_20_arr', {'length': 20, 'item_type': 'character'}),
+        ('bit_8', {'precision': 8}),
+        ('vbt_8', {'precision': 8}),
+        ('tim_2', {'precision': 2}),
+        ('ttz_3', {'precision': 3}),
+        ('tsp_4', {'precision': 4}),
+        ('tsz_5', {'precision': 5})
+    ]
+    assert res == expect_res

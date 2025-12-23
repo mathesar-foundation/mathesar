@@ -34,3 +34,9 @@ get_object_counts = msar.MathesarFunction(
     name="get_object_counts",
     code_path=d3l_path("get_object_counts.sql"),
 )
+
+get_type_options = msar.MathesarFunction(
+    dependencies=[utils.get_interval_fields],
+    name="get_type_options",
+    code_path=d3l_path("get_type_options.sql"),
+)
