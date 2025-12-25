@@ -7,7 +7,7 @@ const emailType: AbstractTypeConfiguration = {
   getIcon: () => ({ ...iconUiTypeEmail, label: 'Email' }),
   defaultDbType: DB_TYPES.MSAR__EMAIL,
   cellInfo: {
-    type: 'string',
+    type: 'email',
   },
 };
 

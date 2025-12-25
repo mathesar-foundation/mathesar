@@ -3,6 +3,7 @@ import boolean from './boolean';
 import date from './date';
 import datetime from './datetime';
 import duration from './duration';
+import email from './email';
 import file from './file';
 import money from './money';
 import number from './number';
@@ -25,6 +26,7 @@ const simpleDataTypeComponentFactories: Record<
   number,
   money,
   uri,
+  email,
   duration,
   date,
   time,

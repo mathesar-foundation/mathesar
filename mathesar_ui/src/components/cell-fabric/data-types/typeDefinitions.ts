@@ -15,6 +15,7 @@ export type SimpleCellDataTypes =
   | 'boolean'
   | 'number'
   | 'uri'
+  | 'email'
   | 'duration'
   | 'date'
   | 'money'
