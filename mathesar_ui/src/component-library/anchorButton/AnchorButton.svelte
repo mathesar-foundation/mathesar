@@ -8,7 +8,7 @@
    * Appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
    * @required
    */
-  export let appearance: Appearance = 'default';
+  export let appearance: Appearance = 'control';
 
   /**
    * Size. One of: 'small', 'medium', 'large'.
