@@ -4426,31 +4426,22 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$
 WITH orderable_cte AS (
-  SELECT attnum
+  SELECT DISTINCT attnum
   FROM pg_catalog.pg_attribute
-    INNER JOIN pg_catalog.pg_cast ON atttypid=castsource
-    INNER JOIN pg_catalog.pg_operator ON casttarget=oprleft
+    INNER JOIN pg_catalog.pg_type ON atttypid = pg_type.oid
+    INNER JOIN pg_catalog.pg_opclass ON (pg_type.oid = opcintype OR pg_type.oid = opckeytype)
+    INNER JOIN pg_catalog.pg_am ON opcmethod = pg_am.oid
   WHERE
     attrelid = tab_id
     AND attnum > 0
     AND NOT attisdropped
-    AND castcontext = 'i'
-    AND oprname = '<'
-  UNION SELECT attnum
-  FROM pg_catalog.pg_attribute
-    INNER JOIN pg_catalog.pg_operator ON atttypid=oprleft
-  WHERE
-    attrelid = tab_id
-    AND attnum > 0
-    AND NOT attisdropped
-    AND oprname = '<'
+    AND amname = 'btree'
+    AND opcdefault = true
+    AND has_column_privilege(tab_id, attnum, 'SELECT')
   ORDER BY attnum
 )
 SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
--- This privilege check is redundant in context, but may be useful for other callers.
 FROM orderable_cte
--- This privilege check is redundant in context, but may be useful for other callers.
-WHERE has_column_privilege(tab_id, attnum, 'SELECT');
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
