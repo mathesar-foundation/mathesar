@@ -1,15 +1,12 @@
 <script lang="ts">
+  import FormattedInput from '@mathesar/component-library/formatted-input/FormattedInput.svelte';
   import CellValue from '@mathesar/components/CellValue.svelte';
-  import {
-    PrecomputedMatchHighlighter,
-    TextInput,
-  } from '@mathesar-component-library';
+  import { PrecomputedMatchHighlighter } from '@mathesar-component-library';
 
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { FormattedInputCellProps } from '../typeDefinitions';
 
   import UriCellContent from './UriCellContent.svelte';
-  import FormattedInput from '@mathesar/component-library/formatted-input/FormattedInput.svelte';
 
   type $$Props = FormattedInputCellProps;
 
