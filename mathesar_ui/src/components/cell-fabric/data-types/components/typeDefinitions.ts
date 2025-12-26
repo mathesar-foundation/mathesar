@@ -172,6 +172,7 @@ export interface FormattedInputCellExternalProps
   extends Omit<FormattedInputProps<string>, 'disabled' | 'value'> {
   formatForDisplay: CellValueFormatter<string>;
   useTabularNumbers?: boolean;
+  horizontalAlignment?: HorizontalAlignment;
 }
 
 export interface FormattedInputCellProps
