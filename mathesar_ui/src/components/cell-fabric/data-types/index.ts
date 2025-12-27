@@ -5,6 +5,7 @@ import datetime from './datetime';
 import duration from './duration';
 import email from './email';
 import file from './file';
+import json from './json';
 import money from './money';
 import number from './number';
 import string from './string';
@@ -16,6 +17,7 @@ import type {
   SimpleCellDataTypes,
 } from './typeDefinitions';
 import uri from './uri';
+import uuid from './uuid';
 
 const simpleDataTypeComponentFactories: Record<
   SimpleCellDataTypes,
@@ -27,6 +29,8 @@ const simpleDataTypeComponentFactories: Record<
   money,
   uri,
   email,
+  uuid,
+  json,
   duration,
   date,
   time,

@@ -16,6 +16,8 @@ export type SimpleCellDataTypes =
   | 'number'
   | 'uri'
   | 'email'
+  | 'uuid'
+  | 'json'
   | 'duration'
   | 'date'
   | 'money'

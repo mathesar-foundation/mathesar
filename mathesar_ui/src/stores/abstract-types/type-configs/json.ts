@@ -7,7 +7,7 @@ const jsonType: AbstractTypeConfiguration = {
   getIcon: () => ({ ...iconUiTypeJson, label: 'JSON' }),
   defaultDbType: DB_TYPES.JSONB,
   cellInfo: {
-    type: 'string',
+    type: 'json',
     config: {
       multiLine: true,
     },
