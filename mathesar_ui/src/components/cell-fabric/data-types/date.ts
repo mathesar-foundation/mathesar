@@ -36,7 +36,7 @@ function getProps(column: RawColumnWithMetadata): DateTimeCellExternalProps {
   };
 }
 
-const stringType: CellComponentFactory = {
+const dateType: CellComponentFactory = {
   get: (
     column: RawColumnWithMetadata,
   ): ComponentAndProps<DateTimeCellExternalProps> => ({
@@ -59,4 +59,4 @@ const stringType: CellComponentFactory = {
   },
 };
 
-export default stringType;
+export default dateType;
