@@ -547,10 +547,97 @@ export default class SheetSelection {
    * is simpler.
    */
   resized(direction: Direction): SheetSelection {
-    // TODO
+    if (!this.activeCellId) {
+      // If there is no active cell, then select first cell -- same in Google sheet
+      return this.ofFirstDataCell();
+    }
 
-    // eslint-disable-next-line no-console
-    console.log(direction, 'Sheet selection resizing is not yet implemented');
-    return this;
+    // "Anchor" of the rectangle that contains all selected cells
+    const { rowId: anchorRowId, columnId: anchorColumnId } = parseCellId(
+      this.activeCellId,
+    );
+
+    // Array for row/col ids
+    const rowOrder = [...this.plane.rowIds];
+    const colOrder = [...this.plane.columnIds];
+
+    // Row/col id string to index
+    const rowIndex = (id: string) => rowOrder.indexOf(id);
+    const colIndex = (id: string) => colOrder.indexOf(id);
+
+    // Anchor row/col index
+    const anchorRowIndex = rowIndex(anchorRowId);
+    const anchorColIndex = colIndex(anchorColumnId);
+
+    // Boundary
+    if (anchorRowIndex === -1 || anchorColIndex === -1) {
+      return this;
+    }
+
+    // Row or Col ids to indices in ascending order
+    const selectedRowIndices = [...this.rowIds]
+      .map(rowIndex)
+      .filter((i) => i !== -1)
+      .sort((a, b) => a - b);
+    const selectedColIndices = [...this.columnIds]
+      .map(colIndex)
+      .filter((i) => i !== -1)
+      .sort((a, b) => a - b);
+
+    // Top-left and Bottom-right coordinates
+    const topRowIndex =
+      selectedRowIndices.length > 0 ? selectedRowIndices[0] : anchorRowIndex;
+    const bottomRowIndex =
+      selectedRowIndices.length > 0
+        ? selectedRowIndices[selectedRowIndices.length - 1]
+        : anchorRowIndex;
+    const leftColIndex =
+      selectedColIndices.length > 0 ? selectedColIndices[0] : anchorColIndex;
+    const rightColIndex =
+      selectedColIndices.length > 0
+        ? selectedColIndices[selectedColIndices.length - 1]
+        : anchorColIndex;
+
+    // Extent is the diagonal opposite for Anchor
+    let extentRowIndex =
+      anchorRowIndex === topRowIndex ? bottomRowIndex : topRowIndex;
+    let extentColIndex =
+      anchorColIndex === leftColIndex ? rightColIndex : leftColIndex;
+
+    // Move extent point with a direction
+    switch (direction) {
+      case 'up': {
+        if (extentRowIndex <= 0) return this;
+        extentRowIndex -= 1;
+        break;
+      }
+      case 'down': {
+        if (extentRowIndex >= rowOrder.length - 1) return this;
+        extentRowIndex += 1;
+        break;
+      }
+      case 'left': {
+        if (extentColIndex <= 0) return this;
+        extentColIndex -= 1;
+        break;
+      }
+      case 'right': {
+        if (extentColIndex >= colOrder.length - 1) return this;
+        extentColIndex += 1;
+        break;
+      }
+      default:
+        return this;
+    }
+
+    // Make cell id for Extent point
+    const newExtentRowId = rowOrder[extentRowIndex];
+    const newExtentColId = colOrder[extentColIndex];
+    if (!newExtentRowId || !newExtentColId) {
+      return this;
+    }
+    const newExtentCellId = makeCellId(newExtentRowId, newExtentColId);
+
+    return this.ofDataCellRange(this.activeCellId, newExtentCellId);
   }
 }

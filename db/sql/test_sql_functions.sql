@@ -2178,7 +2178,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION test_alter_columns_single_name() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
@@ -2190,6 +2189,25 @@ BEGIN
     'col_alters',
     ARRAY['id', 'blah', 'col2', 'Col sp', 'col_opts', 'coltim']
   );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_mathesar_id_column_name()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  tab_oid oid;
+  col_alters_jsonb jsonb := '[{"attnum": 1, "name": "new_id"}]';
+BEGIN
+  PERFORM __setup_column_alter();
+  tab_oid := 'test_schema.col_alters'::regclass::oid;
+
+  BEGIN
+    PERFORM msar.alter_columns(tab_oid, col_alters_jsonb);
+  EXCEPTION
+    WHEN OTHERS THEN
+      RETURN NEXT pass('Exception was correctly raised when renaming Mathesar ID column.');
+  END;
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -5226,6 +5244,45 @@ BEGIN
     ),
     '(((atable.col2) = (''500'')) AND ((atable.col3) < (''abcde''))) OR ((atable.id) > (''20''))'
   );
+  RETURN NEXT is(
+    msar.build_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'not', 'args', jsonb_build_array(
+          jsonb_build_object(
+            'type', 'equal', 'args', jsonb_build_array(
+              jsonb_build_object('type', 'attnum', 'value', 2),
+              jsonb_build_object('type', 'literal', 'value', 500))
+          )
+        )
+      )
+    ),
+    'NOT ((atable.col1) = (''500''))'
+  );
+  RETURN NEXT is(
+    msar.build_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'not', 'args', jsonb_build_array(
+          jsonb_build_object(
+            'type', 'or', 'args', jsonb_build_array(
+              jsonb_build_object(
+                'type', 'equal', 'args', jsonb_build_array(
+                  jsonb_build_object('type', 'attnum', 'value', 2),
+                  jsonb_build_object('type', 'literal', 'value', 500))
+              ),
+              jsonb_build_object(
+                'type', 'lesser', 'args', jsonb_build_array(
+                  jsonb_build_object('type', 'attnum', 'value', 3),
+                  jsonb_build_object('type', 'literal', 'value', 100))
+              )
+            )
+          )
+        )
+      )
+    ),
+    'NOT (((atable.col1) = (''500'')) OR ((atable.col2) < (''100'')))'
+  );
 END;
 $$ LANGUAGE plpgsql;
 
@@ -6270,6 +6327,30 @@ BEGIN
       '/'           -- ❌ widget.projection.sensitivity (❌ because can't join)
     )
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_record_summary_after_dropped_referenced_column()
+RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+
+  ALTER TABLE "Counselors" DROP COLUMN "Name";
+  RETURN NEXT is(
+    msar.get_record_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      rec_id => 4,
+      return_record_summaries => true,
+      table_record_summary_templates => jsonb_build_object(
+        '"Students"'::regclass::oid,
+        '[[4], " ", [5], "% - (", [3, 3], " / ", [3, 2, 2], ")"]'::jsonb
+      )
+    ) -> 'record_summaries' ->> '4',
+    'Ida Idalia 90% - (Carol Carlson / )',
+    'record summary executes fine after dropping referenced FK column "Counselors"."Name"'
+  );
+
 END;
 $$ LANGUAGE plpgsql;
 
