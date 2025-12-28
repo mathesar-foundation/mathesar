@@ -4437,7 +4437,16 @@ WITH orderable_cte AS (
   SELECT DISTINCT attnum
   FROM pg_catalog.pg_attribute
     INNER JOIN pg_catalog.pg_type ON atttypid = pg_type.oid
-    INNER JOIN pg_catalog.pg_opclass ON (pg_type.oid = opcintype OR pg_type.oid = opckeytype)
+    INNER JOIN pg_catalog.pg_opclass ON (
+      pg_type.oid = opcintype
+      OR pg_type.oid = opckeytype
+      OR EXISTS (
+        SELECT 1 FROM pg_catalog.pg_cast
+        WHERE castsource = pg_type.oid
+          AND casttarget = opcintype
+          AND castmethod = 'b'
+      )
+    )
     INNER JOIN pg_catalog.pg_am ON opcmethod = pg_am.oid
   WHERE
     attrelid = tab_id
@@ -4448,7 +4457,7 @@ WITH orderable_cte AS (
     AND has_column_privilege(tab_id, attnum, 'SELECT')
   ORDER BY attnum
 )
-SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
+SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc') ORDER BY attnum), '[]'::jsonb)
 FROM orderable_cte
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
