@@ -13,7 +13,10 @@
   } from '@mathesar-component-library';
 
   import CellWrapper from '../CellWrapper.svelte';
-  import type { LinkedRecordCellProps } from '../typeDefinitions';
+  import type {
+    ForeignKeyCellValue,
+    LinkedRecordCellProps,
+  } from '../typeDefinitions';
 
   type $$Props = LinkedRecordCellProps;
 
@@ -23,6 +26,7 @@
   export let isActive: $$Props['isActive'];
   export let columnFabric: $$Props['columnFabric'];
   export let value: $$Props['value'] = undefined;
+  export let setValue: (newValue: $$Props['value']) => void;
   export let searchValue: $$Props['searchValue'] = undefined;
   export let recordSummary: $$Props['recordSummary'] = undefined;
   export let setRecordSummary: Required<$$Props>['setRecordSummary'] = () => {};
@@ -44,21 +48,23 @@
       const result = await recordSelector.acquireUserInput({
         tableOid: tableId,
       });
+      let newValue: ForeignKeyCellValue;
       if (result) {
         const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
         if (linkedFkColumnId) {
           const fkValue = result.record[linkedFkColumnId];
           // ResultValue accepts arrays, however we do not support fk values that are arrays.
           // If an fk value is an array (currently not possible in Mathesar), we take the first element.
-          value = Array.isArray(fkValue) ? fkValue[0] : fkValue;
+          newValue = Array.isArray(fkValue) ? fkValue[0] : fkValue;
         } else {
-          value = result.recordId;
+          newValue = result.recordId as ForeignKeyCellValue;
         }
+        setValue(newValue);
         setRecordSummary(String(result.recordId), result.recordSummary);
       } else {
-        value = null;
+        newValue = null;
+        setValue(newValue);
       }
-      dispatch('update', { value });
     } catch {
       // do nothing - record selector was closed
     }

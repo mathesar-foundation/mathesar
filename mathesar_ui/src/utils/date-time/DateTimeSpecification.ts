@@ -74,9 +74,12 @@ const timeFormattingStringMap: Record<TimeFormat, string> = {
 const commonTimeFormattingStrings = [
   'hh:mm:ss a',
   'HH:mm:ss',
+  'H:mm:ss',
   'hh:mm a',
   'HH:mm',
+  'H:mm',
 ];
+
 const commonTimeWithTZFormattingStrings = [
   ...commonTimeFormattingStrings,
   ...combine(
@@ -139,7 +142,7 @@ export default class DateTimeSpecification {
     if (this.type === 'timestamp') {
       return combine(
         allDateFormattingStrings,
-        commonTimeFormattingStrings,
+        ['HH:mm:ss', 'H:mm:ss', 'HH:mm', 'H:mm', 'hh:mm:ss a', 'hh:mm a'],
         (a, b) => `${a} ${b}`,
       );
     }

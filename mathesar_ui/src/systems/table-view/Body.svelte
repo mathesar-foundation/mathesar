@@ -71,7 +71,7 @@
         {#if $displayRowDescriptors[item.index] && shouldRender}
           <Row
             style={item.style}
-            bind:row={$displayRowDescriptors[item.index].row}
+            row={$displayRowDescriptors[item.index].row}
             rowDescriptor={$displayRowDescriptors[item.index]}
           />
         {/if}
@@ -84,7 +84,7 @@
           position: 'relative',
           height: getItemSizeFromRow(displayRowDescriptor.row),
         }}
-        bind:row={displayRowDescriptor.row}
+        row={displayRowDescriptor.row}
         rowDescriptor={displayRowDescriptor}
       />
     {/each}
