@@ -198,6 +198,8 @@
   "database_disconnect_form_into": "This will disconnect the database from Mathesar.",
   "database_disconnected_successfully": "Database disconnected successfully",
   "database_disconnected_without_sql_cleanup": "Database disconnected successfully. Mathesar was unable to connect to the database to remove internal schemas.",
+  "database_dropped_successfully": "Database dropped successfully",
+  "database_dropped_without_sql_cleanup": "Database dropped successfully. Mathesar was unable to connect to the database to remove internal schemas.",
   "database_name": "Database Name",
   "database_new_items_scroll_hint": "Scroll or click here to see the database.",
   "database_not_found": "Database with id [connectionId] is not found.",

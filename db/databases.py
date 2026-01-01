@@ -45,5 +45,8 @@ def drop_database(database_oid, conn):
 
 
 def create_database(database_name, conn):
+    # Must set autocommit before CREATE DATABASE
+    conn.commit()
+    conn.autocommit = True
     with conn.cursor() as c:
         c.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(database_name)))
