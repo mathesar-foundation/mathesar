@@ -43,14 +43,6 @@
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
   $: void underlyingDatabase.runConservatively();
 
-  // // TODO Allow dropping databases
-  // const commonData = preloadCommonData();
-  // $: currentRoleOwnsDatabase =
-  //   $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
-  // $: isDatabaseInInternalServer =
-  //   database.server.host === commonData.internal_db.host &&
-  //   database.server.port === commonData.internal_db.port;
-
   const permissionsModal = modal.spawnModalController();
   const disconnectModal = modal.spawnModalController<Database>();
   const reinstallModal = modal.spawnModalController<Database>();
@@ -146,19 +138,6 @@
                 >
                   {$_('reinstall_mathesar_schemas')}
                 </ButtonMenuItem>
-                <!--
-                TODO: Allow dropping databases
-                https://github.com/mathesar-foundation/mathesar/issues/3862
-              -->
-                <!-- {#if isDatabaseInInternalServer}
-                <ButtonMenuItem
-                  icon={iconDeleteMajor}
-                  danger
-                  disabled={!$currentRoleOwnsDatabase}
-                >
-                  {$_('delete_database')}
-                </ButtonMenuItem>
-              {/if} -->
               </DropdownMenu>
             </div>
           {/if}

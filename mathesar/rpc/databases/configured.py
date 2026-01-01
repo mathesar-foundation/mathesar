@@ -166,19 +166,14 @@ def disconnect(
     database = Database.objects.get(id=database_id)
     database_dropped = False
 
-    # Validate drop_database requirements if requested
     if drop_database:
-        # Check if user is a Mathesar admin
         if not user.is_superuser:
             raise Exception("Only Mathesar admins can drop databases")
         
-        # Check if database is on internal server
         icfg = get_internal_database_config()
         if database.server.host != icfg.host or database.server.port != icfg.port:
             raise Exception("Only databases on the internal server can be dropped")
 
-    # Try to uninstall SQL, but if connection is unavailable, skip it
-    # This allows disconnecting databases with broken connections
     sql_cleaned = True
     try:
         database.uninstall_sql(
@@ -188,19 +183,15 @@ def disconnect(
             password=password,
         )
     except db_exceptions.NoConnectionAvailable:
-        # Connection is broken, skip SQL cleanup and just remove the database record
         sql_cleaned = False
 
-    # Drop the database from the server if requested
     if drop_database:
         try:
             with connect(database_id, user) as conn:
                 # Must set autocommit before any operations to avoid transaction block
                 conn.commit()
-                conn.autocommit = True
-                # Get database OID to drop
-                with conn.cursor() as c:
-                    c.execute("SELECT oid FROM pg_database WHERE datname = %s", (database.name,))
+                conn.commit()
+                conn.autocommit = TrueFROM pg_database WHERE datname = %s", (database.name,))
                     result = c.fetchone()
                     if result:
                         database_oid = result[0]
