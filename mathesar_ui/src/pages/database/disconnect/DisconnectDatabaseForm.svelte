@@ -339,7 +339,8 @@
       form.reset();
       cancel();
     }}
-    canProceed={$dropOption === 'keep' || ($dropOption === 'drop' && canDropDatabase)}
+    canProceed={$dropOption === 'keep' ||
+      ($dropOption === 'drop' && canDropDatabase)}
     onProceed={submit}
     proceedButton={{ label: $_('disconnect') }}
     cancelButton={{ label: $_('cancel') }}

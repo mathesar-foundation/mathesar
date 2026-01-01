@@ -62,7 +62,7 @@
       toast.success(
         result.sql_cleaned
           ? $_('database_dropped_successfully')
-          : $_('database_dropped_without_sql_cleanup')
+          : $_('database_dropped_without_sql_cleanup'),
       );
     } else if (result.sql_cleaned) {
       toast.success($_('database_disconnected_successfully'));
