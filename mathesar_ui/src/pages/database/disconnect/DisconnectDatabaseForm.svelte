@@ -19,6 +19,8 @@
     type DatabaseDisconnectFn,
     databasesStore,
   } from '@mathesar/stores/databases';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     Checkbox,
     Fieldset,
@@ -34,6 +36,23 @@
   export let database: Database;
   export let disconnect: DatabaseDisconnectFn;
   export let cancel: () => void;
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  const commonData = preloadCommonData();
+
+  $: isAdmin = $userProfileStore?.isMathesarAdmin ?? false;
+  $: isInternalDatabase = (() => {
+    if (commonData.routing_context === 'anonymous') {
+      return false;
+    }
+    const internalDb = commonData.internal_db;
+    return (
+      internalDb &&
+      database.server.host === internalDb.host &&
+      database.server.port === internalDb.port
+    );
+  })();
+  $: canDropDatabase = isAdmin && isInternalDatabase;
 
   const dropOptions = {
     keep: $_('keep_the_database'),
@@ -85,6 +104,7 @@
       schemas_to_remove: schemasToRemove,
       role: $useRole ? { name: $roleName, password: $rolePassword } : undefined,
       disconnect_db_server: isLastDbInServer && $removeDbServer,
+      drop_database: $dropOption === 'drop',
     });
   }
 </script>
@@ -183,32 +203,42 @@
 
   <FieldLayout>
     <Fieldset label={$_('in_postgres')} boxed>
-      <FieldLayout>
-        <RadioGroup
-          options={dropOptionKeys}
-          getRadioLabel={getDropOptionLabel}
-          bind:value={$dropOption}
-          isInline
-        />
-      </FieldLayout>
-      {#if $dropOption === 'drop'}
+      {#if canDropDatabase}
         <FieldLayout>
-          <WarningBox>
-            <RichText
-              text={$_('drop_not_yet_implemented')}
-              let:slotName
-              let:translatedArg
-            >
-              {#if slotName === 'link'}
-                <a
-                  href="https://github.com/mathesar-foundation/mathesar/issues/3862"
-                >
-                  {translatedArg}
-                </a>
-              {/if}
-            </RichText>
-          </WarningBox>
+          <RadioGroup
+            options={dropOptionKeys}
+            getRadioLabel={getDropOptionLabel}
+            bind:value={$dropOption}
+            isInline
+          />
         </FieldLayout>
+      {/if}
+      {#if $dropOption === 'drop'}
+        {#if !canDropDatabase}
+          <FieldLayout>
+            <WarningBox>
+              <RichText
+                text={$_('drop_not_yet_implemented')}
+                let:slotName
+                let:translatedArg
+              >
+                {#if slotName === 'link'}
+                  <a
+                    href="https://github.com/mathesar-foundation/mathesar/issues/3862"
+                  >
+                    {translatedArg}
+                  </a>
+                {/if}
+              </RichText>
+            </WarningBox>
+          </FieldLayout>
+        {:else}
+          <FieldLayout>
+            <WarningBox>
+              {$_('drop_database_warning')}
+            </WarningBox>
+          </FieldLayout>
+        {/if}
       {:else if $dropOption === 'keep'}
         <FieldLayout>
           <LabeledInput layout="inline-input-first">
@@ -309,7 +339,7 @@
       form.reset();
       cancel();
     }}
-    canProceed={$dropOption === 'keep'}
+    canProceed={$dropOption === 'keep' || ($dropOption === 'drop' && canDropDatabase)}
     onProceed={submit}
     proceedButton={{ label: $_('disconnect') }}
     cancelButton={{ label: $_('cancel') }}

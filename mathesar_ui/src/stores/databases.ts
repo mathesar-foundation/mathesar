@@ -103,7 +103,8 @@ class DatabasesStore {
     schemas_to_remove?: SystemSchema[];
     role?: { name: string; password: string };
     disconnect_db_server: boolean;
-  }): Promise<{ sql_cleaned: boolean }> {
+    drop_database?: boolean;
+  }): Promise<{ sql_cleaned: boolean; database_dropped: boolean }> {
     const result = await api.databases.configured
       .disconnect({
         database_id: p.database.id,
@@ -112,6 +113,7 @@ class DatabasesStore {
         role_name: p.role?.name,
         password: p.role?.password,
         disconnect_db_server: p.disconnect_db_server,
+        drop_database: p.drop_database,
       })
       .run();
     this.unsortedDatabases.delete(p.database.id);

@@ -92,9 +92,11 @@ export const databases = {
         role_name?: string;
         password?: string;
         disconnect_db_server?: boolean;
+        drop_database?: boolean;
       },
       {
         sql_cleaned: boolean;
+        database_dropped: boolean;
       }
     >(),
   },

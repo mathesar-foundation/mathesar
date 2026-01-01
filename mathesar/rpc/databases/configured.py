@@ -2,9 +2,12 @@ from typing import TypedDict, Optional
 
 from modernrpc.core import REQUEST_KEY
 
+from config.database_config import get_internal_database_config
+from db.databases import drop_database as drop_database_from_server
 from mathesar.models.base import Database
 from mathesar.models import exceptions as db_exceptions
 from mathesar.rpc.decorators import mathesar_rpc_method
+from mathesar.rpc.utils import connect
 
 
 class ConfiguredDatabaseInfo(TypedDict):
@@ -109,8 +112,10 @@ class DisconnectResult(TypedDict):
     Attributes:
         sql_cleaned: Whether Mathesar schemas were successfully removed from the database.
             False indicates the connection was unavailable and cleanup was skipped.
+        database_dropped: Whether the database was dropped from the server.
     """
     sql_cleaned: bool
+    database_dropped: bool
 
 
 @mathesar_rpc_method(name="databases.configured.disconnect")
@@ -121,7 +126,9 @@ def disconnect(
         strict: bool = True,
         role_name: str = None,
         password: str = None,
-        disconnect_db_server: bool = False
+        disconnect_db_server: bool = False,
+        drop_database: bool = False,
+        **kwargs
 ) -> DisconnectResult:
     """
     Disconnect a configured database, after removing Mathesar SQL from it.
@@ -148,11 +155,27 @@ def disconnect(
             metadata(host, port, role credentials) from Mathesar.
             This is intended for optional use while disconnecting the
             last database on the server.
+        drop_database: If True, will drop the database from the server.
+            Only works for databases on the internal server and requires
+            Mathesar admin privileges.
 
     Returns:
         The result of the disconnect operation.
     """
+    user = kwargs.get(REQUEST_KEY).user
     database = Database.objects.get(id=database_id)
+    database_dropped = False
+
+    # Validate drop_database requirements if requested
+    if drop_database:
+        # Check if user is a Mathesar admin
+        if not user.is_superuser:
+            raise Exception("Only Mathesar admins can drop databases")
+        
+        # Check if database is on internal server
+        icfg = get_internal_database_config()
+        if database.server.host != icfg.host or database.server.port != icfg.port:
+            raise Exception("Only databases on the internal server can be dropped")
 
     # Try to uninstall SQL, but if connection is unavailable, skip it
     # This allows disconnecting databases with broken connections
@@ -168,9 +191,26 @@ def disconnect(
         # Connection is broken, skip SQL cleanup and just remove the database record
         sql_cleaned = False
 
+    # Drop the database from the server if requested
+    if drop_database:
+        try:
+            with connect(database_id, user) as conn:
+                # Get database OID to drop
+                with conn.cursor() as c:
+                    c.execute("SELECT oid FROM pg_database WHERE datname = %s", (database.name,))
+                    result = c.fetchone()
+                    if result:
+                        database_oid = result[0]
+                        drop_database_from_server(database_oid, conn)
+                        database_dropped = True
+                    else:
+                        raise Exception(f"Database {database.name} not found on server")
+        except Exception as e:
+            raise Exception(f"Failed to drop database: {str(e)}")
+
     database.delete()
     server_db_count = len(Database.objects.filter(server=database.server))
     if disconnect_db_server and server_db_count == 0:
         database.server.delete()
 
-    return DisconnectResult(sql_cleaned=sql_cleaned)
+    return DisconnectResult(sql_cleaned=sql_cleaned, database_dropped=database_dropped)
