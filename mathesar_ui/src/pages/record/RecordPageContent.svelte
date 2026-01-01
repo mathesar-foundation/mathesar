@@ -23,9 +23,47 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
   import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { toast } from '@mathesar/stores/toast';
+  import { Button, Icon } from '@mathesar-component-library';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import { router } from 'tinro';
+
 
   export let record: RecordStore;
+  // Check if user has permission to delete
+$: ({ currentRolePrivileges } = record.table.currentAccess);
+$: canDeleteTableRecords = $currentRolePrivileges.has('DELETE');
 
+async function handleDeleteRecord() {
+  void confirmDelete({
+    identifierType: $_('record'),
+    body: [
+      $_('deleted_records_cannot_be_recovered', { values: { count: 1 } }),
+      $_('are_you_sure_to_proceed'),
+    ],
+    onProceed: async () => {
+
+      await api.records.delete({
+        database_id: record.table.schema.database.id,
+        schema_oid: record.table.schema.oid,
+        table_oid: record.table.oid,
+        record_ids: [record.recordPk], // <-- FIXED
+      }).run();
+    router.goto(
+        `/db/${record.table.schema.database.id}/schemas/${record.table.schema.oid}/tables/${record.table.oid}/`
+       );
+    },
+    onError: (e) => toast.fromError(e),
+    onSuccess: () => {
+      toast.success({
+        title: $_('count_records_deleted_successfully', {
+          values: { count: 1 },
+        }),
+      });
+    },
+  });
+}
   $: ({ table, tableStructure } = record);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canUpdateTableRecords = $currentRolePrivileges.has('UPDATE');
@@ -87,9 +125,18 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
           {/if}
         </RichText>
       </div>
-      <div slot="action">
-        <div class="form-status"><FormStatus {form} /></div>
-      </div>
+     <div slot="action" class="header-actions">
+  <div class="form-status"><FormStatus {form} /></div>
+
+  <Button
+    on:click={handleDeleteRecord}
+    disabled={!canDeleteTableRecords}
+    appearance="danger"
+  >
+    <Icon {...iconDeleteMajor} />
+    <span>{$_('delete_records', { values: { count: 1 } })}</span>
+  </Button>
+</div>
     </AppSecondaryHeader>
   </div>
   <InsetPageLayout>
