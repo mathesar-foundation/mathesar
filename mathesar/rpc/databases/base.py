@@ -1,11 +1,11 @@
 from typing import Literal, TypedDict
-
 from modernrpc.core import REQUEST_KEY
-
+from config.database_config import get_internal_database_config
 from db.databases import get_database, drop_database
 from mathesar.models.base import Database
 from mathesar.rpc.utils import connect
 from mathesar.rpc.decorators import mathesar_rpc_method
+from mathesar.rpc.exceptions.handlers import MathesarException
 
 
 class DatabaseInfo(TypedDict):
@@ -63,8 +63,14 @@ def delete(*, database_oid: int, database_id: int, **kwargs) -> None:
         database_id: The Django id of the database to connect to.
     """
     user = kwargs.get(REQUEST_KEY).user
-    with connect(database_id, user) as conn:
-        drop_database(database_oid, conn)
+    if not user.is_superuser:
+        raise MathesarException("Only Mathesar admins can delete databases")
+    db = Database.objects.get(id=database_id)
+    icfg = get_internal_database_config()
+    if db.server.host != icfg.host or db.server.port != icfg.port:
+        raise MathesarException("Only databases on the internal server can be deleted")
+    with connect(database_id, user) as c:
+        drop_database(database_oid, c)
 
 
 @mathesar_rpc_method(name="databases.upgrade_sql")
