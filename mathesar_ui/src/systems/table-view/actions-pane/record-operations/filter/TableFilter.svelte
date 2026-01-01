@@ -121,6 +121,7 @@
   badgeCount={individualFilterCount}
   {addColumnToOperation}
   applied={displayFilterList}
+  autoReposition
   {...$$restProps}
 >
   <div class="filters" bind:this={content} use:dnd={{ onChange }}>
