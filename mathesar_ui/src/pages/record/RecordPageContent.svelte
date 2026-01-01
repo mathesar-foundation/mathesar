@@ -18,8 +18,14 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableLink from '@mathesar/components/TableLink.svelte';
-  import { iconDeleteMajor ,iconRecord, iconSave, iconUndo } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconRecord,
+    iconSave,
+    iconUndo,
+  } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import { getTablePageUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
@@ -75,6 +81,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     );
     await record.patch(patch);
   }
+
   async function handleDeleteRecord() {
     void confirmDelete({
       identifierType: $_('record'),
@@ -91,7 +98,11 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
           })
           .run();
         router.goto(
-          `/db/${record.table.schema.database.id}/schemas/${record.table.schema.oid}/tables/${record.table.oid}/`,
+          getTablePageUrl(
+            record.table.schema.database.id,
+            record.table.schema.oid,
+            record.table.oid,
+          ),
         );
       },
       onError: (e) => toast.fromError(e),
@@ -204,7 +215,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     display: flex;
   }
   .form-status {
-    flex: 1
+    flex: 1;
   }
 
   .fields {
