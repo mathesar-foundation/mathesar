@@ -205,12 +205,9 @@
     <Fieldset label={$_('in_postgres')} boxed>
       {#if canDropDatabase}
         <FieldLayout>
-          <RadioGroup
-            options={dropOptionKeys}
-            getRadioLabel={getDropOptionLabel}
-            bind:value={$dropOption}
-            isInline
-          />
+          <WarningBox>
+            {$_('drop_database_warning')}
+          </WarningBox>
         </FieldLayout>
       {/if}
       {#if $dropOption === 'drop'}
