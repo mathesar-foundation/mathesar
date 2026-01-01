@@ -9,22 +9,25 @@ def get_database(conn):
 
 def drop_database(database_oid, conn):
     icfg = get_internal_database_config()
+    # Set autocommit on the incoming connection
+    conn.commit()
+    conn.autocommit = True
+    
     with conn.cursor() as c:
-        # Commit any existing transaction before setting autocommit
-        conn.commit()
-        conn.autocommit = True
         c.execute("SELECT datname FROM pg_database WHERE oid = %s", (database_oid,))
         dbname = c.fetchone()
         if not dbname:
             raise ValueError("Database OID not found")
         c.execute(sql.SQL("ALTER DATABASE {} OWNER TO {}")
             .format(sql.Identifier(dbname[0]), sql.Identifier(icfg.role)))
+    
     # Do not close conn here; let context manager handle it
     with db_conn.mathesar_connection(
         host=icfg.host, port=icfg.port, dbname=icfg.dbname,
         user=icfg.role, password=icfg.password, sslmode=icfg.sslmode,
         application_name='db.databases.drop_database',
     ) as c2:
+        # Set autocommit immediately after connection
         c2.autocommit = True
         with c2.cursor() as cur:
             # Terminate all connections to the database before dropping
