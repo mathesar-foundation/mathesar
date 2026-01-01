@@ -204,8 +204,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     color: var(--color-fg-subtle-1);
   }
   .form-status {
-    grid-row: 1 / span 2;
-    grid-column: 2;
+    flex: 1
   }
 
   .fields {
