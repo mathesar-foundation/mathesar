@@ -226,7 +226,6 @@ def package_mathesar(base_dir: Path, dist_dir: Path) -> None:
     # make it executable
     uv_installer_path.chmod(uv_installer_path.stat().st_mode | 0o111)
 
-
     logger.info("Building Mathesar frontend")
     run_command(["npm", "ci"], cwd=base_dir / "mathesar_ui")
     run_command(["npm", "run", "build"], cwd=base_dir / "mathesar_ui")
@@ -239,7 +238,7 @@ def package_mathesar(base_dir: Path, dist_dir: Path) -> None:
         if not brotli_available:
             logger.warning("Brotli is not installed. Brotli precompression will be skipped!")
         for path in static_dir.rglob("*"):
-            if path.is_file() and not path.suffix in {".br", ".gz"}:
+            if path.is_file() and path.suffix not in {".br", ".gz"}:
                 # Brotli
                 if brotli_available:
                     try:
