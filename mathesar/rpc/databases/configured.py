@@ -188,10 +188,10 @@ def disconnect(
     if drop_database:
         try:
             with connect(database_id, user) as conn:
-                # Must set autocommit before any operations to avoid transaction block
                 conn.commit()
-                conn.commit()
-                conn.autocommit = TrueFROM pg_database WHERE datname = %s", (database.name,))
+                conn.autocommit = True
+                with conn.cursor() as c:
+                    c.execute("SELECT oid FROM pg_database WHERE datname = %s", (database.name,))
                     result = c.fetchone()
                     if result:
                         database_oid = result[0]

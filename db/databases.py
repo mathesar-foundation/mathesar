@@ -28,6 +28,7 @@ def drop_database(database_oid, conn):
         # Set autocommit immediately after connection
         c2.autocommit = True
         with c2.cursor() as cur:
+            cur.execute(
                 sql.SQL("""
                     SELECT pg_terminate_backend(pg_stat_activity.pid)
                     FROM pg_stat_activity
@@ -36,11 +37,10 @@ def drop_database(database_oid, conn):
                 """),
                 (dbname[0],)
             )
-            # Drop the database
             cur.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(dbname[0])))
 
 def create_database(database_name, conn):
-    # Must set autocommit before CREATE DATABASE
     conn.commit()
     conn.autocommit = True
+    with conn.cursor() as c:
         c.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(database_name)))
