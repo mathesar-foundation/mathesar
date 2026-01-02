@@ -11,15 +11,15 @@ def drop_database(database_oid, conn):
     icfg = get_internal_database_config()
     conn.commit()
     conn.autocommit = True
-    
+
     with conn.cursor() as c:
         c.execute("SELECT datname FROM pg_database WHERE oid = %s", (database_oid,))
         dbname = c.fetchone()
         if not dbname:
             raise ValueError("Database OID not found")
         c.execute(sql.SQL("ALTER DATABASE {} OWNER TO {}")
-            .format(sql.Identifier(dbname[0]), sql.Identifier(icfg.role)))
-    
+                  .format(sql.Identifier(dbname[0]), sql.Identifier(icfg.role)))
+
     with db_conn.mathesar_connection(
         host=icfg.host, port=icfg.port, dbname=icfg.dbname,
         user=icfg.role, password=icfg.password, sslmode=icfg.sslmode,
@@ -38,6 +38,7 @@ def drop_database(database_oid, conn):
                 (dbname[0],)
             )
             cur.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(dbname[0])))
+
 
 def create_database(database_name, conn):
     conn.commit()

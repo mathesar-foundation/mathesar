@@ -169,7 +169,7 @@ def disconnect(
     if drop_database:
         if not user.is_superuser:
             raise Exception("Only Mathesar admins can drop databases")
-        
+
         icfg = get_internal_database_config()
         if database.server.host != icfg.host or database.server.port != icfg.port:
             raise Exception("Only databases on the internal server can be dropped")
