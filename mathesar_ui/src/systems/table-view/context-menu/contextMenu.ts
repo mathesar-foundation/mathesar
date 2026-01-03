@@ -5,6 +5,7 @@ import {
   type ClientPosition,
   type ContextMenuController,
   type ModalController,
+  buttonMenuEntry,
   menuSection,
   subMenu,
 } from '@mathesar/component-library';
@@ -18,10 +19,10 @@ import type RecordStore from '@mathesar/systems/record-view/RecordStore';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
+import { getRowActionsData } from '../row-actions/RowActionsDataProvider';
+
 import { copyCells } from './entries/copyCells';
 import { deleteColumn } from './entries/deleteColumn';
-import { deleteRecords } from './entries/deleteRecords';
-import { duplicateRecord } from './entries/duplicateRecord';
 import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import { modifySorting } from './entries/modifySorting';
@@ -55,15 +56,50 @@ export function openTableCellContextMenu({
   const { selection } = tabularData;
 
   function* getEntriesForMultipleRows(rowIds: string[]) {
-    yield* deleteRecords({ tabularData, rowIds });
+    const rowActionsData = getRowActionsData({
+      rowIds,
+      tabularData,
+      modalRecordView,
+    });
+
+    for (const action of rowActionsData.actions) {
+      if (action.id === 'delete-records') {
+        yield buttonMenuEntry({
+          icon: action.icon ,
+          label: action.label,
+          danger: action.danger,
+          onClick: action.onClick!,
+        });
+      }
+    }
   }
 
   function* getEntriesForOneRow(rowId: string) {
     const recordId = tabularData.getRecordIdFromRowId(rowId);
     yield* viewRowRecord({ tabularData, recordId, modalRecordView });
-    yield* duplicateRecord({ tabularData, rowId });
 
-    yield* getEntriesForMultipleRows([rowId]);
+    const rowActionsData = getRowActionsData({
+      rowIds: [rowId],
+      tabularData,
+      modalRecordView,
+    });
+
+    for (const action of rowActionsData.actions) {
+      if (action.id === 'duplicate-record') {
+        yield buttonMenuEntry({
+          icon: action.icon,
+          label: action.label,
+          onClick: action.onClick!,
+        });
+      } else if (action.id === 'delete-records') {
+        yield buttonMenuEntry({
+          icon: action.icon,
+          label: action.label,
+          danger: action.danger,
+          onClick: action.onClick!,
+        });
+      }
+    }
   }
 
   function* getEntriesForArbitraryRows(rowIds: Iterable<string>) {
@@ -109,7 +145,6 @@ export function openTableCellContextMenu({
   }
 
   function* getEntriesForMultipleCells(cellIds: string[]) {
-    // Check if any of the selected cells are joined columns
     const allColumns = get(tabularData.allColumns);
     const hasJoinedColumn = cellIds.some((cellId) => {
       const { columnId } = parseCellId(cellId);
