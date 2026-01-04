@@ -68,7 +68,7 @@ export function openTableCellContextMenu({
           icon: action.icon ,
           label: action.label,
           danger: action.danger,
-          onClick: action.onClick!,
+          onClick: action.onClick,
         });
       }
     }
@@ -89,14 +89,14 @@ export function openTableCellContextMenu({
         yield buttonMenuEntry({
           icon: action.icon,
           label: action.label,
-          onClick: action.onClick!,
+          onClick: action.onClick,
         });
       } else if (action.id === 'delete-records') {
         yield buttonMenuEntry({
           icon: action.icon,
           label: action.label,
           danger: action.danger,
-          onClick: action.onClick!,
+          onClick: action.onClick,
         });
       }
     }

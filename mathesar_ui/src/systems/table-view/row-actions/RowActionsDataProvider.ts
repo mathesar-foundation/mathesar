@@ -14,15 +14,15 @@ import { currentTablesMap } from '@mathesar/stores/tables';
 import { toast } from '@mathesar/stores/toast';
 import RecordStore from '@mathesar/systems/record-view/RecordStore';
 import type { ModalController } from '@mathesar-component-library';
-
+import type { IconProps } from '@mathesar-component-library/types';
 
 export type RowIdentifier = string | number;
 
 export interface RowAction {
   id: string;
   label: string;
-  icon?: any;
-  onClick?: () => void;
+  onClick: () => void;
+  icon?: IconProps;
   href?: string;
   danger?: boolean;
   disabled?: boolean;
@@ -32,17 +32,13 @@ export interface RowActionsData {
   actions: RowAction[];
 }
 
-
-
 export function getRowActionsData(params: {
   rowIds: RowIdentifier[];
   tabularData: TabularData;
   modalRecordView?: ModalController<RecordStore>;
 }): RowActionsData {
   const { rowIds, tabularData, modalRecordView } = params;
-  const actions: RowAction[
-
-  ] = [];
+  const actions: RowAction[] = [];
 
   const canInsertRecords = get(tabularData.canInsertRecords);
   const canDeleteRecords = get(tabularData.canDeleteRecords);
@@ -62,7 +58,6 @@ export function getRowActionsData(params: {
       recordId = undefined;
     }
   }
-
 
   if (
     canViewLinkedEntities &&
@@ -88,7 +83,6 @@ export function getRowActionsData(params: {
     });
   }
 
-
   if (canViewLinkedEntities && rowIds.length === 1 && recordId !== undefined) {
     const getRecordPageUrl = get(storeToGetRecordPageUrl);
     const recordPageUrl = getRecordPageUrl({
@@ -102,10 +96,10 @@ export function getRowActionsData(params: {
         label: get(_)('open_record'),
         icon: iconLinkToRecordPage,
         href: recordPageUrl,
+        onClick: () => { },
       });
     }
   }
-
 
   if (canInsertRecords && rowIds.length === 1 && firstRow) {
     actions.push({
@@ -117,7 +111,6 @@ export function getRowActionsData(params: {
       },
     });
   }
-
 
   if (canDeleteRecords && rowIds.length > 0) {
     actions.push({

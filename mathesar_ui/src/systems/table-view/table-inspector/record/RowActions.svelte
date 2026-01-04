@@ -9,7 +9,10 @@
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import { AnchorButton, Button, Icon } from '@mathesar-component-library';
 
-  import { type RowAction, getRowActionsData } from '../../row-actions/RowActionsDataProvider';
+  import {
+    type RowAction,
+    getRowActionsData,
+  } from '../../row-actions/RowActionsDataProvider';
 
   const tabularData = getTabularDataStoreFromContext();
   const modalRecordView = modalRecordViewContext.get();
