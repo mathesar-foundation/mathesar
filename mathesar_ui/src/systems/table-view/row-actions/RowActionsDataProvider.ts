@@ -47,13 +47,17 @@ export function getRowActionsData(params: {
   const rows = get(tabularData.recordsData.selectableRowsMap);
 
   const firstRowId = rowIds[0];
-  const firstRow = firstRowId !== undefined ? rows.get(String(firstRowId)) : undefined;
+  const firstRow =
+    firstRowId !== undefined ? rows.get(String(firstRowId)) : undefined;
 
   let recordId: string | number | undefined;
   if (firstRow) {
     try {
       const result = tabularData.getRecordIdFromRowId(String(firstRowId));
-      recordId = (typeof result === 'string' || typeof result === 'number') ? result : undefined;
+      recordId =
+        typeof result === 'string' || typeof result === 'number'
+          ? result
+          : undefined;
     } catch {
       recordId = undefined;
     }
@@ -70,7 +74,9 @@ export function getRowActionsData(params: {
       label: get(_)('quick_view_record'),
       icon: iconModalRecordView,
       onClick: () => {
-        const containingTable = get(currentTablesMap).get(tabularData.table.oid);
+        const containingTable = get(currentTablesMap).get(
+          tabularData.table.oid,
+        );
         if (!containingTable) return;
 
         const recordStore = new RecordStore({
@@ -96,7 +102,7 @@ export function getRowActionsData(params: {
         label: get(_)('open_record'),
         icon: iconLinkToRecordPage,
         href: recordPageUrl,
-        onClick: () => { },
+        onClick: () => {},
       });
     }
   }
@@ -131,7 +137,8 @@ export function getRowActionsData(params: {
             }),
             get(_)('are_you_sure_to_proceed'),
           ],
-          onProceed: () => tabularData.recordsData.deleteSelected(rowIds.map(String)),
+          onProceed: () =>
+            tabularData.recordsData.deleteSelected(rowIds.map(String)),
           onError: (e) => toast.fromError(e),
           onSuccess: (count) => {
             toast.success({

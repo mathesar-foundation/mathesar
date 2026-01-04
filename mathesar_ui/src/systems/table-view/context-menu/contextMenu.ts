@@ -65,7 +65,7 @@ export function openTableCellContextMenu({
     for (const action of rowActionsData.actions) {
       if (action.id === 'delete-records') {
         yield buttonMenuEntry({
-          icon: action.icon ,
+          icon: action.icon,
           label: action.label,
           danger: action.danger,
           onClick: action.onClick,
