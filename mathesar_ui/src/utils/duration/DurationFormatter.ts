@@ -230,7 +230,7 @@ function shiftAndFormatISODurationString(
   // Join with : or . depending on milliseconds
   if (unitsInRange[unitsInRange.length - 1] === 'ms' && parts.length > 1) {
     const msValue = parts.pop();
-    return `${parts.join('.')}.${msValue ?? '000'}`;
+    return `${parts.join(':')}.${msValue ?? '000'}`;
   }
 
   return parts.join(':');
@@ -264,21 +264,39 @@ export default class DurationFormatter implements InputFormatter<string> {
   }
 
   format(canonicalValue: string): string {
-    const timeFormatMatch = canonicalValue.match(
-      /^(\d+):(\d+):(\d+(?:\.\d+)?)$/,
-    );
     let isoString = canonicalValue;
 
-    if (timeFormatMatch) {
-      const hours = parseInt(timeFormatMatch[1], 10);
-      const minutes = parseInt(timeFormatMatch[2], 10);
-      const seconds = parseFloat(timeFormatMatch[3]);
+    const daysFormatMatch = canonicalValue.match(
+      /^(\d+) days? (\d+):(\d+):(\d+(?:\.\d+)?)$/,
+    );
+    if (daysFormatMatch) {
+      const days = parseInt(daysFormatMatch[1], 10);
+      const hours = parseInt(daysFormatMatch[2], 10);
+      const minutes = parseInt(daysFormatMatch[3], 10);
+      const seconds = parseFloat(daysFormatMatch[4]);
 
-      isoString = 'PT';
+      isoString = 'P';
+      if (days > 0) isoString += `${days}D`;
+      isoString += 'T';
       if (hours > 0) isoString += `${hours}H`;
       if (minutes > 0) isoString += `${minutes}M`;
       if (seconds > 0) isoString += `${seconds}S`;
       if (isoString === 'PT') isoString = 'PT0S';
+    } else {
+      const timeFormatMatch = canonicalValue.match(
+        /^(\d+):(\d+):(\d+(?:\.\d+)?)$/,
+      );
+      if (timeFormatMatch) {
+        const hours = parseInt(timeFormatMatch[1], 10);
+        const minutes = parseInt(timeFormatMatch[2], 10);
+        const seconds = parseFloat(timeFormatMatch[3]);
+
+        isoString = 'PT';
+        if (hours > 0) isoString += `${hours}H`;
+        if (minutes > 0) isoString += `${minutes}M`;
+        if (seconds > 0) isoString += `${seconds}S`;
+        if (isoString === 'PT') isoString = 'PT0S';
+      }
     }
 
     return shiftAndFormatISODurationString(isoString, this.specification);
