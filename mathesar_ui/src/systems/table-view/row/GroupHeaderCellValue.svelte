@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { FileManifest, ResultValue } from '@mathesar/api/rpc/records';
-  import { Truncate } from '@mathesar/component-library';
+  import { Tooltip, Truncate } from '@mathesar/component-library';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import { parseFileReference } from '@mathesar/components/file-attachments/fileUtils';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
@@ -15,6 +15,7 @@
   export let cellValue: ResultValue | undefined = undefined;
   export let fileManifestsForSheet: AssociatedCellValuesForSheet<FileManifest>;
   export let totalColumns: number;
+  export let containerWidth = 0;
 
   $: processedColumn = processedColumnsMap.get(columnId);
   $: recordId = String(cellValue);
@@ -27,39 +28,82 @@
     if (!fileReference) return undefined;
     return fileManifestsForSheet.get(columnId)?.get(fileReference.mash);
   })();
+  
+  // Calculate equal width for all items considering padding and gaps
+  // Reserve space for count badge (~80px) and gaps (1rem each)
+  const BADGE_WIDTH = 80;
+  const GAP_WIDTH = 16; // 1rem
+  $: availableWidth = containerWidth > 0 
+    ? Math.max(0, containerWidth - BADGE_WIDTH - (totalColumns * GAP_WIDTH) - 32) // 32 for padding
+    : 0;
+  $: maxItemWidth = availableWidth > 0 && totalColumns > 0
+    ? Math.floor(availableWidth / totalColumns)
+    : 0;
+
+  $: displayValue = (() => {
+    if (recordSummary) return recordSummary;
+    if (fileManifest) return fileManifest.uri;
+    return cellValue;
+  })();
+  
+  $: tooltipText = (() => {
+    const columnName = processedColumn?.column.name ?? '';
+    const preprocText = preprocName ? ` (${preprocName})` : '';
+    const valueText =
+      typeof displayValue === 'object' &&
+      displayValue !== null &&
+      'summaryLabel' in displayValue
+        ? String(displayValue.summaryLabel)
+        : String(displayValue ?? '');
+    return `${columnName}${preprocText}: ${valueText}`;
+  })();
 </script>
 
-<span class="tag" style="max-width: calc(100%/{totalColumns})">
-  <span class="name">
-    {processedColumn?.column.name ?? ''}
-    {#if preprocName}
-      <span class="preproc">{preprocName}</span>
-    {/if}
-  </span>
-  <span class="value">
-    {#if recordSummary}
-      <LinkedRecord
-        {recordSummary}
-        {recordId}
-        tableId={linkedTableId}
-        allowsHyperlinks
-      />
-    {:else if processedColumn?.abstractType.identifier === 'file' && fileManifest}
+<Tooltip placement="top">
+  <span
+    slot="trigger"
+    class="tag"
+    style:max-width={maxItemWidth > 0 ? `${maxItemWidth}px` : 'none'}
+    style:flex-basis={maxItemWidth > 0 ? `${maxItemWidth}px` : 'auto'}
+  >
+    <span class="name">
       <Truncate>
-        {fileManifest.uri}
+        {processedColumn?.column.name ?? ''}
+        {#if preprocName}
+          <span class="preproc">{preprocName}</span>
+        {/if}
       </Truncate>
-    {:else}
-      <Truncate>
-        <CellValue value={cellValue} />
-      </Truncate>
-    {/if}
+    </span>
+    <span class="value">
+      {#if recordSummary}
+        <LinkedRecord
+          {recordSummary}
+          {recordId}
+          tableId={linkedTableId}
+          allowsHyperlinks
+        />
+      {:else if processedColumn?.abstractType.identifier === 'file' && fileManifest}
+        <Truncate>
+          {fileManifest.uri}
+        </Truncate>
+      {:else}
+        <Truncate>
+          <CellValue value={cellValue} />
+        </Truncate>
+      {/if}
+    </span>
   </span>
-</span>
+  <div slot="content">{tooltipText}</div>
+</Tooltip>
 
 <style lang="scss">
   .tag {
     overflow: hidden;
     min-width: 3em;
+    flex-shrink: 1;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: column;
 
     .name {
       font-size: var(--sm1);
@@ -68,16 +112,19 @@
       align-items: center;
       gap: 0.14rem;
       margin-bottom: 0.2rem;
+      overflow: hidden;
 
       .preproc {
         font-size: var(--sm3);
         border: 1px solid var(--color-fg-base-muted);
         padding: 0rem 0.3rem;
         border-radius: 5rem;
+        flex-shrink: 0;
       }
     }
     .value {
       font-size: var(--lg1);
+      overflow: hidden;
     }
   }
 </style>
