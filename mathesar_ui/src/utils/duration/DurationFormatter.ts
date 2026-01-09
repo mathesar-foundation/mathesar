@@ -10,7 +10,21 @@ import type {
 import type DurationSpecification from './DurationSpecification';
 
 const FLOAT_REGEX = /^((\.?\d+)|(\d+(\.\d+)?))$/;
-
+function createDurationISO(
+  unitWithValue: Partial<Record<DurationUnit, number>>,
+): string {
+  return dayjs
+    .duration({
+      years: 0,
+      months: 0,
+      days: unitWithValue.d ?? 0,
+      hours: unitWithValue.h ?? 0,
+      minutes: unitWithValue.m ?? 0,
+      seconds: unitWithValue.s ?? 0,
+      milliseconds: unitWithValue.ms ?? 0,
+    })
+    .toISOString();
+}
 function parseTextBasedDuration(userInput: string): string | null {
   const cleanedInput = userInput.trim().toLowerCase();
   if (cleanedInput === '') {
@@ -43,17 +57,7 @@ function parseTextBasedDuration(userInput: string): string | null {
     unitWithValue[unit] = (unitWithValue[unit] ?? 0) + value;
   }
 
-  return dayjs
-    .duration({
-      years: 0,
-      months: 0,
-      days: unitWithValue.d ?? 0,
-      hours: unitWithValue.h ?? 0,
-      minutes: unitWithValue.m ?? 0,
-      seconds: unitWithValue.s ?? 0,
-      milliseconds: unitWithValue.ms ?? 0,
-    })
-    .toISOString();
+  return createDurationISO(unitWithValue);
 }
 
 function parseRawDurationStringToISOString(
@@ -65,27 +69,19 @@ function parseRawDurationStringToISOString(
     unitsInRange = unitsInRange.slice(0, unitsInRange.length - 1);
   }
 
-  let cleanedInput = userInput.trim();
+  const cleanedInput = userInput.trim();
   if (cleanedInput === '') {
     return null;
   }
 
-  const firstEntry = cleanedInput[0];
-  if (firstEntry === ':') {
-    cleanedInput = `0${cleanedInput}`;
-  }
+  const normalized = cleanedInput.replace(/^:/, '0:').replace(/[:.]$/, '$&0');
 
-  const lastEntry = cleanedInput[cleanedInput.length - 1];
-  if (lastEntry === ':' || lastEntry === '.') {
-    cleanedInput = `${cleanedInput}0`;
-  }
-
-  const unitValues = cleanedInput.split(':');
+  const unitValues = normalized.split(':');
   if (unitValues.length > unitsInRange.length) {
     throw new Error('Duration exceeds specified unit range');
   }
 
-  const terms = cleanedInput
+  const terms = normalized
     .split(':')
     .map((entry) => {
       let valueString = entry;
@@ -114,16 +110,7 @@ function parseRawDurationStringToISOString(
     unitWithValue[unit] = terms[index] ?? 0;
   });
 
-  return dayjs
-    .duration({
-      years: 0,
-      months: 0,
-      days: unitWithValue.d ?? 0,
-      hours: unitWithValue.h ?? 0,
-      minutes: unitWithValue.m ?? 0,
-      seconds: unitWithValue.s ?? 0,
-    })
-    .toISOString();
+  return createDurationISO(unitWithValue);
 }
 
 const unitConfig: Record<
@@ -214,18 +201,17 @@ function shiftAndFormatISODurationString(
   const unitsInRange = specification.getUnitsInRange();
 
   // Build the formatted string
-  const parts: string[] = [];
-  for (const unit of unitsInRange) {
-    const value = unitsWithValues[unit] ?? 0;
+  const formatUnit = (unit: DurationUnit, value: number): string => {
+    const floorValue = Math.floor(value).toString();
+    if (unit === 'd') return floorValue;
+    return unit === 'ms'
+      ? floorValue.padStart(3, '0')
+      : floorValue.padStart(2, '0');
+  };
 
-    if (unit === 'd') {
-      parts.push(Math.floor(value).toString());
-    } else if (unit === 'ms') {
-      parts.push(Math.floor(value).toString().padStart(3, '0'));
-    } else {
-      parts.push(Math.floor(value).toString().padStart(2, '0'));
-    }
-  }
+  const parts = unitsInRange.map((unit) =>
+    formatUnit(unit, unitsWithValues[unit] ?? 0),
+  );
 
   // Join with : or . depending on milliseconds
   if (unitsInRange[unitsInRange.length - 1] === 'ms' && parts.length > 1) {
@@ -263,40 +249,48 @@ export default class DurationFormatter implements InputFormatter<string> {
     };
   }
 
-  format(canonicalValue: string): string {
-    let isoString = canonicalValue;
+  private buildISOString(
+    days: number,
+    hours: number,
+    minutes: number,
+    seconds: number,
+  ): string {
+    const dayPart = days > 0 ? `${days}D` : '';
+    const hourPart = hours > 0 ? `${hours}H` : '';
+    const minutePart = minutes > 0 ? `${minutes}M` : '';
+    const secondPart = seconds > 0 ? `${seconds}S` : '';
 
-    const daysFormatMatch = canonicalValue.match(
+    const timePart = hourPart + minutePart + secondPart;
+
+    if (!dayPart && !timePart) {
+      return 'PT0S';
+    }
+
+    return `P${dayPart}T${timePart}`;
+  }
+
+  format(canonicalValue: string): string {
+    const daysMatch = canonicalValue.match(
       /^(\d+) days? (\d+):(\d+):(\d+(?:\.\d+)?)$/,
     );
-    if (daysFormatMatch) {
-      const days = parseInt(daysFormatMatch[1], 10);
-      const hours = parseInt(daysFormatMatch[2], 10);
-      const minutes = parseInt(daysFormatMatch[3], 10);
-      const seconds = parseFloat(daysFormatMatch[4]);
+    const timeMatch = canonicalValue.match(/^(\d+):(\d+):(\d+(?:\.\d+)?)$/);
 
-      isoString = 'P';
-      if (days > 0) isoString += `${days}D`;
-      isoString += 'T';
-      if (hours > 0) isoString += `${hours}H`;
-      if (minutes > 0) isoString += `${minutes}M`;
-      if (seconds > 0) isoString += `${seconds}S`;
-      if (isoString === 'PT') isoString = 'PT0S';
-    } else {
-      const timeFormatMatch = canonicalValue.match(
-        /^(\d+):(\d+):(\d+(?:\.\d+)?)$/,
+    let isoString = canonicalValue;
+
+    if (daysMatch) {
+      isoString = this.buildISOString(
+        parseInt(daysMatch[1], 10),
+        parseInt(daysMatch[2], 10),
+        parseInt(daysMatch[3], 10),
+        parseFloat(daysMatch[4]),
       );
-      if (timeFormatMatch) {
-        const hours = parseInt(timeFormatMatch[1], 10);
-        const minutes = parseInt(timeFormatMatch[2], 10);
-        const seconds = parseFloat(timeFormatMatch[3]);
-
-        isoString = 'PT';
-        if (hours > 0) isoString += `${hours}H`;
-        if (minutes > 0) isoString += `${minutes}M`;
-        if (seconds > 0) isoString += `${seconds}S`;
-        if (isoString === 'PT') isoString = 'PT0S';
-      }
+    } else if (timeMatch) {
+      isoString = this.buildISOString(
+        0,
+        parseInt(timeMatch[1], 10),
+        parseInt(timeMatch[2], 10),
+        parseFloat(timeMatch[3]),
+      );
     }
 
     return shiftAndFormatISODurationString(isoString, this.specification);
