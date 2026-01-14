@@ -1,11 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
   import {
     Button,
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
-  import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
 
   export let controller: ModalController;
   export let columnName: string;
@@ -47,3 +48,6 @@
     margin: 0;
   }
 </style>
+
+
+

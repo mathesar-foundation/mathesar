@@ -2,16 +2,15 @@
   import { _ } from 'svelte-i18n';
 
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { getAvailableName } from '@mathesar/utils/db';
   import { modal } from '@mathesar/stores/modal';
+  import { getAvailableName } from '@mathesar/utils/db';
   import { Spinner, TabContainer } from '@mathesar-component-library';
-
-  import SummarizeColumnModal from './SummarizeColumnModal.svelte';
 
   import type QueryManager from '../QueryManager';
   import type { ColumnWithLink } from '../utils';
 
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
+  import SummarizeColumnModal from './SummarizeColumnModal.svelte';
   import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
 
   export let queryManager: QueryManager;
@@ -30,28 +29,6 @@
   const summarizeModal = modal.spawnModalController();
   let pendingColumn: ColumnWithLink | null = null;
   let pendingAlias = '';
-
-  async function addColumn(column: ColumnWithLink) {
-    const baseAlias = `${column.tableName}_${column.name}`;
-    const allAliases = new Set($query.initial_columns.map((c) => c.alias));
-    const alias = getAvailableName(baseAlias, allAliases);
-    const queryHasNoSummarization = !$query.hasSummarizationTransform();
-
-    if (
-      column.producesMultipleResults &&
-      $confirmationNeededForMultipleResults &&
-      queryHasNoSummarization
-    ) {
-      // Show modal and store pending column info
-      pendingColumn = column;
-      pendingAlias = alias;
-      summarizeModal.open();
-      return;
-    }
-
-    // Add column without summarization
-    await performColumnAddition(column, alias, false);
-  }
 
   async function performColumnAddition(
     column: ColumnWithLink,
@@ -82,6 +59,28 @@
     if (addNewAutoSummarization) {
       [, activeTab] = tabs;
     }
+  }
+
+  async function addColumn(column: ColumnWithLink) {
+    const baseAlias = `${column.tableName}_${column.name}`;
+    const allAliases = new Set($query.initial_columns.map((c) => c.alias));
+    const alias = getAvailableName(baseAlias, allAliases);
+    const queryHasNoSummarization = !$query.hasSummarizationTransform();
+
+    if (
+      column.producesMultipleResults &&
+      $confirmationNeededForMultipleResults &&
+      queryHasNoSummarization
+    ) {
+      // Show modal and store pending column info
+      pendingColumn = column;
+      pendingAlias = alias;
+      summarizeModal.open();
+      return;
+    }
+
+    // Add column without summarization
+    await performColumnAddition(column, alias, false);
   }
 
   async function handleSummarize() {
