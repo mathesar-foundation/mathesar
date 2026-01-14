@@ -1,6 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Button, ControlledModal, type ModalController } from '@mathesar-component-library';
+  import {
+    Button,
+    ControlledModal,
+    type ModalController,
+  } from '@mathesar-component-library';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
 
   export let controller: ModalController;
@@ -38,7 +42,7 @@
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .modal-body p {
     margin: 0;
   }

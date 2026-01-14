@@ -26,7 +26,7 @@
     { id: 'transform-results', label: $_('transform_results') },
   ];
   let activeTab = tabs[0];
-  
+
   const summarizeModal = modal.spawnModalController();
   let pendingColumn: ColumnWithLink | null = null;
   let pendingAlias = '';
@@ -36,7 +36,7 @@
     const allAliases = new Set($query.initial_columns.map((c) => c.alias));
     const alias = getAvailableName(baseAlias, allAliases);
     const queryHasNoSummarization = !$query.hasSummarizationTransform();
-    
+
     if (
       column.producesMultipleResults &&
       $confirmationNeededForMultipleResults &&
@@ -48,18 +48,18 @@
       summarizeModal.open();
       return;
     }
-    
+
     // Add column without summarization
     await performColumnAddition(column, alias, false);
   }
-  
+
   async function performColumnAddition(
     column: ColumnWithLink,
     alias: string,
-    addNewAutoSummarization: boolean
+    addNewAutoSummarization: boolean,
   ) {
     const queryHasNoSummarization = !$query.hasSummarizationTransform();
-    
+
     await queryManager.update((q) => {
       const newQuery = q.withInitialColumn({
         alias,
@@ -83,7 +83,7 @@
       [, activeTab] = tabs;
     }
   }
-  
+
   async function handleSummarize() {
     if (pendingColumn && pendingAlias) {
       await performColumnAddition(pendingColumn, pendingAlias, true);
@@ -92,7 +92,7 @@
     pendingColumn = null;
     pendingAlias = '';
   }
-  
+
   async function handleWithoutSummarization() {
     if (pendingColumn && pendingAlias) {
       await performColumnAddition(pendingColumn, pendingAlias, false);
@@ -101,7 +101,7 @@
     pendingColumn = null;
     pendingAlias = '';
   }
-  
+
   function handleModalClose() {
     // Just close modal without adding column
     pendingColumn = null;
