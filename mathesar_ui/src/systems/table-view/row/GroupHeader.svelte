@@ -39,7 +39,9 @@
   function handleWheel(event: WheelEvent) {
     // Pass horizontal scroll to the parent sheet
     if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-      const sheetBody = containerElement?.closest('[data-sheet-element="body"]');
+      const sheetBody = containerElement?.closest(
+        '[data-sheet-element="body"]',
+      );
       if (sheetBody) {
         sheetBody.scrollLeft += event.deltaX;
       }

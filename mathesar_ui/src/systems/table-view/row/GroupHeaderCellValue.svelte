@@ -28,33 +28,44 @@
     if (!fileReference) return undefined;
     return fileManifestsForSheet.get(columnId)?.get(fileReference.mash);
   })();
-  
+
   // Calculate equal width for all items considering padding and gaps
   // Reserve space for count badge (~80px) and gaps (1rem each)
   const BADGE_WIDTH = 80;
   const GAP_WIDTH = 16; // 1rem
-  $: availableWidth = containerWidth > 0 
-    ? Math.max(0, containerWidth - BADGE_WIDTH - (totalColumns * GAP_WIDTH) - 32) // 32 for padding
-    : 0;
-  $: maxItemWidth = availableWidth > 0 && totalColumns > 0
-    ? Math.floor(availableWidth / totalColumns)
-    : 0;
+  $: availableWidth =
+    containerWidth > 0
+      ? Math.max(
+          0,
+          containerWidth - BADGE_WIDTH - totalColumns * GAP_WIDTH - 32,
+        ) // 32 for padding
+      : 0;
+  $: maxItemWidth =
+    availableWidth > 0 && totalColumns > 0
+      ? Math.floor(availableWidth / totalColumns)
+      : 0;
 
   $: displayValue = (() => {
     if (recordSummary) return recordSummary;
     if (fileManifest) return fileManifest.uri;
     return cellValue;
   })();
-  
+
   $: tooltipText = (() => {
     const columnName = processedColumn?.column.name ?? '';
     const preprocText = preprocName ? ` (${preprocName})` : '';
-    const valueText =
+    let valueText = '';
+    if (
       typeof displayValue === 'object' &&
       displayValue !== null &&
       'summaryLabel' in displayValue
-        ? String(displayValue.summaryLabel)
-        : String(displayValue ?? '');
+    ) {
+      valueText = String(
+        (displayValue as { summaryLabel: unknown }).summaryLabel,
+      );
+    } else {
+      valueText = String(displayValue ?? '');
+    }
     return `${columnName}${preprocText}: ${valueText}`;
   })();
 </script>
