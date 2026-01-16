@@ -1145,6 +1145,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.get_table_info(regnamespace)', 'FUNCTION', NULL),
   ('msar', 'msar.get_total_order(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_type_options(regtype,integer,integer)', 'FUNCTION', NULL),
+  ('msar', 'msar.is_column_orderable(oid,smallint)', 'FUNCTION', NULL),
   ('msar', 'msar.get_unique_local_identifier(text[],text)', 'FUNCTION', NULL),
   ('msar', 'msar.get_valid_target_type_strings(regtype)', 'FUNCTION', NULL),
   ('msar', 'msar.grant_usage_on_custom_mathesar_types_to_public()', 'FUNCTION', NULL),

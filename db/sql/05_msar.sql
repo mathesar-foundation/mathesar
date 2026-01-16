@@ -4542,26 +4542,64 @@ WHERE contype='p' AND conrelid=tab_id AND has_column_privilege(tab_id, attnum, '
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.is_column_orderable(tab_id oid, col_attnum smallint) RETURNS boolean AS $$/*
+Check if a column is orderable by verifying it has a B-tree operator class.
+
+Args:
+  tab_id: The OID of the table containing the column.
+  col_attnum: The attnum of the column to check.
+
+Returns:
+  true if the column can be used in ORDER BY, false otherwise.
+*/
+SELECT EXISTS (
+  SELECT 1
+  FROM pg_catalog.pg_attribute
+    INNER JOIN pg_catalog.pg_opclass ON atttypid = opcintype
+    INNER JOIN pg_catalog.pg_am ON opcmethod = pg_am.oid
+  WHERE
+    attrelid = tab_id
+    AND attnum = col_attnum
+    AND pg_am.amname = 'btree'
+)
+OR EXISTS (
+  SELECT 1
+  FROM pg_catalog.pg_attribute
+    INNER JOIN pg_catalog.pg_cast ON atttypid = castsource
+    INNER JOIN pg_catalog.pg_opclass ON casttarget = opcintype
+    INNER JOIN pg_catalog.pg_am ON opcmethod = pg_am.oid
+  WHERE
+    attrelid = tab_id
+    AND attnum = col_attnum
+    AND castcontext = 'i'
+    AND pg_am.amname = 'btree'
+);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$
 WITH orderable_cte AS (
   SELECT attnum
   FROM pg_catalog.pg_attribute
-    INNER JOIN pg_catalog.pg_cast ON atttypid=castsource
-    INNER JOIN pg_catalog.pg_operator ON casttarget=oprleft
+    INNER JOIN pg_catalog.pg_opclass ON atttypid = opcintype
+    INNER JOIN pg_catalog.pg_am ON opcmethod = pg_am.oid
+  WHERE
+    attrelid = tab_id
+    AND attnum > 0
+    AND NOT attisdropped
+    AND pg_am.amname = 'btree'
+  UNION
+  SELECT attnum
+  FROM pg_catalog.pg_attribute
+    INNER JOIN pg_catalog.pg_cast ON atttypid = castsource
+    INNER JOIN pg_catalog.pg_opclass ON casttarget = opcintype
+    INNER JOIN pg_catalog.pg_am ON opcmethod = pg_am.oid
   WHERE
     attrelid = tab_id
     AND attnum > 0
     AND NOT attisdropped
     AND castcontext = 'i'
-    AND oprname = '<'
-  UNION SELECT attnum
-  FROM pg_catalog.pg_attribute
-    INNER JOIN pg_catalog.pg_operator ON atttypid=oprleft
-  WHERE
-    attrelid = tab_id
-    AND attnum > 0
-    AND NOT attisdropped
-    AND oprname = '<'
+    AND pg_am.amname = 'btree'
   ORDER BY attnum
 )
 SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
@@ -4579,11 +4617,22 @@ Args:
   tab_id: The OID of the table whose columns we'll order by.
   order_: A JSONB array defining any desired ordering of columns.
 */
+WITH filtered_order_cte AS (
+  SELECT attnum, direction
+  FROM jsonb_to_recordset(order_) AS x(attnum smallint, direction text)
+  WHERE msar.is_column_orderable(tab_id, attnum)
+)
 SELECT string_agg(format('%I %s', attnum, msar.sanitize_direction(direction)), ', ')
 FROM jsonb_to_recordset(
     COALESCE(
-      COALESCE(order_, '[]'::jsonb) || msar.get_pkey_order(tab_id),
-      COALESCE(order_, '[]'::jsonb) || msar.get_total_order(tab_id)
+      COALESCE(
+        (SELECT jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', direction)) FROM filtered_order_cte),
+        '[]'::jsonb
+      ) || msar.get_pkey_order(tab_id),
+      COALESCE(
+        (SELECT jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', direction)) FROM filtered_order_cte),
+        '[]'::jsonb
+      ) || msar.get_total_order(tab_id)
     )
 )
   AS x(attnum smallint, direction text)
