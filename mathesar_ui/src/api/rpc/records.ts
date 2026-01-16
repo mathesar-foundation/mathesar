@@ -12,10 +12,15 @@ export interface SortingEntry {
   direction: SortDirection;
 }
 
+export type SqlOperator =
+  | {
+      type: 'and' | 'or';
+      args: [SqlExpr, SqlExpr];
+    }
+  | { type: 'not'; args: [SqlExpr] };
+
 export interface SqlComparison {
   type:
-    | 'and'
-    | 'or'
     | 'equal'
     | 'lesser'
     | 'greater'
@@ -45,7 +50,12 @@ export interface SqlColumn {
   type: 'attnum';
   value: number;
 }
-export type SqlExpr = SqlComparison | SqlFunction | SqlLiteral | SqlColumn;
+export type SqlExpr =
+  | SqlOperator
+  | SqlComparison
+  | SqlFunction
+  | SqlLiteral
+  | SqlColumn;
 
 export interface Group {
   /**

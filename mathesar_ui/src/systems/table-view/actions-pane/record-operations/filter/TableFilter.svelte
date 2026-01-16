@@ -1,6 +1,7 @@
 <script lang="ts">
   import { takeLast } from 'iter-tools';
   import { onMount, tick } from 'svelte';
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import type { LinkedRecordInputElement } from '@mathesar/components/cell-fabric/types';
@@ -65,6 +66,9 @@
   }
 
   function updateVarsAndExternalFiltering() {
+    if (get(filterGroup.args).length === 0) {
+      filterGroup.operator.set('and');
+    }
     const rawFilterGroup = filterGroup.toRaw();
     individualFilterCount = calcNumberOfIndividualFilters(rawFilterGroup);
     const newFiltering = new Filtering(rawFilterGroup);

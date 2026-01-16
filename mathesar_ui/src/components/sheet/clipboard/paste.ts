@@ -38,10 +38,10 @@ export interface PastingContext {
   getSheetColumns: () => RawColumnWithMetadata[];
   getRecordRows: () => RecordRow[];
   confirm: (message: string) => Promise<boolean>;
-  bulkDml: (
-    modificationRecipes: RowModificationRecipe[],
-    additionRecipes?: RowAdditionRecipe[],
-  ) => Promise<{ rowIds: string[]; columnIds: string[] }>;
+  bulkDml: (args: {
+    modificationRecipes: RowModificationRecipe[];
+    additionRecipes: RowAdditionRecipe[];
+  }) => Promise<{ rowIds: string[]; columnIds: string[] }>;
 }
 
 interface TsvCell {
@@ -274,10 +274,10 @@ async function updateViaPaste({
     if (!confirmed) return;
   }
 
-  const { rowIds, columnIds } = await context.bulkDml(
+  const { rowIds, columnIds } = await context.bulkDml({
     modificationRecipes,
     additionRecipes,
-  );
+  });
 
   // Note: When we call `context.bulkDml` the selection store might end up
   // getting updated. This happens if rows are inserted (because a new Plane

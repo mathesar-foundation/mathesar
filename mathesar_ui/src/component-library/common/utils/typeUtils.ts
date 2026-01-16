@@ -22,6 +22,13 @@ export function hasStringProperty<PropertyName extends string>(
   return hasProperty(object, property) && typeof object[property] === 'string';
 }
 
+export function hasNumberProperty<PropertyName extends string>(
+  object: unknown,
+  property: PropertyName,
+): object is { [k in PropertyName]: number } {
+  return hasProperty(object, property) && typeof object[property] === 'number';
+}
+
 export function hasMethod<MethodName extends string>(
   object: unknown,
   method: MethodName,

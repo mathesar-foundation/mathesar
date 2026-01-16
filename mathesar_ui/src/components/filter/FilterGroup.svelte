@@ -20,6 +20,7 @@
     FilterEntryColumn,
     FilterGroup,
     IndividualFilter,
+    RawFilterGroup,
   } from './utils';
 
   interface $$Events {
@@ -27,7 +28,7 @@
   }
 
   const dispatch = createEventDispatcher<$$Events>();
-  const filterOperators = ['and', 'or'] as const;
+  const filterOperators = ['and', 'or', 'not'] as const;
 
   export let columns: ReadableMapLike<
     FilterEntryColumn['id'],
@@ -44,6 +45,19 @@
 
   export let recordSummaries: AssociatedCellData<string>;
 
+  function getOperatorLabel(op?: RawFilterGroup['operator']) {
+    switch (op) {
+      case 'and':
+        return $_('all_of_the_following');
+      case 'or':
+        return $_('any_of_the_following');
+      case 'not':
+        return $_('none_of_the_following');
+      default:
+        return '';
+    }
+  }
+
   function remove(filter: IndividualFilter | FilterGroup) {
     filterGroup.removeArgument(filter);
     dispatch('update');
@@ -56,6 +70,7 @@
   class:empty={!$args.length}
   class:single-filter={$args.length === 1}
   class:or-connect={$operator === 'or'}
+  class:not-connect={$operator === 'not'}
 >
   <div class="connecting-line"></div>
   <div class="filter-group-content">
@@ -63,12 +78,7 @@
       <div class="group-icon">
         <Icon {...iconFilterGroup} />
       </div>
-      <RichText
-        text={$operator === 'or'
-          ? $_('where_condition_is_true')
-          : $_('where_conditions_are_true')}
-        let:slotName
-      >
+      <RichText text={$_('where_conditions_are_true')} let:slotName>
         {#if slotName === 'condition'}
           <span class="operator-selection">
             <Select
@@ -80,9 +90,7 @@
             >
               <span>
                 <RichText
-                  text={option === 'or'
-                    ? $_('any_of_the_following')
-                    : $_('all_of_the_following')}
+                  text={getOperatorLabel(option)}
                   let:slotName={innerSlotName}
                   let:translatedArg
                 >
@@ -171,6 +179,10 @@
 
     &.or-connect {
       --connecting-line-border-style: dashed;
+    }
+
+    &.not-connect {
+      --connecting-line-border-style: dotted;
     }
 
     .connecting-line {
@@ -264,8 +276,8 @@
     .horizontal-connecting-line {
       position: absolute;
       left: 1.2em;
-      top: 1em;
-      width: 1em;
+      top: 1.1em;
+      width: 0.6em;
       height: 1px;
       border-bottom: 1px var(--connecting-line-border-style)
         var(--connecting-line-color);
@@ -285,5 +297,8 @@
     .inner-filter {
       flex-grow: 1;
     }
+  }
+  .filter-group.not-connect .prefix {
+    display: none;
   }
 </style>

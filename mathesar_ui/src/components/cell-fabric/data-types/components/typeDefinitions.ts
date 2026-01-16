@@ -38,6 +38,7 @@ export type CellValueFormatter<T> = (
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
+  setValue: (newValue: Value | null | undefined) => void;
   isActive: boolean;
   disabled: boolean;
   searchValue?: unknown;
@@ -96,7 +97,6 @@ export interface SimpleManyToManyJoinCellValue {
 }
 
 export interface SimpleManyToManyJoinCellExternalProps {
-  columnAlias: string;
   joinPath: JoinPath;
 }
 

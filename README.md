@@ -20,7 +20,6 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 **Table of Contents**
 
 - [Status](#status)
