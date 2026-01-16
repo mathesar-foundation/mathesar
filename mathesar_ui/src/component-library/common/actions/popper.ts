@@ -103,6 +103,55 @@ export default function popper(
   let prevReference: VirtualElement | undefined;
   let observer: ResizeObserver | undefined;
   const autoReposition = actionOpts.autoReposition ?? false;
+  const scrollListeners: Array<{ element: HTMLElement | Window; listener: () => void }> = [];
+
+  function handleScroll() {
+    if (popperInstance) {
+      void popperInstance.update();
+    }
+  }
+
+  function addScrollListeners(reference?: VirtualElement) {
+    // Remove existing scroll listeners
+    scrollListeners.forEach(({ element, listener }) => {
+      element.removeEventListener('scroll', listener);
+    });
+    scrollListeners.length = 0;
+
+    if (!reference || !autoReposition) {
+      return;
+    }
+
+    // Add scroll listener to window
+    scrollListeners.push({ element: window, listener: handleScroll });
+    window.addEventListener('scroll', handleScroll, true);
+
+    // Add scroll listeners to all scrollable parent elements
+    let parent = (reference as { contextElement?: HTMLElement }).contextElement?.parentElement;
+    if (!parent && 'getBoundingClientRect' in reference) {
+      // For virtual elements, try to find a real DOM element
+      const rect = reference.getBoundingClientRect();
+      parent = document.elementFromPoint(rect.x, rect.y)?.parentElement ?? null;
+    }
+
+    while (parent) {
+      const { overflow, overflowX, overflowY } = window.getComputedStyle(parent);
+      const isScrollable = /(auto|scroll)/.test(overflow + overflowX + overflowY);
+      
+      if (isScrollable) {
+        scrollListeners.push({ element: parent, listener: handleScroll });
+        parent.addEventListener('scroll', handleScroll);
+      }
+      parent = parent.parentElement;
+    }
+  }
+
+  function removeScrollListeners() {
+    scrollListeners.forEach(({ element, listener }) => {
+      element.removeEventListener('scroll', listener);
+    });
+    scrollListeners.length = 0;
+  }
 
   function create(reference?: VirtualElement, options?: Partial<Options>) {
     if (!reference) {
@@ -122,11 +171,13 @@ export default function popper(
         void popperInstance.update();
       });
       observer.observe(node);
+      addScrollListeners(reference);
     }
   }
 
   function destroy() {
     observer?.disconnect();
+    removeScrollListeners();
     popperInstance?.destroy();
     prevReference = undefined;
   }

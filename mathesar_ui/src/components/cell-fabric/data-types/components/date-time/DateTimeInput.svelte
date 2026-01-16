@@ -100,6 +100,7 @@
   class="retain-active-cell no-max-height"
   trigger={element}
   bind:isOpen
+  autoReposition={true}
   on:close={onDropdownClose}
 >
   <InlineDateTimePicker
