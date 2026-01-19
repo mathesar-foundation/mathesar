@@ -43,7 +43,7 @@
   async function save(values: FilledFormValues<typeof form>) {
     await createTable({
       schema,
-      name: values.name,
+      name: values.name.trim(),
       description: values.description,
       pkColumn: {
         name: values.pkColumnName,

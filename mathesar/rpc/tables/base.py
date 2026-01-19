@@ -244,6 +244,8 @@ def add(
         The `oid`, `name`, and `renamed_columns` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
+    if table_name is not None:
+        table_name = table_name.strip()
     with connect(database_id, user) as conn:
         created_table_info = create_table_on_database(
             table_name, schema_oid, conn, pkey_column_info, column_data_list, constraint_data_list, owner_oid, comment
@@ -294,6 +296,8 @@ def patch(
         The name of the altered table.
     """
     user = kwargs.get(REQUEST_KEY).user
+    if table_data_dict.get('name') is not None:
+        table_data_dict['name'] = table_data_dict['name'].strip()
     with connect(database_id, user) as conn:
         return alter_table_on_database(table_oid, table_data_dict, conn)
 
@@ -322,6 +326,8 @@ def import_(
         The `oid`, `name`, and `renamed_columns` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
+    if table_name is not None:
+        table_name = table_name.strip()
     with connect(database_id, user) as conn:
         import_result = copy_datafile_to_table(
             user,
