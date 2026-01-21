@@ -108,7 +108,7 @@
 
   .joined-via {
     display: inline;
-    text-wrap: nowrap;
+    white-space: nowrap;
     color: var(--color-fg-subtle-2-muted);
     font-size: var(--sm1);
   }

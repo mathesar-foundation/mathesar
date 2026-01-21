@@ -81,10 +81,19 @@ export interface LinkedRecordInputExternalProps {
   recordSelectionOrchestratorFactory: RecordSelectionOrchestratorFactory;
 }
 
-export interface LinkedRecordInputProps
-  extends CellTypeProps<ForeignKeyCellValue>,
-    LinkedRecordInputExternalProps {
-  columnFabric: CellColumnFabric;
+export interface LinkedRecordInputProps extends LinkedRecordInputExternalProps {
+  value: ForeignKeyCellValue | undefined;
+  recordSummary?: string;
+  setRecordSummary?: (recordId: string, recordSummary: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+}
+
+export interface CellExternalProps<Value = ForeignKeyCellValue>
+  extends Pick<
+    CellTypeProps<Value>,
+    'value' | 'isActive' | 'disabled' | 'searchValue' | 'isIndependentOfSheet'
+  > {
   recordSummary?: string;
   setRecordSummary?: (recordId: string, recordSummary: string) => void;
 }
