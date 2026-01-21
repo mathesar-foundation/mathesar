@@ -16,8 +16,8 @@
   } from '@mathesar-component-library';
 
   import {
-    getDefaultValueOptions,
     type DefaultValueMode,
+    getDefaultValueOptions,
   } from './defaultValueOptions';
 
   export let column: ProcessedColumn;
@@ -49,7 +49,8 @@
 
   $: isDefaultNull = defaultMode === 'none';
   $: isAutoSetEditor = defaultMode === 'auto_set_editor';
-  $: isSetDefaultUser = defaultMode === 'set_default_user' || defaultMode === 'custom';
+  $: isSetDefaultUser =
+    defaultMode === 'set_default_user' || defaultMode === 'custom';
 
   $: actionButtonsVisible = (() => {
     if (defaultMode !== initialDefaultMode) {
@@ -221,5 +222,4 @@
       margin-top: 0.5rem;
     }
   }
-
 </style>

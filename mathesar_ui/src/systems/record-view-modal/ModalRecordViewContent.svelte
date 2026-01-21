@@ -87,7 +87,12 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   <div class="fields">
     {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
       {#if !processedColumn.column.metadata?.track_editing_user}
-        <DirectField {record} {processedColumn} {field} {canUpdateTableRecords} />
+        <DirectField
+          {record}
+          {processedColumn}
+          {field}
+          {canUpdateTableRecords}
+        />
       {/if}
     {/each}
   </div>

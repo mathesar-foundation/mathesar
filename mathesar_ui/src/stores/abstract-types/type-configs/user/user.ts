@@ -1,5 +1,4 @@
-import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-import { getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import { type RawColumnWithMetadata, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUser } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
@@ -61,6 +60,8 @@ function constructDbFormValuesFromTypeOptions(
 ): FormValues {
   // Note: metadata is not available in this function signature
   // The "last edited by" option is now handled in SetDefaultValue component
+  void columnType;
+  void typeOptions;
   return {};
 }
 

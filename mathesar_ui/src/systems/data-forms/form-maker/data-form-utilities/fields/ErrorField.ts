@@ -1,10 +1,11 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import type { RawDataFormField } from '@mathesar/api/rpc/forms';
 import {
   ClientSideError,
   type GeneralizedError,
 } from '@mathesar/components/errors/errorUtils';
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
 
 import type { DataFormStructureCtx } from '../DataFormStructure';
 
@@ -33,10 +34,7 @@ export const dataFormErrors = {
       code: dataFormErrorCodes.COLUMN_TRACK_EDITING_USER,
       data: props,
     }),
-  columnUserDisplayError: (props: {
-    tableOid: number;
-    columnAttnum: number;
-  }) =>
+  columnUserDisplayError: (props: { tableOid: number; columnAttnum: number }) =>
     new ClientSideError({
       message: get(_)('form_field_column_user_display'),
       code: dataFormErrorCodes.COLUMN_USER_DISPLAY,

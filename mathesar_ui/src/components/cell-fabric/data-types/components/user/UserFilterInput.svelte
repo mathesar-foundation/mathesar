@@ -1,23 +1,23 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { get } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
-  import type { User } from '@mathesar/api/rpc/users';
   import type {
     RecordsSummaryListResponse,
     SummarizedRecordReference,
   } from '@mathesar/api/rpc/_common/commonTypes';
-  import AsyncStore from '@mathesar/stores/AsyncStore';
-  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
-  import { rowSeekerContext } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
-  import { getGlobalUsersStore, type UserModel } from '@mathesar/stores/users';
-  import { Button, Icon, Spinner } from '@mathesar-component-library';
-  import { iconDeleteMinor } from '@mathesar/icons';
-  import {
-    getUserLabel,
-    type UserDisplayField,
-  } from '@mathesar/utils/userUtils';
+  import type { User } from '@mathesar/api/rpc/users';
   import Truncate from '@mathesar/component-library/truncate/Truncate.svelte';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
+  import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
+  import { rowSeekerContext } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
+  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
+  import {
+    type UserDisplayField,
+    getUserLabel,
+  } from '@mathesar/utils/userUtils';
+  import { Button, Spinner } from '@mathesar-component-library';
 
   export let value: number | string | undefined = undefined;
   export let disabled = false;
@@ -35,18 +35,21 @@
   $: normalizedValue = (() => {
     if (value === undefined || value === null) return undefined;
     const numValue = typeof value === 'string' ? parseInt(value, 10) : value;
-    return isNaN(numValue as number) ? undefined : (numValue as number);
+    return Number.isNaN(numValue) ? undefined : numValue;
   })();
 
   $: users = usersStore ? get(usersStore.users) : [];
   $: isLoading = usersStore
     ? get(usersStore.requestStatus)?.state === 'processing'
     : false;
-  $: error = usersStore
-    ? get(usersStore.requestStatus)?.state === 'failure'
-      ? get(usersStore.requestStatus)?.errors?.[0]
-      : undefined
-    : undefined;
+  $: error = (() => {
+    if (!usersStore) return undefined;
+    const requestStatus = get(usersStore.requestStatus);
+    if (requestStatus?.state === 'failure') {
+      return requestStatus?.errors?.[0];
+    }
+    return undefined;
+  })();
   $: selectedUser = normalizedValue
     ? users.find((u) => u.id === normalizedValue)
     : undefined;
@@ -164,12 +167,6 @@
     }
   }
 
-  function clearSelection() {
-    value = undefined;
-    dispatch('artificialChange', undefined);
-    dispatch('artificialInput', undefined);
-    // selectedUser is reactive based on value, so it will update automatically
-  }
 </script>
 
 <div class="user-filter-input filter-input">
@@ -190,7 +187,7 @@
             {#if selectedUser}
               {getUserLabel(selectedUser.getUser(), userDisplayField)}
             {:else}
-              {placeholder ?? 'Select user'}
+              {placeholder ?? $_('select_user')}
             {/if}
           </Button>
         </div>

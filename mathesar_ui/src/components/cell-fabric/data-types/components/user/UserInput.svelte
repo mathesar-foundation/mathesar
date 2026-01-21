@@ -2,21 +2,21 @@
   import { createEventDispatcher } from 'svelte';
   import { get } from 'svelte/store';
 
-  import type { User } from '@mathesar/api/rpc/users';
   import type {
     RecordsSummaryListResponse,
     SummarizedRecordReference,
   } from '@mathesar/api/rpc/_common/commonTypes';
-  import AsyncStore from '@mathesar/stores/AsyncStore';
-  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
-  import { getGlobalUsersStore, type UserModel } from '@mathesar/stores/users';
-  import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
+  import type { User } from '@mathesar/api/rpc/users';
   import LinkedRecordInput from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordInput.svelte';
-  import { Spinner } from '@mathesar-component-library';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
+  import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
+  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
+  import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
   import {
-    getUserLabel,
     type UserDisplayField,
+    getUserLabel,
   } from '@mathesar/utils/userUtils';
+  import { Spinner } from '@mathesar-component-library';
 
   export let value: number | undefined = undefined;
   export let disabled = false;
@@ -30,11 +30,14 @@
   $: isLoading = usersStore
     ? get(usersStore.requestStatus)?.state === 'processing'
     : false;
-  $: error = usersStore
-    ? get(usersStore.requestStatus)?.state === 'failure'
-      ? get(usersStore.requestStatus)?.errors?.[0]
-      : undefined
-    : undefined;
+  $: error = (() => {
+    if (!usersStore) return undefined;
+    const requestStatus = get(usersStore.requestStatus);
+    if (requestStatus?.state === 'failure') {
+      return requestStatus?.errors?.[0];
+    }
+    return undefined;
+  })();
   $: selectedUser = users.find((u) => u.id === value);
   $: recordSummary = selectedUser
     ? getUserLabel(selectedUser.getUser(), userDisplayField)
@@ -103,15 +106,17 @@
   // Create record selection orchestrator factory for LinkedRecordInput
   const recordSelectionOrchestratorFactory = makeRowSeekerOrchestratorFactory({
     constructRecordStore: createUserRecordStore,
-    onSelect: (v) => {
+    onSelect: () => {
       // The selectedUser and recordSummary are reactive based on value
       // This callback is mainly for side effects if needed
     },
   });
 
-  function setRecordSummary(key: string, summary: string) {
+  function setRecordSummary(recordId: string, summary: string) {
     // Summary is computed reactively from selectedUser
     // This function is kept for API compatibility
+    void recordId;
+    void summary;
   }
 </script>
 

@@ -1,29 +1,30 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { get } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
-  import type { User } from '@mathesar/api/rpc/users';
   import type {
     RecordsSummaryListResponse,
     SummarizedRecordReference,
   } from '@mathesar/api/rpc/_common/commonTypes';
+  import type { User } from '@mathesar/api/rpc/users';
   import Default from '@mathesar/components/Default.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import AsyncStore from '@mathesar/stores/AsyncStore';
-  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
+  import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
   import { rowSeekerContext } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
-  import { getGlobalUsersStore, type UserModel } from '@mathesar/stores/users';
+  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
+  import {
+    type UserDisplayField,
+    getUserLabel,
+  } from '@mathesar/utils/userUtils';
   import {
     Icon,
     Spinner,
     compareWholeValues,
     iconExpandDown,
   } from '@mathesar-component-library';
-  import {
-    getUserLabel,
-    type UserDisplayField,
-  } from '@mathesar/utils/userUtils';
 
   import CellWrapper from '../CellWrapper.svelte';
   import type { CellExternalProps } from '../typeDefinitions';
@@ -152,7 +153,10 @@
             const user = users.find((u) => u.id === v.key);
             if (user && setRecordSummary) {
               const userApiFormat = user.getUser();
-              const userDisplayValue = getUserLabel(userApiFormat, userDisplayField);
+              const userDisplayValue = getUserLabel(
+                userApiFormat,
+                userDisplayField,
+              );
               setRecordSummary(String(v.key), userDisplayValue);
             }
           }
@@ -164,7 +168,10 @@
         const user = users.find((u) => u.id === selection.key);
         if (user && setRecordSummary) {
           const userApiFormat = user.getUser();
-          const userDisplayValue = getUserLabel(userApiFormat, userDisplayField);
+          const userDisplayValue = getUserLabel(
+            userApiFormat,
+            userDisplayField,
+          );
           setRecordSummary(String(selection.key), userDisplayValue);
         }
       } else {
@@ -252,8 +259,8 @@
       <button
         class="dropdown-button passthrough"
         on:click|stopPropagation={(e) => launchRowSeeker(e)}
-        aria-label="Select user"
-        title="Select user"
+        aria-label={$_('select_user')}
+        title={$_('select_user')}
         type="button"
       >
         <Icon {...iconExpandDown} />

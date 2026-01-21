@@ -1,3 +1,5 @@
+import { readable } from 'svelte/store';
+
 import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import type {
@@ -7,7 +9,6 @@ import type {
 } from '@mathesar/stores/abstract-types/types';
 import { makeForm } from '@mathesar-component-library';
 import type { FormBuildConfiguration } from '@mathesar-component-library/types';
-import { readable } from 'svelte/store';
 
 import DurationConfiguration from './config-components/DurationConfiguration.svelte';
 

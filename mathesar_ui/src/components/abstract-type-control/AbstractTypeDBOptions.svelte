@@ -8,10 +8,7 @@
     FormBuilder,
     getValidationContext,
   } from '@mathesar-component-library';
-  import type {
-    FormBuildConfiguration,
-    FormValues,
-  } from '@mathesar-component-library/types';
+  import type { FormValues } from '@mathesar-component-library/types';
 
   import DbTypeIndicator from './DbTypeIndicator.svelte';
   import { type ColumnWithAbstractType, constructDbForm } from './utils';

@@ -8,7 +8,6 @@ import money from './money';
 import number from './number';
 import string from './string';
 import time from './time';
-import user from './user';
 import type {
   CellComponentFactory,
   CellDataType,
@@ -16,6 +15,7 @@ import type {
   SimpleCellDataTypes,
 } from './typeDefinitions';
 import uri from './uri';
+import user from './user';
 
 const simpleDataTypeComponentFactories: Record<
   SimpleCellDataTypes,

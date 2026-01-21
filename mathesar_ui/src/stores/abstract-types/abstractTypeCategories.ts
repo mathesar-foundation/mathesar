@@ -21,13 +21,13 @@ import Email from './type-configs/email';
 import Fallback from './type-configs/fallback';
 // eslint-disable-next-line import/no-cycle
 import File from './type-configs/file/file';
-import User from './type-configs/user/user';
 import Json from './type-configs/json';
 import Money from './type-configs/money';
 import Number from './type-configs/number';
 import Text from './type-configs/text';
 import Time from './type-configs/time';
 import Uri from './type-configs/uri';
+import User from './type-configs/user/user';
 import Uuid from './type-configs/uuid';
 import { typeCastMap } from './typeCastMap';
 import type {
@@ -328,7 +328,6 @@ function identifyAbstractTypeForDbType(
 
 function identifyAllPossibleAbstractTypesForDbType(
   dbType: DbType,
-  metadata: ColumnMetadata | null = null,
 ): Set<AbstractType> {
   const allPossibleAbstractTypes: Set<AbstractType> = new Set();
   if (dbType === DB_TYPES.JSONB) {
@@ -369,8 +368,7 @@ export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
 
   const targetDbTypes = typeCastMap[dbType] ?? [];
   targetDbTypes.forEach((targetDbType) => {
-    const abstractTypes =
-      identifyAllPossibleAbstractTypesForDbType(targetDbType, metadata);
+    const abstractTypes = identifyAllPossibleAbstractTypesForDbType(targetDbType);
     [...abstractTypes].forEach((absType) => abstractTypeSet.add(absType));
   });
   const abstractTypeList = [...abstractTypeSet].sort((a, b) =>
@@ -451,7 +449,13 @@ export function mergeMetadataOnTypeChange(
     };
   } else if (metadata?.user_display_field != null) {
     // Clear user-specific metadata when changing away from user type
-    const { user_display_field, track_editing_user, ...rest } = result;
+    const {
+      user_display_field: userDisplayField,
+      track_editing_user: trackEditingUser,
+      ...rest
+    } = result;
+    void userDisplayField;
+    void trackEditingUser;
     result = {
       ...rest,
       user_display_field: null,
