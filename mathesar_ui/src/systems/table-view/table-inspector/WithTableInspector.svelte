@@ -1,12 +1,14 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
+  import type { Table } from '@mathesar/models/Table';
   import { tableInspectorWidth } from '@mathesar/stores/localStorage';
   import { WithPanel } from '@mathesar-component-library';
 
   import TableInspector from './TableInspector.svelte';
 
   export let context: 'page' | 'widget' | 'shared-consumer-page';
+  export let table: Table;
   export let showTableInspector: boolean;
   export let activeTabId:
     | ComponentProps<TableInspector>['activeTabId']
@@ -27,6 +29,6 @@
     maxSizePx={600}
   >
     <slot />
-    <TableInspector slot="panel" bind:activeTabId />
+    <TableInspector slot="panel" {table} bind:activeTabId />
   </WithPanel>
 {/if}

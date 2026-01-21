@@ -86,7 +86,10 @@
   }
 
   function getDataForNewRecord(): Record<string, unknown> {
-    const pkColumnIds = $columns.filter((c) => c.primary_key).map((c) => c.id);
+    const pkColumnIds = $columns
+      .filter((c) => c.primary_key)
+      .map((c) => String(c.id));
+    // SearchFuzzy.without expects string[], which we now have
     return Object.fromEntries($searchFuzzy.without(pkColumnIds));
   }
 
@@ -191,7 +194,9 @@
             },
           })}
         {:else}
-          {$_('count_records', { values: { count: $recordCount } })}
+          {$_('count_records', {
+            values: { count: numberFormatter.format($recordCount) },
+          })}
         {/if}
       </div>
     {/if}

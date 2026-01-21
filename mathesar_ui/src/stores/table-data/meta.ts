@@ -12,6 +12,7 @@ import {
 
 import { Filtering, type TerseFiltering } from './filtering';
 import { Grouping, type TerseGrouping } from './grouping';
+import { Joining, type TerseJoining } from './joining';
 import type { RecordsRequestParamsData } from './records';
 import { SearchFuzzy } from './searchFuzzy';
 import { Sorting, type TerseSorting } from './sorting';
@@ -50,6 +51,7 @@ export interface MetaProps {
   sorting: Sorting;
   grouping: Grouping;
   filtering: Filtering;
+  joining: Joining;
 }
 
 /** Adds default values. */
@@ -59,6 +61,7 @@ function getFullMetaProps(p?: Partial<MetaProps>): MetaProps {
     sorting: p?.sorting ?? new Sorting(),
     grouping: p?.grouping ?? new Grouping(),
     filtering: p?.filtering ?? new Filtering(),
+    joining: p?.joining ?? new Joining(),
   };
 }
 
@@ -67,6 +70,7 @@ export type TerseMetaProps = [
   TerseSorting,
   TerseGrouping,
   TerseFiltering,
+  TerseJoining,
 ];
 
 export function makeMetaProps(t: TerseMetaProps): MetaProps {
@@ -75,6 +79,7 @@ export function makeMetaProps(t: TerseMetaProps): MetaProps {
     sorting: Sorting.fromTerse(t[1]),
     grouping: Grouping.fromTerse(t[2]),
     filtering: Filtering.fromTerse(t[3]),
+    joining: Joining.fromTerse(t[4]),
   };
 }
 
@@ -85,6 +90,7 @@ export function makeTerseMetaProps(p?: Partial<MetaProps>): TerseMetaProps {
     props.sorting.terse(),
     props.grouping.terse(),
     props.filtering.terse(),
+    props.joining.terse(),
   ];
 }
 
@@ -120,6 +126,8 @@ export class Meta {
 
   filtering: Writable<Filtering>;
 
+  joining: Writable<Joining>;
+
   searchFuzzy: Writable<SearchFuzzy>;
 
   cellClientSideErrors = new WritableMap<CellKey, ClientSideCellError[]>();
@@ -134,6 +142,16 @@ export class Meta {
     CellKey,
     RequestStatus<RpcError[]>
   >();
+
+  cellsLoading = derived(
+    this.cellModificationStatus,
+    (cellStatus) =>
+      new Set(
+        [...cellStatus.entries()]
+          .filter(([, requestStatus]) => requestStatus.state === 'processing')
+          .map(([cellKey]) => cellKey),
+      ),
+  );
 
   /**
    * For each row, the status of the most recent request to delete the row. If
@@ -172,6 +190,7 @@ export class Meta {
     this.sorting = writable(props.sorting);
     this.grouping = writable(props.grouping);
     this.filtering = writable(props.filtering);
+    this.joining = writable(props.joining);
     this.searchFuzzy = writable(new SearchFuzzy());
 
     this.rowsWithClientSideErrors = derived(
@@ -215,13 +234,20 @@ export class Meta {
     );
 
     this.serialization = derived(
-      [this.pagination, this.sorting, this.grouping, this.filtering],
-      ([pagination, sorting, grouping, filtering]) => {
+      [
+        this.pagination,
+        this.sorting,
+        this.grouping,
+        this.filtering,
+        this.joining,
+      ],
+      ([pagination, sorting, grouping, filtering, joining]) => {
         const serialization = serializeMetaProps({
           pagination,
           sorting,
           grouping,
           filtering,
+          joining,
         });
         if (serialization === defaultMetaPropsSerialization) {
           // Avoid returning a serialization which only includes the empty data
@@ -239,13 +265,15 @@ export class Meta {
         this.grouping,
         this.filtering,
         this.searchFuzzy,
+        this.joining,
       ],
-      ([pagination, sorting, grouping, filtering, searchFuzzy]) => ({
+      ([pagination, sorting, grouping, filtering, searchFuzzy, joining]) => ({
         pagination,
         sorting,
         grouping,
         filtering,
         searchFuzzy,
+        joining,
       }),
     );
 

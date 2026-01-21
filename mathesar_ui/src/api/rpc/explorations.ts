@@ -213,13 +213,4 @@ export const explorations = {
   >(),
 
   run: rpcMethodTypeContainer<ExplorationRunParams, ExplorationResult>(),
-
-  run_saved: rpcMethodTypeContainer<
-    {
-      exploration_id: number;
-      limit: number;
-      offset: number;
-    },
-    ExplorationResult
-  >(),
 };

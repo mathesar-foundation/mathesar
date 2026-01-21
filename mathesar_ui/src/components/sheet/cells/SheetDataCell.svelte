@@ -8,15 +8,14 @@
 
   import { getSheetCellStyle } from './sheetCellUtils';
 
-  type SheetColumnIdentifierKey = $$Generic;
-
   const isSelectingCellRange =
     isSelectingCellRangeContext.get() ?? readable(false);
 
-  export let columnIdentifierKey: SheetColumnIdentifierKey;
+  export let columnIdentifierKey: string;
   export let cellSelectionId: string | undefined = undefined;
   export let selection: SheetSelection | undefined = undefined;
   export let isWithinPlaceholderRow = false;
+  export let isRangeRestricted = false;
 
   $: style = getSheetCellStyle(columnIdentifierKey);
   $: ({ isActive, isSelected, hasSelectionBackground } = (() => {
@@ -39,6 +38,7 @@
 <div
   data-sheet-element="data-cell"
   data-sheet-row-type={isWithinPlaceholderRow ? 'placeholder' : 'data'}
+  data-sheet-column-selection={isRangeRestricted ? 'restrict-range' : undefined}
   data-cell-selection-id={cellSelectionId}
   data-cell-active={isActive ? '' : undefined}
   data-cell-selected={isSelected ? '' : undefined}

@@ -36,13 +36,15 @@ def test_tables_list(rf, monkeypatch, mocked_exec_msar_func):
             'oid': 17408,
             'name': 'Authors',
             'schema': schema_oid,
-            'description': 'a description on the authors table.'
+            'description': 'a description on the authors table.',
+            'type': 'table'
         },
         {
             'oid': 17809,
             'name': 'Books',
             'schema': schema_oid,
-            'description': None
+            'description': None,
+            'type': 'table'
         }
     ]
     mocked_exec_msar_func.fetchone.return_value = [expect_table_list]
@@ -73,7 +75,8 @@ def test_tables_get(rf, monkeypatch, mocked_exec_msar_func):
         'oid': table_oid,
         'name': 'Authors',
         'schema': 2200,
-        'description': 'a description on the authors table.'
+        'description': 'a description on the authors table.',
+        'type': 'table'
     }
     mocked_exec_msar_func.fetchone.return_value = [expect_table_list]
     actual_table_list = tables.get(table_oid=1964474, database_id=11, request=request)

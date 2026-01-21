@@ -132,7 +132,6 @@
       - delete
       - replace
       - run
-      - run_saved
       - ExplorationInfo
       - ExplorationDef
       - ExplorationResult
@@ -179,7 +178,9 @@
       - Group
       - GroupingResponse
       - SearchParam
+      - RecordSummaryMapping
       - RecordSummaryList
+      - LinkedRecordPath
       - SummarizedRecordReference
 
 ## Roles

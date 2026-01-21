@@ -1,13 +1,12 @@
 import type { RecordsListParams } from '@mathesar/api/rpc/records';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 
 export interface GroupEntry {
-  readonly columnId: number;
+  readonly columnId: string;
   readonly preprocFnId?: string;
 }
 
-type TerseGroupEntry =
-  | [GroupEntry['columnId'], GroupEntry['preprocFnId']]
-  | [GroupEntry['columnId']];
+type TerseGroupEntry = [string, GroupEntry['preprocFnId']] | [string];
 
 export type TerseGrouping = TerseGroupEntry[];
 
@@ -52,7 +51,7 @@ export class Grouping {
     });
   }
 
-  withoutColumns(columnIds: number[]): Grouping {
+  withoutColumns(columnIds: string[]): Grouping {
     return new Grouping({
       entries: this.entries.filter(
         (entry) => !columnIds.includes(entry.columnId),
@@ -60,7 +59,7 @@ export class Grouping {
     });
   }
 
-  withPreprocForColumn(columnId: number, preprocFnId?: string): Grouping {
+  withPreprocForColumn(columnId: string, preprocFnId?: string): Grouping {
     return new Grouping({
       entries: this.entries.map((entry) => {
         if (entry.columnId === columnId) {
@@ -80,7 +79,7 @@ export class Grouping {
     }
     return {
       grouping: {
-        columns: this.entries.map((e) => e.columnId),
+        columns: this.entries.map((e) => castColumnIdToNumber(e.columnId)),
         preproc: this.entries.map((e) => e.preprocFnId ?? null),
       },
     };

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { api } from '@mathesar/api/rpc';
+  import { filterJoinableTablesByMaxDepth } from '@mathesar/api/rpc/tables';
   import { Spinner } from '@mathesar/component-library';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
@@ -11,28 +11,22 @@
 
   $: columns = $tabularData.processedColumns;
   $: table = $tabularData.table;
-
-  function getJoinableTables(databaseId: number, tableOid: number) {
-    return api.tables
-      .list_joinable({
-        database_id: databaseId,
-        table_oid: tableOid,
-        max_depth: 1,
-      })
-      .run();
-  }
+  $: joinableTablesValue = $tabularData.joinableTables;
+  $: joinableTablesUpto1Level = $joinableTablesValue.resolvedValue
+    ? filterJoinableTablesByMaxDepth($joinableTablesValue.resolvedValue, 1)
+    : undefined;
 </script>
 
 <div>
-  {#await getJoinableTables(table.schema.database.id, table.oid)}
+  {#if $joinableTablesValue.isLoading}
     <Spinner />
-  {:then joinableTablesResult}
+  {:else if joinableTablesUpto1Level}
     <LinksContent
       {table}
       currentTableColumns={$columns}
-      {joinableTablesResult}
+      joinableTablesResult={joinableTablesUpto1Level}
     />
-  {:catch error}
-    <ErrorBox>{getErrorMessage(error)}</ErrorBox>
-  {/await}
+  {:else if $joinableTablesValue.error}
+    <ErrorBox>{getErrorMessage($joinableTablesValue.error)}</ErrorBox>
+  {/if}
 </div>

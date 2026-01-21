@@ -1,11 +1,13 @@
 import { filter } from 'iter-tools';
 
+import { iconTable, iconView } from '@mathesar/icons';
 import type { Table } from '@mathesar/models/Table';
 import {
   getImportPreviewPageUrl,
   getTablePageUrl,
 } from '@mathesar/routes/urls';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import type { IconProps } from '@mathesar-component-library/types';
 
 interface TableWithImportVerification {
   metadata?: {
@@ -31,13 +33,15 @@ interface TableWithColumnOrder {
 function getColumnOrder(
   processedColumns: ProcessedColumn[],
   table: TableWithColumnOrder,
-): number[] {
+): string[] {
   /**
    * The column ids set in metadata. Because this array comes from
    * loosely-coupled metadata, it might contain ids of columns which no longer
    * exist, and it might lack ids of columns that do exist.
+   * Note: Metadata stores column_order as number[], but we convert to string[]
+   * for internal use.
    */
-  const orderedIds = new Set(table.metadata?.column_order ?? []);
+  const orderedIds = new Set((table.metadata?.column_order ?? []).map(String));
   const existingIds = new Set(processedColumns.map((c) => c.id));
 
   const orderedIdsThatExist = filter((i) => existingIds.has(i), orderedIds);
@@ -47,11 +51,11 @@ function getColumnOrder(
 }
 
 export function orderProcessedColumns(
-  processedColumns: Map<number, ProcessedColumn>,
+  processedColumns: Map<string, ProcessedColumn>,
   table: TableWithColumnOrder,
-): Map<number, ProcessedColumn> {
+): Map<string, ProcessedColumn> {
   const columns = [...processedColumns.values()];
-  const orderedColumns = new Map<number, ProcessedColumn>();
+  const orderedColumns = new Map<string, ProcessedColumn>();
 
   const columnOrder = getColumnOrder(columns, table);
   columnOrder.forEach((id) => {
@@ -76,4 +80,26 @@ export function getLinkForTableItem(
     });
   }
   return getTablePageUrl(databaseId, schemaId, table.oid);
+}
+
+export function isTableView(table: Pick<Table, 'type'>): boolean {
+  return table.type === 'view' || table.type === 'materialized_view';
+}
+
+export function getTableIcon(table: Pick<Table, 'type'>): IconProps {
+  return isTableView(table) ? iconView : iconTable;
+}
+
+export function getTableIconColor(table: Pick<Table, 'type'>): string {
+  return isTableView(table) ? 'var(--color-view)' : 'var(--color-table)';
+}
+
+export function getTableAccentColor(table: Pick<Table, 'type'>): string {
+  return isTableView(table) ? 'var(--color-view-80)' : 'var(--color-table-80)';
+}
+
+export function getTableIconFillColor(table: Pick<Table, 'type'>): string {
+  return isTableView(table)
+    ? 'linear-gradient(135deg, var(--color-view), var(--color-view-80))'
+    : 'linear-gradient(135deg, var(--color-table), var(--color-table-80))';
 }

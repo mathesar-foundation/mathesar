@@ -95,7 +95,7 @@
               value: String(value),
             };
       await columnsDataStore.patch({
-        id: column.id,
+        id: column.column.id,
         default: defaultRequest,
       });
 
@@ -104,10 +104,17 @@
         const metadataUpdate = options.getMetadataUpdate(defaultMode);
         if (metadataUpdate) {
           const currentMetadata = column.column.metadata ?? {};
-          await columnsDataStore.setDisplayOptions(column, {
-            ...currentMetadata,
-            ...metadataUpdate,
-          });
+          await columnsDataStore.setDisplayOptions(
+            new Map([
+              [
+                column.column.id,
+                {
+                  ...currentMetadata,
+                  ...metadataUpdate,
+                },
+              ],
+            ]),
+          );
         }
       }
 

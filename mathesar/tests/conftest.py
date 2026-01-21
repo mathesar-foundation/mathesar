@@ -7,7 +7,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 from django.conf import settings
-from rest_framework.test import APIClient
+from django.test import Client as APIClient
 
 from db import connection
 from mathesar.models.users import User

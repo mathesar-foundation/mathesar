@@ -25,7 +25,7 @@ function getLinkedTable({
   tables,
 }: {
   fkConstraint: FkConstraint;
-  columns: Map<number, ProcessedColumn>;
+  columns: Map<string, ProcessedColumn>;
   tables: Map<number, Table>;
 }): LinkedTable | undefined {
   const table = tables.get(fkConstraint.referent_table_oid);
@@ -36,7 +36,7 @@ function getLinkedTable({
     constraint: fkConstraint,
     table,
     columns: fkConstraint.columns
-      .map((columnId) => columns.get(columnId))
+      .map((columnId) => columns.get(String(columnId)))
       .filter(isDefinedNonNullable),
   };
 }
@@ -47,7 +47,7 @@ export function getLinkedTables({
   tables,
 }: {
   constraints: RawConstraint[];
-  columns: Map<number, ProcessedColumn>;
+  columns: Map<string, ProcessedColumn>;
   tables: Map<number, Table>;
 }): LinkedTable[] {
   return constraints

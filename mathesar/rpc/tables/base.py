@@ -44,6 +44,7 @@ class TableInfo(TypedDict):
         owner_oid: The OID of the direct owner of the table.
         current_role_priv: The privileges available to the user on the table.
         current_role_owns: Whether the current role owns the table.
+        type: The type of the object: "table", "view", or "materialized_view".
     """
     oid: int
     name: str
@@ -62,6 +63,7 @@ class TableInfo(TypedDict):
         ]
     ]
     current_role_owns: bool
+    type: Literal['table', 'view', 'materialized_view']
 
 
 class AddedTableInfo(TypedDict):
@@ -285,7 +287,7 @@ def patch(
 
     Args:
         table_oid: Identity of the table whose name, description or columns we'll modify.
-        table_data_dict: A list describing desired table alterations.
+        table_data_dict: A dict describing desired table alterations.
         database_id: The Django id of the database containing the table.
 
     Returns:

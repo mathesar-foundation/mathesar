@@ -13,6 +13,11 @@
     AnonymousViewerUserModel,
     setGlobalUsersStore,
   } from '@mathesar/stores/users';
+  import AttachableMultiTagger from '@mathesar/systems/multi-tagger/AttachableMultiTagger.svelte';
+  import {
+    AttachableMultiTaggerController,
+    multiTaggerContext,
+  } from '@mathesar/systems/multi-tagger/AttachableMultiTaggerController';
   import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
   import {
     RecordSelectorController,
@@ -79,6 +84,8 @@
   const rowSeekerController = new AttachableRowSeekerController();
   rowSeekerContext.set(rowSeekerController);
 
+  const multiTaggerController = new AttachableMultiTaggerController();
+  multiTaggerContext.set(multiTaggerController);
   // Initialize global users store for User type cells
   setGlobalUsersStore();
 
@@ -139,6 +146,7 @@
   modalController={recordSelectorModal}
 />
 <AttachableRowSeeker controller={rowSeekerController} />
+<AttachableMultiTagger controller={multiTaggerController} />
 <ControlledLightbox controller={lightboxController} />
 <ControlledFileDetailDropdown controller={fileDetailDropdownController} />
 <ModalFileAttachmentUploader controller={modalFileAttachmentUploader} />

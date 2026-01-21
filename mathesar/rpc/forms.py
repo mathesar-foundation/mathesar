@@ -256,7 +256,7 @@ def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
 @mathesar_rpc_method(name="forms.get", auth="anonymous")
 def get(*, form_token: str, **kwargs) -> FormInfo:
     """
-    List information about a form.
+    Get information about a form.
 
     Args:
         form_token: The unique token of the form.
@@ -288,12 +288,12 @@ def get_source_info(*, form_token: str, **kwargs) -> FormInfo:
 
 
 @mathesar_rpc_method(name="forms.list", auth="login")
-def list_(*, database_id: int, schema_oid: int, **kwargs) -> FormInfo:
+def list_(*, database_id: int, schema_oid: int, **kwargs) -> list[FormInfo]:
     """
     List information about forms for a database. Exposed as `list`.
 
     Args:
-        database_id: The Django id of the database containing the form.
+        database_id: The Django id of the database containing the forms.
         schema_oid: The OID of the schema containing the base table(s) of the forms(s).
 
     Returns:
@@ -372,7 +372,7 @@ def list_related_records(
         **kwargs,
 ) -> RecordSummaryList:
     """
-    List records for selection via the row seeker
+    List records for selection via the row seeker.
 
     Args:
         form_token: The unique token of the form.
