@@ -166,7 +166,6 @@
       // User cancelled selection
     }
   }
-
 </script>
 
 <div class="user-filter-input filter-input">

@@ -368,7 +368,8 @@ export function getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
 
   const targetDbTypes = typeCastMap[dbType] ?? [];
   targetDbTypes.forEach((targetDbType) => {
-    const abstractTypes = identifyAllPossibleAbstractTypesForDbType(targetDbType);
+    const abstractTypes =
+      identifyAllPossibleAbstractTypesForDbType(targetDbType);
     [...abstractTypes].forEach((absType) => abstractTypeSet.add(absType));
   });
   const abstractTypeList = [...abstractTypeSet].sort((a, b) =>

@@ -1,4 +1,7 @@
-import { type RawColumnWithMetadata, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
+import {
+  type RawColumnWithMetadata,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUser } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
