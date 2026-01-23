@@ -1,11 +1,14 @@
 import { get } from 'svelte/store';
 
-import { iconTable } from '@mathesar/icons';
 import type { Table } from '@mathesar/models/Table';
 import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import { currentTablesData } from '@mathesar/stores/tables';
-import { component, hyperlinkMenuEntry } from '@mathesar-component-library';
+import {
+  component,
+  hyperlinkMenuEntry,
+  iconExternalLink,
+} from '@mathesar-component-library';
 
 import OpenNamedTable from '../labels/OpenNamedTable.svelte';
 
@@ -35,9 +38,9 @@ export function* openTable(p: { column: ProcessedColumn }) {
   const linkedTable = getLinkedTableDetail(p.column);
   if (linkedTable) {
     yield hyperlinkMenuEntry({
-      label: component(OpenNamedTable, { name: linkedTable.table.name }),
+      label: component(OpenNamedTable, { table: linkedTable.table }),
       href: linkedTable.href,
-      icon: iconTable,
+      icon: iconExternalLink,
     });
   }
 }

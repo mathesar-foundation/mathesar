@@ -4,8 +4,6 @@
   using table inspector
 -->
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
@@ -24,6 +22,8 @@
     getTabularDataStoreFromContext,
     isJoinedColumn,
   } from '@mathesar/stores/table-data';
+  import { currentTablesData } from '@mathesar/stores/tables';
+  import JoinedColumnTooltipContent from '@mathesar/systems/table-view/table-inspector/column/JoinedColumnTooltipContent.svelte';
   import { Icon, Tooltip } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -47,6 +47,22 @@
     const col = columnFabric.column;
     return 'description' in col ? col.description : undefined;
   })();
+
+  $: joinInfo = (() => {
+    if (!isJoinedColumn(columnFabric)) return undefined;
+    const { targetTableOid, intermediateTableOid } = columnFabric;
+    const { tablesMap } = $currentTablesData;
+
+    const targetTable = targetTableOid
+      ? tablesMap.get(targetTableOid)
+      : undefined;
+    const intermediateTable = tablesMap.get(intermediateTableOid);
+
+    return {
+      targetTable,
+      intermediateTable,
+    };
+  })();
 </script>
 
 <div class="header-cell-root">
@@ -63,19 +79,29 @@
     on:mouseenter
   >
     {#if isJoinedColumn(columnFabric)}
-      <ColumnName
-        column={{ ...columnFabric.column, name: columnFabric.displayName }}
-        {hideIcon}
-      />
+      <span class="joined-column-name">
+        <span class="table-link-icon">
+          <Icon {...iconTableLink} />
+        </span>
+        <ColumnName
+          column={{ ...columnFabric.column, name: columnFabric.displayName }}
+          hideIcon={true}
+        />
+      </span>
     {:else}
       <ProcessedColumnName {hideIcon} processedColumn={columnFabric} />
     {/if}
     {#if sorter || hasFilter || grouped || description || isJoinedColumn(columnFabric)}
       <div class="indicator-icons">
         {#if isJoinedColumn(columnFabric)}
-          <Tooltip>
-            <Icon slot="trigger" {...iconTableLink} />
-            <span slot="content">{$_('joined_column_tooltip')}</span>
+          <Tooltip allowHover={true}>
+            <Icon slot="trigger" {...iconDescription} />
+            <div slot="content">
+              <JoinedColumnTooltipContent
+                targetTable={joinInfo?.targetTable}
+                intermediateTable={joinInfo?.intermediateTable}
+              />
+            </div>
           </Tooltip>
         {/if}
         {#if sorter}
@@ -90,7 +116,7 @@
           <Icon {...iconGrouping} />
         {/if}
         {#if description}
-          <Tooltip>
+          <Tooltip allowHover={true}>
             <Icon slot="trigger" {...iconDescription} />
             <div slot="content">{description}</div>
           </Tooltip>
@@ -124,5 +150,17 @@
         margin-left: 0.25rem;
       }
     }
+  }
+
+  .joined-column-name {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .table-link-icon {
+    color: var(--color-column);
+    display: inline-flex;
+    align-items: center;
   }
 </style>

@@ -3,7 +3,7 @@
     JoinableTable,
     JoinableTablesResult,
   } from '@mathesar/api/rpc/tables';
-  import { currentTablesData } from '@mathesar/stores/tables';
+  import { type TablesData, currentTablesData } from '@mathesar/stores/tables';
   import { isDefinedNonNullable } from '@mathesar-component-library';
 
   import TableWidget from './TableWidget.svelte';
@@ -13,8 +13,11 @@
   export let joinableTablesResult: JoinableTablesResult;
   export let isInModal = false;
 
-  function buildWidgetInput(joinableTable: JoinableTable) {
-    const table = $currentTablesData.tablesMap.get(joinableTable.target);
+  function buildWidgetInput(
+    joinableTable: JoinableTable,
+    tablesData: TablesData,
+  ) {
+    const table = tablesData.tablesMap.get(joinableTable.target);
     if (!table) return undefined;
     const fkColumnId = joinableTable.join_path[0].slice(-1)[0][1];
     const { name } =
@@ -24,7 +27,7 @@
 
   $: tableWidgetInputs = joinableTablesResult.joinable_tables
     .filter((joinableTable) => joinableTable.multiple_results)
-    .map(buildWidgetInput)
+    .map((joinableTable) => buildWidgetInput(joinableTable, $currentTablesData))
     .filter(isDefinedNonNullable)
     .sort((a, b) => a.table.name.localeCompare(b.table.name));
 </script>

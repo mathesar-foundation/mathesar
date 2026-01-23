@@ -13,6 +13,7 @@
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
+  export let setValue: (newValue: unknown) => void = () => {};
   export let recordSummary: string | undefined = undefined;
   export let fileManifest: FileManifest | undefined = undefined;
   export let setFileManifest:
@@ -67,9 +68,9 @@
     {isProcessing}
     {showTruncationPopover}
     {canViewLinkedEntities}
-    bind:value
+    {value}
+    {setValue}
     on:movementKeyDown
-    on:update
   />
 
   <div class="loader">
