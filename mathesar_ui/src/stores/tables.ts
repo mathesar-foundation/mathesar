@@ -48,7 +48,7 @@ const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
 
 type TablesMap = Map<Table['oid'], Table>;
 
-interface TablesData {
+export interface TablesData {
   databaseId?: Database['id'];
   schemaOid?: Schema['oid'];
   tablesMap: TablesMap;

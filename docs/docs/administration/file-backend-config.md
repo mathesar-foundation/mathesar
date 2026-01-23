@@ -59,7 +59,7 @@ You'll either create a file named `file_storage.yml` or set up the `FILE_STORAGE
       ```diff
       volumes:
        - ./msar/static:/code/static
-       - ./msar/media:/code/media
+       - ./msar/media:/code/.media
       # Uncomment the following to mount file_storage.yml and enable
       #  an S3-compliant file storage backend
       -# - ./file_storage.yml:/code/file_storage.yml

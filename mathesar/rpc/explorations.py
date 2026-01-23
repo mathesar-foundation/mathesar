@@ -5,7 +5,6 @@ from typing import Optional, TypedDict
 
 from modernrpc.core import REQUEST_KEY
 
-from mathesar.models.base import Explorations
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.explorations import (
@@ -13,7 +12,6 @@ from mathesar.utils.explorations import (
     get_exploration,
     delete_exploration,
     run_exploration,
-    run_saved_exploration,
     replace_exploration,
     create_exploration
 )
@@ -177,26 +175,6 @@ def run(*, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, *
     user = kwargs.get(REQUEST_KEY).user
     with connect(exploration_def["database_id"], user) as conn:
         exploration_result = run_exploration(exploration_def, conn, limit, offset)
-    return ExplorationResult.from_dict(exploration_result)
-
-
-@mathesar_rpc_method(name="explorations.run_saved", auth="login")
-def run_saved(*, exploration_id: int, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
-    """
-    Run a saved exploration.
-
-    Args:
-        exploration_id: The Django id of the exploration to run.
-        limit: The max number of rows to return.(default 100)
-        offset: The number of rows to skip.(default 0)
-
-    Returns:
-        The result of the exploration run.
-    """
-    user = kwargs.get(REQUEST_KEY).user
-    exp_model = Explorations.objects.get(id=exploration_id)
-    with connect(exp_model.database.id, user) as conn:
-        exploration_result = run_saved_exploration(exp_model, limit, offset, conn)
     return ExplorationResult.from_dict(exploration_result)
 
 
