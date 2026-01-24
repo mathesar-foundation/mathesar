@@ -63,6 +63,25 @@
     }
   }
 
+  /**
+   * Since TextInput has two way binding internally and we modify name
+   * when the input value is empty (in updateName), the states within
+   * TextInput and this component may go out of sync.
+   * This bandaid solution keeps it in sync during blur. A better option
+   * which would require refactoring would be to remove two way binding
+   * in lower level components.
+   */
+  function syncQueryName(e: FocusEvent) {
+    const element = e.target;
+    if (
+      element &&
+      element instanceof HTMLInputElement &&
+      element.value !== name
+    ) {
+      element.value = name ?? '';
+    }
+  }
+
   function updateDescription(value: unknown) {
     const newValue = String(value ?? '').trim();
     description = newValue;
@@ -132,6 +151,7 @@
                 value: getValueFromEvent(e),
                 debounce: false,
               })}
+            on:blur={syncQueryName}
           />
         </Debounce>
       </LabeledInput>
