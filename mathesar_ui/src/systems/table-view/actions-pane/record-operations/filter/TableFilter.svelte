@@ -133,14 +133,11 @@
     <div class="header">
       <span>{$_('filter_records')}</span>
       {#if displayFilterList}
-        <Button
-          appearance="plain"
-          class="clear-all-button"
-          on:click={clearAllFilters}
-          title={$_('clear_all_filters')}
-        >
-          <Icon {...iconClose} />
-        </Button>
+        <div class="clear-all-button">
+          <Button appearance="plain" on:click={clearAllFilters}>
+            <Icon {...iconClose} />
+          </Button>
+        </div>
       {/if}
     </div>
     <div class="content">
@@ -171,7 +168,7 @@
   .content {
     margin-top: 0.8rem;
   }
-  :global(.clear-all-button) {
+  .clear-all-button {
     --button-color: var(--color-fg-subtle-2);
     --button-padding: var(--sm6);
   }
