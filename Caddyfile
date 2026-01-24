@@ -12,7 +12,7 @@
 
 		file_server {
 			precompressed br zstd gzip
-			root {$MEDIA_ROOT:/code/media/}
+			root {$MEDIA_ROOT:/code/.media/}
 		}
 	}
 	handle_path /static/* {

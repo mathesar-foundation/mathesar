@@ -143,17 +143,6 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
     }
 
 
-def run_saved_exploration(exp_model, limit, offset, conn):
-    exploration_def = {
-        "database_id": exp_model.database.id,
-        "base_table_oid": exp_model.base_table_oid,
-        "initial_columns": exp_model.initial_columns,
-        "display_names": exp_model.display_names,
-        "transformations": exp_model.transformations,
-    }
-    return run_exploration(exploration_def, conn, limit, offset)
-
-
 def exploration_chunker(
     conn,
     exploration_id,
@@ -164,7 +153,14 @@ def exploration_chunker(
     limit = min(limit or 50000, 50000)  # We cap limit at 50000
     # so that we can avoid loading explorations > 50000 rows into memory.
     exp_model = get_exploration(exploration_id)
-    exp_results = run_saved_exploration(exp_model, limit, offset, conn)
+    exploration_def = {
+        "database_id": exp_model.database.id,
+        "base_table_oid": exp_model.base_table_oid,
+        "initial_columns": exp_model.initial_columns,
+        "display_names": exp_model.display_names,
+        "transformations": exp_model.transformations,
+    }
+    exp_results = run_exploration(exploration_def, conn, limit, offset)
     yield exp_results["output_columns"]
     records = exp_results["records"]
     for i in range(0, records["count"], batch_size):

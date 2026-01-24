@@ -1,6 +1,7 @@
 <script lang="ts">
   import { takeLast } from 'iter-tools';
   import { onMount, tick } from 'svelte';
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import type { LinkedRecordInputElement } from '@mathesar/components/cell-fabric/types';
@@ -24,6 +25,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { Button, Icon, iconClose } from '@mathesar-component-library';
 
   import OperationDropdown from '../OperationDropdown.svelte';
 
@@ -65,6 +67,9 @@
   }
 
   function updateVarsAndExternalFiltering() {
+    if (get(filterGroup.args).length === 0) {
+      filterGroup.operator.set('and');
+    }
     const rawFilterGroup = filterGroup.toRaw();
     individualFilterCount = calcNumberOfIndividualFilters(rawFilterGroup);
     const newFiltering = new Filtering(rawFilterGroup);
@@ -97,6 +102,11 @@
     activateLastFilterInput();
   }
 
+  function clearAllFilters() {
+    filterGroup = new FilterGroup();
+    updateVarsAndExternalFiltering();
+  }
+
   onMount(() =>
     imperativeFilterController?.onOpenDropdown(() => {
       isOpen = true;
@@ -120,7 +130,16 @@
   {...$$restProps}
 >
   <div class="filters" bind:this={content} use:dnd={{ onChange }}>
-    <div class="header">{$_('filter_records')}</div>
+    <div class="header">
+      <span>{$_('filter_records')}</span>
+      {#if displayFilterList}
+        <div class="clear-all-button">
+          <Button appearance="plain" on:click={clearAllFilters}>
+            <Icon {...iconClose} />
+          </Button>
+        </div>
+      {/if}
+    </div>
     <div class="content">
       <FilterGroupComponent
         columns={$processedColumns}
@@ -142,8 +161,15 @@
   }
   .header {
     font-weight: bolder;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   .content {
     margin-top: 0.8rem;
+  }
+  .clear-all-button {
+    --button-color: var(--color-fg-subtle-2);
+    --button-padding: var(--sm6);
   }
 </style>

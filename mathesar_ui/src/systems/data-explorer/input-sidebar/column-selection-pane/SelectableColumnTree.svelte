@@ -8,8 +8,7 @@
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
 
   export let query: Writable<QueryModel>;
-  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
-    {};
+  export let linkCollapsibleOpenState: Record<string, boolean> = {};
   export let columnsWithLinks: Map<ColumnWithLink['id'], ColumnWithLink>;
 </script>
 
