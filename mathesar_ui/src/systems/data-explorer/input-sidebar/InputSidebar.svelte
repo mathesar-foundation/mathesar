@@ -2,8 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
-  import { confirm } from '@mathesar/stores/confirmation';
+  import { modal } from '@mathesar/stores/modal';
   import { getAvailableName } from '@mathesar/utils/db';
   import { Spinner, TabContainer } from '@mathesar-component-library';
 
@@ -11,6 +10,7 @@
   import type { ColumnWithLink } from '../utils';
 
   import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
+  import SummarizeColumnModal from './SummarizeColumnModal.svelte';
   import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
 
   export let queryManager: QueryManager;
@@ -25,39 +25,17 @@
   ];
   let activeTab = tabs[0];
 
-  async function addColumn(column: ColumnWithLink) {
-    const baseAlias = `${column.tableName}_${column.name}`;
-    const allAliases = new Set($query.initial_columns.map((c) => c.alias));
-    const alias = getAvailableName(baseAlias, allAliases);
+  const summarizeModal = modal.spawnModalController();
+  let pendingColumn: ColumnWithLink | null = null;
+  let pendingAlias = '';
+
+  async function performColumnAddition(
+    column: ColumnWithLink,
+    alias: string,
+    addNewAutoSummarization: boolean,
+  ) {
     const queryHasNoSummarization = !$query.hasSummarizationTransform();
-    let addNewAutoSummarization = false;
-    if (
-      column.producesMultipleResults &&
-      $confirmationNeededForMultipleResults &&
-      queryHasNoSummarization
-    ) {
-      addNewAutoSummarization = await confirm({
-        title: {
-          component: PhraseContainingIdentifier,
-          props: {
-            identifier: column.name,
-            wrappingString: $_('summarize_column_with_identifier'),
-          },
-        },
-        body: [
-          $_('summarize_column_recommendation'),
-          $_('summarize_column_configure'),
-        ],
-        proceedButton: {
-          label: $_('yes_summarize_as_list'),
-          icon: undefined,
-        },
-        cancelButton: {
-          label: $_('no_continue_without_summarization'),
-          icon: undefined,
-        },
-      });
-    }
+
     await queryManager.update((q) => {
       const newQuery = q.withInitialColumn({
         alias,
@@ -76,10 +54,56 @@
     if (queryHasNoSummarization) {
       queryManager.selectColumn(alias);
     }
-    // Select transformations tab is auto summarization is added
+    // Select transformations tab if auto summarization is added
     if (addNewAutoSummarization) {
       [, activeTab] = tabs;
     }
+  }
+
+  async function addColumn(column: ColumnWithLink) {
+    const baseAlias = `${column.tableName}_${column.name}`;
+    const allAliases = new Set($query.initial_columns.map((c) => c.alias));
+    const alias = getAvailableName(baseAlias, allAliases);
+    const queryHasNoSummarization = !$query.hasSummarizationTransform();
+
+    if (
+      column.producesMultipleResults &&
+      $confirmationNeededForMultipleResults &&
+      queryHasNoSummarization
+    ) {
+      // Show modal and store pending column info
+      pendingColumn = column;
+      pendingAlias = alias;
+      summarizeModal.open();
+      return;
+    }
+
+    // Add column without summarization
+    await performColumnAddition(column, alias, false);
+  }
+
+  async function handleSummarize() {
+    if (pendingColumn && pendingAlias) {
+      await performColumnAddition(pendingColumn, pendingAlias, true);
+    }
+    summarizeModal.close();
+    pendingColumn = null;
+    pendingAlias = '';
+  }
+
+  async function handleWithoutSummarization() {
+    if (pendingColumn && pendingAlias) {
+      await performColumnAddition(pendingColumn, pendingAlias, false);
+    }
+    summarizeModal.close();
+    pendingColumn = null;
+    pendingAlias = '';
+  }
+
+  function handleModalClose() {
+    // Just close modal without adding column
+    pendingColumn = null;
+    pendingAlias = '';
   }
 </script>
 
@@ -121,6 +145,14 @@
     </TabContainer>
   </section>
 </aside>
+
+<SummarizeColumnModal
+  controller={summarizeModal}
+  columnName={pendingColumn?.name ?? ''}
+  onSummarize={handleSummarize}
+  onWithoutSummarization={handleWithoutSummarization}
+  on:close={handleModalClose}
+/>
 
 <style lang="scss">
   aside.input-sidebar {

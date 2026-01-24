@@ -20,7 +20,7 @@ import type {
   RecordsSearchParams,
   ResultValue,
 } from '@mathesar/api/rpc/records';
-import { makeCellId, parseCellId } from '@mathesar/components/sheet/cellIds';
+import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
 import {
