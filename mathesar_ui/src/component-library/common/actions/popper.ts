@@ -137,7 +137,7 @@ export default function popper(
     while (parent) {
       const { overflow, overflowX, overflowY } = window.getComputedStyle(parent);
       const isScrollable = /(auto|scroll)/.test(overflow + overflowX + overflowY);
-      
+
       if (isScrollable) {
         scrollListeners.push({ element: parent, listener: handleScroll });
         parent.addEventListener('scroll', handleScroll);
