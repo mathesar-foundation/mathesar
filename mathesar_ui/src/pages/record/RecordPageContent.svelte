@@ -140,7 +140,9 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
           appearance="danger"
         >
           <Icon {...iconDeleteMajor} />
-          <span>{$_('delete_records', { values: { count: 1 } })}</span>
+          <span class="responsive-label">
+            {$_('delete_records', { values: { count: 1 } })}
+          </span>
         </Button>
       </div>
     </AppSecondaryHeader>
@@ -213,6 +215,8 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     grid-row: 1 / span 2;
     grid-column: 2;
     display: flex;
+    align-items: baseline;
+    gap: var(--sm5);
   }
   .form-status {
     flex: 1;
@@ -227,5 +231,16 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
   .widgets-container {
     margin: 0 var(--sm1) var(--lg1) var(--sm1);
+  }
+
+  @media (max-width: 38rem) {
+    .responsive-label {
+      display: none;
+    }
+  }
+  @media (max-width: 32rem) {
+    :global(.status-indicator .status-text) {
+      display: none;
+    }
   }
 </style>
