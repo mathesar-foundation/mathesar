@@ -32,7 +32,16 @@
   // Calculate equal width for all items considering padding and gaps
   // Reserve space for count badge (~80px) and gaps (1rem each)
   const BADGE_WIDTH = 80;
-  const GAP_WIDTH = 16; // 1rem
+  const DEFAULT_GAP_WIDTH = 16;
+  const GAP_WIDTH =
+    typeof window !== 'undefined'
+      ? (() => {
+          const root = document.documentElement;
+          const fontSize = getComputedStyle(root).fontSize;
+          const parsed = parseFloat(fontSize);
+          return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_GAP_WIDTH;
+        })()
+      : DEFAULT_GAP_WIDTH;
 
   type WidthMetrics = {
     availableWidth: number;
