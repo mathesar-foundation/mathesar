@@ -5,7 +5,7 @@
   export let href: string;
 
   /**
-   * Appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
+   * Appearance. One of: 'control', 'input', 'primary', 'secondary', 'plain', 'ghost'.
    * @required
    */
   export let appearance: Appearance = 'control';

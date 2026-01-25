@@ -1,5 +1,4 @@
 export type Appearance =
-  | 'default'
   | 'control'
   | 'input'
   | 'primary'

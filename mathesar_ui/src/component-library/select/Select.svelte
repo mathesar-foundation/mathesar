@@ -61,7 +61,7 @@
   export { classes as class };
 
   /**
-   * Appearance of the trigger button. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
+   * Appearance of the trigger button. One of: 'control', 'input', 'primary', 'secondary', 'plain', 'ghost'.
    */
   export let triggerAppearance: DefinedProps['triggerAppearance'] = 'input';
 

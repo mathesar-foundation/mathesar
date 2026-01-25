@@ -57,7 +57,7 @@
 <Story
   name="Basic"
   args={{
-    appearance: 'default',
+    appearance: 'control',
     slotContent: 'Basic button',
   }}
   {argTypes}
@@ -69,7 +69,6 @@
 </Story>
 
 <Story name="Appearances" parameters={disabledAddons}>
-  <Button appearance="default">Default button</Button>
   <Button appearance="control">Control button</Button>
   <Button appearance="input">Input button</Button>
   <Button appearance="primary">Primary button</Button>
