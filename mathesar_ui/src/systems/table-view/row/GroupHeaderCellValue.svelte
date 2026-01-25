@@ -33,18 +33,46 @@
   // Reserve space for count badge (~80px) and gaps (1rem each)
   const BADGE_WIDTH = 80;
   const GAP_WIDTH = 16; // 1rem
-  $: availableWidth =
-    containerWidth > 0
-      ? Math.max(
-          0,
-          containerWidth - BADGE_WIDTH - totalColumns * GAP_WIDTH - 32,
-        ) // 32 for padding
-      : 0;
-  $: maxItemWidth =
-    availableWidth > 0 && totalColumns > 0
-      ? Math.floor(availableWidth / totalColumns)
-      : 0;
 
+  type WidthMetrics = {
+    availableWidth: number;
+    maxItemWidth: number;
+  };
+
+  const widthMetricsCache = new Map<string, WidthMetrics>();
+
+  function getWidthMetrics(
+    containerWidth: number,
+    totalColumns: number,
+  ): WidthMetrics {
+    const key = `${containerWidth}-${totalColumns}`;
+    const cached = widthMetricsCache.get(key);
+    if (cached) {
+      return cached;
+    }
+
+    const availableWidth =
+      containerWidth > 0
+        ? Math.max(
+            0,
+            containerWidth - BADGE_WIDTH - totalColumns * GAP_WIDTH - 32,
+          ) // 32 for padding
+        : 0;
+
+    const maxItemWidth =
+      availableWidth > 0 && totalColumns > 0
+        ? Math.floor(availableWidth / totalColumns)
+        : 0;
+
+    const metrics: WidthMetrics = { availableWidth, maxItemWidth };
+    widthMetricsCache.set(key, metrics);
+    return metrics;
+  }
+
+  $: ({ availableWidth, maxItemWidth } = getWidthMetrics(
+    containerWidth,
+    totalColumns,
+  ));
   $: displayValue = (() => {
     if (recordSummary) return recordSummary;
     if (fileManifest) return fileManifest.uri;
