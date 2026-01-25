@@ -41,6 +41,33 @@ function parseKeywords(input: string): Dayjs | undefined {
   }
 }
 
+function makeLooseVariants(formats: string[]): string[] {
+  const variants = new Set<string>();
+
+  for (const f of formats) {
+    variants.add(f);
+
+    if (f.includes('HH')) {
+      variants.add(f.replace(/HH/g, 'H'));
+    }
+
+    if (f.includes(':ss')) {
+      variants.add(f.replace(':ss', ''));
+      variants.add(f.replace(':ss.Z', ''));
+      variants.add(f.replace(':ss Z', ''));
+      variants.add(f.replace(':ssZZ', ''));
+    }
+
+    if (f.includes('T')) {
+      variants.add(f.replace('T', ' '));
+    } else if (f.includes(' ')) {
+      variants.add(f.replace(' ', 'T'));
+    }
+  }
+
+  return Array.from(variants);
+}
+
 function parseWithSpec(
   input: string,
   spec: DateTimeSpecification,
@@ -52,7 +79,9 @@ function parseWithSpec(
     ...canonicalFormats,
   ];
 
-  const strictResult = dayjs(input, allFormats, true);
+  const looseFormats = makeLooseVariants(allFormats);
+
+  const strictResult = dayjs(input, looseFormats, true);
   if (strictResult.isValid()) return strictResult;
 
   const canonicalResult = dayjs(input, canonicalFormats);
@@ -72,8 +101,15 @@ export default class DateTimeFormatter implements InputFormatter<string> {
    * @param input could come from the user or from an API response
    */
   parse(input: string): ParseResult<string> {
-    const dayjsValue =
+    let dayjsValue =
       parseKeywords(input) ?? parseWithSpec(input, this.specification);
+
+    if (!dayjsValue) {
+      const permissive = dayjs(input);
+      if (permissive.isValid()) {
+        dayjsValue = permissive;
+      }
+    }
 
     const value = (() => {
       if (dayjsValue) {

@@ -13,6 +13,7 @@ import type {
   RawFilterGroup,
   RawIndividualFilter,
 } from '@mathesar/components/filter/utils';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 
 import type { FilterId } from '../abstract-types/types';
 
@@ -45,7 +46,7 @@ function individualFilterToSqlExpr(
 ): SqlExpr {
   const column: SqlColumn = {
     type: 'attnum',
-    value: Number(individualFilter.columnId),
+    value: castColumnIdToNumber(individualFilter.columnId),
   };
 
   /** Generate an SqlLiteral value */
@@ -190,7 +191,7 @@ function getCountOfNonConjunctionalExpr(expr: SqlExpr) {
 }
 
 function getCountOfColumnInExpr(expr: SqlExpr, columnId: string): number {
-  if (expr.type === 'attnum' && expr.value === Number(columnId)) {
+  if (expr.type === 'attnum' && expr.value === castColumnIdToNumber(columnId)) {
     return 1;
   }
   let count = 0;
@@ -219,10 +220,8 @@ function filterGroupToSqlExpr(group: RawFilterGroup): SqlExpr | undefined {
     return filterSqlExpr;
   }
 
-  if (group.args.length === 1) {
-    const entry = group.args[0];
-    return toSQLExpr(entry);
-  }
+  const effectiveOperatorForArgs =
+    group.operator === 'not' ? 'or' : group.operator;
 
   let expr = toSQLExpr(group.args[0]);
 
@@ -230,12 +229,19 @@ function filterGroupToSqlExpr(group: RawFilterGroup): SqlExpr | undefined {
     const joinedExpr = toSQLExpr(group.args[i]);
     if (expr !== undefined && joinedExpr) {
       expr = {
-        type: group.operator,
+        type: effectiveOperatorForArgs,
         args: [expr, joinedExpr],
       };
     } else if (joinedExpr) {
       expr = joinedExpr;
     }
+  }
+
+  if (group.operator === 'not' && expr) {
+    return {
+      type: 'not',
+      args: [expr],
+    };
   }
 
   return expr;

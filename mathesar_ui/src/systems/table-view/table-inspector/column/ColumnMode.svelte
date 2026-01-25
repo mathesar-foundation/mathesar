@@ -2,8 +2,6 @@
   import { _ } from 'svelte-i18n';
 
   import InspectorSection from '@mathesar/components/InspectorSection.svelte';
-  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import TableLink from '@mathesar/components/TableLink.svelte';
   import {
     tableInspectorColumnActionsVisible,
     tableInspectorColumnDataTypeVisible,
@@ -28,6 +26,7 @@
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
   import ColumnTypeSpecifierTag from './ColumnTypeSpecifierTag.svelte';
+  import JoinedColumnTooltipContent from './JoinedColumnTooltipContent.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -94,25 +93,10 @@
   {/if}
   {#if joinInfo}
     <div class="joined-column-info">
-      <WarningBox>
-        {$_('joined_column_tooltip')}
-      </WarningBox>
-      {#if joinInfo.targetTable}
-        <div class="table-link-group">
-          <div class="table-link-header">
-            {$_('joined_table')}
-          </div>
-          <TableLink table={joinInfo.targetTable} />
-        </div>
-      {/if}
-      {#if joinInfo.mappingTable}
-        <div class="table-link-group">
-          <div class="table-link-header">
-            {$_('mapping_table')}
-          </div>
-          <TableLink table={joinInfo.mappingTable} />
-        </div>
-      {/if}
+      <JoinedColumnTooltipContent
+        targetTable={joinInfo.targetTable}
+        intermediateTable={joinInfo.mappingTable}
+      />
     </div>
   {/if}
   {#if column}
@@ -205,27 +189,11 @@
     padding: var(--lg4);
   }
 
-  .columns-selected-count {
-    padding: 1rem;
+  .joined-column-info {
+    padding: var(--lg2);
   }
 
-  .joined-column-info {
-    padding: var(--sm1);
-    display: flex;
-    flex-direction: column;
-    gap: var(--sm1);
-
-    .table-link-group {
-      display: flex;
-      flex-direction: column;
-      gap: var(--sm5);
-      padding: var(--sm6);
-    }
-
-    .table-link-header {
-      color: var(--color-fg-subtle-1);
-      font-size: var(--sm1);
-      font-weight: var(--font-weight-medium);
-    }
+  .columns-selected-count {
+    padding: 1rem;
   }
 </style>

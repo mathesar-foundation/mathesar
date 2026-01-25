@@ -5,6 +5,7 @@ export interface TextAreaProps extends SimplifiedInputProps, BaseInputProps {
   value?: string | null;
   element?: HTMLTextAreaElement;
   addNewLineOnEnterKeyCombinations?: boolean;
+  onValueChange?: (value: string) => void;
 }
 
 export interface TextAreaProcessedKeyDown {

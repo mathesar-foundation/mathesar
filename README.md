@@ -12,8 +12,8 @@
   <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme-top" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Contributor Wiki</a> • <a href="https://github.com/orgs/mathesar-foundation/projects/2" target="_blank">Roadmap</a>
 </p>
 
-
 # Mathesar
+
 Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface—no code needed. It’s self hosted, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions. The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.
 
 Mathesar is as scalable as Postgres and supports any size or complexity of data, making it ideal for workflows involving production databases. It requires minimal setup, and integrates into your existing infrastructure. Because Mathesar is self-hosted, your data never leaves your servers, and access control based on Postgres roles and privileges keeps your database secure without adding unnecessary risk.
@@ -36,6 +36,8 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
   - [Linking two tables together](#linking-two-tables-together)
   - [Managing table permissions](#managing-table-permissions)
   - [Viewing a single record with related records](#viewing-a-single-record-with-related-records)
+  - [Building a form](#building-a-form)
+  - [Filling out a form](#filling-out-a-form)
   - [Viewing an Exploration (query result)](#viewing-an-exploration-query-result)
   - [Building an Exploration (query)](#building-an-exploration-query)
   - [Disconnecting a database](#disconnecting-a-database)
@@ -47,6 +49,7 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Status
+
 - [x] **Public Alpha**: You can install and deploy Mathesar on your server. Go easy on us!
 - [x] **Public Beta**: Stable and feature-rich enough to implement in production
 - [ ] **Public**: Widely used in production environments
@@ -54,15 +57,19 @@ Mathesar is as scalable as Postgres and supports any size or complexity of data,
 We are currently in the **public beta** stage.
 
 ## Install Mathesar
+
 Please see [our documentation](https://docs.mathesar.org/?ref=github-readme-installing) for instructions on installing Mathesar on your own server.
 
 ## Join our community
+
 The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list.
 
 ### Contribute to Mathesar
+
 We actively encourage contribution! Get started by reading our [Contributor Guide](./CONTRIBUTING.md).
 
 ## Features
+
 - **Built on Postgres**: Connect to an existing Postgres database or set one up from scratch.
 - **Install in minutes**: Install using Docker in minutes, integrate into any existing infrastructure.
 - **Postgres-based access control**: Use existing Postgres roles within Mathesar's UI, or set up your own.
@@ -71,13 +78,16 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 - **Data entry**: Use our spreadsheet-like interface to view, create, update, and delete table records.
 - **Filter, sort, and group**: Quickly slice your data in different ways.
 - **Query builder**: Use our Data Explorer to build queries without knowing anything about SQL or joins.
+- **Forms**: Build and share forms to collect data from anyone via a unique link, with submissions automatically saved as new records.
 - **Import and export data**: Import and export data into Mathesar easily to work with your data elsewhere.
 - **Schema migrations**: Transfer columns between tables in two clicks.
 - **Uses Postgres features**: Mathesar uses and manipulates Postgres schemas, primary keys, foreign keys, constraints and data types. e.g. "Relationships" in the UI are foreign keys in the database.
 - **Custom data types**: Custom data types for emails and URLs, validated at the database level.
 
 ## Screenshots
+
 ### Connecting a database
+
 ![connect-db](https://github.com/user-attachments/assets/d7188c8d-a040-4bc4-8350-28b2a6fd1661)
 
 ### Adding collaborators
@@ -101,6 +111,12 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 ### Viewing a single record with related records
 ![record-page](https://github.com/user-attachments/assets/d2e621e3-5597-44ef-ae87-482bec0b9bcc)
 
+### Building a form
+![form-builder](https://raw.githubusercontent.com/mathesar-foundation/mathesar/develop/docs/docs/assets/releases/0.5.0/form-builder.png)
+
+### Filling out a form
+![form-fill-example](https://raw.githubusercontent.com/mathesar-foundation/mathesar/develop/docs/docs/assets/releases/0.5.0/form-fill-example.png)
+
 ### Viewing an Exploration (query result)
 ![viewing-exploration](https://github.com/user-attachments/assets/410cb99f-a583-411b-9706-7967bff673e6)
 
@@ -111,15 +127,19 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 ![disconnect-db](https://github.com/user-attachments/assets/f22e9c78-3c92-40c8-8ef9-dcb4cf8e8aea)
 
 ## Mathesar in action
+
 https://github.com/user-attachments/assets/6bdfb178-17b4-4abf-aac4-9781e1d841ab
 
 ## Our motivation
+
 Using databases shouldn't require technical expertise or expensive, closed-off tools. Databases are incredibly powerful, but they're often trapped behind complex interfaces that are hard to use or limit how people can access and share their data. We want to change that by building user-friendly tools that unlock the power of existing databases without sacrificing accessibility, portability, or extensibility.
 
 Mathesar is our answer: an open-source platform designed to unlock the full potential of PostgreSQL, one of the most powerful and trusted open-source databases. Mathesar is easy to use, interoperable, and extensible, while also giving you complete control over your data. As a nonprofit, we're committed to keeping Mathesar 100% open source and available to everyone—because better ways to work with data mean better decisions, and better decisions lead to a better world.
 
 ## Bugs and troubleshooting
+
 If you run into problems, refer to our [troubleshooting guide](./TROUBLESHOOTING.md).
 
 ## License
+
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
