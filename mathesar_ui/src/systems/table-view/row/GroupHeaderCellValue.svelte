@@ -16,6 +16,7 @@
   export let fileManifestsForSheet: AssociatedCellValuesForSheet<FileManifest>;
   export let totalColumns: number;
   export let containerWidth = 0;
+  export let badgeWidth = 80;
 
   $: processedColumn = processedColumnsMap.get(columnId);
   $: recordId = String(cellValue);
@@ -31,15 +32,16 @@
 
   // Calculate equal width for all items considering padding and gaps
   // Reserve space for count badge (~80px) and gaps (1rem each)
-  const BADGE_WIDTH = 80;
   const DEFAULT_GAP_WIDTH = 16;
   const GAP_WIDTH =
     typeof window !== 'undefined'
       ? (() => {
           const root = document.documentElement;
-          const fontSize = getComputedStyle(root).fontSize;
+          const { fontSize } = getComputedStyle(root);
           const parsed = parseFloat(fontSize);
-          return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_GAP_WIDTH;
+          return Number.isFinite(parsed) && parsed > 0
+            ? parsed
+            : DEFAULT_GAP_WIDTH;
         })()
       : DEFAULT_GAP_WIDTH;
 
@@ -48,39 +50,52 @@
     maxItemWidth: number;
   };
 
+  const MIN_ITEM_WIDTH = 40; // Minimum width per item for graceful degradation
+
   const widthMetricsCache = new Map<string, WidthMetrics>();
 
   function getWidthMetrics(
-    containerWidth: number,
-    totalColumns: number,
+    cWidth: number,
+    tCols: number,
+    bWidth: number,
   ): WidthMetrics {
-    const key = `${containerWidth}-${totalColumns}`;
+    const key = `${cWidth}-${tCols}-${bWidth}`;
     const cached = widthMetricsCache.get(key);
     if (cached) {
       return cached;
     }
 
     const availableWidth =
-      containerWidth > 0
-        ? Math.max(
-            0,
-            containerWidth - BADGE_WIDTH - totalColumns * GAP_WIDTH - 32,
-          ) // 32 for padding
+      cWidth > 0
+        ? Math.max(0, cWidth - bWidth - Math.max(0, tCols) * GAP_WIDTH - 32) // 32 for padding
         : 0;
 
-    const maxItemWidth =
-      availableWidth > 0 && totalColumns > 0
-        ? Math.floor(availableWidth / totalColumns)
-        : 0;
+    const maxItemWidth = (() => {
+      if (availableWidth <= 0 || tCols <= 0) {
+        // No usable space or no columns to render; allow layout to fall back gracefully.
+        return 0;
+      }
+      // Determine how many columns can reasonably fit given a minimum width.
+      const maxColumnsByWidth = Math.max(
+        1,
+        Math.floor(availableWidth / MIN_ITEM_WIDTH),
+      );
+      const effectiveColumns = Math.min(tCols, maxColumnsByWidth);
+      if (effectiveColumns <= 0) {
+        return 0;
+      }
+      return Math.floor(availableWidth / effectiveColumns);
+    })();
 
     const metrics: WidthMetrics = { availableWidth, maxItemWidth };
     widthMetricsCache.set(key, metrics);
     return metrics;
   }
 
-  $: ({ availableWidth, maxItemWidth } = getWidthMetrics(
+  $: ({ maxItemWidth } = getWidthMetrics(
     containerWidth,
     totalColumns,
+    badgeWidth,
   ));
   $: displayValue = (() => {
     if (recordSummary) return recordSummary;

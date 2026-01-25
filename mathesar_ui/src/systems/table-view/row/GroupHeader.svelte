@@ -22,6 +22,7 @@
 
   let containerElement: HTMLElement;
   let containerWidth = 0;
+  let badgeWidth = 0;
 
   $: ({ columnIds, preprocIds } = grouping);
   $: preProcFunctionsForColumn = columnIds.map(
@@ -39,6 +40,7 @@
   function handleWheel(event: WheelEvent) {
     // Pass horizontal scroll to the parent sheet
     if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+      event.preventDefault();
       const sheetBody = containerElement?.closest(
         '[data-sheet-element="body"]',
       );
@@ -70,9 +72,10 @@
           {fileManifestsForSheet}
           totalColumns={columnIds.length}
           {containerWidth}
+          {badgeWidth}
         />
       {/each}
-      <div class="count-container">
+      <div class="count-container" bind:clientWidth={badgeWidth}>
         <Badge>
           {group.count}
         </Badge>
