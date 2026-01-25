@@ -43,9 +43,6 @@
         {@const stringColumnId = String(columnId)}
         <div
           class="group-header-item"
-          title={row.groupValues?.[stringColumnId] != null
-            ? String(row.groupValues[stringColumnId])
-            : undefined}
         >
           <GroupHeaderCellValue
             {processedColumnsMap}
@@ -74,6 +71,9 @@
     border-bottom: 1px solid var(--color-border-grid);
     border-right: 1px solid var(--color-border-grid);
     overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .groups-data {
@@ -81,6 +81,7 @@
     width: 100%;
     gap: 1rem;
     overflow: hidden;
+    min-width: 0;
   }
 
   .group-header-item {
@@ -96,5 +97,6 @@
     --badge-font-size: var(--sm1);
     --badge-text-color: var(--color-fg-subtle-1);
     --badge-background-color: var(--color-bg-sunken-1-hover);
+    max-width: 100%;
   }
 </style>
