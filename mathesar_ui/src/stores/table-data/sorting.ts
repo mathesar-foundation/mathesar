@@ -7,6 +7,7 @@ import {
   type SortDirection,
   allowedSortDirections,
 } from '@mathesar/components/sort-entry/utils';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 import { ImmutableMap } from '@mathesar-component-library';
 
 import type { Grouping } from './grouping';
@@ -48,7 +49,7 @@ export class Sorting extends ImmutableMap<string, SortDirection> {
   private recordsRequestParams(): Pick<RecordsListParams, 'order'> {
     const sortingEntries: ApiSortingEntry[] = [...this].map(
       ([columnId, sortDirection]) => ({
-        attnum: Number(columnId),
+        attnum: castColumnIdToNumber(columnId),
         direction: getApiSortDirection(sortDirection),
       }),
     );

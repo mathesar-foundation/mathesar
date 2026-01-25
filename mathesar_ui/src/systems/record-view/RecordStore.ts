@@ -1,4 +1,5 @@
-import { type Writable, writable } from 'svelte/store';
+import { type Writable, get, writable } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
@@ -73,6 +74,11 @@ export default class RecordStore {
           return_record_summaries: true,
         })
         .run();
+      if (response.count === 0) {
+        throw new Error(
+          get(_)('record_not_found', { values: { id: this.recordPk } }),
+        );
+      }
       this.updateSelfWithApiResponseData(response);
       this.fetchRequest.set({ state: 'success' });
     } catch (error) {

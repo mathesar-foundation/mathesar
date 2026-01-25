@@ -21,6 +21,8 @@ from db.deprecated.functions.base import (
 from db.deprecated.functions.packed import DistinctArrayAgg
 from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
+from datetime import date, time, datetime
+from collections.abc import Mapping, Sequence
 
 
 def list_explorations(database_id, schema_oid=None):
@@ -64,6 +66,44 @@ def create_exploration(exploration_def):
         display_names=exploration_def.get("display_names", {}),
         description=exploration_def.get("description")
     )
+
+
+def _serialize_value_for_json(value):
+    """
+    Convert values returned from DBQuery into JSON‑serializable forms.
+
+    Handles timezone‑aware time / datetime objects (including inside arrays)
+    by converting them to ISO 8601 strings, while leaving other types intact.
+    """
+    # Handle basic temporal types
+    if isinstance(value, (date, datetime, time)):
+        # Use ISO string, which preserves timezone info when present
+        return value.isoformat()
+
+    # Handle sequences (e.g. lists/tuples/arrays from DISTINCT LIST)
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return [_serialize_value_for_json(v) for v in value]
+
+    # Handle mappings/dicts
+    if isinstance(value, Mapping):
+        return {k: _serialize_value_for_json(v) for k, v in value.items()}
+
+    # Fallback: leave as is (must already be serializable)
+    return value
+
+
+def _serialize_records_for_json(records):
+    """
+    Apply _serialize_value_for_json to each record row dict.
+    """
+    serialized_results = []
+    for row in records:
+        serialized_row = {
+            key: _serialize_value_for_json(val)
+            for key, val in row.items()
+        }
+        serialized_results.append(serialized_row)
+    return serialized_results
 
 
 def run_exploration(exploration_def, conn, limit=100, offset=0):
@@ -122,6 +162,9 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
     )
     query_results = db_query.get_records(limit=limit, offset=offset)
 
+    raw_results = [r._asdict() for r in query_results]
+    serialized_results = _serialize_records_for_json(raw_results)
+
     column_metadata = _get_exploration_column_metadata(
         exploration_def,
         processed_initial_columns,
@@ -134,24 +177,13 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         "query": exploration_def,
         "records": {
             "count": db_query.count,
-            "results": [r._asdict() for r in query_results],
+            "results": serialized_results,
         },
         "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
         "column_metadata": column_metadata,
         "limit": limit,
         "offset": offset
     }
-
-
-def run_saved_exploration(exp_model, limit, offset, conn):
-    exploration_def = {
-        "database_id": exp_model.database.id,
-        "base_table_oid": exp_model.base_table_oid,
-        "initial_columns": exp_model.initial_columns,
-        "display_names": exp_model.display_names,
-        "transformations": exp_model.transformations,
-    }
-    return run_exploration(exploration_def, conn, limit, offset)
 
 
 def exploration_chunker(
@@ -164,7 +196,14 @@ def exploration_chunker(
     limit = min(limit or 50000, 50000)  # We cap limit at 50000
     # so that we can avoid loading explorations > 50000 rows into memory.
     exp_model = get_exploration(exploration_id)
-    exp_results = run_saved_exploration(exp_model, limit, offset, conn)
+    exploration_def = {
+        "database_id": exp_model.database.id,
+        "base_table_oid": exp_model.base_table_oid,
+        "initial_columns": exp_model.initial_columns,
+        "display_names": exp_model.display_names,
+        "transformations": exp_model.transformations,
+    }
+    exp_results = run_exploration(exploration_def, conn, limit, offset)
     yield exp_results["output_columns"]
     records = exp_results["records"]
     for i in range(0, records["count"], batch_size):

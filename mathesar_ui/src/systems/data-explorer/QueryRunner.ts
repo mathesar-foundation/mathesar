@@ -17,7 +17,6 @@ import type {
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
-import { runSavedExploration } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import {
   type CancellablePromise,
@@ -49,8 +48,6 @@ export interface QueryRowsData {
   rows: QueryRow[];
 }
 
-type QueryRunMode = 'queryId' | 'queryObject';
-
 export class QueryRunner {
   query: Writable<QueryModel>;
 
@@ -78,16 +75,7 @@ export class QueryRunner {
 
   private runPromise: CancellablePromise<ExplorationResult> | undefined;
 
-  private runMode: QueryRunMode;
-
-  constructor({
-    query,
-    runMode,
-  }: {
-    query: QueryModel;
-    runMode?: QueryRunMode;
-  }) {
-    this.runMode = runMode ?? 'queryObject';
+  constructor({ query }: { query: QueryModel }) {
     this.query = writable(query);
     this.speculateProcessedColumns();
     void this.run();
@@ -151,30 +139,13 @@ export class QueryRunner {
     try {
       const paginationParams = get(this.pagination).recordsRequestParams();
       this.runState.set({ state: 'processing' });
-      if (this.runMode === 'queryObject') {
-        const internalRunPromise = api.explorations
-          .run({
-            exploration_def: queryModel.toAnonymousExploration(),
-            ...paginationParams,
-          })
-          .run();
-        this.runPromise = internalRunPromise;
-        const internalResponse = await internalRunPromise;
-        response = internalResponse;
-      } else {
-        const queryId = queryModel.id;
-        if (!queryId) {
-          this.runState.set({
-            state: 'failure',
-            errors: ['Query does not contain an id'],
-          });
-          return undefined;
-        }
-        this.runPromise = runSavedExploration(queryModel.id, {
+      this.runPromise = api.explorations
+        .run({
+          exploration_def: queryModel.toAnonymousExploration(),
           ...paginationParams,
-        });
-        response = await this.runPromise;
-      }
+        })
+        .run();
+      response = await this.runPromise;
 
       const columnsMetaData = processColumnMetaData(response.column_metadata);
       this.columnsMetaData.set(columnsMetaData);

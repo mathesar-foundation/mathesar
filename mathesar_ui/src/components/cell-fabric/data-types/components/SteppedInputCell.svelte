@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
 
   import CellValue from '@mathesar/components/CellValue.svelte';
   import {
@@ -23,6 +23,7 @@
 
   export let isActive: Props['isActive'];
   export let value: Props['value'];
+  export let setValue: (newValue: Value | null | undefined) => void;
   export let disabled: Props['disabled'];
   export let multiLineTruncate = false;
   export let formatValue: CellValueFormatter<Value> | undefined = undefined;
@@ -35,7 +36,8 @@
 
   let cellRef: HTMLElement;
   let isEditMode = false;
-  let lastSavedValue: Value | undefined | null = undefined;
+  /** Stored ephemerally while the user is editing the cell */
+  let valueInEditMode: Value | undefined | null = undefined;
 
   $: formattedValue = formatValue?.(value) ?? value;
   $: matchParts = (() => {
@@ -57,31 +59,28 @@
     return compareWholeValues(searchValue, value, formatter);
   })();
 
-  function setModeToEdit() {
-    if (!disabled) {
-      isEditMode = true;
+  function enterEditMode() {
+    if (disabled) return; // Can't edit disabled cells
+    isEditMode = true;
+    valueInEditMode = value;
+  }
+
+  function exitEditMode(saveStrategy: 'saveChanges' | 'discardChanges') {
+    if (!isEditMode) return;
+    if (saveStrategy === 'saveChanges' && valueInEditMode !== value) {
+      setValue(valueInEditMode);
     }
-  }
-
-  function resetEditMode() {
     isEditMode = false;
-  }
-
-  function revertValue() {
-    value = lastSavedValue;
-  }
-
-  function initLastSavedValue() {
-    lastSavedValue = value;
+    valueInEditMode = undefined;
   }
 
   function handleKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
         if (isEditMode) {
-          resetEditMode();
+          exitEditMode('saveChanges');
         } else {
-          setModeToEdit();
+          enterEditMode();
         }
         // Preventing default behaviour here. Interesting problem: If this is
         // not prevented, the textarea gets a new line break. Needs more digging
@@ -89,11 +88,10 @@
         e.preventDefault();
         break;
       case 'Escape':
-        revertValue();
-        resetEditMode();
+        exitEditMode('discardChanges');
         break;
       case 'Tab':
-        resetEditMode();
+        exitEditMode('saveChanges');
         dispatch('movementKeyDown', {
           originalEvent: e,
           key: e.key,
@@ -115,43 +113,20 @@
     }
   }
 
-  function dispatchUpdate() {
-    if (value === lastSavedValue) {
-      return;
-    }
-    initLastSavedValue();
-    dispatch('update', {
-      value,
-    });
-  }
-
-  function handleInputKeydown(e: KeyboardEvent) {
-    switch (e.key) {
-      case 'Escape':
-        revertValue();
-        break;
-      case 'Enter':
-      case 'Tab':
-        dispatchUpdate();
-        break;
-      default:
-        break;
-    }
-  }
-
   function handleInputBlur() {
-    dispatchUpdate();
-    resetEditMode();
+    exitEditMode('saveChanges');
   }
 
-  onMount(initLastSavedValue);
+  function setValueInEditMode(v: Value | null) {
+    valueInEditMode = v;
+  }
 </script>
 
 <CellWrapper
   {isActive}
   {disabled}
   bind:element={cellRef}
-  on:dblclick={setModeToEdit}
+  on:dblclick={enterEditMode}
   on:keydown={handleKeyDown}
   on:mouseenter
   mode={isEditMode ? 'edit' : 'default'}
@@ -162,7 +137,7 @@
   {isIndependentOfSheet}
 >
   {#if isEditMode}
-    <slot {handleInputBlur} {handleInputKeydown} />
+    <slot {handleInputBlur} {setValueInEditMode} />
   {:else}
     <div
       class="content"
