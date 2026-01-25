@@ -41,9 +41,7 @@
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
         {@const stringColumnId = String(columnId)}
-        <div
-          class="group-header-item"
-        >
+        <div class="group-header-item">
           <GroupHeaderCellValue
             {processedColumnsMap}
             cellValue={row.groupValues?.[stringColumnId]}
