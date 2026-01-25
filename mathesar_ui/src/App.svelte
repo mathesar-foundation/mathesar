@@ -107,13 +107,13 @@
     --cell-bg-color-row-selected: var(--color-selection-subtle-1);
     --cell-bg-color-joined-cell: color-mix(
       in srgb,
-      var(--color-highlight-d),
-      transparent 88%
+      var(--color-record-fk),
+      transparent 98%
     );
     --cell-bg-color-joined-header: color-mix(
       in srgb,
-      var(--color-highlight-d),
-      transparent 78%
+      var(--color-record-fk),
+      transparent 90%
     );
 
     --cell-text-color-processing: var(--color-fg-base-muted);

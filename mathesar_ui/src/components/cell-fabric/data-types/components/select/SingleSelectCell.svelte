@@ -27,6 +27,7 @@
 
   export let isActive: DefinedProps['isActive'];
   export let value: DefinedProps['value'] = undefined;
+  export let setValue: (newValue: DefinedProps['value']) => void;
   export let disabled: DefinedProps['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
@@ -89,8 +90,8 @@
   }
 
   function setValueFromListBox(values: Option[]) {
-    [value] = values;
-    dispatch('update', { value });
+    const [newValue] = values;
+    setValue(newValue);
   }
 
   function handleDropdownClose(api: ListBoxApi<Option>) {

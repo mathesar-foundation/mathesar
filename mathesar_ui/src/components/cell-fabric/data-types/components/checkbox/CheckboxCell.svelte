@@ -13,6 +13,7 @@
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'] = undefined;
+  export let setValue: (newValue: $$Props['value']) => void;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
   export let isProcessing: $$Props['isProcessing'];
@@ -23,16 +24,11 @@
 
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
-  function dispatchUpdate() {
-    dispatch('update', { value });
-  }
-
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Enter':
         if (isActive) {
-          value = !value;
-          dispatchUpdate();
+          setValue(!value);
         }
         break;
       case 'Tab':
@@ -60,8 +56,7 @@
 
   function handleMouseUp() {
     if (!disabled && isActive && shouldToggleOnMouseUp) {
-      value = !value;
-      dispatchUpdate();
+      setValue(!value);
     }
   }
 </script>
@@ -82,10 +77,10 @@
     <Default />
   {:else}
     <Checkbox
-      bind:checked={value}
+      checked={value}
+      on:change={({ detail }) => setValue(detail)}
       allowIndeterminate={true}
       disabled={disabled || isProcessing}
-      on:change={dispatchUpdate}
     />
   {/if}
 </CellWrapper>

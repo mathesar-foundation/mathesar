@@ -143,6 +143,16 @@ export class Meta {
     RequestStatus<RpcError[]>
   >();
 
+  cellsLoading = derived(
+    this.cellModificationStatus,
+    (cellStatus) =>
+      new Set(
+        [...cellStatus.entries()]
+          .filter(([, requestStatus]) => requestStatus.state === 'processing')
+          .map(([cellKey]) => cellKey),
+      ),
+  );
+
   /**
    * For each row, the status of the most recent request to delete the row. If
    * no request has been made, then no entry will be present in the map.

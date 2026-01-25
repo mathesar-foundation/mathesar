@@ -6,11 +6,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import GrowableTextArea from '@mathesar/components/GrowableTextArea.svelte';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import {
     CancelOrProceedButtonPair,
-    TextArea,
     TextInput,
   } from '@mathesar-component-library';
 
@@ -24,10 +24,11 @@
   let value = '';
   let isSubmitting = false;
 
+  $: inputElement = isLongText ? GrowableTextArea : TextInput;
+
   $: validationErrors =
     value === initialValue ? [] : getValidationErrors(value);
   $: canSave = validationErrors.length === 0 && value !== initialValue;
-  $: inputElement = isLongText ? TextArea : TextInput;
 
   function makeEditable() {
     value = initialValue;
@@ -69,11 +70,13 @@
         autofocus
         bind:value
       />
+
       {#if validationErrors.length}
         {#each validationErrors as error}
           <span class="error">{error}</span>
         {/each}
       {/if}
+
       <CancelOrProceedButtonPair
         onProceed={handleSave}
         onCancel={handleCancel}

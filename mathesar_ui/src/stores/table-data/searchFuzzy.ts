@@ -1,5 +1,6 @@
 import type { RecordsSearchParams } from '@mathesar/api/rpc/records';
 import { ImmutableMap } from '@mathesar/component-library';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 
 /**
  * Due to the way that the fuzzy search works, it doesn't make sense to search
@@ -20,7 +21,7 @@ export class SearchFuzzy extends ImmutableMap<string, unknown> {
 
   getSearchParams(): RecordsSearchParams['search_params'] {
     return [...this].map(([columnId, value]) => ({
-      attnum: Number(columnId),
+      attnum: castColumnIdToNumber(columnId),
       literal: value,
     }));
   }

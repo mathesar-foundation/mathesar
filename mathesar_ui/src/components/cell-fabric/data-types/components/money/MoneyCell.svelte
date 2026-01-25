@@ -8,6 +8,7 @@
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'];
+  export let setValue: (newValue: $$Props['value']) => void;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
   export let formatterOptions: $$Props['formatterOptions'];
@@ -17,7 +18,8 @@
 </script>
 
 <SteppedInputCell
-  bind:value
+  {value}
+  {setValue}
   {isActive}
   {disabled}
   {searchValue}
@@ -27,17 +29,16 @@
   formatValue={formatForDisplay}
   horizontalAlignment="right"
   let:handleInputBlur
-  let:handleInputKeydown
+  let:setValueInEditMode
   on:movementKeyDown
   on:mouseenter
-  on:update
 >
   <MoneyCellInput
     focusOnMount={true}
     {disabled}
-    bind:value
+    {value}
     {...formatterOptions}
     on:blur={handleInputBlur}
-    on:keydown={handleInputKeydown}
+    on:artificialInput={({ detail }) => setValueInEditMode(detail)}
   />
 </SteppedInputCell>

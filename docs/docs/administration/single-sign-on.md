@@ -68,7 +68,7 @@ You'll either create a file named `sso.yml` or set up the `OIDC_CONFIG_DICT` env
     ```diff
      volumes:
        - ./msar/static:/code/static
-       - ./msar/media:/code/media
+       - ./msar/media:/code/.media
      # Uncomment the following to mount sso.yml and enable Single Sign-On (SSO).
     -# - ./sso.yml:/code/sso.yml
     +  - ./sso.yml:/code/sso.yml
