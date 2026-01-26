@@ -372,31 +372,6 @@ export class TabularData {
     this.constraintsDataStore.on('constraintRemoved', async () => {
       void this.joinableTables.run();
     });
-
-    // Automatically unhide required columns when new records are being created
-    this.recordsData.newRecords.subscribe((newRecords) => {
-      if (newRecords.length > 0) {
-        const requiredColumnIds = get(this.columnsDataStore.columns)
-          .filter((column) => !column.nullable)
-          .map((column) => String(column.id));
-
-        let columnsUnhidden = false;
-        this.meta.hiddenColumns.update((hiddenColumns) => {
-          let updated = hiddenColumns;
-          for (const columnId of requiredColumnIds) {
-            if (hiddenColumns.hasColumn(columnId)) {
-              updated = updated.withoutColumn(columnId);
-              columnsUnhidden = true;
-            }
-          }
-          return updated;
-        });
-
-        if (columnsUnhidden) {
-          toast.info(get(_)('required_hidden_columns_made_visible'));
-        }
-      }
-    });
   }
 
   refresh(): Promise<unknown> {
@@ -463,6 +438,32 @@ export class TabularData {
     const pkColumn = get(this.columnsDataStore.pkColumn);
     if (!pkColumn) return undefined;
     return row.record[pkColumn.id];
+  }
+
+  async addNewRecord() {
+    const newRecord = await this.recordsData.addEmptyRecord();
+    const requiredColumnIds = get(this.columnsDataStore.columns)
+      .filter((column) => {
+        const hasDynamicDefault = column.default?.is_dynamic ?? false;
+        const isNullable = column.nullable;
+        return !isNullable && !hasDynamicDefault;
+      })
+      .map((column) => String(column.id));
+
+    let columnsUnhidden = false;
+    this.meta.hiddenColumns.update((hiddenColumns) => {
+      const updatedHiddenColumns =
+        hiddenColumns.withoutColumns(requiredColumnIds);
+      if (updatedHiddenColumns.size !== hiddenColumns.size) {
+        columnsUnhidden = true;
+      }
+      return updatedHiddenColumns;
+    });
+
+    if (columnsUnhidden) {
+      toast.info(get(_)('required_hidden_columns_made_visible'));
+    }
+    return newRecord;
   }
 
   destroy(): void {

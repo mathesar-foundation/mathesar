@@ -56,7 +56,7 @@
 
     e.stopPropagation(); // Prevents cell selection from starting
 
-    await recordsData.addEmptyRecord();
+    await $tabularData.addNewRecord();
 
     // Select the first editable cell in the newly added row.
     const columns = $processedColumns.values();
