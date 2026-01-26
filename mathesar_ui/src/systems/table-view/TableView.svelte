@@ -60,6 +60,7 @@
     selection,
     recordsData,
     allColumns,
+    displayedColumns,
     columnsDataStore,
   } = $tabularData);
   $: $tabularData, (tableInspectorTab = 'table');
@@ -104,7 +105,7 @@
   $: sheetColumns = (() => {
     const columns: Array<{ column: { id: string; name: string } }> = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...[...$allColumns].map(([columnId, columnFabric]) => {
+      ...[...$displayedColumns].map(([columnId, columnFabric]) => {
         const name = isJoinedColumn(columnFabric)
           ? columnFabric.displayName
           : columnFabric.column.name;
@@ -125,7 +126,7 @@
   $: columnWidths = new ImmutableMap([
     [ID_ROW_CONTROL_COLUMN, ROW_HEADER_WIDTH_PX],
     [ID_ADD_NEW_COLUMN, 32],
-    ...[...getCustomizedColumnWidths($processedColumns.values())],
+    ...getCustomizedColumnWidths($processedColumns.values()),
     ...[...$allColumns]
       .filter(([, col]) => isJoinedColumn(col))
       .map(([id]): [string, number] => [id, 300]),

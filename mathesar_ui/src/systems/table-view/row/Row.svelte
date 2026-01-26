@@ -32,7 +32,7 @@
     processedColumns,
     selection,
     canUpdateRecords,
-    allColumns,
+    displayedColumns,
   } = $tabularData);
   $: ({
     rowStatus,
@@ -105,7 +105,7 @@
         fileManifestsForSheet={$fileManifests}
       />
     {:else if isRecordRow(row)}
-      {#each [...$allColumns] as [columnId, columnFabric] (columnId)}
+      {#each [...$displayedColumns] as [columnId, columnFabric] (columnId)}
         <RowCell
           {selection}
           {row}

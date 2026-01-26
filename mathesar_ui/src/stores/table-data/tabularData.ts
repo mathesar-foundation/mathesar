@@ -158,6 +158,8 @@ export class TabularData {
 
   allColumns: Readable<Map<string, ProcessedColumn | JoinedColumn>>;
 
+  displayedColumns: Readable<Map<string, ProcessedColumn | JoinedColumn>>;
+
   /**
    * In the future, this will be set dynamically in for publicly shared links
    * where user should not be able to (for example) open the record page for
@@ -278,29 +280,37 @@ export class TabularData {
     );
 
     this.allColumns = derived(
-      [this.processedColumns, this.joinedColumns, this.meta.hiddenColumns],
-      ([processedColumns, joinedColumns, hiddenColumns]) => {
-        const all = new Map<string, ProcessedColumn | JoinedColumn>([
+      [this.processedColumns, this.joinedColumns],
+      ([processedColumns, joinedColumns]) =>
+        new Map<string, ProcessedColumn | JoinedColumn>([
           ...processedColumns,
           ...joinedColumns,
-        ]);
-        for (const columnId of hiddenColumns) {
-          all.delete(columnId);
-        }
-        return all;
-      },
+        ]),
+    );
+
+    this.displayedColumns = derived(
+      [this.allColumns, this.meta.hiddenColumns],
+      ([allColumns, hiddenColumns]) =>
+        new Map(
+          [...allColumns.entries()].filter(([key]) => !hiddenColumns.has(key)),
+        ),
     );
 
     const plane = derived(
       [
         this.recordsData.selectableRowsMap,
-        this.allColumns,
+        this.displayedColumns,
         this.display.placeholderRowId,
         this.joinedColumns,
       ],
-      ([selectableRowsMap, allColumns, placeholderRowId, joinedColumns]) => {
+      ([
+        selectableRowsMap,
+        displayedColumns,
+        placeholderRowId,
+        joinedColumns,
+      ]) => {
         const rowIds = new Series([...selectableRowsMap.keys()]);
-        const columnIds = new Series([...allColumns.keys()]);
+        const columnIds = new Series([...displayedColumns.keys()]);
         const rangeRestrictedColumnIds = new ImmutableSet(joinedColumns.keys());
         return new Plane(
           rowIds,
