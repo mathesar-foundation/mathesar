@@ -32,7 +32,7 @@
     processedColumns,
     selection,
     canUpdateRecords,
-    allColumns,
+    displayedColumns,
   } = $tabularData);
   $: ({
     rowStatus,
@@ -56,7 +56,7 @@
 
     e.stopPropagation(); // Prevents cell selection from starting
 
-    await recordsData.addEmptyRecord();
+    await $tabularData.addNewRecord();
 
     // Select the first editable cell in the newly added row.
     const columns = $processedColumns.values();
@@ -105,7 +105,7 @@
         fileManifestsForSheet={$fileManifests}
       />
     {:else if isRecordRow(row)}
-      {#each [...$allColumns] as [columnId, columnFabric] (columnId)}
+      {#each [...$displayedColumns] as [columnId, columnFabric] (columnId)}
         <RowCell
           {selection}
           {row}

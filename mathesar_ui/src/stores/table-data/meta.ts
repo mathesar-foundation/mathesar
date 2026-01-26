@@ -12,6 +12,7 @@ import {
 
 import { Filtering, type TerseFiltering } from './filtering';
 import { Grouping, type TerseGrouping } from './grouping';
+import { HiddenColumns, type TerseHiddenColumns } from './hiddenColumns';
 import { Joining, type TerseJoining } from './joining';
 import type { RecordsRequestParamsData } from './records';
 import { SearchFuzzy } from './searchFuzzy';
@@ -52,6 +53,7 @@ export interface MetaProps {
   grouping: Grouping;
   filtering: Filtering;
   joining: Joining;
+  hiddenColumns: HiddenColumns;
 }
 
 /** Adds default values. */
@@ -62,6 +64,7 @@ function getFullMetaProps(p?: Partial<MetaProps>): MetaProps {
     grouping: p?.grouping ?? new Grouping(),
     filtering: p?.filtering ?? new Filtering(),
     joining: p?.joining ?? new Joining(),
+    hiddenColumns: p?.hiddenColumns ?? new HiddenColumns(),
   };
 }
 
@@ -71,6 +74,7 @@ export type TerseMetaProps = [
   TerseGrouping,
   TerseFiltering,
   TerseJoining,
+  TerseHiddenColumns,
 ];
 
 export function makeMetaProps(t: TerseMetaProps): MetaProps {
@@ -80,6 +84,7 @@ export function makeMetaProps(t: TerseMetaProps): MetaProps {
     grouping: Grouping.fromTerse(t[2]),
     filtering: Filtering.fromTerse(t[3]),
     joining: Joining.fromTerse(t[4]),
+    hiddenColumns: HiddenColumns.fromTerse(t[5]),
   };
 }
 
@@ -91,6 +96,7 @@ export function makeTerseMetaProps(p?: Partial<MetaProps>): TerseMetaProps {
     props.grouping.terse(),
     props.filtering.terse(),
     props.joining.terse(),
+    props.hiddenColumns.terse(),
   ];
 }
 
@@ -103,7 +109,8 @@ function deserializeMetaProps(s: string): MetaProps | undefined {
   // more robust manner.
   if (!s) return undefined;
   try {
-    return makeMetaProps(JSON.parse(Url64.decode(s)) as TerseMetaProps);
+    const terse = JSON.parse(Url64.decode(s)) as unknown[];
+    return makeMetaProps(terse as TerseMetaProps);
   } catch {
     return undefined;
   }
@@ -127,6 +134,8 @@ export class Meta {
   filtering: Writable<Filtering>;
 
   joining: Writable<Joining>;
+
+  hiddenColumns: Writable<HiddenColumns>;
 
   searchFuzzy: Writable<SearchFuzzy>;
 
@@ -191,6 +200,7 @@ export class Meta {
     this.grouping = writable(props.grouping);
     this.filtering = writable(props.filtering);
     this.joining = writable(props.joining);
+    this.hiddenColumns = writable(props.hiddenColumns);
     this.searchFuzzy = writable(new SearchFuzzy());
 
     this.rowsWithClientSideErrors = derived(
@@ -240,14 +250,16 @@ export class Meta {
         this.grouping,
         this.filtering,
         this.joining,
+        this.hiddenColumns,
       ],
-      ([pagination, sorting, grouping, filtering, joining]) => {
+      ([pagination, sorting, grouping, filtering, joining, hiddenColumns]) => {
         const serialization = serializeMetaProps({
           pagination,
           sorting,
           grouping,
           filtering,
           joining,
+          hiddenColumns,
         });
         if (serialization === defaultMetaPropsSerialization) {
           // Avoid returning a serialization which only includes the empty data
