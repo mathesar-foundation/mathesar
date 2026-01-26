@@ -7,31 +7,31 @@ export class HiddenColumns extends ImmutableSet<string> {
     super(columnIds);
   }
 
-  hasColumn(columnId: string): boolean {
+  hasColumn(columnId: string) {
     return this.has(columnId);
   }
 
-  withColumn(columnId: string): HiddenColumns {
-    return this.with(columnId) as HiddenColumns;
+  withColumn(columnId: string) {
+    return this.with(columnId);
   }
 
-  withColumns(columnIds: string[]): HiddenColumns {
-    return this.union(columnIds) as HiddenColumns;
+  withColumns(columnIds: string[]) {
+    return this.union(columnIds);
   }
 
-  withoutColumn(columnId: string): HiddenColumns {
-    return this.without(columnId) as HiddenColumns;
+  withoutColumn(columnId: string) {
+    return this.without(columnId);
   }
 
-  withoutColumns(columnIds: string[]): HiddenColumns {
-    return this.without(columnIds) as HiddenColumns;
+  withoutColumns(columnIds: string[]) {
+    return this.without(columnIds);
   }
 
   terse(): TerseHiddenColumns {
     return [...this];
   }
 
-  static fromTerse(terse: TerseHiddenColumns): HiddenColumns {
+  static fromTerse(terse: TerseHiddenColumns) {
     return new HiddenColumns(terse);
   }
 }
