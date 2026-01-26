@@ -28,7 +28,7 @@
       <Icon {...iconWarning} />
     {/if}
   </span>
-  <span>
+  <span class="status-text">
     {messages[state] ?? ''}
   </span>
 </span>

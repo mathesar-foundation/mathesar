@@ -38,7 +38,6 @@ import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type {
   AddableExploration,
-  ExplorationResult,
   SavedExploration,
 } from '@mathesar/api/rpc/explorations';
 import type { Database } from '@mathesar/models/Database';
@@ -202,22 +201,6 @@ export function getExploration(
   id: SavedExploration['id'],
 ): CancellablePromise<SavedExploration> {
   return api.explorations.get({ exploration_id: id }).run();
-}
-
-export function runSavedExploration(
-  id: number,
-  params: {
-    limit: number;
-    offset: number;
-  },
-): CancellablePromise<ExplorationResult> {
-  return api.explorations
-    .run_saved({
-      exploration_id: id,
-      limit: params.limit,
-      offset: params.offset,
-    })
-    .run();
 }
 
 export function deleteExploration(id: number): CancellablePromise<void> {

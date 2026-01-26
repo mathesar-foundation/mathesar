@@ -355,14 +355,14 @@ CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_id integer) RETURNS text AS $$/*
 Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
-More precisely, this function returns the name of attributes of any relation appearing in the
+More precisely, this function returns the name of attributes that are not dropped, for any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function).
 
 Args:
   rel_id:  The OID of the relation.
   col_id:  The attnum of the column in the relation.
 */
-SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id;
+SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id AND NOT attisdropped;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -370,7 +370,7 @@ CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_name text) RETURNS text AS $$/*
 Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
-More precisely, this function returns the unquoted name of attributes of any relation appearing in the
+More precisely, this function returns the unquoted name of attributes that are not dropped, for any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function). If the given
 col_name is not in the relation, we return null.
 
@@ -381,7 +381,7 @@ Args:
   rel_id:  The OID of the relation.
   col_name:  The unquoted name of the column in the relation.
 */
-SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name;
+SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name AND NOT attisdropped;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -4356,9 +4356,10 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 CREATE TABLE msar.expr_templates (expr_key text PRIMARY KEY, expr_template text);
 INSERT INTO msar.expr_templates VALUES
-  -- basic composition operators
+  -- basic logical operators
   ('and', '(%s) AND (%s)'),
   ('or', '(%s) OR (%s)'),
+  ('not', 'NOT (%s)'),
   -- general comparison operators
   ('equal', '(%s) = (%s)'),
   ('lesser', '(%s) < (%s)'),
