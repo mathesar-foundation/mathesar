@@ -136,7 +136,7 @@
       }
     }
 
-    @media (max-width: 38rem) {
+    @media (max-width: 42rem) {
       & :global(.responsive-button-label) {
         display: none;
       }
