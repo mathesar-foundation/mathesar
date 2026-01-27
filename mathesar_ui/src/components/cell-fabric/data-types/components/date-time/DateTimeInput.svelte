@@ -117,6 +117,9 @@
     isRelative={allowRelativePresets}
     {type}
     {formatter}
-    on:change={close}
+    on:change={(e) => {
+      onValueChange(e.detail);
+      close();
+    }}
   />
 </AttachableDropdown>

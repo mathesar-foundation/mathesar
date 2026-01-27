@@ -16,6 +16,7 @@
 
   import TableFilter from './record-operations/filter/TableFilter.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
+  import HideColumnsDropdown from './record-operations/hide/HideColumnsDropdown.svelte';
   import JoinDropdown from './record-operations/join/JoinDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
 
@@ -23,7 +24,7 @@
 
   $: ({ table, meta, isLoading, hasPrimaryKey } = $tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
-  $: ({ sorting, grouping, sheetState } = meta);
+  $: ({ sorting, grouping, hiddenColumns, sheetState } = meta);
 
   $: isSelectable = $currentRolePrivileges.has('SELECT');
   $: isView = isTableView(table);
@@ -49,6 +50,7 @@
       <TableFilter />
       <SortDropdown {sorting} />
       <GroupDropdown {grouping} />
+      <HideColumnsDropdown {hiddenColumns} />
       {#if !isView}
         <JoinDropdown />
       {/if}
