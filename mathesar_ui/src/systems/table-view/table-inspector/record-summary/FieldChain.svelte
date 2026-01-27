@@ -43,7 +43,17 @@
       value={column}
       onUpdate={(c) => onUpdate(c ? [c.id] : [])}
       allowEmpty
-    />
+
+    >
+
+      <span slot="empty"  class="do-not-import"> 
+
+        {$_('None')}
+
+      </span>
+
+    </SelectProcessedColumn>
+    
     {#if referentTable}
       <div class="delimiter">
         <FieldDelimiter />
