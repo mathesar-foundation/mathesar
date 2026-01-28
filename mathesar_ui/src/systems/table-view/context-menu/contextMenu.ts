@@ -24,6 +24,10 @@ import { deleteRecords } from './entries/deleteRecords';
 import { duplicateRecord } from './entries/duplicateRecord';
 import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
+import {
+  modifyHiddenColumns,
+  modifyHiddenColumnsMultiple,
+} from './entries/modifyHiddenColumns';
 import { modifySorting } from './entries/modifySorting';
 import { openJoinedTables } from './entries/openJoinedTables';
 import { openTable } from './entries/openTable';
@@ -88,15 +92,15 @@ export function openTableCellContextMenu({
     yield* modifyFilters({ tabularData, column, imperativeFilterController });
     yield* modifySorting({ tabularData, column });
     yield* modifyGrouping({ tabularData, column });
+    yield* modifyHiddenColumns({ tabularData, column });
 
     yield menuSection(...openTable({ column }));
 
     yield* deleteColumn({ tabularData, column });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function* getEntriesForMultipleColumns(columnIds: string[]) {
-    // None yet
+    yield* modifyHiddenColumnsMultiple({ tabularData, columnIds });
   }
 
   function* getEntriesForArbitraryColumns(columnIds: Iterable<string>) {

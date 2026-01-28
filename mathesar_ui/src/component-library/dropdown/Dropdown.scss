@@ -12,6 +12,7 @@ button.dropdown.trigger {
   > .label {
     display: inline-flex;
     align-items: center;
+    gap: 0.25rem;
     position: relative;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -19,9 +20,6 @@ button.dropdown.trigger {
     box-sizing: content-box;
     min-height: 1em;
     flex-grow: 1;
-    > *:not(:last-child) {
-      margin-right: 0.25rem;
-    }
   }
 
   > .arrow {
