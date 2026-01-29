@@ -250,7 +250,7 @@ export async function updateTable({
         database_id: schema.database.id,
         table_oid: rawPartialTable.oid,
         table_data_dict: {
-          name: rawPartialTable.name,
+          name: rawPartialTable.name?.trim(),
           description: rawPartialTable.description,
         },
       }),
@@ -313,7 +313,7 @@ export async function createTable({
     .add({
       database_id: schema.database.id,
       schema_oid: schema.oid,
-      table_name: name,
+      table_name: name?.trim(),
       comment: description,
       pkey_column_info: pkColumn,
     })
@@ -345,7 +345,7 @@ export async function createTableFromDataFile(props: {
     .import({
       database_id: schema.database.id,
       schema_oid: schema.oid,
-      table_name: props.name,
+      table_name: props.name?.trim(),
       data_file_id: props.dataFile.id,
     })
     .run();
@@ -508,10 +508,15 @@ export function factoryToGetTableNameValidationErrors(
 
   return derived([otherTableNames, _], ([$otherTableNames, $_]) => {
     function getNameValidationErrors(name: string): string[] {
-      if (!name.trim()) {
+      const trimmedName = name.trim();
+      if (!trimmedName) {
         return [$_('table_name_cannot_be_empty')];
       }
-      if ($otherTableNames.has(name)) {
+      if (
+        Array.from($otherTableNames).some(
+          (n) => n.trim().toLowerCase() === trimmedName.toLowerCase(),
+        )
+      ) {
         return [$_('table_with_name_already_exists')];
       }
       return [];
