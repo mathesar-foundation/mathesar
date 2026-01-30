@@ -24,12 +24,15 @@ export class Database {
 
   readonly needsUpgradeAttention: boolean;
 
+  readonly postgresqlVersion: number | null;
+
   constructor(props: { server: Server; rawDatabase: RawDatabase }) {
     this.id = props.rawDatabase.id;
     this.name = props.rawDatabase.name;
     this.nickname = props.rawDatabase.nickname;
     this.server = props.server;
     this.needsUpgradeAttention = props.rawDatabase.needs_upgrade_attention;
+    this.postgresqlVersion = props.rawDatabase.postgresql_version;
   }
 
   get displayName() {
