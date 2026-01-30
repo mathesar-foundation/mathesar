@@ -14,6 +14,7 @@
     defined,
   } from '@mathesar-component-library/types';
 
+  import { parseCellId } from './cellIds';
   import {
     type SheetCellDetails,
     beginSelection,
@@ -22,7 +23,6 @@
   } from './selection';
   import { isSelectingCellRangeContext } from './selection/isSelectingCellRangeContext';
   import type SheetSelectionStore from './selection/SheetSelectionStore';
-  import { parseCellId } from './cellIds';
   import {
     calculateColumnStyleMapAndRowWidth,
     focusActiveCell,
@@ -181,14 +181,14 @@
         if (!$selection) return undefined;
         const { activeCellId } = $selection;
         if (!activeCellId) return undefined;
-        
+
         // If shift-clicking a column header, use the active column as the starting point
         // to enable proper column range selection
         if (targetCell.type === 'column-header-cell') {
           const { columnId } = parseCellId(activeCellId);
           return { type: 'column-header-cell', columnId };
         }
-        
+
         return { type: 'data-cell', cellId: activeCellId };
       }
       return undefined;
