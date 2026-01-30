@@ -35,6 +35,13 @@ export class Database {
     this.postgresqlVersion = props.rawDatabase.postgresql_version;
   }
 
+  get isPostgresDeprecated() {
+    if (this.postgresqlVersion === null) return false;
+
+    // Mathesar 0.8.0 drops support for PostgreSQL versions 13 and below
+    return this.postgresqlVersion < 140000;
+  }
+
   get displayName() {
     return this.nickname ?? this.name;
   }
