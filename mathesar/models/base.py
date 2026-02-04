@@ -149,9 +149,10 @@ class Database(BaseModel):
         connection has privileges to modify Mathesar's system schemata.
         """
         admin_role_query = """
-        SELECT nspowner::regrole::text
-        FROM pg_catalog.pg_namespace
-        WHERE nspname='msar';
+        SELECT r.rolname
+        FROM pg_catalog.pg_namespace n
+        JOIN pg_catalog.pg_roles r ON r.oid = n.nspowner
+        WHERE n.nspname = 'msar';
         """
 
         for role_map in UserDatabaseRoleMap.objects.filter(database=self):

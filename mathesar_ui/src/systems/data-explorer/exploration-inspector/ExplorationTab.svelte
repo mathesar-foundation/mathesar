@@ -18,10 +18,12 @@
   import {
     Button,
     CancelOrProceedButtonPair,
+    Debounce,
     Icon,
     LabeledInput,
     TextArea,
     TextInput,
+    getValueFromEvent,
   } from '@mathesar-component-library';
 
   import QueryManager from '../QueryManager';
@@ -42,27 +44,50 @@
     hasChanges = true;
   }
 
-  function handleNameChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    if (target.value.trim() === '') {
-      target.value =
+  function updateName(value: unknown) {
+    let newValue = String(value ?? '');
+
+    if (newValue.trim() === '') {
+      newValue =
         $query.name ??
         getAvailableName(
           'New_Exploration',
           new Set([...$queries.data.values()].map((q) => q.name)),
         );
     }
-    name = target.value;
+
+    name = newValue;
+
     if ('update' in queryHandler) {
-      void queryHandler.update((q) => q.withName(target.value));
+      void queryHandler.update((q) => q.withName(newValue));
     }
   }
 
-  function handleDescriptionChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    description = target.value.trim();
+  /**
+   * Since TextInput has two way binding internally and we modify name
+   * when the input value is empty (in updateName), the states within
+   * TextInput and this component may go out of sync.
+   * This bandaid solution keeps it in sync during blur. A better option
+   * which would require refactoring would be to remove two way binding
+   * in lower level components.
+   */
+  function syncQueryName(e: FocusEvent) {
+    const element = e.target;
+    if (
+      element &&
+      element instanceof HTMLInputElement &&
+      element.value !== name
+    ) {
+      element.value = name ?? '';
+    }
+  }
+
+  function updateDescription(value: unknown) {
+    const newValue = String(value ?? '').trim();
+    description = newValue;
+
     if ('update' in queryHandler) {
-      void queryHandler.update((q) => q.withDescription(description ?? ''));
+      void queryHandler.update((q) => q.withDescription(newValue ?? ''));
     }
   }
 
@@ -90,12 +115,12 @@
   }
 
   function handleDeleteExploration() {
-    if ($query.id !== undefined) {
-      const queryId = $query.id;
+    const { id } = $query;
+    if (id !== undefined) {
       void confirmDelete({
         identifierType: $_('exploration'),
         onProceed: async () => {
-          await deleteExploration(queryId);
+          await deleteExploration(id);
           dispatch('delete');
         },
       });
@@ -107,22 +132,53 @@
   <Form>
     <FormField>
       <LabeledInput label={$_('name')} layout="stacked">
-        <TextInput
-          value={name}
-          aria-label={$_('name')}
-          on:change={handleNameChange}
-          on:input={setHasChangesToTrue}
-        />
+        <Debounce
+          let:handleNewValue
+          on:artificialChange={(e) => updateName(e.detail)}
+        >
+          <TextInput
+            value={name}
+            aria-label={$_('name')}
+            on:input={(e) => {
+              setHasChangesToTrue();
+              handleNewValue({
+                value: getValueFromEvent(e),
+                debounce: true,
+              });
+            }}
+            on:change={(e) =>
+              handleNewValue({
+                value: getValueFromEvent(e),
+                debounce: false,
+              })}
+            on:blur={syncQueryName}
+          />
+        </Debounce>
       </LabeledInput>
     </FormField>
     <FormField>
       <LabeledInput label={$_('description')} layout="stacked">
-        <TextArea
-          value={description}
-          aria-label={$_('description')}
-          on:change={handleDescriptionChange}
-          on:input={setHasChangesToTrue}
-        />
+        <Debounce
+          let:handleNewValue
+          on:artificialChange={(e) => updateDescription(e.detail)}
+        >
+          <TextArea
+            value={description}
+            aria-label={$_('description')}
+            on:input={(e) => {
+              setHasChangesToTrue();
+              handleNewValue({
+                value: getValueFromEvent(e),
+                debounce: true,
+              });
+            }}
+            on:change={(e) =>
+              handleNewValue({
+                value: getValueFromEvent(e),
+                debounce: false,
+              })}
+          />
+        </Debounce>
       </LabeledInput>
     </FormField>
 
