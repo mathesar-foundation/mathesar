@@ -31,14 +31,26 @@
         </span>
       </label>
     </div>
+
     <div class="labeled-input layout-stacked">
       <label for="id_password" class="label-component">
         <span class="label-content">
           <span class="labeled-input-label">{% translate "Password" %}</span>
-          <span class="labeled-input-slot input">
+          <span class="labeled-input-slot input" style="position: relative; display: flex; align-items: center;">
             <input type="password" name="password"
             class="input-element{% if form.password.errors %} has-error{% endif %}"
-            autocomplete="current-password" required id="id_password">
+            autocomplete="current-password" required id="id_password"
+            style="padding-right: 2.5rem;">
+            <button type="button" id="togglePasswordBtn" class="toggle-password-btn" aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="16" height="16" class="icon-eye">
+                <!-- faEye -->
+                <path fill="currentColor" d="M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35 0 0 0 0 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35 0 0 0 0-29.19zM288 400a144 144 0 1 1 144-144 143.93 143.93 0 0 1-144 144zm0-240a95.31 95.31 0 0 0-25.31 3.79 47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z"/>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="16" height="16" class="icon-eye-slash" style="display: none;">
+                <!-- faEyeSlash -->
+                <path fill="currentColor" d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4a33.06 33.06 0 0 0 0-26.5c-53.6-106.7-160.7-177.9-281.5-177.9-39.7 0-78.6 7.7-115 22L47.7 7.7c-.5-.4-1.1-.3-1.5-.2zM324 100c92.8 0 174.5 54.4 213.9 133.5a242.4 242.4 0 0 1-52.1 66.1L480 305.4a100.06 100.06 0 0 0-33.8-37.5l-33.3-26.1c-9.1-7.1-18.7-13.4-28.7-18.7L330.6 182c8.9-1.3 17.9-2 27.2-2zm-46.7 32l62.2 48.8c.8 3.5 1.1 7.1 1.1 10.6 0 26.5-21.5 48-48 48-.8 0-1.6-.1-2.4-.2l-51.4-40.3c1.6-9.6 6.3-18.4 13.3-25.5 6.4-6.4 15.2-10.4 24.8-11.4l.4-.1zm-136 6L285 249.2a99.45 99.45 0 0 0 71.9 85.3l-28.9 22.7a143.95 143.95 0 0 1-52.1 3.2 144.17 144.17 0 0 1-131-155.1c0-21.4 5.3-41.5 14.5-59.5l-18-14.1A246.34 246.34 0 0 0 32 233.5 33.06 33.06 0 0 0 32 260c53.6 106.7 160.7 177.9 281.5 177.9 59.8 0 115.8-17.7 163.7-48.4L515 419.1 141.2 138z"/>
+              </svg>
+            </button>
           </span>
           {% if form.password.errors %}
             <span class="help error">
@@ -89,4 +101,50 @@
 
     </div>
   </form>
+
+  <style>
+    .toggle-password-btn {
+      position: absolute;
+      right: 0.5rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-fg-subtle-1, #666);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem;
+      z-index: 2;
+    }
+    .toggle-password-btn:hover {
+      color: var(--color-fg-base, #000);
+    }
+    .toggle-password-btn:focus {
+      outline: none;
+    }
+  </style>
+
+  <script>
+    (function() {
+      const toggleBtn = document.getElementById('togglePasswordBtn');
+      const passwordInput = document.getElementById('id_password');
+      const iconEye = toggleBtn.querySelector('.icon-eye');
+      const iconEyeSlash = toggleBtn.querySelector('.icon-eye-slash');
+
+      if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', function() {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          
+          if (type === 'text') {
+            iconEye.style.display = 'none';
+            iconEyeSlash.style.display = 'block';
+          } else {
+            iconEye.style.display = 'block';
+            iconEyeSlash.style.display = 'none';
+          }
+        });
+      }
+    })();
+  </script>
 {% endblock %}

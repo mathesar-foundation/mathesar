@@ -31,6 +31,7 @@ import {
   faExternalLink,
   faExternalLinkAlt,
   faEyeSlash,
+  faEye,
   faFile,
   faFileAlt,
   faFileArchive,
@@ -199,6 +200,8 @@ export const iconFillOutForm: IconProps = { data: faPlay };
 export const iconDownload: IconProps = { data: faCloudDownloadAlt };
 export const iconSelectMultipleCells: IconProps = { data: faExpand };
 export const iconHideColumn: IconProps = { data: faEyeSlash };
+export const iconShow: IconProps = { data: faEye };
+export const iconHide: IconProps = { data: faEyeSlash };
 
 // THINGS
 //
