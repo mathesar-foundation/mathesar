@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block styles %}
-  {% if development_mode %}
-    <!--
+{% if development_mode %}
+<!--
       In development mode, vite loads mathesar-component-library
       styles, which takes a while. This leads to a flickering
       effect where elements are shown without styles as soon
@@ -11,58 +11,129 @@
       This block hides them until vite loads the styles.
       This is not a concern during production.
     -->
-    <style type="text/css">
-      body {
-        visibility: hidden;
-      }
-    </style>
-  {% else %}
-    {% for css_file in manifest_data.module_css %}
-      <link rel="stylesheet" href="{% static css_file %}" />
-    {% endfor %}
-  {% endif %}
+<style type="text/css">
+  body {
+    visibility: hidden;
+  }
+</style>
+{% else %}
+{% for css_file in manifest_data.module_css %}
+<link rel="stylesheet" href="{% static css_file %}" />
+{% endfor %}
+{% endif %}
 
-  <style type="text/css">
-    .message-box.error-message,
-    .message-box.warning-message {
-      border: 1px solid;
-      border-radius: var(--border-radius-m);
-      padding: var(--sm3);
-      display: flex;
-    }
-    .message-box.error-message .icon,
-    .message-box.warning-message .icon{
-      font-weight: bold;
-      margin-right: 0.5rem;
-      opacity: 0.7;
-    } 
-    .message-box.error-message {
-      background: var(--color-bg-danger);
-      border-color: var(--color-border-danger);
-      color: var(--color-fg-danger);
-    }
-    .message-box.warning-message {
-      background: var(--color-bg-warning);
-      border-color: var(--color-border-warning);
-      color: var(--color-fg-warning)
-    }
-  </style>
+<style type="text/css">
+  .message-box.error-message,
+  .message-box.warning-message {
+    border: 1px solid;
+    border-radius: var(--border-radius-m);
+    padding: var(--sm3);
+    display: flex;
+  }
+
+  .message-box.error-message .icon,
+  .message-box.warning-message .icon {
+    font-weight: bold;
+    margin-right: 0.5rem;
+    opacity: 0.7;
+  }
+
+  .message-box.error-message {
+    background: var(--color-bg-danger);
+    border-color: var(--color-border-danger);
+    color: var(--color-fg-danger);
+  }
+
+  .message-box.warning-message {
+    background: var(--color-bg-warning);
+    border-color: var(--color-border-warning);
+    color: var(--color-fg-warning)
+  }
+
+  /* Password Toggle Styles */
+  .password-toggle-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .password-toggle-wrapper input {
+    padding-right: 2.5rem !important;
+    /* Ensure text doesn't overlap button */
+  }
+
+  .toggle-password-btn {
+    position: absolute;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-fg-subtle-1, #666);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    z-index: 2;
+  }
+
+  .toggle-password-btn:hover {
+    color: var(--color-fg-base, #000);
+  }
+
+  .toggle-password-btn:focus {
+    outline: none;
+  }
+</style>
 
 
-  {% block page_styles %}{% endblock %}
+{% block page_styles %}{% endblock %}
 {% endblock %}
 
 {% block scripts %}
-  {% if development_mode %}
-    <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
-    <script type="module" src="{{ client_dev_url }}/src/component-library/styles.scss"></script>
-    <script type="module" defer>
-      (function () {
-        document.body.style.visibility = 'visible';
-      })();
-    </script>
-  {% endif %}
+{% if development_mode %}
+<script type="module" src="{{ client_dev_url }}/@vite/client"></script>
+<script type="module" src="{{ client_dev_url }}/src/component-library/styles.scss"></script>
+<script type="module" defer>
+  (function () {
+    document.body.style.visibility = 'visible';
+  })();
+</script>
+{% endif %}
 
-  {% block page_scripts %}{% endblock %}
+{% block page_scripts %}{% endblock %}
+
+<script>
+  // Password Visibility Toggle Logic
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.addEventListener('click', function (e) {
+      const btn = e.target.closest('.toggle-password-btn');
+      if (!btn) return;
+
+      // Find the input within the same wrapper
+      const wrapper = btn.closest('.password-toggle-wrapper') || btn.closest('.labeled-input-slot');
+      const input = wrapper ? wrapper.querySelector('input') : null;
+
+      if (input) {
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+
+        const iconEye = btn.querySelector('.icon-eye');
+        const iconEyeSlash = btn.querySelector('.icon-eye-slash');
+
+        if (type === 'text') {
+          if (iconEye) iconEye.style.display = 'none';
+          if (iconEyeSlash) iconEyeSlash.style.display = 'block';
+
+          // Optional: Focus back to input to keep typing
+          input.focus();
+        } else {
+          if (iconEye) iconEye.style.display = 'block';
+          if (iconEyeSlash) iconEyeSlash.style.display = 'none';
+
+          input.focus();
+        }
+      }
+    });
+  });
+</script>
 {% endblock %}
-

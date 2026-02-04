@@ -4,142 +4,165 @@
 {% block title %}{% translate "Login" %}{% endblock %}
 
 {% block page_styles %}
-  <style type="text/css">
-    body {
-      padding: 4rem 2rem;
-      background: var(--color-bg-base);
-      --login-page-spacing: var(--lg5);
-      color: var(--color-fg-base);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .align-center {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .logo img {
-      width: 13.25rem;
-      display: block;
-    }
-    .tutorial {
-      max-width: 48rem;
-      line-height: var(--lg3);
-    }
-    .tutorial .body {
-      margin-top: var(--sm3);
-    }
-    .login-card {
-      max-width: 28rem;
-      background-color: var(--card-background);
-      padding: var(--login-page-spacing);
-      border-radius: var(--border-radius-l);
-      box-shadow: 0 4px 6px -1px var(--color-shadow),
-                 0 2px 4px -2px var(--color-shadow),
-                 0 0 0 1px var(--color-shadow) inset;
-    }
-    .login-card h1 {
-      font-weight: var(--font-weight-medium);
-      font-size: var(--lg4);
-      margin: 0 0 var(--lg3);
-      text-align: center;
-      color: var(--color-fg-base);
-    }
-    .login-card .labeled-input + .labeled-input {
-      margin-top: var(--sm1);
-    }
-    .login-card .labeled-input .help.info {
-      color: var(--color-fg-subtle-2);
-    }
-    .login-card .labeled-input .help.error {
-      color: var(--color-fg-danger);
-    }
-    .login-card .footer {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--lg3);
-    }
-    .tutorial, .login-card,
-    .login-card form, .login-card .footer {
-      margin-top: var(--login-page-spacing);
-    }
+<style type="text/css">
+  body {
+    padding: 4rem 2rem;
+    background: var(--color-bg-base);
+    --login-page-spacing: var(--lg5);
+    color: var(--color-fg-base);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .align-center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .logo img {
+    width: 13.25rem;
+    display: block;
+  }
+
+  .tutorial {
+    max-width: 48rem;
+    line-height: var(--lg3);
+  }
+
+  .tutorial .body {
+    margin-top: var(--sm3);
+  }
+
+  .login-card {
+    max-width: 28rem;
+    background-color: var(--card-background);
+    padding: var(--login-page-spacing);
+    border-radius: var(--border-radius-l);
+    box-shadow: 0 4px 6px -1px var(--color-shadow),
+      0 2px 4px -2px var(--color-shadow),
+      0 0 0 1px var(--color-shadow) inset;
+  }
+
+  .login-card h1 {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--lg4);
+    margin: 0 0 var(--lg3);
+    text-align: center;
+    color: var(--color-fg-base);
+  }
+
+  .login-card .labeled-input+.labeled-input {
+    margin-top: var(--sm1);
+  }
+
+  .login-card .labeled-input .help.info {
+    color: var(--color-fg-subtle-2);
+  }
+
+  .login-card .labeled-input .help.error {
+    color: var(--color-fg-danger);
+  }
+
+  .login-card .footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--lg3);
+  }
+
+  .tutorial,
+  .login-card,
+  .login-card form,
+  .login-card .footer {
+    margin-top: var(--login-page-spacing);
+  }
+
+  .unsupported-device {
+    display: none;
+    margin-top: var(--lg3);
+    background: var(--color-bg-danger);
+    border: solid 1px var(--color-border-danger);
+    border-radius: var(--border-radius-m);
+    padding: var(--sm1) var(--lg1);
+  }
+
+  .unsupported-device .title {
+    margin-top: var(--sm3);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--lg1);
+    text-align: center;
+    color: var(--color-fg-base);
+  }
+
+  .unsupported-device .warning-icon {
+    margin-top: var(--sm3);
+    font-size: var(--lg3);
+    text-align: center;
+  }
+
+  .login-card .language-selector {
+    display: block;
+    background-color: var(--color-bg-input);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--border-radius-m);
+    color: var(--color-fg-base);
+    padding: var(--sm3);
+    cursor: pointer;
+  }
+
+  @media (max-width: 50rem) {
     .unsupported-device {
-      display: none;
-      margin-top: var(--lg3);
-      background: var(--color-bg-danger);
-      border: solid 1px var(--color-border-danger);
-      border-radius: var(--border-radius-m);
-      padding: var(--sm1) var(--lg1);
-    }
-    .unsupported-device .title {
-      margin-top: var(--sm3);
-      font-weight: var(--font-weight-bold);
-      font-size: var(--lg1);
-      text-align: center;
-      color: var(--color-fg-base);
-    }
-    .unsupported-device .warning-icon {
-      margin-top: var(--sm3);
-      font-size: var(--lg3);
-      text-align: center;
-    }
-    .login-card .language-selector {
       display: block;
-      background-color: var(--color-bg-input);
-      border: 1px solid var(--color-border-input);
-      border-radius: var(--border-radius-m);
-      color: var(--color-fg-base);
-      padding: var(--sm3);
-      cursor: pointer;
     }
-    @media (max-width: 50rem) {
-      .unsupported-device {
-        display: block;
-      }
+  }
+
+  @media (max-height: 30rem) {
+    .unsupported-device {
+      display: block;
     }
-    @media (max-height: 30rem) {
-      .unsupported-device {
-        display: block;
-      }
-    }
-  </style>
+  }
+</style>
 {% endblock %}
 
 {% block page_scripts %}
-  <script>
-    function showLoadingStatus(newText) {
-      const loginButton = document.querySelector('form button[type="submit"]');
+<script>
+  function showLoadingStatus(newText) {
+    const loginButton = document.querySelector('form button[type="submit"]');
+    if (loginButton) {
       loginButton.disabled = true;
       loginButton.innerText = newText ?? 'Loading...';
     }
-  </script>
+  }
+</script>
 {% endblock %}
 
 {% block content %}
-  <div class="logo">
-    <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
-  </div>
+<div class="logo">
+  <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center" />
+</div>
 
-  <div class="login-card align-center">
-    <h1>{% block h1 %} {% endblock %}</h1>
-    {% block box_content %} {% endblock %}
-    {% comment %} set_language https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#the-set-language-redirect-view  {% endcomment %}
-    <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
-      <input name="next" type="hidden" value="{{ redirect_to }}">
-      <select name="language" onchange="form.submit()" class="language-selector align-center" aria-label="Display Language">
-          {% get_current_language as LANGUAGE_CODE %}
-          {% get_available_languages as LANGUAGES %}
-          {% get_language_info_list for LANGUAGES as languages %}
-          {% for language in languages %}
-              <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
-                  {{ language.name_local }} ({{ language.code }})
-              </option>
-          {% endfor %}
-      </select>
-    </form>
-   
-  </div>
+<div class="login-card align-center">
+  <h1>{% block h1 %} {% endblock %}</h1>
+  {% block box_content %} {% endblock %}
+  {% comment %} set_language
+  https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#the-set-language-redirect-view {% endcomment %}
+  <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+    <input name="next" type="hidden" value="{{ redirect_to }}">
+    <select name="language" onchange="form.submit()" class="language-selector align-center"
+      aria-label="Display Language">
+      {% get_current_language as LANGUAGE_CODE %}
+      {% get_available_languages as LANGUAGES %}
+      {% get_language_info_list for LANGUAGES as languages %}
+      {% for language in languages %}
+      <option value="{{ language.code }}" {% if language.code==LANGUAGE_CODE %} selected{% endif %}>
+        {{ language.name_local }} ({{ language.code }})
+      </option>
+      {% endfor %}
+    </select>
+  </form>
+
+</div>
 {% endblock %}

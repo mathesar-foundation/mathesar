@@ -74,8 +74,8 @@
     display: grid;
     gap: var(--lg1);
     box-shadow: 0 4px 6px -1px var(--color-shadow),
-            0 2px 4px -2px var(--color-shadow),
-            0 0 0 1px var(--color-shadow) inset;
+      0 2px 4px -2px var(--color-shadow),
+      0 0 0 1px var(--color-shadow) inset;
   }
 
   .form-card .form-group-title {
@@ -117,7 +117,7 @@
     color: var(--color-fg-subtle-1);
   }
 
-  
+
   .language-selector-form {
     position: fixed;
     top: 2%;
@@ -148,29 +148,24 @@
 <div class="container">
   <div class="heading">
     <div class="logo">
-      <img
-        src="{% static 'images/red-logo-with-text.svg' %}"
-        alt="Mathesar Logo"
-      />
+      <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" />
     </div>
     <h1>{% translate "Finish Setting Up Mathesar" %}</h1>
     <div class="instruction">
       <div>{% translate "Welcome to Mathesar!" %}</div>
       <div>
-        {% translate "Create an Admin user to start using Mathesar. You can also choose to share anonymous data to help us improve." %}
+        {% translate "Create an Admin user to start using Mathesar. You can also choose to share anonymous data to help
+        us improve." %}
       </div>
     </div>
   </div>
 
-  <form
-    method="post"
-    class="form-card"
-    onsubmit="showLoadingStatus({{ creating_user_loader_text }});"
-  >
+  <form method="post" class="form-card" onsubmit="showLoadingStatus({{ creating_user_loader_text }});">
     <div>
       <div class="form-group-title">{% translate "Create Admin User" %}</div>
       <div class="help info title-help">
-        {% translate "Set up an Admin user account. This account will have full control over your Mathesar installation." %}
+        {% translate "Set up an Admin user account. This account will have full control over your Mathesar
+        installation." %}
       </div>
     </div>
 
@@ -181,17 +176,9 @@
         <label for="id_username" class="label-component">
           {% translate "Username" %}
         </label>
-        <input
-          type="text"
-          name="username"
-          class="input-element{% if form.username.errors %} has-error{% endif %}"
-          value="{% if form.username.value %}{{ form.username.value }}{% endif %}"
-          autofocus
-          autocapitalize="none"
-          autocomplete="username"
-          required
-          id="id_username"
-        />
+        <input type="text" name="username" class="input-element{% if form.username.errors %} has-error{% endif %}"
+          value="{% if form.username.value %}{{ form.username.value }}{% endif %}" autofocus autocapitalize="none"
+          autocomplete="username" required id="id_username" />
       </div>
       {% if form.username.errors %}
       <div class="help error">
@@ -207,35 +194,45 @@
             {% translate "Password" %}
           </label>
 
-          <input
-            type="password"
-            name="password1"
-            class="input-element{% if form.password1.errors %} has-error{% endif %}"
-            value="{% if form.password1.value %}{{ form.password1.value }}{% endif %}"
-            autofocus
-            autocapitalize="none"
-            autocomplete="new-password"
-            required
-            id="id_password1"
-          />
+          <div class="password-toggle-wrapper">
+            <input type="password" name="password1"
+              class="input-element{% if form.password1.errors %} has-error{% endif %}"
+              value="{% if form.password1.value %}{{ form.password1.value }}{% endif %}" autofocus autocapitalize="none"
+              autocomplete="new-password" required id="id_password1" />
+            <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="16" height="16" class="icon-eye">
+                <path fill="currentColor"
+                  d="M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35 0 0 0 0 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35 0 0 0 0-29.19zM288 400a144 144 0 1 1 144-144 143.93 143.93 0 0 1-144 144zm0-240a95.31 95.31 0 0 0-25.31 3.79 47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="16" height="16"
+                class="icon-eye-slash" style="display: none;">
+                <path fill="currentColor"
+                  d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4a33.06 33.06 0 0 0 0-26.5c-53.6-106.7-160.7-177.9-281.5-177.9-39.7 0-78.6 7.7-115 22L47.7 7.7c-.5-.4-1.1-.3-1.5-.2zM324 100c92.8 0 174.5 54.4 213.9 133.5a242.4 242.4 0 0 1-52.1 66.1L480 305.4a100.06 100.06 0 0 0-33.8-37.5l-33.3-26.1c-9.1-7.1-18.7-13.4-28.7-18.7L330.6 182c8.9-1.3 17.9-2 27.2-2zm-46.7 32l62.2 48.8c.8 3.5 1.1 7.1 1.1 10.6 0 26.5-21.5 48-48 48-.8 0-1.6-.1-2.4-.2l-51.4-40.3c1.6-9.6 6.3-18.4 13.3-25.5 6.4-6.4 15.2-10.4 24.8-11.4l.4-.1zm-136 6L285 249.2a99.45 99.45 0 0 0 71.9 85.3l-28.9 22.7a143.95 143.95 0 0 1-52.1 3.2 144.17 144.17 0 0 1-131-155.1c0-21.4 5.3-41.5 14.5-59.5l-18-14.1A246.34 246.34 0 0 0 32 233.5 33.06 33.06 0 0 0 32 260c53.6 106.7 160.7 177.9 281.5 177.9 59.8 0 115.8-17.7 163.7-48.4L515 419.1 141.2 138z" />
+              </svg>
+            </button>
+          </div>
         </div>
         <div>
           <label for="id_password2" class="label-component">
             {% translate "Confirm Password" %}
           </label>
 
-          <div class="input">
-            <input
-              type="password"
-              name="password2"
+          <div class="input password-toggle-wrapper">
+            <input type="password" name="password2"
               class="input-element{% if form.password2.errors %} has-error{% endif %}"
-              value="{% if form.password2.value %}{{ form.password2.value }}{% endif %}"
-              autofocus
-              autocapitalize="none"
-              autocomplete="new-password"
-              required
-              id="id_password2"
-            />
+              value="{% if form.password2.value %}{{ form.password2.value }}{% endif %}" autofocus autocapitalize="none"
+              autocomplete="new-password" required id="id_password2" />
+            <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="16" height="16" class="icon-eye">
+                <path fill="currentColor"
+                  d="M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35 0 0 0 0 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35 0 0 0 0-29.19zM288 400a144 144 0 1 1 144-144 143.93 143.93 0 0 1-144 144zm0-240a95.31 95.31 0 0 0-25.31 3.79 47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="16" height="16"
+                class="icon-eye-slash" style="display: none;">
+                <path fill="currentColor"
+                  d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4a33.06 33.06 0 0 0 0-26.5c-53.6-106.7-160.7-177.9-281.5-177.9-39.7 0-78.6 7.7-115 22L47.7 7.7c-.5-.4-1.1-.3-1.5-.2zM324 100c92.8 0 174.5 54.4 213.9 133.5a242.4 242.4 0 0 1-52.1 66.1L480 305.4a100.06 100.06 0 0 0-33.8-37.5l-33.3-26.1c-9.1-7.1-18.7-13.4-28.7-18.7L330.6 182c8.9-1.3 17.9-2 27.2-2zm-46.7 32l62.2 48.8c.8 3.5 1.1 7.1 1.1 10.6 0 26.5-21.5 48-48 48-.8 0-1.6-.1-2.4-.2l-51.4-40.3c1.6-9.6 6.3-18.4 13.3-25.5 6.4-6.4 15.2-10.4 24.8-11.4l.4-.1zm-136 6L285 249.2a99.45 99.45 0 0 0 71.9 85.3l-28.9 22.7a143.95 143.95 0 0 1-52.1 3.2 144.17 144.17 0 0 1-131-155.1c0-21.4 5.3-41.5 14.5-59.5l-18-14.1A246.34 246.34 0 0 0 32 233.5 33.06 33.06 0 0 0 32 260c53.6 106.7 160.7 177.9 281.5 177.9 59.8 0 115.8-17.7 163.7-48.4L515 419.1 141.2 138z" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -284,13 +281,8 @@
     <div class="inputs-container">
       <div class="labeled-input layout-inline-input-first">
         <div class="label-content">
-          <input
-            class="checkbox labeled-input-slot input"
-            type="checkbox"
-            id="one_time_confirmation"
-            name="one_time_installation_confirmation"
-            checked
-          />
+          <input class="checkbox labeled-input-slot input" type="checkbox" id="one_time_confirmation"
+            name="one_time_installation_confirmation" checked />
           <label class="labeled-input-label label-component" for="one_time_confirmation">
             {% translate "Send a one-time confirmation to let us know you've installed Mathesar" %}
           </label>
@@ -302,13 +294,8 @@
       </div>
       <div class="labeled-input layout-inline-input-first">
         <div class="label-content">
-          <input
-            class="checkbox labeled-input-slot input"
-            type="checkbox"
-            id="usage_stats"
-            name="usage_stats"
-            checked
-          />
+          <input class="checkbox labeled-input-slot input" type="checkbox" id="usage_stats" name="usage_stats"
+            checked />
           <label class="labeled-input-label label-component" for="usage_stats">
             {% translate "Enable anonymous usage data collection" %}
           </label>
@@ -316,19 +303,11 @@
             {% translate "Share anonymous usage data periodically to help us improve features." %}
             {% translate "No personal data is collected, and you can change this setting anytime." %}
             <!-- TODO_BETA: Add correct link to analytics information docs-page/website -->
-            <a
-              class="help-link"
-              href="https://docs.mathesar.org/user-guide/usage-data-collection/"
-              target="_blank"
-            >
+            <a class="help-link" href="https://docs.mathesar.org/user-guide/usage-data-collection/" target="_blank">
               {% translate "See what's shared." %}
             </a>
             <div>
-              <a
-                class="help-link"
-                href="https://mathesar.org/privacy"
-                target="_blank"
-              >
+              <a class="help-link" href="https://mathesar.org/privacy" target="_blank">
                 {% translate "See our privacy policy." %}
               </a>
             </div>
@@ -345,15 +324,16 @@
   </form>
   <form class="language-selector-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
     <input name="next" type="hidden" value="{{ redirect_to }}">
-    <select name="language" onchange="form.submit()" class="language-selector align-center" aria-label="Display Language">
-        {% get_current_language as LANGUAGE_CODE %}
-        {% get_available_languages as LANGUAGES %}
-        {% get_language_info_list for LANGUAGES as languages %}
-        {% for language in languages %}
-            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
-                {{ language.name_local }} ({{ language.code }})
-            </option>
-        {% endfor %}
+    <select name="language" onchange="form.submit()" class="language-selector align-center"
+      aria-label="Display Language">
+      {% get_current_language as LANGUAGE_CODE %}
+      {% get_available_languages as LANGUAGES %}
+      {% get_language_info_list for LANGUAGES as languages %}
+      {% for language in languages %}
+      <option value="{{ language.code }}" {% if language.code==LANGUAGE_CODE %} selected{% endif %}>
+        {{ language.name_local }} ({{ language.code }})
+      </option>
+      {% endfor %}
     </select>
   </form>
 </div>
