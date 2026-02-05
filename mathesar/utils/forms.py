@@ -234,44 +234,63 @@ def submit_form(form_token, values, user=None):
     ]
 
     # Set track_editing_user columns for authenticated users
-    # We need to handle this for each table that will be inserted into
     if user and user.is_authenticated and hasattr(user, 'id'):
-        # Get unique table OIDs and their minimum depths from field_info_list
-        table_depths = {}
+        # Collect insertion contexts from current fields.
+        # A context maps to one row insert (table + parent linkage).
+        insertion_contexts = []
+        seen_contexts = set()
         for field_info in field_info_list:
-            table_oid = field_info['table_oid']
-            depth = field_info['depth']
-            if table_oid not in table_depths or depth < table_depths[table_oid]:
-                table_depths[table_oid] = depth
+            context = (
+                field_info['table_oid'],
+                field_info['parent_key'],
+                field_info['depth'],
+            )
+            if context not in seen_contexts:
+                insertion_contexts.append({
+                    "table_oid": field_info['table_oid'],
+                    "parent_key": field_info['parent_key'],
+                    "depth": field_info['depth'],
+                })
+                seen_contexts.add(context)
 
-        # For each table, add track_editing_user columns to field_info_list and values
-        for table_oid, depth in table_depths.items():
-            columns_meta_data = get_columns_meta_data(table_oid, form_model.database.id)
+        existing_columns = {
+            (field_info['table_oid'], field_info['parent_key'], field_info['column_attnum'])
+            for field_info in field_info_list
+        }
+        metadata_cache = {}
+        synthetic_count = 0
+
+        for context in insertion_contexts:
+            table_oid = context['table_oid']
+            parent_key = context['parent_key']
+            depth = context['depth']
+            if table_oid not in metadata_cache:
+                metadata_cache[table_oid] = list(
+                    get_columns_meta_data(table_oid, form_model.database.id)
+                )
             track_editing_columns = [
-                c.attnum for c in columns_meta_data
+                c.attnum for c in metadata_cache[table_oid]
                 if c.user_display_field and c.track_editing_user
             ]
 
             for column_attnum in track_editing_columns:
-                # Check if this column is already in field_info_list
-                already_included = any(
-                    fi['table_oid'] == table_oid and fi['column_attnum'] == column_attnum
-                    for fi in field_info_list
+                key_tuple = (table_oid, parent_key, column_attnum)
+                if key_tuple in existing_columns:
+                    continue
+
+                synthetic_count += 1
+                key = (
+                    f"__track_editing_user_{table_oid}_{column_attnum}_{synthetic_count}"
                 )
-
-                if not already_included:
-                    # Add it to field_info_list with a generated key
-                    # Use a key that won't conflict with existing keys
-                    key = f"__track_editing_user_{table_oid}_{column_attnum}"
-                    field_info_list.append({
-                        "key": key,
-                        "parent_key": None,
-                        "column_attnum": column_attnum,
-                        "table_oid": table_oid,
-                        "depth": depth
-                    })
-
-                    values[key] = user.id
+                field_info_list.append({
+                    "key": key,
+                    "parent_key": parent_key,
+                    "column_attnum": column_attnum,
+                    "table_oid": table_oid,
+                    "depth": depth
+                })
+                values[key] = user.id
+                existing_columns.add(key_tuple)
 
     with form_model.connection as conn:
         form_insert(field_info_list, values, conn)

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mathesar', '0010_columnmetadata_user_type'),
+        ('mathesar', '0009_columnmetadata_file_backend'),
     ]
 
     operations = [
