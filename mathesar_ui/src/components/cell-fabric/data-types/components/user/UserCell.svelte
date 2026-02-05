@@ -1,20 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { get } from 'svelte/store';
+  import { readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type {
-    RecordsSummaryListResponse,
-    SummarizedRecordReference,
-  } from '@mathesar/api/rpc/_common/commonTypes';
-  import type { User } from '@mathesar/api/rpc/users';
+  import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
   import Default from '@mathesar/components/Default.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  import AsyncStore from '@mathesar/stores/AsyncStore';
   import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
   import { rowSeekerContext } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
-  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
   import {
     type UserDisplayField,
     getUserLabel,
@@ -28,11 +22,13 @@
 
   import CellWrapper from '../CellWrapper.svelte';
   import type { CellExternalProps } from '../typeDefinitions';
+  import { createUserRecordStore } from './userRecordUtils';
 
   const dispatch = createEventDispatcher();
 
   export let isActive: CellExternalProps['isActive'];
   export let value: CellExternalProps['value'] = undefined;
+  export let setValue: (newValue: CellExternalProps['value']) => void;
   export let searchValue: CellExternalProps['searchValue'] = undefined;
   export let recordSummary: CellExternalProps['recordSummary'] = undefined;
   export let setRecordSummary:
@@ -48,79 +44,21 @@
   const usersStore = getGlobalUsersStore();
   const rowSeekerController = rowSeekerContext.get();
 
+  // Use proper store subscriptions with readable fallbacks
+  const usersReadable = usersStore?.users ?? readable<UserModel[]>([]);
+  const requestStatusReadable = usersStore?.requestStatus ?? readable(undefined);
+
   $: hasValue = value !== undefined && value !== null;
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
-  $: users = usersStore ? get(usersStore.users) : [];
-  $: isLoadingUsers = usersStore
-    ? get(usersStore.requestStatus)?.state === 'processing'
-    : false;
-
-  // Convert users to SummarizedRecordReference format
-  function convertUsersToRecords(
-    _users: UserModel[],
-    searchQuery?: string,
-    limit?: number,
-    offset?: number,
-  ): RecordsSummaryListResponse {
-    // Convert UserModel[] to User[] format for filtering
-    const usersAsApiFormat: User[] = _users.map((u) => u.getUser());
-
-    // Filter users based on search query
-    let filteredUsers = usersAsApiFormat;
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filteredUsers = usersAsApiFormat.filter(
-        (user) =>
-          user.username?.toLowerCase().includes(query) ||
-          user.full_name?.toLowerCase().includes(query) ||
-          user.email?.toLowerCase().includes(query),
-      );
-    }
-
-    // Apply pagination
-    const totalCount = filteredUsers.length;
-    const start = offset ?? 0;
-    const end = limit ? start + limit : filteredUsers.length;
-    const paginatedUsers = filteredUsers.slice(start, end);
-
-    // Convert to SummarizedRecordReference format
-    const results: SummarizedRecordReference[] = paginatedUsers.map((user) => ({
-      key: user.id,
-      summary: getUserLabel(user, userDisplayField),
-    }));
-
-    return {
-      results,
-      count: totalCount,
-    };
-  }
-
-  // Create AsyncStore for row seeker
-  function createUserRecordStore(): RowSeekerRecordStore {
-    return new AsyncStore<
-      {
-        limit?: number | null;
-        offset?: number | null;
-        search?: string | null;
-      },
-      RecordsSummaryListResponse
-    >(async (params) => {
-      const { limit = null, offset = null, search = null } = params;
-      return convertUsersToRecords(
-        users,
-        search ?? undefined,
-        limit ?? undefined,
-        offset ?? undefined,
-      );
-    });
-  }
+  $: users = $usersReadable;
+  $: isLoadingUsers = $requestStatusReadable?.state === 'processing';
 
   // Get previous value for row seeker
   function getPreviousValue(): SummarizedRecordReference | undefined {
     if (value === undefined || value === null) {
       return undefined;
     }
-    const user = users.find((u) => u.id === value);
+    const user = users.find((u) => u.id === Number(value));
     if (!user) {
       return {
         key: value,
@@ -139,18 +77,19 @@
     event?.stopPropagation();
 
     // Ensure users are loaded
-    if (usersStore && get(usersStore.requestStatus)?.state !== 'success') {
-      await usersStore.fetchUsers();
+    if ($requestStatusReadable?.state !== 'success') {
+      await usersStore?.fetchUsers();
     }
 
     try {
       const selection = await rowSeekerController.acquireUserSelection({
         triggerElement: cellWrapperElement,
         previousValue: getPreviousValue(),
-        constructRecordStore: createUserRecordStore,
+        constructRecordStore: () =>
+          createUserRecordStore(users, userDisplayField),
         onSelect: (v) => {
           if (v) {
-            const user = users.find((u) => u.id === v.key);
+            const user = users.find((u) => u.id === Number(v.key));
             if (user && setRecordSummary) {
               const userApiFormat = user.getUser();
               const userDisplayValue = getUserLabel(
@@ -164,8 +103,9 @@
       });
 
       if (selection) {
-        value = selection.key as number;
-        const user = users.find((u) => u.id === selection.key);
+        const newValue = selection.key as number;
+        setValue(newValue);
+        const user = users.find((u) => u.id === Number(selection.key));
         if (user && setRecordSummary) {
           const userApiFormat = user.getUser();
           const userDisplayValue = getUserLabel(
@@ -175,9 +115,8 @@
           setRecordSummary(String(selection.key), userDisplayValue);
         }
       } else {
-        value = null;
+        setValue(null);
       }
-      dispatch('update', { value });
     } catch {
       // User cancelled selection
     }
@@ -240,7 +179,7 @@
 >
   <div class="user-cell" class:disabled>
     <div class="value">
-      {#if isLoadingUsers && !hasValue}
+      {#if isLoadingUsers}
         <Spinner />
       {:else if hasValue}
         <LinkedRecord

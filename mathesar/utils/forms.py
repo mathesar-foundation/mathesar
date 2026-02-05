@@ -218,6 +218,7 @@ def submit_form(form_token, values, user=None):
     """
     form_model = Form.objects.get(token=form_token)
     assert form_model.publish_public, 'This form does not accept submissions'
+    values = dict(values)
     fields_to_pick = [i for i in values.keys() if isinstance(values[i], dict) and values[i].get('type') == 'pick']
     field_info_list = [
         {
@@ -270,7 +271,6 @@ def submit_form(form_token, values, user=None):
                         "depth": depth
                     })
 
-                    # Set the value to the user ID
                     values[key] = user.id
 
     with form_model.connection as conn:

@@ -12,10 +12,9 @@ const userType: CellComponentFactory = {
   get: (column: RawColumnWithMetadata): ComponentAndProps => ({
     component: UserCell,
     props: {
-      userDisplayField: getMetadataValue(
-        column.metadata ?? {},
-        'user_display_field',
-      ),
+      userDisplayField:
+        getMetadataValue(column.metadata ?? {}, 'user_display_field') ??
+        'username',
     },
   }),
   getInput: (column: RawColumnWithMetadata): ComponentAndProps => ({

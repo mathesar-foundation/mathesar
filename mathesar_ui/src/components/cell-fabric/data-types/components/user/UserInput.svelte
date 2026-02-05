@@ -1,22 +1,17 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { get } from 'svelte/store';
+  import { readable } from 'svelte/store';
 
-  import type {
-    RecordsSummaryListResponse,
-    SummarizedRecordReference,
-  } from '@mathesar/api/rpc/_common/commonTypes';
-  import type { User } from '@mathesar/api/rpc/users';
   import LinkedRecordInput from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordInput.svelte';
-  import AsyncStore from '@mathesar/stores/AsyncStore';
   import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
-  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
   import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
   import {
     type UserDisplayField,
     getUserLabel,
   } from '@mathesar/utils/userUtils';
   import { Spinner } from '@mathesar-component-library';
+
+  import { createUserRecordStore } from './userRecordUtils';
 
   export let value: number | undefined = undefined;
   export let disabled = false;
@@ -26,15 +21,17 @@
   const dispatch = createEventDispatcher();
 
   const usersStore = getGlobalUsersStore();
-  $: users = usersStore ? get(usersStore.users) : [];
-  $: isLoading = usersStore
-    ? get(usersStore.requestStatus)?.state === 'processing'
-    : false;
+
+  // Use proper store subscriptions with readable fallbacks
+  const usersReadable = usersStore?.users ?? readable<UserModel[]>([]);
+  const requestStatusReadable = usersStore?.requestStatus ?? readable(undefined);
+
+  $: users = $usersReadable;
+  $: isLoading = $requestStatusReadable?.state === 'processing';
   $: error = (() => {
-    if (!usersStore) return undefined;
-    const requestStatus = get(usersStore.requestStatus);
-    if (requestStatus?.state === 'failure') {
-      return requestStatus?.errors?.[0];
+    if ($requestStatusReadable?.state === 'failure') {
+      return ($requestStatusReadable as { state: 'failure'; errors?: string[] })
+        ?.errors?.[0];
     }
     return undefined;
   })();
@@ -43,81 +40,17 @@
     ? getUserLabel(selectedUser.getUser(), userDisplayField)
     : undefined;
 
-  // Convert users to SummarizedRecordReference format
-  function convertUsersToRecords(
-    _users: UserModel[],
-    searchQuery?: string,
-    limit?: number,
-    offset?: number,
-  ): RecordsSummaryListResponse {
-    // Convert UserModel[] to User[] format for filtering
-    const usersAsApiFormat: User[] = _users.map((u) => u.getUser());
-
-    // Filter users based on search query
-    let filteredUsers = usersAsApiFormat;
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filteredUsers = usersAsApiFormat.filter(
-        (user) =>
-          user.username?.toLowerCase().includes(query) ||
-          user.full_name?.toLowerCase().includes(query) ||
-          user.email?.toLowerCase().includes(query),
-      );
-    }
-
-    // Apply pagination
-    const totalCount = filteredUsers.length;
-    const start = offset ?? 0;
-    const end = limit ? start + limit : filteredUsers.length;
-    const paginatedUsers = filteredUsers.slice(start, end);
-
-    // Convert to SummarizedRecordReference format
-    const results: SummarizedRecordReference[] = paginatedUsers.map((user) => ({
-      key: user.id,
-      summary: getUserLabel(user, userDisplayField),
-    }));
-
-    return {
-      results,
-      count: totalCount,
-    };
-  }
-
-  // Create AsyncStore for row seeker
-  function createUserRecordStore(): RowSeekerRecordStore {
-    return new AsyncStore<
-      {
-        limit?: number | null;
-        offset?: number | null;
-        search?: string | null;
-      },
-      RecordsSummaryListResponse
-    >(async (params) => {
-      const { limit = null, offset = null, search = null } = params;
-      return convertUsersToRecords(
-        users,
-        search ?? undefined,
-        limit ?? undefined,
-        offset ?? undefined,
-      );
-    });
-  }
-
   // Create record selection orchestrator factory for LinkedRecordInput
   const recordSelectionOrchestratorFactory = makeRowSeekerOrchestratorFactory({
-    constructRecordStore: createUserRecordStore,
+    constructRecordStore: () => createUserRecordStore(users, userDisplayField),
     onSelect: () => {
       // The selectedUser and recordSummary are reactive based on value
-      // This callback is mainly for side effects if needed
     },
   });
 
-  function setRecordSummary(recordId: string, summary: string) {
-    // Summary is computed reactively from selectedUser
-    // This function is kept for API compatibility
-    void recordId;
-    void summary;
-  }
+  // Intentionally a no-op: recordSummary is computed reactively from
+  // selectedUser, so this callback exists only for LinkedRecordInput API compat.
+  function setRecordSummary(_recordId: string, _summary: string) {}
 </script>
 
 <div class="user-input">

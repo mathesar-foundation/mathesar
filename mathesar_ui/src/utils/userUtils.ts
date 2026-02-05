@@ -19,16 +19,8 @@ export function getUserLabel(
   user: User,
   displayField: UserDisplayField = 'full_name',
 ): string {
-  // Access the property directly by name, fall back to ID if empty
   const fieldValue = user[displayField];
-  // Check for null, undefined, empty string, or the string "null"/"undefined"
-  if (
-    fieldValue &&
-    fieldValue !== 'null' &&
-    fieldValue !== 'undefined' &&
-    typeof fieldValue === 'string' &&
-    fieldValue.trim() !== ''
-  ) {
+  if (fieldValue && typeof fieldValue === 'string' && fieldValue.trim() !== '') {
     return fieldValue;
   }
   return String(user.id);

@@ -1,23 +1,19 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { get } from 'svelte/store';
+  import { readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type {
-    RecordsSummaryListResponse,
-    SummarizedRecordReference,
-  } from '@mathesar/api/rpc/_common/commonTypes';
-  import type { User } from '@mathesar/api/rpc/users';
+  import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
   import Truncate from '@mathesar/component-library/truncate/Truncate.svelte';
-  import AsyncStore from '@mathesar/stores/AsyncStore';
   import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
   import { rowSeekerContext } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
-  import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
   import {
     type UserDisplayField,
     getUserLabel,
   } from '@mathesar/utils/userUtils';
   import { Button, Spinner } from '@mathesar-component-library';
+
+  import { createUserRecordStore } from './userRecordUtils';
 
   export let value: number | string | undefined = undefined;
   export let disabled = false;
@@ -31,6 +27,10 @@
 
   let triggerElement: HTMLElement | undefined;
 
+  // Use proper store subscriptions with readable fallbacks
+  const usersReadable = usersStore?.users ?? readable<UserModel[]>([]);
+  const requestStatusReadable = usersStore?.requestStatus ?? readable(undefined);
+
   // Normalize value to number for comparison (filter values might come as strings)
   $: normalizedValue = (() => {
     if (value === undefined || value === null) return undefined;
@@ -38,81 +38,18 @@
     return Number.isNaN(numValue) ? undefined : numValue;
   })();
 
-  $: users = usersStore ? get(usersStore.users) : [];
-  $: isLoading = usersStore
-    ? get(usersStore.requestStatus)?.state === 'processing'
-    : false;
+  $: users = $usersReadable;
+  $: isLoading = $requestStatusReadable?.state === 'processing';
   $: error = (() => {
-    if (!usersStore) return undefined;
-    const requestStatus = get(usersStore.requestStatus);
-    if (requestStatus?.state === 'failure') {
-      return requestStatus?.errors?.[0];
+    if ($requestStatusReadable?.state === 'failure') {
+      return ($requestStatusReadable as { state: 'failure'; errors?: string[] })
+        ?.errors?.[0];
     }
     return undefined;
   })();
   $: selectedUser = normalizedValue
     ? users.find((u) => u.id === normalizedValue)
     : undefined;
-
-  // Convert users to SummarizedRecordReference format
-  function convertUsersToRecords(
-    _users: UserModel[],
-    searchQuery?: string,
-    limit?: number,
-    offset?: number,
-  ): RecordsSummaryListResponse {
-    // Convert UserModel[] to User[] format for filtering
-    const usersAsApiFormat: User[] = _users.map((u) => u.getUser());
-
-    // Filter users based on search query
-    let filteredUsers = usersAsApiFormat;
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filteredUsers = usersAsApiFormat.filter(
-        (user) =>
-          user.username?.toLowerCase().includes(query) ||
-          user.full_name?.toLowerCase().includes(query) ||
-          user.email?.toLowerCase().includes(query),
-      );
-    }
-
-    // Apply pagination
-    const totalCount = filteredUsers.length;
-    const start = offset ?? 0;
-    const end = limit ? start + limit : filteredUsers.length;
-    const paginatedUsers = filteredUsers.slice(start, end);
-
-    // Convert to SummarizedRecordReference format
-    const results: SummarizedRecordReference[] = paginatedUsers.map((user) => ({
-      key: user.id,
-      summary: getUserLabel(user, userDisplayField),
-    }));
-
-    return {
-      results,
-      count: totalCount,
-    };
-  }
-
-  // Create AsyncStore for row seeker
-  function createUserRecordStore(): RowSeekerRecordStore {
-    return new AsyncStore<
-      {
-        limit?: number | null;
-        offset?: number | null;
-        search?: string | null;
-      },
-      RecordsSummaryListResponse
-    >(async (params) => {
-      const { limit = null, offset = null, search = null } = params;
-      return convertUsersToRecords(
-        users,
-        search ?? undefined,
-        limit ?? undefined,
-        offset ?? undefined,
-      );
-    });
-  }
 
   // Get previous value for row seeker
   function getPreviousValue(): SummarizedRecordReference | undefined {
@@ -134,15 +71,16 @@
     if (disabled || !triggerElement || !rowSeekerController) return;
 
     // Ensure users are loaded
-    if (usersStore && get(usersStore.requestStatus)?.state !== 'success') {
-      await usersStore.fetchUsers();
+    if ($requestStatusReadable?.state !== 'success') {
+      await usersStore?.fetchUsers();
     }
 
     try {
       const selection = await rowSeekerController.acquireUserSelection({
         triggerElement,
         previousValue: getPreviousValue(),
-        constructRecordStore: createUserRecordStore,
+        constructRecordStore: () =>
+          createUserRecordStore(users, userDisplayField),
         onSelect: (v) => {
           // selectedUser is reactive based on value, so we just update value
           if (v) {

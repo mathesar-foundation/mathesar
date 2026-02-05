@@ -37,8 +37,9 @@ def test_records_list(rf, monkeypatch, mocked_exec_msar_func):
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
         "grouping": {
             "columns": [2],
+            "preproc": None,
             "groups": [
-                {"id": 3, "count": 8, "results_eq": {"1": "lsfj", "2": 3422}}
+                {"id": 3, "count": 8, "results_eq": {"1": "lsfj", "2": 3422}, "result_indices": None}
             ]
         },
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
