@@ -22,6 +22,7 @@
 
   import CellWrapper from '../CellWrapper.svelte';
   import type { CellExternalProps } from '../typeDefinitions';
+
   import { createUserRecordStore } from './userRecordUtils';
 
   const dispatch = createEventDispatcher();
@@ -46,7 +47,8 @@
 
   // Use proper store subscriptions with readable fallbacks
   const usersReadable = usersStore?.users ?? readable<UserModel[]>([]);
-  const requestStatusReadable = usersStore?.requestStatus ?? readable(undefined);
+  const requestStatusReadable =
+    usersStore?.requestStatus ?? readable(undefined);
 
   $: hasValue = value !== undefined && value !== null;
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);

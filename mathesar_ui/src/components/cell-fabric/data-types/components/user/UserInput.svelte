@@ -24,7 +24,8 @@
 
   // Use proper store subscriptions with readable fallbacks
   const usersReadable = usersStore?.users ?? readable<UserModel[]>([]);
-  const requestStatusReadable = usersStore?.requestStatus ?? readable(undefined);
+  const requestStatusReadable =
+    usersStore?.requestStatus ?? readable(undefined);
 
   $: users = $usersReadable;
   $: isLoading = $requestStatusReadable?.state === 'processing';
@@ -50,7 +51,10 @@
 
   // Intentionally a no-op: recordSummary is computed reactively from
   // selectedUser, so this callback exists only for LinkedRecordInput API compat.
-  function setRecordSummary(_recordId: string, _summary: string) {}
+  const setRecordSummary: (
+    recordId: string,
+    summary: string,
+  ) => void = () => {};
 </script>
 
 <div class="user-input">

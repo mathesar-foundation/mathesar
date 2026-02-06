@@ -20,7 +20,11 @@ export function getUserLabel(
   displayField: UserDisplayField = 'full_name',
 ): string {
   const fieldValue = user[displayField];
-  if (fieldValue && typeof fieldValue === 'string' && fieldValue.trim() !== '') {
+  if (
+    fieldValue &&
+    typeof fieldValue === 'string' &&
+    fieldValue.trim() !== ''
+  ) {
     return fieldValue;
   }
   return String(user.id);

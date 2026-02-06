@@ -29,7 +29,8 @@
 
   // Use proper store subscriptions with readable fallbacks
   const usersReadable = usersStore?.users ?? readable<UserModel[]>([]);
-  const requestStatusReadable = usersStore?.requestStatus ?? readable(undefined);
+  const requestStatusReadable =
+    usersStore?.requestStatus ?? readable(undefined);
 
   // Normalize value to number for comparison (filter values might come as strings)
   $: normalizedValue = (() => {
