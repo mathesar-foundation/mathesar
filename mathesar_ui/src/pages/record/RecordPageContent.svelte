@@ -5,6 +5,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
 -->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { router } from 'tinro';
 
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
@@ -17,18 +18,27 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableLink from '@mathesar/components/TableLink.svelte';
-  import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
+  import {
+    iconDeleteMajor,
+    iconRecord,
+    iconSave,
+    iconUndo,
+  } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import { getTablePageUrl } from '@mathesar/routes/urls';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { toast } from '@mathesar/stores/toast';
   import DirectField from '@mathesar/systems/record-view/DirectField.svelte';
   import type RecordStore from '@mathesar/systems/record-view/RecordStore';
   import RecordViewLoadingSpinner from '@mathesar/systems/record-view/RecordViewLoadingSpinner.svelte';
   import Widgets from '@mathesar/systems/record-view/Widgets.svelte';
+  import { Button, Icon } from '@mathesar-component-library';
 
   export let record: RecordStore;
-
   $: ({ table, tableStructure } = record);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canUpdateTableRecords = $currentRolePrivileges.has('UPDATE');
+  $: canDeleteTableRecords = $currentRolePrivileges.has('DELETE');
   $: ({ processedColumns } = tableStructure);
   $: ({ recordPk, summary, fieldValues } = record);
   $: fieldPropsObjects = [...$processedColumns.values()].map((c) => ({
@@ -71,6 +81,40 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     );
     await record.patch(patch);
   }
+
+  async function handleDeleteRecord() {
+    void confirmDelete({
+      identifierType: $_('record'),
+      body: [
+        $_('deleted_records_cannot_be_recovered', { values: { count: 1 } }),
+        $_('are_you_sure_to_proceed'),
+      ],
+      onProceed: async () => {
+        await api.records
+          .delete({
+            database_id: record.table.schema.database.id,
+            table_oid: record.table.oid,
+            record_ids: [record.recordPk],
+          })
+          .run();
+        router.goto(
+          getTablePageUrl(
+            record.table.schema.database.id,
+            record.table.schema.oid,
+            record.table.oid,
+          ),
+        );
+      },
+      onError: (e) => toast.fromError(e),
+      onSuccess: () => {
+        toast.success({
+          title: $_('count_records_deleted_successfully', {
+            values: { count: 1 },
+          }),
+        });
+      },
+    });
+  }
 </script>
 
 <div class="record-page-content">
@@ -87,8 +131,19 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
           {/if}
         </RichText>
       </div>
-      <div slot="action">
+      <div slot="action" class="header-actions">
         <div class="form-status"><FormStatus {form} /></div>
+
+        <Button
+          on:click={handleDeleteRecord}
+          disabled={!canDeleteTableRecords}
+          appearance="danger"
+        >
+          <Icon {...iconDeleteMajor} />
+          <span class="responsive-label">
+            {$_('delete_records', { values: { count: 1 } })}
+          </span>
+        </Button>
       </div>
     </AppSecondaryHeader>
   </div>
@@ -156,9 +211,15 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     grid-column: 1;
     color: var(--color-fg-subtle-1);
   }
-  .form-status {
+  .header-actions {
     grid-row: 1 / span 2;
     grid-column: 2;
+    display: flex;
+    align-items: baseline;
+    gap: var(--sm5);
+  }
+  .form-status {
+    flex: 1;
   }
 
   .fields {
@@ -170,5 +231,16 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
   .widgets-container {
     margin: 0 var(--sm1) var(--lg1) var(--sm1);
+  }
+
+  @media (max-width: 38rem) {
+    .responsive-label {
+      display: none;
+    }
+  }
+  @media (max-width: 32rem) {
+    :global(.status-indicator .status-text) {
+      display: none;
+    }
   }
 </style>

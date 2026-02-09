@@ -29,7 +29,7 @@
   export let table: Table;
 
   $: columnOrder = columnOrder ?? [];
-  $: ({ selection, processedColumns, allColumns } = $tabularData);
+  $: ({ selection, processedColumns, displayedColumns } = $tabularData);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
   let selectedColumnIdsOrdered: string[] = [];
@@ -109,7 +109,7 @@
     />
   </SheetOriginCell>
 
-  {#each [...$allColumns] as [columnId, columnFabric] (columnId)}
+  {#each [...$displayedColumns] as [columnId, columnFabric] (columnId)}
     {@const isSelected = $selection.columnIds.has(columnId)}
     {@const isJoined = isJoinedColumn(columnFabric)}
     <SheetColumnHeaderCell
