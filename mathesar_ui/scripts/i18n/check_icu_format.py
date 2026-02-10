@@ -26,39 +26,39 @@ def check_balanced_braces(text, key):
 def check_plural_syntax(text, key):
     """Validate ICU plural syntax."""
     plural_pattern = r'\{(\w+),\s*plural,\s*([^}]+)\}'
-    
+
     for match in re.finditer(plural_pattern, text):
         cases_text = match.group(2)
-        
+
         if 'other' not in cases_text:
             return f"Plural in '{key}' missing required 'other' case"
-        
+
         valid_cases = r'\b(zero|one|two|few|many|other|=\d+)\s*\{'
         if not re.search(valid_cases, cases_text):
             return f"Invalid plural syntax in '{key}'"
-    
+
     return None
 
 
 def main():
     with open(EN_DICT_FILE, 'r') as f:
         dictionary = json.load(f)
-    
+
     errors = []
-    
+
     for key, value in dictionary.items():
         if not isinstance(value, str):
             continue
-        
+
         error = check_balanced_braces(value, key)
         if error:
             errors.append(error)
             continue
-        
+
         error = check_plural_syntax(value, key)
         if error:
             errors.append(error)
-    
+
     if errors:
         print("ERROR: ICU format validation failed:")
         for error in errors:

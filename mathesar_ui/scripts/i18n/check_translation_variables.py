@@ -13,26 +13,26 @@ SRC_DIR = MATHESAR_UI_DIR / 'src'
 def extract_variables_from_icu(text):
     """Extract variable names from ICU MessageFormat text."""
     variables = set()
-    
+
     # Simple variables: {varName}
     for match in re.finditer(r'\{([a-zA-Z_]\w*)\}', text):
         variables.add(match.group(1))
-    
+
     # Plural variables: {varName, plural, ...}
     for match in re.finditer(r'\{(\w+),\s*plural,', text):
         variables.add(match.group(1))
-    
+
     # Select variables: {varName, select, ...}
     for match in re.finditer(r'\{(\w+),\s*select,', text):
         variables.add(match.group(1))
-    
+
     return variables
 
 
 def find_translation_calls():
     """Find all translation function calls and their arguments."""
     calls = []
-    
+
     # Find all .svelte and .ts files
     result = subprocess.run(
         [
@@ -43,7 +43,7 @@ def find_translation_calls():
         text=True,
         shell=False
     )
-    
+
     if result.returncode != 0:
         return calls
 
@@ -51,7 +51,7 @@ def find_translation_calls():
         f for f in result.stdout.strip().split('\n')
         if f and 'i18n' not in f
     ]
-    
+
     for filepath in files:
         try:
             with open(filepath, 'r') as f:
@@ -62,7 +62,7 @@ def find_translation_calls():
                 r"\$_\s*\(\s*'([^']+)'\s*"
                 r"(?:,\s*\{[^}]*values\s*:\s*\{([^}]*)\})?[^)]*\)"
             )
-            
+
             for match in re.finditer(
                 pattern, content, re.MULTILINE | re.DOTALL
             ):
@@ -82,17 +82,17 @@ def find_translation_calls():
                 })
         except Exception:
             continue
-    
+
     return calls
 
 
 def main():
     with open(EN_DICT_FILE, 'r') as f:
         dictionary = json.load(f)
-    
+
     calls = find_translation_calls()
     errors = []
-    
+
     for call in calls:
         key = call['key']
         if key not in dictionary:
@@ -107,7 +107,7 @@ def main():
                 f"{call['file']}: Key '{key}' requires variables "
                 f"{sorted(missing)} but they are not provided"
             )
-    
+
     if errors:
         print("ERROR: Translation calls missing required variables:")
         for error in errors:

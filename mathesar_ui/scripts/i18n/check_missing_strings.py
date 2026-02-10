@@ -16,7 +16,7 @@ def find_all_used_keys():
     """Find all translation keys used in the codebase."""
     keys = set()
     pattern = r"(?:\$_|get\(_\))\(\s*'([^']+)'"
-    
+
     try:
         result = subprocess.run(
             [
@@ -32,7 +32,7 @@ def find_all_used_keys():
             text=True,
             check=False
         )
-        
+
         for line in result.stdout.split('\n'):
             if line:
                 match = re.search(pattern, line)
@@ -40,17 +40,17 @@ def find_all_used_keys():
                     keys.add(match.group(1))
     except Exception as e:
         print(f"Error: {e}")
-    
+
     return keys
 
 
 def main():
     with open(EN_DICT_FILE, 'r') as f:
         dict_keys = set(json.load(f).keys())
-    
+
     used_keys = find_all_used_keys()
     missing = used_keys - dict_keys
-    
+
     if missing:
         print("ERROR: Translation keys used but not in dict.json:")
         for key in sorted(missing):
