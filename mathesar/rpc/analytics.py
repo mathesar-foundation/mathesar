@@ -70,8 +70,10 @@ class AnalyticsState(TypedDict):
 @mathesar_rpc_method(name="analytics.get_state")
 def get_state() -> AnalyticsState:
     """
+    Get the current state of analytics.
+
     Returns:
-        A boolean to identify if analytics is enabled.
+        A dict containing the current state of analytics.
     """
     return AnalyticsState.from_boolean(is_analytics_enabled())
 
@@ -79,7 +81,7 @@ def get_state() -> AnalyticsState:
 @mathesar_rpc_method(name="analytics.initialize")
 def initialize():
     """
-    Initialize analytics collection and reporting in Mathesar
+    Initialize analytics collection and reporting in Mathesar.
 
     If initialized, analytics are gathered to a local model once per day,
     and uploaded.
@@ -90,7 +92,7 @@ def initialize():
 @mathesar_rpc_method(name="analytics.disable")
 def disable():
     """
-    Disable analytics collection and reporting in Mathesar
+    Disable analytics collection and reporting in Mathesar.
 
     Disabling analytics amounts to (for now) simply deleting the
     Installation ID, ensuring that it's impossible to save analytics
@@ -103,8 +105,10 @@ def disable():
 @mathesar_rpc_method(name="analytics.view_report")
 def view_report() -> AnalyticsReport:
     """
-    View an example analytics report, prepared with the same function
-    that creates real reports that would be saved and uploaded.
+    View an example analytics report.
+
+    The report is prepared with the same function that creates real reports
+    that would be saved and uploaded.
 
     Returns:
         An analytics report.

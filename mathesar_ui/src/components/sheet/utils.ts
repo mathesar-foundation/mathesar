@@ -26,9 +26,11 @@ export interface SheetContextStores {
 export interface SheetContext {
   stores: SheetContextStores;
   api: {
-    setColumnWidth: (columnIdentifierKey: string, width: number) => void;
-    getColumnWidth: (columnIdentifierKey: string) => number;
-    resetColumnWidth: (columnIdentifierKey: string) => void;
+    getColumnWidth: (columnId: string) => number;
+    /** Called continuously — while the user is resizing a column. */
+    handleDraggingColumnWidth: (columnId: string, width: number | null) => void;
+    /** Called once — when the user is finished resizing a column */
+    handleReleaseColumnWidth: (columnId: string, width: number | null) => void;
     setHorizontalScrollOffset: (offset: number) => void;
     setScrollOffset: (offset: number) => void;
   };

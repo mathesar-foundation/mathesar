@@ -13,6 +13,7 @@ import type {
   RawFilterGroup,
   RawIndividualFilter,
 } from '@mathesar/components/filter/utils';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 
 import type { FilterId } from '../abstract-types/types';
 
@@ -45,7 +46,7 @@ function individualFilterToSqlExpr(
 ): SqlExpr {
   const column: SqlColumn = {
     type: 'attnum',
-    value: Number(individualFilter.columnId),
+    value: castColumnIdToNumber(individualFilter.columnId),
   };
 
   /** Generate an SqlLiteral value */
@@ -190,7 +191,7 @@ function getCountOfNonConjunctionalExpr(expr: SqlExpr) {
 }
 
 function getCountOfColumnInExpr(expr: SqlExpr, columnId: string): number {
-  if (expr.type === 'attnum' && expr.value === Number(columnId)) {
+  if (expr.type === 'attnum' && expr.value === castColumnIdToNumber(columnId)) {
     return 1;
   }
   let count = 0;

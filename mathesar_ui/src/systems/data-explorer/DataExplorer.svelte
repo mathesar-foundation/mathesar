@@ -10,11 +10,9 @@
   import type QueryManager from './QueryManager';
   import ExplorationResults from './result-pane/ExplorationResults.svelte';
   import StatusBar from './StatusBar.svelte';
-  import type { ColumnWithLink } from './utils';
 
   export let queryManager: QueryManager;
-  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
-    {};
+  export let linkCollapsibleOpenState: Record<string, boolean> = {};
 
   $: ({ query } = queryManager);
   $: hasColumns = !!$query.initial_columns.length;

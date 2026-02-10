@@ -7,6 +7,7 @@ import {
   readable,
   writable,
 } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
@@ -29,6 +30,8 @@ import type {
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
+import { toast } from '@mathesar/stores/toast';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { ImmutableSet, defined } from '@mathesar-component-library';
 
@@ -155,6 +158,8 @@ export class TabularData {
 
   allColumns: Readable<Map<string, ProcessedColumn | JoinedColumn>>;
 
+  displayedColumns: Readable<Map<string, ProcessedColumn | JoinedColumn>>;
+
   /**
    * In the future, this will be set dynamically in for publicly shared links
    * where user should not be able to (for example) open the record page for
@@ -172,7 +177,7 @@ export class TabularData {
       database: props.database,
       table: this.table,
       hiddenColumns: Array.from(contextualFilters.keys()).map((id) =>
-        Number(id),
+        castColumnIdToNumber(id),
       ),
     });
     this.constraintsDataStore = new ConstraintsDataStore({
@@ -283,16 +288,29 @@ export class TabularData {
         ]),
     );
 
+    this.displayedColumns = derived(
+      [this.allColumns, this.meta.hiddenColumns],
+      ([allColumns, hiddenColumns]) =>
+        new Map(
+          [...allColumns.entries()].filter(([key]) => !hiddenColumns.has(key)),
+        ),
+    );
+
     const plane = derived(
       [
         this.recordsData.selectableRowsMap,
-        this.allColumns,
+        this.displayedColumns,
         this.display.placeholderRowId,
         this.joinedColumns,
       ],
-      ([selectableRowsMap, allColumns, placeholderRowId, joinedColumns]) => {
+      ([
+        selectableRowsMap,
+        displayedColumns,
+        placeholderRowId,
+        joinedColumns,
+      ]) => {
         const rowIds = new Series([...selectableRowsMap.keys()]);
-        const columnIds = new Series([...allColumns.keys()]);
+        const columnIds = new Series([...displayedColumns.keys()]);
         const rangeRestrictedColumnIds = new ImmutableSet(joinedColumns.keys());
         return new Plane(
           rowIds,
@@ -340,6 +358,7 @@ export class TabularData {
       this.meta.sorting.update((s) => s.without(stringColumnId));
       this.meta.grouping.update((g) => g.withoutColumns([stringColumnId]));
       this.meta.filtering.update((f) => f.withoutColumns([stringColumnId]));
+      this.meta.hiddenColumns.update((h) => h.withoutColumn(stringColumnId));
       await this.constraintsDataStore.fetch();
       void this.joinableTables.run();
     });
@@ -419,6 +438,32 @@ export class TabularData {
     const pkColumn = get(this.columnsDataStore.pkColumn);
     if (!pkColumn) return undefined;
     return row.record[pkColumn.id];
+  }
+
+  async addNewRecord() {
+    const newRecord = await this.recordsData.addEmptyRecord();
+    const requiredColumnIds = get(this.columnsDataStore.columns)
+      .filter((column) => {
+        const hasDynamicDefault = column.default?.is_dynamic ?? false;
+        const isNullable = column.nullable;
+        return !isNullable && !hasDynamicDefault;
+      })
+      .map((column) => String(column.id));
+
+    let columnsUnhidden = false;
+    this.meta.hiddenColumns.update((hiddenColumns) => {
+      const updatedHiddenColumns =
+        hiddenColumns.withoutColumns(requiredColumnIds);
+      if (updatedHiddenColumns.size !== hiddenColumns.size) {
+        columnsUnhidden = true;
+      }
+      return updatedHiddenColumns;
+    });
+
+    if (columnsUnhidden) {
+      toast.info(get(_)('required_hidden_columns_made_visible'));
+    }
+    return newRecord;
   }
 
   destroy(): void {

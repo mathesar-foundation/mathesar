@@ -29,6 +29,7 @@ def add_foreign_key_column(
         column_name: The name of the column to create.
         referrer_table_oid: The OID of the table getting the new column.
         referent_table_oid: The OID of the table being referenced.
+        database_id: The Django id of the database containing the table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -66,9 +67,10 @@ def add_mapping_table(
 
     Args:
         table_name: The name for the new mapping table.
-        schema_oid: The OID of the schema for the mapping table.
         mapping_columns: The foreign key columns to create in the
             mapping table.
+        schema_oid: The OID of the schema for the mapping table.
+        database_id: The Django id of the database containing the table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -89,9 +91,10 @@ def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> dict:
         table_oid: The OID of the table whose columns we're inferring types for.
         database_id: The Django id of the database containing the table.
 
-    The response JSON will have attnum keys, and values will be the
-    result of `format_type` for the inferred type of each column, i.e., the
-    canonical string referring to the type.
+    Returns:
+        The response JSON will have attnum keys, and values will be the
+        result of `format_type` for the inferred type of each column, i.e., the
+        canonical string referring to the type.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:

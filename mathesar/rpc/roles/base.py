@@ -77,7 +77,7 @@ class RoleInfo(TypedDict):
 def list_(*, database_id: int, **kwargs) -> list[RoleInfo]:
     """
     List information about roles for a database server. Exposed as `list`.
-    Requires a database id inorder to connect to the server.
+    Requires a database id in order to connect to the server.
 
     Args:
         database_id: The Django id of the database.
@@ -106,8 +106,8 @@ def add(
     Args:
         rolename: The name of the role to be created.
         database_id: The Django id of the database.
-        password: The password for the rolename to set.
-        login: Whether the role to be created could login.
+        password: The password for the role.
+        login: Whether the role to be created can login.
 
     Returns:
         A dict describing the created role.
@@ -129,7 +129,7 @@ def delete(
     Drop a role on a database server.
 
     Args:
-        role_oid: The OID of the role to drop on the database.
+        role_oid: The OID of the role to drop on the server.
         database_id: The Django id of the database.
     """
     user = kwargs.get(REQUEST_KEY).user
@@ -171,7 +171,7 @@ def set_members(
 
     Args:
       parent_role_oid: The OID of role whose membership will be granted/revoked to/from other roles.
-      members: An array of role OID(s) whom we want to grant direct membership of the parent role.
+      members: An array of role OID(s) to which we want to grant direct membership of the parent role.
                Only the OID(s) present in the array will be granted membership of parent role,
                Membership will be revoked for existing members not present in this array.
 

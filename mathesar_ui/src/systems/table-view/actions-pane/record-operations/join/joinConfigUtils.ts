@@ -3,6 +3,7 @@ import type {
   JoinableTable,
   JoinableTablesResult,
 } from '@mathesar/api/rpc/tables';
+import { castColumnIdToNumber } from '@mathesar/utils/columnUtils';
 
 /**
  * This represents a "simple" many-to-many relationship such that the mapping
@@ -151,7 +152,7 @@ export function getSimpleManyToManyJoinPath(
     ],
     [
       [intermediateTableOid, intermediateTableFkToTargetColumn],
-      [targetTableOid, Number(targetTablePkColumn)],
+      [targetTableOid, castColumnIdToNumber(targetTablePkColumn)],
     ],
   ];
 }

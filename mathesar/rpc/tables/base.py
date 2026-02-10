@@ -287,7 +287,7 @@ def patch(
 
     Args:
         table_oid: Identity of the table whose name, description or columns we'll modify.
-        table_data_dict: A list describing desired table alterations.
+        table_data_dict: A dict describing desired table alterations.
         database_id: The Django id of the database containing the table.
 
     Returns:

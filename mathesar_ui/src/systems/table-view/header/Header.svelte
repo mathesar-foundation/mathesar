@@ -12,7 +12,6 @@
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
-    type JoinedColumn,
     type ProcessedColumn,
     getTabularDataStoreFromContext,
     isJoinedColumn,
@@ -30,8 +29,7 @@
   export let table: Table;
 
   $: columnOrder = columnOrder ?? [];
-  $: ({ selection, processedColumns, allColumns, columnsDataStore } =
-    $tabularData);
+  $: ({ selection, processedColumns, displayedColumns } = $tabularData);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
   let selectedColumnIdsOrdered: string[] = [];
@@ -99,19 +97,6 @@
     selectedColumnIdsOrdered = [];
     newColumnOrder = [];
   }
-
-  function saveColumnWidth(
-    column: ProcessedColumn | JoinedColumn,
-    width: number | null,
-  ) {
-    // Joined columns do not persist width to the database
-    if (isJoinedColumn(column)) {
-      return;
-    }
-    void columnsDataStore.setDisplayOptions(column.column, {
-      display_width: width,
-    });
-  }
 </script>
 
 <SheetHeader>
@@ -124,7 +109,7 @@
     />
   </SheetOriginCell>
 
-  {#each [...$allColumns] as [columnId, columnFabric] (columnId)}
+  {#each [...$displayedColumns] as [columnId, columnFabric] (columnId)}
     {@const isSelected = $selection.columnIds.has(columnId)}
     {@const isJoined = isJoinedColumn(columnFabric)}
     <SheetColumnHeaderCell
@@ -150,11 +135,7 @@
           </Droppable>
         </Draggable>
       {/if}
-      <SheetCellResizer
-        columnIdentifierKey={columnId}
-        afterResize={(width) => saveColumnWidth(columnFabric, width)}
-        onReset={() => saveColumnWidth(columnFabric, null)}
-      />
+      <SheetCellResizer {columnId} />
     </SheetColumnHeaderCell>
   {/each}
 

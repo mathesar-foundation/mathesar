@@ -51,7 +51,7 @@
             {renamedIdColumn}
           />
           <SheetCellResizer
-            columnIdentifierKey={String(column.id)}
+            columnId={String(column.id)}
             minColumnWidth={MIN_IMPORT_COLUMN_WIDTH_PX}
           />
         </SheetColumnHeaderCell>
