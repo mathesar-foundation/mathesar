@@ -1674,15 +1674,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#upgrading-to-090" class="md-nav__link">
-    <span class="md-ellipsis">
-      Upgrading to 0.9.0
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#improvements" class="md-nav__link">
     <span class="md-ellipsis">
       Improvements
@@ -1711,9 +1702,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#improved-record-page-functionality" class="md-nav__link">
+  <a href="#delete-directly-on-the-record-page" class="md-nav__link">
     <span class="md-ellipsis">
-      Improved record page functionality
+      Delete directly on the record page
     </span>
   </a>
   
@@ -1784,6 +1775,39 @@
       Maintenance
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrading to 0.9.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrading to 0.9.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-installations-using-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      For installations using Docker Compose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-direct-installations-of-mathesar-on-linux-macos-or-wsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      For direct installations of Mathesar on Linux, macOS, or WSL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2374,15 +2398,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#upgrading-to-090" class="md-nav__link">
-    <span class="md-ellipsis">
-      Upgrading to 0.9.0
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#improvements" class="md-nav__link">
     <span class="md-ellipsis">
       Improvements
@@ -2411,9 +2426,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#improved-record-page-functionality" class="md-nav__link">
+  <a href="#delete-directly-on-the-record-page" class="md-nav__link">
     <span class="md-ellipsis">
-      Improved record page functionality
+      Delete directly on the record page
     </span>
   </a>
   
@@ -2487,6 +2502,39 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#upgrading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrading to 0.9.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrading to 0.9.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-installations-using-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      For installations using Docker Compose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-direct-installations-of-mathesar-on-linux-macos-or-wsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      For direct installations of Mathesar on Linux, macOS, or WSL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2514,8 +2562,6 @@
 <div class="admonition info">
 <p>This page provides a comprehensive list of all changes in the release.</p>
 </div>
-<h2 id="upgrading-to-090">Upgrading to 0.9.0<a class="headerlink" href="#upgrading-to-090" title="Permanent link">&para;</a></h2>
-<p>TODO</p>
 <!-- ## Security fixes -->
 
 <!-- ## Breaking changes -->
@@ -2523,6 +2569,12 @@
 
 <h2 id="improvements">Improvements<a class="headerlink" href="#improvements" title="Permanent link">&para;</a></h2>
 <h3 id="hide-columns-on-the-table-page">Hide columns on the table page<a class="headerlink" href="#hide-columns-on-the-table-page" title="Permanent link">&para;</a></h3>
+<figure>
+<p><img alt="Mathesar UI screenshot of hiding the &quot;ID&quot; column" src="../../assets/releases/0.9.0/hide-columns-dropdown.png" /></p>
+<figcaption>
+<p>Hide columns dropdown with checkboxes for selecting which columns to show or hide.</p>
+</figcaption>
+</figure>
 <p>The table page now includes a &ldquo;Hide columns&rdquo; button that allows you to temporarily hide columns you don&rsquo;t need to see, making it easier to focus on the data that matters most. You can hide columns individually or use column context menu actions to hide multiple selected columns at once.</p>
 <p>When adding new records, any required columns that are hidden will automatically be shown with a notification, ensuring you can always complete required fields.</p>
 <p><em>Related work:</em></p>
@@ -2531,11 +2583,12 @@
 <p>Mathesar now supports resizing multiple columns simultaneously, making it faster to adjust column widths across your table. You can also use Shift + arrow keys to select ranges of cells, bringing spreadsheet-like navigation to Mathesar tables.</p>
 <p><em>Related work:</em></p>
 <p><a href="https://github.com/mathesar-foundation/mathesar/pull/5075" title="Allow multiple columns to be resized together">#5075</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/5101" title="Implement cell range selection (shift + arrow)">#5101</a></p>
-<h3 id="improved-record-page-functionality">Improved record page functionality<a class="headerlink" href="#improved-record-page-functionality" title="Permanent link">&para;</a></h3>
+<h3 id="delete-directly-on-the-record-page">Delete directly on the record page<a class="headerlink" href="#delete-directly-on-the-record-page" title="Permanent link">&para;</a></h3>
 <p>The record page now includes a delete button, allowing you to delete records directly from the record view without navigating back to the table page. Column descriptions are also now displayed via an info icon with a tooltip on hover, keeping the interface clean while making context easily accessible.</p>
 <p><em>Related work:</em></p>
 <p><a href="https://github.com/mathesar-foundation/mathesar/pull/5156" title="Enable record deletion from the record page">#5156</a> <a href="https://github.com/mathesar-foundation/mathesar/pull/5112" title="Show column descriptions in record page">#5112</a></p>
 <h3 id="data-exploration-duplication">Data exploration duplication<a class="headerlink" href="#data-exploration-duplication" title="Permanent link">&para;</a></h3>
+<p><img alt="Mathesar UI screenshot of duplicating an exploration" src="../../assets/releases/0.9.0/data-exploration-duplication.png" /></p>
 <p>You can now duplicate data explorations directly from the context menu on the schema page. This makes it easy to create variations of existing explorations or use them as starting points for new queries.</p>
 <p><em>Related work:</em></p>
 <p><a href="https://github.com/mathesar-foundation/mathesar/pull/5079" title="Add data exploration duplication entry">#5079</a></p>
@@ -2583,6 +2636,94 @@
 <li>Remove explorations.run_saved API from frontend <a href="https://github.com/mathesar-foundation/mathesar/pull/5147" title="Remove explorations.run_saved API from frontend">#5147</a></li>
 <li>Bump pymdown-extensions from 10.16 to 10.16.1 in /docs <a href="https://github.com/mathesar-foundation/mathesar/pull/5121" title="Bump pymdown-extensions from 10.16 to 10.16.1 in /docs">#5121</a></li>
 </ul>
+<h2 id="upgrading">Upgrading to 0.9.0<a class="headerlink" href="#upgrading" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">PostgreSQL 13 and Python 3.9 no longer supported</p>
+<p>Mathesar 0.8.0 ended official support for PostgreSQL 13 and Python 3.9. Please upgrade to PostgreSQL 14+ and Python 3.10+ before upgrading to Mathesar 0.9.0.</p>
+</div>
+<h3 id="for-installations-using-docker-compose">For installations using Docker Compose<a class="headerlink" href="#for-installations-using-docker-compose" title="Permanent link">&para;</a></h3>
+<p>If you have a Docker compose installation, run the command below:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker compose -f /etc/mathesar/docker-compose.yml up --pull always -d
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Your installation directory may be different</p>
+<p>You may need to change <code>/etc/mathesar/</code> in the command above if you chose to install Mathesar to a different directory.</p>
+</div>
+<h3 id="for-direct-installations-of-mathesar-on-linux-macos-or-wsl">For direct installations of Mathesar on Linux, macOS, or WSL<a class="headerlink" href="#for-direct-installations-of-mathesar-on-linux-macos-or-wsl" title="Permanent link">&para;</a></h3>
+<p>Mathesar provides an install script that automates both fresh installs and upgrades for standalone (non-Docker) installations.</p>
+<p>Follow the steps below to upgrade Mathesar:</p>
+<ol>
+<li>
+<p>Enter your installation directory into the box below and press <kbd>Enter</kbd> to personalize this guide:</p>
+<p><input data-input-for="MATHESAR_INSTALL_DIR" aria-label="Your Mathesar installation directory" value="Please enable JavaScript"></p>
+<ul>
+<li>Do <em>not</em> include a trailing slash.</li>
+<li>Do <em>not</em> use any variables like <code>$HOME</code>.</li>
+</ul>
+</li>
+<li>
+<p>Go to your Mathesar installation directory.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>cd xMATHESAR_INSTALL_DIRx
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Your installation directory may be different from above if you used a different directory when installing Mathesar.</p>
+</div>
+</li>
+<li>
+<p>Download and run the install script for 0.9.0
+    <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl -sSfL https://github.com/mathesar-foundation/mathesar/releases/download/0.9.0/install.sh -o install.sh
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>chmod +x install.sh
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>./install.sh .
+</span></code></pre></div></p>
+</li>
+<li>
+<p>Replace your gunicorn systemd service with a Mathesar systemd service</p>
+<ol>
+<li>
+<p>Disable and stop the existing gunicorn service
+    <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>systemctl disable gunicorn.service
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>systemctl stop gunicorn.service
+</span></code></pre></div></p>
+</li>
+<li>
+<p>Follow the steps in <a href="../../administration/install-from-scratch/#run-mathesar-as-a-systemd-service">Run Mathesar as a systemd service</a> from the installation guide</p>
+</li>
+<li>
+<p>Remove the gunicorn service file
+    <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo rm /lib/systemd/system/gunicorn.service
+</span></code></pre></div></p>
+</li>
+</ol>
+</li>
+<li>
+<p>Update your Caddyfile</p>
+<ol>
+<li>
+<p>Use the configuration shown in <a href="../../administration/install-from-scratch/#install-and-configure-caddy">Install and configure Caddy</a> in the installation guide, and update your Caddyfile accordingly</p>
+</li>
+<li>
+<p>Ensure that your domains are specified directly in the first line of the Caddyfile</p>
+</li>
+<li>
+<p>Restart your Caddy service
+  <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>systemctl restart caddy.service
+</span></code></pre></div></p>
+</li>
+</ol>
+</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>If you&rsquo;re running Mathesar only on localhost and do not want it to run as a service</strong>, you could:</p>
+<ol>
+<li>Remove the gunicorn and caddy services</li>
+<li>Start Mathesar manually with:
+  <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mathesar run
+</span></code></pre></div></li>
+</ol>
+</div>
 
 
 
