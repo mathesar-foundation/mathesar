@@ -253,11 +253,6 @@ METHODS = [
         "explorations.run",
         [user_is_authenticated]
     ),
-    (
-        explorations.run_saved,
-        "explorations.run_saved",
-        [user_is_authenticated]
-    ),
 
     (
         forms.add,

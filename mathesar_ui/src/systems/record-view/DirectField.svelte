@@ -10,6 +10,7 @@
   import Null from '@mathesar/components/Null.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import {
+    iconDescription,
     iconLinkToRecordPage,
     iconModalRecordView,
     iconSetToNull,
@@ -21,11 +22,13 @@
   import {
     ButtonMenuItem,
     DropdownMenu,
+    Icon,
     Label,
     LabelController,
     LinkMenuItem,
     iconExpandDown,
   } from '@mathesar-component-library';
+  import Tooltip from '@mathesar-component-library-dir/tooltip/Tooltip.svelte';
 
   import RecordStore from './RecordStore';
 
@@ -97,10 +100,24 @@
 <div class="direct-field">
   <div class="left cell">
     <div class="complex-label">
-      <div class="label">
+      <div class="label-with-info">
         <Label controller={labelController}>
           <ProcessedColumnName {processedColumn} />
         </Label>
+        {#if processedColumn.column.description}
+          <Tooltip placements={['right']}>
+            <span
+              slot="trigger"
+              class="info-icon"
+              aria-label={$_('column_description')}
+            >
+              <Icon {...iconDescription} />
+            </span>
+            <div slot="content">
+              {processedColumn.column.description}
+            </div>
+          </Tooltip>
+        {/if}
       </div>
       <div class="options">
         <DropdownMenu
@@ -187,37 +204,60 @@
   .direct-field {
     display: contents;
   }
+
   .direct-field:not(:last-child) .cell {
     padding-bottom: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: solid var(--color-border-section) 1px;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-border-section);
   }
+
   .left {
     display: flex;
     align-items: flex-start;
-    justify-content: end;
+    justify-content: flex-end;
+    padding-right: 0.75rem;
   }
+
   .complex-label {
     display: flex;
-    align-items: center;
-    justify-content: end;
+    flex-direction: row;
+    justify-content: space-between;
     max-width: 15rem;
+    gap: 0.3rem;
+  }
+
+  .label-with-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     overflow: hidden;
+    min-width: 0;
   }
-  .label {
+
+  .label-with-info :global(label) {
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
   }
-  .options {
-    margin: 0 0.2rem;
+
+  .info-icon {
+    font-size: 0.85rem;
+    color: var(--color-fg-muted);
+    cursor: help;
+    user-select: none;
+    flex-shrink: 0;
   }
+
+  .info-icon:hover {
+    color: var(--color-fg);
+  }
+
   .input {
     position: relative;
     isolation: isolate;
   }
-  .input > :global(*) {
-    position: relative;
-    z-index: 1;
-  }
+
   .null {
     position: absolute;
     z-index: 2;

@@ -23,13 +23,11 @@
   } from '@mathesar-component-library';
 
   import type QueryManager from '../QueryManager';
-  import type { ColumnWithLink } from '../utils';
 
   const saveModalController = modal.spawnModalController();
 
   export let queryManager: QueryManager;
-  export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
-    {};
+  export let linkCollapsibleOpenState: Record<string, boolean> = {};
   export let isInspectorOpen: boolean;
 
   $: ({ rowsData, query, queryHasUnsavedChanges } = queryManager);

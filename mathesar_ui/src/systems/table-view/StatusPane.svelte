@@ -64,7 +64,7 @@
   }
 
   async function addRecord() {
-    await recordsData.addEmptyRecord();
+    await $tabularData.addNewRecord();
 
     // Select and focus the first editable cell in the new record row so that
     // the user can start editing immediately.

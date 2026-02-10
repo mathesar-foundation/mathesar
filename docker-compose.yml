@@ -186,7 +186,7 @@ services:
 
     volumes:
       - ./msar/static:/code/static
-      - ./msar/media:/code/media
+      - ./msar/media:/code/.media
       - ./msar/secrets:/code/.secrets
       # Uncomment the following to mount file_storage.yml and enable
       #  an S3-compliant file storage backend
@@ -257,6 +257,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./msar/media:/code/media
+      - ./msar/media:/code/.media
       - ./msar/static:/code/static
       - ./msar/caddy:/data

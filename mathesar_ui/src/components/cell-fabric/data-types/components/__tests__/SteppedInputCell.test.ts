@@ -7,6 +7,7 @@ const requiredProps = {
   isActive: false,
   isSelected: false,
   disabled: false,
+  setValue: () => {},
 };
 
 describe('StepperInputCell', () => {
