@@ -58,7 +58,8 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
-OIDC_CONFIG_FILE = BASE_DIR.joinpath('sso.yml')
+DEFAULT_OIDC_CONFIG_FILE = BASE_DIR.joinpath('sso.yml')
+OIDC_CONFIG_FILE = os.getenv('OIDC_CONFIG_FILE', DEFAULT_OIDC_CONFIG_FILE)
 OIDC_CONFIG_DICT = {}
 # Try loading OIDC_CONFIG_DICT from env, iff it doesn't exist, try loading from sso.yml
 try:
