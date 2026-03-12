@@ -10,4 +10,4 @@ mkdocstrings==0.29.1
 mkdocstrings-python==1.16.12
 pymdown-extensions==10.16.1
 setuptools==78.1.1
-black==24.3.0
+black==26.3.1
