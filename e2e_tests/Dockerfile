@@ -6,7 +6,9 @@ WORKDIR /e2e
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Copy config files (test source files are mounted at runtime)
-COPY tsconfig.json playwright.config.ts ./
+# Copy config, framework, app-specific code
+COPY tsconfig.json screenwriter.config.ts ./
+COPY framework/ ./framework/
+COPY mathesar/ ./mathesar/
 
-CMD ["npx", "playwright", "test"]
+CMD ["npm", "run", "test"]

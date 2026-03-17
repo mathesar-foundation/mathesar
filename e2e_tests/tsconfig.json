@@ -12,7 +12,8 @@
     "noEmit": true
   },
   "include": [
-    "playwright.config.ts",
-    "tests/**/*.ts"
+    "screenwriter.config.ts",
+    "framework/**/*.ts",
+    "mathesar/**/*.ts"
   ]
 }

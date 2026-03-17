@@ -196,6 +196,10 @@ mathesar/static/mathesar/
 # Playwright trace files and reports
 test-results/
 playwright-report/
+.outcome-data/
+
+# Auto-generated e2e test runners
+e2e_tests/.generated/
 
 # core dumps generated sometimes when something goes wrong with Playwright
 core

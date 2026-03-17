@@ -52,10 +52,16 @@ services:
       context: e2e_tests
     environment:
       - BASE_URL=http://mathesar-e2e-service:8000
+      - POSTGRES_HOST=mathesar-e2e-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
     depends_on:
       e2e-service:
         condition: service_healthy
     volumes:
-      - ./e2e_tests/tests:/e2e/tests
+      - ./e2e_tests/framework:/e2e/framework
+      - ./e2e_tests/mathesar:/e2e/mathesar
       - ./e2e_tests/test-results:/e2e/test-results
       - ./e2e_tests/playwright-report:/e2e/playwright-report

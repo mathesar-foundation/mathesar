@@ -3,14 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "playwright test",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
-    "report": "playwright show-report"
+    "generate": "tsx framework/scripts/generate-runners.ts",
+    "test": "tsx framework/scripts/screenwriter.ts",
+    "test:headed": "tsx framework/scripts/screenwriter.ts --headed",
+    "test:debug": "tsx framework/scripts/screenwriter.ts --debug",
+    "report": "playwright show-report",
+    "validate-dag": "tsx framework/scripts/validate-dag.ts",
+    "list-outcomes": "tsx framework/scripts/list-outcomes.ts",
+    "visualize-dag": "tsx framework/scripts/visualize-dag.ts",
+    "scaffold": "tsx framework/scripts/scaffold-test.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",
     "@types/node": "^25.5.0",
+    "@types/pg": "^8.15.4",
+    "tsx": "^4.19.0",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "pg": "^8.16.0"
   }
 }
