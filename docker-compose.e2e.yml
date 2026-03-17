@@ -1,0 +1,61 @@
+---
+services:
+  e2e-db:
+    image: pgautoupgrade/pgautoupgrade:17-bookworm
+    container_name: mathesar-e2e-db
+    environment:
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d mathesar_django -U mathesar"]
+      interval: 2s
+      timeout: 1s
+      retries: 30
+      start_period: 3s
+
+  e2e-service:
+    container_name: mathesar-e2e-service
+    build:
+      context: .
+      target: production
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
+    environment:
+      - ALLOWED_HOSTS=*
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
+      - POSTGRES_HOST=mathesar-e2e-db
+      - POSTGRES_PORT=5432
+      - SECRET_KEY=e2e-test-secret-key-not-for-production
+      - DEBUG=false
+    depends_on:
+      e2e-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    expose:
+      - "8000"
+
+  e2e-test-runner:
+    container_name: mathesar-e2e-test-runner
+    build:
+      context: e2e_tests
+    environment:
+      - BASE_URL=http://mathesar-e2e-service:8000
+    depends_on:
+      e2e-service:
+        condition: service_healthy
+    volumes:
+      - ./e2e_tests/tests:/e2e/tests
+      - ./e2e_tests/test-results:/e2e/test-results
+      - ./e2e_tests/playwright-report:/e2e/playwright-report

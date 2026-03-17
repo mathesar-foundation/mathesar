@@ -193,8 +193,9 @@ node_modules/
 # Client Build files
 mathesar/static/mathesar/
 
-# Playwright trace files
+# Playwright trace files and reports
 test-results/
+playwright-report/
 
 # core dumps generated sometimes when something goes wrong with Playwright
 core
