@@ -15,6 +15,7 @@
   export let formatter: $$Props['formatter'];
   export let formatForDisplay: $$Props['formatForDisplay'];
   export let useTabularNumbers: $$Props['useTabularNumbers'] = undefined;
+  export let horizontalAlignment: $$Props['horizontalAlignment'] = undefined;
 </script>
 
 <SteppedInputCell
@@ -25,7 +26,7 @@
   {isIndependentOfSheet}
   {showTruncationPopover}
   {useTabularNumbers}
-  horizontalAlignment="right"
+  {horizontalAlignment}
   let:handleInputBlur
   let:setValueInEditMode
   formatValue={formatForDisplay}

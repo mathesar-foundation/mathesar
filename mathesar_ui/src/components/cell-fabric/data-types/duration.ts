@@ -26,6 +26,7 @@ function getProps(
   const formatter = new DurationFormatter(durationSpecification);
   return {
     useTabularNumbers: true,
+    horizontalAlignment: 'right',
     formatter,
     placeholder: durationSpecification.getFormattingString(),
     formatForDisplay: (

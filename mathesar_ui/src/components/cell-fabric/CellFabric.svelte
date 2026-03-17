@@ -52,7 +52,6 @@
 >
   <svelte:component
     this={component}
-    {...props}
     {columnFabric}
     {isActive}
     {disabled}
@@ -70,6 +69,7 @@
     {canViewLinkedEntities}
     {value}
     {setValue}
+    {...props}
     on:movementKeyDown
   />
 

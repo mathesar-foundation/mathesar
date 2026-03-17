@@ -4,7 +4,7 @@ import {
 } from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
-import UriCell from './components/uri/UriCell.svelte';
+import FormattedInputCell from './components/formatted-input/FormattedInputCell.svelte';
 import type { CellComponentFactory } from './typeDefinitions';
 import { SpecialStringFormatter } from './utils';
 
@@ -23,9 +23,12 @@ function getProps() {
   };
 }
 
-const uriType: CellComponentFactory = {
+const jsonType: CellComponentFactory = {
   initialInputValue: '',
-  get: (): ComponentAndProps => ({ component: UriCell, props: getProps() }),
+  get: (): ComponentAndProps => ({
+    component: FormattedInputCell,
+    props: getProps(),
+  }),
   getInput: (): ComponentAndProps => ({
     component: FormattedInput,
     props: getProps(),
@@ -35,4 +38,4 @@ const uriType: CellComponentFactory = {
   },
 };
 
-export default uriType;
+export default jsonType;

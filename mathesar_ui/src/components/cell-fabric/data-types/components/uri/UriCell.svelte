@@ -1,16 +1,14 @@
 <script lang="ts">
+  import FormattedInput from '@mathesar/component-library/formatted-input/FormattedInput.svelte';
   import CellValue from '@mathesar/components/CellValue.svelte';
-  import {
-    PrecomputedMatchHighlighter,
-    TextInput,
-  } from '@mathesar-component-library';
+  import { PrecomputedMatchHighlighter } from '@mathesar-component-library';
 
   import SteppedInputCell from '../SteppedInputCell.svelte';
-  import type { CellTypeProps } from '../typeDefinitions';
+  import type { FormattedInputCellProps } from '../typeDefinitions';
 
   import UriCellContent from './UriCellContent.svelte';
 
-  type $$Props = CellTypeProps<string>;
+  type $$Props = FormattedInputCellProps;
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'] = undefined;
@@ -19,6 +17,8 @@
   export let searchValue: $$Props['searchValue'] = undefined;
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
+  export let formatter: $$Props['formatter'];
+  export let formatForDisplay: $$Props['formatForDisplay'];
 </script>
 
 <SteppedInputCell
@@ -31,6 +31,7 @@
   {showTruncationPopover}
   let:handleInputBlur
   let:setValueInEditMode
+  formatValue={formatForDisplay}
   on:movementKeyDown
   on:mouseenter
 >
@@ -45,11 +46,13 @@
       </UriCellContent>
     </CellValue>
   </span>
-  <TextInput
+  <FormattedInput
     focusOnMount={true}
+    {...$$restProps}
     {disabled}
     {value}
-    onValueChange={setValueInEditMode}
+    on:artificialInput={({ detail }) => setValueInEditMode(detail)}
+    {formatter}
     on:blur={handleInputBlur}
   />
 </SteppedInputCell>

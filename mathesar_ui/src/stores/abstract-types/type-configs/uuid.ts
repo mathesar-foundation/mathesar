@@ -7,7 +7,7 @@ const uuidType: AbstractTypeConfiguration = {
   getIcon: () => ({ ...iconUiTypeUuid, label: 'UUID' }),
   defaultDbType: DB_TYPES.UUID,
   cellInfo: {
-    type: 'string',
+    type: 'uuid',
   },
 };
 
