@@ -5155,6 +5155,23 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_enum_labels_for_tab(tab_id oid) RETURNS jsonb AS $$/*
+Returns a JSONB object mapping each enum column’s attnum to 
+its ordered list of enum labels for the given table OID.
+
+Args:
+  tab_oid: The OID of the table for which we're getting enum labels.
+*/
+SELECT jsonb_build_object(pga.attnum, jsonb_agg(pge.enumlabel ORDER BY pge.enumsortorder)) AS ej
+  FROM pg_catalog.pg_attribute pga
+  LEFT JOIN pg_catalog.pg_type pgt ON pga.atttypid = pgt.oid
+  INNER JOIN pg_catalog.pg_enum pge ON pgt.oid = pge.enumtypid
+  WHERE pga.attrelid = tab_id
+GROUP BY pga.attnum;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_self_summary_json_expr(tab_id oid) RETURNS TEXT AS $$/*
 */
 SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS NOT NULL THEN
@@ -5399,6 +5416,8 @@ BEGIN
       'SELECT COUNT(1) AS count_hack'
     )
   ) INTO records;
+  /* Populate records_json with enum labels */
+  records := records || jsonb_build_object('enum_labels', msar.get_enum_labels_for_tab(tab_id));
   RETURN records;
 END;
 $$ LANGUAGE plpgsql STABLE;
