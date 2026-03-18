@@ -1,62 +1,62 @@
 import type { Page } from '@playwright/test';
-import type { RequirementHandle, TestCallable } from '../types';
+import type { TestHandle } from '../types';
 import { registry } from '../store/registry';
-import { resolveRequirements } from './dependency-resolver';
 import { outcomeStore } from '../store/outcome-store';
-import { createContext } from '../store/test-context';
-
-export type TestRef<T = unknown> = RequirementHandle<T> | TestCallable<T>;
-
-function getOutcomeCode(ref: TestRef): string {
-  if ('standaloneOutcomeCode' in ref) return ref.standaloneOutcomeCode;
-  return ref.outcomeCode;
-}
+import { dryRun } from './dry-run';
+import { execute } from './executor';
+import { compareStepTrees } from './step-tree-compare';
 
 /**
- * Resolve all requirements for a test definition and run its flow.
+ * Run a standalone test's scenario with a real browser page.
  *
- * Use this inside a Playwright `test()` callback. The test file calls
- * Playwright's `test()` directly, ensuring correct file attribution in reports.
+ * 1. Looks up the test in the registry
+ * 2. Dry-runs the scenario to get the expected step tree
+ * 3. Executes the scenario with the real browser
+ * 4. Compares step trees (detects conditional steps)
+ * 5. Stores the outcome for cross-worker sharing
  *
- * Accepts a `TestRef` (handle or callable) or a test code `string`.
- * When a string is passed, the standalone test with that code is looked up.
- *
- * @example
- * ```ts
- * import { test } from '@playwright/test';
- * import { runFlow } from '../src/framework';
- * import '../src/tests/install';
- *
- * test('install', async ({ page }) => {
- *   await runFlow(page, 'install');
- * });
- * ```
+ * @param page - Playwright Page object
+ * @param ref - Test code string or TestHandle
  */
 export async function runFlow(
   page: Page,
-  ref: TestRef | string,
+  ref: TestHandle | string,
 ): Promise<void> {
-  let testDef;
+  const code = typeof ref === 'string' ? ref : ref.code;
+  const entry = registry.get(code);
 
-  if (typeof ref === 'string') {
-    testDef = registry.getStandaloneByCode(ref);
-    if (!testDef) {
-      throw new Error(
-        `Test with code '${ref}' not found in registry. ` +
-          `Ensure the test definition file is imported.`,
-      );
-    }
-  } else {
-    const outcomeCode = getOutcomeCode(ref);
-    testDef = registry.get(outcomeCode);
-    if (!testDef) {
-      throw new Error(`Test '${outcomeCode}' not found in registry`);
-    }
+  if (!entry) {
+    throw new Error(
+      `Test with code '${code}' not found in registry. ` +
+        `Ensure the test definition file is imported.`,
+    );
   }
 
-  const requirements = testDef.getRequirements();
-  await resolveRequirements(requirements);
+  const { handle, standaloneParams } = entry;
 
-  const context = createContext(outcomeStore);
-  await testDef.runFlow(page, context);
+  if (standaloneParams === undefined) {
+    throw new Error(
+      `Test '${code}' has no standalone params. ` +
+        `Only tests with standalone config can be run directly.`,
+    );
+  }
+
+  // 1. Dry-run to capture expected step tree
+  const dryRunResult = await dryRun(handle, standaloneParams);
+
+  // 2. Execute with real browser
+  const executionResult = await execute(page, handle, standaloneParams);
+
+  // 3. Compare step trees
+  const mismatch = compareStepTrees(
+    code,
+    dryRunResult.stepTree,
+    executionResult.stepTree,
+  );
+  if (mismatch) {
+    throw new Error(mismatch.message);
+  }
+
+  // 4. Store outcome for cross-worker sharing
+  outcomeStore.set(code, executionResult.outcome);
 }

@@ -1,42 +1,41 @@
-import type { RegisteredTest } from '../types';
+import type { TestHandle } from '../types';
+
+export interface RegisteredEntry {
+  handle: TestHandle;
+  standaloneParams?: unknown;
+}
 
 class TestRegistry {
-  private tests = new Map<string, RegisteredTest>();
+  private tests = new Map<string, RegisteredEntry>();
 
-  register(test: RegisteredTest): void {
-    const existing = this.tests.get(test.outcomeCode);
+  register(handle: TestHandle, standaloneParams?: unknown): void {
+    const existing = this.tests.get(handle.code);
     if (existing) {
-      if (existing.testCode !== test.testCode) {
-        throw new Error(
-          `Duplicate outcome code '${test.outcomeCode}' registered by ` +
-            `test '${test.testCode}', but already registered by test ` +
-            `'${existing.testCode}'. Each outcome code must be unique.`,
-        );
-      }
-      return;
+      throw new Error(
+        `Duplicate test code '${handle.code}'. Each test code must be unique.`,
+      );
     }
-    this.tests.set(test.outcomeCode, test);
+    this.tests.set(handle.code, { handle, standaloneParams });
   }
 
-  get(outcomeCode: string): RegisteredTest | undefined {
-    return this.tests.get(outcomeCode);
+  get(code: string): RegisteredEntry | undefined {
+    return this.tests.get(code);
   }
 
-  getStandaloneByCode(testCode: string): RegisteredTest | undefined {
-    for (const test of this.tests.values()) {
-      if (test.testCode === testCode && test.isStandalone) {
-        return test;
-      }
-    }
-    return undefined;
-  }
-
-  getAll(): RegisteredTest[] {
+  getAll(): RegisteredEntry[] {
     return Array.from(this.tests.values());
   }
 
-  has(outcomeCode: string): boolean {
-    return this.tests.has(outcomeCode);
+  getStandalone(): RegisteredEntry[] {
+    return this.getAll().filter((e) => e.standaloneParams !== undefined);
+  }
+
+  has(code: string): boolean {
+    return this.tests.has(code);
+  }
+
+  clear(): void {
+    this.tests.clear();
   }
 }
 

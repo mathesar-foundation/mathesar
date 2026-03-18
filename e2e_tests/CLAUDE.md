@@ -6,23 +6,25 @@
 e2e_tests/
   framework/          # Generic, self-contained, extractable test framework
     src/              # Framework source code
-      engine/         # Orchestration: defineTest, test runner, dependency resolver, DAG, global setup
-      store/          # Data management: registry, outcome store, outcome codes, test context
+      engine/         # Orchestration: defineTest, dry-run, executor, DAG, global setup
+      store/          # Data management: registry, outcome store
+      __tests__/      # Framework unit & integration tests (Vitest)
       config.ts       # Config types, validation, createPlaywrightConfig(), getBaseURL()
-      types.ts        # Type definitions
+      types.ts        # Type definitions (TestHandle, ScenarioContext, StepNode)
       index.ts        # Public API re-exports
     scripts/          # CLI tools
-      screenwriter.ts # Main wrapper — orchestrates generate → validate → run
+      screenwriter.ts # Main wrapper — orchestrates generate → dry-run → validate → run
       generate-runners.ts
       scaffold-test.ts
       validate-dag.ts
       list-outcomes.ts
       visualize-dag.ts
       load-config.ts
+    vitest.config.ts  # Vitest config for framework tests
   mathesar/           # Mathesar-specific test code
     tests/            # Test definitions — ONE file per test (you write these)
     pages/            # Page Object Models
-    db/               # Postgres client + SQL helpers for fixtures
+    db/               # Postgres client + SQL helpers
   .generated/         # Auto-generated Playwright runners (gitignored)
 ```
 
@@ -33,94 +35,164 @@ e2e_tests/
 ## Running Tests
 
 ```bash
-npm run test              # run all tests (headless)
+npm run test              # run all e2e tests (headless)
 npm run test:headed       # run with browser visible
 npm run test:debug        # run in debug mode
+npm run test:framework    # run framework unit tests (Vitest, no browser)
 ```
 
 The `npm run test` command invokes the screenwriter wrapper (`framework/scripts/screenwriter.ts`), which orchestrates:
 1. Load configuration from `screenwriter.config.ts`
 2. Generate Playwright runner files in `.generated/`
-3. Load test definitions and validate the dependency DAG
-4. Spawn Playwright to execute tests
+3. Load test definitions and dry-run all scenarios
+4. Build and validate the DAG from captured step trees
+5. Spawn Playwright to execute tests
 
 ## Framework Concepts
 
-### defineTest
+### Composable Scenarios
 
-Every test has two halves:
-- **fixture** — programmatic setup (DB queries, HTTP calls). Runs when a downstream test needs this test's outcome. Fast.
-- **flow** — browser interactions via Playwright Page. Contains assertions. This is the actual user-facing test.
-
-Two overloads based on `params`:
+Every test is a **scenario** — an async function that receives a `t` context object and optional params, and returns typed outcome data. Scenarios compose other scenarios via `t.step()`.
 
 ```typescript
-// No params → returns RequirementHandle (use directly in requires arrays)
-export const install = defineTest<InstallOutcome>({
-  code: 'install',
-  fixture: async (context) => { /* return outcome data */ },
-  flow: async (page, context) => { /* browser test */ },
-});
+import { z } from 'zod';
+import { defineTest } from '../../framework/src';
 
-// With params → returns TestCallable (call with args to get RequirementHandle)
-export const login = defineTest<LoginOutcome>({
-  code: 'login',
-  params: { user: 'admin' },           // defaults for standalone run
-  primaryParams: ['user'],              // REQUIRED when used as dependency
-  requires: () => [install],            // dependencies
-  fixture: async (context, params) => { /* return outcome data */ },
-  flow: async (page, context, params) => { /* browser test */ },
+export const myTest = defineTest({
+  code: 'my-test',
+  params: z.object({ name: z.string() }),
+  outcome: z.object({ id: z.number() }),
+
+  scenario: async (t, params) => {
+    // Compose other tests as sub-steps
+    await t.step('Login to Mathesar', login, { user: 'admin', password: 'admin' });
+
+    // Perform browser actions that produce data
+    const result = await t.action('Create resource', z.object({ id: z.number() }), async (page) => {
+      await page.goto('/');
+      // ... browser interactions ...
+      return { id: 42 };
+    });
+
+    // Assert browser state
+    await t.check('Verify resource visible', async (page) => {
+      await expect(page.getByText(params.name)).toBeVisible();
+    });
+
+    // Return typed outcome
+    return { id: result.id };
+  },
+
+  standalone: { params: { name: 'Test' } },
 });
 ```
 
-### Params
+### The `t` Context Object
 
-- **primaryParams** — the test's own concern. REQUIRED when calling as dependency: `login('admin')`.
-- **Other params** — forwarded from parent. OPTIONAL, fall back to defaults.
-- Single primary: `login('admin')` or `login('admin', { optionalParam: 'val' })`.
-- Multiple primaries: `createColumn({ table: 'orders', column: 'name' })`.
-- Each test explicitly declares and forwards params it wants to expose. No implicit forwarding.
+The scenario function receives a `t` (ScenarioContext) with three methods:
 
-### requires / Dependencies
+| Method | Purpose | Returns |
+|--------|---------|---------|
+| `t.step(label, testHandle, params)` | Compose another test as a sub-step | That test's typed outcome |
+| `t.action(label, schema, closure)` | Run browser code that produces data | Validated data matching schema |
+| `t.check(label, closure)` | Run browser assertions | void |
+
+**Every call requires a descriptive label** as the first argument. Labels serve as DAG node names and human-readable documentation.
+
+### Zod Schemas
+
+Every test declares `params` and `outcome` Zod schemas:
 
 ```typescript
-requires: () => [install]                           // read access (default)
-requires: () => [createTable('orders').write()]      // write access
-requires: (p) => [login(p.user)]                     // param forwarding
+const myParams = z.object({ user: z.string(), password: z.string() });
+const myOutcome = z.object({ sessionId: z.string() });
+
+defineTest({
+  code: 'my-test',
+  params: myParams,
+  outcome: myOutcome,
+  // TypeScript infers params and outcome types from schemas
+  scenario: async (t, params) => {
+    // params is { user: string; password: string }
+    return { sessionId: '...' }; // validated against myOutcome
+  },
+});
 ```
 
-- `read` — safe to parallelize with other readers.
-- `write` — serialized with all other consumers. Two unrelated writers = DAG validation error.
-- Dependencies are resolved recursively: if A requires B requires C, running A's flow first runs C's fixture, then B's fixture, then A's flow.
+- **Params schema** — validates standalone params at registration time, and execution-time params
+- **Outcome schema** — validates the scenario's return value at execution time
+- **Action schemas** — each `t.action()` declares a return schema, validated at execution time
 
-### Outcome Codes
+### Dry-Run & Static Analysis
 
-Format: `code(val1,val2,...)` with values sorted by key, JSON-stringified. Non-parameterized: just `code`.
+Before any browser opens, the framework **dry-runs** each scenario:
 
-Same outcome code = same DAG node = fixture runs once, result shared. **Changing a default value changes outcome codes — treat as breaking.**
+1. Generates fake params from the Zod schema (e.g., `z.string()` → `"fake_string"`)
+2. Calls the scenario with a **recorder** `t` that:
+   - `t.step()` → recursively dry-runs the sub-scenario, returns fake outcome
+   - `t.action()` → **skips the closure**, returns fake data from schema
+   - `t.check()` → **skips the closure**
+3. Records the step tree: which steps, in what order, with what labels
 
-### Outcome Store
+This captures the full **step tree** — the DAG of test composition — without touching a browser.
 
-- In-memory map + file-backed JSON (`.outcome-data/`) for cross-worker sync.
-- `context.get(handle)` returns typed outcome data from a dependency.
-- Cleared by `globalSetup` before each run.
+**Why it works:** All fake values are real typed values (not proxies), so any computation in the scenario body (string concat, method calls, property access) works naturally in both modes.
 
-### Authentication
+### No Conditional Steps
 
+Step structure must be **deterministic** regardless of runtime values. The framework enforces this by comparing the dry-run step tree with the execution step tree. If they differ, you get a clear error:
+
+```
+Step count mismatch in 'my-test': dry-run had 2 steps, execution had 3.
+This usually means your scenario has conditional steps based on runtime values, which is not supported.
+```
+
+**Don't do this:**
 ```typescript
-import { install } from './install';
-import { setupAuth } from './login';
-
-// In a downstream flow:
-flow: async (page, context) => {
-  const loginData = context.get(login('admin'));
-  await setupAuth(page, loginData);   // sets session cookies
-  await page.goto('/some-page');
-  // ... now authenticated
+scenario: async (t, params) => {
+  const result = await t.action('Get data', schema, async (page) => { ... });
+  if (result.needsSetup) {  // ❌ Conditional step!
+    await t.step('Extra setup', otherTest, {});
+  }
 }
 ```
 
-`login` fixture handles the full Django CSRF dance via HTTP, returns `{ sessionId, csrfToken, username, password }`.
+### Variable Capture (Data Flow)
+
+Steps return typed data that flows naturally:
+
+```typescript
+scenario: async (t) => {
+  const db = await t.step('Create database', createDatabase, {
+    name: 'Library',
+    login: { user: 'admin', password: 'admin' },
+  });
+
+  // db.databaseName is a real typed value
+  const table = await t.step('Import table', createTableFromImport, {
+    database: db.databaseName,  // data flows between steps
+    name: 'Books',
+  });
+
+  return { databaseName: db.databaseName, tableName: table.tableName };
+}
+```
+
+### Encapsulation
+
+Parent tests only see a child test's **return value**, not its internal step outcomes. A child test's internal actions, checks, and sub-steps are opaque to the parent.
+
+### Standalone Config
+
+Tests that can be run independently need a `standalone` section:
+
+```typescript
+standalone: {
+  params: { user: 'admin', password: 'admin' },
+}
+```
+
+Tests without `standalone` can only be used as sub-steps via `t.step()`.
 
 ## How to Write a New Test
 
@@ -128,58 +200,53 @@ flow: async (page, context) => {
 
 ```bash
 cd e2e_tests
-npm run scaffold -- \
-  --code connect-database \
-  --primary database \
-  --params database=default,user=admin \
-  --requires login
+npm run scaffold -- --code connect-database --requires login
 ```
 
 Creates `mathesar/tests/connect-database.ts` with a skeleton.
 
-### 2. Define outcome interface
+### 2. Define schemas
 
 ```typescript
-export interface ConnectDatabaseOutcome {
-  databaseId: number;
-  databaseName: string;
-}
+const connectDatabaseParams = z.object({
+  name: z.string(),
+  login: z.object({ user: z.string(), password: z.string() }),
+});
+
+const connectDatabaseOutcome = z.object({
+  databaseId: z.number(),
+  databaseName: z.string(),
+});
 ```
 
-### 3. Implement fixture
-
-The fixture produces the same end-state as the flow but programmatically (direct DB/API). Used when downstream tests need this outcome without running the browser.
+### 3. Implement scenario
 
 ```typescript
-fixture: async (context, params) => {
-  const loginData = context.get(login(params.user as string));
-  // Direct DB query or API call to connect the database
-  const databaseId = await connectDatabaseViaApi(
-    BASE_URL, loginData.sessionId, params.database as string
-  );
-  return { databaseId, databaseName: params.database as string };
+scenario: async (t, params) => {
+  // Compose: log in first
+  await t.step('Login', login, params.login);
+
+  // Action: browser interactions that produce data
+  const result = await t.action('Connect database', connectDatabaseOutcome, async (page) => {
+    await page.goto('/');
+    // ... fill form, click buttons ...
+    return { databaseId: 1, databaseName: params.name };
+  });
+
+  // Check: assertions
+  await t.check('Database appears in sidebar', async (page) => {
+    await expect(page.getByText(params.name)).toBeVisible();
+  });
+
+  return { databaseId: result.databaseId, databaseName: result.databaseName };
 },
 ```
 
-### 4. Implement flow
-
-The flow is the actual browser test. Start with navigation, use Page Objects, end with assertions.
-
-```typescript
-flow: async (page, context, params) => {
-  const loginData = context.get(login(params.user as string));
-  await setupAuth(page, loginData);
-  await page.goto('/');
-  // ... browser interactions using Page Objects ...
-  await expect(page.locator('.database-name')).toContainText(params.database as string);
-},
-```
-
-### 5. Validate
+### 4. Validate
 
 ```bash
-npm run validate-dag      # check for cycles/conflicts
-npm run list-outcomes     # see all outcomes
+npm run validate-dag      # check for cycles/missing references
+npm run test:framework    # run framework unit tests
 ```
 
 ## Page Object Model Rules
@@ -197,10 +264,16 @@ class TablePage {
   async addColumn(name: string, type: string) { /* clicks, fills */ }
 }
 
-// In test flow:
-const tablePage = new TablePage(page);
-await tablePage.addColumn('amount', 'numeric');
-await expect(tablePage.columnHeader('amount')).toBeVisible();
+// In test scenario:
+await t.action('Add column', schema, async (page) => {
+  const tablePage = new TablePage(page);
+  await tablePage.addColumn('amount', 'numeric');
+  return { columnName: 'amount' };
+});
+await t.check('Column visible', async (page) => {
+  const tablePage = new TablePage(page);
+  await expect(tablePage.columnHeader('amount')).toBeVisible();
+});
 ```
 
 ## DB Helpers (mathesar/db/)
@@ -211,16 +284,17 @@ await expect(tablePage.columnHeader('amount')).toBeVisible();
 - `createSuperuser(username, password)` — inserts into `mathesar_user` with Django-compatible password hash (PBKDF2-SHA256, 720k iterations). Idempotent via `ON CONFLICT`.
 - `loginViaHttp(baseUrl, username, password)` — performs Django CSRF dance (GET page → extract token → POST credentials → capture rotated token). Returns `{ sessionId, csrfToken }`.
 
-Add new query helpers here as fixtures need them.
+Add new query helpers here as needed.
 
 ## Scripts
 
 | Command | Purpose |
 |---|---|
-| `npm run test` | Run tests via screenwriter wrapper (generate → validate → playwright). |
-| `npm run validate-dag` | Check cycles, missing outcomes, write conflicts. Exit 1 on error. |
-| `npm run list-outcomes` | Table of all outcomes, producers, and consumers. |
-| `npm run visualize-dag` | Mermaid diagram of the DAG. |
+| `npm run test` | Run e2e tests via screenwriter wrapper (generate → dry-run → validate → playwright). |
+| `npm run test:framework` | Run framework unit tests with Vitest (no browser needed). |
+| `npm run validate-dag` | Dry-run all tests, build DAG, check cycles/missing references. Exit 1 on error. |
+| `npm run list-outcomes` | Table of all registered tests and their composition structure. |
+| `npm run visualize-dag` | Mermaid diagram of the DAG showing test composition. |
 | `npm run scaffold -- --code <code> ...` | Generate test skeleton. |
 | `npm run generate` | Manually regenerate `.generated/` runners. |
 
@@ -239,12 +313,11 @@ Test runner has direct DB access via env vars. Volume mounts for dev: `framework
 
 1. **File name = test code.** `install.ts` must use `code: 'install'`.
 2. **No `page.waitForTimeout()`.** Use Playwright's auto-waiting and auto-retrying assertions (`await expect(locator).toBeVisible()`).
-3. **Flows start with navigation.** Never assume current page state after fixture resolution.
-4. **Fixtures must be idempotent** or use `ON CONFLICT` / check-before-create patterns.
-5. **Outcome data is the contract** between fixture and flow. Both must produce data matching the same TypeScript interface.
-6. **Changing a param default changes outcome codes** for all downstream tests. Treat as API change.
-7. **Two unrelated `write` consumers = validation error.** Use serial chains or isolated resources.
-8. **No auto-cleanup.** Docker teardown handles it. Don't add cleanup logic in fixtures.
-9. **Unique resource names in fixtures** to avoid collisions in parallel branches: `test_table_${testCode}_${Date.now()}`.
-10. **Don't edit `.generated/` files.** They're overwritten on every test invocation.
-11. **Read outcome data, don't hardcode.** Use `context.get(handle)` to get IDs, names, etc. from dependencies.
+3. **No conditional steps.** Step structure must be deterministic. Don't wrap `t.step()`, `t.action()`, or `t.check()` in conditionals based on runtime values.
+4. **Every action returns data.** Even if it's just `return {}` with `z.object({})`. Actions always declare a schema for their return value.
+5. **Scenarios always return data.** Validated against the declared outcome Zod schema.
+6. **Labels are mandatory.** Every `t.step()`, `t.action()`, and `t.check()` has a human-readable label as the first argument.
+7. **Don't edit `.generated/` files.** They're overwritten on every test invocation.
+8. **Data flows via return values.** Use `const result = await t.step(...)` and access `result.field`. No external stores or context objects.
+9. **No auto-cleanup.** Docker teardown handles it. Don't add cleanup logic.
+10. **Unique resource names** to avoid collisions in parallel branches.

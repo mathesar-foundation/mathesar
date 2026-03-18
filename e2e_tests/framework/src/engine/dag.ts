@@ -1,15 +1,17 @@
-import type { AccessMode } from '../types';
+import type { StepNode } from '../types';
 import { registry } from '../store/registry';
+import { dryRun } from './dry-run';
 
 export interface DagNode {
-  outcomeCode: string;
   testCode: string;
-  isStandalone: boolean;
-  requirements: { outcomeCode: string; access: AccessMode }[];
+  hasStandalone: boolean;
+  stepTree: StepNode[];
+  /** Test codes referenced via t.step() — direct children only */
+  composedTests: string[];
 }
 
 export interface DagValidationError {
-  type: 'cycle' | 'missing_outcome' | 'write_conflict';
+  type: 'cycle' | 'missing_test';
   message: string;
 }
 
@@ -19,89 +21,73 @@ export interface Dag {
   topologicalOrder: string[];
 }
 
-export function buildDag(): Dag {
-  const tests = registry.getAll();
+/**
+ * Build the DAG by dry-running all registered tests and analyzing their step trees.
+ *
+ * The DAG captures which tests compose which other tests via t.step().
+ * It detects cycles and missing test references.
+ */
+export async function buildDag(): Promise<Dag> {
+  const entries = registry.getAll();
   const nodes = new Map<string, DagNode>();
   const errors: DagValidationError[] = [];
 
-  for (const test of tests) {
-    const requirements = test.getRequirements();
-    nodes.set(test.outcomeCode, {
-      outcomeCode: test.outcomeCode,
-      testCode: test.testCode,
-      isStandalone: test.isStandalone,
-      requirements: requirements.map((r) => ({
-        outcomeCode: r.outcomeCode,
-        access: r.access,
-      })),
-    });
+  // Dry-run each registered test to capture step trees
+  for (const entry of entries) {
+    const { handle, standaloneParams } = entry;
+    try {
+      const result = await dryRun(handle, standaloneParams);
+      const composedTests = extractComposedTests(result.stepTree);
+
+      nodes.set(handle.code, {
+        testCode: handle.code,
+        hasStandalone: standaloneParams !== undefined,
+        stepTree: result.stepTree,
+        composedTests,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const isCycle = message.includes('Circular dependency');
+      errors.push({
+        type: isCycle ? 'cycle' : 'missing_test',
+        message: isCycle
+          ? message
+          : `Failed to dry-run test '${handle.code}': ${message}`,
+      });
+    }
   }
 
-  // Check for missing outcomes
+  // Check for missing test references
   for (const [, node] of nodes) {
-    for (const req of node.requirements) {
-      if (!nodes.has(req.outcomeCode)) {
+    for (const composedCode of node.composedTests) {
+      if (!nodes.has(composedCode) && !registry.has(composedCode)) {
         errors.push({
-          type: 'missing_outcome',
+          type: 'missing_test',
           message:
-            `Test '${node.outcomeCode}' requires '${req.outcomeCode}' ` +
-            `which is not registered`,
+            `Test '${node.testCode}' references test '${composedCode}' via t.step(), ` +
+            `but '${composedCode}' is not registered.`,
         });
       }
     }
   }
 
-  // Check for write conflicts: two write consumers of the same outcome
-  // with no dependency chain between them
-  const outcomeWriters = new Map<string, string[]>();
-  for (const [, node] of nodes) {
-    for (const req of node.requirements) {
-      if (req.access === 'write') {
-        const writers = outcomeWriters.get(req.outcomeCode) || [];
-        writers.push(node.outcomeCode);
-        outcomeWriters.set(req.outcomeCode, writers);
-      }
-    }
-  }
-  for (const [outcome, writers] of outcomeWriters) {
-    if (writers.length > 1) {
-      // Check if any pair of writers has no dependency between them
-      for (let i = 0; i < writers.length; i++) {
-        for (let j = i + 1; j < writers.length; j++) {
-          if (
-            !hasPath(nodes, writers[i], writers[j]) &&
-            !hasPath(nodes, writers[j], writers[i])
-          ) {
-            errors.push({
-              type: 'write_conflict',
-              message:
-                `Tests '${writers[i]}' and '${writers[j]}' both write to ` +
-                `'${outcome}' but have no dependency between them. ` +
-                `They could run in parallel and conflict.`,
-            });
-          }
-        }
-      }
-    }
-  }
-
-  // Topological sort + cycle detection
+  // Cycle detection + topological sort
   const topologicalOrder: string[] = [];
   const visited = new Set<string>();
   const visiting = new Set<string>();
 
   function visit(code: string): boolean {
     if (visited.has(code)) return true;
-    if (visiting.has(code)) return false; // cycle
+    if (visiting.has(code)) return false;
 
     visiting.add(code);
     const node = nodes.get(code);
     if (node) {
-      for (const req of node.requirements) {
-        if (!visit(req.outcomeCode)) {
+      for (const dep of node.composedTests) {
+        if (!visit(dep)) {
           errors.push({
             type: 'cycle',
-            message: `Circular dependency detected involving '${code}' and '${req.outcomeCode}'`,
+            message: `Circular dependency detected involving '${code}' and '${dep}'`,
           });
           return false;
         }
@@ -120,24 +106,23 @@ export function buildDag(): Dag {
   return { nodes, errors, topologicalOrder };
 }
 
-function hasPath(
-  nodes: Map<string, DagNode>,
-  from: string,
-  to: string,
-): boolean {
-  const visited = new Set<string>();
-  const queue = [from];
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    if (current === to) return true;
-    if (visited.has(current)) continue;
-    visited.add(current);
-    const node = nodes.get(current);
-    if (node) {
-      for (const req of node.requirements) {
-        queue.push(req.outcomeCode);
+/**
+ * Extract the set of test codes referenced by t.step() in a step tree.
+ * Collects from all nesting levels.
+ */
+function extractComposedTests(tree: StepNode[]): string[] {
+  const codes = new Set<string>();
+
+  function walk(nodes: StepNode[]) {
+    for (const node of nodes) {
+      if (node.type === 'step') {
+        codes.add(node.testCode);
+        // Don't recurse into children — those are the sub-test's own steps.
+        // We only want direct composition edges for the DAG.
       }
     }
   }
-  return false;
+
+  walk(tree);
+  return Array.from(codes);
 }

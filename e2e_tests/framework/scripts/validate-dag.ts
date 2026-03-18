@@ -1,8 +1,8 @@
 /**
  * Validate the test DAG.
  *
- * Imports all test files to populate the registry, then builds the DAG
- * and checks for cycles, missing outcomes, and write conflicts.
+ * Imports all test files to populate the registry, then dry-runs all tests,
+ * builds the DAG, and checks for cycles and missing references.
  *
  * Usage: npx tsx framework/scripts/validate-dag.ts
  */
@@ -29,17 +29,21 @@ async function main() {
   }
 
   const { buildDag } = await import('../src/engine/dag');
-  const dag = buildDag();
+  const dag = await buildDag();
 
   console.log(`\nDAG Summary:`);
   console.log(`  Nodes: ${dag.nodes.size}`);
   console.log(
-    `  Standalone tests: ${Array.from(dag.nodes.values()).filter((n) => n.isStandalone).length}`,
-  );
-  console.log(
-    `  Parameterized instances: ${Array.from(dag.nodes.values()).filter((n) => !n.isStandalone).length}`,
+    `  Standalone tests: ${Array.from(dag.nodes.values()).filter((n) => n.hasStandalone).length}`,
   );
   console.log(`  Topological order: ${dag.topologicalOrder.join(' -> ')}`);
+
+  // Show composition edges
+  for (const [, node] of dag.nodes) {
+    if (node.composedTests.length > 0) {
+      console.log(`  ${node.testCode} composes: ${node.composedTests.join(', ')}`);
+    }
+  }
 
   if (dag.errors.length === 0) {
     console.log('\n  No errors found.');

@@ -4,8 +4,9 @@
  * Orchestrates the full pipeline:
  *   1. Load configuration
  *   2. Generate Playwright runner files
- *   3. Load test definitions and validate the dependency DAG
- *   4. Run Playwright
+ *   3. Load test definitions
+ *   4. Dry-run all tests and build/validate the DAG
+ *   5. Run Playwright
  *
  * Usage:
  *   npx tsx framework/scripts/screenwriter.ts [playwright args...]
@@ -58,16 +59,20 @@ async function main() {
     testsImport,
   });
 
-  // 3. Load test definitions and validate the dependency DAG
+  // 3. Load test definitions
   loadTestFiles(config.testsDir);
-  const dag = buildDag();
+
+  // 4. Dry-run all tests and build/validate the DAG
+  const dag = await buildDag();
   if (dag.errors.length > 0) {
     const messages = dag.errors.map((e) => `  [${e.type}] ${e.message}`).join('\n');
     console.error('DAG validation failed:\n' + messages);
     process.exit(1);
   }
 
-  // 4. Run Playwright
+  console.log(`DAG validated: ${dag.nodes.size} test(s), no errors.`);
+
+  // 5. Run Playwright
   const result = spawnSync(
     'npx',
     ['playwright', 'test', '--config', configPath, ...extraArgs],

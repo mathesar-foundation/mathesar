@@ -1,14 +1,12 @@
 /**
- * Generate a test definition file skeleton.
+ * Generate a test definition file skeleton using the new composable API.
  *
  * Usage:
- *   npx tsx framework/scripts/scaffold-test.ts --code create-table --primary table --params database=default,user=admin --requires login
+ *   npx tsx framework/scripts/scaffold-test.ts --code create-table --requires login
  *
  * Options:
  *   --code       Test code (required, used as filename and test identifier)
- *   --primary    Primary param names (comma-separated)
- *   --params     All param names with optional defaults (comma-separated, e.g. "database=default,user=admin")
- *   --requires   Required test codes (comma-separated)
+ *   --requires   Test codes to compose via t.step() (comma-separated)
  *   --config     Path to screenwriter config file (default: screenwriter.config.ts in cwd)
  */
 
@@ -19,16 +17,12 @@ import { toRelativePosix } from '../src/config';
 
 interface ScaffoldOptions {
   code: string;
-  params: { name: string; default: string }[];
-  primaryParams: string[];
   requires: string[];
 }
 
 function parseArgs(args: string[]): ScaffoldOptions {
   const opts: ScaffoldOptions = {
     code: '',
-    params: [],
-    primaryParams: [],
     requires: [],
   };
 
@@ -36,15 +30,6 @@ function parseArgs(args: string[]): ScaffoldOptions {
     switch (args[i]) {
       case '--code':
         opts.code = args[++i];
-        break;
-      case '--primary':
-        opts.primaryParams = args[++i].split(',').map((s) => s.trim());
-        break;
-      case '--params':
-        opts.params = args[++i].split(',').map((s) => {
-          const [name, def] = s.trim().split('=');
-          return { name, default: def ?? `'default_${name}'` };
-        });
         break;
       case '--requires':
         opts.requires = args[++i].split(',').map((s) => s.trim());
@@ -63,19 +48,6 @@ function parseArgs(args: string[]): ScaffoldOptions {
   return opts;
 }
 
-function quoteDefault(value: string): string {
-  if (
-    value.startsWith("'") ||
-    value.startsWith('"') ||
-    value === 'true' ||
-    value === 'false' ||
-    !isNaN(Number(value))
-  ) {
-    return value;
-  }
-  return `'${value}'`;
-}
-
 function toPascalCase(code: string): string {
   return code
     .split('-')
@@ -83,75 +55,63 @@ function toPascalCase(code: string): string {
     .join('');
 }
 
+function toCamelCase(code: string): string {
+  const pascal = toPascalCase(code);
+  return pascal.charAt(0).toLowerCase() + pascal.slice(1);
+}
+
 function generateTestFile(
   opts: ScaffoldOptions,
   frameworkImport: string,
 ): string {
-  const outcomeName = `${toPascalCase(opts.code)}Outcome`;
-  const hasParams = opts.params.length > 0;
+  const varName = toCamelCase(opts.code);
+  const outcomeName = `${toCamelCase(opts.code)}Outcome`;
   const lines: string[] = [];
 
   // Imports
+  lines.push(`import { z } from 'zod';`);
   lines.push(`import { defineTest } from '${frameworkImport}';`);
   if (opts.requires.length > 0) {
     for (const req of opts.requires) {
-      lines.push(`import { ${req} } from './${req}';`);
+      lines.push(`import { ${toCamelCase(req)} } from './${req}';`);
     }
   }
-  lines.push("import { expect } from '@playwright/test';");
 
   lines.push('');
 
-  // Outcome interface
-  lines.push(`export interface ${outcomeName} {`);
+  // Schemas
+  lines.push(`const ${varName}Params = z.object({`);
+  lines.push('  // TODO: Define params');
+  lines.push('});');
+  lines.push('');
+  lines.push(`const ${outcomeName} = z.object({`);
   lines.push('  // TODO: Define outcome data');
-  lines.push('}');
+  lines.push('});');
   lines.push('');
 
   // defineTest call
-  lines.push(`export const ${opts.code.replace(/-/g, '_')} = defineTest<${outcomeName}>({`);
+  lines.push(`export const ${varName} = defineTest({`);
   lines.push(`  code: '${opts.code}',`);
+  lines.push(`  params: ${varName}Params,`);
+  lines.push(`  outcome: ${outcomeName},`);
+  lines.push('');
+  lines.push('  scenario: async (t, params) => {');
 
-  if (hasParams) {
-    const paramEntries = opts.params
-      .map((p) => `${p.name}: ${quoteDefault(p.default)}`)
-      .join(', ');
-    lines.push(`  params: { ${paramEntries} },`);
-
-    if (opts.primaryParams.length > 0) {
-      const primaries = opts.primaryParams.map((p) => `'${p}'`).join(', ');
-      lines.push(`  primaryParams: [${primaries}],`);
-    }
-
-    if (opts.requires.length > 0) {
-      lines.push(`  requires: () => [${opts.requires.join(', ')}],`);
-    }
-
-    lines.push('');
-    lines.push('  fixture: async (context, params) => {');
-    lines.push('    // TODO: Implement fixture — set up state via DB queries');
-    lines.push(`    return {} as ${outcomeName};`);
-    lines.push('  },');
-    lines.push('');
-    lines.push('  flow: async (page, context, params) => {');
-    lines.push('    // TODO: Implement flow — browser interactions');
-    lines.push('  },');
-  } else {
-    if (opts.requires.length > 0) {
-      lines.push(`  requires: [${opts.requires.join(', ')}],`);
-    }
-
-    lines.push('');
-    lines.push('  fixture: async (context) => {');
-    lines.push('    // TODO: Implement fixture — set up state via DB queries');
-    lines.push(`    return {} as ${outcomeName};`);
-    lines.push('  },');
-    lines.push('');
-    lines.push('  flow: async (page, context) => {');
-    lines.push('    // TODO: Implement flow — browser interactions');
-    lines.push('  },');
+  // Add t.step() calls for requirements
+  for (const req of opts.requires) {
+    const reqVar = toCamelCase(req);
+    lines.push(`    await t.step('${toPascalCase(req)}', ${reqVar}, {});`);
   }
 
+  lines.push('');
+  lines.push('    // TODO: Add actions and checks');
+  lines.push('');
+  lines.push(`    return {} as z.infer<typeof ${outcomeName}>;`);
+  lines.push('  },');
+  lines.push('');
+  lines.push('  standalone: {');
+  lines.push(`    params: {} as z.infer<typeof ${varName}Params>,`);
+  lines.push('  },');
   lines.push('});');
   lines.push('');
 
