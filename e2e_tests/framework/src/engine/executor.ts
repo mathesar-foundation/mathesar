@@ -59,7 +59,7 @@ export async function execute<TParams, TOutcome>(
         const parseResult = subTest.outcomeSchema.safeParse(cached.outcome);
         if (parseResult.success) {
           // Recursively restore browser state from all transitive dependencies
-          await restoreFromCache(page, cacheKey, subTest as { restoreFn?: (page: Page, outcome: unknown) => Promise<void> });
+          await restoreFromCache(page, cacheKey, subTest);
 
           // Dry-run for step tree shape (must match what the parent's dry-run produced)
           const dryRunResult = await dryRun(subTest, subParams);
@@ -72,7 +72,7 @@ export async function execute<TParams, TOutcome>(
           });
           subStepRecords.push({ testCode: subTest.code, cacheKey });
 
-          return cached.outcome as O;
+          return parseResult.data;
         }
         // If schema validation fails, fall through to re-execute
       }

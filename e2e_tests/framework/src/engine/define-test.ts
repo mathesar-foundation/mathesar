@@ -48,9 +48,7 @@ export function defineTest<TParams, TOutcome>(
     restoreFn: def.restore,
   };
 
-  // Cast needed because TestHandle is generic but the registry stores TestHandle<unknown, unknown>.
-  // The runtime behavior is identical — TypeScript just can't prove the variance is safe here.
-  registry.register(handle as TestHandle, def.standalone?.params);
+  registry.register(handle, def.standalone?.params);
 
   return handle;
 }

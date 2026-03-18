@@ -11,6 +11,13 @@ export interface StoredEntry {
   subSteps: SubStepRecord[];
 }
 
+function isStoredEntry(value: unknown): value is StoredEntry {
+  if (typeof value !== 'object' || value === null) return false;
+  return 'outcome' in value
+    && 'subSteps' in value
+    && Array.isArray(value.subSteps);
+}
+
 export class OutcomeStore {
   private memory = new Map<string, StoredEntry>();
   private readonly dir: string;
@@ -35,9 +42,11 @@ export class OutcomeStore {
     }
     const filePath = path.join(this.dir, this.toFileName(cacheKey));
     if (fs.existsSync(filePath)) {
-      const entry = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as StoredEntry;
-      this.memory.set(cacheKey, entry);
-      return entry;
+      const parsed: unknown = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      if (isStoredEntry(parsed)) {
+        this.memory.set(cacheKey, parsed);
+        return parsed;
+      }
     }
     return undefined;
   }

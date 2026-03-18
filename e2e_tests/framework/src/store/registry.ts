@@ -8,14 +8,25 @@ export interface RegisteredEntry {
 class TestRegistry {
   private tests = new Map<string, RegisteredEntry>();
 
-  register(handle: TestHandle, standaloneParams?: unknown): void {
+  /**
+   * Register a test handle. Generic so callers pass fully-typed handles
+   * without casting. Type erasure happens here: TestHandle<P, O> is stored
+   * as TestHandle (defaults to <unknown, unknown>). This is safe because
+   * all retrieval paths validate with the handle's schema before use.
+   */
+  register<P, O>(handle: TestHandle<P, O>, standaloneParams?: P): void {
     const existing = this.tests.get(handle.code);
     if (existing) {
       throw new Error(
         `Duplicate test code '${handle.code}'. Each test code must be unique.`,
       );
     }
-    this.tests.set(handle.code, { handle, standaloneParams });
+    // Type erasure: the generic params are lost when stored in the map.
+    // This is the single controlled cast point for registry storage.
+    this.tests.set(handle.code, {
+      handle: handle as TestHandle,
+      standaloneParams,
+    });
   }
 
   get(code: string): RegisteredEntry | undefined {

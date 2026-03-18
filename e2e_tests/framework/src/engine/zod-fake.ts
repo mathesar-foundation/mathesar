@@ -9,7 +9,9 @@ import { z } from 'zod';
  * property access) works naturally.
  */
 export function generateFakeValue<T>(schema: z.ZodType<T>): T {
-  return generateFromSchema(schema as z.ZodType) as T;
+  // The cast narrows unknown → T. This is safe because generateFromSchema
+  // produces a value structurally matching the schema by construction.
+  return generateFromSchema(schema) as T;
 }
 
 function generateFromSchema(schema: z.ZodType): unknown {
@@ -26,9 +28,8 @@ function generateFromSchema(schema: z.ZodType): unknown {
   }
 
   if (schema instanceof z.ZodObject) {
-    const shape = schema.shape as Record<string, z.ZodType>;
     const result: Record<string, unknown> = {};
-    for (const [key, fieldSchema] of Object.entries(shape)) {
+    for (const [key, fieldSchema] of Object.entries(schema.shape)) {
       result[key] = generateFromSchema(fieldSchema);
     }
     return result;
@@ -43,8 +44,7 @@ function generateFromSchema(schema: z.ZodType): unknown {
   }
 
   if (schema instanceof z.ZodEnum) {
-    const values = schema.options as readonly string[];
-    return values[0];
+    return schema.options[0];
   }
 
   if (schema instanceof z.ZodLiteral) {
@@ -52,8 +52,8 @@ function generateFromSchema(schema: z.ZodType): unknown {
   }
 
   if (schema instanceof z.ZodUnion) {
-    const options = schema.options as z.ZodType[];
-    return generateFromSchema(options[0]);
+    // Zod v4: options elements are $ZodType (internal) not ZodType (public).
+    return generateFromSchema(schema.options[0] as z.ZodType);
   }
 
   if (schema instanceof z.ZodNullable) {
@@ -61,13 +61,14 @@ function generateFromSchema(schema: z.ZodType): unknown {
   }
 
   if (schema instanceof z.ZodDefault) {
-    // unwrap() returns the inner schema without the default wrapper
-    return generateFromSchema((schema as any).unwrap());
+    // Zod v4: removeDefault() returns $ZodType (internal) not ZodType (public).
+    // The cast bridges this gap; the runtime value IS a ZodType instance.
+    return generateFromSchema(schema.removeDefault() as z.ZodType);
   }
 
   if (schema instanceof z.ZodPipe) {
-    // ZodPipe wraps transforms in zod v4 — unwrap to the input schema
-    return generateFromSchema((schema as any)._def.in);
+    // Zod v4: _def.in is typed as $ZodType (internal) not ZodType (public).
+    return generateFromSchema(schema._def.in as z.ZodType);
   }
 
   // Fallback: return undefined for unknown schema types

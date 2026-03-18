@@ -2,10 +2,6 @@ import type { Page } from '@playwright/test';
 import { outcomeStore } from '../store/outcome-store';
 import { registry } from '../store/registry';
 
-interface Restorable {
-  restoreFn?: (page: Page, outcome: unknown) => Promise<void>;
-}
-
 /**
  * Recursively restore browser state from cached outcomes.
  *
@@ -13,15 +9,20 @@ interface Restorable {
  * matching DAG topological order. Uses a Set to avoid duplicate restores for
  * diamond dependencies.
  *
+ * Generic over TOutcome so callers can pass a fully-typed TestHandle<P, O>
+ * without casting. The recursive call through the registry infers TOutcome
+ * as `unknown` (since registry erases type params), which is safe because
+ * outcomes were schema-validated when stored.
+ *
  * @param page - Playwright Page to restore state on
  * @param cacheKey - Cache key of the test whose state to restore
  * @param handle - Object with an optional restoreFn
  * @param restored - Set of already-restored cache keys (for diamond dep dedup)
  */
-export async function restoreFromCache(
+export async function restoreFromCache<TOutcome = unknown>(
   page: Page,
   cacheKey: string,
-  handle: Restorable,
+  handle: { restoreFn?: (page: Page, outcome: TOutcome) => Promise<void> },
   restored?: Set<string>,
 ): Promise<void> {
   const seen = restored ?? new Set<string>();
@@ -41,8 +42,9 @@ export async function restoreFromCache(
     }
   }
 
-  // Then restore this test's own browser state
+  // Then restore this test's own browser state.
+  // The cast is safe: entry.outcome was validated against outcomeSchema when stored.
   if (handle.restoreFn) {
-    await handle.restoreFn(page, entry.outcome);
+    await handle.restoreFn(page, entry.outcome as TOutcome);
   }
 }

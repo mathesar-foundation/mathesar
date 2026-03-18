@@ -95,5 +95,5 @@ export async function snapshotBrowserState(
   page: Page,
 ): Promise<NormalizedBrowserState> {
   const state = await page.context().storageState();
-  return normalizeBrowserState(state as StorageState);
+  return normalizeBrowserState(state);
 }

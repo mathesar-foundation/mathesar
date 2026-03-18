@@ -36,8 +36,7 @@ export async function dryRun<TParams, TOutcome>(
 
   visiting.add(handle.code);
 
-  const actualParams =
-    params ?? (generateFakeValue(handle.paramsSchema) as TParams);
+  const actualParams = params ?? generateFakeValue(handle.paramsSchema);
   const nodes: StepNode[] = [];
 
   const recorder: ScenarioContext = {
