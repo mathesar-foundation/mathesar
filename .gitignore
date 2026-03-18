@@ -193,13 +193,8 @@ node_modules/
 # Client Build files
 mathesar/static/mathesar/
 
-# Playwright trace files and reports
-test-results/
-playwright-report/
-.outcome-data/
-
-# Auto-generated e2e test runners
-e2e_tests/.generated/
+# E2E test outputs (runners, outcomes, Playwright artifacts/reports)
+e2e_tests/.output/
 
 # core dumps generated sometimes when something goes wrong with Playwright
 core

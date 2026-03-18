@@ -8,10 +8,45 @@ import { registry } from '../store/registry';
  * Create a mock Page object that tracks method calls.
  * Used in executor tests where we need a Page-like object.
  */
-export function createMockPage(): Record<string, unknown> & { _calls: string[] } {
+export function createMockPage(): Record<string, unknown> & {
+  _calls: string[];
+  _cookies: Array<{ name: string; value: string; url?: string }>;
+  _localStorage: Map<string, Map<string, string>>;
+} {
   const calls: string[] = [];
+  const cookies: Array<{ name: string; value: string; url?: string; domain?: string; path?: string }> = [];
+  const localStorage = new Map<string, Map<string, string>>();
+
+  const mockContext = {
+    storageState: async () => ({
+      cookies: cookies.map((c) => ({
+        name: c.name,
+        value: c.value,
+        domain: c.domain ?? 'localhost',
+        path: c.path ?? '/',
+        expires: -1,
+        httpOnly: false,
+        secure: false,
+        sameSite: 'Lax' as const,
+      })),
+      origins: Array.from(localStorage.entries()).map(([origin, entries]) => ({
+        origin,
+        localStorage: Array.from(entries.entries()).map(([name, value]) => ({ name, value })),
+      })),
+    }),
+    addCookies: async (newCookies: Array<{ name: string; value: string; url?: string }>) => {
+      for (const c of newCookies) {
+        cookies.push(c);
+      }
+      calls.push(`addCookies:${newCookies.map((c) => c.name).join(',')}`);
+    },
+  };
+
   return {
     _calls: calls,
+    _cookies: cookies,
+    _localStorage: localStorage,
+    context: () => mockContext,
     goto: async (url: string) => {
       calls.push(`goto:${url}`);
     },

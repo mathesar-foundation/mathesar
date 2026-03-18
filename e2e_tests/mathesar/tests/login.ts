@@ -4,7 +4,6 @@ import { loginViaHttp } from '../db/queries';
 import { LoginPage } from '../pages/login.page';
 import { install } from './install';
 import { expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
 
 const loginParams = z.object({
   user: z.string(),
@@ -22,6 +21,14 @@ export const login = defineTest({
   code: 'login',
   params: loginParams,
   outcome: loginOutcome,
+
+  restore: async (page, outcome) => {
+    const baseURL = getBaseURL();
+    await page.context().addCookies([
+      { name: 'sessionid', value: outcome.sessionId, url: baseURL },
+      { name: 'csrftoken', value: outcome.csrfToken, url: baseURL },
+    ]);
+  },
 
   scenario: async (t, params) => {
     await t.step('Install Mathesar', install, {});
@@ -57,20 +64,3 @@ export const login = defineTest({
     params: { user: 'admin', password: 'mathesar_password' },
   },
 });
-
-/**
- * Set up authentication cookies on a Playwright page using login outcome data.
- * Call this in any flow that requires a logged-in session.
- */
-export type LoginOutcome = z.infer<typeof loginOutcome>;
-
-export async function setupAuth(
-  page: Page,
-  outcome: LoginOutcome,
-) {
-  const baseURL = getBaseURL();
-  await page.context().addCookies([
-    { name: 'sessionid', value: outcome.sessionId, url: baseURL },
-    { name: 'csrftoken', value: outcome.csrfToken, url: baseURL },
-  ]);
-}

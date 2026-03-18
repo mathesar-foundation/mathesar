@@ -1,39 +1,50 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+export interface SubStepRecord {
+  testCode: string;
+  cacheKey: string;
+}
+
+export interface StoredEntry {
+  outcome: unknown;
+  subSteps: SubStepRecord[];
+}
+
 export class OutcomeStore {
-  private memory = new Map<string, unknown>();
+  private memory = new Map<string, StoredEntry>();
   private readonly dir: string;
 
   constructor(dir?: string) {
-    this.dir = dir ?? path.join(process.cwd(), '.outcome-data');
+    this.dir = dir ?? path.join(process.cwd(), '.output', 'outcomes');
   }
 
-  set(outcomeCode: string, data: unknown): void {
-    this.memory.set(outcomeCode, data);
+  set(cacheKey: string, outcome: unknown, subSteps: SubStepRecord[]): void {
+    const entry: StoredEntry = { outcome, subSteps };
+    this.memory.set(cacheKey, entry);
     if (!fs.existsSync(this.dir)) {
       fs.mkdirSync(this.dir, { recursive: true });
     }
-    const filePath = path.join(this.dir, this.toFileName(outcomeCode));
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    const filePath = path.join(this.dir, this.toFileName(cacheKey));
+    fs.writeFileSync(filePath, JSON.stringify(entry, null, 2));
   }
 
-  get(outcomeCode: string): unknown | undefined {
-    if (this.memory.has(outcomeCode)) {
-      return this.memory.get(outcomeCode);
+  get(cacheKey: string): StoredEntry | undefined {
+    if (this.memory.has(cacheKey)) {
+      return this.memory.get(cacheKey);
     }
-    const filePath = path.join(this.dir, this.toFileName(outcomeCode));
+    const filePath = path.join(this.dir, this.toFileName(cacheKey));
     if (fs.existsSync(filePath)) {
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      this.memory.set(outcomeCode, data);
-      return data;
+      const entry = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as StoredEntry;
+      this.memory.set(cacheKey, entry);
+      return entry;
     }
     return undefined;
   }
 
-  has(outcomeCode: string): boolean {
-    if (this.memory.has(outcomeCode)) return true;
-    const filePath = path.join(this.dir, this.toFileName(outcomeCode));
+  has(cacheKey: string): boolean {
+    if (this.memory.has(cacheKey)) return true;
+    const filePath = path.join(this.dir, this.toFileName(cacheKey));
     return fs.existsSync(filePath);
   }
 
@@ -44,8 +55,8 @@ export class OutcomeStore {
     }
   }
 
-  private toFileName(outcomeCode: string): string {
-    return encodeURIComponent(outcomeCode) + '.json';
+  private toFileName(cacheKey: string): string {
+    return encodeURIComponent(cacheKey) + '.json';
   }
 }
 

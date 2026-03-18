@@ -45,6 +45,7 @@ export function defineTest<TParams, TOutcome>(
     paramsSchema: def.params,
     outcomeSchema: def.outcome,
     scenarioFn: def.scenario,
+    restoreFn: def.restore,
   };
 
   // Cast needed because TestHandle is generic but the registry stores TestHandle<unknown, unknown>.

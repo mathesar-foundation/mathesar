@@ -9,6 +9,7 @@ export interface TestHandle<TParams = unknown, TOutcome = unknown> {
   readonly paramsSchema: z.ZodType<TParams>;
   readonly outcomeSchema: z.ZodType<TOutcome>;
   readonly scenarioFn: ScenarioFn<TParams, TOutcome>;
+  readonly restoreFn?: (page: Page, outcome: TOutcome) => Promise<void>;
 }
 
 /**
@@ -29,6 +30,7 @@ export interface TestDefinition<TParams, TOutcome> {
   outcome: z.ZodType<TOutcome>;
   scenario: ScenarioFn<TParams, TOutcome>;
   standalone?: { params: TParams };
+  restore?: (page: Page, outcome: TOutcome) => Promise<void>;
 }
 
 /**

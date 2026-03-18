@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from 'zod';
-import { buildDag } from '../engine/dag';
+import { buildDag, computeLevels } from '../engine/dag';
 import { defineTest } from '../engine/define-test';
 import { resetRegistry } from './test-utils';
 
@@ -234,6 +234,55 @@ describe('buildDag', () => {
     if (parentNode.stepTree[0].type === 'step') {
       expect(parentNode.stepTree[0].label).toBe('Initialize child system');
     }
+  });
+
+  it('computeLevels assigns correct levels', async () => {
+    const leaf = defineTest({
+      code: 'level-leaf',
+      params: z.object({}),
+      outcome: z.object({}),
+      scenario: async () => ({}),
+      standalone: { params: {} },
+    });
+
+    const mid = defineTest({
+      code: 'level-mid',
+      params: z.object({}),
+      outcome: z.object({}),
+      scenario: async (t) => {
+        await t.step('Leaf', leaf, {});
+        return {};
+      },
+      standalone: { params: {} },
+    });
+
+    defineTest({
+      code: 'level-root',
+      params: z.object({}),
+      outcome: z.object({}),
+      scenario: async (t) => {
+        await t.step('Mid', mid, {});
+        return {};
+      },
+      standalone: { params: {} },
+    });
+
+    // Independent test at same level as leaf
+    defineTest({
+      code: 'level-independent',
+      params: z.object({}),
+      outcome: z.object({}),
+      scenario: async () => ({}),
+      standalone: { params: {} },
+    });
+
+    const dag = await buildDag();
+    const levels = computeLevels(dag);
+
+    expect(levels.get('level-leaf')).toBe(0);
+    expect(levels.get('level-independent')).toBe(0);
+    expect(levels.get('level-mid')).toBe(1);
+    expect(levels.get('level-root')).toBe(2);
   });
 
   it('topological sort produces valid execution order', async () => {

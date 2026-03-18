@@ -63,5 +63,4 @@ services:
     volumes:
       - ./e2e_tests/framework:/e2e/framework
       - ./e2e_tests/mathesar:/e2e/mathesar
-      - ./e2e_tests/test-results:/e2e/test-results
-      - ./e2e_tests/playwright-report:/e2e/playwright-report
+      - ./e2e_tests/.output:/e2e/.output

@@ -7,17 +7,22 @@ import {
 export interface ScreenwriterConfig {
   /** Absolute path to the directory containing test definition files */
   testsDir: string;
-  /** Absolute path to the directory for auto-generated runner files */
-  generatedDir?: string;
+  /** Absolute path to the root output directory (default: .output/) */
+  outputDir?: string;
   /** Base URL for the application under test */
   baseURL: string;
-  /** Playwright-specific configuration (testDir and globalSetup are managed by the framework) */
-  playwright?: Omit<PlaywrightTestConfig, 'testDir' | 'globalSetup'>;
+  /**
+   * Playwright-specific configuration.
+   * testDir, globalSetup, and projects are managed by the framework.
+   * Projects are auto-generated from the DAG with level-based dependencies.
+   */
+  playwright?: Omit<PlaywrightTestConfig, 'testDir' | 'globalSetup' | 'projects'>;
 }
 
 export interface ResolvedScreenwriterConfig {
   testsDir: string;
-  generatedDir: string;
+  outputDir: string;
+  runnersDir: string;
   frameworkSrcDir: string;
   baseURL: string;
 }
@@ -41,7 +46,12 @@ export function getResolvedConfig(): ResolvedScreenwriterConfig {
  * Returns the resolved base URL for the application under test.
  */
 export function getBaseURL(): string {
-  return getResolvedConfig().baseURL;
+  if (_resolved) return _resolved.baseURL;
+  if (process.env.SCREENWRITER_BASE_URL) return process.env.SCREENWRITER_BASE_URL;
+  throw new Error(
+    'getBaseURL() called but no config is available. ' +
+    'Either import screenwriter.config.ts or set SCREENWRITER_BASE_URL env var.',
+  );
 }
 
 export function toRelativePosix(from: string, to: string): string {
@@ -58,14 +68,15 @@ export function toRelativePosix(from: string, to: string): string {
  * not here.
  */
 export function createPlaywrightConfig(config: ScreenwriterConfig): PlaywrightTestConfig {
-  const { testsDir, generatedDir: generatedDirOpt, playwright } = config;
-  const generatedDir = generatedDirOpt ?? path.join(process.cwd(), '.generated');
+  const { testsDir, outputDir: outputDirOpt, playwright } = config;
+  const outputDir = outputDirOpt ?? path.join(process.cwd(), '.output');
+  const runnersDir = path.join(outputDir, 'runners');
 
-  _resolved = { testsDir, generatedDir, frameworkSrcDir: __dirname, baseURL: config.baseURL };
+  _resolved = { testsDir, outputDir, runnersDir, frameworkSrcDir: __dirname, baseURL: config.baseURL };
 
   return playwrightDefineConfig({
     ...playwright,
-    testDir: generatedDir,
+    testDir: runnersDir,
     globalSetup: require.resolve('./engine/global-setup'),
     use: {
       ...(playwright?.use ?? {}),

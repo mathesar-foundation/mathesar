@@ -5,15 +5,17 @@ import { outcomeStore } from '../store/outcome-store';
 import { dryRun } from './dry-run';
 import { execute } from './executor';
 import { compareStepTrees } from './step-tree-compare';
+import { makeCacheKey } from './cache-key';
 
 /**
  * Run a standalone test's scenario with a real browser page.
  *
- * 1. Looks up the test in the registry
- * 2. Dry-runs the scenario to get the expected step tree
- * 3. Executes the scenario with the real browser
- * 4. Compares step trees (detects conditional steps)
- * 5. Stores the outcome for cross-worker sharing
+ * 1. Checks if the outcome is already cached (skip if so)
+ * 2. Looks up the test in the registry
+ * 3. Dry-runs the scenario to get the expected step tree
+ * 4. Executes the scenario with the real browser
+ * 5. Compares step trees (detects conditional steps)
+ * 6. Stores the outcome for cross-worker sharing
  *
  * @param page - Playwright Page object
  * @param ref - Test code string or TestHandle
@@ -41,6 +43,13 @@ export async function runFlow(
     );
   }
 
+  // Check if outcome is already cached (might have been executed as a sub-step)
+  const cacheKey = makeCacheKey(code, standaloneParams);
+  if (outcomeStore.has(cacheKey)) {
+    console.log(`Skipping '${code}' \u2014 outcome already cached`);
+    return;
+  }
+
   // 1. Dry-run to capture expected step tree
   const dryRunResult = await dryRun(handle, standaloneParams);
 
@@ -58,5 +67,5 @@ export async function runFlow(
   }
 
   // 4. Store outcome for cross-worker sharing
-  outcomeStore.set(code, executionResult.outcome);
+  outcomeStore.set(cacheKey, executionResult.outcome, executionResult.subSteps);
 }

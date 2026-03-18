@@ -1,16 +1,16 @@
 /**
  * Auto-generate Playwright test runner files from test definitions.
  *
- * Reads all *.ts files in the tests directory and generates corresponding
- * .generated/<name>.test.ts wrappers. Each wrapper performs a side-effect
- * import of the definition (populating the registry) and calls runFlow
- * with the test code string.
+ * Generates runner files grouped by execution level (from DAG analysis)
+ * into phase-specific subdirectories:
+ *   .output/runners/phase-0/install.test.ts
+ *   .output/runners/phase-1/login.test.ts
+ *   .output/runners/phase-2/create-database.test.ts
  *
- * Convention: file name = test code (install.ts → code "install")
+ * Each wrapper performs a side-effect import of the definition (populating
+ * the registry) and calls runFlow with the test code string.
  *
- * Usage:
- *   npx tsx framework/scripts/generate-runners.ts   (standalone)
- *   Also runs automatically via the screenwriter wrapper on every test invocation.
+ * Convention: file name = test code (install.ts -> code "install")
  */
 
 import * as fs from 'node:fs';
@@ -21,16 +21,24 @@ export interface RunnerGeneratorConfig {
   generatedDir: string;
   frameworkImport: string;
   testsImport: string;
+  /** Map of testCode -> level. If not provided, all tests go to phase-0. */
+  levels?: Map<string, number>;
+  /** Set of test codes that have standalone params. Only these get runners. */
+  standaloneCodes?: Set<string>;
 }
 
 function generateRunner(
   testCode: string,
   config: RunnerGeneratorConfig,
+  phaseDir: string,
 ): string {
+  const frameworkImport = toRelativePosix(phaseDir, path.resolve(config.generatedDir, config.frameworkImport));
+  const testsImport = toRelativePosix(phaseDir, path.resolve(config.generatedDir, config.testsImport));
+
   return `// Auto-generated from ${testCode}.ts — do not edit
 import { test } from '@playwright/test';
-import { runFlow } from '${config.frameworkImport}';
-import '${config.testsImport}/${testCode}';
+import { runFlow } from '${frameworkImport}';
+import '${testsImport}/${testCode}';
 
 test('${testCode}', async ({ page }) => {
   await runFlow(page, '${testCode}');
@@ -38,9 +46,13 @@ test('${testCode}', async ({ page }) => {
 `;
 }
 
-export function generateRunners(config: RunnerGeneratorConfig): void {
+function toRelativePosix(from: string, to: string): string {
+  return path.relative(from, to).split(path.sep).join('/');
+}
+
+export function generateRunners(config: RunnerGeneratorConfig): { maxLevel: number } {
   if (!fs.existsSync(config.testsDir)) {
-    return;
+    return { maxLevel: -1 };
   }
 
   const testFiles = fs
@@ -48,49 +60,74 @@ export function generateRunners(config: RunnerGeneratorConfig): void {
     .filter((f) => f.endsWith('.ts') && !f.endsWith('.d.ts') && !f.endsWith('.test.ts'));
 
   if (testFiles.length === 0) {
-    return;
+    return { maxLevel: -1 };
   }
 
-  // Ensure generated dir exists and remove stale runners
+  // Clean the generated directory
   if (fs.existsSync(config.generatedDir)) {
-    for (const file of fs.readdirSync(config.generatedDir)) {
-      if (file.endsWith('.test.ts')) {
-        fs.unlinkSync(path.join(config.generatedDir, file));
-      }
-    }
-  } else {
-    fs.mkdirSync(config.generatedDir, { recursive: true });
+    fs.rmSync(config.generatedDir, { recursive: true, force: true });
   }
+  fs.mkdirSync(config.generatedDir, { recursive: true });
+
+  let maxLevel = 0;
 
   for (const file of testFiles) {
     const testCode = file.replace(/\.ts$/, '');
-    const runnerPath = path.join(config.generatedDir, `${testCode}.test.ts`);
-    fs.writeFileSync(runnerPath, generateRunner(testCode, config));
+
+    // Only generate runners for standalone tests
+    if (config.standaloneCodes && !config.standaloneCodes.has(testCode)) {
+      continue;
+    }
+
+    const level = config.levels?.get(testCode) ?? 0;
+    if (level > maxLevel) maxLevel = level;
+
+    const phaseDir = path.join(config.generatedDir, `phase-${level}`);
+    if (!fs.existsSync(phaseDir)) {
+      fs.mkdirSync(phaseDir, { recursive: true });
+    }
+
+    const runnerPath = path.join(phaseDir, `${testCode}.test.ts`);
+    fs.writeFileSync(runnerPath, generateRunner(testCode, config, phaseDir));
   }
+
+  return { maxLevel };
 }
 
 // Run directly via CLI
 if (require.main === module) {
   (async () => {
     const { loadConfig } = await import('./load-config');
-    const { toRelativePosix } = await import('../src/config');
     const config = await loadConfig();
 
-    const frameworkImport = toRelativePosix(config.generatedDir, config.frameworkSrcDir);
-    const testsImport = toRelativePosix(config.generatedDir, config.testsDir);
-    generateRunners({
+    const frameworkSrcDir = path.resolve(__dirname, '..', 'src');
+    const frameworkImport = toRelativePosix(config.runnersDir, frameworkSrcDir);
+    const testsImport = toRelativePosix(config.runnersDir, config.testsDir);
+    const result = generateRunners({
       testsDir: config.testsDir,
-      generatedDir: config.generatedDir,
+      generatedDir: config.runnersDir,
       frameworkImport,
       testsImport,
     });
 
-    const count = fs.existsSync(config.generatedDir)
-      ? fs.readdirSync(config.generatedDir).filter((f) => f.endsWith('.test.ts')).length
+    const count = fs.existsSync(config.runnersDir)
+      ? countGeneratedFiles(config.runnersDir)
       : 0;
-    console.log(`Generated ${count} test runner(s) in .generated/.`);
+    console.log(`Generated ${count} test runner(s) in .output/runners/ (max level: ${result.maxLevel}).`);
   })().catch((err) => {
     console.error('Failed to generate runners:', err);
     process.exit(1);
   });
+}
+
+function countGeneratedFiles(dir: string): number {
+  let count = 0;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      count += countGeneratedFiles(path.join(dir, entry.name));
+    } else if (entry.name.endsWith('.test.ts')) {
+      count++;
+    }
+  }
+  return count;
 }

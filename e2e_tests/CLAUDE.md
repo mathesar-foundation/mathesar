@@ -6,7 +6,7 @@
 e2e_tests/
   framework/          # Generic, self-contained, extractable test framework
     src/              # Framework source code
-      engine/         # Orchestration: defineTest, dry-run, executor, DAG, global setup
+      engine/         # Orchestration: defineTest, dry-run, executor, DAG, caching, restore
       store/          # Data management: registry, outcome store
       __tests__/      # Framework unit & integration tests (Vitest)
       config.ts       # Config types, validation, createPlaywrightConfig(), getBaseURL()
@@ -25,7 +25,12 @@ e2e_tests/
     tests/            # Test definitions — ONE file per test (you write these)
     pages/            # Page Object Models
     db/               # Postgres client + SQL helpers
-  .generated/         # Auto-generated Playwright runners (gitignored)
+  .output/            # All generated/output files (gitignored)
+    playwright.config.ts  # Auto-generated Playwright config
+    runners/          # Auto-generated Playwright test runners
+    outcomes/         # Cached test outcome data
+    test-results/     # Playwright artifacts (traces, screenshots, videos)
+    playwright-report/  # HTML test report
 ```
 
 **To add a test:** create `mathesar/tests/<code>.ts` with `defineTest()`. That's it — the wrapper auto-generates runners and validates the DAG on every `npm run test`.
@@ -43,10 +48,12 @@ npm run test:framework    # run framework unit tests (Vitest, no browser)
 
 The `npm run test` command invokes the screenwriter wrapper (`framework/scripts/screenwriter.ts`), which orchestrates:
 1. Load configuration from `screenwriter.config.ts`
-2. Generate Playwright runner files in `.generated/`
-3. Load test definitions and dry-run all scenarios
-4. Build and validate the DAG from captured step trees
-5. Spawn Playwright to execute tests
+2. Load test definitions and dry-run all scenarios
+3. Build and validate the DAG from captured step trees
+4. Compute execution levels from the DAG
+5. Generate Playwright runner files grouped by level in `.output/runners/phase-N/`
+6. Generate a dynamic Playwright config with project dependencies
+7. Spawn Playwright — each phase runs after its dependencies complete
 
 ## Framework Concepts
 
@@ -194,6 +201,62 @@ standalone: {
 
 Tests without `standalone` can only be used as sub-steps via `t.step()`.
 
+### Caching & Deduplication
+
+When `t.step()` composes a sub-test, the framework checks the **outcome store** before executing. If the sub-test has already run with the same params (same test code + same params = same cache key), the cached outcome is returned immediately — the sub-test's closures do NOT re-execute.
+
+Cache keys are `testCode:hash(params)`. The hash uses deterministic JSON serialization (sorted keys at every level) + SHA-256, so `{user: "a", pass: "b"}` and `{pass: "b", user: "a"}` produce the same key.
+
+**How caching works in practice:**
+1. `install` runs standalone in phase-0 → outcome cached
+2. `login` runs in phase-1, calls `t.step('Install', install, {})` → cache hit, install not re-executed
+3. Both tests pass, install only ran once
+
+### Restore Hooks (Browser State)
+
+When a sub-step is cached and skipped, any browser state it would have produced (cookies, localStorage) is lost because each test gets a fresh page. The `restore` hook reconstructs browser state from cached outcome data.
+
+```typescript
+export const login = defineTest({
+  code: 'login',
+  params: loginParams,
+  outcome: loginOutcome,
+
+  // Called on cache hit to restore browser state from outcome data
+  restore: async (page, outcome) => {
+    const baseURL = getBaseURL();
+    await page.context().addCookies([
+      { name: 'sessionid', value: outcome.sessionId, url: baseURL },
+      { name: 'csrftoken', value: outcome.csrfToken, url: baseURL },
+    ]);
+  },
+
+  scenario: async (t, params) => { /* ... */ },
+  standalone: { params: { user: 'admin', password: 'mathesar_password' } },
+});
+```
+
+**Restore hook rules:**
+- **Optional** — only needed for tests that modify browser state (cookies, localStorage)
+- **Producer-side** — defined on `defineTest()`, not on the `t.step()` call site
+- **Essential state only** — set cookies/localStorage, do NOT navigate
+- **Transitive** — when a cached test has sub-steps with restore hooks, the framework calls ALL restore hooks in dependency order (deepest first). If test C composes B which composes login, and C is cached, the framework calls `login.restore → B.restore → C.restore`.
+- **Browser state detection** — the framework automatically detects when a test modifies browser state but has no restore hook, and emits a warning
+
+**Convention:** Test authors should NOT rely on browser state from composed sub-steps. After `t.step()`, always navigate explicitly. Use outcome data (not page state) to drive subsequent actions.
+
+### Level-Based Parallel Execution
+
+The framework computes **execution levels** from the DAG:
+- Level 0: tests with no dependencies (e.g., `install`)
+- Level 1: tests whose dependencies are all level 0 (e.g., `login`)
+- Level N: tests whose dependencies are all level < N
+
+Each level becomes a Playwright project. Level N depends on level N-1. Tests within a level run in **parallel** across workers. This means:
+- `install` runs first (phase-0)
+- `login` runs next (phase-1)
+- `create-database` and `create-table` run in parallel (phase-2)
+
 ## How to Write a New Test
 
 ### 1. Scaffold
@@ -296,7 +359,7 @@ Add new query helpers here as needed.
 | `npm run list-outcomes` | Table of all registered tests and their composition structure. |
 | `npm run visualize-dag` | Mermaid diagram of the DAG showing test composition. |
 | `npm run scaffold -- --code <code> ...` | Generate test skeleton. |
-| `npm run generate` | Manually regenerate `.generated/` runners. |
+| `npm run generate` | Manually regenerate `.output/runners/` test runners. |
 
 ## Docker Setup
 
@@ -305,9 +368,9 @@ Three containers in `docker-compose.e2e.yml`:
 - `e2e-service` — Mathesar app (built from production Dockerfile)
 - `e2e-test-runner` — Playwright (built from `e2e_tests/Dockerfile`)
 
-Test runner has direct DB access via env vars. Volume mounts for dev: `framework/`, `mathesar/`, `test-results/`, `playwright-report/`.
+Test runner has direct DB access via env vars. Volume mounts for dev: `framework/`, `mathesar/`, `.output/`.
 
-`.generated/` is NOT mounted — it's created inside the container by the screenwriter wrapper at runtime. No rebuild needed to add tests.
+`.output/` is mounted as a single Docker volume. All generated files (runners, outcomes, Playwright artifacts, reports) live under this directory. No rebuild needed to add tests.
 
 ## Rules and Pitfalls
 
@@ -317,7 +380,10 @@ Test runner has direct DB access via env vars. Volume mounts for dev: `framework
 4. **Every action returns data.** Even if it's just `return {}` with `z.object({})`. Actions always declare a schema for their return value.
 5. **Scenarios always return data.** Validated against the declared outcome Zod schema.
 6. **Labels are mandatory.** Every `t.step()`, `t.action()`, and `t.check()` has a human-readable label as the first argument.
-7. **Don't edit `.generated/` files.** They're overwritten on every test invocation.
+7. **Don't edit `.output/` files.** They're overwritten on every test invocation.
 8. **Data flows via return values.** Use `const result = await t.step(...)` and access `result.field`. No external stores or context objects.
 9. **No auto-cleanup.** Docker teardown handles it. Don't add cleanup logic.
 10. **Unique resource names** to avoid collisions in parallel branches.
+11. **Add restore hooks for tests that modify browser state.** If your test sets cookies or localStorage, add a `restore` function to `defineTest()`. The framework warns if a test changes browser state without a restore hook.
+12. **Don't rely on browser state from composed sub-steps.** After `t.step()`, always navigate explicitly. Sub-steps may be cached and their browser effects skipped.
+13. **Outcomes should carry forward data needed by downstream restore hooks.** If your test composes `login`, include session data in your outcome so your restore hook can set cookies.

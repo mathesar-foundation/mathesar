@@ -11,32 +11,18 @@ export const screenwriterConfig: ScreenwriterConfig = {
     fullyParallel: false,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
-    workers: 1,
+    workers: 3,
     reporter: [
       ['html', { open: 'never', outputFolder: 'playwright-report' }],
       ['list'],
     ],
     outputDir: 'test-results',
     use: {
+      ...devices['Desktop Chrome'],
       trace: 'on-first-retry',
       screenshot: 'only-on-failure',
       video: 'retain-on-failure',
     },
-    projects: [
-      {
-        name: 'chromium',
-        use: { ...devices['Desktop Chrome'] },
-      },
-      // Uncomment to enable multi-browser testing:
-      // {
-      //   name: 'firefox',
-      //   use: { ...devices['Desktop Firefox'] },
-      // },
-      // {
-      //   name: 'webkit',
-      //   use: { ...devices['Desktop Safari'] },
-      // },
-    ],
   },
 };
 

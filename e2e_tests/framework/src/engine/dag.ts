@@ -107,6 +107,31 @@ export async function buildDag(): Promise<Dag> {
 }
 
 /**
+ * Compute the execution level for each test in the DAG.
+ *
+ * Level = longest path from any root (test with no dependencies).
+ * Tests at the same level are independent and can run in parallel.
+ * Tests at level N depend only on tests at levels < N.
+ *
+ * Must be called after buildDag() with a valid (error-free) DAG.
+ */
+export function computeLevels(dag: Dag): Map<string, number> {
+  const levels = new Map<string, number>();
+  for (const code of dag.topologicalOrder) {
+    const node = dag.nodes.get(code);
+    if (!node || node.composedTests.length === 0) {
+      levels.set(code, 0);
+    } else {
+      const maxDepLevel = Math.max(
+        ...node.composedTests.map((dep) => levels.get(dep) ?? 0),
+      );
+      levels.set(code, maxDepLevel + 1);
+    }
+  }
+  return levels;
+}
+
+/**
  * Extract the set of test codes referenced by t.step() in a step tree.
  * Collects from all nesting levels.
  */
