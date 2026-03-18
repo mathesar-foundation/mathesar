@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { defineTest, getBaseURL } from '../../framework/src';
-import { loginViaHttp } from '../db/queries';
 import { LoginPage } from '../pages/login.page';
 import { install } from './install';
 import { expect } from '@playwright/test';
@@ -43,12 +42,13 @@ export const login = defineTest({
 
         await expect(page).not.toHaveURL(/login/);
 
-        // Also perform HTTP login for session data
-        const { sessionId, csrfToken } = await loginViaHttp(
-          getBaseURL(),
-          params.user,
-          params.password,
-        );
+        const cookies = await page.context().cookies();
+        const sessionId = cookies.find((c) => c.name === 'sessionid')?.value;
+        const csrfToken = cookies.find((c) => c.name === 'csrftoken')?.value;
+
+        if (!sessionId || !csrfToken) {
+          throw new Error('Failed to get session cookies after login');
+        }
 
         return {
           sessionId,

@@ -343,11 +343,7 @@ await t.check('Column visible', async (page) => {
 
 `client.ts` provides a pooled Postgres connection using env vars (`POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`).
 
-`queries.ts` contains reusable SQL helpers:
-- `createSuperuser(username, password)` — inserts into `mathesar_user` with Django-compatible password hash (PBKDF2-SHA256, 720k iterations). Idempotent via `ON CONFLICT`.
-- `loginViaHttp(baseUrl, username, password)` — performs Django CSRF dance (GET page → extract token → POST credentials → capture rotated token). Returns `{ sessionId, csrfToken }`.
-
-Add new query helpers here as needed.
+Add SQL query helpers in `queries.ts` as needed.
 
 ## Scripts
 
