@@ -1,4 +1,4 @@
-import type { ScenarioContext, StepNode, TestHandle } from '../types';
+import type { ScenarioContext, StepNode, TestHandle, TestFixtures } from '../types';
 import { generateFakeValue } from './zod-fake';
 
 export interface DryRunResult {
@@ -58,7 +58,7 @@ export async function dryRun<TParams, TOutcome>(
     async action<O>(
       label: string,
       schema: import('zod').ZodType<O>,
-      _fn: (page: import('@playwright/test').Page) => Promise<O>,
+      _fn: (fixtures: TestFixtures) => Promise<O>,
     ): Promise<O> {
       nodes.push({ type: 'action', label });
       return generateFakeValue(schema);
@@ -66,7 +66,7 @@ export async function dryRun<TParams, TOutcome>(
 
     async check(
       label: string,
-      _fn: (page: import('@playwright/test').Page) => Promise<void>,
+      _fn: (fixtures: TestFixtures) => Promise<void>,
     ): Promise<void> {
       nodes.push({ type: 'check', label });
     },

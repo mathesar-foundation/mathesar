@@ -1,5 +1,15 @@
-import type { Page } from '@playwright/test';
+import type { Page, APIRequestContext } from '@playwright/test';
 import type { z } from 'zod';
+
+/**
+ * Playwright fixtures threaded through the framework.
+ * Passed to action closures, check closures, and restore hooks.
+ */
+export interface TestFixtures {
+  page: Page;
+  baseURL: string;
+  request: APIRequestContext;
+}
 
 /**
  * A test handle returned by defineTest(). Used as a reference in t.step().
@@ -9,7 +19,7 @@ export interface TestHandle<TParams = unknown, TOutcome = unknown> {
   readonly paramsSchema: z.ZodType<TParams>;
   readonly outcomeSchema: z.ZodType<TOutcome>;
   readonly scenarioFn: ScenarioFn<TParams, TOutcome>;
-  readonly restoreFn?: (page: Page, outcome: TOutcome) => Promise<void>;
+  readonly restoreFn?: (fixtures: TestFixtures, outcome: TOutcome) => Promise<void>;
 }
 
 /**
@@ -30,7 +40,7 @@ export interface TestDefinition<TParams, TOutcome> {
   outcome: z.ZodType<TOutcome>;
   scenario: ScenarioFn<TParams, TOutcome>;
   standalone?: { params: TParams };
-  restore?: (page: Page, outcome: TOutcome) => Promise<void>;
+  restore?: (fixtures: TestFixtures, outcome: TOutcome) => Promise<void>;
 }
 
 /**
@@ -42,9 +52,9 @@ export interface ScenarioContext {
   action<O>(
     label: string,
     schema: z.ZodType<O>,
-    fn: (page: Page) => Promise<O>,
+    fn: (fixtures: TestFixtures) => Promise<O>,
   ): Promise<O>;
-  check(label: string, fn: (page: Page) => Promise<void>): Promise<void>;
+  check(label: string, fn: (fixtures: TestFixtures) => Promise<void>): Promise<void>;
 }
 
 /**

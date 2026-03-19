@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { TestFixtures } from '../types';
 import { outcomeStore } from '../store/outcome-store';
 import { registry } from '../store/registry';
 
@@ -14,15 +14,15 @@ import { registry } from '../store/registry';
  * as `unknown` (since registry erases type params), which is safe because
  * outcomes were schema-validated when stored.
  *
- * @param page - Playwright Page to restore state on
+ * @param fixtures - Playwright test fixtures (page, baseURL, request)
  * @param cacheKey - Cache key of the test whose state to restore
  * @param handle - Object with an optional restoreFn
  * @param restored - Set of already-restored cache keys (for diamond dep dedup)
  */
 export async function restoreFromCache<TOutcome = unknown>(
-  page: Page,
+  fixtures: TestFixtures,
   cacheKey: string,
-  handle: { restoreFn?: (page: Page, outcome: TOutcome) => Promise<void> },
+  handle: { restoreFn?: (fixtures: TestFixtures, outcome: TOutcome) => Promise<void> },
   restored?: Set<string>,
 ): Promise<void> {
   const seen = restored ?? new Set<string>();
@@ -38,13 +38,13 @@ export async function restoreFromCache<TOutcome = unknown>(
   for (const sub of entry.subSteps) {
     const subRegistered = registry.get(sub.testCode);
     if (subRegistered?.handle) {
-      await restoreFromCache(page, sub.cacheKey, subRegistered.handle, seen);
+      await restoreFromCache(fixtures, sub.cacheKey, subRegistered.handle, seen);
     }
   }
 
   // Then restore this test's own browser state.
   // The cast is safe: entry.outcome was validated against outcomeSchema when stored.
   if (handle.restoreFn) {
-    await handle.restoreFn(page, entry.outcome as TOutcome);
+    await handle.restoreFn(fixtures, entry.outcome as TOutcome);
   }
 }

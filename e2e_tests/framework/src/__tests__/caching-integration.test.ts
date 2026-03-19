@@ -9,7 +9,7 @@ import { dryRun } from '../engine/dry-run';
 import { OutcomeStore, outcomeStore } from '../store/outcome-store';
 import { makeCacheKey } from '../engine/cache-key';
 import { compareStepTrees } from '../engine/step-tree-compare';
-import { createMockPage, resetRegistry } from './test-utils';
+import { createMockFixtures, resetRegistry } from './test-utils';
 
 let testOutcomeDir: string;
 
@@ -53,16 +53,16 @@ describe('caching integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
 
     // First execution: child runs
-    const result1 = await execute(mockPage as any, parent, {});
+    const result1 = await execute(mockFixtures as any, parent, {});
     expect(result1.outcome).toEqual({ childId: 100 });
     expect(childClosureCount).toBe(1);
 
     // Second execution: child is cached, closure should not re-execute
     childClosureCount = 0;
-    const result2 = await execute(mockPage as any, parent, {});
+    const result2 = await execute(mockFixtures as any, parent, {});
     expect(result2.outcome).toEqual({ childId: 100 });
     expect(childClosureCount).toBe(0); // cached — closure not re-executed
   });
@@ -92,16 +92,16 @@ describe('caching integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
 
     // Execute once to populate cache
-    await execute(mockPage as any, parent, {});
+    await execute(mockFixtures as any, parent, {});
 
     // Dry-run parent to get expected tree
     const dryRunResult = await dryRun(parent, {});
 
     // Execute again (child will be cached)
-    const result2 = await execute(mockPage as any, parent, {});
+    const result2 = await execute(mockFixtures as any, parent, {});
 
     // Step trees should match despite child being cached
     const mismatch = compareStepTrees('tree-parent', dryRunResult.stepTree, result2.stepTree);
@@ -137,8 +137,8 @@ describe('caching integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
-    const result = await execute(mockPage as any, parent, {});
+    const mockFixtures = createMockFixtures();
+    const result = await execute(mockFixtures as any, parent, {});
 
     // Both run because params differ
     expect(result.outcome).toEqual({
@@ -198,12 +198,12 @@ describe('caching integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
 
     // First: execute login standalone (populates install + login caches via t.step)
     // We need to execute login's outcome via a parent so t.step stores it.
     // Execute login directly first (this caches install via t.step internally):
-    const loginResult = await execute(mockPage as any, login, {});
+    const loginResult = await execute(mockFixtures as any, login, {});
     // Manually store login's outcome so it's available as a cache hit:
     const loginCacheKey = makeCacheKey('restore-login', {});
     outcomeStore.set(loginCacheKey, loginResult.outcome, loginResult.subSteps);
@@ -211,7 +211,7 @@ describe('caching integration', () => {
     restoreLog.length = 0;
 
     // Now execute consumer — login is cached, so restore hooks should fire
-    await execute(mockPage as any, consumer, {});
+    await execute(mockFixtures as any, consumer, {});
 
     // install.restore fires first (transitive dep), then login.restore
     expect(restoreLog).toEqual([
@@ -241,8 +241,8 @@ describe('caching integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
-    const result = await execute(mockPage as any, parent, {});
+    const mockFixtures = createMockFixtures();
+    const result = await execute(mockFixtures as any, parent, {});
 
     expect(result.subSteps).toHaveLength(1);
     expect(result.subSteps[0].testCode).toBe('substep-child');
@@ -259,7 +259,7 @@ describe('caching integration', () => {
         outcome: z.object({}),
         // No restore hook!
         scenario: async (t) => {
-          return await t.action('Set cookie', z.object({}), async (page) => {
+          return await t.action('Set cookie', z.object({}), async ({ page }) => {
             // Simulate browser state change by adding a cookie
             await (page as any).context().addCookies([
               { name: 'new-cookie', value: 'val' },
@@ -280,8 +280,8 @@ describe('caching integration', () => {
         standalone: { params: {} },
       });
 
-      const mockPage = createMockPage();
-      await execute(mockPage as any, parent, {});
+      const mockFixtures = createMockFixtures();
+      await execute(mockFixtures as any, parent, {});
 
       // Warning should have been emitted for 'warn-child'
       expect(warnSpy).toHaveBeenCalledWith(
@@ -302,7 +302,7 @@ describe('caching integration', () => {
         outcome: z.object({}),
         restore: async () => {},
         scenario: async (t) => {
-          return await t.action('Set cookie', z.object({}), async (page) => {
+          return await t.action('Set cookie', z.object({}), async ({ page }) => {
             await (page as any).context().addCookies([
               { name: 'new-cookie', value: 'val' },
             ]);
@@ -322,8 +322,8 @@ describe('caching integration', () => {
         standalone: { params: {} },
       });
 
-      const mockPage = createMockPage();
-      await execute(mockPage as any, parent, {});
+      const mockFixtures = createMockFixtures();
+      await execute(mockFixtures as any, parent, {});
 
       // No warning because restore hook exists
       expect(warnSpy).not.toHaveBeenCalled();

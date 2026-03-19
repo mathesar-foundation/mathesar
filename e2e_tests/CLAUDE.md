@@ -9,7 +9,7 @@ e2e_tests/
       engine/         # Orchestration: defineTest, dry-run, executor, DAG, caching, restore
       store/          # Data management: registry, outcome store
       __tests__/      # Framework unit & integration tests (Vitest)
-      config.ts       # Config types, validation, createPlaywrightConfig(), getBaseURL()
+      config.ts       # Config types, validation, createPlaywrightConfig()
       types.ts        # Type definitions (TestHandle, ScenarioContext, StepNode)
       index.ts        # Public API re-exports
     scripts/          # CLI tools
@@ -75,14 +75,14 @@ export const myTest = defineTest({
     await t.step('Login to Mathesar', login, { user: 'admin', password: 'admin' });
 
     // Perform browser actions that produce data
-    const result = await t.action('Create resource', z.object({ id: z.number() }), async (page) => {
+    const result = await t.action('Create resource', z.object({ id: z.number() }), async ({ page }) => {
       await page.goto('/');
       // ... browser interactions ...
       return { id: 42 };
     });
 
     // Assert browser state
-    await t.check('Verify resource visible', async (page) => {
+    await t.check('Verify resource visible', async ({ page }) => {
       await expect(page.getByText(params.name)).toBeVisible();
     });
 
@@ -223,8 +223,7 @@ export const login = defineTest({
   outcome: loginOutcome,
 
   // Called on cache hit to restore browser state from outcome data
-  restore: async (page, outcome) => {
-    const baseURL = getBaseURL();
+  restore: async ({ page, baseURL }, outcome) => {
     await page.context().addCookies([
       { name: 'sessionid', value: outcome.sessionId, url: baseURL },
       { name: 'csrftoken', value: outcome.csrfToken, url: baseURL },
@@ -290,14 +289,14 @@ scenario: async (t, params) => {
   await t.step('Login', login, params.login);
 
   // Action: browser interactions that produce data
-  const result = await t.action('Connect database', connectDatabaseOutcome, async (page) => {
+  const result = await t.action('Connect database', connectDatabaseOutcome, async ({ page }) => {
     await page.goto('/');
     // ... fill form, click buttons ...
     return { databaseId: 1, databaseName: params.name };
   });
 
   // Check: assertions
-  await t.check('Database appears in sidebar', async (page) => {
+  await t.check('Database appears in sidebar', async ({ page }) => {
     await expect(page.getByText(params.name)).toBeVisible();
   });
 
@@ -328,12 +327,12 @@ class TablePage {
 }
 
 // In test scenario:
-await t.action('Add column', schema, async (page) => {
+await t.action('Add column', schema, async ({ page }) => {
   const tablePage = new TablePage(page);
   await tablePage.addColumn('amount', 'numeric');
   return { columnName: 'amount' };
 });
-await t.check('Column visible', async (page) => {
+await t.check('Column visible', async ({ page }) => {
   const tablePage = new TablePage(page);
   await expect(tablePage.columnHeader('amount')).toBeVisible();
 });

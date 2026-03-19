@@ -5,7 +5,7 @@ import { dryRun } from '../engine/dry-run';
 import { execute } from '../engine/executor';
 import { buildDag } from '../engine/dag';
 import { compareStepTrees } from '../engine/step-tree-compare';
-import { createMockPage, resetRegistry } from './test-utils';
+import { createMockFixtures, resetRegistry } from './test-utils';
 
 beforeEach(() => {
   resetRegistry();
@@ -41,8 +41,8 @@ describe('integration', () => {
     expect(dag.nodes.has('full-pipeline')).toBe(true);
 
     // Execute
-    const mockPage = createMockPage();
-    const executionResult = await execute(mockPage as any, handle, { name: 'World' });
+    const mockFixtures = createMockFixtures();
+    const executionResult = await execute(mockFixtures as any, handle, { name: 'World' });
     expect(executionResult.outcome).toEqual({ greeting: 'Hello, World!' });
 
     // Compare step trees
@@ -86,8 +86,8 @@ describe('integration', () => {
     expect(dryRunResult.stepTree[0].type).toBe('step');
 
     // Execute
-    const mockPage = createMockPage();
-    const result = await execute(mockPage as any, parent, {});
+    const mockFixtures = createMockFixtures();
+    const result = await execute(mockFixtures as any, parent, {});
     expect(result.outcome).toEqual({ finalValue: 10 });
 
     // Step trees match
@@ -127,8 +127,8 @@ describe('integration', () => {
     expect(dag.errors).toEqual([]);
 
     // Execute: both run independently with distinct outcomes
-    const mockPage = createMockPage();
-    const result = await execute(mockPage as any, parent, {});
+    const mockFixtures = createMockFixtures();
+    const result = await execute(mockFixtures as any, parent, {});
     expect(result.outcome).toEqual({
       first: 'processed-Library',
       second: 'processed-Archive',
@@ -165,8 +165,8 @@ describe('integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
-    const result = await execute(mockPage as any, consumer, {});
+    const mockFixtures = createMockFixtures();
+    const result = await execute(mockFixtures as any, consumer, {});
     expect(result.outcome).toEqual({ summary: 'Resource TestDB has id 42' });
   });
 
@@ -186,8 +186,8 @@ describe('integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
-    const result = await execute(mockPage as any, handle, {});
+    const mockFixtures = createMockFixtures();
+    const result = await execute(mockFixtures as any, handle, {});
     expect(result.outcome).toEqual({ message: 'runtime-generated' });
   });
 
@@ -225,8 +225,8 @@ describe('integration', () => {
     expect(dryRunResult.stepTree).toHaveLength(2);
 
     // Execution: computation works on real values
-    const mockPage = createMockPage();
-    const result = await execute(mockPage as any, parent, {});
+    const mockFixtures = createMockFixtures();
+    const result = await execute(mockFixtures as any, parent, {});
     expect(result.outcome).toEqual({ combined: 'first-data + second-data' });
   });
 
@@ -254,8 +254,8 @@ describe('integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
-    await expect(execute(mockPage as any, parent, {})).rejects.toThrow(
+    const mockFixtures = createMockFixtures();
+    await expect(execute(mockFixtures as any, parent, {})).rejects.toThrow(
       /Step 'Run failing child'.*Action 'Failing step'.*Connection refused/,
     );
   });
@@ -283,7 +283,7 @@ describe('integration', () => {
       standalone: { params: {} },
     });
 
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
 
     // Dry-run captures 1 step (action only)
     const dryRunResult = await dryRun(handle, {});
@@ -291,7 +291,7 @@ describe('integration', () => {
 
     // Execution captures 2 steps (action + conditional check)
     isExecuting = false; // reset
-    const executionResult = await execute(mockPage as any, handle, {});
+    const executionResult = await execute(mockFixtures as any, handle, {});
     expect(executionResult.stepTree).toHaveLength(2);
 
     // Comparison detects the mismatch

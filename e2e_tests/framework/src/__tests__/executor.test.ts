@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from 'zod';
 import { execute } from '../engine/executor';
-import { createMockPage, quickHandle, resetRegistry } from './test-utils';
+import { createMockFixtures, quickHandle, resetRegistry } from './test-utils';
 
 beforeEach(() => {
   resetRegistry();
 });
 
 describe('execute', () => {
-  it('executes action closures with page object', async () => {
-    const mockPage = createMockPage();
+  it('executes action closures with fixtures', async () => {
+    const mockFixtures = createMockFixtures();
     const handle = quickHandle(
       'test-action-exec',
       z.object({}),
@@ -18,7 +18,7 @@ describe('execute', () => {
         const result = await t.action(
           'Do something',
           z.object({ name: z.string() }),
-          async (page) => {
+          async ({ page }) => {
             await (page as any).goto('/test');
             return { name: 'done' };
           },
@@ -27,20 +27,20 @@ describe('execute', () => {
       },
     );
 
-    const result = await execute(mockPage as any, handle, {});
-    expect(mockPage._calls).toContain('goto:/test');
+    const result = await execute(mockFixtures as any, handle, {});
+    expect(mockFixtures._page._calls).toContain('goto:/test');
     expect(result.outcome).toEqual({ name: 'done' });
   });
 
-  it('executes check closures with page object', async () => {
-    const mockPage = createMockPage();
+  it('executes check closures with fixtures', async () => {
+    const mockFixtures = createMockFixtures();
     let checkExecuted = false;
     const handle = quickHandle(
       'test-check-exec',
       z.object({}),
       z.object({}),
       async (t) => {
-        await t.check('Verify something', async (page) => {
+        await t.check('Verify something', async ({ page }) => {
           await (page as any).goto('/check');
           checkExecuted = true;
         });
@@ -48,13 +48,13 @@ describe('execute', () => {
       },
     );
 
-    await execute(mockPage as any, handle, {});
+    await execute(mockFixtures as any, handle, {});
     expect(checkExecuted).toBe(true);
-    expect(mockPage._calls).toContain('goto:/check');
+    expect(mockFixtures._page._calls).toContain('goto:/check');
   });
 
   it('returns real values from action closures (not fakes)', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     const handle = quickHandle(
       'test-real-values',
       z.object({}),
@@ -69,12 +69,12 @@ describe('execute', () => {
       },
     );
 
-    const result = await execute(mockPage as any, handle, {});
+    const result = await execute(mockFixtures as any, handle, {});
     expect(result.outcome).toEqual({ name: 'real_value' });
   });
 
   it('validates action return value against Zod schema', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     const handle = quickHandle(
       'test-action-validation',
       z.object({}),
@@ -89,13 +89,13 @@ describe('execute', () => {
       },
     );
 
-    await expect(execute(mockPage as any, handle, {})).rejects.toThrow(
+    await expect(execute(mockFixtures as any, handle, {})).rejects.toThrow(
       /Action 'Bad action'.*invalid data/,
     );
   });
 
   it('validates scenario return value against outcome schema', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     const handle = quickHandle(
       'test-outcome-validation',
       z.object({}),
@@ -105,13 +105,13 @@ describe('execute', () => {
       },
     );
 
-    await expect(execute(mockPage as any, handle, {})).rejects.toThrow(
+    await expect(execute(mockFixtures as any, handle, {})).rejects.toThrow(
       /Test 'test-outcome-validation' returned invalid outcome/,
     );
   });
 
   it('recursively executes sub-scenarios via t.step()', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     const executionOrder: string[] = [];
 
     const childHandle = quickHandle(
@@ -145,7 +145,7 @@ describe('execute', () => {
       },
     );
 
-    const result = await execute(mockPage as any, parentHandle, {});
+    const result = await execute(mockFixtures as any, parentHandle, {});
     expect(result.outcome).toEqual({ childResult: 'hello-world' });
     expect(executionOrder).toEqual([
       'parent-start',
@@ -157,7 +157,7 @@ describe('execute', () => {
   });
 
   it('executes steps in sequential order', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     const order: number[] = [];
     const handle = quickHandle(
       'test-sequential',
@@ -179,12 +179,12 @@ describe('execute', () => {
       },
     );
 
-    await execute(mockPage as any, handle, {});
+    await execute(mockFixtures as any, handle, {});
     expect(order).toEqual([1, 2, 3]);
   });
 
   it('records step tree during execution', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     const handle = quickHandle(
       'test-tree-recording',
       z.object({}),
@@ -196,14 +196,14 @@ describe('execute', () => {
       },
     );
 
-    const result = await execute(mockPage as any, handle, {});
+    const result = await execute(mockFixtures as any, handle, {});
     expect(result.stepTree).toHaveLength(2);
     expect(result.stepTree[0]).toEqual({ type: 'action', label: 'Action 1' });
     expect(result.stepTree[1]).toEqual({ type: 'check', label: 'Check 1' });
   });
 
   it('passes correct params to sub-scenarios', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     let receivedParams: unknown;
 
     const childHandle = quickHandle(
@@ -226,12 +226,12 @@ describe('execute', () => {
       },
     );
 
-    await execute(mockPage as any, parentHandle, {});
+    await execute(mockFixtures as any, parentHandle, {});
     expect(receivedParams).toEqual({ x: 42, y: 'hello' });
   });
 
   it('handles errors in action closures', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     const handle = quickHandle(
       'test-action-error',
       z.object({}),
@@ -244,13 +244,13 @@ describe('execute', () => {
       },
     );
 
-    await expect(execute(mockPage as any, handle, {})).rejects.toThrow(
+    await expect(execute(mockFixtures as any, handle, {})).rejects.toThrow(
       /Action 'Failing action'.*Browser crashed/,
     );
   });
 
   it('handles errors in check closures', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     const handle = quickHandle(
       'test-check-error',
       z.object({}),
@@ -263,13 +263,13 @@ describe('execute', () => {
       },
     );
 
-    await expect(execute(mockPage as any, handle, {})).rejects.toThrow(
+    await expect(execute(mockFixtures as any, handle, {})).rejects.toThrow(
       /Check 'Failing check'.*Assertion failed/,
     );
   });
 
   it('validates params against schema before running scenario', async () => {
-    const mockPage = createMockPage();
+    const mockFixtures = createMockFixtures();
     let scenarioCalled = false;
     const handle = quickHandle(
       'test-params-validation',
@@ -282,7 +282,7 @@ describe('execute', () => {
     );
 
     await expect(
-      execute(mockPage as any, handle, { name: 123 } as any),
+      execute(mockFixtures as any, handle, { name: 123 } as any),
     ).rejects.toThrow(/Invalid params for test 'test-params-validation'/);
     expect(scenarioCalled).toBe(false);
   });

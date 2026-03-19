@@ -40,8 +40,8 @@ import { test } from '@playwright/test';
 import { runFlow } from '${frameworkImport}';
 import '${testsImport}/${testCode}';
 
-test('${testCode}', async ({ page }) => {
-  await runFlow(page, '${testCode}');
+test('${testCode}', async ({ page, baseURL, request }) => {
+  await runFlow({ page, baseURL: baseURL!, request }, '${testCode}');
 });
 `;
 }

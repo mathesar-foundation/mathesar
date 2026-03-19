@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defineTest, getBaseURL } from '../../framework/src';
+import { defineTest } from '../../framework/src';
 import { LoginPage } from '../pages/login.page';
 import { install } from './install';
 import { expect } from '@playwright/test';
@@ -21,8 +21,7 @@ export const login = defineTest({
   params: loginParams,
   outcome: loginOutcome,
 
-  restore: async (page, outcome) => {
-    const baseURL = getBaseURL();
+  restore: async ({ page, baseURL }, outcome) => {
     await page.context().addCookies([
       { name: 'sessionid', value: outcome.sessionId, url: baseURL },
       { name: 'csrftoken', value: outcome.csrfToken, url: baseURL },
@@ -35,7 +34,7 @@ export const login = defineTest({
     return await t.action(
       'Fill credentials and log in',
       loginOutcome,
-      async (page) => {
+      async ({ page }) => {
         const loginPage = new LoginPage(page);
         await loginPage.goto();
         await loginPage.login(params.user, params.password);
@@ -46,6 +45,7 @@ export const login = defineTest({
         const sessionId = cookies.find((c) => c.name === 'sessionid')?.value;
         const csrfToken = cookies.find((c) => c.name === 'csrftoken')?.value;
 
+        // Don't throw. Always use expect.
         if (!sessionId || !csrfToken) {
           throw new Error('Failed to get session cookies after login');
         }

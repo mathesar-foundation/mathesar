@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import type { TestHandle, ScenarioFn } from '../types';
+import type { Page, APIRequestContext } from '@playwright/test';
+import type { TestHandle, TestFixtures, ScenarioFn } from '../types';
 import { dryRun, type DryRunResult } from '../engine/dry-run';
 import { execute, type ExecutionResult } from '../engine/executor';
 import { registry } from '../store/registry';
@@ -73,6 +74,20 @@ export function createMockPage(): Record<string, unknown> & {
 }
 
 /**
+ * Create mock TestFixtures wrapping a mock page.
+ * Use `_page` to access the mock's tracking properties (_calls, _cookies, etc.).
+ */
+export function createMockFixtures() {
+  const mockPage = createMockPage();
+  return {
+    page: mockPage as unknown as Page,
+    baseURL: 'http://localhost:3000',
+    request: {} as APIRequestContext,
+    _page: mockPage,
+  };
+}
+
+/**
  * Reset the registry between tests.
  */
 export function resetRegistry(): void {
@@ -108,13 +123,13 @@ export async function dryRunTest<P, O>(
 }
 
 /**
- * Helper to execute a test handle with a mock page.
+ * Helper to execute a test handle with mock fixtures.
  */
 export async function executeTest<P, O>(
   handle: TestHandle<P, O>,
   params: P,
-  page?: unknown,
+  fixtures?: TestFixtures,
 ): Promise<ExecutionResult<O>> {
-  const mockPage = page ?? createMockPage();
-  return execute(mockPage as import('@playwright/test').Page, handle, params);
+  const mockFixtures = fixtures ?? (createMockFixtures() as unknown as TestFixtures);
+  return execute(mockFixtures, handle, params);
 }

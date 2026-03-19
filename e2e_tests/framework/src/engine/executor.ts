@@ -1,6 +1,5 @@
-import type { Page } from '@playwright/test';
 import type { z } from 'zod';
-import type { ScenarioContext, StepNode, TestHandle } from '../types';
+import type { ScenarioContext, StepNode, TestHandle, TestFixtures } from '../types';
 import type { SubStepRecord } from '../store/outcome-store';
 import { outcomeStore } from '../store/outcome-store';
 import { makeCacheKey } from './cache-key';
@@ -22,14 +21,14 @@ export interface ExecutionResult<TOutcome> {
  *
  * The executor `t` object:
  * - t.step() → checks cache first; on miss, recursively executes the sub-scenario
- * - t.action() → runs the closure with the page, validates return, returns real result
- * - t.check() → runs the closure with the page
+ * - t.action() → runs the closure with the fixtures, validates return, returns real result
+ * - t.check() → runs the closure with the fixtures
  *
  * Records the step tree during execution for comparison with the dry-run tree.
  * Records sub-step metadata for recursive restore on future cache hits.
  */
 export async function execute<TParams, TOutcome>(
-  page: Page,
+  fixtures: TestFixtures,
   handle: TestHandle<TParams, TOutcome>,
   params: TParams,
 ): Promise<ExecutionResult<TOutcome>> {
@@ -59,7 +58,7 @@ export async function execute<TParams, TOutcome>(
         const parseResult = subTest.outcomeSchema.safeParse(cached.outcome);
         if (parseResult.success) {
           // Recursively restore browser state from all transitive dependencies
-          await restoreFromCache(page, cacheKey, subTest);
+          await restoreFromCache(fixtures, cacheKey, subTest);
 
           // Dry-run for step tree shape (must match what the parent's dry-run produced)
           const dryRunResult = await dryRun(subTest, subParams);
@@ -79,9 +78,9 @@ export async function execute<TParams, TOutcome>(
 
       // CACHE MISS: execute with real browser, detect browser state changes
       try {
-        const before = await snapshotBrowserState(page);
-        const subResult = await execute(page, subTest, subParams);
-        const after = await snapshotBrowserState(page);
+        const before = await snapshotBrowserState(fixtures.page);
+        const subResult = await execute(fixtures, subTest, subParams);
+        const after = await snapshotBrowserState(fixtures.page);
 
         // Warn if browser state changed but no restore hook exists
         if (browserStateChanged(before, after) && !subTest.restoreFn) {
@@ -116,11 +115,11 @@ export async function execute<TParams, TOutcome>(
     async action<O>(
       label: string,
       schema: z.ZodType<O>,
-      fn: (page: Page) => Promise<O>,
+      fn: (fixtures: TestFixtures) => Promise<O>,
     ): Promise<O> {
       let result: O;
       try {
-        result = await fn(page);
+        result = await fn(fixtures);
       } catch (err) {
         throw wrapError(err, `Action '${label}' in test '${handle.code}' failed`);
       }
@@ -139,10 +138,10 @@ export async function execute<TParams, TOutcome>(
 
     async check(
       label: string,
-      fn: (page: Page) => Promise<void>,
+      fn: (fixtures: TestFixtures) => Promise<void>,
     ): Promise<void> {
       try {
-        await fn(page);
+        await fn(fixtures);
       } catch (err) {
         throw wrapError(err, `Check '${label}' in test '${handle.code}' failed`);
       }

@@ -20,7 +20,7 @@ export const install = defineTest({
     return await t.action(
       'Set up superuser and complete installation',
       installOutcome,
-      async (page) => {
+      async ({ page }) => {
         // Browser flow: complete the installation wizard
         await page.goto('/');
         await expect(page).toHaveURL(/complete_installation/);

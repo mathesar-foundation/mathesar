@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { restoreFromCache } from '../engine/restore';
 import { outcomeStore } from '../store/outcome-store';
 import { registry } from '../store/registry';
-import { createMockPage, resetRegistry } from './test-utils';
+import { createMockFixtures, resetRegistry } from './test-utils';
 import type { TestHandle } from '../types';
 
 beforeEach(() => {
@@ -29,14 +29,14 @@ function registerHandle(
 describe('restoreFromCache', () => {
   it('calls restore hook with cached outcome', async () => {
     const restoreLog: string[] = [];
-    const handle = registerHandle('test-a', async (_page, outcome) => {
+    const handle = registerHandle('test-a', async (_fixtures, outcome) => {
       restoreLog.push(`restore-a:${JSON.stringify(outcome)}`);
     });
 
     outcomeStore.set('test-a:abc', { value: 42 }, []);
 
-    const page = createMockPage();
-    await restoreFromCache(page as any, 'test-a:abc', handle);
+    const mockFixtures = createMockFixtures();
+    await restoreFromCache(mockFixtures as any, 'test-a:abc', handle);
 
     expect(restoreLog).toEqual(['restore-a:{"value":42}']);
   });
@@ -45,9 +45,9 @@ describe('restoreFromCache', () => {
     const handle = registerHandle('test-no-restore');
     outcomeStore.set('test-no-restore:abc', { value: 1 }, []);
 
-    const page = createMockPage();
+    const mockFixtures = createMockFixtures();
     // Should not throw
-    await restoreFromCache(page as any, 'test-no-restore:abc', handle);
+    await restoreFromCache(mockFixtures as any, 'test-no-restore:abc', handle);
   });
 
   it('does nothing when cache entry is missing', async () => {
@@ -55,9 +55,9 @@ describe('restoreFromCache', () => {
       throw new Error('should not be called');
     });
 
-    const page = createMockPage();
+    const mockFixtures = createMockFixtures();
     // Should not throw — missing entry is silently skipped
-    await restoreFromCache(page as any, 'test-missing:xyz', handle);
+    await restoreFromCache(mockFixtures as any, 'test-missing:xyz', handle);
   });
 
   it('restores transitive dependencies in depth-first order', async () => {
@@ -78,8 +78,8 @@ describe('restoreFromCache', () => {
     outcomeStore.set('mid:b', {}, [{ testCode: 'leaf', cacheKey: 'leaf:a' }]);
     outcomeStore.set('top:c', {}, [{ testCode: 'mid', cacheKey: 'mid:b' }]);
 
-    const page = createMockPage();
-    await restoreFromCache(page as any, 'top:c', topHandle);
+    const mockFixtures = createMockFixtures();
+    await restoreFromCache(mockFixtures as any, 'top:c', topHandle);
 
     // Depth-first: leaf first, then mid, then top
     expect(restoreLog).toEqual(['restore-leaf', 'restore-mid', 'restore-top']);
@@ -110,8 +110,8 @@ describe('restoreFromCache', () => {
       { testCode: 'branch-b', cacheKey: 'branch-b:z' },
     ]);
 
-    const page = createMockPage();
-    await restoreFromCache(page as any, 'root:w', rootHandle);
+    const mockFixtures = createMockFixtures();
+    await restoreFromCache(mockFixtures as any, 'root:w', rootHandle);
 
     // shared should only be restored once despite being in both branches
     expect(restoreLog.filter((l) => l === 'restore-shared')).toHaveLength(1);

@@ -1,5 +1,4 @@
-import type { Page } from '@playwright/test';
-import type { TestHandle } from '../types';
+import type { TestHandle, TestFixtures } from '../types';
 import { registry } from '../store/registry';
 import { outcomeStore } from '../store/outcome-store';
 import { dryRun } from './dry-run';
@@ -17,11 +16,11 @@ import { makeCacheKey } from './cache-key';
  * 5. Compares step trees (detects conditional steps)
  * 6. Stores the outcome for cross-worker sharing
  *
- * @param page - Playwright Page object
+ * @param fixtures - Playwright test fixtures (page, baseURL, request)
  * @param ref - Test code string or TestHandle
  */
 export async function runFlow(
-  page: Page,
+  fixtures: TestFixtures,
   ref: TestHandle | string,
 ): Promise<void> {
   const code = typeof ref === 'string' ? ref : ref.code;
@@ -54,7 +53,7 @@ export async function runFlow(
   const dryRunResult = await dryRun(handle, standaloneParams);
 
   // 2. Execute with real browser
-  const executionResult = await execute(page, handle, standaloneParams);
+  const executionResult = await execute(fixtures, handle, standaloneParams);
 
   // 3. Compare step trees
   const mismatch = compareStepTrees(

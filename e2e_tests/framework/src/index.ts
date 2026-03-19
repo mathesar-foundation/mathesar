@@ -19,11 +19,12 @@ export { registry } from './store/registry';
 export { outcomeStore } from './store/outcome-store';
 
 // Config
-export { createPlaywrightConfig, getResolvedConfig, getBaseURL, toRelativePosix } from './config';
+export { createPlaywrightConfig, getResolvedConfig, toRelativePosix } from './config';
 export type { ScreenwriterConfig, ResolvedScreenwriterConfig } from './config';
 
 // Types
 export type {
+  TestFixtures,
   TestHandle,
   TestDefinition,
   ScenarioContext,
