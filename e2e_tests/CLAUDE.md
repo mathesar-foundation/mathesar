@@ -375,6 +375,66 @@ Test runner has direct DB access via env vars. Volume mounts for dev: `framework
 
 `.output/` is mounted as a single Docker volume. All generated files (runners, outcomes, Playwright artifacts, reports) live under this directory. No rebuild needed to add tests.
 
+## Best Practices for Writing Tests
+
+### Always compose existing tests — never reimplement flows
+
+Before writing any `t.action()`, check `mathesar/tests/` for an existing test that already covers the flow you need. If one exists, use `t.step()` to compose it. This is the most important rule of this framework.
+
+**Why:** Composability is the core design principle. Reimplementing a flow that already exists as a test (e.g., manually filling login fields instead of composing the `login` test) breaks caching, bypasses restore hooks, duplicates maintenance burden, and defeats the DAG. If the original flow changes, every manual copy breaks silently.
+
+**This applies even when:**
+- The flow appears in the middle of a larger scenario (e.g., logging in as a different user after a logout)
+- The params come from a prior action's return value (dry-run handles this via Zod fakes)
+- You only need a subset of what the existing test does (compose it anyway; the outcome gives you what you need)
+
+```typescript
+// ❌ BAD — reimplements login inside an action
+await t.action('Log in as new user', z.object({}), async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  await loginPage.goto();
+  await loginPage.login(username, password);
+  return {};
+});
+
+// ✅ GOOD — composes the existing login test
+await t.step('Login as new user', login, { user: username, password });
+```
+
+Only use `t.action()` for a flow when no existing test covers it **and** the flow is too specific to this scenario to warrant its own reusable test.
+
+### Use `t.action()` only for test-specific browser interactions
+
+Actions are for browser interactions unique to this test that produce data. They should not duplicate logic that exists in another test.
+
+### Use `t.check()` for assertions, navigate explicitly
+
+After any `t.step()`, the browser state is undefined (the sub-step may have been cached). Always navigate explicitly in `t.check()` closures rather than assuming a particular page is loaded.
+
+### Design outcomes for downstream consumers
+
+When your test will be composed by others, return data they'll need. Include credentials, IDs, names — anything a downstream test might need to build on your work.
+
+### Keep Page Objects slim and assertion-free
+
+POMs expose locators and actions, never assertions. Tests decide what to assert. Store `page` as an explicit class field and initialize all static locators in the constructor. Use methods for dynamic locators that depend on parameters.
+
+```typescript
+export class MyPage {
+  private page: Page;
+  readonly heading: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.heading = page.getByRole('heading', { name: 'My Page' });
+  }
+
+  itemLink(name: string): Locator {
+    return this.page.getByRole('link', { name });
+  }
+}
+```
+
 ## Rules and Pitfalls
 
 1. **File name = test code.** `install.ts` must use `code: 'install'`.
