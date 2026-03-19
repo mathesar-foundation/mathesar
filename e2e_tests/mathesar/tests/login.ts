@@ -10,8 +10,6 @@ const loginParams = z.object({
 });
 
 const loginOutcome = z.object({
-  sessionId: z.string(),
-  csrfToken: z.string(),
   username: z.string(),
   password: z.string(),
 });
@@ -22,10 +20,25 @@ export const login = defineTest({
   outcome: loginOutcome,
 
   restore: async ({ page, baseURL }, outcome) => {
-    await page.context().addCookies([
-      { name: 'sessionid', value: outcome.sessionId, url: baseURL },
-      { name: 'csrftoken', value: outcome.csrfToken, url: baseURL },
-    ]);
+    // GET login page to obtain CSRF cookie
+    await page.request.get(`${baseURL}/auth/login/`);
+    const cookies = await page.context().cookies();
+    const csrfToken = cookies.find((c) => c.name === 'csrftoken')?.value;
+
+    // POST with credentials to establish a fresh session
+    const response = await page.request.post(`${baseURL}/auth/login/`, {
+      form: {
+        username: outcome.username,
+        password: outcome.password,
+        csrfmiddlewaretoken: csrfToken ?? '',
+      },
+      headers: {
+        Referer: `${baseURL}/auth/login/`,
+      },
+    });
+    if (!response.ok()) {
+      throw new Error(`Login restore failed: ${response.status()}`);
+    }
   },
 
   scenario: async (t, params) => {
@@ -41,18 +54,7 @@ export const login = defineTest({
 
         await expect(page).not.toHaveURL(/login/);
 
-        const cookies = await page.context().cookies();
-        const sessionId = cookies.find((c) => c.name === 'sessionid')?.value;
-        const csrfToken = cookies.find((c) => c.name === 'csrftoken')?.value;
-
-        // Don't throw. Always use expect.
-        if (!sessionId || !csrfToken) {
-          throw new Error('Failed to get session cookies after login');
-        }
-
         return {
-          sessionId,
-          csrfToken,
           username: params.user,
           password: params.password,
         };

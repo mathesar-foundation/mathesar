@@ -222,12 +222,20 @@ export const login = defineTest({
   params: loginParams,
   outcome: loginOutcome,
 
-  // Called on cache hit to restore browser state from outcome data
+  // Called on cache hit to establish a fresh authenticated session
   restore: async ({ page, baseURL }, outcome) => {
-    await page.context().addCookies([
-      { name: 'sessionid', value: outcome.sessionId, url: baseURL },
-      { name: 'csrftoken', value: outcome.csrfToken, url: baseURL },
-    ]);
+    await page.request.get(`${baseURL}/auth/login/`);
+    const cookies = await page.context().cookies();
+    const csrfToken = cookies.find((c) => c.name === 'csrftoken')?.value;
+
+    await page.request.post(`${baseURL}/auth/login/`, {
+      form: {
+        username: outcome.username,
+        password: outcome.password,
+        csrfmiddlewaretoken: csrfToken ?? '',
+      },
+      headers: { Referer: `${baseURL}/auth/login/` },
+    });
   },
 
   scenario: async (t, params) => { /* ... */ },
@@ -238,7 +246,7 @@ export const login = defineTest({
 **Restore hook rules:**
 - **Optional** — only needed for tests that modify browser state (cookies, localStorage)
 - **Producer-side** — defined on `defineTest()`, not on the `t.step()` call site
-- **Essential state only** — set cookies/localStorage, do NOT navigate
+- **Essential state only** — set cookies/localStorage or re-establish sessions programmatically, do NOT navigate
 - **Transitive** — when a cached test has sub-steps with restore hooks, the framework calls ALL restore hooks in dependency order (deepest first). If test C composes B which composes login, and C is cached, the framework calls `login.restore → B.restore → C.restore`.
 - **Browser state detection** — the framework automatically detects when a test modifies browser state but has no restore hook, and emits a warning
 
@@ -381,4 +389,4 @@ Test runner has direct DB access via env vars. Volume mounts for dev: `framework
 10. **Unique resource names** to avoid collisions in parallel branches.
 11. **Add restore hooks for tests that modify browser state.** If your test sets cookies or localStorage, add a `restore` function to `defineTest()`. The framework warns if a test changes browser state without a restore hook.
 12. **Don't rely on browser state from composed sub-steps.** After `t.step()`, always navigate explicitly. Sub-steps may be cached and their browser effects skipped.
-13. **Outcomes should carry forward data needed by downstream restore hooks.** If your test composes `login`, include session data in your outcome so your restore hook can set cookies.
+13. **Outcomes should carry forward data needed by downstream restore hooks.** If your test composes a sub-step that modifies browser state, include the data needed for re-establishment in your outcome (e.g., credentials for re-login).
