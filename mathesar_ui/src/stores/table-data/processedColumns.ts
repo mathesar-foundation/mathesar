@@ -15,6 +15,7 @@ import {
   getDbTypeBasedInputCap,
   getDbTypeBasedSimpleInputCap,
   getDisplayFormatter,
+  getEnumInputCap,
   getInitialInputValue,
   getLinkedRecordInputCap,
 } from '@mathesar/components/cell-fabric/utils';
@@ -97,6 +98,7 @@ export class ProcessedColumn implements CellColumnFabric {
     columnIndex: number;
     constraints: RawConstraint[];
     hasEnhancedPrimaryKeyCell?: boolean;
+    enumLabels?: string[];
   }) {
     this.id = String(props.column.id);
     this.column = props.column;
@@ -136,22 +138,35 @@ export class ProcessedColumn implements CellColumnFabric {
       ? this.linkFk.referent_table_oid
       : undefined;
 
+    const isEnumColumn = this.abstractType.identifier === 'enum';
+    const enumValues = isEnumColumn ? props.enumLabels : undefined;
+
     this.cellComponentAndProps = getCellCap({
       cellInfo: this.abstractType.cellInfo,
       column: this.column,
       fkTargetTableId,
       pkTargetTableId: displayEnhancedPkCell ? this.tableOid : undefined,
+      enumValues,
     });
 
-    this.inputComponentAndProps = fkTargetTableId
-      ? getLinkedRecordInputCap({
-          recordSelectionOrchestratorFactory:
-            makeRecordSelectorOrchestratorFactory({
-              tableOid: fkTargetTableId,
-            }),
-          targetTableId: fkTargetTableId,
-        })
-      : getDbTypeBasedInputCap(this.column, this.abstractType.cellInfo);
+    if (fkTargetTableId) {
+      this.inputComponentAndProps = getLinkedRecordInputCap({
+        recordSelectionOrchestratorFactory:
+          makeRecordSelectorOrchestratorFactory({
+            tableOid: fkTargetTableId,
+          }),
+        targetTableId: fkTargetTableId,
+      });
+    } else if (isEnumColumn && enumValues) {
+      this.inputComponentAndProps = getEnumInputCap({
+        enumValues,
+      });
+    } else {
+      this.inputComponentAndProps = getDbTypeBasedInputCap(
+        this.column,
+        this.abstractType.cellInfo,
+      );
+    }
 
     this.simpleInputComponentAndProps =
       getDbTypeBasedSimpleInputCap(this.column, this.abstractType.cellInfo) ??
@@ -185,23 +200,28 @@ export class ProcessedColumn implements CellColumnFabric {
     })();
   }
 
-  withoutEnhancedPkCell() {
+  withoutEnhancedPkCell(enumLabels?: string[]) {
     return new ProcessedColumn({
       tableOid: this.tableOid,
       column: this.column,
       columnIndex: this.columnIndex,
       constraints: this.relevantConstraints,
       hasEnhancedPrimaryKeyCell: false,
+      enumLabels,
     });
   }
 }
 
 export function getFirstEditableColumn(
   columns: Iterable<ProcessedColumn>,
+  enumLabels?: Record<string, string[]>,
 ): ProcessedColumn | undefined {
   return execPipe(
     columns,
-    map((c) => c.withoutEnhancedPkCell()),
+    map((c) => {
+      const columnEnumLabels = enumLabels?.[c.id];
+      return c.withoutEnhancedPkCell(columnEnumLabels);
+    }),
     find((c) => c.isEditable),
   );
 }

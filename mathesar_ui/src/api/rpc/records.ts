@@ -127,6 +127,8 @@ export interface RecordsResponse {
   /** Keys are attnums. */
   download_links: Record<string, FileManifestColumnData>;
   joined_record_summaries: Record<string, RecordSummaryColumnData> | null;
+  /** Keys are column attnums (as strings). Values are the enum labels for that column. */
+  enum_labels: Record<string, string[]> | null;
 }
 
 export const records = {

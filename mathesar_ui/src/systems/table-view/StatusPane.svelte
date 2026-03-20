@@ -40,6 +40,7 @@
   $: ({ pagination } = meta);
   $: ({ leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords, persistedNewRecords } = recordsData);
+  $: enumLabels = recordsData.enumLabels;
   $: recordState = $state;
   $: columnsFetchStatus = columnsDataStore.fetchStatus;
   $: max = Math.min($totalCount ?? 0, rightBound);
@@ -70,7 +71,7 @@
     // the user can start editing immediately.
     selection.update((s) =>
       s.ofNewRecordDataEntryCell(
-        getFirstEditableColumn($processedColumns.values())?.id.toString(),
+        getFirstEditableColumn($processedColumns.values(), $enumLabels)?.id.toString(),
       ),
     );
   }

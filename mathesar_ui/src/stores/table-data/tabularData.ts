@@ -200,20 +200,29 @@ export class TabularData {
     this.table = props.table;
 
     this.processedColumns = derived(
-      [this.columnsDataStore.columns, this.constraintsDataStore],
-      ([columns, constraintsData]) =>
+      [
+        this.columnsDataStore.columns,
+        this.constraintsDataStore,
+        this.recordsData.enumLabels,
+      ],
+      ([columns, constraintsData, enumLabels]) =>
         orderProcessedColumns(
           new Map(
-            columns.map((column, columnIndex) => [
-              String(column.id),
-              new ProcessedColumn({
-                tableOid: this.table.oid,
-                column,
-                columnIndex,
-                constraints: constraintsData.constraints,
-                hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
-              }),
-            ]),
+            columns.map((column, columnIndex) => {
+              const columnIdStr = String(column.id);
+              const columnEnumLabels = enumLabels[columnIdStr];
+              return [
+                columnIdStr,
+                new ProcessedColumn({
+                  tableOid: this.table.oid,
+                  column,
+                  columnIndex,
+                  constraints: constraintsData.constraints,
+                  hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
+                  enumLabels: columnEnumLabels,
+                }),
+              ];
+            }),
           ),
           this.table,
         ),

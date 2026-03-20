@@ -41,6 +41,7 @@
     cellClientSideErrors,
   } = meta);
   $: ({ grouping, linkedRecordSummaries, fileManifests } = recordsData);
+  $: enumLabels = recordsData.enumLabels;
   $: isPlaceholderRow = isPlaceholderRecordRow(row);
   $: rowSelectionId = getRowSelectionId(row);
   $: creationStatus = $rowCreationStatus.get(row.identifier)?.state;
@@ -60,7 +61,7 @@
 
     // Select the first editable cell in the newly added row.
     const columns = $processedColumns.values();
-    const columnId = getFirstEditableColumn(columns)?.id.toString();
+    const columnId = getFirstEditableColumn(columns, $enumLabels)?.id.toString();
     if (!columnId) return;
     selection.update((s) => s.ofNewRecordDataEntryCell(columnId));
   }
