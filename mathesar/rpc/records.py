@@ -189,6 +189,7 @@ class RecordList(TypedDict):
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
     joined_record_summaries: dict
+    enum_labels: dict
     download_links: Optional[dict]
 
     @classmethod
@@ -200,6 +201,7 @@ class RecordList(TypedDict):
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
             joined_record_summaries=d.get("joined_record_summaries"),
+            enum_labels=d.get("enum_labels"),
             download_links=d.get("download_links") or None
         )
 
