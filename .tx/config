@@ -1,7 +1,7 @@
 [main]
 host = https://app.transifex.com
 
-[o:mathesar:p:mathesar:r:1ddc32ccfbc766536a5302dbfe05132e]
+[o:mathesar:p:mathesar:r:django]
 file_filter            = translations/<lang>/LC_MESSAGES/django.po
 source_file            = translations/en/LC_MESSAGES/django.po
 source_lang            = en
@@ -9,7 +9,7 @@ type                   = PO
 resource_name          = django
 replace_edited_strings = false
 
-[o:mathesar:p:mathesar:r:23897e6fd86c828760683099538d4710]
+[o:mathesar:p:mathesar:r:svelte]
 file_filter            = mathesar_ui/src/i18n/languages/<lang>/dict.json
 source_file            = mathesar_ui/src/i18n/languages/en/dict.json
 source_lang            = en
