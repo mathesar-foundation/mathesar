@@ -65,7 +65,8 @@ function getTableStructureAsyncStore(tableProps: TableStructureProps) {
                 column: c,
                 columnIndex: index,
                 constraints,
-                userTrackingAttnum: rawTableWithMetadata.metadata?.user_tracking_attnum,
+                userTrackingAttnum:
+                  rawTableWithMetadata.metadata?.user_tracking_attnum,
               }),
             ]),
           ),

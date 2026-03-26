@@ -91,7 +91,6 @@ export interface RequiredColumnMetadata {
    * If non-null, the column is treated as a user column.
    */
   user_display_field: 'full_name' | 'email' | 'username' | null;
-
 }
 
 /** The column metadata values, types as we get them from the API. */

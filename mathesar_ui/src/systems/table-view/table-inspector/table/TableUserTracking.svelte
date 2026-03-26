@@ -35,8 +35,7 @@
     })),
   ];
 
-  $: selectedOption =
-    options.find((o) => o.id === currentAttnum) ?? (options[0] as TrackingOption);
+  $: selectedOption = options.find((o) => o.id === currentAttnum) ?? options[0];
 
   let saveStatus: RequestStatus | undefined;
 
@@ -69,7 +68,8 @@
     {options}
     value={selectedOption}
     on:change={(e) => e.detail && handleChange(e.detail)}
-    disabled={!($currentRoleOwns ?? false) || saveStatus?.state === 'processing'}
+    disabled={!($currentRoleOwns ?? false) ||
+      saveStatus?.state === 'processing'}
     getLabel={(o) => o?.label ?? ''}
   />
 {/if}
