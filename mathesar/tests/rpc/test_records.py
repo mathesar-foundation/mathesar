@@ -135,7 +135,7 @@ def test_records_add(rf, monkeypatch, mocked_exec_msar_func):
     monkeypatch.setattr(records, 'connect', mock_connect)
     mock_table_meta = MagicMock()
     mock_table_meta.user_tracking_attnum = None
-    monkeypatch.setattr(records, 'get_table_meta_data', lambda *a: mock_table_meta)
+    monkeypatch.setattr(records, 'get_table_meta_data', lambda *_: mock_table_meta)
     expect_record = {
         "results": [record_def],
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
@@ -180,7 +180,7 @@ def test_records_patch(rf, monkeypatch, mocked_exec_msar_func):
     monkeypatch.setattr(records, 'connect', mock_connect)
     mock_table_meta = MagicMock()
     mock_table_meta.user_tracking_attnum = None
-    monkeypatch.setattr(records, 'get_table_meta_data', lambda *a: mock_table_meta)
+    monkeypatch.setattr(records, 'get_table_meta_data', lambda *_: mock_table_meta)
     expect_record = {
         "results": [record_def | {"3": "another"}],
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
