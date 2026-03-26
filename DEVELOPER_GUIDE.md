@@ -227,6 +227,93 @@ If you'd like to manually push or pull translations, follow the instructions in 
 
 1. Commit and push the changes to our repo.
 
+#### Activating a fully-translated language in the UI
+
+Once a language reaches 100% translation on Transifex (for both the `django` and `svelte` resources), follow these steps to add it to the app.
+
+1. Check translation completion via the [Transifex dashboard](https://app.transifex.com/mathesar/mathesar/dashboard/) or the API:
+
+    ```
+    curl -s -H "Authorization: Bearer $TX_TOKEN" \
+      "https://rest.api.transifex.com/resource_language_stats?filter%5Bproject%5D=o:mathesar:p:mathesar&filter%5Bresource%5D=o:mathesar:p:mathesar:r:23897e6fd86c828760683099538d4710"
+    ```
+
+1. Pull the translation files for the new language (e.g. `de` for German):
+
+    ```
+    TX_TOKEN=<transifex_api_token> tx pull -l de --force
+    ```
+
+    This creates two files:
+    - `translations/de/LC_MESSAGES/django.po`
+    - `mathesar_ui/src/i18n/languages/de/dict.json`
+
+1. Create `mathesar_ui/src/i18n/languages/de/index.ts` (copy from an existing language and substitute the language code):
+
+    ```ts
+    import { type LangObject, addTranslationsToGlobalWindowObject } from '../utils';
+
+    import deDict from './dict.json';
+
+    const lang: LangObject = {
+      language: 'de',
+      dictionary: deDict,
+    };
+
+    addTranslationsToGlobalWindowObject(lang);
+
+    export default lang;
+    ```
+
+1. Update `mathesar_ui/src/i18n/languages/utils.ts` — add the new code to the `Language` type:
+
+    ```ts
+    export type Language = 'en' | 'de' | 'es' | 'fr' | 'ja';
+    ```
+
+1. Update `mathesar_ui/src/global.d.ts` — add the new code to `Window.Mathesar.translations`:
+
+    ```ts
+    translations: {
+      de?: LanguageDictionary;
+      // ...
+    };
+    ```
+
+1. Update `mathesar_ui/src/i18n/index.ts` — register the loader:
+
+    ```ts
+    const loaders = {
+      // ...
+      de: () => import('./languages/de'),
+    };
+
+    // and inside initI18n():
+    register('de', () => loadDictionaryAsync('de'));
+    ```
+
+1. Update `mathesar_ui/vite.config.js` — add the language as a build entry point:
+
+    ```js
+    input: {
+      // ...
+      de: './src/i18n/languages/de/index.ts',
+    },
+    ```
+
+1. Update `config/settings/common_settings.py` — add the language to `LANGUAGES`:
+
+    ```python
+    LANGUAGES = [
+        # ...
+        ('de', 'German'),
+    ]
+    ```
+
+1. Run `npx svelte-check --tsconfig tsconfig.json --threshold warning` from `mathesar_ui/` to confirm no type errors.
+
+1. Commit and open a PR.
+
 
 ## Opening a shell in the container
 
