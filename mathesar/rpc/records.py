@@ -18,7 +18,7 @@ from db.records import (
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_columns_meta_data
-from mathesar.utils.tables import get_table_record_summary_templates
+from mathesar.utils.tables import get_table_meta_data, get_table_record_summary_templates
 from mathesar.utils.download_links import get_download_links
 from mathesar.utils.user_display import (
     apply_track_editing_user,
@@ -350,19 +350,16 @@ def list_(
             ),
         )
 
-    # Add download links for file columns
-    download_link_columns = [c.attnum for c in columns_meta_data if c.file_backend]
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns,
+        columns_meta_data,
     ) or None
 
-    # Add user display values for user columns
     user_summaries = get_user_linked_record_summaries(
         columns_meta_data, record_info.get("results", [])
     )
-    if user_summaries:
+    if user_summaries is not None:
         if record_info.get("linked_record_summaries") is None:
             record_info["linked_record_summaries"] = {}
         record_info["linked_record_summaries"].update(user_summaries)
@@ -417,19 +414,16 @@ def get(
             },
         )
 
-    # Add download links for file columns
-    download_link_columns = [c.attnum for c in columns_meta_data if c.file_backend]
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns,
+        columns_meta_data,
     ) or None
 
-    # Add user display values for user columns
     user_summaries = get_user_linked_record_summaries(
         columns_meta_data, record_info.get("results", [])
     )
-    if user_summaries:
+    if user_summaries is not None:
         if record_info.get("linked_record_summaries") is None:
             record_info["linked_record_summaries"] = {}
         record_info["linked_record_summaries"].update(user_summaries)
@@ -468,7 +462,8 @@ def add(
     """
     user = kwargs.get(REQUEST_KEY).user
     columns_meta_data = list(get_columns_meta_data(table_oid, database_id))
-    record_def = apply_track_editing_user(record_def, columns_meta_data, user.id)
+    table_meta_data = get_table_meta_data(table_oid, database_id)
+    record_def = apply_track_editing_user(record_def, table_meta_data, user.id)
 
     with connect(database_id, user) as conn:
         record_info = add_record_to_table(
@@ -481,11 +476,10 @@ def add(
             ),
         )
 
-    # Add user display values for user columns
     user_summaries = get_user_linked_record_summaries(
         columns_meta_data, record_info.get("results", [])
     )
-    if user_summaries:
+    if user_summaries is not None:
         if record_info.get("linked_record_summaries") is None:
             record_info["linked_record_summaries"] = {}
         record_info["linked_record_summaries"].update(user_summaries)
@@ -525,7 +519,8 @@ def patch(
     """
     user = kwargs.get(REQUEST_KEY).user
     columns_meta_data = list(get_columns_meta_data(table_oid, database_id))
-    record_def = apply_track_editing_user(record_def, columns_meta_data, user.id)
+    table_meta_data = get_table_meta_data(table_oid, database_id)
+    record_def = apply_track_editing_user(record_def, table_meta_data, user.id)
 
     with connect(database_id, user) as conn:
         record_info = patch_record_in_table(
@@ -539,11 +534,10 @@ def patch(
             ),
         )
 
-    # Add user display values for user columns
     user_summaries = get_user_linked_record_summaries(
         columns_meta_data, record_info.get("results", [])
     )
-    if user_summaries:
+    if user_summaries is not None:
         if record_info.get("linked_record_summaries") is None:
             record_info["linked_record_summaries"] = {}
         record_info["linked_record_summaries"].update(user_summaries)
@@ -625,19 +619,16 @@ def search(
             ),
         )
 
-    # Add download links for file columns
-    download_link_columns = [c.attnum for c in columns_meta_data if c.file_backend]
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns,
+        columns_meta_data,
     ) or None
 
-    # Add user display values for user columns
     user_summaries = get_user_linked_record_summaries(
         columns_meta_data, record_info.get("results", [])
     )
-    if user_summaries:
+    if user_summaries is not None:
         if record_info.get("linked_record_summaries") is None:
             record_info["linked_record_summaries"] = {}
         record_info["linked_record_summaries"].update(user_summaries)

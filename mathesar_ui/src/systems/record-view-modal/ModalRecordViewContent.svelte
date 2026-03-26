@@ -30,7 +30,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
   $: ({ processedColumns } = tableStructure);
   $: ({ recordPk, summary, fieldValues } = record);
   $: fieldPropsObjects = [...$processedColumns.values()]
-    .filter((c) => !c.column.metadata?.track_editing_user)
+    .filter((c) => !c.isUserTrackingColumn)
     .map((c) => ({
       processedColumn: c,
       field: optionalField($fieldValues.get(c.id)),
@@ -54,16 +54,13 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
     const processedColumn = $processedColumns.get(columnId);
     if (!processedColumn) return false;
 
-    // Only patch columns that are not primary keys and not track_editing_user columns.
+    // Only patch columns that are not primary keys and not auto-managed columns
+    // (e.g. user-tracking columns that are auto-populated by the backend).
     //
     // See https://github.com/mathesar-foundation/mathesar/issues/4318
-    //
-    // It would probably be better to check if the column is editable but we
-    // don't have that information here. It would be good to include that in the
-    // columns API response at some point.
     return (
       !processedColumn.column.primary_key &&
-      !processedColumn.column.metadata?.track_editing_user
+      !processedColumn.isUserTrackingColumn
     );
   }
 
@@ -86,7 +83,7 @@ TODO: Resolve code duplication between this file and RecordPageContent.svelte.
 
   <div class="fields">
     {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-      {#if !processedColumn.column.metadata?.track_editing_user}
+      {#if !processedColumn.isUserTrackingColumn}
         <DirectField
           {record}
           {processedColumn}

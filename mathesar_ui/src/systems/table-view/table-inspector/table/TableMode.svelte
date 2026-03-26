@@ -10,6 +10,7 @@
     tableInspectorTableLinksVisible,
     tableInspectorTablePropertiesVisible,
     tableInspectorTableRecordSummaryVisible,
+    tableInspectorTableUserTrackingVisible,
   } from '@mathesar/stores/localStorage';
   import { modal } from '@mathesar/stores/modal';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
@@ -24,6 +25,7 @@
   import TableDescription from './TableDescription.svelte';
   import TableName from './TableName.svelte';
   import TablePermissionsModal from './TablePermissionsModal.svelte';
+  import TableUserTracking from './TableUserTracking.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   const permissionModal = modal.spawnModalController();
@@ -74,6 +76,17 @@
     bind:isOpen={$tableInspectorTableRecordSummaryVisible}
   >
     <TableRecordSummaryConfig tabularData={$tabularData} />
+  </InspectorSection>
+
+  <InspectorSection
+    title={$_('user_tracking')}
+    bind:isOpen={$tableInspectorTableUserTrackingVisible}
+  >
+    <div slot="title">
+      {$_('user_tracking')}
+      <Help>{$_('user_tracking_help')}</Help>
+    </div>
+    <TableUserTracking />
   </InspectorSection>
 {/if}
 

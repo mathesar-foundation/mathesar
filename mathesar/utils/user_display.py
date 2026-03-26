@@ -25,11 +25,9 @@ def get_user_display_values(
     if not user_ids:
         return {}
 
-    # Fetch users in bulk
     users = User.objects.filter(id__in=user_ids)
     user_map = {user.id: user for user in users}
 
-    # Build display values using the specified display field
     display_values = {}
     for user_id in user_ids:
         user = user_map.get(user_id)
@@ -64,12 +62,10 @@ def get_user_linked_record_summaries(columns_meta_data, results):
     for column_attnum, display_field in user_columns:
         user_ids = set()
         for record in results:
-            user_id = record.get(str(column_attnum)) or record.get(column_attnum)
+            user_id = record.get(str(column_attnum))
             if user_id is not None:
                 try:
-                    user_ids.add(
-                        int(user_id) if not isinstance(user_id, int) else user_id
-                    )
+                    user_ids.add(int(user_id) if not isinstance(user_id, int) else user_id)
                 except (ValueError, TypeError):
                     continue
         if user_ids:
@@ -80,20 +76,21 @@ def get_user_linked_record_summaries(columns_meta_data, results):
     return linked_record_summaries if linked_record_summaries else None
 
 
-def apply_track_editing_user(record_def, columns_meta_data, user_id):
+def apply_track_editing_user(record_def, table_meta_data, user_id):
     """
-    Return a new record_def with track_editing_user columns set to the user ID.
+    Return a new record_def with the user-tracking column set to the user ID.
 
     Args:
         record_def: The original record definition dict
-        columns_meta_data: List of column metadata objects (already fetched)
+        table_meta_data: TableMetaData model instance (or None)
         user_id: The ID of the current user
 
     Returns:
-        A new dict with track_editing_user columns set to user_id
+        A new dict with the user_tracking_attnum column set to user_id,
+        or the original record_def if no tracking column is configured.
     """
+    if not table_meta_data or not table_meta_data.user_tracking_attnum:
+        return record_def
     result = dict(record_def)
-    for col in columns_meta_data:
-        if col.user_display_field and col.track_editing_user:
-            result[str(col.attnum)] = user_id
+    result[str(table_meta_data.user_tracking_attnum)] = user_id
     return result

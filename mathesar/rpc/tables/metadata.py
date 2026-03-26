@@ -22,6 +22,9 @@ class TableMetaDataRecord(TypedDict):
         column_order: The order in which columns of a table are displayed.
         record_summary_template: The record summary template.
         mathesar_added_pkey_attnum: The attnum of the most recently-set pkey column.
+        user_tracking_attnum: The attnum of the column used to auto-record the editing user.
+            When set, adding or patching a record will automatically populate this column
+            with the current user's ID.
     """
     id: int
     database_id: int
@@ -31,6 +34,7 @@ class TableMetaDataRecord(TypedDict):
     column_order: Optional[list[int]]
     record_summary_template: Optional[dict[str, Union[str, list[int]]]]
     mathesar_added_pkey_attnum: Optional[int]
+    user_tracking_attnum: Optional[int]
 
     @classmethod
     def from_model(cls, model):
@@ -43,6 +47,7 @@ class TableMetaDataRecord(TypedDict):
             column_order=model.column_order,
             record_summary_template=model.record_summary_template,
             mathesar_added_pkey_attnum=model.mathesar_added_pkey_attnum,
+            user_tracking_attnum=model.user_tracking_attnum,
         )
 
 
@@ -56,12 +61,14 @@ class TableMetaDataBlob(TypedDict):
         column_order: The order in which columns of a table are displayed.
         record_summary_template: The record summary template
         mathesar_added_pkey_attnum: The attnum of the most recently-set pkey column.
+        user_tracking_attnum: The attnum of the column used to auto-record the editing user.
     """
     data_file_id: Optional[int]
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
     record_summary_template: Optional[dict[str, Union[str, list[int]]]]
     mathesar_added_pkey_attnum: Optional[int]
+    user_tracking_attnum: Optional[int]
 
     @classmethod
     def from_model(cls, model):
@@ -71,6 +78,7 @@ class TableMetaDataBlob(TypedDict):
             column_order=model.column_order,
             record_summary_template=model.record_summary_template,
             mathesar_added_pkey_attnum=model.mathesar_added_pkey_attnum,
+            user_tracking_attnum=model.user_tracking_attnum,
         )
 
 

@@ -256,7 +256,6 @@ class ColumnMetaData(BaseModel):
         max_length=50,
         null=True
     )
-    track_editing_user = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
@@ -283,6 +282,7 @@ class TableMetaData(BaseModel):
     column_order = models.JSONField(null=True)
     record_summary_template = models.JSONField(null=True)
     mathesar_added_pkey_attnum = models.PositiveIntegerField(null=True)
+    user_tracking_attnum = models.SmallIntegerField(null=True)
 
     class Meta:
         constraints = [

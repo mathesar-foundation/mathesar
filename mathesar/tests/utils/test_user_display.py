@@ -19,13 +19,19 @@ def _make_user(id, full_name="", email="", username=""):
     return user
 
 
-def _make_column_meta(attnum, user_display_field=None, track_editing_user=False):
+def _make_column_meta(attnum, user_display_field=None):
     """Create a mock ColumnMetaData object."""
     col = MagicMock()
     col.attnum = attnum
     col.user_display_field = user_display_field
-    col.track_editing_user = track_editing_user
     return col
+
+
+def _make_table_meta(user_tracking_attnum=None):
+    """Create a mock TableMetaData object."""
+    meta = MagicMock()
+    meta.user_tracking_attnum = user_tracking_attnum
+    return meta
 
 
 class TestGetUserDisplayValues:
@@ -188,56 +194,36 @@ class TestGetUserLinkedRecordSummaries:
 
 
 class TestApplyTrackEditingUser:
-    def test_no_tracking_columns(self):
-        cols = [
-            _make_column_meta(1, user_display_field="full_name", track_editing_user=False),
-            _make_column_meta(2, user_display_field=None, track_editing_user=False),
-        ]
+    def test_no_table_meta(self):
+        """When table_meta_data is None, record_def is returned unchanged."""
         record_def = {"1": "some_value"}
-        result = ud.apply_track_editing_user(record_def, cols, 42)
+        result = ud.apply_track_editing_user(record_def, None, 42)
         assert result == {"1": "some_value"}
 
-    def test_single_tracking_column(self):
-        cols = [
-            _make_column_meta(1, user_display_field=None, track_editing_user=False),
-            _make_column_meta(5, user_display_field="full_name", track_editing_user=True),
-        ]
+    def test_no_tracking_attnum(self):
+        """When user_tracking_attnum is None, record_def is returned unchanged."""
+        table_meta = _make_table_meta(user_tracking_attnum=None)
         record_def = {"1": "some_value"}
-        result = ud.apply_track_editing_user(record_def, cols, 42)
+        result = ud.apply_track_editing_user(record_def, table_meta, 42)
+        assert result == {"1": "some_value"}
+
+    def test_tracking_column_set(self):
+        """When user_tracking_attnum is set, inject user_id under its string key."""
+        table_meta = _make_table_meta(user_tracking_attnum=5)
+        record_def = {"1": "some_value"}
+        result = ud.apply_track_editing_user(record_def, table_meta, 42)
         assert result == {"1": "some_value", "5": 42}
 
-    def test_multiple_tracking_columns(self):
-        cols = [
-            _make_column_meta(2, user_display_field="email", track_editing_user=True),
-            _make_column_meta(7, user_display_field="username", track_editing_user=True),
-        ]
-        record_def = {"1": "data"}
-        result = ud.apply_track_editing_user(record_def, cols, 99)
-        assert result == {"1": "data", "2": 99, "7": 99}
-
     def test_does_not_mutate_original(self):
-        cols = [
-            _make_column_meta(3, user_display_field="full_name", track_editing_user=True),
-        ]
+        table_meta = _make_table_meta(user_tracking_attnum=3)
         record_def = {"1": "original"}
-        result = ud.apply_track_editing_user(record_def, cols, 10)
+        result = ud.apply_track_editing_user(record_def, table_meta, 10)
         assert result == {"1": "original", "3": 10}
         assert record_def == {"1": "original"}
 
-    def test_requires_user_display_field(self):
-        """track_editing_user without user_display_field should not apply."""
-        cols = [
-            _make_column_meta(3, user_display_field=None, track_editing_user=True),
-        ]
-        record_def = {"1": "data"}
-        result = ud.apply_track_editing_user(record_def, cols, 42)
-        assert result == {"1": "data"}
-
     def test_overwrites_existing_value(self):
         """If the record already has a value for the tracking column, overwrite it."""
-        cols = [
-            _make_column_meta(3, user_display_field="full_name", track_editing_user=True),
-        ]
+        table_meta = _make_table_meta(user_tracking_attnum=3)
         record_def = {"1": "data", "3": 999}
-        result = ud.apply_track_editing_user(record_def, cols, 42)
+        result = ud.apply_track_editing_user(record_def, table_meta, 42)
         assert result == {"1": "data", "3": 42}

@@ -105,7 +105,8 @@ def _get_filename_for_uri(uri):
     return posixpath.split(uri)[-1]
 
 
-def get_download_links(request, results, keys):
+def get_download_links(request, results, columns_meta_data):
+    keys = [c.attnum for c in columns_meta_data if c.file_backend]
     return {
         key: get_links_details(
             request,

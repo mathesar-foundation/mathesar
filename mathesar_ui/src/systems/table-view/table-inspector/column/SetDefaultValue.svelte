@@ -10,7 +10,6 @@
   import { toast } from '@mathesar/stores/toast';
   import {
     CancelOrProceedButtonPair,
-    Help,
     LabeledInput,
     Radio,
   } from '@mathesar-component-library';
@@ -48,7 +47,6 @@
   }
 
   $: isDefaultNull = defaultMode === 'none';
-  $: isAutoSetEditor = defaultMode === 'auto_set_editor';
   $: isSetDefaultUser =
     defaultMode === 'set_default_user' || defaultMode === 'custom';
 
@@ -82,42 +80,21 @@
   async function save() {
     typeChangeState = { state: 'processing' };
     try {
-      // Update default value
-      const defaultRequest =
-        isDefaultNull || isAutoSetEditor
-          ? null
-          : {
-              // For user type columns, the default is always static (a user ID)
-              // For other types, preserve existing is_dynamic setting
-              is_dynamic:
-                defaultMode === 'set_default_user'
-                  ? false
-                  : !!column.column.default?.is_dynamic,
-              value: String(value),
-            };
+      const defaultRequest = isDefaultNull
+        ? null
+        : {
+            // For user type columns, the default is always static (a user ID)
+            // For other types, preserve existing is_dynamic setting
+            is_dynamic:
+              defaultMode === 'set_default_user'
+                ? false
+                : !!column.column.default?.is_dynamic,
+            value: String(value),
+          };
       await columnsDataStore.patch({
         id: column.column.id,
         default: defaultRequest,
       });
-
-      // Update metadata if this column type supports it
-      if (options.supportsMetadataUpdate && options.getMetadataUpdate) {
-        const metadataUpdate = options.getMetadataUpdate(defaultMode);
-        if (metadataUpdate) {
-          const currentMetadata = column.column.metadata ?? {};
-          await columnsDataStore.setDisplayOptions(
-            new Map([
-              [
-                column.column.id,
-                {
-                  ...currentMetadata,
-                  ...metadataUpdate,
-                },
-              ],
-            ]),
-          );
-        }
-      }
 
       typeChangeState = { state: 'success' };
     } catch (err) {
@@ -161,19 +138,6 @@
       {disabled}
     />
   </LabeledInput>
-  {#if options.availableModes.includes('auto_set_editor')}
-    <LabeledInput layout="inline-input-first">
-      <span slot="label">
-        {$_('default_value_auto_set_editor')}
-        <Help>{$_('default_value_auto_set_editor_help')}</Help>
-      </span>
-      <Radio
-        checked={isAutoSetEditor}
-        on:change={() => setDefaultMode('auto_set_editor')}
-        {disabled}
-      />
-    </LabeledInput>
-  {/if}
   {#if options.availableModes.includes('set_default_user')}
     <LabeledInput layout="inline-input-first">
       <span slot="label">{$_(options.customValueLabel)}</span>

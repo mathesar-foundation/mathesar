@@ -91,18 +91,24 @@ export class ProcessedColumn implements CellColumnFabric {
 
   readonly isEditable: boolean;
 
+  readonly isUserTrackingColumn: boolean;
+
+  readonly userTrackingAttnum: number | null | undefined;
+
   constructor(props: {
     tableOid: Table['oid'];
     column: RawColumnWithMetadata;
     columnIndex: number;
     constraints: RawConstraint[];
     hasEnhancedPrimaryKeyCell?: boolean;
+    userTrackingAttnum?: number | null;
   }) {
     this.id = String(props.column.id);
     this.column = props.column;
     this.columnIndex = props.columnIndex;
     this.tableOid = props.tableOid;
     this.hasEnhancedPrimaryKeyCell = props.hasEnhancedPrimaryKeyCell ?? true;
+    this.userTrackingAttnum = props.userTrackingAttnum;
 
     this.relevantConstraints = props.constraints.filter((c) =>
       c.columns.includes(this.column.id),
@@ -181,13 +187,18 @@ export class ProcessedColumn implements CellColumnFabric {
       if (isPk) {
         return !this.hasEnhancedPrimaryKeyCell && !hasDynamicDefault;
       }
-      // Disable editing for user columns with track_editing_user enabled
-      const isTrackEditingUser = !!this.column.metadata?.track_editing_user;
-      if (isTrackEditingUser) {
+      // Disable editing for the user-tracking column
+      if (
+        props.userTrackingAttnum != null &&
+        this.column.id === props.userTrackingAttnum
+      ) {
         return false;
       }
       return true;
     })();
+    this.isUserTrackingColumn =
+      props.userTrackingAttnum != null &&
+      this.column.id === props.userTrackingAttnum;
   }
 
   withoutEnhancedPkCell() {
@@ -197,6 +208,7 @@ export class ProcessedColumn implements CellColumnFabric {
       columnIndex: this.columnIndex,
       constraints: this.relevantConstraints,
       hasEnhancedPrimaryKeyCell: false,
+      userTrackingAttnum: this.userTrackingAttnum,
     });
   }
 }

@@ -9,7 +9,7 @@ from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
-from mathesar.utils.columns import get_columns_meta_data
+from mathesar.utils.tables import get_table_meta_data
 
 
 def validate_and_get_associated_role(user, database_id, associated_role_id=None):
@@ -205,6 +205,51 @@ def iterate_form_fields(fields, parent_field=None, depth=0, fields_to_pick=[]):
         )
 
 
+def _inject_user_tracking_fields(field_info_list, values, user, database_id):
+    """
+    Inject synthetic field entries for the user-tracking column in each insertion context.
+
+    For each unique (table_oid, parent_key, depth) insertion context in the form,
+    looks up the table's user_tracking_attnum and, if set and not already covered
+    by an explicit field, adds a synthetic field entry that sets that column to
+    the current user's ID.
+    """
+    insertion_contexts = {
+        (fi['table_oid'], fi['parent_key'], fi['depth'])
+        for fi in field_info_list
+    }
+    existing_columns = {
+        (fi['table_oid'], fi['parent_key'], fi['column_attnum'])
+        for fi in field_info_list
+    }
+    table_meta_cache = {}
+    synthetic_count = 0
+
+    for table_oid, parent_key, depth in insertion_contexts:
+        if table_oid not in table_meta_cache:
+            table_meta_cache[table_oid] = get_table_meta_data(table_oid, database_id)
+        table_meta = table_meta_cache[table_oid]
+        tracking_attnum = table_meta.user_tracking_attnum if table_meta else None
+        if not tracking_attnum:
+            continue
+
+        key_tuple = (table_oid, parent_key, tracking_attnum)
+        if key_tuple in existing_columns:
+            continue
+
+        synthetic_count += 1
+        key = f"__user_tracking_{table_oid}_{tracking_attnum}_{synthetic_count}"
+        field_info_list.append({
+            "key": key,
+            "parent_key": parent_key,
+            "column_attnum": tracking_attnum,
+            "table_oid": table_oid,
+            "depth": depth,
+        })
+        values[key] = user.id
+        existing_columns.add(key_tuple)
+
+
 def submit_form(form_token, values, user=None):
     """
     Submit a form.
@@ -213,13 +258,12 @@ def submit_form(form_token, values, user=None):
         form_token: The unique token of the form.
         values: A dict describing the values to insert.
         user: Optional Django user object. If provided and authenticated,
-            track_editing_user columns will be set to the user's ID.
-            If None or anonymous, these columns will remain unset (NULL).
+            the table's user_tracking_attnum column will be set to the user's ID.
+            If None or anonymous, that column will remain unset (NULL).
     """
     form_model = Form.objects.get(token=form_token)
     assert form_model.publish_public, 'This form does not accept submissions'
-    values = dict(values)
-    fields_to_pick = [i for i in values.keys() if isinstance(values[i], dict) and values[i].get('type') == 'pick']
+    fields_to_pick = [k for k, v in values.items() if isinstance(v, dict) and v.get('type') == 'pick']
     field_info_list = [
         {
             "key": field.key,
@@ -232,65 +276,10 @@ def submit_form(form_token, values, user=None):
             fields_to_pick=fields_to_pick
         )
     ]
+    values = dict(values)
 
-    # Set track_editing_user columns for authenticated users
     if user and user.is_authenticated and hasattr(user, 'id'):
-        # Collect insertion contexts from current fields.
-        # A context maps to one row insert (table + parent linkage).
-        insertion_contexts = []
-        seen_contexts = set()
-        for field_info in field_info_list:
-            context = (
-                field_info['table_oid'],
-                field_info['parent_key'],
-                field_info['depth'],
-            )
-            if context not in seen_contexts:
-                insertion_contexts.append({
-                    "table_oid": field_info['table_oid'],
-                    "parent_key": field_info['parent_key'],
-                    "depth": field_info['depth'],
-                })
-                seen_contexts.add(context)
-
-        existing_columns = {
-            (field_info['table_oid'], field_info['parent_key'], field_info['column_attnum'])
-            for field_info in field_info_list
-        }
-        metadata_cache = {}
-        synthetic_count = 0
-
-        for context in insertion_contexts:
-            table_oid = context['table_oid']
-            parent_key = context['parent_key']
-            depth = context['depth']
-            if table_oid not in metadata_cache:
-                metadata_cache[table_oid] = list(
-                    get_columns_meta_data(table_oid, form_model.database.id)
-                )
-            track_editing_columns = [
-                c.attnum for c in metadata_cache[table_oid]
-                if c.user_display_field and c.track_editing_user
-            ]
-
-            for column_attnum in track_editing_columns:
-                key_tuple = (table_oid, parent_key, column_attnum)
-                if key_tuple in existing_columns:
-                    continue
-
-                synthetic_count += 1
-                key = (
-                    f"__track_editing_user_{table_oid}_{column_attnum}_{synthetic_count}"
-                )
-                field_info_list.append({
-                    "key": key,
-                    "parent_key": parent_key,
-                    "column_attnum": column_attnum,
-                    "table_oid": table_oid,
-                    "depth": depth
-                })
-                values[key] = user.id
-                existing_columns.add(key_tuple)
+        _inject_user_tracking_fields(field_info_list, values, user, form_model.database.id)
 
     with form_model.connection as conn:
         form_insert(field_info_list, values, conn)

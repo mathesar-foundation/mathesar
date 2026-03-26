@@ -187,6 +187,7 @@ export class ColumnsDataStore extends EventHandler<{
         return metadata === undefined ? column : { ...column, metadata };
       }),
     );
+    await this.dispatch('columnPatched');
   }
 
   async changeType(spec: {

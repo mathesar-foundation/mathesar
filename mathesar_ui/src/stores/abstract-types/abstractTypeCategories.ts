@@ -446,21 +446,14 @@ export function mergeMetadataOnTypeChange(
     result = {
       ...result,
       user_display_field: result.user_display_field ?? 'username',
-      track_editing_user: result.track_editing_user ?? false,
     };
   } else if (metadata?.user_display_field != null) {
     // Clear user-specific metadata when changing away from user type
-    const {
-      user_display_field: userDisplayField,
-      track_editing_user: trackEditingUser,
-      ...rest
-    } = result;
+    const { user_display_field: userDisplayField, ...rest } = result;
     void userDisplayField;
-    void trackEditingUser;
     result = {
       ...rest,
       user_display_field: null,
-      track_editing_user: false,
     };
   }
 

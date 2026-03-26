@@ -24,8 +24,8 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="columnmetadata",
-            name="track_editing_user",
-            field=models.BooleanField(default=False),
+            model_name="tablemetadata",
+            name="user_tracking_attnum",
+            field=models.SmallIntegerField(null=True),
         ),
     ]
