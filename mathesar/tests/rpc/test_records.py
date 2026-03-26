@@ -9,6 +9,8 @@ Fixtures:
 import json
 from contextlib import contextmanager
 
+from unittest.mock import MagicMock
+
 from mathesar.rpc import records
 from mathesar.models.users import User
 
@@ -131,6 +133,9 @@ def test_records_add(rf, monkeypatch, mocked_exec_msar_func):
             raise AssertionError('incorrect parameters passed')
 
     monkeypatch.setattr(records, 'connect', mock_connect)
+    mock_table_meta = MagicMock()
+    mock_table_meta.user_tracking_attnum = None
+    monkeypatch.setattr(records, 'get_table_meta_data', lambda *a: mock_table_meta)
     expect_record = {
         "results": [record_def],
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
@@ -173,6 +178,9 @@ def test_records_patch(rf, monkeypatch, mocked_exec_msar_func):
             raise AssertionError('incorrect parameters passed')
 
     monkeypatch.setattr(records, 'connect', mock_connect)
+    mock_table_meta = MagicMock()
+    mock_table_meta.user_tracking_attnum = None
+    monkeypatch.setattr(records, 'get_table_meta_data', lambda *a: mock_table_meta)
     expect_record = {
         "results": [record_def | {"3": "another"}],
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
