@@ -192,6 +192,7 @@ class ColumnInfo(TypedDict):
     has_dependents: bool
     description: str
     current_role_priv: list[Literal['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']]
+    enum_labels: dict
 
     @classmethod
     def from_dict(cls, col_info):
@@ -205,6 +206,7 @@ class ColumnInfo(TypedDict):
             default=ColumnDefault.from_dict(col_info.get("default")),
             has_dependents=col_info["has_dependents"],
             description=col_info.get("description"),
+            enum_labels=col_info.get("enum_labels"),
             current_role_priv=col_info["current_role_priv"]
         )
 

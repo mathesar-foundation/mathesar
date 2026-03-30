@@ -923,7 +923,8 @@ CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
   "default" jsonb, -- the default for the column(if any).
   has_dependents boolean, -- is the column referenced by others.
   description text, -- The description of the column on the database.
-  current_role_priv jsonb -- Privileges of the current role on the column.
+  current_role_priv jsonb, -- Privileges of the current role on the column.
+  enum_labels jsonb
 ) AS $$
 SELECT
   attnum AS id,
@@ -937,7 +938,10 @@ SELECT
   msar.describe_column_default(tab_id, attnum) AS default,
   msar.has_dependents(tab_id, attnum) AS has_dependents,
   msar.col_description(tab_id, attnum) AS description,
-  msar.list_column_privileges_for_current_role(tab_id, attnum) AS current_role_priv
+  msar.list_column_privileges_for_current_role(tab_id, attnum) AS current_role_priv,
+  CASE WHEN pgt.typtype = 'e'
+    THEN msar.get_enum_labels(tab_id, attnum)
+    ELSE 'null'::jsonb END AS enum_labels
 FROM pg_catalog.pg_attribute pga
   LEFT JOIN pg_catalog.pg_index pgi ON pga.attrelid=pgi.indrelid
     AND pga.attnum=ANY(pgi.indkey) AND pgi.indisprimary
@@ -5159,18 +5163,18 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_enum_labels_for_tab(tab_id oid) RETURNS jsonb AS $$/*
+msar.get_enum_labels(tab_id oid, col_id smallint) RETURNS jsonb AS $$/*
 Returns a JSONB object mapping each enum column’s attnum to 
 its ordered list of enum labels for the given table OID.
 
 Args:
   tab_oid: The OID of the table for which we're getting enum labels.
 */
-SELECT jsonb_build_object(pga.attnum, jsonb_agg(pge.enumlabel ORDER BY pge.enumsortorder)) AS ej
+SELECT jsonb_agg(pge.enumlabel ORDER BY pge.enumsortorder) AS ej
   FROM pg_catalog.pg_attribute pga
   LEFT JOIN pg_catalog.pg_type pgt ON pga.atttypid = pgt.oid
   INNER JOIN pg_catalog.pg_enum pge ON pgt.oid = pge.enumtypid
-  WHERE pga.attrelid = tab_id
+  WHERE pga.attrelid = tab_id AND pga.attnum = col_id
 GROUP BY pga.attnum;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -5420,8 +5424,6 @@ BEGIN
       'SELECT COUNT(1) AS count_hack'
     )
   ) INTO records;
-  /* Populate records object with enum labels */
-  records := records || jsonb_build_object('enum_labels', msar.get_enum_labels_for_tab(tab_id));
   RETURN records;
 END;
 $$ LANGUAGE plpgsql STABLE;
