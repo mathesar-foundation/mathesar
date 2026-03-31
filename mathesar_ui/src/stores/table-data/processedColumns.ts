@@ -98,7 +98,7 @@ export class ProcessedColumn implements CellColumnFabric {
     columnIndex: number;
     constraints: RawConstraint[];
     hasEnhancedPrimaryKeyCell?: boolean;
-    enumLabels: string[] | null;
+    enumLabels: unknown[] | null;
   }) {
     this.id = String(props.column.id);
     this.column = props.column;
@@ -213,7 +213,7 @@ export class ProcessedColumn implements CellColumnFabric {
 }
 
 export function getFirstEditableColumn(
-  columns: Iterable<ProcessedColumn>
+  columns: Iterable<ProcessedColumn>,
 ): ProcessedColumn | undefined {
   return execPipe(
     columns,

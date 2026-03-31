@@ -1,3 +1,4 @@
+import { Select } from '@mathesar/component-library';
 import SingleSelectCell from './components/select/SingleSelectCell.svelte';
 import type { CellColumnLike, CellComponentFactory } from './typeDefinitions';
 
@@ -22,7 +23,7 @@ const enumType: CellComponentFactory = {
   ): ReturnType<CellComponentFactory['getInput']> => {
     const enumValues = (config?.enumValues ?? []) as string[];
     return {
-      component: SingleSelectCell,
+      component: Select,
       props: {
         options: enumValues,
         getLabel: (option?: string) => option ?? '',
@@ -30,11 +31,6 @@ const enumType: CellComponentFactory = {
       },
     };
   },
-  getSimpleInput: (
-    column: CellColumnLike,
-    config?: { enumValues?: unknown[] },
-  ): ReturnType<CellComponentFactory['getInput']> =>
-    enumType.getInput(column, config),
   getDisplayFormatter: () => String,
 };
 

@@ -201,7 +201,7 @@ export class TabularData {
 
     this.processedColumns = derived(
       [this.columnsDataStore.columns, this.constraintsDataStore],
-       ([columns, constraintsData]) =>
+      ([columns, constraintsData]) =>
         orderProcessedColumns(
           new Map(
             columns.map((column, columnIndex) => [
