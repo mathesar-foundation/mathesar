@@ -912,6 +912,23 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_enum_labels(tab_id oid, col_id smallint) RETURNS jsonb AS $$/*
+Returns a JSONB object mapping each enum column’s attnum to 
+its ordered list of enum labels for the given table OID.
+
+Args:
+  tab_oid: The OID of the table for which we're getting enum labels.
+*/
+SELECT jsonb_agg(pge.enumlabel ORDER BY pge.enumsortorder) AS ej
+  FROM pg_catalog.pg_attribute pga
+  LEFT JOIN pg_catalog.pg_type pgt ON pga.atttypid = pgt.oid
+  INNER JOIN pg_catalog.pg_enum pge ON pgt.oid = pge.enumtypid
+  WHERE pga.attrelid = tab_id AND pga.attnum = col_id
+GROUP BY pga.attnum;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
 (
   id smallint, -- The OID of the column.
@@ -5159,23 +5176,6 @@ SELECT string_agg(
   ), ', '
 )
 FROM fkey_map_cte;
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.get_enum_labels(tab_id oid, col_id smallint) RETURNS jsonb AS $$/*
-Returns a JSONB object mapping each enum column’s attnum to 
-its ordered list of enum labels for the given table OID.
-
-Args:
-  tab_oid: The OID of the table for which we're getting enum labels.
-*/
-SELECT jsonb_agg(pge.enumlabel ORDER BY pge.enumsortorder) AS ej
-  FROM pg_catalog.pg_attribute pga
-  LEFT JOIN pg_catalog.pg_type pgt ON pga.atttypid = pgt.oid
-  INNER JOIN pg_catalog.pg_enum pge ON pgt.oid = pge.enumtypid
-  WHERE pga.attrelid = tab_id AND pga.attnum = col_id
-GROUP BY pga.attnum;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
