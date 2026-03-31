@@ -98,7 +98,7 @@ export class ProcessedColumn implements CellColumnFabric {
     columnIndex: number;
     constraints: RawConstraint[];
     hasEnhancedPrimaryKeyCell?: boolean;
-    enumLabels?: string[];
+    enumLabels: string[] | null;
   }) {
     this.id = String(props.column.id);
     this.column = props.column;
@@ -200,28 +200,24 @@ export class ProcessedColumn implements CellColumnFabric {
     })();
   }
 
-  withoutEnhancedPkCell(enumLabels?: string[]) {
+  withoutEnhancedPkCell() {
     return new ProcessedColumn({
       tableOid: this.tableOid,
       column: this.column,
       columnIndex: this.columnIndex,
       constraints: this.relevantConstraints,
       hasEnhancedPrimaryKeyCell: false,
-      enumLabels,
+      enumLabels: this.column.enum_labels,
     });
   }
 }
 
 export function getFirstEditableColumn(
-  columns: Iterable<ProcessedColumn>,
-  enumLabels?: Record<string, string[]>,
+  columns: Iterable<ProcessedColumn>
 ): ProcessedColumn | undefined {
   return execPipe(
     columns,
-    map((c) => {
-      const columnEnumLabels = enumLabels?.[c.id];
-      return c.withoutEnhancedPkCell(columnEnumLabels);
-    }),
+    map((c) => c.withoutEnhancedPkCell()),
     find((c) => c.isEditable),
   );
 }

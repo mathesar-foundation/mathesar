@@ -191,8 +191,6 @@ export class RecordsData {
 
   fileManifests = new AssociatedCellData<FileManifest>();
 
-  enumLabels: Writable<Record<string, string[]>> = writable({});
-
   grouping: Writable<RecordGrouping | undefined>;
 
   totalCount: Writable<number | undefined>;
@@ -349,9 +347,6 @@ export class RecordsData {
         this.fileManifests.setFetchedValuesFromPrimitive(
           response.download_links,
         );
-      }
-      if (response.enum_labels) {
-        this.enumLabels.set(response.enum_labels);
       }
       this.fetchedRecordRows.set(
         response.results.map(
