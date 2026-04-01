@@ -149,7 +149,17 @@ export class ProcessedColumn implements CellColumnFabric {
       enumValues,
     });
 
-    if (fkTargetTableId) {
+  this.inputComponentAndProps = fkTargetTableId
+      ? getLinkedRecordInputCap({
+          recordSelectionOrchestratorFactory:
+            makeRecordSelectorOrchestratorFactory({
+              tableOid: fkTargetTableId,
+            }),
+          targetTableId: fkTargetTableId,
+        })
+      : getDbTypeBasedInputCap(this.column, this.abstractType.cellInfo);
+
+    /* if (fkTargetTableId) {
       this.inputComponentAndProps = getLinkedRecordInputCap({
         recordSelectionOrchestratorFactory:
           makeRecordSelectorOrchestratorFactory({
@@ -166,7 +176,7 @@ export class ProcessedColumn implements CellColumnFabric {
         this.column,
         this.abstractType.cellInfo,
       );
-    }
+    } */
 
     this.simpleInputComponentAndProps =
       getDbTypeBasedSimpleInputCap(this.column, this.abstractType.cellInfo) ??

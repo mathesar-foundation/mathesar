@@ -1,34 +1,37 @@
 import { Select } from '@mathesar/component-library';
 import SingleSelectCell from './components/select/SingleSelectCell.svelte';
-import type { CellColumnLike, CellComponentFactory } from './typeDefinitions';
+import type { CellComponentFactory } from './typeDefinitions';
+import { type RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
+import type {
+  SingleSelectCellExternalProps,
+} from './components/typeDefinitions';
+
+function getProps(
+  column: RawColumnWithMetadata,
+): SingleSelectCellExternalProps<string | null> {
+  const labels : unknown[] | null = column.enum_labels;
+  return {
+    options: labels ? [...labels] : [],
+    getLabel: (value?: string | null) => value ?? '',
+  };
+}
 
 const enumType: CellComponentFactory = {
   initialInputValue: undefined,
   get: (
-    column: CellColumnLike,
-    config?: { enumValues?: unknown[] },
+    column: RawColumnWithMetadata
   ): ReturnType<CellComponentFactory['get']> => {
-    const enumValues = (config?.enumValues ?? []) as string[];
     return {
       component: SingleSelectCell,
-      props: {
-        options: enumValues,
-        getLabel: (option?: string) => option ?? '',
-      },
+      props: getProps(column),
     };
   },
   getInput: (
-    column: CellColumnLike,
-    config?: { enumValues?: unknown[] },
+    column: RawColumnWithMetadata,
   ): ReturnType<CellComponentFactory['getInput']> => {
-    const enumValues = (config?.enumValues ?? []) as string[];
     return {
       component: Select,
-      props: {
-        options: enumValues,
-        getLabel: (option?: string) => option ?? '',
-        isActive: true,
-      },
+      props: getProps(column),
     };
   },
   getDisplayFormatter: () => String,

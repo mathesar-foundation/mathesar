@@ -89,6 +89,11 @@ export function getDbTypeBasedInputCap(
   const cellInfo =
     optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   const config = getCellConfiguration(column.type, cellInfo);
+  /* console.log("yo")
+  console.log(column);
+  console.log(cellInfo);
+  console.log(config);
+  console.log(DataTypes[cellInfo?.type ?? 'string'].getInput(column, config)); */
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
 
