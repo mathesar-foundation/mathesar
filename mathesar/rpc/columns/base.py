@@ -192,7 +192,7 @@ class ColumnInfo(TypedDict):
     has_dependents: bool
     description: str
     current_role_priv: list[Literal['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']]
-    enum_values: dict
+    enum_values: list
 
     @classmethod
     def from_dict(cls, col_info):
