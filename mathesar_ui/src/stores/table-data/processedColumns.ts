@@ -192,7 +192,6 @@ export class ProcessedColumn implements CellColumnFabric {
       columnIndex: this.columnIndex,
       constraints: this.relevantConstraints,
       hasEnhancedPrimaryKeyCell: false,
-      enumLabels: this.column.enum_labels,
     });
   }
 }

@@ -212,7 +212,7 @@ export class TabularData {
                 columnIndex,
                 constraints: constraintsData.constraints,
                 hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
-              })
+              }),
             ]),
           ),
           this.table,

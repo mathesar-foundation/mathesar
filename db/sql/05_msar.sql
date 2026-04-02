@@ -913,9 +913,9 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_enum_labels(tab_id oid, col_id smallint) RETURNS jsonb AS $$/*
+msar.get_enum_values(tab_id oid, col_id smallint) RETURNS jsonb AS $$/*
 Returns a JSONB object mapping each enum column’s attnum to 
-its ordered list of enum labels for the given table OID.
+its ordered list of enum values for the given table OID and column attnum.
 
 Args:
   tab_oid: The OID of the table for which we're getting enum labels.
@@ -941,7 +941,7 @@ CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
   has_dependents boolean, -- is the column referenced by others.
   description text, -- The description of the column on the database.
   current_role_priv jsonb, -- Privileges of the current role on the column.
-  enum_labels jsonb
+  enum_values jsonb -- List of valid enum values for an enum column.
 ) AS $$
 SELECT
   attnum AS id,
@@ -957,8 +957,8 @@ SELECT
   msar.col_description(tab_id, attnum) AS description,
   msar.list_column_privileges_for_current_role(tab_id, attnum) AS current_role_priv,
   CASE WHEN pgt.typtype = 'e'
-    THEN msar.get_enum_labels(tab_id, attnum)
-    ELSE 'null'::jsonb END AS enum_labels
+    THEN msar.get_enum_values(tab_id, attnum)
+    ELSE 'null'::jsonb END AS enum_values
 FROM pg_catalog.pg_attribute pga
   LEFT JOIN pg_catalog.pg_index pgi ON pga.attrelid=pgi.indrelid
     AND pga.attnum=ANY(pgi.indkey) AND pgi.indisprimary

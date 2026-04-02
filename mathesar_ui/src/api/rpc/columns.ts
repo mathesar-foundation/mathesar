@@ -58,7 +58,7 @@ interface RawColumn {
   default: ColumnDefault | null;
   has_dependents: boolean;
   current_role_priv: ColumnPrivilege[];
-  enum_labels: unknown[] | null;
+  enum_values: unknown[] | null;
 }
 
 /**

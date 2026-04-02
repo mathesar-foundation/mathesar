@@ -9,7 +9,7 @@ import type {
 function getProps(
   column: RawColumnWithMetadata,
 ): SingleSelectCellExternalProps<string | null> {
-  const labels : unknown[] | null = column.enum_labels;
+  const labels : unknown[] | null = column.enum_values;
   return {
     options: labels ? [...labels] : [],
     getLabel: (value?: string | null) => value ?? '',
