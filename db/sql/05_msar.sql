@@ -918,7 +918,8 @@ Returns a JSONB object mapping each enum column’s attnum to
 its ordered list of enum values for the given table OID and column attnum.
 
 Args:
-  tab_oid: The OID of the table for which we're getting enum labels.
+  tab_oid: The OID of the table.
+  col_id: The attnum of the column for which we're getting enum labels.
 */
 SELECT jsonb_agg(pge.enumlabel ORDER BY pge.enumsortorder) AS ej
   FROM pg_catalog.pg_attribute pga
