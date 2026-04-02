@@ -205,7 +205,7 @@ const typesResponse: AbstractTypeResponse[] = [
   {
     identifier: 'enum',
     name: 'Enum',
-    db_types: [DB_TYPES.ENUM], /* this needs to be filled automatically based on the db type */
+    db_types: [DB_TYPES.ENUM],
   },
   {
     identifier: 'money',

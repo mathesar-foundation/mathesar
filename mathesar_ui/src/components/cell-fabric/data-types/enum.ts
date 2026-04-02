@@ -2,9 +2,7 @@ import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import { Select } from '@mathesar/component-library';
 
 import SingleSelectCell from './components/select/SingleSelectCell.svelte';
-import type {
-  SingleSelectCellExternalProps,
-} from './components/typeDefinitions';
+import type { SingleSelectCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
 
 function getProps(
@@ -20,17 +18,17 @@ function getProps(
 const enumType: CellComponentFactory = {
   initialInputValue: undefined,
   get: (
-    column: RawColumnWithMetadata
+    column: RawColumnWithMetadata,
   ): ReturnType<CellComponentFactory['get']> => ({
-      component: SingleSelectCell,
-      props: getProps(column),
-    }),
+    component: SingleSelectCell,
+    props: getProps(column),
+  }),
   getInput: (
     column: RawColumnWithMetadata,
   ): ReturnType<CellComponentFactory['getInput']> => ({
-      component: Select,
-      props: getProps(column),
-    }),
+    component: Select,
+    props: getProps(column),
+  }),
   getDisplayFormatter: () => String,
 };
 
