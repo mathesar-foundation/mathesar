@@ -1,9 +1,9 @@
-import { iconUiTypeUnknown } from '@mathesar/icons';
+import { iconUiTypeEnum } from '@mathesar/icons';
 
 import type { AbstractTypeConfiguration } from '../types';
 
 const enumType: AbstractTypeConfiguration = {
-  getIcon: () => ({ ...iconUiTypeUnknown, label: 'Enum' }),
+  getIcon: () => ({ ...iconUiTypeEnum, label: 'Enum' }),
   cellInfo: {
     type: 'enum',
   },
