@@ -30,7 +30,6 @@ export function getCellCap({
   fkTargetTableId,
   pkTargetTableId,
   joinedColumnInfo,
-  enumValues,
 }: {
   cellInfo: CellInfo;
   column: CellColumnLike;
@@ -45,7 +44,6 @@ export function getCellCap({
    */
   pkTargetTableId?: Table['oid'];
   joinedColumnInfo?: JoinedColumnInfo;
-  enumValues?: unknown[];
 }): ComponentAndProps {
   if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
@@ -76,9 +74,6 @@ export function getCellCap({
   }
 
   const config = getCellConfiguration(column.type, cellInfo);
-  if (enumValues && cellInfo.type === 'enum') {
-    return DataTypes.enum.get(column, { ...config, enumValues });
-  }
   return DataTypes[cellInfo?.type ?? 'string'].get(column, config);
 }
 
@@ -89,11 +84,6 @@ export function getDbTypeBasedInputCap(
   const cellInfo =
     optionalCellInfo ?? getCellInfo(column.type, column.metadata);
   const config = getCellConfiguration(column.type, cellInfo);
-  /* console.log("yo")
-  console.log(column);
-  console.log(cellInfo);
-  console.log(config);
-  console.log(DataTypes[cellInfo?.type ?? 'string'].getInput(column, config)); */
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
 
@@ -113,15 +103,6 @@ export function getLinkedRecordInputCap(
   props: LinkedRecordInputExternalProps,
 ): ComponentAndProps {
   return { component: LinkedRecordInput, props };
-}
-
-export interface EnumInputCapProps {
-  enumValues: unknown[];
-}
-
-export function getEnumInputCap(props: EnumInputCapProps): ComponentAndProps {
-  const config = { enumValues: props.enumValues };
-  return DataTypes.enum.getInput({ type: '' } as CellColumnLike, config);
 }
 
 export function getInitialInputValue(

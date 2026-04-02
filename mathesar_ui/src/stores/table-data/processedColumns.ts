@@ -15,7 +15,6 @@ import {
   getDbTypeBasedInputCap,
   getDbTypeBasedSimpleInputCap,
   getDisplayFormatter,
-  getEnumInputCap,
   getInitialInputValue,
   getLinkedRecordInputCap,
 } from '@mathesar/components/cell-fabric/utils';
@@ -98,7 +97,6 @@ export class ProcessedColumn implements CellColumnFabric {
     columnIndex: number;
     constraints: RawConstraint[];
     hasEnhancedPrimaryKeyCell?: boolean;
-    enumLabels: unknown[] | null;
   }) {
     this.id = String(props.column.id);
     this.column = props.column;
@@ -138,18 +136,14 @@ export class ProcessedColumn implements CellColumnFabric {
       ? this.linkFk.referent_table_oid
       : undefined;
 
-    const isEnumColumn = this.abstractType.identifier === 'enum';
-    const enumValues = isEnumColumn ? props.enumLabels : undefined;
-
     this.cellComponentAndProps = getCellCap({
       cellInfo: this.abstractType.cellInfo,
       column: this.column,
       fkTargetTableId,
       pkTargetTableId: displayEnhancedPkCell ? this.tableOid : undefined,
-      enumValues,
     });
 
-  this.inputComponentAndProps = fkTargetTableId
+    this.inputComponentAndProps = fkTargetTableId
       ? getLinkedRecordInputCap({
           recordSelectionOrchestratorFactory:
             makeRecordSelectorOrchestratorFactory({
@@ -158,25 +152,6 @@ export class ProcessedColumn implements CellColumnFabric {
           targetTableId: fkTargetTableId,
         })
       : getDbTypeBasedInputCap(this.column, this.abstractType.cellInfo);
-
-    /* if (fkTargetTableId) {
-      this.inputComponentAndProps = getLinkedRecordInputCap({
-        recordSelectionOrchestratorFactory:
-          makeRecordSelectorOrchestratorFactory({
-            tableOid: fkTargetTableId,
-          }),
-        targetTableId: fkTargetTableId,
-      });
-    } else if (isEnumColumn && enumValues) {
-      this.inputComponentAndProps = getEnumInputCap({
-        enumValues,
-      });
-    } else {
-      this.inputComponentAndProps = getDbTypeBasedInputCap(
-        this.column,
-        this.abstractType.cellInfo,
-      );
-    } */
 
     this.simpleInputComponentAndProps =
       getDbTypeBasedSimpleInputCap(this.column, this.abstractType.cellInfo) ??
