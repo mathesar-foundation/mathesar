@@ -8,7 +8,7 @@ import type { CellComponentFactory } from './typeDefinitions';
 function getProps(
   column: RawColumnWithMetadata,
 ): SingleSelectCellExternalProps<string | null> {
-  const labels: unknown[] | null = column.enum_values;
+  const labels: string[] | null = column.enum_values;
   return {
     options: labels ? [...labels] : [],
     getLabel: (value?: string | null) => value ?? '',
