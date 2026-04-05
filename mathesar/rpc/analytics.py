@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing analytics.
 """
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, Union
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.analytics import (
     is_analytics_enabled,
@@ -32,6 +32,7 @@ class AnalyticsReport(TypedDict):
         exploration_count: The number of explorations.
         form_count: The number of forms.
         public_form_count: The number of published forms.
+        is_dockerized: Whether Mathesar is running inside a Docker container.
     """
     installation_id: Optional[str]
     mathesar_version: str
@@ -45,6 +46,7 @@ class AnalyticsReport(TypedDict):
     exploration_count: int
     form_count: int
     public_form_count: int
+    is_dockerized: Union[bool, None]
 
     @classmethod
     def from_dict(cls, d):
