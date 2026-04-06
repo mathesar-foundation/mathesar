@@ -24,6 +24,7 @@ export interface BaseCommonData {
   supported_languages: Record<string, string>;
   is_authenticated: boolean;
   file_backends: { backend: string; anonymous_access: boolean }[] | null;
+  custom_logo_url: string | null;
 }
 
 export interface AuthenticatedCommonData extends BaseCommonData {

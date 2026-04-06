@@ -1,14 +1,23 @@
 <script lang="ts">
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
+
   import Logo from './Logo.svelte';
   import MathesarName from './MathesarName.svelte';
+
+  const commonData = preloadCommonData();
+  const { custom_logo_url } = commonData;
 
   export let href: string;
   export let compactLayout = false;
 </script>
 
 <a {...$$restProps} {href} class="home-link" class:compact={compactLayout}>
-  <Logo />
-  <div class="mathesar"><MathesarName /></div>
+  {#if custom_logo_url}
+    <img src={custom_logo_url} alt="Custom Logo" class="custom-logo" />
+  {:else}
+    <Logo />
+    <div class="mathesar"><MathesarName /></div>
+  {/if}
 </a>
 
 <style>
@@ -32,5 +41,9 @@
   }
   .home-link.compact .mathesar {
     display: none;
+  }
+  .custom-logo {
+    height: 1.5rem;
+    object-fit: contain;
   }
 </style>
