@@ -9,7 +9,11 @@ function getProps(
   column: RawColumnWithMetadata,
 ): SingleSelectCellExternalProps<string | null> {
   return {
-    options: column.type_options?.enum_values ?? [],
+    autoSelect: 'none',
+    options: [
+      ...(column.nullable ? [null] : []),
+      ...(column.type_options?.enum_values ?? []),
+    ],
     getLabel: (value?: string | null) => value ?? '',
   };
 }
