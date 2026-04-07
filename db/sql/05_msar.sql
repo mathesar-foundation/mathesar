@@ -812,6 +812,7 @@ SELECT nullif(
       )
     WHEN (SELECT typtype FROM pg_type WHERE oid = typ_id) = 'e' THEN
       jsonb_build_object(
+        'original_type', typ_id::regtype::text,
         'enum_values',
         (SELECT jsonb_agg(enumlabel ORDER BY enumsortorder)
          FROM pg_catalog.pg_enum WHERE enumtypid = typ_id::oid)
@@ -821,7 +822,14 @@ SELECT nullif(
   || CASE
     WHEN typ_ndims>0 THEN
       -- This string wrangling is debatably dubious, but avoids a slow join.
-      jsonb_build_object('item_type', rtrim(typ_id::regtype::text, '[]'))
+      jsonb_build_object(
+        'item_type',
+        CASE
+          WHEN (SELECT typtype FROM pg_type WHERE oid = (SELECT typelem FROM pg_type WHERE oid = typ_id)) = 'e'
+          THEN '_enum'
+          ELSE rtrim(typ_id::regtype::text, '[]')
+        END
+      )
     ELSE '{}'
   END,
   '{}'
@@ -937,7 +945,7 @@ SELECT
   attnum AS id,
   attname AS name,
   CASE WHEN attndims>0 THEN '_array'
-    WHEN pgt.typtype = 'e' THEN 'enum'
+    WHEN pgt.typtype = 'e' THEN '_enum'
     ELSE atttypid::regtype::text END AS type,
   msar.get_type_options(atttypid, atttypmod, attndims) AS type_options,
   NOT attnotnull AS nullable,

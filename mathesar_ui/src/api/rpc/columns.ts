@@ -30,6 +30,9 @@ export interface ColumnTypeOptions {
   /** The member type for arrays.  */
   item_type?: string | null;
 
+  /** The actual PostgreSQL type name for enum types. */
+  original_type?: string | null;
+
   /** An ordered list of valid enum labels. */
   enum_values?: string[] | null;
 }
