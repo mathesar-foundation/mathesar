@@ -159,7 +159,7 @@ export type CheckBoxCellProps = CellTypeProps<boolean>;
 
 export type SingleSelectCellExternalProps<Option> = Pick<
   SelectProps<Option>,
-  'options' | 'getLabel'
+  'options' | 'getLabel' | 'autoSelect'
 >;
 
 export interface SingleSelectCellProps<Option>

@@ -20,7 +20,8 @@ export type SimpleCellDataTypes =
   | 'money'
   | 'time'
   | 'datetime'
-  | 'file';
+  | 'file'
+  | 'enum';
 
 export type CompoundCellDataTypes = 'array';
 
