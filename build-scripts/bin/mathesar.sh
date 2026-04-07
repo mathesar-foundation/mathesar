@@ -11,6 +11,7 @@ include_source "../common_utilities.sh"
 #=======CONFIGURATIONS=========================================================
 
 MATHESAR_PORT=8000
+MATHESAR_ADDR="0.0.0.0"
 
 SCRIPT_NAME=$(basename "$0")
 
@@ -220,7 +221,7 @@ run_mathesar() {
   local gunicorn_args
   gunicorn_args=(
     config.wsgi
-    -b "0.0.0.0:${MATHESAR_PORT}"
+    -b "${MATHESAR_ADDR}:${MATHESAR_PORT}"
     --chdir "${BASE_DIR}"
   )
   if [[ "${DEBUG}" = "true" ]]; then
@@ -261,6 +262,7 @@ Commands:
 
       Options:
         --port <port>, -p <port>        Specify the port for Mathesar's web service (default is 8000).
+        --addr <addr>, -a <addr>        Specify the bind addr for Mathesar's web service (default is 0.0.0.0).        
 
       Advanced options (for CI/CD):
         --prefer-exported-env, -e       Prefer existing exported environment variables over the .env file.
@@ -346,6 +348,14 @@ if [ "${COMMAND}" = "run" ]; then
           usage_err "The --port/-p option requires an argument."
         fi
         ;;
+      --addr|-a)
+        if [ -n "$2" ]; then
+          MATHESAR_ADDR="$2"
+          shift 2
+        else
+          usage_err "The --addr/-a option requires an argument."
+        fi
+        ;;        
       --prefer-exported-env|-e)
         PREFER_EXPORTED_ENV=true
         shift
