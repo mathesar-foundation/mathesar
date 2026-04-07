@@ -424,8 +424,13 @@ export function mergeMetadataOnTypeChange(
 }
 
 export function getAllowedAbstractTypesForNewColumn() {
+  const typesDisallowedForNewColumnCreation = new Set([
+    ...Object.keys(comboAbstractTypeCategories),
+    abstractTypeCategory.Enum,
+  ]);
+
   return [...abstractTypesMap.values(), fileAbstractType]
-    .filter((type) => !comboAbstractTypeCategories[type.identifier])
+    .filter((type) => !typesDisallowedForNewColumnCreation.has(type.identifier))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
