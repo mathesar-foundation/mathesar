@@ -20,6 +20,7 @@ const numericallyOperableTypesParams = {
   [abstractTypeCategory.Duration]: [abstractTypeCategory.Duration],
   [abstractTypeCategory.Number]: [abstractTypeCategory.Number],
   [abstractTypeCategory.Money]: [abstractTypeCategory.Money],
+  [abstractTypeCategory.Enum]: [abstractTypeCategory.Enum],
 };
 
 function constructAliasMapForTypes(
