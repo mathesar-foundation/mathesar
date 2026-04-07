@@ -35,12 +35,16 @@ class TypeOptions(TypedDict, total=False):
         fields: Which time fields are stored. See Postgres docs.
         length: The maximum length of a character-type field.
         item_type: The member type for arrays.
+        original_type: The actual PostgreSQL type name for enum types.
+        enum_values: An ordered list of valid enum labels.
     """
     precision: int
     scale: int
     fields: str
     length: int
     item_type: str
+    original_type: str
+    enum_values: list
 
     @classmethod
     def from_dict(cls, type_options):
@@ -54,6 +58,8 @@ class TypeOptions(TypedDict, total=False):
             fields=type_options.get("fields"),
             length=type_options.get("length"),
             item_type=type_options.get("item_type"),
+            original_type=type_options.get("original_type"),
+            enum_values=type_options.get("enum_values"),
         )
         reduced_keys = {k: v for k, v in all_keys.items() if v is not None}
         if reduced_keys != {}:
