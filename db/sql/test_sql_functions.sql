@@ -3110,7 +3110,7 @@ BEGIN
     $j${
       "id": 1, "name": "id", "type": "integer",
       "default": {"value": "identity", "is_dynamic": true},
-      "nullable": false, "description": null, "enum_values": null, "primary_key": true,
+      "nullable": false, "description": null, "primary_key": true,
       "type_options": null, "has_dependents": true
     }$j$
   );
@@ -3124,7 +3124,7 @@ BEGIN
     (col_info -> 1) - ARRAY['current_role_priv'],
     $j${
       "id": 2, "name": "num_plain", "type": "numeric", "default": null, "nullable": false,
-      "description": null, "enum_values": null, "primary_key": false,
+      "description": null, "primary_key": false,
       "type_options": {"scale": null, "precision": null}, "has_dependents": false
     }$j$
   );
@@ -3138,7 +3138,7 @@ BEGIN
     (col_info -> 2) - ARRAY['current_role_priv'],
     $j${
       "id": 3, "name": "var_128", "type": "character varying", "default": null, "nullable": true,
-      "description": null, "enum_values": null, "primary_key": false,
+      "description": null, "primary_key": false,
       "type_options": {"length": 128}, "has_dependents": false
     }$j$
   );
@@ -3152,7 +3152,7 @@ BEGIN
     (col_info -> 3) - ARRAY['current_role_priv'],
     $j${
       "id": 4, "name": "txt", "type": "text", "default": {"value": "abc", "is_dynamic": false},
-      "nullable": true, "description": "A super comment ;", "enum_values": null,
+      "nullable": true, "description": "A super comment ;",
       "primary_key": false, "type_options": null, "has_dependents": false
     }$j$
   );
@@ -3167,7 +3167,7 @@ BEGIN
     $j${
       "id": 5, "name": "tst", "type": "timestamp without time zone",
       "default": {"value": "now()", "is_dynamic": true}, "nullable": true, "description": null,
-      "enum_values": null, "primary_key": false, "type_options": {"precision": null},
+      "primary_key": false, "type_options": {"precision": null},
       "has_dependents": false
     }$j$
   );
@@ -3181,7 +3181,7 @@ BEGIN
     (col_info -> 5) - ARRAY['current_role_priv'],
     $j${
       "id": 6, "name": "int_arr", "type": "_array", "default": null, "nullable": true,
-      "description": null, "enum_values": null, "primary_key": false,
+      "description": null, "primary_key": false,
       "type_options": {"item_type": "integer"}, "has_dependents": false
     }$j$
   );
@@ -3195,7 +3195,7 @@ BEGIN
     (col_info -> 6) - ARRAY['current_role_priv'],
     $j${
       "id": 7, "name": "num_opt_arr", "type": "_array", "default": null, "nullable": true,
-      "description": null, "enum_values": null, "primary_key": false,
+      "description": null, "primary_key": false,
       "type_options": {"scale": 10, "item_type": "numeric", "precision": 15},
       "has_dependents": false
     }$j$

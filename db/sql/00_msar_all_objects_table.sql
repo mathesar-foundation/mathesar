@@ -1107,7 +1107,6 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.get_database_name(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_default_summary_column(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_duplicate_col_defs(oid,smallint[],text[],boolean)', 'FUNCTION', NULL),
-  ('msar', 'msar.get_enum_values(oid,smallint)', 'FUNCTION', NULL),
   ('msar', 'msar.get_extracted_col_def_jsonb(oid,integer[])', 'FUNCTION', NULL),
   ('msar', 'msar.get_extracted_con_def_jsonb(oid,integer[])', 'FUNCTION', NULL),
   ('msar', 'msar.get_fkey_action_from_char("char")', 'FUNCTION', NULL),

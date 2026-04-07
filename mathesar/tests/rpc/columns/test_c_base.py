@@ -37,7 +37,6 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'nullable': False, 'description': None, 'primary_key': True,
             'type_options': None,
             'has_dependents': True,
-            'enum_values': None,
             'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 2, 'name': 'numcol', 'type': 'numeric',
@@ -47,7 +46,6 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'primary_key': False,
             'type_options': None,
             'has_dependents': False,
-            'enum_values': None,
             'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 4, 'name': 'numcolmod', 'type': 'numeric',
@@ -55,7 +53,6 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'scale': 3, 'precision': 5},
             'has_dependents': False,
-            'enum_values': None,
             'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
@@ -63,7 +60,6 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'fields': 'day to second'},
             'has_dependents': False,
-            'enum_values': None,
             'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }, {
             'id': 10, 'name': 'arrcol', 'type': '_array',
@@ -71,7 +67,6 @@ def test_columns_list(rf, monkeypatch, mocked_exec_msar_func):
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'item_type': 'character varying', 'length': 3},
             'has_dependents': False,
-            'enum_values': None,
             'current_role_priv': ['SELECT', 'INSERT', 'UPDATE']
         }
     ]

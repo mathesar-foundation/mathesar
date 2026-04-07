@@ -87,6 +87,7 @@ export function columnTypeOptionsAreEqual(
     length: null,
     fields: null,
     item_type: null,
+    enum_values: null,
   };
   const fields = Object.keys(fieldsObj) as TypeOption[];
 

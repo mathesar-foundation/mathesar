@@ -35,12 +35,14 @@ class TypeOptions(TypedDict, total=False):
         fields: Which time fields are stored. See Postgres docs.
         length: The maximum length of a character-type field.
         item_type: The member type for arrays.
+        enum_values: An ordered list of valid enum labels.
     """
     precision: int
     scale: int
     fields: str
     length: int
     item_type: str
+    enum_values: list
 
     @classmethod
     def from_dict(cls, type_options):
@@ -54,6 +56,7 @@ class TypeOptions(TypedDict, total=False):
             fields=type_options.get("fields"),
             length=type_options.get("length"),
             item_type=type_options.get("item_type"),
+            enum_values=type_options.get("enum_values"),
         )
         reduced_keys = {k: v for k, v in all_keys.items() if v is not None}
         if reduced_keys != {}:
@@ -192,7 +195,6 @@ class ColumnInfo(TypedDict):
     has_dependents: bool
     description: str
     current_role_priv: list[Literal['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']]
-    enum_values: list
 
     @classmethod
     def from_dict(cls, col_info):
@@ -206,7 +208,6 @@ class ColumnInfo(TypedDict):
             default=ColumnDefault.from_dict(col_info.get("default")),
             has_dependents=col_info["has_dependents"],
             description=col_info.get("description"),
-            enum_values=col_info.get("enum_values"),
             current_role_priv=col_info["current_role_priv"]
         )
 

@@ -776,6 +776,7 @@ by the input type, but the keys will be a subset of:
   fields: See PostgreSQL documentation of the `interval` type.
   length: Applies to "text" types where the user can specify the length.
   item_type: Gives the type of array members for array-types
+  enum_values: An ordered list of valid enum labels for enum types.
 
 Args:
   typ_id: an OID or valid type representing string will work here.
@@ -808,6 +809,12 @@ SELECT nullif(
       -- For all these types, the typmod is equal to the precision.
       jsonb_build_object(
         'precision', nullif(typ_mod, -1)
+      )
+    WHEN (SELECT typtype FROM pg_type WHERE oid = typ_id) = 'e' THEN
+      jsonb_build_object(
+        'enum_values',
+        (SELECT jsonb_agg(enumlabel ORDER BY enumsortorder)
+         FROM pg_catalog.pg_enum WHERE enumtypid = typ_id::oid)
       )
     ELSE jsonb_build_object()
   END
@@ -912,23 +919,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.get_enum_values(tab_id oid, col_id smallint) RETURNS jsonb AS $$/*
-Returns a JSONB object mapping each enum column’s attnum to 
-its ordered list of enum values for the given table OID and column attnum.
-
-Args:
-  tab_oid: The OID of the table.
-  col_id: The attnum of the column for which we're getting enum labels.
-*/
-SELECT jsonb_agg(pge.enumlabel ORDER BY pge.enumsortorder) AS ej
-  FROM pg_catalog.pg_attribute pga
-  LEFT JOIN pg_catalog.pg_type pgt ON pga.atttypid = pgt.oid
-  INNER JOIN pg_catalog.pg_enum pge ON pgt.oid = pge.enumtypid
-  WHERE pga.attrelid = tab_id AND pga.attnum = col_id
-GROUP BY pga.attnum;
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
-
 
 CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
 (
@@ -941,8 +931,7 @@ CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
   "default" jsonb, -- the default for the column(if any).
   has_dependents boolean, -- is the column referenced by others.
   description text, -- The description of the column on the database.
-  current_role_priv jsonb, -- Privileges of the current role on the column.
-  enum_values jsonb -- List of valid enum values for an enum column.
+  current_role_priv jsonb -- Privileges of the current role on the column.
 ) AS $$
 SELECT
   attnum AS id,
@@ -956,10 +945,7 @@ SELECT
   msar.describe_column_default(tab_id, attnum) AS default,
   msar.has_dependents(tab_id, attnum) AS has_dependents,
   msar.col_description(tab_id, attnum) AS description,
-  msar.list_column_privileges_for_current_role(tab_id, attnum) AS current_role_priv,
-  CASE WHEN pgt.typtype = 'e'
-    THEN msar.get_enum_values(tab_id, attnum)
-    ELSE 'null'::jsonb END AS enum_values
+  msar.list_column_privileges_for_current_role(tab_id, attnum) AS current_role_priv
 FROM pg_catalog.pg_attribute pga
   LEFT JOIN pg_catalog.pg_index pgi ON pga.attrelid=pgi.indrelid
     AND pga.attnum=ANY(pgi.indkey) AND pgi.indisprimary

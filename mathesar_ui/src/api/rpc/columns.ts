@@ -29,6 +29,9 @@ export interface ColumnTypeOptions {
 
   /** The member type for arrays.  */
   item_type?: string | null;
+
+  /** An ordered list of valid enum labels. */
+  enum_values?: string[] | null;
 }
 
 interface ColumnDefault {
@@ -58,7 +61,6 @@ interface RawColumn {
   default: ColumnDefault | null;
   has_dependents: boolean;
   current_role_priv: ColumnPrivilege[];
-  enum_values: string[] | null;
 }
 
 /**

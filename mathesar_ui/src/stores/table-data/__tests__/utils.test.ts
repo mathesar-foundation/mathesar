@@ -58,7 +58,6 @@ describe('getRowStatus', () => {
                 has_dependents: false,
                 current_role_priv: [],
                 metadata: null,
-                enum_values: null,
               },
             },
           ],
