@@ -1,5 +1,7 @@
 # Mathesar E2E Testing Framework
 
+> **For vision, design decisions, and roadmap see [VISION.md](VISION.md).**
+
 ## Quick Reference
 
 ```
@@ -23,7 +25,9 @@ e2e_tests/
     vitest.config.ts  # Vitest config for framework tests
   mathesar/           # Mathesar-specific test code
     tests/            # Test definitions — ONE file per test (you write these)
-    pages/            # Page Object Models
+    interactions/     # Interaction objects (replaces Page Object Models)
+      views/          # Where the user IS — Page-scoped entry points
+      regions/        # What the user interacts WITH — Locator-scoped, reusable
     db/               # Postgres client + SQL helpers
   .output/            # All generated/output files (gitignored)
     playwright.config.ts  # Auto-generated Playwright config
@@ -264,6 +268,18 @@ Each level becomes a Playwright project. Level N depends on level N-1. Tests wit
 - `login` runs next (phase-1)
 - `create-database` and `create-table` run in parallel (phase-2)
 
+### Tiered Abstraction
+
+Tests fall into tiers based on how much Playwright code they contain:
+
+| Tier | Contains | Review effort | LLM success rate |
+|------|----------|---------------|------------------|
+| **Tier 1** — Pure composition | Only `t.step()` calls, no browser code | Near-zero | Highest |
+| **Tier 2** — Thin action closures | `t.step()` + small `t.action()`/`t.check()` using interaction objects | Moderate | High |
+| **Tier 3** — Complex imperative | Raw Playwright for interactions that can't be simplified | Full review | Lower |
+
+The framework nudges toward Tier 1: build atomic tests early (Tier 2) so future tests compose them (Tier 1). Tier 3 code should be wrapped into reusable atomic tests whenever possible. See [VISION.md § 5](VISION.md#5-tiered-abstraction) for details.
+
 ## How to Write a New Test
 
 ### 1. Scaffold
@@ -319,30 +335,129 @@ npm run validate-dag      # check for cycles/missing references
 npm run test:framework    # run framework unit tests
 ```
 
-## Page Object Model Rules
+### Atomic Tests (compose-only)
 
-- POMs expose **actions** (verbs) and **locators** (nouns), NEVER assertions.
-- Tests decide what to assert. POMs are reusable.
-- When a selector breaks, fix it in one POM, not in 15 test files.
-- Tests should never contain raw selectors — always use POM locators.
-- Place in `mathesar/pages/`. Component POMs (Modal, Dropdown) go in `mathesar/pages/components/`.
+Atomic tests encapsulate a single UI interaction and have no `standalone` config — they can only be used as sub-steps via `t.step()`. Place them in `mathesar/tests/atoms/`.
 
 ```typescript
-// Good POM
-class TablePage {
-  readonly columnHeader = (name: string) => this.page.locator(`th:has-text("${name}")`);
-  async addColumn(name: string, type: string) { /* clicks, fills */ }
-}
-
-// In test scenario:
-await t.action('Add column', schema, async ({ page }) => {
-  const tablePage = new TablePage(page);
-  await tablePage.addColumn('amount', 'numeric');
-  return { columnName: 'amount' };
+export const gridAddRecord = defineTest({
+  code: 'grid-add-record',
+  description: 'Add a new record to the currently visible data grid',
+  params: z.object({ columnIndex: z.number(), value: z.string() }),
+  outcome: z.object({ value: z.string() }),
+  scenario: async (t, params) => {
+    return await t.action('Add record', schema, async ({ page }) => {
+      // Single, focused UI interaction
+      return { value: params.value };
+    });
+  },
+  // No standalone — compose-only
 });
-await t.check('Column visible', async ({ page }) => {
-  const tablePage = new TablePage(page);
-  await expect(tablePage.columnHeader('amount')).toBeVisible();
+```
+
+Build atomic tests for repeated interactions so composite tests can compose them via `t.step()` rather than reimplementing the interaction. See [VISION.md § 4](VISION.md#4-architecture-tests-all-the-way-down) for the "tests all the way down" philosophy.
+
+## Interaction Objects
+
+Interaction objects model **what the user sees and does**, not app internals. They replace the Page Object Model with a composable, locator-scoped tree. If the app is rewritten, the public API stays stable — only internal selectors change.
+
+### Two Kinds of Objects
+
+| Kind | Constructor | Purpose | Directory |
+|------|-------------|---------|-----------|
+| **View** | `Page` | Where the user IS — a navigation target/page entry point | `interactions/views/` |
+| **Region** | `Locator` | What the user interacts WITH — a bounded UI area | `interactions/regions/` |
+
+Views are thin wrappers that compose regions. Regions are reusable across views.
+
+### Three-Part Vocabulary
+
+Each object exposes:
+- **Locators** — elements the user can see (getters returning `Locator`)
+- **Actions** — things the user can do (async methods)
+- **State observations** — things the user can wait for (async `waitFor*()` methods)
+
+### Rules
+
+1. **Locator-scoped.** Regions take `Locator`, views take `Page`. All queries go through `this.root`/`this.page`.
+2. **Never escape scope for queries.** `this.root.page()` only for keyboard/mouse events, never for `locator()` queries. Exception: portaled elements (modals, dropdowns) — documented with a comment.
+3. **Child objects via getters/methods.** Lazy creation: `get grid() { return new DataGrid(...); }`. Never pre-create in constructor.
+4. **No assertions.** Objects expose locators and perform actions. Tests assert. `waitFor*()` methods are state observations, not assertions.
+5. **Views are thin.** If significant interaction logic creeps in, extract a region.
+6. **One file per interaction domain.** `DataGrid` + `DataRow` + `DataCell` share `data-grid.ts`.
+7. **User perspective naming.** Name objects and methods for what the user sees/does, not implementation details.
+8. **Prefer ARIA selectors.** Use `getByRole`, `getByText`, `getByLabel` before falling back to data attributes or CSS.
+9. **Primitives only, no convenience methods.** Regions expose fine-grained primitives. Multi-step workflows belong in atomic tests (`defineTest` + `t.step()`), not as convenience methods on regions.
+
+### Selector Priority
+
+ARIA roles/labels > text content > existing data attributes (`data-sheet-element`) > structural selectors.
+
+No app changes for selectors. If a selector proves brittle, ask before adding new attributes.
+
+### Pattern: Region
+
+```typescript
+// interactions/regions/data-grid.ts — Locator-scoped, user-perspective API
+export class DataGrid {
+  constructor(private root: Locator) {}
+
+  // Locators
+  get newRecordButton() { return this.root.getByRole('button', { name: 'New Record' }); }
+  get unsavedIndicator() { return this.root.getByText('unsaved'); }
+
+  // Child regions
+  draftRow() { return new DataRow(this.root.locator('[data-sheet-element="data-row"]').filter({ hasText: 'DEFAULT' }).first()); }
+  rowContaining(text: string) { return new DataRow(this.root.locator('[data-sheet-element="data-row"]').filter({ hasText: text })); }
+
+  // Actions
+  async addRecord() { await this.newRecordButton.click(); }
+
+  // State observations
+  async waitForSaved() { await expect(this.unsavedIndicator).toBeHidden(); }
+}
+```
+
+### Pattern: View
+
+```typescript
+// interactions/views/table.view.ts — Page-scoped, thin composition
+export class TableView {
+  constructor(private page: Page) {}
+
+  get heading() { return this.page.locator('h1'); }
+  get grid() { return new DataGrid(this.page.locator('[data-sheet-element="sheet"]')); }
+}
+```
+
+### Pattern: Portaled Elements (Modals)
+
+Modals render at body level via `use:portal`. A factory function creates a scoped region:
+
+```typescript
+// interactions/regions/modal.ts
+export function modal(page: Page, titleText: string | RegExp): Modal {
+  return new Modal(
+    page.locator('[role="dialog"]').filter({
+      has: page.getByRole('heading').filter({ hasText: titleText })
+    })
+  );
+}
+```
+
+### Usage in Tests
+
+```typescript
+await t.action('Add record', schema, async ({ page }) => {
+  const table = new TableView(page);
+  await table.grid.addRecord();
+  await table.grid.draftRow().cell(1).edit('value');
+  await table.grid.waitForSaved();
+  return { value: 'value' };
+});
+await t.check('Record visible', async ({ page }) => {
+  const table = new TableView(page);
+  await expect(table.grid.rowContaining('value').element).toBeVisible();
 });
 ```
 
@@ -376,6 +491,10 @@ Test runner has direct DB access via env vars. Volume mounts for dev: `framework
 `.output/` is mounted as a single Docker volume. All generated files (runners, outcomes, Playwright artifacts, reports) live under this directory. No rebuild needed to add tests.
 
 ## Best Practices for Writing Tests
+
+### Check the test catalog before writing new actions
+
+Before writing any `t.action()`, check `mathesar/tests/` (and `mathesar/tests/atoms/`) for an existing test that already covers the interaction. Use the test catalog (when available via `npm run list-outcomes`) or browse the test files. The LLM test-authoring workflow is: read code → browse UI → compose existing tests → write new actions only for uncovered interactions. See [VISION.md § 7](VISION.md#7-llm-test-authoring-context) for the full LLM authoring context.
 
 ### Always compose existing tests — never reimplement flows
 
@@ -415,23 +534,17 @@ After any `t.step()`, the browser state is undefined (the sub-step may have been
 
 When your test will be composed by others, return data they'll need. Include credentials, IDs, names — anything a downstream test might need to build on your work.
 
-### Keep Page Objects slim and assertion-free
+### Keep interaction objects slim and assertion-free
 
-POMs expose locators and actions, never assertions. Tests decide what to assert. Store `page` as an explicit class field and initialize all static locators in the constructor. Use methods for dynamic locators that depend on parameters.
+Interaction objects expose locators and actions, never assertions. Tests decide what to assert. Use getters for locators (lazy creation). Use methods for parameterized locators and actions.
 
 ```typescript
-export class MyPage {
-  private page: Page;
-  readonly heading: Locator;
+export class MyView {
+  constructor(private page: Page) {}
 
-  constructor(page: Page) {
-    this.page = page;
-    this.heading = page.getByRole('heading', { name: 'My Page' });
-  }
+  get heading() { return this.page.getByRole('heading', { name: 'My Page' }); }
 
-  itemLink(name: string): Locator {
-    return this.page.getByRole('link', { name });
-  }
+  itemLink(name: string) { return this.page.getByRole('link', { name }); }
 }
 ```
 

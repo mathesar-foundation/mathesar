@@ -2,8 +2,9 @@ import { z } from "zod";
 import { defineTest } from "../../framework/src";
 import { login } from "./login";
 import { expect } from "@playwright/test";
-import { DatabasesPage, ConnectDatabaseDialog } from "../pages/databases.page";
-import { DatabasePage } from "../pages/database.page";
+import { DatabasesView } from "../interactions/views/databases.view";
+import { DatabaseView } from "../interactions/views/database.view";
+import { connectDatabaseModal } from "../interactions/regions/connect-database-modal";
 
 const connectDatabaseParams = z.object({
   login: z.object({ user: z.string(), password: z.string() }),
@@ -29,11 +30,11 @@ export const connectDatabase = defineTest({
       "Create new internal database with sample schema",
       connectDatabaseOutcome,
       async ({ page }) => {
-        const databasesPage = new DatabasesPage(page);
-        await databasesPage.goto();
-        await databasesPage.connectDatabaseButton.click();
+        const databases = new DatabasesView(page);
+        await databases.goto();
+        await databases.connectDatabaseButton.click();
 
-        const dialog = new ConnectDatabaseDialog(page);
+        const dialog = connectDatabaseModal(page);
         await dialog.createNewDatabase(
           params.databaseName,
           params.sampleSchema,
@@ -41,7 +42,7 @@ export const connectDatabase = defineTest({
 
         // Wait for database to appear in the list
         await expect(
-          databasesPage.databaseLink(params.databaseName),
+          databases.databaseLink(params.databaseName),
         ).toBeVisible();
 
         return {
@@ -53,20 +54,20 @@ export const connectDatabase = defineTest({
     );
 
     await t.check("Database is listed on the home page", async ({ page }) => {
-      const databasesPage = new DatabasesPage(page);
-      await databasesPage.goto();
+      const databases = new DatabasesView(page);
+      await databases.goto();
       await expect(
-        databasesPage.databaseEntry(result.databaseName),
+        databases.databaseEntry(result.databaseName),
       ).toBeVisible();
     });
 
     await t.check("Schema is present inside the database", async ({ page }) => {
-      const databasesPage = new DatabasesPage(page);
-      await databasesPage.goto();
-      await databasesPage.databaseLink(result.databaseName).click();
+      const databases = new DatabasesView(page);
+      await databases.goto();
+      await databases.databaseLink(result.databaseName).click();
 
-      const databasePage = new DatabasePage(page);
-      await expect(databasePage.schemaLink(result.schemaName)).toBeVisible();
+      const database = new DatabaseView(page);
+      await expect(database.schemaLink(result.schemaName)).toBeVisible();
     });
 
     return {

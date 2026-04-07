@@ -2,10 +2,10 @@ import { z } from "zod";
 import { defineTest } from "../../framework/src";
 import { connectDatabase } from "./connect-database";
 import { expect } from "@playwright/test";
-import { DatabasesPage } from "../pages/databases.page";
-import { DatabasePage } from "../pages/database.page";
-import { SchemaPage } from "../pages/schema.page";
-import { TablePage } from "../pages/table.page";
+import { DatabasesView } from "../interactions/views/databases.view";
+import { DatabaseView } from "../interactions/views/database.view";
+import { SchemaView } from "../interactions/views/schema.view";
+import { TableView } from "../interactions/views/table.view";
 
 const addTableRecordParams = z.object({
   login: z.object({ user: z.string(), password: z.string() }),
@@ -41,45 +41,31 @@ export const addTableRecord = defineTest({
       addTableRecordOutcome,
       async ({ page }) => {
         // Navigate: databases -> database -> schema -> table
-        const databasesPage = new DatabasesPage(page);
-        await databasesPage.goto();
-        await databasesPage.databaseLink(db.databaseName).click();
+        const databases = new DatabasesView(page);
+        await databases.goto();
+        await databases.databaseLink(db.databaseName).click();
 
-        const databasePage = new DatabasePage(page);
-        await databasePage.schemaLink(db.schemaName).click();
+        const database = new DatabaseView(page);
+        await database.schemaLink(db.schemaName).click();
 
-        const schemaPage = new SchemaPage(page);
-        await schemaPage.tableLink(params.tableName).click();
+        const schema = new SchemaView(page);
+        await schema.tableLink(params.tableName).click();
 
-        const tablePage = new TablePage(page);
-        await expect(tablePage.heading).toContainText(params.tableName);
+        const table = new TableView(page);
+        await expect(table.heading).toContainText(params.tableName);
 
         // Add new record — creates an empty draft row at the bottom
-        await tablePage.newRecordButton.click();
-        await expect(page.getByText("+1 unsaved")).toBeVisible();
+        await table.grid.addRecord();
+        await expect(table.grid.unsavedIndicator).toBeVisible();
 
-        // Find the new row by its "DEFAULT" id placeholder (virtual
-        // scrolling means .last() may pick up an offscreen placeholder).
-        const newRow = page
-          .locator('[data-sheet-element="data-row"]')
-          .filter({ hasText: "DEFAULT" })
-          .first();
-
-        // Double-click the name cell (index 1; index 0 is the id column)
-        // to enter edit mode, type the value, then Tab to commit the cell
-        // and trigger a save.
-        await newRow
-          .locator('[data-sheet-element="data-cell"]')
-          .nth(1)
-          .dblclick();
-        await page.keyboard.type(params.record.name);
-        await page.keyboard.press("Tab");
+        // Edit the name cell (index 1; index 0 is the id column)
+        await table.grid.draftRow().cell(1).edit(params.record.name);
 
         // Wait for the record to save (unsaved indicator disappears)
-        await expect(page.getByText("unsaved")).toBeHidden();
+        await table.grid.waitForSaved();
 
         await expect(
-          page.getByText(params.record.name, { exact: true }),
+          table.grid.rowContaining(params.record.name).element,
         ).toBeVisible();
 
         return {
@@ -91,17 +77,20 @@ export const addTableRecord = defineTest({
 
     await t.check("New record is visible in the table", async ({ page }) => {
       // Navigate back to the table and verify the record exists
-      const databasesPage = new DatabasesPage(page);
-      await databasesPage.goto();
-      await databasesPage.databaseLink(db.databaseName).click();
+      const databases = new DatabasesView(page);
+      await databases.goto();
+      await databases.databaseLink(db.databaseName).click();
 
-      const databasePage = new DatabasePage(page);
-      await databasePage.schemaLink(db.schemaName).click();
+      const database = new DatabaseView(page);
+      await database.schemaLink(db.schemaName).click();
 
-      const schemaPage = new SchemaPage(page);
-      await schemaPage.tableLink(result.tableName).click();
+      const schema = new SchemaView(page);
+      await schema.tableLink(result.tableName).click();
 
-      await expect(page.getByText(result.recordName)).toBeVisible();
+      const table = new TableView(page);
+      await expect(
+        table.grid.rowContaining(result.recordName).element,
+      ).toBeVisible();
     });
 
     return {

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { defineTest } from "../../framework/src";
 import { login } from "./login";
 import { expect } from "@playwright/test";
-import { AdminUsersPage, AddUserPage } from "../pages/admin-users.page";
+import { AdminUsersView, AddUserView } from "../interactions/views/admin-users.view";
 
 const addUserParams = z.object({
   login: z.object({ user: z.string(), password: z.string() }),
@@ -28,17 +28,17 @@ export const addUser = defineTest({
       "Create a new user via the administration page",
       addUserOutcome,
       async ({ page }) => {
-        const adminUsersPage = new AdminUsersPage(page);
-        await adminUsersPage.goto();
-        await expect(adminUsersPage.heading).toBeVisible();
+        const adminUsers = new AdminUsersView(page);
+        await adminUsers.goto();
+        await expect(adminUsers.heading).toBeVisible();
 
-        await adminUsersPage.addUserLink.click();
+        await adminUsers.addUserLink.click();
 
-        const addUserPage = new AddUserPage(page);
-        await expect(addUserPage.heading).toBeVisible();
+        const addUser = new AddUserView(page);
+        await expect(addUser.heading).toBeVisible();
 
         const newTempPassword = "test_password";
-        await addUserPage.fillAndSubmit(
+        await addUser.fillAndSubmit(
           params.newUser.username,
           newTempPassword,
         );
@@ -54,9 +54,9 @@ export const addUser = defineTest({
     );
 
     await t.check("New user appears in the users list", async ({ page }) => {
-      const adminUsersPage = new AdminUsersPage(page);
-      await adminUsersPage.goto();
-      await expect(adminUsersPage.userLink(result.username)).toBeVisible();
+      const adminUsers = new AdminUsersView(page);
+      await adminUsers.goto();
+      await expect(adminUsers.userLink(result.username)).toBeVisible();
     });
 
     await t.action(

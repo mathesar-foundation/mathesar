@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { defineTest } from '../../framework/src';
-import { LoginPage } from '../pages/login.page';
+import { LoginView } from '../interactions/views/login.view';
 import { install } from './install';
 import { expect } from '@playwright/test';
 
@@ -48,9 +48,9 @@ export const login = defineTest({
       'Fill credentials and log in',
       loginOutcome,
       async ({ page }) => {
-        const loginPage = new LoginPage(page);
-        await loginPage.goto();
-        await loginPage.login(params.user, params.password);
+        const loginView = new LoginView(page);
+        await loginView.goto();
+        await loginView.login(params.user, params.password);
 
         await expect(page).not.toHaveURL(/login/);
 
