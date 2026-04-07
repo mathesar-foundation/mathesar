@@ -12,6 +12,7 @@ export const DB_TYPES = {
   DATERANGE: 'daterange',
   DECIMAL: 'decimal',
   DOUBLE_PRECISION: 'double precision',
+  ENUM: '_enum',
   INET: 'inet',
   INT4RANGE: 'int4range',
   INT8RANGE: 'int8range',
