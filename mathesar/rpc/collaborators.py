@@ -35,19 +35,13 @@ def list_(*, database_id: int = None, **kwargs) -> list[CollaboratorInfo]:
     """
     List information about collaborators. Exposed as `list`.
 
-    If called with no `database_id`, all collaborators for all databases are listed.
-
     Args:
         database_id: The Django id of the database associated with the collaborators.
 
     Returns:
         A list of collaborators.
     """
-    if database_id is not None:
-        user_database_role_map_qs = UserDatabaseRoleMap.objects.filter(database__id=database_id)
-    else:
-        user_database_role_map_qs = UserDatabaseRoleMap.objects.all()
-
+    user_database_role_map_qs = UserDatabaseRoleMap.objects.filter(database__id=database_id)
     return [CollaboratorInfo.from_model(db_model) for db_model in user_database_role_map_qs]
 
 
