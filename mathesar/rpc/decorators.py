@@ -42,7 +42,7 @@ def mathesar_rpc_method(*, name, auth="superuser"):
 
     def combo_decorator(f):
         return rpc_method(name=name)(
-            auth_wrap(authorization_wrap(maintain_models(wire_analytics(handle_rpc_exceptions(f)))))
+            auth_wrap(maintain_models(wire_analytics(handle_rpc_exceptions(authorization_wrap(f)))))
         )
     return combo_decorator
 
@@ -73,7 +73,7 @@ def ensure_db_authorization(f):
             database_id = kwargs[DATABASE_ID_KEY]
             try:
                 models.UserDatabaseRoleMap.objects.get(database__id=database_id, user=user)
-            except models.UserDatabaseRoleMap.DoesNotExist as e:
-                raise exceptions.NoConnectionAvailable(e)
+            except models.UserDatabaseRoleMap.DoesNotExist:
+                raise exceptions.NoConnectionAvailable
         return f(*args, **kwargs)
     return wrapper
