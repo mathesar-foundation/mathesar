@@ -31,7 +31,7 @@ class CollaboratorInfo(TypedDict):
 
 
 @mathesar_rpc_method(name="collaborators.list", auth="login")
-def list_(*, database_id: int = None, **kwargs) -> list[CollaboratorInfo]:
+def list_(*, database_id: int, **kwargs) -> list[CollaboratorInfo]:
     """
     List information about collaborators. Exposed as `list`.
 
