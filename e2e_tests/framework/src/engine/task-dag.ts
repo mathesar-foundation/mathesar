@@ -1,7 +1,8 @@
 import type { TaskStepNode } from '../types';
-import { registry, isTaskHandle } from '../store/registry';
+import { registry } from '../store/registry';
 import { taskDryRun } from './task-dry-run';
-import type { TaskHandle } from '../types';
+import { scenarioDryRun } from './scenario-dry-run';
+import { validateResourceLifecycles } from './task-dag-validate-resources';
 
 export interface TaskDagNode {
   taskCode: string;
@@ -9,10 +10,18 @@ export interface TaskDagNode {
   stepTree: TaskStepNode[];
   /** Task codes referenced via t.ensure() or t.perform() — direct children only */
   composedTasks: string[];
+  /** True if this node is a scenario (leaf node). */
+  isScenario?: boolean;
 }
 
 export interface TaskDagValidationError {
-  type: 'cycle' | 'missing_task';
+  type:
+    | 'cycle'
+    | 'missing_task'
+    | 'resource_update_without_create'
+    | 'resource_duplicate_perform_create'
+    | 'resource_create_after_delete'
+    | 'resource_missing_parent';
   message: string;
 }
 
@@ -32,10 +41,9 @@ export async function buildTaskDag(): Promise<TaskDag> {
 
   for (const entry of entries) {
     const { handle, standaloneParams } = entry;
-    if (!isTaskHandle(handle)) continue;
 
     try {
-      const result = await taskDryRun(handle as TaskHandle, standaloneParams);
+      const result = await taskDryRun(handle, standaloneParams);
       const composedTasks = extractComposedTasks(result.stepTree);
 
       nodes.set(handle.code, {
@@ -52,6 +60,31 @@ export async function buildTaskDag(): Promise<TaskDag> {
         message: isCycle
           ? message
           : `Failed to dry-run task '${handle.code}': ${message}`,
+      });
+    }
+  }
+
+  // Process scenarios as leaf nodes
+  const scenarioEntries = registry.getAllScenarios();
+  for (const entry of scenarioEntries) {
+    const { handle } = entry;
+
+    try {
+      const result = await scenarioDryRun(handle);
+      const composedTasks = extractComposedTasks(result.stepTree);
+
+      nodes.set(handle.code, {
+        taskCode: handle.code,
+        hasStandalone: true, // scenarios are always standalone
+        stepTree: result.stepTree,
+        composedTasks,
+        isScenario: true,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      errors.push({
+        type: 'missing_task',
+        message: `Failed to dry-run scenario '${handle.code}': ${message}`,
       });
     }
   }
@@ -101,6 +134,11 @@ export async function buildTaskDag(): Promise<TaskDag> {
   for (const code of nodes.keys()) {
     visit(code);
   }
+
+  // Validate resource lifecycles across all tasks
+  const levels = computeTaskLevels({ nodes, errors: [], topologicalOrder });
+  const resourceErrors = validateResourceLifecycles(nodes, topologicalOrder, levels);
+  errors.push(...resourceErrors);
 
   return { nodes, errors, topologicalOrder };
 }

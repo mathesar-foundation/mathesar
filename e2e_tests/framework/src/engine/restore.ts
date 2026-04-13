@@ -9,7 +9,7 @@ import { registry } from '../store/registry';
  * matching DAG topological order. Uses a Set to avoid duplicate restores for
  * diamond dependencies.
  *
- * Generic over TOutcome so callers can pass a fully-typed TestHandle<P, O>
+ * Generic over TOutcome so callers can pass a fully-typed TaskHandle<P, O>
  * without casting. The recursive call through the registry infers TOutcome
  * as `unknown` (since registry erases type params), which is safe because
  * outcomes were schema-validated when stored.

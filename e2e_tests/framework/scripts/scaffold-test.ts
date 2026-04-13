@@ -1,12 +1,12 @@
 /**
- * Generate a test definition file skeleton using the new composable API.
+ * Generate a task definition file skeleton using the composable API.
  *
  * Usage:
  *   npx tsx framework/scripts/scaffold-test.ts --code create-table --requires login
  *
  * Options:
- *   --code       Test code (required, used as filename and test identifier)
- *   --requires   Test codes to compose via t.step() (comma-separated)
+ *   --code       Task code (required, used as filename and task identifier)
+ *   --requires   Task codes to compose via t.ensure() (comma-separated)
  *   --config     Path to screenwriter config file (default: screenwriter.config.ts in cwd)
  */
 
@@ -70,7 +70,7 @@ function generateTestFile(
 
   // Imports
   lines.push(`import { z } from 'zod';`);
-  lines.push(`import { defineTest } from '${frameworkImport}';`);
+  lines.push(`import { defineTask } from '${frameworkImport}';`);
   if (opts.requires.length > 0) {
     for (const req of opts.requires) {
       lines.push(`import { ${toCamelCase(req)} } from './${req}';`);
@@ -89,18 +89,18 @@ function generateTestFile(
   lines.push('});');
   lines.push('');
 
-  // defineTest call
-  lines.push(`export const ${varName} = defineTest({`);
+  // defineTask call
+  lines.push(`export const ${varName} = defineTask({`);
   lines.push(`  code: '${opts.code}',`);
   lines.push(`  params: ${varName}Params,`);
   lines.push(`  outcome: ${outcomeName},`);
   lines.push('');
-  lines.push('  scenario: async (t, params) => {');
+  lines.push('  task: async (t, params) => {');
 
-  // Add t.step() calls for requirements
+  // Add t.ensure() calls for requirements
   for (const req of opts.requires) {
     const reqVar = toCamelCase(req);
-    lines.push(`    await t.step('${toPascalCase(req)}', ${reqVar}, {});`);
+    lines.push(`    await t.ensure(${reqVar}, {});`);
   }
 
   lines.push('');
@@ -135,7 +135,7 @@ async function main() {
   const content = generateTestFile(opts, frameworkImport);
   fs.mkdirSync(testsDir, { recursive: true });
   fs.writeFileSync(outputPath, content);
-  console.log(`Created test definition: ${path.relative(process.cwd(), outputPath)}`);
+  console.log(`Created task definition: ${path.relative(process.cwd(), outputPath)}`);
 }
 
 main().catch((err) => {

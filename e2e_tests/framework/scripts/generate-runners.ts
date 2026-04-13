@@ -25,8 +25,8 @@ export interface RunnerGeneratorConfig {
   levels?: Map<string, number>;
   /** Set of test codes that have standalone params. Only these get runners. */
   standaloneCodes?: Set<string>;
-  /** Set of test codes that are TaskHandle (new model). Others use legacy runFlow. */
-  taskCodes?: Set<string>;
+  /** Set of test codes that are ScenarioHandle. Uses runScenarioFlow. */
+  scenarioCodes?: Set<string>;
 }
 
 function generateRunner(
@@ -37,8 +37,8 @@ function generateRunner(
   const frameworkImport = toRelativePosix(phaseDir, path.resolve(config.generatedDir, config.frameworkImport));
   const testsImport = toRelativePosix(phaseDir, path.resolve(config.generatedDir, config.testsImport));
 
-  const isTask = config.taskCodes?.has(testCode) ?? false;
-  const runFn = isTask ? 'runTaskFlow' : 'runFlow';
+  const isScenario = config.scenarioCodes?.has(testCode) ?? false;
+  const runFn = isScenario ? 'runScenarioFlow' : 'runTaskFlow';
 
   return `// Auto-generated from ${testCode}.ts — do not edit
 import { test } from '@playwright/test';

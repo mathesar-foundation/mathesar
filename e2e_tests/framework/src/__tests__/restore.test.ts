@@ -4,7 +4,7 @@ import { restoreFromCache } from '../engine/restore';
 import { outcomeStore } from '../store/outcome-store';
 import { registry } from '../store/registry';
 import { createMockFixtures, resetRegistry } from './test-utils';
-import type { TestHandle } from '../types';
+import type { TaskHandle } from '../types';
 
 beforeEach(() => {
   resetRegistry();
@@ -13,13 +13,13 @@ beforeEach(() => {
 
 function registerHandle(
   code: string,
-  restoreFn?: (page: any, outcome: any) => Promise<void>,
-): TestHandle {
-  const handle: TestHandle = {
+  restoreFn?: (fixtures: any, outcome: any) => Promise<void>,
+): TaskHandle {
+  const handle: TaskHandle = {
     code,
     paramsSchema: z.object({}),
     outcomeSchema: z.object({}),
-    scenarioFn: async () => ({}),
+    taskFn: async () => ({}),
     restoreFn,
   };
   registry.register(handle, {});

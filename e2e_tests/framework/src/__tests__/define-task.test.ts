@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from 'zod';
 import { defineTask } from '../engine/define-task';
-import { registry, isTaskHandle } from '../store/registry';
+import { registry } from '../store/registry';
 import { resetRegistry } from './test-utils';
 
 beforeEach(() => {
@@ -70,7 +70,7 @@ describe('defineTask', () => {
     expect(entry).toBeDefined();
     expect(entry!.handle.code).toBe('registered-task');
     expect(entry!.standaloneParams).toEqual({});
-    expect(isTaskHandle(entry!.handle)).toBe(true);
+    expect(entry!.handle.code).toBe('registered-task');
   });
 
   it('prevents duplicate code registration', () => {

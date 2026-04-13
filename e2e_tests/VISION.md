@@ -69,7 +69,7 @@ Each cycle narrows the error space. The framework's error messages must be actio
 ### 3.4 Composability is the core product
 
 What Screenwriter uniquely provides:
-- **Typed test composition** — `t.step()` with Zod-validated data flow
+- **Typed task composition** — `t.ensure()` / `t.perform()` with Zod-validated data flow
 - **DAG-based execution** — parallel scheduling, caching, dependency tracking
 - **Review artifacts from the DAG** — screenplays, visualizations, diffs
 
@@ -79,45 +79,50 @@ What Screenwriter does NOT prescribe:
 
 The framework is **opinionated about structure** (composability, DAG, types, caching) and **unopinionated about UI interaction** (Playwright is the escape hatch, not a limitation).
 
-## 4. Architecture: Tests All The Way Down
+## 4. Architecture: Resources, Tasks, and Scenarios
 
-There is one concept: `defineTest`. It serves both atomic interactions and composite journeys.
+Three primitives serve different roles:
 
-### Atomic tests (the interaction layer)
+- **Resources** (`defineResource`) — Declarative state types with schema, key function, and optional parent-child nesting. No creation logic — purely metadata used for lifecycle tracking and DAG-time validation.
+- **Tasks** (`defineTask`) — Composable action units. Action-driven, declare CRUD on resources, optionally provide programmatic fast paths. Tasks form the core of the DAG.
+- **Scenarios** (`defineScenario`) — Business-driven user stories that compose tasks. Leaf nodes in the DAG — never composed by other scenarios or tasks.
 
-Small, focused tests with a single `t.action()`. They encapsulate one UI workflow and are compose-only (no `standalone`).
+### Atomic tasks (the interaction layer)
+
+Small, focused tasks with a single `t.action()`. They encapsulate one UI workflow and are compose-only (no `standalone`).
 
 ```typescript
 // mathesar/tests/atoms/grid-add-record.ts
-export const gridAddRecord = defineTest({
+export const gridAddRecord = defineTask({
   code: 'grid-add-record',
-  description: 'Add a new record to the currently visible data grid',
   params: z.object({ columnIndex: z.number(), value: z.string() }),
   outcome: z.object({ value: z.string() }),
-  scenario: async (t, params) => {
-    return await t.action('Add record', schema, async ({ page }) => {
-      // Single, focused UI interaction
-      // ...
-      return { value: params.value };
+  task: async (t, params) => {
+    return await t.action('Add record', {
+      schema: z.object({ value: z.string() }),
+      fn: async ({ page }) => {
+        // Single, focused UI interaction
+        return { value: params.value };
+      },
     });
   },
   // No standalone — compose-only
 });
 ```
 
-### Composite tests (user journeys)
+### Composite tasks (user journeys)
 
-Compose atomic tests and other composite tests via `t.step()`. Most of the code is wiring, not Playwright.
+Compose atomic tasks and other composite tasks via `t.ensure()` and `t.perform()`. Most of the code is wiring, not Playwright.
 
 ```typescript
 // mathesar/tests/add-table-record.ts
-export const addTableRecord = defineTest({
+export const addTableRecord = defineTask({
   code: 'add-table-record',
-  description: 'Navigate to a table and add a new record',
-  scenario: async (t, params) => {
-    const db = await t.step('Connect database', connectDatabase, { ... });
-    await t.step('Navigate to table', navigateToTable, { ... });
-    const record = await t.step('Add record', gridAddRecord, { ... });
+  params: z.object({ ... }),
+  outcome: z.object({ tableName: z.string(), recordName: z.string() }),
+  task: async (t, params) => {
+    const db = await t.ensure(connectDatabase, { ... });
+    const record = await t.perform(gridAddRecord, { ... });
     await t.check('Record visible', async ({ page }) => {
       await expect(page.getByText(record.value)).toBeVisible();
     });
@@ -129,10 +134,10 @@ export const addTableRecord = defineTest({
 
 ### The compounding effect
 
-Each atomic test makes future tests cheaper:
-- **Early:** Many atomic tests need writing, composite tests have action closures
-- **Growth:** Atomic catalog grows, new composite tests are mostly `t.step()` calls
-- **Maturity:** New tests are 90%+ composition. UI changes only break atomic tests.
+Each atomic task makes future tasks cheaper:
+- **Early:** Many atomic tasks need writing, composite tasks have action closures
+- **Growth:** Atomic catalog grows, new composite tasks are mostly `t.ensure()`/`t.perform()` calls
+- **Maturity:** New tasks are 90%+ composition. UI changes only break atomic tasks.
 
 ## 5. Tiered Abstraction
 
@@ -331,15 +336,18 @@ The framework evolved through several iterations:
 **What won: Zod-fake dry-run.** Generate real typed values from Zod schemas during dry-run. One scenario function runs in two modes (recorder vs executor). No proxies, computation works naturally, step tree captured for DAG and determinism enforcement.
 
 **Key architecture (current):**
-- `defineTest()` returns a `TestHandle` with Zod-typed params, outcomes, and optional restore hook
-- Scenarios use `t.step()`, `t.action()`, `t.check()` — all with mandatory labels
+- Three primitives: `defineResource()` (state types), `defineTask()` (composable actions), `defineScenario()` (user stories)
+- `defineTask()` returns a `TaskHandle` with Zod-typed params, outcomes, dual execution paths (manual + programmatic), and optional restore hook
+- Tasks use `t.ensure()` (resource-centric, prefers programmatic), `t.perform()` (task-centric, always browser), `t.action()`, `t.check()`
+- Resource declarations on actions: `.creates()`, `.updates()`, `.deletes()` with `.with()` chaining for parent-child nesting
+- Two caching layers: resource lifecycle cache (used by `t.ensure()`), task completion cache (used by both intents)
+- DAG-time resource validation: type-level structural checks (create-before-update/delete, no duplicate creates, cascade correctness)
 - Static analysis via dry-run with Zod-generated fake values
 - Step tree determinism enforcement: dry-run vs execution tree comparison
-- `t.step()` caches outcomes: same test + same params = cache hit
-- Cache keys: `testCode:sha256(stableStringify(params))`
+- Cache keys: `taskCode:sha256(stableStringify(params))`
 - Restore hooks reconstruct browser state from cached outcomes (transitive)
 - Browser state detection: framework snapshots storageState() before/after, warns if changed without restore hook
-- Level-based execution: Playwright project dependencies group tests by DAG level
+- Level-based execution: Playwright project dependencies group tasks/scenarios by DAG level
 
 **The failure-mode argument (for future reference):**
 If read/write modes are ever revisited:
@@ -351,15 +359,20 @@ Safe-by-default (default=write) is the stronger position.
 
 | Decision | Rationale |
 |----------|-----------|
-| Composable scenarios with `t.step()` | Replaced fixture/flow model. Allows browser flows to compose each other. |
+| Three primitives: Resource + Task + Scenario | Separates state (resource), action (task), and story (scenario). Replaced defineTest(). |
+| `t.ensure()` vs `t.perform()` | Explicit about "need resource" vs "need task to run". ensure prefers programmatic, perform always browser. |
+| Two caching layers | Resource lifecycle cache (for ensure) + task completion cache (for both intents). Each intent has its own cache. |
+| Resource ops on actions | Declarative `.creates()`/`.updates()`/`.deletes()` on `t.action()` config. Enables DAG-time validation. |
+| Parent-child resource nesting | Models real containment (Database, Schema, Table). Cascade deletes. `.with()` chaining. |
+| DAG-time resource validation | Type-level structural checks catch lifecycle errors before any browser runs. |
 | Zod-fake dry-run (not proxies) | Proxies are fragile. Real typed values from Zod schemas work naturally in all contexts. |
 | No conditional steps (determinism) | Step tree comparison catches non-determinism. Simplifies static analysis and DAG building. |
 | No state machine models | Rejected for e2e testing — terrible in practice despite looking good on paper. |
-| Always compose via `t.step()` | Never reimplement existing test logic in `t.action()`. Composability is the core principle. |
-| Tests all the way down | One concept (defineTest) for both atomic interactions and composite journeys. No separate "interaction" abstraction. |
+| Always compose via `t.ensure()`/`t.perform()` | Never reimplement existing task logic in `t.action()`. Composability is the core principle. |
+| Tasks all the way down | One concept (defineTask) for both atomic interactions and composite journeys. Scenarios as leaf nodes for stories. |
 | Framework = strict harness | Mechanical verification prevents LLM hallucination. LLM works within the rails, not around them. |
 | LLM = observer + decision maker | LLM reads code, browses UI, writes tests. Framework validates. LLM is not part of runtime. |
-| Per-domain interaction grouping | When organizing atomic tests, group by user workflow domain, not by page. |
+| Per-domain interaction grouping | When organizing atomic tasks, group by user workflow domain, not by page. |
 | Three review mechanisms | PR screenplay (quick), DAG diff (impact), HTML report (deep). |
 
 ## 13. Key Constraints

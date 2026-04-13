@@ -3,8 +3,8 @@
  *
  * Orchestrates the full pipeline:
  *   1. Load configuration
- *   2. Load test definitions
- *   3. Dry-run all tests and build/validate the DAG
+ *   2. Load test/scenario definitions
+ *   3. Dry-run all tasks/scenarios and build/validate the DAG
  *   4. Compute execution levels from the DAG
  *   5. Generate Playwright runner files grouped by level
  *   6. Generate dynamic Playwright config with project dependencies
@@ -19,9 +19,8 @@ import { spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { getResolvedConfig, toRelativePosix } from '../src/config';
-import { buildDag, computeLevels } from '../src/engine/dag';
 import { buildTaskDag, computeTaskLevels } from '../src/engine/task-dag';
-import { registry, isTaskHandle } from '../src/store/registry';
+import { registry } from '../src/store/registry';
 import { generateRunners } from './generate-runners';
 
 function getConfigPath(args: string[]): { configPath: string; extraArgs: string[] } {
@@ -112,35 +111,29 @@ async function main() {
   // 2. Load test definitions (populates registry)
   loadTestFiles(config.testsDir);
 
-  // 3. Dry-run all tests/tasks and build/validate DAGs
-  // Build legacy DAG for TestHandle entries
-  const legacyDag = await buildDag();
-  // Build task DAG for TaskHandle entries
-  const taskDag = await buildTaskDag();
+  // 3. Dry-run all tasks/scenarios and build/validate the DAG
+  const dag = await buildTaskDag();
 
-  const allErrors = [...legacyDag.errors, ...taskDag.errors];
-  if (allErrors.length > 0) {
-    const messages = allErrors.map((e) => `  [${e.type}] ${e.message}`).join('\n');
+  if (dag.errors.length > 0) {
+    const messages = dag.errors.map((e) => `  [${e.type}] ${e.message}`).join('\n');
     console.error('DAG validation failed:\n' + messages);
     process.exit(1);
   }
 
-  const totalNodes = legacyDag.nodes.size + taskDag.nodes.size;
-  console.log(`DAG validated: ${totalNodes} entry/entries, no errors.`);
+  console.log(`DAG validated: ${dag.nodes.size} entry/entries, no errors.`);
 
-  // 4. Compute execution levels (merge both DAGs)
-  const legacyLevels = computeLevels(legacyDag);
-  const taskLevels = computeTaskLevels(taskDag);
-  const levels = new Map<string, number>([...legacyLevels, ...taskLevels]);
+  // 4. Compute execution levels
+  const levels = computeTaskLevels(dag);
 
-  // Collect standalone codes and task codes
+  // Collect standalone codes and scenario codes
   const standaloneCodes = new Set<string>();
-  const taskCodes = new Set<string>();
+  const scenarioCodes = new Set<string>();
   for (const entry of registry.getStandalone()) {
     standaloneCodes.add(entry.handle.code);
-    if (isTaskHandle(entry.handle)) {
-      taskCodes.add(entry.handle.code);
-    }
+  }
+  for (const entry of registry.getAllScenarios()) {
+    standaloneCodes.add(entry.handle.code);
+    scenarioCodes.add(entry.handle.code);
   }
 
   // 5. Generate runner files grouped by level
@@ -153,7 +146,7 @@ async function main() {
     testsImport,
     levels,
     standaloneCodes,
-    taskCodes,
+    scenarioCodes,
   });
 
   // 6. Generate dynamic Playwright config

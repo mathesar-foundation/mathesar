@@ -1,7 +1,7 @@
 /**
  * Visualize the test DAG as a Mermaid diagram.
  *
- * Shows test composition as a directed graph with step trees.
+ * Shows task and scenario composition as a directed graph with step trees.
  *
  * Usage: npx tsx framework/scripts/visualize-dag.ts
  *
@@ -10,7 +10,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { StepNode } from '../src/types';
+import type { TaskStepNode } from '../src/types';
 import { loadConfig } from './load-config';
 
 async function main() {
@@ -24,8 +24,8 @@ async function main() {
     await import(file);
   }
 
-  const { buildDag } = await import('../src/engine/dag');
-  const dag = await buildDag();
+  const { buildTaskDag } = await import('../src/engine/task-dag');
+  const dag = await buildTaskDag();
 
   const lines: string[] = ['graph TD'];
 
@@ -35,14 +35,18 @@ async function main() {
   for (const [code, node] of dag.nodes) {
     const id = `N${idCounter++}`;
     nodeIds.set(code, id);
-    const style = node.hasStandalone ? `[${code}]` : `([${code}])`;
+    const style = node.isScenario
+      ? `{${code}}`  // diamond for scenarios
+      : node.hasStandalone
+        ? `[${code}]`
+        : `([${code}])`;
     lines.push(`  ${id}${style}`);
   }
 
   // Create composition edges
   for (const [code, node] of dag.nodes) {
     const toId = nodeIds.get(code)!;
-    for (const composedCode of node.composedTests) {
+    for (const composedCode of node.composedTasks) {
       const fromId = nodeIds.get(composedCode);
       if (fromId) {
         lines.push(`  ${fromId} --> ${toId}`);
@@ -57,9 +61,12 @@ async function main() {
       let stepCounter = 0;
       for (const step of node.stepTree) {
         const stepId = `${nodeIds.get(code)}_S${stepCounter++}`;
-        const label = step.type === 'step'
-          ? `${step.label} → ${step.testCode}`
-          : `${step.type}: ${step.label}`;
+        let label: string;
+        if (step.type === 'ensure' || step.type === 'perform') {
+          label = `${step.type}: ${step.label} → ${step.taskCode}`;
+        } else {
+          label = `${step.type}: ${step.label}`;
+        }
         lines.push(`    ${stepId}["${label}"]`);
       }
       lines.push('  end');

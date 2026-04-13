@@ -1,4 +1,5 @@
 import type { ScenarioDefinition, ScenarioHandle } from '../types';
+import { registry } from '../store/registry';
 
 /**
  * Define a business-driven scenario that composes tasks.
@@ -26,9 +27,7 @@ export function defineScenario(def: ScenarioDefinition): ScenarioHandle {
     scenarioFn: def.scenario,
   };
 
-  // Scenarios are not registered in the task registry — they're discovered
-  // separately and added to the DAG as leaf nodes. Registration happens
-  // in the scenario registry (to be added when scenario execution is wired up).
+  registry.registerScenario(handle);
 
   return handle;
 }

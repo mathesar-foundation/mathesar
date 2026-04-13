@@ -1,7 +1,6 @@
 import type { TaskHandle, TestFixtures } from '../types';
 import { registry } from '../store/registry';
 import { outcomeStore } from '../store/outcome-store';
-import { isTaskHandle } from '../store/registry';
 import { taskDryRun } from './task-dry-run';
 import { taskExecute } from './task-executor';
 import { compareTaskStepTrees } from './task-step-tree-compare';
@@ -31,13 +30,7 @@ export async function runTaskFlow(
     );
   }
 
-  if (!isTaskHandle(entry.handle)) {
-    throw new Error(
-      `'${code}' is not a TaskHandle. Use runFlow() for legacy TestHandle.`,
-    );
-  }
-
-  const handle = entry.handle as TaskHandle;
+  const handle = entry.handle;
   const { standaloneParams } = entry;
 
   if (standaloneParams === undefined) {

@@ -1,19 +1,17 @@
 // Engine — orchestration and execution
-export { defineTest } from './engine/define-test';
 export { defineResource } from './engine/define-resource';
 export { defineTask } from './engine/define-task';
 export { defineScenario } from './engine/define-scenario';
-export { runFlow } from './engine/test-runner';
 export { runTaskFlow } from './engine/task-runner';
-export { dryRun } from './engine/dry-run';
+export { runScenarioFlow } from './engine/scenario-runner';
 export { taskDryRun } from './engine/task-dry-run';
-export { execute } from './engine/executor';
+export { scenarioDryRun } from './engine/scenario-dry-run';
 export { taskExecute } from './engine/task-executor';
+export { scenarioExecute } from './engine/scenario-executor';
 export { compareTaskStepTrees } from './engine/task-step-tree-compare';
-export { buildDag, computeLevels } from './engine/dag';
 export { buildTaskDag, computeTaskLevels } from './engine/task-dag';
+export { validateResourceLifecycles } from './engine/task-dag-validate-resources';
 export { generateFakeValue } from './engine/zod-fake';
-export { compareStepTrees } from './engine/step-tree-compare';
 export { makeCacheKey } from './engine/cache-key';
 export { restoreFromCache } from './engine/restore';
 export {
@@ -34,11 +32,6 @@ export type { ScreenwriterConfig, ResolvedScreenwriterConfig } from './config';
 // Types
 export type {
   TestFixtures,
-  TestHandle,
-  TestDefinition,
-  ScenarioContext,
-  ScenarioFn,
-  StepNode,
   ResourceHandle,
   ResourceOp,
   ResourceOpType,
@@ -54,14 +47,14 @@ export type {
   TaskStepNode,
   CompositionIntent,
 } from './types';
-export type { DagNode, Dag, DagValidationError } from './engine/dag';
-export type { DryRunResult } from './engine/dry-run';
+export type { TaskDagNode, TaskDag, TaskDagValidationError } from './engine/task-dag';
 export type { TaskDryRunResult } from './engine/task-dry-run';
-export type { ExecutionResult } from './engine/executor';
+export type { ScenarioDryRunResult } from './engine/scenario-dry-run';
 export type { TaskExecutionResult } from './engine/task-executor';
+export type { ScenarioExecutionResult } from './engine/scenario-executor';
 export type { ResourceInstance } from './store/resource-store';
 export type { SubStepRecord, StoredEntry } from './store/outcome-store';
-export type { RegisteredEntry, RegisteredHandle } from './store/registry';
-export { isTaskHandle, isTestHandle } from './store/registry';
+export type { RegisteredEntry, RegisteredScenario } from './store/registry';
+export { isScenarioHandle } from './store/registry';
 export type { RunnerGeneratorConfig } from '../scripts/generate-runners';
 export type { NormalizedBrowserState } from './engine/browser-state';

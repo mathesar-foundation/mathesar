@@ -1,8 +1,9 @@
 /**
  * Validate the test DAG.
  *
- * Imports all test files to populate the registry, then dry-runs all tests,
- * builds the DAG, and checks for cycles and missing references.
+ * Imports all test files to populate the registry, then dry-runs all tasks
+ * and scenarios, builds the DAG, and checks for cycles, missing references,
+ * and resource lifecycle errors.
  *
  * Usage: npx tsx framework/scripts/validate-dag.ts
  */
@@ -28,20 +29,24 @@ async function main() {
     await import(file);
   }
 
-  const { buildDag } = await import('../src/engine/dag');
-  const dag = await buildDag();
+  const { buildTaskDag } = await import('../src/engine/task-dag');
+  const dag = await buildTaskDag();
+
+  const taskCount = Array.from(dag.nodes.values()).filter((n) => !n.isScenario).length;
+  const scenarioCount = Array.from(dag.nodes.values()).filter((n) => n.isScenario).length;
 
   console.log(`\nDAG Summary:`);
-  console.log(`  Nodes: ${dag.nodes.size}`);
+  console.log(`  Tasks: ${taskCount}`);
+  console.log(`  Scenarios: ${scenarioCount}`);
   console.log(
-    `  Standalone tests: ${Array.from(dag.nodes.values()).filter((n) => n.hasStandalone).length}`,
+    `  Standalone: ${Array.from(dag.nodes.values()).filter((n) => n.hasStandalone).length}`,
   );
   console.log(`  Topological order: ${dag.topologicalOrder.join(' -> ')}`);
 
   // Show composition edges
   for (const [, node] of dag.nodes) {
-    if (node.composedTests.length > 0) {
-      console.log(`  ${node.testCode} composes: ${node.composedTests.join(', ')}`);
+    if (node.composedTasks.length > 0) {
+      console.log(`  ${node.taskCode} composes: ${node.composedTasks.join(', ')}`);
     }
   }
 

@@ -1,8 +1,5 @@
-import { z } from 'zod';
 import type { Page, APIRequestContext } from '@playwright/test';
-import type { TestHandle, TestFixtures, ScenarioFn } from '../types';
-import { dryRun, type DryRunResult } from '../engine/dry-run';
-import { execute, type ExecutionResult } from '../engine/executor';
+import type { TestFixtures } from '../types';
 import { registry } from '../store/registry';
 
 /**
@@ -92,44 +89,4 @@ export function createMockFixtures() {
  */
 export function resetRegistry(): void {
   registry.clear();
-}
-
-/**
- * Helper to define a quick synthetic test for testing purposes.
- * Does NOT register in the registry (use defineTest for that).
- */
-export function quickHandle<TParams = Record<string, never>, TOutcome = unknown>(
-  code: string,
-  paramsSchema: z.ZodType<TParams>,
-  outcomeSchema: z.ZodType<TOutcome>,
-  scenarioFn: ScenarioFn<TParams, TOutcome>,
-): TestHandle<TParams, TOutcome> {
-  return {
-    code,
-    paramsSchema,
-    outcomeSchema,
-    scenarioFn,
-  };
-}
-
-/**
- * Helper to dry-run a test handle and return the step tree.
- */
-export async function dryRunTest<P, O>(
-  handle: TestHandle<P, O>,
-  params?: P,
-): Promise<DryRunResult> {
-  return dryRun(handle, params);
-}
-
-/**
- * Helper to execute a test handle with mock fixtures.
- */
-export async function executeTest<P, O>(
-  handle: TestHandle<P, O>,
-  params: P,
-  fixtures?: TestFixtures,
-): Promise<ExecutionResult<O>> {
-  const mockFixtures = fixtures ?? (createMockFixtures() as unknown as TestFixtures);
-  return execute(mockFixtures, handle, params);
 }
