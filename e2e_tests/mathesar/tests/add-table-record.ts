@@ -58,8 +58,8 @@ export const addTableRecord = defineTest({
         await table.grid.addRecord();
         await expect(table.grid.unsavedIndicator).toBeVisible();
 
-        // Edit the name cell (index 1; index 0 is the id column)
-        await table.grid.draftRow().cell(1).edit(params.record.name);
+        // Edit the name cell (index 2; columns are: id=0, address=1, name=2)
+        await table.grid.draftRow().cell(2).edit(params.record.name);
 
         // Wait for the record to save (unsaved indicator disappears)
         await table.grid.waitForSaved();
