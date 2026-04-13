@@ -5,12 +5,13 @@
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
-  import { currentTablesMap } from '@mathesar/stores/tables';
+  import { getTableFromApi } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
   import { Window, defined, portal } from '@mathesar-component-library';
 
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
 
   /**
    * This is the distance between the top of the nested selector window and the
@@ -20,7 +21,7 @@
    * add more UI within that area, we'll need to update this value.
    */
   const nestedSelectorVerticalOffset = '2rem';
-
+  const tableFetch = new AsyncStore(getTableFromApi);
   export let controller: RecordSelectorController;
   export let windowPositionerElement: HTMLElement;
 
@@ -31,7 +32,8 @@
     nestingLevel: controller.nestingLevel + 1,
   });
   $: ({ tableOid, purpose } = controller);
-  $: table = defined($tableOid, (oid) => $currentTablesMap.get(oid));
+  $: void (async () => {defined($tableOid, async (oid) => (await tableFetch.run({ tableOid: oid })))})();
+  $: table = $tableFetch.resolvedValue;
   $: tabularData =
     $tableOid && table
       ? new TabularData({

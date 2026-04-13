@@ -41,7 +41,8 @@ import {
   collapse,
 } from '@mathesar-component-library';
 
-import { currentSchema } from './schemas';
+import { currentSchema, schemas } from './schemas';
+import { databasesStore } from './databases';
 
 const commonData = preloadCommonData();
 const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
@@ -62,7 +63,7 @@ function makeEmptyTablesData(): TablesData {
   };
 }
 
-const tablesStore = writable(makeEmptyTablesData());
+export const tablesStore = writable(makeEmptyTablesData());
 
 function sortTables(tables: Iterable<Table>): Table[] {
   const allTables = [...tables];
@@ -365,6 +366,51 @@ export async function createTableFromDataFile(props: {
     table: fullTable,
     renamedColumns: created.renamed_columns,
   };
+}
+
+export function getTableFromApi({tableOid}: {tableOid: Table['oid'];}): CancellablePromise<Table> {
+  const $tablesStore = get(tablesStore);
+  const $currentDatabase = get(databasesStore.currentDatabase);
+  const $schemas = get(schemas);
+  if (!$currentDatabase) {
+    return new CancellablePromise((reject) => reject());
+  }
+  if (
+    $tablesStore.databaseId === $currentDatabase.id
+  ) {
+    const table = $tablesStore.tablesMap.get(tableOid);
+    if (table) {
+      return new CancellablePromise((resolve) => {
+        console.log('cache hit');
+        resolve(table);
+      });
+    }
+  }
+  console.log('cache miss');
+  const promise = api.tables
+    .get_with_metadata({
+      database_id: $currentDatabase.id,
+      table_oid: tableOid,
+    })
+    .run();
+  return new CancellablePromise(
+      (resolve, reject) => {
+        void promise.then((rawTableWithMetadata) => {
+        const schema = $schemas.data.get(rawTableWithMetadata.schema);
+        if(!schema){
+          return;
+        }
+        const table = putTableInStore({
+          schema: schema,
+          rawTableWithMetadata,
+        });
+        return resolve(table);
+      }, reject);
+    },
+    () => {
+      promise.cancel();
+    },
+  );
 }
 
 export function getTableFromStoreOrApi({
