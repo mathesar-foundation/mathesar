@@ -44,6 +44,7 @@
       {#if hasCloseButton}
         <Button
           appearance="plain"
+          aria-label="Close"
           on:click={handleCloseButtonClick}
           tabIndex={closeButtonTabIndex}
         >

@@ -193,8 +193,8 @@ node_modules/
 # Client Build files
 mathesar/static/mathesar/
 
-# Playwright trace files
-test-results/
+# E2E test outputs (runners, outcomes, Playwright artifacts/reports)
+e2e_tests/.output/
 
 # core dumps generated sometimes when something goes wrong with Playwright
 core
@@ -204,3 +204,6 @@ config/settings/local.py
 
 # Transifex binary
 tx
+
+# Playwright
+.playwright-cli
