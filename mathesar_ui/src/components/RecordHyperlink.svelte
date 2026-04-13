@@ -1,20 +1,22 @@
 <script lang="ts">
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { currentTablesMap } from '@mathesar/stores/tables';
+  import { getTableFromApi } from '@mathesar/stores/tables';
   import RecordStore from '@mathesar/systems/record-view/RecordStore';
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
 
   const modalRecordView = modalRecordViewContext.get();
+  const tableFetch = new AsyncStore(getTableFromApi);
 
   export let tableId: number;
   export let recordId: unknown;
 
   $: href = $storeToGetRecordPageUrl({ tableId, recordId });
-
+  $: void (async () => (await tableFetch.run({ tableOid: tableId })))();
   function handleLinkClick(e: MouseEvent) {
     if (!modalRecordView) return;
     if (recordId === undefined) return;
-    const table = $currentTablesMap.get(tableId);
+    const table = $tableFetch.resolvedValue;
     if (!table) return;
     e.preventDefault();
     e.stopPropagation();
