@@ -1,5 +1,5 @@
 import type { StepNode } from '../types';
-import { registry } from '../store/registry';
+import { registry, isTestHandle } from '../store/registry';
 import { dryRun } from './dry-run';
 
 export interface DagNode {
@@ -33,8 +33,11 @@ export async function buildDag(): Promise<Dag> {
   const errors: DagValidationError[] = [];
 
   // Dry-run each registered test to capture step trees
+  // Note: only legacy TestHandle entries are processed here.
+  // TaskHandle entries will be processed by the task DAG builder.
   for (const entry of entries) {
     const { handle, standaloneParams } = entry;
+    if (!isTestHandle(handle)) continue;
     try {
       const result = await dryRun(handle, standaloneParams);
       const composedTests = extractComposedTests(result.stepTree);

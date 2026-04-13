@@ -1,5 +1,5 @@
 import type { TestHandle, TestFixtures } from '../types';
-import { registry } from '../store/registry';
+import { registry, isTestHandle } from '../store/registry';
 import { outcomeStore } from '../store/outcome-store';
 import { dryRun } from './dry-run';
 import { execute } from './executor';
@@ -33,7 +33,14 @@ export async function runFlow(
     );
   }
 
-  const { handle, standaloneParams } = entry;
+  if (!isTestHandle(entry.handle)) {
+    throw new Error(
+      `'${code}' is not a legacy TestHandle. Use runTaskFlow() for TaskHandle.`,
+    );
+  }
+
+  const handle = entry.handle as TestHandle;
+  const { standaloneParams } = entry;
 
   if (standaloneParams === undefined) {
     throw new Error(
