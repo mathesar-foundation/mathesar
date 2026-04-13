@@ -3,7 +3,7 @@ import type { Page, Locator } from '@playwright/test';
 export class Modal {
   constructor(private root: Locator) {}
 
-  get title() { return this.root.getByRole('heading').first(); }
+  get title() { return this.root.locator('[data-window-area="title"]').first(); }
   get content() { return this.root; }
 
   async close() {
@@ -15,7 +15,7 @@ export class Modal {
 export function modal(page: Page, titleText: string | RegExp): Modal {
   return new Modal(
     page.locator('[role="dialog"]').filter({
-      has: page.getByRole('heading').filter({ hasText: titleText })
+      has: page.locator('[data-window-area="title"]').filter({ hasText: titleText })
     })
   );
 }

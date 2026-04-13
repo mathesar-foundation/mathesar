@@ -25,11 +25,14 @@ export class ConnectDatabaseModal extends Modal {
   }
 }
 
-/** Factory: locates the Connect Database dialog by its heading. */
+/**
+ * Factory: locates the topmost Connect Database dialog.
+ * This modal's title changes during the interaction flow (from
+ * "How would you like to connect your database?" to "Create a New Database"),
+ * so we select the topmost dialog rather than filtering by title.
+ */
 export function connectDatabaseModal(page: Page): ConnectDatabaseModal {
   return new ConnectDatabaseModal(
-    page.locator('[role="dialog"]').filter({
-      has: page.getByRole('heading').filter({ hasText: /Connect Database/ })
-    })
+    page.locator('[role="dialog"]').last()
   );
 }
