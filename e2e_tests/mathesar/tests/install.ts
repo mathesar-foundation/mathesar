@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { defineTest } from '../../framework/src';
-import { InstallationView } from '../interactions/views/installation.view';
+import { InstallationPage } from '../interactions/regions/installation.page';
 import { expect } from '@playwright/test';
 
 const DEFAULT_USERNAME = 'admin';
@@ -25,7 +25,7 @@ export const install = defineTest({
         await page.goto('/');
         await expect(page).toHaveURL(/complete_installation/);
 
-        const installation = new InstallationView(page);
+        const installation = new InstallationPage(page);
         await expect(installation.heading).toContainText(
           'Finish Setting Up Mathesar',
         );

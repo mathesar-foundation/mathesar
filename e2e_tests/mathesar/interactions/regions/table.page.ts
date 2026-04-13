@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
-import { DataGrid } from '../regions/data-grid';
+import { DataGrid } from '../components/data-grid';
 
-export class TableView {
+export class TablePage {
   constructor(private page: Page) {}
 
   get heading() { return this.page.locator('h1'); }

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-export class LoginView {
+export class LoginPage {
   constructor(private page: Page) {}
 
   get usernameInput() { return this.page.locator('input[name="username"]'); }

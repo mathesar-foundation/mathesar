@@ -2,8 +2,8 @@ import { z } from "zod";
 import { defineTest } from "../../framework/src";
 import { login } from "./login";
 import { expect } from "@playwright/test";
-import { DatabasesView } from "../interactions/views/databases.view";
-import { DatabaseView } from "../interactions/views/database.view";
+import { HomePage } from "../interactions/regions/home.page";
+import { DatabasePage } from "../interactions/regions/database.page";
 import { connectDatabaseModal } from "../interactions/regions/connect-database-modal";
 
 const connectDatabaseParams = z.object({
@@ -30,9 +30,9 @@ export const connectDatabase = defineTest({
       "Create new internal database with sample schema",
       connectDatabaseOutcome,
       async ({ page }) => {
-        const databases = new DatabasesView(page);
-        await databases.goto();
-        await databases.connectDatabaseButton.click();
+        const home = new HomePage(page);
+        await home.goto();
+        await home.connectDatabaseButton.click();
 
         const dialog = connectDatabaseModal(page);
         await dialog.createNewDatabase(
@@ -42,7 +42,7 @@ export const connectDatabase = defineTest({
 
         // Wait for database to appear in the list
         await expect(
-          databases.databaseLink(params.databaseName),
+          home.databaseLink(params.databaseName),
         ).toBeVisible();
 
         return {
@@ -54,19 +54,19 @@ export const connectDatabase = defineTest({
     );
 
     await t.check("Database is listed on the home page", async ({ page }) => {
-      const databases = new DatabasesView(page);
-      await databases.goto();
+      const home = new HomePage(page);
+      await home.goto();
       await expect(
-        databases.databaseEntry(result.databaseName),
+        home.databaseEntry(result.databaseName),
       ).toBeVisible();
     });
 
     await t.check("Schema is present inside the database", async ({ page }) => {
-      const databases = new DatabasesView(page);
-      await databases.goto();
-      await databases.databaseLink(result.databaseName).click();
+      const home = new HomePage(page);
+      await home.goto();
+      await home.databaseLink(result.databaseName).click();
 
-      const database = new DatabaseView(page);
+      const database = new DatabasePage(page);
       await expect(database.schemaLink(result.schemaName)).toBeVisible();
     });
 

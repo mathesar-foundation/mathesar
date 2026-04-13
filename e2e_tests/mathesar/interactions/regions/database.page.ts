@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-export class DatabaseView {
+export class DatabasePage {
   constructor(private page: Page) {}
 
   get schemasHeading() { return this.page.getByRole('tab', { name: /Schemas/ }); }

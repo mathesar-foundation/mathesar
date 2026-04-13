@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-export class DatabasesView {
+export class HomePage {
   constructor(private page: Page) {}
 
   get heading() { return this.page.getByRole('heading', { name: 'Databases' }); }

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { Modal } from './modal';
+import { Modal } from '../components/modal';
 
 /**
  * The "Connect Database" dialog — portaled to body, so scoped via

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { defineTest } from "../../framework/src";
 import { login } from "./login";
 import { expect } from "@playwright/test";
-import { AdminUsersView, AddUserView } from "../interactions/views/admin-users.view";
+import { AdminUsersPage, AddUserPage } from "../interactions/regions/admin-users.page";
 
 const addUserParams = z.object({
   login: z.object({ user: z.string(), password: z.string() }),
@@ -28,13 +28,13 @@ export const addUser = defineTest({
       "Create a new user via the administration page",
       addUserOutcome,
       async ({ page }) => {
-        const adminUsers = new AdminUsersView(page);
+        const adminUsers = new AdminUsersPage(page);
         await adminUsers.goto();
         await expect(adminUsers.heading).toBeVisible();
 
         await adminUsers.addUserLink.click();
 
-        const addUser = new AddUserView(page);
+        const addUser = new AddUserPage(page);
         await expect(addUser.heading).toBeVisible();
 
         const newTempPassword = "test_password";
@@ -54,7 +54,7 @@ export const addUser = defineTest({
     );
 
     await t.check("New user appears in the users list", async ({ page }) => {
-      const adminUsers = new AdminUsersView(page);
+      const adminUsers = new AdminUsersPage(page);
       await adminUsers.goto();
       await expect(adminUsers.userLink(result.username)).toBeVisible();
     });

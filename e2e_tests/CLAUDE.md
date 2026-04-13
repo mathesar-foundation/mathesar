@@ -26,8 +26,8 @@ e2e_tests/
   mathesar/           # Mathesar-specific test code
     tests/            # Test definitions — ONE file per test (you write these)
     interactions/     # Interaction objects (replaces Page Object Models)
-      views/          # Where the user IS — Page-scoped entry points
-      regions/        # What the user interacts WITH — Locator-scoped, reusable
+      components/     # Generic UI primitives — reusable base classes (Modal, DataGrid)
+      regions/        # Pages (Page-scoped entry points) and feature-specific regions
     db/               # Postgres client + SQL helpers
   .output/            # All generated/output files (gitignored)
     playwright.config.ts  # Auto-generated Playwright config
@@ -361,14 +361,15 @@ Build atomic tests for repeated interactions so composite tests can compose them
 
 Interaction objects model **what the user sees and does**, not app internals. They replace the Page Object Model with a composable, locator-scoped tree. If the app is rewritten, the public API stays stable — only internal selectors change.
 
-### Two Kinds of Objects
+### Three Kinds of Objects
 
 | Kind | Constructor | Purpose | Directory |
 |------|-------------|---------|-----------|
-| **View** | `Page` | Where the user IS — a navigation target/page entry point | `interactions/views/` |
-| **Region** | `Locator` | What the user interacts WITH — a bounded UI area | `interactions/regions/` |
+| **Page** | `Page` | Where the user IS — a navigation target/page entry point | `interactions/regions/` (`.page.ts` suffix) |
+| **Region** | `Locator` | What the user interacts WITH — a feature-specific bounded UI area | `interactions/regions/` |
+| **Component** | `Locator` | Generic, reusable UI primitive (Modal, DataGrid) — not tied to any feature | `interactions/components/` |
 
-Views are thin wrappers that compose regions. Regions are reusable across views.
+Pages are thin wrappers that compose regions and components. Components are reusable across pages and regions.
 
 ### Three-Part Vocabulary
 
@@ -379,11 +380,11 @@ Each object exposes:
 
 ### Rules
 
-1. **Locator-scoped.** Regions take `Locator`, views take `Page`. All queries go through `this.root`/`this.page`.
+1. **Locator-scoped.** Regions and components take `Locator`, pages take `Page`. All queries go through `this.root`/`this.page`.
 2. **Never escape scope for queries.** `this.root.page()` only for keyboard/mouse events, never for `locator()` queries. Exception: portaled elements (modals, dropdowns) — documented with a comment.
 3. **Child objects via getters/methods.** Lazy creation: `get grid() { return new DataGrid(...); }`. Never pre-create in constructor.
 4. **No assertions.** Objects expose locators and perform actions. Tests assert. `waitFor*()` methods are state observations, not assertions.
-5. **Views are thin.** If significant interaction logic creeps in, extract a region.
+5. **Pages are thin.** If significant interaction logic creeps in, extract a region or component.
 6. **One file per interaction domain.** `DataGrid` + `DataRow` + `DataCell` share `data-grid.ts`.
 7. **User perspective naming.** Name objects and methods for what the user sees/does, not implementation details.
 8. **Prefer ARIA selectors.** Use `getByRole`, `getByText`, `getByLabel` before falling back to data attributes or CSS.
@@ -395,10 +396,10 @@ ARIA roles/labels > text content > existing data attributes (`data-sheet-element
 
 No app changes for selectors. If a selector proves brittle, ask before adding new attributes.
 
-### Pattern: Region
+### Pattern: Component
 
 ```typescript
-// interactions/regions/data-grid.ts — Locator-scoped, user-perspective API
+// interactions/components/data-grid.ts — Locator-scoped, user-perspective API
 export class DataGrid {
   constructor(private root: Locator) {}
 
@@ -418,11 +419,11 @@ export class DataGrid {
 }
 ```
 
-### Pattern: View
+### Pattern: Page
 
 ```typescript
-// interactions/views/table.view.ts — Page-scoped, thin composition
-export class TableView {
+// interactions/regions/table.page.ts — Page-scoped, thin composition
+export class TablePage {
   constructor(private page: Page) {}
 
   get heading() { return this.page.locator('h1'); }
@@ -435,7 +436,7 @@ export class TableView {
 Modals render at body level via `use:portal`. A factory function creates a scoped region:
 
 ```typescript
-// interactions/regions/modal.ts
+// interactions/components/modal.ts
 export function modal(page: Page, titleText: string | RegExp): Modal {
   return new Modal(
     page.locator('[role="dialog"]').filter({
@@ -449,14 +450,14 @@ export function modal(page: Page, titleText: string | RegExp): Modal {
 
 ```typescript
 await t.action('Add record', schema, async ({ page }) => {
-  const table = new TableView(page);
+  const table = new TablePage(page);
   await table.grid.addRecord();
   await table.grid.draftRow().cell(1).edit('value');
   await table.grid.waitForSaved();
   return { value: 'value' };
 });
 await t.check('Record visible', async ({ page }) => {
-  const table = new TableView(page);
+  const table = new TablePage(page);
   await expect(table.grid.rowContaining('value').element).toBeVisible();
 });
 ```
@@ -539,7 +540,7 @@ When your test will be composed by others, return data they'll need. Include cre
 Interaction objects expose locators and actions, never assertions. Tests decide what to assert. Use getters for locators (lazy creation). Use methods for parameterized locators and actions.
 
 ```typescript
-export class MyView {
+export class MyPage {
   constructor(private page: Page) {}
 
   get heading() { return this.page.getByRole('heading', { name: 'My Page' }); }

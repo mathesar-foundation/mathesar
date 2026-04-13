@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-export class AdminUsersView {
+export class AdminUsersPage {
   constructor(private page: Page) {}
 
   get heading() { return this.page.getByRole('heading', { name: /Users/ }); }
@@ -14,7 +14,7 @@ export class AdminUsersView {
   }
 }
 
-export class AddUserView {
+export class AddUserPage {
   constructor(private page: Page) {}
 
   get heading() { return this.page.getByRole('heading', { name: 'New User' }); }
