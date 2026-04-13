@@ -46,7 +46,7 @@ services:
     expose:
       - "8000"
     ports:
-      - "8000:8000"
+      - "8010:8000"
 
   e2e-test-runner:
     container_name: mathesar-e2e-test-runner
