@@ -43,6 +43,16 @@ e2e_tests/
 
 ## Running Tests
 
+From the **project root**, run the full e2e suite via Docker:
+
+```bash
+./run_e2e_tests.sh        # builds & runs the full e2e stack (db, app, test runner), then tears down
+```
+
+This script uses `docker-compose.e2e.yml` to spin up Postgres, the Mathesar service (built from the production Dockerfile), and the Playwright test runner. It runs `npm run test` inside the container, then tears everything down with `docker compose down -v`.
+
+The following `npm run` commands are what execute **inside the test runner container**:
+
 ```bash
 npm run test              # run all e2e tests (headless)
 npm run test:headed       # run with browser visible

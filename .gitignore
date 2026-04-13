@@ -204,3 +204,6 @@ config/settings/local.py
 
 # Transifex binary
 tx
+
+# Playwright
+.playwright-cli
