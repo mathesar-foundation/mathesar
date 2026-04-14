@@ -377,13 +377,10 @@ export function getTableFromApi({tableOid}: {tableOid: Table['oid'];}): Cancella
     const table = $tablesStore.tablesMap.get(tableOid);
     if (table) {
       return new CancellablePromise((resolve) => {
-        console.log('cache hit');
-        console.log($tablesStore);
         resolve(table);
       });
     }
   }
-  console.log('cache miss');
   const promise = api.tables
     .get_with_metadata({
       database_id: $currentDatabase.id,
