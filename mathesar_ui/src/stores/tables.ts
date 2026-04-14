@@ -51,7 +51,6 @@ type TablesMap = Map<Table['oid'], Table>;
 
 export interface TablesData {
   databaseId?: Database['id'];
-  // schemaOid?: Schema['oid'];
   tablesMap: TablesMap;
   requestStatus: RequestStatus;
 }
@@ -111,8 +110,7 @@ export async function fetchTablesForCurrentSchema() {
   try {
     tablesStore.update(($tablesStore) => {
       if (
-        $tablesStore.databaseId === $currentSchema.database.id/*  &&
-        $tablesStore.schemaOid === $currentSchema.oid */
+        $tablesStore.databaseId === $currentSchema.database.id
       ) {
         return {
           ...$tablesStore,
@@ -140,8 +138,7 @@ export async function fetchTablesForCurrentSchema() {
   } catch (err) {
     tablesStore.update(($tablesStore) => {
       if (
-        $tablesStore.databaseId === $currentSchema.database.id /* &&
-        $tablesStore.schemaOid === $currentSchema.oid */
+        $tablesStore.databaseId === $currentSchema.database.id
       ) {
         return {
           ...$tablesStore,
@@ -226,7 +223,7 @@ function putTableInStore({
         tablesMap: newTablesMap,
       };
     });
-    schema.setTableCount(get(tablesStore).tablesMap.size);
+    schema.setTableCount([...get(tablesStore).tablesMap.values()].filter((table) => table.schema.oid === schema.oid).length);
   }
   return fullTable;
 }
@@ -427,8 +424,7 @@ export function getTableFromStoreOrApi({
   const $tablesStore = get(tablesStore);
 
   if (
-    $tablesStore.databaseId === schema.database.id /* &&
-    $tablesStore.schemaOid === schema.oid  */&&
+    $tablesStore.databaseId === schema.database.id &&
     !clearCache
   ) {
     const table = $tablesStore.tablesMap.get(tableOid);
@@ -468,8 +464,7 @@ export const currentTablesData = collapse(
   derived(currentSchema, ($currentSchema) => {
     const $tablesStore = get(tablesStore);
     if (
-      $tablesStore.databaseId !== $currentSchema?.database.id /* ||
-      $tablesStore.schemaOid !== $currentSchema?.oid */
+      $tablesStore.databaseId !== $currentSchema?.database.id
     ) {
       if (
         preload &&
@@ -481,8 +476,7 @@ export const currentTablesData = collapse(
           setTablesStore($currentSchema, commonData.tables.data);
         } else {
           tablesStore.set({
-            databaseId: $currentSchema.database.id,/* 
-            schemaOid: $currentSchema.oid, */
+            databaseId: $currentSchema.database.id,
             tablesMap: new Map(),
             requestStatus: {
               state: 'failure',
