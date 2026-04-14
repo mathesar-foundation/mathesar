@@ -62,7 +62,7 @@ function makeEmptyTablesData(): TablesData {
   };
 }
 
-export const tablesStore = writable(makeEmptyTablesData());
+const tablesStore = writable(makeEmptyTablesData());
 
 function sortTables(tables: Iterable<Table>): Table[] {
   const allTables = [...tables];
@@ -90,7 +90,6 @@ function setTablesStore(
 
   tablesStore.set({
     databaseId: schema.database.id,
-    // schemaOid: schema.oid,
     tablesMap,
     requestStatus: { state: 'success' },
   });
