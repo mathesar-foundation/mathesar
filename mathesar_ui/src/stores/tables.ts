@@ -51,7 +51,7 @@ type TablesMap = Map<Table['oid'], Table>;
 
 export interface TablesData {
   databaseId?: Database['id'];
-  schemaOid?: Schema['oid'];
+  // schemaOid?: Schema['oid'];
   tablesMap: TablesMap;
   requestStatus: RequestStatus;
 }
@@ -91,7 +91,7 @@ function setTablesStore(
 
   tablesStore.set({
     databaseId: schema.database.id,
-    schemaOid: schema.oid,
+    // schemaOid: schema.oid,
     tablesMap,
     requestStatus: { state: 'success' },
   });
@@ -111,8 +111,8 @@ export async function fetchTablesForCurrentSchema() {
   try {
     tablesStore.update(($tablesStore) => {
       if (
-        $tablesStore.databaseId === $currentSchema.database.id &&
-        $tablesStore.schemaOid === $currentSchema.oid
+        $tablesStore.databaseId === $currentSchema.database.id/*  &&
+        $tablesStore.schemaOid === $currentSchema.oid */
       ) {
         return {
           ...$tablesStore,
@@ -140,8 +140,8 @@ export async function fetchTablesForCurrentSchema() {
   } catch (err) {
     tablesStore.update(($tablesStore) => {
       if (
-        $tablesStore.databaseId === $currentSchema.database.id &&
-        $tablesStore.schemaOid === $currentSchema.oid
+        $tablesStore.databaseId === $currentSchema.database.id /* &&
+        $tablesStore.schemaOid === $currentSchema.oid */
       ) {
         return {
           ...$tablesStore,
@@ -180,8 +180,8 @@ export function deleteTable(
         schema.setTableCount(get(schema.tableCount) - 1);
         const $tablesStore = get(tablesStore);
         if (
-          $tablesStore.databaseId === schema.database.id &&
-          $tablesStore.schemaOid === schema.oid
+          $tablesStore.databaseId === schema.database.id /* &&
+          $tablesStore.schemaOid === schema.oid */
         ) {
           tablesStore.update((tableStoreData) => {
             tableStoreData.tablesMap.delete(tableOid);
@@ -213,8 +213,8 @@ function putTableInStore({
   });
   const $tablesStore = get(tablesStore);
   if (
-    $tablesStore.databaseId === schema.database.id &&
-    $tablesStore.schemaOid === schema.oid
+    $tablesStore.databaseId === schema.database.id /* &&
+    $tablesStore.schemaOid === schema.oid */
   ) {
     tablesStore.update((tablesData) => {
       tablesData.tablesMap.set(fullTable.oid, fullTable);
@@ -382,6 +382,7 @@ export function getTableFromApi({tableOid}: {tableOid: Table['oid'];}): Cancella
     if (table) {
       return new CancellablePromise((resolve) => {
         console.log('cache hit');
+        console.log($tablesStore);
         resolve(table);
       });
     }
@@ -426,8 +427,8 @@ export function getTableFromStoreOrApi({
   const $tablesStore = get(tablesStore);
 
   if (
-    $tablesStore.databaseId === schema.database.id &&
-    $tablesStore.schemaOid === schema.oid &&
+    $tablesStore.databaseId === schema.database.id /* &&
+    $tablesStore.schemaOid === schema.oid  */&&
     !clearCache
   ) {
     const table = $tablesStore.tablesMap.get(tableOid);
@@ -467,8 +468,8 @@ export const currentTablesData = collapse(
   derived(currentSchema, ($currentSchema) => {
     const $tablesStore = get(tablesStore);
     if (
-      $tablesStore.databaseId !== $currentSchema?.database.id ||
-      $tablesStore.schemaOid !== $currentSchema?.oid
+      $tablesStore.databaseId !== $currentSchema?.database.id /* ||
+      $tablesStore.schemaOid !== $currentSchema?.oid */
     ) {
       if (
         preload &&
@@ -480,8 +481,8 @@ export const currentTablesData = collapse(
           setTablesStore($currentSchema, commonData.tables.data);
         } else {
           tablesStore.set({
-            databaseId: $currentSchema.database.id,
-            schemaOid: $currentSchema.oid,
+            databaseId: $currentSchema.database.id,/* 
+            schemaOid: $currentSchema.oid, */
             tablesMap: new Map(),
             requestStatus: {
               state: 'failure',
