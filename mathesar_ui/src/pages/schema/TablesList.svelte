@@ -12,13 +12,13 @@
   import EditTableModal from './EditTableModal.svelte';
   import EmptyEntityList from './EmptyEntityList.svelte';
   import TableCard from './TableCard.svelte';
+  import { currentSchema } from '@mathesar/stores/schemas';
 
   const editTableModal = modal.spawnModalController();
   const tablePermissionsModal = modal.spawnModalController();
 
   export let tables: Table[];
   export let database: Database;
-  export let schema: Schema;
 
   let tableForEditing: Table | undefined;
   let tableForPermissions: Table | undefined;
@@ -43,14 +43,15 @@
       }}
     >
       {#each tables as table (table.oid)}
-        <TableCard
-          {table}
-          {database}
-          {schema}
-          {openEditTableModal}
-          {openTablePermissionsModal}
-          condensed={containerWidth < 400}
-        />
+        {#if table.schema === $currentSchema}
+          <TableCard
+            {table}
+            {database}
+            {openEditTableModal}
+            {openTablePermissionsModal}
+            condensed={containerWidth < 400}
+          />
+        {/if}
       {/each}
     </div>
   {:else}

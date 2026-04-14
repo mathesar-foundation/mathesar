@@ -89,7 +89,6 @@
     {:else}
       <TablesList
         tables={[...tablesMap.values()]}
-        {schema}
         database={schema.database}
       />
     {/if}
