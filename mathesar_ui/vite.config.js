@@ -43,6 +43,8 @@ export default defineConfig({
       input: {
         main: './src/main.ts',
         en: './src/i18n/languages/en/index.ts',
+        es: './src/i18n/languages/es/index.ts',
+        fr: './src/i18n/languages/fr/index.ts',
         ja: './src/i18n/languages/ja/index.ts',
       },
     },
