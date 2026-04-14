@@ -3,6 +3,7 @@ import boolean from './boolean';
 import date from './date';
 import datetime from './datetime';
 import duration from './duration';
+import enumFactory from './enum';
 import file from './file';
 import money from './money';
 import number from './number';
@@ -32,6 +33,7 @@ const simpleDataTypeComponentFactories: Record<
   datetime,
   file,
   user,
+  enum: enumFactory,
 };
 
 const compoundDataTypeComponentFactories: Record<

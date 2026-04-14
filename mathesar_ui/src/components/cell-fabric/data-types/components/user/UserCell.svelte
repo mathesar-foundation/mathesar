@@ -18,6 +18,7 @@
     Spinner,
     compareWholeValues,
     iconExpandDown,
+    iconWarning,
   } from '@mathesar-component-library';
 
   import CellWrapper from '../CellWrapper.svelte';
@@ -54,6 +55,11 @@
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
   $: users = $usersReadable;
   $: isLoadingUsers = $requestStatusReadable?.state === 'processing';
+  $: usersLoaded = $requestStatusReadable?.state === 'success';
+  $: showBrokenLink =
+    hasValue &&
+    usersLoaded &&
+    !users.some((u) => u.id === Number(value));
 
   // Get previous value for row seeker
   function getPreviousValue(): SummarizedRecordReference | undefined {
@@ -183,6 +189,11 @@
     <div class="value">
       {#if isLoadingUsers}
         <Spinner />
+      {:else if showBrokenLink}
+        <span class="broken-link" title={$_('user_not_found')}>
+          <Icon {...iconWarning} />
+          <span class="broken-value">{value}</span>
+        </span>
       {:else if hasValue}
         <LinkedRecord
           recordId={value}
@@ -238,5 +249,14 @@
   }
   .dropdown-button:hover {
     color: var(--color-fg-base);
+  }
+  .broken-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-fg-base-disabled);
+  }
+  .broken-value {
+    text-decoration: line-through;
   }
 </style>

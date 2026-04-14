@@ -21,7 +21,8 @@ export type SimpleCellDataTypes =
   | 'time'
   | 'datetime'
   | 'file'
-  | 'user';
+  | 'user'
+  | 'enum';
 
 export type CompoundCellDataTypes = 'array';
 

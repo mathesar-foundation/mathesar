@@ -18,6 +18,7 @@ import Date from './type-configs/date';
 import DateTime from './type-configs/datetime';
 import Duration from './type-configs/duration';
 import Email from './type-configs/email';
+import Enum from './type-configs/enum';
 import Fallback from './type-configs/fallback';
 // eslint-disable-next-line import/no-cycle
 import File from './type-configs/file/file';
@@ -65,6 +66,7 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.Json]: Json,
   [abstractTypeCategory.File]: File,
   [abstractTypeCategory.User]: User,
+  [abstractTypeCategory.Enum]: Enum,
 };
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
@@ -201,6 +203,11 @@ const typesResponse: AbstractTypeResponse[] = [
     identifier: 'email',
     name: 'Email',
     db_types: [DB_TYPES.MSAR__EMAIL],
+  },
+  {
+    identifier: 'enum',
+    name: 'Enum',
+    db_types: [DB_TYPES.ENUM],
   },
   {
     identifier: 'money',
@@ -461,8 +468,13 @@ export function mergeMetadataOnTypeChange(
 }
 
 export function getAllowedAbstractTypesForNewColumn() {
+  const typesDisallowedForNewColumnCreation = new Set<string>([
+    ...Object.keys(comboAbstractTypeCategories),
+    abstractTypeCategory.Enum,
+  ]);
+
   return [...abstractTypesMap.values(), fileAbstractType, userAbstractType]
-    .filter((type) => !comboAbstractTypeCategories[type.identifier])
+    .filter((type) => !typesDisallowedForNewColumnCreation.has(type.identifier))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 

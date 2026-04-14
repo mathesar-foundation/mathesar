@@ -278,7 +278,7 @@ def submit_form(form_token, values, user=None):
     ]
     values = dict(values)
 
-    if user and user.is_authenticated and hasattr(user, 'id'):
+    if user and user.is_authenticated:
         _inject_user_tracking_fields(field_info_list, values, user, form_model.database.id)
 
     with form_model.connection as conn:

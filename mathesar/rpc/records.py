@@ -360,9 +360,8 @@ def list_(
         columns_meta_data, record_info.get("results", [])
     )
     if user_summaries is not None:
-        if record_info.get("linked_record_summaries") is None:
-            record_info["linked_record_summaries"] = {}
-        record_info["linked_record_summaries"].update(user_summaries)
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
 
     return RecordList.from_dict(record_info)
 
@@ -424,9 +423,8 @@ def get(
         columns_meta_data, record_info.get("results", [])
     )
     if user_summaries is not None:
-        if record_info.get("linked_record_summaries") is None:
-            record_info["linked_record_summaries"] = {}
-        record_info["linked_record_summaries"].update(user_summaries)
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
 
     return RecordList.from_dict(record_info)
 
@@ -480,9 +478,8 @@ def add(
         columns_meta_data, record_info.get("results", [])
     )
     if user_summaries is not None:
-        if record_info.get("linked_record_summaries") is None:
-            record_info["linked_record_summaries"] = {}
-        record_info["linked_record_summaries"].update(user_summaries)
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
 
     return RecordAdded.from_dict(record_info)
 
@@ -538,9 +535,8 @@ def patch(
         columns_meta_data, record_info.get("results", [])
     )
     if user_summaries is not None:
-        if record_info.get("linked_record_summaries") is None:
-            record_info["linked_record_summaries"] = {}
-        record_info["linked_record_summaries"].update(user_summaries)
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
 
     return RecordAdded.from_dict(record_info)
 
@@ -629,9 +625,8 @@ def search(
         columns_meta_data, record_info.get("results", [])
     )
     if user_summaries is not None:
-        if record_info.get("linked_record_summaries") is None:
-            record_info["linked_record_summaries"] = {}
-        record_info["linked_record_summaries"].update(user_summaries)
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
 
     return RecordList.from_dict(record_info)
 
