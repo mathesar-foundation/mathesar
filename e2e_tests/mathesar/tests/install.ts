@@ -14,6 +14,20 @@ export const install = defineTask({
     session: AuthSession.schema,
   }),
 
+  // install's lasting effect is server-side (the superuser row) and is
+  // persistent — future test runs don't need the wizard to be re-executed.
+  // The browser-side session Django sets during the wizard is transient and
+  // intentionally NOT restored here: install's only caller is `login`, and
+  // login.task navigates to /auth/login/ to sign in from scratch. If we
+  // re-established the session here, Django would redirect away from the
+  // login page and login.task would hang waiting for the username field.
+  //
+  // Any task needing an authenticated session must compose `login`, which
+  // has its own restoreFn. This no-op exists solely so the framework knows
+  // install's state-change (cookies set by the wizard) is intentional and
+  // does not need replaying.
+  restore: async () => {},
+
   task: async (t) => {
     return await t.action(
       'Set up superuser and complete installation',

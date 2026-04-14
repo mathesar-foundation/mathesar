@@ -4,6 +4,8 @@ import type {
   TestFixtures,
 } from '../types';
 import type { SubStepRecord } from '../store/outcome-store';
+import type { BrowserStateChange } from './browser-state';
+import { formatMissingRestoreHookWarning } from './browser-state';
 import { createExecutorContext, setTaskExecuteFn } from './create-task-context';
 
 export interface TaskExecutionResult<TOutcome> {
@@ -36,12 +38,14 @@ export async function taskExecute<TParams, TOutcome>(
 
   const nodes: TaskStepNode[] = [];
   const subStepRecords: SubStepRecord[] = [];
+  const ownChanges: BrowserStateChange[] = [];
 
   const executor = createExecutorContext(
     fixtures,
     handle.code,
     nodes,
     subStepRecords,
+    ownChanges,
   );
 
   const outcome = await handle.taskFn(executor, params);
@@ -53,6 +57,13 @@ export async function taskExecute<TParams, TOutcome>(
       `Task '${handle.code}' returned invalid outcome: ` +
         outcomeResult.error.message,
     );
+  }
+
+  // Warn only for state changes caused by THIS task's own action/check
+  // closures. Sub-task state changes are attributed at their own level
+  // (each sub-task runs its own taskExecute with its own ownChanges).
+  if (ownChanges.length > 0 && !handle.restoreFn) {
+    console.warn(formatMissingRestoreHookWarning(handle.code, ownChanges));
   }
 
   return { outcome, stepTree: nodes, subSteps: subStepRecords };

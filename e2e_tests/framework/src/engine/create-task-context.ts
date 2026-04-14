@@ -15,7 +15,7 @@ import { taskDryRun } from './task-dry-run';
 import {
   snapshotBrowserState,
   describeBrowserStateChanges,
-  formatMissingRestoreHookWarning,
+  type BrowserStateChange,
 } from './browser-state';
 
 /**
@@ -95,12 +95,19 @@ function wrapError(err: unknown, context: string): Error {
  * Create a TaskContext executor implementation for use in both task and
  * scenario execution. The context handles ensure/perform/action/check
  * with caching, resource tracking, and browser state management.
+ *
+ * `ownChanges` accumulates browser-state diffs caused by the current task's
+ * OWN `t.action` / `t.check` closures — not by sub-tasks composed via
+ * `t.ensure` / `t.perform`. This lets the executor (task-executor.ts) emit
+ * the "missing restore hook" warning precisely for state the task is
+ * responsible for, without false positives from sub-task mutations.
  */
 export function createExecutorContext(
   fixtures: TestFixtures,
   contextLabel: string,
   nodes: TaskStepNode[],
   subStepRecords: SubStepRecord[],
+  ownChanges: BrowserStateChange[],
 ): TaskContext {
   return {
     async ensure<P, O>(
@@ -154,16 +161,11 @@ export function createExecutorContext(
           subStepTree = dryRunResult.stepTree;
           subSubSteps = [];
         } else {
-          // Manual path — browser-based
-          const before = await snapshotBrowserState(fixtures.page);
+          // Manual path — browser-based. The sub-task's own executor tracks
+          // its own state changes and emits its own warning; we don't diff
+          // at this boundary, since those changes are the sub-task's
+          // responsibility, not ours.
           const subResult = await getTaskExecute()(fixtures, subTask, subParams);
-          const after = await snapshotBrowserState(fixtures.page);
-
-          const changes = describeBrowserStateChanges(before, after);
-          if (changes.length > 0 && !subTask.restoreFn) {
-            console.warn(formatMissingRestoreHookWarning(subTask.code, changes));
-          }
-
           subOutcome = subResult.outcome;
           subStepTree = subResult.stepTree;
           subSubSteps = subResult.subSteps;
@@ -211,16 +213,11 @@ export function createExecutorContext(
         }
       }
 
-      // Cache miss: always use manual (browser) path for perform
+      // Cache miss: always use manual (browser) path for perform.
+      // The sub-task's own executor tracks its own state changes and emits
+      // its own warning; we don't diff at this boundary.
       try {
-        const before = await snapshotBrowserState(fixtures.page);
         const subResult = await getTaskExecute()(fixtures, subTask, subParams);
-        const after = await snapshotBrowserState(fixtures.page);
-
-        const changes = describeBrowserStateChanges(before, after);
-        if (changes.length > 0 && !subTask.restoreFn) {
-          console.warn(formatMissingRestoreHookWarning(subTask.code, changes));
-        }
 
         outcomeStore.set(cacheKey, subResult.outcome, subResult.subSteps);
 
@@ -242,6 +239,9 @@ export function createExecutorContext(
       label: string,
       config: ActionConfig<O>,
     ): Promise<O> {
+      // Snapshot around the closure so any state change it causes is
+      // attributed to THIS task (not a composed sub-task).
+      const before = await snapshotBrowserState(fixtures.page);
       let result: O;
       try {
         result = await config.fn(fixtures);
@@ -251,6 +251,8 @@ export function createExecutorContext(
           `Action '${label}' in '${contextLabel}' failed`,
         );
       }
+      const after = await snapshotBrowserState(fixtures.page);
+      ownChanges.push(...describeBrowserStateChanges(before, after));
 
       // Validate against schema
       const parseResult = config.schema.safeParse(result);
@@ -282,6 +284,10 @@ export function createExecutorContext(
       label: string,
       fn: (fixtures: TestFixtures) => Promise<void>,
     ): Promise<void> {
+      // Checks shouldn't normally modify state, but navigation inside a
+      // check (e.g., `page.goto`) can rotate cookies. Attribute any diff
+      // to THIS task so the warning is accurate.
+      const before = await snapshotBrowserState(fixtures.page);
       try {
         await fn(fixtures);
       } catch (err) {
@@ -290,6 +296,8 @@ export function createExecutorContext(
           `Check '${label}' in '${contextLabel}' failed`,
         );
       }
+      const after = await snapshotBrowserState(fixtures.page);
+      ownChanges.push(...describeBrowserStateChanges(before, after));
       nodes.push({ type: 'check', label });
     },
   };
