@@ -14,7 +14,8 @@ import { restoreFromCache } from './restore';
 import { taskDryRun } from './task-dry-run';
 import {
   snapshotBrowserState,
-  browserStateChanged,
+  describeBrowserStateChanges,
+  formatMissingRestoreHookWarning,
 } from './browser-state';
 
 /**
@@ -158,10 +159,9 @@ export function createExecutorContext(
           const subResult = await getTaskExecute()(fixtures, subTask, subParams);
           const after = await snapshotBrowserState(fixtures.page);
 
-          if (browserStateChanged(before, after) && !subTask.restoreFn) {
-            console.warn(
-              `\u26a0 Task '${subTask.code}' modifies browser state but has no restore hook.`,
-            );
+          const changes = describeBrowserStateChanges(before, after);
+          if (changes.length > 0 && !subTask.restoreFn) {
+            console.warn(formatMissingRestoreHookWarning(subTask.code, changes));
           }
 
           subOutcome = subResult.outcome;
@@ -217,10 +217,9 @@ export function createExecutorContext(
         const subResult = await getTaskExecute()(fixtures, subTask, subParams);
         const after = await snapshotBrowserState(fixtures.page);
 
-        if (browserStateChanged(before, after) && !subTask.restoreFn) {
-          console.warn(
-            `\u26a0 Task '${subTask.code}' modifies browser state but has no restore hook.`,
-          );
+        const changes = describeBrowserStateChanges(before, after);
+        if (changes.length > 0 && !subTask.restoreFn) {
+          console.warn(formatMissingRestoreHookWarning(subTask.code, changes));
         }
 
         outcomeStore.set(cacheKey, subResult.outcome, subResult.subSteps);

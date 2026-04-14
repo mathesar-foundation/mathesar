@@ -17,6 +17,8 @@ export { restoreFromCache } from './engine/restore';
 export {
   normalizeBrowserState,
   browserStateChanged,
+  describeBrowserStateChanges,
+  formatMissingRestoreHookWarning,
   snapshotBrowserState,
 } from './engine/browser-state';
 
@@ -57,4 +59,4 @@ export type { SubStepRecord, StoredEntry } from './store/outcome-store';
 export type { RegisteredEntry, RegisteredScenario } from './store/registry';
 export { isScenarioHandle } from './store/registry';
 export type { RunnerGeneratorConfig } from '../scripts/generate-runners';
-export type { NormalizedBrowserState } from './engine/browser-state';
+export type { NormalizedBrowserState, BrowserStateChange } from './engine/browser-state';
