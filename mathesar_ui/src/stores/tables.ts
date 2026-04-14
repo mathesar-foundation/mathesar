@@ -176,8 +176,7 @@ export function deleteTable(
         schema.setTableCount(get(schema.tableCount) - 1);
         const $tablesStore = get(tablesStore);
         if (
-          $tablesStore.databaseId === schema.database.id /* &&
-          $tablesStore.schemaOid === schema.oid */
+          $tablesStore.databaseId === schema.database.id
         ) {
           tablesStore.update((tableStoreData) => {
             tableStoreData.tablesMap.delete(tableOid);
@@ -209,8 +208,7 @@ function putTableInStore({
   });
   const $tablesStore = get(tablesStore);
   if (
-    $tablesStore.databaseId === schema.database.id /* &&
-    $tablesStore.schemaOid === schema.oid */
+    $tablesStore.databaseId === schema.database.id
   ) {
     tablesStore.update((tablesData) => {
       tablesData.tablesMap.set(fullTable.oid, fullTable);
