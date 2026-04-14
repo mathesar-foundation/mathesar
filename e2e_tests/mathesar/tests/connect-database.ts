@@ -10,7 +10,7 @@ import { Database, Schema } from '../resources/database';
 const connectDatabaseParams = z.object({
   login: z.object({ user: z.string(), password: z.string() }),
   databaseName: z.string(),
-  sampleSchema: z.string(),
+  sampleSchema: z.string().optional(),
 });
 
 export const connectDatabase = defineTask({
@@ -25,7 +25,7 @@ export const connectDatabase = defineTask({
     await t.ensure(login, params.login);
 
     const result = await t.action(
-      'Create new internal database with sample schema',
+      'Create new internal database',
       {
         schema: z.object({
           database: Database.schema,
@@ -54,7 +54,7 @@ export const connectDatabase = defineTask({
             },
             schema: {
               databaseName: params.databaseName,
-              schemaName: params.sampleSchema,
+              schemaName: params.sampleSchema ?? 'public',
             },
           };
         },

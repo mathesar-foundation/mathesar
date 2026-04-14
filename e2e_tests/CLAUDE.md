@@ -506,6 +506,29 @@ ARIA roles/labels > text content > existing data attributes (`data-sheet-element
 
 No app changes for selectors. If a selector proves brittle, ask before adding new attributes.
 
+### Gotchas: Svelte + Playwright
+
+Patterns that surface repeatedly in Mathesar because of how Svelte renders:
+
+- **`bind:value` sets the IDL `value` property, never the `value` attribute.** Selectors like `input[value="X"]`, `filter({ hasText: 'X' })` on a container, and `getByRole('textbox', { name: 'X' })` all fail to match a user-entered value. When you need to pick an element by its input contents, iterate and compare with `inputValue()`:
+  ```typescript
+  const cells = this.page.locator('[data-sheet-element="column-header-cell"]');
+  const count = await cells.count();
+  for (let i = 0; i < count; i++) {
+    if ((await cells.nth(i).locator('input[type="text"]').inputValue()) === name) { ... }
+  }
+  ```
+
+- **Multiple inputs per cell.** Form rows often pair `<input type="checkbox">` with `<input type="text">`. A bare `input` selector hits both and trips strict mode. Scope with `input[type="text"]` or `getByRole('textbox')`.
+
+- **`getByRole(role, { name })` substring-matches by default.** A short name like `patents` also matches `patents_db` in the breadcrumb. Pass `{ exact: true }` whenever a name could partially overlap another visible name.
+
+- **Portaled elements need a stable anchor.** Anchor on a wrapper attribute that exists from the moment the element renders, not on contents that depend on state. Known anchors:
+  - Modals: `[role="dialog"]` (see `connectDatabaseModal`)
+  - Dropdowns/popovers: `[data-attachable-dropdown]` (see `typeEditorPopover`)
+
+  Don't anchor on e.g. a `Save` button that only appears after the user has changed something — the factory will miss the popover on first render.
+
 ### Pattern: Component
 
 ```typescript
@@ -665,6 +688,23 @@ export class MyPage {
 }
 ```
 
+### Expose a `waitFor*()` observation for async-rendered content
+
+Many Mathesar pages paint the chrome (breadcrumb, heading, action bar) immediately but fill in the data area asynchronously after API calls. Don't rely on the heading as a readiness signal — the next interaction will race the data and fail intermittently.
+
+Add a dedicated readiness observation on the interaction object, anchored on a signal that only flips after data arrives:
+
+```typescript
+export class ImportPreviewPage {
+  async waitForLoaded() {
+    // "Confirm & create table" is only enabled after preview columns load.
+    await expect(this.confirmButton).toBeEnabled();
+  }
+}
+```
+
+Call it from the test before interacting with the dynamic region.
+
 ## Rules and Pitfalls
 
 1. **File name = code.** `install.ts` must use `code: 'install'`.
@@ -680,3 +720,4 @@ export class MyPage {
 11. **Add restore hooks for tasks that modify browser state.** If your task sets cookies or localStorage, add a `restore` function to `defineTask()`. The framework warns if a task changes browser state without a restore hook.
 12. **Don't rely on browser state from composed sub-steps.** After `t.ensure()` / `t.perform()`, always navigate explicitly. Sub-steps may be cached and their browser effects skipped.
 13. **Outcomes should carry forward data needed by downstream restore hooks.** If your task composes a sub-step that modifies browser state, include the data needed for re-establishment in your outcome (e.g., credentials for re-login).
+14. **Wait for dynamic content explicitly.** The heading being visible is not a signal that data has loaded. Expose a `waitFor*()` observation on the interaction object (anchored on a signal that only flips once data is in), and call it from the test before interacting with the dynamic region.
