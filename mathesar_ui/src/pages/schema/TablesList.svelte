@@ -3,16 +3,15 @@
 
   import { iconTable } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { modal } from '@mathesar/stores/modal';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import TablePermissionsModal from '@mathesar/systems/table-view/table-inspector/table/TablePermissionsModal.svelte';
 
   import EditTableModal from './EditTableModal.svelte';
   import EmptyEntityList from './EmptyEntityList.svelte';
   import TableCard from './TableCard.svelte';
-  import { currentSchema } from '@mathesar/stores/schemas';
 
   const editTableModal = modal.spawnModalController();
   const tablePermissionsModal = modal.spawnModalController();

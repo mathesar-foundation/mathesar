@@ -10,7 +10,6 @@
     iconSelectRecord,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import {
     getImportPreviewPageUrl,

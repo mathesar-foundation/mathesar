@@ -41,8 +41,8 @@ import {
   collapse,
 } from '@mathesar-component-library';
 
-import { currentSchema, schemas } from './schemas';
 import { databasesStore } from './databases';
+import { currentSchema, schemas } from './schemas';
 
 const commonData = preloadCommonData();
 const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
@@ -108,9 +108,7 @@ export async function fetchTablesForCurrentSchema() {
 
   try {
     tablesStore.update(($tablesStore) => {
-      if (
-        $tablesStore.databaseId === $currentSchema.database.id
-      ) {
+      if ($tablesStore.databaseId === $currentSchema.database.id) {
         return {
           ...$tablesStore,
           requestStatus: { state: 'processing' },
@@ -136,9 +134,7 @@ export async function fetchTablesForCurrentSchema() {
     setTablesStore($currentSchema, tableEntries);
   } catch (err) {
     tablesStore.update(($tablesStore) => {
-      if (
-        $tablesStore.databaseId === $currentSchema.database.id
-      ) {
+      if ($tablesStore.databaseId === $currentSchema.database.id) {
         return {
           ...$tablesStore,
           requestStatus: {
@@ -175,9 +171,7 @@ export function deleteTable(
       void promise.then(() => {
         schema.setTableCount(get(schema.tableCount) - 1);
         const $tablesStore = get(tablesStore);
-        if (
-          $tablesStore.databaseId === schema.database.id
-        ) {
+        if ($tablesStore.databaseId === schema.database.id) {
           tablesStore.update((tableStoreData) => {
             tableStoreData.tablesMap.delete(tableOid);
             return {
@@ -207,9 +201,7 @@ function putTableInStore({
     rawTableWithMetadata,
   });
   const $tablesStore = get(tablesStore);
-  if (
-    $tablesStore.databaseId === schema.database.id
-  ) {
+  if ($tablesStore.databaseId === schema.database.id) {
     tablesStore.update((tablesData) => {
       tablesData.tablesMap.set(fullTable.oid, fullTable);
       const newTablesMap = new Map(
@@ -220,7 +212,11 @@ function putTableInStore({
         tablesMap: newTablesMap,
       };
     });
-    schema.setTableCount([...get(tablesStore).tablesMap.values()].filter((table) => table.schema.oid === schema.oid).length);
+    schema.setTableCount(
+      [...get(tablesStore).tablesMap.values()].filter(
+        (table) => table.schema.oid === schema.oid,
+      ).length,
+    );
   }
   return fullTable;
 }
@@ -362,16 +358,18 @@ export async function createTableFromDataFile(props: {
   };
 }
 
-export function getTableFromApi({tableOid}: {tableOid: Table['oid'];}): CancellablePromise<Table> {
+export function getTableFromApi({
+  tableOid,
+}: {
+  tableOid: Table['oid'];
+}): CancellablePromise<Table> {
   const $tablesStore = get(tablesStore);
   const $currentDatabase = get(databasesStore.currentDatabase);
   const $schemas = get(schemas);
   if (!$currentDatabase) {
     return new CancellablePromise((reject) => reject());
   }
-  if (
-    $tablesStore.databaseId === $currentDatabase.id
-  ) {
+  if ($tablesStore.databaseId === $currentDatabase.id) {
     const table = $tablesStore.tablesMap.get(tableOid);
     if (table) {
       return new CancellablePromise((resolve) => {
@@ -386,17 +384,17 @@ export function getTableFromApi({tableOid}: {tableOid: Table['oid'];}): Cancella
     })
     .run();
   return new CancellablePromise(
-      (resolve, reject) => {
-        void promise.then((rawTableWithMetadata) => {
+    (resolve, reject) => {
+      void promise.then((rawTableWithMetadata) => {
         const schema = $schemas.data.get(rawTableWithMetadata.schema);
-        if(!schema){
+        if (!schema) {
           return;
         }
         const table = putTableInStore({
-          schema: schema,
+          schema,
           rawTableWithMetadata,
         });
-        return resolve(table);
+        resolve(table);
       }, reject);
     },
     () => {
@@ -417,10 +415,7 @@ export function getTableFromStoreOrApi({
 }): CancellablePromise<Table> {
   const $tablesStore = get(tablesStore);
 
-  if (
-    $tablesStore.databaseId === schema.database.id &&
-    !clearCache
-  ) {
+  if ($tablesStore.databaseId === schema.database.id && !clearCache) {
     const table = $tablesStore.tablesMap.get(tableOid);
     if (table) {
       return new CancellablePromise((resolve) => {
@@ -457,9 +452,7 @@ let preload = true;
 export const currentTablesData = collapse(
   derived(currentSchema, ($currentSchema) => {
     const $tablesStore = get(tablesStore);
-    if (
-      $tablesStore.databaseId !== $currentSchema?.database.id
-    ) {
+    if ($tablesStore.databaseId !== $currentSchema?.database.id) {
       if (
         preload &&
         isInAuthenticatedContext &&

@@ -8,8 +8,8 @@
   import type { Schema } from '@mathesar/models/Schema';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
-  import { currentTableId, getTableFromApi } from '@mathesar/stores/tables';
   import AsyncStore from '@mathesar/stores/AsyncStore';
+  import { currentTableId, getTableFromApi } from '@mathesar/stores/tables';
 
   import RecordPageRoute from './RecordPageRoute.svelte';
 
@@ -18,7 +18,7 @@
   export let tableId: number;
   const tableFetch = new AsyncStore(getTableFromApi);
   $: $currentTableId = tableId;
-  $: void (async () => (await tableFetch.run({ tableOid: tableId })))();
+  $: void tableFetch.run({ tableOid: tableId });
   $: table = $tableFetch.resolvedValue;
 
   function handleUnmount() {

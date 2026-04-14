@@ -87,10 +87,7 @@
         {onCreateEmptyTable}
       />
     {:else}
-      <TablesList
-        tables={[...tablesMap.values()]}
-        database={schema.database}
-      />
+      <TablesList tables={[...tablesMap.values()]} database={schema.database} />
     {/if}
   </div>
 

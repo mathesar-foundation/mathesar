@@ -4,6 +4,7 @@
 
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
   import { getTableFromApi } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
@@ -11,7 +12,6 @@
 
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
-  import AsyncStore from '@mathesar/stores/AsyncStore';
 
   /**
    * This is the distance between the top of the nested selector window and the
@@ -32,7 +32,7 @@
     nestingLevel: controller.nestingLevel + 1,
   });
   $: ({ tableOid, purpose } = controller);
-  $: void (async () => {defined($tableOid, async (oid) => (await tableFetch.run({ tableOid: oid })))})();
+  $: if ($tableOid !== undefined) void tableFetch.run({ tableOid: $tableOid });
   $: table = $tableFetch.resolvedValue;
   $: tabularData =
     $tableOid && table
