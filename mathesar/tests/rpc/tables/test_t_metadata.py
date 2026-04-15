@@ -2,13 +2,17 @@
 This file tests the table metadata RPC functions.
 
 Fixtures:
+    rf(pytest-django): Provides mocked `Request` objects.
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
 """
 from mathesar.models.base import TableMetaData, Database, Server, DataFile
+from mathesar.models.users import User
 from mathesar.rpc.tables import metadata
 
 
-def test_tables_meta_data_list(monkeypatch):
+def test_tables_meta_data_list(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
     database_id = 2
 
     def mock_list_tables_meta_data(_database_id):
@@ -59,5 +63,5 @@ def test_tables_meta_data_list(monkeypatch):
             mathesar_added_pkey_attnum=None,
         ),
     ]
-    actual_metadata_list = metadata.list_(database_id=database_id)
+    actual_metadata_list = metadata.list_(database_id=database_id, request=request)
     assert actual_metadata_list == expect_metadata_list
