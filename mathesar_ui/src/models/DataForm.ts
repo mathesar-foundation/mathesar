@@ -62,10 +62,13 @@ export class DataForm {
   ): CancellablePromise<DataForm> {
     const promise = api.forms
       .patch(
-        constructRequestToUpdateForm({
-          ...dataFormStructure,
-          id: this.id,
-        }),
+        constructRequestToUpdateForm(
+          this.schema.database.id,
+          {
+            ...dataFormStructure,
+            id: this.id,
+          }
+        ),
       )
       .run();
 
@@ -101,7 +104,7 @@ export class DataForm {
 
   updateSharingPreferences(sharePublicly: boolean) {
     const promise = api.forms
-      .set_publish_public({ form_id: this.id, publish_public: sharePublicly })
+      .set_publish_public({ database_id: this.schema.database.id, form_id: this.id, publish_public: sharePublicly })
       .run();
 
     return new CancellablePromise(
@@ -120,7 +123,7 @@ export class DataForm {
   }
 
   regenerateToken() {
-    const promise = api.forms.regenerate_token({ form_id: this.id }).run();
+    const promise = api.forms.regenerate_token({ database_id: this.schema.database.id, form_id: this.id }).run();
     return new CancellablePromise(
       (resolve, reject) => {
         promise
@@ -135,7 +138,7 @@ export class DataForm {
   }
 
   delete(): CancellablePromise<void> {
-    return api.forms.delete({ form_id: this.id }).run();
+    return api.forms.delete({ database_id: this.schema.database.id, form_id: this.id }).run();
   }
 
   toRawDataFormStore(): Readable<RawDataForm> {

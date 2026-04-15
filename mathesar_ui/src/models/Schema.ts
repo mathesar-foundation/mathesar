@@ -139,7 +139,7 @@ export class Schema {
   }
 
   addDataForm(dataFormDef: RawEphemeralDataForm): CancellablePromise<DataForm> {
-    const promise = api.forms.add(constructRequestToAddForm(dataFormDef)).run();
+    const promise = api.forms.add(constructRequestToAddForm(this.database.id, dataFormDef)).run();
 
     return new CancellablePromise(
       (resolve, reject) => {

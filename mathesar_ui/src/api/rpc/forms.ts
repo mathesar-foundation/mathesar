@@ -107,10 +107,15 @@ export type RawDataFormSource = Record<
  * We have not removed them from the backend since we might want to separate them on the frontend in the future.
  */
 
-export function constructRequestToAddForm(dataFormDef: RawEphemeralDataForm): {
+export function constructRequestToAddForm(
+  database_id: RawDatabase['id'],
+  dataFormDef: RawEphemeralDataForm
+): {
+  database_id: RawDatabase['id'];
   form_def: AddRawDataFormRequest;
 } {
   return {
+    database_id: database_id,
     form_def: {
       ...dataFormDef,
       header_title: { text: dataFormDef.name },
@@ -122,9 +127,14 @@ export function constructRequestToAddForm(dataFormDef: RawEphemeralDataForm): {
 }
 
 export function constructRequestToUpdateForm(
+  database_id: RawDatabase['id'],
   updateFormDef: RawDataFormStructure & { id: number },
-): { update_form_def: UpdateRawDataFormRequest } {
+): {
+  database_id: RawDatabase['id'],
+  update_form_def: UpdateRawDataFormRequest
+} {
   return {
+    database_id: database_id,
     update_form_def: {
       ...updateFormDef,
       version: dataFormStructureVersion,
@@ -158,18 +168,21 @@ export const forms = {
   >(),
   add: rpcMethodTypeContainer<
     {
+      database_id: RawDatabase['id'];
       form_def: AddRawDataFormRequest;
     },
     RawDataFormResponse
   >(),
   patch: rpcMethodTypeContainer<
     {
+      database_id: RawDatabase['id'];
       update_form_def: UpdateRawDataFormRequest;
     },
     RawDataFormResponse
   >(),
   delete: rpcMethodTypeContainer<
     {
+      database_id: RawDatabase['id'];
       form_id: RawDataForm['id'];
     },
     void
@@ -193,12 +206,14 @@ export const forms = {
   >(),
   regenerate_token: rpcMethodTypeContainer<
     {
+      database_id: RawDatabase['id'];
       form_id: RawDataForm['id'];
     },
     string
   >(),
   set_publish_public: rpcMethodTypeContainer<
     {
+      database_id: RawDatabase['id'];
       form_id: RawDataForm['id'];
       publish_public: boolean;
     },
