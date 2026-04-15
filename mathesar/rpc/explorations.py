@@ -182,7 +182,7 @@ def run(*, database_id: int, exploration_def: ExplorationDef, limit: int = 100, 
 
 
 @mathesar_rpc_method(name="explorations.replace", auth="login")
-def replace(*, database_id: int, new_exploration: ExplorationInfo) -> ExplorationInfo:
+def replace(*, database_id: int, new_exploration: ExplorationInfo, **kwargs) -> ExplorationInfo:
     """
     Replace a saved exploration.
 
@@ -198,7 +198,7 @@ def replace(*, database_id: int, new_exploration: ExplorationInfo) -> Exploratio
 
 
 @mathesar_rpc_method(name="explorations.add", auth="login")
-def add(*, database_id: int, exploration_def: ExplorationDef) -> ExplorationInfo:
+def add(*, database_id: int, exploration_def: ExplorationDef, **kwargs) -> ExplorationInfo:
     """
     Add a new exploration.
 
