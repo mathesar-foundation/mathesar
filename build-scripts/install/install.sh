@@ -16,19 +16,19 @@ MATHESAR_VERSION=___MATHESAR_VERSION___
 
 PACKAGE_LINK="https://github.com/mathesar-foundation/mathesar/releases/download/${MATHESAR_VERSION}/mathesar.tar.gz"
 
-# Allow system python versions >=3.9
+# Allow system python versions >=3.10
 # - If the user has the latest version, we assume they have the necessary knowledge
 #   and requirements to also have `build-essential` installed.
 # - If they run into issues, they could always trigger the install script with the `-f` flag
 #   to force download python.
 # - We only specify the lowest supported python version here.
-SYSTEM_PYTHON_DETECTION_SPEC=">=3.9"
+SYSTEM_PYTHON_DETECTION_SPEC=">=3.10"
 
-# For uv-managed versions, allow only 3.9 to 3.11
-# When we download python, we always download 3.11
+# For uv-managed versions, allow only 3.10 to 3.14
+# When we download python, we always download 3.14
 # These versions should always pass with the `SYSTEM_PYTHON_DETECTION_SPEC` version checks.
-MANAGED_PYTHON_DETECTION_SPEC=">=3.9,<3.12"
-MANAGED_DEFAULT_PYTHON_DOWNLOAD_VERSION="3.11"
+MANAGED_PYTHON_DETECTION_SPEC=">=3.10,<3.15"
+MANAGED_DEFAULT_PYTHON_DOWNLOAD_VERSION="3.14"
 
 VENV_DIR_NAME="mathesar-venv"
 ENV_FILE_NAME=".env"
