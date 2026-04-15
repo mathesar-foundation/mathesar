@@ -32,7 +32,17 @@ def mathesar_rpc_method(*, name, auth="superuser"):
     authorization_wrap = lambda x: x # noqa
     if auth == "login":
         auth_wrap = http_basic_auth_login_required
-        authorization_wrap = ensure_db_authorization
+        authorization_ignore_list = [
+            'analytics.upload_feedback',
+            'databases.configured.list',
+            'servers.configured.list',
+            'users.get',
+            'users.list',
+            'users.patch_self',
+            'users.password.replace_own'
+        ]
+        if name not in authorization_ignore_list:
+            authorization_wrap = ensure_db_authorization
     elif auth == "superuser":
         auth_wrap = http_basic_auth_superuser_required
     elif auth == "anonymous":
@@ -68,12 +78,11 @@ def ensure_db_authorization(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         DATABASE_ID_KEY = 'database_id'
-        if DATABASE_ID_KEY in kwargs.keys():
-            user = kwargs.get(REQUEST_KEY).user
-            database_id = kwargs[DATABASE_ID_KEY]
-            try:
-                models.UserDatabaseRoleMap.objects.get(database__id=database_id, user=user)
-            except models.UserDatabaseRoleMap.DoesNotExist:
-                raise exceptions.NoConnectionAvailable
+        user = kwargs.get(REQUEST_KEY).user
+        database_id = kwargs[DATABASE_ID_KEY]
+        try:
+            models.UserDatabaseRoleMap.objects.get(database__id=database_id, user=user)
+        except models.UserDatabaseRoleMap.DoesNotExist:
+            raise exceptions.NoConnectionAvailable
         return f(*args, **kwargs)
     return wrapper
