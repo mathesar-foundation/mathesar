@@ -28,11 +28,27 @@ export class DataGrid {
   }
 
   columnHeader(name: string) {
-    return this.root.locator('[data-sheet-element="column-header-cell"]').filter({ hasText: name });
+    return this.root
+      .locator('[data-sheet-element="column-header-cell"]')
+      .filter({ hasText: name });
   }
 
   // --- Actions ---
   async addRecord() { await this.newRecordButton.click(); }
+
+  /**
+   * Click a column header to select that column. The table-view wires
+   * `on:mousedown` on the header to open the Column tab of the inspector.
+   *
+   * Note: Mathesar's grid only extends a selection via Shift-click
+   * (contiguous range). Ctrl/Cmd-click is a no-op. If a caller needs to
+   * act on a non-contiguous set of columns, they should select a single
+   * column here and add the rest via whatever flow they're entering
+   * (e.g., the `Columns to Extract` MultiSelect in the extract dialog).
+   */
+  async selectColumn(name: string): Promise<void> {
+    await this.columnHeader(name).click();
+  }
 
   // --- State observations ---
   async waitForSaved() { await expect(this.unsavedIndicator).toBeHidden(); }

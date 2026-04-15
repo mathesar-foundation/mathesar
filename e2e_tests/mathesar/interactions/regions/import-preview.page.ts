@@ -13,6 +13,7 @@ export class ImportPreviewPage {
   get tableNameInput() { return this.page.getByRole('textbox', { name: 'Table Name' }); }
   get confirmButton() { return this.page.getByRole('button', { name: 'Confirm & create table' }); }
   get cancelButton() { return this.page.getByRole('button', { name: 'Cancel' }).first(); }
+  get primaryKeyButton() { return this.page.getByRole('button', { name: 'Primary Key Column' }); }
 
   /** Column header region for a given column by its display name. */
   column(name: string): ImportPreviewColumn {
@@ -105,4 +106,50 @@ export function typeEditorPopover(page: Page): TypeEditorPopover {
       .locator('[data-attachable-dropdown]')
       .filter({ has: page.getByRole('button', { name: 'Data Type' }) }),
   );
+}
+
+/**
+ * The Primary Key Column popover inside the import-preview form.
+ *
+ * Two strategies are supported (via the Strategy dropdown):
+ *   - "Add a new primary key column" — create an auto-incrementing PK column.
+ *   - "Choose an existing column for the primary key" — reuse a CSV column.
+ *
+ * When the "existing" strategy is picked, a Column dropdown appears that
+ * lists every detected CSV column. The user then clicks
+ * "Update primary key column" to commit the choice.
+ *
+ * The popover is an inline expandable section on the preview form (not
+ * portaled). Each of its buttons — Strategy, Column, Update, Discard —
+ * is unique on the page during the import preview flow, so we rely on
+ * page-level role queries rather than a narrow scope.
+ */
+export class PrimaryKeyPopover {
+  constructor(private page: Page) {}
+
+  get strategyButton() { return this.page.getByRole('button', { name: 'Strategy' }); }
+  get columnButton() { return this.page.getByRole('button', { name: 'Column', exact: true }); }
+  get updateButton() { return this.page.getByRole('button', { name: 'Update primary key column' }); }
+  get discardButton() { return this.page.getByRole('button', { name: 'Discard Changes' }); }
+
+  strategyOption(name: 'Add a new primary key column' | 'Choose an existing column for the primary key') {
+    return this.page.getByRole('option', { name });
+  }
+
+  columnOption(name: string) {
+    return this.page.getByRole('option', { name: new RegExp(`\\b${name}\\b`) });
+  }
+
+  async chooseExistingColumn(columnName: string) {
+    await this.strategyButton.click();
+    await this.strategyOption('Choose an existing column for the primary key').click();
+    await this.columnButton.click();
+    await this.columnOption(columnName).click();
+    await this.updateButton.click();
+  }
+}
+
+/** Factory: the PK popover is inline on the import-preview page. */
+export function primaryKeyPopover(page: Page): PrimaryKeyPopover {
+  return new PrimaryKeyPopover(page);
 }

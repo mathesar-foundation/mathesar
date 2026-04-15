@@ -40,12 +40,19 @@ function generateRunner(
   const isScenario = config.scenarioCodes?.has(testCode) ?? false;
   const runFn = isScenario ? 'runScenarioFlow' : 'runTaskFlow';
 
+  // Scenarios compose many tasks and can run for several minutes. Give them
+  // a generous ceiling so they don't hit Playwright's 30s default.
+  const timeoutMs = isScenario ? 20 * 60 * 1000 : undefined;
+  const timeoutLine = timeoutMs !== undefined
+    ? `\n  test.setTimeout(${timeoutMs});`
+    : '';
+
   return `// Auto-generated from ${testCode}.ts — do not edit
 import { test } from '@playwright/test';
 import { ${runFn} } from '${frameworkImport}';
 import '${testsImport}/${testCode}';
 
-test('${testCode}', async ({ page, baseURL, request }) => {
+test('${testCode}', async ({ page, baseURL, request }) => {${timeoutLine}
   await ${runFn}({ page, baseURL: baseURL!, request }, '${testCode}');
 });
 `;
