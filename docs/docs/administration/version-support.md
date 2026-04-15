@@ -35,3 +35,12 @@ In other words, unsupported versions may function, but we make no guarantees and
 ## Regarding Python Support
 
 Python support is mostly relevant for installations using the [Install From Scratch](install-from-scratch.md) instructions.
+
+## Where These Versions Are Defined in Code
+
+For curious users, and maintainers updating this policy, the version settings referenced above are defined in these files:
+
+- Supported Python and PostgreSQL test matrix: [`.github/workflows/test-and-lint-code.yml`](https://github.com/mathesar-foundation/mathesar/blob/develop/.github/workflows/test-and-lint-code.yml)
+- Default Python and PostgreSQL versions for Docker images: [`Dockerfile`](https://github.com/mathesar-foundation/mathesar/blob/develop/Dockerfile) and [`api_tests/Dockerfile`](https://github.com/mathesar-foundation/mathesar/blob/develop/api_tests/Dockerfile)
+- Default Python and PostgreSQL versions for local Docker Compose environments: [`docker-compose.dev.yml`](https://github.com/mathesar-foundation/mathesar/blob/develop/docker-compose.dev.yml) and [`docker-compose.test.yml`](https://github.com/mathesar-foundation/mathesar/blob/develop/docker-compose.test.yml)
+- Python detection and download policy for install-from-scratch installs: [`build-scripts/install/install.sh`](https://github.com/mathesar-foundation/mathesar/blob/develop/build-scripts/install/install.sh)
