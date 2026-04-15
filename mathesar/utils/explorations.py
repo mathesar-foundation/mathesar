@@ -31,17 +31,17 @@ def list_explorations(database_id, schema_oid=None):
     return Explorations.objects.filter(database__id=database_id)
 
 
-def get_exploration(exploration_id):
-    return Explorations.objects.get(id=exploration_id)
+def get_exploration(exploration_id, database_id):
+    return Explorations.objects.get(id=exploration_id, database__id=database_id)
 
 
-def delete_exploration(exploration_id):
-    Explorations.objects.get(id=exploration_id).delete()
+def delete_exploration(exploration_id, database_id):
+    Explorations.objects.get(id=exploration_id, database__id=database_id).delete()
 
 
-def replace_exploration(new_exploration):
-    Explorations.objects.filter(id=new_exploration["id"]).update(
-        database=Database.objects.get(id=new_exploration["database_id"]),
+def replace_exploration(new_exploration, database_id):
+    Explorations.objects.filter(id=new_exploration["id"], database__id=database_id).update(
+        database=Database.objects.get(id=database_id),
         name=new_exploration["name"],
         base_table_oid=new_exploration["base_table_oid"],
         schema_oid=new_exploration["schema_oid"],
@@ -54,9 +54,9 @@ def replace_exploration(new_exploration):
     return get_exploration(new_exploration["id"])
 
 
-def create_exploration(exploration_def):
+def create_exploration(exploration_def, database_id):
     return Explorations.objects.create(
-        database=Database.objects.get(id=exploration_def["database_id"]),
+        database=Database.objects.get(id=database_id),
         name=exploration_def["name"],
         base_table_oid=exploration_def["base_table_oid"],
         schema_oid=exploration_def["schema_oid"],

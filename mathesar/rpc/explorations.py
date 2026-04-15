@@ -134,37 +134,40 @@ def list_(*, database_id: int, schema_oid: int = None, **kwargs) -> list[Explora
 
 
 @mathesar_rpc_method(name="explorations.get", auth="login")
-def get(*, exploration_id: int, **kwargs) -> ExplorationInfo:
+def get(*, database_id: int, exploration_id: int, **kwargs) -> ExplorationInfo:
     """
     Get information about an exploration.
 
     Args:
+        database_id: The Django id of the database containing the exploration.
         exploration_id: The Django id of the exploration.
 
     Returns:
         Exploration details for a given exploration_id.
     """
-    exploration = get_exploration(exploration_id)
+    exploration = get_exploration(exploration_id, database_id)
     return ExplorationInfo.from_model(exploration)
 
 
 @mathesar_rpc_method(name="explorations.delete", auth="login")
-def delete(*, exploration_id: int, **kwargs) -> None:
+def delete(*, database_id: int, exploration_id: int, **kwargs) -> None:
     """
     Delete an exploration.
 
     Args:
+        database_id: The Django id of the database containing the exploration.
         exploration_id: The Django id of the exploration to delete.
     """
-    delete_exploration(exploration_id)
+    delete_exploration(exploration_id, database_id)
 
 
 @mathesar_rpc_method(name="explorations.run", auth="login")
-def run(*, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
+def run(*, database_id: int, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
     """
     Run an exploration.
 
     Args:
+        database_id: The Django id of the database containing the exploration.
         exploration_def: A dict describing an exploration to run.
         limit: The max number of rows to return.(default 100)
         offset: The number of rows to skip.(default 0)
@@ -173,36 +176,38 @@ def run(*, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, *
         The result of the exploration run.
     """
     user = kwargs.get(REQUEST_KEY).user
-    with connect(exploration_def["database_id"], user) as conn:
+    with connect(database_id, user) as conn:
         exploration_result = run_exploration(exploration_def, conn, limit, offset)
     return ExplorationResult.from_dict(exploration_result)
 
 
 @mathesar_rpc_method(name="explorations.replace", auth="login")
-def replace(*, new_exploration: ExplorationInfo) -> ExplorationInfo:
+def replace(*, database_id: int, new_exploration: ExplorationInfo) -> ExplorationInfo:
     """
     Replace a saved exploration.
 
     Args:
+        database_id: The Django id of the database containing the exploration.
         new_exploration: A dict describing the exploration to replace, including the updated fields.
 
     Returns:
         The exploration details for the replaced exploration.
     """
-    replaced_exp_model = replace_exploration(new_exploration)
+    replaced_exp_model = replace_exploration(new_exploration, database_id)
     return ExplorationInfo.from_model(replaced_exp_model)
 
 
 @mathesar_rpc_method(name="explorations.add", auth="login")
-def add(*, exploration_def: ExplorationDef) -> ExplorationInfo:
+def add(*, database_id: int, exploration_def: ExplorationDef) -> ExplorationInfo:
     """
     Add a new exploration.
 
     Args:
+        database_id: The Django id of the database containing the exploration.
         exploration_def: A dict describing the exploration to create.
 
     Returns:
         The exploration details for the newly created exploration.
     """
-    exp_model = create_exploration(exploration_def)
+    exp_model = create_exploration(exploration_def, database_id)
     return ExplorationInfo.from_model(exp_model)
