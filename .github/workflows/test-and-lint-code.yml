@@ -34,6 +34,7 @@ jobs:
             *.py
             mathesar/**
             db/**
+            requirements.txt
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
@@ -48,7 +49,9 @@ jobs:
         id: changed_files
         uses: tj-actions/changed-files@v46
         with:
-          files: '**.py'
+          files: |
+            **.py
+            requirements.txt
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
