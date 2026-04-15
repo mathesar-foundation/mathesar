@@ -4,7 +4,8 @@ Mathesar supports the versions of Python and PostgreSQL that are officially supp
 
 | Mathesar versions | Latest Release Date | Python Versions | PostgreSQL Versions | Description of changes                                          |
 | ----------------- | ------------------- | --------------- | ------------------- | --------------------------------------------------------------- |
-| 0.8.x             | Upcoming            | 3.10–3.13       | 14–18               | Drops support for PostgreSQL 13                                 |
+| 0.9.x             | 2026-02             | 3.10–3.14       | 14–18               | Adds support for Python 3.14                                    |
+| 0.8.x             | 2025-12             | 3.10–3.13       | 14–18               | Drops support for PostgreSQL 13                                 |
 | 0.7.x             | 2025-10             | 3.10–3.13       | 13–18               | Adds support for PostgreSQL 18 and drops support for Python 3.9 |
 | 0.2.x–0.6.x       | 2025-09             | 3.9–3.13        | 13 – 17             | -                                                               |
 
@@ -23,11 +24,12 @@ In other words, unsupported versions may function, but we make no guarantees and
 
 - Python 3.10 is supported upstream until October 2026
 - PostgreSQL 14 is supported upstream until November 2026
+- PostgreSQL 19 is expected to release in September 2026
 
 ## Default Python and PostgreSQL versions for Mathesar
 
 - Mathesar's Docker image uses PostgreSQL 17.
-- Mathesar's Docker image uses Python 3.13.
+- Mathesar's Docker image uses Python 3.14.
 - The default PostgreSQL version provided in our example `docker-compose.yml` is 17.
 
 ## Regarding Python Support
