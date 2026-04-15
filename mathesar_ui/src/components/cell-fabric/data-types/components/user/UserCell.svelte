@@ -57,9 +57,7 @@
   $: isLoadingUsers = $requestStatusReadable?.state === 'processing';
   $: usersLoaded = $requestStatusReadable?.state === 'success';
   $: showBrokenLink =
-    hasValue &&
-    usersLoaded &&
-    !users.some((u) => u.id === Number(value));
+    hasValue && usersLoaded && !users.some((u) => u.id === Number(value));
 
   // Get previous value for row seeker
   function getPreviousValue(): SummarizedRecordReference | undefined {
