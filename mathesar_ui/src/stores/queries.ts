@@ -172,9 +172,14 @@ function putExplorationInStore(exploration: SavedExploration) {
 }
 
 export function addExploration(
+  database_id: Database['id'],
   exploration: AddableExploration,
 ): CancellablePromise<SavedExploration> {
-  const promise = api.explorations.add({ exploration_def: exploration }).run();
+  const promise = api.explorations.add(
+    {
+      database_id: database_id,
+      exploration_def: exploration
+    }).run();
   void promise.then((savedExploration) => {
     putExplorationInStore(savedExploration);
     return savedExploration;
@@ -183,11 +188,14 @@ export function addExploration(
 }
 
 export function replaceExploration(
+  database_id: Database['id'],
   exploration: SavedExploration,
 ): CancellablePromise<SavedExploration> {
   const promise = api.explorations
-    .replace({ new_exploration: exploration })
-    .run();
+    .replace({
+      database_id: database_id,
+      new_exploration: exploration
+    }).run();
 
   void promise.then((newlySavedExploration) => {
     putExplorationInStore(newlySavedExploration);
@@ -198,13 +206,21 @@ export function replaceExploration(
 }
 
 export function getExploration(
+  database_id: Database['id'],
   id: SavedExploration['id'],
 ): CancellablePromise<SavedExploration> {
-  return api.explorations.get({ exploration_id: id }).run();
+  return api.explorations.get({ database_id: database_id, exploration_id: id }).run();
 }
 
-export function deleteExploration(id: number): CancellablePromise<void> {
-  const promise = api.explorations.delete({ exploration_id: id }).run();
+export function deleteExploration(
+  database_id: Database['id'],
+  id: number
+): CancellablePromise<void> {
+  const promise = api.explorations.delete(
+    {
+      database_id: database_id,
+      exploration_id: id
+    }).run();
 
   const $queriesStore = get(queriesStore);
   const $currentSchema = get(currentSchema);

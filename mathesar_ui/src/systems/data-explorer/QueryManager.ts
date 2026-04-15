@@ -37,8 +37,8 @@ export default class QueryManager extends QueryRunner {
     /** Keys are table OIDs */
     inputColumns: CacheManager<number, InputColumnsStoreSubstance>;
   } = {
-    inputColumns: new CacheManager(5),
-  };
+      inputColumns: new CacheManager(5),
+    };
 
   state: Writable<{
     inputColumnsFetchState?: RequestStatus;
@@ -77,7 +77,7 @@ export default class QueryManager extends QueryRunner {
     onSave?: (instance: SavedExploration) => unknown;
   }) {
     super({ query });
-    this.onSaveCallback = onSave ?? (() => {});
+    this.onSaveCallback = onSave ?? (() => { });
     void this.calculateInputColumnTree();
   }
 
@@ -284,9 +284,9 @@ export default class QueryManager extends QueryRunner {
       this.querySavePromise?.cancel();
       // TODO: Check for latest validation status here
       if (explorationIsSaved(maybeSavedExploration)) {
-        this.querySavePromise = replaceExploration(maybeSavedExploration);
+        this.querySavePromise = replaceExploration(maybeSavedExploration.database_id, maybeSavedExploration);
       } else if (explorationIsAddable(maybeSavedExploration)) {
-        this.querySavePromise = addExploration(maybeSavedExploration);
+        this.querySavePromise = addExploration(maybeSavedExploration.database_id, maybeSavedExploration);
       } else {
         throw new Error(get(_)('error_saving_query'));
       }

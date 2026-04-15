@@ -141,6 +141,7 @@ export class QueryRunner {
       this.runState.set({ state: 'processing' });
       this.runPromise = api.explorations
         .run({
+          database_id: queryModel.database_id,
           exploration_def: queryModel.toAnonymousExploration(),
           ...paginationParams,
         })
