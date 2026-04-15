@@ -238,18 +238,19 @@ class SettableFormDef(AddFormDef):
 
 
 @mathesar_rpc_method(name="forms.add", auth="login")
-def add(*, form_def: AddFormDef, **kwargs) -> FormInfo:
+def add(*, database_id: int, form_def: AddFormDef, **kwargs) -> FormInfo:
     """
     Add a new form.
 
     Args:
+        database_id: The Django id of the database containing the forms.
         form_def: A dict describing the form to create.
 
     Returns:
         The details for the newly created form.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model = create_form(form_def, user)
+    form_model = create_form(form_def, user, database_id)
     return FormInfo.from_model(form_model)
 
 
@@ -304,60 +305,64 @@ def list_(*, database_id: int, schema_oid: int, **kwargs) -> list[FormInfo]:
 
 
 @mathesar_rpc_method(name="forms.regenerate_token", auth="login")
-def regenerate_token(*, form_id: int, **kwargs) -> str:
+def regenerate_token(*, database_id: int, form_id: int, **kwargs) -> str:
     """
     Regenerate the unique token for a form.
 
     Args:
+        database_id: The Django id of the database containing the forms.
         form_id: The Django id of the form.
 
     Returns:
         The new token for the form.
     """
-    token = regen_form_token(form_id)
+    token = regen_form_token(form_id, database_id)
     return token
 
 
 @mathesar_rpc_method(name="forms.set_publish_public", auth="login")
-def set_publish_public(*, form_id: int, publish_public: bool, **kwargs) -> bool:
+def set_publish_public(*, database_id: int, form_id: int, publish_public: bool, **kwargs) -> bool:
     """
     Set/Unset the form to be publicly shareable.
 
     Args:
+        database_id: The Django id of the database containing the forms.
         form_id: The Django id of the form.
         publish_public: Specify whether to share the form publicly.
 
     Returns:
         The updated state of public sharing for the form.
     """
-    updated_publish_public = set_form_public_setting(form_id, publish_public)
+    updated_publish_public = set_form_public_setting(form_id, publish_public, database_id)
     return updated_publish_public
 
 
 @mathesar_rpc_method(name="forms.delete", auth="login")
-def delete(*, form_id: int, **kwargs) -> None:
+def delete(*, database_id: int, form_id: int, **kwargs) -> None:
     """
     Delete a form.
 
     Args:
+        database_id: The Django id of the database containing the forms.
         form_id: The Django id of the form to delete.
     """
-    delete_form(form_id)
+    delete_form(form_id, database_id)
 
 
 @mathesar_rpc_method(name="forms.patch", auth="login")
-def patch(*, update_form_def: SettableFormDef, **kwargs) -> FormInfo:
+def patch(*, database_id: int, update_form_def: SettableFormDef, **kwargs) -> FormInfo:
     """
     Update a form.
 
     Args:
+        database_id: The Django id of the database containing the forms.
         update_form_def: A dict describing the form to update, including the updated fields.
 
     Returns:
         The form info for the updated form.
     """
     user = kwargs.get(REQUEST_KEY).user
-    form_model = patch_form(update_form_def, user)
+    form_model = patch_form(update_form_def, user, database_id)
     return FormInfo.from_model(form_model)
 
 
