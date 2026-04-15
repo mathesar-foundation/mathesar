@@ -35,6 +35,7 @@ jobs:
             mathesar/**
             db/**
             requirements.txt
+            requirements-dev.txt
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
@@ -52,6 +53,7 @@ jobs:
           files: |
             **.py
             requirements.txt
+            requirements-dev.txt
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
