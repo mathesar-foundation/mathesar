@@ -35,12 +35,12 @@
     void confirmDelete({
       identifierType: 'Exploration',
       identifierName: exploration.name,
-      onProceed: () => deleteExploration(exploration.id),
+      onProceed: () => deleteExploration(database.id, exploration.id),
     });
   }
 
   function handleDuplicate() {
-    addExploration({
+    addExploration(database.id, {
       ...exploration,
       name: getExplorationDuplicateName(exploration),
     }).catch((error) => {

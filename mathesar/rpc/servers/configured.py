@@ -1,5 +1,7 @@
 from typing import TypedDict, Optional
 
+from modernrpc.core import REQUEST_KEY
+
 from mathesar.models.base import Server
 from mathesar.rpc.decorators import mathesar_rpc_method
 
@@ -44,14 +46,20 @@ class ConfiguredServerPatch(TypedDict):
 
 
 @mathesar_rpc_method(name="servers.configured.list", auth="login")
-def list_() -> list[ConfiguredServerInfo]:
+def list_(**kwargs) -> list[ConfiguredServerInfo]:
     """
     List information about servers. Exposed as `list`.
 
     Returns:
         A list of server details.
     """
-    server_qs = Server.objects.all()
+    user = kwargs.get(REQUEST_KEY).user
+    if user.is_superuser:
+        server_qs = Server.objects.all()
+    else:
+        server_qs = Server.objects.filter(
+            databases__userdatabaserolemap__user=user
+        ).distinct()
 
     return [ConfiguredServerInfo.from_model(db_model) for db_model in server_qs]
 

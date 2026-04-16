@@ -20,7 +20,11 @@
   export let controller: ModalController;
 
   async function handleSave(name: string, description: string) {
-    await replaceExploration({ ...exploration, name, description });
+    await replaceExploration(exploration.database_id, {
+      ...exploration,
+      name,
+      description,
+    });
   }
 </script>
 
