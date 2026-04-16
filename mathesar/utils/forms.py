@@ -105,8 +105,8 @@ def create_form_fields(form_model, fields_def_list):
 
 
 @transaction.atomic
-def create_form(form_def, user):
-    database = Database.objects.get(id=form_def["database_id"])
+def create_form(form_def, user, database_id):
+    database = Database.objects.get(id=database_id)
     associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
     form_model = Form.objects.create(
         token=uuid4(),
@@ -158,22 +158,22 @@ def list_forms(database_id, schema_oid):
     return Form.objects.filter(database__id=database_id, schema_oid=schema_oid)
 
 
-def regen_form_token(form_id):
-    form_model = Form.objects.get(id=form_id)
+def regen_form_token(form_id, database_id):
+    form_model = Form.objects.get(id=form_id, database__id=database_id)
     form_model.token = uuid4()
     form_model.save()
     return form_model.token
 
 
-def set_form_public_setting(form_id, publish_public):
-    form_model = Form.objects.get(id=form_id)
+def set_form_public_setting(form_id, publish_public, database_id):
+    form_model = Form.objects.get(id=form_id, database__id=database_id)
     form_model.publish_public = publish_public
     form_model.save()
     return form_model.publish_public
 
 
-def delete_form(form_id):
-    Form.objects.get(id=form_id).delete()
+def delete_form(form_id, database_id):
+    Form.objects.get(id=form_id, database__id=database_id).delete()
 
 
 def iterate_form_fields(fields, parent_field=None, depth=0, fields_to_pick=[]):
@@ -286,8 +286,8 @@ def submit_form(form_token, values, user=None):
 
 
 @transaction.atomic
-def patch_form(update_form_def, user):
-    form_model = Form.objects.get(id=update_form_def["id"])
+def patch_form(update_form_def, user, database_id):
+    form_model = Form.objects.get(id=update_form_def["id"], database__id=database_id)
     associated_role = validate_and_get_associated_role(
         user,
         database_id=form_model.database.id,
@@ -308,4 +308,4 @@ def patch_form(update_form_def, user):
         submit_redirect_url=update_form_def.get("submit_redirect_url"),
         submit_button_label=update_form_def.get("submit_button_label")
     )
-    return Form.objects.get(id=update_form_def["id"])
+    return Form.objects.get(id=update_form_def["id"], database__id=database_id)

@@ -2,14 +2,18 @@
 This file tests the column metadata RPC functions.
 
 Fixtures:
+    rf(pytest-django): Provides mocked `Request` objects.
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
 """
 from mathesar.models.base import ColumnMetaData, Database, Server
+from mathesar.models.users import User
 from mathesar.rpc.columns import metadata
 
 
 # TODO consider mocking out ColumnMetaData queryset for this test
-def test_columns_meta_data_list(monkeypatch):
+def test_columns_meta_data_list(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
     database_id = 2
     table_oid = 123456
 
@@ -67,5 +71,5 @@ def test_columns_meta_data_list(monkeypatch):
             user_display_field=None,
         ),
     ]
-    actual_metadata_list = metadata.list_(table_oid=table_oid, database_id=database_id)
+    actual_metadata_list = metadata.list_(table_oid=table_oid, database_id=database_id, request=request)
     assert actual_metadata_list == expect_metadata_list
