@@ -284,9 +284,15 @@ export default class QueryManager extends QueryRunner {
       this.querySavePromise?.cancel();
       // TODO: Check for latest validation status here
       if (explorationIsSaved(maybeSavedExploration)) {
-        this.querySavePromise = replaceExploration(maybeSavedExploration.database_id, maybeSavedExploration);
+        this.querySavePromise = replaceExploration(
+          maybeSavedExploration.database_id,
+          maybeSavedExploration,
+        );
       } else if (explorationIsAddable(maybeSavedExploration)) {
-        this.querySavePromise = addExploration(maybeSavedExploration.database_id, maybeSavedExploration);
+        this.querySavePromise = addExploration(
+          maybeSavedExploration.database_id,
+          maybeSavedExploration,
+        );
       } else {
         throw new Error(get(_)('error_saving_query'));
       }

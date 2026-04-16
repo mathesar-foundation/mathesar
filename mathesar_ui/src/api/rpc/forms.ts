@@ -109,13 +109,13 @@ export type RawDataFormSource = Record<
 
 export function constructRequestToAddForm(
   database_id: RawDatabase['id'],
-  dataFormDef: RawEphemeralDataForm
+  dataFormDef: RawEphemeralDataForm,
 ): {
   database_id: RawDatabase['id'];
   form_def: AddRawDataFormRequest;
 } {
   return {
-    database_id: database_id,
+    database_id,
     form_def: {
       ...dataFormDef,
       header_title: { text: dataFormDef.name },
@@ -130,11 +130,11 @@ export function constructRequestToUpdateForm(
   database_id: RawDatabase['id'],
   updateFormDef: RawDataFormStructure & { id: number },
 ): {
-  database_id: RawDatabase['id'],
-  update_form_def: UpdateRawDataFormRequest
+  database_id: RawDatabase['id'];
+  update_form_def: UpdateRawDataFormRequest;
 } {
   return {
-    database_id: database_id,
+    database_id,
     update_form_def: {
       ...updateFormDef,
       version: dataFormStructureVersion,

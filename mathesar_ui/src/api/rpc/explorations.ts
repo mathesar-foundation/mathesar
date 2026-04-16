@@ -199,14 +199,20 @@ export const explorations = {
     SavedExploration[]
   >(),
 
-  get: rpcMethodTypeContainer<{ database_id: number; exploration_id: number }, SavedExploration>(),
+  get: rpcMethodTypeContainer<
+    { database_id: number; exploration_id: number },
+    SavedExploration
+  >(),
 
   add: rpcMethodTypeContainer<
     { database_id: number; exploration_def: AddableExploration },
     SavedExploration
   >(),
 
-  delete: rpcMethodTypeContainer<{ database_id: number; exploration_id: number }, void>(),
+  delete: rpcMethodTypeContainer<
+    { database_id: number; exploration_id: number },
+    void
+  >(),
 
   replace: rpcMethodTypeContainer<
     { database_id: number; new_exploration: SavedExploration },
