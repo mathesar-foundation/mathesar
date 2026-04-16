@@ -187,7 +187,6 @@ def test_forms_add(rf, monkeypatch):
     form_def = {
         "name": "form1",
         "version": 1,
-        "database_id": 1,
         "schema_oid": 18145,
         "base_table_oid": 18152,
         "associated_role_id": 121,

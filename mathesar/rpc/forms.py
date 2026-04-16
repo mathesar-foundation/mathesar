@@ -181,7 +181,6 @@ class AddFormDef(TypedDict):
         name: The name of the form.
         description: The description of the form.
         version: The version of the form for reconciliation of json fields.
-        database_id: The Django id of the database containing the Form.
         schema_oid: The OID of the schema where within which form exists.
         base_table_oid: The table OID based on which a form will be created.
         associated_role_id: The Django id of the configured role to be used while submitting a form.
@@ -195,7 +194,6 @@ class AddFormDef(TypedDict):
     name: str
     description: Optional[str]
     version: int
-    database_id: int
     schema_oid: int
     base_table_oid: int
     associated_role_id: Optional[int]
