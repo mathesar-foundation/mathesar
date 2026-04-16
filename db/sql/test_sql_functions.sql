@@ -1,6 +1,116 @@
 DROP EXTENSION IF EXISTS pgtap CASCADE;
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
+-- movie_rentals sample data (structure only) ------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_movie_rentals_structure() RETURNS SETOF TEXT AS $$
+BEGIN
+
+  CREATE TABLE customers (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    full_name text NOT NULL,
+    notes text
+  );
+  CREATE TABLE genres (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text NOT NULL UNIQUE
+  );
+  CREATE TABLE location_types (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text NOT NULL UNIQUE
+  );
+  CREATE TABLE movies (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    title text NOT NULL,
+    overview text,
+    release_date date,
+    lang text,
+    rating text,
+    popularity real,
+    vote_count integer,
+    vote_average real,
+    budget bigint,
+    revenue bigint,
+    runtime integer
+  );
+  CREATE TABLE people (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text NOT NULL,
+    also_known_as text[] DEFAULT '{}'::text[] NOT NULL,
+    birth_date date,
+    death_date date,
+    popularity real,
+    imdb_id text,
+    biography text
+  );
+  CREATE TABLE stores (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    street_name text NOT NULL,
+    phone text
+  );
+  CREATE TABLE studios (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name text NOT NULL
+  );
+  CREATE TABLE cast_roles (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    movie bigint NOT NULL REFERENCES movies(id),
+    person bigint NOT NULL REFERENCES people(id),
+    character_name text
+  );
+  CREATE TABLE crew_roles (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    movie bigint NOT NULL REFERENCES movies(id),
+    person bigint NOT NULL REFERENCES people(id),
+    department text,
+    job text
+  );
+  CREATE TABLE emails (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    customer bigint REFERENCES customers(id),
+    email text NOT NULL,
+    location_type bigint REFERENCES location_types(id),
+    weight integer,
+    UNIQUE (email, customer)
+  );
+  CREATE TABLE items (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    barcode uuid DEFAULT gen_random_uuid() NOT NULL UNIQUE,
+    movie bigint NOT NULL REFERENCES movies(id),
+    store bigint REFERENCES stores(id)
+  );
+  CREATE TABLE movies_genres (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    movie bigint NOT NULL REFERENCES movies(id),
+    genre bigint NOT NULL REFERENCES genres(id)
+  );
+  CREATE TABLE movies_studios (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    movie bigint NOT NULL REFERENCES movies(id),
+    studio bigint NOT NULL REFERENCES studios(id),
+    UNIQUE (movie, studio)
+  );
+  CREATE TABLE phones (
+    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    customer bigint NOT NULL REFERENCES customers(id),
+    phone text NOT NULL,
+    location_type bigint REFERENCES location_types(id),
+    weight integer,
+    UNIQUE (phone, customer)
+  );
+  CREATE TABLE rentals (
+    /* 1 */ id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    /* 2 */ customer bigint NOT NULL REFERENCES customers(id),
+    /* 3 */ item bigint NOT NULL REFERENCES items(id),
+    /* 4 */ price numeric(10,2) NOT NULL,
+    /* 5 */ time_out timestamp with time zone NOT NULL,
+    /* 6 */ time_in timestamp with time zone
+  );
+
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- msar.drop_columns -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_drop_columns() RETURNS SETOF TEXT AS $$
@@ -7926,355 +8036,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- msar.form_insert -------------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION __setup_items_books_authors_insert() RETURNS SETOF TEXT AS $$
-BEGIN
-  CREATE TABLE "Authors" (
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
-    "First Name" text, -- attnum: 2, field_key: _id-609eefde-cfcc-4ebf-97a4-62992c210312
-    "Last Name" text, -- attnum: 3, field_key: _id-4bb46271-aeee-4305-85b8-c436564c1e00
-    "Website" text -- attnum: 4, field_key: _id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482
-  );
-
-  CREATE TABLE "Publishers" (
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
-    "Name" text -- attnum: 2, field_key: NA
-  );
-
-  CREATE TABLE "Books" (
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
-    "Title" text, -- attnum: 2, field_key: _id-c5eb5c89-cfc6-4d92-923a-4fbbd1674a85
-    "Publication Year" date, -- attnum: 3, field_key: _id-200d2e3b-7128-4e61-b970-20826f95bf2f
-    "ISBN" text, -- attnum: 4, field_key: _id-2625e6be-07d8-47d2-a1ba-e9c543105b2e
-    "Page Count" integer, -- attnum:5, field_key: _id-fdb0f3a9-1c42-4178-b3e4-14e7cbf4fc71
-    "Author" integer REFERENCES "Authors"(id), -- attnum: 6, field_key: _id-e1b04f11-ace0-4419-be8a-8464bdba4e4e
-    "Publisher" integer REFERENCES "Publishers"(id) -- attnum: 7, field_key: _id-9dafdd73-11d8-4a75-87e8-4d66b1b0c9bd
-  );
-
-  CREATE TABLE "Items" (
-    id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY, -- attnum: 1, field_key: NA
-    "Barcode" text, -- attnum: 2 , field_key: _id-51bbd9d2-fb45-4c84-b8f0-4a8422186b08
-    "Acquisition Date" date, -- attnum: 3, field_key: _id-bbe76760-f136-48e4-bc54-92ade2eb1984
-    "Acquisition Price" mathesar_types.mathesar_money, -- attnum: 4, field_key: _id-58670595-6726-454a-a10c-9ba30985b8b1
-    "Book" integer REFERENCES "Books"(id) -- attnum: 5, field_key: _id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0
-  );
-
-  INSERT INTO "Publishers"("Name") VALUES ('37signals'), ('A Book Apart'), ('Ace Books'), ('Adams Media');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_form_insert_fk() RETURNS SETOF TEXT AS $$
-DECLARE
-  items_table_oid oid;
-  books_table_oid oid;
-  authors_table_oid oid;
-  field_info_list jsonb;
-  values_ jsonb;
-  authors_table_record jsonb;
-  books_table_record jsonb;
-  items_table_record jsonb;
-BEGIN
-  PERFORM __setup_items_books_authors_insert();
-
-  items_table_oid := '"Items"'::regclass::oid;
-  books_table_oid := '"Books"'::regclass::oid;
-  authors_table_oid := '"Authors"'::regclass::oid;
-
-  field_info_list := jsonb_build_array(
-    jsonb_build_object(
-      'key', '_id-51bbd9d2-fb45-4c84-b8f0-4a8422186b08',
-      'parent_key', null,
-      'column_attnum', 2,
-      'table_oid', items_table_oid,
-      'depth', 0
-    ),
-    jsonb_build_object(
-      'key', '_id-bbe76760-f136-48e4-bc54-92ade2eb1984',
-      'parent_key', null,
-      'column_attnum', 3,
-      'table_oid', items_table_oid,
-      'depth', 0
-    ),
-    jsonb_build_object(
-      'key', '_id-58670595-6726-454a-a10c-9ba30985b8b1',
-      'parent_key', null,
-      'column_attnum', 4,
-      'table_oid', items_table_oid,
-      'depth', 0
-    ),
-    jsonb_build_object(
-      'key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
-      'parent_key', null,
-      'column_attnum', 5,
-      'table_oid', items_table_oid,
-      'depth', 0
-    ),
-
-    jsonb_build_object(
-      'key', '_id-c5eb5c89-cfc6-4d92-923a-4fbbd1674a85',
-      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
-      'column_attnum', 2,
-      'table_oid', books_table_oid,
-      'depth', 1
-    ),
-    jsonb_build_object(
-      'key', '_id-200d2e3b-7128-4e61-b970-20826f95bf2f',
-      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
-      'column_attnum', 3,
-      'table_oid', books_table_oid,
-      'depth', 1
-    ),
-    jsonb_build_object(
-      'key', '_id-2625e6be-07d8-47d2-a1ba-e9c543105b2e',
-      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
-      'column_attnum', 4,
-      'table_oid', books_table_oid,
-      'depth', 1
-    ),
-    jsonb_build_object(
-      'key', '_id-fdb0f3a9-1c42-4178-b3e4-14e7cbf4fc71',
-      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
-      'column_attnum', 5,
-      'table_oid', books_table_oid,
-      'depth', 1
-    ),
-    jsonb_build_object(
-      'key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
-      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
-      'column_attnum', 6,
-      'table_oid', books_table_oid,
-      'depth', 1
-    ),
-    jsonb_build_object(
-      'key', '_id-9dafdd73-11d8-4a75-87e8-4d66b1b0c9bd',
-      'parent_key', '_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0',
-      'column_attnum', 7,
-      'table_oid', books_table_oid,
-      'depth', 1
-    ),
-
-    jsonb_build_object(
-      'key', '_id-609eefde-cfcc-4ebf-97a4-62992c210312',
-      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
-      'column_attnum', 2,
-      'table_oid', authors_table_oid,
-      'depth', 2
-    ),
-    jsonb_build_object(
-      'key', '_id-4bb46271-aeee-4305-85b8-c436564c1e00',
-      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
-      'column_attnum', 3,
-      'table_oid', authors_table_oid,
-      'depth', 2
-    ),
-    jsonb_build_object(
-      'key', '_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482',
-      'parent_key', '_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e',
-      'column_attnum', 4,
-      'table_oid', authors_table_oid,
-      'depth', 2
-    )
-  );
-
-  values_ := $j${
-    "_id-51bbd9d2-fb45-4c84-b8f0-4a8422186b08": "454Z-D2A5-36AB-2EA6",
-    "_id-bbe76760-f136-48e4-bc54-92ade2eb1984": "2025-08-05",
-    "_id-58670595-6726-454a-a10c-9ba30985b8b1": "15.99",
-    "_id-c5eb5c89-cfc6-4d92-923a-4fbbd1674a85": "The book of wonders",
-    "_id-fdb0f3a9-1c42-4178-b3e4-14e7cbf4fc71": "365",
-    "_id-609eefde-cfcc-4ebf-97a4-62992c210312": "John",
-    "_id-4bb46271-aeee-4305-85b8-c436564c1e00": "Doe",
-    "_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482": "https://johndoebooks.com",
-    "_id-9dafdd73-11d8-4a75-87e8-4d66b1b0c9bd": {
-      "type": "pick",
-      "value": 4
-    },
-    "_id-dc75f085-6d98-44aa-a5c3-75ab7c577bc0": {
-      "type": "create"
-    },
-    "_id-e1b04f11-ace0-4419-be8a-8464bdba4e4e": {
-      "type": "create"
-    }
-  }$j$;
-
-  PERFORM msar.form_insert(field_info_list, values_); -- INSERT function call
-
-  SELECT jsonb_agg(to_jsonb(a)) FROM "Authors" a INTO authors_table_record;
-  SELECT jsonb_agg(to_jsonb(b)) FROM "Books" b INTO books_table_record;
-  SELECT jsonb_agg(to_jsonb(i)) FROM "Items" i INTO items_table_record;
-
-  RETURN NEXT is(
-    authors_table_record,
-    $j$[
-      {
-        "id": 1,
-        "Website": "https://johndoebooks.com",
-        "Last Name": "Doe",
-        "First Name": "John"
-      }
-    ]$j$
-  );
-  RETURN NEXT is(
-    books_table_record,
-    $j$[
-      {
-        "id": 1,
-        "Title": "The book of wonders",
-        "Publication Year": null,
-        "ISBN": null,
-        "Page Count": 365,
-        "Author": 1,
-        "Publisher": 4
-      }
-    ]$j$
-  );
-  RETURN NEXT is(
-    items_table_record,
-    $j$[
-      {
-        "id": 1,
-        "Book": 1,
-        "Barcode": "454Z-D2A5-36AB-2EA6",
-        "Acquisition Date": "2025-08-05",
-        "Acquisition Price": 15.99
-      }
-    ]$j$
-  );
-
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_form_insert_scalar() RETURNS SETOF TEXT AS $$
-DECLARE
-  authors_table_oid oid;
-  field_info_list jsonb;
-  values_ jsonb;
-  authors_table_record jsonb;
-BEGIN
-  PERFORM __setup_items_books_authors_insert();
-
-  authors_table_oid := '"Authors"'::regclass::oid;
-
-  field_info_list := jsonb_build_array(
-    jsonb_build_object(
-      'key', '_id-609eefde-cfcc-4ebf-97a4-62992c210312',
-      'parent_key', null,
-      'column_attnum', 2,
-      'table_oid', authors_table_oid,
-      'depth', 0
-    ),
-    jsonb_build_object(
-      'key', '_id-4bb46271-aeee-4305-85b8-c436564c1e00',
-      'parent_key', null,
-      'column_attnum', 3,
-      'table_oid', authors_table_oid,
-      'depth', 0
-    ),
-    jsonb_build_object(
-      'key', '_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482',
-      'parent_key', null,
-      'column_attnum', 4,
-      'table_oid', authors_table_oid,
-      'depth', 0
-    )
-  );
-
-  values_ := $j${
-    "_id-609eefde-cfcc-4ebf-97a4-62992c210312": "John",
-    "_id-4bb46271-aeee-4305-85b8-c436564c1e00": "Doe",
-    "_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482": "https://johndoebooks.com"
-  }$j$;
-
-  PERFORM msar.form_insert(field_info_list, values_);
-
-  SELECT jsonb_agg(to_jsonb(a)) FROM "Authors" a INTO authors_table_record;
-
-  RETURN NEXT is(
-    authors_table_record,
-    $j$[
-      {
-        "id": 1,
-        "Website": "https://johndoebooks.com",
-        "Last Name": "Doe",
-        "First Name": "John"
-      }
-    ]$j$
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION __setup_single_col_multi_fk_insert() RETURNS SETOF TEXT AS $$
-BEGIN
-  CREATE TABLE a (
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
-    fkey_field integer -- attnum: 2, field_key: _id-b3384ea8-d937-4bdc-b0d3-60cca1279e01
-  );
-
-  CREATE TABLE b (
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
-    fk_0 INTEGER UNIQUE -- attnum: 2, field_key: _id-50855cd2-2e5d-4c4f-bb64-527f410d5087
-  );
-
-  CREATE TABLE c (
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- attnum: 1, field_key: NA
-    fk_1 integer UNIQUE, -- attnum: 2, field_key: NA
-    fk_2 integer UNIQUE -- attnum: 3, field_key: NA
-  );
-
-  ALTER TABLE a ADD CONSTRAINT fk0 FOREIGN KEY (fkey_field) REFERENCES b(fk_0);
-  ALTER TABLE a ADD CONSTRAINT fk1 FOREIGN KEY (fkey_field) REFERENCES c(fk_1);
-  ALTER TABLE a ADD CONSTRAINT fk2 FOREIGN KEY (fkey_field) REFERENCES c(fk_2);
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_single_col_multi_fk_insert() RETURNS SETOF TEXT AS $$
-DECLARE
-  tab_a_oid oid;
-  tab_b_oid oid;
-  field_info_list jsonb;
-  values_ jsonb;
-BEGIN
-  PERFORM __setup_single_col_multi_fk_insert();
-
-  tab_a_oid := 'a'::regclass::oid;
-  tab_b_oid := 'b'::regclass::oid;
-
-  field_info_list := jsonb_build_array(
-    jsonb_build_object(
-      'key', '_id-b3384ea8-d937-4bdc-b0d3-60cca1279e01',
-      'parent_key', null,
-      'column_attnum', 2,
-      'table_oid', tab_a_oid,
-      'depth', 0
-    ),
-    jsonb_build_object(
-      'key', '_id-50855cd2-2e5d-4c4f-bb64-527f410d5087',
-      'parent_key', '_id-b3384ea8-d937-4bdc-b0d3-60cca1279e01',
-      'column_attnum', 2,
-      'table_oid', tab_b_oid,
-      'depth', 1
-    )
-  );
-
-  values_ := $j${
-    "_id-50855cd2-2e5d-4c4f-bb64-527f410d5087": "9",
-    "_id-b3384ea8-d937-4bdc-b0d3-60cca1279e01": {
-      "type": "create"
-    }
-  }$j$;
-
-  RETURN NEXT throws_ok(
-    format('SELECT msar.form_insert(%L, %L)', field_info_list, values_),
-    'Inserting into a column with foreign key constraints referencing multiple columns is currently unsupported.'
-  );
-END;
-$$ LANGUAGE plpgsql;
-
 
 CREATE OR REPLACE FUNCTION __setup_files_table_with_bad_mash() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -8349,6 +8110,489 @@ BEGIN
     ]
     $j$,
     results
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.insert_related -------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_insert_related__basic() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `movies` record titled "Galaxy Quest" released on 1999-12-25.
+
+  PERFORM __setup_movie_rentals_structure();
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'movies'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object('type', 'literal', 'value', 'Galaxy Quest')
+      ),
+      jsonb_build_object(
+        'column_attnum', 4,
+        'value', jsonb_build_object('type', 'literal', 'value', '1999-12-25')
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT title, release_date FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest', '1999-12-25'::date) $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__many_to_one_simple() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `items` record with barcode "682254fd-c78b-473f-8df1-44c560051218". Associate it
+  -- with an existing `stores` record having id 1. And associate it with a new `movies` record
+  -- having title "Galaxy Quest".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  -- Insert a store with id 1 for the test
+  INSERT INTO stores (street_name) VALUES ('Main Street');
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'items'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object(
+          'type', 'literal',
+          'value', '682254fd-c78b-473f-8df1-44c560051218'
+        )
+      ),
+      jsonb_build_object(
+        'column_attnum', 4,
+        'value', jsonb_build_object('type', 'literal', 'value', 1)
+      ),
+      jsonb_build_object(
+        'column_attnum', 3,
+        'value', jsonb_build_object(
+          'type', 'new_linked_record_id',
+          'record', jsonb_build_object(
+            'table_oid', 'movies'::regclass::oid,
+            'fields', jsonb_build_array(
+              jsonb_build_object(
+                'column_attnum', 2,
+                'value', jsonb_build_object(
+                  'type', 'literal',
+                  'value', 'Galaxy Quest'
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT barcode, movie, store FROM items $q$,
+    $v$ VALUES ('682254fd-c78b-473f-8df1-44c560051218'::uuid, 1::bigint, 1::bigint) $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT title FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest') $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__many_to_one_transitive() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `rentals` record.
+  -- Associate the rental with an existing customer named Alice.
+  -- Associate the rental with a new item.
+  -- Associate the item with an existing store named Main Street.
+  -- Set the item barcode to "682254fd-c78b-473f-8df1-44c560051218".
+  -- Associate the item with a new movie named "Galaxy Quest".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  INSERT INTO customers (full_name) VALUES ('Alice');
+  INSERT INTO stores (street_name) VALUES ('Main Street');
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'rentals'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 4, -- Price
+        'value', jsonb_build_object(
+          'type', 'literal',
+          'value', 2.99
+        )
+      ),
+      jsonb_build_object(
+        'column_attnum', 5, -- Time out
+        'value', jsonb_build_object(
+          'type', 'literal',
+          'value', '2000-01-01 12:00:00'::timestamp
+        )
+      ),
+      -- Associate rental with existing customer Alice (id = 1)
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object(
+          'type', 'literal',
+          'value', 1
+        )
+      ),
+      -- Associate rental with a new item, itself linked to existing store and new movie
+      jsonb_build_object(
+        'column_attnum', 3,
+        'value', jsonb_build_object(
+          'type', 'new_linked_record_id',
+          'record', jsonb_build_object(
+            'table_oid', 'items'::regclass::oid,
+            'fields', jsonb_build_array(
+              -- item barcode
+              jsonb_build_object(
+                'column_attnum', 2,
+                'value', jsonb_build_object(
+                  'type', 'literal',
+                  'value', '682254fd-c78b-473f-8df1-44c560051218'
+                )
+              ),
+              -- item.store -> existing store with id = 1
+              jsonb_build_object(
+                'column_attnum', 4,
+                'value', jsonb_build_object(
+                  'type', 'literal',
+                  'value', 1
+                )
+              ),
+              -- item.movie -> new movie "Galaxy Quest"
+              jsonb_build_object(
+                'column_attnum', 3,
+                'value', jsonb_build_object(
+                  'type', 'new_linked_record_id',
+                  'record', jsonb_build_object(
+                    'table_oid', 'movies'::regclass::oid,
+                    'fields', jsonb_build_array(
+                      jsonb_build_object(
+                        'column_attnum', 2,
+                        'value', jsonb_build_object(
+                          'type', 'literal',
+                          'value', 'Galaxy Quest'
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT customer, item FROM rentals $q$,
+    $v$ VALUES (1::bigint, 1::bigint) $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT barcode, movie, store FROM items $q$,
+    $v$ VALUES ('682254fd-c78b-473f-8df1-44c560051218'::uuid, 1::bigint, 1::bigint) $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT title FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest') $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__one_to_many() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `customers` record named "Alice", and associate it two new `emails` records having
+  -- email values "a@b.c" and "x@y.z".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'customers'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object('type', 'literal', 'value', 'Alice')
+      )
+    ),
+    'related_records', jsonb_build_array(
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'emails'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object('type', 'literal', 'value', 'a@b.c')
+          )
+        )
+      ),
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'emails'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object('type', 'literal', 'value', 'x@y.z')
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT full_name FROM customers $q$,
+    $v$ VALUES ('Alice') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT customer, email FROM emails $q$,
+    $v$ VALUES (1::bigint, 'a@b.c'), (1::bigint, 'x@y.z') $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__tag_pick_and_insert() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `movies` record titled "Galaxy Quest". Associate it with existing `genres` records
+  -- that have id values 1 and 2, plus a new `genres` record named "Comedy".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  -- Insert existing genres with ids 1 and 2
+  INSERT INTO genres (name) VALUES ('Action'), ('Adventure');
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'movies'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object('type', 'literal', 'value', 'Galaxy Quest')
+      )
+    ),
+    'related_records', jsonb_build_array(
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object('type', 'literal', 'value', 1)
+          )
+        )
+      ),
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object('type', 'literal', 'value', 2)
+          )
+        )
+      ),
+      jsonb_build_object(
+        'fk_column_attnum', 2,
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                'table_oid', 'genres'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Comedy')
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT title FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT name FROM genres ORDER BY id $q$,
+    $v$ VALUES ('Action'), ('Adventure'), ('Comedy') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT movie, genre FROM movies_genres ORDER BY genre $q$,
+    $v$ VALUES (1::bigint, 1::bigint), (1::bigint, 2::bigint), (1::bigint, 3::bigint) $v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_insert_related__multiple_tag_fields() RETURNS SETOF TEXT AS $$
+DECLARE
+  record_spec jsonb;
+BEGIN
+  -- Insert a new `movies` record titled "Galaxy Quest". Associate it with new `genres` records
+  -- named and "Action" and "Adventure". And associate it with new `studios` records named "Foo" and
+  -- "Bar".
+
+  PERFORM __setup_movie_rentals_structure();
+
+  record_spec := jsonb_build_object(
+    'table_oid', 'movies'::regclass::oid,
+    'fields', jsonb_build_array(
+      jsonb_build_object(
+        'column_attnum', 2,
+        'value', jsonb_build_object('type', 'literal', 'value', 'Galaxy Quest')
+      )
+    ),
+    'related_records', jsonb_build_array(
+      jsonb_build_object(
+        -- insert a `movies_genres` record for genre "Action"
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fk_column_attnum', 2,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                -- insert a `genres` record named "Action"
+                'table_oid', 'genres'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Action')
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+      jsonb_build_object(
+        -- insert a `movies_genres` record for genre "Adventure"
+        'table_oid', 'movies_genres'::regclass::oid,
+        'fk_column_attnum', 2,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                -- insert a `genres` record named "Adventure"
+                'table_oid', 'genres'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Adventure')
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+      jsonb_build_object(
+        -- insert a `movies_studios` record for studio "Foo"
+        'table_oid', 'movies_studios'::regclass::oid,
+        'fk_column_attnum', 2,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                -- insert a `studios` record named "Foo"
+                'table_oid', 'studios'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Foo')
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+      jsonb_build_object(
+        -- insert a `movies_studios` record for studio "Bar"
+        'table_oid', 'movies_studios'::regclass::oid,
+        'fk_column_attnum', 2,
+        'fields', jsonb_build_array(
+          jsonb_build_object(
+            'column_attnum', 3,
+            'value', jsonb_build_object(
+              'type', 'new_linked_record_id',
+              'record', jsonb_build_object(
+                -- insert a `studios` record named "Bar"
+                'table_oid', 'studios'::regclass::oid,
+                'fields', jsonb_build_array(
+                  jsonb_build_object(
+                    'column_attnum', 2,
+                    'value', jsonb_build_object('type', 'literal', 'value', 'Bar')
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
+  PERFORM msar.insert_related(record_spec);
+
+  RETURN NEXT set_eq(
+    $q$ SELECT title FROM movies $q$,
+    $v$ VALUES ('Galaxy Quest') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT name FROM genres $q$,
+    $v$ VALUES ('Action'), ('Adventure') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT name FROM studios $q$,
+    $v$ VALUES ('Bar'), ('Foo') $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT movie, genre FROM movies_genres $q$,
+    $v$ VALUES (1::bigint, 1::bigint), (1::bigint, 2::bigint) $v$
+  );
+  RETURN NEXT set_eq(
+    $q$ SELECT movie, studio FROM movies_studios $q$,
+    $v$ VALUES (1::bigint, 1::bigint), (1::bigint, 2::bigint) $v$
   );
 END;
 $$ LANGUAGE plpgsql;

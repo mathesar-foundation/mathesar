@@ -91,6 +91,20 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.gen_unique_identifier() RETURNS text AS $$/*
+Generates a unique identifier that can be used (for example) to name a CTE.
+
+These values look like:
+
+_f3ceac6f18ae4eb79c66a9d7364922c0
+
+They are a UUID, without dashes, prefixed with an underscore.
+*/
+BEGIN
+  RETURN format('_%s', replace(gen_random_uuid()::text, '-', ''));
+END;
+$$ LANGUAGE plpgsql VOLATILE PARALLEL UNSAFE;
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- GENERAL DDL FUNCTIONS
@@ -6049,143 +6063,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.build_insert_lookup_table(field_info_list jsonb, values_ jsonb) RETURNS TABLE
-(
-  table_name text,
-  column_names text,
-  values_ text,
-  cte_name text,
-  from_cte_name text
-) AS $$/*
-Returns a lookup table for given field_info_list and values_
-
-Example: Inserting into Items while creating a new book entry, adding a new Title,
-creating a new entry for Author, picking a Publisher.
-           table_name           |                  column_names                   |                values_                 | cte_name | from_cte_name
---------------------------------+-------------------------------------------------+----------------------------------------+----------+---------------
- "Library Management"."Authors" | "First Name", "Last Name"                       | 'Jerome K.', 'Jerome                   | k1_cte   |
- "Library Management"."Books"   | "Title", "Author", "Publisher"                  | 'Three men in a Boat', k1_cte.id, '12' | k0_cte   | k1_cte
- "Library Management"."Items"   | "Acquisition Date", "Acquisition Price", "Book" | '2025-10-09', '69.69', k0_cte.id       |          | k0_cte
-
-Calling msar.form_insert() on this table would generate the following SQL:
-
-WITH k1_cte AS (
-  INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'Jerome K.', 'Jerome' RETURNING *
-), k0_cte AS (
-  INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *
-) INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
-*/
-WITH cte AS (
-  SELECT
-    pga.attname::name AS column_name,
-    fields.table_oid::bigint AS table_oid,
-    fields.depth::integer AS depth,
-    CASE
-      WHEN vals.value::jsonb->>'type' = 'create' THEN concat(quote_ident(concat(fields.key::text, '_cte')), '.', quote_ident(ref_attr.attname))
-      WHEN vals.value::jsonb->>'type' = 'pick' THEN quote_nullable(vals.value::jsonb->>'value')
-      ELSE quote_nullable(vals.value::jsonb #>> '{}')
-    END AS value,
-    CASE
-      WHEN fields.parent_key IS NOT NULL THEN quote_ident(concat(fields.parent_key::text, '_cte'))
-      ELSE NULL
-    END AS cte_name,
-    CASE
-      WHEN vals.value::jsonb->>'type' = 'create' THEN quote_ident(concat(fields.key::text, '_cte'))
-      ELSE NULL
-    END AS from_cte_name
-  FROM jsonb_to_recordset(field_info_list) AS fields(
-    key text,
-    parent_key text,
-    column_attnum smallint,
-    table_oid bigint,
-    depth integer)
-  INNER JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
-  LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
-
-  LEFT JOIN pg_constraint pgc
-    ON fields.column_attnum = ANY(pgc.conkey)
-    AND pgc.conrelid = fields.table_oid
-    AND pgc.contype = 'f'
-  LEFT JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
-  LEFT JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
-  LEFT JOIN pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
-), multi_fks_cte AS (
-  SELECT msar.raise_exception(
-    'Inserting into a column with foreign key constraints referencing multiple columns is currently unsupported.'
-  )
-  FROM cte GROUP BY column_name, from_cte_name HAVING count(*) > 1
-)
-SELECT
-  __msar.get_qualified_relation_name(table_oid) AS table_name,
-  string_agg(quote_ident(column_name), ', ') AS column_names,
-  string_agg(value, ', ') AS values_,
-  cte_name,
-  string_agg(from_cte_name, ', ') AS from_cte_name
-FROM cte
-CROSS JOIN (SELECT COUNT(*) FROM multi_fks_cte) AS force_multi_fks_cte_execution
-GROUP BY table_oid, cte_name, depth ORDER BY depth DESC;
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.form_insert(field_info_list jsonb, values_ jsonb) RETURNS VOID AS $$/*
-Given field_info_list and values_, generates a lookup table for insert, builds and executes an insert statement.
-
-field_info_list should have the folowing form:
-[
-  {"key": "k1", "parent_key":null, "column_attnum":5, "table_oid":1234, "depth":0},
-  {"key": "k3", "parent_key":"k1", "column_attnum":3, "table_oid":4321, "depth":1},
-  {"key": "k2", "parent_key":"k1", "column_attnum":2, "table_oid":4321, "depth":1},
-]
-
-values_ should be in the form:
-{
-  "k1": {"type": "create"},
-  "k2": "Jane",
-  "k3": "Doe"
-}
-
-Example of the SQL generated while Inserting into Items table while creating
-a new book entry, adding a new Title, creating a new entry for Author, picking a Publisher.
-
-WITH k1_cte AS (
-  INSERT INTO "Library Management"."Authors"("First Name", "Last Name") SELECT 'Jerome K.', 'Jerome' RETURNING *
-), k0_cte AS (
-  INSERT INTO "Library Management"."Books"("Title", "Author", "Publisher") SELECT 'Three men in a Boat', k1_cte.id, '12' FROM k1_cte RETURNING *
-) INSERT INTO "Library Management"."Items"("Acquisition Date", "Acquisition Price", "Book") SELECT '2025-10-09', '69.69', k0_cte.id FROM k0_cte RETURNING *
-*/
-DECLARE
-  ins RECORD;
-  insert_str text := '';
-  insert_stub text;
-  insert_count integer;
-BEGIN
-  SELECT COUNT(*) INTO insert_count FROM msar.build_insert_lookup_table(field_info_list, values_);
-
-  FOR ins IN SELECT * FROM msar.build_insert_lookup_table(field_info_list, values_) LOOP
-    insert_stub := 'INSERT INTO ' ||
-      ins.table_name || '(' || ins.column_names || ') SELECT ' || ins.values_ ||
-      CASE
-        WHEN ins.from_cte_name IS NOT NULL THEN CONCAT(' FROM ', ins.from_cte_name)
-        ELSE '' END || ' RETURNING *';
-    CASE
-      WHEN insert_count > 1 AND ins.cte_name IS NOT NULL THEN
-        insert_str := CONCAT_WS(',', NULLIF(insert_str, ''), ins.cte_name || ' AS (' || insert_stub || ')');
-      WHEN ins.cte_name IS NULL THEN
-        insert_str :=  insert_str || insert_stub;
-    END CASE;
-  END LOOP;
-
-  CASE
-    WHEN insert_count > 1 THEN
-      insert_str := 'WITH ' || insert_str;
-    ELSE NULL;
-  END CASE;
-  EXECUTE insert_str;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.build_join_expr(join_path jsonb) RETURNS TEXT AS $$/* 
 Returns a left join sql expr for a given join path.
 
@@ -6281,3 +6158,266 @@ Args:
       )
   ) FROM cte
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.insert_related(record_spec jsonb) RETURNS void AS $$/*
+Inserts many related records into a table.
+
+The record_spec argument is defined by the following TypeScript type:
+
+```ts
+type RecordSpec = {
+  table_oid: number;
+  fields: FieldSpec[];
+  related_records?: RelatedRecordSpec[];
+};
+type RelatedRecordSpec = RecordSpec & {
+  fk_column_attnum: number;
+};
+type FieldSpec = {
+  column_attnum: number;
+  value: ValueSpec;
+};
+type ValueSpec = LiteralValue | NewLinkedRecordIdValue;
+type LiteralValue = {
+  type: 'literal';
+  value: unknown;
+};
+type NewLinkedRecordIdValue = {
+  type: 'new_linked_record_id';
+  record: RecordSpec;
+};
+```
+
+This function is defined before some of its dependencies because the call stack involves mutual
+recursion. Plus, this is the most top-level function for the insert_related family of functions, so
+the main types are documented here.
+*/
+DECLARE
+  sql text;
+BEGIN
+  sql := msar.insert_related__build_sql(record_spec);
+  -- RAISE NOTICE '%', sql; -- Un-comment for troubleshooting purposes
+  EXECUTE sql;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+
+CREATE OR REPLACE FUNCTION msar.insert_related__build_sql(
+  record_spec jsonb,
+  back_reference jsonb DEFAULT NULL
+) RETURNS TEXT AS $$/*
+This builds the SQL for the insert_related function. See docs there for arg structure.
+
+Args:
+  record_spec: See `msar.insert_related` for type doc
+  back_reference: This value is passed when we're inserting related records so that the related
+    records can reference records inserted before them.
+
+    ```ts
+    type BackReference = {
+      fk_column_attnum: number; // The column in the target table that will receive the value
+      parent_cte_name: string; // The name of the CTE that contains the record being referenced
+    };
+    ```
+
+The SQL built from this function will:
+- Return the pk value of the inserted record in a column named `pk`.
+- Contain CTEs if the record references other new records to create.
+*/
+DECLARE
+  recipe jsonb;
+  all_ctes jsonb;
+  final_insert text;
+BEGIN
+  recipe := msar.insert_related__build_sql_recipe(record_spec, back_reference);
+  all_ctes := recipe->'cte_dependencies';
+  final_insert := recipe->>'main_record_insert_sql';
+
+  IF recipe->'cte_dependents' <> '[]'::jsonb THEN
+    all_ctes := all_ctes || jsonb_build_array(format(
+      $q$ %1$I(pk) AS (%2$s) $q$,
+      recipe->>'main_record_insert_cte_name',
+      recipe->>'main_record_insert_sql'
+    ));
+    all_ctes := all_ctes || coalesce(recipe->'cte_dependents', '[]'::jsonb);
+    final_insert := format($q$ SELECT pk FROM %1$I $q$, recipe->>'main_record_insert_cte_name');
+  END IF;
+
+  RETURN (
+    SELECT coalesce('WITH ' || string_agg(c, E',\n') || E'\n', '')
+    FROM jsonb_array_elements_text(all_ctes) AS t(c)
+  ) || final_insert;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.insert_related__build_sql_recipe(
+  record_spec jsonb,
+  back_reference jsonb DEFAULT NULL
+) RETURNS jsonb AS $$/*
+Returns
+
+```ts
+type SqlRecipe = {
+  cte_dependencies: string[]; // CTEs that need to come before the main insert
+  main_record_insert_sql: string;
+  main_record_insert_cte_name: string;
+  cte_dependents: string[]; // CTEs that need to come after the main insert
+};
+```
+*/
+DECLARE
+  table_oid oid := (record_spec->>'table_oid')::oid;
+  prepared_fields jsonb; -- PreparedField[] (see insert_related__prepare_field)
+  cte_dependencies jsonb;
+  cte_dependents text[];
+  main_record_insert_sql text;
+  main_record_insert_cte_name text := msar.gen_unique_identifier();
+BEGIN
+  prepared_fields := (
+    SELECT jsonb_agg(msar.insert_related__prepare_field(table_oid, field_spec))
+    FROM jsonb_array_elements(record_spec->'fields') AS t(field_spec)
+  );
+  IF back_reference IS NOT NULL THEN
+    prepared_fields := prepared_fields || jsonb_build_array(
+      jsonb_build_object(
+        'target_column_name', msar.get_column_name(
+          table_oid,
+          (back_reference->>'fk_column_attnum')::int
+        ),
+        'value_expression', format('%I.pk', back_reference->>'parent_cte_name'),
+        'from', back_reference->>'parent_cte_name'
+      )
+    );
+  END IF;
+
+  cte_dependencies := jsonb_path_query_array(prepared_fields, '$[*].cte_dependencies[*]');
+  
+  main_record_insert_sql := format(
+    $q$
+      INSERT INTO %1$I.%2$I (%3$s)
+      SELECT %4$s %5$s
+      RETURNING %6$s AS pk
+    $q$,
+    /* %1 */ msar.get_relation_schema_name(table_oid),
+    /* %2 */ msar.get_relation_name(table_oid),
+    /* %3 column names */ (
+      SELECT string_agg(n->>'target_column_name', ', ')
+      FROM jsonb_array_elements(prepared_fields) AS t(n)
+    ),
+    /* %4 value expressions */ (
+      SELECT string_agg(n->>'value_expression', ', ')
+      FROM jsonb_array_elements(prepared_fields) AS t(n)
+    ),
+    /* %5 FROM clause */ (
+      SELECT coalesce(E'\n      FROM ' || string_agg(prepared_field->>'from', ', '), '')
+      FROM jsonb_array_elements(prepared_fields) AS t(prepared_field)
+      WHERE prepared_field->>'from' IS NOT NULL
+    ),
+    /* %6 pk column name */ msar.get_column_name(table_oid, msar.get_pk_column(table_oid))
+  );
+
+  cte_dependents := array(
+    SELECT jsonb_array_elements_text(
+      msar.insert_related__flatten_recipe(
+        msar.insert_related__build_sql_recipe(
+          related_record_spec,
+          jsonb_build_object(
+            'fk_column_attnum', (related_record_spec->>'fk_column_attnum')::int,
+            'parent_cte_name', main_record_insert_cte_name
+          )
+        )
+      )
+    )
+    FROM jsonb_array_elements(record_spec->'related_records') AS t(related_record_spec)
+  );
+
+  RETURN jsonb_build_object(
+    'cte_dependencies', cte_dependencies,
+    'main_record_insert_sql', main_record_insert_sql,
+    'main_record_insert_cte_name', main_record_insert_cte_name,
+    'cte_dependents', cte_dependents
+  );
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.insert_related__prepare_field(
+  table_oid oid,
+  field_spec jsonb
+) RETURNS jsonb AS $$/*
+Prepares strings needed to template SQL for a single field when inserting a record into a table.
+
+Args:
+  table_oid: The OID of the table to insert into.
+  field_spec: The field specification to prepare. See `msar.insert_related` and look at the
+    `FieldSpec` type definition for the arg structure here.
+
+This function returns JSONB with the following structure:
+    
+```ts
+type PreparedField = {
+  target_column_name: string;
+  value_expression: string;
+  from?: string;
+  cte_dependencies: string[];
+};
+```
+
+- `target_column_name` is the (unquoted) name of the column in the target table that will receive
+    the value.
+- `value_expression` is the SQL expression that will be used to compute the value.
+- `from` is a table name that the value expression references.
+- `cte_dependencies` holds the CTEs that need to be executed to insert the related record (and any
+    dependent records of the related record.)
+*/
+DECLARE
+  column_name text;
+  value_spec jsonb;
+  value_type text;
+  linked_record_recipe jsonb; -- SqlRecipe (see insert_related__build_sql_recipe)
+BEGIN
+  column_name := msar.get_column_name(table_oid, (field_spec->>'column_attnum')::integer);
+  value_spec := field_spec->'value';
+  value_type := value_spec->>'type';
+  
+  IF value_type = 'literal' THEN
+    RETURN jsonb_build_object(
+      'target_column_name', column_name,
+      'value_expression', quote_nullable(value_spec->'value' #>> '{}'),
+      'cte_dependencies', '[]'::jsonb
+    );
+  END IF;
+  
+  IF value_type = 'new_linked_record_id' THEN
+    linked_record_recipe := msar.insert_related__build_sql_recipe(value_spec->'record');
+    RETURN jsonb_build_object(
+      'target_column_name', column_name,
+      'value_expression', format('%I.pk', linked_record_recipe->>'main_record_insert_cte_name'),
+      'from', linked_record_recipe->>'main_record_insert_cte_name',
+      'cte_dependencies', msar.insert_related__flatten_recipe(linked_record_recipe)
+    );
+  END IF;
+  
+  RAISE EXCEPTION 'Unknown value_spec type: %', value_type;
+END;
+$$ LANGUAGE plpgsql STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.insert_related__flatten_recipe(recipe jsonb) RETURNS jsonb AS $$/*
+Produces an array of CTE dependencies from a SqlRecipe.
+*/
+BEGIN
+  RETURN coalesce(recipe->'cte_dependencies', '[]'::jsonb) ||
+    jsonb_build_array(
+      format(
+        '%I(pk) AS (%s)',
+        recipe->>'main_record_insert_cte_name',
+        recipe->>'main_record_insert_sql'
+      )
+    ) ||
+    coalesce(recipe->'cte_dependents', '[]'::jsonb);
+END;
+$$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
+
