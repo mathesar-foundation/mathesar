@@ -65,7 +65,6 @@ class ExplorationDef(TypedDict):
     Definition about a runnable exploration.
 
     Attributes:
-        database_id: The Django id of the database containing the exploration.
         name: The name of the exploration.
         base_table_oid: The OID of the base table of the exploration on the database.
         schema_oid: The OID of the schema containing the base table of the exploration.
@@ -75,7 +74,6 @@ class ExplorationDef(TypedDict):
         display_names: A map between the actual column names on the database and the alias to be displayed(if any).
         description: The description of the exploration.
     """
-    database_id: int
     name: str
     base_table_oid: int
     schema_oid: int
