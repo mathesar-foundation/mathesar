@@ -51,7 +51,7 @@ def replace_exploration(new_exploration, database_id):
         display_names=new_exploration.get("display_names", {}),
         description=new_exploration.get("description")
     )
-    return get_exploration(new_exploration["id"])
+    return get_exploration(new_exploration["id"], database_id)
 
 
 def create_exploration(exploration_def, database_id):
