@@ -1,12 +1,12 @@
 # Working with the user data type
 
-Mathesar's **user data type** allows you to store references to Mathesar users directly in your database tables. This makes it easy to track who created records, who is assigned to tasks, or who last edited a row.
+Mathesar's **user data type** allows you to store references to Mathesar users directly in your database tables. This makes it easy to track who created records, who is assigned to tasks, or who last edited a record.
 
 - User columns store Mathesar user IDs (integer values).
 - Users are displayed using their username, display name, or email address (configurable).
 - You can select users from a searchable list when editing cells.
 - User columns support default values.
-- A table can designate one user column to automatically record who last edited each row.
+- A table can designate one user column to automatically record who last edited each record.
 
 ## Adding user columns
 
@@ -65,11 +65,11 @@ User columns support two default value options, which you can configure in the c
 
 ### No default
 
-The column has no default value. Users must manually select a value for each row.
+The column has no default value. Users must manually select a value for each record.
 
 ### Set a default user
 
-Sets a specific user as the default value for new rows. When you create a new record, this column will automatically be populated with the selected user.
+Sets a specific user as the default value for new records. When you create a new record, this column will automatically be populated with the selected user.
 
 To set a default user:
 
@@ -80,7 +80,7 @@ To set a default user:
 
 ## Tracking who edits records
 
-Each table can designate one user-type column to automatically track who last edited each row. This is configured at the table level rather than on the column itself.
+Each table can designate one user-type column to automatically track who last edited each record. This is configured at the table level rather than on the column itself.
 
 To enable tracking:
 
