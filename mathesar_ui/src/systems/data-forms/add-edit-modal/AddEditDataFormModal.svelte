@@ -79,7 +79,10 @@
           submit_redirect_url: null,
           submit_button_label: null,
           fields: [...tableStructureSubstance.processedColumns.values()]
-            .filter((pc) => !pc.column.default?.is_dynamic)
+            .filter(
+              (pc) =>
+                !pc.column.default?.is_dynamic && !pc.isUserTrackingColumn,
+            )
             .map((c, index) => processedColumnToRawDataFormField(c, index)),
         };
         await $schemaRouteContext.insertDataForm(rawEpf);

@@ -60,6 +60,12 @@ interface TableMetadata {
   record_summary_template: RecordSummaryTemplate | null;
   /** The attnum of the most recently-set pkey column (used during import) */
   mathesar_added_pkey_attnum: number | null;
+  /**
+   * The attnum of the column used to auto-record the editing user.
+   * When set, adding or patching a record automatically populates this column
+   * with the current user's ID.
+   */
+  user_tracking_attnum: number | null;
 }
 
 export interface RawTableWithMetadata extends RawTable {

@@ -40,6 +40,7 @@ nav:
           - File data type: user-guide/files.md
           - Form builder: user-guide/forms.md
           - Data Explorer: user-guide/data-explorer.md
+          - User data type: user-guide/user-type.md
       - Data management:
           - Importing data: user-guide/importing-data.md
           - Exporting data: user-guide/exporting-data.md

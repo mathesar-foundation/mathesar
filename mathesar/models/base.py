@@ -251,6 +251,11 @@ class ColumnMetaData(BaseModel):
     duration_max = models.CharField(max_length=255, null=True)
     display_width = models.PositiveIntegerField(null=True)
     file_backend = models.CharField(max_length=255, null=True)
+    user_display_field = models.CharField(
+        choices=[("full_name", "full_name"), ("email", "email"), ("username", "username")],
+        max_length=50,
+        null=True
+    )
 
     class Meta:
         constraints = [
@@ -277,6 +282,7 @@ class TableMetaData(BaseModel):
     column_order = models.JSONField(null=True)
     record_summary_template = models.JSONField(null=True)
     mathesar_added_pkey_attnum = models.PositiveIntegerField(null=True)
+    user_tracking_attnum = models.SmallIntegerField(null=True)
 
     class Meta:
         constraints = [

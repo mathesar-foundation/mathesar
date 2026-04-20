@@ -212,6 +212,7 @@ export class TabularData {
                 columnIndex,
                 constraints: constraintsData.constraints,
                 hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
+                userTrackingAttnum: this.table.metadata?.user_tracking_attnum,
               }),
             ]),
           ),
