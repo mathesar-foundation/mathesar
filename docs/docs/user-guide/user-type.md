@@ -5,7 +5,8 @@ Mathesar's **user data type** allows you to store references to Mathesar users d
 - User columns store Mathesar user IDs (integer values).
 - Users are displayed using their username, display name, or email address (configurable).
 - You can select users from a searchable list when editing cells.
-- User columns support default values, including automatically tracking who last edited a record.
+- User columns support default values.
+- A table can designate one user column to automatically record who last edited each row.
 
 ## Adding user columns
 
@@ -60,23 +61,11 @@ The selected display field will be used throughout Mathesar when showing this co
 
 ## Setting default values
 
-User columns support three default value options, which you can configure in the column inspector's **Default Value** section:
-
-![Default value options for a user column](../assets/images/user-type/default-values.png)
-/// caption
-User columns support three default value modes: no default, auto-set to editor, or set a specific default user. When "auto-set" is chosen, the user column is not editable.
-///
+User columns support two default value options, which you can configure in the column inspector's **Default Value** section: no default, or a specific default user.
 
 ### No default
 
 The column has no default value. Users must manually select a value for each row.
-
-### Auto-set to editor
-
-Automatically sets the column to the user who last edited the record. This is useful for tracking who made changes to records.
-
-!!! info "Auto-set columns are read-only"
-    When a column is set to "Auto-set to editor", it becomes non-editable in the Mathesar UI. The value is automatically updated whenever a record is modified through Mathesar, including via form submission.
 
 ### Set a default user
 
@@ -89,6 +78,23 @@ To set a default user:
 1. Choose the user from the user selection dialog.
 1. Save your changes.
 
+## Tracking who edits records
+
+Each table can designate one user-type column to automatically track who last edited each row. This is configured at the table level rather than on the column itself.
+
+To enable tracking:
+
+1. Open the table you want to track edits for.
+1. Open the **Table Inspector** and locate the **User tracking** section.
+1. Select a user column from the dropdown. Choose **None** to disable tracking.
+
+Once set, Mathesar updates the chosen column to the current user on every add or edit — including edits made through form submissions. The tracked column is not manually editable in the UI.
+
+Only one user column per table can be designated for tracking at a time. Any user-type column in the table is eligible.
+
+!!! info "Tracking applies to edits made through Mathesar"
+    The value is updated when records are modified through Mathesar (including forms). Direct database writes that bypass Mathesar will not trigger the update.
+
 ## Limitations
 
 ### User columns cannot be used in forms
@@ -98,18 +104,18 @@ User type columns cannot be added to [forms](./forms.md) because they require au
 !!! warning "Forms restriction"
     If you try to add a user column to a form, you'll see an error message. User columns are automatically excluded from form field options.
 
-Note that columns with "Auto-set to editor" enabled will still be automatically populated when form submissions are processed, even though the field cannot be included in the form itself.
+Note that if a table has a tracked user column (see [Tracking who edits records](#tracking-who-edits-records)), that column will still be automatically populated when form submissions are processed, even though the field cannot be included in the form itself.
 
 ## Use cases
 
 User columns are useful for:
 
 - **Tracking ownership**: Record who created or owns a record (e.g., "Created By", "Assigned To").
-- **Audit trails**: Track who last modified a record using "Auto-set to editor".
+- **Audit trails**: Track who last modified a record by designating a user column in the table's **User tracking** setting.
 - **Task assignment**: Assign tasks or items to specific users.
 - **Approval workflows**: Track who approved or reviewed records.
 
 For example, in a **Projects** table, you might have:
 
 - an **Assigned To** column set to a project manager's Mathesar user by default
-- a **Last Modified By** column set to "Auto-set to editor" to track recent changes
+- a **Last Modified By** column designated as the table's tracked user column to record recent changes
