@@ -417,4 +417,5 @@ def submit(*, form_token: str, values: dict, **kwargs) -> None:
         form_token: The unique token of the form.
         values: A dict describing the values to insert.
     """
-    return submit_form(form_token, values)
+    user = kwargs.get(REQUEST_KEY).user
+    return submit_form(form_token, values, user)

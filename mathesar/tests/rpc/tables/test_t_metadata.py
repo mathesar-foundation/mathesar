@@ -27,6 +27,7 @@ def test_tables_meta_data_list(rf, monkeypatch):
                 import_verified=True,
                 column_order=[8, 9, 10],
                 record_summary_template=None,
+                user_tracking_attnum=None,
             ),
             TableMetaData(
                 id=2,
@@ -36,6 +37,7 @@ def test_tables_meta_data_list(rf, monkeypatch):
                 import_verified=False,
                 column_order=[],
                 record_summary_template=None,
+                user_tracking_attnum=None,
             ),
         ]
 
@@ -51,6 +53,7 @@ def test_tables_meta_data_list(rf, monkeypatch):
             column_order=[8, 9, 10],
             record_summary_template=None,
             mathesar_added_pkey_attnum=None,
+            user_tracking_attnum=None,
         ),
         metadata.TableMetaDataRecord(
             id=2,
@@ -61,6 +64,7 @@ def test_tables_meta_data_list(rf, monkeypatch):
             column_order=[],
             record_summary_template=None,
             mathesar_added_pkey_attnum=None,
+            user_tracking_attnum=None,
         ),
     ]
     actual_metadata_list = metadata.list_(database_id=database_id, request=request)
