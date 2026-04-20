@@ -74,7 +74,6 @@ export const roles = {
   configured: {
     list: rpcMethodTypeContainer<
       {
-        database_id: RawDatabase['id'];
         server_id: RawConfiguredRole['server_id'];
       },
       Array<RawConfiguredRole>
