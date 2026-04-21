@@ -81,7 +81,7 @@
 
 ## Data Modeling
 
-:::data_modeling
+::: data_modeling
     options:
       members:
       - add_foreign_key_column
@@ -158,7 +158,7 @@
 
 ## Records
 
-:::records
+::: records
     options:
       members:
       - list_

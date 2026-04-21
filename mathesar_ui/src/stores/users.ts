@@ -144,6 +144,21 @@ class WritableUsersStore {
 
 export type UsersStore = MakeWritablePropertiesReadable<WritableUsersStore>;
 
+// Global instance for app-wide access
+let globalUsersStore: WritableUsersStore | undefined;
+
+export function getGlobalUsersStore(): UsersStore | undefined {
+  return globalUsersStore;
+}
+
+export function setGlobalUsersStore(): UsersStore {
+  if (globalUsersStore !== undefined) {
+    throw Error('Global UsersStore has already been set');
+  }
+  globalUsersStore = new WritableUsersStore();
+  return globalUsersStore;
+}
+
 export function getUsersStoreFromContext(): UsersStore | undefined {
   return getContext<WritableUsersStore>(contextKey);
 }

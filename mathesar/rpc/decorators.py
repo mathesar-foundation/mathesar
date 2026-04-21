@@ -4,12 +4,13 @@ import threading
 from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.core.cache import cache
-from modernrpc.core import rpc_method
+from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import (
     http_basic_auth_login_required,
     http_basic_auth_superuser_required,
 )
 from mathesar.analytics import wire_analytics
+from mathesar.models import base as models, exceptions
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.utils.download_links import maintain_download_links
 
@@ -28,8 +29,20 @@ def mathesar_rpc_method(*, name, auth="superuser"):
             - "login": any logged in user can call it.
             - "anonymous": any user can call it, no login required.
     """
+    authorization_wrap = lambda x: x # noqa
     if auth == "login":
         auth_wrap = http_basic_auth_login_required
+        authorization_ignore_list = [
+            'analytics.upload_feedback',
+            'databases.configured.list',
+            'servers.configured.list',
+            'users.get',
+            'users.list',
+            'users.patch_self',
+            'users.password.replace_own'
+        ]
+        if name not in authorization_ignore_list:
+            authorization_wrap = ensure_db_authorization
     elif auth == "superuser":
         auth_wrap = http_basic_auth_superuser_required
     elif auth == "anonymous":
@@ -39,7 +52,7 @@ def mathesar_rpc_method(*, name, auth="superuser"):
 
     def combo_decorator(f):
         return rpc_method(name=name)(
-            auth_wrap(maintain_models(wire_analytics(handle_rpc_exceptions(f))))
+            auth_wrap(maintain_models(wire_analytics(handle_rpc_exceptions(authorization_wrap(f)))))
         )
     return combo_decorator
 
@@ -58,3 +71,18 @@ def run_model_maintenance():
         expire_date__lt=datetime.datetime.now(datetime.timezone.utc)
     ).delete()
     maintain_download_links()
+
+
+def ensure_db_authorization(f):
+    # This is needed for endpoints with "login" auth that don't call connect()
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        DATABASE_ID_KEY = 'database_id'
+        user = kwargs.get(REQUEST_KEY).user
+        database_id = kwargs[DATABASE_ID_KEY]
+        try:
+            models.UserDatabaseRoleMap.objects.get(database__id=database_id, user=user)
+        except models.UserDatabaseRoleMap.DoesNotExist:
+            raise exceptions.NoConnectionAvailable
+        return f(*args, **kwargs)
+    return wrapper

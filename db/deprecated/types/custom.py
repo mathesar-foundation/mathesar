@@ -2,6 +2,7 @@ from enum import Enum
 from psycopg2.extras import Json
 from sqlalchemy import case, func, and_, cast
 from sqlalchemy.dialects.postgresql import (
+    ENUM as SA_ENUM,
     CHAR as SA_CHAR,
     DATE as SA_DATE,
     INTERVAL as SA_INTERVAL,
@@ -408,6 +409,7 @@ CUSTOM_DB_TYPE_TO_SA_CLASS = frozendict(
         MathesarCustomType.MATHESAR_MONEY: MathesarMoney,
         PostgresType.CHAR: CHAR,
         PostgresType.DATE: DATE,
+        PostgresType.ENUM: SA_ENUM,
         PostgresType.TIME_WITH_TIME_ZONE: TIME_WITH_TIME_ZONE,
         PostgresType.TIME_WITHOUT_TIME_ZONE: TIME_WITHOUT_TIME_ZONE,
         PostgresType.TIMESTAMP_WITH_TIME_ZONE: TIMESTAMP_WITH_TIME_ZONE,

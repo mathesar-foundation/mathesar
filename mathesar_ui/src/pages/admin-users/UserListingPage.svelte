@@ -7,10 +7,7 @@
   import { iconAddNew } from '@mathesar/icons';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
-  import {
-    type UserModel,
-    getUsersStoreFromContext,
-  } from '@mathesar/stores/users';
+  import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
   import { AnchorButton, Icon } from '@mathesar-component-library';
 
   import UserRow from './UserRow.svelte';
@@ -18,7 +15,7 @@
 
   let filterQuery = '';
 
-  const usersStore = getUsersStoreFromContext();
+  const usersStore = getGlobalUsersStore();
   $: requestStatus = usersStore?.requestStatus;
   $: users = usersStore?.users;
 

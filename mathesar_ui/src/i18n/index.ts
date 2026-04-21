@@ -5,6 +5,8 @@ import type { LangObject } from './languages/utils';
 
 const loaders = {
   en: () => import('./languages/en'),
+  es: () => import('./languages/es'),
+  fr: () => import('./languages/fr'),
   ja: () => import('./languages/ja'),
 };
 
@@ -23,6 +25,8 @@ function setLanguageCookie(language: LangObject['language']) {
 
 export async function initI18n(language: LangObject['language']) {
   register('en', () => loadDictionaryAsync('en'));
+  register('es', () => loadDictionaryAsync('es'));
+  register('fr', () => loadDictionaryAsync('fr'));
   register('ja', () => loadDictionaryAsync('ja'));
 
   const { translations } = window.Mathesar || {};

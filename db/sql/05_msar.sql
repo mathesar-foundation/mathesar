@@ -775,7 +775,9 @@ by the input type, but the keys will be a subset of:
   scale: the scale of a numeric type
   fields: See PostgreSQL documentation of the `interval` type.
   length: Applies to "text" types where the user can specify the length.
-  item_type: Gives the type of array members for array-types
+  item_type: Gives the type of array members for array-types.
+  original_type: The actual PostgreSQL type name for enum types.
+  enum_values: An ordered list of valid enum labels for enum types.
 
 Args:
   typ_id: an OID or valid type representing string will work here.
@@ -809,12 +811,30 @@ SELECT nullif(
       jsonb_build_object(
         'precision', nullif(typ_mod, -1)
       )
+    WHEN (SELECT typtype FROM pg_catalog.pg_type WHERE oid = typ_id) = 'e' THEN
+      jsonb_build_object(
+        'original_type', typ_id::regtype::text,
+        'enum_values',
+        (SELECT jsonb_agg(enumlabel ORDER BY enumsortorder)
+         FROM pg_catalog.pg_enum WHERE enumtypid = typ_id)
+      )
     ELSE jsonb_build_object()
   END
   || CASE
     WHEN typ_ndims>0 THEN
-      -- This string wrangling is debatably dubious, but avoids a slow join.
-      jsonb_build_object('item_type', rtrim(typ_id::regtype::text, '[]'))
+      jsonb_build_object(
+        'item_type',
+        CASE
+          WHEN (
+            SELECT typtype
+            FROM pg_catalog.pg_type
+            WHERE oid = (SELECT typelem FROM pg_catalog.pg_type WHERE oid = typ_id)
+          ) = 'e'
+          THEN '_enum'
+          -- This string wrangling is debatably dubious, but avoids a slow join.
+          ELSE rtrim(typ_id::regtype::text, '[]')
+        END
+      )
     ELSE '{}'
   END,
   '{}'
@@ -928,7 +948,9 @@ CREATE OR REPLACE FUNCTION msar.column_info_table(tab_id regclass) RETURNS TABLE
 SELECT
   attnum AS id,
   attname AS name,
-  CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END AS type,
+  CASE WHEN attndims>0 THEN '_array'
+    WHEN pgt.typtype = 'e' THEN '_enum'
+    ELSE atttypid::regtype::text END AS type,
   msar.get_type_options(atttypid, atttypmod, attndims) AS type_options,
   NOT attnotnull AS nullable,
   COALESCE(pgi.indisprimary, false) AS primary_key,
@@ -937,7 +959,9 @@ SELECT
   msar.col_description(tab_id, attnum) AS description,
   msar.list_column_privileges_for_current_role(tab_id, attnum) AS current_role_priv
 FROM pg_catalog.pg_attribute pga
-  LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey) AND pgi.indisprimary
+  LEFT JOIN pg_catalog.pg_index pgi ON pga.attrelid=pgi.indrelid
+    AND pga.attnum=ANY(pgi.indkey) AND pgi.indisprimary
+  LEFT JOIN pg_catalog.pg_type pgt ON pga.atttypid=pgt.oid
 WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -4427,31 +4451,31 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$
 WITH orderable_cte AS (
-  SELECT attnum
+  SELECT DISTINCT attnum
   FROM pg_catalog.pg_attribute
-    INNER JOIN pg_catalog.pg_cast ON atttypid=castsource
-    INNER JOIN pg_catalog.pg_operator ON casttarget=oprleft
+    INNER JOIN pg_catalog.pg_type ON atttypid = pg_type.oid
+    INNER JOIN pg_catalog.pg_opclass ON (
+      pg_type.oid = opcintype
+      OR pg_type.oid = opckeytype
+      OR EXISTS (
+        SELECT 1 FROM pg_catalog.pg_cast
+        WHERE castsource = pg_type.oid
+          AND casttarget = opcintype
+          AND castmethod = 'b'
+      )
+    )
+    INNER JOIN pg_catalog.pg_am ON opcmethod = pg_am.oid
   WHERE
     attrelid = tab_id
     AND attnum > 0
     AND NOT attisdropped
-    AND castcontext = 'i'
-    AND oprname = '<'
-  UNION SELECT attnum
-  FROM pg_catalog.pg_attribute
-    INNER JOIN pg_catalog.pg_operator ON atttypid=oprleft
-  WHERE
-    attrelid = tab_id
-    AND attnum > 0
-    AND NOT attisdropped
-    AND oprname = '<'
+    AND amname = 'btree'
+    AND opcdefault = true
+    AND has_column_privilege(tab_id, attnum, 'SELECT')
   ORDER BY attnum
 )
-SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
--- This privilege check is redundant in context, but may be useful for other callers.
+SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc') ORDER BY attnum), '[]'::jsonb)
 FROM orderable_cte
--- This privilege check is redundant in context, but may be useful for other callers.
-WHERE has_column_privilege(tab_id, attnum, 'SELECT');
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 

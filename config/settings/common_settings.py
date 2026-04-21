@@ -332,6 +332,8 @@ BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
 # i18n
 LANGUAGES = [
     ('en', 'English'),
+    ('es', 'Spanish'),
+    ('fr', 'French'),
     ('ja', 'Japanese'),
 ]
 LOCALE_PATHS = [

@@ -119,7 +119,7 @@ def get_common_data(request, database_id=None, schema_oid=None):
         'current_schema': current_schema_oid,
         'databases': databases,
         'internal_db': _get_internal_db_meta(),
-        'servers': get_servers_list(),
+        'servers': get_servers_list(request=request),
         'schemas': schemas,
         'tables': get_table_list(request, current_database_id, current_schema_oid),
         'user': get_user_data(request),

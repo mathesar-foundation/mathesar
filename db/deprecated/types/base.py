@@ -64,6 +64,7 @@ class PostgresType(DatabaseType, Enum):
     DATE = 'date'
     DATERANGE = 'daterange'
     DOUBLE_PRECISION = 'double precision'
+    ENUM = '_enum'  # not present natively in the ischema_names dict but needed for enum type columns in explorations.
     HSTORE = 'hstore'
     INET = 'inet'
     INT4RANGE = 'int4range'
