@@ -49,7 +49,7 @@ if [ ! -f $NOTES_FILE ]; then
   mv $NOTES_FILE.tmp $NOTES_FILE
 fi
 
-PREV_NOTES_FILE=$(ls -1 | sort | grep -B 1 $NOTES_FILE | head -n 1)
+PREV_NOTES_FILE=$(ls -1 | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.md$' | sort -V | grep -B 1 "^$NOTES_FILE$" | head -n 1)
 PREV_RELEASE=$(echo $PREV_NOTES_FILE | sed s/.md$//)
 
 # Validate that PREV_RELEASE is a valid git reference (branch or tag).
@@ -64,12 +64,6 @@ CACHE_DIR=cache
 COMMITS_FILE="$CACHE_DIR/commits.txt"
 ALL_PRS_FILE="$CACHE_DIR/all_prs.json"
 INCLUDED_PRS_FILE="$CACHE_DIR/included_prs.txt"
-
-# Use the latest release notes file
-NOTES_FILE=$(ls -1 | grep -e '^[0-9]\.[0-9]\.[0-9]' | sort | tail -n 1)
-
-# Assume the release version number to match the file name
-RELEASE=$(echo $NOTES_FILE | sed s/.md$//)
 
 # Find the release branch. If we've already cut a branch for the release (and we
 # have it locally), then use that. Otherwise, use "develop".
