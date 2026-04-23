@@ -17,6 +17,7 @@ export const LOCAL_STORAGE_KEYS = {
   tableInspectorTableRecordSummaryVisible: 'table-inspector-table-record-summary-visible',
   tableInspectorTableActionsVisible: 'table-inspector-table-actions-visible',
   tableInspectorTableAdvancedVisible: 'table-inspector-table-advanced-visible',
+  tableInspectorTableUserTrackingVisible: 'table-inspector-table-user-tracking-visible',
   tableInspectorColumnPropertiesVisible: 'table-inspector-column-properties-visible',
   tableInspectorColumnDataTypeVisible: 'table-inspector-column-data-type-visible',
   tableInspectorColumnDefaultValueVisible: 'table-inspector-column-default-value-visible',
@@ -65,6 +66,11 @@ export const tableInspectorTableActionsVisible = new LocalStorageStore({
 
 export const tableInspectorTableAdvancedVisible = new LocalStorageStore({
   key: LOCAL_STORAGE_KEYS.tableInspectorTableAdvancedVisible,
+  defaultValue: false,
+});
+
+export const tableInspectorTableUserTrackingVisible = new LocalStorageStore({
+  key: LOCAL_STORAGE_KEYS.tableInspectorTableUserTrackingVisible,
   defaultValue: false,
 });
 

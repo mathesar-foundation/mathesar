@@ -9,7 +9,11 @@
   import { setReleasesStoreInContext } from '@mathesar/stores/releases';
   import { toast } from '@mathesar/stores/toast';
   import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
-  import { AnonymousViewerUserModel } from '@mathesar/stores/users';
+  import {
+    AnonymousViewerUserModel,
+    getGlobalUsersStore,
+    setGlobalUsersStore,
+  } from '@mathesar/stores/users';
   import AttachableMultiTagger from '@mathesar/systems/multi-tagger/AttachableMultiTagger.svelte';
   import {
     AttachableMultiTaggerController,
@@ -83,6 +87,11 @@
 
   const multiTaggerController = new AttachableMultiTaggerController();
   multiTaggerContext.set(multiTaggerController);
+  // Initialize global users store for User type cells.
+  // Skip for anonymous sessions since `users.list` requires authentication.
+  if (commonData.is_authenticated && !getGlobalUsersStore()) {
+    setGlobalUsersStore();
+  }
 
   const lightboxController = new LightboxController();
   lightboxContext.set(lightboxController);

@@ -1,6 +1,6 @@
 #=========== STAGE: BASE =====================================================#
 
-ARG PYTHON_VERSION=3.13-bookworm
+ARG PYTHON_VERSION=3.14-bookworm
 FROM python:$PYTHON_VERSION AS base
 
 ENV PYTHONUNBUFFERED=1
@@ -55,7 +55,7 @@ WORKDIR /code/
 
 #=========== STAGE: TESTING ==================================================#
 
-ARG PYTHON_VERSION=3.13-bookworm
+ARG PYTHON_VERSION=3.14-bookworm
 FROM python:$PYTHON_VERSION AS testing
 
 # Mathesar source

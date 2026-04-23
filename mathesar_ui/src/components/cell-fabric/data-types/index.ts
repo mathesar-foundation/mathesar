@@ -16,6 +16,7 @@ import type {
   SimpleCellDataTypes,
 } from './typeDefinitions';
 import uri from './uri';
+import user from './user';
 
 const simpleDataTypeComponentFactories: Record<
   SimpleCellDataTypes,
@@ -31,6 +32,7 @@ const simpleDataTypeComponentFactories: Record<
   time,
   datetime,
   file,
+  user,
   enum: enumFactory,
 };
 

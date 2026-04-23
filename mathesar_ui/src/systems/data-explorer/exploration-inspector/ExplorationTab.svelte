@@ -104,6 +104,7 @@
         .model.withDescription(description).model;
       // TODO: Write better utility methods to identify saved instances
       await replaceExploration(
+        $query.database_id,
         updatedQuery.toMaybeSavedExploration() as SavedExploration,
       );
       query.set(updatedQuery);
@@ -120,7 +121,7 @@
       void confirmDelete({
         identifierType: $_('exploration'),
         onProceed: async () => {
-          await deleteExploration(id);
+          await deleteExploration($query.database_id, id);
           dispatch('delete');
         },
       });
