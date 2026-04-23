@@ -1697,6 +1697,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#security-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Fixes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#improvements" class="md-nav__link">
     <span class="md-ellipsis">
       Improvements
@@ -2426,6 +2435,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#security-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Fixes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#improvements" class="md-nav__link">
     <span class="md-ellipsis">
       Improvements
@@ -2572,7 +2590,15 @@
 <p>This page provides a comprehensive list of all changes in the release.</p>
 </div>
 <!-- ## Security fixes -->
-
+<h2 id="security-fixes">Security Fixes<a class="headerlink" href="#security-fixes" title="Permanent link">&para;</a></h2>
+<p>This release fixes two access-control issues in database-scoped RPC methods.</p>
+<p>Previously, authenticated users could access some Mathesar-managed metadata, and in some cases read, replace, or delete saved explorations, for databases where they were not collaborators. These issues did not grant access to underlying PostgreSQL table data, expose database credentials, or bypass PostgreSQL permissions.</p>
+<p>Users should upgrade during their normal maintenance window.</p>
+<ul>
+<li>Fixed missing collaborator checks for database-scoped metadata RPC methods. See  <a href="https://github.com/mathesar-foundation/mathesar/security/advisories/GHSA-jh9v-hqw8-5cq8">GHSA-jh9v-hqw8-5cq8</a>.</li>
+<li>Fixed missing collaborator checks for saved exploration RPC methods. See  <a href="https://github.com/mathesar-foundation/mathesar/security/advisories/GHSA-wf8r-g5rp-w69f">GHSA-wf8r-g5rp-w69f</a>.</li>
+</ul>
+<p><em>Related work:</em> <a href="https://github.com/mathesar-foundation/mathesar/commit/23ddcac341e07156b2bae812c6a032fc942c654b"><code>23ddcac</code></a></p>
 <!-- ## Breaking changes -->
 <!-- (This section lists any breaking changes to publicly exposed and documented machine interfaces to Mathesar such as the API or DB functions) -->
 
